@@ -46,5 +46,5 @@ Detaylı not için `CLAUDE.md` içindeki "Stil Skorlama Motoru" bölümü.
 
 Brewmaster, Bulldog Brewer ile 10–12 L batch ölçeğinde çalışan tek bir kullanıcının (ben, Kaan) günlük üretim ihtiyaçlarına göre yazılmış kapalı bir araçtır. Ticari hedefi yok; gerçek kullanım sırasında biriken geri besleme ile öğrenen kişiselleştirilmiş bir sistem hâline getirmek uzun vadeli vizyonudur.
 
-Geliştirme tamamen Claude Code (Anthropic) ile yürütülür; bu repo da o sürecin canlı çalışma alanıdır.
+Geliştirme tamamen Claude Code (Anthropic) ile yürütülür; bu repo da o sürecin canlı çalışma alanıdır. 
 
