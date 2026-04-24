@@ -1,0 +1,163 @@
+=== STYLE_DEFINITIONS Thresholds — Kategori Ozet Tablo ===
+
+Kriter önem ağırlıkları:
+  YEAST:   safe=40  marginal=15   (en belirleyici)
+  MALT:    safe=25  marginal=10
+  SRM:     safe=15  marginal=5
+  IBU:     safe=10  marginal=3
+  ABV:     safe=10  marginal=3
+  OG:      safe=10  marginal=3
+  MARKERS: safe=20  marginal=5
+
+--------------------------------------------------------------------------------
+
+▼ LAGER (49 stil)
+   Ornek: Modern American Light Lager (american_light_lager)
+   ├ YEAST primary: [lager] | excluded: [ale, wheat, wit, belcika, saison, kveik, sour]
+   ├ SRM safe: 1.5-12, marginal: 0-17.25
+   ├ IBU safe: 5-20
+   ├ ABV safe: 3.5-4.4
+   ├ MALT kriterleri: pilsnerPct, cornPct, ricePct
+   └ MARKER kriterleri: bonusMaya
+
+▼ SPECIALTY (37 stil)
+   Ornek: Experimental (experimental_beer)
+   ├ YEAST primary: [ale, belcika, lager, wheat, sour, saison, kveik, wit]
+   ├ SRM safe: 2-40, marginal: 0-59
+   ├ IBU safe: 0-80
+   ├ ABV safe: 3-12
+   └ MARKER kriterleri: bonusMaya
+
+▼ ALE (20 stil)
+   Ornek: Cream Ale (american_cream_ale)
+   ├ YEAST primary: [ale] | secondary: [lager] | excluded: [wheat, wit, belcika, saison, kveik, sour]
+   ├ SRM safe: 2-5, marginal: 0.5-6.5
+   ├ IBU safe: 8-22
+   ├ ABV safe: 4.2-5.7
+   ├ MALT kriterleri: baseMaltPct, cornRicePct
+   └ MARKER kriterleri: bonusMaya
+
+▼ IPA (16 stil)
+   Ornek: İngiliz IPA (british_india_pale_ale)
+   ├ YEAST primary: [ale] | secondary: [kveik] | excluded: [wheat, wit, belcika, saison, sour]
+   ├ SRM safe: 6-14, marginal: 2-18
+   ├ IBU safe: 35-63
+   ├ ABV safe: 4.5-7.5
+   ├ MALT kriterleri: crystalPct, marisOtterPct
+   └ MARKER kriterleri: bonusMaya, bonusHop
+
+▼ OTHER (13 stil)
+   Ornek: American Wheat (american_wheat_beer)
+   ├ YEAST primary: [ale] | secondary: [wheat] | excluded: [lager, wit, belcika, saison, kveik, sour]
+   ├ SRM safe: 2-10, marginal: 0-14
+   ├ IBU safe: 10-35
+   ├ ABV safe: 3.5-5.6
+   ├ MALT kriterleri: wheatPct, pilsnerPct
+   └ MARKER kriterleri: bonusMaya
+
+▼ STOUT_PORTER (13 stil)
+   Ornek: Brown Porter (brown_porter)
+   ├ YEAST primary: [ale] | secondary: [lager] | excluded: [wheat, wit, belcika, saison, sour]
+   ├ SRM safe: 20-35, marginal: 12.5-42.5
+   ├ IBU safe: 18-35
+   ├ ABV safe: 4-6
+   ├ MALT kriterleri: baseMaltPct, crystalPct
+   └ MARKER kriterleri: bonusMaya
+
+▼ BELGIAN (13 stil)
+   Ornek: Belçika Pale Ale (belgian_speciale_belge)
+   ├ YEAST primary: [belcika] | excluded: [ale, lager, wheat, wit, kveik, sour]
+   ├ SRM safe: 4-14, marginal: 0-19
+   ├ IBU safe: 20-30
+   ├ ABV safe: 4.8-6.2
+   ├ MALT kriterleri: pilsnerPct, crystalPct, aromaticMunichPct
+   └ MARKER kriterleri: bonusMaya
+
+▼ STRONG_ALE (11 stil)
+   Ornek: Strong Ale (strong_ale)
+   ├ YEAST primary: [ale] | secondary: [belcika] | excluded: [lager, wheat, wit, saison, sour]
+   ├ SRM safe: 8-22, marginal: 1-29
+   ├ IBU safe: 30-60
+   ├ ABV safe: 5.5-11.3
+   ├ MALT kriterleri: crystalPct, marisOtterPct
+   └ MARKER kriterleri: bonusMaya
+
+▼ WEIZEN (6 stil)
+   Ornek: Hefeweizen (south_german_hefeweizen)
+   ├ YEAST primary: [wheat] | secondary: [ale] | excluded: [lager, wit, belcika, saison, kveik, sour]
+   ├ SRM safe: 2-9, marginal: 0-12.5
+   ├ IBU safe: 8-15
+   ├ ABV safe: 4.3-5.6
+   ├ MALT kriterleri: wheatPct
+   └ MARKER kriterleri: bonusMaya, bonusHop
+
+▼ SOUR_KETTLE (6 stil)
+   Ornek: Berliner Weisse (berliner_weisse)
+   ├ YEAST primary: [sour] | secondary: [wheat, wit] | excluded: [lager, belcika, saison, kveik]
+   ├ SRM safe: 2-4, marginal: 1-5
+   ├ IBU safe: 3-8
+   ├ ABV safe: 2.8-5
+   ├ MALT kriterleri: wheatPct, pilsnerPct
+   └ MARKER kriterleri: bonusMaya
+
+▼ LAMBIC (4 stil)
+   Ornek: Lambic (belgian_lambic)
+   ├ YEAST primary: [sour] | excluded: [ale, lager, wheat, wit, belcika, saison, kveik]
+   ├ SRM safe: 3-13, marginal: 0-18
+   ├ IBU safe: 0-23
+   ├ ABV safe: 5-8
+   ├ MALT kriterleri: pilsnerPct
+   └ MARKER kriterleri: bonusMaya
+
+▼ WILD (4 stil)
+   Ornek: Brett Beer (brett_beer)
+   ├ YEAST primary: [sour] | secondary: [ale, belcika] | excluded: [lager, wheat, wit, saison, kveik]
+   ├ SRM safe: 3-20, marginal: 0-28.5
+   └ MARKER kriterleri: bonusMaya
+
+▼ SAISON (3 stil)
+   Ornek: Bière de Garde (french_bi_re_de_garde)
+   ├ YEAST primary: [saison] | secondary: [belcika] | excluded: [ale, lager, wheat, wit, sour]
+   ├ SRM safe: 4-19, marginal: 0-26.5
+   ├ IBU safe: 18-30
+   ├ ABV safe: 4.4-8.5
+   ├ MALT kriterleri: pilsnerPct, munichPct, viennaPct
+   └ MARKER kriterleri: bonusMaya
+
+▼ FLANDERS (3 stil)
+   Ornek: Flanders Red Ale (flanders_red_ale)
+   ├ YEAST primary: [sour] | secondary: [belcika] | excluded: [ale, lager, wheat, wit, saison, kveik]
+   ├ SRM safe: 10-17, marginal: 6.5-20.5
+   ├ IBU safe: 10-25
+   ├ ABV safe: 4.6-6.5
+   ├ MALT kriterleri: pilsnerPct, munichPct, viennaPct, crystalPct
+   └ MARKER kriterleri: bonusMaya
+
+▼ FARMHOUSE (3 stil)
+   Ornek: Sahti (sahti)
+   ├ YEAST primary: [kveik, saison] | secondary: [ale] | excluded: [lager, wheat, wit, sour]
+   ├ SRM safe: 4-22, marginal: 0-31
+   ├ IBU safe: 0-15
+   ├ ABV safe: 7-11
+   ├ MALT kriterleri: baseMaltPct
+   └ MARKER kriterleri: bonusMaya
+
+▼ WITBIER (1 stil)
+   Ornek: Witbier (belgian_witbier)
+   ├ YEAST primary: [wit] | secondary: [belcika] | excluded: [lager, wheat, saison, kveik, sour]
+   ├ SRM safe: 2-4, marginal: 1-5
+   ├ IBU safe: 8-20
+   ├ ABV safe: 4-5.5
+   ├ MALT kriterleri: wheatPct, oatsPct
+   └ MARKER kriterleri: bonusMaya, bonusKatki
+
+--------------------------------------------------------------------------------
+
+Exclusion (hardZero) kural sayisi:
+  Yeast exclusion: 155 stil
+  SRM exclusion:   125
+  IBU exclusion:   144
+  ABV exclusion:   0
+  OG exclusion:    0
+  Malt exclusion:  178
+  Marker exclusion:0
