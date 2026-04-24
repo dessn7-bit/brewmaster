@@ -1,0 +1,448 @@
+{
+  "timestamp": "2026-04-24T23:20:18.375Z",
+  "dataset": {
+    "count": 1016,
+    "features": 61
+  },
+  "features": {
+    "yeast": [
+      "yeast_english",
+      "yeast_american",
+      "yeast_belgian",
+      "yeast_saison",
+      "yeast_wheat_german",
+      "yeast_german_lager",
+      "yeast_czech_lager",
+      "yeast_american_lager",
+      "yeast_kolsch",
+      "yeast_altbier",
+      "yeast_cal_common",
+      "yeast_brett",
+      "yeast_lacto",
+      "yeast_sour_blend",
+      "yeast_kveik",
+      "yeast_wit"
+    ],
+    "hops": [
+      "hop_american_c",
+      "hop_english",
+      "hop_german",
+      "hop_czech_saaz",
+      "hop_nz",
+      "hop_aged",
+      "hop_northern_brewer"
+    ],
+    "malts": [
+      "pct_pilsner",
+      "pct_base",
+      "pct_munich",
+      "pct_vienna",
+      "pct_wheat",
+      "pct_oats",
+      "pct_crystal",
+      "pct_choc",
+      "pct_roast",
+      "pct_corn"
+    ],
+    "additives": [
+      "katki_lactose",
+      "katki_fruit",
+      "katki_spice_herb",
+      "katki_chocolate",
+      "katki_coffee",
+      "katki_chile",
+      "katki_smoke",
+      "katki_honey",
+      "katki_pumpkin",
+      "katki_salt"
+    ],
+    "missing": [
+      "mash_temp_c",
+      "fermentation_temp_c",
+      "water_ca_ppm",
+      "water_so4_ppm",
+      "yeast_attenuation",
+      "boil_time_min",
+      "dry_hop_days"
+    ]
+  },
+  "classDistribution": {
+    "top20": [
+      [
+        "american_india_pale_ale",
+        59
+      ],
+      [
+        "french_belgian_saison",
+        41
+      ],
+      [
+        "american_imperial_stout",
+        29
+      ],
+      [
+        "american_pale_ale",
+        22
+      ],
+      [
+        "double_ipa",
+        20
+      ],
+      [
+        "czech_pale_lager",
+        18
+      ],
+      [
+        "belgian_tripel",
+        18
+      ],
+      [
+        "german_altbier",
+        17
+      ],
+      [
+        "international_pale_lager",
+        17
+      ],
+      [
+        "juicy_or_hazy_india_pale_ale",
+        16
+      ],
+      [
+        "flanders_red_ale",
+        16
+      ],
+      [
+        "belgian_strong_dark_ale",
+        15
+      ],
+      [
+        "belgian_witbier",
+        15
+      ],
+      [
+        "munich_helles",
+        14
+      ],
+      [
+        "german_koelsch",
+        14
+      ],
+      [
+        "gose",
+        13
+      ],
+      [
+        "german_maerzen",
+        12
+      ],
+      [
+        "south_german_hefeweizen",
+        12
+      ],
+      [
+        "german_pilsener",
+        12
+      ],
+      [
+        "belgian_fruit_lambic",
+        12
+      ]
+    ],
+    "bottom20": [
+      [
+        "swedish_gotlandsdricke",
+        1
+      ],
+      [
+        "dutch_kuit_kuyt_or_koyt",
+        1
+      ],
+      [
+        "european_dark_lager",
+        1
+      ],
+      [
+        "english_porter",
+        1
+      ],
+      [
+        "scottish_heavy",
+        1
+      ],
+      [
+        "scottish_light",
+        1
+      ],
+      [
+        "dunkles_bock",
+        1
+      ],
+      [
+        "dortmunder_export",
+        1
+      ],
+      [
+        "dunkles_weissbier",
+        1
+      ],
+      [
+        "lambic",
+        1
+      ],
+      [
+        "specialty_smoked_beer",
+        1
+      ],
+      [
+        "english_barleywine",
+        1
+      ],
+      [
+        "tropical_stout",
+        1
+      ],
+      [
+        "irish_stout",
+        1
+      ],
+      [
+        "american_rye_beer",
+        1
+      ],
+      [
+        "cream_ale",
+        1
+      ],
+      [
+        "blonde_ale",
+        1
+      ],
+      [
+        "italian_pilsner",
+        1
+      ],
+      [
+        "german_weissbier",
+        1
+      ],
+      [
+        "french_amber_ale",
+        1
+      ]
+    ],
+    "underRepresented": 121,
+    "specific": {
+      "dubbel": 11,
+      "witbier": 0,
+      "biereDeGarde": 3,
+      "viennaLager": 11
+    }
+  },
+  "confusionMatrix": {
+    "top20Pairs": [
+      [
+        "american_wild_ale → wild_beer",
+        9
+      ],
+      [
+        "belgian_pale_ale → belgian_speciale_belge",
+        6
+      ],
+      [
+        "doppelbock → german_doppelbock",
+        5
+      ],
+      [
+        "american_wild → wild_beer",
+        4
+      ],
+      [
+        "schwarzbier → german_schwarzbier",
+        4
+      ],
+      [
+        "fruit_lambic → belgian_fruit_lambic",
+        4
+      ],
+      [
+        "american_pale_ale → belgian_witbier",
+        3
+      ],
+      [
+        "pumpkin_squash_beer → belgian_witbier",
+        3
+      ],
+      [
+        "czech_pale_lager → munich_helles",
+        3
+      ],
+      [
+        "mild → english_dark_mild_ale",
+        3
+      ],
+      [
+        "helles_bock → german_heller_bock_maibock",
+        3
+      ],
+      [
+        "weizenbock → south_german_weizenbock",
+        3
+      ],
+      [
+        "smoked_beer → smoke_beer",
+        3
+      ],
+      [
+        "specialty_historical → historical_beer",
+        3
+      ],
+      [
+        "american_barleywine → american_barley_wine_ale",
+        3
+      ],
+      [
+        "biere_de_garde → french_bi_re_de_garde",
+        3
+      ],
+      [
+        "czech_amber_lager → vienna_lager",
+        2
+      ],
+      [
+        "czech_dark_lager → vienna_lager",
+        2
+      ],
+      [
+        "strong_ale → belgian_witbier",
+        2
+      ],
+      [
+        "rye_beer → german_rye_ale",
+        2
+      ]
+    ],
+    "worstStyles": [
+      {
+        "style": "belgian_pale_ale",
+        "precision": 0,
+        "total": 6
+      },
+      {
+        "style": "doppelbock",
+        "precision": 0,
+        "total": 5
+      },
+      {
+        "style": "american_wild_ale",
+        "precision": 0,
+        "total": 9
+      },
+      {
+        "style": "czech_dark_lager",
+        "precision": 0.42857142857142855,
+        "total": 7
+      },
+      {
+        "style": "czech_pale_lager",
+        "precision": 0.5,
+        "total": 18
+      },
+      {
+        "style": "pumpkin_squash_beer",
+        "precision": 0.5,
+        "total": 6
+      },
+      {
+        "style": "belgian_fruit_beer",
+        "precision": 0.6666666666666666,
+        "total": 6
+      },
+      {
+        "style": "winter_seasonal_beer",
+        "precision": 0.7142857142857143,
+        "total": 7
+      },
+      {
+        "style": "california_common_beer",
+        "precision": 0.8,
+        "total": 5
+      },
+      {
+        "style": "american_wheat_beer",
+        "precision": 0.8,
+        "total": 5
+      }
+    ]
+  },
+  "dubbelCase": {
+    "recipe": {
+      "_og": 1.062,
+      "_fg": 1.012,
+      "_abv": 6.62,
+      "_ibu": 16,
+      "_srm": 38,
+      "_mayaTip": "belcika",
+      "mayaId": "bb_abbaye",
+      "maya2Id": "",
+      "_yeast_raw": "BB Abbaye Manastır belcika",
+      "hopIds": [],
+      "maltIds": [],
+      "katkiIds": [],
+      "percents": {
+        "pilsnerPct": 70,
+        "baseMaltPct": 0,
+        "munichPct": 15,
+        "viennaPct": 0,
+        "wheatPct": 0,
+        "oatsPct": 0,
+        "crystalPct": 10,
+        "chocPct": 5,
+        "roastPct": 0,
+        "cornPct": 0,
+        "ricePct": 0,
+        "sugarPct": 0,
+        "aromaticAbbeyMunichPct": 0,
+        "smokedPct": 0,
+        "ryePct": 0
+      },
+      "lactose": false,
+      "filtered": false,
+      "aged": false,
+      "dhPer10L": 0,
+      "blended": false
+    },
+    "prediction": [
+      {
+        "slug": "belgian_witbier",
+        "score": 0.10076560163038845,
+        "confidence": 10,
+        "displayTR": "belgian_witbier"
+      },
+      {
+        "slug": "french_bi_re_de_garde",
+        "score": 0.09482964593409292,
+        "confidence": 9,
+        "displayTR": "french_bi_re_de_garde"
+      },
+      {
+        "slug": "german_rye_ale",
+        "score": 0.08575316435411812,
+        "confidence": 9,
+        "displayTR": "german_rye_ale"
+      },
+      {
+        "slug": "belgian_lambic",
+        "score": 0.07558985817022677,
+        "confidence": 8,
+        "displayTR": "belgian_lambic"
+      },
+      {
+        "slug": "vienna_lager",
+        "score": 0.07329645356177658,
+        "confidence": 7,
+        "displayTR": "vienna_lager"
+      }
+    ]
+  }
+}
