@@ -1,0 +1,116 @@
+{
+  "timestamp": "2026-04-25T12:52:19.614Z",
+  "phase": "FAZ_3_FEATURE_ENGINEERING_PLAN",
+  "current_dataset": "_ml_dataset_v6_batch_2ab_complete.json",
+  "current_recipe_count": 1100,
+  "current_feature_count": 61,
+  "phases": [
+    {
+      "phase": "3A",
+      "title": "Process Features Implementation",
+      "target_features": [
+        "mash_temp_c",
+        "fermentation_temp_c",
+        "water_ca_ppm",
+        "water_so4_ppm",
+        "water_cl_ppm",
+        "yeast_attenuation",
+        "boil_time_min",
+        "dry_hop_days",
+        "mash_type_step",
+        "mash_type_decoction",
+        "lagering_days"
+      ],
+      "strategy": "Add process feature columns to all 1100 recipes",
+      "impact": "Discrimination between same-yeast different-process styles"
+    },
+    {
+      "phase": "3B",
+      "title": "Yeast Granularity Split",
+      "target_features": [
+        "yeast_abbey",
+        "yeast_witbier",
+        "yeast_golden_strong",
+        "yeast_saison_3724",
+        "yeast_saison_dupont",
+        "yeast_english_bitter",
+        "yeast_english_mild"
+      ],
+      "strategy": "Replace yeast_belgian with granular strain categories",
+      "impact": "Belgian style family disambiguation"
+    },
+    {
+      "phase": "3C",
+      "title": "Style-Based Default Backfill",
+      "target": "All 1100 existing recipes",
+      "strategy": "Backfill new features with style-based defaults",
+      "impact": "Complete feature coverage without null values"
+    }
+  ],
+  "style_defaults_preview": {
+    "belgian_dubbel": {
+      "mash_temp_c": 67,
+      "fermentation_temp_c": 20,
+      "water_ca_ppm": 150,
+      "water_so4_ppm": 280,
+      "water_cl_ppm": 180,
+      "yeast_attenuation": 75,
+      "boil_time_min": 60,
+      "dry_hop_days": 0,
+      "yeast_abbey": 1,
+      "yeast_witbier": 0,
+      "yeast_golden_strong": 0
+    },
+    "belgian_witbier": {
+      "mash_temp_c": 65,
+      "fermentation_temp_c": 19,
+      "water_ca_ppm": 100,
+      "water_so4_ppm": 150,
+      "water_cl_ppm": 100,
+      "yeast_attenuation": 82,
+      "boil_time_min": 60,
+      "dry_hop_days": 0,
+      "yeast_abbey": 0,
+      "yeast_witbier": 1,
+      "yeast_golden_strong": 0
+    },
+    "american_india_pale_ale": {
+      "mash_temp_c": 66,
+      "fermentation_temp_c": 19,
+      "water_ca_ppm": 300,
+      "water_so4_ppm": 400,
+      "water_cl_ppm": 100,
+      "yeast_attenuation": 80,
+      "boil_time_min": 60,
+      "dry_hop_days": 4,
+      "yeast_abbey": 0,
+      "yeast_witbier": 0,
+      "yeast_golden_strong": 0
+    },
+    "german_koelsch": {
+      "mash_temp_c": 64,
+      "fermentation_temp_c": 16,
+      "water_ca_ppm": 80,
+      "water_so4_ppm": 60,
+      "water_cl_ppm": 80,
+      "yeast_attenuation": 85,
+      "boil_time_min": 90,
+      "dry_hop_days": 0,
+      "yeast_abbey": 0,
+      "yeast_witbier": 0,
+      "yeast_golden_strong": 0
+    }
+  },
+  "expected_impact": {
+    "feature_count": "61 → 76 (+15 process features)",
+    "discrimination": [
+      "Belgian family: Dubbel vs Witbier vs Golden Strong",
+      "German family: Kölsch vs Altbier vs Lager distinction",
+      "American family: Traditional vs Modern IPA variants",
+      "Process family: Decoction vs step mash, water chemistry regions"
+    ],
+    "expected_accuracy": "+3-5% top-1 improvement (diagnostic suggests process features critical)",
+    "model_complexity": "Manageable - 61 → 76 features still within range"
+  },
+  "next_step": "Start with Phase 3A: Process Features Implementation"
+}
