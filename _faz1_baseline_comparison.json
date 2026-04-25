@@ -1,0 +1,107 @@
+{
+  "timestamp": "2026-04-25T12:30:14.731Z",
+  "phase": "FAZ_1_ALIAS_NORMALIZATION",
+  "original_results": {
+    "top1": "38.0",
+    "top3": "54.0",
+    "top5": "60.0",
+    "total_tests": 50,
+    "confusion_pairs": [
+      [
+        "munich_helles → american_lager",
+        1
+      ],
+      [
+        "czech_amber_lager → vienna_lager",
+        1
+      ],
+      [
+        "american_imperial_stout → dessert_stout_or_pastry_beer",
+        1
+      ],
+      [
+        "american_barleywine → dessert_stout_or_pastry_beer",
+        1
+      ],
+      [
+        "english_dark_mild_ale → european_dark_lager",
+        1
+      ],
+      [
+        "other_belgian_ale → extra_special_bitter",
+        1
+      ],
+      [
+        "specialty_saison → french_biere_de_garde",
+        1
+      ],
+      [
+        "german_koelsch → american_wild_ale",
+        1
+      ],
+      [
+        "flanders_red_ale → american_wild_ale",
+        1
+      ],
+      [
+        "british_india_pale_ale → special_bitter_or_best_bitter",
+        1
+      ]
+    ]
+  },
+  "normalized_results": {
+    "top1": "40.0",
+    "top3": "56.0",
+    "top5": "62.0",
+    "total_tests": 50,
+    "confusion_pairs": [
+      [
+        "munich_helles → american_lager",
+        1
+      ],
+      [
+        "czech_amber_lager → vienna_lager",
+        1
+      ],
+      [
+        "american_imperial_stout → dessert_stout_or_pastry_beer",
+        1
+      ],
+      [
+        "american_barleywine → dessert_stout_or_pastry_beer",
+        1
+      ],
+      [
+        "mild → dark_lager",
+        1
+      ],
+      [
+        "other_belgian_ale → extra_special_bitter",
+        1
+      ],
+      [
+        "specialty_saison → french_biere_de_garde",
+        1
+      ],
+      [
+        "german_koelsch → american_wild_ale",
+        1
+      ],
+      [
+        "flanders_red_ale → american_wild_ale",
+        1
+      ],
+      [
+        "british_india_pale_ale → special_bitter_or_best_bitter",
+        1
+      ]
+    ]
+  },
+  "improvement": {
+    "top1_delta": 2,
+    "top3_delta": 2,
+    "top5_delta": 2
+  },
+  "style_reduction": "179 → 150",
+  "recipes_changed": 209
+}
