@@ -1,0 +1,52 @@
+{
+  "timestamp": "2026-04-25T13:20:21.380Z",
+  "phase": "FAZ_5B_AB_TESTING_FRAMEWORK_COMPLETE",
+  "test_configuration": {
+    "test_set_size": 260,
+    "v5_model": "Multi-Ensemble (KNN + RF + Rule)",
+    "v6_model": "Optimized k=5 Manhattan K-NN",
+    "evaluation_metric": "Top-1 accuracy on holdout test"
+  },
+  "performance_comparison": {
+    "v5": {
+      "top1_accuracy": 52.7,
+      "top3_accuracy": 73.1,
+      "top5_accuracy": 75.8,
+      "avg_confidence": 0.585
+    },
+    "v6": {
+      "top1_accuracy": 62.3,
+      "top3_accuracy": 75,
+      "top5_accuracy": 76.2,
+      "avg_confidence": 0.657
+    },
+    "improvements": {
+      "top1": 9.6,
+      "top3": 1.9,
+      "top5": 0.4
+    }
+  },
+  "head_to_head": {
+    "both_correct": 135,
+    "both_wrong": 96,
+    "v5_only_correct": 2,
+    "v6_only_correct": 27,
+    "net_v6_advantage": 25
+  },
+  "statistical_significance": {
+    "v5_only_correct": 2,
+    "v6_only_correct": 27,
+    "mcnemar_statistic": 19.862068965517242,
+    "p_value": "< 0.05",
+    "significant": true
+  },
+  "belgian_discrimination": {
+    "dubbel_total": 5,
+    "v5_dubbel_witbier_errors": 0,
+    "v6_dubbel_witbier_errors": 0,
+    "discrimination_improvement": 0
+  },
+  "success_status": "SUCCESS",
+  "production_recommendation": "DEPLOY_V6",
+  "next_phase": "FAZ_5C_PRODUCTION_MODEL_INTEGRATION"
+}

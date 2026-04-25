@@ -1,0 +1,41 @@
+{
+  "timestamp": "2026-04-25T13:15:48.893Z",
+  "phase": "FAZ_5A_HOLDOUT_TEST_CREATION_COMPLETE",
+  "dataset_split": {
+    "total_recipes": 1100,
+    "training_recipes": 840,
+    "test_recipes": 260,
+    "split_ratio": "840/260 (76.4%/23.6%)"
+  },
+  "stratification": {
+    "original_styles": 150,
+    "test_styles": 150,
+    "missing_styles": 0,
+    "quality": "GOOD"
+  },
+  "holdout_performance": {
+    "top1_accuracy": 62.3,
+    "top3_accuracy": 75,
+    "top5_accuracy": 76.2,
+    "average_confidence": 0.657
+  },
+  "loocv_comparison": {
+    "top1_variance": -6.2,
+    "top3_variance": -7.3,
+    "top5_variance": -8.4,
+    "variance_status": "HIGH_VARIANCE"
+  },
+  "belgian_discrimination": {
+    "dubbel_recipes": 5,
+    "dubbel_accuracy": 100,
+    "dubbel_witbier_confusion": 0,
+    "status": "RESOLVED"
+  },
+  "success_criteria": {
+    "target_accuracy": 66,
+    "achieved_accuracy": 62.3,
+    "success": false,
+    "ready_for_production": false
+  },
+  "next_phase": "FAZ_5B_AB_TESTING_FRAMEWORK"
+}
