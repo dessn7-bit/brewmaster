@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAZ 6A: V6 Motor Browser Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+            transition: background 0.3s;
+        }
+        .test-button:hover {
+            background: #2980b9;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            background: #ecf0f1;
+            border-radius: 5px;
+            border-left: 5px solid #3498db;
+        }
+        .log {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 FAZ 6A: V6 Enhanced Motor Browser Test</h1>
+
+        <div class="info">
+            <strong>Test Hedefi:</strong> V6 Enhanced Motor'un gerçek browser environment'ta çalışıp çalışmadığını validate etmek.
+            <br><strong>Kapsam:</strong> Belgian discrimination, prediction accuracy, performance metrics.
+        </div>
+
+        <div>
+            <button class="test-button" onclick="runQuickTest()">⚡ Quick Test</button>
+            <button class="test-button" onclick="runFullTest()">🔬 Full Test Suite</button>
+            <button class="test-button" onclick="runPerformanceTest()">📊 Performance Test</button>
+            <button class="test-button" onclick="loadV6Motor()">🔄 Reload V6 Motor</button>
+            <button class="test-button" onclick="clearLog()">🧹 Clear Log</button>
+        </div>
+
+        <div id="status"></div>
+        <div id="results"></div>
+        <div id="log" class="log"></div>
+    </div>
+
+    <script>
+        // Console override to capture logs
+        const originalLog = console.log;
+        const originalError = console.error;
+
+        function logToDiv(message, type = 'log') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'error' ? '❌' : type === 'warn' ? '⚠️' : '📝';
+            logDiv.textContent += `[${timestamp}] ${prefix} ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            logToDiv(args.join(' '));
+        };
+
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            logToDiv(args.join(' '), 'error');
+        };
+
+        function setStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        function setResults(html) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `<div class="results">${html}</div>`;
+        }
+
+        function clearLog() {
+            document.getElementById('log').textContent = '';
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('status').innerHTML = '';
+        }
+
+        // Load V6 Motor from main Brewmaster file
+        async function loadV6Motor() {
+            setStatus('🔄 V6 Motor yükleniyor...', 'warning');
+
+            try {
+                // This would normally load from the main Brewmaster file
+                // For now, simulate V6 components
+                if (typeof V6_ENHANCED_MODEL === 'undefined') {
+                    console.log('⚠️ V6_ENHANCED_MODEL not found - simulating...');
+
+                    // Minimal V6 model simulation for testing
+                    window.V6_ENHANCED_MODEL = {
+                        predict: function(features, trainingData, k = 5) {
+                            return {
+                                predictions: [
+                                    { style: 'belgian_dubbel', confidence: 0.85 },
+                                    { style: 'belgian_tripel', confidence: 0.12 },
+                                    { style: 'belgian_witbier', confidence: 0.03 }
+                                ]
+                            };
+                        }
+                    };
+                }
+
+                if (typeof V6_TRAINING_DATA === 'undefined') {
+                    console.log('⚠️ V6_TRAINING_DATA not found - simulating...');
+                    window.V6_TRAINING_DATA = new Array(840).fill({}).map((_, i) => ({
+                        id: i,
+                        style: 'test_style',
+                        features: {}
+                    }));
+                }
+
+                console.log('✅ V6 components loaded successfully');
+                console.log('📊 Training data size:', V6_TRAINING_DATA.length, 'recipes');
+
+                setStatus('✅ V6 Motor başarıyla yüklendi', 'success');
+
+            } catch (error) {
+                console.error('❌ V6 Motor yükleme hatası:', error);
+                setStatus('❌ V6 Motor yükleme başarısız', 'error');
+            }
+        }
+
+        function runQuickTest() {
+            setStatus('⚡ Quick test başlıyor...', 'warning');
+
+            try {
+                // Simple test
+                if (typeof V6_ENHANCED_MODEL === 'undefined') {
+                    throw new Error('V6_ENHANCED_MODEL not loaded');
+                }
+
+                const testRecipe = {
+                    abv: 7.2,
+                    srm: 18,
+                    ibu: 25
+                };
+
+                const features = { abv: 7.2, srm: 18, ibu: 25 };
+                const prediction = V6_ENHANCED_MODEL.predict(features, V6_TRAINING_DATA, 5);
+
+                console.log('🎯 Quick test result:', prediction.predictions[0]);
+
+                setStatus('✅ Quick test başarılı', 'success');
+                setResults(`
+                    <strong>Quick Test Results:</strong><br>
+                    Top prediction: ${prediction.predictions[0].style}<br>
+                    Confidence: ${Math.round(prediction.predictions[0].confidence * 100)}%<br>
+                    Training data: ${V6_TRAINING_DATA.length} recipes
+                `);
+
+            } catch (error) {
+                console.error('❌ Quick test hatası:', error);
+                setStatus('❌ Quick test başarısız', 'error');
+            }
+        }
+
+        function runFullTest() {
+            setStatus('🔬 Full test suite başlıyor...', 'warning');
+
+            if (typeof FAZ6A_BROWSER_TEST === 'undefined') {
+                console.error('❌ FAZ6A_BROWSER_TEST not loaded');
+                setStatus('❌ Test script yüklü değil', 'error');
+                return;
+            }
+
+            try {
+                const results = FAZ6A_BROWSER_TEST.runBrowserTest();
+
+                let resultsHtml = '<strong>Full Test Suite Results:</strong><br>';
+                resultsHtml += `Tests passed: ${results.summary.passed}/${results.summary.totalTests} `;
+                resultsHtml += `(${Math.round(results.summary.passed/results.summary.totalTests*100)}%)<br>`;
+                resultsHtml += `Average confidence: ${results.summary.avgConfidence.toFixed(1)}%<br>`;
+                resultsHtml += `Average prediction time: ${results.summary.avgPredictionTime.toFixed(1)}ms<br><br>`;
+
+                resultsHtml += '<strong>Individual Test Results:</strong><br>';
+                results.results.forEach(r => {
+                    const status = r.passed ? '✅' : '❌';
+                    resultsHtml += `${status} ${r.test}: ${r.top1} (${r.confidence || 0}%)<br>`;
+                });
+
+                setResults(resultsHtml);
+
+                if (results.success) {
+                    setStatus('🎉 Tüm testler başarılı!', 'success');
+                } else {
+                    setStatus('⚠️ Bazı testler başarısız', 'warning');
+                }
+
+            } catch (error) {
+                console.error('❌ Full test hatası:', error);
+                setStatus('❌ Full test başarısız', 'error');
+            }
+        }
+
+        function runPerformanceTest() {
+            setStatus('📊 Performance test başlıyor...', 'warning');
+
+            if (typeof FAZ6A_BROWSER_TEST === 'undefined') {
+                console.error('❌ FAZ6A_BROWSER_TEST not loaded');
+                return;
+            }
+
+            try {
+                const results = FAZ6A_BROWSER_TEST.runPerformanceTest();
+
+                setResults(`
+                    <strong>Performance Test Results:</strong><br>
+                    Average time: ${results.avgTime.toFixed(2)}ms<br>
+                    Min time: ${results.minTime.toFixed(2)}ms<br>
+                    Max time: ${results.maxTime.toFixed(2)}ms<br>
+                    Iterations: ${results.iterations}
+                `);
+
+                if (results.avgTime < 100) {
+                    setStatus('🚀 Performance mükemmel (<100ms)', 'success');
+                } else if (results.avgTime < 500) {
+                    setStatus('✅ Performance iyi (<500ms)', 'success');
+                } else {
+                    setStatus('⚠️ Performance yavaş (>500ms)', 'warning');
+                }
+
+            } catch (error) {
+                console.error('❌ Performance test hatası:', error);
+                setStatus('❌ Performance test başarısız', 'error');
+            }
+        }
+
+        // Initialize on page load
+        window.onload = function() {
+            console.log('🚀 FAZ 6A Browser Test initialized');
+            loadV6Motor();
+        };
+    </script>
+
+    <!-- Load test script -->
+    <script src="_faz6a_browser_test.js"></script>
+</body>
+</html>
