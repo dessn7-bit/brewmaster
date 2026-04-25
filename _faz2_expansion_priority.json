@@ -1,0 +1,198 @@
+{
+  "timestamp": "2026-04-25T12:31:49.415Z",
+  "phase": "FAZ_2_EXPANSION_PLANNING",
+  "current_under_represented": 113,
+  "priority_tiers": {
+    "tier0": 6,
+    "tier1": 6,
+    "tier2": 5
+  },
+  "implementation_plan": [
+    {
+      "batch": "Batch 2A: Foundation Styles",
+      "target_styles": [
+        "stout",
+        "mild",
+        "ipa",
+        "blonde_ale"
+      ],
+      "target_recipes": "15-20 total",
+      "strategy": "Focus on BJCP exemplars and commercial clones",
+      "measurement": "LOOCV after each style completion"
+    },
+    {
+      "batch": "Batch 2B: Consolidated Styles",
+      "target_styles": [
+        "porter",
+        "brown_ale"
+      ],
+      "target_recipes": "10-15 total",
+      "strategy": "Build upon alias consolidation with geographic variants",
+      "measurement": "Test porter/brown_ale confusion resolution"
+    },
+    {
+      "batch": "Batch 2C: Regional Archetypes",
+      "target_styles": [
+        "irish_dry_stout",
+        "french_biere_de_garde",
+        "scotch_ale_or_wee_heavy"
+      ],
+      "target_recipes": "15-20 total",
+      "strategy": "Authentic regional examples from traditional breweries",
+      "measurement": "LOOCV + geographic style accuracy"
+    },
+    {
+      "batch": "Batch 2D: Modern Craft",
+      "target_styles": [
+        "white_ipa",
+        "brut_ipa",
+        "west_coast_india_pale_ale"
+      ],
+      "target_recipes": "15-20 total",
+      "strategy": "Modern American craft brewery recipes",
+      "measurement": "IPA family disambiguation accuracy"
+    }
+  ],
+  "recipe_sources": {
+    "tier0": [
+      "BJCP commercial examples (Guinness, Newcastle, Sierra Nevada, Samuel Smith)",
+      "Clone recipes from Brewing Classic Styles",
+      "NHC/GABF winning recipes in these categories",
+      "BYO Magazine \"Style Profile\" recipes"
+    ],
+    "tier1": [
+      "Regional brewery signature recipes",
+      "Craft brewery clone recipes",
+      "HomebrewTalk highly-rated recipes",
+      "BJCP judge training examples"
+    ],
+    "tier2": [
+      "Modern craft brewery examples",
+      "Experimental/innovative recipes from brewing magazines",
+      "Competition-winning modern interpretations",
+      "Popular homebrew forum recipes"
+    ]
+  },
+  "styles_analyzed": [
+    {
+      "style": "stout",
+      "count": 5,
+      "tier": 0,
+      "reason": "BJCP Category 16 - Foundation dark ale"
+    },
+    {
+      "style": "mild",
+      "count": 9,
+      "tier": 0,
+      "reason": "BJCP Category 11 - British foundation style"
+    },
+    {
+      "style": "ipa",
+      "count": 4,
+      "tier": 0,
+      "reason": "BJCP Category 21 - Core IPA category confusion"
+    },
+    {
+      "style": "blonde_ale",
+      "count": 5,
+      "tier": 0,
+      "reason": "BJCP Category 18 - American foundation ale"
+    },
+    {
+      "style": "porter",
+      "count": 0,
+      "tier": 0,
+      "reason": "Consolidated from american/english porter, need examples"
+    },
+    {
+      "style": "brown_ale",
+      "count": 0,
+      "tier": 0,
+      "reason": "Consolidated from american/english brown_ale, need examples"
+    },
+    {
+      "style": "irish_dry_stout",
+      "count": 8,
+      "tier": 1,
+      "reason": "Guinness archetype - major commercial significance"
+    },
+    {
+      "style": "weizenbock",
+      "count": 8,
+      "tier": 1,
+      "reason": "German wheat-bock hybrid - important Bavarian style"
+    },
+    {
+      "style": "french_biere_de_garde",
+      "count": 8,
+      "tier": 1,
+      "reason": "BJCP Category 24C - major French farmhouse style"
+    },
+    {
+      "style": "common_beer",
+      "count": 8,
+      "tier": 1,
+      "reason": "California/Kentucky Common - American historical styles"
+    },
+    {
+      "style": "dark_lager",
+      "count": 8,
+      "tier": 1,
+      "reason": "Consolidated dark lager category"
+    },
+    {
+      "style": "scotch_ale_or_wee_heavy",
+      "count": 8,
+      "tier": 1,
+      "reason": "BJCP Category 17 - Scottish strong ale archetype"
+    },
+    {
+      "style": "white_ipa",
+      "count": 8,
+      "tier": 2,
+      "reason": "Modern American craft innovation - wheat IPA hybrid"
+    },
+    {
+      "style": "brut_ipa",
+      "count": 8,
+      "tier": 2,
+      "reason": "New American style - dry-finished IPA variant"
+    },
+    {
+      "style": "west_coast_india_pale_ale",
+      "count": 7,
+      "tier": 2,
+      "reason": "Classic American IPA archetype differentiation"
+    },
+    {
+      "style": "american_wheat_ale",
+      "count": 7,
+      "tier": 2,
+      "reason": "American interpretation of wheat beer"
+    },
+    {
+      "style": "berliner_weisse",
+      "count": 7,
+      "tier": 2,
+      "reason": "BJCP Category 23 - German sour wheat beer"
+    },
+    {
+      "style": "baltic_porter",
+      "count": 8,
+      "tier": 3,
+      "reason": "BJCP Category 9 - Imperial porter variant"
+    },
+    {
+      "style": "special_bitter_or_best_bitter",
+      "count": 8,
+      "tier": 3,
+      "reason": "BJCP Category 11 - British bitter spectrum"
+    },
+    {
+      "style": "winter_seasonal_beer",
+      "count": 7,
+      "tier": 3,
+      "reason": "Seasonal category - spiced/strong winter ales"
+    }
+  ]
+}
