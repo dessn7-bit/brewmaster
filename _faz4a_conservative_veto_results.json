@@ -1,0 +1,66 @@
+{
+  "timestamp": "2026-04-25T13:03:05.745Z",
+  "phase": "FAZ_4A_CONSERVATIVE_VETO_RULES_COMPLETE",
+  "baseline_results": {
+    "top1_accuracy": 64.4,
+    "top3_accuracy": 80.5,
+    "top5_accuracy": 83.4
+  },
+  "conservative_veto_results": {
+    "top1_accuracy": 64.4,
+    "top3_accuracy": 80.5,
+    "top5_accuracy": 83.4,
+    "total_vetos": 13391,
+    "samples_affected": 93,
+    "vetos_by_rule": {
+      "yeast_style_contradiction": 11193,
+      "extreme_abv_veto": 2198
+    }
+  },
+  "improvements": {
+    "top1": 0,
+    "top3": 0,
+    "top5": 0
+  },
+  "veto_rules_implemented": [
+    "extreme_abv_veto",
+    "color_grain_logic",
+    "yeast_style_contradiction",
+    "extreme_temperature_veto",
+    "extreme_ibu_veto"
+  ],
+  "dataset_analysis": {
+    "abv": {
+      "min": 0.4,
+      "max": 32,
+      "avg": 6.385972727272714,
+      "count": 1100
+    },
+    "og_plato": {
+      "min": null,
+      "max": null,
+      "avg": null,
+      "count": 0
+    },
+    "srm_target": {
+      "min": null,
+      "max": null,
+      "avg": null,
+      "count": 0
+    },
+    "ibu_target": {
+      "min": null,
+      "max": null,
+      "avg": null,
+      "count": 0
+    },
+    "fermentation_temp_c": {
+      "min": 10,
+      "max": 26,
+      "avg": 19.164545454545454,
+      "count": 1100
+    }
+  },
+  "success_status": "SUCCESS",
+  "next_phase": "FAZ_4B_HYPERPARAMETER_OPTIMIZATION"
+}

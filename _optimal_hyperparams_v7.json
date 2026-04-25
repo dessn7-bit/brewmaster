@@ -1,0 +1,243 @@
+{
+  "timestamp": "2026-04-25T12:11:06.312Z",
+  "version": "V7",
+  "optimization_method": "grid_search_simulation",
+  "optimal_config": {
+    "knn_k": 7,
+    "rf_trees": 70,
+    "rf_depth": 21,
+    "rf_features": 18,
+    "w_knn": 0.35,
+    "w_rf": 0.65,
+    "w_rule": 0.1,
+    "name": "deeper_rf"
+  },
+  "expected_performance": {
+    "top1_accuracy": 0.8101034686313962,
+    "top3_accuracy": 0.8931034686313961,
+    "top5_accuracy": 0.9331034686313961,
+    "belgian_dubbel_rank": 2,
+    "confidence": 0.748082774905117
+  },
+  "dubbel_test": {
+    "rank": 2,
+    "score": 0.175,
+    "confidence": 18,
+    "top_competitor": "american_india_pale_ale"
+  },
+  "targets_met": false,
+  "all_results": [
+    {
+      "config": {
+        "knn_k": 7,
+        "rf_trees": 70,
+        "rf_depth": 21,
+        "rf_features": 18,
+        "w_knn": 0.35,
+        "w_rf": 0.65,
+        "w_rule": 0.1,
+        "name": "deeper_rf"
+      },
+      "performance": {
+        "top1_accuracy": 0.8101034686313962,
+        "top3_accuracy": 0.8931034686313961,
+        "top5_accuracy": 0.9331034686313961,
+        "belgian_dubbel_rank": 2,
+        "confidence": 0.748082774905117
+      },
+      "dubbel_test": {
+        "rank": 2,
+        "score": 0.175,
+        "confidence": 18,
+        "top_competitor": "american_india_pale_ale"
+      },
+      "score": 0.8539931217682565
+    },
+    {
+      "config": {
+        "knn_k": 7,
+        "rf_trees": 60,
+        "rf_depth": 18,
+        "rf_features": 15,
+        "w_knn": 0.35,
+        "w_rf": 0.65,
+        "w_rule": 0.1,
+        "name": "V6.3_baseline"
+      },
+      "performance": {
+        "top1_accuracy": 0.7872932284254467,
+        "top3_accuracy": 0.8702932284254467,
+        "top5_accuracy": 0.9102932284254467,
+        "belgian_dubbel_rank": 2,
+        "confidence": 0.7298345827403574
+      },
+      "dubbel_test": {
+        "rank": 2,
+        "score": 0.175,
+        "confidence": 18,
+        "top_competitor": "american_india_pale_ale"
+      },
+      "score": 0.833463905582902
+    },
+    {
+      "config": {
+        "knn_k": 5,
+        "rf_trees": 60,
+        "rf_depth": 18,
+        "rf_features": 15,
+        "w_knn": 0.4,
+        "w_rf": 0.6,
+        "w_rule": 0.1,
+        "name": "conservative_knn"
+      },
+      "performance": {
+        "top1_accuracy": 0.7592704971362095,
+        "top3_accuracy": 0.8422704971362095,
+        "top5_accuracy": 0.8822704971362095,
+        "belgian_dubbel_rank": 3,
+        "confidence": 0.7074163977089677
+      },
+      "dubbel_test": {
+        "rank": 2,
+        "score": 0.175,
+        "confidence": 18,
+        "top_competitor": "american_india_pale_ale"
+      },
+      "score": 0.8082434474225885
+    },
+    {
+      "config": {
+        "knn_k": 5,
+        "rf_trees": 50,
+        "rf_depth": 15,
+        "rf_features": 12,
+        "w_knn": 0.35,
+        "w_rf": 0.6,
+        "w_rule": 0.15,
+        "name": "rule_focused"
+      },
+      "performance": {
+        "top1_accuracy": 0.7504505282812319,
+        "top3_accuracy": 0.8349505282812318,
+        "top5_accuracy": 0.8749505282812319,
+        "belgian_dubbel_rank": 3,
+        "confidence": 0.7003604226249855
+      },
+      "dubbel_test": {
+        "rank": 2,
+        "score": 0.16,
+        "confidence": 16,
+        "top_competitor": "american_india_pale_ale"
+      },
+      "score": 0.8007554754531087
+    },
+    {
+      "config": {
+        "knn_k": 7,
+        "rf_trees": 60,
+        "rf_depth": 18,
+        "rf_features": 15,
+        "w_knn": 0.3,
+        "w_rf": 0.7,
+        "w_rule": 0.1,
+        "name": "rf_heavy"
+      },
+      "performance": {
+        "top1_accuracy": 0.7282739676713585,
+        "top3_accuracy": 0.8112739676713585,
+        "top5_accuracy": 0.8512739676713585,
+        "belgian_dubbel_rank": 3,
+        "confidence": 0.6826191741370868
+      },
+      "dubbel_test": {
+        "rank": 2,
+        "score": 0.175,
+        "confidence": 18,
+        "top_competitor": "american_india_pale_ale"
+      },
+      "score": 0.7803465709042227
+    },
+    {
+      "config": {
+        "knn_k": 7,
+        "rf_trees": 65,
+        "rf_depth": 18,
+        "rf_features": 16,
+        "w_knn": 0.33,
+        "w_rf": 0.67,
+        "w_rule": 0.08,
+        "name": "balanced_v7"
+      },
+      "performance": {
+        "top1_accuracy": 0.7255860905755124,
+        "top3_accuracy": 0.8079860905755123,
+        "top5_accuracy": 0.8479860905755123,
+        "belgian_dubbel_rank": 4,
+        "confidence": 0.6804688724604099
+      },
+      "dubbel_test": {
+        "rank": 2,
+        "score": 0.15500000000000003,
+        "confidence": 16,
+        "top_competitor": "american_india_pale_ale"
+      },
+      "score": 0.7777474815179611
+    },
+    {
+      "config": {
+        "knn_k": 9,
+        "rf_trees": 70,
+        "rf_depth": 21,
+        "rf_features": 18,
+        "w_knn": 0.3,
+        "w_rf": 0.7,
+        "w_rule": 0.05,
+        "name": "advanced_ml"
+      },
+      "performance": {
+        "top1_accuracy": 0.7157985938406407,
+        "top3_accuracy": 0.7972985938406406,
+        "top5_accuracy": 0.8372985938406406,
+        "belgian_dubbel_rank": 4,
+        "confidence": 0.6726388750725125
+      },
+      "dubbel_test": {
+        "rank": 2,
+        "score": 0.14500000000000002,
+        "confidence": 15,
+        "top_competitor": "american_india_pale_ale"
+      },
+      "score": 0.7686687344565766
+    },
+    {
+      "config": {
+        "knn_k": 7,
+        "rf_trees": 60,
+        "rf_depth": 18,
+        "rf_features": 15,
+        "w_knn": 0.4,
+        "w_rf": 0.55,
+        "w_rule": 0.15,
+        "name": "rule_heavy"
+      },
+      "performance": {
+        "top1_accuracy": 0.6759892247702197,
+        "top3_accuracy": 0.7604892247702196,
+        "top5_accuracy": 0.8004892247702197,
+        "belgian_dubbel_rank": 2,
+        "confidence": 0.6407913798161757
+      },
+      "dubbel_test": {
+        "rank": 2,
+        "score": 0.175,
+        "confidence": 18,
+        "top_competitor": "american_india_pale_ale"
+      },
+      "score": 0.7337403022931978
+    }
+  ],
+  "recommendations": {
+    "deploy_ready": false,
+    "next_steps": "Adjust hyperparameters and retest"
+  }
+}

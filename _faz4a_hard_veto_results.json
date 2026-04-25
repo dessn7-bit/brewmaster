@@ -1,0 +1,46 @@
+{
+  "timestamp": "2026-04-25T13:01:43.508Z",
+  "phase": "FAZ_4A_HARD_VETO_RULES_COMPLETE",
+  "baseline_results": {
+    "top1_accuracy": 64.4,
+    "top3_accuracy": 80.5,
+    "top5_accuracy": 83.4
+  },
+  "veto_results": {
+    "top1_accuracy": 0,
+    "top3_accuracy": 0,
+    "top5_accuracy": 0,
+    "total_vetos": 1208000,
+    "vetos_by_rule": {
+      "abv_og_consistency": 1207801,
+      "fermentation_temp_consistency": 199
+    },
+    "top_vetoed_styles": {
+      "american_india_pale_ale": 64782,
+      "french_belgian_saison": 45059,
+      "pale_lager": 38465,
+      "pale_ale": 36234,
+      "american_imperial_stout": 31842,
+      "brown_ale": 29646,
+      "belgian_dubbel": 28548,
+      "double_ipa": 21960,
+      "belgian_tripel": 19764,
+      "porter": 19764
+    }
+  },
+  "improvements": {
+    "top1": -64.4,
+    "top3": -80.5,
+    "top5": -83.4
+  },
+  "veto_rules_implemented": [
+    "abv_og_consistency",
+    "srm_grain_consistency",
+    "ibu_hop_consistency",
+    "style_signature_consistency",
+    "water_chemistry_consistency",
+    "fermentation_temp_consistency"
+  ],
+  "success_status": "MARGINAL",
+  "next_phase": "FAZ_4B_HYPERPARAMETER_OPTIMIZATION"
+}

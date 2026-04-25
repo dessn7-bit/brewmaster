@@ -1,0 +1,153 @@
+{
+  "timestamp": "2026-04-25T13:07:25.548Z",
+  "phase": "FAZ_4C_ENSEMBLE_METHODS_COMPLETE",
+  "baseline_results": {
+    "top1_accuracy": 67.4,
+    "top3_accuracy": 82.3,
+    "top5_accuracy": 84.6,
+    "approach": "Single optimized K-NN (Manhattan, k=10)"
+  },
+  "ensemble_results": {
+    "top1_accuracy": 67.9,
+    "top3_accuracy": 74.3,
+    "top5_accuracy": 77.2,
+    "approach": "Multi-model ensemble with confidence weighting"
+  },
+  "improvements": {
+    "top1": 0.5,
+    "top3": -8,
+    "top5": -7.4
+  },
+  "ensemble_components": [
+    {
+      "name": "K5_Manhattan",
+      "accuracy": 68.5,
+      "weight": 0.8,
+      "params": {
+        "k": 5,
+        "distanceMetric": "manhattan"
+      }
+    },
+    {
+      "name": "K7_Manhattan",
+      "accuracy": 67.9,
+      "weight": 1,
+      "params": {
+        "k": 7,
+        "distanceMetric": "manhattan"
+      }
+    },
+    {
+      "name": "K10_Manhattan",
+      "accuracy": 67.4,
+      "weight": 1.2,
+      "params": {
+        "k": 10,
+        "distanceMetric": "manhattan"
+      }
+    },
+    {
+      "name": "K12_Manhattan",
+      "accuracy": 67.1,
+      "weight": 1,
+      "params": {
+        "k": 12,
+        "distanceMetric": "manhattan"
+      }
+    },
+    {
+      "name": "K15_Manhattan",
+      "accuracy": 66.6,
+      "weight": 0.8,
+      "params": {
+        "k": 15,
+        "distanceMetric": "manhattan"
+      }
+    },
+    {
+      "name": "K10_Euclidean",
+      "accuracy": 64.1,
+      "weight": 0.6,
+      "params": {
+        "k": 10,
+        "distanceMetric": "euclidean"
+      }
+    },
+    {
+      "name": "Grain_Specialist",
+      "accuracy": 37.5,
+      "weight": 0.9,
+      "params": {
+        "k": 10,
+        "distanceMetric": "manhattan",
+        "featureSubset": [
+          "grain_pilsner",
+          "grain_munich",
+          "grain_wheat",
+          "grain_crystal",
+          "grain_chocolate",
+          "grain_black",
+          "grain_roasted_barley",
+          "grain_cara_pils",
+          "grain_victory",
+          "grain_biscuit",
+          "grain_aromatic",
+          "abv",
+          "srm",
+          "og",
+          "mash_temp_c"
+        ]
+      }
+    },
+    {
+      "name": "Hop_Specialist",
+      "accuracy": 38.8,
+      "weight": 0.9,
+      "params": {
+        "k": 10,
+        "distanceMetric": "manhattan",
+        "featureSubset": [
+          "hop_bittering",
+          "hop_aroma",
+          "hop_flavor",
+          "hop_noble",
+          "hop_citrus",
+          "hop_tropical",
+          "hop_pine",
+          "hop_floral",
+          "ibu",
+          "dry_hop_days",
+          "water_so4_ppm",
+          "water_cl_ppm"
+        ]
+      }
+    },
+    {
+      "name": "Process_Specialist",
+      "accuracy": 43.1,
+      "weight": 1.1,
+      "params": {
+        "k": 10,
+        "distanceMetric": "manhattan",
+        "featureSubset": [
+          "yeast_abbey",
+          "yeast_witbier",
+          "yeast_golden_strong",
+          "yeast_attenuation",
+          "fermentation_temp_c",
+          "mash_temp_c",
+          "water_ca_ppm",
+          "water_so4_ppm",
+          "water_cl_ppm",
+          "boil_time_min",
+          "dry_hop_days",
+          "lagering_days",
+          "mash_type_step",
+          "mash_type_decoction"
+        ]
+      }
+    }
+  ],
+  "success_status": "MARGINAL_IMPROVEMENT",
+  "next_phase": "FAZ_4D_HIERARCHICAL_PREDICTION"
+}

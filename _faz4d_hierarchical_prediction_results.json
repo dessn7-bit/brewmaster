@@ -1,0 +1,30 @@
+{
+  "timestamp": "2026-04-25T13:09:18.234Z",
+  "phase": "FAZ_4D_HIERARCHICAL_PREDICTION_COMPLETE",
+  "baseline_results": {
+    "top1_accuracy": 68.5,
+    "top3_accuracy": 82.3,
+    "top5_accuracy": 84.6,
+    "approach": "Single k=5 Manhattan K-NN"
+  },
+  "hierarchical_results": {
+    "top1_accuracy": 67.8,
+    "top3_accuracy": 67.8,
+    "top5_accuracy": 67.8,
+    "approach": "Two-stage hierarchical (family → style)"
+  },
+  "improvements": {
+    "top1": -0.7,
+    "top3": -14.5,
+    "top5": -16.8
+  },
+  "hierarchical_analysis": {
+    "family_accuracy": 92.1,
+    "hierarchical_usage": 93.3,
+    "global_fallback": 6.7,
+    "avg_family_confidence": 0.855,
+    "avg_style_confidence": 0.741
+  },
+  "style_families_defined": 6,
+  "success_status": "NO_IMPROVEMENT"
+}
