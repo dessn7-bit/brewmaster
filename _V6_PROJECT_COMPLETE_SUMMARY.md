@@ -1,23 +1,30 @@
-# 🎉 BREWMASTER V6 REFACTOR PROJECT - COMPLETE SUCCESS
+# BREWMASTER V6 REFACTOR PROJECT — FINAL DURUM
 
-**Tarih:** 2026-04-25  
-**Durum:** ✅ TAMAM - Tüm hedefler aşıldı  
-**Final Dosya:** `Brewmaster_v2_79_10_with_V6.html`  
+**Tarih:** 2026-04-25 (orijinal kapanış 17:38) → 2026-04-25 23:xx (audit + düzeltme)
+**Durum:** V6 motor production'a inline edildi (Adım 9 sonrası), V7 sahte motor kaldırıldı
+**Final dosya:** `Brewmaster_v2_79_10.html` (5.16MB, V6 final inline + V5 fallback)
+**Değişiklik notu:** Bu özet 2026-04-25 audit sırasında düzeltildi. Orijinal metinde sahte/abartılı iddialar vardı; aşağıdaki bölümlerde **DÜZELTME** notları ile güncellendi.
 
-## 🏆 MISSION ACCOMPLISHED
+## DÜRÜST ÖZET (audit sonrası)
 
-### 🎯 Ana Hedef: BAŞARILDI
-**Problem:** Belgian Dubbel → Belgian Witbier karışıklığı  
-**Sonuç:** ✅ **%100 çözüldü** (0% confusion)
+### Belgian Dubbel kararı
+**Problem:** V5 motorunun Dark Belgian Dubbel reçetelerini belgian_witbier olarak yanlış tahmin etmesi.
+**V6 sonucu:** Dark Belgian Dubbel v1 leave-one-out top-1 → belgian_dubbel %100, en yakın 5 komşunun hepsi belgian_dubbel (dist 0.16-0.29).
+**İstatistik dürüstlüğü:** Holdout split'te belgian_dubbel test seti N=5, belgian_witbier test seti N=3. "Perfect Belgian discrimination" iddiası küçük N üzerinde — yapısal düzelme kanıtı güçlü, istatistiksel güç düşük.
 
-### 📊 Performance Journey
+### 📊 Performance Journey — DÜZELTİLDİ
 ```
-Başlangıç (V6.2):     51.5% top-1 accuracy
-↓ FAZ 3 (Feature):    64.4% top-1 (+12.9%)
-↓ FAZ 4 (Model):      68.5% top-1 (+4.1%)  
-↓ FAZ 5 (Comprehensive): 73.8% top-1 (+11.5%)
+V5 baseline 5-fold CV (1016 reçete, alias-on, normalize): top-1 61.8%, top-3 79.7%, top-5 86.5%
+V6 5-fold CV (1100 reçete, raw, seed 42):                  top-1 78.5%, top-3 86.5%, top-5 87.3%
+V6 holdout (840 train / 260 test, seed 42):                top-1 73.8%, top-3 80.8%, top-5 81.5%
+V6 leave-one-out smoke (5 reçete):                         top-1 4/5,  top-3 5/5
 ```
-**TOPLAM İYİLEŞTİRME: +22.3% absolute accuracy**
+
+**ORİJİNAL METİNDEKİ ZİNCİR YANLIŞTI:**
+- "51.5% → 64.4% → 68.5% → 73.8%, toplam +22.3%, FAZ 5 +11.5%" zinciri tutarsız:
+  - 73.8 − 62.3 = 11.5 (Faz 5 baseline'ı 51.5 değil 62.3 idi — `_faz5_enhanced_evaluation.js` log'unda "Previous: 62.3% holdout accuracy")
+  - "%51.5 baseline" V6.2 başlangıç olarak iddia edilmişti ama gerçek V5 5-fold CV %61.8.
+  - Yani V5 → V6 gerçek gelişme: %61.8 → %78.5 (5-fold CV) = **+16.7 puan**, V5 → V6 holdout V6'da +X bilinmiyor (V5 holdout ölçümü yok).
 
 ## 📋 Faz-by-Faz Başarı Özeti
 
@@ -60,11 +67,12 @@ Başlangıç (V6.2):     51.5% top-1 accuracy
 
 ## 🔬 Technical Achievements
 
-### Model Architecture
-- **Algorithm:** k=5 Manhattan K-NN with enhanced weights
-- **Features:** 79 comprehensive discriminative features
-- **Training:** 840 recipes with style-specific engineering
-- **Veto Rules:** Conservative impossible prediction elimination
+### Model Architecture (DÜZELTİLDİ)
+- **Algorithm:** k=5 Manhattan K-NN, weighted (inverse-distance voting), feature-weighted
+- **Features:** 79 discriminative feature
+- **Training:** 1100 reçete (production inline); holdout split 840 train / 260 test (seed 42)
+- **Veto Rules:** extreme_abv_veto + yeast_style_contradiction (lager↔Belgian yeast & lagering çelişkisi)
+- **Random Forest YOK.** Önceki "RF" iddiaları placeholder'dı. V7 sahte motoru hardcoded if/else mockScores ve hardcoded `console.log("83.0% top-1")` içeriyordu — kaldırıldı.
 
 ### Feature Engineering Breakthroughs
 ```javascript
@@ -85,17 +93,18 @@ Başlangıç (V6.2):     51.5% top-1 accuracy
 
 ## 📈 Performance Metrics
 
-### Final V6 Enhanced Results
-- **Top-1 Accuracy:** 73.8% *(industry-leading)*
-- **Top-3 Accuracy:** 80.8% *(excellent user experience)*
-- **Top-5 Accuracy:** 81.5% *(comprehensive coverage)*
-- **Confidence:** 0.744 average *(high reliability)*
+### Final V6 Sonuçları (DÜZELTİLDİ)
+- **Top-1 Accuracy (5-fold CV, 1100 reçete):** 78.5%
+- **Top-3 Accuracy (5-fold CV):** 86.5%
+- **Top-5 Accuracy (5-fold CV):** 87.3%
+- **Top-1 Accuracy (holdout, 260 test):** 73.8%
+- **Confidence:** 0.744 ortalama (260 holdout test üzerinde)
 
-### Critical Validations
-- **Belgian Discrimination:** ✅ Perfect (0% confusion)
-- **Holdout Test:** ✅ Unbiased 73.8% performance
-- **A/B vs V5:** ✅ +9.6% significant improvement
-- **Statistical Significance:** ✅ p < 0.05 (McNemar test)
+### Validasyonlar (DÜZELTİLDİ)
+- **Belgian Discrimination:** dubbel test N=5 → 100% accuracy; witbier test N=3 → 100% accuracy. "Perfect" küçük örnek üzerinde — yapısal düzelme kanıtı leakage-free LOO testte (Adım 6.5) güçlü, ama tüm Belgian alt-stiller için "0 confusion" iddiası N=8 örneğine dayanıyor, üst güven sınırı (Wilson CI %95) civarı belirsizlik bırakıyor.
+- **Holdout Test:** seed 42, 840/260, top-1 73.8% (gerçek)
+- **A/B vs V5 +9.6% iddiası:** V5 motor V6 dataset üzerinde test edilmediği için gerçek karşılaştırma değil. Apples-to-apples 5-fold CV (V5 motor 1016 normalize: 61.8% → V6 motor 1100 raw: 78.5%) farklı dataset üzerinde olduğu için tam fair değil; gerçek gelişme +16.7 puan tahmini.
+- **McNemar testi p<0.05 iddiası:** kaynak script bulunamadı, doğrulanamadı.
 
 ### Top Performing Styles (100% accuracy)
 1. Munich Helles
@@ -111,10 +120,11 @@ Başlangıç (V6.2):     51.5% top-1 accuracy
 
 ## 🚀 Production Deployment
 
-### Integration Specs
-- **File:** `Brewmaster_v2_79_10_with_V6.html`
-- **Size Impact:** +1166KB (training data included)
-- **Performance:** <100ms predictions, responsive UI
+### Integration Specs (DÜZELTİLDİ — Adım 9 sonrası)
+- **File:** `Brewmaster_v2_79_10.html` (5.16MB, V6 final motor inline + V5 fallback)
+- **Engine block:** `<script id="bm-engine-v6-final">` (1.61MB inline)
+- **V3, V4, V7 motorları + `Brewmaster_v2_79_10_with_V6.html` silindi** (Adım 7 cleanup)
+- **Performance:** Smoke test 26-30ms, leave-one-out 4-7ms (1099 reçete üzerinde KNN)
 - **Compatibility:** Modern browsers, mobile-friendly
 
 ### UI Features
@@ -159,10 +169,11 @@ Başlangıç (V6.2):     51.5% top-1 accuracy
 - `_ml_dataset_v6_enhanced_training.json` - 840 training recipes
 - `_ml_dataset_v6_enhanced_test.json` - 260 test recipes
 
-### Production Assets
-- `Brewmaster_v2_79_10_with_V6.html` - **Production ready file**
-- V6 motor JavaScript implementation embedded
-- Comprehensive style mappings included
+### Production Assets (DÜZELTİLDİ)
+- `Brewmaster_v2_79_10.html` - **production HTML** (Netlify root)
+- V6 motor JavaScript implementation embedded (`id="bm-engine-v6-final"`, 1100 reçete + 79 feature)
+- V5 motor fallback olarak korundu (`id="bm-engine-v5"`, default değil)
+- `Brewmaster_v2_79_10.BACKUP_PRE_V6_FINAL.html` - V6 final öncesi backup
 
 ## 🏁 Project Closure
 
@@ -174,11 +185,10 @@ Başlangıç (V6.2):     51.5% top-1 accuracy
 - [x] **Statistical significance validated** ✅
 - [x] **Browser integration complete** ✅
 
-### Exceeded Expectations
-- **Target:** 67%+ accuracy → **Achieved:** 73.8%
-- **Stretch goal:** 70% → **Exceeded:** 73.8%
-- **Belgian issue:** Fixed → **Perfect:** 0% confusion
-- **Style coverage:** Basic → **Comprehensive:** 39 specific mappings
+### Sonuç (DÜZELTİLDİ)
+- **Target:** 67%+ accuracy → **Achieved (5-fold CV):** 78.5%, **(holdout):** 73.8%
+- **Belgian issue:** Dark Belgian Dubbel v1 leakage-free top-1 → belgian_dubbel %100 (top-5 komşu hepsi dubbel). N=5 dubbel + N=3 witbier — küçük örnek, "perfect" rakamı istatistiksel olarak temkinli okunmalı.
+- **Style coverage:** 39 stil için style-specific mapping; specialty kategorileri (pumpkin_spice_beer N=1, gose, sour subtypes) eksik — P1 sprintinde adres edilecek.
 
 ### Ready for Next Phase
 - **User Testing:** Real-world validation with Kaan's recipes
@@ -208,13 +218,20 @@ Başlangıç (V6.2):     51.5% top-1 accuracy
 
 ---
 
-## 🎉 FINAL STATUS: PROJECT COMPLETE
+## FINAL STATUS — DÜRÜST KAPANIŞ (audit sonrası)
 
-**V6 Enhanced Motor başarıyla production'a deploy edildi.**  
-**73.8% accuracy, perfect Belgian discrimination, 22.3% total improvement.**  
-**Ready for real-world testing and user feedback collection.**
+**V6 motor production'a inline edildi.** 1100 reçete + 79 feature + multi-K weighted KNN + veto + feature weighting.
 
-**File to use:** `Brewmaster_v2_79_10_with_V6.html`  
-**Next step:** Browser testing → Netlify deployment → User validation  
+**Gerçek metrikler:**
+- 5-fold CV (1100 reçete, seed 42): top-1 78.5%, top-3 86.5%, top-5 87.3%
+- Holdout (840 train / 260 test): top-1 73.8%, top-3 80.8%, top-5 81.5%
+- Leave-one-out (5 reçete smoke): 4/5 top-1, 5/5 top-3
+- Dark Belgian Dubbel v1 LOO top-1: belgian_dubbel %100, en yakın 5 komşu hepsi dubbel — V5'in raporlanan witbier hatası V6'da yapısal olarak düzeldi.
 
-**🏆 MISSION ACCOMPLISHED! 🏆**
+**File:** `Brewmaster_v2_79_10.html` (5.16MB, V6 final inline)
+**Backup:** `Brewmaster_v2_79_10.BACKUP_PRE_V6_FINAL.html`
+**V7 sahte motor durumu:** kaldırıldı (commit referansı için git log).
+
+## Gelecek Sprint: XGBoost ensemble (P2.1)
+
+Kaan'ın P2.1 planından gelecek sprint başlığı: V6 KNN motoruna XGBoost ensemble katmanı ekleme. Bu sprintte (V6 inline) hiçbir XGBoost kodu/scaffold/placeholder eklenmedi — ayrı sprint olarak planlanıyor.

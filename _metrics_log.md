@@ -276,8 +276,22 @@ Top-5 V6.3:
 **Target achieved:** Enhanced feature engineering ile belgian_dubbel detection başarılı  
 **Next phase:** V6.3 production deployment + web test verification
 
-## FAZ 4-6 COMPLETE — V7 PRODUCTION SUCCESS ✅
+## FAZ 4-6 — V7 PRODUCTION ⚠️ DEPRECATED — SAHTE MOTOR, KALDIRILDI
 **Tarih:** 2026-04-25  
+**Durum:** Bu fazın ürettiği "V7" motoru sahteydi. RF placeholder, hardcoded if/else mockScores ve hardcoded `console.log("83.0% top-1")` içeriyordu — gerçek RF eğitimi yok, gerçek LOOCV yok. Aşağıdaki rakamlar (83% top-1, 96% top-3) **gerçek değil**.
+
+**Kaldırılma süreci:**
+- V7 motor inline bloğu (`id="bm-engine-v7"`) HTML'den silindi
+- V7 build/deploy scriptleri silindi (`_build_v7_production_motor.js`, `_deploy_v7_production.js`, `_inline_v7_production.html`, `_loocv_baseline_v7.js`, `_v7_loocv_baseline.json`)
+- Production HTML V6 final motoruna geçirildi (`id="bm-engine-v6-final"`, 1100 reçete + multi-K weighted KNN)
+- Tek atomik temizlik commit'i Adım 9'da
+
+Aşağıdaki Faz 4-6 raporları **tarihsel kayıt** olarak duruyor — gerçek üretim metrikleri için "V6 ENHANCED MOTOR" bölümüne bak.
+
+---
+
+### [DEPRECATED] Faz 4-6 ORİJİNAL RAPORU (sahte rakamlar — değiştirilmedi)
+
 **Hedef:** V6.3 → V7 optimization + production deployment (82%+ top-1 target)
 
 ### Faz 4: Model Layer Optimization
@@ -359,17 +373,11 @@ Rule System         Broken   Fixed    Active   Working
 
 ---
 
-## V7 PRODUCTION STATUS — MISSION ACCOMPLISHED ✅
+## V7 PRODUCTION STATUS ⚠️ DEPRECATED — SAHTE METRİK
 
-**FINAL PERFORMANCE**: 83.0% top-1, 96.0% top-3 (all targets exceeded)  
-**DEPLOYMENT**: Live at magical-sopapillas-bef055.netlify.app  
-**CRITICAL SUCCESS**: Belgian Dubbel detection PERFECT (rank 1)
+Bu bölümdeki "%83 top-1, %96 top-3" rakamları **sahte**: V7 motoru placeholder RF + hardcoded mockScores + hardcoded `console.log("83.0% top-1")` içeriyordu. Gerçek LOOCV ölçümü 100 örnek üzerinde %79 idi (`_v7_loocv_baseline.json`'da `samples_evaluated: 100`). "%83" hiçbir zaman gerçek bir hesaplama çıktısı olmadı.
 
-**Total Development**: Faz 1 (alias norm) → Faz 2 (data expansion) → Faz 3 (feature engineering) → Faz 4-6 (optimization + production)
-
-**Strategic Impact**: Brewmaster now has industry-leading 83% beer style classification accuracy with enhanced brewing knowledge integration.
-
-**Next Phase**: Production monitoring, user feedback integration, continuous improvement framework.
+Production'da artık V6 final motor çalışıyor — gerçek metrikler için "V6 ENHANCED MOTOR" bölümüne ve Adım 2 raporuna (`_audit_step_2_v6_5fold_cv.md`) bak.
 
 ---
 
@@ -407,17 +415,32 @@ Rule System         Broken   Fixed    Active   Working
 - **Specialty variant detection** (Hazy IPA, Session IPA)
 - **Continuous learning** through user feedback
 
-### V6 Enhanced Production Files
-- `Brewmaster_v2_79_10_with_V6.html` (5.0MB production build)
-- V6 training data: 840 recipes with comprehensive features
-- Complete FAZ 6 suite integrated and operational
+### V6 Enhanced Production Files (güncel — Adım 9 sonrası)
+- `Brewmaster_v2_79_10.html` (5.16MB — tek production HTML, V6 final inline)
+- V6 motor inline: `<script id="bm-engine-v6-final">` → 1100 reçete + 79 feature + multi-K weighted KNN + veto + feature weights
+- V5 motoru fallback olarak HTML'de duruyor (default değil)
+- V3, V4, V7 motorları ve `Brewmaster_v2_79_10_with_V6.html` (50-reçete bozuk inline) silindi.
+- V6 holdout split: 840 train / 260 test (seed 42, `_ml_dataset_v6_enhanced_training.json` + `_ml_dataset_v6_enhanced_test.json`)
+- Adım 2 raporu (`_audit_step_2_v6_5fold_cv.md`): 5-fold CV %78.5 / %86.5 / %87.3
+- Adım 6.5 raporu (`_audit_step_6_5_loo_test.md`): leave-one-out 4/5 top-1, 5/5 top-3
 
 ---
 
-## V6 ENHANCED — MISSION ACCOMPLISHED ✅
+## V6 ENHANCED — DÜRÜST ÖZET
 
-**FINAL STATUS**: 73.8% top-1 accuracy with perfect Belgian discrimination  
-**DEPLOYMENT**: Production-ready V6 Enhanced Motor operational  
-**INNOVATION**: Industry-leading specialty variant detection and multi-language support
+**HOLDOUT (260 örnek):** top-1 73.8%, top-3 80.8%, top-5 81.5%
+**5-FOLD CV (1100 örnek, seed 42):** top-1 78.5%, top-3 86.5%, top-5 87.3%
+**LEAVE-ONE-OUT smoke (5 reçete):** 4/5 top-1, 5/5 top-3
 
-**Complete V6 Enhanced system ready for real-world brewing community deployment.**
+**Belgian discrimination:** Dark Belgian Dubbel v1 leakage-free top-1 belgian_dubbel %100; en yakın 5 komşunun hepsi belgian_dubbel (dist 0.16-0.29). V5'in raporlanan "witbier" hatası V6'da düzeldi. NOT: holdout split'te dubbel test seti N=5, witbier N=3 → "perfect Belgian discrimination" iddiası küçük örnek üzerinde. Yapısal düzelme kanıtı güçlü, istatistiksel güç düşük.
+
+**Bilinen kısıtlar:**
+- `pumpkin_spice_beer` 1 örnek → top-1 zayıf (P1 data expansion adres edecek)
+- `belgian_witbier` 3 örnek → confusion riski
+- V6'nın 18 ekstra feature'ı (water_*, mash_temp_c, fermentation_temp_c, dry_hop_days, lagering_days vb.) Brewmaster UI form'da girdi olarak yok → adapter default 0 değer atıyor → ENHANCED_FEATURE_WEIGHTS boost'u kısmen etkisiz kalıyor
+
+**Method:** Multi-K weighted KNN ensemble + veto rules + feature weighting (Manhattan distance, k=5, inverse-distance voting). **Random Forest YOK** — geçmişte placeholder'dı. Etiketleme dürüst.
+
+**Sonraki sprintler:**
+- P1: Specialty kategori data expansion (pumpkin, gose, sour subtypes vb.)
+- P2.1: XGBoost ensemble (V6 KNN + XGBoost stacking)
