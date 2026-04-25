@@ -1,4 +1,4 @@
-// Brewmaster yeni skorlama motoru
+// Brewmaster yeni skorlama motoru V6.0
 // Kullanim: const { styleMatchScore, findBestMatches } = require('./style_engine.js');
 const fs = require('fs');
 const defs = JSON.parse(fs.readFileSync(__dirname + '/STYLE_DEFINITIONS.json', 'utf8'));
@@ -8,6 +8,28 @@ const FAMILY_MAP           = FAM.familyMap;
 const FAMILY_DISCRIMINATORS = FAM.discriminators;
 const SPECIALTY_CAP_FAMILIES   = FAM.specialtyCapFamilies || ['specialty'];
 const SPECIALTY_CAP_NORMALIZED = FAM.specialtyCapNormalized || 85;
+
+// V6.0 Alias normalization mapping (Faz 1)
+const ALIAS_MAP = {
+  'doppelbock': 'german_doppelbock',
+  'schwarzbier': 'german_schwarzbier',
+  'american_wild': 'american_wild_ale',
+  'fruit_lambic': 'belgian_fruit_lambic',
+  'biere_de_garde': 'french_biere_de_garde',
+  'french_bi_re_de_garde': 'french_biere_de_garde',
+  'belgian_speciale_belge': 'belgian_pale_ale',
+  'american_barley_wine_ale': 'american_barleywine',
+  'german_kolsch': 'german_koelsch',
+  'italian_pilsener': 'italian_pilsner',
+  'lambic': 'belgian_lambic',
+  'wild_beer': 'american_wild_ale',
+  'english_barleywine': 'british_barley_wine_ale'
+};
+
+// Normalize slug (input/output)
+function normalizeSlug(slug) {
+  return ALIAS_MAP[slug] || slug;
+}
 
 function inRange(v, zone) {
   if (!zone) return false;
@@ -65,7 +87,9 @@ function computeMaxScore(t, boostFields, boostMult, boostMarkers) {
 }
 
 function styleMatchScore(slug, recipe, opts = {}) {
-  const def = defs[slug];
+  // V6.0: Input slug normalization
+  const normalizedSlug = normalizeSlug(slug);
+  const def = defs[normalizedSlug];
   if (!def) return null;
   const t = def.thresholds || {};
   let raw = 0;
@@ -314,7 +338,13 @@ function findBestMatches(recipe, topN = 5) {
     });
   }
 
-  return res.slice(0, topN);
+  // V6.0: Output slug normalization
+  const finalRes = res.slice(0, topN);
+  finalRes.forEach(result => {
+    result.slug = normalizeSlug(result.slug);
+  });
+
+  return finalRes;
 }
 
 // Substyle trigger kontrolu (Faz 2b'de genisletilecek)
@@ -346,4 +376,4 @@ function matchSubstyles(recipe, topParentSlug) {
   return hits;
 }
 
-module.exports = { styleMatchScore, findBestMatches, matchSubstyles, defs, subs };
+module.exports = { styleMatchScore, findBestMatches, matchSubstyles, normalizeSlug, defs, subs, ALIAS_MAP };
