@@ -1,0 +1,74 @@
+{
+  "timestamp": "2026-04-25T12:06:28.796Z",
+  "version": "V6.3",
+  "test_case": "Dark Belgian Dubbel",
+  "input": {
+    "og": 1.062,
+    "fg": 1.012,
+    "abv": 6.62,
+    "ibu": 16,
+    "srm": 38,
+    "mayaId": "bb_abbaye",
+    "maya2Id": null,
+    "maltIds": [
+      "pilsner",
+      "munich",
+      "crystal_60",
+      "chocolate"
+    ],
+    "hopIds": [
+      "ekg"
+    ],
+    "katkiIds": []
+  },
+  "predictions": [
+    {
+      "slug": "american_india_pale_ale",
+      "score": 0.2530496052480245,
+      "confidence": 25,
+      "displayTR": "American India Pale Ale"
+    },
+    {
+      "slug": "belgian_dubbel",
+      "score": 0.13,
+      "confidence": 13,
+      "displayTR": "Belgian Dubbel"
+    },
+    {
+      "slug": "american_pale_ale",
+      "score": 0.0975,
+      "confidence": 10,
+      "displayTR": "American Pale Ale"
+    },
+    {
+      "slug": "german_schwarzbier",
+      "score": 0.05831895652904759,
+      "confidence": 6,
+      "displayTR": "German Schwarzbier"
+    },
+    {
+      "slug": "german_maerzen",
+      "score": 0.05580752305881744,
+      "confidence": 6,
+      "displayTR": "German Maerzen"
+    }
+  ],
+  "belgian_dubbel_rank": 2,
+  "success": true,
+  "meta": {
+    "k": 7,
+    "wKNN": 0.35,
+    "wRF": 0.65,
+    "wRule": 0.1,
+    "knn_contrib": 7,
+    "rf_contrib": 3,
+    "rule_contrib": 0,
+    "total_features": 101
+  },
+  "improvements": {
+    "features_total": 101,
+    "enhanced_yeast": true,
+    "process_features": true,
+    "strain_specific": true
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "timestamp": "2026-04-25T12:05:29.223Z",
+  "version": "v6.3",
+  "features": {
+    "total": 101,
+    "original": 61,
+    "process": 22,
+    "strain": 18
+  },
+  "hyperparameters": {
+    "rf_trees": 60,
+    "rf_depth": 18,
+    "rf_features": 15,
+    "rf_min_samples": 8,
+    "knn_k": 7,
+    "knn_weights": "distance",
+    "w_knn": 0.35,
+    "w_rf": 0.65,
+    "w_rule": 0.1
+  },
+  "training_data": {
+    "recipes": 1071,
+    "normalization": true
+  },
+  "build_config": {
+    "merge_strategy": "flatten_all",
+    "normalize_features": true,
+    "feature_selection": {
+      "enabled": false,
+      "min_usage_threshold": 0.01,
+      "max_correlation": 0.95
+    }
+  }
+}
