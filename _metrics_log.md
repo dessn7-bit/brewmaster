@@ -29,13 +29,42 @@ belgian_pale_ale: 6 → 8 reçete (+33%)
 
 ---
 
-## BASELINE MEASUREMENT NEEDED
+## Faz 2 — TRAINING DATA EXPANSION (Batch 1: Tier 1)
+**Tarih:** 2026-04-25  
+**Hedef:** Core BJCP stiller class balance düzeltme
 
-**Next:** Run LOOCV on V6.0 baseline  
-- V5 reference: Top-1 ~60.6% (from diagnostic report)  
-- V6.0 expected: +5-8 puan (alias confusion reduction)
+### Training Data Changes (V6.0 → V6.1)
+- **Total recipes:** 1031 → 1045 (+14)
+- **Under-represented classes:** 148 → 145 (-3)
 
-**Test Recipe (Dark Belgian Dubbel):**
-- OG 1.062, SRM 38, Belgian maya  
-- V5 prediction: belgian_witbier (wrong)  
-- V6.0 target: belgian_dubbel in top-3
+### Tier 1 Core Stiller İyileştirme
+```
+english_brown_ale: 8 → 12 (+4) ✅ Target reached
+american_porter: 7 → 12 (+5) ✅ Target reached  
+oatmeal_stout: 7 → 12 (+5) ✅ Target reached
+```
+
+### Added Recipes (14 total)
+- **English Brown Ale:** Newcastle clone, Samuel Smith clone, traditional, modern
+- **American Porter:** Deschutes Black Butte, Edmund Fitzgerald, classic, robust, Bell's style
+- **Oatmeal Stout:** Samuel Smith, Breakfast Stout inspired, traditional, smooth, rich
+
+### V6.1 Motor Status
+- ✅ RF Forest: 759.2 KB (+13KB)
+- ✅ Motor size: 980.0 KB 
+- ✅ Build successful, no errors
+
+### Sources Used
+- Newcastle Brown Ale clone (AHA)
+- Samuel Smith Nut Brown/Oatmeal clones
+- Deschutes Black Butte Porter clone (AHA)
+- Great Lakes Edmund Fitzgerald Porter clone
+
+---
+
+## NEXT: Batch 2 — Tier 2 Craft Styles
+
+**Remaining targets:** Session IPA, Black IPA, White IPA, Brut IPA, Rye IPA  
+**Expected:** +30 recipes, weitere class balance improvement
+
+**LOOCV Measurement:** Pending (Real ML model test needed)
