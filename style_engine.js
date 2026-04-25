@@ -184,6 +184,55 @@ function styleMatchScore(slug, recipe, opts = {}) {
     }
   }
 
+  // CROSS-FIELD EXCLUSIONS (Hard brewing constraints)
+  // SRM boundary check
+  if (def.srm && recipe.srm != null) {
+    const minSRM = def.srm[0];
+    const maxSRM = def.srm[1];
+    if (recipe.srm > maxSRM) {
+      exclusions.push(`CROSS-FIELD: SRM ${recipe.srm} > max ${maxSRM} for ${def.displayTR || slug}`);
+    }
+    if (recipe.srm < minSRM) {
+      exclusions.push(`CROSS-FIELD: SRM ${recipe.srm} < min ${minSRM} for ${def.displayTR || slug}`);
+    }
+  }
+
+  // ABV boundary check
+  if (def.abv && recipe.abv != null) {
+    const minABV = def.abv[0];
+    const maxABV = def.abv[1];
+    if (recipe.abv > maxABV) {
+      exclusions.push(`CROSS-FIELD: ABV ${recipe.abv}% > max ${maxABV}% for ${def.displayTR || slug}`);
+    }
+    if (recipe.abv < minABV) {
+      exclusions.push(`CROSS-FIELD: ABV ${recipe.abv}% < min ${minABV}% for ${def.displayTR || slug}`);
+    }
+  }
+
+  // IBU boundary check
+  if (def.ibu && recipe.ibu != null) {
+    const minIBU = def.ibu[0];
+    const maxIBU = def.ibu[1];
+    if (recipe.ibu > maxIBU) {
+      exclusions.push(`CROSS-FIELD: IBU ${recipe.ibu} > max ${maxIBU} for ${def.displayTR || slug}`);
+    }
+    if (recipe.ibu < minIBU) {
+      exclusions.push(`CROSS-FIELD: IBU ${recipe.ibu} < min ${minIBU} for ${def.displayTR || slug}`);
+    }
+  }
+
+  // OG boundary check
+  if (def.og && recipe.og != null) {
+    const minOG = def.og[0];
+    const maxOG = def.og[1];
+    if (recipe.og > maxOG) {
+      exclusions.push(`CROSS-FIELD: OG ${recipe.og} > max ${maxOG} for ${def.displayTR || slug}`);
+    }
+    if (recipe.og < minOG) {
+      exclusions.push(`CROSS-FIELD: OG ${recipe.og} < min ${minOG} for ${def.displayTR || slug}`);
+    }
+  }
+
   if (exclusions.length > 0) {
     return { score: 0, normalized: 0, exclusions, breakdown: [] };
   }
