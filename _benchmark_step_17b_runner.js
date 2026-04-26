@@ -10,8 +10,6 @@
     BM_ENGINE_V5: typeof window.BM_ENGINE_V5 === "object" && typeof window.BM_ENGINE_V5.classifyMulti === "function",
     BM_ENGINE_V6_FINAL: typeof window.BM_ENGINE_V6_FINAL === "object" && typeof window.BM_ENGINE_V6_FINAL.classifyMulti === "function",
     BJCP: typeof BJCP === "object" && BJCP !== null,
-    __BM_DEFS: typeof __BM_DEFS === "object" && __BM_DEFS !== null,
-    _v5ToBjcpKey: typeof _v5ToBjcpKey === "function",
     KR: typeof KR !== "undefined" && Array.isArray(KR),
     S: typeof S === "object" && S !== null,
     calc: typeof calc === "function",
@@ -49,15 +47,35 @@
   console.log(`[bm17b] Pool: ${pool.length} reçete (toplam ${KR.length}, gt boş ${gtEmpty}, gt BJCP-bilinmez ${gtUnknown.length})`);
 
   // ---- 3. NORMALIZE ----
+  // Inline kopya: HTML satır 13906-13923. Algoritma birebir aynı, _bjcp → BJCP.
+  function _bm17_v5ToBjcpKey(slug, displayTR){
+    if(!slug && !displayTR) return null;
+    const target = ((displayTR||'')+' '+(slug||'').replace(/_/g,' ')).toLowerCase();
+    const tokens = target.split(/\s+/).filter(t=>t.length>2);
+    let best=null, bestScore=0;
+    for(const key in BJCP){
+      const kl = key.toLowerCase();
+      const kt = kl.replace(/[\/\(\),]/g,' ').split(/\s+/).filter(t=>t.length>2);
+      let score = 0;
+      for(const t of tokens){
+        if(t==='ipa' && /\bipa\b/.test(kl)) score += 3;
+        else if(kl.includes(t)) score += 2;
+        else if(kt.some(k=>k.startsWith(t)||t.startsWith(k))) score += 1;
+      }
+      if(score>bestScore){ bestScore=score; best=key; }
+    }
+    return bestScore>=2 ? best : null;
+  }
+
   function slugToBjcpName(slug, displayTR) {
     if (!slug) return { name: null, layer: "none" };
     try {
-      if (__BM_DEFS[slug] && __BM_DEFS[slug].bjcpName && BJCP[__BM_DEFS[slug].bjcpName]) {
+      if (typeof __BM_DEFS !== "undefined" && __BM_DEFS && __BM_DEFS[slug] && __BM_DEFS[slug].bjcpName && BJCP[__BM_DEFS[slug].bjcpName]) {
         return { name: __BM_DEFS[slug].bjcpName, layer: "L1_BM_DEFS" };
       }
     } catch(e){}
     try {
-      const fuzzy = _v5ToBjcpKey(slug, displayTR);
+      const fuzzy = _bm17_v5ToBjcpKey(slug, displayTR);
       if (fuzzy && BJCP[fuzzy]) return { name: fuzzy, layer: "L2_fuzzy" };
     } catch(e){}
     return { name: null, layer: "unmapped" };
@@ -232,11 +250,15 @@
       console.error("[bm17b] İndirme hatası:", e);
     }
     console.log("[bm17b] DONE. Süre:", R.meta.elapsed_ms, "ms");
-    console.table([
-      { motor:"V2c", n:R.aggregate.v2c.n, top1:R.aggregate.v2c.top1, top3:R.aggregate.v2c.top3, unmapped:R.aggregate.v2c.unmapped, error:R.aggregate.v2c.error },
-      { motor:"V5",  n:R.aggregate.v5.n,  top1:R.aggregate.v5.top1,  top3:R.aggregate.v5.top3,  unmapped:R.aggregate.v5.unmapped,  error:R.aggregate.v5.error },
-      { motor:"V6",  n:R.aggregate.v6.n,  top1:R.aggregate.v6.top1,  top3:R.aggregate.v6.top3,  unmapped:R.aggregate.v6.unmapped,  error:R.aggregate.v6.error },
-    ]);
+    if (!R.aggregate.aborted) {
+      console.table([
+        { motor:"V2c", n:R.aggregate.v2c.n, top1:R.aggregate.v2c.top1, top3:R.aggregate.v2c.top3, unmapped:R.aggregate.v2c.unmapped, error:R.aggregate.v2c.error },
+        { motor:"V5",  n:R.aggregate.v5.n,  top1:R.aggregate.v5.top1,  top3:R.aggregate.v5.top3,  unmapped:R.aggregate.v5.unmapped,  error:R.aggregate.v5.error },
+        { motor:"V6",  n:R.aggregate.v6.n,  top1:R.aggregate.v6.top1,  top3:R.aggregate.v6.top3,  unmapped:R.aggregate.v6.unmapped,  error:R.aggregate.v6.error },
+      ]);
+    } else {
+      console.warn("[bm17b] ABORT:", R.aggregate.reason, R.aggregate.missing || "");
+    }
     console.log("[bm17b] Full report → localStorage._bm_benchmark_step_17b_result");
     if (R.errors && R.errors.length) console.warn("[bm17b]", R.errors.length, "hata var, raporda detay");
   }
