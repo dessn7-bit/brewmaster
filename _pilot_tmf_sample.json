@@ -1,0 +1,69 @@
+{
+  "_meta": {
+    "generated": "2026-04-26",
+    "source": "The Mad Fermentationist blog (themadfermentationist.com)",
+    "description": "TMF pilot — 2 sample recipes parsed via WebFetch. Demonstrates structured extraction is feasible.",
+    "author": "Mike Tonsmeire (American Sour Beers book author)",
+    "total_estimated_blog_recipes": "150+",
+    "sample_size": 2,
+    "parse_success_rate": "2/2 = 100%"
+  },
+  "records": [
+    {
+      "name": "Pliny the Younger Clone",
+      "url": "https://www.themadfermentationist.com/2010/12/pliny-younger-clone-recipe.html",
+      "style": "Double IPA",
+      "batch_size_gal": 5.25,
+      "og": 1.094,
+      "fg": 1.008,
+      "abv": 10.6,
+      "ibu": 199.5,
+      "srm": 6.6,
+      "boil_time_min": 95,
+      "brewhouse_efficiency_pct": 48,
+      "malts": [
+        {"name": "American 2-row", "lb": 25.00, "percent": 92.0},
+        {"name": "CaraPils", "lb": 0.94, "percent": 3.5},
+        {"name": "Corn Sugar", "lb": 1.00, "percent": 3.7},
+        {"name": "Cane Sugar", "lb": 0.25, "percent": 0.9}
+      ],
+      "hops": [
+        {"name": "HopShot", "amount_ml": 10, "timing_min": 90, "use": "boil"},
+        {"name": "Columbus", "amount_oz": 2.00, "alpha": 13.0, "timing_min": 60, "use": "boil"},
+        {"name": "Amarillo", "amount_oz": 4.00, "alpha": 6.9, "timing_min": 0, "use": "flameout"},
+        {"name": "Centennial", "amount_oz": 3.00, "alpha": 8.8, "timing_min": 0, "use": "flameout"},
+        {"name": "Simcoe", "amount_oz": 2.00, "alpha": 12.2, "timing_min": 0, "use": "flameout"},
+        {"name": "Amarillo", "amount_oz": 1.00, "alpha": 10.0, "use": "dry_hop"},
+        {"name": "Centennial", "amount_oz": 1.00, "alpha": 10.5, "use": "dry_hop"},
+        {"name": "Simcoe", "amount_oz": 1.00, "alpha": 14.0, "use": "dry_hop"}
+      ],
+      "yeast": {"name": "White Labs WLP001 California Ale", "type": "Ale"},
+      "parse_quality": "complete"
+    },
+    {
+      "name": "RauchDunkel - Smoked Dark Lager",
+      "url": "https://www.themadfermentationist.com/2010/06/rauchdunkel-smoked-dark-lager.html",
+      "style": "Dark Lager / Rauchbier",
+      "og": 1.047,
+      "ibu": 22.2,
+      "srm_estimated": 19.9,
+      "batch_size_gal": 5.25,
+      "boil_time_min": 90,
+      "brewhouse_efficiency_pct": 72,
+      "mash_temp_f": 153,
+      "mash_time_min": 60,
+      "malts": [
+        {"name": "German Vienna Malt", "lb": 3.00, "percent": 32},
+        {"name": "German Munich Malt", "lb": 3.00, "percent": 32},
+        {"name": "Weyermann Smoked Malt", "lb": 3.00, "percent": 32},
+        {"name": "Chocolate Rye", "lb": 0.38, "percent": 4}
+      ],
+      "hops": [
+        {"name": "Czech Saaz", "amount_oz": 2.00, "alpha": 2.80, "timing_min": 45, "use": "boil"},
+        {"name": "Czech Saaz", "amount_oz": 0.50, "alpha": 2.80, "timing_min": 10, "use": "boil"}
+      ],
+      "yeast": {"name": "Saflager Weihenstephan W-34/70", "type": "Lager"},
+      "parse_quality": "complete (FG/ABV not specified by author)"
+    }
+  ]
+}
