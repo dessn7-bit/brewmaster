@@ -1,0 +1,133 @@
+{
+  "cv_best": {
+    "score": 0.7313903406891212,
+    "params": {
+      "depth": 3,
+      "n_est": 400
+    }
+  },
+  "results": [
+    {
+      "config": "V8_XGB_73class",
+      "n_classes": 81,
+      "train_n": 1437,
+      "test_n": 349,
+      "dropped": 23,
+      "train_top1": 0.9916492693110647,
+      "test_top1": 0.4699140401146132,
+      "test_top3": 0.673352435530086,
+      "test_top5": 0.7650429799426934,
+      "overfit_gap": 0.5217352291964514
+    },
+    {
+      "config": "V8_XGB_14cat_main",
+      "n_classes": 15,
+      "train_n": 1437,
+      "test_n": 372,
+      "dropped": 0,
+      "train_top1": 0.9979123173277662,
+      "test_top1": 0.6774193548387096,
+      "test_top3": 0.8467741935483871,
+      "test_top5": 0.9193548387096774,
+      "overfit_gap": 0.32049296248905657
+    }
+  ],
+  "per_class_14cat": [
+    {
+      "main_cat": "American Hoppy",
+      "n": 109,
+      "correct": 96,
+      "acc": 0.8807339449541285
+    },
+    {
+      "main_cat": "German Lager",
+      "n": 94,
+      "correct": 80,
+      "acc": 0.851063829787234
+    },
+    {
+      "main_cat": "Stout / Porter",
+      "n": 44,
+      "correct": 39,
+      "acc": 0.8863636363636364
+    },
+    {
+      "main_cat": "Specialty / Adjunct",
+      "n": 19,
+      "correct": 0,
+      "acc": 0.0
+    },
+    {
+      "main_cat": "Hybrid Ale-Lager",
+      "n": 16,
+      "correct": 6,
+      "acc": 0.375
+    },
+    {
+      "main_cat": "Saison / Farmhouse",
+      "n": 14,
+      "correct": 8,
+      "acc": 0.5714285714285714
+    },
+    {
+      "main_cat": "German Wheat",
+      "n": 13,
+      "correct": 5,
+      "acc": 0.38461538461538464
+    },
+    {
+      "main_cat": "Irish / Red Ale",
+      "n": 12,
+      "correct": 5,
+      "acc": 0.4166666666666667
+    },
+    {
+      "main_cat": "Belgian Pale / Witbier",
+      "n": 11,
+      "correct": 5,
+      "acc": 0.45454545454545453
+    },
+    {
+      "main_cat": "British Bitter / Mild",
+      "n": 11,
+      "correct": 0,
+      "acc": 0.0
+    },
+    {
+      "main_cat": "British Strong / Old",
+      "n": 8,
+      "correct": 0,
+      "acc": 0.0
+    },
+    {
+      "main_cat": "Sour / Wild / Brett",
+      "n": 8,
+      "correct": 4,
+      "acc": 0.5
+    },
+    {
+      "main_cat": "Belgian Strong / Trappist",
+      "n": 8,
+      "correct": 4,
+      "acc": 0.5
+    },
+    {
+      "main_cat": "unmapped",
+      "n": 3,
+      "correct": 0,
+      "acc": 0.0
+    },
+    {
+      "main_cat": "Historical / Special",
+      "n": 2,
+      "correct": 0,
+      "acc": 0.0
+    }
+  ],
+  "sources": {
+    "pilot": 197,
+    "diydog": 247,
+    "tmf": 169,
+    "mmum": 1200
+  }
+}
