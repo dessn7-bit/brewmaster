@@ -1,0 +1,123 @@
+{
+  "results": [
+    {
+      "config": "V6_KNN_73class",
+      "n_classes": 73,
+      "train_n": 467,
+      "test_n": 118,
+      "train_top1": 0.9957173447537473,
+      "test_top1": 0.2542372881355932,
+      "test_top3": 0.423728813559322,
+      "test_top5": 0.4915254237288136,
+      "overfit_gap": 0.7414800566181541,
+      "belgian": {
+        "belgian_dubbel": {
+          "test_n": 1,
+          "top1": 0,
+          "top3": 0
+        },
+        "belgian_tripel": {
+          "test_n": 1,
+          "top1": 0,
+          "top3": 0
+        },
+        "belgian_quadrupel": {
+          "test_n": 1,
+          "top1": 0,
+          "top3": 0
+        },
+        "belgian_strong_dark_ale": {
+          "test_n": 1,
+          "top1": 0,
+          "top3": 0
+        }
+      }
+    },
+    {
+      "config": "V7_XGB_73class",
+      "n_classes": 73,
+      "train_n": 467,
+      "test_n": 118,
+      "train_top1": 0.9635974304068522,
+      "test_top1": 0.3559322033898305,
+      "test_top3": 0.5254237288135594,
+      "test_top5": 0.5932203389830508,
+      "overfit_gap": 0.6076652270170217,
+      "belgian": {
+        "belgian_dubbel": {
+          "test_n": 1,
+          "top1": 0,
+          "top3": 0
+        },
+        "belgian_tripel": {
+          "test_n": 1,
+          "top1": 0,
+          "top3": 0
+        },
+        "belgian_quadrupel": {
+          "test_n": 1,
+          "top1": 0,
+          "top3": 0
+        },
+        "belgian_strong_dark_ale": {
+          "test_n": 1,
+          "top1": 0,
+          "top3": 0
+        }
+      }
+    },
+    {
+      "config": "V6_KNN_14cat_main",
+      "n_classes": 15,
+      "train_n": 467,
+      "test_n": 146,
+      "train_top1": 0.9978586723768736,
+      "test_top1": 0.5136986301369864,
+      "test_top3": 0.6986301369863014,
+      "test_top5": 0.7671232876712328,
+      "overfit_gap": 0.4841600422398873,
+      "belgian": {
+        "category": "Belgian Strong / Trappist",
+        "test_n": 4,
+        "top1": 1,
+        "top3": 1
+      }
+    },
+    {
+      "config": "V7_XGB_14cat_main",
+      "n_classes": 15,
+      "train_n": 467,
+      "test_n": 146,
+      "train_top1": 0.9935760171306209,
+      "test_top1": 0.5342465753424658,
+      "test_top3": 0.7808219178082192,
+      "test_top5": 0.8493150684931506,
+      "overfit_gap": 0.45932944178815516,
+      "belgian": {
+        "category": "Belgian Strong / Trappist",
+        "test_n": 4,
+        "top1": 0,
+        "top3": 1
+      }
+    },
+    {
+      "config": "V7_XGB_14cat_best",
+      "n_classes": 15,
+      "train_n": 467,
+      "test_n": 146,
+      "train_top1": 0.9528907922912205,
+      "test_top1": 0.541095890410959,
+      "test_top3": 0.773972602739726,
+      "test_top5": 0.8561643835616438,
+      "overfit_gap": 0.4117949018802616,
+      "belgian": {}
+    }
+  ],
+  "cv_sweep_best": {
+    "score": 0.6915808739418898,
+    "params": {
+      "depth": 3,
+      "n_est": 100
+    }
+  }
+}
