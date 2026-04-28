@@ -1,0 +1,158 @@
+{
+  "meta": {
+    "date": "2026-04-28T07:30:40.028178+00:00",
+    "input": "_ml_dataset_v14_pre_retrain.json",
+    "output": "brewmaster_v15_cleaned.json",
+    "total_recipes_in": 8518,
+    "total_recipes_out": 8416,
+    "dropped": 102
+  },
+  "B5d_name_override": {
+    "total_overridden": 50,
+    "by_rule": {
+      "B5d_name_festbier": 36,
+      "B5d_name_belgian_ipa": 6,
+      "B5d_name_lambic": 6,
+      "B5d_name_gueuze": 2
+    }
+  },
+  "B1_B2_migration": {
+    "total_migrated": 918,
+    "by_rule": {
+      "B1a_zero_risk_alias": 48,
+      "B2_american_hops": 382,
+      "B2_default": 77,
+      "B2_strong_abv5.5": 311,
+      "B2_amber_srm12": 59,
+      "B2_english_hops": 21,
+      "B1c_english_pale_name_hop": 18,
+      "B2_aussie_hops": 2
+    }
+  },
+  "B3_yeast_normalize": {
+    "cleaned": 0
+  },
+  "B4_brett_features": {
+    "distribution": {
+      "has_brett": 63,
+      "is_100pct_brett": 45,
+      "has_lacto": 18,
+      "is_mixed_fermentation": 18,
+      "has_pedio": 2
+    }
+  },
+  "B5_byo_recovery_yeast_stat": {
+    "total_recovered": 763,
+    "by_rule": {
+      "B5a_brett_only": 25,
+      "B5b_stat_imperial_stout": 70,
+      "B5b_stat_pilsener": 127,
+      "B5b_stat_dry_stout": 131,
+      "B5b_stat_american_ipa": 139,
+      "B5b_stat_tripel": 35,
+      "B5b_stat_american_pale": 38,
+      "B5b_stat_brown_ale": 33,
+      "B5b_stat_dubbel": 84,
+      "B5a_mixed_sour": 9,
+      "B5b_stat_helles": 25,
+      "B5a_wit_yeast": 3,
+      "B5a_hefe_yeast": 5,
+      "B5a_trappist_dark_strong": 2,
+      "B5b_stat_saison": 15,
+      "B5b_stat_hefe": 11,
+      "B5b_stat_international_pale": 1,
+      "B5a_saison_yeast": 8,
+      "B5a_trappist_dubbel": 2
+    },
+    "pre_byo_unlabeled": 883
+  },
+  "B5e_canonical_name_recovery": {
+    "total_recovered": 8,
+    "by_rule": {
+      "B5e_name_american_ipa": 4,
+      "B5e_name_quadrupel": 1,
+      "B5e_name_altbier": 1,
+      "B5e_name_dark_strong": 1,
+      "B5e_name_gose": 1
+    }
+  },
+  "B6_ibu_fix": {
+    "fixed": 1182
+  },
+  "C1_drop": {
+    "dropped": 102,
+    "rejected_log": "_rejected_recipes.json"
+  },
+  "slug_coverage": {
+    "pre_invalid_slugs_total": 2335,
+    "post_invalid_slugs_total": 1432,
+    "pre_null_slugs": 883,
+    "post_null_slugs": 0,
+    "pre_unique_slugs": 118,
+    "post_unique_slugs": 123
+  },
+  "pre_slug_dist_top30": {
+    "<NULL>": 883,
+    "pale_ale": 852,
+    "american_india_pale_ale": 804,
+    "american_amber_red_ale": 294,
+    "brown_ale": 289,
+    "south_german_hefeweizen": 284,
+    "munich_helles": 218,
+    "porter": 179,
+    "german_maerzen": 176,
+    "german_pilsener": 169,
+    "belgian_blonde_ale": 165,
+    "pale_lager": 160,
+    "german_koelsch": 147,
+    "specialty_beer": 147,
+    "german_altbier": 136,
+    "belgian_tripel": 131,
+    "irish_red_ale": 131,
+    "belgian_witbier": 128,
+    "american_imperial_stout": 124,
+    "stout": 119,
+    "irish_dry_stout": 117,
+    "german_doppelbock": 115,
+    "extra_special_bitter": 110,
+    "oatmeal_stout": 107,
+    "american_wheat_ale": 106,
+    "british_india_pale_ale": 100,
+    "belgian_dubbel": 94,
+    "herb_and_spice_beer": 93,
+    "american_lager": 92,
+    "french_belgian_saison": 88
+  },
+  "post_slug_dist_top30": {
+    "american_india_pale_ale": 945,
+    "american_pale_ale": 497,
+    "american_amber_red_ale": 353,
+    "american_strong_pale_ale": 311,
+    "south_german_hefeweizen": 300,
+    "german_pilsener": 296,
+    "brown_ale": 289,
+    "irish_dry_stout": 248,
+    "munich_helles": 242,
+    "american_imperial_stout": 194,
+    "belgian_dubbel": 179,
+    "porter": 179,
+    "belgian_tripel": 166,
+    "belgian_blonde_ale": 164,
+    "pale_lager": 159,
+    "german_maerzen": 151,
+    "german_koelsch": 147,
+    "specialty_beer": 146,
+    "german_altbier": 135,
+    "belgian_witbier": 131,
+    "irish_red_ale": 131,
+    "stout": 119,
+    "german_doppelbock": 115,
+    "french_belgian_saison": 111,
+    "extra_special_bitter": 110,
+    "oatmeal_stout": 107,
+    "american_wheat_ale": 106,
+    "british_india_pale_ale": 98,
+    "herb_and_spice_beer": 93,
+    "american_lager": 92
+  }
+}
