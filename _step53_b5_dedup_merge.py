@@ -150,7 +150,7 @@ for c, n in cluster_counter.most_common():
     print(f'  {c:15s} {n:>7d} ({100*n/len(v17):.1f}%)', flush=True)
 
 # ── Save ──
-out_path = f'{WORKING}/_v17_dataset.json'
+out_path = f'{WORKING}/_v18_dataset.json'
 print(f'\n[7] Writing {out_path}... ({t():.1f}s)', flush=True)
 out = {
     'recipes': v17,
@@ -158,7 +158,7 @@ out = {
         'feature_list': feature_list,
         'count': len(v17),
         'sources': dict(src_counter),
-        'version': 'V17',
+        'version': 'V18',
     }
 }
 with open(out_path, 'w', encoding='utf-8') as f:

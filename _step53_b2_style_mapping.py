@@ -14,8 +14,14 @@ import os
 
 OUT_DIR = 'C:/Users/Kaan/brewmaster/working'
 
-# V15 82 slug listesi (referans)
+# V15 82 slug listesi + V18 9 yeni slug (Adım 54)
 V15_SLUGS = set(json.load(open('C:/Users/Kaan/brewmaster/_v16_label_encoder_slug.json', encoding='utf-8'))['classes'])
+V18_NEW_SLUGS = {
+    'flanders_red_ale', 'belgian_gueuze', 'belgian_fruit_lambic',
+    'gose', 'export_stout',
+    'red_ipa', 'white_ipa', 'rye_ipa', 'belgian_ipa',
+}
+V15_SLUGS = V15_SLUGS | V18_NEW_SLUGS  # 91 toplam
 
 # (cat, name) → V15 slug. None = exclude (cider/mead/etc.)
 # Sözlük key formatı: "cat::name" (cat boşsa sadece name).
@@ -129,7 +135,7 @@ NAME_MAP = {
     'irish extra stout':            'foreign_extra_stout' if 'foreign_extra_stout' in V15_SLUGS else 'sweet_stout',
     'sweet stout':                  'sweet_stout',
     'oatmeal stout':                'oatmeal_stout',
-    'foreign extra stout':          'sweet_stout',
+    'foreign extra stout':          'export_stout',          # V18 Adım 54: ayrı slug (1A onayı)
     'tropical stout':               'sweet_stout',
     'american stout':               'stout',
     'imperial stout':               'american_imperial_stout',
@@ -151,10 +157,10 @@ NAME_MAP = {
     'double ipa':                   'double_ipa',
     'english ipa':                  'british_india_pale_ale',
     'specialty ipa: black ipa':     'black_ipa',
-    'specialty ipa: red ipa':       'american_amber_red_ale',
-    'specialty ipa: rye ipa':       'american_india_pale_ale',
-    'specialty ipa: white ipa':     'belgian_witbier',
-    'specialty ipa: belgian ipa':   'belgian_strong_golden',
+    'specialty ipa: red ipa':       'red_ipa',               # V18 Adım 54: ayrı slug
+    'specialty ipa: rye ipa':       'rye_ipa',               # V18 Adım 54: ayrı slug
+    'specialty ipa: white ipa':     'white_ipa',             # V18 Adım 54: ayrı slug
+    'specialty ipa: belgian ipa':   'belgian_ipa',           # V18 Adım 54: ayrı slug
     'specialty ipa: brown ipa':     'american_brown_ale',
     'specialty ipa: new england ipa': 'juicy_or_hazy_india_pale_ale',
 
@@ -173,12 +179,12 @@ NAME_MAP = {
 
     # ===== Sour =====
     'berliner weisse':              'berliner_weisse',
-    'gose':                         'berliner_weisse',
-    'flanders red ale':             'belgian_lambic',
+    'gose':                         'gose',                  # V18 Adım 54: ayrı slug
+    'flanders red ale':             'flanders_red_ale',      # V18 Adım 54: ayrı slug
     'flanders brown ale/oud bruin': 'oud_bruin',
     'oud bruin':                    'oud_bruin',
-    'fruit lambic':                 'belgian_lambic',
-    'gueuze':                       'belgian_lambic',
+    'fruit lambic':                 'belgian_fruit_lambic',  # V18 Adım 54: ayrı slug
+    'gueuze':                       'belgian_gueuze',        # V18 Adım 54: ayrı slug
     'lambic':                       'belgian_lambic',
     'straight (unblended) lambic':  'belgian_lambic',
     'mixed-fermentation sour beer': 'mixed_fermentation_sour_beer',

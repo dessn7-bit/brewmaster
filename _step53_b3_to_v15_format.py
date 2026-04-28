@@ -47,11 +47,19 @@ style_map_data = json.load(open(f'{WORKING}/_rmwoods_style_to_v15slug.json', enc
 NAME_TO_SLUG = style_map_data['name_to_slug']
 EXCLUDE = set(style_map_data['exclude_names'])
 
-# V15 81 features
+# V15 81 features (V16 label encoder + V18 yeni 9 slug)
 v15_lbl = json.load(open(f'{ROOT}/_v16_label_encoder_slug.json', encoding='utf-8'))
 V15_FEATURE_LIST = v15_lbl['feature_list']
 V15_SLUGS = set(v15_lbl['classes'])
-print(f'  V15 features: {len(V15_FEATURE_LIST)}, slugs: {len(V15_SLUGS)} ({t():.1f}s)', flush=True)
+
+# V18 Adım 54: 9 yeni slug ekle (B-2 mapping'in hedefleri)
+V18_NEW_SLUGS = {
+    'flanders_red_ale', 'belgian_gueuze', 'belgian_fruit_lambic',
+    'gose', 'export_stout',
+    'red_ipa', 'white_ipa', 'rye_ipa', 'belgian_ipa',
+}
+V15_SLUGS = V15_SLUGS | V18_NEW_SLUGS  # toplam 91 slug
+print(f'  V15 features: {len(V15_FEATURE_LIST)}, V18 slugs: {len(V15_SLUGS)} ({t():.1f}s)', flush=True)
 
 
 # ── Malt classify ──
@@ -91,10 +99,15 @@ CLEAN_US05_PATTERNS = [
     'safale us05', 'us-05', 'us05', 'bry-97', 'bry97', 'chico',
 ]
 BRETT_RE = re.compile(
-    r'\bbrett(anomyces)?\b|'
+    # Adım 54 Faz 2: kelime varyasyonları + commercial blend + brewery process
+    r'brett(anomyces|y|ish|ed)?\b|'  # brett, brettanomyces, bretty, brettish, bretted (kelime sınırı kalktı)
     r'\bwlp\s*0?(644|645|648|650|651|652|653|654|655|656|660|665|670|671|672|4639)\b|'
     r'\bwy?\s*0?5(112|151|526|512|733|378)\b|'
-    r'bruxellensis|lambicus|drie|trois|clausenii', re.IGNORECASE)
+    r'bruxellensis|lambicus|drie|trois|clausenii|'
+    r'\bwild\s*(ale|yeast|fermentation|brew)\b|'
+    r'wildbrew\s*sour|philly\s*sour|lallemand\s*wild|omega\s*(?:yeast\s*)?(?:cosmic|saisonstein|hothead)|'
+    r'\bfoeder\b|funky|farmhouse\s*sour|barrel\s*(?:aged\s*)?sour',
+    re.IGNORECASE)
 LACTO_RE = re.compile(
     r'\blacto(bacillus)?\b|\bwlp\s*0?(67[127]|693|672|6727|677)\b|'
     r'\bwy?\s*0?5(335|223|424)\b', re.IGNORECASE)
@@ -337,7 +350,15 @@ for i, core in enumerate(core_records):
     if og is None and ferm_list:
         tot_p_kg = sum(((f.get('potential') or 1.036) - 1.0) * (f.get('amount_kg') or 0) for f in ferm_list)
         if tot_p_kg > 0 and batch_l > 0:
-            eff = (core.get('efficiency') or 75) / 100.0 if core.get('efficiency') else 0.75
+            # FIX (Adım 54): efficiency hem decimal (rmwoods 0.75) hem pct (V16 75) kabul.
+            # Adım 53 bug: 0.75 / 100 = 0.0075 → OG 100× düşük.
+            eff_raw = core.get('efficiency')
+            if eff_raw is None or eff_raw == 0:
+                eff = 0.75
+            elif eff_raw > 1:   # percentage form (75)
+                eff = eff_raw / 100.0
+            else:               # decimal form (0.75)
+                eff = eff_raw
             og_est = 1 + (tot_p_kg * eff * 2.205 / (batch_l * 0.264))
             og = round(og_est, 4)
             nan_filled['og_est'] += 1
@@ -395,9 +416,39 @@ for i, core in enumerate(core_records):
 print(f'\n[4] Processed in {t():.1f}s. Stats: {dict(stats)}', flush=True)
 print(f'  NaN filled: {dict(nan_filled)}', flush=True)
 
-# 5. Save
+# 5. Sanity check (Adım 54 — dataset rebuild sonrası zorunlu)
+print(f'\n[5] SANITY CHECK — V18 dataset distribution ({t():.1f}s)', flush=True)
+import statistics as _st
+def stats(values):
+    vals = [v for v in values if v is not None and v > 0]
+    if not vals: return 'N/A'
+    return f'mean={_st.mean(vals):.3f} std={_st.stdev(vals) if len(vals)>1 else 0:.3f} min={min(vals):.3f} max={max(vals):.3f} n={len(vals)}'
+
+og_vals = [r['features']['og'] for r in out_records]
+fg_vals = [r['features']['fg'] for r in out_records]
+abv_vals = [r['features']['abv'] for r in out_records]
+ibu_vals = [r['features']['ibu'] for r in out_records]
+srm_vals = [r['features']['srm'] for r in out_records]
+
+print(f'  OG:  {stats(og_vals)}')
+print(f'  FG:  {stats(fg_vals)}')
+print(f'  ABV: {stats(abv_vals)}')
+print(f'  IBU: {stats(ibu_vals)}')
+print(f'  SRM: {stats(srm_vals)}')
+
+# BJCP plausibility check
+og_mean = _st.mean([v for v in og_vals if v > 0])
+abv_mean = _st.mean([v for v in abv_vals if v > 0])
+if og_mean < 1.020 or og_mean > 1.100:
+    print(f'  ⚠️  WARNING: OG mean {og_mean:.3f} BJCP plausible range (1.020-1.100) DIŞINDA — bug olabilir')
+if abv_mean < 2.0 or abv_mean > 12.0:
+    print(f'  ⚠️  WARNING: ABV mean {abv_mean:.2f}% BJCP plausible range (2-12%) DIŞINDA — bug olabilir')
+if og_mean >= 1.020 and og_mean <= 1.100 and abv_mean >= 2.0 and abv_mean <= 12.0:
+    print(f'  ✅ Sanity check OK — OG/ABV BJCP range içinde')
+
+# 6. Save
 out_path = f'{WORKING}/_rmwoods_v15_format.json'
-print(f'\n[5] Writing {out_path}...', flush=True)
+print(f'\n[6] Writing {out_path}...', flush=True)
 with open(out_path, 'w', encoding='utf-8') as f:
     json.dump({'recipes': out_records, 'meta': {'feature_list': V15_FEATURE_LIST, 'count': len(out_records)}}, f, ensure_ascii=False)
 size_mb = os.path.getsize(out_path) / (1024 * 1024)
