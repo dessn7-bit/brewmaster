@@ -1,7 +1,7 @@
 # Brewmaster Proje Notları
 
 ## Proje
-Brewmaster, Türkçe bir ev üretimi (homebrewing) web uygulaması. Tek dosya: Brewmaster_v2_79_10.html (~2MB, ~17500 satır). PWA/APK olarak Netlify'da deploy ediliyor: magical-sopapillas-bef055.netlify.app. Netlify siteId: 35f5d4f4-e057-4be2-8192-8ce49abab1f7. Drive folder: 18sZbIP7ELOzkEQ-GQoXiHTAWFIEgTkR-.
+Brewmaster, Türkçe bir ev üretimi (homebrewing) web uygulaması. Tek dosya: Brewmaster_v2_79_10.html (~2MB, ~17500 satır). PWA/APK olarak deploy ediliyor. Drive folder: 18sZbIP7ELOzkEQ-GQoXiHTAWFIEgTkR-.
 
 ## ÇOK ÖNEMLİ - Kullanıcı Kuralı
 Kaan kod bilmiyor. Tüm kod okuma, yazma, düzenleme, deploy işlerini Claude yapar. Kaan'a asla "şunu kopyala/yapıştır" veya "şu satırı düzenle" denmez. Kaan sadece ne istediğini söyler (bug adı, özellik), gerisini Claude halleder.
@@ -11,7 +11,7 @@ Kaan kod bilmiyor. Tüm kod okuma, yazma, düzenleme, deploy işlerini Claude ya
 2. grep/findstr ile hedefli oku
 3. str_replace ile düzenle
 4. Değişiklikten sonra syntax kontrol yap (node -c gibi)
-5. Tamamlandığında Netlify'a deploy et
+5. Tamamlandığında deploy et
 6. Her major iş bitiminde Drive'a push (parent 18sZbIP7ELOzkEQ-GQoXiHTAWFIEgTkR-).
 7. Drive push kuralı (MCP API update yok):
    - Küçük raporlar (.md, .json < 100KB): dosya adına ISO tarih suffix ekle. Örn: `_last_session_summary_2026-04-23T18-30.md`
