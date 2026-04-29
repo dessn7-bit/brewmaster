@@ -1,0 +1,111 @@
+[1] Loading V19-aliased dataset... 0.0s
+  V19-aliased: 383331 recipes, 89 features  11.3s
+
+[2] Sampling V6_C2 (16 cluster × 2000)... 11.3s
+  barleywine  :   4533 pool →  2000 sampled
+  belgian     :  23988 pool →  2000 sampled
+  bitter      :  19684 pool →  2000 sampled
+  bock        :   3606 pool →  2000 sampled
+  brown       :  12301 pool →  2000 sampled
+  cream       :  20618 pool →  2000 sampled
+  ipa         :  76427 pool →  2000 sampled
+  lager       :  22837 pool →  2000 sampled
+  mild        :   9401 pool →  2000 sampled
+  pale_ale    :  55363 pool →  2000 sampled
+  porter      :  14796 pool →  2000 sampled
+  saison      :  19947 pool →  2000 sampled
+  sour        :   4883 pool →  2000 sampled
+  specialty   :  41289 pool →  2000 sampled
+  stout       :  32873 pool →  2000 sampled
+  wheat       :  20785 pool →  2000 sampled
+
+  Total: 32000 recipes
+
+[3] Saving working/_v6_c2_dataset.json... 11.3s
+  Saved 61 MB
+
+[4] V6_C2 retrain — 5-fold CV cluster-level... 13.3s
+  X shape: (32000, 56), classes: 16
+    fold 1: top1=0.5358 top3=0.7342
+    fold 2: top1=0.5350 top3=0.7366
+    fold 3: top1=0.5377 top3=0.7397
+    fold 4: top1=0.5428 top3=0.7419
+    fold 5: top1=0.5417 top3=0.7327
+
+  V6_C2 MEAN: top1=0.5386 (±0.0031)  top3=0.7370 (±0.0034)
+
+  V6_C2 per-class accuracy (16 cluster):
+    barleywine   n= 2000 correct= 1390 acc= 69.50%
+    belgian      n= 2000 correct= 1174 acc= 58.70%
+    bitter       n= 2000 correct=  958 acc= 47.90%
+    bock         n= 2000 correct= 1314 acc= 65.70%
+    brown        n= 2000 correct=  848 acc= 42.40%
+    cream        n= 2000 correct=  882 acc= 44.10%
+    ipa          n= 2000 correct= 1133 acc= 56.65%
+    lager        n= 2000 correct= 1105 acc= 55.25%
+    mild         n= 2000 correct=  902 acc= 45.10%
+    pale_ale     n= 2000 correct=  923 acc= 46.15%
+    porter       n= 2000 correct= 1019 acc= 50.95%
+    saison       n= 2000 correct= 1271 acc= 63.55%
+    sour         n= 2000 correct= 1255 acc= 62.75%
+    specialty    n= 2000 correct=  321 acc= 16.05%
+    stout        n= 2000 correct= 1288 acc= 64.40%
+    wheat        n= 2000 correct= 1452 acc= 72.60%
+
+[5] Eski V6 baseline simulasyon... 20.4s
+  HTML'den TRAINING_RECS extract...
+  Eski V6 reçete: 1100
+  Cluster mapped: 809, classes: 16
+    fold 1: top1=0.8210 top3=0.9259
+    fold 2: top1=0.8765 top3=0.9630
+    fold 3: top1=0.8457 top3=0.9259
+    fold 4: top1=0.8519 top3=0.9383
+    fold 5: top1=0.8261 top3=0.9193
+
+  ESKİ V6 baseline: top1=0.8442 (±0.0199)  top3=0.9345 (±0.0155)
+
+[6] Sample test V6_C2 (cluster-level, 5 reçete)... 20.7s
+
+  Test: Witbier (Hoegaarden) (beklenen: wheat)
+       1. belgian      prob=1.000
+       2. barleywine   prob=0.000
+       3. bitter       prob=0.000
+       4. bock         prob=0.000
+       5. brown        prob=0.000
+    Match top-1: False, in_top3: False
+
+  Test: American IPA (Sierra Nevada Pale) (beklenen: pale_ale)
+    ⭐ 1. pale_ale     prob=0.655
+       2. cream        prob=0.192
+       3. specialty    prob=0.153
+       4. barleywine   prob=0.000
+       5. bock         prob=0.000
+    Match top-1: True, in_top3: True
+
+  Test: Brett Pale Ale (100% Brett) (beklenen: sour)
+       1. saison       prob=0.638
+    ⭐ 2. sour         prob=0.362
+       3. barleywine   prob=0.000
+       4. belgian      prob=0.000
+       5. brown        prob=0.000
+    Match top-1: False, in_top3: True
+
+  Test: Belgian Quadrupel (Westvleteren 12) (beklenen: belgian)
+    ⭐ 1. belgian      prob=1.000
+       2. barleywine   prob=0.000
+       3. bitter       prob=0.000
+       4. bock         prob=0.000
+       5. brown        prob=0.000
+    Match top-1: True, in_top3: True
+
+  Test: Dortmunder (DAB tarzı) (beklenen: lager)
+    ⭐ 1. lager        prob=1.000
+       2. barleywine   prob=0.000
+       3. bitter       prob=0.000
+       4. belgian      prob=0.000
+       5. bock         prob=0.000
+    Match top-1: True, in_top3: True
+
+[7] Saving results... 20.8s
+
+[DONE] 20.8s

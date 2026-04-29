@@ -1,0 +1,337 @@
+{
+  "sampling": {
+    "strategy": "V6_C2 cluster sabit M=2000",
+    "total_recipes": 32000,
+    "clusters": 16,
+    "cluster_counts": {
+      "barleywine": 2000,
+      "belgian": 2000,
+      "bitter": 2000,
+      "bock": 2000,
+      "brown": 2000,
+      "cream": 2000,
+      "ipa": 2000,
+      "lager": 2000,
+      "mild": 2000,
+      "pale_ale": 2000,
+      "porter": 2000,
+      "saison": 2000,
+      "sour": 2000,
+      "specialty": 2000,
+      "stout": 2000,
+      "wheat": 2000
+    }
+  },
+  "v6_c2_cv": {
+    "top1_mean": 0.5386,
+    "top1_std": 0.0031,
+    "top3_mean": 0.737,
+    "top3_std": 0.0034,
+    "per_class": {
+      "barleywine": {
+        "n": 2000,
+        "correct": 1390,
+        "acc": 0.695
+      },
+      "belgian": {
+        "n": 2000,
+        "correct": 1174,
+        "acc": 0.587
+      },
+      "bitter": {
+        "n": 2000,
+        "correct": 958,
+        "acc": 0.479
+      },
+      "bock": {
+        "n": 2000,
+        "correct": 1314,
+        "acc": 0.657
+      },
+      "brown": {
+        "n": 2000,
+        "correct": 848,
+        "acc": 0.424
+      },
+      "cream": {
+        "n": 2000,
+        "correct": 882,
+        "acc": 0.441
+      },
+      "ipa": {
+        "n": 2000,
+        "correct": 1133,
+        "acc": 0.5665
+      },
+      "lager": {
+        "n": 2000,
+        "correct": 1105,
+        "acc": 0.5525
+      },
+      "mild": {
+        "n": 2000,
+        "correct": 902,
+        "acc": 0.451
+      },
+      "pale_ale": {
+        "n": 2000,
+        "correct": 923,
+        "acc": 0.4615
+      },
+      "porter": {
+        "n": 2000,
+        "correct": 1019,
+        "acc": 0.5095
+      },
+      "saison": {
+        "n": 2000,
+        "correct": 1271,
+        "acc": 0.6355
+      },
+      "sour": {
+        "n": 2000,
+        "correct": 1255,
+        "acc": 0.6275
+      },
+      "specialty": {
+        "n": 2000,
+        "correct": 321,
+        "acc": 0.1605
+      },
+      "stout": {
+        "n": 2000,
+        "correct": 1288,
+        "acc": 0.644
+      },
+      "wheat": {
+        "n": 2000,
+        "correct": 1452,
+        "acc": 0.726
+      }
+    }
+  },
+  "old_v6_baseline": {
+    "recipes": 809,
+    "top1_mean": 0.8442,
+    "top3_mean": 0.9345,
+    "per_class": {
+      "ipa": {
+        "n": 129,
+        "correct": 123,
+        "acc": 0.9535
+      },
+      "lager": {
+        "n": 129,
+        "correct": 119,
+        "acc": 0.9225
+      },
+      "cream": {
+        "n": 51,
+        "correct": 43,
+        "acc": 0.8431
+      },
+      "belgian": {
+        "n": 99,
+        "correct": 94,
+        "acc": 0.9495
+      },
+      "wheat": {
+        "n": 27,
+        "correct": 25,
+        "acc": 0.9259
+      },
+      "stout": {
+        "n": 76,
+        "correct": 67,
+        "acc": 0.8816
+      },
+      "bock": {
+        "n": 15,
+        "correct": 11,
+        "acc": 0.7333
+      },
+      "pale_ale": {
+        "n": 10,
+        "correct": 6,
+        "acc": 0.6
+      },
+      "saison": {
+        "n": 56,
+        "correct": 45,
+        "acc": 0.8036
+      },
+      "mild": {
+        "n": 17,
+        "correct": 5,
+        "acc": 0.2941
+      },
+      "brown": {
+        "n": 27,
+        "correct": 14,
+        "acc": 0.5185
+      },
+      "bitter": {
+        "n": 33,
+        "correct": 31,
+        "acc": 0.9394
+      },
+      "porter": {
+        "n": 34,
+        "correct": 22,
+        "acc": 0.6471
+      },
+      "specialty": {
+        "n": 30,
+        "correct": 7,
+        "acc": 0.2333
+      },
+      "sour": {
+        "n": 69,
+        "correct": 66,
+        "acc": 0.9565
+      },
+      "barleywine": {
+        "n": 7,
+        "correct": 5,
+        "acc": 0.7143
+      }
+    }
+  },
+  "sample_test": {
+    "Witbier (Hoegaarden)": {
+      "expected": "wheat",
+      "top5": [
+        [
+          "belgian",
+          1.0
+        ],
+        [
+          "barleywine",
+          0.0
+        ],
+        [
+          "bitter",
+          0.0
+        ],
+        [
+          "bock",
+          0.0
+        ],
+        [
+          "brown",
+          0.0
+        ]
+      ],
+      "match_top1": false,
+      "in_top3": false
+    },
+    "American IPA (Sierra Nevada Pale)": {
+      "expected": "pale_ale",
+      "top5": [
+        [
+          "pale_ale",
+          0.6554
+        ],
+        [
+          "cream",
+          0.1916
+        ],
+        [
+          "specialty",
+          0.153
+        ],
+        [
+          "barleywine",
+          0.0
+        ],
+        [
+          "bock",
+          0.0
+        ]
+      ],
+      "match_top1": true,
+      "in_top3": true
+    },
+    "Brett Pale Ale (100% Brett)": {
+      "expected": "sour",
+      "top5": [
+        [
+          "saison",
+          0.6381
+        ],
+        [
+          "sour",
+          0.3619
+        ],
+        [
+          "barleywine",
+          0.0
+        ],
+        [
+          "belgian",
+          0.0
+        ],
+        [
+          "brown",
+          0.0
+        ]
+      ],
+      "match_top1": false,
+      "in_top3": true
+    },
+    "Belgian Quadrupel (Westvleteren 12)": {
+      "expected": "belgian",
+      "top5": [
+        [
+          "belgian",
+          1.0
+        ],
+        [
+          "barleywine",
+          0.0
+        ],
+        [
+          "bitter",
+          0.0
+        ],
+        [
+          "bock",
+          0.0
+        ],
+        [
+          "brown",
+          0.0
+        ]
+      ],
+      "match_top1": true,
+      "in_top3": true
+    },
+    "Dortmunder (DAB tarzı)": {
+      "expected": "lager",
+      "top5": [
+        [
+          "lager",
+          1.0
+        ],
+        [
+          "barleywine",
+          0.0
+        ],
+        [
+          "bitter",
+          0.0
+        ],
+        [
+          "belgian",
+          0.0
+        ],
+        [
+          "bock",
+          0.0
+        ]
+      ],
+      "match_top1": true,
+      "in_top3": true
+    }
+  }
+}

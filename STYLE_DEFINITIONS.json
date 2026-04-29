@@ -201,7 +201,9 @@
           }
         }
       }
-    }
+    },
+    "_aliased_to": "american_lager",
+    "_alias_step": "Adim 60a (V19-aliased)"
   },
   "american_lager": {
     "slug": "american_lager",
@@ -1265,7 +1267,9 @@
           }
         }
       }
-    }
+    },
+    "_aliased_to": "vienna_lager",
+    "_alias_step": "Adim 60a (V19-aliased)"
   },
   "czech_dark_lager": {
     "slug": "czech_dark_lager",
@@ -2345,7 +2349,29 @@
           }
         }
       }
-    }
+    },
+    "_aliased_to": "multi-target (ABV-based split + drop)",
+    "_alias_step": "Adim 60a (V19-aliased)",
+    "_conditional_rules": [
+      {
+        "condition": "ABV > 0.5 (gerçek leichtbier)",
+        "target": "pale_lager",
+        "count": 2,
+        "samples": [
+          "Meister Hölle No 1 (ABV 2.6)",
+          "Hersbrucker Leichter Stopfer (ABV 4.0)"
+        ]
+      },
+      {
+        "condition": "ABV == 0.5 (FreiBier alkolsüz)",
+        "target": "DROP",
+        "count": 2,
+        "samples": [
+          "FreiBier [2]",
+          "FreiBier [IPA Simcoe]"
+        ]
+      }
+    ]
   },
   "german_koelsch": {
     "slug": "german_koelsch",
@@ -4844,7 +4870,9 @@
           }
         }
       }
-    }
+    },
+    "_aliased_to": "german_doppelbock",
+    "_alias_step": "Adim 60a (V19-aliased)"
   },
   "baltic_porter": {
     "slug": "baltic_porter",
@@ -6588,7 +6616,9 @@
           }
         }
       }
-    }
+    },
+    "_aliased_to": "american_pale_ale",
+    "_alias_step": "Adim 60a (V19-aliased)"
   },
   "british_india_pale_ale": {
     "slug": "british_india_pale_ale",
@@ -7232,7 +7262,9 @@
           }
         }
       }
-    }
+    },
+    "_aliased_to": "brown_ale",
+    "_alias_step": "Adim 60a (V19-aliased)"
   },
   "brown_porter": {
     "slug": "brown_porter",
@@ -9315,7 +9347,9 @@
           }
         }
       }
-    }
+    },
+    "_aliased_to": "old_ale",
+    "_alias_step": "Adim 60a (V19-aliased)"
   },
   "scotch_ale_or_wee_heavy": {
     "slug": "scotch_ale_or_wee_heavy",
@@ -16136,7 +16170,9 @@
           }
         }
       }
-    }
+    },
+    "_aliased_to": "american_lager",
+    "_alias_step": "Adim 60a (V19-aliased)"
   },
   "international_amber_lager": {
     "slug": "international_amber_lager",
@@ -19723,7 +19759,9 @@
           }
         }
       }
-    }
+    },
+    "_aliased_to": "smoked_beer",
+    "_alias_step": "Adim 60a (V19-aliased)"
   },
   "pre_prohibition_lager": {
     "slug": "pre_prohibition_lager",
@@ -23238,7 +23276,9 @@
           }
         }
       }
-    }
+    },
+    "_aliased_to": "german_pilsener",
+    "_alias_step": "Adim 60a (V19-aliased)"
   },
   "english_pale_ale": {
     "slug": "english_pale_ale",
@@ -24501,7 +24541,9 @@
           }
         }
       }
-    }
+    },
+    "_aliased_to": "american_india_pale_ale",
+    "_alias_step": "Adim 60a (V19-aliased)"
   },
   "juicy_or_hazy_pale_ale": {
     "slug": "juicy_or_hazy_pale_ale",
@@ -25246,7 +25288,9 @@
           }
         }
       }
-    }
+    },
+    "_aliased_to": "american_india_pale_ale",
+    "_alias_step": "Adim 60a (V19-aliased)"
   },
   "american_belgo_ale": {
     "slug": "american_belgo_ale",
@@ -26344,7 +26388,9 @@
           }
         }
       }
-    }
+    },
+    "_aliased_to": "american_amber_red_ale",
+    "_alias_step": "Adim 60a (V19-aliased)"
   },
   "india_pale_ale": {
     "slug": "india_pale_ale",
@@ -26710,7 +26756,9 @@
           }
         }
       }
-    }
+    },
+    "_aliased_to": "smoked_beer",
+    "_alias_step": "Adim 60a (V19-aliased)"
   },
   "american_sour_ale": {
     "slug": "american_sour_ale",
@@ -26992,7 +27040,9 @@
           }
         }
       }
-    }
+    },
+    "_aliased_to": "mixed_fermentation_sour_beer",
+    "_alias_step": "Adim 60a (V19-aliased)"
   },
   "leipzig_gose": {
     "slug": "leipzig_gose",
@@ -28826,7 +28876,9 @@
           }
         }
       }
-    }
+    },
+    "_aliased_to": "belgian_blonde_ale",
+    "_alias_step": "Adim 60a (V19-aliased)"
   },
   "belgian_quadrupel": {
     "slug": "belgian_quadrupel",
@@ -29727,7 +29779,26 @@
           }
         }
       }
-    }
+    },
+    "_aliased_to": "multi-target (OG-based 3-split)",
+    "_alias_step": "Adim 60a (V19-aliased)",
+    "_conditional_rules": [
+      {
+        "condition": "OG >= 1.080",
+        "target": "belgian_strong_dark_ale",
+        "count": 2
+      },
+      {
+        "condition": "1.060 <= OG < 1.080",
+        "target": "belgian_dubbel",
+        "count": 1
+      },
+      {
+        "condition": "OG < 1.060",
+        "target": "belgian_blonde_ale",
+        "count": 3
+      }
+    ]
   },
   "grodziskie": {
     "slug": "grodziskie",
@@ -31221,7 +31292,9 @@
           }
         }
       }
-    }
+    },
+    "_aliased_to": "specialty_beer",
+    "_alias_step": "Adim 60a (V19-aliased)"
   },
   "swedish_gotlandsdricke": {
     "slug": "swedish_gotlandsdricke",
@@ -32066,7 +32139,9 @@
           }
         }
       }
-    }
+    },
+    "_aliased_to": "vienna_lager",
+    "_alias_step": "Adim 60a (V19-aliased)"
   },
   "european_dark_lager": {
     "slug": "european_dark_lager",
@@ -36576,7 +36651,9 @@
           }
         }
       }
-    }
+    },
+    "_aliased_to": "fruit_beer",
+    "_alias_step": "Adim 60a (V19-aliased)"
   },
   "belgian_fruit_beer": {
     "slug": "belgian_fruit_beer",
@@ -37186,7 +37263,9 @@
           }
         }
       }
-    }
+    },
+    "_aliased_to": "specialty_beer",
+    "_alias_step": "Adim 60a (V19-aliased)"
   },
   "pumpkin_squash_beer": {
     "slug": "pumpkin_squash_beer",
@@ -37388,7 +37467,9 @@
           }
         }
       }
-    }
+    },
+    "_aliased_to": "specialty_beer",
+    "_alias_step": "Adim 60a (V19-aliased)"
   },
   "chocolate_or_cocoa_beer": {
     "slug": "chocolate_or_cocoa_beer",
@@ -37590,7 +37671,9 @@
           }
         }
       }
-    }
+    },
+    "_aliased_to": "specialty_beer",
+    "_alias_step": "Adim 60a (V19-aliased)"
   },
   "dessert_stout_or_pastry_beer": {
     "slug": "dessert_stout_or_pastry_beer",
@@ -37954,7 +38037,9 @@
           }
         }
       }
-    }
+    },
+    "_aliased_to": "specialty_beer",
+    "_alias_step": "Adim 60a (V19-aliased)"
   },
   "chili_pepper_beer": {
     "slug": "chili_pepper_beer",
@@ -38667,7 +38752,9 @@
           }
         }
       }
-    }
+    },
+    "_aliased_to": "specialty_beer",
+    "_alias_step": "Adim 60a (V19-aliased)"
   },
   "rye_beer": {
     "slug": "rye_beer",
@@ -40209,7 +40296,9 @@
           }
         }
       }
-    }
+    },
+    "_aliased_to": "specialty_beer",
+    "_alias_step": "Adim 60a (V19-aliased)"
   },
   "wild_beer": {
     "slug": "wild_beer",
@@ -40750,7 +40839,9 @@
           }
         }
       }
-    }
+    },
+    "_dropped": true,
+    "_drop_step": "Adim 60a (V19-aliased)"
   },
   "non_alcohol_malt_beverage": {
     "slug": "non_alcohol_malt_beverage",

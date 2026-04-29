@@ -1,0 +1,284 @@
+{
+  "meta": {
+    "created": "2026-04-29",
+    "sprint": "Adim 60a",
+    "source_dataset": "V19",
+    "output_dataset": "V19-aliased",
+    "commit_ref": "fc952aa (Adim 59 sonrasi)"
+  },
+  "simple_aliases": {
+    "west_coast_india_pale_ale": {
+      "target": "american_india_pale_ale",
+      "reason": "BJCP 21A varyant",
+      "count": 2
+    },
+    "session_india_pale_ale": {
+      "target": "american_india_pale_ale",
+      "reason": "düşük ABV AIPA varyantı",
+      "count": 5
+    },
+    "juicy_or_hazy_double_india_pale_ale": {
+      "target": "double_ipa",
+      "reason": "NEIPA+DIPA combo",
+      "count": 1
+    },
+    "imperial_red_ale": {
+      "target": "american_amber_red_ale",
+      "reason": "modern amber-IPA crossover",
+      "count": 4
+    },
+    "strong_bitter": {
+      "target": "extra_special_bitter",
+      "reason": "BJCP 11C ESB profil eşdeğeri",
+      "count": 6
+    },
+    "scottish_heavy": {
+      "target": "scottish_export",
+      "reason": "BJCP 14B varyant",
+      "count": 1
+    },
+    "strong_ale": {
+      "target": "old_ale",
+      "reason": "BJCP 17B Old Ale profil",
+      "count": 7
+    },
+    "foreign_extra_stout": {
+      "target": "export_stout",
+      "reason": "BJCP 16D, mevcut export_stout slug",
+      "count": 1
+    },
+    "tropical_stout": {
+      "target": "export_stout",
+      "reason": "BJCP 16D foreign extra varyantı",
+      "count": 2
+    },
+    "smoke_porter": {
+      "target": "smoked_beer",
+      "reason": "porter+smoke",
+      "count": 1
+    },
+    "coffee_beer": {
+      "target": "specialty_beer",
+      "reason": "specialty cluster, katki_coffee feature mevcut",
+      "count": 4
+    },
+    "belgian_session_ale": {
+      "target": "belgian_blonde_ale",
+      "reason": "düşük ABV Belgian Single",
+      "count": 4
+    },
+    "strong_scotch_ale": {
+      "target": "scotch_ale_or_wee_heavy",
+      "reason": "BJCP 17C",
+      "count": 1
+    },
+    "cream_ale": {
+      "target": "american_cream_ale",
+      "reason": "Adım 54 alias merge devamı",
+      "count": 2
+    },
+    "english_brown_ale": {
+      "target": "brown_ale",
+      "reason": "BJCP 13B",
+      "count": 1
+    },
+    "american_light_lager": {
+      "target": "american_lager",
+      "reason": "düşük alkol American Lager varyantı",
+      "count": 3
+    },
+    "international_pale_lager": {
+      "target": "american_lager",
+      "reason": "generic",
+      "count": 1
+    },
+    "czech_amber_lager": {
+      "target": "vienna_lager",
+      "reason": "BJCP 3A amber-Continental",
+      "count": 2
+    },
+    "franconian_rotbier": {
+      "target": "vienna_lager",
+      "reason": "German amber",
+      "count": 3
+    },
+    "new_zealand_pilsner": {
+      "target": "german_pilsener",
+      "reason": "NZ hop dışı pilsner profili",
+      "count": 2
+    },
+    "german_eisbock": {
+      "target": "german_doppelbock",
+      "reason": "BJCP 9C konsantre doppelbock",
+      "count": 4
+    },
+    "australian_pale_ale": {
+      "target": "american_pale_ale",
+      "reason": "modern APA hop varyantı (Pacific Ale)",
+      "count": 3
+    },
+    "american_fruited_sour_ale": {
+      "target": "mixed_fermentation_sour_beer",
+      "reason": "sour+fruit",
+      "count": 2
+    },
+    "fruit_wheat_beer": {
+      "target": "fruit_beer",
+      "reason": "fruit cluster, katki_fruit feature mevcut",
+      "count": 7
+    },
+    "piwo_grodziskie": {
+      "target": "smoked_beer",
+      "reason": "Polish smoked wheat (BJCP X3)",
+      "count": 1
+    },
+    "chocolate_or_cocoa_beer": {
+      "target": "specialty_beer",
+      "reason": "specialty cluster",
+      "count": 1
+    },
+    "pumpkin_spice_beer": {
+      "target": "specialty_beer",
+      "reason": "katki_pumpkin feature mevcut",
+      "count": 1
+    },
+    "pumpkin_squash_beer": {
+      "target": "specialty_beer",
+      "reason": "katki_pumpkin feature mevcut",
+      "count": 2
+    },
+    "specialty_honey_beer": {
+      "target": "specialty_beer",
+      "reason": "specialty cluster",
+      "count": 3
+    },
+    "specialty_historical": {
+      "target": "specialty_beer",
+      "reason": "specialty cluster (TMF Adambier vs)",
+      "count": 4
+    },
+    "historical_beer": {
+      "target": "specialty_beer",
+      "reason": "generic specialty",
+      "count": 1
+    },
+    "finnish_sahti": {
+      "target": "specialty_beer",
+      "reason": "BJCP 27 niş historical",
+      "count": 2
+    }
+  },
+  "conditional_aliases": {
+    "other_belgian_ale": {
+      "method": "OG-based 3-split",
+      "rules": [
+        {
+          "condition": "OG >= 1.080",
+          "target": "belgian_strong_dark_ale",
+          "count": 2
+        },
+        {
+          "condition": "1.060 <= OG < 1.080",
+          "target": "belgian_dubbel",
+          "count": 1
+        },
+        {
+          "condition": "OG < 1.060",
+          "target": "belgian_blonde_ale",
+          "count": 3
+        }
+      ],
+      "total": 6
+    },
+    "dark_lager": {
+      "method": "SRM-based split",
+      "rules": [
+        {
+          "condition": "SRM <= 15",
+          "target": "munich_dunkel",
+          "count": 1
+        },
+        {
+          "condition": "SRM > 15",
+          "target": "german_schwarzbier",
+          "count": 4
+        }
+      ],
+      "total": 5
+    },
+    "american_wild_ale": {
+      "method": "Recipe name infer",
+      "rules": [
+        {
+          "condition": "name contains \"funky\" + (\"big\" or pale)",
+          "target": "brett_beer",
+          "count": 2,
+          "samples": [
+            "Funky Pale Ale Recipe",
+            "Big Funky Beers"
+          ]
+        },
+        {
+          "condition": "default (sour/solera/beatification)",
+          "target": "mixed_fermentation_sour_beer",
+          "count": 5,
+          "samples": [
+            "Beatification Clone",
+            "Sour Bourbon Barrel Porter",
+            "Apple Brandy Solera",
+            "Buckwheat Sour Amber",
+            "Sour Solera Beer Barrel"
+          ]
+        }
+      ],
+      "total": 7,
+      "note": "TMF parser yeast detail %0 extract — name-based infer geçici çözüm. Adım 61+ TMF parser fix."
+    },
+    "german_leichtbier": {
+      "method": "ABV-based split + drop",
+      "rules": [
+        {
+          "condition": "ABV > 0.5 (gerçek leichtbier)",
+          "target": "pale_lager",
+          "count": 2,
+          "samples": [
+            "Meister Hölle No 1 (ABV 2.6)",
+            "Hersbrucker Leichter Stopfer (ABV 4.0)"
+          ]
+        },
+        {
+          "condition": "ABV == 0.5 (FreiBier alkolsüz)",
+          "target": "DROP",
+          "count": 2,
+          "samples": [
+            "FreiBier [2]",
+            "FreiBier [IPA Simcoe]"
+          ]
+        }
+      ],
+      "total": 4,
+      "note": "munich_helles profile-uyumsuz (OG 1.044-1.048 sample 1.024-1.039). pale_lager BJCP 1A profile-uyumlu."
+    }
+  },
+  "drops": {
+    "gluten_free_beer": {
+      "count": 1,
+      "reason": "Beslenme-bazlı (sorghum/millet/rice malt), BJCP slug'larına alias edilemez"
+    },
+    "braureka_30601": {
+      "slug": "german_leichtbier",
+      "reason": "FreiBier alkolsüz (ABV 0.5)"
+    },
+    "braureka_31814": {
+      "slug": "german_leichtbier",
+      "reason": "FreiBier IPA Simcoe alkolsüz (ABV 0.5)"
+    }
+  },
+  "standalone_kept": {
+    "brut_ipa": {
+      "count": 3,
+      "reason": "BJCP X4 modern style, train ≥10 filter ile train edilemez ama dataset'te kalır",
+      "next_step": "Adım 61+ ek scrape (BYO/AHA brut_ipa search) ile ≥10 yapılır"
+    }
+  }
+}
