@@ -1,0 +1,114 @@
+[1] Loading V19 + V18.3 models + label encoders...
+  V19 classes=87, features=89
+  V18.3 classes=87, features=93
+
+=== TEST 1: 5 stat feature gain (V19 vs V18.3) ===
+
+feature          V19 gain     V19.1 gain          Δ       Δ%
+TOTAL             1685.81        1730.76
+og                  21.52          22.17      +0.65   +0.00pp
+fg                   4.50           4.52      +0.02   -0.01pp
+abv                 15.38          14.88      -0.49   -0.05pp
+ibu                 29.65          28.93      -0.72   -0.09pp
+srm                 38.91          38.59      -0.32   -0.08pp
+
+5-STAT TOTAL: V19=6.52%  V18.3=6.30%  Δ=-0.22pp
+
+Top 20 features V18.3 (by gain%):
+  yeast_saison                    12.37%      214.17
+  yeast_witbier                    9.54%      165.16
+  has_lacto                        4.59%       79.39
+  yeast_kolsch                     3.46%       59.95
+  katki_pumpkin                    2.79%       48.33
+  yeast_abbey                      2.77%       47.90
+  katki_lactose                    2.42%       41.92
+  has_coriander                    2.23%       38.67
+  srm                              2.23%       38.59
+  has_spice                        2.16%       37.42
+  hop_english                      1.76%       30.39
+  pct_wheat                        1.74%       30.17
+  dry_hop_days                     1.74%       30.05
+  ibu                              1.67%       28.93
+  hop_american_c                   1.57%       27.09
+  pct_smoked                       1.44%       24.87
+  yeast_wheat_german               1.40%       24.18
+  has_orange_peel                  1.30%       22.58
+  yeast_cal_common                 1.29%       22.34
+  og                               1.28%       22.17
+
+
+=== TEST 2: 4 profile × OG sweep ===
+
+--- NEIPA ---
+OG       V19 top-1                           V19.1 top-1                         match  
+1.04     american_india_pale_ale             american_india_pale_ale             ✓
+1.05     american_india_pale_ale             american_india_pale_ale             ✓
+1.06     american_india_pale_ale             american_india_pale_ale             ✓
+1.075    american_india_pale_ale             american_india_pale_ale             ✓
+1.09     american_india_pale_ale             american_india_pale_ale             ✓
+
+--- Saison ---
+OG       V19 top-1                           V19.1 top-1                         match  
+1.04     french_belgian_saison               french_belgian_saison               ✓
+1.05     french_belgian_saison               french_belgian_saison               ✓
+1.06     french_belgian_saison               french_belgian_saison               ✓
+1.075    french_belgian_saison               french_belgian_saison               ✓
+1.09     french_belgian_saison               french_belgian_saison               ✓
+
+--- Imperial_Stout ---
+OG       V19 top-1                           V19.1 top-1                         match  
+1.04     stout                               stout                               ✓
+1.05     stout                               stout                               ✓
+1.06     stout                               stout                               ✓
+1.075    american_imperial_stout             stout                               Δ
+1.09     american_imperial_stout             american_imperial_stout             ✓
+
+--- Belgian_Witbier ---
+OG       V19 top-1                           V19.1 top-1                         match  
+1.04     belgian_witbier                     belgian_witbier                     ✓
+1.05     belgian_witbier                     belgian_witbier                     ✓
+1.06     belgian_witbier                     belgian_witbier                     ✓
+1.075    belgian_witbier                     belgian_witbier                     ✓
+1.09     belgian_witbier                     belgian_witbier                     ✓
+
+
+=== TEST 3: Per-slug holdout t1/t3 (V19 vs V18.3) ===
+
+slug                                        V19 n     V19 t1  V19.1 n   V19.1 t1      Δt1      V19 t3   V19.1 t3      Δt3
+belgian_ipa                                    44       4.5%       44       6.8%    +2.3pp       27.3%      25.0%    -2.3pp
+rye_ipa                                        62      17.7%       62      19.4%    +1.6pp       53.2%      56.5%    +3.2pp
+white_ipa                                      53      11.3%       53       7.5%    -3.8pp       22.6%      26.4%    +3.8pp
+red_ipa                                        83       9.6%       83      10.8%    +1.2pp       39.8%      37.3%    -2.4pp
+gose                                           43      39.5%       43      34.9%    -4.7pp       65.1%      65.1%    +0.0pp
+belgian_gueuze                                 40       5.0%       40       5.0%    +0.0pp       32.5%      27.5%    -5.0pp
+belgian_quadrupel                              15       0.0%       15       0.0%    +0.0pp       20.0%      20.0%    +0.0pp
+brett_beer                                     20      25.0%       20      20.0%    -5.0pp       45.0%      40.0%    -5.0pp
+mixed_fermentation_sour_beer                   54      16.7%       54      16.7%    +0.0pp       31.5%      31.5%    +0.0pp
+dunkles_bock                                   17      23.5%       17      17.6%    -5.9pp       29.4%      29.4%    +0.0pp
+kellerbier                                     19       0.0%       19       0.0%    +0.0pp       15.8%      10.5%    -5.3pp
+german_oktoberfest_festbier                    20      15.0%       20      20.0%    +5.0pp       40.0%      30.0%   -10.0pp
+english_pale_ale                               21       0.0%       21       0.0%    +0.0pp        0.0%       0.0%    +0.0pp
+special_bitter_or_best_bitter                 541      36.6%      541      35.7%    -0.9pp       68.0%      67.8%    -0.2pp
+belgian_strong_dark_ale                       634      65.5%      634      64.7%    -0.8pp       81.4%      81.7%    +0.3pp
+flanders_red_ale                              172      60.5%      172      59.9%    -0.6pp       67.4%      70.3%    +2.9pp
+belgian_lambic                                109      33.0%      109      34.9%    +1.8pp       56.0%      53.2%    -2.8pp
+belgian_fruit_lambic                          106      25.5%      106      24.5%    -0.9pp       52.8%      50.0%    -2.8pp
+oud_bruin                                     112      36.6%      112      35.7%    -0.9pp       43.8%      45.5%    +1.8pp
+export_stout                                  316      11.7%      316      11.4%    -0.3pp       42.4%      39.9%    -2.5pp
+juicy_or_hazy_india_pale_ale                   29      24.1%       29      20.7%    -3.4pp       44.8%      41.4%    -3.4pp
+black_ipa                                     126      31.7%      126      34.1%    +2.4pp       58.7%      60.3%    +1.6pp
+
+
+=== HEADLINE METRICS ===
+V19 slug top-1: 55.40%
+V19.1 slug top-1: 55.37%
+Δ = -0.03pp
+
+V19 slug top-3: 79.59%
+V19.1 slug top-3: 79.60%
+Δ = +0.01pp
+
+V19 14cat top-1: 65.12%
+V19.1 14cat top-1: 65.10%
+
+[SENSITIVITY TEST DONE]
