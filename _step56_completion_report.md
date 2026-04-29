@@ -85,7 +85,7 @@
 |---|---|---|---|
 | V18.3 sıkı (a=1.0, l=2.0, mcw=5, n=300) | 4.14pp ✓ | -0.80pp | gap PASS, headline FAIL |
 | V18.3.1 gevşek (a=0.5, l=1.5, mcw=3, n=400) | 5.78pp 🔴 | -0.50pp | gap FAIL, headline kısmen iyi |
-| **Adım 58 deneme** | **a=0.75, l=1.75, mcw=4, n=350** | (orta band) | Sweet spot bu band içinde |
+| **Adım 58 deneme** | **a=0.85, l=1.85, mcw=4, n=350** | (V18.3 sıkı yakını) | Sweet spot V18.3 tarafında — gap güvenli kalsın |
 
 ### 6. Transformative slug kazanımları (artifact'lerde, Adım 58'de geri gelecek)
 - brett_beer: 0% → 30% (+30pp)
@@ -138,16 +138,16 @@ Adım 57 = **M1-M10 UX iyileştirmeleri**.
    - has_dry_hop_heavy (NEIPA %16 → %50+) — gerçek dry hop g/L hesapla
    - has_late_hop_pct (modern IPA discriminator)
    - dry_hop_grams_per_liter (continuous, NEIPA imza)
-3. **Dedupe Plan C uygula** (test edildi, baseline)
+3. **V18.3 dataset baz** (working/archive/v18_3_dataset_clean.json) — etiket temizlik + dedupe Plan C kazanımları korunur, baştan başlamaya gerek yok
 4. **Outlier drop pipeline standard** (KURAL 1 zorunlu)
-5. **Reg tuning sweet spot dene**: alpha=0.75, lambda=1.75, mcw=4, n_est=350
+5. **Reg tuning sweet spot dene**: alpha=0.85, lambda=1.85, mcw=4, n_est=350 (V18.3 sıkı yakını, gap güvenli)
 
-## Adım Sıralama (Kaan onayı sonrası kalıcı)
+## Adım Sıralama (Kaan kararı, memory #29)
 
-- **Adım 57** = M1-M10 UX iyileştirmeleri (kullanıcı için doğrudan değer)
-- **Adım 58** = rmwoods raw re-parse + V19 deploy (Witbier/NEIPA feature yeniden tasarım, V18.3 kazanımları geri)
-- **Adım 59** = Faz B sour cluster (gose vs Berliner ayrımı, has_salt güçlü coverage)
-- **Adım 60** = Faz C German/IPA varyant rafineleme
+- **Adım 57** = Sprint 56a kapanış (BUGÜN) — rapor + archive + commit
+- **Adım 58** = rmwoods raw HDF5 re-parse + Witbier/NEIPA kurtarma → V19 deploy
+- **Adım 59** = Faz B sour cluster (gose has_salt güçlü, brett strain) → V19.1 deploy
+- **Adım 60** = V6 strateji yeniden değerlendirme (memory #26 referans, KNN distance audit, dataset/tier/feature subset revize)
 
 ---
 
