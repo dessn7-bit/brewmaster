@@ -636,15 +636,15 @@ window.bmV2cExportFeedback = function() {
       northern_brewer: /(northern\s*brewer|cluster|mount\s*hood)/i
     };
     const KATKI_SIG = {
-      fruit:      /meyve|fruit|mango|passion|seftali|peach|strawberry|cilek|raspberry|cherry|kiraz|apple|elma|pear|armut|uzum|grape|orange|portakal|lemon|limon|lime|cranberry|pomegranate|blueberry/i,
-      spice_herb: /koriander|coriander|kişniş|kisnis|ginger|zencefil|cinnamon|tarcin|tarçın|nutmeg|clove|karanfil|herbs|rosemary|biberiye|mint|nane|lavender|lavanta|hibiscus|elderflower|jasmine|matcha|juniper|ardic|ardıç|chamomile|papatya/i,
+      fruit:      /meyve|fruit|mango|passion|seftali|peach|strawberry|cilek|çilek|raspberry|ahududu|frambuaz|cherry|kiraz|visne|vişne|apple|elma|pear|armut|uzum|üzüm|grape|orange|portakal|lemon|limon|lime|cranberry|pomegranate|nar|blueberry|ananas|pineapple|karpuz|watermelon|karadut|dut|mulberry|kayisi|kayısı|apricot|hindistan|coconut|greyfurt|grapefruit|kestane|chestnut/i,
+      spice_herb: /koriander|coriander|kişniş|kisnis|ginger|zencefil|cinnamon|tarcin|tarçın|nutmeg|muskat|clove|karanfil|cardamom|kakule|herbs|rosemary|biberiye|mint|nane|lavender|lavanta|hibiscus|hibiskus|elderflower|mürver|murver|jasmine|yasemin|matcha|juniper|ardic|ardıç|chamomile|papatya|vanilla|vanilya|gül|ihlamur|sumak|sumac|allspice|yenibahar|gul/i,
       chocolate:  /chocolate|cacao|kakao|cocoa|cikolata|çikolata|nibs/i,
       coffee:     /coffee|kahve|espresso|mocha/i,
       chile:      /chile|chili|jalape|habane|pepper|biber/i,
-      smoke:      /smoke|smoked|rauch|isli|islı/i,
+      smoke:      /smoke|smoked|rauch|isli|islı|tütsü|tutsu/i,
       honey:      /^bal$|honey(?!\s*malt)|\bbal\b/i,
       pumpkin:    /pumpkin|balkabak|squash/i,
-      salt:       /\b(salt|tuz|kosher)\b/i,
+      salt:       /\b(salt|kosher|gose)\b|\btuz(?!\w)/i,
       lactose:    /lactose|laktoz|milk\s*sugar|lakt/i
     };
     const HAS_SIG = {
@@ -652,11 +652,11 @@ window.bmV2cExportFeedback = function() {
       orange_peel: /orange.{0,3}peel|portakal.{0,3}kabuk/i,
       coffee:      /coffee|kahve|espresso|mocha/i,
       chamomile:   /chamomile|papatya/i,
-      salt:        /\b(salt|tuz|kosher)\b/i,
-      spice:       /coriander|cinnamon|nutmeg|clove|ginger|cardamom|allspice|kişniş|kisnis|tarcin|tarçın|karanfil|zencefil|baharatlar|baharat|herbs|rosemary|biberiye|mint|nane|lavender|lavanta|hibiscus|elderflower|jasmine|matcha|juniper|ardic|ardıç/i,
+      salt:        /\b(salt|kosher|gose)\b|\btuz(?!\w)/i,
+      spice:       /coriander|cinnamon|nutmeg|muskat|clove|ginger|cardamom|kakule|allspice|yenibahar|kişniş|kisnis|tarcin|tarçın|karanfil|zencefil|baharatlar|baharat|herbs|rosemary|biberiye|mint|nane|lavender|lavanta|hibiscus|hibiskus|elderflower|mürver|murver|jasmine|yasemin|matcha|juniper|ardic|ardıç|vanilla|vanilya|gül|gul|ihlamur|sumak|sumac/i,
       chili:       /chile|chili|jalape|habane|pepper|biber/i,
-      smoke:       /smoke|smoked|rauch|isli/i,
-      fruit:       /meyve|fruit|mango|passion|seftali|peach|strawberry|cilek|raspberry|cherry|kiraz|apple|elma|pear|armut|uzum|grape|orange|portakal|lemon|limon|lime|cranberry|pomegranate|blueberry/i
+      smoke:       /smoke|smoked|rauch|isli|islı|tütsü|tutsu/i,
+      fruit:       /meyve|fruit|mango|passion|seftali|peach|strawberry|cilek|çilek|raspberry|ahududu|frambuaz|cherry|kiraz|visne|vişne|apple|elma|pear|armut|uzum|üzüm|grape|orange|portakal|lemon|limon|lime|cranberry|pomegranate|nar|blueberry|ananas|pineapple|karpuz|karadut|dut|kayisi|kayısı|apricot|hindistan|coconut|greyfurt|grapefruit|kestane/i
     };
 
     function _flag(rx, str) { return rx.test(str || '') ? 1 : 0; }
@@ -4275,7 +4275,12 @@ const KATKILAR=[
   {id:"clarity_ferm",ad:"Clarity Ferm (BrewTan B/White Labs)",g:"Fermantasyon",gu:0,fermente:false,ibu_dk60:0,srm:0,etki:"Chill haze azaltır, bonus olarak gluten'i <20ppm'e düşürür (gluten-free sertifikalı değil).",acik:"White Labs proline-specific endopeptidase. Chill haze proteinlerini parçalar — permanent çözüm. Bonus: wheat/barley biralarında gluten <20ppm (AB 'gluten-free' standart altı; sertifikalı değil, duyarlı kişiler dikkat). 1 ampul (10mL) / 20L. Kaynak: White Labs tech sheet.",kullanim:"Fermentere pitch anında",birim:"mL",density:1.11,/* kayn: White Labs WLN4000 datasheet: carrier ≥45% glycerol + CRC glycerol/water mix */zaman:"Fermantasyon",tags:["Enzim", "Gluten", "Chill Haze", "White Labs"],varsayDozgL:0.5,maxDozgL:0.8,maxUyari:"Standart doz 0.5mL/L (10mL/20L)",onerilenZaman:["Fermantasyon başı"],fiyat:"pahali",alerjen:[]},
 
   // PROSES — Clarity Ferm'e alternative
-  {id:"calcium_sulfate",ad:"Kalsiyum Sülfat (Gypsum CaSO₄)",g:"Proses",gu:0,fermente:false,ibu_dk60:0,srm:0,etki:"Hop karakterini artırır, mash pH düşürür. Pale Ale/IPA için Burton-style su.",acik:"CaSO₄·2H₂O. Sülfat iyon hop acılığını keskinleştirir. 0.5-4g/20L. Burton-on-Trent stili IPA için yüksek doz. Kaynak: Palmer 'Water', Bru'n Water. Su sekmesinde de var — Proses'ten de erişilebilir.",kullanim:"Mash suyuna",birim:"g",zaman:"Mash",tags:["Su", "Gypsum", "Mash", "Hop"],varsayDozgL:0.2,maxDozgL:0.5,maxUyari:"Burton tarzı üst sınır, aşırı kuru-keskin",onerilenZaman:["Mash"],fiyat:"ucuz",alerjen:[]}
+  {id:"calcium_sulfate",ad:"Kalsiyum Sülfat (Gypsum CaSO₄)",g:"Proses",gu:0,fermente:false,ibu_dk60:0,srm:0,etki:"Hop karakterini artırır, mash pH düşürür. Pale Ale/IPA için Burton-style su.",acik:"CaSO₄·2H₂O. Sülfat iyon hop acılığını keskinleştirir. 0.5-4g/20L. Burton-on-Trent stili IPA için yüksek doz. Kaynak: Palmer 'Water', Bru'n Water. Su sekmesinde de var — Proses'ten de erişilebilir.",kullanim:"Mash suyuna",birim:"g",zaman:"Mash",tags:["Su", "Gypsum", "Mash", "Hop"],varsayDozgL:0.2,maxDozgL:0.5,maxUyari:"Burton tarzı üst sınır, aşırı kuru-keskin",onerilenZaman:["Mash"],fiyat:"ucuz",alerjen:[]},
+
+  // ═══ Adım 15b — Sprint A: 3 yeni entry (has_salt, katki_smoke, katki_pumpkin sıfır-match için) ═══
+  {id:"tuz_kosher",ad:"Tuz / Kosher Salt",g:"Adjunct",gu:0,fermente:false,ibu_dk60:0,srm:0,etki:"OG/FG/SRM/IBU etkisiz. Mineralite + algılı tuzluluk verir. Gose/Catharina sour için kritik.",acik:"İyotsuz mutfak tuzu veya kosher salt (NaCl). 1-3 g/L Gose, 0.5-1 g/L diğer sour stillerinde. Boil sonu veya fermentasyon sonu eklenir.",kullanim:"Boil sonu veya Fermentasyon sonu",birim:"g",tags:["Gose","Sour","Mineralite","Salt"],varsayDozgL:1,maxDozgL:5,maxUyari:"Aşırı tuzlu, denge bozulur",onerilenZaman:["Kaynatma sonu","Fermantasyon sonu"],fiyat:"ucuz",alerjen:[]},
+  {id:"balkabagi",ad:"Balkabağı (Pumpkin Püre)",g:"Meyve",gu:30,fermente:"partial",ibu_dk60:0,srm:5,etki:"OG hafif artış (~30 PPG/kg), kısmi fermente. Hafif kabak aroması.",acik:"Konserve veya taze balkabağı püresi. Mash'e eklenir (yüksek alfa-amilaz aktif). Pumpkin Spice Beer için temel. 50-200 g/L.",kullanim:"Mash veya Boil",birim:"g",tags:["Pumpkin","Autumn","Squash","Balkabak"],varsayDozgL:50,maxDozgL:200,maxUyari:"Aşırı kabak baskın aroma",onerilenZaman:["Mash","Kaynatmada"],fiyat:"orta",alerjen:[]},
+  {id:"smoke_ext",ad:"Smoked Malt Ekstrakt",g:"Aroma",gu:0,fermente:false,ibu_dk60:0,srm:0,etki:"Renk/OG etkisi yok. Yoğun is/duman aroması.",acik:"Sıvı smoked malt ekstraktı (kayın/beech, mesquite). Rauchbier'de smoked malt yerine veya katkı olarak. 0.5-2 g/L.",kullanim:"Boil sonu veya Fermentasyon",birim:"mL",tags:["Smoke","Rauchbier","Smoked","Tütsü"],varsayDozgL:0.5,maxDozgL:2,maxUyari:"Aşırı yangın/küllü",onerilenZaman:["Kaynatma sonu","Fermantasyon"],fiyat:"orta",alerjen:[]}
 ];
 let aramaMetni="";
 let _editId=null; // Düzenlenen tarihin ID'si, null ise yeni tarif
