@@ -14413,13 +14413,16 @@ return `
         ${(()=>{
           // ═══ REÇETE DOKTORU v2 — Tolerance + Specialty stil önerileri ═══
           const _bjcp=BJCP;
+          // Kullanıcı manuel seçim S.stil > motor tahmini (Adım 13b)
           // V5/V12 top-1 → BJCP key — DRY tek fonksiyon (window.bmSlugToBjcp)
-          if (typeof __top3V6_engine !== 'undefined' && __top3V6_engine && __top3V6_engine.length) {
+          if (typeof S !== 'undefined' && S.stil && _bjcp[S.stil]) {
+            stil_tah = S.stil;
+          } else if (typeof __top3V6_engine !== 'undefined' && __top3V6_engine && __top3V6_engine.length) {
             const _v5Key = window.bmSlugToBjcp ? window.bmSlugToBjcp(__top3V6_engine[0].slug, __top3V6_engine[0].displayTR) : null;
             if (_v5Key) stil_tah = _v5Key;
             else stil_tah = __top3V6_engine[0].displayTR || __top3V6_engine[0].slug || stil_tah;
           }
-          const _stKey=alt_stil && _bjcp[alt_stil] ? alt_stil : stil_tah;
+          const _stKey=(typeof S !== 'undefined' && S.stil && _bjcp[S.stil]) ? S.stil : (alt_stil && _bjcp[alt_stil] ? alt_stil : stil_tah);
           const _stRef=_bjcp[_stKey];
           const v=(S.verim||70)/100;
           const L_gal=_hacim*0.264172;
