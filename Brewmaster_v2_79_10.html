@@ -11419,7 +11419,7 @@ function rEditorKatki(){
       var sonIds=katkiSonYukle();
       var h='';
       // Stil bazlı öneri — aktif stile göre relevant tag'li katkıları öner
-      var _stilAd=((S.stil&&S.stil!=='Otomatik')?S.stil:window._lastAltStil)||'';
+      var _stilAd=((S.stil&&S.stil!=='Otomatik')?S.stil:(window._lastAltStil||window._lastStilTah))||'';
       var _stilLow=_stilAd.toLowerCase();
       var _stilTag=[];
       if(_stilLow.indexOf('dubbel')>-1) _stilTag=['Dubbel','Belgian','Dark'];
@@ -13843,68 +13843,12 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
   else                         stil_grup="🍺 Ale";
 
 
-  // ── Alt stil tanımı — değerlere göre otomatik nitelendirme ────
+  // Adım 15h — alt_stil arkaik kural-bazlı niteleme kaldırıldı (V19 87 slug spesifik öneri verir)
+  // alt_stil değişkeni hâlâ tanımlı ama her zaman boş — ileri uyumluluk için
   var alt_stil = "";
-  (function(){
-    var s = stil_tah || "";
-    var isDark    = _srm > 17;
-    var isStrong  = _abv > 8.0;
-    var isImp     = _abv > 9.0;
-    var isSession = _abv < 4.0;
-    var isHazy    = _dhPer10L >= 5;
-    var isSour    = _lakAsit && _lakMl/(_hacim||11)*10 >= 3;
-    var isFruited = (_mangoG+_seftaliG+_ananasG+_visneG+_karadutG+_ahududuG) > 30;
-
-    if(_mayaTip==="belcika"||_mayaTip==="saison"){
-      if(s.includes("Dubbel")){
-        if(isDark && isStrong) alt_stil="Imperial Dark Belgian Dubbel";
-        else if(isDark)        alt_stil="Dark Belgian Dubbel";
-        else if(isStrong)      alt_stil="Strong Belgian Dubbel";
-        else                   alt_stil="Belgian Dubbel";
-      } else if(s.includes("Tripel")){
-        alt_stil=isStrong?"Imperial Belgian Tripel":isFruited?"Fruited Belgian Tripel":"Belgian Tripel";
-      } else if(s.includes("Quadrupel")||s.includes("Abt")){
-        alt_stil="Belgian Quadrupel";
-      } else if(s.includes("Saison")){
-        alt_stil=isDark?"Dark Saison":isStrong?"Strong Saison":isFruited?"Fruited Saison":isHazy?"Hazy Saison":"Belgian Saison";
-      } else if(s.includes("Blonde")){
-        alt_stil=isFruited?"Fruited Belgian Blonde":"Belgian Blonde Ale";
-      } else if(s.includes("Strong Golden")){
-        alt_stil="Belgian Strong Golden Ale";
-      } else if(s.includes("Pale")){
-        alt_stil=isHazy?"Hazy Belgian Pale":"Belgian Pale Ale";
-      } else if(isDark&&isStrong){
-        alt_stil="Belgian Dark Strong Ale";
-      } else if(isDark){
-        alt_stil="Dark Belgian Ale";
-      }
-    } else if(s.includes("IPA")||s.includes("Hazy")){
-      if(isSour&&isHazy)       alt_stil="Sour IPA";
-      else if(isFruited&&isHazy) alt_stil="Fruited Hazy IPA";
-      else if(isImp)           alt_stil="Imperial Hazy IPA";
-      else if(isHazy&&isDark)  alt_stil="Dark Hazy IPA";
-      else if(isHazy)          alt_stil="New England IPA";
-      else if(s.includes("West Coast")) alt_stil="West Coast IPA";
-      else if(isStrong)        alt_stil="Double IPA";
-      else if(isSession)       alt_stil="Session IPA";
-    } else if(_mayaTip==="lager"){
-      if(isDark&&_abv>=6.3)    alt_stil="Doppelbock";
-      else if(isDark)          alt_stil="Dark Lager";
-    } else if(s.includes("Stout")||s.includes("Porter")){
-      if(isImp)                alt_stil="Imperial Stout";
-      else if(isFruited)       alt_stil="Fruited Stout";
-    } else if(_mayaTip==="wheat"||_mayaTip==="wit"){
-      if(_abv>=7)              alt_stil="Weizenbock";
-      else if(isDark)          alt_stil="Dunkelweizen";
-      else if(isSour)          alt_stil="Berliner Weisse";
-    } else if(_mayaTip==="sour"||isSour){
-      alt_stil=isFruited&&isDark?"Dark Fruited Sour":isFruited?"Fruited Sour Ale":"Kettle Sour";
-    }
-  })();
-  S.altStil = alt_stil;
-  // Global'e set et — rEditorMalt/rEditorHop gibi ayrı fonksiyonlar kullanabilsin
+  S.altStil = "";
   window._lastStilTah = stil_tah;
-  window._lastAltStil = alt_stil;
+  window._lastAltStil = "";
 
 
 // ════ TAT PROFİLİ — EŞIK BAZLI, SADECE GERÇEK ETKİ ══════
