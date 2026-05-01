@@ -556,7 +556,7 @@ window.bmV2cExportFeedback = function() {
   (function migrateOldMotor(){
     try {
       const old = localStorage.getItem(TOGGLE_KEY);
-      if (old && [].indexOf(old) >= 0) {
+      if (old && old !== 'V12' && old !== 'V2c' && old !== 'V6') {
         console.log('%c[BM Motor Migration] ' + old + ' -> V12 (V19) DEFAULT (Adim 51 toggle temizligi)', 'background:#6A1B9A;color:#fff;padding:3px 8px;font-weight:700;');
         localStorage.setItem(TOGGLE_KEY, 'V12');
       }
