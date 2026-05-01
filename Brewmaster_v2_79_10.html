@@ -14311,11 +14311,14 @@ return `
               normalized: r.normalized
             }));
           }
+          // Kullanıcı manuel seçim S.stil > motor V5 top-1 (Adım 14b)
           // V5 varsa stil_tah ve _stKey V5 top-1'e yaslansın (Doktor ile tutarlı)
-          if (_v5TopBjcp && _v5TopBjcp.length) {
+          if (typeof S !== 'undefined' && S.stil && _bjcp[S.stil]) {
+            stil_tah = S.stil;
+          } else if (_v5TopBjcp && _v5TopBjcp.length) {
             stil_tah = _v5TopBjcp[0].bjcp;
           }
-          const _stKey=alt_stil && _bjcp[alt_stil] ? alt_stil : stil_tah;
+          const _stKey=(typeof S !== 'undefined' && S.stil && _bjcp[S.stil]) ? S.stil : (alt_stil && _bjcp[alt_stil] ? alt_stil : stil_tah);
           const _stRef=_bjcp[_stKey];
           if(!_stRef) return '';
           // Aralık karşılaştırması ekranda gösterilen ondalık hassasiyetiyle yapılır.
