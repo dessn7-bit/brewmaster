@@ -577,7 +577,7 @@ window.bmV2cExportFeedback = function() {
       fetch(LABELS_URL,{cache:'force-cache'}).then(r=>{if(!r.ok)throw new Error('labels HTTP '+r.status);return r.json();})
     ]).then(function(arr){
       cache.model=arr[0]; cache.labels=arr[1];
-      console.log('%c[BM V12 (V15)] Cluster model yüklendi: '+cache.model.learner.gradient_booster.model.gbtree_model_param.num_trees+' tree, '+cache.labels.feature_list.length+' feature','background:#6A1B9A;color:#fff;padding:2px 6px;');
+      console.log('%c[BM V12 (V19)] Cluster model yüklendi: '+cache.model.learner.gradient_booster.model.gbtree_model_param.num_trees+' tree, '+cache.labels.feature_list.length+' feature','background:#6A1B9A;color:#fff;padding:2px 6px;');
       return cache;
     }).catch(function(e){ console.warn('[BM V12] Cluster model yüklenemedi:', e); loadingPromise=null; throw e; });
     return loadingPromise;
@@ -590,7 +590,7 @@ window.bmV2cExportFeedback = function() {
       fetch(SLUG_LABELS_URL,{cache:'force-cache'}).then(r=>{if(!r.ok)throw new Error('slug labels HTTP '+r.status);return r.json();})
     ]).then(function(arr){
       cache.slugModel=arr[0]; cache.slugLabels=arr[1];
-      console.log('%c[BM V12 Slug (V16)] Slug model yüklendi: '+cache.slugModel.learner.gradient_booster.model.gbtree_model_param.num_trees+' tree, '+cache.slugLabels.classes.length+' slug','background:#9C27B0;color:#fff;padding:2px 6px;');
+      console.log('%c[BM V12 Slug (V19)] Slug model yüklendi: '+cache.slugModel.learner.gradient_booster.model.gbtree_model_param.num_trees+' tree, '+cache.slugLabels.classes.length+' slug','background:#9C27B0;color:#fff;padding:2px 6px;');
       return cache;
     }).catch(function(e){ console.warn('[BM V12 Slug] Slug model yüklenemedi:', e); slugLoadingPromise=null; throw e; });
     return slugLoadingPromise;
@@ -14029,10 +14029,10 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
         var __v12Cluster = window.BM_V12.predictSync(__recipeV2);
         if (__v12Cluster) {
           window.__lastV12ClusterResult = __v12Cluster;
-          console.log('%c[BM V12 (V19) cluster] 14-cat XGBoost', 'background:#6A1B9A;color:#fff;padding:2px 6px;');
+          console.log('%c[BM V12 (V19) cluster] 16-cat XGBoost', 'background:#6A1B9A;color:#fff;padding:2px 6px;');
           __v12Cluster.top3.forEach(function(r,i){ console.log('    cluster '+(i+1)+'. '+r.displayTR+' %'+r.normalized); });
         }
-        // Slug prediction (slug model V15+, 91 slug)
+        // Slug prediction (slug model V19, 87 slug)
         if (window.BM_V12.isSlugReady && window.BM_V12.isSlugReady()) {
           try {
             var __v12Slug = window.BM_V12.predictSlugSync(__recipeV2);
@@ -14042,7 +14042,7 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
               window.__lastV12SlugResult = __v12Slug;
               window.__lastV12Result = __v12Slug;
               window.__bmV12DispatchInfo.slugBranchHit = true;
-              console.log('%c[BM V12 (V19) slug] 91-slug XGBoost', 'background:#9C27B0;color:#fff;padding:2px 6px;');
+              console.log('%c[BM V12 (V19) slug] 87-slug XGBoost', 'background:#9C27B0;color:#fff;padding:2px 6px;');
               __v12Slug.top3.forEach(function(r,i){ console.log('    slug '+(i+1)+'. '+r.displayTR+' %'+r.normalized); });
             } else {
               window.__bmV12DispatchInfo.slugReturnedNull = true;
@@ -14650,7 +14650,7 @@ return `
               // model dosyaları archive/ klasöründe. Sadece V6 (KNN, eski) + V12 (V19 XGBoost, default).
               return '<span style="display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap">'+
                 btn('V6', 'V6 (KNN)', '#558B2F', 'V6 KNN — 1100 reçete (eski/küçük model)')+
-                btn('V12', 'V12 (V19) ⭐', '#6A1B9A', 'V12 DEFAULT — V19 XGBoost (Adım 58 rmwoods raw re-parse + Witbier kurtarma + Plan C dedupe, 8 yeni feature, 91 slug, slug t1 55.4, 14cat 65.1)')+
+                btn('V12', 'V12 (V19) ⭐', '#6A1B9A', 'V12 DEFAULT — V19 XGBoost (Adım 58 rmwoods raw re-parse + Witbier kurtarma + Plan C dedupe, 8 yeni feature, 87 slug, slug t1 55.4, 16cat 65.1)')+
               '</span>';
             })() : '')+
           '</div>'+
