@@ -636,8 +636,8 @@ window.bmV2cExportFeedback = function() {
       northern_brewer: /(northern\s*brewer|cluster|mount\s*hood)/i
     };
     const KATKI_SIG = {
-      fruit:      /meyve|fruit|mango|passion|seftali|peach|strawberry|cilek|çilek|raspberry|ahududu|frambuaz|cherry|kiraz|visne|vişne|apple|elma|pear|armut|uzum|üzüm|grape|orange|portakal|lemon|limon|lime|cranberry|pomegranate|nar|blueberry|ananas|pineapple|karpuz|watermelon|karadut|dut|mulberry|kayisi|kayısı|apricot|hindistan|coconut|greyfurt|grapefruit|kestane|chestnut/i,
-      spice_herb: /koriander|coriander|kişniş|kisnis|ginger|zencefil|cinnamon|tarcin|tarçın|nutmeg|muskat|clove|karanfil|cardamom|kakule|herbs|rosemary|biberiye|mint|nane|lavender|lavanta|hibiscus|hibiskus|elderflower|mürver|murver|jasmine|yasemin|matcha|juniper|ardic|ardıç|chamomile|papatya|vanilla|vanilya|gül|ihlamur|sumak|sumac|allspice|yenibahar|gul/i,
+      fruit:      /meyve|fruit|mango|passion|seftali|peach|strawberry|cilek|çilek|raspberry|ahududu|frambuaz|cherry|kiraz|visne|vişne|apple|elma|pear|armut|uzum|üzüm|grape|orange|portakal|lemon|limon|lime|cranberry|pomegranate|nar|blueberry|ananas|pineapple|karpuz|watermelon|karadut|dut|mulberry|kayisi|kayısı|apricot|hindistan|coconut|greyfurt|grapefruit|kestane|chestnut|bergamot|yuzu|cumquat|kumquat|kamkat|sudachi|kabosu|pomelo|saddok|şaddok|citrus|narenciye/i,
+      spice_herb: /koriander|coriander|kişniş|kisnis|ginger|zencefil|cinnamon|tarcin|tarçın|nutmeg|muskat|clove|karanfil|cardamom|kakule|herbs|rosemary|biberiye|mint|nane|lavender|lavanta|hibiscus|hibiskus|elderflower|mürver|murver|jasmine|yasemin|matcha|juniper|ardic|ardıç|chamomile|papatya|vanilla|vanilya|gül|ihlamur|sumak|sumac|allspice|yenibahar|gul|kekik|thyme|adaçayı|adacayi|sage|defne|bay\s*leaf|bay-leaf/i,
       chocolate:  /chocolate|cacao|kakao|cocoa|cikolata|çikolata|nibs/i,
       coffee:     /coffee|kahve|espresso|mocha/i,
       chile:      /chile|chili|jalape|habane|pepper|biber/i,
@@ -653,10 +653,10 @@ window.bmV2cExportFeedback = function() {
       coffee:      /coffee|kahve|espresso|mocha/i,
       chamomile:   /chamomile|papatya/i,
       salt:        /\b(salt|kosher|gose)\b|\btuz(?!\w)/i,
-      spice:       /coriander|cinnamon|nutmeg|muskat|clove|ginger|cardamom|kakule|allspice|yenibahar|kişniş|kisnis|tarcin|tarçın|karanfil|zencefil|baharatlar|baharat|herbs|rosemary|biberiye|mint|nane|lavender|lavanta|hibiscus|hibiskus|elderflower|mürver|murver|jasmine|yasemin|matcha|juniper|ardic|ardıç|vanilla|vanilya|gül|gul|ihlamur|sumak|sumac/i,
+      spice:       /coriander|cinnamon|nutmeg|muskat|clove|ginger|cardamom|kakule|allspice|yenibahar|kişniş|kisnis|tarcin|tarçın|karanfil|zencefil|baharatlar|baharat|herbs|rosemary|biberiye|mint|nane|lavender|lavanta|hibiscus|hibiskus|elderflower|mürver|murver|jasmine|yasemin|matcha|juniper|ardic|ardıç|vanilla|vanilya|gül|gul|ihlamur|sumak|sumac|kekik|thyme|adaçayı|adacayi|sage|defne|bay\s*leaf|bay-leaf/i,
       chili:       /chile|chili|jalape|habane|pepper|biber/i,
       smoke:       /smoke|smoked|rauch|isli|islı|tütsü|tutsu/i,
-      fruit:       /meyve|fruit|mango|passion|seftali|peach|strawberry|cilek|çilek|raspberry|ahududu|frambuaz|cherry|kiraz|visne|vişne|apple|elma|pear|armut|uzum|üzüm|grape|orange|portakal|lemon|limon|lime|cranberry|pomegranate|nar|blueberry|ananas|pineapple|karpuz|karadut|dut|kayisi|kayısı|apricot|hindistan|coconut|greyfurt|grapefruit|kestane/i
+      fruit:       /meyve|fruit|mango|passion|seftali|peach|strawberry|cilek|çilek|raspberry|ahududu|frambuaz|cherry|kiraz|visne|vişne|apple|elma|pear|armut|uzum|üzüm|grape|orange|portakal|lemon|limon|lime|cranberry|pomegranate|nar|blueberry|ananas|pineapple|karpuz|karadut|dut|kayisi|kayısı|apricot|hindistan|coconut|greyfurt|grapefruit|kestane|bergamot|yuzu|cumquat|kumquat|kamkat|sudachi|kabosu|pomelo|saddok|şaddok|citrus|narenciye/i
     };
 
     function _flag(rx, str) { return rx.test(str || '') ? 1 : 0; }
