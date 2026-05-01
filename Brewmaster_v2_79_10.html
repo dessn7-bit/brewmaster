@@ -964,8 +964,8 @@ window.bmV2cExportFeedback = function() {
 })();
 </script>
 <script id="bm-engine-v6">
-// V6 — 17-cluster KNN motoru (Adım 61 P2 Adım 3)
-// Reference: _v6_reference.json (34000 × 56 unscaled, 17 cluster)
+// V6 — 14-cluster KNN motoru (Adım 61 P2 Adım 3)
+// Reference: _v6_reference.json (28000 × 56 unscaled, 14 cluster)
 // Scaler: _v6_scaler.json (StandardScaler mean+scale 56)
 // Meta: _v6_meta.json (features 56 + classes 17 + displayTR)
 // API: window.BM_V6.predictSync(uiRecipe) → top3 cluster + confidence + displayTR
@@ -985,16 +985,16 @@ window.bmV2cExportFeedback = function() {
       fetch(META_URL, {cache:'force-cache'}).then(r=>{if(!r.ok)throw new Error('V6 meta HTTP '+r.status);return r.json();})
     ]).then(function(arr){
       const ref = arr[0], sc = arr[1], me = arr[2];
-      cache.X = ref.X;          // 34000 × 56 unscaled
+      cache.X = ref.X;          // 28000 × 56 unscaled
       cache.y = ref.y;          // 34000 cluster labels
       cache.mean = sc.mean;     // 56 means
       cache.scale = sc.scale;   // 56 scales
       cache.K = sc.n_neighbors || 5;
       cache.weights = sc.weights || 'distance';
       cache.features = me.features;       // 56 ordered
-      cache.classes = me.classes;         // 17 cluster
+      cache.classes = me.classes;         // 14 cluster
       cache.displayTR = me.displayTR;     // {cluster: TR}
-      console.log('%c[BM V6] 17-cluster reference yüklendi: '+cache.X.length+' reçete × '+cache.features.length+' feature, K='+cache.K+' '+cache.weights, 'background:#1976D2;color:#fff;padding:2px 6px;');
+      console.log('%c[BM V6] 14-cluster reference yüklendi: '+cache.X.length+' reçete × '+cache.features.length+' feature, K='+cache.K+' '+cache.weights, 'background:#1976D2;color:#fff;padding:2px 6px;');
       return cache;
     }).catch(function(e){ console.warn('[BM V6] yüklenemedi:', e); loadingPromise=null; throw e; });
     return loadingPromise;
@@ -1034,7 +1034,7 @@ window.bmV2cExportFeedback = function() {
       xs[i] = (x[i] - cache.mean[i]) / s;
     }
     // Compute Euclidean distances to all 34000 references (scaled)
-    // Performance: 34000 × 56 = ~2M ops, ms-scale
+    // Performance: 28000 × 56 = ~2M ops, ms-scale
     var X = cache.X, y = cache.y, mean = cache.mean, scale = cache.scale;
     var nRef = X.length;
     var dists = new Float64Array(nRef);
@@ -1083,7 +1083,7 @@ window.bmV2cExportFeedback = function() {
     return {
       top3: top3,
       top1: top3[0],
-      _meta: { motor: 'V6_17cluster_KNN_K5', n_ref: nRef, K: K }
+      _meta: { motor: 'V6_14cluster_KNN_K5', n_ref: nRef, K: K }
     };
   }
 
@@ -13724,25 +13724,25 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
   // 5-fold CV (seed 42): top-1 78.5%  top-3 86.5%  top-5 87.3%
   // Holdout (840/260, seed 42): top-1 73.8%  top-3 80.8%  top-5 81.5%
   // RF YOK — geçmişte placeholder'dı, dürüstçe çıkartıldı
-  // V6 17-cluster + V12 dispatcher (Adım 5.5 hotfix — eski V6 1100 reçete kaldırıldı, yeni V6 aktif)
+  // V6 14-cluster + V12 dispatcher (Adım 5.5 hotfix — eski V6 1100 reçete kaldırıldı, yeni V6 aktif)
   var __top3V6_engine = null;
   var __v6_meta = null;
 
-  // === V6 17-cluster KNN dispatcher (Adım 5.5) ===
+  // === V6 14-cluster KNN dispatcher (Adım 5.5) ===
   try {
     if (window.BM_V6 && window.BM_V6.isReady() && typeof __recipeV2 !== 'undefined') {
       var __v6Result = window.BM_V6.predictSync(__recipeV2);
       if (__v6Result) {
         // V6 cluster sonucu — UI bilgi şeridi için ayrı global tutulur
         window.__lastV6ClusterResult = __v6Result;
-        console.log('%c[BM V6 17-cluster] KNN K=5 weighted distance (34000 reçete, 56 feature, CV t1=0.5588)', 'background:#1976D2;color:#fff;padding:2px 6px;');
+        console.log('%c[BM V6 14-cluster] KNN K=5 weighted distance (28000 reçete, 56 feature, CV t1=0.5823)', 'background:#1976D2;color:#fff;padding:2px 6px;');
         __v6Result.top3.forEach(function(r,i){ console.log('    cluster '+(i+1)+'. '+r.displayTR+' %'+r.confidence); });
       }
     } else if (window.BM_V6 && !window.BM_V6.isReady()) {
       // V6 fetch henüz tamam değil — auto-load zaten devam ediyor
       window.__lastV6ClusterResult = null;
     }
-  } catch(e) { console.warn('[BM V6 17-cluster] motor hatasi:', e && e.message); }
+  } catch(e) { console.warn('[BM V6 14-cluster] motor hatasi:', e && e.message); }
 
   // === V12 (V19) dispatcher (Adım 5.5: eski V6 guard'ından decouple, bağımsız try) ===
   try {
@@ -14201,7 +14201,7 @@ return `
       <div style="height:6px;background:${renk_hex}"></div>
       <div style="padding:14px">
         ${(()=>{
-          // V6 17-cluster cluster bilgi şeridi (Adım 5.5)
+          // V6 14-cluster cluster bilgi şeridi (Adım 5.5)
           var _v6 = (typeof window!=='undefined' && window.__lastV6ClusterResult) ? window.__lastV6ClusterResult : null;
           if (!_v6 || !_v6.top1) return '';
           var _t1 = _v6.top1;
