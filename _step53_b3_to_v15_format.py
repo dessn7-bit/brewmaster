@@ -102,7 +102,9 @@ BRETT_RE = re.compile(
     # Adım 54 Faz 2: kelime varyasyonları + commercial blend + brewery process
     r'brett(anomyces|y|ish|ed)?\b|'  # brett, brettanomyces, bretty, brettish, bretted (kelime sınırı kalktı)
     r'\bwlp\s*0?(644|645|648|650|651|652|653|654|655|656|660|665|670|671|672|4639)\b|'
-    r'\bwy?\s*0?5(112|151|526|512|733|378)\b|'
+    # Adim 18c-1c-2 (2026-05-03): wy? prefix fix (wyeast XXXX) + bare numeric
+    r'\b(?:wyeast|wy)\s*[\#\.]?\s*0?5(112|151|526|512|733|378)\b|'
+    r'\b5(112|151|526|512|733|378)\b|'
     r'bruxellensis|lambicus|drie|trois|clausenii|'
     r'\bwild\s*(ale|yeast|fermentation|brew)\b|'
     r'wildbrew\s*sour|philly\s*sour|lallemand\s*wild|omega\s*(?:yeast\s*)?(?:cosmic|saisonstein|hothead)|'
@@ -112,7 +114,9 @@ BRETT_RE = re.compile(
     re.IGNORECASE)
 LACTO_RE = re.compile(
     r'\blacto(bacillus)?\b|\bwlp\s*0?(67[127]|693|672|6727|677)\b|'
-    r'\bwy?\s*0?5(335|223|424)\b|'
+    # Adim 18c-1c-2 (2026-05-03): wy? prefix fix + bare numeric (5223/5424 düşük FP, 5335 kombo only)
+    r'\b(?:wyeast|wy)\s*[\#\.]?\s*0?5(335|223|424)\b|'
+    r'\b5(223|424)\b|'
     # Adim 18c-1 (2026-05-03): Philly Sour Lacto-Brett Saccharomyces hibrit
     r'philly\s*sour',
     re.IGNORECASE)
@@ -120,7 +124,8 @@ PEDIO_RE = re.compile(r'\bpedio(coccus)?\b|\bwlp\s*0?661\b|damnosus', re.IGNOREC
 CLEAN_NEUTRAL_RE = re.compile(
     r'\bus[\s-]?05\b|\bs[\s-]?04\b|\b(safale|safbrew|nottingham|windsor|bry[\s-]?97)\b|'
     r'\bwlp\s*0?(001|002|005|007|008|029|051|060|095|099)\b|'
-    r'\bwy?\s*0?(1056|1968|1318|1098|1272|1275)\b', re.IGNORECASE)
+    # Adim 18c-1c-2: wy? prefix fix
+    r'\b(?:wyeast|wy)\s*[\#\.]?\s*0?(1056|1968|1318|1098|1272|1275)\b', re.IGNORECASE)
 
 
 # ── Calculation helpers ──
@@ -215,33 +220,38 @@ def compute_features(core, ferm_list, hop_list, yeast_list, misc_list):
     # Yeast — Adim 18c-1 (2026-05-03): 18 yeast pattern duzeltme
     feats['yeast_belgian'] = 1 if (any(p in yeast_str for p in BELGIAN_YEAST_PATTERNS) or
         re.search(r'belgian\s*(saison|ale|abbey|trappist|tripel|dubbel|witbier|lambic|farmhouse)|imperial\s*b[\s\-]?\d+', yeast_str)) else 0
-    feats['yeast_abbey'] = 1 if (any(s in yeast_str for s in ('abbey', 'trappist', '1762', '1214', '3787', 'wlp500', 'wlp530', 'wlp540', 'wlp575')) or
-        re.search(r'abbaye|wyeast?\s*0?3789', yeast_str)) else 0
-    feats['yeast_saison'] = 1 if re.search(r'saison|sasion|farmhouse|wallonia(n)?|saisonstein|saisonette|seizon|hommage|bugfarm|\b(3711|3724|3725|3726)\b|wlp\s*0?(565|566|568|590|585|670)|wy?\s*0?(3724|3711|3725|3726)', yeast_str) else 0
+    # Adim 18c-1c-2: bare numeric (1762/1214/3787) cikar (FP riski), wlp 5xx bosluklu varyant ekle, wyeast prefix kombo
+    feats['yeast_abbey'] = 1 if (any(s in yeast_str for s in ('abbey', 'trappist', 'wlp500', 'wlp 500', 'wlp530', 'wlp 530', 'wlp540', 'wlp 540', 'wlp575', 'wlp 575')) or
+        re.search(r'abbaye|\b(?:wyeast|wy)\s*[\#\.]?\s*0?(1214|1762|3787|3789)\b', yeast_str)) else 0
+    # Adim 18c-1c-2: wy? prefix fix
+    feats['yeast_saison'] = 1 if re.search(r'saison|sasion|farmhouse|wallonia(n)?|saisonstein|saisonette|seizon|hommage|bugfarm|\b(3711|3724|3725|3726)\b|wlp\s*0?(565|566|568|590|585|670)\b|\b(?:wyeast|wy)\s*[\#\.]?\s*0?(3724|3711|3725|3726)\b', yeast_str) else 0
     feats['yeast_kveik'] = 1 if re.search(r'\bkveik\b|voss|hornindal|lida|laerdal|aurland|stranda|granvin|sigmund|ebbegarden|opshaug|midtbust|gjernes', yeast_str) else 0
-    feats['yeast_english'] = 1 if re.search(r'\bwlp\s*0?(002|005|007|013|023|029)|\bwy?\s*0?(1098|1318|1968|1275)|english ale', yeast_str) else 0
+    # Adim 18c-1c-2: wy? prefix fix + bare 1098 (düşük FP); 1318/1968/1275 kombo only (yüksek FP)
+    feats['yeast_english'] = 1 if re.search(r'\bwlp\s*0?(002|005|007|013|023|029)\b|\b(?:wyeast|wy)\s*[\#\.]?\s*0?(1098|1318|1968|1275)\b|\b1098\b|english\s+ale', yeast_str) else 0
     feats['yeast_american'] = 1 if any(p in yeast_str for p in CLEAN_US05_PATTERNS) else 0
-    # Adim 18c-1c-1 (2026-05-03): bock cluster lager pattern KONSERVATIF (FP %10 hedefi)
+    # Adim 18c-1c-1 + 18c-1c-2 (2026-05-03): KONSERVATIF + Düzeltme 1+2 (WLP 800/802 grup, czech budejovice, pilsner/urquell, parantez içi lager kombo)
     feats['yeast_german_lager'] = 1 if re.search(
-        r'\bw-?34/70|\bs-?23\b|\bs-?189|2124 bohemian|2206 bavarian|wlp830 german|wlp838 southern|wlp802|wlp840|'
+        r'\bw-?34/70|\bs-?23\b|\bs-?189|2124 bohemian|2206 bavarian|'
         r'saflager|'
-        r'wlp\s*0?(820|830|833|835|838|840|850|860|885|940)\b|'
+        r'wlp\s*0?(800|802|820|830|833|835|838|840|850|860|885|940)\b|'
         r'\b(2001|2002|2007|2042|2112|2124|2206|2247|2272|2278|2308|2487|2633)\b|'
         r'mangrove\s*jack.{0,30}(m\s*54|m\s*76|m\s*84)|'
         r'\b(m54|m76|m84)\s+(bavarian|munich|bohemian|lager)|'
         r'imperial\s*l\s*(13|17|28)\b|'
-        r'\b(bock|doppelbock|maibock|hella\s*bock|munich|vienna|bavarian|oktoberfest|festbier|maerzen|rauchbier|dortmund|helles|schwarzbier|dunkel|budvar|czech\s*pils|danish|zurich|brewferm|diamond)\s+(lager|yeast)',
+        r'\b(bock|doppelbock|maibock|hella\s*bock|munich|vienna|bavarian|oktoberfest|festbier|maerzen|rauchbier|dortmund|helles|schwarzbier|dunkel|budvar|czech\s+(?:pils|budejovice)|pilsner|urquell|original\s*pilsner|danish|zurich|brewferm|diamond)(?:\s+(lager|yeast)|\s*\([^)]*lager)',
         yeast_str) else 0
-    feats['yeast_czech_lager'] = 1 if re.search(r'\bwy?\s*0?(2278|2272)|wlp802|bohemian', yeast_str) else 0
-    feats['yeast_american_lager'] = 1 if re.search(r'\bwlp840|2007 pilsen|wy?2007', yeast_str) else 0
-    feats['yeast_kolsch'] = 1 if re.search(r'k[oö]lsch|kolsch|wlp003|wlp029|wy?2565', yeast_str) else 0
-    feats['yeast_altbier'] = 1 if re.search(r'altbier|wlp036|wy?1338', yeast_str) else 0
-    feats['yeast_cal_common'] = 1 if re.search(r'california\s+lager|wlp810|wy?2112', yeast_str) else 0
+    # Adim 18c-1c-2: wy? prefix fix + bare numeric (düşük FP) / kombo only (yüksek FP)
+    feats['yeast_czech_lager'] = 1 if re.search(r'\b(?:wyeast|wy)\s*[\#\.]?\s*0?(2278|2272)\b|\b2278\b|wlp\s*0?802\b|bohemian', yeast_str) else 0
+    feats['yeast_american_lager'] = 1 if re.search(r'wlp\s*0?840\b|2007\s+pilsen|\b(?:wyeast|wy)\s*[\#\.]?\s*0?2007\b', yeast_str) else 0
+    feats['yeast_kolsch'] = 1 if re.search(r'k[oö]lsch|kolsch|wlp\s*0?(003|029)\b|\b(?:wyeast|wy)\s*[\#\.]?\s*0?2565\b|\b2565\b', yeast_str) else 0
+    feats['yeast_altbier'] = 1 if re.search(r'altbier|wlp\s*0?036\b|\b(?:wyeast|wy)\s*[\#\.]?\s*0?1338\b|\b1338\b', yeast_str) else 0
+    feats['yeast_cal_common'] = 1 if re.search(r'california\s+lager|wlp\s*0?810\b|\b(?:wyeast|wy)\s*[\#\.]?\s*0?2112\b|\b2112\b', yeast_str) else 0
     feats['yeast_brett'] = 1 if BRETT_RE.search(yeast_str) else 0
     feats['yeast_lacto'] = 1 if LACTO_RE.search(yeast_str) else 0
     feats['yeast_sour_blend'] = 1 if re.search(r'sour\s*blend|mixed\s*culture|wildbrew\s*sour|sour\s*pitch|amalgamation|wild\s*ale\s*blend|the\s*funk|barrel\s*blend', yeast_str) else 0
-    feats['yeast_witbier'] = 1 if re.search(r'witbier|wlp\s*0?40[01]|wy?3944|hoegaarden|wit\s*ale|wit\s*yeast', yeast_str) else 0
-    feats['yeast_wheat_german'] = 1 if re.search(r'weihenstephan|wlp300|wlp380|wy?3068|wb[\s\-]?06|hefeweizen|munich\s*wheat', yeast_str) else 0
+    # Adim 18c-1c-2: wy? prefix fix + bare numeric
+    feats['yeast_witbier'] = 1 if re.search(r'witbier|wlp\s*0?40[01]\b|\b(?:wyeast|wy)\s*[\#\.]?\s*0?3944\b|\b3944\b|hoegaarden|wit\s*ale|wit\s*yeast', yeast_str) else 0
+    feats['yeast_wheat_german'] = 1 if re.search(r'weihenstephan|wlp\s*0?(300|380)\b|\b(?:wyeast|wy)\s*[\#\.]?\s*0?3068\b|\b3068\b|wb[\s\-]?06|hefeweizen|munich\s*wheat', yeast_str) else 0
     feats['yeast_wit'] = feats['yeast_witbier']
 
     # Hops
