@@ -442,6 +442,97 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
   console.log('[BM_ENGINE] yuklendi:', Object.keys(__BM_DEFS).length, 'stil,', Object.keys(__BM_FAMS.familyMap||{}).length, 'aile etiketi');
 })();
 
+// ═══════════════════════════════════════════════════════════════════════════
+// FAZ 3 — Feedback Loop (Kaan stil override + log)
+// localStorage anahtarı: bm_v2c_feedback
+// Her kayıt: {ts, recipeSig, oldTop1, correctSlug, correctLabel, recipeName}
+// ═══════════════════════════════════════════════════════════════════════════
+
+// ── 2026-04-25 seed: Kaan'in canlida gordugu 2 yanlis tahmin (idempotent, tek seferlik) ──
+(function bmV2cSeed_20260425(){
+  try {
+    if (localStorage.getItem('bm_v2c_seed_2026_04_25')) return;
+    const log = JSON.parse(localStorage.getItem('bm_v2c_feedback')||'[]');
+    const seedTs = Date.parse('2026-04-25T08:00:00');
+    log.push({
+      ts: seedTs,
+      recipeSig: 'Dark Belgian Dubbel_1.062_6.6',
+      oldTop1: 'Witbier',
+      correctSlug: 'belgian_dubbel',
+      correctLabel: 'Belgian Dubbel',
+      _note: 'OG 1.062 FG 1.012 SRM 38 IBU 16 ABV 6.62% maya BB Abbaye. V5 top-3: Witbier/Biere de Garde/Vienna Lager. SRM 38 Witbier olamaz (2-4), Vienna ale mayasiyla olmaz.'
+    });
+    log.push({
+      ts: seedTs + 1000,
+      recipeSig: 'test_1.061_6.0',
+      oldTop1: 'Hoppy Hefeweizen',
+      correctSlug: 'south_german_hefeweizen',
+      correctLabel: 'South German Hefeweizen',
+      _note: 'OG 1.061 FG 1.016 SRM ~5 IBU 28 maya BB Alman Bugday. V5 top-3: Hoppy Hefeweizen/Witbier/Biere de Garde. Doru: Hefeweizen veya Witbier.'
+    });
+    localStorage.setItem('bm_v2c_feedback', JSON.stringify(log));
+    localStorage.setItem('bm_v2c_seed_2026_04_25', '1');
+    console.log('%c[V2c Seed 2026-04-25] 2 feedback eklendi', 'background:#C88A13;color:#fff;padding:2px 6px');
+  } catch(e) { console.warn('V2c seed hata:', e); }
+})();
+
+window.bmV2cFeedback = function(slug, label, recipeSig, oldTop1, btn) {
+  try {
+    const log = JSON.parse(localStorage.getItem('bm_v2c_feedback')||'[]');
+    const motorVersion = (window.BM_V85 && window.BM_V85.getMotor()) || 'V6';
+    const entry = { ts: Date.now(), recipeSig, oldTop1, correctSlug: slug, correctLabel: label, motorVersion: motorVersion };
+    log.push(entry);
+    localStorage.setItem('bm_v2c_feedback', JSON.stringify(log));
+    if (btn) { btn.innerHTML = '✓'; btn.style.background = '#5A8F3E'; btn.title = 'Kaydedildi'; btn.disabled = true; }
+    console.log('%c[V2c Feedback] kaydedildi:', 'background:#5A8F3E;color:#fff;padding:2px 6px', entry);
+    if (typeof alertUI === 'function') alertUI({ tip:'basari', mesaj:'Düzeltme kaydedildi ('+motorVersion+'): ' + label });
+    // Firebase'e push (sync varsa) — log batch'i tek bir array olarak gönderilir
+    try {
+      if (typeof syncCfg !== 'undefined' && syncCfg && typeof syncUrl === 'function' && syncUrl()) {
+        const fbUrl = syncUrl().replace(/\.json$/, '/feedback.json');
+        fetch(fbUrl, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(entry) })
+          .then(function(r){ if(r.ok) console.log('[V2c Feedback] Firebase push ok'); })
+          .catch(function(e){ console.warn('[V2c Feedback] Firebase push fail (kayıt zaten LS\'de):', e && e.message); });
+      }
+    } catch(fbErr) { /* sync yoksa sessizce geç */ }
+  } catch(e) { console.warn('V2c feedback error:', e); }
+};
+
+window.bmV2cFeedbackOther = function(recipeSig, oldTop1) {
+  const input = prompt('Doğru stil adı/slug? (Ör: south_german_hefeweizen, american_pale_ale)');
+  if (!input) return;
+  const slug = input.trim().toLowerCase().replace(/\s+/g,'_');
+  window.bmV2cFeedback(slug, input.trim(), recipeSig, oldTop1, null);
+  alert('Kaydedildi: ' + input);
+};
+
+window.bmV2cShowFeedback = function() {
+  try {
+    const log = JSON.parse(localStorage.getItem('bm_v2c_feedback')||'[]');
+    console.log('%c[V2c Feedback Log] '+log.length+' düzeltme', 'background:#C88A13;color:#fff;padding:2px 6px');
+    console.table(log.map(e => ({
+      tarih: new Date(e.ts).toLocaleDateString('tr-TR'),
+      reçete: e.recipeSig,
+      eski_öneri: e.oldTop1,
+      düzeltme: e.correctLabel
+    })));
+    // Kopya için JSON dump
+    console.log('Export JSON:', JSON.stringify(log, null, 2));
+    alert(log.length + ' düzeltme var. Console\'a yazdım.');
+  } catch(e) { console.warn(e); }
+};
+
+window.bmV2cExportFeedback = function() {
+  try {
+    const log = localStorage.getItem('bm_v2c_feedback')||'[]';
+    const blob = new Blob([log], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'bm_v2c_feedback_'+Date.now()+'.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch(e) { console.warn(e); }
+};
 </script>
 <!-- ═══════════════════════════════════════════════════════════════════════════
      V8.5 CANARY MOTOR (Adım 43) — XGBoost 14cat, 5847 reçete training
@@ -14193,6 +14284,10 @@ return `
           const _inABV=!_stRef.abv||(_abvR>=_stRef.abv[0]&&_abvR<=_stRef.abv[1]);
           const _all=_inOG&&_inIBU&&_inSRM&&_inABV;
           const _icon=s=>s?'✅':'⚠️';
+          // Feedback count
+          var _fbCount=0, _lastFb=null;
+          try { var _log=JSON.parse(localStorage.getItem('bm_v2c_feedback')||'[]'); _fbCount=_log.length; _lastFb=_log[_log.length-1]; } catch(e){}
+          var _recipeSig = (S.ad||'recipe')+'_'+(_og||0).toFixed(3)+'_'+(_abv||0).toFixed(1);
           // V5 varsa V5 top-3, yoksa rule-based fallback
           var _barSource = _v5TopBjcp
             ? _v5TopBjcp.map(function(x){ return { nm: x.bjcp, pct: x.normalized, slug: x.slug, displayTR: x.displayTR }; })
@@ -14200,6 +14295,7 @@ return `
                 var mp=(_hibritSorted.length > 0 ? _hibritSorted : _stilSorted)[0][1]||1;
                 return { nm: s[0], pct: Math.round(s[1]/mp*100), slug: s[0], displayTR: s[0] };
               });
+          var _v5Top1Name = _v5TopBjcp ? _v5TopBjcp[0].displayTR : (_barSource[0] ? _barSource[0].nm : '');
           return '<div style="background:var(--card);border:1px solid var(--bor);border-left:3px solid '+(_all?'var(--yk)':'var(--sk)')+';border-radius:6px;padding:6px 9px;margin-top:6px;font-size:10px">'+
             '<div style="margin-bottom:6px;display:flex;flex-wrap:wrap;gap:4px;align-items:center">'+
             _barSource.map(function(s,i){
@@ -14207,6 +14303,8 @@ return `
               var bg=i===0?'var(--bakir)':i===1?'var(--altin)':'var(--dim)';
               var opacity=i===0?'1':i===1?'.75':'.55';
               var safeNm=String(nm).replace(/\\x27/g,"\\\\\\x27").replace(/"/g,'&quot;');
+              var safeSlug=String(s.slug||nm).replace(/'/g,"\\'");
+              var safeDisp=String(s.displayTR||nm).replace(/'/g,"\\'");
               var seciliMi=S.stil===nm;
               var _crossFamily = (typeof _v5CrossFlags !== 'undefined' && _v5CrossFlags[i]);
               var _crossBadge = _crossFamily
@@ -14220,8 +14318,10 @@ return `
                   +_crossBadge
                   +'<div style="width:'+Math.round(pct*0.4)+'px;height:4px;background:'+bg+';border-radius:2px;opacity:'+opacity+'"></div>'
                 +'</button>'
+                + (_v5TopBjcp ? '<button onclick="bmV2cFeedback(\''+safeSlug+'\',\''+safeDisp+'\',\''+_recipeSig+'\',\''+_v5Top1Name.replace(/\'/g,"\\\'")+'\',this)" style="font-size:9px;background:#C88A13;color:#fff;border:none;padding:1px 4px;border-radius:3px;cursor:pointer;line-height:1" title="Bu stil doğru">✓</button>' : '')
                 +'</span>';
             }).join('')+
+            (_v5TopBjcp ? '<button onclick="bmV2cFeedbackOther(\''+_recipeSig+'\',\''+_v5Top1Name.replace(/\'/g,"\\\'")+'\')" style="font-size:9px;background:#F5E9C6;color:#6B4A0D;border:1px solid #C88A13;padding:2px 6px;border-radius:4px;cursor:pointer;margin-left:2px" title="Hiçbiri doğru değil">✏️ düzelt</button>' : '')+
           '</div>'+
           '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;margin-bottom:4px;flex-wrap:wrap;gap:4px">'+
             '<span style="font-weight:700;color:var(--kahve);font-size:11px">BJCP ('+_stKey+')</span>'+
@@ -14253,6 +14353,7 @@ return `
             var prefix = m==='V12' ? '⭐' : '⚠️';
             return '<div style="font-size:9px;color:'+color+';background:'+bgC+';border:1px solid '+color+';border-radius:4px;padding:3px 6px;margin-bottom:4px;line-height:1.3">'+prefix+' <b>'+lbl+'</b> — 14 ana kategori tahmini (slug yerine küme). BJCP karşılaştırması V6 stiliyle yapılır. Geri bildirim için ✓ butonlarını kullan.</div>';
           })() : '')+
+          (_lastFb && _v5TopBjcp ? '<div style="font-size:9px;color:#8A6A2E;margin-bottom:4px;font-style:italic">Son düzeltme: '+new Date(_lastFb.ts).toLocaleDateString('tr-TR')+' — motor <b>'+_lastFb.oldTop1+'</b> → sen <b>'+_lastFb.correctLabel+'</b></div>' : '')+
           '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;font-size:10px">'+
             '<div>'+_icon(_inOG)+' <b>OG:</b> '+_stRef.og[0].toFixed(3)+'-'+_stRef.og[1].toFixed(3)+'</div>'+
             '<div>'+_icon(_inIBU)+' <b>IBU:</b> '+_stRef.ibu[0]+'-'+_stRef.ibu[1]+'</div>'+
