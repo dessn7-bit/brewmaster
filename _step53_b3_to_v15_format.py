@@ -221,7 +221,17 @@ def compute_features(core, ferm_list, hop_list, yeast_list, misc_list):
     feats['yeast_kveik'] = 1 if re.search(r'\bkveik\b|voss|hornindal|lida|laerdal|aurland|stranda|granvin|sigmund|ebbegarden|opshaug|midtbust|gjernes', yeast_str) else 0
     feats['yeast_english'] = 1 if re.search(r'\bwlp\s*0?(002|005|007|013|023|029)|\bwy?\s*0?(1098|1318|1968|1275)|english ale', yeast_str) else 0
     feats['yeast_american'] = 1 if any(p in yeast_str for p in CLEAN_US05_PATTERNS) else 0
-    feats['yeast_german_lager'] = 1 if re.search(r'\bw-?34/70|\bs-?23\b|\bs-?189|2124 bohemian|2206 bavarian|wlp830 german|wlp838 southern|wlp802|wlp840', yeast_str) else 0
+    # Adim 18c-1c-1 (2026-05-03): bock cluster lager pattern KONSERVATIF (FP %10 hedefi)
+    feats['yeast_german_lager'] = 1 if re.search(
+        r'\bw-?34/70|\bs-?23\b|\bs-?189|2124 bohemian|2206 bavarian|wlp830 german|wlp838 southern|wlp802|wlp840|'
+        r'saflager|'
+        r'wlp\s*0?(820|830|833|835|838|840|850|860|885|940)\b|'
+        r'\b(2001|2002|2007|2042|2112|2124|2206|2247|2272|2278|2308|2487|2633)\b|'
+        r'mangrove\s*jack.{0,30}(m\s*54|m\s*76|m\s*84)|'
+        r'\b(m54|m76|m84)\s+(bavarian|munich|bohemian|lager)|'
+        r'imperial\s*l\s*(13|17|28)\b|'
+        r'\b(bock|doppelbock|maibock|hella\s*bock|munich|vienna|bavarian|oktoberfest|festbier|maerzen|rauchbier|dortmund|helles|schwarzbier|dunkel|budvar|czech\s*pils|danish|zurich|brewferm|diamond)\s+(lager|yeast)',
+        yeast_str) else 0
     feats['yeast_czech_lager'] = 1 if re.search(r'\bwy?\s*0?(2278|2272)|wlp802|bohemian', yeast_str) else 0
     feats['yeast_american_lager'] = 1 if re.search(r'\bwlp840|2007 pilsen|wy?2007', yeast_str) else 0
     feats['yeast_kolsch'] = 1 if re.search(r'k[oö]lsch|kolsch|wlp003|wlp029|wy?2565', yeast_str) else 0
