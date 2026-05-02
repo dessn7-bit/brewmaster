@@ -106,11 +106,16 @@ BRETT_RE = re.compile(
     r'bruxellensis|lambicus|drie|trois|clausenii|'
     r'\bwild\s*(ale|yeast|fermentation|brew)\b|'
     r'wildbrew\s*sour|philly\s*sour|lallemand\s*wild|omega\s*(?:yeast\s*)?(?:cosmic|saisonstein|hothead)|'
-    r'\bfoeder\b|funky|farmhouse\s*sour|barrel\s*(?:aged\s*)?sour',
+    r'\bfoeder\b|funky|farmhouse\s*sour|barrel\s*(?:aged\s*)?sour|'
+    # Adim 18c-1 (2026-05-03): commercial blend brand'leri ek
+    r'amalgamation|cosmic|hothead\s*ale|all\s*the\s*bretts|funkwerks|saisonstein',
     re.IGNORECASE)
 LACTO_RE = re.compile(
     r'\blacto(bacillus)?\b|\bwlp\s*0?(67[127]|693|672|6727|677)\b|'
-    r'\bwy?\s*0?5(335|223|424)\b', re.IGNORECASE)
+    r'\bwy?\s*0?5(335|223|424)\b|'
+    # Adim 18c-1 (2026-05-03): Philly Sour Lacto-Brett Saccharomyces hibrit
+    r'philly\s*sour',
+    re.IGNORECASE)
 PEDIO_RE = re.compile(r'\bpedio(coccus)?\b|\bwlp\s*0?661\b|damnosus', re.IGNORECASE)
 CLEAN_NEUTRAL_RE = re.compile(
     r'\bus[\s-]?05\b|\bs[\s-]?04\b|\b(safale|safbrew|nottingham|windsor|bry[\s-]?97)\b|'
@@ -207,24 +212,26 @@ def compute_features(core, ferm_list, hop_list, yeast_list, misc_list):
     feats = {f'pct_{k}': round(100 * v / total_kg, 2) for k, v in pct.items()}
     feats['total_base'] = round(total_kg * 2.20462, 2)
 
-    # Yeast
-    feats['yeast_belgian'] = 1 if any(p in yeast_str for p in BELGIAN_YEAST_PATTERNS) else 0
-    feats['yeast_abbey'] = 1 if any(s in yeast_str for s in ('abbey', 'trappist', '1762', '1214', '3787', 'wlp500', 'wlp530', 'wlp540', 'wlp575')) else 0
-    feats['yeast_saison'] = 1 if re.search(r'\bsaison\b|wlp\s*0?(565|566|568|590|585)|wy?\s*0?(3724|3711|3725|3726)', yeast_str) else 0
-    feats['yeast_kveik'] = 1 if re.search(r'\bkveik\b|voss|hornindal', yeast_str) else 0
+    # Yeast — Adim 18c-1 (2026-05-03): 18 yeast pattern duzeltme
+    feats['yeast_belgian'] = 1 if (any(p in yeast_str for p in BELGIAN_YEAST_PATTERNS) or
+        re.search(r'belgian\s*(saison|ale|abbey|trappist|tripel|dubbel|witbier|lambic|farmhouse)|imperial\s*b[\s\-]?\d+', yeast_str)) else 0
+    feats['yeast_abbey'] = 1 if (any(s in yeast_str for s in ('abbey', 'trappist', '1762', '1214', '3787', 'wlp500', 'wlp530', 'wlp540', 'wlp575')) or
+        re.search(r'abbaye|wyeast?\s*0?3789', yeast_str)) else 0
+    feats['yeast_saison'] = 1 if re.search(r'saison|sasion|farmhouse|wallonia(n)?|saisonstein|saisonette|seizon|hommage|bugfarm|\b(3711|3724|3725|3726)\b|wlp\s*0?(565|566|568|590|585|670)|wy?\s*0?(3724|3711|3725|3726)', yeast_str) else 0
+    feats['yeast_kveik'] = 1 if re.search(r'\bkveik\b|voss|hornindal|lida|laerdal|aurland|stranda|granvin|sigmund|ebbegarden|opshaug|midtbust|gjernes', yeast_str) else 0
     feats['yeast_english'] = 1 if re.search(r'\bwlp\s*0?(002|005|007|013|023|029)|\bwy?\s*0?(1098|1318|1968|1275)|english ale', yeast_str) else 0
     feats['yeast_american'] = 1 if any(p in yeast_str for p in CLEAN_US05_PATTERNS) else 0
     feats['yeast_german_lager'] = 1 if re.search(r'\bw-?34/70|\bs-?23\b|\bs-?189|2124 bohemian|2206 bavarian|wlp830 german|wlp838 southern|wlp802|wlp840', yeast_str) else 0
     feats['yeast_czech_lager'] = 1 if re.search(r'\bwy?\s*0?(2278|2272)|wlp802|bohemian', yeast_str) else 0
     feats['yeast_american_lager'] = 1 if re.search(r'\bwlp840|2007 pilsen|wy?2007', yeast_str) else 0
-    feats['yeast_kolsch'] = 1 if re.search(r'k[oö]lsch|kolsch|wlp029|wy?2565', yeast_str) else 0
+    feats['yeast_kolsch'] = 1 if re.search(r'k[oö]lsch|kolsch|wlp003|wlp029|wy?2565', yeast_str) else 0
     feats['yeast_altbier'] = 1 if re.search(r'altbier|wlp036|wy?1338', yeast_str) else 0
     feats['yeast_cal_common'] = 1 if re.search(r'california\s+lager|wlp810|wy?2112', yeast_str) else 0
     feats['yeast_brett'] = 1 if BRETT_RE.search(yeast_str) else 0
     feats['yeast_lacto'] = 1 if LACTO_RE.search(yeast_str) else 0
-    feats['yeast_sour_blend'] = 1 if re.search(r'sour\s*blend|mixed\s*culture|wildbrew\s*sour|sour\s*pitch', yeast_str) else 0
-    feats['yeast_witbier'] = 1 if re.search(r'witbier|wlp\s*0?40[01]|wy?3944', yeast_str) else 0
-    feats['yeast_wheat_german'] = 1 if re.search(r'weihenstephan|wlp300|wy?3068|wb-06', yeast_str) else 0
+    feats['yeast_sour_blend'] = 1 if re.search(r'sour\s*blend|mixed\s*culture|wildbrew\s*sour|sour\s*pitch|amalgamation|wild\s*ale\s*blend|the\s*funk|barrel\s*blend', yeast_str) else 0
+    feats['yeast_witbier'] = 1 if re.search(r'witbier|wlp\s*0?40[01]|wy?3944|hoegaarden|wit\s*ale|wit\s*yeast', yeast_str) else 0
+    feats['yeast_wheat_german'] = 1 if re.search(r'weihenstephan|wlp300|wlp380|wy?3068|wb[\s\-]?06|hefeweizen|munich\s*wheat', yeast_str) else 0
     feats['yeast_wit'] = feats['yeast_witbier']
 
     # Hops
