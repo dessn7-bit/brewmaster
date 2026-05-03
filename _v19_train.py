@@ -21,47 +21,72 @@ feat_list = data['meta']['feature_list']
 print(f'  V19: {len(recipes)} recipes, {len(feat_list)} features', flush=True)
 
 
+# Adim 18d-pre Sprint B (2026-05-04): V19 SLUG_TO_CLUSTER V6 ile hizalandi
+# Eski 16 cluster, yeni 14 cluster (cream/amber_ale/belgian/bitter/brown/mild/barleywine silindi)
+# V6 87 slug + 4 V19-only ekleme: cream_ale->pale_ale, golden_or_blonde_ale->pale_ale,
+# american_barleywine->strong_ale, sweet_stout_or_cream_stout->stout
 SLUG_TO_CLUSTER = {
-    'belgian_lambic': 'sour', 'oud_bruin': 'sour', 'berliner_weisse': 'sour',
-    'mixed_fermentation_sour_beer': 'sour', 'brett_beer': 'sour',
-    'fruit_beer': 'specialty', 'herb_and_spice_beer': 'specialty',
-    'winter_seasonal_beer': 'specialty', 'smoked_beer': 'specialty',
-    'specialty_beer': 'specialty', 'experimental_beer': 'specialty',
-    'american_india_pale_ale': 'ipa', 'double_ipa': 'ipa', 'black_ipa': 'ipa',
-    'juicy_or_hazy_india_pale_ale': 'ipa', 'british_india_pale_ale': 'ipa',
-    'irish_dry_stout': 'stout', 'sweet_stout': 'stout', 'sweet_stout_or_cream_stout': 'stout',
-    'oatmeal_stout': 'stout', 'stout': 'stout', 'american_imperial_stout': 'stout',
-    'brown_porter': 'porter', 'robust_porter': 'porter', 'baltic_porter': 'porter', 'porter': 'porter',
-    'american_pale_ale': 'pale_ale', 'english_pale_ale': 'pale_ale',
-    'american_amber_red_ale': 'pale_ale', 'american_strong_pale_ale': 'pale_ale',
-    'belgian_witbier': 'belgian', 'belgian_blonde_ale': 'belgian', 'belgian_dubbel': 'belgian',
-    'belgian_tripel': 'belgian', 'belgian_strong_dark_ale': 'belgian',
-    'belgian_strong_golden': 'belgian', 'belgian_quadrupel': 'belgian',
-    'french_belgian_saison': 'saison', 'specialty_saison': 'saison', 'french_biere_de_garde': 'saison',
-    'south_german_hefeweizen': 'wheat', 'south_german_dunkel_weizen': 'wheat',
-    'south_german_weizenbock': 'wheat', 'american_wheat_ale': 'wheat', 'german_rye_ale': 'wheat',
-    'american_lager': 'lager', 'german_pilsener': 'lager', 'pale_lager': 'lager',
-    'pre_prohibition_lager': 'lager', 'munich_helles': 'lager', 'munich_dunkel': 'lager',
-    'vienna_lager': 'lager', 'german_maerzen': 'lager', 'german_oktoberfest_festbier': 'lager',
-    'german_schwarzbier': 'lager', 'dortmunder_european_export': 'lager', 'kellerbier': 'lager',
-    'bamberg_maerzen_rauchbier': 'lager',
-    'german_bock': 'bock', 'german_doppelbock': 'bock', 'german_heller_bock_maibock': 'bock',
-    'dunkles_bock': 'bock',
-    'american_brown_ale': 'brown', 'brown_ale': 'brown',
-    'american_cream_ale': 'cream', 'cream_ale': 'cream', 'common_beer': 'cream',
-    'german_koelsch': 'cream', 'german_altbier': 'cream',
-    'mild': 'mild', 'irish_red_ale': 'mild',
-    'blonde_ale': 'cream', 'golden_or_blonde_ale': 'cream',
-    'ordinary_bitter': 'bitter', 'special_bitter_or_best_bitter': 'bitter',
-    'extra_special_bitter': 'bitter', 'scottish_export': 'bitter', 'scotch_ale_or_wee_heavy': 'bitter',
-    'old_ale': 'bitter',
-    'american_barley_wine_ale': 'barleywine', 'american_barleywine': 'barleywine',
-    'british_barley_wine_ale': 'barleywine',
-    'flanders_red_ale': 'sour', 'belgian_gueuze': 'sour',
-    'belgian_fruit_lambic': 'sour', 'gose': 'sour',
-    'export_stout': 'stout',
-    'red_ipa': 'ipa', 'white_ipa': 'ipa', 'rye_ipa': 'ipa',
-    'belgian_ipa': 'belgian',
+    # CLUSTER 1: brown_ale (8 slug — V6 ile ayni)
+    'american_brown_ale':'brown_ale','mild':'brown_ale','brown_ale':'brown_ale',
+    'irish_red_ale':'brown_ale','scottish_export':'brown_ale',
+    'american_amber_red_ale':'brown_ale','german_altbier':'brown_ale',
+    'french_biere_de_garde':'brown_ale',
+    # CLUSTER 2: bock (4 slug)
+    'german_doppelbock':'bock','german_heller_bock_maibock':'bock',
+    'german_bock':'bock','dunkles_bock':'bock',
+    # CLUSTER 3: ipa (9 slug, +belgian_ipa)
+    'american_india_pale_ale':'ipa','double_ipa':'ipa',
+    'british_india_pale_ale':'ipa','black_ipa':'ipa','white_ipa':'ipa',
+    'red_ipa':'ipa','rye_ipa':'ipa','juicy_or_hazy_india_pale_ale':'ipa',
+    'belgian_ipa':'ipa',
+    # CLUSTER 4: lager (10 slug)
+    'american_lager':'lager','german_maerzen':'lager','common_beer':'lager',
+    'vienna_lager':'lager','munich_helles':'lager','pale_lager':'lager',
+    'dortmunder_european_export':'lager','bamberg_maerzen_rauchbier':'lager',
+    'kellerbier':'lager','german_oktoberfest_festbier':'lager',
+    # CLUSTER 5: lager_dark (2 slug)
+    'german_schwarzbier':'lager_dark','munich_dunkel':'lager_dark',
+    # CLUSTER 6: pale_ale (8 slug + 2 V19-only) - cream + bitter ailesi V6
+    'american_pale_ale':'pale_ale','english_pale_ale':'pale_ale',
+    'blonde_ale':'pale_ale','american_cream_ale':'pale_ale',
+    'german_koelsch':'pale_ale','extra_special_bitter':'pale_ale',
+    'special_bitter_or_best_bitter':'pale_ale','ordinary_bitter':'pale_ale',
+    # V19-only (V6'da yok) — pale_ale'a yonlendir (Sprint B karar)
+    'cream_ale':'pale_ale','golden_or_blonde_ale':'pale_ale',
+    # CLUSTER 7: pilsner (2 slug)
+    'german_pilsener':'pilsner','pre_prohibition_lager':'pilsner',
+    # CLUSTER 8: porter (4 slug)
+    'robust_porter':'porter','brown_porter':'porter',
+    'baltic_porter':'porter','porter':'porter',
+    # CLUSTER 9: saison (2 slug — V6'da french_biere_de_garde brown_ale'a tasindi)
+    'french_belgian_saison':'saison','specialty_saison':'saison',
+    # CLUSTER 10: sour (9 slug)
+    'berliner_weisse':'sour','flanders_red_ale':'sour','belgian_lambic':'sour',
+    'belgian_fruit_lambic':'sour','oud_bruin':'sour',
+    'mixed_fermentation_sour_beer':'sour','gose':'sour',
+    'belgian_gueuze':'sour','brett_beer':'sour',
+    # CLUSTER 11: specialty (6 slug)
+    'specialty_beer':'specialty','herb_and_spice_beer':'specialty',
+    'fruit_beer':'specialty','winter_seasonal_beer':'specialty',
+    'smoked_beer':'specialty','experimental_beer':'specialty',
+    # CLUSTER 12: stout (6 slug + 1 V19-only)
+    'american_imperial_stout':'stout','stout':'stout','oatmeal_stout':'stout',
+    'sweet_stout':'stout','irish_dry_stout':'stout','export_stout':'stout',
+    # V19-only — stout'a yonlendir
+    'sweet_stout_or_cream_stout':'stout',
+    # CLUSTER 13: strong_ale (11 slug + 1 V19-only — Belgian + barleywine + scotch_ale + old_ale)
+    'belgian_tripel':'strong_ale','belgian_strong_dark_ale':'strong_ale',
+    'american_barley_wine_ale':'strong_ale','scotch_ale_or_wee_heavy':'strong_ale',
+    'belgian_strong_golden':'strong_ale','old_ale':'strong_ale',
+    'british_barley_wine_ale':'strong_ale','american_strong_pale_ale':'strong_ale',
+    'belgian_quadrupel':'strong_ale','belgian_blonde_ale':'strong_ale',
+    'belgian_dubbel':'strong_ale',
+    # V19-only — strong_ale'a yonlendir
+    'american_barleywine':'strong_ale',
+    # CLUSTER 14: wheat (6 slug + belgian_witbier)
+    'american_wheat_ale':'wheat','south_german_hefeweizen':'wheat',
+    'south_german_dunkel_weizen':'wheat','south_german_weizenbock':'wheat',
+    'german_rye_ale':'wheat','belgian_witbier':'wheat',
 }
 
 print(f'[2] Compute bjcp_main_category...', flush=True)

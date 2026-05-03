@@ -423,6 +423,20 @@ Bilincli kayit: V6 reference V21 mirasi -> Adim 18c-1c-5f
 Bilincli kayit: V2c yeast okumuyor -> Adim 18c-1c-5g
 Bilincli kayit: 12 numara Wyeast audit -> Adim 18c-1c-5e
 
+V28c (Adim 18d-pre Sprint A, K1 yeast_saison pattern guncelleme):
+sha256: 2659bbbea28834182a6930d95eff25c1c252264f94ce8254c4f680ef67fb30b4
+Boyut: 1267.4 MB
+Recete: 376845
+Kapsam: V28b + 102 yeast_saison 0->1 (BE-134/BE-256/M29/Lalbrew Farmhouse)
+Parser commit: 6a8e1d7
+
+V19 SLUG_TO_CLUSTER V6 ile hizalandi (Adim 18d-pre Sprint B 2026-05-04):
+Eski 16 cluster (cream/amber_ale/belgian/bitter/brown/mild/barleywine), yeni 14 cluster.
+French_biere_de_garde saison -> brown_ale tasindi.
+4 V19-only slug yonlendirme: cream_ale->pale_ale, golden_or_blonde_ale->pale_ale,
+american_barleywine->strong_ale, sweet_stout_or_cream_stout->stout.
+Atif: working/_step60a_v19_v6_mapping_diff.json (32 farkli mapping tablosu).
+
 V28b production deploy (Adim 59, commit 73daae9):
 HTML: Brewmaster_v2_79_11.html (URL: https://dessn7-bit.github.io/brewmaster/Brewmaster_v2_79_11.html)
 sha256 V28b dataset post-meta: 8359f033338e9aeb399850b72e202f9e70577a1639a87f81d3dde75bf820ae8a
