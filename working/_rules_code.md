@@ -326,7 +326,23 @@ Sprint sonunda tek seferde 82 hata listesi çıkarılamaz. İteratif zorlama ger
 
 ---
 
+## Dataset Baseline Kayitlari
+
+V27 (Adim 18c-1c-5 Asama 3, commit 6c93aeb):
+sha256: 8c2d132d1913a57203040a98c9ef1ceebc2e18ce771b0f233718e1215c12442d
+Boyut: 1267.4 MB
+Recete: 376845
+
+V28a (Adim 18c-1c-5d C1 izole, commit edilmedi):
+sha256: 5dfcc4ccecac8bb3d250f5a4f552b39a2d0fd475a582fb98993507f1824cf301
+Boyut: 1267.4 MB (V27'den 126 byte farkli)
+Recete: 376845
+Kapsam: C1 Wyeast 2272 izole (3 feature, 8 recete etkilendi)
+
+---
+
 ## Versiyon
 
 - v1 (2026-05-04): İlk taslak. 82 hatadan çıkarılan 10 bölüm, 38 kural. Tablo 82/82 hata atıflı (Hata 25 6.1'e bağlandı).
 - v2 (2026-05-04 — AŞAMA C başlangıcı): Hipotez iptal kayıt bölümü eklendi. Hata 22 (Wyeast 3056 Brett blend) iptal — Wyeast resmi kaynak Saccharomyces saf blend doğrulamasıyla. Bölüm 9 Kural 1 (memory verify) ve Bölüm 3 Kural 1 (kaynak URL etiketi) referansı pekiştirildi.
+- v2.1 (2026-05-04 — V28a build sonrası): Dataset Baseline Kayıtları bölümü eklendi (V27 + V28a sha256, boyut, reçete sayısı, etkilenen reçete kapsamı).
