@@ -336,6 +336,20 @@ Sprint sonunda tek seferde 82 hata listesi çıkarılamaz. İteratif zorlama ger
 
 ---
 
+## Anomali esik kalibrasyon notu
+
+V28a 8 etkilenen recete deneyiminde tasarlanan "cluster diff etkilenen disinda 100+ bayrak" esigi V28b 2827 etkilenen icin yanlis kalibre. ML retrain decision boundary kaymasi etki buyuklugu ile nonlineer artar.
+
+**Yeni rehber:** Cluster diff anomali kriteri etki orani VE transition yon dogrulamasi birlikte olmalidir. Sadece sayim yetersiz.
+
+- Etkilenen recete cluster diff orani: %5 ust sinir (V28b %4.4)
+- Etkilenmemis recete cluster diff orani: %3 ust sinir (V28b %1.5)
+- Top-N transition yon mantikli mi (yakin komsu cluster mi): hizli audit gerek
+
+**Atif:** V28b cluster diff incelemesi 03.05.2026.
+
+---
+
 ## Bolum 12 — Denetim ekrana yazma protokolu
 
 ### Kural 12.1 — Kritik blok odakli ekrana yazma
