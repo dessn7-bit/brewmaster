@@ -338,11 +338,22 @@ Sprint sonunda tek seferde 82 hata listesi çıkarılamaz. İteratif zorlama ger
 
 ## Bolum 12 — Denetim ekrana yazma protokolu
 
-### Kural 12.1 — Mesaj govdesinde tam kod blok zorunlu
+### Kural 12.1 — Kritik blok odakli ekrana yazma
 
-Build script veya kritik kod denetiminde Code, dosya icerigini Read tool sonucu olarak degil, mesaj govdesinde markdown code blok olarak satir numarali ekrana yazar. Hicbir satir atlanmaz. "Rutin" notu, "..." kisaltmasi yok. Yorum satirlari dahil.
+Build script veya kritik kod denetiminde Code, KRITIK MANTIK BLOKLARINI mesaj govdesinde markdown code blok olarak satir numarali ekrana yazar.
 
-**Atif:** V28a + V28b_C2 denetim eksikligi 03.05.2026.
+**Kritik bloklar:**
+- Default UNION/kopya tanimi
+- Targeted exception kosul ve uygulama
+- Drift guard sayim ve kontrol
+- Pattern regex tanimlari
+- Sha256 baseline kontrol
+
+**Kritik olmayan:** import, audit JSON yazimi, log print, baseline metric tanimi gibi rutin kisimlar Code'un raporuna guven olur, ekrana yazilmaz.
+
+Hicbir kritik satir atlanmaz, "..." kisaltmasi yok, yorum satirlari dahil. Token/uzunluk sinirinda tasma olursa Code mesaji bolup ardisik mesajlarda devam eder.
+
+**Atif:** V28a + V28b_C2 denetim protokolu uygulama deneyimi 03.05.2026.
 
 ---
 
