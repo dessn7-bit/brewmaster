@@ -326,6 +326,16 @@ Sprint sonunda tek seferde 82 hata listesi çıkarılamaz. İteratif zorlama ger
 
 ---
 
+## Bolum 11 — Cross-dataset lookup disiplini
+
+### Kural 11.1 — Cross-dataset lookup eslesme garantisi
+
+Cross-dataset lookup yontemi kullanirken (V6 reference ↔ V19 dataset, V21 ↔ V27 vb.) ID semasi ve tuple eslesme garantisi onceden dogrulanmalı. Eslesme orani %100'den dusukse "eslesmedi" kayit olarak raporlanmali, eslesen sonuclar dataset geneli icin temsili sayilmamali.
+
+**Atif:** Adim 18c-1c-5d Madde c v1 raporu yontem hatasi 03.05.2026.
+
+---
+
 ## Dataset Baseline Kayitlari
 
 V27 (Adim 18c-1c-5 Asama 3, commit 6c93aeb):
