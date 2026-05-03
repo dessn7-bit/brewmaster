@@ -1,0 +1,538 @@
+{
+  "meta": {
+    "sprint": "Adim 60b saison cluster no-saison-yeast detayli analiz",
+    "rule_refs": [
+      "KURAL 1.4",
+      "KURAL 4.4",
+      "KURAL 6.3"
+    ],
+    "cluster_mapping": "V19 SLUG_TO_CLUSTER",
+    "random_seed": 42
+  },
+  "sha256_check": {
+    "v28b": "8359f033338e9aeb399850b72e202f9e70577a1639a87f81d3dde75bf820ae8a"
+  },
+  "total_no_saison_yeast": 6526,
+  "slug_breakdown": {
+    "specialty_saison": 4309,
+    "french_belgian_saison": 1742,
+    "french_biere_de_garde": 475
+  },
+  "yeast_flag_distribution": {
+    "yeast_abbey": {
+      "count": 1661,
+      "pct": 25.5
+    },
+    "yeast_altbier": {
+      "count": 2,
+      "pct": 0.0
+    },
+    "yeast_american": {
+      "count": 374,
+      "pct": 5.7
+    },
+    "yeast_american_lager": {
+      "count": 8,
+      "pct": 0.1
+    },
+    "yeast_belgian": {
+      "count": 3418,
+      "pct": 52.4
+    },
+    "yeast_brett": {
+      "count": 533,
+      "pct": 8.2
+    },
+    "yeast_cal_common": {
+      "count": 34,
+      "pct": 0.5
+    },
+    "yeast_czech_lager": {
+      "count": 22,
+      "pct": 0.3
+    },
+    "yeast_english": {
+      "count": 274,
+      "pct": 4.2
+    },
+    "yeast_german_lager": {
+      "count": 86,
+      "pct": 1.3
+    },
+    "yeast_kolsch": {
+      "count": 76,
+      "pct": 1.2
+    },
+    "yeast_kveik": {
+      "count": 22,
+      "pct": 0.3
+    },
+    "yeast_lacto": {
+      "count": 42,
+      "pct": 0.6
+    },
+    "yeast_saison": {
+      "count": 0,
+      "pct": 0.0
+    },
+    "yeast_sour_blend": {
+      "count": 196,
+      "pct": 3.0
+    },
+    "yeast_wheat_german": {
+      "count": 119,
+      "pct": 1.8
+    },
+    "yeast_wit": {
+      "count": 596,
+      "pct": 9.1
+    },
+    "yeast_witbier": {
+      "count": 596,
+      "pct": 9.1
+    }
+  },
+  "no_yeast_count": 663,
+  "no_yeast_pct": 10.2,
+  "kategori_ayrim": {
+    "siralama": "K5 (no_yeast) -> K1 (pattern eksik) -> K2 (multi-strain Belle+Belgian) -> K3 (reslug Belgian abbey) -> K4 (reslug brown ale) -> K_OTHER",
+    "dagilim": {
+      "K_OTHER_siniflandirilamayan": 1522,
+      "K3_reslug_belgian_abbey": 4390,
+      "K4_reslug_brown_ale": 588,
+      "K1_pattern_eksik": 26
+    },
+    "samples_per_kategori_5er": {
+      "K1_pattern_eksik": [
+        {
+          "id": "braureka_21126",
+          "slug": "french_belgian_saison",
+          "raw_yeast": "Fermentis SafAle BE-134",
+          "flags_set": []
+        },
+        {
+          "id": "braureka_21127",
+          "slug": "french_belgian_saison",
+          "raw_yeast": "Fermentis SafAle BE-134",
+          "flags_set": []
+        },
+        {
+          "id": "braureka_31996",
+          "slug": "french_belgian_saison",
+          "raw_yeast": "Fermentis SafAle BE-134",
+          "flags_set": []
+        },
+        {
+          "id": "braureka_34130",
+          "slug": "french_belgian_saison",
+          "raw_yeast": "Fermentis SafAle BE-134",
+          "flags_set": []
+        },
+        {
+          "id": "rmwoods_27367",
+          "slug": "french_belgian_saison",
+          "raw_yeast": "m29 (85.0%)",
+          "flags_set": []
+        }
+      ],
+      "K2_multi_strain_belle_belgian": [],
+      "K3_reslug_belgian_abbey": [
+        {
+          "id": "tmf_hoppy-french-saison.html",
+          "slug": "french_belgian_saison",
+          "raw_yeast": "and hops take the lead. Mostly Belgian pilsener malt with just a touch of malted",
+          "flags_set": [
+            "yeast_belgian"
+          ]
+        },
+        {
+          "id": "mmum_640",
+          "slug": "french_belgian_saison",
+          "raw_yeast": "Safbrew S33",
+          "flags_set": [
+            "yeast_belgian"
+          ]
+        },
+        {
+          "id": "recipator_10208",
+          "slug": "french_belgian_saison",
+          "raw_yeast": "1000ml starter of White Labs WLP 550 Belgian Ale Yeast.",
+          "flags_set": [
+            "yeast_belgian"
+          ]
+        },
+        {
+          "id": "recipator_10938",
+          "slug": "french_belgian_saison",
+          "raw_yeast": "wyeast belgian abbey ale, 1214",
+          "flags_set": [
+            "yeast_abbey",
+            "yeast_belgian"
+          ]
+        },
+        {
+          "id": "recipator_11384",
+          "slug": "french_biere_de_garde",
+          "raw_yeast": "Safbrew T-58",
+          "flags_set": [
+            "yeast_belgian"
+          ]
+        }
+      ],
+      "K4_reslug_brown_ale": [
+        {
+          "id": "recipator_3978",
+          "slug": "french_biere_de_garde",
+          "raw_yeast": "WLP 011 european ale",
+          "flags_set": [
+            "yeast_english"
+          ]
+        },
+        {
+          "id": "recipator_5541",
+          "slug": "french_biere_de_garde",
+          "raw_yeast": "American Ale Yeast",
+          "flags_set": [
+            "yeast_american"
+          ]
+        },
+        {
+          "id": "recipator_5625",
+          "slug": "french_biere_de_garde",
+          "raw_yeast": "White Labs WLP011 European Ale",
+          "flags_set": [
+            "yeast_english"
+          ]
+        },
+        {
+          "id": "braureka_10359",
+          "slug": "french_biere_de_garde",
+          "raw_yeast": "Danstar Nottingham Ale",
+          "flags_set": [
+            "yeast_english"
+          ]
+        },
+        {
+          "id": "braureka_116",
+          "slug": "french_belgian_saison",
+          "raw_yeast": "Fermentis Safale S-04",
+          "flags_set": [
+            "yeast_english"
+          ]
+        }
+      ],
+      "K5_no_yeast_eksik_veri": [],
+      "K_OTHER_siniflandirilamayan": [
+        {
+          "id": "tmf_dark-orange-rosemary-saison.html",
+          "slug": "specialty_saison",
+          "raw_yeast": "and spices provide the aromatics.",
+          "flags_set": []
+        },
+        {
+          "id": "tmf_american-farmhouse-currant-dark-saison.html",
+          "slug": "specialty_saison",
+          "raw_yeast": "rehydated.",
+          "flags_set": []
+        },
+        {
+          "id": "tmf_honey-oat-tart-saison.html",
+          "slug": "specialty_saison",
+          "raw_yeast": "and its interaction with the Australian hops. Grain is subtle.",
+          "flags_set": []
+        },
+        {
+          "id": "tmf_beet-and-brett-saison.html",
+          "slug": "specialty_saison",
+          "raw_yeast": "are required to convert the other common fermentation off-flavors, like diacetyl",
+          "flags_set": []
+        },
+        {
+          "id": "tmf_rye-saison-with-brett.html",
+          "slug": "specialty_saison",
+          "raw_yeast": "Brettanomyces + Brett",
+          "flags_set": [
+            "yeast_brett"
+          ]
+        }
+      ]
+    }
+  },
+  "samples_per_slug_10er": {
+    "specialty_saison": [
+      {
+        "id": "rmwoods_210954",
+        "slug": "specialty_saison",
+        "raw_yeast": "belgian strong ale yeast (white labs, ale, 81.5%); champagne yeast (white labs, champagne, 77.5%)",
+        "flags_set": [
+          "yeast_belgian"
+        ],
+        "kategori": "K3_reslug_belgian_abbey"
+      },
+      {
+        "id": "rmwoods_261284",
+        "slug": "specialty_saison",
+        "raw_yeast": "belgian wit ale yeast (white labs, ale, 76.0%)",
+        "flags_set": [
+          "yeast_belgian",
+          "yeast_wit",
+          "yeast_witbier"
+        ],
+        "kategori": "K3_reslug_belgian_abbey"
+      },
+      {
+        "id": "rmwoods_87727",
+        "slug": "specialty_saison",
+        "raw_yeast": "american ale ii (wyeast, ale, 75.0%)",
+        "flags_set": [
+          "yeast_american"
+        ],
+        "kategori": "K4_reslug_brown_ale"
+      },
+      {
+        "id": "rmwoods_262713",
+        "slug": "specialty_saison",
+        "raw_yeast": "safbrew t-58 (fermentis, ale, 73.0%)",
+        "flags_set": [
+          "yeast_belgian"
+        ],
+        "kategori": "K3_reslug_belgian_abbey"
+      },
+      {
+        "id": "rmwoods_119472",
+        "slug": "specialty_saison",
+        "raw_yeast": "abbey ale yeast (white labs, ale, 75.0%)",
+        "flags_set": [
+          "yeast_abbey"
+        ],
+        "kategori": "K3_reslug_belgian_abbey"
+      },
+      {
+        "id": "rmwoods_326230",
+        "slug": "specialty_saison",
+        "raw_yeast": "abbey ale (ale, 80.0%)",
+        "flags_set": [
+          "yeast_abbey"
+        ],
+        "kategori": "K3_reslug_belgian_abbey"
+      },
+      {
+        "id": "rmwoods_226026",
+        "slug": "specialty_saison",
+        "raw_yeast": "belgian abbey ii (wyeast, ale, 75.0%)",
+        "flags_set": [
+          "yeast_abbey",
+          "yeast_belgian"
+        ],
+        "kategori": "K3_reslug_belgian_abbey"
+      },
+      {
+        "id": "rmwoods_189373",
+        "slug": "specialty_saison",
+        "raw_yeast": "belgian ale yeast (white labs, ale, 78.0%)",
+        "flags_set": [
+          "yeast_belgian"
+        ],
+        "kategori": "K3_reslug_belgian_abbey"
+      },
+      {
+        "id": "rmwoods_344140",
+        "slug": "specialty_saison",
+        "raw_yeast": "trappist ale yeast wlp500 (white labs, ale, 77.5%)",
+        "flags_set": [
+          "yeast_abbey",
+          "yeast_belgian"
+        ],
+        "kategori": "K3_reslug_belgian_abbey"
+      },
+      {
+        "id": "rmwoods_29951",
+        "slug": "specialty_saison",
+        "raw_yeast": "trappist high gravity (wyeast, ale, 76.0%)",
+        "flags_set": [
+          "yeast_abbey"
+        ],
+        "kategori": "K3_reslug_belgian_abbey"
+      }
+    ],
+    "french_belgian_saison": [
+      {
+        "id": "rmwoods_41774",
+        "slug": "french_belgian_saison",
+        "raw_yeast": "belgian ale (wyeast, ale, 74.0%)",
+        "flags_set": [
+          "yeast_belgian"
+        ],
+        "kategori": "K3_reslug_belgian_abbey"
+      },
+      {
+        "id": "rmwoods_303993",
+        "slug": "french_belgian_saison",
+        "raw_yeast": "lochristi brettanomyces blend (the yeast bay, ale, 85.0%)",
+        "flags_set": [
+          "yeast_brett"
+        ],
+        "kategori": "K_OTHER_siniflandirilamayan"
+      },
+      {
+        "id": "rmwoods_344333",
+        "slug": "french_belgian_saison",
+        "raw_yeast": "- - (default, ale, 75.0%); oyl-061 unknown norwegian (ale)",
+        "flags_set": [],
+        "kategori": "K_OTHER_siniflandirilamayan"
+      },
+      {
+        "id": "rmwoods_13493",
+        "slug": "french_belgian_saison",
+        "raw_yeast": "roeselare ale blend (wyeast, ale, 80.0%)",
+        "flags_set": [
+          "yeast_sour_blend"
+        ],
+        "kategori": "K_OTHER_siniflandirilamayan"
+      },
+      {
+        "id": "rmwoods_393303",
+        "slug": "french_belgian_saison",
+        "raw_yeast": "safbrew - wheat beer yeast wb-06 (fermentis / safale, wheat, 86.0%)",
+        "flags_set": [
+          "yeast_wheat_german"
+        ],
+        "kategori": "K_OTHER_siniflandirilamayan"
+      },
+      {
+        "id": "rmwoods_15542",
+        "slug": "french_belgian_saison",
+        "raw_yeast": "american wheat (wyeast, ale, 73.0%)",
+        "flags_set": [
+          "yeast_wheat_german"
+        ],
+        "kategori": "K_OTHER_siniflandirilamayan"
+      },
+      {
+        "id": "rmwoods_330500",
+        "slug": "french_belgian_saison",
+        "raw_yeast": "american ale (wyeast, ale, 75.0%)",
+        "flags_set": [
+          "yeast_american"
+        ],
+        "kategori": "K4_reslug_brown_ale"
+      },
+      {
+        "id": "rmwoods_306989",
+        "slug": "french_belgian_saison",
+        "raw_yeast": "belgian ale (mangrove jack's, ale, 100.0%)",
+        "flags_set": [
+          "yeast_belgian"
+        ],
+        "kategori": "K3_reslug_belgian_abbey"
+      },
+      {
+        "id": "rmwoods_244791",
+        "slug": "french_belgian_saison",
+        "raw_yeast": "trappist ale yeast (white labs, ale, 77.5%)",
+        "flags_set": [
+          "yeast_abbey"
+        ],
+        "kategori": "K3_reslug_belgian_abbey"
+      },
+      {
+        "id": "rmwoods_355148",
+        "slug": "french_belgian_saison",
+        "raw_yeast": "trappist high gravity (wyeast, ale, 76.0%)",
+        "flags_set": [
+          "yeast_abbey"
+        ],
+        "kategori": "K3_reslug_belgian_abbey"
+      }
+    ],
+    "french_biere_de_garde": [
+      {
+        "id": "rmwoods_378783",
+        "slug": "french_biere_de_garde",
+        "raw_yeast": "belgian strong ale 1388 (wyeast, ale, 76.0%)",
+        "flags_set": [
+          "yeast_belgian"
+        ],
+        "kategori": "K3_reslug_belgian_abbey"
+      },
+      {
+        "id": "rmwoods_356340",
+        "slug": "french_biere_de_garde",
+        "raw_yeast": "belgian abby ale ii 1762 (wyeast, ale, 75.0%)",
+        "flags_set": [
+          "yeast_abbey"
+        ],
+        "kategori": "K3_reslug_belgian_abbey"
+      },
+      {
+        "id": "rmwoods_193543",
+        "slug": "french_biere_de_garde",
+        "raw_yeast": "belgian ale (wyeast, ale, 74.0%)",
+        "flags_set": [
+          "yeast_belgian"
+        ],
+        "kategori": "K3_reslug_belgian_abbey"
+      },
+      {
+        "id": "rmwoods_191863",
+        "slug": "french_biere_de_garde",
+        "raw_yeast": "private collection biere de garde (wyeast, ale, 76.5%)",
+        "flags_set": [],
+        "kategori": "K_OTHER_siniflandirilamayan"
+      },
+      {
+        "id": "rmwoods_177883",
+        "slug": "french_biere_de_garde",
+        "raw_yeast": "german ale (wyeast, ale, 75.0%)",
+        "flags_set": [
+          "yeast_kolsch"
+        ],
+        "kategori": "K_OTHER_siniflandirilamayan"
+      },
+      {
+        "id": "rmwoods_51401",
+        "slug": "french_biere_de_garde",
+        "raw_yeast": "belgian golden ale yeast (white labs, ale, 75.5%)",
+        "flags_set": [
+          "yeast_belgian"
+        ],
+        "kategori": "K3_reslug_belgian_abbey"
+      },
+      {
+        "id": "rmwoods_144406",
+        "slug": "french_biere_de_garde",
+        "raw_yeast": "forbidden fruit (wyeast, ale, 75.0%); champagne yeast (75.0%)",
+        "flags_set": [
+          "yeast_wit",
+          "yeast_witbier"
+        ],
+        "kategori": "K_OTHER_siniflandirilamayan"
+      },
+      {
+        "id": "rmwoods_137683",
+        "slug": "french_biere_de_garde",
+        "raw_yeast": "european ale yeast (white labs, ale, 83.5%)",
+        "flags_set": [
+          "yeast_english"
+        ],
+        "kategori": "K4_reslug_brown_ale"
+      },
+      {
+        "id": "recipator_2417",
+        "slug": "french_biere_de_garde",
+        "raw_yeast": "White Labs \"Belgian Ale\"",
+        "flags_set": [
+          "yeast_belgian"
+        ],
+        "kategori": "K3_reslug_belgian_abbey"
+      },
+      {
+        "id": "rmwoods_257107",
+        "slug": "french_biere_de_garde",
+        "raw_yeast": "biere de garde (76.0%)",
+        "flags_set": [],
+        "kategori": "K_OTHER_siniflandirilamayan"
+      }
+    ]
+  }
+}

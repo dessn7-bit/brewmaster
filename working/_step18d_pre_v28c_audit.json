@@ -1,0 +1,92 @@
+{
+  "meta": {
+    "sprint": "Adim 18d-pre Sprint A V28c build",
+    "rule_refs": [
+      "KURAL 1.4",
+      "KURAL 4.4",
+      "KURAL 12.1"
+    ],
+    "build_seconds": 29.4,
+    "total_recipes": 376845
+  },
+  "v28b_baseline": {
+    "pre_sha": "8359f033338e9aeb399850b72e202f9e70577a1639a87f81d3dde75bf820ae8a",
+    "post_sha": "8359f033338e9aeb399850b72e202f9e70577a1639a87f81d3dde75bf820ae8a",
+    "intact": true
+  },
+  "v28c": {
+    "path": "working/_v28c_aliased_dataset.json",
+    "size_bytes_pre_meta": 1329002349,
+    "sha256_pre_meta": "f9f45d220dce41a80020060db5d6d2ec0ec715a6e93361fc693a94f9868cee78",
+    "size_bytes_final": 1329004625,
+    "sha256_final": "2659bbbea28834182a6930d95eff25c1c252264f94ce8254c4f680ef67fb30b4",
+    "recipe_count": 376845
+  },
+  "targeted_exception": {
+    "pattern": "\\bbe[\\s\\-]?134\\b|\\bbe[\\s\\-]?256\\b|\\bm[\\s\\-]?29\\b|\\blalbrew\\s+farmhouse\\b",
+    "kosul": "has_K1 + V28b[yeast_saison]=0 -> V28c[yeast_saison]=1",
+    "applied_count": 102,
+    "samples_10": [
+      {
+        "id": "mmum_1091",
+        "slug": "american_amber_red_ale",
+        "raw_yeast": "SafAle BE-256"
+      },
+      {
+        "id": "mmum_1429",
+        "slug": "american_india_pale_ale",
+        "raw_yeast": "Best West USA OG Ale und Abby-Hefe Safale BE-256"
+      },
+      {
+        "id": "mmum_1534",
+        "slug": "herb_and_spice_beer",
+        "raw_yeast": "SafAle BE 256"
+      },
+      {
+        "id": "mmum_1756",
+        "slug": "herb_and_spice_beer",
+        "raw_yeast": "Fermentis SafAle BE-134"
+      },
+      {
+        "id": "braureka_12862",
+        "slug": "belgian_tripel",
+        "raw_yeast": "Fermentis SafAle BE-256"
+      },
+      {
+        "id": "braureka_14886",
+        "slug": "belgian_witbier",
+        "raw_yeast": "Fermentis SafAle BE-134"
+      },
+      {
+        "id": "braureka_17845",
+        "slug": "belgian_strong_dark_ale",
+        "raw_yeast": "Fermentis SafAle BE-256"
+      },
+      {
+        "id": "braureka_18432",
+        "slug": "belgian_blonde_ale",
+        "raw_yeast": "Fermentis SafAle BE-256"
+      },
+      {
+        "id": "braureka_18442",
+        "slug": "american_india_pale_ale",
+        "raw_yeast": "Fermentis SafAle BE-256"
+      },
+      {
+        "id": "braureka_18444",
+        "slug": "american_india_pale_ale",
+        "raw_yeast": "Fermentis SafAle BE-256"
+      }
+    ]
+  },
+  "drift_guard": {
+    "non_K1_drift": 0,
+    "beklenen": 0
+  },
+  "anomali_check": {
+    "esik": 200,
+    "olcum": 102,
+    "anomali": false,
+    "drift_anomali": false
+  }
+}

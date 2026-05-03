@@ -1,0 +1,155 @@
+{
+  "meta": {
+    "sprint": "Adim 60 Saison/Belgian Dubbel overlap teshis",
+    "rule_refs": [
+      "KURAL 1.4",
+      "KURAL 4.4",
+      "KURAL 9.2"
+    ],
+    "parser_yeast_saison_pattern": "saison|sasion|farmhouse|wallonia(n)?|saisonstein|saisonette|seizon|hommage|bugfarm|\\b(3711|3724|3725|3726)\\b|wlp\\s*0?(565|566|568|590|585|670)\\b|\\b(?:wyeast|wy)\\s*[\\#\\.]?\\s*0?(3724|3711|3725|3726)\\b",
+    "saison_keywords_listesi": {
+      "kelimeler": [
+        "saison",
+        "sasion (typo)",
+        "farmhouse",
+        "wallonia(n)",
+        "saisonstein",
+        "saisonette",
+        "seizon",
+        "hommage",
+        "bugfarm"
+      ],
+      "wyeast_numara": [
+        "3711 French Saison",
+        "3724 Belgian Saison",
+        "3725 Biere de Garde",
+        "3726 Farmhouse"
+      ],
+      "wlp_numara": [
+        "WLP565 Belgian Saison I",
+        "WLP566 Belgian Saison II",
+        "WLP568 Belgian Saison Ale Blend",
+        "WLP585 Belgian Saison III",
+        "WLP590 French Saison",
+        "WLP670 Farmhouse Blend"
+      ],
+      "eksik_olabilir": [
+        "Lalbrew Farmhouse",
+        "Mangrove Jacks M29",
+        "BE-134 Saison",
+        "BE-256 Pale Saison"
+      ]
+    }
+  },
+  "sha256_check": {
+    "v27": "8c2d132d1913a57203040a98c9ef1ceebc2e18ce771b0f233718e1215c12442d",
+    "v28b": "8359f033338e9aeb399850b72e202f9e70577a1639a87f81d3dde75bf820ae8a",
+    "v27_intact": true,
+    "v28b_intact": true
+  },
+  "v28b_belgian_dubbel": {
+    "total": 3252,
+    "yeast_saison_1_count": 58,
+    "yeast_saison_1_pct": 1.8,
+    "yeast_belgian_1_count": 1775,
+    "yeast_belgian_1_pct": 54.6,
+    "yeast_abbey_1_count": 1955,
+    "yeast_abbey_1_pct": 60.1,
+    "saison_AND_belgian": 18,
+    "saison_only_belgian_0": 40
+  },
+  "v27_belgian_dubbel": {
+    "total": 3252,
+    "yeast_saison_1_count": 58,
+    "yeast_saison_1_pct": 1.8,
+    "yeast_belgian_1_count": 1786,
+    "yeast_belgian_1_pct": 54.9
+  },
+  "v27_to_v28b_change_in_belgian_dubbel": {
+    "yeast_saison_changed": 0,
+    "yeast_belgian_changed": 11,
+    "note": "C3 belle saison kaldirma: yeast_belgian 1->0. C3 yeast_saison'a dokunmadi."
+  },
+  "samples_yeast_saison_1_belgian_dubbel": [
+    {
+      "id": "recipator_8877",
+      "raw_yeast": "2.5 L Starter with Wyeast 3726 Farmhouse Ale",
+      "yeast_saison": 1,
+      "yeast_belgian": 0,
+      "yeast_abbey": 0,
+      "yeast_brett": 0
+    },
+    {
+      "id": "byo_biere-de-garde",
+      "raw_yeast": "Wyeast 3725",
+      "yeast_saison": 1,
+      "yeast_belgian": 0,
+      "yeast_abbey": 0,
+      "yeast_brett": 0
+    },
+    {
+      "id": "byo_brasserie-a-vapeur-s-saison-de-pipaix-clone",
+      "raw_yeast": "Wyeast 3726",
+      "yeast_saison": 1,
+      "yeast_belgian": 0,
+      "yeast_abbey": 0,
+      "yeast_brett": 0
+    },
+    {
+      "id": "byo_gordon-strongs-biere-de-garde",
+      "raw_yeast": "Wyeast 3725",
+      "yeast_saison": 1,
+      "yeast_belgian": 0,
+      "yeast_abbey": 0,
+      "yeast_brett": 0
+    },
+    {
+      "id": "rmwoods_4496",
+      "raw_yeast": "norwegian farmhouse ale (85.0%)",
+      "yeast_saison": 1,
+      "yeast_belgian": 0,
+      "yeast_abbey": 0,
+      "yeast_brett": 0
+    },
+    {
+      "id": "rmwoods_12483",
+      "raw_yeast": "belgian style saison ale yeast blend (white labs, ale, 78.0%)",
+      "yeast_saison": 1,
+      "yeast_belgian": 0,
+      "yeast_abbey": 0,
+      "yeast_brett": 0
+    },
+    {
+      "id": "rmwoods_23767",
+      "raw_yeast": "wyeast farmhouse 3722 (wyeast, ale, 76.5%)",
+      "yeast_saison": 1,
+      "yeast_belgian": 0,
+      "yeast_abbey": 0,
+      "yeast_brett": 0
+    },
+    {
+      "id": "rmwoods_33522",
+      "raw_yeast": "french saison (wyeast, ale, 83.0%)",
+      "yeast_saison": 1,
+      "yeast_belgian": 0,
+      "yeast_abbey": 0,
+      "yeast_brett": 0
+    },
+    {
+      "id": "rmwoods_42367",
+      "raw_yeast": "french saison (wyeast, ale, 85.0%)",
+      "yeast_saison": 1,
+      "yeast_belgian": 0,
+      "yeast_abbey": 0,
+      "yeast_brett": 0
+    },
+    {
+      "id": "rmwoods_43823",
+      "raw_yeast": "belgian saison yeast (wyeast, ale, 74.0%); belgian ale (wyeast, ale, 74.0%)",
+      "yeast_saison": 1,
+      "yeast_belgian": 1,
+      "yeast_abbey": 0,
+      "yeast_brett": 0
+    }
+  ]
+}

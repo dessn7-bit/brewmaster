@@ -1,0 +1,89 @@
+[1] Loading working/_v28c_aliased_dataset.json...
+  V19: 376845 recipes, 89 features
+[2] Compute bjcp_main_category...
+  main_cat counts: Counter({'ipa': 75456, 'pale_ale': 70521, 'specialty': 41028, 'brown_ale': 37673, 'stout': 32326, 'strong_ale': 27543, 'wheat': 26218, 'saison': 18871, 'lager': 15608, 'porter': 14578, 'pilsner': 6537, 'sour': 4725, 'bock': 3534, 'lager_dark': 2224, 'other': 3})
+[3] Slug filter ≥10: 87 slugs
+[4] Stratified split 80/20...
+  train: 301473  test: 75369
+
+============================================================
+V19 14-CATEGORY MODEL
+============================================================
+Classes: 14, train n=301473, test n=75369
+Training V19 14cat (depth=3, n_est=200, hist) — sweet spot reg: alpha=0.85 lambda=1.85...
+
+[V19 14cat] train: 0.6958  test t1: 0.6928  t3: 0.9271  t5: 0.9801
+Gap: +0.0029
+
+Per-class:
+  ipa             n= 15090  top1= 12750 (0.845)  top3= 14642 (0.970)
+  pale_ale        n= 14104  top1= 10301 (0.730)  top3= 13444 (0.953)
+  specialty       n=  8206  top1=  1836 (0.224)  top3=  7447 (0.908)
+  brown_ale       n=  7536  top1=  4913 (0.652)  top3=  6786 (0.900)
+  stout           n=  6465  top1=  5684 (0.879)  top3=  6260 (0.968)
+  strong_ale      n=  5510  top1=  3863 (0.701)  top3=  4810 (0.873)
+  wheat           n=  5243  top1=  4590 (0.875)  top3=  5005 (0.955)
+  saison          n=  3774  top1=  2658 (0.704)  top3=  3451 (0.914)
+  lager           n=  3121  top1=  1904 (0.610)  top3=  2537 (0.813)
+  porter          n=  2915  top1=  1513 (0.519)  top3=  2675 (0.918)
+  pilsner         n=  1308  top1=   875 (0.669)  top3=  1142 (0.873)
+  sour            n=   945  top1=   634 (0.671)  top3=   762 (0.806)
+  bock            n=   707  top1=   404 (0.571)  top3=   540 (0.764)
+  lager_dark      n=   445  top1=   293 (0.658)  top3=   370 (0.831)
+
+Wrote working/_v19_v28c_model_14cat.json (3287 KB)
+
+============================================================
+V19 SLUG MODEL
+============================================================
+Slugs ≥10: 87
+  Slug train: 301473  test: 75369
+Training V19 slug (depth=4, n_est=350, hist) — sweet spot reg: alpha=0.85 lambda=1.85 mcw=4...
+
+[V19 slug] train t1: 0.6234  test t1: 0.5724  t3: 0.8144  t5: 0.8962
+[V19 slug] TRAIN-TEST GAP: 0.0510 (+5.10pp) — KURAL 4: <5pp PASS
+  🔴 FAIL — gap >= 5pp
+
+Spotlight slug metrics:
+  american_india_pale_ale                  n= 11049  top1=0.786  top3=0.966
+  american_pale_ale                        n=  8537  top1=0.614  top3=0.903
+  specialty_beer                           n=  5669  top1=0.181  top3=0.753
+  french_belgian_saison                    n=  2789  top1=0.889  top3=0.941
+  south_german_hefeweizen                  n=  1571  top1=0.789  top3=0.914
+  belgian_witbier                          n=  1138  top1=0.778  top3=0.883
+  belgian_dubbel                           n=   650  top1=0.708  top3=0.849
+  belgian_tripel                           n=   691  top1=0.630  top3=0.849
+  belgian_quadrupel                        n=    15  top1=0.000  top3=0.200
+  belgian_strong_dark_ale                  n=   629  top1=0.677  top3=0.833
+  belgian_strong_golden                    n=   443  top1=0.447  top3=0.770
+  belgian_blonde_ale                       n=  1124  top1=0.571  top3=0.750
+  belgian_ipa                              n=    42  top1=0.095  top3=0.190
+  rye_ipa                                  n=    59  top1=0.203  top3=0.559
+  white_ipa                                n=    49  top1=0.041  top3=0.306
+  red_ipa                                  n=    75  top1=0.093  top3=0.427
+  black_ipa                                n=   118  top1=0.407  top3=0.627
+  juicy_or_hazy_india_pale_ale             n=    27  top1=0.333  top3=0.519
+  gose                                     n=    40  top1=0.350  top3=0.575
+  belgian_gueuze                           n=    39  top1=0.077  top3=0.256
+  belgian_lambic                           n=   105  top1=0.429  top3=0.705
+  belgian_fruit_lambic                     n=   105  top1=0.419  top3=0.667
+  flanders_red_ale                         n=   169  top1=0.633  top3=0.728
+  oud_bruin                                n=   109  top1=0.431  top3=0.578
+  berliner_weisse                          n=   312  top1=0.737  top3=0.849
+  mixed_fermentation_sour_beer             n=    47  top1=0.149  top3=0.234
+  brett_beer                               n=    19  top1=0.053  top3=0.158
+  dunkles_bock                             n=    15  top1=0.133  top3=0.400
+  german_oktoberfest_festbier              n=    18  top1=0.056  top3=0.167
+  kellerbier                               n=    18  top1=0.167  top3=0.278
+  english_pale_ale                         n=    18  top1=0.111  top3=0.222
+  extra_special_bitter                     n=  1515  top1=0.544  top3=0.770
+  special_bitter_or_best_bitter            n=   528  top1=0.367  top3=0.706
+  ordinary_bitter                          n=   390  top1=0.456  top3=0.667
+  blonde_ale                               n=  1441  top1=0.513  top3=0.779
+  export_stout                             n=   312  top1=0.160  top3=0.446
+  specialty_saison                         n=   985  top1=0.146  top3=0.653
+
+Wrote working/_v19_v28c_model_slug.json (51137 KB)
+
+Wrote _v19_metrics.json
+[V19 TRAIN DONE]
