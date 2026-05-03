@@ -336,6 +336,16 @@ Sprint sonunda tek seferde 82 hata listesi çıkarılamaz. İteratif zorlama ger
 
 ---
 
+## Bolum 12 — Denetim ekrana yazma protokolu
+
+### Kural 12.1 — Mesaj govdesinde tam kod blok zorunlu
+
+Build script veya kritik kod denetiminde Code, dosya icerigini Read tool sonucu olarak degil, mesaj govdesinde markdown code blok olarak satir numarali ekrana yazar. Hicbir satir atlanmaz. "Rutin" notu, "..." kisaltmasi yok. Yorum satirlari dahil.
+
+**Atif:** V28a + V28b_C2 denetim eksikligi 03.05.2026.
+
+---
+
 ## Bolum 11 — Cross-dataset lookup disiplini
 
 ### Kural 11.1 — Cross-dataset lookup eslesme garantisi
