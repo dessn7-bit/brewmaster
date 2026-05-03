@@ -413,6 +413,16 @@ Boyut: 1267.4 MB (V27'den 126 byte farkli)
 Recete: 376845
 Kapsam: C1 Wyeast 2272 izole (3 feature, 8 recete etkilendi)
 
+V28b (Adim 18c-1c-5d kapanis, commit edildi):
+sha256: bc8a7b0dd900019ff79900e9f871641bfe162d1c41bbd85cb7f2f37a4b938024
+Boyut: 1267.4 MB
+Recete: 376845
+Kapsam: 9 aktif pattern, 2827 exception
+Bilincli kayit: 237 multi-strain FP + C4/C5 0 etki -> Adim 18d
+Bilincli kayit: V6 reference V21 mirasi -> Adim 18c-1c-5f
+Bilincli kayit: V2c yeast okumuyor -> Adim 18c-1c-5g
+Bilincli kayit: 12 numara Wyeast audit -> Adim 18c-1c-5e
+
 ---
 
 ## Versiyon
