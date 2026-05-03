@@ -437,6 +437,16 @@ French_biere_de_garde saison -> brown_ale tasindi.
 american_barleywine->strong_ale, sweet_stout_or_cream_stout->stout.
 Atif: working/_step60a_v19_v6_mapping_diff.json (32 farkli mapping tablosu).
 
+V28d (Adim 18d-pre Sprint C, K3 reslug, PRODUCTION):
+sha256: efa0115a91fc3b571e529c58f3e5c48c325ab3647ef7a881da7cb637710c199f
+Boyut: 1.32 GB
+Recete: 376845
+Kapsam: V28c + 4201 K3 reslug saison cluster -> Belgian abbey/dubbel/tripel/quadrupel/strong_dark/strong_golden
+V19 retrain V28d 14 cluster top1 0.6986 gap +0.30
+Production URL: Brewmaster_v2_79_12.html (commit d1e5986, 03.05.2026)
+Eski URL korundu rollback: Brewmaster_v2_79_11.html (V28b), Brewmaster_v2_79_10.html (V27)
+Sprint D K4 iptal -> Adim 18d kayit (486 reçete algoritmik kriter yetersiz)
+
 V28b production deploy (Adim 59, commit 73daae9):
 HTML: Brewmaster_v2_79_11.html (URL: https://dessn7-bit.github.io/brewmaster/Brewmaster_v2_79_11.html)
 sha256 V28b dataset post-meta: 8359f033338e9aeb399850b72e202f9e70577a1639a87f81d3dde75bf820ae8a
