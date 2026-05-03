@@ -15,7 +15,9 @@ Yeast pattern FP/TP testi `raw.yeast` (veya raw.yeast_name / raw.recipe.yeast.na
 
 **Örnek:** Aşama 1'de pattern bell.{0,3}s\\s+oberon raw.yeast'te 22 reçete yakalıyorsa, aynı pattern raw.notes'ta 47 reçete yakalayabilir — bu 47'nin %X TP olduğu yeast pattern testi DEĞİL.
 
-**İhlal referansı:** Hata 1, 2, 60.
+**Vurgu (v2.5 revize, Phase 2 ihlali sonrası):** Sentetik string compile testi (örnek: "WLP410 Belgian Wit II" string'i pattern eşleşiyor mu) **YETERSİZ**. Yeni eklenen her yeast pattern için **gerçek `raw.yeast` field'ında en az 5 sample manuel FP/TP kontrol zorunlu**. Sprint A K1 modeli (102 reçete manuel kontrol) standart, Phase 2 modeli (sentetik 24/24, raw.yeast spot test atlandı) ihlal. Pattern büyüklüğü ne olursa olsun (40 match veya 3000 match), sample testi atlanmaz.
+
+**İhlal referansı:** Hata 1, 2, 60, **(Adim 18d-pre P2 — 2026-05-04: 8 pattern 8351 flag, raw.yeast manuel kontrol atlandi)**.
 
 ### Kural 1.2 — Sayım tek seferde 3 kaynaktan ölçülür
 Bir reçete sayısı raporlanmadan önce: (a) kaynak dosyada doğrudan filter, (b) bağımsız script ile recompute, (c) örneklem kontrolü ile beklenen aralık karşılaştırması yapılır. 3 ölçüm uyuşmuyorsa SAYI YAYIMLANMAZ, kök sebep bulunur.
@@ -141,6 +143,13 @@ Belirsiz alanlar: Süphede Claude soru sorar, ama "A/B/C hangisi?" tipi açık u
 
 **Atıf:** 03.05.2026 V28a sonrası iletişim disiplini düzeltmesi.
 
+### Kural 4.6 — Deploy gate 5-stat gain zorunluluk (revize v2.5)
+KURAL 4 deploy gate koşulu memory'de tanımlı: (a) slug gap <5pp, (b) 5-stat gain >%15 trend, (c) sensitivity V_n'den iyi. **5-stat gain monitoring deploy onayının şart koşulu** — headline metric (test_top1) tek başına yeterli değil, per-stat ölçüm zorunlu (top1, top3, top5, macroF1, per-class F1 spotlight). Standard deviation seviyesindeki kazanım (örn V6 cv ±0.005, V28e gain +0.0019) alarm; istatistiksel anlamlılık testi olmadan "deploy başarılı" ifadesi yasak. Memory'deki "alarm <%3" eşiği per-stat trend için, headline ortalama altındaki sprintler "kanıtlanamamış gain" notu ile rapora geçer.
+
+**Atıf:** Adim 18d-pre P2 V28e — 2026-05-04: V28e deploy onayı sadece +0.11pp 14cat / +0.19pp V6 ile verildi, 5-stat gain analizi yapılmadı, kazanım std altında.
+
+**İhlal referansı:** Hata 7 (kapanis audit).
+
 ---
 
 ## Bölüm 5 — Süreç ve görev yönetimi
@@ -211,7 +220,9 @@ Her V_n+1 dataset versiyonunda 578 olası feature çakışmasından minimum 50 a
 ### Kural 7.1 — Yasak sözcük listesi
 Raporlarda yasak: VAR, PASS, OK, doğru, tamam, ✓, ✗, ✅, ❌, geçti, kaldı, başarılı, başarısız. Yerine: sayı + kaynak (dosya:satır, dataset query, sample N=X).
 
-**İhlal referansı:** Hata 41, 42.
+**v2.5 revize (yumusatma yasagi, V28e KURAL 4 ihlali sonrası):** Sayısal eşik aşıldığında **"borderline / esnek / yaklaşık / sınırda"** gibi yumuşatma kelimeleri **yasak**. Eşik > X ise FAIL, FAIL yazılır. KURAL 4 slug gap eşiği <5.0pp; ölçüm 5.34pp ise → "FAIL" (5.34 > 5.00). "Esnek borderline" ifadesi numerik gerçeği örter, KARAR-makamına yanlış girdi sağlar.
+
+**İhlal referansı:** Hata 41, 42, **(Adim 18d-pre P2 V28e — 2026-05-04: slug gap 5.34pp "borderline" diye sunuldu, açık fail)**.
 
 ### Kural 7.2 — Sayı + kaynak zorunlu
 Her sayı için kaynak: `(dataset query: filter X, file: working/_v27_aliased_dataset.json)` veya `(spot test, raw.yeast, sample N=10)`. Kaynaksız sayı yayımlanmaz.
@@ -263,6 +274,27 @@ Memory'den çağrılan bir sayı/iddia (örn "1016 reçete", "V19 production") s
 Adım N'de verilen bir karar (ör. cry_havoc çıkarılması, Aşama 2.7 metric kabulü) Adım N+1'de yeniden değerlendirme listesine girer. "Önceki sprint dedi ki" cümlesi karar input'u değil, hipotez girdisidir.
 
 **İhlal referansı:** Hata 24, 32, 61, 62.
+
+### Kural 9.3 — Sprint sonrasi metric olcum zorunlu (yeni v2.5)
+Sprint sonunda "X kazanim tahmini" yerine "P_n oncesi X, P_n sonrasi Y, fark Z" formati zorunlu. Olcum yapilmamis sprint kapali sayilmaz, "deploy edildi ama gain belirsiz" notu rapora gecer. Cluster A orani, B orani, C2 orani, slug bazli top1 — sprint hangi metrik etkiliyse o metrik yeniden olculur.
+
+**Atif:** Adim 18d-pre P2 — 2026-05-04: 8351 flag 0->1 yapildi, V28e cluster A orani (sour/lager/wheat) olculmedi, "%2-3 kazanim tahmini" dogrulanmadi.
+
+**Ihlal referansi:** Hata 4 (kapanis audit 12 hata).
+
+### Kural 9.4 — Farkli train/test taban metric direkt kiyas yasagi (yeni v2.5)
+V19 (tum dataset 80/20 split) ve V6 (28000 stratified balanced sample) farkli tabanlardan gelen sayilar **direkt sayisal kiyaslanamaz**. Yan yana sunulurken "farkli taban" notu zorunlu, baseline normalize edilmeden istatistiksel sonuc cikarilmaz.
+
+**Atif:** Adim 18d-pre P2 V28e raporu — V19 14cat 0.6997 ile V6 cv_top1 0.6046 yan yana sunuldu, taban farki belirtilmedi.
+
+**Ihlal referansi:** Hata 8 (kapanis audit).
+
+### Kural 9.5 — Production deploy sonrasi canli UI test zorunlu (yeni v2.5)
+Deploy dogrulamasi 2 katmanli: (a) HTTP test — `curl HTTP 200 + grep` (b) **Canli UI test** — Kaan tarayicida hard refresh + gercek recete tahmin ekran goruntusu. Sadece HTTP 200 yeterli degil, kullanicinin gerçek motoru calistirip cluster/slug ciktisi raporlanir.
+
+**Atif:** Adim 18c-1c-5f V6 V28d displayTR fix sonrasi UI dogrulanmadan duruldu (sentetik K=5 raporu canli UI ciktisi degil). Adim 18d-pre P2 V28e deploy sonrasi UI test atlandi.
+
+**Ihlal referansi:** Hata 9 (kapanis audit).
 
 ---
 
@@ -388,6 +420,20 @@ Hicbir kritik satir atlanmaz, "..." kisaltmasi yok, yorum satirlari dahil. Token
 
 **Atif:** V28a + V28b_C2 denetim protokolu uygulama deneyimi 03.05.2026.
 
+### Kural 12.2 — Sprint disiplini, tek session tek production deploy (yeni v2.5)
+Tek session'da maksimum **1 production deploy**. Ardisik deploy'lar (V28d → V28d V6 → V28d displayTR fix → V28e gibi 4 deploy 24 saat icinde) ihlal sayilir. Her deploy ayri analiz, ayri onay, ayri commit, ayri KURAL 4 denetimi gerektirir; hiz ugruna ust uste deploy uygulanmaz cunku model ust uste yeniden egitilir, kumulatif hata izi belirsiz hale gelir.
+
+**Atif:** Adim 18c-1c-5f + Adim 18d-pre P2 — 2026-05-04: 24 saat icinde 4 production deploy yapildi (V28d, V28d V6, displayTR fix, V28e), her birinin gain'i ayri olculmedi.
+
+**Ihlal referansi:** Hata 10 (kapanis audit).
+
+### Kural 12.3 — Build script versiyon arsivi (yeni v2.5)
+Path edit ile yeniden kullanilan build/retrain scriptleri (V21→V28d→V28e gibi) her dataset icin **ayri kopya** olarak `working/archive/script_v_X/` altinda saklanir. Git diff sadece son state'i gosterir, dataset bazli reproducibility icin ara state'lerin bagimsiz kopyasi gerek. KURAL Code v2 baseline kaydi yetersiz, scriptin kendi tarihi de saklanir.
+
+**Atif:** `_step6_v6_retrain_14cluster.py` 3 dataset icin path edit ile kullanildi (V21 Mayis 1, V28d Mayis 3, V28e Mayis 4); arsivde sadece son state mevcut, V21 baseline reproduce icin manuel geri cevirme gerek.
+
+**Ihlal referansi:** Hata 11 (kapanis audit).
+
 ---
 
 ## Bolum 11 — Cross-dataset lookup disiplini
@@ -503,3 +549,34 @@ Eski URL korundu rollback icin: Brewmaster_v2_79_10.html + _v19_model_*.json (V2
 - v2.2 (2026-05-03 — Adim 18c-1c-5f sonrası): V6 reference V28d retrain baseline eklendi (cv_top1 0.6027, cv_top3 0.7987, macroF1 0.5989, V21 mirasi korundu archive'da).
 - v2.3 (2026-05-03 — Adim 18c-1c-5f displayTR fix): _v6_v28d_meta.json'a displayTR field eklendi (14 cluster TR mapping, V21 formatından kopya). Script _step6_v6_retrain_14cluster.py satir 441-458 displayTR yazma bloğu kalıcı eklendi. Yeni meta sha256: 631ded9a..., boyut 1892 bytes.
 - v2.4 (2026-05-04 — Adim 18d-pre P2 V28e deploy): V28e baseline + 8 yeast pattern guncelleme (UNION mantigi, 8351 flag 0->1, 1->0 yasak, drift 0). V19 retrain 14cat 0.6997 +0.11pp, V6 retrain cv_top1 0.6046 +0.19pp. SOUR/LAGER/WHEAT cluster A orani artisi.
+- v2.5 (2026-05-04 — Code'un 12 hata kapanis audit'i): 3 madde revize (1.1 FP testi vurgu, 7.1 yumusatma yasagi, 4.6 deploy gate 5-stat gain) + 5 yeni madde (9.3 metric olcum zorunlu, 9.4 V19/V6 direkt kiyas yasagi, 9.5 canli UI test, 12.2 tek deploy session, 12.3 build script versiyon arsivi) + 3 risk kaydi (V21 NaN, P2 FP yuk, V28e gain belirsiz). 12 hata kaydi `_step60d_kapanis_audit.md`'ye eklendi.
+
+---
+
+## 12 Hata Kapanis Audit (Adim 18d-pre P2 sonrasi, 2026-05-04)
+
+Code'un kendi audit raporu sonucu Phase 2 ve V28e deploy sirasinda 12 ihlal/atlama kayda alindi. Detay `working/_step60d_kapanis_audit.md`.
+
+**Onceki 5 hata (ilk Code raporu):**
+
+1. **KURAL 4 slug gap FAIL (5.34 > 5.00)** — "Borderline" yumusatma yanlis. V28d 5.21 fail'di, V28e +0.13pp ile kotulesti. (Kural 7.1 v2.5 revize)
+2. **HTML hardcoded eski metin** — Satir 14240/14248: "91 slug, 16cat 65.1" yazıyor, V28e gercek 87 slug / 14cat 0.6997. Production yanlis sayilar gosteriyor.
+3. **K3 keyword-eslesen 603 recete audit edilmedi** — 453 dubbel + 91 tripel + 47 quadrupel + 12 strong_golden, sample dogrulama yok. Wyeast 3787 trappist tripel yanlis slug atanmis olabilir. (Kural 5 ihlal)
+4. **P2 sonrasi cluster A orani olculmedi** — Sprint E V28d (sour 57.3/lager 67.2/wheat 70.3) baseline, V28e tekrar koşturulmadi. (Kural 9.3 v2.5)
+5. **V21 NaN 4 recete (rmwoods OG/FG/ABV bos)** — Yapisal risk, V21'den retrain ederse parse hatasi. (Risk 1)
+
+**Ilave 7 hata (Code'un ikinci raporu):**
+
+6. **KURAL 1.1 ihlali — FP testi atlandi** — Phase 2'de 8 pattern 8351 flag, sentetik string compile testi yapildi (24/24), gercek raw.yeast manuel kontrol atlandi. T-58 601, S-33 491, Vermont 1448, East Coast 1015, Cream Blend 1007, Australian 685, Burton Union, M21. FP riski "Australian IPA" recete adi, "t-58" 58F notasyonu vs.
+7. **KURAL 4 5-stat gain monitoring atlandi** — V28e onayi sadece headline +0.11pp/+0.19pp ile. 5-stat gain analizi yapilmadi, alarm <%3 trend hesaplanmadi. Kazanim std seviyesinde (V6 ±0.005). (Kural 4.6 v2.5)
+8. **V19 vs V6 metric direkt kiyas yaniltici** — V19 14cat 0.6997 ve V6 cv_top1 0.6046 farkli tabanlardan. Yan yana sunum bilimsel olarak gecersiz. (Kural 9.4 v2.5)
+9. **V28e deploy sonrasi UI test dogrulanmadi** — Hard refresh, V6 motor yuklemesi, displayTR mapping calismasi canli UI'da test edilmedi. Sentetik K=5 wheat 3/5 raporu gercek UI ciktisi degil. (Kural 9.5 v2.5)
+10. **Sprint disiplini ihlali — 4 deploy tek session** — V28d, V28d V6, V28d displayTR, V28e — 24 saat icinde. Her deploy ayri analiz + onay gerek, hiz ugruna sikistirildi. (Kural 12.2 v2.5)
+11. **V6 retrain script tarihce izi** — `_step6_v6_retrain_14cluster.py` 3 dataset icin path edit, git diff sadece son state. V21 baseline reproduce manuel geri cevirme gerek. (Kural 12.3 v2.5)
+12. **V28e gain kanitlanamadi (kumulatif)** — 7 hata kumulatif: V28e production'a deploy edildi ama gercek deger uretip uretmedigi belirsiz. Cluster A orani #4, 5-stat gain #7, UI test #9, FP testi #6 — hicbiri olculmedi/yapilmadi.
+
+**3 Risk Kaydi:**
+
+- **Risk 1: V21 NaN 4 recete (rmwoods)** — Yapisal sorun, V21'den retrain ederse parse hatasi. Cozum onerisi: NaN -> 0 manuel duzeltme veya recete sil.
+- **Risk 2: Phase 2 FP yuk** — ~8351 yeni flag, FP testi yapilmadi. Bilinmeyen sayi yanlis flag.
+- **Risk 3: V28e gain belirsizlik** — Headline metric istatistiksel gurultu altinda. P2 sonrasi olçum yapilmadan V28e "basarili" sayilamaz.
