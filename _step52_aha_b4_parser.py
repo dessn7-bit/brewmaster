@@ -267,7 +267,9 @@ BRETT_RE = re.compile(
     r'\bwild\s*(ale|yeast|fermentation|brew)\b|'
     r'wildbrew\s*sour|philly\s*sour|lallemand\s*wild|omega\s*(?:yeast\s*)?(?:cosmic|saisonstein|hothead)|'
     r'\bfoeder\b|funky|farmhouse\s*sour|barrel\s*(?:aged\s*)?sour|'
-    r'amalgamation|cosmic|hothead\s*ale|all\s*the\s*bretts|funkwerks|saisonstein',
+    r'amalgamation|cosmic|hothead\s*ale|all\s*the\s*bretts|funkwerks|saisonstein|'
+    # Adim 18d-pre P2 (2026-05-04): +ECY02 Flemish Ale Blend (mixed-ferm Brett+Sacc)
+    r'ecy[\s\-]?0?2\b|flemish\s+ale\s+blend',
     # Adim 18c-1c-5d AŞAMA C revize (2026-05-04): Cellador pattern erteleme — Adim 18c-1c-7'ye tasindi (KURAL 2.4 ≥10 ihlali, 3 recete yetersiz orneklem)
     re.IGNORECASE,
 )
@@ -339,7 +341,8 @@ def detect_features(rec, parsed):
         re.search(r'belgian\s*(saison|ale|abbey|trappist|tripel|dubbel|witbier|lambic|farmhouse)|imperial\s*b[\s\-]?\d+|'
                   r'safbrew\s*[-\s]?[ts][\s-]?(58|33)|safbrew\s+(?:specialty|general/?belgian)\s+ale\s+yeast|'
                   r'antwerp\s+ale\s+yeast|'
-                  r'wlp\s*0?(515|570|545)\b|'
+                  r'wlp\s*0?(510|515|545|570|575)\b|'
+                  r'\bt[\s\-]?58\b|\bs[\s\-]?33\b|bastogne|belgian\s+style\s+ale\s+blend|'
                   r'belgian\s+golden\s+ale\s+yeast|belgian\s+strong\s+ale\s+yeast', yeast_str)) else 0
     # Adim 18c-1c-2: bare numeric (1762/1214/3787) cikar (FP riski), wlp 5xx bosluklu varyant ekle, wyeast prefix kombo
     feats['yeast_abbey'] = 1 if (any(s in yeast_str for s in ('abbey', 'trappist', 'wlp500', 'wlp 500', 'wlp530', 'wlp 530', 'wlp540', 'wlp 540', 'wlp575', 'wlp 575')) or
@@ -356,7 +359,8 @@ def detect_features(rec, parsed):
         r'\b(1098|1187|1275|1318|1469|1945|1968)\b|'
         r'english\s+ale|burton\s+ale\s+yeast|ringwood\s+ale|west\s+yorkshire(\s+ale)?|'
         r'yorkshire\s+square\s+ale|manchester\s+ale\s+yeast|european\s+ale(\s+yeast)?|'
-        r'\bneobritannia\b|nb[\s\-]+neobritannia',
+        r'\bneobritannia\b|nb[\s\-]+neobritannia|'
+        r'australian\s+ale|burton\s+union\s*\(?\s*mangrove\s+jack',
         yeast_str) else 0
     # Adim 18c-1c-5 (2026-05-03): +7 brand (denny's, NW ale, pacman, san_diego, california_v, super_high_gravity, us_west_coast M44)
     # Adim 18c-1c-5d C8/C9/C11 (2026-05-04):
@@ -366,13 +370,14 @@ def detect_features(rec, parsed):
     feats['yeast_american'] = 1 if (any(p in yeast_str for p in CLEAN_US05_PATTERNS) or
         re.search(r'denny.{0,3}s\s+favorite\s*50|'
                   r'\b(?:wyeast|wy)\s*[\#\.]?\s*0?(1450|1332|1764)\b|\b(1450|1332|1764)\b|\(\s*1764\s*\)|'
-                  r'wlp\s*0?(051|090|099)\b|'
+                  r'wlp\s*0?(051|072|080|090|099|862)\b|'
                   r'northwest\s+ale|\bpac\s*man\b|'
                   r'san\s+diego\s+super(\s+yeast)?|'
                   r'california\s+v\s+ale\s+yeast|'
                   r'super\s+high\s+gravity(\s+ale)?|'
                   r'\bm\s*44(\s+(?:us|west|west\s+coast))?|u\.?s\.?\s+west\s+coast(\s+yeast)?(\s+m\s*44)?|mangrove\s*jack.{0,15}m\s*44|'
                   r'\bnorcal\s*#?\s*1\b|gigayeast.{0,10}norcal|\bgy\s*0?001\b|'
+                  r'vermont\s+ale|east\s+coast\s+ale|cream\s+ale\s+(?:yeast\s+)?blend|cry\s+havoc|'
                   # Adim 18c-1c-5d AŞAMA C revize (2026-05-04): C9 muntons only — \bpremium\s+gold\b cikarildi (FP riski, "Premium Gold Wheat" recipe adlari)
                   r'muntons\s+premium\s+gold|'
                   r'coopers?\s+(?:brewery\s+)?pure\s+brewers?(\s+yeast)?',
@@ -381,7 +386,7 @@ def detect_features(rec, parsed):
     feats['yeast_german_lager'] = 1 if re.search(
         r'\bw-?34/70|\bs-?23\b|\bs-?189|2124 bohemian|2206 bavarian|'
         r'saflager|'
-        r'wlp\s*0?(800|802|820|830|833|835|838|840|850|860|885|940)\b|'
+        r'wlp\s*0?(800|802|820|830|833|835|838|840|850|860|862|885|940)\b|'
         # Adim 18c-1c-5d AŞAMA C revize (2026-05-04): bare 2272 cikarildi (Wyeast resmi 2272 = American Lager, German degil; C1 ek)
         # Kalan 12 numara (2001/2002/2007/2042/2112/2124/2206/2247/2278/2308/2487/2633) Adim 18c-1c-5e ayri sprint
         r'\b(2001|2002|2007|2042|2112|2124|2206|2247|2278|2308|2487|2633)\b|'
@@ -404,12 +409,14 @@ def detect_features(rec, parsed):
     feats['yeast_cal_common'] = 1 if re.search(r'california\s+lager|wlp\s*0?810\b|\b(?:wyeast|wy)\s*[\#\.]?\s*0?2112\b|\b2112\b', yeast_str) else 0
     feats['yeast_brett'] = 1 if BRETT_RE.search(yeast_str_full) else 0
     feats['yeast_lacto'] = 1 if LACTO_RE.search(yeast_str_full) else 0
-    feats['yeast_sour_blend'] = 1 if re.search(r'sour\s*blend|mixed\s*culture|wildbrew\s*sour|sour\s*pitch|amalgamation|wild\s*ale\s*blend|the\s*funk|barrel\s*blend', yeast_str_full) else 0
+    # Adim 18d-pre P2 (2026-05-04): +WLP630/655/670 + 3191/3278 + ECY02 + flemish_ale_blend
+    feats['yeast_sour_blend'] = 1 if re.search(r'sour\s*blend|mixed\s*culture|wildbrew\s*sour|sour\s*pitch|amalgamation|wild\s*ale\s*blend|the\s*funk|barrel\s*blend|wlp\s*0?(630|655|670)\b|\b(?:wyeast|wy)\s*[\#\.]?\s*0?(3191|3278)\b|\b(3191|3278)\b|ecy[\s\-]?0?2\b|flemish\s+ale\s+blend|berliner\s+weisse\s+blend', yeast_str_full) else 0
     # Adim 18c-1c-5: +forbidden_fruit + brewferm_blanche + 5 wheat brand
-    feats['yeast_witbier'] = 1 if re.search(r'witbier|wlp\s*0?40[01]\b|\b(?:wyeast|wy)\s*[\#\.]?\s*0?(3944|3463)\b|\b(3944|3463)\b|hoegaarden|wit\s*ale|wit\s*yeast|forbidden\s+fruit|brewferm\s+blanche', yeast_str_full) else 0
+    # Adim 18d-pre P2 (2026-05-04): +WLP410/4015 + M21 + Lalbrew Wit + Imperial B44 + Wyeast 3942
+    feats['yeast_witbier'] = 1 if re.search(r'witbier|wlp\s*0?(400|401|410|4015)\b|\b(?:wyeast|wy)\s*[\#\.]?\s*0?(3944|3463|3942)\b|\b(3944|3463|3942)\b|\bm[\s\-]?21\b|mangrove\s+jacks?\s+belgian\s+wit|lalbrew\s+wit\b|\bb[\s\-]?44\b|imperial\s+witbier|hoegaarden|wit\s*ale|wit\s*yeast|forbidden\s+fruit|brewferm\s+blanche', yeast_str_full) else 0
     feats['yeast_wheat_german'] = 1 if re.search(
         r'weihenstephan|wlp\s*0?(300|380)\b|'
-        r'\b(?:wyeast|wy)\s*[\#\.]?\s*0?(1010|3056|3068)\b|\b(1010|3056|3068)\b|'
+        r'\b(?:wyeast|wy)\s*[\#\.]?\s*0?(1010|3056|3068|3942)\b|\b(1010|3056|3068|3942)\b|'
         r'wb[\s\-]?06|hefeweizen|munich\s*wheat|munich\s+classic|'
         r'american\s+wheat(\s+ale)?(\s+yeast)?|bavarian\s+wheat(\s+blend)?|'
         r'danstar\s+munich|lallemand\s+munich(\s+wheat)?|'
