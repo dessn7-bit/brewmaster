@@ -438,6 +438,14 @@ scale_arr = sc_full.scale_.tolist()
 with open(ARCH / '_v6_scaler.json', 'w', encoding='utf-8') as f:
     json.dump({'mean': mean_arr, 'scale': scale_arr, 'features': COMPACT_FEATURES}, f)
 
+CLUSTER_DISPLAY_TR = {
+    'bock': 'Bock', 'brown_ale': 'Brown Ale', 'ipa': 'IPA',
+    'lager': 'Lager', 'lager_dark': 'Dark Lager', 'pale_ale': 'Pale Ale',
+    'pilsner': 'Pilsner', 'porter': 'Porter', 'saison': 'Saison',
+    'sour': 'Sour', 'specialty': 'Specialty', 'stout': 'Stout',
+    'strong_ale': 'Strong Ale', 'wheat': 'Wheat',
+}
+
 with open(ARCH / '_v6_meta.json', 'w', encoding='utf-8') as f:
     json.dump({
         'version': 'v2.81.0',
@@ -446,6 +454,7 @@ with open(ARCH / '_v6_meta.json', 'w', encoding='utf-8') as f:
         'features': COMPACT_FEATURES,
         'classes': sorted(set(y.tolist())),
         'date': '2026-05-01',
+        'displayTR': CLUSTER_DISPLAY_TR,
     }, f, indent=2)
 
 ref_sz = (ARCH / 'v6_reference.json').stat().st_size / (1024**2)
