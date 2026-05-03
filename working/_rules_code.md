@@ -131,6 +131,16 @@ Seçenek listesinde hiçbir seçeneğin yanına "önerilir / tercih / uygun / ma
 
 **Atıf:** V28 rollback rapor 03.05.2026.
 
+### Kural 4.5 — KARAR yasağı kapsam ayrımı
+
+KARAR yasağı kapsamı: strateji yönü, dataset karar(lar)ı, kapsam genişletme/kısaltma, sprint sıralaması. Bunlar Kaan'da.
+
+KARAR yasağı KAPSAMI DIŞINDA: Build script teknik detay, anomali eşik tasarımı, defensive guard kalibrasyonu, retrain parametre seçimi, performans/doğruluk trade-off'u. Bunlar Claude araştırır + karar verir + gerekçesini sunar. Kaan teknik detayda onay/red verir, üretmez.
+
+Belirsiz alanlar: Süphede Claude soru sorar, ama "A/B/C hangisi?" tipi açık uçlu soru değil — "Karar X, gerekçe Y, itiraz var mı?" formatı.
+
+**Atıf:** 03.05.2026 V28a sonrası iletişim disiplini düzeltmesi.
+
 ---
 
 ## Bölüm 5 — Süreç ve görev yönetimi
