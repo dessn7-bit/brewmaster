@@ -1,0 +1,56 @@
+{
+  "meta": {
+    "sprint": "Adim 18c-1c-5d V28b stability baseline",
+    "method": "V27 ardisik 2 XGBoost retrain (random_state=42, hist, n_jobs=-1)",
+    "rule_refs": [
+      "KURAL 1.4",
+      "KURAL 4.4",
+      "KURAL 6.3"
+    ]
+  },
+  "sha256_check": {
+    "v27_intact": true,
+    "v28b_intact": true
+  },
+  "run_1_train_seconds": 49.6,
+  "run_2_train_seconds": 68.2,
+  "classes_run1": [
+    "barleywine",
+    "belgian",
+    "bitter",
+    "bock",
+    "brown",
+    "cream",
+    "ipa",
+    "lager",
+    "mild",
+    "pale_ale",
+    "porter",
+    "saison",
+    "sour",
+    "specialty",
+    "stout",
+    "wheat"
+  ],
+  "classes_run2": [
+    "barleywine",
+    "belgian",
+    "bitter",
+    "bock",
+    "brown",
+    "cream",
+    "ipa",
+    "lager",
+    "mild",
+    "pale_ale",
+    "porter",
+    "saison",
+    "sour",
+    "specialty",
+    "stout",
+    "wheat"
+  ],
+  "stability_cluster_diff": 0,
+  "top10_stability_transitions": [],
+  "yorum": "V27 ardisik 2 retrain ayni dataset uzerinde. Cluster diff degeri XGBoost tree_method=\"hist\" + n_jobs=-1 thread varyasyonundan kaynaklanir. Pattern degisikligi yok."
+}

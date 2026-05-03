@@ -1,0 +1,1008 @@
+{
+  "meta": {
+    "sprint": "Adim 18c-1c-5d V28b a (XGBoost gain)",
+    "rule_refs": [
+      "KURAL 4.4 (oneri yasagi)",
+      "KURAL 4.5 (kapsam ayrimi)"
+    ],
+    "feature_count": 89
+  },
+  "sha256_check": {
+    "v27_intact": true,
+    "v28b_intact": true
+  },
+  "top10_v27": [
+    "yeast_saison",
+    "yeast_wheat_german",
+    "yeast_belgian",
+    "yeast_abbey",
+    "yeast_german_lager",
+    "yeast_witbier",
+    "dry_hop_days",
+    "yeast_american",
+    "yeast_lacto",
+    "katki_pumpkin"
+  ],
+  "top10_v28b": [
+    "yeast_saison",
+    "yeast_wheat_german",
+    "yeast_belgian",
+    "yeast_german_lager",
+    "yeast_abbey",
+    "yeast_witbier",
+    "dry_hop_days",
+    "yeast_american",
+    "katki_pumpkin",
+    "yeast_sour_blend"
+  ],
+  "top10_added": [
+    "yeast_sour_blend"
+  ],
+  "top10_removed": [
+    "yeast_lacto"
+  ],
+  "top10_icerik_degisimi": true,
+  "hedef_features": [
+    {
+      "feature": "yeast_belgian",
+      "gain_v27": 0.062312,
+      "gain_v28b": 0.060886,
+      "delta_abs": -0.001426,
+      "delta_pct": -2.29,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "yeast_english",
+      "gain_v27": 0.019171,
+      "gain_v28b": 0.019841,
+      "delta_abs": 0.00067,
+      "delta_pct": 3.49,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "yeast_american",
+      "gain_v27": 0.024749,
+      "gain_v28b": 0.025944,
+      "delta_abs": 0.001195,
+      "delta_pct": 4.83,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "yeast_german_lager",
+      "gain_v27": 0.056099,
+      "gain_v28b": 0.058592,
+      "delta_abs": 0.002492,
+      "delta_pct": 4.44,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "yeast_kolsch",
+      "gain_v27": 0.018169,
+      "gain_v28b": 0.018405,
+      "delta_abs": 0.000236,
+      "delta_pct": 1.3,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "yeast_wheat_german",
+      "gain_v27": 0.064479,
+      "gain_v28b": 0.067989,
+      "delta_abs": 0.003511,
+      "delta_pct": 5.45,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    }
+  ],
+  "hedef_anomali": false,
+  "all_features_gain": [
+    {
+      "feature": "og",
+      "gain_v27": 0.014149,
+      "gain_v28b": 0.013839,
+      "delta_abs": -0.00031,
+      "delta_pct": -2.19,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "fg",
+      "gain_v27": 0.0023,
+      "gain_v28b": 0.002324,
+      "delta_abs": 2.4e-05,
+      "delta_pct": 1.05,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "abv",
+      "gain_v27": 0.007178,
+      "gain_v28b": 0.007268,
+      "delta_abs": 8.9e-05,
+      "delta_pct": 1.25,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "ibu",
+      "gain_v27": 0.017762,
+      "gain_v28b": 0.018244,
+      "delta_abs": 0.000482,
+      "delta_pct": 2.72,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "srm",
+      "gain_v27": 0.023071,
+      "gain_v28b": 0.024031,
+      "delta_abs": 0.000961,
+      "delta_pct": 4.16,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "pct_pilsner",
+      "gain_v27": 0.009106,
+      "gain_v28b": 0.00905,
+      "delta_abs": -5.5e-05,
+      "delta_pct": -0.61,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "pct_pale_ale",
+      "gain_v27": 0.002085,
+      "gain_v28b": 0.002106,
+      "delta_abs": 2.1e-05,
+      "delta_pct": 1.03,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "pct_munich",
+      "gain_v27": 0.004157,
+      "gain_v28b": 0.004363,
+      "delta_abs": 0.000206,
+      "delta_pct": 4.95,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "pct_vienna",
+      "gain_v27": 0.00248,
+      "gain_v28b": 0.00255,
+      "delta_abs": 6.9e-05,
+      "delta_pct": 2.79,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "pct_wheat",
+      "gain_v27": 0.021117,
+      "gain_v28b": 0.021789,
+      "delta_abs": 0.000672,
+      "delta_pct": 3.18,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "pct_oats",
+      "gain_v27": 0.006713,
+      "gain_v28b": 0.006962,
+      "delta_abs": 0.000248,
+      "delta_pct": 3.7,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "pct_rye",
+      "gain_v27": 0.005964,
+      "gain_v28b": 0.006046,
+      "delta_abs": 8.2e-05,
+      "delta_pct": 1.38,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "pct_crystal",
+      "gain_v27": 0.001939,
+      "gain_v28b": 0.001966,
+      "delta_abs": 2.6e-05,
+      "delta_pct": 1.36,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "pct_choc",
+      "gain_v27": 0.017369,
+      "gain_v28b": 0.018135,
+      "delta_abs": 0.000766,
+      "delta_pct": 4.41,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "pct_roast",
+      "gain_v27": 0.016208,
+      "gain_v28b": 0.016375,
+      "delta_abs": 0.000168,
+      "delta_pct": 1.03,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "pct_smoked",
+      "gain_v27": 0.0043,
+      "gain_v28b": 0.004529,
+      "delta_abs": 0.000229,
+      "delta_pct": 5.33,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "pct_corn",
+      "gain_v27": 0.003774,
+      "gain_v28b": 0.003744,
+      "delta_abs": -3e-05,
+      "delta_pct": -0.79,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "pct_rice",
+      "gain_v27": 0.001208,
+      "gain_v28b": 0.001228,
+      "delta_abs": 2e-05,
+      "delta_pct": 1.63,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "pct_sugar",
+      "gain_v27": 0.004041,
+      "gain_v28b": 0.004084,
+      "delta_abs": 4.3e-05,
+      "delta_pct": 1.07,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "pct_aromatic_abbey",
+      "gain_v27": 0.002368,
+      "gain_v28b": 0.002391,
+      "delta_abs": 2.4e-05,
+      "delta_pct": 1.0,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "pct_sixrow",
+      "gain_v27": 0.000814,
+      "gain_v28b": 0.000694,
+      "delta_abs": -0.00012,
+      "delta_pct": -14.69,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "pct_other",
+      "gain_v27": 0.003276,
+      "gain_v28b": 0.00338,
+      "delta_abs": 0.000105,
+      "delta_pct": 3.2,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "total_base",
+      "gain_v27": 0.001025,
+      "gain_v28b": 0.001023,
+      "delta_abs": -1e-06,
+      "delta_pct": -0.14,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "yeast_belgian",
+      "gain_v27": 0.062312,
+      "gain_v28b": 0.060886,
+      "delta_abs": -0.001426,
+      "delta_pct": -2.29,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "yeast_abbey",
+      "gain_v27": 0.057732,
+      "gain_v28b": 0.056446,
+      "delta_abs": -0.001286,
+      "delta_pct": -2.23,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "yeast_saison",
+      "gain_v27": 0.121544,
+      "gain_v28b": 0.109828,
+      "delta_abs": -0.011717,
+      "delta_pct": -9.64,
+      "mutlak_anomali": true,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "yeast_kveik",
+      "gain_v27": 7.8e-05,
+      "gain_v28b": 9.4e-05,
+      "delta_abs": 1.6e-05,
+      "delta_pct": 20.66,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "yeast_english",
+      "gain_v27": 0.019171,
+      "gain_v28b": 0.019841,
+      "delta_abs": 0.00067,
+      "delta_pct": 3.49,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "yeast_american",
+      "gain_v27": 0.024749,
+      "gain_v28b": 0.025944,
+      "delta_abs": 0.001195,
+      "delta_pct": 4.83,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "yeast_german_lager",
+      "gain_v27": 0.056099,
+      "gain_v28b": 0.058592,
+      "delta_abs": 0.002492,
+      "delta_pct": 4.44,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "yeast_czech_lager",
+      "gain_v27": 0.002872,
+      "gain_v28b": 0.002016,
+      "delta_abs": -0.000856,
+      "delta_pct": -29.8,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "yeast_american_lager",
+      "gain_v27": 0.021183,
+      "gain_v28b": 0.022624,
+      "delta_abs": 0.001442,
+      "delta_pct": 6.81,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "yeast_kolsch",
+      "gain_v27": 0.018169,
+      "gain_v28b": 0.018405,
+      "delta_abs": 0.000236,
+      "delta_pct": 1.3,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "yeast_altbier",
+      "gain_v27": 0.009495,
+      "gain_v28b": 0.0101,
+      "delta_abs": 0.000606,
+      "delta_pct": 6.38,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "yeast_cal_common",
+      "gain_v27": 0.010658,
+      "gain_v28b": 0.010759,
+      "delta_abs": 0.000101,
+      "delta_pct": 0.94,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "yeast_brett",
+      "gain_v27": 0.003857,
+      "gain_v28b": 0.003056,
+      "delta_abs": -0.000801,
+      "delta_pct": -20.77,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "yeast_lacto",
+      "gain_v27": 0.024671,
+      "gain_v28b": 0.020843,
+      "delta_abs": -0.003828,
+      "delta_pct": -15.51,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "yeast_sour_blend",
+      "gain_v27": 0.024104,
+      "gain_v28b": 0.024434,
+      "delta_abs": 0.000331,
+      "delta_pct": 1.37,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "yeast_witbier",
+      "gain_v27": 0.043888,
+      "gain_v28b": 0.045422,
+      "delta_abs": 0.001534,
+      "delta_pct": 3.49,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "yeast_wheat_german",
+      "gain_v27": 0.064479,
+      "gain_v28b": 0.067989,
+      "delta_abs": 0.003511,
+      "delta_pct": 5.45,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "yeast_wit",
+      "gain_v27": 0.01673,
+      "gain_v28b": 0.018374,
+      "delta_abs": 0.001644,
+      "delta_pct": 9.83,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "hop_american_c",
+      "gain_v27": 0.019304,
+      "gain_v28b": 0.020432,
+      "delta_abs": 0.001128,
+      "delta_pct": 5.84,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "hop_english",
+      "gain_v27": 0.01411,
+      "gain_v28b": 0.013991,
+      "delta_abs": -0.00012,
+      "delta_pct": -0.85,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "hop_german",
+      "gain_v27": 0.004434,
+      "gain_v28b": 0.00465,
+      "delta_abs": 0.000216,
+      "delta_pct": 4.87,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "hop_czech_saaz",
+      "gain_v27": 0.003126,
+      "gain_v28b": 0.003091,
+      "delta_abs": -3.5e-05,
+      "delta_pct": -1.13,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "hop_nz",
+      "gain_v27": 0.001018,
+      "gain_v28b": 0.001174,
+      "delta_abs": 0.000157,
+      "delta_pct": 15.41,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "hop_aged",
+      "gain_v27": 0.000954,
+      "gain_v28b": 0.000966,
+      "delta_abs": 1.2e-05,
+      "delta_pct": 1.22,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "hop_northern_brewer",
+      "gain_v27": 0.00498,
+      "gain_v28b": 0.005374,
+      "delta_abs": 0.000394,
+      "delta_pct": 7.92,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "katki_fruit",
+      "gain_v27": 0.001309,
+      "gain_v28b": 0.001286,
+      "delta_abs": -2.3e-05,
+      "delta_pct": -1.72,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "katki_spice_herb",
+      "gain_v27": 0.004314,
+      "gain_v28b": 0.003888,
+      "delta_abs": -0.000426,
+      "delta_pct": -9.86,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "katki_chocolate",
+      "gain_v27": 0.003262,
+      "gain_v28b": 0.003378,
+      "delta_abs": 0.000116,
+      "delta_pct": 3.54,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "katki_coffee",
+      "gain_v27": 0.002358,
+      "gain_v28b": 0.002414,
+      "delta_abs": 5.6e-05,
+      "delta_pct": 2.37,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "katki_chile",
+      "gain_v27": 0.002994,
+      "gain_v28b": 0.00258,
+      "delta_abs": -0.000414,
+      "delta_pct": -13.82,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "katki_smoke",
+      "gain_v27": 0.00016,
+      "gain_v28b": 0.000145,
+      "delta_abs": -1.4e-05,
+      "delta_pct": -8.95,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "katki_honey",
+      "gain_v27": 0.001707,
+      "gain_v28b": 0.001777,
+      "delta_abs": 7e-05,
+      "delta_pct": 4.11,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "katki_pumpkin",
+      "gain_v27": 0.024426,
+      "gain_v28b": 0.025504,
+      "delta_abs": 0.001078,
+      "delta_pct": 4.41,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "katki_salt",
+      "gain_v27": 0.000915,
+      "gain_v28b": 0.000916,
+      "delta_abs": 1e-06,
+      "delta_pct": 0.15,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "katki_lactose",
+      "gain_v27": 0.003932,
+      "gain_v28b": 0.003666,
+      "delta_abs": -0.000266,
+      "delta_pct": -6.76,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "mash_temp_c",
+      "gain_v27": 0.00116,
+      "gain_v28b": 0.001183,
+      "delta_abs": 2.3e-05,
+      "delta_pct": 1.99,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "fermentation_temp_c",
+      "gain_v27": 0.001542,
+      "gain_v28b": 0.001651,
+      "delta_abs": 0.000108,
+      "delta_pct": 7.02,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "yeast_attenuation",
+      "gain_v27": 0.003763,
+      "gain_v28b": 0.003967,
+      "delta_abs": 0.000204,
+      "delta_pct": 5.42,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "boil_time_min",
+      "gain_v27": 0.001929,
+      "gain_v28b": 0.002018,
+      "delta_abs": 8.9e-05,
+      "delta_pct": 4.63,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "water_ca_ppm",
+      "gain_v27": 0.001143,
+      "gain_v28b": 0.001292,
+      "delta_abs": 0.000149,
+      "delta_pct": 13.06,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "water_so4_ppm",
+      "gain_v27": 0.001582,
+      "gain_v28b": 0.002392,
+      "delta_abs": 0.00081,
+      "delta_pct": 51.16,
+      "mutlak_anomali": false,
+      "oransal_anomali": true,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "water_cl_ppm",
+      "gain_v27": 0.0,
+      "gain_v28b": 0.0,
+      "delta_abs": 0.0,
+      "delta_pct": null,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "dry_hop_days",
+      "gain_v27": 0.042002,
+      "gain_v28b": 0.038552,
+      "delta_abs": -0.00345,
+      "delta_pct": -8.21,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "mash_type_step",
+      "gain_v27": 0.001841,
+      "gain_v28b": 0.001942,
+      "delta_abs": 0.000101,
+      "delta_pct": 5.48,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "mash_type_decoction",
+      "gain_v27": 0.0,
+      "gain_v28b": 0.0,
+      "delta_abs": 0.0,
+      "delta_pct": null,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "lagering_days",
+      "gain_v27": 0.001158,
+      "gain_v28b": 0.001366,
+      "delta_abs": 0.000208,
+      "delta_pct": 17.96,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "has_coffee",
+      "gain_v27": 0.003225,
+      "gain_v28b": 0.003083,
+      "delta_abs": -0.000141,
+      "delta_pct": -4.38,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "has_fruit",
+      "gain_v27": 0.004755,
+      "gain_v28b": 0.004714,
+      "delta_abs": -4.1e-05,
+      "delta_pct": -0.85,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "has_spice",
+      "gain_v27": 0.01123,
+      "gain_v28b": 0.013394,
+      "delta_abs": 0.002164,
+      "delta_pct": 19.27,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "has_chili",
+      "gain_v27": 0.002219,
+      "gain_v28b": 0.002227,
+      "delta_abs": 7e-06,
+      "delta_pct": 0.34,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "has_smoke",
+      "gain_v27": 0.00035,
+      "gain_v28b": 0.000484,
+      "delta_abs": 0.000133,
+      "delta_pct": 38.08,
+      "mutlak_anomali": false,
+      "oransal_anomali": true,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "has_belgian_yeast",
+      "gain_v27": 0.003723,
+      "gain_v28b": 0.003639,
+      "delta_abs": -8.4e-05,
+      "delta_pct": -2.25,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "has_clean_us05_isolate",
+      "gain_v27": 0.002715,
+      "gain_v28b": 0.002823,
+      "delta_abs": 0.000108,
+      "delta_pct": 3.98,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "has_brett",
+      "gain_v27": 0.004116,
+      "gain_v28b": 0.004708,
+      "delta_abs": 0.000592,
+      "delta_pct": 14.38,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "has_lacto",
+      "gain_v27": 0.001746,
+      "gain_v28b": 0.001926,
+      "delta_abs": 0.00018,
+      "delta_pct": 10.28,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "has_pedio",
+      "gain_v27": 0.000243,
+      "gain_v28b": 0.000406,
+      "delta_abs": 0.000163,
+      "delta_pct": 67.08,
+      "mutlak_anomali": false,
+      "oransal_anomali": true,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "is_mixed_fermentation",
+      "gain_v27": 0.000602,
+      "gain_v28b": 0.000633,
+      "delta_abs": 3.1e-05,
+      "delta_pct": 5.16,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "is_100pct_brett",
+      "gain_v27": 0.006235,
+      "gain_v28b": 0.006765,
+      "delta_abs": 0.00053,
+      "delta_pct": 8.51,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "has_coriander",
+      "gain_v27": 0.011149,
+      "gain_v28b": 0.011747,
+      "delta_abs": 0.000597,
+      "delta_pct": 5.36,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "has_orange_peel",
+      "gain_v27": 0.004122,
+      "gain_v28b": 0.003947,
+      "delta_abs": -0.000175,
+      "delta_pct": -4.25,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "has_chamomile",
+      "gain_v27": 0.002239,
+      "gain_v28b": 0.000965,
+      "delta_abs": -0.001274,
+      "delta_pct": -56.9,
+      "mutlak_anomali": false,
+      "oransal_anomali": true,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "has_salt",
+      "gain_v27": 0.001789,
+      "gain_v28b": 0.001876,
+      "delta_abs": 8.7e-05,
+      "delta_pct": 4.86,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "has_dry_hop_heavy",
+      "gain_v27": 0.01427,
+      "gain_v28b": 0.012584,
+      "delta_abs": -0.001686,
+      "delta_pct": -11.81,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "has_whirlpool_heavy",
+      "gain_v27": 0.004083,
+      "gain_v28b": 0.004129,
+      "delta_abs": 4.6e-05,
+      "delta_pct": 1.14,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "dry_hop_grams_per_liter",
+      "gain_v27": 0.01443,
+      "gain_v28b": 0.015195,
+      "delta_abs": 0.000764,
+      "delta_pct": 5.3,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    },
+    {
+      "feature": "late_hop_pct",
+      "gain_v27": 0.003141,
+      "gain_v28b": 0.003382,
+      "delta_abs": 0.000241,
+      "delta_pct": 7.67,
+      "mutlak_anomali": false,
+      "oransal_anomali": false,
+      "anomali_bayrak": false
+    }
+  ],
+  "anomali_check": {
+    "esik_mutlak": 0.005,
+    "esik_oransal": 30,
+    "logic": "AND",
+    "hedef_anomali": false,
+    "top10_icerik_degisimi": true,
+    "genel_anomali_bayrak": true
+  }
+}

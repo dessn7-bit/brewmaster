@@ -1,0 +1,199 @@
+{
+  "meta": {
+    "sprint": "Adim 18c-1c-5d V28b (C2-C11 ardisik build)",
+    "olusturma": "2026-05-04",
+    "rule_refs": ["KURAL 4.5 (kapsam ayrimi)", "KURAL 1.4 (recete vs flag)", "KURAL 11.1 (cross-dataset)"],
+    "isimlendirme": "V28b_C2 -> V28b_C3 -> ... -> V28b_C11 (kumulatif)",
+    "v28a_baseline_sha256": "5dfcc4ccecac8bb3d250f5a4f552b39a2d0fd475a582fb98993507f1824cf301",
+    "v27_baseline_sha256": "8c2d132d1913a57203040a98c9ef1ceebc2e18ce771b0f233718e1215c12442d"
+  },
+  "prompt_duzeltme_bayraklari": [
+    {
+      "konum": "Kaan prompt C3",
+      "iddia": "saison+american 332 (B5b'den 154 FP)",
+      "audit_olcum": "B5b raporu saison+american 332 toplam, %0.6 = 2 recete pattern_FP. 154 FP yanlis sayim.",
+      "kaynak": "working/_step18c1c5d_b5b_anomaly_classification.json",
+      "duzeltme": "C3 belgian overflow odagi: lager+belgian 483 (%8.5 FP = 41 recete)"
+    },
+    {
+      "konum": "Kaan prompt C4",
+      "iddia": "yeast_american'dan 42 yanlis flag 1->0",
+      "audit_olcum": "Bell oberon parser commit e12c62b'de yeast_wheat_german pattern icinde, yeast_american DEGIL.",
+      "kaynak": "_step53_b3_to_v15_format.py line 290 + B9 audit",
+      "duzeltme": "C4 hedef feature: yeast_wheat_german (yeast_american degil)"
+    },
+    {
+      "konum": "Kaan prompt C5",
+      "iddia": "yeast_australian'a 94 recete eklenmesi",
+      "audit_olcum": "yeast_australian feature dataset'te YOK. 18 yeast feature listesi: yeast_belgian, yeast_abbey, ..., yeast_wheat_german, yeast_wit. Mauri brew parser commit e12c62b'de yeast_german_lager pattern icinde.",
+      "kaynak": "_step53_b3_to_v15_format.py line 266 + B9 audit",
+      "duzeltme": "C5 hedef feature: yeast_german_lager (yeast_australian degil)"
+    },
+    {
+      "konum": "Kaan prompt C9",
+      "iddia": "yeast_english'e 309 recete sadece muntons kombosuyla",
+      "audit_olcum": "Premium Gold parser commit e12c62b'de yeast_american pattern icinde (revize sonrasi muntons-only). C9 hedef feature: yeast_american.",
+      "kaynak": "_step53_b3_to_v15_format.py yeast_american block + B2 audit",
+      "duzeltme": "C9 hedef feature: yeast_american (yeast_english degil), beklenen etki muntons recete sayisi (B2 audit'te 2 sample 'Muntons Premium Gold')"
+    }
+  ],
+  "patterns": {
+    "C2": {
+      "ad": "Kolsch overflow daraltma",
+      "targeted_exception": {
+        "feature": "yeast_kolsch",
+        "kosul_aciklama": "Eski loose pattern (k[oö]ls(?:ch|h)|kolsch|kolsh, sinirsiz) yakalı AND yeni strict pattern \\bk[oö]ls(?:ch|h)\\b yakalanmıyor",
+        "from_to": "1 -> 0"
+      },
+      "drift_guard_field_regex": "(k[oö]ls(?:ch|h)) AND NOT (\\bk[oö]ls(?:ch|h)\\b)",
+      "beklenen_etki": {
+        "min_recete": 0,
+        "max_recete": 200,
+        "kaynak": "B5b wheat+kolsch 144 (%47.2 FP = 68 recete) + stout+kolsch 49 (%42.9 FP = 21 recete) = ~89 reçete + diger cluster benzer"
+      },
+      "audit_referans": "B5b raporu, wheat+kolsch ve stout+kolsch FP siniflandirmasi",
+      "hafifletilmis_dogrulama": ["b (V19 cluster diff)", "a (V19 XGBoost gain)"]
+    },
+    "C3": {
+      "ad": "Belgian overflow daraltma (belle saison kaldirildi)",
+      "targeted_exception": {
+        "feature": "yeast_belgian",
+        "kosul_aciklama": "raw.yeast'te 'belle saison' yakalı AND eski BELGIAN_YEAST_PATTERNS listesinde 'belle saison' vardi (yeni listede yok)",
+        "from_to": "1 -> 0"
+      },
+      "drift_guard_field_regex": "\\bbelle\\s+saison\\b",
+      "beklenen_etki": {
+        "min_recete": 30,
+        "max_recete": 100,
+        "kaynak": "B5b lager+belgian 483 reçete %8.5 FP = 41 reçete; B6 belgian_strong_545 -> yeast_abbey %9.1 subset (beklenen) - belle saison 41 olası bağlamlı"
+      },
+      "audit_referans": "B5b lager+belgian, B6 belgian_strong_545",
+      "hafifletilmis_dogrulama": ["b (V19 cluster diff)", "a (V19 XGBoost gain)"]
+    },
+    "C4": {
+      "ad": "Bell's Oberon strict sinir (loose 46 -> strict 4)",
+      "targeted_exception": {
+        "feature": "yeast_wheat_german",
+        "kosul_aciklama": "Eski loose pattern bell.{0,3}s\\s+oberon yakalı AND yeni strict pattern bell'?s?\\s+oberon yakalamıyor",
+        "from_to": "1 -> 0"
+      },
+      "drift_guard_field_regex": "(bell.{0,3}s\\s+oberon) AND NOT (bell'?s?\\s+oberon)",
+      "beklenen_etki": {
+        "min_recete": 35,
+        "max_recete": 50,
+        "kaynak": "B9 audit: loose 46, strict 4, loose_only diff = 42"
+      },
+      "audit_referans": "B9 raporu",
+      "hafifletilmis_dogrulama": ["b (V19 cluster diff)", "a (V19 XGBoost gain)"]
+    },
+    "C5": {
+      "ad": "Mauri brew space variant (mauribrew -> mauri\\s*brew, +94 recete)",
+      "targeted_exception": {
+        "feature": "yeast_german_lager",
+        "kosul_aciklama": "raw.yeast'te 'mauri brew' (space) yakalı AND eski 'mauribrew' (nospace) yakalanmıyor (+lager kontekst sart)",
+        "from_to": "0 -> 1"
+      },
+      "drift_guard_field_regex": "\\bmauri\\s+brew\\b AND NOT \\bmauribrew\\b",
+      "beklenen_etki": {
+        "min_recete": 80,
+        "max_recete": 110,
+        "kaynak": "B9 audit: nospace 69, space1 94, double space 0, dash 0, any 163; space-only ~94 recete"
+      },
+      "audit_referans": "B9 raporu mauri brew variants",
+      "hafifletilmis_dogrulama": ["b (V19 cluster diff)", "a (V19 XGBoost gain)"]
+    },
+    "C6": {
+      "ad": "Cellador House Blends erteleme (no-op dogrulamasi)",
+      "tip": "no-op",
+      "kosul": "BRETT_RE pattern'de cellador\\s+house\\s+ble?n?ds? YOK (Aşama C revize sirasinda cikarildi)",
+      "drift_guard_field_regex": "(parser kodunda cellador kontrolu)",
+      "beklenen_etki": {
+        "min_recete": 0,
+        "max_recete": 0,
+        "kaynak": "Adim 18c-1c-7'ye ertelendi (KURAL 2.4 ≥10 ihlali, 3 recete yetersiz orneklem)"
+      },
+      "audit_referans": "AŞAMA C revize raporu",
+      "hafifletilmis_dogrulama": ["dogrulama: parser kodunda cellador yok, V28b_C5 == V28b_C6 (no-op)"]
+    },
+    "C7": {
+      "ad": "NB Neobritannia (Wyeast 1945, +352 recete potansiyel)",
+      "targeted_exception": {
+        "feature": "yeast_english",
+        "kosul_aciklama": "raw.yeast'te 'neobritannia' veya bare '1945' yakalı AND V_oncesi yeast_english=0",
+        "from_to": "0 -> 1"
+      },
+      "drift_guard_field_regex": "\\bneobritannia\\b|\\b1945\\b|nb[\\s\\-]+neobritannia",
+      "beklenen_etki": {
+        "min_recete": 300,
+        "max_recete": 400,
+        "kaynak": "B2 audit: nb_neobritannia 352 toplam, 330 yeast flag yok"
+      },
+      "audit_referans": "B2 audit + Wyeast 1945 web dogrulama",
+      "hafifletilmis_dogrulama": ["b (V19 cluster diff)", "a (V19 XGBoost gain)"]
+    },
+    "C8": {
+      "ad": "NorCal #1 (GigaYeast GY001, +6 recete)",
+      "targeted_exception": {
+        "feature": "yeast_american",
+        "kosul_aciklama": "raw.yeast'te '\\bnorcal\\s*#?\\s*1\\b' veya 'gigayeast.{0,10}norcal' veya '\\bgy\\s*0?001\\b' yakalı AND V_oncesi yeast_american=0",
+        "from_to": "0 -> 1"
+      },
+      "drift_guard_field_regex": "\\bnorcal\\s*#?\\s*1\\b|gigayeast.{0,10}norcal|\\bgy\\s*0?001\\b",
+      "beklenen_etki": {
+        "min_recete": 5,
+        "max_recete": 10,
+        "kaynak": "B2 audit: norcal_1 6 toplam"
+      },
+      "audit_referans": "B2 audit",
+      "hafifletilmis_dogrulama": ["b (V19 cluster diff)", "a (V19 XGBoost gain)"]
+    },
+    "C9": {
+      "ad": "Premium Gold muntons-only kombo (FP konservatif, hedef yeast_american)",
+      "targeted_exception": {
+        "feature": "yeast_american",
+        "kosul_aciklama": "raw.yeast'te 'muntons\\s+premium\\s+gold' yakalı AND V_oncesi yeast_american=0",
+        "from_to": "0 -> 1"
+      },
+      "drift_guard_field_regex": "muntons\\s+premium\\s+gold",
+      "beklenen_etki": {
+        "min_recete": 1,
+        "max_recete": 10,
+        "kaynak": "B2 audit: premium_gold 309 toplam, muntons-only spot 2 sample. Tam muntons recete sayisi build'de olculecek."
+      },
+      "audit_referans": "B2 audit + AŞAMA C revize raporu (premium gold tek başına FP riski nedeniyle muntons-only kondu)",
+      "hafifletilmis_dogrulama": ["b (V19 cluster diff)", "a (V19 XGBoost gain)"]
+    },
+    "C10": {
+      "ad": "Lalbrew Diamond (yeast_german_lager)",
+      "targeted_exception": {
+        "feature": "yeast_german_lager",
+        "kosul_aciklama": "raw.yeast'te '\\blalbrew\\s+diamond\\b' veya '\\blallemand\\s+(?:premium\\s+)?diamond\\b' veya '\\bdiamond\\s+lager(\\s+yeast)?\\b' yakalı AND V_oncesi yeast_german_lager=0",
+        "from_to": "0 -> 1"
+      },
+      "drift_guard_field_regex": "\\blalbrew\\s+diamond\\b|\\blallemand\\s+(?:premium\\s+)?diamond\\b|\\bdiamond\\s+lager(\\s+yeast)?\\b",
+      "beklenen_etki": {
+        "min_recete": 1,
+        "max_recete": 60,
+        "kaynak": "B2 audit: lalbrew_diamond 54 toplam, 53 zaten flag (yeast_german_lager zaten yakaliyordu eski 'diamond' substring ile). 1 yeni potansiyel."
+      },
+      "audit_referans": "B2 audit + Lallemand resmi web dogrulama",
+      "hafifletilmis_dogrulama": ["b (V19 cluster diff)", "a (V19 XGBoost gain)"]
+    },
+    "C11": {
+      "ad": "Coopers Pure Brewers (yeast_american, +36 recete)",
+      "targeted_exception": {
+        "feature": "yeast_american",
+        "kosul_aciklama": "raw.yeast'te 'coopers?\\s+(?:brewery\\s+)?pure\\s+brewers?(\\s+yeast)?' yakalı AND V_oncesi yeast_american=0",
+        "from_to": "0 -> 1"
+      },
+      "drift_guard_field_regex": "coopers?\\s+(?:brewery\\s+)?pure\\s+brewers?(\\s+yeast)?",
+      "beklenen_etki": {
+        "min_recete": 30,
+        "max_recete": 40,
+        "kaynak": "B2 audit: coopers_pure_brewers 36 toplam, 33 yeast flag yok"
+      },
+      "audit_referans": "B2 audit",
+      "hafifletilmis_dogrulama": ["b (V19 cluster diff)", "a (V19 XGBoost gain)"]
+    }
+  }
+}

@@ -1,0 +1,422 @@
+{
+  "meta": {
+    "sprint": "Adim 18c-1c-5d V28b b (V19 cluster diff)",
+    "rule_refs": [
+      "KURAL 1.4 (recete vs flag)",
+      "KURAL 4.4 (oneri yasagi)",
+      "KURAL 6.3 (sample N)"
+    ],
+    "train_time_v27_seconds": 59.9,
+    "train_time_v28b_seconds": 68.0,
+    "classes_v27": [
+      "barleywine",
+      "belgian",
+      "bitter",
+      "bock",
+      "brown",
+      "cream",
+      "ipa",
+      "lager",
+      "mild",
+      "pale_ale",
+      "porter",
+      "saison",
+      "sour",
+      "specialty",
+      "stout",
+      "wheat"
+    ],
+    "classes_v28b": [
+      "barleywine",
+      "belgian",
+      "bitter",
+      "bock",
+      "brown",
+      "cream",
+      "ipa",
+      "lager",
+      "mild",
+      "pale_ale",
+      "porter",
+      "saison",
+      "sour",
+      "specialty",
+      "stout",
+      "wheat"
+    ]
+  },
+  "sha256_check": {
+    "v27_pre": "8c2d132d1913a57203040a98c9ef1ceebc2e18ce771b0f233718e1215c12442d",
+    "v27_post": "8c2d132d1913a57203040a98c9ef1ceebc2e18ce771b0f233718e1215c12442d",
+    "v27_intact": true,
+    "v28b_pre": "bc8a7b0dd900019ff79900e9f871641bfe162d1c41bbd85cb7f2f37a4b938024",
+    "v28b_post": "bc8a7b0dd900019ff79900e9f871641bfe162d1c41bbd85cb7f2f37a4b938024",
+    "v28b_intact": true
+  },
+  "sayim": {
+    "total_recipes": 376843,
+    "total_cluster_changed": 5839,
+    "audit_exception_total": 2827,
+    "cluster_diff_outside_pattern_estimate": 5839
+  },
+  "top20_transitions": [
+    {
+      "from": "pale_ale",
+      "to": "ipa",
+      "count": 453
+    },
+    {
+      "from": "ipa",
+      "to": "pale_ale",
+      "count": 415
+    },
+    {
+      "from": "porter",
+      "to": "stout",
+      "count": 181
+    },
+    {
+      "from": "stout",
+      "to": "porter",
+      "count": 161
+    },
+    {
+      "from": "pale_ale",
+      "to": "specialty",
+      "count": 152
+    },
+    {
+      "from": "specialty",
+      "to": "pale_ale",
+      "count": 144
+    },
+    {
+      "from": "specialty",
+      "to": "ipa",
+      "count": 127
+    },
+    {
+      "from": "pale_ale",
+      "to": "cream",
+      "count": 127
+    },
+    {
+      "from": "bitter",
+      "to": "specialty",
+      "count": 115
+    },
+    {
+      "from": "bitter",
+      "to": "mild",
+      "count": 112
+    },
+    {
+      "from": "brown",
+      "to": "porter",
+      "count": 106
+    },
+    {
+      "from": "ipa",
+      "to": "specialty",
+      "count": 103
+    },
+    {
+      "from": "pale_ale",
+      "to": "bitter",
+      "count": 101
+    },
+    {
+      "from": "belgian",
+      "to": "saison",
+      "count": 97
+    },
+    {
+      "from": "mild",
+      "to": "bitter",
+      "count": 93
+    },
+    {
+      "from": "specialty",
+      "to": "bitter",
+      "count": 92
+    },
+    {
+      "from": "cream",
+      "to": "pale_ale",
+      "count": 83
+    },
+    {
+      "from": "specialty",
+      "to": "porter",
+      "count": 79
+    },
+    {
+      "from": "cream",
+      "to": "specialty",
+      "count": 78
+    },
+    {
+      "from": "wheat",
+      "to": "specialty",
+      "count": 76
+    }
+  ],
+  "sample_diff_50": [
+    {
+      "id": "rmwoods_356272",
+      "v27_cluster": "pale_ale",
+      "v28b_cluster": "ipa"
+    },
+    {
+      "id": "rmwoods_56200",
+      "v27_cluster": "pale_ale",
+      "v28b_cluster": "specialty"
+    },
+    {
+      "id": "rmwoods_192700",
+      "v27_cluster": "pale_ale",
+      "v28b_cluster": "porter"
+    },
+    {
+      "id": "rmwoods_215645",
+      "v27_cluster": "belgian",
+      "v28b_cluster": "specialty"
+    },
+    {
+      "id": "mmum_989",
+      "v27_cluster": "bock",
+      "v28b_cluster": "wheat"
+    },
+    {
+      "id": "rmwoods_249869",
+      "v27_cluster": "porter",
+      "v28b_cluster": "specialty"
+    },
+    {
+      "id": "rmwoods_307574",
+      "v27_cluster": "lager",
+      "v28b_cluster": "cream"
+    },
+    {
+      "id": "rmwoods_133682",
+      "v27_cluster": "specialty",
+      "v28b_cluster": "brown"
+    },
+    {
+      "id": "rmwoods_388490",
+      "v27_cluster": "cream",
+      "v28b_cluster": "pale_ale"
+    },
+    {
+      "id": "recipator_10372",
+      "v27_cluster": "cream",
+      "v28b_cluster": "pale_ale"
+    },
+    {
+      "id": "rmwoods_161705",
+      "v27_cluster": "belgian",
+      "v28b_cluster": "saison"
+    },
+    {
+      "id": "rmwoods_268847",
+      "v27_cluster": "cream",
+      "v28b_cluster": "lager"
+    },
+    {
+      "id": "rmwoods_133831",
+      "v27_cluster": "pale_ale",
+      "v28b_cluster": "ipa"
+    },
+    {
+      "id": "rmwoods_275549",
+      "v27_cluster": "mild",
+      "v28b_cluster": "bitter"
+    },
+    {
+      "id": "rmwoods_253549",
+      "v27_cluster": "wheat",
+      "v28b_cluster": "pale_ale"
+    },
+    {
+      "id": "rmwoods_72829",
+      "v27_cluster": "specialty",
+      "v28b_cluster": "mild"
+    },
+    {
+      "id": "rmwoods_85258",
+      "v27_cluster": "pale_ale",
+      "v28b_cluster": "ipa"
+    },
+    {
+      "id": "rmwoods_233927",
+      "v27_cluster": "pale_ale",
+      "v28b_cluster": "ipa"
+    },
+    {
+      "id": "rmwoods_216546",
+      "v27_cluster": "specialty",
+      "v28b_cluster": "lager"
+    },
+    {
+      "id": "rmwoods_184133",
+      "v27_cluster": "mild",
+      "v28b_cluster": "specialty"
+    },
+    {
+      "id": "rmwoods_41767",
+      "v27_cluster": "bitter",
+      "v28b_cluster": "pale_ale"
+    },
+    {
+      "id": "rmwoods_174732",
+      "v27_cluster": "specialty",
+      "v28b_cluster": "sour"
+    },
+    {
+      "id": "rmwoods_215073",
+      "v27_cluster": "ipa",
+      "v28b_cluster": "belgian"
+    },
+    {
+      "id": "rmwoods_156694",
+      "v27_cluster": "bitter",
+      "v28b_cluster": "specialty"
+    },
+    {
+      "id": "rmwoods_337650",
+      "v27_cluster": "specialty",
+      "v28b_cluster": "lager"
+    },
+    {
+      "id": "rmwoods_67010",
+      "v27_cluster": "ipa",
+      "v28b_cluster": "pale_ale"
+    },
+    {
+      "id": "rmwoods_275631",
+      "v27_cluster": "pale_ale",
+      "v28b_cluster": "specialty"
+    },
+    {
+      "id": "rmwoods_327541",
+      "v27_cluster": "mild",
+      "v28b_cluster": "sour"
+    },
+    {
+      "id": "rmwoods_222156",
+      "v27_cluster": "stout",
+      "v28b_cluster": "porter"
+    },
+    {
+      "id": "rmwoods_187437",
+      "v27_cluster": "ipa",
+      "v28b_cluster": "saison"
+    },
+    {
+      "id": "rmwoods_210793",
+      "v27_cluster": "pale_ale",
+      "v28b_cluster": "mild"
+    },
+    {
+      "id": "rmwoods_326062",
+      "v27_cluster": "pale_ale",
+      "v28b_cluster": "mild"
+    },
+    {
+      "id": "rmwoods_120932",
+      "v27_cluster": "bitter",
+      "v28b_cluster": "specialty"
+    },
+    {
+      "id": "mmum_433",
+      "v27_cluster": "specialty",
+      "v28b_cluster": "porter"
+    },
+    {
+      "id": "rmwoods_215044",
+      "v27_cluster": "lager",
+      "v28b_cluster": "pale_ale"
+    },
+    {
+      "id": "rmwoods_375289",
+      "v27_cluster": "ipa",
+      "v28b_cluster": "specialty"
+    },
+    {
+      "id": "tmf_czech-baltic-porter.html",
+      "v27_cluster": "stout",
+      "v28b_cluster": "porter"
+    },
+    {
+      "id": "rmwoods_53195",
+      "v27_cluster": "brown",
+      "v28b_cluster": "porter"
+    },
+    {
+      "id": "rmwoods_376237",
+      "v27_cluster": "wheat",
+      "v28b_cluster": "specialty"
+    },
+    {
+      "id": "aha_concrete-bicycle-belgian-golden-strong-ale",
+      "v27_cluster": "saison",
+      "v28b_cluster": "belgian"
+    },
+    {
+      "id": "rmwoods_9785",
+      "v27_cluster": "stout",
+      "v28b_cluster": "porter"
+    },
+    {
+      "id": "rmwoods_211239",
+      "v27_cluster": "pale_ale",
+      "v28b_cluster": "bitter"
+    },
+    {
+      "id": "rmwoods_222341",
+      "v27_cluster": "specialty",
+      "v28b_cluster": "sour"
+    },
+    {
+      "id": "rmwoods_311308",
+      "v27_cluster": "sour",
+      "v28b_cluster": "brown"
+    },
+    {
+      "id": "rmwoods_94992",
+      "v27_cluster": "specialty",
+      "v28b_cluster": "lager"
+    },
+    {
+      "id": "rmwoods_371327",
+      "v27_cluster": "pale_ale",
+      "v28b_cluster": "ipa"
+    },
+    {
+      "id": "rmwoods_147839",
+      "v27_cluster": "specialty",
+      "v28b_cluster": "ipa"
+    },
+    {
+      "id": "rmwoods_24019",
+      "v27_cluster": "specialty",
+      "v28b_cluster": "mild"
+    },
+    {
+      "id": "aha_gordon-strong-american-porter",
+      "v27_cluster": "stout",
+      "v28b_cluster": "porter"
+    },
+    {
+      "id": "rmwoods_324305",
+      "v27_cluster": "barleywine",
+      "v28b_cluster": "ipa"
+    }
+  ],
+  "anomali_check": {
+    "kriter": "Etkilenen disinda 100+ recete cluster diff",
+    "total_changed": 5839,
+    "audit_exception": 2827,
+    "note": "Pattern feature degisikligi (yeast flag) cluster atamasini DOGRUDAN degistirmez. total_changed degeri etkilenen ve etkilenmeyen ayrimini icerir; tam ayrim icin 2827 ID listesi gerekirdi."
+  }
+}

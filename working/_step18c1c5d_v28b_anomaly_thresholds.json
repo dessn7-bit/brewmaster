@@ -1,0 +1,40 @@
+{
+  "meta": {
+    "sprint": "Adim 18c-1c-5d V28b anomali esik spesifikasyonu",
+    "olusturma": "2026-05-04",
+    "rule_refs": ["KURAL 4.5 (esik tasarimi Claude'a)", "KURAL 1.4 (recete vs flag)", "KURAL 6.3 (sample N)"]
+  },
+  "yeast_feature_gain_delta": {
+    "mutlak_min": 0.005,
+    "oransal_min": 0.30,
+    "logic": "AND (ikisi de asildiysa bayrak)",
+    "uygulama": "Her yeast feature icin V_oncesi gain ile V_sonrasi gain karsilastirilir. (V_sonrasi - V_oncesi) mutlak >= 0.005 VE V_sonrasi-V_oncesi/V_oncesi mutlak >= 0.30 ise bayrak.",
+    "ornek": "yeast_czech_lager V27=0.0028 V28a=0.0023 -> mutlak 0.0005 (esik 0.005 alti, gain dusuk feature) -> bayrak yok. Mutlak esik kucuk gain feature'larin yapay anomali bayragini engeller."
+  },
+  "top_10_feature": {
+    "kriter": "icerik_degisimi",
+    "logic": "feature listeden cikti (eski top-10'da var, yeni top-10'da yok) VEYA girdi (eski yok, yeni var) -> bayrak. Sadece sira degisimi (4<->5) bayrak DEGIL.",
+    "uygulama": "set(top_10_v_oncesi) symmetric_difference set(top_10_v_sonrasi) >= 1 ise bayrak. Sira degisimi (rank 4 vs 5) bayrak degil.",
+    "ornek": "V27 top-10: [a, b, c, d, e, f, g, h, i, j], V28a top-10: [a, b, c, e, d, f, g, h, j, k] -> i cikti, k girdi -> bayrak. Ama [a, b, c, d, e, f, g, h, i, j] vs [a, b, c, e, d, f, g, h, i, j] -> bayrak yok (sadece d/e sira degisti)."
+  },
+  "v19_cluster_diff": {
+    "etkilenen_disinda_max": 100,
+    "logic": "Etkilenen recete (build kosulu has_pattern=True) disinda 100+ recete cluster degistiyse bayrak. XGBoost determinizm kontrolu.",
+    "uygulama": "total_cluster_diff - cluster_diff_etkilenen_recete > 100 ise bayrak.",
+    "ornek": "V28a b madde: 1 etkilenen disinda 0 cluster diff (toplam 1) -> bayrak yok"
+  },
+  "drift_guard_per_pattern": {
+    "esik": 0,
+    "logic": "has_<pattern>=False recetelerde V_oncesi != V_sonrasi yeast feature degisimi olamaz. 1+ ise kod hatasi.",
+    "uygulama": "non_2272_drift sayaci V28a'da 0 idi. Her V28b_X build script'i kendi has_<pattern> kosulunu kullanir, drift sayar."
+  },
+  "build_etki_buyuklugu": {
+    "max_recete_etki_bir_pattern": 5000,
+    "logic": "Bir pattern 5000+ recete etkilerse (V28 STRICT kazasi 67800), DUR + Kaan onayi.",
+    "uygulama": "Toplam exception_applied (1->0 + 0->1 toplami) > 5000 ise build durdur, Kaan onayi.",
+    "ornek": "C7 NB Neobritannia ~352 recete potansiyel (esik altinda). V28 STRICT kazasi 64244 yeast_american (esik ustu, build durdurulurdu)."
+  },
+  "claude_karar_yetkisi_disi": {
+    "kapsam": "Bu esik degerleri Claude tasarladi. Kaan teknik detayda onay/red verir (KURAL 4.5 kapsami)."
+  }
+}

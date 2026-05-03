@@ -1,0 +1,246 @@
+{
+  "meta": {
+    "sprint": "Adim 18c-1c-5d V28b transition audit",
+    "rule_refs": [
+      "KURAL 1.4",
+      "KURAL 4.4",
+      "Anomali esik kalibrasyon notu"
+    ],
+    "method": "V19 b raporundan top20_transitions oku, yakin komsu cluster cifti listesi ile yon kontrol",
+    "yakin_komsu_pairs": [
+      [
+        "barleywine",
+        "ipa"
+      ],
+      [
+        "barleywine",
+        "stout"
+      ],
+      [
+        "belgian",
+        "saison"
+      ],
+      [
+        "belgian",
+        "specialty"
+      ],
+      [
+        "belgian",
+        "wheat"
+      ],
+      [
+        "bitter",
+        "mild"
+      ],
+      [
+        "bock",
+        "lager"
+      ],
+      [
+        "brown",
+        "mild"
+      ],
+      [
+        "brown",
+        "porter"
+      ],
+      [
+        "brown",
+        "stout"
+      ],
+      [
+        "cream",
+        "lager"
+      ],
+      [
+        "cream",
+        "wheat"
+      ],
+      [
+        "ipa",
+        "pale_ale"
+      ],
+      [
+        "lager",
+        "pale_ale"
+      ],
+      [
+        "porter",
+        "stout"
+      ],
+      [
+        "saison",
+        "specialty"
+      ],
+      [
+        "saison",
+        "wheat"
+      ]
+    ]
+  },
+  "total_cluster_diff": 5839,
+  "top20_transitions_with_flag": [
+    {
+      "from": "pale_ale",
+      "to": "ipa",
+      "count": 453,
+      "yakin_komsu": true
+    },
+    {
+      "from": "ipa",
+      "to": "pale_ale",
+      "count": 415,
+      "yakin_komsu": true
+    },
+    {
+      "from": "porter",
+      "to": "stout",
+      "count": 181,
+      "yakin_komsu": true
+    },
+    {
+      "from": "stout",
+      "to": "porter",
+      "count": 161,
+      "yakin_komsu": true
+    },
+    {
+      "from": "pale_ale",
+      "to": "specialty",
+      "count": 152,
+      "yakin_komsu": false
+    },
+    {
+      "from": "specialty",
+      "to": "pale_ale",
+      "count": 144,
+      "yakin_komsu": false
+    },
+    {
+      "from": "specialty",
+      "to": "ipa",
+      "count": 127,
+      "yakin_komsu": false
+    },
+    {
+      "from": "pale_ale",
+      "to": "cream",
+      "count": 127,
+      "yakin_komsu": false
+    },
+    {
+      "from": "bitter",
+      "to": "specialty",
+      "count": 115,
+      "yakin_komsu": false
+    },
+    {
+      "from": "bitter",
+      "to": "mild",
+      "count": 112,
+      "yakin_komsu": true
+    },
+    {
+      "from": "brown",
+      "to": "porter",
+      "count": 106,
+      "yakin_komsu": true
+    },
+    {
+      "from": "ipa",
+      "to": "specialty",
+      "count": 103,
+      "yakin_komsu": false
+    },
+    {
+      "from": "pale_ale",
+      "to": "bitter",
+      "count": 101,
+      "yakin_komsu": false
+    },
+    {
+      "from": "belgian",
+      "to": "saison",
+      "count": 97,
+      "yakin_komsu": true
+    },
+    {
+      "from": "mild",
+      "to": "bitter",
+      "count": 93,
+      "yakin_komsu": true
+    },
+    {
+      "from": "specialty",
+      "to": "bitter",
+      "count": 92,
+      "yakin_komsu": false
+    },
+    {
+      "from": "cream",
+      "to": "pale_ale",
+      "count": 83,
+      "yakin_komsu": false
+    },
+    {
+      "from": "specialty",
+      "to": "porter",
+      "count": 79,
+      "yakin_komsu": false
+    },
+    {
+      "from": "cream",
+      "to": "specialty",
+      "count": 78,
+      "yakin_komsu": false
+    },
+    {
+      "from": "wheat",
+      "to": "specialty",
+      "count": 76,
+      "yakin_komsu": false
+    }
+  ],
+  "top10_ozet": {
+    "yakin_komsu_count": 5,
+    "uzak_count": 5,
+    "uzak_transitions": [
+      {
+        "from": "pale_ale",
+        "to": "specialty",
+        "count": 152,
+        "yakin_komsu": false
+      },
+      {
+        "from": "specialty",
+        "to": "pale_ale",
+        "count": 144,
+        "yakin_komsu": false
+      },
+      {
+        "from": "specialty",
+        "to": "ipa",
+        "count": 127,
+        "yakin_komsu": false
+      },
+      {
+        "from": "pale_ale",
+        "to": "cream",
+        "count": 127,
+        "yakin_komsu": false
+      },
+      {
+        "from": "bitter",
+        "to": "specialty",
+        "count": 115,
+        "yakin_komsu": false
+      }
+    ]
+  },
+  "top20_aggregate": {
+    "yakin_count_total": 1618,
+    "uzak_count_total": 1277,
+    "yakin_pct": 55.9
+  },
+  "karar_yolu": "v28b_iptal"
+}

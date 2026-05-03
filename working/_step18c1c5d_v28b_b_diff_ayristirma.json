@@ -1,0 +1,28 @@
+{
+  "meta": {
+    "sprint": "Adim 18c-1c-5d V28b cluster diff ayristirma",
+    "rule_refs": [
+      "KURAL 1.4",
+      "KURAL 4.4"
+    ]
+  },
+  "sha256_check": {
+    "v27_intact": true,
+    "v28b_intact": true
+  },
+  "sayim": {
+    "total_recipes": 376845,
+    "etkilenen_recipes": 2827,
+    "etkilenmemis_recipes": 374018,
+    "audit_exception_total_v28b": 2827,
+    "cluster_diff_etkilenen": 123,
+    "cluster_diff_etkilenmemis": 5716,
+    "cluster_diff_etkilenmemis_anomali_esik": 100
+  },
+  "karar_ipucu": {
+    "stability_baseline": 0,
+    "ayristirma_etkilenmemis": 5716,
+    "kriter": "etkilenmemis cluster diff stability_baseline ile uyumlu mu",
+    "note": "Stability >= ayristirma_etkilenmemis ise V28b dataset etkisi noise icinde, kabul yolu acik"
+  }
+}
