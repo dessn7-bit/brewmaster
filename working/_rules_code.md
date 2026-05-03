@@ -350,6 +350,25 @@ V28a 8 etkilenen recete deneyiminde tasarlanan "cluster diff etkilenen disinda 1
 
 ---
 
+## Cluster transition siniflandirma notu
+
+Yakin komsu cluster ciftleri:
+- pale_ale <-> ipa (hop yogunlugu spektrumu)
+- porter <-> stout (roast yogunlugu)
+- brown <-> porter
+- bitter <-> mild
+- pale_ale <-> bitter (ortak ale tabani, hop fark)
+- pale_ale <-> cream (ortak ale tabani, ABV/IBU fark)
+- belgian <-> saison
+- lager <-> pilsner
+- barleywine <-> ipa (high ABV imperial)
+
+Specialty cluster (fruit/herb/spice/winter/smoked/experimental) "diger" kategori — her cluster ile yakin komsu sayilir.
+
+**Atif:** V28b transition audit 03.05.2026.
+
+---
+
 ## Bolum 12 — Denetim ekrana yazma protokolu
 
 ### Kural 12.1 — Kritik blok odakli ekrana yazma
