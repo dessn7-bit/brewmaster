@@ -447,6 +447,21 @@ Production URL: Brewmaster_v2_79_12.html (commit d1e5986, 03.05.2026)
 Eski URL korundu rollback: Brewmaster_v2_79_11.html (V28b), Brewmaster_v2_79_10.html (V27)
 Sprint D K4 iptal -> Adim 18d kayit (486 reçete algoritmik kriter yetersiz)
 
+V6 reference V28d retrain (Adim 18c-1c-5f, 03.05.2026):
+sha256 _v6_v28d_reference.json: c2b7c99bfd35c069...
+Boyut _v6_v28d_reference.json: 10.84 MB
+Cluster: 14 (V21 mirasiyla ayni mapping)
+Sample: 28000 stratified slug-equal redistribution
+Feature: 56 COMPACT_FEATURES
+5-fold CV top1: 0.6027 (V21 baseline 0.5823, +2.04pp)
+5-fold CV top3: 0.7987 (V21 baseline 0.7874, +1.13pp)
+Macro F1: 0.5989 (V21 baseline 0.5788, +2.01pp)
+Sanity 50 sample top1: 0.5800
+Yansiyan: Sprint A K1 102 yeast_saison flag + Sprint C K3 4201 reslug
+Production URL: Brewmaster_v2_79_10.html (V28d production, fetch URL guncellendi)
+V21 mirasi korundu: working/archive/v6_step6/ (rollback) + root _v6_v21_*.json
+V28d artifact dosyalari: _v6_v28d_reference.json + _v6_v28d_meta.json + _v6_v28d_scaler.json
+
 V28b production deploy (Adim 59, commit 73daae9):
 HTML: Brewmaster_v2_79_11.html (URL: https://dessn7-bit.github.io/brewmaster/Brewmaster_v2_79_11.html)
 sha256 V28b dataset post-meta: 8359f033338e9aeb399850b72e202f9e70577a1639a87f81d3dde75bf820ae8a
@@ -462,3 +477,4 @@ Eski URL korundu rollback icin: Brewmaster_v2_79_10.html + _v19_model_*.json (V2
 - v1 (2026-05-04): İlk taslak. 82 hatadan çıkarılan 10 bölüm, 38 kural. Tablo 82/82 hata atıflı (Hata 25 6.1'e bağlandı).
 - v2 (2026-05-04 — AŞAMA C başlangıcı): Hipotez iptal kayıt bölümü eklendi. Hata 22 (Wyeast 3056 Brett blend) iptal — Wyeast resmi kaynak Saccharomyces saf blend doğrulamasıyla. Bölüm 9 Kural 1 (memory verify) ve Bölüm 3 Kural 1 (kaynak URL etiketi) referansı pekiştirildi.
 - v2.1 (2026-05-04 — V28a build sonrası): Dataset Baseline Kayıtları bölümü eklendi (V27 + V28a sha256, boyut, reçete sayısı, etkilenen reçete kapsamı).
+- v2.2 (2026-05-03 — Adim 18c-1c-5f sonrası): V6 reference V28d retrain baseline eklendi (cv_top1 0.6027, cv_top3 0.7987, macroF1 0.5989, V21 mirasi korundu archive'da).

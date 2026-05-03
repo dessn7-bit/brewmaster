@@ -873,15 +873,15 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
 })();
 </script>
 <script id="bm-engine-v6">
-// V6 — 14-cluster KNN motoru (Adım 61 P2 Adım 3)
-// Reference: _v6_reference.json (28000 × 56 unscaled, 14 cluster)
-// Scaler: _v6_scaler.json (StandardScaler mean+scale 56)
-// Meta: _v6_meta.json (features 56 + classes 17 + displayTR)
+// V6 — 14-cluster KNN motoru (Adım 18c-1c-5f V28d retrain)
+// Reference: _v6_v28d_reference.json (28000 × 56 unscaled, 14 cluster, V28d build)
+// Scaler: _v6_v28d_scaler.json (StandardScaler mean+scale 56)
+// Meta: _v6_v28d_meta.json (features 56 + classes 14 + displayTR)
 // API: window.BM_V6.predictSync(uiRecipe) → top3 cluster + confidence + displayTR
 (function(){
-  const REF_URL = '_v6_reference.json';
-  const SCALER_URL = '_v6_scaler.json';
-  const META_URL = '_v6_meta.json';
+  const REF_URL = '_v6_v28d_reference.json';
+  const SCALER_URL = '_v6_v28d_scaler.json';
+  const META_URL = '_v6_v28d_meta.json';
   const cache = { X: null, y: null, mean: null, scale: null, features: null, classes: null, displayTR: null, K: 5, weights: 'distance' };
   let loadingPromise = null;
 
