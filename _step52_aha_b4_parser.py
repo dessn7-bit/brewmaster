@@ -345,7 +345,8 @@ def detect_features(rec, parsed):
     feats['yeast_abbey'] = 1 if (any(s in yeast_str for s in ('abbey', 'trappist', 'wlp500', 'wlp 500', 'wlp530', 'wlp 530', 'wlp540', 'wlp 540', 'wlp575', 'wlp 575')) or
         re.search(r'abbaye|\b(?:wyeast|wy)\s*[\#\.]?\s*0?(1214|1762|3787|3789)\b', yeast_str)) else 0
     # Adim 18c-1c-2: wy? prefix fix
-    feats['yeast_saison'] = 1 if re.search(r'saison|sasion|farmhouse|wallonia(n)?|saisonstein|saisonette|seizon|hommage|bugfarm|\b(3711|3724|3725|3726)\b|wlp\s*0?(565|566|568|590|585|670)\b|\b(?:wyeast|wy)\s*[\#\.]?\s*0?(3724|3711|3725|3726)\b', yeast_str) else 0
+    # Adim 18d-pre Sprint A (2026-05-04): K1 pattern eksik — BE-134, BE-256, M29, Lalbrew Farmhouse eklendi
+    feats['yeast_saison'] = 1 if re.search(r'saison|sasion|farmhouse|wallonia(n)?|saisonstein|saisonette|seizon|hommage|bugfarm|\b(3711|3724|3725|3726)\b|wlp\s*0?(565|566|568|590|585|670)\b|\b(?:wyeast|wy)\s*[\#\.]?\s*0?(3724|3711|3725|3726)\b|\bbe[\s\-]?134\b|\bbe[\s\-]?256\b|\bm[\s\-]?29\b|\blalbrew\s+farmhouse\b', yeast_str) else 0
     feats['yeast_kveik'] = 1 if re.search(r'\bkveik\b|voss|hornindal|lida|laerdal|aurland|stranda|granvin|sigmund|ebbegarden|opshaug|midtbust|gjernes', yeast_str) else 0
     # Adim 18c-1c-5 (2026-05-03): +6 brand + bare numeric (Asama 1.6 spot test 21/21 TP)
     # Adim 18c-1c-5d C7 (2026-05-04): NB Neobritannia (Wyeast 1945, English ale yeast, 352 recete gap)
