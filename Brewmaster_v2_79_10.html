@@ -471,10 +471,10 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
       }
     } catch(e) {}
   })();
-  const MODEL_URL = '_v19_v28d_model_14cat.json';
-  const LABELS_URL = '_v19_v28d_label_encoder_14cat.json';
-  const SLUG_MODEL_URL = '_v19_v28d_model_slug.json';
-  const SLUG_LABELS_URL = '_v19_v28d_label_encoder_slug.json';
+  const MODEL_URL = '_v19_v28e_model_14cat.json';
+  const LABELS_URL = '_v19_v28e_label_encoder_14cat.json';
+  const SLUG_MODEL_URL = '_v19_v28e_model_slug.json';
+  const SLUG_LABELS_URL = '_v19_v28e_label_encoder_slug.json';
   const cache = { model: null, labels: null, slugModel: null, slugLabels: null };
   let loadingPromise = null;
   let slugLoadingPromise = null;
@@ -873,15 +873,15 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
 })();
 </script>
 <script id="bm-engine-v6">
-// V6 — 14-cluster KNN motoru (Adım 18c-1c-5f V28d retrain)
-// Reference: _v6_v28d_reference.json (28000 × 56 unscaled, 14 cluster, V28d build)
-// Scaler: _v6_v28d_scaler.json (StandardScaler mean+scale 56)
-// Meta: _v6_v28d_meta.json (features 56 + classes 14 + displayTR)
+// V6 — 14-cluster KNN motoru (Adım 18d-pre P2 V28e retrain)
+// Reference: _v6_v28e_reference.json (28000 × 56 unscaled, 14 cluster, V28e build)
+// Scaler: _v6_v28e_scaler.json (StandardScaler mean+scale 56)
+// Meta: _v6_v28e_meta.json (features 56 + classes 14 + displayTR)
 // API: window.BM_V6.predictSync(uiRecipe) → top3 cluster + confidence + displayTR
 (function(){
-  const REF_URL = '_v6_v28d_reference.json';
-  const SCALER_URL = '_v6_v28d_scaler.json';
-  const META_URL = '_v6_v28d_meta.json';
+  const REF_URL = '_v6_v28e_reference.json';
+  const SCALER_URL = '_v6_v28e_scaler.json';
+  const META_URL = '_v6_v28e_meta.json';
   const cache = { X: null, y: null, mean: null, scale: null, features: null, classes: null, displayTR: null, K: 5, weights: 'distance' };
   let loadingPromise = null;
 

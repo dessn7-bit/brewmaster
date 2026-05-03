@@ -447,6 +447,26 @@ Production URL: Brewmaster_v2_79_12.html (commit d1e5986, 03.05.2026)
 Eski URL korundu rollback: Brewmaster_v2_79_11.html (V28b), Brewmaster_v2_79_10.html (V27)
 Sprint D K4 iptal -> Adim 18d kayit (486 reçete algoritmik kriter yetersiz)
 
+V28e (Adim 18d-pre P2, 8 yeast pattern guncelleme, PRODUCTION):
+sha256: 475746f7d01db80b202c08328adafcc12b44eb1e4282f2add1382d756fd7eb17
+Boyut: 1329192654 bytes (~1.32 GB)
+Recete: 376845
+Kapsam: V28d + 8351 yeast flag 0->1 (UNION mantigi, 1->0 yasak)
+  yeast_american 3865 (Vermont/East Coast/Cream Blend/WLP862)
+  yeast_belgian 2221 (WLP510 Bastogne/WLP575/T-58/S-33)
+  yeast_english 948 (Australian/Burton Union)
+  yeast_sour_blend 877 (WLP630/655/670/3191/3278/ECY02)
+  yeast_german_lager 285 (WLP862 Cry Havoc)
+  yeast_witbier 63 (WLP410/4015/M21/Lalbrew/B44/3942)
+  yeast_wheat_german 53 (Wyeast 3942)
+  yeast_brett 39 (ECY02 Flemish Ale Blend)
+non_p2_drift: 0 (P2 disi 18 yeast feature degismedi)
+Parser commit: 0c3a704 (Adim 18d-pre P2 8 pattern guncelleme)
+V19 retrain V28e: 14cat top1 0.6997 (V28d 0.6986 +0.11pp), slug top1 0.5724, slug t3 0.8154, slug gap 5.34pp (KURAL 4 esnek borderline)
+V6 retrain V28e: cv_top1 0.6046 (V28d 0.6027 +0.19pp), cv_top3 0.7989, macroF1 0.6008
+Production URL: Brewmaster_v2_79_10.html (HTML 7 fetch URL guncellendi V28e isimlerine)
+V28d artifact'lar root'ta korundu rollback icin (_v19_v28d_*.json + _v6_v28d_*.json)
+
 V6 reference V28d retrain (Adim 18c-1c-5f, 03.05.2026):
 sha256 _v6_v28d_reference.json: c2b7c99bfd35c069...
 Boyut _v6_v28d_reference.json: 10.84 MB
@@ -482,3 +502,4 @@ Eski URL korundu rollback icin: Brewmaster_v2_79_10.html + _v19_model_*.json (V2
 - v2.1 (2026-05-04 — V28a build sonrası): Dataset Baseline Kayıtları bölümü eklendi (V27 + V28a sha256, boyut, reçete sayısı, etkilenen reçete kapsamı).
 - v2.2 (2026-05-03 — Adim 18c-1c-5f sonrası): V6 reference V28d retrain baseline eklendi (cv_top1 0.6027, cv_top3 0.7987, macroF1 0.5989, V21 mirasi korundu archive'da).
 - v2.3 (2026-05-03 — Adim 18c-1c-5f displayTR fix): _v6_v28d_meta.json'a displayTR field eklendi (14 cluster TR mapping, V21 formatından kopya). Script _step6_v6_retrain_14cluster.py satir 441-458 displayTR yazma bloğu kalıcı eklendi. Yeni meta sha256: 631ded9a..., boyut 1892 bytes.
+- v2.4 (2026-05-04 — Adim 18d-pre P2 V28e deploy): V28e baseline + 8 yeast pattern guncelleme (UNION mantigi, 8351 flag 0->1, 1->0 yasak, drift 0). V19 retrain 14cat 0.6997 +0.11pp, V6 retrain cv_top1 0.6046 +0.19pp. SOUR/LAGER/WHEAT cluster A orani artisi.

@@ -24,8 +24,8 @@ from sklearn.metrics import f1_score
 
 sys.stdout.reconfigure(encoding='utf-8', line_buffering=True)
 
-DATASET = Path('C:/Users/Kaan/brewmaster/working/_v28d_aliased_dataset.json')
-ARCH = Path('C:/Users/Kaan/brewmaster/working/archive/v6_step6_v28d')
+DATASET = Path('C:/Users/Kaan/brewmaster/working/_v28e_aliased_dataset.json')
+ARCH = Path('C:/Users/Kaan/brewmaster/working/archive/v6_step6_v28e')
 ARCH.mkdir(parents=True, exist_ok=True)
 
 T0 = time.time()
