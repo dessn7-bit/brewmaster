@@ -250,7 +250,8 @@ BELGIAN_YEAST_PATTERNS = [
     'wyeast 3787', 'wy3787', 'wyeast 3522', 'wy3522', 'wyeast 3864', 'wy3864',
     'wlp500', 'wlp 500', 'wlp530', 'wlp 530', 'wlp540', 'wlp 540', 'wlp565',
     'wlp 565', 'wlp570', 'wlp 570', 'wlp575', 'wlp 575', 'wlp590', 'wlp 590',
-    'safbrew abbaye', 'lalbrew abbaye', 'lallemand abbaye', 'belle saison',
+    'safbrew abbaye', 'lalbrew abbaye', 'lallemand abbaye',
+    # Adim 18c-1c-5d C3 (2026-05-04): 'belle saison' cikarildi (yeast_saison'da yakali, lager cluster overflow nedeni)
 ]
 CLEAN_US05_PATTERNS = [
     'wyeast 1056', 'wy1056', 'wlp001', 'wlp 001', 'safale us-05',
@@ -267,6 +268,7 @@ BRETT_RE = re.compile(
     r'wildbrew\s*sour|philly\s*sour|lallemand\s*wild|omega\s*(?:yeast\s*)?(?:cosmic|saisonstein|hothead)|'
     r'\bfoeder\b|funky|farmhouse\s*sour|barrel\s*(?:aged\s*)?sour|'
     r'amalgamation|cosmic|hothead\s*ale|all\s*the\s*bretts|funkwerks|saisonstein',
+    # Adim 18c-1c-5d AŞAMA C revize (2026-05-04): Cellador pattern erteleme — Adim 18c-1c-7'ye tasindi (KURAL 2.4 ≥10 ihlali, 3 recete yetersiz orneklem)
     re.IGNORECASE,
 )
 LACTO_RE = re.compile(
@@ -346,14 +348,20 @@ def detect_features(rec, parsed):
     feats['yeast_saison'] = 1 if re.search(r'saison|sasion|farmhouse|wallonia(n)?|saisonstein|saisonette|seizon|hommage|bugfarm|\b(3711|3724|3725|3726)\b|wlp\s*0?(565|566|568|590|585|670)\b|\b(?:wyeast|wy)\s*[\#\.]?\s*0?(3724|3711|3725|3726)\b', yeast_str) else 0
     feats['yeast_kveik'] = 1 if re.search(r'\bkveik\b|voss|hornindal|lida|laerdal|aurland|stranda|granvin|sigmund|ebbegarden|opshaug|midtbust|gjernes', yeast_str) else 0
     # Adim 18c-1c-5 (2026-05-03): +6 brand + bare numeric (Asama 1.6 spot test 21/21 TP)
+    # Adim 18c-1c-5d C7 (2026-05-04): NB Neobritannia (Wyeast 1945, English ale yeast, 352 recete gap)
     feats['yeast_english'] = 1 if re.search(
         r'\bwlp\s*0?(002|005|007|011|013|023|029|037)\b|'
-        r'\b(?:wyeast|wy)\s*[\#\.]?\s*0?(1098|1187|1275|1318|1469|1968)\b|'
-        r'\b(1098|1187|1275|1318|1469|1968)\b|'
+        r'\b(?:wyeast|wy)\s*[\#\.]?\s*0?(1098|1187|1275|1318|1469|1945|1968)\b|'
+        r'\b(1098|1187|1275|1318|1469|1945|1968)\b|'
         r'english\s+ale|burton\s+ale\s+yeast|ringwood\s+ale|west\s+yorkshire(\s+ale)?|'
-        r'yorkshire\s+square\s+ale|manchester\s+ale\s+yeast|european\s+ale(\s+yeast)?',
+        r'yorkshire\s+square\s+ale|manchester\s+ale\s+yeast|european\s+ale(\s+yeast)?|'
+        r'\bneobritannia\b|nb[\s\-]+neobritannia',
         yeast_str) else 0
     # Adim 18c-1c-5 (2026-05-03): +7 brand (denny's, NW ale, pacman, san_diego, california_v, super_high_gravity, us_west_coast M44)
+    # Adim 18c-1c-5d C8/C9/C11 (2026-05-04):
+    #   +NorCal #1 (GigaYeast GY001, 6 recete)
+    #   +Premium Gold (Muntons Premium Gold, neutral ale yeast, 309 recete)
+    #   +Coopers Pure Brewers (Avustralya extract kit yeast, 36 recete)
     feats['yeast_american'] = 1 if (any(p in yeast_str for p in CLEAN_US05_PATTERNS) or
         re.search(r'denny.{0,3}s\s+favorite\s*50|'
                   r'\b(?:wyeast|wy)\s*[\#\.]?\s*0?(1450|1332|1764)\b|\b(1450|1332|1764)\b|\(\s*1764\s*\)|'
@@ -362,25 +370,35 @@ def detect_features(rec, parsed):
                   r'san\s+diego\s+super(\s+yeast)?|'
                   r'california\s+v\s+ale\s+yeast|'
                   r'super\s+high\s+gravity(\s+ale)?|'
-                  r'\bm\s*44(\s+(?:us|west|west\s+coast))?|u\.?s\.?\s+west\s+coast(\s+yeast)?(\s+m\s*44)?|mangrove\s*jack.{0,15}m\s*44',
+                  r'\bm\s*44(\s+(?:us|west|west\s+coast))?|u\.?s\.?\s+west\s+coast(\s+yeast)?(\s+m\s*44)?|mangrove\s*jack.{0,15}m\s*44|'
+                  r'\bnorcal\s*#?\s*1\b|gigayeast.{0,10}norcal|\bgy\s*0?001\b|'
+                  # Adim 18c-1c-5d AŞAMA C revize (2026-05-04): C9 muntons only — \bpremium\s+gold\b cikarildi (FP riski, "Premium Gold Wheat" recipe adlari)
+                  r'muntons\s+premium\s+gold|'
+                  r'coopers?\s+(?:brewery\s+)?pure\s+brewers?(\s+yeast)?',
                   yeast_str)) else 0
     # Adim 18c-1c-1 + 18c-1c-2 (2026-05-03): KONSERVATIF + Düzeltme 1+2 — _step53 ile identik
     feats['yeast_german_lager'] = 1 if re.search(
         r'\bw-?34/70|\bs-?23\b|\bs-?189|2124 bohemian|2206 bavarian|'
         r'saflager|'
         r'wlp\s*0?(800|802|820|830|833|835|838|840|850|860|885|940)\b|'
-        r'\b(2001|2002|2007|2042|2112|2124|2206|2247|2272|2278|2308|2487|2633)\b|'
+        # Adim 18c-1c-5d AŞAMA C revize (2026-05-04): bare 2272 cikarildi (Wyeast resmi 2272 = American Lager, German degil; C1 ek)
+        # Kalan 12 numara (2001/2002/2007/2042/2112/2124/2206/2247/2278/2308/2487/2633) Adim 18c-1c-5e ayri sprint
+        r'\b(2001|2002|2007|2042|2112|2124|2206|2247|2278|2308|2487|2633)\b|'
         r'mangrove\s*jack.{0,30}(m\s*54|m\s*76|m\s*84)|'
         r'\b(m54|m76|m84)\s+(bavarian|munich|bohemian|lager)|'
         r'imperial\s*l\s*(13|17|28)\b|'
         # Adim 18c-1c-5: +o(k|c)toberfest[/]m[äa]rzen (slash + k/c yazım), +mauribrew, +octoberfest
-        r'\b(bock|doppelbock|maibock|hella\s*bock|munich|vienna|bavarian|o(?:k|c)toberfest[/\s]+m[äa]rzen|o(?:k|c)toberfest|festbier|maerzen|rauchbier|dortmund|helles|schwarzbier|dunkel|budvar|czech\s+(?:pils|budejovice)|pilsner|urquell|original\s*pilsner|danish|zurich|brewferm|diamond|mauribrew)(?:\s+(lager|yeast|blend)|\s*\([^)]*lager)',
+        # Adim 18c-1c-5d C5+C10 (2026-05-04): mauribrew → mauri\s*brew (94 recete kayip recovery), lalbrew\s+diamond explicit
+        r'\b(bock|doppelbock|maibock|hella\s*bock|munich|vienna|bavarian|o(?:k|c)toberfest[/\s]+m[äa]rzen|o(?:k|c)toberfest|festbier|maerzen|rauchbier|dortmund|helles|schwarzbier|dunkel|budvar|czech\s+(?:pils|budejovice)|pilsner|urquell|original\s*pilsner|danish|zurich|brewferm|diamond|mauri\s*brew)(?:\s+(lager|yeast|blend)|\s*\([^)]*lager)|'
+        r'\blalbrew\s+diamond\b|\blallemand\s+(?:premium\s+)?diamond\b|\bdiamond\s+lager(\s+yeast)?\b',
         yeast_str) else 0
     # Adim 18c-1c-2: wy? prefix fix + bare numeric (düşük FP) / kombo only (yüksek FP)
-    # Adim 18c-1c-5: bare 2272 ek + bare 2007 ek + kolsh typo
-    feats['yeast_czech_lager'] = 1 if re.search(r'\b(?:wyeast|wy)\s*[\#\.]?\s*0?(2278|2272)\b|\b(2278|2272)\b|wlp\s*0?802\b|bohemian', yeast_str) else 0
-    feats['yeast_american_lager'] = 1 if re.search(r'wlp\s*0?840\b|2007\s+pilsen|\b(?:wyeast|wy)\s*[\#\.]?\s*0?2007\b|\b2007\b', yeast_str) else 0
-    feats['yeast_kolsch'] = 1 if re.search(r'k[oö]ls(?:ch|h)|kolsch|kolsh|wlp\s*0?(003|029)\b|\b(?:wyeast|wy)\s*[\#\.]?\s*0?2565\b|\b2565\b', yeast_str) else 0
+    # Adim 18c-1c-5d C1 (2026-05-04): bare 2272 cikarildi (Wyeast 2272 = North American Lager, czech degil; yeast_american_lager'a tasindi)
+    feats['yeast_czech_lager'] = 1 if re.search(r'\b(?:wyeast|wy)\s*[\#\.]?\s*0?2278\b|\b2278\b|wlp\s*0?802\b|bohemian', yeast_str) else 0
+    # Adim 18c-1c-5d C1 (2026-05-04): bare 2272 ek (Wyeast 2272 = North American Lager, czech_lager'dan tasindi)
+    feats['yeast_american_lager'] = 1 if re.search(r'wlp\s*0?840\b|2007\s+pilsen|\b(?:wyeast|wy)\s*[\#\.]?\s*0?(2007|2272)\b|\b(2007|2272)\b', yeast_str) else 0
+    # Adim 18c-1c-5d C2 (2026-05-04): word-boundary eklendi (sinir netligi KURAL 2.6), redundant kolsch|kolsh kaldirildi
+    feats['yeast_kolsch'] = 1 if re.search(r'\bk[oö]ls(?:ch|h)\b|wlp\s*0?(003|029)\b|\b(?:wyeast|wy)\s*[\#\.]?\s*0?2565\b|\b2565\b', yeast_str) else 0
     feats['yeast_altbier'] = 1 if re.search(r'altbier|wlp\s*0?036\b|\b(?:wyeast|wy)\s*[\#\.]?\s*0?1338\b|\b1338\b', yeast_str) else 0
     feats['yeast_cal_common'] = 1 if re.search(r'california\s+lager|wlp\s*0?810\b|\b(?:wyeast|wy)\s*[\#\.]?\s*0?2112\b|\b2112\b', yeast_str) else 0
     feats['yeast_brett'] = 1 if BRETT_RE.search(yeast_str_full) else 0
@@ -395,7 +413,8 @@ def detect_features(rec, parsed):
         r'american\s+wheat(\s+ale)?(\s+yeast)?|bavarian\s+wheat(\s+blend)?|'
         r'danstar\s+munich|lallemand\s+munich(\s+wheat)?|'
         r'schneider\s*[-\s]?weisse|schneider.tap|'
-        r"bell.{0,3}s\s+oberon", yeast_str_full) else 0
+        # Adim 18c-1c-5d C4 (2026-05-04): bell.{0,3}s -> bell'?s?, sinir netligi + apostrof+s opsiyonel (42 FP loose match dustu, KURAL 2.6)
+        r"bell'?s?\s+oberon", yeast_str_full) else 0
     feats['yeast_wit'] = feats['yeast_witbier']
 
     # Hop features
