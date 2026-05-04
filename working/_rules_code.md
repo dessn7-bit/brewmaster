@@ -505,7 +505,9 @@ Production URL: Brewmaster_v2_79_12.html (commit d1e5986, 03.05.2026)
 Eski URL korundu rollback: Brewmaster_v2_79_11.html (V28b), Brewmaster_v2_79_10.html (V27)
 Sprint D K4 iptal -> Adim 18d kayit (486 reçete algoritmik kriter yetersiz)
 
-V28i (Sub-sprint 3, Witbier reslug 1022 algoritmik + 3465 manuel + 1201 dokunulmaz, PRODUCTION DEPLOY 2026-05-05):
+V28i (Sub-sprint 3, Witbier reslug 1022 algoritmik + 3465 manuel + 1201 dokunulmaz, BUILT 2026-05-05, ROLLBACK 2026-05-05):
+ROLLBACK SEBEP: V28i UI evaluator bug, kok sebep belirsiz. V28i model Python 5/5 sentetik PASS (dogru), UI predictSlugSync BB Alman Bugday recete Munich Helles 41% yanlis (Hefeweizen top-5 disinda). Code derin teshis 5 madde yapisal kontrol HEPSI PASS (model dosya, label encoder, feature listesi, tree agirlik, JS reader). Kok sebep belirsiz. V28h_v2 stabil production geri.
+V28i ARSIV: working/_v19_v28i_*.json + working/_v28i_aliased_dataset.json + working/archive/v28i_artifact_archive/ root artifact'lar. Sonra UI bug fix sonrasi tekrar deploy edilebilir.
 sha256: 0f404f4bee24cd61e4fa7d028ebbcab0d0caee561c7a2bac5ff481de5d2fea9a
 Boyut: 1329993334 bytes (~1.32 GB)
 Recete: 376845 (V28h_v2 ile esit, sadece witbier slug etiket degisikligi)
