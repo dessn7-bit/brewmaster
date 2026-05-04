@@ -638,7 +638,7 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
 
     // Percents (V85 V6→V8.5 schema)
     var pct_pilsner = p.pilsnerPct || 0;
-    var pct_pale_ale = isAbbey ? 0 : (p.baseMaltPct || 0);
+    var pct_pale_ale = isAbbey ? 0 : (p.paleAlePct || 0);
     var pct_munich = p.munichPct || 0;
     var pct_vienna = p.viennaPct || 0;
     var pct_wheat = p.wheatPct || 0;
@@ -13550,7 +13550,8 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
         maltIds:  (S.maltlar  ||[]).map(m=>m&&m.id).filter(Boolean),
         katkiIds: (S.katkilar ||[]).map(k=>k&&k.id).filter(Boolean),
         percents: {
-          pilsnerPct:  _pctOf(/pilsner|pils|bohem|bel_pils|best_heidel|best_pale|briess_pale|chateau_pils|extra_pale|golden_promise|maris|pale_ale|synergy|thracian|viking_pale|viking_pils/i),
+          pilsnerPct:  _pctOf(/pilsner|pils|bohem|bel_pils|best_heidel|best_pale|briess_pale|chateau_pils|extra_pale|golden_promise|maris|synergy|thracian|viking_pale|viking_pils/i),
+          paleAlePct:  _pctOf(/^pale_ale$|^pale$|\bpale_ale\b/i),
           wheatPct:    _pctOf(/wheat|bugday|weizen|weyermann_wheat|chateau_wheat|best_wheat/i),
           oatsWheatPct:_pctOf(/wheat|bugday|weizen|oat|yulaf/i),
           oatsPct:     _pctOf(/oat|yulaf/i),
