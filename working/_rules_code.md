@@ -420,12 +420,22 @@ Hicbir kritik satir atlanmaz, "..." kisaltmasi yok, yorum satirlari dahil. Token
 
 **Atif:** V28a + V28b_C2 denetim protokolu uygulama deneyimi 03.05.2026.
 
-### Kural 12.2 — Sprint disiplini, tek session tek production deploy (yeni v2.5)
-Tek session'da maksimum **1 production deploy**. Ardisik deploy'lar (V28d → V28d V6 → V28d displayTR fix → V28e gibi 4 deploy 24 saat icinde) ihlal sayilir. Her deploy ayri analiz, ayri onay, ayri commit, ayri KURAL 4 denetimi gerektirir; hiz ugruna ust uste deploy uygulanmaz cunku model ust uste yeniden egitilir, kumulatif hata izi belirsiz hale gelir.
+### Kural 12.2 — Her production deploy oncesi tam denetim zorunlu (revize v2.6)
 
-**Atif:** Adim 18c-1c-5f + Adim 18d-pre P2 — 2026-05-04: 24 saat icinde 4 production deploy yapildi (V28d, V28d V6, displayTR fix, V28e), her birinin gain'i ayri olculmedi.
+Her production deploy oncesi tam denetim zorunlu:
+- **KURAL 4**: 5-stat gain + slug gap kontrolu (PASS gerek)
+- **KURAL 1.1**: Yeni pattern eklendiyse FP audit (raw.yeast 5+ sample manuel)
+- **KURAL 9.5**: Canli UI test (deploy sonrasi hard refresh + ekran goruntusu)
+- **Sha guard**: V27/V28b/V28d/V28e (ve son dataset) sha intact dogrulama
+- **Working tree**: clean veya gerekçeli uncommitted dosya listesi
 
-**Ihlal referansi:** Hata 10 (kapanis audit).
+Deploy sayisi sinirsiz, denetim atlama yasak. **Hizli arka arkaya deploy KURAL 12.2 ihlali DEGIL**; **denetimsiz deploy KURAL 12.2 ihlalidir**.
+
+**Atif (revize):** v2.5 'tek session 1 deploy' yanlis tanim. 24 saat icinde 4 deploy (V28d, V28d V6, displayTR fix, V28e) sayisal olarak ihlal degil — sebep her deploy oncesi denetim atlanmis olmasi (gain olculmemis, FP audit yok, UI test yok). v2.6 revize asil ihlali deploy sayisi degil denetim eksikligi olarak yeniden tanimlar.
+
+**Ihlal referansi:** Hata 10 (kapanis audit) — revize formuyla yeniden yorumlanir: 4 deploy degil, 4 deploy'un her biri icin denetim atlanmasi ihlal.
+
+**Tarihce:** v2.5'te yanlis tanim ('tek session 1 deploy'), v2.6'da revize edildi (Adim 18d-pre Oncelik 2.5 deploy hazirligi sirasinda Kaan tespit etti — sayisal sinirlama yerine denetim sart kosulu).
 
 ### Kural 12.3 — Build script versiyon arsivi (yeni v2.5)
 Path edit ile yeniden kullanilan build/retrain scriptleri (V21→V28d→V28e gibi) her dataset icin **ayri kopya** olarak `working/archive/script_v_X/` altinda saklanir. Git diff sadece son state'i gosterir, dataset bazli reproducibility icin ara state'lerin bagimsiz kopyasi gerek. KURAL Code v2 baseline kaydi yetersiz, scriptin kendi tarihi de saklanir.
@@ -551,6 +561,7 @@ Eski URL korundu rollback icin: Brewmaster_v2_79_10.html + _v19_model_*.json (V2
 - v2.4 (2026-05-04 — Adim 18d-pre P2 V28e deploy): V28e baseline + 8 yeast pattern guncelleme (UNION mantigi, 8351 flag 0->1, 1->0 yasak, drift 0). V19 retrain 14cat 0.6997 +0.11pp, V6 retrain cv_top1 0.6046 +0.19pp. SOUR/LAGER/WHEAT cluster A orani artisi.
 - v2.5 (2026-05-04 — Code'un 12 hata kapanis audit'i): 3 madde revize (1.1 FP testi vurgu, 7.1 yumusatma yasagi, 4.6 deploy gate 5-stat gain) + 5 yeni madde (9.3 metric olcum zorunlu, 9.4 V19/V6 direkt kiyas yasagi, 9.5 canli UI test, 12.2 tek deploy session, 12.3 build script versiyon arsivi) + 3 risk kaydi (V21 NaN, P2 FP yuk, V28e gain belirsiz). 12 hata kaydi `_step60d_kapanis_audit.md`'ye eklendi.
 - v2.5.1 (2026-05-04 — Oncelik 1A + 1B kapanis): P2 audit %100 kapsam tamam (81/81 TP, 0 FP — ilk 8 pattern 40 sample + ek 8 brand 36 sample + WLP670 5 sample). K3 603 keyword-eslesen audit (57 sample): Quadrupel %93 KABUL, Dubbel %53 KISMEN, Tripel %33 KRITIK, Strong Golden %25 KRITIK. 14 YANLIS recete + 4 hata pattern + 18d pattern matrisi yon (maya bazli + negatif baglam + profile zone + pattern genisletme) `_to_do_step18d.json`'a eklendi. V19 quadrupel 0.000 paradoksu = ML mimari sorunu (47 recete az + class weight eksigi), dataset temiz.
+- v2.6 (2026-05-04 — KURAL 12.2 revize): v2.5'te 'tek session 1 deploy' yanlis tanim. Asil mesele her deploy oncesi tam denetim (KURAL 4 + 1.1 + 9.5 + sha guard + working tree clean). Hizli arka arkaya deploy ihlal degil; denetimsiz deploy ihlal. Deploy sayisi sinirsiz. Adim 18d-pre Oncelik 2.5 deploy hazirligi sirasinda Kaan tespit.
 
 ---
 
@@ -602,3 +613,15 @@ P2 audit %100 kapsam tamamlandiktan sonra K3 reslug 603 reçete (4201 toplam K3'
 4. Maya/recete konflikt: WLP530 + saison recete -> tripel atandi
 
 **14 YANLIS recete + 18d pattern matrisi yon** (maya bazli + negatif baglam + profile zone gate + pattern genisletme) `working/_to_do_step18d.json`'a eklendi. KARAR Kaan'da: 14 reçete 18d toplu reslug ile gider (mini-sprint maliyeti orantisiz).
+
+---
+
+## HTML hardcoded metin manuel update disiplini (Adim 18d-pre Hata #2, 2026-05-04)
+
+Her V19 retrain sonrasi (slug t1, 14cat t1, gap, note alanlari) `Brewmaster_v2_79_10.html` satir 14240 + 14248 manuel `str_replace` ile guncellensin. Statik metin secimi yapildi (Secenek A — hizli, sonraki retrain manuel update gerek). Dinamik JS okuma (Secenek B) Kaan tarafindan reddedildi (kapsam fazlaligi).
+
+**Format:**
+- Satir 14240 (button hover tooltip): `btn('V12', 'V12 (V19) ⭐', '#6A1B9A', 'V12 DEFAULT — V19 XGBoost (<note>, <slug_count> slug, slug t1 <slug_t1> / 14cat <cat_t1>, gap <gap> PASS/FAIL)')`
+- Satir 14248 (status badge label): `var lbl = m==='V12' ? 'V12 (V19) DEFAULT (<note>, <slug_count> slug, slug t1 <slug_t1> / 14cat <cat_t1>, gap <gap> PASS/FAIL)' : ...`
+
+**Atif:** Adim 18d-pre Hata #2 — V19 ilk deploy era'sindan kalma metin (91 slug, 16cat 65.1, slug t1 55.4) V28e production'a kadar guncellenmedi. Senaryo 4 deploy ile birlikte duzeltildi (87 slug, 14cat 69.97, slug t1 57.28, gap 4.98 PASS).
