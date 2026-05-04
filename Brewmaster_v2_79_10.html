@@ -14349,7 +14349,23 @@ return `
               return {tip:'ale_clean', ad:'Temiz Ale (Specialty base)', oneri:'<b>US-05</b>, <b>Nottingham</b>, <b>WLP001</b> — nötr/temiz maya karakteri ekstraların (meyve/baharat/bal/vb.) öne çıkmasını sağlar'};
             return null;
           }
-          
+          // Adim 2: stil-tip spesifik high-attenuation maya listesi (FG yuksek Cözüm 2)
+          function _highAttenYeast(tip){
+            switch(tip){
+              case 'wheat':       return '<b>WB-06 (%75)</b>, <b>WY3068 Weihenstephan (%77)</b>, <b>WLP300 Hefeweizen IV (%76)</b>, <b>MJ M20 Bavarian (%74)</b>';
+              case 'lager':       return '<b>WLP830 German (%82)</b>, <b>W-34/70 (%83)</b>, <b>S-189 (%82)</b>, <b>WY2124 Bohemian (%83)</b>';
+              case 'belcika':     return '<b>WY3787 Trappist High Grav (%85)</b>, <b>WLP530 Abbey (%84)</b>, <b>MJ M31 (%82)</b>, <b>WY1762 Belgian Abbey II (%85)</b>';
+              case 'saison':      return '<b>WY3711 French Saison (%85)</b>, <b>Belle Saison (%82)</b>, <b>WLP565 Dupont (%80)</b>';
+              case 'kveik':       return '<b>Voss (%85)</b>, <b>Hornindal (%85)</b>, <b>OYL-071 Lutra (%80)</b>';
+              case 'sour':        return '<b>WLP655 Belgian Sour Mix (%75)</b>, <b>ECY02 Flemish Ale Blend (%70)</b>';
+              case 'brett':       return '<b>WLP648 Brett Trois (%75)</b>, <b>OYL-218 Brett 2.0 (%80)</b>';
+              case 'ale_english': return '<b>WLP013 London Ale (%76)</b>, <b>S-04 (%75)</b>, <b>WY1098 British (%76)</b>';
+              case 'ale_hybrid':  return '<b>WLP080 Cream Blend (%75)</b>, <b>MJ M36 Burton (%76)</b>';
+              case 'ale_clean':   return '<b>US-05 (%82)</b>, <b>Nottingham (%83)</b>, <b>WLP001 California (%82)</b>, <b>WY1056 American (%82)</b>';
+              default:            return '<b>US-05 (%82)</b>, <b>Nottingham (%83)</b>, <b>WLP001 (%82)</b>';
+            }
+          }
+
           const _beklenen=_beklenenMaya(stil_tah);
           if(_beklenen){
             const _mevcutTip=mayaObj?.tip;
@@ -14428,7 +14444,7 @@ return `
                   baslik:`FG yüksek: ${_fg.toFixed(3)} — ${_stKey} hedefi ${_stRef.fg[0]}-${_stRef.fg[1]}`,
                   coz:`Bira çok tatlı kalacak, dekstrin fazla, ABV düşük.<br>
                     <b>Çözüm 1 (mash):</b> <b>Mash sıcaklığını 64°C'ye düşür</b> (beta-amilaz aktif → fermente şeker artar). 63-64°C, 75-90 dk mash.<br>
-                    <b>Çözüm 2 (maya):</b> Yüksek attenuation maya: <b>US-05 (%82)</b>, <b>Nottingham (%83)</b>, <b>Lallemand Verdant IPA (%82)</b>, <b>WLP090 San Diego (%85)</b><br>
+                    <b>Çözüm 2 (maya):</b> Yüksek attenuation maya: ${_highAttenYeast(_beklenen?.tip)}<br>
                     <b>Çözüm 3 (grist):</b> Crystal/Karamel malt oranını azalt (%5-10'dan %2-3'e), Carapils tamamen kaldır<br>
                     <b>Çözüm 4 (katkı):</b> Brut IPA gibi kuru bitiş için amyloglucosidase enzim (%0.5-1 mL/L)`
                 });
