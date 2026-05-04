@@ -420,13 +420,13 @@ Hicbir kritik satir atlanmaz, "..." kisaltmasi yok, yorum satirlari dahil. Token
 
 **Atif:** V28a + V28b_C2 denetim protokolu uygulama deneyimi 03.05.2026.
 
-### Kural 12.2 — Her production deploy oncesi tam denetim zorunlu (revize v2.6)
+### Kural 12.2 — Her production deploy oncesi tam denetim zorunlu (revize v2.7)
 
 Her production deploy oncesi tam denetim zorunlu:
 - **KURAL 4**: 5-stat gain + slug gap kontrolu (PASS gerek)
 - **KURAL 1.1**: Yeni pattern eklendiyse FP audit (raw.yeast 5+ sample manuel)
 - **KURAL 9.5**: Canli UI test (deploy sonrasi hard refresh + ekran goruntusu)
-- **Sha guard**: V27/V28b/V28d/V28e (ve son dataset) sha intact dogrulama
+- **Sha guard (v2.7)**: V27/V28b/V28d/V28e (ve son dataset) sha intact dogrulama **Python hashlib gercek hash karsilastirmasi ile**, transcript referansi yetersiz
 - **Working tree**: clean veya gerekçeli uncommitted dosya listesi
 
 Deploy sayisi sinirsiz, denetim atlama yasak. **Hizli arka arkaya deploy KURAL 12.2 ihlali DEGIL**; **denetimsiz deploy KURAL 12.2 ihlalidir**.
@@ -469,9 +469,11 @@ Boyut: 1267.4 MB (V27'den 126 byte farkli)
 Recete: 376845
 Kapsam: C1 Wyeast 2272 izole (3 feature, 8 recete etkilendi)
 
-V28b (Adim 18c-1c-5d kapanis, commit edildi):
-sha256: bc8a7b0dd900019ff79900e9f871641bfe162d1c41bbd85cb7f2f37a4b938024
-Boyut: 1267.4 MB
+V28b (Adim 18c-1c-5d kapanis, Adim 59 meta eklendi, GUNCEL BASELINE):
+sha256_current: 8359f033338e9aeb399850b72e202f9e70577a1639a87f81d3dde75bf820ae8a (Adim 59 post-meta, GUNCEL)
+sha256_pre_meta: bc8a7b0dd900019ff79900e9f871641bfe162d1c41bbd85cb7f2f37a4b938024 (Adim 18c-1c-5d V28b BUILD orijinal)
+Sapma_sebep: Adim 59 _step59_v28b_add_meta.py V28b'a feature_list + meta blogu ekledi (audit log: working/_step59_v28b_add_meta_audit.json). Tracked legitimate islem, icerik zarari yok.
+Boyut: 1329004710 bytes (1267.4 MB pre-meta + 2361 bytes meta)
 Recete: 376845
 Kapsam: 9 aktif pattern, 2827 exception
 Bilincli kayit: 237 multi-strain FP + C4/C5 0 etki -> Adim 18d
@@ -502,6 +504,60 @@ V19 retrain V28d 14 cluster top1 0.6986 gap +0.30
 Production URL: Brewmaster_v2_79_12.html (commit d1e5986, 03.05.2026)
 Eski URL korundu rollback: Brewmaster_v2_79_11.html (V28b), Brewmaster_v2_79_10.html (V27)
 Sprint D K4 iptal -> Adim 18d kayit (486 reçete algoritmik kriter yetersiz)
+
+V28h_v2 (Sub-sprint 2B C kararı, Dunkelweizen reslug 94 algoritmik + Schwarzbier manuel, BUILT 2026-05-04):
+sha256: ac0d95e091b81833e992d02dcf57ea0ba833820e89a7232c34433a257d4b2097
+Boyut: 1329698053 bytes (~1.32 GB)
+Recete: 376845 (V28g ile esit, sadece slug etiket degisikligi)
+Kapsam: V28g + 94 reslug (BA 2026 5-metric tam zone, sadece wheat ici reslug, cluster taşıma YOK):
+  WEIZENBOCK_TASMA 40 -> south_german_weizenbock (wheat cluster, algoritmik)
+  HEFEWEIZEN_TASMA 18 -> south_german_hefeweizen (wheat cluster, algoritmik)
+  BERNSTEIN_TASMA 35 -> south_german_bernsteinfarbenes_weizen (wheat cluster, algoritmik)
+  ROGGENBIER_TASMA 1 -> roggenbier (wheat cluster, algoritmik)
+  SCHWARZBIER_TASMA_MANUEL 40 -> 18d manuel review (cluster taşıma -2.5pp kanıtlı, algoritmik DEGIL)
+  ZONE_INSIDE 273 dokunulmaz (south_german_dunkel_weizen)
+  HOPPY_DUNKEL_IBU>25 199 + ZONE_BORDERLINE 1483 = 1682 manuel review (18d kapsami)
+non_dw_drift: 0 (Dunkelweizen disi 374756 recete dokunulmaz)
+Yeni slug eklenmiyor — slug count 91 sabit
+Cluster tasima: YOK (sadece wheat ici reslug)
+Manuel review 18d toplam: 5+7+8 = 1722 reçete (Schwarzbier 40 + Hoppy 199 + Borderline 1483)
+V19 retrain V28h_v2: pending (Senaryo 5 parametreler)
+V6 retrain V28h_v2: pending (V19 retrain sonrasi)
+Kaynak: STYLE_DEFINITIONS.json (BJCP 2021 + BA 2026 hibrit) + working/_step60d_v28h_v2_build.py
+Mutually exclusive priority order: 1_WEIZENBOCK > 2_HEFEWEIZEN > 3_BERNSTEIN > 4_ROGGENBIER > 5_SCHWARZBIER_MANUEL > 6_ZONE_INSIDE > 7_HOPPY > 8_BORDERLINE
+C kararı gerekce (KURAL 9.2 sayisal kanit): V28g→V28h cluster taşıma Schwarzbier top1 -2.5pp kazanim YOK, V28h slug gap 5.02 FAIL. Bernstein +23.8pp + Weizenbock +4.9pp + Hefeweizen +1.0pp + Roggenbier +11.1pp wheat ici kazanimlari korunur.
+KAAN KARAR (DURMA NOKTASI 2 — C): V28h iptal, V28h_v2 build (sadece wheat ici reslug, Schwarzbier manuel)
+
+V28h (Sub-sprint 2B IPTAL, Dunkelweizen reslug 134 algoritmik, BUILT 2026-05-04, ARSIV working/_v28h_archive/):
+sha256: 4fcc6c8b52019a573dac9f9b7bfc6935c7a9b156bd5846aeba85432051168dc9
+Boyut: 1329693131 bytes (~1.32 GB)
+Recete: 376845 (V28g ile esit, sadece slug etiket degisikligi)
+IPTAL SEBEP: V19 retrain Senaryo 5 slug gap 5.02pp FAIL (V28g 4.86 PASS, +0.16pp regression). Schwarzbier cluster taşıma top1 -2.5pp kazanim vermedi.
+Kapsam: V28g + 134 reslug (BA 2026 5-metric tam zone, KAAN AUDIT FG+ABV+IBU lower bound her filtreye dahil):
+  WEIZENBOCK_TASMA 40 -> south_german_weizenbock (wheat cluster)
+  HEFEWEIZEN_TASMA 18 -> south_german_hefeweizen (wheat cluster)
+  BERNSTEIN_TASMA 35 -> south_german_bernsteinfarbenes_weizen (wheat cluster)
+  ROGGENBIER_TASMA 1 -> roggenbier (wheat cluster)
+  SCHWARZBIER_TASMA 40 -> german_schwarzbier (lager_dark cluster) — CLUSTER TAŞIMA, KAZANIM YOK
+  ZONE_INSIDE 273 dokunulmaz (south_german_dunkel_weizen)
+  HOPPY_DUNKEL_IBU>25 199 + ZONE_BORDERLINE 1483 = 1682 manuel review (18d kapsami)
+non_dw_drift: 0 (Dunkelweizen disi 374756 recete dokunulmaz)
+Yeni slug eklenmiyor — slug count 91 sabit
+Cluster tasima: wheat -40 (Schwarzbier lager_dark'a) + lager_dark +40
+V19 retrain V28h Senaryo 5: 14cat top1 0.6992 (V28g 0.6990 yatay), slug top1 0.5701 (V28g 0.5713 -0.12pp), gap 5.02pp FAIL
+V19 V28h per-slug ölçüm (V28g→V28h delta):
+  Schwarzbier 0.648->0.623 -2.5pp (cluster taşıma KAZANIM YOK, C kararı temeli)
+  Bernstein 0.462->0.700 +23.8pp (transformative, n=20)
+  Weizenbock 0.664->0.713 +4.9pp (notable kazanim)
+  Hefeweizen 0.800->0.810 +1.0pp (yatay marjinal)
+  Dunkel_weizen 0.811->0.803 -0.8pp (yatay)
+  Roggenbier 0.667->0.778 +11.1pp (yan kazanim)
+Endise: Kellerbier 0.111->0.000 (-11.1pp yeni zero), Gose 0.400->0.325 (-7.5pp), belgian_strong_golden 0.422->0.389 (-3.3pp)
+Kaynak: STYLE_DEFINITIONS.json (BJCP 2021 + BA 2026 hibrit) + working/_step60d_subsprint2b_build_netlesme_revize.json
+Mutually exclusive priority order: 1_WEIZENBOCK > 2_HEFEWEIZEN > 3_BERNSTEIN > 4_ROGGENBIER > 5_SCHWARZBIER > 6_ZONE_INSIDE > 7_HOPPY > 8_BORDERLINE
+KAAN AUDIT 5 sorun duzeltildi: WEIZENBOCK FG+ABV, HEFEWEIZEN FG, BERNSTEIN FG+ABV+IBU strict, SCHWARZBIER tam BA zone, ZONE_INSIDE referans
+KAAN KARAR (DURMA NOKTASI 2 — C): V28h iptal, V28h_v2 build (Schwarzbier manuel)
+ARSIV: working/_v28h_archive/ (model + dataset + reslug log + train script + build script)
 
 V28g (Sub-sprint 2A, Rye Ale reslug 136 algoritmik, BUILT 2026-05-04):
 sha256: e21a168c321c97c8ed9b5fcc30c011b665342b0a190575795208662c7995a05a
@@ -618,6 +674,7 @@ Eski URL korundu rollback icin: Brewmaster_v2_79_10.html + _v19_model_*.json (V2
 - v2.5 (2026-05-04 — Code'un 12 hata kapanis audit'i): 3 madde revize (1.1 FP testi vurgu, 7.1 yumusatma yasagi, 4.6 deploy gate 5-stat gain) + 5 yeni madde (9.3 metric olcum zorunlu, 9.4 V19/V6 direkt kiyas yasagi, 9.5 canli UI test, 12.2 tek deploy session, 12.3 build script versiyon arsivi) + 3 risk kaydi (V21 NaN, P2 FP yuk, V28e gain belirsiz). 12 hata kaydi `_step60d_kapanis_audit.md`'ye eklendi.
 - v2.5.1 (2026-05-04 — Oncelik 1A + 1B kapanis): P2 audit %100 kapsam tamam (81/81 TP, 0 FP — ilk 8 pattern 40 sample + ek 8 brand 36 sample + WLP670 5 sample). K3 603 keyword-eslesen audit (57 sample): Quadrupel %93 KABUL, Dubbel %53 KISMEN, Tripel %33 KRITIK, Strong Golden %25 KRITIK. 14 YANLIS recete + 4 hata pattern + 18d pattern matrisi yon (maya bazli + negatif baglam + profile zone + pattern genisletme) `_to_do_step18d.json`'a eklendi. V19 quadrupel 0.000 paradoksu = ML mimari sorunu (47 recete az + class weight eksigi), dataset temiz.
 - v2.6 (2026-05-04 — KURAL 12.2 revize): v2.5'te 'tek session 1 deploy' yanlis tanim. Asil mesele her deploy oncesi tam denetim (KURAL 4 + 1.1 + 9.5 + sha guard + working tree clean). Hizli arka arkaya deploy ihlal degil; denetimsiz deploy ihlal. Deploy sayisi sinirsiz. Adim 18d-pre Oncelik 2.5 deploy hazirligi sirasinda Kaan tespit.
+- v2.7 (2026-05-04 — Sub-sprint 2B C kararı, Sha guard rapor zorunluluğu): Sha guard raporu **gerçek hashlib hash karşılaştırması** ile yapılır. Transcript verisi tek başına yeterli değil — Sub-sprint 1/2A/2B raporlarinda V28b sha guard atlandi (gevsek check), 4 sprint boyunca sapma fark edilmedi. Adim 59 V28b meta ekleme (mesru tracked islem) ile sha bc8a7b0d -> 8359f033 oldu, ama KURAL Code baseline kaydı atlanmis. DURMA NOKTASI 7a Kaan B kararı arastirma + C kararı baseline guncelleme. Kayıt: gelecekte her sha guard raporu Python hashlib check ile yapılır, transcript önceki rapor referansı yetersiz. Audit log referansi: working/_step60d_v28b_sha_sapmasi_arastirma.json + working/_step59_v28b_add_meta_audit.json.
 
 ---
 

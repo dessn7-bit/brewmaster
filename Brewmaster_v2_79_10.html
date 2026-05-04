@@ -471,10 +471,10 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
       }
     } catch(e) {}
   })();
-  const MODEL_URL = '_v19_v28g_model_14cat.json';
-  const LABELS_URL = '_v19_v28g_label_encoder_14cat.json';
-  const SLUG_MODEL_URL = '_v19_v28g_model_slug.json';
-  const SLUG_LABELS_URL = '_v19_v28g_label_encoder_slug.json';
+  const MODEL_URL = '_v19_v28h_v2_model_14cat.json';
+  const LABELS_URL = '_v19_v28h_v2_label_encoder_14cat.json';
+  const SLUG_MODEL_URL = '_v19_v28h_v2_model_slug.json';
+  const SLUG_LABELS_URL = '_v19_v28h_v2_label_encoder_slug.json';
   const cache = { model: null, labels: null, slugModel: null, slugLabels: null };
   let loadingPromise = null;
   let slugLoadingPromise = null;
@@ -874,14 +874,14 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
 </script>
 <script id="bm-engine-v6">
 // V6 — 14-cluster KNN motoru (Adım 18d-pre P2 V28e retrain)
-// Reference: _v6_v28g_reference.json (28000 × 56 unscaled, 14 cluster, V28g Sub-sprint 2A Rye Ale reslug)
-// Scaler: _v6_v28g_scaler.json (StandardScaler mean+scale 56)
-// Meta: _v6_v28g_meta.json (features 56 + classes 14 + displayTR)
+// Reference: _v6_v28h_v2_reference.json (28000 × 56 unscaled, 14 cluster, V28h_v2 Sub-sprint 2B C kararı Dunkelweizen reslug)
+// Scaler: _v6_v28h_v2_scaler.json (StandardScaler mean+scale 56)
+// Meta: _v6_v28h_v2_meta.json (features 56 + classes 14 + displayTR)
 // API: window.BM_V6.predictSync(uiRecipe) → top3 cluster + confidence + displayTR
 (function(){
-  const REF_URL = '_v6_v28g_reference.json';
-  const SCALER_URL = '_v6_v28g_scaler.json';
-  const META_URL = '_v6_v28g_meta.json';
+  const REF_URL = '_v6_v28h_v2_reference.json';
+  const SCALER_URL = '_v6_v28h_v2_scaler.json';
+  const META_URL = '_v6_v28h_v2_meta.json';
   const cache = { X: null, y: null, mean: null, scale: null, features: null, classes: null, displayTR: null, K: 5, weights: 'distance' };
   let loadingPromise = null;
 
@@ -13650,7 +13650,7 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
       if (__v6Result) {
         // V6 cluster sonucu — UI bilgi şeridi için ayrı global tutulur
         window.__lastV6ClusterResult = __v6Result;
-        console.log('%c[BM V6 14-cluster] KNN K=5 weighted distance (28000 reçete, 56 feature, V28g CV t1=0.6065)', 'background:#1976D2;color:#fff;padding:2px 6px;');
+        console.log('%c[BM V6 14-cluster] KNN K=5 weighted distance (28000 reçete, 56 feature, V28h_v2 CV t1=0.6068)', 'background:#1976D2;color:#fff;padding:2px 6px;');
         __v6Result.top3.forEach(function(r,i){ console.log('    cluster '+(i+1)+'. '+r.displayTR+' %'+r.confidence); });
       }
     } else if (window.BM_V6 && !window.BM_V6.isReady()) {
@@ -14244,7 +14244,7 @@ return `
               // model dosyaları archive/ klasöründe. Sadece V6 (KNN, eski) + V12 (V19 XGBoost, default).
               return '<span style="display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap">'+
                 btn('V6', 'V6 (KNN)', '#558B2F', 'V6 KNN — 1100 reçete (eski/küçük model)')+
-                btn('V12', 'V12 (V19) ⭐', '#6A1B9A', 'V12 DEFAULT — V19 XGBoost (Adim 58 + Phase 2 + V28f Hefeweizen + V28g Rye Ale reslug Senaryo 5, 91 slug, slug t1 57.13 / 14cat 69.90, gap 4.86 PASS)')+
+                btn('V12', 'V12 (V19) ⭐', '#6A1B9A', 'V12 DEFAULT — V19 XGBoost (Adim 58 + Phase 2 + V28f Hefeweizen + V28g Rye Ale + V28h_v2 Dunkelweizen reslug Senaryo 5, 91 slug, slug t1 57.17 / 14cat 69.91, gap 4.78 PASS)')+
               '</span>';
             })() : '')+
           '</div>'+
@@ -14252,7 +14252,7 @@ return `
             var m = localStorage.getItem('bm_motor_version') || 'V12';
             var color = m==='V12' ? '#6A1B9A' : (m==='V101' ? '#0D47A1' : (m==='V10' ? '#1B5E20' : (m==='V9' ? '#7B1FA2' : '#C88A13')));
             var bgC = m==='V12' ? '#F3E5F5' : (m==='V101' ? '#E3F2FD' : (m==='V10' ? '#E8F5E9' : (m==='V9' ? '#F3E5F5' : '#FFF7E0')));
-            var lbl = m==='V12' ? 'V12 (V19) DEFAULT (Adim 58 + Phase 2 + V28f Hefeweizen + V28g Rye Ale reslug Senaryo 5, 91 slug, slug t1 57.13 / 14cat 69.90, gap 4.86 PASS)' :
+            var lbl = m==='V12' ? 'V12 (V19) DEFAULT (Adim 58 + Phase 2 + V28f Hefeweizen + V28g Rye Ale + V28h_v2 Dunkelweizen reslug Senaryo 5, 91 slug, slug t1 57.17 / 14cat 69.91, gap 4.78 PASS)' :
                       m==='V101' ? 'V10.1 (8061 reçete, +Roerstok+Amervallei NL kulüpleri)' :
                       m==='V10' ? 'BETA V10 aktif (~8000 reçete, +twortwat NL Hollanda topluluğu)' :
                       m==='V9' ? 'BETA V9 aktif (7783 reçete, +%34 V8.5)' :
