@@ -13674,6 +13674,11 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
         error: null
       };
       if (window.BM_V12.isReady()) {
+        // Expose mod (KAAN UI feature vector teshis): __recipeV2 + buildFeatures cikti
+        window.__lastV12Recipe = __recipeV2;
+        if (typeof window.__bmBuildFeaturesV12 === 'function') {
+          try { window.__lastV12Features = window.__bmBuildFeaturesV12(__recipeV2); } catch(e) {}
+        }
         // 14-cat cluster prediction (always run, fast)
         var __v12Cluster = window.BM_V12.predictSync(__recipeV2);
         if (__v12Cluster) {
@@ -13689,6 +13694,7 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
               __top3V6_engine = __v12Slug.topN || __v12Slug.top3;
               __v6_meta = __v12Slug._meta;
               window.__lastV12SlugResult = __v12Slug;
+              window.__lastV12Slug = __v12Slug;
               window.__lastV12Result = __v12Slug;
               window.__bmV12DispatchInfo.slugBranchHit = true;
               console.log('%c[BM V12 (V19) slug] 87-slug XGBoost', 'background:#9C27B0;color:#fff;padding:2px 6px;');
