@@ -14321,7 +14321,7 @@ return `
             if(/\bbrett\b|brettanomyces|farmhouse brett/i.test(s))
               return {tip:'brett', ad:'Brett (Brettanomyces)', oneri:'<b>WLP650 Brett Brux</b>, <b>WLP645 Brett Claussenii</b>, <b>OYL-202 Brett C</b>, <b>OYL-218 Brett 2.0</b>'};
             // Lager (all sub-styles + historical)
-            if(/\blager\b|pilsner|pilsen|pils\b|helles|\bdunkel|schwarzbier|\bbock\b|doppelbock|eisbock|maibock|weizenbock|münchen|munich helles|munich dunkel|vienna lager|märzen|marzen|oktoberfest|festbier|dortmund|czech dark|czech premium|czech amber|czech pale|bohemian|american lager|light lager|international pale|pre-prohibition|american adjunct|baltic porter|california common|steam beer|rauchbier|kellerbier|zwickelbier|zoigl|kentucky common|dampfbier/i.test(s))
+            if(/\blager\b|pilsner|pilsen|pils\b|helles|\bdunkel(?!weizen)|schwarzbier|\bbock\b|doppelbock|eisbock|maibock|münchen|munich helles|munich dunkel|vienna lager|märzen|marzen|oktoberfest|festbier|dortmund|czech dark|czech premium|czech amber|czech pale|bohemian|american lager|light lager|international pale|pre-prohibition|american adjunct|baltic porter|california common|steam beer|rauchbier|kellerbier|zwickelbier|zoigl|kentucky common|dampfbier/i.test(s))
               return {tip:'lager', ad:'Lager', oneri:'<b>W-34/70</b> (kuru, universal), <b>Saflager S-189</b>, <b>S-23</b>, <b>WY2124 Bohemian</b>, <b>WY2206 Bavarian</b>, <b>WLP830 German</b>'};
             // Wheat (incl. German wheat styles + historical wheat-based)
             if(/weizen|weissbier|\bhefe|dunkelweizen|witbier|belgian white|white ale|roggenbier|grodziskie|grätzer|gratzer|wheat beer|wheatwine|spiced wheat|herb wheat|australian wheat/i.test(s))
