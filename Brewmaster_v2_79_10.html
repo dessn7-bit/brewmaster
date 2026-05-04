@@ -638,7 +638,7 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
 
     // Percents (V85 V6→V8.5 schema)
     var pct_pilsner = p.pilsnerPct || 0;
-    var pct_pale_ale = isAbbey ? 0 : (p.baseMaltPct || 0);
+    var pct_pale_ale = isAbbey ? 0 : (p.paleAlePct ?? p.baseMaltPct ?? 0);
     var pct_munich = p.munichPct || 0;
     var pct_vienna = p.viennaPct || 0;
     var pct_wheat = p.wheatPct || 0;
