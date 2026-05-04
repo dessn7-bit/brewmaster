@@ -14365,6 +14365,30 @@ return `
               default:            return '<b>US-05 (%82)</b>, <b>Nottingham (%83)</b>, <b>WLP001 (%82)</b>';
             }
           }
+          // Adim 3: stil-tip spesifik base malt onerisi (OG dusuk Cözüm 1)
+          function _baseMaltSuggestion(tip){
+            switch(tip){
+              case 'wheat':       return 'Pilsner Malt + Wheat Malt';
+              case 'lager':       return 'Pilsner + Munich';
+              case 'belcika':     return 'Pilsner + Aromatic/Abbey';
+              case 'saison':      return 'Pilsner + Wheat';
+              case 'kveik':       return 'Pale Ale + Pilsner';
+              case 'sour':        return 'Pilsner + Wheat';
+              case 'brett':       return 'Pilsner + Pale Ale';
+              case 'ale_english': return 'Maris Otter + Pale Malt';
+              case 'ale_hybrid':  return 'Pilsner + Pale Ale';
+              case 'ale_clean':
+              default:            return 'Pale Ale, Pilsner, Pale Malt 2-Row';
+            }
+          }
+          // Adim 4: Crystal/Karamel azaltma sadece ale stilleri icin anlamli
+          function _showCrystalSolution(tip){
+            return ['ale_clean','ale_english','ale_hybrid'].includes(tip);
+          }
+          // Adim 4: Brut IPA enzim sadece ale_clean (IPA tipi) icin
+          function _showBrutEnzymSolution(tip){
+            return tip === 'ale_clean';
+          }
 
           const _beklenen=_beklenenMaya(stil_tah);
           if(_beklenen){
@@ -14419,7 +14443,7 @@ return `
                 durum:'kırmızı', ikon:'📈',
                 baslik:`OG düşük: ${_og.toFixed(3)} (${_stKey} hedefi ${_stRef.og[0]}-${_stRef.og[1]})`,
                 coz:`Wort'da yeterli fermente olabilir şeker yok — final alkol düşük kalacak.<br>
-                  <b>Çözüm 1:</b> <b>+${ek_kg.toFixed(2)} kg</b> base malt ekle (Pale Ale, Pilsner, Pale Malt 2-Row). → OG ~${tOG.toFixed(3)}<br>
+                  <b>Çözüm 1:</b> <b>+${ek_kg.toFixed(2)} kg</b> base malt ekle (${_baseMaltSuggestion(_beklenen?.tip)}). → OG ~${tOG.toFixed(3)}<br>
                   <b>Çözüm 2:</b> Verimi artır (mash sıcaklığı ${(S.mashSc||66)+1}°C'ye çıkar, mash süresini ${S.mashDk||60}'dan 75-90 dk'ya uzat)<br>
                   <b>Çözüm 3:</b> Batch hacmini küçült (${_hacim}L → ${(_hacim*_og/(tOG||_og)).toFixed(1)}L ile aynı malt aynı OG verir)`
               });
@@ -14444,9 +14468,8 @@ return `
                   baslik:`FG yüksek: ${_fg.toFixed(3)} — ${_stKey} hedefi ${_stRef.fg[0]}-${_stRef.fg[1]}`,
                   coz:`Bira çok tatlı kalacak, dekstrin fazla, ABV düşük.<br>
                     <b>Çözüm 1 (mash):</b> <b>Mash sıcaklığını 64°C'ye düşür</b> (beta-amilaz aktif → fermente şeker artar). 63-64°C, 75-90 dk mash.<br>
-                    <b>Çözüm 2 (maya):</b> Yüksek attenuation maya: ${_highAttenYeast(_beklenen?.tip)}<br>
-                    <b>Çözüm 3 (grist):</b> Crystal/Karamel malt oranını azalt (%5-10'dan %2-3'e), Carapils tamamen kaldır<br>
-                    <b>Çözüm 4 (katkı):</b> Brut IPA gibi kuru bitiş için amyloglucosidase enzim (%0.5-1 mL/L)`
+                    <b>Çözüm 2 (maya):</b> Yüksek attenuation maya: ${_highAttenYeast(_beklenen?.tip)}<br>${_showCrystalSolution(_beklenen?.tip) ? `                    <b>Çözüm 3 (grist):</b> Crystal/Karamel malt oranını azalt (%5-10'dan %2-3'e), Carapils tamamen kaldır<br>
+` : ''}${_showBrutEnzymSolution(_beklenen?.tip) ? `                    <b>Çözüm 4 (katkı):</b> Brut IPA gibi kuru bitiş için amyloglucosidase enzim (%0.5-1 mL/L)` : ''}`
                 });
               } else if(_fg<_stRef.fg[0]-TOL_FG){
                 oneriler.push({
