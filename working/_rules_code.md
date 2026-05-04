@@ -505,6 +505,73 @@ Production URL: Brewmaster_v2_79_12.html (commit d1e5986, 03.05.2026)
 Eski URL korundu rollback: Brewmaster_v2_79_11.html (V28b), Brewmaster_v2_79_10.html (V27)
 Sprint D K4 iptal -> Adim 18d kayit (486 reçete algoritmik kriter yetersiz)
 
+V28i (Sub-sprint 3, Witbier reslug 1022 algoritmik + 3465 manuel + 1201 dokunulmaz, PRODUCTION DEPLOY 2026-05-05):
+sha256: 0f404f4bee24cd61e4fa7d028ebbcab0d0caee561c7a2bac5ff481de5d2fea9a
+Boyut: 1329993334 bytes (~1.32 GB)
+Recete: 376845 (V28h_v2 ile esit, sadece witbier slug etiket degisikligi)
+V19 retrain V28i Senaryo 5: 14cat top1 0.7001 (V28h_v2 0.6991 +0.10pp), 14cat gap 0.48pp (V28h_v2 0.62pp daraldi PASS)
+  slug top1 0.5708 (V28h_v2 0.5717 -0.09pp marjinal gurultu), slug gap 4.87pp PASS (V28h_v2 4.78pp +0.09pp marjinal)
+V19 V28i hedef slug per-class (V28h_v2 -> V28i):
+  belgian_witbier (kaynak) 0.788 -> 0.808 (+2.0pp)
+  south_german_hefeweizen 0.821 -> 0.832 (+1.1pp)
+  south_german_dunkel_weizen 0.797 -> 0.825 (+2.8pp)
+  roggenbier 0.704 -> 0.815 (+11.1pp)
+  american_wheat_beer 0.645 -> 0.624 (-2.1pp buyumeye ragmen — backlog arastirma)
+  south_german_bernsteinfarbenes_weizen 0.700 -> 0.600 (-10.0pp n=20 kucuk)
+V19 V28i sour cluster yan etki (slug-level weighted +0.32pp NET POZITIF):
+  oud_bruin 0.404 -> 0.505 (+10.1pp transformative recovery)
+  mixed_fermentation_sour 0.064 -> 0.191 (+12.7pp transformative recovery)
+  belgian_fruit_lambic 0.324 -> 0.362 (+3.8pp)
+  belgian_lambic 0.429 -> 0.438 (+0.9pp)
+  brett_beer 0.105 -> 0.000 (n=19 gurultu — endise notu, sonraki sprint trend kontrol)
+  gose 0.475 -> 0.400 (-7.5pp n=40 kucuk dalgalanma)
+  belgian_gueuze 0.103 -> 0.051 (-5.2pp n=39 kucuk)
+  berliner_weisse 0.772 -> 0.721 (-5.1pp Sub-sprint 2A emsal recovery beklenti)
+  flanders_red_ale 0.676 -> 0.651 (-2.5pp marjinal)
+  14cat sour cluster -3.5pp gorunum (yaniltici, slug-level weighted +0.32pp gercek skor)
+V6 retrain V28i: cv_top1 0.6066 (V28h_v2 0.6068 -0.02pp yatay), sour_F1 0.7507 (V28h_v2 0.7494 +0.13pp POZITIF — V19 weighted ile uyumlu), wheat_F1 0.8002 (V28h_v2 0.8025 -0.23pp marjinal)
+Kapsam: V28h_v2 + 1022 reslug (BA 5-metric tam zone + marker gate K1+K2-C Filtre D+K3 Kaan onayli):
+  ZONE_INSIDE_MARKER 1201 dokunulmaz (belgian_witbier'da kal, marker var etiket guvenli)
+  ZONE_INSIDE_NO_MARKER 399 manuel review (etiket guvensiz, marker yok)
+  HEFEWEIZEN_TASMA 463 -> south_german_hefeweizen (wheat cluster ici, algoritmik)
+  AMERICAN_WHEAT_FILTRE_D 559 -> american_wheat_beer (wheat cluster ici, no_marker filter, algoritmik)
+  AMERICAN_WHEAT_MARKER_VAR 1291 manuel review (etiket kirliligi riski %64.5 coriander markerli muhtemel gercek witbier)
+  WHITE_IPA_MANUEL 6 manuel review (cluster taşıma yan etki riski, K3)
+  HOPPY_WITBIER_IBU>30 379 manuel review
+  ZONE_BORDERLINE 1390 manuel review
+non_witbier_drift: 0 (witbier disi 371157 recete dokunulmaz)
+Yeni slug eklenmiyor — slug count 91 sabit
+Cluster tasima: YOK (tum reslug wheat cluster ici, Sub-sprint 2B C kararı emsal uygulandi)
+Manuel review 18d toplam: 2+5+6+7+8 = 3465 reçete (kumulatif 18d 5430 + 3465 = 8895 reçete)
+Marker gate K1: has_coriander OR has_orange_peel zorunlu ZONE_INSIDE icin (etiket guvenligi)
+K2-C Filtre D: AWB no_marker only (1852 -> 559, marker_var 1291 manuel — etiket kirliligi riski)
+K3: WHITE_IPA cluster taşıma yapilmadi (Sub-sprint 2B C kararı emsal)
+Kaynak: STYLE_DEFINITIONS.json + working/_step60d_subsprint3_build_netlesme_revize.json
+Mutually exclusive priority order: 1_ZONE_INSIDE_MARKER > 2_ZONE_INSIDE_NO_MARKER > 3_HEFEWEIZEN > 4_AWB_FILTRE_D > 5_AWB_MARKER_VAR > 6_WHITE_IPA > 7_HOPPY > 8_BORDERLINE
+KAAN KARAR (3/3 onay): K1 marker gate + K2-C Filtre D no_marker + K3 white_ipa manuel
+KAAN KARAR (DURMA NOKTASI 2 — B): V28i deploy onay sebep sour weighted +0.32pp net pozitif + Sub-sprint 2A emsal recovery pattern + KURAL 4 PASS
+Kapsam: V28h_v2 + 1022 reslug (BA 5-metric tam zone + marker gate K1+K2-C Filtre D+K3 Kaan onayli):
+  ZONE_INSIDE_MARKER 1201 dokunulmaz (belgian_witbier'da kal, marker var etiket guvenli)
+  ZONE_INSIDE_NO_MARKER 399 manuel review (etiket guvensiz, marker yok)
+  HEFEWEIZEN_TASMA 463 -> south_german_hefeweizen (wheat cluster ici, algoritmik)
+  AMERICAN_WHEAT_FILTRE_D 559 -> american_wheat_beer (wheat cluster ici, no_marker filter, algoritmik)
+  AMERICAN_WHEAT_MARKER_VAR 1291 manuel review (etiket kirliligi riski %64.5 coriander markerli muhtemel gercek witbier)
+  WHITE_IPA_MANUEL 6 manuel review (cluster taşıma yan etki riski, K3)
+  HOPPY_WITBIER_IBU>30 379 manuel review
+  ZONE_BORDERLINE 1390 manuel review
+non_witbier_drift: 0 (witbier disi 371157 recete dokunulmaz)
+Yeni slug eklenmiyor — slug count 91 sabit
+Cluster tasima: YOK (tum reslug wheat cluster ici, Sub-sprint 2B C kararı emsal uygulandi)
+Manuel review 18d toplam: 2+5+6+7+8 = 3465 reçete
+Marker gate K1: has_coriander OR has_orange_peel zorunlu ZONE_INSIDE icin (etiket guvenligi)
+K2-C Filtre D: AWB no_marker only (1852 -> 559, marker_var 1291 manuel — etiket kirliligi riski)
+K3: WHITE_IPA cluster taşıma yapilmadi (Sub-sprint 2B C kararı emsal)
+V19 retrain V28i: pending (Senaryo 5 parametreler)
+V6 retrain V28i: pending (V19 retrain sonrasi)
+Kaynak: STYLE_DEFINITIONS.json (BJCP 2021 + BA 2026 hibrit) + working/_step60d_subsprint3_build_netlesme_revize.json
+Mutually exclusive priority order: 1_ZONE_INSIDE_MARKER > 2_ZONE_INSIDE_NO_MARKER > 3_HEFEWEIZEN > 4_AWB_FILTRE_D > 5_AWB_MARKER_VAR > 6_WHITE_IPA > 7_HOPPY > 8_BORDERLINE
+KAAN KARAR (3/3 onay): K1 marker gate + K2-C Filtre D no_marker + K3 white_ipa manuel
+
 V28h_v2 (Sub-sprint 2B C kararı, Dunkelweizen reslug 94 algoritmik + Schwarzbier manuel, BUILT 2026-05-04):
 sha256: ac0d95e091b81833e992d02dcf57ea0ba833820e89a7232c34433a257d4b2097
 Boyut: 1329698053 bytes (~1.32 GB)
@@ -738,3 +805,43 @@ Her V19 retrain sonrasi (slug t1, 14cat t1, gap, note alanlari) `Brewmaster_v2_7
 - Satir 14248 (status badge label): `var lbl = m==='V12' ? 'V12 (V19) DEFAULT (<note>, <slug_count> slug, slug t1 <slug_t1> / 14cat <cat_t1>, gap <gap> PASS/FAIL)' : ...`
 
 **Atif:** Adim 18d-pre Hata #2 — V19 ilk deploy era'sindan kalma metin (91 slug, 16cat 65.1, slug t1 55.4) V28e production'a kadar guncellenmedi. Senaryo 4 deploy ile birlikte duzeltildi (87 slug, 14cat 69.97, slug t1 57.28, gap 4.98 PASS).
+
+---
+
+# BACKLOG (KAAN ONAYLI, KAYIT TARIHI 2026-05-04)
+
+Detay: `working/_backlog.json` (her sub-sprint kapanisinda guncellenir)
+
+## Aktif Backlog
+
+1. **Sub-sprint 2C-bis: Berliner Weisse + Sour Cluster Kalibrasyon Audit**
+   - Kaynak: Sub-sprint 2C iptal (3-D karari, working/_step60d_subsprint2c_iptal_kapanis.json)
+   - Sebep: FRUIT_LAMBIC 231 recete profil sapma (-50% IBU), etiket guvenligi belirsiz, sour cluster ici emsal yok
+   - Oncelik: Yuksek (V28h_v2 production'da sour cluster zayif: belgian_fruit_lambic 0.324, mixed_ferm 0.064, gueuze 0.103)
+
+2. **Rye_ipa Training Imbalance Fix**
+   - Kaynak: Sub-sprint 2A V28g kapanis
+   - Hedef: rye_ipa V28h_v2 0.186 -> %50+
+   - Yontem: american_ipa down-sample veya rye_ipa up-sample veya class_weight (1:187 imbalance)
+
+3. **Schwarzbier 40 Recete Manuel Review (18d kapsami)**
+   - Kaynak: Sub-sprint 2B C karari
+   - Detay: working/_v28h_v2_reslug_log.json schwarzbier_manuel_18d listesi
+
+4. **Log Mesaj Kozmetik Fix**
+   - HTML "[BM V12 (V19) slug] 87-slug" varsa "91-slug"; "16-cat" varsa "14-cat"
+
+5. **V28h_v2 Yeni Endise Slug'lar**
+   - mixed_fermentation_sour 0.064 (n=47, Sub-sprint 2C-bis ile birlikte)
+   - specialty_saison 0.069 (n=334)
+   - belgian_quadrupel 0.000 sabit (n=24)
+   - kellerbier 0.111 (n=18)
+   - german_oktoberfest_festbier 0.056 (n=18)
+   - english_pale_ale 0.111, belgian_ipa 0.119, white_ipa 0.120, red_ipa 0.200
+
+## Sub-Sprint Sirasi (oneri, Kaan karar)
+- Sub-sprint 3: **Witbier** (5688 recete, OOF analiz, wheat cluster — emsal Sub-sprint 1 +1.83pp)
+- Sub-sprint 4: **American Wheat Ale + Weizenbock** (9909 recete, wheat cluster — emsal Sub-sprint 1)
+- Sub-sprint 5: Gose + Fruit Lambic + Lambic genel (727 recete, sour cluster — kucuk slug audit)
+- Sub-sprint 2C-bis: Berliner + Sour Cluster Kalibrasyon (1561 + sour genel)
+- Sub-sprint 6: Sistemik wheat slug review (gerek olursa)
