@@ -503,6 +503,33 @@ Production URL: Brewmaster_v2_79_12.html (commit d1e5986, 03.05.2026)
 Eski URL korundu rollback: Brewmaster_v2_79_11.html (V28b), Brewmaster_v2_79_10.html (V27)
 Sprint D K4 iptal -> Adim 18d kayit (486 reçete algoritmik kriter yetersiz)
 
+V28g (Sub-sprint 2A, Rye Ale reslug 136 algoritmik, BUILT 2026-05-04):
+sha256: e21a168c321c97c8ed9b5fcc30c011b665342b0a190575795208662c7995a05a
+Boyut: 1329606534 bytes (~1.32 GB)
+Recete: 376845 (V28f ile esit, sadece slug etiket degisikligi)
+Kapsam: V28f + 136 reslug (BA 2026 priority order, 6 alt-grup mutually exclusive):
+  RYE_IPA 2 -> rye_ipa (ipa cluster mevcut)
+  ROGGENBIER 134 -> roggenbier (KAAN KARAR 2: wheat cluster)
+  ZONE_INSIDE 43 dokunulmaz (german_rye_ale)
+  HOPPY_RYE_IBU>35 101 + IMPERIAL_RYE_OG>1.075 14 + ZONE_BORDERLINE 426 = 541 manuel review (18d kapsami)
+non_ra_drift: 0 (Rye Ale disi 376125 recete dokunulmaz)
+Yeni 1 slug: roggenbier (V19 SLUG_TO_CLUSTER 90 -> 91; rye_ipa zaten mevcut)
+V19 retrain V28g (Senaryo 5: subsample 0.6, colsample 0.6, gamma 0.5, mcw 6, reg_lambda 2.5):
+  14cat top1 0.6990 (V28f esit), top3 0.9298, gap 0.58pp
+  slug top1 0.5713 (V28f_S5 0.5712 +0.01pp), top3 0.8149, top5 0.8940, **gap 4.86pp PASS** (KURAL 4)
+  Yeni roggenbier slug top1 0.667 (n=27, Wilson CI [0.478, 0.814] alt sinir 0.5 marjinal alti)
+  Backlog 1: rye_ipa V28f %22 -> V28g %18.6 (extreme 1:187 imbalance, sonraki sprint fix)
+  Backlog 2: oud_bruin V28f %46 -> V28g %35 (-11pp, V28g spesifik kalibrasyon kayma, sour cluster audit)
+V6 retrain V28g: cv_top1 0.6065 (V28f 0.6068 -0.03pp yatay), cv_top3 0.8022, macroF1 0.6027
+  Wheat cluster F1 0.7931 (en yuksek), sour 0.7477
+Kaynak: STYLE_DEFINITIONS.json (BJCP 2021 + BA 2026 hibrit) + working/_step60d_subsprint2a_build_netlesme.json
+Mutually exclusive priority order: 1_RYE_IPA > 2_ROGGENBIER > 3_ZONE_INSIDE > 4_HOPPY > 5_IMPERIAL > 6_BORDERLINE
+KAAN KARAR 1: rye_ipa cluster ipa (IPA aile tipik OG 1.056-1.075 + IBU 50-75)
+KAAN KARAR 2: roggenbier cluster wheat (rye-bazli grain ozelligi, dunkel yerine)
+KAAN KARAR 3: 136 algoritmik + 541 manuel + 43 dokunulmaz onayi
+KAAN KARAR 4 (DURMA NOKTASI 2 — B): V28g deploy onay, 3 endise kabul (roggenbier CI marjinal, rye_ipa devralma, oud_bruin -11pp), 2 backlog sprint
+Production URL Brewmaster_v2_79_10.html (HTML 7 fetch URL guncellendi V28g isimlerine, hardcoded metin satir 14240/14248/13652 V28g + roggenbier ile guncellendi)
+
 V28f (Sub-sprint 1, Hefeweizen reslug 1879 algoritmik, BUILT 2026-05-04):
 sha256: 97bd61bdcda7bc19b7b4aff9ae9a4142476de31ea87d810f4f1a1b2f8f622e93
 Boyut: 1329575246 bytes (~1.32 GB)
