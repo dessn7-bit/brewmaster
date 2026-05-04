@@ -503,6 +503,35 @@ Production URL: Brewmaster_v2_79_12.html (commit d1e5986, 03.05.2026)
 Eski URL korundu rollback: Brewmaster_v2_79_11.html (V28b), Brewmaster_v2_79_10.html (V27)
 Sprint D K4 iptal -> Adim 18d kayit (486 reçete algoritmik kriter yetersiz)
 
+V28f (Sub-sprint 1, Hefeweizen reslug 1879 algoritmik, BUILT 2026-05-04):
+sha256: 97bd61bdcda7bc19b7b4aff9ae9a4142476de31ea87d810f4f1a1b2f8f622e93
+Boyut: 1329575246 bytes (~1.32 GB)
+Recete: 376845 (V28e ile esit, sadece slug etiket degisikligi)
+Kapsam: V28e + 1879 reslug (BA 2026 priority order, 12 alt-grup mutually exclusive):
+  ZONE_INSIDE 2810 dokunulmaz (south_german_hefeweizen)
+  AMERICAN_WHEAT_WINE 6 -> american_wheat_wine_ale (strong_ale cluster KAAN KARAR 1)
+  WEIZENBOCK 194 -> south_german_weizenbock
+  BERNSTEIN_WEIZEN 67 -> south_german_bernsteinfarbenes_weizen
+  DUNKEL_WEIZEN 44 -> south_german_dunkel_weizen
+  LEICHTES_WEIZEN 117 -> german_leichtes_weizen
+  AMERICAN_WHEAT_BEER 1451 -> american_wheat_beer
+  Manuel review 3167 (HOPPY 272 + HIGH_IBU_NO_WG 94 + VERY_HIGH_SRM 28 + ZONE_BORDERLINE 2773) — 18d kapsami
+non_hef_drift: 0 (Hefeweizen disi 368989 recete dokunulmaz)
+Yeni 4 slug: south_german_bernsteinfarbenes_weizen, german_leichtes_weizen, american_wheat_beer, american_wheat_wine_ale (slug filter ≥10 ile wheat_wine_ale n=6 dropped, training 90 slug)
+V19 retrain V28f Senaryo 4 (V28f S4): 14cat top1 0.6990, slug top1 0.5719, gap 5.08pp FAIL
+V19 retrain V28f Senaryo 5 (V28f S5, S4+S1 kombo subsample 0.6 colsample 0.6 gamma 0.5 mcw 6 reg_lambda 2.5): 14cat top1 0.6990, slug top1 0.5712, slug top3 0.8155, slug top5 0.8945, **gap 4.86pp PASS** (KURAL 4)
+  Test top1 V28f_S4 baseline -0.0007 dususu std ±0.18pp altinda (gurultu, KURAL 7.1 yumusatma yok, kabul kosulu strict FAIL ama 4/5 PASS)
+  Per-class: oktoberfest_festbier zero'dan cikti +5.6pp, leichtes_weizen +4.3pp, hefeweizen 0.799 stabil, belgian_lambic -5.7pp gerileme
+  Zero slug 2 -> 1 (mimari kazanim)
+V6 retrain V28f: cv_top1 0.6068 (+0.22pp V28e 0.6046'ya gore), cv_top3 0.7999, macroF1 0.6030, sanity 50: 33/50=0.66
+  Wheat cluster F1 0.7931 (en yuksek), sour 0.7477, lager_dark 0.6992
+Kaynak: STYLE_DEFINITIONS.json (BJCP 2021 + BA 2026 hibrit) + working/_step60d_hefeweizen_build_netlesme.json
+Mutually exclusive priority order: 1_ZONE_INSIDE > 2_AWW > 3_WEIZENBOCK > 4_BERNSTEIN > 5_DUNKEL > 6_LEICHTES > 7-9 manuel > 10_AWB > 11-12 manuel
+KAAN KARAR 1: AMERICAN_WHEAT_WINE -> strong_ale cluster (BA OG 1.08-1.12 + ABV 8-12.2 wheat yerine strong_ale uygunluk)
+KAAN KARAR 2: V19 retrain Senaryo 4 ile basla — V28f_S4 gap FAIL, Senaryo 5 (S4+S1 kombo) ile gap PASS
+KAAN KARAR 3 (DURMA 2 revize): S5 kabul, ASAMA 6 V6 retrain devam — gap PASS oldugu icin, test top1 -0.0007 gurultu
+Production URL Brewmaster_v2_79_10.html (HTML 7 fetch URL guncellendi V28f isimlerine, hardcoded metin satir 14240/14248/13652 V28f S5 ile guncellendi)
+
 V28e (Adim 18d-pre P2, 8 yeast pattern guncelleme, PRODUCTION):
 sha256: 475746f7d01db80b202c08328adafcc12b44eb1e4282f2add1382d756fd7eb17
 Boyut: 1329192654 bytes (~1.32 GB)
