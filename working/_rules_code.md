@@ -550,6 +550,7 @@ Eski URL korundu rollback icin: Brewmaster_v2_79_10.html + _v19_model_*.json (V2
 - v2.3 (2026-05-03 — Adim 18c-1c-5f displayTR fix): _v6_v28d_meta.json'a displayTR field eklendi (14 cluster TR mapping, V21 formatından kopya). Script _step6_v6_retrain_14cluster.py satir 441-458 displayTR yazma bloğu kalıcı eklendi. Yeni meta sha256: 631ded9a..., boyut 1892 bytes.
 - v2.4 (2026-05-04 — Adim 18d-pre P2 V28e deploy): V28e baseline + 8 yeast pattern guncelleme (UNION mantigi, 8351 flag 0->1, 1->0 yasak, drift 0). V19 retrain 14cat 0.6997 +0.11pp, V6 retrain cv_top1 0.6046 +0.19pp. SOUR/LAGER/WHEAT cluster A orani artisi.
 - v2.5 (2026-05-04 — Code'un 12 hata kapanis audit'i): 3 madde revize (1.1 FP testi vurgu, 7.1 yumusatma yasagi, 4.6 deploy gate 5-stat gain) + 5 yeni madde (9.3 metric olcum zorunlu, 9.4 V19/V6 direkt kiyas yasagi, 9.5 canli UI test, 12.2 tek deploy session, 12.3 build script versiyon arsivi) + 3 risk kaydi (V21 NaN, P2 FP yuk, V28e gain belirsiz). 12 hata kaydi `_step60d_kapanis_audit.md`'ye eklendi.
+- v2.5.1 (2026-05-04 — Oncelik 1A + 1B kapanis): P2 audit %100 kapsam tamam (81/81 TP, 0 FP — ilk 8 pattern 40 sample + ek 8 brand 36 sample + WLP670 5 sample). K3 603 keyword-eslesen audit (57 sample): Quadrupel %93 KABUL, Dubbel %53 KISMEN, Tripel %33 KRITIK, Strong Golden %25 KRITIK. 14 YANLIS recete + 4 hata pattern + 18d pattern matrisi yon (maya bazli + negatif baglam + profile zone + pattern genisletme) `_to_do_step18d.json`'a eklendi. V19 quadrupel 0.000 paradoksu = ML mimari sorunu (47 recete az + class weight eksigi), dataset temiz.
 
 ---
 
@@ -580,3 +581,24 @@ Code'un kendi audit raporu sonucu Phase 2 ve V28e deploy sirasinda 12 ihlal/atla
 - **Risk 1: V21 NaN 4 recete (rmwoods)** — Yapisal sorun, V21'den retrain ederse parse hatasi. Cozum onerisi: NaN -> 0 manuel duzeltme veya recete sil.
 - **Risk 2: Phase 2 FP yuk** — ~8351 yeni flag, FP testi yapilmadi. Bilinmeyen sayi yanlis flag.
 - **Risk 3: V28e gain belirsizlik** — Headline metric istatistiksel gurultu altinda. P2 sonrasi olçum yapilmadan V28e "basarili" sayilamaz.
+
+---
+
+## K3 603 keyword-eslesen audit (Adim 18d-pre Oncelik 1B, 2026-05-04)
+
+P2 audit %100 kapsam tamamlandiktan sonra K3 reslug 603 reçete (4201 toplam K3'ten default fallback olmayanlar) audit edildi. Detay `working/_step18d_pre_p2_k3_603_audit.json`.
+
+**Sonuc:**
+- 57 sample manuel inceleme: 30 DOGRU / 13 TARTISMALI / 14 YANLIS — genel %53 dogru.
+- belgian_quadrupel: 15 sample, %93 dogru, **KABUL**. V19 0.000 paradoksu ML mimari sorunu (class weight + 47 recete az), dataset temiz.
+- belgian_dubbel: 15 sample, %53 dogru, KISMEN PROBLEM.
+- belgian_tripel: 15 sample, %33 dogru, **KRITIK PROBLEM**.
+- belgian_strong_golden: 12 sample, %25 dogru, **KRITIK PROBLEM**.
+
+**4 hata patterni:**
+1. FP negatif/generic kelime: 'double', 'triple', 'not a X', 'X light', 'X starter', 'X clone'
+2. Profile zone uyumsuz: Patersbier 4-5% ABV dubbel atandi, light versiyonlar strong_golden atandi
+3. Pattern eksik: 'westy db' Westvleteren 12 kisaltmasi yakalamadi
+4. Maya/recete konflikt: WLP530 + saison recete -> tripel atandi
+
+**14 YANLIS recete + 18d pattern matrisi yon** (maya bazli + negatif baglam + profile zone gate + pattern genisletme) `working/_to_do_step18d.json`'a eklendi. KARAR Kaan'da: 14 reçete 18d toplu reslug ile gider (mini-sprint maliyeti orantisiz).

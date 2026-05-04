@@ -7,9 +7,79 @@
     "486 K4 reslug aday saison cluster brown ale yeast (Adim 18d-pre Sprint D iptal)",
     "1522 K_OTHER manuel inceleme (saison cluster)",
     "3598 K3 default fallback belgian_strong_dark_ale duzeltmesi (Adim 18d-pre Sprint C, yanlis fallback) — Wyeast 1762/3787, WLP510/500/530/540 vb. dogru slug atama (dubbel/tripel/quadrupel)",
+    "603 K3 keyword-eslesen recete duzeltmesi (Adim 18d-pre Oncelik 1B, 14 YANLIS + tripel/strong_golden kritik problem)",
     "diger cluster reslug aday (Sprint E sonrasi)"
   ],
   "neden": "K3 default fallback tek slug (belgian_strong_dark_ale) yanlis, raw.yeast keyword arama yetersiz (Wyeast 3787 trappist -> tripel olmaliydi default'a dustu). Maya bazli pattern ile dogru slug atama gerek.",
   "oncelik": "yuksek",
-  "atif": "Adim 18d-pre Sprint C K3 default fallback bulgusu 03.05.2026"
+  "atif": "Adim 18d-pre Sprint C K3 default fallback bulgusu 03.05.2026 + Oncelik 1B K3 603 audit 04.05.2026",
+  "k3_603_audit_kayit": {
+    "tarih": "04.05.2026",
+    "atif_dosya": "working/_step18d_pre_p2_k3_603_audit.json",
+    "alt_grup_sonuclari": {
+      "belgian_quadrupel": "15 sample, %93 dogru, KABUL — V19 0.000 paradoksu ML mimari sorunu (class weight), dataset temiz",
+      "belgian_dubbel": "15 sample, %53 dogru, KISMEN PROBLEM",
+      "belgian_tripel": "15 sample, %33 dogru, KRITIK PROBLEM",
+      "belgian_strong_golden": "12 sample, %25 dogru, KRITIK PROBLEM"
+    },
+    "yanlis_recete_listesi": [
+      "rmwoods_119103 westy db 12 -> quadrupel olmali",
+      "rmwoods_9271 sorachi ace double wit -> witbier (FP double)",
+      "rmwoods_62255 double bogey's tank 7 -> saison",
+      "rmwoods_105345 patersbier zone",
+      "rmwoods_36776 patersbier zone",
+      "rmwoods_384925 #43trappist single -> patersbier",
+      "rmwoods_138337 belgium triple berry wheat -> fruit specialty (FP triple)",
+      "rmwoods_304971 not a tripel -> specialty (FP negatif baglam)",
+      "rmwoods_401028 rustic dark saison -> saison",
+      "rmwoods_215880 zone alti specialty",
+      "rmwoods_21057 sake rice blonde duvel dregs -> blonde",
+      "rmwoods_47395 delirium LIGHT -> light/session",
+      "rmwoods_258330 functional starter for my duvel -> starter (bira degil)",
+      "rmwoods_46228 session quad -> session zone alti"
+    ],
+    "hata_pattern_listesi": [
+      "FP negatif/generic kelime: 'double', 'triple', 'not a X', 'X light', 'X starter', 'X clone'",
+      "Profile zone uyumsuz: Patersbier 4-5% ABV dubbel atandi, light versiyonlar strong_golden atandi",
+      "Pattern eksik: 'westy db' Westvleteren 12 kisaltmasi yakalamadi",
+      "Maya/recete konflikt: WLP530 + saison recete -> tripel atandi"
+    ]
+  },
+  "18d_pattern_matrisi_yon": {
+    "1_maya_bazli_slug_atamasi": {
+      "Wyeast_1762": "belgian_dubbel (Rochefort tipi)",
+      "Wyeast_3787": "belgian_tripel veya belgian_quadrupel (high gravity gate)",
+      "Wyeast_1214": "belgian_dubbel veya belgian_abbey",
+      "WLP500": "belgian_dubbel (Trappist)",
+      "WLP510_Bastogne": "belgian_tripel",
+      "WLP530": "belgian_tripel (Abbey Ale ad yaniltici)",
+      "WLP540_Abbey_IV": "belgian_quadrupel",
+      "WLP570": "belgian_strong_golden (Duvel)"
+    },
+    "2_negatif_baglam_reddi": [
+      "'not a X' -> X slug atama",
+      "'X starter' -> bira degil, atlanacak",
+      "'X light' -> session/light slug",
+      "'X clone' -> X slug (clone uretim icin gecerli)",
+      "'double X' (X != belgian) -> X stil, dubbel degil",
+      "'triple X' (X != belgian) -> X stil, tripel degil"
+    ],
+    "3_profile_zone_gate": {
+      "belgian_dubbel_OG": "1.060-1.080",
+      "belgian_tripel_OG": "1.075-1.085",
+      "belgian_quadrupel_OG": "1.085-1.110",
+      "belgian_strong_golden_OG": "1.070-1.095",
+      "belgian_strong_golden_ABV_min": "7.5%",
+      "patersbier_ABV": "4-5% (dubbel/tripel/quadrupel olmaz)"
+    },
+    "4_pattern_genisletme": [
+      "Westvleteren 12 alias: 'westy db', 'westy 12', 'westvleteren'",
+      "diger Trappist clone aliases (TBD 18d)"
+    ]
+  },
+  "v19_quadrupel_0000_kayit": {
+    "tespit": "V19 belgian_quadrupel slug per-doğruluk 0.000 (n=24, V28e)",
+    "neden": "Dataset temiz (manual audit %93). ML mimari sorunu — 47 recete cok az, V19 train/test split sonrasi test setinde model %0 isabet.",
+    "cozum_alani": "Dataset disi, V19 retrain parametre ayari (class weight, oversample, focal loss). Adim 18d kapsami DEGIL, ayri sprint."
+  }
 }
