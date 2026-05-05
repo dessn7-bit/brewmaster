@@ -760,12 +760,133 @@ Yapisal kontrol — V28h_v2 vs V28i model file kiyas:
 - Label encoder classes ordering: identical
 Atif: working/_step60d_v28i_ui_fix_denemesi.json yapisal kontrol bolumu.
 
-Sub-sprint 3 V28i UI bug forensic notu (05.05.2026):
+Sub-sprint 3 V28i UI bug forensic + V28i RETRY DEPLOY notu (05.05.2026):
+
+**Asama A — Ilk teshis (5 madde yapisal kontrol):**
 - Bug: BB Alman Bugday recete UI Munich Helles %41 (Hefeweizen Python %87)
 - Yapisal kontroller HEPSI PASS (yukarida)
-- Tek bulunan UI bug: predictRawWith fonksiyonu (HTML satir 522) `scores=new Array(numClass).fill(0)` — XGBoost base_score eklemiyor; Python xgb.Booster.predict eklerken JS path eklemiyor. Etki marjinal (V28i 1/14 cluster top1 flip, V28h_v2 2/14 flip), Hefeweizen->Helles flip'ini AÇIKLAMIYOR.
-- Reproduce edilemedi: BB Alman Bugday recete state preserve edilmemis, sentetik profille flip tetiklenmedi.
-- Karar: V28i kalici iptal, archive'de sakli (forensic), Sub-sprint 4 American Wheat'a gec.
+- Tek bulunan UI bug: predictRawWith fonksiyonu (HTML satir 522) `scores=new Array(numClass).fill(0)` — XGBoost base_score eklemiyor; Python xgb.Booster.predict eklerken JS path eklemiyor. Etki marjinal (V28i 1/14 cluster top1 flip, V28h_v2 2/14 flip), Hefeweizen->Helles flip'ini IK ASAMADA AÇIKLAMIYOR.
+
+**Asama B — base_score fix V28h_v2 deploy (commit a7f8c57, 05.05.2026):**
+- predictRawWith base_score init eklendi (HTML satir 517-541, +15 satir).
+- 17 sentetik recete head-to-head: 17/17 Python xgb.Booster.predict ile birebir match.
+- Mevcut bug etki: 2/17 yanlis top1 (porter -> robust_porter, saison -> french_belgian_saison FLIP).
+- Avg confidence +14pp iyilesme (15 recete top1 ayni, kalibrasyon).
+- KAAN UI TEST: BB Alman Bugday Hefeweizen %68 (V28h_v2 baseline) -> %89 (V28h_v2 + base_score fix), TRANSFORMATIVE +21pp. V28i UI bug muhtemel sebep base_score idi.
+
+**Asama C — V28i retry deploy (commit 020666e, 05.05.2026):**
+- V28i artifact'lar archive'den root'a kopya (4 V19 + 3 V6 file).
+- HTML 7 fetch URL v28h_v2 -> v28i + 3 metin update (V12 button hover + status badge + V6 console log).
+- V28h_v2 artifact'lar root'da kalir (rollback hazirligi).
+- KAAN UI TEST: BB Alman Bugday Hefeweizen V28i + base_score fix %77 (V28h_v2 + base_score %89'dan -12pp, V28i bug %41'den +36pp). SENARYO 2 KISMI.
+
+**Asama D — Tutarsizlik arastirmasi (3 madde reconcile):**
+1. Witbier rmwoods +2.52pp claim DOGRULANDI vs sentetik W1 -9.72pp REGRESYON: Iki olcum farkli populasyon, dataset cleaning yan etkisi (V28i training data 'saf witbier' agirlikli, sentetik basic profil V28i'nin yeni Hefeweizen sinirina kayan). 5 V28h_v2 test split witbier sample: 2/5 V28i flip yanlis, 1/5 V28i daha iyi, 2/5 esit dogru.
+2. Bernstein +34.90pp transformative dolayli etki: Training data V28h_v2 = V28i (n=102 birebir, profile mean identical). Sentetik kazanim wheat cluster decision boundary keskinlesmesinin yan etkisi. rmwoods n=20 -10pp olçum gurultusu.
+3. BB UI -12pp sentetik realistic'te REPRODUCE EDILEMEDI (10 varyant avg %0 fark). UI BB recipe state preserve edilmedi. En yakin varyant: I_BB_zone_overshoot_OG_1.060 V28i %78.68 (UI %77 ile -1.7pp fark) — UI BB OG zone ustunde olabilir.
+
+**Asama E — KAAN KARARI: V28i + base_score fix PRODUCTION KORUMA (05.05.2026):**
+- Sayisal kanit: rmwoods 2356 recete net kazanim (witbier +2.52pp + hefe +1.14pp + dunkel +2.76pp), Bernstein +34.90pp transformative yan etki, Bock +13.31pp / Strong Ale +8.15pp sentetik, Sub-sprint 3 dataset cleaning 1022 reslug etiket guvenligi gercek deger.
+- Bilinen regresyonlar (backlog kayit): BB UI -12pp, Munich Helles rmwoods -8.57pp (n=280), Specialty Rauchbier sentetik confidence -29.42pp (top1 dogru), Witbier W3 no-marker yanlis flip (Sub-sprint 3 K1 yan etkisi kabul edilen).
+- V2c uyum kayit: BB Hefeweizen V2c %88 (eski motor) yakin V28h_v2+fix %89'a, V28i+fix %77 -11pp duser.
+- Atif: working/_step60d_v28i_retry_base_score_fix.json + _step60d_v28i_retry_sentetik_test.json + _step60d_v28i_retry_tutarsizlik_arastirma.json + _step60d_v28i_koruma_karari.json.
+
+V28i SHA INTACT (KURAL 12.2 v2.7.1 hashlib gercek check):
+- Dataset 0f404f4bee24cd61... (working/_v28i_aliased_dataset.json)
+- Model_slug 1527070b0415aff1... (root + working/archive/v28i_artifact_archive/, ayni)
+- Model_14cat 8e744d489e2bf91e... (root + arsiv)
+- Label encoder slug+14cat hash-identical V28h_v2 ile
+V28h_v2 SHA INTACT (rollback hazirligi):
+- Dataset ac0d95e091b81833... (working/_v28h_v2_aliased_dataset.json)
+- Model_slug 4317a3bb33faaf59... (root)
+- Hicbir V28h_v2 dosyasi silinmedi.
+
+PRODUCTION URL: https://dessn7-bit.github.io/brewmaster/Brewmaster_v2_79_10.html (commit 020666e, V28i + base_score fix).
+
+---
+
+## Sub-sprint 4 American Wheat Staged Build (v2.7.3, 2026-05-05)
+
+KAAN ONAY: WIDER + B-FULL + STAGED + V19/V6 paralel retrain (5 karar tüm KABUL).
+
+**ASAMA 1 — Filtre A wider AWB->Hefe**
+- Filtre kosul: AWB + og 1.044-1.052 + ibu 8-20 + srm 3-7 + abv 4.5-5.5 + yeast_wheat_german > 0
+- Reslug count: 202 reçete (Kaan tahmini 297, exact spec 202)
+- AWB n_total: 2010 -> 1808 (-202)
+- Hefe n_total: 6458 -> 6660 (+202)
+- V28j_a dataset sha: e5267253c1293796b723b7955e171be032540d4334f5f1c56346b34d1ff49d83 (1268.7 MB)
+- V28j_a model_slug sha: 15e7c1c5d2d24bf2... (saved)
+- V28j_a model_14cat sha: 262df53019f9d4c2...
+- V28j_a v6_reference sha: c1e783a22cd9661c...
+
+**Asama 1 V19 metrics:**
+- 14cat top1 0.6995 (V28i 0.7001, -0.06pp marjinal eşit), gap 0.50pp PASS
+- slug top1 0.5706 (V28i 0.5708, -0.02pp marjinal eşit), gap 4.90pp PASS
+
+**Asama 1 V6 metrics:**
+- cv_top1 0.6064 (V28i 0.6066, -0.02pp marjinal), macro F1 0.6026, sanity 50: 0.6400
+
+**Asama 1 rmwoods per-class transformative kazanimlar:**
+- munich_helles 0.5179 -> 0.5500 (+3.21pp RECOVERY — V28i'deki -8.57pp regresyon kismi kapanmis)
+- south_german_weizenbock 0.6935 -> 0.7356 (+4.21pp transformative)
+- bamberg_maerzen_rauchbier 0.5000 -> 0.5789 (+7.89pp transformative)
+- german_heller_bock_maibock 0.5076 -> 0.5534 (+4.58pp transformative)
+- south_german_hefeweizen 0.8320 -> 0.8341 (+0.21pp marjinal pozitif)
+
+**Asama 1 marjinal regresyonlar (kabul edilen, gate icinde):**
+- belgian_witbier 0.8081 -> 0.7942 (-1.39pp)
+- american_wheat_beer 0.6244 -> 0.6050 (-1.94pp marjinal PASS gate=0.6044)
+- robust_porter 0.5905 -> 0.5730 (-1.75pp)
+
+**Asama 1 PASS:** rmwoods 14/14 PASS, KURAL 4 PASS (gap 4.90pp), sentetik 15/20 (FAIL strict 17 ama cluster ailesi 19/20 PASS, tek FLIP cluster ICI Helles->Pilsener basic profil), KAAN onay PASS_devam.
+
+**ASAMA 2 — Filtre B wider AWA->Hefe**
+- Filtre kosul: AWA + og 1.040-1.052 + ibu 8-25 + srm 3-8 + yeast_wheat_german > 0
+- Reslug count: 742 reçete (Kaan tahmini 382, exact spec 742)
+- AWA n_total: 8837 -> 8095 (-742)
+- Hefe n_total: 6660 -> 7402 (+742)
+- V28j_b dataset sha: 9f2806ee685d0bbc54dfa5921879b875288302eb2138bde1854235390c59b3ed
+- V28j_b model_slug sha: da29cda29eb0b76a... (saved)
+
+**Asama 2 V19 metrics:**
+- 14cat top1 0.7004 (V28j_a 0.6995 +0.09pp), gap 0.38pp PASS
+- slug top1 0.5713 (V28j_a 0.5706 +0.07pp), gap 4.76pp PASS
+
+**Asama 2 sentetik 17/20 PASS** (V28j_a 15/20 -> V28j_b 17/20, +2 FLIP dogruya), cluster ailesi 20/20 PASS
+
+**Asama 2 rmwoods per-class — KARMASIK SONUC:**
+- TRANSFORMATIVE KUMULATIF: munich_helles 0.5500 -> 0.6000 (V28i'den +8.21pp KUMULATIF, V28i regresyon TAM kapandi), heller_bock +5.73pp kumulatif, pilsener +2.42pp kumulatif
+- 5 PER-CLASS FAIL (gate -0.02 ihlal): AWB -3.04pp (kumulatif -4.98pp), Witbier -2.36pp (-3.75pp kumulatif), Weizenbock -2.68pp (kumulatif +1.53pp koruyor), AWA -2.71pp, Rauchbier -7.89pp (Asama 1 +7.89pp kazanim TAM KAYIP)
+
+**KAAN KARARI:** Asama 2 NET NEGATIF — Helles +5pp ek kazanim vs 5 slug regresyon ~ -18pp toplam, Rauchbier transformative kayip karar verici. **V28j_a deploy V28j_b yerine, Asama 2/3 IPTAL.** V28j_b artifact'lar arsiv (working/archive/v28j_b_artifact_archive/, forensic).
+
+**ASAMA 3 BASLAMADI — Sub-sprint 4 KAPSAM SINIRLAMA dersi:**
+Wider filtre + 2.+ asama her zaman ek monoton kazanim getirmez. Yan etkiler asama bazli izlenir, gate FAIL'de onceki PASS asamasina rollback (KURAL 4 emsal). Sub-sprint 4 staged build: 3 asama planli, 1 deploy.
+
+**Sub-sprint 4 KISMI KAPANIS — V28j_a PRODUCTION:**
+- Asama 1 transformative kazanimlar korundu (Helles RECOVERY +3.21pp, Weizenbock +4.21pp, Rauchbier +7.89pp, Bock +4.58pp)
+- Marjinal regresyonlar (Witbier -1.39pp, AWB -1.94pp) kabul edilen
+- V28i + base_score fix yerine V28j_a deploy
+- V28h_v2 + fix rollback hazir (commit a7f8c57)
+- Atif: working/_step60d_subsprint4_asama1_filtreA.json + asama2_filtreB.json + risk_arastirma.json + asama1_build.py + asama1_sentetik.py + kapanis_v28j_a_deploy.json
+
+V28j_a SHA INTACT (KURAL 12.2 v2.7.1 hashlib gercek check):
+- Dataset e5267253c1293796b723b7955e171be032540d4334f5f1c56346b34d1ff49d83 (working/_v28j_a_aliased_dataset.json, 1268.7 MB, V28i 0f404f4b... + 202 reslug)
+- Model_slug 15e7c1c5d2d24bf2... (root + working/, ayni)
+- Model_14cat 262df53019f9d4c2...
+- V6 reference c1e783a22cd9661c... (working/archive/v6_step6_v28j_a/v6_reference.json)
+- Label encoder slug+14cat hash-identical V28h_v2/V28i ile
+
+V28i ROLLBACK HAZIR (bir adim geri):
+- Dataset 0f404f4bee24cd61... (working/)
+- Model archive 1527070b... (working/archive/v28i_artifact_archive/)
+- Root'tan V28j_a deploy ile silindi, archive korundu
+
+V28h_v2 ROLLBACK HAZIR (iki adim geri):
+- Dataset ac0d95e0... (working/)
+- Model 4317a3bb... (root)
+
+PRODUCTION URL: https://dessn7-bit.github.io/brewmaster/Brewmaster_v2_79_10.html (V28j_a deploy).
 
 ---
 
@@ -782,6 +903,8 @@ Sub-sprint 3 V28i UI bug forensic notu (05.05.2026):
 - v2.6 (2026-05-04 — KURAL 12.2 revize): v2.5'te 'tek session 1 deploy' yanlis tanim. Asil mesele her deploy oncesi tam denetim (KURAL 4 + 1.1 + 9.5 + sha guard + working tree clean). Hizli arka arkaya deploy ihlal degil; denetimsiz deploy ihlal. Deploy sayisi sinirsiz. Adim 18d-pre Oncelik 2.5 deploy hazirligi sirasinda Kaan tespit.
 - v2.7 (2026-05-04 — Sub-sprint 2B C kararı, Sha guard rapor zorunluluğu): Sha guard raporu **gerçek hashlib hash karşılaştırması** ile yapılır. Transcript verisi tek başına yeterli değil — Sub-sprint 1/2A/2B raporlarinda V28b sha guard atlandi (gevsek check), 4 sprint boyunca sapma fark edilmedi. Adim 59 V28b meta ekleme (mesru tracked islem) ile sha bc8a7b0d -> 8359f033 oldu, ama KURAL Code baseline kaydı atlanmis. DURMA NOKTASI 7a Kaan B kararı arastirma + C kararı baseline guncelleme. Kayıt: gelecekte her sha guard raporu Python hashlib check ile yapılır, transcript önceki rapor referansı yetersiz. Audit log referansi: working/_step60d_v28b_sha_sapmasi_arastirma.json + working/_step59_v28b_add_meta_audit.json.
 - v2.7.1 (2026-05-05 — Dataset sha vs Model sha ayrim bolumu eklendi): Sub-sprint 3 V28i UI bug teshisi sirasinda bir kayit hatasi tespit edildi: V28h_v2 ve V28i icin sha kayitlar dataset (~1.32 GB) icindi ama predictRawWith bug analizi sirasinda model dosyasi (~50 MB) sha'sini hesapladik ve "discrepancy" olarak yorumladik (yanilis cikarim). Hashlib gercek check sonucu: dataset sha kayitlari TAMAMI dogru, model dosyalari icin AYRI sha takibi gerekiyor. KURAL 12.2 v2.7 disiplini bu ayrimi netlestirir: her sha kontrol edildiginde HANGI artifact icin kontrol edildigi belirtilir (dataset / model / label encoder / V6 reference). Yeni "Model File Sha Tracking" bolumu eklendi (V28h_v2 + V28i model sha'lari + yapisal kontrol kiyas + Sub-sprint 3 V28i UI bug forensic notu). Audit log referansi: working/_step60d_sha_kayit_duzeltme_05.05.2026.json + working/_step60d_v28i_ui_fix_denemesi.json.
+- v2.7.2 (2026-05-05 — base_score fix + V28i retry deploy + V28i koruma karari): predictRawWith fonksiyonu (HTML satir 517-541) base_score init eklendi (commit a7f8c57). 17/17 Python xgb.Booster.predict ile birebir match. V28h_v2 + fix BB UI Hefeweizen %68 -> %89 transformative. V28i artifact retry deploy (commit 020666e), V28i + fix BB UI %77. KAAN KARARI: V28i + fix PRODUCTION KORUMA (rmwoods 2356 recete net kazanim + Sub-sprint 3 dataset cleaning gercek deger > BB tek recete -12pp). 4 bilinen regresyon backlog'a (BB UI, Munich Helles rmwoods -8.57pp, Specialty Rauchbier sentetik -29.42pp confidence, Witbier W3 no-marker flip). 3 tutarsizlik reconcile: rmwoods cleaned test set vs sentetik basic profil populasyon farki, Bernstein +34.90pp dolayli yan etki (training data identical), BB UI recipe state preserve edilmedi sentetikte reproduce yok. KURAL 9.4 vurgu: rmwoods test set metric ≠ sentetik UI behavior, ayri rapor zorunlu (KURAL 10 dual accuracy). Atif: working/_step60d_base_score_fix.json + _step60d_v28i_retry_base_score_fix.json + _step60d_v28i_retry_sentetik_test.json + _step60d_v28i_retry_tutarsizlik_arastirma.json + _step60d_v28i_koruma_karari.json.
+- v2.7.3 (2026-05-05 — Sub-sprint 4 American Wheat staged build emsali, V28j_a PRODUCTION): Sub-sprint 4 Kapsam B wider B-FULL staged onayi (5 karar). Asama 1 Filtre A AWB->Hefe wider 202 reslug PASS (rmwoods 14/14 + 4 transformative kazanim: Helles +3.21pp RECOVERY, Weizenbock +4.21pp, Rauchbier +7.89pp, Bock +4.58pp). Asama 2 Filtre B AWA->Hefe wider 742 reslug NET NEGATIF (rmwoods 5/17 FAIL: AWB/Witbier/Weizenbock/AWA/Rauchbier kumulatif -18pp toplam, Helles +5pp ek kazanim degmedi, Rauchbier +7.89pp Asama 1 transformative kazanim KAYIP). KAAN KARARI: V28j_a deploy V28j_b yerine, Asama 2/3 IPTAL. **DERS: Wider+staged build her zaman monoton kazanim vermez, asama bazli rollback disiplini KURAL 4 emsal.** Asama bazli gate FAIL'de bir onceki PASS asamasina geri donus. Atif: working/_step60d_subsprint4_risk_arastirma.json + _step60d_subsprint4_asama1_filtreA.json + _step60d_subsprint4_asama2_filtreB.json + _step60d_subsprint4_kapanis_v28j_a_deploy.json. V28j_a SHA: dataset e5267253... + model_slug 15e7c1c5... INTACT.
 
 ---
 
