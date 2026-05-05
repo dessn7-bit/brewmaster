@@ -1030,6 +1030,105 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     return {sorted: sorted, reason: firstMeaningful || 'no_trigger', applied: false};
   }
 
+  // Sub-sprint 8 Porter cluster post-process (V19 model degismez, UI tie-break 4 alan)
+  // Sirala: B Baltic > D Robust koru > C Brown Porter > E Porter konso
+  function _ppPorterBaltic(f, sorted) {
+    var yg = f.yeast_german_lager || 0, yc = f.yeast_czech_lager || 0;
+    var abv = f.abv || 0, srm = f.srm || 0, pr = f.pct_roast || 0;
+    var trig = (yg > 0 || (yc > 0 && srm >= 30)) && (abv >= 6.5 && abv <= 9.5) && (srm >= 28 && srm <= 40) && (pr >= 1 && pr <= 4);
+    if (!trig) return {sorted: sorted, reason:'no_trigger'};
+    if (!sorted.length) return {sorted: sorted, reason:'no_trigger'};
+    var top1 = sorted[0].cls;
+    if (top1 !== 'robust_porter' && top1 !== 'american_imperial_stout' && top1 !== 'german_doppelbock') return {sorted: sorted, reason:'no_trigger'};
+    if (abv > 9.5) return {sorted: sorted, reason:'B_counter_imp_stout_abv'};
+    if (pr > 5) return {sorted: sorted, reason:'B_counter_imp_stout_roast'};
+    if ((f.yeast_witbier || 0) > 0) return {sorted: sorted, reason:'B_counter_witbier'};
+    if ((f.yeast_brett || 0) > 0 || (f.yeast_sour_blend || 0) > 0) return {sorted: sorted, reason:'B_counter_sour'};
+    if ((f.yeast_belgian || 0) > 0) return {sorted: sorted, reason:'B_counter_belgian'};
+    var idx = -1;
+    for (var i = 0; i < Math.min(3, sorted.length); i++) if (sorted[i].cls === 'baltic_porter') { idx = i; break; }
+    if (idx < 0) return {sorted: sorted, reason:'B_baltic_not_in_top3'};
+    var t = sorted[idx];
+    var newProb = Math.min(0.70, (t.prob || 0) + 0.15);
+    var ns = sorted.slice(); ns.splice(idx, 1); ns.unshift({cls: t.cls, prob: newProb});
+    return {sorted: ns, reason:'B_baltic_applied'};
+  }
+  function _ppPorterRobustGuard(f, sorted) {
+    var ye = f.yeast_english || 0, ya = f.yeast_american || 0;
+    var abv = f.abv || 0, srm = f.srm || 0, pr = f.pct_roast || 0;
+    var trig = (ye > 0 || ya > 0) && (abv >= 5.0 && abv <= 7.5) && (srm >= 30 && srm <= 40) && (pr >= 2 && pr <= 4);
+    if (!trig) return {sorted: sorted, reason:'no_trigger'};
+    if (!sorted.length) return {sorted: sorted, reason:'no_trigger'};
+    if (sorted[0].cls !== 'american_imperial_stout') return {sorted: sorted, reason:'no_trigger'};
+    if ((f.yeast_witbier || 0) > 0) return {sorted: sorted, reason:'D_counter_witbier'};
+    if ((f.yeast_brett || 0) > 0 || (f.yeast_sour_blend || 0) > 0) return {sorted: sorted, reason:'D_counter_sour'};
+    if ((f.yeast_belgian || 0) > 0) return {sorted: sorted, reason:'D_counter_belgian'};
+    var idx = -1;
+    for (var i = 0; i < Math.min(3, sorted.length); i++) if (sorted[i].cls === 'robust_porter') { idx = i; break; }
+    if (idx < 0) return {sorted: sorted, reason:'D_robust_not_in_top3'};
+    var t = sorted[idx];
+    var newProb = Math.min(0.60, (t.prob || 0) + 0.10);
+    var ns = sorted.slice(); ns.splice(idx, 1); ns.unshift({cls: t.cls, prob: newProb});
+    return {sorted: ns, reason:'D_robust_applied'};
+  }
+  function _ppPorterBrown(f, sorted) {
+    var ye = f.yeast_english || 0, ya = f.yeast_american || 0;
+    var srm = f.srm || 0, abv = f.abv || 0, ibu = f.ibu || 0, pr = f.pct_roast || 0, kc = f.katki_chocolate || 0;
+    var trig = ((ye > 0) || (srm >= 26 && srm <= 32)) && (abv >= 4.5 && abv <= 5.8) && (ibu >= 25 && ibu <= 40);
+    if (!trig) return {sorted: sorted, reason:'no_trigger'};
+    if (!sorted.length) return {sorted: sorted, reason:'no_trigger'};
+    var top1 = sorted[0].cls;
+    if (top1 !== 'american_brown_ale' && top1 !== 'brown_ale') return {sorted: sorted, reason:'no_trigger'};
+    if (pr > 3) return {sorted: sorted, reason:'C_counter_robust_high_roast'};
+    if (ya > 0 && srm < 24) return {sorted: sorted, reason:'C_counter_amer_brown_low_srm'};
+    if (pr === 0 && kc === 0) return {sorted: sorted, reason:'C_counter_no_roast_no_choc'};
+    if ((f.yeast_witbier || 0) > 0) return {sorted: sorted, reason:'C_counter_witbier'};
+    if ((f.yeast_brett || 0) > 0 || (f.yeast_sour_blend || 0) > 0) return {sorted: sorted, reason:'C_counter_sour'};
+    if ((f.yeast_belgian || 0) > 0) return {sorted: sorted, reason:'C_counter_belgian'};
+    var idx = -1;
+    for (var i = 0; i < Math.min(3, sorted.length); i++) if (sorted[i].cls === 'brown_porter') { idx = i; break; }
+    if (idx < 0) return {sorted: sorted, reason:'C_brown_porter_not_in_top3'};
+    var t = sorted[idx];
+    var newProb = Math.min(0.65, (t.prob || 0) + 0.12);
+    var ns = sorted.slice(); ns.splice(idx, 1); ns.unshift({cls: t.cls, prob: newProb});
+    return {sorted: ns, reason:'C_brown_porter_applied'};
+  }
+  function _ppPorterKategoriKonso(f, sorted) {
+    if (!sorted.length || sorted[0].cls !== 'porter') return {sorted: sorted, reason:'no_trigger'};
+    var ye = f.yeast_english || 0, ya = f.yeast_american || 0;
+    var srm = f.srm || 0, abv = f.abv || 0, pr = f.pct_roast || 0;
+    if (!((ye > 0 || ya > 0) && (srm >= 30 && srm <= 40) && (abv >= 5 && abv <= 7))) return {sorted: sorted, reason:'E_top1_porter_but_profile_mismatch'};
+    if ((f.yeast_german_lager || 0) > 0) return {sorted: sorted, reason:'E_counter_baltic'};
+    if (pr > 5) return {sorted: sorted, reason:'E_counter_imp_stout_roast'};
+    if ((f.yeast_witbier || 0) > 0) return {sorted: sorted, reason:'E_counter_witbier'};
+    if ((f.yeast_brett || 0) > 0 || (f.yeast_sour_blend || 0) > 0) return {sorted: sorted, reason:'E_counter_sour'};
+    if ((f.yeast_belgian || 0) > 0) return {sorted: sorted, reason:'E_counter_belgian'};
+    var porter_prob = sorted[0].prob;
+    var rp_idx = -1;
+    for (var i = 0; i < sorted.length; i++) if (sorted[i].cls === 'robust_porter') { rp_idx = i; break; }
+    if (rp_idx < 0) return {sorted: sorted, reason:'E_robust_not_found'};
+    var rp_orig_prob = sorted[rp_idx].prob;
+    var ns = sorted.slice();
+    ns.splice(0, 1);
+    var new_rp_idx = rp_idx > 0 ? rp_idx - 1 : rp_idx;
+    ns.splice(new_rp_idx, 1);
+    ns.unshift({cls: 'robust_porter', prob: porter_prob});
+    ns.splice(1, 0, {cls: 'porter', prob: rp_orig_prob});
+    return {sorted: ns, reason:'E_porter_konso_applied'};
+  }
+  function postProcessPorter(featObj, sorted) {
+    var firstMeaningful = null;
+    var funcs = [_ppPorterBaltic, _ppPorterRobustGuard, _ppPorterBrown, _ppPorterKategoriKonso];
+    for (var i = 0; i < funcs.length; i++) {
+      var r = funcs[i](featObj, sorted);
+      if (r.reason.indexOf('_applied') >= 0 && r.reason.indexOf('_applied') === r.reason.length - 8) {
+        return {sorted: r.sorted, reason: r.reason, applied: true};
+      }
+      if (r.reason !== 'no_trigger' && firstMeaningful === null) firstMeaningful = r.reason;
+    }
+    return {sorted: sorted, reason: firstMeaningful || 'no_trigger', applied: false};
+  }
+
   function predictSlugSync(uiRecipe) {
     if (!cache.slugModel || !cache.slugLabels) return null;
     const featObj = buildFeatures(uiRecipe); if (!featObj) return null;
@@ -1044,12 +1143,14 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     sorted = ppS.sorted;
     var ppB = postProcessBelgian(featObj, sorted);
     sorted = ppB.sorted;
+    var ppP = postProcessPorter(featObj, sorted);
+    sorted = ppP.sorted;
     const fmt = function(x){return {slug:x.cls, displayTR:slugDisplay(x.cls), score:x.prob, normalized:Math.round(x.prob*100)};};
     return {
       top3: sorted.slice(0,3).map(fmt),
       top5: sorted.slice(0,5).map(fmt),
       topN: sorted.slice(0,10).map(fmt),  // Bug 4 same-family filter için 10 slug pool
-      _meta: {motor:'V12_slug_V16model', n_classes:cache.slugLabels.classes.length, witbier_w3_pp: ppW.reason, witbier_w3_applied: ppW.applied, sour_pp: ppS.reason, sour_applied: ppS.applied, belgian_pp: ppB.reason, belgian_applied: ppB.applied}
+      _meta: {motor:'V12_slug_V16model', n_classes:cache.slugLabels.classes.length, witbier_w3_pp: ppW.reason, witbier_w3_applied: ppW.applied, sour_pp: ppS.reason, sour_applied: ppS.applied, belgian_pp: ppB.reason, belgian_applied: ppB.applied, porter_pp: ppP.reason, porter_applied: ppP.applied}
     };
   }
   // Adım 61 P2 Adım 3 — V6 motor için buildFeatures expose
