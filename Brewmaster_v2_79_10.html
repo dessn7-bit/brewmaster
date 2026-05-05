@@ -1497,6 +1497,90 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     return {sorted: sorted, reason: firstMeaningful || 'no_trigger', applied: false};
   }
 
+  // Sub-sprint 12 Bock post-process — 3 alan + F smoke counter (Rauchbier KORUMA).
+  // KRITIK: Sub-sprint 4 transformative (Munich Helles, Rauchbier, Bock) korumali.
+  function _ppBoA(f, sorted) {
+    var yg = f.yeast_german_lager || 0, abv = f.abv || 0, srm = f.srm || 0;
+    var pm = f.pct_munich || 0, ibu = f.ibu || 0;
+    var trig = (yg > 0) && (abv >= 7.5 && abv <= 9.5) && (srm >= 16 && srm <= 25) && (pm >= 20) && (ibu >= 20 && ibu <= 32);
+    if (!trig || !sorted.length) return {sorted: sorted, reason:'no_trigger'};
+    var top1 = sorted[0].cls;
+    if (top1 !== 'german_bock' && top1 !== 'german_heller_bock_maibock' && top1 !== 'south_german_weizenbock' && top1 !== 'american_imperial_stout' && top1 !== 'baltic_porter' && top1 !== 'specialty_beer') return {sorted: sorted, reason:'no_trigger'};
+    if (srm > 30) return {sorted: sorted, reason:'A_counter_imperial_baltic_zone'};
+    if (abv > 10) return {sorted: sorted, reason:'A_counter_eisbock_zone'};
+    if ((f.yeast_wheat_german || 0) > 0 || (f.yeast_witbier || 0) > 0) return {sorted: sorted, reason:'A_counter_weizenbock'};
+    if ((f.yeast_brett || 0) > 0 || (f.yeast_sour_blend || 0) > 0) return {sorted: sorted, reason:'A_counter_sour'};
+    if ((f.yeast_belgian || 0) > 0) return {sorted: sorted, reason:'A_counter_belgian'};
+    if ((f.yeast_american || 0) > 0 || (f.yeast_english || 0) > 0) return {sorted: sorted, reason:'A_counter_ale_yeast'};
+    var idx = -1;
+    for (var i = 0; i < Math.min(3, sorted.length); i++) if (sorted[i].cls === 'german_doppelbock') { idx = i; break; }
+    if (idx < 0) return {sorted: sorted, reason:'A_doppelbock_not_in_top3'};
+    var t = sorted[idx];
+    var newProb = Math.min(0.70, (t.prob || 0) + 0.12);
+    var ns = sorted.slice(); ns.splice(idx, 1); ns.unshift({cls: t.cls, prob: newProb});
+    return {sorted: ns, reason:'A_doppelbock_applied'};
+  }
+  function _ppBoC(f, sorted) {
+    var yg = f.yeast_german_lager || 0, abv = f.abv || 0, srm = f.srm || 0;
+    var pm = f.pct_munich || 0, ibu = f.ibu || 0;
+    var trig = (yg > 0) && (abv >= 6.0 && abv <= 7.0) && (srm >= 14 && srm <= 22) && (pm >= 25) && (ibu >= 20 && ibu <= 30);
+    if (!trig || !sorted.length) return {sorted: sorted, reason:'no_trigger'};
+    var top1 = sorted[0].cls;
+    if (top1 !== 'german_doppelbock' && top1 !== 'german_heller_bock_maibock' && top1 !== 'munich_dunkel' && top1 !== 'german_maerzen' && top1 !== 'specialty_beer') return {sorted: sorted, reason:'no_trigger'};
+    if (abv > 7.5) return {sorted: sorted, reason:'C_counter_doppelbock_zone'};
+    if (abv < 6) return {sorted: sorted, reason:'C_counter_helles_dunkel_zone'};
+    if (srm > 25) return {sorted: sorted, reason:'C_counter_dunkles_bock_zone'};
+    if ((f.yeast_wheat_german || 0) > 0 || (f.yeast_witbier || 0) > 0) return {sorted: sorted, reason:'C_counter_weizenbock'};
+    if ((f.yeast_brett || 0) > 0 || (f.yeast_sour_blend || 0) > 0) return {sorted: sorted, reason:'C_counter_sour'};
+    if ((f.yeast_belgian || 0) > 0) return {sorted: sorted, reason:'C_counter_belgian'};
+    if ((f.yeast_american || 0) > 0 || (f.yeast_english || 0) > 0) return {sorted: sorted, reason:'C_counter_ale_yeast'};
+    var idx = -1;
+    for (var i = 0; i < Math.min(3, sorted.length); i++) if (sorted[i].cls === 'german_bock') { idx = i; break; }
+    if (idx < 0) return {sorted: sorted, reason:'C_german_bock_not_in_top3'};
+    var t = sorted[idx];
+    var newProb = Math.min(0.60, (t.prob || 0) + 0.10);
+    var ns = sorted.slice(); ns.splice(idx, 1); ns.unshift({cls: t.cls, prob: newProb});
+    return {sorted: ns, reason:'C_german_bock_applied'};
+  }
+  function _ppBoB(f, sorted) {
+    var yg = f.yeast_german_lager || 0, abv = f.abv || 0, srm = f.srm || 0;
+    var pp = f.pct_pilsner || 0, ibu = f.ibu || 0;
+    var trig = (yg > 0) && (abv >= 6.0 && abv <= 7.5) && (srm >= 5 && srm <= 12) && (pp >= 25) && (ibu >= 22 && ibu <= 40);
+    if (!trig || !sorted.length) return {sorted: sorted, reason:'no_trigger'};
+    var top1 = sorted[0].cls;
+    if (top1 !== 'munich_helles' && top1 !== 'german_pilsener' && top1 !== 'american_pale_ale' && top1 !== 'german_maerzen' && top1 !== 'german_bock' && top1 !== 'specialty_beer') return {sorted: sorted, reason:'no_trigger'};
+    if (abv < 6) return {sorted: sorted, reason:'B_counter_munich_helles_protect'};
+    if (srm > 14) return {sorted: sorted, reason:'B_counter_trad_bock_zone'};
+    if ((f.pct_munich || 0) > 30) return {sorted: sorted, reason:'B_counter_trad_doppelbock_zone'};
+    if ((f.yeast_wheat_german || 0) > 0 || (f.yeast_witbier || 0) > 0) return {sorted: sorted, reason:'B_counter_weizenbock'};
+    if ((f.yeast_brett || 0) > 0 || (f.yeast_sour_blend || 0) > 0) return {sorted: sorted, reason:'B_counter_sour'};
+    if ((f.yeast_belgian || 0) > 0) return {sorted: sorted, reason:'B_counter_belgian'};
+    if ((f.yeast_american || 0) > 0 || (f.yeast_english || 0) > 0) return {sorted: sorted, reason:'B_counter_ale_yeast'};
+    var idx = -1;
+    for (var i = 0; i < Math.min(3, sorted.length); i++) if (sorted[i].cls === 'german_heller_bock_maibock') { idx = i; break; }
+    if (idx < 0) return {sorted: sorted, reason:'B_heller_bock_not_in_top3'};
+    var t = sorted[idx];
+    var newProb = Math.min(0.60, (t.prob || 0) + 0.10);
+    var ns = sorted.slice(); ns.splice(idx, 1); ns.unshift({cls: t.cls, prob: newProb});
+    return {sorted: ns, reason:'B_heller_bock_applied'};
+  }
+  function postProcessBock(featObj, sorted) {
+    // F smoke bypass — global counter (Rauchbier KORUMA Sub-sprint 4 transformative)
+    if ((featObj.katki_smoke || 0) > 0 || (featObj.pct_smoked || 0) > 0 || (featObj.has_smoked || 0) > 0) {
+      return {sorted: sorted, reason: 'counter_smoke_rauchbier_protect', applied: false};
+    }
+    var firstMeaningful = null;
+    var funcs = [_ppBoA, _ppBoC, _ppBoB];
+    for (var i = 0; i < funcs.length; i++) {
+      var r = funcs[i](featObj, sorted);
+      if (r.reason.indexOf('_applied') >= 0 && r.reason.indexOf('_applied') === r.reason.length - 8) {
+        return {sorted: r.sorted, reason: r.reason, applied: true};
+      }
+      if (r.reason !== 'no_trigger' && firstMeaningful === null) firstMeaningful = r.reason;
+    }
+    return {sorted: sorted, reason: firstMeaningful || 'no_trigger', applied: false};
+  }
+
   function predictSlugSync(uiRecipe) {
     if (!cache.slugModel || !cache.slugLabels) return null;
     const featObj = buildFeatures(uiRecipe); if (!featObj) return null;
@@ -1519,12 +1603,14 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     sorted = ppT.sorted;
     var ppBA = postProcessBrownAle(featObj, sorted);
     sorted = ppBA.sorted;
+    var ppBO = postProcessBock(featObj, sorted);
+    sorted = ppBO.sorted;
     const fmt = function(x){return {slug:x.cls, displayTR:slugDisplay(x.cls), score:x.prob, normalized:Math.round(x.prob*100)};};
     return {
       top3: sorted.slice(0,3).map(fmt),
       top5: sorted.slice(0,5).map(fmt),
       topN: sorted.slice(0,10).map(fmt),  // Bug 4 same-family filter için 10 slug pool
-      _meta: {motor:'V12_slug_V16model', n_classes:cache.slugLabels.classes.length, witbier_w3_pp: ppW.reason, witbier_w3_applied: ppW.applied, sour_pp: ppS.reason, sour_applied: ppS.applied, belgian_pp: ppB.reason, belgian_applied: ppB.applied, porter_pp: ppP.reason, porter_applied: ppP.applied, strong_ale_pp: ppA.reason, strong_ale_applied: ppA.applied, stout_pp: ppT.reason, stout_applied: ppT.applied, brown_ale_pp: ppBA.reason, brown_ale_applied: ppBA.applied}
+      _meta: {motor:'V12_slug_V16model', n_classes:cache.slugLabels.classes.length, witbier_w3_pp: ppW.reason, witbier_w3_applied: ppW.applied, sour_pp: ppS.reason, sour_applied: ppS.applied, belgian_pp: ppB.reason, belgian_applied: ppB.applied, porter_pp: ppP.reason, porter_applied: ppP.applied, strong_ale_pp: ppA.reason, strong_ale_applied: ppA.applied, stout_pp: ppT.reason, stout_applied: ppT.applied, brown_ale_pp: ppBA.reason, brown_ale_applied: ppBA.applied, bock_pp: ppBO.reason, bock_applied: ppBO.applied}
     };
   }
   // Adım 61 P2 Adım 3 — V6 motor için buildFeatures expose
