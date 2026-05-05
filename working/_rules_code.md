@@ -732,6 +732,43 @@ Eski URL korundu rollback icin: Brewmaster_v2_79_10.html + _v19_model_*.json (V2
 
 ---
 
+## Model File Sha Tracking (v2.7.1, 2026-05-05)
+
+Yukaridaki "Dataset Baseline Kayitlari" bolumundeki sha256 degerleri **DATASET dosyalari** (working/_v28*_aliased_dataset.json, ~1.32 GB) icin. **Model dosyalari** (working/_v19_v28*_model_*.json, ~50 MB) AYRI artifact'lar — kendi sha'lari var.
+
+KURAL 12.2 v2.7 disiplini gereği BU AYRIM ONEMLI: dataset bozulmasi != model bozulmasi. Her ikisi de ayri hashlib check ile dogrulanmali.
+
+V28h_v2 model artifact'lari (production):
+- _v19_v28h_v2_model_slug.json: sha256 4317a3bb33faaf593d89b59b3f121df61bc6d563bb8de85dcff2efb1c2e565a3 (48849113 bytes, 31850 tree, 91 class, 89 feature)
+- _v19_v28h_v2_model_14cat.json: sha256 4be19015a28d52e25a3caf4b8784db88182becc86cf4c82580079cbd743e0182 (3365644 bytes)
+- _v19_v28h_v2_label_encoder_slug.json: sha256 63c6a62cfb9e8b0c (4228 bytes, 91 class + 89 feature_list)
+- _v19_v28h_v2_label_encoder_14cat.json: sha256 c8a79779251e46e7 (2154 bytes)
+
+V28i model artifact'lari (arsiv, working/archive/v28i_artifact_archive/):
+- _v19_v28i_model_slug.json: sha256 1527070b0415aff172ab879242af7fd1e563cf6a7609916cd7927fadc0ca2c24 (48884226 bytes, 31850 tree, 91 class, 89 feature)
+- _v19_v28i_model_14cat.json: sha256 8e744d489e2bf91e382748ea149b5ba2bd54c162ea91bbb92460d10dd77f427d (3362825 bytes)
+- _v19_v28i_label_encoder_slug.json: sha256 63c6a62cfb9e8b0c (V28h_v2 ile birebir hash-identical, ayni 91 class + 89 feature_list)
+- _v19_v28i_label_encoder_14cat.json: sha256 c8a79779251e46e7 (V28h_v2 ile birebir hash-identical)
+
+Yapisal kontrol — V28h_v2 vs V28i model file kiyas:
+- Tree count: 31850 = 31850 (identical)
+- Class count: 91 = 91 (identical)
+- Feature count: 89 = 89 (identical, feature_list hash-identical)
+- JSON layout: ['learner','version'] / ['gradient_booster','model','trees'] (identical)
+- gbtree_model_param: identical
+- Tree weights + base_score: marjinal farkli (V28i 1022 reslug recete egitildi)
+- Label encoder classes ordering: identical
+Atif: working/_step60d_v28i_ui_fix_denemesi.json yapisal kontrol bolumu.
+
+Sub-sprint 3 V28i UI bug forensic notu (05.05.2026):
+- Bug: BB Alman Bugday recete UI Munich Helles %41 (Hefeweizen Python %87)
+- Yapisal kontroller HEPSI PASS (yukarida)
+- Tek bulunan UI bug: predictRawWith fonksiyonu (HTML satir 522) `scores=new Array(numClass).fill(0)` — XGBoost base_score eklemiyor; Python xgb.Booster.predict eklerken JS path eklemiyor. Etki marjinal (V28i 1/14 cluster top1 flip, V28h_v2 2/14 flip), Hefeweizen->Helles flip'ini AÇIKLAMIYOR.
+- Reproduce edilemedi: BB Alman Bugday recete state preserve edilmemis, sentetik profille flip tetiklenmedi.
+- Karar: V28i kalici iptal, archive'de sakli (forensic), Sub-sprint 4 American Wheat'a gec.
+
+---
+
 ## Versiyon
 
 - v1 (2026-05-04): İlk taslak. 82 hatadan çıkarılan 10 bölüm, 38 kural. Tablo 82/82 hata atıflı (Hata 25 6.1'e bağlandı).
@@ -744,6 +781,7 @@ Eski URL korundu rollback icin: Brewmaster_v2_79_10.html + _v19_model_*.json (V2
 - v2.5.1 (2026-05-04 — Oncelik 1A + 1B kapanis): P2 audit %100 kapsam tamam (81/81 TP, 0 FP — ilk 8 pattern 40 sample + ek 8 brand 36 sample + WLP670 5 sample). K3 603 keyword-eslesen audit (57 sample): Quadrupel %93 KABUL, Dubbel %53 KISMEN, Tripel %33 KRITIK, Strong Golden %25 KRITIK. 14 YANLIS recete + 4 hata pattern + 18d pattern matrisi yon (maya bazli + negatif baglam + profile zone + pattern genisletme) `_to_do_step18d.json`'a eklendi. V19 quadrupel 0.000 paradoksu = ML mimari sorunu (47 recete az + class weight eksigi), dataset temiz.
 - v2.6 (2026-05-04 — KURAL 12.2 revize): v2.5'te 'tek session 1 deploy' yanlis tanim. Asil mesele her deploy oncesi tam denetim (KURAL 4 + 1.1 + 9.5 + sha guard + working tree clean). Hizli arka arkaya deploy ihlal degil; denetimsiz deploy ihlal. Deploy sayisi sinirsiz. Adim 18d-pre Oncelik 2.5 deploy hazirligi sirasinda Kaan tespit.
 - v2.7 (2026-05-04 — Sub-sprint 2B C kararı, Sha guard rapor zorunluluğu): Sha guard raporu **gerçek hashlib hash karşılaştırması** ile yapılır. Transcript verisi tek başına yeterli değil — Sub-sprint 1/2A/2B raporlarinda V28b sha guard atlandi (gevsek check), 4 sprint boyunca sapma fark edilmedi. Adim 59 V28b meta ekleme (mesru tracked islem) ile sha bc8a7b0d -> 8359f033 oldu, ama KURAL Code baseline kaydı atlanmis. DURMA NOKTASI 7a Kaan B kararı arastirma + C kararı baseline guncelleme. Kayıt: gelecekte her sha guard raporu Python hashlib check ile yapılır, transcript önceki rapor referansı yetersiz. Audit log referansi: working/_step60d_v28b_sha_sapmasi_arastirma.json + working/_step59_v28b_add_meta_audit.json.
+- v2.7.1 (2026-05-05 — Dataset sha vs Model sha ayrim bolumu eklendi): Sub-sprint 3 V28i UI bug teshisi sirasinda bir kayit hatasi tespit edildi: V28h_v2 ve V28i icin sha kayitlar dataset (~1.32 GB) icindi ama predictRawWith bug analizi sirasinda model dosyasi (~50 MB) sha'sini hesapladik ve "discrepancy" olarak yorumladik (yanilis cikarim). Hashlib gercek check sonucu: dataset sha kayitlari TAMAMI dogru, model dosyalari icin AYRI sha takibi gerekiyor. KURAL 12.2 v2.7 disiplini bu ayrimi netlestirir: her sha kontrol edildiginde HANGI artifact icin kontrol edildigi belirtilir (dataset / model / label encoder / V6 reference). Yeni "Model File Sha Tracking" bolumu eklendi (V28h_v2 + V28i model sha'lari + yapisal kontrol kiyas + Sub-sprint 3 V28i UI bug forensic notu). Audit log referansi: working/_step60d_sha_kayit_duzeltme_05.05.2026.json + working/_step60d_v28i_ui_fix_denemesi.json.
 
 ---
 

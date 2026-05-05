@@ -515,11 +515,24 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     return baseW[nid];
   }
   function predictRawWith(model, features) {
+    // base_score init (boost_from_average=1) — Python xgb.Booster.predict ile birebir uyum, Asama 2 V28h_v2 17/17 PASS
     if (!model) return null;
     const trees=model.learner.gradient_booster.model.trees;
     const treeInfo=model.learner.gradient_booster.model.tree_info;
-    const numClass=parseInt(model.learner.learner_model_param.num_class,10);
-    const scores=new Array(numClass).fill(0);
+    const lp=model.learner.learner_model_param;
+    const numClass=parseInt(lp.num_class,10);
+    let scores=null;
+    const bsRaw=lp.base_score;
+    if (typeof bsRaw === 'string' && bsRaw.length > 0 && bsRaw.charAt(0) === '[') {
+      try {
+        const parsed=JSON.parse(bsRaw);
+        if (Array.isArray(parsed) && parsed.length === numClass) scores = parsed.slice();
+      } catch(e) {}
+    }
+    if (!scores) {
+      const scalar = (typeof bsRaw === 'number') ? bsRaw : (typeof bsRaw === 'string' ? Number(bsRaw) : 0);
+      scores = new Array(numClass).fill(isNaN(scalar) ? 0 : scalar);
+    }
     for (let i=0;i<trees.length;i++) scores[treeInfo[i]] += evalTree(trees[i], features);
     let maxS=-Infinity; for (let i=0;i<numClass;i++) if (scores[i]>maxS) maxS=scores[i];
     let sum=0; const exps=new Array(numClass);
