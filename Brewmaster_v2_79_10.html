@@ -861,6 +861,84 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     return {sorted: newSorted, applied: true, reason:'applied', boost_pp: (newProb - wit.prob) * 100};
   }
 
+  // Sub-sprint 6 Sour cluster post-process (V19 model degismez, UI tie-break 4 alan)
+  // Sirala: C gueuze > F fruit_lambic > D gose > B mixed_ferm. Counter chain'e devam, applied early return.
+  function _ppSourGueuze(f, sorted) {
+    var yb = f.yeast_brett || 0, ysb = f.yeast_sour_blend || 0;
+    if (!(yb > 0 && ysb > 0)) return {sorted: sorted, reason:'no_trigger'};
+    if ((f.katki_fruit || 0) > 0) return {sorted: sorted, reason:'C_counter_katki_fruit'};
+    if (!sorted.length) return {sorted: sorted, reason:'C_no_top'};
+    var top1 = sorted[0].cls;
+    if (top1 !== 'belgian_lambic' && top1 !== 'belgian_fruit_lambic') return {sorted: sorted, reason:'C_top1_not_lambic_family'};
+    var gIdx = -1;
+    for (var i = 0; i < Math.min(3, sorted.length); i++) if (sorted[i].cls === 'belgian_gueuze') { gIdx = i; break; }
+    if (gIdx < 0) return {sorted: sorted, reason:'C_gueuze_not_in_top3'};
+    var g = sorted[gIdx];
+    var newProb = Math.min(0.75, (g.prob || 0) + 0.15);
+    var ns = sorted.slice(); ns.splice(gIdx, 1); ns.unshift({cls: g.cls, prob: newProb});
+    return {sorted: ns, reason:'C_gueuze_applied'};
+  }
+  function _ppSourFruitLambic(f, sorted) {
+    var kf = f.katki_fruit || 0, yb = f.yeast_brett || 0, ysb = f.yeast_sour_blend || 0, pw = f.pct_wheat || 0;
+    if (!(kf > 0 && (yb > 0 || ysb > 0) && pw >= 20)) return {sorted: sorted, reason:'no_trigger'};
+    if ((f.yeast_witbier || 0) > 0) return {sorted: sorted, reason:'F_counter_witbier'};
+    if ((f.abv || 0) > 8) return {sorted: sorted, reason:'F_counter_abv'};
+    if (!sorted.length) return {sorted: sorted, reason:'F_no_top'};
+    var top1 = sorted[0].cls;
+    if (top1 !== 'belgian_lambic' && top1 !== 'fruit_beer' && top1 !== 'mixed_fermentation_sour_beer') return {sorted: sorted, reason:'F_top1_not_target'};
+    var fIdx = -1;
+    for (var i = 0; i < Math.min(3, sorted.length); i++) if (sorted[i].cls === 'belgian_fruit_lambic') { fIdx = i; break; }
+    if (fIdx < 0) return {sorted: sorted, reason:'F_fruit_lambic_not_in_top3'};
+    var fl = sorted[fIdx];
+    var newProb = Math.min(0.75, (fl.prob || 0) + 0.15);
+    var ns = sorted.slice(); ns.splice(fIdx, 1); ns.unshift({cls: fl.cls, prob: newProb});
+    return {sorted: ns, reason:'F_fruit_lambic_applied'};
+  }
+  function _ppSourGose(f, sorted) {
+    var hs = f.has_salt || 0, yl = f.yeast_lacto || 0, hl = f.has_lacto || 0, ysb = f.yeast_sour_blend || 0, pw = f.pct_wheat || 0, abv = f.abv || 0;
+    if (!(hs > 0 && (yl > 0 || hl > 0 || ysb > 0) && pw >= 30 && pw <= 60 && abv >= 4 && abv <= 6)) return {sorted: sorted, reason:'no_trigger'};
+    if ((f.has_coriander || 0) > 0) return {sorted: sorted, reason:'D_counter_coriander'};
+    if ((f.has_orange_peel || 0) > 0) return {sorted: sorted, reason:'D_counter_orange_peel'};
+    if (!sorted.length) return {sorted: sorted, reason:'D_no_top'};
+    var top1 = sorted[0].cls;
+    if (top1 !== 'berliner_weisse' && top1 !== 'american_wheat_beer' && top1 !== 'south_german_hefeweizen') return {sorted: sorted, reason:'D_top1_not_target'};
+    var gIdx = -1;
+    for (var i = 0; i < Math.min(3, sorted.length); i++) if (sorted[i].cls === 'gose') { gIdx = i; break; }
+    if (gIdx < 0) return {sorted: sorted, reason:'D_gose_not_in_top3'};
+    var g = sorted[gIdx];
+    var newProb = Math.min(0.75, (g.prob || 0) + 0.18);
+    var ns = sorted.slice(); ns.splice(gIdx, 1); ns.unshift({cls: g.cls, prob: newProb});
+    return {sorted: ns, reason:'D_gose_applied'};
+  }
+  function _ppSourMixedFerm(f, sorted) {
+    var ysb = f.yeast_sour_blend || 0, yb = f.yeast_brett || 0, isf = f.is_mixed_fermentation || 0, hb = f.has_brett || 0, hl = f.has_lacto || 0;
+    var trig = (ysb > 0) || (yb > 0 && isf > 0) || (hb > 0 && hl > 0);
+    if (!trig) return {sorted: sorted, reason:'no_trigger'};
+    if ((f.katki_fruit || 0) > 0) return {sorted: sorted, reason:'B_counter_katki_fruit'};
+    if (!sorted.length) return {sorted: sorted, reason:'B_no_top'};
+    var top1 = sorted[0].cls;
+    if (top1 !== 'berliner_weisse' && top1 !== 'french_belgian_saison' && top1 !== 'specialty_beer') return {sorted: sorted, reason:'B_top1_not_target'};
+    var mIdx = -1;
+    for (var i = 0; i < Math.min(3, sorted.length); i++) if (sorted[i].cls === 'mixed_fermentation_sour_beer') { mIdx = i; break; }
+    if (mIdx < 0) return {sorted: sorted, reason:'B_mixed_ferm_not_in_top3'};
+    var m = sorted[mIdx];
+    var newProb = Math.min(0.70, (m.prob || 0) + 0.12);
+    var ns = sorted.slice(); ns.splice(mIdx, 1); ns.unshift({cls: m.cls, prob: newProb});
+    return {sorted: ns, reason:'B_mixed_ferm_applied'};
+  }
+  function postProcessSour(featObj, sorted) {
+    var firstMeaningful = null;
+    var funcs = [_ppSourGueuze, _ppSourFruitLambic, _ppSourGose, _ppSourMixedFerm];
+    for (var i = 0; i < funcs.length; i++) {
+      var r = funcs[i](featObj, sorted);
+      if (r.reason.indexOf('_applied') >= 0 && r.reason.indexOf('_applied') === r.reason.length - 8) {
+        return {sorted: r.sorted, reason: r.reason, applied: true};
+      }
+      if (r.reason !== 'no_trigger' && firstMeaningful === null) firstMeaningful = r.reason;
+    }
+    return {sorted: sorted, reason: firstMeaningful || 'no_trigger', applied: false};
+  }
+
   function predictSlugSync(uiRecipe) {
     if (!cache.slugModel || !cache.slugLabels) return null;
     const featObj = buildFeatures(uiRecipe); if (!featObj) return null;
@@ -869,14 +947,16 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     for (let i=0;i<featList.length;i++) featArr[i] = featObj[featList[i]] || 0;
     const probs = predictRawWith(cache.slugModel, featArr); if (!probs) return null;
     var sorted = cache.slugLabels.classes.map(function(cls,i){return {cls,prob:probs[i]};}).sort(function(a,b){return b.prob-a.prob;});
-    var pp = postProcessWitbierW3(featObj, sorted);
-    sorted = pp.sorted;
+    var ppW = postProcessWitbierW3(featObj, sorted);
+    sorted = ppW.sorted;
+    var ppS = postProcessSour(featObj, sorted);
+    sorted = ppS.sorted;
     const fmt = function(x){return {slug:x.cls, displayTR:slugDisplay(x.cls), score:x.prob, normalized:Math.round(x.prob*100)};};
     return {
       top3: sorted.slice(0,3).map(fmt),
       top5: sorted.slice(0,5).map(fmt),
       topN: sorted.slice(0,10).map(fmt),  // Bug 4 same-family filter için 10 slug pool
-      _meta: {motor:'V12_slug_V16model', n_classes:cache.slugLabels.classes.length, witbier_w3_pp: pp.reason, witbier_w3_applied: pp.applied}
+      _meta: {motor:'V12_slug_V16model', n_classes:cache.slugLabels.classes.length, witbier_w3_pp: ppW.reason, witbier_w3_applied: ppW.applied, sour_pp: ppS.reason, sour_applied: ppS.applied}
     };
   }
   // Adım 61 P2 Adım 3 — V6 motor için buildFeatures expose
