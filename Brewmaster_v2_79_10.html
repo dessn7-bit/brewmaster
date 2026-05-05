@@ -832,6 +832,35 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
   function slugDisplay(s) {
     return String(s||'').split('_').map(function(w){ return w.length ? w[0].toUpperCase()+w.slice(1) : ''; }).join(' ');
   }
+  // Sub-sprint 5-ter Witbier W3 post-process (V19 model degismez, sadece UI tie-break)
+  // Tetikleyici: yeast_witbier=1 + has_coriander=0 + has_orange_peel=0
+  // Karsi kosul: pct_wheat<20 OR pct_pilsner<20 OR abv>6.5 -> kural calisma
+  // Aksiyon: top1 in WHEAT_FAMILY ve top3'te belgian_witbier varsa swap, witbier prob +0.15 (cap 0.75)
+  var WITBIER_W3_WHEAT_FAMILY = ['south_german_hefeweizen','south_german_dunkel_weizen','south_german_weizenbock','american_wheat_beer','american_wheat_ale','south_german_bernsteinfarbenes_weizen','german_leichtes_weizen'];
+  function postProcessWitbierW3(featObj, sorted) {
+    var yw = featObj.yeast_witbier || 0;
+    var hasC = featObj.has_coriander || 0;
+    var hasO = featObj.has_orange_peel || 0;
+    if (!(yw > 0 && hasC === 0 && hasO === 0)) return {sorted: sorted, applied: false, reason:'no_trigger'};
+    var pctW = featObj.pct_wheat || 0;
+    var pctP = featObj.pct_pilsner || 0;
+    var abv = featObj.abv || 0;
+    if (pctW < 20 || pctP < 20) return {sorted: sorted, applied: false, reason:'counter_grist'};
+    if (abv > 6.5) return {sorted: sorted, applied: false, reason:'counter_abv'};
+    if (!sorted.length || WITBIER_W3_WHEAT_FAMILY.indexOf(sorted[0].cls) < 0) return {sorted: sorted, applied: false, reason:'top1_not_wheat_family'};
+    var witIdx = -1;
+    for (var i = 0; i < Math.min(3, sorted.length); i++) {
+      if (sorted[i].cls === 'belgian_witbier') { witIdx = i; break; }
+    }
+    if (witIdx < 0) return {sorted: sorted, applied: false, reason:'witbier_not_in_top3'};
+    var wit = sorted[witIdx];
+    var newProb = Math.min(0.75, (wit.prob || 0) + 0.15);
+    var newSorted = sorted.slice();
+    newSorted.splice(witIdx, 1);
+    newSorted.unshift({cls: wit.cls, prob: newProb});
+    return {sorted: newSorted, applied: true, reason:'applied', boost_pp: (newProb - wit.prob) * 100};
+  }
+
   function predictSlugSync(uiRecipe) {
     if (!cache.slugModel || !cache.slugLabels) return null;
     const featObj = buildFeatures(uiRecipe); if (!featObj) return null;
@@ -839,13 +868,15 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     const featArr = new Array(featList.length);
     for (let i=0;i<featList.length;i++) featArr[i] = featObj[featList[i]] || 0;
     const probs = predictRawWith(cache.slugModel, featArr); if (!probs) return null;
-    const sorted = cache.slugLabels.classes.map(function(cls,i){return {cls,prob:probs[i]};}).sort(function(a,b){return b.prob-a.prob;});
+    var sorted = cache.slugLabels.classes.map(function(cls,i){return {cls,prob:probs[i]};}).sort(function(a,b){return b.prob-a.prob;});
+    var pp = postProcessWitbierW3(featObj, sorted);
+    sorted = pp.sorted;
     const fmt = function(x){return {slug:x.cls, displayTR:slugDisplay(x.cls), score:x.prob, normalized:Math.round(x.prob*100)};};
     return {
       top3: sorted.slice(0,3).map(fmt),
       top5: sorted.slice(0,5).map(fmt),
       topN: sorted.slice(0,10).map(fmt),  // Bug 4 same-family filter için 10 slug pool
-      _meta: {motor:'V12_slug_V16model', n_classes:cache.slugLabels.classes.length}
+      _meta: {motor:'V12_slug_V16model', n_classes:cache.slugLabels.classes.length, witbier_w3_pp: pp.reason, witbier_w3_applied: pp.applied}
     };
   }
   // Adım 61 P2 Adım 3 — V6 motor için buildFeatures expose
