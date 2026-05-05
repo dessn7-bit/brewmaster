@@ -1370,6 +1370,133 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     return {sorted: sorted, reason: firstMeaningful || 'no_trigger', applied: false};
   }
 
+  // Sub-sprint 11 Brown Ale post-process — 5 alan (D/C/A/B/G). Top1 trigger icinde.
+  function _ppBaD(f, sorted) {
+    var yk = f.yeast_kolsch || 0, hg = f.hop_german || 0;
+    var abv = f.abv || 0, ibu = f.ibu || 0, srm = f.srm || 0;
+    var trig = (yk > 0) && (hg > 0) && (abv >= 4.5 && abv <= 5.5) && (ibu >= 30 && ibu <= 50) && (srm >= 12 && srm <= 17);
+    if (!trig || !sorted.length) return {sorted: sorted, reason:'no_trigger'};
+    var top1 = sorted[0].cls;
+    if (top1 !== 'american_brown_ale' && top1 !== 'brown_ale' && top1 !== 'american_amber_red_ale' && top1 !== 'extra_special_bitter' && top1 !== 'specialty_beer' && top1 !== 'german_maerzen') return {sorted: sorted, reason:'no_trigger'};
+    if ((f.yeast_american || 0) > 0 || (f.yeast_english || 0) > 0) return {sorted: sorted, reason:'D_counter_amer_eng_yeast'};
+    if ((f.hop_american_c || 0) > 0) return {sorted: sorted, reason:'D_counter_amer_hop'};
+    if (srm > 18) return {sorted: sorted, reason:'D_counter_brown_zone'};
+    if ((f.yeast_witbier || 0) > 0) return {sorted: sorted, reason:'D_counter_witbier'};
+    if ((f.yeast_brett || 0) > 0 || (f.yeast_sour_blend || 0) > 0) return {sorted: sorted, reason:'D_counter_sour'};
+    if ((f.yeast_belgian || 0) > 0) return {sorted: sorted, reason:'D_counter_belgian'};
+    if ((f.yeast_german_lager || 0) > 0) return {sorted: sorted, reason:'D_counter_baltic'};
+    var idx = -1;
+    for (var i = 0; i < Math.min(3, sorted.length); i++) if (sorted[i].cls === 'german_altbier') { idx = i; break; }
+    if (idx < 0) return {sorted: sorted, reason:'D_altbier_not_in_top3'};
+    var t = sorted[idx];
+    var newProb = Math.min(0.75, (t.prob || 0) + 0.18);
+    var ns = sorted.slice(); ns.splice(idx, 1); ns.unshift({cls: t.cls, prob: newProb});
+    return {sorted: ns, reason:'D_altbier_applied'};
+  }
+  function _ppBaC(f, sorted) {
+    var ye = f.yeast_english || 0, abv = f.abv || 0, ibu = f.ibu || 0, srm = f.srm || 0, pc = f.pct_crystal || 0;
+    var trig = (ye > 0) && (abv >= 3 && abv <= 4) && (ibu >= 10 && ibu <= 25) && (srm >= 14) && (pc >= 5);
+    if (!trig || !sorted.length) return {sorted: sorted, reason:'no_trigger'};
+    var top1 = sorted[0].cls;
+    if (top1 !== 'brown_ale' && top1 !== 'irish_red_ale' && top1 !== 'ordinary_bitter' && top1 !== 'specialty_beer') return {sorted: sorted, reason:'no_trigger'};
+    if (abv > 4) return {sorted: sorted, reason:'C_counter_brown_zone'};
+    if (abv < 3) return {sorted: sorted, reason:'C_counter_session_zone'};
+    if ((f.pct_roast || 0) >= 1.5) return {sorted: sorted, reason:'C_counter_irish_red_roast'};
+    if (ibu > 28) return {sorted: sorted, reason:'C_counter_esb_high_ibu'};
+    if ((f.yeast_witbier || 0) > 0) return {sorted: sorted, reason:'C_counter_witbier'};
+    if ((f.yeast_brett || 0) > 0 || (f.yeast_sour_blend || 0) > 0) return {sorted: sorted, reason:'C_counter_sour'};
+    if ((f.yeast_belgian || 0) > 0) return {sorted: sorted, reason:'C_counter_belgian'};
+    if ((f.yeast_german_lager || 0) > 0) return {sorted: sorted, reason:'C_counter_baltic'};
+    var idx = -1;
+    for (var i = 0; i < Math.min(3, sorted.length); i++) if (sorted[i].cls === 'mild') { idx = i; break; }
+    if (idx < 0) return {sorted: sorted, reason:'C_mild_not_in_top3'};
+    var t = sorted[idx];
+    var newProb = Math.min(0.65, (t.prob || 0) + 0.12);
+    var ns = sorted.slice(); ns.splice(idx, 1); ns.unshift({cls: t.cls, prob: newProb});
+    return {sorted: ns, reason:'C_mild_applied'};
+  }
+  function _ppBaA(f, sorted) {
+    var ya = f.yeast_american || 0, abv = f.abv || 0, ibu = f.ibu || 0, srm = f.srm || 0;
+    var hac = f.hop_american_c || 0, hap = f.hop_american_p || 0;
+    var trig = (ya > 0) && (abv >= 4 && abv <= 5.8) && (ibu >= 30 && ibu <= 45) && (srm >= 18 && srm <= 26) && (hac > 0 || hap > 0);
+    if (!trig || !sorted.length) return {sorted: sorted, reason:'no_trigger'};
+    var top1 = sorted[0].cls;
+    if (top1 !== 'brown_ale' && top1 !== 'american_amber_red_ale' && top1 !== 'robust_porter' && top1 !== 'specialty_beer') return {sorted: sorted, reason:'no_trigger'};
+    if (srm > 28) return {sorted: sorted, reason:'A_counter_brown_porter_border'};
+    if (srm < 18) return {sorted: sorted, reason:'A_counter_amber_red_zone'};
+    if (abv > 6) return {sorted: sorted, reason:'A_counter_old_ale_zone'};
+    if ((f.yeast_english || 0) > 0 && (f.pct_crystal || 0) >= 8) return {sorted: sorted, reason:'A_counter_english_irish_zone'};
+    if ((f.yeast_witbier || 0) > 0) return {sorted: sorted, reason:'A_counter_witbier'};
+    if ((f.yeast_brett || 0) > 0 || (f.yeast_sour_blend || 0) > 0) return {sorted: sorted, reason:'A_counter_sour'};
+    if ((f.yeast_belgian || 0) > 0) return {sorted: sorted, reason:'A_counter_belgian'};
+    if ((f.yeast_german_lager || 0) > 0) return {sorted: sorted, reason:'A_counter_baltic'};
+    var idx = -1;
+    for (var i = 0; i < Math.min(3, sorted.length); i++) if (sorted[i].cls === 'american_brown_ale') { idx = i; break; }
+    if (idx < 0) return {sorted: sorted, reason:'A_amer_brown_not_in_top3'};
+    var t = sorted[idx];
+    var newProb = Math.min(0.65, (t.prob || 0) + 0.12);
+    var ns = sorted.slice(); ns.splice(idx, 1); ns.unshift({cls: t.cls, prob: newProb});
+    return {sorted: ns, reason:'A_amer_brown_applied'};
+  }
+  function _ppBaB(f, sorted) {
+    var ye = f.yeast_english || 0, he = f.hop_english || 0, hac = f.hop_american_c || 0;
+    var abv = f.abv || 0, ibu = f.ibu || 0, srm = f.srm || 0;
+    var trig = (ye > 0) && (abv >= 4.5 && abv <= 5.5) && (ibu >= 25 && ibu <= 35) && (srm >= 16 && srm <= 22) && (he > 0 || hac === 0);
+    if (!trig || !sorted.length) return {sorted: sorted, reason:'no_trigger'};
+    var top1 = sorted[0].cls;
+    if (top1 !== 'american_brown_ale' && top1 !== 'mild' && top1 !== 'irish_red_ale' && top1 !== 'extra_special_bitter' && top1 !== 'specialty_beer') return {sorted: sorted, reason:'no_trigger'};
+    if ((f.yeast_american || 0) > 0) return {sorted: sorted, reason:'B_counter_amer_yeast'};
+    if (abv < 4) return {sorted: sorted, reason:'B_counter_mild_zone'};
+    if (abv > 5.8) return {sorted: sorted, reason:'B_counter_old_ale_zone'};
+    if ((f.pct_roast || 0) >= 1.5) return {sorted: sorted, reason:'B_counter_irish_red_porter_zone'};
+    if ((f.yeast_witbier || 0) > 0) return {sorted: sorted, reason:'B_counter_witbier'};
+    if ((f.yeast_brett || 0) > 0 || (f.yeast_sour_blend || 0) > 0) return {sorted: sorted, reason:'B_counter_sour'};
+    if ((f.yeast_belgian || 0) > 0) return {sorted: sorted, reason:'B_counter_belgian'};
+    if ((f.yeast_german_lager || 0) > 0) return {sorted: sorted, reason:'B_counter_baltic'};
+    var idx = -1;
+    for (var i = 0; i < Math.min(3, sorted.length); i++) if (sorted[i].cls === 'brown_ale') { idx = i; break; }
+    if (idx < 0) return {sorted: sorted, reason:'B_brown_ale_not_in_top3'};
+    var t = sorted[idx];
+    var newProb = Math.min(0.60, (t.prob || 0) + 0.12);
+    var ns = sorted.slice(); ns.splice(idx, 1); ns.unshift({cls: t.cls, prob: newProb});
+    return {sorted: ns, reason:'B_english_brown_applied'};
+  }
+  function _ppBaG(f, sorted) {
+    var ye = f.yeast_english || 0, abv = f.abv || 0, pr = f.pct_roast || 0;
+    var srm = f.srm || 0, pc = f.pct_crystal || 0, ibu = f.ibu || 0;
+    var trig = (ye > 0) && (abv >= 4.5 && abv <= 5.5) && (pr >= 0.8 && pr <= 2.5) && (srm >= 12 && srm <= 17) && (pc >= 6) && (ibu >= 22 && ibu <= 32);
+    if (!trig || !sorted.length) return {sorted: sorted, reason:'no_trigger'};
+    var top1 = sorted[0].cls;
+    if (top1 !== 'brown_ale' && top1 !== 'american_amber_red_ale' && top1 !== 'scottish_export' && top1 !== 'specialty_beer') return {sorted: sorted, reason:'no_trigger'};
+    if ((f.yeast_american || 0) > 0) return {sorted: sorted, reason:'G_counter_amer_yeast_amber_zone'};
+    if (pr > 3) return {sorted: sorted, reason:'G_counter_porter_stout_zone'};
+    if (abv > 5.8) return {sorted: sorted, reason:'G_counter_scotch_strong_zone'};
+    if (ibu > 35) return {sorted: sorted, reason:'G_counter_amber_ipa_zone'};
+    if ((f.yeast_witbier || 0) > 0) return {sorted: sorted, reason:'G_counter_witbier'};
+    if ((f.yeast_brett || 0) > 0 || (f.yeast_sour_blend || 0) > 0) return {sorted: sorted, reason:'G_counter_sour'};
+    if ((f.yeast_belgian || 0) > 0) return {sorted: sorted, reason:'G_counter_belgian'};
+    if ((f.yeast_german_lager || 0) > 0) return {sorted: sorted, reason:'G_counter_baltic'};
+    var idx = -1;
+    for (var i = 0; i < Math.min(3, sorted.length); i++) if (sorted[i].cls === 'irish_red_ale') { idx = i; break; }
+    if (idx < 0) return {sorted: sorted, reason:'G_irish_red_not_in_top3'};
+    var t = sorted[idx];
+    var newProb = Math.min(0.60, (t.prob || 0) + 0.10);
+    var ns = sorted.slice(); ns.splice(idx, 1); ns.unshift({cls: t.cls, prob: newProb});
+    return {sorted: ns, reason:'G_irish_red_applied'};
+  }
+  function postProcessBrownAle(featObj, sorted) {
+    var firstMeaningful = null;
+    var funcs = [_ppBaD, _ppBaC, _ppBaA, _ppBaB, _ppBaG];
+    for (var i = 0; i < funcs.length; i++) {
+      var r = funcs[i](featObj, sorted);
+      if (r.reason.indexOf('_applied') >= 0 && r.reason.indexOf('_applied') === r.reason.length - 8) {
+        return {sorted: r.sorted, reason: r.reason, applied: true};
+      }
+      if (r.reason !== 'no_trigger' && firstMeaningful === null) firstMeaningful = r.reason;
+    }
+    return {sorted: sorted, reason: firstMeaningful || 'no_trigger', applied: false};
+  }
+
   function predictSlugSync(uiRecipe) {
     if (!cache.slugModel || !cache.slugLabels) return null;
     const featObj = buildFeatures(uiRecipe); if (!featObj) return null;
@@ -1390,12 +1517,14 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     sorted = ppA.sorted;
     var ppT = postProcessStout(featObj, sorted);
     sorted = ppT.sorted;
+    var ppBA = postProcessBrownAle(featObj, sorted);
+    sorted = ppBA.sorted;
     const fmt = function(x){return {slug:x.cls, displayTR:slugDisplay(x.cls), score:x.prob, normalized:Math.round(x.prob*100)};};
     return {
       top3: sorted.slice(0,3).map(fmt),
       top5: sorted.slice(0,5).map(fmt),
       topN: sorted.slice(0,10).map(fmt),  // Bug 4 same-family filter için 10 slug pool
-      _meta: {motor:'V12_slug_V16model', n_classes:cache.slugLabels.classes.length, witbier_w3_pp: ppW.reason, witbier_w3_applied: ppW.applied, sour_pp: ppS.reason, sour_applied: ppS.applied, belgian_pp: ppB.reason, belgian_applied: ppB.applied, porter_pp: ppP.reason, porter_applied: ppP.applied, strong_ale_pp: ppA.reason, strong_ale_applied: ppA.applied, stout_pp: ppT.reason, stout_applied: ppT.applied}
+      _meta: {motor:'V12_slug_V16model', n_classes:cache.slugLabels.classes.length, witbier_w3_pp: ppW.reason, witbier_w3_applied: ppW.applied, sour_pp: ppS.reason, sour_applied: ppS.applied, belgian_pp: ppB.reason, belgian_applied: ppB.applied, porter_pp: ppP.reason, porter_applied: ppP.applied, strong_ale_pp: ppA.reason, strong_ale_applied: ppA.applied, stout_pp: ppT.reason, stout_applied: ppT.applied, brown_ale_pp: ppBA.reason, brown_ale_applied: ppBA.applied}
     };
   }
   // Adım 61 P2 Adım 3 — V6 motor için buildFeatures expose
