@@ -1251,6 +1251,125 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     return {sorted: sorted, reason: firstMeaningful || 'no_trigger', applied: false};
   }
 
+  // Sub-sprint 10 Stout post-process — 5 alan (A/C/D/B/E). Top1 trigger icinde.
+  function _ppStA(f, sorted) {
+    var ya = f.yeast_american || 0, ye = f.yeast_english || 0;
+    var abv = f.abv || 0, srm = f.srm || 0, pr = f.pct_roast || 0;
+    var trig = (ya > 0 || ye > 0) && (abv >= 8) && (srm >= 40) && (pr >= 4);
+    if (!trig || !sorted.length) return {sorted: sorted, reason:'no_trigger'};
+    var top1 = sorted[0].cls;
+    if (top1 !== 'stout' && top1 !== 'robust_porter' && top1 !== 'american_strong_pale_ale' && top1 !== 'specialty_beer') return {sorted: sorted, reason:'no_trigger'};
+    if (abv < 8) return {sorted: sorted, reason:'A_counter_stout_zone_abv'};
+    if (srm < 35) return {sorted: sorted, reason:'A_counter_stout_zone_srm'};
+    if ((f.yeast_german_lager || 0) > 0) return {sorted: sorted, reason:'A_counter_baltic'};
+    if ((f.yeast_witbier || 0) > 0) return {sorted: sorted, reason:'A_counter_witbier'};
+    if ((f.yeast_brett || 0) > 0 || (f.yeast_sour_blend || 0) > 0) return {sorted: sorted, reason:'A_counter_sour'};
+    if ((f.yeast_belgian || 0) > 0) return {sorted: sorted, reason:'A_counter_belgian'};
+    var idx = -1;
+    for (var i = 0; i < Math.min(3, sorted.length); i++) if (sorted[i].cls === 'american_imperial_stout') { idx = i; break; }
+    if (idx < 0) return {sorted: sorted, reason:'A_imperial_not_in_top3'};
+    var t = sorted[idx];
+    var newProb = Math.min(0.70, (t.prob || 0) + 0.12);
+    var ns = sorted.slice(); ns.splice(idx, 1); ns.unshift({cls: t.cls, prob: newProb});
+    return {sorted: ns, reason:'A_imperial_applied'};
+  }
+  function _ppStC(f, sorted) {
+    var po = f.pct_oats || 0, abv = f.abv || 0, srm = f.srm || 0;
+    var trig = (po >= 8) && (abv >= 4 && abv <= 6.5) && (srm >= 30);
+    if (!trig || !sorted.length) return {sorted: sorted, reason:'no_trigger'};
+    var top1 = sorted[0].cls;
+    if (top1 !== 'stout' && top1 !== 'sweet_stout' && top1 !== 'irish_dry_stout' && top1 !== 'robust_porter') return {sorted: sorted, reason:'no_trigger'};
+    if ((f.katki_lactose || 0) > 0) return {sorted: sorted, reason:'C_counter_sweet_lactose'};
+    if (abv > 7) return {sorted: sorted, reason:'C_counter_imperial_zone'};
+    if ((f.yeast_witbier || 0) > 0) return {sorted: sorted, reason:'C_counter_witbier'};
+    if ((f.yeast_brett || 0) > 0 || (f.yeast_sour_blend || 0) > 0) return {sorted: sorted, reason:'C_counter_sour'};
+    if ((f.yeast_belgian || 0) > 0) return {sorted: sorted, reason:'C_counter_belgian'};
+    if ((f.yeast_german_lager || 0) > 0) return {sorted: sorted, reason:'C_counter_baltic'};
+    var idx = -1;
+    for (var i = 0; i < Math.min(3, sorted.length); i++) if (sorted[i].cls === 'oatmeal_stout') { idx = i; break; }
+    if (idx < 0) return {sorted: sorted, reason:'C_oatmeal_not_in_top3'};
+    var t = sorted[idx];
+    var newProb = Math.min(0.70, (t.prob || 0) + 0.15);
+    var ns = sorted.slice(); ns.splice(idx, 1); ns.unshift({cls: t.cls, prob: newProb});
+    return {sorted: ns, reason:'C_oatmeal_applied'};
+  }
+  function _ppStD(f, sorted) {
+    var kl = f.katki_lactose || 0, abv = f.abv || 0, srm = f.srm || 0;
+    var trig = (kl >= 1) && (abv >= 4 && abv <= 6.5) && (srm >= 30);
+    if (!trig || !sorted.length) return {sorted: sorted, reason:'no_trigger'};
+    var top1 = sorted[0].cls;
+    if (top1 !== 'stout' && top1 !== 'oatmeal_stout' && top1 !== 'robust_porter') return {sorted: sorted, reason:'no_trigger'};
+    if ((f.pct_oats || 0) >= 8) return {sorted: sorted, reason:'D_counter_oatmeal_zone'};
+    if (abv > 7) return {sorted: sorted, reason:'D_counter_imperial_zone'};
+    if ((f.yeast_witbier || 0) > 0) return {sorted: sorted, reason:'D_counter_witbier'};
+    if ((f.yeast_brett || 0) > 0 || (f.yeast_sour_blend || 0) > 0) return {sorted: sorted, reason:'D_counter_sour'};
+    if ((f.yeast_belgian || 0) > 0) return {sorted: sorted, reason:'D_counter_belgian'};
+    if ((f.yeast_german_lager || 0) > 0) return {sorted: sorted, reason:'D_counter_baltic'};
+    var idx = -1;
+    for (var i = 0; i < Math.min(3, sorted.length); i++) if (sorted[i].cls === 'sweet_stout') { idx = i; break; }
+    if (idx < 0) return {sorted: sorted, reason:'D_sweet_not_in_top3'};
+    var t = sorted[idx];
+    var newProb = Math.min(0.70, (t.prob || 0) + 0.15);
+    var ns = sorted.slice(); ns.splice(idx, 1); ns.unshift({cls: t.cls, prob: newProb});
+    return {sorted: ns, reason:'D_sweet_applied'};
+  }
+  function _ppStB(f, sorted) {
+    var ye = f.yeast_english || 0, abv = f.abv || 0, pr = f.pct_roast || 0, ibu = f.ibu || 0, srm = f.srm || 0;
+    var trig = (ye > 0) && (abv >= 3.8 && abv <= 5.5) && (pr >= 6) && (ibu >= 25 && ibu <= 45) && (srm >= 30);
+    if (!trig || !sorted.length) return {sorted: sorted, reason:'no_trigger'};
+    var top1 = sorted[0].cls;
+    if (top1 !== 'stout' && top1 !== 'oatmeal_stout' && top1 !== 'robust_porter' && top1 !== 'brown_porter') return {sorted: sorted, reason:'no_trigger'};
+    if (abv > 5.5) return {sorted: sorted, reason:'B_counter_imperial_zone'};
+    if ((f.katki_lactose || 0) > 0) return {sorted: sorted, reason:'B_counter_sweet'};
+    if ((f.pct_oats || 0) > 7) return {sorted: sorted, reason:'B_counter_oatmeal'};
+    if ((f.yeast_witbier || 0) > 0) return {sorted: sorted, reason:'B_counter_witbier'};
+    if ((f.yeast_brett || 0) > 0 || (f.yeast_sour_blend || 0) > 0) return {sorted: sorted, reason:'B_counter_sour'};
+    if ((f.yeast_belgian || 0) > 0) return {sorted: sorted, reason:'B_counter_belgian'};
+    if ((f.yeast_german_lager || 0) > 0) return {sorted: sorted, reason:'B_counter_baltic'};
+    var idx = -1;
+    for (var i = 0; i < Math.min(3, sorted.length); i++) if (sorted[i].cls === 'irish_dry_stout') { idx = i; break; }
+    if (idx < 0) return {sorted: sorted, reason:'B_irish_not_in_top3'};
+    var t = sorted[idx];
+    var newProb = Math.min(0.65, (t.prob || 0) + 0.12);
+    var ns = sorted.slice(); ns.splice(idx, 1); ns.unshift({cls: t.cls, prob: newProb});
+    return {sorted: ns, reason:'B_irish_applied'};
+  }
+  function _ppStE(f, sorted) {
+    var ye = f.yeast_english || 0, abv = f.abv || 0, ibu = f.ibu || 0, srm = f.srm || 0;
+    var trig = (ye > 0) && (abv >= 6.0 && abv <= 8.0) && (ibu >= 45 && ibu <= 65) && (srm >= 35);
+    if (!trig || !sorted.length) return {sorted: sorted, reason:'no_trigger'};
+    var top1 = sorted[0].cls;
+    if (top1 !== 'stout' && top1 !== 'robust_porter' && top1 !== 'american_imperial_stout') return {sorted: sorted, reason:'no_trigger'};
+    if (abv > 8) return {sorted: sorted, reason:'E_counter_imperial'};
+    if (abv < 6) return {sorted: sorted, reason:'E_counter_stout_irish'};
+    if ((f.yeast_american || 0) > 0) return {sorted: sorted, reason:'E_counter_amer_yeast'};
+    if ((f.pct_oats || 0) >= 8) return {sorted: sorted, reason:'E_counter_oatmeal'};
+    if ((f.katki_lactose || 0) > 0) return {sorted: sorted, reason:'E_counter_sweet'};
+    if ((f.yeast_witbier || 0) > 0) return {sorted: sorted, reason:'E_counter_witbier'};
+    if ((f.yeast_brett || 0) > 0 || (f.yeast_sour_blend || 0) > 0) return {sorted: sorted, reason:'E_counter_sour'};
+    if ((f.yeast_belgian || 0) > 0) return {sorted: sorted, reason:'E_counter_belgian'};
+    if ((f.yeast_german_lager || 0) > 0) return {sorted: sorted, reason:'E_counter_baltic'};
+    var idx = -1;
+    for (var i = 0; i < Math.min(3, sorted.length); i++) if (sorted[i].cls === 'export_stout') { idx = i; break; }
+    if (idx < 0) return {sorted: sorted, reason:'E_export_not_in_top3'};
+    var t = sorted[idx];
+    var newProb = Math.min(0.55, (t.prob || 0) + 0.10);
+    var ns = sorted.slice(); ns.splice(idx, 1); ns.unshift({cls: t.cls, prob: newProb});
+    return {sorted: ns, reason:'E_export_applied'};
+  }
+  function postProcessStout(featObj, sorted) {
+    var firstMeaningful = null;
+    var funcs = [_ppStA, _ppStC, _ppStD, _ppStB, _ppStE];
+    for (var i = 0; i < funcs.length; i++) {
+      var r = funcs[i](featObj, sorted);
+      if (r.reason.indexOf('_applied') >= 0 && r.reason.indexOf('_applied') === r.reason.length - 8) {
+        return {sorted: r.sorted, reason: r.reason, applied: true};
+      }
+      if (r.reason !== 'no_trigger' && firstMeaningful === null) firstMeaningful = r.reason;
+    }
+    return {sorted: sorted, reason: firstMeaningful || 'no_trigger', applied: false};
+  }
+
   function predictSlugSync(uiRecipe) {
     if (!cache.slugModel || !cache.slugLabels) return null;
     const featObj = buildFeatures(uiRecipe); if (!featObj) return null;
@@ -1269,12 +1388,14 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     sorted = ppP.sorted;
     var ppA = postProcessStrongAle(featObj, sorted);
     sorted = ppA.sorted;
+    var ppT = postProcessStout(featObj, sorted);
+    sorted = ppT.sorted;
     const fmt = function(x){return {slug:x.cls, displayTR:slugDisplay(x.cls), score:x.prob, normalized:Math.round(x.prob*100)};};
     return {
       top3: sorted.slice(0,3).map(fmt),
       top5: sorted.slice(0,5).map(fmt),
       topN: sorted.slice(0,10).map(fmt),  // Bug 4 same-family filter için 10 slug pool
-      _meta: {motor:'V12_slug_V16model', n_classes:cache.slugLabels.classes.length, witbier_w3_pp: ppW.reason, witbier_w3_applied: ppW.applied, sour_pp: ppS.reason, sour_applied: ppS.applied, belgian_pp: ppB.reason, belgian_applied: ppB.applied, porter_pp: ppP.reason, porter_applied: ppP.applied, strong_ale_pp: ppA.reason, strong_ale_applied: ppA.applied}
+      _meta: {motor:'V12_slug_V16model', n_classes:cache.slugLabels.classes.length, witbier_w3_pp: ppW.reason, witbier_w3_applied: ppW.applied, sour_pp: ppS.reason, sour_applied: ppS.applied, belgian_pp: ppB.reason, belgian_applied: ppB.applied, porter_pp: ppP.reason, porter_applied: ppP.applied, strong_ale_pp: ppA.reason, strong_ale_applied: ppA.applied, stout_pp: ppT.reason, stout_applied: ppT.applied}
     };
   }
   // Adım 61 P2 Adım 3 — V6 motor için buildFeatures expose
