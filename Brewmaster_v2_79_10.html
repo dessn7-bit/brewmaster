@@ -2274,6 +2274,113 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     return {sorted: sorted, reason: firstMeaningful || 'no_trigger', applied: false};
   }
 
+  // Sub-sprint 19 Specialty post-process — FAZ 1 SON (4 alan: A Smoked + Rauchbier counter > B Fruit + brett counter > C Herb/Spice + Witbier counter > D Winter combo).
+  // KRITIK: Specialty kurallari MARKER-DRIVEN, signature-driven DEGIL — ana cluster signature varsa bypass.
+  // KORUMA AGRESIF: Rauchbier (Sub-sprint 4 +7.89pp), fruit_lambic (Sub-sprint 6 F), Witbier W3 (Sub-sprint 5-ter), 14 cluster border.
+  function _ppSpA(f, sorted) {
+    // Smoked Beer + Rauchbier counter AGRESIF
+    var ps = f.pct_smoked || 0;
+    var ks = f.katki_smoke || 0;
+    var abv = f.abv || 0, srm = f.srm || 0, ibu = f.ibu || 0;
+    var trig = (ps >= 5 || ks >= 1) && (abv >= 4 && abv <= 7) && (srm >= 8 && srm <= 30);
+    if (!trig || !sorted.length) return {sorted: sorted, reason:'no_trigger'};
+    var top1 = sorted[0].cls;
+    if (top1 !== 'robust_porter' && top1 !== 'bamberg_maerzen_rauchbier' && top1 !== 'specialty_beer' && top1 !== 'brown_porter' && top1 !== 'baltic_porter') return {sorted: sorted, reason:'no_trigger'};
+    // Rauchbier KORUMA AGRESIF
+    if ((f.yeast_german_lager || 0) > 0 && (abv >= 4.5 && abv <= 6) && (srm >= 12 && srm <= 18) && (ibu >= 22 && ibu <= 32)) return {sorted: sorted, reason:'A_counter_rauchbier_zone_protect'};
+    if (top1 === 'bamberg_maerzen_rauchbier') return {sorted: sorted, reason:'A_counter_rauchbier_top1_protect'};
+    if (ps >= 30) return {sorted: sorted, reason:'A_counter_rauchbier_dominant_zone'};
+    if ((f.yeast_witbier || 0) > 0 || (f.yeast_belgian || 0) > 0) return {sorted: sorted, reason:'A_counter_witbier_belgian'};
+    var idx = -1;
+    for (var i = 0; i < Math.min(3, sorted.length); i++) if (sorted[i].cls === 'smoked_beer') { idx = i; break; }
+    if (idx < 0) return {sorted: sorted, reason:'A_smoked_beer_not_in_top3'};
+    var t = sorted[idx];
+    var newProb = Math.min(0.60, (t.prob || 0) + 0.12);
+    var ns = sorted.slice(); ns.splice(idx, 1); ns.unshift({cls: t.cls, prob: newProb});
+    return {sorted: ns, reason:'A_smoked_beer_applied'};
+  }
+  function _ppSpB(f, sorted) {
+    // Fruit Beer + fruit_lambic counter
+    var kf = f.katki_fruit || 0;
+    var hf = f.has_fruit || 0;
+    var abv = f.abv || 0, ibu = f.ibu || 0, srm = f.srm || 0;
+    var trig = (kf >= 1 || hf > 0) && (abv >= 4 && abv <= 7) && (ibu >= 10 && ibu <= 40) && (srm >= 4 && srm <= 12);
+    if (!trig || !sorted.length) return {sorted: sorted, reason:'no_trigger'};
+    var top1 = sorted[0].cls;
+    if (top1 !== 'american_wheat_ale' && top1 !== 'american_wheat_beer' && top1 !== 'american_pale_ale' && top1 !== 'belgian_fruit_lambic' && top1 !== 'specialty_beer' && top1 !== 'belgian_witbier') return {sorted: sorted, reason:'no_trigger'};
+    // fruit_lambic KORUMA
+    if ((f.yeast_brett || 0) > 0 || (f.yeast_sour_blend || 0) > 0) return {sorted: sorted, reason:'B_counter_fruit_lambic_zone'};
+    if (top1 === 'belgian_fruit_lambic' && (sorted[0].prob || 0) >= 0.55) return {sorted: sorted, reason:'B_counter_fruit_lambic_high_confidence'};
+    if ((f.has_coriander || 0) > 0 || (f.has_orange_peel || 0) > 0) return {sorted: sorted, reason:'B_counter_witbier_w3_zone'};
+    if ((f.yeast_witbier || 0) > 0 && (f.pct_wheat || 0) >= 20) return {sorted: sorted, reason:'B_counter_witbier_white_ipa_zone'};
+    if (ibu > 50) return {sorted: sorted, reason:'B_counter_ipa_zone'};
+    var idx = -1;
+    for (var i = 0; i < Math.min(3, sorted.length); i++) if (sorted[i].cls === 'fruit_beer') { idx = i; break; }
+    if (idx < 0) return {sorted: sorted, reason:'B_fruit_beer_not_in_top3'};
+    var t = sorted[idx];
+    var newProb = Math.min(0.55, (t.prob || 0) + 0.12);
+    var ns = sorted.slice(); ns.splice(idx, 1); ns.unshift({cls: t.cls, prob: newProb});
+    return {sorted: ns, reason:'B_fruit_beer_applied'};
+  }
+  function _ppSpC(f, sorted) {
+    // Herb/Spice/Pumpkin + Witbier counter (pumpkin bonus +5pp)
+    var ksh = f.katki_spice_herb || 0;
+    var hs = f.has_spice || 0;
+    var kp = f.katki_pumpkin || 0;
+    var abv = f.abv || 0, srm = f.srm || 0;
+    var trig = (ksh >= 1 || hs > 0 || kp >= 1) && (abv >= 4 && abv <= 8) && (srm >= 4 && srm <= 22);
+    if (!trig || !sorted.length) return {sorted: sorted, reason:'no_trigger'};
+    var top1 = sorted[0].cls;
+    if (top1 !== 'specialty_beer' && top1 !== 'winter_seasonal_beer' && top1 !== 'belgian_witbier') return {sorted: sorted, reason:'no_trigger'};
+    // Witbier W3 KORUMA
+    if ((f.yeast_witbier || 0) > 0 && (f.has_coriander || 0) > 0 && (f.has_orange_peel || 0) > 0) return {sorted: sorted, reason:'C_counter_witbier_w3_classic_zone'};
+    if (top1 === 'belgian_witbier' && (sorted[0].prob || 0) >= 0.55) return {sorted: sorted, reason:'C_counter_witbier_high_confidence'};
+    if ((f.yeast_brett || 0) > 0 || (f.yeast_sour_blend || 0) > 0) return {sorted: sorted, reason:'C_counter_brett_sour'};
+    var idx = -1;
+    for (var i = 0; i < Math.min(3, sorted.length); i++) if (sorted[i].cls === 'herb_and_spice_beer') { idx = i; break; }
+    if (idx < 0) return {sorted: sorted, reason:'C_herb_spice_not_in_top3'};
+    var t = sorted[idx];
+    var bonus = (kp >= 1) ? 0.05 : 0;  // pumpkin bonus +5pp
+    var newProb = Math.min(0.60, (t.prob || 0) + 0.12 + bonus);
+    var ns = sorted.slice(); ns.splice(idx, 1); ns.unshift({cls: t.cls, prob: newProb});
+    return {sorted: ns, reason:'C_herb_spice_applied'};
+  }
+  function _ppSpD(f, sorted) {
+    // Winter Seasonal: ABV/SRM/spice combo (orange_peel/honey winter marker)
+    var abv = f.abv || 0, srm = f.srm || 0;
+    var spice = ((f.has_spice || 0) > 0 || (f.katki_spice_herb || 0) >= 1);
+    var winter_marker = ((f.has_orange_peel || 0) > 0 || (f.katki_honey || 0) >= 1);
+    var trig = (abv >= 6) && (srm >= 12) && spice && winter_marker;
+    if (!trig || !sorted.length) return {sorted: sorted, reason:'no_trigger'};
+    var top1 = sorted[0].cls;
+    if (top1 !== 'specialty_beer' && top1 !== 'herb_and_spice_beer') return {sorted: sorted, reason:'no_trigger'};
+    if ((f.yeast_witbier || 0) > 0) return {sorted: sorted, reason:'D_counter_witbier'};
+    if ((f.yeast_brett || 0) > 0 || (f.yeast_sour_blend || 0) > 0) return {sorted: sorted, reason:'D_counter_brett_sour'};
+    if ((f.pct_smoked || 0) >= 5) return {sorted: sorted, reason:'D_counter_smoked_zone'};
+    if ((f.katki_fruit || 0) >= 1) return {sorted: sorted, reason:'D_counter_fruit_zone'};
+    if (abv > 10) return {sorted: sorted, reason:'D_counter_strong_ale_zone'};
+    var idx = -1;
+    for (var i = 0; i < Math.min(3, sorted.length); i++) if (sorted[i].cls === 'winter_seasonal_beer') { idx = i; break; }
+    if (idx < 0) return {sorted: sorted, reason:'D_winter_seasonal_not_in_top3'};
+    var t = sorted[idx];
+    var newProb = Math.min(0.55, (t.prob || 0) + 0.10);
+    var ns = sorted.slice(); ns.splice(idx, 1); ns.unshift({cls: t.cls, prob: newProb});
+    return {sorted: ns, reason:'D_winter_seasonal_applied'};
+  }
+  function postProcessSpecialty(featObj, sorted) {
+    var firstMeaningful = null;
+    // Sirala: A Smoked + Rauchbier counter (transformative koruma ilk) > B Fruit + brett counter > C Herb/Spice + Witbier counter > D Winter combo
+    var funcs = [_ppSpA, _ppSpB, _ppSpC, _ppSpD];
+    for (var i = 0; i < funcs.length; i++) {
+      var r = funcs[i](featObj, sorted);
+      if (r.reason.indexOf('_applied') >= 0 && r.reason.indexOf('_applied') === r.reason.length - 8) {
+        return {sorted: r.sorted, reason: r.reason, applied: true};
+      }
+      if (r.reason !== 'no_trigger' && firstMeaningful === null) firstMeaningful = r.reason;
+    }
+    return {sorted: sorted, reason: firstMeaningful || 'no_trigger', applied: false};
+  }
+
   function predictSlugSync(uiRecipe) {
     if (!cache.slugModel || !cache.slugLabels) return null;
     const featObj = buildFeatures(uiRecipe); if (!featObj) return null;
@@ -2310,12 +2417,14 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     sorted = ppSa.sorted;
     var ppLd = postProcessLagerDark(featObj, sorted);
     sorted = ppLd.sorted;
+    var ppSp = postProcessSpecialty(featObj, sorted);
+    sorted = ppSp.sorted;
     const fmt = function(x){return {slug:x.cls, displayTR:slugDisplay(x.cls), score:x.prob, normalized:Math.round(x.prob*100)};};
     return {
       top3: sorted.slice(0,3).map(fmt),
       top5: sorted.slice(0,5).map(fmt),
       topN: sorted.slice(0,10).map(fmt),  // Bug 4 same-family filter için 10 slug pool
-      _meta: {motor:'V12_slug_V16model', n_classes:cache.slugLabels.classes.length, witbier_w3_pp: ppW.reason, witbier_w3_applied: ppW.applied, sour_pp: ppS.reason, sour_applied: ppS.applied, belgian_pp: ppB.reason, belgian_applied: ppB.applied, porter_pp: ppP.reason, porter_applied: ppP.applied, strong_ale_pp: ppA.reason, strong_ale_applied: ppA.applied, stout_pp: ppT.reason, stout_applied: ppT.applied, brown_ale_pp: ppBA.reason, brown_ale_applied: ppBA.applied, bock_pp: ppBO.reason, bock_applied: ppBO.applied, lager_pp: ppLG.reason, lager_applied: ppLG.applied, ipa_pp: ppI.reason, ipa_applied: ppI.applied, pilsner_pp: ppPi.reason, pilsner_applied: ppPi.applied, pale_ale_pp: ppPa.reason, pale_ale_applied: ppPa.applied, saison_pp: ppSa.reason, saison_applied: ppSa.applied, lager_dark_pp: ppLd.reason, lager_dark_applied: ppLd.applied}
+      _meta: {motor:'V12_slug_V16model', n_classes:cache.slugLabels.classes.length, witbier_w3_pp: ppW.reason, witbier_w3_applied: ppW.applied, sour_pp: ppS.reason, sour_applied: ppS.applied, belgian_pp: ppB.reason, belgian_applied: ppB.applied, porter_pp: ppP.reason, porter_applied: ppP.applied, strong_ale_pp: ppA.reason, strong_ale_applied: ppA.applied, stout_pp: ppT.reason, stout_applied: ppT.applied, brown_ale_pp: ppBA.reason, brown_ale_applied: ppBA.applied, bock_pp: ppBO.reason, bock_applied: ppBO.applied, lager_pp: ppLG.reason, lager_applied: ppLG.applied, ipa_pp: ppI.reason, ipa_applied: ppI.applied, pilsner_pp: ppPi.reason, pilsner_applied: ppPi.applied, pale_ale_pp: ppPa.reason, pale_ale_applied: ppPa.applied, saison_pp: ppSa.reason, saison_applied: ppSa.applied, lager_dark_pp: ppLd.reason, lager_dark_applied: ppLd.applied, specialty_pp: ppSp.reason, specialty_applied: ppSp.applied}
     };
   }
   // Adım 61 P2 Adım 3 — V6 motor için buildFeatures expose
