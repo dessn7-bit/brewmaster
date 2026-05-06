@@ -2119,6 +2119,95 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     return {sorted: sorted, reason: firstMeaningful || 'no_trigger', applied: false};
   }
 
+  // Sub-sprint 17 Saison post-process — 3 alan (B specialty_saison varyasyon > C Bière de Garde > D brett_beer dar). A FBS signature ATLA (n=13002 BORDER, %93 HIGH).
+  // FBS n=13002 BORDER: hicbir kural FBS top1 kirmamali (top1 list dogal mutually exclusive + B trigger varyasyon kosul).
+  // Cross-cluster: Sub-sprint 5-ter Witbier W3 (has_coriander/orange_peel), 6 Sour (yeast_sour_blend), 7 Belgian (yeast_belgian dominant + saison absent).
+  function _ppSaB(f, sorted) {
+    // Specialty Saison varyasyon (Strong/Brett+Dark/Very Dark/Modern dry-hop) — MULTI-SIGNAL TIGHT (FBS koruma)
+    var ys = f.yeast_saison || 0;
+    var abv = f.abv || 0, srm = f.srm || 0;
+    var yb = f.yeast_brett || 0;
+    var dh = f.dry_hop_grams_per_liter || 0;
+    var trig = (ys > 0) && (abv >= 7.5 || (yb > 0 && srm >= 10) || dh >= 2.0);
+    if (!trig || !sorted.length) return {sorted: sorted, reason:'no_trigger'};
+    var top1 = sorted[0].cls;
+    if (top1 !== 'french_belgian_saison' && top1 !== 'belgian_fruit_lambic' && top1 !== 'mixed_fermentation_sour_beer' && top1 !== 'specialty_beer') return {sorted: sorted, reason:'no_trigger'};
+    if (top1 === 'french_belgian_saison' && (sorted[0].prob || 0) >= 0.55) return {sorted: sorted, reason:'B_counter_fbs_high_confidence'};
+    if ((f.has_coriander || 0) > 0 || (f.has_orange_peel || 0) > 0) return {sorted: sorted, reason:'B_counter_witbier_w3_zone'};
+    if ((f.yeast_sour_blend || 0) > 0) return {sorted: sorted, reason:'B_counter_mixed_ferm_zone'};
+    if (abv > 9) return {sorted: sorted, reason:'B_counter_belgian_strong_zone'};
+    if ((f.yeast_witbier || 0) > 0) return {sorted: sorted, reason:'B_counter_witbier_yeast'};
+    if ((f.pct_smoked || 0) >= 5) return {sorted: sorted, reason:'B_counter_rauchbier'};
+    var idx = -1;
+    for (var i = 0; i < Math.min(3, sorted.length); i++) if (sorted[i].cls === 'specialty_saison') { idx = i; break; }
+    if (idx < 0) return {sorted: sorted, reason:'B_specialty_saison_not_in_top3'};
+    var t = sorted[idx];
+    var newProb = Math.min(0.70, (t.prob || 0) + 0.15);
+    var ns = sorted.slice(); ns.splice(idx, 1); ns.unshift({cls: t.cls, prob: newProb});
+    return {sorted: ns, reason:'B_specialty_saison_applied'};
+  }
+  function _ppSaC(f, sorted) {
+    // Bière de Garde border (Sub-sprint 11 E ertele kapanis)
+    var ys = f.yeast_saison || 0, ybe = f.yeast_belgian || 0;
+    var abv = f.abv || 0, ibu = f.ibu || 0, srm = f.srm || 0;
+    var pm = f.pct_munich || 0, pv = f.pct_vienna || 0;
+    var trig = (ys > 0 || ybe > 0) && (abv >= 6 && abv <= 7.5) && (ibu >= 18 && ibu <= 30) && (srm >= 8 && srm <= 14) && (pm >= 8 && pv >= 5);
+    if (!trig || !sorted.length) return {sorted: sorted, reason:'no_trigger'};
+    var top1 = sorted[0].cls;
+    if (top1 !== 'french_belgian_saison' && top1 !== 'belgian_blonde_ale' && top1 !== 'french_biere_de_garde' && top1 !== 'american_amber_red_ale' && top1 !== 'specialty_beer') return {sorted: sorted, reason:'no_trigger'};
+    if (top1 === 'french_belgian_saison' && (sorted[0].prob || 0) >= 0.55) return {sorted: sorted, reason:'C_counter_fbs_high_confidence'};
+    if (abv > 8) return {sorted: sorted, reason:'C_counter_belgian_strong_zone'};
+    if (srm < 7) return {sorted: sorted, reason:'C_counter_fbs_zone'};
+    if (ibu > 35) return {sorted: sorted, reason:'C_counter_ibu_zone'};
+    if ((f.yeast_brett || 0) > 0) return {sorted: sorted, reason:'C_counter_brett_varyasyon'};
+    if ((f.has_coriander || 0) > 0 || (f.has_orange_peel || 0) > 0) return {sorted: sorted, reason:'C_counter_witbier_w3_zone'};
+    if ((f.yeast_sour_blend || 0) > 0) return {sorted: sorted, reason:'C_counter_mixed_ferm_zone'};
+    if ((f.pct_smoked || 0) >= 5) return {sorted: sorted, reason:'C_counter_rauchbier'};
+    var idx = -1;
+    for (var i = 0; i < Math.min(3, sorted.length); i++) if (sorted[i].cls === 'french_biere_de_garde') { idx = i; break; }
+    if (idx < 0) return {sorted: sorted, reason:'C_biere_de_garde_not_in_top3'};
+    var t = sorted[idx];
+    var newProb = Math.min(0.60, (t.prob || 0) + 0.12);
+    var ns = sorted.slice(); ns.splice(idx, 1); ns.unshift({cls: t.cls, prob: newProb});
+    return {sorted: ns, reason:'C_biere_de_garde_applied'};
+  }
+  function _ppSaD(f, sorted) {
+    // Brett Beer dar zone (n=94 dar, dusuk cap)
+    var yb = f.yeast_brett || 0;
+    var abv = f.abv || 0, fg = f.fg || 0;
+    var dh = f.dry_hop_grams_per_liter || 0;
+    var trig = (yb > 0) && (abv >= 5 && abv <= 7) && (fg > 0 && fg <= 1.005) && (dh >= 0.5);
+    if (!trig || !sorted.length) return {sorted: sorted, reason:'no_trigger'};
+    var top1 = sorted[0].cls;
+    if (top1 !== 'mixed_fermentation_sour_beer' && top1 !== 'belgian_fruit_lambic' && top1 !== 'belgian_lambic' && top1 !== 'specialty_beer') return {sorted: sorted, reason:'no_trigger'};
+    if ((f.yeast_saison || 0) > 0) return {sorted: sorted, reason:'D_counter_saison_varyasyon'};
+    if ((f.yeast_sour_blend || 0) > 0) return {sorted: sorted, reason:'D_counter_mixed_ferm_zone'};
+    if ((f.has_coriander || 0) > 0 || (f.has_orange_peel || 0) > 0) return {sorted: sorted, reason:'D_counter_witbier_w3_zone'};
+    if ((f.pct_wheat || 0) >= 30) return {sorted: sorted, reason:'D_counter_witbier_berliner_zone'};
+    if (abv > 7.5) return {sorted: sorted, reason:'D_counter_belgian_strong_zone'};
+    if ((f.pct_smoked || 0) >= 5) return {sorted: sorted, reason:'D_counter_rauchbier'};
+    var idx = -1;
+    for (var i = 0; i < Math.min(3, sorted.length); i++) if (sorted[i].cls === 'brett_beer') { idx = i; break; }
+    if (idx < 0) return {sorted: sorted, reason:'D_brett_beer_not_in_top3'};
+    var t = sorted[idx];
+    var newProb = Math.min(0.55, (t.prob || 0) + 0.10);
+    var ns = sorted.slice(); ns.splice(idx, 1); ns.unshift({cls: t.cls, prob: newProb});
+    return {sorted: ns, reason:'D_brett_beer_applied'};
+  }
+  function postProcessSaison(featObj, sorted) {
+    var firstMeaningful = null;
+    // Sirala: B specialty_saison varyasyon > C Bière de Garde > D brett_beer dar
+    var funcs = [_ppSaB, _ppSaC, _ppSaD];
+    for (var i = 0; i < funcs.length; i++) {
+      var r = funcs[i](featObj, sorted);
+      if (r.reason.indexOf('_applied') >= 0 && r.reason.indexOf('_applied') === r.reason.length - 8) {
+        return {sorted: r.sorted, reason: r.reason, applied: true};
+      }
+      if (r.reason !== 'no_trigger' && firstMeaningful === null) firstMeaningful = r.reason;
+    }
+    return {sorted: sorted, reason: firstMeaningful || 'no_trigger', applied: false};
+  }
+
   function predictSlugSync(uiRecipe) {
     if (!cache.slugModel || !cache.slugLabels) return null;
     const featObj = buildFeatures(uiRecipe); if (!featObj) return null;
@@ -2151,12 +2240,14 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     sorted = ppPi.sorted;
     var ppPa = postProcessPaleAle(featObj, sorted);
     sorted = ppPa.sorted;
+    var ppSa = postProcessSaison(featObj, sorted);
+    sorted = ppSa.sorted;
     const fmt = function(x){return {slug:x.cls, displayTR:slugDisplay(x.cls), score:x.prob, normalized:Math.round(x.prob*100)};};
     return {
       top3: sorted.slice(0,3).map(fmt),
       top5: sorted.slice(0,5).map(fmt),
       topN: sorted.slice(0,10).map(fmt),  // Bug 4 same-family filter için 10 slug pool
-      _meta: {motor:'V12_slug_V16model', n_classes:cache.slugLabels.classes.length, witbier_w3_pp: ppW.reason, witbier_w3_applied: ppW.applied, sour_pp: ppS.reason, sour_applied: ppS.applied, belgian_pp: ppB.reason, belgian_applied: ppB.applied, porter_pp: ppP.reason, porter_applied: ppP.applied, strong_ale_pp: ppA.reason, strong_ale_applied: ppA.applied, stout_pp: ppT.reason, stout_applied: ppT.applied, brown_ale_pp: ppBA.reason, brown_ale_applied: ppBA.applied, bock_pp: ppBO.reason, bock_applied: ppBO.applied, lager_pp: ppLG.reason, lager_applied: ppLG.applied, ipa_pp: ppI.reason, ipa_applied: ppI.applied, pilsner_pp: ppPi.reason, pilsner_applied: ppPi.applied, pale_ale_pp: ppPa.reason, pale_ale_applied: ppPa.applied}
+      _meta: {motor:'V12_slug_V16model', n_classes:cache.slugLabels.classes.length, witbier_w3_pp: ppW.reason, witbier_w3_applied: ppW.applied, sour_pp: ppS.reason, sour_applied: ppS.applied, belgian_pp: ppB.reason, belgian_applied: ppB.applied, porter_pp: ppP.reason, porter_applied: ppP.applied, strong_ale_pp: ppA.reason, strong_ale_applied: ppA.applied, stout_pp: ppT.reason, stout_applied: ppT.applied, brown_ale_pp: ppBA.reason, brown_ale_applied: ppBA.applied, bock_pp: ppBO.reason, bock_applied: ppBO.applied, lager_pp: ppLG.reason, lager_applied: ppLG.applied, ipa_pp: ppI.reason, ipa_applied: ppI.applied, pilsner_pp: ppPi.reason, pilsner_applied: ppPi.applied, pale_ale_pp: ppPa.reason, pale_ale_applied: ppPa.applied, saison_pp: ppSa.reason, saison_applied: ppSa.applied}
     };
   }
   // Adım 61 P2 Adım 3 — V6 motor için buildFeatures expose
