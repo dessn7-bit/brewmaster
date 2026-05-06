@@ -2208,6 +2208,72 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     return {sorted: sorted, reason: firstMeaningful || 'no_trigger', applied: false};
   }
 
+  // Sub-sprint 18 Lager Dark post-process — 2 alan (A Munich Dunkel > B Schwarzbier).
+  // Cross-cluster mutually exclusive: Bock (12 A/B/C/E ABV>=6), Baltic Porter (8 B ABV>=6.5+SRM>=30), Robust Porter (8 D yeast_eng/amer), Imperial Stout (10 A ABV>=8+SRM>=40), Wheat Dunkel (yeast_wheat_german/witbier), Maerzen/Vienna (13 D/C SRM 8-13 dogal), Munich Helles (13 G SRM 3-5 dogal).
+  function _ppLdA(f, sorted) {
+    // Munich Dunkel signature
+    var yg = f.yeast_german_lager || 0;
+    var pm = f.pct_munich || 0;
+    var abv = f.abv || 0, srm = f.srm || 0, ibu = f.ibu || 0;
+    var hg = f.hop_german || 0;
+    var trig = (yg > 0) && (pm >= 30) && (abv >= 4.5 && abv <= 5.6) && (srm >= 14 && srm <= 22) && (ibu >= 18 && ibu <= 30) && (hg > 0);
+    if (!trig || !sorted.length) return {sorted: sorted, reason:'no_trigger'};
+    var top1 = sorted[0].cls;
+    if (top1 !== 'german_maerzen' && top1 !== 'german_schwarzbier' && top1 !== 'vienna_lager' && top1 !== 'american_amber_red_ale' && top1 !== 'american_brown_ale' && top1 !== 'traditional_bock' && top1 !== 'specialty_beer') return {sorted: sorted, reason:'no_trigger'};
+    if (top1 === 'german_schwarzbier' && (sorted[0].prob || 0) >= 0.55) return {sorted: sorted, reason:'A_counter_sw_high_confidence'};
+    if (abv > 6) return {sorted: sorted, reason:'A_counter_bock_zone'};
+    if (srm > 25) return {sorted: sorted, reason:'A_counter_schwarzbier_zone'};
+    if (((f.pct_choc || 0) + (f.pct_roast || 0)) >= 2) return {sorted: sorted, reason:'A_counter_schwarzbier_marker'};
+    if ((f.yeast_witbier || 0) > 0 || (f.yeast_wheat_german || 0) > 0) return {sorted: sorted, reason:'A_counter_wheat_dunkel_zone'};
+    if ((f.yeast_english || 0) > 0 || (f.yeast_american || 0) > 0) return {sorted: sorted, reason:'A_counter_porter_brown_zone'};
+    if (srm > 28 && abv > 6) return {sorted: sorted, reason:'A_counter_baltic_porter_zone'};
+    if ((f.pct_smoked || 0) >= 5) return {sorted: sorted, reason:'A_counter_rauchbier'};
+    var idx = -1;
+    for (var i = 0; i < Math.min(3, sorted.length); i++) if (sorted[i].cls === 'munich_dunkel') { idx = i; break; }
+    if (idx < 0) return {sorted: sorted, reason:'A_munich_dunkel_not_in_top3'};
+    var t = sorted[idx];
+    var newProb = Math.min(0.65, (t.prob || 0) + 0.12);
+    var ns = sorted.slice(); ns.splice(idx, 1); ns.unshift({cls: t.cls, prob: newProb});
+    return {sorted: ns, reason:'A_munich_dunkel_applied'};
+  }
+  function _ppLdB(f, sorted) {
+    // Schwarzbier signature
+    var yg = f.yeast_german_lager || 0;
+    var abv = f.abv || 0, srm = f.srm || 0, ibu = f.ibu || 0;
+    var pcr = (f.pct_choc || 0) + (f.pct_roast || 0);
+    var trig = (yg > 0) && (abv >= 4.4 && abv <= 5.4) && (srm >= 25 && srm <= 35) && (ibu >= 20 && ibu <= 32) && (pcr >= 2);
+    if (!trig || !sorted.length) return {sorted: sorted, reason:'no_trigger'};
+    var top1 = sorted[0].cls;
+    if (top1 !== 'munich_dunkel' && top1 !== 'robust_porter' && top1 !== 'baltic_porter' && top1 !== 'american_brown_ale' && top1 !== 'specialty_beer') return {sorted: sorted, reason:'no_trigger'};
+    if (top1 === 'munich_dunkel' && (sorted[0].prob || 0) >= 0.55) return {sorted: sorted, reason:'B_counter_md_high_confidence'};
+    if (abv > 6) return {sorted: sorted, reason:'B_counter_bock_baltic_zone'};
+    if (srm > 38) return {sorted: sorted, reason:'B_counter_imperial_stout_robust_zone'};
+    if ((f.yeast_english || 0) > 0 || (f.yeast_american || 0) > 0) return {sorted: sorted, reason:'B_counter_porter_stout_zone'};
+    if (srm < 24) return {sorted: sorted, reason:'B_counter_munich_dunkel_zone'};
+    if ((f.yeast_witbier || 0) > 0 || (f.yeast_wheat_german || 0) > 0) return {sorted: sorted, reason:'B_counter_wheat_dunkel_zone'};
+    if ((f.pct_smoked || 0) >= 5) return {sorted: sorted, reason:'B_counter_rauchbier'};
+    var idx = -1;
+    for (var i = 0; i < Math.min(3, sorted.length); i++) if (sorted[i].cls === 'german_schwarzbier') { idx = i; break; }
+    if (idx < 0) return {sorted: sorted, reason:'B_schwarzbier_not_in_top3'};
+    var t = sorted[idx];
+    var newProb = Math.min(0.65, (t.prob || 0) + 0.12);
+    var ns = sorted.slice(); ns.splice(idx, 1); ns.unshift({cls: t.cls, prob: newProb});
+    return {sorted: ns, reason:'B_schwarzbier_applied'};
+  }
+  function postProcessLagerDark(featObj, sorted) {
+    var firstMeaningful = null;
+    // Sirala: A Munich Dunkel (pct_munich DOMINANT) > B Schwarzbier (choc/roast)
+    var funcs = [_ppLdA, _ppLdB];
+    for (var i = 0; i < funcs.length; i++) {
+      var r = funcs[i](featObj, sorted);
+      if (r.reason.indexOf('_applied') >= 0 && r.reason.indexOf('_applied') === r.reason.length - 8) {
+        return {sorted: r.sorted, reason: r.reason, applied: true};
+      }
+      if (r.reason !== 'no_trigger' && firstMeaningful === null) firstMeaningful = r.reason;
+    }
+    return {sorted: sorted, reason: firstMeaningful || 'no_trigger', applied: false};
+  }
+
   function predictSlugSync(uiRecipe) {
     if (!cache.slugModel || !cache.slugLabels) return null;
     const featObj = buildFeatures(uiRecipe); if (!featObj) return null;
@@ -2242,12 +2308,14 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     sorted = ppPa.sorted;
     var ppSa = postProcessSaison(featObj, sorted);
     sorted = ppSa.sorted;
+    var ppLd = postProcessLagerDark(featObj, sorted);
+    sorted = ppLd.sorted;
     const fmt = function(x){return {slug:x.cls, displayTR:slugDisplay(x.cls), score:x.prob, normalized:Math.round(x.prob*100)};};
     return {
       top3: sorted.slice(0,3).map(fmt),
       top5: sorted.slice(0,5).map(fmt),
       topN: sorted.slice(0,10).map(fmt),  // Bug 4 same-family filter için 10 slug pool
-      _meta: {motor:'V12_slug_V16model', n_classes:cache.slugLabels.classes.length, witbier_w3_pp: ppW.reason, witbier_w3_applied: ppW.applied, sour_pp: ppS.reason, sour_applied: ppS.applied, belgian_pp: ppB.reason, belgian_applied: ppB.applied, porter_pp: ppP.reason, porter_applied: ppP.applied, strong_ale_pp: ppA.reason, strong_ale_applied: ppA.applied, stout_pp: ppT.reason, stout_applied: ppT.applied, brown_ale_pp: ppBA.reason, brown_ale_applied: ppBA.applied, bock_pp: ppBO.reason, bock_applied: ppBO.applied, lager_pp: ppLG.reason, lager_applied: ppLG.applied, ipa_pp: ppI.reason, ipa_applied: ppI.applied, pilsner_pp: ppPi.reason, pilsner_applied: ppPi.applied, pale_ale_pp: ppPa.reason, pale_ale_applied: ppPa.applied, saison_pp: ppSa.reason, saison_applied: ppSa.applied}
+      _meta: {motor:'V12_slug_V16model', n_classes:cache.slugLabels.classes.length, witbier_w3_pp: ppW.reason, witbier_w3_applied: ppW.applied, sour_pp: ppS.reason, sour_applied: ppS.applied, belgian_pp: ppB.reason, belgian_applied: ppB.applied, porter_pp: ppP.reason, porter_applied: ppP.applied, strong_ale_pp: ppA.reason, strong_ale_applied: ppA.applied, stout_pp: ppT.reason, stout_applied: ppT.applied, brown_ale_pp: ppBA.reason, brown_ale_applied: ppBA.applied, bock_pp: ppBO.reason, bock_applied: ppBO.applied, lager_pp: ppLG.reason, lager_applied: ppLG.applied, ipa_pp: ppI.reason, ipa_applied: ppI.applied, pilsner_pp: ppPi.reason, pilsner_applied: ppPi.applied, pale_ale_pp: ppPa.reason, pale_ale_applied: ppPa.applied, saison_pp: ppSa.reason, saison_applied: ppSa.applied, lager_dark_pp: ppLd.reason, lager_dark_applied: ppLd.applied}
     };
   }
   // Adım 61 P2 Adım 3 — V6 motor için buildFeatures expose
