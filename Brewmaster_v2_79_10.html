@@ -848,6 +848,9 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     if (pctW < 20 || pctP < 20) return {sorted: sorted, applied: false, reason:'counter_grist'};
     if (abv > 6.5) return {sorted: sorted, applied: false, reason:'counter_abv'};
     if (!sorted.length || WITBIER_W3_WHEAT_FAMILY.indexOf(sorted[0].cls) < 0) return {sorted: sorted, applied: false, reason:'top1_not_wheat_family'};
+    // Sub-sprint 20 FIX 6: Wheat family self-guard (AWA/AWB + Hefeweizen + Weizenbock + Dunkelweizen + Bernstein + Leichtes witbier'a flip edilmemeli)
+    var WHEAT_SELF_GUARD = ['american_wheat_ale','american_wheat_beer','south_german_hefeweizen','south_german_dunkel_weizen','south_german_weizenbock','south_german_bernsteinfarbenes_weizen','german_leichtes_weizen'];
+    if (WHEAT_SELF_GUARD.indexOf(sorted[0].cls) >= 0) return {sorted: sorted, applied: false, reason:'wheat_family_self_guard'};
     var witIdx = -1;
     for (var i = 0; i < Math.min(3, sorted.length); i++) {
       if (sorted[i].cls === 'belgian_witbier') { witIdx = i; break; }
@@ -927,6 +930,12 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     return {sorted: ns, reason:'B_mixed_ferm_applied'};
   }
   function postProcessSour(featObj, sorted) {
+    // Sub-sprint 20: top1 zaten Sour cluster slug ise self-guard
+    if (sorted.length > 0) {
+      var top1cls_sr = sorted[0].cls;
+      var SOUR_FAMILY = ['gueuze','classic_gueuze','belgian_lambic','belgian_fruit_lambic','gose','straight_sour_or_unblended_lambic','mixed_fermentation_sour_beer','flanders_red','flanders_brown_or_oud_bruin','berliner_weisse','american_sour_or_funky_ale','brett_beer','french_belgian_saison','specialty_saison'];
+      if (SOUR_FAMILY.indexOf(top1cls_sr) >= 0) return {sorted: sorted, reason: 'sour_cluster_self_guard', applied: false};
+    }
     var firstMeaningful = null;
     var funcs = [_ppSourGueuze, _ppSourFruitLambic, _ppSourGose, _ppSourMixedFerm];
     for (var i = 0; i < funcs.length; i++) {
@@ -1018,6 +1027,12 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     return {sorted: ns, reason:'C_blonde_applied'};
   }
   function postProcessBelgian(featObj, sorted) {
+    // Sub-sprint 20: Belgian cluster self-guard
+    if (sorted.length > 0) {
+      var top1cls_bg = sorted[0].cls;
+      var BELGIAN_FAMILY = ['belgian_dubbel','belgian_tripel','belgian_strong_dark_ale','belgian_strong_golden','belgian_blonde_ale','belgian_pale_ale','belgian_specialty_ale','belgian_ipa'];
+      if (BELGIAN_FAMILY.indexOf(top1cls_bg) >= 0) return {sorted: sorted, reason: 'belgian_cluster_self_guard', applied: false};
+    }
     var firstMeaningful = null;
     var funcs = [_ppBelgianDark, _ppBelgianIPA, _ppBelgianTripel, _ppBelgianBlonde];
     for (var i = 0; i < funcs.length; i++) {
@@ -1117,6 +1132,12 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     return {sorted: ns, reason:'E_porter_konso_applied'};
   }
   function postProcessPorter(featObj, sorted) {
+    // Sub-sprint 20: Porter cluster self-guard
+    if (sorted.length > 0) {
+      var top1cls_po = sorted[0].cls;
+      var PORTER_FAMILY = ['robust_porter','baltic_porter','brown_porter','porter','american_imperial_stout','oatmeal_stout','sweet_stout','irish_stout','irish_dry_stout','stout','american_brown_ale','german_doppelbock','doppelbock','brown_ale','american_amber_red_ale','irish_red_ale','mild','english_brown_ale'];
+      if (PORTER_FAMILY.indexOf(top1cls_po) >= 0) return {sorted: sorted, reason: 'porter_cluster_self_guard', applied: false};
+    }
     var firstMeaningful = null;
     var funcs = [_ppPorterBaltic, _ppPorterRobustGuard, _ppPorterBrown, _ppPorterKategoriKonso];
     for (var i = 0; i < funcs.length; i++) {
@@ -1239,6 +1260,12 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     return {sorted: ns, reason:'C_old_ale_applied'};
   }
   function postProcessStrongAle(featObj, sorted) {
+    // Sub-sprint 20: Strong Ale cluster self-guard + IPA family koruma (ABW vs DIPA boundary)
+    if (sorted.length > 0) {
+      var top1cls_sa = sorted[0].cls;
+      var STRONGALE_FAMILY = ['american_barley_wine_ale','british_barley_wine_ale','american_strong_pale_ale','old_ale','scotch_ale_or_wee_heavy','imperial_red_ale','double_ipa','american_india_pale_ale'];
+      if (STRONGALE_FAMILY.indexOf(top1cls_sa) >= 0) return {sorted: sorted, reason: 'strongale_cluster_self_guard', applied: false};
+    }
     var firstMeaningful = null;
     var funcs = [_ppSAA, _ppSAD, _ppSAB, _ppSAE, _ppSAC];
     for (var i = 0; i < funcs.length; i++) {
@@ -1358,6 +1385,12 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     return {sorted: ns, reason:'E_export_applied'};
   }
   function postProcessStout(featObj, sorted) {
+    // Sub-sprint 20 FIX 7+1: top1 zaten Stout cluster slug ise self-cluster guard (generic stout / specialty alt-slug korumasi)
+    if (sorted.length > 0) {
+      var top1cls = sorted[0].cls;
+      var STOUT_FAMILY = ['stout','american_imperial_stout','oatmeal_stout','sweet_stout','foreign_extra_stout','irish_stout','irish_dry_stout','dry_stout','tropical_stout','export_stout','robust_porter','baltic_porter','brown_porter','porter'];
+      if (STOUT_FAMILY.indexOf(top1cls) >= 0) return {sorted: sorted, reason: 'stout_cluster_self_guard', applied: false};
+    }
     var firstMeaningful = null;
     var funcs = [_ppStA, _ppStC, _ppStD, _ppStB, _ppStE];
     for (var i = 0; i < funcs.length; i++) {
@@ -1485,6 +1518,12 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     return {sorted: ns, reason:'G_irish_red_applied'};
   }
   function postProcessBrownAle(featObj, sorted) {
+    // Sub-sprint 20: Brown Ale cluster self-guard
+    if (sorted.length > 0) {
+      var top1cls_ba = sorted[0].cls;
+      var BROWNALE_FAMILY = ['american_brown_ale','brown_ale','english_brown_ale','northern_english_brown_ale','mild','german_altbier','irish_red_ale','scottish_export','biere_de_garde','french_biere_de_garde','robust_porter','baltic_porter','brown_porter','porter','american_amber_red_ale','specialty_beer'];
+      if (BROWNALE_FAMILY.indexOf(top1cls_ba) >= 0) return {sorted: sorted, reason: 'brownale_cluster_self_guard', applied: false};
+    }
     var firstMeaningful = null;
     var funcs = [_ppBaD, _ppBaC, _ppBaA, _ppBaB, _ppBaG];
     for (var i = 0; i < funcs.length; i++) {
@@ -1565,6 +1604,12 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     return {sorted: ns, reason:'B_heller_bock_applied'};
   }
   function postProcessBock(featObj, sorted) {
+    // Sub-sprint 20 FIX 4: Bock + Lager border self-guard (Maerzen + Doppelbock + Trad Bock + Helles Bock + Dunkles + Eisbock + Weizenbock korumasi)
+    if (sorted.length > 0) {
+      var top1cls_bo = sorted[0].cls;
+      var BOCK_FAMILY = ['doppelbock','german_doppelbock','traditional_bock','dunkles_bock','german_heller_bock_maibock','eisbock','south_german_weizenbock','german_maerzen','vienna_lager','german_bock','german_pilsener','munich_helles'];
+      if (BOCK_FAMILY.indexOf(top1cls_bo) >= 0) return {sorted: sorted, reason: 'bock_cluster_self_guard', applied: false};
+    }
     // F smoke bypass — global counter (Rauchbier KORUMA Sub-sprint 4 transformative)
     if ((featObj.katki_smoke || 0) > 0 || (featObj.pct_smoked || 0) > 0 || (featObj.has_smoked || 0) > 0) {
       return {sorted: sorted, reason: 'counter_smoke_rauchbier_protect', applied: false};
@@ -1708,7 +1753,13 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     return {sorted: ns, reason:'F_festbier_applied'};
   }
   function postProcessLager(featObj, sorted) {
-    // G Munich Helles GLOBAL COUNTER (Sub-sprint 4 transformative KORUMA — dispatch basinda)
+    // Sub-sprint 20 FIX 5+4: top1 zaten Lager cluster slug ise self-cluster guard (Munich Helles transformative ANY-prob bypass + Maerzen + tum Lager slug korumasi)
+    if (sorted.length > 0) {
+      var top1cls_lg = sorted[0].cls;
+      var LAGER_FAMILY = ['munich_helles','american_lager','common_beer','vienna_lager','german_maerzen','dortmunder_european_export','german_oktoberfest_festbier','kellerbier','bamberg_maerzen_rauchbier','pale_lager','german_pilsener','pre_prohibition_lager','classic_american_pilsner','bohemian_pilsener','german_bock','doppelbock','german_doppelbock','traditional_bock','dunkles_bock','german_heller_bock_maibock','eisbock','munich_dunkel','german_schwarzbier'];
+      if (LAGER_FAMILY.indexOf(top1cls_lg) >= 0) return {sorted: sorted, reason: 'lager_cluster_self_guard', applied: false};
+    }
+    // G Munich Helles GLOBAL COUNTER (Sub-sprint 4 transformative KORUMA — dispatch basinda) — zone-based ek katman
     var abv = featObj.abv || 0, srm = featObj.srm || 0, ibu = featObj.ibu || 0;
     var pp = featObj.pct_pilsner || 0, yg = featObj.yeast_german_lager || 0;
     if ((abv >= 4.5 && abv <= 5.3) && (srm >= 3 && srm <= 5) && (ibu >= 18 && ibu <= 25) && (pp >= 60) && (yg > 0)) {
@@ -1877,6 +1928,12 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     return {sorted: ns, reason:'H_amer_amber_red_applied'};
   }
   function postProcessIPA(featObj, sorted) {
+    // Sub-sprint 20 FIX 3: top1 zaten IPA cluster slug VEYA ESB ise self-cluster guard
+    if (sorted.length > 0) {
+      var top1cls_ip = sorted[0].cls;
+      var IPA_FAMILY = ['american_india_pale_ale','double_ipa','british_india_pale_ale','black_ipa','red_ipa','rye_ipa','white_ipa','belgian_ipa','juicy_or_hazy_india_pale_ale','american_amber_red_ale','extra_special_bitter','american_strong_pale_ale','american_barley_wine_ale','british_barley_wine_ale','english_pale_ale','american_pale_ale'];
+      if (IPA_FAMILY.indexOf(top1cls_ip) >= 0) return {sorted: sorted, reason: 'ipa_cluster_self_guard', applied: false};
+    }
     var firstMeaningful = null;
     var funcs = [_ppIpaE, _ppIpaC, _ppIpaD, _ppIpaB, _ppIpaF, _ppIpaG, _ppIpaH];
     for (var i = 0; i < funcs.length; i++) {
@@ -1955,6 +2012,12 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     return {sorted: ns, reason:'C_pale_lager_applied'};
   }
   function postProcessPilsner(featObj, sorted) {
+    // Sub-sprint 20: Pilsner cluster self-guard
+    if (sorted.length > 0) {
+      var top1cls_pi = sorted[0].cls;
+      var PILSNER_FAMILY = ['german_pilsener','pre_prohibition_lager','pale_lager','classic_american_pilsner','bohemian_pilsener'];
+      if (PILSNER_FAMILY.indexOf(top1cls_pi) >= 0) return {sorted: sorted, reason: 'pilsner_cluster_self_guard', applied: false};
+    }
     var firstMeaningful = null;
     // Sirala: B PPL UNIQUE corn/rice > A GP signature > C PL dar
     var funcs = [_ppPiB, _ppPiA, _ppPiC];
@@ -2106,6 +2169,12 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     return {sorted: ns, reason:'F_esb_applied'};
   }
   function postProcessPaleAle(featObj, sorted) {
+    // Sub-sprint 20 FIX 3: top1 zaten Pale Ale cluster slug VEYA ESB ise self-cluster guard
+    if (sorted.length > 0) {
+      var top1cls_pa = sorted[0].cls;
+      var PALEALE_FAMILY = ['american_pale_ale','english_pale_ale','extra_special_bitter','ordinary_bitter','special_bitter_or_best_bitter','german_koelsch','blonde_ale','american_cream_ale'];
+      if (PALEALE_FAMILY.indexOf(top1cls_pa) >= 0) return {sorted: sorted, reason: 'paleale_cluster_self_guard', applied: false};
+    }
     var firstMeaningful = null;
     // Sirala: E Cream UNIQUE > D Kölsch UNIQUE > A Special Bitter > B Blonde > C Ordinary > F ESB
     var funcs = [_ppPaE, _ppPaD, _ppPaA, _ppPaB, _ppPaC, _ppPaF];
@@ -2195,6 +2264,12 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     return {sorted: ns, reason:'D_brett_beer_applied'};
   }
   function postProcessSaison(featObj, sorted) {
+    // Sub-sprint 20: Saison cluster self-guard
+    if (sorted.length > 0) {
+      var top1cls_sn = sorted[0].cls;
+      var SAISON_FAMILY = ['french_belgian_saison','specialty_saison','french_biere_de_garde','brett_beer','biere_de_garde'];
+      if (SAISON_FAMILY.indexOf(top1cls_sn) >= 0) return {sorted: sorted, reason: 'saison_cluster_self_guard', applied: false};
+    }
     var firstMeaningful = null;
     // Sirala: B specialty_saison varyasyon > C Bière de Garde > D brett_beer dar
     var funcs = [_ppSaB, _ppSaC, _ppSaD];
@@ -2261,6 +2336,12 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     return {sorted: ns, reason:'B_schwarzbier_applied'};
   }
   function postProcessLagerDark(featObj, sorted) {
+    // Sub-sprint 20 FIX 4: Lager Dark + Maerzen border self-guard
+    if (sorted.length > 0) {
+      var top1cls_ld = sorted[0].cls;
+      var LAGER_DARK_FAMILY = ['munich_dunkel','german_schwarzbier','german_maerzen','vienna_lager'];
+      if (LAGER_DARK_FAMILY.indexOf(top1cls_ld) >= 0) return {sorted: sorted, reason: 'lager_dark_cluster_self_guard', applied: false};
+    }
     var firstMeaningful = null;
     // Sirala: A Munich Dunkel (pct_munich DOMINANT) > B Schwarzbier (choc/roast)
     var funcs = [_ppLdA, _ppLdB];
@@ -2368,6 +2449,12 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     return {sorted: ns, reason:'D_winter_seasonal_applied'};
   }
   function postProcessSpecialty(featObj, sorted) {
+    // Sub-sprint 20 FIX 2+6: top1 zaten Specialty cluster slug VEYA wheat family (AWA/AWB) ise self-cluster guard
+    if (sorted.length > 0) {
+      var top1cls_sp = sorted[0].cls;
+      var SPECIALTY_FAMILY = ['specialty_beer','herb_and_spice_beer','fruit_beer','winter_seasonal_beer','smoked_beer','experimental_beer','american_wheat_ale','american_wheat_beer','robust_porter','baltic_porter','brown_porter','porter','american_imperial_stout','oatmeal_stout','sweet_stout','irish_stout','irish_dry_stout','stout','south_german_hefeweizen','south_german_dunkel_weizen','south_german_weizenbock','south_german_bernsteinfarbenes_weizen','german_leichtes_weizen','belgian_witbier','belgian_fruit_lambic','american_pale_ale','american_india_pale_ale','american_amber_red_ale','american_brown_ale','double_ipa','juicy_or_hazy_india_pale_ale','blonde_ale','french_belgian_saison'];
+      if (SPECIALTY_FAMILY.indexOf(top1cls_sp) >= 0) return {sorted: sorted, reason: 'specialty_cluster_self_guard', applied: false};
+    }
     var firstMeaningful = null;
     // Sirala: A Smoked + Rauchbier counter (transformative koruma ilk) > B Fruit + brett counter > C Herb/Spice + Witbier counter > D Winter combo
     var funcs = [_ppSpA, _ppSpB, _ppSpC, _ppSpD];
