@@ -2516,6 +2516,12 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
   }
   // Adım 61 P2 Adım 3 — V6 motor için buildFeatures expose
   window.__bmBuildFeaturesV12 = buildFeatures;
+  // D-2.A — V20 motor + F1 Hibrit için predictRawWith, modeller ve labels expose (DRY tree traversal reuse)
+  window.__bmPredictRawWith = predictRawWith;
+  window.__bmGetV12SlugLabels = function(){ return cache.slugLabels; };
+  window.__bmGetV12ClusterLabels = function(){ return cache.labels; };
+  window.__bmGetV12SlugModel = function(){ return cache.slugModel; };
+  window.__bmGetV12ClusterModel = function(){ return cache.model; };
 
     window.BM_V12 = {
     isV12Active: function(){ return (localStorage.getItem(TOGGLE_KEY) || 'V12') === 'V12'; },
@@ -2551,6 +2557,205 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
   }
 })();
 </script>
+
+<!-- D-2.A — V20 (α=0.30) + F1 Hibrit motorları
+     V20 = V19 mimarisi + class-balanced sample weights (alpha=0.30 blend, D-1.5 winner).
+     F1 Hibrit = (P_V19 + P_V20) / 2 client-side runtime blend.
+     V12 IIFE'den predictRawWith + buildFeatures + LE reuse — DRY.
+     Graceful degradation: V20 fetch fail → blok gizlenir, V12 ana kart sağlam kalır.
+-->
+<script id="bm-engine-v20-hibrit">
+(function(){
+  const V20_SLUG_URL = '_v20_alpha_030_slug.json';
+  const V20_14CAT_URL = '_v20_alpha_030_14cat.json';
+  const cache = { v20Slug: null, v20Cluster: null };
+  let v20SlugLoadingPromise = null;
+  let v20ClusterLoadingPromise = null;
+
+  function loadV20Slug() {
+    if (cache.v20Slug) return Promise.resolve(cache.v20Slug);
+    if (v20SlugLoadingPromise) return v20SlugLoadingPromise;
+    v20SlugLoadingPromise = fetch(V20_SLUG_URL,{cache:'force-cache'})
+      .then(function(r){ if(!r.ok) throw new Error('V20 slug HTTP '+r.status); return r.json(); })
+      .then(function(m){
+        cache.v20Slug = m;
+        try {
+          var nt = m.learner.gradient_booster.model.gbtree_model_param.num_trees;
+          console.log('%c[BM V20 (α=0.30) slug] yüklendi: '+nt+' tree','background:#0277BD;color:#fff;padding:2px 6px;');
+        } catch(e) {}
+        return m;
+      })
+      .catch(function(e){ console.warn('[BM V20 slug] yüklenemedi:', e && e.message); v20SlugLoadingPromise=null; throw e; });
+    return v20SlugLoadingPromise;
+  }
+
+  function loadV20Cluster() {
+    if (cache.v20Cluster) return Promise.resolve(cache.v20Cluster);
+    if (v20ClusterLoadingPromise) return v20ClusterLoadingPromise;
+    v20ClusterLoadingPromise = fetch(V20_14CAT_URL,{cache:'force-cache'})
+      .then(function(r){ if(!r.ok) throw new Error('V20 cluster HTTP '+r.status); return r.json(); })
+      .then(function(m){
+        cache.v20Cluster = m;
+        try {
+          var nt = m.learner.gradient_booster.model.gbtree_model_param.num_trees;
+          console.log('%c[BM V20 cluster] yüklendi: '+nt+' tree','background:#0277BD;color:#fff;padding:2px 6px;');
+        } catch(e) {}
+        return m;
+      })
+      .catch(function(e){ console.warn('[BM V20 cluster] yüklenemedi:', e && e.message); v20ClusterLoadingPromise=null; throw e; });
+    return v20ClusterLoadingPromise;
+  }
+
+  function isReady() {
+    return !!(cache.v20Slug && cache.v20Cluster);
+  }
+  function isSlugReady() { return !!cache.v20Slug; }
+
+  // Generic predict — V12'nin predictRawWith fonksiyonunu reuse
+  function v20PredictSlug(uiRecipe) {
+    if (!cache.v20Slug) return null;
+    if (typeof window.__bmBuildFeaturesV12 !== 'function') return null;
+    if (typeof window.__bmPredictRawWith !== 'function') return null;
+    if (typeof window.__bmGetV12SlugLabels !== 'function') return null;
+    var slugLabels = window.__bmGetV12SlugLabels();
+    if (!slugLabels) return null;
+    var featObj = window.__bmBuildFeaturesV12(uiRecipe);
+    if (!featObj) return null;
+    var featList = slugLabels.feature_list;
+    var featArr = new Array(featList.length);
+    for (var i=0;i<featList.length;i++) featArr[i] = featObj[featList[i]] || 0;
+    var probs = window.__bmPredictRawWith(cache.v20Slug, featArr);
+    if (!probs) return null;
+    var sorted = slugLabels.classes.map(function(cls,i){ return {cls: cls, prob: probs[i]}; })
+                   .sort(function(a,b){ return b.prob - a.prob; });
+    var fmt = function(x){
+      var disp = (typeof window.bmSlugDisplayTR === 'function') ? window.bmSlugDisplayTR(x.cls) : x.cls;
+      return { slug: x.cls, displayTR: disp, score: x.prob, normalized: Math.round(x.prob*100) };
+    };
+    return {
+      top3: sorted.slice(0,3).map(fmt),
+      top5: sorted.slice(0,5).map(fmt),
+      topN: sorted.slice(0,10).map(fmt),
+      probs: probs,
+      classes: slugLabels.classes,
+      _meta: { motor: 'V20_alpha030_slug', n_classes: slugLabels.classes.length }
+    };
+  }
+
+  function v20PredictCluster(uiRecipe) {
+    if (!cache.v20Cluster) return null;
+    if (typeof window.__bmBuildFeaturesV12 !== 'function') return null;
+    if (typeof window.__bmPredictRawWith !== 'function') return null;
+    if (typeof window.__bmGetV12ClusterLabels !== 'function') return null;
+    var labels = window.__bmGetV12ClusterLabels();
+    if (!labels) return null;
+    var featObj = window.__bmBuildFeaturesV12(uiRecipe);
+    if (!featObj) return null;
+    var featList = labels.feature_list;
+    var featArr = new Array(featList.length);
+    for (var i=0;i<featList.length;i++) featArr[i] = featObj[featList[i]] || 0;
+    var probs = window.__bmPredictRawWith(cache.v20Cluster, featArr);
+    if (!probs) return null;
+    var sorted = labels.classes.map(function(cls,i){ return {cls: cls, prob: probs[i]}; })
+                   .sort(function(a,b){ return b.prob - a.prob; });
+    return {
+      top3: sorted.slice(0,3),
+      probs: probs,
+      classes: labels.classes,
+      _meta: { motor: 'V20_alpha030_cluster' }
+    };
+  }
+
+  // F1 Hibrit slug — (P_V19 + P_V20) / 2 client-side blend
+  // V12 cache.slugModel ile V20 cache.v20Slug aynı 91 class + 89 feature schema ediyor.
+  // P_V19 := V12 slug top-1 raw probs (window.__lastV12SlugResult kullanılmaz çünkü post-process sonrası,
+  //          ham probs için yeniden inference)
+  function f1HybridSlug(uiRecipe) {
+    if (!cache.v20Slug) return null;
+    if (typeof window.__bmBuildFeaturesV12 !== 'function') return null;
+    if (typeof window.__bmPredictRawWith !== 'function') return null;
+    if (typeof window.__bmGetV12SlugLabels !== 'function') return null;
+    if (!window.BM_V12 || !window.BM_V12.isSlugReady || !window.BM_V12.isSlugReady()) return null;
+    // V12'nin slug modeline doğrudan erişim için private cache'i ele almıyoruz:
+    // V12 IIFE içinde predictSlugSync yapısı zaten var, ham prob için yeniden çağırmamız gerek.
+    // Çözüm: V12 IIFE'de cache.slugModel'i de window'a expose et (ek edit zorunlu) —
+    // veya: V19 modeli ayrıca burada yeniden fetch et (DRY ihlali, 48MB ek transfer).
+    // Pragmatik: V12 cache.slugModel'i window.__bmGetV12SlugModel ile expose etmeyi
+    // gerektirir. Bu ek expose edit'i ÜST IIFE'de yapıldı (bu IIFE'den hemen önce).
+    if (typeof window.__bmGetV12SlugModel !== 'function') return null;
+    var v12Model = window.__bmGetV12SlugModel();
+    if (!v12Model) return null;
+    var slugLabels = window.__bmGetV12SlugLabels();
+    var featObj = window.__bmBuildFeaturesV12(uiRecipe);
+    if (!featObj) return null;
+    var featList = slugLabels.feature_list;
+    var featArr = new Array(featList.length);
+    for (var i=0;i<featList.length;i++) featArr[i] = featObj[featList[i]] || 0;
+    var p19 = window.__bmPredictRawWith(v12Model, featArr);
+    var p20 = window.__bmPredictRawWith(cache.v20Slug, featArr);
+    if (!p19 || !p20) return null;
+    var nC = p19.length;
+    var blend = new Array(nC);
+    for (var i=0;i<nC;i++) blend[i] = (p19[i] + p20[i]) / 2;
+    var sorted = slugLabels.classes.map(function(cls,i){ return {cls: cls, prob: blend[i]}; })
+                   .sort(function(a,b){ return b.prob - a.prob; });
+    var fmt = function(x){
+      var disp = (typeof window.bmSlugDisplayTR === 'function') ? window.bmSlugDisplayTR(x.cls) : x.cls;
+      return { slug: x.cls, displayTR: disp, score: x.prob, normalized: Math.round(x.prob*100) };
+    };
+    return {
+      top3: sorted.slice(0,3).map(fmt),
+      top5: sorted.slice(0,5).map(fmt),
+      topN: sorted.slice(0,10).map(fmt),
+      probs: blend,
+      classes: slugLabels.classes,
+      _meta: { motor: 'F1_hybrid_v19_v20_50_50', formula: '(P_V19 + P_V20) / 2' }
+    };
+  }
+
+  window.BM_V20 = {
+    isReady: isReady,
+    isSlugReady: isSlugReady,
+    preloadSlug: loadV20Slug,
+    preloadCluster: loadV20Cluster,
+    predictSlugSync: v20PredictSlug,
+    predictClusterSync: v20PredictCluster
+  };
+  window.BM_F1_HYBRID = {
+    predictSlugSync: f1HybridSlug,
+    formula: '(P_V19 + P_V20) / 2'
+  };
+  // Auto preload — V12 motor active ise (ana kullanım), V20 + Hibrit motor de yüklensin
+  if (window.BM_V12 && window.BM_V12.isV12Active && window.BM_V12.isV12Active()) {
+    loadV20Cluster().catch(function(){});
+    // Slug lazy: V12 slug yüklendikten sonra V20 slug yüklensin
+    setTimeout(function(){
+      if (window.BM_V12 && window.BM_V12.isSlugReady && window.BM_V12.isSlugReady()) {
+        loadV20Slug().then(function(){
+          // Recalc trigger — V20 + F1 Hibrit sonuçları UI'ya inject olsun
+          try { if (typeof calc === 'function') {
+            console.log('%c[BM V20 + F1 Hibrit] tüm motorlar yüklendi, recalc tetikleniyor','background:#0277BD;color:#fff;padding:2px 6px;');
+            calc();
+          } } catch(e) {}
+        }).catch(function(){});
+      } else {
+        // V12 slug henüz yüklenmedi; V12 slug yüklendiğinde tekrar dene
+        var iv = setInterval(function(){
+          if (window.BM_V12 && window.BM_V12.isSlugReady && window.BM_V12.isSlugReady()) {
+            clearInterval(iv);
+            loadV20Slug().then(function(){
+              try { if (typeof calc === 'function') calc(); } catch(e) {}
+            }).catch(function(){});
+          }
+        }, 500);
+        // Maksimum 30 saniye sonra abandone
+        setTimeout(function(){ clearInterval(iv); }, 30000);
+      }
+    }, 200);
+  }
+})();
+</script>
+
 <script id="bm-engine-v6">
 // V6 — 14-cluster KNN motoru (Adım 18d-pre P2 V28e retrain)
 // Reference: _v6_v28j_a_reference.json (28000 × 56 unscaled, 14 cluster, V28j_a Sub-sprint 4 Asama 1 AWB->Hefe Filtre A wider 202 reslug)
@@ -15418,6 +15623,45 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
     }
   } catch(e) { console.warn('[BM V12] motor hatasi:', e && e.message); }
 
+  // === D-2.A V20 (α=0.30) + F1 Hibrit dispatcher (V12 ana sonuca DOKUNMAZ, ek window expose) ===
+  try {
+    if (window.BM_V20 && window.BM_V20.isSlugReady && window.BM_V20.isSlugReady()
+        && window.BM_V12 && window.BM_V12.isSlugReady && window.BM_V12.isSlugReady()
+        && typeof __recipeV2 !== 'undefined') {
+      try {
+        var __v20Slug = window.BM_V20.predictSlugSync(__recipeV2);
+        if (__v20Slug) {
+          window.__lastV20SlugResult = __v20Slug;
+          console.log('%c[BM V20 (α=0.30) slug]','background:#0277BD;color:#fff;padding:2px 6px;');
+          __v20Slug.top3.forEach(function(r,i){ console.log('    V20 '+(i+1)+'. '+r.displayTR+' %'+r.normalized); });
+        }
+      } catch (v20err) {
+        console.warn('[BM V20 slug] dispatcher exception:', v20err && v20err.message);
+      }
+      try {
+        var __f1Hybrid = window.BM_F1_HYBRID.predictSlugSync(__recipeV2);
+        if (__f1Hybrid) {
+          window.__lastF1HybridSlugResult = __f1Hybrid;
+          console.log('%c[BM F1 Hibrit (V19+V20)/2]','background:#388E3C;color:#fff;padding:2px 6px;');
+          __f1Hybrid.top3.forEach(function(r,i){ console.log('    Hibrit '+(i+1)+'. '+r.displayTR+' %'+r.normalized); });
+        }
+      } catch (f1err) {
+        console.warn('[BM F1 Hibrit] dispatcher exception:', f1err && f1err.message);
+      }
+    }
+    // Cluster (14cat) tarafı — opsiyonel, ileride genişletilir
+    if (window.BM_V20 && window.BM_V20.isReady && window.BM_V20.isReady() && typeof __recipeV2 !== 'undefined') {
+      try {
+        var __v20Cluster = window.BM_V20.predictClusterSync(__recipeV2);
+        if (__v20Cluster) window.__lastV20ClusterResult = __v20Cluster;
+      } catch (vcerr) {
+        console.warn('[BM V20 cluster] exception:', vcerr && vcerr.message);
+      }
+    }
+  } catch (D2err) {
+    console.warn('[BM D-2.A V20+Hibrit] dispatcher genel hatasi:', D2err && D2err.message);
+  }
+
   // Manuel stil seçimi varsa override (BJCP listesinde olmalı)
   if(S.stil && typeof BJCP!=='undefined' && BJCP[S.stil]){
     stil_tah=S.stil;
@@ -15946,6 +16190,81 @@ return `
             '<div>'+_icon(_inABV)+' <b>ABV:</b> '+_stRef.abv[0]+'%-'+_stRef.abv[1]+'%</div>'+
           '</div>'+
         '</div>';
+        })()}
+        ${(()=>{
+          // ═══ D-2.A MOTOR KARŞILAŞTIRMASI — V12 + V20 + F1 Hibrit kompakt blok ═══
+          // V12 ana kart üstte zaten render edildi. Bu blok V20 ve Hibrit'i ek olarak gösterir.
+          // Graceful: V20/F1 sonuçları yoksa blok boş string döner — V12 ana kart sağlam kalır.
+          var _v12r = window.__lastV12SlugResult;
+          var _v20r = window.__lastV20SlugResult;
+          var _f1r  = window.__lastF1HybridSlugResult;
+          // Üçü birden olmalı, yoksa blok yok
+          if (!_v12r || !_v12r.top3 || _v12r.top3.length === 0) return '';
+          if (!_v20r || !_v20r.top3 || _v20r.top3.length === 0) return '';
+          if (!_f1r  || !_f1r.top3  || _f1r.top3.length  === 0) return '';
+
+          var _v12Top1 = _v12r.top3[0];
+          var _v20Top1 = _v20r.top3[0];
+          var _f1Top1  = _f1r.top3[0];
+
+          var _v12Prob = (_v12Top1.score || 0);
+          var _v20Prob = (_v20Top1.score || 0);
+          // Auto-recommend rozet kuralı: V20 top1 prob >= V12 top1 prob + 0.05 ise V20'de ⭐
+          var _v20Win = (_v20Prob - _v12Prob) >= 0.05;
+          // 3 motor uyumlu badge: V12, V20, F1 hepsi aynı top-1 slug
+          var _allAgree = (_v12Top1.slug === _v20Top1.slug) && (_v20Top1.slug === _f1Top1.slug);
+
+          // Engine card renkleri
+          var _v12Color = '#6A1B9A'; var _v12Bg = '#F3E5F5';   // mor (V12)
+          var _v20Color = '#0277BD'; var _v20Bg = '#E1F5FE';   // mavi (V20)
+          var _f1Color  = '#388E3C'; var _f1Bg  = '#E8F5E9';   // yeşil (Hibrit)
+          var _agreeColor = '#388E3C'; var _agreeBg = '#C8E6C9';
+
+          var _starV12 = (!_allAgree && !_v20Win) ? ' <span title="Bu reçete için V12 (V19) en yüksek güven" style="color:#FFB300;font-size:13px">⭐</span>' : '';
+          var _starV20 = (!_allAgree &&  _v20Win) ? ' <span title="Bu reçete için V20 (α=0.30) +5pp+ avantajlı" style="color:#FFB300;font-size:13px">⭐</span>' : '';
+          var _agreeBadge = _allAgree
+            ? '<span style="display:inline-block;background:'+_agreeBg+';color:'+_agreeColor+';font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px;border:1px solid '+_agreeColor+'">✓ 3 motor uyumlu</span>'
+            : '';
+
+          function _render3(top3) {
+            return top3.slice(0,3).map(function(r,i){
+              var pct = r.normalized || 0;
+              var disp = (window.bmSlugToBjcp ? window.bmSlugToBjcp(r.slug, r.displayTR) : null) || r.displayTR || r.slug;
+              return '<div style="display:flex;align-items:center;gap:6px;font-size:11px;padding:2px 0">'+
+                '<span style="font-weight:700;color:var(--soluk);width:14px;text-align:right">'+(i+1)+'.</span>'+
+                '<span style="flex:1;color:var(--yazi)'+(i===0?';font-weight:600':'')+'">'+disp+'</span>'+
+                '<span style="color:var(--soluk);font-size:10px;width:36px;text-align:right">%'+pct+'</span>'+
+                '</div>';
+            }).join('');
+          }
+
+          function _card(title, color, bg, top3, badgeStar, tooltipTitle) {
+            return '<div style="flex:1;min-width:0;background:'+bg+';border:1.5px solid '+color+';border-radius:8px;padding:7px 10px" title="'+tooltipTitle+'">'+
+              '<div style="font-size:10px;font-weight:700;color:'+color+';margin-bottom:4px;letter-spacing:.3px;display:flex;align-items:center">'+
+                '<span>'+title+'</span>'+badgeStar+
+              '</div>'+
+              _render3(top3)+
+            '</div>';
+          }
+
+          var _v12Tooltip = "V19 (V12) — Mainstream uzmanı. American IPA, Stout, Pale Lager gibi büyük slug'larda yüksek doğruluk.";
+          var _v20Tooltip = "V20 (α=0.30) — Class-balanced retrain, küçük slug undertraining çözümü. Belgian Quadrupel, Brett Beer, Festbier gibi azınlık stillerde V19'dan +%14 daha doğru. KORUMA A 4 transformative slug korunmuş.";
+          var _f1Tooltip  = "Hibrit (V19+V20) — V19 ve V20 prob distribution'larının saf %50/%50 ortalaması. İki motorun ortak kanıtı, denge motoru. 376K in-sample +0.34pp anlamlı.";
+
+          return '<div style="margin-top:10px;padding:8px;background:rgba(180,120,20,.04);border:1px dashed var(--bor);border-radius:6px">'+
+            '<div style="font-size:11px;font-weight:700;color:var(--kahve);margin-bottom:6px;display:flex;align-items:center">'+
+              '<span>🎯 Motor Karşılaştırması (V12 + V20 + Hibrit)</span>'+_agreeBadge+
+            '</div>'+
+            '<div style="display:flex;flex-direction:column;gap:6px">'+
+              _card('V12 (V19)', _v12Color, _v12Bg, _v12r.top3, _starV12, _v12Tooltip)+
+              _card('V20 (α=0.30)', _v20Color, _v20Bg, _v20r.top3, _starV20, _v20Tooltip)+
+              _card('Hibrit (V19+V20)', _f1Color, _f1Bg, _f1r.top3, '', _f1Tooltip)+
+            '</div>'+
+            '<div style="font-size:9px;color:var(--soluk);margin-top:5px;line-height:1.4">'+
+              "V12 ana kart başlığı + BJCP karşılaştırması post-process'li V12 sonucuna bağlı (Sub-sprint 17-20). V20 + Hibrit raw model çıktısı (post-process YOK)."+
+              (_allAgree ? '' : (_v20Win ? ' V20 bu reçete için +5pp avantajlı (⭐).' : ' V12 bu reçete için en yüksek güven (⭐).'))+
+            '</div>'+
+          '</div>';
         })()}
         ${(()=>{
           // ═══ REÇETE DOKTORU v2 — Tolerance + Specialty stil önerileri ═══
