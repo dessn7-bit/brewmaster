@@ -2530,7 +2530,10 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     preload: loadModel,
     preloadSlug: loadSlugModel,
     predictSync: predictSync,
-    predictSlugSync: predictSlugSync
+    predictSlugSync: predictSlugSync,
+    // D-1.9g: B1 LightGBM 109 feature build için 89 base feature expose
+    buildFeatures: buildFeatures,
+    get featureList(){ return cache.labels && cache.labels.feature_list; }
   };
   // Bug 8 diagnostic — initial state
   window.__lastV12SlugResult = null;
@@ -2752,6 +2755,246 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
         setTimeout(function(){ clearInterval(iv); }, 30000);
       }
     }, 200);
+  }
+})();
+</script>
+
+<!-- D-1.9g — B1 LightGBM Hierarchical motor (ONNX Runtime Web)
+     Production HTML c216e4d0 INTACT — bu dosya Brewmaster_v2_80_test.html (test wrapper).
+     Model: brewmaster-models bucket (138 MB ONNX), Worker proxy TR-uyumlu.
+     Lazy load + IndexedDB cache (SHA8 key, model değişirse otomatik invalidate). -->
+<script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.21.0/dist/ort.min.js"></script>
+<script id="bm-engine-b1-lgbm">
+(function(){
+  // ── D-1.9g final fit ONNX SHA8 ──
+  const B1_SHA8 = '55d8ca93'; // ONNX dosyası R2'de v12_lgbm_b1_55d8ca93.onnx (95.82 MB)
+  const B1_URL = 'https://brewmaster-models.dessn7.workers.dev/v12_lgbm_b1_' + B1_SHA8 + '.onnx';
+  const IDB_DB = 'bm_b1_models';
+  const IDB_STORE = 'onnx';
+  const IDB_KEY = 'b1_' + B1_SHA8;
+  const CLASSES = ['bock','brown_ale','ipa','lager','lager_dark','pale_ale','pilsner','porter','saison','sour','specialty','stout','strong_ale','wheat'];
+  const CLUSTER_TR = {bock:'Bock',brown_ale:'Brown Ale',ipa:'IPA',lager:'Lager',lager_dark:'Koyu Lager',pale_ale:'Pale Ale',pilsner:'Pilsner',porter:'Porter',saison:'Saison',sour:'Ekşi',specialty:'Özel',stout:'Stout',strong_ale:'Güçlü Ale',wheat:'Buğday'};
+
+  // ── IndexedDB helpers (lazy cache) ──
+  function idbOpen() {
+    return new Promise(function(resolve, reject){
+      var req = indexedDB.open(IDB_DB, 1);
+      req.onupgradeneeded = function(){ req.result.createObjectStore(IDB_STORE); };
+      req.onsuccess = function(){ resolve(req.result); };
+      req.onerror = function(){ reject(req.error); };
+    });
+  }
+  function idbGet(key) {
+    return idbOpen().then(function(db){
+      return new Promise(function(resolve, reject){
+        var tx = db.transaction(IDB_STORE,'readonly').objectStore(IDB_STORE).get(key);
+        tx.onsuccess = function(){ resolve(tx.result); };
+        tx.onerror = function(){ reject(tx.error); };
+      });
+    });
+  }
+  function idbPut(key, value) {
+    return idbOpen().then(function(db){
+      return new Promise(function(resolve, reject){
+        var tx = db.transaction(IDB_STORE,'readwrite').objectStore(IDB_STORE).put(value, key);
+        tx.onsuccess = function(){ resolve(); };
+        tx.onerror = function(){ reject(tx.error); };
+      });
+    });
+  }
+
+  // ── ONNX session lazy load ──
+  var sessionPromise = null;
+  var loadProgress = { state: 'idle', percent: 0, message: '' };
+  function setProgress(state, pct, msg) {
+    loadProgress.state = state; loadProgress.percent = pct; loadProgress.message = msg;
+    try { if (typeof window.bmB1ProgressCallback === 'function') window.bmB1ProgressCallback(loadProgress); } catch(e){}
+  }
+
+  function loadOnnxBytes() {
+    return idbGet(IDB_KEY).then(function(cached){
+      if (cached && cached.byteLength > 1000000) {
+        setProgress('cached', 100, 'IndexedDB cache hit (' + Math.round(cached.byteLength/1024/1024) + ' MB)');
+        return cached;
+      }
+      setProgress('downloading', 0, 'Hierarchical motor indiriliyor...');
+      return fetch(B1_URL).then(function(r){
+        if (!r.ok) throw new Error('B1 fetch HTTP ' + r.status);
+        var total = parseInt(r.headers.get('Content-Length') || '0', 10);
+        var reader = r.body.getReader();
+        var chunks = []; var received = 0;
+        function pump() {
+          return reader.read().then(function(res){
+            if (res.done) {
+              var blob = new Uint8Array(received);
+              var off = 0;
+              for (var i=0;i<chunks.length;i++) { blob.set(chunks[i], off); off += chunks[i].length; }
+              setProgress('saving', 100, 'IndexedDB cache yazılıyor...');
+              return idbPut(IDB_KEY, blob.buffer).then(function(){
+                setProgress('ready', 100, 'Hierarchical motor hazır (' + Math.round(received/1024/1024) + ' MB)');
+                return blob.buffer;
+              });
+            }
+            chunks.push(res.value); received += res.value.length;
+            if (total) setProgress('downloading', Math.round(100 * received / total), 'İndiriliyor: ' + Math.round(received/1024/1024) + ' / ' + Math.round(total/1024/1024) + ' MB');
+            return pump();
+          });
+        }
+        return pump();
+      });
+    });
+  }
+
+  function loadSession() {
+    if (sessionPromise) return sessionPromise;
+    if (!window.ort) { console.warn('[BM B1] onnxruntime-web yüklenmedi'); return Promise.reject(new Error('ort missing')); }
+    try {
+      ort.env.wasm.numThreads = Math.min(4, navigator.hardwareConcurrency || 1);
+      ort.env.wasm.simd = true;
+      ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.21.0/dist/';
+    } catch(e){}
+    sessionPromise = loadOnnxBytes().then(function(buf){
+      setProgress('initializing', 100, 'ONNX Runtime başlatılıyor...');
+      return ort.InferenceSession.create(buf, { executionProviders: ['wasm'] });
+    }).then(function(sess){
+      console.log('%c[BM B1 LightGBM] ONNX session hazır','background:#FF6F00;color:#fff;padding:2px 6px;');
+      setProgress('ready', 100, 'Hierarchical motor aktif');
+      return sess;
+    }).catch(function(e){
+      console.warn('[BM B1] load fail:', e && e.message);
+      sessionPromise = null;
+      setProgress('error', 0, 'Yükleme hatası: ' + (e && e.message));
+      throw e;
+    });
+    return sessionPromise;
+  }
+
+  // ── 109 feature build (89 V12 base + 20 yeni B1 extension) ──
+  // 89 base: V12'nin buildFeatures çıktısı kullanılır (window.__bmV12LastFeatures veya re-extract).
+  // 20 yeni: hop flags, hop counts, mash, batch, marker counts. UI alanlarından best-effort.
+  function buildB1Features(uiR) {
+    if (!window.BM_V12 || typeof window.BM_V12.buildFeatures !== 'function') {
+      console.warn('[BM B1] BM_V12.buildFeatures yok, B1 inference yapılamaz');
+      return null;
+    }
+    var base89 = window.BM_V12.buildFeatures(uiR);
+    if (!base89 || !window.BM_V12.featureList || base89.length !== 89) {
+      console.warn('[BM B1] V12 89 feature alınamadı');
+      return null;
+    }
+    var ext20 = build20Extension(uiR);
+    var v109 = new Float32Array(109);
+    for (var i=0;i<89;i++) v109[i] = +base89[i] || 0;
+    for (var j=0;j<20;j++) v109[89+j] = +ext20[j] || 0;
+    return v109;
+  }
+
+  function build20Extension(uiR) {
+    var hops = (uiR && uiR.hoplar) || [];
+    var katki = (uiR && uiR.katkilar) || [];
+    var batch_l = +(uiR && uiR.hacim) || 0;
+    var og = +(uiR && uiR.og) || 0;
+    // hop name patterns
+    var rxList = [
+      /\bcascade\b/i, /\bcitra\b/i, /\bgalaxy\b/i, /\bsimcoe\b/i, /\bcentennial\b/i, /\bamarillo\b/i
+    ];
+    var hopNames = (typeof HOPLAR !== 'undefined' && Array.isArray(HOPLAR))
+      ? hops.map(function(h){ var x = HOPLAR.find(function(z){return z && z.id===h.id;}); return ((x && x.ad) || h.id || '').toLowerCase(); })
+      : hops.map(function(h){ return (h.id || '').toLowerCase(); });
+    var seenSet = {}; for (var i=0;i<hopNames.length;i++) seenSet[hopNames[i]] = 1;
+    var seen = Object.keys(seenSet);
+    var flags = rxList.map(function(rx){ return seen.some(function(n){return rx.test(n);}) ? 1 : 0; });
+    var diversity = seen.length;
+    var dryHopCount = hops.filter(function(h){ return (h.t === 0 || h.tip === 'dryhop' || (typeof h.t === 'number' && h.t === 0)); }).length;
+    var bittering = 0, aroma = 0, alphaSum = 0, alphaCnt = 0;
+    for (var k=0;k<hops.length;k++) {
+      var h = hops[k]; var amt = +h.gr || 0; var tm = (typeof h.t === 'number' ? h.t : null);
+      if (tm !== null && tm >= 60) bittering += amt;
+      else if (tm !== null && tm < 30) aroma += amt;
+      var entry = (typeof HOPLAR !== 'undefined') ? HOPLAR.find(function(z){return z && z.id===h.id;}) : null;
+      var alpha = entry && (entry.alpha || entry.aa);
+      if (typeof alpha === 'number' && alpha > 0) { alphaSum += alpha; alphaCnt++; }
+    }
+    var bToA = aroma > 0 ? bittering / aroma : 0;
+    var alphaAvg = alphaCnt > 0 ? alphaSum / alphaCnt : 0;
+    // mash
+    var mashSteps = +(uiR && uiR.mash_steps) || 1;
+    var mashEff = +(uiR && uiR.verim) || 0;
+    // markers
+    var markerKeys = ['has_brett','has_lacto','has_pedio','has_smoke','has_fruit','has_spice','has_coriander','has_orange_peel','has_chamomile','has_salt','has_chili','has_coffee'];
+    var markerCount = 0;
+    var v12Feats = (typeof window.BM_V12 !== 'undefined' && window.BM_V12.featureList) ? window.BM_V12.featureList : [];
+    var base89Map = {};
+    if (v12Feats.length) {
+      var b89 = window.BM_V12.buildFeatures(uiR);
+      for (var ii=0;ii<v12Feats.length;ii++) base89Map[v12Feats[ii]] = b89[ii];
+    }
+    for (var mi=0;mi<markerKeys.length;mi++) if (base89Map[markerKeys[mi]]) markerCount++;
+    var katkiActive = katki.length;
+    var sfs = (base89Map['katki_smoke'] || 0) + (base89Map['katki_fruit'] || 0) + (base89Map['katki_spice_herb'] || 0);
+    return [
+      flags[0], flags[1], flags[2], flags[3], flags[4], flags[5],
+      diversity, dryHopCount,
+      Math.round(bittering*100)/100, Math.round(aroma*100)/100,
+      Math.round(bToA*1000)/1000, Math.round(alphaAvg*10000)/10000,
+      mashSteps, (mashSteps > 1 ? 1 : 0), mashEff,
+      batch_l,
+      batch_l > 0 ? Math.round((og - 1.0) * 1000 / batch_l * 10000) / 10000 : 0,
+      markerCount, katkiActive, (sfs > 0 ? 1 : 0)
+    ];
+  }
+
+  // ── Inference: returns Promise<{topCluster, topProb, top3, probs, classes, _meta}> ──
+  function predictCluster(uiR) {
+    return loadSession().then(function(sess){
+      var v = buildB1Features(uiR);
+      if (!v) return null;
+      var input = new ort.Tensor('float32', v, [1, 109]);
+      var inName = sess.inputNames[0];
+      var feeds = {}; feeds[inName] = input;
+      return sess.run(feeds).then(function(out){
+        var probKey = sess.outputNames.find(function(n){
+          var t = out[n]; return t && t.dims && t.dims.length === 2 && t.dims[1] === 14;
+        }) || sess.outputNames[sess.outputNames.length - 1];
+        var probs = Array.from(out[probKey].data);
+        var sorted = CLASSES.map(function(c, i){ return { cluster: c, displayTR: CLUSTER_TR[c], prob: probs[i] }; })
+          .sort(function(a,b){ return b.prob - a.prob; });
+        var result = {
+          top3: sorted.slice(0, 3).map(function(r){ return { cluster: r.cluster, displayTR: r.displayTR, score: r.prob, normalized: Math.round(r.prob*100) }; }),
+          topCluster: sorted[0].cluster,
+          topProb: sorted[0].prob,
+          probs: probs, classes: CLASSES,
+          _meta: { motor: 'B1_LightGBM_109feat_14cat', sha8: B1_SHA8, model_url: B1_URL }
+        };
+        window.__lastB1ClusterResult = result;
+        return result;
+      });
+    });
+  }
+
+  // ── Public API + auto-preload (V12 active ise) ──
+  window.BM_B1 = {
+    SHA8: B1_SHA8, MODEL_URL: B1_URL, CLASSES: CLASSES,
+    isReady: function(){ return sessionPromise !== null; },
+    progress: function(){ return loadProgress; },
+    preload: loadSession,
+    predictCluster: predictCluster,
+    buildFeatures: buildB1Features,
+  };
+
+  // Auto-preload defer (V12 active ise + ilk calc sonrası 2sn bekle)
+  if (window.BM_V12 && window.BM_V12.isV12Active && window.BM_V12.isV12Active()) {
+    setTimeout(function(){
+      loadSession().then(function(){
+        // Recalc trigger — Hierarchical sonucu UI'ya inject olsun
+        try {
+          if (typeof calc === 'function') {
+            console.log('%c[BM B1 Hierarchical] motor hazır, recalc tetikleniyor','background:#FF6F00;color:#fff;padding:2px 6px;');
+            calc();
+          }
+        } catch(e) {}
+      }).catch(function(){});
+    }, 3000); // V20 + Hibrit sonra 3sn'de B1 başlat
   }
 })();
 </script>
@@ -15662,6 +15905,25 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
     console.warn('[BM D-2.A V20+Hibrit] dispatcher genel hatasi:', D2err && D2err.message);
   }
 
+  // === D-1.9g B1 Hierarchical (LightGBM cluster) dispatcher (async, ana sonuca DOKUNMAZ) ===
+  try {
+    if (window.BM_B1 && typeof window.BM_B1.predictCluster === 'function' && typeof __recipeV2 !== 'undefined') {
+      var _b1Key = ''+_og+'|'+_fg+'|'+_ibu+'|'+_srm+'|'+_abv+'|'+(S.mayaId||'')+'|'+(S.maltlar||[]).map(function(m){return m.id+':'+m.gr;}).join(',')+'|'+(S.hoplar||[]).map(function(h){return h.id+':'+h.gr+':'+h.t;}).join(',')+'|'+(S.katkilar||[]).map(function(k){return k.id;}).join(',');
+      if (window.__lastB1RecipeKey !== _b1Key) {
+        window.__lastB1RecipeKey = _b1Key;
+        window.BM_B1.predictCluster(__recipeV2).then(function(r){
+          if (r) {
+            console.log('%c[BM B1 Hierarchical]','background:#FF6F00;color:#fff;padding:2px 6px;', 'top1='+r.topCluster+' ('+(r.topProb*100).toFixed(1)+'%)');
+            // UI re-render — kart insert için
+            try { if (typeof calc === 'function') calc(); } catch(e) {}
+          }
+        }).catch(function(e){ console.warn('[BM B1] predict exception:', e && e.message); });
+      }
+    }
+  } catch (B1err) {
+    console.warn('[BM B1 Hierarchical] dispatcher genel hatasi:', B1err && B1err.message);
+  }
+
   // Manuel stil seçimi varsa override (BJCP listesinde olmalı)
   if(S.stil && typeof BJCP!=='undefined' && BJCP[S.stil]){
     stil_tah=S.stil;
@@ -16192,13 +16454,14 @@ return `
         '</div>';
         })()}
         ${(()=>{
-          // ═══ D-2.A MOTOR KARŞILAŞTIRMASI — V12 + V20 + F1 Hibrit kompakt blok ═══
-          // V12 ana kart üstte zaten render edildi. Bu blok V20 ve Hibrit'i ek olarak gösterir.
-          // Graceful: V20/F1 sonuçları yoksa blok boş string döner — V12 ana kart sağlam kalır.
+          // ═══ D-1.9g MOTOR KARŞILAŞTIRMASI — V12 + V20 + F1 Hibrit + B1 Hierarchical (4 motor) ═══
+          // V12 ana kart üstte zaten render edildi. Bu blok V20 + Hibrit + B1'i ek olarak gösterir.
+          // Graceful: motor sonuçları yoksa ilgili kart boş string döner.
           var _v12r = window.__lastV12SlugResult;
           var _v20r = window.__lastV20SlugResult;
           var _f1r  = window.__lastF1HybridSlugResult;
-          // Üçü birden olmalı, yoksa blok yok
+          var _b1r  = window.__lastB1ClusterResult;  // D-1.9g: B1 cluster top3 (lazy loaded)
+          // V12+V20+F1 üçü olmalı, yoksa blok yok (mevcut davranış korunur)
           if (!_v12r || !_v12r.top3 || _v12r.top3.length === 0) return '';
           if (!_v20r || !_v20r.top3 || _v20r.top3.length === 0) return '';
           if (!_f1r  || !_f1r.top3  || _f1r.top3.length  === 0) return '';
@@ -16218,10 +16481,19 @@ return `
           var _v12Color = '#6A1B9A'; var _v12Bg = '#F3E5F5';   // mor (V12)
           var _v20Color = '#0277BD'; var _v20Bg = '#E1F5FE';   // mavi (V20)
           var _f1Color  = '#388E3C'; var _f1Bg  = '#E8F5E9';   // yeşil (Hibrit)
+          var _b1Color  = '#FF6F00'; var _b1Bg  = '#FFF3E0';   // turuncu (B1 Hierarchical)
           var _agreeColor = '#388E3C'; var _agreeBg = '#C8E6C9';
 
-          var _starV12 = (!_allAgree && !_v20Win) ? ' <span title="Bu reçete için V12 (V19) en yüksek güven" style="color:#FFB300;font-size:13px">⭐</span>' : '';
-          var _starV20 = (!_allAgree &&  _v20Win) ? ' <span title="Bu reçete için V20 (α=0.30) +5pp+ avantajlı" style="color:#FFB300;font-size:13px">⭐</span>' : '';
+          // D-1.9g: B1 ⭐ override — specialty/porter/lager/bock/brown_ale/strong_ale cluster'larda
+          // Phase B per-cluster keşif: B1 bu cluster'larda V19'dan +5-15pp daha doğru.
+          var _SPECIALTY_CLUSTERS = ['specialty','porter','lager','bock','brown_ale','strong_ale'];
+          var _b1Win = false;
+          if (_b1r && _b1r.topCluster && _SPECIALTY_CLUSTERS.indexOf(_b1r.topCluster) >= 0) {
+            _b1Win = true;
+          }
+          var _starV12 = (!_b1Win && !_allAgree && !_v20Win) ? ' <span title="Bu reçete için V12 (V19) en yüksek güven" style="color:#FFB300;font-size:13px">⭐</span>' : '';
+          var _starV20 = (!_b1Win && !_allAgree &&  _v20Win) ? ' <span title="Bu reçete için V20 (α=0.30) +5pp+ avantajlı" style="color:#FFB300;font-size:13px">⭐</span>' : '';
+          var _starB1  = _b1Win ? ' <span title="Bu reçete cluster\'ı için Hierarchical (B1 LightGBM) +5-15pp avantajlı (Phase B 5-fold CV)" style="color:#FFB300;font-size:13px">⭐</span>' : '';
           var _agreeBadge = _allAgree
             ? '<span style="display:inline-block;background:'+_agreeBg+';color:'+_agreeColor+';font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px;border:1px solid '+_agreeColor+'">✓ 3 motor uyumlu</span>'
             : '';
@@ -16250,19 +16522,36 @@ return `
           var _v12Tooltip = "V19 (V12) — Mainstream uzmanı. American IPA, Stout, Pale Lager gibi büyük slug'larda yüksek doğruluk.";
           var _v20Tooltip = "V20 (α=0.30) — Class-balanced retrain, küçük slug undertraining çözümü. Belgian Quadrupel, Brett Beer, Festbier gibi azınlık stillerde V19'dan +%14 daha doğru. KORUMA A 4 transformative slug korunmuş.";
           var _f1Tooltip  = "Hibrit (V19+V20) — V19 ve V20 prob distribution'larının saf %50/%50 ortalaması. İki motorun ortak kanıtı, denge motoru. 376K in-sample +0.34pp anlamlı.";
+          var _b1Tooltip  = "Hierarchical (V19+B1 LightGBM) — D-1.9g 138 MB cluster motoru. V12 buildFeatures (89) + 20 yeni feature → 14-cluster classification. Phase B 5-fold CV: full +2.57pp Δ vs V19, specialty +14.89pp, porter +9.65pp, lager +5.83pp, bock +5.04pp transformative. Non-rmwoods +4.13pp generalization gain (V19 source asimetri azaltıcı).";
+
+          // D-1.9g: B1 kartı — ready ise kart, yükleniyor ise progress, idle ise gizli
+          var _b1Card = '';
+          if (_b1r && _b1r.top3 && _b1r.top3.length) {
+            _b1Card = _card('Hierarchical (V19+B1)', _b1Color, _b1Bg, _b1r.top3, _starB1, _b1Tooltip);
+          } else if (window.BM_B1 && typeof window.BM_B1.progress === 'function') {
+            var _p = window.BM_B1.progress();
+            if (_p && _p.state && _p.state !== 'idle') {
+              _b1Card = '<div style="flex:1;min-width:0;background:'+_b1Bg+';border:1.5px dashed '+_b1Color+';border-radius:8px;padding:7px 10px" title="'+_b1Tooltip+'">'+
+                '<div style="font-size:10px;font-weight:700;color:'+_b1Color+';margin-bottom:4px">Hierarchical (V19+B1) — yükleniyor</div>'+
+                '<div style="font-size:11px;color:'+_b1Color+'">'+ (_p.message || '') +'</div>'+
+                '<div style="height:4px;background:#fff;border-radius:2px;overflow:hidden;margin-top:4px"><div style="height:100%;background:'+_b1Color+';width:'+(_p.percent||0)+'%"></div></div>'+
+              '</div>';
+            }
+          }
 
           return '<div style="margin-top:10px;padding:8px;background:rgba(180,120,20,.04);border:1px dashed var(--bor);border-radius:6px">'+
             '<div style="font-size:11px;font-weight:700;color:var(--kahve);margin-bottom:6px;display:flex;align-items:center">'+
-              '<span>🎯 Motor Karşılaştırması (V12 + V20 + Hibrit)</span>'+_agreeBadge+
+              '<span>🎯 Motor Karşılaştırması (V12 + V20 + Hibrit + Hierarchical)</span>'+_agreeBadge+
             '</div>'+
             '<div style="display:flex;flex-direction:column;gap:6px">'+
               _card('V12 (V19)', _v12Color, _v12Bg, _v12r.top3, _starV12, _v12Tooltip)+
               _card('V20 (α=0.30)', _v20Color, _v20Bg, _v20r.top3, _starV20, _v20Tooltip)+
               _card('Hibrit (V19+V20)', _f1Color, _f1Bg, _f1r.top3, '', _f1Tooltip)+
+              _b1Card+
             '</div>'+
             '<div style="font-size:9px;color:var(--soluk);margin-top:5px;line-height:1.4">'+
-              "V12 ana kart başlığı + BJCP karşılaştırması post-process'li V12 sonucuna bağlı (Sub-sprint 17-20). V20 + Hibrit raw model çıktısı (post-process YOK)."+
-              (_allAgree ? '' : (_v20Win ? ' V20 bu reçete için +5pp avantajlı (⭐).' : ' V12 bu reçete için en yüksek güven (⭐).'))+
+              "V12 ana kart başlığı + BJCP karşılaştırması post-process'li V12 sonucuna bağlı (Sub-sprint 17-20). V20 + Hibrit + B1 raw model çıktısı (post-process YOK)."+
+              (_b1Win ? ' B1 cluster ('+(_b1r&&_b1r.topCluster)+') Phase B kanıtlı +5-15pp avantajlı (⭐).' : (_allAgree ? '' : (_v20Win ? ' V20 bu reçete için +5pp avantajlı (⭐).' : ' V12 bu reçete için en yüksek güven (⭐).')))+
             '</div>'+
           '</div>';
         })()}
