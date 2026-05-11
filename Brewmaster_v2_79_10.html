@@ -2508,36 +2508,55 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     return {sorted: ns, reason: reason, applied: true};
   }
 
-  // D-1.9r: AIPA <-> ASPA border fix — V12 modelin border zone karari (ABV 6-7, IBU 50-65)
-  // klasik AIPA reçetelerini ASPA olarak yanlis siniflandiriyor. delta<5pp + classic features ile swap.
+  // D-1.9r/s: AIPA <-> ASPA border fix — V12 modelin border zone karari (ABV 6-7.5, IBU 50-70)
+  // Branch A (D-1.9r): top1=ASPA + top2=AIPA + classic AIPA features -> AIPA swap (pull-back)
+  // Branch B (D-1.9s): top1=AIPA + top2=ASPA + classic ASPA features -> ASPA swap (pull-up)
   function postProcessAipaAspaBorder(featObj, sorted) {
     if (!sorted || sorted.length < 2) return {sorted: sorted, reason: 'empty', applied: false};
     var f = featObj || {};
     var top1 = sorted[0].cls, top2 = sorted[1].cls;
-    // Pre-condition: top-1=ASPA + top-2=AIPA (border bug)
-    if (top1 !== 'american_strong_pale_ale' || top2 !== 'american_india_pale_ale') {
-      return {sorted: sorted, reason: 'not_aspa_aipa_border', applied: false};
-    }
-    var delta = (sorted[0].prob || 0) - (sorted[1].prob || 0);
-    // D-1.9r v2: threshold 15pp (V12 border zone'da 5-15pp tipik fark, 5pp çok dar idi)
-    if (delta >= 0.15) return {sorted: sorted, reason: 'border_delta_too_large', applied: false};
-    // Classic AIPA criteria (3+ gerekli)
     var abv = +f.abv || 0, ibu = +f.ibu || 0, og = +f.og || 0;
-    var crit = 0;
-    if (abv < 7.0) crit++;                    // klasik AIPA ABV<7
-    if (ibu < 65) crit++;                     // klasik AIPA IBU<65
-    if (og < 1.065) crit++;                   // klasik AIPA OG<1.065
-    if ((f.yeast_american || 0) > 0) crit++;  // US-05/WLP001
-    if (crit < 3) return {sorted: sorted, reason: 'classic_aipa_crit_too_low_' + crit, applied: false};
-    // Swap: AIPA top-1, ASPA top-2 (prob swap)
-    var ns = sorted.slice();
-    var aipaEntry = ns[1];
-    var aspaEntry = ns[0];
-    aipaEntry.prob = aspaEntry.prob;  // AIPA original ASPA'nin prob'unu alir (max boost)
-    aspaEntry.prob = sorted[1].prob;  // ASPA AIPA'nin eski prob'una düşer
-    ns[0] = aipaEntry;
-    ns[1] = aspaEntry;
-    return {sorted: ns, reason: 'aipa_aspa_border_swap_crit' + crit, applied: true};
+    var delta = (sorted[0].prob || 0) - (sorted[1].prob || 0);
+
+    // Branch A: top1=ASPA + top2=AIPA -> classic AIPA swap (D-1.9r, delta<15pp)
+    if (top1 === 'american_strong_pale_ale' && top2 === 'american_india_pale_ale') {
+      if (delta >= 0.15) return {sorted: sorted, reason: 'border_delta_too_large_aipa_pullback', applied: false};
+      var critA = 0;
+      if (abv < 7.0) critA++;                    // klasik AIPA ABV<7
+      if (ibu < 65) critA++;                     // klasik AIPA IBU<65
+      if (og < 1.065) critA++;                   // klasik AIPA OG<1.065
+      if ((f.yeast_american || 0) > 0) critA++;  // US-05/WLP001
+      if (critA < 3) return {sorted: sorted, reason: 'classic_aipa_crit_too_low_' + critA, applied: false};
+      var nsA = sorted.slice();
+      var aipaEntry = nsA[1]; var aspaEntry = nsA[0];
+      aipaEntry.prob = aspaEntry.prob;
+      aspaEntry.prob = sorted[1].prob;
+      nsA[0] = aipaEntry; nsA[1] = aspaEntry;
+      return {sorted: nsA, reason: 'aipa_aspa_border_swap_crit' + critA, applied: true};
+    }
+
+    // Branch B: top1=AIPA + top2=ASPA -> classic ASPA swap (D-1.9s pull-up)
+    // delta<40pp + 4/4 criteria zorunlu (V12 AIPA bias daha yüksek, 30pp+ deltada bile swap güvenli ASPA criteria 4/4 ise)
+    if (top1 === 'american_india_pale_ale' && top2 === 'american_strong_pale_ale') {
+      // Edge guard: yeast_neipa -> muhtemel Imperial NEIPA, ASPA değil
+      if ((f.yeast_neipa || 0) > 0) return {sorted: sorted, reason: 'classic_aspa_skip_neipa_yeast', applied: false};
+      if (delta >= 0.40) return {sorted: sorted, reason: 'border_delta_too_large_aspa_pullup', applied: false};
+      var critB = 0;
+      if (abv >= 6.5) critB++;                    // klasik ASPA ABV>=6.5
+      if (ibu >= 65) critB++;                     // klasik ASPA IBU>=65
+      if (og >= 1.062) critB++;                   // klasik ASPA OG>=1.062
+      if ((f.yeast_american || 0) > 0) critB++;   // US-05/WLP001
+      // D-1.9s pull-up: 4/4 ZORUNLU (V12 AIPA bias güçlü, false positive riski yüksek -> sıkı)
+      if (critB < 4) return {sorted: sorted, reason: 'classic_aspa_crit_too_low_' + critB, applied: false};
+      var nsB = sorted.slice();
+      var aspaEntryB = nsB[1]; var aipaEntryB = nsB[0];
+      aspaEntryB.prob = aipaEntryB.prob;  // ASPA AIPA'nin prob'unu alir
+      aipaEntryB.prob = sorted[1].prob;   // AIPA ASPA'nin eski prob'una düşer
+      nsB[0] = aspaEntryB; nsB[1] = aipaEntryB;
+      return {sorted: nsB, reason: 'aspa_aipa_border_swap_crit' + critB, applied: true};
+    }
+
+    return {sorted: sorted, reason: 'not_aipa_aspa_border', applied: false};
   }
 
   // D-1.9q: white_ipa post-process — Memory Adim 59 kazanim #2: AIPA'ya %44.7 kaciyor (witbier'a %0.8)
