@@ -726,6 +726,9 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     // D-1.9q: yeast_neipa Vermont/Kveik/NEIPA blend strain detection (postProcess only, model'e girmez)
     var NEIPA_YEAST_IDS = ['verdant','imp_a38','bb_belc_neipa33','bb_ing04','kveikv','kveiko','kveik_fg','oyl061','oyl091','oyl090','oyl057','oyl071','bb22a','bb22b','mj_m44'];
     var yeast_neipa = (NEIPA_YEAST_IDS.indexOf(mid) >= 0) ? 1 : 0;
+    // D-1.9r: has_neipa_name reçete adı pattern detection (NEIPA palyatif marker, edge guard postProcess'te)
+    var biraAd_lower = ((r.biraAd || '') + '').toLowerCase();
+    var has_neipa_name = /neipa|northeast|hazy|haze|juicy/i.test(biraAd_lower) ? 1 : 0;
 
     // Brett/lacto/pedio yeast string regex (V12 mevcut versiyondan korunuyor, mid+mAd üzerinde)
     var hasBrett = /\bbrett(anomyces)?\b|\bwlp\s*0?(644|645|648|650|651|652|653|654|655|656|660|665|670|671|672|4639)\b|\bwy?\s*0?5(112|151|526|512|733|378)\b|bruxellensis|lambicus|drie|trois|clausenii/.test(yeastStr);
@@ -763,7 +766,7 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
       yeast_brett: hasBrett ? 1 : 0,
       yeast_lacto: hasLacto ? 1 : 0,
       yeast_sour_blend: yeast_sour_blend,
-      yeast_witbier: yeast_witbier, yeast_wheat_german: yeast_wheat_german, yeast_wit: yeast_wit, yeast_neipa: yeast_neipa,
+      yeast_witbier: yeast_witbier, yeast_wheat_german: yeast_wheat_german, yeast_wit: yeast_wit, yeast_neipa: yeast_neipa, has_neipa_name: has_neipa_name,
       hop_american_c: _flag(HOP_SIG.american_c, hopAdStr),
       hop_english:    _flag(HOP_SIG.english, hopAdStr),
       hop_german:     _flag(HOP_SIG.german, hopAdStr),
@@ -2485,8 +2488,10 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     if (og < 1.052 || abv < 4.8) return {sorted: sorted, reason: 'og_abv_too_low_apa_zone', applied: false};
     // Guard: West Coast IPA zone (IBU>=80) -> WCIPA muhtemel, NEIPA degil
     if (ibu >= 80) return {sorted: sorted, reason: 'ibu_too_high_wcipa', applied: false};
-    // Trigger: yeast_neipa (Vermont/Kveik) OR (pct_oats>=15 + IBU<55 + mouthfeel hazy)
-    var hasNeipaSignal = (f.yeast_neipa || 0) > 0 || ((f.pct_oats || 0) >= 15 && ibu < 55);
+    // D-1.9r: Trigger genişletildi — has_neipa_name (reçete adı) kombine guard ile
+    // Hazy Pale Ale edge case: has_neipa_name TEK BAŞINA tetiklemez, oats/yeast/wheat kombine gerek
+    var hasNameSignal = (f.has_neipa_name || 0) > 0 && ((f.pct_oats || 0) >= 10 || (f.yeast_neipa || 0) > 0 || (f.pct_wheat || 0) >= 15);
+    var hasNeipaSignal = (f.yeast_neipa || 0) > 0 || hasNameSignal || ((f.pct_oats || 0) >= 15 && ibu < 55);
     if (!hasNeipaSignal) return {sorted: sorted, reason: 'no_trigger', applied: false};
     // NEIPA top-3'te bul, top-1'e tasi
     var neipaIdx = -1;
@@ -2501,6 +2506,38 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     ns.unshift(neipa);
     var reason = 'neipa_applied_' + (f.yeast_neipa ? 'yeast' : 'oats_ibu');
     return {sorted: ns, reason: reason, applied: true};
+  }
+
+  // D-1.9r: AIPA <-> ASPA border fix — V12 modelin border zone karari (ABV 6-7, IBU 50-65)
+  // klasik AIPA reçetelerini ASPA olarak yanlis siniflandiriyor. delta<5pp + classic features ile swap.
+  function postProcessAipaAspaBorder(featObj, sorted) {
+    if (!sorted || sorted.length < 2) return {sorted: sorted, reason: 'empty', applied: false};
+    var f = featObj || {};
+    var top1 = sorted[0].cls, top2 = sorted[1].cls;
+    // Pre-condition: top-1=ASPA + top-2=AIPA (border bug)
+    if (top1 !== 'american_strong_pale_ale' || top2 !== 'american_india_pale_ale') {
+      return {sorted: sorted, reason: 'not_aspa_aipa_border', applied: false};
+    }
+    var delta = (sorted[0].prob || 0) - (sorted[1].prob || 0);
+    // D-1.9r v2: threshold 15pp (V12 border zone'da 5-15pp tipik fark, 5pp çok dar idi)
+    if (delta >= 0.15) return {sorted: sorted, reason: 'border_delta_too_large', applied: false};
+    // Classic AIPA criteria (3+ gerekli)
+    var abv = +f.abv || 0, ibu = +f.ibu || 0, og = +f.og || 0;
+    var crit = 0;
+    if (abv < 7.0) crit++;                    // klasik AIPA ABV<7
+    if (ibu < 65) crit++;                     // klasik AIPA IBU<65
+    if (og < 1.065) crit++;                   // klasik AIPA OG<1.065
+    if ((f.yeast_american || 0) > 0) crit++;  // US-05/WLP001
+    if (crit < 3) return {sorted: sorted, reason: 'classic_aipa_crit_too_low_' + crit, applied: false};
+    // Swap: AIPA top-1, ASPA top-2 (prob swap)
+    var ns = sorted.slice();
+    var aipaEntry = ns[1];
+    var aspaEntry = ns[0];
+    aipaEntry.prob = aspaEntry.prob;  // AIPA original ASPA'nin prob'unu alir (max boost)
+    aspaEntry.prob = sorted[1].prob;  // ASPA AIPA'nin eski prob'una düşer
+    ns[0] = aipaEntry;
+    ns[1] = aspaEntry;
+    return {sorted: ns, reason: 'aipa_aspa_border_swap_crit' + crit, applied: true};
   }
 
   // D-1.9q: white_ipa post-process — Memory Adim 59 kazanim #2: AIPA'ya %44.7 kaciyor (witbier'a %0.8)
@@ -2570,6 +2607,9 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     var ppSp = postProcessSpecialty(featObj, sorted);
     sorted = ppSp.sorted;
     // D-1.9q: NEIPA + white_ipa postProcess (Sub-sprint chain sonunda — class imbalance fix)
+    // D-1.9r: AIPA<->ASPA border fix (NEIPA'dan önce çünkü AIPA korunması NEIPA tetiklemeden olmalı)
+    var ppAA = postProcessAipaAspaBorder(featObj, sorted);
+    sorted = ppAA.sorted;
     var ppN = postProcessNeipa(featObj, sorted);
     sorted = ppN.sorted;
     var ppWI = postProcessWhiteIpa(featObj, sorted);
@@ -2579,7 +2619,7 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
       top3: sorted.slice(0,3).map(fmt),
       top5: sorted.slice(0,5).map(fmt),
       topN: sorted.slice(0,10).map(fmt),  // Bug 4 same-family filter için 10 slug pool
-      _meta: {motor:'V12_slug_V16model', n_classes:cache.slugLabels.classes.length, witbier_w3_pp: ppW.reason, witbier_w3_applied: ppW.applied, sour_pp: ppS.reason, sour_applied: ppS.applied, belgian_pp: ppB.reason, belgian_applied: ppB.applied, porter_pp: ppP.reason, porter_applied: ppP.applied, strong_ale_pp: ppA.reason, strong_ale_applied: ppA.applied, stout_pp: ppT.reason, stout_applied: ppT.applied, brown_ale_pp: ppBA.reason, brown_ale_applied: ppBA.applied, bock_pp: ppBO.reason, bock_applied: ppBO.applied, lager_pp: ppLG.reason, lager_applied: ppLG.applied, ipa_pp: ppI.reason, ipa_applied: ppI.applied, pilsner_pp: ppPi.reason, pilsner_applied: ppPi.applied, pale_ale_pp: ppPa.reason, pale_ale_applied: ppPa.applied, saison_pp: ppSa.reason, saison_applied: ppSa.applied, lager_dark_pp: ppLd.reason, lager_dark_applied: ppLd.applied, specialty_pp: ppSp.reason, specialty_applied: ppSp.applied, neipa_pp: ppN.reason, neipa_applied: ppN.applied, white_ipa_pp: ppWI.reason, white_ipa_applied: ppWI.applied}
+      _meta: {motor:'V12_slug_V16model', n_classes:cache.slugLabels.classes.length, witbier_w3_pp: ppW.reason, witbier_w3_applied: ppW.applied, sour_pp: ppS.reason, sour_applied: ppS.applied, belgian_pp: ppB.reason, belgian_applied: ppB.applied, porter_pp: ppP.reason, porter_applied: ppP.applied, strong_ale_pp: ppA.reason, strong_ale_applied: ppA.applied, stout_pp: ppT.reason, stout_applied: ppT.applied, brown_ale_pp: ppBA.reason, brown_ale_applied: ppBA.applied, bock_pp: ppBO.reason, bock_applied: ppBO.applied, lager_pp: ppLG.reason, lager_applied: ppLG.applied, ipa_pp: ppI.reason, ipa_applied: ppI.applied, pilsner_pp: ppPi.reason, pilsner_applied: ppPi.applied, pale_ale_pp: ppPa.reason, pale_ale_applied: ppPa.applied, saison_pp: ppSa.reason, saison_applied: ppSa.applied, lager_dark_pp: ppLd.reason, lager_dark_applied: ppLd.applied, specialty_pp: ppSp.reason, specialty_applied: ppSp.applied, aipa_aspa_pp: ppAA.reason, aipa_aspa_applied: ppAA.applied, neipa_pp: ppN.reason, neipa_applied: ppN.applied, white_ipa_pp: ppWI.reason, white_ipa_applied: ppWI.applied}
     };
   }
   // Adım 61 P2 Adım 3 — V6 motor için buildFeatures expose
@@ -15358,6 +15398,7 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
       // Reset recipe objesini yeni motor formatina donustur
       __recipeV2 = {
         _og:_og, _fg:_fg, _ibu:_ibu, _srm:_srm, _abv:_abv, _mayaTip:_mayaTip,
+        biraAd: S.biraAd||'',
         mayaId: S.mayaId||'', maya2Id: S.maya2Id||'',
         hopIds:   (S.hoplar   ||[]).map(h=>h&&h.id).filter(Boolean),
         maltIds:  (S.maltlar  ||[]).map(m=>m&&m.id).filter(Boolean),
