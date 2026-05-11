@@ -15663,18 +15663,33 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
   }
 
   // === D-1.9g B1 Hierarchical (LightGBM cluster) dispatcher (async, ana sonuca DOKUNMAZ) ===
+  // D-1.9g-fix4: __recipeV2 + S.hoplar/maltlar/katkilar/hacim merge (build20Extension rich data)
+  // + always-recalc finally (UI ready->done geçişi).
   try {
     if (window.BM_B1 && typeof window.BM_B1.predictCluster === 'function' && typeof __recipeV2 !== 'undefined') {
       var _b1Key = ''+_og+'|'+_fg+'|'+_ibu+'|'+_srm+'|'+_abv+'|'+(S.mayaId||'')+'|'+(S.maltlar||[]).map(function(m){return m.id+':'+m.gr;}).join(',')+'|'+(S.hoplar||[]).map(function(h){return h.id+':'+h.gr+':'+h.t;}).join(',')+'|'+(S.katkilar||[]).map(function(k){return k.id;}).join(',');
       if (window.__lastB1RecipeKey !== _b1Key) {
         window.__lastB1RecipeKey = _b1Key;
-        window.BM_B1.predictCluster(__recipeV2).then(function(r){
+        var _b1Input = Object.assign({}, __recipeV2, {
+          hoplar:   S.hoplar   || [],
+          maltlar:  S.maltlar  || [],
+          katkilar: S.katkilar || [],
+          hacim:    S.hacim    || 0,
+          og:       _og,
+          mash_steps: (S.mashSteps || 1),
+          verim:    (S.verim || 0)
+        });
+        window.BM_B1.predictCluster(_b1Input).then(function(r){
           if (r) {
-            console.log('%c[BM B1 Hierarchical]','background:#FF6F00;color:#fff;padding:2px 6px;', 'top1='+r.topCluster+' ('+(r.topProb*100).toFixed(1)+'%)');
-            // UI re-render — kart insert için
-            try { if (typeof calc === 'function') calc(); } catch(e) {}
+            console.log('%c[BM B1 Hierarchical]','background:#FF6F00;color:#fff;padding:2px 6px;', 'top1='+r.topCluster+' ('+(r.topProb*100).toFixed(1)+'%) latency='+((r._meta && r._meta.latency_ms) || 0)+'ms');
+          } else {
+            console.warn('[BM B1 dispatch] predict returned null — feature build veya inference fail (F12 step1-4 log)');
           }
-        }).catch(function(e){ console.warn('[BM B1] predict exception:', e && e.message); });
+          try { if (typeof calc === 'function') calc(); } catch(e) {}
+        }).catch(function(e){
+          console.error('[BM B1 dispatch] predict exception:', e && e.message, e && e.stack);
+          try { if (typeof calc === 'function') calc(); } catch(_){}
+        });
       }
     }
   } catch (B1err) {
@@ -16283,6 +16298,8 @@ return `
 
           // D-1.9g: B1 kartı — ready ise kart, yükleniyor ise progress, idle ise gizli
           // D-1.9g-fix2: error state ayri (retry button), downloading/saving/initializing/ready transient mesaj
+          // D-1.9g-fix4: state='ready' + _b1r null durumu icin "inference cal-s-yor" intermediate
+          //              + 30s timeout fail message (silent fail teshisi)
           var _b1Card = '';
           if (_b1r && _b1r.top3 && _b1r.top3.length) {
             _b1Card = _card('Hierarchical (V19+B1)', _b1Color, _b1Bg, _b1r.top3, _starB1, _b1Tooltip);
@@ -16294,6 +16311,24 @@ return `
                 '<div style="font-size:11px;color:#c0392b;margin-bottom:5px">'+ (_p.message || 'Yükleme başarısız') +'</div>'+
                 '<button onclick="if(window.bmB1Retry)window.bmB1Retry()" style="font-size:10px;padding:3px 8px;background:#c0392b;color:#fff;border:0;border-radius:4px;cursor:pointer">Yeniden dene</button>'+
               '</div>';
+            } else if (_p && _p.state === 'ready') {
+              // D-1.9g-fix4: motor loaded ama inference henuz tamamlanmadi (_b1r null).
+              // inference timeout > 30s -> fail mesaji (silent fail teshis kolay olsun).
+              var _infStart = window.__b1InferenceStartTs || 0;
+              var _infElapsed = _infStart ? (Date.now() - _infStart) : 0;
+              if (_infStart && _infElapsed > 30000) {
+                _b1Card = '<div style="flex:1;min-width:0;background:'+_b1Bg+';border:1.5px dashed #c0392b;border-radius:8px;padding:7px 10px" title="'+_b1Tooltip+'">'+
+                  '<div style="font-size:10px;font-weight:700;color:#c0392b;margin-bottom:4px">Hierarchical (V19+B1) — inference fail</div>'+
+                  '<div style="font-size:11px;color:#c0392b;margin-bottom:5px">30 sn sonrası sonuç gelmedi. F12 Console (BM B1 inf step) kontrol.</div>'+
+                  '<button onclick="if(window.bmB1Retry)window.bmB1Retry()" style="font-size:10px;padding:3px 8px;background:#c0392b;color:#fff;border:0;border-radius:4px;cursor:pointer">Yeniden dene</button>'+
+                '</div>';
+              } else {
+                _b1Card = '<div style="flex:1;min-width:0;background:'+_b1Bg+';border:1.5px dashed '+_b1Color+';border-radius:8px;padding:7px 10px" title="'+_b1Tooltip+'">'+
+                  '<div style="font-size:10px;font-weight:700;color:'+_b1Color+';margin-bottom:4px">Hierarchical (V19+B1) — inference çalışıyor</div>'+
+                  '<div style="font-size:11px;color:'+_b1Color+'">Motor yüklendi, top-3 hesaplanıyor...</div>'+
+                  '<div style="height:4px;background:#fff;border-radius:2px;overflow:hidden;margin-top:4px"><div style="height:100%;background:'+_b1Color+';width:100%"></div></div>'+
+                '</div>';
+              }
             } else if (_p && _p.state && _p.state !== 'idle') {
               _b1Card = '<div style="flex:1;min-width:0;background:'+_b1Bg+';border:1.5px dashed '+_b1Color+';border-radius:8px;padding:7px 10px" title="'+_b1Tooltip+'">'+
                 '<div style="font-size:10px;font-weight:700;color:'+_b1Color+';margin-bottom:4px">Hierarchical (V19+B1) — yükleniyor</div>'+
@@ -21108,39 +21143,56 @@ syncBaslat();
   }
 
   // -- 109 feature build (89 V12 base + 20 yeni B1 extension) --
-  // 89 base: V12'nin buildFeatures c-kt-s- kullan-l-r (window.__bmV12LastFeatures veya re-extract).
-  // 20 yeni: hop flags, hop counts, mash, batch, marker counts. UI alanlar-ndan best-effort.
+  // D-1.9g-fix4: V12 buildFeatures **OBJECT** dondurur (key:value), array degil.
+  // featureList (V12 cluster labels.feature_list) ordering ile array'e cevir.
+  // 20 yeni: hop flags, dryhop count, bittering/aroma sums, mash, batch, marker counts.
   function buildB1Features(uiR) {
     if (typeof window.__bmBuildFeaturesV12 !== 'function') {
-      console.warn('[BM B1] __bmBuildFeaturesV12 yok');
-      return null;
+      console.warn('[BM B1 inf step1] __bmBuildFeaturesV12 yok'); return null;
     }
-    var base89 = window.__bmBuildFeaturesV12(uiR);
+    var featObj = window.__bmBuildFeaturesV12(uiR);
+    if (!featObj || typeof featObj !== 'object') {
+      console.warn('[BM B1 inf step1] featObj invalid typeof=' + typeof featObj); return null;
+    }
     var v12Labels = (typeof window.__bmGetV12ClusterLabels === 'function') ? window.__bmGetV12ClusterLabels() : null;
     var featureList = v12Labels && v12Labels.feature_list;
-    if (!base89 || !featureList || base89.length !== 89) {
-      console.warn('[BM B1] V12 89 feature alinamadi');
-      return null;
+    if (!featureList || !featureList.length) {
+      console.warn('[BM B1 inf step1] V12 cluster labels yok (feature_list missing) - V12 model loaded?'); return null;
     }
-    var ext20 = build20Extension(uiR);
+    // OBJECT -> ordered ARRAY (V12 predictSync ile ayni)
+    var base89 = new Array(featureList.length);
+    for (var i=0;i<featureList.length;i++) base89[i] = +featObj[featureList[i]] || 0;
+    if (base89.length !== 89) {
+      console.warn('[BM B1 inf step1] base89.length=' + base89.length + ' !== 89 (featureList.length=' + featureList.length + ')'); return null;
+    }
+    var ext20 = build20Extension(uiR, featObj);
+    if (!ext20 || ext20.length !== 20) {
+      console.warn('[BM B1 inf step1] ext20 invalid length=' + (ext20 ? ext20.length : 'null')); return null;
+    }
     var v109 = new Float32Array(109);
-    for (var i=0;i<89;i++) v109[i] = +base89[i] || 0;
+    for (var k=0;k<89;k++) v109[k] = +base89[k] || 0;
     for (var j=0;j<20;j++) v109[89+j] = +ext20[j] || 0;
     return v109;
   }
 
-  function build20Extension(uiR) {
+  function build20Extension(uiR, featObj) {
+    // D-1.9g-fix4: V1/V2 hibrit input destegi.
+    // Dispatcher rich data (uiR.hoplar/maltlar/katkilar with .gr/.t) +
+    //            __recipeV2 format (uiR.hopIds/katkiIds string ID listesi) ikisini de kabul eder.
+    // V1 format yoksa V2 hopIds fallback (sadece flags/diversity icin yeterli, bittering=0).
     var hops = (uiR && uiR.hoplar) || [];
     var katki = (uiR && uiR.katkilar) || [];
+    var hopIds = (uiR && uiR.hopIds) || hops.map(function(h){return h && h.id;}).filter(Boolean);
+    var katkiIds = (uiR && uiR.katkiIds) || katki.map(function(k){return k && k.id;}).filter(Boolean);
     var batch_l = +(uiR && uiR.hacim) || 0;
-    var og = +(uiR && uiR.og) || 0;
+    var og = +(uiR && (uiR.og || uiR._og)) || 0;
     // hop name patterns
     var rxList = [
       /\bcascade\b/i, /\bcitra\b/i, /\bgalaxy\b/i, /\bsimcoe\b/i, /\bcentennial\b/i, /\bamarillo\b/i
     ];
     var hopNames = (typeof HOPLAR !== 'undefined' && Array.isArray(HOPLAR))
-      ? hops.map(function(h){ var x = HOPLAR.find(function(z){return z && z.id===h.id;}); return ((x && x.ad) || h.id || '').toLowerCase(); })
-      : hops.map(function(h){ return (h.id || '').toLowerCase(); });
+      ? hopIds.map(function(id){ var x = HOPLAR.find(function(z){return z && z.id===id;}); return ((x && x.ad) || id || '').toLowerCase(); })
+      : hopIds.map(function(id){ return (id || '').toLowerCase(); });
     var seenSet = {}; for (var i=0;i<hopNames.length;i++) seenSet[hopNames[i]] = 1;
     var seen = Object.keys(seenSet);
     var flags = rxList.map(function(rx){ return seen.some(function(n){return rx.test(n);}) ? 1 : 0; });
@@ -21160,19 +21212,17 @@ syncBaslat();
     // mash
     var mashSteps = +(uiR && uiR.mash_steps) || 1;
     var mashEff = +(uiR && uiR.verim) || 0;
-    // markers
+    // markers — featObj parametre alindi, DRY (V12 OBJECT direkt key okuma)
+    if (!featObj && typeof window.__bmBuildFeaturesV12 === 'function') {
+      try { featObj = window.__bmBuildFeaturesV12(uiR); } catch(e) { featObj = null; }
+    }
     var markerKeys = ['has_brett','has_lacto','has_pedio','has_smoke','has_fruit','has_spice','has_coriander','has_orange_peel','has_chamomile','has_salt','has_chili','has_coffee'];
     var markerCount = 0;
-    var v12Labels = (typeof window.__bmGetV12ClusterLabels === 'function') ? window.__bmGetV12ClusterLabels() : null;
-    var v12Feats = (v12Labels && v12Labels.feature_list) || [];
-    var base89Map = {};
-    if (v12Feats.length && typeof window.__bmBuildFeaturesV12 === 'function') {
-      var b89 = window.__bmBuildFeaturesV12(uiR);
-      for (var ii=0;ii<v12Feats.length;ii++) base89Map[v12Feats[ii]] = b89[ii];
+    if (featObj && typeof featObj === 'object') {
+      for (var mi=0;mi<markerKeys.length;mi++) if (featObj[markerKeys[mi]]) markerCount++;
     }
-    for (var mi=0;mi<markerKeys.length;mi++) if (base89Map[markerKeys[mi]]) markerCount++;
-    var katkiActive = katki.length;
-    var sfs = (base89Map['katki_smoke'] || 0) + (base89Map['katki_fruit'] || 0) + (base89Map['katki_spice_herb'] || 0);
+    var katkiActive = katkiIds.length;
+    var sfs = featObj ? ((featObj['katki_smoke'] || 0) + (featObj['katki_fruit'] || 0) + (featObj['katki_spice_herb'] || 0)) : 0;
     return [
       flags[0], flags[1], flags[2], flags[3], flags[4], flags[5],
       diversity, dryHopCount,
@@ -21186,17 +21236,27 @@ syncBaslat();
   }
 
   // -- Inference: returns Promise<{topCluster, topProb, top3, probs, classes, _meta}> --
+  // D-1.9g-fix4: step1/2/3/4 log + explicit error catch + inference timing
   function predictCluster(uiR) {
+    console.log('[BM B1 inf step2] predictCluster start');
+    window.__b1InferenceStartTs = Date.now();
     return loadSession().then(function(sess){
+      console.log('[BM B1 inf step3] session ready, building 109 feature vec');
       var v = buildB1Features(uiR);
-      if (!v) return null;
+      if (!v) { console.warn('[BM B1 inf step3] buildB1Features returned null'); return null; }
       var input = new ort.Tensor('float32', v, [1, 109]);
       var inName = sess.inputNames[0];
       var feeds = {}; feeds[inName] = input;
+      var t0 = (typeof performance !== 'undefined' ? performance.now() : Date.now());
       return sess.run(feeds).then(function(out){
+        var dt = ((typeof performance !== 'undefined' ? performance.now() : Date.now()) - t0).toFixed(1);
+        console.log('[BM B1 inf step4] sess.run done ' + dt + 'ms outputs=' + sess.outputNames.join(','));
         var probKey = sess.outputNames.find(function(n){
           var t = out[n]; return t && t.dims && t.dims.length === 2 && t.dims[1] === 14;
         }) || sess.outputNames[sess.outputNames.length - 1];
+        if (!out[probKey] || !out[probKey].data) {
+          console.warn('[BM B1 inf step4] probKey=' + probKey + ' has no data'); return null;
+        }
         var probs = Array.from(out[probKey].data);
         var sorted = CLASSES.map(function(c, i){ return { cluster: c, displayTR: CLUSTER_TR[c], prob: probs[i] }; })
           .sort(function(a,b){ return b.prob - a.prob; });
@@ -21205,11 +21265,14 @@ syncBaslat();
           topCluster: sorted[0].cluster,
           topProb: sorted[0].prob,
           probs: probs, classes: CLASSES,
-          _meta: { motor: 'B1_LightGBM_109feat_14cat', sha8: B1_SHA8, model_url: B1_URL }
+          _meta: { motor: 'B1_LightGBM_109feat_14cat', sha8: B1_SHA8, model_url: B1_URL, latency_ms: +dt }
         };
         window.__lastB1ClusterResult = result;
         return result;
       });
+    }).catch(function(e){
+      console.error('[BM B1 inf] predictCluster exception:', e && e.message, e && e.stack);
+      throw e;
     });
   }
 
