@@ -21258,9 +21258,83 @@ syncBaslat();
     return b1;
   }
 
+  // -- D-1.9l: Fruit + Wheat marker post-process (D-1.9k applySmokeOverride aynasi) --
+  // Mango Wheat case: wheat malt baskin + fruit adjunct -> B1 specialty hatasini wheat'e override.
+  // Banana ester yeast-derived: KATKI_SIG.fruit pattern banana yok -> false positive guard.
+  // V12/V20/Hibrit slug DOKUNULMAZ.
+  function applyFruitWheatOverride(b1Result, featObj) {
+    if (!b1Result || !b1Result.top3 || !b1Result.top3.length) return b1Result;
+    var pw = +(featObj && featObj.pct_wheat) || 0;
+    var kf = +(featObj && featObj.katki_fruit) || 0;
+    var hf = +(featObj && featObj.has_fruit) || 0;
+    if (!kf && !hf) return b1Result;     // Fruit signal yok -> dokunma (Hefeweizen banana ester guard)
+    if (pw < 10) return b1Result;        // Wheat signal yok -> dokunma (Mango IPA gibi)
+    var top1 = b1Result.top3[0].cluster;
+    if (top1 === 'wheat') return b1Result;                       // Zaten wheat -> dokunma
+    if (top1 === 'sour' && pw >= 20) return b1Result;            // Fruited Berliner/Gose koru
+    // STRONG: wheat_pct>=50 + fruit + top1 in target clusters
+    var STRONG_WHEAT_OVERRIDE_CLUSTERS = ['specialty','ipa','saison','pale_ale','brown_ale'];
+    if (pw >= 50 && (kf || hf) && STRONG_WHEAT_OVERRIDE_CLUSTERS.indexOf(top1) >= 0) {
+      return overrideWheat(b1Result, top1, 'strong_fruit_wp' + Math.round(pw) + '_top1_' + top1);
+    }
+    // SOFT: wheat_pct>=30 + fruit -> wheat 2x boost + resort
+    if (pw >= 30 && (kf || hf)) {
+      return softBoostWheat(b1Result, 'soft_fruit_wp' + Math.round(pw) + (kf ? '_katki' : '_has'));
+    }
+    return b1Result;
+  }
+
+  function overrideWheat(b1, oldTop1, reason) {
+    var whIdx = -1;
+    for (var i = 0; i < b1.top3.length; i++) if (b1.top3[i].cluster === 'wheat') { whIdx = i; break; }
+    var whEntry;
+    if (whIdx >= 0) {
+      whEntry = b1.top3[whIdx];
+      b1.top3.splice(whIdx, 1);
+    } else {
+      var whClassIdx = (b1.classes || CLASSES).indexOf('wheat');
+      var whRawProb = (whClassIdx >= 0 && b1.probs) ? b1.probs[whClassIdx] : 0.10;
+      whEntry = { cluster: 'wheat', displayTR: CLUSTER_LABELS['wheat'] || 'Wheat', score: Math.max(whRawProb, 0.20), normalized: Math.max(Math.round(whRawProb*100), 20) };
+    }
+    whEntry.score = Math.max(whEntry.score, 0.55);
+    whEntry.normalized = Math.round(whEntry.score * 100);
+    b1.top3.unshift(whEntry);
+    if (b1.top3[1]) {
+      b1.top3[1].score = Math.min(b1.top3[1].score, 0.35);
+      b1.top3[1].normalized = Math.round(b1.top3[1].score * 100);
+    }
+    b1.top3 = b1.top3.slice(0, 3);
+    b1.topCluster = 'wheat';
+    b1.topProb = whEntry.score;
+    b1._fruitWheatOverride = reason;
+    console.log('%c[BM B1 fruit]','background:#FFB300;color:#fff;padding:2px 6px;', reason + ' | top1: ' + oldTop1 + ' -> wheat');
+    return b1;
+  }
+
+  function softBoostWheat(b1, reason) {
+    if (!b1.probs || !b1.classes) return b1;
+    var probs = b1.probs.slice();
+    var whIdx = b1.classes.indexOf('wheat');
+    if (whIdx < 0) return b1;
+    probs[whIdx] = probs[whIdx] * 2;
+    var sum = probs.reduce(function(s,p){return s+p;}, 0);
+    if (sum <= 0) return b1;
+    probs = probs.map(function(p){ return p / sum; });
+    var sorted = b1.classes.map(function(c,i){ return { cluster: c, displayTR: CLUSTER_LABELS[c] || c, prob: probs[i] }; })
+      .sort(function(a,b){ return b.prob - a.prob; });
+    b1.top3 = sorted.slice(0, 3).map(function(r){ return { cluster: r.cluster, displayTR: r.displayTR, score: r.prob, normalized: Math.round(r.prob*100) }; });
+    b1.topCluster = sorted[0].cluster;
+    b1.topProb = sorted[0].prob;
+    b1.probs = probs;
+    b1._fruitWheatOverride = reason;
+    console.log('%c[BM B1 fruit]','background:#FFB300;color:#fff;padding:2px 6px;', reason + ' | new top1: ' + b1.topCluster);
+    return b1;
+  }
+
   // -- Inference: returns Promise<{topCluster, topProb, top3, probs, classes, _meta}> --
   // D-1.9g-fix4: step1/2/3/4 log + explicit error catch + inference timing
   // D-1.9k: applySmokeOverride post-process result oluştuktan sonra cagrilir
+  // D-1.9l: applyFruitWheatOverride smoke override'dan sonra cagrilir (cakisma yok)
   function predictCluster(uiR) {
     console.log('[BM B1 inf step2] predictCluster start');
     window.__b1InferenceStartTs = Date.now();
@@ -21292,11 +21366,15 @@ syncBaslat();
           _meta: { motor: 'B1_LightGBM_109feat_14cat', sha8: B1_SHA8, model_url: B1_URL, latency_ms: +dt }
         };
         // D-1.9k: Smoke marker post-process — Rauchbier/Smoked Beer/Lichtenhainer/Grätzer override
+        // D-1.9l: Fruit+Wheat marker post-process — Mango Wheat case override (smoke override'dan SONRA)
         // V12/V20/Hibrit slug DOKUNULMAZ (Sub-sprint 4-19 transformative koruma intact).
         try {
           var _featObj = (typeof window.__bmBuildFeaturesV12 === 'function') ? window.__bmBuildFeaturesV12(uiR) : null;
-          if (_featObj) result = applySmokeOverride(result, _featObj);
-        } catch(e) { console.warn('[BM B1 smoke] override exception:', e && e.message); }
+          if (_featObj) {
+            result = applySmokeOverride(result, _featObj);
+            result = applyFruitWheatOverride(result, _featObj);
+          }
+        } catch(e) { console.warn('[BM B1 postprocess] override exception:', e && e.message); }
         window.__lastB1ClusterResult = result;
         return result;
       });
