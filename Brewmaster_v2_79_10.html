@@ -16023,16 +16023,18 @@ return `
       <div style="height:6px;background:${renk_hex}"></div>
       <div style="padding:14px">
         ${(()=>{
-          // V6 14-cluster cluster bilgi şeridi (Adım 5.5)
-          var _v6 = (typeof window!=='undefined' && window.__lastV6ClusterResult) ? window.__lastV6ClusterResult : null;
-          if (!_v6 || !_v6.top1) return '';
-          var _t1 = _v6.top1;
-          var _t2 = _v6.top3 && _v6.top3[1] ? _v6.top3[1] : null;
-          var _sub = _t2 ? ' <span style="color:var(--soluk);font-size:10px">· '+_t2.displayTR+' %'+_t2.confidence+'</span>' : '';
-          return '<div style="margin-bottom:8px;padding:5px 10px;background:rgba(25,118,210,0.08);border-left:3px solid #1976D2;border-radius:4px;font-size:11px;color:var(--yazi)">'+
-                 '<span style="font-weight:600;color:#1976D2">V6 Cluster:</span> '+
+          // D-1.9j Faz 1: V6 ribbon -> B1 LightGBM cluster ribbon (top-3, orijinal dil)
+          // V6 IIFE intact arka planda kalir (Adim 62 ensemble backlog).
+          var _b1 = (typeof window!=='undefined' && window.__lastB1ClusterResult) ? window.__lastB1ClusterResult : null;
+          if (!_b1 || !_b1.top3 || !_b1.top3.length) return '';
+          var _t = _b1.top3;
+          var _t1 = _t[0], _t2 = _t[1] || null, _t3 = _t[2] || null;
+          var _sub2 = _t2 ? ' <span style="color:var(--soluk);font-size:10px">· '+_t2.displayTR+' %'+_t2.normalized+'</span>' : '';
+          var _sub3 = _t3 ? ' <span style="color:var(--soluk);font-size:10px">· '+_t3.displayTR+' %'+_t3.normalized+'</span>' : '';
+          return '<div style="margin-bottom:8px;padding:5px 10px;background:rgba(255,111,0,0.08);border-left:3px solid #FF6F00;border-radius:4px;font-size:11px;color:var(--yazi)">'+
+                 '<span style="font-weight:600;color:#FF6F00">Cluster (B1 LightGBM):</span> '+
                  '<span style="font-weight:600">'+_t1.displayTR+'</span>'+
-                 ' <span style="color:var(--soluk)">%'+_t1.confidence+'</span>'+_sub+
+                 ' <span style="color:var(--soluk)">%'+_t1.normalized+'</span>'+_sub2+_sub3+
                  '</div>';
         })()}
         <div style="margin-bottom:14px">
@@ -16227,12 +16229,12 @@ return `
         })()}
         ${(()=>{
           // ═══ D-1.9g MOTOR KARŞILAŞTIRMASI — V12 + V20 + F1 Hibrit + B1 Hierarchical (4 motor) ═══
-          // V12 ana kart üstte zaten render edildi. Bu blok V20 + Hibrit + B1'i ek olarak gösterir.
+          // V12 ana kart üstte zaten render edildi. Bu blok V20 + Hibrit'i ek olarak gösterir.
+          // D-1.9j Faz 1: 4. kart "Hierarchical (V19+B1)" KALDIRILDI — B1 cluster top-3 üst ribbon'a taşındı.
           // Graceful: motor sonuçları yoksa ilgili kart boş string döner.
           var _v12r = window.__lastV12SlugResult;
           var _v20r = window.__lastV20SlugResult;
           var _f1r  = window.__lastF1HybridSlugResult;
-          var _b1r  = window.__lastB1ClusterResult;  // D-1.9g: B1 cluster top3 (lazy loaded)
           // V12+V20+F1 üçü olmalı, yoksa blok yok (mevcut davranış korunur)
           if (!_v12r || !_v12r.top3 || _v12r.top3.length === 0) return '';
           if (!_v20r || !_v20r.top3 || _v20r.top3.length === 0) return '';
@@ -16253,19 +16255,10 @@ return `
           var _v12Color = '#6A1B9A'; var _v12Bg = '#F3E5F5';   // mor (V12)
           var _v20Color = '#0277BD'; var _v20Bg = '#E1F5FE';   // mavi (V20)
           var _f1Color  = '#388E3C'; var _f1Bg  = '#E8F5E9';   // yeşil (Hibrit)
-          var _b1Color  = '#FF6F00'; var _b1Bg  = '#FFF3E0';   // turuncu (B1 Hierarchical)
           var _agreeColor = '#388E3C'; var _agreeBg = '#C8E6C9';
 
-          // D-1.9g: B1 ⭐ override — specialty/porter/lager/bock/brown_ale/strong_ale cluster'larda
-          // Phase B per-cluster keşif: B1 bu cluster'larda V19'dan +5-15pp daha doğru.
-          var _SPECIALTY_CLUSTERS = ['specialty','porter','lager','bock','brown_ale','strong_ale'];
-          var _b1Win = false;
-          if (_b1r && _b1r.topCluster && _SPECIALTY_CLUSTERS.indexOf(_b1r.topCluster) >= 0) {
-            _b1Win = true;
-          }
-          var _starV12 = (!_b1Win && !_allAgree && !_v20Win) ? ' <span title="Bu reçete için V12 (V19) en yüksek güven" style="color:#FFB300;font-size:13px">⭐</span>' : '';
-          var _starV20 = (!_b1Win && !_allAgree &&  _v20Win) ? ' <span title="Bu reçete için V20 (α=0.30) +5pp+ avantajlı" style="color:#FFB300;font-size:13px">⭐</span>' : '';
-          var _starB1  = _b1Win ? ' <span title="Bu reçete cluster\'ı için Hierarchical (B1 LightGBM) +5-15pp avantajlı (Phase B 5-fold CV)" style="color:#FFB300;font-size:13px">⭐</span>' : '';
+          var _starV12 = (!_allAgree && !_v20Win) ? ' <span title="Bu reçete için V12 (V19) en yüksek güven" style="color:#FFB300;font-size:13px">⭐</span>' : '';
+          var _starV20 = (!_allAgree &&  _v20Win) ? ' <span title="Bu reçete için V20 (α=0.30) +5pp+ avantajlı" style="color:#FFB300;font-size:13px">⭐</span>' : '';
           var _agreeBadge = _allAgree
             ? '<span style="display:inline-block;background:'+_agreeBg+';color:'+_agreeColor+';font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px;border:1px solid '+_agreeColor+'">✓ 3 motor uyumlu</span>'
             : '';
@@ -16294,63 +16287,19 @@ return `
           var _v12Tooltip = "V19 (V12) — Mainstream uzmanı. American IPA, Stout, Pale Lager gibi büyük slug'larda yüksek doğruluk.";
           var _v20Tooltip = "V20 (α=0.30) — Class-balanced retrain, küçük slug undertraining çözümü. Belgian Quadrupel, Brett Beer, Festbier gibi azınlık stillerde V19'dan +%14 daha doğru. KORUMA A 4 transformative slug korunmuş.";
           var _f1Tooltip  = "Hibrit (V19+V20) — V19 ve V20 prob distribution'larının saf %50/%50 ortalaması. İki motorun ortak kanıtı, denge motoru. 376K in-sample +0.34pp anlamlı.";
-          var _b1Tooltip  = "Hierarchical (V19+B1 LightGBM) — D-1.9g 138 MB cluster motoru. V12 buildFeatures (89) + 20 yeni feature → 14-cluster classification. Phase B 5-fold CV: full +2.57pp Δ vs V19, specialty +14.89pp, porter +9.65pp, lager +5.83pp, bock +5.04pp transformative. Non-rmwoods +4.13pp generalization gain (V19 source asimetri azaltıcı).";
-
-          // D-1.9g: B1 kartı — ready ise kart, yükleniyor ise progress, idle ise gizli
-          // D-1.9g-fix2: error state ayri (retry button), downloading/saving/initializing/ready transient mesaj
-          // D-1.9g-fix4: state='ready' + _b1r null durumu icin "inference cal-s-yor" intermediate
-          //              + 30s timeout fail message (silent fail teshisi)
-          var _b1Card = '';
-          if (_b1r && _b1r.top3 && _b1r.top3.length) {
-            _b1Card = _card('Hierarchical (V19+B1)', _b1Color, _b1Bg, _b1r.top3, _starB1, _b1Tooltip);
-          } else if (window.BM_B1 && typeof window.BM_B1.progress === 'function') {
-            var _p = window.BM_B1.progress();
-            if (_p && _p.state === 'error') {
-              _b1Card = '<div style="flex:1;min-width:0;background:'+_b1Bg+';border:1.5px dashed #c0392b;border-radius:8px;padding:7px 10px" title="'+_b1Tooltip+'">'+
-                '<div style="font-size:10px;font-weight:700;color:#c0392b;margin-bottom:4px">Hierarchical (V19+B1) — hata</div>'+
-                '<div style="font-size:11px;color:#c0392b;margin-bottom:5px">'+ (_p.message || 'Yükleme başarısız') +'</div>'+
-                '<button onclick="if(window.bmB1Retry)window.bmB1Retry()" style="font-size:10px;padding:3px 8px;background:#c0392b;color:#fff;border:0;border-radius:4px;cursor:pointer">Yeniden dene</button>'+
-              '</div>';
-            } else if (_p && _p.state === 'ready') {
-              // D-1.9g-fix4: motor loaded ama inference henuz tamamlanmadi (_b1r null).
-              // inference timeout > 30s -> fail mesaji (silent fail teshis kolay olsun).
-              var _infStart = window.__b1InferenceStartTs || 0;
-              var _infElapsed = _infStart ? (Date.now() - _infStart) : 0;
-              if (_infStart && _infElapsed > 30000) {
-                _b1Card = '<div style="flex:1;min-width:0;background:'+_b1Bg+';border:1.5px dashed #c0392b;border-radius:8px;padding:7px 10px" title="'+_b1Tooltip+'">'+
-                  '<div style="font-size:10px;font-weight:700;color:#c0392b;margin-bottom:4px">Hierarchical (V19+B1) — inference fail</div>'+
-                  '<div style="font-size:11px;color:#c0392b;margin-bottom:5px">30 sn sonrası sonuç gelmedi. F12 Console (BM B1 inf step) kontrol.</div>'+
-                  '<button onclick="if(window.bmB1Retry)window.bmB1Retry()" style="font-size:10px;padding:3px 8px;background:#c0392b;color:#fff;border:0;border-radius:4px;cursor:pointer">Yeniden dene</button>'+
-                '</div>';
-              } else {
-                _b1Card = '<div style="flex:1;min-width:0;background:'+_b1Bg+';border:1.5px dashed '+_b1Color+';border-radius:8px;padding:7px 10px" title="'+_b1Tooltip+'">'+
-                  '<div style="font-size:10px;font-weight:700;color:'+_b1Color+';margin-bottom:4px">Hierarchical (V19+B1) — inference çalışıyor</div>'+
-                  '<div style="font-size:11px;color:'+_b1Color+'">Motor yüklendi, top-3 hesaplanıyor...</div>'+
-                  '<div style="height:4px;background:#fff;border-radius:2px;overflow:hidden;margin-top:4px"><div style="height:100%;background:'+_b1Color+';width:100%"></div></div>'+
-                '</div>';
-              }
-            } else if (_p && _p.state && _p.state !== 'idle') {
-              _b1Card = '<div style="flex:1;min-width:0;background:'+_b1Bg+';border:1.5px dashed '+_b1Color+';border-radius:8px;padding:7px 10px" title="'+_b1Tooltip+'">'+
-                '<div style="font-size:10px;font-weight:700;color:'+_b1Color+';margin-bottom:4px">Hierarchical (V19+B1) — yükleniyor</div>'+
-                '<div style="font-size:11px;color:'+_b1Color+'">'+ (_p.message || '') +'</div>'+
-                '<div style="height:4px;background:#fff;border-radius:2px;overflow:hidden;margin-top:4px"><div style="height:100%;background:'+_b1Color+';width:'+(_p.percent||0)+'%;transition:width .3s ease"></div></div>'+
-              '</div>';
-            }
-          }
 
           return '<div style="margin-top:10px;padding:8px;background:rgba(180,120,20,.04);border:1px dashed var(--bor);border-radius:6px">'+
             '<div style="font-size:11px;font-weight:700;color:var(--kahve);margin-bottom:6px;display:flex;align-items:center">'+
-              '<span>🎯 Motor Karşılaştırması (V12 + V20 + Hibrit + Hierarchical)</span>'+_agreeBadge+
+              '<span>🎯 Motor Karşılaştırması (V12 + V20 + Hibrit)</span>'+_agreeBadge+
             '</div>'+
             '<div style="display:flex;flex-direction:column;gap:6px">'+
               _card('V12 (V19)', _v12Color, _v12Bg, _v12r.top3, _starV12, _v12Tooltip)+
               _card('V20 (α=0.30)', _v20Color, _v20Bg, _v20r.top3, _starV20, _v20Tooltip)+
               _card('Hibrit (V19+V20)', _f1Color, _f1Bg, _f1r.top3, '', _f1Tooltip)+
-              _b1Card+
             '</div>'+
             '<div style="font-size:9px;color:var(--soluk);margin-top:5px;line-height:1.4">'+
-              "V12 ana kart başlığı + BJCP karşılaştırması post-process'li V12 sonucuna bağlı (Sub-sprint 17-20). V20 + Hibrit + B1 raw model çıktısı (post-process YOK)."+
-              (_b1Win ? ' B1 cluster ('+(_b1r&&_b1r.topCluster)+') Phase B kanıtlı +5-15pp avantajlı (⭐).' : (_allAgree ? '' : (_v20Win ? ' V20 bu reçete için +5pp avantajlı (⭐).' : ' V12 bu reçete için en yüksek güven (⭐).')))+
+              "V12 ana kart başlığı + BJCP karşılaştırması post-process'li V12 sonucuna bağlı (Sub-sprint 17-20). V20 + Hibrit raw model çıktısı (post-process YOK). B1 cluster top-3 üst ribbon (turuncu)."+
+              (_allAgree ? '' : (_v20Win ? ' V20 bu reçete için +5pp avantajlı (⭐).' : ' V12 bu reçete için en yüksek güven (⭐).'))+
             '</div>'+
           '</div>';
         })()}
@@ -21023,7 +20972,9 @@ syncBaslat();
   const IDB_STORE = 'onnx';
   const IDB_KEY = 'b1_' + B1_SHA8;
   const CLASSES = ['bock','brown_ale','ipa','lager','lager_dark','pale_ale','pilsner','porter','saison','sour','specialty','stout','strong_ale','wheat'];
-  const CLUSTER_TR = {bock:'Bock',brown_ale:'Brown Ale',ipa:'IPA',lager:'Lager',lager_dark:'Koyu Lager',pale_ale:'Pale Ale',pilsner:'Pilsner',porter:'Porter',saison:'Saison',sour:'Eksi',specialty:'Ozel',stout:'Stout',strong_ale:'Guclu Ale',wheat:'Bugday'};
+  // D-1.9j Faz 1 Kaan onayli Taslak A: orijinal dil (homebrew topluluğu İngilizce standart).
+  // Eski TR ASCII (Bugday/Eksi/Ozel/Guclu Ale/Koyu Lager) KALDIRILDI.
+  const CLUSTER_LABELS = {bock:'Bock',brown_ale:'Brown Ale',ipa:'IPA',lager:'Lager',lager_dark:'Dark Lager',pale_ale:'Pale Ale',pilsner:'Pilsner',porter:'Porter',saison:'Saison',sour:'Sour',specialty:'Specialty',stout:'Stout',strong_ale:'Strong Ale',wheat:'Wheat'};
 
   // -- IndexedDB helpers (lazy cache) --
   function idbOpen() {
@@ -21258,7 +21209,7 @@ syncBaslat();
           console.warn('[BM B1 inf step4] probKey=' + probKey + ' has no data'); return null;
         }
         var probs = Array.from(out[probKey].data);
-        var sorted = CLASSES.map(function(c, i){ return { cluster: c, displayTR: CLUSTER_TR[c], prob: probs[i] }; })
+        var sorted = CLASSES.map(function(c, i){ return { cluster: c, displayTR: CLUSTER_LABELS[c], prob: probs[i] }; })
           .sort(function(a,b){ return b.prob - a.prob; });
         var result = {
           top3: sorted.slice(0, 3).map(function(r){ return { cluster: r.cluster, displayTR: r.displayTR, score: r.prob, normalized: Math.round(r.prob*100) }; }),
