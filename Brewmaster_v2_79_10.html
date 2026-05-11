@@ -465,8 +465,9 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
   (function migrateOldMotor(){
     try {
       const old = localStorage.getItem(TOGGLE_KEY);
-      if (old && old !== 'V12' && old !== 'V2c' && old !== 'V6') {
-        console.log('%c[BM Motor Migration] ' + old + ' -> V12 (V19) DEFAULT (Adim 51 toggle temizligi)', 'background:#6A1B9A;color:#fff;padding:3px 8px;font-weight:700;');
+      // D-1.9n: 'V6' valid listesinden cikarildi (V6 IIFE D-1.9m'de kaldirildi)
+      if (old && old !== 'V12' && old !== 'V2c') {
+        console.log('%c[BM Motor Migration] ' + old + ' -> V12 (V19) DEFAULT (D-1.9m V6 IIFE removal sonrasi)', 'background:#6A1B9A;color:#fff;padding:3px 8px;font-weight:700;');
         localStorage.setItem(TOGGLE_KEY, 'V12');
       }
     } catch(e) {}
@@ -15385,11 +15386,11 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
   // Holdout (840/260, seed 42): top-1 73.8%  top-3 80.8%  top-5 81.5%
   // RF YOK — geçmişte placeholder'dı, dürüstçe çıkartıldı
   // V6 14-cluster + V12 dispatcher (Adım 5.5 hotfix — eski V6 1100 reçete kaldırıldı, yeni V6 aktif)
-  var __top3V6_engine = null;
-  var __v6_meta = null;
+  var __top3V12_engine = null;
+  var __v12_meta = null;
 
-  // D-1.9m: V6 dispatcher KALDIRILDI (D-1.9i: B1 14/14 cluster üstün, V6 dead code temizlik).
-  // V6 IIFE de kaldırıldı (line ~2759-2896). __top3V6_engine + __v6_meta isimleri V12 verisi tasir, korundu.
+  // D-1.9m: V6 dispatcher + IIFE KALDIRILDI (D-1.9i: B1 14/14 cluster üstün, V6 dead code temizlik).
+  // D-1.9n: Yukarıdaki __top3V12_engine + __v12_meta eskiden __top3V6_engine + __v6_meta idi (legacy isim, V12 verisi tasiyordu, rename edildi).
 
   // === V12 (V19) dispatcher (Adım 5.5: eski V6 guard'ından decouple, bağımsız try) ===
   try {
@@ -15424,8 +15425,8 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
           try {
             var __v12Slug = window.BM_V12.predictSlugSync(__recipeV2);
             if (__v12Slug) {
-              __top3V6_engine = __v12Slug.topN || __v12Slug.top3;
-              __v6_meta = __v12Slug._meta;
+              __top3V12_engine = __v12Slug.topN || __v12Slug.top3;
+              __v12_meta = __v12Slug._meta;
               window.__lastV12SlugResult = __v12Slug;
               window.__lastV12Slug = __v12Slug;
               window.__lastV12Result = __v12Slug;
@@ -15436,16 +15437,16 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
               window.__bmV12DispatchInfo.slugReturnedNull = true;
               console.warn('[BM V12 slug] predictSlugSync returned null');
               if (__v12Cluster) {
-                __top3V6_engine = __v12Cluster.top3;
-                __v6_meta = Object.assign({}, __v12Cluster._meta, {motor: 'V12_cluster_slug_null'});
+                __top3V12_engine = __v12Cluster.top3;
+                __v12_meta = Object.assign({}, __v12Cluster._meta, {motor: 'V12_cluster_slug_null'});
               }
             }
           } catch (slugErr) {
             window.__bmV12DispatchInfo.error = String(slugErr);
             console.error('[BM V12 slug] predictSlugSync exception:', slugErr);
             if (__v12Cluster) {
-              __top3V6_engine = __v12Cluster.top3;
-              __v6_meta = Object.assign({}, __v12Cluster._meta, {motor: 'V12_cluster_slug_exception'});
+              __top3V12_engine = __v12Cluster.top3;
+              __v12_meta = Object.assign({}, __v12Cluster._meta, {motor: 'V12_cluster_slug_exception'});
             }
           }
         } else {
@@ -15458,8 +15459,8 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
             console.warn('[BM V12 Slug] fetch fail — cluster fallback:', e && e.message);
           });
           if (__v12Cluster) {
-            __top3V6_engine = __v12Cluster.top3;
-            __v6_meta = Object.assign({}, __v12Cluster._meta, {motor: 'V12_cluster_pending_slug'});
+            __top3V12_engine = __v12Cluster.top3;
+            __v12_meta = Object.assign({}, __v12Cluster._meta, {motor: 'V12_cluster_pending_slug'});
           }
         }
       } else {
@@ -15872,7 +15873,7 @@ return `
       <div style="padding:14px">
         ${(()=>{
           // D-1.9j Faz 1: V6 ribbon -> B1 LightGBM cluster ribbon (top-3, orijinal dil)
-          // V6 IIFE intact arka planda kalir (Adim 62 ensemble backlog).
+          // D-1.9m: V6 IIFE kaldırıldı (V6 vs B1 head-to-head B1 14/14 üstün). JSON yedek repo'da, git history rollback.
           var _b1 = (typeof window!=='undefined' && window.__lastB1ClusterResult) ? window.__lastB1ClusterResult : null;
           if (!_b1 || !_b1.top3 || !_b1.top3.length) return '';
           var _t = _b1.top3;
@@ -15895,9 +15896,9 @@ return `
               let _v12Title = null;
               let _v12Confidence = null;
               let _v12IsSlugLevel = false;
-              if (typeof __top3V6_engine !== 'undefined' && __top3V6_engine && __top3V6_engine.length && typeof window!=='undefined' && window.bmSlugToBjcp) {
-                _v12Title = window.bmSlugToBjcp(__top3V6_engine[0].slug, __top3V6_engine[0].displayTR);
-                _v12Confidence = __top3V6_engine[0].normalized;
+              if (typeof __top3V12_engine !== 'undefined' && __top3V12_engine && __top3V12_engine.length && typeof window!=='undefined' && window.bmSlugToBjcp) {
+                _v12Title = window.bmSlugToBjcp(__top3V12_engine[0].slug, __top3V12_engine[0].displayTR);
+                _v12Confidence = __top3V12_engine[0].normalized;
                 _v12IsSlugLevel = !!(window.BM_V12 && window.BM_V12.isSlugReady && window.BM_V12.isSlugReady());
               }
               // Belirsiz kuralı: SADECE slug-model'den geldiyse + conf < 20
@@ -15953,8 +15954,8 @@ return `
           const _enableFamilyFilter = (_motor === 'V12') && window.bmSlugFamily;
           let _v5TopBjcp = null;
           let _v5CrossFlags = [false, false, false];  // 🔀 işareti her ribbon slot için
-          if (typeof __top3V6_engine !== 'undefined' && __top3V6_engine && __top3V6_engine.length) {
-            const _rawPool = __top3V6_engine;  // V12: 10 slug, legacy motorlar: 3 slug
+          if (typeof __top3V12_engine !== 'undefined' && __top3V12_engine && __top3V12_engine.length) {
+            const _rawPool = __top3V12_engine;  // V12: 10 slug, legacy motorlar: 3 slug
             let _picked;
             if (_enableFamilyFilter && _rawPool[0] && _rawPool[0].slug) {
               const _f1 = window.bmSlugFamily(_rawPool[0].slug);
@@ -16047,10 +16048,10 @@ return `
                   (active ? 'background:'+bg+';color:#fff;font-weight:700' : 'background:#fff;color:'+bg+';font-weight:500');
                 return '<button onclick="window.bmSetMotor(\''+v+'\')" title="'+title+'" style="'+style+'">'+(active?'✓ ':'')+label+'</button>';
               }
-              // Adım 51 toggle temizliği — V8.5/V9/V10/V10.1 UI'dan kaldırıldı, motor scripts kalıyor (debug),
-              // model dosyaları archive/ klasöründe. Sadece V6 (KNN, eski) + V12 (V19 XGBoost, default).
+              // Adım 51 toggle temizliği — V8.5/V9/V10/V10.1 UI'dan kaldırıldı, model dosyaları archive/ klasöründe.
+              // D-1.9m: V6 (KNN) IIFE kaldırıldı (V6 vs B1 head-to-head B1 14/14 üstün). UI butonu da bu satırda silindi.
+              // Aktif slug motorları: V12 (V19 default), V20 (alpha=0.30), Hibrit (V19+V20 mean). B1 cluster ribbon üstte.
               return '<span style="display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap">'+
-                btn('V6', 'V6 (KNN)', '#558B2F', 'V6 KNN — 1100 reçete (eski/küçük model)')+
                 btn('V12', 'V12 (V19) ⭐', '#6A1B9A', 'V12 DEFAULT — V19 XGBoost (Adim 58 + V28f Hefeweizen + V28g Rye Ale + V28h_v2 Dunkelweizen + V28i Witbier + V28j_a Filtre A AWB->Hefe wider 202 reslug + base_score fix, 91 slug, slug t1 0.5706 / 14cat 0.6995, gap 4.90 PASS)')+
               '</span>';
             })() : '')+
@@ -16158,10 +16159,10 @@ return `
           // V5/V12 top-1 → BJCP key — DRY tek fonksiyon (window.bmSlugToBjcp)
           if (typeof S !== 'undefined' && S.stil && _bjcp[S.stil]) {
             stil_tah = S.stil;
-          } else if (typeof __top3V6_engine !== 'undefined' && __top3V6_engine && __top3V6_engine.length) {
-            const _v5Key = window.bmSlugToBjcp ? window.bmSlugToBjcp(__top3V6_engine[0].slug, __top3V6_engine[0].displayTR) : null;
+          } else if (typeof __top3V12_engine !== 'undefined' && __top3V12_engine && __top3V12_engine.length) {
+            const _v5Key = window.bmSlugToBjcp ? window.bmSlugToBjcp(__top3V12_engine[0].slug, __top3V12_engine[0].displayTR) : null;
             if (_v5Key) stil_tah = _v5Key;
-            else stil_tah = __top3V6_engine[0].displayTR || __top3V6_engine[0].slug || stil_tah;
+            else stil_tah = __top3V12_engine[0].displayTR || __top3V12_engine[0].slug || stil_tah;
           }
           const _stKey=(typeof S !== 'undefined' && S.stil && _bjcp[S.stil]) ? S.stil : (alt_stil && _bjcp[alt_stil] ? alt_stil : stil_tah);
           const _stRef=_bjcp[_stKey];
