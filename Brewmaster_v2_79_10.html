@@ -723,6 +723,9 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     var yeast_wheat_german = (mt === 'wheat') ? 1 : 0;
     var yeast_wit = (mt === 'wit') ? 1 : 0;
     var yeast_sour_blend = (mt === 'sour') ? 1 : 0;
+    // D-1.9q: yeast_neipa Vermont/Kveik/NEIPA blend strain detection (postProcess only, model'e girmez)
+    var NEIPA_YEAST_IDS = ['verdant','imp_a38','bb_belc_neipa33','bb_ing04','kveikv','kveiko','kveik_fg','oyl061','oyl091','oyl090','oyl057','oyl071','bb22a','bb22b','mj_m44'];
+    var yeast_neipa = (NEIPA_YEAST_IDS.indexOf(mid) >= 0) ? 1 : 0;
 
     // Brett/lacto/pedio yeast string regex (V12 mevcut versiyondan korunuyor, mid+mAd üzerinde)
     var hasBrett = /\bbrett(anomyces)?\b|\bwlp\s*0?(644|645|648|650|651|652|653|654|655|656|660|665|670|671|672|4639)\b|\bwy?\s*0?5(112|151|526|512|733|378)\b|bruxellensis|lambicus|drie|trois|clausenii/.test(yeastStr);
@@ -760,7 +763,7 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
       yeast_brett: hasBrett ? 1 : 0,
       yeast_lacto: hasLacto ? 1 : 0,
       yeast_sour_blend: yeast_sour_blend,
-      yeast_witbier: yeast_witbier, yeast_wheat_german: yeast_wheat_german, yeast_wit: yeast_wit,
+      yeast_witbier: yeast_witbier, yeast_wheat_german: yeast_wheat_german, yeast_wit: yeast_wit, yeast_neipa: yeast_neipa,
       hop_american_c: _flag(HOP_SIG.american_c, hopAdStr),
       hop_english:    _flag(HOP_SIG.english, hopAdStr),
       hop_german:     _flag(HOP_SIG.german, hopAdStr),
@@ -2469,6 +2472,65 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     return {sorted: sorted, reason: firstMeaningful || 'no_trigger', applied: false};
   }
 
+  // D-1.9q: NEIPA post-process — class imbalance fix (NEIPA n=134, AIPA 412x dominant)
+  // Memory Adim 59 kazanim #1: NEIPA collapse kok sebep TMF parser fail. Bu UI palyatif.
+  // V12 top-1 != NEIPA + (yeast_neipa OR oats high + IBU mid) + ABV/OG guard -> top-1 NEIPA
+  function postProcessNeipa(featObj, sorted) {
+    if (!sorted || !sorted.length) return {sorted: sorted, reason: 'empty', applied: false};
+    var f = featObj || {};
+    var top1 = sorted[0].cls;
+    if (top1 === 'juicy_or_hazy_india_pale_ale') return {sorted: sorted, reason: 'already_neipa', applied: false};
+    var og = +f.og || 0, abv = +f.abv || 0, ibu = +f.ibu || 0;
+    // Guard: Pale Ale zone (OG<1.052, ABV<4.8) -> APA korunur, NEIPA degil
+    if (og < 1.052 || abv < 4.8) return {sorted: sorted, reason: 'og_abv_too_low_apa_zone', applied: false};
+    // Guard: West Coast IPA zone (IBU>=80) -> WCIPA muhtemel, NEIPA degil
+    if (ibu >= 80) return {sorted: sorted, reason: 'ibu_too_high_wcipa', applied: false};
+    // Trigger: yeast_neipa (Vermont/Kveik) OR (pct_oats>=15 + IBU<55 + mouthfeel hazy)
+    var hasNeipaSignal = (f.yeast_neipa || 0) > 0 || ((f.pct_oats || 0) >= 15 && ibu < 55);
+    if (!hasNeipaSignal) return {sorted: sorted, reason: 'no_trigger', applied: false};
+    // NEIPA top-3'te bul, top-1'e tasi
+    var neipaIdx = -1;
+    for (var i = 0; i < sorted.length; i++) if (sorted[i].cls === 'juicy_or_hazy_india_pale_ale') { neipaIdx = i; break; }
+    if (neipaIdx < 0) return {sorted: sorted, reason: 'neipa_not_in_classes', applied: false};
+    if (neipaIdx === 0) return {sorted: sorted, reason: 'already_neipa', applied: false};
+    var ns = sorted.slice();
+    var neipa = ns.splice(neipaIdx, 1)[0];
+    // Prob boost: NEIPA min 0.50, eski top-1 max 0.35
+    neipa.prob = Math.max(neipa.prob, 0.50);
+    ns[0].prob = Math.min(ns[0].prob, 0.35);
+    ns.unshift(neipa);
+    var reason = 'neipa_applied_' + (f.yeast_neipa ? 'yeast' : 'oats_ibu');
+    return {sorted: ns, reason: reason, applied: true};
+  }
+
+  // D-1.9q: white_ipa post-process — Memory Adim 59 kazanim #2: AIPA'ya %44.7 kaciyor (witbier'a %0.8)
+  // V12 top-1=AIPA + pct_wheat>=20 + (yeast_witbier OR yeast_belgian OR has_coriander) -> white_ipa
+  function postProcessWhiteIpa(featObj, sorted) {
+    if (!sorted || !sorted.length) return {sorted: sorted, reason: 'empty', applied: false};
+    var f = featObj || {};
+    var top1 = sorted[0].cls;
+    if (top1 === 'white_ipa') return {sorted: sorted, reason: 'already_white_ipa', applied: false};
+    // Sub-sprint 5-ter Witbier W3 emsali: top-1=belgian_witbier dokunmaz (Witbier kazanimi korunur)
+    if (top1 === 'belgian_witbier') return {sorted: sorted, reason: 'witbier_top1_protect', applied: false};
+    // Pre-condition: top-1=AIPA (Adim 59 kanit: %44.7 white_ipa AIPA'ya kaciyor)
+    if (top1 !== 'american_india_pale_ale') return {sorted: sorted, reason: 'not_aipa_top1', applied: false};
+    // Trigger: wheat>=20 + (Belgian/Witbier yeast OR coriander)
+    if ((f.pct_wheat || 0) < 20) return {sorted: sorted, reason: 'wheat_too_low', applied: false};
+    var belgianSig = (f.yeast_witbier || 0) > 0 || (f.yeast_belgian || 0) > 0 || (f.has_coriander || 0) > 0;
+    if (!belgianSig) return {sorted: sorted, reason: 'no_belgian_signal', applied: false};
+    // white_ipa entry top-3'te bul, top-1'e tasi
+    var whIdx = -1;
+    for (var i = 0; i < sorted.length; i++) if (sorted[i].cls === 'white_ipa') { whIdx = i; break; }
+    if (whIdx < 0) return {sorted: sorted, reason: 'white_ipa_not_in_classes', applied: false};
+    if (whIdx === 0) return {sorted: sorted, reason: 'already_white_ipa', applied: false};
+    var ns = sorted.slice();
+    var wh = ns.splice(whIdx, 1)[0];
+    wh.prob = Math.max(wh.prob, 0.50);
+    ns[0].prob = Math.min(ns[0].prob, 0.35);
+    ns.unshift(wh);
+    return {sorted: ns, reason: 'white_ipa_applied_wheat_belgian', applied: true};
+  }
+
   function predictSlugSync(uiRecipe) {
     if (!cache.slugModel || !cache.slugLabels) return null;
     const featObj = buildFeatures(uiRecipe); if (!featObj) return null;
@@ -2507,12 +2569,17 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     sorted = ppLd.sorted;
     var ppSp = postProcessSpecialty(featObj, sorted);
     sorted = ppSp.sorted;
+    // D-1.9q: NEIPA + white_ipa postProcess (Sub-sprint chain sonunda — class imbalance fix)
+    var ppN = postProcessNeipa(featObj, sorted);
+    sorted = ppN.sorted;
+    var ppWI = postProcessWhiteIpa(featObj, sorted);
+    sorted = ppWI.sorted;
     const fmt = function(x){return {slug:x.cls, displayTR:slugDisplay(x.cls), score:x.prob, normalized:Math.round(x.prob*100)};};
     return {
       top3: sorted.slice(0,3).map(fmt),
       top5: sorted.slice(0,5).map(fmt),
       topN: sorted.slice(0,10).map(fmt),  // Bug 4 same-family filter için 10 slug pool
-      _meta: {motor:'V12_slug_V16model', n_classes:cache.slugLabels.classes.length, witbier_w3_pp: ppW.reason, witbier_w3_applied: ppW.applied, sour_pp: ppS.reason, sour_applied: ppS.applied, belgian_pp: ppB.reason, belgian_applied: ppB.applied, porter_pp: ppP.reason, porter_applied: ppP.applied, strong_ale_pp: ppA.reason, strong_ale_applied: ppA.applied, stout_pp: ppT.reason, stout_applied: ppT.applied, brown_ale_pp: ppBA.reason, brown_ale_applied: ppBA.applied, bock_pp: ppBO.reason, bock_applied: ppBO.applied, lager_pp: ppLG.reason, lager_applied: ppLG.applied, ipa_pp: ppI.reason, ipa_applied: ppI.applied, pilsner_pp: ppPi.reason, pilsner_applied: ppPi.applied, pale_ale_pp: ppPa.reason, pale_ale_applied: ppPa.applied, saison_pp: ppSa.reason, saison_applied: ppSa.applied, lager_dark_pp: ppLd.reason, lager_dark_applied: ppLd.applied, specialty_pp: ppSp.reason, specialty_applied: ppSp.applied}
+      _meta: {motor:'V12_slug_V16model', n_classes:cache.slugLabels.classes.length, witbier_w3_pp: ppW.reason, witbier_w3_applied: ppW.applied, sour_pp: ppS.reason, sour_applied: ppS.applied, belgian_pp: ppB.reason, belgian_applied: ppB.applied, porter_pp: ppP.reason, porter_applied: ppP.applied, strong_ale_pp: ppA.reason, strong_ale_applied: ppA.applied, stout_pp: ppT.reason, stout_applied: ppT.applied, brown_ale_pp: ppBA.reason, brown_ale_applied: ppBA.applied, bock_pp: ppBO.reason, bock_applied: ppBO.applied, lager_pp: ppLG.reason, lager_applied: ppLG.applied, ipa_pp: ppI.reason, ipa_applied: ppI.applied, pilsner_pp: ppPi.reason, pilsner_applied: ppPi.applied, pale_ale_pp: ppPa.reason, pale_ale_applied: ppPa.applied, saison_pp: ppSa.reason, saison_applied: ppSa.applied, lager_dark_pp: ppLd.reason, lager_dark_applied: ppLd.applied, specialty_pp: ppSp.reason, specialty_applied: ppSp.applied, neipa_pp: ppN.reason, neipa_applied: ppN.applied, white_ipa_pp: ppWI.reason, white_ipa_applied: ppWI.applied}
     };
   }
   // Adım 61 P2 Adım 3 — V6 motor için buildFeatures expose
