@@ -21079,13 +21079,21 @@ syncBaslat();
     if (sessionPromise) return sessionPromise;
     if (!window.ort) { console.warn('[BM B1] onnxruntime-web yuklenmedi'); return Promise.reject(new Error('ort missing')); }
     try {
-      ort.env.wasm.numThreads = Math.min(4, navigator.hardwareConcurrency || 1);
+      // D-1.9g-fix3: GitHub Pages COOP/COEP yok → SharedArrayBuffer yok → threaded WASM crash
+      // numThreads=1 + proxy=false ile ort-wasm-simd-threaded.jsep.mjs dynamic import'unu engelle
+      ort.env.wasm.numThreads = 1;
       ort.env.wasm.simd = true;
+      ort.env.wasm.proxy = false;
       ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.21.0/dist/';
     } catch(e){}
     sessionPromise = loadOnnxBytes().then(function(buf){
       setProgress('initializing', 100, 'ONNX Runtime baslat-l-yor...');
-      return ort.InferenceSession.create(buf, { executionProviders: ['wasm'] });
+      // D-1.9g-fix3: sequential executionMode + graph opt — single-thread tutarli
+      return ort.InferenceSession.create(buf, {
+        executionProviders: ['wasm'],
+        graphOptimizationLevel: 'all',
+        executionMode: 'sequential'
+      });
     }).then(function(sess){
       console.log('%c[BM B1 LightGBM] ONNX session haz-r','background:#FF6F00;color:#fff;padding:2px 6px;');
       setProgress('ready', 100, 'Hierarchical motor aktif');
