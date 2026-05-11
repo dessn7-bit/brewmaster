@@ -21186,8 +21186,81 @@ syncBaslat();
     ];
   }
 
+  // -- D-1.9k: Smoke marker post-process --
+  // Sub-sprint 4-19 V12 slug Rauchbier KORUMA emsali, B1 cluster ribbon icin uyarlandi.
+  // featObj.pct_smoked (V12 buildFeatures cikti) + katki_smoke kontrol.
+  // V12/V20/Hibrit slug DOKUNULMAZ — sadece B1 cluster ribbon override.
+  function applySmokeOverride(b1Result, featObj) {
+    if (!b1Result || !b1Result.top3 || !b1Result.top3.length) return b1Result;
+    var ps = +(featObj && featObj.pct_smoked) || 0;
+    var ks = +(featObj && featObj.katki_smoke) || 0;
+    if (ps < 5 && !ks) return b1Result; // Hic smoke yok -> dokunma
+    var top1 = b1Result.top3[0].cluster;
+    if (top1 === 'specialty') return b1Result; // Zaten specialty -> dokunma
+    if (top1 === 'porter' && ps < 50) return b1Result; // Smoked Porter porter cluster dogru
+    // STRONG smoke: ps>=20 AND top1 in [lager, lager_dark, brown_ale, bock]
+    var STRONG_OVERRIDE_CLUSTERS = ['lager','lager_dark','brown_ale','bock'];
+    if (ps >= 20 && STRONG_OVERRIDE_CLUSTERS.indexOf(top1) >= 0) {
+      return overrideSpecialty(b1Result, top1, 'strong_smoke_ps' + Math.round(ps) + '_top1_' + top1);
+    }
+    // SOFT smoke: ps 5-19 OR katki_smoke -> 2x boost specialty + resort
+    if (ps >= 5 || ks > 0) {
+      return softBoostSpecialty(b1Result, 'soft_smoke_ps' + Math.round(ps) + (ks ? '_katki' : ''));
+    }
+    return b1Result;
+  }
+
+  function overrideSpecialty(b1, oldTop1, reason) {
+    var spIdx = -1;
+    for (var i = 0; i < b1.top3.length; i++) if (b1.top3[i].cluster === 'specialty') { spIdx = i; break; }
+    var spEntry;
+    if (spIdx >= 0) {
+      spEntry = b1.top3[spIdx];
+      b1.top3.splice(spIdx, 1);
+    } else {
+      // specialty top-3 yok: raw probs'tan estimate veya min 0.20
+      var spClassIdx = (b1.classes || CLASSES).indexOf('specialty');
+      var spRawProb = (spClassIdx >= 0 && b1.probs) ? b1.probs[spClassIdx] : 0.10;
+      spEntry = { cluster: 'specialty', displayTR: CLUSTER_LABELS['specialty'] || 'Specialty', score: Math.max(spRawProb, 0.20), normalized: Math.max(Math.round(spRawProb*100), 20) };
+    }
+    spEntry.score = Math.max(spEntry.score, 0.55);
+    spEntry.normalized = Math.round(spEntry.score * 100);
+    b1.top3.unshift(spEntry);
+    if (b1.top3[1]) {
+      b1.top3[1].score = Math.min(b1.top3[1].score, 0.35);
+      b1.top3[1].normalized = Math.round(b1.top3[1].score * 100);
+    }
+    b1.top3 = b1.top3.slice(0, 3);
+    b1.topCluster = 'specialty';
+    b1.topProb = spEntry.score;
+    b1._smokeOverride = reason;
+    console.log('%c[BM B1 smoke]','background:#FF6F00;color:#fff;padding:2px 6px;', reason + ' | top1: ' + oldTop1 + ' -> specialty');
+    return b1;
+  }
+
+  function softBoostSpecialty(b1, reason) {
+    if (!b1.probs || !b1.classes) return b1;
+    var probs = b1.probs.slice();
+    var spIdx = b1.classes.indexOf('specialty');
+    if (spIdx < 0) return b1;
+    probs[spIdx] = probs[spIdx] * 2;
+    var sum = probs.reduce(function(s,p){return s+p;}, 0);
+    if (sum <= 0) return b1;
+    probs = probs.map(function(p){ return p / sum; });
+    var sorted = b1.classes.map(function(c,i){ return { cluster: c, displayTR: CLUSTER_LABELS[c] || c, prob: probs[i] }; })
+      .sort(function(a,b){ return b.prob - a.prob; });
+    b1.top3 = sorted.slice(0, 3).map(function(r){ return { cluster: r.cluster, displayTR: r.displayTR, score: r.prob, normalized: Math.round(r.prob*100) }; });
+    b1.topCluster = sorted[0].cluster;
+    b1.topProb = sorted[0].prob;
+    b1.probs = probs;
+    b1._smokeOverride = reason;
+    console.log('%c[BM B1 smoke]','background:#FF6F00;color:#fff;padding:2px 6px;', reason + ' | new top1: ' + b1.topCluster);
+    return b1;
+  }
+
   // -- Inference: returns Promise<{topCluster, topProb, top3, probs, classes, _meta}> --
   // D-1.9g-fix4: step1/2/3/4 log + explicit error catch + inference timing
+  // D-1.9k: applySmokeOverride post-process result oluştuktan sonra cagrilir
   function predictCluster(uiR) {
     console.log('[BM B1 inf step2] predictCluster start');
     window.__b1InferenceStartTs = Date.now();
@@ -21218,6 +21291,12 @@ syncBaslat();
           probs: probs, classes: CLASSES,
           _meta: { motor: 'B1_LightGBM_109feat_14cat', sha8: B1_SHA8, model_url: B1_URL, latency_ms: +dt }
         };
+        // D-1.9k: Smoke marker post-process — Rauchbier/Smoked Beer/Lichtenhainer/Grätzer override
+        // V12/V20/Hibrit slug DOKUNULMAZ (Sub-sprint 4-19 transformative koruma intact).
+        try {
+          var _featObj = (typeof window.__bmBuildFeaturesV12 === 'function') ? window.__bmBuildFeaturesV12(uiR) : null;
+          if (_featObj) result = applySmokeOverride(result, _featObj);
+        } catch(e) { console.warn('[BM B1 smoke] override exception:', e && e.message); }
         window.__lastB1ClusterResult = result;
         return result;
       });
