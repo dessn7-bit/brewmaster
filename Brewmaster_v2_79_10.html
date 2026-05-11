@@ -727,8 +727,9 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     var NEIPA_YEAST_IDS = ['verdant','imp_a38','bb_belc_neipa33','bb_ing04','kveikv','kveiko','kveik_fg','oyl061','oyl091','oyl090','oyl057','oyl071','bb22a','bb22b','mj_m44'];
     var yeast_neipa = (NEIPA_YEAST_IDS.indexOf(mid) >= 0) ? 1 : 0;
     // D-1.9r: has_neipa_name reçete adı pattern detection (NEIPA palyatif marker, edge guard postProcess'te)
+    // D-1.9t: regex genişletildi (ne ipa, new england, haze nation, milkshake/tropical/vermont ipa, fluffy)
     var biraAd_lower = ((r.biraAd || '') + '').toLowerCase();
-    var has_neipa_name = /neipa|northeast|hazy|haze|juicy/i.test(biraAd_lower) ? 1 : 0;
+    var has_neipa_name = /neipa|ne[\s\-]ipa|new\s*england|northeast|hazy|haze|juicy|milkshake\s*ipa|tropical\s*ipa|vermont\s*ipa|fluffy?/i.test(biraAd_lower) ? 1 : 0;
 
     // Brett/lacto/pedio yeast string regex (V12 mevcut versiyondan korunuyor, mid+mAd üzerinde)
     var hasBrett = /\bbrett(anomyces)?\b|\bwlp\s*0?(644|645|648|650|651|652|653|654|655|656|660|665|670|671|672|4639)\b|\bwy?\s*0?5(112|151|526|512|733|378)\b|bruxellensis|lambicus|drie|trois|clausenii/.test(yeastStr);
