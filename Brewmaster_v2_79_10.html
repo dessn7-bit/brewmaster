@@ -16054,10 +16054,21 @@ return `
           var _stc = (typeof window!=='undefined' && window.__lastStrategyCResult) ? window.__lastStrategyCResult : null;
           if (!_stc || !_stc.top3 || !_stc.top3.length) return '';
           var slugDisp = function(s){ return String(s||'').split('_').map(function(w){ return w.length ? w[0].toUpperCase()+w.slice(1) : ''; }).join(' '); };
+          // Adım 64.3-hotfix-2: V12 bmSlugToBjcp() mapping reuse (Memory #24 label kuralı uyum, DRY)
+          // Önce: kendi slugDisp Title Case → 61/91 slug V12'den FARKLI görünüyordu (audit-2)
+          // Şimdi: bmSlugToBjcp varsa SLUG_TO_BJCP[slug], yoksa displayTR, yoksa Title Case fallback
+          var _resolveDisp = function(s){
+            if (!s) return '';
+            if (typeof window.bmSlugToBjcp === 'function') {
+              var mapped = window.bmSlugToBjcp(s.slug, s.displayTR);
+              if (mapped) return mapped;
+            }
+            return s.displayTR || slugDisp(s.slug);
+          };
           var _st1 = _stc.top3[0], _st2 = _stc.top3[1] || null, _st3 = _stc.top3[2] || null;
-          var _sname1 = _st1.displayTR || slugDisp(_st1.slug);
-          var _sub2s = _st2 ? ' <span style="color:var(--soluk);font-size:10px">· '+(_st2.displayTR || slugDisp(_st2.slug))+' %'+_st2.normalized+'</span>' : '';
-          var _sub3s = _st3 ? ' <span style="color:var(--soluk);font-size:10px">· '+(_st3.displayTR || slugDisp(_st3.slug))+' %'+_st3.normalized+'</span>' : '';
+          var _sname1 = _resolveDisp(_st1);
+          var _sub2s = _st2 ? ' <span style="color:var(--soluk);font-size:10px">· '+_resolveDisp(_st2)+' %'+_st2.normalized+'</span>' : '';
+          var _sub3s = _st3 ? ' <span style="color:var(--soluk);font-size:10px">· '+_resolveDisp(_st3)+' %'+_st3.normalized+'</span>' : '';
           var _fallbackNote = _stc.fallback ? ' <span style="color:#9E9E9E;font-size:9px;font-style:italic">(specialty→V12)</span>' : '';
           return '<div style="margin-bottom:8px;padding:5px 10px;background:rgba(0,137,123,0.10);border-left:3px solid #00897B;border-radius:4px;font-size:11px;color:var(--yazi)">'+
                  '<span style="font-weight:600;color:#00897B">Strategy C (Hibrit Hierarchical):</span> '+
