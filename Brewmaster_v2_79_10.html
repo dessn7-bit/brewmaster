@@ -16079,18 +16079,13 @@ return `
       <div style="height:6px;background:${renk_hex}"></div>
       <div style="padding:14px">
         ${(()=>{
-          // D-1.9j Faz 1: V6 ribbon -> B1 LightGBM cluster ribbon (top-3, orijinal dil)
-          // D-1.9m: V6 IIFE kaldırıldı (V6 vs B1 head-to-head B1 14/14 üstün). JSON yedek repo'da, git history rollback.
-          var _b1 = (typeof window!=='undefined' && window.__lastB1ClusterResult) ? window.__lastB1ClusterResult : null;
-          if (!_b1 || !_b1.top3 || !_b1.top3.length) return '';
-          var _t = _b1.top3;
-          var _t1 = _t[0], _t2 = _t[1] || null, _t3 = _t[2] || null;
-          var _sub2 = _t2 ? ' <span style="color:var(--soluk);font-size:10px">· '+_t2.displayTR+' %'+_t2.normalized+'</span>' : '';
-          var _sub3 = _t3 ? ' <span style="color:var(--soluk);font-size:10px">· '+_t3.displayTR+' %'+_t3.normalized+'</span>' : '';
+          // Adım 78-Hotfix-v3: B1 ribbon recipe change stale fix. HTML build'de ESKİ
+          // global değeri okuma — placeholder yaz. updateRibbon (Hotfix-v2) predict.then()
+          // bittiğinde gerçek değeri innerHTML ile yazacak. Eski stale değer hiç görünmez.
+          // data-ribbon="b1-cluster" attribute korunur (Hotfix-v2 querySelector hedefi).
           return '<div data-ribbon="b1-cluster" style="margin-bottom:8px;padding:5px 10px;background:rgba(255,111,0,0.08);border-left:3px solid #FF6F00;border-radius:4px;font-size:11px;color:var(--yazi)">'+
                  '<span style="font-weight:600;color:#FF6F00">Cluster (B1 LightGBM):</span> '+
-                 '<span style="font-weight:600">'+_t1.displayTR+'</span>'+
-                 ' <span style="color:var(--soluk)">%'+_t1.normalized+'</span>'+_sub2+_sub3+
+                 '<span style="color:var(--soluk);font-style:italic">Tahmin yapılıyor...</span>'+
                  '</div>';
         })()}
         ${(()=>{
@@ -16109,31 +16104,13 @@ return `
                  '</div>';
         })()}
         ${(()=>{
-          // Adım 64.3c-2 — Strategy C (Hibrit Hierarchical) ribbon (B1 cluster ribbon ALTINDA)
-          // V_cluster ile slug top-3, V12 specialty fallback aktifse note
-          var _stc = (typeof window!=='undefined' && window.__lastStrategyCResult) ? window.__lastStrategyCResult : null;
-          if (!_stc || !_stc.top3 || !_stc.top3.length) return '';
-          var slugDisp = function(s){ return String(s||'').split('_').map(function(w){ return w.length ? w[0].toUpperCase()+w.slice(1) : ''; }).join(' '); };
-          // Adım 64.3-hotfix-2: V12 bmSlugToBjcp() mapping reuse (Memory #24 label kuralı uyum, DRY)
-          // Önce: kendi slugDisp Title Case → 61/91 slug V12'den FARKLI görünüyordu (audit-2)
-          // Şimdi: bmSlugToBjcp varsa SLUG_TO_BJCP[slug], yoksa displayTR, yoksa Title Case fallback
-          var _resolveDisp = function(s){
-            if (!s) return '';
-            if (typeof window.bmSlugToBjcp === 'function') {
-              var mapped = window.bmSlugToBjcp(s.slug, s.displayTR);
-              if (mapped) return mapped;
-            }
-            return s.displayTR || slugDisp(s.slug);
-          };
-          var _st1 = _stc.top3[0], _st2 = _stc.top3[1] || null, _st3 = _stc.top3[2] || null;
-          var _sname1 = _resolveDisp(_st1);
-          var _sub2s = _st2 ? ' <span style="color:var(--soluk);font-size:10px">· '+_resolveDisp(_st2)+' %'+_st2.normalized+'</span>' : '';
-          var _sub3s = _st3 ? ' <span style="color:var(--soluk);font-size:10px">· '+_resolveDisp(_st3)+' %'+_st3.normalized+'</span>' : '';
-          var _fallbackNote = _stc.fallback ? ' <span style="color:#9E9E9E;font-size:9px;font-style:italic">(specialty→V12)</span>' : '';
+          // Adım 78-Hotfix-v3: Strategy C ribbon recipe change stale fix. HTML build'de
+          // ESKİ global değeri okuma — placeholder yaz. updateRibbon (Hotfix-v2) predict.then()
+          // bittiğinde gerçek değeri innerHTML ile yazacak. Eski stale değer hiç görünmez.
+          // data-ribbon="strategy-c" attribute korunur (Hotfix-v2 querySelector hedefi).
           return '<div data-ribbon="strategy-c" style="margin-bottom:8px;padding:5px 10px;background:rgba(0,137,123,0.10);border-left:3px solid #00897B;border-radius:4px;font-size:11px;color:var(--yazi)">'+
                  '<span style="font-weight:600;color:#00897B">Strategy C (Hibrit Hierarchical):</span> '+
-                 '<span style="font-weight:600">'+_sname1+'</span>'+
-                 ' <span style="color:var(--soluk)">%'+_st1.normalized+'</span>'+_sub2s+_sub3s+_fallbackNote+
+                 '<span style="color:var(--soluk);font-style:italic">Tahmin yapılıyor...</span>'+
                  '</div>';
         })()}
         <div style="margin-bottom:14px">
