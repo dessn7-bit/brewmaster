@@ -15711,6 +15711,26 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
         window.BM_B1.predictCluster(_b1Input).then(function(r){
           if (r) {
             console.log('%c[BM B1 Hierarchical]','background:#FF6F00;color:#fff;padding:2px 6px;', 'top1='+r.topCluster+' ('+(r.topProb*100).toFixed(1)+'%) latency='+((r._meta && r._meta.latency_ms) || 0)+'ms');
+            // Adım 64.3-hotfix: Strategy C SIRALI çağrısı — B1 sonucu __lastB1ClusterResult'a set edildi (line 21418)
+            // Strategy C kendi BM_B1.predictCluster() YAPMIYOR (race condition fix), mevcut sonucu okuyor
+            try {
+              if (window.BM_STRATEGY_C && typeof window.BM_STRATEGY_C.predict === 'function') {
+                window.BM_STRATEGY_C.predict(_b1Input).then(function(stcRes){
+                  if (stcRes) {
+                    window.__lastStrategyCResult = stcRes;
+                    console.log('%c[BM Strategy C]','background:#00897B;color:#fff;padding:2px 6px;', 'top1='+stcRes.topSlug+' ('+(stcRes.topProb*100).toFixed(1)+'%) cluster='+stcRes.cluster+' fallback='+(stcRes.fallback || 'none')+' latency='+((stcRes._meta && stcRes._meta.latency_ms) || 0)+'ms');
+                  } else {
+                    console.warn('[BM Strategy C] predict returned null');
+                  }
+                  try { if (typeof calc === 'function') calc(); } catch(_){}
+                }).catch(function(stcErr){
+                  console.error('[BM Strategy C] predict exception:', stcErr && stcErr.message);
+                  try { if (typeof calc === 'function') calc(); } catch(_){}
+                });
+              }
+            } catch (stcChainErr) {
+              console.warn('[BM Strategy C] chain exception:', stcChainErr && stcChainErr.message);
+            }
           } else {
             console.warn('[BM B1 dispatch] predict returned null — feature build veya inference fail (F12 step1-4 log)');
           }
@@ -16067,6 +16087,34 @@ return `
                  '<span style="font-weight:600;color:#FF6F00">Cluster (B1 LightGBM):</span> '+
                  '<span style="font-weight:600">'+_t1.displayTR+'</span>'+
                  ' <span style="color:var(--soluk)">%'+_t1.normalized+'</span>'+_sub2+_sub3+
+                 '</div>';
+        })()}
+        ${(()=>{
+          // Adım 64.3c-2 — Strategy C (Hibrit Hierarchical) ribbon (B1 cluster ribbon ALTINDA)
+          // V_cluster ile slug top-3, V12 specialty fallback aktifse note
+          var _stc = (typeof window!=='undefined' && window.__lastStrategyCResult) ? window.__lastStrategyCResult : null;
+          if (!_stc || !_stc.top3 || !_stc.top3.length) return '';
+          var slugDisp = function(s){ return String(s||'').split('_').map(function(w){ return w.length ? w[0].toUpperCase()+w.slice(1) : ''; }).join(' '); };
+          // Adım 64.3-hotfix-2: V12 bmSlugToBjcp() mapping reuse (Memory #24 label kuralı uyum, DRY)
+          // Önce: kendi slugDisp Title Case → 61/91 slug V12'den FARKLI görünüyordu (audit-2)
+          // Şimdi: bmSlugToBjcp varsa SLUG_TO_BJCP[slug], yoksa displayTR, yoksa Title Case fallback
+          var _resolveDisp = function(s){
+            if (!s) return '';
+            if (typeof window.bmSlugToBjcp === 'function') {
+              var mapped = window.bmSlugToBjcp(s.slug, s.displayTR);
+              if (mapped) return mapped;
+            }
+            return s.displayTR || slugDisp(s.slug);
+          };
+          var _st1 = _stc.top3[0], _st2 = _stc.top3[1] || null, _st3 = _stc.top3[2] || null;
+          var _sname1 = _resolveDisp(_st1);
+          var _sub2s = _st2 ? ' <span style="color:var(--soluk);font-size:10px">· '+_resolveDisp(_st2)+' %'+_st2.normalized+'</span>' : '';
+          var _sub3s = _st3 ? ' <span style="color:var(--soluk);font-size:10px">· '+_resolveDisp(_st3)+' %'+_st3.normalized+'</span>' : '';
+          var _fallbackNote = _stc.fallback ? ' <span style="color:#9E9E9E;font-size:9px;font-style:italic">(specialty→V12)</span>' : '';
+          return '<div style="margin-bottom:8px;padding:5px 10px;background:rgba(0,137,123,0.10);border-left:3px solid #00897B;border-radius:4px;font-size:11px;color:var(--yazi)">'+
+                 '<span style="font-weight:600;color:#00897B">Strategy C (Hibrit Hierarchical):</span> '+
+                 '<span style="font-weight:600">'+_sname1+'</span>'+
+                 ' <span style="color:var(--soluk)">%'+_st1.normalized+'</span>'+_sub2s+_sub3s+_fallbackNote+
                  '</div>';
         })()}
         <div style="margin-bottom:14px">
@@ -21463,8 +21511,182 @@ syncBaslat();
 })();
 </script>
 
-<!-- Adim 68 P1 E yonu: Strategy C IIFE kaldirildi (B1_v3 standalone deploy).
-     B1 ribbon top-3 cluster KALIR. V_cluster artefaktlar R2 bucket'ta tutulur (silinmedi). -->
+<!-- Adım 64.3c-1 — Strategy C (Hierarchical 2-stage + V12 specialty fallback)
+     Architecture: B1 LightGBM cluster predict (109 feat ONNX) →
+                   if 'specialty' OR V_cluster missing → V12 flat slug (89 feat XGBoost JSON)
+                   else → V_cluster XGBoost JSON predict (cluster-specific, 89 feat)
+     Models: 13 V_cluster (R2 brewmaster-models bucket, lazy load 0.8-6.2 MB each)
+     Worker proxy: brewmaster-models.dessn7.workers.dev (TR DPI uyumlu, CORS dessn7-bit.github.io)
+     V_CLUSTER_CONF_THRESHOLD=0 (analysis: all conf bins V_cluster > V12 flat, hibrit fallback gereksiz)
+     KORUMA: D-1.9 + Sub-sprint 4 + post-process DOKUNMAZ (64.3c-2 audit) -->
+<script id="bm-engine-strategy-c">
+(function(){
+  // 13 V_cluster R2 production URL'leri (SHA8 dahil, cache busting)
+  var WORKER_BASE = 'https://brewmaster-models.dessn7.workers.dev';
+  var V_CLUSTER_URLS = {
+    'sour':       WORKER_BASE + '/v_cluster_sour_8d3249c1.json',
+    'bock':       WORKER_BASE + '/v_cluster_bock_fe67dc97.json',
+    'wheat':      WORKER_BASE + '/v_cluster_wheat_c5bdb11b.json',
+    'stout':      WORKER_BASE + '/v_cluster_stout_1beeebf8.json',
+    'strong_ale': WORKER_BASE + '/v_cluster_strong_ale_32d14c12.json',
+    'ipa':        WORKER_BASE + '/v_cluster_ipa_7fcedd71.json',
+    'pale_ale':   WORKER_BASE + '/v_cluster_pale_ale_3566faf2.json',
+    'saison':     WORKER_BASE + '/v_cluster_saison_0dead725.json',
+    'brown_ale':  WORKER_BASE + '/v_cluster_brown_ale_f1a5d926.json',
+    'lager':      WORKER_BASE + '/v_cluster_lager_291692b4.json',
+    'lager_dark': WORKER_BASE + '/v_cluster_lager_dark_c5509bcd.json',
+    'pilsner':    WORKER_BASE + '/v_cluster_pilsner_b42243d7.json',
+    'porter':     WORKER_BASE + '/v_cluster_porter_9b38305d.json'
+  };
+  // Adım 64.3a final fit feature_list = V19 89 feature (same as V12 slug model)
+  // Cluster slug taxonomy: 13 cluster, specialty hariç (V12 flat ana strategy)
+  var V_CLUSTER_CONF_THRESHOLD = 0.0; // Adım 64.3c-1 analiz: hibrit fallback gereksiz, sadece cascade fallback
+
+  var cache = new Map(); // cluster_id → { model, classes }
+  var loadingPromises = new Map(); // cluster_id → Promise<{model, classes}>
+
+  function loadVCluster(cluster) {
+    if (cache.has(cluster)) return Promise.resolve(cache.get(cluster));
+    if (loadingPromises.has(cluster)) return loadingPromises.get(cluster);
+    if (!V_CLUSTER_URLS[cluster]) {
+      console.warn('[BM Strategy C] V_cluster URL not found:', cluster);
+      return Promise.reject(new Error('V_cluster URL missing: ' + cluster));
+    }
+    var url = V_CLUSTER_URLS[cluster];
+    console.log('%c[BM Strategy C]','background:#00897B;color:#fff;padding:2px 6px;', 'lazy load V_' + cluster + ' ' + url.split('/').pop());
+    var promise = fetch(url, {cache:'force-cache'}).then(function(r){
+      if (!r.ok) throw new Error('V_' + cluster + ' fetch HTTP ' + r.status);
+      return r.json();
+    }).then(function(model){
+      // Classes are stored in companion _le.json — but production deploy did NOT upload LE separately.
+      // Instead, embed classes inline (Adım 64.3a final fit LE'leri local mevcut, deploy için inline gerek).
+      // 64.3c-1 quick fix: classes inline embed (training-time LabelEncoder order).
+      var classes = V_CLUSTER_CLASSES[cluster];
+      if (!classes) throw new Error('V_cluster classes missing: ' + cluster);
+      var entry = {model: model, classes: classes, sha8: url.match(/_([a-f0-9]{8})\.json/)[1]};
+      cache.set(cluster, entry);
+      loadingPromises.delete(cluster);
+      console.log('%c[BM Strategy C]','background:#00897B;color:#fff;padding:2px 6px;', 'V_' + cluster + ' loaded: ' + classes.length + ' slug, ' + Math.round(JSON.stringify(model).length/1024) + ' KB');
+      return entry;
+    }).catch(function(err){
+      loadingPromises.delete(cluster);
+      console.error('[BM Strategy C] V_' + cluster + ' load fail:', err && err.message);
+      throw err;
+    });
+    loadingPromises.set(cluster, promise);
+    return promise;
+  }
+
+  // Embed 13 cluster slug classes (Adım 64.3a LabelEncoder order)
+  // Source: working/_step64_3a_v_<cluster>_final_le.json
+  var V_CLUSTER_CLASSES = {
+    'sour': ['belgian_fruit_lambic','belgian_gueuze','belgian_lambic','berliner_weisse','brett_beer','flanders_red_ale','gose','mixed_fermentation_sour_beer','oud_bruin'],
+    'bock': ['dunkles_bock','german_bock','german_doppelbock','german_heller_bock_maibock'],
+    'wheat': ['american_wheat_ale','american_wheat_beer','belgian_witbier','german_leichtes_weizen','german_rye_ale','roggenbier','south_german_bernsteinfarbenes_weizen','south_german_dunkel_weizen','south_german_hefeweizen','south_german_weizenbock'],
+    'stout': ['american_imperial_stout','export_stout','irish_dry_stout','oatmeal_stout','stout','sweet_stout'],
+    'strong_ale': ['american_barley_wine_ale','american_strong_pale_ale','belgian_blonde_ale','belgian_dubbel','belgian_quadrupel','belgian_strong_dark_ale','belgian_strong_golden','belgian_tripel','british_barley_wine_ale','old_ale','scotch_ale_or_wee_heavy'],
+    'ipa': ['american_india_pale_ale','belgian_ipa','black_ipa','british_india_pale_ale','double_ipa','juicy_or_hazy_india_pale_ale','red_ipa','rye_ipa','white_ipa'],
+    'pale_ale': ['american_cream_ale','american_pale_ale','blonde_ale','english_pale_ale','extra_special_bitter','german_koelsch','ordinary_bitter','special_bitter_or_best_bitter'],
+    'saison': ['french_belgian_saison','specialty_saison'],
+    'brown_ale': ['american_amber_red_ale','american_brown_ale','brown_ale','french_biere_de_garde','german_altbier','irish_red_ale','mild','scottish_export'],
+    'lager': ['american_lager','bamberg_maerzen_rauchbier','common_beer','dortmunder_european_export','german_maerzen','german_oktoberfest_festbier','kellerbier','munich_helles','pale_lager','vienna_lager'],
+    'lager_dark': ['german_schwarzbier','munich_dunkel'],
+    'pilsner': ['german_pilsener','pre_prohibition_lager'],
+    'porter': ['baltic_porter','brown_porter','porter','robust_porter']
+  };
+
+  // V_cluster predict — XGBoost JSON via V12 predictRawWith helper
+  function predictVCluster(cluster, featObj) {
+    var entry = cache.get(cluster);
+    if (!entry) throw new Error('V_cluster not loaded: ' + cluster);
+    if (typeof window.__bmPredictRawWith !== 'function') throw new Error('__bmPredictRawWith missing (V12 IIFE not loaded)');
+    var slugLabels = window.__bmGetV12SlugLabels && window.__bmGetV12SlugLabels();
+    var featList = slugLabels && slugLabels.feature_list;
+    if (!featList) throw new Error('V12 feature_list missing');
+    var featArr = new Array(featList.length);
+    for (var i=0; i<featList.length; i++) featArr[i] = featObj[featList[i]] || 0;
+    var probs = window.__bmPredictRawWith(entry.model, featArr);
+    if (!probs) return null;
+    // Map probs → slug + sort top-3
+    var sorted = entry.classes.map(function(slug, i){ return {slug: slug, prob: probs[i]}; })
+      .sort(function(a, b){ return b.prob - a.prob; });
+    return sorted;
+  }
+
+  // Strategy C inference — Adım 64.3-hotfix: B1 dispatcher result kullan (race condition fix)
+  // Önce: BM_B1.predictCluster() kendi çağırırdı → B1 dispatcher ile paralel sess.run() race condition
+  // Şimdi: window.__lastB1ClusterResult oku (B1 dispatcher set ediyor line 21418)
+  // Strategy C dispatcher (calc içinde) B1 dispatcher predict.then() SONRASI tetiklenir → sıralı garantili
+  // Returns Promise<{topSlug, topProb, top3, cluster, clusterProb, _meta}>
+  function predict(uiRecipe) {
+    if (typeof window.__bmBuildFeaturesV12 !== 'function') {
+      return Promise.reject(new Error('__bmBuildFeaturesV12 not available'));
+    }
+    var featObj = window.__bmBuildFeaturesV12(uiRecipe);
+    if (!featObj) return Promise.reject(new Error('buildFeatures returned null'));
+
+    // 64.3-hotfix: B1 sonucu ZATEN B1 dispatcher tarafından alındı, kendi inference yapma
+    var b1res = window.__lastB1ClusterResult;
+    if (!b1res || !b1res.topCluster) {
+      return Promise.reject(new Error('B1 result not ready yet — Strategy C dispatcher B1 dispatcher SONRASI tetiklenmeli'));
+    }
+
+    var t0 = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+    // Promise.resolve ile async chain'i koru (cluster lazy load gerek)
+    return Promise.resolve(b1res).then(function(b1res){
+      var cluster = b1res.topCluster;
+      var clusterProb = b1res.topProb;
+
+      // Specialty cluster → V12 flat fallback (B1 recall %38 → V12 ana strategy)
+      if (cluster === 'specialty' || !V_CLUSTER_URLS[cluster]) {
+        var v12 = window.BM_V12 && window.BM_V12.predictSlugSync && window.BM_V12.predictSlugSync(uiRecipe);
+        if (!v12) throw new Error('V12 flat fallback failed');
+        return {
+          topSlug: v12.top3[0].slug,
+          topProb: v12.top3[0].score,
+          top3: v12.top3,
+          cluster: cluster, clusterProb: clusterProb,
+          fallback: 'specialty_v12_flat',
+          _meta: {motor: 'Strategy_C', sha8: 'b1_6619d8fb+v12_flat', latency_ms: +((((typeof performance!=='undefined')?performance.now():Date.now())-t0).toFixed(1))}
+        };
+      }
+
+      // V_cluster lazy load + predict
+      return loadVCluster(cluster).then(function(entry){
+        var sortedV = predictVCluster(cluster, featObj);
+        if (!sortedV) throw new Error('V_' + cluster + ' predict failed');
+        var top1 = sortedV[0];
+        // V_CLUSTER_CONF_THRESHOLD=0 → hibrit fallback OFF, cascade-only (B1 wrong cluster zaten specialty fallback'e gider)
+        // Future: if threshold > 0 and top1.prob < threshold → V12 flat fallback
+        var slugDisplay = function(s){ return String(s||'').split('_').map(function(w){ return w.length ? w[0].toUpperCase()+w.slice(1) : ''; }).join(' '); };
+        var top3 = sortedV.slice(0, 3).map(function(x){ return {slug: x.slug, displayTR: slugDisplay(x.slug), score: x.prob, normalized: Math.round(x.prob*100)}; });
+        return {
+          topSlug: top1.slug,
+          topProb: top1.prob,
+          top3: top3,
+          cluster: cluster, clusterProb: clusterProb,
+          fallback: null,
+          _meta: {motor: 'Strategy_C', sha8: 'b1_6619d8fb+v_' + cluster + '_' + entry.sha8, latency_ms: +((((typeof performance!=='undefined')?performance.now():Date.now())-t0).toFixed(1))}
+        };
+      });
+    });
+  }
+
+  // Public API
+  window.BM_STRATEGY_C = {
+    URLS: V_CLUSTER_URLS,
+    CLASSES: V_CLUSTER_CLASSES,
+    CONF_THRESHOLD: V_CLUSTER_CONF_THRESHOLD,
+    isClusterLoaded: function(cluster){ return cache.has(cluster); },
+    loadVCluster: loadVCluster,
+    predict: predict,
+    cache: cache,
+    note: '64.3c-1 INFERENCE EMBED — motor ribbon entegrasyonu 64.3c-2, post-process audit 64.3c-2'
+  };
+
+  console.log('%c[BM Strategy C]','background:#00897B;color:#fff;padding:3px 8px;font-weight:700;', 'IIFE loaded. 13 V_cluster URLs + lazy load + V12 specialty fallback. window.BM_STRATEGY_C.predict(uiRecipe) test ready.');
+})();
+</script>
 
 </body>
 </html>
