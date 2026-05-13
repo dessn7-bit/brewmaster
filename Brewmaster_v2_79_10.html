@@ -15720,14 +15720,17 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
                 }
                 window.__bmB1InFlight = false;
                 try { if (typeof calc === 'function') calc(); } catch(_){}
+                try { if (typeof render === 'function') render(); } catch(_){}
               }).catch(function(stcErr){
                 console.error('[BM Strategy C] predict exception:', stcErr && stcErr.message);
                 window.__bmB1InFlight = false;
                 try { if (typeof calc === 'function') calc(); } catch(_){}
+                try { if (typeof render === 'function') render(); } catch(_){}
               });
             } else {
               window.__bmB1InFlight = false;
               try { if (typeof calc === 'function') calc(); } catch(_){}
+              try { if (typeof render === 'function') render(); } catch(_){}
             }
           } catch (stcChainErr) {
             console.warn('[BM Strategy C] chain exception:', stcChainErr && stcChainErr.message);
@@ -15737,11 +15740,13 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
           console.warn('[BM B1 dispatch] predict returned null — feature build veya inference fail (F12 step1-4 log)');
           window.__bmB1InFlight = false;
           try { if (typeof calc === 'function') calc(); } catch(e) {}
+          try { if (typeof render === 'function') render(); } catch(e) {}
         }
       }).catch(function(e){
         console.error('[BM B1 dispatch] predict exception:', e && e.message, e && e.stack);
         window.__bmB1InFlight = false;
         try { if (typeof calc === 'function') calc(); } catch(_){}
+        try { if (typeof render === 'function') render(); } catch(_){}
       });
     }
   } catch (B1err) {
