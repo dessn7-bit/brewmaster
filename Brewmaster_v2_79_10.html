@@ -15693,56 +15693,60 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
   // D-1.9g-fix4: __recipeV2 + S.hoplar/maltlar/katkilar/hacim merge (build20Extension rich data)
   // + always-recalc finally (UI ready->done geçişi).
   try {
-    if (window.BM_B1 && typeof window.BM_B1.predictCluster === 'function' && typeof __recipeV2 !== 'undefined') {
-      var _b1Key = ''+_og+'|'+_fg+'|'+_ibu+'|'+_srm+'|'+_abv+'|'+(S.mayaId||'')+'|'+(S.maltlar||[]).map(function(m){return m.id+':'+m.gr;}).join(',')+'|'+(S.hoplar||[]).map(function(h){return h.id+':'+h.gr+':'+h.t;}).join(',')+'|'+(S.katkilar||[]).map(function(k){return k.id;}).join(',');
-      if (window.__lastB1RecipeKey !== _b1Key) {
-        window.__lastB1RecipeKey = _b1Key;
-        var _b1Input = Object.assign({}, __recipeV2, {
-          hoplar:   S.hoplar   || [],
-          maltlar:  S.maltlar  || [],
-          katkilar: S.katkilar || [],
-          hacim:    S.hacim    || 0,
-          og:       _og,
-          mash_steps: (S.mashSteps || 1),
-          verim:    (S.verim || 0)
-        });
-        // Adım 68 P1 E yönü: Strategy C dispatcher kaldırıldı (B1_v3 standalone).
-        // B1 dispatcher kendi predict + calc() — Strategy C SIRALI çağrısı YOK.
-        window.BM_B1.predictCluster(_b1Input).then(function(r){
-          if (r) {
-            console.log('%c[BM B1 Hierarchical]','background:#FF6F00;color:#fff;padding:2px 6px;', 'top1='+r.topCluster+' ('+(r.topProb*100).toFixed(1)+'%) latency='+((r._meta && r._meta.latency_ms) || 0)+'ms');
-            // Adım 64.3-hotfix: Strategy C SIRALI çağrısı — B1 sonucu __lastB1ClusterResult'a set edildi (line 21418)
-            // Strategy C kendi BM_B1.predictCluster() YAPMIYOR (race condition fix), mevcut sonucu okuyor
-            try {
-              if (window.BM_STRATEGY_C && typeof window.BM_STRATEGY_C.predict === 'function') {
-                window.BM_STRATEGY_C.predict(_b1Input).then(function(stcRes){
-                  if (stcRes) {
-                    window.__lastStrategyCResult = stcRes;
-                    console.log('%c[BM Strategy C]','background:#00897B;color:#fff;padding:2px 6px;', 'top1='+stcRes.topSlug+' ('+(stcRes.topProb*100).toFixed(1)+'%) cluster='+stcRes.cluster+' fallback='+(stcRes.fallback || 'none')+' latency='+((stcRes._meta && stcRes._meta.latency_ms) || 0)+'ms');
-                  } else {
-                    console.warn('[BM Strategy C] predict returned null');
-                  }
-                  try { if (typeof calc === 'function') calc(); } catch(_){}
-                }).catch(function(stcErr){
-                  console.error('[BM Strategy C] predict exception:', stcErr && stcErr.message);
-                  try { if (typeof calc === 'function') calc(); } catch(_){}
-                });
-              }
-            } catch (stcChainErr) {
-              console.warn('[BM Strategy C] chain exception:', stcChainErr && stcChainErr.message);
+    // Adım 78 Yön A: _b1Key cache kaldırıldı (m.gr/h.gr/h.t field uyumsuzluğu → recipe change stale).
+    // In-flight flag ile recursion önlenir (calc'tan B1 predict, .then'de calc tetik döngü).
+    if (window.BM_B1 && typeof window.BM_B1.predictCluster === 'function' && typeof __recipeV2 !== 'undefined' && !window.__bmB1InFlight) {
+      window.__bmB1InFlight = true;
+      var _b1Input = Object.assign({}, __recipeV2, {
+        hoplar:   S.hoplar   || [],
+        maltlar:  S.maltlar  || [],
+        katkilar: S.katkilar || [],
+        hacim:    S.hacim    || 0,
+        og:       _og,
+        mash_steps: (S.mashSteps || 1),
+        verim:    (S.verim || 0)
+      });
+      window.BM_B1.predictCluster(_b1Input).then(function(r){
+        if (r) {
+          console.log('%c[BM B1 Hierarchical]','background:#FF6F00;color:#fff;padding:2px 6px;', 'top1='+r.topCluster+' ('+(r.topProb*100).toFixed(1)+'%) latency='+((r._meta && r._meta.latency_ms) || 0)+'ms');
+          try {
+            if (window.BM_STRATEGY_C && typeof window.BM_STRATEGY_C.predict === 'function') {
+              window.BM_STRATEGY_C.predict(_b1Input).then(function(stcRes){
+                if (stcRes) {
+                  window.__lastStrategyCResult = stcRes;
+                  console.log('%c[BM Strategy C]','background:#00897B;color:#fff;padding:2px 6px;', 'top1='+stcRes.topSlug+' ('+(stcRes.topProb*100).toFixed(1)+'%) cluster='+stcRes.cluster+' fallback='+(stcRes.fallback || 'none')+' latency='+((stcRes._meta && stcRes._meta.latency_ms) || 0)+'ms');
+                } else {
+                  console.warn('[BM Strategy C] predict returned null');
+                }
+                window.__bmB1InFlight = false;
+                try { if (typeof calc === 'function') calc(); } catch(_){}
+              }).catch(function(stcErr){
+                console.error('[BM Strategy C] predict exception:', stcErr && stcErr.message);
+                window.__bmB1InFlight = false;
+                try { if (typeof calc === 'function') calc(); } catch(_){}
+              });
+            } else {
+              window.__bmB1InFlight = false;
+              try { if (typeof calc === 'function') calc(); } catch(_){}
             }
-          } else {
-            console.warn('[BM B1 dispatch] predict returned null — feature build veya inference fail (F12 step1-4 log)');
+          } catch (stcChainErr) {
+            console.warn('[BM Strategy C] chain exception:', stcChainErr && stcChainErr.message);
+            window.__bmB1InFlight = false;
           }
+        } else {
+          console.warn('[BM B1 dispatch] predict returned null — feature build veya inference fail (F12 step1-4 log)');
+          window.__bmB1InFlight = false;
           try { if (typeof calc === 'function') calc(); } catch(e) {}
-        }).catch(function(e){
-          console.error('[BM B1 dispatch] predict exception:', e && e.message, e && e.stack);
-          try { if (typeof calc === 'function') calc(); } catch(_){}
-        });
-      }
+        }
+      }).catch(function(e){
+        console.error('[BM B1 dispatch] predict exception:', e && e.message, e && e.stack);
+        window.__bmB1InFlight = false;
+        try { if (typeof calc === 'function') calc(); } catch(_){}
+      });
     }
   } catch (B1err) {
     console.warn('[BM B1 Hierarchical] dispatcher genel hatasi:', B1err && B1err.message);
+    window.__bmB1InFlight = false;
   }
 
   // Adım 64.3-hotfix: Strategy C ayrı dispatcher KALDIRILDI — B1 dispatcher predict.then() içine entegre edildi (yukarıda).
