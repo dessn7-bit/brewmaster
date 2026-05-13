@@ -15435,26 +15435,42 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
         hopIds:   (S.hoplar   ||[]).map(h=>h&&h.id).filter(Boolean),
         maltIds:  (S.maltlar  ||[]).map(m=>m&&m.id).filter(Boolean),
         katkiIds: (S.katkilar ||[]).map(k=>k&&k.id).filter(Boolean),
-        percents: {
+        percents: (function(){
+          // Adım 71 — Sugar katkı toplama helper (Kaan'in UI'da S.katkilar'a eklediği Candi/Şeker'leri pct_sugar'a katar)
+          var _sugarKatkiPct = (function(){
+            if (typeof S === 'undefined' || !S.katkilar || !_toplamMaltKg) return 0;
+            var totalG = (S.katkilar||[]).reduce(function(s, k){
+              if (!k || !k.id) return s;
+              var ki = (typeof KATKILAR !== 'undefined') ? KATKILAR.find(function(x){return x && x.id===k.id;}) : null;
+              if (ki && (ki.g === 'Şeker' || /candi|candy|nobet|sugar|sirup|syrup|demerara|turbinado|bal|honey|invert|treacle|molass/i.test(k.id))) return s + (+k.g || 0);
+              return s;
+            }, 0);
+            return (totalG / 1000) / _toplamMaltKg * 100;
+          })();
+          return {
           pilsnerPct:  (_pctOf(/pilsner|pils|bohem|bel_pils|best_heidel|best_pale|briess_pale|chateau_pils|extra_pale|golden_promise|maris|synergy|thracian|viking_pale|viking_pils/i) || 0),
-          paleAlePct:  _pctOf(/^pale_ale$|^pale$|\bpale_ale\b/i),
+          // Adım 71: Bisküvi malt (bisk, biskuvi_arpa Hitit) pale_ale base extension olarak sayılır (BJCP base malt grubu)
+          paleAlePct:  _pctOf(/^pale_ale$|^pale$|\bpale_ale\b|^bisk$|^biskuvi_arpa$|chateau_biscuit|victory/i),
           wheatPct:    _pctOf(/wheat|bugday|weizen|weyermann_wheat|chateau_wheat|best_wheat/i),
           oatsWheatPct:_pctOf(/wheat|bugday|weizen|oat|yulaf/i),
           oatsPct:     _pctOf(/oat|yulaf/i),
           munichPct:   _pctOf(/munich|muenchner|munchner|weyermann_munich|best_munich/i),
           viennaPct:   _pctOf(/vienna|viyana|weyermann_vienna|best_vienna/i),
-          crystalPct:  _pctOf(/crystal|caramel|cara[_-]?|kristal|caravienna|caramunich|carahell|caraamber|caraaroma|c\d+/i),
+          // Adım 71: Karamela Arpa Maltı (Hitit, karamela_arpa) Crystal 120 yerli eşdeğeri olarak sayılır
+          crystalPct:  _pctOf(/crystal|caramel|cara[_-]?|kristal|caravienna|caramunich|carahell|caraamber|caraaroma|c\d+|karamela|kara_arpa/i),
           chocPct:     _pctOf(/choc|chocolate|cikolata|carafa|dehusked/i),
           roastPct:    _pctOf(/roast|kavrulmus|black|siyah|patent/i),
           cornPct:     _pctOf(/corn|misir|mais|flaked_corn/i),
           ricePct:     _pctOf(/rice|pirinc/i),
-          sugarPct:    _pctOf(/sugar|seker|candi|candy|nobet|demerara|turbinado|molasses/i),
+          // Adım 71: sugar malt + katki birleşimi (Kaan UI'da Candi'yi S.katkilar'a eklediyse de sayılır)
+          sugarPct:    _pctOf(/sugar|seker|candi|candy|nobet|demerara|turbinado|molasses|^dex$|^sek$|^lak$|^bal$|invert/i) + _sugarKatkiPct,
           aromaticMunichPct: _pctOf(/aromatic|melanoid/i),
           aromaticAbbeyMunichPct: _pctOf(/aromatic|abbey|special_b/i),
           smokedPct:   _pctOf(/smoke|rauch|isli|smoked/i),
           ryePct:      _pctOf(/rye|cavdar/i),
           baseMaltPct: _pctOf(/pilsner|pils|pale|maris|munich|vienna|best_heidel|golden|wheat/i),
-        },
+          };
+        })(),
         lactose:   _hasKatki(/laktoz|lactose/i),
         filtered:  _hasFiltrasyon,
         aged:      (S.brewLog||[]).some(e=>e && e.tip==="aging"),
