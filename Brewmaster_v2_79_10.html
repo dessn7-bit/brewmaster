@@ -16090,6 +16090,21 @@ return `
                  '</div>';
         })()}
         ${(()=>{
+          // Adım 77: V12 cluster ribbon (16-cat XGBoost). B1 ribbon altinda, yesil.
+          // __lastV12ClusterResult line 15597'de BM_V12.predictSync sonucu set ediliyor.
+          var _v12c = (typeof window!=='undefined' && window.__lastV12ClusterResult) ? window.__lastV12ClusterResult : null;
+          if (!_v12c || !_v12c.top3 || !_v12c.top3.length) return '';
+          var _t = _v12c.top3;
+          var _t1 = _t[0], _t2 = _t[1] || null, _t3 = _t[2] || null;
+          var _sub2 = _t2 ? ' <span style="color:var(--soluk);font-size:10px">· '+_t2.displayTR+' %'+_t2.normalized+'</span>' : '';
+          var _sub3 = _t3 ? ' <span style="color:var(--soluk);font-size:10px">· '+_t3.displayTR+' %'+_t3.normalized+'</span>' : '';
+          return '<div style="margin-bottom:8px;padding:5px 10px;background:rgba(67,160,71,0.08);border-left:3px solid #43A047;border-radius:4px;font-size:11px;color:var(--yazi)">'+
+                 '<span style="font-weight:600;color:#43A047">Cluster (V12 XGBoost):</span> '+
+                 '<span style="font-weight:600">'+_t1.displayTR+'</span>'+
+                 ' <span style="color:var(--soluk)">%'+_t1.normalized+'</span>'+_sub2+_sub3+
+                 '</div>';
+        })()}
+        ${(()=>{
           // Adım 64.3c-2 — Strategy C (Hibrit Hierarchical) ribbon (B1 cluster ribbon ALTINDA)
           // V_cluster ile slug top-3, V12 specialty fallback aktifse note
           var _stc = (typeof window!=='undefined' && window.__lastStrategyCResult) ? window.__lastStrategyCResult : null;
