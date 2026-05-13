@@ -15719,15 +15719,15 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
                   console.warn('[BM Strategy C] predict returned null');
                 }
                 window.__bmB1InFlight = false;
-                try { if (typeof calc === 'function') calc(); } catch(_){}
+                try { if (typeof window.updateRibbon === 'function') { window.updateRibbon('b1-cluster'); window.updateRibbon('strategy-c'); } } catch(_){}
               }).catch(function(stcErr){
                 console.error('[BM Strategy C] predict exception:', stcErr && stcErr.message);
                 window.__bmB1InFlight = false;
-                try { if (typeof calc === 'function') calc(); } catch(_){}
+                try { if (typeof window.updateRibbon === 'function') { window.updateRibbon('b1-cluster'); window.updateRibbon('strategy-c'); } } catch(_){}
               });
             } else {
               window.__bmB1InFlight = false;
-              try { if (typeof calc === 'function') calc(); } catch(_){}
+              try { if (typeof window.updateRibbon === 'function') { window.updateRibbon('b1-cluster'); window.updateRibbon('strategy-c'); } } catch(_){}
             }
           } catch (stcChainErr) {
             console.warn('[BM Strategy C] chain exception:', stcChainErr && stcChainErr.message);
@@ -15736,12 +15736,12 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
         } else {
           console.warn('[BM B1 dispatch] predict returned null — feature build veya inference fail (F12 step1-4 log)');
           window.__bmB1InFlight = false;
-          try { if (typeof calc === 'function') calc(); } catch(e) {}
+          try { if (typeof window.updateRibbon === 'function') { window.updateRibbon('b1-cluster'); window.updateRibbon('strategy-c'); } } catch(e) {}
         }
       }).catch(function(e){
         console.error('[BM B1 dispatch] predict exception:', e && e.message, e && e.stack);
         window.__bmB1InFlight = false;
-        try { if (typeof calc === 'function') calc(); } catch(_){}
+        try { if (typeof window.updateRibbon === 'function') { window.updateRibbon('b1-cluster'); window.updateRibbon('strategy-c'); } } catch(_){}
       });
     }
   } catch (B1err) {
@@ -16087,7 +16087,7 @@ return `
           var _t1 = _t[0], _t2 = _t[1] || null, _t3 = _t[2] || null;
           var _sub2 = _t2 ? ' <span style="color:var(--soluk);font-size:10px">· '+_t2.displayTR+' %'+_t2.normalized+'</span>' : '';
           var _sub3 = _t3 ? ' <span style="color:var(--soluk);font-size:10px">· '+_t3.displayTR+' %'+_t3.normalized+'</span>' : '';
-          return '<div style="margin-bottom:8px;padding:5px 10px;background:rgba(255,111,0,0.08);border-left:3px solid #FF6F00;border-radius:4px;font-size:11px;color:var(--yazi)">'+
+          return '<div data-ribbon="b1-cluster" style="margin-bottom:8px;padding:5px 10px;background:rgba(255,111,0,0.08);border-left:3px solid #FF6F00;border-radius:4px;font-size:11px;color:var(--yazi)">'+
                  '<span style="font-weight:600;color:#FF6F00">Cluster (B1 LightGBM):</span> '+
                  '<span style="font-weight:600">'+_t1.displayTR+'</span>'+
                  ' <span style="color:var(--soluk)">%'+_t1.normalized+'</span>'+_sub2+_sub3+
@@ -16130,7 +16130,7 @@ return `
           var _sub2s = _st2 ? ' <span style="color:var(--soluk);font-size:10px">· '+_resolveDisp(_st2)+' %'+_st2.normalized+'</span>' : '';
           var _sub3s = _st3 ? ' <span style="color:var(--soluk);font-size:10px">· '+_resolveDisp(_st3)+' %'+_st3.normalized+'</span>' : '';
           var _fallbackNote = _stc.fallback ? ' <span style="color:#9E9E9E;font-size:9px;font-style:italic">(specialty→V12)</span>' : '';
-          return '<div style="margin-bottom:8px;padding:5px 10px;background:rgba(0,137,123,0.10);border-left:3px solid #00897B;border-radius:4px;font-size:11px;color:var(--yazi)">'+
+          return '<div data-ribbon="strategy-c" style="margin-bottom:8px;padding:5px 10px;background:rgba(0,137,123,0.10);border-left:3px solid #00897B;border-radius:4px;font-size:11px;color:var(--yazi)">'+
                  '<span style="font-weight:600;color:#00897B">Strategy C (Hibrit Hierarchical):</span> '+
                  '<span style="font-weight:600">'+_sname1+'</span>'+
                  ' <span style="color:var(--soluk)">%'+_st1.normalized+'</span>'+_sub2s+_sub3s+_fallbackNote+
@@ -21061,6 +21061,57 @@ syncBaslat();
      Production HTML c216e4d0 INTACT - bu dosya Brewmaster_v2_80_test.html (test wrapper).
      Model: brewmaster-models bucket (138 MB ONNX), Worker proxy TR-uyumlu.
      Lazy load + IndexedDB cache (SHA8 key, model degisirse otomatik invalidate). -->
+<!-- Adim 78-Hotfix-v2: updateRibbon() helper — partial DOM update.
+     predict.then() callback'inde RENDER YERINE bu helper cagrilir.
+     YASAK: helper icinde calc()/render()/rEditor() cagrisi YOK (recursion onleme).
+     Sadece document.querySelector + innerHTML targeted write. -->
+<script id="bm-update-ribbon-helper">
+(function(){
+  function _b1RibbonInner(b1){
+    if (!b1 || !b1.top3 || !b1.top3.length) return '';
+    var _t = b1.top3;
+    var _t1 = _t[0], _t2 = _t[1] || null, _t3 = _t[2] || null;
+    var _sub2 = _t2 ? ' <span style="color:var(--soluk);font-size:10px">· '+_t2.displayTR+' %'+_t2.normalized+'</span>' : '';
+    var _sub3 = _t3 ? ' <span style="color:var(--soluk);font-size:10px">· '+_t3.displayTR+' %'+_t3.normalized+'</span>' : '';
+    return '<span style="font-weight:600;color:#FF6F00">Cluster (B1 LightGBM):</span> ' +
+           '<span style="font-weight:600">'+_t1.displayTR+'</span>' +
+           ' <span style="color:var(--soluk)">%'+_t1.normalized+'</span>'+_sub2+_sub3;
+  }
+  function _scRibbonInner(stc){
+    if (!stc || !stc.top3 || !stc.top3.length) return '';
+    var slugDisp = function(s){ return String(s||'').split('_').map(function(w){ return w.length ? w[0].toUpperCase()+w.slice(1) : ''; }).join(' '); };
+    var _resolveDisp = function(s){
+      if (!s) return '';
+      if (typeof window.bmSlugToBjcp === 'function') {
+        var mapped = window.bmSlugToBjcp(s.slug, s.displayTR);
+        if (mapped) return mapped;
+      }
+      return s.displayTR || slugDisp(s.slug);
+    };
+    var _st1 = stc.top3[0], _st2 = stc.top3[1] || null, _st3 = stc.top3[2] || null;
+    var _sname1 = _resolveDisp(_st1);
+    var _sub2s = _st2 ? ' <span style="color:var(--soluk);font-size:10px">· '+_resolveDisp(_st2)+' %'+_st2.normalized+'</span>' : '';
+    var _sub3s = _st3 ? ' <span style="color:var(--soluk);font-size:10px">· '+_resolveDisp(_st3)+' %'+_st3.normalized+'</span>' : '';
+    var _fallbackNote = stc.fallback ? ' <span style="color:#9E9E9E;font-size:9px;font-style:italic">(specialty→V12)</span>' : '';
+    return '<span style="font-weight:600;color:#00897B">Strategy C (Hibrit Hierarchical):</span> ' +
+           '<span style="font-weight:600">'+_sname1+'</span>' +
+           ' <span style="color:var(--soluk)">%'+_st1.normalized+'</span>'+_sub2s+_sub3s+_fallbackNote;
+  }
+  window.updateRibbon = function(name){
+    try {
+      var el = document.querySelector('[data-ribbon="' + name + '"]');
+      if (!el) return;
+      if (name === 'b1-cluster') {
+        var html = _b1RibbonInner(window.__lastB1ClusterResult);
+        if (html) el.innerHTML = html;
+      } else if (name === 'strategy-c') {
+        var html2 = _scRibbonInner(window.__lastStrategyCResult);
+        if (html2) el.innerHTML = html2;
+      }
+    } catch(e) { /* silent */ }
+  };
+})();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.21.0/dist/ort.min.js"></script>
 <script id="bm-engine-b1-lgbm">
 (function(){
