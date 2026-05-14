@@ -21255,6 +21255,22 @@ syncBaslat();
     for (var k=0;k<89;k++) v116[k] = +base89[k] || 0;
     for (var j=0;j<20;j++) v116[89+j] = +ext20[j] || 0;
     for (var n=0;n<7;n++) v116[109+n] = +ext7[n] || 0;
+    // Adim 82-Hotfix-v2 DEBUG: v116[109..115] inspection (NEW_FEATURES_7 placement check)
+    try {
+      var FEAT7_NAMES = ['has_cocoa_chocolate','has_vanilla','has_spices_general','has_smoke_rauch','has_fruit_general','has_belgian_yeast_str','has_brown_roasted_mix'];
+      var ext7Display = ext7.map(function(v,i){ return FEAT7_NAMES[i]+'='+v; }).join(' ');
+      var v116Tail = Array.from(v116.slice(109, 116)).map(function(v,i){ return FEAT7_NAMES[i]+'='+v; }).join(' ');
+      console.log('%c[BM B1 DEBUG v82h2]','background:#9C27B0;color:#fff;padding:2px 6px;',
+        'ext7=['+ext7.join(',')+'] | v116[109..115]=['+Array.from(v116.slice(109,116)).join(',')+']');
+      console.log('%c[BM B1 DEBUG v82h2]','background:#9C27B0;color:#fff;padding:2px 6px;',
+        'ext7 named: '+ext7Display);
+      console.log('%c[BM B1 DEBUG v82h2]','background:#9C27B0;color:#fff;padding:2px 6px;',
+        'v116 tail named: '+v116Tail);
+      console.log('%c[BM B1 DEBUG v82h2]','background:#9C27B0;color:#fff;padding:2px 6px;',
+        'v116 sample stats: len='+v116.length+' nonzero_total='+v116.reduce(function(a,v){return a+(v!==0?1:0);},0)+' nonzero_in_109_115='+Array.from(v116.slice(109,116)).reduce(function(a,v){return a+(v!==0?1:0);},0));
+    } catch (e) {
+      console.error('[BM B1 DEBUG v82h2] log error:', e.message);
+    }
     return v116;
   }
 
