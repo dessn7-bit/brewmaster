@@ -21793,11 +21793,101 @@ syncBaslat();
     var slugDisplay = function(s){ return String(s||'').split('_').map(function(w){ return w.length ? w[0].toUpperCase()+w.slice(1) : ''; }).join(' '); };
     // Adim 87: multi-cluster confidence threshold (top-1 prob düşükse top-3 combined score)
     var STC_MULTI_THRESHOLD = 0.60;
+
+    // Adim 90: 3-motor hibrit slug agreement helper
+    // SLUG_TO_CLUSTER reverse lookup (V_CLUSTER_CLASSES'tan tek seferlik build)
+    var _SLUG_TO_CLUSTER_CACHE = null;
+    function _getSlugCluster(slug) {
+      if (!_SLUG_TO_CLUSTER_CACHE) {
+        _SLUG_TO_CLUSTER_CACHE = {};
+        for (var c in V_CLUSTER_CLASSES) {
+          var arr = V_CLUSTER_CLASSES[c] || [];
+          for (var i = 0; i < arr.length; i++) _SLUG_TO_CLUSTER_CACHE[arr[i]] = c;
+        }
+      }
+      return _SLUG_TO_CLUSTER_CACHE[slug] || null;
+    }
+
+    // Hibrit agreement check: 3/3 veya 2/3 uyum + B1 cluster içinde mi
+    // Returns {topSlug, agreeCount, votes, sourceMotors} ya da null
+    function _hybridAgreement(uiRecipe, b1TopCluster) {
+      try {
+        var v12r = (window.BM_V12 && window.BM_V12.isSlugReady && window.BM_V12.isSlugReady() && window.BM_V12.predictSlugSync)
+          ? window.BM_V12.predictSlugSync(uiRecipe) : null;
+        var v20r = (window.BM_V20 && window.BM_V20.isSlugReady && window.BM_V20.isSlugReady() && window.BM_V20.predictSlugSync)
+          ? window.BM_V20.predictSlugSync(uiRecipe) : null;
+        var hyr = (window.BM_F1_HYBRID && window.BM_F1_HYBRID.predictSlugSync)
+          ? window.BM_F1_HYBRID.predictSlugSync(uiRecipe) : null;
+        var v12_slug = v12r && v12r.top3 && v12r.top3[0] && v12r.top3[0].slug;
+        var v20_slug = v20r && v20r.top3 && v20r.top3[0] && v20r.top3[0].slug;
+        var hyb_slug = hyr && hyr.top3 && hyr.top3[0] && hyr.top3[0].slug;
+        var votes = [v12_slug, v20_slug, hyb_slug].filter(function(s){ return s; });
+        if (votes.length < 2) return null;
+        // Most frequent vote
+        var voteCounts = {};
+        votes.forEach(function(s){ voteCounts[s] = (voteCounts[s] || 0) + 1; });
+        var topVote = Object.keys(voteCounts).sort(function(a, b){ return voteCounts[b] - voteCounts[a]; })[0];
+        var agreeCount = voteCounts[topVote];
+        if (agreeCount < 2) return null;
+        // Cluster check
+        var topVoteCluster = _getSlugCluster(topVote);
+        if (topVoteCluster !== b1TopCluster) return null;
+        var sourceMotors = [];
+        if (v12_slug === topVote) sourceMotors.push('V12');
+        if (v20_slug === topVote) sourceMotors.push('V20');
+        if (hyb_slug === topVote) sourceMotors.push('Hibrit');
+        // V12 top-3 baz al, topVote öne çıkar
+        var v12Top3 = (v12r && v12r.top3) ? v12r.top3.slice() : [];
+        var topVoteIdx = -1;
+        for (var i = 0; i < v12Top3.length; i++) if (v12Top3[i].slug === topVote) { topVoteIdx = i; break; }
+        if (topVoteIdx > 0) {
+          var moved = v12Top3.splice(topVoteIdx, 1)[0];
+          v12Top3.unshift(moved);
+        } else if (topVoteIdx < 0) {
+          // V12 top-3'te yok (V20 + Hibrit topVote idi) — manuel top-1 entry
+          var topVoteProb = (hyr && hyr.probs && hyr.classes) ? (hyr.probs[hyr.classes.indexOf(topVote)] || 0.5) : 0.5;
+          v12Top3.unshift({slug: topVote, displayTR: slugDisplay(topVote), score: topVoteProb, normalized: Math.round(topVoteProb*100)});
+        }
+        return {
+          topSlug: topVote, agreeCount: agreeCount, votes: votes,
+          sourceMotors: sourceMotors, top3: v12Top3.slice(0, 3),
+          v12_slug: v12_slug, v20_slug: v20_slug, hyb_slug: hyb_slug
+        };
+      } catch (e) {
+        console.warn('[BM Strategy C hybrid] agreement check exception:', e && e.message);
+        return null;
+      }
+    }
+
     // Promise.resolve ile async chain'i koru (cluster lazy load gerek)
     return Promise.resolve(b1res).then(function(b1res){
       var cluster = b1res.topCluster;
       var clusterProb = b1res.topProb;
       var top3 = (b1res.top3 || []).slice(0, 3);
+
+      // Adim 90: 3-motor hibrit agreement check (ÖNCELİK — multi-mode'dan ÖNCE)
+      // V12/V20/Hibrit slug uyumu + B1 cluster içinde mi → Strategy C = uyumlu slug
+      if (cluster !== 'specialty' && V_CLUSTER_URLS[cluster]) {
+        var hyba = _hybridAgreement(uiRecipe, cluster);
+        if (hyba && hyba.agreeCount >= 2) {
+          console.log('%c[BM Strategy C hybrid]','background:#43A047;color:#fff;padding:2px 6px;font-weight:700;',
+            'HYBRID AGREEMENT ' + hyba.agreeCount + '/3 slug=' + hyba.topSlug + ' cluster=' + cluster +
+            ' (V12=' + hyba.v12_slug + ', V20=' + hyba.v20_slug + ', Hibrit=' + hyba.hyb_slug + ')');
+          var hybridTop1 = hyba.top3[0];
+          return {
+            topSlug: hyba.topSlug,
+            topProb: hybridTop1 ? hybridTop1.score : 0.7,
+            top3: hyba.top3,
+            cluster: cluster, clusterProb: clusterProb,
+            fallback: null,
+            hybrid_agreement: hyba.agreeCount + '/3',
+            hybrid_motors: hyba.sourceMotors,
+            _meta: {motor: 'Strategy_C', mode: 'hybrid_agreement', agreement: hyba.agreeCount, motors: hyba.sourceMotors,
+                    b1_cluster: cluster, b1_clusterProb: clusterProb,
+                    latency_ms: +((((typeof performance!=='undefined')?performance.now():Date.now())-t0).toFixed(1))}
+          };
+        }
+      }
 
       // Specialty cluster → V12 flat fallback (B1 recall %38 → V12 ana strategy)
       if (cluster === 'specialty' || !V_CLUSTER_URLS[cluster]) {
