@@ -21848,10 +21848,32 @@ syncBaslat();
       }
 
       console.log('%c[BM Strategy C multi]','background:#9C27B0;color:#fff;padding:2px 6px;', 'top1 prob ' + (clusterProb*100).toFixed(1) + '% < ' + (STC_MULTI_THRESHOLD*100) + '%, loading top-' + validTop3.length + ' V_clusters parallel');
+      // Adim 89-Debug-Fix: multi-mode featObj snapshot (tum cluster'larin paylastigi feature dict)
+      try {
+        var fk2 = function(k){ return featObj[k] !== undefined ? featObj[k] : 'absent'; };
+        console.log('%c[BM Strategy C multi DEBUG]','background:#9C27B0;color:#fff;padding:2px 6px;',
+          'featObj YEAST: has_belgian_yeast=' + fk2('has_belgian_yeast') + ' yeast_belgian=' + fk2('yeast_belgian') +
+          ' yeast_abbey=' + fk2('yeast_abbey') + ' yeast_saison=' + fk2('yeast_saison') +
+          ' yeast_english=' + fk2('yeast_english') + ' yeast_american=' + fk2('yeast_american') +
+          ' has_clean_us05_isolate=' + fk2('has_clean_us05_isolate'));
+        console.log('%c[BM Strategy C multi DEBUG]','background:#9C27B0;color:#fff;padding:2px 6px;',
+          'featObj GRIST: pale_ale=' + fk2('pct_pale_ale') + ' pilsner=' + fk2('pct_pilsner') +
+          ' munich=' + fk2('pct_munich') + ' aromatic_abbey=' + fk2('pct_aromatic_abbey') +
+          ' crystal=' + fk2('pct_crystal') + ' choc=' + fk2('pct_choc') + ' sugar=' + fk2('pct_sugar'));
+        console.log('%c[BM Strategy C multi DEBUG]','background:#9C27B0;color:#fff;padding:2px 6px;',
+          'featObj PARAMS: og=' + fk2('og') + ' abv=' + fk2('abv') + ' ibu=' + fk2('ibu') +
+          ' srm=' + fk2('srm') + ' fg=' + fk2('fg') + ' fermentation_temp_c=' + fk2('fermentation_temp_c'));
+      } catch (e) { console.error('[BM Strategy C multi DEBUG] featObj log error:', e && e.message); }
       var loadPromises = validTop3.map(function(c){
         return loadVCluster(c.cluster).then(function(entry){
           var sortedV = predictVCluster(c.cluster, featObj);
           if (!sortedV) return null;
+          // Adim 89-Debug-Fix: multi-mode V_<cluster> top-5 slug log (tum cluster'lar icin)
+          try {
+            var top5dbg = sortedV.slice(0, 5).map(function(s){ return s.slug + '(' + (s.prob*100).toFixed(2) + '%)'; }).join(', ');
+            console.log('%c[BM V_' + c.cluster + ' MULTI DEBUG]','background:#E91E63;color:#fff;padding:2px 6px;font-weight:700;',
+              'sha8=' + entry.sha8 + ' | clusterProb=' + (c.score*100).toFixed(1) + '% | TOP-5 SLUG: ' + top5dbg);
+          } catch (eDbg) { console.error('[BM V_' + c.cluster + ' MULTI DEBUG] log error:', eDbg && eDbg.message); }
           return {cluster: c.cluster, clusterProb: +c.score, sortedV: sortedV, entry: entry};
         }).catch(function(err){
           console.warn('[BM Strategy C multi] V_' + c.cluster + ' fail: ' + (err && err.message));
