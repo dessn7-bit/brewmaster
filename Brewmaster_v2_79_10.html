@@ -21092,16 +21092,15 @@ syncBaslat();
 <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.21.0/dist/ort.min.js"></script>
 <script id="bm-engine-b1-lgbm">
 (function(){
-  // -- D-1.9g final fit ONNX SHA8 --
-  const B1_SHA8 = '6619d8fb'; // Adim 68 P1-hotfix: B1_v3 zipmap=False re-export (browser uyumlu tensor output, ZipMap kaldirildi). 30.46 MB.
-  const B1_URL = 'https://brewmaster-models.dessn7.workers.dev/b1_v3_' + B1_SHA8 + '.onnx';
+  // -- Adim 82: B1_v5 19-cat (Adim 80 audit + 80.5 + 80.6 specialty alt-cluster decomposition + Adim 81 retrain) --
+  const B1_SHA8 = 'f41a886f'; // Adim 82: B1_v5 LightGBM 19-cat (14 ana cluster + 5 specialty alt + specialty_other), zipmap=False, 12.29 MB.
+  const B1_URL = 'https://brewmaster-models.dessn7.workers.dev/b1_v5_' + B1_SHA8 + '.onnx';
   const IDB_DB = 'bm_b1_models';
   const IDB_STORE = 'onnx';
   const IDB_KEY = 'b1_' + B1_SHA8;
-  const CLASSES = ['bock','brown_ale','ipa','lager','lager_dark','pale_ale','pilsner','porter','saison','sour','specialty','stout','strong_ale','wheat'];
-  // D-1.9j Faz 1 Kaan onayli Taslak A: orijinal dil (homebrew topluluğu İngilizce standart).
-  // Eski TR ASCII (Bugday/Eksi/Ozel/Guclu Ale/Koyu Lager) KALDIRILDI.
-  const CLUSTER_LABELS = {bock:'Bock',brown_ale:'Brown Ale',ipa:'IPA',lager:'Lager',lager_dark:'Dark Lager',pale_ale:'Pale Ale',pilsner:'Pilsner',porter:'Porter',saison:'Saison',sour:'Sour',specialty:'Specialty',stout:'Stout',strong_ale:'Strong Ale',wheat:'Wheat'};
+  const CLASSES = ['bock','brown_ale','ipa','lager','lager_dark','pale_ale','pilsner','porter','saison','sour','stout','strong_ale','wheat','specialty_brett_wild','specialty_chocolate_dessert','specialty_fruit','specialty_smoke_wood','specialty_spice','specialty_other'];
+  // Adim 82: Specialty cluster 6 alt-cluster'a parcalandi (Adim 80 audit). Eski 'specialty' single label kaldirildi.
+  const CLUSTER_LABELS = {bock:'Bock',brown_ale:'Brown Ale',ipa:'IPA',lager:'Lager',lager_dark:'Dark Lager',pale_ale:'Pale Ale',pilsner:'Pilsner',porter:'Porter',saison:'Saison',sour:'Sour',stout:'Stout',strong_ale:'Strong Ale',wheat:'Wheat',specialty_chocolate_dessert:'Specialty (Chocolate)',specialty_spice:'Specialty (Spice)',specialty_fruit:'Specialty (Fruit)',specialty_smoke_wood:'Specialty (Smoke/Wood)',specialty_brett_wild:'Specialty (Brett/Wild)',specialty_other:'Specialty (Other)'};
 
   // -- IndexedDB helpers (lazy cache) --
   function idbOpen() {
@@ -21583,7 +21582,14 @@ syncBaslat();
     'lager':      WORKER_BASE + '/v_cluster_lager_291692b4.json',
     'lager_dark': WORKER_BASE + '/v_cluster_lager_dark_c5509bcd.json',
     'pilsner':    WORKER_BASE + '/v_cluster_pilsner_b42243d7.json',
-    'porter':     WORKER_BASE + '/v_cluster_porter_9b38305d.json'
+    'porter':     WORKER_BASE + '/v_cluster_porter_9b38305d.json',
+    // Adim 82: 6 yeni V_specialty alt-cluster (Adim 80 + 80.5 + 80.6 + 81 retrain)
+    'specialty_chocolate_dessert': WORKER_BASE + '/v_cluster_specialty_chocolate_dessert_b98d26bc.json',
+    'specialty_spice':             WORKER_BASE + '/v_cluster_specialty_spice_d9aa63b6.json',
+    'specialty_fruit':             WORKER_BASE + '/v_cluster_specialty_fruit_2c9b576f.json',
+    'specialty_smoke_wood':        WORKER_BASE + '/v_cluster_specialty_smoke_wood_e68e6997.json',
+    'specialty_brett_wild':        WORKER_BASE + '/v_cluster_specialty_brett_wild_21f550c2.json',
+    'specialty_other':             WORKER_BASE + '/v_cluster_specialty_other_87017918.json'
   };
   // Adım 64.3a final fit feature_list = V19 89 feature (same as V12 slug model)
   // Cluster slug taxonomy: 13 cluster, specialty hariç (V12 flat ana strategy)
@@ -21639,7 +21645,14 @@ syncBaslat();
     'lager': ['american_lager','bamberg_maerzen_rauchbier','common_beer','dortmunder_european_export','german_maerzen','german_oktoberfest_festbier','kellerbier','munich_helles','pale_lager','vienna_lager'],
     'lager_dark': ['german_schwarzbier','munich_dunkel'],
     'pilsner': ['german_pilsener','pre_prohibition_lager'],
-    'porter': ['baltic_porter','brown_porter','porter','robust_porter']
+    'porter': ['baltic_porter','brown_porter','porter','robust_porter'],
+    // Adim 82: 6 V_specialty alt-cluster slug LE (LabelEncoder alphabetical order)
+    'specialty_chocolate_dessert': ['experimental_beer','fruit_beer','herb_and_spice_beer','smoked_beer','specialty_beer','winter_seasonal_beer'],
+    'specialty_spice':             ['experimental_beer','fruit_beer','herb_and_spice_beer','specialty_beer','winter_seasonal_beer'],
+    'specialty_fruit':             ['experimental_beer','fruit_beer','herb_and_spice_beer','specialty_beer','winter_seasonal_beer'],
+    'specialty_smoke_wood':        ['experimental_beer','fruit_beer','herb_and_spice_beer','smoked_beer','specialty_beer','winter_seasonal_beer'],
+    'specialty_brett_wild':        ['experimental_beer','fruit_beer','herb_and_spice_beer','smoked_beer','specialty_beer','winter_seasonal_beer'],
+    'specialty_other':             ['experimental_beer','fruit_beer','herb_and_spice_beer','specialty_beer','winter_seasonal_beer']
   };
 
   // V_cluster predict — XGBoost JSON via V12 predictRawWith helper
