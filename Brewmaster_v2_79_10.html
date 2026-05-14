@@ -21092,16 +21092,15 @@ syncBaslat();
 <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.21.0/dist/ort.min.js"></script>
 <script id="bm-engine-b1-lgbm">
 (function(){
-  // -- D-1.9g final fit ONNX SHA8 --
-  const B1_SHA8 = '6619d8fb'; // Adim 68 P1-hotfix: B1_v3 zipmap=False re-export (browser uyumlu tensor output, ZipMap kaldirildi). 30.46 MB.
-  const B1_URL = 'https://brewmaster-models.dessn7.workers.dev/b1_v3_' + B1_SHA8 + '.onnx';
+  // -- Adim 82-Hotfix: B1_v5 19-cat + NEW_FEATURES_7 JS port (Memory #29 madde 3 identicallik 35/35 PASS) --
+  const B1_SHA8 = 'f41a886f'; // Adim 82-Hotfix: B1_v5 LightGBM 19-cat (14 ana + 5 specialty alt + specialty_other), zipmap=False, 12.29 MB, 116 feat (89+20+7).
+  const B1_URL = 'https://brewmaster-models.dessn7.workers.dev/b1_v5_' + B1_SHA8 + '.onnx';
   const IDB_DB = 'bm_b1_models';
   const IDB_STORE = 'onnx';
   const IDB_KEY = 'b1_' + B1_SHA8;
-  const CLASSES = ['bock','brown_ale','ipa','lager','lager_dark','pale_ale','pilsner','porter','saison','sour','specialty','stout','strong_ale','wheat'];
-  // D-1.9j Faz 1 Kaan onayli Taslak A: orijinal dil (homebrew topluluğu İngilizce standart).
-  // Eski TR ASCII (Bugday/Eksi/Ozel/Guclu Ale/Koyu Lager) KALDIRILDI.
-  const CLUSTER_LABELS = {bock:'Bock',brown_ale:'Brown Ale',ipa:'IPA',lager:'Lager',lager_dark:'Dark Lager',pale_ale:'Pale Ale',pilsner:'Pilsner',porter:'Porter',saison:'Saison',sour:'Sour',specialty:'Specialty',stout:'Stout',strong_ale:'Strong Ale',wheat:'Wheat'};
+  const CLASSES = ['bock','brown_ale','ipa','lager','lager_dark','pale_ale','pilsner','porter','saison','sour','stout','strong_ale','wheat','specialty_brett_wild','specialty_chocolate_dessert','specialty_fruit','specialty_smoke_wood','specialty_spice','specialty_other'];
+  // Adim 82-Hotfix: Specialty cluster 6 alt-cluster'a parcalandi (Adim 80 audit). Eski 'specialty' single label kaldirildi.
+  const CLUSTER_LABELS = {bock:'Bock',brown_ale:'Brown Ale',ipa:'IPA',lager:'Lager',lager_dark:'Dark Lager',pale_ale:'Pale Ale',pilsner:'Pilsner',porter:'Porter',saison:'Saison',sour:'Sour',stout:'Stout',strong_ale:'Strong Ale',wheat:'Wheat',specialty_chocolate_dessert:'Specialty (Chocolate)',specialty_spice:'Specialty (Spice)',specialty_fruit:'Specialty (Fruit)',specialty_smoke_wood:'Specialty (Smoke/Wood)',specialty_brett_wild:'Specialty (Brett/Wild)',specialty_other:'Specialty (Other)'};
 
   // -- IndexedDB helpers (lazy cache) --
   function idbOpen() {
@@ -21247,10 +21246,16 @@ syncBaslat();
     if (!ext20 || ext20.length !== 20) {
       console.warn('[BM B1 inf step1] ext20 invalid length=' + (ext20 ? ext20.length : 'null')); return null;
     }
-    var v109 = new Float32Array(109);
-    for (var k=0;k<89;k++) v109[k] = +base89[k] || 0;
-    for (var j=0;j<20;j++) v109[89+j] = +ext20[j] || 0;
-    return v109;
+    // Adim 82-Hotfix: NEW_FEATURES_7 (Python _step79_feature_dist.py extract_7_features identical, 35/35 bit-level PASS)
+    var ext7 = build7Extension(uiR, featObj);
+    if (!ext7 || ext7.length !== 7) {
+      console.warn('[BM B1 inf step1] ext7 invalid length=' + (ext7 ? ext7.length : 'null')); return null;
+    }
+    var v116 = new Float32Array(116);
+    for (var k=0;k<89;k++) v116[k] = +base89[k] || 0;
+    for (var j=0;j<20;j++) v116[89+j] = +ext20[j] || 0;
+    for (var n=0;n<7;n++) v116[109+n] = +ext7[n] || 0;
+    return v116;
   }
 
   function build20Extension(uiR, featObj) {
@@ -21311,6 +21316,68 @@ syncBaslat();
       batch_l > 0 ? Math.round((og - 1.0) * 1000 / batch_l * 10000) / 10000 : 0,
       markerCount, katkiActive, (sfs > 0 ? 1 : 0)
     ];
+  }
+
+  // -- Adim 82-Hotfix: build7Extension (NEW_FEATURES_7 Adim 79 emsali, Python _step79_feature_dist.py port) --
+  // Memory #29 madde 3 identicallik: 5 sample x 7 feature x Python vs JS = 35/35 PASS (working/_step82h_identicallik_report.json)
+  // Regex patterns Python re.compile(...,re.I) birebir.
+  var RX_COCOA_7 = /cocoa|cacao|kakao|chocolate(?!\s*malt)|cikolata|koyu cikolata|chocolatecolat/i;
+  var RX_VANILLA_7 = /vanilla|vanilya|vanilla bean|vanilla extract/i;
+  var RX_SPICES_7 = /cinnamon|tarcin|kakule|cardamom|karanfil|clove|anise|anason|coriander|kisnis|allspice|nutmeg|ginger/i;
+  var RX_SMOKE_7 = /rauch|smoked|isli|beech\s*smoke|cherry\s*smoke|peat\s*smoke/i;
+  var RX_FRUIT_7 = /cherry|kiraz|raspberry|ahududu|peach|seftali|blueberry|yaban mersini|blackberry|boguntlen|apple|elma|orange peel|portakal|lemon|limon|apricot|kayisi|pear|armut|strawberry|cilek|plum|erik/i;
+  var RX_BELGIAN_YEAST_7 = /wlp500|wlp510|wlp530|wlp540|wlp550|wlp565|wlp570|wlp575|wy1214|wy1762|wy1388|wy3522|wy3787|wy3522|t-58|t58|be-256|be256|saflager.*be|abbaye|trappist|chimay|westmalle|rochefort|westvleteren|orval|achel|saison.*dupont|farmhouse/i;
+
+  function buildText7(uiR) {
+    var parts = [];
+    var MALTS = (typeof MALTLAR !== 'undefined' && Array.isArray(MALTLAR)) ? MALTLAR : [];
+    var HOPS  = (typeof HOPLAR  !== 'undefined' && Array.isArray(HOPLAR))  ? HOPLAR  : [];
+    var KATK  = (typeof KATKILAR!== 'undefined' && Array.isArray(KATKILAR))? KATKILAR: [];
+    var MAYA  = (typeof MAYALAR !== 'undefined' && Array.isArray(MAYALAR)) ? MAYALAR : [];
+    (uiR.maltlar || []).forEach(function(m){
+      if (!m || !m.id) return;
+      var e = MALTS.find(function(x){ return x && x.id === m.id; });
+      if (e) { if (e.ad) parts.push(e.ad); if (e.g) parts.push(e.g); }
+    });
+    (uiR.hoplar || []).forEach(function(h){
+      if (!h || !h.id) return;
+      var e = HOPS.find(function(x){ return x && x.id === h.id; });
+      if (e && e.ad) parts.push(e.ad);
+    });
+    (uiR.katkilar || []).forEach(function(k){
+      if (!k || !k.id) return;
+      var e = KATK.find(function(x){ return x && x.id === k.id; });
+      if (e && e.ad) parts.push(e.ad);
+    });
+    var mayaId = null;
+    if (uiR.maya) mayaId = (typeof uiR.maya === 'object') ? uiR.maya.id : uiR.maya;
+    if (mayaId) {
+      var em = MAYA.find(function(x){ return x && x.id === mayaId; });
+      if (em && em.ad) parts.push(em.ad);
+    }
+    return parts.join(' ');
+  }
+
+  function build7Extension(uiR, featObj) {
+    if (!featObj) featObj = {};
+    var text = buildText7(uiR || {});
+    var has_cocoa = (featObj.katki_chocolate || RX_COCOA_7.test(text)) ? 1 : 0;
+    var has_vanilla = RX_VANILLA_7.test(text) ? 1 : 0;
+    var has_spices = (featObj.has_spice || featObj.has_coriander ||
+                      featObj.has_orange_peel || featObj.has_chamomile ||
+                      RX_SPICES_7.test(text)) ? 1 : 0;
+    var has_smoke = (featObj.has_smoke || (featObj.pct_smoked || 0) > 0 ||
+                     featObj.katki_smoke || RX_SMOKE_7.test(text)) ? 1 : 0;
+    var has_fruit = (featObj.has_fruit || featObj.katki_fruit ||
+                     RX_FRUIT_7.test(text)) ? 1 : 0;
+    var has_belg = (featObj.has_belgian_yeast || RX_BELGIAN_YEAST_7.test(text)) ? 1 : 0;
+    var pct_choc = featObj.pct_choc || 0;
+    var pct_roast = featObj.pct_roast || 0;
+    var pct_crystal = featObj.pct_crystal || 0;
+    var has_brown_mix = (pct_choc > 0.5 && pct_crystal > 1 &&
+                         (pct_roast > 0 || pct_choc > 2)) ? 1 : 0;
+    return [has_cocoa, has_vanilla, has_spices, has_smoke,
+            has_fruit, has_belg, has_brown_mix];
   }
 
   // -- D-1.9k: Smoke marker post-process --
@@ -21469,7 +21536,7 @@ syncBaslat();
       console.log('[BM B1 inf step3] session ready, building 109 feature vec');
       var v = buildB1Features(uiR);
       if (!v) { console.warn('[BM B1 inf step3] buildB1Features returned null'); return null; }
-      var input = new ort.Tensor('float32', v, [1, 109]);
+      var input = new ort.Tensor('float32', v, [1, 116]);
       var inName = sess.inputNames[0];
       var feeds = {}; feeds[inName] = input;
       var t0 = (typeof performance !== 'undefined' ? performance.now() : Date.now());
@@ -21583,7 +21650,14 @@ syncBaslat();
     'lager':      WORKER_BASE + '/v_cluster_lager_291692b4.json',
     'lager_dark': WORKER_BASE + '/v_cluster_lager_dark_c5509bcd.json',
     'pilsner':    WORKER_BASE + '/v_cluster_pilsner_b42243d7.json',
-    'porter':     WORKER_BASE + '/v_cluster_porter_9b38305d.json'
+    'porter':     WORKER_BASE + '/v_cluster_porter_9b38305d.json',
+    // Adim 82-Hotfix: 6 yeni V_specialty alt-cluster (Adim 80 + 80.5 + 80.6 + 81 retrain)
+    'specialty_chocolate_dessert': WORKER_BASE + '/v_cluster_specialty_chocolate_dessert_b98d26bc.json',
+    'specialty_spice':             WORKER_BASE + '/v_cluster_specialty_spice_d9aa63b6.json',
+    'specialty_fruit':             WORKER_BASE + '/v_cluster_specialty_fruit_2c9b576f.json',
+    'specialty_smoke_wood':        WORKER_BASE + '/v_cluster_specialty_smoke_wood_e68e6997.json',
+    'specialty_brett_wild':        WORKER_BASE + '/v_cluster_specialty_brett_wild_21f550c2.json',
+    'specialty_other':             WORKER_BASE + '/v_cluster_specialty_other_87017918.json'
   };
   // Adım 64.3a final fit feature_list = V19 89 feature (same as V12 slug model)
   // Cluster slug taxonomy: 13 cluster, specialty hariç (V12 flat ana strategy)
@@ -21639,7 +21713,14 @@ syncBaslat();
     'lager': ['american_lager','bamberg_maerzen_rauchbier','common_beer','dortmunder_european_export','german_maerzen','german_oktoberfest_festbier','kellerbier','munich_helles','pale_lager','vienna_lager'],
     'lager_dark': ['german_schwarzbier','munich_dunkel'],
     'pilsner': ['german_pilsener','pre_prohibition_lager'],
-    'porter': ['baltic_porter','brown_porter','porter','robust_porter']
+    'porter': ['baltic_porter','brown_porter','porter','robust_porter'],
+    // Adim 82-Hotfix: 6 V_specialty alt-cluster slug LE (LabelEncoder alphabetical order)
+    'specialty_chocolate_dessert': ['experimental_beer','fruit_beer','herb_and_spice_beer','smoked_beer','specialty_beer','winter_seasonal_beer'],
+    'specialty_spice':             ['experimental_beer','fruit_beer','herb_and_spice_beer','specialty_beer','winter_seasonal_beer'],
+    'specialty_fruit':             ['experimental_beer','fruit_beer','herb_and_spice_beer','specialty_beer','winter_seasonal_beer'],
+    'specialty_smoke_wood':        ['experimental_beer','fruit_beer','herb_and_spice_beer','smoked_beer','specialty_beer','winter_seasonal_beer'],
+    'specialty_brett_wild':        ['experimental_beer','fruit_beer','herb_and_spice_beer','smoked_beer','specialty_beer','winter_seasonal_beer'],
+    'specialty_other':             ['experimental_beer','fruit_beer','herb_and_spice_beer','specialty_beer','winter_seasonal_beer']
   };
 
   // V_cluster predict — XGBoost JSON via V12 predictRawWith helper
