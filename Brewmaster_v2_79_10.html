@@ -21092,9 +21092,9 @@ syncBaslat();
 <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.21.0/dist/ort.min.js"></script>
 <script id="bm-engine-b1-lgbm">
 (function(){
-  // -- Adim 82-Hotfix: B1_v5 19-cat + NEW_FEATURES_7 JS port (Memory #29 madde 3 identicallik 35/35 PASS) --
-  const B1_SHA8 = 'f41a886f'; // Adim 82-Hotfix: B1_v5 LightGBM 19-cat (14 ana + 5 specialty alt + specialty_other), zipmap=False, 12.29 MB, 116 feat (89+20+7).
-  const B1_URL = 'https://brewmaster-models.dessn7.workers.dev/b1_v5_' + B1_SHA8 + '.onnx';
+  // -- Adim 86: B1_v6 + V12c_v3 deploy (Adim 84 Cat A 25K remap + Adim 85 Cat B 6K marker dağıtım + paralel retrain) --
+  const B1_SHA8 = 'bc5c5f60'; // Adim 86: B1_v6 LightGBM 19-cat, 5-fold top1 0.8048 (+6.28pp vs B1_v5), KORUMA A 6/6 +5-12pp, zipmap=False, 12.35 MB, 116 feat.
+  const B1_URL = 'https://brewmaster-models.dessn7.workers.dev/b1_v6_' + B1_SHA8 + '.onnx';
   const IDB_DB = 'bm_b1_models';
   const IDB_STORE = 'onnx';
   const IDB_KEY = 'b1_' + B1_SHA8;
@@ -21638,26 +21638,27 @@ syncBaslat();
   // 13 V_cluster R2 production URL'leri (SHA8 dahil, cache busting)
   var WORKER_BASE = 'https://brewmaster-models.dessn7.workers.dev';
   var V_CLUSTER_URLS = {
-    'sour':       WORKER_BASE + '/v_cluster_sour_8d3249c1.json',
-    'bock':       WORKER_BASE + '/v_cluster_bock_fe67dc97.json',
-    'wheat':      WORKER_BASE + '/v_cluster_wheat_c5bdb11b.json',
-    'stout':      WORKER_BASE + '/v_cluster_stout_1beeebf8.json',
-    'strong_ale': WORKER_BASE + '/v_cluster_strong_ale_32d14c12.json',
-    'ipa':        WORKER_BASE + '/v_cluster_ipa_7fcedd71.json',
-    'pale_ale':   WORKER_BASE + '/v_cluster_pale_ale_3566faf2.json',
-    'saison':     WORKER_BASE + '/v_cluster_saison_0dead725.json',
-    'brown_ale':  WORKER_BASE + '/v_cluster_brown_ale_f1a5d926.json',
-    'lager':      WORKER_BASE + '/v_cluster_lager_291692b4.json',
-    'lager_dark': WORKER_BASE + '/v_cluster_lager_dark_c5509bcd.json',
-    'pilsner':    WORKER_BASE + '/v_cluster_pilsner_b42243d7.json',
-    'porter':     WORKER_BASE + '/v_cluster_porter_9b38305d.json',
-    // Adim 82-Hotfix: 6 yeni V_specialty alt-cluster (Adim 80 + 80.5 + 80.6 + 81 retrain)
-    'specialty_chocolate_dessert': WORKER_BASE + '/v_cluster_specialty_chocolate_dessert_b98d26bc.json',
-    'specialty_spice':             WORKER_BASE + '/v_cluster_specialty_spice_d9aa63b6.json',
-    'specialty_fruit':             WORKER_BASE + '/v_cluster_specialty_fruit_2c9b576f.json',
-    'specialty_smoke_wood':        WORKER_BASE + '/v_cluster_specialty_smoke_wood_e68e6997.json',
+    // Adim 86: 13 base V_cluster re-fit (label_v6 = cluster_v5 priority, Cat A 25,927 remap yansır)
+    'sour':       WORKER_BASE + '/v_cluster_sour_b1f556cd.json',
+    'bock':       WORKER_BASE + '/v_cluster_bock_772b7e9b.json',
+    'wheat':      WORKER_BASE + '/v_cluster_wheat_899f05ce.json',
+    'stout':      WORKER_BASE + '/v_cluster_stout_05050fa7.json',
+    'strong_ale': WORKER_BASE + '/v_cluster_strong_ale_e6d9c899.json',
+    'ipa':        WORKER_BASE + '/v_cluster_ipa_5d81929e.json',
+    'pale_ale':   WORKER_BASE + '/v_cluster_pale_ale_89cbbb83.json',
+    'saison':     WORKER_BASE + '/v_cluster_saison_4f7c9105.json',
+    'brown_ale':  WORKER_BASE + '/v_cluster_brown_ale_69e36a26.json',
+    'lager':      WORKER_BASE + '/v_cluster_lager_a9e30823.json',
+    'lager_dark': WORKER_BASE + '/v_cluster_lager_dark_c9db10c9.json',
+    'pilsner':    WORKER_BASE + '/v_cluster_pilsner_93a1f948.json',
+    'porter':     WORKER_BASE + '/v_cluster_porter_9a1462bb.json',
+    // Adim 86: 6 V_specialty alt-cluster re-fit (Cat B priority cascade yansır, brett_wild SHA sabit)
+    'specialty_chocolate_dessert': WORKER_BASE + '/v_cluster_specialty_chocolate_dessert_7caafaf2.json',
+    'specialty_spice':             WORKER_BASE + '/v_cluster_specialty_spice_3326fa99.json',
+    'specialty_fruit':             WORKER_BASE + '/v_cluster_specialty_fruit_74a4c63c.json',
+    'specialty_smoke_wood':        WORKER_BASE + '/v_cluster_specialty_smoke_wood_2bc3b9cb.json',
     'specialty_brett_wild':        WORKER_BASE + '/v_cluster_specialty_brett_wild_21f550c2.json',
-    'specialty_other':             WORKER_BASE + '/v_cluster_specialty_other_87017918.json'
+    'specialty_other':             WORKER_BASE + '/v_cluster_specialty_other_261c3295.json'
   };
   // Adım 64.3a final fit feature_list = V19 89 feature (same as V12 slug model)
   // Cluster slug taxonomy: 13 cluster, specialty hariç (V12 flat ana strategy)
