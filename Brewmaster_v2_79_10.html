@@ -21761,10 +21761,14 @@ syncBaslat();
     }
 
     var t0 = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+    var slugDisplay = function(s){ return String(s||'').split('_').map(function(w){ return w.length ? w[0].toUpperCase()+w.slice(1) : ''; }).join(' '); };
+    // Adim 87: multi-cluster confidence threshold (top-1 prob düşükse top-3 combined score)
+    var STC_MULTI_THRESHOLD = 0.60;
     // Promise.resolve ile async chain'i koru (cluster lazy load gerek)
     return Promise.resolve(b1res).then(function(b1res){
       var cluster = b1res.topCluster;
       var clusterProb = b1res.topProb;
+      var top3 = (b1res.top3 || []).slice(0, 3);
 
       // Specialty cluster → V12 flat fallback (B1 recall %38 → V12 ana strategy)
       if (cluster === 'specialty' || !V_CLUSTER_URLS[cluster]) {
@@ -21776,26 +21780,93 @@ syncBaslat();
           top3: v12.top3,
           cluster: cluster, clusterProb: clusterProb,
           fallback: 'specialty_v12_flat',
-          _meta: {motor: 'Strategy_C', sha8: 'b1_6619d8fb+v12_flat', latency_ms: +((((typeof performance!=='undefined')?performance.now():Date.now())-t0).toFixed(1))}
+          _meta: {motor: 'Strategy_C', mode: 'single', sha8: 'b1_' + (window.BM_B1 && window.BM_B1.SHA8 || 'unknown') + '+v12_flat', latency_ms: +((((typeof performance!=='undefined')?performance.now():Date.now())-t0).toFixed(1))}
         };
       }
 
-      // V_cluster lazy load + predict
-      return loadVCluster(cluster).then(function(entry){
-        var sortedV = predictVCluster(cluster, featObj);
-        if (!sortedV) throw new Error('V_' + cluster + ' predict failed');
-        var top1 = sortedV[0];
-        // V_CLUSTER_CONF_THRESHOLD=0 → hibrit fallback OFF, cascade-only (B1 wrong cluster zaten specialty fallback'e gider)
-        // Future: if threshold > 0 and top1.prob < threshold → V12 flat fallback
-        var slugDisplay = function(s){ return String(s||'').split('_').map(function(w){ return w.length ? w[0].toUpperCase()+w.slice(1) : ''; }).join(' '); };
-        var top3 = sortedV.slice(0, 3).map(function(x){ return {slug: x.slug, displayTR: slugDisplay(x.slug), score: x.prob, normalized: Math.round(x.prob*100)}; });
+      // Adim 87: Single-mode (top-1 prob ≥ 0.60) — mevcut hızlı path
+      if (clusterProb >= STC_MULTI_THRESHOLD) {
+        return loadVCluster(cluster).then(function(entry){
+          var sortedV = predictVCluster(cluster, featObj);
+          if (!sortedV) throw new Error('V_' + cluster + ' predict failed');
+          var top1 = sortedV[0];
+          var top3Out = sortedV.slice(0, 3).map(function(x){ return {slug: x.slug, displayTR: slugDisplay(x.slug), score: x.prob, normalized: Math.round(x.prob*100)}; });
+          return {
+            topSlug: top1.slug,
+            topProb: top1.prob,
+            top3: top3Out,
+            cluster: cluster, clusterProb: clusterProb,
+            fallback: null,
+            _meta: {motor: 'Strategy_C', mode: 'single', conf_threshold: STC_MULTI_THRESHOLD, sha8: 'b1_' + (window.BM_B1 && window.BM_B1.SHA8 || 'unknown') + '+v_' + cluster + '_' + entry.sha8, latency_ms: +((((typeof performance!=='undefined')?performance.now():Date.now())-t0).toFixed(1))}
+          };
+        });
+      }
+
+      // Adim 87: Multi-mode (top-1 prob < 0.60) — parallel top-3 V_cluster + combined score
+      var validTop3 = top3.filter(function(c){ return c.cluster !== 'specialty' && V_CLUSTER_URLS[c.cluster]; });
+      if (!validTop3.length) {
+        // Tüm top-3 specialty veya URL yok → V12 flat fallback
+        var v12f = window.BM_V12 && window.BM_V12.predictSlugSync && window.BM_V12.predictSlugSync(uiRecipe);
+        if (!v12f) throw new Error('Multi-mode V12 flat fallback failed (no valid clusters)');
         return {
-          topSlug: top1.slug,
-          topProb: top1.prob,
-          top3: top3,
+          topSlug: v12f.top3[0].slug,
+          topProb: v12f.top3[0].score,
+          top3: v12f.top3,
           cluster: cluster, clusterProb: clusterProb,
+          fallback: 'multi_no_valid_v12_flat',
+          _meta: {motor: 'Strategy_C', mode: 'multi_fallback_v12', conf_threshold: STC_MULTI_THRESHOLD, latency_ms: +((((typeof performance!=='undefined')?performance.now():Date.now())-t0).toFixed(1))}
+        };
+      }
+
+      console.log('%c[BM Strategy C multi]','background:#9C27B0;color:#fff;padding:2px 6px;', 'top1 prob ' + (clusterProb*100).toFixed(1) + '% < ' + (STC_MULTI_THRESHOLD*100) + '%, loading top-' + validTop3.length + ' V_clusters parallel');
+      var loadPromises = validTop3.map(function(c){
+        return loadVCluster(c.cluster).then(function(entry){
+          var sortedV = predictVCluster(c.cluster, featObj);
+          if (!sortedV) return null;
+          return {cluster: c.cluster, clusterProb: +c.score, sortedV: sortedV, entry: entry};
+        }).catch(function(err){
+          console.warn('[BM Strategy C multi] V_' + c.cluster + ' fail: ' + (err && err.message));
+          return null;
+        });
+      });
+
+      return Promise.all(loadPromises).then(function(results){
+        results = results.filter(function(r){ return r && r.sortedV; });
+        if (!results.length) {
+          // All cluster loads failed → V12 flat fallback
+          var v12ff = window.BM_V12 && window.BM_V12.predictSlugSync && window.BM_V12.predictSlugSync(uiRecipe);
+          if (!v12ff) throw new Error('Multi-mode all loads failed, V12 fallback also failed');
+          return {
+            topSlug: v12ff.top3[0].slug, topProb: v12ff.top3[0].score, top3: v12ff.top3,
+            cluster: cluster, clusterProb: clusterProb, fallback: 'multi_all_failed_v12_flat',
+            _meta: {motor: 'Strategy_C', mode: 'multi_fallback_v12', latency_ms: +((((typeof performance!=='undefined')?performance.now():Date.now())-t0).toFixed(1))}
+          };
+        }
+
+        // Combined score = clusterProb × slugProb (top-5 each cluster)
+        var combined = [];
+        results.forEach(function(r){
+          r.sortedV.slice(0, 5).forEach(function(s){
+            combined.push({
+              slug: s.slug, cluster: r.cluster,
+              clusterProb: r.clusterProb, slugProb: +s.prob,
+              combinedScore: r.clusterProb * (+s.prob)
+            });
+          });
+        });
+        combined.sort(function(a, b){ return b.combinedScore - a.combinedScore; });
+        var top1 = combined[0];
+        var top3Combined = combined.slice(0, 3).map(function(x){
+          return {slug: x.slug, displayTR: slugDisplay(x.slug), score: x.combinedScore, normalized: Math.round(x.combinedScore*100), cluster: x.cluster, _slugProb: x.slugProb, _clusterProb: x.clusterProb};
+        });
+        var sources = results.map(function(r){ return r.cluster + '(' + (r.clusterProb*100).toFixed(0) + '%)'; }).join('+');
+        console.log('%c[BM Strategy C multi]','background:#9C27B0;color:#fff;padding:2px 6px;', 'combined top1=' + top1.slug + ' (' + (top1.combinedScore*100).toFixed(1) + '%) sources=[' + sources + ']');
+        return {
+          topSlug: top1.slug, topProb: top1.combinedScore, top3: top3Combined,
+          cluster: top1.cluster, clusterProb: clusterProb,
           fallback: null,
-          _meta: {motor: 'Strategy_C', sha8: 'b1_6619d8fb+v_' + cluster + '_' + entry.sha8, latency_ms: +((((typeof performance!=='undefined')?performance.now():Date.now())-t0).toFixed(1))}
+          multi_mode: true, multi_sources: results.length, multi_clusters: results.map(function(r){return r.cluster;}),
+          _meta: {motor: 'Strategy_C', mode: 'multi', conf_threshold: STC_MULTI_THRESHOLD, b1_top3_clusters: validTop3.map(function(x){return x.cluster;}), latency_ms: +((((typeof performance!=='undefined')?performance.now():Date.now())-t0).toFixed(1))}
         };
       });
     });
