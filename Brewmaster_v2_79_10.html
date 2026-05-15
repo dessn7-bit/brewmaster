@@ -21850,17 +21850,116 @@ syncBaslat();
     var STC_MULTI_THRESHOLD = 0.60;
 
     // Adim 90: 3-motor hibrit slug agreement helper
-    // SLUG_TO_CLUSTER reverse lookup (V_CLUSTER_CLASSES'tan tek seferlik build)
-    var _SLUG_TO_CLUSTER_CACHE = null;
+    // Adim 104 KATMAN 1 FIX: BJCP-canonical inline tablo (V_CLUSTER_CLASSES reverse lookup TERK EDILDI).
+    // Sebep: V_CLUSTER_CLASSES her cluster'in TRAIN slug listesini iceriyor (Adim 99 deploy).
+    //   Adim 97-98 cleanup ile bir slug birden fazla cluster'da gozukur (kross-contamination).
+    //   First-win base-priority de yanlis: 'bock' alfabetik ilk → 'belgian_dubbel' bock'a atanirdi.
+    // Cozum: Adim 83/97 audit script'lerinin SLUG_TO_CLUSTER tablosunu inline embed.
+    //   98 slug -> 13 base + 5 specialty (specialty_brett_wild slug yok). BJCP-canonical mapping.
+    var BJCP_SLUG_TO_CLUSTER = {
+      // 13 base cluster (BJCP-canonical)
+      'american_lager': 'lager',
+      'bamberg_maerzen_rauchbier': 'lager',
+      'common_beer': 'lager',
+      'dortmunder_european_export': 'lager',
+      'german_maerzen': 'lager',
+      'german_oktoberfest_festbier': 'lager',
+      'kellerbier': 'lager',
+      'munich_helles': 'lager',
+      'pale_lager': 'lager',
+      'vienna_lager': 'lager',
+      'german_schwarzbier': 'lager_dark',
+      'munich_dunkel': 'lager_dark',
+      'german_pilsener': 'pilsner',
+      'pre_prohibition_lager': 'pilsner',
+      'american_wheat_ale': 'wheat',
+      'american_wheat_beer': 'wheat',
+      'belgian_witbier': 'wheat',
+      'german_leichtes_weizen': 'wheat',
+      'german_rye_ale': 'wheat',
+      'roggenbier': 'wheat',
+      'south_german_bernsteinfarbenes_weizen': 'wheat',
+      'south_german_dunkel_weizen': 'wheat',
+      'south_german_hefeweizen': 'wheat',
+      'south_german_weizenbock': 'wheat',
+      'american_india_pale_ale': 'ipa',
+      'belgian_ipa': 'ipa',
+      'black_ipa': 'ipa',
+      'british_india_pale_ale': 'ipa',
+      'double_ipa': 'ipa',
+      'juicy_or_hazy_india_pale_ale': 'ipa',
+      'red_ipa': 'ipa',
+      'rye_ipa': 'ipa',
+      'white_ipa': 'ipa',
+      'american_cream_ale': 'pale_ale',
+      'american_pale_ale': 'pale_ale',
+      'blonde_ale': 'pale_ale',
+      'cream_ale': 'pale_ale',
+      'english_pale_ale': 'pale_ale',
+      'extra_special_bitter': 'pale_ale',
+      'german_koelsch': 'pale_ale',
+      'golden_or_blonde_ale': 'pale_ale',
+      'ordinary_bitter': 'pale_ale',
+      'special_bitter_or_best_bitter': 'pale_ale',
+      'american_imperial_stout': 'stout',
+      'export_stout': 'stout',
+      'irish_dry_stout': 'stout',
+      'oatmeal_stout': 'stout',
+      'stout': 'stout',
+      'sweet_stout': 'stout',
+      'sweet_stout_or_cream_stout': 'stout',
+      'baltic_porter': 'porter',
+      'brown_porter': 'porter',
+      'porter': 'porter',
+      'robust_porter': 'porter',
+      'french_belgian_saison': 'saison',
+      'specialty_saison': 'saison',
+      'belgian_fruit_lambic': 'sour',
+      'belgian_gueuze': 'sour',
+      'belgian_lambic': 'sour',
+      'berliner_weisse': 'sour',
+      'brett_beer': 'sour',
+      'flanders_red_ale': 'sour',
+      'gose': 'sour',
+      'mixed_fermentation_sour_beer': 'sour',
+      'oud_bruin': 'sour',
+      'dunkles_bock': 'bock',
+      'german_bock': 'bock',
+      'german_doppelbock': 'bock',
+      'german_heller_bock_maibock': 'bock',
+      'american_barley_wine_ale': 'strong_ale',
+      'american_barleywine': 'strong_ale',
+      'american_strong_pale_ale': 'strong_ale',
+      'american_wheat_wine_ale': 'strong_ale',
+      'belgian_blonde_ale': 'strong_ale',
+      'belgian_dubbel': 'strong_ale',
+      'belgian_quadrupel': 'strong_ale',
+      'belgian_strong_dark_ale': 'strong_ale',
+      'belgian_strong_golden': 'strong_ale',
+      'belgian_tripel': 'strong_ale',
+      'british_barley_wine_ale': 'strong_ale',
+      'old_ale': 'strong_ale',
+      'scotch_ale_or_wee_heavy': 'strong_ale',
+      'american_amber_red_ale': 'brown_ale',
+      'american_brown_ale': 'brown_ale',
+      'brown_ale': 'brown_ale',
+      'french_biere_de_garde': 'brown_ale',
+      'german_altbier': 'brown_ale',
+      'irish_red_ale': 'brown_ale',
+      'mild': 'brown_ale',
+      'scottish_export': 'brown_ale',
+      // 5 specialty alt-cluster (Adim 97 mapping)
+      'chocolate_or_cocoa_beer': 'specialty_chocolate_dessert',
+      'pastry_beer': 'specialty_chocolate_dessert',
+      'fruit_beer': 'specialty_fruit',
+      'smoked_beer': 'specialty_smoke_wood',
+      'herb_and_spice_beer': 'specialty_spice',
+      'experimental_beer': 'specialty_other',
+      'specialty_beer': 'specialty_other',
+      'winter_seasonal_beer': 'specialty_other'
+    };
     function _getSlugCluster(slug) {
-      if (!_SLUG_TO_CLUSTER_CACHE) {
-        _SLUG_TO_CLUSTER_CACHE = {};
-        for (var c in V_CLUSTER_CLASSES) {
-          var arr = V_CLUSTER_CLASSES[c] || [];
-          for (var i = 0; i < arr.length; i++) _SLUG_TO_CLUSTER_CACHE[arr[i]] = c;
-        }
-      }
-      return _SLUG_TO_CLUSTER_CACHE[slug] || null;
+      return BJCP_SLUG_TO_CLUSTER[slug] || null;
     }
 
     // Adim 96: 4-motor hibrit slug agreement (V_<cluster> + V12 + V20 + Hibrit oylama)
@@ -21928,12 +22027,24 @@ syncBaslat();
         }
 
         // 4. Cluster check — topVote slug B1 cluster içinde mi
+        // Adim 104 KATMAN 2: full consensus (agreeCount === totalVotes && totalVotes >= 2)
+        // durumunda cluster_mismatch BYPASS. Mantik: tum motorlar tek slug'a oy verdi,
+        // B1 dusuk guven (<%60) iken motor konsensusu B1 cluster tahminden daha guvenilir.
+        // Partial consensus (3/4 veya 2/4) cluster_mismatch koruma KORUNUR (false positive riski).
         var topVoteCluster = _getSlugCluster(topVote);
         if (topVoteCluster !== b1TopCluster) {
-          console.log('%c[BM Strategy C hybrid]','background:#D32F2F;color:#fff;padding:2px 6px;', 'FAIL cluster=' + b1TopCluster + ' reason=cluster_mismatch (topVote=' + topVote + ' → cluster=' + topVoteCluster + ' !== b1=' + b1TopCluster + ')');
-          return null;
+          var fullConsensus = (agreeCount === totalVotes && totalVotes >= 2);
+          if (fullConsensus) {
+            console.log('%c[BM Strategy C hybrid]','background:#43A047;color:#fff;padding:2px 6px;font-weight:700;', 'PASS cluster_mismatch BYPASS (full consensus ' + agreeCount + '/' + totalVotes + '): topVote=' + topVote + ' canonical_cluster=' + topVoteCluster + ' (B1 said ' + b1TopCluster + ')');
+            // Continue PASS path — topVoteCluster overrides b1TopCluster for result reporting
+            // (return statement asagida b1TopCluster argumanini kullaniyor, caller hybaCluster ile override eder)
+          } else {
+            console.log('%c[BM Strategy C hybrid]','background:#D32F2F;color:#fff;padding:2px 6px;', 'FAIL cluster=' + b1TopCluster + ' reason=cluster_mismatch (topVote=' + topVote + ' → cluster=' + topVoteCluster + ' !== b1=' + b1TopCluster + ', partial consensus ' + agreeCount + '/' + totalVotes + ')');
+            return null;
+          }
+        } else {
+          console.log('%c[BM Strategy C hybrid]','background:#43A047;color:#fff;padding:2px 6px;font-weight:700;', 'PASS cluster=' + b1TopCluster + ' slug=' + topVote + ' agreeCount=' + agreeCount + '/' + totalVotes);
         }
-        console.log('%c[BM Strategy C hybrid]','background:#43A047;color:#fff;padding:2px 6px;font-weight:700;', 'PASS cluster=' + b1TopCluster + ' slug=' + topVote + ' agreeCount=' + agreeCount + '/' + totalVotes);
 
         // 5. Agreeing + dissenting motors
         var agreeingMotors = allMotors.filter(function(m){ return m.slug === topVote; });
@@ -21968,6 +22079,7 @@ syncBaslat();
           dissentingMotors: dissentingList,
           top3: v12Top3.slice(0, 3),
           ribbonProb: ribbonProb,
+          topVoteCluster: topVoteCluster, // Adim 104 KATMAN 2: caller bypass durumunda canonical cluster kullanir
           v_cluster_slug: vc_motor && vc_motor.slug,
           v_cluster_prob: vc_motor && vc_motor.prob,
           v12_slug: v12_motor && v12_motor.slug,
@@ -22081,11 +22193,16 @@ syncBaslat();
         var hh = _hybridAgreement(uiRecipe, tc, featObj);
         if (hh && hh.agreeCount >= 2) {
           hyba = hh;
-          hybaCluster = tc;
-          hybaClusterProb = tcp;
+          // Adim 104 KATMAN 2: bypass durumunda canonical cluster kullan (hh.topVoteCluster)
+          // non-bypass case'inde topVoteCluster === tc oldugu icin override etkisiz
+          hybaCluster = hh.topVoteCluster || tc;
+          // hybaClusterProb: bypass case'inde B1 top-3'te canonical cluster prob bul, yoksa tc.score
+          var canonicalEntry = (top3 || []).find(function(c){ return c.cluster === hybaCluster; });
+          hybaClusterProb = canonicalEntry ? +canonicalEntry.score : tcp;
           hybaRank = hi + 1;
           // Adim 103 DEBUG: PASS break
-          console.log('%c[BM Strategy C top-3]','background:#43A047;color:#fff;padding:2px 6px;font-weight:700;', 'PASS at hi=' + hi + ' cluster=' + tc + ' break loop');
+          var bypassNote = (hh.topVoteCluster && hh.topVoteCluster !== tc) ? ' (KATMAN 2 BYPASS: B1 said ' + tc + ', canonical ' + hh.topVoteCluster + ')' : '';
+          console.log('%c[BM Strategy C top-3]','background:#43A047;color:#fff;padding:2px 6px;font-weight:700;', 'PASS at hi=' + hi + ' cluster=' + hybaCluster + bypassNote + ' break loop');
           break;
         }
       }
