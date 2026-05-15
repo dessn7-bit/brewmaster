@@ -21866,8 +21866,44 @@ syncBaslat();
       }
     }
 
-    // Promise.resolve ile async chain'i koru (cluster lazy load gerek)
-    return Promise.resolve(b1res).then(function(b1res){
+    // Adim 94-fix-2: V12/V20 slug ready wait (R2 fetch race fix)
+    // Ilk page load: B1 ready -> Strategy C dispatch tetiklenir, V12/V20 slug R2'dan
+    // fetch'te (~1-2sn). Hybrid agreement V12+V20+Hibrit top-1 ister. 2500ms timeout
+    // ile bekle; asilirsa mevcut multi-mode fallback (silinmis dispatch davranis).
+    // Hibrit V12+V20'den turetilir (f1HybridSlug line 2815), ayri ready check'e gerek yok.
+    function _waitForSlugMotorsReady(timeoutMs) {
+      var ready = function(){
+        var v12 = window.BM_V12 && window.BM_V12.isSlugReady && window.BM_V12.isSlugReady();
+        var v20 = window.BM_V20 && window.BM_V20.isSlugReady && window.BM_V20.isSlugReady();
+        return v12 && v20;
+      };
+      if (ready()) return Promise.resolve('ready_immediate');
+      console.log('%c[BM Strategy C wait]','background:#9C27B0;color:#fff;padding:2px 6px;',
+        'slug motors not yet ready, polling up to ' + timeoutMs + 'ms');
+      var tStart = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+      return new Promise(function(resolve){
+        var resolved = false;
+        var iv = setInterval(function(){
+          if (resolved) { clearInterval(iv); return; }
+          if (ready()) {
+            resolved = true; clearInterval(iv);
+            var tEnd = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+            console.log('%c[BM Strategy C wait]','background:#43A047;color:#fff;padding:2px 6px;',
+              'slug motors ready after ' + (tEnd - tStart).toFixed(0) + 'ms');
+            resolve('ready_polled');
+          }
+        }, 100);
+        setTimeout(function(){
+          if (resolved) return;
+          resolved = true; clearInterval(iv);
+          console.warn('[BM Strategy C wait] timeout ' + timeoutMs + 'ms — V12/V20 slug not ready, multi-mode fallback');
+          resolve('timeout');
+        }, timeoutMs);
+      });
+    }
+
+    // Adim 94-fix-2: wait V12/V20 slug ready (timeout 2500ms) then dispatch chain
+    return _waitForSlugMotorsReady(2500).then(function(){ return b1res; }).then(function(b1res){
       var cluster = b1res.topCluster;
       var clusterProb = b1res.topProb;
       var top3 = (b1res.top3 || []).slice(0, 3);
