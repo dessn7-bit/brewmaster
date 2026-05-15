@@ -477,8 +477,8 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
   // Sample test 64.3d sonrası motor toggle'a Strategy_C option eklenebilir (gelecek sub-sprint).
   // Adim 99: V12c_v4 89-feature (46ad6294, dataset_v7 +7.46pp) + V12_v5 slug (2df2431a reuse) R2 deploy.
   // Adim 97-98 dataset cleanup (Tier 2+3 remap 39K) sonrasi V12c_v4 retrain. B1_v7 ONNX 116 compat KRITER 4 PASS.
-  const MODEL_URL = 'https://brewmaster-models.dessn7.workers.dev/v12c_v4_model_19cat_46ad6294.json';
-  const LABELS_URL = 'https://brewmaster-models.dessn7.workers.dev/v12c_v4_label_encoder_19cat_46ad6294.json';
+  const MODEL_URL = 'https://brewmaster-models.dessn7.workers.dev/v12c_v5_model_14cat_d4cbc398.json';
+  const LABELS_URL = 'https://brewmaster-models.dessn7.workers.dev/v12c_v5_label_encoder_14cat_d4cbc398.json';
   const SLUG_MODEL_URL = 'https://brewmaster-models.dessn7.workers.dev/v12slug_v5_model_2df2431a.json';
   const SLUG_LABELS_URL = 'https://brewmaster-models.dessn7.workers.dev/v12slug_v5_label_encoder_2df2431a.json';
   const cache = { model: null, labels: null, slugModel: null, slugLabels: null };
@@ -21145,14 +21145,14 @@ syncBaslat();
 <script id="bm-engine-b1-lgbm">
 (function(){
   // -- Adim 86: B1_v6 + V12c_v3 deploy (Adim 84 Cat A 25K remap + Adim 85 Cat B 6K marker dağıtım + paralel retrain) --
-  const B1_SHA8 = '470ccdee'; // Adim 99: B1_v7 LightGBM 19-cat, 5-fold top1 0.8762 (+7.14pp vs B1_v6, dataset_v7 cleanup), KORUMA A 6/6 pozitif, Specialty +%10-22pp, 12.37 MB.
-  const B1_URL = 'https://brewmaster-models.dessn7.workers.dev/b1_v7_' + B1_SHA8 + '.onnx';
+  const B1_SHA8 = '17484c93'; // Adim 105: B1_v8 LightGBM 14-cat (19→14 refactor), 5-fold top1 0.8802, specialty F1 0.557, ECE_calibrated 0.0041 (isotonic).
+  const B1_URL = 'https://brewmaster-models.dessn7.workers.dev/b1_v8_' + B1_SHA8 + '.onnx';
   const IDB_DB = 'bm_b1_models';
   const IDB_STORE = 'onnx';
   const IDB_KEY = 'b1_' + B1_SHA8;
-  const CLASSES = ['bock','brown_ale','ipa','lager','lager_dark','pale_ale','pilsner','porter','saison','sour','stout','strong_ale','wheat','specialty_brett_wild','specialty_chocolate_dessert','specialty_fruit','specialty_smoke_wood','specialty_spice','specialty_other'];
+  const CLASSES = ['bock','brown_ale','ipa','lager','lager_dark','pale_ale','pilsner','porter','saison','sour','stout','strong_ale','wheat','specialty'];
   // Adim 82-Hotfix: Specialty cluster 6 alt-cluster'a parcalandi (Adim 80 audit). Eski 'specialty' single label kaldirildi.
-  const CLUSTER_LABELS = {bock:'Bock',brown_ale:'Brown Ale',ipa:'IPA',lager:'Lager',lager_dark:'Dark Lager',pale_ale:'Pale Ale',pilsner:'Pilsner',porter:'Porter',saison:'Saison',sour:'Sour',stout:'Stout',strong_ale:'Strong Ale',wheat:'Wheat',specialty_chocolate_dessert:'Specialty (Chocolate)',specialty_spice:'Specialty (Spice)',specialty_fruit:'Specialty (Fruit)',specialty_smoke_wood:'Specialty (Smoke/Wood)',specialty_brett_wild:'Specialty (Brett/Wild)',specialty_other:'Specialty (Other)'};
+  const CLUSTER_LABELS = {bock:'Bock',brown_ale:'Brown Ale',ipa:'IPA',lager:'Lager',lager_dark:'Dark Lager',pale_ale:'Pale Ale',pilsner:'Pilsner',porter:'Porter',saison:'Saison',sour:'Sour',stout:'Stout',strong_ale:'Strong Ale',wheat:'Wheat',specialty:'Specialty'};
 
   // -- IndexedDB helpers (lazy cache) --
   function idbOpen() {
@@ -21239,6 +21239,62 @@ syncBaslat();
     });
   }
 
+  // Adim 105 KATMAN A: Isotonic calibration cache + load + interpolate
+  var CALIBRATION_URL = 'https://brewmaster-models.dessn7.workers.dev/b1_v8_calibration_29744456.json';
+  var _calibrationCache = null;
+  var _calibrationLoadingPromise = null;
+  function loadCalibration() {
+    if (_calibrationCache) return Promise.resolve(_calibrationCache);
+    if (_calibrationLoadingPromise) return _calibrationLoadingPromise;
+    _calibrationLoadingPromise = fetch(CALIBRATION_URL, {cache: 'force-cache'}).then(function(r){
+      if (!r.ok) throw new Error('calibration fetch HTTP ' + r.status);
+      return r.json();
+    }).then(function(params){
+      _calibrationCache = params;
+      console.log('%c[BM B1 calibration]','background:#43A047;color:#fff;padding:2px 6px;', 'isotonic params loaded: ' + params.n_classes + ' classes, ' + params.curves.length + ' curves');
+      return params;
+    }).catch(function(e){
+      console.warn('[BM B1 calibration] load fail, raw probs kullanilacak:', e && e.message);
+      _calibrationLoadingPromise = null;
+      throw e;
+    });
+    return _calibrationLoadingPromise;
+  }
+  // Isotonic 1D piecewise-linear interpolate
+  function _isotonicInterp(x, xArr, yArr) {
+    if (x <= xArr[0]) return yArr[0];
+    if (x >= xArr[xArr.length - 1]) return yArr[xArr.length - 1];
+    // Binary search for x in xArr
+    var lo = 0, hi = xArr.length - 1;
+    while (lo < hi - 1) {
+      var mid = (lo + hi) >> 1;
+      if (xArr[mid] <= x) lo = mid; else hi = mid;
+    }
+    var dx = xArr[hi] - xArr[lo];
+    if (dx === 0) return yArr[lo];
+    return yArr[lo] + (yArr[hi] - yArr[lo]) * (x - xArr[lo]) / dx;
+  }
+  function applyCalibration(rawProbs, classes) {
+    if (!_calibrationCache) return rawProbs.slice(); // calibration yüklü değilse raw
+    var curves = _calibrationCache.curves;
+    var calLabels = _calibrationCache.labels;
+    var calProbs = rawProbs.slice();
+    for (var i = 0; i < classes.length; i++) {
+      var c = classes[i];
+      var curveIdx = calLabels.indexOf(c);
+      if (curveIdx < 0) continue; // missing curve → keep raw
+      var curve = curves[curveIdx];
+      calProbs[i] = _isotonicInterp(rawProbs[i], curve.x, curve.y);
+    }
+    // Renormalize
+    var sum = 0;
+    for (var j = 0; j < calProbs.length; j++) sum += calProbs[j];
+    if (sum > 0) {
+      for (var k = 0; k < calProbs.length; k++) calProbs[k] /= sum;
+    }
+    return calProbs;
+  }
+
   function loadSession() {
     if (sessionPromise) return sessionPromise;
     if (!window.ort) { console.warn('[BM B1] onnxruntime-web yuklenmedi'); return Promise.reject(new Error('ort missing')); }
@@ -21261,6 +21317,8 @@ syncBaslat();
     }).then(function(sess){
       console.log('%c[BM B1 LightGBM] ONNX session haz-r','background:#FF6F00;color:#fff;padding:2px 6px;');
       setProgress('ready', 100, 'Hierarchical motor aktif');
+      // Adim 105 KATMAN A: calibration params paralel preload (B1 predict öncesi hazır olması için)
+      loadCalibration().catch(function(){});
       return sess;
     }).catch(function(e){
       console.warn('[BM B1] load fail:', e && e.message);
@@ -21601,15 +21659,17 @@ syncBaslat();
         if (!out[probKey] || !out[probKey].data) {
           console.warn('[BM B1 inf step4] probKey=' + probKey + ' has no data'); return null;
         }
-        var probs = Array.from(out[probKey].data);
+        var rawProbs = Array.from(out[probKey].data);
+        // Adim 105 KATMAN A: isotonic calibration uygulama (raw → calibrated)
+        var probs = applyCalibration(rawProbs, CLASSES);
         var sorted = CLASSES.map(function(c, i){ return { cluster: c, displayTR: CLUSTER_LABELS[c], prob: probs[i] }; })
           .sort(function(a,b){ return b.prob - a.prob; });
         var result = {
           top3: sorted.slice(0, 3).map(function(r){ return { cluster: r.cluster, displayTR: r.displayTR, score: r.prob, normalized: Math.round(r.prob*100) }; }),
           topCluster: sorted[0].cluster,
           topProb: sorted[0].prob,
-          probs: probs, classes: CLASSES,
-          _meta: { motor: 'B1_LightGBM_109feat_14cat', sha8: B1_SHA8, model_url: B1_URL, latency_ms: +dt }
+          probs: probs, raw_probs: rawProbs, classes: CLASSES,
+          _meta: { motor: 'B1_LightGBM_116feat_14cat_calibrated', sha8: B1_SHA8, model_url: B1_URL, latency_ms: +dt, calibration: _calibrationCache ? 'isotonic' : 'raw' }
         };
         // D-1.9k: Smoke marker post-process — Rauchbier/Smoked Beer/Lichtenhainer/Grätzer override
         // D-1.9l: Fruit+Wheat marker post-process — Mango Wheat case override (smoke override'dan SONRA)
@@ -21705,12 +21765,8 @@ syncBaslat();
     'pilsner':    WORKER_BASE + '/v_cluster_pilsner_cedec674.json',
     'porter':     WORKER_BASE + '/v_cluster_porter_b3f09857.json',
     // Adim 86: 6 V_specialty alt-cluster re-fit (Cat B priority cascade yansır, brett_wild SHA sabit)
-    'specialty_chocolate_dessert': WORKER_BASE + '/v_cluster_specialty_chocolate_dessert_276ed844.json',
-    'specialty_spice':             WORKER_BASE + '/v_cluster_specialty_spice_32884d2c.json',
-    'specialty_fruit':             WORKER_BASE + '/v_cluster_specialty_fruit_9674ea64.json',
-    'specialty_smoke_wood':        WORKER_BASE + '/v_cluster_specialty_smoke_wood_2d50797d.json',
-    'specialty_brett_wild':        WORKER_BASE + '/v_cluster_specialty_brett_wild_14e99144.json',
-    'specialty_other':             WORKER_BASE + '/v_cluster_specialty_other_b1395ee3.json'
+    // Adim 105: 6 specialty alt collapsed → tek 'specialty' cluster (45,310 reçete, 77 slug)
+    'specialty':                   WORKER_BASE + '/v_cluster_specialty_ad025b6f.json'
   };
   // Adım 64.3a final fit feature_list = V19 89 feature (same as V12 slug model)
   // Cluster slug taxonomy: 13 cluster, specialty hariç (V12 flat ana strategy)
@@ -21767,12 +21823,7 @@ syncBaslat();
     'bock': ['american_amber_red_ale', 'american_lager', 'american_pale_ale', 'baltic_porter', 'dunkles_bock', 'french_biere_de_garde', 'german_altbier', 'german_bock', 'german_doppelbock', 'german_heller_bock_maibock', 'german_maerzen', 'german_pilsener', 'german_schwarzbier', 'munich_dunkel', 'munich_helles', 'south_german_weizenbock', 'specialty_beer', 'specialty_saison', 'vienna_lager'],
     'strong_ale': ['american_amber_red_ale', 'american_barley_wine_ale', 'american_brown_ale', 'american_cream_ale', 'american_imperial_stout', 'american_india_pale_ale', 'american_lager', 'american_pale_ale', 'american_strong_pale_ale', 'american_wheat_ale', 'american_wheat_beer', 'baltic_porter', 'belgian_blonde_ale', 'belgian_dubbel', 'belgian_fruit_lambic', 'belgian_ipa', 'belgian_lambic', 'belgian_quadrupel', 'belgian_strong_dark_ale', 'belgian_strong_golden', 'belgian_tripel', 'belgian_witbier', 'blonde_ale', 'british_barley_wine_ale', 'british_india_pale_ale', 'brown_ale', 'brown_porter', 'common_beer', 'double_ipa', 'export_stout', 'extra_special_bitter', 'flanders_red_ale', 'french_belgian_saison', 'french_biere_de_garde', 'fruit_beer', 'german_altbier', 'german_bock', 'german_doppelbock', 'german_heller_bock_maibock', 'german_koelsch', 'german_maerzen', 'german_pilsener', 'herb_and_spice_beer', 'irish_red_ale', 'mild', 'old_ale', 'ordinary_bitter', 'oud_bruin', 'porter', 'pre_prohibition_lager', 'robust_porter', 'scotch_ale_or_wee_heavy', 'scottish_export', 'south_german_hefeweizen', 'south_german_weizenbock', 'special_bitter_or_best_bitter', 'specialty_beer', 'specialty_saison', 'stout', 'sweet_stout', 'winter_seasonal_beer'],
     'brown_ale': ['american_amber_red_ale', 'american_barley_wine_ale', 'american_brown_ale', 'american_cream_ale', 'american_india_pale_ale', 'american_lager', 'american_pale_ale', 'american_strong_pale_ale', 'american_wheat_ale', 'baltic_porter', 'bamberg_maerzen_rauchbier', 'belgian_blonde_ale', 'belgian_dubbel', 'belgian_strong_dark_ale', 'black_ipa', 'blonde_ale', 'british_barley_wine_ale', 'british_india_pale_ale', 'brown_ale', 'brown_porter', 'common_beer', 'double_ipa', 'export_stout', 'extra_special_bitter', 'flanders_red_ale', 'french_belgian_saison', 'french_biere_de_garde', 'german_altbier', 'german_bock', 'german_doppelbock', 'german_heller_bock_maibock', 'german_koelsch', 'german_maerzen', 'german_rye_ale', 'german_schwarzbier', 'herb_and_spice_beer', 'irish_dry_stout', 'irish_red_ale', 'kellerbier', 'mild', 'munich_dunkel', 'oatmeal_stout', 'old_ale', 'ordinary_bitter', 'oud_bruin', 'porter', 'red_ipa', 'robust_porter', 'scotch_ale_or_wee_heavy', 'scottish_export', 'south_german_dunkel_weizen', 'special_bitter_or_best_bitter', 'specialty_beer', 'specialty_saison', 'stout', 'sweet_stout', 'vienna_lager', 'winter_seasonal_beer'],
-    'specialty_chocolate_dessert': ['american_amber_red_ale', 'american_barley_wine_ale', 'american_brown_ale', 'american_cream_ale', 'american_imperial_stout', 'american_india_pale_ale', 'american_lager', 'american_pale_ale', 'american_strong_pale_ale', 'american_wheat_ale', 'baltic_porter', 'belgian_blonde_ale', 'belgian_dubbel', 'belgian_strong_dark_ale', 'black_ipa', 'blonde_ale', 'british_barley_wine_ale', 'british_india_pale_ale', 'brown_ale', 'brown_porter', 'common_beer', 'double_ipa', 'experimental_beer', 'export_stout', 'extra_special_bitter', 'french_biere_de_garde', 'fruit_beer', 'german_altbier', 'german_bock', 'german_doppelbock', 'german_maerzen', 'german_rye_ale', 'german_schwarzbier', 'herb_and_spice_beer', 'irish_dry_stout', 'irish_red_ale', 'mild', 'munich_dunkel', 'oatmeal_stout', 'old_ale', 'ordinary_bitter', 'oud_bruin', 'porter', 'robust_porter', 'scotch_ale_or_wee_heavy', 'scottish_export', 'smoked_beer', 'south_german_dunkel_weizen', 'south_german_weizenbock', 'special_bitter_or_best_bitter', 'specialty_beer', 'specialty_saison', 'stout', 'sweet_stout', 'winter_seasonal_beer'],
-    'specialty_spice': ['american_amber_red_ale', 'american_barley_wine_ale', 'american_brown_ale', 'american_cream_ale', 'american_india_pale_ale', 'american_lager', 'american_pale_ale', 'american_wheat_ale', 'baltic_porter', 'belgian_blonde_ale', 'belgian_dubbel', 'belgian_strong_dark_ale', 'belgian_strong_golden', 'belgian_tripel', 'belgian_witbier', 'berliner_weisse', 'blonde_ale', 'british_barley_wine_ale', 'brown_ale', 'brown_porter', 'common_beer', 'double_ipa', 'experimental_beer', 'extra_special_bitter', 'french_belgian_saison', 'french_biere_de_garde', 'fruit_beer', 'german_maerzen', 'gose', 'herb_and_spice_beer', 'irish_red_ale', 'old_ale', 'robust_porter', 'scotch_ale_or_wee_heavy', 'south_german_hefeweizen', 'specialty_beer', 'specialty_saison', 'winter_seasonal_beer'],
-    'specialty_fruit': ['american_amber_red_ale', 'american_barley_wine_ale', 'american_brown_ale', 'american_cream_ale', 'american_india_pale_ale', 'american_lager', 'american_pale_ale', 'american_wheat_ale', 'american_wheat_beer', 'belgian_blonde_ale', 'belgian_dubbel', 'belgian_fruit_lambic', 'belgian_strong_dark_ale', 'belgian_strong_golden', 'belgian_tripel', 'belgian_witbier', 'berliner_weisse', 'blonde_ale', 'british_india_pale_ale', 'common_beer', 'double_ipa', 'experimental_beer', 'extra_special_bitter', 'flanders_red_ale', 'french_belgian_saison', 'french_biere_de_garde', 'fruit_beer', 'german_koelsch', 'german_pilsener', 'gose', 'herb_and_spice_beer', 'irish_red_ale', 'mild', 'mixed_fermentation_sour_beer', 'munich_helles', 'old_ale', 'pre_prohibition_lager', 'robust_porter', 'south_german_hefeweizen', 'specialty_beer', 'specialty_saison', 'white_ipa', 'winter_seasonal_beer'],
-    'specialty_smoke_wood': ['american_amber_red_ale', 'american_barley_wine_ale', 'american_brown_ale', 'american_imperial_stout', 'american_india_pale_ale', 'american_lager', 'american_pale_ale', 'american_wheat_ale', 'baltic_porter', 'bamberg_maerzen_rauchbier', 'belgian_blonde_ale', 'belgian_strong_dark_ale', 'blonde_ale', 'british_india_pale_ale', 'brown_porter', 'double_ipa', 'experimental_beer', 'export_stout', 'extra_special_bitter', 'french_belgian_saison', 'french_biere_de_garde', 'fruit_beer', 'german_doppelbock', 'german_maerzen', 'german_rye_ale', 'herb_and_spice_beer', 'irish_red_ale', 'old_ale', 'porter', 'robust_porter', 'scotch_ale_or_wee_heavy', 'scottish_export', 'smoked_beer', 'specialty_beer', 'specialty_saison', 'stout', 'winter_seasonal_beer'],
-    'specialty_brett_wild': ['american_brown_ale', 'american_cream_ale', 'american_pale_ale', 'american_wheat_ale', 'berliner_weisse', 'experimental_beer', 'french_belgian_saison', 'fruit_beer', 'herb_and_spice_beer', 'smoked_beer', 'specialty_beer', 'specialty_saison', 'sweet_stout', 'winter_seasonal_beer'],
-    'specialty_other': ['american_amber_red_ale', 'american_barley_wine_ale', 'american_brown_ale', 'american_cream_ale', 'american_imperial_stout', 'american_india_pale_ale', 'american_lager', 'american_pale_ale', 'american_wheat_ale', 'baltic_porter', 'belgian_blonde_ale', 'belgian_dubbel', 'belgian_fruit_lambic', 'belgian_strong_dark_ale', 'belgian_strong_golden', 'belgian_tripel', 'berliner_weisse', 'black_ipa', 'blonde_ale', 'british_barley_wine_ale', 'british_india_pale_ale', 'brown_ale', 'brown_porter', 'common_beer', 'double_ipa', 'experimental_beer', 'export_stout', 'extra_special_bitter', 'french_belgian_saison', 'french_biere_de_garde', 'fruit_beer', 'german_altbier', 'german_bock', 'german_doppelbock', 'german_heller_bock_maibock', 'german_koelsch', 'german_maerzen', 'german_pilsener', 'german_rye_ale', 'german_schwarzbier', 'herb_and_spice_beer', 'irish_dry_stout', 'irish_red_ale', 'mild', 'oatmeal_stout', 'old_ale', 'oud_bruin', 'porter', 'robust_porter', 'scotch_ale_or_wee_heavy', 'scottish_export', 'south_german_hefeweizen', 'specialty_beer', 'specialty_saison', 'stout', 'sweet_stout', 'winter_seasonal_beer']
+    'specialty': ['american_amber_red_ale', 'american_barley_wine_ale', 'american_brown_ale', 'american_cream_ale', 'american_imperial_stout', 'american_india_pale_ale', 'american_lager', 'american_pale_ale', 'american_strong_pale_ale', 'american_wheat_ale', 'american_wheat_beer', 'baltic_porter', 'bamberg_maerzen_rauchbier', 'belgian_blonde_ale', 'belgian_dubbel', 'belgian_fruit_lambic', 'belgian_lambic', 'belgian_strong_dark_ale', 'belgian_strong_golden', 'belgian_tripel', 'belgian_witbier', 'berliner_weisse', 'black_ipa', 'blonde_ale', 'brett_beer', 'british_barley_wine_ale', 'british_india_pale_ale', 'brown_ale', 'brown_porter', 'common_beer', 'double_ipa', 'experimental_beer', 'export_stout', 'extra_special_bitter', 'flanders_red_ale', 'french_belgian_saison', 'french_biere_de_garde', 'fruit_beer', 'german_altbier', 'german_bock', 'german_doppelbock', 'german_heller_bock_maibock', 'german_koelsch', 'german_maerzen', 'german_pilsener', 'german_rye_ale', 'german_schwarzbier', 'gose', 'herb_and_spice_beer', 'irish_dry_stout', 'irish_red_ale', 'mild', 'mixed_fermentation_sour_beer', 'munich_dunkel', 'munich_helles', 'oatmeal_stout', 'old_ale', 'ordinary_bitter', 'oud_bruin', 'pale_lager', 'porter', 'pre_prohibition_lager', 'robust_porter', 'scotch_ale_or_wee_heavy', 'scottish_export', 'smoked_beer', 'south_german_dunkel_weizen', 'south_german_hefeweizen', 'south_german_weizenbock', 'special_bitter_or_best_bitter', 'specialty_beer', 'specialty_saison', 'stout', 'sweet_stout', 'vienna_lager', 'white_ipa', 'winter_seasonal_beer']
   };
 
   // V_cluster predict — XGBoost JSON via V12 predictRawWith helper
@@ -21949,14 +22000,14 @@ syncBaslat();
       'mild': 'brown_ale',
       'scottish_export': 'brown_ale',
       // 5 specialty alt-cluster (Adim 97 mapping)
-      'chocolate_or_cocoa_beer': 'specialty_chocolate_dessert',
-      'pastry_beer': 'specialty_chocolate_dessert',
-      'fruit_beer': 'specialty_fruit',
-      'smoked_beer': 'specialty_smoke_wood',
-      'herb_and_spice_beer': 'specialty_spice',
-      'experimental_beer': 'specialty_other',
-      'specialty_beer': 'specialty_other',
-      'winter_seasonal_beer': 'specialty_other'
+      'chocolate_or_cocoa_beer': 'specialty',
+      'pastry_beer': 'specialty',
+      'fruit_beer': 'specialty',
+      'smoked_beer': 'specialty',
+      'herb_and_spice_beer': 'specialty',
+      'experimental_beer': 'specialty',
+      'specialty_beer': 'specialty',
+      'winter_seasonal_beer': 'specialty'
     };
     function _getSlugCluster(slug) {
       return BJCP_SLUG_TO_CLUSTER[slug] || null;
