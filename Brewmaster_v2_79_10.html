@@ -475,11 +475,10 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
   // Adım 64.3c-2: Strategy C (Hibrit Hierarchical) HER ZAMAN ribbon olarak görünür (B1 cluster ribbon emsali).
   // Motor toggle (V12/V20/Hibrit/B1) ETKİLENMEZ — Strategy C bilgi katmanı (V12 ana kart YANINDA).
   // Sample test 64.3d sonrası motor toggle'a Strategy_C option eklenebilir (gelecek sub-sprint).
-  // Adim 92: V12c_v3 cluster (19-cat) + V12_v5 slug (dataset_v5_clean) R2 deploy
-  const MODEL_URL = 'https://brewmaster-models.dessn7.workers.dev/v12c_v3_model_19cat_8be3e3c5.json';
-  const LABELS_URL = 'https://brewmaster-models.dessn7.workers.dev/v12c_v3_label_encoder_19cat_8be3e3c5.json';
-  const SLUG_MODEL_URL = 'https://brewmaster-models.dessn7.workers.dev/v12slug_v5_model_2df2431a.json';
-  const SLUG_LABELS_URL = 'https://brewmaster-models.dessn7.workers.dev/v12slug_v5_label_encoder_2df2431a.json';
+  const MODEL_URL = '_v19_v28j_a_model_14cat.json';
+  const LABELS_URL = '_v19_v28j_a_label_encoder_14cat.json';
+  const SLUG_MODEL_URL = '_v19_v28j_a_model_slug.json';
+  const SLUG_LABELS_URL = '_v19_v28j_a_label_encoder_slug.json';
   const cache = { model: null, labels: null, slugModel: null, slugLabels: null };
   let loadingPromise = null;
   let slugLoadingPromise = null;
@@ -2706,8 +2705,7 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
 -->
 <script id="bm-engine-v20-hibrit">
 (function(){
-  // Adim 92: V20_v5 slug (dataset_v5_clean, α=0.30) R2 deploy. V20_14CAT_URL dokunulmadi (V20 cluster retrain yapilmadi).
-  const V20_SLUG_URL = 'https://brewmaster-models.dessn7.workers.dev/v20slug_v5_alpha030_40dcee6c.json';
+  const V20_SLUG_URL = '_v20_alpha_030_slug.json';
   const V20_14CAT_URL = '_v20_alpha_030_14cat.json';
   const cache = { v20Slug: null, v20Cluster: null };
   let v20SlugLoadingPromise = null;
