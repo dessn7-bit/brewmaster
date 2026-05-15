@@ -15495,10 +15495,17 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
         katkiIds: (S.katkilar ||[]).map(k=>k&&k.id).filter(Boolean),
         percents: (function(){
           // Adım 73 — Explicit ID list (regex deterministik fail durumunda kesin fix).
-          // Kaan F12 audit: pct_pale_ale=0 + pct_sugar=0 hâlâ yanlış. Regex match deterministik
-          // davranmıyor → explicit ID list ile her ID'yi tam isimle yakala.
-          var _PALE_ALE_IDS = ['pale_ale','pale_ale_malt','pale','bisk','biskuvi','biscuit','biskuvi_arpa','chateau_biscuit','victory','viking_pale','best_pale','briess_pale','extra_pale','thracian_pale','muntons_propino','muntons_spa','halcyon','tipple','fawcett_mild','golden_promise','maris','maris_extra','crisp_pa'];
+          // Adım 110 — Tam emsal uygulama: Pilsner/Munich/Vienna/Wheat/Aromatic Abbey için
+          // explicit ID list. Kaan F12 kanıt: pct_pilsner=0 + pct_other=57.32 (regex barke
+          // ID'sini kaçırıyor → Weyermann Barke Pilsner unrecognized).
+          var _PALE_ALE_IDS = ['pale_ale','pale_ale_malt','pale','bisk','biskuvi','biscuit','biskuvi_arpa','chateau_biscuit','victory','viking_pale','best_pale','briess_pale','extra_pale','thracian_pale','muntons_propino','muntons_spa','halcyon','tipple','fawcett_mild','golden_promise','maris','maris_extra','crisp_pa','best_heidel','chateau_bld'];
           var _SUGAR_KATKI_IDS = ['koyu_candy','koyu_candi','candi','candi_s','candi_drk','candi_amb','candi_clr','candy_clr','candy_amb','candy_drk','candi_sugar','acik_candi','kahve_candi','nobet_sek','beyaz_seker','esmer_seker','kahverengi_seker','sugar','glikoz','dextrose','dex','sek','lak','bal','honey','maple','invert_no1','invert_no2','invert_no3','invert1','invert2','invert3','molasses','demerara','turbinado'];
+          // Adım 110 — Tam emsal explicit ID lists (MALTLAR envanter audit, working/_step110_maltlar_inventory.json)
+          var _PILSNER_IDS = ['pilsner','bel_pils','barke','bohem_pils','bohemian','viking_pils','best_pils','synergy','chateau_pils','thracian_pils'];
+          var _MUNICH_IDS = ['munich','dark_munich','munich_light','viking_munich','best_munich','chateau_munich','thracian_munich','chateau_melano'];
+          var _VIENNA_IDS = ['vienna','viking_vienna','thracian_vienna'];
+          var _WHEAT_IDS = ['wheat','dark_wheat','best_wheat','chateau_wheat','thracian_wheat','smoked_oak'];
+          var _AROMATIC_ABBEY_IDS = ['specb','aromatic','abbey_malt','best_aromatic','chateau_specb'];
 
           var _explicitPctMalt = function(idList){
             if (!_toplamMaltKg) return 0;
@@ -15520,14 +15527,18 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
           var _sugarKatkiPct = _explicitPctKatki(_SUGAR_KATKI_IDS);
 
           return {
-          pilsnerPct:  (_pctOf(/pilsner|pils|bohem|bel_pils|chateau_pils|synergy|thracian_pils|viking_pils/i) || 0),
+          // Adım 110: Pilsner regex → explicit ID list (barke ve diğer eksik ID'leri yakala)
+          pilsnerPct:  _explicitPctMalt(_PILSNER_IDS),
           // Adım 73: Explicit ID list (regex yerine deterministik)
           paleAlePct:  _explicitPctMalt(_PALE_ALE_IDS),
-          wheatPct:    _pctOf(/wheat|bugday|weizen|weyermann_wheat|chateau_wheat|best_wheat/i),
+          // Adım 110: Wheat regex → explicit (base wheat sadece, adjunct/crystal/koyu wheat hariç)
+          wheatPct:    _explicitPctMalt(_WHEAT_IDS),
           oatsWheatPct:_pctOf(/wheat|bugday|weizen|oat|yulaf/i),
           oatsPct:     _pctOf(/oat|yulaf/i),
-          munichPct:   _pctOf(/munich|muenchner|munchner|weyermann_munich|best_munich/i),
-          viennaPct:   _pctOf(/vienna|viyana|weyermann_vienna|best_vienna/i),
+          // Adım 110: Munich regex → explicit (cara_munich crystal'a ait, hariç)
+          munichPct:   _explicitPctMalt(_MUNICH_IDS),
+          // Adım 110: Vienna regex → explicit
+          viennaPct:   _explicitPctMalt(_VIENNA_IDS),
           // Adım 71: Karamela Arpa Maltı (Hitit, karamela_arpa) Crystal 120 yerli eşdeğeri olarak sayılır
           crystalPct:  _pctOf(/crystal|caramel|cara[_-]?|kristal|caravienna|caramunich|carahell|caraamber|caraaroma|c\d+|karamela|kara_arpa|koyu_kristal/i),
           chocPct:     _pctOf(/choc|chocolate|cikolata|carafa|dehusked/i),
@@ -15537,7 +15548,8 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
           // Adım 73: Explicit ID list (regex yerine deterministik) + malt grubu da dahil
           sugarPct:    _explicitPctMalt(_SUGAR_KATKI_IDS) + _sugarKatkiPct,
           aromaticMunichPct: _pctOf(/aromatic|melanoid/i),
-          aromaticAbbeyMunichPct: _pctOf(/aromatic|abbey|special_b/i),
+          // Adım 110: Aromatic Abbey regex → explicit (specb underscore eksik, regex fail)
+          aromaticAbbeyMunichPct: _explicitPctMalt(_AROMATIC_ABBEY_IDS),
           smokedPct:   _pctOf(/smoke|rauch|isli|smoked/i),
           ryePct:      _pctOf(/rye|cavdar/i),
           baseMaltPct: _pctOf(/pilsner|pils|pale|maris|munich|vienna|best_heidel|golden|wheat/i),
