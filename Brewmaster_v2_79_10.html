@@ -15645,7 +15645,7 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
         var __v12Cluster = window.BM_V12.predictSync(__recipeV2);
         if (__v12Cluster) {
           window.__lastV12ClusterResult = __v12Cluster;
-          console.log('%c[BM V12 (V19) cluster] 16-cat XGBoost', 'background:#6A1B9A;color:#fff;padding:2px 6px;');
+          console.log('%c[BM V12 (V19) cluster] 14-cat XGBoost', 'background:#6A1B9A;color:#fff;padding:2px 6px;');
           __v12Cluster.top3.forEach(function(r,i){ console.log('    cluster '+(i+1)+'. '+r.displayTR+' %'+r.normalized); });
         }
         // Slug prediction (slug model V19, 87 slug)
@@ -15659,7 +15659,7 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
               window.__lastV12Slug = __v12Slug;
               window.__lastV12Result = __v12Slug;
               window.__bmV12DispatchInfo.slugBranchHit = true;
-              console.log('%c[BM V12 (V19) slug] 87-slug XGBoost', 'background:#9C27B0;color:#fff;padding:2px 6px;');
+              console.log('%c[BM V12 (V19) slug] 91-slug XGBoost', 'background:#9C27B0;color:#fff;padding:2px 6px;');
               __v12Slug.top3.forEach(function(r,i){ console.log('    slug '+(i+1)+'. '+r.displayTR+' %'+r.normalized); });
             } else {
               window.__bmV12DispatchInfo.slugReturnedNull = true;
@@ -16141,7 +16141,7 @@ return `
                  '</div>';
         })()}
         ${(()=>{
-          // Adım 77: V12 cluster ribbon (16-cat XGBoost). B1 ribbon altinda, yesil.
+          // Adım 77 + 105: V12 cluster ribbon (14-cat XGBoost, Adım 105 19→14 refactor). B1 ribbon altinda, yesil.
           // __lastV12ClusterResult line 15597'de BM_V12.predictSync sonucu set ediliyor.
           var _v12c = (typeof window!=='undefined' && window.__lastV12ClusterResult) ? window.__lastV12ClusterResult : null;
           if (!_v12c || !_v12c.top3 || !_v12c.top3.length) return '';
@@ -21660,8 +21660,43 @@ syncBaslat();
           console.warn('[BM B1 inf step4] probKey=' + probKey + ' has no data'); return null;
         }
         var rawProbs = Array.from(out[probKey].data);
+        // Adim 107 DEBUG: raw probs top-5 + key featObj dump (Python ONNX baseline ile karsilastirma)
+        try {
+          var _rawTop = CLASSES.map(function(c, i){ return [c, rawProbs[i]]; })
+            .sort(function(a, b){ return b[1] - a[1] }).slice(0, 5);
+          console.log('%c[BM B1 DEBUG raw]','background:#FF6F00;color:#fff;padding:2px 6px;font-weight:700;',
+            _rawTop.map(function(x){ return x[0] + '=' + (x[1]*100).toFixed(4) + '%'; }).join(', '));
+          // featObj key fields dump (V12 buildFeatures output snapshot)
+          var _fobj = (typeof window.__bmBuildFeaturesV12 === 'function') ? window.__bmBuildFeaturesV12(uiR) : null;
+          if (_fobj) {
+            console.log('%c[BM B1 DEBUG featObj-grist]','background:#FF6F00;color:#fff;padding:2px 6px;',
+              'pct_pilsner=' + (_fobj.pct_pilsner||0).toFixed(4) +
+              ' pct_pale_ale=' + (_fobj.pct_pale_ale||0).toFixed(4) +
+              ' pct_munich=' + (_fobj.pct_munich||0).toFixed(4) +
+              ' pct_crystal=' + (_fobj.pct_crystal||0).toFixed(4) +
+              ' pct_choc=' + (_fobj.pct_choc||0).toFixed(4) +
+              ' pct_aromatic_abbey=' + (_fobj.pct_aromatic_abbey||0).toFixed(4) +
+              ' pct_sugar=' + (_fobj.pct_sugar||0).toFixed(4) +
+              ' pct_wheat=' + (_fobj.pct_wheat||0).toFixed(4));
+            console.log('%c[BM B1 DEBUG featObj-yeast]','background:#FF6F00;color:#fff;padding:2px 6px;',
+              'yeast_belgian=' + (_fobj.yeast_belgian||0) + ' yeast_abbey=' + (_fobj.yeast_abbey||0) +
+              ' has_belgian_yeast=' + (_fobj.has_belgian_yeast||0));
+            console.log('%c[BM B1 DEBUG featObj-marker]','background:#FF6F00;color:#fff;padding:2px 6px;',
+              'has_cocoa_chocolate=raw_via_ext7 (build7Extension) katki_chocolate=' + (_fobj.katki_chocolate||0) +
+              ' has_smoke=' + (_fobj.has_smoke||0) + ' pct_smoked=' + (_fobj.pct_smoked||0).toFixed(4) +
+              ' has_fruit=' + (_fobj.has_fruit||0));
+          }
+        } catch(e) { console.warn('[BM B1 DEBUG] log error:', e && e.message); }
         // Adim 105 KATMAN A: isotonic calibration uygulama (raw → calibrated)
         var probs = applyCalibration(rawProbs, CLASSES);
+        // Adim 107 DEBUG: calibrated probs top-5
+        try {
+          var _calTop = CLASSES.map(function(c, i){ return [c, probs[i]]; })
+            .sort(function(a, b){ return b[1] - a[1] }).slice(0, 5);
+          console.log('%c[BM B1 DEBUG cal]','background:#43A047;color:#fff;padding:2px 6px;font-weight:700;',
+            _calTop.map(function(x){ return x[0] + '=' + (x[1]*100).toFixed(4) + '%'; }).join(', ') +
+            ' | calibration=' + (_calibrationCache ? 'isotonic' : 'raw_passthrough'));
+        } catch(e) {}
         var sorted = CLASSES.map(function(c, i){ return { cluster: c, displayTR: CLUSTER_LABELS[c], prob: probs[i] }; })
           .sort(function(a,b){ return b.prob - a.prob; });
         var result = {
