@@ -2719,11 +2719,36 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
   // Adim 96-fix-3: Embedded render trigger — cache set + log sonrası render() defensive call.
   // Caller-independent: loadV20Slug/loadV20Cluster nerden çağırılırsa çağırılsın, model yüklenince
   // dispatcher block (rEditorGenel) tetiklenir → V20+Hibrit tahmin log + ribbon update.
+  // Adim 101 KATMAN 2: V20 slug ready sonrası Strategy C predict explicit re-execute eklendi
+  // (B1 in-flight guard bypass için 300ms defer + __lastB1ClusterResult fresh predict).
   function _v20TriggerRender(motor) {
     try {
       if (typeof render === 'function') {
         console.log('%c[BM V20 load->render]','background:#0277BD;color:#fff;padding:2px 6px;', motor + ' loaded, render() tetikleniyor (Adim 96-fix-3 embedded)');
         render();
+        // Adim 101 KATMAN 2: 300ms defer sonra Strategy C predict explicit re-execute
+        // Memory #28 madde 1 uyumlu: load callback içinde predict çağrısı (predict.then() chain'de render YOK).
+        // V20 ready iken full 4-motor hybrid agreement (B1 top-3 döngü + 4 motor vote) çalışır.
+        if (motor === 'V20 slug') {
+          setTimeout(function(){
+            try {
+              if (window.BM_STRATEGY_C && typeof window.BM_STRATEGY_C.predict === 'function' &&
+                  window.__lastB1ClusterResult && window.__lastV12Recipe) {
+                window.BM_STRATEGY_C.predict(window.__lastV12Recipe).then(function(stcRes){
+                  if (stcRes) {
+                    window.__lastStrategyCResult = stcRes;
+                    console.log('%c[BM Strategy C V20-reexec]','background:#00897B;color:#fff;padding:2px 6px;',
+                      'V20 ready sonrası re-execute: top1=' + stcRes.topSlug +
+                      ' mode=' + ((stcRes._meta && stcRes._meta.mode) || '?') +
+                      (stcRes.hybrid_agreement ? ' agreement=' + stcRes.hybrid_agreement : '') +
+                      ' cluster=' + (stcRes.cluster || '?'));
+                    try { if (typeof window.updateRibbon === 'function') window.updateRibbon('strategy-c'); } catch(_){}
+                  }
+                }).catch(function(e){ console.warn('[BM Strategy C V20-reexec] exception:', e && e.message); });
+              }
+            } catch(e) { console.warn('[BM Strategy C V20-reexec] outer exception:', e && e.message); }
+          }, 300);
+        }
       } else if (typeof calc === 'function') {
         calc();
       }
@@ -21966,29 +21991,39 @@ syncBaslat();
       });
     }
 
-    // Adim 96: V_<b1Cluster> preload paralel (hybrid agreement 4. motor)
-    // V_cluster cache'te yüklü değilse hybrid agreement sadece 3 motor (V12+V20+Hibrit) ile çalışır.
-    // Bu preload V_<cluster> yüklenmesi için race 2500ms, başarısızsa hybrid agreement V_cluster vote'unu skip eder.
-    var _vcPreload;
-    if (b1res.topCluster && b1res.topCluster !== 'specialty' && V_CLUSTER_URLS[b1res.topCluster]) {
-      _vcPreload = Promise.race([
-        loadVCluster(b1res.topCluster).then(function(){ return 'vc_loaded'; }).catch(function(err){
-          console.warn('[BM Strategy C hybrid preload] V_' + b1res.topCluster + ' load fail:', err && err.message);
-          return 'vc_load_fail';
-        }),
-        new Promise(function(r){ setTimeout(function(){ r('vc_timeout'); }, 2500); })
-      ]);
-    } else {
-      _vcPreload = Promise.resolve('vc_skipped');
-    }
+    // Adim 101 KATMAN 1: V_cluster preload B1 top-3 paralel (top-1 yerine)
+    // Adim 100 hybrid agreement B1 top-3 cluster iterate eder; top-2/top-3 cluster match'inde
+    // V_<cluster> cache yüklü değilse vc_motor=null, tek motor (V12) ile agreement FAIL.
+    // Çözüm: B1 top-3 cluster'larin V_<cluster>'ları paralel preload, top-2/top-3 match'inde
+    // 4-motor agreement mümkün olur.
+    var _vcPreloadPromises = [];
+    var _topClustersForPreload = (b1res.top3 || []).slice(0, 3);
+    _topClustersForPreload.forEach(function(tc){
+      var c = tc.cluster;
+      if (c && c !== 'specialty' && V_CLUSTER_URLS[c]) {
+        _vcPreloadPromises.push(Promise.race([
+          loadVCluster(c).then(function(){ return 'loaded:' + c; }).catch(function(err){
+            console.warn('[BM Strategy C preload] V_' + c + ' load fail:', err && err.message);
+            return 'fail:' + c;
+          }),
+          new Promise(function(r){ setTimeout(function(){ r('timeout:' + c); }, 2500); })
+        ]));
+      }
+    });
+    var _vcPreload = _vcPreloadPromises.length
+      ? Promise.all(_vcPreloadPromises).then(function(arr){ return arr.join(','); })
+      : Promise.resolve('vc_skipped');
 
-    // Adim 94-fix-2 + Adim 96: V12/V20 slug ready wait + V_cluster preload (paralel), sonra dispatch chain
+    // Adim 94-fix-2 + Adim 96 + Adim 101 KATMAN 1: slug ready wait + V_cluster top-3 preload paralel
     return Promise.all([_waitForSlugMotorsReady(2500), _vcPreload]).then(function(results){
       var vcStatus = results[1];
-      if (vcStatus === 'vc_load_fail' || vcStatus === 'vc_timeout') {
-        console.warn('[BM Strategy C hybrid preload] V_' + b1res.topCluster + ' status=' + vcStatus + ' — hybrid agreement 3-motor (V_cluster skip)');
-      } else if (vcStatus === 'vc_loaded') {
-        console.log('%c[BM Strategy C hybrid preload]','background:#43A047;color:#fff;padding:2px 6px;', 'V_' + b1res.topCluster + ' ready, hybrid agreement 4-motor active');
+      if (vcStatus !== 'vc_skipped') {
+        var allLoaded = vcStatus.split(',').every(function(s){ return s.indexOf('loaded:') === 0; });
+        if (allLoaded) {
+          console.log('%c[BM Strategy C preload]','background:#43A047;color:#fff;padding:2px 6px;', 'B1 top-3 V_cluster ready: ' + vcStatus);
+        } else {
+          console.warn('[BM Strategy C preload] B1 top-3 V_cluster partial: ' + vcStatus + ' — hybrid agreement V_cluster vote skip per failed cluster');
+        }
       }
       return b1res;
     }).then(function(b1res){
