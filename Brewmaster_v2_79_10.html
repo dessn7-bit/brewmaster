@@ -2716,6 +2716,20 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
   let v20SlugLoadingPromise = null;
   let v20ClusterLoadingPromise = null;
 
+  // Adim 96-fix-3: Embedded render trigger — cache set + log sonrası render() defensive call.
+  // Caller-independent: loadV20Slug/loadV20Cluster nerden çağırılırsa çağırılsın, model yüklenince
+  // dispatcher block (rEditorGenel) tetiklenir → V20+Hibrit tahmin log + ribbon update.
+  function _v20TriggerRender(motor) {
+    try {
+      if (typeof render === 'function') {
+        console.log('%c[BM V20 load->render]','background:#0277BD;color:#fff;padding:2px 6px;', motor + ' loaded, render() tetikleniyor (Adim 96-fix-3 embedded)');
+        render();
+      } else if (typeof calc === 'function') {
+        calc();
+      }
+    } catch(e) { console.warn('[BM V20 load->render] exception:', motor, e && e.message); }
+  }
+
   function loadV20Slug() {
     if (cache.v20Slug) return Promise.resolve(cache.v20Slug);
     if (v20SlugLoadingPromise) return v20SlugLoadingPromise;
@@ -2727,6 +2741,8 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
           var nt = m.learner.gradient_booster.model.gbtree_model_param.num_trees;
           console.log('%c[BM V20 (α=0.30) slug] yüklendi: '+nt+' tree','background:#0277BD;color:#fff;padding:2px 6px;');
         } catch(e) {}
+        // Adim 96-fix-3: embedded render trigger (caller-independent)
+        _v20TriggerRender('V20 slug');
         return m;
       })
       .catch(function(e){ console.warn('[BM V20 slug] yüklenemedi:', e && e.message); v20SlugLoadingPromise=null; throw e; });
@@ -2744,6 +2760,8 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
           var nt = m.learner.gradient_booster.model.gbtree_model_param.num_trees;
           console.log('%c[BM V20 cluster] yüklendi: '+nt+' tree','background:#0277BD;color:#fff;padding:2px 6px;');
         } catch(e) {}
+        // Adim 96-fix-3: embedded render trigger
+        _v20TriggerRender('V20 cluster');
         return m;
       })
       .catch(function(e){ console.warn('[BM V20 cluster] yüklenemedi:', e && e.message); v20ClusterLoadingPromise=null; throw e; });
