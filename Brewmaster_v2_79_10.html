@@ -21365,6 +21365,27 @@ syncBaslat();
     for (var k=0;k<89;k++) v116[k] = +base89[k] || 0;
     for (var j=0;j<20;j++) v116[89+j] = +ext20[j] || 0;
     for (var n=0;n<7;n++) v116[109+n] = +ext7[n] || 0;
+    // Adim 109 — B1 116-feature expose for full audit (Python ONNX reproduce için)
+    // Kaan F12'de: copy(JSON.stringify(window.__lastB1Features)) ile clipboard'a alır
+    // VEYA [BM B1 DEBUG v116 full] log satırını kopyalar
+    try {
+      window.__lastB1Features = Array.from(v116);
+      var _v12Lbl = (typeof window.__bmGetV12ClusterLabels === 'function') ? window.__bmGetV12ClusterLabels() : null;
+      var _baseNames89 = (_v12Lbl && _v12Lbl.feature_list) || [];
+      // B1 27 extras: ext20 (20) + ext7 (7) Python feature_list_116 sıralaması ile
+      var _EXT_NAMES_27 = [
+        'hop_cascade_flag','hop_citra_flag','hop_galaxy_flag','hop_simcoe_flag','hop_centennial_flag','hop_amarillo_flag',
+        'hop_diversity_count','hop_dry_hop_phase_count','hop_bittering_amount_total_g','hop_aroma_amount_total_g',
+        'hop_bitter_to_aroma_ratio','hop_alpha_avg','mash_steps_n','is_multi_step_mash','mash_eff_pct_raw',
+        'batch_size_l_raw','og_per_l_normalized','marker_count','katki_active_count','katki_smoke_or_fruit_or_spice',
+        'has_cocoa_chocolate','has_vanilla','has_spices_general','has_smoke_rauch','has_fruit_general',
+        'has_belgian_yeast_str','has_brown_roasted_mix'
+      ];
+      var _allNames116 = _baseNames89.concat(_EXT_NAMES_27);
+      window.__lastB1FeatureNames = _allNames116;
+      console.log('%c[BM B1 DEBUG v116 full]','background:#FF6F00;color:#fff;padding:2px 6px;font-weight:700;',
+        JSON.stringify(Object.fromEntries(_allNames116.map(function(n, i){ return [n, +(v116[i].toFixed(6))]; }))));
+    } catch(e) { console.warn('[BM B1 DEBUG v116 full] expose error:', e && e.message); }
     return v116;
   }
 
