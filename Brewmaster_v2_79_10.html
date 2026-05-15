@@ -21732,9 +21732,13 @@ syncBaslat();
     var entry = cache.get(cluster);
     if (!entry) throw new Error('V_cluster not loaded: ' + cluster);
     if (typeof window.__bmPredictRawWith !== 'function') throw new Error('__bmPredictRawWith missing (V12 IIFE not loaded)');
+    // Adim 93-hotfix: cluster LE R2 fetch chain'inde slug LE'den once hazir oluyor.
+    // feature_list cluster+slug LE'de IDENTICAL 89 base — onceki slug-only access multi-mode
+    // race condition'a yol aciyordu (B1 ready -> Strategy C dispatch, slug LE henuz fetch'te).
+    var clusterLabels = window.__bmGetV12ClusterLabels && window.__bmGetV12ClusterLabels();
     var slugLabels = window.__bmGetV12SlugLabels && window.__bmGetV12SlugLabels();
-    var featList = slugLabels && slugLabels.feature_list;
-    if (!featList) throw new Error('V12 feature_list missing');
+    var featList = (clusterLabels && clusterLabels.feature_list) || (slugLabels && slugLabels.feature_list);
+    if (!featList) throw new Error('V12 feature_list missing (cluster+slug both unavailable)');
     var featArr = new Array(featList.length);
     for (var i=0; i<featList.length; i++) featArr[i] = featObj[featList[i]] || 0;
     var probs = window.__bmPredictRawWith(entry.model, featArr);
