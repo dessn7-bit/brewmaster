@@ -2679,7 +2679,8 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
   if (window.BM_V12.isV12Active()) {
     // Cluster model upfront (3 MB), slug lazy on-demand
     loadModel().then(function(){
-      try { if (typeof calc === 'function') calc(); } catch(e) { console.warn('[BM V12] post-cluster-load calc() exception:', e); }
+      // Adim 96-fix-2: calc() pure math, dispatcher tetiklemiyor — render() ile full chain
+      try { if (typeof render === 'function') render(); else if (typeof calc === 'function') calc(); } catch(e) { console.warn('[BM V12] post-cluster-load render() exception:', e); }
       // Trigger slug model preload in background (28 MB, lazy)
       loadSlugModel().then(function(){
         // setTimeout: DOM/UI cycle'ı bekle, sonra recalc — Kaan'ın "Bug 8" race condition'ını önle
@@ -2687,10 +2688,11 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
         // window.__lastV12SlugResult set edilir.
         setTimeout(function(){
           try {
-            if (typeof calc === 'function') {
+            // Adim 96-fix-2: render() tam zincir (calc → render → rEditor → rEditorGenel → dispatcher block)
+            if (typeof render === 'function') {
               console.log('%c[BM V12 Slug] auto-recalc post-load', 'background:#9C27B0;color:#fff;padding:2px 6px;');
-              calc();
-            }
+              render();
+            } else if (typeof calc === 'function') { calc(); }
           } catch(e) { console.error('[BM V12 Slug] auto-recalc exception:', e); }
         }, 100);
       }).catch(function(e){ console.warn('[BM V12 Slug] auto-preload fetch fail:', e && e.message); });
@@ -2875,10 +2877,11 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
       if (window.BM_V12 && window.BM_V12.isSlugReady && window.BM_V12.isSlugReady()) {
         loadV20Slug().then(function(){
           // Recalc trigger — V20 + F1 Hibrit sonuçları UI'ya inject olsun
-          try { if (typeof calc === 'function') {
+          // Adim 96-fix-2: render() ile full chain (calc tek başına dispatcher tetiklemiyor)
+          try { if (typeof render === 'function') {
             console.log('%c[BM V20 + F1 Hibrit] tüm motorlar yüklendi, recalc tetikleniyor','background:#0277BD;color:#fff;padding:2px 6px;');
-            calc();
-          } } catch(e) {}
+            render();
+          } else if (typeof calc === 'function') { calc(); } } catch(e) {}
         }).catch(function(){});
       } else {
         // V12 slug henüz yüklenmedi; V12 slug yüklendiğinde tekrar dene
@@ -2886,7 +2889,8 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
           if (window.BM_V12 && window.BM_V12.isSlugReady && window.BM_V12.isSlugReady()) {
             clearInterval(iv);
             loadV20Slug().then(function(){
-              try { if (typeof calc === 'function') calc(); } catch(e) {}
+              // Adim 96-fix-2: render() ile full chain
+              try { if (typeof render === 'function') render(); else if (typeof calc === 'function') calc(); } catch(e) {}
             }).catch(function(){});
           }
         }, 500);
@@ -15635,7 +15639,8 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
           window.__bmV12DispatchInfo.clusterFallback = true;
           window.BM_V12.preloadSlug().then(function(){
             console.log('%c[BM V12 Slug] preload OK — recalc tetikleniyor', 'background:#9C27B0;color:#fff;padding:2px 6px;');
-            try { calc(); } catch(e){ console.error('[BM V12 Slug] post-preload calc() exception:', e); }
+            // Adim 96-fix-2: render() ile full chain (calc tek başına dispatcher block tetiklemiyor → slug log YOK)
+            try { if (typeof render === 'function') render(); else calc(); } catch(e){ console.error('[BM V12 Slug] post-preload render() exception:', e); }
           }).catch(function(e){
             console.warn('[BM V12 Slug] fetch fail — cluster fallback:', e && e.message);
           });
@@ -15646,7 +15651,8 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
         }
       } else {
         // Cluster model not yet loaded
-        window.BM_V12.preload().then(function(){ try { calc(); } catch(e){} }).catch(function(){
+        // Adim 96-fix-2: render() ile full chain
+        window.BM_V12.preload().then(function(){ try { if (typeof render === 'function') render(); else calc(); } catch(e){} }).catch(function(){
           console.warn('[BM V12] Cluster model fetch failed');
         });
       }
