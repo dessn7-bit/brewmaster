@@ -21996,22 +21996,45 @@ syncBaslat();
       var clusterProb = b1res.topProb;
       var top3 = (b1res.top3 || []).slice(0, 3);
 
-      // Adim 96: 4-motor hibrit agreement check (V_<cluster> + V12 + V20 + Hibrit, ÖNCELİK — multi-mode'dan ÖNCE)
-      // V_cluster preload yukarıda Promise.all ile tamamlandı; cache'te yüklü değilse 3-motor fallback.
-      if (cluster !== 'specialty' && V_CLUSTER_URLS[cluster]) {
-        var hyba = _hybridAgreement(uiRecipe, cluster, featObj);
-        if (hyba && hyba.agreeCount >= 2) {
-          var motorsStr = 'V_' + cluster + '=' + (hyba.v_cluster_slug || 'absent') +
-            ', V12=' + (hyba.v12_slug || 'absent') +
-            ', V20=' + (hyba.v20_slug || 'absent') +
-            ', Hibrit=' + (hyba.hyb_slug || 'absent');
-          var dissentStr = hyba.dissentingMotors.length
-            ? hyba.dissentingMotors.map(function(d){ return d.motor + '(' + d.slug + ')'; }).join(', ')
-            : 'none';
-          console.log('%c[BM Strategy C hybrid]','background:#43A047;color:#fff;padding:2px 6px;font-weight:700;',
-            'AGREEMENT ' + hyba.agreeCount + '/' + hyba.totalVotes + ' slug=' + hyba.topSlug +
-            ' cluster=' + cluster + ' (motors: ' + motorsStr + ') | ayrisik: ' + dissentStr +
-            ' | ribbon_prob=' + (hyba.ribbonProb*100).toFixed(1) + '%');
+      // Adim 100: hibrit agreement B1 top-3 cluster'larina döngu (B1 top-1 tek bagimli degil)
+      // Belgian Dubbel + kakao emsali: B1 top-1 specialty_chocolate_dessert dönebilir (kakao marker),
+      // slug motorlar belgian_dubbel (strong_ale cluster) der. Top-1 sadece kontrol edilirse cluster
+      // mismatch → hybrid fail → multi-mode bypass. Top-3 iterate → top-2 strong_ale match → PASS.
+      // Memory #29 Koreller motor: 4-motor konsensus zayif sinyal degil, B1 cluster gatekeeper top-3
+      // boyutunda esnetilir (V12/V20/Hibrit + V_<matched cluster> uyumu kabul).
+      var hyba = null;
+      var hybaCluster = null;
+      var hybaClusterProb = null;
+      var hybaRank = null; // B1 top-1, top-2, top-3 hangisinde match oldu
+      for (var hi = 0; hi < top3.length && hi < 3; hi++) {
+        var tc = top3[hi].cluster;
+        var tcp = +top3[hi].score;
+        if (tc === 'specialty' || !V_CLUSTER_URLS[tc]) continue;
+        var hh = _hybridAgreement(uiRecipe, tc, featObj);
+        if (hh && hh.agreeCount >= 2) {
+          hyba = hh;
+          hybaCluster = tc;
+          hybaClusterProb = tcp;
+          hybaRank = hi + 1;
+          break;
+        }
+      }
+      if (hyba) {
+        var motorsStr = 'V_' + hybaCluster + '=' + (hyba.v_cluster_slug || 'absent') +
+          ', V12=' + (hyba.v12_slug || 'absent') +
+          ', V20=' + (hyba.v20_slug || 'absent') +
+          ', Hibrit=' + (hyba.hyb_slug || 'absent');
+        var dissentStr = hyba.dissentingMotors.length
+          ? hyba.dissentingMotors.map(function(d){ return d.motor + '(' + d.slug + ')'; }).join(', ')
+          : 'none';
+        var rankNote = hybaRank > 1 ? ' (B1 top-' + hybaRank + ', not top-1=' + cluster + ')' : '';
+        console.log('%c[BM Strategy C hybrid]','background:#43A047;color:#fff;padding:2px 6px;font-weight:700;',
+          'AGREEMENT ' + hyba.agreeCount + '/' + hyba.totalVotes + ' slug=' + hyba.topSlug +
+          ' cluster=' + hybaCluster + rankNote + ' (motors: ' + motorsStr + ') | ayrisik: ' + dissentStr +
+          ' | ribbon_prob=' + (hyba.ribbonProb*100).toFixed(1) + '%');
+        // Use hybaCluster + hybaClusterProb (matched B1 rank, may differ from top-1)
+        cluster = hybaCluster;
+        clusterProb = hybaClusterProb;
           return {
             topSlug: hyba.topSlug,
             topProb: hyba.ribbonProb,
@@ -22029,7 +22052,6 @@ syncBaslat();
                     b1_cluster: cluster, b1_clusterProb: clusterProb,
                     latency_ms: +((((typeof performance!=='undefined')?performance.now():Date.now())-t0).toFixed(1))}
           };
-        }
       }
 
       // Specialty cluster → V12 flat fallback (B1 recall %38 → V12 ana strategy)
