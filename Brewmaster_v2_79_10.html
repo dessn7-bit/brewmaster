@@ -21401,27 +21401,8 @@ syncBaslat();
     for (var k=0;k<89;k++) v116[k] = +base89[k] || 0;
     for (var j=0;j<20;j++) v116[89+j] = +ext20[j] || 0;
     for (var n=0;n<7;n++) v116[109+n] = +ext7[n] || 0;
-    // Adim 109 — B1 116-feature expose for full audit (Python ONNX reproduce için)
-    // Kaan F12'de: copy(JSON.stringify(window.__lastB1Features)) ile clipboard'a alır
-    // VEYA [BM B1 DEBUG v116 full] log satırını kopyalar
-    try {
-      window.__lastB1Features = Array.from(v116);
-      var _v12Lbl = (typeof window.__bmGetV12ClusterLabels === 'function') ? window.__bmGetV12ClusterLabels() : null;
-      var _baseNames89 = (_v12Lbl && _v12Lbl.feature_list) || [];
-      // B1 27 extras: ext20 (20) + ext7 (7) Python feature_list_116 sıralaması ile
-      var _EXT_NAMES_27 = [
-        'hop_cascade_flag','hop_citra_flag','hop_galaxy_flag','hop_simcoe_flag','hop_centennial_flag','hop_amarillo_flag',
-        'hop_diversity_count','hop_dry_hop_phase_count','hop_bittering_amount_total_g','hop_aroma_amount_total_g',
-        'hop_bitter_to_aroma_ratio','hop_alpha_avg','mash_steps_n','is_multi_step_mash','mash_eff_pct_raw',
-        'batch_size_l_raw','og_per_l_normalized','marker_count','katki_active_count','katki_smoke_or_fruit_or_spice',
-        'has_cocoa_chocolate','has_vanilla','has_spices_general','has_smoke_rauch','has_fruit_general',
-        'has_belgian_yeast_str','has_brown_roasted_mix'
-      ];
-      var _allNames116 = _baseNames89.concat(_EXT_NAMES_27);
-      window.__lastB1FeatureNames = _allNames116;
-      console.log('%c[BM B1 DEBUG v116 full]','background:#FF6F00;color:#fff;padding:2px 6px;font-weight:700;',
-        JSON.stringify(Object.fromEntries(_allNames116.map(function(n, i){ return [n, +(v116[i].toFixed(6))]; }))));
-    } catch(e) { console.warn('[BM B1 DEBUG v116 full] expose error:', e && e.message); }
+    // Adim 118: B1 DEBUG v116 full log + window.__lastB1Features/__lastB1FeatureNames expose SILINDI
+    // (Adim 109 audit artigi, production stable sonrasi gereksiz). Test komutlari icin window.__lastB1ClusterResult yeterli.
     return v116;
   }
 
@@ -21697,63 +21678,26 @@ syncBaslat();
   // D-1.9k: applySmokeOverride post-process result oluştuktan sonra cagrilir
   // D-1.9l: applyFruitWheatOverride smoke override'dan sonra cagrilir (cakisma yok)
   function predictCluster(uiR) {
-    console.log('[BM B1 inf step2] predictCluster start');
+    // Adim 118: B1 inf step2/3/4 + B1 DEBUG raw/cal/featObj-grist/yeast/marker logs SILINDI (production console temizlik).
     window.__b1InferenceStartTs = Date.now();
     return loadSession().then(function(sess){
-      console.log('[BM B1 inf step3] session ready, building 116 feature vec');
       var v = buildB1Features(uiR);
-      if (!v) { console.warn('[BM B1 inf step3] buildB1Features returned null'); return null; }
+      if (!v) { console.warn('[BM B1 inf] buildB1Features returned null'); return null; }
       var input = new ort.Tensor('float32', v, [1, 116]);
       var inName = sess.inputNames[0];
       var feeds = {}; feeds[inName] = input;
       var t0 = (typeof performance !== 'undefined' ? performance.now() : Date.now());
       return sess.run(feeds).then(function(out){
         var dt = ((typeof performance !== 'undefined' ? performance.now() : Date.now()) - t0).toFixed(1);
-        console.log('[BM B1 inf step4] sess.run done ' + dt + 'ms outputs=' + sess.outputNames.join(','));
         var probKey = sess.outputNames.find(function(n){
           var t = out[n]; return t && t.dims && t.dims.length === 2 && t.dims[1] === 14;
         }) || sess.outputNames[sess.outputNames.length - 1];
         if (!out[probKey] || !out[probKey].data) {
-          console.warn('[BM B1 inf step4] probKey=' + probKey + ' has no data'); return null;
+          console.warn('[BM B1 inf] probKey=' + probKey + ' has no data'); return null;
         }
         var rawProbs = Array.from(out[probKey].data);
-        // Adim 107 DEBUG: raw probs top-5 + key featObj dump (Python ONNX baseline ile karsilastirma)
-        try {
-          var _rawTop = CLASSES.map(function(c, i){ return [c, rawProbs[i]]; })
-            .sort(function(a, b){ return b[1] - a[1] }).slice(0, 5);
-          console.log('%c[BM B1 DEBUG raw]','background:#FF6F00;color:#fff;padding:2px 6px;font-weight:700;',
-            _rawTop.map(function(x){ return x[0] + '=' + (x[1]*100).toFixed(4) + '%'; }).join(', '));
-          // featObj key fields dump (V12 buildFeatures output snapshot)
-          var _fobj = (typeof window.__bmBuildFeaturesV12 === 'function') ? window.__bmBuildFeaturesV12(uiR) : null;
-          if (_fobj) {
-            console.log('%c[BM B1 DEBUG featObj-grist]','background:#FF6F00;color:#fff;padding:2px 6px;',
-              'pct_pilsner=' + (_fobj.pct_pilsner||0).toFixed(4) +
-              ' pct_pale_ale=' + (_fobj.pct_pale_ale||0).toFixed(4) +
-              ' pct_munich=' + (_fobj.pct_munich||0).toFixed(4) +
-              ' pct_crystal=' + (_fobj.pct_crystal||0).toFixed(4) +
-              ' pct_choc=' + (_fobj.pct_choc||0).toFixed(4) +
-              ' pct_aromatic_abbey=' + (_fobj.pct_aromatic_abbey||0).toFixed(4) +
-              ' pct_sugar=' + (_fobj.pct_sugar||0).toFixed(4) +
-              ' pct_wheat=' + (_fobj.pct_wheat||0).toFixed(4));
-            console.log('%c[BM B1 DEBUG featObj-yeast]','background:#FF6F00;color:#fff;padding:2px 6px;',
-              'yeast_belgian=' + (_fobj.yeast_belgian||0) + ' yeast_abbey=' + (_fobj.yeast_abbey||0) +
-              ' has_belgian_yeast=' + (_fobj.has_belgian_yeast||0));
-            console.log('%c[BM B1 DEBUG featObj-marker]','background:#FF6F00;color:#fff;padding:2px 6px;',
-              'has_cocoa_chocolate=raw_via_ext7 (build7Extension) katki_chocolate=' + (_fobj.katki_chocolate||0) +
-              ' has_smoke=' + (_fobj.has_smoke||0) + ' pct_smoked=' + (_fobj.pct_smoked||0).toFixed(4) +
-              ' has_fruit=' + (_fobj.has_fruit||0));
-          }
-        } catch(e) { console.warn('[BM B1 DEBUG] log error:', e && e.message); }
         // Adim 105 KATMAN A: isotonic calibration uygulama (raw → calibrated)
         var probs = applyCalibration(rawProbs, CLASSES);
-        // Adim 107 DEBUG: calibrated probs top-5
-        try {
-          var _calTop = CLASSES.map(function(c, i){ return [c, probs[i]]; })
-            .sort(function(a, b){ return b[1] - a[1] }).slice(0, 5);
-          console.log('%c[BM B1 DEBUG cal]','background:#43A047;color:#fff;padding:2px 6px;font-weight:700;',
-            _calTop.map(function(x){ return x[0] + '=' + (x[1]*100).toFixed(4) + '%'; }).join(', ') +
-            ' | calibration=' + (_calibrationCache ? 'isotonic' : 'raw_passthrough'));
-        } catch(e) {}
         var sorted = CLASSES.map(function(c, i){ return { cluster: c, displayTR: CLUSTER_LABELS[c], prob: probs[i] }; })
           .sort(function(a,b){ return b.prob - a.prob; });
         var result = {
@@ -21938,33 +21882,8 @@ syncBaslat();
     var sorted = entry.classes.map(function(slug, i){ return {slug: slug, prob: probs[i]}; })
       .sort(function(a, b){ return b.prob - a.prob; });
 
-    // Adim 89 DEBUG: V_strong_ale UI featObj vs Python identicallik audit
-    // Memory #29 madde 3 — V_cluster modellerin browser inference Python'dan farkli olabilir
-    if (cluster === 'strong_ale') {
-      try {
-        var fk = function(k){ return featObj[k] !== undefined ? featObj[k] : 'absent'; };
-        var nonzero = 0; for (var ii=0; ii<featArr.length; ii++) if (featArr[ii] !== 0) nonzero++;
-        console.log('%c[BM V_strong_ale DEBUG]','background:#E91E63;color:#fff;padding:2px 6px;font-weight:700;',
-          'sha8=' + entry.sha8 + ' | featArr len=' + featArr.length + ' nonzero=' + nonzero);
-        console.log('%c[BM V_strong_ale DEBUG]','background:#E91E63;color:#fff;padding:2px 6px;',
-          'YEAST flags: has_belgian_yeast=' + fk('has_belgian_yeast') + ' yeast_belgian=' + fk('yeast_belgian') +
-          ' yeast_abbey=' + fk('yeast_abbey') + ' yeast_saison=' + fk('yeast_saison') +
-          ' yeast_english=' + fk('yeast_english') + ' yeast_american=' + fk('yeast_american') +
-          ' has_clean_us05_isolate=' + fk('has_clean_us05_isolate'));
-        console.log('%c[BM V_strong_ale DEBUG]','background:#E91E63;color:#fff;padding:2px 6px;',
-          'GRIST pct: pale_ale=' + fk('pct_pale_ale') + ' pilsner=' + fk('pct_pilsner') +
-          ' munich=' + fk('pct_munich') + ' aromatic_abbey=' + fk('pct_aromatic_abbey') +
-          ' crystal=' + fk('pct_crystal') + ' choc=' + fk('pct_choc') + ' sugar=' + fk('pct_sugar'));
-        console.log('%c[BM V_strong_ale DEBUG]','background:#E91E63;color:#fff;padding:2px 6px;',
-          'PARAMS: og=' + fk('og') + ' abv=' + fk('abv') + ' ibu=' + fk('ibu') + ' srm=' + fk('srm') +
-          ' fg=' + fk('fg') + ' fermentation_temp_c=' + fk('fermentation_temp_c'));
-        var top5 = sorted.slice(0, 5).map(function(x){ return x.slug + '(' + (x.prob*100).toFixed(2) + '%)'; }).join(', ');
-        console.log('%c[BM V_strong_ale DEBUG]','background:#E91E63;color:#fff;padding:2px 6px;',
-          'TOP-5 SLUG: ' + top5);
-      } catch (e) {
-        console.error('[BM V_strong_ale DEBUG] log error:', e && e.message);
-      }
-    }
+    // Adim 118: V_strong_ale DEBUG audit logs (Adim 89 artigi) SILINDI. Production stable, Python identicallik audit'i tamamlandi.
+
 
     return sorted;
   }
@@ -22110,8 +22029,7 @@ syncBaslat();
     // V_<cluster> sync predict (cache'te ise) — yüklü değilse o motor null vote (3 motor agreement fallback).
     function _hybridAgreement(uiRecipe, b1TopCluster, featObj) {
       try {
-        // Adim 103 DEBUG: çağrı başında
-        console.log('%c[BM Strategy C hybrid]','background:#FF6F00;color:#fff;padding:2px 6px;', 'called cluster=' + b1TopCluster + ' featObj_present=' + !!featObj + ' cache.has(' + b1TopCluster + ')=' + cache.has(b1TopCluster));
+        // Adim 118: "called cluster=X featObj_present=Y cache.has=Z" debug log SILINDI (iç trace, production gereksiz).
 
         // 1. V_<cluster> sync predict (cache'te yüklüyse)
         var vc_motor = null;
@@ -22140,34 +22058,18 @@ syncBaslat();
         var hyb_motor = (hyr && hyr.top3 && hyr.top3[0])
           ? {motor: 'Hibrit', slug: hyr.top3[0].slug, prob: +hyr.top3[0].score, top3: hyr.top3, probs: hyr.probs, classes: hyr.classes} : null;
 
-        // Adim 103 DEBUG: her motor sonucu
-        console.log('%c[BM Strategy C agreement]','background:#FF6F00;color:#fff;padding:2px 6px;',
-          'V_cluster=' + (vc_motor ? vc_motor.slug : 'null') +
-          ' V12=' + (v12_motor ? v12_motor.slug : 'null') +
-          ' V20=' + (v20_motor ? v20_motor.slug : 'null') +
-          ' Hibrit=' + (hyb_motor ? hyb_motor.slug : 'null'));
+        // Adim 118: agreement DEBUG (motor sonuçları detay + votes detay) + FAIL traces SILINDI (production gereksiz, ribbon AGREEMENT log özet veriyor).
 
         var allMotors = [vc_motor, v12_motor, v20_motor, hyb_motor].filter(function(m){ return m && m.slug; });
         var totalVotes = allMotors.length;
-        if (totalVotes < 2) {
-          console.log('%c[BM Strategy C hybrid]','background:#D32F2F;color:#fff;padding:2px 6px;', 'FAIL cluster=' + b1TopCluster + ' reason=totalVotes<2 (totalVotes=' + totalVotes + ')');
-          return null;
-        }
+        if (totalVotes < 2) return null;
 
         // 3. Vote counting
         var voteCounts = {};
         allMotors.forEach(function(m){ voteCounts[m.slug] = (voteCounts[m.slug] || 0) + 1; });
         var topVote = Object.keys(voteCounts).sort(function(a, b){ return voteCounts[b] - voteCounts[a]; })[0];
         var agreeCount = voteCounts[topVote];
-
-        // Adim 103 DEBUG: vote sayım sonrası
-        console.log('%c[BM Strategy C agreement]','background:#FF6F00;color:#fff;padding:2px 6px;',
-          'votes=' + JSON.stringify(voteCounts) + ' topVote=' + topVote + ' agreeCount=' + agreeCount + ' totalVotes=' + totalVotes);
-
-        if (agreeCount < 2) {
-          console.log('%c[BM Strategy C hybrid]','background:#D32F2F;color:#fff;padding:2px 6px;', 'FAIL cluster=' + b1TopCluster + ' reason=agreeCount<2 (topVote=' + topVote + ' count=' + agreeCount + ')');
-          return null;
-        }
+        if (agreeCount < 2) return null;
 
         // 4. Cluster check — topVote slug B1 cluster içinde mi
         // Adim 104 KATMAN 2: full consensus (agreeCount === totalVotes && totalVotes >= 2)
@@ -22182,12 +22084,11 @@ syncBaslat();
             // Continue PASS path — topVoteCluster overrides b1TopCluster for result reporting
             // (return statement asagida b1TopCluster argumanini kullaniyor, caller hybaCluster ile override eder)
           } else {
-            console.log('%c[BM Strategy C hybrid]','background:#D32F2F;color:#fff;padding:2px 6px;', 'FAIL cluster=' + b1TopCluster + ' reason=cluster_mismatch (topVote=' + topVote + ' → cluster=' + topVoteCluster + ' !== b1=' + b1TopCluster + ', partial consensus ' + agreeCount + '/' + totalVotes + ')');
+            // Adim 118: FAIL cluster_mismatch debug log SILINDI (partial consensus normal fallback).
             return null;
           }
-        } else {
-          console.log('%c[BM Strategy C hybrid]','background:#43A047;color:#fff;padding:2px 6px;font-weight:700;', 'PASS cluster=' + b1TopCluster + ' slug=' + topVote + ' agreeCount=' + agreeCount + '/' + totalVotes);
         }
+        // Adim 118: PASS hybrid log SILINDI — caller-side AGREEMENT log (line 22374) zaten ribbon analiz veriyor.
 
         // 5. Agreeing + dissenting motors
         var agreeingMotors = allMotors.filter(function(m){ return m.slug === topVote; });
@@ -22247,18 +22148,13 @@ syncBaslat();
         return v12 && v20;
       };
       if (ready()) return Promise.resolve('ready_immediate');
-      console.log('%c[BM Strategy C wait]','background:#9C27B0;color:#fff;padding:2px 6px;',
-        'slug motors not yet ready, polling up to ' + timeoutMs + 'ms');
-      var tStart = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+      // Adim 118: "polling up to Xms" + "ready after Xms" debug logs SILINDI; timeout WARN korunur.
       return new Promise(function(resolve){
         var resolved = false;
         var iv = setInterval(function(){
           if (resolved) { clearInterval(iv); return; }
           if (ready()) {
             resolved = true; clearInterval(iv);
-            var tEnd = (typeof performance !== 'undefined') ? performance.now() : Date.now();
-            console.log('%c[BM Strategy C wait]','background:#43A047;color:#fff;padding:2px 6px;',
-              'slug motors ready after ' + (tEnd - tStart).toFixed(0) + 'ms');
             resolve('ready_polled');
           }
         }, 100);
@@ -22330,18 +22226,12 @@ syncBaslat();
       var hybaCluster = null;
       var hybaClusterProb = null;
       var hybaRank = null; // B1 top-1, top-2, top-3 hangisinde match oldu
-      // Adim 103 DEBUG: top-3 dongu basinda
-      console.log('%c[BM Strategy C top-3]','background:#FF6F00;color:#fff;padding:2px 6px;', 'iterate b1_top3=' + JSON.stringify(top3.map(function(t){ return t.cluster + '(' + (t.score*100).toFixed(1) + '%)'; })));
+      // Adim 118: top-3 iterate + top-3 try (hi=X) + SKIP debug logs SILINDI (production gereksiz, PASS at hi log özet yeterli).
       for (var hi = 0; hi < top3.length && hi < 3; hi++) {
         var tc = top3[hi].cluster;
         var tcp = +top3[hi].score;
         var hasUrl = !!V_CLUSTER_URLS[tc];
-        // Adim 103 DEBUG: her iterasyon
-        console.log('%c[BM Strategy C top-3 try]','background:#FF6F00;color:#fff;padding:2px 6px;', 'hi=' + hi + ' cluster=' + tc + ' has_url=' + hasUrl + ' specialty_literal=' + (tc === 'specialty'));
-        if (tc === 'specialty' || !hasUrl) {
-          console.log('%c[BM Strategy C top-3 try]','background:#9C27B0;color:#fff;padding:2px 6px;', 'SKIP hi=' + hi + ' reason=' + (tc === 'specialty' ? 'specialty_literal' : 'no_url'));
-          continue;
-        }
+        if (tc === 'specialty' || !hasUrl) continue;
         var hh = _hybridAgreement(uiRecipe, tc, featObj);
         if (hh && hh.agreeCount >= 2) {
           hyba = hh;
@@ -22358,10 +22248,7 @@ syncBaslat();
           break;
         }
       }
-      // Adim 103 DEBUG: dongu sonu
-      if (!hyba) {
-        console.log('%c[BM Strategy C top-3]','background:#D32F2F;color:#fff;padding:2px 6px;', 'FAIL all top-3 — falling through to specialty/single/multi mode');
-      }
+      // Adim 118: "FAIL all top-3 — falling through" debug log SILINDI (normal fallback davranisi).
       if (hyba) {
         var motorsStr = 'V_' + hybaCluster + '=' + (hyba.v_cluster_slug || 'absent') +
           ', V12=' + (hyba.v12_slug || 'absent') +
@@ -22446,32 +22333,11 @@ syncBaslat();
       }
 
       console.log('%c[BM Strategy C multi]','background:#9C27B0;color:#fff;padding:2px 6px;', 'top1 prob ' + (clusterProb*100).toFixed(1) + '% < ' + (STC_MULTI_THRESHOLD*100) + '%, loading top-' + validTop3.length + ' V_clusters parallel');
-      // Adim 89-Debug-Fix: multi-mode featObj snapshot (tum cluster'larin paylastigi feature dict)
-      try {
-        var fk2 = function(k){ return featObj[k] !== undefined ? featObj[k] : 'absent'; };
-        console.log('%c[BM Strategy C multi DEBUG]','background:#9C27B0;color:#fff;padding:2px 6px;',
-          'featObj YEAST: has_belgian_yeast=' + fk2('has_belgian_yeast') + ' yeast_belgian=' + fk2('yeast_belgian') +
-          ' yeast_abbey=' + fk2('yeast_abbey') + ' yeast_saison=' + fk2('yeast_saison') +
-          ' yeast_english=' + fk2('yeast_english') + ' yeast_american=' + fk2('yeast_american') +
-          ' has_clean_us05_isolate=' + fk2('has_clean_us05_isolate'));
-        console.log('%c[BM Strategy C multi DEBUG]','background:#9C27B0;color:#fff;padding:2px 6px;',
-          'featObj GRIST: pale_ale=' + fk2('pct_pale_ale') + ' pilsner=' + fk2('pct_pilsner') +
-          ' munich=' + fk2('pct_munich') + ' aromatic_abbey=' + fk2('pct_aromatic_abbey') +
-          ' crystal=' + fk2('pct_crystal') + ' choc=' + fk2('pct_choc') + ' sugar=' + fk2('pct_sugar'));
-        console.log('%c[BM Strategy C multi DEBUG]','background:#9C27B0;color:#fff;padding:2px 6px;',
-          'featObj PARAMS: og=' + fk2('og') + ' abv=' + fk2('abv') + ' ibu=' + fk2('ibu') +
-          ' srm=' + fk2('srm') + ' fg=' + fk2('fg') + ' fermentation_temp_c=' + fk2('fermentation_temp_c'));
-      } catch (e) { console.error('[BM Strategy C multi DEBUG] featObj log error:', e && e.message); }
+      // Adim 118: Strategy C multi DEBUG (featObj YEAST/GRIST/PARAMS) + V_<cluster> MULTI DEBUG SILINDI (Adim 89 artigi, production gereksiz).
       var loadPromises = validTop3.map(function(c){
         return loadVCluster(c.cluster).then(function(entry){
           var sortedV = predictVCluster(c.cluster, featObj);
           if (!sortedV) return null;
-          // Adim 89-Debug-Fix: multi-mode V_<cluster> top-5 slug log (tum cluster'lar icin)
-          try {
-            var top5dbg = sortedV.slice(0, 5).map(function(s){ return s.slug + '(' + (s.prob*100).toFixed(2) + '%)'; }).join(', ');
-            console.log('%c[BM V_' + c.cluster + ' MULTI DEBUG]','background:#E91E63;color:#fff;padding:2px 6px;font-weight:700;',
-              'sha8=' + entry.sha8 + ' | clusterProb=' + (c.score*100).toFixed(1) + '% | TOP-5 SLUG: ' + top5dbg);
-          } catch (eDbg) { console.error('[BM V_' + c.cluster + ' MULTI DEBUG] log error:', eDbg && eDbg.message); }
           return {cluster: c.cluster, clusterProb: +c.score, sortedV: sortedV, entry: entry};
         }).catch(function(err){
           console.warn('[BM Strategy C multi] V_' + c.cluster + ' fail: ' + (err && err.message));
