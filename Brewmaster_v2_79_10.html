@@ -22401,52 +22401,57 @@ syncBaslat();
 
   console.log('%c[BM Strategy C]','background:#00897B;color:#fff;padding:3px 8px;font-weight:700;', 'IIFE loaded. 19 V_cluster URLs + lazy load + V12 specialty fallback. window.BM_STRATEGY_C.predict(uiRecipe) test ready.');
 
-  // Adim 116 FAZ 1: Eager preload top-5 (Adim 115 top-3 genisletmesi).
-  // Kaniti: Adim 115 F12 Kaan emsali B1 top-3=[strong_ale,specialty,stout] => V_stout 11MB lazy 700ms penalty.
-  // Top-5 secim (label_v5 dist 376810 recipe): ipa %20.81 + pale_ale %19.50 + brown_ale %10.12 + stout %8.64 + strong_ale %8.60 = %67.67 hit rate.
-  // specialty atlandi (V12 flat fallback strategy zaten var, V_specialty 77 slug fazla MB maliyetli).
-  // wheat atlandi (%7.23, Belgian Trappist/Strong cluster'lardan once kabul).
-  // requestIdleCallback timeout=3000ms ile UI block etmez. Worker quota 100k/gun, 5 req/user %5 kullanim.
-  var _EAGER_PRELOAD_CLUSTERS = ['ipa', 'pale_ale', 'brown_ale', 'stout', 'strong_ale'];
-  function _eagerPreloadTopClusters() {
-    console.log('%c[BM Strategy C eager preload]','background:#FFC107;color:#000;padding:2px 6px;', 'background fetch ' + _EAGER_PRELOAD_CLUSTERS.join(', '));
-    _EAGER_PRELOAD_CLUSTERS.forEach(function(c){
+  // Adim 119: Eager preload SPLIT — critical (V_strong_ale page load anında) + secondary (V20 sonrası 4 cluster).
+  // Kanit (Adim 118 F12 2 test): Kaan network V20 31MB ~4sn, Adim 117 V20-gated eager 5 cluster ~5-7sn'de hazir,
+  // B1 inference Strategy C call ~5sn'de tetikleniyor => V_strong_ale cache miss => 3/3 agreement (ribbon -3pp).
+  // Cozum: V_strong_ale eager OZEL paralel V20 ile (49MB toplam, V20'yi ~0.5sn geciktirir kabul edilir),
+  //        diger 4 cluster (ipa+pale_ale+brown_ale+stout) V20 sonrasi (Adim 117 davranis korunur).
+  // Worker quota aynı (5 cluster total). Top-5 secim Adim 116'dan korundu.
+  var _CRITICAL_EAGER = ['strong_ale'];                              // V20 olmadan, page load anında — Belgian Dubbel kritik
+  var _SECONDARY_EAGER = ['ipa', 'pale_ale', 'brown_ale', 'stout'];  // V20 sonrasi, secondary cluster'lar
+  function _eagerPreloadList(list, label) {
+    console.log('%c[BM Strategy C eager preload]','background:#FFC107;color:#000;padding:2px 6px;', label + ' background fetch ' + list.join(', '));
+    list.forEach(function(c){
       if (cache.has(c)) return; // zaten yuklu
       loadVCluster(c).then(function(){
-        console.log('%c[BM Strategy C eager preload]','background:#FFC107;color:#000;padding:2px 6px;', 'V_' + c + ' cached (eager)');
+        console.log('%c[BM Strategy C eager preload]','background:#FFC107;color:#000;padding:2px 6px;', 'V_' + c + ' cached (eager ' + label + ')');
       }).catch(function(err){
         console.warn('[BM Strategy C eager preload] V_' + c + ' fail (lazy fallback OK):', err && err.message);
       });
     });
   }
-  // Adim 117: V20 slug ready BEKLE, sonra eager preload tetikle (network bandwidth oncelik V20'ye).
-  // Kanit: Adim 116 F12 eager 67MB V20 31MB fetch'ini geciktirdi (wait 2423ms, cold 2443ms).
-  // Adim 115 emsali (eager 44MB) V20 paralel yuklenebildi, cold 712ms idi.
-  // Polling 200ms tick, V20 ready timeout 30sn fallback (her durumda eager tetikleyici).
-  function _waitV20ThenPreload() {
+  // Critical eager: hemen başla (V20 ready BEKLEMEZ, paralel fetch)
+  // 18MB V_strong_ale + 31MB V20 = ~49MB paralel, Adim 116 67MB'lik competition'dan daha rahat
+  if (typeof requestIdleCallback === 'function') {
+    requestIdleCallback(function(){ _eagerPreloadList(_CRITICAL_EAGER, 'critical'); }, { timeout: 1000 });
+  } else {
+    setTimeout(function(){ _eagerPreloadList(_CRITICAL_EAGER, 'critical'); }, 100);
+  }
+  // Secondary eager: V20 ready sonrası (Adim 117 davranisi korunur, network bandwidth competition Adim 116 fix'i)
+  function _waitV20ThenSecondaryPreload() {
     var start = (typeof performance !== 'undefined') ? performance.now() : Date.now();
     var fired = false;
     var fire = function(reason){
       if (fired) return; fired = true;
       var elapsed = ((typeof performance !== 'undefined') ? performance.now() : Date.now()) - start;
       console.log('%c[BM Strategy C eager preload]','background:#FFC107;color:#000;padding:2px 6px;',
-        'V20 ' + reason + ' after ' + elapsed.toFixed(0) + 'ms, scheduling idle preload');
+        'V20 ' + reason + ' after ' + elapsed.toFixed(0) + 'ms, scheduling secondary preload');
       if (typeof requestIdleCallback === 'function') {
-        requestIdleCallback(_eagerPreloadTopClusters, { timeout: 3000 });
+        requestIdleCallback(function(){ _eagerPreloadList(_SECONDARY_EAGER, 'secondary'); }, { timeout: 3000 });
       } else {
-        setTimeout(_eagerPreloadTopClusters, 500);
+        setTimeout(function(){ _eagerPreloadList(_SECONDARY_EAGER, 'secondary'); }, 500);
       }
     };
     var iv = setInterval(function(){
       var ready = window.BM_V20 && window.BM_V20.isSlugReady && window.BM_V20.isSlugReady();
       if (ready) { clearInterval(iv); fire('slug ready'); }
     }, 200);
-    // 30sn timeout fallback — V20 fail olsa bile eager preload her durumda tetiklenir
+    // 30sn timeout fallback — V20 fail olsa bile secondary preload her durumda tetiklenir
     setTimeout(function(){
       if (!fired) { clearInterval(iv); fire('timeout 30s (fallback)'); }
     }, 30000);
   }
-  _waitV20ThenPreload();
+  _waitV20ThenSecondaryPreload();
 })();
 </script>
 
