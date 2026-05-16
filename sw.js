@@ -11,7 +11,10 @@
 // Adim 123-fix (17.05.2026): version bump (bm-cache-v123-1 -> v123-2) + './' kaldirildi (GitHub Pages /brewmaster/ 404 doniyor)
 // cache.addAll atomic -> tek fail tum pre-cache iptal idi (Kaan F12 17.05.2026 01:55: HTML cache'de YOK).
 // Promise.allSettled + cache.add fail-tolerant: bir asset fail olsa digerleri cache'e gider, per-asset log.
-const CACHE_VERSION = 'bm-cache-v123-2';
+// Adim 123-fix-2 (17.05.2026 02:02): version v123-2 -> v123-3 bump. Kaan F12 retest install hic tetiklenmedi —
+// browser sw.js'i HTTP cache'ten okumus, yeni indirmemis. Bu sw.js dosyasi degisiklik var (version bump) -> browser fresh check.
+// HTML register'da {updateViaCache:'none'} + reg.update() ile sw.js HTTP cache bypass.
+const CACHE_VERSION = 'bm-cache-v123-3';
 const CRITICAL_ASSETS = [
   './Brewmaster_v2_79_10.html',
   './manifest.webmanifest',

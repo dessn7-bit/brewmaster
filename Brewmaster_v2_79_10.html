@@ -22483,12 +22483,17 @@ syncBaslat();
 </script>
 
 <!-- Adim 123: Service Worker register — offline HTML acilir + ML modeller cache (TR network slow kazanim) + Firebase Network Only (anlik veri). -->
+<!-- Adim 123-fix-2 (17.05.2026): updateViaCache:'none' + reg.update() —
+     Kaan F12 retest install hic tetiklenmedi (browser sw.js'i HTTP cache'ten okudu, yeni indirmedi).
+     Bu iki ayar her load'da sw.js'i network'ten fresh fetch + zorla update check. -->
 <script id="bm-sw-register">
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function(){
-    navigator.serviceWorker.register('sw.js', { scope: './' })
+    navigator.serviceWorker.register('sw.js', { scope: './', updateViaCache: 'none' })
       .then(function(reg){
-        console.log('%c[BM SW] registered','background:#1976D2;color:#fff;padding:2px 6px;font-weight:700;', 'scope=' + reg.scope);
+        console.log('%c[BM SW] registered','background:#1976D2;color:#fff;padding:2px 6px;font-weight:700;', 'scope=' + reg.scope + ' (updateViaCache=none)');
+        // Adim 123-fix-2: Force update check (HTTP cache bypass + fresh sw.js fetch)
+        reg.update().catch(function(){});
       })
       .catch(function(err){
         console.warn('[BM SW] register fail:', err && err.message);
