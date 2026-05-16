@@ -22482,5 +22482,20 @@ syncBaslat();
 })();
 </script>
 
+<!-- Adim 123: Service Worker register — offline HTML acilir + ML modeller cache (TR network slow kazanim) + Firebase Network Only (anlik veri). -->
+<script id="bm-sw-register">
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js', { scope: './' })
+      .then(function(reg){
+        console.log('%c[BM SW] registered','background:#1976D2;color:#fff;padding:2px 6px;font-weight:700;', 'scope=' + reg.scope);
+      })
+      .catch(function(err){
+        console.warn('[BM SW] register fail:', err && err.message);
+      });
+  });
+}
+</script>
+
 </body>
 </html>
