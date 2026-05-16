@@ -842,6 +842,9 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     return {
       top3: sorted.slice(0,3).map(function(x){return {slug:x.cls, displayTR:MAIN_TR[x.cls]||x.cls, score:x.prob, normalized:Math.round(x.prob*100)};}),
       top5: sorted.slice(0,5),
+      // Adim 120: probs+classes expose (B1+V12 cluster hibrit icin gerekli)
+      probs: probs,
+      classes: cache.labels.classes,
       _meta: {motor:'V12_14cat_V16model', n_classes:cache.labels.classes.length}
     };
   }
@@ -15798,15 +15801,15 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
                   console.warn('[BM Strategy C] predict returned null');
                 }
                 window.__bmB1InFlight = false;
-                try { if (typeof window.updateRibbon === 'function') { window.updateRibbon('b1-cluster'); window.updateRibbon('strategy-c'); } } catch(_){}
+                try { if (typeof window.updateRibbon === 'function') { window.updateRibbon('hybrid-cluster'); window.updateRibbon('strategy-c'); } } catch(_){}
               }).catch(function(stcErr){
                 console.error('[BM Strategy C] predict exception:', stcErr && stcErr.message);
                 window.__bmB1InFlight = false;
-                try { if (typeof window.updateRibbon === 'function') { window.updateRibbon('b1-cluster'); window.updateRibbon('strategy-c'); } } catch(_){}
+                try { if (typeof window.updateRibbon === 'function') { window.updateRibbon('hybrid-cluster'); window.updateRibbon('strategy-c'); } } catch(_){}
               });
             } else {
               window.__bmB1InFlight = false;
-              try { if (typeof window.updateRibbon === 'function') { window.updateRibbon('b1-cluster'); window.updateRibbon('strategy-c'); } } catch(_){}
+              try { if (typeof window.updateRibbon === 'function') { window.updateRibbon('hybrid-cluster'); window.updateRibbon('strategy-c'); } } catch(_){}
             }
           } catch (stcChainErr) {
             console.warn('[BM Strategy C] chain exception:', stcChainErr && stcChainErr.message);
@@ -15815,12 +15818,12 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
         } else {
           console.warn('[BM B1 dispatch] predict returned null — feature build veya inference fail (F12 step1-4 log)');
           window.__bmB1InFlight = false;
-          try { if (typeof window.updateRibbon === 'function') { window.updateRibbon('b1-cluster'); window.updateRibbon('strategy-c'); } } catch(e) {}
+          try { if (typeof window.updateRibbon === 'function') { window.updateRibbon('hybrid-cluster'); window.updateRibbon('strategy-c'); } } catch(e) {}
         }
       }).catch(function(e){
         console.error('[BM B1 dispatch] predict exception:', e && e.message, e && e.stack);
         window.__bmB1InFlight = false;
-        try { if (typeof window.updateRibbon === 'function') { window.updateRibbon('b1-cluster'); window.updateRibbon('strategy-c'); } } catch(_){}
+        try { if (typeof window.updateRibbon === 'function') { window.updateRibbon('hybrid-cluster'); window.updateRibbon('strategy-c'); } } catch(_){}
       });
     }
   } catch (B1err) {
@@ -16158,28 +16161,12 @@ return `
       <div style="height:6px;background:${renk_hex}"></div>
       <div style="padding:14px">
         ${(()=>{
-          // Adım 78-Hotfix-v3: B1 ribbon recipe change stale fix. HTML build'de ESKİ
-          // global değeri okuma — placeholder yaz. updateRibbon (Hotfix-v2) predict.then()
-          // bittiğinde gerçek değeri innerHTML ile yazacak. Eski stale değer hiç görünmez.
-          // data-ribbon="b1-cluster" attribute korunur (Hotfix-v2 querySelector hedefi).
-          return '<div data-ribbon="b1-cluster" style="margin-bottom:8px;padding:5px 10px;background:rgba(255,111,0,0.08);border-left:3px solid #FF6F00;border-radius:4px;font-size:11px;color:var(--yazi)">'+
-                 '<span style="font-weight:600;color:#FF6F00">Cluster (B1 LightGBM):</span> '+
+          // Adim 120: B1 LightGBM + V12 XGBoost cluster ribbon'lari BIRLESTIRILDI -> tek hibrit ribbon.
+          // Formul (B1_cal[i] + V12[i]) / 2, kanonik 14-class. Strategy C dispatcher aynı hibrit top-3 kullanir.
+          // Placeholder, updateRibbon('hybrid-cluster') Strategy C predict.then()'de gercek deger yazar.
+          return '<div data-ribbon="hybrid-cluster" style="margin-bottom:8px;padding:5px 10px;background:rgba(123,31,162,0.08);border-left:3px solid #7B1FA2;border-radius:4px;font-size:11px;color:var(--yazi)">'+
+                 '<span style="font-weight:600;color:#7B1FA2">Cluster (B1+V12 Hibrit):</span> '+
                  '<span style="color:var(--soluk);font-style:italic">Tahmin yapılıyor...</span>'+
-                 '</div>';
-        })()}
-        ${(()=>{
-          // Adım 77 + 105: V12 cluster ribbon (14-cat XGBoost, Adım 105 19→14 refactor). B1 ribbon altinda, yesil.
-          // __lastV12ClusterResult line 15597'de BM_V12.predictSync sonucu set ediliyor.
-          var _v12c = (typeof window!=='undefined' && window.__lastV12ClusterResult) ? window.__lastV12ClusterResult : null;
-          if (!_v12c || !_v12c.top3 || !_v12c.top3.length) return '';
-          var _t = _v12c.top3;
-          var _t1 = _t[0], _t2 = _t[1] || null, _t3 = _t[2] || null;
-          var _sub2 = _t2 ? ' <span style="color:var(--soluk);font-size:10px">· '+_t2.displayTR+' %'+_t2.normalized+'</span>' : '';
-          var _sub3 = _t3 ? ' <span style="color:var(--soluk);font-size:10px">· '+_t3.displayTR+' %'+_t3.normalized+'</span>' : '';
-          return '<div style="margin-bottom:8px;padding:5px 10px;background:rgba(67,160,71,0.08);border-left:3px solid #43A047;border-radius:4px;font-size:11px;color:var(--yazi)">'+
-                 '<span style="font-weight:600;color:#43A047">Cluster (V12 XGBoost):</span> '+
-                 '<span style="font-weight:600">'+_t1.displayTR+'</span>'+
-                 ' <span style="color:var(--soluk)">%'+_t1.normalized+'</span>'+_sub2+_sub3+
                  '</div>';
         })()}
         ${(()=>{
@@ -21123,13 +21110,28 @@ syncBaslat();
      Sadece document.querySelector + innerHTML targeted write. -->
 <script id="bm-update-ribbon-helper">
 (function(){
-  function _b1RibbonInner(b1){
+  // Adim 120: hibrit ribbon — B1 cluster + V12 cluster probs ortalamasi, kanonik 14-class.
+  // V12 yoksa B1 top-3 fallback (Strategy C dispatcher ile ayni mantik).
+  function _hybridRibbonInner(){
+    var b1 = window.__lastB1ClusterResult;
+    var v12 = window.__lastV12ClusterResult;
     if (!b1 || !b1.top3 || !b1.top3.length) return '';
-    var _t = b1.top3;
-    var _t1 = _t[0], _t2 = _t[1] || null, _t3 = _t[2] || null;
+    var CLUSTER_LABELS_TR = {bock:'Bock',brown_ale:'Brown Ale',ipa:'IPA',lager:'Lager',lager_dark:'Dark Lager',pale_ale:'Pale Ale',pilsner:'Pilsner',porter:'Porter',saison:'Saison',sour:'Sour',stout:'Stout',strong_ale:'Strong Ale',wheat:'Wheat',specialty:'Specialty'};
+    var top3 = null;
+    if (v12 && v12.probs && v12.classes && b1.probs && b1.classes &&
+        b1.classes.length === 14 && v12.classes.length === 14 &&
+        b1.classes.every(function(c, i){ return c === v12.classes[i]; })) {
+      var hybridProbs = b1.probs.map(function(p, i){ return (p + v12.probs[i]) / 2; });
+      var sorted = b1.classes.map(function(c, i){ return { displayTR: CLUSTER_LABELS_TR[c] || c, score: hybridProbs[i], normalized: Math.round(hybridProbs[i] * 100) }; }).sort(function(a, b){ return b.score - a.score; });
+      top3 = sorted.slice(0, 3);
+    } else {
+      // Fallback B1 top-3
+      top3 = b1.top3.slice(0, 3);
+    }
+    var _t1 = top3[0], _t2 = top3[1] || null, _t3 = top3[2] || null;
     var _sub2 = _t2 ? ' <span style="color:var(--soluk);font-size:10px">· '+_t2.displayTR+' %'+_t2.normalized+'</span>' : '';
     var _sub3 = _t3 ? ' <span style="color:var(--soluk);font-size:10px">· '+_t3.displayTR+' %'+_t3.normalized+'</span>' : '';
-    return '<span style="font-weight:600;color:#FF6F00">Cluster (B1 LightGBM):</span> ' +
+    return '<span style="font-weight:600;color:#7B1FA2">Cluster (B1+V12 Hibrit):</span> ' +
            '<span style="font-weight:600">'+_t1.displayTR+'</span>' +
            ' <span style="color:var(--soluk)">%'+_t1.normalized+'</span>'+_sub2+_sub3;
   }
@@ -21157,8 +21159,8 @@ syncBaslat();
     try {
       var el = document.querySelector('[data-ribbon="' + name + '"]');
       if (!el) return;
-      if (name === 'b1-cluster') {
-        var html = _b1RibbonInner(window.__lastB1ClusterResult);
+      if (name === 'hybrid-cluster') {
+        var html = _hybridRibbonInner();
         if (html) el.innerHTML = html;
       } else if (name === 'strategy-c') {
         var html2 = _scRibbonInner(window.__lastStrategyCResult);
@@ -21906,6 +21908,30 @@ syncBaslat();
       return Promise.reject(new Error('B1 result not ready yet — Strategy C dispatcher B1 dispatcher SONRASI tetiklenmeli'));
     }
 
+    // Adim 120: B1 + V12 cluster hibrit top-3 (UI ribbon + iterate icin)
+    // Formul: (B1_cal[i] + V12[i]) / 2, kanonik 14-class sirali (B1 CLASSES === V12 labels.classes ZATEN PASS).
+    // Defensive: V12 yoksa veya class mismatch -> B1 top-3 fallback (Strategy C kirilmasin).
+    var v12res = window.__lastV12ClusterResult;
+    var hybridTop3 = null;
+    var hybridProbs = null;
+    if (v12res && v12res.probs && v12res.classes && b1res.probs && b1res.classes &&
+        b1res.classes.length === 14 && v12res.classes.length === 14 &&
+        b1res.classes.every(function(c, i){ return c === v12res.classes[i]; })) {
+      hybridProbs = b1res.probs.map(function(p, i){ return (p + v12res.probs[i]) / 2; });
+      var hybridSorted = b1res.classes.map(function(c, i){
+        return { cluster: c, displayTR: c, score: hybridProbs[i], normalized: Math.round(hybridProbs[i] * 100) };
+      }).sort(function(a, b){ return b.score - a.score; });
+      hybridTop3 = hybridSorted.slice(0, 3);
+      console.log('%c[BM Cluster Hibrit]','background:#7B1FA2;color:#fff;padding:2px 6px;font-weight:700;',
+        'top-3 ' + hybridTop3.map(function(t){ return t.cluster + '=' + (t.score*100).toFixed(1) + '%'; }).join(' · '));
+    } else {
+      // Fallback: V12 cluster yok (henuz yuklenmedi) veya class mismatch -> B1 top-3
+      hybridTop3 = (b1res.top3 || []).slice(0, 3).map(function(t){
+        return { cluster: t.cluster, displayTR: t.displayTR, score: t.score, normalized: t.normalized };
+      });
+      console.log('%c[BM Cluster Hibrit]','background:#7B1FA2;color:#fff;padding:2px 6px;', 'V12 cluster yok, B1 top-3 fallback');
+    }
+
     var t0 = (typeof performance !== 'undefined') ? performance.now() : Date.now();
     var slugDisplay = function(s){ return String(s||'').split('_').map(function(w){ return w.length ? w[0].toUpperCase()+w.slice(1) : ''; }).join(' '); };
     // Adim 87: multi-cluster confidence threshold (top-1 prob düşükse top-3 combined score)
@@ -22212,9 +22238,10 @@ syncBaslat();
     return _waitForSlugMotorsReady(2500).then(function(){
       return b1res;
     }).then(function(b1res){
-      var cluster = b1res.topCluster;
-      var clusterProb = b1res.topProb;
-      var top3 = (b1res.top3 || []).slice(0, 3);
+      // Adim 120: iterate B1 top-3 yerine HIBRIT top-3 (B1+V12 ortalama) — Strategy C cluster gatekeeper
+      var cluster = hybridTop3[0].cluster;
+      var clusterProb = hybridTop3[0].score;
+      var top3 = hybridTop3;
 
       // Adim 100: hibrit agreement B1 top-3 cluster'larina döngu (B1 top-1 tek bagimli degil)
       // Belgian Dubbel + kakao emsali: B1 top-1 specialty_chocolate_dessert dönebilir (kakao marker),
