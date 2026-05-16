@@ -21335,17 +21335,26 @@ syncBaslat();
     } catch(e){}
     sessionPromise = loadOnnxBytes().then(function(buf){
       setProgress('initializing', 100, 'ONNX Runtime baslat-l-yor...');
+      // Adim 115 FAZ 1: ONNX session + calibration params PARALEL Promise.all (race condition fix).
+      // Eskiden cal load fire-and-forget idi (line 21348 .catch(function(){})), B1 inference cal'dan
+      // once basliyordu => raw_passthrough. Adim 114 F12 kaniti: [BM B1 DEBUG cal] calibration=raw_passthrough.
+      // Cal load fail = raw probs fallback (applyCalibration line 21305 mevcut davranisi korunur).
       // D-1.9g-fix3: sequential executionMode + graph opt — single-thread tutarli
-      return ort.InferenceSession.create(buf, {
-        executionProviders: ['wasm'],
-        graphOptimizationLevel: 'all',
-        executionMode: 'sequential'
-      });
-    }).then(function(sess){
-      console.log('%c[BM B1 LightGBM] ONNX session haz-r','background:#FF6F00;color:#fff;padding:2px 6px;');
+      return Promise.all([
+        ort.InferenceSession.create(buf, {
+          executionProviders: ['wasm'],
+          graphOptimizationLevel: 'all',
+          executionMode: 'sequential'
+        }),
+        loadCalibration().catch(function(e){
+          console.warn('[BM B1] calibration load fail, raw probs ile devam:', e && e.message);
+          return null;
+        })
+      ]);
+    }).then(function(results){
+      var sess = results[0];
+      console.log('%c[BM B1 LightGBM] ONNX session + cal haz-r','background:#FF6F00;color:#fff;padding:2px 6px;');
       setProgress('ready', 100, 'Hierarchical motor aktif');
-      // Adim 105 KATMAN A: calibration params paralel preload (B1 predict öncesi hazır olması için)
-      loadCalibration().catch(function(){});
       return sess;
     }).catch(function(e){
       console.warn('[BM B1] load fail:', e && e.message);
@@ -22516,6 +22525,29 @@ syncBaslat();
   };
 
   console.log('%c[BM Strategy C]','background:#00897B;color:#fff;padding:3px 8px;font-weight:700;', 'IIFE loaded. 19 V_cluster URLs + lazy load + V12 specialty fallback. window.BM_STRATEGY_C.predict(uiRecipe) test ready.');
+
+  // Adim 115 FAZ 2: Page load eager preload — top-3 popular V_cluster background fetch.
+  // Kaniti: Adim 114 F12 Strategy C ilk recipe latency 1633ms (V_strong_ale 18MB + V_stout 11MB lazy load).
+  // Top-3 secim (label_v5 dist dataset_v4_clean.json): ipa %20.81 + pale_ale %19.50 + strong_ale %8.60 = %48.91 hit rate.
+  // specialty atlanir (V12 flat fallback strategy). Stout atlanir (Belgian Dubbel olmadan ilk recipe nadir).
+  // requestIdleCallback timeout=3000ms ile UI block etmez. Worker quota 100k/gun, 3 req/user %3 kullanim.
+  var _EAGER_PRELOAD_CLUSTERS = ['ipa', 'pale_ale', 'strong_ale'];
+  function _eagerPreloadTopClusters() {
+    console.log('%c[BM Strategy C eager preload]','background:#FFC107;color:#000;padding:2px 6px;', 'background fetch ' + _EAGER_PRELOAD_CLUSTERS.join(', '));
+    _EAGER_PRELOAD_CLUSTERS.forEach(function(c){
+      if (cache.has(c)) return; // zaten yuklu
+      loadVCluster(c).then(function(){
+        console.log('%c[BM Strategy C eager preload]','background:#FFC107;color:#000;padding:2px 6px;', 'V_' + c + ' cached (eager)');
+      }).catch(function(err){
+        console.warn('[BM Strategy C eager preload] V_' + c + ' fail (lazy fallback OK):', err && err.message);
+      });
+    });
+  }
+  if (typeof requestIdleCallback === 'function') {
+    requestIdleCallback(_eagerPreloadTopClusters, { timeout: 3000 });
+  } else {
+    setTimeout(_eagerPreloadTopClusters, 2000);
+  }
 })();
 </script>
 
