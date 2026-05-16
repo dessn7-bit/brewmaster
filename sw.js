@@ -9,56 +9,49 @@
 // CACHE_VERSION her major deploy'da artirilir, eski cache'ler activate event'inde silinir.
 // Rollback: F12 Application -> Service Workers -> Unregister + Storage -> Clear site data + git revert.
 
-// Adim 123-fix-3 (17.05.2026): version v123-3 -> v123-4 bump.
-// Kaan F12 retest: HTML cache PASS, ML offline FAIL (v12c + label_encoder + _v20_alpha_030 + ort.min.js + v_cluster).
-// Kok neden: Kaan ONLINE iken ML auto-load + eager preload bitmeden offline'a gecti -> runtime cache populate olmadi.
+// Adim 123-fix-4 (17.05.2026): v123-4 install KIRILDI — Cache Storage bm-cache-v123-4 BOS 0 entry,
+// HTML offline acilmadi (v123-3 baseline regresyon). Kok neden hipotezi:
+//   CRITICAL_REMOTE cross-origin fetch+put install event'inde exception firlatti -> install event abort -> hicbir asset cache'lenmedi.
+//   Promise.allSettled cross-origin opaque/CORS edge case SW context'inde tum cache'i kirdi.
 // Fix:
-//   1. CRITICAL_ASSETS genisledi: + _v20_alpha_030_14cat.json (3.4 MB same-origin) + ort.min.js (340 KB CDN) + b1_v8 cal (150 KB)
-//      -> Install event'te garanti pre-cache, online warm-up gerek YOK
-//   2. Same-origin static asset (JSON/JS/WASM) Network First -> Stale While Revalidate
-//      -> Cache hit instant + background revalidate; offline cache hit deterministik
-//   3. HTML navigate icin Network First korunur (deploy guncelleme yansir)
-//   4. Big ML modeller (V12 slug 28MB, V20 slug 31MB, V_cluster 11-18MB each) runtime warm-up:
-//      -> Online'da auto-load + eager preload sirasinda Cache First handler ile cache populate
-//      -> Kaan online 30 sn beklesin, sonra offline (Cache Storage check)
-const CACHE_VERSION = 'bm-cache-v123-4';
+//   1. CRITICAL_REMOTE TAMAMEN KALDIRILDI (ort.min.js + b1_v8 cal). Runtime Cache First handler zaten cover ediyor.
+//   2. CRITICAL_LOCAL v123-3 baseline'a geri dondu: HTML + manifest + 2 icon (4 entry, TEST EDILMIS).
+//      _v20_alpha_030_14cat.json kaldirildi (3.4 MB, runtime SWR handler'a birakildi).
+//   3. Install event sequential for-loop async/await try/catch — Promise.allSettled SW edge case fix.
+//   4. CACHE_VERSION bump v123-4 -> v123-5 (eski boş v123-4 invalidate).
+//   5. Fetch handler same-origin SWR + HTML Network First KORUNUR (Adim 123-fix-3 yapisi dogru is).
+const CACHE_VERSION = 'bm-cache-v123-5';
 
-// Same-origin pre-cache (small + kritik static asset'ler)
+// Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [
   './Brewmaster_v2_79_10.html',
   './manifest.webmanifest',
   './icon-192.png',
-  './icon-512.png',
-  './_v20_alpha_030_14cat.json'   // V20 cluster (3.4 MB same-origin)
-];
-
-// Cross-origin pre-cache (cache.add opaque sorunu olmasin diye fetch+put manuel)
-const CRITICAL_REMOTE = [
-  'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.21.0/dist/ort.min.js',  // 340 KB
-  'https://brewmaster-models.dessn7.workers.dev/b1_v8_calibration_29744456.json'  // 150 KB B1 isotonic
+  './icon-512.png'
 ];
 
 self.addEventListener('install', function(event) {
   console.log('[BM SW] install start ' + CACHE_VERSION);
-  event.waitUntil(
-    caches.open(CACHE_VERSION).then(function(cache) {
-      var localPromises = CRITICAL_LOCAL.map(function(url) {
-        return cache.add(url)
-          .then(function(){ console.log('[BM SW] cached: ' + url); })
-          .catch(function(err){ console.error('[BM SW] cache FAIL: ' + url + ' — ' + (err && err.message)); });
-      });
-      var remotePromises = CRITICAL_REMOTE.map(function(url) {
-        return fetch(url, { cache: 'no-cache' }).then(function(res) {
-          if (res && (res.status === 200 || res.type === 'opaque')) {
-            return cache.put(url, res).then(function(){ console.log('[BM SW] cached remote: ' + url.split('/').pop()); });
-          } else {
-            console.error('[BM SW] cache FAIL remote (HTTP ' + (res && res.status) + '): ' + url);
-          }
-        }).catch(function(err){ console.error('[BM SW] cache FAIL remote: ' + url.split('/').pop() + ' — ' + (err && err.message)); });
-      });
-      return Promise.allSettled(localPromises.concat(remotePromises));
-    }).then(function(){ console.log('[BM SW] install done ' + CACHE_VERSION); })
-  );
+  event.waitUntil((async function(){
+    var cache;
+    try {
+      cache = await caches.open(CACHE_VERSION);
+    } catch (e) {
+      console.error('[BM SW] caches.open FAIL: ' + (e && e.message));
+      return;
+    }
+    // Sequential for-loop try/catch — her asset ayri (allSettled SW edge case fix)
+    for (var i = 0; i < CRITICAL_LOCAL.length; i++) {
+      var url = CRITICAL_LOCAL[i];
+      try {
+        await cache.add(url);
+        console.log('[BM SW] cached: ' + url);
+      } catch (err) {
+        console.error('[BM SW] cache FAIL: ' + url + ' — ' + (err && err.message));
+      }
+    }
+    console.log('[BM SW] install done ' + CACHE_VERSION);
+  })());
   self.skipWaiting();
 });
 
