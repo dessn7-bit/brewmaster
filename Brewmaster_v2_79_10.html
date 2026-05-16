@@ -657,7 +657,10 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
 
     // Percents (V85 V6→V8.5 schema)
     var pct_pilsner = p.pilsnerPct || 0;
-    var pct_pale_ale = isAbbey ? 0 : (p.paleAlePct ?? p.baseMaltPct ?? 0);
+    // Adim 114 — isAbbey?0 override KALDIRILDI (train-inference identicallik, Memory #29 madde 3 fix).
+    // Training'de 1760 emsal (yeast_abbey=1 + paleAlePct>=60) model'i hazirladi (%63.98 strong_ale, %91.59 mainstream).
+    // Production override out-of-distribution input uretiyordu. Kanit: working/_step113_5_audit.md
+    var pct_pale_ale = p.paleAlePct ?? p.baseMaltPct ?? 0;
     var pct_munich = p.munichPct || 0;
     var pct_vienna = p.viennaPct || 0;
     var pct_wheat = p.wheatPct || 0;
