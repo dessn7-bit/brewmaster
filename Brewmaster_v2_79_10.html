@@ -22553,11 +22553,34 @@ syncBaslat();
       });
     });
   }
-  if (typeof requestIdleCallback === 'function') {
-    requestIdleCallback(_eagerPreloadTopClusters, { timeout: 3000 });
-  } else {
-    setTimeout(_eagerPreloadTopClusters, 2000);
+  // Adim 117: V20 slug ready BEKLE, sonra eager preload tetikle (network bandwidth oncelik V20'ye).
+  // Kanit: Adim 116 F12 eager 67MB V20 31MB fetch'ini geciktirdi (wait 2423ms, cold 2443ms).
+  // Adim 115 emsali (eager 44MB) V20 paralel yuklenebildi, cold 712ms idi.
+  // Polling 200ms tick, V20 ready timeout 30sn fallback (her durumda eager tetikleyici).
+  function _waitV20ThenPreload() {
+    var start = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+    var fired = false;
+    var fire = function(reason){
+      if (fired) return; fired = true;
+      var elapsed = ((typeof performance !== 'undefined') ? performance.now() : Date.now()) - start;
+      console.log('%c[BM Strategy C eager preload]','background:#FFC107;color:#000;padding:2px 6px;',
+        'V20 ' + reason + ' after ' + elapsed.toFixed(0) + 'ms, scheduling idle preload');
+      if (typeof requestIdleCallback === 'function') {
+        requestIdleCallback(_eagerPreloadTopClusters, { timeout: 3000 });
+      } else {
+        setTimeout(_eagerPreloadTopClusters, 500);
+      }
+    };
+    var iv = setInterval(function(){
+      var ready = window.BM_V20 && window.BM_V20.isSlugReady && window.BM_V20.isSlugReady();
+      if (ready) { clearInterval(iv); fire('slug ready'); }
+    }, 200);
+    // 30sn timeout fallback — V20 fail olsa bile eager preload her durumda tetiklenir
+    setTimeout(function(){
+      if (!fired) { clearInterval(iv); fire('timeout 30s (fallback)'); }
+    }, 30000);
   }
+  _waitV20ThenPreload();
 })();
 </script>
 
