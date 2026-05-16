@@ -8,9 +8,11 @@
 // CACHE_VERSION her major deploy'da artirilir, eski cache'ler activate event'inde silinir.
 // Rollback: F12 Application -> Service Workers -> Unregister + Storage -> Clear site data + git revert.
 
-const CACHE_VERSION = 'bm-cache-v123-1';
+// Adim 123-fix (17.05.2026): version bump (bm-cache-v123-1 -> v123-2) + './' kaldirildi (GitHub Pages /brewmaster/ 404 doniyor)
+// cache.addAll atomic -> tek fail tum pre-cache iptal idi (Kaan F12 17.05.2026 01:55: HTML cache'de YOK).
+// Promise.allSettled + cache.add fail-tolerant: bir asset fail olsa digerleri cache'e gider, per-asset log.
+const CACHE_VERSION = 'bm-cache-v123-2';
 const CRITICAL_ASSETS = [
-  './',
   './Brewmaster_v2_79_10.html',
   './manifest.webmanifest',
   './icon-192.png',
@@ -18,13 +20,16 @@ const CRITICAL_ASSETS = [
 ];
 
 self.addEventListener('install', function(event) {
-  console.log('[BM SW] install ' + CACHE_VERSION);
+  console.log('[BM SW] install start ' + CACHE_VERSION);
   event.waitUntil(
     caches.open(CACHE_VERSION).then(function(cache) {
-      return cache.addAll(CRITICAL_ASSETS);
-    }).catch(function(err) {
-      console.warn('[BM SW] install cache.addAll fail:', err && err.message);
-    })
+      // Fail-tolerant: her asset ayri cache.add, biri fail olsa diger asset'ler cache'e gider
+      return Promise.allSettled(CRITICAL_ASSETS.map(function(url) {
+        return cache.add(url)
+          .then(function(){ console.log('[BM SW] cached: ' + url); })
+          .catch(function(err){ console.error('[BM SW] cache FAIL: ' + url + ' — ' + (err && err.message)); });
+      }));
+    }).then(function(){ console.log('[BM SW] install done ' + CACHE_VERSION); })
   );
   self.skipWaiting();
 });
