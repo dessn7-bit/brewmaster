@@ -5998,10 +5998,18 @@ window.aramaGuncelle=function(el){
   aramaMetni=el.value;
   clearTimeout(_aramaTimer);
   _aramaTimer=setTimeout(function(){
-    const pos=el.selectionStart;
-    render();
-    const inp=document.getElementById('aramaInp');
-    if(inp){inp.focus();try{inp.setSelectionRange(pos,pos);}catch(e){}}
+    // Adım 127-fix-1: render() full reload yerine partial update (Memory #26 emsali).
+    // render() innerHTML reset arama input blur tetikliyor -> NotFoundError banner.
+    // bmListeRefresh sadece #bmKartListesi günceller, input DOM'da kalır, focus
+    // kaybolmaz. Fallback: bmListeRefresh yoksa veya kart container yoksa render().
+    if (typeof window.bmListeRefresh === 'function' && document.getElementById('bmKartListesi')) {
+      window.bmListeRefresh();
+    } else {
+      const pos=el.selectionStart;
+      render();
+      const inp=document.getElementById('aramaInp');
+      if(inp){inp.focus();try{inp.setSelectionRange(pos,pos);}catch(e){}}
+    }
   },100);
 };
 window.setListeSekme=function(si){listeSekme=["aktif","yapimda","arsiv","istek"][si]||"aktif";aramaMetni="";render();};
@@ -10642,7 +10650,7 @@ function rListe(){
     '<header class="bm-page-head">'+
       '<div>'+
         '<h1>'+pageBaslik+'</h1>'+
-        '<div class="bm-sub">'+pageAlt+'</div>'+
+        '<div id="bm-page-sub" class="bm-sub">'+pageAlt+'</div>'+
       '</div>'+
       '<div class="bm-page-act">'+
         '<div class="bm-search">'+
@@ -10768,9 +10776,12 @@ function rListe(){
   }
 
   const bosMetin={aktif:"Planlanmış tarif yok — + Yeni reçete ile başla.",yapimda:"Yapım aşamasında tarif yok.",arsiv:"Arşivlenmiş tarif yok.",istek:"İstek listesi boş."};
-  const listHTML=filtreliKR.length===0
+  // Adım 127-fix-1: listHTML #bmKartListesi sarmalandı (partial DOM update,
+  // bmListeRefresh() arama tekrar-render sırasında full render önler).
+  const listIc=filtreliKR.length===0
     ?'<div class="bm-empty">'+(arama?"'"+aramaMetni+"' için sonuç bulunamadı.":bosMetin[listeSekme]||"")+'</div>'
     :'<div class="bm-cards">'+filtreliKR.map(tarifKart).join("")+'</div>';
+  const listHTML='<div id="bmKartListesi">'+listIc+'</div>';
 
   // ─── Final compose ──────────────────────────────────────
   return '<div class="bm-defter-root">'+
@@ -21456,6 +21467,105 @@ syncBaslat();
   window.addEventListener('offline', function(){ try { window.bmSyncIconUpdate('baglanti-yok'); } catch(_){} });
   // İlk paint sonrası bir sefer set et
   setTimeout(function(){ try { window.bmSyncIconUpdate(navigator.onLine ? 'bagli' : 'baglanti-yok'); } catch(_){} }, 500);
+
+  // ─── Adim 127-fix-1: Partial DOM refresh (recete karti listesi) ───
+  // render() innerHTML reset arama input blur sirasinda NotFoundError verir.
+  // Bu helper sadece #bmKartListesi'ni gunceller, sidebar/header/stats/chips
+  // intact kalir, arama input focus + selection kaybolmaz.
+  // rListe() ile ayni filtre + tarifKart logic'ini duplicate eder (rListe icindeki
+  // closures dis scope'tan erisilemiyor, Adim 130 refactor zamanina kadar tolere).
+  window.bmListeRefresh = function(){
+    try {
+      var cont = document.getElementById('bmKartListesi');
+      if (!cont) return; // rListe DOM'da degil — silent
+      if (typeof KR === 'undefined' || typeof MALTLAR === 'undefined') return;
+
+      var rk = function(t){ return srmR(parseFloat((t.ozet||{}).srm)||0); };
+      var clr = function(s){ return s<5?'Sarı':s<12?'Altın':s<22?'Amber':s<40?'Koyu':'Siyah'; };
+      var colorTag = function(s){ return s<7?'ALTIN':s<15?'ORTA-AÇIK':'KOYU'; };
+
+      var arama = (typeof aramaMetni!=='undefined'?aramaMetni:'').toLowerCase().trim();
+      var durumKR = KR.filter(function(t){ return (t.durum||'aktif')===listeSekme; });
+      var klasorKR = aktifKlasor ? durumKR.filter(function(t){ return (t.klasor||'')===aktifKlasor; }) : durumKR;
+      var filtreliKR = arama ? klasorKR.filter(function(t){
+        return esc(t.biraAd).toLowerCase().indexOf(arama)>=0
+            || (t.notlar||'').toLowerCase().indexOf(arama)>=0
+            || (t.maltlar||[]).some(function(m){ var ml=MALTLAR.find(function(x){return x&&x.id===m.id;}); return ml && ml.ad.toLowerCase().indexOf(arama)>=0; })
+            || (t.hoplar||[]).some(function(h){ var hp=HOPLAR.find(function(x){return x&&x.id===h.id;}); return hp && hp.ad.toLowerCase().indexOf(arama)>=0; });
+      }) : klasorKR;
+
+      function tarifKart(t){
+        var srmNum=parseFloat((t.ozet||{}).srm)||0;
+        var bandColor=rk(t);
+        var cTag=colorTag(srmNum);
+        var cFull=clr(srmNum);
+        var isTaslak=(t.durum||'aktif')==='aktif';
+        var klOpts=getKlasorler().filter(function(k){return k;}).map(function(k){return '<option value="'+k+'"'+(t.klasor===k?' selected':'')+'>'+k+'</option>';}).join('');
+        var og=(t.ozet||{}).og||'—';
+        var abv=(t.ozet||{}).abv?'%'+(t.ozet||{}).abv:'—';
+        var ibu=(t.ozet||{}).ibu||'—';
+        var srm=(t.ozet||{}).srm||'—';
+        var maltOzet=t.maltlar&&t.maltlar.length?
+          t.maltlar.slice(0,3).map(function(m){var ml=MALTLAR.find(function(x){return x&&x.id===m.id;});return(ml?ml.ad:m.id)+' '+m.kg+'kg';}).join(' · ')+(t.maltlar.length>3?' · …':'')
+          :'Malt eklenmemiş';
+        var durum=t.durum||'aktif';
+        return '<article class="bm-card fade" data-tid="'+t.id+'">'+
+          '<header class="bm-card-band" style="background:linear-gradient(135deg,'+bandColor+',rgba(0,0,0,.15) 100%),'+bandColor+'">'+
+            '<span class="bm-tag">'+cTag+'</span>'+
+            (isTaslak?'<span class="bm-tag">TASLAK</span>':'')+
+          '</header>'+
+          '<div class="bm-card-body">'+
+            '<div class="bm-card-top">'+
+              '<div style="flex:1;min-width:0">'+
+                '<h2>'+esc(t.biraAd)+'</h2>'+
+                '<div class="bm-card-meta">'+
+                  '<span>📅 '+t.tarih+'</span>'+
+                  '<span>📁 '+(t.klasor||'Klasörsüz')+'</span>'+
+                '</div>'+
+              '</div>'+
+              '<button class="bm-card-open" onclick="tarifAcById(this)">Aç →</button>'+
+              '<button class="bm-card-x" onclick="silOnayById(this)" title="Sil">×</button>'+
+            '</div>'+
+            '<div class="bm-card-metrics">'+
+              '<div class="bm-metric"><label>OG</label><span>'+og+'</span></div>'+
+              '<div class="bm-metric"><label>ABV</label><span>'+abv+'</span></div>'+
+              '<div class="bm-metric"><label>IBU</label><span>'+ibu+'</span></div>'+
+              '<div class="bm-metric"><label>SRM</label><span>'+srm+'</span></div>'+
+              '<div class="bm-metric color"><span class="bm-dot" style="background:'+bandColor+'"></span><span>'+cFull+'</span></div>'+
+            '</div>'+
+            '<div class="bm-card-malts">🌾 '+maltOzet+'</div>'+
+            '<div class="bm-card-actions">'+
+              (durum==='aktif'?'<button class="bm-act go" onclick="tarifDurumDegistir(\''+t.id+'\',\'yapimda\')">🔥 Aktife Al</button>':'')+
+              (durum==='yapimda'?'<button class="bm-act go" onclick="tarifDurumDegistir(\''+t.id+'\',\'aktif\')">📋 Plana Al</button>':'')+
+              ((durum==='arsiv'||durum==='istek')?'<button class="bm-act go" onclick="tarifDurumDegistir(\''+t.id+'\',\'aktif\')">📋 Planla</button>':'')+
+              (durum!=='arsiv'?'<button class="bm-act arsiv" onclick="tarifDurumDegistir(\''+t.id+'\',\'arsiv\')">📦 Arşiv</button>':'')+
+              (durum!=='istek'?'<button class="bm-act istek" onclick="tarifDurumDegistir(\''+t.id+'\',\'istek\')">⭐ İstek</button>':'')+
+              '<button class="bm-act dus" onclick="stoktenManuelDus(\''+t.id+'\')" title="Stoktan düş">🔽 Stoktan Düş</button>'+
+              '<button class="bm-act iade" onclick="stoktenManuelIade(\''+t.id+'\')" title="Stoğa iade">↩️ İade</button>'+
+            '</div>'+
+            '<div class="bm-card-folder">'+
+              '<span style="font-size:11px;color:var(--bm-text-muted)">📁</span>'+
+              '<select onchange="klasoruDegistir(this)"><option value="">Klasörsüz</option>'+klOpts+'</select>'+
+            '</div>'+
+          '</div>'+
+          (typeof silOnayBar==='function'?silOnayBar(t.id):'')+
+        '</article>';
+      }
+
+      var bosMetin = {aktif:'Planlanmış tarif yok — + Yeni reçete ile başla.',yapimda:'Yapım aşamasında tarif yok.',arsiv:'Arşivlenmiş tarif yok.',istek:'İstek listesi boş.'};
+      var newIc = filtreliKR.length===0
+        ? '<div class="bm-empty">'+(arama?"'"+aramaMetni+"' için sonuç bulunamadı.":bosMetin[listeSekme]||'')+'</div>'
+        : '<div class="bm-cards">'+filtreliKR.map(tarifKart).join('')+'</div>';
+
+      cont.innerHTML = newIc;
+
+      // Üst başlık alt yazısı (recete sayisi + klasor)
+      var sub = document.getElementById('bm-page-sub');
+      if (sub) sub.textContent = filtreliKR.length+' reçete · '+(aktifKlasor||'tüm klasörler');
+    } catch(err) {
+      console.warn('[bmListeRefresh] exception:', err && err.message);
+    }
+  };
 })();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.21.0/dist/ort.min.js"></script>
