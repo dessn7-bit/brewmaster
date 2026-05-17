@@ -20,7 +20,13 @@
 //   3. Install event sequential for-loop async/await try/catch — Promise.allSettled SW edge case fix.
 //   4. CACHE_VERSION bump v123-4 -> v123-5 (eski boş v123-4 invalidate).
 //   5. Fetch handler same-origin SWR + HTML Network First KORUNUR (Adim 123-fix-3 yapisi dogru is).
-const CACHE_VERSION = 'bm-cache-v123-5';
+// Adim 125-fix (17.05.2026): HTML deploy (Adim 125 V12/V20 slug kart kaldirma) sonrasi
+// Kaan browser'da eski HTML gordu. CACHE_VERSION sabit kalinca yeni install tetiklenmiyor,
+// v123-5 cache'inde stale HTML serve ediliyor. Bump ile yeni SW install + skipWaiting
+// + clients.claim → eski cache silinir, yeni HTML cache'e girer. Tek hard refresh yeterli.
+// KALICI KURAL: HTML degisikligi olan her sub-sprint deploy'da CACHE_VERSION bump zorunlu.
+// Format: bm-cache-vXXX-Y (XXX=Adim no, Y=sub-fix counter).
+const CACHE_VERSION = 'bm-cache-v125-1';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [
