@@ -26,13 +26,12 @@
 // + clients.claim → eski cache silinir, yeni HTML cache'e girer. Tek hard refresh yeterli.
 // KALICI KURAL: HTML degisikligi olan her sub-sprint deploy'da CACHE_VERSION bump zorunlu.
 // Format: bm-cache-vXXX-Y (XXX=Adim no, Y=sub-fix counter).
-// Adim 126 (17.05.2026): Recete Defteri yeniden tasarim (sidebar + 4 stat + yeni
-// kartlar). KURAL 12.3 zorunlu HTML bump — eski v125-1 cache invalidate.
-// Adim 129 ROLLBACK (17.05.2026): Tum Adim 129 sprint (6 fix) silindi. pre-step129 state'e donus.
-// SW CACHE_VERSION bump cache invalidate icin (eski v129-X cache'ler activate event'inde silinir).
-// Kaan talimat: "tasarim kismini komple rollback yapilcak eski programa geri donuyoruz".
-// Hicbir KURAL 12.4/5/6 (sentinel, network-first, postMessage) burada YOK — pre-step129 ham yapi.
-const CACHE_VERSION = 'bm-cache-v130-1';
+// Adim 130 KOMPLE ROLLBACK (17.05.2026): Adim 126 (Recete Defteri yeniden tasarim PILOT) +
+// 126-fix-1 (arama duplicate) + 127 (Logo + arama + CMD+K + bell dropdown) + 127-fix-1
+// (bmListeRefresh innerHTML fix) + 129 (detay banner) zinciri komple silindi.
+// Kaan talimat: "yeni tasarım işine geçmeden öncesine dönecez" -> Adim 125-fix (5c618f3) hali.
+// CACHE_VERSION bump v130-1 -> v131-1 (eski v126/v127/v129/v130 cache'leri invalidate).
+const CACHE_VERSION = 'bm-cache-v131-1';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [
