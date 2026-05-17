@@ -28,7 +28,11 @@
 // Format: bm-cache-vXXX-Y (XXX=Adim no, Y=sub-fix counter).
 // Adim 126 (17.05.2026): Recete Defteri yeniden tasarim (sidebar + 4 stat + yeni
 // kartlar). KURAL 12.3 zorunlu HTML bump — eski v125-1 cache invalidate.
-const CACHE_VERSION = 'bm-cache-v127-2';
+// Adim 129 ROLLBACK (17.05.2026): Tum Adim 129 sprint (6 fix) silindi. pre-step129 state'e donus.
+// SW CACHE_VERSION bump cache invalidate icin (eski v129-X cache'ler activate event'inde silinir).
+// Kaan talimat: "tasarim kismini komple rollback yapilcak eski programa geri donuyoruz".
+// Hicbir KURAL 12.4/5/6 (sentinel, network-first, postMessage) burada YOK — pre-step129 ham yapi.
+const CACHE_VERSION = 'bm-cache-v130-1';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [
