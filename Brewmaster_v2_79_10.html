@@ -151,7 +151,8 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
 /* Sidebar (240px sticky) */
 .bm-side{position:sticky;top:0;align-self:start;height:100vh;background:#fff;border-right:1px solid var(--bm-border);display:flex;flex-direction:column;padding:14px 12px;gap:12px;overflow-y:auto}
 .bm-side-head{display:flex;align-items:center;gap:10px;padding:4px 4px 8px;border-bottom:1px solid var(--bm-border)}
-.bm-side-head .bm-av{width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,#d97935,#8a4a16);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Quicksand';font-weight:700;font-size:16px;flex-shrink:0}
+.bm-side-head .bm-av{width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,#d97935,#8a4a16);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Quicksand';font-weight:700;font-size:16px;flex-shrink:0;overflow:hidden}
+.bm-side-head .bm-av img{width:100%;height:100%;object-fit:cover;display:block}
 .bm-side-head h2{font-size:15px;letter-spacing:.3px}
 .bm-side-head .bm-ver{font-size:9px;color:var(--bm-text-muted);letter-spacing:1.4px;text-transform:uppercase;margin-top:2px}
 .bm-new-btn{background:var(--bm-primary);color:#fff;font-family:'Quicksand';font-weight:700;font-size:13px;padding:10px 14px;border-radius:10px;display:flex;align-items:center;justify-content:center;gap:6px;letter-spacing:.2px;box-shadow:0 1px 2px rgba(217,121,53,.25);transition:background .15s}
@@ -188,6 +189,17 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
 .bm-icon-btn.yellow{color:#b88a20}
 .bm-icon-btn.red{color:#d44a3a}
 .bm-icon-btn .bm-dot-badge{position:absolute;top:-3px;right:-3px;min-width:16px;height:16px;border-radius:8px;background:#d44a3a;color:#fff;font-size:9px;font-weight:700;padding:0 4px;display:flex;align-items:center;justify-content:center;border:1.5px solid #fff}
+.bm-icon-btn.offline{color:var(--bm-text-muted);opacity:.55}
+.bm-icon-btn.warning{color:#d44a3a}
+
+/* Adim 127: Bell dropdown panel + sync state */
+.bm-bell-wrap{position:relative}
+.bm-bell-panel{position:absolute;top:calc(100% + 6px);right:0;width:280px;background:#fff;border:1px solid var(--bm-border);border-radius:12px;box-shadow:0 8px 24px rgba(42,31,16,.12);padding:12px;z-index:200;display:none;font-family:'Nunito'}
+.bm-bell-panel.open{display:block;animation:bmBellIn .15s ease-out}
+@keyframes bmBellIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.bm-bell-panel h4{font-family:'Quicksand';font-size:13px;font-weight:700;color:var(--bm-text);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--bm-border)}
+.bm-bell-empty{text-align:center;padding:18px 12px;color:var(--bm-text-muted);font-size:12px;line-height:1.5}
+.bm-bell-empty .bm-bell-ico{font-size:24px;margin-bottom:6px;opacity:.4;display:block}
 
 /* Stat kartlar 4 */
 .bm-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
@@ -10600,7 +10612,7 @@ function rListe(){
   const sidebar=
     '<aside class="bm-side">'+
       '<header class="bm-side-head">'+
-        '<div class="bm-av">K</div>'+
+        '<div class="bm-av"><img src="./icon-192.png" alt="Kabeer" onerror="this.parentNode.textContent=\'K\'"></div>'+
         '<div style="flex:1;min-width:0">'+
           '<h2>Kabeer</h2>'+
           '<div class="bm-ver">'+APP_VERSION+'</div>'+
@@ -10638,9 +10650,15 @@ function rListe(){
           '<input id="aramaInp" type="text" placeholder="Tarif, malt, hop ara..." value="'+esc(aramaMetni)+'" onchange="aramaMetni=this.value;render()" onkeyup="aramaGuncelle(this)">'+
           (aramaMetni?'<button onclick="clearArama()" style="font-size:16px;color:var(--bm-text-muted);padding:0 4px">×</button>':'<kbd>⌘K</kbd>')+
         '</div>'+
-        '<button class="bm-icon-btn green" onclick="syncPanelAc()" title="Sync">☁️</button>'+
+        '<button id="bm-sync-icon" class="bm-icon-btn green" onclick="syncPanelAc()" title="Senkron: bağlanıyor...">☁️</button>'+
         '<button class="bm-icon-btn yellow" onclick="stokEkranAc()" title="Stok">📦</button>'+
-        '<button class="bm-icon-btn red" title="Bildirimler (yakında)">🔔<span class="bm-dot-badge">0</span></button>'+
+        '<div class="bm-bell-wrap">'+
+          '<button class="bm-icon-btn red" onclick="window.bmBellToggle(event)" title="Bildirimler">🔔<span class="bm-dot-badge">0</span></button>'+
+          '<div id="bm-bell-panel" class="bm-bell-panel" onclick="event.stopPropagation()">'+
+            '<h4>🔔 Bildirimler</h4>'+
+            '<div class="bm-bell-empty"><span class="bm-bell-ico">🔕</span>Henüz bildirim yok.<br><span style="font-size:10px;color:var(--bm-text-muted);font-style:italic">Adım 131+ — gerçek bildirimler eklenecek</span></div>'+
+          '</div>'+
+        '</div>'+
       '</div>'+
     '</header>';
 
@@ -20244,6 +20262,9 @@ function syncDinle(){
 }
 
 function syncDurumGuncelle(durum){
+  // Adim 127: bm-sync-icon (yeni rListe UI) class + tooltip update
+  try { if (typeof window.bmSyncIconUpdate === 'function') window.bmSyncIconUpdate(durum); } catch(_){}
+  // Legacy #syncDurum elementi (eski header, yeni rListe'de yok — fallback intact)
   const el = document.getElementById('syncDurum');
   if(!el) return;
   const durumlar = {
@@ -21359,6 +21380,82 @@ syncBaslat();
       }
     } catch(e) { /* silent */ }
   };
+})();
+</script>
+<script id="bm-step127-ui-helpers">
+// Adim 127 (17.05.2026): Recete Defteri UI helpers
+//   - bmBellToggle: bildirim panel toggle + outside click close
+//   - keydown Ctrl/Cmd+K -> arama input focus
+//   - bmSyncStateUpdate: sync icon class + tooltip (online/offline + Firebase state)
+//   - online/offline event listener (browser network state)
+// Detay sayfasi, motor, dispatcher DOKUNULMAZ. Tum fonksiyonlar bm-defter-root
+// elementi yoksa silent return (diger sayfalarda render edildiginde error vermez).
+(function(){
+  // ─── Bell panel toggle ─────────────────────────────────
+  window.bmBellToggle = function(ev){
+    if (ev) { ev.stopPropagation(); }
+    var panel = document.getElementById('bm-bell-panel');
+    if (!panel) return;
+    var nowOpen = panel.classList.toggle('open');
+    if (nowOpen) {
+      // Outside click closer (one-shot)
+      setTimeout(function(){
+        var closer = function(e){
+          var p = document.getElementById('bm-bell-panel');
+          if (!p) { document.removeEventListener('click', closer); return; }
+          if (!p.contains(e.target)) {
+            p.classList.remove('open');
+            document.removeEventListener('click', closer);
+          }
+        };
+        document.addEventListener('click', closer);
+      }, 0);
+    }
+  };
+
+  // ─── Ctrl/Cmd + K -> arama input focus ────────────────
+  document.addEventListener('keydown', function(e){
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
+      var inp = document.getElementById('aramaInp');
+      if (inp) {
+        e.preventDefault();
+        inp.focus();
+        try { inp.select(); } catch(_){}
+      }
+    }
+  });
+
+  // ─── Sync icon state (online/offline + Firebase durumu) ─
+  // syncDurumGuncelle() (line ~20246) Firebase event'lerinde 'ok'/'guncel'/
+  // 'bagli'/'hata'/'baglanti-yok'/'kapali' durumlari yayinliyor. Bu helper
+  // bm-sync-icon class'ini ona gore guncelliyor (Adim 126 yeni UI). Eski
+  // text-based #syncDurum elementi yeni rListe()'de YOK, fallback olarak
+  // syncDurumGuncelle icinden cagrilacak.
+  window.bmSyncIconUpdate = function(durum){
+    var icon = document.getElementById('bm-sync-icon');
+    if (!icon) return;
+    var online = (typeof navigator !== 'undefined') ? navigator.onLine : true;
+    icon.classList.remove('offline','warning','green');
+    var title, cls, glyph;
+    if (!online) {
+      cls = 'offline'; title = 'Bağlantı yok, lokal modda'; glyph = '☁️';
+    } else if (durum === 'hata' || durum === 'baglanti-yok') {
+      cls = 'warning'; title = 'Bağlantı hatası'; glyph = '⚠️';
+    } else if (durum === 'kapali') {
+      cls = 'offline'; title = 'Senkron kapalı'; glyph = '☁️';
+    } else {
+      // ok / guncel / bagli / default
+      cls = 'green'; title = 'Senkron: bağlı'; glyph = '☁️';
+    }
+    icon.classList.add(cls);
+    icon.title = title;
+    if (icon.textContent !== glyph) icon.textContent = glyph;
+  };
+  // İlk state — page load
+  window.addEventListener('online',  function(){ try { window.bmSyncIconUpdate('bagli'); } catch(_){} });
+  window.addEventListener('offline', function(){ try { window.bmSyncIconUpdate('baglanti-yok'); } catch(_){} });
+  // İlk paint sonrası bir sefer set et
+  setTimeout(function(){ try { window.bmSyncIconUpdate(navigator.onLine ? 'bagli' : 'baglanti-yok'); } catch(_){} }, 500);
 })();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.21.0/dist/ort.min.js"></script>

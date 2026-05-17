@@ -28,7 +28,7 @@
 // Format: bm-cache-vXXX-Y (XXX=Adim no, Y=sub-fix counter).
 // Adim 126 (17.05.2026): Recete Defteri yeniden tasarim (sidebar + 4 stat + yeni
 // kartlar). KURAL 12.3 zorunlu HTML bump — eski v125-1 cache invalidate.
-const CACHE_VERSION = 'bm-cache-v126-2';
+const CACHE_VERSION = 'bm-cache-v127-1';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [
