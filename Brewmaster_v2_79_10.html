@@ -10537,16 +10537,6 @@ function rListe(){
   const colorTag=s=>s<7?"ALTIN":s<15?"ORTA-AÇIK":"KOYU";
   const klasorler=getKlasorler();
 
-  // Filtrele
-  const arama=aramaMetni.toLowerCase().trim();
-  const durumKR=KR.filter(t=>(t.durum||"aktif")===listeSekme);
-  const klasorKR=aktifKlasor?durumKR.filter(t=>(t.klasor||"")===aktifKlasor):durumKR;
-  const filtreliKR=arama?klasorKR.filter(t=>
-    esc(t.biraAd).toLowerCase().includes(arama)||
-    (t.notlar||"").toLowerCase().includes(arama)||
-    (t.maltlar||[]).some(m=>{const ml=MALTLAR.find(x=>x&&x.id===m.id);return ml&&ml.ad.toLowerCase().includes(arama);})||
-    (t.hoplar||[]).some(h=>{const hp=HOPLAR.find(x=>x&&x.id===h.id);return hp&&hp.ad.toLowerCase().includes(arama);})
-  ):klasorKR;
 
   // Sekme mapping: aktif='Planlananlar', yapimda='Aktif', arsiv='Arşiv', istek='İstek'
   const SEKMELER=[
