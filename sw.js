@@ -31,7 +31,10 @@
 // (bmListeRefresh innerHTML fix) + 129 (detay banner) zinciri komple silindi.
 // Kaan talimat: "yeni tasarım işine geçmeden öncesine dönecez" -> Adim 125-fix (5c618f3) hali.
 // CACHE_VERSION bump v130-1 -> v131-1 (eski v126/v127/v129/v130 cache'leri invalidate).
-const CACHE_VERSION = 'bm-cache-v131-1';
+// Adim 131-A (18.05.2026): v131-1 -> v131-2, sub-sprint 131-B sidebar markup prep, KURAL 12.3.
+// Strategy C ribbon baseline alindi (4/4 agreement + %87.5 consensus + strong_ale eager intact).
+// HTML degismedi, sadece SW version bump (sub-sprint 131-B'de HTML degisikligi gelecek).
+const CACHE_VERSION = 'bm-cache-v131-2';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [
