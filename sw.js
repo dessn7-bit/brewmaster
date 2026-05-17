@@ -34,7 +34,11 @@
 // Adim 131-A (18.05.2026): v131-1 -> v131-2, sub-sprint 131-B sidebar markup prep, KURAL 12.3.
 // Strategy C ribbon baseline alindi (4/4 agreement + %87.5 consensus + strong_ale eager intact).
 // HTML degismedi, sadece SW version bump (sub-sprint 131-B'de HTML degisikligi gelecek).
-const CACHE_VERSION = 'bm-cache-v131-2';
+// Adim 131-B (18.05.2026): v131-2 -> v131-3, sidebar markup deploy (240px sol panel, Image 2 stili).
+// HTML degisiklikleri: body grid, <aside id="bm-sidebar">, sidebar CSS, renderSidebar() + 8 SVG icon,
+// logo refactor (const BM_LOGO_DATAURL global single-source). Mevcut sekme/klasor bar/aksiyon
+// bar/aramaInp/taniBtn INTACT (131-C..G icin sirada). KURAL 12.3 zorunlu bump.
+const CACHE_VERSION = 'bm-cache-v131-3';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [
