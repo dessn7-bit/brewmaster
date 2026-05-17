@@ -16370,40 +16370,16 @@ return `
         '</div>';
         })()}
         ${(()=>{
-          // ═══ D-1.9g MOTOR KARŞILAŞTIRMASI — V12 + V20 + F1 Hibrit + B1 Hierarchical (4 motor) ═══
-          // V12 ana kart üstte zaten render edildi. Bu blok V20 + Hibrit'i ek olarak gösterir.
-          // D-1.9j Faz 1: 4. kart "Hierarchical (V19+B1)" KALDIRILDI — B1 cluster top-3 üst ribbon'a taşındı.
-          // Graceful: motor sonuçları yoksa ilgili kart boş string döner.
-          var _v12r = window.__lastV12SlugResult;
-          var _v20r = window.__lastV20SlugResult;
+          // ═══ Adım 125 — UI SLUG SADELEŞTİRME (V12 + V20 kart KALDIRILDI, Hibrit tek kart) ═══
+          // Önceki: D-1.9g 4 motor → D-1.9j 3 kart (V12+V20+Hibrit) → Adım 125 tek kart (Hibrit).
+          // V12 slug + V20 slug predictSync motorları arka planda çalışmaya devam ediyor —
+          // Strategy C dispatcher V12+V20+Hibrit 3-sinyal agreement için window.__lastV12SlugResult /
+          // __lastV20SlugResult okumaya devam eder. Sadece UI kartları kaldırıldı.
+          // V12 ana kart başlığı + BJCP karşılaştırması üstte zaten render edildi (post-process'li).
           var _f1r  = window.__lastF1HybridSlugResult;
-          // V12+V20+F1 üçü olmalı, yoksa blok yok (mevcut davranış korunur)
-          if (!_v12r || !_v12r.top3 || _v12r.top3.length === 0) return '';
-          if (!_v20r || !_v20r.top3 || _v20r.top3.length === 0) return '';
-          if (!_f1r  || !_f1r.top3  || _f1r.top3.length  === 0) return '';
+          if (!_f1r || !_f1r.top3 || _f1r.top3.length === 0) return '';
 
-          var _v12Top1 = _v12r.top3[0];
-          var _v20Top1 = _v20r.top3[0];
-          var _f1Top1  = _f1r.top3[0];
-
-          var _v12Prob = (_v12Top1.score || 0);
-          var _v20Prob = (_v20Top1.score || 0);
-          // Auto-recommend rozet kuralı: V20 top1 prob >= V12 top1 prob + 0.05 ise V20'de ⭐
-          var _v20Win = (_v20Prob - _v12Prob) >= 0.05;
-          // 3 motor uyumlu badge: V12, V20, F1 hepsi aynı top-1 slug
-          var _allAgree = (_v12Top1.slug === _v20Top1.slug) && (_v20Top1.slug === _f1Top1.slug);
-
-          // Engine card renkleri
-          var _v12Color = '#6A1B9A'; var _v12Bg = '#F3E5F5';   // mor (V12)
-          var _v20Color = '#0277BD'; var _v20Bg = '#E1F5FE';   // mavi (V20)
-          var _f1Color  = '#388E3C'; var _f1Bg  = '#E8F5E9';   // yeşil (Hibrit)
-          var _agreeColor = '#388E3C'; var _agreeBg = '#C8E6C9';
-
-          var _starV12 = (!_allAgree && !_v20Win) ? ' <span title="Bu reçete için V12 (V19) en yüksek güven" style="color:#FFB300;font-size:13px">⭐</span>' : '';
-          var _starV20 = (!_allAgree &&  _v20Win) ? ' <span title="Bu reçete için V20 (α=0.30) +5pp+ avantajlı" style="color:#FFB300;font-size:13px">⭐</span>' : '';
-          var _agreeBadge = _allAgree
-            ? '<span style="display:inline-block;background:'+_agreeBg+';color:'+_agreeColor+';font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px;border:1px solid '+_agreeColor+'">✓ 3 motor uyumlu</span>'
-            : '';
+          var _f1Color = '#388E3C'; var _f1Bg = '#E8F5E9';   // yeşil (Hibrit)
 
           function _render3(top3) {
             return top3.slice(0,3).map(function(r,i){
@@ -16417,31 +16393,15 @@ return `
             }).join('');
           }
 
-          function _card(title, color, bg, top3, badgeStar, tooltipTitle) {
-            return '<div style="flex:1;min-width:0;background:'+bg+';border:1.5px solid '+color+';border-radius:8px;padding:7px 10px" title="'+tooltipTitle+'">'+
-              '<div style="font-size:10px;font-weight:700;color:'+color+';margin-bottom:4px;letter-spacing:.3px;display:flex;align-items:center">'+
-                '<span>'+title+'</span>'+badgeStar+
-              '</div>'+
-              _render3(top3)+
-            '</div>';
-          }
-
-          var _v12Tooltip = "V19 (V12) — Mainstream uzmanı. American IPA, Stout, Pale Lager gibi büyük slug'larda yüksek doğruluk.";
-          var _v20Tooltip = "V20 (α=0.30) — Class-balanced retrain, küçük slug undertraining çözümü. Belgian Quadrupel, Brett Beer, Festbier gibi azınlık stillerde V19'dan +%14 daha doğru. KORUMA A 4 transformative slug korunmuş.";
-          var _f1Tooltip  = "Hibrit (V19+V20) — V19 ve V20 prob distribution'larının saf %50/%50 ortalaması. İki motorun ortak kanıtı, denge motoru. 376K in-sample +0.34pp anlamlı.";
+          var _f1Tooltip = "Slug (Hibrit V19+V20) — V19 ve V20 prob distribution'larının %50/%50 ortalaması. İki motorun ortak kanıtı, denge motoru. V12 + V20 ayrı kartları Adım 125'te kaldırıldı, motorlar arkaplanda Strategy C dispatcher için çalışmaya devam eder.";
 
           return '<div style="margin-top:10px;padding:8px;background:rgba(180,120,20,.04);border:1px dashed var(--bor);border-radius:6px">'+
-            '<div style="font-size:11px;font-weight:700;color:var(--kahve);margin-bottom:6px;display:flex;align-items:center">'+
-              '<span>🎯 Motor Karşılaştırması (V12 + V20 + Hibrit)</span>'+_agreeBadge+
+            '<div style="font-size:11px;font-weight:700;color:var(--kahve);margin-bottom:6px">'+
+              '🎯 Slug (Hibrit V12+V20)'+
             '</div>'+
-            '<div style="display:flex;flex-direction:column;gap:6px">'+
-              _card('V12 (V19)', _v12Color, _v12Bg, _v12r.top3, _starV12, _v12Tooltip)+
-              _card('V20 (α=0.30)', _v20Color, _v20Bg, _v20r.top3, _starV20, _v20Tooltip)+
-              _card('Hibrit (V19+V20)', _f1Color, _f1Bg, _f1r.top3, '', _f1Tooltip)+
-            '</div>'+
-            '<div style="font-size:9px;color:var(--soluk);margin-top:5px;line-height:1.4">'+
-              "V12 ana kart başlığı + BJCP karşılaştırması post-process'li V12 sonucuna bağlı (Sub-sprint 17-20). V20 + Hibrit raw model çıktısı (post-process YOK). B1 cluster top-3 üst ribbon (turuncu)."+
-              (_allAgree ? '' : (_v20Win ? ' V20 bu reçete için +5pp avantajlı (⭐).' : ' V12 bu reçete için en yüksek güven (⭐).'))+
+            '<div style="background:'+_f1Bg+';border:1.5px solid '+_f1Color+';border-radius:8px;padding:7px 10px" title="'+_f1Tooltip+'">'+
+              '<div style="font-size:10px;font-weight:700;color:'+_f1Color+';margin-bottom:4px;letter-spacing:.3px">Hibrit (V19+V20)/2</div>'+
+              _render3(_f1r.top3)+
             '</div>'+
           '</div>';
         })()}
