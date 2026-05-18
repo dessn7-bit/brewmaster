@@ -122,7 +122,14 @@
 // transform + translateZ(0) GPU layer, -webkit-tap-highlight-color:transparent + touch-action:
 // manipulation, contain:layout style, backdrop-filter:none, @media(hover:hover) hover/active guard.
 // 131-A..K intact. KURAL 12.3 zorunlu bump.
-const CACHE_VERSION = 'bm-cache-v131-13';
+// Adim 131-M (18.05.2026): v131-13 -> v131-14, empty state container width daralma fix.
+// Kaan iddia: ARSIV empty (filtreliKR=[]) sekmede sayfa wrapper DAR, non-empty TAM. Hipotez A/B/C.
+// Puppeteer 36/36 PASS (iPhone13 + Pixel6 + GalaxyA52 × 4 sekme × 3 klasor matrix):
+// .bm-main getBoundingClientRect().width SABIT her kombinasyon, empty vs non-empty deltaMain=0.000px.
+// FIX: rListe inline-style div'ler CSS class'a tasindi: .bm-liste-wrap (eski padding:12px wrapper) +
+// .bm-empty-state (eski empty placeholder). Iki class da width:100% box-sizing:border-box min-width:0
+// explicit. .bm-main + #ekran width:100% + box-sizing:border-box stabilize. 131-A..L intact.
+const CACHE_VERSION = 'bm-cache-v131-14';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [

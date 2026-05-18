@@ -56,7 +56,7 @@ body{background:var(--bg);color:var(--kahve);font-family:var(--font-body);displa
 /* Adim 131-I: Mobile drawer CSS sidebar bloğunun SONRASINDA tasindi (cascade order fix) */
 body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(circle at 18% 24%,rgba(107,85,55,.06) 0%,transparent 55%),radial-gradient(circle at 82% 68%,rgba(85,65,40,.05) 0%,transparent 55%),radial-gradient(circle at 50% 50%,transparent 60%,rgba(107,85,55,.07) 100%)}
 body>*{position:relative;z-index:1}
-#ekran{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:28px}
+#ekran{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:28px;width:100%;min-width:0;box-sizing:border-box}
 input,select,textarea,button{font-family:inherit}
 ::-webkit-scrollbar{width:3px}
 ::-webkit-scrollbar-thumb{background:var(--bor2);border-radius:2px}
@@ -170,7 +170,7 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
 }
 
 /* Adim 131-C: Ust header (Image 2 stili) */
-.bm-main{grid-column:2;display:flex;flex-direction:column;min-width:0;height:100vh;overflow:hidden}
+.bm-main{grid-column:2;display:flex;flex-direction:column;min-width:0;height:100vh;overflow:hidden;width:100%;box-sizing:border-box}
 .bm-header{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 22px;background:#FFFFFF;border-bottom:1px solid #F1EFE8;z-index:5;position:relative}
 .bm-header-left{display:flex;flex-direction:column;min-width:0;gap:2px}
 .bm-header-title{font-family:var(--font-display);font-size:22px;font-weight:700;color:#3D2817;line-height:1.15;letter-spacing:.2px}
@@ -200,6 +200,12 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
 .bm-yapimda-item:hover{background:#FFF7E6;border-color:#EF9F27}
 .bm-yapimda-item-ad{flex:1;font-family:var(--font-display);font-size:14px;font-weight:600;color:#3D2817;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .bm-yapimda-item-meta{font-size:11px;color:#8E8B86;flex-shrink:0}
+/* Adim 131-M: Empty state container width daralma fix (filtreliKR=[] tetikli .bm-main shrink)
+   Hipotez A: flex/grid parent min-content; B: empty div wrong parent; C: innerHTML reset class kaybi.
+   Defense-in-depth: wrapper'a explicit width:100% + box-sizing:border-box, empty state da aynı.
+   Validation: 4 sekme × 3 klasor = 12 kombinasyon, .bm-main getBoundingClientRect().width SABIT. */
+.bm-liste-wrap{padding:12px;width:100%;box-sizing:border-box;min-width:0;display:block}
+.bm-empty-state{width:100%;box-sizing:border-box;display:block;text-align:center;padding:40px 20px;color:var(--dim);font-size:13px;min-width:0}
 /* Adim 131-L: Mobile defense-in-depth — minmax sub-pixel, will-change/translateZ, contain, tap-highlight, hover media */
 .bm-stat-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);column-gap:10px;row-gap:10px;padding:8px 12px 10px;align-items:stretch}
 .bm-stat-kart{background:#FFFFFF;border:1px solid #F1EFE8;border-radius:10px;padding:10px 12px;cursor:pointer;transition:background-color .15s;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;will-change:transform;transform:translateZ(0);backdrop-filter:none;-webkit-backdrop-filter:none;contain:layout style;min-width:0}
@@ -10988,8 +10994,9 @@ function rListe(){
     arsiv:"Arşivlenmiş tarif yok.",
     istek:"İstek listesi boş."
   };
+  // Adim 131-M: Empty state + list wrapper explicit width (mobile .bm-main daralma fix)
   const listHTML=filtreliKR.length===0
-    ?'<div style="text-align:center;padding:40px 20px;color:var(--dim);font-size:13px">'+(arama?"'"+aramaMetni+"' için sonuç bulunamadı.":bosMetin[listeSekme]||"")+'</div>'
+    ?'<div class="bm-empty-state">'+(arama?"'"+aramaMetni+"' için sonuç bulunamadı.":bosMetin[listeSekme]||"")+'</div>'
     :filtreliKR.map(tarifKart).join("");
 
   // Adim 131-C: Eski ust aksiyon bar (logo/syncPanelAc/stokEkranAc/+Yeni/syncDurum) KALDIRILDI.
@@ -10999,7 +11006,7 @@ function rListe(){
     renderYapimdaVurgu()+
     renderStatKartlar()+
     renderKlasorChip()+
-    '<div style="padding:12px">'+listHTML+'</div>';
+    '<div class="bm-liste-wrap">'+listHTML+'</div>';
 }
 
 
