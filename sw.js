@@ -115,7 +115,14 @@
 //   sat 208: .bm-stat-kart.active{border:1px solid #EF9F27} -> .active{border-color:#EF9F27}
 // Hover (border-color:#EF9F27) ve focus (outline:2px) zaten width-stable, intact. 131-A..J intact.
 // KURAL 12.3 bump.
-const CACHE_VERSION = 'bm-cache-v131-12';
+// Adim 131-L (18.05.2026): v131-12 -> v131-13, mobile spesifik defense in depth render fix.
+// Kaan iddia: desktop temiz, Android Chrome'da stat kart bozulma. Puppeteer 12/12 PASS
+// (iPhone13 + Pixel6 + GalaxyA52, widthDelta=0.000px, CLS=0, border=rgb(239,159,39) 1px).
+// FIX: minmax(0,1fr) sub-pixel, transition layout-property kaldirildi (sadece bg-color), will-change:
+// transform + translateZ(0) GPU layer, -webkit-tap-highlight-color:transparent + touch-action:
+// manipulation, contain:layout style, backdrop-filter:none, @media(hover:hover) hover/active guard.
+// 131-A..K intact. KURAL 12.3 zorunlu bump.
+const CACHE_VERSION = 'bm-cache-v131-13';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [
