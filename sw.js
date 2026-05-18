@@ -172,6 +172,22 @@
 // setAktifKlasor icindeki setTimeout(bmDebugUpdate,50) cagrilari. KORUNDU: window.listeSekme/
 // window.aktifKlasor expose (sat 5937 + setter sync) - Sprint 132 sub-sprint'leri (Klonla vs)
 // state expose kullanir. 131-A..T fix'leri INTACT, motor zinciri dokunulmadi.
+// Adim 132-D (19.05.2026): v131-23 -> v131-24, Akordiyon temel patern + Genel tab 3 section.
+// CSS .bm-acc framework: background:#fff border:#E5DCC8 radius:12, header:padding:12 14 min-height:44px
+// hover:#FAEEDA focus:outline 2 #EF9F27. title (ellipsis) + meta (collapsed iken bile ozet badge, max 160px)
+// + chevron (▾ rotate -90 collapsed). body max-height transition 0.3s ease.
+// JS framework: bmAccToggle(id, force?) + bmAccInit() + localStorage 'bm_acc_state'. ARIA aria-expanded.
+// Inline onclick + onkeydown (Enter/Space) header element.
+// render() sonu setTimeout bmAccInit (state restore + binding).
+// Genel tab PILOT 3 section:
+//   #1 "🎯 Stil Tahmini & Reçete Doktoru" (expanded) - eski big gradient card refactor, color stripe
+//      acc-body border-top 6px ${renk_hex}. Recipe Doctor IIFE icerige dahil (132-D-2'de ayrilir).
+//   #2 "📊 Reçete Profili" (collapsed) - Tahmini Bira Profili kart + Karbonhidrat/Kalori +
+//      Stok Durumu & Muadiller IIFE'leri wraps.
+//   #3 "🍻 Fermentasyon Durumu" (expanded) - _fermDurum self-header (<div class="th">..</div>)
+//      regex.replace ile strip, accordion header tek baslik olur.
+// PILOT: sadece Genel tab. 132-E'de Malt/Hop/Maya tablarina yayilir.
+// 131-A..T + 132-pre/B/C/A intact. Motor zinciri dokunulmadi.
 // Adim 132-A (19.05.2026): v131-22 -> v131-23, Sticky ozet paneli Genel tab pilot.
 // HTML: rEditorGenel return basinda <div class="bm-sticky-summary" id="bm-summary" data-tab="genel">
 //   - <span class="bm-ss-renk" id="ss-renk"> srmR(srm) hex bg
@@ -203,7 +219,7 @@
 // 'planlananlar' string - sat 10770 statTanim mapping) + olusturma/guncelleme timestamps + KR.unshift
 // + _origKy(KR) localStorage save + _syncGonderDebounced Firebase push + tarifAc(yeni.id) editor yonlendir.
 // flash mesaj. 131-A..T + 132-pre intact. Motor zinciri dokunulmadi.
-const CACHE_VERSION = 'bm-cache-v131-23';
+const CACHE_VERSION = 'bm-cache-v131-24';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [
