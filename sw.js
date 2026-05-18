@@ -129,7 +129,15 @@
 // FIX: rListe inline-style div'ler CSS class'a tasindi: .bm-liste-wrap (eski padding:12px wrapper) +
 // .bm-empty-state (eski empty placeholder). Iki class da width:100% box-sizing:border-box min-width:0
 // explicit. .bm-main + #ekran width:100% + box-sizing:border-box stabilize. 131-A..L intact.
-const CACHE_VERSION = 'bm-cache-v131-14';
+// Adim 131-N (18.05.2026): TANI, deploy YOK. 4-state Puppeteer (URLBarVisible 384x780 + URLBarHidden
+// 384x830 × ARSIV + PLANLANANLAR): .bm-main widthDelta=0px her durumda KANIT, BUT heightDelta=50px.
+// Karar: Hipotez D (URL bar dynamic viewport) ispatlandi. Width bug YOK, viewport height bug var.
+// Kaan height degisimini width algiliyor (empty state alt yarisi bos + URL bar gorunur => "dar" hissi).
+// Adim 131-O (18.05.2026): v131-14 -> v131-15, 100vh -> 100dvh dynamic viewport fix (Senaryo D cozum).
+// 6 yer CSS cift katman (100vh fallback + 100dvh override): body grid-template-rows, .bm-main height,
+// .bm-sidebar height (desktop + mobile), #ekran height (desktop), .brewday-timeline-icerik min-height.
+// Viewport meta'ya viewport-fit=cover EKLEME (dvh ile uyumlu, notch destegi). 131-A..N intact.
+const CACHE_VERSION = 'bm-cache-v131-15';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [
