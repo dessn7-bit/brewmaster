@@ -230,6 +230,48 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
 .bm-taslak-btn.bm-taslak-sil{background:#FCEBEB;border:0.5px solid #F3D2D2;color:#A32D2D}
 .bm-taslak-btn.bm-taslak-sil:hover{border-color:#A32D2D}
 @media (max-width:768px){.bm-klasor-bar{padding:10px;gap:6px}.bm-taslak-banner{margin:10px;padding:10px;flex-direction:column;align-items:stretch}.bm-taslak-eylem{justify-content:flex-end}}
+
+/* Adim 131-F: Recete kartlari buyuk gradient banner (Image 2) */
+.bm-recete-kart{background:#FFFFFF;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04),0 4px 12px rgba(0,0,0,.05);margin:0 12px 12px;position:relative}
+.bm-recete-banner{position:relative;padding:18px 18px 22px;color:#FFFFFF;overflow:hidden}
+.bm-recete-banner.light{background:#EF9F27}
+.bm-recete-banner.medium{background:#D97706}
+.bm-recete-banner.dark{background:linear-gradient(135deg,#4F2A0E 0%,#412402 100%)}
+.bm-recete-banner.dark .bm-recete-ac-btn{color:#412402}
+.bm-recete-badge-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.bm-recete-badge{display:inline-block;background:rgba(255,255,255,.3);color:#FFFFFF;font-size:11px;font-weight:500;letter-spacing:.4px;text-transform:uppercase;padding:2px 8px;border-radius:4px}
+.bm-recete-badge.taslak{background:rgba(255,255,255,.55);color:#412402}
+.bm-recete-baslik{font-family:var(--font-display);font-size:22px;font-weight:700;color:#FFFFFF;line-height:1.15;margin-bottom:4px;padding-right:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bm-recete-meta{display:flex;flex-wrap:wrap;align-items:center;gap:12px;font-size:12px;color:rgba(255,255,255,.92)}
+.bm-recete-meta span{display:inline-flex;align-items:center;gap:5px}
+.bm-recete-meta .ti{width:13px;height:13px;stroke-width:1.8;opacity:.95}
+.bm-recete-ac-btn{position:absolute;top:14px;right:14px;background:#FFFFFF;color:#854F0B;border:none;border-radius:5px;padding:4px 12px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:background .12s,transform .08s}
+.bm-recete-ac-btn:hover{background:#FFF7E6}
+.bm-recete-ac-btn:active{transform:scale(.96)}
+.bm-recete-info{background:#FFFFFF;padding:12px 16px 14px}
+.bm-recete-metric-row{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:6px}
+.bm-recete-metric{display:inline-flex;align-items:center;gap:5px;background:#FAEEDA;padding:5px 10px;border-radius:7px;font-size:12px;line-height:1}
+.bm-recete-metric-etiket{color:#888780;font-size:11px}
+.bm-recete-metric-deger{color:#3D2817;font-weight:600}
+.bm-recete-renk-chip{display:inline-flex;align-items:center;gap:6px;background:#FAEEDA;padding:5px 10px;border-radius:7px;font-size:12px;color:#3D2817;line-height:1}
+.bm-recete-renk-dot{display:inline-block;width:10px;height:10px;border-radius:50%;border:1px solid rgba(0,0,0,.12);flex-shrink:0}
+.bm-recete-malzeme{font-size:12px;color:#5F5E5A;line-height:1.5;margin:6px 0 10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bm-recete-eylem-bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding-top:8px;border-top:1px solid #F1EFE8}
+.bm-recete-eylem-chip{display:inline-flex;align-items:center;gap:5px;background:#FFFFFF;border:0.5px solid #F1EFE8;color:#5F5E5A;border-radius:18px;padding:4px 10px;font-size:11px;font-weight:500;cursor:pointer;font-family:inherit;white-space:nowrap;transition:border-color .12s,color .12s}
+.bm-recete-eylem-chip:hover{border-color:#EF9F27}
+.bm-recete-eylem-chip .ti{width:12px;height:12px;stroke-width:1.8;flex-shrink:0;color:#EF9F27}
+.bm-recete-eylem-chip.aktife{color:#854F0B}
+.bm-recete-eylem-chip.aktife .ti{color:#D85A30}
+.bm-recete-eylem-chip.stoktan .ti{color:#5F5E5A}
+.bm-recete-eylem-chip.iade .ti{color:#1D9E75}
+.bm-recete-eylem-chip-sil{display:inline-flex;align-items:center;gap:4px;background:#FCEBEB;border:0.5px solid #F3D2D2;color:#A32D2D;border-radius:18px;padding:4px 10px;font-size:11px;font-weight:500;cursor:pointer;font-family:inherit;transition:border-color .12s}
+.bm-recete-eylem-chip-sil:hover{border-color:#A32D2D}
+.bm-recete-klasor-dropdown-wrap{margin-left:auto;position:relative;display:inline-flex;align-items:center}
+.bm-recete-klasor-dropdown{appearance:none;-webkit-appearance:none;-moz-appearance:none;background:#FFFFFF url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235F5E5A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>") no-repeat right 8px center;border:0.5px solid #F1EFE8;border-radius:6px;padding:4px 26px 4px 28px;font-size:11px;font-weight:500;color:#5F5E5A;font-family:inherit;cursor:pointer;line-height:1.4;height:auto;min-height:24px;transition:border-color .12s}
+.bm-recete-klasor-dropdown:hover{border-color:#EF9F27}
+.bm-recete-klasor-dropdown:focus{outline:none;border-color:#EF9F27}
+.bm-recete-klasor-icon{position:absolute;left:8px;top:50%;transform:translateY(-50%);color:#EF9F27;pointer-events:none;width:13px;height:13px}
+@media (max-width:768px){.bm-recete-kart{margin:0 10px 10px}.bm-recete-banner{padding:14px 14px 18px}.bm-recete-baslik{font-size:18px;padding-right:50px}.bm-recete-ac-btn{top:10px;right:10px;padding:3px 10px;font-size:11px}.bm-recete-info{padding:10px 12px 12px}.bm-recete-eylem-bar{gap:5px}.bm-recete-eylem-chip,.bm-recete-eylem-chip-sil{padding:3px 9px}.bm-recete-klasor-dropdown-wrap{margin-left:0;margin-top:4px}}
 </style>
 </head>
 <body>
@@ -10509,6 +10551,9 @@ const BM_SVG = {
   'cloud': '<svg class="ti" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.657 18c-2.572 0 -4.657 -2.007 -4.657 -4.483c0 -2.475 2.085 -4.482 4.657 -4.482c.393 -1.762 1.794 -3.2 3.675 -3.773c1.88 -.572 3.956 -.193 5.444 .993c1.488 1.187 2.162 3.012 1.77 4.774h.99c1.913 0 3.464 1.56 3.464 3.486c0 1.927 -1.551 3.485 -3.465 3.485h-11.878"/></svg>',
   'package': '<svg class="ti" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4.5l0 9l-8 4.5l-8 -4.5l0 -9l8 -4.5"/><path d="M12 12l8 -4.5"/><path d="M12 12l0 9"/><path d="M12 12l-8 -4.5"/><path d="M16 5.25l-8 4.5"/></svg>',
   'bell': '<svg class="ti" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 5a2 2 0 0 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6"/><path d="M9 17v1a3 3 0 0 0 6 0v-1"/></svg>',
+  'arrow-back-up': '<svg class="ti" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14l-4 -4l4 -4"/><path d="M5 10h11a4 4 0 1 1 0 8h-1"/></svg>',
+  'chevron-down': '<svg class="ti" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>',
+  'calendar': '<svg class="ti" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"/><path d="M16 3v4"/><path d="M8 3v4"/><path d="M4 11h16"/></svg>',
 };
 
 function renderSidebar(){
@@ -10809,41 +10854,84 @@ function rListe(){
   // Mevcut handler'lar (setAktifKlasor, klasorSilIste, klasorSilOnay, yeniKlasorAc/Kaydet/Iptal/Klavye) intact.
 
   // Tarif kartları
+  // Adim 131-F: Recete kart yeniden tasarim (Image 2 stili) — buyuk gradient banner + alt info + eylem chip
   function tarifKart(t){
-    const klOpts=getKlasorler().filter(k=>k).map(k=>'<option value="'+k+'"'+(t.klasor===k?' selected':'')+'>'+k+'</option>').join('');
-    return'<div class="fade" data-tid="'+t.id+'" style="background:var(--card);border:1px solid var(--bor);border-radius:12px;margin-bottom:10px;overflow:hidden;box-shadow:var(--golge2)">'+
-      '<div style="height:4px;background:'+rk(t)+'"></div>'+
-      '<div style="padding:14px">'+
-        '<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:8px">'+
-          '<div style="flex:1;min-width:0">'+
-            (t.klasor?'<div style="font-size:9px;background:var(--sa);color:var(--sk);border-radius:4px;padding:1px 7px;display:inline-block;margin-bottom:3px;border:1px solid #C8B070;font-weight:600">📂 '+t.klasor+'</div><br>':'')+
-            '<div style="font-size:16px;font-weight:700;color:var(--kahve);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--font-display)">'+esc(t.biraAd)+'</div>'+
-            '<div style="font-size:10px;color:var(--dim);margin-top:2px">📅 '+t.tarih+'</div>'+
+    const ozet=t.ozet||{};
+    const srmVal=parseFloat(ozet.srm)||0;
+    const renkAdi=clr(srmVal);                // Sari/Altin/Amber/Koyu/Siyah
+    const renkHex=rk(t);                       // SRM->hex
+    // Banner sinifi (SRM bazli): <12 light (turuncu), <22 medium (koyu turuncu), >=22 dark (gradient kahve)
+    const bannerCls = srmVal<12 ? 'light' : (srmVal<22 ? 'medium' : 'dark');
+    const klOpts=getKlasorler().filter(k=>k).map(k=>'<option value="'+esc(k)+'"'+(t.klasor===k?' selected':'')+'>'+esc(k)+'</option>').join('');
+    const durum=t.durum||'aktif';
+    // Durum bazli aksiyon chip (mevcut UX intact)
+    let durumChip='';
+    if(durum==='aktif'){
+      durumChip='<button class="bm-recete-eylem-chip aktife" onclick="tarifDurumDegistir(\''+t.id+'\',\'yapimda\')">'+BM_SVG.flame+'<span>Aktife Al</span></button>';
+    } else if(durum==='yapimda'){
+      durumChip='<button class="bm-recete-eylem-chip aktife" onclick="tarifDurumDegistir(\''+t.id+'\',\'aktif\')">'+BM_SVG['clipboard-list']+'<span>Plana Al</span></button>';
+    } else { // arsiv / istek
+      durumChip='<button class="bm-recete-eylem-chip aktife" onclick="tarifDurumDegistir(\''+t.id+'\',\'aktif\')">'+BM_SVG['clipboard-list']+'<span>Planla</span></button>';
+    }
+    const arsivChip = (durum!=='arsiv')
+      ? '<button class="bm-recete-eylem-chip arsiv" onclick="tarifDurumDegistir(\''+t.id+'\',\'arsiv\')">'+BM_SVG.archive+'<span>Arsiv</span></button>'
+      : '';
+    const istekChip = (durum!=='istek')
+      ? '<button class="bm-recete-eylem-chip istek" onclick="tarifDurumDegistir(\''+t.id+'\',\'istek\')">'+BM_SVG.star+'<span>Istek</span></button>'
+      : '';
+    // Banner badges
+    const renkBadge='<span class="bm-recete-badge">'+_esc131B(renkAdi).toUpperCase()+'</span>';
+    const taslakBadge = !t.durum ? '<span class="bm-recete-badge taslak">TASLAK</span>' : '';
+    // Meta satiri: tarih + klasor (varsa)
+    const metaParts=[];
+    if(t.tarih) metaParts.push('<span>'+BM_SVG.calendar+_esc131B(t.tarih)+'</span>');
+    if(t.klasor) metaParts.push('<span>'+BM_SVG.folder+_esc131B(t.klasor)+'</span>');
+    const metaHtml = metaParts.length ? '<div class="bm-recete-meta">'+metaParts.join('')+'</div>' : '';
+    // Metric pills
+    const ogV = (ozet.og !== undefined && ozet.og !== null && ozet.og !== '') ? ozet.og : '—';
+    const abvV = (ozet.abv !== undefined && ozet.abv !== null && ozet.abv !== '') ? ('%'+ozet.abv) : '—';
+    const ibuV = (ozet.ibu !== undefined && ozet.ibu !== null && ozet.ibu !== '') ? ozet.ibu : '—';
+    const srmV = (ozet.srm !== undefined && ozet.srm !== null && ozet.srm !== '') ? ozet.srm : '—';
+    const metricHtml =
+      '<div class="bm-recete-metric"><span class="bm-recete-metric-etiket">OG</span><span class="bm-recete-metric-deger">'+ogV+'</span></div>'+
+      '<div class="bm-recete-metric"><span class="bm-recete-metric-etiket">ABV</span><span class="bm-recete-metric-deger">'+abvV+'</span></div>'+
+      '<div class="bm-recete-metric"><span class="bm-recete-metric-etiket">IBU</span><span class="bm-recete-metric-deger">'+ibuV+'</span></div>'+
+      '<div class="bm-recete-metric"><span class="bm-recete-metric-etiket">SRM</span><span class="bm-recete-metric-deger">'+srmV+'</span></div>'+
+      '<div class="bm-recete-renk-chip"><span class="bm-recete-renk-dot" style="background:'+renkHex+'"></span><span>'+_esc131B(renkAdi)+'</span></div>';
+    // Malzeme onizleme (max 3 malt)
+    const malzemeHtml = (t.maltlar && t.maltlar.length)
+      ? '<div class="bm-recete-malzeme">'+t.maltlar.slice(0,3).map(function(m){
+          const ml = MALTLAR.find(x => x && x.id === m.id);
+          return _esc131B((ml ? ml.ad : m.id) + ' ' + m.kg + 'kg');
+        }).join(' &middot; ')+(t.maltlar.length > 3 ? ' &middot; …' : '')+'</div>'
+      : '';
+    return '<div class="bm-recete-kart fade" data-tid="'+t.id+'">'+
+        '<div class="bm-recete-banner '+bannerCls+'">'+
+          '<div class="bm-recete-badge-row">'+renkBadge+taslakBadge+'</div>'+
+          '<div class="bm-recete-baslik">'+_esc131B(t.biraAd||'(adsiz)')+'</div>'+
+          metaHtml+
+          '<button class="bm-recete-ac-btn" onclick="tarifAcById(this)">Ac &rarr;</button>'+
+        '</div>'+
+        '<div class="bm-recete-info">'+
+          '<div class="bm-recete-metric-row">'+metricHtml+'</div>'+
+          malzemeHtml+
+          '<div class="bm-recete-eylem-bar">'+
+            durumChip+
+            arsivChip+
+            istekChip+
+            '<button class="bm-recete-eylem-chip stoktan" onclick="stoktenManuelDus(\''+t.id+'\')" title="Tarif durumunu degistirmeden stoktan dus">'+BM_SVG.package+'<span>Stoktan Dus</span></button>'+
+            '<button class="bm-recete-eylem-chip iade" onclick="stoktenManuelIade(\''+t.id+'\')" title="Tarifin malzemelerini stoga geri ekle">'+BM_SVG['arrow-back-up']+'<span>Iade</span></button>'+
+            '<button class="bm-recete-eylem-chip-sil" onclick="silOnayById(this)" title="Sil">&times; Sil</button>'+
+            '<div class="bm-recete-klasor-dropdown-wrap">'+
+              '<span class="bm-recete-klasor-icon">'+BM_SVG.folder+'</span>'+
+              '<select class="bm-recete-klasor-dropdown" onchange="klasoruDegistir(this)">'+
+                '<option value="">Klasorsuz</option>'+klOpts+
+              '</select>'+
+            '</div>'+
           '</div>'+
-          '<button class="btn" style="background:var(--ya);color:var(--yk);border:1px solid #A0A868;font-size:12px;padding:7px 14px" onclick="tarifAcById(this)">Aç →</button>'+
-          '<button class="btn" style="background:var(--ka);color:var(--kk);border:1px solid #D0A0A0;font-size:16px;padding:5px 10px;line-height:1" onclick="silOnayById(this)">×</button>'+
         '</div>'+
-        '<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">'+
-          [["OG",(t.ozet||{}).og],["ABV","%"+(t.ozet||{}).abv],["IBU",(t.ozet||{}).ibu],["SRM",(t.ozet||{}).srm]].map(([e,d])=>
-            '<div style="background:var(--bg);border-radius:6px;padding:4px 9px;text-align:center;border:1px solid var(--bor)"><div style="font-size:8px;color:var(--soluk);font-weight:600;letter-spacing:.5px">'+e+'</div><div style="font-size:12px;color:var(--bakir);font-weight:700">'+d+'</div></div>'
-          ).join("")+
-          '<div style="background:var(--bg);border-radius:6px;padding:4px 9px;border:1px solid var(--bor);display:flex;align-items:center;gap:4px"><span style="width:11px;height:11px;border-radius:50%;background:'+rk(t)+';border:1px solid var(--bor);display:inline-block"></span><span style="font-size:11px;color:var(--soluk)">'+clr(parseFloat((t.ozet||{}).srm)||0)+'</span></div>'+
-        '</div>'+
-        (t.maltlar&&t.maltlar.length?'<div style="font-size:11px;color:var(--dim);line-height:1.5;margin-bottom:8px">'+t.maltlar.slice(0,3).map(m=>{const ml=MALTLAR.find(x=>x&&x.id===m.id);return(ml?ml.ad:m.id)+' '+m.kg+'kg';}).join(' · ')+(t.maltlar.length>3?' · …':'')+'</div>':'')+
-        '<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;border-top:1px solid var(--bor);padding-top:8px">'+
-          ((t.durum||'aktif')==='aktif'?'<button class="btn" style="font-size:10px;padding:3px 9px;background:var(--ya);color:var(--yk);border-color:#A0A868" onclick="tarifDurumDegistir(\''+t.id+'\',\'yapimda\')">🧬 Aktife Al</button>':'')+(t.durum==='yapimda'?'<button class="btn" style="font-size:10px;padding:3px 9px;background:var(--sa);color:var(--sk);border-color:#B8A860" onclick="tarifDurumDegistir(\''+t.id+'\',\'aktif\')">📋 Plana Al</button>':'')+((t.durum==='arsiv'||t.durum==='istek')?'<button class="btn" style="font-size:10px;padding:3px 9px;background:var(--sa);color:var(--sk);border:1px solid #C8B070" onclick="tarifDurumDegistir(\''+t.id+'\',\'aktif\')">📋 Planla</button>':'')+(t.durum!=='arsiv'?'<button class="btn" style="font-size:10px;padding:3px 9px;background:var(--bg);color:var(--soluk);border:1px solid var(--bor)" onclick="tarifDurumDegistir(\''+t.id+'\',\'arsiv\')">📦 Arşiv</button>':'')+(t.durum!=='istek'?'<button class="btn" style="font-size:10px;padding:3px 9px;background:var(--bg);color:#6B5A7A;border:1px solid #9A8898" onclick="tarifDurumDegistir(\''+t.id+'\',\'istek\')">⭐ İstek</button>':'')+
-          '<select class="inp" style="flex:1;font-size:10px;padding:3px 8px" onchange="klasoruDegistir(this)">'+
-            '<option value="">📂 Klasörsüz</option>'+klOpts+
-          '</select>'+
-        '</div>'+
-        '<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-top:5px;padding-top:5px;border-top:1px dashed var(--bor)">'+
-          '<button class="btn" style="font-size:10px;padding:3px 9px;background:#FFF4DC;color:#8A6A20;border:1px solid #E8C060" onclick="stoktenManuelDus(\''+t.id+'\')" title="Tarif durumunu değiştirmeden stoktan düş">🔽 Stoktan Düş</button>'+
-          '<button class="btn" style="font-size:10px;padding:3px 9px;background:#E8F0E0;color:#5A7A30;border:1px solid #A8C478" onclick="stoktenManuelIade(\''+t.id+'\')" title="Tarifin malzemelerini stoğa geri ekle">↩️ İade</button>'+
-          '<span style="font-size:9px;color:var(--dim);font-style:italic">Manuel stok işlemi</span>'+
-        '</div>'+
-      '</div>'+
-      silOnayBar(t.id)+
-    '</div>';
+        silOnayBar(t.id)+
+      '</div>';
   }
 
   const bosMetin={aktif:"Planlanmış tarif yok — + Yeni Tarif ile başla.",arsiv:"Arşivlenmiş tarif yok.",istek:"İstek listesi boş."};

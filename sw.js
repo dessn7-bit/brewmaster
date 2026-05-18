@@ -58,7 +58,17 @@
 // ikon + biraAd bold + "son duzenleme X once" relative time + Geri yukle/Sil butonlar.
 // Mevcut handler'lar (setAktifKlasor, klasorSilIste, klasorSilOnay, yeniKlasor*, restoreDraft,
 // dismissDraft) tamamen INTACT. Sidebar/header/stat/yapim/recete/taniBtn intact. KURAL 12.3 bump.
-const CACHE_VERSION = 'bm-cache-v131-6';
+// Adim 131-F (18.05.2026): v131-6 -> v131-7, recete kartlari buyuk gradient banner yeniden tasarim
+// (Image 2 stili). tarifKart(t) function tamamen yeniden yazildi (imza + silOnayBar(t.id) intact).
+// CSS ~80 satir / 27 yeni class: bm-recete-kart/banner.light(turuncu)/medium(koyu turuncu)/dark
+// (gradient 4F2A0E->412402) + badge-row/badge.taslak + baslik 22px font-display + meta (tarih +
+// klasor) + ac-btn position absolute sag ust + info section + metric-row 4 pill + renk-chip dot
+// + malzeme onizleme + eylem-bar 5 chip (Aktife Al/Plana Al/Planla durum bazli + Arsiv + Istek +
+// Stoktan Dus + Iade) + Sil kirmizi pastel + klasor-dropdown native select chip-styled (margin-
+// left:auto saga). BM_SVG +3 ikon (arrow-back-up, chevron-down, calendar). Mevcut handler'lar
+// (tarifAcById, tarifDurumDegistir, stoktenManuelDus, stoktenManuelIade, silOnayById, klasoruDegistir)
+// tamamen INTACT. Sidebar/header/stat/yapim/klasor/taslak/taniBtn intact. KURAL 12.3 bump.
+const CACHE_VERSION = 'bm-cache-v131-7';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [
