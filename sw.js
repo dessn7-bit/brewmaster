@@ -172,6 +172,14 @@
 // setAktifKlasor icindeki setTimeout(bmDebugUpdate,50) cagrilari. KORUNDU: window.listeSekme/
 // window.aktifKlasor expose (sat 5937 + setter sync) - Sprint 132 sub-sprint'leri (Klonla vs)
 // state expose kullanir. 131-A..T fix'leri INTACT, motor zinciri dokunulmadi.
+// Adim 132-C (18.05.2026): v131-21 -> v131-22, Breadcrumb editor header'da.
+// HTML: .eh header restructure - 1. satir <nav class="bm-breadcrumb"> ("← Defter / klasor / biraAd"),
+// 2. satir [biraAd input | Kaydet | Klonla] (132-B intact). "‹" geri buton kaldirildi, fonksiyonu
+// "← Defter" link'inde korunuyor. biraAd input oninput → breadcrumb current text canli update
+// (textContent only, DOM rebuild yok).
+// CSS .bm-breadcrumb + .bm-bc-link + .bm-bc-sep + .bm-bc-current. Mobile <=768 daha kucuk: gap 4, current max-width 100.
+// JS: window._bcKlasorAc(k) - klasor link helper (setAktifKlasor yerine direkt assign + render).
+// 131-A..T + 132-pre + 132-B intact. Motor zinciri dokunulmadi.
 // Adim 132-B (18.05.2026): v131-20 -> v131-21, Klonla butonu + tarifKlonla handler.
 // HTML: editor header (sat ~18023) Kaydet butonu yanina '📑 Klonla' button (sadece _editId set ise).
 // CSS: .bm-btn-primary (#EF9F27 turuncu bg, hover #D88A1F, 8px radius, 10px 16px padding, mobile-friendly).
@@ -180,7 +188,7 @@
 // 'planlananlar' string - sat 10770 statTanim mapping) + olusturma/guncelleme timestamps + KR.unshift
 // + _origKy(KR) localStorage save + _syncGonderDebounced Firebase push + tarifAc(yeni.id) editor yonlendir.
 // flash mesaj. 131-A..T + 132-pre intact. Motor zinciri dokunulmadi.
-const CACHE_VERSION = 'bm-cache-v131-21';
+const CACHE_VERSION = 'bm-cache-v131-22';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [

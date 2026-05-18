@@ -237,6 +237,14 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
 .bm-btn-primary:hover{background:#D88A1F}
 .bm-btn-primary:active{background:#C57A0F}
 
+/* Adim 132-C: Editor breadcrumb (Defter / Klasor / Bira adi). "‹" geri butonun fonksiyonu "← Defter" link'inde. */
+.bm-breadcrumb{display:flex;align-items:center;gap:6px;font-size:13px;line-height:1.4;color:rgba(248,232,196,.85);margin-bottom:8px;flex-wrap:nowrap;overflow:hidden;min-width:0}
+.bm-bc-link{color:rgba(248,232,196,.85);cursor:pointer;text-decoration:none;background:none;border:none;font:inherit;padding:0;flex-shrink:0;-webkit-tap-highlight-color:transparent}
+.bm-bc-link:hover{color:#fff}
+.bm-bc-sep{color:rgba(248,232,196,.4);flex-shrink:0;user-select:none}
+.bm-bc-current{color:#fff;font-weight:600;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+@media (max-width:768px){.bm-breadcrumb{font-size:12px;gap:4px}.bm-bc-current{max-width:100px}}
+
 /* Adim 131-E: Klasor chip yeniden tasarim (Image 2) + sari taslak banner */
 .bm-klasor-bar{display:flex;flex-wrap:wrap;gap:8px;padding:12px;align-items:center}
 .bm-klasor-chip{display:inline-flex;align-items:center;gap:6px;background:#FFFFFF;border:0.5px solid #F1EFE8;border-radius:16px;padding:6px 12px;color:#5F5E5A;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:background .12s,border-color .12s,color .12s;white-space:nowrap}
@@ -7026,6 +7034,9 @@ function tarifKlonla(srcId){
   tarifAc(yeni.id);
 }
 window.tarifKlonla=tarifKlonla;
+// Adim 132-C: Breadcrumb klasor link helper. _kl listesinden index aramak yerine direkt assign+render
+// (setAktifKlasor mevcut sidebar drawer + render() yapar ama window._kl liste sayfasinda set, editor'de stale olabilir).
+window._bcKlasorAc=function(k){aktifKlasor=k||'';window.aktifKlasor=aktifKlasor;ekran='liste';render();};
 function tarifSil(id){
   KR=KR.filter(k=>k.id!==id);
   ky(KR);
@@ -18044,9 +18055,14 @@ function rEditor(){
 
   const skmls=[["genel","🏠 Genel"],["malt","🌾 Malt"],["hop","🌿 Hop"],["maya","🧬 Maya"],["hesap","🧮 Hesap"],["su","💧 Su"],["surec","⏱️ Süreç"],["takvim","📅 Takvim"],["katki","🧪 Katkı"],["not","📝 Not"]].map(([id,et])=>`<button data-s="${id}" class="sb-btn${sekme===id?" ak":""}" onclick="setSekme('${id}')">${et}</button>`).join("");
   const kbg=kayitMsg?(kayitTip==="hata"?"var(--ka)":"var(--ya)"):"rgba(248,232,196,.18)",kclr=kayitMsg?(kayitTip==="hata"?"var(--kk)":"var(--yk)"):"#F8E8C4",kbrd=kayitMsg?(kayitTip==="hata"?"#C49080":"#A0A868"):"rgba(248,232,196,.35)";
-  return`<div class="eh"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-    <button class="btn" onclick="ekran='liste';render()" style="background:rgba(248,232,196,.18);color:#F8E8C4;font-size:22px;padding:2px 8px;line-height:1;border-radius:8px;border:1px solid rgba(248,232,196,.25)">‹</button>
-    <input value="${S.biraAd}" onblur="S.biraAd=this.value" placeholder="Bira adı..." style="background:transparent;border:none;border-bottom:1.5px solid rgba(248,232,196,.5);border-radius:0;font-size:17px;font-weight:700;padding:3px 0;color:#F8E8C4;flex:1;outline:none;font-family:var(--font-display)">
+  return`<div class="eh"><nav class="bm-breadcrumb" aria-label="Konum">
+    <button class="bm-bc-link" onclick="ekran='liste';render()" title="Reçete defterine dön">← Defter</button>
+    <span class="bm-bc-sep">/</span>
+    <button class="bm-bc-link" onclick="window._bcKlasorAc('${esc(S.klasor||'')}')" title="${S.klasor?'Klasör: '+esc(S.klasor):'Klasörsüz'}">${esc(S.klasor||'Klasörsüz')}</button>
+    <span class="bm-bc-sep">/</span>
+    <span class="bm-bc-current" id="bm-bc-current">${esc(S.biraAd||'Yeni reçete')}</span>
+  </nav><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+    <input value="${S.biraAd}" oninput="var el=document.getElementById('bm-bc-current');if(el)el.textContent=this.value||'Yeni reçete'" onblur="S.biraAd=this.value" placeholder="Bira adı..." style="background:transparent;border:none;border-bottom:1.5px solid rgba(248,232,196,.5);border-radius:0;font-size:17px;font-weight:700;padding:3px 0;color:#F8E8C4;flex:1;outline:none;font-family:var(--font-display)">
     <button class="btn" onclick="tarifeKaydet()" style="background:${kbg};color:${kclr};border:1px solid ${kbrd};font-size:12px;padding:8px 14px;white-space:nowrap">${kayitMsg||"💾 Kaydet"}</button>
     ${_editId?`<button class="bm-btn-primary" onclick="tarifKlonla('${_editId}')" title="Bu tarifin kopyasını oluştur">📑 Klonla</button>`:''}
   </div>
