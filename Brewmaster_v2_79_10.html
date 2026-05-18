@@ -16715,20 +16715,7 @@ try {
 } catch(e){ _fermDurum=''; }
 
 return `
-    <!-- Adim 132-A: Sticky ozet paneli (Genel tab pilot) -->
-    <div class="bm-sticky-summary" id="bm-summary" data-tab="genel">
-      <div class="bm-ss-stil">
-        <span class="bm-ss-renk" id="ss-renk" style="background:${renk_hex}"></span>
-        <span class="bm-ss-label" id="ss-stil">${esc((S&&S.stil)||(S&&S.stilTah)||(S&&S.biraAd)||'Stil hesaplanıyor...')}</span>
-      </div>
-      <div class="bm-ss-stats">
-        <div class="bm-ss-stat"><span class="ss-label">OG</span><span class="ss-val" id="ss-og">${og.toFixed(3)}</span></div>
-        <div class="bm-ss-stat"><span class="ss-label">FG</span><span class="ss-val" id="ss-fg">${fg.toFixed(3)}</span></div>
-        <div class="bm-ss-stat"><span class="ss-label">ABV</span><span class="ss-val" id="ss-abv">${abv.toFixed(1)}%</span></div>
-        <div class="bm-ss-stat"><span class="ss-label">IBU</span><span class="ss-val" id="ss-ibu">${Math.round(ibu)}</span></div>
-        <div class="bm-ss-stat"><span class="ss-label">SRM</span><span class="ss-val" id="ss-srm">${(parseFloat(srm)||0).toFixed(1)}</span></div>
-      </div>
-    </div>
+    <!-- Adim 132-E: Sticky ozet paneli rEditor wrapper'a tasindi, tab disinda global. -->
     <!-- Adim 132-D: Accordion #1 - Stil Tahmini (eski big gradient card refactor) -->
     <div class="bm-acc" data-acc-id="stil-tahmin" data-acc-default="expanded" aria-expanded="true" style="background:linear-gradient(135deg,var(--bg2),var(--card));border:1px solid var(--bor2);box-shadow:var(--golge2)">
       <button class="bm-acc-header" type="button" aria-expanded="true" onclick="bmAccToggle('stil-tahmin')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmAccToggle('stil-tahmin')}"><span class="bm-acc-title">🎯 Stil Tahmini & Reçete Doktoru</span><span class="bm-acc-meta" data-acc-meta="stil-tahmin"></span><span class="bm-acc-chevron">▾</span></button>
@@ -17947,19 +17934,34 @@ function rEditor(){
   }
 
 
-  // ── MALT ──
+  // ── MALT ── Adim 132-E: accordion wrap (1 section, Malt Faturası)
   else if(sekme==="malt"){
-    ic = rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy);
+    var _maltMetaE = (S.maltlar||[]).length + ' malt · ' + (topMalt||0).toFixed(2) + ' kg';
+    ic = '<div class="bm-acc" data-acc-id="malt-liste" data-acc-default="expanded" aria-expanded="true">'
+       + '<button class="bm-acc-header" type="button" aria-expanded="true" onclick="bmAccToggle(\'malt-liste\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();bmAccToggle(\'malt-liste\')}"><span class="bm-acc-title">🌾 Malt Faturası</span><span class="bm-acc-meta" data-acc-meta="malt-liste">' + _maltMetaE + '</span><span class="bm-acc-chevron">▾</span></button>'
+       + '<div class="bm-acc-body">'
+       + rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy)
+       + '</div></div>';
   }
 
-  // ── HOP ──
+  // ── HOP ── Adim 132-E: accordion wrap (1 section, Hop Şeması)
   else if(sekme==="hop"){
-    ic = rEditorHop(og, ibu, seciHop);
+    var _hopMetaE = (S.hoplar||[]).length + ' ekleme · ' + Math.round(ibu||0) + ' IBU';
+    ic = '<div class="bm-acc" data-acc-id="hop-sema" data-acc-default="expanded" aria-expanded="true">'
+       + '<button class="bm-acc-header" type="button" aria-expanded="true" onclick="bmAccToggle(\'hop-sema\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();bmAccToggle(\'hop-sema\')}"><span class="bm-acc-title">🌿 Hop Şeması</span><span class="bm-acc-meta" data-acc-meta="hop-sema">' + _hopMetaE + '</span><span class="bm-acc-chevron">▾</span></button>'
+       + '<div class="bm-acc-body">'
+       + rEditorHop(og, ibu, seciHop)
+       + '</div></div>';
   }
 
-  // ── MAYA ──
+  // ── MAYA ── Adim 132-E: accordion wrap (1 section, Birincil Maya)
   else if(sekme==="maya"){
-    ic = rEditorMaya(og, fg, abv, maya, maya2, fgKaynak, fgHesap);
+    var _mayaMetaE = (maya?(maya.ad||maya.id||'Maya'):'Maya seçilmedi') + (maya&&maya.attMin&&maya.attMax?' · '+maya.attMin+'-'+maya.attMax+'% att':'');
+    ic = '<div class="bm-acc" data-acc-id="maya-birincil" data-acc-default="expanded" aria-expanded="true">'
+       + '<button class="bm-acc-header" type="button" aria-expanded="true" onclick="bmAccToggle(\'maya-birincil\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();bmAccToggle(\'maya-birincil\')}"><span class="bm-acc-title">🧫 Maya Profili</span><span class="bm-acc-meta" data-acc-meta="maya-birincil">' + _mayaMetaE + '</span><span class="bm-acc-chevron">▾</span></button>'
+       + '<div class="bm-acc-body">'
+       + rEditorMaya(og, fg, abv, maya, maya2, fgKaynak, fgHesap)
+       + '</div></div>';
   }
 
   // ── HESAP ──
@@ -18138,6 +18140,20 @@ function rEditor(){
     ${[["OG",(ogKaynak==="manuel"?"✏ ":"")+og.toFixed(3)],["FG",(fgKaynak==="manuel"?"✏ ":"")+fg.toFixed(3)],["ABV","%"+abv.toFixed(2)],["IBU",ibu.toFixed(0)],["EBC",(parseFloat(srm)*1.97).toFixed(0)],["KH",hKarb(og,fg,330)+"g/şişe"]].map(([e,d],i)=>`<div style="background:rgba(248,232,196,.18);border-radius:8px;padding:9px 14px;text-align:center;flex-shrink:0;border:1px solid rgba(248,232,196,.35)${i===4?";border-top:4px solid "+rk:""}"><div style="font-size:9px;color:rgba(248,232,196,.9);font-weight:700;letter-spacing:1.5px">${e}</div><div style="font-size:${i===5?'14px':'19px'};font-weight:700;color:#F8E8C4;line-height:1.1;font-family:var(--font-display)">${d}</div></div>`).join("")}
   </div></div>
   ${uy?`<div style="padding:8px 12px 0">${uy}</div>`:""}
+  <!-- Adim 132-E: Sticky ozet paneli global (eh disinda, her tab'da gorunur). srmR(srm) renk. -->
+  <div class="bm-sticky-summary" id="bm-summary">
+    <div class="bm-ss-stil">
+      <span class="bm-ss-renk" id="ss-renk" style="background:${typeof srmR==='function'?srmR(parseFloat(srm)||0):'#888'}"></span>
+      <span class="bm-ss-label" id="ss-stil">${esc((S&&S.stil)||(S&&S.stilTah)||(S&&S.biraAd)||'Stil hesaplanıyor...')}</span>
+    </div>
+    <div class="bm-ss-stats">
+      <div class="bm-ss-stat"><span class="ss-label">OG</span><span class="ss-val" id="ss-og">${og.toFixed(3)}</span></div>
+      <div class="bm-ss-stat"><span class="ss-label">FG</span><span class="ss-val" id="ss-fg">${fg.toFixed(3)}</span></div>
+      <div class="bm-ss-stat"><span class="ss-label">ABV</span><span class="ss-val" id="ss-abv">${abv.toFixed(1)}%</span></div>
+      <div class="bm-ss-stat"><span class="ss-label">IBU</span><span class="ss-val" id="ss-ibu">${Math.round(ibu)}</span></div>
+      <div class="bm-ss-stat"><span class="ss-label">SRM</span><span class="ss-val" id="ss-srm">${(parseFloat(srm)||0).toFixed(1)}</span></div>
+    </div>
+  </div>
   <div class="sb">${skmls}</div>
   <div class="tk-k fade">${ic}</div>
   <div style="height:16px"></div>`;

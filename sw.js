@@ -172,6 +172,20 @@
 // setAktifKlasor icindeki setTimeout(bmDebugUpdate,50) cagrilari. KORUNDU: window.listeSekme/
 // window.aktifKlasor expose (sat 5937 + setter sync) - Sprint 132 sub-sprint'leri (Klonla vs)
 // state expose kullanir. 131-A..T fix'leri INTACT, motor zinciri dokunulmadi.
+// Adim 132-E (19.05.2026): v131-24 -> v131-25, Akordiyon yay Malt/Hop/Maya + sticky ozet global.
+// 1) Sticky ozet panel rEditorGenel'den cikarildi, rEditor wrapper'a tasindi (uy ile sb arasi).
+//    Her tab'da gorunur. renk dot srmR(srm) (Genel'in karmasik renk_hex hesabi gerekmiyor).
+//    data-tab attribute kaldirildi. updateStickySummary global helper intact.
+// 2) Malt/Hop/Maya tab dispatch noktasinda (rEditor switch sat ~17937) ic = rEditorXXX() cagrisi
+//    accordion wrap ile guncellendi - mevcut rEditorMalt/Hop/Maya return'leri DOKUNULMADI,
+//    sadece dis wrapper accordion eklendi (caller-level wrap, en guvenli pattern).
+//    Meta badge'ler: malt-liste "{N} malt · {kg} kg", hop-sema "{N} ekleme · {IBU} IBU",
+//    maya-birincil "{maya ad} · {att}% att".
+//    1 section per tab pilot. Cogu section (muadil ayri, ikincil maya ayri, fg-hesap) sub-sprint
+//    132-E-2'ye ertelendi (mevcut muadil panel'ler her satir altinda inline render).
+// 3) bmAccInit() zaten render() sonu cagriliyor (132-D), Malt/Hop/Maya da otomatik isler.
+// 4) Sticky ozet (132-A) intact, hop/malt/maya tab degisinde stat'lar guncel (calc() her render).
+// 131-A..T + 132-pre/B/C/A/D intact. Motor zinciri (B1/V12c/V20/F1) dokunulmadi.
 // Adim 132-D (19.05.2026): v131-23 -> v131-24, Akordiyon temel patern + Genel tab 3 section.
 // CSS .bm-acc framework: background:#fff border:#E5DCC8 radius:12, header:padding:12 14 min-height:44px
 // hover:#FAEEDA focus:outline 2 #EF9F27. title (ellipsis) + meta (collapsed iken bile ozet badge, max 160px)
@@ -219,7 +233,7 @@
 // 'planlananlar' string - sat 10770 statTanim mapping) + olusturma/guncelleme timestamps + KR.unshift
 // + _origKy(KR) localStorage save + _syncGonderDebounced Firebase push + tarifAc(yeni.id) editor yonlendir.
 // flash mesaj. 131-A..T + 132-pre intact. Motor zinciri dokunulmadi.
-const CACHE_VERSION = 'bm-cache-v131-24';
+const CACHE_VERSION = 'bm-cache-v131-25';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [
