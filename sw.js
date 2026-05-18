@@ -68,7 +68,14 @@
 // left:auto saga). BM_SVG +3 ikon (arrow-back-up, chevron-down, calendar). Mevcut handler'lar
 // (tarifAcById, tarifDurumDegistir, stoktenManuelDus, stoktenManuelIade, silOnayById, klasoruDegistir)
 // tamamen INTACT. Sidebar/header/stat/yapim/klasor/taslak/taniBtn intact. KURAL 12.3 bump.
-const CACHE_VERSION = 'bm-cache-v131-7';
+// Adim 131-G SON (18.05.2026): v131-7 -> v131-8, taniBtn sil + post-sanity + Adim 131 sprint kapanis.
+// JS dinamik eklenen yuzen yuvarlak 44x44 #taniBtn (fixed bottom-right bg #5A3000 + 🔍 icon, sat
+// 20596-20731 IIFE) komple SILINDI (~135 satir). taniPaneliAc + taniPaneliKopya + taniPaneliExport
+// + insanOku + zamanFark + butonEkle helper'lari tek IIFE icindeydi, baska referans YOK -> hepsi
+// silindi. CSS rule yoktu (inline style). Image 2 tasarim icinde yuzen buton yer kalmadi (sidebar
+// settings + header icon bar test/tani icin yeterli). Sidebar/header/stat/yapim/klasor/taslak/recete
+// kart INTACT. Tum motor + handler INTACT. KURAL 12.3 bump.
+const CACHE_VERSION = 'bm-cache-v131-8';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [
