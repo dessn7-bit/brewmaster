@@ -176,6 +176,25 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
 .bm-bildirim-baslik{font-size:11px;color:#8E8B86;font-weight:600;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
 .bm-bildirim-bos{font-size:13px;color:#5F5E5A;padding:8px 2px;text-align:center}
 @media (max-width:768px){.bm-header{padding:10px 14px}.bm-header-search input{width:180px}.bm-header-title{font-size:18px}.bm-header-search-icon{left:10px}}
+
+/* Adim 131-D: YAPIM AŞAMASINDA vurgu karti + 4 stat karti (Image 1 yapim + Image 2 stat) */
+.bm-yapimda-vurgu{background:#FAEEDA;border:1px solid #F0DDB8;border-left:3px solid #EF9F27;border-radius:10px;padding:12px 14px;margin:12px 12px 8px}
+.bm-yapimda-baslik{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:500;letter-spacing:.4px;color:#854F0B;text-transform:uppercase;margin-bottom:8px}
+.bm-yapimda-baslik .ti{width:14px;height:14px;color:#EF9F27;stroke-width:2}
+.bm-yapimda-item{display:flex;align-items:center;gap:10px;padding:7px 10px;background:#FFFFFF;border:1px solid #F0E2C2;border-radius:8px;margin-top:6px;cursor:pointer;transition:background .12s,border-color .12s}
+.bm-yapimda-item:hover{background:#FFF7E6;border-color:#EF9F27}
+.bm-yapimda-item-ad{flex:1;font-family:var(--font-display);font-size:14px;font-weight:600;color:#3D2817;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.bm-yapimda-item-meta{font-size:11px;color:#8E8B86;flex-shrink:0}
+.bm-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:8px 12px 10px}
+.bm-stat-kart{background:#FFFFFF;border:0.5px solid #F1EFE8;border-radius:10px;padding:10px 12px;transition:border-color .12s}
+.bm-stat-kart.active{border:1px solid #EF9F27}
+.bm-stat-baslik{font-size:11px;font-weight:500;letter-spacing:.6px;color:#888780;text-transform:uppercase}
+.bm-stat-sayi-wrap{display:flex;align-items:baseline;gap:6px;margin-top:4px}
+.bm-stat-sayi{font-size:24px;font-weight:500;line-height:1}
+.bm-stat-sayi.turuncu{color:#EF9F27}
+.bm-stat-sayi.yesil{color:#1D9E75}
+.bm-stat-alt{font-size:11px;color:#888780}
+@media (max-width:768px){.bm-stat-grid{grid-template-columns:1fr 1fr;padding:8px 10px}.bm-yapimda-vurgu{margin:10px 10px 6px;padding:10px 12px}.bm-stat-sayi{font-size:20px}}
 </style>
 </head>
 <body>
@@ -10595,6 +10614,53 @@ function _bildirimDisTikla(e){
 }
 window.renderHeader = renderHeader;
 
+// ═══ ADIM 131-D: YAPIM AŞAMASINDA vurgu + 4 stat kart helper'lar ════
+// YAPIM AŞAMASINDA vurgu kart (Image 1 stili): yapimda.length > 0 ise render, max 3 item
+function renderYapimdaVurgu(){
+  var yapimda = KR.filter(function(t){ return t.durum === 'yapimda'; });
+  if(yapimda.length === 0) return '';
+  var logTipIkon = {'pitching':'🧬','og_olcum':'🔬','fg_olcum':'📊','sicaklik':'🌡️','dry_hop':'🌿','katki':'🧪','katki_ek':'🧪','cold_crash':'❄️','filtrasyon':'🔆','siseleme':'🍺','tadim':'👅','diacetyl':'🌡️','diger':'📝'};
+  var items = yapimda.slice(0, 3).map(function(t){
+    var bl = t.brewLog || [];
+    var son = bl.length ? bl[bl.length - 1] : null;
+    var meta = son ? ((logTipIkon[son.tip] || '📌') + ' ' + (son.tarih || '')) : '';
+    return '<div class="bm-yapimda-item" data-tid="'+t.id+'" onclick="tarifAcById(this)">'+
+        '<div class="bm-yapimda-item-ad">'+_esc131B(t.biraAd)+'</div>'+
+        (meta ? '<div class="bm-yapimda-item-meta">'+_esc131B(meta)+'</div>' : '')+
+      '</div>';
+  }).join('');
+  return '<div class="bm-yapimda-vurgu">'+
+      '<div class="bm-yapimda-baslik">'+BM_SVG.flame+'<span>Yapim Asamasinda</span></div>'+
+      items+
+    '</div>';
+}
+
+// 4 stat kart (Image 2 stili): statik gosterim, sekme switch sidebar'dan yapilir
+function renderStatKartlar(){
+  var statTanim = [
+    {id:'aktif',   et:'Planlananlar', renk:'turuncu'},
+    {id:'yapimda', et:'Aktif',        renk:'yesil'},
+    {id:'arsiv',   et:'Arsiv',        renk:'yesil'},
+    {id:'istek',   et:'Istek',        renk:'turuncu'}
+  ];
+  var html = statTanim.map(function(s){
+    var n = KR.filter(function(t){
+      return s.id==='aktif' ? ((t.durum||'aktif')==='aktif') : (t.durum===s.id);
+    }).length;
+    var aktif = (s.id === listeSekme);
+    return '<div class="bm-stat-kart'+(aktif ? ' active' : '')+'">'+
+        '<div class="bm-stat-baslik">'+s.et+'</div>'+
+        '<div class="bm-stat-sayi-wrap">'+
+          '<span class="bm-stat-sayi '+s.renk+'">'+n+'</span>'+
+          '<span class="bm-stat-alt">recete</span>'+
+        '</div>'+
+      '</div>';
+  }).join('');
+  return '<div class="bm-stat-grid">'+html+'</div>';
+}
+window.renderYapimdaVurgu = renderYapimdaVurgu;
+window.renderStatKartlar = renderStatKartlar;
+
 // ═══ LİSTE EKRANI ════════════════════════════════════════════
 function rListe(){
   const rk=t=>srmR(parseFloat((t.ozet||{}).srm)||0);
@@ -10612,21 +10678,8 @@ function rListe(){
     (t.hoplar||[]).some(h=>{const hp=HOPLAR.find(x=>x&&x.id===h.id);return hp&&hp.ad.toLowerCase().includes(arama);})
   ):klasorKR;
 
-  // Dashboard — sadece aktif fermentasyon özeti (stats redundant, sekme bar'da var)
-  const yapimda=KR.filter(t=>t.durum==="yapimda");
-  const logTipIkon={"pitching":"🧬","og_olcum":"🔬","fg_olcum":"📊","sicaklik":"🌡️","dry_hop":"🌿","katki":"🧪","katki_ek":"🧪","cold_crash":"❄️","filtrasyon":"🔆","siseleme":"🍺","tadim":"👅","diacetyl":"🌡️","diger":"📝"};
-
-  const dashboard=yapimda.length>0?
-    '<div style="background:var(--card);padding:10px 14px;border-bottom:2px solid var(--bor);box-shadow:inset 0 0 0 1px rgba(250,247,238,.45),0 0 0 3px var(--bg2)">'+
-      '<div style="font-size:9px;color:var(--soluk);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;font-weight:600">⚗️ Yapım Aşamasında</div>'+
-      yapimda.slice(0,3).map(t=>{
-        const son=t.brewLog[t.brewLog.length-1];
-        return'<div onclick="tarifAc(this.dataset.id)" data-id="'+t.id+'" style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--bg);border-radius:6px;margin-bottom:4px;cursor:pointer;border:1px solid var(--bor)">'+
-          '<div style="font-size:13px;font-weight:600;color:var(--kahve);flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-family:var(--font-display)">'+esc(t.biraAd)+'</div>'+
-          '<div style="font-size:10px;color:var(--soluk)">'+(son?logTipIkon[son.tip]||"📌":"")+" "+(son?son.tarih:"")+'</div>'+
-        '</div>';
-      }).join("")+
-    '</div>':"";
+  // Adim 131-D: Eski dashboard (yapim widget) KALDIRILDI — renderYapimdaVurgu() helper'a tasindi (Image 1 stili).
+  // Tum yapimda hesaplama + log icon + slice(0,3) limit + onclick handler yeni helper icinde.
 
   // Adim 131-C: aramaKutu KALDIRILDI — yeni ust header'a tasindi (renderHeader())
   // Mevcut aramaInp ID + handler'lari (aramaGuncelle, aramaMetni, clearArama) intact.
@@ -10726,7 +10779,8 @@ function rListe(){
       '<button onclick="dismissDraft()" style="background:var(--ka);color:var(--kk);border:1px solid #C49080;border-radius:6px;padding:4px 10px;cursor:pointer">Sil</button>'+
       '</span></div>'
     :'')+
-    dashboard+
+    renderYapimdaVurgu()+
+    renderStatKartlar()+
     '<div style="display:flex;border-bottom:2px solid var(--bor2);background:var(--bg2)">'+sekmeBar+'</div>'+
     klasorBar+
     '<div style="padding:12px">'+listHTML+'</div>';

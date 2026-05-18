@@ -44,7 +44,13 @@
 // dropdown placeholder + bildirimPanelToggle handler. rListe icinden uist aksiyon bar + aramaKutu
 // KALDIRILDI; aramaInp ID + handler'lar (aramaGuncelle, clearArama, aramaMetni) header'a tasindi
 // intact. syncDurum text silindi (yesil dot yeterli). KURAL 12.3 zorunlu bump.
-const CACHE_VERSION = 'bm-cache-v131-4';
+// Adim 131-D (18.05.2026): v131-4 -> v131-5, 4 stat karti + YAPIM ASAMASINDA vurgu karti
+// (Image 2 stat grid + Image 1 yapim vurgu). renderYapimdaVurgu() + renderStatKartlar() helper'lar
+// rListe sekme bar oncesine inject. Eski dashboard widget markup (yapimda.length>0 ise koyu kart)
+// KALDIRILDI, yeni krem #FAEEDA bg + orange border-left vurgu kart. Stat 4 kart grid: 0.5px border
+// (aktif sekme 1px orange), sayilar Planlananlar/Istek turuncu Aktif/Arsiv yesil. Tiklanmaz.
+// Sidebar (131-B) + header (131-C) + sekme bar + klasor bar + recete kartlari + taniBtn INTACT.
+const CACHE_VERSION = 'bm-cache-v131-5';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [
