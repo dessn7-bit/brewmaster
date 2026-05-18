@@ -143,7 +143,14 @@
 // + body + .bm-main + #ekran + stat-grid + klasor-bar + liste-wrap canli bounding boxes.
 // Event hook'lari: resize + visualViewport.resize/scroll + 500ms poll + setListeSekme/setAktifKlasor.
 // 131-A..O fix INTACT, motor zinciri dokunulmaz, sadece DEBUG ek. Rollback: 131-Q'da revert.
-const CACHE_VERSION = 'bm-cache-v131-16';
+// Adim 131-R (18.05.2026): v131-16 -> v131-17, .bm-main width icerik-bazli sizing fix (REAL BUG).
+// 131-P debug panel ortaya cikardi: body=1080x551 SABIT ama .bm-main DEGISKEN (AKTIF 448, PL 551,
+// ARSIV 431). Kok neden: 1fr = minmax(auto,1fr) auto min = min-content. Implicit kolon (mobile @media
+// yangimazsa veya .bm-main grid-column:2 1fr-grid'de implicit'e dusterse) icerik min-content sizing.
+// FIX (defense-in-depth): body grid-template-columns 240px 1fr -> 240px minmax(0,1fr); mobile body
+// 1fr -> minmax(0,1fr); body grid-auto-columns:minmax(0,1fr) (implicit kolon defense); .bm-main
+// max-width:100% (defansif). 131-A..P (debug panel dahil) INTACT.
+const CACHE_VERSION = 'bm-cache-v131-17';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [
