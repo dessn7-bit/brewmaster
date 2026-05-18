@@ -75,7 +75,17 @@
 // silindi. CSS rule yoktu (inline style). Image 2 tasarim icinde yuzen buton yer kalmadi (sidebar
 // settings + header icon bar test/tani icin yeterli). Sidebar/header/stat/yapim/klasor/taslak/recete
 // kart INTACT. Tum motor + handler INTACT. KURAL 12.3 bump.
-const CACHE_VERSION = 'bm-cache-v131-8';
+// Adim 131-H (18.05.2026): v131-8 -> v131-9, mobile responsive fix (<=768px).
+// CSS: body grid 1fr mobile, .bm-sidebar position:fixed transform:translateX(-100%) transition .25s
+// z-index:50 (artik display:none degil), .bm-sidebar.open translateX(0). Backdrop element
+// (#bm-backdrop): position:fixed inset:0 bg rgba 0.4 z-index:40 opacity:0 transition, .open ile
+// opacity:1. Hamburger button (.bm-hamburger-btn) sol basinda, sadece <768px gorunur, ti-menu ikon.
+// Mobile header: search input %100 flex:1, iconbtn 28x28, breadcrumb display:none.
+// JS: BM_SVG['menu'] (ti-menu 3 yatay cizgi), window.toggleSidebar + window.closeSidebar global,
+// backdrop element DOMContentLoaded'ta body'ye eklenir. setListeSekme + setAktifKlasor sonuna
+// closeSidebar() inject (sekme/klasor tikla -> sidebar otomatik kapanir UX). Tum mevcut handler
+// INTACT. Test viewport'lar: 360/393/412/430 (Android Chrome) + 768/1280/1440. KURAL 12.3 bump.
+const CACHE_VERSION = 'bm-cache-v131-9';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [

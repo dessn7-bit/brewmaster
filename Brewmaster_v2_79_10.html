@@ -53,7 +53,20 @@
 }
 html,body{height:100%;overflow:hidden}
 body{background:var(--bg);color:var(--kahve);font-family:var(--font-body);display:grid;grid-template-columns:240px 1fr;grid-template-rows:100vh;position:relative}
-@media (max-width:768px){body{grid-template-columns:0 1fr}.bm-sidebar{display:none}}
+/* Adim 131-H: Mobile sidebar drawer + backdrop (<=768px) */
+@media (max-width:768px){
+  body{grid-template-columns:1fr}
+  .bm-sidebar{position:fixed;top:0;left:0;bottom:0;width:240px;height:100vh;transform:translateX(-100%);transition:transform .25s ease;z-index:50;display:flex}
+  .bm-sidebar.open{transform:translateX(0)}
+  .bm-main{grid-column:1}
+}
+.bm-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:40;opacity:0;pointer-events:none;transition:opacity .2s ease}
+.bm-backdrop.open{opacity:1;pointer-events:auto}
+@media (min-width:769px){.bm-backdrop{display:none}}
+.bm-hamburger-btn{display:none;width:32px;height:32px;border-radius:8px;background:transparent;border:none;color:#3D2817;cursor:pointer;align-items:center;justify-content:center;padding:0;flex-shrink:0;transition:background .12s}
+.bm-hamburger-btn:hover{background:#FAF6EE}
+.bm-hamburger-btn .ti{width:20px;height:20px;stroke-width:1.8}
+@media (max-width:768px){.bm-hamburger-btn{display:inline-flex}}
 body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(circle at 18% 24%,rgba(107,85,55,.06) 0%,transparent 55%),radial-gradient(circle at 82% 68%,rgba(85,65,40,.05) 0%,transparent 55%),radial-gradient(circle at 50% 50%,transparent 60%,rgba(107,85,55,.07) 100%)}
 body>*{position:relative;z-index:1}
 #ekran{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:28px}
@@ -175,7 +188,7 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
 .bm-bildirim-dropdown{position:absolute;top:42px;right:0;width:220px;background:#FFFFFF;border:1px solid #E8E4DA;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.10);padding:10px 12px;z-index:50;font-family:inherit}
 .bm-bildirim-baslik{font-size:11px;color:#8E8B86;font-weight:600;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
 .bm-bildirim-bos{font-size:13px;color:#5F5E5A;padding:8px 2px;text-align:center}
-@media (max-width:768px){.bm-header{padding:10px 14px}.bm-header-search input{width:180px}.bm-header-title{font-size:18px}.bm-header-search-icon{left:10px}}
+@media (max-width:768px){.bm-header{padding:10px 12px;gap:8px}.bm-header-right{flex:1;min-width:0;justify-content:flex-end}.bm-header-search{flex:1;min-width:0}.bm-header-search input{width:100%}.bm-header-title{font-size:18px}.bm-header-search-icon{left:10px}.bm-header-iconbtn{width:28px;height:28px}.bm-header-iconbtn .ti{width:13px;height:13px}.bm-header-actions{gap:5px}.bm-header-left{flex-shrink:1;min-width:0}.bm-header-breadcrumb{display:none}}
 
 /* Adim 131-D: YAPIM AŞAMASINDA vurgu karti + 4 stat karti (Image 1 yapim + Image 2 stat) */
 .bm-yapimda-vurgu{background:#FAEEDA;border:1px solid #F0DDB8;border-left:3px solid #EF9F27;border-radius:10px;padding:12px 14px;margin:12px 12px 8px}
@@ -6004,8 +6017,8 @@ window.aramaGuncelle=function(el){
     if(inp){inp.focus();try{inp.setSelectionRange(pos,pos);}catch(e){}}
   },100);
 };
-window.setListeSekme=function(si){listeSekme=["aktif","yapimda","arsiv","istek"][si]||"aktif";aramaMetni="";render();};
-window.setAktifKlasor=function(ki){aktifKlasor=(window._kl||[])[ki]||"";render();};
+window.setListeSekme=function(si){listeSekme=["aktif","yapimda","arsiv","istek"][si]||"aktif";aramaMetni="";render();if(typeof window.closeSidebar==='function')window.closeSidebar();};
+window.setAktifKlasor=function(ki){aktifKlasor=(window._kl||[])[ki]||"";render();if(typeof window.closeSidebar==='function')window.closeSidebar();};
 function stokYukle(){try{return _migrateLegacyKatkiIds(JSON.parse(localStorage.getItem(SK_STOK)||"[]"))||[];}catch{return[];}}
 function stokKaydet(a){
   // v2.78.90 F4: Sessiz hata yutma kaldırıldı - quota dolarsa kullanıcı bilsin
@@ -10554,6 +10567,7 @@ const BM_SVG = {
   'arrow-back-up': '<svg class="ti" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14l-4 -4l4 -4"/><path d="M5 10h11a4 4 0 1 1 0 8h-1"/></svg>',
   'chevron-down': '<svg class="ti" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>',
   'calendar': '<svg class="ti" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"/><path d="M16 3v4"/><path d="M8 3v4"/><path d="M4 11h16"/></svg>',
+  'menu': '<svg class="ti" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l16 0"/><path d="M4 12l16 0"/><path d="M4 18l16 0"/></svg>',
 };
 
 function renderSidebar(){
@@ -10656,6 +10670,7 @@ function renderHeader(){
     '</div>';
 
   hdr.innerHTML =
+    '<button class="bm-hamburger-btn" onclick="toggleSidebar()" title="Menu" aria-label="Menu">'+BM_SVG.menu+'</button>'+
     '<div class="bm-header-left">'+
       '<div class="bm-header-title">'+aktifBaslik+'</div>'+
       '<div class="bm-header-breadcrumb">'+receteSay+' recete &middot; '+klasorSay+' klasor</div>'+
@@ -10670,6 +10685,33 @@ function renderHeader(){
       dropdownHtml+
     '</div>';
 }
+
+// ═══ ADIM 131-H: Mobile sidebar drawer + backdrop ═══
+window.toggleSidebar = function(){
+  var sb = document.getElementById('bm-sidebar');
+  var bd = document.getElementById('bm-backdrop');
+  if(sb) sb.classList.toggle('open');
+  if(bd) bd.classList.toggle('open');
+};
+window.closeSidebar = function(){
+  var sb = document.getElementById('bm-sidebar');
+  var bd = document.getElementById('bm-backdrop');
+  if(sb) sb.classList.remove('open');
+  if(bd) bd.classList.remove('open');
+};
+// Backdrop element init (DOMContentLoaded'ten sonra, body hazir)
+(function _initBackdrop(){
+  function add(){
+    if(document.getElementById('bm-backdrop')) return;
+    var bd = document.createElement('div');
+    bd.id = 'bm-backdrop';
+    bd.className = 'bm-backdrop';
+    bd.onclick = window.closeSidebar;
+    document.body.appendChild(bd);
+  }
+  if(document.body) add();
+  else document.addEventListener('DOMContentLoaded', add);
+})();
 
 // Bildirim dropdown toggle — dis tikla kapan
 window.bildirimPanelToggle = function(ev){
