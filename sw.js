@@ -172,7 +172,15 @@
 // setAktifKlasor icindeki setTimeout(bmDebugUpdate,50) cagrilari. KORUNDU: window.listeSekme/
 // window.aktifKlasor expose (sat 5937 + setter sync) - Sprint 132 sub-sprint'leri (Klonla vs)
 // state expose kullanir. 131-A..T fix'leri INTACT, motor zinciri dokunulmadi.
-const CACHE_VERSION = 'bm-cache-v131-20';
+// Adim 132-B (18.05.2026): v131-20 -> v131-21, Klonla butonu + tarifKlonla handler.
+// HTML: editor header (sat ~18023) Kaydet butonu yanina '📑 Klonla' button (sadece _editId set ise).
+// CSS: .bm-btn-primary (#EF9F27 turuncu bg, hover #D88A1F, 8px radius, 10px 16px padding, mobile-friendly).
+// JS: function tarifKlonla(srcId) - deep clone JSON parse+stringify + crypto.randomUUID (fallback
+// Date.now+Math.random) + biraAd " (kopya)" suffix + durum='aktif' (Planlananlar display label, NOT
+// 'planlananlar' string - sat 10770 statTanim mapping) + olusturma/guncelleme timestamps + KR.unshift
+// + _origKy(KR) localStorage save + _syncGonderDebounced Firebase push + tarifAc(yeni.id) editor yonlendir.
+// flash mesaj. 131-A..T + 132-pre intact. Motor zinciri dokunulmadi.
+const CACHE_VERSION = 'bm-cache-v131-21';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [

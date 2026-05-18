@@ -232,6 +232,11 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
 .bm-stat-alt{font-size:11px;color:#888780}
 @media (max-width:768px){.bm-stat-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);padding:8px 10px}.bm-yapimda-vurgu{margin:10px 10px 6px;padding:10px 12px}.bm-stat-sayi{font-size:20px}}
 
+/* Adim 132-B: Klonla butonu (primary action, turuncu) */
+.bm-btn-primary{background:#EF9F27;color:#FFFFFF;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .12s;white-space:nowrap;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.bm-btn-primary:hover{background:#D88A1F}
+.bm-btn-primary:active{background:#C57A0F}
+
 /* Adim 131-E: Klasor chip yeniden tasarim (Image 2) + sari taslak banner */
 .bm-klasor-bar{display:flex;flex-wrap:wrap;gap:8px;padding:12px;align-items:center}
 .bm-klasor-chip{display:inline-flex;align-items:center;gap:6px;background:#FFFFFF;border:0.5px solid #F1EFE8;border-radius:16px;padding:6px 12px;color:#5F5E5A;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:background .12s,border-color .12s,color .12s;white-space:nowrap}
@@ -6998,6 +7003,29 @@ function tarifeKaydet(){
   }
 }
 function tarifAc(id){const t=KR.find(k=>k&&k.id===id);if(!t)return;clearDraft();_editId=t.id;const{id:_,tarih,ozet,...d}=t;S={...BOS,...d};sekme="genel";ekran="editor";render();}
+// Adim 132-B: Klonla — deep clone + yeni id + " (kopya)" + Planlananlar (durum=aktif) + editöre yönlendir.
+// Not: User spec'inde durum='planlananlar' yaziyordu; gerçek internal value 'aktif' (sat ~10770'te
+// statTanim id='aktif' et='Planlananlar'). 'planlananlar' kullansak rec hiçbir sekmede görünmez.
+function tarifKlonla(srcId){
+  if(!srcId){flash("Klonlamak için önce reçete kaydedilmeli","hata");return;}
+  const src=KR.find(k=>k&&k.id===srcId);
+  if(!src){flash("Kaynak reçete bulunamadı","hata");return;}
+  const yeni=JSON.parse(JSON.stringify(src));
+  // Yeni id: crypto.randomUUID (modern Chrome 92+) varsa onu kullan, yoksa Date.now fallback
+  yeni.id=(typeof crypto!=='undefined'&&crypto.randomUUID)?crypto.randomUUID():(Date.now().toString()+'_'+Math.random().toString(36).slice(2,7));
+  yeni.biraAd=(src.biraAd||'(adsız)')+' (kopya)';
+  yeni.olusturma=Date.now();
+  yeni.guncelleme=Date.now();
+  yeni.durum='aktif'; // Planlananlar sekmesi (display label)
+  // tarih: src'den kopyalandı (deep clone), kullanıcı editör'de güncellesin
+  KR.unshift(yeni); // Listenin başına, tarifeKaydet emsali
+  try{_origKy(KR);}catch(e){console.warn('tarifKlonla _origKy:',e);}
+  // Firebase sync — _origKy çağrımı zaten _syncGonderDebounced'i tetiklemez (direct çağrı), manuel push
+  try{if(typeof _syncGonderDebounced==='function')_syncGonderDebounced();}catch(e){}
+  flash('Kopya oluşturuldu: '+yeni.biraAd);
+  tarifAc(yeni.id);
+}
+window.tarifKlonla=tarifKlonla;
 function tarifSil(id){
   KR=KR.filter(k=>k.id!==id);
   ky(KR);
@@ -18020,6 +18048,7 @@ function rEditor(){
     <button class="btn" onclick="ekran='liste';render()" style="background:rgba(248,232,196,.18);color:#F8E8C4;font-size:22px;padding:2px 8px;line-height:1;border-radius:8px;border:1px solid rgba(248,232,196,.25)">‹</button>
     <input value="${S.biraAd}" onblur="S.biraAd=this.value" placeholder="Bira adı..." style="background:transparent;border:none;border-bottom:1.5px solid rgba(248,232,196,.5);border-radius:0;font-size:17px;font-weight:700;padding:3px 0;color:#F8E8C4;flex:1;outline:none;font-family:var(--font-display)">
     <button class="btn" onclick="tarifeKaydet()" style="background:${kbg};color:${kclr};border:1px solid ${kbrd};font-size:12px;padding:8px 14px;white-space:nowrap">${kayitMsg||"💾 Kaydet"}</button>
+    ${_editId?`<button class="bm-btn-primary" onclick="tarifKlonla('${_editId}')" title="Bu tarifin kopyasını oluştur">📑 Klonla</button>`:''}
   </div>
   <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
     <span style="font-size:10px;color:rgba(248,232,196,.8);font-weight:600">🎯 Hedef Stil:</span>
