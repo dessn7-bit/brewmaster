@@ -172,6 +172,19 @@
 // setAktifKlasor icindeki setTimeout(bmDebugUpdate,50) cagrilari. KORUNDU: window.listeSekme/
 // window.aktifKlasor expose (sat 5937 + setter sync) - Sprint 132 sub-sprint'leri (Klonla vs)
 // state expose kullanir. 131-A..T fix'leri INTACT, motor zinciri dokunulmadi.
+// Adim 132-G (19.05.2026): v131-25 -> v131-26, Muadil chip kompakt Malt/Hop satirlari altinda.
+// HTML her item iteration sat ~10157 oncesi chip-row inject + eski full panel collapsible:
+//   <div class="bm-muadil-wrap">
+//     <div class="bm-muadil-row"> MUADIL: chip1 chip2 chip3 +detay </div>
+//     <div class="bm-muadil-panel-full" style="display:none">eski büyük panel intact</div>
+//   </div>
+// Chip top 3 muadil için: bm-chip-stok yeşil (✓ stoktaki), bm-chip gri (stoksuz).
+// Chip onclick="muadilSec(this)" - mevcut handler intact (data-src/tgt/kat/mik/birim attrs aynı).
+// "+detay" bm-chip-more inline JS toggle full panel display.
+// CSS .bm-muadil-wrap + .bm-muadil-row + .bm-muadil-label + .bm-chip + .bm-chip-stok + .bm-chip-more
+// + .bm-muadil-panel-full. Mobile <=768 daha kompakt (gap 4 + chip padding 2 8 + font 10).
+// muadilSec handler INTACT (132-G sadece UI shell, backend dokunmadi).
+// 131-A..T + 132-pre/B/C/A/D/E intact. Motor zinciri (B1/V12c/V20/F1) dokunulmadi.
 // Adim 132-E (19.05.2026): v131-24 -> v131-25, Akordiyon yay Malt/Hop/Maya + sticky ozet global.
 // 1) Sticky ozet panel rEditorGenel'den cikarildi, rEditor wrapper'a tasindi (uy ile sb arasi).
 //    Her tab'da gorunur. renk dot srmR(srm) (Genel'in karmasik renk_hex hesabi gerekmiyor).
@@ -233,7 +246,7 @@
 // 'planlananlar' string - sat 10770 statTanim mapping) + olusturma/guncelleme timestamps + KR.unshift
 // + _origKy(KR) localStorage save + _syncGonderDebounced Firebase push + tarifAc(yeni.id) editor yonlendir.
 // flash mesaj. 131-A..T + 132-pre intact. Motor zinciri dokunulmadi.
-const CACHE_VERSION = 'bm-cache-v131-25';
+const CACHE_VERSION = 'bm-cache-v131-26';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [

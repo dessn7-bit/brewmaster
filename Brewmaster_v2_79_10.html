@@ -256,6 +256,21 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
   .bm-ss-label{max-width:140px;font-size:12px}
 }
 
+/* Adim 132-G: Muadil chip kompakt (Malt/Hop satirlari altinda inline rounded pill).
+   Mevcut full panel (renderMuadil rows + Bunu Kullan butonu) gizlenir, "+N daha" chip ile toggle.
+   muadilSec handler intact (chip data-src/tgt/kat/mik/birim ile aynı şekilde tetikler). */
+.bm-muadil-wrap{margin:0 14px 8px 22px}
+.bm-muadil-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:4px 0}
+.bm-muadil-label{font-size:10px;line-height:1.2;font-weight:600;color:#8B5A2B;text-transform:uppercase;letter-spacing:.5px;margin-right:4px;flex-shrink:0;font-family:var(--font-body)}
+.bm-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:12px;background:#F5F0E5;color:#5C3A0E;border:1px solid #E5DCC8;cursor:pointer;transition:all .15s;font-size:11px;line-height:1.2;font-family:var(--font-body);white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.bm-chip:hover{background:#FAEEDA;border-color:#EF9F27}
+.bm-chip-stok{background:#E8F0E0;color:#2C5C1F;border-color:#C5D9B5}
+.bm-chip-stok:hover{background:#D5E5C5;border-color:#7CB55A}
+.bm-chip-more{color:#8B5A2B;font-style:italic;background:transparent;border-color:#D6D2C8}
+.bm-chip-more:hover{background:#FAEEDA;color:#EF9F27}
+.bm-muadil-panel-full{margin-top:6px}
+@media (max-width:768px){.bm-muadil-row{gap:4px}.bm-chip{padding:2px 8px;font-size:10px}}
+
 /* Adim 132-D: Akordiyon framework (reusable, 132-E'de diger tablara yayilacak).
    Genel tab pilot 3 section: stil-tahmin (expanded), recete-profili (collapsed), fermentasyon (expanded).
    localStorage 'bm_acc_state' ile expand/collapse durumu kayitli. ARIA + klavye (Enter/Space). */
@@ -10153,8 +10168,40 @@ function stokKontrolHTML(){
         const _gosterSayisi=3;
         const _muadilGoster=muadillerHesap.slice(0,_gosterSayisi);
         const _muadilGizli=muadillerHesap.slice(_gosterSayisi);
-        
-        satirlar+=`<div style="margin:0 14px 8px 22px;padding:6px 10px;background:${varMi?'var(--ya)':'var(--ma)'};border-radius:8px;border:1px solid ${varMi?'#ABB078':'#98A2AE'}">`;
+
+        // Adim 132-G: Kompakt chip-row + collapsible full panel
+        // Kategori kodu (chip onclick + muadilSec için)
+        const _katKoduItem=kat.isim.includes('Malt')?'malt':
+                           kat.isim.includes('Hop')?'hop':
+                           kat.isim.includes('Maya')?(item.id===S.mayaId?'maya1':'maya2'):
+                           kat.isim.includes('Katkı')?'katki':
+                           kat.isim.includes('Mineral')?'mineral':'';
+        satirlar+=`<div class="bm-muadil-wrap">`;
+        satirlar+=`<div class="bm-muadil-row">`;
+        satirlar+=`<span class="bm-muadil-label">MUADIL${_aktifStil?' <span style="font-weight:500;color:var(--dim);text-transform:none;letter-spacing:0">('+esc(_aktifStil)+')</span>':''}</span>`;
+        _muadilGoster.forEach(function(m){
+          var mStokC=stokBul(m.id,m.ad);
+          var stokVarC=!!mStokC;
+          var chipCls=stokVarC?'bm-chip bm-chip-stok':'bm-chip';
+          // Miktar önerisinden sayı+birim çıkar (muadilSec için)
+          var _oMc=(m._oneriMik||'').match(/([\d.,]+)\s*([a-zA-Z]+)/);
+          var _oSayiC=_oMc?parseFloat(_oMc[1].replace(',','.')):0;
+          var _oBirC=_oMc?_oMc[2]:'';
+          var titleTxt=(m._oneriMik?m._oneriMik:'')+(m._uyum===1?' · stile uygun':m._uyum===-1?' · stile aykırı':'');
+          if(_katKoduItem&&_oSayiC>0){
+            satirlar+='<span class="'+chipCls+'" onclick="muadilSec(this)" data-src="'+esc(item.id)+'" data-tgt="'+esc(m.id)+'" data-kat="'+_katKoduItem+'" data-mik="'+_oSayiC+'" data-birim="'+esc(_oBirC)+'" title="'+esc(titleTxt)+'">'+(stokVarC?'✓ ':'')+esc(m.ad)+'</span>';
+          } else {
+            satirlar+='<span class="'+chipCls+'" style="opacity:.65;cursor:default" title="'+esc(titleTxt||'Miktar önerisi yok')+'">'+(stokVarC?'✓ ':'')+esc(m.ad)+'</span>';
+          }
+        });
+        // "+N daha" chip — tıkla full panel toggle
+        if(_muadilGoster.length>0||_muadilGizli.length>0){
+          var _moreCount=_muadilGoster.length+_muadilGizli.length;
+          satirlar+='<span class="bm-chip bm-chip-more" onclick="(function(el){var p=el.closest(\'.bm-muadil-wrap\').querySelector(\'.bm-muadil-panel-full\');if(!p)return;var o=p.style.display===\'none\'||!p.style.display;p.style.display=o?\'block\':\'none\';el.textContent=o?\'− Daha az\':\'+detay\';})(this)">+detay</span>';
+        }
+        satirlar+=`</div>`;
+        // Full panel (default gizli) — eski büyük muadil paneli intact
+        satirlar+=`<div class="bm-muadil-panel-full" style="display:none;padding:6px 10px;background:${varMi?'var(--ya)':'var(--ma)'};border-radius:8px;border:1px solid ${varMi?'#ABB078':'#98A2AE'}">`;
         satirlar+=`<div style="font-size:10px;font-weight:700;color:${varMi?'#666633':'#0066CC'};margin-bottom:5px">↔ Muadil Seçenekleri${_aktifStil?' <span style=\"font-weight:400;color:var(--dim)\">('+_aktifStil+' için en uygun)</span>':''}:</div>`;
         
         function renderMuadil(m,mi){
@@ -10206,7 +10253,8 @@ function stokKontrolHTML(){
           _muadilGizli.forEach((m,mi)=>{satirlar+=renderMuadil(m,mi);});
           satirlar+=`</div>`;
         }
-        satirlar+=`</div>`;
+        satirlar+=`</div>`;   // close bm-muadil-panel-full
+        satirlar+=`</div>`;   // Adim 132-G: close bm-muadil-wrap
       }
       satirlar+=`</div>`;
     });
