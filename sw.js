@@ -158,7 +158,14 @@
 // FIX: .bm-main base kuralinda grid-column:2 -> grid-column:1/-1 GLOBAL. Full span (col 1 to -1).
 // Side effect (desktop): sidebar z-index:2 overlay olarak sol 240px gorsel kapatir, fonksiyonel
 // minimal. body grid-auto-columns:minmax(0,1fr) ve diger 131-R fix'leri INTACT.
-const CACHE_VERSION = 'bm-cache-v131-18';
+// Adim 131-T (18.05.2026): v131-18 -> v131-19, 131-S DESKTOP REGRESYON ACIL FIX.
+// 131-S global 1/-1 desktop'i kirdi: .bm-main 1707x985 sidebar uzerine bindi, icerik gorunmuyor.
+// FIX (restructure): .bm-main base kural grid-column 1/-1 -> 2 (RESTORE desktop). Default RULE
+// SONRASI yeni @media (max-width:768px){.bm-main{grid-column:1/-1}} block ekle (mobile override,
+// CSS cascade source-order ile default'tan SONRA geldigi icin mobile'da 1/-1 kazanir).
+// Source-order kritik: ek @media block default'tan ONCE olsaydi (line 168 gibi), default override
+// eder ve 131-R bug geri gelirdi. 131-A..S fix'leri INTACT, debug panel BIRAK.
+const CACHE_VERSION = 'bm-cache-v131-19';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [
