@@ -38,7 +38,13 @@
 // HTML degisiklikleri: body grid, <aside id="bm-sidebar">, sidebar CSS, renderSidebar() + 8 SVG icon,
 // logo refactor (const BM_LOGO_DATAURL global single-source). Mevcut sekme/klasor bar/aksiyon
 // bar/aramaInp/taniBtn INTACT (131-C..G icin sirada). KURAL 12.3 zorunlu bump.
-const CACHE_VERSION = 'bm-cache-v131-3';
+// Adim 131-C (18.05.2026): v131-3 -> v131-4, ust header markup deploy (Image 2 stili).
+// HTML degisiklikleri: body wrapper (.bm-main flex column header+ekran), <header id="bm-header">,
+// header CSS (~26 satir), BM_SVG +4 ikon (search/cloud/package/bell), renderHeader() + bildirim
+// dropdown placeholder + bildirimPanelToggle handler. rListe icinden uist aksiyon bar + aramaKutu
+// KALDIRILDI; aramaInp ID + handler'lar (aramaGuncelle, clearArama, aramaMetni) header'a tasindi
+// intact. syncDurum text silindi (yesil dot yeterli). KURAL 12.3 zorunlu bump.
+const CACHE_VERSION = 'bm-cache-v131-4';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [
