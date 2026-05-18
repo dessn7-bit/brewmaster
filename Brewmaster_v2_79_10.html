@@ -256,6 +256,14 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
   .bm-ss-label{max-width:140px;font-size:12px}
 }
 
+/* Adim 132-H: 4/4 ensemble agreement badge (Strategy C ribbon icinde).
+   stcRes.hybrid_agreement (örn "4/4") motor consensus oran. 4/4 yesil, 3/4 turuncu, ≤2/4 gri. */
+.bm-ensemble-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:12px;font-size:11px;line-height:1.2;font-weight:600;font-family:var(--font-body);margin-left:8px;white-space:nowrap}
+.bm-badge-4-4{background:#D5E5C5;color:#2C5C1F;border:1px solid #A5C580}
+.bm-badge-3-4{background:#FAEEDA;color:#8B5A2B;border:1px solid #EF9F27}
+.bm-badge-low{background:#F5F0E5;color:#5C3A0E;border:1px solid #E5DCC8}
+.bm-badge-icon{font-size:10px;line-height:1}
+
 /* Adim 132-G: Muadil chip kompakt (Malt/Hop satirlari altinda inline rounded pill).
    Mevcut full panel (renderMuadil rows + Bunu Kullan butonu) gizlenir, "+N daha" chip ile toggle.
    muadilSec handler intact (chip data-src/tgt/kat/mik/birim ile aynı şekilde tetikler). */
@@ -21637,9 +21645,27 @@ syncBaslat();
     var _sub2s = _st2 ? ' <span style="color:var(--soluk);font-size:10px">· '+_resolveDisp(_st2)+' %'+_st2.normalized+'</span>' : '';
     var _sub3s = _st3 ? ' <span style="color:var(--soluk);font-size:10px">· '+_resolveDisp(_st3)+' %'+_st3.normalized+'</span>' : '';
     var _fallbackNote = stc.fallback ? ' <span style="color:#9E9E9E;font-size:9px;font-style:italic">(specialty→V12)</span>' : '';
+    // Adim 132-H: 4/4 ensemble agreement badge (hybrid_agreement "N/M" formatinda)
+    var _badgeHtml = '';
+    try {
+      var _ag = stc.hybrid_agreement || (stc._meta && (stc._meta.agreement + '/' + stc._meta.total));
+      if (_ag && /^\d+\/\d+$/.test(_ag)) {
+        var _parts = _ag.split('/').map(Number);
+        var _ac = _parts[0], _tot = _parts[1];
+        if (_tot > 0) {
+          var _pct = (_ac / _tot * 100).toFixed(1) + '%';
+          var _cls = _ac === _tot && _tot >= 4 ? 'bm-badge-4-4' : _ac >= 3 ? 'bm-badge-3-4' : 'bm-badge-low';
+          var _icon = _ac === _tot && _tot >= 4 ? '✨' : _ac >= 3 ? '◆' : '◇';
+          _badgeHtml = '<span class="bm-ensemble-badge ' + _cls + '" title="' + _ac + '/' + _tot + ' motor consensus · ' + _pct + '">' +
+                       '<span class="bm-badge-icon">' + _icon + '</span>' +
+                       '<span>' + _ac + '/' + _tot + ' · ' + _pct + '</span>' +
+                       '</span>';
+        }
+      }
+    } catch(e) { _badgeHtml = ''; }
     return '<span style="font-weight:600;color:#00897B">Strategy C (Hibrit Hierarchical):</span> ' +
            '<span style="font-weight:600">'+_sname1+'</span>' +
-           ' <span style="color:var(--soluk)">%'+_st1.normalized+'</span>'+_sub2s+_sub3s+_fallbackNote;
+           ' <span style="color:var(--soluk)">%'+_st1.normalized+'</span>'+_sub2s+_sub3s+_fallbackNote + _badgeHtml;
   }
   window.updateRibbon = function(name){
     try {

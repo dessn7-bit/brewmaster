@@ -172,6 +172,18 @@
 // setAktifKlasor icindeki setTimeout(bmDebugUpdate,50) cagrilari. KORUNDU: window.listeSekme/
 // window.aktifKlasor expose (sat 5937 + setter sync) - Sprint 132 sub-sprint'leri (Klonla vs)
 // state expose kullanir. 131-A..T fix'leri INTACT, motor zinciri dokunulmadi.
+// Adim 132-H (19.05.2026): v131-26 -> v131-27, 4/4 ensemble agreement badge Strategy C ribbon.
+// Mevcut Strategy C predict result stcRes.hybrid_agreement ZATEN "N/M" formatinda dosyada (sat
+// 22868). _meta.agreement + _meta.total integer'lar da var. 4 motor karsilastirma backend'de
+// hyba.agreeCount/totalVotes ile zaten yapiliyor (motors: v_cluster_slug + v12_slug + v20_slug
+// + hyb_slug). Sub-sprint sadece UI rozet ekledi.
+// _scRibbonInner (sat ~21548) icine badge HTML inject: hybrid_agreement parse → class+icon.
+//   4/4 (ag=tot>=4): bm-badge-4-4 yesil ✨
+//   3/4 (ag>=3): bm-badge-3-4 turuncu ◆
+//   ≤2/4 (ag<3): bm-badge-low gri ◇
+// CSS .bm-ensemble-badge + 3 varyant + .bm-badge-icon (sat ~257).
+// Motor zinciri (B1/V12c/V20/F1) DOKUNULMADI - sadece predict sonucu okunur ve rozet inject.
+// 131-A..T + 132-pre/B/C/A/D/E/G intact.
 // Adim 132-G (19.05.2026): v131-25 -> v131-26, Muadil chip kompakt Malt/Hop satirlari altinda.
 // HTML her item iteration sat ~10157 oncesi chip-row inject + eski full panel collapsible:
 //   <div class="bm-muadil-wrap">
@@ -246,7 +258,7 @@
 // 'planlananlar' string - sat 10770 statTanim mapping) + olusturma/guncelleme timestamps + KR.unshift
 // + _origKy(KR) localStorage save + _syncGonderDebounced Firebase push + tarifAc(yeni.id) editor yonlendir.
 // flash mesaj. 131-A..T + 132-pre intact. Motor zinciri dokunulmadi.
-const CACHE_VERSION = 'bm-cache-v131-26';
+const CACHE_VERSION = 'bm-cache-v131-27';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [
