@@ -85,7 +85,17 @@
 // backdrop element DOMContentLoaded'ta body'ye eklenir. setListeSekme + setAktifKlasor sonuna
 // closeSidebar() inject (sekme/klasor tikla -> sidebar otomatik kapanir UX). Tum mevcut handler
 // INTACT. Test viewport'lar: 360/393/412/430 (Android Chrome) + 768/1280/1440. KURAL 12.3 bump.
-const CACHE_VERSION = 'bm-cache-v131-9';
+// Adim 131-I (18.05.2026): v131-9 -> v131-10, sidebar sekme button BUG fix + stat kart clickable UX.
+// TANI: Mobile drawer CSS sat 56'da idi, mevcut .bm-sidebar desktop rule sat 142'de (DAHA SONRA),
+// CSS cascade order ile z-index:50 -> 2 override edildi. Sidebar acikken backdrop (z-index:40)
+// sidebar (z-index:2) UZERINE cikti, sekme button click backdrop'a gidip closeSidebar tetikledi.
+// FIX: Mobile drawer CSS sidebar tum rule'larinin (sat 142-167) SONRASINA tasindi. Aynı specificity,
+// sonra gelen kazanir -> mobile match olunca .bm-sidebar z-index:50 aktif, sekme button click dogru.
+// FEATURE: renderStatKartlar her karta onclick=setListeSekme(i) + role=button + tabindex=0 + Enter/
+// Space keyboard support. CSS: cursor:pointer + hover transform translateY(-1px) + box-shadow +
+// focus-visible outline. Aktif kart turuncu border (131-D) intact. Mobile'da stat click sidebar
+// aciklik gerekmiyor. KURAL 12.3 bump.
+const CACHE_VERSION = 'bm-cache-v131-10';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [
