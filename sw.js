@@ -137,7 +137,13 @@
 // 6 yer CSS cift katman (100vh fallback + 100dvh override): body grid-template-rows, .bm-main height,
 // .bm-sidebar height (desktop + mobile), #ekran height (desktop), .brewday-timeline-icerik min-height.
 // Viewport meta'ya viewport-fit=cover EKLEME (dvh ile uyumlu, notch destegi). 131-A..N intact.
-const CACHE_VERSION = 'bm-cache-v131-15';
+// Adim 131-P (18.05.2026): v131-15 -> v131-16, DEBUG paneli ekle (real device tani icin, 131-Q kaldirilir).
+// Sebep: 131-O Kaan cihazinda fix tutmadi, Puppeteer 4/4 PASS dedi ama real Chrome simule edilemiyor.
+// Bottom-fixed yesil monospace overlay: SW version + sekme/klasor + visualVP + innerH + dvh/vh resolved
+// + body + .bm-main + #ekran + stat-grid + klasor-bar + liste-wrap canli bounding boxes.
+// Event hook'lari: resize + visualViewport.resize/scroll + 500ms poll + setListeSekme/setAktifKlasor.
+// 131-A..O fix INTACT, motor zinciri dokunulmaz, sadece DEBUG ek. Rollback: 131-Q'da revert.
+const CACHE_VERSION = 'bm-cache-v131-16';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [

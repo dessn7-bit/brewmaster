@@ -5934,6 +5934,7 @@ function dismissDraft(){clearDraft();window._pendingDraft=null;render();}
 
 let listeSekme="aktif";
 let aktifKlasor="";
+window.listeSekme=listeSekme;window.aktifKlasor=aktifKlasor;
 window._kl=[];
 window.clearArama=function(){aramaMetni='';render();};
 window.setSekmKat=function(sekme,kat){
@@ -6030,8 +6031,8 @@ window.aramaGuncelle=function(el){
     if(inp){inp.focus();try{inp.setSelectionRange(pos,pos);}catch(e){}}
   },100);
 };
-window.setListeSekme=function(si){listeSekme=["aktif","yapimda","arsiv","istek"][si]||"aktif";aramaMetni="";render();setTimeout(function(){if(typeof window.closeSidebar==='function')window.closeSidebar();},0);};
-window.setAktifKlasor=function(ki){aktifKlasor=(window._kl||[])[ki]||"";render();setTimeout(function(){if(typeof window.closeSidebar==='function')window.closeSidebar();},0);};
+window.setListeSekme=function(si){listeSekme=["aktif","yapimda","arsiv","istek"][si]||"aktif";aramaMetni="";window.listeSekme=listeSekme;render();setTimeout(function(){if(typeof window.bmDebugUpdate==='function')window.bmDebugUpdate();},50);setTimeout(function(){if(typeof window.closeSidebar==='function')window.closeSidebar();},0);};
+window.setAktifKlasor=function(ki){aktifKlasor=(window._kl||[])[ki]||"";window.aktifKlasor=aktifKlasor;render();setTimeout(function(){if(typeof window.bmDebugUpdate==='function')window.bmDebugUpdate();},50);setTimeout(function(){if(typeof window.closeSidebar==='function')window.closeSidebar();},0);};
 function stokYukle(){try{return _migrateLegacyKatkiIds(JSON.parse(localStorage.getItem(SK_STOK)||"[]"))||[];}catch{return[];}}
 function stokKaydet(a){
   // v2.78.90 F4: Sessiz hata yutma kaldırıldı - quota dolarsa kullanıcı bilsin
@@ -22801,6 +22802,79 @@ if ('serviceWorker' in navigator) {
       });
   });
 }
+</script>
+
+<!-- Adim 131-P: DEBUG paneli (real device tani icin, 131-Q'da kaldirilacak) -->
+<div id="bm-debug" style="position:fixed;bottom:0;left:0;right:0;background:#111;color:#0F0;font:11px/1.4 monospace;padding:8px 12px;z-index:9999;border-top:1px solid #333;text-align:left;pointer-events:none">
+<div id="bm-debug-content">loading...</div>
+</div>
+<script id="bm-debug-script">
+(function(){
+  function bmDebugUpdate(){
+    try {
+      var vv = window.visualViewport;
+      var main = document.querySelector('.bm-main');
+      var ekran = document.getElementById('ekran');
+      var statGrid = document.querySelector('.bm-stat-grid');
+      var klasorBar = document.querySelector('.bm-klasor-bar');
+      var listeWrap = document.querySelector('.bm-liste-wrap');
+      var body = document.body;
+      var sekme = window.listeSekme || '?';
+      var klasor = (window.aktifKlasor === '' || window.aktifKlasor == null) ? 'Tumu' : window.aktifKlasor;
+      var mainR = main ? main.getBoundingClientRect() : null;
+      var ekranR = ekran ? ekran.getBoundingClientRect() : null;
+      var statR = statGrid ? statGrid.getBoundingClientRect() : null;
+      var klasorR = klasorBar ? klasorBar.getBoundingClientRect() : null;
+      var listeR = listeWrap ? listeWrap.getBoundingClientRect() : null;
+      var bodyR = body.getBoundingClientRect();
+
+      // dvh + vh sentinel olcumu (live computed)
+      var dvhTest = document.createElement('div');
+      dvhTest.style.cssText = 'position:fixed;height:100dvh;width:1px;left:-9999px;top:0';
+      document.body.appendChild(dvhTest);
+      var dvhResolved = dvhTest.getBoundingClientRect().height;
+      dvhTest.remove();
+      var vhTest = document.createElement('div');
+      vhTest.style.cssText = 'position:fixed;height:100vh;width:1px;left:-9999px;top:0';
+      document.body.appendChild(vhTest);
+      var vhResolved = vhTest.getBoundingClientRect().height;
+      vhTest.remove();
+
+      var f = function(n){ return (n==null) ? '?' : Number(n).toFixed(0); };
+      var content = document.getElementById('bm-debug-content');
+      if(!content) return;
+      content.innerHTML =
+        '<b>v131-16 · c472107</b> · sekme=' + sekme + ' klasor=' + klasor + '<br>' +
+        'visualVP=' + f(vv && vv.width) + '×' + f(vv && vv.height) + ' | innerH=' + window.innerHeight +
+        ' | dvh=' + f(dvhResolved) + ' vh=' + f(vhResolved) + '<br>' +
+        'body=' + f(bodyR.width) + '×' + f(bodyR.height) +
+        ' | .bm-main=' + f(mainR && mainR.width) + '×' + f(mainR && mainR.height) + '<br>' +
+        'ekran=' + f(ekranR && ekranR.width) + '×' + f(ekranR && ekranR.height) +
+        ' | stat-grid=' + f(statR && statR.width) + '×' + f(statR && statR.height) + '<br>' +
+        'klasor-bar=' + f(klasorR && klasorR.width) + '×' + f(klasorR && klasorR.height) +
+        ' | liste-wrap=' + f(listeR && listeR.width) + '×' + f(listeR && listeR.height);
+    } catch(e) {
+      var c = document.getElementById('bm-debug-content');
+      if(c) c.innerHTML = 'DEBUG ERR: ' + (e && e.message);
+    }
+  }
+  window.bmDebugUpdate = bmDebugUpdate;
+  function _hookEvents(){
+    window.addEventListener('resize', bmDebugUpdate);
+    if (window.visualViewport){
+      window.visualViewport.addEventListener('resize', bmDebugUpdate);
+      window.visualViewport.addEventListener('scroll', bmDebugUpdate);
+    }
+    // Fallback poll (URL bar geçişlerinde event'ler bazen kaçar)
+    setInterval(bmDebugUpdate, 500);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function(){ bmDebugUpdate(); _hookEvents(); });
+  } else {
+    bmDebugUpdate();
+    _hookEvents();
+  }
+})();
 </script>
 
 </body>
