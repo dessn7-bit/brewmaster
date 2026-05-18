@@ -195,6 +195,41 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
 .bm-stat-sayi.yesil{color:#1D9E75}
 .bm-stat-alt{font-size:11px;color:#888780}
 @media (max-width:768px){.bm-stat-grid{grid-template-columns:1fr 1fr;padding:8px 10px}.bm-yapimda-vurgu{margin:10px 10px 6px;padding:10px 12px}.bm-stat-sayi{font-size:20px}}
+
+/* Adim 131-E: Klasor chip yeniden tasarim (Image 2) + sari taslak banner */
+.bm-klasor-bar{display:flex;flex-wrap:wrap;gap:8px;padding:12px;align-items:center}
+.bm-klasor-chip{display:inline-flex;align-items:center;gap:6px;background:#FFFFFF;border:0.5px solid #F1EFE8;border-radius:16px;padding:6px 12px;color:#5F5E5A;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:background .12s,border-color .12s,color .12s;white-space:nowrap}
+.bm-klasor-chip:hover{border-color:#EF9F27}
+.bm-klasor-chip .ti{width:14px;height:14px;color:#EF9F27;stroke-width:1.8;flex-shrink:0}
+.bm-klasor-chip.active{background:#FAEEDA;border:1px solid #EF9F27;color:#854F0B;font-weight:600}
+.bm-klasor-chip.active .ti{color:#854F0B}
+.bm-klasor-chip-sil{background:transparent;border:none;color:#854F0B;font-size:14px;line-height:1;cursor:pointer;padding:0 0 0 2px;opacity:.7;font-family:inherit}
+.bm-klasor-chip-sil:hover{opacity:1}
+.bm-klasor-chip-add{display:inline-flex;align-items:center;gap:6px;background:transparent;border:1px dashed #D3D1C7;border-radius:16px;padding:6px 12px;color:#888780;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:border-color .12s,color .12s;white-space:nowrap}
+.bm-klasor-chip-add:hover{border-color:#EF9F27;color:#EF9F27}
+.bm-klasor-chip-add .ti{width:12px;height:12px;stroke-width:2}
+.bm-klasor-chip-input-wrap{display:inline-flex;align-items:center;gap:4px;background:#FFFFFF;border:1px solid #EF9F27;border-radius:16px;padding:3px 6px 3px 10px}
+.bm-klasor-chip-input-wrap input{background:transparent;border:none;outline:none;font-size:12px;color:#3D2817;font-family:inherit;width:120px;padding:2px 0}
+.bm-klasor-chip-input-btn{background:transparent;border:none;cursor:pointer;font-size:13px;padding:2px 6px;border-radius:10px;font-family:inherit;line-height:1}
+.bm-klasor-chip-input-btn.ok{color:#1D9E75;font-weight:700}
+.bm-klasor-chip-input-btn.no{color:#A32D2D}
+.bm-klasor-chip-input-btn:hover{background:#F5F3EE}
+.bm-klasor-chip-silonay{display:inline-flex;align-items:center;gap:6px;background:#FCEBEB;border:1px solid #F3D2D2;border-radius:16px;padding:4px 6px 4px 12px;color:#A32D2D;font-size:11px;font-weight:600}
+.bm-klasor-chip-silonay button{border:none;cursor:pointer;font-size:12px;padding:3px 8px;border-radius:12px;font-family:inherit;font-weight:600}
+.bm-klasor-chip-silonay button.evet{background:#A32D2D;color:#FFFFFF}
+.bm-klasor-chip-silonay button.hayir{background:#FFFFFF;color:#5F5E5A;border:0.5px solid #D3D1C7}
+.bm-taslak-banner{display:flex;justify-content:space-between;align-items:center;gap:12px;background:#FAEEDA;border:1px solid #F0DDB8;border-radius:8px;padding:10px 14px;margin:12px}
+.bm-taslak-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+.bm-taslak-icon{width:22px;height:22px;border-radius:50%;background:#FFFFFF;color:#EF9F27;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;border:0.5px solid #F0DDB8}
+.bm-taslak-text{flex:1;min-width:0;font-size:13px;color:#5F5E5A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bm-taslak-text strong{color:#3D2817;font-weight:700}
+.bm-taslak-text-meta{color:#8E8B86;font-weight:400;font-size:12px}
+.bm-taslak-eylem{display:flex;gap:8px;flex-shrink:0}
+.bm-taslak-btn{background:#FFFFFF;border:0.5px solid #D3D1C7;color:#3D2817;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:border-color .12s}
+.bm-taslak-btn:hover{border-color:#EF9F27}
+.bm-taslak-btn.bm-taslak-sil{background:#FCEBEB;border:0.5px solid #F3D2D2;color:#A32D2D}
+.bm-taslak-btn.bm-taslak-sil:hover{border-color:#A32D2D}
+@media (max-width:768px){.bm-klasor-bar{padding:10px;gap:6px}.bm-taslak-banner{margin:10px;padding:10px;flex-direction:column;align-items:stretch}.bm-taslak-eylem{justify-content:flex-end}}
 </style>
 </head>
 <body>
@@ -10661,6 +10696,91 @@ function renderStatKartlar(){
 window.renderYapimdaVurgu = renderYapimdaVurgu;
 window.renderStatKartlar = renderStatKartlar;
 
+// ═══ ADIM 131-E: Klasor chip + sari taslak banner helper'lar ═══
+// Relative time helper (Turkce): az once / X dk once / X saat once / X gun once
+function _relTime(ts){
+  if(!ts || isNaN(ts)) return '';
+  var diff = Date.now() - ts;
+  if(diff < 0) return 'az once';
+  var sec = Math.floor(diff / 1000);
+  if(sec < 60) return 'az once';
+  var min = Math.floor(sec / 60);
+  if(min < 60) return min + ' dk once';
+  var hr = Math.floor(min / 60);
+  if(hr < 24) return hr + ' saat once';
+  var day = Math.floor(hr / 24);
+  return day + ' gun once';
+}
+
+// Klasor chip bar (Image 2 stili) — mevcut handler'lar intact (setAktifKlasor, klasorSilIste,
+// klasorSilOnay, yeniKlasorAc/Kaydet/Iptal/Klavye). Kosul: klasorler.length>1 (Tumu + en az 1).
+function renderKlasorChip(){
+  var klasorler = getKlasorler();
+  // Tumu + en az 1 ek klasor yoksa, sadece "+ Yeni klasor" + yeni-klasor input toggle render
+  // (kullanici hicbir klasor yokken de + Yeni klasor butonunu gormeli)
+  var hasFolders = klasorler.length > 1;
+  var inner = '';
+  if(hasFolders) {
+    inner = klasorler.map(function(k, ki){
+      var ak = (aktifKlasor === k);
+      var silOnayBu = window._klasorSilOnayi === k;
+      if(silOnayBu) {
+        var nT = KR.filter(function(t){ return (t.klasor||'') === k; }).length;
+        return '<span class="bm-klasor-chip-silonay">'+
+            '<span>Sil? '+(nT > 0 ? nT + ' tarif' : 'bos')+'</span>'+
+            '<button class="evet" onclick="klasorSilOnay(true)">&#10003;</button>'+
+            '<button class="hayir" onclick="klasorSilOnay(false)">&#10005;</button>'+
+          '</span>';
+      }
+      var bosKlasor = !k;
+      var iconKey = bosKlasor ? 'folders' : 'folder';
+      var label = bosKlasor ? 'Tumu' : _esc131B(k);
+      // Aktif non-bos klasor -> chip icinde inline x button (mevcut UX intact)
+      var silBtn = (ak && !bosKlasor)
+        ? '<button class="bm-klasor-chip-sil" onclick="event.stopPropagation();klasorSilIste('+ki+')" title="Sil">&times;</button>'
+        : '';
+      return '<button class="bm-klasor-chip'+(ak ? ' active' : '')+'" onclick="setAktifKlasor('+ki+')">'+
+          BM_SVG[iconKey]+
+          '<span>'+label+'</span>'+
+          silBtn+
+        '</button>';
+    }).join('');
+  }
+  // Yeni klasor input toggle (inline aktif) veya + Yeni klasor add button
+  var addBlock = window._yeniKlasorEkleniyor
+    ? '<span class="bm-klasor-chip-input-wrap">'+
+        '<input id="yeniKlasorInp" type="text" onkeydown="yeniKlasorKlavye(this,event)" placeholder="Klasor adi...">'+
+        '<button class="bm-klasor-chip-input-btn ok" onclick="yeniKlasorKaydet()" title="Kaydet">&#10003;</button>'+
+        '<button class="bm-klasor-chip-input-btn no" onclick="yeniKlasorIptal()" title="Iptal">&#10005;</button>'+
+      '</span>'
+    : '<button class="bm-klasor-chip-add" onclick="yeniKlasorAc()">'+BM_SVG.plus+'<span>Yeni klasor</span></button>';
+  return '<div class="bm-klasor-bar">'+inner+addBlock+'</div>';
+}
+
+// Sari taslak banner (Image 2 stili) — koşullu render, mevcut handler intact (restoreDraft, dismissDraft)
+function renderTaslakBanner(){
+  var d = window._pendingDraft;
+  if(!d || !d.s || !d.s.biraAd) return '';
+  var ad = _esc131B(d.s.biraAd);
+  var meta = d.ts ? ' &middot; son duzenleme ' + _relTime(d.ts) : '';
+  return '<div class="bm-taslak-banner">'+
+      '<div class="bm-taslak-left">'+
+        '<span class="bm-taslak-icon">!</span>'+
+        '<div class="bm-taslak-text">'+
+          '<strong>Kaydedilmemis taslak:</strong> '+ad+
+          '<span class="bm-taslak-text-meta">'+meta+'</span>'+
+        '</div>'+
+      '</div>'+
+      '<div class="bm-taslak-eylem">'+
+        '<button class="bm-taslak-btn" onclick="restoreDraft()">Geri yukle</button>'+
+        '<button class="bm-taslak-btn bm-taslak-sil" onclick="dismissDraft()">Sil</button>'+
+      '</div>'+
+    '</div>';
+}
+window._relTime = _relTime;
+window.renderKlasorChip = renderKlasorChip;
+window.renderTaslakBanner = renderTaslakBanner;
+
 // ═══ LİSTE EKRANI ════════════════════════════════════════════
 function rListe(){
   const rk=t=>srmR(parseFloat((t.ozet||{}).srm)||0);
@@ -10684,46 +10804,9 @@ function rListe(){
   // Adim 131-C: aramaKutu KALDIRILDI — yeni ust header'a tasindi (renderHeader())
   // Mevcut aramaInp ID + handler'lari (aramaGuncelle, aramaMetni, clearArama) intact.
 
-  // Klasör filtre bar + inline "Yeni Klasör" input toggle + inline silme onayı
-  const klasorBar=
-    '<div style="display:flex;gap:6px;overflow-x:auto;padding:8px 12px 6px;scrollbar-width:none;background:var(--bg2);align-items:center">'+
-      (klasorler.length>1?klasorler.map((k,ki)=>{
-        const ak=aktifKlasor===k;
-        const silOnayBu=window._klasorSilOnayi===k;
-        if(silOnayBu){
-          const nT=KR.filter(t=>(t.klasor||"")===k).length;
-          return'<div style="display:flex;gap:3px;flex-shrink:0;align-items:center;background:var(--ka);border:1.5px solid var(--kk);border-radius:16px;padding:2px 4px 2px 10px">'+
-            '<span style="font-size:11px;font-weight:600;color:var(--kk)">Sil? '+(nT>0?nT+' tarif':'boş')+'</span>'+
-            '<button onclick="klasorSilOnay(true)" style="padding:3px 8px;border-radius:14px;border:1.5px solid var(--kk);background:var(--kk);color:var(--card);font-size:12px;font-weight:700;cursor:pointer">✓</button>'+
-            '<button onclick="klasorSilOnay(false)" style="padding:3px 8px;border-radius:14px;border:1.5px solid var(--bor2);background:var(--card);color:var(--soluk);font-size:12px;cursor:pointer">✗</button>'+
-          '</div>';
-        }
-        const bosKlasor=!k;
-        return'<div style="display:inline-flex;align-items:center;flex-shrink:0;border-radius:16px;border:1.5px solid '+(ak?"var(--altin)":"var(--bor)")+';background:'+(ak?"var(--sa)":"var(--card)")+';overflow:hidden">'+
-          '<button onclick="setAktifKlasor('+ki+')" style="padding:4px 12px;border:none;background:transparent;color:'+(ak?"var(--bakir)":"var(--soluk)")+';font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap">'+(k||"📂 Tümü")+'</button>'+
-          (ak&&!bosKlasor?'<button onclick="klasorSilIste('+ki+')" style="padding:4px 8px 4px 2px;border:none;background:transparent;color:var(--soluk);font-size:14px;line-height:1;cursor:pointer;opacity:.6" title="Sil">×</button>':'')+
-        '</div>';
-      }).join(""):"")+
-      (window._yeniKlasorEkleniyor?
-        '<div style="display:flex;gap:3px;flex-shrink:0;align-items:center">'+
-          '<input id="yeniKlasorInp" type="text" onkeydown="yeniKlasorKlavye(this,event)" placeholder="Klasör adı..." style="padding:4px 10px;border-radius:14px;border:1.5px solid var(--altin);background:var(--card);color:var(--kahve);font-size:11px;width:110px;outline:none">'+
-          '<button onclick="yeniKlasorKaydet()" style="flex-shrink:0;padding:4px 9px;border-radius:14px;border:1.5px solid var(--yk);background:var(--ya);color:var(--yk);font-size:12px;font-weight:700;cursor:pointer">✓</button>'+
-          '<button onclick="yeniKlasorIptal()" style="flex-shrink:0;padding:4px 9px;border-radius:14px;border:1.5px solid var(--kk);background:var(--ka);color:var(--kk);font-size:12px;cursor:pointer">✗</button>'+
-        '</div>'
-      :
-        '<button onclick="yeniKlasorAc()" style="flex-shrink:0;padding:4px 12px;border-radius:16px;border:1.5px dashed var(--bor2);background:transparent;color:var(--soluk);font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap">+ Yeni Klasör</button>'
-      )+
-    '</div>';
-
-  // Sekme bar
-  const sekmeTanim=[{id:"aktif",et:"📋 Planlananlar"},{id:"yapimda",et:"🧬 Aktif"},{id:"arsiv",et:"📦 Arşiv"},{id:"istek",et:"⭐ İstek"}];
-  const sekmeBar=sekmeTanim.map((s,si)=>{
-    const n=KR.filter(t=>(s.id==="aktif"?(t.durum||"aktif")==="aktif":t.durum===s.id)).length;
-    const ak=s.id===listeSekme;
-    return'<button onclick="setListeSekme('+si+')" style="flex:1;padding:10px 4px;border:none;border-bottom:3px solid '+(ak?"var(--altin)":"transparent")+';background:'+(ak?"rgba(139,90,43,.08)":"transparent")+';font-size:11px;font-weight:'+(ak?700:500)+';color:'+(ak?"var(--bakir)":"var(--soluk)")+';cursor:pointer">'+
-      s.et+(n>0?' <span style="background:'+(ak?"var(--altin)":"var(--bor2)")+';color:#fff;border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700">'+n+'</span>':'')+
-    '</button>';
-  }).join("");
+  // Adim 131-E: klasorBar const KALDIRILDI — renderKlasorChip() helper'a tasindi (Image 2 stili).
+  //              sekmeTanim + sekmeBar KALDIRILDI — sidebar tek kaynak (131-B).
+  // Mevcut handler'lar (setAktifKlasor, klasorSilIste, klasorSilOnay, yeniKlasorAc/Kaydet/Iptal/Klavye) intact.
 
   // Tarif kartları
   function tarifKart(t){
@@ -10771,18 +10854,10 @@ function rListe(){
   // Adim 131-C: Eski ust aksiyon bar (logo/syncPanelAc/stokEkranAc/+Yeni/syncDurum) KALDIRILDI.
   // Yeni ust header (renderHeader) sayfa basligi + breadcrumb + arama + 3 ikon ile yer aldi.
   // syncPanelAc + stokEkranAc handler'lari header'da; +Yeni sidebar'da (bm-sidebar-cta); syncDurum text silindi (yesil dot yeterli).
-  return (window._pendingDraft&&window._pendingDraft.s&&window._pendingDraft.s.biraAd?
-      '<div style="background:var(--sa);color:var(--sk);padding:10px 14px;border:1px solid #C8B070;border-left:4px solid var(--sk);border-radius:8px;margin:0 0 10px 0;display:flex;align-items:center;justify-content:space-between;gap:8px">'+
-      '<span>&#9888;&#65039; Kaydedilmemiş: <b>'+esc(window._pendingDraft.s.biraAd)+'</b></span>'+
-      '<span style="display:flex;gap:6px">'+
-      '<button onclick="restoreDraft()" style="background:var(--card);color:var(--kahve);border:1px solid var(--bor);border-radius:6px;padding:4px 10px;font-weight:bold;cursor:pointer">Geri Yükle</button>'+
-      '<button onclick="dismissDraft()" style="background:var(--ka);color:var(--kk);border:1px solid #C49080;border-radius:6px;padding:4px 10px;cursor:pointer">Sil</button>'+
-      '</span></div>'
-    :'')+
+  return renderTaslakBanner()+
     renderYapimdaVurgu()+
     renderStatKartlar()+
-    '<div style="display:flex;border-bottom:2px solid var(--bor2);background:var(--bg2)">'+sekmeBar+'</div>'+
-    klasorBar+
+    renderKlasorChip()+
     '<div style="padding:12px">'+listHTML+'</div>';
 }
 

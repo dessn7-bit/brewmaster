@@ -50,7 +50,15 @@
 // KALDIRILDI, yeni krem #FAEEDA bg + orange border-left vurgu kart. Stat 4 kart grid: 0.5px border
 // (aktif sekme 1px orange), sayilar Planlananlar/Istek turuncu Aktif/Arsiv yesil. Tiklanmaz.
 // Sidebar (131-B) + header (131-C) + sekme bar + klasor bar + recete kartlari + taniBtn INTACT.
-const CACHE_VERSION = 'bm-cache-v131-5';
+// Adim 131-E (18.05.2026): v131-5 -> v131-6, klasor chip yeniden tasarim (Image 2 stili) +
+// sekme bar KALDIRILDI (sidebar tek kaynak, 131-B) + sari taslak banner yeniden tasarim.
+// renderKlasorChip() + renderTaslakBanner() + _relTime() helper'lar. CSS ~40 satir: chip pill
+// (aktif turuncu bg + 1px orange, pasif beyaz + 0.5px gri + turuncu ti-folder ikon), + Yeni
+// klasor dashed 1px chip, inline input/silonay UX intact. Taslak: bg #FAEEDA + 22x22 yuvarlak !
+// ikon + biraAd bold + "son duzenleme X once" relative time + Geri yukle/Sil butonlar.
+// Mevcut handler'lar (setAktifKlasor, klasorSilIste, klasorSilOnay, yeniKlasor*, restoreDraft,
+// dismissDraft) tamamen INTACT. Sidebar/header/stat/yapim/recete/taniBtn intact. KURAL 12.3 bump.
+const CACHE_VERSION = 'bm-cache-v131-6';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [
