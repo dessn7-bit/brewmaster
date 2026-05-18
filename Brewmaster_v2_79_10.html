@@ -6017,8 +6017,8 @@ window.aramaGuncelle=function(el){
     if(inp){inp.focus();try{inp.setSelectionRange(pos,pos);}catch(e){}}
   },100);
 };
-window.setListeSekme=function(si){listeSekme=["aktif","yapimda","arsiv","istek"][si]||"aktif";aramaMetni="";render();if(typeof window.closeSidebar==='function')window.closeSidebar();};
-window.setAktifKlasor=function(ki){aktifKlasor=(window._kl||[])[ki]||"";render();if(typeof window.closeSidebar==='function')window.closeSidebar();};
+window.setListeSekme=function(si){if(typeof window.closeSidebar==='function')window.closeSidebar();listeSekme=["aktif","yapimda","arsiv","istek"][si]||"aktif";aramaMetni="";render();};
+window.setAktifKlasor=function(ki){if(typeof window.closeSidebar==='function')window.closeSidebar();aktifKlasor=(window._kl||[])[ki]||"";render();};
 function stokYukle(){try{return _migrateLegacyKatkiIds(JSON.parse(localStorage.getItem(SK_STOK)||"[]"))||[];}catch{return[];}}
 function stokKaydet(a){
   // v2.78.90 F4: Sessiz hata yutma kaldırıldı - quota dolarsa kullanıcı bilsin
