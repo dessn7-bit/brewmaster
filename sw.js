@@ -165,7 +165,14 @@
 // CSS cascade source-order ile default'tan SONRA geldigi icin mobile'da 1/-1 kazanir).
 // Source-order kritik: ek @media block default'tan ONCE olsaydi (line 168 gibi), default override
 // eder ve 131-R bug geri gelirdi. 131-A..S fix'leri INTACT, debug panel BIRAK.
-const CACHE_VERSION = 'bm-cache-v131-19';
+// Adim 132-pre-cleanup (18.05.2026): v131-19 -> v131-20, 131-P DEBUG paneli kaldirildi.
+// Gercek device tani tamamlandi (131-N/R/S/T -> mobil/desktop regresyon zinciri kapandi). Sprint
+// 132 (UI tasarim genisletme) baslangic hazirligi: temiz baseline.
+// KALDI: <div id="bm-debug"> + <script id="bm-debug-script"> body sonu blok. setListeSekme/
+// setAktifKlasor icindeki setTimeout(bmDebugUpdate,50) cagrilari. KORUNDU: window.listeSekme/
+// window.aktifKlasor expose (sat 5937 + setter sync) - Sprint 132 sub-sprint'leri (Klonla vs)
+// state expose kullanir. 131-A..T fix'leri INTACT, motor zinciri dokunulmadi.
+const CACHE_VERSION = 'bm-cache-v131-20';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [
