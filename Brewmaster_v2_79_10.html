@@ -176,7 +176,11 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
 /* Adim 131-O: 100vh -> 100dvh dynamic viewport (URL bar bagimsiz, 131-N tani Senaryo D fix).
    Fallback: 100vh once eski Android Chrome <108; 100dvh modern override (cascade order). */
 /* Adim 131-R: max-width:100% defense (content-based sizing kacisi, body grid minmax(0,1fr) ile birlikte). */
-.bm-main{grid-column:2;display:flex;flex-direction:column;min-width:0;height:100vh;height:100dvh;overflow:hidden;width:100%;max-width:100%;box-sizing:border-box}
+/* Adim 131-S: 131-R REGRESYON FIX. grid-auto-columns:minmax(0,1fr) + .bm-main grid-column:2 default
+   (mobile @media line 168 cascade source-order tarafindan override edildigi icin .bm-main col 2 implicit
+   kolona dustu = body/2 daralma 275×1080). FIX: grid-column:1/-1 global (full span, side effect: desktop
+   sidebar z-index:2 overlay olarak .bm-main'in sol 240px'ini gorsel kapatir, fonksiyonel etki minimal). */
+.bm-main{grid-column:1/-1;display:flex;flex-direction:column;min-width:0;height:100vh;height:100dvh;overflow:hidden;width:100%;max-width:100%;box-sizing:border-box}
 .bm-header{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 22px;background:#FFFFFF;border-bottom:1px solid #F1EFE8;z-index:5;position:relative}
 .bm-header-left{display:flex;flex-direction:column;min-width:0;gap:2px}
 .bm-header-title{font-family:var(--font-display);font-size:22px;font-weight:700;color:#3D2817;line-height:1.15;letter-spacing:.2px}
@@ -22848,7 +22852,7 @@ if ('serviceWorker' in navigator) {
       var content = document.getElementById('bm-debug-content');
       if(!content) return;
       content.innerHTML =
-        '<b>v131-17 · 131-R</b> · sekme=' + sekme + ' klasor=' + klasor + '<br>' +
+        '<b>v131-18 · 131-S</b> · sekme=' + sekme + ' klasor=' + klasor + '<br>' +
         'visualVP=' + f(vv && vv.width) + '×' + f(vv && vv.height) + ' | innerH=' + window.innerHeight +
         ' | dvh=' + f(dvhResolved) + ' vh=' + f(vhResolved) + '<br>' +
         'body=' + f(bodyR.width) + '×' + f(bodyR.height) +

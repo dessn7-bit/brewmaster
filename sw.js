@@ -150,7 +150,15 @@
 // FIX (defense-in-depth): body grid-template-columns 240px 1fr -> 240px minmax(0,1fr); mobile body
 // 1fr -> minmax(0,1fr); body grid-auto-columns:minmax(0,1fr) (implicit kolon defense); .bm-main
 // max-width:100% (defansif). 131-A..P (debug panel dahil) INTACT.
-const CACHE_VERSION = 'bm-cache-v131-17';
+// Adim 131-S (18.05.2026): v131-17 -> v131-18, 131-R REGRESYON ACIL FIX.
+// 131-R sonrasi Kaan debug panel: AKTIF .bm-main=275x1080 (body 551 / 2). Sayfa saga hizali, sol bos.
+// Kok neden: grid-auto-columns:minmax(0,1fr) implicit kolon yaratti. .bm-main col:2 default (mobile
+// @media line 168 .bm-main col:1 override edilmedi cunku CSS cascade source-order ile default (line
+// 180) sonra geliyor) -> .bm-main implicit kolon 2'ye dustu, body iki esit 1fr track'a bolundu.
+// FIX: .bm-main base kuralinda grid-column:2 -> grid-column:1/-1 GLOBAL. Full span (col 1 to -1).
+// Side effect (desktop): sidebar z-index:2 overlay olarak sol 240px gorsel kapatir, fonksiyonel
+// minimal. body grid-auto-columns:minmax(0,1fr) ve diger 131-R fix'leri INTACT.
+const CACHE_VERSION = 'bm-cache-v131-18';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [
