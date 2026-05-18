@@ -103,7 +103,19 @@
 // FIX: bosMetin'e yapimda anahtari eklendi ("Aktif tarif yok - Planlananlar'dan bir tarifi 'Aktife
 // Al' ile baslat."). Diger 3 mesaj intact (aktif/arsiv/istek). 4 sekme icin empty state dinamik.
 // KURAL 12.3 bump.
-const CACHE_VERSION = 'bm-cache-v131-11';
+// Adim 131-K (18.05.2026): v131-11 -> v131-12, aktif stat kart grid tasma defense-in-depth fix.
+// TANI (puppeteer mobile 393, real touch + programmatic + direct fn 12/12 PASS + 5 edge senaryo
+// 5/5 PASS): production'da REPRO YOK. WIDTH DELTA = 0.000px her sekmede (181.5px sabit). Browser
+// CSS 0.5px'i computed style'da 1px'e yuvarlamis, box-sizing universal border-box (sat 18) zaten
+// aktif. Yani inactive ve active render border ESIT 1px, grid stable.
+// DEFENSE-IN-DEPTH FIX: gelecekteki dpr=1 / eski cihaz / browser sub-pixel rounding farki ihtimaline
+// karsi CSS'te border-width'i EKSPLISIT 1px sabitle, active sadece border-color swap (border-width
+// hic degismez -> grid'e etki imkansiz).
+//   sat 204: .bm-stat-kart{border:0.5px solid #F1EFE8} -> border:1px solid #F1EFE8
+//   sat 208: .bm-stat-kart.active{border:1px solid #EF9F27} -> .active{border-color:#EF9F27}
+// Hover (border-color:#EF9F27) ve focus (outline:2px) zaten width-stable, intact. 131-A..J intact.
+// KURAL 12.3 bump.
+const CACHE_VERSION = 'bm-cache-v131-12';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [
