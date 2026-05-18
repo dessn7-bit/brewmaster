@@ -95,7 +95,15 @@
 // Space keyboard support. CSS: cursor:pointer + hover transform translateY(-1px) + box-shadow +
 // focus-visible outline. Aktif kart turuncu border (131-D) intact. Mobile'da stat click sidebar
 // aciklik gerekmiyor. KURAL 12.3 bump.
-const CACHE_VERSION = 'bm-cache-v131-10';
+// Adim 131-J (18.05.2026): v131-10 -> v131-11, stat kart ARSIV/ISTEK mapping bug fix + empty state.
+// TANI (puppeteer mobile 393): Mapping BUG YOK (stat onclick 0/1/2/3, setListeSekme dizi sirali
+// aktif/yapimda/arsiv/istek, sidebar/header/header titles tutarli). Side effect BUG YOK (klasor
+// click listeSekme intact). GERCEK BUG: bosMetin hardcoded objesinde yapimda anahtari EKSIK ->
+// listeSekme=yapimda + filtreliKR=[] durumunda bos ekran mesaj YOK (UX bug).
+// FIX: bosMetin'e yapimda anahtari eklendi ("Aktif tarif yok - Planlananlar'dan bir tarifi 'Aktife
+// Al' ile baslat."). Diger 3 mesaj intact (aktif/arsiv/istek). 4 sekme icin empty state dinamik.
+// KURAL 12.3 bump.
+const CACHE_VERSION = 'bm-cache-v131-11';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [

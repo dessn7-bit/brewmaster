@@ -10981,7 +10981,13 @@ function rListe(){
       '</div>';
   }
 
-  const bosMetin={aktif:"Planlanmış tarif yok — + Yeni Tarif ile başla.",arsiv:"Arşivlenmiş tarif yok.",istek:"İstek listesi boş."};
+  // Adim 131-J: bosMetin yapimda anahtari eklendi (131-I tani bug: yapimda sekme bos ekran mesaj yoktu)
+  const bosMetin={
+    aktif:"Planlanmış tarif yok — + Yeni Tarif ile başla.",
+    yapimda:"Aktif tarif yok — Planlananlar'dan bir tarifi 'Aktife Al' ile başlat.",
+    arsiv:"Arşivlenmiş tarif yok.",
+    istek:"İstek listesi boş."
+  };
   const listHTML=filtreliKR.length===0
     ?'<div style="text-align:center;padding:40px 20px;color:var(--dim);font-size:13px">'+(arama?"'"+aramaMetni+"' için sonuç bulunamadı.":bosMetin[listeSekme]||"")+'</div>'
     :filtreliKR.map(tarifKart).join("");
