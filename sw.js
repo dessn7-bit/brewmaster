@@ -172,6 +172,21 @@
 // setAktifKlasor icindeki setTimeout(bmDebugUpdate,50) cagrilari. KORUNDU: window.listeSekme/
 // window.aktifKlasor expose (sat 5937 + setter sync) - Sprint 132 sub-sprint'leri (Klonla vs)
 // state expose kullanir. 131-A..T fix'leri INTACT, motor zinciri dokunulmadi.
+// Adim 132-A (19.05.2026): v131-22 -> v131-23, Sticky ozet paneli Genel tab pilot.
+// HTML: rEditorGenel return basinda <div class="bm-sticky-summary" id="bm-summary" data-tab="genel">
+//   - <span class="bm-ss-renk" id="ss-renk"> srmR(srm) hex bg
+//   - <span class="bm-ss-label" id="ss-stil"> S.stil > S.stilTah > S.biraAd fallback
+//   - 5 stat: OG/FG/ABV/IBU/SRM (calc() sonuclari, initial render dolu)
+// CSS .bm-sticky-summary + .bm-ss-* (cream BG + backdrop-filter blur + sticky top:var(--bm-header-h))
+//   Desktop: gap 14, current max-width 200. Mobile <=768: gap 8, current max-width 140, kompakt.
+// JS:
+//   - window.updateStickySummary(): predict.then() hook - stil + renk dot DOM update
+//   - window._bmUpdateHeaderH(): .eh height olcum + --bm-header-h CSS var set
+//   - render() sonu setTimeout _bmUpdateHeaderH (sticky-summary top hizalama)
+//   - ResizeObserver .eh degisirse (breadcrumb wrap vs) auto-update
+// Predict.then() 6 hook'a updateStickySummary call eklendi (updateRibbon strategy-c yanina).
+// PILOT: sadece Genel tab. 132-E'de diger tablara yayilir.
+// 131-A..T + 132-pre/B/C intact. Motor zinciri dokunulmadi.
 // Adim 132-C (18.05.2026): v131-21 -> v131-22, Breadcrumb editor header'da.
 // HTML: .eh header restructure - 1. satir <nav class="bm-breadcrumb"> ("← Defter / klasor / biraAd"),
 // 2. satir [biraAd input | Kaydet | Klonla] (132-B intact). "‹" geri buton kaldirildi, fonksiyonu
@@ -188,7 +203,7 @@
 // 'planlananlar' string - sat 10770 statTanim mapping) + olusturma/guncelleme timestamps + KR.unshift
 // + _origKy(KR) localStorage save + _syncGonderDebounced Firebase push + tarifAc(yeni.id) editor yonlendir.
 // flash mesaj. 131-A..T + 132-pre intact. Motor zinciri dokunulmadi.
-const CACHE_VERSION = 'bm-cache-v131-22';
+const CACHE_VERSION = 'bm-cache-v131-23';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [

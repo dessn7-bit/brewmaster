@@ -237,6 +237,25 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
 .bm-btn-primary:hover{background:#D88A1F}
 .bm-btn-primary:active{background:#C57A0F}
 
+/* Adim 132-A: Sticky ozet paneli (yatay serit, Genel tab pilot). Header altinda yapisir,
+   scroll boyunca renk dot + stil adi + OG/FG/ABV/IBU/SRM gorunur. .eh height dinamik
+   --bm-header-h CSS var ile takip edilir (ResizeObserver). 132-E'de diger tablara yayilir. */
+.bm-sticky-summary{position:sticky;top:var(--bm-header-h, 200px);z-index:10;background:rgba(250,238,218,.95);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:8px 12px;border:1px solid #E5DCC8;border-radius:8px;display:flex;align-items:center;gap:12px;flex-wrap:nowrap;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.bm-ss-stil{display:flex;align-items:center;gap:6px;min-width:0;flex:1}
+.bm-ss-renk{width:16px;height:16px;border-radius:50%;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,0.1);flex-shrink:0}
+.bm-ss-label{font-size:13px;line-height:1.2;font-weight:600;color:#2A1A0A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;font-family:var(--font-body)}
+.bm-ss-stats{display:flex;gap:14px;margin-left:auto;flex-shrink:0}
+.bm-ss-stat{display:flex;flex-direction:column;align-items:flex-end;min-width:36px}
+.ss-label{font-size:10px;line-height:1;color:#8B5A2B;text-transform:uppercase;letter-spacing:.5px;font-family:var(--font-body)}
+.ss-val{font-size:14px;line-height:1.2;font-weight:700;color:#2A1A0A;font-family:var(--font-display);margin-top:2px}
+@media (max-width:768px){
+  .bm-sticky-summary{padding:6px 10px;gap:8px}
+  .bm-ss-stats{gap:8px}
+  .bm-ss-stat{min-width:30px}
+  .ss-val{font-size:13px}
+  .bm-ss-label{max-width:140px;font-size:12px}
+}
+
 /* Adim 132-C: Editor breadcrumb (Defter / Klasor / Bira adi). "‹" geri butonun fonksiyonu "← Defter" link'inde. */
 .bm-breadcrumb{display:flex;align-items:center;gap:6px;font-size:13px;line-height:1.4;color:rgba(248,232,196,.85);margin-bottom:8px;flex-wrap:nowrap;overflow:hidden;min-width:0}
 .bm-bc-link{color:rgba(248,232,196,.85);cursor:pointer;text-decoration:none;background:none;border:none;font:inherit;padding:0;flex-shrink:0;-webkit-tap-highlight-color:transparent}
@@ -2951,7 +2970,7 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
                       ' mode=' + ((stcRes._meta && stcRes._meta.mode) || '?') +
                       (stcRes.hybrid_agreement ? ' agreement=' + stcRes.hybrid_agreement : '') +
                       ' cluster=' + (stcRes.cluster || '?'));
-                    try { if (typeof window.updateRibbon === 'function') window.updateRibbon('strategy-c'); } catch(_){}
+                    try { if (typeof window.updateRibbon === 'function') window.updateRibbon('strategy-c'); if (typeof window.updateStickySummary === 'function') window.updateStickySummary(); } catch(_){}
                   }
                 }).catch(function(e){ console.warn('[BM Strategy C V20-reexec] exception:', e && e.message); });
               }
@@ -16325,15 +16344,15 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
                   console.warn('[BM Strategy C] predict returned null');
                 }
                 window.__bmB1InFlight = false;
-                try { if (typeof window.updateRibbon === 'function') { window.updateRibbon('hybrid-cluster'); window.updateRibbon('strategy-c'); } } catch(_){}
+                try { if (typeof window.updateRibbon === 'function') { window.updateRibbon('hybrid-cluster'); window.updateRibbon('strategy-c'); if (typeof window.updateStickySummary === 'function') window.updateStickySummary(); } } catch(_){}
               }).catch(function(stcErr){
                 console.error('[BM Strategy C] predict exception:', stcErr && stcErr.message);
                 window.__bmB1InFlight = false;
-                try { if (typeof window.updateRibbon === 'function') { window.updateRibbon('hybrid-cluster'); window.updateRibbon('strategy-c'); } } catch(_){}
+                try { if (typeof window.updateRibbon === 'function') { window.updateRibbon('hybrid-cluster'); window.updateRibbon('strategy-c'); if (typeof window.updateStickySummary === 'function') window.updateStickySummary(); } } catch(_){}
               });
             } else {
               window.__bmB1InFlight = false;
-              try { if (typeof window.updateRibbon === 'function') { window.updateRibbon('hybrid-cluster'); window.updateRibbon('strategy-c'); } } catch(_){}
+              try { if (typeof window.updateRibbon === 'function') { window.updateRibbon('hybrid-cluster'); window.updateRibbon('strategy-c'); if (typeof window.updateStickySummary === 'function') window.updateStickySummary(); } } catch(_){}
             }
           } catch (stcChainErr) {
             console.warn('[BM Strategy C] chain exception:', stcChainErr && stcChainErr.message);
@@ -16342,12 +16361,12 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
         } else {
           console.warn('[BM B1 dispatch] predict returned null — feature build veya inference fail (F12 step1-4 log)');
           window.__bmB1InFlight = false;
-          try { if (typeof window.updateRibbon === 'function') { window.updateRibbon('hybrid-cluster'); window.updateRibbon('strategy-c'); } } catch(e) {}
+          try { if (typeof window.updateRibbon === 'function') { window.updateRibbon('hybrid-cluster'); window.updateRibbon('strategy-c'); if (typeof window.updateStickySummary === 'function') window.updateStickySummary(); } } catch(e) {}
         }
       }).catch(function(e){
         console.error('[BM B1 dispatch] predict exception:', e && e.message, e && e.stack);
         window.__bmB1InFlight = false;
-        try { if (typeof window.updateRibbon === 'function') { window.updateRibbon('hybrid-cluster'); window.updateRibbon('strategy-c'); } } catch(_){}
+        try { if (typeof window.updateRibbon === 'function') { window.updateRibbon('hybrid-cluster'); window.updateRibbon('strategy-c'); if (typeof window.updateStickySummary === 'function') window.updateStickySummary(); } } catch(_){}
       });
     }
   } catch (B1err) {
@@ -16681,6 +16700,20 @@ try {
 } catch(e){ _fermDurum=''; }
 
 return `
+    <!-- Adim 132-A: Sticky ozet paneli (Genel tab pilot) -->
+    <div class="bm-sticky-summary" id="bm-summary" data-tab="genel">
+      <div class="bm-ss-stil">
+        <span class="bm-ss-renk" id="ss-renk" style="background:${renk_hex}"></span>
+        <span class="bm-ss-label" id="ss-stil">${esc((S&&S.stil)||(S&&S.stilTah)||(S&&S.biraAd)||'Stil hesaplanıyor...')}</span>
+      </div>
+      <div class="bm-ss-stats">
+        <div class="bm-ss-stat"><span class="ss-label">OG</span><span class="ss-val" id="ss-og">${og.toFixed(3)}</span></div>
+        <div class="bm-ss-stat"><span class="ss-label">FG</span><span class="ss-val" id="ss-fg">${fg.toFixed(3)}</span></div>
+        <div class="bm-ss-stat"><span class="ss-label">ABV</span><span class="ss-val" id="ss-abv">${abv.toFixed(1)}%</span></div>
+        <div class="bm-ss-stat"><span class="ss-label">IBU</span><span class="ss-val" id="ss-ibu">${Math.round(ibu)}</span></div>
+        <div class="bm-ss-stat"><span class="ss-label">SRM</span><span class="ss-val" id="ss-srm">${(parseFloat(srm)||0).toFixed(1)}</span></div>
+      </div>
+    </div>
     <div style="background:linear-gradient(135deg,var(--bg2),var(--card));border:1px solid var(--bor2);border-radius:14px;overflow:hidden;margin-bottom:10px;box-shadow:var(--golge2)">
       <div style="height:6px;background:${renk_hex}"></div>
       <div style="padding:14px">
@@ -18123,6 +18156,8 @@ function render(){
     document.getElementById("ekran").innerHTML=ekran==="liste"?rListe():ekran==="stok"?rStok():rEditor();
     try{ renderSidebar(); }catch(e){ console.warn("renderSidebar fail:", e); }
     try{ renderHeader(); }catch(e){ console.warn("renderHeader fail:", e); }
+    // Adim 132-A: render sonrasi --bm-header-h CSS var guncelle (sticky-summary top hizalama)
+    try{ setTimeout(function(){ if(typeof window._bmUpdateHeaderH==='function') window._bmUpdateHeaderH(); }, 0); }catch(_){}
   }catch(e){
     console.error('render:',e);
     var _eb=document.getElementById('_errBanner')||document.createElement('div');
@@ -21525,6 +21560,54 @@ syncBaslat();
       }
     } catch(e) { /* silent */ }
   };
+
+  // Adim 132-A: Sticky ozet paneli live update (predict.then() hook'larindan cagirilir).
+  // Genel tab'a render edilen #bm-summary panel'inin stil/renk/stat alanlarini gunceller.
+  // Stat'lar (OG/FG/ABV/IBU/SRM) zaten render sirasinda dolu - sadece stilTah + renk dot update.
+  window.updateStickySummary = function(){
+    try {
+      var stilEl = document.getElementById('ss-stil');
+      var renkEl = document.getElementById('ss-renk');
+      if (stilEl) {
+        // S.stil (manuel) > S.stilTah (auto) > biraAd fallback
+        var stil = (window.S && window.S.stil) || (window.S && window.S.stilTah) || (window.S && window.S.biraAd) || '';
+        if (stil) stilEl.textContent = stil;
+      }
+      if (renkEl && typeof srmR === 'function' && window.S) {
+        var srmVal = parseFloat(window.S.srm) || (typeof _lastSrm !== 'undefined' ? _lastSrm : null);
+        // Fallback: ozet'ten oku
+        if (srmVal == null && window.S && window.S.maltlar) {
+          try { var _c = calc(); srmVal = parseFloat(_c.srm) || 0; } catch(_){}
+        }
+        if (srmVal != null) renkEl.style.background = srmR(srmVal);
+      }
+    } catch(e) { /* silent */ }
+  };
+
+  // Adim 132-A: Header height observer - --bm-header-h CSS var dinamik update.
+  // .eh sticky header height degisirse (breadcrumb wrap, hedef stil select, vs) sticky-summary
+  // top: var(--bm-header-h) ile altinda hizalanir.
+  window._bmUpdateHeaderH = function(){
+    try {
+      var eh = document.querySelector('.eh');
+      if (!eh) return;
+      var h = eh.getBoundingClientRect().height;
+      if (h > 0) document.documentElement.style.setProperty('--bm-header-h', h + 'px');
+    } catch(e) {}
+  };
+  // Initial setup + ResizeObserver (modern browsers)
+  if (typeof window !== 'undefined') {
+    setTimeout(function(){
+      window._bmUpdateHeaderH();
+      try {
+        if (window.ResizeObserver && !window._bmHeaderObs) {
+          window._bmHeaderObs = new ResizeObserver(function(){ window._bmUpdateHeaderH(); });
+          var eh = document.querySelector('.eh');
+          if (eh) window._bmHeaderObs.observe(eh);
+        }
+      } catch(_){}
+    }, 100);
+  }
 })();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.21.0/dist/ort.min.js"></script>
