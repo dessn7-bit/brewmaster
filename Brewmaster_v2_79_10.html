@@ -371,6 +371,13 @@ body[data-mode="view"] .bm-chip{pointer-events:none;opacity:.6}
 .bm-acc[aria-expanded="false"] .bm-acc-body{max-height:0;opacity:0;padding-top:0;padding-bottom:0}
 @media (max-width:768px){.bm-acc-meta{max-width:110px;font-size:11px}.bm-acc-title{font-size:13px}}
 
+/* Adim 134-bl-1: Malt/Hop inline muadil chip (132-G centralized .bm-muadil-wrap Genel tab INTACT, dual visibility) */
+.bm-muadil-inline{font-size:11px;color:var(--soluk);margin-top:0;padding:6px 10px;border-top:1px dashed rgba(184,118,63,.15);background:rgba(245,232,208,.35);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.bm-muadil-inline-label{color:var(--dim);font-size:10.5px;font-weight:600;letter-spacing:.3px;flex-shrink:0}
+.bm-muadil-inline-chip{padding:2px 8px;background:#F5E8D0;border:1px solid rgba(184,118,63,.3);border-radius:10px;font-size:11px;color:#5C3A0E;cursor:pointer;transition:background .15s,border-color .15s;white-space:nowrap;font-family:var(--font-body)}
+.bm-muadil-inline-chip:hover{background:#E8C28A;border-color:#B8763F}
+@media (max-width:480px){.bm-muadil-inline{gap:4px;padding:6px 8px}.bm-muadil-inline-chip{padding:2px 7px;font-size:10.5px}}
+
 /* Adim 134-G: bm-toast vintage komponenti (flash + alert dönüşüm). z-index 1900 (sync modal 2000 altında). */
 #bm-toast-container{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column-reverse;gap:8px;z-index:1900;pointer-events:none;max-width:380px}
 .bm-toast{pointer-events:auto;padding:12px 16px;border-radius:10px;border:1.5px solid #B8763F;background:#F5E8D0;color:#5C3A0E;font-size:13px;line-height:1.4;box-shadow:0 4px 16px rgba(184,118,63,.20);cursor:pointer;opacity:0;transform:translateY(10px);transition:opacity .2s ease-out,transform .2s ease-out;font-family:var(--font-body)}
@@ -14534,6 +14541,8 @@ function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
       }
     }
     const _kat=katKodu(ml?ml.g:'');
+    // Adim 134-bl-1: inline muadil chip (132-G centralized intact, dual visibility)
+    const _muadilM = (typeof MUADIL!=='undefined' && MUADIL[m.id]) ? MUADIL[m.id].slice(0,3) : [];
     return`<div style="background:var(--card);border:1px solid var(--bor);border-left:4px solid ${_kat.renk};border-radius:8px;margin-bottom:6px;overflow:hidden">
       <div style="display:flex;align-items:center;gap:8px;padding:8px 10px">
         <div style="width:14px;height:14px;border-radius:50%;background:${srmR(ml?ml.r:0)};border:2px solid rgba(0,0,0,.1);flex-shrink:0"></div>
@@ -14549,6 +14558,10 @@ function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
         </div>
         <button class="btn" style="background:none;color:var(--kk);font-size:20px;padding:0 4px;line-height:1" onclick="maltSil(${i})">×</button>
       </div>
+      ${_muadilM.length>0?`<div class="bm-muadil-inline" data-bm-muadil-malt="${esc(m.id)}">
+        <span class="bm-muadil-inline-label">↔ Muadil:</span>
+        ${_muadilM.map(mu=>`<span class="bm-muadil-inline-chip" data-muadil-id="${esc(mu.id)}" onclick="bmToast(this.dataset.muadilTip,'info')" data-muadil-tip="${esc(mu.ad)}${mu.fark?(' — '+esc((mu.fark||'').replace(/^[✅⚠️ℹ️🟡]+\s*/,''))):''}">${esc((mu.ad||'').split(' (')[0])}</span>`).join('')}
+      </div>`:''}
       ${_ozet||_rol?`<div onclick="(function(el){var c=el.nextElementSibling;var o=c.style.maxHeight==='0px'||!c.style.maxHeight;c.style.maxHeight=o?c.scrollHeight+'px':'0px';c.style.opacity=o?'1':'0';el.querySelector('.md-t').textContent=o?'▲':'▼';})(this)" style="border-top:1px solid var(--bor);padding:5px 10px;background:var(--bg2);cursor:pointer;user-select:none;display:flex;align-items:center;gap:6px;font-size:10px;color:var(--soluk)">
         <span>ℹ️ Bu malt ne yapıyor?</span>
         <span class="md-t" style="margin-left:auto;font-size:9px">▼</span>
@@ -14730,15 +14743,23 @@ function rEditorHop(og, ibu, seciHop){
     const _turEtiket=h.tur==="boil"?h.dk+" dk":h.tur==="whirlpool"?"WP "+_whT+"°C / "+_whDk+"dk":h.tur==="hop_stand"?"HS "+(h.whT||80)+"°C / "+(h.dk||30)+"dk":h.tur==="fwh"?"FWH · 60dk eşd.":"Dry Hop · "+_dryD+" gün kalır";
     const _grup=hp?hp.g:'';
     const _gRenk=_hopRenk(_grup);
-    return`<div class="satir" style="border-left:4px solid ${_gRenk}">
-      <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--kahve)">${hp?hp.ad:h.id}${_formIkon}${_grup?` <span style="font-size:9px;color:${_gRenk};background:${_gRenk}22;padding:1px 5px;border-radius:3px;font-weight:700;letter-spacing:.3px;vertical-align:middle">${_grup.toUpperCase()}</span>`:''}</div>
-      <div style="font-size:10px;color:var(--soluk);margin-top:2px">${_turEtiket} · ${aa}% AA</div></div>
-      <div style="text-align:right"><div style="font-size:12px;font-weight:600;color:${ik>0?"var(--bakir)":"var(--yk)"}">${ik>0?"+"+ik.toFixed(1)+" IBU":"🌿 Aroma"}</div><div style="font-size:11px;color:var(--soluk)">${h.g} g</div></div>
-      <div style="display:flex;flex-direction:column;gap:1px;margin-left:2px">
-        <button style="background:none;border:none;color:${i===0?'var(--dim)':'var(--bakir)'};font-size:11px;padding:0 3px;line-height:1;cursor:${i===0?'not-allowed':'pointer'};opacity:${i===0?'.4':'1'}" onclick="hopUp(${i})" ${i===0?'disabled':''}>▲</button>
-        <button style="background:none;border:none;color:${i===S.hoplar.length-1?'var(--dim)':'var(--bakir)'};font-size:11px;padding:0 3px;line-height:1;cursor:${i===S.hoplar.length-1?'not-allowed':'pointer'};opacity:${i===S.hoplar.length-1?'.4':'1'}" onclick="hopDown(${i})" ${i===S.hoplar.length-1?'disabled':''}>▼</button>
+    // Adim 134-bl-1: inline muadil chip
+    const _muadilH = (typeof MUADIL!=='undefined' && MUADIL[h.id]) ? MUADIL[h.id].slice(0,3) : [];
+    return`<div class="satir" style="border-left:4px solid ${_gRenk};display:block;padding:0">
+      <div style="display:flex;align-items:center;gap:8px;padding:10px 12px">
+        <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--kahve)">${hp?hp.ad:h.id}${_formIkon}${_grup?` <span style="font-size:9px;color:${_gRenk};background:${_gRenk}22;padding:1px 5px;border-radius:3px;font-weight:700;letter-spacing:.3px;vertical-align:middle">${_grup.toUpperCase()}</span>`:''}</div>
+        <div style="font-size:10px;color:var(--soluk);margin-top:2px">${_turEtiket} · ${aa}% AA</div></div>
+        <div style="text-align:right"><div style="font-size:12px;font-weight:600;color:${ik>0?"var(--bakir)":"var(--yk)"}">${ik>0?"+"+ik.toFixed(1)+" IBU":"🌿 Aroma"}</div><div style="font-size:11px;color:var(--soluk)">${h.g} g</div></div>
+        <div style="display:flex;flex-direction:column;gap:1px;margin-left:2px">
+          <button style="background:none;border:none;color:${i===0?'var(--dim)':'var(--bakir)'};font-size:11px;padding:0 3px;line-height:1;cursor:${i===0?'not-allowed':'pointer'};opacity:${i===0?'.4':'1'}" onclick="hopUp(${i})" ${i===0?'disabled':''}>▲</button>
+          <button style="background:none;border:none;color:${i===S.hoplar.length-1?'var(--dim)':'var(--bakir)'};font-size:11px;padding:0 3px;line-height:1;cursor:${i===S.hoplar.length-1?'not-allowed':'pointer'};opacity:${i===S.hoplar.length-1?'.4':'1'}" onclick="hopDown(${i})" ${i===S.hoplar.length-1?'disabled':''}>▼</button>
+        </div>
+        <button class="btn" style="background:none;color:var(--kk);font-size:20px;padding:0 4px;line-height:1" onclick="S.hoplar.splice(${i},1);render()">×</button>
       </div>
-      <button class="btn" style="background:none;color:var(--kk);font-size:20px;padding:0 4px;line-height:1" onclick="S.hoplar.splice(${i},1);render()">×</button>
+      ${_muadilH.length>0?`<div class="bm-muadil-inline" data-bm-muadil-hop="${esc(h.id)}">
+        <span class="bm-muadil-inline-label">↔ Muadil:</span>
+        ${_muadilH.map(mu=>`<span class="bm-muadil-inline-chip" data-muadil-id="${esc(mu.id)}" onclick="bmToast(this.dataset.muadilTip,'info')" data-muadil-tip="${esc(mu.ad)}${mu.fark?(' — '+esc((mu.fark||'').replace(/^[✅⚠️ℹ️🟡]+\s*/,''))):''}">${esc((mu.ad||'').split(' (')[0])}</span>`).join('')}
+      </div>`:''}
     </div>`;
   }).join("");
   // I-H3: toplam gram + I-H4: BU:GU + M-H5: anormal IBU uyarısı
