@@ -66,8 +66,23 @@ input,select,textarea,button{font-family:inherit}
 input[type=number]::-webkit-inner-spin-button{opacity:.5}
 .btn{border:none;border-radius:8px;padding:9px 16px;cursor:pointer;font-weight:600;transition:all .15s;font-size:13px}
 .btn:active{transform:scale(.96);opacity:.85}
-.inp{background:#fff;color:var(--kahve);border:1.5px solid var(--bor);border-radius:8px;padding:9px 12px;width:100%;font-size:13px;transition:border .15s}
-.inp:focus{outline:none;border-color:var(--altin)}
+.inp{background:#fff;color:var(--kahve);border:1.5px solid var(--bor);border-radius:8px;padding:9px 12px;width:100%;font-size:13px;transition:border .15s,box-shadow .15s}
+.inp:focus{outline:none;border-color:#B8763F;box-shadow:0 0 0 2px rgba(184,118,63,.15)}
+.inp:hover:not(:focus):not(:disabled){border-color:rgba(184,118,63,.5)}
+.inp:disabled,.inp[disabled]{opacity:.6;cursor:not-allowed;background:#FAF6EE}
+/* Adim 134-H: Number input arrows gizle (textfield clean look, Kaan numeric pattern) */
+input[type="number"].inp::-webkit-outer-spin-button,input[type="number"].inp::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+input[type="number"].inp{-moz-appearance:textfield}
+/* Adim 134-H: Checkbox/Radio vintage CSS-only — .bm-skip-vintage escape hatch */
+input[type="checkbox"]:not(.bm-skip-vintage),input[type="radio"]:not(.bm-skip-vintage){appearance:none;-webkit-appearance:none;-moz-appearance:none;width:18px;height:18px;border:1.5px solid var(--bor);background:#fff;cursor:pointer;position:relative;transition:border-color .15s,background .15s,box-shadow .15s;margin:0;flex-shrink:0;vertical-align:middle}
+input[type="checkbox"]:not(.bm-skip-vintage){border-radius:4px}
+input[type="radio"]:not(.bm-skip-vintage){border-radius:50%}
+input[type="checkbox"]:checked:not(.bm-skip-vintage){background:#B8763F;border-color:#B8763F}
+input[type="checkbox"]:checked:not(.bm-skip-vintage)::after{content:'✓';color:#fff;font-size:13px;line-height:1;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-weight:700}
+input[type="radio"]:checked:not(.bm-skip-vintage){border-color:#B8763F}
+input[type="radio"]:checked:not(.bm-skip-vintage)::after{content:'';width:8px;height:8px;background:#B8763F;border-radius:50%;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
+input[type="checkbox"]:focus-visible:not(.bm-skip-vintage),input[type="radio"]:focus-visible:not(.bm-skip-vintage){box-shadow:0 0 0 2px rgba(184,118,63,.20);outline:none}
+input[type="checkbox"]:disabled,input[type="radio"]:disabled{opacity:.5;cursor:not-allowed}
 .kart{background:var(--card);border:1px solid var(--bor);border-radius:10px;padding:14px;margin-bottom:10px;box-shadow:inset 0 0 0 1px rgba(250,247,238,.55),0 0 0 3px var(--bg2),0 1px 0 3px var(--bor),var(--golge);position:relative}
 .satir{display:flex;align-items:center;gap:8px;padding:10px 12px;margin-bottom:5px;background:#fff;border-radius:10px;border:1px solid var(--bor);box-shadow:var(--golge)}
 .etiket{font-size:10px;color:var(--soluk);font-weight:600;letter-spacing:.8px;text-transform:uppercase;display:block;margin-bottom:4px}
