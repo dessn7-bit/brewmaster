@@ -257,8 +257,10 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
   .ss-label{font-size:9px}
   .bm-ss-label{max-width:90px;font-size:11px}
   .bm-ss-renk{width:14px;height:14px}
-  /* Adim 132-J-4(a): Kaydet+Klonla flex row 380px overflow fix — buton padding kucult */
-  .eh .btn,.eh .bm-btn-primary{padding:6px 10px;font-size:11px}
+  /* Adim 132-J-4(a): Kaydet+Klonla flex row 380px overflow fix — buton padding+font kucult,
+     input min-width:0 (intrinsic content size cap kaldir, flex:1 dogru shrink eder). */
+  .eh .btn,.eh .bm-btn-primary{padding:6px 8px;font-size:11px}
+  .eh input[style*="flex:1"]{min-width:0;font-size:14px !important}
 }
 /* Adim 132-J-4(b): Milestone timeline gun hucresi 380px overflow fix (6px -> 4px) */
 @media (max-width:420px){
