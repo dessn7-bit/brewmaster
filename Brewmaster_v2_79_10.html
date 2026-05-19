@@ -287,6 +287,15 @@ input[type="checkbox"]:disabled,input[type="radio"]:disabled{opacity:.5;cursor:n
 @media (max-width:420px){
   .bm-ms-cell{min-width:4px !important}
 }
+/* Adim 134-bl-3: Long timeline (>90 gun lager) horizontal scroll mobile — continuous Gantt korunur, wrap break etmez */
+.bm-ms-container{display:flex;align-items:stretch;border-radius:4px;overflow:visible;background:var(--bg2)}
+@media (max-width:480px){
+  .bm-ms-container-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:6px;scrollbar-color:var(--vintage) var(--bg2);scrollbar-width:thin}
+  .bm-ms-container-wrap::-webkit-scrollbar{height:4px}
+  .bm-ms-container-wrap::-webkit-scrollbar-track{background:var(--bg2);border-radius:2px}
+  .bm-ms-container-wrap::-webkit-scrollbar-thumb{background:var(--vintage);border-radius:2px}
+  .bm-ms-cell{min-width:5px !important}
+}
 
 /* Adim 133-A-2: Recete Doktoru kart UX refactor — header / aciklama / cozum chip-rows / hedef
    Vintage Amber palette uyumlu. Eski inline regex-split <b>Cozum N:</b> yerine yapısal layout. */
@@ -12307,7 +12316,7 @@ function rEditorTakvim(maya, maya2, tv){
           +'<span style="font-size:11px;color:'+_faz_renk_txt+';font-weight:700">'+_faz_str+'</span>'
         +'</div>'
         +(_faz_ozet?'<div style="font-size:11px;color:var(--soluk);margin-bottom:8px;padding:4px 8px;background:var(--bg2);border-radius:6px;border-left:3px solid '+_faz_renk_txt+'">'+_faz_ozet+'</div>':'')
-        +'<div style="padding-top:12px"><div style="display:flex;align-items:stretch;border-radius:4px;overflow:visible;background:var(--bg2)">'+_gunHucreler+'</div></div>'
+        +'<div class="bm-ms-container-wrap" style="padding-top:12px"><div class="bm-ms-container">'+_gunHucreler+'</div></div>'
         +_etiketH
         +'<div style="display:flex;gap:10px;font-size:9px;color:var(--dim);margin-top:8px;flex-wrap:wrap">'
           +'<span><span style="display:inline-block;width:10px;height:10px;background:#A8C478;border-radius:2px;vertical-align:middle;margin-right:3px"></span>Fermantasyon</span>'
