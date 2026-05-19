@@ -282,8 +282,18 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
 .bm-doctor-cozumler{margin-top:6px}
 .bm-doctor-cozumler-label{font-family:var(--font-body);font-size:11px;font-weight:600;color:#8B5A2B;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
 .bm-doctor-cozum-rows{display:flex;flex-direction:column;gap:6px}
-.bm-doctor-cozum-chip{display:flex;align-items:flex-start;gap:8px;padding:8px 12px;background:#F5E8D0;border:1px solid #D4B58A;border-radius:8px;transition:background .15s,border-color .15s}
-.bm-doctor-cozum-chip:hover{background:#E8C28A;border-color:#B8763F}
+.bm-doctor-cozum-chip{display:flex;align-items:flex-start;gap:8px;padding:8px 12px;background:#F5E8D0;border:1px solid #D4B58A;border-radius:8px;transition:background .15s,border-color .15s,transform .12s,box-shadow .15s;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none}
+.bm-doctor-cozum-chip:hover{background:#E8C28A;border-color:#B8763F;transform:translateY(-1px);box-shadow:0 2px 4px rgba(139,90,43,.12)}
+.bm-doctor-cozum-chip:active{transform:translateY(0);box-shadow:0 1px 2px rgba(139,90,43,.10)}
+.bm-doctor-cozum-chip:focus-visible{outline:2px solid #B8763F;outline-offset:2px}
+.bm-doctor-cozum-chip.bm-chip-disabled{opacity:.65;cursor:default}
+.bm-doctor-cozum-chip.bm-chip-disabled:hover{transform:none;box-shadow:none;background:#F5E8D0;border-color:#D4B58A}
+/* Adim 133-A-4: Aksiyon ok ikonu chip sag tarafinda */
+.bm-chip-arrow{color:#B8763F;opacity:.5;margin-left:auto;font-size:14px;transition:opacity .15s,transform .15s;flex-shrink:0;line-height:1.4;align-self:center}
+.bm-doctor-cozum-chip:hover .bm-chip-arrow{opacity:1;transform:translateX(2px)}
+/* Adim 133-A-4: malt_azalt action sonrasi matching .satir highlight pulse (2.2sn) */
+.bm-malt-highlight{animation:bmMaltPulse 2.2s ease-in-out}
+@keyframes bmMaltPulse{0%,100%{background:transparent;box-shadow:none}50%{background:#E8C28A;box-shadow:0 0 0 2px #B8763F}}
 .cozum-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#B8763F;color:#fff;font-family:var(--font-body);font-size:11px;font-weight:600;flex-shrink:0;line-height:1}
 .cozum-text{font-family:var(--font-body);font-size:13px;line-height:1.4;color:#5C3A0E;flex:1;min-width:0}
 .bm-doctor-hedef{font-family:var(--font-body);font-size:13px;font-style:italic;color:#8B5A2B;margin-top:8px;padding-top:8px;border-top:1px dashed #D4B58A}
@@ -17749,9 +17759,18 @@ return `
                     '<div class="bm-doctor-cozumler-label">Çözümler</div>'+
                     '<div class="bm-doctor-cozum-rows">'+
                       p.cozumler.map(function(c,i){
-                        return '<div class="bm-doctor-cozum-chip">'+
+                        // Adim 133-A-4: chip click action — data-text + data-ikon (context routing).
+                        // Plain text for parser (strip HTML tags + decode entities).
+                        var _plain = String(c||'').replace(/<[^>]*>/g,'').replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').trim();
+                        var _enc = _plain.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+                        var _ikonEnc = String(o.ikon||'').replace(/"/g,'&quot;');
+                        return '<div class="bm-doctor-cozum-chip" role="button" tabindex="0" '+
+                          'onclick="window.bmDoctorChipClick(this.dataset.text,this.dataset.ikon)" '+
+                          'onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();window.bmDoctorChipClick(this.dataset.text,this.dataset.ikon)}" '+
+                          'data-text="'+_enc+'" data-ikon="'+_ikonEnc+'">'+
                           '<span class="cozum-num">'+(i+1)+'</span>'+
                           '<span class="cozum-text">'+c+'</span>'+
+                          '<span class="bm-chip-arrow" aria-hidden="true">→</span>'+
                         '</div>';
                       }).join('')+
                     '</div>'+
@@ -21932,6 +21951,123 @@ syncBaslat();
       });
     };
   })();
+
+  // Adim 133-A-4: Recete Doktoru cozum chip aksiyon — parse + dispatch (hop_ekle/malt_ekle/malt_azalt/info).
+  // Parse: "+9g Centennial/Columbus" → hop_ekle, "+0.5 kg Crystal 40" → malt_ekle, "azalt"/"kaldır" → *_azalt
+  // ikon hint context routing: 🌿 hop, 📈/🎨/📉 malt. Ambiguous → fallback info.
+  window.bmDoctorChipParse = function(text, ikon){
+    text = String(text||'').trim();
+    if (!text) return {action:'info', text:''};
+    var lower = text.toLowerCase();
+    // 1) Azalt/kaldır/düşür kuralı
+    if (/\bazalt|kaldır|kaldir|düşür|dusur/i.test(lower)) {
+      return {action: (ikon==='🌿' ? 'hop_azalt' : 'malt_azalt'), text: text};
+    }
+    // 2) Sayı + birim (+9g veya +0.5 kg veya +200g)
+    var amtMatch = text.match(/^\s*[+•\-]?\s*(\d+(?:[\.,]\d+)?)\s*(kg|g)\b/i);
+    if (amtMatch) {
+      var amt = parseFloat(amtMatch[1].replace(',','.'));
+      var unit = amtMatch[2].toLowerCase();
+      var afterAmt = text.slice(amtMatch[0].length).trim().replace(/^[A-Za-zÇĞıİÖŞÜçğöşü]+\s+/,''); // skip prefix like "kg"
+      // Name extraction: ilk kelime grubu / veya ( veya — sınırlı
+      var nameMatch = afterAmt.match(/^([A-Za-zÇĞıİÖŞÜçğöşü0-9 ]+?)(?:\s*[\/(—–-]|\s*$)/);
+      if (nameMatch) {
+        var name = nameMatch[1].trim();
+        // Context routing
+        if (ikon==='🌿') {
+          // Hop kontekti: g birim, gram olarak ekle
+          var gram = unit==='g' ? amt : amt*1000;
+          return {action:'hop_ekle', name:name, gram:Math.round(gram), text:text};
+        }
+        if (ikon==='📈' || ikon==='📉' || ikon==='🎨') {
+          // Malt kontekti: kg birimine çevir
+          var kg = unit==='kg' ? amt : amt/1000;
+          return {action:'malt_ekle', name:name, kg:+kg.toFixed(3), text:text};
+        }
+        // Generic: large gram → hop, small kg/decimal → malt
+        if (unit==='g' && amt >= 5) {
+          return {action:'hop_ekle', name:name, gram:amt, text:text};
+        }
+        var kg2 = unit==='kg' ? amt : amt/1000;
+        return {action:'malt_ekle', name:name, kg:+kg2.toFixed(3), text:text};
+      }
+    }
+    // 3) Default: info
+    return {action:'info', text:text};
+  };
+
+  window.bmDoctorChipClick = function(text, ikon){
+    try {
+      var parsed = window.bmDoctorChipParse(text, ikon);
+
+      if (parsed.action === 'hop_ekle' && typeof HOPLAR !== 'undefined') {
+        // Exact ad match → partial indexOf fallback
+        var hop = HOPLAR.find(function(h){ return h && h.ad && h.ad.toLowerCase() === parsed.name.toLowerCase(); }) ||
+                  HOPLAR.find(function(h){ return h && h.ad && h.ad.toLowerCase().indexOf(parsed.name.toLowerCase()) >= 0; });
+        if (!hop) {
+          if (typeof flash === 'function') flash('Hop bulunamadı: '+parsed.name, 'err');
+          console.warn('[bmDoctorChip] hop_ekle name lookup fail:', parsed.name);
+          return;
+        }
+        // Yeni satır (zaten varsa "kümülatif eklendi" mesajı belirsizliği önler) — push dogrudan
+        S.hoplar.push({id:hop.id, g:parsed.gram, dk:60, tur:'boil', cAA:null, form:'pellet', _ad:hop.ad});
+        if (typeof flash === 'function') flash('✓ '+hop.ad+' '+parsed.gram+'g eklendi (60dk boil)', 'ok');
+        if (typeof render === 'function') render();
+        return;
+      }
+
+      if (parsed.action === 'malt_ekle' && typeof MALTLAR !== 'undefined') {
+        var malt = MALTLAR.find(function(m){ return m && m.ad && m.ad.toLowerCase() === parsed.name.toLowerCase(); }) ||
+                   MALTLAR.find(function(m){ return m && m.ad && m.ad.toLowerCase().indexOf(parsed.name.toLowerCase()) >= 0; });
+        if (!malt) {
+          if (typeof flash === 'function') flash('Malt bulunamadı: '+parsed.name, 'err');
+          console.warn('[bmDoctorChip] malt_ekle name lookup fail:', parsed.name);
+          return;
+        }
+        var existingIdx = (S.maltlar||[]).findIndex(function(m){ return m && m.id === malt.id; });
+        if (existingIdx >= 0) {
+          S.maltlar[existingIdx].kg = +(S.maltlar[existingIdx].kg + parsed.kg).toFixed(3);
+          if (typeof flash === 'function') flash('✓ '+malt.ad+' mevcuttu — '+parsed.kg+' kg eklendi (toplam '+S.maltlar[existingIdx].kg+' kg)', 'ok');
+        } else {
+          S.maltlar.push({id:malt.id, kg:parsed.kg, marka:'', _ad:malt.ad});
+          if (typeof flash === 'function') flash('✓ '+malt.ad+' '+parsed.kg+' kg eklendi', 'ok');
+        }
+        if (typeof render === 'function') render();
+        return;
+      }
+
+      if (parsed.action === 'malt_azalt') {
+        if (typeof setSekme === 'function') setSekme('malt');
+        // Highlight matching malt rows (key term match içerikte)
+        setTimeout(function(){
+          var keywords = ['Chocolate','Roasted','Crystal','Black','Munich','Carafa','Pale','Pilsner','Vienna','Acid','Karamel','Çikolata'];
+          var hits = 0;
+          document.querySelectorAll('.satir').forEach(function(s){
+            var t = (s.textContent||'').toLowerCase();
+            if (keywords.some(function(k){ return t.indexOf(k.toLowerCase()) >= 0; })) {
+              s.classList.add('bm-malt-highlight');
+              hits++;
+              setTimeout(function(){ s.classList.remove('bm-malt-highlight'); }, 2300);
+            }
+          });
+          if (typeof flash === 'function') flash('🎨 '+hits+' malt azaltma için işaretlendi', 'ok');
+        }, 200);
+        return;
+      }
+
+      if (parsed.action === 'hop_azalt') {
+        if (typeof setSekme === 'function') setSekme('hop');
+        if (typeof flash === 'function') flash('🌿 Hop sekmesine geçildi — gramaj veya AA azalt', 'ok');
+        return;
+      }
+
+      // info / fallback
+      if (typeof flash === 'function') flash('💡 Bu öneri manuel uygulama gerektirir', 'ok');
+    } catch (e) {
+      console.warn('[bmDoctorChipClick]', e);
+      if (typeof flash === 'function') flash('Aksiyon başarısız', 'err');
+    }
+  };
 
   // Adim 132-I: Recete mode toggle (edit/view) — segmented mini toggle handler.
   // localStorage 'bm_recete_mode_'+recId key'inde persist. render() icinde data-mode body attr set.

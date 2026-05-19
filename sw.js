@@ -172,6 +172,26 @@
 // setAktifKlasor icindeki setTimeout(bmDebugUpdate,50) cagrilari. KORUNDU: window.listeSekme/
 // window.aktifKlasor expose (sat 5937 + setter sync) - Sprint 132 sub-sprint'leri (Klonla vs)
 // state expose kullanir. 131-A..T fix'leri INTACT, motor zinciri dokunulmadi.
+// Adim 133-A-4 (19.05.2026): v131-36 -> v131-37, Recete Doktoru cozum chip aksiyon entegrasyon.
+// 133-A-2 layout sonrasi chip'ler interactive: tıklanabilir + arrow icon + hover transform.
+// Parse: window.bmDoctorChipParse(text, ikon) — regex ladder:
+//   "+9g Centennial/Columbus" → action=hop_ekle, gram=9, name="Centennial"
+//   "+0.5 kg Crystal 40" → action=malt_ekle, kg=0.5, name="Crystal 40"
+//   "azalt|kaldır|düşür" → action=malt_azalt (veya hop_azalt ikon=🌿 ise)
+//   Belirsiz → action=info (safe fallback)
+//   ikon hint context routing: 🌿→hop, 📈/📉/🎨→malt.
+// Dispatch: window.bmDoctorChipClick(text, ikon) — switch action:
+//   hop_ekle: HOPLAR.find(ad) exact→partial, S.hoplar.push({id,g,dk:60,tur:'boil',...}) + flash + render
+//   malt_ekle: MALTLAR.find(ad), existing varsa kg toplama / yoksa push + flash + render
+//   malt_azalt: setSekme('malt') + .satir keyword match (Chocolate/Roasted/Crystal/Black/Munich/Carafa) → .bm-malt-highlight pulse 2.2sn
+//   hop_azalt: setSekme('hop') + flash hint
+//   info: flash "manuel uygulama" toast
+// Render: chip'e onclick + onkeydown (Enter/Space) + data-text + data-ikon + role=button + tabindex=0 + arrow icon.
+// CSS: cursor pointer + hover transform(-1px) + box-shadow + focus outline + .bm-chip-arrow opacity transition.
+// .bm-malt-highlight keyframes bmMaltPulse (transparent → #E8C28A bg + box-shadow #B8763F 2px).
+// 133-A-2 BUILD logic (oneriler[] push, ~530 sat rule) + 133-A-2 render parse fallback INTACT.
+// hopEkle/maltEkle signature DOKUNULMAZ (chip handler S arrays'e dogrudan push, render() ile sync).
+// Sprint 132 + 133-A-1/2/3 + 133-B-1 INTACT. Motor zinciri DOKUNULMADI.
 // Adim 133-A-3 (19.05.2026): v131-35 -> v131-36, Motor toggle V12 sadeleştirme + arsiv flag.
 // rEditorGenel motor toggle (sat 17099-17125): V12 tek aktif motor, V8.5/V9/V10/V101 arsiv.
 // YAKLAŞIM A (minimal): SHOW_ARCHIVE_MOTORS=false flag eklendi, arsiv motor btn() cagrilari
@@ -397,7 +417,7 @@
 // 'planlananlar' string - sat 10770 statTanim mapping) + olusturma/guncelleme timestamps + KR.unshift
 // + _origKy(KR) localStorage save + _syncGonderDebounced Firebase push + tarifAc(yeni.id) editor yonlendir.
 // flash mesaj. 131-A..T + 132-pre intact. Motor zinciri dokunulmadi.
-const CACHE_VERSION = 'bm-cache-v131-36';
+const CACHE_VERSION = 'bm-cache-v131-37';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [
