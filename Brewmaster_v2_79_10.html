@@ -22363,11 +22363,22 @@ syncBaslat();
           console.warn('[bmDoctorChip] hop_ekle name lookup fail:', parsed.name);
           return;
         }
-        // Yeni satır (zaten varsa "kümülatif eklendi" mesajı belirsizliği önler) — push dogrudan
-        S.hoplar.push({id:hop.id, g:parsed.gram, dk:60, tur:'boil', cAA:null, form:'pellet', _ad:hop.ad});
-        if (typeof flash === 'function') flash('✓ '+hop.ad+' '+parsed.gram+'g eklendi (60dk boil)', 'ok');
+        // 134-bl-7: Duplicate önle — aynı id + aynı dk (default 60) varsa miktar artır
+        var _newDk = 60;
+        var _existHopIdx = (S.hoplar||[]).findIndex(function(h){
+          return h && h.id === hop.id && (h.dk === undefined || h.dk === _newDk);
+        });
+        if (_existHopIdx >= 0) {
+          var _mevG = parseFloat(S.hoplar[_existHopIdx].g) || 0;
+          var _yeniG = +(_mevG + parsed.gram).toFixed(2);
+          S.hoplar[_existHopIdx].g = _yeniG;
+          if (typeof flash === 'function') flash('✓ '+hop.ad+' mevcuttu — '+parsed.gram+'g eklendi (toplam '+_yeniG+'g)', 'ok');
+        } else {
+          S.hoplar.push({id:hop.id, g:parsed.gram, dk:_newDk, tur:'boil', cAA:null, form:'pellet', _ad:hop.ad});
+          if (typeof flash === 'function') flash('✓ '+hop.ad+' '+parsed.gram+'g eklendi (60dk boil)', 'ok');
+        }
         if (typeof render === 'function') render();
-        // 134-bl-6: Stok auto-decrement
+        // 134-bl-6: Stok auto-decrement (her iki branch'te de — yeni eklenen miktar düşülür)
         if (typeof window.bmStokDusurTek === 'function') window.bmStokDusurTek(hop.id, hop.ad, parsed.gram, 'g');
         return;
       }
