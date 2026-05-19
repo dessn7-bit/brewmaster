@@ -172,6 +172,25 @@
 // setAktifKlasor icindeki setTimeout(bmDebugUpdate,50) cagrilari. KORUNDU: window.listeSekme/
 // window.aktifKlasor expose (sat 5937 + setter sync) - Sprint 132 sub-sprint'leri (Klonla vs)
 // state expose kullanir. 131-A..T fix'leri INTACT, motor zinciri dokunulmadi.
+// Adim 132-J-2/3/4/5 (19.05.2026): v131-30 -> v131-31, Polish toplu deploy (4 alt-task tek commit).
+// J-2 (header stat duplicate sil + sticky KH ekle):
+//   sat 18266-18268 editor ust kahve header 6 stat (OG/FG/ABV/IBU/EBC/KH) blok kaldirildi.
+//   sticky ozet 132-A+E zaten OG/FG/ABV/IBU/SRM gosteriyor + KH stat eklendi (6 stat sticky).
+//   EBC duplicate (SRM*1.97), gosterilmiyor. Mobile <=768px sticky compact (gap 6, font 11).
+// J-3 (Malt/Hop/Maya sira ters):
+//   rEditorMalt/Hop/Maya ic refactor: mevcut malzeme listesi USTTE, "+Yeni X Ekle" collapsible
+//   .bm-acc data-acc-id=malt-ekle/hop-ekle/maya-sec ALTTA (default kapali, bos liste ise acik).
+//   maya tab: detay kart USTTE + 2.maya detay + "Maya Sec/Degistir" collapsible altta.
+//   maltEkle/hopEkle event handler + S.maltlar/hoplar/mayaId data INTACT.
+// J-4 (mobile overflow fix):
+//   (a) eh header Kaydet+Klonla flex row 380px: .eh .btn,.eh .bm-btn-primary padding 6 10 + font 11
+//   (b) milestone gun hucresi .bm-ms-cell class + @media max-width:420px min-width 4px override.
+//   Body scrollWidth <= 380 hedef (132-pre baseline restore).
+// J-5 (132-H badge tooltip ribbon_prob):
+//   _scRibbonInner badge title: "N/M motor consensus · pct% · ribbon prob X.X%" (was sadece N/M).
+//   stc._meta.ribbon_prob || stc.topProb fallback. Backward compat (eski stcRes still PASS).
+// J-1 Vintage Amber palette intact, 131-A..T + 132-pre/B/C/A/D/E/G/H/F + fix-1 intact.
+// Motor zinciri (B1/V12c/V20/F1) dokunulmadi. Stil renk dot DATA intact.
 // Adim 132-J-1 (19.05.2026): v131-29 -> v131-30, Vintage Amber accent global migration (Scope B).
 // Mevcut parlak turuncu palette -> Vintage Amber palette. 5 hex × 55 occurrence global migrate.
 //   #EF9F27 -> #B8763F  (primary accent, 32 match)  button bg/border/icon/focus ring/badge border
@@ -304,7 +323,7 @@
 // 'planlananlar' string - sat 10770 statTanim mapping) + olusturma/guncelleme timestamps + KR.unshift
 // + _origKy(KR) localStorage save + _syncGonderDebounced Firebase push + tarifAc(yeni.id) editor yonlendir.
 // flash mesaj. 131-A..T + 132-pre intact. Motor zinciri dokunulmadi.
-const CACHE_VERSION = 'bm-cache-v131-30';
+const CACHE_VERSION = 'bm-cache-v131-31';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [

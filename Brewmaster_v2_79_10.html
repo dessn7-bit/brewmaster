@@ -249,11 +249,20 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
 .ss-label{font-size:10px;line-height:1;color:#8B5A2B;text-transform:uppercase;letter-spacing:.5px;font-family:var(--font-body)}
 .ss-val{font-size:14px;line-height:1.2;font-weight:700;color:#2A1A0A;font-family:var(--font-display);margin-top:2px}
 @media (max-width:768px){
-  .bm-sticky-summary{padding:6px 10px;gap:8px}
-  .bm-ss-stats{gap:8px}
-  .bm-ss-stat{min-width:30px}
-  .ss-val{font-size:13px}
-  .bm-ss-label{max-width:140px;font-size:12px}
+  /* Adim 132-J-2: 6 stat (KH dahil) mobile kompakt — gap 6, min-width 26, font 11 */
+  .bm-sticky-summary{padding:6px 8px;gap:6px}
+  .bm-ss-stats{gap:6px}
+  .bm-ss-stat{min-width:26px}
+  .ss-val{font-size:11px}
+  .ss-label{font-size:9px}
+  .bm-ss-label{max-width:90px;font-size:11px}
+  .bm-ss-renk{width:14px;height:14px}
+  /* Adim 132-J-4(a): Kaydet+Klonla flex row 380px overflow fix — buton padding kucult */
+  .eh .btn,.eh .bm-btn-primary{padding:6px 10px;font-size:11px}
+}
+/* Adim 132-J-4(b): Milestone timeline gun hucresi 380px overflow fix (6px -> 4px) */
+@media (max-width:420px){
+  .bm-ms-cell{min-width:4px !important}
 }
 
 /* Adim 132-H: 4/4 ensemble agreement badge (Strategy C ribbon icinde).
@@ -12081,7 +12090,7 @@ function rEditorTakvim(maya, maya2, tv){
         // Şişeleme sınırında ayırıcı çizgi
         var _borderL = (_siGunI !== null && g === _siGunI) ? 'border-left:2px solid var(--altin);' : '';
 
-        _gunHucreler += '<div title="'+_title+'" style="flex:1;min-width:6px;height:18px;background:'+_bg+';'+(_bugunMu?'outline:2px solid var(--altin);outline-offset:-1px;z-index:2;':'')+_borderL+'position:relative">'+_ikonH+'</div>';
+        _gunHucreler += '<div class="bm-ms-cell" title="'+_title+'" style="flex:1;min-width:6px;height:18px;background:'+_bg+';'+(_bugunMu?'outline:2px solid var(--altin);outline-offset:-1px;z-index:2;':'')+_borderL+'position:relative">'+_ikonH+'</div>';
       }
 
       // Alt etiketler — şişeleme ve kondisyon milestone'ları
@@ -13462,18 +13471,19 @@ function rEditorMaya(og, fg, abv, maya, maya2, fgKaynak, fgHesap){
     _mayaKatHtml+=accGrup(etiket+' ('+filtMayalar.length+')',mih,'maya_'+tip,gi<2,tipRenk);
   });
 
+  // Adim 132-J-3: Mevcut maya detay USTTE, "Maya Seç/Değiştir" collapsible ALTTA (default kapali, maya yoksa acik)
+  const _mySecDefault = maya ? 'collapsed' : 'expanded';
+  const _mySecAria = maya ? 'false' : 'true';
+  const _mySecBaslik = maya ? '🔄 Maya Değiştir' : '➕ Maya Seç';
   return `
-    <span class="etiket">1. Maya</span>
-    <div style="font-size:10px;color:var(--dim);margin-bottom:6px">🟢 Şarap dolabı · 🟡 Oda sıcaklığı · 🔴 Yüksek sıcaklık mayası</div>
-    <input type="text" class="inp" style="margin-bottom:6px;font-size:12px" placeholder="🔍 Maya ara... (Enter: ilk eşleşeni seç)" value="${sekmeArama.maya}" onchange="sekmeArama.maya=this.value;render()" onkeydown="if(event.key==='Enter'){const q=this.value.toLowerCase().trim();if(!q)return;const _m=MAYALAR.find(x=>x&&(x.ad||'').toLowerCase().includes(q));if(_m){S.mayaId=_m.id;this.value='';sekmeArama.maya='';flash('Maya seçildi: '+_m.ad,'ok');render();}else flash('Eşleşen maya yok','err');event.preventDefault();}">
     ${maya?(()=>{
-      // Pitch rate hesabı (Jamil Zainasheff yöntemi)
+      // Pitch rate hızlı bilgi şeridi (maya seçili)
       const _ogP2=og>1?-616.868+1111.14*og-630.272*og*og+135.997*og*og*og:0;
       const _mayaTipLocal=maya?maya.tip:'ale';
-      const _pitchRate=_mayaTipLocal==="lager"?1.5:_mayaTipLocal==="kveik"?0.5:0.75; // M cells/mL/°P
-      const _cellsM=_pitchRate*_ogP2*(S.hacim||11)*1000; // milyon hücre
-      const _cellsB=(_cellsM/1000).toFixed(0); // milyar hücre
-      const _paketler=Math.ceil(_cellsM/200000); // 200B hücre/paket
+      const _pitchRate=_mayaTipLocal==="lager"?1.5:_mayaTipLocal==="kveik"?0.5:0.75;
+      const _cellsM=_pitchRate*_ogP2*(S.hacim||11)*1000;
+      const _cellsB=(_cellsM/1000).toFixed(0);
+      const _paketler=Math.ceil(_cellsM/200000);
       const _starter=_cellsM>200000*2?"✅ Starter önerilir":"";
       return '<div style="background:var(--sa);border:1px solid #C8B070;border-radius:8px;padding:8px 12px;margin-bottom:8px;font-size:11px">'+
         '<span style="font-weight:700;color:var(--sk)">🧬 Pitch Rate: </span>'+
@@ -13481,12 +13491,21 @@ function rEditorMaya(og, fg, abv, maya, maya2, fgKaynak, fgHesap){
         (_starter?'<span style="color:var(--kk);margin-left:6px;font-weight:600">'+_starter+'</span>':'')+
       '</div>';
     })():""}
-    ${_mayaKatHtml}${det}
-    <div style="margin-top:10px">
-      <span class="etiket">2. Maya (Opsiyonel)</span>
-      <div style="font-size:10px;color:var(--dim);margin-bottom:6px">Ko-fermentasyon. FG ortalaması hesaplanır.</div>
-      <select class="inp" onchange="S.maya2Id=this.value;render()">${mopts2}</select>
-      ${det2}
+    ${det || (!maya?'<div style="text-align:center;padding:20px;color:var(--dim);font-size:13px">Henüz maya seçilmedi — aşağıdan seç</div>':'')}
+    ${maya && S.maya2Id ? `<div style="margin-top:10px"><span class="etiket">2. Maya</span>${det2}</div>` : ''}
+    <div class="bm-acc" data-acc-id="maya-sec" data-acc-default="${_mySecDefault}" aria-expanded="${_mySecAria}" style="margin-top:10px">
+      <button class="bm-acc-header" type="button" aria-expanded="${_mySecAria}" onclick="bmAccToggle('maya-sec')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmAccToggle('maya-sec')}"><span class="bm-acc-title">${_mySecBaslik}</span><span class="bm-acc-chevron">▾</span></button>
+      <div class="bm-acc-body">
+        <span class="etiket">1. Maya</span>
+        <div style="font-size:10px;color:var(--dim);margin-bottom:6px">🟢 Şarap dolabı · 🟡 Oda sıcaklığı · 🔴 Yüksek sıcaklık mayası</div>
+        <input type="text" class="inp" style="margin-bottom:6px;font-size:12px" placeholder="🔍 Maya ara... (Enter: ilk eşleşeni seç)" value="${sekmeArama.maya}" onchange="sekmeArama.maya=this.value;render()" onkeydown="if(event.key==='Enter'){const q=this.value.toLowerCase().trim();if(!q)return;const _m=MAYALAR.find(x=>x&&(x.ad||'').toLowerCase().includes(q));if(_m){S.mayaId=_m.id;this.value='';sekmeArama.maya='';flash('Maya seçildi: '+_m.ad,'ok');render();}else flash('Eşleşen maya yok','err');event.preventDefault();}">
+        ${_mayaKatHtml}
+        <div style="margin-top:10px">
+          <span class="etiket">2. Maya (Opsiyonel)</span>
+          <div style="font-size:10px;color:var(--dim);margin-bottom:6px">Ko-fermentasyon. FG ortalaması hesaplanır.</div>
+          <select class="inp" onchange="S.maya2Id=this.value;render()">${mopts2}</select>
+        </div>
+      </div>
     </div>
     ${(()=>{
       // ═══ PITCH RATE HESABI ═══
@@ -14161,48 +14180,54 @@ function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
     _maltKatHtml+=accGrup((_mKI[g]||'•')+' '+_gAd+' ('+ms.length+')',mih,'malt_'+g.replace(/\s+/g,'_'),gi<2,katKodu(g).renk);
   });
 
+  // Adim 132-J-3: Mevcut malt listesi USTTE, "+Yeni Malt Ekle" collapsible ALTTA (default kapali, bos liste ise acik)
+  const _mEkleDefault = S.maltlar.length ? 'collapsed' : 'expanded';
+  const _mEkleAria = S.maltlar.length ? 'false' : 'true';
   return `
     ${(typeof _sonSilinenMalt!=='undefined'&&_sonSilinenMalt)?`<div style="padding:8px 12px;background:#FFF8E8;border:1px solid #E8C070;border-radius:8px;margin-bottom:10px;display:flex;align-items:center;gap:10px">
       <span style="font-size:11px;color:#7a4a00;flex:1">✕ Son silinen: <b>${(()=>{const _ml=MALTLAR.find(x=>x&&x.id===_sonSilinenMalt.item.id);return _ml?_ml.ad:_sonSilinenMalt.item.id;})()}</b> (${_sonSilinenMalt.item.kg} kg)</span>
       <button onclick="maltGeriAl()" style="background:#7a4a00;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer">↶ Geri Al</button>
     </div>`:''}
-    <span class="etiket">Sistem Verimi</span>
-    <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap">
-      ${[55,60,61,62,65,70].map(v=>`<button class="btn" style="flex:1;min-width:50px;padding:7px 0;border:1.5px solid ${S.verim===v?"var(--altin)":"var(--bor)"};background:${S.verim===v?"var(--sa)":"var(--card)"};color:${S.verim===v?"var(--bakir)":"var(--soluk)"};font-weight:${S.verim===v?700:500}" onclick="S.verim=${v};render()">%${v}</button>`).join("")}
-      <input type="number" class="inp" style="width:70px;text-align:center;font-weight:${![55,60,61,62,65,70].includes(S.verim)?700:500};${![55,60,61,62,65,70].includes(S.verim)?'border:1.5px solid var(--altin);background:var(--sa);color:var(--bakir);':''}" placeholder="Özel" min="30" max="95" value="${![55,60,61,62,65,70].includes(S.verim)?S.verim:''}" onchange="var v=parseInt(this.value);if(v>=30&&v<=95){S.verim=v;render();}">
-    </div>
-    <div style="margin-bottom:12px">
-      <div onclick="(function(el){var c=el.nextElementSibling;var o=c.style.maxHeight==='0px'||!c.style.maxHeight;c.style.maxHeight=o?c.scrollHeight+'px':'0px';c.style.opacity=o?'1':'0';el.querySelector('.ok-t').textContent=o?'▲':'▼';})(this)" style="display:flex;align-items:center;gap:6px;padding:7px 10px;background:var(--bg2);border:1px solid var(--bor);border-radius:8px;cursor:pointer;user-select:none;font-size:11px;color:var(--soluk);font-weight:600">
-        <span>💡</span><span style="flex:1">Verimi nasıl ölçersiniz?</span>
-        <span class="ok-t" style="font-size:10px;color:var(--dim)">▼</span>
-      </div>
-      <div style="max-height:0;opacity:0;overflow:hidden;transition:max-height .3s,opacity .2s">
-        <div class="uybox uy-s" style="font-size:11px;margin-top:6px;margin-bottom:0">
-          Pre-boil hacmini ve SG'yi ölçün.<br>
-          Verim% = (Ölçülen OG − 1) × hacim × 1000 ÷ Teorik GU × 100<br>
-          Teorik GU = tüm malların (gu × kg) toplamı. Bulldog için %65–70 tipiktir.<br>
-          Mash sıcaklığı OG'yi değiştirmez; FG ve gövdeyi değiştirir.
+    ${S.maltlar.length?`<span class="etiket" style="margin-bottom:6px">Malt Listesi (${S.maltlar.length})</span>${sl}${ts}`:`<div style="text-align:center;padding:20px;color:var(--dim);font-size:13px">Henüz malt eklenmedi — aşağıdan ekle</div>`}
+    <div class="bm-acc" data-acc-id="malt-ekle" data-acc-default="${_mEkleDefault}" aria-expanded="${_mEkleAria}" style="margin-top:10px">
+      <button class="bm-acc-header" type="button" aria-expanded="${_mEkleAria}" onclick="bmAccToggle('malt-ekle')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmAccToggle('malt-ekle')}"><span class="bm-acc-title">➕ Yeni Malt Ekle</span><span class="bm-acc-chevron">▾</span></button>
+      <div class="bm-acc-body">
+        <span class="etiket">Sistem Verimi</span>
+        <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap">
+          ${[55,60,61,62,65,70].map(v=>`<button class="btn" style="flex:1;min-width:50px;padding:7px 0;border:1.5px solid ${S.verim===v?"var(--altin)":"var(--bor)"};background:${S.verim===v?"var(--sa)":"var(--card)"};color:${S.verim===v?"var(--bakir)":"var(--soluk)"};font-weight:${S.verim===v?700:500}" onclick="S.verim=${v};render()">%${v}</button>`).join("")}
+          <input type="number" class="inp" style="width:70px;text-align:center;font-weight:${![55,60,61,62,65,70].includes(S.verim)?700:500};${![55,60,61,62,65,70].includes(S.verim)?'border:1.5px solid var(--altin);background:var(--sa);color:var(--bakir);':''}" placeholder="Özel" min="30" max="95" value="${![55,60,61,62,65,70].includes(S.verim)?S.verim:''}" onchange="var v=parseInt(this.value);if(v>=30&&v<=95){S.verim=v;render();}">
+        </div>
+        <div style="margin-bottom:12px">
+          <div onclick="(function(el){var c=el.nextElementSibling;var o=c.style.maxHeight==='0px'||!c.style.maxHeight;c.style.maxHeight=o?c.scrollHeight+'px':'0px';c.style.opacity=o?'1':'0';el.querySelector('.ok-t').textContent=o?'▲':'▼';})(this)" style="display:flex;align-items:center;gap:6px;padding:7px 10px;background:var(--bg2);border:1px solid var(--bor);border-radius:8px;cursor:pointer;user-select:none;font-size:11px;color:var(--soluk);font-weight:600">
+            <span>💡</span><span style="flex:1">Verimi nasıl ölçersiniz?</span>
+            <span class="ok-t" style="font-size:10px;color:var(--dim)">▼</span>
+          </div>
+          <div style="max-height:0;opacity:0;overflow:hidden;transition:max-height .3s,opacity .2s">
+            <div class="uybox uy-s" style="font-size:11px;margin-top:6px;margin-bottom:0">
+              Pre-boil hacmini ve SG'yi ölçün.<br>
+              Verim% = (Ölçülen OG − 1) × hacim × 1000 ÷ Teorik GU × 100<br>
+              Teorik GU = tüm malların (gu × kg) toplamı. Bulldog için %65–70 tipiktir.<br>
+              Mash sıcaklığı OG'yi değiştirmez; FG ve gövdeyi değiştirir.
+            </div>
+          </div>
+        </div>
+        <span class="etiket">Malt Ekle</span>
+        <input type="text" class="inp" style="margin-bottom:6px;font-size:12px" placeholder="🔍 Malt ara... (Enter: ilk eşleşeni ekle)" value="${sekmeArama.malt}" onchange="sekmeArama.malt=this.value;render()" onkeydown="if(event.key==='Enter'){const q=this.value.toLowerCase().trim();if(!q)return;const _k=sekmKat.malt;const _m=MALTLAR.find(x=>x&&x.ad.toLowerCase().includes(q)&&(!_k||x.g===_k));if(_m){yM.id=_m.id;maltEkle();this.value='';sekmeArama.malt='';}else flash('Eşleşen malt yok','err');event.preventDefault();}">
+        ${_maltKatHtml}
+        <div style="display:flex;gap:8px;margin-bottom:6px;align-items:center">
+          <input type="number" id="ymKg" class="inp" style="width:90px;font-weight:600;text-align:center" value="${yM.kg}" min=".01" max="8" step=".01" onchange="yM.kg=parseFloat(this.value)||0">
+          <span style="color:var(--soluk);font-size:13px">kg</span>
+          <button class="btn" style="background:var(--altin);color:#fff;margin-left:auto;padding:9px 20px" onclick="maltEkle()">+ Ekle</button>
+        </div>
+        <span class="etiket">Marka (Opsiyonel)</span>
+        <input type="text" id="ymMarka" class="inp" style="margin-bottom:3px" placeholder="Weyermann, Crisp, Simpsons..." value="${yM.marka}" onblur="yM.marka=this.value">
+        <div style="display:flex;gap:6px;margin-bottom:8px">
+          <div id="moIpucu" style="font-size:10px;color:var(--dim);flex:1">${seciMalt?.mo||""}</div>
+          ${seciMalt?`<div style="font-size:10px;padding:3px 8px;border-radius:4px;font-weight:600;background:${seciMalt.gu>0?"#E8F4E8":"#FFF0F0"};color:${seciMalt.gu>0?"var(--yk)":"var(--kk)"}">GU: ${seciMalt.gu} · ${seciMalt.r}°L</div>`:""}
         </div>
       </div>
     </div>
-    <span class="etiket">Malt Ekle</span>
-    <input type="text" class="inp" style="margin-bottom:6px;font-size:12px" placeholder="🔍 Malt ara... (Enter: ilk eşleşeni ekle)" value="${sekmeArama.malt}" onchange="sekmeArama.malt=this.value;render()" onkeydown="if(event.key==='Enter'){const q=this.value.toLowerCase().trim();if(!q)return;const _k=sekmKat.malt;const _m=MALTLAR.find(x=>x&&x.ad.toLowerCase().includes(q)&&(!_k||x.g===_k));if(_m){yM.id=_m.id;maltEkle();this.value='';sekmeArama.malt='';}else flash('Eşleşen malt yok','err');event.preventDefault();}">
-    ${_maltKatHtml}
-    <div style="display:flex;gap:8px;margin-bottom:6px;align-items:center">
-      <input type="number" id="ymKg" class="inp" style="width:90px;font-weight:600;text-align:center" value="${yM.kg}" min=".01" max="8" step=".01" onchange="yM.kg=parseFloat(this.value)||0">
-      <span style="color:var(--soluk);font-size:13px">kg</span>
-      <button class="btn" style="background:var(--altin);color:#fff;margin-left:auto;padding:9px 20px" onclick="maltEkle()">+ Ekle</button>
-    </div>
-    <span class="etiket">Marka (Opsiyonel)</span>
-    <input type="text" id="ymMarka" class="inp" style="margin-bottom:3px"
-      placeholder="Weyermann, Crisp, Simpsons..."
-      value="${yM.marka}"
-      onblur="yM.marka=this.value">
-    <div style="display:flex;gap:6px;margin-bottom:8px">
-      <div id="moIpucu" style="font-size:10px;color:var(--dim);flex:1">${seciMalt?.mo||""}</div>
-      ${seciMalt?`<div style="font-size:10px;padding:3px 8px;border-radius:4px;font-weight:600;background:${seciMalt.gu>0?"#E8F4E8":"#FFF0F0"};color:${seciMalt.gu>0?"var(--yk)":"var(--kk)"}">GU: ${seciMalt.gu} · ${seciMalt.r}°L</div>`:""}
-    </div>
-    ${S.maltlar.length?`<span class="etiket" style="margin-bottom:6px">Malt Listesi</span>${sl}${ts}`:`<div style="text-align:center;padding:20px;color:var(--dim);font-size:13px">Henüz malt eklenmedi</div>`}${katkilarHTML}`;
+    ${katkilarHTML}`;
 }
 
 
@@ -14327,34 +14352,42 @@ function rEditorHop(og, ibu, seciHop){
     _hopKatHtml+=accGrup((g||'Diğer')+' ('+hs.length+')',hih,'hop_'+g.replace(/\s+/g,'_'),gi<2,_hopRenk(g));
   });
 
+  // Adim 132-J-3: Mevcut hop listesi USTTE, "+Yeni Hop Ekle" collapsible ALTTA (default kapali, bos ise acik)
+  const _hEkleDefault = S.hoplar.length ? 'collapsed' : 'expanded';
+  const _hEkleAria = S.hoplar.length ? 'false' : 'true';
   return `
-    <span class="etiket">Hop Ekle</span>
-    <input type="text" class="inp" style="margin-bottom:6px;font-size:12px" placeholder="🔍 Hop ara... (Enter: ilk eşleşeni ekle)" value="${sekmeArama.hop}" onchange="sekmeArama.hop=this.value;render()" onkeydown="if(event.key==='Enter'){const q=this.value.toLowerCase().trim();if(!q)return;const _k=sekmKat.hop;const _h=HOPLAR.find(x=>x&&x.ad.toLowerCase().includes(q)&&(!_k||x.g===_k));if(_h){yH.id=_h.id;hopEkle();this.value='';sekmeArama.hop='';}else flash('Eşleşen hop yok','err');event.preventDefault();}">
-    ${_hopKatHtml}
-    <div style="display:flex;gap:8px;margin-bottom:6px;align-items:center">
-      <input type="number" id="yhG" class="inp" style="width:80px;font-weight:600;text-align:center" value="${yH.g}" min="1" max="500" step="1" onchange="var v=parseFloat(this.value)||0;if(v>500){flash('Hop miktarı 500g üstü — kontrol et','err');}yH.g=Math.min(500,v)">
-      <span style="color:var(--soluk);font-size:13px">g</span>
-      <select class="inp" style="flex:1" onchange="yH.tur=this.value;if(this.value==='whirlpool'){yH.dk=15;yH.whT=85;}else if(this.value==='hop_stand'){yH.dk=30;yH.whT=80;}else if(this.value==='dry_hop'){yH.dk=0;yH.whT=null;yH.dryDays=yH.dryDays||5;}else if(this.value==='fwh'){yH.dk=60;yH.whT=null;}else{yH.dk=60;yH.whT=null;}render()">
-        <option value="boil"${yH.tur==="boil"?" selected":""}>Kaynatma</option>
-        <option value="fwh"${yH.tur==="fwh"?" selected":""}>First Wort Hop (FWH)</option>
-        <option value="whirlpool"${yH.tur==="whirlpool"?" selected":""}>Whirlpool (aktif)</option>
-        <option value="hop_stand"${yH.tur==="hop_stand"?" selected":""}>Hop Stand (pasif)</option>
-        <option value="dry_hop"${yH.tur==="dry_hop"?" selected":""}>Dry Hop</option>
-      </select>
-    </div>
-    <div style="margin-bottom:8px">
-      <span class="etiket">Hop Formu</span>
-      <div style="display:flex;gap:4px">
-        ${[['pellet','🌾 Pellet','1.0x (standart)'],['leaf','🍃 Whole Leaf','0.9x (düşük bitter)'],['cryo','❄️ Cryo','1.1x (konsantre)']].map(([v,ad,aciklama])=>{const ak=(yH.form||'pellet')===v;return `<button class="btn" style="flex:1;padding:7px 4px;border:1.5px solid ${ak?'var(--altin)':'var(--bor)'};background:${ak?'var(--sa)':'var(--card)'};color:${ak?'var(--bakir)':'var(--soluk)'};font-size:11px;font-weight:${ak?700:500};line-height:1.2" onclick="yH.form='${v}';render()"><div>${ad}</div><div style="font-size:9px;font-weight:400;margin-top:2px;opacity:.75">${aciklama}</div></button>`;}).join('')}
+    ${S.hoplar.length?`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><span class="etiket" style="margin-bottom:0">Hop Listesi (${S.hoplar.length})</span>${S.hoplar.length>=2?`<button class="btn" style="background:var(--bg2);color:var(--bakir);border:1px solid var(--bor);font-size:10px;padding:4px 10px" onclick="hopAutoSort()" title="Süreç sırasına göre diz: FWH → Boil(60→15) → Whirlpool → Hop Stand → Dry Hop">📋 Sırala</button>`:''}</div>${sl2}${tibu}`:`<div style="text-align:center;padding:20px;color:var(--dim);font-size:13px">Henüz hop eklenmedi — aşağıdan ekle</div>`}
+    <div class="bm-acc" data-acc-id="hop-ekle" data-acc-default="${_hEkleDefault}" aria-expanded="${_hEkleAria}" style="margin-top:10px">
+      <button class="bm-acc-header" type="button" aria-expanded="${_hEkleAria}" onclick="bmAccToggle('hop-ekle')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmAccToggle('hop-ekle')}"><span class="bm-acc-title">➕ Yeni Hop Ekle</span><span class="bm-acc-chevron">▾</span></button>
+      <div class="bm-acc-body">
+        <span class="etiket">Hop Ekle</span>
+        <input type="text" class="inp" style="margin-bottom:6px;font-size:12px" placeholder="🔍 Hop ara... (Enter: ilk eşleşeni ekle)" value="${sekmeArama.hop}" onchange="sekmeArama.hop=this.value;render()" onkeydown="if(event.key==='Enter'){const q=this.value.toLowerCase().trim();if(!q)return;const _k=sekmKat.hop;const _h=HOPLAR.find(x=>x&&x.ad.toLowerCase().includes(q)&&(!_k||x.g===_k));if(_h){yH.id=_h.id;hopEkle();this.value='';sekmeArama.hop='';}else flash('Eşleşen hop yok','err');event.preventDefault();}">
+        ${_hopKatHtml}
+        <div style="display:flex;gap:8px;margin-bottom:6px;align-items:center">
+          <input type="number" id="yhG" class="inp" style="width:80px;font-weight:600;text-align:center" value="${yH.g}" min="1" max="500" step="1" onchange="var v=parseFloat(this.value)||0;if(v>500){flash('Hop miktarı 500g üstü — kontrol et','err');}yH.g=Math.min(500,v)">
+          <span style="color:var(--soluk);font-size:13px">g</span>
+          <select class="inp" style="flex:1" onchange="yH.tur=this.value;if(this.value==='whirlpool'){yH.dk=15;yH.whT=85;}else if(this.value==='hop_stand'){yH.dk=30;yH.whT=80;}else if(this.value==='dry_hop'){yH.dk=0;yH.whT=null;yH.dryDays=yH.dryDays||5;}else if(this.value==='fwh'){yH.dk=60;yH.whT=null;}else{yH.dk=60;yH.whT=null;}render()">
+            <option value="boil"${yH.tur==="boil"?" selected":""}>Kaynatma</option>
+            <option value="fwh"${yH.tur==="fwh"?" selected":""}>First Wort Hop (FWH)</option>
+            <option value="whirlpool"${yH.tur==="whirlpool"?" selected":""}>Whirlpool (aktif)</option>
+            <option value="hop_stand"${yH.tur==="hop_stand"?" selected":""}>Hop Stand (pasif)</option>
+            <option value="dry_hop"${yH.tur==="dry_hop"?" selected":""}>Dry Hop</option>
+          </select>
+        </div>
+        <div style="margin-bottom:8px">
+          <span class="etiket">Hop Formu</span>
+          <div style="display:flex;gap:4px">
+            ${[['pellet','🌾 Pellet','1.0x (standart)'],['leaf','🍃 Whole Leaf','0.9x (düşük bitter)'],['cryo','❄️ Cryo','1.1x (konsantre)']].map(([v,ad,aciklama])=>{const ak=(yH.form||'pellet')===v;return `<button class="btn" style="flex:1;padding:7px 4px;border:1.5px solid ${ak?'var(--altin)':'var(--bor)'};background:${ak?'var(--sa)':'var(--card)'};color:${ak?'var(--bakir)':'var(--soluk)'};font-size:11px;font-weight:${ak?700:500};line-height:1.2" onclick="yH.form='${v}';render()"><div>${ad}</div><div style="font-size:9px;font-weight:400;margin-top:2px;opacity:.75">${aciklama}</div></button>`;}).join('')}
+          </div>
+        </div>
+        ${ekO}
+        <div style="margin-bottom:10px">
+          <span class="etiket">Özel Alpha Asit % — Opsiyonel</span>
+          <input type="number" id="yhAA" class="inp" placeholder="Boş = varsayılan (${seciHop?.aa||"?"}%) — paketindeki farklıysa gir" step=".1" min="1" max="30" value="${yH.cAA||""}" onchange="yH.cAA=this.value?parseFloat(this.value):null">
+        </div>
+        <button class="btn" style="background:var(--yk);color:#C0F0C0;width:100%;margin-bottom:6px;padding:10px" onclick="hopEkle()">+ Hop Ekle</button>
       </div>
-    </div>
-    ${ekO}
-    <div style="margin-bottom:10px">
-      <span class="etiket">Özel Alpha Asit % — Opsiyonel</span>
-      <input type="number" id="yhAA" class="inp" placeholder="Boş = varsayılan (${seciHop?.aa||"?"}%) — paketindeki farklıysa gir" step=".1" min="1" max="30" value="${yH.cAA||""}" onchange="yH.cAA=this.value?parseFloat(this.value):null">
-    </div>
-    <button class="btn" style="background:var(--yk);color:#C0F0C0;width:100%;margin-bottom:14px;padding:10px" onclick="hopEkle()">+ Hop Ekle</button>
-    ${S.hoplar.length?`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><span class="etiket" style="margin-bottom:0">Hop Listesi</span>${S.hoplar.length>=2?`<button class="btn" style="background:var(--bg2);color:var(--bakir);border:1px solid var(--bor);font-size:10px;padding:4px 10px" onclick="hopAutoSort()" title="Süreç sırasına göre diz: FWH → Boil(60→15) → Whirlpool → Hop Stand → Dry Hop">📋 Sırala</button>`:''}</div>${sl2}${tibu}`:`<div style="text-align:center;padding:20px;color:var(--dim);font-size:13px">Henüz hop eklenmedi</div>`}`;
+    </div>`;
 }
 
 
@@ -18263,9 +18296,7 @@ function rEditor(){
       ${typeof BJCP!=='undefined'?Object.keys(BJCP).sort().map(sn=>`<option value="${sn}"${S.stil===sn?" selected":""}>${sn}</option>`).join(""):""}
     </select>
   </div>
-  <div style="display:flex;gap:5px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none">
-    ${[["OG",(ogKaynak==="manuel"?"✏ ":"")+og.toFixed(3)],["FG",(fgKaynak==="manuel"?"✏ ":"")+fg.toFixed(3)],["ABV","%"+abv.toFixed(2)],["IBU",ibu.toFixed(0)],["EBC",(parseFloat(srm)*1.97).toFixed(0)],["KH",hKarb(og,fg,330)+"g/şişe"]].map(([e,d],i)=>`<div style="background:rgba(248,232,196,.18);border-radius:8px;padding:9px 14px;text-align:center;flex-shrink:0;border:1px solid rgba(248,232,196,.35)${i===4?";border-top:4px solid "+rk:""}"><div style="font-size:9px;color:rgba(248,232,196,.9);font-weight:700;letter-spacing:1.5px">${e}</div><div style="font-size:${i===5?'14px':'19px'};font-weight:700;color:#F8E8C4;line-height:1.1;font-family:var(--font-display)">${d}</div></div>`).join("")}
-  </div></div>
+  </div><!-- Adim 132-J-2: editor üst kahve header 6 stat duplicate KALDIRILDI (sticky özet 132-A+E zaten gosteriyor, KH J-2'de sticky'ye eklendi) -->
   ${uy?`<div style="padding:8px 12px 0">${uy}</div>`:""}
   <!-- Adim 132-E: Sticky ozet paneli global (eh disinda, her tab'da gorunur). srmR(srm) renk. -->
   <div class="bm-sticky-summary" id="bm-summary">
@@ -18279,6 +18310,7 @@ function rEditor(){
       <div class="bm-ss-stat"><span class="ss-label">ABV</span><span class="ss-val" id="ss-abv">${abv.toFixed(1)}%</span></div>
       <div class="bm-ss-stat"><span class="ss-label">IBU</span><span class="ss-val" id="ss-ibu">${Math.round(ibu)}</span></div>
       <div class="bm-ss-stat"><span class="ss-label">SRM</span><span class="ss-val" id="ss-srm">${(parseFloat(srm)||0).toFixed(1)}</span></div>
+      <div class="bm-ss-stat"><span class="ss-label">KH</span><span class="ss-val" id="ss-kh">${(typeof hKarb==='function'?hKarb(og,fg,330):'-')}g</span></div>
     </div>
   </div>
   <div class="sb">${skmls}</div>
@@ -21730,7 +21762,10 @@ syncBaslat();
           var _pct = (_ac / _tot * 100).toFixed(1) + '%';
           var _cls = _ac === _tot && _tot >= 4 ? 'bm-badge-4-4' : _ac >= 3 ? 'bm-badge-3-4' : 'bm-badge-low';
           var _icon = _ac === _tot && _tot >= 4 ? '✨' : _ac >= 3 ? '◆' : '◇';
-          _badgeHtml = '<span class="bm-ensemble-badge ' + _cls + '" title="' + _ac + '/' + _tot + ' motor consensus · ' + _pct + '">' +
+          // Adim 132-J-5: weighted prob avg (ribbon_prob) tooltip'e eklendi
+          var _ribbon = stc._meta && stc._meta.ribbon_prob != null ? stc._meta.ribbon_prob : (stc.topProb||null);
+          var _ribbonStr = (_ribbon != null && !isNaN(_ribbon)) ? ' · ribbon prob ' + (_ribbon * 100).toFixed(1) + '%' : '';
+          _badgeHtml = '<span class="bm-ensemble-badge ' + _cls + '" title="' + _ac + '/' + _tot + ' motor consensus · ' + _pct + _ribbonStr + '">' +
                        '<span class="bm-badge-icon">' + _icon + '</span>' +
                        '<span>' + _ac + '/' + _tot + ' · ' + _pct + '</span>' +
                        '</span>';
