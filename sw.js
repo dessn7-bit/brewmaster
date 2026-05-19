@@ -172,6 +172,21 @@
 // setAktifKlasor icindeki setTimeout(bmDebugUpdate,50) cagrilari. KORUNDU: window.listeSekme/
 // window.aktifKlasor expose (sat 5937 + setter sync) - Sprint 132 sub-sprint'leri (Klonla vs)
 // state expose kullanir. 131-A..T fix'leri INTACT, motor zinciri dokunulmadi.
+// Adim 132-fix-1 (19.05.2026): v131-28 -> v131-29, Firebase syncAl URL cift json path fix.
+// BUG (production 3 cihaz loop): user Firebase URL'ini full path olarak yapistirinca
+//   (ör: "https://kabir-35fe1-default-rtdb.firebaseio.com/brewmaster_kabir.json")
+//   syncUrl() basina ekstra "/brewmaster_<oda>.json" daha eklerek cift path olusturuyor:
+//   "...firebaseio.com/brewmaster_kabir.json/brewmaster_kabir.json" -> 400 Bad Request.
+// syncDinle 5sn interval ile sonsuz loop, syncGonder de ayni bug (PUT cift path), 3 cihaz
+// senkron tamamen down. Bug code'da dormant baslangictan beri (^83bab02 2026-04-25);
+// 131-W'de Kaan dogru base URL girmis, son re-entry full path yapismis tetiklenmis.
+// FIX (sat 20608 syncUrl, tek satir defansif strip):
+//   base = url.replace(/\/$/, '').replace(/\/brewmaster_[^\/]*\.json$/i, '');
+//   User'in localStorage'ini elle duzeltmesine gerek yok, syncUrl her durumda dogru
+//   URL inşa ediyor. 4/4 smoke test PASS (full path, base, trailing slash, farkli oda).
+// 131-W veri kurtarma mantigi (Firebase BOS yerel dolu -> EZME REDDEDILDI) regresyon
+// yok, tam tersine RESTORE (URL bozukken res.ok=false ile bypass oluyordu).
+// 131-A..T + 132-pre/B/C/A/D/E/F/G/H intact. Motor zinciri (B1/V12c/V20/F1) dokunulmadi.
 // Adim 132-F (19.05.2026): v131-27 -> v131-28, Takvim tab 132-D akordiyon refactor (Image 2 stil).
 // rEditorTakvim() final return REWRITE (sat ~12489): 10 ic render bloğu (_ustDurum, _milestoneTl,
 // _alarmKart, _kaliteKart, _stilIdealKart, _sonrakiKart, _grafikKart, _takvimKart, _detaylarKart,
@@ -276,7 +291,7 @@
 // 'planlananlar' string - sat 10770 statTanim mapping) + olusturma/guncelleme timestamps + KR.unshift
 // + _origKy(KR) localStorage save + _syncGonderDebounced Firebase push + tarifAc(yeni.id) editor yonlendir.
 // flash mesaj. 131-A..T + 132-pre intact. Motor zinciri dokunulmadi.
-const CACHE_VERSION = 'bm-cache-v131-28';
+const CACHE_VERSION = 'bm-cache-v131-29';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [

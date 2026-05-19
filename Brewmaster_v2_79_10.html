@@ -20605,7 +20605,10 @@ function syncUrl(){
   if(!syncCfg||!syncCfg.url||!syncCfg.oda) return null;
   // url: https://proje-xxx-default-rtdb.firebaseio.com
   // path: /brewmaster_<oda>.json
-  const base = syncCfg.url.replace(/\/$/, '');
+  // Adim 132-fix-1: defansif strip — user full path yapıştırmış olabilir
+  // (ör: "https://...firebaseio.com/brewmaster_kabir.json"). Trailing
+  // /brewmaster_<x>.json suffix soyulur, doğru oda ile yeniden inşa edilir.
+  const base = syncCfg.url.replace(/\/$/, '').replace(/\/brewmaster_[^\/]*\.json$/i, '');
   return base + '/brewmaster_' + syncCfg.oda + '.json';
 }
 
