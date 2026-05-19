@@ -17097,6 +17097,10 @@ return `
           '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;margin-bottom:4px;flex-wrap:wrap;gap:4px">'+
             '<span style="font-weight:700;color:var(--kahve);font-size:11px">BJCP ('+_stKey+')</span>'+
             (_v5TopBjcp ? (function(){
+              // Adim 133-A-3: Motor toggle sadelestirme. V12 tek aktif motor. Arsiv motor btn'lari
+              // SHOW_ARCHIVE_MOTORS=false ile dormant — true'ya cevirince 5-buton UI geri acilir.
+              // Gelecek motor (V13 vs) eklemek icin sadece btn() cagrisi + flag uzerinden ekle.
+              var SHOW_ARCHIVE_MOTORS = false;
               var motor = localStorage.getItem('bm_motor_version') || 'V12';
               function btn(v, label, bg, title) {
                 var active = (motor === v);
@@ -17107,9 +17111,16 @@ return `
               // Adım 51 toggle temizliği — V8.5/V9/V10/V10.1 UI'dan kaldırıldı, model dosyaları archive/ klasöründe.
               // D-1.9m: V6 (KNN) IIFE kaldırıldı (V6 vs B1 head-to-head B1 14/14 üstün). UI butonu da bu satırda silindi.
               // Aktif slug motorları: V12 (V19 default), V20 (alpha=0.30), Hibrit (V19+V20 mean). B1 cluster ribbon üstte.
-              return '<span style="display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap">'+
-                btn('V12', 'V12 (V19) ⭐', '#B8763F', 'V12 DEFAULT — V19 XGBoost (Adim 58 + V28f Hefeweizen + V28g Rye Ale + V28h_v2 Dunkelweizen + V28i Witbier + V28j_a Filtre A AWB->Hefe wider 202 reslug + base_score fix, 91 slug, slug t1 0.5706 / 14cat 0.6995, gap 4.90 PASS)')+
-              '</span>';
+              var html = '<span style="display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap">'+
+                btn('V12', 'V12 (V19) ⭐', '#B8763F', 'V12 DEFAULT — V19 XGBoost (Adim 58 + V28f Hefeweizen + V28g Rye Ale + V28h_v2 Dunkelweizen + V28i Witbier + V28j_a Filtre A AWB->Hefe wider 202 reslug + base_score fix, 91 slug, slug t1 0.5706 / 14cat 0.6995, gap 4.90 PASS)');
+              if (SHOW_ARCHIVE_MOTORS) {
+                // Arsiv motor btn'lari (gelecek aktivasyon icin korundu, model dosyalari archive/'de):
+                html += btn('V101', 'V10.1', '#0D47A1', 'V10.1 (8061 recete, +Roerstok+Amervallei NL kulupleri)');
+                html += btn('V10',  'V10',   '#1B5E20', 'BETA V10 (~8000 recete, +twortwat NL Hollanda toplulugu)');
+                html += btn('V9',   'V9',    '#7B1FA2', 'BETA V9 (7783 recete, +%34 V8.5)');
+                html += btn('V85',  'V8.5',  '#C88A13', 'BETA V8.5 (5847 recete)');
+              }
+              return html + '</span>';
             })() : '')+
           '</div>'+
           ((_v5TopBjcp && ['V85','V9','V10','V101','V12'].indexOf(localStorage.getItem('bm_motor_version') || 'V12')>=0) ? (function(){

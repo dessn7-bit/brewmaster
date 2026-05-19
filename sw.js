@@ -172,6 +172,15 @@
 // setAktifKlasor icindeki setTimeout(bmDebugUpdate,50) cagrilari. KORUNDU: window.listeSekme/
 // window.aktifKlasor expose (sat 5937 + setter sync) - Sprint 132 sub-sprint'leri (Klonla vs)
 // state expose kullanir. 131-A..T fix'leri INTACT, motor zinciri dokunulmadi.
+// Adim 133-A-3 (19.05.2026): v131-35 -> v131-36, Motor toggle V12 sadeleştirme + arsiv flag.
+// rEditorGenel motor toggle (sat 17099-17125): V12 tek aktif motor, V8.5/V9/V10/V101 arsiv.
+// YAKLAŞIM A (minimal): SHOW_ARCHIVE_MOTORS=false flag eklendi, arsiv motor btn() cagrilari
+// if (SHOW_ARCHIVE_MOTORS) altina alindi (dormant, gelecek aktivasyon icin korundu).
+// Render: html = '<span>'+btn('V12', ...)+ (SHOW_ARCHIVE_MOTORS ? btn('V101')+btn('V10')+btn('V9')+btn('V85') : '') + '</span>';
+// V12 click handler intact. localStorage 'bm_motor_version' default 'V12' intact.
+// Arsiv motor renkleri (#0D47A1 V101 / #1B5E20 V10 / #7B1FA2 V9 / #C88A13 V8.5) INTACT dormant kodda.
+// Gelecek motor (V13 vs): btn('V13', ...) + flag flip ile yeniden UI'a ekle.
+// Sprint 132 + 133-A-1/2 + 133-B-1 INTACT. Motor zinciri (B1+V12+V20+F1+Strategy C) DOKUNULMADI.
 // Adim 133-B-1 (19.05.2026): v131-34 -> v131-35, Defter ana sayfa 3 hex vintage swap.
 // 133-B discovery raporu sonrasi: Defter ana sayfa %85+ zaten vintage (J-1 + 131 sprint chain), 3 nokta non-vintage:
 //   1. CSS sat 396 .bm-recete-banner.medium (SRM 12-22 amber/dark beer kart header):
@@ -388,7 +397,7 @@
 // 'planlananlar' string - sat 10770 statTanim mapping) + olusturma/guncelleme timestamps + KR.unshift
 // + _origKy(KR) localStorage save + _syncGonderDebounced Firebase push + tarifAc(yeni.id) editor yonlendir.
 // flash mesaj. 131-A..T + 132-pre intact. Motor zinciri dokunulmadi.
-const CACHE_VERSION = 'bm-cache-v131-35';
+const CACHE_VERSION = 'bm-cache-v131-36';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [
