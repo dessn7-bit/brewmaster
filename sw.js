@@ -172,6 +172,18 @@
 // setAktifKlasor icindeki setTimeout(bmDebugUpdate,50) cagrilari. KORUNDU: window.listeSekme/
 // window.aktifKlasor expose (sat 5937 + setter sync) - Sprint 132 sub-sprint'leri (Klonla vs)
 // state expose kullanir. 131-A..T fix'leri INTACT, motor zinciri dokunulmadi.
+// Adim 133-B-1 (19.05.2026): v131-34 -> v131-35, Defter ana sayfa 3 hex vintage swap.
+// 133-B discovery raporu sonrasi: Defter ana sayfa %85+ zaten vintage (J-1 + 131 sprint chain), 3 nokta non-vintage:
+//   1. CSS sat 396 .bm-recete-banner.medium (SRM 12-22 amber/dark beer kart header):
+//      #D97706 (parlak amber) -> linear-gradient(135deg, #B8763F 0%, #8B5A2B 100%)
+//      Hierarchy: .light solid #B8763F → .medium gradient (vintage primary→dark) → .dark gradient #4F2A0E→#412402
+//   2. CSS sat 422 .bm-recete-eylem-chip.aktife .ti (Aktife Al/Plana Al icon):
+//      #D85A30 (turuncu icon) -> #B8763F (vintage primary)
+//   3. CSS sat 140 .bm-sidebar-cta:hover (+ Yeni recete CTA hover):
+//      #D88A18 -> #A8632E (vintage primary dark variant)
+// Banner.light + banner.dark INTACT. Stil renk dot DATA (srmR SRM-based) INTACT.
+// Semantic kırmızı (Sil eylem chip #FCEBEB/#A32D2D) + semantic yeşil (.iade #1D9E75) INTACT.
+// Sprint 132 + 133-A-1 + 133-A-2 tum sub-sprint INTACT. Motor zinciri DOKUNULMADI.
 // Adim 133-A-2 (19.05.2026): v131-33 -> v131-34, Recete Doktoru kart UX refactor (alan E).
 // Mevcut inline <br>+<b>Cozum N:</b> regex-split fragility yerine yapısal layout:
 //   .bm-doctor-kart > .bm-doctor-header (ikon+baslik+durum-badge) +
@@ -376,7 +388,7 @@
 // 'planlananlar' string - sat 10770 statTanim mapping) + olusturma/guncelleme timestamps + KR.unshift
 // + _origKy(KR) localStorage save + _syncGonderDebounced Firebase push + tarifAc(yeni.id) editor yonlendir.
 // flash mesaj. 131-A..T + 132-pre intact. Motor zinciri dokunulmadi.
-const CACHE_VERSION = 'bm-cache-v131-34';
+const CACHE_VERSION = 'bm-cache-v131-35';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [
