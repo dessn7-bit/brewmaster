@@ -356,6 +356,17 @@ body[data-mode="view"] .bm-chip{pointer-events:none;opacity:.6}
 .bm-acc[aria-expanded="false"] .bm-acc-body{max-height:0;opacity:0;padding-top:0;padding-bottom:0}
 @media (max-width:768px){.bm-acc-meta{max-width:110px;font-size:11px}.bm-acc-title{font-size:13px}}
 
+/* Adim 134-G: bm-toast vintage komponenti (flash + alert dönüşüm). z-index 1900 (sync modal 2000 altında). */
+#bm-toast-container{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column-reverse;gap:8px;z-index:1900;pointer-events:none;max-width:380px}
+.bm-toast{pointer-events:auto;padding:12px 16px;border-radius:10px;border:1.5px solid #B8763F;background:#F5E8D0;color:#5C3A0E;font-size:13px;line-height:1.4;box-shadow:0 4px 16px rgba(184,118,63,.20);cursor:pointer;opacity:0;transform:translateY(10px);transition:opacity .2s ease-out,transform .2s ease-out;font-family:var(--font-body)}
+.bm-toast.bm-toast--show{opacity:1;transform:translateY(0)}
+.bm-toast.bm-toast--leave{opacity:0;transform:translateY(10px);transition:opacity .3s ease-in,transform .3s ease-in}
+.bm-toast--info{background:#F5E8D0;border-color:#B8763F;color:#5C3A0E}
+.bm-toast--success{background:#E8F5E8;border-color:#3FBF73;color:#1A5A1A}
+.bm-toast--warning{background:#FFF4D0;border-color:#D4B58A;color:#8B5A2B}
+.bm-toast--error{background:#FAECEC;border-color:#C62828;color:#7A1A1A}
+@media (max-width:480px){#bm-toast-container{bottom:12px;left:12px;right:12px;max-width:none}.bm-toast{font-size:13px;padding:12px 14px}}
+
 /* Adim 132-C: Editor breadcrumb (Defter / Klasor / Bira adi). "‹" geri butonun fonksiyonu "← Defter" link'inde. */
 .bm-breadcrumb{display:flex;align-items:center;gap:6px;font-size:13px;line-height:1.4;color:rgba(248,232,196,.85);margin-bottom:8px;flex-wrap:nowrap;overflow:hidden;min-width:0}
 .bm-bc-link{color:rgba(248,232,196,.85);cursor:pointer;text-decoration:none;background:none;border:none;font:inherit;padding:0;flex-shrink:0;-webkit-tap-highlight-color:transparent}
@@ -3287,7 +3298,7 @@ function batchOlcek(){
   const yeniStr=prompt(`Yeni hacim (Litre):\nMevcut: ${mevcut}L\n\nTüm malt, hop, katkı, mineral miktarları orantılı olarak yeniden hesaplanacak.\n(OG, IBU, SRM değişmez — sadece batç büyür/küçülür)`,mevcut);
   if(!yeniStr)return;
   const yeni=parseFloat(yeniStr);
-  if(!yeni||yeni<=0||yeni===mevcut){if(yeni===mevcut)alert("Hacim aynı — değişiklik yapılmadı.");return;}
+  if(!yeni||yeni<=0||yeni===mevcut){if(yeni===mevcut)bmToast("Hacim aynı — değişiklik yapılmadı.",'info');return;}
   const oran=yeni/mevcut;
   
   // Malt kg
@@ -3306,13 +3317,13 @@ function batchOlcek(){
   S.hacim=yeni;
   
   if(typeof render==='function')render();
-  alert(`✓ Reçete ${mevcut}L'den ${yeni}L'ye ölçeklendirildi (oran ×${oran.toFixed(2)})`);
+  bmToast(`✓ Reçete ${mevcut}L'den ${yeni}L'ye ölçeklendirildi (oran ×${oran.toFixed(2)})`,'success');
 }
 window.batchOlcek=batchOlcek;
 
 // ═══ BEERXML EXPORT — BeerXML 1.0 standart formatı ═══
 function beerXmlExport(){
-  if(!S||!S.biraAd){alert("Önce reçete adı verin.");return;}
+  if(!S||!S.biraAd){bmToast("Önce reçete adı verin.",'warning');return;}
   
   const xe=(s)=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
   const h=S.hacim||11;
@@ -3505,9 +3516,9 @@ ${mashSteps}
     a.click();
     document.body.removeChild(a);
     setTimeout(()=>URL.revokeObjectURL(url),100);
-    alert(`✓ ${a.download} indirildi.\nBeerSmith, Brewfather, Brewer's Friend'e import edilebilir.`);
+    bmToast(`✓ ${a.download} indirildi · BeerSmith/Brewfather/Brewer's Friend import edilebilir`,'success');
   }catch(e){
-    alert('Export hatası: '+e.message);
+    bmToast('Export hatası: '+e.message,'error');
   }
 }
 window.beerXmlExport=beerXmlExport;
@@ -4164,7 +4175,7 @@ function suProfilOneriUygula(hedefId) {
   if (!hedefId) hedefId = S.suHedef;
   if (!hedefId && S.stil) hedefId = stildenSuProfili(S.stil);
   if (!hedefId) {
-    alert("Önce bir hedef profil seç veya bira için stil seç (stilden otomatik çıkarım yapılır)");
+    bmToast("Önce bir hedef profil seç veya bira için stil seç (stilden otomatik çıkarım yapılır)",'warning');
     return;
   }
   const hedef = SU_PROFILLERI.find(p=>p&&p.id===hedefId);
@@ -10338,7 +10349,47 @@ function stokKontrolHTML(){
 
 
 // ── ACCORDION HELPER ───────────────────────────────────────────────────────
-function flash(msg,tip){kayitMsg=msg;kayitTip=tip||"ok";render();setTimeout(()=>{kayitMsg="";kayitTip="ok";render();},4000);}
+// Adim 134-G: bm-toast vintage komponenti
+// flash() artık header Kaydet button text overwrite YAPMIYOR — sağ alt toast gösterir.
+// kayitMsg/kayitTip eski global'lar muhafaza (geri uyumluluk), her zaman "" kalır.
+window.bmToast = function(msg, tip){
+  tip = tip || 'info';
+  // Eski "ok"/"hata" tipleri uyumlu (flash legacy)
+  if(tip==='ok') tip='success';
+  else if(tip==='hata') tip='error';
+  if(['info','success','warning','error'].indexOf(tip)<0) tip='info';
+  var cont = document.getElementById('bm-toast-container');
+  if(!cont){
+    cont = document.createElement('div');
+    cont.id = 'bm-toast-container';
+    document.body.appendChild(cont);
+  }
+  // Max 3 visible — fazlasını dismiss
+  while(cont.children.length >= 3){ cont.removeChild(cont.firstChild); }
+  var t = document.createElement('div');
+  t.className = 'bm-toast bm-toast--'+tip;
+  var assertive = (tip==='warning' || tip==='error');
+  t.setAttribute('role', assertive ? 'alert' : 'status');
+  t.setAttribute('aria-live', assertive ? 'assertive' : 'polite');
+  t.textContent = msg;
+  cont.appendChild(t);
+  // Fade in
+  requestAnimationFrame(function(){ t.classList.add('bm-toast--show'); });
+  // Auto-dismiss 4sn + hover pause
+  var timer = null;
+  var dismiss = function(){
+    if(t.classList.contains('bm-toast--leave')) return;
+    t.classList.add('bm-toast--leave');
+    setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); }, 320);
+  };
+  var startTimer = function(){ timer = setTimeout(dismiss, 4000); };
+  startTimer();
+  t.addEventListener('mouseenter', function(){ if(timer){ clearTimeout(timer); timer=null; } });
+  t.addEventListener('mouseleave', function(){ startTimer(); });
+  t.addEventListener('click', function(){ if(timer){ clearTimeout(timer); timer=null; } dismiss(); });
+  return t;
+};
+function flash(msg,tip){ try { window.bmToast(msg, tip); } catch(_){} }
 function yeniTarif(){S={...BOS};_editId=null;sekme="genel";ekran="editor";render();}
 function setSekme(s){
   const notEl=document.getElementById("notText");
@@ -21152,7 +21203,7 @@ function syncKaydetVeBaslat(){
   const url = (document.getElementById('syncUrlInp')?.value||'').trim();
   const oda = (document.getElementById('syncOdaInp')?.value||'').trim().replace(/[^a-z0-9\-]/gi,'').toLowerCase();
   const cihaz = (document.getElementById('syncCihazInp')?.value||'').trim() || 'A';
-  if(!url||!oda){ alert('URL ve Oda Kodu zorunlu!'); return; }
+  if(!url||!oda){ bmToast('URL ve Oda Kodu zorunlu!','warning'); return; }
   syncCfg = {url, oda, cihaz};
   syncKaydet(syncCfg);
   document.querySelector('[onclick="this.remove()"]')?.remove();
