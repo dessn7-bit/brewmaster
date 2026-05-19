@@ -267,6 +267,34 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
   .bm-ms-cell{min-width:4px !important}
 }
 
+/* Adim 133-A-2: Recete Doktoru kart UX refactor — header / aciklama / cozum chip-rows / hedef
+   Vintage Amber palette uyumlu. Eski inline regex-split <b>Cozum N:</b> yerine yapısal layout. */
+.bm-doctor-kart{background:var(--card);border-left:4px solid #B8763F;border-radius:8px;padding:12px 14px;margin-bottom:10px}
+.bm-doctor-kart.bm-doctor-kırmızı{border-left-color:#C68B5B}
+.bm-doctor-kart.bm-doctor-sarı{border-left-color:#D4B58A}
+.bm-doctor-header{display:flex;align-items:center;gap:8px;font-family:var(--font-display);font-size:14px;font-weight:500;color:#5C3A0E;margin-bottom:6px;flex-wrap:wrap}
+.bm-doctor-ikon{font-size:16px;line-height:1;flex-shrink:0}
+.bm-doctor-baslik{flex:1;min-width:0;line-height:1.3}
+.bm-doctor-durum-badge{padding:2px 8px;border-radius:10px;font-family:var(--font-body);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-left:auto;white-space:nowrap;flex-shrink:0}
+.bm-doctor-durum-kırmızı{background:#F5E8E0;color:#8B3D1F;border:1px solid #C68B5B}
+.bm-doctor-durum-sarı{background:#F5EFDC;color:#8B5A2B;border:1px solid #D4B58A}
+.bm-doctor-aciklama{font-family:var(--font-body);font-size:13px;line-height:1.5;color:#5C3A0E;margin-bottom:10px}
+.bm-doctor-cozumler{margin-top:6px}
+.bm-doctor-cozumler-label{font-family:var(--font-body);font-size:11px;font-weight:600;color:#8B5A2B;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.bm-doctor-cozum-rows{display:flex;flex-direction:column;gap:6px}
+.bm-doctor-cozum-chip{display:flex;align-items:flex-start;gap:8px;padding:8px 12px;background:#F5E8D0;border:1px solid #D4B58A;border-radius:8px;transition:background .15s,border-color .15s}
+.bm-doctor-cozum-chip:hover{background:#E8C28A;border-color:#B8763F}
+.cozum-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#B8763F;color:#fff;font-family:var(--font-body);font-size:11px;font-weight:600;flex-shrink:0;line-height:1}
+.cozum-text{font-family:var(--font-body);font-size:13px;line-height:1.4;color:#5C3A0E;flex:1;min-width:0}
+.bm-doctor-hedef{font-family:var(--font-body);font-size:13px;font-style:italic;color:#8B5A2B;margin-top:8px;padding-top:8px;border-top:1px dashed #D4B58A}
+@media (max-width:768px){
+  .bm-doctor-kart{padding:10px 12px}
+  .bm-doctor-cozum-chip{padding:6px 10px}
+  .cozum-text{font-size:12px}
+  .bm-doctor-aciklama{font-size:12px}
+  .bm-doctor-header{font-size:13px}
+}
+
 /* Adim 132-I: Detay/Readonly mode toggle (edit/view segmented mini toggle).
    POZISYON: editor header sag, Kaydet butonu solunda. CSS Vintage Amber palette (J-1).
    Aktif: #B8763F bg + #FFFFFF text. Pasif: #D4B58A border + #8B5A2B text + hover #F5E8D0.
@@ -17672,33 +17700,55 @@ return `
           }
           
           if(!oneriler.length) return '';
-          
-          const cardColor={'kırmızı':'#F5E8E0','sarı':'#F5EFDC'};
-          const borderColor={'kırmızı':'var(--kk)','sarı':'var(--sk)'};
-          const textColor={'kırmızı':'var(--kk)','sarı':'var(--sk)'};
+
+          // Adim 133-A-2: yapısal layout (header + aciklama + cozum chip-rows + hedef)
+          // Mevcut o.coz body string parse → {aciklama, cozumler[], hedef}. Push noktaları INTACT.
+          // Parse kuralı: <br>\s* split → her satır kategori (Çözüm prefix / bullet / hedef / açıklama).
+          var _doctorParse = function(coz){
+            var lines = String(coz||'').split(/<br>\s*/);
+            var aciklama = [], cozumler = [], hedef = '';
+            var cozumPrefixRE = /^\s*<b>\s*(Çözüm \d+(?:\s*\([^)]+\))?)\s*:\s*<\/b>\s*/;
+            var bulletRE = /^\s*•\s*/;
+            var hedefRE = /^\s*→\s*/;
+            for (var li=0; li<lines.length; li++) {
+              var line = lines[li].trim();
+              if (!line) continue;
+              if (hedefRE.test(line)) { hedef = line.replace(hedefRE,''); continue; }
+              if (cozumPrefixRE.test(line)) { cozumler.push(line.replace(cozumPrefixRE,'').trim()); continue; }
+              if (bulletRE.test(line)) { cozumler.push(line.replace(bulletRE,'').trim()); continue; }
+              aciklama.push(line);
+            }
+            return {aciklama: aciklama.join(' '), cozumler: cozumler, hedef: hedef};
+          };
+          var _durumLabel = function(d){ return d==='kırmızı' ? 'Kritik' : (d==='sarı' ? 'Uyarı' : 'Bilgi'); };
+
           return '<div style="background:var(--card);border:1px solid var(--bor);border-left:4px solid var(--bakir);border-radius:10px;padding:10px 12px;margin:8px 0;">'+
             '<div style="font-size:13px;font-weight:700;color:var(--kahve);margin-bottom:8px">💊 Reçete Doktoru — Stile uyum için öneriler</div>'+
-            oneriler.map(o=>
-              '<div style="background:'+cardColor[o.durum]+';border:1px solid var(--bor);border-left:3px solid '+borderColor[o.durum]+';border-radius:6px;padding:8px 10px;margin-bottom:6px">'+
-                '<div style="font-size:12px;font-weight:700;color:'+textColor[o.durum]+';margin-bottom:6px">'+o.ikon+' '+o.baslik+'</div>'+
-                (function(){
-                  // Çözüm X: olup olmadığına göre render et
-                  var parts=o.coz.split(/<br>\s*(?=<b>Çözüm \d+:<\/b>)/);
-                  if(parts.length<=1) return '<div style="font-size:11px;color:var(--kahve);line-height:1.5">💡 '+o.coz+'</div>';
-                  // İlk parça açıklama (Çözüm öncesi), sonra her biri ayrı blok
-                  var html='';
-                  var ilk=parts[0].trim();
-                  if(ilk) html+='<div style="font-size:11px;color:var(--kahve);line-height:1.5;margin-bottom:6px">💡 '+ilk+'</div>';
-                  for(var pi=1;pi<parts.length;pi++){
-                    var p=parts[pi].trim();
-                    html+='<div style="font-size:11px;color:var(--kahve);line-height:1.45;padding:3px 0 3px 8px;border-left:2px solid '+borderColor[o.durum]+';margin-bottom:3px">'
-                      +p.replace(/<b>(Çözüm \d+:)<\/b>/,'<b style="color:'+textColor[o.durum]+'">$1</b>')
-                      +'</div>';
-                  }
-                  return html;
-                })()+
-              '</div>'
-            ).join('')+
+            oneriler.map(function(o){
+              var p = _doctorParse(o.coz);
+              return '<div class="bm-doctor-kart bm-doctor-'+o.durum+'">'+
+                '<div class="bm-doctor-header">'+
+                  '<span class="bm-doctor-ikon">'+o.ikon+'</span>'+
+                  '<span class="bm-doctor-baslik">'+o.baslik+'</span>'+
+                  '<span class="bm-doctor-durum-badge bm-doctor-durum-'+o.durum+'">'+_durumLabel(o.durum)+'</span>'+
+                '</div>'+
+                (p.aciklama ? '<div class="bm-doctor-aciklama">'+p.aciklama+'</div>' : '')+
+                (p.cozumler.length ?
+                  '<div class="bm-doctor-cozumler">'+
+                    '<div class="bm-doctor-cozumler-label">Çözümler</div>'+
+                    '<div class="bm-doctor-cozum-rows">'+
+                      p.cozumler.map(function(c,i){
+                        return '<div class="bm-doctor-cozum-chip">'+
+                          '<span class="cozum-num">'+(i+1)+'</span>'+
+                          '<span class="cozum-text">'+c+'</span>'+
+                        '</div>';
+                      }).join('')+
+                    '</div>'+
+                  '</div>'
+                : '')+
+                (p.hedef ? '<div class="bm-doctor-hedef">'+p.hedef+'</div>' : '')+
+              '</div>';
+            }).join('')+
           '</div>';
         })()}
 ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştırma kaldırıldı. V5 Top-3 + feedback üst şeritte. */''}

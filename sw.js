@@ -172,6 +172,24 @@
 // setAktifKlasor icindeki setTimeout(bmDebugUpdate,50) cagrilari. KORUNDU: window.listeSekme/
 // window.aktifKlasor expose (sat 5937 + setter sync) - Sprint 132 sub-sprint'leri (Klonla vs)
 // state expose kullanir. 131-A..T fix'leri INTACT, motor zinciri dokunulmadi.
+// Adim 133-A-2 (19.05.2026): v131-33 -> v131-34, Recete Doktoru kart UX refactor (alan E).
+// Mevcut inline <br>+<b>Cozum N:</b> regex-split fragility yerine yapısal layout:
+//   .bm-doctor-kart > .bm-doctor-header (ikon+baslik+durum-badge) +
+//     .bm-doctor-aciklama (prose) + .bm-doctor-cozumler (label + chip-rows) + .bm-doctor-hedef (italic, üst dash)
+// DATA TRANSFORM: oneriler[] BUILD logic INTACT (sat ~17143-17680, ~530 sat rule logic dokunulmadi).
+// Sadece RENDER aşamasında o.coz body string parse (Quick path) — <br>\s* split + her satır kategori:
+//   <b>Çözüm N(?:\s*(\w+)?):</b> → cozum chip
+//   • <b>...</b> → cozum chip (bullet form, IBU low / SRM low)
+//   → ... → hedef (italic alt satır)
+//   diğer → aciklama paragraph
+// Quick path push schema migration YAPILMADI (~30 push noktasi, ROBUST PARSER yeterli). Backward compat 100%.
+// CSS .bm-doctor-* (~20 satir): vintage amber palette (#B8763F primary, #C68B5B kırmızı border,
+//   #D4B58A sarı border, #F5E8D0 chip bg, #E8C28A chip:hover bg, #5C3A0E body text, #8B5A2B label,
+//   #F5E8E0 kırmızı pastel, #F5EFDC sarı pastel). Mobile <=768px kompakt (font 12/13, padding 6 10).
+// Durum label hesap: kırmızı→Kritik, sarı→Uyarı, diğer→Bilgi (yeni badge).
+// Reçete Doktoru LOGIC + öneri tetik koşulları + hedef hesaplama DOKUNULMADI.
+// Action item entegrasyon (chip → otomatik hopEkle/maltEkle) bu scope DISI (133-A-4 backlog).
+// Sprint 132 + 133-A-1 INTACT. Motor zinciri DOKUNULMADI. Stil renk dot DATA INTACT.
 // Adim 133-A-1 (19.05.2026): v131-32 -> v131-33, Editor Genel tab eski icerik vintage migration.
 // 5 alan (A+B+C+D+F) — discovery'de tespit edilen 6 alandan E (Recete Doktoru UX) HARIC mekanik hex swap:
 //   A. Cluster ribbon (mor): #7B1FA2 -> #B8763F (×3 UI nokta), rgba(123,31,162,0.08) -> rgba(184,118,63,0.08)
@@ -358,7 +376,7 @@
 // 'planlananlar' string - sat 10770 statTanim mapping) + olusturma/guncelleme timestamps + KR.unshift
 // + _origKy(KR) localStorage save + _syncGonderDebounced Firebase push + tarifAc(yeni.id) editor yonlendir.
 // flash mesaj. 131-A..T + 132-pre intact. Motor zinciri dokunulmadi.
-const CACHE_VERSION = 'bm-cache-v131-33';
+const CACHE_VERSION = 'bm-cache-v131-34';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [
