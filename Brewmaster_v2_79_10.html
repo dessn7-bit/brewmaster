@@ -22038,7 +22038,9 @@ syncBaslat();
 
       if (parsed.action === 'malt_azalt') {
         if (typeof setSekme === 'function') setSekme('malt');
-        // Highlight matching malt rows (key term match içerikte)
+        // flash() ÖNCE — render() tetikler, .satir DOM stable olur.
+        // Highlight class flash render'dan SONRA (400ms buffer ki yeni .satir DOM'a uygulansın).
+        if (typeof flash === 'function') flash('🎨 Maltları işaretliyorum...', 'ok');
         setTimeout(function(){
           var keywords = ['Chocolate','Roasted','Crystal','Black','Munich','Carafa','Pale','Pilsner','Vienna','Acid','Karamel','Çikolata'];
           var hits = 0;
@@ -22050,8 +22052,7 @@ syncBaslat();
               setTimeout(function(){ s.classList.remove('bm-malt-highlight'); }, 2300);
             }
           });
-          if (typeof flash === 'function') flash('🎨 '+hits+' malt azaltma için işaretlendi', 'ok');
-        }, 200);
+        }, 400);
         return;
       }
 
