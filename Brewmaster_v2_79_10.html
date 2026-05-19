@@ -12800,8 +12800,27 @@ function rEditorSu(){
       <button class="btn" style="background:none;color:var(--kk);font-size:20px;padding:0 4px;line-height:1" onclick="S.suMineralleri.splice(${i},1);render()">×</button>
     </div>`;
   }).join("");
-  return `
-    ${suOneriHTML}${(() => {
+  // Adim 134-B: 5 alan caller-level accordion wrap (132-F pattern). İç render+handler DOKUNULMAZ.
+  function _bmAccWrap(id, icon, title, meta, content, defaultOpen){
+    var _expStr = defaultOpen ? 'true' : 'false';
+    var _defAttr = defaultOpen ? 'expanded' : 'collapsed';
+    var _metaHtml = '<span class="bm-acc-meta" data-acc-meta="'+id+'">'+(meta||'')+'</span>';
+    return '<div class="bm-acc" data-acc-id="'+id+'" data-acc-default="'+_defAttr+'" aria-expanded="'+_expStr+'">'
+      + '<button class="bm-acc-header" type="button" aria-expanded="'+_expStr+'" '
+      + 'onclick="bmAccToggle(\''+id+'\')" '
+      + 'onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();bmAccToggle(\''+id+'\')}">'
+      + '<span class="bm-acc-title">'+icon+' '+title+'</span>'
+      + _metaHtml
+      + '<span class="bm-acc-chevron">▾</span>'
+      + '</button>'
+      + '<div class="bm-acc-body">'+(content||'')+'</div>'
+    + '</div>';
+  }
+
+  // Block extraction — mevcut HTML/IIFE'leri değişkenlere atan
+  var _suStilHTML = suOneriHTML;
+
+  var _suKaynakHTML = (() => {
       // Su profili seçici kartı
       // Kaynak: sadece RO ve RO+Mineral (kullanıcı damıtık/RO kullanıyor)
       const kaynakSecenek = SU_PROFILLERI.filter(p => p.id === 'distile' || p.id === 'ro_mineral');
@@ -12860,7 +12879,9 @@ function rEditorSu(){
         </div>
         ${hedefBlok}
       </div>`;
-    })()}<div class="kart" style="background:var(--ma);border-color:#B0C8E0;margin-bottom:10px">
+    })();
+
+  var _suHesapHTML = `<div class="kart" style="background:var(--ma);border-color:#B0C8E0;margin-bottom:10px">
       <div style="font-size:13px;font-weight:700;color:var(--mk);margin-bottom:8px">Su Profili — Sonuçlar (${S.hacim||11}L için ppm)</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap">${ppmSatirlar}</div>
       <div style="font-size:10px;color:var(--dim);margin-top:8px">
@@ -12905,8 +12926,9 @@ function rEditorSu(){
         if(ppm.Na>150)return `<div style="margin-top:6px;padding:6px 10px;background:#FDF4E0;border-left:3px solid #E0A060;border-radius:6px;font-size:11px;color:#7A5020">⚠️ Na ${ppm.Na.toFixed(0)} ppm — 150+ üstünde belirgin tuzlu tat. Gose için OK, diğer stiller için fazla.</div>`;
         return '';
       })()}
-    </div>
-    <div class="kart">
+    </div>`;
+
+  var _suEkleHTML = `<div class="kart">
       <div style="font-size:13px;font-weight:700;color:var(--kahve);margin-bottom:10px">Mineral Ekle</div>
       <select class="inp" style="margin-bottom:6px" id="yMinId" onchange="yMin.id=this.value;document.getElementById('minAcik').textContent=MINERALLER.find(x=>x&&x.id===this.value)?.aciklama||''">${minOpts}</select>
       <div id="minAcik" style="font-size:10px;color:var(--dim);margin-bottom:6px">${seciMin?.aciklama||""}</div>
@@ -12916,8 +12938,9 @@ function rEditorSu(){
         <button class="btn bm-edit-only" style="background:var(--bakir);color:var(--card);margin-left:auto;padding:9px 18px;font-family:var(--font-display);letter-spacing:.5px" onclick="mineralEkle()">+ Ekle</button>
       </div>
       ${S.suMineralleri.length?`<span class="etiket" style="margin-bottom:6px">Eklenen Mineraller</span>${minSatirlar}`:`<div style="text-align:center;padding:16px;color:var(--dim);font-size:13px">Henüz mineral eklenmedi.<br>RO su için sıfırdan başlayın.</div>`}
-    </div>
-    ${(()=>{
+    </div>`;
+
+  var _suMashPHHTML = (()=>{
       // ═══ TAHMİNİ MASH pH HESABI ═══
       // Palmer formülü: RA = Alk(CaCO3) - Ca/1.4 - Mg/1.7
       // Mash pH tahmini: grist pH (malt ağırlıklı ort) + su etkisi - asit etkisi
@@ -13068,8 +13091,32 @@ function rEditorSu(){
           Tahmini değer — Kaiser pH modeli (malt Lovibond + RA). Gerçek pH için mash sırasında pH metre ile ölçün.
         </div>
       </div>`;
-    })()}
-  </div>`;
+    })();
+
+  // Meta hesaplamalar (defansif IIFE her biri)
+  var _meta1 = (function(){ try{ return (typeof _profAd!=='undefined' && _profAd) ? String(_profAd) : ''; }catch(e){ return ''; } })();
+  var _meta2 = (function(){ try{ var k=SU_PROFILLERI.find(p=>p&&p.id===S.suKaynak); return k?k.ad:(S.suKaynak||'Damıtık/RO'); }catch(e){ return ''; } })();
+  var _meta3 = (function(){ try{ return 'Ca '+Math.round(ppm.Ca||0)+' ppm'; }catch(e){ return ''; } })();
+  var _meta4 = (function(){ try{ return (S.suMineralleri||[]).length ? ((S.suMineralleri||[]).length+' mineral') : ''; }catch(e){ return ''; } })();
+  // Uyarı sayısı: Ca düşük / Mg yüksek / Na yüksek (Su Hesap kartındaki kurallar)
+  var _uyariSayisi = (function(){
+    try {
+      var n = 0;
+      var _tipUy = (typeof maya!=='undefined'&&maya)?maya.tip:'ale';
+      var _minCa = _tipUy==='lager'?30:50;
+      if((ppm.Ca||0) < _minCa) n++;
+      if((ppm.Mg||0) > 30) n++;
+      if((ppm.Na||0) > 150) n++;
+      return n;
+    } catch(e){ return 0; }
+  })();
+
+  // 5 akordiyon caller-wrap (uyarı varsa hesap kartı default açık → kullanıcı fark eder)
+  return _bmAccWrap('su-stil',     '🎯', 'Stil Önerisi',          _meta1, _suStilHTML,    !!_suStilHTML)
+       + _bmAccWrap('su-kaynak',   '💧', 'Su Kaynağı + Hedef',   _meta2, _suKaynakHTML,  true)
+       + _bmAccWrap('su-hesap',    '🧮', 'ChemPalmer Sonuç',     _meta3 + (_uyariSayisi ? ' · '+_uyariSayisi+' uyarı' : ''), _suHesapHTML, true)
+       + _bmAccWrap('su-ekle',     '➕', 'Mineral Ekle',          _meta4, _suEkleHTML,    false)
+       + (_suMashPHHTML ? _bmAccWrap('su-mash-ph', '🧪', 'Mash pH Tahmini', '', _suMashPHHTML, false) : '');
 }
 
 

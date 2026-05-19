@@ -172,6 +172,19 @@
 // setAktifKlasor icindeki setTimeout(bmDebugUpdate,50) cagrilari. KORUNDU: window.listeSekme/
 // window.aktifKlasor expose (sat 5937 + setter sync) - Sprint 132 sub-sprint'leri (Klonla vs)
 // state expose kullanir. 131-A..T fix'leri INTACT, motor zinciri dokunulmadi.
+// Adim 134-B (19.05.2026): v131-39 -> v131-40, Su tab 5 akordiyon (Image 2 stil, 132-F pattern).
+// rEditorSu (sat 12626-13076, ~450 sat tek uzun fonksiyon) — 5 grup caller-level accordion wrap.
+// 7 grup spec'inden gerçek 5 görünür blok (su-rapor + profil-db ayrı kart değil, mevcut blok içinde):
+//   su-stil      🎯 Stil Önerisi         meta: profil adı     default: varsa açık (S.maltlar.length)
+//   su-kaynak    💧 Su Kaynağı + Hedef   meta: kaynak adı     default: açık
+//   su-hesap     🧮 ChemPalmer Sonuç     meta: "Ca X ppm · N uyarı"  default: açık (ana sonuç + uyarılar)
+//   su-ekle      ➕ Mineral Ekle         meta: "N mineral"    default: kapalı
+//   su-mash-ph   🧪 Mash pH Tahmini      meta: yok            default: kapalı (advanced + maltlar.length conditional)
+// Block extraction: suOneriHTML var + 2 IIFE + 2 template literal. _bmAccWrap local helper (132-F kopya).
+// İç handler+hesap (mineralEkle, suProfilUygula, suProfilOneriUygula, ChemPalmer pH, hardness uyarıları) DOKUNULMAZ.
+// Stil renk DATA + ALARM kırmızı/sarı (#FAECEC/#FDF4E0) + hardness gradient INTACT.
+// Sprint 132 + 133 + 134-Q + 134-A INTACT. Motor zinciri DOKUNULMADI.
+// Sticky özet global Su tab'da intact (132-E).
 // Adim 134-A (19.05.2026): v131-38 -> v131-39, Hesap tab 5 akordiyon (Image 2 stil, 132-F pattern).
 // rEditorHesap (sat 13712-13793) final return REWRITE: 5 kart caller-level accordion wrap.
 // İç kart HTML+handler (batchOlcek, beerXmlExport, primingHesap, suHesap, besin tablo) DOKUNULMAZ.
@@ -451,7 +464,7 @@
 // 'planlananlar' string - sat 10770 statTanim mapping) + olusturma/guncelleme timestamps + KR.unshift
 // + _origKy(KR) localStorage save + _syncGonderDebounced Firebase push + tarifAc(yeni.id) editor yonlendir.
 // flash mesaj. 131-A..T + 132-pre intact. Motor zinciri dokunulmadi.
-const CACHE_VERSION = 'bm-cache-v131-39';
+const CACHE_VERSION = 'bm-cache-v131-40';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [
