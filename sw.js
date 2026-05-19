@@ -172,6 +172,19 @@
 // setAktifKlasor icindeki setTimeout(bmDebugUpdate,50) cagrilari. KORUNDU: window.listeSekme/
 // window.aktifKlasor expose (sat 5937 + setter sync) - Sprint 132 sub-sprint'leri (Klonla vs)
 // state expose kullanir. 131-A..T fix'leri INTACT, motor zinciri dokunulmadi.
+// Adim 132-J-1 (19.05.2026): v131-29 -> v131-30, Vintage Amber accent global migration (Scope B).
+// Mevcut parlak turuncu palette -> Vintage Amber palette. 5 hex × 55 occurrence global migrate.
+//   #EF9F27 -> #B8763F  (primary accent, 32 match)  button bg/border/icon/focus ring/badge border
+//   #FAEEDA -> #E8C28A  (light hover/active bg, 10 match)  sidebar-active/chip:hover/badge-3-4/klasor-active
+//   #F0DDB8 -> #D4B58A  (light accent border, 3 match)  yapımda-vurgu/taslak-banner border (derived)
+//   #854F0B -> #8B5A2B  (dark accent text, 8 match)  sidebar/klasor active text/yapımda-baslik
+//                        --bakir variable ile birlesik 2B (kahve header rengi ile harmonize)
+//   #FFF7E6 -> #F5E8D0  (item hover bg, 2 match)  yapimda-item:hover, recete-ac-btn:hover
+// Stil renk dot DATA (srmR 10 hex F3F993..2A1107) + hop origin (#B87A3D) INTACT, sadece accent migrate.
+// Semantic hexler (alarm red/yellow #FAECEC/FAE8E8/FFF8E8, manuel positive #EFFFEF, bg2 ivory #EFE6D0)
+// DOKUNULMADI. Migration sonrasi --bakir/--altin (#8B5A2B/#B8874E) ile palette tam harmonize.
+// 5 replace_all global + grep delta dogrulama: 5/5 eski 0 + yeni count=spec match.
+// 131-A..T + 132-pre/B/C/A/D/E/F/G/H + 132-fix-1 intact. Motor zinciri dokunulmadi.
 // Adim 132-fix-1 (19.05.2026): v131-28 -> v131-29, Firebase syncAl URL cift json path fix.
 // BUG (production 3 cihaz loop): user Firebase URL'ini full path olarak yapistirinca
 //   (ör: "https://kabir-35fe1-default-rtdb.firebaseio.com/brewmaster_kabir.json")
@@ -291,7 +304,7 @@
 // 'planlananlar' string - sat 10770 statTanim mapping) + olusturma/guncelleme timestamps + KR.unshift
 // + _origKy(KR) localStorage save + _syncGonderDebounced Firebase push + tarifAc(yeni.id) editor yonlendir.
 // flash mesaj. 131-A..T + 132-pre intact. Motor zinciri dokunulmadi.
-const CACHE_VERSION = 'bm-cache-v131-29';
+const CACHE_VERSION = 'bm-cache-v131-30';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [
