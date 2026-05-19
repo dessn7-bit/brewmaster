@@ -172,6 +172,25 @@
 // setAktifKlasor icindeki setTimeout(bmDebugUpdate,50) cagrilari. KORUNDU: window.listeSekme/
 // window.aktifKlasor expose (sat 5937 + setter sync) - Sprint 132 sub-sprint'leri (Klonla vs)
 // state expose kullanir. 131-A..T fix'leri INTACT, motor zinciri dokunulmadi.
+// Adim 133-A-1 (19.05.2026): v131-32 -> v131-33, Editor Genel tab eski icerik vintage migration.
+// 5 alan (A+B+C+D+F) — discovery'de tespit edilen 6 alandan E (Recete Doktoru UX) HARIC mekanik hex swap:
+//   A. Cluster ribbon (mor): #7B1FA2 -> #B8763F (×3 UI nokta), rgba(123,31,162,0.08) -> rgba(184,118,63,0.08)
+//      sat 16902-16903 + 21760 _hybridRibbonInner. console.log decorator + V9 archive toggle INTACT.
+//   B. Strategy C ribbon (teal): #00897B -> #8B5A2B (×3 UI nokta), rgba(0,137,123,0.10) -> rgba(139,90,43,0.10)
+//      sat 16912-16913 + 21801 _scRibbonInner. #8B5A2B = --bakir (ana sonuç vurgu, hierarchy kahve).
+//      5 console.log decorator INTACT (dev tool color). 132-H 4/4 badge zaten vintage J-1.
+//   C. Hibrit (V19+V20)/2 alt kart (yeşil): #388E3C/#E8F5E9 -> #B8763F/#E8C28A
+//      sat 17117 _f1Color/_f1Bg. console.log 16487 INTACT.
+//   D. Motor toggle V12 (mor): #6A1B9A/#F3E5F5 -> #B8763F/#E8C28A
+//      sat 17083 btn arg + 17089 color (V12 branch) + 17090 bgC (V12 branch).
+//      V8.5/V9/V10/V101 arsiv toggle hex'leri DOKUNULMADI (133-A-3 sadelestirme'de ele alinacak).
+//      3 console.log decorator INTACT.
+//   F. Durum "Istek Listesi" badge (mor varyant): #E0D6DC/#6B5A7A/#9A8898 -> #E8C28A/#8B5A2B/#D4B58A
+//      sat 17705. Log kategori #E0D6DC (11395) + 2 stok kategori (13762, 13764) INTACT (data renkleri).
+// INTACT (zaten vintage): Top-3 stil pill (var(--bakir/altin/dim)), BU:GU/Atten/SRM kartlar (var(--card/bor)),
+//   Recete Doktoru ana kart (#F5E8E0/#F5EFDC pastel kahve-krem, var(--bakir) border), bm-badge-4-4/3-4/low (J-1).
+// 9/9 hex + 2/2 rgba migration delta PASS (targeted Edit, replace_all yasak — console/archive overlap).
+// Sprint 132 tum sub-sprint INTACT. Motor zinciri DOKUNULMADI. Stil renk dot DATA INTACT.
 // Adim 132-I (19.05.2026): v131-31 -> v131-32, Detay/Readonly mode toggle (edit/view switch).
 // POZISYON: Editor header sag, Kaydet butonu solunda segmented mini toggle [Düzenle | Görüntüle].
 // Vintage Amber (J-1) palette: aktif #B8763F bg + #FFFFFF text, pasif #D4B58A border + #8B5A2B text.
@@ -339,7 +358,7 @@
 // 'planlananlar' string - sat 10770 statTanim mapping) + olusturma/guncelleme timestamps + KR.unshift
 // + _origKy(KR) localStorage save + _syncGonderDebounced Firebase push + tarifAc(yeni.id) editor yonlendir.
 // flash mesaj. 131-A..T + 132-pre intact. Motor zinciri dokunulmadi.
-const CACHE_VERSION = 'bm-cache-v131-32';
+const CACHE_VERSION = 'bm-cache-v131-33';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [

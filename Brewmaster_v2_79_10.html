@@ -16899,8 +16899,8 @@ return `
           // Adim 120: B1 LightGBM + V12 XGBoost cluster ribbon'lari BIRLESTIRILDI -> tek hibrit ribbon.
           // Formul (B1_cal[i] + V12[i]) / 2, kanonik 14-class. Strategy C dispatcher aynı hibrit top-3 kullanir.
           // Placeholder, updateRibbon('hybrid-cluster') Strategy C predict.then()'de gercek deger yazar.
-          return '<div data-ribbon="hybrid-cluster" style="margin-bottom:8px;padding:5px 10px;background:rgba(123,31,162,0.08);border-left:3px solid #7B1FA2;border-radius:4px;font-size:11px;color:var(--yazi)">'+
-                 '<span style="font-weight:600;color:#7B1FA2">Cluster (B1+V12 Hibrit):</span> '+
+          return '<div data-ribbon="hybrid-cluster" style="margin-bottom:8px;padding:5px 10px;background:rgba(184,118,63,0.08);border-left:3px solid #B8763F;border-radius:4px;font-size:11px;color:var(--yazi)">'+
+                 '<span style="font-weight:600;color:#B8763F">Cluster (B1+V12 Hibrit):</span> '+
                  '<span style="color:var(--soluk);font-style:italic">Tahmin yapılıyor...</span>'+
                  '</div>';
         })()}
@@ -16909,8 +16909,8 @@ return `
           // ESKİ global değeri okuma — placeholder yaz. updateRibbon (Hotfix-v2) predict.then()
           // bittiğinde gerçek değeri innerHTML ile yazacak. Eski stale değer hiç görünmez.
           // data-ribbon="strategy-c" attribute korunur (Hotfix-v2 querySelector hedefi).
-          return '<div data-ribbon="strategy-c" style="margin-bottom:8px;padding:5px 10px;background:rgba(0,137,123,0.10);border-left:3px solid #00897B;border-radius:4px;font-size:11px;color:var(--yazi)">'+
-                 '<span style="font-weight:600;color:#00897B">Strategy C (Hibrit Hierarchical):</span> '+
+          return '<div data-ribbon="strategy-c" style="margin-bottom:8px;padding:5px 10px;background:rgba(139,90,43,0.10);border-left:3px solid #8B5A2B;border-radius:4px;font-size:11px;color:var(--yazi)">'+
+                 '<span style="font-weight:600;color:#8B5A2B">Strategy C (Hibrit Hierarchical):</span> '+
                  '<span style="color:var(--soluk);font-style:italic">Tahmin yapılıyor...</span>'+
                  '</div>';
         })()}
@@ -17080,14 +17080,14 @@ return `
               // D-1.9m: V6 (KNN) IIFE kaldırıldı (V6 vs B1 head-to-head B1 14/14 üstün). UI butonu da bu satırda silindi.
               // Aktif slug motorları: V12 (V19 default), V20 (alpha=0.30), Hibrit (V19+V20 mean). B1 cluster ribbon üstte.
               return '<span style="display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap">'+
-                btn('V12', 'V12 (V19) ⭐', '#6A1B9A', 'V12 DEFAULT — V19 XGBoost (Adim 58 + V28f Hefeweizen + V28g Rye Ale + V28h_v2 Dunkelweizen + V28i Witbier + V28j_a Filtre A AWB->Hefe wider 202 reslug + base_score fix, 91 slug, slug t1 0.5706 / 14cat 0.6995, gap 4.90 PASS)')+
+                btn('V12', 'V12 (V19) ⭐', '#B8763F', 'V12 DEFAULT — V19 XGBoost (Adim 58 + V28f Hefeweizen + V28g Rye Ale + V28h_v2 Dunkelweizen + V28i Witbier + V28j_a Filtre A AWB->Hefe wider 202 reslug + base_score fix, 91 slug, slug t1 0.5706 / 14cat 0.6995, gap 4.90 PASS)')+
               '</span>';
             })() : '')+
           '</div>'+
           ((_v5TopBjcp && ['V85','V9','V10','V101','V12'].indexOf(localStorage.getItem('bm_motor_version') || 'V12')>=0) ? (function(){
             var m = localStorage.getItem('bm_motor_version') || 'V12';
-            var color = m==='V12' ? '#6A1B9A' : (m==='V101' ? '#0D47A1' : (m==='V10' ? '#1B5E20' : (m==='V9' ? '#7B1FA2' : '#C88A13')));
-            var bgC = m==='V12' ? '#F3E5F5' : (m==='V101' ? '#E3F2FD' : (m==='V10' ? '#E8F5E9' : (m==='V9' ? '#F3E5F5' : '#FFF7E0')));
+            var color = m==='V12' ? '#B8763F' : (m==='V101' ? '#0D47A1' : (m==='V10' ? '#1B5E20' : (m==='V9' ? '#7B1FA2' : '#C88A13')));
+            var bgC = m==='V12' ? '#E8C28A' : (m==='V101' ? '#E3F2FD' : (m==='V10' ? '#E8F5E9' : (m==='V9' ? '#F3E5F5' : '#FFF7E0')));
             var lbl = m==='V12' ? 'V12 (V19) DEFAULT (Adim 58 + V28f Hefeweizen + V28g Rye Ale + V28h_v2 Dunkelweizen + V28i Witbier + V28j_a Filtre A AWB->Hefe wider 202 reslug + base_score fix, 91 slug, slug t1 0.5706 / 14cat 0.6995, gap 4.90 PASS)' :
                       m==='V101' ? 'V10.1 (8061 reçete, +Roerstok+Amervallei NL kulüpleri)' :
                       m==='V10' ? 'BETA V10 aktif (~8000 reçete, +twortwat NL Hollanda topluluğu)' :
@@ -17114,7 +17114,7 @@ return `
           var _f1r  = window.__lastF1HybridSlugResult;
           if (!_f1r || !_f1r.top3 || _f1r.top3.length === 0) return '';
 
-          var _f1Color = '#388E3C'; var _f1Bg = '#E8F5E9';   // yeşil (Hibrit)
+          var _f1Color = '#B8763F'; var _f1Bg = '#E8C28A';   // vintage amber (Adim 133-A-1 ex yeşil)
 
           function _render3(top3) {
             return top3.slice(0,3).map(function(r,i){
@@ -17702,7 +17702,7 @@ return `
           '</div>';
         })()}
 ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştırma kaldırıldı. V5 Top-3 + feedback üst şeritte. */''}
-            ${S.durum==="arsiv"?'<div style="font-size:10px;background:var(--bg2);color:var(--soluk);padding:2px 8px;border:1px solid var(--bor);border-radius:4px;display:inline-block;margin-top:4px">📦 Arşiv</div>':S.durum==="istek"?'<div style="font-size:10px;background:#E0D6DC;color:#6B5A7A;padding:2px 8px;border:1px solid #9A8898;border-radius:4px;display:inline-block;margin-top:4px">⭐ İstek Listesi</div>':""}
+            ${S.durum==="arsiv"?'<div style="font-size:10px;background:var(--bg2);color:var(--soluk);padding:2px 8px;border:1px solid var(--bor);border-radius:4px;display:inline-block;margin-top:4px">📦 Arşiv</div>':S.durum==="istek"?'<div style="font-size:10px;background:#E8C28A;color:#8B5A2B;padding:2px 8px;border:1px solid #D4B58A;border-radius:4px;display:inline-block;margin-top:4px">⭐ İstek Listesi</div>':""}
         </div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px">
           ${(()=>{
@@ -21757,7 +21757,7 @@ syncBaslat();
     var _t1 = top3[0], _t2 = top3[1] || null, _t3 = top3[2] || null;
     var _sub2 = _t2 ? ' <span style="color:var(--soluk);font-size:10px">· '+_t2.displayTR+' %'+_t2.normalized+'</span>' : '';
     var _sub3 = _t3 ? ' <span style="color:var(--soluk);font-size:10px">· '+_t3.displayTR+' %'+_t3.normalized+'</span>' : '';
-    return '<span style="font-weight:600;color:#7B1FA2">Cluster (B1+V12 Hibrit):</span> ' +
+    return '<span style="font-weight:600;color:#B8763F">Cluster (B1+V12 Hibrit):</span> ' +
            '<span style="font-weight:600">'+_t1.displayTR+'</span>' +
            ' <span style="color:var(--soluk)">%'+_t1.normalized+'</span>'+_sub2+_sub3;
   }
@@ -21798,7 +21798,7 @@ syncBaslat();
         }
       }
     } catch(e) { _badgeHtml = ''; }
-    return '<span style="font-weight:600;color:#00897B">Strategy C (Hibrit Hierarchical):</span> ' +
+    return '<span style="font-weight:600;color:#8B5A2B">Strategy C (Hibrit Hierarchical):</span> ' +
            '<span style="font-weight:600">'+_sname1+'</span>' +
            ' <span style="color:var(--soluk)">%'+_st1.normalized+'</span>'+_sub2s+_sub3s+_fallbackNote + _badgeHtml;
   }
