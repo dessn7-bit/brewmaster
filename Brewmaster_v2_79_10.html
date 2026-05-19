@@ -408,12 +408,11 @@ body[data-mode="view"] .bm-chip{pointer-events:none;opacity:.6}
 @media (max-width:480px){#bm-toast-container{bottom:12px;left:12px;right:12px;max-width:none}.bm-toast{font-size:13px;padding:12px 14px}}
 
 /* Adim 132-C: Editor breadcrumb (Defter / Klasor / Bira adi). "‹" geri butonun fonksiyonu "← Defter" link'inde. */
-.bm-breadcrumb{display:flex;align-items:center;gap:6px;font-size:13px;line-height:1.4;color:rgba(248,232,196,.85);margin-bottom:8px;flex-wrap:nowrap;overflow:hidden;min-width:0}
-.bm-bc-link{color:rgba(248,232,196,.85);cursor:pointer;text-decoration:none;background:none;border:none;font:inherit;padding:0;flex-shrink:0;-webkit-tap-highlight-color:transparent}
-.bm-bc-link:hover{color:#fff}
-.bm-bc-sep{color:rgba(248,232,196,.4);flex-shrink:0;user-select:none}
-.bm-bc-current{color:#fff;font-weight:600;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
-@media (max-width:768px){.bm-breadcrumb{font-size:12px;gap:4px}.bm-bc-current{max-width:100px}}
+/* Adim 134-GERI: 132-C breadcrumb UX karmaşası → tek "← Geri" tuşu */
+.bm-geri{background:transparent;border:1px solid rgba(248,232,196,.35);padding:6px 12px;border-radius:6px;font-size:13px;color:#F8E8C4;cursor:pointer;transition:background .15s,border-color .15s;display:inline-flex;align-items:center;gap:4px;min-height:32px;font-family:inherit;-webkit-tap-highlight-color:transparent;margin-bottom:8px}
+.bm-geri:hover{background:rgba(248,232,196,.12);border-color:#F8E8C4}
+.bm-geri:active{transform:scale(.97)}
+@media (max-width:480px){.bm-geri{font-size:12px;padding:6px 10px}}
 
 /* Adim 131-E: Klasor chip yeniden tasarim (Image 2) + sari taslak banner */
 .bm-klasor-bar{display:flex;flex-wrap:wrap;gap:8px;padding:12px;align-items:center}
@@ -7207,6 +7206,17 @@ window.tarifKlonla=tarifKlonla;
 // Adim 132-C: Breadcrumb klasor link helper. _kl listesinden index aramak yerine direkt assign+render
 // (setAktifKlasor mevcut sidebar drawer + render() yapar ama window._kl liste sayfasinda set, editor'de stale olabilir).
 window._bcKlasorAc=function(k){aktifKlasor=k||'';window.aktifKlasor=aktifKlasor;ekran='liste';render();};
+// Adim 134-GERI: 132-C breadcrumb → tek "← Geri" tuşu. S.klasor varsa o klasöre dön, yoksa defter ana sayfa.
+window.bmGeriDon=function(){
+  try {
+    if (typeof S!=='undefined' && S && S.klasor) {
+      aktifKlasor = S.klasor;
+      window.aktifKlasor = aktifKlasor;
+    }
+    ekran = 'liste';
+    if (typeof render === 'function') render();
+  } catch(e){ console.warn('[bmGeriDon]',e); }
+};
 function tarifSil(id){
   KR=KR.filter(k=>k.id!==id);
   ky(KR);
@@ -18672,14 +18682,9 @@ function rEditor(){
     return (S && S.durum === 'arsiv') ? 'view' : 'edit';
   })();
   try { if (typeof document !== 'undefined') document.body.setAttribute('data-mode', _recMode); } catch(e){}
-  return`<div class="eh"><nav class="bm-breadcrumb" aria-label="Konum">
-    <button class="bm-bc-link" onclick="ekran='liste';render()" title="Reçete defterine dön">← Defter</button>
-    <span class="bm-bc-sep">/</span>
-    <button class="bm-bc-link" onclick="window._bcKlasorAc('${esc(S.klasor||'')}')" title="${S.klasor?'Klasör: '+esc(S.klasor):'Klasörsüz'}">${esc(S.klasor||'Klasörsüz')}</button>
-    <span class="bm-bc-sep">/</span>
-    <span class="bm-bc-current" id="bm-bc-current">${esc(S.biraAd||'Yeni reçete')}</span>
-  </nav><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
-    <input value="${S.biraAd}" oninput="var el=document.getElementById('bm-bc-current');if(el)el.textContent=this.value||'Yeni reçete'" onblur="S.biraAd=this.value" placeholder="Bira adı..." style="background:transparent;border:none;border-bottom:1.5px solid rgba(248,232,196,.5);border-radius:0;font-size:17px;font-weight:700;padding:3px 0;color:#F8E8C4;flex:1;outline:none;font-family:var(--font-display)">
+  return`<div class="eh"><button class="bm-geri" type="button" onclick="window.bmGeriDon()" aria-label="Geri dön" title="${S.klasor?'← '+esc(S.klasor)+' klasörüne dön':'← Defter'}">← Geri</button>
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+    <input value="${S.biraAd}" onblur="S.biraAd=this.value" placeholder="Bira adı..." style="background:transparent;border:none;border-bottom:1.5px solid rgba(248,232,196,.5);border-radius:0;font-size:17px;font-weight:700;padding:3px 0;color:#F8E8C4;flex:1;outline:none;font-family:var(--font-display)">
     ${_editId?`<div class="bm-mode-toggle" role="tablist" aria-label="Reçete modu"><button class="bm-mode-btn ${_recMode==='edit'?'active':''}" type="button" role="tab" aria-selected="${_recMode==='edit'}" onclick="bmReceteMode('${_editId}','edit')">✏️ Düzenle</button><button class="bm-mode-btn ${_recMode==='view'?'active':''}" type="button" role="tab" aria-selected="${_recMode==='view'}" onclick="bmReceteMode('${_editId}','view')">👁️ Görüntüle</button></div>`:''}
     <button class="btn bm-edit-only" onclick="tarifeKaydet()" style="background:${kbg};color:${kclr};border:1px solid ${kbrd};font-size:12px;padding:8px 14px;white-space:nowrap">${kayitMsg||"💾 Kaydet"}</button>
     ${_editId?`<button class="bm-btn-primary" onclick="tarifKlonla('${_editId}')" title="Bu tarifin kopyasını oluştur">📑 Klonla</button>`:''}
