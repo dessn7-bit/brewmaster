@@ -13725,8 +13725,26 @@ function rEditorHesap(og, fg, abv, maya){
   const pb=+(hacim+0.9).toFixed(1);
   const pre=+(parseFloat(pb)+parseFloat(kb)).toFixed(1);
   const mash=+(parseFloat(pre)+parseFloat(em)).toFixed(1);
-  return `
-    <div class="kart">
+  // Adim 134-A: 5 kart caller-level accordion wrap (132-F/E pattern). İç render bloklar DOKUNULMAZ.
+  // Local _bmAccWrap helper (rEditorTakvim emsali, lokal kopya — gelecek global çıkarım opsiyonel).
+  function _bmAccWrap(id, icon, title, meta, content, defaultOpen){
+    var _expStr = defaultOpen ? 'true' : 'false';
+    var _defAttr = defaultOpen ? 'expanded' : 'collapsed';
+    var _metaHtml = '<span class="bm-acc-meta" data-acc-meta="'+id+'">'+(meta||'')+'</span>';
+    return '<div class="bm-acc" data-acc-id="'+id+'" data-acc-default="'+_defAttr+'" aria-expanded="'+_expStr+'">'
+      + '<button class="bm-acc-header" type="button" aria-expanded="'+_expStr+'" '
+      + 'onclick="bmAccToggle(\''+id+'\')" '
+      + 'onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();bmAccToggle(\''+id+'\')}">'
+      + '<span class="bm-acc-title">'+icon+' '+title+'</span>'
+      + _metaHtml
+      + '<span class="bm-acc-chevron">▾</span>'
+      + '</button>'
+      + '<div class="bm-acc-body">'+(content||'')+'</div>'
+    + '</div>';
+  }
+
+  // 5 kart içerikleri (mevcut HTML, sadece dış accordion wrap'a sarılır)
+  var _kartBatch = `<div class="kart">
       <div style="font-size:14px;font-weight:700;color:var(--kahve);margin-bottom:12px">⚗️ Batç Hacmi</div>
       <span class="etiket">Hedef Şişeleme Hacmi</span>
       <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
@@ -13736,14 +13754,16 @@ function rEditorHesap(og, fg, abv, maya){
         <div style="font-size:11px;color:var(--dim);margin-bottom:6px">📏 Reçete ölçeklendirme — tüm malt/hop/katkı/mineral miktarlarını orantılı ayarlar</div>
         <button class="btn" onclick="batchOlcek()" style="background:var(--bakir);color:#fff;padding:8px 14px;font-size:12px;width:100%">↗️ Reçeteyi Başka Hacme Ölçeklendir</button>
       </div>
-    </div>
-    <div class="kart">
+    </div>`;
+
+  var _kartExport = `<div class="kart">
       <div style="font-size:14px;font-weight:700;color:var(--kahve);margin-bottom:10px">📤 Reçete Dışa Aktarma</div>
       <div style="font-size:11px;color:var(--dim);margin-bottom:10px;line-height:1.5">BeerXML 1.0 standart formatı. <b>BeerSmith, Brewfather, Brewer's Friend, BeerTools</b> uygulamalarına import edilebilir.</div>
       <button class="btn" onclick="beerXmlExport()" style="background:var(--altin);color:#fff;padding:10px 14px;font-size:13px;width:100%;font-weight:600">🍺 BeerXML Olarak İndir</button>
       <div style="font-size:9px;color:var(--soluk);margin-top:6px;text-align:center">Malt, hop, maya, mash, su, katkılar — tümü dahil</div>
-    </div>
-    <div class="kart">
+    </div>`;
+
+  var _kartPriming = `<div class="kart">
       <div style="font-size:14px;font-weight:700;color:var(--kahve);margin-bottom:12px">🍾 Priming / Şişeleme</div>
       <span class="etiket">Hedef CO₂ (vol)</span>
       <input type="number" class="inp" value="${S.primVol}" min="1.5" max="5" step=".1" style="margin-bottom:5px" onchange="S.primVol=parseFloat(this.value)||2.4;S._primVolAuto=false;render()">
@@ -13759,37 +13779,53 @@ function rEditorHesap(og, fg, abv, maya){
         <div style="font-size:50px;font-weight:600;color:var(--bakir);line-height:1.1;font-family:var(--font-display);margin-top:4px">${(()=>{const y=S.primYontem||'Dekstroz';if(y==='Sıvı CO₂ Şekeri')return (pg*1.35).toFixed(0)+'mL';if(y==='Beyaz Şeker')return (pg*0.9575).toFixed(0)+'g';return pg.toFixed(0)+'g';})()}</div>
         <div style="font-size:11px;color:var(--soluk);margin-top:4px;font-style:italic">${(()=>{const y=S.primYontem||'Dekstroz';if(y==='Sıvı CO₂ Şekeri')return 'Konsantre sıvı — ürüne göre değişir, etiket talimatına bak';if(y==='Beyaz Şeker')return 'Dekstroz: '+(pg).toFixed(0)+'g';return 'Beyaz Şeker: '+(pg*.9575).toFixed(0)+'g';})()}</div>
       </div>
-    </div>
-    <div class="kart" style="background:#F5E8D0;border:1px solid var(--bor);border-left:4px solid var(--mk)">
+    </div>`;
+
+  var _kartSu = `<div class="kart" style="background:#F5E8D0;border:1px solid var(--bor);border-left:4px solid var(--mk)">
       <div style="font-size:14px;font-weight:700;color:var(--kahve);margin-bottom:12px;font-family:var(--font-display)">💧 Su Hesabı (${hacim}L hedef)</div>
       ${[["Hedef şişeleme",hacim+"L"],["+ Trub & transfer","+0.9L"],["Post-boil hedef",pb+"L"],["+ Kaynatma kaybı ("+_kSure+"dk)","+"+kb+"L"],["Pre-boil hedef",pre+"L"],["+ Malt emilimi (0.7L/kg)","+"+em+"L"],["TOPLAM SU",mash+"L"]].map(([e,d],i)=>`<div class="hs" style="${i===6?"color:var(--bakir);font-size:14px;font-weight:700":""}"><span>${e}</span><span>${d}</span></div>`).join("")}
       <div style="margin-top:10px;padding:8px 12px;background:var(--card);border:1px solid var(--bor);border-radius:8px;font-size:11px;color:var(--soluk)">
         Strike: ~${Math.round(mash*0.65)}L · Sparge: ~${Math.round(mash*0.35)}L
       </div>
-    </div>
-    ${og>1.001?(()=>{
-      // Tek formül kaynağı — hKarb/hKalori ile tutarlı (v2.78.16 unified)
-      const _c100=hKarb(og,fg,100).toFixed(1);
-      const _c330=hKarb(og,fg,330).toFixed(1);
-      const _c500=hKarb(og,fg,500).toFixed(1);
-      const _k100=hKalori(og,fg,abv,100);
-      const _k330=hKalori(og,fg,abv,330);
-      const _k500=hKalori(og,fg,abv,500);
-      return '<div class="kart" style="background:#F5E8D0;border:1px solid var(--bor);border-left:4px solid var(--yk)">'+
-        '<div style="font-size:14px;font-weight:700;color:var(--kahve);margin-bottom:12px;font-family:var(--font-display)">🧬 Besin Değerleri (Tahmini)</div>'+
-        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">'+
-          '<div style="background:var(--card);border-radius:10px;padding:10px;text-align:center;border:1px solid var(--bor)"><div style="font-size:9px;color:var(--soluk);font-weight:700;letter-spacing:.5px">KARBONHİDRAT</div><div style="font-size:24px;font-weight:600;color:var(--bakir);font-family:var(--font-display)">'+_c100+'</div><div style="font-size:9px;color:var(--soluk)">g / 100mL</div></div>'+
-          '<div style="background:var(--card);border-radius:10px;padding:10px;text-align:center;border:1px solid var(--bor)"><div style="font-size:9px;color:var(--soluk);font-weight:700;letter-spacing:.5px">KALORİ</div><div style="font-size:24px;font-weight:600;color:var(--bakir);font-family:var(--font-display)">'+_k100+'</div><div style="font-size:9px;color:var(--soluk)">kcal / 100mL</div></div>'+
-          '<div style="background:var(--card);border-radius:10px;padding:10px;text-align:center;border:1px solid var(--bor)"><div style="font-size:9px;color:var(--soluk);font-weight:700;letter-spacing:.5px">ALKOL</div><div style="font-size:24px;font-weight:600;color:var(--bakir);font-family:var(--font-display)">%'+abv.toFixed(2)+'</div><div style="font-size:9px;color:var(--soluk)">ABV</div></div>'+
-        '</div>'+
-        '<div style="background:var(--card);border-radius:10px;border:1px solid var(--bor);overflow:hidden;margin-bottom:6px">'+
-          '<div style="display:flex;background:#E8C28A;padding:6px 12px;border-bottom:1px solid var(--bor)"><span style="flex:1;font-size:10px;font-weight:700;color:var(--kahve);letter-spacing:.5px">Porsiyon</span><span style="flex:1;text-align:center;font-size:10px;font-weight:700;color:var(--kahve);letter-spacing:.5px">Karbonhidrat</span><span style="flex:1;text-align:right;font-size:10px;font-weight:700;color:var(--kahve);letter-spacing:.5px">Kalori</span></div>'+
-          '<div style="display:flex;padding:9px 12px;border-bottom:1px solid var(--bor)"><span style="flex:1;font-size:13px;color:var(--kahve)">🍺 330mL</span><span style="flex:1;font-size:14px;font-weight:700;color:var(--bakir);text-align:center;font-family:var(--font-display)">'+_c330+'g</span><span style="flex:1;font-size:14px;font-weight:700;color:var(--bakir);text-align:right;font-family:var(--font-display)">'+_k330+' kcal</span></div>'+
-          '<div style="display:flex;padding:9px 12px"><span style="flex:1;font-size:13px;color:var(--kahve)">🍺 500mL</span><span style="flex:1;font-size:14px;font-weight:700;color:var(--bakir);text-align:center;font-family:var(--font-display)">'+_c500+'g</span><span style="flex:1;font-size:14px;font-weight:700;color:var(--bakir);text-align:right;font-family:var(--font-display)">'+_k500+' kcal</span></div>'+
-        '</div>'+
-        '<div style="font-size:9px;color:var(--soluk);text-align:center;font-style:italic">ASBC · Real Extract · Balling Plato</div>'+
-      '</div>';
-    })():""}`;
+    </div>`;
+
+  var _kartNutri = '';
+  var _meta5 = '';
+  if (og > 1.001) {
+    const _c100=hKarb(og,fg,100).toFixed(1);
+    const _c330=hKarb(og,fg,330).toFixed(1);
+    const _c500=hKarb(og,fg,500).toFixed(1);
+    const _k100=hKalori(og,fg,abv,100);
+    const _k330=hKalori(og,fg,abv,330);
+    const _k500=hKalori(og,fg,abv,500);
+    _meta5 = _k330 + ' kcal/330mL';
+    _kartNutri = '<div class="kart" style="background:#F5E8D0;border:1px solid var(--bor);border-left:4px solid var(--yk)">'+
+      '<div style="font-size:14px;font-weight:700;color:var(--kahve);margin-bottom:12px;font-family:var(--font-display)">🧬 Besin Değerleri (Tahmini)</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">'+
+        '<div style="background:var(--card);border-radius:10px;padding:10px;text-align:center;border:1px solid var(--bor)"><div style="font-size:9px;color:var(--soluk);font-weight:700;letter-spacing:.5px">KARBONHİDRAT</div><div style="font-size:24px;font-weight:600;color:var(--bakir);font-family:var(--font-display)">'+_c100+'</div><div style="font-size:9px;color:var(--soluk)">g / 100mL</div></div>'+
+        '<div style="background:var(--card);border-radius:10px;padding:10px;text-align:center;border:1px solid var(--bor)"><div style="font-size:9px;color:var(--soluk);font-weight:700;letter-spacing:.5px">KALORİ</div><div style="font-size:24px;font-weight:600;color:var(--bakir);font-family:var(--font-display)">'+_k100+'</div><div style="font-size:9px;color:var(--soluk)">kcal / 100mL</div></div>'+
+        '<div style="background:var(--card);border-radius:10px;padding:10px;text-align:center;border:1px solid var(--bor)"><div style="font-size:9px;color:var(--soluk);font-weight:700;letter-spacing:.5px">ALKOL</div><div style="font-size:24px;font-weight:600;color:var(--bakir);font-family:var(--font-display)">%'+abv.toFixed(2)+'</div><div style="font-size:9px;color:var(--soluk)">ABV</div></div>'+
+      '</div>'+
+      '<div style="background:var(--card);border-radius:10px;border:1px solid var(--bor);overflow:hidden;margin-bottom:6px">'+
+        '<div style="display:flex;background:#E8C28A;padding:6px 12px;border-bottom:1px solid var(--bor)"><span style="flex:1;font-size:10px;font-weight:700;color:var(--kahve);letter-spacing:.5px">Porsiyon</span><span style="flex:1;text-align:center;font-size:10px;font-weight:700;color:var(--kahve);letter-spacing:.5px">Karbonhidrat</span><span style="flex:1;text-align:right;font-size:10px;font-weight:700;color:var(--kahve);letter-spacing:.5px">Kalori</span></div>'+
+        '<div style="display:flex;padding:9px 12px;border-bottom:1px solid var(--bor)"><span style="flex:1;font-size:13px;color:var(--kahve)">🍺 330mL</span><span style="flex:1;font-size:14px;font-weight:700;color:var(--bakir);text-align:center;font-family:var(--font-display)">'+_c330+'g</span><span style="flex:1;font-size:14px;font-weight:700;color:var(--bakir);text-align:right;font-family:var(--font-display)">'+_k330+' kcal</span></div>'+
+        '<div style="display:flex;padding:9px 12px"><span style="flex:1;font-size:13px;color:var(--kahve)">🍺 500mL</span><span style="flex:1;font-size:14px;font-weight:700;color:var(--bakir);text-align:center;font-family:var(--font-display)">'+_c500+'g</span><span style="flex:1;font-size:14px;font-weight:700;color:var(--bakir);text-align:right;font-family:var(--font-display)">'+_k500+' kcal</span></div>'+
+      '</div>'+
+      '<div style="font-size:9px;color:var(--soluk);text-align:center;font-style:italic">ASBC · Real Extract · Balling Plato</div>'+
+    '</div>';
+  }
+
+  // Meta hesaplamalar
+  var _meta1 = hacim + 'L';
+  var _meta3 = (S.primVol || '—') + ' vol';
+  var _meta4 = mash + 'L';
+
+  // 5 akordiyon caller-wrap (besin değerleri opsiyonel og>1.001)
+  return _bmAccWrap('hesap-bath',    '🥃', 'Batç Hacmi',           _meta1, _kartBatch,   true)
+       + _bmAccWrap('hesap-export',  '📤', 'Reçete Dışa Aktarma',  '',     _kartExport,  false)
+       + _bmAccWrap('hesap-priming', '🍾', 'Priming / Şişeleme',   _meta3, _kartPriming, false)
+       + _bmAccWrap('hesap-su',      '💧', 'Su Hesabı',            _meta4, _kartSu,      true)
+       + (_kartNutri ? _bmAccWrap('hesap-nutri', '🧬', 'Besin Değerleri', _meta5, _kartNutri, false) : '');
 }
 
 

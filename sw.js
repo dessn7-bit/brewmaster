@@ -172,6 +172,20 @@
 // setAktifKlasor icindeki setTimeout(bmDebugUpdate,50) cagrilari. KORUNDU: window.listeSekme/
 // window.aktifKlasor expose (sat 5937 + setter sync) - Sprint 132 sub-sprint'leri (Klonla vs)
 // state expose kullanir. 131-A..T fix'leri INTACT, motor zinciri dokunulmadi.
+// Adim 134-A (19.05.2026): v131-38 -> v131-39, Hesap tab 5 akordiyon (Image 2 stil, 132-F pattern).
+// rEditorHesap (sat 13712-13793) final return REWRITE: 5 kart caller-level accordion wrap.
+// İç kart HTML+handler (batchOlcek, beerXmlExport, primingHesap, suHesap, besin tablo) DOKUNULMAZ.
+// 5 akordiyon grup:
+//   hesap-bath    🥃 Batç Hacmi          [açık]   meta: "{N}L"
+//   hesap-export  📤 Reçete Dışa Aktarma [kapalı] meta: yok
+//   hesap-priming 🍾 Priming / Şişeleme  [kapalı] meta: "{vol} vol"
+//   hesap-su      💧 Su Hesabı           [açık]   meta: "{L}L toplam"
+//   hesap-nutri   🧬 Besin Değerleri     [kapalı] meta: "{kcal}/330mL" — og>1.001 conditional
+// Local _bmAccWrap helper (rEditorTakvim 132-F emsali kopya, gelecekte global çıkarım opsiyonel).
+// 5 kart string'i ayrı değişkenlere atılı: _kartBatch, _kartExport, _kartPriming, _kartSu, _kartNutri.
+// bmAccToggle/bmAccInit framework (132-D) intact, render() sonu state restore + ARIA bind otomatik.
+// Sticky özet (132-E global) Hesap tab'da intact. Vintage Amber palette (134-Q sonrası) intact.
+// Sprint 132 + 133 + 134-Q INTACT. Motor zinciri DOKUNULMADI.
 // Adim 134-Q (19.05.2026): v131-37 -> v131-38, Toplu mekanik hex swap + HTML title fix.
 // Sprint 134 Faz 1: keşif raporu mekanik alanlar tek commit. 18 hex migration + 1 title fix.
 //   A. Hesap tab pastel: #FFF4DC×5 / #E4ECE7×3 / #EAEED8×3 → #F5E8D0 + #DDE2C2×1 → #E8C28A
@@ -437,7 +451,7 @@
 // 'planlananlar' string - sat 10770 statTanim mapping) + olusturma/guncelleme timestamps + KR.unshift
 // + _origKy(KR) localStorage save + _syncGonderDebounced Firebase push + tarifAc(yeni.id) editor yonlendir.
 // flash mesaj. 131-A..T + 132-pre intact. Motor zinciri dokunulmadi.
-const CACHE_VERSION = 'bm-cache-v131-38';
+const CACHE_VERSION = 'bm-cache-v131-39';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [
