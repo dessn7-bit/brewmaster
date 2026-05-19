@@ -267,6 +267,19 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
   .bm-ms-cell{min-width:4px !important}
 }
 
+/* Adim 132-I: Detay/Readonly mode toggle (edit/view segmented mini toggle).
+   POZISYON: editor header sag, Kaydet butonu solunda. CSS Vintage Amber palette (J-1).
+   Aktif: #B8763F bg + #FFFFFF text. Pasif: #D4B58A border + #8B5A2B text + hover #F5E8D0.
+   body[data-mode="view"] selector ile .bm-edit-only/.bm-edit-only-acc/.bm-chip global gizleme. */
+.bm-mode-toggle{display:inline-flex;border:1px solid #D4B58A;border-radius:8px;overflow:hidden;font-family:var(--font-body);font-size:12px;font-weight:500;flex-shrink:0;-webkit-tap-highlight-color:transparent}
+.bm-mode-btn{padding:6px 10px;background:transparent;color:#8B5A2B;border:none;cursor:pointer;transition:background .15s,color .15s;font-family:inherit;font-size:inherit;font-weight:inherit;display:inline-flex;align-items:center;gap:4px;line-height:1;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.bm-mode-btn.active{background:#B8763F;color:#FFFFFF}
+.bm-mode-btn:not(.active):hover{background:#F5E8D0}
+body[data-mode="view"] .bm-edit-only{display:none !important}
+body[data-mode="view"] .bm-acc.bm-edit-only-acc{display:none !important}
+body[data-mode="view"] .bm-chip{pointer-events:none;opacity:.6}
+@media (max-width:768px){.bm-mode-btn{padding:5px 7px;font-size:11px}}
+
 /* Adim 132-H: 4/4 ensemble agreement badge (Strategy C ribbon icinde).
    stcRes.hybrid_agreement (örn "4/4") motor consensus oran. 4/4 yesil, 3/4 turuncu, ≤2/4 gri. */
 .bm-ensemble-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:12px;font-size:11px;line-height:1.2;font-weight:600;font-family:var(--font-body);margin-left:8px;white-space:nowrap}
@@ -11419,8 +11432,8 @@ function rEditorTakvim(maya, maya2, tv){
             +(e.deger?'<span style="font-size:11px;background:rgba(0,0,0,.07);color:var(--bakir);padding:1px 7px;border-radius:8px;font-weight:600">'+esc(e.deger)+(e.tip==='sicaklik'?'°C':e.tip==='fg_olcum'?' gravity':'')+'</span>':'')
           +'</div>'
           +'<div>'
-          +'<button onclick="logDuzenle('+ii+')" style="background:none;border:none;color:#90b;font-size:12px;cursor:pointer;padding:2px 4px">✏️</button>'
-          +'<button onclick="logSilIdx('+ii+')" style="background:none;border:none;color:#bbb;font-size:14px;cursor:pointer;padding:2px 4px">✕</button>'
+          +'<button class="bm-edit-only" onclick="logDuzenle('+ii+')" style="background:none;border:none;color:#90b;font-size:12px;cursor:pointer;padding:2px 4px">✏️</button>'
+          +'<button class="bm-edit-only" onclick="logSilIdx('+ii+')" style="background:none;border:none;color:#bbb;font-size:14px;cursor:pointer;padding:2px 4px">✕</button>'
           +'</div>'
         +'</div>'
         +(e.not&&e.tip!=='katki'&&e.tip!=='tadim'?'<div style="font-size:11px;color:var(--soluk);margin-top:3px">'+esc(e.not)+'</div>':'')
@@ -12307,7 +12320,7 @@ function rEditorTakvim(maya, maya2, tv){
       +(_bl.length?'<button onclick="logExport()" style="background:var(--card);border:1px solid var(--bor);color:var(--kahve);font-size:10px;padding:3px 8px;border-radius:6px;cursor:pointer;font-weight:600">📋 Kopyala</button>':'')
     +'</div>'
     +(_bl.length?'<div id="logListeCont" style="max-height:500px;overflow-y:auto">'+_gruppedLog+'</div>':'<div style="padding:20px;text-align:center;color:var(--dim);font-size:12px">Henüz kayıt yok — aşağıdan ekle</div>')
-    +'<div style="border-top:1px solid var(--bor)">'
+    +'<div class="bm-edit-only" style="border-top:1px solid var(--bor)">'
       +'<div onclick="toggleLogForm()" style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;cursor:pointer;user-select:none;background:linear-gradient(135deg,var(--altin) 0%,#B8863A 100%);color:#fff">'
         +'<span style="font-size:13px;font-weight:700">➕ Yeni Kayıt Ekle</span>'
         +'<span id="logFormArr" style="font-size:12px">▼</span>'
@@ -12862,7 +12875,7 @@ function rEditorSu(){
       <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center">
         <input type="number" id="yMinMiktar" class="inp" style="width:90px;text-align:center;font-weight:600" value="${yMin.miktar}" min=".1" step=".1" onchange="yMin.miktar=parseFloat(this.value)||0">
         <span style="color:var(--soluk);font-size:13px">${seciMin?.birim||"g"} / ${S.hacim||11}L</span>
-        <button class="btn" style="background:var(--bakir);color:var(--card);margin-left:auto;padding:9px 18px;font-family:var(--font-display);letter-spacing:.5px" onclick="mineralEkle()">+ Ekle</button>
+        <button class="btn bm-edit-only" style="background:var(--bakir);color:var(--card);margin-left:auto;padding:9px 18px;font-family:var(--font-display);letter-spacing:.5px" onclick="mineralEkle()">+ Ekle</button>
       </div>
       ${S.suMineralleri.length?`<span class="etiket" style="margin-bottom:6px">Eklenen Mineraller</span>${minSatirlar}`:`<div style="text-align:center;padding:16px;color:var(--dim);font-size:13px">Henüz mineral eklenmedi.<br>RO su için sıfırdan başlayın.</div>`}
     </div>
@@ -13217,7 +13230,7 @@ function rEditorSurec(){
       <div style="font-size:13px;font-weight:700;color:var(--kahve)">🌡️ Mash Süreci</div>
       <div style="display:flex;align-items:center;gap:6px">
         <span style="font-size:11px;color:var(--soluk)">Toplam: ${_mToplam} dk</span>
-        <button onclick="if(!S.mashAdimlar.length)S.mashAdimlar=[{sc:S.mashSc,dk:S.mashDk}];S.mashAdimlar.push({sc:67,dk:20});render()" style="background:var(--altin);color:#fff;border:none;border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer">+ Adım</button>
+        <button class="bm-edit-only" onclick="if(!S.mashAdimlar.length)S.mashAdimlar=[{sc:S.mashSc,dk:S.mashDk}];S.mashAdimlar.push({sc:67,dk:20});render()" style="background:var(--altin);color:#fff;border:none;border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer">+ Adım</button>
       </div>
     </div>
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:7px 10px;background:#FFF8EE;border-radius:8px;border:1px solid #F0C070">
@@ -13495,7 +13508,7 @@ function rEditorMaya(og, fg, abv, maya, maya2, fgKaynak, fgHesap){
     })():""}
     ${det || (!maya?'<div style="text-align:center;padding:20px;color:var(--dim);font-size:13px">Henüz maya seçilmedi — aşağıdan seç</div>':'')}
     ${maya && S.maya2Id ? `<div style="margin-top:10px"><span class="etiket">2. Maya</span>${det2}</div>` : ''}
-    <div class="bm-acc" data-acc-id="maya-sec" data-acc-default="${_mySecDefault}" aria-expanded="${_mySecAria}" style="margin-top:10px">
+    <div class="bm-acc bm-edit-only-acc" data-acc-id="maya-sec" data-acc-default="${_mySecDefault}" aria-expanded="${_mySecAria}" style="margin-top:10px">
       <button class="bm-acc-header" type="button" aria-expanded="${_mySecAria}" onclick="bmAccToggle('maya-sec')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmAccToggle('maya-sec')}"><span class="bm-acc-title">${_mySecBaslik}</span><span class="bm-acc-chevron">▾</span></button>
       <div class="bm-acc-body">
         <span class="etiket">1. Maya</span>
@@ -13937,7 +13950,7 @@ function rEditorKatki(){
          +'<select id="kb_'+k.id+'" class="inp" style="width:52px;padding:3px">'
          +bl.map(function(b){return '<option'+(b===k.birim?' selected':'')+'>'+b+'</option>';}).join('')
          +'</select></div>'
-         +'<button class="btn" style="background:var(--altin);color:#fff;font-size:12px;padding:6px 12px" data-kid="'+k.id+'" onclick="katki_ekle_tarif(this.dataset.kid)">+ Ekle</button>'
+         +'<button class="btn bm-edit-only" style="background:var(--altin);color:#fff;font-size:12px;padding:6px 12px" data-kid="'+k.id+'" onclick="katki_ekle_tarif(this.dataset.kid)">+ Ekle</button>'
          +'</div></div>';
     });
     _gH+=accGrup((_kI[g]||'•')+' '+g+' ('+ks.length+')',ih,'katki_'+g.replace(/\s+/g,'_'), !!kArama, gRenkKat);
@@ -13954,7 +13967,7 @@ function rEditorKatki(){
       </select>
     </div>
     <div style="font-size:10px;color:var(--soluk);margin-bottom:6px">Zamanlamayı seç — tarife eklenecek:</div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap">
+    <div class="bm-edit-only" style="display:flex;gap:6px;flex-wrap:wrap">
       ${["Kaynatmada","Whirlpool'da","Fermentasyonda","Dry Hop","Şişelemede"].map(z=>`<button class="btn" style="background:var(--sa);color:var(--sk);border:1px solid #E8C060;font-size:12px;padding:6px 12px" onclick="katki_ekle_ozel(this.textContent)">${z}</button>`).join("")}
     </div>
   </div>
@@ -14191,7 +14204,7 @@ function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
       <button onclick="maltGeriAl()" style="background:#7a4a00;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer">↶ Geri Al</button>
     </div>`:''}
     ${S.maltlar.length?`<span class="etiket" style="margin-bottom:6px">Malt Listesi (${S.maltlar.length})</span>${sl}${ts}`:`<div style="text-align:center;padding:20px;color:var(--dim);font-size:13px">Henüz malt eklenmedi — aşağıdan ekle</div>`}
-    <div class="bm-acc" data-acc-id="malt-ekle" data-acc-default="${_mEkleDefault}" aria-expanded="${_mEkleAria}" style="margin-top:10px">
+    <div class="bm-acc bm-edit-only-acc" data-acc-id="malt-ekle" data-acc-default="${_mEkleDefault}" aria-expanded="${_mEkleAria}" style="margin-top:10px">
       <button class="bm-acc-header" type="button" aria-expanded="${_mEkleAria}" onclick="bmAccToggle('malt-ekle')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmAccToggle('malt-ekle')}"><span class="bm-acc-title">➕ Yeni Malt Ekle</span><span class="bm-acc-chevron">▾</span></button>
       <div class="bm-acc-body">
         <span class="etiket">Sistem Verimi</span>
@@ -14359,7 +14372,7 @@ function rEditorHop(og, ibu, seciHop){
   const _hEkleAria = S.hoplar.length ? 'false' : 'true';
   return `
     ${S.hoplar.length?`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><span class="etiket" style="margin-bottom:0">Hop Listesi (${S.hoplar.length})</span>${S.hoplar.length>=2?`<button class="btn" style="background:var(--bg2);color:var(--bakir);border:1px solid var(--bor);font-size:10px;padding:4px 10px" onclick="hopAutoSort()" title="Süreç sırasına göre diz: FWH → Boil(60→15) → Whirlpool → Hop Stand → Dry Hop">📋 Sırala</button>`:''}</div>${sl2}${tibu}`:`<div style="text-align:center;padding:20px;color:var(--dim);font-size:13px">Henüz hop eklenmedi — aşağıdan ekle</div>`}
-    <div class="bm-acc" data-acc-id="hop-ekle" data-acc-default="${_hEkleDefault}" aria-expanded="${_hEkleAria}" style="margin-top:10px">
+    <div class="bm-acc bm-edit-only-acc" data-acc-id="hop-ekle" data-acc-default="${_hEkleDefault}" aria-expanded="${_hEkleAria}" style="margin-top:10px">
       <button class="bm-acc-header" type="button" aria-expanded="${_hEkleAria}" onclick="bmAccToggle('hop-ekle')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmAccToggle('hop-ekle')}"><span class="bm-acc-title">➕ Yeni Hop Ekle</span><span class="bm-acc-chevron">▾</span></button>
       <div class="bm-acc-body">
         <span class="etiket">Hop Ekle</span>
@@ -18280,18 +18293,29 @@ function rEditor(){
 
   const skmls=[["genel","🏠 Genel"],["malt","🌾 Malt"],["hop","🌿 Hop"],["maya","🧬 Maya"],["hesap","🧮 Hesap"],["su","💧 Su"],["surec","⏱️ Süreç"],["takvim","📅 Takvim"],["katki","🧪 Katkı"],["not","📝 Not"]].map(([id,et])=>`<button data-s="${id}" class="sb-btn${sekme===id?" ak":""}" onclick="setSekme('${id}')">${et}</button>`).join("");
   const kbg=kayitMsg?(kayitTip==="hata"?"var(--ka)":"var(--ya)"):"rgba(248,232,196,.18)",kclr=kayitMsg?(kayitTip==="hata"?"var(--kk)":"var(--yk)"):"#F8E8C4",kbrd=kayitMsg?(kayitTip==="hata"?"#C49080":"#A0A868"):"rgba(248,232,196,.35)";
+  // Adim 132-I: Recete mode (edit/view) — localStorage persist + S.durum default + body data-mode
+  const _recMode = (function(){
+    if (!_editId) return 'edit';
+    try {
+      const saved = localStorage.getItem('bm_recete_mode_' + _editId);
+      if (saved === 'edit' || saved === 'view') return saved;
+    } catch(e){}
+    return (S && S.durum === 'arsiv') ? 'view' : 'edit';
+  })();
+  try { if (typeof document !== 'undefined') document.body.setAttribute('data-mode', _recMode); } catch(e){}
   return`<div class="eh"><nav class="bm-breadcrumb" aria-label="Konum">
     <button class="bm-bc-link" onclick="ekran='liste';render()" title="Reçete defterine dön">← Defter</button>
     <span class="bm-bc-sep">/</span>
     <button class="bm-bc-link" onclick="window._bcKlasorAc('${esc(S.klasor||'')}')" title="${S.klasor?'Klasör: '+esc(S.klasor):'Klasörsüz'}">${esc(S.klasor||'Klasörsüz')}</button>
     <span class="bm-bc-sep">/</span>
     <span class="bm-bc-current" id="bm-bc-current">${esc(S.biraAd||'Yeni reçete')}</span>
-  </nav><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+  </nav><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
     <input value="${S.biraAd}" oninput="var el=document.getElementById('bm-bc-current');if(el)el.textContent=this.value||'Yeni reçete'" onblur="S.biraAd=this.value" placeholder="Bira adı..." style="background:transparent;border:none;border-bottom:1.5px solid rgba(248,232,196,.5);border-radius:0;font-size:17px;font-weight:700;padding:3px 0;color:#F8E8C4;flex:1;outline:none;font-family:var(--font-display)">
-    <button class="btn" onclick="tarifeKaydet()" style="background:${kbg};color:${kclr};border:1px solid ${kbrd};font-size:12px;padding:8px 14px;white-space:nowrap">${kayitMsg||"💾 Kaydet"}</button>
+    ${_editId?`<div class="bm-mode-toggle" role="tablist" aria-label="Reçete modu"><button class="bm-mode-btn ${_recMode==='edit'?'active':''}" type="button" role="tab" aria-selected="${_recMode==='edit'}" onclick="bmReceteMode('${_editId}','edit')">✏️ Düzenle</button><button class="bm-mode-btn ${_recMode==='view'?'active':''}" type="button" role="tab" aria-selected="${_recMode==='view'}" onclick="bmReceteMode('${_editId}','view')">👁️ Görüntüle</button></div>`:''}
+    <button class="btn bm-edit-only" onclick="tarifeKaydet()" style="background:${kbg};color:${kclr};border:1px solid ${kbrd};font-size:12px;padding:8px 14px;white-space:nowrap">${kayitMsg||"💾 Kaydet"}</button>
     ${_editId?`<button class="bm-btn-primary" onclick="tarifKlonla('${_editId}')" title="Bu tarifin kopyasını oluştur">📑 Klonla</button>`:''}
   </div>
-  <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+  <div class="bm-edit-only" style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
     <span style="font-size:10px;color:rgba(248,232,196,.8);font-weight:600">🎯 Hedef Stil:</span>
     <select onchange="S.stil=this.value;render()" style="background:rgba(248,232,196,.12);color:#F8E8C4;border:1px solid rgba(248,232,196,.35);border-radius:6px;font-size:11px;padding:4px 8px;flex:1;outline:none;font-family:inherit;cursor:pointer">
       <option value=""${!S.stil?" selected":""}>── Otomatik (bileşenlerden) ──</option>
@@ -21847,6 +21871,16 @@ syncBaslat();
       });
     };
   })();
+
+  // Adim 132-I: Recete mode toggle (edit/view) — segmented mini toggle handler.
+  // localStorage 'bm_recete_mode_'+recId key'inde persist. render() icinde data-mode body attr set.
+  // Default mode rEditor body'sinde belirlenir (S.durum==='arsiv' → view, diger → edit).
+  window.bmReceteMode = function(recId, mode){
+    if(!recId || (mode !== 'edit' && mode !== 'view')) return;
+    try { localStorage.setItem('bm_recete_mode_' + recId, mode); } catch(e){}
+    try { document.body.setAttribute('data-mode', mode); } catch(e){}
+    if (typeof render === 'function') render();
+  };
 
   // Adim 132-A: Header height observer - --bm-header-h CSS var dinamik update.
   // .eh sticky header height degisirse (breadcrumb wrap, hedef stil select, vs) sticky-summary

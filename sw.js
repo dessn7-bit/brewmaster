@@ -172,6 +172,22 @@
 // setAktifKlasor icindeki setTimeout(bmDebugUpdate,50) cagrilari. KORUNDU: window.listeSekme/
 // window.aktifKlasor expose (sat 5937 + setter sync) - Sprint 132 sub-sprint'leri (Klonla vs)
 // state expose kullanir. 131-A..T fix'leri INTACT, motor zinciri dokunulmadi.
+// Adim 132-I (19.05.2026): v131-31 -> v131-32, Detay/Readonly mode toggle (edit/view switch).
+// POZISYON: Editor header sag, Kaydet butonu solunda segmented mini toggle [Düzenle | Görüntüle].
+// Vintage Amber (J-1) palette: aktif #B8763F bg + #FFFFFF text, pasif #D4B58A border + #8B5A2B text.
+// DEFAULT MOD (rEditor body'sinde _recMode):
+//   S.durum==='arsiv' -> view, diger (planlananlar/aktif/istek) -> edit, localStorage 'bm_recete_mode_'+recId override.
+//   render() icinde document.body.setAttribute('data-mode', _recMode) → CSS hide tetiklenir.
+// READ-ONLY MODDA (body[data-mode="view"]) gizlenen:
+//   .bm-edit-only display:none → Kaydet butonu, Hedef Stil dropdown row, Log form (Yeni Kayit Ekle),
+//   log sil/duzenle butonlari (sat 11420-11422), mineralEkle +Ekle, mash +Adim, katki_ekle_tarif/ozel buttons.
+//   .bm-acc.bm-edit-only-acc display:none → malt-ekle/hop-ekle/maya-sec collapsible accordions.
+//   .bm-chip pointer-events:none + opacity:.6 → muadil chip onclick devre disi.
+// GORUNUR HER IKI MODDA: Klonla, breadcrumb, sticky ozet, Strategy C ribbon + 4/4 badge, akordiyon header
+// aç/kapat (bm-acc-header genel), mevcut malzeme satirlari + log kayitlari, grafikler, milestone timeline.
+// JS: window.bmReceteMode(recId, mode) — localStorage persist + data-mode set + render(). render() icinde
+// _recMode hesabi her render'da yenilenir (data sync). 131-A..T + 132-pre/B/C/A/D/E/F/G/H + fix-1 + J-1 + J-2/3/4/5 intact.
+// Motor zinciri DOKUNULMADI. S.brewLog data + event handler intact (sadece UI gizli, data korunur).
 // Adim 132-J-2/3/4/5 (19.05.2026): v131-30 -> v131-31, Polish toplu deploy (4 alt-task tek commit).
 // J-2 (header stat duplicate sil + sticky KH ekle):
 //   sat 18266-18268 editor ust kahve header 6 stat (OG/FG/ABV/IBU/EBC/KH) blok kaldirildi.
@@ -323,7 +339,7 @@
 // 'planlananlar' string - sat 10770 statTanim mapping) + olusturma/guncelleme timestamps + KR.unshift
 // + _origKy(KR) localStorage save + _syncGonderDebounced Firebase push + tarifAc(yeni.id) editor yonlendir.
 // flash mesaj. 131-A..T + 132-pre intact. Motor zinciri dokunulmadi.
-const CACHE_VERSION = 'bm-cache-v131-31';
+const CACHE_VERSION = 'bm-cache-v131-32';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [
