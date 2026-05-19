@@ -172,6 +172,24 @@
 // setAktifKlasor icindeki setTimeout(bmDebugUpdate,50) cagrilari. KORUNDU: window.listeSekme/
 // window.aktifKlasor expose (sat 5937 + setter sync) - Sprint 132 sub-sprint'leri (Klonla vs)
 // state expose kullanir. 131-A..T fix'leri INTACT, motor zinciri dokunulmadi.
+// Adim 132-F (19.05.2026): v131-27 -> v131-28, Takvim tab 132-D akordiyon refactor (Image 2 stil).
+// rEditorTakvim() final return REWRITE (sat ~12489): 10 ic render bloğu (_ustDurum, _milestoneTl,
+// _alarmKart, _kaliteKart, _stilIdealKart, _sonrakiKart, _grafikKart, _takvimKart, _detaylarKart,
+// _logFormKart) DOKUNULMAZ, sadece dısa 6 .bm-acc grubuna sarıldı (caller-level wrap, 132-E pattern):
+//   takvim-faz       🎯 Faz & Sonraki Adım    [açık]  _ustDurum + _sonrakiKart
+//   takvim-milestone 📊 Milestone Timeline    [açık]  _milestoneTl
+//   takvim-alarm     🚨 Alarmlar              [varsa] _alarmKart  (default = (sayı>0))
+//   takvim-log       📝 Fermantasyon Günlüğü  [açık]  _logFormKart
+//   takvim-grafik    📈 Grafikler & Kalite    [kapalı] _grafikKart + _kaliteKart
+//   takvim-detay     📅 Detay Takvimler       [kapalı] _stilIdealKart + _takvimKart + _detaylarKart
+// Meta hesaplamalar: faz adı (Primary N.gün / Dry Hop / Cold Crash / Kondisyon / Hazırlık),
+// "Gün X" milestone, alarm bekleyen sayısı (_alarmlariOku), brewLog.length, kaliteSkoru toplam/100.
+// Local _bmAccWrap helper (rEditorTakvim ic) eklendi (132-E pattern HTML inline, .bm-acc-body class).
+// Event handler INTACT: logEkle/logSil/logDuzenle/toggleLogForm/toggleTakGor/logTipDegisti/_setLogNot/
+// logExport/logDuzenleSifirla. S.brewLog data + auto-side-effect (fg_olcum→S.fgManuel,
+// og_olcum→S.ogManuel, pitching→durum=yapımda) INTACT. Brewday modal (window._brewday) ayri DOKUNULMADI.
+// bmAccInit() render() sonu setTimeout 132-D intact, yeni 6 akordiyon otomatik state restore + ARIA.
+// 131-A..T + 132-pre/B/C/A/D/E/G/H intact. Motor zinciri (B1/V12c/V20/F1) DOKUNULMADI.
 // Adim 132-H (19.05.2026): v131-26 -> v131-27, 4/4 ensemble agreement badge Strategy C ribbon.
 // Mevcut Strategy C predict result stcRes.hybrid_agreement ZATEN "N/M" formatinda dosyada (sat
 // 22868). _meta.agreement + _meta.total integer'lar da var. 4 motor karsilastirma backend'de
@@ -258,7 +276,7 @@
 // 'planlananlar' string - sat 10770 statTanim mapping) + olusturma/guncelleme timestamps + KR.unshift
 // + _origKy(KR) localStorage save + _syncGonderDebounced Firebase push + tarifAc(yeni.id) editor yonlendir.
 // flash mesaj. 131-A..T + 132-pre intact. Motor zinciri dokunulmadi.
-const CACHE_VERSION = 'bm-cache-v131-27';
+const CACHE_VERSION = 'bm-cache-v131-28';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [

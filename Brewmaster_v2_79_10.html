@@ -12486,7 +12486,78 @@ function rEditorTakvim(maya, maya2, tv){
   // v2.78.80 — Fermantasyon alarm kartı
   var _alarmKart = '';
   try { if(typeof _alarmKartRender === 'function') _alarmKart = _alarmKartRender(); } catch(e){ console.warn('alarmKart render',e); }
-  return _ustDurum + _milestoneTl + _alarmKart + _kaliteKart + _stilIdealKart + _sonrakiKart + _grafikKart + _takvimKart + _detaylarKart + _logFormKart;
+
+  // ── Adim 132-F: 6 akordiyon grubu (Takvim tab 132-D pattern caller-level wrap) ──
+  // 10 ic render bloğu DOKUNULMAZ — sadece dışa sarılır. Event handler + S.brewLog
+  // + auto-side-effects intact. Akordiyon CSS .bm-acc + JS bmAccToggle/bmAccInit 132-D'den.
+  // Meta: faz adı / "Gün X" / "{N} aktif" / "{N} kayıt" / "X/100" / yok.
+  // Default open: faz/milestone/log = true; alarm = (sayı>0); grafik/detay = false.
+
+  // Meta hesaplamalar
+  var _bmF_fazAd = (function(){
+    try {
+      if(_bl.some(function(x){return x.tip==='siseleme';})) return 'Kondisyon';
+      if(_bl.some(function(x){return x.tip==='cold_crash';})) return 'Cold Crash';
+      if(_bl.some(function(x){return x.tip==='dry_hop';})) return 'Dry Hop';
+      var _p = _bl.filter(function(x){return x.tip==='pitching';}).pop();
+      if(_p && _p.tarih){
+        var _g = Math.floor((new Date()-new Date(_p.tarih))/(864e5));
+        return 'Primary · ' + _g + '. gün';
+      }
+      return 'Hazırlık';
+    } catch(e){ return ''; }
+  })();
+  var _bmF_milestoneMeta = (function(){
+    try {
+      var _p = _bl.filter(function(x){return x.tip==='pitching';}).pop();
+      if(!_p || !_p.tarih) return '';
+      var _g = Math.floor((new Date()-new Date(_p.tarih))/(864e5));
+      return 'Gün ' + _g;
+    } catch(e){ return ''; }
+  })();
+  var _bmF_alarmSayisi = (function(){
+    try {
+      if(typeof _alarmlariOku !== 'function') return 0;
+      var _tum = _alarmlariOku() || {};
+      var _aRid = (typeof _editId !== 'undefined' && _editId) ? _editId : ((typeof S !== 'undefined' && S) ? S.id : null);
+      var _hedef = null;
+      if(_aRid && _tum[_aRid] && _tum[_aRid].durum === 'aktif') _hedef = _tum[_aRid];
+      if(!_hedef){
+        var _aktifIds = Object.keys(_tum).filter(function(k){return _tum[k].durum === 'aktif';});
+        if(_aktifIds.length){
+          _aktifIds.sort(function(a,b){return (_tum[b].olusTs||0) - (_tum[a].olusTs||0);});
+          _hedef = _tum[_aktifIds[0]];
+        }
+      }
+      if(!_hedef || !_hedef.alarmlar) return 0;
+      return _hedef.alarmlar.filter(function(a){return a.durum === 'bekliyor' || a.durum === 'gosterildi';}).length;
+    } catch(e){ return 0; }
+  })();
+  var _bmF_logSayisi = _bl.length;
+  var _bmF_kaliteMeta = (typeof _ks2 !== 'undefined' && _ks2 && _ks2.acik) ? (_ks2.toplam + '/100') : '';
+
+  function _bmAccWrap(id, icon, title, meta, content, defaultOpen){
+    var _expStr = defaultOpen ? 'true' : 'false';
+    var _defAttr = defaultOpen ? 'expanded' : 'collapsed';
+    var _metaHtml = '<span class="bm-acc-meta" data-acc-meta="'+id+'">'+(meta||'')+'</span>';
+    return '<div class="bm-acc" data-acc-id="'+id+'" data-acc-default="'+_defAttr+'" aria-expanded="'+_expStr+'">'
+      + '<button class="bm-acc-header" type="button" aria-expanded="'+_expStr+'" '
+      + 'onclick="bmAccToggle(\''+id+'\')" '
+      + 'onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();bmAccToggle(\''+id+'\')}">'
+      + '<span class="bm-acc-title">'+icon+' '+title+'</span>'
+      + _metaHtml
+      + '<span class="bm-acc-chevron">▾</span>'
+      + '</button>'
+      + '<div class="bm-acc-body">'+(content||'')+'</div>'
+    + '</div>';
+  }
+
+  return _bmAccWrap('takvim-faz',       '🎯', 'Faz & Sonraki Adım',    _bmF_fazAd,                                            _ustDurum + _sonrakiKart,                          true)
+       + _bmAccWrap('takvim-milestone', '📊', 'Milestone Timeline',    _bmF_milestoneMeta,                                    _milestoneTl,                                       true)
+       + _bmAccWrap('takvim-alarm',     '🚨', 'Alarmlar',              _bmF_alarmSayisi > 0 ? (_bmF_alarmSayisi + ' aktif') : '—', _alarmKart,                                    _bmF_alarmSayisi > 0)
+       + _bmAccWrap('takvim-log',       '📝', 'Fermantasyon Günlüğü',  _bmF_logSayisi + ' kayıt',                              _logFormKart,                                       true)
+       + _bmAccWrap('takvim-grafik',    '📈', 'Grafikler & Kalite',    _bmF_kaliteMeta || '—',                                _grafikKart + _kaliteKart,                          false)
+       + _bmAccWrap('takvim-detay',     '📅', 'Detay Takvimler',       '',                                                    _stilIdealKart + _takvimKart + _detaylarKart,       false);
 }
 
 // ═══ EDITOR: SU SEKMESİ ══════════════════════════════════════
