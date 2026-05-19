@@ -172,6 +172,26 @@
 // setAktifKlasor icindeki setTimeout(bmDebugUpdate,50) cagrilari. KORUNDU: window.listeSekme/
 // window.aktifKlasor expose (sat 5937 + setter sync) - Sprint 132 sub-sprint'leri (Klonla vs)
 // state expose kullanir. 131-A..T fix'leri INTACT, motor zinciri dokunulmadi.
+// Adim 134-Q (19.05.2026): v131-37 -> v131-38, Toplu mekanik hex swap + HTML title fix.
+// Sprint 134 Faz 1: keşif raporu mekanik alanlar tek commit. 18 hex migration + 1 title fix.
+//   A. Hesap tab pastel: #FFF4DC×5 / #E4ECE7×3 / #EAEED8×3 → #F5E8D0 + #DDE2C2×1 → #E8C28A
+//   B. Süreç tab: #2D7A2D (hop event renk) → #B8763F, #8B3A8B (katki event renk) → #8B5A2B
+//      #FFF8EE×5 → #F5E8D0 (uyari kart bg), #F0C070×5 → #D4B58A (border, 11884 DATA chip INTACT)
+//   C. Katki tab: #F0F8E8/#E0F0D8 → #F5E8D0/#E8C28A (stil öneri kart, 13398 atten history INTACT)
+//      #7A9A4A×2 → #B8763F (border), #FFF8E0/#FFF4D0 → #F5E8D0/#E8C28A (favoriler, 19187 brewday onay INTACT)
+//      #E8B830×3 → #B8763F (favoriler border)
+//   D. Not tab tadım: #FFB74D×3 → #B8763F (border-left)
+//   E. Sync panel: #1A3A5A×3 → #5C3A0E (koyu kahve), #A0D0F0 → #E8C28A, #F0F6FF → #F5E8D0
+//   F. HTML title: <title>Kabeer</title> → <title>Brewmaster</title> (manifest tutarlılık)
+// 18 alan migrate, 4 DATA/semantic context INTACT:
+//   - #F0C070 sicaklik DATA chip (11884) INTACT
+//   - #FFF4D0 brewday onay bildirim izin warning (19187) INTACT
+//   - #F0F8E8 rEditorMaya atten history (13398) INTACT
+//   - #8B3A8B Kondisyon faz DATA renk (11976) INTACT
+// Semantic kırmızı (Sil/destructive #FCEBEB/#FAECEC/#A32D2D/#FAE8E8) INTACT.
+// Semantic yeşil (positive/iade #1D9E75/#3FBF73) INTACT. Stil renk dot DATA srmR INTACT.
+// Sprint 132 + 133-A-1/2/3/4 + 133-B-1 INTACT. Motor zinciri DOKUNULMADI.
+// 4 fn syntax check (rEditorHesap/Surec/Katki/syncPanelAc) PASS.
 // Adim 133-A-4 (19.05.2026): v131-36 -> v131-37, Recete Doktoru cozum chip aksiyon entegrasyon.
 // 133-A-2 layout sonrasi chip'ler interactive: tıklanabilir + arrow icon + hover transform.
 // Parse: window.bmDoctorChipParse(text, ikon) — regex ladder:
@@ -417,7 +437,7 @@
 // 'planlananlar' string - sat 10770 statTanim mapping) + olusturma/guncelleme timestamps + KR.unshift
 // + _origKy(KR) localStorage save + _syncGonderDebounced Firebase push + tarifAc(yeni.id) editor yonlendir.
 // flash mesaj. 131-A..T + 132-pre intact. Motor zinciri dokunulmadi.
-const CACHE_VERSION = 'bm-cache-v131-37';
+const CACHE_VERSION = 'bm-cache-v131-38';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [
