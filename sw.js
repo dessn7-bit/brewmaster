@@ -172,6 +172,20 @@
 // setAktifKlasor icindeki setTimeout(bmDebugUpdate,50) cagrilari. KORUNDU: window.listeSekme/
 // window.aktifKlasor expose (sat 5937 + setter sync) - Sprint 132 sub-sprint'leri (Klonla vs)
 // state expose kullanir. 131-A..T fix'leri INTACT, motor zinciri dokunulmadi.
+// Adim 134-C (19.05.2026): v131-40 -> v131-41, Süreç tab 5 akordiyon (Image 2 stil, 132-F pattern).
+// rEditorSurec (sat 13077-13432, ~180 sat tek uzun fonksiyon) — 5 grup caller-level accordion wrap.
+// 8 görünür blok 5 gruba konsolide:
+//   surec-hazirlik   🔧 Hazırlık Kontrolü       _hazirHTML var      açık (her zaman ilgili)
+//   surec-brewday    🍺 Brewday Modu            banner + timer      açık (brewday aktif: window._brewday.aktif || pitching/og_olcum log)
+//   surec-olcum      📏 Brewday Ölçümleri       Pre-boil + OG/FG manuel + correction tools accordion (nested accGrup INTACT)  kapalı
+//   surec-mash       🌾 Mash Süreci             adım listesi + presets   kapalı
+//   surec-kaynatma   🔥 Kaynatma + Hop Timeline kaynatma süre + _tl + katki takvimi IIFE + dry hop (4 blok birleşik)   kapalı
+// Block extraction: _hazirHTML var (zaten) + 4 yeni const (_surecBrewday/_surecOlcum/_surecMash/_surecKaynatma).
+// Local _bmAccWrap helper (132-F kopya). brewdayBaslatEkran/brewTimerBaslat/mashAdimEkle/setSurecKDk handler DOKUNULMAZ.
+// 134-Q hop event chip #B8763F + katki event chip #8B5A2B + Süreç uyari kart #F5E8D0/#D4B58A INTACT.
+// Brewday modal full-screen koyu kahve stil ayrı (.brewday-timeline/.brewday-modal-icerik) INTACT.
+// S.brewLog 11 log tip + auto-side-effects (fg_olcum→fgManuel, og_olcum→ogManuel, pitching→durum=yapımda) INTACT.
+// Sprint 132 + 133 + 134-Q + 134-A + 134-B INTACT. Motor zinciri DOKUNULMADI.
 // Adim 134-B (19.05.2026): v131-39 -> v131-40, Su tab 5 akordiyon (Image 2 stil, 132-F pattern).
 // rEditorSu (sat 12626-13076, ~450 sat tek uzun fonksiyon) — 5 grup caller-level accordion wrap.
 // 7 grup spec'inden gerçek 5 görünür blok (su-rapor + profil-db ayrı kart değil, mevcut blok içinde):
@@ -464,7 +478,7 @@
 // 'planlananlar' string - sat 10770 statTanim mapping) + olusturma/guncelleme timestamps + KR.unshift
 // + _origKy(KR) localStorage save + _syncGonderDebounced Firebase push + tarifAc(yeni.id) editor yonlendir.
 // flash mesaj. 131-A..T + 132-pre intact. Motor zinciri dokunulmadi.
-const CACHE_VERSION = 'bm-cache-v131-40';
+const CACHE_VERSION = 'bm-cache-v131-41';
 
 // Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
 const CRITICAL_LOCAL = [

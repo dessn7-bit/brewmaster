@@ -13169,9 +13169,27 @@ function rEditorSurec(){
   var _cC=calc();
   var _ogHsp=_cC.ogHesap.toFixed(3), _fgHsp=_cC.fgHesap.toFixed(3);
   var _ogKyn=_cC.ogKaynak, _fgKyn=_cC.fgKaynak;
-  return `
-  ${_hazirHTML}
-  <div class="kart" style="margin-bottom:10px;background:linear-gradient(135deg,#6B4423 0%,#8B5A2B 100%);border:none">
+  // Adim 134-C: 5 alan caller-level accordion wrap (132-F pattern). İç bloklar DOKUNULMAZ.
+  function _bmAccWrap(id, icon, title, meta, content, defaultOpen){
+    var _expStr = defaultOpen ? 'true' : 'false';
+    var _defAttr = defaultOpen ? 'expanded' : 'collapsed';
+    var _metaHtml = '<span class="bm-acc-meta" data-acc-meta="'+id+'">'+(meta||'')+'</span>';
+    return '<div class="bm-acc" data-acc-id="'+id+'" data-acc-default="'+_defAttr+'" aria-expanded="'+_expStr+'">'
+      + '<button class="bm-acc-header" type="button" aria-expanded="'+_expStr+'" '
+      + 'onclick="bmAccToggle(\''+id+'\')" '
+      + 'onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();bmAccToggle(\''+id+'\')}">'
+      + '<span class="bm-acc-title">'+icon+' '+title+'</span>'
+      + _metaHtml
+      + '<span class="bm-acc-chevron">▾</span>'
+      + '</button>'
+      + '<div class="bm-acc-body">'+(content||'')+'</div>'
+    + '</div>';
+  }
+
+  // Block 1: hazırlık checklist (zaten _hazirHTML var)
+
+  // Block 2: brewday banner + kaynatma timer (birleşik)
+  var _surecBrewday = `<div class="kart" style="margin-bottom:10px;background:linear-gradient(135deg,#6B4423 0%,#8B5A2B 100%);border:none">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
       <div style="font-size:24px;line-height:1">🔥</div>
       <div style="flex:1">
@@ -13205,7 +13223,10 @@ function rEditorSurec(){
         <b>⚠️ Sekme açık kalmalı</b> — tarayıcıyı kapatma. Ekran kilitli olabilir.
       </div>
     </div>
-  </div>
+  </div>`;
+
+  // Block 3: Brewday Ölçümleri (Pre-boil OG + manuel OG/FG + correction tools)
+  var _surecOlcum = `
   <div class="kart" style="margin-bottom:10px;background:${(_ogKyn==="manuel"||_fgKyn==="manuel")?"#EFFFEF":"var(--card)"};border-color:${(_ogKyn==="manuel"||_fgKyn==="manuel")?"#60C060":"var(--bor)"}">
     <div style="font-size:13px;font-weight:700;color:var(--kahve);margin-bottom:4px">📏 Brewday Ölçümleri</div>
     <div style="font-size:10px;color:var(--dim);margin-bottom:8px">Gerçek ölçüm girince ABV ve fermentasyon tahminleri ona göre hesaplanır. Boş bırakırsan reçeteden tahmin edilir.</div>
@@ -13309,8 +13330,10 @@ function rEditorSurec(){
         '</div>'+
         '</div>','brewday_correction_tools',false)}
     </div>
-  </div>
-  <div class="kart" style="margin-bottom:10px">
+  </div>`;
+
+  // Block 4: Mash Süreci
+  var _surecMash = `<div class="kart" style="margin-bottom:10px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
       <div style="font-size:13px;font-weight:700;color:var(--kahve)">🌡️ Mash Süreci</div>
       <div style="display:flex;align-items:center;gap:6px">
@@ -13332,8 +13355,10 @@ function rEditorSurec(){
       <button onclick="S.mashAdimlar=[{sc:63,dk:30},{sc:72,dk:20}];S.mashSc=63;render()" style="background:var(--card);border:1px solid var(--bor);border-radius:6px;padding:3px 8px;font-size:10px;cursor:pointer;color:var(--yazi)">63+72°C</button>
       <button onclick="S.mashAdimlar=[{sc:50,dk:15},{sc:63,dk:30},{sc:72,dk:20},{sc:76,dk:10}];S.mashSc=63;render()" style="background:var(--card);border:1px solid var(--bor);border-radius:6px;padding:3px 8px;font-size:10px;cursor:pointer;color:var(--yazi)">4 adım</button>
     </div>
-  </div>
-  <div class="kart">
+  </div>`;
+
+  // Block 5: Kaynatma + Hop Timeline + Katki Takvimi + Dry Hop (birleşik)
+  var _surecKaynatma = `<div class="kart">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
       <div style="font-size:13px;font-weight:700;color:var(--kahve)">⏱️ Kaynatma</div>
       <div style="display:flex;align-items:center;gap:6px">
@@ -13429,6 +13454,20 @@ function rEditorSurec(){
     <div style="font-size:12px;font-weight:700;color:var(--kahve);margin-bottom:8px">🌿 Dry Hop</div>
     ${_dhl.length>0?_dhl.map(function(h){var hp=HOPLAR.find(function(x){return x.id===h.id;});return '<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--bg2);border-radius:8px;margin-bottom:6px"><span>🌿</span><span style="font-size:12px;font-weight:600">'+esc(h._ad||(hp&&hp.ad)||h.id)+'</span><span style="font-size:11px;color:var(--soluk);margin-left:auto">'+h.g+'g</span></div>';}).join(''):'<div style="font-size:12px;color:var(--dim)">Dry hop eklenmedi</div>'}
   </div>`;
+
+  // Defaults + meta
+  var _brewdayAktif = !!((window._brewday && window._brewday.aktif) || (S.brewLog||[]).some(function(l){ return l && (l.tip==='pitching' || l.tip==='og_olcum'); }));
+  var _meta1 = (typeof _hazirGecer!=='undefined') ? (_hazirGecer+'/'+_hazirToplam) : '';
+  var _meta2 = _brewdayAktif ? 'Aktif' : '';
+  var _meta3 = (_ogKyn==='manuel'||_fgKyn==='manuel') ? 'manuel' : '';
+  var _meta4 = ((S.mashAdimlar||[]).length||1) + ' adım · ' + _mToplam + ' dk';
+  var _meta5 = _kSure + ' dk';
+
+  return _bmAccWrap('surec-hazirlik','🔧','Hazırlık Kontrolü',_meta1,_hazirHTML,true)
+       + _bmAccWrap('surec-brewday','🍺','Brewday Modu',_meta2,_surecBrewday,_brewdayAktif)
+       + _bmAccWrap('surec-olcum','📏','Brewday Ölçümleri',_meta3,_surecOlcum,false)
+       + _bmAccWrap('surec-mash','🌾','Mash Süreci',_meta4,_surecMash,false)
+       + _bmAccWrap('surec-kaynatma','🔥','Kaynatma + Hop Timeline',_meta5,_surecKaynatma,false);
 }
 
 
