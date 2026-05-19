@@ -22241,6 +22241,47 @@ syncBaslat();
     };
   })();
 
+  // Adim 134-bl-6: Chip stok auto-decrement helper — bmDoctorChipClick hop_ekle/malt_ekle sonrası çağrılır.
+  // Mevcut _stokMalBul + _stokBirimCevir reuse. STOK dokunulmaz: yetersiz/yok → toast info+warning, sessiz fail.
+  window.bmStokDusurTek = function(refId, ad, miktar, recipeBirim){
+    try {
+      if (typeof STOK === 'undefined' || !Array.isArray(STOK) || STOK.length === 0) {
+        if (typeof bmToast === 'function') bmToast('📦 '+ad+' stokta yok — stoğa eklemeyi unutmayın', 'info');
+        return;
+      }
+      var idx = (typeof _stokMalBul === 'function') ? _stokMalBul(refId, ad) : -1;
+      if (idx < 0) {
+        if (typeof bmToast === 'function') bmToast('📦 '+ad+' stokta yok — stoğa eklemeyi unutmayın', 'info');
+        return;
+      }
+      var s = STOK[idx];
+      var sb = s.birim || 'g';
+      var dusulecek = (typeof _stokBirimCevir === 'function') ? _stokBirimCevir(parseFloat(miktar)||0, recipeBirim, sb) : null;
+      if (dusulecek === null || dusulecek === undefined) {
+        if (typeof bmToast === 'function') bmToast('📦 '+ad+' birim uyumsuz ('+recipeBirim+' → '+sb+')', 'warning');
+        return;
+      }
+      var mevcut = parseFloat(s.miktar) || 0;
+      if (mevcut < dusulecek) {
+        if (typeof bmToast === 'function') bmToast('📦 '+ad+' stok yetersiz ('+mevcut+sb+' / '+dusulecek+sb+' gerekli)', 'warning');
+        return;
+      }
+      var yeni = Math.max(0, Math.round((mevcut - dusulecek)*1000)/1000);
+      STOK[idx] = Object.assign({}, s, {miktar: yeni});
+      if (typeof stokKaydet === 'function') stokKaydet(STOK);
+      // Toast — düşük stok / tükenme uyarısı
+      if (yeni === 0) {
+        if (typeof bmToast === 'function') bmToast('📦 '+ad+': tükendi', 'warning');
+      } else if ((sb === 'g' && yeni < 10) || (sb === 'kg' && yeni < 0.1) || (sb === 'mL' && yeni < 10) || (sb === 'L' && yeni < 0.1) || (sb === 'adet' && yeni < 2)) {
+        if (typeof bmToast === 'function') bmToast('📦 '+ad+': '+yeni+sb+' kaldı (düşük stok)', 'warning');
+      } else {
+        if (typeof bmToast === 'function') bmToast('📦 '+ad+': '+mevcut+sb+' → '+yeni+sb, 'info');
+      }
+    } catch(e) {
+      console.warn('[bmStokDusurTek]', e);
+    }
+  };
+
   // Adim 133-A-4: Recete Doktoru cozum chip aksiyon — parse + dispatch (hop_ekle/malt_ekle/malt_azalt/info).
   // Parse: "+9g Centennial/Columbus" → hop_ekle, "+0.5 kg Crystal 40" → malt_ekle, "azalt"/"kaldır" → *_azalt
   // ikon hint context routing: 🌿 hop, 📈/🎨/📉 malt. Ambiguous → fallback info.
@@ -22326,6 +22367,8 @@ syncBaslat();
         S.hoplar.push({id:hop.id, g:parsed.gram, dk:60, tur:'boil', cAA:null, form:'pellet', _ad:hop.ad});
         if (typeof flash === 'function') flash('✓ '+hop.ad+' '+parsed.gram+'g eklendi (60dk boil)', 'ok');
         if (typeof render === 'function') render();
+        // 134-bl-6: Stok auto-decrement
+        if (typeof window.bmStokDusurTek === 'function') window.bmStokDusurTek(hop.id, hop.ad, parsed.gram, 'g');
         return;
       }
 
@@ -22346,6 +22389,8 @@ syncBaslat();
           if (typeof flash === 'function') flash('✓ '+malt.ad+' '+parsed.kg+' kg eklendi', 'ok');
         }
         if (typeof render === 'function') render();
+        // 134-bl-6: Stok auto-decrement
+        if (typeof window.bmStokDusurTek === 'function') window.bmStokDusurTek(malt.id, malt.ad, parsed.kg, 'kg');
         return;
       }
 
