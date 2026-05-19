@@ -13930,6 +13930,23 @@ function rEditorKatki(){
     "Proses":"⚗️","Egzotik":"🌏"
   };
 
+  // Local _bmAccWrap helper (132-D pattern, rEditorTakvim/Su/Surec/Hesap emsali)
+  function _bmAccWrap(id, icon, title, meta, content, defaultOpen){
+    var _expStr = defaultOpen ? 'true' : 'false';
+    var _defAttr = defaultOpen ? 'expanded' : 'collapsed';
+    var _metaHtml = '<span class="bm-acc-meta" data-acc-meta="'+id+'">'+(meta||'')+'</span>';
+    return '<div class="bm-acc" data-acc-id="'+id+'" data-acc-default="'+_defAttr+'" aria-expanded="'+_expStr+'">'
+      + '<button class="bm-acc-header" type="button" aria-expanded="'+_expStr+'" '
+      + 'onclick="bmAccToggle(\''+id+'\')" '
+      + 'onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();bmAccToggle(\''+id+'\')}">'
+      + '<span class="bm-acc-title">'+icon+' '+title+'</span>'
+      + _metaHtml
+      + '<span class="bm-acc-chevron">▾</span>'
+      + '</button>'
+      + '<div class="bm-acc-body">'+(content||'')+'</div>'
+    + '</div>';
+  }
+
   // ═══ EKLENEN KATKILAR PANELİ (en üst) ═══
   var _hac = S.hacim || 11;
   // Kapsamlı overdose eşikleri — literatür bazlı (g/L veya adet cinsinden)
@@ -14116,7 +14133,20 @@ function rEditorKatki(){
     _gH+=accGrup((_kI[g]||'•')+' '+g+' ('+ks.length+')',ih,'katki_'+g.replace(/\s+/g,'_'), !!kArama, gRenkKat);
   });
 
-  return _eklenenlerPanel+`<div class="kart" style="background:var(--bg2);border:1.5px solid var(--altin);margin-bottom:12px">
+  // ═══ 134-D ACCORDION META + BLOCK EXTRACTION ═══
+  var _bmK_eklenenSay = (S.katkilar||[]).length;
+  var _bmK_uyariSay = 0;
+  try {
+    _bmK_uyariSay = (S.katkilar||[]).filter(function(kt){
+      var kDB = KATKILAR.find(function(x){return x&&x.id===kt.id;});
+      return _katkiUyari(kt, kDB, _hac).indexOf('⚠️')===0;
+    }).length;
+  } catch(_){}
+  var _bmK_eklenenMeta = _bmK_eklenenSay>0 ? (_bmK_eklenenSay+' katki'+(_bmK_uyariSay>0 ? ' · '+_bmK_uyariSay+' aşım' : '')) : '';
+  var _bmK_aramaMeta = sekmeArama.katki ? ('🔍 "'+sekmeArama.katki+'" · '+katkilarFiltreli.length+' sonuç') : '';
+  var _bmK_gridMeta = sekmeArama.katki ? (katkilarFiltreli.length+'/'+KATKILAR.length+' katkı') : (KATKILAR.length+' katkı · '+katAdi.length+' kategori');
+
+  var _ozelKatkiHTML = `<div class="kart" style="background:var(--bg2);border:1.5px solid var(--altin);margin:0">
     <div style="font-size:13px;font-weight:700;color:var(--bakir);margin-bottom:10px">✏️ Özel Katkı Ekle</div>
     <div style="display:flex;gap:8px;margin-bottom:8px">
       <input type="text" id="ozKatki" class="inp" style="flex:2" placeholder="Malzeme adı (örn: Frenk Üzümü, Rezene...)">
@@ -14130,8 +14160,9 @@ function rEditorKatki(){
     <div class="bm-edit-only" style="display:flex;gap:6px;flex-wrap:wrap">
       ${["Kaynatmada","Whirlpool'da","Fermentasyonda","Dry Hop","Şişelemede"].map(z=>`<button class="btn" style="background:var(--sa);color:var(--sk);border:1px solid #E8C060;font-size:12px;padding:6px 12px" onclick="katki_ekle_ozel(this.textContent)">${z}</button>`).join("")}
     </div>
-  </div>
-  <div style="margin-bottom:10px">
+  </div>`;
+
+  var _aramaAreaHTML = `<div style="margin:0">
     <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
       <div style="position:relative;flex:1">
         <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none">🔍</span>
@@ -14201,8 +14232,12 @@ function rEditorKatki(){
       ${katKatBar}
     </div>
     ${katkilarFiltreli.length===0?`<div style="text-align:center;padding:20px;color:var(--dim);font-size:13px">🔍 "${sekmeArama.katki}" için sonuç bulunamadı</div>`:""}
-  </div>
-  ${_gH}`;
+  </div>`;
+
+  return (_bmK_eklenenSay>0 ? _bmAccWrap('katki-eklenen', '✓', 'Eklenen Katkılar', _bmK_eklenenMeta, _eklenenlerPanel, true) : '')
+       + _bmAccWrap('katki-ozel',   '✏️', 'Özel Katkı Ekle', '', _ozelKatkiHTML, false)
+       + _bmAccWrap('katki-arama',  '🔍', 'Arama + Öneriler', _bmK_aramaMeta, _aramaAreaHTML, true)
+       + _bmAccWrap('katki-grid',   '🧪', 'Tüm Katkılar', _bmK_gridMeta, _gH, true);
 }
 
 
