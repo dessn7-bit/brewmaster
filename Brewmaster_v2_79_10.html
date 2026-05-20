@@ -316,8 +316,9 @@ input[type="checkbox"]:disabled,input[type="radio"]:disabled{opacity:.5;cursor:n
 .bm-doctor-cozum-chip:hover{background:var(--kahve-light);border-color:var(--vintage);transform:translateY(-1px);box-shadow:0 2px 4px rgba(139,90,43,.12)}
 .bm-doctor-cozum-chip:active{transform:translateY(0);box-shadow:0 1px 2px rgba(139,90,43,.10)}
 .bm-doctor-cozum-chip:focus-visible{outline:2px solid var(--vintage);outline-offset:2px}
-.bm-doctor-cozum-chip.bm-chip-disabled{opacity:.65;cursor:default}
-.bm-doctor-cozum-chip.bm-chip-disabled:hover{transform:none;box-shadow:none;background:var(--kahve-bg);border-color:var(--kahve-border)}
+.bm-doctor-cozum-chip.bm-chip-disabled,.bm-doctor-cozum-chip[disabled],.bm-doctor-cozum-chip.is-disabled{opacity:.5;cursor:not-allowed;pointer-events:none;background:var(--kahve-bg);border-color:var(--kahve-border);color:var(--soluk)}
+.bm-doctor-cozum-chip.bm-chip-disabled:hover,.bm-doctor-cozum-chip[disabled]:hover,.bm-doctor-cozum-chip.is-disabled:hover{transform:none;box-shadow:none;background:var(--kahve-bg);border-color:var(--kahve-border)}
+.bm-doctor-cozum-chip[disabled]::after,.bm-doctor-cozum-chip.is-disabled::after{content:' ✓';color:var(--vintage);font-size:0.9em;margin-left:4px;font-weight:600}
 /* Adim 133-A-4: Aksiyon ok ikonu chip sag tarafinda */
 .bm-chip-arrow{color:var(--vintage);opacity:.5;margin-left:auto;font-size:14px;transition:opacity .15s,transform .15s;flex-shrink:0;line-height:1.4;align-self:center}
 .bm-doctor-cozum-chip:hover .bm-chip-arrow{opacity:1;transform:translateX(2px)}
@@ -18188,8 +18189,8 @@ return `
                         var _enc = _plain.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
                         var _ikonEnc = String(o.ikon||'').replace(/"/g,'&quot;');
                         return '<div class="bm-doctor-cozum-chip" role="button" tabindex="0" '+
-                          'onclick="window.bmDoctorChipClick(this.dataset.text,this.dataset.ikon)" '+
-                          'onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();window.bmDoctorChipClick(this.dataset.text,this.dataset.ikon)}" '+
+                          'onclick="window.bmDoctorChipClick(this.dataset.text,this.dataset.ikon,this)" '+
+                          'onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();window.bmDoctorChipClick(this.dataset.text,this.dataset.ikon,this)}" '+
                           'data-text="'+_enc+'" data-ikon="'+_ikonEnc+'">'+
                           '<span class="cozum-num">'+(i+1)+'</span>'+
                           '<span class="cozum-text">'+c+'</span>'+
@@ -22355,8 +22356,21 @@ syncBaslat();
     return {action:'info', text:text};
   };
 
-  window.bmDoctorChipClick = function(text, ikon){
+  // Adim 134-bl-8: Chip disable helper — state-mutate action başarıyla tamamlandıktan SONRA çağrılır.
+  // KRİTİK kural: S.hoplar/S.maltlar değişti mi → disable; değişmedi → bırak.
+  window.bmDoctorChipDisable = function(chipEl){
+    if (!chipEl || !chipEl.setAttribute) return;
     try {
+      chipEl.setAttribute('disabled', 'true');
+      chipEl.classList.add('is-disabled');
+      chipEl.setAttribute('aria-disabled', 'true');
+      chipEl.setAttribute('tabindex', '-1');
+    } catch(e) { console.warn('[bmDoctorChipDisable]', e); }
+  };
+
+  window.bmDoctorChipClick = function(text, ikon, chipEl){
+    try {
+      // 134-bl-8: chipEl optional — render onclick="...,this" geçer. Geri uyumlu (undefined → no-op disable).
       var parsed = window.bmDoctorChipParse(text, ikon);
 
       if (parsed.action === 'hop_ekle' && typeof HOPLAR !== 'undefined') {
@@ -22382,6 +22396,8 @@ syncBaslat();
           S.hoplar.push({id:hop.id, g:parsed.gram, dk:_newDk, tur:'boil', cAA:null, form:'pellet', _ad:hop.ad});
           if (typeof flash === 'function') flash('✓ '+hop.ad+' '+parsed.gram+'g eklendi (60dk boil)', 'ok');
         }
+        // 134-bl-8: S.hoplar değişti → disable (render öncesi — render onclick'i yeniden basabilir)
+        window.bmDoctorChipDisable(chipEl);
         if (typeof render === 'function') render();
         // 134-bl-6: Stok auto-decrement (her iki branch'te de — yeni eklenen miktar düşülür)
         if (typeof window.bmStokDusurTek === 'function') window.bmStokDusurTek(hop.id, hop.ad, parsed.gram, 'g');
@@ -22404,6 +22420,8 @@ syncBaslat();
           S.maltlar.push({id:malt.id, kg:parsed.kg, marka:'', _ad:malt.ad});
           if (typeof flash === 'function') flash('✓ '+malt.ad+' '+parsed.kg+' kg eklendi', 'ok');
         }
+        // 134-bl-8: S.maltlar değişti → disable
+        window.bmDoctorChipDisable(chipEl);
         if (typeof render === 'function') render();
         // 134-bl-6: Stok auto-decrement
         if (typeof window.bmStokDusurTek === 'function') window.bmStokDusurTek(malt.id, malt.ad, parsed.kg, 'kg');
@@ -22466,6 +22484,8 @@ syncBaslat();
           var azaltN = Math.min(mevcut, parseFloat(parsed.gram) || 0);
           var yeni = Math.max(0, +(mevcut - azaltN).toFixed(2));
           S.hoplar[idx].g = yeni;
+          // 134-bl-8: S.hoplar değişti → disable (render öncesi)
+          window.bmDoctorChipDisable(chipEl);
           if (typeof setSekme === 'function') setSekme('hop');
           if (typeof render === 'function') render();
           if (typeof bmToast === 'function') bmToast('✓ '+(hopDef?hopDef.ad:parsed.name)+': '+mevcut+'g → '+yeni+'g', 'success');
