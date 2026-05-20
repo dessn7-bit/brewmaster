@@ -140,7 +140,8 @@ input[type="radio"]:checked:not(.bm-skip-vintage)::after{content:'';width:8px;he
 input[type="checkbox"]:focus-visible:not(.bm-skip-vintage),input[type="radio"]:focus-visible:not(.bm-skip-vintage){box-shadow:0 0 0 2px rgba(184,118,63,.20);outline:none}
 input[type="checkbox"]:disabled,input[type="radio"]:disabled{opacity:.5;cursor:not-allowed}
 .kart{background:var(--card);border:1px solid var(--bor);border-radius:10px;padding:14px;margin-bottom:10px;box-shadow:inset 0 0 0 1px rgba(250,247,238,.55),0 0 0 3px var(--bg2),0 1px 0 3px var(--bor),var(--golge);position:relative}
-.satir{display:flex;align-items:center;gap:8px;padding:10px 12px;margin-bottom:5px;background:#fff;border-radius:10px;border:1px solid var(--bor);box-shadow:var(--golge)}
+/* Adim 135-L: .satir genel liste kart (Stok + malt/hop/maya/katki tab'lari uniform) — mockup token. */
+.satir{display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-2) var(--sp-3);margin-bottom:var(--sp-1);background:var(--bg-card);border-radius:var(--r-sm);border:1px solid var(--cizgi-arac);box-shadow:var(--elv-1)}
 .etiket{font-size:10px;color:var(--soluk);font-weight:600;letter-spacing:.8px;text-transform:uppercase;display:block;margin-bottom:4px}
 .uybox{border-radius:8px;padding:8px 12px;margin-bottom:6px;font-size:12px;font-weight:500;display:flex;align-items:center;gap:7px}
 .uy-s{background:var(--sa);border:1px solid #B8A860;color:var(--sk)}
@@ -10971,16 +10972,16 @@ function rStok(){
           +(eksikRez > 0 ? ' · <strong>eksik: '+eksikRez.toFixed(2)+rezBirim+'</strong>' : '')
           +'</div>';
       }
-      return '<div class="satir" style="'+(dusuk?'border-color:#C49080;background:var(--ka);':'')+'margin-bottom:6px">'
-        +'<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;color:var(--metin)">'+esc(s.ad)+'</div>'
-        +'<div style="font-size:10px;color:'+(dusuk?'var(--kk)':'var(--dim)')+'">'+(dusuk?'⚠️ ':'')+s.miktar+' '+s.birim+(s.uyari>0?' · Uyarı: '+s.uyari+s.birim:'')+'</div>'
+      return '<div class="satir" style="'+(dusuk?'border-color:var(--crit);background:var(--crit-bg);':'')+'margin-bottom:var(--sp-1)">'
+        +'<div style="flex:1;min-width:0"><div style="font-family:var(--font-govde);font-size:var(--fs-sm);font-weight:var(--fw-semibold);color:var(--ink)">'+esc(s.ad)+'</div>'
+        +'<div style="font-family:var(--font-govde);font-size:var(--fs-xs);color:'+(dusuk?'var(--crit)':'var(--metin-soluk)')+'">'+(dusuk?'⚠️ ':'')+s.miktar+' '+s.birim+(s.uyari>0?' · Uyarı: '+s.uyari+s.birim:'')+'</div>'
         +rezSatir
         +'</div>'
-        +'<div style="display:flex;align-items:center;gap:4px">'
-        +'<button class="btn" style="background:none;color:var(--dim);font-size:16px;padding:0 6px" onclick="stokGuncelle('+idx+',-1)">−</button>'
-        +'<input id="adim_'+idx+'" type="number" value="'+(s.adim||1)+'" min="1" style="width:40px;text-align:center;font-size:11px;padding:2px" class="inp">'
-        +'<button class="btn" style="background:none;color:var(--yk);font-size:16px;padding:0 6px" onclick="stokGuncelle('+idx+',1)">+</button>'
-        +'<button class="btn" style="background:none;color:var(--kk);font-size:18px;padding:0 4px" onclick="stokSil('+idx+')">×</button>'
+        +'<div style="display:flex;align-items:center;gap:var(--sp-1)">'
+        +'<button class="btn" style="background:none;color:var(--metin-soluk);font-size:16px;padding:0 6px;box-shadow:none" onclick="stokGuncelle('+idx+',-1)">−</button>'
+        +'<input id="adim_'+idx+'" type="number" value="'+(s.adim||1)+'" min="1" style="width:40px;text-align:center;font-size:var(--fs-xs);padding:2px" class="inp">'
+        +'<button class="btn" style="background:none;color:var(--ok);font-size:16px;padding:0 6px;box-shadow:none" onclick="stokGuncelle('+idx+',1)">+</button>'
+        +'<button class="btn" style="background:none;color:var(--crit);font-size:18px;padding:0 4px;box-shadow:none" onclick="stokSil('+idx+')">×</button>'
         +'</div></div>';
     }).join('');
     return accGrup((_sI[g]||'📦')+' '+g+' ('+items.length+')',ih,'stok_'+g.replace(/\s+/g,'_'),true);
@@ -11067,26 +11068,27 @@ function rStok(){
   if(stokEkranTab==='gecmis'){
     var hist = stokHistYukle();
     if(hist.length===0){
-      gecmisIc = '<div style="text-align:center;padding:30px;color:var(--dim);font-size:13px">📜 Henüz stok hareketi yok.<br>Bir tarifi "Yapımda"ya çektiğinde veya manuel düşüm yaptığında burada görünecek.</div>';
+      gecmisIc = '<div style="text-align:center;padding:var(--sp-6) var(--sp-4);color:var(--metin-soluk);font-family:var(--font-govde);font-size:var(--fs-sm);line-height:var(--lh-base)">📜 Henüz stok hareketi yok.<br>Bir tarifi "Yapımda"ya çektiğinde veya manuel düşüm yaptığında burada görünecek.</div>';
     } else {
-      gecmisIc = '<div style="padding:4px">'+hist.map(function(h){
+      // 135-L: tipRenk semantic token (dusum→crit, iade→ok, manuel→warn, default→metin-soluk)
+      gecmisIc = '<div style="padding:var(--sp-1)">'+hist.map(function(h){
         var tipIkon = h.tip==='dusum'?'🔽':h.tip==='iade'?'↩️':h.tip==='manuel_dusum'?'🔽':h.tip==='manuel_ekle'?'➕':'🔄';
-        var tipRenk = h.tip==='dusum'?'#C62828':h.tip==='iade'?'#2A7A2A':h.tip==='manuel_dusum'?'#8A6A20':'#555';
+        var tipRenk = h.tip==='dusum'?'var(--crit)':h.tip==='iade'?'var(--ok)':h.tip==='manuel_dusum'?'var(--warn)':'var(--metin-soluk)';
         var tipAd = h.tip==='dusum'?'Yapıma alındı — Düşüm':h.tip==='iade'?'Yapımdan çıkarıldı — İade':h.tip==='manuel_dusum'?'Manuel düşüm':h.tip==='manuel_ekle'?'Manuel ekle':'İşlem';
         var malzListe = (h.malzemeler||[]).map(function(m){
-          if(m.bulundu===false) return '<span style="color:#C62828">⚠ '+esc(m.ad)+' (bulunamadı)</span>';
+          if(m.bulundu===false) return '<span style="color:var(--crit)">⚠ '+esc(m.ad)+' (bulunamadı)</span>';
           return esc(m.ad);
         }).join(' · ');
-        return '<div style="background:#fff;border:1px solid var(--bor);border-left:3px solid '+tipRenk+';border-radius:8px;padding:8px 10px;margin-bottom:6px">'
+        return '<div style="background:var(--bg-card);border:1px solid var(--cizgi-arac);border-left:3px solid '+tipRenk+';border-radius:var(--r-sm);padding:var(--sp-2) var(--sp-3);margin-bottom:var(--sp-1);box-shadow:var(--elv-1)">'
           +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px">'
-          +'<div style="font-size:11px;font-weight:700;color:'+tipRenk+'">'+tipIkon+' '+tipAd+'</div>'
-          +'<div style="font-size:9px;color:var(--dim)">'+_tarihFmt(h.t)+'</div>'
+          +'<div style="font-family:var(--font-govde);font-size:var(--fs-xs);font-weight:var(--fw-bold);color:'+tipRenk+'">'+tipIkon+' '+tipAd+'</div>'
+          +'<div style="font-family:var(--font-govde);font-size:var(--fs-xs);color:var(--metin-soluk)">'+_tarihFmt(h.t)+'</div>'
           +'</div>'
-          +(h.tarifAd?'<div style="font-size:11px;color:var(--kahve);margin-bottom:3px">📋 '+esc(h.tarifAd)+'</div>':'')
-          +'<div style="font-size:10px;color:var(--dim);line-height:1.4">'+malzListe+'</div>'
+          +(h.tarifAd?'<div style="font-family:var(--font-govde);font-size:var(--fs-xs);color:var(--ink);margin-bottom:3px">📋 '+esc(h.tarifAd)+'</div>':'')
+          +'<div style="font-family:var(--font-govde);font-size:var(--fs-xs);color:var(--metin-soluk);line-height:var(--lh-base)">'+malzListe+'</div>'
         +'</div>';
       }).join('')+'</div>';
-      gecmisIc += '<div style="text-align:center;margin-top:10px"><button class="btn" style="font-size:11px;padding:6px 14px;background:#fff;color:var(--kk);border:1px solid #D0A0A0" onclick="stokHistTemizle()">🗑️ Geçmişi Temizle</button></div>';
+      gecmisIc += '<div style="text-align:center;margin-top:var(--sp-2)"><button class="bm-ayar-btn bm-ayar-btn-uyari" onclick="stokHistTemizle()" style="font-size:var(--fs-xs);padding:var(--sp-1) var(--sp-3)">🗑️ Geçmişi Temizle</button></div>';
     }
     return _stokHeaderHTML()+
     _stokAnaTabBarHTML()+
