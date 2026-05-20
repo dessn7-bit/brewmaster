@@ -57,19 +57,23 @@
   --font-display:"EB Garamond",Georgia,serif;
   --font-body:"IBM Plex Sans",system-ui,sans-serif;
 
-  /* Adim 135-A design token sistemi (2026-05-20). Mevcut variable korunur, yeni token ek katman. */
-  /* A. Renk taban notr cream */
+  /* Adim 135-A design token sistemi (2026-05-20). Mevcut bl-2 variable korunur, yeni token ek katman.
+     135-A1 cakisma cozumu (2026-05-20): vintage-koyu/vintage-mid mevcut kahve-koyu/bakir ile birebir
+     ayni deger oldugu icin var() ALIAS — single source of truth bl-2 kahve-* tokenlari. accent-soft
+     (cream ton), bg-app/bg-card/bg-sunken (notr offset), cizgi-arac (subtle divider) FARKLI deger,
+     mevcut kahve-* ile cakismaz. */
+  /* A. Renk taban notr cream — kahve-* paletinden bagimsiz, modern dengeli */
   --bg-app:#FAF7F1;
   --bg-card:#FDFBF7;
   --bg-sunken:#F2EEE6;
-  /* Vintage accent alias */
-  --vintage-koyu:rgb(92,58,14);
-  --vintage-mid:rgb(139,90,43);
+  /* Vintage accent alias — bl-2 kahve-koyu/bakir ile birebir AYNI, var() reference */
+  --vintage-koyu:var(--kahve-koyu);
+  --vintage-mid:var(--bakir);
   --accent-soft:#F0E0CC;
   /* Metin hiyerarsi */
   --metin:#2E2A24;
   --metin-soluk:#6A5F50;
-  /* Border yumusak */
+  /* Border yumusak — kahve-border (D4B58A vintage emphasis) ile farkli amac (subtle divider) */
   --cizgi-arac:#EAE4D8;
   /* B. Elevation kahve tabanli */
   --elv-1:0 1px 2px rgba(92,58,14,.06);
