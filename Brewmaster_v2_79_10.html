@@ -116,12 +116,16 @@ input,select,textarea,button{font-family:inherit}
 ::-webkit-scrollbar{width:3px}
 ::-webkit-scrollbar-thumb{background:var(--bor2);border-radius:2px}
 input[type=number]::-webkit-inner-spin-button{opacity:.5}
-.btn{border:none;border-radius:8px;padding:9px 16px;cursor:pointer;font-weight:600;transition:all .15s;font-size:13px}
+/* Adim 135-F (2026-05-20): .btn + .inp token uniform.
+   Mockup: input bg-card + cizgi-arac 1px border + r-sm radius + font-govde, focus vintage glow KORU.
+   Buton iki ana tip — primary (vintage dolu) + secondary (transparent vintage border).
+   onClick handler + hover/disabled davranis intact, 134-H checkbox/radio + 135-E .sb-btn DOKUNULMAZ. */
+.btn{border:none;border-radius:var(--r-sm);padding:var(--sp-2) var(--sp-4);cursor:pointer;font-family:var(--font-govde);font-weight:var(--fw-semibold);transition:background .15s,color .15s,box-shadow .15s,transform .08s;font-size:var(--fs-sm)}
 .btn:active{transform:scale(.96);opacity:.85}
-.inp{background:#fff;color:var(--kahve);border:1.5px solid var(--bor);border-radius:8px;padding:9px 12px;width:100%;font-size:13px;transition:border .15s,box-shadow .15s}
-.inp:focus{outline:none;border-color:var(--vintage);box-shadow:0 0 0 2px rgba(184,118,63,.15)}
+.inp{background:var(--bg-card);color:var(--ink);border:1px solid var(--cizgi-arac);border-radius:var(--r-sm);padding:var(--sp-2) var(--sp-3);width:100%;font-family:var(--font-govde);font-size:var(--fs-base);transition:border-color .15s,box-shadow .15s}
+.inp:focus{outline:none;border-color:var(--vintage);box-shadow:0 0 0 2px rgba(184,118,63,.18)}
 .inp:hover:not(:focus):not(:disabled){border-color:rgba(184,118,63,.5)}
-.inp:disabled,.inp[disabled]{opacity:.6;cursor:not-allowed;background:#FAF6EE}
+.inp:disabled,.inp[disabled]{opacity:.6;cursor:not-allowed;background:var(--bg-sunken)}
 /* Adim 134-H: Number input arrows gizle (textfield clean look, Kaan numeric pattern) */
 input[type="number"].inp::-webkit-outer-spin-button,input[type="number"].inp::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 input[type="number"].inp{-moz-appearance:textfield}
@@ -304,9 +308,10 @@ input[type="checkbox"]:disabled,input[type="radio"]:disabled{opacity:.5;cursor:n
 @media (max-width:768px){.bm-stat-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);padding:8px 10px}.bm-yapimda-vurgu{margin:10px 10px 6px;padding:10px 12px}.bm-stat-sayi{font-size:20px}}
 
 /* Adim 132-B: Klonla butonu (primary action, turuncu) */
-.bm-btn-primary{background:var(--vintage);color:#FFFFFF;border:none;border-radius:8px;padding:10px 16px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .12s;white-space:nowrap;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
-.bm-btn-primary:hover{background:#D88A1F}
-.bm-btn-primary:active{background:#C57A0F}
+/* 135-F primary uniform: vintage + beyaz + r-sm + font-govde + elv-1 + hover vintage-koyu */
+.bm-btn-primary{background:var(--vintage);color:#FFFFFF;border:none;border-radius:var(--r-sm);padding:var(--sp-2) var(--sp-4);font-family:var(--font-govde);font-size:var(--fs-sm);font-weight:var(--fw-semibold);cursor:pointer;transition:background .15s,box-shadow .15s,transform .08s;box-shadow:var(--elv-1);white-space:nowrap;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.bm-btn-primary:hover{background:var(--vintage-koyu);box-shadow:var(--elv-2)}
+.bm-btn-primary:active{background:var(--vintage-koyu);transform:scale(.97)}
 
 /* Adim 132-A: Sticky ozet paneli (yatay serit, Genel tab pilot). Header altinda yapisir,
    scroll boyunca renk dot + stil adi + OG/FG/ABV/IBU/SRM gorunur. .eh height dinamik
@@ -431,12 +436,13 @@ body[data-mode="view"] .bm-chip{pointer-events:none;opacity:.6}
 .bm-ayar-satir:last-child{border-bottom:none}
 .bm-ayar-satir-text{flex:1;min-width:0;line-height:1.4}
 .bm-ayar-satir-text small{display:block;font-size:10.5px;color:var(--soluk);margin-top:2px;font-weight:400}
-.bm-ayar-btn{background:var(--vintage);color:#fff;border:none;border-radius:6px;padding:7px 14px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;flex-shrink:0;transition:background .15s}
-.bm-ayar-btn:hover{background:var(--kahve-koyu)}
-.bm-ayar-btn-sec{background:transparent;color:var(--bakir);border:1px solid var(--kahve-border);border-radius:6px;padding:6px 12px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;flex-shrink:0;transition:background .15s}
-.bm-ayar-btn-sec:hover{background:var(--kahve-bg)}
-.bm-ayar-btn-uyari{background:#C84A3A;color:#fff}
-.bm-ayar-btn-uyari:hover{background:#A53A2C}
+/* 135-F uniform: ayar buton 3 varyant — primary (vintage), secondary (transparent vintage border), destructive (--crit) */
+.bm-ayar-btn{background:var(--vintage);color:#FFFFFF;border:none;border-radius:var(--r-sm);padding:var(--sp-2) var(--sp-3);font-family:var(--font-govde);font-size:var(--fs-sm);font-weight:var(--fw-semibold);cursor:pointer;flex-shrink:0;transition:background .15s,box-shadow .15s;box-shadow:var(--elv-1)}
+.bm-ayar-btn:hover{background:var(--vintage-koyu);box-shadow:var(--elv-2)}
+.bm-ayar-btn-sec{background:transparent;color:var(--vintage);border:1px solid var(--vintage);border-radius:var(--r-sm);padding:var(--sp-2) var(--sp-3);font-family:var(--font-govde);font-size:var(--fs-sm);font-weight:var(--fw-semibold);cursor:pointer;flex-shrink:0;transition:background .15s,color .15s}
+.bm-ayar-btn-sec:hover{background:var(--accent-soft);color:var(--vintage-koyu)}
+.bm-ayar-btn-uyari{background:var(--crit);color:#FFFFFF;box-shadow:var(--elv-1)}
+.bm-ayar-btn-uyari:hover{background:#A53A2C;box-shadow:var(--elv-2)}
 .bm-bildirim-grup{margin-bottom:16px}
 .bm-bildirim-grup-baslik{font-size:11px;font-weight:700;color:var(--soluk);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;padding:0 2px}
 .bm-bildirim-satir{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--card);border:1px solid var(--bor);border-radius:8px;margin-bottom:6px;font-size:12.5px}
@@ -478,8 +484,8 @@ button:disabled:hover,.btn:disabled:hover,.btn.bm-disabled:hover{background:inhe
 .bm-empty-state-ikon{font-size:32px;line-height:1;margin-bottom:8px;opacity:.7}
 .bm-empty-state-baslik{font-size:14px;font-weight:700;color:var(--kahve);margin-bottom:4px;font-family:var(--font-display);letter-spacing:.3px}
 .bm-empty-state-mesaj{font-size:12px;color:var(--soluk);max-width:280px;margin:0 auto 10px}
-.bm-empty-state-aksiyon{display:inline-block;background:var(--vintage);color:#fff;border:none;border-radius:6px;padding:7px 16px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s}
-.bm-empty-state-aksiyon:hover{background:var(--kahve-koyu)}
+.bm-empty-state-aksiyon{display:inline-block;background:var(--vintage);color:#FFFFFF;border:none;border-radius:var(--r-sm);padding:var(--sp-2) var(--sp-4);font-family:var(--font-govde);font-size:var(--fs-sm);font-weight:var(--fw-semibold);cursor:pointer;box-shadow:var(--elv-1);transition:background .15s,box-shadow .15s}
+.bm-empty-state-aksiyon:hover{background:var(--vintage-koyu);box-shadow:var(--elv-2)}
 .bm-error-state{border:1px solid #E5C5BE;background:#FFF5F3;border-radius:10px;padding:14px;margin:10px 0;display:flex;align-items:flex-start;gap:10px;font-size:12.5px;color:#7A2E20}
 .bm-error-state-ikon{font-size:20px;line-height:1;flex-shrink:0}
 .bm-error-state-icerik{flex:1;min-width:0;line-height:1.45}
