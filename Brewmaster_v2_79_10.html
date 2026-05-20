@@ -56,6 +56,33 @@
   --golge2:2px 3px 0 rgba(61,40,23,.06),0 4px 12px rgba(61,40,23,.06);
   --font-display:"EB Garamond",Georgia,serif;
   --font-body:"IBM Plex Sans",system-ui,sans-serif;
+
+  /* Adim 135-A design token sistemi (2026-05-20). Mevcut variable korunur, yeni token ek katman. */
+  /* A. Renk taban notr cream */
+  --bg-app:#FAF7F1;
+  --bg-card:#FDFBF7;
+  --bg-sunken:#F2EEE6;
+  /* Vintage accent alias */
+  --vintage-koyu:rgb(92,58,14);
+  --vintage-mid:rgb(139,90,43);
+  --accent-soft:#F0E0CC;
+  /* Metin hiyerarsi */
+  --metin:#2E2A24;
+  --metin-soluk:#6A5F50;
+  /* Border yumusak */
+  --cizgi-arac:#EAE4D8;
+  /* B. Elevation kahve tabanli */
+  --elv-1:0 1px 2px rgba(92,58,14,.06);
+  --elv-2:0 2px 8px rgba(28,14,14,.08);
+  --elv-3:0 8px 24px rgba(92,58,14,.12);
+  /* C. Spacing 4px ritim */
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px;
+  /* D. Radius */
+  --r-sm:8px; --r-md:12px; --r-lg:16px;
+  /* E. Tipografi olcegi */
+  --fs-xs:11px; --fs-sm:13px; --fs-base:14px; --fs-md:16px; --fs-lg:20px; --fs-xl:28px;
+  --fw-regular:400; --fw-medium:500; --fw-semibold:600; --fw-bold:700;
+  --lh-tight:1.2; --lh-base:1.45; --lh-loose:1.6;
 }
 html,body{height:100%;overflow:hidden}
 /* Adim 131-R: 1fr -> minmax(0,1fr) + grid-auto-columns minmax(0,1fr) defense.
@@ -426,6 +453,18 @@ button:disabled:hover,.btn:disabled:hover,.btn.bm-disabled:hover{background:inhe
 .bm-error-state-ikon{font-size:20px;line-height:1;flex-shrink:0}
 .bm-error-state-icerik{flex:1;min-width:0;line-height:1.45}
 .bm-error-state-icerik strong{font-weight:700;color:#5A1E10;display:block;margin-bottom:2px}
+
+/* Adim 135-A POC: 4 mini stat kart (BU:GU / Attenüasyon / SRM / Hacim).
+   Token sistemi proof-of-concept. Nötr taban (--bg-card) + amber accent (--vintage) + modern elevation (--elv-1) +
+   4px ritim (--sp-*) + tipografi ölçeği (--fs-xs/lg). Önceki inline style (background:var(--card);border-radius:8px;
+   padding:9px;border:1px solid var(--bor);box-shadow:var(--golge)) tamamen token'lara migrate. */
+.bm-statmini-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-2);margin-bottom:var(--sp-3)}
+.bm-statmini-card{background:var(--bg-card);border:1px solid var(--cizgi-arac);border-radius:var(--r-sm);padding:var(--sp-3) var(--sp-2);text-align:center;box-shadow:var(--elv-1);transition:transform .15s ease,box-shadow .15s ease}
+.bm-statmini-card:hover{transform:translateY(-1px);box-shadow:var(--elv-2)}
+.bm-statmini-label{font-size:var(--fs-xs);color:var(--metin-soluk);font-weight:var(--fw-semibold);letter-spacing:.6px;text-transform:uppercase;margin-bottom:var(--sp-1);line-height:var(--lh-tight)}
+.bm-statmini-value{font-size:var(--fs-lg);font-weight:var(--fw-bold);color:var(--vintage);font-family:var(--font-display);line-height:var(--lh-tight)}
+.bm-statmini-alt{font-size:var(--fs-xs);color:var(--metin-soluk);margin-top:var(--sp-1);line-height:var(--lh-tight)}
+@media (max-width:768px){.bm-statmini-grid{grid-template-columns:repeat(2,1fr);gap:var(--sp-1)}.bm-statmini-card{padding:var(--sp-2)}.bm-statmini-value{font-size:var(--fs-md)}}
 
 /* Adim 132-G: Muadil chip kompakt (Malt/Hop satirlari altinda inline rounded pill).
    Mevcut full panel (renderMuadil rows + Bunu Kullan butonu) gizlenir, "+N daha" chip ile toggle.
@@ -18331,7 +18370,8 @@ return `
 ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştırma kaldırıldı. V5 Top-3 + feedback üst şeritte. */''}
             ${S.durum==="arsiv"?'<div style="font-size:10px;background:var(--bg2);color:var(--soluk);padding:2px 8px;border:1px solid var(--bor);border-radius:4px;display:inline-block;margin-top:4px">📦 Arşiv</div>':S.durum==="istek"?'<div style="font-size:10px;background:var(--kahve-light);color:var(--bakir);padding:2px 8px;border:1px solid var(--kahve-border);border-radius:4px;display:inline-block;margin-top:4px">⭐ İstek Listesi</div>':""}
         </div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px">
+        <!-- Adim 135-A POC: 4 stat mini-kart token migration (eski tarz: 9px label / 15px değer / var(--golge), yeni: token sistem) -->
+        <div class="bm-statmini-grid">
           ${(()=>{
             const bG=og>1.001?(ibu/((og-1)*1000)).toFixed(2):'—';
             const bGt=og>1.001?(parseFloat(bG)>0.8?'💥 Çok Acı':parseFloat(bG)>0.5?'⚖️ Dengeli':parseFloat(bG)>0.3?'🍺 Maltlı':'🍯 Çok Maltlı'):'';
@@ -18344,10 +18384,10 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
               ['Hacim',_hacim+'L','']
             ];
             return rows.map(([e,d,alt])=>
-              '<div style="background:var(--card);border-radius:8px;padding:9px;text-align:center;border:1px solid var(--bor);box-shadow:var(--golge)">'+
-                '<div style="font-size:9px;color:var(--soluk);font-weight:700;letter-spacing:.8px;margin-bottom:3px">'+e+'</div>'+
-                '<div style="font-size:15px;font-weight:700;color:var(--bakir);font-family:var(--font-display)">'+d+'</div>'+
-                (alt?'<div style="font-size:9px;color:var(--dim);margin-top:2px">'+alt+'</div>':'')+
+              '<div class="bm-statmini-card">'+
+                '<div class="bm-statmini-label">'+e+'</div>'+
+                '<div class="bm-statmini-value">'+d+'</div>'+
+                (alt?'<div class="bm-statmini-alt">'+alt+'</div>':'')+
               '</div>'
             ).join('');
           })()}
