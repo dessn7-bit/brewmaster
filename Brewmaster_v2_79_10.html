@@ -171,7 +171,9 @@ input[type="checkbox"]:disabled,input[type="radio"]:disabled{opacity:.5;cursor:n
 .bd-s{font-size:38px;font-weight:600;color:var(--bakir);line-height:1;font-family:var(--font-display);letter-spacing:.5px}
 .hs{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--bor);font-size:13px}
 .hs:last-child{border-bottom:none;font-weight:700;color:var(--bakir)}
-.header{background:linear-gradient(160deg,#6B4423 0%,var(--bakir) 55%,#A67040 100%);padding:10px 14px;box-shadow:0 3px 12px rgba(107,68,35,.30)}
+/* Adim 135-K: .header (Stok ekranı) — 135-I app banner emsali, koyu kahve + amber accent (uniform). */
+.header{background:linear-gradient(135deg,#46301F 0%,#3A2818 100%);padding:var(--sp-4) var(--sp-5);position:relative;border-radius:var(--r-md) var(--r-md) 0 0}
+.header::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;background:linear-gradient(90deg,transparent 0%,rgba(184,118,63,.55) 50%,transparent 100%);pointer-events:none}
 /* Adim 135-I: .eh (recete header) reçete header AÇIK BEYAZ-KREM (banner altına bitişik).
    Mockup: bg linear-gradient(180deg, #FFFFFF, #FCF9F3) + cizgi-arac border + padding sp-5 sp-5 sp-4.
    Sticky davranış INTACT. İçerik inline color literal'lar render JS'te ayrıca düzeltilir. */
@@ -432,22 +434,29 @@ body[data-mode="view"] .bm-chip{pointer-events:none;opacity:.6}
 /* Adim 134-AYAR: Stok sayfasi 3 ana sekme bar (Stok / Ayarlar / Bildirimler).
    Stok header'in altinda full-width tab bar, vintage palet. Aktif: vintage bg + cream text + alt cubuk.
    Pasif: transparent + bakir text. Hover: kahve-bg subtle. Internal stokEkranTab (Liste/Hareketler) ALTINDA kalir. */
-.bm-stok-anatabs{display:flex;background:var(--card);border-bottom:1.5px solid var(--kahve-border);font-family:var(--font-body)}
-.bm-stok-anatab{flex:1;padding:11px 8px;border:none;background:transparent;color:var(--bakir);font-size:12.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;line-height:1;border-bottom:3px solid transparent;transition:background .15s,color .15s,border-color .15s;font-family:inherit;-webkit-tap-highlight-color:transparent;position:relative}
-.bm-stok-anatab:hover:not(.aktif){background:var(--kahve-bg)}
-.bm-stok-anatab.aktif{background:var(--kahve-bg);color:var(--kahve-koyu);border-bottom-color:var(--vintage);font-weight:700}
-.bm-stok-anatab .bm-anatab-badge{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#E04E2B;color:#fff;font-size:10px;font-weight:700;line-height:1}
+/* Adim 135-K: .bm-stok-anatabs 3 ana sekme — 135-E .sb-btn emsali (aktif vintage alt-çizgi, dolgu YOK) */
+.bm-stok-anatabs{display:flex;background:var(--bg-card);border-bottom:1px solid var(--cizgi-arac);font-family:var(--font-govde)}
+.bm-stok-anatab{flex:1;padding:var(--sp-3) var(--sp-2);border:none;background:transparent;color:var(--metin-soluk);font-size:var(--fs-sm);font-weight:var(--fw-semibold);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:var(--sp-1);line-height:1;border-bottom:2.5px solid transparent;transition:color .15s,border-color .15s;font-family:inherit;-webkit-tap-highlight-color:transparent;position:relative}
+.bm-stok-anatab:hover:not(.aktif){color:var(--ink)}
+.bm-stok-anatab.aktif{background:transparent;color:var(--vintage-mid);border-bottom-color:var(--vintage);font-weight:var(--fw-semibold)}
+.bm-stok-anatab .bm-anatab-badge{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--crit);color:#FFFFFF;font-size:var(--fs-xs);font-weight:var(--fw-bold);line-height:1}
 .bm-stok-anatab.aktif .bm-anatab-badge{background:var(--vintage)}
+/* Adim 135-K: Stok iç tab bar (Liste/Hareketler) — anatabs ile uyumlu sade */
+.bm-stok-ictab-bar{display:flex;background:var(--bg-sunken);border-bottom:1px solid var(--cizgi-arac);font-family:var(--font-govde)}
+.bm-stok-ictab{flex:1;padding:var(--sp-2) var(--sp-3);border:none;background:transparent;color:var(--metin-soluk);font-family:inherit;font-size:var(--fs-sm);font-weight:var(--fw-semibold);cursor:pointer;border-bottom:2.5px solid transparent;transition:color .15s,background .15s,border-color .15s;-webkit-tap-highlight-color:transparent}
+.bm-stok-ictab:hover:not(.aktif){color:var(--ink)}
+.bm-stok-ictab.aktif{background:var(--bg-card);color:var(--vintage-mid);border-bottom-color:var(--vintage)}
 @media (max-width:768px){.bm-stok-anatab{padding:9px 6px;font-size:11.5px;gap:4px}}
 
 /* Adim 134-AYAR: Ayarlar/Bildirim icerik karti (form list pattern, 134-G/H vintage uyumlu). */
 .bm-stok-icerik{padding:14px}
-.bm-ayar-kart{background:var(--card);border:1px solid var(--kahve-border);border-radius:10px;padding:14px;margin-bottom:12px}
-.bm-ayar-kart-baslik{font-size:13px;font-weight:700;color:var(--kahve-koyu);margin-bottom:10px;display:flex;align-items:center;gap:6px;font-family:var(--font-display);letter-spacing:.3px}
-.bm-ayar-satir{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px dashed var(--bor);font-size:12.5px;color:var(--metin)}
+/* Adim 135-K: .bm-ayar-kart mockup uniform — bg-card + cizgi-arac + r-md + sp-4 + elv-1 */
+.bm-ayar-kart{background:var(--bg-card);border:1px solid var(--cizgi-arac);border-radius:var(--r-md);padding:var(--sp-4);margin-bottom:var(--sp-3);box-shadow:var(--elv-1)}
+.bm-ayar-kart-baslik{font-family:var(--font-baslik);font-size:var(--fs-md);font-weight:var(--fw-semibold);color:var(--ink);margin-bottom:var(--sp-2);display:flex;align-items:center;gap:var(--sp-1);letter-spacing:.2px}
+.bm-ayar-satir{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-2);padding:var(--sp-2) 0;border-bottom:1px dashed var(--cizgi-arac);font-family:var(--font-govde);font-size:var(--fs-sm);color:var(--ink)}
 .bm-ayar-satir:last-child{border-bottom:none}
-.bm-ayar-satir-text{flex:1;min-width:0;line-height:1.4}
-.bm-ayar-satir-text small{display:block;font-size:10.5px;color:var(--soluk);margin-top:2px;font-weight:400}
+.bm-ayar-satir-text{flex:1;min-width:0;line-height:var(--lh-base)}
+.bm-ayar-satir-text small{display:block;font-size:var(--fs-xs);color:var(--metin-soluk);margin-top:2px;font-weight:var(--fw-regular)}
 /* 135-F uniform: ayar buton 3 varyant — primary (vintage), secondary (transparent vintage border), destructive (--crit) */
 .bm-ayar-btn{background:var(--vintage);color:#FFFFFF;border:none;border-radius:var(--r-sm);padding:var(--sp-2) var(--sp-3);font-family:var(--font-govde);font-size:var(--fs-sm);font-weight:var(--fw-semibold);cursor:pointer;flex-shrink:0;transition:background .15s,box-shadow .15s;box-shadow:var(--elv-1)}
 .bm-ayar-btn:hover{background:var(--vintage-koyu);box-shadow:var(--elv-2)}
@@ -455,16 +464,17 @@ body[data-mode="view"] .bm-chip{pointer-events:none;opacity:.6}
 .bm-ayar-btn-sec:hover{background:var(--accent-soft);color:var(--vintage-koyu)}
 .bm-ayar-btn-uyari{background:var(--crit);color:#FFFFFF;box-shadow:var(--elv-1)}
 .bm-ayar-btn-uyari:hover{background:#A53A2C;box-shadow:var(--elv-2)}
-.bm-bildirim-grup{margin-bottom:16px}
-.bm-bildirim-grup-baslik{font-size:11px;font-weight:700;color:var(--soluk);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;padding:0 2px}
-.bm-bildirim-satir{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--card);border:1px solid var(--bor);border-radius:8px;margin-bottom:6px;font-size:12.5px}
-.bm-bildirim-satir-kritik{border-left:3px solid #C62828;background:#FFF5F3}
+/* Adim 135-K: .bm-bildirim-* token migrate — bg-card + cizgi-arac + r-sm + sp + font-govde + ink/muted */
+.bm-bildirim-grup{margin-bottom:var(--sp-4)}
+.bm-bildirim-grup-baslik{font-family:var(--font-govde);font-size:var(--fs-xs);font-weight:var(--fw-semibold);color:var(--metin-soluk);text-transform:uppercase;letter-spacing:.6px;margin-bottom:var(--sp-1);padding:0 2px}
+.bm-bildirim-satir{display:flex;align-items:flex-start;gap:var(--sp-2);padding:var(--sp-2) var(--sp-3);background:var(--bg-card);border:1px solid var(--cizgi-arac);border-radius:var(--r-sm);margin-bottom:var(--sp-1);font-family:var(--font-govde);font-size:var(--fs-sm);color:var(--ink)}
+.bm-bildirim-satir-kritik{border-left:3px solid var(--crit);background:var(--crit-bg)}
 .bm-bildirim-satir-uyari{border-left:3px solid var(--vintage);background:rgba(184,118,63,.06)}
-.bm-bildirim-satir-bilgi{border-left:3px solid #8A6A20}
+.bm-bildirim-satir-bilgi{border-left:3px solid var(--warn)}
 .bm-bildirim-ikon{font-size:18px;line-height:1;flex-shrink:0}
-.bm-bildirim-icerik{flex:1;min-width:0;line-height:1.4}
-.bm-bildirim-icerik strong{color:var(--kahve-koyu);font-weight:700}
-.bm-bildirim-icerik small{display:block;font-size:10.5px;color:var(--soluk);margin-top:3px}
+.bm-bildirim-icerik{flex:1;min-width:0;line-height:var(--lh-base)}
+.bm-bildirim-icerik strong{color:var(--ink);font-weight:var(--fw-bold)}
+.bm-bildirim-icerik small{display:block;font-size:var(--fs-xs);color:var(--metin-soluk);margin-top:3px}
 .bm-pref-toggle{display:flex;align-items:center;gap:8px;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .bm-pref-toggle input[type="checkbox"]{margin:0}
 
@@ -10851,9 +10861,10 @@ function _stokAnaTabBarHTML(){
 
 // Adim 134-AYAR: Stok header HTML — ayarlar/bildirim sekmesinde de paylasilan ust banner.
 function _stokHeaderHTML(){
-  return '<div class="header" style="display:flex;align-items:center;gap:10px;padding:14px 16px">'+
-    '<button class="btn" onclick="stokEkranKapat()" style="background:rgba(255,255,255,.2);color:#F0D8A0;font-size:22px;padding:2px 8px;border-radius:8px;line-height:1">‹</button>'+
-    '<div style="font-size:18px;font-weight:700;color:#F0D8A0;flex:1">📦 Stok Yönetimi</div>'+
+  // 135-K: 135-I app banner emsali — koyu kahve gradient .header CSS + cream Fraunces title + sade icon button.
+  return '<div class="header" style="display:flex;align-items:center;gap:10px">'+
+    '<button class="btn" onclick="stokEkranKapat()" style="background:rgba(255,255,255,.07);color:#F6EAD7;font-size:22px;padding:2px 8px;border-radius:var(--r-sm);line-height:1;border:1px solid rgba(255,255,255,.12)">‹</button>'+
+    '<div style="font-family:var(--font-baslik);font-size:var(--fs-md);font-weight:var(--fw-semibold);color:#F6EAD7;flex:1">📦 Stok Yönetimi</div>'+
   '</div>';
 }
 
@@ -11031,10 +11042,10 @@ function rStok(){
       '<input id="stokAramaInp" type="text" class="inp" style="font-size:13px;margin-bottom:6px" placeholder="🔍 Stokta ara..." value="'+esc(sekmeArama.stok)+'" oninput="_stokAra(this.value)">'+
       (stokGruplari.length>0?'<div style="display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px">'+stokKatBar+'</div>':'')+
     '</div>';
-  // Tab bar
-  var _tabBar = '<div style="display:flex;background:var(--bg2);border-bottom:1px solid var(--bor)">'
-    +'<button onclick="stokTabSet(\'liste\')" style="flex:1;padding:10px;border:none;background:'+(stokEkranTab==='liste'?'#fff':'transparent')+';color:'+(stokEkranTab==='liste'?'var(--bakir)':'var(--soluk)')+';font-size:12px;font-weight:700;cursor:pointer;border-bottom:2px solid '+(stokEkranTab==='liste'?'var(--altin)':'transparent')+'">📦 Stok Listesi</button>'
-    +'<button onclick="stokTabSet(\'gecmis\')" style="flex:1;padding:10px;border:none;background:'+(stokEkranTab==='gecmis'?'#fff':'transparent')+';color:'+(stokEkranTab==='gecmis'?'var(--bakir)':'var(--soluk)')+';font-size:12px;font-weight:700;cursor:pointer;border-bottom:2px solid '+(stokEkranTab==='gecmis'?'var(--altin)':'transparent')+'">📜 Hareketler</button>'
+  // Tab bar — Adim 135-K: inline style → CSS class .bm-stok-ictab*. JS stokTabSet INTACT.
+  var _tabBar = '<div class="bm-stok-ictab-bar">'
+    +'<button class="bm-stok-ictab'+(stokEkranTab==='liste'?' aktif':'')+'" onclick="stokTabSet(\'liste\')">📦 Stok Listesi</button>'
+    +'<button class="bm-stok-ictab'+(stokEkranTab==='gecmis'?' aktif':'')+'" onclick="stokTabSet(\'gecmis\')">📜 Hareketler</button>'
     +'</div>';
   // Geçmiş ekranı
   function _tarihFmt(ts){
@@ -11077,18 +11088,12 @@ function rStok(){
       }).join('')+'</div>';
       gecmisIc += '<div style="text-align:center;margin-top:10px"><button class="btn" style="font-size:11px;padding:6px 14px;background:#fff;color:var(--kk);border:1px solid #D0A0A0" onclick="stokHistTemizle()">🗑️ Geçmişi Temizle</button></div>';
     }
-    return '<div class="header" style="display:flex;align-items:center;gap:10px;padding:14px 16px">'+
-      '<button class="btn" onclick="stokEkranKapat()" style="background:rgba(255,255,255,.2);color:#F0D8A0;font-size:22px;padding:2px 8px;border-radius:8px;line-height:1">‹</button>'+
-      '<div style="font-size:18px;font-weight:700;color:#F0D8A0;flex:1">📦 Stok Yönetimi</div>'+
-    '</div>'+
+    return _stokHeaderHTML()+
     _stokAnaTabBarHTML()+
     _tabBar+
     '<div style="padding:12px">'+gecmisIc+'</div>';
   }
-  return'<div class="header" style="display:flex;align-items:center;gap:10px;padding:14px 16px">'+
-    '<button class="btn" onclick="stokEkranKapat()" style="background:rgba(255,255,255,.2);color:#F0D8A0;font-size:22px;padding:2px 8px;border-radius:8px;line-height:1">‹</button>'+
-    '<div style="font-size:18px;font-weight:700;color:#F0D8A0;flex:1">📦 Stok Yönetimi</div>'+
-  '</div>'+
+  return _stokHeaderHTML()+
   _stokAnaTabBarHTML()+
   _tabBar+
   stokAramaKutu+
