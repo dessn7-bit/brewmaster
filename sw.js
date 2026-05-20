@@ -478,14 +478,19 @@
 // 'planlananlar' string - sat 10770 statTanim mapping) + olusturma/guncelleme timestamps + KR.unshift
 // + _origKy(KR) localStorage save + _syncGonderDebounced Firebase push + tarifAc(yeni.id) editor yonlendir.
 // flash mesaj. 131-A..T + 132-pre intact. Motor zinciri dokunulmadi.
-const CACHE_VERSION = 'bm-cache-v131-61';
+const CACHE_VERSION = 'bm-cache-v131-62';
 
-// Same-origin pre-cache (v123-3 baseline 4 asset, test edilmis)
+// Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
+// — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
 const CRITICAL_LOCAL = [
   './Brewmaster_v2_79_10.html',
   './manifest.webmanifest',
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+  './fonts/Fraunces-latin.woff2',
+  './fonts/Fraunces-latin-ext.woff2',
+  './fonts/HankenGrotesk-latin.woff2',
+  './fonts/HankenGrotesk-latin-ext.woff2'
 ];
 
 self.addEventListener('install', function(event) {
