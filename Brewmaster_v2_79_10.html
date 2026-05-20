@@ -172,7 +172,10 @@ input[type="checkbox"]:disabled,input[type="radio"]:disabled{opacity:.5;cursor:n
 .hs{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--bor);font-size:13px}
 .hs:last-child{border-bottom:none;font-weight:700;color:var(--bakir)}
 .header{background:linear-gradient(160deg,#6B4423 0%,var(--bakir) 55%,#A67040 100%);padding:10px 14px;box-shadow:0 3px 12px rgba(107,68,35,.30)}
-.eh{background:linear-gradient(135deg,#6B4423 0%,var(--bakir) 100%);padding:12px 14px;position:sticky;top:0;z-index:100;box-shadow:0 3px 12px rgba(107,68,35,.35);border-bottom:2px solid rgba(240,233,212,.28);border-top:1px solid rgba(240,233,212,.14)}
+/* Adim 135-I: .eh (recete header) reçete header AÇIK BEYAZ-KREM (banner altına bitişik).
+   Mockup: bg linear-gradient(180deg, #FFFFFF, #FCF9F3) + cizgi-arac border + padding sp-5 sp-5 sp-4.
+   Sticky davranış INTACT. İçerik inline color literal'lar render JS'te ayrıca düzeltilir. */
+.eh{background:linear-gradient(180deg,#FFFFFF 0%,#FCF9F3 100%);padding:var(--sp-5) var(--sp-5) var(--sp-4);position:sticky;top:0;z-index:100;border:1px solid var(--cizgi-arac);border-top:none;border-radius:0 0 var(--r-md) var(--r-md);box-shadow:var(--elv-1)}
 .serit{margin-top:8px;padding:10px 12px;background:var(--bg2);border-radius:10px;border:1px solid var(--bor);display:flex;gap:14px;flex-wrap:wrap;align-items:center}
 .tk-k{background:#fff;border:1px solid var(--bor);border-top:none;margin:0 8px;border-radius:0 0 12px 12px;padding:14px}
 .pill{font-size:10px;background:var(--sa);color:var(--sk);border-radius:4px;padding:1px 7px;font-weight:600;border:1px solid #C8B070;display:inline-block}
@@ -258,19 +261,24 @@ input[type="checkbox"]:disabled,input[type="radio"]:disabled{opacity:.5;cursor:n
    bug geri gelirdi (131-R kok neden bugu). Bu sebeple yeni @media block default rule'dan SONRA. */
 .bm-main{grid-column:2;display:flex;flex-direction:column;min-width:0;height:100vh;height:100dvh;overflow:hidden;width:100%;max-width:100%;box-sizing:border-box}
 @media (max-width:768px){.bm-main{grid-column:1/-1}}
-.bm-header{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 22px;background:#FFFFFF;border-bottom:1px solid #F1EFE8;z-index:5;position:relative}
+/* Adim 135-I (2026-05-20): App banner KOYU KAHVE + alt amber accent.
+   .bm-header rolü beyaz→koyu kahve (üst app şerit), .eh rolü koyu kahve→beyaz-krem (reçete header).
+   Mockup: gradient #46301F→#3A2818, üst köşe r-md radius, ::after 2px amber gradient accent çizgi. */
+.bm-header{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:var(--sp-4) var(--sp-5);background:linear-gradient(135deg,#46301F 0%,#3A2818 100%);border:none;border-radius:var(--r-md) var(--r-md) 0 0;z-index:5;position:relative}
+.bm-header::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;background:linear-gradient(90deg,transparent 0%,rgba(184,118,63,.55) 50%,transparent 100%);pointer-events:none}
 .bm-header-left{display:flex;flex-direction:column;min-width:0;gap:2px}
-.bm-header-title{font-family:var(--font-display);font-size:22px;font-weight:700;color:#3D2817;line-height:1.15;letter-spacing:.2px}
-.bm-header-breadcrumb{font-size:12px;color:#8E8B86;font-weight:500}
+.bm-header-title{font-family:var(--font-baslik);font-size:19px;font-weight:var(--fw-semibold);color:#F6EAD7;line-height:var(--lh-tight);letter-spacing:.2px}
+.bm-header-breadcrumb{font-family:var(--font-govde);font-size:var(--fs-xs);color:#A98E73;font-weight:var(--fw-medium)}
 .bm-header-right{display:flex;align-items:center;gap:10px;flex-shrink:0;position:relative}
 .bm-header-search{position:relative;display:flex;align-items:center}
-.bm-header-search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--vintage);width:14px;height:14px;pointer-events:none}
-.bm-header-search input{background:#FFFFFF;color:#3D2817;border:0.5px solid #D6D2C8;border-radius:18px;padding:7px 30px 7px 32px;font-size:13px;font-family:inherit;width:260px;outline:none;transition:border-color .12s}
-.bm-header-search input:focus{border-color:var(--vintage)}
-.bm-header-search-clear{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:#8E8B86;font-size:16px;line-height:1;cursor:pointer;padding:2px 4px}
+.bm-header-search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#F6EAD7;opacity:.7;width:14px;height:14px;pointer-events:none}
+.bm-header-search input{background:rgba(255,255,255,.06);color:#F6EAD7;border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:7px 30px 7px 32px;font-family:var(--font-govde);font-size:var(--fs-sm);width:260px;outline:none;transition:border-color .12s,background .12s}
+.bm-header-search input::placeholder{color:#A98E73}
+.bm-header-search input:focus{border-color:var(--vintage);background:rgba(255,255,255,.10)}
+.bm-header-search-clear{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:#A98E73;font-size:16px;line-height:1;cursor:pointer;padding:2px 4px}
 .bm-header-actions{display:flex;align-items:center;gap:8px}
-.bm-header-iconbtn{position:relative;width:30px;height:30px;border-radius:50%;background:#FFFFFF;border:0.5px solid #D6D2C8;color:#5F5E5A;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:border-color .12s,color .12s}
-.bm-header-iconbtn:hover{border-color:var(--vintage);color:var(--vintage)}
+.bm-header-iconbtn{position:relative;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:#F6EAD7;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:border-color .12s,color .12s,background .12s}
+.bm-header-iconbtn:hover{border-color:var(--vintage);color:var(--vintage);background:rgba(184,118,63,.15)}
 .bm-header-iconbtn .ti{width:15px;height:15px;stroke-width:1.8}
 .bm-header-sync-dot{position:absolute;top:2px;right:2px;width:7px;height:7px;border-radius:50%;background:#3FBF73;border:1.5px solid #FFFFFF;box-sizing:content-box}
 .bm-header-bell-badge{position:absolute;top:-2px;right:-2px;min-width:14px;height:14px;padding:0 4px;border-radius:7px;background:#E04E2B;color:#FFFFFF;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1;border:1.5px solid #FFFFFF;box-sizing:content-box}
@@ -410,10 +418,12 @@ input[type="checkbox"]:disabled,input[type="radio"]:disabled{opacity:.5;cursor:n
    134-TEMA (2026-05-20): pasif buton koyu kahve banner uzerinde okunmuyordu (color:var(--bakir) + transparent
    = banner ile karisip kaybolma → algi "mor amber lozenge tek"). Pasif text rgba cream, border banner-aware. Aktif vintage intact.
    body[data-mode="view"] selector ile .bm-edit-only/.bm-edit-only-acc/.bm-chip global gizleme. */
-.bm-mode-toggle{display:inline-flex;border:1px solid rgba(248,232,196,.45);border-radius:8px;overflow:hidden;font-family:var(--font-body);font-size:12px;font-weight:500;flex-shrink:0;-webkit-tap-highlight-color:transparent;background:rgba(0,0,0,.12)}
-.bm-mode-btn{padding:6px 10px;background:transparent;color:rgba(248,232,196,.88);border:none;cursor:pointer;transition:background .15s,color .15s;font-family:inherit;font-size:inherit;font-weight:inherit;display:inline-flex;align-items:center;gap:4px;line-height:1;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+/* Adim 135-I: Mode toggle açık beyaz-krem banner üzeri yeniden hizalandı.
+   134-TEMA cream rgba pasif text artık beyaz bg üzeri okunmuyor — --bg-sunken bg + --metin-soluk pasif text. */
+.bm-mode-toggle{display:inline-flex;border:1px solid var(--cizgi-arac);border-radius:var(--r-sm);overflow:hidden;font-family:var(--font-govde);font-size:var(--fs-sm);font-weight:var(--fw-medium);flex-shrink:0;-webkit-tap-highlight-color:transparent;background:var(--bg-sunken)}
+.bm-mode-btn{padding:6px 10px;background:transparent;color:var(--metin-soluk);border:none;cursor:pointer;transition:background .15s,color .15s;font-family:inherit;font-size:inherit;font-weight:inherit;display:inline-flex;align-items:center;gap:4px;line-height:1;white-space:nowrap;-webkit-tap-highlight-color:transparent}
 .bm-mode-btn.active{background:var(--vintage);color:#FFFFFF}
-.bm-mode-btn:not(.active):hover{background:rgba(248,232,196,.18);color:#F8E8C4}
+.bm-mode-btn:not(.active):hover{background:var(--accent-soft);color:var(--ink)}
 body[data-mode="view"] .bm-edit-only{display:none !important}
 body[data-mode="view"] .bm-acc.bm-edit-only-acc{display:none !important}
 body[data-mode="view"] .bm-chip{pointer-events:none;opacity:.6}
@@ -569,8 +579,9 @@ button:disabled:hover,.btn:disabled:hover,.btn.bm-disabled:hover{background:inhe
 
 /* Adim 132-C: Editor breadcrumb (Defter / Klasor / Bira adi). "‹" geri butonun fonksiyonu "← Defter" link'inde. */
 /* Adim 134-GERI: 132-C breadcrumb UX karmaşası → tek "← Geri" tuşu */
-.bm-geri{background:transparent;border:1px solid rgba(248,232,196,.35);padding:6px 12px;border-radius:6px;font-size:13px;color:#F8E8C4;cursor:pointer;transition:background .15s,border-color .15s;display:inline-flex;align-items:center;gap:4px;min-height:32px;font-family:inherit;-webkit-tap-highlight-color:transparent;margin-bottom:8px}
-.bm-geri:hover{background:rgba(248,232,196,.12);border-color:#F8E8C4}
+/* Adim 135-I: .bm-geri reçete header açık bg üzeri secondary buton */
+.bm-geri{background:transparent;border:1px solid var(--cizgi-arac);padding:var(--sp-1) var(--sp-3);border-radius:var(--r-sm);font-family:var(--font-govde);font-size:var(--fs-sm);font-weight:var(--fw-medium);color:var(--vintage);cursor:pointer;transition:background .15s,border-color .15s,color .15s;display:inline-flex;align-items:center;gap:4px;min-height:32px;-webkit-tap-highlight-color:transparent;margin-bottom:var(--sp-2)}
+.bm-geri:hover{background:var(--accent-soft);border-color:var(--vintage);color:var(--vintage-koyu)}
 .bm-geri:active{transform:scale(.97)}
 @media (max-width:480px){.bm-geri{font-size:12px;padding:6px 10px}}
 
@@ -18891,7 +18902,7 @@ function rEditor(){
   }
 
   const skmls=[["genel","🏠 Genel"],["malt","🌾 Malt"],["hop","🌿 Hop"],["maya","🧬 Maya"],["hesap","🧮 Hesap"],["su","💧 Su"],["surec","⏱️ Süreç"],["takvim","📅 Takvim"],["katki","🧪 Katkı"],["not","📝 Not"]].map(([id,et])=>`<button data-s="${id}" class="sb-btn${sekme===id?" ak":""}" onclick="setSekme('${id}')">${et}</button>`).join("");
-  const kbg=kayitMsg?(kayitTip==="hata"?"var(--ka)":"var(--ya)"):"rgba(248,232,196,.18)",kclr=kayitMsg?(kayitTip==="hata"?"var(--kk)":"var(--yk)"):"#F8E8C4",kbrd=kayitMsg?(kayitTip==="hata"?"#C49080":"#A0A868"):"rgba(248,232,196,.35)";
+  const kbg=kayitMsg?(kayitTip==="hata"?"var(--ka)":"var(--ya)"):"var(--vintage)",kclr=kayitMsg?(kayitTip==="hata"?"var(--kk)":"var(--yk)"):"#FFFFFF",kbrd=kayitMsg?(kayitTip==="hata"?"#C49080":"#A0A868"):"var(--vintage)";
   // Adim 132-I: Recete mode (edit/view) — localStorage persist + S.durum default + body data-mode
   const _recMode = (function(){
     if (!_editId) return 'edit';
@@ -18904,14 +18915,14 @@ function rEditor(){
   try { if (typeof document !== 'undefined') document.body.setAttribute('data-mode', _recMode); } catch(e){}
   return`<div class="eh"><button class="bm-geri" type="button" onclick="window.bmGeriDon()" aria-label="Geri dön" title="${S.klasor?'← '+esc(S.klasor)+' klasörüne dön':'← Defter'}">← Geri</button>
   <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
-    <input value="${S.biraAd}" onblur="S.biraAd=this.value" placeholder="Bira adı..." style="background:transparent;border:none;border-bottom:1.5px solid rgba(248,232,196,.5);border-radius:0;font-size:17px;font-weight:700;padding:3px 0;color:#F8E8C4;flex:1;outline:none;font-family:var(--font-display)">
+    <input value="${S.biraAd}" onblur="S.biraAd=this.value" placeholder="Bira adı..." style="background:transparent;border:none;border-bottom:1.5px solid var(--cizgi-arac);border-radius:0;font-size:var(--fs-xl);font-weight:var(--fw-bold);padding:3px 0;color:var(--metin);letter-spacing:-.01em;flex:1;outline:none;font-family:var(--font-baslik)">
     ${_editId?`<div class="bm-mode-toggle" role="tablist" aria-label="Reçete modu"><button class="bm-mode-btn ${_recMode==='edit'?'active':''}" type="button" role="tab" aria-selected="${_recMode==='edit'}" onclick="bmReceteMode('${_editId}','edit')">✏️ Düzenle</button><button class="bm-mode-btn ${_recMode==='view'?'active':''}" type="button" role="tab" aria-selected="${_recMode==='view'}" onclick="bmReceteMode('${_editId}','view')">👁️ Görüntüle</button></div>`:''}
-    <button class="btn bm-edit-only" onclick="tarifeKaydet()" style="background:${kbg};color:${kclr};border:1px solid ${kbrd};font-size:12px;padding:8px 14px;white-space:nowrap">${kayitMsg||"💾 Kaydet"}</button>
+    <button class="btn bm-edit-only" onclick="tarifeKaydet()" style="background:${kbg};color:${kclr};border:1px solid ${kbrd};font-size:var(--fs-sm);padding:var(--sp-2) var(--sp-4);white-space:nowrap">${kayitMsg||"💾 Kaydet"}</button>
     ${_editId?`<button class="bm-btn-primary" onclick="tarifKlonla('${_editId}')" title="Bu tarifin kopyasını oluştur">📑 Klonla</button>`:''}
   </div>
   <div class="bm-edit-only" style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
-    <span style="font-size:10px;color:rgba(248,232,196,.8);font-weight:600">🎯 Hedef Stil:</span>
-    <select onchange="S.stil=this.value;render()" style="background:rgba(248,232,196,.12);color:#F8E8C4;border:1px solid rgba(248,232,196,.35);border-radius:6px;font-size:11px;padding:4px 8px;flex:1;outline:none;font-family:inherit;cursor:pointer">
+    <span style="font-size:var(--fs-xs);color:var(--metin-soluk);font-weight:var(--fw-semibold)">🎯 Hedef Stil:</span>
+    <select onchange="S.stil=this.value;render()" style="background:var(--bg-card);color:var(--ink);border:1px solid var(--cizgi-arac);border-radius:var(--r-sm);font-size:var(--fs-xs);padding:4px 8px;flex:1;outline:none;font-family:var(--font-govde);cursor:pointer">
       <option value=""${!S.stil?" selected":""}>── Otomatik (bileşenlerden) ──</option>
       ${typeof BJCP!=='undefined'?Object.keys(BJCP).sort().map(sn=>`<option value="${sn}"${S.stil===sn?" selected":""}>${sn}</option>`).join(""):""}
     </select>
