@@ -582,35 +582,38 @@ button:disabled:hover,.btn:disabled:hover,.btn.bm-disabled:hover{background:inhe
 @media (max-width:768px){.bm-klasor-bar{padding:10px;gap:6px}.bm-taslak-banner{margin:10px;padding:10px;flex-direction:column;align-items:stretch}.bm-taslak-eylem{justify-content:flex-end}}
 
 /* Adim 131-F: Recete kartlari buyuk gradient banner (Image 2) */
-.bm-recete-kart{background:#FFFFFF;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04),0 4px 12px rgba(0,0,0,.05);margin:0 12px 12px;position:relative}
-.bm-recete-banner{position:relative;padding:18px 18px 22px;color:#FFFFFF;overflow:hidden}
-.bm-recete-banner.light{background:var(--vintage)}
-.bm-recete-banner.medium{background:linear-gradient(135deg,var(--vintage) 0%,var(--bakir) 100%)}
-.bm-recete-banner.dark{background:linear-gradient(135deg,#4F2A0E 0%,#412402 100%)}
-.bm-recete-banner.dark .bm-recete-ac-btn{color:#412402}
-.bm-recete-badge-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
-.bm-recete-badge{display:inline-block;background:rgba(255,255,255,.3);color:#FFFFFF;font-size:11px;font-weight:500;letter-spacing:.4px;text-transform:uppercase;padding:2px 8px;border-radius:4px}
-.bm-recete-badge.taslak{background:rgba(255,255,255,.55);color:#412402}
-.bm-recete-baslik{font-family:var(--font-display);font-size:22px;font-weight:700;color:#FFFFFF;line-height:1.15;margin-bottom:4px;padding-right:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bm-recete-meta{display:flex;flex-wrap:wrap;align-items:center;gap:12px;font-size:12px;color:rgba(255,255,255,.92)}
+/* Adim 135-D (2026-05-20): .bm-recete-kart token + mockup gorsel refactor.
+   Onaylı mockup paleti: --bg-card beyaz kart, --cizgi-arac ince border, --r-md 14px radius, --elv-1/2 shadow.
+   Renkli/koyu banner gradient'ler (light/medium/dark vintage→bakir, #4F2A0E→#412402) KALDIR — eski iz.
+   Banner artik sade beyaz (kart bg ile birlesir), baslik --ink, meta --metin-soluk. tarifKart() JS DOKUNULMAZ.
+   Bira rengi gostergesi (.bm-recete-renk-dot inline srmR hex) DATA, DOKUNULMAZ. */
+.bm-recete-kart{background:var(--bg-card);border:1px solid var(--cizgi-arac);border-radius:var(--r-md);overflow:hidden;box-shadow:var(--elv-1);margin:0 var(--sp-3) var(--sp-3);position:relative;transition:box-shadow .2s ease,transform .15s ease}
+.bm-recete-kart:hover{box-shadow:var(--elv-2);transform:translateY(-1px)}
+.bm-recete-banner{position:relative;padding:var(--sp-4) var(--sp-4) var(--sp-3);color:var(--ink);overflow:hidden}
+.bm-recete-banner.light,.bm-recete-banner.medium,.bm-recete-banner.dark{background:transparent}
+.bm-recete-badge-row{display:flex;flex-wrap:wrap;gap:var(--sp-1);margin-bottom:var(--sp-2)}
+.bm-recete-badge{display:inline-block;background:var(--accent-soft);color:var(--metin);font-size:var(--fs-xs);font-weight:var(--fw-medium);letter-spacing:.4px;text-transform:uppercase;padding:2px var(--sp-2);border-radius:var(--r-sm)}
+.bm-recete-badge.taslak{background:var(--bg-sunken);color:var(--metin-soluk)}
+.bm-recete-baslik{font-family:var(--font-baslik);font-size:var(--fs-lg);font-weight:var(--fw-bold);color:var(--ink);line-height:var(--lh-tight);margin-bottom:var(--sp-1);padding-right:var(--sp-6);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bm-recete-meta{display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp-3);font-family:var(--font-govde);font-size:var(--fs-sm);color:var(--metin-soluk)}
 .bm-recete-meta span{display:inline-flex;align-items:center;gap:5px}
 .bm-recete-meta .ti{width:13px;height:13px;stroke-width:1.8;opacity:.95}
-.bm-recete-ac-btn{position:absolute;top:14px;right:14px;background:#FFFFFF;color:var(--bakir);border:none;border-radius:5px;padding:4px 12px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:background .12s,transform .08s}
-.bm-recete-ac-btn:hover{background:var(--kahve-bg)}
+.bm-recete-ac-btn{position:absolute;top:var(--sp-3);right:var(--sp-3);background:var(--vintage);color:#FFFFFF;border:none;border-radius:var(--r-sm);padding:var(--sp-1) var(--sp-3);font-size:var(--fs-sm);font-weight:var(--fw-medium);cursor:pointer;font-family:inherit;transition:background .12s,transform .08s}
+.bm-recete-ac-btn:hover{background:var(--vintage-koyu)}
 .bm-recete-ac-btn:active{transform:scale(.96)}
-.bm-recete-info{background:#FFFFFF;padding:12px 16px 14px}
-.bm-recete-metric-row{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:6px}
-.bm-recete-metric{display:inline-flex;align-items:center;gap:5px;background:var(--kahve-light);padding:5px 10px;border-radius:7px;font-size:12px;line-height:1}
-.bm-recete-metric-etiket{color:#888780;font-size:11px}
-.bm-recete-metric-deger{color:#3D2817;font-weight:600}
-.bm-recete-renk-chip{display:inline-flex;align-items:center;gap:6px;background:var(--kahve-light);padding:5px 10px;border-radius:7px;font-size:12px;color:#3D2817;line-height:1}
+.bm-recete-info{background:var(--bg-card);padding:var(--sp-2) var(--sp-4) var(--sp-3)}
+.bm-recete-metric-row{display:flex;flex-wrap:wrap;gap:var(--sp-1);margin-bottom:var(--sp-1)}
+.bm-recete-metric{display:inline-flex;align-items:center;gap:5px;background:var(--bg-sunken);padding:var(--sp-1) var(--sp-2);border-radius:var(--r-sm);font-size:var(--fs-sm);line-height:1}
+.bm-recete-metric-etiket{color:var(--metin-soluk);font-size:var(--fs-xs)}
+.bm-recete-metric-deger{color:var(--ink);font-weight:var(--fw-semibold)}
+.bm-recete-renk-chip{display:inline-flex;align-items:center;gap:6px;background:var(--bg-sunken);padding:var(--sp-1) var(--sp-2);border-radius:var(--r-sm);font-size:var(--fs-sm);color:var(--ink);line-height:1}
 .bm-recete-renk-dot{display:inline-block;width:10px;height:10px;border-radius:50%;border:1px solid rgba(0,0,0,.12);flex-shrink:0}
-.bm-recete-malzeme{font-size:12px;color:#5F5E5A;line-height:1.5;margin:6px 0 10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bm-recete-eylem-bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding-top:8px;border-top:1px solid #F1EFE8}
-.bm-recete-eylem-chip{display:inline-flex;align-items:center;gap:5px;background:#FFFFFF;border:0.5px solid #F1EFE8;color:#5F5E5A;border-radius:18px;padding:4px 10px;font-size:11px;font-weight:500;cursor:pointer;font-family:inherit;white-space:nowrap;transition:border-color .12s,color .12s}
-.bm-recete-eylem-chip:hover{border-color:var(--vintage)}
+.bm-recete-malzeme{font-size:var(--fs-sm);color:var(--metin-soluk);line-height:var(--lh-base);margin:var(--sp-1) 0 var(--sp-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bm-recete-eylem-bar{display:flex;flex-wrap:wrap;gap:var(--sp-1);align-items:center;padding-top:var(--sp-2);border-top:1px solid var(--cizgi-arac)}
+.bm-recete-eylem-chip{display:inline-flex;align-items:center;gap:5px;background:var(--bg-card);border:1px solid var(--cizgi-arac);color:var(--metin-soluk);border-radius:18px;padding:var(--sp-1) var(--sp-2);font-size:var(--fs-xs);font-weight:var(--fw-medium);cursor:pointer;font-family:inherit;white-space:nowrap;transition:border-color .12s,color .12s,background .12s}
+.bm-recete-eylem-chip:hover{border-color:var(--vintage);background:var(--accent-soft)}
 .bm-recete-eylem-chip .ti{width:12px;height:12px;stroke-width:1.8;flex-shrink:0;color:var(--vintage)}
-.bm-recete-eylem-chip.aktife{color:var(--bakir)}
+.bm-recete-eylem-chip.aktife{color:var(--vintage-mid)}
 .bm-recete-eylem-chip.aktife .ti{color:var(--vintage)}
 .bm-recete-eylem-chip.stoktan .ti{color:#5F5E5A}
 .bm-recete-eylem-chip.iade .ti{color:#1D9E75}
