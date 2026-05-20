@@ -29,21 +29,22 @@
   --bg:var(--bg-app);          /* eski #F7F2E3 → yeni #F7F3EC mockup nötr taban */
   --bg2:var(--bg-sunken);      /* eski #EFE6D0 → yeni #F1ECE2 mockup sunken */
   --card:var(--bg-card);       /* eski #FEFBF2 → yeni #FFFFFF mockup beyaz kart */
-  /* Border — net görünür */
-  --bor:#D4C4A8;
-  --bor2:#B0A08C;
+  /* Border — Adim 135-Q: GRUP B alias swap (yüksek risk, ~143 kullanım). Eski koyu amber border → açık nötr cizgi. */
+  --bor:var(--cizgi-arac);        /* eski #D4C4A8 → yeni #E9E1D2 mockup subtle divider */
+  --bor2:var(--cizgi-arac);       /* eski #B0A08C → yeni #E9E1D2 tek border standartı */
   /* Ink hierarchy */
   --kahve:var(--metin);        /* eski #3D2817 → yeni #3D2A1C mockup espresso */
   --bakir:rgb(139,90,43); /* 134-bl-2: literal form, replace_all recursion önle. var(--bakir) = rgb(139,90,43) */
   --altin:#B8874E;
-  --soluk:#6A5A44;
-  --dim:#B0A088;
+  /* 135-Q GRUP B: pasif metin 2-kademe → tek muted (mockup). dim×99 + soluk×149 birleşir. */
+  --soluk:var(--metin-soluk);    /* eski #6A5A44 → yeni #8A7E70 mockup muted */
+  --dim:var(--metin-soluk);      /* eski #B0A088 → yeni #8A7E70 tek muted varyant */
   /* Adim 134-bl-2: Vintage palette consolidation. rgb() literal (replace_all recursion önle, görsel #hex eşdeğeri) */
   --vintage:rgb(184,118,63);       /* Brand primary vintage amber/copper */
   --kahve-koyu:rgb(92,58,14);      /* Darker text başlıklar, primary buttons */
   --kahve-bg:var(--accent-soft);   /* eski rgb(245,232,208) → yeni #F4E7D2 mockup amber-soft */
   --kahve-light:rgb(232,194,138);  /* Light amber accent gradient/hover */
-  --kahve-border:rgb(212,181,138); /* Mid border, dividers */
+  --kahve-border:var(--cizgi-arac); /* 135-Q: eski rgb(212,181,138) → yeni #E9E1D2 mockup subtle divider (×11 genel border UI) */
   /* Semantic sadece badge/border için */
   --yk:#5A6B2A;--ya:#E8E4C8;--kk:#8B3A1A;--ka:#F0D8C8;
   --mk:#4A5970;--ma:#DAE0E4;--sk:#8B6A1A;--sa:#F0E4BC;
