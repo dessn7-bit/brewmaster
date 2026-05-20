@@ -354,6 +354,44 @@ body[data-mode="view"] .bm-acc.bm-edit-only-acc{display:none !important}
 body[data-mode="view"] .bm-chip{pointer-events:none;opacity:.6}
 @media (max-width:768px){.bm-mode-btn{padding:5px 7px;font-size:11px}}
 
+/* Adim 134-AYAR: Stok sayfasi 3 ana sekme bar (Stok / Ayarlar / Bildirimler).
+   Stok header'in altinda full-width tab bar, vintage palet. Aktif: vintage bg + cream text + alt cubuk.
+   Pasif: transparent + bakir text. Hover: kahve-bg subtle. Internal stokEkranTab (Liste/Hareketler) ALTINDA kalir. */
+.bm-stok-anatabs{display:flex;background:var(--card);border-bottom:1.5px solid var(--kahve-border);font-family:var(--font-body)}
+.bm-stok-anatab{flex:1;padding:11px 8px;border:none;background:transparent;color:var(--bakir);font-size:12.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;line-height:1;border-bottom:3px solid transparent;transition:background .15s,color .15s,border-color .15s;font-family:inherit;-webkit-tap-highlight-color:transparent;position:relative}
+.bm-stok-anatab:hover:not(.aktif){background:var(--kahve-bg)}
+.bm-stok-anatab.aktif{background:var(--kahve-bg);color:var(--kahve-koyu);border-bottom-color:var(--vintage);font-weight:700}
+.bm-stok-anatab .bm-anatab-badge{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#E04E2B;color:#fff;font-size:10px;font-weight:700;line-height:1}
+.bm-stok-anatab.aktif .bm-anatab-badge{background:var(--vintage)}
+@media (max-width:768px){.bm-stok-anatab{padding:9px 6px;font-size:11.5px;gap:4px}}
+
+/* Adim 134-AYAR: Ayarlar/Bildirim icerik karti (form list pattern, 134-G/H vintage uyumlu). */
+.bm-stok-icerik{padding:14px}
+.bm-ayar-kart{background:var(--card);border:1px solid var(--kahve-border);border-radius:10px;padding:14px;margin-bottom:12px}
+.bm-ayar-kart-baslik{font-size:13px;font-weight:700;color:var(--kahve-koyu);margin-bottom:10px;display:flex;align-items:center;gap:6px;font-family:var(--font-display);letter-spacing:.3px}
+.bm-ayar-satir{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px dashed var(--bor);font-size:12.5px;color:var(--metin)}
+.bm-ayar-satir:last-child{border-bottom:none}
+.bm-ayar-satir-text{flex:1;min-width:0;line-height:1.4}
+.bm-ayar-satir-text small{display:block;font-size:10.5px;color:var(--soluk);margin-top:2px;font-weight:400}
+.bm-ayar-btn{background:var(--vintage);color:#fff;border:none;border-radius:6px;padding:7px 14px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;flex-shrink:0;transition:background .15s}
+.bm-ayar-btn:hover{background:var(--kahve-koyu)}
+.bm-ayar-btn-sec{background:transparent;color:var(--bakir);border:1px solid var(--kahve-border);border-radius:6px;padding:6px 12px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;flex-shrink:0;transition:background .15s}
+.bm-ayar-btn-sec:hover{background:var(--kahve-bg)}
+.bm-ayar-btn-uyari{background:#C84A3A;color:#fff}
+.bm-ayar-btn-uyari:hover{background:#A53A2C}
+.bm-bildirim-grup{margin-bottom:16px}
+.bm-bildirim-grup-baslik{font-size:11px;font-weight:700;color:var(--soluk);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;padding:0 2px}
+.bm-bildirim-satir{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--card);border:1px solid var(--bor);border-radius:8px;margin-bottom:6px;font-size:12.5px}
+.bm-bildirim-satir-kritik{border-left:3px solid #C62828;background:#FFF5F3}
+.bm-bildirim-satir-uyari{border-left:3px solid var(--vintage);background:rgba(184,118,63,.06)}
+.bm-bildirim-satir-bilgi{border-left:3px solid #8A6A20}
+.bm-bildirim-ikon{font-size:18px;line-height:1;flex-shrink:0}
+.bm-bildirim-icerik{flex:1;min-width:0;line-height:1.4}
+.bm-bildirim-icerik strong{color:var(--kahve-koyu);font-weight:700}
+.bm-bildirim-icerik small{display:block;font-size:10.5px;color:var(--soluk);margin-top:3px}
+.bm-pref-toggle{display:flex;align-items:center;gap:8px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.bm-pref-toggle input[type="checkbox"]{margin:0}
+
 /* Adim 132-H: 4/4 ensemble agreement badge (Strategy C ribbon icinde).
    stcRes.hybrid_agreement (örn "4/4") motor consensus oran. 4/4 yesil, 3/4 turuncu, ≤2/4 gri. */
 .bm-ensemble-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:12px;font-size:11px;line-height:1.2;font-weight:600;font-family:var(--font-body);margin-left:8px;white-space:nowrap}
@@ -5994,6 +6032,8 @@ let sekme="genel",ekran="liste";
 let sekmeArama={malt:'',hop:'',maya:'',katki:'',stok:''};
 let sekmKat={malt:'',hop:'',maya:'',katki:'',stok:''}; // aktif kategori filtresi
 let stokEkranTab='liste'; // 'liste' | 'gecmis'
+// Adim 134-AYAR: Stok sayfasi 3 ana sekme [Stok|Ayarlar|Bildirimler]. Default 'stok'. LS persist.
+let stokAnaTab=(function(){try{var v=localStorage.getItem('bm_stok_ana_tab');return (v==='ayarlar'||v==='bildirim')?v:'stok';}catch(e){return 'stok';}})();
 let yM={id:"pale_ale",kg:1.0,marka:""},yH={id:"citra",g:15,dk:60,tur:"boil",cAA:null,dryDays:5,form:"pellet"};
 let yMin={id:"caso4",miktar:1.0};
 let kayitMsg="",silOnay=null;
@@ -10637,7 +10677,56 @@ function tkv(maya,og,fg,abv,hoplar,maya2,stil){
 
 
 // ═══ STOK EKRANI ════════════════════════════════════════════
+// Adim 134-AYAR: Ana sekme bar HTML — Stok / Ayarlar / Bildirimler. 'aktif' class CSS'le stilize.
+function _stokAnaTabBarHTML(){
+  function _tab(id,ikon,label,badge){
+    var ak = stokAnaTab===id;
+    var bHtml = (badge && badge>0) ? '<span class="bm-anatab-badge">'+badge+'</span>' : '';
+    return '<button type="button" class="bm-stok-anatab'+(ak?' aktif':'')+'" onclick="window.stokAnaTabSet(\''+id+'\')" data-anatab="'+id+'">'+
+      '<span>'+ikon+'</span><span>'+label+'</span>'+bHtml+
+    '</button>';
+  }
+  // Bildirim badge — bekleyen alarm + dusuk stok sayisi
+  var bildirimSay = 0;
+  try {
+    if (typeof STOK !== 'undefined' && Array.isArray(STOK)) {
+      bildirimSay += STOK.filter(function(s){ return s && s.uyari>0 && (s.miktar||0) <= s.uyari; }).length;
+    }
+    if (typeof _alarmlariOku === 'function') {
+      var _al = _alarmlariOku();
+      var _simdi = Date.now();
+      Object.keys(_al).forEach(function(rid){
+        var rec = _al[rid];
+        if (!rec || rec.durum !== 'aktif') return;
+        (rec.alarmlar||[]).forEach(function(a){
+          if (a && (a.durum==='bekliyor'||a.durum==='gosterildi') && a.tip!=='pasif' && a.ts <= _simdi) bildirimSay++;
+        });
+      });
+    }
+  } catch(e){}
+  return '<div class="bm-stok-anatabs">'+
+    _tab('stok','📦','Stok',0)+
+    _tab('ayarlar','⚙️','Ayarlar',0)+
+    _tab('bildirim','🔔','Bildirimler',bildirimSay)+
+  '</div>';
+}
+
+// Adim 134-AYAR: Stok header HTML — ayarlar/bildirim sekmesinde de paylasilan ust banner.
+function _stokHeaderHTML(){
+  return '<div class="header" style="display:flex;align-items:center;gap:10px;padding:14px 16px">'+
+    '<button class="btn" onclick="stokEkranKapat()" style="background:rgba(255,255,255,.2);color:#F0D8A0;font-size:22px;padding:2px 8px;border-radius:8px;line-height:1">‹</button>'+
+    '<div style="font-size:18px;font-weight:700;color:#F0D8A0;flex:1">📦 Stok Yönetimi</div>'+
+  '</div>';
+}
+
 function rStok(){
+  // Adim 134-AYAR: ana sekme dispatch — ayarlar/bildirim erken donus, 'stok' mevcut akis.
+  if (stokAnaTab === 'ayarlar' && typeof rStokAyarlar === 'function') {
+    return _stokHeaderHTML() + _stokAnaTabBarHTML() + '<div class="bm-stok-icerik">' + rStokAyarlar() + '</div>';
+  }
+  if (stokAnaTab === 'bildirim' && typeof rStokBildirim === 'function') {
+    return _stokHeaderHTML() + _stokAnaTabBarHTML() + '<div class="bm-stok-icerik">' + rStokBildirim() + '</div>';
+  }
   const sArama=sekmeArama.stok.toLowerCase();
   const stokKat=sekmKat.stok;
   const stokGruplari=[...new Set(STOK.map(s=>s.g||"Diğer"))].sort();
@@ -10854,6 +10943,7 @@ function rStok(){
       '<button class="btn" onclick="stokEkranKapat()" style="background:rgba(255,255,255,.2);color:#F0D8A0;font-size:22px;padding:2px 8px;border-radius:8px;line-height:1">‹</button>'+
       '<div style="font-size:18px;font-weight:700;color:#F0D8A0;flex:1">📦 Stok Yönetimi</div>'+
     '</div>'+
+    _stokAnaTabBarHTML()+
     _tabBar+
     '<div style="padding:12px">'+gecmisIc+'</div>';
   }
@@ -10861,6 +10951,7 @@ function rStok(){
     '<button class="btn" onclick="stokEkranKapat()" style="background:rgba(255,255,255,.2);color:#F0D8A0;font-size:22px;padding:2px 8px;border-radius:8px;line-height:1">‹</button>'+
     '<div style="font-size:18px;font-weight:700;color:#F0D8A0;flex:1">📦 Stok Yönetimi</div>'+
   '</div>'+
+  _stokAnaTabBarHTML()+
   _tabBar+
   stokAramaKutu+
   '<div style="padding:12px">'+stokEkleForm+'<div id="stokListeDiv">'+stokListesi+'</div></div>';
@@ -10939,7 +11030,7 @@ function renderSidebar(){
     '<div class="bm-sidebar-user">'+
       '<div class="bm-sidebar-user-avatar">K</div>'+
       '<div class="bm-sidebar-user-name">Kaan</div>'+
-      '<button class="bm-sidebar-user-settings" title="Ayarlar">'+BM_SVG.settings+'</button>'+
+      '<button class="bm-sidebar-user-settings" title="Ayarlar" onclick="window.stokAnaTabSet(\'ayarlar\');if(typeof closeSidebar===\'function\')closeSidebar()">'+BM_SVG.settings+'</button>'+
     '</div>';
 }
 // Local escape helper (mevcut esc'i sarmalar — eger varsa kullan)
@@ -10972,11 +11063,14 @@ function renderHeader(){
   var bellBadgeHtml = bellBadgeCount > 0
     ? '<span class="bm-header-bell-badge">'+bellBadgeCount+'</span>'
     : '';
-  // Bildirim dropdown (acik durumda)
+  // Bildirim dropdown (acik durumda) — Adim 134-AYAR: "Tumunu gor" link Bildirimler sekmesine
   var dropdownHtml = _bildirimPanelAcik
     ? '<div class="bm-bildirim-dropdown" id="bm-bildirim-dropdown">'+
         '<div class="bm-bildirim-baslik">Bildirimler</div>'+
         '<div class="bm-bildirim-bos">Henuz bildirim yok</div>'+
+        '<div style="border-top:1px solid #E8E4DA;margin-top:6px;padding-top:6px;text-align:center">'+
+          '<button onclick="_bildirimPanelAcik=false;window.stokAnaTabSet(\'bildirim\')" style="background:none;border:none;color:var(--vintage);font-size:12px;font-weight:600;cursor:pointer;padding:4px 8px">Tümünü gör →</button>'+
+        '</div>'+
       '</div>'
     : '';
   // Arama input — mevcut aramaInp ID + handler'lar KORUNDU
@@ -20979,6 +21073,302 @@ window.stoktenManuelDus=stoktenManuelDus;
 window.stoktenManuelIade=stoktenManuelIade;
 window.stokTabSet=function(tab){ stokEkranTab=tab; if(ekran==='stok'){document.getElementById('ekran').innerHTML=rStok();}else render(); };
 window.stokHistTemizle=function(){ if(confirm('📜 Tüm stok hareket geçmişi silinsin mi? (Geri alınamaz)')){ stokHistKaydet([]); if(ekran==='stok'){document.getElementById('ekran').innerHTML=rStok();}else render(); flash('Geçmiş temizlendi ✓'); } };
+
+// ═══ Adim 134-AYAR: Stok ana sekme handlers + Ayarlar/Bildirim render ════════════════════════════
+window.stokAnaTabSet = function(tab){
+  if (tab !== 'stok' && tab !== 'ayarlar' && tab !== 'bildirim') return;
+  stokAnaTab = tab;
+  try { localStorage.setItem('bm_stok_ana_tab', tab); } catch(e){}
+  if (ekran === 'stok') { document.getElementById('ekran').innerHTML = rStok(); }
+  else { ekran = 'stok'; render(); }
+};
+
+// Bildirim tercihleri — default tum acik. bm_bildirim_tercih LS persist.
+window.bmBildirimTercihOku = function(){
+  var def = { alarm:true, dusukStok:true };
+  try {
+    var raw = localStorage.getItem('bm_bildirim_tercih');
+    if (raw) { var p = JSON.parse(raw); return Object.assign(def, p||{}); }
+  } catch(e){}
+  return def;
+};
+window.bmBildirimTercihKaydet = function(p){
+  try { localStorage.setItem('bm_bildirim_tercih', JSON.stringify(p||{})); } catch(e){}
+};
+window.bmBildirimTercihToggle = function(key){
+  var p = window.bmBildirimTercihOku();
+  p[key] = !p[key];
+  window.bmBildirimTercihKaydet(p);
+  if (ekran === 'stok') { document.getElementById('ekran').innerHTML = rStok(); }
+  if (typeof bmToast === 'function') bmToast('Tercih kaydedildi', 'info');
+};
+
+// Cache temizle — SW caches.delete + reload
+window.bmCacheTemizle = function(){
+  if (!confirm('🧹 Tüm cache temizlensin ve sayfa yeniden yüklensin mi?\n(Localstorage verisi korunur)')) return;
+  try {
+    if ('caches' in window) {
+      caches.keys().then(function(keys){
+        Promise.all(keys.map(function(k){ return caches.delete(k); })).then(function(){
+          if (typeof bmToast === 'function') bmToast('Cache temizlendi — yeniden yükleniyor', 'success');
+          setTimeout(function(){ location.reload(true); }, 600);
+        });
+      });
+    } else {
+      if (typeof bmToast === 'function') bmToast('caches API yok — sadece sayfa yenileniyor', 'warning');
+      setTimeout(function(){ location.reload(true); }, 400);
+    }
+  } catch(e){
+    console.warn('[bmCacheTemizle]', e);
+    if (typeof bmToast === 'function') bmToast('Hata: '+e.message, 'error');
+  }
+};
+
+// SW guncelle — registration.update() force
+window.bmSwGuncelle = function(){
+  try {
+    if (!('serviceWorker' in navigator)) {
+      if (typeof bmToast === 'function') bmToast('Service Worker desteklenmiyor', 'warning');
+      return;
+    }
+    navigator.serviceWorker.getRegistration().then(function(reg){
+      if (!reg) {
+        if (typeof bmToast === 'function') bmToast('SW kayıtlı değil', 'warning');
+        return;
+      }
+      reg.update().then(function(){
+        if (typeof bmToast === 'function') bmToast('SW güncelleme tetiklendi — birkaç saniye sonra reload', 'success');
+        setTimeout(function(){ location.reload(); }, 1500);
+      }).catch(function(e){
+        if (typeof bmToast === 'function') bmToast('SW güncelleme hata: '+e.message, 'error');
+      });
+    });
+  } catch(e){
+    console.warn('[bmSwGuncelle]', e);
+    if (typeof bmToast === 'function') bmToast('Hata: '+e.message, 'error');
+  }
+};
+
+// Veri export — tum bm_ ve diger app LS key'leri JSON blob indir
+window.bmVeriExport = function(){
+  try {
+    var dump = {};
+    for (var i=0; i<localStorage.length; i++){
+      var k = localStorage.key(i);
+      if (!k) continue;
+      // Sadece app-related: bm_, kabir_, _orig, KR backup keys
+      if (/^(bm_|kabir_|_orig|KR$)/.test(k)) {
+        dump[k] = localStorage.getItem(k);
+      }
+    }
+    var meta = { exportTs: Date.now(), version: 'v2.79.10', keys: Object.keys(dump).length };
+    var payload = { meta: meta, data: dump };
+    var blob = new Blob([JSON.stringify(payload, null, 2)], { type:'application/json' });
+    var d = new Date();
+    var ts = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+'_'+String(d.getHours()).padStart(2,'0')+String(d.getMinutes()).padStart(2,'0');
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'brewmaster_yedek_'+ts+'.json';
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 200);
+    if (typeof bmToast === 'function') bmToast('Yedek indirildi ('+meta.keys+' anahtar)', 'success');
+  } catch(e){
+    console.warn('[bmVeriExport]', e);
+    if (typeof bmToast === 'function') bmToast('Export hata: '+e.message, 'error');
+  }
+};
+
+// Veri import — JSON dosya sec, dikkatli onay, LS restore
+window.bmVeriImport = function(inputEl){
+  try {
+    var file = inputEl && inputEl.files && inputEl.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev){
+      try {
+        var p = JSON.parse(ev.target.result);
+        if (!p || !p.data || typeof p.data !== 'object') throw new Error('Geçersiz format (data alanı yok)');
+        var keyCount = Object.keys(p.data).length;
+        var msg = '⚠️ DİKKAT: '+keyCount+' anahtar mevcut verinin ÜZERİNE YAZILACAK.\n\nYedek tarihi: '+(p.meta && p.meta.exportTs ? new Date(p.meta.exportTs).toLocaleString('tr-TR') : '?')+'\n\nDevam edilsin mi?';
+        if (!confirm(msg)) {
+          if (typeof bmToast === 'function') bmToast('Import iptal edildi', 'info');
+          inputEl.value = '';
+          return;
+        }
+        var ok = 0;
+        Object.keys(p.data).forEach(function(k){
+          try { localStorage.setItem(k, p.data[k]); ok++; } catch(e){ console.warn('LS set fail', k, e); }
+        });
+        if (typeof bmToast === 'function') bmToast('Import tamamlandı ('+ok+'/'+keyCount+' anahtar) — yeniden yükleniyor', 'success');
+        setTimeout(function(){ location.reload(); }, 1200);
+      } catch(e) {
+        console.warn('[bmVeriImport parse]', e);
+        if (typeof bmToast === 'function') bmToast('Import hata: '+e.message, 'error');
+      }
+      inputEl.value = '';
+    };
+    reader.readAsText(file);
+  } catch(e){
+    console.warn('[bmVeriImport]', e);
+    if (typeof bmToast === 'function') bmToast('Hata: '+e.message, 'error');
+  }
+};
+
+// Ayarlar sekmesi render
+window.rStokAyarlar = function(){
+  var swVer = '?';
+  try {
+    if (typeof CACHE_VERSION === 'string') swVer = CACHE_VERSION;
+  } catch(e){}
+  var lsKayit = 0, lsBoyut = 0;
+  try {
+    for (var i=0; i<localStorage.length; i++){
+      var k = localStorage.key(i);
+      if (!k) continue;
+      if (/^(bm_|kabir_|_orig|KR$)/.test(k)) {
+        lsKayit++;
+        lsBoyut += (localStorage.getItem(k) || '').length;
+      }
+    }
+  } catch(e){}
+  var boyutKB = (lsBoyut/1024).toFixed(1);
+  // Firebase sync durumu — syncDurumu/syncSon global'leri varsa kullan
+  var syncDurum = 'bilinmiyor';
+  try {
+    if (typeof _syncSon !== 'undefined' && _syncSon) {
+      var dk = Math.round((Date.now() - _syncSon)/60000);
+      syncDurum = dk<1 ? 'az önce' : (dk<60 ? dk+' dk önce' : Math.round(dk/60)+' saat önce');
+    } else if (typeof window._syncBaslangic === 'function') {
+      syncDurum = 'pasif';
+    }
+  } catch(e){}
+  return ''+
+    '<div class="bm-ayar-kart">'+
+      '<div class="bm-ayar-kart-baslik">🎨 Tema</div>'+
+      '<div class="bm-ayar-satir">'+
+        '<div class="bm-ayar-satir-text">Vintage Amber <small>Tek tema (Sprint 134 görsel kimlik)</small></div>'+
+        '<div style="width:24px;height:24px;border-radius:50%;background:var(--vintage);border:2px solid var(--kahve-border)"></div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="bm-ayar-kart">'+
+      '<div class="bm-ayar-kart-baslik">☁️ Senkronizasyon</div>'+
+      '<div class="bm-ayar-satir">'+
+        '<div class="bm-ayar-satir-text">Firebase sync <small>Durum: '+syncDurum+'</small></div>'+
+        '<button class="bm-ayar-btn-sec" onclick="if(typeof syncPanelAc===\'function\')syncPanelAc()">Panel</button>'+
+      '</div>'+
+    '</div>'+
+    '<div class="bm-ayar-kart">'+
+      '<div class="bm-ayar-kart-baslik">💾 Veri</div>'+
+      '<div class="bm-ayar-satir">'+
+        '<div class="bm-ayar-satir-text">Yedek dışa aktar <small>'+lsKayit+' anahtar · '+boyutKB+' KB JSON</small></div>'+
+        '<button class="bm-ayar-btn" onclick="window.bmVeriExport()">İndir</button>'+
+      '</div>'+
+      '<div class="bm-ayar-satir">'+
+        '<div class="bm-ayar-satir-text">Yedek içe aktar <small>JSON dosya seç — onay sonrası restore</small></div>'+
+        '<label class="bm-ayar-btn-sec" style="cursor:pointer;display:inline-flex">Seç<input type="file" accept="application/json,.json" onchange="window.bmVeriImport(this)" style="display:none"></label>'+
+      '</div>'+
+    '</div>'+
+    '<div class="bm-ayar-kart">'+
+      '<div class="bm-ayar-kart-baslik">🧹 Cache</div>'+
+      '<div class="bm-ayar-satir">'+
+        '<div class="bm-ayar-satir-text">Service Worker güncelle <small>Yeni sürümü zorla indir + reload</small></div>'+
+        '<button class="bm-ayar-btn-sec" onclick="window.bmSwGuncelle()">Güncelle</button>'+
+      '</div>'+
+      '<div class="bm-ayar-satir">'+
+        '<div class="bm-ayar-satir-text">Tüm cache temizle <small>SW caches.delete + reload (LS korunur)</small></div>'+
+        '<button class="bm-ayar-btn bm-ayar-btn-uyari" onclick="window.bmCacheTemizle()">Temizle</button>'+
+      '</div>'+
+    '</div>'+
+    '<div class="bm-ayar-kart">'+
+      '<div class="bm-ayar-kart-baslik">ℹ️ Uygulama</div>'+
+      '<div class="bm-ayar-satir">'+
+        '<div class="bm-ayar-satir-text">Versiyon <small>HTML v2.79.10 · SW '+swVer+'</small></div>'+
+      '</div>'+
+    '</div>';
+};
+
+// Bildirim sekmesi render — alarmlar + dusuk stok + tercihler
+window.rStokBildirim = function(){
+  var pref = window.bmBildirimTercihOku();
+  var kritikSatir = [];
+  var bekleyenSatir = [];
+  var yakSatir = [];
+  // Alarmlar
+  if (pref.alarm && typeof _alarmlariOku === 'function') {
+    try {
+      var _al = _alarmlariOku();
+      var simdi = Date.now();
+      Object.keys(_al).forEach(function(rid){
+        var rec = _al[rid];
+        if (!rec || rec.durum !== 'aktif') return;
+        var recAd = (function(){ var t = (KR||[]).find(function(x){return x&&x.id===rid;}); return t ? (t.biraAd||t.ad||'(adsız)') : '(silinmiş tarif)'; })();
+        (rec.alarmlar||[]).forEach(function(a){
+          if (!a) return;
+          if (a.durum==='tamamlandi' || a.durum==='atlandi' || a.tip==='pasif') return;
+          var d = new Date(a.ts);
+          var gun = String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0');
+          var saat = String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+          var label = (a.tip||'alarm')+' · '+gun+' '+saat;
+          var row = {
+            tipSinif: '',
+            ikon: '⏰',
+            icerik: '<strong>'+(a.baslik||a.tip||'Alarm')+'</strong> — '+(a.aciklama||'')+'<small>'+label+' · '+recAd+'</small>'
+          };
+          if (a.ts <= simdi) { row.tipSinif='kritik'; row.ikon='🔴'; kritikSatir.push(row); }
+          else if ((a.ts - simdi)/864e5 < 1) { row.tipSinif='uyari'; row.ikon='⏳'; bekleyenSatir.push(row); }
+          else { row.tipSinif='bilgi'; row.ikon='📅'; yakSatir.push(row); }
+        });
+      });
+    } catch(e){ console.warn('[rStokBildirim alarm]', e); }
+  }
+  // Dusuk stok
+  if (pref.dusukStok && typeof STOK !== 'undefined' && Array.isArray(STOK)) {
+    STOK.forEach(function(s){
+      if (!s || !(s.uyari>0)) return;
+      if ((s.miktar||0) <= s.uyari) {
+        var row = {
+          tipSinif: 'uyari',
+          ikon: '📦',
+          icerik: '<strong>'+(s.ad||'?')+'</strong> · düşük stok<small>Mevcut: '+s.miktar+s.birim+' · Eşik: '+s.uyari+s.birim+'</small>'
+        };
+        bekleyenSatir.push(row);
+      }
+    });
+  }
+  function _renderSatir(r){
+    return '<div class="bm-bildirim-satir bm-bildirim-satir-'+r.tipSinif+'">'+
+      '<span class="bm-bildirim-ikon">'+r.ikon+'</span>'+
+      '<div class="bm-bildirim-icerik">'+r.icerik+'</div>'+
+    '</div>';
+  }
+  function _grup(baslik, arr){
+    if (arr.length === 0) return '';
+    return '<div class="bm-bildirim-grup">'+
+      '<div class="bm-bildirim-grup-baslik">'+baslik+' ('+arr.length+')</div>'+
+      arr.map(_renderSatir).join('')+
+    '</div>';
+  }
+  var liste = _grup('🔴 Kritik (geçti)', kritikSatir) + _grup('⚠️ Aktif', bekleyenSatir) + _grup('📅 Yaklaşan', yakSatir);
+  if (!liste) liste = '<div style="text-align:center;padding:30px;color:var(--dim);font-size:13px">🔔 Aktif bildirim yok.<br><span style="font-size:11px;opacity:.75">Brewday alarmları, düşük stok ve diğer uyarılar burada görünür.</span></div>';
+  // Tercih toggle bloku
+  var tercihBlok =
+    '<div class="bm-ayar-kart">'+
+      '<div class="bm-ayar-kart-baslik">⚙️ Bildirim tercihleri</div>'+
+      '<div class="bm-ayar-satir">'+
+        '<label class="bm-pref-toggle bm-ayar-satir-text">'+
+          '<input type="checkbox" '+(pref.alarm?'checked':'')+' onchange="window.bmBildirimTercihToggle(\'alarm\')">'+
+          '<span>Fermantasyon alarmları <small>Brewday sonrası kurulan alarmlar</small></span>'+
+        '</label>'+
+      '</div>'+
+      '<div class="bm-ayar-satir">'+
+        '<label class="bm-pref-toggle bm-ayar-satir-text">'+
+          '<input type="checkbox" '+(pref.dusukStok?'checked':'')+' onchange="window.bmBildirimTercihToggle(\'dusukStok\')">'+
+          '<span>Düşük stok uyarıları <small>Stok ≤ uyarı eşiği</small></span>'+
+        '</label>'+
+      '</div>'+
+    '</div>';
+  return liste + tercihBlok;
+};
 window.setSurecKDk=function(idx,val){
   if(S.katkilar&&S.katkilar[idx]!==undefined){
     S.katkilar[idx].dk=val!==''?parseInt(val):null;
