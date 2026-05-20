@@ -57,32 +57,37 @@
   --font-display:"EB Garamond",Georgia,serif;
   --font-body:"IBM Plex Sans",system-ui,sans-serif;
 
-  /* Adim 135-A design token sistemi (2026-05-20). Mevcut bl-2 variable korunur, yeni token ek katman.
-     135-A1 cakisma cozumu (2026-05-20): vintage-koyu/vintage-mid mevcut kahve-koyu/bakir ile birebir
-     ayni deger oldugu icin var() ALIAS — single source of truth bl-2 kahve-* tokenlari. accent-soft
-     (cream ton), bg-app/bg-card/bg-sunken (notr offset), cizgi-arac (subtle divider) FARKLI deger,
-     mevcut kahve-* ile cakismaz. */
-  /* A. Renk taban notr cream — kahve-* paletinden bagimsiz, modern dengeli */
-  --bg-app:#FAF7F1;
-  --bg-card:#FDFBF7;
-  --bg-sunken:#F2EEE6;
-  /* Vintage accent alias — bl-2 kahve-koyu/bakir ile birebir AYNI, var() reference */
-  --vintage-koyu:var(--kahve-koyu);
-  --vintage-mid:var(--bakir);
-  --accent-soft:#F0E0CC;
-  /* Metin hiyerarsi */
-  --metin:#2E2A24;
-  --metin-soluk:#6A5F50;
-  /* Border yumusak — kahve-border (D4B58A vintage emphasis) ile farkli amac (subtle divider) */
-  --cizgi-arac:#EAE4D8;
-  /* B. Elevation kahve tabanli */
-  --elv-1:0 1px 2px rgba(92,58,14,.06);
-  --elv-2:0 2px 8px rgba(28,14,14,.08);
-  --elv-3:0 8px 24px rgba(92,58,14,.12);
-  /* C. Spacing 4px ritim */
+  /* Adim 135-A design token sistemi (2026-05-20).
+     135-A1 (2026-05-20): vintage-koyu/vintage-mid ALIAS, single source bl-2 kahve-koyu/bakir.
+     135-A2 (2026-05-20): TOKEN DEGERLERI onayli mockup ile birebir senkron. Token ISIMLERI sabit,
+     alias mimarisi (DRY) intact, sadece literal value'lar mockup'a hizalandi. */
+  /* A. Renk taban — mockup-aligned */
+  --bg-app:#F7F3EC;          /* notr kirik beyaz taban */
+  --bg-card:#FFFFFF;         /* tam beyaz kart */
+  --bg-sunken:#F1ECE2;       /* ic alan / satir */
+  /* Vintage accent alias — bl-2 birebir, 135-A2 mockup #8B5A2B/#5C3A0E zaten alias ile esit */
+  --vintage-koyu:var(--kahve-koyu);  /* #5C3A0E (mockup vintage-darker) */
+  --vintage-mid:var(--bakir);        /* #8B5A2B (mockup vintage-deep) */
+  --accent-soft:#F4E7D2;     /* hover/secili/ikon bg (mockup amber-soft) */
+  /* Metin hiyerarsi — mockup-aligned. --metin baslik (espresso), --ink govde (yeni) */
+  --metin:#3D2A1C;           /* baslik metni (mockup espresso) */
+  --ink:#2E2620;             /* govde metni (mockup ink, --metin'den daha koyu nötr) */
+  --espresso:var(--metin);   /* mockup naming alias = --metin */
+  --metin-soluk:#8A7E70;     /* soluk metin (mockup muted) */
+  /* Border yumusak — mockup-aligned */
+  --cizgi-arac:#E9E1D2;      /* ince ayrac (mockup --line) */
+  /* Semantic — 135-A2 yeni mockup token'lari */
+  --crit:#BC4533; --crit-bg:#FBEDEA;
+  --warn:#C08A2E;
+  --ok:#4A7C59;
+  /* B. Elevation iki-kademe shadow — mockup kahve tonlu rgba(74,53,38) */
+  --elv-1:0 1px 2px rgba(74,53,38,.05),0 1px 3px rgba(74,53,38,.06);
+  --elv-2:0 2px 6px rgba(74,53,38,.05),0 6px 16px rgba(74,53,38,.07);
+  --elv-3:0 10px 30px rgba(74,53,38,.13);
+  /* C. Spacing 4px ritim — mockup birebir */
   --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px;
-  /* D. Radius */
-  --r-sm:8px; --r-md:12px; --r-lg:16px;
+  /* D. Radius — mockup r-md 14px / r-lg 18px (r-sm mevcut korunur) */
+  --r-sm:8px; --r-md:14px; --r-lg:18px;
   /* E. Tipografi olcegi */
   --fs-xs:11px; --fs-sm:13px; --fs-base:14px; --fs-md:16px; --fs-lg:20px; --fs-xl:28px;
   --fw-regular:400; --fw-medium:500; --fw-semibold:600; --fw-bold:700;
