@@ -558,6 +558,11 @@ button:disabled:hover,.btn:disabled:hover,.btn.bm-disabled:hover{background:inhe
 .bm-acc-body{padding:0 var(--sp-4) var(--sp-4);max-height:5000px;opacity:1;transition:max-height .3s ease,opacity .2s ease,padding .2s ease;overflow:hidden}
 .bm-acc[aria-expanded="false"] .bm-acc-body{max-height:0;opacity:0;padding-top:0;padding-bottom:0}
 @media (max-width:768px){.bm-acc-meta{max-width:110px;font-size:var(--fs-xs)}.bm-acc-title{font-size:var(--fs-sm)}}
+/* Adim 135-J (2026-05-20): .bm-acc-feature — Stil Tahmini accordion KONTEYNER subtle feature.
+   135-C base intact (radius/shadow/header/body), SADECE krem gradient bg ile diger accordion'lardan ayrisir.
+   Eski 132-D inline gradient (#bg2/#card) + bor2 border + golge2 shadow KALDIRILDI.
+   Body border-top:6px DATA srmR hex INTACT (bira rengi gostergesi). */
+.bm-acc.bm-acc-feature{background:linear-gradient(180deg,#FCF6EB 0%,#F9F0E0 100%)}
 
 /* Adim 134-bl-1: Malt/Hop inline muadil chip (132-G centralized .bm-muadil-wrap Genel tab INTACT, dual visibility) */
 .bm-muadil-inline{font-size:11px;color:var(--soluk);margin-top:0;padding:6px 10px;border-top:1px dashed rgba(184,118,63,.15);background:rgba(245,232,208,.35);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
@@ -17583,7 +17588,7 @@ try {
 return `
     <!-- Adim 132-E: Sticky ozet paneli rEditor wrapper'a tasindi, tab disinda global. -->
     <!-- Adim 132-D: Accordion #1 - Stil Tahmini (eski big gradient card refactor) -->
-    <div class="bm-acc" data-acc-id="stil-tahmin" data-acc-default="expanded" aria-expanded="true" style="background:linear-gradient(135deg,var(--bg2),var(--card));border:1px solid var(--bor2);box-shadow:var(--golge2)">
+    <div class="bm-acc bm-acc-feature" data-acc-id="stil-tahmin" data-acc-default="expanded" aria-expanded="true">
       <button class="bm-acc-header" type="button" aria-expanded="true" onclick="bmAccToggle('stil-tahmin')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmAccToggle('stil-tahmin')}"><span class="bm-acc-title">🎯 Stil Tahmini & Reçete Doktoru</span><span class="bm-acc-meta" data-acc-meta="stil-tahmin"></span><span class="bm-acc-chevron">▾</span></button>
       <div class="bm-acc-body" style="border-top:6px solid ${renk_hex};padding:14px">
         ${(()=>{
