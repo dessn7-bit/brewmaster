@@ -21550,6 +21550,42 @@ window.MALTLAR=MALTLAR;window.MINERALLER=MINERALLER;
 
 // Sadece sayısal inputlar için canlı render; metin alanlarını atla
 // input listener kaldırıldı — onchange/onblur kullanılıyor
+
+// Adim 137-F: Dark Belgian Dubbel sample reçete init — render()'dan ÖNCE taşındı.
+// Önceki konumu (syncBaslat sonrası) mobile/yavaş CPU'da render() ile IIFE arası 0-300ms
+// boş empty state flash'ına sebep oluyordu (137-E tespit). Buraya alındı: ilk render Dubbel ile gelir.
+(function(){
+  try{
+    const DUBBEL_ID='dubbel_2024'; const DUBBEL_VER=5;
+    const dubbel={"id": "dubbel_2024", "biraAd": "Dark Belgian Dubbel", "maltlar": [{"id": "pale_ale", "kg": 2.0}, {"id": "munich", "kg": 0.64}, {"id": "chateau_biscuit", "kg": 0.35}, {"id": "c40", "kg": 0.2}, {"id": "rye", "kg": 0.17}, {"id": "c120", "kg": 0.11}, {"id": "dark_wheat", "kg": 0.055}, {"id": "rice_hulls", "kg": 0.13}, {"id": "candy_drk", "kg": 0.2}], "hoplar": [{"id": "hallertau", "g": 14, "dk": 60, "tur": "boil", "cAA": null}, {"id": "spalt", "g": 12, "dk": 10, "tur": "boil", "cAA": null}], "mayaId": "bb_abbaye", "maya2Id": "", "katkilar": [{"id": "kakao", "miktar": 30, "birim": "g", "ad": "Kakao Nibları (Cacao Nibs)", "zaman": "Fermentasyon sonunda (soğuk)"}, {"id": "vanilya", "miktar": 1, "birim": "adet", "ad": "Vanilya Çubuğu", "zaman": "Cold crash sonrası (5°C)"}, {"id": "maya_besini", "miktar": 0.5, "birim": "g", "ad": "Maya Besini (Yeast Nutrient)", "zaman": "Fermentere ekle"}, {"id": "jelatin", "miktar": 0.5, "birim": "g", "ad": "Berraklaştırıcı Toz Jelatin", "zaman": "Cold crash sırasında (5°C)"}, {"id": "antioxid", "miktar": 0.5, "birim": "g", "ad": "Antioksidasyon Tuzu (Metabisülfit)", "zaman": "Şişelemede veya fıçıda"}], "suMineralleri": [{"id": "cacl2", "miktar": 5.0}, {"id": "mgso4", "miktar": 1.5}, {"id": "laktik", "miktar": 1.5}], "hacim": 11, "verim": 61, "mashSc": 66, "ogManuel": "", "fgManuel": "", "primVol": 2.5, "primTemp": 20, "primYontem": "Dekstroz", "brewLog": [], "notlar": "Dark Belgian Dubbel — Yarışma Reçetesi\n\nOG ~1.064 | FG ~1.014 | ABV ~%6.8 | IBU ~14 | EBC ~41\n\n• Mash suyu 13L (66°C), sparge 5L saf RO\n• Mash pH hedefi 5.3 — laktik asit ile ayarla\n• Çeltik kavuzu mash'te diğer maltlarla birlikte sepete ekle\n• Candi Sugar'ı kaynatmanın 15. dakikasında ekle\n• Kakao nibsini önce yıka, hafifçe kavur → secondary\n• Vanilya çubuğunu yar, son 3 günde ekle\n• Fermentasyon: 18°C başla → 3. gün 22°C'ye çık\n• Jelatin: 60°C 100mL suda çöz, soğuk kondisyon 3-4 gün 5°C\n• Antioksidasyon şişelemeden hemen önce", "durum": "aktif", "klasor": "Yarışma", "tarih": "13.04.2026", "_ver": 9};
+    let stored=[];
+    try{stored=_migrateAllRecipes(JSON.parse(localStorage.getItem('bm_v6'))||[]);}catch(e){}
+    if(!Array.isArray(stored))stored=[];
+    const existingIdx=stored.findIndex(r=>r.id===DUBBEL_ID);
+    if(existingIdx >= 0){
+      if(typeof KR!=='undefined' && Array.isArray(KR)){
+        const _kidx = KR.findIndex(r=>r.id===DUBBEL_ID);
+        if(_kidx < 0) KR.unshift(stored[existingIdx]);
+      }
+      return;
+    }
+    const _prevS2 = S ? {...S} : null;
+    S = {...BOS, ...dubbel};
+    try{
+      const {og,srm,ibu,fg,abv}=calc();
+      dubbel.ozet={og:og.toFixed(3),srm:srm.toFixed(1),ibu:ibu.toFixed(0),fg:fg.toFixed(3),abv:abv.toFixed(2)};
+      dubbel._ver=DUBBEL_VER;
+    }catch(e){}
+    if(_prevS2) S=_prevS2;
+    stored.unshift(dubbel);
+    localStorage.setItem('bm_v6', JSON.stringify(stored));
+    try{ if(window._bmIDB) window._bmIDB.put('bm_v6', JSON.stringify(stored)); }catch(e){}
+    if(typeof KR!=='undefined' && Array.isArray(KR)){
+      if(!KR.find(r=>r&&r.id===DUBBEL_ID)) KR.unshift(dubbel);
+    }
+  }catch(e){console.warn('Dubbel:',e.message);}
+})();
+
 render();
 
 // ═══ BULUT SENKRON ══════════════════════════════════════════
@@ -21867,54 +21903,8 @@ window.addEventListener('online', function(){
 // Başlat
 syncBaslat();
 
-
-// Dark Belgian Dubbel reçetesini yükle
-(function(){
-  try{
-    const DUBBEL_ID='dubbel_2024'; const DUBBEL_VER=5;
-    const dubbel={"id": "dubbel_2024", "biraAd": "Dark Belgian Dubbel", "maltlar": [{"id": "pale_ale", "kg": 2.0}, {"id": "munich", "kg": 0.64}, {"id": "chateau_biscuit", "kg": 0.35}, {"id": "c40", "kg": 0.2}, {"id": "rye", "kg": 0.17}, {"id": "c120", "kg": 0.11}, {"id": "dark_wheat", "kg": 0.055}, {"id": "rice_hulls", "kg": 0.13}, {"id": "candy_drk", "kg": 0.2}], "hoplar": [{"id": "hallertau", "g": 14, "dk": 60, "tur": "boil", "cAA": null}, {"id": "spalt", "g": 12, "dk": 10, "tur": "boil", "cAA": null}], "mayaId": "bb_abbaye", "maya2Id": "", "katkilar": [{"id": "kakao", "miktar": 30, "birim": "g", "ad": "Kakao Nibları (Cacao Nibs)", "zaman": "Fermentasyon sonunda (soğuk)"}, {"id": "vanilya", "miktar": 1, "birim": "adet", "ad": "Vanilya Çubuğu", "zaman": "Cold crash sonrası (5°C)"}, {"id": "maya_besini", "miktar": 0.5, "birim": "g", "ad": "Maya Besini (Yeast Nutrient)", "zaman": "Fermentere ekle"}, {"id": "jelatin", "miktar": 0.5, "birim": "g", "ad": "Berraklaştırıcı Toz Jelatin", "zaman": "Cold crash sırasında (5°C)"}, {"id": "antioxid", "miktar": 0.5, "birim": "g", "ad": "Antioksidasyon Tuzu (Metabisülfit)", "zaman": "Şişelemede veya fıçıda"}], "suMineralleri": [{"id": "cacl2", "miktar": 5.0}, {"id": "mgso4", "miktar": 1.5}, {"id": "laktik", "miktar": 1.5}], "hacim": 11, "verim": 61, "mashSc": 66, "ogManuel": "", "fgManuel": "", "primVol": 2.5, "primTemp": 20, "primYontem": "Dekstroz", "brewLog": [], "notlar": "Dark Belgian Dubbel — Yarışma Reçetesi\n\nOG ~1.064 | FG ~1.014 | ABV ~%6.8 | IBU ~14 | EBC ~41\n\n• Mash suyu 13L (66°C), sparge 5L saf RO\n• Mash pH hedefi 5.3 — laktik asit ile ayarla\n• Çeltik kavuzu mash'te diğer maltlarla birlikte sepete ekle\n• Candi Sugar'ı kaynatmanın 15. dakikasında ekle\n• Kakao nibsini önce yıka, hafifçe kavur → secondary\n• Vanilya çubuğunu yar, son 3 günde ekle\n• Fermentasyon: 18°C başla → 3. gün 22°C'ye çık\n• Jelatin: 60°C 100mL suda çöz, soğuk kondisyon 3-4 gün 5°C\n• Antioksidasyon şişelemeden hemen önce", "durum": "aktif", "klasor": "Yarışma", "tarih": "13.04.2026", "_ver": 9};
-    // localStorage
-    let stored=[];
-    try{stored=_migrateAllRecipes(JSON.parse(localStorage.getItem('bm_v6'))||[]);}catch(e){}
-    if(!Array.isArray(stored))stored=[];
-    const existingIdx=stored.findIndex(r=>r.id===DUBBEL_ID);
-
-    // ═══ KULLANICI VERİSİNİ ASLA EZME ═══════════════════════════
-    // Dubbel reçetesi zaten localStorage'da varsa DOKUNMA.
-    // Kullanıcı bu reçete üzerinde değişiklik yapmış olabilir (malt,
-    // hop, maya, hacim, mash vb.) — her açılışta orijinal haline
-    // sıfırlamak = veri kaybı.
-    if(existingIdx >= 0){
-      // Zaten var — hiçbir şey yapma. KR'ye yükleme işi yl() tarafından
-      // zaten yapıldı. Sadece runtime KR'de yoksa (beklenmedik durum)
-      // mevcut storage'daki versiyonu koy.
-      if(typeof KR!=='undefined' && Array.isArray(KR)){
-        const _kidx = KR.findIndex(r=>r.id===DUBBEL_ID);
-        if(_kidx < 0) KR.unshift(stored[existingIdx]);
-      }
-      return;
-    }
-
-    // Dubbel yok — ilk kurulum. Ozet hesapla ve ekle.
-    const _prevS2 = S ? {...S} : null;
-    S = {...BOS, ...dubbel};
-    try{
-      const {og,srm,ibu,fg,abv}=calc();
-      dubbel.ozet={og:og.toFixed(3),srm:srm.toFixed(1),ibu:ibu.toFixed(0),fg:fg.toFixed(3),abv:abv.toFixed(2)};
-      dubbel._ver=DUBBEL_VER;
-    }catch(e){}
-    if(_prevS2) S=_prevS2;
-
-    stored.unshift(dubbel);
-    localStorage.setItem('bm_v6', JSON.stringify(stored));
-    // IDB yedek de
-    try{ if(window._bmIDB) window._bmIDB.put('bm_v6', JSON.stringify(stored)); }catch(e){}
-
-    if(typeof KR!=='undefined' && Array.isArray(KR)){
-      if(!KR.find(r=>r&&r.id===DUBBEL_ID)) KR.unshift(dubbel);
-    }
-  }catch(e){console.warn('Dubbel:',e.message);}
-})();
+// 137-F: Dark Belgian Dubbel sample reçete init bloğu render() öncesine taşındı (sat ~21553).
+// Eski konum (burada, syncBaslat sonrası) mobile flash regresyonuna sebep oluyordu.
 
 
 // ═══════════════════════════════════════════════════════════════════
