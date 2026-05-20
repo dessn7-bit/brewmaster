@@ -143,10 +143,14 @@ input[type="checkbox"]:disabled,input[type="radio"]:disabled{opacity:.5;cursor:n
 .uy-k{background:var(--ka);border:1px solid #C49080;color:var(--kk)}
 .fade{animation:fd .18s ease}
 @keyframes fd{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
-.sb{display:flex;border-bottom:2px solid var(--bor);overflow-x:auto;scrollbar-width:none;padding:0 8px}
+/* Adim 135-E (2026-05-20): .sb sekme bar token + mockup refactor.
+   Mockup: aktif tab --vintage alt-cizgi 2.5px (dolgu/bg YOK), pasif --metin-soluk hover --ink.
+   Tab bar tabani: ince border-bottom --cizgi-arac. Yatay scroll mobile korunur. JS setSekme INTACT. */
+.sb{display:flex;border-bottom:1px solid var(--cizgi-arac);overflow-x:auto;scrollbar-width:none;padding:0 var(--sp-2)}
 .sb::-webkit-scrollbar{display:none}
-.sb-btn{padding:14px 16px;font-size:16px;font-weight:600;border:none;border-bottom:3px solid transparent;cursor:pointer;background:transparent;white-space:nowrap;flex-shrink:0;margin-bottom:-2px;transition:all .15s;color:var(--soluk)}
-.sb-btn.ak{color:var(--bakir);border-bottom-color:var(--altin);background:rgba(139,90,43,.07)}
+.sb-btn{padding:var(--sp-3) var(--sp-4);font-family:var(--font-govde);font-size:var(--fs-md);font-weight:var(--fw-semibold);border:none;border-bottom:2.5px solid transparent;cursor:pointer;background:transparent;white-space:nowrap;flex-shrink:0;margin-bottom:-1px;transition:color .15s,border-color .15s;color:var(--metin-soluk)}
+.sb-btn:hover:not(.ak){color:var(--ink)}
+.sb-btn.ak{color:var(--vintage-mid);border-bottom-color:var(--vintage);background:transparent}
 .iki{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .uc{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
 .ts{padding:8px 14px;border-bottom:1px solid var(--bor);font-size:12.5px;line-height:1.5}
@@ -307,22 +311,30 @@ input[type="checkbox"]:disabled,input[type="radio"]:disabled{opacity:.5;cursor:n
 /* Adim 132-A: Sticky ozet paneli (yatay serit, Genel tab pilot). Header altinda yapisir,
    scroll boyunca renk dot + stil adi + OG/FG/ABV/IBU/SRM gorunur. .eh height dinamik
    --bm-header-h CSS var ile takip edilir (ResizeObserver). 132-E'de diger tablara yayilir. */
-.bm-sticky-summary{position:sticky;top:var(--bm-header-h, 200px);z-index:10;background:rgba(250,238,218,.95);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:8px 12px;border:1px solid #E5DCC8;border-radius:8px;display:flex;align-items:center;gap:12px;flex-wrap:nowrap;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
-.bm-ss-stil{display:flex;align-items:center;gap:6px;min-width:0;flex:1}
-.bm-ss-renk{width:16px;height:16px;border-radius:50%;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,0.1);flex-shrink:0}
-.bm-ss-label{font-size:13px;line-height:1.2;font-weight:600;color:#2A1A0A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;font-family:var(--font-body)}
-.bm-ss-stats{display:flex;gap:14px;margin-left:auto;flex-shrink:0}
-.bm-ss-stat{display:flex;flex-direction:column;align-items:flex-end;min-width:36px}
-.ss-label{font-size:10px;line-height:1;color:var(--bakir);text-transform:uppercase;letter-spacing:.5px;font-family:var(--font-body)}
-.ss-val{font-size:14px;line-height:1.2;font-weight:700;color:#2A1A0A;font-family:var(--font-display);margin-top:2px}
+/* Adim 135-E (2026-05-20): .bm-sticky-summary token + mockup refactor.
+   Sol "lead": renk dot + stil adi (Fraunces --ink), sag tarafinda --cizgi-arac dikey ayrac.
+   Sag "metrics": 6 metric (OG/FG/ABV/IBU/SRM/KH) — her biri dikey kolon (label ust + deger alt),
+   aralarinda ince --cizgi-arac dikey ayrac. Container --bg-card + --r-md + --elv-2.
+   Position sticky DAVRANISI INTACT (132-A/E), metric DEGERLERI INTACT, JS handlers DOKUNULMAZ. */
+.bm-sticky-summary{position:sticky;top:var(--bm-header-h, 200px);z-index:10;background:var(--bg-card);padding:var(--sp-2) var(--sp-3);border:1px solid var(--cizgi-arac);border-radius:var(--r-md);display:flex;align-items:center;gap:var(--sp-3);flex-wrap:nowrap;margin-bottom:var(--sp-2);box-shadow:var(--elv-2)}
+.bm-ss-stil{display:flex;align-items:center;gap:var(--sp-2);min-width:0;flex:1;padding-right:var(--sp-3);border-right:1px solid var(--cizgi-arac)}
+.bm-ss-renk{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--bg-card);box-shadow:0 0 0 1px rgba(0,0,0,0.1);flex-shrink:0}
+.bm-ss-label{font-family:var(--font-baslik);font-size:var(--fs-md);line-height:var(--lh-tight);font-weight:var(--fw-semibold);color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px}
+.bm-ss-stats{display:flex;gap:0;margin-left:auto;flex-shrink:0}
+.bm-ss-stat{display:flex;flex-direction:column;align-items:center;min-width:48px;padding:0 var(--sp-2);border-right:1px solid var(--cizgi-arac)}
+.bm-ss-stat:last-child{border-right:none;padding-right:0}
+.bm-ss-stat:first-child{padding-left:0}
+.ss-label{font-family:var(--font-govde);font-size:var(--fs-xs);line-height:1;color:var(--metin-soluk);text-transform:uppercase;letter-spacing:.5px;font-weight:var(--fw-semibold)}
+.ss-val{font-family:var(--font-baslik);font-size:var(--fs-md);line-height:var(--lh-tight);font-weight:var(--fw-bold);color:var(--ink);margin-top:2px}
 @media (max-width:768px){
-  /* Adim 132-J-2: 6 stat (KH dahil) mobile kompakt — gap 6, min-width 26, font 11 */
-  .bm-sticky-summary{padding:6px 8px;gap:6px}
-  .bm-ss-stats{gap:6px}
-  .bm-ss-stat{min-width:26px}
-  .ss-val{font-size:11px}
+  /* Adim 132-J-2 + 135-E mobile: 6 stat KH kompakt — gap kucult, min-width 32, fs azalt */
+  .bm-sticky-summary{padding:var(--sp-1) var(--sp-2);gap:var(--sp-1);flex-wrap:wrap}
+  .bm-ss-stil{padding-right:var(--sp-2);min-width:100%;border-right:none;border-bottom:1px solid var(--cizgi-arac);padding-bottom:var(--sp-1);margin-bottom:var(--sp-1)}
+  .bm-ss-stats{gap:0;width:100%;justify-content:space-between}
+  .bm-ss-stat{min-width:32px;padding:0 var(--sp-1)}
+  .ss-val{font-size:var(--fs-sm)}
   .ss-label{font-size:9px}
-  .bm-ss-label{max-width:90px;font-size:11px}
+  .bm-ss-label{max-width:none;font-size:var(--fs-sm)}
   .bm-ss-renk{width:14px;height:14px}
   /* Adim 132-J-4(a): Kaydet+Klonla flex row 380px overflow fix — buton padding+font kucult,
      input min-width:0 (intrinsic content size cap kaldir, flex:1 dogru shrink eder). */
