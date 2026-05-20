@@ -362,28 +362,30 @@ input[type="checkbox"]:disabled,input[type="radio"]:disabled{opacity:.5;cursor:n
 
 /* Adim 133-A-2: Recete Doktoru kart UX refactor — header / aciklama / cozum chip-rows / hedef
    Vintage Amber palette uyumlu. Eski inline regex-split <b>Cozum N:</b> yerine yapısal layout. */
-.bm-doctor-kart{background:var(--card);border-left:4px solid var(--vintage);border-radius:8px;padding:12px 14px;margin-bottom:10px}
-.bm-doctor-kart.bm-doctor-kırmızı{border-left-color:#C68B5B}
-.bm-doctor-kart.bm-doctor-sarı{border-left-color:var(--kahve-border)}
-.bm-doctor-header{display:flex;align-items:center;gap:8px;font-family:var(--font-display);font-size:14px;font-weight:500;color:var(--kahve-koyu);margin-bottom:6px;flex-wrap:wrap}
-.bm-doctor-ikon{font-size:16px;line-height:1;flex-shrink:0}
-.bm-doctor-baslik{flex:1;min-width:0;line-height:1.3}
-.bm-doctor-durum-badge{padding:2px 8px;border-radius:10px;font-family:var(--font-body);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-left:auto;white-space:nowrap;flex-shrink:0}
-.bm-doctor-durum-kırmızı{background:#F5E8E0;color:#8B3D1F;border:1px solid #C68B5B}
-.bm-doctor-durum-sarı{background:#F5EFDC;color:var(--bakir);border:1px solid var(--kahve-border)}
-.bm-doctor-aciklama{font-family:var(--font-body);font-size:13px;line-height:1.5;color:var(--kahve-koyu);margin-bottom:10px}
-.bm-doctor-cozumler{margin-top:6px}
-.bm-doctor-cozumler-label{font-family:var(--font-body);font-size:11px;font-weight:600;color:var(--bakir);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
-.bm-doctor-cozum-rows{display:flex;flex-direction:column;gap:6px}
-.bm-doctor-cozum-chip{display:flex;align-items:flex-start;gap:8px;padding:8px 12px;background:var(--kahve-bg);border:1px solid var(--kahve-border);border-radius:8px;transition:background .15s,border-color .15s,transform .12s,box-shadow .15s;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none}
-.bm-doctor-cozum-chip:hover{background:var(--kahve-light);border-color:var(--vintage);transform:translateY(-1px);box-shadow:0 2px 4px rgba(139,90,43,.12)}
-.bm-doctor-cozum-chip:active{transform:translateY(0);box-shadow:0 1px 2px rgba(139,90,43,.10)}
+/* Adim 135-H (2026-05-20): Recete Doktoru kart + chip token + mockup refactor.
+   Mockup: kart bg-card + cizgi-arac + r-md + elv-1, kalin renkli border-left KALDIR.
+   Chip bg accent-soft + cizgi-arac border + r-sm + Hanken semibold; hover border vintage + yukselir.
+   Disabled state (134-bl-8) + tick INTACT, token migrate. Chip aksiyon/toast JS DOKUNULMAZ. */
+.bm-doctor-kart{background:var(--bg-card);border:1px solid var(--cizgi-arac);border-radius:var(--r-md);padding:var(--sp-4);margin-bottom:var(--sp-3);box-shadow:var(--elv-1)}
+.bm-doctor-header{display:flex;align-items:center;gap:var(--sp-2);font-family:var(--font-baslik);font-size:var(--fs-md);font-weight:var(--fw-semibold);color:var(--ink);margin-bottom:var(--sp-2);flex-wrap:wrap}
+.bm-doctor-ikon{font-size:18px;line-height:1;flex-shrink:0}
+.bm-doctor-baslik{flex:1;min-width:0;line-height:var(--lh-tight)}
+.bm-doctor-durum-badge{padding:2px var(--sp-2);border-radius:var(--r-sm);font-family:var(--font-govde);font-size:var(--fs-xs);font-weight:var(--fw-semibold);text-transform:uppercase;letter-spacing:.5px;margin-left:auto;white-space:nowrap;flex-shrink:0}
+.bm-doctor-durum-kırmızı{background:var(--crit-bg);color:var(--crit);border:1px solid var(--crit)}
+.bm-doctor-durum-sarı{background:var(--accent-soft);color:var(--warn);border:1px solid var(--cizgi-arac)}
+.bm-doctor-aciklama{font-family:var(--font-govde);font-size:var(--fs-sm);line-height:var(--lh-base);color:var(--ink);margin-bottom:var(--sp-2)}
+.bm-doctor-cozumler{margin-top:var(--sp-1)}
+.bm-doctor-cozumler-label{font-family:var(--font-govde);font-size:var(--fs-xs);font-weight:var(--fw-semibold);color:var(--metin-soluk);text-transform:uppercase;letter-spacing:.5px;margin-bottom:var(--sp-1)}
+.bm-doctor-cozum-rows{display:flex;flex-direction:column;gap:var(--sp-1)}
+.bm-doctor-cozum-chip{display:flex;align-items:flex-start;gap:var(--sp-1);padding:var(--sp-2) var(--sp-3);background:var(--accent-soft);border:1px solid var(--cizgi-arac);border-radius:var(--r-sm);font-family:var(--font-govde);font-size:var(--fs-sm);font-weight:var(--fw-semibold);color:var(--ink);transition:background .15s,border-color .15s,transform .12s,box-shadow .15s;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none}
+.bm-doctor-cozum-chip:hover{border-color:var(--vintage);transform:translateY(-1px);box-shadow:var(--elv-2)}
+.bm-doctor-cozum-chip:active{transform:translateY(0);box-shadow:var(--elv-1)}
 .bm-doctor-cozum-chip:focus-visible{outline:2px solid var(--vintage);outline-offset:2px}
-.bm-doctor-cozum-chip.bm-chip-disabled,.bm-doctor-cozum-chip[disabled],.bm-doctor-cozum-chip.is-disabled{opacity:.5;cursor:not-allowed;pointer-events:none;background:var(--kahve-bg);border-color:var(--kahve-border);color:var(--soluk)}
-.bm-doctor-cozum-chip.bm-chip-disabled:hover,.bm-doctor-cozum-chip[disabled]:hover,.bm-doctor-cozum-chip.is-disabled:hover{transform:none;box-shadow:none;background:var(--kahve-bg);border-color:var(--kahve-border)}
-.bm-doctor-cozum-chip[disabled]::after,.bm-doctor-cozum-chip.is-disabled::after{content:' ✓';color:var(--vintage);font-size:0.9em;margin-left:4px;font-weight:600}
+.bm-doctor-cozum-chip.bm-chip-disabled,.bm-doctor-cozum-chip[disabled],.bm-doctor-cozum-chip.is-disabled{opacity:.5;cursor:not-allowed;pointer-events:none;background:var(--bg-sunken);border-color:var(--cizgi-arac);color:var(--metin-soluk)}
+.bm-doctor-cozum-chip.bm-chip-disabled:hover,.bm-doctor-cozum-chip[disabled]:hover,.bm-doctor-cozum-chip.is-disabled:hover{transform:none;box-shadow:none;background:var(--bg-sunken);border-color:var(--cizgi-arac)}
+.bm-doctor-cozum-chip[disabled]::after,.bm-doctor-cozum-chip.is-disabled::after{content:' ✓';color:var(--vintage);font-size:0.9em;margin-left:4px;font-weight:var(--fw-semibold)}
 /* Adim 133-A-4: Aksiyon ok ikonu chip sag tarafinda */
-.bm-chip-arrow{color:var(--vintage);opacity:.5;margin-left:auto;font-size:14px;transition:opacity .15s,transform .15s;flex-shrink:0;line-height:1.4;align-self:center}
+.bm-chip-arrow{color:var(--vintage);opacity:.5;margin-left:auto;font-size:var(--fs-base);transition:opacity .15s,transform .15s;flex-shrink:0;line-height:1.4;align-self:center}
 .bm-doctor-cozum-chip:hover .bm-chip-arrow{opacity:1;transform:translateX(2px)}
 /* Adim 133-A-4: malt_azalt action sonrasi matching .satir highlight pulse (2.2sn) */
 .bm-malt-highlight{animation:bmMaltPulse 2.2s ease-in-out}
@@ -393,7 +395,7 @@ input[type="checkbox"]:disabled,input[type="radio"]:disabled{opacity:.5;cursor:n
 @keyframes bmMaltPulse{0%,100%{background:transparent;box-shadow:none}50%{background:var(--kahve-light);box-shadow:0 0 0 2px var(--vintage)}}
 .cozum-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--vintage);color:#fff;font-family:var(--font-body);font-size:11px;font-weight:600;flex-shrink:0;line-height:1}
 .cozum-text{font-family:var(--font-body);font-size:13px;line-height:1.4;color:var(--kahve-koyu);flex:1;min-width:0}
-.bm-doctor-hedef{font-family:var(--font-body);font-size:13px;font-style:italic;color:var(--bakir);margin-top:8px;padding-top:8px;border-top:1px dashed var(--kahve-border)}
+.bm-doctor-hedef{font-family:var(--font-govde);font-size:var(--fs-sm);font-style:italic;color:var(--metin-soluk);margin-top:var(--sp-2);padding-top:var(--sp-2);border-top:1px dashed var(--cizgi-arac)}
 @media (max-width:768px){
   .bm-doctor-kart{padding:10px 12px}
   .bm-doctor-cozum-chip{padding:6px 10px}
@@ -22659,11 +22661,11 @@ syncBaslat();
       top3 = b1.top3.slice(0, 3);
     }
     var _t1 = top3[0], _t2 = top3[1] || null, _t3 = top3[2] || null;
-    var _sub2 = _t2 ? ' <span style="color:var(--soluk);font-size:10px">· '+_t2.displayTR+' %'+_t2.normalized+'</span>' : '';
-    var _sub3 = _t3 ? ' <span style="color:var(--soluk);font-size:10px">· '+_t3.displayTR+' %'+_t3.normalized+'</span>' : '';
-    return '<span style="font-weight:600;color:var(--vintage)">Cluster (B1+V12 Hibrit):</span> ' +
-           '<span style="font-weight:600">'+_t1.displayTR+'</span>' +
-           ' <span style="color:var(--soluk)">%'+_t1.normalized+'</span>'+_sub2+_sub3;
+    var _sub2 = _t2 ? ' <span style="color:var(--metin-soluk);font-size:var(--fs-xs)">· '+_t2.displayTR+' %'+_t2.normalized+'</span>' : '';
+    var _sub3 = _t3 ? ' <span style="color:var(--metin-soluk);font-size:var(--fs-xs)">· '+_t3.displayTR+' %'+_t3.normalized+'</span>' : '';
+    return '<span class="bm-tahmin-label">Cluster (B1+V12 Hibrit):</span> ' +
+           '<span style="font-weight:var(--fw-semibold);color:var(--ink)">'+_t1.displayTR+'</span>' +
+           ' <span style="color:var(--metin-soluk)">%'+_t1.normalized+'</span>'+_sub2+_sub3;
   }
   function _scRibbonInner(stc){
     if (!stc || !stc.top3 || !stc.top3.length) return '';
@@ -22678,9 +22680,9 @@ syncBaslat();
     };
     var _st1 = stc.top3[0], _st2 = stc.top3[1] || null, _st3 = stc.top3[2] || null;
     var _sname1 = _resolveDisp(_st1);
-    var _sub2s = _st2 ? ' <span style="color:var(--soluk);font-size:10px">· '+_resolveDisp(_st2)+' %'+_st2.normalized+'</span>' : '';
-    var _sub3s = _st3 ? ' <span style="color:var(--soluk);font-size:10px">· '+_resolveDisp(_st3)+' %'+_st3.normalized+'</span>' : '';
-    var _fallbackNote = stc.fallback ? ' <span style="color:#9E9E9E;font-size:9px;font-style:italic">(specialty→V12)</span>' : '';
+    var _sub2s = _st2 ? ' <span style="color:var(--metin-soluk);font-size:var(--fs-xs)">· '+_resolveDisp(_st2)+' %'+_st2.normalized+'</span>' : '';
+    var _sub3s = _st3 ? ' <span style="color:var(--metin-soluk);font-size:var(--fs-xs)">· '+_resolveDisp(_st3)+' %'+_st3.normalized+'</span>' : '';
+    var _fallbackNote = stc.fallback ? ' <span style="color:var(--metin-soluk);font-size:var(--fs-xs);font-style:italic">(specialty→V12)</span>' : '';
     // Adim 132-H: 4/4 ensemble agreement badge (hybrid_agreement "N/M" formatinda)
     var _badgeHtml = '';
     try {
@@ -22702,9 +22704,9 @@ syncBaslat();
         }
       }
     } catch(e) { _badgeHtml = ''; }
-    return '<span style="font-weight:600;color:var(--bakir)">Strategy C (Hibrit Hierarchical):</span> ' +
-           '<span style="font-weight:600">'+_sname1+'</span>' +
-           ' <span style="color:var(--soluk)">%'+_st1.normalized+'</span>'+_sub2s+_sub3s+_fallbackNote + _badgeHtml;
+    return '<span class="bm-tahmin-label">Strategy C (Hibrit Hierarchical):</span> ' +
+           '<span style="font-weight:var(--fw-semibold);color:var(--ink)">'+_sname1+'</span>' +
+           ' <span style="color:var(--metin-soluk)">%'+_st1.normalized+'</span>'+_sub2s+_sub3s+_fallbackNote + _badgeHtml;
   }
   window.updateRibbon = function(name){
     try {
