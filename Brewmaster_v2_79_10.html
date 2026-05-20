@@ -503,17 +503,23 @@ button:disabled:hover,.btn:disabled:hover,.btn.bm-disabled:hover{background:inhe
 /* Adim 132-D: Akordiyon framework (reusable, 132-E'de diger tablara yayilacak).
    Genel tab pilot 3 section: stil-tahmin (expanded), recete-profili (collapsed), fermentasyon (expanded).
    localStorage 'bm_acc_state' ile expand/collapse durumu kayitli. ARIA + klavye (Enter/Space). */
-.bm-acc{background:#fff;border:1px solid #E5DCC8;border-radius:12px;margin:8px 0;overflow:hidden}
-.bm-acc-header{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;user-select:none;transition:background .15s;min-height:44px;background:transparent;border:none;width:100%;text-align:left;font-family:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
-.bm-acc-header:hover{background:var(--kahve-light)}
+/* Adim 135-C (2026-05-20): .bm-acc token + mockup gorsel refactor.
+   Onaylı mockup paleti: --bg-card beyaz kart, --cizgi-arac ince border, --r-md 14px radius.
+   Renkli border-left KALDIR (eski iz, mockup'ta yok). Acik state --elv-2, kapali --elv-1 (subtle).
+   Acik header altinda --cizgi-arac ayrac. JS (bmAccToggle/bmAccInit) DOKUNULMAZ, sadece CSS. */
+.bm-acc{background:var(--bg-card);border:1px solid var(--cizgi-arac);border-radius:var(--r-md);margin:var(--sp-2) 0;overflow:hidden;box-shadow:var(--elv-2);transition:box-shadow .2s ease}
+.bm-acc[aria-expanded="false"]{box-shadow:var(--elv-1)}
+.bm-acc-header{display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-3) var(--sp-4);cursor:pointer;user-select:none;transition:background .15s;min-height:44px;background:transparent;border:none;border-bottom:1px solid transparent;width:100%;text-align:left;font-family:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
+.bm-acc:not([aria-expanded="false"]) .bm-acc-header{border-bottom-color:var(--cizgi-arac)}
+.bm-acc-header:hover{background:var(--accent-soft)}
 .bm-acc-header:focus-visible{outline:2px solid var(--vintage);outline-offset:-2px}
-.bm-acc-title{font-size:14px;line-height:1.3;font-weight:600;color:#2A1A0A;flex:1;font-family:var(--font-body);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bm-acc-meta{font-size:12px;line-height:1.3;font-weight:500;color:var(--bakir);font-family:var(--font-body);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0}
-.bm-acc-chevron{font-size:12px;color:var(--bakir);transition:transform .2s;flex-shrink:0;line-height:1}
+.bm-acc-title{font-size:var(--fs-md);line-height:var(--lh-tight);font-weight:var(--fw-semibold);color:var(--ink);flex:1;font-family:var(--font-govde);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bm-acc-meta{font-size:var(--fs-sm);line-height:var(--lh-tight);font-weight:var(--fw-medium);color:var(--metin-soluk);font-family:var(--font-govde);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0}
+.bm-acc-chevron{font-size:var(--fs-sm);color:var(--metin-soluk);transition:transform .2s;flex-shrink:0;line-height:1}
 .bm-acc[aria-expanded="false"] .bm-acc-chevron{transform:rotate(-90deg)}
-.bm-acc-body{padding:0 14px 14px;max-height:5000px;opacity:1;transition:max-height .3s ease,opacity .2s ease,padding .2s ease;overflow:hidden}
+.bm-acc-body{padding:0 var(--sp-4) var(--sp-4);max-height:5000px;opacity:1;transition:max-height .3s ease,opacity .2s ease,padding .2s ease;overflow:hidden}
 .bm-acc[aria-expanded="false"] .bm-acc-body{max-height:0;opacity:0;padding-top:0;padding-bottom:0}
-@media (max-width:768px){.bm-acc-meta{max-width:110px;font-size:11px}.bm-acc-title{font-size:13px}}
+@media (max-width:768px){.bm-acc-meta{max-width:110px;font-size:var(--fs-xs)}.bm-acc-title{font-size:var(--fs-sm)}}
 
 /* Adim 134-bl-1: Malt/Hop inline muadil chip (132-G centralized .bm-muadil-wrap Genel tab INTACT, dual visibility) */
 .bm-muadil-inline{font-size:11px;color:var(--soluk);margin-top:0;padding:6px 10px;border-top:1px dashed rgba(184,118,63,.15);background:rgba(245,232,208,.35);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
