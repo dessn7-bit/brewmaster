@@ -24,15 +24,16 @@
 @font-face{font-family:'Hanken Grotesk';font-style:normal;font-weight:400 700;font-display:swap;src:url('fonts/HankenGrotesk-latin-ext.woff2') format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
-  /* Açık kremsi parşömen — net hiyerarşi */
-  --bg:#F7F2E3;      /* Sayfa zemini — soft light cream */
-  --bg2:#EFE6D0;     /* Kart zemini — ivory, sayfadan net ayrışır */
-  --card:#FEFBF2;    /* İç kutular — neredeyse beyaz kağıt */
+  /* Adim 135-P: GRUP A alias swap (düşük risk). Eski token isimleri korunur, değerler yeni token'a yönlendirildi.
+     bg/bg2/card/kahve/kahve-bg/golge ~209 kullanım — :root tek-satır alias ile otomatik 135-A2 paletine geçti. */
+  --bg:var(--bg-app);          /* eski #F7F2E3 → yeni #F7F3EC mockup nötr taban */
+  --bg2:var(--bg-sunken);      /* eski #EFE6D0 → yeni #F1ECE2 mockup sunken */
+  --card:var(--bg-card);       /* eski #FEFBF2 → yeni #FFFFFF mockup beyaz kart */
   /* Border — net görünür */
   --bor:#D4C4A8;
   --bor2:#B0A08C;
   /* Ink hierarchy */
-  --kahve:#3D2817;
+  --kahve:var(--metin);        /* eski #3D2817 → yeni #3D2A1C mockup espresso */
   --bakir:rgb(139,90,43); /* 134-bl-2: literal form, replace_all recursion önle. var(--bakir) = rgb(139,90,43) */
   --altin:#B8874E;
   --soluk:#6A5A44;
@@ -40,7 +41,7 @@
   /* Adim 134-bl-2: Vintage palette consolidation. rgb() literal (replace_all recursion önle, görsel #hex eşdeğeri) */
   --vintage:rgb(184,118,63);       /* Brand primary vintage amber/copper */
   --kahve-koyu:rgb(92,58,14);      /* Darker text başlıklar, primary buttons */
-  --kahve-bg:rgb(245,232,208);     /* Hafif cream bg info chip, hover */
+  --kahve-bg:var(--accent-soft);   /* eski rgb(245,232,208) → yeni #F4E7D2 mockup amber-soft */
   --kahve-light:rgb(232,194,138);  /* Light amber accent gradient/hover */
   --kahve-border:rgb(212,181,138); /* Mid border, dividers */
   /* Semantic sadece badge/border için */
@@ -58,8 +59,8 @@
   --kat-koyu-bg:#EDE0D3;--kat-koyu-t:#5D341A;
   --kat-ek-bg:#F0E9E0;--kat-ek-t:#6B5A48;
   --kat-seker-bg:#FFE8D4;--kat-seker-t:#A85420;
-  /* Gölgeler — Adim 135-O: --golge2 (0 kullanım, ölü kod) kaldırıldı. --golge eski component'lerde 18 yer */
-  --golge:0 2px 6px rgba(61,40,23,.08);
+  /* Gölgeler — 135-O: --golge2 ölü kod kaldırıldı. 135-P: --golge → var(--elv-1) alias (18 yer otomatik modern iki-kademe) */
+  --golge:var(--elv-1);
   /* Adim 135-B: Fraunces serif baslik + Hanken Grotesk sans govde. Eski font-display/-body alias intact. */
   --font-baslik:"Fraunces",Georgia,serif;
   --font-govde:"Hanken Grotesk",system-ui,sans-serif;
