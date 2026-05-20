@@ -97,7 +97,7 @@
   /* C. Spacing 4px ritim — mockup birebir */
   --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px;
   /* D. Radius — mockup r-md 14px / r-lg 18px (r-sm mevcut korunur) */
-  --r-sm:8px; --r-md:14px; --r-lg:18px;
+  --r-sm:9px; --r-md:14px; --r-lg:18px;
   /* E. Tipografi olcegi */
   --fs-xs:11px; --fs-sm:13px; --fs-base:14px; --fs-md:16px; --fs-lg:20px; --fs-xl:25px;
   --fw-regular:400; --fw-medium:500; --fw-semibold:600; --fw-bold:700;
@@ -490,6 +490,14 @@ button:disabled:hover,.btn:disabled:hover,.btn.bm-disabled:hover{background:inhe
 .bm-error-state-ikon{font-size:20px;line-height:1;flex-shrink:0}
 .bm-error-state-icerik{flex:1;min-width:0;line-height:1.45}
 .bm-error-state-icerik strong{font-weight:700;color:#5A1E10;display:block;margin-bottom:2px}
+
+/* Adim 135-G (2026-05-20): Stil tahmini sonuc kartlari (Cluster + Strategy C ribbon).
+   Mockup: bg-card + cizgi-arac + r-md + elv-1, renkli border-left/koyu bg KALDIRILDI.
+   Inline style yerine class — data-ribbon attribute updateRibbon() JS selector INTACT.
+   Etiket Fraunces + vintage-mid, icerik Hanken + ink. */
+.bm-tahmin-ribbon{background:var(--bg-card);border:1px solid var(--cizgi-arac);border-radius:var(--r-md);padding:var(--sp-2) var(--sp-3);margin-bottom:var(--sp-2);box-shadow:var(--elv-1);font-family:var(--font-govde);font-size:var(--fs-sm);line-height:var(--lh-base);color:var(--ink)}
+.bm-tahmin-ribbon .bm-tahmin-label{font-family:var(--font-baslik);font-weight:var(--fw-semibold);color:var(--vintage-mid);margin-right:4px}
+.bm-tahmin-ribbon .bm-tahmin-placeholder{color:var(--metin-soluk);font-style:italic}
 
 /* Adim 135-A POC: 4 mini stat kart (BU:GU / Attenüasyon / SRM / Hacim).
    Token sistemi proof-of-concept. Nötr taban (--bg-card) + amber accent (--vintage) + modern elevation (--elv-1) +
@@ -17569,9 +17577,9 @@ return `
           // Adim 120: B1 LightGBM + V12 XGBoost cluster ribbon'lari BIRLESTIRILDI -> tek hibrit ribbon.
           // Formul (B1_cal[i] + V12[i]) / 2, kanonik 14-class. Strategy C dispatcher aynı hibrit top-3 kullanir.
           // Placeholder, updateRibbon('hybrid-cluster') Strategy C predict.then()'de gercek deger yazar.
-          return '<div data-ribbon="hybrid-cluster" style="margin-bottom:8px;padding:5px 10px;background:rgba(184,118,63,0.08);border-left:3px solid var(--vintage);border-radius:4px;font-size:11px;color:var(--yazi)">'+
-                 '<span style="font-weight:600;color:var(--vintage)">Cluster (B1+V12 Hibrit):</span> '+
-                 '<span style="color:var(--soluk);font-style:italic">Tahmin yapılıyor...</span>'+
+          return '<div class="bm-tahmin-ribbon" data-ribbon="hybrid-cluster">'+
+                 '<span class="bm-tahmin-label">Cluster (B1+V12 Hibrit):</span>'+
+                 '<span class="bm-tahmin-placeholder">Tahmin yapılıyor...</span>'+
                  '</div>';
         })()}
         ${(()=>{
@@ -17579,9 +17587,9 @@ return `
           // ESKİ global değeri okuma — placeholder yaz. updateRibbon (Hotfix-v2) predict.then()
           // bittiğinde gerçek değeri innerHTML ile yazacak. Eski stale değer hiç görünmez.
           // data-ribbon="strategy-c" attribute korunur (Hotfix-v2 querySelector hedefi).
-          return '<div data-ribbon="strategy-c" style="margin-bottom:8px;padding:5px 10px;background:rgba(139,90,43,0.10);border-left:3px solid var(--bakir);border-radius:4px;font-size:11px;color:var(--yazi)">'+
-                 '<span style="font-weight:600;color:var(--bakir)">Strategy C (Hibrit Hierarchical):</span> '+
-                 '<span style="color:var(--soluk);font-style:italic">Tahmin yapılıyor...</span>'+
+          return '<div class="bm-tahmin-ribbon" data-ribbon="strategy-c">'+
+                 '<span class="bm-tahmin-label">Strategy C (Hibrit Hierarchical):</span>'+
+                 '<span class="bm-tahmin-placeholder">Tahmin yapılıyor...</span>'+
                  '</div>';
         })()}
         <div style="margin-bottom:14px">
