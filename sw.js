@@ -514,7 +514,18 @@
 //      TOP ile birebir aynı C tonu, 3 ton kayboluyor.
 // DOKUNULMADI: 135-I .bm-header gradient (sat 285) + .eh editor header (sat 182) + renderHeader/
 // sekmeBasliklari + serit DOM + logo IIFE + motor zinciri + DATA/semantic 132/133/134.
-const CACHE_VERSION = 'bm-cache-v131-84';
+// Adim 137-G Parca 1 devami (2026-05-21): v131-84 -> v131-85, masthead wordmark = KABEER+demon
+// gorsel (360x174 RGBA PNG, base64 inline). HTML degisiklikleri:
+//   - F:11158 yeni const BM_WORDMARK_DATAURL='data:image/png;base64,...' (~67KB)
+//   - F:738 <img bm-marka-logo> alt="Kabeer" -> alt="" (dekoratif)
+//   - F:739 <span bm-marka-isim>Kabeer</span> -> <img bm-marka-isim-img alt="Kabeer">
+//   - IIFE (~F:11163): __bmwm = #bm-marka-isim-img.src = BM_WORDMARK_DATAURL atamasi eklendi
+//   - CSS .bm-marka-serit @media mobile: +height:54px +overflow:hidden (serit sabit, tasan kirpilir)
+//   - CSS yeni rule: .bm-marka-isim-img{height:70px;width:auto;display:block;flex-shrink:0}
+//   - CSS .bm-marka-isim (span class kurali) silindi (span artik yok, kullanim YOK)
+// kabeer-wordmark.png LOCAL'de tutuldu, repo/precache'e EKLENMEDI.
+// DOKUNULMADI: 135-I .bm-header gradient + .eh + renderHeader/sekme + motor + Sprint 132/133/134.
+const CACHE_VERSION = 'bm-cache-v131-85';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
