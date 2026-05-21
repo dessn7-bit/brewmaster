@@ -486,7 +486,21 @@
 // editor header rengi/sticky DOKUNULMADI; sekmeBasliklari + breadcrumb + motor zinciri + masaustu
 // header+sidebar INTACT. Mobil only (<=768px), desktop'ta sidebar zaten logo gosteriyor.
 // Tıklama handler eklenmedi (Parca 2 kapsami).
-const CACHE_VERSION = 'bm-cache-v131-82';
+// Adim 137-G cila (Parca 1, 2026-05-21): v131-82 -> v131-83, marka seridi V4 + C tonu + header.
+// Sirf CSS cila (HTML eleman + logo IIFE INTACT):
+//   1) Marka seridi V4: logo 20→30px, "Kabeer" --fs-sm→--fs-lg Fraunces krem,
+//      padding sp-2 sp-3 → sp-3 sp-4 (kalin band, eski ince band hissi gitti),
+//      justify-content:center (ortalı), bg var(--metin) espresso → var(--kahve-masthead) #63492F
+//      sicak C tonu, ::after 2px amber gradient (transparent→var(--vintage)→transparent) alt
+//      tam genislik ince çizgi.
+//   2) Header (.bm-header) C tonuna: 135-I espresso gradient #46301F→#3A2818 yer degisti
+//      var(--kahve-masthead) #63492F → var(--kahve-masthead-dark) #48351F. Tum viewport'lar
+//      (mobile + desktop) ayni gradient (kasıtlı). Strip + header tek aile, görsel kaynastir.
+//   3) Token: 2 yeni token (--kahve-masthead + --kahve-masthead-dark) :root içinde. Tek iyi-
+//      isimli aile (masthead kahve). Scattered hardcoded hex YOK.
+// .eh editor reçete header (135-I beyaz-krem) DOKUNULMADI. sekmeBasliklari + motor + Sprint
+// 132/133/134 + IIFE + HTML DOM yapisi INTACT.
+const CACHE_VERSION = 'bm-cache-v131-83';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.

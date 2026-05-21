@@ -80,6 +80,15 @@
   --vintage-koyu:var(--kahve-koyu);  /* #5C3A0E (mockup vintage-darker) */
   --vintage-mid:var(--bakir);        /* #8B5A2B (mockup vintage-deep) */
   --accent-soft:#F4E7D2;     /* hover/secili/ikon bg (mockup amber-soft) */
+  /* Adim 137-G cila (Parca 1, 2026-05-21): "Masthead" sicak kahve C tonu ailesi.
+     Tek iyi-isimli token cifti: strip bg + header gradient TOP = --kahve-masthead;
+     header gradient BOTTOM = --kahve-masthead-dark. 135-I espresso gradient (#46301F→
+     #3A2818) tamamen bu C tonuyla yer degisti (tum viewport'larda kasıtlı). Strip
+     ile header gorsel kaynastir (iki satir tek header). Spec'te header top icin
+     ~#5E452D verilmisti — strip target #63492F ile birlestirildi (5 RGB unit fark,
+     visual unity icin daha temiz). */
+  --kahve-masthead:#63492F;
+  --kahve-masthead-dark:#48351F;
   /* Metin hiyerarsi — mockup-aligned. --metin baslik (espresso), --ink govde (yeni) */
   --metin:#3D2A1C;           /* baslik metni (mockup espresso) */
   --ink:#2E2620;             /* govde metni (mockup ink, --metin'den daha koyu nötr) */
@@ -270,8 +279,12 @@ input[type="checkbox"]:disabled,input[type="radio"]:disabled{opacity:.5;cursor:n
 @media (max-width:768px){.bm-main{grid-column:1/-1}}
 /* Adim 135-I (2026-05-20): App banner KOYU KAHVE + alt amber accent.
    .bm-header rolü beyaz→koyu kahve (üst app şerit), .eh rolü koyu kahve→beyaz-krem (reçete header).
-   Mockup: gradient #46301F→#3A2818, üst köşe r-md radius, ::after 2px amber gradient accent çizgi. */
-.bm-header{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:var(--sp-4) var(--sp-5);background:linear-gradient(135deg,#46301F 0%,#3A2818 100%);border:none;border-radius:var(--r-md) var(--r-md) 0 0;z-index:5;position:relative}
+   Mockup: gradient #46301F→#3A2818, üst köşe r-md radius, ::after 2px amber gradient accent çizgi.
+   Adim 137-G cila (Parca 1, 2026-05-21): 135-I koyu espresso gradient'i C tonu ailesi ile
+   degisti — var(--kahve-masthead) #63492F → var(--kahve-masthead-dark) #48351F. Tum viewport'lar
+   (mobile + desktop) kasıtlı olarak ayni gradient'i alir. .eh editor header (135-I beyaz-krem)
+   dokunulmadi. */
+.bm-header{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:var(--sp-4) var(--sp-5);background:linear-gradient(135deg,var(--kahve-masthead) 0%,var(--kahve-masthead-dark) 100%);border:none;border-radius:var(--r-md) var(--r-md) 0 0;z-index:5;position:relative}
 .bm-header::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;background:linear-gradient(90deg,transparent 0%,rgba(184,118,63,.55) 50%,transparent 100%);pointer-events:none}
 .bm-header-left{display:flex;flex-direction:column;min-width:0;gap:2px}
 .bm-header-title{font-family:var(--font-baslik);font-size:19px;font-weight:var(--fw-semibold);color:#F6EAD7;line-height:var(--lh-tight);letter-spacing:.2px}
@@ -293,18 +306,22 @@ input[type="checkbox"]:disabled,input[type="radio"]:disabled{opacity:.5;cursor:n
 .bm-bildirim-baslik{font-size:11px;color:#8E8B86;font-weight:600;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
 .bm-bildirim-bos{font-size:13px;color:#5F5E5A;padding:8px 2px;text-align:center}
 @media (max-width:768px){.bm-header{padding:10px 12px;gap:8px}.bm-header-right{flex:1;min-width:0;justify-content:flex-end}.bm-header-search{flex:1;min-width:0}.bm-header-search input{width:100%}.bm-header-title{font-size:18px}.bm-header-search-icon{left:10px}.bm-header-iconbtn{width:28px;height:28px}.bm-header-iconbtn .ti{width:13px;height:13px}.bm-header-actions{gap:5px}.bm-header-left{flex-shrink:1;min-width:0}.bm-header-breadcrumb{display:none}}
-/* Adim 137-G (Parca 1, 2026-05-21): Mobil kalici "Kabeer" marka seridi.
-   Desktop'ta GIZLI (sidebar zaten logo gosteriyor). Mobile @media flex.
-   Renk ailesi: bg=var(--metin) espresso (135-I .bm-header gradient end #3A2818'e yakin),
-   text=var(--accent-soft) krem-amber (135-I bm-header-title #F6EAD7 emsali, token-pure).
-   "Iki satir tek header" gorsel butunlugu icin mobile-only .bm-header'in ust kose radius'u 0;
-   135-I gradient + 135-I .eh sticky dokunulmadi. Sayfa yiginda flex item olarak natural akista,
-   bm-header'in non-scroll davranisini izler (.bm-main height:100vh overflow:hidden parent). */
+/* Adim 137-G cila (Parca 1, 2026-05-21): Mobil kalici "Kabeer" marka seridi V4.
+   Onceki ince band hissi (logo 20px, fs-sm, var(--metin) espresso, padding sp-2 sp-3,
+   sola hizali) yerine: V4 ortalı (justify-content:center), logo 30px, isim --fs-lg
+   Fraunces krem, padding sp-3 sp-4 (kalin band), bg var(--kahve-masthead) #63492F
+   C tonu (header gradient TOP ile birebir = gorsel kaynastir), en altta 2px amber
+   gradient (transparent->vintage->transparent) ::after.
+   Desktop'ta GIZLI (sidebar zaten logo gosteriyor). Mobile-only .bm-header.border-radius:0
+   ("iki satir tek header" gorsel butunluk).
+   .eh editor reçete header (135-I beyaz-krem) dokunulmadi; HTML eleman + logo IIFE
+   degismedi (sadece CSS cila). */
 .bm-marka-serit{display:none}
-.bm-marka-serit .bm-marka-logo-img{width:20px;height:20px;border-radius:var(--r-sm);flex-shrink:0;display:block}
-.bm-marka-isim{font-family:var(--font-baslik);font-size:var(--fs-sm);font-weight:var(--fw-semibold);color:var(--accent-soft);letter-spacing:.2px;line-height:var(--lh-tight)}
+.bm-marka-serit .bm-marka-logo-img{width:30px;height:30px;border-radius:var(--r-sm);flex-shrink:0;display:block}
+.bm-marka-isim{font-family:var(--font-baslik);font-size:var(--fs-lg);font-weight:var(--fw-semibold);color:var(--accent-soft);letter-spacing:.2px;line-height:var(--lh-tight)}
 @media (max-width:768px){
-  .bm-marka-serit{display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-2) var(--sp-3);background:var(--metin);border-radius:var(--r-md) var(--r-md) 0 0;flex-shrink:0;position:relative;z-index:6}
+  .bm-marka-serit{display:flex;align-items:center;justify-content:center;gap:var(--sp-2);padding:var(--sp-3) var(--sp-4);background:var(--kahve-masthead);border-radius:var(--r-md) var(--r-md) 0 0;flex-shrink:0;position:relative;z-index:6}
+  .bm-marka-serit::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;background:linear-gradient(90deg,transparent 0%,var(--vintage) 50%,transparent 100%);pointer-events:none}
   .bm-header{border-radius:0}
 }
 
