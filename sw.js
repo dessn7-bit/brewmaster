@@ -478,7 +478,15 @@
 // 'planlananlar' string - sat 10770 statTanim mapping) + olusturma/guncelleme timestamps + KR.unshift
 // + _origKy(KR) localStorage save + _syncGonderDebounced Firebase push + tarifAc(yeni.id) editor yonlendir.
 // flash mesaj. 131-A..T + 132-pre intact. Motor zinciri dokunulmadi.
-const CACHE_VERSION = 'bm-cache-v131-81';
+// Adim 137-G (Parca 1, 2026-05-21): v131-81 -> v131-82, mobil kalici Kabeer marka seridi.
+// HTML degisiklikleri: <div class="bm-main"> ic ilk child <div id="bm-marka-serit"> (logo img +
+// Kabeer span, statik). CSS ~10 satir (.bm-marka-serit default display:none + mobile @media flex
+// + bm-header border-radius:0 mobile, "iki satir tek header" gorsel butunluk). Logo src init IIFE
+// BM_LOGO_DATAURL tanim sonrasi (markup'a 54KB base64 kopya YOK). 135-I .bm-header gradient + .eh
+// editor header rengi/sticky DOKUNULMADI; sekmeBasliklari + breadcrumb + motor zinciri + masaustu
+// header+sidebar INTACT. Mobil only (<=768px), desktop'ta sidebar zaten logo gosteriyor.
+// Tıklama handler eklenmedi (Parca 2 kapsami).
+const CACHE_VERSION = 'bm-cache-v131-82';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
