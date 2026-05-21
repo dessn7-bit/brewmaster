@@ -525,7 +525,7 @@
 //   - CSS .bm-marka-isim (span class kurali) silindi (span artik yok, kullanim YOK)
 // kabeer-wordmark.png LOCAL'de tutuldu, repo/precache'e EKLENMEDI.
 // DOKUNULMADI: 135-I .bm-header gradient + .eh + renderHeader/sekme + motor + Sprint 132/133/134.
-const CACHE_VERSION = 'bm-cache-v131-89';
+const CACHE_VERSION = 'bm-cache-v131-90';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
@@ -537,7 +537,8 @@ const CRITICAL_LOCAL = [
   './fonts/Fraunces-latin.woff2',
   './fonts/Fraunces-latin-ext.woff2',
   './fonts/HankenGrotesk-latin.woff2',
-  './fonts/HankenGrotesk-latin-ext.woff2'
+  './fonts/HankenGrotesk-latin-ext.woff2',
+  './fonts/Cinzel.woff2'
 ];
 
 self.addEventListener('install', function(event) {
