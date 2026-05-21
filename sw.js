@@ -500,7 +500,21 @@
 //      isimli aile (masthead kahve). Scattered hardcoded hex YOK.
 // .eh editor reçete header (135-I beyaz-krem) DOKUNULMADI. sekmeBasliklari + motor + Sprint
 // 132/133/134 + IIFE + HTML DOM yapisi INTACT.
-const CACHE_VERSION = 'bm-cache-v131-83';
+// Adim 137-G cila duzeltme (Parca 1, 2026-05-21): v131-83 -> v131-84, 3 gorsel hata fix.
+// CILA_3SORUN_TESHIS.md raporundaki 3 kok neden duzelten deger degisimleri:
+//   1) Serit kose krem leke: .bm-marka-serit mobile border-radius var(--r-md) var(--r-md) 0 0
+//      → 0. Sebep: tam genislik (w=360) seritte üst köseler R=14px yarıçapla geri çekildiği
+//      için arkadaki body bg #F7F3EC görünüyor → krem leke. Düz köse → leke kaybolur.
+//   2) Hamburger gizli: .bm-hamburger-btn color #3D2817 (koyu kahve) → var(--masthead-ink)
+//      (#F6EAD7 krem); .bm-header-iconbtn color #F6EAD7 → ayni token (token-pure unify).
+//      Yeni :root token --masthead-ink:#F6EAD7. 4 header ikonu (1 hamburger + 3 iconbtn)
+//      birebir ayni renk. WCAG kontrast 1.67:1 FAIL → 7:1 AAA pass (krem on C tonu).
+//   3) Üstte 3 ton sandvic: <meta name="theme-color"> + manifest.webmanifest theme_color
+//      #6B4423 → #63492F (=var(--kahve-masthead) literal). Statusbar artık serit + header
+//      TOP ile birebir aynı C tonu, 3 ton kayboluyor.
+// DOKUNULMADI: 135-I .bm-header gradient (sat 285) + .eh editor header (sat 182) + renderHeader/
+// sekmeBasliklari + serit DOM + logo IIFE + motor zinciri + DATA/semantic 132/133/134.
+const CACHE_VERSION = 'bm-cache-v131-84';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
