@@ -17450,7 +17450,7 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
   if      (_ibu >= 50) _tPush("sert, uzun acı bitiş", 'baskin');
   else if (_ibu >= 30) _tPush("dengeli belirgin acılık", 'baskin');
   else if (_ibu >= 15) _tPush("ölçülü hop acılığı", 'hafif');
-  else if (_ibu >= 8)  _tPush("hafif hop acılığı arka planda", 'hafif');
+  else if (_ibu >= 8)  _tPush("hafif hop acılığı", 'hafif');
   // Dry-hop lezzeti (acılıktan bağımsız — yüksek IBU + yüksek dry hop birlikte çıkabilir)
   if      (_dhPer10L >= 5) _tPush("yoğun hop lezzeti — tropikal/citrus damakta belirgin", 'baskin');
   else if (_dhPer10L >= 3) _tPush("hop lezzeti öne çıkıyor — tropikal/citrus damakta", 'baskin');
@@ -18840,19 +18840,28 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
             'font-size:12px;font-weight:700;margin:2px">'+e.ikon+' '+e.ad+'</span>'
           ).join(' ');
           const _grAcik=_gorselRenk.map(e=>e.acik).join(' · ');
-          profRows.push(["🌈 Görsel Renk",_grHtml+'<div style="margin-top:4px;font-size:10px;color:var(--dim);font-style:italic">'+_grAcik+'</div>']);
+          // Adim 137-G Asama 4: GORSEL RENK 3 parca — chip'ler (deger) / acik metin (sonuc) / verdict.
+          profRows.push(["🌈 Görsel Renk", _grHtml + '<div style="margin-top:4px;font-size:10px;color:var(--dim);font-style:italic">' + _grAcik + '</div><div style="margin-top:3px;font-size:10px;color:var(--ok)">✓ Görsel renk katkısı profile yansıyor.</div>']);
         }
 
         const mD=[];
-        if(_whtPct>=15) mD.push('Buğday %'+_whtPct.toFixed(0));
-        if(_munPct>=15) mD.push('Münih %'+_munPct.toFixed(0));
-        if(_crsPct>=10) mD.push('Kristal %'+_crsPct.toFixed(0));
-        if(_roastPct>=3) mD.push('Roast %'+_roastPct.toFixed(0));
-        if(_chocPct>=3) mD.push('Çikolata %'+_chocPct.toFixed(0));
-        if(_oatPct>=5)  mD.push('Yulaf %'+_oatPct.toFixed(0));
-        if(_smokePct>=5) mD.push('Smoke %'+_smokePct.toFixed(0));
-        if(_rypPct>=5)  mD.push('Çavdar %'+_rypPct.toFixed(0));
-        if(mD.length) _ps("🌾 Tahıl Analizi", mD.join(' | '), profRows);
+        // Adim 137-G Asama 4: TAHIL ANALIZI 3 parca — deger + her ozel maltin katkisi + verdict.
+        var _mTaSonuc = [];
+        if(_whtPct>=15)  { mD.push('Buğday %'+_whtPct.toFixed(0));   _mTaSonuc.push('buğday köpük yapısını destekler ve hafif bulanıklık katar'); }
+        if(_munPct>=15)  { mD.push('Münih %'+_munPct.toFixed(0));    _mTaSonuc.push('Münih maltı ekmeksi malty derinlik verir'); }
+        if(_crsPct>=10)  { mD.push('Kristal %'+_crsPct.toFixed(0));  _mTaSonuc.push('kristal malt karamel tatlılığı ve gövde katar'); }
+        if(_roastPct>=3) { mD.push('Roast %'+_roastPct.toFixed(0));  _mTaSonuc.push('kavrulmuş arpa kuruluk ve kahve-yanık nota verir'); }
+        if(_chocPct>=3)  { mD.push('Çikolata %'+_chocPct.toFixed(0));_mTaSonuc.push('çikolata maltı koyu kakao karakteri verir'); }
+        if(_oatPct>=5)   { mD.push('Yulaf %'+_oatPct.toFixed(0));    _mTaSonuc.push('yulaf kremsi ağız hissi ve köpük kalıcılığı katar'); }
+        if(_smokePct>=5) { mD.push('Smoke %'+_smokePct.toFixed(0));  _mTaSonuc.push('dumanlı malt et/odun karakteri ekler'); }
+        if(_rypPct>=5)   { mD.push('Çavdar %'+_rypPct.toFixed(0));   _mTaSonuc.push('çavdar baharatlı/kuru bitkisel nota verir'); }
+        if(mD.length) {
+          var taC1 = mD.join(' | ') + '.';
+          var _msStr = _mTaSonuc.join('; ');
+          var taC2 = _msStr.charAt(0).toUpperCase() + _msStr.slice(1) + '.';
+          var taC3 = '✓ Özel malt katkıları profile yansıyor.';
+          _ps("🌾 Tahıl Analizi", taC1 + ' ' + taC2 + ' ' + taC3, profRows);
+        }
 
         const kD=[];
         // Temel katkılar
@@ -18994,7 +19003,8 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
         if(_meyerLimG>=5)   kD.push('Meyer limon '+_meyerLimG.toFixed(0)+'g/10L → tatlı-çiçeksi limon');
         if(_saddokG>=5)     kD.push('Şaddok/pomelo '+_saddokG.toFixed(0)+'g/10L → hafif bitter citrus');
         if(_narTozG>=5)     kD.push('Citrus peel tozu '+_narTozG.toFixed(0)+'g/10L → citrus buketi');
-        if(kD.length) _ps("🧪 Katkı Etkileri", kD.join(' · '), profRows);
+        // Adim 137-G Asama 4: KATKI ETKILERI — per-katki teknik dokumu korundu, sonuna tek verdict.
+        if(kD.length) _ps("🧪 Katkı Etkileri", kD.join(' · ') + '. ✓ ' + kD.length + ' katkı profile işlendi.', profRows);
 
         if(_ppm&&(_ppm.SO4>30||_ppm.Cl>30||_ppm.Ca>30)){
           const sD=[];
@@ -19005,20 +19015,38 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
           else if(_so4cl<0.5&&_ppm.Cl>60) sD.push('SO4:Cl='+_so4cl.toFixed(1)+'→yumuşak');
           // Su Profili satırı kaldırıldı — Su İyonları satırı zaten bu bilgiyi içeriyor (detaylı)
         }
-        // Su iyonu profili — profil satırı
+        // Adim 137-G Asama 4: SU IYONLARI 3 parca — iyonlar+oran / iyon etkileri / verdict (denge ya da uc ⚠).
         if(_ppm&&(_ppm.SO4>30||_ppm.Cl>30||_ppm.Ca>50)){
-          const _sd=[];
-          if(_ppm.Ca>50)   _sd.push('Ca '+_ppm.Ca.toFixed(0)+'ppm → enzim, köpük');
-          if(_ppm.SO4>50)  _sd.push('SO₄ '+_ppm.SO4.toFixed(0)+'ppm → keskinlik');
-          if(_ppm.Cl>50)   _sd.push('Cl '+_ppm.Cl.toFixed(0)+'ppm → dolgunluk');
-          if(_ppm.Mg>10)   _sd.push('Mg '+_ppm.Mg.toFixed(0)+'ppm → hafif acılık');
-          if(_ppm.Na>50)   _sd.push('Na '+_ppm.Na.toFixed(0)+'ppm → tuzluluk');
-          if(_ppm.HCO3>50) _sd.push('HCO₃ '+_ppm.HCO3.toFixed(0)+'ppm → alkalinite');
-          const _sc=_ppm.Cl>0?(_ppm.SO4/_ppm.Cl).toFixed(1):'∞';
-          _sd.push('SO₄:Cl='+_sc+' → '+(_so4cl>2?'kuru, keskin bitiş':_so4cl<0.5?'yumuşak, dolgun':'dengeli'));
-          _ps("💧 Su İyonları", _sd.join(' · '), profRows);
+          var _suIons = [];
+          var _suEtki = [];
+          if(_ppm.Ca>50)   { _suIons.push('Ca '+_ppm.Ca.toFixed(0)+'ppm');   _suEtki.push('Ca enzim aktivitesi ve köpük yapısını destekler'); }
+          if(_ppm.SO4>50)  { _suIons.push('SO₄ '+_ppm.SO4.toFixed(0)+'ppm'); _suEtki.push('SO₄ hop keskinliğini öne çıkarır'); }
+          if(_ppm.Cl>50)   { _suIons.push('Cl '+_ppm.Cl.toFixed(0)+'ppm');   _suEtki.push('Cl malt dolgunluğunu artırır'); }
+          if(_ppm.Mg>10)   { _suIons.push('Mg '+_ppm.Mg.toFixed(0)+'ppm');   _suEtki.push('Mg hafif metalik-acılık katar'); }
+          if(_ppm.Na>50)   { _suIons.push('Na '+_ppm.Na.toFixed(0)+'ppm');   _suEtki.push('Na tuzluluk algısı verir'); }
+          if(_ppm.HCO3>50) { _suIons.push('HCO₃ '+_ppm.HCO3.toFixed(0)+'ppm');_suEtki.push('HCO₃ alkaliniteyi ve mash pH\'ı yükseltir'); }
+          var _scStr = _ppm.Cl>0 ? (_ppm.SO4/_ppm.Cl).toFixed(2) : '∞';
+          var _oranKar = _so4cl>2 ? 'kuru, keskin bitiş eğilimli' : _so4cl<0.5 ? 'yumuşak, dolgun eğilimli' : 'dengeli';
+          var suC1 = _suIons.join(' · ') + ' · SO₄:Cl=' + _scStr + '.';
+          var _seStr = _suEtki.join('; ');
+          var suC2 = _seStr.charAt(0).toUpperCase() + _seStr.slice(1) + ' — oran ' + _oranKar + '.';
+          var suC3 = (_so4cl>3 || (_so4cl<0.3 && _ppm.Cl>60))
+            ? '⚠ SO₄:Cl uçta — su profili gözden geçirilebilir.'
+            : '✓ İyon dengesi profile uyumlu.';
+          _ps("💧 Su İyonları", suC1 + ' ' + suC2 + ' ' + suC3, profRows);
         }
-        if(_lakAsit) _ps("💧 Laktik Asit", (_lakMl/(_hacim||11)*10).toFixed(1)+'mL/10L → pH düşürücü, hafif ekşilik', profRows);
+        // Adim 137-G Asama 4: LAKTIK ASIT 3 parca — mL/10L / pH ve ekşilik etkisi / verdict.
+        if(_lakAsit){
+          var _lAsit = _lakMl/(_hacim||11)*10;
+          var _lEtki, _lVerdict;
+          if (_lAsit < 1.5)        { _lEtki = 'mash pH\'ı hafifçe düşürür, bira tadına ekşilik geçmez'; _lVerdict = '✓ Sadece pH ayarı, ekşi tat hedefi yok.'; }
+          else if (_lAsit < 4)     { _lEtki = 'algılanabilir hafif asidik tüy, mash pH\'ı belirgin düşer';  _lVerdict = '✓ Hafif ekşilik bekleniyor.'; }
+          else if (_lAsit < 10)    { _lEtki = 'belirgin laktik ekşilik damakta hissedilir, ağız ferahlatıcı'; _lVerdict = '✓ Sour-stili asidite hedefte.'; }
+          else                     { _lEtki = 'çok yüksek asit — sert ekşilik, damak iritan';                _lVerdict = '⚠ Aşırı asit — 5-15 mL/L sınırını kontrol et.'; }
+          var laC1 = _lAsit.toFixed(1) + ' mL/10L laktik asit (%88).';
+          var laC2 = _lEtki.charAt(0).toUpperCase() + _lEtki.slice(1) + '.';
+          _ps("💧 Laktik Asit", laC1 + ' ' + laC2 + ' ' + _lVerdict, profRows);
+        }
 
         // Adim 137-G P4 fix-4 (Asama 2 fix): ALKOL bandi incelt — %3.5-5 sessionable / %5-6.5 standart /
         // %6.5-9 guclu-sipping / %9+ cok guclu. %5.0 ile %6.2 farkli banda dussun.
