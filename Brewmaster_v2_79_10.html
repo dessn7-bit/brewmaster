@@ -15221,9 +15221,9 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
       'ale_clean':   'temiz, düşük ester bir fermentasyon — malt karakteri öne çıkar',
       'ale_english': 'hafif meyveli ester ve topraksı tonlar damağa düşer',
       'ale_hybrid':  'hibrit profil — temiz lager netliği üstüne ince ale meyvesi',
-      'wheat':       'muz ve karanfil fenoller ön plana çıkar',
+      'wheat':       'muz-karanfil fenol potansiyeli taşır (mayaya/sıcaklığa göre değişir)',
       'wit':         'baharat, koriander ve turunçgil notalar baskın olur',
-      'belcika':     'karmaşık ester ve hafif baharat profili gelişir',
+      'belcika':     'karmaşık ester ve hafif baharat potansiyeli taşır',
       'saison':      'biber notalı, kuru ve fenolik bir karakter verir',
       'kveik':       'tropikal ester baskın, hızlı ve sıcakta atak gösterir',
       'sour':        'laktik asit ve canlı bir ekşilik öne çıkar',
@@ -17662,39 +17662,51 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
                     : _crsPct>=20 ? 'Bal rengi'
                     : _srm>12 ? 'Açık kahve'
                     : 'Beyaz';
+      // Adim 137-G P4 fix-2: kopuk verdict — yalnizca protein destegi (bugday/yulaf) VEYA Ca>100 → ✓.
+      // Diger durumlarda ⚠ "%5-10 bugday veya CaraFoam ekle". Orta-Ca durumunda proza abartmasin.
+      var kopukDestekli = (_whtPct >= 20) || (_oatPct >= 10) || (_ca > 100);
       var kopukKal, kopukProz;
-      if (_whtPct>=50 || _oatPct>=20)        { kopukKal = 'çok kalıcı ve yoğun'; kopukProz = 'protein zengin grist sayesinde bardakta uzun süre dik tutuyor'; }
+      if (_whtPct>=50 || _oatPct>=20)        { kopukKal = 'çok kalıcı ve yoğun';     kopukProz = 'protein zengin grist sayesinde bardakta uzun süre dik tutuyor'; }
       else if (_whtPct>=20 || _oatPct>=10)   { kopukKal = 'kalıcı, ince kabarcıklı'; kopukProz = 'buğday/yulaf proteini köpüğü yapısal olarak destekliyor'; }
-      else if (_ca>100)                      { kopukKal = 'orta kalıcı'; kopukProz = 'yüksek kalsiyum protein–köpük etkileşimini güçlendiriyor'; }
-      else if (_roastPct>=5)                 { kopukKal = 'ince ve az kalıcı'; kopukProz = 'kavurma yağları köpüğü zayıflatıyor, başlık çabuk dağılıyor'; }
-      else if (_laktozG>=150)                { kopukKal = 'kremsi ve kalıcı'; kopukProz = 'laktoz başlığa kalın, kremsi bir doku katıyor'; }
-      else                                   { kopukKal = 'orta kalıcı'; kopukProz = 'sıradan bir başlık — yıkıcı bir destek yok ama hemen de çökmüyor'; }
+      else if (_ca>100)                      { kopukKal = 'orta kalıcı';             kopukProz = 'yüksek kalsiyum protein–köpük etkileşimini güçlendiriyor'; }
+      else if (_roastPct>=5)                 { kopukKal = 'ince ve az kalıcı';       kopukProz = 'kavurma yağları köpüğü zayıflatıyor, başlık çabuk dağılıyor'; }
+      else if (_laktozG>=150)                { kopukKal = 'kremsi ama az yapısal';   kopukProz = 'laktoz başlığa kremsi doku katıyor ama protein desteği yetersiz'; }
+      else                                   { kopukKal = 'sınırlı kalıcı';          kopukProz = 'protein destek yok, başlık orta-kısa ömürlü kalıyor'; }
       var kC1 = 'Buğday %' + (_whtPct||0).toFixed(0) + ', yulaf %' + (_oatPct||0).toFixed(0) + ', Ca ' + Math.round(_ca||0) + ' ppm.';
       var kC2 = kopukRenk + ', ' + kopukKal + ' bir köpük — ' + kopukProz + '.';
-      var kC3 = ((_whtPct||0) < 10 && (_oatPct||0) < 5 && (_ca||0) < 50) ? '⚠ Köpük desteği zayıf — buğday/yulaf veya kalsiyum ekle.'
-              : '✓ Köpük profili destekli.';
+      var kC3 = kopukDestekli ? '✓ Köpük profili destekli.'
+                              : '⚠ Daha kalıcı köpük için %5-10 buğday/yulaf veya CaraFoam ekle.';
       kopuk = kC1 + ' ' + kC2 + ' ' + kC3;
     }
   }
 
   // ════ HOP KARAKTER ═══════════════════════════════════════════
-  // Adim 137-G P4 fix: hop — orta parca proza, "Sonuc:" kaldirildi.
+  // Adim 137-G P4 fix-2: hop verdict — recete stil dayatmasi YASAK (kart stili bilmiyor).
+  // 3 profil dürüstçe: malt-agirlikli / dengeli / hop-agirlikli — üçü de geçerli, verdict her zaman ✓.
+  // IBU 0 ise "hopsuz / gruit tarzi".
   let hopKarakter;
   {
-    var hopTan, hopProz;
-    if (_dhPer10L>=10)      { hopTan = 'Patlayan dry hop';          hopProz = 'burunda yoğun tropikal, citrus ve reçineli aromalar dolduruyor'; }
-    else if (_dhPer10L>=5)  { hopTan = 'Belirgin dry hop';           hopProz = 'aromanın hop tarafı net hissediliyor, malt arka planda kalıyor'; }
-    else if (_dhPer10L>=2)  { hopTan = 'Hafif dry hop katkısı';     hopProz = 'taze hop notası ipucu olarak burna düşüyor'; }
-    else if (_ibu>=55)      { hopTan = 'Yüksek acılık, sert hop';   hopProz = 'kaynatma hop\'u damakta keskin ve baskın bir acılık bırakıyor'; }
-    else if (_ibu>=35)      { hopTan = 'Orta-yüksek dengeli acılık'; hopProz = 'belirgin bir acılık var ama malt karşılığı onu dengeliyor'; }
-    else if (_ibu>=15)      { hopTan = 'Hafif-orta acılık';         hopProz = 'malt ön planda, hop sadece çerçeveleyici bir acılık katıyor'; }
-    else                    { hopTan = 'Minimal hop';                hopProz = 'malt tatlılığı tamamen önde, hop aroma ve acılığı algılanmıyor'; }
     var _buGu = (_og > 1.001) ? (_ibu / ((_og - 1) * 1000)) : null;
+    var hopTan, hopProz;
+    if (_ibu < 1) {
+      hopTan = 'Hopsuz, gruit tarzı';
+      hopProz = 'hop yok — bira tamamen malt ve katkı karakteriyle taşınıyor';
+    } else if (_dhPer10L>=10)      { hopTan = 'Patlayan dry hop';          hopProz = 'burunda yoğun tropikal, citrus ve reçineli aromalar dolduruyor'; }
+    else if (_dhPer10L>=5)  { hopTan = 'Belirgin dry hop';                  hopProz = 'aromanın hop tarafı net hissediliyor, malt arka planda kalıyor'; }
+    else if (_dhPer10L>=2)  { hopTan = 'Hafif dry hop katkısı';             hopProz = 'taze hop notası ipucu olarak burna düşüyor'; }
+    else if (_ibu>=55)      { hopTan = 'Yüksek acılık, sert hop';           hopProz = 'kaynatma hop\'u damakta keskin ve baskın bir acılık bırakıyor'; }
+    else if (_ibu>=35)      { hopTan = 'Orta-yüksek acılık';                hopProz = 'belirgin bir acılık öne çıkıyor, hop kaynatma damakta hissediliyor'; }
+    else if (_ibu>=15)      { hopTan = 'Hafif-orta acılık';                  hopProz = 'malt ön planda, hop sadece çerçeveleyici bir acılık katıyor'; }
+    else                    { hopTan = 'Minimal hop acılığı';                hopProz = 'malt tatlılığı tamamen önde, hop aroma ve acılığı arka planda'; }
+    // Profil etiketi — sadece betimleme, recete dayatma DEGIL
+    var profilEtiketi;
+    if (_ibu < 1)                                         profilEtiketi = 'Hopsuz profil';
+    else if (_buGu !== null && _buGu > 0.7)               profilEtiketi = 'Hop-ağırlıklı profil';
+    else if (_buGu !== null && _buGu >= 0.4 && _buGu <= 0.7) profilEtiketi = 'Dengeli profil';
+    else                                                  profilEtiketi = 'Malt-ağırlıklı profil';
     var hC1 = 'IBU ' + Math.round(_ibu) + ', dry hop ' + (_dhPer10L||0).toFixed(1) + ' g/10L, BU:GU ' + (_buGu !== null ? _buGu.toFixed(2) : '—') + '.';
     var hC2 = hopTan + ' — ' + hopProz + '.';
-    var hC3 = (_buGu !== null && _buGu > 0.9) ? '⚠ Çok acı — IBU azalt veya OG yükselt.'
-            : (_buGu !== null && _buGu < 0.3 && _og > 1.030) ? '⚠ Çok maltlı — denge için hop ekle.'
-            : '✓ Hop-malt dengesi.';
+    var hC3 = '✓ ' + profilEtiketi + '.';
     hopKarakter = hC1 + ' ' + hC2 + ' ' + hC3;
   }
 
