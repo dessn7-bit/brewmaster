@@ -19003,8 +19003,9 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
         if(_meyerLimG>=5)   kD.push('Meyer limon '+_meyerLimG.toFixed(0)+'g/10L → tatlı-çiçeksi limon');
         if(_saddokG>=5)     kD.push('Şaddok/pomelo '+_saddokG.toFixed(0)+'g/10L → hafif bitter citrus');
         if(_narTozG>=5)     kD.push('Citrus peel tozu '+_narTozG.toFixed(0)+'g/10L → citrus buketi');
-        // Adim 137-G Asama 4 fix-2: KATKI ETKILERI — eksik katkilari S.katkilar dolasimi ile ekle.
-        // Ozel push dali yoksa genel satir; hicbir katki sessizce dusmesin.
+        // Adim 137-G Asama 4 fix-2 (revize): KATKI ETKILERI — eksik katkilari S.katkilar dolasimi ile ekle.
+        // Match: KATKILAR.ad ilk kelime vs kD push'unun ilk kelime; iki yonlu substring (karadut/dut gibi).
+        // Hicbir katki sessizce dusmesin, ayrica cift sayim olmasin.
         try {
           if (Array.isArray(S.katkilar) && typeof KATKILAR !== 'undefined' && Array.isArray(KATKILAR)) {
             S.katkilar.forEach(function(k){
@@ -19013,14 +19014,17 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
               if (!isFinite(miktar) || miktar <= 0) return;
               var kDB = KATKILAR.find(function(x){ return x && x.id === k.id; });
               if (!kDB) return;
-              var kAdKisa = (kDB.ad || '').split('(')[0].trim();
-              if (!kAdKisa) return;
-              var lower = kAdKisa.toLowerCase();
-              var bulundu = kD.some(function(line){ return line.toLowerCase().indexOf(lower) === 0; });
+              var kAdIlk = (kDB.ad || '').split(/[\s\/(]/)[0].trim().toLowerCase();
+              if (!kAdIlk) return;
+              var bulundu = kD.some(function(line){
+                var pushIlk = line.split(/[\s\/(]/)[0].toLowerCase();
+                return pushIlk === kAdIlk || pushIlk.indexOf(kAdIlk) >= 0 || kAdIlk.indexOf(pushIlk) >= 0;
+              });
               if (!bulundu) {
                 var birim = kDB.birim || 'g';
                 var miktar10L = (miktar / (_hacim||11) * 10).toFixed(1);
-                kD.push(kAdKisa + ' ' + miktar10L + birim + '/10L → reçeteye eklendi, profile katkıda bulunur');
+                var kAdGoster = (kDB.ad || '').split('(')[0].trim();
+                kD.push(kAdGoster + ' ' + miktar10L + birim + '/10L → reçeteye eklendi, profile katkıda bulunur');
               }
             });
           }
