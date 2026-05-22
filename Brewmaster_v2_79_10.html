@@ -17409,13 +17409,17 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
 
 
 // ════ TAT PROFİLİ — EŞIK BAZLI, SADECE GERÇEK ETKİ ══════
-  // Her bileşen için eşik: altındaysa yazılmaz, üstündeyse fark seviyesiyle yazılır
+  // Adim 137-G Asama 3: tatNota obje dizisi {txt, kat, yog} — sentezleme icin meta tasiyor.
+  // Tespit kosullari (esik+miktar) dokunulmadi; sadece push edilen degerin yapisi degisti.
   const tatNota=[];
+  let _curKatT = 'malt';
   function _tEkle(pct_or_val, esik1, esik2, yazi1, yazi2){
-    if(pct_or_val>=esik2) tatNota.push(yazi2||yazi1);
-    else if(pct_or_val>=esik1) tatNota.push(yazi1);
+    if(pct_or_val>=esik2) tatNota.push({txt: yazi2||yazi1, kat: _curKatT, yog: 'baskin'});
+    else if(pct_or_val>=esik1) tatNota.push({txt: yazi1, kat: _curKatT, yog: 'hafif'});
   }
+  function _tPush(txt, yog){ tatNota.push({txt, kat: _curKatT, yog: yog || 'baskin'}); }
   // Malt — oran bazlı
+  _curKatT = 'malt';
   _tEkle(_chocPct, 3,9, "çikolata, bitter kakao","yoğun çikolata, espresso");
   _tEkle(_roastPct,2,8, "kavurma kuru acılığı","sert kömür, kuru acı bitiş");
   _tEkle(_crsPct,  15,35,"hafif karamel","belirgin karamel, kuru üzüm");
@@ -17427,6 +17431,7 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
   _tEkle(_smokePct,8,25, "hafif duman nüansı","yoğun duman ve et");
   _tEkle(_honPct,  4,10, "hafif bal tatlılığı","belirgin bal aroması");
   // Katkılar — gram/10L bazlı, gerçek eşikler
+  _curKatT = 'katki';
   _tEkle(_laktozG, 120,300,"hafif kremsi sütlülük","kremsi sütlü tatlılık (laktoz belirgin)");
   _tEkle(_vanilG,  3,9,   "ince vanilya nüansı","belirgin vanilya");
   _tEkle(_kakaoG,  15,45, "bitter çikolata (kakao)","yoğun bitter kakao");
@@ -17434,162 +17439,171 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
   _tEkle(_damlG,   3,8,   "hafif reçine","çam reçinesi");
   _tEkle(_hindG,   4,12,  "hindistan cevizi nüansı","belirgin hindistan cevizi");
   // Hop acılığı — IBU bazlı, sadece gerçek acılık
-  if(_ibu>=50)         tatNota.push("sert, uzun acı bitiş");
-  else if(_ibu>=30&&_dhPer10L<2) tatNota.push("dengeli belirgin acılık");
-  else if(_ibu>=15&&_dhPer10L>=3) tatNota.push("hop aroması ön planda, acılık ikincil");
+  _curKatT = 'hop';
+  if(_ibu>=50)         _tPush("sert, uzun acı bitiş", 'baskin');
+  else if(_ibu>=30&&_dhPer10L<2) _tPush("dengeli belirgin acılık", 'baskin');
+  else if(_ibu>=15&&_dhPer10L>=3) _tPush("hop aroması ön planda, acılık ikincil", 'hafif');
   // Laktik asit / sour etkisi
+  _curKatT = 'katki';
   if(_lakAsit){
     const _lE=_lakMl/(_hacim||11)*10;
-    if(_lE>=4) tatNota.push("belirgin laktik ekşilik");
-    else if(_lE>=2) tatNota.push("hafif asidik tüy");
+    if(_lE>=4) _tPush("belirgin laktik ekşilik", 'baskin');
+    else if(_lE>=2) _tPush("hafif asidik tüy", 'hafif');
   }
   // Su profili tadı
-  if(_ppm&&_so4cl>2.5&&_ibu>15) tatNota.push("SO₄ keskinliği — kuru, uzun bitiş");
-  else if(_ppm&&_cl>80&&_so4cl<0.6) tatNota.push("Cl+ yumuşaklığı — dolgun ağız hissi");
+  _curKatT = 'su';
+  if(_ppm&&_so4cl>2.5&&_ibu>15) _tPush("SO₄ keskinliği — kuru, uzun bitiş", 'baskin');
+  else if(_ppm&&_cl>80&&_so4cl<0.6) _tPush("Cl+ yumuşaklığı — dolgun ağız hissi", 'hafif');
   // Yeni katkı tatları
-  if(_tarcinG>=1)    tatNota.push(_tarcinG>=3?"belirgin tarçın baharatlılığı":"hafif tarçın nüansı");
-  if(_karanfilG>=0.5)tatNota.push(_karanfilG>=2?"yoğun karanfil, fenolik":"ince karanfil baharatlılığı");
-  if(_zencefilG>=2)  tatNota.push(_zencefilG>=5?"sert zencefil keskinliği":"hafif zencefil sıcaklığı");
-  if(_meseG>=5)      tatNota.push(_meseG>=15?"belirgin meşe taneni, vanilya":"hafif oakiness, tanen");
-  if(_nobetSekG>=80) tatNota.push("şeker katkısı → kuru, hafif tatlı bitiş");
-  if(_maltodexG>=30) tatNota.push("maltodextrin → dolgun ağız hissi, gövde artışı");
-  if(_karadutG>=15)  tatNota.push("dut meyve aroması, hafif tanen");
-  if(_cilikG>=30)    tatNota.push("çilek tatlılığı");
-  if(_visneG>=30)    tatNota.push("vişne ekşi-tatlı derinliği");
-  if(_espressoG>=40) tatNota.push("kahve kreması, bitter");
-  if(_bitterCikG>=25)tatNota.push("bitter çikolata yoğunluğu");
-  if(_fistikG>=25)   tatNota.push("kremsi fıstık ezmesi");
-  if(_jalaG>=10)     tatNota.push("biber acılığı, capsaicin ısısı");
-  if(_treacleG>=20)  tatNota.push("pekmez derinliği, bitter-tatlı");
-  if(_narG>=30)      tatNota.push("nar ekşiliği, tanin");
-  if(_cranberryG>=30)tatNota.push("cranberry keskin ekşisi");
-  if(_naneG>=3)      tatNota.push("nane, ferahlatıcı mentol");
-  if(_yenibaharG>=2) tatNota.push("tarçın-karanfil-muskat triosu");
-  if(_turmerikG>=3)  tatNota.push("hafif acımsı, toprak, egzotik");
-  if(_hurmaG>=25)    tatNota.push("hurma karamel tatlılığı");
-  if(_limeG>=3)      tatNota.push("keskin lime, ferahlatıcı turunçgil asidikliği");
-  if(_bergamotMG>=5||_putBergG>=5) tatNota.push("bergamot, Earl Grey — çiçeksi citrus");
-  if(_turunçG>=5||_turunçKG>=5)   tatNota.push("bitter orange — turunç, marmelat acılığı");
-  if(_combavaG>=3)  tatNota.push("kaffir lime, yoğun Asya citrusu");
-  if(_cumquatG>=5)  tatNota.push("kamkat — tatlı kabuk + ekşi iç");
+  _curKatT = 'katki';
+  if(_tarcinG>=1)    _tPush(_tarcinG>=3?"belirgin tarçın baharatlılığı":"hafif tarçın nüansı", _tarcinG>=3?'baskin':'hafif');
+  if(_karanfilG>=0.5)_tPush(_karanfilG>=2?"yoğun karanfil, fenolik":"ince karanfil baharatlılığı", _karanfilG>=2?'baskin':'hafif');
+  if(_zencefilG>=2)  _tPush(_zencefilG>=5?"sert zencefil keskinliği":"hafif zencefil sıcaklığı", _zencefilG>=5?'baskin':'hafif');
+  if(_meseG>=5)      _tPush(_meseG>=15?"belirgin meşe taneni, vanilya":"hafif oakiness, tanen", _meseG>=15?'baskin':'hafif');
+  if(_nobetSekG>=80) _tPush("şeker katkısı → kuru, hafif tatlı bitiş", 'hafif');
+  if(_maltodexG>=30) _tPush("maltodextrin → dolgun ağız hissi, gövde artışı", 'hafif');
+  if(_karadutG>=15)  _tPush("dut meyve aroması, hafif tanen");
+  if(_cilikG>=30)    _tPush("çilek tatlılığı");
+  if(_visneG>=30)    _tPush("vişne ekşi-tatlı derinliği");
+  if(_espressoG>=40) _tPush("kahve kreması, bitter");
+  if(_bitterCikG>=25)_tPush("bitter çikolata yoğunluğu");
+  if(_fistikG>=25)   _tPush("kremsi fıstık ezmesi");
+  if(_jalaG>=10)     _tPush("biber acılığı, capsaicin ısısı");
+  if(_treacleG>=20)  _tPush("pekmez derinliği, bitter-tatlı");
+  if(_narG>=30)      _tPush("nar ekşiliği, tanin");
+  if(_cranberryG>=30)_tPush("cranberry keskin ekşisi");
+  if(_naneG>=3)      _tPush("nane, ferahlatıcı mentol");
+  if(_yenibaharG>=2) _tPush("tarçın-karanfil-muskat triosu");
+  if(_turmerikG>=3)  _tPush("hafif acımsı, toprak, egzotik", 'hafif');
+  if(_hurmaG>=25)    _tPush("hurma karamel tatlılığı");
+  if(_limeG>=3)      _tPush("keskin lime, ferahlatıcı turunçgil asidikliği");
+  if(_bergamotMG>=5||_putBergG>=5) _tPush("bergamot, Earl Grey — çiçeksi citrus");
+  if(_turunçG>=5||_turunçKG>=5)   _tPush("bitter orange — turunç, marmelat acılığı");
+  if(_combavaG>=3)  _tPush("kaffir lime, yoğun Asya citrusu");
+  if(_cumquatG>=5)  _tPush("kamkat — tatlı kabuk + ekşi iç");
   // Ek katkı tatları
-  if(_karabibrEkG>=3)  tatNota.push(_karabibrEkG>=8?"yoğun karabiber":"hafif biber nüansı");
-  if(_rezeneG>=2)      tatNota.push("anason, rezene");
-  if(_sumakG>=3)       tatNota.push("sumak ekşiliği, Orta Doğu");
-  if(_anasonG>=1)      tatNota.push("yoğun anason-likörlü");
-  if(_safranG>=0.2)    tatNota.push("safran, egzotik, aromatik");
-  if(_papatyaG>=2)     tatNota.push("papatya, hafif çiçek");
-  if(_yaseG>=2)        tatNota.push("yasemin, parfümsü");
-  if(_beyazCayG>=3)    tatNota.push("beyaz çay, nazik bitki");
-  if(_kekikG>=1)       tatNota.push("kekik, Akdeniz otsu");
-  if(_defneG>=1)       tatNota.push("defne, baharatlı-bitkisel");
-  if(_kakaKavrG>=10)   tatNota.push("kavurma kakao, hafif çikolata");
-  if(_kereciG>=10)     tatNota.push("keçiboynuzu, doğal çikolata");
-  if(_kestaneG>=15)    tatNota.push("kestane tatlılığı, toprak");
-  if(_ananasG>=20)     tatNota.push("ananas, tropikal ekşi");
-  if(_portKabG>=5||_greyfKabG>=5) tatNota.push("citrus kabuğu, turunçgil");
-  if(_kayisiG>=20)     tatNota.push("kuru kayısı-erik, jam");
-  if(_hibiskusG>=5)    tatNota.push("hibiskus, çiçeksi ekşilik");
-  if(_guavaG>=15)     tatNota.push("guava, tropikal");
-  if(_armutG>=20)     tatNota.push("armut, hafif şarapımsı");
-  if(_tamarindG>=10)  tatNota.push("tamarind, Asya ekşisi");
-  if(_oolongG>=3)      tatNota.push("oolong çay, çiçeksi-hafif");
-  if(_puErhG>=3)       tatNota.push("pu-erh, fermente çay, toprak");
-  if(_tahiniG>=15)     tatNota.push("susam, kremsi fındık");
-  if(_meseSpirG>=5)    tatNota.push("meşe spirali, tanen, vanilla");
-  if(_bourbonMG>=10)   tatNota.push("bourbon, karamel, vanilya, meşe");
-  if(_rumMG>=10)       tatNota.push("rum, tropikal, meşe");
-  if(_kirazAhG>=5)     tatNota.push("kiraz ağacı, meyve-duman");
-  if(_portMG>=5)       tatNota.push("porto, koyu meyve, tanen");
-  if(_sherMG>=5)       tatNota.push("sherry, kuru meyve, fındık");
-  if(_mapleG>=20)     tatNota.push("akçaağaç, ağaç karamel");
-  if(_hamBalG>=20)    tatNota.push("ham bal, çiçeksi tatlılık");
-  if(_demerGG>=30)     tatNota.push("demerara, ham şeker, melasımsı");
-  if(tatNota.length===0) tatNota.push("temiz, nötr malt tabanı");
+  if(_karabibrEkG>=3)  _tPush(_karabibrEkG>=8?"yoğun karabiber":"hafif biber nüansı", _karabibrEkG>=8?'baskin':'hafif');
+  if(_rezeneG>=2)      _tPush("anason, rezene");
+  if(_sumakG>=3)       _tPush("sumak ekşiliği, Orta Doğu");
+  if(_anasonG>=1)      _tPush("yoğun anason-likörlü");
+  if(_safranG>=0.2)    _tPush("safran, egzotik, aromatik");
+  if(_papatyaG>=2)     _tPush("papatya, hafif çiçek", 'hafif');
+  if(_yaseG>=2)        _tPush("yasemin, parfümsü");
+  if(_beyazCayG>=3)    _tPush("beyaz çay, nazik bitki", 'hafif');
+  if(_kekikG>=1)       _tPush("kekik, Akdeniz otsu", 'hafif');
+  if(_defneG>=1)       _tPush("defne, baharatlı-bitkisel", 'hafif');
+  if(_kakaKavrG>=10)   _tPush("kavurma kakao, hafif çikolata");
+  if(_kereciG>=10)     _tPush("keçiboynuzu, doğal çikolata");
+  if(_kestaneG>=15)    _tPush("kestane tatlılığı, toprak");
+  if(_ananasG>=20)     _tPush("ananas, tropikal ekşi");
+  if(_portKabG>=5||_greyfKabG>=5) _tPush("citrus kabuğu, turunçgil");
+  if(_kayisiG>=20)     _tPush("kuru kayısı-erik, jam");
+  if(_hibiskusG>=5)    _tPush("hibiskus, çiçeksi ekşilik");
+  if(_guavaG>=15)     _tPush("guava, tropikal");
+  if(_armutG>=20)     _tPush("armut, hafif şarapımsı");
+  if(_tamarindG>=10)  _tPush("tamarind, Asya ekşisi");
+  if(_oolongG>=3)      _tPush("oolong çay, çiçeksi-hafif", 'hafif');
+  if(_puErhG>=3)       _tPush("pu-erh, fermente çay, toprak");
+  if(_tahiniG>=15)     _tPush("susam, kremsi fındık");
+  if(_meseSpirG>=5)    _tPush("meşe spirali, tanen, vanilla");
+  if(_bourbonMG>=10)   _tPush("bourbon, karamel, vanilya, meşe");
+  if(_rumMG>=10)       _tPush("rum, tropikal, meşe");
+  if(_kirazAhG>=5)     _tPush("kiraz ağacı, meyve-duman");
+  if(_portMG>=5)       _tPush("porto, koyu meyve, tanen");
+  if(_sherMG>=5)       _tPush("sherry, kuru meyve, fındık");
+  if(_mapleG>=20)     _tPush("akçaağaç, ağaç karamel");
+  if(_hamBalG>=20)    _tPush("ham bal, çiçeksi tatlılık");
+  if(_demerGG>=30)     _tPush("demerara, ham şeker, melasımsı");
 
   // ════ KOKU PROFİLİ — EŞIK BAZLI ════════════════════════════
+  // Adim 137-G Asama 3: kokuNota obje dizisi {txt, kat, yog} — wheat maya yumusatildi (potansiyel ifadesi).
   const kokuNota=[];
+  let _curKatK = 'hop';
+  function _kPush(txt, yog){ kokuNota.push({txt, kat: _curKatK, yog: yog || 'baskin'}); }
   // Dry hop — en dominant koku kaynağı
-  if(_dhPer10L>=10)     kokuNota.push("patlayan dry hop — tropikal, citrus, çiçek, reçine");
-  else if(_dhPer10L>=5) kokuNota.push("belirgin dry hop aroması — tropikal meyve, citrus");
-  else if(_dhPer10L>=2) kokuNota.push("hafif dry hop — citrus ve çiçek tüyü");
+  _curKatK = 'hop';
+  if(_dhPer10L>=10)     _kPush("patlayan dry hop — tropikal, citrus, çiçek, reçine", 'baskin');
+  else if(_dhPer10L>=5) _kPush("belirgin dry hop aroması — tropikal meyve, citrus", 'baskin');
+  else if(_dhPer10L>=2) _kPush("hafif dry hop — citrus ve çiçek tüyü", 'hafif');
   // Boil hop (yalnızca anlamlı IBU'da)
   if(_boilHop.length>0&&_ibu>25&&_dhPer10L<2)
-    kokuNota.push(_ibu>50?"yoğun reçine, bitkisel hop":"hafif hop aroması");
-  // Maya kokusu — her tip kendi esteri
-  if(_mayaTip==="wheat")   kokuNota.push("muz ve karanfil (isoamyl acetate esteri)");
-  else if(_mayaTip==="wit") kokuNota.push("turunçgil kabuğu, kişniş, hafif baharat");
-  else if(_mayaTip==="belcika") kokuNota.push("meyve, baharat, fenolik karakteri");
-  else if(_mayaTip==="saison")  kokuNota.push("biber, tropikal meyve, kuru");
-  else if(_mayaTip==="kveik")   kokuNota.push("narenciye, portakal, tropikal");
+    _kPush(_ibu>50?"yoğun reçine, bitkisel hop":"hafif hop aroması", _ibu>50?'baskin':'hafif');
+  // Maya kokusu — her tip kendi esteri (wheat/belcika potansiyel ifadesiyle yumusatildi)
+  _curKatK = 'maya';
+  if(_mayaTip==="wheat")        _kPush("muz-karanfil ester potansiyeli (mayaya/sıcaklığa göre değişir)", 'baskin');
+  else if(_mayaTip==="wit")     _kPush("turunçgil kabuğu, kişniş, hafif baharat", 'baskin');
+  else if(_mayaTip==="belcika") _kPush("meyve, baharat ve fenolik karakter potansiyeli", 'baskin');
+  else if(_mayaTip==="saison")  _kPush("biber, tropikal meyve, kuru", 'baskin');
+  else if(_mayaTip==="kveik")   _kPush("narenciye, portakal, tropikal", 'baskin');
   else if(_mayaTip==="sour"||(_lakAsit&&_lakMl/(_hacim||11)*10>=4))
-    kokuNota.push("laktik ekşilik, taze, yoğurt");
-  else if(_mayaTip==="lager")   kokuNota.push("temiz, tahıl, minimal maya esteri");
+                                _kPush("laktik ekşilik, taze, yoğurt", 'baskin');
+  else if(_mayaTip==="lager")   _kPush("temiz, tahıl, minimal maya esteri", 'hafif');
   // Malt kokusu — yalnızca yüksek oranlarda belirgin
-  if(_smokePct>=8)   kokuNota.push("duman, meşe");
-  if(_chocPct>=5)    kokuNota.push("çikolata ve espresso");
-  if(_roastPct>=5)   kokuNota.push("kavurma, kahve");
-  if(_munPct>=30)    kokuNota.push("ekmek ve zengin malt");
-  if(_honPct>=6)     kokuNota.push("bal nüansı");
-  if(_whtPct>=30)    kokuNota.push("taze buğday, hafif limonlu");
-  if(_crsPct>=20)    kokuNota.push("karamel tatlılığı");
-  if(_rypPct>=15)    kokuNota.push("çavdar, baharatlı-bitkisel");
-  if(_oatPct>=15)    kokuNota.push("yulaflı kremsilik, hafif şeker");
-  if(_biscPct>=8)    kokuNota.push("bisküvi, tost");
+  _curKatK = 'malt';
+  if(_smokePct>=8)   _kPush("duman, meşe", _smokePct>=25?'baskin':'hafif');
+  if(_chocPct>=5)    _kPush("çikolata ve espresso", _chocPct>=9?'baskin':'hafif');
+  if(_roastPct>=5)   _kPush("kavurma, kahve", _roastPct>=8?'baskin':'hafif');
+  if(_munPct>=30)    _kPush("ekmek ve zengin malt", _munPct>=40?'baskin':'hafif');
+  if(_honPct>=6)     _kPush("bal nüansı", _honPct>=10?'baskin':'hafif');
+  if(_whtPct>=30)    _kPush("taze buğday, hafif limonlu", _whtPct>=45?'baskin':'hafif');
+  if(_crsPct>=20)    _kPush("karamel tatlılığı", _crsPct>=35?'baskin':'hafif');
+  if(_rypPct>=15)    _kPush("çavdar, baharatlı-bitkisel", _rypPct>=30?'baskin':'hafif');
+  if(_oatPct>=15)    _kPush("yulaflı kremsilik, hafif şeker", 'hafif');
+  if(_biscPct>=8)    _kPush("bisküvi, tost", _biscPct>=15?'baskin':'hafif');
   // Katkı kokusu — eşikli
-  if(_vanilG>=5)     kokuNota.push("vanilya");
-  if(_kakaoG>=20)    kokuNota.push("bitter çikolata");
-  if(_limonG>=8)     kokuNota.push("limon, turunçgil");
-  if(_hindG>=5)      kokuNota.push("hindistan cevizi");
+  _curKatK = 'katki';
+  if(_vanilG>=5)     _kPush("vanilya", _vanilG>=9?'baskin':'hafif');
+  if(_kakaoG>=20)    _kPush("bitter çikolata", _kakaoG>=45?'baskin':'hafif');
+  if(_limonG>=8)     _kPush("limon, turunçgil", _limonG>=12?'baskin':'hafif');
+  if(_hindG>=5)      _kPush("hindistan cevizi", _hindG>=12?'baskin':'hafif');
   // Yeni katkı kokuları
-  if(_tarcinG>=1)    kokuNota.push(_tarcinG>=3?"yoğun tarçın":"hafif tarçın");
-  if(_karanfilG>=0.5)kokuNota.push("karanfil, baharat");
-  if(_zencefilG>=2)  kokuNota.push("zencefil, keskin aromatik");
-  if(_kisniscG>=1)   kokuNota.push("kişniş, turunçgil-çiçek");
-  if(_meseG>=8)      kokuNota.push("meşe, vanilya, odun");
-  if(_kakuleG>=0.5)  kokuNota.push("kakule, egzotik baharat");
-  if(_muskatG>=0.5)  kokuNota.push("muskat, yoğun aromatik");
-  if(_karadutG>=10)  kokuNota.push("dut, kırmızı meyve");
-  if(_maviCayG>=2)   kokuNota.push("mavi çiçek, egzotik");
-  if(_cilikG>=30)    kokuNota.push("taze çilek");
-  if(_ahududuG>=30)  kokuNota.push("frambuaz, kırmızı meyve");
-  if(_mangoG>=30||_seftaliG>=30) kokuNota.push("tropikal meyve patlaması");
-  if(_lavantiG>=1)   kokuNota.push("lavanta, çiçeksi");
-  if(_gulG>=2)       kokuNota.push("gül, çiçek");
-  if(_elderG>=2)     kokuNota.push("mürver çiçeği, muscat");
-  if(_espressoG>=40) kokuNota.push("espresso, kahve kreması");
-  if(_matchaG>=3)    kokuNota.push("yeşil çay, matcha");
-  if(_narG>=30)      kokuNota.push("nar, koyu meyve");
-  if(_yabanMersG>=30)kokuNota.push("yaban mersini, kırmızı meyve");
-  if(_bergamotG>=2||_bergamotMG>=3||_putBergG>=3) kokuNota.push("bergamot, çiçeksi Earl Grey");
-  if(_turunçG>=3||_turunçKG>=3) kokuNota.push("turunç, bitter orange — witbier klasiği");
-  if(_combavaG>=2)  kokuNota.push("kaffir lime, Güneydoğu Asya citrusu");
-  if(_cumquatG>=5)  kokuNota.push("kamkat, egzotik citrus");
-  if(_yuzuG>=2)      kokuNota.push("yuzu, Japon citrusu");
-  if(_rooibosG>=3)   kokuNota.push("rooibos, vanilya-bitki");
-  if(_naneG>=3)      kokuNota.push("nane, ferahlatıcı");
-  if(_biberiyeG>=2)  kokuNota.push("biberiye, Akdeniz reçinesi");
+  if(_tarcinG>=1)    _kPush(_tarcinG>=3?"yoğun tarçın":"hafif tarçın", _tarcinG>=3?'baskin':'hafif');
+  if(_karanfilG>=0.5)_kPush("karanfil, baharat", _karanfilG>=2?'baskin':'hafif');
+  if(_zencefilG>=2)  _kPush("zencefil, keskin aromatik", _zencefilG>=5?'baskin':'hafif');
+  if(_kisniscG>=1)   _kPush("kişniş, turunçgil-çiçek", 'hafif');
+  if(_meseG>=8)      _kPush("meşe, vanilya, odun", _meseG>=15?'baskin':'hafif');
+  if(_kakuleG>=0.5)  _kPush("kakule, egzotik baharat");
+  if(_muskatG>=0.5)  _kPush("muskat, yoğun aromatik");
+  if(_karadutG>=10)  _kPush("dut, kırmızı meyve");
+  if(_maviCayG>=2)   _kPush("mavi çiçek, egzotik", 'hafif');
+  if(_cilikG>=30)    _kPush("taze çilek");
+  if(_ahududuG>=30)  _kPush("frambuaz, kırmızı meyve");
+  if(_mangoG>=30||_seftaliG>=30) _kPush("tropikal meyve patlaması");
+  if(_lavantiG>=1)   _kPush("lavanta, çiçeksi", 'hafif');
+  if(_gulG>=2)       _kPush("gül, çiçek", 'hafif');
+  if(_elderG>=2)     _kPush("mürver çiçeği, muscat", 'hafif');
+  if(_espressoG>=40) _kPush("espresso, kahve kreması");
+  if(_matchaG>=3)    _kPush("yeşil çay, matcha", 'hafif');
+  if(_narG>=30)      _kPush("nar, koyu meyve");
+  if(_yabanMersG>=30)_kPush("yaban mersini, kırmızı meyve");
+  if(_bergamotG>=2||_bergamotMG>=3||_putBergG>=3) _kPush("bergamot, çiçeksi Earl Grey");
+  if(_turunçG>=3||_turunçKG>=3) _kPush("turunç, bitter orange — witbier klasiği");
+  if(_combavaG>=2)   _kPush("kaffir lime, Güneydoğu Asya citrusu");
+  if(_cumquatG>=5)   _kPush("kamkat, egzotik citrus");
+  if(_yuzuG>=2)      _kPush("yuzu, Japon citrusu");
+  if(_rooibosG>=3)   _kPush("rooibos, vanilya-bitki", 'hafif');
+  if(_naneG>=3)      _kPush("nane, ferahlatıcı");
+  if(_biberiyeG>=2)  _kPush("biberiye, Akdeniz reçinesi", 'hafif');
   // Ek katkı kokuları
-  if(_rezeneG>=2)      kokuNota.push("rezene, anason");
-  if(_safranG>=0.2)    kokuNota.push("safran, egzotik baharat");
-  if(_papatyaG>=2)     kokuNota.push("papatya, hafif çiçek");
-  if(_yaseG>=2)        kokuNota.push("yasemin, parfümsü çiçek");
-  if(_kekikG>=1)       kokuNota.push("kekik, Akdeniz otsu");
-  if(_oolongG>=3)      kokuNota.push("oolong çay, çiçeksi");
-  if(_puErhG>=3)       kokuNota.push("pu-erh, toprak fermente çay");
-  if(_kestaneG>=15)    kokuNota.push("kestane, tatlı toprak");
-  if(_ananasG>=20)     kokuNota.push("ananas, tropikal");
-  if(_portKabG>=5)     kokuNota.push("portakal kabuğu, citrus");
-  if(_hibiskusG>=5)    kokuNota.push("hibiskus, çiçeksi");
-  if(_guavaG>=15)     kokuNota.push("guava, egzotik tropikal");
-  if(_armutG>=20)     kokuNota.push("armut, tatlı meyve");
-  if(_tamarindG>=10)  kokuNota.push("tamarind, Asya ekşisi");
-  if(_meseSpirG>=5)    kokuNota.push("meşe, vanilya, tanen");
-  if(_bourbonMG>=10)   kokuNota.push("bourbon + vanilya + meşe");
-  if(_portMG>=5)       kokuNota.push("porto + koyu meyve + meşe");
-  if(_mapleG>=20)     kokuNota.push("akçaağaç, ağaç tatlısı");
-  if(_hamBalG>=20)    kokuNota.push("taze bal, çiçeksi");
-  if(kokuNota.length===0) kokuNota.push("hafif malt ve tahıl, nötr");
+  if(_rezeneG>=2)      _kPush("rezene, anason");
+  if(_safranG>=0.2)    _kPush("safran, egzotik baharat");
+  if(_papatyaG>=2)     _kPush("papatya, hafif çiçek", 'hafif');
+  if(_yaseG>=2)        _kPush("yasemin, parfümsü çiçek");
+  if(_kekikG>=1)       _kPush("kekik, Akdeniz otsu", 'hafif');
+  if(_oolongG>=3)      _kPush("oolong çay, çiçeksi", 'hafif');
+  if(_puErhG>=3)       _kPush("pu-erh, toprak fermente çay");
+  if(_kestaneG>=15)    _kPush("kestane, tatlı toprak");
+  if(_ananasG>=20)     _kPush("ananas, tropikal");
+  if(_portKabG>=5)     _kPush("portakal kabuğu, citrus");
+  if(_hibiskusG>=5)    _kPush("hibiskus, çiçeksi");
+  if(_guavaG>=15)      _kPush("guava, egzotik tropikal");
+  if(_armutG>=20)      _kPush("armut, tatlı meyve");
+  if(_tamarindG>=10)   _kPush("tamarind, Asya ekşisi");
+  if(_meseSpirG>=5)    _kPush("meşe, vanilya, tanen");
+  if(_bourbonMG>=10)   _kPush("bourbon + vanilya + meşe");
+  if(_portMG>=5)       _kPush("porto + koyu meyve + meşe");
+  if(_mapleG>=20)      _kPush("akçaağaç, ağaç tatlısı");
+  if(_hamBalG>=20)     _kPush("taze bal, çiçeksi");
 
   // ════ GÖVDE ══════════════════════════════════════════════════
   // Adim 137-G P4 fix: govde — orta parca proza (sonucun aciklamasi). "Sonuc:" oneki kaldirildi.
@@ -18645,8 +18659,53 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
         const _ps=(e,d,rows)=>{ if(d&&String(d).trim()) rows.push([e,d]); };
         const profRows=[];
 
-        _ps("👅 Tat",         tatNota.length?tatNota.join(' · '):null, profRows);
-        _ps("👃 Koku",        kokuNota.length?kokuNota.join(' · '):null, profRows);
+        // Adim 137-G Asama 3: Tat/Koku sentez — sabit 3-cumle yapi (baskinlar / hafifler+karakter / verdict).
+        // Uzunluk recetenin nota sayisindan bagimsiz: baskin tavan 4, hafif tavan 3.
+        function _sentezProfil(arr, varlikYok, ibuLocal) {
+          if (!arr || !arr.length) return varlikYok;
+          var baskin = arr.filter(function(n){ return n.yog === 'baskin'; });
+          var hafif  = arr.filter(function(n){ return n.yog === 'hafif'; });
+          // Tavanla
+          var ust = baskin.slice(0, 4);
+          var alt = hafif.slice(0, 3);
+          // Kategori dağılımı (toplam)
+          var katSay = {};
+          arr.forEach(function(n){ katSay[n.kat] = (katSay[n.kat]||0) + 1; });
+          var domKat = '', domCount = 0;
+          for (var k in katSay) if (katSay[k] > domCount) { domCount = katSay[k]; domKat = k; }
+          var karakter = (domKat === 'malt')  ? 'malt-odaklı'
+                       : (domKat === 'hop')   ? 'hop-öne çıkan'
+                       : (domKat === 'katki') ? 'katkı-katmanlı'
+                       : (domKat === 'maya')  ? 'maya-karakteri belirgin'
+                       : (domKat === 'su')    ? 'su-etkili'
+                       :                        'sade';
+          var yogunluk = (arr.length >= 12) ? 'yoğun'
+                       : (arr.length >= 6)  ? 'katmanlı'
+                       : (arr.length >= 3)  ? 'dengeli'
+                       :                       'sade ve temiz';
+          // c1 — baskınlar
+          var c1 = ust.length
+            ? 'Baskın: ' + ust.map(function(n){ return n.txt; }).join(', ') + '.'
+            : (alt.length ? 'Belirgin baskın nota yok; sadece arka plan nüansları var.' : 'Belirgin nota oluşmadı.');
+          // c2 — destekleyen + karakter
+          var arkada = alt.length ? 'Arkada ' + alt.map(function(n){ return n.txt; }).join(', ') + '; ' : '';
+          var c2 = arkada + karakter + ', ' + yogunluk + ' bir profil.';
+          // c3 — verdict
+          var cokYaris = ust.length >= 5;
+          var ibuYukNarinNota = (ibuLocal >= 50) && arr.some(function(n){
+            return /muz|frambuaz|çilek|elder|mürver|papatya|lavanta|gül|yasemin|kişniş|narenciye/i.test(n.txt);
+          });
+          var c3;
+          if (cokYaris)           c3 = '⚠ Çok sayıda baskın nota yarışıyor — profil dağınık olabilir.';
+          else if (ibuYukNarinNota) c3 = '⚠ Yüksek IBU narin meyve/çiçek notalarını bastırabilir.';
+          else                    c3 = '✓ Tutarlı profil.';
+          return c1.charAt(0).toUpperCase() + c1.slice(1) + ' ' + c2.charAt(0).toUpperCase() + c2.slice(1) + ' ' + c3;
+        }
+        var _tatVarlikYok = 'Belirgin tat notası tespit edilmedi. Temiz ve nötr bir malt tabanı. ✓ Tutarlı profil.';
+        var _kokuVarlikYok = 'Belirgin koku notası tespit edilmedi. Hafif malt ve tahıl, nötr bir burun. ✓ Tutarlı profil.';
+
+        _ps("👅 Tat",         _sentezProfil(tatNota,  _tatVarlikYok,  _ibu), profRows);
+        _ps("👃 Koku",        _sentezProfil(kokuNota, _kokuVarlikYok, _ibu), profRows);
         _ps("🫗 Gövde",       govde, profRows);
         _ps("🌊 Bitiş",       bitis, profRows);
         _ps("🍺 Köpük",       kopuk, profRows);
