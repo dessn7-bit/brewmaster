@@ -15421,7 +15421,6 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
   // skipped duplicate: _saddokG
   const _narTozG = _bk('narTozG', ['narenciye_toz']);
   const _yulafEzmGG = _bk('yulafEzmGG', ['yulaf_ezm']);
-  const _balTozG = _bk('balTozG', ['bal_tozu']);
   const _greyfurtG = _bk('greyfurtG', ['greyfurt_kabuk']);
   // dup_removed: const _limonG       =_katG("kuru_lime");
   // Citrus _katG çağrıları _limeG tanımından önce geliyor — inline kullan
@@ -18882,7 +18881,6 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
         if(_hindG>=2) { kD.push('Hindistan cevizi '+_hindG.toFixed(0)+'g/10L → tropikal, egzotik'); _kapsa('hindG'); }
         if(_katHoneyG>=10) { kD.push('Bal/Bal tozu '+_katHoneyG.toFixed(0)+'g/10L → tatlı bal aroması, hafif çiçeksi'); _kapsa('katHoneyG'); }
         if(_damlG>=2) { kD.push('Damla sakızı '+_damlG.toFixed(0)+'g/10L → çam reçinesi, yoğun aroma'); _kapsa('damlG'); }
-        if(_honPct>=8||_katHoneyG>=10) { kD.push('Bal '+(Math.max(_honPct,0)+_katHoneyG).toFixed(0)+' → tatlı bal aroması, çiçeksi koku'); _kapsa('katHoneyG'); }
         // Dolgunluk katkıları
         if(_yulafEzmG>=20) { kD.push('Yulaf ezmesi '+_yulafEzmG.toFixed(0)+'g/10L → kremsilik, yumuşak gövde'); _kapsa('yulafEzmG'); }
         if(_maltodexG>=20) { kD.push('Maltodextrin '+_maltodexG.toFixed(0)+'g/10L → gövde+dolgunluk, tat nötr'); _kapsa('maltodexG'); }
@@ -18934,7 +18932,6 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
         if(_jalaG>=5) { kD.push('Jalapeño '+_jalaG.toFixed(0)+'g/10L → biber acılığı'); _kapsa('jalaG'); }
         // Adjunct
         if(_yulafEzmGG>=20) { kD.push('Yulaf ezmesi '+_yulafEzmGG.toFixed(0)+'g/10L → kremsilik'); _kapsa('yulafEzmGG'); }
-        if(_balTozG>=10) { kD.push('Bal tozu '+_balTozG.toFixed(0)+'g/10L → bal tatlılığı'); _kapsa('balTozG'); }
         // Şeker katkıları
         if(_katG("koyu_candy")>=20) { kD.push('Koyu candi '+_katG("koyu_candy").toFixed(0)+'g/10L → bitter karamel, D-180'); kapsananIds.add('koyu_candy'); }
         if(_katG("erik")>=15) { kD.push('Erik/kuru erik '+_katG("erik").toFixed(0)+'g/10L → koyu kuru meyve'); kapsananIds.add('erik'); }
