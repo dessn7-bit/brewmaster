@@ -15296,154 +15296,159 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
   function _katG(id){
     return _kgCache[id] || 0;
   }
+  // Adim sub-sprint 2 ek-B: _bk = bucket -> id listesi tek dogruluk kaynagi.
+  // Her _xxxG tanim satiri _bk('xxxG', ['id1',...]) cagrisina cevrildi;
+  // _BUCKETS map'i bucket adlarini ID dizilerine baglar (kD dedup icin kullanilir).
+  var _BUCKETS = {};
+  function _bk(ad, ids){ _BUCKETS[ad] = ids; var s = 0; for (var i = 0; i < ids.length; i++) s += _katG(ids[i]); return s; }
   const _katHoneyG=(_katG("bal_tozu")||0); // Katkı bal tozu (bal malt için _honPct kullanılır)
-  const _laktozG =_katG("lak");      // Laktoz katkısı — >150g/10L anlamlı
-  const _vanilG  =_katG("vanilya");  // >3g/10L ince, >8 belirgin
-  const _kakaoG  =_katG("kakao");    // >20g/10L anlamlı
-  const _limonG  =_katG("limon_otu");
-  const _damlG   =_katG("damla");
-  const _cilikG     =_katG("cilek");
-  const _ahududuG   =_katG("ahududu");
-  const _visneG     =_katG("visne");
-  const _seftaliG   =_katG("seftali");
-  const _mangoG     =_katG("mango");
-  const _ananasG    =_katG("ananas");
-  const _pasionG    =_katG("passion_fruit");
-  const _guavaG     =_katG("guava");
-  const _hibiskusG  =_katG("hibiskus");
-  const _lavantiG   =_katG("lavanta");
-  const _gulG       =_katG("kuru_gul");
-  const _elderG     =_katG("elderflower");
-  const _espressoG  =_katG("espresso");
-  const _kahveCekG  =_katG("kahve_cekirdek");
-  const _bitterCikG =_katG("bitter_cik");
-  const _fistikG    =_katG("fistik_ezmesi");
-  const _mapleG     =_katG("akcaagac");
-  const _hamBalG    =_katG("ham_bal");
-  const _treacleG   =_katG("treacle");
-  const _jalaG      =_katG("jalapeno");
-  const _armutG      =_katG("armut");
-  const _erikG       =_katG("erik");
-  const _narG        =_katG("nar");
-  const _yabanMersG  =_katG("yaban_mersini");
-  const _cranberryG  =_katG("cranberry");
-  const _elmaG       =_katG("elma");
-  const _narEksiG    =_katG("nar_eksisi");
-  const _hurmaG      =_katG("hurma");
-  const _incirG      =_katG("incir");
-  const _tamarindG   =_katG("tamarind");
-  const _kusburG     =_katG("kusburnu");
-  const _bergamotG   =_katG("bergamot");
-  const _yuzuG       =_katG("yuzu");
-  const _rooibosG    =_katG("rooibos");
-  const _oolongG     =_katG("oolong");
-  const _naneG       =_katG("nane");
-  const _biberiyeG   =_katG("biberiye");
-  const _kekikG      =_katG("kekik");
-  const _adacayiG    =_katG("adacayi");
-  const _turmerikG   =_katG("turmerik");
-  const _yenibaharG  =_katG("yenibahar");
-  const _demerG      =_katG("demerera");
-  const _jaggeryG    =_katG("jaggery");
-  const _kuruUzumG   =_katG("kuru_uzum");
-  const _bergamotMG  =_katG("bergamot_meyve");
-  const _putBergG    =_katG("puturlu_bergamot");
+  const _laktozG = _bk('laktozG', ['lak']);      // Laktoz katkısı — >150g/10L anlamlı
+  const _vanilG = _bk('vanilG', ['vanilya']);  // >3g/10L ince, >8 belirgin
+  const _kakaoG = _bk('kakaoG', ['kakao']);    // >20g/10L anlamlı
+  const _limonG = _bk('limonG', ['limon_otu']);
+  const _damlG = _bk('damlG', ['damla']);
+  const _cilikG = _bk('cilikG', ['cilek']);
+  const _ahududuG = _bk('ahududuG', ['ahududu']);
+  const _visneG = _bk('visneG', ['visne']);
+  const _seftaliG = _bk('seftaliG', ['seftali']);
+  const _mangoG = _bk('mangoG', ['mango']);
+  const _ananasG = _bk('ananasG', ['ananas']);
+  const _pasionG = _bk('pasionG', ['passion_fruit']);
+  const _guavaG = _bk('guavaG', ['guava']);
+  const _hibiskusG = _bk('hibiskusG', ['hibiskus']);
+  const _lavantiG = _bk('lavantiG', ['lavanta']);
+  const _gulG = _bk('gulG', ['kuru_gul']);
+  const _elderG = _bk('elderG', ['elderflower']);
+  const _espressoG = _bk('espressoG', ['espresso']);
+  const _kahveCekG = _bk('kahveCekG', ['kahve_cekirdek']);
+  const _bitterCikG = _bk('bitterCikG', ['bitter_cik']);
+  const _fistikG = _bk('fistikG', ['fistik_ezmesi']);
+  const _mapleG = _bk('mapleG', ['akcaagac']);
+  const _hamBalG = _bk('hamBalG', ['ham_bal']);
+  const _treacleG = _bk('treacleG', ['treacle']);
+  const _jalaG = _bk('jalaG', ['jalapeno']);
+  const _armutG = _bk('armutG', ['armut']);
+  const _erikG = _bk('erikG', ['erik']);
+  const _narG = _bk('narG', ['nar']);
+  const _yabanMersG = _bk('yabanMersG', ['yaban_mersini']);
+  const _cranberryG = _bk('cranberryG', ['cranberry']);
+  const _elmaG = _bk('elmaG', ['elma']);
+  const _narEksiG = _bk('narEksiG', ['nar_eksisi']);
+  const _hurmaG = _bk('hurmaG', ['hurma']);
+  const _incirG = _bk('incirG', ['incir']);
+  const _tamarindG = _bk('tamarindG', ['tamarind']);
+  const _kusburG = _bk('kusburG', ['kusburnu']);
+  const _bergamotG = _bk('bergamotG', ['bergamot']);
+  const _yuzuG = _bk('yuzuG', ['yuzu']);
+  const _rooibosG = _bk('rooibosG', ['rooibos']);
+  const _oolongG = _bk('oolongG', ['oolong']);
+  const _naneG = _bk('naneG', ['nane']);
+  const _biberiyeG = _bk('biberiyeG', ['biberiye']);
+  const _kekikG = _bk('kekikG', ['kekik']);
+  const _adacayiG = _bk('adacayiG', ['adacayi']);
+  const _turmerikG = _bk('turmerikG', ['turmerik']);
+  const _yenibaharG = _bk('yenibaharG', ['yenibahar']);
+  const _demerG = _bk('demerG', ['demerera']);
+  const _jaggeryG = _bk('jaggeryG', ['jaggery']);
+  const _kuruUzumG = _bk('kuruUzumG', ['kuru_uzum']);
+  const _bergamotMG = _bk('bergamotMG', ['bergamot_meyve']);
+  const _putBergG = _bk('putBergG', ['puturlu_bergamot']);
   const _turunçG     =_katG("turunc");
   const _turunçKG    =_katG("turunc_kabuk");
-  const _combavaG    =_katG("combava");
-  const _cumquatG    =_katG("cumquat");
+  const _combavaG = _bk('combavaG', ['combava']);
+  const _cumquatG = _bk('cumquatG', ['cumquat']);
   const _yuzu_suyuG  =_katG("yuzu_suyu");
-  const _saddokG     =_katG("saddok");
+  const _saddokG = _bk('saddokG', ['saddok']);
   // ─── Ek katkı değişkenleri ──────────────────────────────
-  const _kestaneG    =_katG("kestane");
-  const _dutKuruG    =_katG("dut_kuru");
-  const _karabibrEkG =_katG("karabiber")+_katG("black_pepper");
-  const _beyazCayG   =_katG("beyaz_cay");
+  const _kestaneG = _bk('kestaneG', ['kestane']);
+  const _dutKuruG = _bk('dutKuruG', ['dut_kuru']);
+  const _karabibrEkG = _bk('karabibrEkG', ['karabiber', 'black_pepper']);
+  const _beyazCayG = _bk('beyazCayG', ['beyaz_cay']);
   // skipped duplicate: _ananasG
-  const _karpuzG     =_katG("karpuz");
-  const _portKabG    =_katG("portakal_kabuk");
-  const _greyfKabG   =_katG("greyfurt_kabuk");
-  const _kayisiG     =_katG("kuru_kayisi");
-  const _elmaKonsG   =_katG("elma_konsantre");
+  const _karpuzG = _bk('karpuzG', ['karpuz']);
+  const _portKabG = _bk('portKabG', ['portakal_kabuk']);
+  const _greyfKabG = _bk('greyfKabG', ['greyfurt_kabuk']);
+  const _kayisiG = _bk('kayisiG', ['kuru_kayisi']);
+  const _elmaKonsG = _bk('elmaKonsG', ['elma_konsantre']);
   // skipped duplicate: _hibiskusG
-  const _visnKonsG   =_katG("visne_konsantre");
-  const _vanilOzG    =_katG("vanilla_oz");
-  const _papatyaG    =_katG("papatya");
-  const _yaseG       =_katG("yasemin");
-  const _invertG     =_katG("invert_seker");
-  const _agaveGG     =_katG("agave");
-  const _rezeneG     =_katG("rezene");
-  const _sumakG      =_katG("sumak");
-  const _anasonG     =_katG("anason");
-  const _safranG     =_katG("karakulak_saf");
-  const _meseSpirG   =_katG("mese_spiral");
-  const _bourbonMG   =_katG("bourbon_mese");
-  const _rumMG       =_katG("rum_mese");
-  const _coconutGG   =_katG("coconut_sut");
-  const _kakaoYagG   =_katG("kakao_yag");
-  const _kIncirG     =_katG("kuru_incir");
-  const _papaG       =_katG("papaya");
-  const _limonKG     =_katG("limon_konsantre");
-  const _musmulaG    =_katG("musmula");
-  const _kaffirG     =_katG("kaffir_lime");
+  const _visnKonsG = _bk('visnKonsG', ['visne_konsantre']);
+  const _vanilOzG = _bk('vanilOzG', ['vanilla_oz']);
+  const _papatyaG = _bk('papatyaG', ['papatya']);
+  const _yaseG = _bk('yaseG', ['yasemin']);
+  const _invertG = _bk('invertG', ['invert_seker']);
+  const _agaveGG = _bk('agaveGG', ['agave']);
+  const _rezeneG = _bk('rezeneG', ['rezene']);
+  const _sumakG = _bk('sumakG', ['sumak']);
+  const _anasonG = _bk('anasonG', ['anason']);
+  const _safranG = _bk('safranG', ['karakulak_saf']);
+  const _meseSpirG = _bk('meseSpirG', ['mese_spiral']);
+  const _bourbonMG = _bk('bourbonMG', ['bourbon_mese']);
+  const _rumMG = _bk('rumMG', ['rum_mese']);
+  const _coconutGG = _bk('coconutGG', ['coconut_sut']);
+  const _kakaoYagG = _bk('kakaoYagG', ['kakao_yag']);
+  const _kIncirG = _bk('kIncirG', ['kuru_incir']);
+  const _papaG = _bk('papaG', ['papaya']);
+  const _limonKG = _bk('limonKG', ['limon_konsantre']);
+  const _musmulaG = _bk('musmulaG', ['musmula']);
+  const _kaffirG = _bk('kaffirG', ['kaffir_lime']);
   // skipped duplicate: _oolongG
-  const _puErhG      =_katG("pu_erh");
-  const _tahiniG     =_katG("tahini");
+  const _puErhG = _bk('puErhG', ['pu_erh']);
+  const _tahiniG = _bk('tahiniG', ['tahini']);
   // skipped duplicate: _kekikG
-  const _adacayiGG   =_katG("adacayi");
-  const _defneG      =_katG("defne");
-  const _kakaKavrG   =_katG("kakao_kavr");
-  const _kereciG     =_katG("kereceli");
-  const _uzunBibG    =_katG("uzun_biber");
-  const _kirazAhG    =_katG("kiraz_ahsap");
-  const _elmaAhG     =_katG("elma_ahsap");
-  const _ginMG       =_katG("gin_mese");
-  const _portMG      =_katG("port_mese");
-  const _sherMG      =_katG("sherry_mese");
-  const _tequMG      =_katG("tequila_mese");
-  const _demerGG     =_katG("demerera");
-  const _jaggeryGG   =_katG("jaggery");
-  const _piloG       =_katG("piloncillo");
-  const _kUzumG      =_katG("kuru_uzum");
-  const _sorgumG     =_katG("sorgum");
-  const _berKabuG    =_katG("bergamot_kabuk_kuru");
-  const _citZestG    =_katG("citrus_zest_mix");
-  const _sudachiG    =_katG("ponzu_kabuk");
-  const _limettaG    =_katG("limetta");
-  const _finLimG     =_katG("finger_lime");
-  const _yuzuSuyG    =_katG("yuzu_suyu");
-  const _meyerLimG   =_katG("maymuncuk");
+  const _adacayiGG = _bk('adacayiGG', ['adacayi']);
+  const _defneG = _bk('defneG', ['defne']);
+  const _kakaKavrG = _bk('kakaKavrG', ['kakao_kavr']);
+  const _kereciG = _bk('kereciG', ['kereceli']);
+  const _uzunBibG = _bk('uzunBibG', ['uzun_biber']);
+  const _kirazAhG = _bk('kirazAhG', ['kiraz_ahsap']);
+  const _elmaAhG = _bk('elmaAhG', ['elma_ahsap']);
+  const _ginMG = _bk('ginMG', ['gin_mese']);
+  const _portMG = _bk('portMG', ['port_mese']);
+  const _sherMG = _bk('sherMG', ['sherry_mese']);
+  const _tequMG = _bk('tequMG', ['tequila_mese']);
+  const _demerGG = _bk('demerGG', ['demerera']);
+  const _jaggeryGG = _bk('jaggeryGG', ['jaggery']);
+  const _piloG = _bk('piloG', ['piloncillo']);
+  const _kUzumG = _bk('kUzumG', ['kuru_uzum']);
+  const _sorgumG = _bk('sorgumG', ['sorgum']);
+  const _berKabuG = _bk('berKabuG', ['bergamot_kabuk_kuru']);
+  const _citZestG = _bk('citZestG', ['citrus_zest_mix']);
+  const _sudachiG = _bk('sudachiG', ['ponzu_kabuk']);
+  const _limettaG = _bk('limettaG', ['limetta']);
+  const _finLimG = _bk('finLimG', ['finger_lime']);
+  const _yuzuSuyG = _bk('yuzuSuyG', ['yuzu_suyu']);
+  const _meyerLimG = _bk('meyerLimG', ['maymuncuk']);
   // skipped duplicate: _saddokG
-  const _narTozG     =_katG("narenciye_toz");
-  const _yulafEzmGG  =_katG("yulaf_ezm");
-  const _balTozG     =_katG("bal_tozu");
-  const _greyfurtG    =_katG("greyfurt_kabuk");
+  const _narTozG = _bk('narTozG', ['narenciye_toz']);
+  const _yulafEzmGG = _bk('yulafEzmGG', ['yulaf_ezm']);
+  const _balTozG = _bk('balTozG', ['bal_tozu']);
+  const _greyfurtG = _bk('greyfurtG', ['greyfurt_kabuk']);
   // dup_removed: const _limonG       =_katG("kuru_lime");
   // Citrus _katG çağrıları _limeG tanımından önce geliyor — inline kullan
   const _allCitrusG  =(_bergamotMG||0)+(_putBergG||0)+(_turunçG||0)+(_turunçKG||0)+
                       (_combavaG||0)+(_cumquatG||0)+(_yuzuG||0)+(_yuzu_suyuG||0)+
                       (_saddokG||0)+(_greyfurtG||0)+
                       (_katG("kuru_lime")||0)+(_katG("limon_konsantre")||0);
-  const _matchaG    =_katG("matcha");
-  const _coconutG   =_katG("coconut_sut");
-  const _hindG   =_katG("hindistan");
+  const _matchaG = _bk('matchaG', ['matcha']);
+  const _coconutG = _bk('coconutG', ['coconut_sut']);
+  const _hindG = _bk('hindG', ['hindistan']);
   // Yeni katkı değişkenleri
-  const _yulafEzmG =_katG("yulaf_ezm");    // Yulaf ezmesi — kremsilik, dolgunluk
-  const _maltodexG =_katG("maltodex");     // Maltodextrin — gövde, dolgunluk
-  const _meseG     =_katG("mese_cipsi")+_katG("viski_mese"); // Meşe — vanilya, tanen
-  const _tarcinG   =_katG("tarcin");       // Tarçın — baharat
-  const _karanfilG =_katG("karanfil");     // Karanfil — baharat
-  const _zencefilG =_katG("zencefil");     // Zencefil — keskin baharat
-  const _kakuleG   =_katG("kakule");       // Kakule — aromatik baharat
-  const _kisniscG  =_katG("kisnisch");     // Kişniş — turunçgil, çiçeksi
-  const _karadutG  =_katG("karadut")+_katG("dut_kuru"); // Dut — meyve
-  const _limeG     =_katG("kuru_lime");    // Lime — turunçgil
-  const _maviCayG  =_katG("mavi_kelebek");// Mavi kelebek çayı — renk, çiçek
+  const _yulafEzmG = _bk('yulafEzmG', ['yulaf_ezm']);    // Yulaf ezmesi — kremsilik, dolgunluk
+  const _maltodexG = _bk('maltodexG', ['maltodex']);     // Maltodextrin — gövde, dolgunluk
+  const _meseG = _bk('meseG', ['mese_cipsi', 'viski_mese']); // Meşe — vanilya, tanen
+  const _tarcinG = _bk('tarcinG', ['tarcin']);       // Tarçın — baharat
+  const _karanfilG = _bk('karanfilG', ['karanfil']);     // Karanfil — baharat
+  const _zencefilG = _bk('zencefilG', ['zencefil']);     // Zencefil — keskin baharat
+  const _kakuleG = _bk('kakuleG', ['kakule']);       // Kakule — aromatik baharat
+  const _kisniscG = _bk('kisniscG', ['kisnisch']);     // Kişniş — turunçgil, çiçeksi
+  const _karadutG = _bk('karadutG', ['karadut', 'dut_kuru']); // Dut — meyve
+  const _limeG = _bk('limeG', ['kuru_lime']);    // Lime — turunçgil
+  const _maviCayG = _bk('maviCayG', ['mavi_kelebek']);// Mavi kelebek çayı — renk, çiçek
           // dup-final: const _beyazCayG =_katG("beyaz_cay");    // Beyaz çay — hafif, bitki
-  const _nobetSekG =_katG("nobet_sek")+_katG("candi_s")+_katG("koyu_candy"); // Şekerler
-  const _karabibrG =_katG("karabiber");   // Karabiber — baharat
-  const _kestaG    =_katG("kestane");      // Kestane — tatlı, toprak
-  const _muskatG   =_katG("muskat");       // Muskat — baharat, yoğun
+  const _nobetSekG = _bk('nobetSekG', ['nobet_sek', 'candi_s', 'koyu_candy']); // Şekerler
+  const _karabibrG = _bk('karabibrG', ['karabiber']);   // Karabiber — baharat
+  const _kestaG = _bk('kestaG', ['kestane']);      // Kestane — tatlı, toprak
+  const _muskatG = _bk('muskatG', ['muskat']);       // Muskat — baharat, yoğun
 
   // Su profili
   const _ppm=S.suMineralleri&&S.suMineralleri.length?suProfiliHesapla(S.suMineralleri,_hacim):null;
@@ -18750,7 +18755,7 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
           // fermantasyonda pigmentleri parçalanır — renk etkisi görünmez.
 
           // [1] Mavi Kelebek Çayı — ternasin anthocyanin, pH'a göre renk
-          const _mbG=_katG("mavi_kelebek");
+          const _mbG = _bk('mbG', ['mavi_kelebek']);
           if(_mbG>=2){
             const _phTahmin=typeof _pH_est!=="undefined"?_pH_est:4.3;
             if(_phTahmin<=4.0)
@@ -18764,15 +18769,15 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
                 acik:('Mavi Kelebek Çayı '+_mbG.toFixed(1)+'g/10L — yüksek pH\'da parlak mavi')});
           }
           // [2] Hibiskus — en güçlü doğal kırmızı pigment
-          const _hbG=_katG("hibiskus");
+          const _hbG = _bk('hbG', ['hibiskus']);
           if(_hbG>=5) ef.push({ikon:"🔴",renk:"#C2003C",ad:"Kırmızı-Pembe",
             acik:('Hibiskus '+_hbG.toFixed(0)+'g/10L — canlı kırmızı, fermantasyonda stabil')});
           // [3] Matcha — klorofil, güçlü yeşil
-          const _mtG=_katG("matcha");
+          const _mtG = _bk('mtG', ['matcha']);
           if(_mtG>=3) ef.push({ikon:"🟢",renk:"#2D8653",ad:"Yeşil",
             acik:('Matcha '+_mtG.toFixed(1)+'g/10L — klorofil bazlı yeşil ton. Post-ferm ekle (ısıda solar)')});
           // [4] Zerdeçal — kurkumin, alkali kararlı sarı
-          const _zrG=_katG("turmerik");
+          const _zrG = _bk('zrG', ['turmerik']);
           if(_zrG>=3) ef.push({ikon:"🟡",renk:"#E6AC00",ad:"Parlak Sarı",
             acik:('Zerdeçal '+_zrG.toFixed(1)+'g/10L — kurkumin çok stabil, güçlü sarı renk')});
           // [5] Safran — krosin, en stabil doğal sarı
@@ -18784,11 +18789,11 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
           else if(_karadutG>=20) ef.push({ikon:"🟣",renk:"#7B3F9A",ad:"Hafif Mor",
             acik:('Karadut '+_karadutG.toFixed(0)+'g/10L — renk var ama fermantasyonda kısmen solar')});
           // [7] Vişne konsantre — stabil koyu kırmızı
-          const _vsKG=_katG("visne_konsantre");
+          const _vsKG = _bk('vsKG', ['visne_konsantre']);
           if(_vsKG>=30) ef.push({ikon:"🍒",renk:"#8B0000",ad:"Vişne Kırmızısı",
             acik:('Vişne konsantre '+_vsKG.toFixed(0)+'mL/10L — derin kırmızı, Kriek rengi')});
           // [8] Spirulina — fikosiyananin, çok stabil değil
-          const _spG=_katG("spirulina");
+          const _spG = _bk('spG', ['spirulina']);
           if(_spG>=3) ef.push({ikon:"🔵",renk:"#0B7A75",ad:"Mavi-Yeşil",
             acik:('Spirulina '+_spG.toFixed(1)+'g/10L — şişelemede ekle, fermantasyonda tamamen bozulur')});
           // [9] Cranberry konsantre — kırmızımsı
