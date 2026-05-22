@@ -18738,7 +18738,7 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
                         : (_roastPct>=5 || _srm>20)? 'koyuluk berraklığı gizler'
                         :                            'berrak görünür';
           var renkC1 = renk_adi + ' · ' + _srm + ' SRM / ' + _rEBC + ' EBC' + _katRenkMCU + '.';
-          var renkC2 = renkSebep + '; ' + berraklik + '.';
+          var renkC2 = renkSebep.charAt(0).toUpperCase() + renkSebep.slice(1) + '; ' + berraklik + '.';
           var renkC3 = '✓ Renk profili tutarlı.';
           _ps("🎨 Renk", renkC1 + ' ' + renkC2 + ' ' + renkC3, profRows);
         }
@@ -18931,14 +18931,16 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
         }
         if(_lakAsit) _ps("💧 Laktik Asit", (_lakMl/(_hacim||11)*10).toFixed(1)+'mL/10L → pH düşürücü, hafif ekşilik', profRows);
 
-        // Adim 137-G P4 fix-3 (Asama 2): ALKOL — 3 parca (deger / kategori anlami / verdict).
+        // Adim 137-G P4 fix-4 (Asama 2 fix): ALKOL bandi incelt — %3.5-5 sessionable / %5-6.5 standart /
+        // %6.5-9 guclu-sipping / %9+ cok guclu. %5.0 ile %6.2 farkli banda dussun.
         if (_abv > 0.5) {
           var aKat, aProz;
-          if (_abv < 4.5)       { aKat = 'sessionable';     aProz = 'düşük alkol — birkaç bardak rahat içilir, oturma birası karakteri'; }
-          else if (_abv < 6.5)  { aKat = 'standart';        aProz = 'normal güç — günlük bira aralığı, içicilik yüksek'; }
-          else if (_abv < 9)    { aKat = 'güçlü, sipping';  aProz = 'belirgin alkol — yavaş yudumlanır, ısınma hissi bekleniyor'; }
-          else if (_abv < 11)   { aKat = 'çok güçlü';       aProz = 'yoğun alkol — küçük servis, sipping/snifter kullanımı uygun'; }
-          else                  { aKat = 'extreme';         aProz = 'aşırı alkol — barleywine/eisbock seviyesi, çok yavaş içim'; }
+          if (_abv < 3.5)        { aKat = 'çok hafif/alkolsüze yakın'; aProz = 'çok düşük alkol — neredeyse alkolsüz, suya yakın bir his'; }
+          else if (_abv <= 5)    { aKat = 'sessionable';                aProz = 'günlük bira aralığı, birden fazla bardak rahat içilir'; }
+          else if (_abv <= 6.5)  { aKat = 'standart';                   aProz = 'ölçülü içilir, session değil — orta güç bira'; }
+          else if (_abv < 9)     { aKat = 'güçlü, sipping';             aProz = 'belirgin alkol — yavaş yudumlanır, ısınma hissi bekleniyor'; }
+          else if (_abv < 11)    { aKat = 'çok güçlü';                  aProz = 'yoğun alkol — küçük servis, sipping/snifter kullanımı uygun'; }
+          else                   { aKat = 'extreme';                    aProz = 'aşırı alkol — barleywine/eisbock seviyesi, çok yavaş içim'; }
           var alkC1 = '%' + _abv.toFixed(2) + ' ABV (' + aKat + ').';
           var alkC2 = aProz.charAt(0).toUpperCase() + aProz.slice(1) + '.';
           var alkC3 = (_abv >= 10) ? '⚠ Çok yüksek alkol — ferment sıcaklığı + maya seçimi dikkatli olmalı.'
@@ -18952,7 +18954,7 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
           var kProz, kVerdict;
           if (kV < 1.8)        { kProz = 'çok yumuşak, az köpürür; ağız hissi dolgun, asit/keskinlik bastırılır'; kVerdict = '⚠ Düşük taraf (cask-ale aralığı) — spritzig bira için 2.2+ hedeflenir.'; }
           else if (kV < 2.4)   { kProz = 'orta-yumuşak; klasik ale aralığı, dengeli ağız hissi'; kVerdict = '✓ Karbonasyon dengeli.'; }
-          else if (kV < 3.0)   { kProz = 'canlı, ferah; CO₂ damağı yıkıyor, crisp hissini ve hop aromasını öne çıkarıyor'; kVerdict = '✓ Karbonasyon dengeli.'; }
+          else if (kV < 3.0)   { kProz = 'canlı, ferah; CO₂ damağı yıkıyor, crisp hissini ve aromayı öne çıkarıyor'; kVerdict = '✓ Karbonasyon dengeli.'; }
           else if (kV <= 3.5)  { kProz = 'yüksek karbonasyon; spritzig/şampanya benzeri kabarcık, asit algısı öne çıkar'; kVerdict = '✓ Karbonasyon dengeli.'; }
           else                 { kProz = 'çok yüksek karbonasyon; bardakta yoğun köpük patlaması, asit algısı keskinleşir'; kVerdict = '⚠ Üst sınır (>3.5 vol) — şişe basıncı + maya tolerans kontrolü.'; }
           var kC1 = 'Hedef ' + kV + ' vol CO₂.';
