@@ -17430,6 +17430,11 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
   _tEkle(_oatPct,  10,25,"hafif kremsilik (yulaf)","kremsi yulaf dolgunluğu");
   _tEkle(_smokePct,8,25, "hafif duman nüansı","yoğun duman ve et");
   _tEkle(_honPct,  4,10, "hafif bal tatlılığı","belirgin bal aroması");
+  // Adim 137-G Asama 3 fix-A: BAZ MALT (pilsner/pale) tat notasi — specialty toplami disindaki kalan oran.
+  // Sade pilsner (100% baz malt) TAT bos kalmasin.
+  var _basePct = Math.max(0, 100 - ((_whtPct||0) + (_munPct||0) + (_crsPct||0) + (_roastPct||0) + (_chocPct||0) + (_biscPct||0) + (_smokePct||0) + (_rypPct||0) + (_oatPct||0) + (_honPct||0)));
+  if (_basePct >= 75)      _tPush("dolu, bal-tahıl malt karakteri", 'baskin');
+  else if (_basePct >= 40) _tPush("tahıl-ekmek maltlığı", 'hafif');
   // Katkılar — gram/10L bazlı, gerçek eşikler
   _curKatT = 'katki';
   _tEkle(_laktozG, 120,300,"hafif kremsi sütlülük","kremsi sütlü tatlılık (laktoz belirgin)");
@@ -17438,11 +17443,26 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
   _tEkle(_limonG,  5,12,  "hafif turunçgil","belirgin limon/citrus");
   _tEkle(_damlG,   3,8,   "hafif reçine","çam reçinesi");
   _tEkle(_hindG,   4,12,  "hindistan cevizi nüansı","belirgin hindistan cevizi");
-  // Hop acılığı — IBU bazlı, sadece gerçek acılık
+  // Adim 137-G Asama 3 fix-B: HOP TAT zinciri — ACILIK ve DRY-HOP LEZZET bagimsiz if'lerle.
+  // Acilik notasi IBU bazli; dry-hop lezzet notasi IBU'dan bagimsiz dhPer10L bazli.
   _curKatT = 'hop';
-  if(_ibu>=50)         _tPush("sert, uzun acı bitiş", 'baskin');
-  else if(_ibu>=30&&_dhPer10L<2) _tPush("dengeli belirgin acılık", 'baskin');
-  else if(_ibu>=15&&_dhPer10L>=3) _tPush("hop aroması ön planda, acılık ikincil", 'hafif');
+  // Acılık (IBU bazlı, tam kapsam)
+  if      (_ibu >= 50) _tPush("sert, uzun acı bitiş", 'baskin');
+  else if (_ibu >= 30) _tPush("dengeli belirgin acılık", 'baskin');
+  else if (_ibu >= 15) _tPush("ölçülü hop acılığı", 'hafif');
+  else if (_ibu >= 8)  _tPush("hafif hop acılığı arka planda", 'hafif');
+  // Dry-hop lezzeti (acılıktan bağımsız — yüksek IBU + yüksek dry hop birlikte çıkabilir)
+  if      (_dhPer10L >= 5) _tPush("yoğun hop lezzeti — tropikal/citrus damakta belirgin", 'baskin');
+  else if (_dhPer10L >= 3) _tPush("hop lezzeti öne çıkıyor — tropikal/citrus damakta", 'baskin');
+  else if (_dhPer10L >= 2) _tPush("hafif hop lezzeti — taze yeşil nüans", 'hafif');
+  // Adim 137-G Asama 3 fix-C: MAYA esteri TAT'a da — KOKU'daki tip karakteri TAT'a yansir.
+  _curKatT = 'maya';
+  if      (_mayaTip === "wheat")   _tPush("muz-karanfil ester potansiyeli (mayaya/sıcaklığa göre değişir)", 'baskin');
+  else if (_mayaTip === "wit")     _tPush("turunçgil ve kişniş baharatı, hafif fenolik", 'baskin');
+  else if (_mayaTip === "belcika") _tPush("meyve ve hafif baharat ester potansiyeli", 'baskin');
+  else if (_mayaTip === "saison")  _tPush("biber notalı, kuru fenolik karakter", 'baskin');
+  else if (_mayaTip === "kveik")   _tPush("narenciye ve tropikal ester baskınlığı", 'baskin');
+  else if (_mayaTip === "lager")   _tPush("temiz lager karakteri, minimal ester", 'hafif');
   // Laktik asit / sour etkisi
   _curKatT = 'katki';
   if(_lakAsit){
@@ -17550,6 +17570,8 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
   if(_rypPct>=15)    _kPush("çavdar, baharatlı-bitkisel", _rypPct>=30?'baskin':'hafif');
   if(_oatPct>=15)    _kPush("yulaflı kremsilik, hafif şeker", 'hafif');
   if(_biscPct>=8)    _kPush("bisküvi, tost", _biscPct>=15?'baskin':'hafif');
+  // Adim 137-G Asama 3 fix-A: BAZ MALT (pilsner/pale) koku notasi — sade biralarda hafif tahil-ekmek aromasi.
+  if (_basePct >= 60) _kPush("tahıl-ekmek aroması", 'hafif');
   // Katkı kokusu — eşikli
   _curKatK = 'katki';
   if(_vanilG>=5)     _kPush("vanilya", _vanilG>=9?'baskin':'hafif');
@@ -18683,12 +18705,20 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
                        : (arr.length >= 6)  ? 'katmanlı'
                        : (arr.length >= 3)  ? 'dengeli'
                        :                       'sade ve temiz';
-          // c1 — baskınlar
-          var c1 = ust.length
-            ? 'Baskın: ' + ust.map(function(n){ return n.txt; }).join(', ') + '.'
-            : (alt.length ? 'Belirgin baskın nota yok; sadece arka plan nüansları var.' : 'Belirgin nota oluşmadı.');
+          // c1 — baskınlar (yoksa hafif notalari ust'e cikar — "yumusak nuanslar" dili)
+          // Adim 137-G Asama 3 fix-D: 0 baskin durumunda yumusak nuans ifadesi
+          var c1, _arkaListele = true;
+          if (ust.length) {
+            c1 = 'Baskın: ' + ust.map(function(n){ return n.txt; }).join(', ') + '.';
+          } else if (alt.length) {
+            c1 = 'Öne çıkan yumuşak nüanslar: ' + alt.map(function(n){ return n.txt; }).join(', ') + '.';
+            _arkaListele = false; // c2'de tekrar listeleme
+          } else {
+            c1 = 'Belirgin nota oluşmadı.';
+            _arkaListele = false;
+          }
           // c2 — destekleyen + karakter
-          var arkada = alt.length ? 'Arkada ' + alt.map(function(n){ return n.txt; }).join(', ') + '; ' : '';
+          var arkada = (_arkaListele && alt.length) ? 'Arkada ' + alt.map(function(n){ return n.txt; }).join(', ') + '; ' : '';
           var c2 = arkada + karakter + ', ' + yogunluk + ' bir profil.';
           // c3 — verdict
           var cokYaris = ust.length >= 5;
