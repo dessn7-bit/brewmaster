@@ -15301,7 +15301,7 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
   // _BUCKETS map'i bucket adlarini ID dizilerine baglar (kD dedup icin kullanilir).
   var _BUCKETS = {};
   function _bk(ad, ids){ _BUCKETS[ad] = ids; var s = 0; for (var i = 0; i < ids.length; i++) s += _katG(ids[i]); return s; }
-  const _katHoneyG=(_katG("bal_tozu")||0); // Katkı bal tozu (bal malt için _honPct kullanılır)
+  const _katHoneyG = _bk('katHoneyG', ['bal_tozu']); // Katkı bal tozu (bal malt için _honPct kullanılır)
   const _laktozG = _bk('laktozG', ['lak']);      // Laktoz katkısı — >150g/10L anlamlı
   const _vanilG = _bk('vanilG', ['vanilya']);  // >3g/10L ince, >8 belirgin
   const _kakaoG = _bk('kakaoG', ['kakao']);    // >20g/10L anlamlı
@@ -18869,172 +18869,172 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
         }
 
         const kD=[];
+        // Adim sub-sprint 2 ek-B/C: ID-tabanli dedup — kapsananIds Set ve _kapsa() helper.
+        // Her ozel push'tan sonra _kapsa('xxxG') cagrilir; xxxG -> _BUCKETS[xxxG] -> id listesi -> Set.
+        // Generic dongu kapsananIds.has(k.id) kontrolu ile substring match yerine ID-tabanli dedup yapar.
+        var kapsananIds = new Set();
+        function _kapsa(b){ var a = _BUCKETS[b] || []; for (var i = 0; i < a.length; i++) kapsananIds.add(a[i]); }
         // Temel katkılar
-        if(_laktozG>=60)  kD.push('Laktoz '+_laktozG.toFixed(0)+'g/10L → kalıcı tatlılık, kremsilik, FG yükselir');
-        if(_vanilG>=1.5)  kD.push('Vanilya '+_vanilG.toFixed(1)+'g/10L → vanilya aroması, tatlı-kremsi tat');
-        if(_kakaoG>=8)    kD.push('Kakao '+_kakaoG.toFixed(0)+'g/10L → bitter çikolata, koyu meyve');
-        if(_limonG>=3)    kD.push('Limon otu '+_limonG.toFixed(0)+'g/10L → taze turunçgil, limon');
-        if(_hindG>=2)     kD.push('Hindistan cevizi '+_hindG.toFixed(0)+'g/10L → tropikal, egzotik');
-        if(_katHoneyG>=10) kD.push('Bal/Bal tozu '+_katHoneyG.toFixed(0)+'g/10L → tatlı bal aroması, hafif çiçeksi');
-        if(_damlG>=2)     kD.push('Damla sakızı '+_damlG.toFixed(0)+'g/10L → çam reçinesi, yoğun aroma');
-        if(_honPct>=8||_katHoneyG>=10) kD.push('Bal '+(Math.max(_honPct,0)+_katHoneyG).toFixed(0)+' → tatlı bal aroması, çiçeksi koku');
+        if(_laktozG>=60) { kD.push('Laktoz '+_laktozG.toFixed(0)+'g/10L → kalıcı tatlılık, kremsilik, FG yükselir'); _kapsa('laktozG'); }
+        if(_vanilG>=1.5) { kD.push('Vanilya '+_vanilG.toFixed(1)+'g/10L → vanilya aroması, tatlı-kremsi tat'); _kapsa('vanilG'); }
+        if(_kakaoG>=8) { kD.push('Kakao '+_kakaoG.toFixed(0)+'g/10L → bitter çikolata, koyu meyve'); _kapsa('kakaoG'); }
+        if(_limonG>=3) { kD.push('Limon otu '+_limonG.toFixed(0)+'g/10L → taze turunçgil, limon'); _kapsa('limonG'); }
+        if(_hindG>=2) { kD.push('Hindistan cevizi '+_hindG.toFixed(0)+'g/10L → tropikal, egzotik'); _kapsa('hindG'); }
+        if(_katHoneyG>=10) { kD.push('Bal/Bal tozu '+_katHoneyG.toFixed(0)+'g/10L → tatlı bal aroması, hafif çiçeksi'); _kapsa('katHoneyG'); }
+        if(_damlG>=2) { kD.push('Damla sakızı '+_damlG.toFixed(0)+'g/10L → çam reçinesi, yoğun aroma'); _kapsa('damlG'); }
+        if(_honPct>=8||_katHoneyG>=10) { kD.push('Bal '+(Math.max(_honPct,0)+_katHoneyG).toFixed(0)+' → tatlı bal aroması, çiçeksi koku'); _kapsa('katHoneyG'); }
         // Dolgunluk katkıları
-        if(_yulafEzmG>=20) kD.push('Yulaf ezmesi '+_yulafEzmG.toFixed(0)+'g/10L → kremsilik, yumuşak gövde');
-        if(_maltodexG>=20) kD.push('Maltodextrin '+_maltodexG.toFixed(0)+'g/10L → gövde+dolgunluk, tat nötr');
+        if(_yulafEzmG>=20) { kD.push('Yulaf ezmesi '+_yulafEzmG.toFixed(0)+'g/10L → kremsilik, yumuşak gövde'); _kapsa('yulafEzmG'); }
+        if(_maltodexG>=20) { kD.push('Maltodextrin '+_maltodexG.toFixed(0)+'g/10L → gövde+dolgunluk, tat nötr'); _kapsa('maltodexG'); }
         // Şeker katkıları
-        if(_nobetSekG>=50) kD.push('Şeker katkısı '+_nobetSekG.toFixed(0)+'g/10L → OG artırır, kuru bitiş');
+        if(_nobetSekG>=50) { kD.push('Şeker katkısı '+_nobetSekG.toFixed(0)+'g/10L → OG artırır, kuru bitiş'); _kapsa('nobetSekG'); }
         // Meşe/ahşap
-        if(_meseG>=5)     kD.push('Meşe '+_meseG.toFixed(0)+'g/10L → vanilya, tanen, oakiness, olgunlaşma');
+        if(_meseG>=5) { kD.push('Meşe '+_meseG.toFixed(0)+'g/10L → vanilya, tanen, oakiness, olgunlaşma'); _kapsa('meseG'); }
         // Baharatlar — eşik değerler küçük (güçlü aromalı)
-        if(_tarcinG>=1)   kD.push('Tarçın '+_tarcinG.toFixed(1)+'g/10L → sıcak baharat, tatlı-acı');
-        if(_karanfilG>=0.5) kD.push('Karanfil '+_karanfilG.toFixed(1)+'g/10L → yoğun baharat, fenolik');
-        if(_zencefilG>=2) kD.push('Zencefil '+_zencefilG.toFixed(1)+'g/10L → keskin, sıcak baharat');
-        if(_kakuleG>=0.5) kD.push('Kakule '+_kakuleG.toFixed(1)+'g/10L → aromatik, egzotik baharat');
-        if(_muskatG>=0.5) kD.push('Muskat '+_muskatG.toFixed(1)+'g/10L → yoğun baharat, fıstık-ağaç');
-        if(_karabibrG>=1) kD.push('Karabiber '+_karabibrG.toFixed(1)+'g/10L → keskin, biber');
+        if(_tarcinG>=1) { kD.push('Tarçın '+_tarcinG.toFixed(1)+'g/10L → sıcak baharat, tatlı-acı'); _kapsa('tarcinG'); }
+        if(_karanfilG>=0.5) { kD.push('Karanfil '+_karanfilG.toFixed(1)+'g/10L → yoğun baharat, fenolik'); _kapsa('karanfilG'); }
+        if(_zencefilG>=2) { kD.push('Zencefil '+_zencefilG.toFixed(1)+'g/10L → keskin, sıcak baharat'); _kapsa('zencefilG'); }
+        if(_kakuleG>=0.5) { kD.push('Kakule '+_kakuleG.toFixed(1)+'g/10L → aromatik, egzotik baharat'); _kapsa('kakuleG'); }
+        if(_muskatG>=0.5) { kD.push('Muskat '+_muskatG.toFixed(1)+'g/10L → yoğun baharat, fıstık-ağaç'); _kapsa('muskatG'); }
+        if(_karabibrG>=1) { kD.push('Karabiber '+_karabibrG.toFixed(1)+'g/10L → keskin, biber'); _kapsa('karabibrG'); }
         // Kişniş (Wit birasının klasik baharatı)
-        if(_kisniscG>=1)  kD.push('Kişniş '+_kisniscG.toFixed(1)+'g/10L → turunçgil, çiçeksi (witbier klasiği)');
+        if(_kisniscG>=1) { kD.push('Kişniş '+_kisniscG.toFixed(1)+'g/10L → turunçgil, çiçeksi (witbier klasiği)'); _kapsa('kisniscG'); }
         // Meyve katkıları
-        if(_karadutG>=10) kD.push('Dut '+_karadutG.toFixed(0)+'g/10L → derin meyve, tanin, renk');
-        if(_limeG>=3)     kD.push('Lime '+_limeG.toFixed(1)+'g/10L → keskin turunçgil, taze');
-        if(_kestaG>=10)   kD.push('Kestane '+_kestaG.toFixed(0)+'g/10L → tatlı, toprak, fındık');
+        if(_karadutG>=10) { kD.push('Dut '+_karadutG.toFixed(0)+'g/10L → derin meyve, tanin, renk'); _kapsa('karadutG'); }
+        if(_limeG>=3) { kD.push('Lime '+_limeG.toFixed(1)+'g/10L → keskin turunçgil, taze'); _kapsa('limeG'); }
+        if(_kestaG>=10) { kD.push('Kestane '+_kestaG.toFixed(0)+'g/10L → tatlı, toprak, fındık'); _kapsa('kestaG'); }
         // Çay/bitki
-        if(_maviCayG>=2)  kD.push('Mavi kelebek çayı '+_maviCayG.toFixed(0)+'g/10L → mavi/mor renk, çiçeksi');
-        if(_beyazCayG>=2) kD.push('Beyaz çay '+_beyazCayG.toFixed(0)+'g/10L → hafif bitki, nazik buket');
+        if(_maviCayG>=2) { kD.push('Mavi kelebek çayı '+_maviCayG.toFixed(0)+'g/10L → mavi/mor renk, çiçeksi'); _kapsa('maviCayG'); }
+        if(_beyazCayG>=2) { kD.push('Beyaz çay '+_beyazCayG.toFixed(0)+'g/10L → hafif bitki, nazik buket'); _kapsa('beyazCayG'); }
         // Meyve katkıları
-        if(_cilikG>=20)    kD.push('Çilek '+_cilikG.toFixed(0)+'g/10L → tatlı kırmızı meyve');
-        if(_ahududuG>=20)  kD.push('Frambuaz '+_ahududuG.toFixed(0)+'g/10L → ekşi-tatlı kırmızı');
-        if(_visneG>=20)    kD.push('Vişne '+_visneG.toFixed(0)+'g/10L → derin ekşi meyve, Kriek');
-        if(_seftaliG>=20)  kD.push('Şeftali '+_seftaliG.toFixed(0)+'g/10L → tropikal tatlı');
-        if(_mangoG>=20)    kD.push('Mango '+_mangoG.toFixed(0)+'g/10L → yoğun tropikal');
-        if(_pasionG>=20)   kD.push('Passion fruit '+_pasionG.toFixed(0)+'g/10L → egzotik ekşi');
-        if(_guavaG>=20)    kD.push('Guava '+_guavaG.toFixed(0)+'g/10L → tropikal-egzotik');
-        if(_hibiskusG>=5)  kD.push('Hibiskus '+_hibiskusG.toFixed(0)+'g/10L → kırmızı renk, çiçek');
+        if(_cilikG>=20) { kD.push('Çilek '+_cilikG.toFixed(0)+'g/10L → tatlı kırmızı meyve'); _kapsa('cilikG'); }
+        if(_ahududuG>=20) { kD.push('Frambuaz '+_ahududuG.toFixed(0)+'g/10L → ekşi-tatlı kırmızı'); _kapsa('ahududuG'); }
+        if(_visneG>=20) { kD.push('Vişne '+_visneG.toFixed(0)+'g/10L → derin ekşi meyve, Kriek'); _kapsa('visneG'); }
+        if(_seftaliG>=20) { kD.push('Şeftali '+_seftaliG.toFixed(0)+'g/10L → tropikal tatlı'); _kapsa('seftaliG'); }
+        if(_mangoG>=20) { kD.push('Mango '+_mangoG.toFixed(0)+'g/10L → yoğun tropikal'); _kapsa('mangoG'); }
+        if(_pasionG>=20) { kD.push('Passion fruit '+_pasionG.toFixed(0)+'g/10L → egzotik ekşi'); _kapsa('pasionG'); }
+        if(_guavaG>=20) { kD.push('Guava '+_guavaG.toFixed(0)+'g/10L → tropikal-egzotik'); _kapsa('guavaG'); }
+        if(_hibiskusG>=5) { kD.push('Hibiskus '+_hibiskusG.toFixed(0)+'g/10L → kırmızı renk, çiçek'); _kapsa('hibiskusG'); }
         // Çiçek katkıları
-        if(_lavantiG>=1)   kD.push('Lavanta '+_lavantiG.toFixed(1)+'g/10L → çiçeksi, parfümsü');
-        if(_gulG>=2)       kD.push('Gül '+_gulG.toFixed(0)+'g/10L → romantik çiçek');
-        if(_elderG>=2)     kD.push('Mürver çiçeği '+_elderG.toFixed(0)+'g/10L → muscat, bahar');
+        if(_lavantiG>=1) { kD.push('Lavanta '+_lavantiG.toFixed(1)+'g/10L → çiçeksi, parfümsü'); _kapsa('lavantiG'); }
+        if(_gulG>=2) { kD.push('Gül '+_gulG.toFixed(0)+'g/10L → romantik çiçek'); _kapsa('gulG'); }
+        if(_elderG>=2) { kD.push('Mürver çiçeği '+_elderG.toFixed(0)+'g/10L → muscat, bahar'); _kapsa('elderG'); }
         // Kahve & çikolata
-        if(_espressoG>=30) kD.push('Espresso '+_espressoG.toFixed(0)+'mL/10L → yoğun kahve');
-        if(_kahveCekG>=15) kD.push('Kahve çekirdeği '+_kahveCekG.toFixed(0)+'g/10L → kahve-çikolata');
-        if(_bitterCikG>=20)kD.push('Bitter çikolata '+_bitterCikG.toFixed(0)+'g/10L → yoğun kakao');
-        if(_fistikG>=20)   kD.push('Fıstık ezmesi '+_fistikG.toFixed(0)+'g/10L → kremsi fıstık');
+        if(_espressoG>=30) { kD.push('Espresso '+_espressoG.toFixed(0)+'mL/10L → yoğun kahve'); _kapsa('espressoG'); }
+        if(_kahveCekG>=15) { kD.push('Kahve çekirdeği '+_kahveCekG.toFixed(0)+'g/10L → kahve-çikolata'); _kapsa('kahveCekG'); }
+        if(_bitterCikG>=20) { kD.push('Bitter çikolata '+_bitterCikG.toFixed(0)+'g/10L → yoğun kakao'); _kapsa('bitterCikG'); }
+        if(_fistikG>=20) { kD.push('Fıstık ezmesi '+_fistikG.toFixed(0)+'g/10L → kremsi fıstık'); _kapsa('fistikG'); }
         // Şeker katkıları
-        if(_mapleG>=30)    kD.push('Akçaağaç şurubu '+_mapleG.toFixed(0)+'mL/10L → karamel-ağaç');
-        if(_hamBalG>=30)   kD.push('Ham bal '+_hamBalG.toFixed(0)+'g/10L → çiçeksi bal');
-        if(_treacleG>=15)  kD.push('Treacle '+_treacleG.toFixed(0)+'g/10L → bitter karamel, dark');
+        if(_mapleG>=30) { kD.push('Akçaağaç şurubu '+_mapleG.toFixed(0)+'mL/10L → karamel-ağaç'); _kapsa('mapleG'); }
+        if(_hamBalG>=30) { kD.push('Ham bal '+_hamBalG.toFixed(0)+'g/10L → çiçeksi bal'); _kapsa('hamBalG'); }
+        if(_treacleG>=15) { kD.push('Treacle '+_treacleG.toFixed(0)+'g/10L → bitter karamel, dark'); _kapsa('treacleG'); }
         // Egzotik
-        if(_matchaG>=3)    kD.push('Matcha '+_matchaG.toFixed(1)+'g/10L → bitkisel, yeşil renk');
-        if(_coconutG>=30)  kD.push('Hindistan cevizi sütü '+_coconutG.toFixed(0)+'mL/10L → kremsi');
-        if(_jalaG>=5)      kD.push('Jalapeño '+_jalaG.toFixed(0)+'g/10L → biber acılığı');
+        if(_matchaG>=3) { kD.push('Matcha '+_matchaG.toFixed(1)+'g/10L → bitkisel, yeşil renk'); _kapsa('matchaG'); }
+        if(_coconutG>=30) { kD.push('Hindistan cevizi sütü '+_coconutG.toFixed(0)+'mL/10L → kremsi'); _kapsa('coconutG'); }
+        if(_jalaG>=5) { kD.push('Jalapeño '+_jalaG.toFixed(0)+'g/10L → biber acılığı'); _kapsa('jalaG'); }
         // Adjunct
-        if(_yulafEzmGG>=20) kD.push('Yulaf ezmesi '+_yulafEzmGG.toFixed(0)+'g/10L → kremsilik');
-        if(_balTozG>=10)    kD.push('Bal tozu '+_balTozG.toFixed(0)+'g/10L → bal tatlılığı');
+        if(_yulafEzmGG>=20) { kD.push('Yulaf ezmesi '+_yulafEzmGG.toFixed(0)+'g/10L → kremsilik'); _kapsa('yulafEzmGG'); }
+        if(_balTozG>=10) { kD.push('Bal tozu '+_balTozG.toFixed(0)+'g/10L → bal tatlılığı'); _kapsa('balTozG'); }
         // Şeker katkıları
-        if(_katG("koyu_candy")>=20) kD.push('Koyu candi '+_katG("koyu_candy").toFixed(0)+'g/10L → bitter karamel, D-180');
-        if(_katG("erik")>=15)  kD.push('Erik/kuru erik '+_katG("erik").toFixed(0)+'g/10L → koyu kuru meyve');
-        if(_finLimG>=3)       kD.push('Parmak limonu '+_finLimG.toFixed(0)+'g/10L → citrus havyarı');
-        if(_mapleG>=20)    kD.push('Akçaağaç '+_mapleG.toFixed(0)+'mL/10L → karamel-ağaç');
-        if(_hamBalG>=20)   kD.push('Ham bal '+_hamBalG.toFixed(0)+'g/10L → çiçeksi bal');
-        if(_invertG>=30)    kD.push('İnvert şeker '+_invertG.toFixed(0)+'g/10L → temiz, İngiliz tarzı');
-        if(_agaveGG>=30)    kD.push('Agave '+_agaveGG.toFixed(0)+'mL/10L → tropikal tatlılık');
-        if(_demerGG>=30)    kD.push('Demerara '+_demerGG.toFixed(0)+'g/10L → ham şeker, melasımsı');
-        if(_jaggeryGG>=20)  kD.push('Jaggery '+_jaggeryGG.toFixed(0)+'g/10L → palmiye tatlılığı');
-        if(_piloG>=20)      kD.push('Piloncillo '+_piloG.toFixed(0)+'g/10L → koyu Meksika şekeri');
-        if(_kUzumG>=20)     kD.push('Kuru üzüm '+_kUzumG.toFixed(0)+'g/10L → meyvemsi tatlılık');
-        if(_sorgumG>=20)    kD.push('Sorgum '+_sorgumG.toFixed(0)+'mL/10L → glütensiz tatlılık');
+        if(_katG("koyu_candy")>=20) { kD.push('Koyu candi '+_katG("koyu_candy").toFixed(0)+'g/10L → bitter karamel, D-180'); kapsananIds.add('koyu_candy'); }
+        if(_katG("erik")>=15) { kD.push('Erik/kuru erik '+_katG("erik").toFixed(0)+'g/10L → koyu kuru meyve'); kapsananIds.add('erik'); }
+        if(_finLimG>=3) { kD.push('Parmak limonu '+_finLimG.toFixed(0)+'g/10L → citrus havyarı'); _kapsa('finLimG'); }
+        if(_mapleG>=20) { kD.push('Akçaağaç '+_mapleG.toFixed(0)+'mL/10L → karamel-ağaç'); _kapsa('mapleG'); }
+        if(_hamBalG>=20) { kD.push('Ham bal '+_hamBalG.toFixed(0)+'g/10L → çiçeksi bal'); _kapsa('hamBalG'); }
+        if(_invertG>=30) { kD.push('İnvert şeker '+_invertG.toFixed(0)+'g/10L → temiz, İngiliz tarzı'); _kapsa('invertG'); }
+        if(_agaveGG>=30) { kD.push('Agave '+_agaveGG.toFixed(0)+'mL/10L → tropikal tatlılık'); _kapsa('agaveGG'); }
+        if(_demerGG>=30) { kD.push('Demerara '+_demerGG.toFixed(0)+'g/10L → ham şeker, melasımsı'); _kapsa('demerGG'); }
+        if(_jaggeryGG>=20) { kD.push('Jaggery '+_jaggeryGG.toFixed(0)+'g/10L → palmiye tatlılığı'); _kapsa('jaggeryGG'); }
+        if(_piloG>=20) { kD.push('Piloncillo '+_piloG.toFixed(0)+'g/10L → koyu Meksika şekeri'); _kapsa('piloG'); }
+        if(_kUzumG>=20) { kD.push('Kuru üzüm '+_kUzumG.toFixed(0)+'g/10L → meyvemsi tatlılık'); _kapsa('kUzumG'); }
+        if(_sorgumG>=20) { kD.push('Sorgum '+_sorgumG.toFixed(0)+'mL/10L → glütensiz tatlılık'); _kapsa('sorgumG'); }
         // Meyve (ek)
-        if(_kestaneG>=15)   kD.push('Kestane '+_kestaneG.toFixed(0)+'g/10L → tatlı-toprak');
-        if(_dutKuruG>=15)   kD.push('Kuru dut '+_dutKuruG.toFixed(0)+'g/10L → dut, kırmızı meyve');
-        if(_ananasG>=20)    kD.push('Ananas '+_ananasG.toFixed(0)+'g/10L → tropikal ekşi');
-        if(_karpuzG>=30)    kD.push('Karpuz '+_karpuzG.toFixed(0)+'g/10L → hafif yaz meyvesi');
-        if(_portKabG>=5)    kD.push('Portakal kabuğu '+_portKabG.toFixed(0)+'g/10L → tatlı citrus');
-        if(_greyfKabG>=5)   kD.push('Greyfurt kabuğu '+_greyfKabG.toFixed(0)+'g/10L → bitter citrus');
-        if(_kayisiG>=20)    kD.push('Kayısı/erik '+_kayisiG.toFixed(0)+'g/10L → kuru meyve tatlılığı');
-        if(_elmaKonsG>=20)  kD.push('Elma konsantres '+_elmaKonsG.toFixed(0)+'mL/10L → cider nüansı');
-        if(_hibiskusG>=5)   kD.push('Hibiskus '+_hibiskusG.toFixed(0)+'g/10L → kırmızı renk, ekşi çiçek');
-        if(_visnKonsG>=20)  kD.push('Vişne suyu '+_visnKonsG.toFixed(0)+'mL/10L → Kriek tarzı');
-        if(_pasionG>=15)    kD.push('Passion fruit '+_pasionG.toFixed(0)+'g/10L → egzotik ekşi');
-        if(_guavaG>=15)    kD.push('Guava '+_guavaG.toFixed(0)+'g/10L → tropikal');
-        if(_armutG>=20)    kD.push('Armut '+_armutG.toFixed(0)+'g/10L → hafif şarapımsı meyve');
-        if(_elmaG>=20)     kD.push('Elma '+_elmaG.toFixed(0)+'g/10L → cider nüansı');
-        if(_narEksiG>=10)    kD.push('Nar ekşisi '+_narEksiG.toFixed(0)+'mL/10L → egzotik ekşi');
-        if(_incirG>=15||_kIncirG>=15) kD.push('İncir/kuru incir → derin tatlı meyve');
-        if(_tamarindG>=10) kD.push('Tamarind '+_tamarindG.toFixed(0)+'g/10L → Asya ekşiliği');
-        if(_kusburG>=5)      kD.push('Kuşburnu '+_kusburG.toFixed(0)+'g/10L → doğal ekşilik');
-        if(_papaG>=15)      kD.push('Papaya '+_papaG.toFixed(0)+'g/10L → egzotik tropikal');
-        if(_limonKG>=10)    kD.push('Limon konsantres '+_limonKG.toFixed(0)+'mL/10L → keskin asit');
-        if(_musmulaG>=15)   kD.push('Muşmula/ayva '+_musmulaG.toFixed(0)+'g/10L → çiçeksi-tatlı');
+        if(_kestaneG>=15) { kD.push('Kestane '+_kestaneG.toFixed(0)+'g/10L → tatlı-toprak'); _kapsa('kestaneG'); }
+        if(_dutKuruG>=15) { kD.push('Kuru dut '+_dutKuruG.toFixed(0)+'g/10L → dut, kırmızı meyve'); _kapsa('dutKuruG'); }
+        if(_ananasG>=20) { kD.push('Ananas '+_ananasG.toFixed(0)+'g/10L → tropikal ekşi'); _kapsa('ananasG'); }
+        if(_karpuzG>=30) { kD.push('Karpuz '+_karpuzG.toFixed(0)+'g/10L → hafif yaz meyvesi'); _kapsa('karpuzG'); }
+        if(_portKabG>=5) { kD.push('Portakal kabuğu '+_portKabG.toFixed(0)+'g/10L → tatlı citrus'); _kapsa('portKabG'); }
+        if(_greyfKabG>=5) { kD.push('Greyfurt kabuğu '+_greyfKabG.toFixed(0)+'g/10L → bitter citrus'); _kapsa('greyfKabG'); }
+        if(_kayisiG>=20) { kD.push('Kayısı/erik '+_kayisiG.toFixed(0)+'g/10L → kuru meyve tatlılığı'); _kapsa('kayisiG'); }
+        if(_elmaKonsG>=20) { kD.push('Elma konsantres '+_elmaKonsG.toFixed(0)+'mL/10L → cider nüansı'); _kapsa('elmaKonsG'); }
+        if(_hibiskusG>=5) { kD.push('Hibiskus '+_hibiskusG.toFixed(0)+'g/10L → kırmızı renk, ekşi çiçek'); _kapsa('hibiskusG'); }
+        if(_visnKonsG>=20) { kD.push('Vişne suyu '+_visnKonsG.toFixed(0)+'mL/10L → Kriek tarzı'); _kapsa('visnKonsG'); }
+        if(_pasionG>=15) { kD.push('Passion fruit '+_pasionG.toFixed(0)+'g/10L → egzotik ekşi'); _kapsa('pasionG'); }
+        if(_guavaG>=15) { kD.push('Guava '+_guavaG.toFixed(0)+'g/10L → tropikal'); _kapsa('guavaG'); }
+        if(_armutG>=20) { kD.push('Armut '+_armutG.toFixed(0)+'g/10L → hafif şarapımsı meyve'); _kapsa('armutG'); }
+        if(_elmaG>=20) { kD.push('Elma '+_elmaG.toFixed(0)+'g/10L → cider nüansı'); _kapsa('elmaG'); }
+        if(_narEksiG>=10) { kD.push('Nar ekşisi '+_narEksiG.toFixed(0)+'mL/10L → egzotik ekşi'); _kapsa('narEksiG'); }
+        if(_incirG>=15||_kIncirG>=15) { kD.push('İncir/kuru incir → derin tatlı meyve'); _kapsa('incirG'); _kapsa('kIncirG'); }
+        if(_tamarindG>=10) { kD.push('Tamarind '+_tamarindG.toFixed(0)+'g/10L → Asya ekşiliği'); _kapsa('tamarindG'); }
+        if(_kusburG>=5) { kD.push('Kuşburnu '+_kusburG.toFixed(0)+'g/10L → doğal ekşilik'); _kapsa('kusburG'); }
+        if(_papaG>=15) { kD.push('Papaya '+_papaG.toFixed(0)+'g/10L → egzotik tropikal'); _kapsa('papaG'); }
+        if(_limonKG>=10) { kD.push('Limon konsantres '+_limonKG.toFixed(0)+'mL/10L → keskin asit'); _kapsa('limonKG'); }
+        if(_musmulaG>=15) { kD.push('Muşmula/ayva '+_musmulaG.toFixed(0)+'g/10L → çiçeksi-tatlı'); _kapsa('musmulaG'); }
         // Baharat (ek)
-        if(_karabibrEkG>=3) kD.push('Karabiber '+_karabibrEkG.toFixed(0)+'g/10L → biber, baharat');
-        if(_rezeneG>=2)     kD.push('Rezene '+_rezeneG.toFixed(0)+'g/10L → anason-meyan kökü');
-        if(_sumakG>=3)      kD.push('Sumak '+_sumakG.toFixed(0)+'g/10L → ekşi, Orta Doğu');
-        if(_anasonG>=1)     kD.push('Anason '+_anasonG.toFixed(0)+'g/10L → yoğun meyan kökü');
-        if(_safranG>=0.2)   kD.push('Safran '+_safranG.toFixed(1)+'g/10L → egzotik, sarı renk');
-        if(_vanilOzG>=3)    kD.push('Vanilya özü '+_vanilOzG.toFixed(0)+'mL/10L → konsantre vanilya');
-        if(_papatyaG>=2)    kD.push('Papatya '+_papatyaG.toFixed(0)+'g/10L → bitki, çiçek');
-        if(_yaseG>=2)       kD.push('Yasemin '+_yaseG.toFixed(0)+'g/10L → egzotik çiçek');
-        if(_beyazCayG>=3)   kD.push('Beyaz çay '+_beyazCayG.toFixed(0)+'g/10L → hafif bitki');
-        if(_kekikG>=1)      kD.push('Kekik '+_kekikG.toFixed(0)+'g/10L → Akdeniz baharatı');
-        if(_adacayiGG>=1)   kD.push('Adaçayı '+_adacayiGG.toFixed(0)+'g/10L → aromatik, bitkisel');
-        if(_defneG>=1)      kD.push('Defne '+_defneG.toFixed(0)+'adet/10L → baharatlı-bitkisel');
-        if(_kakaKavrG>=10)  kD.push('Kakao kabuğu '+_kakaKavrG.toFixed(0)+'g/10L → hafif çikolata');
-        if(_kereciG>=10)    kD.push('Keçiboynuzu '+_kereciG.toFixed(0)+'g/10L → doğal çikolata');
-        if(_uzunBibG>=1)    kD.push('Uzun biber '+_uzunBibG.toFixed(0)+'g/10L → karmaşık baharat');
-        if(_kahveCekG>=15) kD.push('Kahve çekirdeği '+_kahveCekG.toFixed(0)+'g/10L → kahve-çikolata');
+        if(_karabibrEkG>=3) { kD.push('Karabiber '+_karabibrEkG.toFixed(0)+'g/10L → biber, baharat'); _kapsa('karabibrEkG'); }
+        if(_rezeneG>=2) { kD.push('Rezene '+_rezeneG.toFixed(0)+'g/10L → anason-meyan kökü'); _kapsa('rezeneG'); }
+        if(_sumakG>=3) { kD.push('Sumak '+_sumakG.toFixed(0)+'g/10L → ekşi, Orta Doğu'); _kapsa('sumakG'); }
+        if(_anasonG>=1) { kD.push('Anason '+_anasonG.toFixed(0)+'g/10L → yoğun meyan kökü'); _kapsa('anasonG'); }
+        if(_safranG>=0.2) { kD.push('Safran '+_safranG.toFixed(1)+'g/10L → egzotik, sarı renk'); _kapsa('safranG'); }
+        if(_vanilOzG>=3) { kD.push('Vanilya özü '+_vanilOzG.toFixed(0)+'mL/10L → konsantre vanilya'); _kapsa('vanilOzG'); }
+        if(_papatyaG>=2) { kD.push('Papatya '+_papatyaG.toFixed(0)+'g/10L → bitki, çiçek'); _kapsa('papatyaG'); }
+        if(_yaseG>=2) { kD.push('Yasemin '+_yaseG.toFixed(0)+'g/10L → egzotik çiçek'); _kapsa('yaseG'); }
+        if(_beyazCayG>=3) { kD.push('Beyaz çay '+_beyazCayG.toFixed(0)+'g/10L → hafif bitki'); _kapsa('beyazCayG'); }
+        if(_kekikG>=1) { kD.push('Kekik '+_kekikG.toFixed(0)+'g/10L → Akdeniz baharatı'); _kapsa('kekikG'); }
+        if(_adacayiGG>=1) { kD.push('Adaçayı '+_adacayiGG.toFixed(0)+'g/10L → aromatik, bitkisel'); _kapsa('adacayiGG'); }
+        if(_defneG>=1) { kD.push('Defne '+_defneG.toFixed(0)+'adet/10L → baharatlı-bitkisel'); _kapsa('defneG'); }
+        if(_kakaKavrG>=10) { kD.push('Kakao kabuğu '+_kakaKavrG.toFixed(0)+'g/10L → hafif çikolata'); _kapsa('kakaKavrG'); }
+        if(_kereciG>=10) { kD.push('Keçiboynuzu '+_kereciG.toFixed(0)+'g/10L → doğal çikolata'); _kapsa('kereciG'); }
+        if(_uzunBibG>=1) { kD.push('Uzun biber '+_uzunBibG.toFixed(0)+'g/10L → karmaşık baharat'); _kapsa('uzunBibG'); }
+        if(_kahveCekG>=15) { kD.push('Kahve çekirdeği '+_kahveCekG.toFixed(0)+'g/10L → kahve-çikolata'); _kapsa('kahveCekG'); }
         // Aroma (ek)
-        if(_oolongG>=3)     kD.push('Oolong '+_oolongG.toFixed(0)+'g/10L → çiçeksi çay');
-        if(_puErhG>=3)      kD.push('Pu-erh '+_puErhG.toFixed(0)+'g/10L → fermente çay, toprak');
-        if(_tahiniG>=15)    kD.push('Tahin '+_tahiniG.toFixed(0)+'g/10L → kremsi susam');
-        if(_coconutGG>=30)  kD.push('Hindistan cevizi sütü '+_coconutGG.toFixed(0)+'mL/10L → kremsi');
-        if(_kakaoYagG>=5)   kD.push('Kakao yağı '+_kakaoYagG.toFixed(0)+'g/10L → kremsi çikolata');
-        if(_kaffirG>=1)     kD.push('Kaffir lime '+_kaffirG.toFixed(0)+'adet/10L → Asya citrusu');
+        if(_oolongG>=3) { kD.push('Oolong '+_oolongG.toFixed(0)+'g/10L → çiçeksi çay'); _kapsa('oolongG'); }
+        if(_puErhG>=3) { kD.push('Pu-erh '+_puErhG.toFixed(0)+'g/10L → fermente çay, toprak'); _kapsa('puErhG'); }
+        if(_tahiniG>=15) { kD.push('Tahin '+_tahiniG.toFixed(0)+'g/10L → kremsi susam'); _kapsa('tahiniG'); }
+        if(_coconutGG>=30) { kD.push('Hindistan cevizi sütü '+_coconutGG.toFixed(0)+'mL/10L → kremsi'); _kapsa('coconutGG'); }
+        if(_kakaoYagG>=5) { kD.push('Kakao yağı '+_kakaoYagG.toFixed(0)+'g/10L → kremsi çikolata'); _kapsa('kakaoYagG'); }
+        if(_kaffirG>=1) { kD.push('Kaffir lime '+_kaffirG.toFixed(0)+'adet/10L → Asya citrusu'); _kapsa('kaffirG'); }
         // Meşe (ek)
-        if(_meseSpirG>=5)   kD.push('Meşe spirali '+_meseSpirG.toFixed(0)+'g/10L → tanen, vanilya');
-        if(_bourbonMG>=10)  kD.push('Bourbon meşe '+_bourbonMG.toFixed(0)+'g/10L → bourbon+meşe');
-        if(_rumMG>=10)      kD.push('Rum meşe '+_rumMG.toFixed(0)+'g/10L → rum+tropikal+meşe');
-        if(_kirazAhG>=5)    kD.push('Kiraz ağacı '+_kirazAhG.toFixed(0)+'g/10L → meyve-duman');
-        if(_elmaAhG>=5)     kD.push('Elma ağacı '+_elmaAhG.toFixed(0)+'g/10L → meyve-smoke');
-        if(_ginMG>=5)       kD.push('Gin meşesi '+_ginMG.toFixed(0)+'g/10L → juniper+meşe');
-        if(_portMG>=5)      kD.push('Porto meşesi '+_portMG.toFixed(0)+'g/10L → koyu meyve+tanen');
-        if(_sherMG>=5)      kD.push('Sherry meşesi '+_sherMG.toFixed(0)+'g/10L → kuru meyve+fındık');
-        if(_tequMG>=5)      kD.push('Tequila meşesi '+_tequMG.toFixed(0)+'g/10L → agave+citrus');
+        if(_meseSpirG>=5) { kD.push('Meşe spirali '+_meseSpirG.toFixed(0)+'g/10L → tanen, vanilya'); _kapsa('meseSpirG'); }
+        if(_bourbonMG>=10) { kD.push('Bourbon meşe '+_bourbonMG.toFixed(0)+'g/10L → bourbon+meşe'); _kapsa('bourbonMG'); }
+        if(_rumMG>=10) { kD.push('Rum meşe '+_rumMG.toFixed(0)+'g/10L → rum+tropikal+meşe'); _kapsa('rumMG'); }
+        if(_kirazAhG>=5) { kD.push('Kiraz ağacı '+_kirazAhG.toFixed(0)+'g/10L → meyve-duman'); _kapsa('kirazAhG'); }
+        if(_elmaAhG>=5) { kD.push('Elma ağacı '+_elmaAhG.toFixed(0)+'g/10L → meyve-smoke'); _kapsa('elmaAhG'); }
+        if(_ginMG>=5) { kD.push('Gin meşesi '+_ginMG.toFixed(0)+'g/10L → juniper+meşe'); _kapsa('ginMG'); }
+        if(_portMG>=5) { kD.push('Porto meşesi '+_portMG.toFixed(0)+'g/10L → koyu meyve+tanen'); _kapsa('portMG'); }
+        if(_sherMG>=5) { kD.push('Sherry meşesi '+_sherMG.toFixed(0)+'g/10L → kuru meyve+fındık'); _kapsa('sherMG'); }
+        if(_tequMG>=5) { kD.push('Tequila meşesi '+_tequMG.toFixed(0)+'g/10L → agave+citrus'); _kapsa('tequMG'); }
         // Citrus (ek)
-        if(_berKabuG>=3)    kD.push('Bergamot kab. '+_berKabuG.toFixed(0)+'g/10L → Earl Grey');
-        if(_citZestG>=5)    kD.push('Karma citrus '+_citZestG.toFixed(0)+'g/10L → çok boyutlu citrus');
-        if(_sudachiG>=2)    kD.push('Sudachi/kabosu '+_sudachiG.toFixed(0)+'g/10L → keskin Japon citrus');
-        if(_limettaG>=3)    kD.push('Limetta '+_limettaG.toFixed(0)+'g/10L → tatlı lime');
-        if(_yuzuSuyG>=5)    kD.push('Yuzu suyu '+_yuzuSuyG.toFixed(0)+'mL/10L → Japon citrusu');
-        if(_meyerLimG>=5)   kD.push('Meyer limon '+_meyerLimG.toFixed(0)+'g/10L → tatlı-çiçeksi limon');
-        if(_saddokG>=5)     kD.push('Şaddok/pomelo '+_saddokG.toFixed(0)+'g/10L → hafif bitter citrus');
-        if(_narTozG>=5)     kD.push('Citrus peel tozu '+_narTozG.toFixed(0)+'g/10L → citrus buketi');
-        // Adim 137-G Asama 4 fix-2 (revize): KATKI ETKILERI — eksik katkilari S.katkilar dolasimi ile ekle.
-        // Match: KATKILAR.ad ilk kelime vs kD push'unun ilk kelime; iki yonlu substring (karadut/dut gibi).
-        // Hicbir katki sessizce dusmesin, ayrica cift sayim olmasin.
+        if(_berKabuG>=3) { kD.push('Bergamot kab. '+_berKabuG.toFixed(0)+'g/10L → Earl Grey'); _kapsa('berKabuG'); }
+        if(_citZestG>=5) { kD.push('Karma citrus '+_citZestG.toFixed(0)+'g/10L → çok boyutlu citrus'); _kapsa('citZestG'); }
+        if(_sudachiG>=2) { kD.push('Sudachi/kabosu '+_sudachiG.toFixed(0)+'g/10L → keskin Japon citrus'); _kapsa('sudachiG'); }
+        if(_limettaG>=3) { kD.push('Limetta '+_limettaG.toFixed(0)+'g/10L → tatlı lime'); _kapsa('limettaG'); }
+        if(_yuzuSuyG>=5) { kD.push('Yuzu suyu '+_yuzuSuyG.toFixed(0)+'mL/10L → Japon citrusu'); _kapsa('yuzuSuyG'); }
+        if(_meyerLimG>=5) { kD.push('Meyer limon '+_meyerLimG.toFixed(0)+'g/10L → tatlı-çiçeksi limon'); _kapsa('meyerLimG'); }
+        if(_saddokG>=5) { kD.push('Şaddok/pomelo '+_saddokG.toFixed(0)+'g/10L → hafif bitter citrus'); _kapsa('saddokG'); }
+        if(_narTozG>=5) { kD.push('Citrus peel tozu '+_narTozG.toFixed(0)+'g/10L → citrus buketi'); _kapsa('narTozG'); }
+        // Adim sub-sprint 2 ek-C: KATKI ETKILERI — eksik katkilari ID-TABANLI dedup ile ekle.
+        // kapsananIds Set'i ozel push'larin kapsadigi id'leri tutar (B asamasinda hook ile dolduruldu).
+        // Substring/indexOf mantigi TAMAMEN kaldirildi.
         try {
           if (Array.isArray(S.katkilar) && typeof KATKILAR !== 'undefined' && Array.isArray(KATKILAR)) {
             S.katkilar.forEach(function(k){
               if (!k || !k.id) return;
               var miktar = parseFloat(k.miktar);
               if (!isFinite(miktar) || miktar <= 0) return;
+              if (kapsananIds.has(k.id)) return;
               var kDB = KATKILAR.find(function(x){ return x && x.id === k.id; });
               if (!kDB) {
                 // DB'de bilinmeyen ID — yine de listele, sessizce dusmesin
                 kD.push(k.id + ' ' + miktar + (k.birim||'g') + ' → tanınmayan katkı ID, profile etkisi tespit edilemedi');
+                kapsananIds.add(k.id);
                 return;
               }
-              var kAdIlk = (kDB.ad || '').split(/[\s\/(]/)[0].trim().toLowerCase();
-              if (!kAdIlk) return;
-              var bulundu = kD.some(function(line){
-                var pushIlk = line.split(/[\s\/(]/)[0].toLowerCase();
-                return pushIlk === kAdIlk || pushIlk.indexOf(kAdIlk) >= 0 || kAdIlk.indexOf(pushIlk) >= 0;
-              });
-              if (!bulundu) {
-                var birim = kDB.birim || 'g';
-                var miktar10L = (miktar / (_hacim||11) * 10).toFixed(1);
-                var kAdGoster = (kDB.ad || '').split('(')[0].trim();
-                kD.push(kAdGoster + ' ' + miktar10L + birim + '/10L → reçeteye eklendi, profile katkıda bulunur');
-              }
+              var birim = kDB.birim || 'g';
+              var miktar10L = (miktar / (_hacim||11) * 10).toFixed(1);
+              var kAdGoster = (kDB.ad || '').split('(')[0].trim();
+              kD.push(kAdGoster + ' ' + miktar10L + birim + '/10L → reçeteye eklendi, profile katkıda bulunur');
+              kapsananIds.add(k.id);
             });
           }
         } catch(_kEx) { /* sessiz fallback */ }
