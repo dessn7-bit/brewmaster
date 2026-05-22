@@ -15209,19 +15209,32 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
 
   // Maya tipi bazlı karakter
   const _mayaTip=maya?maya.tip:"ale";
-  // Adim 137-G P4: mayaKarakter 3 cumle sablon — recete sayilarindan, stil_tah'a bakmaz.
-  // (1) deger: maya.ad + gercek attenuasyon + S.primTemp; (2) sonuc: maya.atu araligi + ideal sicaklik; (3) verdict.
+  // Adim 137-G P4 fix: mayaKarakter — S.primTemp KALDIRILDI (primTemp = priming/conditioning, fermentasyon DEGIL).
+  // 3 parca: (1) maya.ad + gercek attenuasyon + atu araligi; (2) ideal sicaklikta tip karakteri (proza); (3) verdict.
   const mayaKarakter = (function(){
-    if (!maya || !maya.atu || maya.ideal == null) return 'Maya seçilmemiş, attenüasyon ve sıcaklık hedefi tanımsız. Sonuç tahmin edilemez. ⚠ Önce maya seç.';
+    if (!maya || !maya.atu || maya.ideal == null) return 'Maya seçilmemiş, attenüasyon ve ester profili tanımsız. Karakter tahmin edilemez. ⚠ Önce maya seç.';
     var _attn = (_og > 1 && _fg > 1 && _og > _fg) ? ((_og - _fg) / (_og - 1) * 100) : null;
-    var _t = (typeof S !== 'undefined' && S.primTemp != null) ? S.primTemp : null;
-    var c1 = maya.ad + ' · attenüasyon ' + (_attn !== null ? '%' + _attn.toFixed(0) : '—') + ', fermentasyon ' + (_t !== null ? _t + '°C' : '— °C') + '.';
-    var c2 = 'Beklenen %' + maya.atu[0] + '–' + maya.atu[1] + ', ideal ' + maya.ideal + '°C.';
+    var _atnStr = _attn !== null ? '%' + _attn.toFixed(0) : '—';
+    var c1 = maya.ad + ' · ' + _atnStr + ' attenüasyon, mayanın %' + maya.atu[0] + '–' + maya.atu[1] + ' aralığında.';
+    var tipProz = {
+      'ale':         'temiz, düşük ester bir fermentasyon — malt karakteri öne çıkar',
+      'ale_clean':   'temiz, düşük ester bir fermentasyon — malt karakteri öne çıkar',
+      'ale_english': 'hafif meyveli ester ve topraksı tonlar damağa düşer',
+      'ale_hybrid':  'hibrit profil — temiz lager netliği üstüne ince ale meyvesi',
+      'wheat':       'muz ve karanfil fenoller ön plana çıkar',
+      'wit':         'baharat, koriander ve turunçgil notalar baskın olur',
+      'belcika':     'karmaşık ester ve hafif baharat profili gelişir',
+      'saison':      'biber notalı, kuru ve fenolik bir karakter verir',
+      'kveik':       'tropikal ester baskın, hızlı ve sıcakta atak gösterir',
+      'sour':        'laktik asit ve canlı bir ekşilik öne çıkar',
+      'brett':       'brett funk ve barnyard karakteri gelişir',
+      'lager':       'temiz, crisp, ester ve fenol minimal kalır'
+    };
+    var prz = tipProz[maya.tip] || 'maya kendi karakteristik ester/fenol profilini verir';
+    var c2 = 'İdeal ~' + maya.ideal + '°C\'de ' + prz + '.';
     var uy = [];
-    if (_attn !== null && _attn < maya.atu[0] - 2) uy.push('attn düşük (mash 64°C / yüksek-attn maya öner)');
-    else if (_attn !== null && _attn > maya.atu[1] + 2) uy.push('attn yüksek (mash 68°C / düşük-attn maya öner)');
-    if (_t !== null && _t < maya.ideal - 3) uy.push('sıcaklık düşük — ester bastırılır');
-    else if (_t !== null && _t > maya.ideal + 3) uy.push('sıcaklık yüksek — fusel/aşırı ester riski');
+    if (_attn !== null && _attn < maya.atu[0] - 2) uy.push('attn aralığın altında (mash daha sıcak / yüksek-attn maya öner)');
+    else if (_attn !== null && _attn > maya.atu[1] + 2) uy.push('attn aralığın üstünde (mash daha düşük / düşük-attn maya öner)');
     var c3 = uy.length ? '⚠ ' + uy.join('; ') + '.' : '✓ Maya hedefte.';
     return c1 + ' ' + c2 + ' ' + c3;
   })();
@@ -17579,30 +17592,31 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
   if(kokuNota.length===0) kokuNota.push("hafif malt ve tahıl, nötr");
 
   // ════ GÖVDE ══════════════════════════════════════════════════
-  // Adim 137-G P4: govde 3 cumle sablon — (1) RE+OG+FG+attn; (2) tanim+ekler; (3) verdict.
+  // Adim 137-G P4 fix: govde — orta parca proza (sonucun aciklamasi). "Sonuc:" oneki kaldirildi.
   const _toPlato2=sg=>Math.max(0,-616.868+1111.14*sg-630.272*sg*sg+135.997*sg*sg*sg);
   const re_val=0.1808*_toPlato2(_og)+0.8192*_toPlato2(_fg);
   let govde;
   {
     var _attnG = (_og > 1 && _fg > 1 && _og > _fg) ? ((_og - _fg) / (_og - 1) * 100) : null;
-    var govdeTan = re_val>10 ? 'tam gövde, çok dolgun' :
-                   re_val>7  ? 'orta-tam gövde' :
-                   re_val>4.5? 'orta gövde' :
-                   re_val>2.5? 'hafif-orta gövde' :
-                               'hafif, sek';
+    var govdeTan, govdeProz;
+    if (re_val > 10)        { govdeTan = 'Tam gövde';        govdeProz = 'dolgun ve ağız kaplayıcı, bira belirgin bir vücut taşır'; }
+    else if (re_val > 7)    { govdeTan = 'Orta-tam gövde';   govdeProz = 'belirgin bir dolgunluk var, geride dekstrin hissedilir'; }
+    else if (re_val > 4.5)  { govdeTan = 'Orta gövde';       govdeProz = 'geride sınırlı dekstrin kalıyor, ağız hissi ne dolgun ne sulu'; }
+    else if (re_val > 2.5)  { govdeTan = 'Hafif-orta gövde'; govdeProz = 'hafif bir dolgunluk var, bira göreceli ince akıyor'; }
+    else                    { govdeTan = 'Hafif, sek gövde'; govdeProz = 'neredeyse su gibi akıyor, ağızda dolgunluk minimal'; }
     var ekG = [];
-    if (_oatPct>=15)   ekG.push('yulaf kremsi katkısı');
-    if (_laktozG>=150) ekG.push('laktoz dolgunlaştırıyor');
-    if (_whtPct>=40)   ekG.push('buğday hafifletiyor');
-    if (_roastPct>=8)  ekG.push('kavurma kuruluk ekliyor');
-    if (_crsPct>=15)   ekG.push('crystal malt dolgunluğu');
-    if (_munPct>=30)   ekG.push('Münih maltı hissi');
-    if (_attnG !== null && _attnG >= 85) ekG.push('yüksek attn → kuru ağız');
-    else if (_attnG !== null && _attnG <= 65) ekG.push('düşük attn → tatlımsı ağız');
-    if (_fg >= 1.020)      ekG.push('FG yüksek → dessert tatlılığı');
-    else if (_fg <= 1.006) ekG.push('FG düşük → sek, çıtır');
-    var gC1 = 'Real Extract ' + re_val.toFixed(1) + '° (OG ' + _og.toFixed(3) + ' → FG ' + _fg.toFixed(3) + ', attn ' + (_attnG !== null ? '%' + _attnG.toFixed(0) : '—') + ').';
-    var gC2 = 'Sonuç: ' + govdeTan + (ekG.length ? '; ' + ekG.join(', ') : '') + '.';
+    if (_oatPct>=15)   ekG.push('yulaf kremsiliği ekliyor');
+    if (_laktozG>=150) ekG.push('laktoz tatlılık+kremsilik bırakıyor');
+    if (_whtPct>=40)   ekG.push('buğday hafifletici etki yapıyor');
+    if (_roastPct>=8)  ekG.push('kavurma kuruluğu çekiyor');
+    if (_crsPct>=15)   ekG.push('crystal dekstrin dolgunluğu katıyor');
+    if (_munPct>=30)   ekG.push('Münih malt malty bir hissiyat veriyor');
+    if (_attnG !== null && _attnG >= 85) ekG.push('yüksek attn kuru ağız bırakıyor');
+    else if (_attnG !== null && _attnG <= 65) ekG.push('düşük attn tatlımsı kalıntı bırakıyor');
+    if (_fg >= 1.020)      ekG.push('FG yüksekliği dessert tatlılığı bırakıyor');
+    else if (_fg <= 1.006) ekG.push('FG düşüklüğü sek ve çıtır bir bitiş veriyor');
+    var gC1 = 'Real Extract ' + re_val.toFixed(1) + '° (OG ' + _og.toFixed(3) + ' → FG ' + _fg.toFixed(3) + ', ' + (_attnG !== null ? '%' + _attnG.toFixed(0) : '—') + ' attenüasyon).';
+    var gC2 = govdeTan + ' — ' + govdeProz + (ekG.length ? '; ' + ekG.join(', ') : '') + '.';
     var gC3 = (re_val > 7)   ? '⚠ Dolgun — alkol/ester riski; gerekirse mash 64°C\'ye çek.'
             : (re_val < 2.5) ? '⚠ İnce — Crystal/Carapils veya yulaf ile dolgunluk ekle.'
             : '✓ Gövde dengeli.';
@@ -17610,17 +17624,18 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
   }
 
   // ════ BİTİŞ ══════════════════════════════════════════════════
-  // Adim 137-G P4: bitis 3 cumle sablon — (1) IBU+ABV+SO4:Cl; (2) tanim+su iyon ekleri; (3) verdict.
+  // Adim 137-G P4 fix: bitis — orta parca proza, "Sonuc:" kaldirildi.
   let bitis;
   {
-    var bitisTan = (_lakAsit && _lakMl/(_hacim||11)*10 >= 4) ? 'ekşi, ferahlatıcı (laktik)'
-                 : _ibu > 55 ? 'uzun, sert acı'
-                 : _ibu > 35 && _so4cl > 1.8 ? 'uzun, kuru ve keskin'
-                 : _ibu > 25 ? 'orta uzunlukta, dengeli'
-                 : _crsPct >= 25 && _ibu < 15 ? 'tatlı, kısa (karamel kalıcı)'
-                 : _laktozG >= 200 ? 'kremsi, tatlı'
-                 : _roastPct >= 5 ? 'kuru, hafif acı (kavurma)'
-                 : 'kısa, temiz';
+    var bitisTan, bitisProz;
+    if (_lakAsit && _lakMl/(_hacim||11)*10 >= 4) { bitisTan = 'Ekşi, ferahlatıcı bitiş'; bitisProz = 'laktik asit damakta canlı bir tazelik bırakıyor'; }
+    else if (_ibu > 55)                  { bitisTan = 'Uzun, sert acı bitiş';     bitisProz = 'damakta uzun süre kalan keskin bir acılık baskın'; }
+    else if (_ibu > 35 && _so4cl > 1.8)  { bitisTan = 'Uzun, kuru ve keskin bitiş'; bitisProz = 'SO₄ baskın su acıyı uzatıp damağı kurutuyor'; }
+    else if (_ibu > 25)                  { bitisTan = 'Orta uzunlukta, dengeli bitiş'; bitisProz = 'acılık ne zorlayıcı ne yetersiz, malt-hop dengesi damakta korunuyor'; }
+    else if (_crsPct >= 25 && _ibu < 15) { bitisTan = 'Tatlı, kısa bitiş';        bitisProz = 'karamel kalıntısı damakta geriye tatlı bir tüy bırakıyor'; }
+    else if (_laktozG >= 200)            { bitisTan = 'Kremsi, tatlı bitiş';      bitisProz = 'laktoz şekeri tatlılığı ve kremsiliği uzatıyor'; }
+    else if (_roastPct >= 5)             { bitisTan = 'Kuru, hafif acı bitiş';   bitisProz = 'kavurma maltları kısa bir bitter izle bitiriyor'; }
+    else                                 { bitisTan = 'Kısa, temiz bitiş';        bitisProz = 'damakta belirgin bir kalıntı bırakmayan, çabuk dağılan bir final'; }
     var ekB = [];
     if      (_abv > 8)   ekB.push('belirgin alkol ısınması');
     else if (_abv > 6.5) ekB.push('hafif alkol ısınması');
@@ -17628,7 +17643,7 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
     else if (_cl > 100 && _so4cl < 0.6) ekB.push('Cl+ dolgunluk');
     if (_hco3 > 150 && _srm < 15) ekB.push('alkalinite tüyü');
     var bC1 = 'IBU ' + Math.round(_ibu) + ', ABV %' + _abv.toFixed(1) + ', SO₄:Cl ' + (typeof _so4cl !== 'undefined' && isFinite(_so4cl) ? _so4cl.toFixed(2) : '—') + '.';
-    var bC2 = 'Sonuç: ' + bitisTan + (ekB.length ? '; ' + ekB.join(', ') : '') + '.';
+    var bC2 = bitisTan + ' — ' + bitisProz + (ekB.length ? '; ' + ekB.join(', ') : '') + '.';
     var bC3 = (_abv > 8) ? '⚠ Yüksek alkol — ferment sıcaklığı kontrol, lagering uzat.'
             : (_so4cl > 2.5 && _ibu < 25) ? '⚠ SO₄ baskın ama hop yetersiz — su profili gözden geçir.'
             : (_so4cl < 0.4 && _ibu > 40) ? '⚠ Cl baskın hop ağır — SO₄ artırılabilir.'
@@ -17637,24 +17652,25 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
   }
 
   // ════ KÖPÜK ══════════════════════════════════════════════════
-  // Adim 137-G P4: kopuk 3 cumle sablon — (1) bugday+yulaf+Ca; (2) renk+kalicilik; (3) verdict.
+  // Adim 137-G P4 fix: kopuk — orta parca proza, "Sonuc:" kaldirildi.
   let kopuk;
   {
     if (!S.maltlar || S.maltlar.length === 0) {
-      kopuk = 'Buğday %—, yulaf %—, Ca — ppm. Köpük tahmini yapılamadı (malt yok). ⚠ Önce malt ekle.';
+      kopuk = 'Buğday %—, yulaf %—, Ca — ppm. Köpük tahmini yapılamadı; tarife henüz malt eklenmedi. ⚠ Önce malt ekle.';
     } else {
-      var kopukRenk = (_roastPct>=5 || _chocPct>=5) ? 'koyu kahve'
-                    : _crsPct>=20 ? 'bal rengi'
-                    : _srm>12 ? 'açık kahve'
-                    : 'beyaz';
-      var kopukKal = (_whtPct>=50 || _oatPct>=20) ? 'çok kalıcı, yoğun'
-                   : (_whtPct>=20 || _oatPct>=10) ? 'kalıcı, ince kabarcıklar'
-                   : _ca>100 ? 'orta kalıcı (Ca destekli)'
-                   : _roastPct>=5 ? 'ince, az kalıcı (kavurma)'
-                   : _laktozG>=150 ? 'kremsi, kalıcı'
-                   : 'orta kalıcı';
+      var kopukRenk = (_roastPct>=5 || _chocPct>=5) ? 'Koyu kahve'
+                    : _crsPct>=20 ? 'Bal rengi'
+                    : _srm>12 ? 'Açık kahve'
+                    : 'Beyaz';
+      var kopukKal, kopukProz;
+      if (_whtPct>=50 || _oatPct>=20)        { kopukKal = 'çok kalıcı ve yoğun'; kopukProz = 'protein zengin grist sayesinde bardakta uzun süre dik tutuyor'; }
+      else if (_whtPct>=20 || _oatPct>=10)   { kopukKal = 'kalıcı, ince kabarcıklı'; kopukProz = 'buğday/yulaf proteini köpüğü yapısal olarak destekliyor'; }
+      else if (_ca>100)                      { kopukKal = 'orta kalıcı'; kopukProz = 'yüksek kalsiyum protein–köpük etkileşimini güçlendiriyor'; }
+      else if (_roastPct>=5)                 { kopukKal = 'ince ve az kalıcı'; kopukProz = 'kavurma yağları köpüğü zayıflatıyor, başlık çabuk dağılıyor'; }
+      else if (_laktozG>=150)                { kopukKal = 'kremsi ve kalıcı'; kopukProz = 'laktoz başlığa kalın, kremsi bir doku katıyor'; }
+      else                                   { kopukKal = 'orta kalıcı'; kopukProz = 'sıradan bir başlık — yıkıcı bir destek yok ama hemen de çökmüyor'; }
       var kC1 = 'Buğday %' + (_whtPct||0).toFixed(0) + ', yulaf %' + (_oatPct||0).toFixed(0) + ', Ca ' + Math.round(_ca||0) + ' ppm.';
-      var kC2 = 'Sonuç: ' + kopukRenk + ' renk, ' + kopukKal + '.';
+      var kC2 = kopukRenk + ', ' + kopukKal + ' bir köpük — ' + kopukProz + '.';
       var kC3 = ((_whtPct||0) < 10 && (_oatPct||0) < 5 && (_ca||0) < 50) ? '⚠ Köpük desteği zayıf — buğday/yulaf veya kalsiyum ekle.'
               : '✓ Köpük profili destekli.';
       kopuk = kC1 + ' ' + kC2 + ' ' + kC3;
@@ -17662,19 +17678,20 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
   }
 
   // ════ HOP KARAKTER ═══════════════════════════════════════════
-  // Adim 137-G P4: hop 3 cumle sablon — (1) IBU+dry hop+BU:GU; (2) tanim; (3) verdict.
+  // Adim 137-G P4 fix: hop — orta parca proza, "Sonuc:" kaldirildi.
   let hopKarakter;
   {
-    var hopTan = _dhPer10L>=10 ? 'patlayan dry hop (tropikal/citrus/reçine)'
-               : _dhPer10L>=5 ? 'belirgin dry hop, aromalı'
-               : _dhPer10L>=2 ? 'hafif dry hop katkısı'
-               : _ibu>=55 ? 'yüksek acılık, reçineli, sert'
-               : _ibu>=35 ? 'orta-yüksek acılık, dengeli'
-               : _ibu>=15 ? 'hafif-orta acılık, malt dengeli'
-               : 'minimal hop, malt ön planda';
+    var hopTan, hopProz;
+    if (_dhPer10L>=10)      { hopTan = 'Patlayan dry hop';          hopProz = 'burunda yoğun tropikal, citrus ve reçineli aromalar dolduruyor'; }
+    else if (_dhPer10L>=5)  { hopTan = 'Belirgin dry hop';           hopProz = 'aromanın hop tarafı net hissediliyor, malt arka planda kalıyor'; }
+    else if (_dhPer10L>=2)  { hopTan = 'Hafif dry hop katkısı';     hopProz = 'taze hop notası ipucu olarak burna düşüyor'; }
+    else if (_ibu>=55)      { hopTan = 'Yüksek acılık, sert hop';   hopProz = 'kaynatma hop\'u damakta keskin ve baskın bir acılık bırakıyor'; }
+    else if (_ibu>=35)      { hopTan = 'Orta-yüksek dengeli acılık'; hopProz = 'belirgin bir acılık var ama malt karşılığı onu dengeliyor'; }
+    else if (_ibu>=15)      { hopTan = 'Hafif-orta acılık';         hopProz = 'malt ön planda, hop sadece çerçeveleyici bir acılık katıyor'; }
+    else                    { hopTan = 'Minimal hop';                hopProz = 'malt tatlılığı tamamen önde, hop aroma ve acılığı algılanmıyor'; }
     var _buGu = (_og > 1.001) ? (_ibu / ((_og - 1) * 1000)) : null;
     var hC1 = 'IBU ' + Math.round(_ibu) + ', dry hop ' + (_dhPer10L||0).toFixed(1) + ' g/10L, BU:GU ' + (_buGu !== null ? _buGu.toFixed(2) : '—') + '.';
-    var hC2 = 'Sonuç: ' + hopTan + '.';
+    var hC2 = hopTan + ' — ' + hopProz + '.';
     var hC3 = (_buGu !== null && _buGu > 0.9) ? '⚠ Çok acı — IBU azalt veya OG yükselt.'
             : (_buGu !== null && _buGu < 0.3 && _og > 1.030) ? '⚠ Çok maltlı — denge için hop ekle.'
             : '✓ Hop-malt dengesi.';
