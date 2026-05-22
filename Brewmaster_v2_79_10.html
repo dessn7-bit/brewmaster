@@ -17681,9 +17681,8 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
   }
 
   // ════ HOP KARAKTER ═══════════════════════════════════════════
-  // Adim 137-G P4 fix-2: hop verdict — recete stil dayatmasi YASAK (kart stili bilmiyor).
-  // 3 profil dürüstçe: malt-agirlikli / dengeli / hop-agirlikli — üçü de geçerli, verdict her zaman ✓.
-  // IBU 0 ise "hopsuz / gruit tarzi".
+  // Adim 137-G P4 fix-3 (Asama 2): hop prozasi mutlak "malt ön planda" lafzini kaldirdi —
+  // denge ifadesi verdict profil etiketine birakildi (BU:GU). Proza yalniz acilik karakterini soyler.
   let hopKarakter;
   {
     var _buGu = (_og > 1.001) ? (_ibu / ((_og - 1) * 1000)) : null;
@@ -17691,13 +17690,13 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
     if (_ibu < 1) {
       hopTan = 'Hopsuz, gruit tarzı';
       hopProz = 'hop yok — bira tamamen malt ve katkı karakteriyle taşınıyor';
-    } else if (_dhPer10L>=10)      { hopTan = 'Patlayan dry hop';          hopProz = 'burunda yoğun tropikal, citrus ve reçineli aromalar dolduruyor'; }
-    else if (_dhPer10L>=5)  { hopTan = 'Belirgin dry hop';                  hopProz = 'aromanın hop tarafı net hissediliyor, malt arka planda kalıyor'; }
-    else if (_dhPer10L>=2)  { hopTan = 'Hafif dry hop katkısı';             hopProz = 'taze hop notası ipucu olarak burna düşüyor'; }
-    else if (_ibu>=55)      { hopTan = 'Yüksek acılık, sert hop';           hopProz = 'kaynatma hop\'u damakta keskin ve baskın bir acılık bırakıyor'; }
-    else if (_ibu>=35)      { hopTan = 'Orta-yüksek acılık';                hopProz = 'belirgin bir acılık öne çıkıyor, hop kaynatma damakta hissediliyor'; }
-    else if (_ibu>=15)      { hopTan = 'Hafif-orta acılık';                  hopProz = 'malt ön planda, hop sadece çerçeveleyici bir acılık katıyor'; }
-    else                    { hopTan = 'Minimal hop acılığı';                hopProz = 'malt tatlılığı tamamen önde, hop aroma ve acılığı arka planda'; }
+    } else if (_dhPer10L>=10) { hopTan = 'Patlayan dry hop';         hopProz = 'burunda yoğun tropikal, citrus ve reçineli aromalar dolduruyor'; }
+    else if (_dhPer10L>=5)    { hopTan = 'Belirgin dry hop';         hopProz = 'aromanın hop tarafı net hissediliyor, taze yeşil notalar burnu sarıyor'; }
+    else if (_dhPer10L>=2)    { hopTan = 'Hafif dry hop katkısı';    hopProz = 'taze hop notası ipucu olarak burna düşüyor'; }
+    else if (_ibu>=55)        { hopTan = 'Yüksek acılık, sert hop';  hopProz = 'damakta keskin ve baskın bir acılık uzun süre kalıyor'; }
+    else if (_ibu>=35)        { hopTan = 'Orta-yüksek acılık';       hopProz = 'belirgin bir hop acılığı damakta net hissediliyor'; }
+    else if (_ibu>=15)        { hopTan = 'Hafif-orta acılık';         hopProz = 'ölçülü bir keskinlik var, malt karşılığı net algılanıyor'; }
+    else                      { hopTan = 'Minimal hop acılığı';       hopProz = 'düşük seviyede keskinlik, bira ağırlıklı olarak malt karakteriyle taşınıyor'; }
     // Profil etiketi — sadece betimleme, recete dayatma DEGIL
     var profilEtiketi;
     if (_ibu < 1)                                         profilEtiketi = 'Hopsuz profil';
@@ -18725,7 +18724,24 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
 
         // Renk satırı — görsel efekt varsa birlikte göster
         const _katRenkMCU=_katSRM_toplam>0.5?' · katkı +'+_katSRM_toplam.toFixed(1)+' MCU':'';
-        _ps("🎨 Renk", renk_adi+' · '+(parseFloat(_srm)*1.97).toFixed(0)+' EBC / '+_srm+' SRM'+_katRenkMCU, profRows);
+        // Adim 137-G P4 fix-3 (Asama 2): RENK — 3 parca (deger / grist sebep + berraklik / verdict).
+        {
+          var _rEBC = (parseFloat(_srm)*1.97).toFixed(0);
+          var renkSebep = (_roastPct>=5) ? 'koyu renk kavurma maltlarından geliyor, yanık kahve tonları belirgin'
+                        : (_chocPct>=5)  ? 'çikolata maltı renge derinlik veriyor'
+                        : (_crsPct>=15)  ? 'crystal/karamel maltı renge bakır-kehribar veriyor'
+                        : (_munPct>=30)  ? 'Münih maltı altın-kehribar getiriyor'
+                        : (_srm<4)       ? 'açık baz maltlar (pilsner/pale) renge baskın, ton soluk'
+                        :                  'baz maltlar ve hafif karamel renge ölçülü ton katıyor';
+          var berraklik = (_whtPct>=30)            ? 'buğday proteini bulanık (hazy) görünüm verir'
+                        : (_oatPct>=10)            ? 'yulaf hafif bulanıklık katar'
+                        : (_roastPct>=5 || _srm>20)? 'koyuluk berraklığı gizler'
+                        :                            'berrak görünür';
+          var renkC1 = renk_adi + ' · ' + _srm + ' SRM / ' + _rEBC + ' EBC' + _katRenkMCU + '.';
+          var renkC2 = renkSebep + '; ' + berraklik + '.';
+          var renkC3 = '✓ Renk profili tutarlı.';
+          _ps("🎨 Renk", renkC1 + ' ' + renkC2 + ' ' + renkC3, profRows);
+        }
 
         // Görsel renk efekti satırı — sadece özel katkı varsa
         if(_gorselRenk.length>0){
@@ -18915,33 +18931,74 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
         }
         if(_lakAsit) _ps("💧 Laktik Asit", (_lakMl/(_hacim||11)*10).toFixed(1)+'mL/10L → pH düşürücü, hafif ekşilik', profRows);
 
-        const aT=_abv<3.5?'Alkolsüze yakın':_abv<4.5?'Hafif':_abv<5.5?'Orta':_abv<7?'Orta-güçlü':_abv<9?'Güçlü':'Çok güçlü';
-        if(_abv>0.5) _ps("🔥 Alkol", '%'+_abv.toFixed(2)+' ABV · '+aT, profRows);
+        // Adim 137-G P4 fix-3 (Asama 2): ALKOL — 3 parca (deger / kategori anlami / verdict).
+        if (_abv > 0.5) {
+          var aKat, aProz;
+          if (_abv < 4.5)       { aKat = 'sessionable';     aProz = 'düşük alkol — birkaç bardak rahat içilir, oturma birası karakteri'; }
+          else if (_abv < 6.5)  { aKat = 'standart';        aProz = 'normal güç — günlük bira aralığı, içicilik yüksek'; }
+          else if (_abv < 9)    { aKat = 'güçlü, sipping';  aProz = 'belirgin alkol — yavaş yudumlanır, ısınma hissi bekleniyor'; }
+          else if (_abv < 11)   { aKat = 'çok güçlü';       aProz = 'yoğun alkol — küçük servis, sipping/snifter kullanımı uygun'; }
+          else                  { aKat = 'extreme';         aProz = 'aşırı alkol — barleywine/eisbock seviyesi, çok yavaş içim'; }
+          var alkC1 = '%' + _abv.toFixed(2) + ' ABV (' + aKat + ').';
+          var alkC2 = aProz.charAt(0).toUpperCase() + aProz.slice(1) + '.';
+          var alkC3 = (_abv >= 10) ? '⚠ Çok yüksek alkol — ferment sıcaklığı + maya seçimi dikkatli olmalı.'
+                                   : '✓ Alkol seviyesi taşınabilir.';
+          _ps("🔥 Alkol", alkC1 + ' ' + alkC2 + ' ' + alkC3, profRows);
+        }
 
-        const kV=S.primVol||2.4;
-        const kT=stil_tah.includes('Weizen')||stil_tah.includes('Wit')?'2.8-3.5 vol önerilen':
-          stil_tah.includes('Stout')||stil_tah.includes('Porter')?'1.8-2.4 vol önerilen':
-          stil_tah.includes('IPA')||stil_tah.includes('Pale')?'2.3-2.8 vol önerilen':
-          stil_tah.includes('Lager')||stil_tah.includes('Pils')?'2.4-2.8 vol önerilen':
-          stil_tah.includes('Saison')||stil_tah.includes('Belgian')?'2.5-3.5 vol önerilen':
-          '2.3-2.5 vol önerilen';
-        _ps("💨 Karbonasyon", 'Hedef '+kV+' vol · '+kT, profRows);
+        // Adim 137-G P4 fix-3 (Asama 2): KARBONASYON — stil_tah KALDIRILDI, evrensel fizik.
+        {
+          var kV = S.primVol || 2.4;
+          var kProz, kVerdict;
+          if (kV < 1.8)        { kProz = 'çok yumuşak, az köpürür; ağız hissi dolgun, asit/keskinlik bastırılır'; kVerdict = '⚠ Düşük taraf (cask-ale aralığı) — spritzig bira için 2.2+ hedeflenir.'; }
+          else if (kV < 2.4)   { kProz = 'orta-yumuşak; klasik ale aralığı, dengeli ağız hissi'; kVerdict = '✓ Karbonasyon dengeli.'; }
+          else if (kV < 3.0)   { kProz = 'canlı, ferah; CO₂ damağı yıkıyor, crisp hissini ve hop aromasını öne çıkarıyor'; kVerdict = '✓ Karbonasyon dengeli.'; }
+          else if (kV <= 3.5)  { kProz = 'yüksek karbonasyon; spritzig/şampanya benzeri kabarcık, asit algısı öne çıkar'; kVerdict = '✓ Karbonasyon dengeli.'; }
+          else                 { kProz = 'çok yüksek karbonasyon; bardakta yoğun köpük patlaması, asit algısı keskinleşir'; kVerdict = '⚠ Üst sınır (>3.5 vol) — şişe basıncı + maya tolerans kontrolü.'; }
+          var kC1 = 'Hedef ' + kV + ' vol CO₂.';
+          var kC2 = kProz.charAt(0).toUpperCase() + kProz.slice(1) + '.';
+          _ps("💨 Karbonasyon", kC1 + ' ' + kC2 + ' ' + kVerdict, profRows);
+        }
 
-        const sT=stil_tah.includes('Lager')||stil_tah.includes('Pils')?'3-5°C · Uzun bardak':
-          stil_tah.includes('Weizen')?'5-7°C · Weizen bardağı':
-          stil_tah.includes('IPA')||stil_tah.includes('Pale')?'8-12°C · Pint':
-          stil_tah.includes('Stout')?'10-13°C · Nonic pint':
-          stil_tah.includes('Saison')||stil_tah.includes('Belgian')?'7-12°C · Goblet':
-          _abv>=8?'10-14°C · Snifter':'8-12°C · Pint';
-        _ps("🍻 Servis", sT, profRows);
+        // Adim 137-G P4 fix-3 (Asama 2): SERVIS — stil_tah KALDIRILDI, ABV + koyuluk turevli.
+        {
+          var sLo, sHi, sNeden, sKadeh;
+          if (_abv >= 8 || _srm >= 20) {
+            sLo = 12; sHi = 14;
+            sNeden = 'güçlü/koyu bira ılık serviste aromaları açar, soğukta karmaşık ester ve kavurma bastırılır';
+            sKadeh = 'sipping kadehi — küçük, ağzı toplanan (snifter/tulip) ısıyı korur ve aromayı yoğunlaştırır';
+          } else if (_abv >= 5 || _srm >= 10) {
+            sLo = 8; sHi = 11;
+            sNeden = 'orta güç/renkte bira bu aralıkta hem ferahlık hem malt karakterini dengeli verir';
+            sKadeh = 'standart pint/bardak — orta ağız, klasik içim';
+          } else {
+            sLo = 4; sHi = 7;
+            sNeden = 'hafif/açık bira soğukta crisp ve ferah algılanır, ılıkta su gibi düz çıkar';
+            sKadeh = 'standart bardak/uzun bardak — ferah sessionable içim';
+          }
+          var srvC1 = sLo + '–' + sHi + '°C servis sıcaklığı.';
+          var srvC2 = sNeden.charAt(0).toUpperCase() + sNeden.slice(1) + '; ' + sKadeh + '.';
+          var srvC3 = '✓ Servis aralığı belirlendi.';
+          _ps("🍻 Servis", srvC1 + ' ' + srvC2 + ' ' + srvC3, profRows);
+        }
 
-        const yT=_ibu>=40||stil_tah.includes('IPA')?'Baharatlı yemek, burger, sert peynir':
-          stil_tah.includes('Stout')||stil_tah.includes('Porter')?'Çikolata tatlısı, barbekü, oyster':
-          stil_tah.includes('Weizen')||stil_tah.includes('Wit')?'Deniz ürünleri, taze peynir, salata':
-          stil_tah.includes('Saison')?'Keçi peyniri, tavuk, hafif et':
-          stil_tah.includes('Lager')?'Pizza, ızgara balık, aperitif':
-          _abv>=8?'Füme et, sert peynir, çikolatalı tatlı':'Sandviç, beyaz et, hafif atıştırmalık';
-        _ps("🍽️ Yiyecek", yT, profRows);
+        // Adim 137-G P4 fix-3 (Asama 2): YIYECEK — stil_tah KALDIRILDI, recete ozelliklerinden 2-3 esleme.
+        {
+          var pairs = [];
+          if (_ibu >= 50)               pairs.push('baharatlı/yağlı yemek (acılık yağı keser, damağı temizler)');
+          else if (_ibu >= 30)          pairs.push('burger, kızarmış tavuk (orta acılık yağı dengeler)');
+          if (_roastPct >= 5 || _chocPct >= 5) pairs.push('ızgara et veya çikolata-kahve tatlısı (kavurma-malt eşleşmesi)');
+          if (_abv >= 8)                pairs.push('zengin/ağır yemek: kuzu, brisket, sert peynir (alkol yağı keser)');
+          if (_laktozG >= 150)          pairs.push('tatlı tatlılar: cheesecake, vanilyalı muhallebi (laktoz tatlılığı tamamlar)');
+          if (_whtPct >= 30)            pairs.push('hafif balık, taze peynir, salata (protein-buğday yumuşaklığı)');
+          if (_crsPct >= 20 && _ibu < 30) pairs.push('karamel tatlılar, fıstık ezmesi (karamel-malt eşleşmesi)');
+          if (pairs.length === 0)       pairs.push('pizza, sandviç, beyaz et (çok yönlü dengeli eşleşme)');
+          pairs = pairs.slice(0, 3);
+          var yC1 = 'Acılık ' + Math.round(_ibu) + ' IBU, ABV %' + _abv.toFixed(1) + ', SRM ' + _srm + '.';
+          var yC2 = pairs.join('; ') + '.';
+          var yC3 = '✓ Eşleşme önerisi reçete profilinden.';
+          _ps("🍽️ Yiyecek", yC1.charAt(0).toUpperCase() + yC1.slice(1) + ' ' + yC2.charAt(0).toUpperCase() + yC2.slice(1) + ' ' + yC3, profRows);
+        }
 
         return profRows.map(([e,d])=>
           '<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--bor)">'+
