@@ -525,7 +525,7 @@
 //   - CSS .bm-marka-isim (span class kurali) silindi (span artik yok, kullanim YOK)
 // kabeer-wordmark.png LOCAL'de tutuldu, repo/precache'e EKLENMEDI.
 // DOKUNULMADI: 135-I .bm-header gradient + .eh + renderHeader/sekme + motor + Sprint 132/133/134.
-const CACHE_VERSION = 'bm-cache-v131-92';
+const CACHE_VERSION = 'bm-cache-v131-93';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
