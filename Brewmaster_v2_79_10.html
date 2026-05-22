@@ -18047,11 +18047,13 @@ return `
 
           return '<div style="margin-top:10px;padding:8px;background:rgba(180,120,20,.04);border:1px dashed var(--bor);border-radius:6px">'+
             '<div style="font-size:11px;font-weight:700;color:var(--kahve);margin-bottom:6px">'+
-              '🎯 Slug (Hibrit V12+V20)'+
+              '🎯 Slug (Hibrit)'+
             '</div>'+
-            '<div style="background:'+_f1Bg+';border:1.5px solid '+_f1Color+';border-radius:8px;padding:7px 10px" title="'+_f1Tooltip+'">'+
-              '<div style="font-size:10px;font-weight:700;color:'+_f1Color+';margin-bottom:4px;letter-spacing:.3px">Hibrit (V19+V20)/2</div>'+
-              _render3(_f1r.top3)+
+            '<div style="border:1px solid '+_f1Color+';border-radius:8px;overflow:hidden" title="'+_f1Tooltip+'">'+
+              '<div style="background:'+_f1Color+';color:#FBF3E4;font-size:10px;font-weight:700;letter-spacing:.3px;padding:5px 10px">Hibrit (V19+V20)/2</div>'+
+              '<div style="background:'+_f1Bg+';padding:7px 10px">'+
+                _render3(_f1r.top3)+
+              '</div>'+
             '</div>'+
           '</div>';
         })()}
@@ -24511,7 +24513,7 @@ syncBaslat();
     // Ilk page load: B1 ready -> Strategy C dispatch tetiklenir, V12/V20 slug R2'dan
     // fetch'te (~1-2sn). Hybrid agreement V12+V20+Hibrit top-1 ister. 2500ms timeout
     // ile bekle; asilirsa mevcut multi-mode fallback (silinmis dispatch davranis).
-    // Hibrit V12+V20'den turetilir (f1HybridSlug line 2815), ayri ready check'e gerek yok.
+    // Hibrit V19+V20'den turetilir (f1HybridSlug line 2815), ayri ready check'e gerek yok.
     function _waitForSlugMotorsReady(timeoutMs) {
       var ready = function(){
         var v12 = window.BM_V12 && window.BM_V12.isSlugReady && window.BM_V12.isSlugReady();
