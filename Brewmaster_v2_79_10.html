@@ -19003,7 +19003,28 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
         if(_meyerLimG>=5)   kD.push('Meyer limon '+_meyerLimG.toFixed(0)+'g/10L → tatlı-çiçeksi limon');
         if(_saddokG>=5)     kD.push('Şaddok/pomelo '+_saddokG.toFixed(0)+'g/10L → hafif bitter citrus');
         if(_narTozG>=5)     kD.push('Citrus peel tozu '+_narTozG.toFixed(0)+'g/10L → citrus buketi');
-        // Adim 137-G Asama 4: KATKI ETKILERI — per-katki teknik dokumu korundu, sonuna tek verdict.
+        // Adim 137-G Asama 4 fix-2: KATKI ETKILERI — eksik katkilari S.katkilar dolasimi ile ekle.
+        // Ozel push dali yoksa genel satir; hicbir katki sessizce dusmesin.
+        try {
+          if (Array.isArray(S.katkilar) && typeof KATKILAR !== 'undefined' && Array.isArray(KATKILAR)) {
+            S.katkilar.forEach(function(k){
+              if (!k || !k.id) return;
+              var miktar = parseFloat(k.miktar);
+              if (!isFinite(miktar) || miktar <= 0) return;
+              var kDB = KATKILAR.find(function(x){ return x && x.id === k.id; });
+              if (!kDB) return;
+              var kAdKisa = (kDB.ad || '').split('(')[0].trim();
+              if (!kAdKisa) return;
+              var lower = kAdKisa.toLowerCase();
+              var bulundu = kD.some(function(line){ return line.toLowerCase().indexOf(lower) === 0; });
+              if (!bulundu) {
+                var birim = kDB.birim || 'g';
+                var miktar10L = (miktar / (_hacim||11) * 10).toFixed(1);
+                kD.push(kAdKisa + ' ' + miktar10L + birim + '/10L → reçeteye eklendi, profile katkıda bulunur');
+              }
+            });
+          }
+        } catch(_kEx) { /* sessiz fallback */ }
         if(kD.length) _ps("🧪 Katkı Etkileri", kD.join(' · ') + '. ✓ ' + kD.length + ' katkı profile işlendi.', profRows);
 
         if(_ppm&&(_ppm.SO4>30||_ppm.Cl>30||_ppm.Ca>30)){
@@ -19035,14 +19056,24 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
             : '✓ İyon dengesi profile uyumlu.';
           _ps("💧 Su İyonları", suC1 + ' ' + suC2 + ' ' + suC3, profRows);
         }
-        // Adim 137-G Asama 4: LAKTIK ASIT 3 parca — mL/10L / pH ve ekşilik etkisi / verdict.
+        // Adim 137-G Asama 4 fix-1: LAKTIK ASIT — stil iddiasi YOK, asidin gercek islevi (pH ayar) odaklı.
+        // 3 parca: deger (mL/10L) / pH ve doza-bagli tat etkisi / verdict (uc dozda ⚠).
         if(_lakAsit){
           var _lAsit = _lakMl/(_hacim||11)*10;
           var _lEtki, _lVerdict;
-          if (_lAsit < 1.5)        { _lEtki = 'mash pH\'ı hafifçe düşürür, bira tadına ekşilik geçmez'; _lVerdict = '✓ Sadece pH ayarı, ekşi tat hedefi yok.'; }
-          else if (_lAsit < 4)     { _lEtki = 'algılanabilir hafif asidik tüy, mash pH\'ı belirgin düşer';  _lVerdict = '✓ Hafif ekşilik bekleniyor.'; }
-          else if (_lAsit < 10)    { _lEtki = 'belirgin laktik ekşilik damakta hissedilir, ağız ferahlatıcı'; _lVerdict = '✓ Sour-stili asidite hedefte.'; }
-          else                     { _lEtki = 'çok yüksek asit — sert ekşilik, damak iritan';                _lVerdict = '⚠ Aşırı asit — 5-15 mL/L sınırını kontrol et.'; }
+          if (_lAsit < 3) {
+            _lEtki = 'birincil etkisi mash/şıra pH\'ını düşürmek — bu dozda damakta belirgin ekşilik beklenmez';
+            _lVerdict = '✓ Tipik pH-ayar aralığı.';
+          } else if (_lAsit < 7) {
+            _lEtki = 'mash pH\'ını belirgin düşürür; damakta hafif bir keskinlik/canlılık verebilir, net ekşi tat değil';
+            _lVerdict = '✓ Yüksek-uçtan pH ayarı; hafif keskinlik makul.';
+          } else if (_lAsit < 12) {
+            _lEtki = 'pH düşürmenin yanında damakta belirgin ekşilik yaratır — kasıtlı bir asit katkısı';
+            _lVerdict = '✓ Kasıtlı ekşilik niyeti; doz kontrolde.';
+          } else {
+            _lEtki = 'çok yüksek doz — pH agresif düşer, damak iritasyonu ve sert ekşilik riski';
+            _lVerdict = '⚠ Aşırı asit — ölçü/birim doğru mu ve kasıtlı mı kontrol et.';
+          }
           var laC1 = _lAsit.toFixed(1) + ' mL/10L laktik asit (%88).';
           var laC2 = _lEtki.charAt(0).toUpperCase() + _lEtki.slice(1) + '.';
           _ps("💧 Laktik Asit", laC1 + ' ' + laC2 + ' ' + _lVerdict, profRows);
