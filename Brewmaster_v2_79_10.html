@@ -293,7 +293,7 @@ input[type="checkbox"]:disabled,input[type="radio"]:disabled{opacity:.5;cursor:n
    degisti — var(--kahve-masthead) #63492F → var(--kahve-masthead-dark) #48351F. Tum viewport'lar
    (mobile + desktop) kasıtlı olarak ayni gradient'i alir. .eh editor header (135-I beyaz-krem)
    dokunulmadi. */
-.bm-header{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:var(--sp-4) var(--sp-5);background:linear-gradient(135deg,var(--kahve-masthead) 0%,var(--kahve-masthead-dark) 100%);border:none;border-radius:var(--r-md) var(--r-md) 0 0;z-index:5;position:relative}
+.bm-header{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:var(--sp-4) var(--sp-5);background:linear-gradient(135deg,var(--kahve-masthead) 0%,var(--kahve-masthead-dark) 100%);border:none;border-radius:0;z-index:5;position:relative}
 .bm-header::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;background:linear-gradient(90deg,transparent 0%,rgba(184,118,63,.55) 50%,transparent 100%);pointer-events:none}
 .bm-header-left{display:flex;flex-direction:column;min-width:0;gap:2px}
 .bm-header-title{font-family:var(--font-baslik);font-size:19px;font-weight:var(--fw-semibold);color:#F6EAD7;line-height:var(--lh-tight);letter-spacing:.2px}
@@ -325,13 +325,9 @@ input[type="checkbox"]:disabled,input[type="radio"]:disabled{opacity:.5;cursor:n
    ("iki satir tek header" gorsel butunluk).
    .eh editor reçete header (135-I beyaz-krem) dokunulmadi; HTML eleman + logo IIFE
    degismedi (sadece CSS cila). */
-.bm-marka-serit{display:none}
+.bm-marka-serit{display:flex;align-items:center;justify-content:center;gap:var(--sp-2);padding:var(--sp-3) var(--sp-4);background:var(--kahve-masthead);border-radius:0;flex-shrink:0;position:relative;z-index:6;height:72px;overflow:hidden;cursor:pointer}
+.bm-marka-serit::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;background:linear-gradient(90deg,transparent 0%,var(--vintage) 50%,transparent 100%);pointer-events:none}
 .bm-marka-isim-img{height:64px;width:auto;display:block;flex-shrink:0}
-@media (max-width:768px){
-  .bm-marka-serit{display:flex;align-items:center;justify-content:center;gap:var(--sp-2);padding:var(--sp-3) var(--sp-4);background:var(--kahve-masthead);border-radius:0;flex-shrink:0;position:relative;z-index:6;height:72px;overflow:hidden;cursor:pointer}
-  .bm-marka-serit::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;background:linear-gradient(90deg,transparent 0%,var(--vintage) 50%,transparent 100%);pointer-events:none}
-  .bm-header{border-radius:0}
-}
 
 /* Adim 131-D: YAPIM AŞAMASINDA vurgu karti + 4 stat karti (Image 1 yapim + Image 2 stat) */
 .bm-yapimda-vurgu{background:var(--kahve-light);border:1px solid var(--kahve-border);border-left:3px solid var(--vintage);border-radius:10px;padding:12px 14px;margin:12px 12px 8px}
@@ -385,6 +381,12 @@ input[type="checkbox"]:disabled,input[type="radio"]:disabled{opacity:.5;cursor:n
 .bm-ss-stat:first-child{padding-left:0}
 .ss-label{font-family:var(--font-govde);font-size:var(--fs-xs);line-height:1;color:var(--metin-soluk);text-transform:uppercase;letter-spacing:.5px;font-weight:var(--fw-semibold)}
 .ss-val{font-family:var(--font-baslik);font-size:var(--fs-md);line-height:var(--lh-tight);font-weight:var(--fw-bold);color:var(--ink);margin-top:2px}
+/* Adim 137-G P3: OG/SRM stat satiri masaustu (>=769px) — fs ve min-width bir kademe buyutuldu, mobil override (max-width:768px) AYNEN korunur. */
+@media (min-width:769px){
+  .bm-ss-stat{min-width:62px;padding:0 var(--sp-3)}
+  .ss-val{font-size:var(--fs-lg)}
+  .ss-label{font-size:var(--fs-sm)}
+}
 @media (max-width:768px){
   /* Adim 132-J-2 + 135-E mobile: 6 stat KH kompakt — gap kucult, min-width 32, fs azalt */
   .bm-sticky-summary{padding:var(--sp-1) var(--sp-2);gap:var(--sp-1);flex-wrap:wrap}
