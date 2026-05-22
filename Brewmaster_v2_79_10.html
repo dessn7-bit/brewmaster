@@ -18933,18 +18933,20 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
 
         // Adim 137-G P4 fix-4 (Asama 2 fix): ALKOL bandi incelt — %3.5-5 sessionable / %5-6.5 standart /
         // %6.5-9 guclu-sipping / %9+ cok guclu. %5.0 ile %6.2 farkli banda dussun.
+        // _abv 1-dijit yuvarla (UI ile tutarli) — boundary 5.0 sessionable, 5.1+ standart.
         if (_abv > 0.5) {
+          var _abvR = Math.round(_abv * 10) / 10;
           var aKat, aProz;
-          if (_abv < 3.5)        { aKat = 'çok hafif/alkolsüze yakın'; aProz = 'çok düşük alkol — neredeyse alkolsüz, suya yakın bir his'; }
-          else if (_abv <= 5)    { aKat = 'sessionable';                aProz = 'günlük bira aralığı, birden fazla bardak rahat içilir'; }
-          else if (_abv <= 6.5)  { aKat = 'standart';                   aProz = 'ölçülü içilir, session değil — orta güç bira'; }
-          else if (_abv < 9)     { aKat = 'güçlü, sipping';             aProz = 'belirgin alkol — yavaş yudumlanır, ısınma hissi bekleniyor'; }
-          else if (_abv < 11)    { aKat = 'çok güçlü';                  aProz = 'yoğun alkol — küçük servis, sipping/snifter kullanımı uygun'; }
-          else                   { aKat = 'extreme';                    aProz = 'aşırı alkol — barleywine/eisbock seviyesi, çok yavaş içim'; }
+          if (_abvR < 3.5)        { aKat = 'çok hafif/alkolsüze yakın'; aProz = 'çok düşük alkol — neredeyse alkolsüz, suya yakın bir his'; }
+          else if (_abvR <= 5)    { aKat = 'sessionable';                aProz = 'günlük bira aralığı, birden fazla bardak rahat içilir'; }
+          else if (_abvR <= 6.5)  { aKat = 'standart';                   aProz = 'ölçülü içilir, session değil — orta güç bira'; }
+          else if (_abvR < 9)     { aKat = 'güçlü, sipping';             aProz = 'belirgin alkol — yavaş yudumlanır, ısınma hissi bekleniyor'; }
+          else if (_abvR < 11)    { aKat = 'çok güçlü';                  aProz = 'yoğun alkol — küçük servis, sipping/snifter kullanımı uygun'; }
+          else                    { aKat = 'extreme';                    aProz = 'aşırı alkol — barleywine/eisbock seviyesi, çok yavaş içim'; }
           var alkC1 = '%' + _abv.toFixed(2) + ' ABV (' + aKat + ').';
           var alkC2 = aProz.charAt(0).toUpperCase() + aProz.slice(1) + '.';
-          var alkC3 = (_abv >= 10) ? '⚠ Çok yüksek alkol — ferment sıcaklığı + maya seçimi dikkatli olmalı.'
-                                   : '✓ Alkol seviyesi taşınabilir.';
+          var alkC3 = (_abvR >= 10) ? '⚠ Çok yüksek alkol — ferment sıcaklığı + maya seçimi dikkatli olmalı.'
+                                    : '✓ Alkol seviyesi taşınabilir.';
           _ps("🔥 Alkol", alkC1 + ' ' + alkC2 + ' ' + alkC3, profRows);
         }
 
