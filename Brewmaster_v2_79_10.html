@@ -19013,7 +19013,11 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
               var miktar = parseFloat(k.miktar);
               if (!isFinite(miktar) || miktar <= 0) return;
               var kDB = KATKILAR.find(function(x){ return x && x.id === k.id; });
-              if (!kDB) return;
+              if (!kDB) {
+                // DB'de bilinmeyen ID — yine de listele, sessizce dusmesin
+                kD.push(k.id + ' ' + miktar + (k.birim||'g') + ' → tanınmayan katkı ID, profile etkisi tespit edilemedi');
+                return;
+              }
               var kAdIlk = (kDB.ad || '').split(/[\s\/(]/)[0].trim().toLowerCase();
               if (!kAdIlk) return;
               var bulundu = kD.some(function(line){
