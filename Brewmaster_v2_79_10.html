@@ -18262,7 +18262,7 @@ return `
                   coz:`Bira çok tatlı kalacak, dekstrin fazla, ABV düşük.<br>
                     <b>Çözüm 1 (mash):</b> <b>Mash sıcaklığını 64°C'ye düşür</b> (beta-amilaz aktif → fermente şeker artar). 63-64°C, 75-90 dk mash.<br>
                     <b>Çözüm 2 (maya):</b> Yüksek attenuation maya: ${_highAttenYeast(_beklenen?.tip)}<br>${_showCrystalSolution(_beklenen?.tip) ? `                    <b>Çözüm 3 (grist):</b> Crystal/Karamel malt oranını azalt (%5-10'dan %2-3'e), Carapils tamamen kaldır<br>
-` : ''}${_showBrutEnzymSolution(_beklenen?.tip) ? `                    <b>Çözüm 4 (katkı):</b> Brut IPA gibi kuru bitiş için amyloglucosidase enzim (%0.5-1 mL/L)` : ''}`
+` : ''}${_showBrutEnzymSolution(_beklenen?.tip) ? `                    <b>Çözüm 4 (katkı):</b> Brut IPA gibi kuru bitiş için amyloglucosidase enzim (~0.5-1 mL/L, maşa ekle)` : ''}`
                 });
               } else if(_fg<_stRef.fg[0]-TOL_FG){
                 oneriler.push({
@@ -18287,9 +18287,9 @@ return `
                 baslik:`IBU düşük: ${Math.round(_ibu)} — ${_stKey} hedefi ${_stRef.ibu[0]}-${_stRef.ibu[1]}`,
                 coz:`Bira yeterince acı değil — malt-hop dengesi tatlıya kayacak.<br>
                   <b>60 dk bittering hop eklemesi</b> (seçeneklerden biri):<br>
-                  • <b>+${Math.round(g_cent)}g Centennial/Columbus</b> (~10% AA)<br>
-                  • <b>+${Math.round(g_magnum)}g Magnum/Warrior</b> (~14% AA — daha az gram, temiz acılık)<br>
-                  • <b>+${Math.round(g_cent*1.5)}g Cascade/Saaz/Hallertau</b> (~5-7% AA — klasik stiller için)<br>
+                  • <b>+${Math.round(g_cent)}g Centennial</b> (~10% AA)<br>
+                  • <b>+${Math.round(g_magnum)}g Magnum/Columbus/Warrior</b> (~14-16% AA — daha az gram, temiz acılık)<br>
+                  • <b>+${Math.round(g_cent*2.5)}g Saaz/Hallertau/Tettnang</b> (~3-5% AA — klasik stiller için)<br>
                   → Hedef IBU ~${Math.round(tIBU)}`
               });
             } else if(_ibu>_stRef.ibu[1]+TOL_IBU){
@@ -18430,7 +18430,7 @@ return `
                 durum:'kırmızı', ikon:'🎃',
                 baslik:`Pumpkin Beer için balkabağı yok`,
                 coz:`Balkabağı (fırında pişmiş, ezilmiş): <b>${(_hacim*50).toFixed(0)}-${(_hacim*100).toFixed(0)}g</b> mash'e ekle (50-100 g/L).<br>
-                  <b>Alternatif</b>: Hazır pumpkin puree ${(_hacim*80).toFixed(0)}g. Rice hulls (${(_hacim*50).toFixed(0)}g) stuck mash'i önler.`
+                  <b>Alternatif</b>: Hazır pumpkin puree ${(_hacim*80).toFixed(0)}g. Rice hulls (${(_hacim*15).toFixed(0)}g) stuck mash'i önler.`
               });
             }
             const bharatVar=katkilarHasAny(['tarcin','karanfil','ginger','zencefil','muskat','yenibahar','allspice']);
@@ -18549,8 +18549,8 @@ return `
                 durum:'sarı', ikon:'🛢️',
                 baslik:`Barrel-aged stil — fıçı/oak yok`,
                 coz:`Gerçek fıçı alternatifleri (home brew'da pratik):<br>
-                  • <b>Oak chips</b>: ${(_hacim*2).toFixed(0)}-${(_hacim*5).toFixed(0)}g (secondary, 2-4 hafta). French/American/Hungarian oak seçimi.<br>
-                  • <b>Oak cubes</b>: ${(_hacim*3).toFixed(0)}-${(_hacim*7).toFixed(0)}g (daha yavaş, 4-8 hafta)<br>
+                  • <b>Oak chips</b>: ${(_hacim*1).toFixed(0)}-${(_hacim*3).toFixed(0)}g (secondary, 2-4 hafta). French/American/Hungarian oak seçimi.<br>
+                  • <b>Oak cubes</b>: ${(_hacim*2).toFixed(0)}-${(_hacim*4).toFixed(0)}g (daha yavaş, 4-8 hafta)<br>
                   • <b>Bourbon flavor</b>: ${(_hacim*15).toFixed(0)}-${(_hacim*30).toFixed(0)}mL bourbon + ${(_hacim*2).toFixed(0)}g bourbon-soaked oak<br>
                   • <b>Tost seviyesi</b>: Medium-Plus tost ideal (vanilla + karamel + spice)`
               });
