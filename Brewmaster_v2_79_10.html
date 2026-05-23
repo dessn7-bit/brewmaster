@@ -18118,7 +18118,7 @@ return `
               return {tip:'lager', ad:'Lager', oneri:'<b>W-34/70</b> (kuru, universal), <b>Saflager S-189</b>, <b>S-23</b>, <b>WY2124 Bohemian</b>, <b>WY2206 Bavarian</b>, <b>WLP830 German</b>'};
             // Wheat (incl. German wheat styles + historical wheat-based)
             if(/weizen|weissbier|\bhefe|dunkelweizen|witbier|belgian white|white ale|roggenbier|grodziskie|grätzer|gratzer|wheat beer|wheatwine|spiced wheat|herb wheat|australian wheat/i.test(s))
-              return {tip:'wheat', ad:'Wheat/Hefe', oneri:'<b>WB-06</b> (kuru), <b>WY3068 Weihenstephan</b>, <b>WLP300 Hefeweizen IV</b>, <b>MJ M20</b>, <b>WY3944 Wit</b> (Witbier için)'};
+              return {tip:'wheat', ad:'Wheat/Hefe', oneri:'<b>WB-06</b> (kuru), <b>WY3068 Weihenstephan</b>, <b>WLP300 Hefeweizen</b>, <b>MJ M20</b>, <b>WY3944 Wit</b> (Witbier için)'};
             // Kveik (Norwegian/Nordic farmhouse — Sahti de kveik uyumlu)
             if(/kveik|norwegian farmhouse|sahti|nordic farmhouse/i.test(s))
               return {tip:'kveik', ad:'Kveik (Norveç Farmhouse)', oneri:'<b>Voss</b> (Lallemand), <b>Hornindal</b>, <b>OYL-071 Lutra</b> (en nötr), <b>OYL-061 Voss</b>, <b>OYL-091 Hornindal</b>'};
@@ -18215,7 +18215,7 @@ return `
                 durum:'kırmızı', ikon:'🧪',
                 baslik:`Maya uyumsuz: şu an <b>${_mevcutAd}</b> (${_mevcutTip||'?'}) — bu stil <b>${_beklenen.ad}</b> maya ister`,
                 coz:`${stil_tah} stili için uygun maya tipi: <b>${_beklenen.ad}</b>. Öneriler: ${_beklenen.oneri}<br><br>
-                  <b>Neden önemli?</b> Yanlış maya tipi: fermentasyon sıcaklığı uyumsuzluğu, ester/fenol profili sapması, attenüasyon sorunu.${_beklenen.tip==='lager'?'<br>🌡️ Lager mayası <b>10-13°C</b> aralığında fermente olur (dolap gerekli).':_beklenen.tip==='kveik'?'<br>🔥 Kveik <b>25-38°C</b> aralığında fermente (ısıtıcı/oda).':_beklenen.tip==='saison'?'<br>🌡️ Saison <b>22-28°C</b> (yüksek sıcaklık karakter verir).':_beklenen.tip==='sour'?'<br>🦠 Sour maya tatlılığı kuru-ekşiye çevirir, normal ale mayasıyla olmaz.':''}`
+                  <b>Neden önemli?</b> Yanlış maya tipi: fermentasyon sıcaklığı uyumsuzluğu, ester/fenol profili sapması, attenüasyon sorunu.${_beklenen.tip==='lager'?'<br>🌡️ Lager mayası <b>10-13°C</b> aralığında fermente olur (dolap gerekli).':_beklenen.tip==='kveik'?'<br>🔥 Kveik <b>25-38°C</b> aralığında fermente (ısıtıcı/oda).':_beklenen.tip==='saison'?'<br>🌡️ Saison <b>22-35°C</b> (yüksek sıcaklık karakter verir).':_beklenen.tip==='sour'?'<br>🦠 Sour maya tatlılığı kuru-ekşiye çevirir, normal ale mayasıyla olmaz.':''}`
               });
             }
           }
@@ -18350,11 +18350,11 @@ return `
                 durum:'kırmızı', ikon:'🦠',
                 baslik:`Sour stil — asitlik kaynağı yok!`,
                 coz:`Sour bira için <b>asitlik kaynağı şart</b>. Seçenekler:<br>
-                  • <b>Kettle sour</b>: Lactobacillus ile mash/kaynatma öncesi 24-48h pre-acid (en hızlı)<br>
-                  • <b>Co-pitch</b>: Lactobacillus + Saccharomyces (Omega OYL-605, WLP677)<br>
-                  • <b>Mixed ferment</b>: Brett + Lacto + Pedio (Flanders/Lambic için, 3-12 ay)<br>
-                  • <b>Quick sour</b>: %3-5 Asit Malt (Sauermalz) grist içinde<br>
-                  • <b>Post-ferment</b>: 5-15 mL/L %88 laktik asit (hedef pH 3.2-3.5)`
+                  • <b>Kettle sour</b>: kaynatma öncesi worta Lactobacillus, 24-48h ekşit, sonra normal kaynat<br>
+                  • <b>Co-pitch</b>: Lacto'yu (OYL-605 / WLP677) Sacch ile birlikte fermentere pitch'le<br>
+                  • <b>Mixed ferment</b>: Brett + Lacto + Pedio (Flanders/Lambic için, 6-18 ay)<br>
+                  • <b>Quick sour</b>: ~%8 Asit Malt (Sauermalz) grist içinde (%5 hafif tartlık; %10 üzeri mash pH'ını aşırı düşürür)<br>
+                  • <b>Post-ferment</b>: %88 laktik asit — az başlayıp pH/tada göre ekle (tipik ~2-6 mL/L; hedef pH 3.2-3.5)`
               });
             } else if(laktikVar || asitMaltVar){
               // Asit var ama nasıl?
@@ -18364,7 +18364,7 @@ return `
                 oneriler.push({
                   durum:'sarı', ikon:'🦠',
                   baslik:`Sour pH için laktik miktarı az`,
-                  coz:`Mevcut ${laktikMiktar}mL laktik asit — hedef pH 3.2-3.5 için <b>${(_hacim*5).toFixed(0)}-${(_hacim*10).toFixed(0)}mL</b> gerekli (5-10 mL/L). Post-fermentasyon ekle, tat kontrolü yaparak.`
+                  coz:`Mevcut ${laktikMiktar}mL laktik asit — hedef pH 3.2-3.5 için toplam ~${(_hacim*2).toFixed(0)}-${(_hacim*6).toFixed(0)}mL (~2-6 mL/L) hedefle. Az ekleyip pH/tada göre ayarla.`
                 });
               }
             }
@@ -18375,7 +18375,7 @@ return `
                 oneriler.push({
                   durum:'sarı', ikon:'🧂',
                   baslik:`Gose için deniz tuzu yok`,
-                  coz:`Gose'nin karakteristik tuzluluğu için <b>${(_hacim*0.3).toFixed(1)}-${(_hacim*0.5).toFixed(1)}g deniz tuzu</b> (3-5 g/hL, kaynatma son 5dk)`
+                  coz:`Gose'nin karakteristik tuzluluğu için <b>${(_hacim*0.5).toFixed(1)}-${(_hacim*1).toFixed(1)}g deniz tuzu</b> (~0.5-1 g/L, kaynatma son 5dk)`
                 });
               }
               const corianderVar=katkilarHasAny(['kiymik','kisnis','coriander']);
