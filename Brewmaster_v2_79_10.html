@@ -18452,9 +18452,9 @@ return `
                 durum:'kırmızı', ikon:'🍯',
                 baslik:`Honey Beer için bal yok`,
                 coz:`Bal ekleme:<br>
-                  • <b>Fermenter'a</b> (yüksek fermente, %85+): ${(_hacim*100).toFixed(0)}-${(_hacim*300).toFixed(0)}g (secondary, pastörize)<br>
+                  • <b>Fermenter'a</b> (yüksek fermente, ~%95): ${(_hacim*100).toFixed(0)}-${(_hacim*300).toFixed(0)}g (secondary, pastörize)<br>
                   • <b>Kaynatma sonu</b> (wort): aromayı korur<br>
-                  • Bal 1g ≈ 1.035 PPG (pale malt ~1.037). Hesaba katmayı unutma — OG artırır.`
+                  • Bal ≈ 35 PPG (1 lb/galon → ~1.035 SG). Hesaba katmayı unutma — OG artırır.`
               });
             }
           }
@@ -18467,8 +18467,8 @@ return `
                 durum:'kırmızı', ikon:'💨',
                 baslik:`Smoked stil — dumanlı malt yok`,
                 coz:`Dumanlı malt önerileri:<br>
-                  • <b>Rauchmalz (Weyermann beechwood)</b>: Klasik Bamberg. Grist'in %50-100'ü (hafif Rauchbier için %30-50)<br>
-                  • <b>Peat smoked malt</b>: Scotch/Whisky karakteri. Grist'in %5-15'i (çok güçlü!)<br>
+                  • <b>Rauchmalz (Weyermann beechwood)</b>: Klasik Bamberg. Grist'in %50-100'ü (hafif Rauchbier için %20-50)<br>
+                  • <b>Peat smoked malt</b>: Scotch/Whisky karakteri. Grist'in %1-5'i (çok güçlü — %1 altı bile belirgin)<br>
                   • <b>Cherry wood smoked</b>: Daha nazik, meyveli duman`
               });
             }
@@ -18482,8 +18482,8 @@ return `
                 durum:'kırmızı', ikon:'☕',
                 baslik:`Coffee Beer için kahve yok`,
                 coz:`Kahve ekleme:<br>
-                  • <b>Cold brew</b> (en iyi): ${(_hacim*50).toFixed(0)}-${(_hacim*100).toFixed(0)}g çekilmiş kahve + 500mL su, 12-24h → süz, secondary'ye ekle<br>
-                  • <b>Whole bean</b> secondary'de: ${(_hacim*15).toFixed(0)}-${(_hacim*30).toFixed(0)}g (3-7 gün dry-bean)<br>
+                  • <b>Cold brew</b> (en iyi): ${(_hacim*6).toFixed(0)}-${(_hacim*10).toFixed(0)}g çekilmiş kahve + kahvenin ~6 katı soğuk su, 12-24h → süz, secondary'ye ekle<br>
+                  • <b>Whole bean</b> secondary'de: ${(_hacim*3).toFixed(0)}-${(_hacim*8).toFixed(0)}g (3-7 gün dry-bean)<br>
                   • <b>Espresso shot</b>: ${Math.ceil(_hacim/2)} shot (daha hızlı ama daha asidik)`
               });
             }
@@ -18533,10 +18533,10 @@ return `
                 durum:'kırmızı', ikon:'🧫',
                 baslik:`Brett stil — Brettanomyces maya yok`,
                 coz:`Brett maya seçenekleri:<br>
-                  • <b>Pure Brett</b>: WLP650 Brett Bruxellensis, WLP645 Brett Claussenii, OYL-202 Brett C (tek başına ferment)<br>
-                  • <b>Brett + Sacch co-pitch</b>: OYL-218 Brett 2.0, Lallemand Philly Sour (modern yaklaşım)<br>
-                  • <b>100% Brett IPA</b>: Saccharomyces temizlikten sonra Brett ekle (2-3 ay)<br>
-                  <b>Karakter</b>: Funk, horse blanket, tropical fruit, earthy. Fermentasyon 4-6 hafta alabilir.`
+                  • <b>Saf Brett</b>: WLP650 / OYL-202 (B. bruxellensis), WLP645 (B. claussenii)<br>
+                  • <b>Brett blend</b>: OYL-218 "All the Bretts" — 10+ Brett suşu, ikincilde yüksek attenüasyon<br>
+                  • <b>İkincil ekleme (klasik)</b>: Sacch ile birincil fermantasyon → sonra Brett ekle, funk aylar içinde gelişir<br>
+                  <b>Karakter</b>: funk, horse blanket, tropikal meyve, topraksı. Ferment 4-6 hafta.`
               });
             }
           }
@@ -18565,9 +18565,9 @@ return `
                 durum:'sarı', ikon:'⚫',
                 baslik:`Black IPA — dehusked koyu malt önerilir`,
                 coz:`Roastiness OLMADAN koyu renk için dehusked malt şart (standart Chocolate/Roasted Barley Black IPA'yı stout'a çevirir):<br>
-                  • <b>Weyermann Carafa Special III</b>: ${(_hacim*0.025).toFixed(2)}-${(_hacim*0.04).toFixed(2)} kg (pürüzsüz, tam siyah)<br>
-                  • <b>Midnight Wheat</b> (Briess): benzer, kahvemsi ipucu<br>
-                  • <b>Blackprinz</b>: en temiz, sadece renk<br>
+                  • <b>Weyermann Carafa Special III</b>: ${(_hacim*0.008).toFixed(2)}-${(_hacim*0.014).toFixed(2)} kg (pürüzsüz, tam siyah)<br>
+                  • <b>Midnight Wheat</b> (Briess): en pürüzsüz alternatif<br>
+                  • <b>Blackprinz</b> (Briess): temiz, yüksek oranda hafif kahve/kakao notası<br>
                   <b>İpucu</b>: Grist'in sadece %3-5'i yeterli. IPA hop agresivliği korunur ama görsel stout. Koyu malt → mash son 10dk ekle (kapping).`
               });
             }
