@@ -11215,8 +11215,8 @@ function renderSidebar(){
   var sekmeDef = [
     {id:'aktif',   et:'Planlananlar', icon:'clipboard-list'},
     {id:'yapimda', et:'Aktif',        icon:'flame'},
-    {id:'arsiv',   et:'Arsiv',        icon:'archive'},
-    {id:'istek',   et:'Istek',        icon:'star'}
+    {id:'arsiv',   et:'Arşiv',        icon:'archive'},
+    {id:'istek',   et:'İstek',        icon:'star'}
   ];
   var sekmeHtml = sekmeDef.map(function(s, si){
     var n = KR.filter(function(t){
@@ -11233,11 +11233,11 @@ function renderSidebar(){
   var klasorler = getKlasorler();
   var klasorHtml = klasorler.map(function(k, ki){
     var ak = (aktifKlasor === k);
-    var label = k || 'Tumu';
+    var label = k || 'Tümü';
     var iconColorClass = k ? 'bm-folder-icon-tek' : 'bm-folder-icon-tumu';
     var iconSvg = (k ? BM_SVG.folder : BM_SVG.folders).replace('class="ti"', 'class="ti '+iconColorClass+'"');
     return '<button class="bm-sidebar-folder'+(ak?' active':'')+'" onclick="setAktifKlasor('+ki+')">'+
-      '<span class="bm-sidebar-folder-label">'+iconSvg+(k?_esc131B(k):'Tumu')+'</span>'+
+      '<span class="bm-sidebar-folder-label">'+iconSvg+(k?_esc131B(k):'Tümü')+'</span>'+
     '</button>';
   }).join('');
 
@@ -11249,12 +11249,12 @@ function renderSidebar(){
         '<div class="bm-sidebar-version">v2.79.10</div>'+
       '</div>'+
     '</div>'+
-    '<button class="bm-sidebar-cta" onclick="yeniTarif()">'+BM_SVG.plus+'Yeni recete</button>'+
+    '<button class="bm-sidebar-cta" onclick="yeniTarif()">'+BM_SVG.plus+'Yeni reçete</button>'+
     '<div class="bm-sidebar-section">Sekmeler</div>'+
     sekmeHtml+
-    '<div class="bm-sidebar-section">Klasorler</div>'+
+    '<div class="bm-sidebar-section">Klasörler</div>'+
     klasorHtml+
-    '<button class="bm-sidebar-folder-add" onclick="yeniKlasorAc()">'+BM_SVG.plus+'Yeni klasor</button>'+
+    '<button class="bm-sidebar-folder-add" onclick="yeniKlasorAc()">'+BM_SVG.plus+'Yeni klasör</button>'+
     '<div class="bm-sidebar-user">'+
       '<div class="bm-sidebar-user-avatar">K</div>'+
       '<div class="bm-sidebar-user-name">Kaan</div>'+
@@ -11278,7 +11278,7 @@ function renderHeader(){
   if(ekran==="ana"){ hdr.style.display="none"; hdr.innerHTML=""; return; }
   hdr.style.display="";
   // Sekme basligi (rListe sekmeTanim ile uyumlu — emoji yok, sade)
-  var sekmeBasliklari = {aktif:'Planlananlar', yapimda:'Aktif', arsiv:'Arsiv', istek:'Istek'};
+  var sekmeBasliklari = {aktif:'Planlananlar', yapimda:'Aktif', arsiv:'Arşiv', istek:'İstek'};
   var aktifBaslik = sekmeBasliklari[listeSekme] || 'Planlananlar';
   // Breadcrumb: aktif sekme + klasor filtreli sayim (ARAMA HARIC)
   var durumKR = KR.filter(function(t){
@@ -11297,7 +11297,7 @@ function renderHeader(){
   var dropdownHtml = _bildirimPanelAcik
     ? '<div class="bm-bildirim-dropdown" id="bm-bildirim-dropdown">'+
         '<div class="bm-bildirim-baslik">Bildirimler</div>'+
-        '<div class="bm-bildirim-bos">Henuz bildirim yok</div>'+
+        '<div class="bm-bildirim-bos">Henüz bildirim yok</div>'+
         '<div style="border-top:1px solid #E8E4DA;margin-top:6px;padding-top:6px;text-align:center">'+
           '<button onclick="_bildirimPanelAcik=false;window.stokAnaTabSet(\'bildirim\')" style="background:none;border:none;color:var(--vintage);font-size:12px;font-weight:600;cursor:pointer;padding:4px 8px">Tümünü gör →</button>'+
         '</div>'+
@@ -11316,7 +11316,7 @@ function renderHeader(){
     '<button class="bm-hamburger-btn" onclick="toggleSidebar()" title="Menu" aria-label="Menu">'+BM_SVG.menu+'</button>'+
     '<div class="bm-header-left">'+
       '<div class="bm-header-title">'+aktifBaslik+'</div>'+
-      '<div class="bm-header-breadcrumb">'+receteSay+' recete &middot; '+klasorSay+' klasor</div>'+
+      '<div class="bm-header-breadcrumb">'+receteSay+' reçete &middot; '+klasorSay+' klasör</div>'+
     '</div>'+
     '<div class="bm-header-right">'+
       aramaHtml+
@@ -11395,7 +11395,7 @@ function renderYapimdaVurgu(){
       '</div>';
   }).join('');
   return '<div class="bm-yapimda-vurgu">'+
-      '<div class="bm-yapimda-baslik">'+BM_SVG.flame+'<span>Yapim Asamasinda</span></div>'+
+      '<div class="bm-yapimda-baslik">'+BM_SVG.flame+'<span>Yapım Aşamasında</span></div>'+
       items+
     '</div>';
 }
@@ -11405,8 +11405,8 @@ function renderStatKartlar(){
   var statTanim = [
     {id:'aktif',   et:'Planlananlar', renk:'turuncu'},
     {id:'yapimda', et:'Aktif',        renk:'yesil'},
-    {id:'arsiv',   et:'Arsiv',        renk:'yesil'},
-    {id:'istek',   et:'Istek',        renk:'turuncu'}
+    {id:'arsiv',   et:'Arşiv',        renk:'yesil'},
+    {id:'istek',   et:'İstek',        renk:'turuncu'}
   ];
   var html = statTanim.map(function(s, si){
     var n = KR.filter(function(t){
@@ -11417,7 +11417,7 @@ function renderStatKartlar(){
         '<div class="bm-stat-baslik">'+s.et+'</div>'+
         '<div class="bm-stat-sayi-wrap">'+
           '<span class="bm-stat-sayi '+s.renk+'">'+n+'</span>'+
-          '<span class="bm-stat-alt">recete</span>'+
+          '<span class="bm-stat-alt">reçete</span>'+
         '</div>'+
       '</div>';
   }).join('');
@@ -11457,14 +11457,14 @@ function renderKlasorChip(){
       if(silOnayBu) {
         var nT = KR.filter(function(t){ return (t.klasor||'') === k; }).length;
         return '<span class="bm-klasor-chip-silonay">'+
-            '<span>Sil? '+(nT > 0 ? nT + ' tarif' : 'bos')+'</span>'+
+            '<span>Sil? '+(nT > 0 ? nT + ' tarif' : 'boş')+'</span>'+
             '<button class="evet" onclick="klasorSilOnay(true)">&#10003;</button>'+
             '<button class="hayir" onclick="klasorSilOnay(false)">&#10005;</button>'+
           '</span>';
       }
       var bosKlasor = !k;
       var iconKey = bosKlasor ? 'folders' : 'folder';
-      var label = bosKlasor ? 'Tumu' : _esc131B(k);
+      var label = bosKlasor ? 'Tümü' : _esc131B(k);
       // Aktif non-bos klasor -> chip icinde inline x button (mevcut UX intact)
       var silBtn = (ak && !bosKlasor)
         ? '<button class="bm-klasor-chip-sil" onclick="event.stopPropagation();klasorSilIste('+ki+')" title="Sil">&times;</button>'
@@ -11483,7 +11483,7 @@ function renderKlasorChip(){
         '<button class="bm-klasor-chip-input-btn ok" onclick="yeniKlasorKaydet()" title="Kaydet">&#10003;</button>'+
         '<button class="bm-klasor-chip-input-btn no" onclick="yeniKlasorIptal()" title="Iptal">&#10005;</button>'+
       '</span>'
-    : '<button class="bm-klasor-chip-add" onclick="yeniKlasorAc()">'+BM_SVG.plus+'<span>Yeni klasor</span></button>';
+    : '<button class="bm-klasor-chip-add" onclick="yeniKlasorAc()">'+BM_SVG.plus+'<span>Yeni klasör</span></button>';
   return '<div class="bm-klasor-bar">'+inner+addBlock+'</div>';
 }
 
@@ -11559,10 +11559,10 @@ function rListe(){
       durumChip='<button class="bm-recete-eylem-chip aktife" onclick="tarifDurumDegistir(\''+t.id+'\',\'aktif\')">'+BM_SVG['clipboard-list']+'<span>Planla</span></button>';
     }
     const arsivChip = (durum!=='arsiv')
-      ? '<button class="bm-recete-eylem-chip arsiv" onclick="tarifDurumDegistir(\''+t.id+'\',\'arsiv\')">'+BM_SVG.archive+'<span>Arsiv</span></button>'
+      ? '<button class="bm-recete-eylem-chip arsiv" onclick="tarifDurumDegistir(\''+t.id+'\',\'arsiv\')">'+BM_SVG.archive+'<span>Arşiv</span></button>'
       : '';
     const istekChip = (durum!=='istek')
-      ? '<button class="bm-recete-eylem-chip istek" onclick="tarifDurumDegistir(\''+t.id+'\',\'istek\')">'+BM_SVG.star+'<span>Istek</span></button>'
+      ? '<button class="bm-recete-eylem-chip istek" onclick="tarifDurumDegistir(\''+t.id+'\',\'istek\')">'+BM_SVG.star+'<span>İstek</span></button>'
       : '';
     // Banner badges
     const renkBadge='<span class="bm-recete-badge">'+_esc131B(renkAdi).toUpperCase()+'</span>';
@@ -11595,7 +11595,7 @@ function rListe(){
           '<div class="bm-recete-badge-row">'+renkBadge+taslakBadge+'</div>'+
           '<div class="bm-recete-baslik">'+_esc131B(t.biraAd||'(adsiz)')+'</div>'+
           metaHtml+
-          '<button class="bm-recete-ac-btn" onclick="tarifAcById(this)">Ac &rarr;</button>'+
+          '<button class="bm-recete-ac-btn" onclick="tarifAcById(this)">Aç &rarr;</button>'+
         '</div>'+
         '<div class="bm-recete-info">'+
           '<div class="bm-recete-metric-row">'+metricHtml+'</div>'+
@@ -11604,13 +11604,13 @@ function rListe(){
             durumChip+
             arsivChip+
             istekChip+
-            '<button class="bm-recete-eylem-chip stoktan" onclick="stoktenManuelDus(\''+t.id+'\')" title="Tarif durumunu degistirmeden stoktan dus">'+BM_SVG.package+'<span>Stoktan Dus</span></button>'+
-            '<button class="bm-recete-eylem-chip iade" onclick="stoktenManuelIade(\''+t.id+'\')" title="Tarifin malzemelerini stoga geri ekle">'+BM_SVG['arrow-back-up']+'<span>Iade</span></button>'+
+            '<button class="bm-recete-eylem-chip stoktan" onclick="stoktenManuelDus(\''+t.id+'\')" title="Tarif durumunu degistirmeden stoktan dus">'+BM_SVG.package+'<span>Stoktan Düş</span></button>'+
+            '<button class="bm-recete-eylem-chip iade" onclick="stoktenManuelIade(\''+t.id+'\')" title="Tarifin malzemelerini stoga geri ekle">'+BM_SVG['arrow-back-up']+'<span>İade</span></button>'+
             '<button class="bm-recete-eylem-chip-sil" onclick="silOnayById(this)" title="Sil">&times; Sil</button>'+
             '<div class="bm-recete-klasor-dropdown-wrap">'+
               '<span class="bm-recete-klasor-icon">'+BM_SVG.folder+'</span>'+
               '<select class="bm-recete-klasor-dropdown" onchange="klasoruDegistir(this)">'+
-                '<option value="">Klasorsuz</option>'+klOpts+
+                '<option value="">Klasörsüz</option>'+klOpts+
               '</select>'+
             '</div>'+
           '</div>'+
