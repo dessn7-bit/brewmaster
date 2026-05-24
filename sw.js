@@ -533,7 +533,11 @@
 // (oninput debounce 150ms, TR-normalize prefix>contains, top 10). Secim = kategori akordeonuyla
 // AYNI yol (yM.id + render()); Enter mevcut "ilk eslesen" KORUNDU; Esc/disari tik/secim kapatir.
 // HTML degisti -> KURAL 12.3 CACHE_VERSION bump v131-107 -> v131-108.
-const CACHE_VERSION = 'bm-cache-v131-108';
+// typeahead-genel (2026-05-24): malt type-ahead TEK genel helper'a tasindi (bmArama/_bmAramaCfg/
+// bmAramaSec) + Hop + Maya arama kutularina da yayildi. Secim her sekmenin MEVCUT mekanizmasi
+// (malt yM.id, hop yH.id, maya S.mayaId; +render). Katki zaten canli grid, Su native select -> haric.
+// HTML degisti -> KURAL 12.3 CACHE_VERSION bump v131-108 -> v131-109.
+const CACHE_VERSION = 'bm-cache-v131-109';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.

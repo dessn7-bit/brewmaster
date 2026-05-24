@@ -14066,7 +14066,8 @@ function rEditorMaya(og, fg, abv, maya, maya2, fgKaynak, fgHesap){
       <div class="bm-acc-body">
         <span class="etiket">1. Maya</span>
         <div style="font-size:10px;color:var(--dim);margin-bottom:6px">🟢 Şarap dolabı · 🟡 Oda sıcaklığı · 🔴 Yüksek sıcaklık mayası</div>
-        <input type="text" class="inp" style="margin-bottom:6px;font-size:12px" placeholder="🔍 Maya ara... (Enter: ilk eşleşeni seç)" value="${sekmeArama.maya}" onchange="sekmeArama.maya=this.value;render()" onkeydown="if(event.key==='Enter'){const q=this.value.toLowerCase().trim();if(!q)return;const _m=MAYALAR.find(x=>x&&(x.ad||'').toLowerCase().includes(q));if(_m){S.mayaId=_m.id;this.value='';sekmeArama.maya='';flash('Maya seçildi: '+_m.ad,'ok');render();}else flash('Eşleşen maya yok','err');event.preventDefault();}">
+        <input type="text" id="bm-arama-maya-inp" class="inp bm-arama-inp" style="margin-bottom:6px;font-size:12px" placeholder="🔍 Maya ara — yazınca öneriler çıkar (Enter: ilk eşleşeni seç)" value="${sekmeArama.maya}" oninput="bmArama('maya',this.value)" onchange="sekmeArama.maya=this.value;render()" onkeydown="if(event.key==='Escape'){var _p=document.getElementById('bm-arama-maya');if(_p)_p.innerHTML='';this.blur();return;}if(event.key==='Enter'){const q=this.value.toLowerCase().trim();if(!q)return;const _m=MAYALAR.find(x=>x&&(x.ad||'').toLowerCase().includes(q));if(_m){S.mayaId=_m.id;this.value='';sekmeArama.maya='';flash('Maya seçildi: '+_m.ad,'ok');var _p2=document.getElementById('bm-arama-maya');if(_p2)_p2.innerHTML='';render();}else flash('Eşleşen maya yok','err');event.preventDefault();}">
+        <div id="bm-arama-maya" class="bm-arama-panel"></div>
         ${_mayaKatHtml}
         <div style="margin-top:10px">
           <span class="etiket">2. Maya (Opsiyonel)</span>
@@ -15011,8 +15012,8 @@ function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
       <button class="bm-acc-header" type="button" aria-expanded="${_mEkleAria}" onclick="bmAccToggle('malt-ekle')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmAccToggle('malt-ekle')}"><span class="bm-acc-title">➕ Yeni Malt Ekle</span><span class="bm-acc-chevron">▾</span></button>
       <div class="bm-acc-body">
         <span class="etiket">Malt Ekle</span>
-        <input type="text" id="bm-malt-arama-input" class="inp" style="margin-bottom:6px;font-size:12px" placeholder="🔍 Malt ara — yazınca öneriler çıkar (Enter: ilk eşleşeni ekle)" value="${sekmeArama.malt}" oninput="bmMaltAramaOneri(this.value)" onchange="sekmeArama.malt=this.value;render()" onkeydown="if(event.key==='Escape'){var _p=document.getElementById('bm-malt-arama-oneri');if(_p)_p.innerHTML='';this.blur();return;}if(event.key==='Enter'){const q=this.value.toLowerCase().trim();if(!q)return;const _k=sekmKat.malt;const _m=MALTLAR.find(x=>x&&x.ad.toLowerCase().includes(q)&&(!_k||x.g===_k));if(_m){yM.id=_m.id;maltEkle();this.value='';sekmeArama.malt='';var _p2=document.getElementById('bm-malt-arama-oneri');if(_p2)_p2.innerHTML='';}else flash('Eşleşen malt yok','err');event.preventDefault();}">
-        <div id="bm-malt-arama-oneri"></div>
+        <input type="text" id="bm-arama-malt-inp" class="inp bm-arama-inp" style="margin-bottom:6px;font-size:12px" placeholder="🔍 Malt ara — yazınca öneriler çıkar (Enter: ilk eşleşeni ekle)" value="${sekmeArama.malt}" oninput="bmArama('malt',this.value)" onchange="sekmeArama.malt=this.value;render()" onkeydown="if(event.key==='Escape'){var _p=document.getElementById('bm-arama-malt');if(_p)_p.innerHTML='';this.blur();return;}if(event.key==='Enter'){const q=this.value.toLowerCase().trim();if(!q)return;const _k=sekmKat.malt;const _m=MALTLAR.find(x=>x&&x.ad.toLowerCase().includes(q)&&(!_k||x.g===_k));if(_m){yM.id=_m.id;maltEkle();this.value='';sekmeArama.malt='';var _p2=document.getElementById('bm-arama-malt');if(_p2)_p2.innerHTML='';}else flash('Eşleşen malt yok','err');event.preventDefault();}">
+        <div id="bm-arama-malt" class="bm-arama-panel"></div>
         ${_maltKatHtml}
         <div style="display:flex;gap:8px;margin-bottom:6px;align-items:center">
           <input type="number" id="ymKg" class="inp" style="width:90px;font-weight:600;text-align:center" value="${yM.kg}" min=".01" max="8" step=".01" onchange="yM.kg=parseFloat(this.value)||0">
@@ -15169,7 +15170,8 @@ function rEditorHop(og, ibu, seciHop){
       <button class="bm-acc-header" type="button" aria-expanded="${_hEkleAria}" onclick="bmAccToggle('hop-ekle')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmAccToggle('hop-ekle')}"><span class="bm-acc-title">➕ Yeni Hop Ekle</span><span class="bm-acc-chevron">▾</span></button>
       <div class="bm-acc-body">
         <span class="etiket">Hop Ekle</span>
-        <input type="text" class="inp" style="margin-bottom:6px;font-size:12px" placeholder="🔍 Hop ara... (Enter: ilk eşleşeni ekle)" value="${sekmeArama.hop}" onchange="sekmeArama.hop=this.value;render()" onkeydown="if(event.key==='Enter'){const q=this.value.toLowerCase().trim();if(!q)return;const _k=sekmKat.hop;const _h=HOPLAR.find(x=>x&&x.ad.toLowerCase().includes(q)&&(!_k||x.g===_k));if(_h){yH.id=_h.id;hopEkle();this.value='';sekmeArama.hop='';}else flash('Eşleşen hop yok','err');event.preventDefault();}">
+        <input type="text" id="bm-arama-hop-inp" class="inp bm-arama-inp" style="margin-bottom:6px;font-size:12px" placeholder="🔍 Hop ara — yazınca öneriler çıkar (Enter: ilk eşleşeni ekle)" value="${sekmeArama.hop}" oninput="bmArama('hop',this.value)" onchange="sekmeArama.hop=this.value;render()" onkeydown="if(event.key==='Escape'){var _p=document.getElementById('bm-arama-hop');if(_p)_p.innerHTML='';this.blur();return;}if(event.key==='Enter'){const q=this.value.toLowerCase().trim();if(!q)return;const _k=sekmKat.hop;const _h=HOPLAR.find(x=>x&&x.ad.toLowerCase().includes(q)&&(!_k||x.g===_k));if(_h){yH.id=_h.id;hopEkle();this.value='';sekmeArama.hop='';var _p2=document.getElementById('bm-arama-hop');if(_p2)_p2.innerHTML='';}else flash('Eşleşen hop yok','err');event.preventDefault();}">
+        <div id="bm-arama-hop" class="bm-arama-panel"></div>
         ${_hopKatHtml}
         <div style="display:flex;gap:8px;margin-bottom:6px;align-items:center">
           <input type="number" id="yhG" class="inp" style="width:80px;font-weight:600;text-align:center" value="${yH.g}" min="1" max="500" step="1" onchange="var v=parseFloat(this.value)||0;if(v>500){flash('Hop miktarı 500g üstü — kontrol et','err');}yH.g=Math.min(500,v)">
@@ -21142,23 +21144,37 @@ window.brewTimerTik=function(){
   }
 };
 
-// ── Malt arama type-ahead (canli oneri dropdown). Secim = kategori akordeonuyla AYNI yol: yM.id + render().
-var _bmMaltAramaTimer=null;
+// ── Genel malzeme arama type-ahead (Malt + Hop + Maya, TEK helper — kopya/drift yok).
+// Secim = ilgili sekmenin MEVCUT mekanizmasi: malt yM.id + render, hop yH.id + render, maya S.mayaId + render.
+// Panel akis-ici (akordeon CSS max-height:5000px), render()'dan bagimsiz (focus kaybi yok).
+var _bmAramaTimer=null;
 function _bmTrNorm(s){return (s||'').toString().toLocaleLowerCase('tr-TR').replace(/ı/g,'i').replace(/İ/g,'i').replace(/ş/g,'s').replace(/ğ/g,'g').replace(/ü/g,'u').replace(/ö/g,'o').replace(/ç/g,'c').replace(/â/g,'a').replace(/î/g,'i').replace(/û/g,'u').trim();}
-function bmMaltAramaOneri(q){ if(_bmMaltAramaTimer)clearTimeout(_bmMaltAramaTimer); _bmMaltAramaTimer=setTimeout(function(){_bmMaltAramaOneriCiz(q);},150); }
-function _bmMaltAramaOneriCiz(q){
-  var panel=document.getElementById('bm-malt-arama-oneri'); if(!panel)return;
+var _bmAramaCfg={
+  malt:{panel:'bm-arama-malt',data:function(){return MALTLAR;},ad:function(m){return m.ad;},
+    sat:function(m){var k=katKodu(m.g);return '<span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:9px;font-weight:700;background:'+k.bg+';color:'+k.tx+';letter-spacing:.3px;flex-shrink:0">'+k.ad+'</span><span style="flex:1;min-width:0;font-size:12px;font-weight:600;color:var(--kahve);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(m.ad)+'</span><span style="font-size:10px;color:var(--soluk);flex-shrink:0">'+m.r+'°L · GU '+m.gu+'</span>';},
+    sec:function(id){yM.id=id;sekmeArama.malt='';render();}},
+  hop:{panel:'bm-arama-hop',data:function(){return HOPLAR;},ad:function(h){return h.ad;},
+    sat:function(h){return '<span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:9px;font-weight:700;background:var(--bg2);color:var(--soluk);letter-spacing:.3px;flex-shrink:0">'+esc(h.g||'Hop')+'</span><span style="flex:1;min-width:0;font-size:12px;font-weight:600;color:var(--kahve);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(h.ad)+'</span><span style="font-size:10px;color:var(--soluk);flex-shrink:0">'+h.aa+'% AA</span>';},
+    sec:function(id){yH.id=id;sekmeArama.hop='';render();}},
+  maya:{panel:'bm-arama-maya',data:function(){return MAYALAR;},ad:function(m){return m.ad;},
+    sat:function(m){var c=mayaRenk(m.tip);var att=(m.atu&&m.atu.length===2)?(m.atu[0]+'-'+m.atu[1]+'%'):'';return '<span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:9px;font-weight:700;background:'+c+'22;color:'+c+';letter-spacing:.3px;flex-shrink:0">'+esc(mayaKisaTip(m.tip))+'</span><span style="flex:1;min-width:0;font-size:12px;font-weight:600;color:var(--kahve);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(m.ad)+'</span><span style="font-size:10px;color:var(--soluk);flex-shrink:0">'+(att?att+' · ':'')+m.ideal+'°C</span>';},
+    sec:function(id){S.mayaId=id;sekmeArama.maya='';render();}}
+};
+function bmArama(key,q){ if(_bmAramaTimer)clearTimeout(_bmAramaTimer); _bmAramaTimer=setTimeout(function(){_bmAramaCiz(key,q);},150); }
+function _bmAramaCiz(key,q){
+  var cfg=_bmAramaCfg[key]; if(!cfg)return;
+  var panel=document.getElementById(cfg.panel); if(!panel)return;
   var nq=_bmTrNorm(q); if(!nq){panel.innerHTML='';return;}
-  var arr=[];
-  for(var i=0;i<MALTLAR.length;i++){var m=MALTLAR[i];if(!m||!m.ad)continue;var na=_bmTrNorm(m.ad);var sc=-1;if(na===nq)sc=0;else if(na.indexOf(nq)===0)sc=1;else if(na.indexOf(nq)>=0)sc=2;if(sc<0)continue;arr.push({m:m,sc:sc,len:na.length});}
-  arr.sort(function(a,b){return a.sc-b.sc||a.len-b.len||(a.m.ad<b.m.ad?-1:1);});
-  if(!arr.length){panel.innerHTML='<div style="padding:8px 10px;font-size:11px;color:var(--dim);border:1px solid var(--bor);border-radius:8px;background:var(--card);margin-bottom:8px">Eşleşen malt yok</div>';return;}
+  var data=cfg.data()||[],arr=[];
+  for(var i=0;i<data.length;i++){var it=data[i];if(!it)continue;var nm=cfg.ad(it);if(!nm)continue;var na=_bmTrNorm(nm);var sc=-1;if(na===nq)sc=0;else if(na.indexOf(nq)===0)sc=1;else if(na.indexOf(nq)>=0)sc=2;if(sc<0)continue;arr.push({it:it,sc:sc,len:na.length,nm:nm});}
+  arr.sort(function(a,b){return a.sc-b.sc||a.len-b.len||(a.nm<b.nm?-1:1);});
+  if(!arr.length){panel.innerHTML='<div style="padding:8px 10px;font-size:11px;color:var(--dim);border:1px solid var(--bor);border-radius:8px;background:var(--card);margin-bottom:8px">Eşleşen yok</div>';return;}
   var more=arr.length-10;
-  var rows=arr.slice(0,10).map(function(o){var m=o.m,k=katKodu(m.g);return '<div onmousedown="event.preventDefault();bmMaltAramaSec(&quot;'+esc(m.id)+'&quot;)" style="display:flex;align-items:center;gap:8px;padding:7px 10px;cursor:pointer;border-bottom:1px solid var(--bor)" onmouseover="this.style.background=\'var(--bg2)\'" onmouseout="this.style.background=\'\'"><span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:9px;font-weight:700;background:'+k.bg+';color:'+k.tx+';letter-spacing:.3px;flex-shrink:0">'+k.ad+'</span><span style="flex:1;min-width:0;font-size:12px;font-weight:600;color:var(--kahve);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(m.ad)+'</span><span style="font-size:10px;color:var(--soluk);flex-shrink:0">'+m.r+'°L · GU '+m.gu+'</span></div>';}).join('');
+  var rows=arr.slice(0,10).map(function(o){return '<div onmousedown="event.preventDefault();bmAramaSec(&quot;'+key+'&quot;,&quot;'+esc(o.it.id)+'&quot;)" style="display:flex;align-items:center;gap:8px;padding:7px 10px;cursor:pointer;border-bottom:1px solid var(--bor)" onmouseover="this.style.background=\'var(--bg2)\'" onmouseout="this.style.background=\'\'">'+cfg.sat(o.it)+'</div>';}).join('');
   panel.innerHTML='<div style="border:1px solid var(--bor);border-radius:8px;background:var(--card);box-shadow:var(--golge);margin-bottom:8px;max-height:320px;overflow-y:auto">'+rows+(more>0?'<div style="padding:6px 10px;font-size:10px;color:var(--dim);text-align:center">+'+more+' daha — aramayı daralt</div>':'')+'</div>';
 }
-function bmMaltAramaSec(id){ if(!id)return; yM.id=id; sekmeArama.malt=''; var p=document.getElementById('bm-malt-arama-oneri'); if(p)p.innerHTML=''; render(); }
-if(typeof document!=='undefined'&&!window.__bmMaltAramaOutside){window.__bmMaltAramaOutside=true;document.addEventListener('mousedown',function(e){var panel=document.getElementById('bm-malt-arama-oneri');if(!panel||!panel.innerHTML)return;if(e.target&&e.target.closest&&(e.target.closest('#bm-malt-arama-oneri')||e.target.id==='bm-malt-arama-input'))return;panel.innerHTML='';});}
+function bmAramaSec(key,id){ var cfg=_bmAramaCfg[key]; if(!cfg||!id)return; var p=document.getElementById(cfg.panel); if(p)p.innerHTML=''; cfg.sec(id); }
+if(typeof document!=='undefined'&&!window.__bmAramaOutside){window.__bmAramaOutside=true;document.addEventListener('mousedown',function(e){if(e.target&&e.target.closest&&(e.target.closest('.bm-arama-panel')||(e.target.classList&&e.target.classList.contains('bm-arama-inp'))))return;document.querySelectorAll('.bm-arama-panel').forEach(function(p){if(p.innerHTML)p.innerHTML='';});});}
 
 function maltEkle(){
   const id=document.getElementById("ymId")?.value||yM.id;
