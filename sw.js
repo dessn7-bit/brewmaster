@@ -546,7 +546,9 @@
 // (Dingemans datasheet EBC->Lovibond), dex gu:362->350 (dekstroz 42 PPG). HTML degisti -> bump v131-110 -> v131-111.
 // TANIM-resync-A (2026-05-24): TANIM açıklama metinlerindeki GU:/temiz-format Renk: sayilari
 // MALTLAR ile eşitlendi (114 malt; 9 malt rengi Adım B'ye ertelendi). HTML degisti -> bump v131-111 -> v131-112.
-const CACHE_VERSION = 'bm-cache-v131-112';
+// TANIM-resync-A-tamamlama (2026-05-24): A regex'i ondalik °L atlamis — crisp_cc (2.5°L) + viking_xpa
+// (1.9°L) TANIM rengi MALTLAR.r=2 ile eşitlendi. HTML degisti -> bump v131-112 -> v131-113.
+const CACHE_VERSION = 'bm-cache-v131-113';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
