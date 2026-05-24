@@ -544,7 +544,9 @@
 // basinda açik reçeteyi commit eder. HTML degisti -> KURAL 12.3 CACHE_VERSION bump v131-109 -> v131-110.
 // malt-veri-duzeltme (2026-05-24): MALTLAR 3 deger fix — cara45 r:17->45, dingemans_cara20 r:18->8
 // (Dingemans datasheet EBC->Lovibond), dex gu:362->350 (dekstroz 42 PPG). HTML degisti -> bump v131-110 -> v131-111.
-const CACHE_VERSION = 'bm-cache-v131-111';
+// TANIM-resync-A (2026-05-24): TANIM açıklama metinlerindeki GU:/temiz-format Renk: sayilari
+// MALTLAR ile eşitlendi (114 malt; 9 malt rengi Adım B'ye ertelendi). HTML degisti -> bump v131-111 -> v131-112.
+const CACHE_VERSION = 'bm-cache-v131-112';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
