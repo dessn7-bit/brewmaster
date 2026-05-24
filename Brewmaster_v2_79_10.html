@@ -6784,8 +6784,11 @@ function getKlasorler(){
   return window._kl;
 }
 function klasorDegistir(id,yeniKlasor){
+  _commitOpenRecipe(); // açık reçete edits'i koru (stale-save fix)
   const t=KR.find(k=>k&&k.id===id);if(!t)return;
-  t.klasor=yeniKlasor;ky(KR);render();
+  t.klasor=yeniKlasor;
+  if(_editId===id && typeof S!=='undefined' && S) S.klasor=yeniKlasor;
+  ky(KR);render();
 }
 // Stok yetersizlik kontrolü — tarifte olan ama stokta olmayan/yetersiz malzemeleri bulur
 // Dönüş: {yetersiz:[{ad,ihtiyac,mevcut,birim,refId}], eksik:[{ad,ihtiyac,birim,refId}]}
@@ -7040,7 +7043,24 @@ function stoktenManuelIade(tarifId){
   render();
 }
 
+// verim/maya-fix: Açık reçetenin (editör buffer'ı S) commit edilmemiş düzenlemelerini KR[_editId]'e
+// IN-PLACE işler (id/tarih korunur, ozet tazelenir). Durum/klasör/klonla/sil gibi KR'yi kaydeden
+// yollar S yerine stale KR objesini yazarsa maya/verim/FG + (tarifAc deep-clone sonrası) malt/hop/katkı
+// düzenlemeleri kaybolurdu. Bu helper o yolların başında çağrılır → hiçbir stale-save kalmaz.
+function _commitOpenRecipe(){
+  try{
+    if(typeof _editId==='undefined' || !_editId) return false;
+    if(typeof S==='undefined' || !S) return false;
+    const t=KR.find(k=>k&&k.id===_editId);
+    if(!t) return false;
+    const snap=JSON.parse(JSON.stringify(S)); // S'te id/tarih/ozet YOK (tarifAc destructure) → t.id/t.tarih korunur
+    Object.keys(snap).forEach(function(key){ t[key]=snap[key]; });
+    try{const r=calc();t.ozet={og:r.og.toFixed(3),fg:r.fg.toFixed(3),abv:r.abv.toFixed(2),ibu:r.ibu.toFixed(0),srm:r.srm.toFixed(0)};}catch(e){}
+    return true;
+  }catch(e){ console.warn('_commitOpenRecipe:',e); return false; }
+}
 function tarifDurumDegistir(id,yeniDurum){
+  _commitOpenRecipe(); // açık reçete edits'i koru (stale-save fix) — id ne olursa olsun
   const t=KR.find(k=>k&&k.id===id);if(!t)return;
   const eskiDurum=t.durum||'aktif';
   // Yapıma çekmeden önce yetersizlik kontrol
@@ -7448,12 +7468,13 @@ function tarifeKaydet(){
     flash("⚠️ Kayıt hatası: "+(_ke&&_ke.message||_ke),"hata");
   }
 }
-function tarifAc(id){const t=KR.find(k=>k&&k.id===id);if(!t)return;clearDraft();_editId=t.id;const{id:_,tarih,ozet,...d}=t;S={...BOS,...d};sekme="genel";ekran="editor";render();}
+function tarifAc(id){const t=KR.find(k=>k&&k.id===id);if(!t)return;clearDraft();_editId=t.id;const{id:_,tarih,ozet,...d}=t;S=JSON.parse(JSON.stringify({...BOS,...d}));sekme="genel";ekran="editor";render();}
 // Adim 132-B: Klonla — deep clone + yeni id + " (kopya)" + Planlananlar (durum=aktif) + editöre yönlendir.
 // Not: User spec'inde durum='planlananlar' yaziyordu; gerçek internal value 'aktif' (sat ~10770'te
 // statTanim id='aktif' et='Planlananlar'). 'planlananlar' kullansak rec hiçbir sekmede görünmez.
 function tarifKlonla(srcId){
   if(!srcId){flash("Klonlamak için önce reçete kaydedilmeli","hata");return;}
+  _commitOpenRecipe(); // açık reçete (klon kaynağı olabilir) güncel commit — kopya + kaynak edits'i korunur
   const src=KR.find(k=>k&&k.id===srcId);
   if(!src){flash("Kaynak reçete bulunamadı","hata");return;}
   const yeni=JSON.parse(JSON.stringify(src));
@@ -7487,6 +7508,7 @@ window.bmGeriDon=function(){
   } catch(e){ console.warn('[bmGeriDon]',e); }
 };
 function tarifSil(id){
+  if(typeof _editId!=='undefined'&&_editId&&_editId!==id) _commitOpenRecipe(); // silinen ≠ açık reçete ise açık edits'i koru
   KR=KR.filter(k=>k.id!==id);
   ky(KR);
   silOnay=null;
@@ -10709,7 +10731,7 @@ window.bmToast = function(msg, tip){
   return t;
 };
 function flash(msg,tip){ try { window.bmToast(msg, tip); } catch(_){} }
-function yeniTarif(){S={...BOS};_editId=null;sekme="genel";ekran="editor";render();}
+function yeniTarif(){S=JSON.parse(JSON.stringify(BOS));_editId=null;sekme="genel";ekran="editor";render();}
 function setSekme(s){
   const notEl=document.getElementById("notText");
   if(notEl)S.notlar=notEl.value;
@@ -21672,7 +21694,7 @@ window.yeniKlasorKaydet=function(){var el=document.getElementById('yeniKlasorInp
 window.yeniKlasorKlavye=function(el,ev){if(ev.key==='Enter'){ev.preventDefault();window.yeniKlasorKaydet();}else if(ev.key==='Escape'){ev.preventDefault();window.yeniKlasorIptal();}};
 window.stilSec=function(el){const s=el.getAttribute('data-stil');if(!s)return;S.stil=(S.stil===s)?'':s;render();};
 window.klasorSilIste=function(ki){const k=(window._kl||[])[ki];if(!k)return;window._klasorSilOnayi=k;render();};
-window.klasorSilOnay=function(onaylandi){const k=window._klasorSilOnayi;window._klasorSilOnayi=null;if(!onaylandi||!k){render();return;}KR.forEach(t=>{if((t.klasor||"")===k)t.klasor="";});if(window._pendingKlasor)window._pendingKlasor=window._pendingKlasor.filter(x=>x!==k);if(aktifKlasor===k)aktifKlasor="";ky(KR);render();};
+window.klasorSilOnay=function(onaylandi){const k=window._klasorSilOnayi;window._klasorSilOnayi=null;if(!onaylandi||!k){render();return;}_commitOpenRecipe();KR.forEach(t=>{if((t.klasor||"")===k)t.klasor="";});if(typeof _editId!=='undefined'&&_editId){const _et=KR.find(x=>x&&x.id===_editId);if(_et&&typeof S!=='undefined'&&S)S.klasor=_et.klasor;}if(window._pendingKlasor)window._pendingKlasor=window._pendingKlasor.filter(x=>x!==k);if(aktifKlasor===k)aktifKlasor="";ky(KR);render();};
 window.silOnayById=function(el){const id=el.closest('[data-tid]')?.dataset?.tid;if(id){silOnay=id;render();}};
 window.tarifSilById=function(el){const id=el.closest('[data-tid]')?.dataset?.tid;if(id)tarifSil(id);};
 window.logEkle=logEkle;

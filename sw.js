@@ -537,7 +537,12 @@
 // bmAramaSec) + Hop + Maya arama kutularina da yayildi. Secim her sekmenin MEVCUT mekanizmasi
 // (malt yM.id, hop yH.id, maya S.mayaId; +render). Katki zaten canli grid, Su native select -> haric.
 // HTML degisti -> KURAL 12.3 CACHE_VERSION bump v131-108 -> v131-109.
-const CACHE_VERSION = 'bm-cache-v131-109';
+// edit-kaybi-fix (2026-05-24): durum/klasor/klonla/sil reçeteyi kaydederken S (editör buffer) yerine
+// stale KR objesini yaziyordu -> commit edilmemiş maya/verim/FG (+deep-clone sonrasi malt/hop/katki)
+// düzenlemeleri kayboluyordu. FIX: tarifAc/yeniTarif deep-clone (S↔KR ayrik) + yeni _commitOpenRecipe()
+// helper 5 stale-save yolunun (tarifDurumDegistir/klasorDegistir/tarifKlonla/klasorSilOnay/tarifSil)
+// basinda açik reçeteyi commit eder. HTML degisti -> KURAL 12.3 CACHE_VERSION bump v131-109 -> v131-110.
+const CACHE_VERSION = 'bm-cache-v131-110';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
