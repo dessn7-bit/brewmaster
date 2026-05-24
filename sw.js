@@ -559,7 +559,9 @@
 // MALTLAR-renk-fix (2026-05-25): specb r150->115, chateau_choc r450->340, chateau_black r650->480
 // (datasheet duzeltme) + TANIM Renk eşitleme + MUADIL temizlik (Caramele Aroma 75->~16°L; bozuk
 // muadil id carafa2->crf2 x2, carafa3->crf3). 10 nokta. bump v131-116 -> v131-117.
-const CACHE_VERSION = 'bm-cache-v131-117';
+// MALTLAR-renk-fix-2 (2026-05-25): chateau_specb r150->110 (Castle datasheet 260-320 EBC ~110°L) +
+// TANIM Renk eşitleme. 2 nokta. bump v131-117 -> v131-118.
+const CACHE_VERSION = 'bm-cache-v131-118';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
