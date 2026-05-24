@@ -525,7 +525,11 @@
 //   - CSS .bm-marka-isim (span class kurali) silindi (span artik yok, kullanim YOK)
 // kabeer-wordmark.png LOCAL'de tutuldu, repo/precache'e EKLENMEDI.
 // DOKUNULMADI: 135-I .bm-header gradient + .eh + renderHeader/sekme + motor + Sprint 132/133/134.
-const CACHE_VERSION = 'bm-cache-v131-106';
+// verim-fix (2026-05-24): rEditorMalt() "Sistem Verimi" kontrolu "Yeni Malt Ekle"
+// akordeonunun (c15e0c7/Adim 132-J ile gomulmustu) DISINA alindi — standalone, her modda
+// gorunur (bm-edit-only-acc YOK). Akordeon (malt arama/ekle) kapali-default KORUNDU.
+// HTML degisti -> KURAL 12.3 CACHE_VERSION bump v131-106 -> v131-107.
+const CACHE_VERSION = 'bm-cache-v131-107';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.

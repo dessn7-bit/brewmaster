@@ -14985,28 +14985,31 @@ function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
       <button onclick="maltGeriAl()" style="background:#7a4a00;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer">↶ Geri Al</button>
     </div>`:''}
     ${S.maltlar.length?`<span class="etiket" style="margin-bottom:6px">Malt Listesi (${S.maltlar.length})</span>${sl}${ts}`:`<div style="text-align:center;padding:20px;color:var(--dim);font-size:13px">Henüz malt eklenmedi — aşağıdan ekle</div>`}
+    <!-- verim-fix (c15e0c7/Adim 132-J cerrahi geri alma): Sistem Verimi akordeon DISINA alindi — standalone, Duzenle+Goruntule her iki modda gorunur (bm-edit-only-acc YOK). "Yeni Malt Ekle" akordeonu (malt arama/kategori/ekle) kapali-default KORUNDU. -->
+    <div style="margin-top:10px">
+      <span class="etiket">Sistem Verimi</span>
+      <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap">
+        ${[55,60,61,62,65,70].map(v=>`<button class="btn" style="flex:1;min-width:50px;padding:7px 0;border:1.5px solid ${S.verim===v?"var(--altin)":"var(--bor)"};background:${S.verim===v?"var(--sa)":"var(--card)"};color:${S.verim===v?"var(--bakir)":"var(--soluk)"};font-weight:${S.verim===v?700:500}" onclick="S.verim=${v};render()">%${v}</button>`).join("")}
+        <input type="number" class="inp" style="width:70px;text-align:center;font-weight:${![55,60,61,62,65,70].includes(S.verim)?700:500};${![55,60,61,62,65,70].includes(S.verim)?'border:1.5px solid var(--altin);background:var(--sa);color:var(--bakir);':''}" placeholder="Özel" min="30" max="95" value="${![55,60,61,62,65,70].includes(S.verim)?S.verim:''}" onchange="var v=parseInt(this.value);if(v>=30&&v<=95){S.verim=v;render();}">
+      </div>
+      <div style="margin-bottom:12px">
+        <div onclick="(function(el){var c=el.nextElementSibling;var o=c.style.maxHeight==='0px'||!c.style.maxHeight;c.style.maxHeight=o?c.scrollHeight+'px':'0px';c.style.opacity=o?'1':'0';el.querySelector('.ok-t').textContent=o?'▲':'▼';})(this)" style="display:flex;align-items:center;gap:6px;padding:7px 10px;background:var(--bg2);border:1px solid var(--bor);border-radius:8px;cursor:pointer;user-select:none;font-size:11px;color:var(--soluk);font-weight:600">
+          <span>💡</span><span style="flex:1">Verimi nasıl ölçersiniz?</span>
+          <span class="ok-t" style="font-size:10px;color:var(--dim)">▼</span>
+        </div>
+        <div style="max-height:0;opacity:0;overflow:hidden;transition:max-height .3s,opacity .2s">
+          <div class="uybox uy-s" style="font-size:11px;margin-top:6px;margin-bottom:0">
+            Pre-boil hacmini ve SG'yi ölçün.<br>
+            Verim% = (Ölçülen OG − 1) × hacim × 1000 ÷ Teorik GU × 100<br>
+            Teorik GU = tüm malların (gu × kg) toplamı. Bulldog için %65–70 tipiktir.<br>
+            Mash sıcaklığı OG'yi değiştirmez; FG ve gövdeyi değiştirir.
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="bm-acc bm-edit-only-acc" data-acc-id="malt-ekle" data-acc-default="${_mEkleDefault}" aria-expanded="${_mEkleAria}" style="margin-top:10px">
       <button class="bm-acc-header" type="button" aria-expanded="${_mEkleAria}" onclick="bmAccToggle('malt-ekle')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmAccToggle('malt-ekle')}"><span class="bm-acc-title">➕ Yeni Malt Ekle</span><span class="bm-acc-chevron">▾</span></button>
       <div class="bm-acc-body">
-        <span class="etiket">Sistem Verimi</span>
-        <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap">
-          ${[55,60,61,62,65,70].map(v=>`<button class="btn" style="flex:1;min-width:50px;padding:7px 0;border:1.5px solid ${S.verim===v?"var(--altin)":"var(--bor)"};background:${S.verim===v?"var(--sa)":"var(--card)"};color:${S.verim===v?"var(--bakir)":"var(--soluk)"};font-weight:${S.verim===v?700:500}" onclick="S.verim=${v};render()">%${v}</button>`).join("")}
-          <input type="number" class="inp" style="width:70px;text-align:center;font-weight:${![55,60,61,62,65,70].includes(S.verim)?700:500};${![55,60,61,62,65,70].includes(S.verim)?'border:1.5px solid var(--altin);background:var(--sa);color:var(--bakir);':''}" placeholder="Özel" min="30" max="95" value="${![55,60,61,62,65,70].includes(S.verim)?S.verim:''}" onchange="var v=parseInt(this.value);if(v>=30&&v<=95){S.verim=v;render();}">
-        </div>
-        <div style="margin-bottom:12px">
-          <div onclick="(function(el){var c=el.nextElementSibling;var o=c.style.maxHeight==='0px'||!c.style.maxHeight;c.style.maxHeight=o?c.scrollHeight+'px':'0px';c.style.opacity=o?'1':'0';el.querySelector('.ok-t').textContent=o?'▲':'▼';})(this)" style="display:flex;align-items:center;gap:6px;padding:7px 10px;background:var(--bg2);border:1px solid var(--bor);border-radius:8px;cursor:pointer;user-select:none;font-size:11px;color:var(--soluk);font-weight:600">
-            <span>💡</span><span style="flex:1">Verimi nasıl ölçersiniz?</span>
-            <span class="ok-t" style="font-size:10px;color:var(--dim)">▼</span>
-          </div>
-          <div style="max-height:0;opacity:0;overflow:hidden;transition:max-height .3s,opacity .2s">
-            <div class="uybox uy-s" style="font-size:11px;margin-top:6px;margin-bottom:0">
-              Pre-boil hacmini ve SG'yi ölçün.<br>
-              Verim% = (Ölçülen OG − 1) × hacim × 1000 ÷ Teorik GU × 100<br>
-              Teorik GU = tüm malların (gu × kg) toplamı. Bulldog için %65–70 tipiktir.<br>
-              Mash sıcaklığı OG'yi değiştirmez; FG ve gövdeyi değiştirir.
-            </div>
-          </div>
-        </div>
         <span class="etiket">Malt Ekle</span>
         <input type="text" class="inp" style="margin-bottom:6px;font-size:12px" placeholder="🔍 Malt ara... (Enter: ilk eşleşeni ekle)" value="${sekmeArama.malt}" onchange="sekmeArama.malt=this.value;render()" onkeydown="if(event.key==='Enter'){const q=this.value.toLowerCase().trim();if(!q)return;const _k=sekmKat.malt;const _m=MALTLAR.find(x=>x&&x.ad.toLowerCase().includes(q)&&(!_k||x.g===_k));if(_m){yM.id=_m.id;maltEkle();this.value='';sekmeArama.malt='';}else flash('Eşleşen malt yok','err');event.preventDefault();}">
         ${_maltKatHtml}
