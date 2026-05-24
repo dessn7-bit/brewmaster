@@ -556,7 +556,10 @@
 // MUADIL-detay-fix (2026-05-25): dex/cara MALTLAR degisikliklerinin biraktigi bayat sayilar — MUADIL
 // detay metinlerinde "GU 362"->"GU 350" (x4) + cara20 "18°L,EBC 40-60"->"8°L,EBC 20" + "Cara 20 (18°L)"
 // ->"(8°L)". 6 degisiklik, sadece MUADIL. bump v131-115 -> v131-116.
-const CACHE_VERSION = 'bm-cache-v131-116';
+// MALTLAR-renk-fix (2026-05-25): specb r150->115, chateau_choc r450->340, chateau_black r650->480
+// (datasheet duzeltme) + TANIM Renk eşitleme + MUADIL temizlik (Caramele Aroma 75->~16°L; bozuk
+// muadil id carafa2->crf2 x2, carafa3->crf3). 10 nokta. bump v131-116 -> v131-117.
+const CACHE_VERSION = 'bm-cache-v131-117';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
