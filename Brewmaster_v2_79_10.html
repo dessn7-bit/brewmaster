@@ -15011,7 +15011,8 @@ function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
       <button class="bm-acc-header" type="button" aria-expanded="${_mEkleAria}" onclick="bmAccToggle('malt-ekle')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmAccToggle('malt-ekle')}"><span class="bm-acc-title">➕ Yeni Malt Ekle</span><span class="bm-acc-chevron">▾</span></button>
       <div class="bm-acc-body">
         <span class="etiket">Malt Ekle</span>
-        <input type="text" class="inp" style="margin-bottom:6px;font-size:12px" placeholder="🔍 Malt ara... (Enter: ilk eşleşeni ekle)" value="${sekmeArama.malt}" onchange="sekmeArama.malt=this.value;render()" onkeydown="if(event.key==='Enter'){const q=this.value.toLowerCase().trim();if(!q)return;const _k=sekmKat.malt;const _m=MALTLAR.find(x=>x&&x.ad.toLowerCase().includes(q)&&(!_k||x.g===_k));if(_m){yM.id=_m.id;maltEkle();this.value='';sekmeArama.malt='';}else flash('Eşleşen malt yok','err');event.preventDefault();}">
+        <input type="text" id="bm-malt-arama-input" class="inp" style="margin-bottom:6px;font-size:12px" placeholder="🔍 Malt ara — yazınca öneriler çıkar (Enter: ilk eşleşeni ekle)" value="${sekmeArama.malt}" oninput="bmMaltAramaOneri(this.value)" onchange="sekmeArama.malt=this.value;render()" onkeydown="if(event.key==='Escape'){var _p=document.getElementById('bm-malt-arama-oneri');if(_p)_p.innerHTML='';this.blur();return;}if(event.key==='Enter'){const q=this.value.toLowerCase().trim();if(!q)return;const _k=sekmKat.malt;const _m=MALTLAR.find(x=>x&&x.ad.toLowerCase().includes(q)&&(!_k||x.g===_k));if(_m){yM.id=_m.id;maltEkle();this.value='';sekmeArama.malt='';var _p2=document.getElementById('bm-malt-arama-oneri');if(_p2)_p2.innerHTML='';}else flash('Eşleşen malt yok','err');event.preventDefault();}">
+        <div id="bm-malt-arama-oneri"></div>
         ${_maltKatHtml}
         <div style="display:flex;gap:8px;margin-bottom:6px;align-items:center">
           <input type="number" id="ymKg" class="inp" style="width:90px;font-weight:600;text-align:center" value="${yM.kg}" min=".01" max="8" step=".01" onchange="yM.kg=parseFloat(this.value)||0">
@@ -21140,6 +21141,24 @@ window.brewTimerTik=function(){
     }
   }
 };
+
+// ── Malt arama type-ahead (canli oneri dropdown). Secim = kategori akordeonuyla AYNI yol: yM.id + render().
+var _bmMaltAramaTimer=null;
+function _bmTrNorm(s){return (s||'').toString().toLocaleLowerCase('tr-TR').replace(/ı/g,'i').replace(/İ/g,'i').replace(/ş/g,'s').replace(/ğ/g,'g').replace(/ü/g,'u').replace(/ö/g,'o').replace(/ç/g,'c').replace(/â/g,'a').replace(/î/g,'i').replace(/û/g,'u').trim();}
+function bmMaltAramaOneri(q){ if(_bmMaltAramaTimer)clearTimeout(_bmMaltAramaTimer); _bmMaltAramaTimer=setTimeout(function(){_bmMaltAramaOneriCiz(q);},150); }
+function _bmMaltAramaOneriCiz(q){
+  var panel=document.getElementById('bm-malt-arama-oneri'); if(!panel)return;
+  var nq=_bmTrNorm(q); if(!nq){panel.innerHTML='';return;}
+  var arr=[];
+  for(var i=0;i<MALTLAR.length;i++){var m=MALTLAR[i];if(!m||!m.ad)continue;var na=_bmTrNorm(m.ad);var sc=-1;if(na===nq)sc=0;else if(na.indexOf(nq)===0)sc=1;else if(na.indexOf(nq)>=0)sc=2;if(sc<0)continue;arr.push({m:m,sc:sc,len:na.length});}
+  arr.sort(function(a,b){return a.sc-b.sc||a.len-b.len||(a.m.ad<b.m.ad?-1:1);});
+  if(!arr.length){panel.innerHTML='<div style="padding:8px 10px;font-size:11px;color:var(--dim);border:1px solid var(--bor);border-radius:8px;background:var(--card);margin-bottom:8px">Eşleşen malt yok</div>';return;}
+  var more=arr.length-10;
+  var rows=arr.slice(0,10).map(function(o){var m=o.m,k=katKodu(m.g);return '<div onmousedown="event.preventDefault();bmMaltAramaSec(&quot;'+esc(m.id)+'&quot;)" style="display:flex;align-items:center;gap:8px;padding:7px 10px;cursor:pointer;border-bottom:1px solid var(--bor)" onmouseover="this.style.background=\'var(--bg2)\'" onmouseout="this.style.background=\'\'"><span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:9px;font-weight:700;background:'+k.bg+';color:'+k.tx+';letter-spacing:.3px;flex-shrink:0">'+k.ad+'</span><span style="flex:1;min-width:0;font-size:12px;font-weight:600;color:var(--kahve);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(m.ad)+'</span><span style="font-size:10px;color:var(--soluk);flex-shrink:0">'+m.r+'°L · GU '+m.gu+'</span></div>';}).join('');
+  panel.innerHTML='<div style="border:1px solid var(--bor);border-radius:8px;background:var(--card);box-shadow:var(--golge);margin-bottom:8px;max-height:320px;overflow-y:auto">'+rows+(more>0?'<div style="padding:6px 10px;font-size:10px;color:var(--dim);text-align:center">+'+more+' daha — aramayı daralt</div>':'')+'</div>';
+}
+function bmMaltAramaSec(id){ if(!id)return; yM.id=id; sekmeArama.malt=''; var p=document.getElementById('bm-malt-arama-oneri'); if(p)p.innerHTML=''; render(); }
+if(typeof document!=='undefined'&&!window.__bmMaltAramaOutside){window.__bmMaltAramaOutside=true;document.addEventListener('mousedown',function(e){var panel=document.getElementById('bm-malt-arama-oneri');if(!panel||!panel.innerHTML)return;if(e.target&&e.target.closest&&(e.target.closest('#bm-malt-arama-oneri')||e.target.id==='bm-malt-arama-input'))return;panel.innerHTML='';});}
 
 function maltEkle(){
   const id=document.getElementById("ymId")?.value||yM.id;
