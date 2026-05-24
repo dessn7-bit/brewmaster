@@ -553,7 +553,10 @@
 // HTML degisti -> bump v131-113 -> v131-114.
 // TANIM-resync-B-son (2026-05-25): thracian_cara_ar TANIM "~75°L (spec tahmini)" -> "EBC: 30-50 (~16°L)"
 // (Thracian datasheet 30-50 EBC ≈ 16°L, MALTLAR.r=16). black_wheat hala bekliyor. bump v131-114 -> v131-115.
-const CACHE_VERSION = 'bm-cache-v131-115';
+// MUADIL-detay-fix (2026-05-25): dex/cara MALTLAR degisikliklerinin biraktigi bayat sayilar — MUADIL
+// detay metinlerinde "GU 362"->"GU 350" (x4) + cara20 "18°L,EBC 40-60"->"8°L,EBC 20" + "Cara 20 (18°L)"
+// ->"(8°L)". 6 degisiklik, sadece MUADIL. bump v131-115 -> v131-116.
+const CACHE_VERSION = 'bm-cache-v131-116';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
