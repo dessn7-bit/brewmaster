@@ -542,7 +542,9 @@
 // düzenlemeleri kayboluyordu. FIX: tarifAc/yeniTarif deep-clone (S↔KR ayrik) + yeni _commitOpenRecipe()
 // helper 5 stale-save yolunun (tarifDurumDegistir/klasorDegistir/tarifKlonla/klasorSilOnay/tarifSil)
 // basinda açik reçeteyi commit eder. HTML degisti -> KURAL 12.3 CACHE_VERSION bump v131-109 -> v131-110.
-const CACHE_VERSION = 'bm-cache-v131-110';
+// malt-veri-duzeltme (2026-05-24): MALTLAR 3 deger fix — cara45 r:17->45, dingemans_cara20 r:18->8
+// (Dingemans datasheet EBC->Lovibond), dex gu:362->350 (dekstroz 42 PPG). HTML degisti -> bump v131-110 -> v131-111.
+const CACHE_VERSION = 'bm-cache-v131-111';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
