@@ -551,7 +551,9 @@
 // TANIM-resync-B (2026-05-24): 4 malt renk metni MALTLAR.r ile eşitlendi (koyu_kristal ~27,
 // karamela_arpa ~109, koyu_kahve_arpa ~254, cara_aroma 140). thracian_cara_ar+black_wheat bekliyor.
 // HTML degisti -> bump v131-113 -> v131-114.
-const CACHE_VERSION = 'bm-cache-v131-114';
+// TANIM-resync-B-son (2026-05-25): thracian_cara_ar TANIM "~75°L (spec tahmini)" -> "EBC: 30-50 (~16°L)"
+// (Thracian datasheet 30-50 EBC ≈ 16°L, MALTLAR.r=16). black_wheat hala bekliyor. bump v131-114 -> v131-115.
+const CACHE_VERSION = 'bm-cache-v131-115';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
