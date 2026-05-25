@@ -595,7 +595,10 @@
 // Faz2-Batch7 sek-MUADIL B (2026-05-25): sek (Beyaz Şeker) grubu kalan 5/11 MUADIL kartinin fark+detay
 // metni yeniden yazildi (piloncillo/rice/sorghum/invert/pancar profil + gramaj; DEF dokunulmadi).
 // bump v131-129 -> v131-130.
-const CACHE_VERSION = 'bm-cache-v131-130';
+// Faz2-Batch8 SON tekli-MUADIL (2026-05-25): 6 tekli MUADIL karti (akcaagac/maple/hurma/kuru_uzum/
+// nobet_sek/co2_sivi) fark+detay yeniden yazildi. Faz 2 MUADIL yeniden yazim TAMAMLANDI. DEF dokunulmadi.
+// bump v131-130 -> v131-131.
+const CACHE_VERSION = 'bm-cache-v131-131';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
