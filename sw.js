@@ -563,7 +563,10 @@
 // TANIM Renk eşitleme. 2 nokta. bump v131-117 -> v131-118.
 // black_wheat-fix (2026-05-25): MALTLAR r=640 DOGRU (dokunulmadi); TANIM ~450->~640°L (1600-1800 EBC)
 // + 5 MUADIL detay metni 450->640 (Hitit datasheet). 6 degisiklik, MALTLAR haric. bump v131-118 -> v131-119.
-const CACHE_VERSION = 'bm-cache-v131-119';
+// specb-MUADIL-detay+fark (2026-05-25): specb MUADIL 10 detay + 8 fark datasheet'e gore yeniden
+// yazildi (115°L/GU285) + cara_dark muadil ad "CaraDark"->"CaraBohemian (Weyermann)". Sadece
+// MUADIL (MALTLAR/TANIM/recete/Firebase haric). bump v131-119 -> v131-120.
+const CACHE_VERSION = 'bm-cache-v131-120';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
