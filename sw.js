@@ -574,7 +574,10 @@
 // bump v131-121 -> v131-122.
 // corn_sugar-acik-fix (2026-05-25): Faz 1 kalintisi — acik metni "290 vs 384" -> "350 vs 384"
 // (gu 290->350 olunca bayat kaldi). Tek string. bump v131-122 -> v131-123.
-const CACHE_VERSION = 'bm-cache-v131-123';
+// Faz2-Batch1 candi-MUADIL (2026-05-25): 7 candi grubu MUADIL kartinin fark+detay metni yeniden
+// yazildi (clear/amber/dark profil + GU 267 + gramaj guncel; DEF objelerine dokunulmadi).
+// bump v131-123 -> v131-124.
+const CACHE_VERSION = 'bm-cache-v131-124';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
