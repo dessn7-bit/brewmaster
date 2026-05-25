@@ -592,7 +592,10 @@
 // Faz2-Batch6 sek-MUADIL A (2026-05-25): sek (Beyaz Şeker) grubu ilk 6/11 MUADIL kartinin fark+detay
 // metni yeniden yazildi (bozuk fark fix: Chateau Munich/Pilsen/Briess/Flaked stale -> dogru karsilastirma).
 // DEF objesine dokunulmadi. bump v131-128 -> v131-129.
-const CACHE_VERSION = 'bm-cache-v131-129';
+// Faz2-Batch7 sek-MUADIL B (2026-05-25): sek (Beyaz Şeker) grubu kalan 5/11 MUADIL kartinin fark+detay
+// metni yeniden yazildi (piloncillo/rice/sorghum/invert/pancar profil + gramaj; DEF dokunulmadi).
+// bump v131-129 -> v131-130.
+const CACHE_VERSION = 'bm-cache-v131-130';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
