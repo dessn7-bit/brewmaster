@@ -601,7 +601,10 @@
 // Faz3-Batch1 TANIM-seker (2026-05-25): TANIM dict'inde 8 bayat seker girdisinin gomulu GU/renk
 // sayilari DEF+MUADIL ile esitlendi (invert2/3, bal_tozu, nobet_sek, candi_s, koyu_candy, akcaagac, invert_seker).
 // bump v131-131 -> v131-132.
-const CACHE_VERSION = 'bm-cache-v131-132';
+// Faz3-Batch2 SON TANIM-seker (2026-05-25): TANIM dict'inde son 8 bayat seker girdisi GU/renk duzeltildi
+// (agave/pancar_sek/demerera/jaggery/piloncillo/sorgum/rice_syrup/maltodex). Seker veri butunlugu DEF+MUADIL+TANIM TAMAM.
+// bump v131-132 -> v131-133.
+const CACHE_VERSION = 'bm-cache-v131-133';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
