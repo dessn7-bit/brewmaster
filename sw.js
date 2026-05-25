@@ -580,7 +580,10 @@
 // Faz2-Batch2 invert-MUADIL (2026-05-25): 4 invert grubu MUADIL kartinin fark+detay metni yeniden
 // yazildi (invert2 GU 324/32°L + invert3 GU 324/60°L profil + gramaj guncel; DEF objelerine dokunulmadi).
 // bump v131-124 -> v131-125.
-const CACHE_VERSION = 'bm-cache-v131-125';
+// Faz2-Batch3 bal-MUADIL (2026-05-25): 6 bal/ham_bal grubu MUADIL kartinin fark+detay metni yeniden
+// yazildi (bal GU 290 + ham_bal cig/pastorize + akcaagac/agave/bal_tozu profil; DEF objelerine dokunulmadi).
+// bump v131-125 -> v131-126.
+const CACHE_VERSION = 'bm-cache-v131-126';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
