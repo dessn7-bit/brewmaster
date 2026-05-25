@@ -566,7 +566,10 @@
 // specb-MUADIL-detay+fark (2026-05-25): specb MUADIL 10 detay + 8 fark datasheet'e gore yeniden
 // yazildi (115°L/GU285) + cara_dark muadil ad "CaraDark"->"CaraBohemian (Weyermann)". Sadece
 // MUADIL (MALTLAR/TANIM/recete/Firebase haric). bump v131-119 -> v131-120.
-const CACHE_VERSION = 'bm-cache-v131-120';
+// chateau_black-MUADIL-renk-fix (2026-05-25): black karti MUADIL detay "Chateau Black (250, 450°L,
+// min 1200 EBC)" -> "(250, 480°L, 1150-1400 EBC)" (MALTLAR r=480 + TANIM ile esitleme, 450°L bayat
+// kalmis). Tek string, sadece MUADIL. bump v131-120 -> v131-121.
+const CACHE_VERSION = 'bm-cache-v131-121';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
