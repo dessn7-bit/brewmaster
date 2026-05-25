@@ -612,7 +612,10 @@
 // Kalan-3 laktoz-GU (2026-05-25): lak DEF gu 334->367 (laktoz monohidrat ~44 PPG, dex monohidrat ile tutarli)
 // MALTLAR+KATKILAR + TANIM "(fermentable)"->"(fermente olmaz)" + maltodex MUADIL laktoz GU. fermente:false korundu.
 // bump v131-135 -> v131-136.
-const CACHE_VERSION = 'bm-cache-v131-136';
+// Kalan-4 SON TANIM-ekleme (2026-05-25): TANIM dict'e 5 eksik seker girdisi eklendi (uzum_pekmez,
+// harnup_pekmez, cam_bal, kestane_bal, candi_d45) — DEF gu/renk ile tutarli. Seker veri butunlugu TAM KAPANIS.
+// bump v131-136 -> v131-137.
+const CACHE_VERSION = 'bm-cache-v131-137';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
