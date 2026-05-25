@@ -615,7 +615,10 @@
 // Kalan-4 SON TANIM-ekleme (2026-05-25): TANIM dict'e 5 eksik seker girdisi eklendi (uzum_pekmez,
 // harnup_pekmez, cam_bal, kestane_bal, candi_d45) — DEF gu/renk ile tutarli. Seker veri butunlugu TAM KAPANIS.
 // bump v131-136 -> v131-137.
-const CACHE_VERSION = 'bm-cache-v131-137';
+// Chateau-malt-batch (2026-05-25): 4 Castle malt DEF renk/GU duzeltme (cara_gold/cara_ruby/melano/bld)
+// + TANIM/MUADIL gomulu deger + 6 yeni Castle malt (vienna/munich_light/abbey/cara_belge/melano_light/cara_clair)
+// + 5 siniflandirma dizisi guncelleme. bump v131-137 -> v131-138.
+const CACHE_VERSION = 'bm-cache-v131-138';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
