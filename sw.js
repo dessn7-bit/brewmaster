@@ -621,7 +621,9 @@
 // Chateau-6malt-TANIM-MUADIL (2026-05-25): 6 yeni Castle malt icin TANIM aciklamasi + MUADIL muadil-karti
 // eklendi (vienna/munich_light/abbey/cara_belge/melano_light/cara_clair). TANIM 554->560, MUADIL 986->992.
 // bump v131-138 -> v131-139.
-const CACHE_VERSION = 'bm-cache-v131-139';
+// BestMalz-batch (2026-05-25): 8 BestMalz malt DEF gu/renk duzeltme (heidel/munich/wheat/acid/aromatic/
+// caramel_a/redx/choc) + TANIM + MUADIL gomulu deger. #9 best_heidel disambig (maris_extra korundu). bump v131-139 -> v131-140.
+const CACHE_VERSION = 'bm-cache-v131-140';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
