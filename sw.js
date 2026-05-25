@@ -609,7 +609,10 @@
 // Kalan-2 bal_tozu-fermente (2026-05-25): bal_tozu DEF etki/acik + TANIM fermente abartisi duzeltildi
 // (bal+maltodekstrin tasiyici ~%50-70 fermente; "~%90-95"/"kuru bitis" yanlisti). gu:320+fermente:true degismedi.
 // bump v131-134 -> v131-135.
-const CACHE_VERSION = 'bm-cache-v131-135';
+// Kalan-3 laktoz-GU (2026-05-25): lak DEF gu 334->367 (laktoz monohidrat ~44 PPG, dex monohidrat ile tutarli)
+// MALTLAR+KATKILAR + TANIM "(fermentable)"->"(fermente olmaz)" + maltodex MUADIL laktoz GU. fermente:false korundu.
+// bump v131-135 -> v131-136.
+const CACHE_VERSION = 'bm-cache-v131-136';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
