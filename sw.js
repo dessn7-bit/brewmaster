@@ -629,7 +629,9 @@
 // DEF + TANIM + MUADIL. bump v131-141 -> v131-142.
 // Viking-batch (2026-05-25): 3 Viking malt gu/renk duzeltme (pale 312->308, munich 308/8->300/9,
 // vienna spec dogrulama) DEF + TANIM + MUADIL. #6 viking_vienna disambig (thracian_vienna korundu). bump v131-142 -> v131-143.
-const CACHE_VERSION = 'bm-cache-v131-143';
+// Dingemans-batch (2026-05-26): cara8 gu293->288, cara20 gu285->288 + dingemans_mild->dingemans_pale
+// id yeniden adlandirma (DEF+TANIM+MUADIL+_IDS, 4 nokta) + metin guncelleme. bump v131-143 -> v131-144.
+const CACHE_VERSION = 'bm-cache-v131-144';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
