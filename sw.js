@@ -569,7 +569,10 @@
 // chateau_black-MUADIL-renk-fix (2026-05-25): black karti MUADIL detay "Chateau Black (250, 450°L,
 // min 1200 EBC)" -> "(250, 480°L, 1150-1400 EBC)" (MALTLAR r=480 + TANIM ile esitleme, 450°L bayat
 // kalmis). Tek string, sadece MUADIL. bump v131-120 -> v131-121.
-const CACHE_VERSION = 'bm-cache-v131-121';
+// seker-veri-denetimi Faz 1 (2026-05-25): MALTLAR+KATKILAR 18 seker/tatlandirici girdi, 25 sayisal
+// alan (gu/r/srm) datasheet duzeltme + nobet_sek etki metni renk ifadesi duzeltme. Sadece veri.
+// bump v131-121 -> v131-122.
+const CACHE_VERSION = 'bm-cache-v131-122';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
