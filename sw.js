@@ -604,7 +604,9 @@
 // Faz3-Batch2 SON TANIM-seker (2026-05-25): TANIM dict'inde son 8 bayat seker girdisi GU/renk duzeltildi
 // (agave/pancar_sek/demerera/jaggery/piloncillo/sorgum/rice_syrup/maltodex). Seker veri butunlugu DEF+MUADIL+TANIM TAMAM.
 // bump v131-132 -> v131-133.
-const CACHE_VERSION = 'bm-cache-v131-133';
+// Kalan-1 carapils-MUADIL (2026-05-25): Maltodextrin->Carapils MUADIL kartindaki yanlis "OG'ye ETKİSİ YOK"
+// duzeltildi (maltodextrin gu334 OG'ye gravite katar) + kesik metin yeniden yazildi. bump v131-133 -> v131-134.
+const CACHE_VERSION = 'bm-cache-v131-134';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
