@@ -598,7 +598,10 @@
 // Faz2-Batch8 SON tekli-MUADIL (2026-05-25): 6 tekli MUADIL karti (akcaagac/maple/hurma/kuru_uzum/
 // nobet_sek/co2_sivi) fark+detay yeniden yazildi. Faz 2 MUADIL yeniden yazim TAMAMLANDI. DEF dokunulmadi.
 // bump v131-130 -> v131-131.
-const CACHE_VERSION = 'bm-cache-v131-131';
+// Faz3-Batch1 TANIM-seker (2026-05-25): TANIM dict'inde 8 bayat seker girdisinin gomulu GU/renk
+// sayilari DEF+MUADIL ile esitlendi (invert2/3, bal_tozu, nobet_sek, candi_s, koyu_candy, akcaagac, invert_seker).
+// bump v131-131 -> v131-132.
+const CACHE_VERSION = 'bm-cache-v131-132';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
