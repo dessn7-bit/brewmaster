@@ -623,7 +623,9 @@
 // bump v131-138 -> v131-139.
 // BestMalz-batch (2026-05-25): 8 BestMalz malt DEF gu/renk duzeltme (heidel/munich/wheat/acid/aromatic/
 // caramel_a/redx/choc) + TANIM + MUADIL gomulu deger. #9 best_heidel disambig (maris_extra korundu). bump v131-139 -> v131-140.
-const CACHE_VERSION = 'bm-cache-v131-140';
+// BestMalz-8yeni-malt (2026-05-25): 8 yeni BestMalz malt eklendi (vienna/munich_dark/melano/melano_light/
+// heidel_wheat/special_x/caramel_p/caramel_h) — DEF + IDS dizileri + TANIM + MUADIL. bump v131-140 -> v131-141.
+const CACHE_VERSION = 'bm-cache-v131-141';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
