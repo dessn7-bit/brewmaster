@@ -653,7 +653,9 @@
 // bump v131-153 -> v131-154.
 // MUADIL-onarim-batch (2026-05-26): 91 yapilandirilmis muadil karti + 3 fark guncel DEF'e gore yeniden uretildi (bayat GU/°L/renk/gramaj duzeltme, script-driven). DEF/TANIM dokunulmadi.
 // bump v131-154 -> v131-155.
-const CACHE_VERSION = 'bm-cache-v131-155';
+// MUADIL-metin-onarim-batch (2026-05-26): 18 kopyala-yapistir bozuk kart (fark+detay alakasiz malttan kopyalanmisti) dogru metinle yeniden yazildi + hml TANIM Weyermann->Gambrinus duzeltme. id+ad korundu, script-driven.
+// bump v131-155 -> v131-156.
+const CACHE_VERSION = 'bm-cache-v131-156';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.

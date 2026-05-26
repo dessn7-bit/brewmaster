@@ -7727,7 +7727,7 @@ const TANIM={"uzum_pekmez":"GU: 300 (Fermente olur). Renk katkısı: 25°L. Üz�
   "herkules":"Tat: Temiz bitter, yüksek AA. AA: %16. Kullanım: Bittering. 6-10g/10L. Stiller: Her stil.",
   "hibiskus":"Fermente OLMAZ. Renk katkısı: 8°L. Kırmızı renk, ekşimsi çiçek, cranberry tarzı Kullanım: Fermantasyon sonu veya son 5dk kaynatma.",
   "hindistan":"Tat: Kremsi hindistan cevizi tropikal aroması — dolgun ve egzotik. Koku: Hindistan cevizi. Kullanım: 50-150g toastlanmış hindistan cevizi / 10L fermentasyon sonunda 5-7 gün beklet. Stiller: Stout, Porter, Tropical Ale, Coconut IPA.",
-  "hml":"Tat: Eşsiz bal ve tatlı karamel — başka hiçbir malt bu tadı veremez. Koku: Çiçek balı, karamel. Gövde: Artırır. Renk: 20°L. GU: 308. Kullanım: %3-7 (fazlası yapay tatlılık). Stiller: Honey Ale, Cream Ale, Blonde Ale — hafif ballı karakter için, Belgian Dubbel, Belgian Quadrupel, Belgian Dark Strong Ale, Belgian Pale Ale, Brown Ale, English Brown, Old Ale. Not: Weyermann Honey Malt; enzimatik işlemle üretilmiş eşsiz profil.",
+  "hml":"Tat: Eşsiz bal ve tatlı karamel — başka hiçbir malt bu tadı veremez. Koku: Çiçek balı, karamel. Gövde: Artırır. Renk: 20°L. GU: 308. Kullanım: %3-7 (fazlası yapay tatlılık). Stiller: Honey Ale, Cream Ale, Blonde Ale — hafif ballı karakter için, Belgian Dubbel, Belgian Quadrupel, Belgian Dark Strong Ale, Belgian Pale Ale, Brown Ale, English Brown, Old Ale. Not: Gambrinus Honey Malt; enzimatik işlemle üretilmiş eşsiz profil.",
   "hop_ekstrakt":"Tat: Saf alfa asit — sadece IBU, sıfır aroma. AA: %62. Kullanım: Sadece bittering — kaynatma başı. Hesap: 1mL ≈ 60-65 IBU / 10L. Aroma için asla kullanma. Not: Ticari biracılık ürünü; homebrew'de dikkatli kullan.",
   "hrblc":"Tat: Beyaz şarap, çiçeksi, limon — çok aromatik Alman hop. Koku: Belirgin beyaz şarap üzümü. AA: %9. Kullanım: Aroma odaklı. 10-15g/10L whirlpool/dry hop. Stiller: Farmhouse Ale, Saison, Wheat IPA. Not: Hallertau Blanc; Alman hoplarının en şarabımsı profili.",
   "hrtau":"Tat: Hallertau Mittelfrüh — aynı bitkisel/topraksı/çiçeksi Nobel profil. AA: %4. Hallertau ile özdeş. 1:1 kullan.",
@@ -8860,10 +8860,10 @@ const MUADIL={
     {id:"pale_ale",ad:"Pale Ale Malt",fark:"⚠️ Aromatic Malt (Dingemans) Bisküvi Malt ile aynı amber malt kategorisi. 1:1.",detay:"Extra Pale Chocolate (Sim (GU 269, 445°L): Orta-koyu çikolata, derin kahve — Pale Chocolate Malt a. → Pale Ale Malt (GU 304, 3°L): Ekmek kabuğu, bisküvi, hafif fındık ve tatlı tahıl. Renk 442°L açılır. Gramajı 85%'ye düşür."}
   ],
   "smoked_peat":[
-    {id:"smoked",ad:"İsli Malt — Kayın (Beech)",fark:"✅ Belgian Pilsner = Pilsner Malt eşdeğeri. GU ~288, renk 1-2°L. 1:1.",detay:"Her ikisi de çok nötr ve temiz base malttır. Belçika stilleri (Saison, Tripel, Golden Strong) için Belgian Pilsner tercih edilir ama Pilsner Malt da mükemmel sonuç verir. Aynı gramajla değiştir."}
+    {id:"smoked",ad:"İsli Malt — Kayın (Beech)",fark:"⚠️ Kayın dumanı daha yumuşak ve etsi; torf dumanının tıbbi/topraksı keskinliği kaybolur.",detay:"İsli Malt Torf (GU 312, 2°L): yoğun torf dumanı, tıbbi, topraksı — İskoç viski karakteri. → İsli Malt Kayın (Beech) (GU 296, 3°L): klasik Bamberg kayın dumanı, tütsülenmiş et, yumuşak. Renk neredeyse aynı. Rauchbier için kayın idealdir; torfun keskin tıbbi notası birçok stilde fazla baskın. %105 gramaj kullan."}
   ],
   "roast_wheat":[
-    {id:"wheat",ad:"Buğday Maltı",fark:"⚠️ Best Malz Munich = Weyermann Munich eşdeğeri. GU ~280, 9°L. 1:1.",detay:"Roasted Wheat (Weyermann) (GU 250, 395°L): Buğday + kavrum. → Buğday Maltı (GU 315, 2°L): Yumuşak buğday tatlılığı, hafif keskin/baharatlı, tartı. Renk 393°L açılır. Gramajı 80%'ye düşür."}
+    {id:"wheat",ad:"Buğday Maltı",fark:"❌ Renk 393°L açılır — kavrulmuş koyu karakter tamamen kaybolur. Buğday Maltı renk vermez.",detay:"Chocolate Wheat (Weyermann) (GU 250, 395°L): kavrulmuş koyu buğday maltı — çikolata/kahve rengi. → Buğday Maltı (GU 315, 2°L): yumuşak buğday tatlılığı, renk vermez. Renk 393°L açılır. Buğday Maltı kavrulmuş karakteri veremez; renk için yerine geçemez. %79 gramaj kullan."}
   ],
 
   "cara_wheat":[
@@ -8880,7 +8880,7 @@ const MUADIL={
     {id:"koyu_kristal",ad:"Koyu Kristal Arpa Maltı",fark:"✅ Koyu Kristal = CaraMunich II yerli eşdeğeri.",detay:"CaraMunich II EBC ~120 (~60°L). Koyu Kristal EBC 60-80 benzer aralık. Karamel, toffee, amber renk için. 1:1 kullan. Märzen, Amber Ale, Vienna Lager için yerli tedarik.",mo:"Herhangi"}
   ],
   "flaked_rye":[
-    {id:"oat",ad:"Yulaf (Flaked Oats)",fark:"⚠️ Flaked Mısır OG artırır ve birayı hafifletir — Yulaf gibi kremsi gövde vermez.",detay:"Flaked Corn (Mısır Flakeleri) Amerikan Lager ve Cream Ale'in geleneksel adjunctıdır. Yulafın kremsi gövdesi yerine OG artırmak ve birayı hafifletmek için kullanılır. Adjunct olarak 1:1 kullanılabilir ama profil farklılaşır."}
+    {id:"oat",ad:"Yulaf (Flaked Oats)",fark:"⚠️ Çavdarın baharatlı/peppery karakteri kaybolur — Yulaf kremsi gövde verir.",detay:"Çavdar Flakeleri (GU 296, 3°L): baharatlı, peppery, bitkisel çavdar karakteri, beta-glukan. → Yulaf Flakeleri (GU 269, 2°L): nötr, kremsi/yağlı ağız hissi, ipeksi gövde. Renk neredeyse aynı. Her ikisi de beta-glukan açısından zengin; çavdarın baharatlığı yerine yulafın kremsi dolgunluğu geçer. %110 gramaj kullan."}
   ],
   "turbinado":[
     {id:"sek",ad:"Beyaz Şeker",fark:"✅ İkisi de yüksek GU. Beyaz şeker nötr; Turbinado hafif şeker kamışı/melas katar.",detay:"Turbinado (Ham Karamel Şeker) (GU 378, 5°L): Ham karamel şeker — çok hafif şeker kamışı ve melas nüansı. → Beyaz Şeker (GU 384, 0°L): Nötr — tamamen kaybolur, kuru bitiş bırakır. GU neredeyse aynı — 1:1 gramaj kullan. Renk ~5°L açılır."}
@@ -8895,25 +8895,25 @@ const MUADIL={
     {id:"c120",ad:"Crystal 120",fark:"✅ Cara 120 (Dingemans) = Crystal 120 ile özdeş. Belçika üretim.",detay:"Cara 120 (Dingemans) (GU 285, 45°L): Kuru üzüm, incir, derin karamel — Crystal 120 eşdeğeri,. → Crystal 120 (GU 285, 120°L): Kuru üzüm, incir, tatlı soya sosu, kavrulmuş şeker — ço. Renk 75°L koyulaşır. 1:1 gramaj kullan."}
   ],
   "rice_flaked":[
-    {id:"oat",ad:"Yulaf (Flaked Oats)",fark:"⚠️ Mısır farklı amaçla kullanılır — OG artırır ve gövdeyi hafifletir, yulaf gibi kremsi gövde vermez.",detay:"Flaked Corn, Amerikan Lager ve Light Ale'de OG artırmak ve birayı hafifletmek için kullanılır. Adjunct olarak 1:1 Yulaf yerine geçilebilir ama aroma ve gövde profili tamamen değişir."}
+    {id:"oat",ad:"Yulaf (Flaked Oats)",fark:"⚠️ Zıt etki — Pirinç birayı kurutur/inceltir, Yulaf kremsi gövde ekler.",detay:"Pirinç Flakeleri (GU 315, 1°L): çok nötr, gövdeyi inceltir, kuru ve temiz bitiş — Amerikan Lager adjunctı. → Yulaf Flakeleri (GU 269, 2°L): kremsi/yağlı ağız hissi, gövde ekler. Renk neredeyse aynı. İşlev zıt: pirinç inceltir, yulaf doldurur — profil tamamen değişir. %117 gramaj kullan."}
   ],
   "extra_pale":[
     {id:"pilsner",ad:"Pilsner Malt",fark:"⚠️ Mısır İrmiği Amerikan Lager adjunctu — gövde hafifletir, cereal mash gerektirir.",detay:"Extra Pale Malt (Crisp) (GU 314, 2°L): Ultra açık renk, çok nötr — renk vermeden fermentable k. → Pilsner Malt (GU 310, 2°L): Çok temiz, nötr tahıl, hafif tatlılık — en sade base ma. Renk neredeyse aynı. 1:1 gramaj kullan."}
   ],
   "sorghum":[
-    {id:"oat",ad:"Yulaf (Flaked Oats)",fark:"✅ Dehusked Black Malt astrenjan içermez — Roasted Barley'den çok daha yumuşak.",detay:"Crisp Dehusked Black Malt, kavuk (husk) çıkarıldığı için bitter astrenjan yok. Roasted Barley yerine daha temiz siyah renk için kullan. Porter, Schwarzbier, Black IPA'da 1:1 kullan."}
+    {id:"oat",ad:"Yulaf (Flaked Oats)",fark:"⚠️ Glütensizlik kaybolur — Yulaf glütensiz bira için uygun değildir.",detay:"Dari (Sorghum) (GU 280, 2°L): glütensiz tahıl, nötr/hafif tatlı — glütensiz biranın temel adjunctı. → Yulaf Flakeleri (GU 269, 2°L): kremsi gövde ama glüten içerir / çapraz bulaşma riski. Renk neredeyse aynı. Glütensiz reçetede Yulaf kullanılamaz; sadece normal birada gövde için geçerli. %104 gramaj kullan."}
   ],
   "hml":[
     {id:"mel",ad:"Melanoidin Malt",fark:"⚠️ Melanoidin — Honey Malt'ın eşsiz bal/tatlı karakteri taklit edilemez.",detay:"Honey Malt, Melanoidin ile aynı kırmızı/amber renk ve Maillard profili üretir ama Honey Malt'ın özgün bal nüansı Melanoidin'de yoktur. Melanoidin en yakın renk+Maillard muadili ama tat farkı belirgin."}
   ],
   "lager_malt":[
-    {id:"pilsner",ad:"Pilsner Malt",fark:"⚠️ Einkorn antik tahıl — GU ~280, topraksı/fındık aroması, buğday maltından farklı profil.",detay:"Siyez Buğdayı (Einkorn) modern buğdaydan daha düşük GU ve daha karmaşık toprak/fındık aroması verir. Saison, Farmhouse Ale'de ilginç karakter katar. 1:1 gramaj ile kullan; OG hesabını güncelle."}
+    {id:"pilsner",ad:"Pilsner Malt",fark:"✅ Çok yakın — her ikisi de nötr, temiz açık base malt.",detay:"Lager Malt (Crisp) (GU 314, 2°L): nötr, temiz, hafif tahıl — İngiliz lager base maltı. → Pilsner Malt (GU 310, 2°L): çok nötr, temiz, kıta Avrupası lager tabanı. Renk neredeyse aynı. Pratikte birbirinin yerine geçer; Pilsner kullanırken DMS riski için 90 dk kaynat. 1:1 gramaj kullan."}
   ],
   "abbey_malt":[
-    {id:"munich",ad:"Munich Malt",fark:"⚠️ Emmer Buğdayı antik tahıl — GU ~278, topraksı karakter, farklı protein profili.",detay:"Emmer Buğdayı Einkorn'a benzer antik tahıldır. Modern buğdaydan daha düşük GU ve daha karmaşık aroma profili sunar. Saison, Bière de Garde, Belgian Ale için ilginç. 1:1 gramajla kullan."}
+    {id:"munich",ad:"Munich Malt",fark:"⚠️ Munich daha açık (12°L) ve daha az karamel — Abbey'in zengin melanoidin derinliği azalır.",detay:"Abbey Malt (GU 288, 18°L): zengin melanoidin, ekmek kabuğu, hafif karamel — Belçika abbey stilleri için. → Munich Malt (GU 300, 6°L): yoğun Maillard ekmek, daha açık. Renk 12°L açılır. Munich benzer maltlı derinlik verir ama daha hafif ve karamelsiz; Abbey'in koyu ekmeksi tonu için %5-10 kavrulmuş malt eklenebilir. %96 gramaj kullan."}
   ],
   "aromatic":[
-    {id:"bisk",ad:"Bisküvi Malt",fark:"✅ Extra Pale çok düşük SRM (~1°L) ve yüksek GU (~305). Pilsner'den biraz daha açık ve fermente edilebilir.",detay:"Crisp Extra Pale, Pilsner Malt'ın Ultra Light versiyonudur. Hazy IPA, Session Beer, New England stillerde kristal berraklık yerine ultra açık renk için tercih edilir. 1:1 kullan; bitiş biraz daha kuru olur."}
+    {id:"bisk",ad:"Bisküvi Malt",fark:"⚠️ Bisküvi daha tost/kuru karakterli; Aromatic'in yoğun maltlı-ekmeksi derinliği farklılaşır.",detay:"Aromatic Malt (Dingemans) (GU 304, 20°L): çok yoğun maltlı aroma, ekmeksi, zengin — güçlü Munich benzeri. → Bisküvi Malt (GU 295, 25°L): kavrulmuş bisküvi, tost, hafif fındık. Renk 5°L koyulaşır. Her ikisi de malt karakteri katar; Bisküvi daha kuru-tost, Aromatic daha dolgun-ekmeksi. 1:1 gramaj kullan."}
   ],
   "crystal_extra":[
     {id:"specb",ad:"Special B",fark:"⚠️ Special B ~45°L daha açık (115 vs 160°L). Renk için ~%140 kullan; aroma benzer.",detay:"Crystal Extra Dark 160 (GU 270, 160°L): Çok yoğun karamel, kuru üzüm — Crystal 160 aralığı. → Special B (GU 285, 115°L): Çok yoğun kuru üzüm, kuru erik, incir, Maillard karamel. Special B ~45°L daha açık — renk için gramajını ~%140 kullan. Aroma derinliği benzer."}
@@ -8922,19 +8922,19 @@ const MUADIL={
     {id:"specb",ad:"Special B",fark:"⚠️ Special B ~43°L daha koyu (115 vs 72°L) ve çok daha yoğun. Renk için ~%65 kullan.",detay:"CaraBohemian (Weyermann) (GU 281, 72°L): orta-koyu karamel, kuru meyve, ekmek kabuğu. → Special B (GU 285, 115°L): çok yoğun kuru üzüm, kuru erik, incir, Maillard karamel. Special B belirgin daha koyu ve çok daha yoğun — renk için gramajını ~%65 kullan."}
   ],
   "potato_fl":[
-    {id:"oat",ad:"Yulaf (Flaked Oats)",fark:"⚠️ Flaked Barley köpük kalıcılığı artırır — Yulaf gibi kremsi gövde vermez.",detay:"Ham Arpa (Flaked Barley), İrlanda Dry Stout'un geleneksel ingredientıdır. Güçlü köpük kalıcılığı sağlar, daha kuru ve sert gövde katar. Yulafın kremsi dolgunluğu yerine tercih edilirse 1:1 kullan."}
+    {id:"oat",ad:"Yulaf (Flaked Oats)",fark:"⚠️ Glütensizlik kaybolur; Yulaf kremsi gövde verir, patates nötr/kuru.",detay:"Patates Flakeleri (GU 270, 1°L): glütensiz nötr nişasta adjunctı, hafif kuru gövde. → Yulaf Flakeleri (GU 269, 2°L): kremsi/yağlı gövde, ipeksi ağız hissi. Renk neredeyse aynı. Glütensiz reçetede Yulaf kullanılamaz; normal birada gövde katkısı için geçerli. 1:1 gramaj kullan."}
   ],
   "rice":[
     {id:"pale_ale",ad:"Pale Ale Malt",fark:"⚠️ Pirinç Kabuğu için doğrudan muadil yoktur — filtre yardımcısıdır.",detay:"Pirinç Kabuğu (GU 0, 0°L): Filtre yardımcısı — OG katkısı sıfır, tat katkısı sıfır. → Pale Ale Malt (GU 300, 3°L): Ekmek kabuğu, bisküvi, hafif fındık ve tatlı tahıl. Renk 3°L koyulaşır. Gramajı kontrol et."}
   ],
   "sinamar":[
-    {id:"choc",ad:"Chocolate Malt",fark:"⚠️ Invert No.2 hafif amber renk (~15°L) ve karamel nüansı katar — Beyaz Şeker gibi renksiz değil.",detay:"Invert Sugar No.2, %95 fermente olur ve hafif toffee/karamel rengi ekler. Belgian Amber veya Strong Ale'de Beyaz Şeker yerine kullanıldığında bira hafif koyulaşır. OG katkısı benzer. Gramajı birebir tut."}
+    {id:"choc",ad:"Chocolate Malt",fark:"⚠️ Chocolate Malt renkle birlikte kavrulmuş/çikolata tadı da katar — Sinamar tatsız saf renktir.",detay:"Sinamar (Weyermann) (GU 0, 800°L): sıvı renk ekstraktı, sadece koyu renk verir, tat ve OG katkısı yok — fermantasyon sonunda mL ile dozlanır. → Chocolate Malt (GU 270, 400°L): kavrulmuş, çikolata/kahve tadı, gövde ve OG katkısı da var. Sinamar yerine Chocolate Malt kullanmak renkle birlikte belirgin kavrulmuş tat ekler; sadece renk istiyorsan eşdeğer değildir. ~50g Chocolate Malt ≈ 5-10 mL Sinamar rengi."}
   ],
   "simp_heritage":[
     {id:"c60",ad:"Crystal 60 / CaraMunich II",fark:"⚠️ Heritage Crystal ~60°L, Crystal 60 aynı aralıkta.",detay:"Heritage Crystal (Simpsons) (GU 277, 65°L): Orta karamel, toffee — Simpsons Heritage Crystal 65°L. → Crystal 60 / CaraMunich I (GU 296, 60°L): Yoğun karamel, toffee, kuru meyve, incir başlangıcı. Renk 5°L açılır. 1:1 gramaj kullan."}
   ],
   "einkorn":[
-    {id:"wheat",ad:"Buğday Maltı",fark:"⚠️ Invert No.3 koyu amber (~60°L) ve kuru üzüm/şeker kamışı nüansı katar — Beyaz Şeker ile aynı değil.",detay:"Invert Sugar No.3 renk ve tat profiline katkı yapar. Beyaz Şeker yerine kullanmak birayı koyulaştırır ve karmaşık karamel tat ekler. Dubbel, Quad, Belgian Dark için tercih edilir. GU farkı için gramajı %110'a çıkar."}
+    {id:"wheat",ad:"Buğday Maltı",fark:"⚠️ Siyez'in antik tahıl topraksı/fındık karakteri kaybolur; Buğday Maltı daha yüksek GU.",detay:"Siyez Buğday (Einkorn) (GU 285, 3°L): antik buğday — topraksı, fındık, düşük GU, karmaşık. → Buğday Maltı (GU 315, 2°L): yumuşak buğday tatlılığı, standart, daha yüksek GU. Renk neredeyse aynı. Buğday Maltı yumuşak buğday karakteri verir ama Siyez'in antik tahıl derinliği yoktur. %90 gramaj kullan."}
   ],
   "cara_aroma":[
     {id:"c120",ad:"Crystal 120",fark:"⚠️ CaraAroma ~130-150°L. Crystal 120 en yakın crystal.",detay:"CaraAroma (Weyermann) (GU 285, 151°L): Çok yoğun karamel, kuru üzüm. → Crystal 120 (GU 285, 120°L): Kuru üzüm, incir, tatlı soya sosu, kavrulmuş şeker — ço. Renk 31°L açılır. 1:1 gramaj kullan."}
@@ -8944,7 +8944,7 @@ const MUADIL={
     {id:"karamela_arpa",ad:"Karamela Arpa Maltı",fark:"✅ Karamela Arpa yakın profil — Fawcett Crystal Dark'a yerli alternatif.",detay:"Fawcett Crystal Dark ~110°L. Karamela Arpa ~145°L biraz daha koyu. Benzer derin karamel. Gramajı %90'a düşür. Yerli tedarik için iyi seçenek.",mo:"Herhangi"}
   ],
   "emmer":[
-    {id:"wheat",ad:"Buğday Maltı",fark:"⚠️ Akçaağaç Şurubu belirgin vanilya/karamel/ormanlık aroma katar — OG katkısı %20 düşük.",detay:"Maple Syrup GU ~300 ve kendine özgü vanilya/toffee/orman aromaları ekler. Fermantasyon sonunda veya son 5 dakika kaynatma sırasında ekle. Aroma kaybını önlemek için kısmen dry addition yapılabilir."}
+    {id:"wheat",ad:"Buğday Maltı",fark:"⚠️ Emmer'in antik tahıl topraksı/karmaşık karakteri kaybolur; Buğday Maltı daha yüksek GU.",detay:"Emmer Buğday (GU 285, 3°L): antik Anadolu buğdayı — topraksı, hafif fındık, karmaşık aroma, düşük GU. → Buğday Maltı (GU 315, 2°L): yumuşak buğday tatlılığı, standart, daha yüksek GU. Renk neredeyse aynı. Buğday Maltı temiz buğday karakteri verir ama Emmer'in antik tahıl derinliği yoktur. %90 gramaj kullan."}
   ],
   "raw_oat":[
     {id:"oat",ad:"Yulaf (Flaked Oats)",fark:"✅ Yulaf Maltı Flaked Oats'un maltlanmış hali. GU ~270. Kremsi gövde aynı, mash daha stabil.",detay:"Ham Yulaf (Raw Oats) (GU 255, 2°L): Ham yulaf — Flaked Oats ile aynı kremsi/yumuşak profil . → Yulaf (Flaked Oats) (GU 269, 2°L): Nötr tahıl, hafif kremsi tatlılık — aroma katkısı minim. Renk neredeyse aynı. %95 gramaj kullan."}
@@ -8962,7 +8962,7 @@ const MUADIL={
     {id:"c40",ad:"Crystal 40 / CaraMunich I",fark:"✅ CaraMunich I = Crystal 40 eşdeğeri. ~40°L. Birebir muadil.",detay:"Cara 45 (Dingemans) (GU 285, 45°L): Karamel, toffee — Crystal 40-50 arası, Belçika üretim. → Crystal 40 / CaraMunich I (GU 293, 40°L): Belirgin karamel, toffee, hafif kuru meyve nüansı. Renk 5°L açılır. 1:1 gramaj kullan."}
   ],
   "invert3":[
-    {id:"sek",ad:"Beyaz Şeker",fark:"⚠️ Farklı işlev — Patates flakeleri gövde/nişasta, Beyaz Şeker fermente OG. Doğrudan muadil değil.",detay:"Patates Flakeleri (Flaked Potato): glütensiz biralarda nötr nişasta adjunctu, hafif kuru gövde katar — fermente OG vermez. → Beyaz Şeker (GU 384, 0°L): nötr fermente şeker, OG artırır, gövdeyi inceltir. İşlev farklı — biri gövde, diğeri OG; doğrudan 1:1 muadil değil."}
+    {id:"sek",ad:"Beyaz Şeker",fark:"⚠️ Renk 60°L açılır — Invert No.3'ün kuru üzüm/melas karakteri kaybolur, Beyaz Şeker renksiz/nötr.",detay:"Invert Sugar No.3 (Koyu) (GU 324, 60°L): koyu invert şeker — kuru üzüm, melas, koyu karamel, İngiliz koyu ale geleneği. → Beyaz Şeker (GU 384, 0°L): nötr sakaroz, renk ve tat vermez, OG artırır. Renk 60°L açılır. Beyaz Şeker sadece fermente OG verir; Invert No.3'ün renk ve karamel tat katkısı kaybolur. %84 gramaj kullan."}
   ],
   "cara_pils_w":[
     {id:"carapils",ad:"Carapils / Dextrin",fark:"✅ Carapils — CaraPils Weyermann ile özdeş dextrin malt. Köpük için.",detay:"CaraPils (Weyermann) (GU 288, 2°L): Neredeyse yok — köpük ve gövde için. → Carapils / Dextrin (GU 285, 2°L): Neredeyse yok — saf dekstrin, fermente olmaz. Renk neredeyse aynı. 1:1 gramaj kullan."}
@@ -8974,7 +8974,7 @@ const MUADIL={
     {id:"wheat",ad:"Buğday Maltı",fark:"⚠️ Ham Yulaf enzim gerektirmez ama uzun mash süresi şart. Marketten ucuza bulunur.",detay:"Kavuzlu Buğday (Spelt/Din (GU 306, 2°L): Fındık, ceviz, topraksı, kompleks antik tahıl — modern . → Buğday Maltı (GU 315, 2°L): Yumuşak buğday tatlılığı, hafif keskin/baharatlı, tartı. Renk neredeyse aynı. 1:1 gramaj kullan."}
   ],
   "midnight":[
-    {id:"roast",ad:"Roasted Barley",fark:"❌ YANLIŞ KATEGORİ: Roasted Wheat ~230°L koyu malt — base malt değil, specialty malt!",detay:"Roasted Wheat (Weyermann) Dunkelweizen, Schwarzweizen rengini koyulaştırmak için az miktarda kullanılan koyu malttır. Base buğday malt olarak kullanılamaz. Renk için: <%5 Chocolate Malt alternatifi olarak değerlendirilebilir."}
+    {id:"roast",ad:"Roasted Barley",fark:"⚠️ Roasted Barley daha keskin ve astrenjan — Midnight Wheat'in yumuşak debittered siyahı kaybolur.",detay:"Midnight Wheat (GU 270, 550°L): debittered çok koyu buğday maltı, yumuşak siyah renk, minimal acılık/astrenjan. → Roasted Barley (GU 235, 500°L): keskin kavrulmuş kahve karakteri, belirgin acılık. Renk 50°L açılır. Roasted Barley daha sert ve astrenjan; Midnight Wheat'in pürüzsüz siyahı yerine kahve-acı notası gelir. Renk eşlemek için %110 gramaj kullan."}
   ],
   "dark_wheat":[
     {id:"black_wheat",ad:"Siyah Buğday Maltı",fark:"⚠️ Siyah Buğday çok daha koyu ve kavrulmuş — karıştırma!",detay:"Dark Wheat ~9°L hafif kavrulmuş buğday aroması. Siyah Buğday ~640°L çok koyu yanık kahve. Tamamen farklı kategori. Dunkelweizen için Dark Wheat; Black IPA ve Schwarzbier için Siyah Buğday.",mo:"Herhangi"}
@@ -8983,7 +8983,7 @@ const MUADIL={
     {id:"c20",ad:"Crystal 20 / CaraHell",fark:"⚠️ Crystal 20 — Crystal 10'dan 10°L daha koyu. Gramajı %80'e düşür.",detay:"Crystal 10L (Briess) (GU 293, 10°L): Çok hafif tatlılık, neredeyse fark edilmez. → Crystal 20 / CaraHell (GU 293, 20°L): Çok hafif karamel, kremsi tatlılık — en nazik crystal m. Renk 10°L koyulaşır. 1:1 gramaj kullan."}
   ],
   "rwh":[
-    {id:"wheat",ad:"Buğday Maltı",fark:"⚠️ Sinamar SIVI renk maltı — OG katkısı sıfır, yalnızca renk verir!",detay:"Sinamar (Weyermann) Carafa III'ten üretilmiş sıvı renk ekstrakt. Fermantasyon sonunda ekle; OG ve aroma profilini değiştirmez. 5-10 mL Sinamar ≈ 50g Chocolate Malt rengi ama tat katkısı minimal."}
+    {id:"wheat",ad:"Buğday Maltı",fark:"✅ Buğday Maltı enzim içerir, mash kolaylaşır — ham buğdayın topraksı keskinliği yumuşar.",detay:"Ham Buğday (Unmalted) (GU 296, 2°L): maltlanmamış buğday — ham, topraksı, yüksek protein, enzim yok. → Buğday Maltı (GU 315, 2°L): maltlanmış, yumuşak buğday tatlılığı, enzim aktif. Renk neredeyse aynı. Buğday Maltı daha kolay mash olur ve daha temiz karakter verir; ham buğdayın belirgin protein/bulanıklık katkısı azalır. %94 gramaj kullan."}
   ],
   "smoked_oak":[
     {id:"smoked",ad:"İsli Malt — Kayın (Beech)",fark:"⚠️ Meşe (Oak) dumanı kayın (Beech) dumanından daha keskin ve reçineli.",detay:"Rauchbier'in geleneksel Bamberg stili Beech (kayın) isli malt kullanır. Meşe isli malt daha odunsu ve keskin duman karakteri verir. İkisi birbirinin yerine geçebilir; Rauchbier için kayın daha otantik. 1:1 kullan."}
@@ -8996,10 +8996,10 @@ const MUADIL={
     {id:"specb",ad:"Special B",fark:"✅ Special B — Chateau Special B'nin Dingemans eşdeğeri. 1:1 değiştir.",detay:"Chateau Special B (Castle) (GU 285, 110°L): Special B eşdeğeri — kuru üzüm, incir, koyu karamel. → Special B (GU 285, 115°L): Çok yoğun kuru üzüm, kuru erik, incir, Maillard karamel. Neredeyse aynı malt (Castle vs Dingemans), renk ~5°L fark. Gramajı 1:1 kullan."}
   ],
   "flaked_wheat":[
-    {id:"oat",ad:"Yulaf (Flaked Oats)",fark:"⚠️ Kinoa glütensiz süper adjunct — Yulaf gibi kremsi gövde vermez, tohumsu aroma katar.",detay:"Kinoa (Quinoa) nötr ve hafif tohumsu aroma katar. Glütensiz biralar için iyi seçenek. Önceden yıka (saponin uzaklaştır) ve kısa süre cereal mash uygula. Yulaf yerine 1:1 kullanılabilir ama profil farklı."}
+    {id:"oat",ad:"Yulaf (Flaked Oats)",fark:"⚠️ Yulaf kremsi gövde verir; Buğday Flakelerinin köpük/buğday karakteri farklılaşır.",detay:"Buğday Flakeleri (Flaked Wheat) (GU 296, 2°L): buğday tatlılığı, köpük kalıcılığı, hafif tartlık. → Yulaf Flakeleri (GU 269, 2°L): kremsi/yağlı ağız hissi, ipeksi gövde. Renk neredeyse aynı. Her ikisi de maltlanmamış adjunct; Yulaf daha kremsi, buğday daha köpüklü/tart. %110 gramaj kullan."}
   ],
   "buckwheat":[
-    {id:"oat",ad:"Yulaf (Flaked Oats)",fark:"⚠️ Yulaf Ezmesi (Tam Yulaf) marketten alınır — enzim yok, uzun mash şart.",detay:"Yulaf Ezmesi (Ham / Tam Yulaf, market), Flaked Oats ile aynı kremsi gövdeyi verir ama enzim içermez. 65°C'de 90 dakika mash uygula. 1:1 gramajla kullan. En ucuz ve kolay bulunan yulaf seçeneği."}
+    {id:"oat",ad:"Yulaf (Flaked Oats)",fark:"⚠️ Glütensizlik kaybolur — Karabuğday glütensiz, Yulaf değil.",detay:"Karabuğday (Buckwheat) (GU 260, 3°L): glütensiz psödo-tahıl — topraksı, fındıksı karakter. → Yulaf Flakeleri (GU 269, 2°L): kremsi gövde ama glüten içerir / çapraz bulaşma riski. Renk neredeyse aynı. Glütensiz reçetede Yulaf kullanılamaz; normal birada gövde için geçerli, profil topraksıdan kremsiye kayar. 1:1 gramaj kullan."}
   ],
 
   "cara_belge":[
@@ -9027,7 +9027,7 @@ const MUADIL={
     {id:"oat",ad:"Yulaf (Flaked Oats)",fark:"⚠️ Mısır farklı amaçla kullanılır — OG artırır ve gövdeyi hafifletir; Yulaf gövde katar.",detay:"Flaked Barley GU 265: kuru/sert gövde, Guinness tarzı köpük (%30-40 artış). Flaked Oats GU 260: kremsi/yağlı ağız hissi. İrlanda Dry Stout'ta Flaked Barley şart — Oats ile 'Oatmeal Stout' olur. Tamamen farklı profil. 1:1 gramaj."}
   ],
   "corn_grits":[
-    {id:"oat",ad:"Yulaf (Flaked Oats)",fark:"⚠️ Flaked Barley köpük kalıcılığı artırır — Yulaf gibi kremsi gövde vermez.",detay:"Ham Arpa (Flaked Barley), İrlanda Dry Stout'un geleneksel ingredientidir. Köpük kalıcılığını artırır ve daha kuru gövde katar. Yulafın kremsi dolgunluğu yerine tercih edilirse 1:1 kullan."}
+    {id:"oat",ad:"Yulaf (Flaked Oats)",fark:"⚠️ Zıt etki — Mısır İrmiği gövdeyi hafifletir, Yulaf kremsi gövde ekler.",detay:"Mısır İrmiği (Corn Grits) (GU 308, 1°L): nötr-hafif tatlı mısır, gövdeyi inceltir, OG artırır — pişirme (cereal mash) gerektirir. → Yulaf Flakeleri (GU 269, 2°L): kremsi/yağlı gövde, ipeksi ağız hissi. Renk neredeyse aynı. İşlev zıt: mısır inceltir, yulaf doldurur — profil tamamen değişir. %114 gramaj kullan."}
   ],
   "corn":[
     {id:"oat",ad:"Yulaf (Flaked Oats)",fark:"✅ Halcyon (Fawcett) İngiliz premium pale malt. GU ~300, 3-4°L. 1:1.",detay:"Mısır (Flaked Corn) (GU 323, 1°L): Nötr, hafif mısır tatlılığı — birayı hafifletir. → Yulaf (Flaked Oats) (GU 269, 2°L): Nötr tahıl, hafif kremsi tatlılık — aroma katkısı minim. Renk neredeyse aynı. %120 gramaj kullan."}
