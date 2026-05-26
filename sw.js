@@ -657,7 +657,9 @@
 // bump v131-155 -> v131-156.
 // sinamar-potato-batch (2026-05-26): sinamar renk 800->3148°L (Weyermann 8100-8600 EBC) + potato_fl gu 270->292 (BYO 35 PPG) DEF+TANIM+muadil. 7 str_replace.
 // bump v131-156 -> v131-157.
-const CACHE_VERSION = 'bm-cache-v131-157';
+// MUADIL-fark-onarim-batch (2026-05-26): 6 kopyala-yapistir bozuk ozet satiri (victory/dehusked_black/oat_malt/cara_munich1/cara45/cara_rye) dogru metinle + 5 bayat sayi (pilsner/reddish/crystal_dark/crystal_light/bal) duzeltildi. 11 str_replace.
+// bump v131-157 -> v131-158.
+const CACHE_VERSION = 'bm-cache-v131-158';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
