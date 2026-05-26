@@ -643,7 +643,9 @@
 // bump v131-148 -> v131-149.
 // Weyermann-W1-batch (2026-05-26): 10 malt gu duzeltme DEF+TANIM (5 base: dark_wheat 311, smoked_oak 311, munich_light 300, spelt 306, abbey_malt 288 + 5 Koyu roasted real-extract: crf1/crf2/crf3/dehusked_black/roast_wheat 272->250). MUADIL'e dokunulmadi. Kaynak: Weyermann Crop 2025.
 // bump v131-149 -> v131-150.
-const CACHE_VERSION = 'bm-cache-v131-150';
+// Weyermann-W2-batch (2026-05-26): 11 Cara/mel malt gu/renk duzeltme DEF+TANIM (mel 288, cara_wheat 262, cara_red 285, cara_pils_w/cara_foam 288, cara_munich1/2/3+cara_dark 281, cara_aroma renk 151, cara_belge renk 13). MUADIL'e dokunulmadi. Kaynak: Weyermann Crop 2025.
+// bump v131-150 -> v131-151.
+const CACHE_VERSION = 'bm-cache-v131-151';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
