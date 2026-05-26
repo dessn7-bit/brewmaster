@@ -649,7 +649,9 @@
 // bump v131-151 -> v131-152.
 // Generic-base-batch (2026-05-26): 7 gu + 1 renk duzeltme DEF+TANIM (pale_ale 304, pilsner 310, wheat 315, munich 300, vienna 304, rye 311, smoked 296 gu + acid r3->2) + roast TANIM "Gövde:" bos alan fix. MUADIL'e dokunulmadi. Kaynak: Weyermann Crop 2025.
 // bump v131-152 -> v131-153.
-const CACHE_VERSION = 'bm-cache-v131-153';
+// Adjunct-gu-rebase-batch (2026-05-26): 8 adjunct gercek extract gu DEF+TANIM (oat 269, rwh 296, fbar 269, corn 323, rice_flaked 315, flaked_wheat 296, flaked_rye 296, corn_grits 308) + crf1/pale_choc TANIM "Gövde:" bos alan fix. r dokunulmadi. MUADIL'e dokunulmadi. Kaynak: Captain Brew + Onebeer.net.
+// bump v131-153 -> v131-154.
+const CACHE_VERSION = 'bm-cache-v131-154';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
