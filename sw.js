@@ -651,7 +651,9 @@
 // bump v131-152 -> v131-153.
 // Adjunct-gu-rebase-batch (2026-05-26): 8 adjunct gercek extract gu DEF+TANIM (oat 269, rwh 296, fbar 269, corn 323, rice_flaked 315, flaked_wheat 296, flaked_rye 296, corn_grits 308) + crf1/pale_choc TANIM "Gövde:" bos alan fix. r dokunulmadi. MUADIL'e dokunulmadi. Kaynak: Captain Brew + Onebeer.net.
 // bump v131-153 -> v131-154.
-const CACHE_VERSION = 'bm-cache-v131-154';
+// MUADIL-onarim-batch (2026-05-26): 91 yapilandirilmis muadil karti + 3 fark guncel DEF'e gore yeniden uretildi (bayat GU/°L/renk/gramaj duzeltme, script-driven). DEF/TANIM dokunulmadi.
+// bump v131-154 -> v131-155.
+const CACHE_VERSION = 'bm-cache-v131-155';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
