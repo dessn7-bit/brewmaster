@@ -641,7 +641,9 @@
 // bump v131-147 -> v131-148.
 // Thracian-batch (2026-05-26): 4 malt gu/renk duzeltme (vienna gu309, cara_bl gu288 r10, cara_ar gu288, fba gu306) + cara_ar MUADIL 75L->16L hatasi + mo "resmi" temizlik + spec metin guncelleme. Kaynak: thracianmalt.com.
 // bump v131-148 -> v131-149.
-const CACHE_VERSION = 'bm-cache-v131-149';
+// Weyermann-W1-batch (2026-05-26): 10 malt gu duzeltme DEF+TANIM (5 base: dark_wheat 311, smoked_oak 311, munich_light 300, spelt 306, abbey_malt 288 + 5 Koyu roasted real-extract: crf1/crf2/crf3/dehusked_black/roast_wheat 272->250). MUADIL'e dokunulmadi. Kaynak: Weyermann Crop 2025.
+// bump v131-149 -> v131-150.
+const CACHE_VERSION = 'bm-cache-v131-150';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
