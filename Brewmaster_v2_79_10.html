@@ -15030,14 +15030,7 @@ function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
     m&&(!mArama||((m.ad||'').toLowerCase().includes(mArama)||(m.mo||'').toLowerCase().includes(mArama)))&&
     (!mKat||m.g===mKat)
   );
-  const maltKatlar=["Base","Özel","Koyu","Adjunct","Şeker"];
-  const maltKatBar=maltKatlar.map(k=>{
-    const n=MALTLAR.filter(m=>m.g===k).length;
-    const ak=sekmKat.malt===k;
-    return`<button onclick="setSekmKat('malt','${k}')" style="flex-shrink:0;padding:4px 10px;border-radius:14px;border:1.5px solid ${ak?"var(--altin)":"var(--bor)"};background:${ak?"var(--sa)":"var(--card)"};color:${ak?"var(--bakir)":"var(--soluk)"};font-size:11px;font-weight:600;cursor:pointer">${k} (${n})</button>`;
-  }).join("");
   const filtreliMg={};filtreliMaltlar.forEach(m=>{(filtreliMg[m.g]=filtreliMg[m.g]||[]).push(m);});
-  const mOpts2=Object.entries(filtreliMg).map(([g,ms])=>`<optgroup label="── ${g} ──">${ms.map(m=>`<option value="${m.id}">${m.ad} (${m.r}°L)</option>`).join("")}</optgroup>`).join("");
   const katkilarFermente=(S.katkilar||[]).filter(k=>{const kat=KATKILAR.find(a=>a&&a.id===k.id);return kat&&kat.gu>0;});
   const katkilarNonFerm=(S.katkilar||[]).filter(k=>{const kat=KATKILAR.find(a=>a&&a.id===k.id);return kat&&kat.gu===0&&kat.fermente===false;});
   const ts=S.maltlar.length?`<div class="serit">
@@ -19314,10 +19307,6 @@ function rEditor(){
   if(og>1.080&&!maya)uy+=`<div class="uybox uy-k">⚠️ OG 1.080+ — starter hazırla</div>`;
   if(ibu>0&&ibu<10&&S.maltlar.length)uy+=`<div class="uybox uy-k">⚠️ IBU ${ibu.toFixed(1)} — çok düşük (< 10 IBU enfeksiyon riski artar)</div>`;
 
-  const mg={};MALTLAR.forEach(m=>{(mg[m.g]=mg[m.g]||[]).push(m);});
-  const hg={};HOPLAR.forEach(h=>{(hg[h.g]=hg[h.g]||[]).push(h);});
-  const mOpts=Object.entries(mg).map(([g,ms])=>`<optgroup label="── ${g} ──">${ms.map(m=>`<option value="${m.id}">${m.ad} (${m.r}°L)</option>`).join("")}</optgroup>`).join("");
-  const hOpts=Object.entries(hg).map(([g,hs])=>`<optgroup label="── ${g} ──">${hs.map(h=>`<option value="${h.id}">${h.ad} (${h.aa}% AA)</option>`).join("")}</optgroup>`).join("");
   const minOpts=MINERALLER.map(m=>`<option value="${m.id}">${m.ad}</option>`).join("");
   const seciMalt=MALTLAR.find(x=>x&&x.id===yM.id);
   const seciHop=HOPLAR.find(x=>x&&x.id===yH.id);
