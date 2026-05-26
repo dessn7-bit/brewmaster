@@ -633,7 +633,9 @@
 // id yeniden adlandirma (DEF+TANIM+MUADIL+_IDS, 4 nokta) + metin guncelleme. bump v131-143 -> v131-144.
 // Briess-batch (2026-05-26): 2-row r3->2, special_roast r50->40 + briess_brown SILINDI (Briess uretmiyor)
 // DEF+TANIM+MUADIL 3 yerden kaldirildi (her biri + trailing virgul). MALTLAR 187->186. bump v131-144 -> v131-145.
-const CACHE_VERSION = 'bm-cache-v131-145';
+// Simpsons-batch (2026-05-26): simp_golden + simp_choc_rye phantom SILINDI (DEF+TANIM+MUADIL+IDS/regex), heritage detay duzeltme.
+// MALTLAR 186->184. bump v131-145 -> v131-146.
+const CACHE_VERSION = 'bm-cache-v131-146';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
