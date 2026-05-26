@@ -647,7 +647,9 @@
 // bump v131-150 -> v131-151.
 // Hitit-batch (2026-05-26): reddish gu312->313, isli_malt gu300->311 + mo/TANIM EBC temizlik, biskuvi_arpa mo temizlik + TANIM EBC format, reddish "Weyermann"->Hitit, melaroma (EBC ~53)->(EBC 280-320). MUADIL'e dokunulmadi. Kaynak: hititmalt.com.
 // bump v131-151 -> v131-152.
-const CACHE_VERSION = 'bm-cache-v131-152';
+// Generic-base-batch (2026-05-26): 7 gu + 1 renk duzeltme DEF+TANIM (pale_ale 304, pilsner 310, wheat 315, munich 300, vienna 304, rye 311, smoked 296 gu + acid r3->2) + roast TANIM "Gövde:" bos alan fix. MUADIL'e dokunulmadi. Kaynak: Weyermann Crop 2025.
+// bump v131-152 -> v131-153.
+const CACHE_VERSION = 'bm-cache-v131-153';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
