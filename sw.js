@@ -661,7 +661,9 @@
 // bump v131-157 -> v131-158.
 // MUADIL-onarim-batch (2026-05-27): 11 bayat inline GU (oat/c20-c120 crystal/rice_hulls/rice/fbar regen'in atladigi inline+tek-haneli format) + 3 kirik referans (biscuit->bisk, cara_amber->cara_munich1/cara_hell DEF'te yok) duzeltildi. 14 kart, script-driven.
 // bump v131-158 -> v131-159.
-const CACHE_VERSION = 'bm-cache-v131-159';
+// rice_hulls-sema-batch (2026-05-27): rice_hulls DEF mo uzun aciklamadan "—" kisaltildi (aciklama TANIM'da mevcut, mo UI'da koken gosteriliyor) + standart-disi ornek alani kaldirildi. 1 str_replace.
+// bump v131-159 -> v131-160.
+const CACHE_VERSION = 'bm-cache-v131-160';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
