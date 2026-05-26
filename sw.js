@@ -645,7 +645,9 @@
 // bump v131-149 -> v131-150.
 // Weyermann-W2-batch (2026-05-26): 11 Cara/mel malt gu/renk duzeltme DEF+TANIM (mel 288, cara_wheat 262, cara_red 285, cara_pils_w/cara_foam 288, cara_munich1/2/3+cara_dark 281, cara_aroma renk 151, cara_belge renk 13). MUADIL'e dokunulmadi. Kaynak: Weyermann Crop 2025.
 // bump v131-150 -> v131-151.
-const CACHE_VERSION = 'bm-cache-v131-151';
+// Hitit-batch (2026-05-26): reddish gu312->313, isli_malt gu300->311 + mo/TANIM EBC temizlik, biskuvi_arpa mo temizlik + TANIM EBC format, reddish "Weyermann"->Hitit, melaroma (EBC ~53)->(EBC 280-320). MUADIL'e dokunulmadi. Kaynak: hititmalt.com.
+// bump v131-151 -> v131-152.
+const CACHE_VERSION = 'bm-cache-v131-152';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
