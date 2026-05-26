@@ -639,7 +639,9 @@
 // bump v131-146 -> v131-147.
 // crisp_cc-batch (2026-05-26): yaniltici NEIPA framing duzeltme (Clear Choice = berraklik/PAC-free malti, NEIPA-spesifik degil). DEF+TANIM+MUADIL, sayisal degisiklik YOK.
 // bump v131-147 -> v131-148.
-const CACHE_VERSION = 'bm-cache-v131-148';
+// Thracian-batch (2026-05-26): 4 malt gu/renk duzeltme (vienna gu309, cara_bl gu288 r10, cara_ar gu288, fba gu306) + cara_ar MUADIL 75L->16L hatasi + mo "resmi" temizlik + spec metin guncelleme. Kaynak: thracianmalt.com.
+// bump v131-148 -> v131-149.
+const CACHE_VERSION = 'bm-cache-v131-149';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
