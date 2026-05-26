@@ -3903,7 +3903,7 @@ const MALTLAR=[
   {id:"tipple",ad:"Tipple Malt (Simpsons)",gu:312,r:3,g:"Base",mo:"Simpsons"},
   {id:"lager_malt",ad:"Lager Malt (Crisp)",gu:314,r:2,g:"Base",mo:"Crisp"},
   {id:"extra_pale",ad:"Extra Pale Malt (Crisp)",gu:314,r:2,g:"Base",mo:"Crisp"},
-  {id:"crisp_cc",ad:"Crisp Clear Choice Pale (NEIPA)",gu:309,r:2,g:"Base",mo:"Crisp"},
+  {id:"crisp_cc",ad:"Crisp Clear Choice Pale Malt",gu:309,r:2,g:"Base",mo:"Crisp"},
   // ── Viking / Best Malz ─────────────────────────────────────
   {id:"viking_pils",ad:"Viking Pilsner Malt",gu:308,r:2,g:"Base",mo:"Viking Malt (Polonya/Finlandiya)"},
   {id:"viking_xpa",ad:"Viking Xtra Pale (3G Null-LOX)",gu:313,r:2,g:"Base",mo:"Viking Malt"},
@@ -7995,7 +7995,7 @@ const TANIM={"uzum_pekmez":"GU: 300 (Fermente olur). Renk katkısı: 25°L. Üz�
   "best_acid":"Tat: Hafif ekşi/asidik — ana işlevi tat değil pH kontrolü. Mayşelemeyi asidifiye eder. Koku: Yok. Gövde: Etkisiz. GU: 292, 2°L. Kullanım: %1-5 (max %10). Stiller: Tüm stiller — özellikle suyu alkali olan homebrewer'lar için. Berliner Weisse, Gose, Sour IPA, Catharina Sour, Lambic, Flanders Red gibi sour stillerde direkt asidite kaynağı. Not: BestMalz Acidulated Malt; laktik asit üretimi sonucu pH düşürür. Alternatif: saf laktik asit veya fosforik asit.",
   "briess_sroast":"Tat: Güçlü tost, fındık, karamel başlangıcı — Amber Ale'in imza malti. Koku: Kavrulmuş ekmek, bisküvi. Gövde: Orta. GU: 277, 40°L. Kullanım: %5-10. Stiller: American Amber Ale, Nut Brown Ale, Bock, Belgian Dubbel. Not: Briess Special Roast; Amber Ale için en sık kullanılan spesifik malt.",
   "muntons_spa":"Tat: Extra light pale — çok nötr, hafif bisküvi. Yüksek ekstrakt verimi. Koku: Çok hafif tahıl. Gövde: Orta-hafif. GU: 316, 1°L. Kullanım: %80-100. Stiller: NEIPA, Hazy IPA, Pale Ale, Golden Ale. Not: Muntons Super Pale Ale — yüksek ekstrakt + çok açık renk; Hazy IPA için popüler UK premium.",
-  "crisp_cc":"Tat: Çok temiz, hafif bal tatlılığı, polifenol-free — chill haze oluşmaz. Koku: Çok hafif ekmek/fırın. Gövde: Orta. GU: 309, 2°L (PPG 37). Kullanım: %80-100. Stiller: NEIPA, Hazy IPA, Cask Ale, Lager. Not: Crisp Clear Choice Pale — proanthocyanidin-free İngiliz pale ale, 2022'de Extra Pale ve Ale versiyonlarını birleştiren yeni ürün. NEIPA'nın yağ gibi parlak wort'u için ideal.",
+  "crisp_cc":"Tat: Çok temiz, hafif bal tatlılığı, polifenol-free — chill haze oluşmaz. Koku: Çok hafif ekmek/fırın. Gövde: Orta. GU: 309, 2°L (PPG 37). Kullanım: %80-100. Stiller: Golden Ale, IPA, Lager, Cask Ale, NEIPA. Not: Crisp Clear Choice Pale — proanthocyanidin-free İngiliz pale ale, 2022'de Extra Pale ve Ale versiyonlarını birleştiren yeni ürün. Polifenol-free yapısı berrak, raf-stabil wort verir; hop karakterini öne çıkarır. Bulanık biralarda oksidatif kararmayı önler.",
   "viking_xpa":"Tat: Hafif tatlılık, temiz malt backbone — null-LOX nedeniyle aging stability çok yüksek. Koku: Neredeyse aromatisiz. Gövde: Hafif. GU: 313, 2°L. Kullanım: %80-100. Stiller: Hazy IPA, Blonde Ale, Lager, Pilsner, Imperial Stout. Not: Viking Xtra Pale 3G — single varietal 100% 3G CB Comfort arpa, null-LOX (%60 daha az SMM/DMS), Kolbach Index min 40% (high modification). MoreBeer! Pro tasarımı.",
   "viking_vienna":"Tat: Hafif Maillard, altın renkli ekmek — Kuzey Avrupa karakteri. Koku: Tahıl, hafif bal. Gövde: Orta. GU: 304, 4°L (EBC 7-10). Kullanım: %40-100. Stiller: Vienna Lager, Märzen, American Amber Ale, Altbier. Not: Viking Malt Vienna — Finlandiya/Polonya üretim. Viking resmi Craft Portfolio: extract %79, renk 7-10 EBC. Weyermann Vienna'dan biraz daha koyu olabilir.",
   "thracian_vienna":"Tat: Hafif Maillard, altın-amber — Akdeniz Yunan 2-row arpa karakteri. Koku: Tahıl, hafif bal. Gövde: Orta. GU: 304, 4°L (spec tahmini). Kullanım: %40-100. Stiller: Vienna Lager, Märzen, Pale Ale, American Amber, Dubbel, Belgian Dark Strong Ale, Belgian Quadrupel, Brown Ale, Amber Ale, Scottish Export, Irish Red Ale, Belgian Pale Ale. Not: Thracian Vienna (Macedonian Thrace Brewery, Yunanistan). Resmi Thracian spec PDF'si tam değer yayımlamadı; Vienna tipik spec'lere göre değerler.",
@@ -9801,8 +9801,8 @@ const MUADIL={
 
 
   ,"crisp_cc":[
-    {id:"vienna",ad:"Vienna Malt",fark:"⚠️ Vienna hafif Maillard. Clear Choice'ın proanthocyanidin-free (bulanık önleyici) karakterinden farklı.",detay:"Crisp Clear Choice (309, 2°L): İngiliz 2-row premium — polifenol-free, NEIPA için ideal clear wort. Vienna (312, 3°L): altın malty. NEIPA için Clear Choice tek başına; Vienna Lager için Vienna."},
-    {id:"munich",ad:"Munich Malt",fark:"⚠️ Munich çok daha koyu ve yoğun Maillard.",detay:"Clear Choice nötr pale. Munich 6°L yoğun ekmek. NEIPA/Hazy için Clear Choice; Bock için Munich."}
+    {id:"vienna",ad:"Vienna Malt",fark:"⚠️ Vienna hafif Maillard. Clear Choice'ın proanthocyanidin-free (bulanık önleyici) karakterinden farklı.",detay:"Crisp Clear Choice (309, 2°L): İngiliz 2-row premium — polifenol-free, berrak ve raf-stabil wort. Vienna (312, 3°L): altın malty. Hop-forward/berrak biralar için Clear Choice; Vienna Lager için Vienna."},
+    {id:"munich",ad:"Munich Malt",fark:"⚠️ Munich çok daha koyu ve yoğun Maillard.",detay:"Clear Choice nötr pale. Munich 6°L yoğun ekmek. Hop-forward/berrak biralar için Clear Choice; Bock için Munich."}
   ],
   "viking_xpa":[
     {id:"munich",ad:"Munich Malt",fark:"⚠️ Munich çok daha koyu ve yoğun Maillard.",detay:"Viking Xtra Pale 3G (313, 1.9°L): null-LOX 3G CB Comfort tek varyete — çok açık renk, high modification. Munich (310, 6°L): yoğun Maillard. Hazy IPA/Pilsner için Xtra Pale; Bock için Munich."},

@@ -637,7 +637,9 @@
 // MALTLAR 186->184. bump v131-145 -> v131-146.
 // Fawcett-batch (2026-05-26): fawcett_mild 3->4°L (EBC 7.5-9) DEF+TANIM+MUADIL duzeltme, fawcett vs muntons mild swap, oat mo-alani temizlik.
 // bump v131-146 -> v131-147.
-const CACHE_VERSION = 'bm-cache-v131-147';
+// crisp_cc-batch (2026-05-26): yaniltici NEIPA framing duzeltme (Clear Choice = berraklik/PAC-free malti, NEIPA-spesifik degil). DEF+TANIM+MUADIL, sayisal degisiklik YOK.
+// bump v131-147 -> v131-148.
+const CACHE_VERSION = 'bm-cache-v131-148';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
