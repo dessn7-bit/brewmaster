@@ -655,7 +655,9 @@
 // bump v131-154 -> v131-155.
 // MUADIL-metin-onarim-batch (2026-05-26): 18 kopyala-yapistir bozuk kart (fark+detay alakasiz malttan kopyalanmisti) dogru metinle yeniden yazildi + hml TANIM Weyermann->Gambrinus duzeltme. id+ad korundu, script-driven.
 // bump v131-155 -> v131-156.
-const CACHE_VERSION = 'bm-cache-v131-156';
+// sinamar-potato-batch (2026-05-26): sinamar renk 800->3148°L (Weyermann 8100-8600 EBC) + potato_fl gu 270->292 (BYO 35 PPG) DEF+TANIM+muadil. 7 str_replace.
+// bump v131-156 -> v131-157.
+const CACHE_VERSION = 'bm-cache-v131-157';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
