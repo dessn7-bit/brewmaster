@@ -4519,7 +4519,7 @@ function suProfilOneriUygula(hedefId) {
 function hOG(ml,v,katkilar,hacim){
   const h=hacim||11;
   let g=0;
-  ml.forEach(m=>{const x=MALTLAR.find(a=>a&&a.id===m.id);if(!x||m.id==="rice")return;
+  ml.forEach(m=>{const x=MALTLAR.find(a=>a&&a.id===m.id);if(!x||m.id==="rice"||m.id==="rice_hulls")return;
     g+=x.gu*m.kg*(x.g==="Şeker"?1:v/100);});
   if(katkilar)katkilar.forEach(k=>{
     const kat=KATKILAR.find(a=>a&&a.id===k.id);
@@ -7429,7 +7429,7 @@ function calc(){
     const abw = (ogP - RE) / (2.0665 - 0.010665*ogP);
     abv = Math.max(0, abw * fg / 0.794);
   }
-  const topMalt=S.maltlar.reduce((s,m)=>{const ml=MALTLAR.find(x=>x&&x.id===m.id);return (!ml||ml.g==="Şeker"||m.id==="rice")?s:s+m.kg;},0);
+  const topMalt=S.maltlar.reduce((s,m)=>{const ml=MALTLAR.find(x=>x&&x.id===m.id);return (!ml||ml.g==="Şeker"||(m.id==="rice"||m.id==="rice_hulls"))?s:s+m.kg;},0);
   // Katkı timing uyarıları
   const aromaUyari=[];
   (S.katkilar||[]).forEach(k=>{
@@ -14322,7 +14322,7 @@ function rEditorHesap(og, fg, abv, maya){
   const pg=prim(S.primVol,S.primTemp,hacim);
   const _co2Min=_co2Range[0], _co2Ideal=_co2Range[1], _co2Max=_co2Range[2];
   const _cAuto=_co2Ideal; // otomatik hedef
-  const topMaltKg=S.maltlar.reduce((s,m)=>{const ml=MALTLAR.find(x=>x&&x.id===m.id);return (!ml||ml.g==="Şeker"||m.id==="rice")?s:s+m.kg;},0);
+  const topMaltKg=S.maltlar.reduce((s,m)=>{const ml=MALTLAR.find(x=>x&&x.id===m.id);return (!ml||ml.g==="Şeker"||(m.id==="rice"||m.id==="rice_hulls"))?s:s+m.kg;},0);
   const em=+(topMaltKg*.7).toFixed(1);
   // Kaynatma kaybı: %12/saat (Palmer), süreye göre orantılı
   const _kSure = S.kaynatmaSure || 60;
@@ -15094,7 +15094,7 @@ function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
       <button class="bm-acc-header" type="button" aria-expanded="${_mEkleAria}" onclick="bmAccToggle('malt-ekle')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmAccToggle('malt-ekle')}"><span class="bm-acc-title">➕ Yeni Malt Ekle</span><span class="bm-acc-chevron">▾</span></button>
       <div class="bm-acc-body">
         <span class="etiket">Malt Ekle</span>
-        <input type="text" id="bm-arama-malt-inp" class="inp bm-arama-inp" style="margin-bottom:6px;font-size:12px" placeholder="🔍 Malt ara — yazınca öneriler çıkar (Enter: ilk eşleşeni ekle)" value="${sekmeArama.malt}" oninput="bmArama('malt',this.value)" onchange="sekmeArama.malt=this.value;render()" onkeydown="if(event.key==='Escape'){var _p=document.getElementById('bm-arama-malt');if(_p)_p.innerHTML='';this.blur();return;}if(event.key==='Enter'){const q=this.value.toLowerCase().trim();if(!q)return;const _k=sekmKat.malt;const _m=MALTLAR.find(x=>x&&x.ad.toLowerCase().includes(q)&&(!_k||x.g===_k));if(_m){yM.id=_m.id;maltEkle();this.value='';sekmeArama.malt='';var _p2=document.getElementById('bm-arama-malt');if(_p2)_p2.innerHTML='';}else flash('Eşleşen malt yok','err');event.preventDefault();}">
+        <input type="text" id="bm-arama-malt-inp" class="inp bm-arama-inp" style="margin-bottom:6px;font-size:12px" placeholder="🔍 Malt ara — yazınca öneriler çıkar (Enter: ilk eşleşeni ekle)" value="${sekmeArama.malt}" oninput="bmArama('malt',this.value)" onchange="sekmeArama.malt=this.value;render()" onkeydown="if(event.key==='Escape'){var _p=document.getElementById('bm-arama-malt');if(_p)_p.innerHTML='';this.blur();return;}if(event.key==='Enter'){const q=this.value.trim();if(!q)return;const _nq=_bmTrNorm(q);const _m=MALTLAR.find(x=>x&&_bmTrNorm(x.ad).includes(_nq));if(_m){yM.id=_m.id;maltEkle();this.value='';sekmeArama.malt='';var _p2=document.getElementById('bm-arama-malt');if(_p2)_p2.innerHTML='';}else flash('Eşleşen malt yok','err');event.preventDefault();}">
         <div id="bm-arama-malt" class="bm-arama-panel"></div>
         ${_maltKatHtml}
         <div style="display:flex;gap:8px;margin-bottom:6px;align-items:center">
@@ -19302,7 +19302,7 @@ function rEditor(){
   const tv=tkv(maya,og,fg,abv,S.hoplar,maya2,_stilTkv);
   let uy="";
   const rye=S.maltlar.find(m=>m&&m.id==="rye");
-  if(rye&&topMalt>0&&(rye.kg/topMalt)>0.15&&!S.maltlar.find(m=>m&&m.id==="rice"))uy+=`<div class="uybox uy-s">⚠️ Çavdar >%${Math.round(rye.kg/topMalt*100)} — Pirinç kabuğu (150-200g) ekle!</div>`;
+  if(rye&&topMalt>0&&(rye.kg/topMalt)>0.15&&!S.maltlar.find(m=>m&&(m.id==="rice"||m.id==="rice_hulls")))uy+=`<div class="uybox uy-s">⚠️ Çavdar >%${Math.round(rye.kg/topMalt*100)} — Pirinç kabuğu (150-200g) ekle!</div>`;
   if((S.maltlar.find(m=>m&&m.id==="lak")||{kg:0}).kg>0.4)uy+=`<div class="uybox uy-s">⚠️ Laktoz yüksek — max 0.4 kg önerilir</div>`;
   if(og>1.080&&!maya)uy+=`<div class="uybox uy-k">⚠️ OG 1.080+ — starter hazırla</div>`;
   if(ibu>0&&ibu<10&&S.maltlar.length)uy+=`<div class="uybox uy-k">⚠️ IBU ${ibu.toFixed(1)} — çok düşük (< 10 IBU enfeksiyon riski artar)</div>`;
