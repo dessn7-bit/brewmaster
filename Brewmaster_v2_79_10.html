@@ -13533,7 +13533,7 @@ function rEditorSu(){
         const mo = MALTLAR.find(x => x && x.id === m.id);
         if (!mo) return;
         // Şekerler (candy, sugar, honey) grist pH'ına dahil değil — fermente olur, mash'i etkilemez
-        if (mo.g==='Şeker' || mo.g==='Sugar') return;
+        if (mo.g==='Şeker') return;
         topKg += (m.kg||0);
         topPH += maltPH(mo) * (m.kg||0);
       });
@@ -19544,8 +19544,6 @@ function render(){
     });
   }
 
-  const e=document.getElementById("ymId");if(e)e.value=yM.id;
-  const f=document.getElementById("yhId");if(f)f.value=yH.id;
   const g=document.getElementById("yMinId");if(g)g.value=yMin.id;
   const mk=document.getElementById("moIpucu");if(mk){const m=MALTLAR.find(x=>x&&x.id===yM.id);if(m&&mk)mk.textContent=m.mo||"";}
   const ma=document.getElementById("minAcik");if(ma){const m=MINERALLER.find(x=>x&&x.id===yMin.id);if(m)ma.textContent=m.aciklama||"";}
@@ -21255,7 +21253,7 @@ function bmAramaSec(key,id){ var cfg=_bmAramaCfg[key]; if(!cfg||!id)return; var 
 if(typeof document!=='undefined'&&!window.__bmAramaOutside){window.__bmAramaOutside=true;document.addEventListener('mousedown',function(e){if(e.target&&e.target.closest&&(e.target.closest('.bm-arama-panel')||(e.target.classList&&e.target.classList.contains('bm-arama-inp'))))return;document.querySelectorAll('.bm-arama-panel').forEach(function(p){if(p.innerHTML)p.innerHTML='';});});}
 
 function maltEkle(){
-  const id=document.getElementById("ymId")?.value||yM.id;
+  const id=yM.id;
   const kg=parseFloat(document.getElementById("ymKg")?.value)||1;
   const marka=(document.getElementById("ymMarka")?.value||"").trim();
   if(!id||kg<=0)return;
@@ -21275,7 +21273,7 @@ function maltEkle(){
   render();
 }
 function hopEkle(){
-  const id=document.getElementById("yhId")?.value||yH.id;
+  const id=yH.id;
   const g=parseFloat(document.getElementById("yhG")?.value)||15;
   const cAA=document.getElementById("yhAA")?.value?parseFloat(document.getElementById("yhAA").value):null;
   if(g<=0)return;
