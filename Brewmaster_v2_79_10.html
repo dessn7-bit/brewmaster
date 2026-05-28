@@ -22241,7 +22241,12 @@ function _syncGonderKeepalive(){
     if(!_bmDirty) return;
     const url = syncUrl();
     if(!url) return;
-    const data = { KR: KR, STOK: STOK, ts: Date.now(), cihaz: syncCfg.cihaz||"A" };
+    const data = {
+      KR: JSON.parse(JSON.stringify(KR)),
+      STOK: JSON.parse(JSON.stringify(STOK)),
+      ts: Date.now(),
+      cihaz: syncCfg.cihaz||"A"
+    };
     fetch(url, {method:'PUT', body: JSON.stringify(data), keepalive: true});
   } catch(e){}
 }
