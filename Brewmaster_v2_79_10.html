@@ -22091,9 +22091,11 @@ window.mineralEkle=mineralEkle;window.notu_kaydet=notu_kaydet;window.stokEkle=st
 window.S=S;window.KR=KR;window.silOnay=silOnay;window.render=render;
 window.addEventListener('beforeunload', function(){
   try{saveDraft();}catch(e){}
+  try{_syncGonderKeepalive();}catch(e){}
 });
 window.addEventListener('pagehide', function(){
   try{saveDraft();}catch(e){}
+  try{_syncGonderKeepalive();}catch(e){}
 });window.STOK=STOK;window.KATKILAR=KATKILAR;window.MALTLAR_DB=MALTLAR;
 window.MALTLAR=MALTLAR;window.MINERALLER=MINERALLER;
 
@@ -22143,6 +22145,7 @@ const SYNC_TS_SK = "bm_sync_ts_v1";  // En son bilinen Firebase ts'i
 let syncCfg = null;
 let syncPollTimer = null;
 let syncBusy = false;
+let _bmDirty = false;
 let syncSonGuncelle = (function(){
   try{ var v=localStorage.getItem(SYNC_TS_SK); return v?parseInt(v,10)||0:0; }catch(e){ return 0; }
 })();
@@ -22211,6 +22214,7 @@ async function syncGonder(){
       body: JSON.stringify(data)
     });
     if(res.ok){
+      _bmDirty=false;
       _syncTsKaydet(data.ts);
       syncDurumGuncelle('ok');
     } else {
@@ -22228,6 +22232,18 @@ async function syncGonder(){
     _syncPending = false;
     setTimeout(syncGonder, 150);
   }
+}
+
+// Faz 1 sync fix: reload/unload sırasında bekleyen push'u keepalive ile gönder (best-effort).
+// URL syncGonder ile parite için syncUrl() (defansif strip) üzerinden kurulur.
+function _syncGonderKeepalive(){
+  try {
+    if(!_bmDirty) return;
+    const url = syncUrl();
+    if(!url) return;
+    const data = { KR: KR, STOK: STOK, ts: Date.now(), cihaz: syncCfg.cihaz||"A" };
+    fetch(url, {method:'PUT', body: JSON.stringify(data), keepalive: true});
+  } catch(e){}
 }
 
 // v2.78.91 Q3 — clearTimeout debounce: ardışık ky/stokKaydet çağrıları tek bir
@@ -22326,7 +22342,14 @@ function syncDinle(){
   if(!url){ syncDurumGuncelle('kapali'); return; }
   
   // İlk anlık kontrol — Dubbel auto-load + render tamamlansın diye gecikmeli
-  setTimeout(syncAl, 1500);
+  // Faz 1 sync fix: yerelde push'lanmamış değişiklik (_bmDirty) varsa ÖNCE push, SONRA pull.
+  setTimeout(function(){
+    if(_bmDirty){
+      try { syncGonder().then(syncAl, syncAl); } catch(e) { syncAl(); }
+    } else {
+      syncAl();
+    }
+  }, 1500);
   
   // 5 saniyede bir kontrol et
   syncPollTimer = setInterval(()=>{ syncAl(); }, 5000);
@@ -22428,7 +22451,7 @@ function syncTemizle(){
 // Senkronu tarifeKaydet ve stokKaydet/Sil/Guncelle ile entegre et
 // v2.78.91 Q3 — setTimeout yerine _syncGonderDebounced (clearTimeout collapse)
 const _origKy = ky;
-window.ky = function(a){ const _r=_origKy(a); _syncGonderDebounced(); return _r; };
+window.ky = function(a){ const _r=_origKy(a); _bmDirty=true; _syncGonderDebounced(); return _r; };
 const _origStokKaydet = stokKaydet;
 window.stokKaydet = function(a){ _origStokKaydet(a); _syncGonderDebounced(); };
 window.syncPanelAc = syncPanelAc;
