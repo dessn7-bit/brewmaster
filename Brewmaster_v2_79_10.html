@@ -6798,6 +6798,7 @@ function klasorDegistir(id,yeniKlasor){
   _commitOpenRecipe(); // açık reçete edits'i koru (stale-save fix)
   const t=KR.find(k=>k&&k.id===id);if(!t)return;
   t.klasor=yeniKlasor;
+  t.guncelleme = Date.now();
   if(_editId===id && typeof S!=='undefined' && S) S.klasor=yeniKlasor;
   ky(KR);render();
 }
@@ -7098,6 +7099,7 @@ function tarifDurumDegistir(id,yeniDurum){
     }
   }
   t.durum=yeniDurum;
+  t.guncelleme = Date.now();
   if(_editId===id) S.durum=yeniDurum;
   if(ky(KR)){clearDraft();}
   silOnay=null;
@@ -7464,6 +7466,7 @@ function tarifeKaydet(){
   const _eskiTarih=_mevcutIdx>=0?KR[_mevcutIdx].tarih:_tarihStr;
   const t={id:_idStr, tarih:_eskiTarih,
     ...JSON.parse(JSON.stringify(S)),
+    guncelleme: Date.now(),
     ozet:{og:og.toFixed(3),fg:fg.toFixed(3),abv:abv.toFixed(2),ibu:ibu.toFixed(0),srm:srm.toFixed(0)}};
   if(_mevcutIdx>=0){KR[_mevcutIdx]=t;}else{KR.unshift(t);}
   _editId=t.id; // Kaydet sonrası ID'yi koru
@@ -20274,6 +20277,7 @@ window.brewdayBaslat=async function(){
         const _kayit = {
           id: _yeniId, tarih: _tarihStr,
           ...JSON.parse(JSON.stringify(S)),
+          guncelleme: Date.now(),
           ozet: {og:_og.toFixed(3),fg:_fg.toFixed(3),abv:_abv.toFixed(2),ibu:_ibu.toFixed(0),srm:_srm.toFixed(0)}
         };
         if(typeof KR !== 'undefined' && Array.isArray(KR)){
@@ -21765,7 +21769,7 @@ window.yeniKlasorKaydet=function(){var el=document.getElementById('yeniKlasorInp
 window.yeniKlasorKlavye=function(el,ev){if(ev.key==='Enter'){ev.preventDefault();window.yeniKlasorKaydet();}else if(ev.key==='Escape'){ev.preventDefault();window.yeniKlasorIptal();}};
 window.stilSec=function(el){const s=el.getAttribute('data-stil');if(!s)return;S.stil=(S.stil===s)?'':s;render();};
 window.klasorSilIste=function(ki){const k=(window._kl||[])[ki];if(!k)return;window._klasorSilOnayi=k;render();};
-window.klasorSilOnay=function(onaylandi){const k=window._klasorSilOnayi;window._klasorSilOnayi=null;if(!onaylandi||!k){render();return;}_commitOpenRecipe();KR.forEach(t=>{if((t.klasor||"")===k)t.klasor="";});if(typeof _editId!=='undefined'&&_editId){const _et=KR.find(x=>x&&x.id===_editId);if(_et&&typeof S!=='undefined'&&S)S.klasor=_et.klasor;}if(window._pendingKlasor)window._pendingKlasor=window._pendingKlasor.filter(x=>x!==k);if(aktifKlasor===k)aktifKlasor="";ky(KR);render();};
+window.klasorSilOnay=function(onaylandi){const k=window._klasorSilOnayi;window._klasorSilOnayi=null;if(!onaylandi||!k){render();return;}_commitOpenRecipe();KR.forEach(t=>{if((t.klasor||"")===k){t.klasor="";t.guncelleme=Date.now();}});if(typeof _editId!=='undefined'&&_editId){const _et=KR.find(x=>x&&x.id===_editId);if(_et&&typeof S!=='undefined'&&S)S.klasor=_et.klasor;}if(window._pendingKlasor)window._pendingKlasor=window._pendingKlasor.filter(x=>x!==k);if(aktifKlasor===k)aktifKlasor="";ky(KR);render();};
 window.silOnayById=function(el){const id=el.closest('[data-tid]')?.dataset?.tid;if(id){silOnay=id;render();}};
 window.tarifSilById=function(el){const id=el.closest('[data-tid]')?.dataset?.tid;if(id)tarifSil(id);};
 window.logEkle=logEkle;
@@ -22108,7 +22112,7 @@ window.MALTLAR=MALTLAR;window.MINERALLER=MINERALLER;
 (function(){
   try{
     const DUBBEL_ID='dubbel_2024'; const DUBBEL_VER=5;
-    const dubbel={"id": "dubbel_2024", "biraAd": "Dark Belgian Dubbel", "maltlar": [{"id": "pale_ale", "kg": 2.0}, {"id": "munich", "kg": 0.64}, {"id": "chateau_biscuit", "kg": 0.35}, {"id": "c40", "kg": 0.2}, {"id": "rye", "kg": 0.17}, {"id": "c120", "kg": 0.11}, {"id": "dark_wheat", "kg": 0.055}, {"id": "rice_hulls", "kg": 0.13}, {"id": "candy_drk", "kg": 0.2}], "hoplar": [{"id": "hallertau", "g": 14, "dk": 60, "tur": "boil", "cAA": null}, {"id": "spalt", "g": 12, "dk": 10, "tur": "boil", "cAA": null}], "mayaId": "bb_abbaye", "maya2Id": "", "katkilar": [{"id": "kakao", "miktar": 30, "birim": "g", "ad": "Kakao Nibları (Cacao Nibs)", "zaman": "Fermentasyon sonunda (soğuk)"}, {"id": "vanilya", "miktar": 1, "birim": "adet", "ad": "Vanilya Çubuğu", "zaman": "Cold crash sonrası (5°C)"}, {"id": "maya_besini", "miktar": 0.5, "birim": "g", "ad": "Maya Besini (Yeast Nutrient)", "zaman": "Fermentere ekle"}, {"id": "jelatin", "miktar": 0.5, "birim": "g", "ad": "Berraklaştırıcı Toz Jelatin", "zaman": "Cold crash sırasında (5°C)"}, {"id": "antioxid", "miktar": 0.5, "birim": "g", "ad": "Antioksidasyon Tuzu (Metabisülfit)", "zaman": "Şişelemede veya fıçıda"}], "suMineralleri": [{"id": "cacl2", "miktar": 5.0}, {"id": "mgso4", "miktar": 1.5}, {"id": "laktik", "miktar": 1.5}], "hacim": 11, "verim": 61, "mashSc": 66, "ogManuel": "", "fgManuel": "", "primVol": 2.5, "primTemp": 20, "primYontem": "Dekstroz", "brewLog": [], "notlar": "Dark Belgian Dubbel — Yarışma Reçetesi\n\nOG ~1.064 | FG ~1.014 | ABV ~%6.8 | IBU ~14 | EBC ~41\n\n• Mash suyu 13L (66°C), sparge 5L saf RO\n• Mash pH hedefi 5.3 — laktik asit ile ayarla\n• Çeltik kavuzu mash'te diğer maltlarla birlikte sepete ekle\n• Candi Sugar'ı kaynatmanın 15. dakikasında ekle\n• Kakao nibsini önce yıka, hafifçe kavur → secondary\n• Vanilya çubuğunu yar, son 3 günde ekle\n• Fermentasyon: 18°C başla → 3. gün 22°C'ye çık\n• Jelatin: 60°C 100mL suda çöz, soğuk kondisyon 3-4 gün 5°C\n• Antioksidasyon şişelemeden hemen önce", "durum": "aktif", "klasor": "Yarışma", "tarih": "13.04.2026", "_ver": 9};
+    const dubbel={"id": "dubbel_2024", "biraAd": "Dark Belgian Dubbel", "maltlar": [{"id": "pale_ale", "kg": 2.0}, {"id": "munich", "kg": 0.64}, {"id": "chateau_biscuit", "kg": 0.35}, {"id": "c40", "kg": 0.2}, {"id": "rye", "kg": 0.17}, {"id": "c120", "kg": 0.11}, {"id": "dark_wheat", "kg": 0.055}, {"id": "rice_hulls", "kg": 0.13}, {"id": "candy_drk", "kg": 0.2}], "hoplar": [{"id": "hallertau", "g": 14, "dk": 60, "tur": "boil", "cAA": null}, {"id": "spalt", "g": 12, "dk": 10, "tur": "boil", "cAA": null}], "mayaId": "bb_abbaye", "maya2Id": "", "katkilar": [{"id": "kakao", "miktar": 30, "birim": "g", "ad": "Kakao Nibları (Cacao Nibs)", "zaman": "Fermentasyon sonunda (soğuk)"}, {"id": "vanilya", "miktar": 1, "birim": "adet", "ad": "Vanilya Çubuğu", "zaman": "Cold crash sonrası (5°C)"}, {"id": "maya_besini", "miktar": 0.5, "birim": "g", "ad": "Maya Besini (Yeast Nutrient)", "zaman": "Fermentere ekle"}, {"id": "jelatin", "miktar": 0.5, "birim": "g", "ad": "Berraklaştırıcı Toz Jelatin", "zaman": "Cold crash sırasında (5°C)"}, {"id": "antioxid", "miktar": 0.5, "birim": "g", "ad": "Antioksidasyon Tuzu (Metabisülfit)", "zaman": "Şişelemede veya fıçıda"}], "suMineralleri": [{"id": "cacl2", "miktar": 5.0}, {"id": "mgso4", "miktar": 1.5}, {"id": "laktik", "miktar": 1.5}], "hacim": 11, "verim": 61, "mashSc": 66, "ogManuel": "", "fgManuel": "", "primVol": 2.5, "primTemp": 20, "primYontem": "Dekstroz", "brewLog": [], "notlar": "Dark Belgian Dubbel — Yarışma Reçetesi\n\nOG ~1.064 | FG ~1.014 | ABV ~%6.8 | IBU ~14 | EBC ~41\n\n• Mash suyu 13L (66°C), sparge 5L saf RO\n• Mash pH hedefi 5.3 — laktik asit ile ayarla\n• Çeltik kavuzu mash'te diğer maltlarla birlikte sepete ekle\n• Candi Sugar'ı kaynatmanın 15. dakikasında ekle\n• Kakao nibsini önce yıka, hafifçe kavur → secondary\n• Vanilya çubuğunu yar, son 3 günde ekle\n• Fermentasyon: 18°C başla → 3. gün 22°C'ye çık\n• Jelatin: 60°C 100mL suda çöz, soğuk kondisyon 3-4 gün 5°C\n• Antioksidasyon şişelemeden hemen önce", "durum": "aktif", "klasor": "Yarışma", "tarih": "13.04.2026", "guncelleme": 0, "_ver": 9};
     let stored=[];
     try{stored=_migrateAllRecipes(JSON.parse(localStorage.getItem('bm_v6'))||[]);}catch(e){}
     if(!Array.isArray(stored))stored=[];
@@ -22287,25 +22291,33 @@ async function syncAl(){
     const yerelKR = Array.isArray(KR) ? KR : [];
     const yerelSTOK = Array.isArray(STOK) ? STOK : [];
 
-    // KR merge: id'ye göre; Firebase versiyonu önce, yerelde olup gelende
-    // olmayan kayıtlar eklenir (silme kararını kullanıcı yerelde almadıysa
-    // veri kaybolmasın)
-    const gelenIds = new Set(gelenKR.map(function(k){return k && k.id;}).filter(Boolean));
-    const yerelEklenecek = yerelKR.filter(function(k){ return k && k.id && !gelenIds.has(k.id); });
-    let yeniKR;
-    if(yerelEklenecek.length > 0){
-      // Yerelde gelende olmayan kayıt var → MERGE
-      yeniKR = gelenKR.concat(yerelEklenecek);
-      console.log('syncAl: merge — Firebase:'+gelenKR.length+' + yerel-özel:'+yerelEklenecek.length);
-    } else if(gelenKR.length === 0 && yerelKR.length > 0){
-      // Firebase BOŞ ama yerelde kayıt var → ezme, tam tersine yerel veriyi
-      // Firebase'e gönder (bir sonraki syncGonder halledecek)
+    // Faz 2: per-reçete guncelleme bazlı son-yazan-kazanır merge.
+    // Migration: guncelleme alanı olmayan eski reçeteler 0 sayılır (en eski).
+    // Guard: Firebase BOŞ + yerel DOLU → ezme reddedilir (mevcut davranış korunur).
+    if(gelenKR.length === 0 && yerelKR.length > 0){
       console.warn('syncAl: Firebase BOŞ, yerel dolu — EZME REDDEDILDI');
       setTimeout(syncGonder, 200);
       return;
-    } else {
-      yeniKR = gelenKR;
     }
+    const gelenMap = new Map();
+    gelenKR.forEach(function(k){ if(k && k.id) gelenMap.set(k.id, k); });
+    const yerelMap = new Map();
+    yerelKR.forEach(function(k){ if(k && k.id) yerelMap.set(k.id, k); });
+    const idSet = new Set();
+    gelenMap.forEach(function(_, id){ idSet.add(id); });
+    yerelMap.forEach(function(_, id){ idSet.add(id); });
+    const yeniKR = [];
+    idSet.forEach(function(id){
+      const g = gelenMap.get(id);
+      const y = yerelMap.get(id);
+      if(!g && y){ yeniKR.push(y); return; }   // sadece yerel
+      if(g && !y){ yeniKR.push(g); return; }   // sadece gelen
+      const gts = (g.guncelleme || 0);
+      const yts = (y.guncelleme || 0);
+      if(yts > gts) yeniKR.push(y);            // yerel daha yeni
+      else yeniKR.push(g);                      // gelen daha yeni veya eşit (deterministik)
+    });
+    console.log('syncAl: merge — Firebase:'+gelenKR.length+' yerel:'+yerelKR.length+' → '+yeniKR.length);
 
     // STOK merge — aynı mantık
     // Fallback: id yoksa ad+birim birleşimiyle eşleştir (eski stok item'ları id'siz olabilir)
