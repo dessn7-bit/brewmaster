@@ -22428,6 +22428,13 @@ function syncPanelAc(){
         placeholder="Telefon veya Tablet"
         value="${mevcut.cihaz||''}">
 
+      <div id="syncDiag" style="font-size:9px;color:var(--soluk);background:var(--kahve-bg);border-radius:6px;padding:8px;margin-bottom:10px;line-height:1.5;word-break:break-all">
+        NODE: ${syncUrl() || '(oda/url eksik)'}<br>
+        DURUM: ${syncPollTimer ? '🟡 polling aktif' : '⚫ kapali'}<br>
+        LAST_TS: ${syncSonGuncelle ? new Date(syncSonGuncelle).toLocaleString('tr-TR',{timeZone:'Europe/Istanbul'}) : 'hic'}<br>
+        SW: ${navigator.serviceWorker && navigator.serviceWorker.controller ? 'aktif' : 'yok'}
+      </div>
+
       <div style="display:flex;gap:8px;margin-bottom:12px">
         <button class="btn" style="flex:1;background:var(--kahve-koyu);color:var(--kahve-light);padding:10px" onclick="syncKaydetVeBaslat()">✓ Kaydet & Bağlan</button>
         <button class="btn" style="background:#FAE8E8;color:#7A1A1A;padding:10px" onclick="syncTemizle()">Kapat</button>
@@ -22500,6 +22507,30 @@ window.addEventListener('online', function(){
         if(_bmDirty) syncGonder();
       }
     }, 500);
+  }
+});
+
+// Faz 2.5b: foreground'a dönünce anlık pull (mobile setInterval throttle telafisi) — pull-first + dirty ise push, Faz 2.5a deseni.
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState==='visible' && syncCfg){
+    try {
+      syncAl().then(function(){
+        if(_bmDirty) syncGonder();
+      }, function(){
+        if(_bmDirty) syncGonder();
+      });
+    } catch(e){ if(_bmDirty) syncGonder(); }
+  }
+});
+window.addEventListener('pageshow', function(){
+  if(syncCfg){
+    try {
+      syncAl().then(function(){
+        if(_bmDirty) syncGonder();
+      }, function(){
+        if(_bmDirty) syncGonder();
+      });
+    } catch(e){ if(_bmDirty) syncGonder(); }
   }
 });
 
