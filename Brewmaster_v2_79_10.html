@@ -22359,12 +22359,16 @@ function syncDinle(){
   if(!url){ syncDurumGuncelle('kapali'); return; }
   
   // İlk anlık kontrol — Dubbel auto-load + render tamamlansın diye gecikmeli
-  // Faz 1 sync fix: yerelde push'lanmamış değişiklik (_bmDirty) varsa ÖNCE push, SONRA pull.
+  // Faz 2.5a: pull-first — önce syncAl (merge yerel-yeniyi korur), sonra hâlâ dirty ise push.
   setTimeout(function(){
-    if(_bmDirty){
-      try { syncGonder().then(syncAl, syncAl); } catch(e) { syncAl(); }
-    } else {
-      syncAl();
+    try {
+      syncAl().then(function(){
+        if(_bmDirty) syncGonder();
+      }, function(){
+        if(_bmDirty) syncGonder();
+      });
+    } catch(e) {
+      if(_bmDirty) syncGonder();
     }
   }, 1500);
   
@@ -22484,8 +22488,18 @@ window.addEventListener('offline', function(){
 window.addEventListener('online', function(){
   if(syncCfg){
     syncDurumGuncelle('bagli');
-    setTimeout(syncAl, 500);     // offline'da atlanan değişiklikleri çek
-    setTimeout(syncGonder, 1200); // yerel bekleyenleri gönder
+    // Faz 2.5a: pull-first — offline'da atlananları çek (syncAl), sonra hâlâ dirty ise push.
+    setTimeout(function(){
+      try {
+        syncAl().then(function(){
+          if(_bmDirty) syncGonder();
+        }, function(){
+          if(_bmDirty) syncGonder();
+        });
+      } catch(e) {
+        if(_bmDirty) syncGonder();
+      }
+    }, 500);
   }
 });
 
