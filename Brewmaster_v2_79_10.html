@@ -4577,6 +4577,7 @@ function hSRM(ml,katkilar,hacim){
 }
 function srmR(s){const r=[[3,"#dbb74b"],[4,"#d5a429"],[5,"#cb8d00"],[7,"#bd7200"],[9,"#af5d00"],[11,"#9e4700"],[14,"#8c3200"],[17,"#7f2500"],[19,"#721900"],[22,"#650d00"],[25,"#560100"],[30,"#460000"],[35,"#3a0000"],[40,"#2b0000"],[50,"#170000"]];for(let i=r.length-1;i>=0;i--)if(s>=r[i][0])return r[i][1];return"#e2d589";}
 function renk_adi(s){const t=[[3,"Buğday"],[4,"Altın Sarısı"],[5,"Bal"],[7,"Kehribar"],[9,"Bakır"],[11,"Koyu Bakır"],[14,"Kızıl Bakır"],[17,"Yakut Kırmızısı"],[19,"Kızıl Kahve"],[22,"Kestane"],[25,"Çikolata"],[30,"Yakut"],[35,"Koyu Kahve"],[40,"Siyah"],[50,"Kara Amber"]];for(let i=t.length-1;i>=0;i--)if(s>=t[i][0])return t[i][1];return"Saman";}
+function bjcp_adi(s){const t=[[3,"Straw"],[4,"Pale Gold"],[5,"Deep Gold"],[7,"Pale Amber"],[9,"Pale Amber"],[11,"Medium Amber"],[14,"Deep Amber"],[17,"Amber Brown"],[19,"Brown"],[22,"Ruby Brown"],[25,"Ruby Brown"],[30,"Deep Brown"],[35,"Black"],[40,"Black"],[50,"Black"]];for(let i=t.length-1;i>=0;i--)if(s>=t[i][0])return t[i][1];return"Pale Straw";}
 // I1 — Malt kategori kod → görsel nitelikleri (renk şeridi, rozet arka/yazı renkleri, Türkçe etiket)
 // Sistem içinde MALTLAR DB'deki `g` alanı "Adjunct" İngilizce kalır (uyumluluk için), gösterimde "Ek Tahıl"
 function katKodu(g){
@@ -11636,7 +11637,8 @@ function rListe(){
   function tarifKart(t){
     const ozet=t.ozet||{};
     const srmVal=parseFloat(ozet.srm)||0;
-    const renkAdi=clr(srmVal);                // Sari/Altin/Amber/Koyu/Siyah
+    const renkAdi=clr(srmVal);                // 16 bant Turkce ad
+    const bjcpAdi=bjcp_adi(srmVal);            // BJCP/Mosher 12 bant EN ad
     const renkHex=rk(t);                       // SRM->hex
     // Banner sinifi (SRM bazli): <12 light (turuncu), <22 medium (koyu turuncu), >=22 dark (gradient kahve)
     const bannerCls = srmVal<12 ? 'light' : (srmVal<22 ? 'medium' : 'dark');
@@ -11658,7 +11660,7 @@ function rListe(){
       ? '<button class="bm-recete-eylem-chip istek" onclick="tarifDurumDegistir(\''+t.id+'\',\'istek\')">'+BM_SVG.star+'<span>İstek</span></button>'
       : '';
     // Banner badges
-    const renkBadge='<span class="bm-recete-badge">'+_esc131B(renkAdi).toUpperCase()+'</span>';
+    const renkBadge='<span class="bm-recete-badge"><b>'+_esc131B(renkAdi)+'</b> <span style="opacity:0.6;font-size:0.85em">· '+_esc131B(bjcpAdi)+'</span></span>';
     const taslakBadge = !t.durum ? '<span class="bm-recete-badge taslak">TASLAK</span>' : '';
     // Meta satiri: tarih + klasor (varsa)
     const metaParts=[];
@@ -11675,7 +11677,7 @@ function rListe(){
       '<div class="bm-recete-metric"><span class="bm-recete-metric-etiket">ABV</span><span class="bm-recete-metric-deger">'+abvV+'</span></div>'+
       '<div class="bm-recete-metric"><span class="bm-recete-metric-etiket">IBU</span><span class="bm-recete-metric-deger">'+ibuV+'</span></div>'+
       '<div class="bm-recete-metric"><span class="bm-recete-metric-etiket">SRM</span><span class="bm-recete-metric-deger">'+srmV+'</span></div>'+
-      '<div class="bm-recete-renk-chip"><span class="bm-recete-renk-dot" style="background:'+renkHex+'"></span><span>'+_esc131B(renkAdi)+'</span></div>';
+      '<div class="bm-recete-renk-chip"><span class="bm-recete-renk-dot" style="background:'+renkHex+'"></span><span>'+_esc131B(renkAdi)+' <span style="opacity:0.6;font-size:0.85em">('+_esc131B(bjcpAdi)+')</span></span></div>';
     // Malzeme onizleme (max 3 malt)
     const malzemeHtml = (t.maltlar && t.maltlar.length)
       ? '<div class="bm-recete-malzeme">'+t.maltlar.slice(0,3).map(function(m){
@@ -18945,7 +18947,7 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
                         : (_oatPct>=10)            ? 'yulaf hafif bulanıklık katar'
                         : (_roastPct>=5 || _srm>20)? 'koyuluk berraklığı gizler'
                         :                            'berrak görünür';
-          var renkC1 = _renkAdi + ' · ' + _srm + ' SRM / ' + _rEBC + ' EBC' + _katRenkMCU + '.';
+          var renkC1 = _renkAdi + ' / ' + bjcp_adi(parseFloat(_srm)||0) + ' (SRM ' + _srm + ') · ' + _rEBC + ' EBC' + _katRenkMCU + '.';
           var renkC2 = renkSebep.charAt(0).toUpperCase() + renkSebep.slice(1) + '; ' + berraklik + '.';
           var renkC3 = '✓ Renk profili tutarlı.';
           _ps("🎨 Renk", renkC1 + ' ' + renkC2 + ' ' + renkC3, profRows);
@@ -19437,6 +19439,7 @@ function rEditor(){
   <div class="bm-sticky-summary" id="bm-summary">
     <div class="bm-ss-stil">
       <span class="bm-ss-renk" id="ss-renk" style="background:${typeof srmR==='function'?srmR(parseFloat(srm)||0):'#888'}"></span>
+      <span class="bm-ss-renk-ad" id="ss-renk-ad" style="font-size:0.9em">${typeof renk_adi==='function'?esc(renk_adi(parseFloat(srm)||0)):''}${typeof bjcp_adi==='function'?' <span style=\"opacity:0.6;font-size:0.85em\">· '+esc(bjcp_adi(parseFloat(srm)||0))+'</span>':''}</span>
       <span class="bm-ss-label" id="ss-stil">${esc((S&&S.stil)||(S&&S.stilTah)||(S&&S.biraAd)||'Stil hesaplanıyor...')}</span>
     </div>
     <div class="bm-ss-stats">
@@ -23395,6 +23398,10 @@ syncBaslat();
           try { var _c = calc(); srmVal = parseFloat(_c.srm) || 0; } catch(_){}
         }
         if (srmVal != null) renkEl.style.background = srmR(srmVal);
+        var renkAdEl = document.getElementById('ss-renk-ad');
+        if (renkAdEl && srmVal != null && typeof renk_adi === 'function' && typeof bjcp_adi === 'function') {
+          renkAdEl.innerHTML = renk_adi(srmVal) + ' <span style="opacity:0.6;font-size:0.85em">· ' + bjcp_adi(srmVal) + '</span>';
+        }
       }
     } catch(e) { /* silent */ }
   };
