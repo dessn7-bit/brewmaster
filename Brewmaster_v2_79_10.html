@@ -4578,6 +4578,68 @@ function hSRM(ml,katkilar,hacim){
 function srmR(s){const r=[[3,"#dbb74b"],[4,"#d5a429"],[5,"#cb8d00"],[7,"#bd7200"],[9,"#af5d00"],[11,"#9e4700"],[14,"#8c3200"],[17,"#7f2500"],[19,"#721900"],[22,"#650d00"],[25,"#560100"],[30,"#460000"],[35,"#3a0000"],[40,"#2b0000"],[50,"#170000"]];for(let i=r.length-1;i>=0;i--)if(s>=r[i][0])return r[i][1];return"#e2d589";}
 function renk_adi(s){const t=[[3,"Buğday"],[4,"Altın Sarısı"],[5,"Bal"],[7,"Kehribar"],[9,"Bakır"],[11,"Koyu Bakır"],[14,"Kızıl Bakır"],[17,"Yakut Kırmızısı"],[19,"Kızıl Kahve"],[22,"Kestane"],[25,"Çikolata"],[30,"Yakut"],[35,"Koyu Kahve"],[40,"Siyah"],[50,"Kara Amber"]];for(let i=t.length-1;i>=0;i--)if(s>=t[i][0])return t[i][1];return"Saman";}
 function bjcp_adi(s){const t=[[3,"Straw"],[4,"Pale Gold"],[5,"Deep Gold"],[7,"Pale Amber"],[9,"Pale Amber"],[11,"Medium Amber"],[14,"Deep Amber"],[17,"Amber Brown"],[19,"Brown"],[22,"Ruby Brown"],[25,"Ruby Brown"],[30,"Deep Brown"],[35,"Black"],[40,"Black"],[50,"Black"]];for(let i=t.length-1;i>=0;i--)if(s>=t[i][0])return t[i][1];return"Pale Straw";}
+// Sprint 2: 15 katki -> 11 pigment grup eslemesi, izli/karisim/baskin mode mantigi
+const _KR_GRUP = {
+  karadut:         {rgb:[92,26,110],  max:400, tr_dusuk:"Erguvan", en_dusuk:"Magenta",   tr_yuksek:"Patlıcan", en_yuksek:"Eggplant", alt_ad_orani:0.40},
+  mavi_kelebek:    {rgb:[30,100,220], max:12,  tr:"Lacivert",      en:"Indigo",          tr_asit:"Erguvan",    en_asit:"Magenta",    ph_sinir:4.2},
+  hibiskus:        {rgb:[194,0,60],   max:80,  tr_dusuk:"Mercan",  en_dusuk:"Coral",     tr_yuksek:"Kızıl",    en_yuksek:"Crimson",  alt_ad_orani:0.50},
+  matcha:          {rgb:[45,134,83],  max:40,  tr:"Fıstık Yeşili", en:"Pistachio Green"},
+  turmerik:        {rgb:[230,172,0],  max:30,  tr:"Hardal",        en:"Mustard"},
+  karakulak_saf:   {rgb:[212,130,10], max:2,   tr:"Portakal",      en:"Orange"},
+  visne_konsantre: {rgb:[139,0,0],    max:200, tr:"Kızıl",         en:"Crimson"},
+  cranberry:       {rgb:[190,45,45],  max:500, tr:"Kızıl",         en:"Crimson"},
+  spirulina:       {rgb:[11,122,117], max:18,  tr:"Zümrüt",        en:"Emerald"},
+  yaban_mersini:   {rgb:[75,0,130],   max:700, tr:"Bordo",         en:"Burgundy"},
+  visne:           {rgb:[120,0,30],   max:400, tr:"Kızıl",         en:"Crimson"},
+  nar:             {rgb:[165,0,33],   max:350, tr:"Bordo",         en:"Burgundy"},
+  dut_kuru:        {rgb:[80,15,90],   max:500, tr:"Patlıcan",      en:"Eggplant"},
+  ahududu:         {rgb:[200,20,80],  max:600, tr:"Patlıcan",      en:"Eggplant"},
+  cilek:           {rgb:[200,40,60],  max:900, tr:"Mercan",        en:"Coral"}
+};
+function aktif_pigment(katkilar, hacim, pH){
+  let enYuksek=null, enYuksekOran=0;
+  for(const [kid, gram] of Object.entries(katkilar||{})){
+    if(!gram||gram<=0) continue;
+    const meta=_KR_GRUP[kid]; if(!meta) continue;
+    const oran=Math.sqrt(Math.min(1, gram/(hacim*meta.max/10)));
+    if(oran>enYuksekOran){ enYuksekOran=oran; enYuksek={kid,gram,oran,meta}; }
+  }
+  if(!enYuksek||enYuksekOran<0.10) return {mode:'izli'};
+  const mode=enYuksekOran>=0.70?'baskin':'karisim';
+  let tr, en;
+  if(enYuksek.kid==='mavi_kelebek'){
+    if(pH<=enYuksek.meta.ph_sinir){ tr=enYuksek.meta.tr_asit; en=enYuksek.meta.en_asit; }
+    else { tr=enYuksek.meta.tr; en=enYuksek.meta.en; }
+  } else if(enYuksek.meta.tr_dusuk){
+    if(enYuksek.oran>=enYuksek.meta.alt_ad_orani){ tr=enYuksek.meta.tr_yuksek; en=enYuksek.meta.en_yuksek; }
+    else { tr=enYuksek.meta.tr_dusuk; en=enYuksek.meta.en_dusuk; }
+  } else { tr=enYuksek.meta.tr; en=enYuksek.meta.en; }
+  return {mode, tr, en, oran:enYuksekOran};
+}
+function renk_band_tr(srm, pigDurum){
+  const srmAdi=renk_adi(Math.round(srm||0));
+  if(!pigDurum||pigDurum.mode==='izli') return srmAdi;
+  if(pigDurum.mode==='baskin') return pigDurum.tr;
+  return srmAdi+' · '+pigDurum.tr;
+}
+function renk_band_en(srm, pigDurum){
+  const srmAdi=bjcp_adi(Math.round(srm||0));
+  if(!pigDurum||pigDurum.mode==='izli') return srmAdi;
+  if(pigDurum.mode==='baskin') return pigDurum.en;
+  return srmAdi+' · '+pigDurum.en;
+}
+// Helper: S.katkilar/t.katkilar (array) -> {kid: gram} map. Only _KR_GRUP keys included.
+function _pigKatkiGramMap(katkilarArr){
+  const m={};
+  (katkilarArr||[]).forEach(function(k){
+    if(!k||!k.id||!_KR_GRUP[k.id]) return;
+    var gr=parseFloat(k.miktar)||0;
+    if(k.birim==='kg') gr*=1000;
+    else if(k.birim==='L') gr*=1000;
+    m[k.id]=(m[k.id]||0)+gr;
+  });
+  return m;
+}
 // I1 — Malt kategori kod → görsel nitelikleri (renk şeridi, rozet arka/yazı renkleri, Türkçe etiket)
 // Sistem içinde MALTLAR DB'deki `g` alanı "Adjunct" İngilizce kalır (uyumluluk için), gösterimde "Ek Tahıl"
 function katKodu(g){
@@ -11637,9 +11699,10 @@ function rListe(){
   function tarifKart(t){
     const ozet=t.ozet||{};
     const srmVal=parseFloat(ozet.srm)||0;
-    const renkAdi=clr(srmVal);                // 16 bant Turkce ad
-    const bjcpAdi=bjcp_adi(srmVal);            // BJCP/Mosher 12 bant EN ad
-    const renkHex=rk(t);                       // SRM->hex
+    const _pigDurum=aktif_pigment(_pigKatkiGramMap(t.katkilar),t.hacim||11,4.3);
+    const renkAdi=renk_band_tr(srmVal,_pigDurum);   // SRM TR + pigment overlay
+    const bjcpAdi=renk_band_en(srmVal,_pigDurum);   // SRM EN + pigment overlay
+    const renkHex=rk(t);                            // SRM->hex
     // Banner sinifi (SRM bazli): <12 light (turuncu), <22 medium (koyu turuncu), >=22 dark (gradient kahve)
     const bannerCls = srmVal<12 ? 'light' : (srmVal<22 ? 'medium' : 'dark');
     const klOpts=getKlasorler().filter(k=>k).map(k=>'<option value="'+esc(k)+'"'+(t.klasor===k?' selected':'')+'>'+esc(k)+'</option>').join('');
@@ -18947,7 +19010,9 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
                         : (_oatPct>=10)            ? 'yulaf hafif bulanıklık katar'
                         : (_roastPct>=5 || _srm>20)? 'koyuluk berraklığı gizler'
                         :                            'berrak görünür';
-          var renkC1 = _renkAdi + ' / ' + bjcp_adi(parseFloat(_srm)||0) + ' (SRM ' + _srm + ') · ' + _rEBC + ' EBC' + _katRenkMCU + '.';
+          var _pigDurumP = aktif_pigment(_pigKatkiGramMap(S.katkilar||[]), _hacim||11, (typeof _pH_est!=="undefined"?_pH_est:4.3));
+          var _srmF = parseFloat(_srm)||0;
+          var renkC1 = renk_band_tr(_srmF, _pigDurumP) + ' / ' + renk_band_en(_srmF, _pigDurumP) + ' (SRM ' + _srm + ') · ' + _rEBC + ' EBC' + _katRenkMCU + '.';
           var renkC2 = renkSebep.charAt(0).toUpperCase() + renkSebep.slice(1) + '; ' + berraklik + '.';
           var renkC3 = '✓ Renk profili tutarlı.';
           _ps("🎨 Renk", renkC1 + ' ' + renkC2 + ' ' + renkC3, profRows);
@@ -19439,7 +19504,7 @@ function rEditor(){
   <div class="bm-sticky-summary" id="bm-summary">
     <div class="bm-ss-stil">
       <span class="bm-ss-renk" id="ss-renk" style="background:${typeof srmR==='function'?srmR(Math.round(parseFloat(srm)||0)):'#888'}"></span>
-      <span class="bm-ss-renk-ad" id="ss-renk-ad" style="font-size:0.9em">${typeof renk_adi==='function'?esc(renk_adi(Math.round(parseFloat(srm)||0))):''}${typeof bjcp_adi==='function'?' <span style=\"opacity:0.6;font-size:0.85em\">· '+esc(bjcp_adi(Math.round(parseFloat(srm)||0)))+'</span>':''}</span>
+      <span class="bm-ss-renk-ad" id="ss-renk-ad" style="font-size:0.9em">${(()=>{const pd=(typeof aktif_pigment==='function'&&typeof _pigKatkiGramMap==='function')?aktif_pigment(_pigKatkiGramMap((window.S&&window.S.katkilar)||[]),(window.S&&window.S.hacim)||11,4.3):{mode:'izli'};const sn=parseFloat(srm)||0;return (typeof renk_band_tr==='function'?esc(renk_band_tr(sn,pd)):'')+(typeof renk_band_en==='function'?' <span style="opacity:0.6;font-size:0.85em">· '+esc(renk_band_en(sn,pd))+'</span>':'');})()}</span>
       <span class="bm-ss-label" id="ss-stil">${esc((S&&S.stil)||(S&&S.stilTah)||(S&&S.biraAd)||'Stil hesaplanıyor...')}</span>
     </div>
     <div class="bm-ss-stats">
@@ -23400,8 +23465,11 @@ syncBaslat();
         var srmRound = srmVal != null ? Math.round(srmVal) : null;
         if (srmRound != null) renkEl.style.background = srmR(srmRound);
         var renkAdEl = document.getElementById('ss-renk-ad');
-        if (renkAdEl && srmRound != null && typeof renk_adi === 'function' && typeof bjcp_adi === 'function') {
-          renkAdEl.innerHTML = renk_adi(srmRound) + ' <span style="opacity:0.6;font-size:0.85em">· ' + bjcp_adi(srmRound) + '</span>';
+        if (renkAdEl && srmRound != null && typeof renk_band_tr === 'function' && typeof renk_band_en === 'function') {
+          var _pigDurumD = (typeof aktif_pigment === 'function' && typeof _pigKatkiGramMap === 'function')
+            ? aktif_pigment(_pigKatkiGramMap((window.S && window.S.katkilar) || []), (window.S && window.S.hacim) || 11, 4.3)
+            : {mode:'izli'};
+          renkAdEl.innerHTML = renk_band_tr(srmRound, _pigDurumD) + ' <span style="opacity:0.6;font-size:0.85em">· ' + renk_band_en(srmRound, _pigDurumD) + '</span>';
         }
         var ssSrmEl = document.getElementById('ss-srm');
         if (ssSrmEl && srmRound != null) ssSrmEl.textContent = srmRound;
