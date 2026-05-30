@@ -4614,7 +4614,24 @@ function aktif_pigment(katkilar, hacim, pH){
     if(enYuksek.oran>=enYuksek.meta.alt_ad_orani){ tr=enYuksek.meta.tr_yuksek; en=enYuksek.meta.en_yuksek; }
     else { tr=enYuksek.meta.tr_dusuk; en=enYuksek.meta.en_dusuk; }
   } else { tr=enYuksek.meta.tr; en=enYuksek.meta.en; }
-  return {mode, tr, en, oran:enYuksekOran};
+  return {mode, tr, en, oran:enYuksekOran, kid:enYuksek.kid};
+}
+function aktif_renk_hex(srm, pigDurum){
+  const srmHex=(typeof srmR==='function')?srmR(Math.round(srm||0)):'#cb8d00';
+  if(!pigDurum||pigDurum.mode==='izli'||!pigDurum.kid) return srmHex;
+  const meta=_KR_GRUP[pigDurum.kid];
+  if(!meta||!meta.rgb) return srmHex;
+  const pigHex='#'+meta.rgb.map(v=>v.toString(16).padStart(2,'0')).join('');
+  if(pigDurum.mode==='baskin') return pigHex;
+  const bR=parseInt(srmHex.substr(1,2),16);
+  const bG=parseInt(srmHex.substr(3,2),16);
+  const bB=parseInt(srmHex.substr(5,2),16);
+  const r=pigDurum.oran||0.4;
+  const w=r*0.85;
+  const nR=Math.round(bR*(1-w)+meta.rgb[0]*w);
+  const nG=Math.round(bG*(1-w)+meta.rgb[1]*w);
+  const nB=Math.round(bB*(1-w)+meta.rgb[2]*w);
+  return '#'+[nR,nG,nB].map(v=>Math.max(0,Math.min(255,v)).toString(16).padStart(2,'0')).join('');
 }
 function renk_band_tr(srm, pigDurum){
   const srmAdi=renk_adi(Math.round(srm||0));
@@ -11700,6 +11717,7 @@ function rListe(){
     const ozet=t.ozet||{};
     const srmVal=parseFloat(ozet.srm)||0;
     const _pigDurum=aktif_pigment(_pigKatkiGramMap(t.katkilar),t.hacim||11,4.3);
+    const _kartHex=aktif_renk_hex(srmVal,_pigDurum); // sol serit + gradyan icin pigment-aware hex
     const renkAdi=renk_band_tr(srmVal,_pigDurum);   // SRM TR + pigment overlay
     const bjcpAdi=renk_band_en(srmVal,_pigDurum);   // SRM EN + pigment overlay
     const renkHex=rk(t);                            // SRM->hex
@@ -11748,7 +11766,7 @@ function rListe(){
           return _esc131B((ml ? ml.ad : m.id) + ' ' + m.kg + 'kg');
         }).join(' &middot; ')+(t.maltlar.length > 3 ? ' &middot; …' : '')+'</div>'
       : '';
-    return '<div class="bm-recete-kart fade" data-tid="'+t.id+'">'+
+    return '<div class="bm-recete-kart fade" data-tid="'+t.id+'" style="border-left:6px solid '+_kartHex+';background:linear-gradient(to right, '+_kartHex+'24, '+_kartHex+'0A 30%, var(--bg-card))">'+
         '<div class="bm-recete-banner '+bannerCls+'">'+
           '<div class="bm-recete-badge-row">'+renkBadge+taslakBadge+'</div>'+
           '<div class="bm-recete-baslik">'+_esc131B(t.biraAd||'(adsiz)')+'</div>'+
