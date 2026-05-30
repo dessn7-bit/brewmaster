@@ -19438,8 +19438,8 @@ function rEditor(){
   <!-- Adim 132-E: Sticky ozet paneli global (eh disinda, her tab'da gorunur). srmR(srm) renk. -->
   <div class="bm-sticky-summary" id="bm-summary">
     <div class="bm-ss-stil">
-      <span class="bm-ss-renk" id="ss-renk" style="background:${typeof srmR==='function'?srmR(parseFloat(srm)||0):'#888'}"></span>
-      <span class="bm-ss-renk-ad" id="ss-renk-ad" style="font-size:0.9em">${typeof renk_adi==='function'?esc(renk_adi(parseFloat(srm)||0)):''}${typeof bjcp_adi==='function'?' <span style=\"opacity:0.6;font-size:0.85em\">· '+esc(bjcp_adi(parseFloat(srm)||0))+'</span>':''}</span>
+      <span class="bm-ss-renk" id="ss-renk" style="background:${typeof srmR==='function'?srmR(Math.round(parseFloat(srm)||0)):'#888'}"></span>
+      <span class="bm-ss-renk-ad" id="ss-renk-ad" style="font-size:0.9em">${typeof renk_adi==='function'?esc(renk_adi(Math.round(parseFloat(srm)||0))):''}${typeof bjcp_adi==='function'?' <span style=\"opacity:0.6;font-size:0.85em\">· '+esc(bjcp_adi(Math.round(parseFloat(srm)||0)))+'</span>':''}</span>
       <span class="bm-ss-label" id="ss-stil">${esc((S&&S.stil)||(S&&S.stilTah)||(S&&S.biraAd)||'Stil hesaplanıyor...')}</span>
     </div>
     <div class="bm-ss-stats">
@@ -19447,7 +19447,7 @@ function rEditor(){
       <div class="bm-ss-stat"><span class="ss-label">FG</span><span class="ss-val" id="ss-fg">${fg.toFixed(3)}</span></div>
       <div class="bm-ss-stat"><span class="ss-label">ABV</span><span class="ss-val" id="ss-abv">${abv.toFixed(1)}%</span></div>
       <div class="bm-ss-stat"><span class="ss-label">IBU</span><span class="ss-val" id="ss-ibu">${Math.round(ibu)}</span></div>
-      <div class="bm-ss-stat"><span class="ss-label">SRM</span><span class="ss-val" id="ss-srm">${(parseFloat(srm)||0).toFixed(1)}</span></div>
+      <div class="bm-ss-stat"><span class="ss-label">SRM</span><span class="ss-val" id="ss-srm">${Math.round(parseFloat(srm)||0)}</span></div>
       <div class="bm-ss-stat"><span class="ss-label">KH</span><span class="ss-val" id="ss-kh">${(typeof hKarb==='function'?hKarb(og,fg,330):'-')}g</span></div>
     </div>
   </div>
@@ -23397,11 +23397,14 @@ syncBaslat();
         if (srmVal == null && window.S && window.S.maltlar) {
           try { var _c = calc(); srmVal = parseFloat(_c.srm) || 0; } catch(_){}
         }
-        if (srmVal != null) renkEl.style.background = srmR(srmVal);
+        var srmRound = srmVal != null ? Math.round(srmVal) : null;
+        if (srmRound != null) renkEl.style.background = srmR(srmRound);
         var renkAdEl = document.getElementById('ss-renk-ad');
-        if (renkAdEl && srmVal != null && typeof renk_adi === 'function' && typeof bjcp_adi === 'function') {
-          renkAdEl.innerHTML = renk_adi(srmVal) + ' <span style="opacity:0.6;font-size:0.85em">· ' + bjcp_adi(srmVal) + '</span>';
+        if (renkAdEl && srmRound != null && typeof renk_adi === 'function' && typeof bjcp_adi === 'function') {
+          renkAdEl.innerHTML = renk_adi(srmRound) + ' <span style="opacity:0.6;font-size:0.85em">· ' + bjcp_adi(srmRound) + '</span>';
         }
+        var ssSrmEl = document.getElementById('ss-srm');
+        if (ssSrmEl && srmRound != null) ssSrmEl.textContent = srmRound;
       }
     } catch(e) { /* silent */ }
   };
