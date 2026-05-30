@@ -4575,7 +4575,8 @@ function hSRM(ml,katkilar,hacim){
   });
   return m===0?0:+(1.4922*Math.pow(m,.6859)).toFixed(1);
 }
-function srmR(s){const r=[[2,"#E9D596"],[5,"#DBC066"],[8,"#CDAA37"],[10,"#BE8C3A"],[14,"#BC6733"],[18,"#8D4C32"],[20,"#6B3A24"],[24,"#5D341A"],[35,"#42200D"],[50,"#2A1107"]];for(let i=r.length-1;i>=0;i--)if(s>=r[i][0])return r[i][1];return"#E9D596";}
+function srmR(s){const r=[[3,"#dbb74b"],[4,"#d5a429"],[5,"#cb8d00"],[7,"#bd7200"],[9,"#af5d00"],[11,"#9e4700"],[14,"#8c3200"],[17,"#7f2500"],[19,"#721900"],[22,"#650d00"],[25,"#560100"],[30,"#460000"],[35,"#3a0000"],[40,"#2b0000"],[50,"#170000"]];for(let i=r.length-1;i>=0;i--)if(s>=r[i][0])return r[i][1];return"#e2d589";}
+function renk_adi(s){const t=[[3,"Buğday"],[4,"Altın Sarısı"],[5,"Bal"],[7,"Kehribar"],[9,"Bakır"],[11,"Koyu Bakır"],[14,"Kızıl Bakır"],[17,"Yakut Kırmızısı"],[19,"Kızıl Kahve"],[22,"Kestane"],[25,"Çikolata"],[30,"Yakut"],[35,"Koyu Kahve"],[40,"Siyah"],[50,"Kara Amber"]];for(let i=t.length-1;i>=0;i--)if(s>=t[i][0])return t[i][1];return"Saman";}
 // I1 — Malt kategori kod → görsel nitelikleri (renk şeridi, rozet arka/yazı renkleri, Türkçe etiket)
 // Sistem içinde MALTLAR DB'deki `g` alanı "Adjunct" İngilizce kalır (uyumluluk için), gösterimde "Ek Tahıl"
 function katKodu(g){
@@ -11606,7 +11607,7 @@ window.renderTaslakBanner = renderTaslakBanner;
 // ═══ LİSTE EKRANI ════════════════════════════════════════════
 function rListe(){
   const rk=t=>srmR(parseFloat((t.ozet||{}).srm)||0);
-  const clr=s=>s<5?"Sarı":s<12?"Altın":s<22?"Amber":s<40?"Koyu":"Siyah";
+  const clr=s=>renk_adi(s);
   const klasorler=getKlasorler();
 
   // Filtrele
@@ -15315,7 +15316,7 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
 
   // Renk — ekranda toFixed(0) ile SRM gösterildiği için kategori karşılaştırması da yuvarlanmış değer üzerinden
   const _srmInt=Math.round(_srm);
-  const renk_adi=_srmInt<3?"Çok Açık Sarı":_srmInt<6?"Açık Sarı":_srmInt<9?"Altın":_srmInt<14?"Koyu Altın":_srmInt<22?"Amber":_srmInt<32?"Koyu Amber":_srmInt<40?"Koyu Kestane":"Siyah/Stout";
+  const _renkAdi=renk_adi(_srmInt);
 
   // Stil tahmini — aşağıdaki blokta hesaplanıyor
 
@@ -17865,7 +17866,7 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
   // Katkı görsel rengini daire/header'a yansıt
   let renk_hex=rk;
   (()=>{
-    const _sR=s=>{const T=[[2,[243,249,147]],[5,[234,226,21]],[8,[205,170,55]],[10,[190,140,58]],[14,[188,103,51]],[18,[141,76,50]],[20,[107,58,36]],[24,[93,52,26]],[35,[66,32,13]],[50,[42,17,7]]];for(let i=T.length-1;i>=0;i--){if(s>=T[i][0]){if(i===T.length-1)return T[i][1];const t=(s-T[i][0])/(T[i+1][0]-T[i][0]);return T[i][1].map((v,j)=>Math.round(v+(T[i+1][1][j]-v)*t));}}return T[0][1];};
+    const _sR=s=>{const T=[[3,[219,183,75]],[4,[213,164,41]],[5,[203,141,0]],[7,[189,114,0]],[9,[175,93,0]],[11,[158,71,0]],[14,[140,50,0]],[17,[127,37,0]],[19,[114,25,0]],[22,[101,13,0]],[25,[86,1,0]],[30,[70,0,0]],[35,[58,0,0]],[40,[43,0,0]],[50,[23,0,0]]];for(let i=T.length-1;i>=0;i--){if(s>=T[i][0])return T[i][1];}return[226,213,137];};
     const _bld=(b,k,r)=>b.map((v,i)=>Math.max(0,Math.min(255,Math.round(v*(1-r*0.85)+k[i]*(r*0.85)))));
     const _bR=(g,m)=>g>0?Math.sqrt(Math.min(1,g/m)):0;
     const _KR={karadut:[92,26,110,400],mavi_kelebek:[30,100,220,12],hibiskus:[194,0,60,80],matcha:[45,134,83,40],turmerik:[230,172,0,30],karakulak_saf:[212,130,10,2],visne_konsantre:[139,0,0,200],cranberry:[190,45,45,500],spirulina:[11,122,117,18],yaban_mersini:[75,0,130,700],visne:[120,0,30,400],nar:[165,0,33,350],dut_kuru:[80,15,90,500],ahududu:[200,20,80,600],cilek:[200,40,60,900]};
@@ -17979,7 +17980,7 @@ return `
                   _mainTitle = _v12Title;
                   _showWeakBadge = _isWeakConfidence;
                 } else {
-                  _mainTitle = stil_tah || renk_adi || 'Belirsiz';
+                  _mainTitle = stil_tah || _renkAdi || 'Belirsiz';
                 }
                 const _subParts = [];
                 if (stil_grup) _subParts.push(stil_grup);
@@ -18944,7 +18945,7 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
                         : (_oatPct>=10)            ? 'yulaf hafif bulanıklık katar'
                         : (_roastPct>=5 || _srm>20)? 'koyuluk berraklığı gizler'
                         :                            'berrak görünür';
-          var renkC1 = renk_adi + ' · ' + _srm + ' SRM / ' + _rEBC + ' EBC' + _katRenkMCU + '.';
+          var renkC1 = _renkAdi + ' · ' + _srm + ' SRM / ' + _rEBC + ' EBC' + _katRenkMCU + '.';
           var renkC2 = renkSebep.charAt(0).toUpperCase() + renkSebep.slice(1) + '; ' + berraklik + '.';
           var renkC3 = '✓ Renk profili tutarlı.';
           _ps("🎨 Renk", renkC1 + ' ' + renkC2 + ' ' + renkC3, profRows);
@@ -22610,7 +22611,7 @@ syncBaslat();
   // ─── srmR() ───
   grup('srmR() — SRM → hex',()=>{
     test('Geçerli hex format',()=>{const r=srmR(2);assert(r.startsWith('#')&&r.length===7,'format: '+r);});
-    test('SRM 45 koyu',()=>{const r=srmR(45);assert(r==='#2A1107'||r==='#42200D','koyu: '+r);});
+    test('SRM 45 koyu',()=>{const r=srmR(45);assert(r==='#2b0000'||r==='#3a0000','koyu: '+r);});
     test('Parlaklık azalması',()=>{const p=h=>parseInt(h.slice(1,3),16)+parseInt(h.slice(3,5),16)+parseInt(h.slice(5,7),16);assert(p(srmR(2))>p(srmR(25)),'parlaklık');});
   });
 
@@ -22640,7 +22641,7 @@ syncBaslat();
   // ─── Edge Case yuvarlama ───
   grup('Edge Case — Yuvarlama (v2.78.10)',()=>{
     test('OG 1.0647 → toFixed(3)="1.065" + aralık eşleşmesi',()=>{const og=1.0647;assert(og.toFixed(3)==='1.065','fix');assert((+og.toFixed(3))>=1.065,'aralık');});
-    test('SRM 21.5 → round=22, _srmInt<22 false (Koyu Amber)',()=>{assert(Math.round(21.5)===22&&!(22<22),'renk sınırı');});
+    test('SRM 21.5 → round=22, renk_adi(22)=Kestane',()=>{assert(Math.round(21.5)===22&&renk_adi(22)==='Kestane','renk sınırı');});
   });
 
   // ─── I1/I2 Kategori çevirisi (v2.78.14) ───
