@@ -4598,13 +4598,15 @@ const _KR_GRUP = {
 };
 function aktif_pigment(katkilar, hacim, pH){
   let enYuksek=null, enYuksekOran=0;
+  const oranMap={};
   for(const [kid, gram] of Object.entries(katkilar||{})){
     if(!gram||gram<=0) continue;
     const meta=_KR_GRUP[kid]; if(!meta) continue;
     const oran=Math.sqrt(Math.min(1, gram/(hacim*meta.max/10)));
+    oranMap[kid]=oran;
     if(oran>enYuksekOran){ enYuksekOran=oran; enYuksek={kid,gram,oran,meta}; }
   }
-  if(!enYuksek||enYuksekOran<0.10) return {mode:'izli'};
+  if(!enYuksek||enYuksekOran<0.10) return {mode:'izli', oranMap, pH};
   const mode=enYuksekOran>=0.70?'baskin':'karisim';
   let tr, en;
   if(enYuksek.kid==='mavi_kelebek'){
@@ -4614,36 +4616,22 @@ function aktif_pigment(katkilar, hacim, pH){
     if(enYuksek.oran>=enYuksek.meta.alt_ad_orani){ tr=enYuksek.meta.tr_yuksek; en=enYuksek.meta.en_yuksek; }
     else { tr=enYuksek.meta.tr_dusuk; en=enYuksek.meta.en_dusuk; }
   } else { tr=enYuksek.meta.tr; en=enYuksek.meta.en; }
-  return {mode, tr, en, oran:enYuksekOran, kid:enYuksek.kid};
+  return {mode, tr, en, oran:enYuksekOran, kid:enYuksek.kid, oranMap, pH};
 }
 function aktif_renk_hex(srm, pigDurum){
   const srmHex=(typeof srmR==='function')?srmR(Math.round(srm||0)):'#cb8d00';
-  if(!pigDurum||pigDurum.mode==='izli'||!pigDurum.kid) return srmHex;
-  const meta=_KR_GRUP[pigDurum.kid];
-  if(!meta||!meta.rgb) return srmHex;
-  const pigHex='#'+meta.rgb.map(v=>v.toString(16).padStart(2,'0')).join('');
-  if(pigDurum.mode==='baskin') return pigHex;
-  const bR=parseInt(srmHex.substr(1,2),16);
-  const bG=parseInt(srmHex.substr(3,2),16);
-  const bB=parseInt(srmHex.substr(5,2),16);
-  const r=pigDurum.oran||0.4;
-  const w=r*0.85;
-  const nR=Math.round(bR*(1-w)+meta.rgb[0]*w);
-  const nG=Math.round(bG*(1-w)+meta.rgb[1]*w);
-  const nB=Math.round(bB*(1-w)+meta.rgb[2]*w);
-  return '#'+[nR,nG,nB].map(v=>Math.max(0,Math.min(255,v)).toString(16).padStart(2,'0')).join('');
+  if(!pigDurum||pigDurum.mode==='izli'||!pigDurum.oranMap) return srmHex;
+  try{ return motorRenk(srm, pigDurum.oranMap, pigDurum.pH).hex; }catch(e){ return srmHex; }
 }
 function renk_band_tr(srm, pigDurum){
   const srmAdi=renk_adi(Math.round(srm||0));
-  if(!pigDurum||pigDurum.mode==='izli') return srmAdi;
-  if(pigDurum.mode==='baskin') return pigDurum.tr;
-  return srmAdi+' · '+pigDurum.tr;
+  if(!pigDurum||pigDurum.mode==='izli'||!pigDurum.oranMap) return srmAdi;
+  try{ return motorRenk(srm, pigDurum.oranMap, pigDurum.pH).nameTr; }catch(e){ return srmAdi; }
 }
 function renk_band_en(srm, pigDurum){
   const srmAdi=bjcp_adi(Math.round(srm||0));
-  if(!pigDurum||pigDurum.mode==='izli') return srmAdi;
-  if(pigDurum.mode==='baskin') return pigDurum.en;
-  return srmAdi+' · '+pigDurum.en;
+  if(!pigDurum||pigDurum.mode==='izli'||!pigDurum.oranMap) return srmAdi;
+  try{ return motorRenk(srm, pigDurum.oranMap, pigDurum.pH).nameEn; }catch(e){ return srmAdi; }
 }
 // Helper: S.katkilar/t.katkilar (array) -> {kid: gram} map. Only _KR_GRUP keys included.
 function _pigKatkiGramMap(katkilarArr){
@@ -4662,6 +4650,35 @@ function _pigKatkiGramMap(katkilarArr){
   });
   return m;
 }
+const motorRenk = (function(){
+  const gg=(x,mu,s1,s2)=>{const s=x<mu?s1:s2,t=(x-mu)/s;return Math.exp(-0.5*t*t);};
+  const xb=l=>1.056*gg(l,599.8,37.9,31)+0.362*gg(l,442,16,26.7)-0.065*gg(l,501.1,20.4,26.2);
+  const yb=l=>0.821*gg(l,568.8,46.9,40.5)+0.286*gg(l,530.9,16.3,31.1);
+  const zb=l=>1.217*gg(l,437,11.8,36)+0.681*gg(l,459,26,13.8);
+  const D65t={380:49.98,390:54.65,400:82.75,410:91.49,420:93.43,430:86.68,440:104.86,450:117.01,460:117.81,470:114.86,480:115.92,490:108.81,500:109.35,510:107.8,520:104.79,530:107.69,540:104.41,550:104.05,560:100,570:96.33,580:95.79,590:88.69,600:90.01,610:89.6,620:87.7,630:83.29,640:83.7,650:80.03,660:80.21,670:82.28,680:78.28,690:69.72,700:71.61};
+  const D65=l=>{if(l<=380)return D65t[380];if(l>=700)return D65t[700];const lo=Math.floor(l/10)*10,f=(l-lo)/10;return D65t[lo]*(1-f)+D65t[lo+10]*f;};
+  const specLab=Afn=>{let X=0,Y=0,Z=0,N=0;for(let l=380;l<=700;l++){const S=D65(l),T=Math.pow(10,-Afn(l));X+=S*T*xb(l);Y+=S*T*yb(l);Z+=S*T*zb(l);N+=S*yb(l);}X/=N;Y/=N;Z/=N;const f=t=>t>0.008856?Math.cbrt(t):7.787*t+16/116;const fx=f(X/0.95047),fy=f(Y),fz=f(Z/1.08883);return [116*fy-16,500*(fx-fy),200*(fy-fz)];};
+  const labToHex=(L,a,b)=>{const fy=(L+16)/116,fx=fy+a/500,fz=fy-b/200;const g=t=>t**3>0.008856?t**3:(t-16/116)/7.787;let X=0.95047*g(fx),Y=g(fy),Z=1.08883*g(fz);let r=3.2406*X-1.5372*Y-0.4986*Z,gr=-0.9689*X+1.8758*Y+0.0415*Z,bl=0.0557*X-0.2040*Y+1.0570*Z;const gam=c=>{c=c<0?0:c>1?1:c;return c<=0.0031308?12.92*c:1.055*Math.pow(c,1/2.4)-0.055;};return '#'+[r,gr,bl].map(c=>Math.round(gam(c)*255).toString(16).padStart(2,'0')).join('');};
+  const hexToLab=h=>{h=h.replace('#','');const r=parseInt(h.slice(0,2),16)/255,g=parseInt(h.slice(2,4),16)/255,b=parseInt(h.slice(4,6),16)/255;const lin=c=>c<=0.04045?c/12.92:Math.pow((c+0.055)/1.055,2.4);const R=lin(r),G=lin(g),B=lin(b);const X=0.4124*R+0.3576*G+0.1805*B,Y=0.2126*R+0.7152*G+0.0722*B,Z=0.0193*R+0.1192*G+0.9505*B;const f=t=>t>0.008856?Math.cbrt(t):7.787*t+16/116;const fx=f(X/0.95047),fy=f(Y),fz=f(Z/1.08883);return [116*fy-16,500*(fx-fy),200*(fy-fz)];};
+  const dE=(a,b)=>Math.sqrt((a[0]-b[0])**2+(a[1]-b[1])**2+(a[2]-b[2])**2);
+  const maltA=(srm,L,l)=>(srm/12.7)*L*(0.02465*Math.exp(-(l-430)/17.591)+0.97535*Math.exp(-(l-430)/82.122));
+  const srmR2=s=>{const r=[[3,"#dbb74b"],[4,"#d5a429"],[5,"#cb8d00"],[7,"#bd7200"],[9,"#af5d00"],[11,"#9e4700"],[14,"#8c3200"],[17,"#7f2500"],[19,"#721900"],[22,"#650d00"],[25,"#560100"],[30,"#460000"],[35,"#3a0000"],[40,"#2b0000"],[50,"#170000"]];for(let i=r.length-1;i>=0;i--)if(s>=r[i][0])return r[i][1];return"#e2d589";};
+  const PIG={karadut:{bands:[[523,48]],pKh:3.8,pHdep:1},visne_konsantre:{bands:[[523,48]],pKh:3.8,pHdep:1},visne:{bands:[[523,48]],pKh:3.8,pHdep:1},cranberry:{bands:[[523,48]],pKh:3.8,pHdep:1},dut_kuru:{bands:[[523,48]],pKh:3.8,pHdep:1},ahududu:{bands:[[523,48]],pKh:3.8,pHdep:1},cilek:{k:0.9,bands:[[505,44]],pKh:3.8,pHdep:1},yaban_mersini:{k:0.85,bands:[[536,54]],pKh:3.8,pHdep:1},nar:{bands:[[530,48]],pKh:3.8,pHdep:1},hibiskus:{bands:[[520,48]],pKh:3.02,pHdep:1},mavi_kelebek:{k:0.62,bands:[[608,46],[562,40]],pKh:99,pHdep:0,asit:{bands:[[548,44]],pKh:99}},turmerik:{bands:[[425,34]],pKh:99,pHdep:0},karakulak_saf:{bands:[[440,36]],pKh:99,pHdep:0},spirulina:{k:0.85,bands:[[616,52],[665,26]],pKh:99,pHdep:0},matcha:{bands:[[430,45],[662,40]],pKh:99,pHdep:0}};
+  const frac=(pH,pKh)=>1/(1+Math.pow(10,pH-pKh));
+  const Kbase=2.6;
+  const PAL=[["#e2d589","Saman","Straw"],["#dbb74b","Buğday","Wheat"],["#d5a429","Altın Sarısı","Golden"],["#cb8d00","Bal","Honey"],["#bd7200","Kehribar","Amber"],["#af5d00","Bakır","Copper"],["#9e4700","Koyu Bakır","Deep Copper"],["#8c3200","Kızıl Bakır","Red Copper"],["#7f2500","Yakut Kırmızısı","Ruby Red"],["#721900","Kızıl Kahve","Red Brown"],["#650d00","Kestane","Chestnut"],["#560100","Çikolata","Chocolate"],["#460000","Yakut","Ruby"],["#3a0000","Koyu Kahve","Dark Brown"],["#2b0000","Siyah","Black"],["#962e6e","Erguvan","Magenta"],["#50154f","Patlıcan","Eggplant"],["#c8283c","Mercan","Coral"],["#8b0000","Kızıl","Crimson"],["#4b0082","Bordo","Burgundy"],["#6a0dad","Mor","Purple"],["#e85d8a","Pembe","Pink"],["#2d8653","Fıstık Yeşili","Pistachio"],["#0b7a75","Zümrüt","Emerald"],["#e6ac00","Hardal","Mustard"],["#d4820a","Portakal","Orange"],["#f2c200","Sarı","Yellow"],["#708238","Zeytin","Olive"],["#1f9bb3","Turkuaz","Turquoise"],["#1e64dc","İndigo","Indigo"],["#16216b","Gece Mavisi","Navy"]];
+  const PALL=PAL.map(p=>[hexToLab(p[0]),p[1],p[2]]);
+  const nearest=lab=>{let bd=1e9,bt='',be='';for(const x of PALL){const d=dE(lab,x[0]);if(d<bd){bd=d;bt=x[1];be=x[2];}}return [bt,be];};
+  return function(srm, pigOranlar, pH){
+    pH=pH||4.3;
+    const pigA=l=>{let A=0;for(const kid in (pigOranlar||{})){const oran=pigOranlar[kid],p=PIG[kid];if(!p||!oran||oran<=0)continue;let spec=p,fr=1;if(p.pHdep){fr=frac(pH,p.pKh)/frac(4.3,p.pKh);}else if(kid==='mavi_kelebek'&&pH<3.5){spec=p.asit;}const bands=spec.bands,peak=oran*Kbase*fr*(p.k||1);for(const b of bands)A+=peak*Math.exp(-0.5*((l-b[0])/b[1])**2);}return A;};
+    const baseLab=hexToLab(srmR2(Math.round(srm||0)));
+    const mM=specLab(l=>maltA(srm,5,l)), mT=specLab(l=>maltA(srm,5,l)+pigA(l));
+    const fLab=[baseLab[0]+(mT[0]-mM[0]),baseLab[1]+(mT[1]-mM[1]),baseLab[2]+(mT[2]-mM[2])];
+    const nm=nearest(fLab);
+    return {hex:labToHex(fLab[0],fLab[1],fLab[2]),nameTr:nm[0],nameEn:nm[1]};
+  };
+})();
 // I1 — Malt kategori kod → görsel nitelikleri (renk şeridi, rozet arka/yazı renkleri, Türkçe etiket)
 // Sistem içinde MALTLAR DB'deki `g` alanı "Adjunct" İngilizce kalır (uyumluluk için), gösterimde "Ek Tahıl"
 function katKodu(g){
