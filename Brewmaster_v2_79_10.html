@@ -15369,6 +15369,45 @@ function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
 
 
 // ═══ EDITOR: HOP SEKMESİ ══════════════════════════════
+function hopDenetim(hoplar, HOPLAR, stilAdi, BJCP, ibu, og, hacim){
+  const out={bulgular:[], metrik:null};
+  const list=(hoplar||[]).filter(h=>h&&h.id&&(+h.g>0));
+  const h=hacim||11; const ib=+ibu||0;
+  const ekle=(onem,msg)=>out.bulgular.push({onem,msg});
+  const gu=(og&&og>1)?((og-1)*1000):0;
+  const bugu=gu>0?ib/gu:0;
+  let buguDesc='—';
+  if(gu>0){ if(bugu<0.3)buguDesc='çok malty'; else if(bugu<0.5)buguDesc='malty'; else if(bugu<0.7)buguDesc='dengeli'; else if(bugu<1.0)buguDesc='hoppy'; else buguDesc='çok acı'; }
+  const isKettle=t=>(t==='boil'||t==='fwh'||t==null);
+  const isLate=t=>(t==='whirlpool'||t==='hop_stand');
+  const boilIBU=(typeof hIBU==='function')?hIBU(list.filter(x=>isKettle(x.tur)),og,h,[]):0;
+  const lateIBU=(typeof hIBU==='function')?hIBU(list.filter(x=>isLate(x.tur)),og,h,[]):0;
+  const dryG=list.filter(x=>x.tur==='dry_hop').reduce((s,x)=>s+(+x.g||0),0);
+  const totalG=list.reduce((s,x)=>s+(+x.g||0),0);
+  const dryGL=dryG/h, totalGL=totalG/h;
+  out.metrik={ibu:+ib.toFixed(1), bugu:+bugu.toFixed(2), buguDesc, boilIBU:+boilIBU.toFixed(1), lateIBU:+lateIBU.toFixed(1), dryGL:+dryGL.toFixed(1), totalGL:+totalGL.toFixed(1)};
+  if(!list.length) return out;
+  const st=stilAdi&&BJCP&&BJCP[stilAdi];
+  if(st&&st.ibu){ const a=st.ibu[0],bv=st.ibu[1];
+    if(ib<a*0.85) ekle('orta','IBU stile göre düşük ('+ib.toFixed(0)+', '+stilAdi+' hedefi '+a+'–'+bv+'). Acılığı artırmayı düşün.');
+    else if(ib>bv*1.15) ekle('orta','IBU stile göre yüksek ('+ib.toFixed(0)+' > '+bv+').');
+  }
+  if(dryGL>20) ekle('kritik','Dry hop '+dryGL.toFixed(1)+' g/L — aşırı. ~8 g/L üstü azalan verim, hop burn ve yüksek hop kaybı riski.');
+  else if(dryGL>12) ekle('orta','Dry hop '+dryGL.toFixed(1)+' g/L — yüksek (~8 g/L üstü azalan verim; soğuk tarafa bölmeyi düşün).');
+  if(!out.bulgular.length) ekle('bilgi','Hop dengesi makul görünüyor.');
+  return out;
+}
+function _hopDenetimRender(hd){
+  if(!hd||!hd.metrik||hd.metrik.totalGL===0) return '';
+  const m=hd.metrik;
+  const sty={kritik:['⛔','#A02020'],orta:['⚠️','#B26B00'],bilgi:['✓','#2D7A2D']};
+  const m1='<div style="font-size:11px;color:var(--dim);margin-bottom:4px">IBU <b style="color:var(--kahve)">'+m.ibu+'</b> · BU:GU <b style="color:var(--kahve)">'+(m.bugu||'—')+'</b> ('+m.buguDesc+')</div>';
+  const m2='<div style="font-size:11px;color:var(--dim);margin-bottom:4px">Acılık: kaynatma '+m.boilIBU+' · geç (whirlpool/stand) '+m.lateIBU+' IBU</div>';
+  const m3='<div style="font-size:11px;color:var(--dim);margin-bottom:8px">Dry hop '+m.dryGL+' g/L · Toplam hop '+m.totalGL+' g/L</div>';
+  const bul=hd.bulgular.map(b=>{const s=sty[b.onem]||sty.bilgi;return '<div style="color:'+s[1]+';font-size:12px;padding:3px 0;line-height:1.4">'+s[0]+' '+b.msg+'</div>';}).join('');
+  return '<div style="background:#fff;border:1px solid #E0D6BA;border-radius:10px;padding:12px;margin-top:10px"><div style="font-weight:700;color:var(--bakir);font-size:13px;margin-bottom:8px">🌿 Hop Denetimi</div>'+m1+m2+m3+bul+'</div>';
+}
+
 function rEditorHop(og, ibu, seciHop){
   const dkO=[90,75,60,45,30,20,15,10,5,1].map(d=>`<option value="${d}"${yH.dk===d?" selected":""}>${d} dk</option>`).join("");
   // Whirlpool iki input: sıcaklık (°C) + süre (dk). Default: 85°C / 15dk.
@@ -15502,6 +15541,7 @@ function rEditorHop(og, ibu, seciHop){
   const _hEkleAria = S.hoplar.length ? 'false' : 'true';
   return `
     ${S.hoplar.length?`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><span class="etiket" style="margin-bottom:0">Hop Listesi (${S.hoplar.length})</span>${S.hoplar.length>=2?`<button class="btn" style="background:var(--bg2);color:var(--bakir);border:1px solid var(--bor);font-size:10px;padding:4px 10px" onclick="hopAutoSort()" title="Süreç sırasına göre diz: FWH → Boil(60→15) → Whirlpool → Hop Stand → Dry Hop">📋 Sırala</button>`:''}</div>${sl2}${tibu}`:`<div style="text-align:center;padding:20px;color:var(--dim);font-size:13px">Henüz hop eklenmedi — aşağıdan ekle</div>`}
+    ${(function(){try{return _hopDenetimRender(hopDenetim(S.hoplar,HOPLAR,(S.stil||null),(typeof BJCP!=='undefined'?BJCP:null),ibu,og,S.hacim||11));}catch(_e){return '';}})()}
     <div class="bm-acc bm-edit-only-acc" data-acc-id="hop-ekle" data-acc-default="${_hEkleDefault}" aria-expanded="${_hEkleAria}" style="margin-top:10px">
       <button class="bm-acc-header" type="button" aria-expanded="${_hEkleAria}" onclick="bmAccToggle('hop-ekle')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmAccToggle('hop-ekle')}"><span class="bm-acc-title">➕ Yeni Hop Ekle</span><span class="bm-acc-chevron">▾</span></button>
       <div class="bm-acc-body">
