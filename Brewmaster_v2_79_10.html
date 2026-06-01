@@ -15038,6 +15038,51 @@ function rEditorNot(){
 
 
 // ═══ EDITOR: MALT SEKMESİ ══════════════════════════════
+function gristDenetim(maltlar, MALTLAR, stilAdi, BJCP, srm, og){
+  const out={dagilim:null,bulgular:[]};
+  const list=(maltlar||[]).filter(m=>m&&m.id&&(+m.kg>0));
+  if(!list.length){return out;}
+  const idx={}; (MALTLAR||[]).forEach(m=>idx[m.id]=m);
+  const kat={Base:0,'Özel':0,Koyu:0,Adjunct:0,'Şeker':0}; let top=0;
+  list.forEach(m=>{const md=idx[m.id]; if(!md)return; const g=md.g; if(kat[g]==null)kat[g]=0; kat[g]+=(+m.kg); top+=(+m.kg);});
+  if(top<=0){return out;}
+  const pct=k=>+((kat[k]/top*100).toFixed(1));
+  const d={base:pct('Base'),ozel:pct('Özel'),koyu:pct('Koyu'),adjunct:pct('Adjunct'),seker:pct('Şeker')};
+  out.dagilim=d;
+  const ekle=(onem,msg)=>out.bulgular.push({onem,msg});
+  if(d.base===0){ ekle('kritik','Base malt yok — nişastayı çevirecek enzim kaynağı yok.'); }
+  else if(d.base<50){ ekle('kritik','Base malt %'+d.base+' — çok düşük (tipik ≥%70). Dönüşüm/ekstrakt yetersiz kalabilir.'); }
+  else if(d.base<60){ ekle('orta','Base malt %'+d.base+' — düşük (tipik ≥%70). Enzim/gövde açısından sınırda.'); }
+  if(d.ozel>40){ ekle('kritik','Özel malt %'+d.ozel+' — çok yüksek (tipik ≤~%20-25). Aşırı tatlılık/astrenjan/gövde.'); }
+  else if(d.ozel>25){ ekle('orta','Özel malt %'+d.ozel+' — yüksek (tipik ≤~%20-25).'); }
+  if(d.koyu>20){ ekle('orta','Koyu malt %'+d.koyu+' — yüksek (tipik stout ~%10, 7-15). Yanık/keskin kavrulma riski.'); }
+  if(d.seker>25){ ekle('kritik','Şeker %'+d.seker+' — çok yüksek. Gövde aşırı incelir, cidery/alkol-sıcaklığı.'); }
+  else if(d.seker>20){ ekle('orta','Şeker %'+d.seker+' — yüksek (tipik ≤%20; Belçika güçlü stilleri hariç).'); }
+  const nonmalt=+(d.adjunct+d.seker).toFixed(1);
+  if(nonmalt>30){ ekle('orta','Malt-dışı (adjunct+şeker) %'+nonmalt+' — yüksek (tipik ≤~%30). FAN/enzim/gövde.'); }
+  const st = stilAdi && BJCP && BJCP[stilAdi];
+  if(st){
+    if(st.srm && srm!=null){ const a=st.srm[0],bv=st.srm[1];
+      if(srm < a*0.85){ ekle('orta','Renk stile göre açık (SRM ~'+(+srm.toFixed(1))+', '+stilAdi+' hedefi '+a+'-'+bv+').'+(d.koyu<1?' Koyu malt ekleyerek koyulaştırabilirsin.':'')); }
+      else if(srm > bv*1.15){ ekle('orta','Renk stile göre koyu (SRM ~'+(+srm.toFixed(1))+' > '+bv+').'+(d.koyu>0?' Koyu maltı azaltabilirsin.':'')); } }
+    if(st.og && og!=null){ const a=st.og[0],bv=st.og[1];
+      if(og < a-0.003){ ekle('orta','Yerçekimi stile göre düşük (OG '+og.toFixed(3)+', hedef '+a.toFixed(3)+'-'+bv.toFixed(3)+'): base/şeker artır veya verim.'); }
+      else if(og > bv+0.003){ ekle('orta','Yerçekimi stile göre yüksek (OG '+og.toFixed(3)+' > '+bv.toFixed(3)+').'); } }
+  }
+  if(!out.bulgular.length){ ekle('bilgi','Grist kompozisyonu dengeli görünüyor.'); }
+  return out;
+}
+function _gristDenetimRender(gd){
+  if(!gd||!gd.dagilim) return '';
+  const d=gd.dagilim;
+  const seg=(w,c,lbl)=> w>0?('<div style="width:'+w+'%;background:'+c+'" title="'+lbl+' %'+w+'"></div>'):'';
+  const bar='<div style="display:flex;height:14px;border-radius:7px;overflow:hidden;margin-bottom:6px;border:1px solid #E0D6BA">'+seg(d.base,'#E3B23C','Base')+seg(d.ozel,'#C8782D','Özel')+seg(d.koyu,'#5A3A22','Koyu')+seg(d.adjunct,'#9AA760','Adjunct')+seg(d.seker,'#D9C5A0','Şeker')+'</div>';
+  const lej='<div style="font-size:11px;color:var(--dim);margin-bottom:8px">Base %'+d.base+' · Özel %'+d.ozel+' · Koyu %'+d.koyu+' · Adjunct %'+d.adjunct+' · Şeker %'+d.seker+'</div>';
+  const sty={kritik:['⛔','#A02020'],orta:['⚠️','#B26B00'],bilgi:['✓','#2D7A2D']};
+  const bul=gd.bulgular.map(b=>{const s=sty[b.onem]||sty.bilgi;return '<div style="color:'+s[1]+';font-size:12px;padding:3px 0;line-height:1.4">'+s[0]+' '+b.msg+'</div>';}).join('');
+  return '<div style="background:#fff;border:1px solid #E0D6BA;border-radius:10px;padding:12px;margin-top:10px"><div style="font-weight:700;color:var(--bakir);font-size:13px;margin-bottom:8px">🧪 Grist Denetimi</div>'+bar+lej+bul+'</div>';
+}
+
 function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
   // Kombine base ve en büyük base bir kere hesapla (rol hesabı için)
   const _baseTopKg=S.maltlar.reduce((s,m2)=>{const ml2=MALTLAR.find(x=>x&&x.id===m2.id);return (ml2&&ml2.g==="Base"&&m2.id!=="rice_hulls"&&m2.id!=="rice")?s+m2.kg:s;},0);
@@ -15216,6 +15261,7 @@ function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
         </div>
       </div>
     </div>
+    ${(function(){try{return _gristDenetimRender(gristDenetim(S.maltlar,MALTLAR,(S.stil||null),(typeof BJCP!=='undefined'?BJCP:null),srm,og));}catch(_e){return '';}})()}
     <div class="bm-acc bm-edit-only-acc" data-acc-id="malt-ekle" data-acc-default="${_mEkleDefault}" aria-expanded="${_mEkleAria}" style="margin-top:10px">
       <button class="bm-acc-header" type="button" aria-expanded="${_mEkleAria}" onclick="bmAccToggle('malt-ekle')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmAccToggle('malt-ekle')}"><span class="bm-acc-title">➕ Yeni Malt Ekle</span><span class="bm-acc-chevron">▾</span></button>
       <div class="bm-acc-body">
