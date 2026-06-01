@@ -15510,7 +15510,7 @@ function rEditorHop(og, ibu, seciHop){
           <button style="background:none;border:none;color:${i===0?'var(--dim)':'var(--bakir)'};font-size:11px;padding:0 3px;line-height:1;cursor:${i===0?'not-allowed':'pointer'};opacity:${i===0?'.4':'1'}" onclick="hopUp(${i})" ${i===0?'disabled':''}>▲</button>
           <button style="background:none;border:none;color:${i===S.hoplar.length-1?'var(--dim)':'var(--bakir)'};font-size:11px;padding:0 3px;line-height:1;cursor:${i===S.hoplar.length-1?'not-allowed':'pointer'};opacity:${i===S.hoplar.length-1?'.4':'1'}" onclick="hopDown(${i})" ${i===S.hoplar.length-1?'disabled':''}>▼</button>
         </div>
-        <button class="btn" style="background:none;color:var(--kk);font-size:20px;padding:0 4px;line-height:1" onclick="S.hoplar.splice(${i},1);render()">×</button>
+        <button class="btn" style="background:none;color:var(--kk);font-size:20px;padding:0 4px;line-height:1" onclick="hopSil(${i})">×</button>
       </div>
       ${_muadilH.length>0?`<div class="bm-muadil-inline" data-bm-muadil-hop="${esc(h.id)}">
         <span class="bm-muadil-inline-label">↔ Muadil:</span>
@@ -15560,6 +15560,7 @@ function rEditorHop(og, ibu, seciHop){
   const _hEkleDefault = S.hoplar.length ? 'collapsed' : 'expanded';
   const _hEkleAria = S.hoplar.length ? 'false' : 'true';
   return `
+    ${(typeof _sonSilinenHop!=='undefined'&&_sonSilinenHop)?`<div style="padding:8px 12px;background:#FFF8E8;border:1px solid #E8C070;border-radius:8px;margin-bottom:10px;display:flex;align-items:center;gap:10px"><span style="font-size:11px;color:#7a4a00;flex:1">✕ Son silinen: <b>${(()=>{const _hp=HOPLAR.find(x=>x&&x.id===_sonSilinenHop.item.id);return _hp?_hp.ad:_sonSilinenHop.item.id;})()}</b> (${_sonSilinenHop.item.g} g)</span><button onclick="hopGeriAl()" style="background:#7a4a00;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer">↶ Geri Al</button></div>`:''}
     ${S.hoplar.length?`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><span class="etiket" style="margin-bottom:0">Hop Listesi (${S.hoplar.length})</span>${S.hoplar.length>=2?`<button class="btn" style="background:var(--bg2);color:var(--bakir);border:1px solid var(--bor);font-size:10px;padding:4px 10px" onclick="hopAutoSort()" title="Süreç sırasına göre diz: FWH → Boil(60→15) → Whirlpool → Hop Stand → Dry Hop">📋 Sırala</button>`:''}</div>${sl2}${tibu}`:`<div style="text-align:center;padding:20px;color:var(--dim);font-size:13px">Henüz hop eklenmedi — aşağıdan ekle</div>`}
     ${(function(){try{return hopTimeline(S.hoplar,HOPLAR);}catch(_e){return '';}})()}
     ${(function(){try{return _hopDenetimRender(hopDenetim(S.hoplar,HOPLAR,(S.stil||null),(typeof BJCP!=='undefined'?BJCP:null),ibu,og,S.hacim||11));}catch(_e){return '';}})()}
@@ -19919,6 +19920,25 @@ window.maltGeriAl=function(){
   flash(`↶ ${ml?ml.ad:'Malt'} geri yüklendi`,"ok");
   render();
 };
+// ── HOP SİLME UNDO (Adim 146 — malt paritesi) ─────────────
+let _sonSilinenHop=null;
+window.hopSil=function(idx){
+  if(idx<0||idx>=S.hoplar.length) return;
+  _sonSilinenHop={idx,item:{...S.hoplar[idx]}};
+  S.hoplar.splice(idx,1);
+  const hp=HOPLAR.find(x=>x&&x.id===_sonSilinenHop.item.id);
+  flash(`✕ ${hp?hp.ad:_sonSilinenHop.item.id} silindi — üst banner'dan ↶ Geri Al`,"ok");
+  render();
+};
+window.hopGeriAl=function(){
+  if(!_sonSilinenHop) return flash("Geri alınacak silme yok","err");
+  const pos=Math.min(_sonSilinenHop.idx,S.hoplar.length);
+  S.hoplar.splice(pos,0,_sonSilinenHop.item);
+  const hp=HOPLAR.find(x=>x&&x.id===_sonSilinenHop.item.id);
+  _sonSilinenHop=null;
+  flash(`↶ ${hp?hp.ad:'Hop'} geri yüklendi`,"ok");
+  render();
+};
 // I5 — Malt/Hop sıralama yukarı-aşağı
 window.maltUp=function(idx){
   if(idx<=0||idx>=S.maltlar.length)return;
@@ -21593,9 +21613,10 @@ function maltEkle(){
 }
 function hopEkle(){
   const id=yH.id;
-  const g=parseFloat(document.getElementById("yhG")?.value)||15;
+  const _rawG=parseFloat(document.getElementById("yhG")?.value);
+  const g=isNaN(_rawG)?15:_rawG;
   const cAA=document.getElementById("yhAA")?.value?parseFloat(document.getElementById("yhAA").value):null;
-  if(g<=0)return;
+  if(g<=0){flash("Geçerli gram gir (>0)","err");return;}
   if(g>500){flash("Hop 500g üstü olamaz","err");return;}
   const hp=HOPLAR.find(x=>x&&x.id===id);
   // Whirlpool ise sıcaklık; Dry hop ise gün; form her hop için
