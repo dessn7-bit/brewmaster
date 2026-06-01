@@ -15437,25 +15437,28 @@ function hopTimeline(hoplar, HOPLAR){
   return '<div style="background:#fff;border:1px solid #E0D6BA;border-radius:10px;padding:12px;margin-top:10px"><div style="font-weight:700;color:var(--bakir);font-size:13px;margin-bottom:8px">⏱️ Hop Zaman Çizelgesi</div><div style="display:flex;align-items:flex-start;gap:2px">'+cols.join(sep)+'</div></div>';
 }
 
-function _hopOlcekHesapla(hoplar, og, hacim, IBU_t){
+function _hopOlcekHesapla(hoplar, og, hacim, IBU_t, katkilar){
   const list=(hoplar||[]); const h=hacim||11;
   const curIBU=(typeof hIBU==='function')?hIBU(list,og,h,[]):0;
+  const katkiIBU=(typeof hIBU==='function')?hIBU([],og,h,katkilar||[]):0;
   if(!(curIBU>0)) return {err:'Acılık veren hop yok (dry hop IBU’ya katkı vermez) — ölçeklenemez.'};
   if(!(IBU_t>0)) return {err:'Geçerli hedef IBU gir.'};
-  const f=IBU_t/curIBU;
+  const hopTarget=IBU_t-katkiIBU;
+  if(hopTarget<=0) return {err:'Katkı acılığı tek başına hedef IBU’yu karşılıyor — hop küçültülemez.'};
+  const f=hopTarget/curIBU;
   const yeni=list.map(m=>({...m, g:(m.tur==='dry_hop')?(+m.g):+(+m.g*f).toFixed(1)}));
   return {f:+f.toFixed(4), yeni, uyari:(f<0.1||f>10)?('Ölçek faktörü aşırı (×'+f.toFixed(2)+') — hedef gerçekçi mi?'):null};
 }
 function _hopOlcekOnizlemeHTML(){
   const h=S.hacim||11, V=S.verim;
   const curOG=(typeof hOG==='function')?hOG(S.maltlar,V,S.katkilar,h):1.05;
-  const curIBU=(typeof hIBU==='function')?hIBU(S.hoplar,curOG,h,[]):0;
+  const curIBU=(typeof hIBU==='function')?hIBU(S.hoplar,curOG,h,S.katkilar):0;
   const IBU_t=(window._hopOlcekIBU!=null&&!isNaN(window._hopOlcekIBU))?window._hopOlcekIBU:Math.round(curIBU);
-  const r=_hopOlcekHesapla(S.hoplar,curOG,h,IBU_t);
+  const r=_hopOlcekHesapla(S.hoplar,curOG,h,IBU_t,S.katkilar);
   if(r.err) return '<div style="color:#A02020;font-size:12px;padding:6px 0">⛔ '+r.err+'</div>';
   const idx={};HOPLAR.forEach(x=>idx[x.id]=x);
   const rows=S.hoplar.map((m,i)=>{const ad=idx[m.id]?idx[m.id].ad:m.id;const ny=r.yeni[i].g;const dh=(m.tur==='dry_hop');return '<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span style="color:var(--dim)">'+ad+(dh?' (dry, değişmez)':'')+'</span><span><b style="color:var(--kahve)">'+(+m.g)+'g → '+ny+'g</b></span></div>';}).join('');
-  const yeniIBU=(typeof hIBU==='function')?hIBU(r.yeni,curOG,h,[]):0;
+  const yeniIBU=(typeof hIBU==='function')?hIBU(r.yeni,curOG,h,S.katkilar):0;
   const uyari=r.uyari?('<div style="color:#B26B00;font-size:11px;padding:4px 0">⚠️ '+r.uyari+'</div>'):'';
   return rows+'<div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 0 2px;border-top:1px dashed #E0D6BA;margin-top:4px;font-weight:700;color:var(--kahve)"><span>Yeni IBU</span><span>'+yeniIBU.toFixed(0)+'</span></div>'+uyari;
 }
@@ -15467,13 +15470,13 @@ function _hopOlcekInput(val){
 function hopOlcekUygula(){
   const h=S.hacim||11, V=S.verim;
   const curOG=(typeof hOG==='function')?hOG(S.maltlar,V,S.katkilar,h):1.05;
-  const curIBU=(typeof hIBU==='function')?hIBU(S.hoplar,curOG,h,[]):0;
+  const curIBU=(typeof hIBU==='function')?hIBU(S.hoplar,curOG,h,S.katkilar):0;
   const IBU_t=(window._hopOlcekIBU!=null&&!isNaN(window._hopOlcekIBU))?window._hopOlcekIBU:Math.round(curIBU);
-  const r=_hopOlcekHesapla(S.hoplar,curOG,h,IBU_t);
+  const r=_hopOlcekHesapla(S.hoplar,curOG,h,IBU_t,S.katkilar);
   if(r.err){if(typeof flash==='function')flash(r.err,'err');return;}
   S.hoplar.forEach((m,i)=>{m.g=r.yeni[i].g;});
   window._hopOlcekIBU=null;
-  if(typeof flash==='function')flash('Hop IBU hedefe ölçeklendi ('+hIBU(S.hoplar,curOG,h,[]).toFixed(0)+' IBU)','ok');
+  if(typeof flash==='function')flash('Hop IBU hedefe ölçeklendi ('+hIBU(S.hoplar,curOG,h,S.katkilar).toFixed(0)+' IBU)','ok');
   render();
 }
 function hopOlcekHTML(curOG,curIBU,curHac){
