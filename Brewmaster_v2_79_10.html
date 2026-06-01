@@ -15038,6 +15038,20 @@ function rEditorNot(){
 
 
 // ═══ EDITOR: MALT SEKMESİ ══════════════════════════════
+const MALT_DP={
+  pale_ale:100,pilsner:100,maris:100,bel_pils:100,barke:100,bohem_pils:100,bohemian:100,best_pils:100,best_heidel:100,briess_pale:100,synergy:100,chateau_bld:100,chateau_pils:100,thracian_pils:100,thracian_pale:100,lager_malt:100,extra_pale:100,crisp_cc:100,viking_pils:100,viking_xpa:100,viking_pale:100,best_pale:100,maris_extra:100,golden_promise:100,pearl:100,halcyon:100,tipple:100,muntons_propino:100,muntons_spa:100,dingemans_pale:100,
+  briess_6row:160,
+  wheat:90,dark_wheat:90,best_heidel_wheat:90,best_wheat:90,chateau_wheat:90,thracian_wheat:90,
+  rye:85,
+  vienna:50,viking_vienna:50,best_vienna:50,chateau_vienna:50,thracian_vienna:50,
+  munich:40,munich_light:40,viking_munich:40,best_munich:40,chateau_munich:40,chateau_munich_light:40,
+  dark_munich:20,best_munich_dark:20,thracian_munich:20,aromatic:20,best_melano:20,best_melano_light:20,
+  abbey_malt:30,chateau_abbey:30,
+  fawcett_mild:50,muntons_mild:50,smoked:80,smoked_oak:80,isli_malt:80,smoked_peat:60,
+  spelt:60,einkorn:30,emmer:30,reddish:40,
+  oat_malt:30,fawcett_oat:30
+};
+
 function gristDenetim(maltlar, MALTLAR, stilAdi, BJCP, srm, og){
   const out={dagilim:null,bulgular:[]};
   const list=(maltlar||[]).filter(m=>m&&m.id&&(+m.kg>0));
@@ -15068,6 +15082,13 @@ function gristDenetim(maltlar, MALTLAR, stilAdi, BJCP, srm, og){
     if(st.og && og!=null){ const a=st.og[0],bv=st.og[1];
       if(og < a-0.003){ ekle('orta','Yerçekimi stile göre düşük (OG '+og.toFixed(3)+', hedef '+a.toFixed(3)+'-'+bv.toFixed(3)+'): base/şeker artır veya verim.'); }
       else if(og > bv+0.003){ ekle('orta','Yerçekimi stile göre yüksek (OG '+og.toFixed(3)+' > '+bv.toFixed(3)+').'); } }
+  }
+  let _dpN=0,_dpD=0;
+  list.forEach(m=>{const md=idx[m.id]; if(!md||md.g==='Şeker'||m.id==='rice_hulls')return; const dp=(typeof MALT_DP!=='undefined'&&MALT_DP[m.id])?MALT_DP[m.id]:0; _dpN+=dp*(+m.kg); _dpD+=(+m.kg);});
+  if(_dpD>0){
+    const _wDP=_dpN/_dpD;
+    if(_wDP<30) ekle('kritik','Diastatik güç ~'+_wDP.toFixed(0)+' °L — 30 altında. Enzimler nişastayı (özellikle çiğ/flaked tahıl) çeviremeyebilir; yüksek-DP base ekle.');
+    else if(_wDP<50) ekle('orta','Diastatik güç ~'+_wDP.toFixed(0)+' °L — sınırda (tam/hızlı dönüşüm için ~70 °L ideal).');
   }
   if(!out.bulgular.length){ ekle('bilgi','Grist kompozisyonu dengeli görünüyor.'); }
   return out;
