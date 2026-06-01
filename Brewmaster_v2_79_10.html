@@ -15408,6 +15408,26 @@ function _hopDenetimRender(hd){
   return '<div style="background:#fff;border:1px solid #E0D6BA;border-radius:10px;padding:12px;margin-top:10px"><div style="font-weight:700;color:var(--bakir);font-size:13px;margin-bottom:8px">🌿 Hop Denetimi</div>'+m1+m2+m3+bul+'</div>';
 }
 
+function hopTimeline(hoplar, HOPLAR){
+  const list=(hoplar||[]).filter(h=>h&&h.id&&(+h.g>0));
+  if(!list.length) return '';
+  const adOf=id=>{const hp=HOPLAR.find(x=>x&&x.id===id);return hp?hp.ad:id;};
+  const fwh=list.filter(h=>h.tur==='fwh');
+  const boil=list.filter(h=>h.tur==='boil'||h.tur==null).slice().sort((a,b)=>(+b.dk||0)-(+a.dk||0));
+  const wp=list.filter(h=>h.tur==='whirlpool'||h.tur==='hop_stand');
+  const dry=list.filter(h=>h.tur==='dry_hop');
+  const pill=(name,sub)=>'<div style="background:var(--ya);border-radius:6px;padding:4px 6px;margin:3px 0;font-size:10px;line-height:1.25"><b style="color:var(--kahve)">'+name+'</b><div style="color:var(--dim);font-size:9px">'+sub+'</div></div>';
+  const faz=(ikon,baslik,pills)=> pills.length?('<div style="flex:1;min-width:0;padding:0 3px"><div style="font-size:10px;font-weight:700;color:var(--bakir);text-align:center;margin-bottom:4px">'+ikon+' '+baslik+'</div>'+pills.join('')+'</div>'):'';
+  const cols=[];
+  if(fwh.length) cols.push(faz('🌾','FWH',fwh.map(h=>pill(adOf(h.id),(+h.g)+'g · ilk wort'))));
+  if(boil.length) cols.push(faz('🔥','Kaynatma',boil.map(h=>pill(adOf(h.id),(+h.g)+'g · '+(+h.dk||0)+'dk'))));
+  if(wp.length) cols.push(faz('🌀','Whirlpool',wp.map(h=>pill(adOf(h.id),(+h.g)+'g · '+(h.whT||85)+'°C/'+(+h.dk||15)+'dk'))));
+  if(dry.length) cols.push(faz('❄️','Dry Hop',dry.map(h=>pill(adOf(h.id),(+h.g)+'g · '+(h.dryDays||5)+' gün'))));
+  if(!cols.length) return '';
+  const sep='<div style="display:flex;align-items:center;color:var(--soluk);font-size:13px;padding-top:18px">→</div>';
+  return '<div style="background:#fff;border:1px solid #E0D6BA;border-radius:10px;padding:12px;margin-top:10px"><div style="font-weight:700;color:var(--bakir);font-size:13px;margin-bottom:8px">⏱️ Hop Zaman Çizelgesi</div><div style="display:flex;align-items:flex-start;gap:2px">'+cols.join(sep)+'</div></div>';
+}
+
 function rEditorHop(og, ibu, seciHop){
   const dkO=[90,75,60,45,30,20,15,10,5,1].map(d=>`<option value="${d}"${yH.dk===d?" selected":""}>${d} dk</option>`).join("");
   // Whirlpool iki input: sıcaklık (°C) + süre (dk). Default: 85°C / 15dk.
@@ -15541,6 +15561,7 @@ function rEditorHop(og, ibu, seciHop){
   const _hEkleAria = S.hoplar.length ? 'false' : 'true';
   return `
     ${S.hoplar.length?`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><span class="etiket" style="margin-bottom:0">Hop Listesi (${S.hoplar.length})</span>${S.hoplar.length>=2?`<button class="btn" style="background:var(--bg2);color:var(--bakir);border:1px solid var(--bor);font-size:10px;padding:4px 10px" onclick="hopAutoSort()" title="Süreç sırasına göre diz: FWH → Boil(60→15) → Whirlpool → Hop Stand → Dry Hop">📋 Sırala</button>`:''}</div>${sl2}${tibu}`:`<div style="text-align:center;padding:20px;color:var(--dim);font-size:13px">Henüz hop eklenmedi — aşağıdan ekle</div>`}
+    ${(function(){try{return hopTimeline(S.hoplar,HOPLAR);}catch(_e){return '';}})()}
     ${(function(){try{return _hopDenetimRender(hopDenetim(S.hoplar,HOPLAR,(S.stil||null),(typeof BJCP!=='undefined'?BJCP:null),ibu,og,S.hacim||11));}catch(_e){return '';}})()}
     <div class="bm-acc bm-edit-only-acc" data-acc-id="hop-ekle" data-acc-default="${_hEkleDefault}" aria-expanded="${_hEkleAria}" style="margin-top:10px">
       <button class="bm-acc-header" type="button" aria-expanded="${_hEkleAria}" onclick="bmAccToggle('hop-ekle')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmAccToggle('hop-ekle')}"><span class="bm-acc-title">➕ Yeni Hop Ekle</span><span class="bm-acc-chevron">▾</span></button>
