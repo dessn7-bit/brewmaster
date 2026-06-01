@@ -6354,6 +6354,15 @@ let S={...BOS};
         if (k && k.id && LEGACY_KATKI_ID_MAP[k.id]) k.id = LEGACY_KATKI_ID_MAP[k.id];
       });
     }
+    // Adim 148: legacy hop tur normalizasyonu (dry/dryhop->dry_hop, fw->fwh)
+    if (obj.hoplar && Array.isArray(obj.hoplar)) {
+      obj.hoplar.forEach(function(h){
+        if (h && h.tur) {
+          if (h.tur==='dry' || h.tur==='dryhop') h.tur='dry_hop';
+          else if (h.tur==='fw') h.tur='fwh';
+        }
+      });
+    }
     // Doğrudan dizi (stok, fav, son kullanılan)
     if (Array.isArray(obj)) {
       obj.forEach(function(item){
