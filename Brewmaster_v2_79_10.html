@@ -15083,6 +15083,65 @@ function _gristDenetimRender(gd){
   return '<div style="background:#fff;border:1px solid #E0D6BA;border-radius:10px;padding:12px;margin-top:10px"><div style="font-weight:700;color:var(--bakir);font-size:13px;margin-bottom:8px">🧪 Grist Denetimi</div>'+bar+lej+bul+'</div>';
 }
 
+function _gristOlcekHesapla(maltlar, katkilar, V, OG_t, H_t){
+  const gMalt=(maltlar||[]).reduce((s,m)=>{const x=MALTLAR.find(a=>a&&a.id===m.id);if(!x||m.id==='rice'||m.id==='rice_hulls')return s;return s+x.gu*(+m.kg)*(x.g==='Şeker'?1:V/100);},0);
+  const gKat=(katkilar||[]).reduce((s,k)=>{const kat=KATKILAR.find(a=>a&&a.id===k.id);if(!kat||!kat.gu)return s;const km=k.birim==='kg'?k.miktar:k.birim==='L'?k.miktar*1.3:k.birim==='mL'?k.miktar/1000*1.3:(['adet','tablet','parça','dal','yaprak'].includes(k.birim))?0:k.miktar/1000;return s+kat.gu*km;},0);
+  if(gMalt<=0) return {err:'Gristte fermente olabilir malt yok.'};
+  if(!(OG_t>1)||!(H_t>0)) return {err:'Geçerli hedef OG ve hacim gir.'};
+  const gTarget=(OG_t-1)*H_t*1000, gMaltNeeded=gTarget-gKat;
+  if(gMaltNeeded<=0) return {err:'Katkılar tek başına hedef OG’yi aşıyor — grist küçültülemez.'};
+  const f=gMaltNeeded/gMalt;
+  const yeni=(maltlar||[]).map(m=>({id:m.id,kg:+(+m.kg*f).toFixed(3),marka:m.marka}));
+  return {f:+f.toFixed(4),yeni,uyari:(f<0.1||f>10)?('Ölçek faktörü aşırı (×'+f.toFixed(2)+') — hedef gerçekçi mi?'):null};
+}
+function _olcekOnizlemeHTML(){
+  const V=S.verim,curHac=S.hacim||11;
+  const curOG=hOG(S.maltlar,V,S.katkilar,curHac);
+  const OG_t=(window._olcekOG!=null&&!isNaN(window._olcekOG))?window._olcekOG:curOG;
+  const H_t=(window._olcekHac!=null&&!isNaN(window._olcekHac))?window._olcekHac:curHac;
+  const r=_gristOlcekHesapla(S.maltlar,S.katkilar,V,OG_t,H_t);
+  if(r.err) return '<div style="color:#A02020;font-size:12px;padding:6px 0">⛔ '+r.err+'</div>';
+  const idx={};MALTLAR.forEach(m=>idx[m.id]=m);
+  const rows=S.maltlar.map((m,i)=>{const ad=idx[m.id]?idx[m.id].ad:m.id;return '<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0;color:var(--soluk)"><span>'+ad+(m.marka?(' ('+m.marka+')'):'')+'</span><span><b>'+(+m.kg).toFixed(2)+'</b> → <b style="color:var(--bakir)">'+r.yeni[i].kg.toFixed(2)+'</b> kg</span></div>';}).join('');
+  const topEski=S.maltlar.reduce((s,m)=>s+(+m.kg),0),topYeni=r.yeni.reduce((s,m)=>s+m.kg,0);
+  const ogYeni=hOG(r.yeni,V,S.katkilar,H_t);
+  const uyari=r.uyari?('<div style="color:#B26B00;font-size:11px;padding:4px 0">⚠️ '+r.uyari+'</div>'):'';
+  return rows+'<div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 0 2px;border-top:1px dashed #E0D6BA;margin-top:4px;font-weight:700"><span>Toplam</span><span>'+topEski.toFixed(2)+' → '+topYeni.toFixed(2)+' kg</span></div><div style="font-size:11px;color:var(--dim)">Sonuç: OG '+ogYeni.toFixed(3)+' · '+H_t+' L · ×'+r.f.toFixed(3)+'</div>'+uyari;
+}
+function _olcekInput(which,val){
+  const n=parseFloat(val);
+  if(which==='og') window._olcekOG=(val===''||isNaN(n))?null:n;
+  else window._olcekHac=(val===''||isNaN(n))?null:n;
+  const pv=document.getElementById('olcekOnizleme');if(pv)pv.innerHTML=_olcekOnizlemeHTML();
+}
+function gristOlcekUygula(){
+  const V=S.verim,curHac=S.hacim||11;
+  const curOG=hOG(S.maltlar,V,S.katkilar,curHac);
+  const OG_t=(window._olcekOG!=null&&!isNaN(window._olcekOG))?window._olcekOG:curOG;
+  const H_t=(window._olcekHac!=null&&!isNaN(window._olcekHac))?window._olcekHac:curHac;
+  const r=_gristOlcekHesapla(S.maltlar,S.katkilar,V,OG_t,H_t);
+  if(r.err){if(typeof flash==='function')flash(r.err,'err');return;}
+  S.maltlar.forEach((m,i)=>{m.kg=r.yeni[i].kg;});
+  S.hacim=H_t;window._olcekOG=null;window._olcekHac=null;
+  if(typeof flash==='function')flash('Grist hedefe ölçeklendi (OG '+hOG(S.maltlar,V,S.katkilar,H_t).toFixed(3)+')','ok');
+  render();
+}
+function gristOlcekHTML(curOG,curHac){
+  if(!S.maltlar||!S.maltlar.length) return '';
+  const ogVal=(window._olcekOG!=null)?window._olcekOG:(+curOG).toFixed(3);
+  const hacVal=(window._olcekHac!=null)?window._olcekHac:curHac;
+  return '<div class="bm-acc bm-edit-only-acc" data-acc-id="grist-olcek" data-acc-default="collapsed" aria-expanded="false" style="margin-top:10px">'
+    +'<button class="bm-acc-header" type="button" aria-expanded="false" onclick="bmAccToggle(\'grist-olcek\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();bmAccToggle(\'grist-olcek\')}"><span class="bm-acc-title">🎯 Hedefe Ölçekle</span><span class="bm-acc-chevron">▾</span></button>'
+    +'<div class="bm-acc-body">'
+    +'<div style="display:flex;gap:10px;margin-bottom:8px">'
+    +'<div style="flex:1"><span class="etiket">Hedef OG</span><input type="number" class="inp" step="0.001" min="1" max="1.2" value="'+ogVal+'" oninput="_olcekInput(\'og\',this.value)"></div>'
+    +'<div style="flex:1"><span class="etiket">Hedef Hacim (L)</span><input type="number" class="inp" step="0.5" min="1" max="200" value="'+hacVal+'" oninput="_olcekInput(\'hac\',this.value)"></div>'
+    +'</div>'
+    +'<div id="olcekOnizleme">'+_olcekOnizlemeHTML()+'</div>'
+    +'<button class="btn" style="background:var(--altin);color:#fff;width:100%;margin-top:8px;padding:9px 0" onclick="gristOlcekUygula()">✓ Uygula (grist kg + hacim güncellenir)</button>'
+    +'</div></div>';
+}
+
 function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
   // Kombine base ve en büyük base bir kere hesapla (rol hesabı için)
   const _baseTopKg=S.maltlar.reduce((s,m2)=>{const ml2=MALTLAR.find(x=>x&&x.id===m2.id);return (ml2&&ml2.g==="Base"&&m2.id!=="rice_hulls"&&m2.id!=="rice")?s+m2.kg:s;},0);
@@ -15262,6 +15321,7 @@ function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
       </div>
     </div>
     ${(function(){try{return _gristDenetimRender(gristDenetim(S.maltlar,MALTLAR,(S.stil||null),(typeof BJCP!=='undefined'?BJCP:null),srm,og));}catch(_e){return '';}})()}
+    ${(function(){try{return (typeof gristOlcekHTML==='function')?gristOlcekHTML(og,S.hacim||11):'';}catch(_e){return '';}})()}
     <div class="bm-acc bm-edit-only-acc" data-acc-id="malt-ekle" data-acc-default="${_mEkleDefault}" aria-expanded="${_mEkleAria}" style="margin-top:10px">
       <button class="bm-acc-header" type="button" aria-expanded="${_mEkleAria}" onclick="bmAccToggle('malt-ekle')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmAccToggle('malt-ekle')}"><span class="bm-acc-title">➕ Yeni Malt Ekle</span><span class="bm-acc-chevron">▾</span></button>
       <div class="bm-acc-body">
