@@ -17,3 +17,84 @@ _kaggle_raw/
 external/
 working/
 __pycache__/
+
+# ── Adım 142: scratch / local-only temizlik (git status sadelesir) ──
+# Wrangler local cache
+.wrangler/
+_cf_worker/.wrangler/
+# Sprint backup & snapshot HTML
+Brewmaster_v2_79_10.BACKUP.*
+Brewmaster_v2_79_10.SNAPSHOT.*
+*_backup.html
+BACKUP_PRE_*.html
+_v2_80_test.html
+# Diagnostic screenshot'lar
+adim*.png
+_malt_*.png
+_maya_*.png
+_tema_*.png
+_masaustu_*.png
+_ayar_*.png
+_verim_*.png
+_slug_*.png
+# Loglar
+*.log
+# Sprint sanity/diagnose/validate scriptleri
+diagnose_*.js
+validate_*.js
+_check.ps1
+# Sprint scratch dizinleri
+_131W_backups/
+_137g_results/
+_137h_on_results/
+_jslint/
+_teshis/
+# ML pipeline scratch (data/model/triage)
+audit_*.json
+manual_review_*.json
+rejected_*.json
+validated_*.json
+byo_recipes.json
+brewmaster_v15_in_progress.json
+# Veri kaynak scrape scratch'leri
+_aha_*
+_bf_*
+_braureka_*
+_byo_*
+_mmum_*
+_recipator_*
+_twortwat_*
+# Sprint pipeline scriptleri
+_step*
+# ML model/dataset versiyonlari
+_v6_*
+_v7_*
+_v8_*
+_v9_*
+_v10_*
+_v11_*
+_v12_*
+_v13_*
+_v14_*
+_v15_*
+_v16_*
+_v17_*
+_v18_*
+_v19_*
+_v85_*
+_v101_*
+# Sprint kapanis/probe scriptleri ve session ozetleri
+_131*
+_132*
+_133*
+_134*
+_135*
+_136*
+_137*
+_138*
+_last_session_summary_*.md
+# Kabeer asset'leri (HTML base64 inline kullaniliyor, kasitli commit edilmiyor)
+kabeer-*.avif
+kabeer-*.png
+_wordmark_b64.txt
+_dionysos_b64.txt
