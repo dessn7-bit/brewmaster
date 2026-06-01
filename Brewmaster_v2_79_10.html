@@ -15428,6 +15428,60 @@ function hopTimeline(hoplar, HOPLAR){
   return '<div style="background:#fff;border:1px solid #E0D6BA;border-radius:10px;padding:12px;margin-top:10px"><div style="font-weight:700;color:var(--bakir);font-size:13px;margin-bottom:8px">⏱️ Hop Zaman Çizelgesi</div><div style="display:flex;align-items:flex-start;gap:2px">'+cols.join(sep)+'</div></div>';
 }
 
+function _hopOlcekHesapla(hoplar, og, hacim, IBU_t){
+  const list=(hoplar||[]); const h=hacim||11;
+  const curIBU=(typeof hIBU==='function')?hIBU(list,og,h,[]):0;
+  if(!(curIBU>0)) return {err:'Acılık veren hop yok (dry hop IBU’ya katkı vermez) — ölçeklenemez.'};
+  if(!(IBU_t>0)) return {err:'Geçerli hedef IBU gir.'};
+  const f=IBU_t/curIBU;
+  const yeni=list.map(m=>({...m, g:(m.tur==='dry_hop')?(+m.g):+(+m.g*f).toFixed(1)}));
+  return {f:+f.toFixed(4), yeni, uyari:(f<0.1||f>10)?('Ölçek faktörü aşırı (×'+f.toFixed(2)+') — hedef gerçekçi mi?'):null};
+}
+function _hopOlcekOnizlemeHTML(){
+  const h=S.hacim||11, V=S.verim;
+  const curOG=(typeof hOG==='function')?hOG(S.maltlar,V,S.katkilar,h):1.05;
+  const curIBU=(typeof hIBU==='function')?hIBU(S.hoplar,curOG,h,[]):0;
+  const IBU_t=(window._hopOlcekIBU!=null&&!isNaN(window._hopOlcekIBU))?window._hopOlcekIBU:Math.round(curIBU);
+  const r=_hopOlcekHesapla(S.hoplar,curOG,h,IBU_t);
+  if(r.err) return '<div style="color:#A02020;font-size:12px;padding:6px 0">⛔ '+r.err+'</div>';
+  const idx={};HOPLAR.forEach(x=>idx[x.id]=x);
+  const rows=S.hoplar.map((m,i)=>{const ad=idx[m.id]?idx[m.id].ad:m.id;const ny=r.yeni[i].g;const dh=(m.tur==='dry_hop');return '<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span style="color:var(--dim)">'+ad+(dh?' (dry, değişmez)':'')+'</span><span><b style="color:var(--kahve)">'+(+m.g)+'g → '+ny+'g</b></span></div>';}).join('');
+  const yeniIBU=(typeof hIBU==='function')?hIBU(r.yeni,curOG,h,[]):0;
+  const uyari=r.uyari?('<div style="color:#B26B00;font-size:11px;padding:4px 0">⚠️ '+r.uyari+'</div>'):'';
+  return rows+'<div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 0 2px;border-top:1px dashed #E0D6BA;margin-top:4px;font-weight:700;color:var(--kahve)"><span>Yeni IBU</span><span>'+yeniIBU.toFixed(0)+'</span></div>'+uyari;
+}
+function _hopOlcekInput(val){
+  const n=parseFloat(val);
+  window._hopOlcekIBU=(val===''||isNaN(n))?null:n;
+  const pv=document.getElementById('hopOlcekOnizleme');if(pv)pv.innerHTML=_hopOlcekOnizlemeHTML();
+}
+function hopOlcekUygula(){
+  const h=S.hacim||11, V=S.verim;
+  const curOG=(typeof hOG==='function')?hOG(S.maltlar,V,S.katkilar,h):1.05;
+  const curIBU=(typeof hIBU==='function')?hIBU(S.hoplar,curOG,h,[]):0;
+  const IBU_t=(window._hopOlcekIBU!=null&&!isNaN(window._hopOlcekIBU))?window._hopOlcekIBU:Math.round(curIBU);
+  const r=_hopOlcekHesapla(S.hoplar,curOG,h,IBU_t);
+  if(r.err){if(typeof flash==='function')flash(r.err,'err');return;}
+  S.hoplar.forEach((m,i)=>{m.g=r.yeni[i].g;});
+  window._hopOlcekIBU=null;
+  if(typeof flash==='function')flash('Hop IBU hedefe ölçeklendi ('+hIBU(S.hoplar,curOG,h,[]).toFixed(0)+' IBU)','ok');
+  render();
+}
+function hopOlcekHTML(curOG,curIBU,curHac){
+  if(!S.hoplar||!S.hoplar.length) return '';
+  const hasBitter=(typeof hIBU==='function')?(hIBU(S.hoplar,curOG,curHac||11,[])>0):false;
+  if(!hasBitter) return '';
+  const ibuVal=(window._hopOlcekIBU!=null)?window._hopOlcekIBU:Math.round(+curIBU);
+  return '<div class="bm-acc bm-edit-only-acc" data-acc-id="hop-olcek" data-acc-default="collapsed" aria-expanded="false" style="margin-top:10px">'
+    +'<button class="bm-acc-header" type="button" aria-expanded="false" onclick="bmAccToggle(\'hop-olcek\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();bmAccToggle(\'hop-olcek\')}"><span class="bm-acc-title">🎯 IBU’ya Ölçekle</span><span class="bm-acc-chevron">▾</span></button>'
+    +'<div class="bm-acc-body">'
+    +'<div style="margin-bottom:8px"><span class="etiket">Hedef IBU</span><input type="number" class="inp" step="1" min="1" max="200" value="'+ibuVal+'" oninput="_hopOlcekInput(this.value)"></div>'
+    +'<div style="font-size:10px;color:var(--dim);margin-bottom:8px">Acılık veren hop\x27lar (boil/whirlpool/stand) orantılı ölçeklenir; dry hop değişmez.</div>'
+    +'<div id="hopOlcekOnizleme">'+_hopOlcekOnizlemeHTML()+'</div>'
+    +'<button class="btn" style="background:var(--altin);color:#fff;width:100%;margin-top:8px;padding:9px 0" onclick="hopOlcekUygula()">✓ Uygula</button>'
+    +'</div></div>';
+}
+
 function rEditorHop(og, ibu, seciHop){
   const dkO=[90,75,60,45,30,20,15,10,5,1].map(d=>`<option value="${d}"${yH.dk===d?" selected":""}>${d} dk</option>`).join("");
   // Whirlpool iki input: sıcaklık (°C) + süre (dk). Default: 85°C / 15dk.
@@ -15564,6 +15618,7 @@ function rEditorHop(og, ibu, seciHop){
     ${S.hoplar.length?`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><span class="etiket" style="margin-bottom:0">Hop Listesi (${S.hoplar.length})</span>${S.hoplar.length>=2?`<button class="btn" style="background:var(--bg2);color:var(--bakir);border:1px solid var(--bor);font-size:10px;padding:4px 10px" onclick="hopAutoSort()" title="Süreç sırasına göre diz: FWH → Boil(60→15) → Whirlpool → Hop Stand → Dry Hop">📋 Sırala</button>`:''}</div>${sl2}${tibu}`:`<div style="text-align:center;padding:20px;color:var(--dim);font-size:13px">Henüz hop eklenmedi — aşağıdan ekle</div>`}
     ${(function(){try{return hopTimeline(S.hoplar,HOPLAR);}catch(_e){return '';}})()}
     ${(function(){try{return _hopDenetimRender(hopDenetim(S.hoplar,HOPLAR,(S.stil||null),(typeof BJCP!=='undefined'?BJCP:null),ibu,og,S.hacim||11));}catch(_e){return '';}})()}
+    ${(function(){try{return (typeof hopOlcekHTML==='function')?hopOlcekHTML(og,ibu,S.hacim||11):'';}catch(_e){return '';}})()}
     <div class="bm-acc bm-edit-only-acc" data-acc-id="hop-ekle" data-acc-default="${_hEkleDefault}" aria-expanded="${_hEkleAria}" style="margin-top:10px">
       <button class="bm-acc-header" type="button" aria-expanded="${_hEkleAria}" onclick="bmAccToggle('hop-ekle')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmAccToggle('hop-ekle')}"><span class="bm-acc-title">➕ Yeni Hop Ekle</span><span class="bm-acc-chevron">▾</span></button>
       <div class="bm-acc-body">
