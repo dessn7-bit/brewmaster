@@ -15446,6 +15446,18 @@ function hopTimeline(hoplar, HOPLAR){
   return '<div style="background:#fff;border:1px solid #E0D6BA;border-radius:10px;padding:12px;margin-top:10px"><div style="font-weight:700;color:var(--bakir);font-size:13px;margin-bottom:8px">⏱️ Hop Zaman Çizelgesi</div><div style="display:flex;align-items:flex-start;gap:2px">'+cols.join(sep)+'</div></div>';
 }
 
+function _hopOnerilenIBU(og){
+  const GU=Math.max(1,(og-1)*1000);
+  const stil=(typeof S!=='undefined'&&(S.stil||S.stilTah))||null;
+  const s=(stil&&typeof BJCP!=='undefined'&&BJCP[stil])?BJCP[stil]:null;
+  if(s&&s.ibu&&s.ibu.length===2&&s.og&&s.og.length===2){
+    const oMin=s.og[0],oMax=s.og[1];
+    const frac=(oMax>oMin)?(og-oMin)/(oMax-oMin):0.5;
+    const f=Math.max(0,Math.min(1,frac));
+    return Math.round(s.ibu[0]+f*(s.ibu[1]-s.ibu[0]));
+  }
+  return Math.round(0.5*GU);
+}
 function _hopOlcekHesapla(hoplar, og, hacim, IBU_t, katkilar){
   const list=(hoplar||[]); const h=hacim||11;
   const curIBU=(typeof hIBU==='function')?hIBU(list,og,h,[]):0;
@@ -15462,7 +15474,7 @@ function _hopOlcekOnizlemeHTML(){
   const h=S.hacim||11, V=S.verim;
   const curOG=(typeof hOG==='function')?hOG(S.maltlar,V,S.katkilar,h):1.05;
   const curIBU=(typeof hIBU==='function')?hIBU(S.hoplar,curOG,h,S.katkilar):0;
-  const IBU_t=(window._hopOlcekIBU!=null&&!isNaN(window._hopOlcekIBU))?window._hopOlcekIBU:Math.round(curIBU);
+  const IBU_t=(window._hopOlcekIBU!=null&&!isNaN(window._hopOlcekIBU))?window._hopOlcekIBU:_hopOnerilenIBU(curOG);
   const r=_hopOlcekHesapla(S.hoplar,curOG,h,IBU_t,S.katkilar);
   if(r.err) return '<div style="color:#A02020;font-size:12px;padding:6px 0">⛔ '+r.err+'</div>';
   const idx={};HOPLAR.forEach(x=>idx[x.id]=x);
@@ -15480,7 +15492,7 @@ function hopOlcekUygula(){
   const h=S.hacim||11, V=S.verim;
   const curOG=(typeof hOG==='function')?hOG(S.maltlar,V,S.katkilar,h):1.05;
   const curIBU=(typeof hIBU==='function')?hIBU(S.hoplar,curOG,h,S.katkilar):0;
-  const IBU_t=(window._hopOlcekIBU!=null&&!isNaN(window._hopOlcekIBU))?window._hopOlcekIBU:Math.round(curIBU);
+  const IBU_t=(window._hopOlcekIBU!=null&&!isNaN(window._hopOlcekIBU))?window._hopOlcekIBU:_hopOnerilenIBU(curOG);
   const r=_hopOlcekHesapla(S.hoplar,curOG,h,IBU_t,S.katkilar);
   if(r.err){if(typeof flash==='function')flash(r.err,'err');return;}
   S.hoplar.forEach((m,i)=>{m.g=r.yeni[i].g;});
@@ -15492,7 +15504,7 @@ function hopOlcekHTML(curOG,curIBU,curHac){
   if(!S.hoplar||!S.hoplar.length) return '';
   const hasBitter=(typeof hIBU==='function')?(hIBU(S.hoplar,curOG,curHac||11,[])>0):false;
   if(!hasBitter) return '';
-  const ibuVal=(window._hopOlcekIBU!=null)?window._hopOlcekIBU:Math.round(+curIBU);
+  const ibuVal=(window._hopOlcekIBU!=null)?window._hopOlcekIBU:_hopOnerilenIBU(curOG);
   return '<div class="bm-acc bm-edit-only-acc" data-acc-id="hop-olcek" data-acc-default="collapsed" aria-expanded="false" style="margin-top:10px">'
     +'<button class="bm-acc-header" type="button" aria-expanded="false" onclick="bmAccToggle(\'hop-olcek\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();bmAccToggle(\'hop-olcek\')}"><span class="bm-acc-title">🎯 IBU’ya Ölçekle</span><span class="bm-acc-chevron">▾</span></button>'
     +'<div class="bm-acc-body">'
