@@ -15585,6 +15585,7 @@ function rEditorHop(og, ibu, seciHop){
           <button style="background:none;border:none;color:${i===0?'var(--dim)':'var(--bakir)'};font-size:11px;padding:0 3px;line-height:1;cursor:${i===0?'not-allowed':'pointer'};opacity:${i===0?'.4':'1'}" onclick="hopUp(${i})" ${i===0?'disabled':''}>▲</button>
           <button style="background:none;border:none;color:${i===S.hoplar.length-1?'var(--dim)':'var(--bakir)'};font-size:11px;padding:0 3px;line-height:1;cursor:${i===S.hoplar.length-1?'not-allowed':'pointer'};opacity:${i===S.hoplar.length-1?'.4':'1'}" onclick="hopDown(${i})" ${i===S.hoplar.length-1?'disabled':''}>▼</button>
         </div>
+        <button class="btn" style="background:none;color:var(--bakir);font-size:14px;padding:0 4px;line-height:1" onclick="hopDuzenleBasla(${i})" title="Düzenle">✏️</button>
         <button class="btn" style="background:none;color:var(--kk);font-size:20px;padding:0 4px;line-height:1" onclick="hopSil(${i})">×</button>
       </div>
       ${_muadilH.length>0?`<div class="bm-muadil-inline" data-bm-muadil-hop="${esc(h.id)}">
@@ -15632,8 +15633,8 @@ function rEditorHop(og, ibu, seciHop){
   });
 
   // Adim 132-J-3: Mevcut hop listesi USTTE, "+Yeni Hop Ekle" collapsible ALTTA (default kapali, bos ise acik)
-  const _hEkleDefault = S.hoplar.length ? 'collapsed' : 'expanded';
-  const _hEkleAria = S.hoplar.length ? 'false' : 'true';
+  const _hEkleDefault = (yH._editIdx!=null) ? 'expanded' : (S.hoplar.length ? 'collapsed' : 'expanded');
+  const _hEkleAria = (yH._editIdx!=null) ? 'true' : (S.hoplar.length ? 'false' : 'true');
   return `
     ${(typeof _sonSilinenHop!=='undefined'&&_sonSilinenHop)?`<div style="padding:8px 12px;background:#FFF8E8;border:1px solid #E8C070;border-radius:8px;margin-bottom:10px;display:flex;align-items:center;gap:10px"><span style="font-size:11px;color:#7a4a00;flex:1">✕ Son silinen: <b>${(()=>{const _hp=HOPLAR.find(x=>x&&x.id===_sonSilinenHop.item.id);return _hp?_hp.ad:_sonSilinenHop.item.id;})()}</b> (${_sonSilinenHop.item.g} g)</span><button onclick="hopGeriAl()" style="background:#7a4a00;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer">↶ Geri Al</button></div>`:''}
     ${S.hoplar.length?`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><span class="etiket" style="margin-bottom:0">Hop Listesi (${S.hoplar.length})</span>${S.hoplar.length>=2?`<button class="btn" style="background:var(--bg2);color:var(--bakir);border:1px solid var(--bor);font-size:10px;padding:4px 10px" onclick="hopAutoSort()" title="Süreç sırasına göre diz: FWH → Boil(60→15) → Whirlpool → Hop Stand → Dry Hop">📋 Sırala</button>`:''}</div>${sl2}${tibu}`:`<div style="text-align:center;padding:20px;color:var(--dim);font-size:13px">Henüz hop eklenmedi — aşağıdan ekle</div>`}
@@ -15669,7 +15670,7 @@ function rEditorHop(og, ibu, seciHop){
           <span class="etiket">Özel Alpha Asit % — Opsiyonel</span>
           <input type="number" id="yhAA" class="inp" placeholder="Boş = varsayılan (${seciHop?.aa||"?"}%) — paketindeki farklıysa gir" step=".1" min="1" max="30" value="${yH.cAA||""}" onchange="yH.cAA=this.value?parseFloat(this.value):null">
         </div>
-        <button class="btn" style="background:var(--yk);color:#C0F0C0;width:100%;margin-bottom:6px;padding:10px" onclick="hopEkle()">+ Hop Ekle</button>
+        <button class="btn" style="background:var(--yk);color:#C0F0C0;width:100%;margin-bottom:6px;padding:10px" onclick="hopEkle()">${yH._editIdx!=null?'✓ Güncelle':'+ Hop Ekle'}</button>${yH._editIdx!=null?'<button class="btn" style="background:none;border:1px solid var(--bor);color:var(--soluk);width:100%;margin-bottom:6px;padding:8px" onclick="hopDuzenleVazgec()">Vazgeç</button>':''}
       </div>
     </div>`;
 }
@@ -20000,6 +20001,7 @@ window.maltGeriAl=function(){
 let _sonSilinenHop=null;
 window.hopSil=function(idx){
   if(idx<0||idx>=S.hoplar.length) return;
+  if(yH._editIdx!=null)yH._editIdx=null;
   _sonSilinenHop={idx,item:{...S.hoplar[idx]}};
   S.hoplar.splice(idx,1);
   const hp=HOPLAR.find(x=>x&&x.id===_sonSilinenHop.item.id);
@@ -20034,6 +20036,18 @@ window.hopUp=function(idx){
 window.hopDown=function(idx){
   if(idx<0||idx>=S.hoplar.length-1)return;
   [S.hoplar[idx],S.hoplar[idx+1]]=[S.hoplar[idx+1],S.hoplar[idx]];
+  render();
+};
+window.hopDuzenleBasla=function(idx){
+  if(idx<0||idx>=S.hoplar.length)return;
+  const h=S.hoplar[idx];
+  yH.id=h.id; yH.g=h.g; yH.dk=h.dk; yH.tur=h.tur; yH.form=h.form||"pellet";
+  yH.cAA=(h.cAA!=null?h.cAA:null); yH.whT=(h.whT!=null?h.whT:null); yH.dryDays=h.dryDays||5;
+  yH._editIdx=idx;
+  render();
+};
+window.hopDuzenleVazgec=function(){
+  yH._editIdx=null;
   render();
 };
 // I-H2 — Otomatik hop sıralaması: süreç sırasına göre
@@ -21701,6 +21715,7 @@ function hopEkle(){
   if(yH.tur==="whirlpool") _obj.whT=yH.whT!=null?yH.whT:85;
   if(yH.tur==="hop_stand") _obj.whT=yH.whT!=null?yH.whT:80;
   if(yH.tur==="dry_hop") _obj.dryDays=yH.dryDays||5;
+  if(yH._editIdx!=null&&yH._editIdx>=0&&yH._editIdx<S.hoplar.length){S.hoplar[yH._editIdx]=_obj;yH._editIdx=null;flash("Hop güncellendi","ok");render();return;}
   S.hoplar.push(_obj);
   render();
 }
