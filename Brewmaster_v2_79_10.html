@@ -21786,6 +21786,38 @@ window.stokEkranAc=stokEkranAc;
 window.stokEkranKapat=stokEkranKapat;
 // Adim 137-G P2: Ana sayfa helper'lari (ekran="ana" + bildirim/ayar bypass).
 window.bmAnaSayfaAc=function(){ ekran='ana'; render(); };
+  // === Adim 160: Android geri tusu uygulama-ici navigasyon (PWA) ===
+  // History API yoktu -> Android geri tusu PWA'yi kapatiyordu. Sentinel pushState + popstate ile
+  // geri tusu uygulama-ici geri gider; ana sayfada islevsiz (asla cikis yapmaz).
+  (function(){
+    if(window.__bmBackNavKurulu) return; window.__bmBackNavKurulu=true;
+    function _geri(){
+      try{
+        // 1) Brewday alt-modallari (alarm/onay) acik mi -> once onlari kapat
+        var _em=document.getElementById('brewdayEventModal');
+        if(_em){ if(typeof window.brewdayModalKapat==='function') window.brewdayModalKapat(); else _em.remove(); return; }
+        var _om=document.getElementById('brewdayOnayModal');
+        if(_om){ _om.remove(); return; }
+        // 2) Aktif brewday oturumu -> islevsiz (kazara aktif brew'u kapatma; kullanici "Bitir" kullanir)
+        if(window._brewday && window._brewday.aktif){ return; }
+        // 3) View hiyerarsisi
+        if(typeof ekran!=='undefined' && ekran==='editor'){
+          if(typeof window.bmGeriDon==='function') window.bmGeriDon();
+          else { ekran='liste'; if(typeof render==='function') render(); }
+          return;
+        }
+        if(typeof ekran!=='undefined' && (ekran==='liste' || ekran==='stok')){
+          if(typeof window.bmAnaSayfaAc==='function') window.bmAnaSayfaAc();
+          else { ekran='ana'; if(typeof render==='function') render(); }
+          return;
+        }
+        // 4) ekran==='ana' (ilk acilis sayfasi) -> islevsiz, hicbir sey yapma
+      }catch(e){ console.warn('[bmBackNav]', e); }
+    }
+    function _sentinel(){ try{ history.pushState({bmNav:1}, ''); }catch(e){} }
+    window.addEventListener('popstate', function(){ _geri(); _sentinel(); });
+    _sentinel(); // ilk sentinel: geri tusu artik hep yakalanir, ana'da bile cikis olmaz
+  })();
 window.bmAnaBildirim=function(){ ekran='stok'; stokAnaTabSet('bildirim'); render(); };
 window.bmAnaAyarlar =function(){ ekran='stok'; stokAnaTabSet('ayarlar');  render(); };
 function logDuzenle(idx){
