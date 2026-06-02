@@ -3246,6 +3246,47 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     return {sorted: ns, reason: 'white_ipa_applied_wheat_belgian', applied: true};
   }
 
+  // === Adim 159: maya-aile SERT maske (hard gate) ===
+  // sorted = [{cls,prob}] tam slug dagilimini maya ailesine gore filtreler + yeniden normalize eder.
+  // wheat (bugday>%50 VEYA cavdar>=%50), wit, saison, lager(+lagering) => sadece izinli aile slug'lari.
+  // kveik / sour / belcika / ale => dokunulmaz. Eski __bmYeastFamilyGuard'in yerine gecer (sentez/calma YOK).
+  window.__bmYeastHardMask = function(uiRecipe, sorted, featObj){
+    try {
+      if(!Array.isArray(sorted) || !sorted.length) return sorted;
+      var maya = (uiRecipe && uiRecipe._mayaTip) || 'ale';
+      var ALLOW = null;
+      if(maya==='wit'){
+        ALLOW = {belgian_witbier:1, white_ipa:1};
+      } else if(maya==='saison'){
+        ALLOW = {french_belgian_saison:1, specialty_saison:1};
+      } else if(maya==='wheat'){
+        var f = featObj || (window.__bmBuildFeaturesV12 ? window.__bmBuildFeaturesV12(uiRecipe) : null);
+        var wp = f ? (f.pct_wheat>1 ? f.pct_wheat : f.pct_wheat*100) : 0;
+        var rp = f ? (f.pct_rye>1   ? f.pct_rye   : f.pct_rye*100)   : 0;
+        if(wp>50 || rp>=50){
+          ALLOW = {south_german_hefeweizen:1, south_german_dunkel_weizen:1, south_german_weizenbock:1,
+                   south_german_bernsteinfarbenes_weizen:1, german_leichtes_weizen:1, roggenbier:1};
+        }
+      } else if(maya==='lager'){
+        var lagered = (uiRecipe && uiRecipe._lagering!==undefined) ? !!uiRecipe._lagering : true;
+        if(lagered){
+          ALLOW = {american_lager:1,pale_lager:1,munich_helles:1,dortmunder_european_export:1,german_maerzen:1,
+                   german_oktoberfest_festbier:1,vienna_lager:1,kellerbier:1,bamberg_maerzen_rauchbier:1,
+                   german_schwarzbier:1,munich_dunkel:1,german_pilsener:1,pre_prohibition_lager:1,dunkles_bock:1,
+                   german_bock:1,german_doppelbock:1,german_heller_bock_maibock:1,baltic_porter:1};
+        } else {
+          ALLOW = {common_beer:1};
+        }
+      }
+      if(!ALLOW) return sorted;
+      var kept = sorted.filter(function(x){ return ALLOW[x.cls]; });
+      if(!kept.length) return sorted; // guvenlik: modelde aile hic yoksa orijinali koru
+      var sum = 0; kept.forEach(function(x){ if(x.prob>0) sum += x.prob; });
+      if(sum>0){ kept.forEach(function(x){ x.prob = x.prob / sum; }); }
+      else { var u = 1/kept.length; kept.forEach(function(x){ x.prob = u; }); }
+      return kept;
+    } catch(_hm){ return sorted; }
+  };
   function predictSlugSync(uiRecipe) {
     if (!cache.slugModel || !cache.slugLabels) return null;
     const featObj = buildFeatures(uiRecipe); if (!featObj) return null;
@@ -3292,6 +3333,7 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     sorted = ppN.sorted;
     var ppWI = postProcessWhiteIpa(featObj, sorted);
     sorted = ppWI.sorted;
+    sorted = window.__bmYeastHardMask(uiRecipe, sorted, featObj);
     const fmt = function(x){return {slug:x.cls, displayTR:slugDisplay(x.cls), score:x.prob, normalized:Math.round(x.prob*100)};};
     return {
       top3: sorted.slice(0,3).map(fmt),
@@ -3464,6 +3506,7 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
       var disp = (typeof window.bmSlugDisplayTR === 'function') ? window.bmSlugDisplayTR(x.cls) : x.cls;
       return { slug: x.cls, displayTR: disp, score: x.prob, normalized: Math.round(x.prob*100) };
     };
+    sorted = window.__bmYeastHardMask(uiRecipe, sorted);
     return {
       top3: sorted.slice(0,3).map(fmt),
       top5: sorted.slice(0,5).map(fmt),
@@ -3535,6 +3578,7 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
       var disp = (typeof window.bmSlugDisplayTR === 'function') ? window.bmSlugDisplayTR(x.cls) : x.cls;
       return { slug: x.cls, displayTR: disp, score: x.prob, normalized: Math.round(x.prob*100) };
     };
+    sorted = window.__bmYeastHardMask(uiRecipe, sorted);
     return {
       top3: sorted.slice(0,3).map(fmt),
       top5: sorted.slice(0,5).map(fmt),
@@ -17538,7 +17582,7 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
   // V6 14-cluster + V12 dispatcher (Adım 5.5 hotfix — eski V6 1100 reçete kaldırıldı, yeni V6 aktif)
 
   /* Adim 157: maya-aile guard helper erken tanim (V12/V20/Hibrit sync guard'lar dispatcher'da kullanir) */
-  if(!window.__bmYeastFamilyGuard){ window.__bmYeastFamilyGuard=function(topN,mayaTip,srm,og,smoke){
+  if(!window.__bmYeastFamilyGuard){ window.__bmYeastFamilyGuard=function(topN,mayaTip,srm,og,smoke){ return topN; /* Adim 159: neutered, hard-mask predictSlug icinde */
     var WZ={'american_wheat_beer':'American Wheat','american_wheat_ale':'American Wheat','south_german_hefeweizen':'Hefeweizen','south_german_weizenbock':'Weizenbock','south_german_kristal_weizen':'Kristal Weizen','german_leichtes_weizen':'Leichtes Weizen','south_german_bernsteinfarbenes_weizen':'Bernsteinfarbenes Weizen (Amber Weizen)','south_german_dunkel_weizen':'Dunkelweizen','bamberg_weiss_rauchbier':'Bamberg Weizen Rauchbier','german_rye_ale':'Roggenbier','roggenbier':'Roggenbier'};
     var WIT={'belgian_witbier':'Witbier'};
     var LAGER={munich_helles:1,pale_lager:1,american_lager:1,vienna_lager:1,dortmunder_european_export:1,german_maerzen:1,german_oktoberfest_festbier:1,kellerbier:1,common_beer:1,bamberg_maerzen_rauchbier:1,german_schwarzbier:1,munich_dunkel:1,german_pilsener:1,pre_prohibition_lager:1,dunkles_bock:1,german_bock:1,german_doppelbock:1,german_heller_bock_maibock:1};
@@ -17590,7 +17634,7 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
             var __v12Slug = window.BM_V12.predictSlugSync(__recipeV2);
             if (__v12Slug) {
               __top3V12_engine = __v12Slug.topN || __v12Slug.top3;
-              try { if(window.__bmYeastFamilyGuard && (_mayaTip && _mayaTip!=='lager') && Array.isArray(__top3V12_engine)){ __top3V12_engine = window.__bmYeastFamilyGuard(__top3V12_engine.slice(),_mayaTip,_srm,_og,(typeof _smokePct!=='undefined'&&_smokePct>0)); __v12Slug.top3=__top3V12_engine.slice(0,3); __v12Slug.topN=__top3V12_engine; if(__top3V12_engine[0]) __v12Slug.__bmYeastGuardV12=__top3V12_engine[0].slug; } } catch(_yg2){}
+              /* Adim 159: eski yeast guard call-site kaldirildi (yerini predictSlug ici hard-mask aldi) */
               __v12_meta = __v12Slug._meta;
               window.__lastV12SlugResult = __v12Slug;
               window.__lastV12Slug = __v12Slug;
@@ -17648,7 +17692,7 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
         var __v20Slug = window.BM_V20.predictSlugSync(__recipeV2);
         if (__v20Slug) {
           window.__lastV20SlugResult = __v20Slug;
-          try { if(window.__bmYeastFamilyGuard && (_mayaTip && _mayaTip!=='lager') && __v20Slug.top3){ __v20Slug.top3=window.__bmYeastFamilyGuard(__v20Slug.top3.slice(),_mayaTip,_srm,_og,(typeof _smokePct!=='undefined'&&_smokePct>0)); } } catch(_yg3){}
+          /* Adim 159: eski yeast guard call-site kaldirildi (yerini predictSlug ici hard-mask aldi) */
           console.log('%c[BM V20 (α=0.30) slug]','background:#0277BD;color:#fff;padding:2px 6px;');
           __v20Slug.top3.forEach(function(r,i){ console.log('    V20 '+(i+1)+'. '+r.displayTR+' %'+r.normalized); });
         }
@@ -17659,7 +17703,7 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
         var __f1Hybrid = window.BM_F1_HYBRID.predictSlugSync(__recipeV2);
         if (__f1Hybrid) {
           window.__lastF1HybridSlugResult = __f1Hybrid;
-          try { if(window.__bmYeastFamilyGuard && (_mayaTip && _mayaTip!=='lager') && __f1Hybrid.top3){ __f1Hybrid.top3=window.__bmYeastFamilyGuard(__f1Hybrid.top3.slice(),_mayaTip,_srm,_og,(typeof _smokePct!=='undefined'&&_smokePct>0)); } } catch(_yg4){}
+          /* Adim 159: eski yeast guard call-site kaldirildi (yerini predictSlug ici hard-mask aldi) */
           console.log('%c[BM F1 Hibrit (V19+V20)/2]','background:#388E3C;color:#fff;padding:2px 6px;');
           __f1Hybrid.top3.forEach(function(r,i){ console.log('    Hibrit '+(i+1)+'. '+r.displayTR+' %'+r.normalized); });
         }
@@ -17705,7 +17749,7 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
               window.BM_STRATEGY_C.predict(_b1Input).then(function(stcRes){
                 if (stcRes) {
                   window.__lastStrategyCResult = stcRes;
-                  try { if(stcRes.top3 && stcRes.top3.length && window.__bmYeastFamilyGuard && (_mayaTip && _mayaTip!=='lager')){ var _gT=window.__bmYeastFamilyGuard(stcRes.top3.slice(),_mayaTip,_srm,_og,(typeof _smokePct!=='undefined'&&_smokePct>0)); if(_gT&&_gT[0]&&_gT[0].slug!==stcRes.topSlug){ stcRes.top3=_gT; stcRes.topSlug=_gT[0].slug; if(_gT[0].normalized!=null) stcRes.topProb=_gT[0].normalized/100; stcRes._yeastGuard=true; console.log('%c[BM Yeast Guard]','background:#00897B;color:#fff;padding:2px 6px;',_mayaTip+' -> '+_gT[0].slug);} } } catch(_yg){}
+                  /* Adim 159: eski yeast guard call-site kaldirildi (yerini predictSlug ici hard-mask aldi) */
                   console.log('%c[BM Strategy C]','background:#00897B;color:#fff;padding:2px 6px;', 'top1='+stcRes.topSlug+' ('+(stcRes.topProb*100).toFixed(1)+'%) cluster='+stcRes.cluster+' fallback='+(stcRes.fallback || 'none')+' latency='+((stcRes._meta && stcRes._meta.latency_ms) || 0)+'ms');
                 } else {
                   console.warn('[BM Strategy C] predict returned null');
@@ -17750,7 +17794,7 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
   }
 
   /* Adim 156: maya-aile guard helper (ground-truth: bugday mayasi=>weizen, wit=>witbier). Unit-test 9/9. */
-  if(!window.__bmYeastFamilyGuard){ window.__bmYeastFamilyGuard=function(topN,mayaTip,srm,og,smoke){
+  if(!window.__bmYeastFamilyGuard){ window.__bmYeastFamilyGuard=function(topN,mayaTip,srm,og,smoke){ return topN; /* Adim 159: neutered, hard-mask predictSlug icinde */
     var WZ={'american_wheat_beer':'American Wheat','american_wheat_ale':'American Wheat','south_german_hefeweizen':'Hefeweizen','south_german_weizenbock':'Weizenbock','south_german_kristal_weizen':'Kristal Weizen','german_leichtes_weizen':'Leichtes Weizen','south_german_bernsteinfarbenes_weizen':'Bernsteinfarbenes Weizen (Amber Weizen)','south_german_dunkel_weizen':'Dunkelweizen','bamberg_weiss_rauchbier':'Bamberg Weizen Rauchbier','german_rye_ale':'Roggenbier','roggenbier':'Roggenbier'};
     var WIT={'belgian_witbier':'Witbier'};
     var LAGER={munich_helles:1,pale_lager:1,american_lager:1,vienna_lager:1,dortmunder_european_export:1,german_maerzen:1,german_oktoberfest_festbier:1,kellerbier:1,common_beer:1,bamberg_maerzen_rauchbier:1,german_schwarzbier:1,munich_dunkel:1,german_pilsener:1,pre_prohibition_lager:1,dunkles_bock:1,german_bock:1,german_doppelbock:1,german_heller_bock_maibock:1};
