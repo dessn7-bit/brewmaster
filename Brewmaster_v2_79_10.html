@@ -1441,7 +1441,7 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
       water_cl_ppm: (r.water_cl_ppm > 0) ? r.water_cl_ppm : 120,
       dry_hop_days: (dpl > 0) ? 5 : 0,
       mash_type_step: 1, mash_type_decoction: 0,
-      lagering_days: (mt === 'lager') ? 14 : 0,
+      lagering_days: ((r && r._lagering !== undefined) ? (r._lagering ? 14 : 0) : ((mt === 'lager') ? 14 : 0)),
       has_coffee: has_coffee, has_fruit: has_fruit, has_spice: has_spice, has_chili: has_chili,
       has_smoke: has_smoke, has_belgian_yeast: has_belgian_yeast, has_clean_us05_isolate: has_clean_us05_isolate,
       has_brett: hasBrett ? 1 : 0, has_lacto: hasLacto ? 1 : 0, has_pedio: hasPedio ? 1 : 0,
@@ -14183,6 +14183,7 @@ function rEditorMaya(og, fg, abv, maya, maya2, fgKaynak, fgHesap){
     })():""}
     ${det || (!maya?'<div style="text-align:center;padding:20px;color:var(--dim);font-size:13px">Henüz maya seçilmedi — aşağıdan seç</div>':'')}
     ${maya && S.maya2Id ? `<div style="margin-top:10px"><span class="etiket">2. Maya</span>${det2}</div>` : ''}
+    ${maya && maya.tip==='lager' ? `<div class="kart" style="margin-top:10px;background:#EAF2F8;border:1px solid #AECBDC;padding:10px 12px"><label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px;color:var(--kahve);line-height:1.4"><input type="checkbox" ${S.lagering!==false?'checked':''} onchange="S.lagering=this.checked;render()" style="width:18px;height:18px;cursor:pointer;flex:none;margin-top:1px"><span><b>Lagering yaptım</b> <span style="color:var(--dim);font-size:11px">(soğuk uzun dinlendirme). İşaretliyse gerçek lager stilleri; kapalıysa California Common.</span></span></label></div>` : ''}
     <div class="bm-acc bm-edit-only-acc" data-acc-id="maya-sec" data-acc-default="${_mySecDefault}" aria-expanded="${_mySecAria}" style="margin-top:10px">
       <button class="bm-acc-header" type="button" aria-expanded="${_mySecAria}" onclick="bmAccToggle('maya-sec')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmAccToggle('maya-sec')}"><span class="bm-acc-title">${_mySecBaslik}</span><span class="bm-acc-chevron">▾</span></button>
       <div class="bm-acc-body">
@@ -17429,7 +17430,7 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
     if (window.BM_ENGINE && window.BM_ENGINE.findBestMatches) {
       // Reset recipe objesini yeni motor formatina donustur
       __recipeV2 = {
-        _og:_og, _fg:_fg, _ibu:_ibu, _srm:_srm, _abv:_abv, _mayaTip:_mayaTip,
+        _og:_og, _fg:_fg, _ibu:_ibu, _srm:_srm, _abv:_abv, _mayaTip:_mayaTip, _lagering:(typeof S!=='undefined'&&S?S.lagering:undefined),
         biraAd: S.biraAd||'',
         mayaId: S.mayaId||'', maya2Id: S.maya2Id||'',
         hopIds:   (S.hoplar   ||[]).map(h=>h&&h.id).filter(Boolean),
