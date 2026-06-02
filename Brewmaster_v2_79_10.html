@@ -17541,14 +17541,13 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
   if(!window.__bmYeastFamilyGuard){ window.__bmYeastFamilyGuard=function(topN,mayaTip,srm,og,smoke){
     var WZ={'american_wheat_beer':'American Wheat','american_wheat_ale':'American Wheat','south_german_hefeweizen':'Hefeweizen','south_german_weizenbock':'Weizenbock','south_german_kristal_weizen':'Kristal Weizen','german_leichtes_weizen':'Leichtes Weizen','south_german_bernsteinfarbenes_weizen':'Bernsteinfarbenes Weizen (Amber Weizen)','south_german_dunkel_weizen':'Dunkelweizen','bamberg_weiss_rauchbier':'Bamberg Weizen Rauchbier','german_rye_ale':'Roggenbier','roggenbier':'Roggenbier'};
     var WIT={'belgian_witbier':'Witbier'};
-    var fam=(mayaTip==='wheat')?WZ:(mayaTip==='wit')?WIT:null;
-    if(!fam||!Array.isArray(topN)||!topN.length) return topN;
-    if(fam[topN[0].slug]) return topN;
-    for(var i=1;i<topN.length;i++){ if(fam[topN[i].slug]){ var e=topN.splice(i,1)[0]; topN.unshift(e); return topN; } }
-    var defSlug,name;
-    if(mayaTip==='wit'){ defSlug='belgian_witbier'; name='Witbier'; }
-    else { if(smoke) defSlug='bamberg_weiss_rauchbier'; else if(og>=1.064) defSlug='south_german_weizenbock'; else if(srm>=13) defSlug='south_german_dunkel_weizen'; else if(srm>=8.5) defSlug='south_german_bernsteinfarbenes_weizen'; else if(og&&og<=1.044) defSlug='german_leichtes_weizen'; else defSlug='south_german_hefeweizen'; name=WZ[defSlug]; }
-    topN.unshift({slug:defSlug,displayTR:name,normalized:(topN[0]&&topN[0].normalized!=null?topN[0].normalized:50),score:(topN[0]&&topN[0].score?topN[0].score:0.5),_yeastGuard:true});
+    var LAGER={munich_helles:1,pale_lager:1,american_lager:1,vienna_lager:1,dortmunder_european_export:1,german_maerzen:1,german_oktoberfest_festbier:1,kellerbier:1,common_beer:1,bamberg_maerzen_rauchbier:1,german_schwarzbier:1,munich_dunkel:1,german_pilsener:1,pre_prohibition_lager:1,dunkles_bock:1,german_bock:1,german_doppelbock:1,german_heller_bock_maibock:1};
+    if(!Array.isArray(topN)||!topN.length) return topN;
+    if(mayaTip==='wheat'){ if(WZ[topN[0].slug]) return topN; for(var i=1;i<topN.length;i++){if(WZ[topN[i].slug]){var e=topN.splice(i,1)[0];topN.unshift(e);return topN;}} var ds; if(smoke)ds='bamberg_weiss_rauchbier';else if(og>=1.064)ds='south_german_weizenbock';else if(srm>=13)ds='south_german_dunkel_weizen';else if(srm>=8.5)ds='south_german_bernsteinfarbenes_weizen';else if(og&&og<=1.044)ds='german_leichtes_weizen';else ds='south_german_hefeweizen'; topN.unshift({slug:ds,displayTR:WZ[ds],normalized:(topN[0]&&topN[0].normalized!=null?topN[0].normalized:50),score:(topN[0]&&topN[0].score?topN[0].score:0.5),_yeastGuard:true}); return topN; }
+    if(mayaTip==='wit'){ if(WIT[topN[0].slug]) return topN; for(var j=1;j<topN.length;j++){if(WIT[topN[j].slug]){var e2=topN.splice(j,1)[0];topN.unshift(e2);return topN;}} topN.unshift({slug:'belgian_witbier',displayTR:'Witbier',normalized:(topN[0]&&topN[0].normalized!=null?topN[0].normalized:50),score:(topN[0]&&topN[0].score?topN[0].score:0.5),_yeastGuard:true}); return topN; }
+    if(mayaTip==='lager') return topN;
+    if(!LAGER[topN[0].slug]) return topN;
+    for(var k=1;k<topN.length;k++){ var sl=topN[k].slug; if(!LAGER[sl]&&!WZ[sl]&&!WIT[sl]){ var e3=topN.splice(k,1)[0]; topN.unshift(e3); return topN; } }
     return topN;
   }; }
   var __top3V12_engine = null;
@@ -17591,7 +17590,7 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
             var __v12Slug = window.BM_V12.predictSlugSync(__recipeV2);
             if (__v12Slug) {
               __top3V12_engine = __v12Slug.topN || __v12Slug.top3;
-              try { if(window.__bmYeastFamilyGuard && (_mayaTip==='wheat'||_mayaTip==='wit') && Array.isArray(__top3V12_engine)){ __top3V12_engine = window.__bmYeastFamilyGuard(__top3V12_engine.slice(),_mayaTip,_srm,_og,(typeof _smokePct!=='undefined'&&_smokePct>0)); __v12Slug.top3=__top3V12_engine.slice(0,3); __v12Slug.topN=__top3V12_engine; if(__top3V12_engine[0]) __v12Slug.__bmYeastGuardV12=__top3V12_engine[0].slug; } } catch(_yg2){}
+              try { if(window.__bmYeastFamilyGuard && (_mayaTip && _mayaTip!=='lager') && Array.isArray(__top3V12_engine)){ __top3V12_engine = window.__bmYeastFamilyGuard(__top3V12_engine.slice(),_mayaTip,_srm,_og,(typeof _smokePct!=='undefined'&&_smokePct>0)); __v12Slug.top3=__top3V12_engine.slice(0,3); __v12Slug.topN=__top3V12_engine; if(__top3V12_engine[0]) __v12Slug.__bmYeastGuardV12=__top3V12_engine[0].slug; } } catch(_yg2){}
               __v12_meta = __v12Slug._meta;
               window.__lastV12SlugResult = __v12Slug;
               window.__lastV12Slug = __v12Slug;
@@ -17649,7 +17648,7 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
         var __v20Slug = window.BM_V20.predictSlugSync(__recipeV2);
         if (__v20Slug) {
           window.__lastV20SlugResult = __v20Slug;
-          try { if(window.__bmYeastFamilyGuard && (_mayaTip==='wheat'||_mayaTip==='wit') && __v20Slug.top3){ __v20Slug.top3=window.__bmYeastFamilyGuard(__v20Slug.top3.slice(),_mayaTip,_srm,_og,(typeof _smokePct!=='undefined'&&_smokePct>0)); } } catch(_yg3){}
+          try { if(window.__bmYeastFamilyGuard && (_mayaTip && _mayaTip!=='lager') && __v20Slug.top3){ __v20Slug.top3=window.__bmYeastFamilyGuard(__v20Slug.top3.slice(),_mayaTip,_srm,_og,(typeof _smokePct!=='undefined'&&_smokePct>0)); } } catch(_yg3){}
           console.log('%c[BM V20 (α=0.30) slug]','background:#0277BD;color:#fff;padding:2px 6px;');
           __v20Slug.top3.forEach(function(r,i){ console.log('    V20 '+(i+1)+'. '+r.displayTR+' %'+r.normalized); });
         }
@@ -17660,7 +17659,7 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
         var __f1Hybrid = window.BM_F1_HYBRID.predictSlugSync(__recipeV2);
         if (__f1Hybrid) {
           window.__lastF1HybridSlugResult = __f1Hybrid;
-          try { if(window.__bmYeastFamilyGuard && (_mayaTip==='wheat'||_mayaTip==='wit') && __f1Hybrid.top3){ __f1Hybrid.top3=window.__bmYeastFamilyGuard(__f1Hybrid.top3.slice(),_mayaTip,_srm,_og,(typeof _smokePct!=='undefined'&&_smokePct>0)); } } catch(_yg4){}
+          try { if(window.__bmYeastFamilyGuard && (_mayaTip && _mayaTip!=='lager') && __f1Hybrid.top3){ __f1Hybrid.top3=window.__bmYeastFamilyGuard(__f1Hybrid.top3.slice(),_mayaTip,_srm,_og,(typeof _smokePct!=='undefined'&&_smokePct>0)); } } catch(_yg4){}
           console.log('%c[BM F1 Hibrit (V19+V20)/2]','background:#388E3C;color:#fff;padding:2px 6px;');
           __f1Hybrid.top3.forEach(function(r,i){ console.log('    Hibrit '+(i+1)+'. '+r.displayTR+' %'+r.normalized); });
         }
@@ -17706,7 +17705,7 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
               window.BM_STRATEGY_C.predict(_b1Input).then(function(stcRes){
                 if (stcRes) {
                   window.__lastStrategyCResult = stcRes;
-                  try { if(stcRes.top3 && stcRes.top3.length && window.__bmYeastFamilyGuard && (_mayaTip==='wheat'||_mayaTip==='wit')){ var _gT=window.__bmYeastFamilyGuard(stcRes.top3.slice(),_mayaTip,_srm,_og,(typeof _smokePct!=='undefined'&&_smokePct>0)); if(_gT&&_gT[0]&&_gT[0].slug!==stcRes.topSlug){ stcRes.top3=_gT; stcRes.topSlug=_gT[0].slug; if(_gT[0].normalized!=null) stcRes.topProb=_gT[0].normalized/100; stcRes._yeastGuard=true; console.log('%c[BM Yeast Guard]','background:#00897B;color:#fff;padding:2px 6px;',_mayaTip+' -> '+_gT[0].slug);} } } catch(_yg){}
+                  try { if(stcRes.top3 && stcRes.top3.length && window.__bmYeastFamilyGuard && (_mayaTip && _mayaTip!=='lager')){ var _gT=window.__bmYeastFamilyGuard(stcRes.top3.slice(),_mayaTip,_srm,_og,(typeof _smokePct!=='undefined'&&_smokePct>0)); if(_gT&&_gT[0]&&_gT[0].slug!==stcRes.topSlug){ stcRes.top3=_gT; stcRes.topSlug=_gT[0].slug; if(_gT[0].normalized!=null) stcRes.topProb=_gT[0].normalized/100; stcRes._yeastGuard=true; console.log('%c[BM Yeast Guard]','background:#00897B;color:#fff;padding:2px 6px;',_mayaTip+' -> '+_gT[0].slug);} } } catch(_yg){}
                   console.log('%c[BM Strategy C]','background:#00897B;color:#fff;padding:2px 6px;', 'top1='+stcRes.topSlug+' ('+(stcRes.topProb*100).toFixed(1)+'%) cluster='+stcRes.cluster+' fallback='+(stcRes.fallback || 'none')+' latency='+((stcRes._meta && stcRes._meta.latency_ms) || 0)+'ms');
                 } else {
                   console.warn('[BM Strategy C] predict returned null');
@@ -17754,14 +17753,13 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
   if(!window.__bmYeastFamilyGuard){ window.__bmYeastFamilyGuard=function(topN,mayaTip,srm,og,smoke){
     var WZ={'american_wheat_beer':'American Wheat','american_wheat_ale':'American Wheat','south_german_hefeweizen':'Hefeweizen','south_german_weizenbock':'Weizenbock','south_german_kristal_weizen':'Kristal Weizen','german_leichtes_weizen':'Leichtes Weizen','south_german_bernsteinfarbenes_weizen':'Bernsteinfarbenes Weizen (Amber Weizen)','south_german_dunkel_weizen':'Dunkelweizen','bamberg_weiss_rauchbier':'Bamberg Weizen Rauchbier','german_rye_ale':'Roggenbier','roggenbier':'Roggenbier'};
     var WIT={'belgian_witbier':'Witbier'};
-    var fam=(mayaTip==='wheat')?WZ:(mayaTip==='wit')?WIT:null;
-    if(!fam||!Array.isArray(topN)||!topN.length) return topN;
-    if(fam[topN[0].slug]) return topN;
-    for(var i=1;i<topN.length;i++){ if(fam[topN[i].slug]){ var e=topN.splice(i,1)[0]; topN.unshift(e); return topN; } }
-    var defSlug,name;
-    if(mayaTip==='wit'){ defSlug='belgian_witbier'; name='Witbier'; }
-    else { if(smoke) defSlug='bamberg_weiss_rauchbier'; else if(og>=1.064) defSlug='south_german_weizenbock'; else if(srm>=13) defSlug='south_german_dunkel_weizen'; else if(srm>=8.5) defSlug='south_german_bernsteinfarbenes_weizen'; else if(og&&og<=1.044) defSlug='german_leichtes_weizen'; else defSlug='south_german_hefeweizen'; name=WZ[defSlug]; }
-    topN.unshift({slug:defSlug,displayTR:name,normalized:(topN[0]&&topN[0].normalized!=null?topN[0].normalized:50),score:(topN[0]&&topN[0].score?topN[0].score:0.5),_yeastGuard:true});
+    var LAGER={munich_helles:1,pale_lager:1,american_lager:1,vienna_lager:1,dortmunder_european_export:1,german_maerzen:1,german_oktoberfest_festbier:1,kellerbier:1,common_beer:1,bamberg_maerzen_rauchbier:1,german_schwarzbier:1,munich_dunkel:1,german_pilsener:1,pre_prohibition_lager:1,dunkles_bock:1,german_bock:1,german_doppelbock:1,german_heller_bock_maibock:1};
+    if(!Array.isArray(topN)||!topN.length) return topN;
+    if(mayaTip==='wheat'){ if(WZ[topN[0].slug]) return topN; for(var i=1;i<topN.length;i++){if(WZ[topN[i].slug]){var e=topN.splice(i,1)[0];topN.unshift(e);return topN;}} var ds; if(smoke)ds='bamberg_weiss_rauchbier';else if(og>=1.064)ds='south_german_weizenbock';else if(srm>=13)ds='south_german_dunkel_weizen';else if(srm>=8.5)ds='south_german_bernsteinfarbenes_weizen';else if(og&&og<=1.044)ds='german_leichtes_weizen';else ds='south_german_hefeweizen'; topN.unshift({slug:ds,displayTR:WZ[ds],normalized:(topN[0]&&topN[0].normalized!=null?topN[0].normalized:50),score:(topN[0]&&topN[0].score?topN[0].score:0.5),_yeastGuard:true}); return topN; }
+    if(mayaTip==='wit'){ if(WIT[topN[0].slug]) return topN; for(var j=1;j<topN.length;j++){if(WIT[topN[j].slug]){var e2=topN.splice(j,1)[0];topN.unshift(e2);return topN;}} topN.unshift({slug:'belgian_witbier',displayTR:'Witbier',normalized:(topN[0]&&topN[0].normalized!=null?topN[0].normalized:50),score:(topN[0]&&topN[0].score?topN[0].score:0.5),_yeastGuard:true}); return topN; }
+    if(mayaTip==='lager') return topN;
+    if(!LAGER[topN[0].slug]) return topN;
+    for(var k=1;k<topN.length;k++){ var sl=topN[k].slug; if(!LAGER[sl]&&!WZ[sl]&&!WIT[sl]){ var e3=topN.splice(k,1)[0]; topN.unshift(e3); return topN; } }
     return topN;
   }; }
   /* Adim 156: sync isim-guard (S.stilTah aileyle tutarli olsun; manuel secim korunur) */
