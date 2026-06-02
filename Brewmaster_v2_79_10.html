@@ -5250,7 +5250,7 @@ function hIBU(hl,og,hacim,katkilar){
   hl.forEach(x=>{
     if(x.tur==="dry_hop")return;
     const hp=HOPLAR.find(a=>a&&a.id===x.id);if(!hp)return;
-    const aa=x.cAA||hp.aa;
+    const aa=(x.cAA!=null?x.cAA:hp.aa);
     const fF=hFormFaktor(x.form||"pellet");
     if(x.tur==="whirlpool"){
       // whT = sıcaklık (°C), dk = gerçek temas süresi
@@ -15455,7 +15455,7 @@ function _hopOlcekHesapla(hoplar, og, hacim, IBU_t, katkilar){
   const hopTarget=IBU_t-katkiIBU;
   if(hopTarget<=0) return {err:'Katkı acılığı tek başına hedef IBU’yu karşılıyor — hop küçültülemez.'};
   const f=hopTarget/curIBU;
-  const yeni=list.map(m=>({...m, g:(m.tur==='dry_hop')?(+m.g):+(+m.g*f).toFixed(1)}));
+  const yeni=list.map(m=>({...m, g:(m.tur==='dry_hop')?(+m.g):Math.min(500,Math.max(0.1,+(+m.g*f).toFixed(1)))}));
   return {f:+f.toFixed(4), yeni, uyari:(f<0.1||f>10)?('Ölçek faktörü aşırı (×'+f.toFixed(2)+') — hedef gerçekçi mi?'):null};
 }
 function _hopOlcekOnizlemeHTML(){
@@ -21695,6 +21695,7 @@ function hopEkle(){
   if(g<=0){flash("Geçerli gram gir (>0)","err");return;}
   if(g>500){flash("Hop 500g üstü olamaz","err");return;}
   const hp=HOPLAR.find(x=>x&&x.id===id);
+  if(!id||!hp){flash("Önce listeden bir hop seç","err");return;}
   // Whirlpool ise sıcaklık; Dry hop ise gün; form her hop için
   const _obj={id,g,dk:yH.dk,tur:yH.tur,cAA,form:yH.form||"pellet",_ad:hp?hp.ad:id};
   if(yH.tur==="whirlpool") _obj.whT=yH.whT!=null?yH.whT:85;
