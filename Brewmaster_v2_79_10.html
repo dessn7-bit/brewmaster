@@ -3643,13 +3643,13 @@ function beerXmlExport(){
     const mo=MALTLAR.find(x=>x&&x.id===m.id);
     if(!mo)return '';
     // PPG → yield% (PPG × 0.131 ≈ yield)
-    const yld=((mo.gu||300)*0.131).toFixed(1);
+    const yld=((mo.gu||300)/384*100).toFixed(1);
     // Lovibond → °L (aynı)
     const isBase=mo.g==='Base';
     return `    <FERMENTABLE>
       <NAME>${xe(mo.ad)}</NAME>
       <VERSION>1</VERSION>
-      <TYPE>Grain</TYPE>
+      <TYPE>${mo.g==='Şeker'?'Sugar':mo.g==='Adjunct'?'Adjunct':'Grain'}</TYPE>
       <AMOUNT>${m.kg}</AMOUNT>
       <YIELD>${yld}</YIELD>
       <COLOR>${mo.r||2}</COLOR>
@@ -3664,20 +3664,26 @@ function beerXmlExport(){
     const ho=HOPLAR.find(x=>x&&x.id===h_.id);
     if(!ho)return '';
     // Tinseth amaç: Dry Hop / Boil / Aroma / First Wort
+    const _t=h_.tur;
     let use='Boil';
-    if(h_.tur==='dry')use='Dry Hop';
+    if(_t==='dry_hop'||_t==='dry'||_t==='dryhop')use='Dry Hop';
+    else if(_t==='fwh'||_t==='fw')use='First Wort';
+    else if(_t==='whirlpool'||_t==='hop_stand')use='Aroma';
     else if(h_.dk===0)use='Aroma';
-    else if(h_.tur==='fw')use='First Wort';
+    const _alpha=h_.cAA||ho.aa||10;
+    const _time=(_t==='dry_hop')?(h_.dryDays||5)*1440:(h_.dk||0);
+    const _htype=(_alpha>=10)?'Bittering':(_alpha<5)?'Aroma':'Both';
+    const _form=(h_.form==='leaf')?'Leaf':'Pellet';
     return `    <HOP>
       <NAME>${xe(ho.ad)}</NAME>
       <VERSION>1</VERSION>
-      <ALPHA>${ho.a||h_.aa||10}</ALPHA>
+      <ALPHA>${_alpha}</ALPHA>
       <AMOUNT>${(h_.g/1000).toFixed(4)}</AMOUNT>
       <USE>${use}</USE>
-      <TIME>${h_.dk||0}</TIME>
-      <TYPE>${ho.t||'Aroma'}</TYPE>
-      <FORM>Pellet</FORM>
-      <ORIGIN>${xe(ho.ul||'')}</ORIGIN>
+      <TIME>${_time}</TIME>
+      <TYPE>${_htype}</TYPE>
+      <FORM>${_form}</FORM>
+      <ORIGIN>${xe(ho.g||'')}</ORIGIN>
     </HOP>`;
   }).filter(x=>x).join('\n');
   
@@ -3687,16 +3693,18 @@ function beerXmlExport(){
     const my=MAYALAR.find(x=>x&&x.id===mid);
     if(!my)continue;
     const atuOrt=my.atu?((my.atu[0]+my.atu[1])/2):75;
+    const _isDry=/US-0|S-0[0-9]|S-2|W-\d|BE-|BB-|WB-|MJ\b|T-58|Nottingham|Windsor|Lallemand|LalBrew|Fermentis|Mangrove|Verdant|Abbaye|Munich Classic|CBC-/i.test(my.ad||'');
     mayaBlocks.push(`    <YEAST>
       <NAME>${xe(my.ad)}</NAME>
       <VERSION>1</VERSION>
       <TYPE>${my.tip==='lager'?'Lager':my.tip==='wheat'?'Wheat':'Ale'}</TYPE>
-      <FORM>${my.form==='kuru'?'Dry':'Liquid'}</FORM>
-      <AMOUNT>${my.form==='kuru'?0.0115:0.035}</AMOUNT>
+      <FORM>${_isDry?'Dry':'Liquid'}</FORM>
+      <AMOUNT>${_isDry?0.0115:0.035}</AMOUNT>
+      <AMOUNT_IS_WEIGHT>${_isDry?'TRUE':'FALSE'}</AMOUNT_IS_WEIGHT>
       <LABORATORY>${xe(my.lab||'')}</LABORATORY>
       <PRODUCT_ID>${xe(my.id)}</PRODUCT_ID>
-      <MIN_TEMPERATURE>${my.s?my.s[0]:18}</MIN_TEMPERATURE>
-      <MAX_TEMPERATURE>${my.s?my.s[1]:22}</MAX_TEMPERATURE>
+      <MIN_TEMPERATURE>${my.sc?my.sc[0]:18}</MIN_TEMPERATURE>
+      <MAX_TEMPERATURE>${my.sc?my.sc[1]:22}</MAX_TEMPERATURE>
       <FLOCCULATION>${my.fl==='yuksek'?'High':my.fl==='orta'?'Medium':'Low'}</FLOCCULATION>
       <ATTENUATION>${atuOrt}</ATTENUATION>
     </YEAST>`);
@@ -3721,16 +3729,17 @@ function beerXmlExport(){
   const miscs=(S.katkilar||[]).map(k=>{
     const ko=(typeof KATKILAR!=='undefined')?KATKILAR.find(x=>x&&x.id===k.id):null;
     if(!ko)return '';
-    const kullanim=k.asama==='boil'?'Boil':k.asama==='mash'?'Mash':k.asama==='primary'?'Primary':k.asama==='secondary'?'Secondary':'Boil';
+    const _z=((k.zaman||ko.zaman||ko.kullanim||'')+'').toLowerCase();
+    const kullanim=_z.includes('mash')?'Mash':_z.includes('kaynat')?'Boil':(_z.includes('secondary')||_z.includes('sonu'))?'Secondary':(_z.includes('fermant')||_z.includes('ferment')||_z.includes('primary')||_z.includes('başı')||_z.includes('basi')||_z.includes('pitch'))?'Primary':(_z.includes('şişele')||_z.includes('sisele')||_z.includes('bottl'))?'Bottling':'Boil';
     return `    <MISC>
       <NAME>${xe(ko.ad)}</NAME>
       <VERSION>1</VERSION>
-      <TYPE>${ko.kat==='spice'?'Spice':ko.kat==='clarity'?'Fining':ko.kat==='yeast_nutrient'?'Other':'Other'}</TYPE>
+      <TYPE>${ko.g==='Berraklaştırıcı'?'Fining':(ko.g==='Aroma'||ko.g==='Meyve'||ko.g==='Meşe')?'Flavor':'Other'}</TYPE>
       <USE>${kullanim}</USE>
       <TIME>${k.dk||0}</TIME>
-      <AMOUNT>${(k.miktar||0)/1000}</AMOUNT>
+      <AMOUNT>${(k.birim==='kg'||k.birim==='L')?(k.miktar||0):(k.birim==='mg')?(k.miktar||0)/1e6:(k.miktar||0)/1000}</AMOUNT>
       <AMOUNT_IS_WEIGHT>${['g','kg','mg'].includes(k.birim)?'TRUE':'FALSE'}</AMOUNT_IS_WEIGHT>
-      <NOTES>${xe(ko.aciklama||'')}</NOTES>
+      <NOTES>${xe(ko.acik||'')}</NOTES>
     </MISC>`;
   }).filter(x=>x).join('\n');
   
@@ -3757,7 +3766,7 @@ function beerXmlExport(){
       <CATEGORY_NUMBER>-</CATEGORY_NUMBER>
       <STYLE_LETTER>-</STYLE_LETTER>
       <STYLE_GUIDE>BJCP</STYLE_GUIDE>
-      <TYPE>Ale</TYPE>
+      <TYPE>${/lager|pilsner|pils|helles|bock|märzen|marzen|schwarz|dunkel|kölsch|kolsch|altbier|steam|california common|festbier|rauch|baltic/i.test(stilTah)?'Lager':'Ale'}</TYPE>
       <OG_MIN>${sRef.og[0]}</OG_MIN>
       <OG_MAX>${sRef.og[1]}</OG_MAX>
       <FG_MIN>${sRef.fg[0]}</FG_MIN>
@@ -3782,7 +3791,7 @@ function beerXmlExport(){
   <BOIL_SIZE>${(h*1.3).toFixed(1)}</BOIL_SIZE>
   <BOIL_TIME>${S.kaynatmaSure||60}</BOIL_TIME>
   <EFFICIENCY>${S.verim||75}</EFFICIENCY>
-  <NOTES>Brewmaster v2.78 ile oluşturulmuştur.${S.notlar?' '+xe(S.notlar):''}</NOTES>
+  <NOTES>Brewmaster v2.79.10 ile oluşturulmuştur.${S.notlar?' '+xe(S.notlar):''}</NOTES>
 ${styleBlock}
   <FERMENTABLES>
 ${fermentables}
