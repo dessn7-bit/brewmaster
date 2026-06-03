@@ -4647,6 +4647,18 @@ const _KR_GRUP = {
   ahududu:         {rgb:[200,20,80],  max:600, tr:"Patlıcan",      en:"Eggplant"},
   cilek:           {rgb:[200,40,60],  max:900, tr:"Mercan",        en:"Coral"}
 };
+// Sprint 2.1 fix (pH-aware): editor + defter kart + sticky aktif_pigment'a ayni Kolbach mash pH'ini gecsin.
+// Eskiden kart/sticky sabit 4.3 veriyordu, editor _pH_est kullaniyordu -> sour + mavi_kelebek recetelerde uyusmazlik.
+function __bm_estPH(suMineralleri, hacim, suKaynak){
+  try {
+    if (typeof suProfiliHesapla !== 'function') return 4.3;
+    var ppm = suProfiliHesapla(suMineralleri, hacim||11, suKaynak);
+    if (!ppm) return 4.3;
+    var ra = (ppm.HCO3/61.0) - ((ppm.Ca/100) + (ppm.Mg/35.1));
+    var v = +(5.72 + 0.04*ra).toFixed(2);
+    return (isFinite(v) && v > 0 && v < 14) ? v : 4.3;
+  } catch(e) { return 4.3; }
+}
 function aktif_pigment(katkilar, hacim, pH){
   let enYuksek=null, enYuksekOran=0;
   const oranMap={};
@@ -11645,7 +11657,7 @@ function rListe(){
   function tarifKart(t){
     const ozet=t.ozet||{};
     const srmVal=parseFloat(ozet.srm)||0;
-    const _pigDurum=aktif_pigment(_pigKatkiGramMap(t.katkilar),t.hacim||11,4.3);
+    const _pigDurum=aktif_pigment(_pigKatkiGramMap(t.katkilar),t.hacim||11,__bm_estPH(t.suMineralleri,t.hacim,t.suKaynak));
     const _kartHex=aktif_renk_hex(srmVal,_pigDurum); // sol serit + gradyan icin pigment-aware hex
     const renkAdi=renk_band_tr(srmVal,_pigDurum);   // SRM TR + pigment overlay
     const bjcpAdi=renk_band_en(srmVal,_pigDurum);   // SRM EN + pigment overlay
@@ -13221,7 +13233,8 @@ function rEditorSu(){
   const ppm=suProfiliHesapla(S.suMineralleri, S.hacim||11, S.suKaynak);
   // pH tahmini Kolbach/RA yöntemi
   const _ra=(ppm.HCO3/61.0)-((ppm.Ca/100)+(ppm.Mg/35.1));
-  const _pH_est=+(5.72+0.04*_ra).toFixed(2);
+  // Sprint 2.1 fix: ortak helper'a sar — editor/kart/sticky ayni kaynaga baglansin.
+  const _pH_est=(typeof __bm_estPH==='function')?__bm_estPH(S.suMineralleri,S.hacim,S.suKaynak):+(5.72+0.04*_ra).toFixed(2);
   const _pH_str=(_pH_est>=5.2&&_pH_est<=5.5)?(_pH_est+' ✅ hedef aralıkta 5.2-5.5'):
     (_pH_est<5.2)?(_pH_est+' ⚠️ çok asidik'):
     (_pH_est<=5.8)?(_pH_est+' ⚠️ yüksek'):(_pH_est+' ⚠️ çok yüksek');
@@ -19750,7 +19763,7 @@ function rEditor(){
   <div class="bm-sticky-summary" id="bm-summary">
     <div class="bm-ss-stil">
       <span class="bm-ss-renk" id="ss-renk" style="background:${typeof srmR==='function'?srmR(Math.round(parseFloat(srm)||0)):'#888'}"></span>
-      <span class="bm-ss-renk-ad" id="ss-renk-ad" style="font-size:0.9em">${(()=>{const pd=(typeof aktif_pigment==='function'&&typeof _pigKatkiGramMap==='function')?aktif_pigment(_pigKatkiGramMap((window.S&&window.S.katkilar)||[]),(window.S&&window.S.hacim)||11,4.3):{mode:'izli'};const sn=parseFloat(srm)||0;return (typeof renk_band_tr==='function'?esc(renk_band_tr(sn,pd)):'')+(typeof renk_band_en==='function'?' <span style="opacity:0.6;font-size:0.85em">· '+esc(renk_band_en(sn,pd))+'</span>':'');})()}</span>
+      <span class="bm-ss-renk-ad" id="ss-renk-ad" style="font-size:0.9em">${(()=>{const _phI=(typeof __bm_estPH==='function')?__bm_estPH((window.S&&window.S.suMineralleri),(window.S&&window.S.hacim),(window.S&&window.S.suKaynak)):4.3;const pd=(typeof aktif_pigment==='function'&&typeof _pigKatkiGramMap==='function')?aktif_pigment(_pigKatkiGramMap((window.S&&window.S.katkilar)||[]),(window.S&&window.S.hacim)||11,_phI):{mode:'izli'};const sn=parseFloat(srm)||0;return (typeof renk_band_tr==='function'?esc(renk_band_tr(sn,pd)):'')+(typeof renk_band_en==='function'?' <span style="opacity:0.6;font-size:0.85em">· '+esc(renk_band_en(sn,pd))+'</span>':'');})()}</span>
       <span class="bm-ss-label" id="ss-stil">${esc((S&&S.stil)||(S&&S.stilTah)||(S&&S.biraAd)||'Stil hesaplanıyor...')}</span>
     </div>
     <div class="bm-ss-stats">
@@ -23780,7 +23793,7 @@ syncBaslat();
         var renkAdEl = document.getElementById('ss-renk-ad');
         if (renkAdEl && srmRound != null && typeof renk_band_tr === 'function' && typeof renk_band_en === 'function') {
           var _pigDurumD = (typeof aktif_pigment === 'function' && typeof _pigKatkiGramMap === 'function')
-            ? aktif_pigment(_pigKatkiGramMap((window.S && window.S.katkilar) || []), (window.S && window.S.hacim) || 11, 4.3)
+            ? aktif_pigment(_pigKatkiGramMap((window.S && window.S.katkilar) || []), (window.S && window.S.hacim) || 11, (typeof __bm_estPH === 'function' ? __bm_estPH((window.S && window.S.suMineralleri), (window.S && window.S.hacim), (window.S && window.S.suKaynak)) : 4.3))
             : {mode:'izli'};
           renkAdEl.innerHTML = renk_band_tr(srmRound, _pigDurumD) + ' <span style="opacity:0.6;font-size:0.85em">· ' + renk_band_en(srmRound, _pigDurumD) + '</span>';
         }
