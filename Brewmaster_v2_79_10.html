@@ -860,7 +860,12 @@ button:disabled:hover,.btn:disabled:hover,.btn.bm-disabled:hover{background:inhe
 .bm-tipo-renk-chip:hover{transform:scale(1.08)}
 .bm-tipo-renk-chip.aktif{border-color:var(--vintage);border-width:3px}
 .bm-tipo-renk-chip.null{background:repeating-linear-gradient(45deg,#fff 0,#fff 4px,#ddd 4px,#ddd 8px)}
-@media (max-width:768px){.bm-tipo-overlay{padding:0;align-items:stretch}.bm-tipo-panel{max-height:100vh;border-radius:0;max-width:100%}}
+.bm-tipo-onizleme{margin-bottom:var(--sp-3);padding:var(--sp-3) var(--sp-4);background:var(--bg-card);border:1px solid var(--cizgi-arac);border-radius:var(--r-sm);display:flex;flex-direction:column;gap:6px}
+.bm-tipo-onizleme-rozet{font-family:var(--font-govde);font-size:10px;font-weight:600;color:var(--metin-soluk);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+.bm-tipo-onizleme-baslik{font-family:var(--font-baslik);font-size:calc(var(--fs-md) * var(--tip-h-scale, 1));font-weight:var(--tip-h-fw, var(--fw-bold));letter-spacing:var(--tip-h-ls, normal);line-height:var(--tip-h-lh, var(--lh-tight));text-transform:var(--tip-h-tt, none);font-variant-caps:var(--tip-h-fvc, normal);font-style:var(--tip-h-fst, normal);color:var(--tip-h-col, var(--ink))}
+.bm-tipo-onizleme-govde{font-family:var(--font-govde);font-size:calc(var(--fs-sm) * var(--tip-b-scale, 1));font-weight:var(--tip-b-fw, var(--fw-regular));letter-spacing:var(--tip-b-ls, normal);line-height:var(--tip-b-lh, var(--lh-base));text-transform:var(--tip-b-tt, none);font-variant-caps:var(--tip-b-fvc, normal);font-style:var(--tip-b-fst, normal);color:var(--tip-b-col, var(--metin-soluk))}
+.bm-tipo-onizleme-sayi{font-family:var(--font-govde);font-size:calc(var(--fs-sm) * var(--tip-b-scale, 1));font-weight:var(--tip-b-fw, var(--fw-semibold));letter-spacing:var(--tip-b-ls, normal);line-height:var(--tip-b-lh, var(--lh-tight));text-transform:var(--tip-b-tt, none);font-variant-caps:var(--tip-b-fvc, normal);font-style:var(--tip-b-fst, normal);color:var(--tip-b-col, var(--ink));font-variant-numeric:var(--tip-b-fvn, normal)}
+@media (max-width:768px){.bm-tipo-overlay{padding:0;align-items:stretch}.bm-tipo-panel{max-height:100vh;border-radius:0;max-width:100%}.bm-tipo-onizleme{padding:var(--sp-2) var(--sp-3)}}
 </style>
 <script id="bm-tipografi-boot">
 (function(){
@@ -1001,6 +1006,12 @@ window.bmTipografiPanelRender = function(){
         '<div class="bm-tipo-katman-bar">'+
           '<button class="bm-tipo-katman-btn'+(L==='h'?' aktif':'')+'" onclick="bmTipografiKatman(\'h\')">Başlık</button>'+
           '<button class="bm-tipo-katman-btn'+(L==='b'?' aktif':'')+'" onclick="bmTipografiKatman(\'b\')">Gövde</button>'+
+        '</div>'+
+        '<div class="bm-tipo-onizleme" aria-label="Canli onizleme">'+
+          '<div class="bm-tipo-onizleme-rozet">Önizleme</div>'+
+          '<div class="bm-tipo-onizleme-baslik">Açık Altın Buğday Birası</div>'+
+          '<div class="bm-tipo-onizleme-govde">Hafif muzlu, karanfilli Weizen — şişeleme öncesi ölçümler</div>'+
+          '<div class="bm-tipo-onizleme-sayi">OG 1.056 · ABV %5.5 · IBU 17 · SRM 5</div>'+
         '</div>'+
         '<div class="bm-tipo-satir"><div class="bm-tipo-etiket">Font ailesi</div>'+
           '<select class="bm-tipo-select" onchange="bmTipografiSet(\'font\', this.value||null)">'+fontOpts+'</select>'+
