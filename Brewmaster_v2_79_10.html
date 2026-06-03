@@ -18555,7 +18555,7 @@ return `
           // bittiğinde gerçek değeri innerHTML ile yazacak. Eski stale değer hiç görünmez.
           // data-ribbon="strategy-c" attribute korunur (Hotfix-v2 querySelector hedefi).
           return '<div class="bm-tahmin-ribbon" data-ribbon="strategy-c">'+
-                 '<span class="bm-tahmin-label">Strategy C (Hibrit <span lang="en">Hierarchical</span>):</span>'+
+                 '<span class="bm-tahmin-label">Strategy C (Hibrit <span class="bm-stil-adi">Hierarchical</span>):</span>'+
                  '<span class="bm-tahmin-placeholder">Tahmin yapılıyor...</span>'+
                  '</div>';
         })()}
@@ -24064,7 +24064,7 @@ syncBaslat();
         }
       }
     } catch(e) { _badgeHtml = ''; }
-    return '<span class="bm-tahmin-label">Strategy C (Hibrit <span lang="en">Hierarchical</span>):</span> ' +
+    return '<span class="bm-tahmin-label">Strategy C (Hibrit <span class="bm-stil-adi">Hierarchical</span>):</span> ' +
            '<span class="bm-stil-adi" style="font-weight:var(--fw-semibold);color:var(--ink)">'+_sname1+'</span>' +
            ' <span style="color:var(--metin-soluk)">%'+_st1.normalized+'</span>'+_sub2s+_sub3s+_fallbackNote + _badgeHtml;
   }
