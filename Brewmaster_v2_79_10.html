@@ -977,7 +977,7 @@ window.bmTipografiPanelRender = function(){
   window.BM_TIPO_FONTS.forEach(function(f){
     fontOpts += '<option value="'+f+'"'+(d.font===f?' selected':'')+'>'+f+'</option>';
   });
-  var renkler = [{hex:null, ad:'Varsayılan'},{hex:'#2E2620', ad:'Koyu'},{hex:'#B8763F', ad:'Amber'},{hex:'#5C3A0E', ad:'Kahve'},{hex:'#7A6E60', ad:'Soluk'}];
+  var renkler = [{hex:null, ad:'Varsayılan'},{hex:'#2E2620', ad:'Koyu'},{hex:'#B8763F', ad:'Amber'},{hex:'#7A2E2E', ad:'Bordo'},{hex:'#3F5E3A', ad:'Yeşil'},{hex:'#33415E', ad:'Lacivert'}];
   var renkChips = renkler.map(function(r){
     var same = ((d.col||null) === r.hex);
     var bg = r.hex ? 'background:'+r.hex : '';
