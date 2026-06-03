@@ -665,7 +665,7 @@
 // bump v131-159 -> v131-160.
 // olu-kod-temizligi-batch (2026-05-27): eski UI yenilemesinden kalma kullanilmayan render degiskenleri silindi — mOpts/mOpts2/hOpts/maltKatBar (+ yetim maltKatlar) ve zincir def'leri (const mg={}/const hg={}). minOpts korundu (4 yerde canli). node --check PASS, MALTLAR=184.
 // bump v131-160 -> v131-161.
-const CACHE_VERSION = 'bm-cache-v131-205';
+const CACHE_VERSION = 'bm-cache-v131-206';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
@@ -678,7 +678,59 @@ const CRITICAL_LOCAL = [
   './fonts/Fraunces-latin-ext.woff2',
   './fonts/HankenGrotesk-latin.woff2',
   './fonts/HankenGrotesk-latin-ext.woff2',
-  './fonts/Cinzel.woff2'
+  './fonts/Cinzel.woff2',
+  './fonts/EBGaramond-latin-ext.woff2',
+  './fonts/EBGaramond-latin.woff2',
+  './fonts/PlayfairDisplay-latin-ext.woff2',
+  './fonts/PlayfairDisplay-latin.woff2',
+  './fonts/Lora-latin-ext.woff2',
+  './fonts/Lora-latin.woff2',
+  './fonts/Spectral-w300-latin-ext.woff2',
+  './fonts/Spectral-w300-latin.woff2',
+  './fonts/Spectral-w400-latin-ext.woff2',
+  './fonts/Spectral-w400-latin.woff2',
+  './fonts/Spectral-w600-latin-ext.woff2',
+  './fonts/Spectral-w600-latin.woff2',
+  './fonts/Spectral-w700-latin-ext.woff2',
+  './fonts/Spectral-w700-latin.woff2',
+  './fonts/LibreBaskerville-latin-ext.woff2',
+  './fonts/LibreBaskerville-latin.woff2',
+  './fonts/CrimsonPro-latin-ext.woff2',
+  './fonts/CrimsonPro-latin.woff2',
+  './fonts/Marcellus-w400-latin-ext.woff2',
+  './fonts/Marcellus-w400-latin.woff2',
+  './fonts/DMSerifDisplay-w400-latin-ext.woff2',
+  './fonts/DMSerifDisplay-w400-latin.woff2',
+  './fonts/ZillaSlab-w300-latin-ext.woff2',
+  './fonts/ZillaSlab-w300-latin.woff2',
+  './fonts/ZillaSlab-w400-latin-ext.woff2',
+  './fonts/ZillaSlab-w400-latin.woff2',
+  './fonts/ZillaSlab-w600-latin-ext.woff2',
+  './fonts/ZillaSlab-w600-latin.woff2',
+  './fonts/ZillaSlab-w700-latin-ext.woff2',
+  './fonts/ZillaSlab-w700-latin.woff2',
+  './fonts/Oswald-latin-ext.woff2',
+  './fonts/Oswald-latin.woff2',
+  './fonts/Poppins-w300-latin-ext.woff2',
+  './fonts/Poppins-w300-latin.woff2',
+  './fonts/Poppins-w400-latin-ext.woff2',
+  './fonts/Poppins-w400-latin.woff2',
+  './fonts/Poppins-w600-latin-ext.woff2',
+  './fonts/Poppins-w600-latin.woff2',
+  './fonts/Poppins-w700-latin-ext.woff2',
+  './fonts/Poppins-w700-latin.woff2',
+  './fonts/SpaceGrotesk-latin-ext.woff2',
+  './fonts/SpaceGrotesk-latin.woff2',
+  './fonts/Quicksand-latin-ext.woff2',
+  './fonts/Quicksand-latin.woff2',
+  './fonts/BricolageGrotesque-latin-ext.woff2',
+  './fonts/BricolageGrotesque-latin.woff2',
+  './fonts/IBMPlexSans-latin-ext.woff2',
+  './fonts/IBMPlexSans-latin.woff2',
+  './fonts/Alegreya-latin-ext.woff2',
+  './fonts/Alegreya-latin.woff2',
+  './fonts/Baloo2-latin-ext.woff2',
+  './fonts/Baloo2-latin.woff2',
 ];
 
 self.addEventListener('install', function(event) {
