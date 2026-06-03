@@ -865,6 +865,8 @@ button:disabled:hover,.btn:disabled:hover,.btn.bm-disabled:hover{background:inhe
 .bm-tipo-onizleme-baslik{font-family:var(--font-baslik);font-size:calc(var(--fs-md) * var(--tip-h-scale, 1));font-weight:var(--tip-h-fw, var(--fw-bold));letter-spacing:var(--tip-h-ls, normal);line-height:var(--tip-h-lh, var(--lh-tight));text-transform:var(--tip-h-tt, none);font-variant-caps:var(--tip-h-fvc, normal);font-style:var(--tip-h-fst, normal);color:var(--tip-h-col, var(--ink))}
 .bm-tipo-onizleme-govde{font-family:var(--font-govde);font-size:calc(var(--fs-sm) * var(--tip-b-scale, 1));font-weight:var(--tip-b-fw, var(--fw-regular));letter-spacing:var(--tip-b-ls, normal);line-height:var(--tip-b-lh, var(--lh-base));text-transform:var(--tip-b-tt, none);font-variant-caps:var(--tip-b-fvc, normal);font-style:var(--tip-b-fst, normal);color:var(--tip-b-col, var(--metin-soluk))}
 .bm-tipo-onizleme-sayi{font-family:var(--font-govde);font-size:calc(var(--fs-sm) * var(--tip-b-scale, 1));font-weight:var(--tip-b-fw, var(--fw-semibold));letter-spacing:var(--tip-b-ls, normal);line-height:var(--tip-b-lh, var(--lh-tight));text-transform:var(--tip-b-tt, none);font-variant-caps:var(--tip-b-fvc, normal);font-style:var(--tip-b-fst, normal);color:var(--tip-b-col, var(--ink));font-variant-numeric:var(--tip-b-fvn, normal)}
+/* Sprint 2.7c+6: Stil/slug adlari Turkce harf-donusumunden muaf — Weissbier->WEISSBIER (WEİSSBİER degil). Diger tipografi (font/renk/agirlik/aralik) korunur (inherit). */
+.bm-stil-adi{text-transform:none !important;font-variant-caps:normal !important}
 @media (max-width:768px){.bm-tipo-overlay{padding:0;align-items:stretch}.bm-tipo-panel{max-height:100vh;border-radius:0;max-width:100%}.bm-tipo-onizleme{padding:var(--sp-2) var(--sp-3)}}
 </style>
 <script id="bm-tipografi-boot">
@@ -11985,7 +11987,7 @@ function rListe(){
       ? '<button class="bm-recete-eylem-chip istek" onclick="tarifDurumDegistir(\''+t.id+'\',\'istek\')">'+BM_SVG.star+'<span>İstek</span></button>'
       : '';
     // Banner badges
-    const renkBadge='<span class="bm-recete-badge"><b>'+_esc131B(renkAdi)+'</b> <span style="opacity:0.6;font-size:0.85em">· '+_esc131B(bjcpAdi)+'</span></span>';
+    const renkBadge='<span class="bm-recete-badge"><b>'+_esc131B(renkAdi)+'</b> <span style="opacity:0.6;font-size:0.85em">· <span class="bm-stil-adi">'+_esc131B(bjcpAdi)+'</span></span></span>';
     const taslakBadge = !t.durum ? '<span class="bm-recete-badge taslak">TASLAK</span>' : '';
     // Meta satiri: tarih + klasor (varsa)
     const metaParts=[];
@@ -12002,7 +12004,7 @@ function rListe(){
       '<div class="bm-recete-metric"><span class="bm-recete-metric-etiket">ABV</span><span class="bm-recete-metric-deger">'+abvV+'</span></div>'+
       '<div class="bm-recete-metric"><span class="bm-recete-metric-etiket">IBU</span><span class="bm-recete-metric-deger">'+ibuV+'</span></div>'+
       '<div class="bm-recete-metric"><span class="bm-recete-metric-etiket">SRM</span><span class="bm-recete-metric-deger">'+srmV+'</span></div>'+
-      '<div class="bm-recete-renk-chip"><span class="bm-recete-renk-dot" style="background:'+renkHex+'"></span><span>'+_esc131B(renkAdi)+' <span style="opacity:0.6;font-size:0.85em">('+_esc131B(bjcpAdi)+')</span></span></div>';
+      '<div class="bm-recete-renk-chip"><span class="bm-recete-renk-dot" style="background:'+renkHex+'"></span><span>'+_esc131B(renkAdi)+' <span style="opacity:0.6;font-size:0.85em">(<span class="bm-stil-adi">'+_esc131B(bjcpAdi)+'</span>)</span></span></div>';
     // Malzeme onizleme (max 3 malt)
     const malzemeHtml = (t.maltlar && t.maltlar.length)
       ? '<div class="bm-recete-malzeme">'+t.maltlar.slice(0,3).map(function(m){
@@ -12706,7 +12708,7 @@ function rEditorTakvim(maya, maya2, tv){
       // Sakkaroz dekstrozdan %95 etkili (mol CO2 verimi: glucose 0.489, sucrose 0.515)
       var _sakkaroz = Math.round(_dekstroz * 0.95 * 10) / 10;
       _primingHtml = '<div style="margin:4px 8px 6px;background:var(--bg2);border:1px solid var(--bor);border-left:3px solid var(--sk);border-radius:10px;padding:8px 12px">'
-        +'<div style="font-size:11px;font-weight:700;color:var(--kahve);margin-bottom:5px;font-family:var(--font-display)">🧮 Priming Hesabı ('+_hacim+'L için)</div>'+(S.stilTah?'<div style="font-size:10px;color:var(--soluk);margin-bottom:4px">🎯 Stil: <b>'+S.stilTah+'</b> → CO₂: '+_co2Min2+'–'+_co2Max2+' vol (hedef: <b>'+_co2H+'</b>)</div>':'')
+        +'<div style="font-size:11px;font-weight:700;color:var(--kahve);margin-bottom:5px;font-family:var(--font-display)">🧮 Priming Hesabı ('+_hacim+'L için)</div>'+(S.stilTah?'<div style="font-size:10px;color:var(--soluk);margin-bottom:4px">🎯 Stil: <b class="bm-stil-adi">'+S.stilTah+'</b> → CO₂: '+_co2Min2+'–'+_co2Max2+' vol (hedef: <b>'+_co2H+'</b>)</div>':'')
         +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:11px;color:var(--kahve)">'
           +'<div>Hedef CO₂: <b>'+_co2H.toFixed(1)+' vol</b></div>'
           +'<div>Sıcaklık: <b>'+_primTemp+'°C</b></div>'
@@ -13610,7 +13612,7 @@ function rEditorSu(){
   const _farkRenk=(ion)=>{const f=Math.round(_prof[ion]||0)-Math.round(ppm[ion]||0);return Math.abs(f)<10?"var(--yk)":f>0?"var(--kk)":"var(--mk)";};
   const suOneriHTML=S.maltlar.length?`
   <div class="kart" style="background:var(--kahve-bg);border:1px solid var(--bor);border-left:4px solid var(--mk);margin-bottom:10px;padding:14px">
-    ${(S.stil||S.stilTah)?`<div style="background:var(--kahve-bg);color:var(--kahve);padding:6px 10px;border-radius:6px;font-size:11px;margin-bottom:8px;border-left:3px solid var(--bakir)"><b>🎯 BJCP stili:</b> ${S.stil||S.stilTah} için önerilen su profili:</div>`:''}
+    ${(S.stil||S.stilTah)?`<div style="background:var(--kahve-bg);color:var(--kahve);padding:6px 10px;border-radius:6px;font-size:11px;margin-bottom:8px;border-left:3px solid var(--bakir)"><b>🎯 BJCP stili:</b> <span class="bm-stil-adi">${S.stil||S.stilTah}</span> için önerilen su profili:</div>`:''}
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
       <div style="flex:1">
         <div style="font-size:13px;font-weight:700;color:var(--soluk)">🎯 Tarifinize Özel Öneri</div>
@@ -13683,7 +13685,7 @@ function rEditorSu(){
       const oneriProfil = oneriIdFromStil ? SU_PROFILLERI.find(p=>p&&p.id===oneriIdFromStil) : null;
       const stilOneriHTML = (S.stil && oneriProfil && !S.suHedef) ? `
         <div style="background:var(--ya);border:1px solid #A8A870;border-left:4px solid var(--yk);border-radius:8px;padding:10px;margin-bottom:8px">
-          <div style="font-size:11px;color:#2A5A2A;font-weight:700;margin-bottom:3px">💡 <b>${S.stil}</b> için önerilen su:</div>
+          <div style="font-size:11px;color:#2A5A2A;font-weight:700;margin-bottom:3px">💡 <b class="bm-stil-adi">${S.stil}</b> için önerilen su:</div>
           <div style="font-size:13px;color:#1A4A1A;font-weight:700;margin-bottom:2px">${oneriProfil.ad}</div>
           <div style="font-size:10px;color:#4A6A4A">${oneriProfil.not||''}</div>
         </div>` : '';
@@ -18553,7 +18555,7 @@ return `
           // bittiğinde gerçek değeri innerHTML ile yazacak. Eski stale değer hiç görünmez.
           // data-ribbon="strategy-c" attribute korunur (Hotfix-v2 querySelector hedefi).
           return '<div class="bm-tahmin-ribbon" data-ribbon="strategy-c">'+
-                 '<span class="bm-tahmin-label">Strategy C (Hibrit Hierarchical):</span>'+
+                 '<span class="bm-tahmin-label">Strategy C (Hibrit <span lang="en">Hierarchical</span>):</span>'+
                  '<span class="bm-tahmin-placeholder">Tahmin yapılıyor...</span>'+
                  '</div>';
         })()}
@@ -18585,7 +18587,7 @@ return `
                 if (stil_grup) _subParts.push(stil_grup);
                 if (alt_stil && alt_stil !== S.stil) _subParts.push(alt_stil);
                 if (_v12Title && _v12Title !== S.stil && _v12Title !== alt_stil) _subParts.push('Sistem önerisi: '+_v12Title+(_isWeakConfidence?' (%'+_v12Confidence+')':''));
-                return `<span style="font-size:15px;font-weight:700;color:var(--bakir);font-family:var(--font-display)">${S.stil}</span>`+
+                return `<span class="bm-stil-adi" style="font-size:15px;font-weight:700;color:var(--bakir);font-family:var(--font-display)">${S.stil}</span>`+
                        (_subParts.length?`<div style="font-size:11px;color:var(--soluk);margin-top:2px">${_subParts.join(' · ')}</div>`:'');
               } else if (alt_stil) {
                 // Otomatik niteleme dolu (örn "Dark Belgian Dubbel") — alt_stil göster, V12 sub-text'te öneri
@@ -18593,7 +18595,7 @@ return `
                 if (stil_grup) _subParts.push(stil_grup);
                 if (_v12Title && _v12Title !== alt_stil) _subParts.push('Sistem önerisi: '+_v12Title+_weakBadge);
                 else if (!_v12Title && stil_tah && stil_tah !== alt_stil) _subParts.push(stil_tah);
-                return `<span style="font-size:15px;font-weight:700;color:var(--bakir);font-family:var(--font-display)">${alt_stil}</span>`+
+                return `<span class="bm-stil-adi" style="font-size:15px;font-weight:700;color:var(--bakir);font-family:var(--font-display)">${alt_stil}</span>`+
                        (_subParts.length?`<div style="font-size:11px;color:var(--soluk);margin-top:2px">${_subParts.join(' · ')}</div>`:'');
               } else {
                 // Saf otomatik — V12 önerisi öncelikli (slug ready + güçlü), zayıf güven badge ile, fallback stil_tah
@@ -18612,7 +18614,7 @@ return `
                 const _subParts = [];
                 if (stil_grup) _subParts.push(stil_grup);
                 if (_isUncertain && _v12Title) _subParts.push('sistem önerisi: '+_v12Title+' (düşük güven %'+_v12Confidence+')');
-                return `<span style="font-size:15px;font-weight:700;color:var(--bakir);font-family:var(--font-display)">${_mainTitle}</span>`+(_showWeakBadge?_weakBadge:'')+
+                return `<span class="bm-stil-adi" style="font-size:15px;font-weight:700;color:var(--bakir);font-family:var(--font-display)">${_mainTitle}</span>`+(_showWeakBadge?_weakBadge:'')+
                        (_subParts.length?`<div style="font-size:11px;color:var(--soluk);margin-top:2px">${_subParts.join(' · ')}</div>`:'');
               }
             })()}</div>
@@ -18702,7 +18704,7 @@ return `
               return '<span style="display:inline-flex;align-items:center;gap:3px">'
                 +'<button onclick="stilSec(this)" data-stil="'+safeNm+'" style="'+_btnStyle+'" title="Hedef stil olarak seç'+(_crossFamily?' (çapraz aile önerisi)':'')+'">'
                   +'<span style="font-size:9px;font-weight:700;color:'+bg+';opacity:'+opacity+'">'+(i+1)+'.</span>'
-                  +'<span style="font-size:10px;color:var(--kahve);font-weight:'+(i===0?'700':'500')+'">'+nm+'</span>'
+                  +'<span class="bm-stil-adi" style="font-size:10px;color:var(--kahve);font-weight:'+(i===0?'700':'500')+'">'+nm+'</span>'
                   +_crossBadge
                   +'<div style="width:'+Math.round(pct*0.4)+'px;height:4px;background:'+bg+';border-radius:2px;opacity:'+opacity+'"></div>'
                 +'</button>'
@@ -18710,7 +18712,7 @@ return `
             }).join('')+
           '</div>'+
           '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;margin-bottom:4px;flex-wrap:wrap;gap:4px">'+
-            '<span style="font-weight:700;color:var(--kahve);font-size:11px">BJCP ('+_stKey+')</span>'+
+            '<span style="font-weight:700;color:var(--kahve);font-size:11px">BJCP (<span class="bm-stil-adi">'+_stKey+'</span>)</span>'+
             (_v5TopBjcp ? (function(){
               // Adim 133-A-3: Motor toggle sadelestirme. V12 tek aktif motor. Arsiv motor btn'lari
               // SHOW_ARCHIVE_MOTORS=false ile dormant — true'ya cevirince 5-buton UI geri acilir.
@@ -20067,7 +20069,7 @@ function rEditor(){
     <div class="bm-ss-stil">
       <span class="bm-ss-renk" id="ss-renk" style="background:${typeof srmR==='function'?srmR(Math.round(parseFloat(srm)||0)):'#888'}"></span>
       <span class="bm-ss-renk-ad" id="ss-renk-ad" style="font-size:0.9em">${(()=>{const _phI=(typeof __bm_estPH==='function')?__bm_estPH((window.S&&window.S.suMineralleri),(window.S&&window.S.hacim),(window.S&&window.S.suKaynak)):4.3;const pd=(typeof aktif_pigment==='function'&&typeof _pigKatkiGramMap==='function')?aktif_pigment(_pigKatkiGramMap((window.S&&window.S.katkilar)||[]),(window.S&&window.S.hacim)||11,_phI):{mode:'izli'};const sn=parseFloat(srm)||0;return (typeof renk_band_tr==='function'?esc(renk_band_tr(sn,pd)):'')+(typeof renk_band_en==='function'?' <span style="opacity:0.6;font-size:0.85em">· '+esc(renk_band_en(sn,pd))+'</span>':'');})()}</span>
-      <span class="bm-ss-label" id="ss-stil">${esc((S&&S.stil)||(S&&S.stilTah)||(S&&S.biraAd)||'Stil hesaplanıyor...')}</span>
+      <span class="bm-ss-label" id="ss-stil"><span class="bm-stil-adi">${esc((S&&S.stil)||(S&&S.stilTah)||(S&&S.biraAd)||'Stil hesaplanıyor...')}</span></span>
     </div>
     <div class="bm-ss-stats">
       <div class="bm-ss-stat"><span class="ss-label">OG</span><span class="ss-val" id="ss-og">${og.toFixed(3)}</span></div>
@@ -24019,10 +24021,10 @@ syncBaslat();
       top3 = b1.top3.slice(0, 3);
     }
     var _t1 = top3[0], _t2 = top3[1] || null, _t3 = top3[2] || null;
-    var _sub2 = _t2 ? ' <span style="color:var(--metin-soluk);font-size:var(--fs-xs)">· '+_t2.displayTR+' %'+_t2.normalized+'</span>' : '';
-    var _sub3 = _t3 ? ' <span style="color:var(--metin-soluk);font-size:var(--fs-xs)">· '+_t3.displayTR+' %'+_t3.normalized+'</span>' : '';
+    var _sub2 = _t2 ? ' <span style="color:var(--metin-soluk);font-size:var(--fs-xs)">· <span class="bm-stil-adi">'+_t2.displayTR+'</span> %'+_t2.normalized+'</span>' : '';
+    var _sub3 = _t3 ? ' <span style="color:var(--metin-soluk);font-size:var(--fs-xs)">· <span class="bm-stil-adi">'+_t3.displayTR+'</span> %'+_t3.normalized+'</span>' : '';
     return '<span class="bm-tahmin-label">Cluster (B1+V12 Hibrit):</span> ' +
-           '<span style="font-weight:var(--fw-semibold);color:var(--ink)">'+_t1.displayTR+'</span>' +
+           '<span class="bm-stil-adi" style="font-weight:var(--fw-semibold);color:var(--ink)">'+_t1.displayTR+'</span>' +
            ' <span style="color:var(--metin-soluk)">%'+_t1.normalized+'</span>'+_sub2+_sub3;
   }
   function _scRibbonInner(stc){
@@ -24038,8 +24040,8 @@ syncBaslat();
     };
     var _st1 = stc.top3[0], _st2 = stc.top3[1] || null, _st3 = stc.top3[2] || null;
     var _sname1 = _resolveDisp(_st1);
-    var _sub2s = _st2 ? ' <span style="color:var(--metin-soluk);font-size:var(--fs-xs)">· '+_resolveDisp(_st2)+' %'+_st2.normalized+'</span>' : '';
-    var _sub3s = _st3 ? ' <span style="color:var(--metin-soluk);font-size:var(--fs-xs)">· '+_resolveDisp(_st3)+' %'+_st3.normalized+'</span>' : '';
+    var _sub2s = _st2 ? ' <span style="color:var(--metin-soluk);font-size:var(--fs-xs)">· <span class="bm-stil-adi">'+_resolveDisp(_st2)+'</span> %'+_st2.normalized+'</span>' : '';
+    var _sub3s = _st3 ? ' <span style="color:var(--metin-soluk);font-size:var(--fs-xs)">· <span class="bm-stil-adi">'+_resolveDisp(_st3)+'</span> %'+_st3.normalized+'</span>' : '';
     var _fallbackNote = stc.fallback ? ' <span style="color:var(--metin-soluk);font-size:var(--fs-xs);font-style:italic">(specialty→V12)</span>' : '';
     // Adim 132-H: 4/4 ensemble agreement badge (hybrid_agreement "N/M" formatinda)
     var _badgeHtml = '';
@@ -24062,8 +24064,8 @@ syncBaslat();
         }
       }
     } catch(e) { _badgeHtml = ''; }
-    return '<span class="bm-tahmin-label">Strategy C (Hibrit Hierarchical):</span> ' +
-           '<span style="font-weight:var(--fw-semibold);color:var(--ink)">'+_sname1+'</span>' +
+    return '<span class="bm-tahmin-label">Strategy C (Hibrit <span lang="en">Hierarchical</span>):</span> ' +
+           '<span class="bm-stil-adi" style="font-weight:var(--fw-semibold);color:var(--ink)">'+_sname1+'</span>' +
            ' <span style="color:var(--metin-soluk)">%'+_st1.normalized+'</span>'+_sub2s+_sub3s+_fallbackNote + _badgeHtml;
   }
   window.updateRibbon = function(name){
@@ -24090,7 +24092,11 @@ syncBaslat();
       if (stilEl) {
         // S.stil (manuel) > S.stilTah (auto) > biraAd fallback
         var stil = (window.S && window.S.stil) || (window.S && window.S.stilTah) || (window.S && window.S.biraAd) || '';
-        if (stil) stilEl.textContent = stil;
+        if (stil) {
+          // Sprint 2.7c+6: stil/slug ad harf-donusumunden muaf (.bm-stil-adi)
+          var safe = String(stil).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+          stilEl.innerHTML = '<span class="bm-stil-adi">'+safe+'</span>';
+        }
       }
       if (renkEl && typeof srmR === 'function' && window.S) {
         var srmVal = parseFloat(window.S.srm) || (typeof _lastSrm !== 'undefined' ? _lastSrm : null);
