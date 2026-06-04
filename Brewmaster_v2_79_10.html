@@ -865,6 +865,7 @@ button:disabled:hover,.btn:disabled:hover,.btn.bm-disabled:hover{background:inhe
 .bm-tipo-onizleme-baslik{font-family:var(--font-baslik);font-size:calc(var(--fs-md) * var(--tip-h-scale, 1));font-weight:var(--tip-h-fw, var(--fw-bold));letter-spacing:var(--tip-h-ls, normal);line-height:var(--tip-h-lh, var(--lh-tight));text-transform:var(--tip-h-tt, none);font-variant-caps:var(--tip-h-fvc, normal);font-style:var(--tip-h-fst, normal);color:var(--tip-h-col, var(--ink))}
 .bm-tipo-onizleme-govde{font-family:var(--font-govde);font-size:calc(var(--fs-sm) * var(--tip-b-scale, 1));font-weight:var(--tip-b-fw, var(--fw-regular));letter-spacing:var(--tip-b-ls, normal);line-height:var(--tip-b-lh, var(--lh-base));text-transform:var(--tip-b-tt, none);font-variant-caps:var(--tip-b-fvc, normal);font-style:var(--tip-b-fst, normal);color:var(--tip-b-col, var(--metin-soluk))}
 .bm-tipo-onizleme-sayi{font-family:var(--font-govde);font-size:calc(var(--fs-sm) * var(--tip-b-scale, 1));font-weight:var(--tip-b-fw, var(--fw-semibold));letter-spacing:var(--tip-b-ls, normal);line-height:var(--tip-b-lh, var(--lh-tight));text-transform:var(--tip-b-tt, none);font-variant-caps:var(--tip-b-fvc, normal);font-style:var(--tip-b-fst, normal);color:var(--tip-b-col, var(--ink));font-variant-numeric:var(--tip-b-fvn, normal)}
+.bm-tipo-onizleme-menu{display:flex;flex-direction:column;gap:2px;background:var(--bg-sunken);border:1px solid var(--cizgi-arac);border-radius:var(--r-sm);padding:var(--sp-2)}
 /* Sprint 2.7c+6: Stil/slug adlari Turkce harf-donusumunden muaf — Weissbier->WEISSBIER (WEİSSBİER degil). Diger tipografi (font/renk/agirlik/aralik) korunur (inherit). */
 .bm-stil-adi{text-transform:none !important;font-variant-caps:normal !important}
 @media (max-width:768px){.bm-tipo-overlay{padding:0;align-items:stretch}.bm-tipo-panel{max-height:100vh;border-radius:0;max-width:100%}.bm-tipo-onizleme{padding:var(--sp-2) var(--sp-3)}}
@@ -1020,6 +1021,16 @@ window.bmTipografiPanelRender = function(){
           '<div class="bm-tipo-onizleme-baslik">Açık Altın Buğday Birası</div>'+
           '<div class="bm-tipo-onizleme-govde">Hafif muzlu, karanfilli <span class="bm-stil-adi">Weizen</span> — şişeleme öncesi ölçümler</div>'+
           '<div class="bm-tipo-onizleme-sayi">OG 1.056 · ABV %5.5 · IBU 17 · SRM 5</div>'+
+        '</div>'+
+        '<div class="bm-tipo-onizleme" aria-label="Menu onizleme">'+
+          '<div class="bm-tipo-onizleme-rozet">Menü</div>'+
+          '<div class="bm-tipo-onizleme-menu">'+
+            '<div class="bm-sidebar-section">Sekmeler</div>'+
+            '<div class="bm-sidebar-tab">Aktif</div>'+
+            '<div class="bm-sidebar-section">Klasörler</div>'+
+            '<div class="bm-sidebar-folder">Tümü</div>'+
+            '<div class="bm-sidebar-folder">Favoriler</div>'+
+          '</div>'+
         '</div>'+
         '<div class="bm-tipo-satir"><div class="bm-tipo-etiket">Font ailesi</div>'+
           '<select class="bm-tipo-select" onchange="bmTipografiSet(\'font\', this.value||null)">'+fontOpts+'</select>'+
