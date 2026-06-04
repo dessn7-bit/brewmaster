@@ -4890,7 +4890,7 @@ function suProfilOneriUygula(hedefId) {
 
 // ═══ HESAPLAR ═══════════════════════════════════════════════
 function hOG(ml,v,katkilar,hacim){
-  const h=hacim||11;
+  const h=(hacim>0)?hacim:11;
   let g=0;
   ml.forEach(m=>{const x=MALTLAR.find(a=>a&&a.id===m.id);if(!x||m.id==="rice"||m.id==="rice_hulls")return;
     g+=x.gu*m.kg*(x.g==="Şeker"?1:v/100);});
@@ -4905,7 +4905,7 @@ function hOG(ml,v,katkilar,hacim){
 }
 // Non-fermentable katkı + laktoz malt → FG'de kalan gravity
 function hNFGravity(katkilar,maltlar,hacim){
-  const h=hacim||11;
+  const h=(hacim>0)?hacim:11;
   let nfg=0;
   // Malt tabından laktoz
   if(maltlar)(maltlar).forEach(m=>{
@@ -5595,7 +5595,7 @@ function katkiKisaKat(g){
   const m={'Şeker':'ŞEKER','Meyve':'MEYVE','Baharat':'BAHARAT','Aroma':'AROMA','Meşe':'MEŞE','Berraklaştırıcı':'BERRAK','Fermantasyon':'FERM','Adjunct':'EK TAHIL','Proses':'PROSES','Egzotik':'EGZOTİK','Kahve & Çikolata':'KAHVE/ÇİK'};
   return m[g]||g.toUpperCase();
 }
-function tin(dk,og){return 1.65*Math.pow(.000125,og-1)*(1-Math.exp(-.04*dk))/4.15;}
+function tin(dk,og){const d=+dk||0;return 1.65*Math.pow(.000125,og-1)*(1-Math.exp(-.04*d))/4.15;}
 // Whirlpool izomerizasyon sıcaklık faktörü (100°C = 1.0 referans)
 // Malowicki (2005) Arrhenius kinetiği: k(T) = 7.9e11 × exp(-11858/T_K)
 // Tinseth 100°C için kalibre; whirlpool'da sıcaklığa göre ölçeklenir
@@ -5626,7 +5626,7 @@ function hFormFaktor(form){
 // UI'da ayrı tür olarak tutulur, kullanıcı farkı görsün.
 function hIBU(hl,og,hacim,katkilar){
   const REF_BATCH_L=11; // Katkı ibu_dk60 değerleri bu referans hacim için kalibre edilmiş
-  const h=hacim||11;let i=0;
+  const h=(hacim>0)?hacim:11;let i=0;
   // Hop IBU (Tinseth + whirlpool için Malowicki sıcaklık düzeltmesi + form çarpanı)
   hl.forEach(x=>{
     if(x.tur==="dry_hop")return;
@@ -14633,7 +14633,7 @@ function rEditorMaya(og, fg, abv, maya, maya2, fgKaynak, fgHesap){
           <div style="font-size:13px;font-weight:700;color:var(--kahve)">🧬 Pitch Rate Hesabı</div>
           <div style="font-size:11px;color:var(--dim)">${tipAd}</div>
         </div>
-        ${S.maya2Id?('<div style="background:rgba(255,255,255,.5);border-radius:6px;padding:7px 10px;margin-bottom:8px;font-size:10px;color:var(--kahve);line-height:1.4"><b>🧬 Ko-pitch (2 maya):</b> Toplam hedef hücre 2 suşa <b>bölünür</b>, toplam değişmez. Oran karaktere bağlı — tipik olarak ana maya baskın (ör. %80 '+maya.ad+' / %20 '+((MAYALAR.find(x=>x&&x.id===S.maya2Id)||{}).ad||'2. maya')+').</div>'):''}
+        ${S.maya2Id?('<div style="background:rgba(255,255,255,.5);border-radius:6px;padding:7px 10px;margin-bottom:8px;font-size:10px;color:var(--kahve);line-height:1.4"><b>🧬 Ko-pitch (2 maya):</b> Toplam hedef hücre iki suşa bölünür, toplam değişmez. Oran karaktere bağlıdır; FG tahmini iki mayanın atenüasyon ortalamasını alır.</div>'):''}
         <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:8px">
           <div style="background:rgba(255,255,255,.5);border-radius:6px;padding:8px 10px">
             <div style="font-size:9px;color:var(--dim);letter-spacing:.5px">HEDEF HÜCRE</div>
@@ -15612,7 +15612,7 @@ function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
 function hopDenetim(hoplar, HOPLAR, stilAdi, BJCP, ibu, og, hacim){
   const out={bulgular:[], metrik:null};
   const list=(hoplar||[]).filter(h=>h&&h.id&&(+h.g>0));
-  const h=hacim||11; const ib=+ibu||0;
+  const h=(hacim>0)?hacim:11; const ib=+ibu||0;
   const ekle=(onem,msg)=>out.bulgular.push({onem,msg});
   const gu=(og&&og>1)?((og-1)*1000):0;
   const bugu=gu>0?ib/gu:0;
@@ -15681,7 +15681,7 @@ function _hopOnerilenIBU(og){
   return Math.round(0.5*GU);
 }
 function _hopOlcekHesapla(hoplar, og, hacim, IBU_t, katkilar){
-  const list=(hoplar||[]); const h=hacim||11;
+  const list=(hoplar||[]); const h=(hacim>0)?hacim:11;
   const curIBU=(typeof hIBU==='function')?hIBU(list,og,h,[]):0;
   const katkiIBU=(typeof hIBU==='function')?hIBU([],og,h,katkilar||[]):0;
   if(!(curIBU>0)) return {err:'Acılık veren hop yok (dry hop IBU’ya katkı vermez) — ölçeklenemez.'};
