@@ -14629,7 +14629,7 @@ function rEditorMaya(og, fg, abv, maya, maya2, fgKaynak, fgHesap){
         </div>`;
       }
       
-      return `<div class="kart" style="margin-top:12px;background:#F0E8DA;border:1.5px solid #C8A870">
+      return `<div class="kart" style="margin-top:12px;background:#EAF4F8;border:1.5px solid #9CC4D8;padding:10px 12px"><div style="font-size:13px;font-weight:700;color:#1A5A7A;margin-bottom:6px">🧪 Maya Besini & Oksijen</div><div style="font-size:11px;color:var(--kahve);line-height:1.5"><b>O2/Aerasyon:</b> ${og>=1.075?'Yüksek — saf O2 ~60-90 sn; çok yüksek OG değerlerinde 12-18 saatte tekrar oksijenle.':og>=1.060?'Artırılmış — saf O2 ~30-45 sn ya da uzun çalkalama.':'Standart aerasyon (çalkalama/splash) yeterli (~8 ppm).'}${maya.tip==='lager'?' Lager: O2 ve hücre ihtiyacı daha yüksek.':maya.tip==='kveik'?' Kveik: düşük O2 toleranslı, az aerasyon yeterli.':''}</div><div style="font-size:11px;color:var(--kahve);line-height:1.5;margin-top:5px"><b>Besin:</b> ${og>=1.075?'Maya besini önerilir — yüksek OG mayanın azot/FAN ihtiyacını artırır; şeker/şurup adjunktu varsa daha da önemli. Dozaj için üretici talimatı (Fermaid-O / DAP).':'Tüm-malt normal OG: malt yeterli FAN sağlar, besin opsiyonel. Bol şeker/şurup adjunktu kullanıyorsan yine de besin düşün.'}</div></div><div class="kart" style="margin-top:12px;background:#F0E8DA;border:1.5px solid #C8A870">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
           <div style="font-size:13px;font-weight:700;color:var(--kahve)">🧬 Pitch Rate Hesabı</div>
           <div style="font-size:11px;color:var(--dim)">${tipAd}</div>
