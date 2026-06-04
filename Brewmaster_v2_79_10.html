@@ -253,7 +253,7 @@ input[type="checkbox"]:disabled,input[type="radio"]:disabled{opacity:.5;cursor:n
    Tab bar tabani: ince border-bottom --cizgi-arac. Yatay scroll mobile korunur. JS setSekme INTACT. */
 .sb{display:flex;border-bottom:1px solid var(--cizgi-arac);overflow-x:auto;scrollbar-width:none;padding:0 var(--sp-2)}
 .sb::-webkit-scrollbar{display:none}
-.sb-btn{padding:var(--sp-3) var(--sp-4);font-family:var(--font-govde);font-size:calc(var(--fs-md) * var(--tip-b-scale, 1));font-weight:var(--tip-b-fw, var(--fw-semibold));border:none;border-bottom:2.5px solid transparent;cursor:pointer;background:transparent;white-space:nowrap;flex-shrink:0;margin-bottom:-1px;transition:color .15s,border-color .15s;color:var(--tip-b-col, var(--metin-soluk));font-variant-caps:var(--tip-b-fvc, normal);font-style:var(--tip-b-fst, normal);text-transform:var(--tip-b-tt, none);letter-spacing:var(--tip-b-ls, normal)}
+.sb-btn{padding:var(--sp-3) var(--sp-4);font-family:var(--font-govde);font-size:calc(var(--fs-md) * var(--tip-b-scale, 1));font-weight:var(--tip-b-fw, var(--fw-semibold));border:none;border-bottom:2.5px solid transparent;cursor:pointer;background:transparent;white-space:nowrap;flex-shrink:0;margin-bottom:-1px;transition:color .15s,border-color .15s;color:var(--tip-b-col, var(--metin-soluk));font-variant-caps:small-caps;font-style:var(--tip-b-fst, normal);text-transform:none;letter-spacing:var(--tip-b-ls, normal)}
 .sb-btn:hover:not(.ak){color:var(--ink)}
 .sb-btn.ak{color:var(--vintage-mid);border-bottom-color:var(--vintage);background:transparent}
 .iki{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -20053,7 +20053,7 @@ function rEditor(){
     ic = rEditorNot();
   }
 
-  const skmls=[["genel","🏠 Genel"],["malt","🌾 Malt"],["hop","🌿 Hop"],["maya","🧬 Maya"],["hesap","🧮 Hesap"],["su","💧 Su"],["surec","⏱️ Süreç"],["takvim","📅 Takvim"],["katki","🧪 Katkı"],["not","📝 Not"]].map(([id,et])=>`<button data-s="${id}" class="sb-btn${sekme===id?" ak":""}" onclick="setSekme('${id}')">${et}</button>`).join("");
+  const skmls=[["genel","🏠 Genel"],["malt","🌾 Malt"],["hop","🌿 Hop"],["maya","🧬 Maya"],["hesap","🧮 Hesap"],["su","💧 Su"],["surec","⏱️ Süreç"],["takvim","📅 Takvim"],["katki","🧪 Katkı"],["not","📝 Not"]].map(([id,et])=>`<button data-s="${id}" lang="und" class="sb-btn${sekme===id?" ak":""}" onclick="setSekme('${id}')">${et}</button>`).join("");
   const kbg=kayitMsg?(kayitTip==="hata"?"var(--ka)":"var(--ya)"):"var(--vintage)",kclr=kayitMsg?(kayitTip==="hata"?"var(--kk)":"var(--yk)"):"#FFFFFF",kbrd=kayitMsg?(kayitTip==="hata"?"#C49080":"#A0A868"):"var(--vintage)";
   // Adim 132-I: Recete mode (edit/view) — localStorage persist + S.durum default + body data-mode
   const _recMode = (function(){
