@@ -11247,6 +11247,7 @@ function tkv(maya,og,fg,abv,hoplar,maya2,stil){
 
   // ESKİ AKIŞ: Maya-tabanlı (stil tanınmadıysa fallback)
   const dh=hoplar.filter(h=>h.tur==="dry_hop"),fs=og>1.080?14:og>1.060?8:6;
+  const sc=maya.ek==="dolap"?Math.min(maya.sc[1],18):(maya.ideal||maya.sc[0]);
   // 2. maya varsa: ortak sicaklik penceresi hesapla; fallback aksinda kullaniciya bilgi/uyari ekle
   const _scKes=maya2?bmMayaSicKesisim(maya,maya2):null;
   const L=[];
