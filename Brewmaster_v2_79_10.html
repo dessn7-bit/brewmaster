@@ -11523,7 +11523,8 @@ function rStok(){
           ${_kFlt.length?'<optgroup label="🧪 Katkı Malzemeleri">'+_kFlt.map(k=>'<option value="'+k.id+'|'+k.ad+'|'+k.birim+'|'+k.g+'">'+k.ad+'</option>').join("")+'</optgroup>':''}
           <optgroup label="── Özel ──"><option value="ozel">Özel / Listede yok</option></optgroup>
         </select>
-        <input type="text" id="stokAd" class="inp" placeholder="Malzeme adı" oninput="window._stokRefId=null;window._stokRefTip=null;" style="margin-bottom:0">
+        <input type="text" id="stokAd" class="inp" placeholder="Malzeme adı" oninput="window._stokRefId=null;window._stokRefTip=null;" style="margin-bottom:4px">
+        <input type="text" id="stokMarka" class="inp" placeholder="🏷️ Marka (opsiyonel) — örn: Hitit, Weyermann" style="margin-bottom:0">
       </div>
       <div style="display:flex;gap:8px;margin-bottom:6px">
         <input type="number" id="stokMiktar" class="inp" placeholder="Miktar" min="0" step="1" style="width:90px">
@@ -22090,7 +22091,10 @@ function stokEkle(){
   const g=document.getElementById("stokGrup")?.value||"Diğer";
   const uyari=parseFloat(document.getElementById("stokUyari")?.value)||0;
   if(!ad)return;
-  var rec = {id:Date.now().toString(),ad,miktar,birim,g,uyari};
+  const marka=(document.getElementById("stokMarka")?.value||"").trim();
+  const adTam = marka ? ad+" ("+marka+")" : ad;
+  var rec = {id:Date.now().toString(),ad:adTam,miktar,birim,g,uyari};
+  rec.marka=marka;
   // Katalogdan seçildiyse refId ekle
   if(window._stokRefId){
     rec.refId = window._stokRefId;
