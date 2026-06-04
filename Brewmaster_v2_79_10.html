@@ -5117,6 +5117,11 @@ function mayaViabilite(ayYas){
   if(ayYas>=6)return Math.max(0.15,Math.pow(0.78,ayYas)); // minimum %15 (çok eski vial)
   return Math.pow(0.78,ayYas);
 }
+// ─ Maya yardımcıları (maya sekmesi) ──
+const BM_KURU_PAKET_B=220; // kuru maya paket bazı (Lallemand 11g ≈ 220B)
+function bmOgPlato(og){return (og>1)?(-616.868+1111.14*og-630.272*og*og+135.997*og*og*og):0;}
+function bmPitchHedef(tip,og){if(tip==='kveik')return{rate:0.5,ad:'Kveik (düşük pitch)'};if(tip==='lager')return{rate:1.5,ad:'Lager (düşük fermentasyon)'};if(og>=1.070)return{rate:1.25,ad:'Yüksek OG ale (>1.070)'};return{rate:0.75,ad:'Standart ale'};}
+function bmMayaSicKesisim(m1,m2){if(!m1||!m2||!m1.sc||!m2.sc)return null;const low=Math.max(m1.sc[0],m2.sc[0]);const high=Math.min(m1.sc[1],m2.sc[1]);return{low,high,ortak:low<=high};}
 // ═══════════════════════════════════════════════════════════
 // KALİTE SKORU — Bilimsel bira kalitesi göstergesi (0-100)
 // ═══════════════════════════════════════════════════════════
@@ -11225,6 +11230,8 @@ function tkv(maya,og,fg,abv,hoplar,maya2,stil){
         if(_kH) _L2.push('Kondisyon: Min '+_kH.min+' hf · İdeal '+_kH.ideal+' hf · Zirve '+_kH.zirve+' hf');
         if(maya2){
           _L2.push('   ℹ 2. Maya: '+maya2.ad+' ('+maya2.sc[0]+'-'+maya2.sc[1]+'°C) — FG ortalaması iki mayadan');
+          const _scK2=(typeof bmMayaSicKesisim==='function')?bmMayaSicKesisim(maya,maya2):null;
+          if(_scK2) _L2.push(_scK2.ortak?('   🌡️ Ortak sıcaklık penceresi: '+_scK2.low+'-'+_scK2.high+'°C — fermantasyonu burada tut'):('   ⚠️ Sıcaklık aralıkları örtüşmüyor — kademeli fermantasyon düşün'));
         }
         return _L2;
       }
@@ -11233,11 +11240,10 @@ function tkv(maya,og,fg,abv,hoplar,maya2,stil){
 
   // ESKİ AKIŞ: Maya-tabanlı (stil tanınmadıysa fallback)
   const dh=hoplar.filter(h=>h.tur==="dry_hop"),fs=og>1.080?14:og>1.060?8:6;
-  // 2. maya varsa: ana protokol 1. mayaya göre, ama sc ortalaması
-  const sc2=maya2?(maya2.ek==="dolap"?Math.min(maya2.sc[1],18):maya2.ideal||maya2.sc[0]):null;
-  const sc=maya.ek==="dolap"?Math.min(maya.sc[1],18):maya.ideal||maya.sc[0];
-  const scEff=sc2?Math.round((sc+sc2)/2):sc;
+  // 2. maya varsa: ortak sicaklik penceresi hesapla; fallback aksinda kullaniciya bilgi/uyari ekle
+  const _scKes=maya2?bmMayaSicKesisim(maya,maya2):null;
   const L=[];
+  if(_scKes) L.push(_scKes.ortak?('🌡️ İki maya ortak sıcaklık penceresi: '+_scKes.low+'-'+_scKes.high+'°C — bu aralıkta tut'):('⚠️ İki mayanın sıcaklık aralığı örtüşmüyor ('+maya.ad+': '+maya.sc[0]+'-'+maya.sc[1]+'°C, '+maya2.ad+': '+maya2.sc[0]+'-'+maya2.sc[1]+'°C). Kademeli fermantasyon gerekebilir.'));
   // Rehydration/Pitching talimatı (kuru maya için — Kveik hariç)
   const isSivi=/^(wy|wlp|oyl|imp_)/.test(maya.id);
   if(maya.tip!=="kveik"){
@@ -14504,13 +14510,12 @@ function rEditorMaya(og, fg, abv, maya, maya2, fgKaynak, fgHesap){
   return `
     ${maya?(()=>{
       // Pitch rate hızlı bilgi şeridi (maya seçili)
-      const _ogP2=og>1?-616.868+1111.14*og-630.272*og*og+135.997*og*og*og:0;
-      const _mayaTipLocal=maya?maya.tip:'ale';
-      const _pitchRate=_mayaTipLocal==="lager"?1.5:_mayaTipLocal==="kveik"?0.5:0.75;
+      const _ogP2=bmOgPlato(og);
+      const _pitchRate=bmPitchHedef(maya?maya.tip:'ale',og).rate;
       const _cellsM=_pitchRate*_ogP2*(S.hacim||11)*1000;
       const _cellsB=(_cellsM/1000).toFixed(0);
-      const _paketler=Math.ceil(_cellsM/200000);
-      const _starter=_cellsM>200000*2?"✅ Starter önerilir":"";
+      const _paketler=Math.ceil(_cellsM/(BM_KURU_PAKET_B*1000));
+      const _starter=_cellsM>BM_KURU_PAKET_B*1000*2?"✅ Starter önerilir":"";
       return '<div style="background:var(--sa);border:1px solid #C8B070;border-radius:8px;padding:8px 12px;margin-bottom:8px;font-size:11px">'+
         '<span style="font-weight:700;color:var(--sk)">🧬 Pitch Rate: </span>'+
         '<span style="color:var(--kahve)">'+_pitchRate+'M hücre/mL/°P → '+_cellsB+'B hücre · '+_paketler+' paket</span>'+
@@ -14541,22 +14546,12 @@ function rEditorMaya(og, fg, abv, maya, maya2, fgKaynak, fgHesap){
       if (!maya || !og || og < 1.001) return '';
       
       // OG → Plato (Balling formülü)
-      const plato = -616.868 + 1111.14*og - 630.272*og*og + 135.997*og*og*og;
-      
-      // Maya tipine göre hedef rate
+      const plato = bmOgPlato(og);
+      // Maya tipine göre hedef rate (tek kaynak: bmPitchHedef)
       const tip = maya.tip || 'ale';
-      let hedefRate; // milyon hücre/mL/°P
-      let tipAd;
-      if (tip === 'lager' || tip === 'pilsner') {
-        hedefRate = 1.5;
-        tipAd = 'Lager (düşük fermentasyon)';
-      } else if (og >= 1.070) {
-        hedefRate = 1.25;
-        tipAd = 'Yüksek OG ale (>1.070)';
-      } else {
-        hedefRate = 0.75;
-        tipAd = 'Standart ale';
-      }
+      const _ph = bmPitchHedef(tip, og);
+      const hedefRate = _ph.rate;
+      const tipAd = _ph.ad;
       
       // Toplam hücre ihtiyacı (milyar)
       const hacim = S.hacim || 11;
@@ -14566,7 +14561,7 @@ function rEditorMaya(og, fg, abv, maya, maya2, fgKaynak, fgHesap){
       // Fermentis kuru: 11.5g paket ≈ 200 milyar
       // Lallemand kuru: 11g paket ≈ 220 milyar  
       // Wyeast/WhiteLabs sıvı: 100 milyar (taze) → aylık %20-25 kayıp
-      const kuruPaketCell = 220; // Fermentis/Lallemand tipik
+      const kuruPaketCell = BM_KURU_PAKET_B; // Fermentis/Lallemand tipik (tek kaynak: BM_KURU_PAKET_B)
       const sivieParketCell = 100;
       
       const kuruPaket = totalCells / kuruPaketCell;
@@ -14638,6 +14633,7 @@ function rEditorMaya(og, fg, abv, maya, maya2, fgKaynak, fgHesap){
           <div style="font-size:13px;font-weight:700;color:var(--kahve)">🧬 Pitch Rate Hesabı</div>
           <div style="font-size:11px;color:var(--dim)">${tipAd}</div>
         </div>
+        ${S.maya2Id?('<div style="background:rgba(255,255,255,.5);border-radius:6px;padding:7px 10px;margin-bottom:8px;font-size:10px;color:var(--kahve);line-height:1.4"><b>🧬 Ko-pitch (2 maya):</b> Toplam hedef hücre 2 suşa <b>bölünür</b>, toplam değişmez. Oran karaktere bağlı — tipik olarak ana maya baskın (ör. %80 '+maya.ad+' / %20 '+((MAYALAR.find(x=>x&&x.id===S.maya2Id)||{}).ad||'2. maya')+').</div>'):''}
         <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:8px">
           <div style="background:rgba(255,255,255,.5);border-radius:6px;padding:8px 10px">
             <div style="font-size:9px;color:var(--dim);letter-spacing:.5px">HEDEF HÜCRE</div>
