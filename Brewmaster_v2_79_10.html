@@ -5601,14 +5601,9 @@ function tin(dk,og){const d=+dk||0;return 1.65*Math.pow(.000125,og-1)*(1-Math.ex
 // Malowicki (2005) Arrhenius kinetiği: k(T) = 7.9e11 × exp(-11858/T_K)
 // Tinseth 100°C için kalibre; whirlpool'da sıcaklığa göre ölçeklenir
 function whFaktor(T){
+  // Malowicki (2005) Arrhenius: k(T)=7.9e11·exp(-11858/T_K); 100°C=1.0'a normalize, sürekli eğri
   if(T>=100) return 1.0;
-  if(T>=95)  return 0.65;
-  if(T>=90)  return 0.40;
-  if(T>=85)  return 0.24;
-  if(T>=80)  return 0.14;
-  if(T>=75)  return 0.08;
-  if(T>=70)  return 0.04;
-  return 0.01; // <70°C izomerizasyon ihmal edilebilir
+  return Math.max(0.01, Math.exp(11858*(1/373.15 - 1/(T+273.15)))); // alt taban 0.01 (~<53°C)
 }
 // M-H1 — Hop form → utilization çarpanı (Palmer/Mosher)
 // Pellet: Tinseth baseline (1.0). Pellet ezilmiş, yüzey alanı büyük, ekstraksiyon max.
