@@ -913,6 +913,12 @@ window.bmTipografiUygula = function(pref){
     set(p+'-scale', d.scale);
   });
   set('--tip-b-fvn', b.fvn ? 'tabular-nums' : null);
+  // Sprint 2.7c+10: harf-donusumu (BUYUK HARF veya Kucuk Kapiteller) aktifken
+  // Chrome lang="tr" yuzunden noktali I'yi italik sentezliyor. Donusum aktifse
+  // belge locale'ini gecici "und"a cevir; yoksa "tr"ye don. Apply fn her ayar
+  // degisiminde + boot anindaki L917 cagrisinda calistigi icin tek yer yeter.
+  var donusumAktif = !!(h.tt || h.fvc || b.tt || b.fvc);
+  root.lang = donusumAktif ? 'und' : 'tr';
 };
 try { window.bmTipografiUygula(window.bmTipografiOku()); } catch(_){}
 
