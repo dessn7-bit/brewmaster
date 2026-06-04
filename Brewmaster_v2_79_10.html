@@ -7894,8 +7894,10 @@ function calc(){
   const _eBoost=(katkilar||[]).reduce((s,k)=>{const kk=KATKILAR.find(a=>a&&a.id===k.id);return s+((kk&&kk.attenBoost)?kk.attenBoost:0);},0);
   let fgHesap=og;
   if(maya&&maya2){
+    const w=(typeof S!=='undefined'&&S.kopitchOran!=null)?S.kopitchOran:0.5;
     const a1=Math.min(98,_atuAgrlk(maya.atu)+_eBoost), a2=Math.min(98,_atuAgrlk(maya2.atu)+_eBoost);
-    fgHesap=+(1+(_nfg||0)+((og-1-(_nfg||0))*(1-(a1+a2)/2/100))).toFixed(4);
+    const aEff=a1*w+a2*(1-w);
+    fgHesap=+(1+(_nfg||0)+((og-1-(_nfg||0))*(1-aEff/100))).toFixed(4);
   }else if(maya){
     const atu=Math.min(98,_atuAgrlk(maya.atu)+_eBoost);
     fgHesap=atu>0?+(1+(_nfg||0)+((og-1-(_nfg||0))*(1-atu/100))).toFixed(4):og;
@@ -14519,7 +14521,7 @@ function rEditorMaya(og, fg, abv, maya, maya2, fgKaynak, fgHesap){
       '</div>';
     })():""}
     ${det || (!maya?'<div style="text-align:center;padding:20px;color:var(--dim);font-size:13px">Henüz maya seçilmedi — aşağıdan seç</div>':'')}
-    ${maya && S.maya2Id ? `<div style="margin-top:10px"><span class="etiket">2. Maya</span>${det2}</div>` : ''}
+    ${maya && S.maya2Id ? ('<div style="margin-top:10px"><span class="etiket">2. Maya</span>'+det2+'<div style="margin-top:8px"><span class="etiket" style="margin-bottom:4px">Ko-pitch oranı (ana / 2.)</span><div style="display:flex;gap:5px;flex-wrap:wrap">'+[[0.5,'50/50'],[0.6,'60/40'],[0.7,'70/30'],[0.8,'80/20'],[0.9,'90/10']].map(function(p){var sel=(S.kopitchOran!=null?S.kopitchOran:0.5)===p[0];return '<button class="btn" style="flex:1;min-width:56px;padding:6px 4px;font-size:11px;border:1.5px solid '+(sel?'var(--altin)':'var(--bor)')+';background:'+(sel?'var(--kahve-bg)':'#fff')+';color:'+(sel?'var(--bakir)':'var(--soluk)')+'" onclick="S.kopitchOran='+p[0]+';render()">'+p[1]+'</button>';}).join('')+'</div><div style="font-size:9px;color:var(--dim);margin-top:3px">FG bu orana göre ağırlıklı</div></div></div>') : ''}
     ${maya && maya.tip==='lager' ? `<div class="kart" style="margin-top:10px;background:#EAF2F8;border:1px solid #AECBDC;padding:10px 12px"><label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px;color:var(--kahve);line-height:1.4"><input type="checkbox" ${S.lagering!==false?'checked':''} onchange="S.lagering=this.checked;render()" style="width:18px;height:18px;cursor:pointer;flex:none;margin-top:1px"><span><b>Lagering yaptım</b> <span style="color:var(--dim);font-size:11px">(soğuk uzun dinlendirme). İşaretliyse gerçek lager stilleri; kapalıysa California Common.</span></span></label></div>` : ''}
     <div class="bm-acc bm-edit-only-acc" data-acc-id="maya-sec" data-acc-default="${_mySecDefault}" aria-expanded="${_mySecAria}" style="margin-top:10px">
       <button class="bm-acc-header" type="button" aria-expanded="${_mySecAria}" onclick="bmAccToggle('maya-sec')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmAccToggle('maya-sec')}"><span class="bm-acc-title">${_mySecBaslik}</span><span class="bm-acc-chevron">▾</span></button>
