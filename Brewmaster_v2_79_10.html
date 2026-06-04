@@ -4899,7 +4899,7 @@ function hOG(ml,v,katkilar,hacim){
     if(!kat||!kat.gu||kat.gu===0)return;
     // Birim → kg dönüşümü. Şurup yoğunluğu ~1.3 kg/L varsayımı (candi syrup, invert sugar için doğru).
     // adet/tablet/parça/dal/yaprak → 0 (OG'ye anlamlı katkı yok)
-    const km=k.birim==="kg"?k.miktar:k.birim==="L"?k.miktar*1.3:k.birim==="mL"?k.miktar/1000*1.3:(k.birim==="adet"||k.birim==="tablet"||k.birim==="parça"||k.birim==="dal"||k.birim==="yaprak")?0:k.miktar/1000;g+=kat.gu*km; // Katkılar post-boil — mash verimi uygulanmaz
+    const km=k.birim==="kg"?k.miktar:k.birim==="L"?k.miktar*BM_SIVI_GML:k.birim==="mL"?k.miktar/1000*BM_SIVI_GML:(k.birim==="adet"||k.birim==="tablet"||k.birim==="parça"||k.birim==="dal"||k.birim==="yaprak")?0:k.miktar/1000;g+=kat.gu*km; // Katkılar post-boil — mash verimi uygulanmaz
   });
   return 1+g/(h*1000);
 }
@@ -4930,7 +4930,7 @@ function hSRM(ml,katkilar,hacim){
   if(katkilar)katkilar.forEach(k=>{
     const kat=KATKILAR.find(a=>a&&a.id===k.id);
     if(!kat||!kat.srm)return;
-    const sm=k.birim==="kg"?k.miktar:k.birim==="L"?k.miktar:(k.birim==="adet"||k.birim==="tablet"||k.birim==="parça"||k.birim==="dal"||k.birim==="yaprak")?0:k.miktar/1000;
+    const sm=k.birim==="kg"?k.miktar:k.birim==="L"?k.miktar*BM_SIVI_GML:(k.birim==="adet"||k.birim==="tablet"||k.birim==="parça"||k.birim==="dal"||k.birim==="yaprak")?0:k.miktar/1000*BM_SIVI_GML;
     // Kaynatma süresi etkisi: Şeker/pre-caramelized → sabit renk; Aromatic katkılar → dk ile orantılı
     const _isSeker=kat.g==="Şeker"||kat.fermente===true;
     const _kz=(k.zaman||"").toLowerCase();
@@ -5119,6 +5119,7 @@ function mayaViabilite(ayYas){
 }
 // ─ Maya yardımcıları (maya sekmesi) ──
 const BM_KURU_PAKET_B=220; // kuru maya paket bazı (Lallemand 11g ≈ 220B)
+const BM_SIVI_GML=1.3; // sıvı katkı yoğunluğu g/mL (candi şurup bazı) — hOG/hSRM/kalori tek kaynak
 function bmOgPlato(og){return (og>1)?(-616.868+1111.14*og-630.272*og*og+135.997*og*og*og):0;}
 function bmPitchHedef(tip,og){if(tip==='kveik')return{rate:0.5,ad:'Kveik (düşük pitch)'};if(tip==='lager')return{rate:1.5,ad:'Lager (düşük fermentasyon)'};if(og>=1.070)return{rate:1.25,ad:'Yüksek OG ale (>1.070)'};return{rate:0.75,ad:'Standart ale'};}
 function bmMayaSicKesisim(m1,m2){if(!m1||!m2||!m1.sc||!m2.sc)return null;const low=Math.max(m1.sc[0],m2.sc[0]);const high=Math.min(m1.sc[1],m2.sc[1]);return{low,high,ortak:low<=high};}
@@ -5666,7 +5667,7 @@ function hIBU(hl,og,hacim,katkilar){
     const inBoil=kz==="kaynatmada"||kz.includes("kaynat");
     if(!inBoil||k.dk==null)return;
     const dkF=Math.min(1,k.dk/60);
-    const mg=k.birim==="kg"?k.miktar*1000:k.birim==="L"?k.miktar*1000:k.birim==="mL"?k.miktar:k.miktar;
+    const mg=k.birim==="kg"?k.miktar*1000:k.birim==="L"?k.miktar*1000*BM_SIVI_GML:k.birim==="mL"?k.miktar*BM_SIVI_GML:k.miktar;
     i+=kat.ibu_dk60*mg*dkF/h*REF_BATCH_L;
   });
   return i;
@@ -19567,8 +19568,8 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
           return S.katkilar.reduce((acc,k)=>{
             const kat=KATKILAR.find(a=>a&&a.id===k.id);
             if(!kat||!kat.srm) return acc;
-            const sm=k.birim==="kg"?k.miktar:k.birim==="L"?k.miktar:
-              (k.birim==="adet"||k.birim==="tablet"||k.birim==="parça"||k.birim==="dal"||k.birim==="yaprak")?0:k.miktar/1000;
+            const sm=k.birim==="kg"?k.miktar:k.birim==="L"?k.miktar*BM_SIVI_GML:
+              (k.birim==="adet"||k.birim==="tablet"||k.birim==="parça"||k.birim==="dal"||k.birim==="yaprak")?0:k.miktar/1000*BM_SIVI_GML;
             return acc+(kat.srm*sm*2.20462)/L2;
           },0);
         })();
