@@ -5674,7 +5674,7 @@ function hIBU(hl,og,hacim,katkilar){
 // ABW = ABV × 0.79 (weight % alkol); RE = 0.1808×OG_plato + 0.8192×FG_plato
 function _bira_re(og,fg){
   if(!og||!fg||og<=1||fg<=0.99)return 0;
-  const _pl=g=>-676.67+1286.4*g-800.47*g*g+190.74*g*g*g;
+  const _pl=g=>bmOgPlato(g);
   return 0.1808*_pl(og)+0.8192*_pl(fg); // Real extract (%)
 }
 function hKalori(og,fg,abv,ml){
@@ -7920,8 +7920,8 @@ function calc(){
   let abv = 0;
   if(og < 1.774 && fg < og){
     // SG → Plato dönüşümü
-    const ogP = -463.37 + 668.72*og - 205.35*og*og;
-    const fgP = -463.37 + 668.72*fg - 205.35*fg*fg;
+    const ogP = bmOgPlato(og);
+    const fgP = bmOgPlato(fg);
     // Balling real extract düzeltmesi (alkol yoğunluğu için)
     const q = 0.22 + 0.001*ogP;
     const RE = (q*ogP + fgP) / (1 + q);
@@ -12159,7 +12159,7 @@ function rEditorTakvim(maya, maya2, tv){
                 const fgH=+(1+(og-1)*(1-attH/100)).toFixed(3);
                 var _bABV=function(og,fg){
                   if(og>=1.774||fg>=og)return 0;
-                  const ogP=-463.37+668.72*og-205.35*og*og,fgP=-463.37+668.72*fg-205.35*fg*fg;
+                  const ogP=bmOgPlato(og),fgP=bmOgPlato(fg);
                   const q=0.22+0.001*ogP,RE=(q*ogP+fgP)/(1+q);
                   return parseFloat(((ogP-RE)/(2.0665-0.010665*ogP)*fg/0.794).toFixed(2));
                 };
@@ -12188,7 +12188,7 @@ function rEditorTakvim(maya, maya2, tv){
         try{
           var _bABV=function(og,fg){
                   if(og>=1.774||fg>=og)return 0;
-                  const ogP=-463.37+668.72*og-205.35*og*og,fgP=-463.37+668.72*fg-205.35*fg*fg;
+                  const ogP=bmOgPlato(og),fgP=bmOgPlato(fg);
                   const q=0.22+0.001*ogP,RE=(q*ogP+fgP)/(1+q);
                   return parseFloat(((ogP-RE)/(2.0665-0.010665*ogP)*fg/0.794).toFixed(2));
                 };
@@ -18385,7 +18385,7 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
 
   // ════ GÖVDE ══════════════════════════════════════════════════
   // Adim 137-G P4 fix: govde — orta parca proza (sonucun aciklamasi). "Sonuc:" oneki kaldirildi.
-  const _toPlato2=sg=>Math.max(0,-616.868+1111.14*sg-630.272*sg*sg+135.997*sg*sg*sg);
+  const _toPlato2=sg=>bmOgPlato(sg);
   const re_val=0.1808*_toPlato2(_og)+0.8192*_toPlato2(_fg);
   let govde;
   {
@@ -19928,7 +19928,7 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
       <div style="font-size:9px;color:var(--dim);margin-top:8px;text-align:center">Tahmini profil — bileşenlere göre otomatik güncellenir</div>
     </div>
     ${og>1.001?(()=>{
-      const _toP3=sg=>Math.max(0,-616.868+1111.14*sg-630.272*sg*sg+135.997*sg*sg*sg);
+      const _toP3=sg=>bmOgPlato(sg);
       const _re3=0.1808*_toP3(_og)+0.8192*_toP3(_fg);
       const _c100=(_re3*_fg*0.96).toFixed(1);
       const _k100=((6.9*(_abv*0.789*10)+4.0*(_re3*_fg*10))/10).toFixed(0);
@@ -20357,7 +20357,7 @@ window.refrakDuzelt=function(){
   if(!out)return;
   if(isNaN(og)||isNaN(fg)||og<=fg||og<1.010||fg<1.000){out.textContent="—";return;}
   // SG → Brix (≈Plato for wort) Balling polynomial (ASBC standart)
-  const sgToBrix = sg => -616.868 + 1111.14*sg - 630.272*sg*sg + 135.997*sg*sg*sg;
+  const sgToBrix = sg => bmOgPlato(sg);
   const ob = sgToBrix(og);
   const fb = sgToBrix(fg);
   // Sean Terrill cubic (Brix tabanlı)
@@ -23685,7 +23685,7 @@ syncBaslat();
     });
     test('M-P2: Sean Terrill — OG 1.060, refr FG 1.020 → gerçek FG hesapla',()=>{
       // SG → Brix (Balling)
-      const sgB=sg=>-616.868+1111.14*sg-630.272*sg*sg+135.997*sg*sg*sg;
+      const sgB=sg=>bmOgPlato(sg);
       const ob=sgB(1.060),fb=sgB(1.020);
       const c=1.0000-0.0044993*ob+0.011774*fb+0.00027581*ob*ob-0.0012717*fb*fb-0.00000728*ob*ob*ob+0.000063293*fb*fb*fb;
       // OG 1.060 ≈ 14.7 Brix, refr FG 1.020 ≈ 5.1 Brix → corrected ~1.005-1.008
@@ -23694,7 +23694,7 @@ syncBaslat();
     test('M-P2: Aussie örneği OG 1.046, refr 1.023 → gerçek ~1.011',()=>{
       // Forum gerçek: 11.4 Brix → 6 Brix = corrected 1.011
       // 1.046 SG = 11.4 Brix, 1.023 SG = 5.85 Brix
-      const sgB=sg=>-616.868+1111.14*sg-630.272*sg*sg+135.997*sg*sg*sg;
+      const sgB=sg=>bmOgPlato(sg);
       const ob=sgB(1.046),fb=sgB(1.023);
       const c=1.0000-0.0044993*ob+0.011774*fb+0.00027581*ob*ob-0.0012717*fb*fb-0.00000728*ob*ob*ob+0.000063293*fb*fb*fb;
       // Beklenen: ~1.010-1.013 (Aussie forum referans)
@@ -23702,7 +23702,7 @@ syncBaslat();
     });
     test('M-P2: Gerçek FG daima refr FG\'den düşük (alkol düzeltme)',()=>{
       // Refraktometre alkol varken yüksek okur → gerçek daha düşük olmalı
-      const sgB=sg=>-616.868+1111.14*sg-630.272*sg*sg+135.997*sg*sg*sg;
+      const sgB=sg=>bmOgPlato(sg);
       const ob=sgB(1.065),fb=sgB(1.025);
       const c=1.0000-0.0044993*ob+0.011774*fb+0.00027581*ob*ob-0.0012717*fb*fb-0.00000728*ob*ob*ob+0.000063293*fb*fb*fb;
       assert(c<1.025,'Gerçek '+c.toFixed(3)+' < refr 1.025');
