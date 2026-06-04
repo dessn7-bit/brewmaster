@@ -5124,6 +5124,11 @@ function bmMayaKalib(id){try{const o=JSON.parse(localStorage.getItem('bm_maya_ka
 function bmMayaKalibSet(id,v){try{const o=JSON.parse(localStorage.getItem('bm_maya_kalibrasyon')||'{}');if(v==null||!(+v>0))delete o[id];else o[id]=Math.round(+v);localStorage.setItem('bm_maya_kalibrasyon',JSON.stringify(o));}catch(e){}}
 function bmFermSic(){try{var v=localStorage.getItem('bm_ferm_sicaklik');return (v==null||v==='')?null:+v;}catch(e){return null;}}
 function bmFermSicSet(v){try{if(v==null||v===''||isNaN(+v))localStorage.removeItem('bm_ferm_sicaklik');else localStorage.setItem('bm_ferm_sicaklik',Math.round(+v));}catch(e){}}
+function bmHasatList(){try{var a=JSON.parse(localStorage.getItem('bm_maya_hasat')||'[]');return Array.isArray(a)?a:[];}catch(e){return [];}}
+function bmHasatSave(a){try{localStorage.setItem('bm_maya_hasat',JSON.stringify(a));}catch(e){}}
+function bmHasatEkle(ad,nesil,tarih,mayaId){if(!ad||!String(ad).trim())return;var a=bmHasatList();a.push({id:'h'+Date.now(),mayaId:mayaId||'',ad:String(ad).trim(),nesil:Math.max(1,Math.min(30,+nesil||1)),tarih:tarih||new Date().toISOString().slice(0,10)});bmHasatSave(a);if(typeof render==='function')render();}
+function bmHasatSil(id){bmHasatSave(bmHasatList().filter(function(x){return x.id!==id;}));if(typeof render==='function')render();}
+function bmHasatYas(tarih){if(!tarih)return null;var d=new Date(tarih+'T00:00:00');if(isNaN(d.getTime()))return null;return Math.max(0,Math.round((Date.now()-d.getTime())/86400000));}
 function bmOgPlato(og){return (og>1)?(-616.868+1111.14*og-630.272*og*og+135.997*og*og*og):0;}
 function bmPitchHedef(tip,og){if(tip==='kveik')return{rate:0.5,ad:'Kveik (düşük pitch)'};if(tip==='lager')return{rate:1.5,ad:'Lager (düşük fermentasyon)'};if(og>=1.070)return{rate:1.25,ad:'Yüksek OG ale (>1.070)'};return{rate:0.75,ad:'Standart ale'};}
 function bmMayaSicKesisim(m1,m2){if(!m1||!m2||!m1.sc||!m2.sc)return null;const low=Math.max(m1.sc[0],m2.sc[0]);const high=Math.min(m1.sc[1],m2.sc[1]);return{low,high,ortak:low<=high};}
