@@ -14834,8 +14834,30 @@ function rEditorHesap(og, fg, abv, maya){
     +'<div style="font-size:9px;color:var(--dim);margin-top:8px;line-height:1.4">Gravity puanı × hacim ≈ sabit. Su eklemek OG düşürür, kaynatmak yükseltir. Varsayılanlar reçeteden gelir; ölçtüğün değeri yaz.</div></div>';
 })();
 
+  var _kartRenk = (function(){
+  var _srmV=(typeof hSRM==='function')?hSRM(S.maltlar||[],S.katkilar||[],hacim):0;
+  var _pigV=(typeof aktif_pigment==='function'&&typeof _pigKatkiGramMap==='function')?aktif_pigment(_pigKatkiGramMap(S.katkilar||[]),hacim,4.3):null;
+  var _hexV=(typeof aktif_renk_hex==='function')?aktif_renk_hex(_srmV,_pigV):'#cb8d00';
+  var _adTr=(typeof renk_band_tr==='function')?renk_band_tr(_srmV,_pigV):'';
+  var _adEn=(typeof renk_band_en==='function')?renk_band_en(_srmV,_pigV):'';
+  var _ebcV=Math.round((_srmV||0)*1.97);
+  return '<div class="kart">'
+    +'<div style="font-size:14px;font-weight:700;color:var(--kahve);margin-bottom:10px">🎨 Renk / SRM</div>'
+    +'<div style="display:flex;align-items:center;gap:14px">'
+    +'<div style="width:64px;height:64px;border-radius:10px;flex-shrink:0;border:2px solid rgba(0,0,0,.15);background:'+_hexV+'"></div>'
+    +'<div>'
+    +'<div style="font-size:32px;font-weight:600;color:var(--bakir);font-family:var(--font-display);line-height:1">'+(_srmV||0).toFixed(1)+' <span style="font-size:14px;color:var(--soluk)">SRM</span></div>'
+    +'<div style="font-size:12px;color:var(--soluk);margin-top:2px">'+_ebcV+' EBC</div>'
+    +'<div style="font-size:13px;color:var(--kahve);font-weight:600;margin-top:4px">'+_adTr+(_adEn&&_adEn!==_adTr?' <span style="color:var(--soluk);font-weight:400">/ '+_adEn+'</span>':'')+'</div>'
+    +'</div>'
+    +'</div>'
+    +'<div style="font-size:9px;color:var(--dim);margin-top:10px;line-height:1.4">SRM tahıl/katkı renk katkısından; renk motoru pigment+pH ile hex üretir. EBC = SRM × 1.97.</div>'
+    +'</div>';
+})();
+
   // 5 akordiyon caller-wrap (besin değerleri opsiyonel og>1.001)
   return _bmAccWrap('hesap-bath',    '🥃', 'Batç Hacmi',           _meta1, _kartBatch,   true)
+       + _bmAccWrap('hesap-renk', '', 'Renk / SRM', '', _kartRenk, false)
        + _bmAccWrap('hesap-su',      '💧', 'Su Hesabı',            _meta4, _kartSu,      true)
        + _bmAccWrap('hesap-strike', '', 'Mash Strike Sıcaklığı', '', _kartStrike, false)
        + _bmAccWrap('hesap-seyreltme', '', 'Seyreltme / Gravity Düzeltme', '', _kartSeyreltme, false)
