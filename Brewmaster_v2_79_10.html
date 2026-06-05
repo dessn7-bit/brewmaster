@@ -14811,7 +14811,7 @@ function rEditorHesap(og, fg, abv, maya){
     +'<span class="etiket">Tahıl Sıcaklığı (°C)</span>'
     +'<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px"><input type="number" class="inp" style="width:80px;text-align:center;font-weight:600" min="0" max="35" step="1" value="'+_gt+'" onchange="S.grainTemp=this.value!==\'\'?parseInt(this.value):null;render()"><span style="font-size:12px;color:var(--soluk)">oda/depo sıcaklığı</span></div>'
     +'<div style="background:var(--sa);border:1px solid var(--bor);border-left:4px solid var(--sk);border-radius:10px;padding:16px;text-align:center"><div style="font-size:10px;color:var(--soluk);font-weight:700;letter-spacing:1.5px;text-transform:uppercase">Strike suyu sıcaklığı</div><div style="font-size:50px;font-weight:600;color:var(--bakir);line-height:1.1;font-family:var(--font-display);margin-top:4px">'+_sw+'°C</div><div style="font-size:11px;color:var(--soluk);margin-top:4px">hedef mash '+_T2+'°C · oran '+_R.toFixed(1)+' L/kg</div></div>'
-    +'<div style="font-size:9px;color:var(--dim);margin-top:8px;line-height:1.4">Palmer formülü: Tw=(0.41/R)(T2−T1)+T2. Tüm su mayışta (all-in-one/BIAB) varsayılır; soğuk kazan için +1-2°C ekle.</div>';
+    +'<div style="font-size:9px;color:var(--dim);margin-top:8px;line-height:1.4">Palmer formülü: Tw=(0.41/R)(T2−T1)+T2. Tüm su mayışta (all-in-one/BIAB) varsayılır; soğuk kazan için +1-2°C ekle.</div></div>';
 })() : '<div class="kart"><div style="font-size:14px;font-weight:700;color:var(--kahve);margin-bottom:8px">🌡️ Mash Strike Suyu Sıcaklığı</div><div style="font-size:11px;color:var(--dim)">Tahıl eklendiğinde hesaplanır (ekstrakt demlemede gerekmez).</div></div>';
 
   var _kartSeyreltme = (function(){
@@ -14831,7 +14831,7 @@ function rEditorHesap(og, fg, abv, maya){
     +'<div><span class="etiket">Hedef OG</span><input type="number" class="inp" style="width:90px" min="1" max="1.2" step="0.001" value="'+_ot.toFixed(3)+'" onchange="S.seyHedef=this.value!==\'\'?parseFloat(this.value):null;render()"></div>'
     +'</div>'
     +'<div style="background:var(--sa);border:1px solid var(--bor);border-left:4px solid var(--sk);border-radius:10px;padding:14px;text-align:center">'+_res+'</div>'
-    +'<div style="font-size:9px;color:var(--dim);margin-top:8px;line-height:1.4">Gravity puanı × hacim ≈ sabit. Su eklemek OG düşürür, kaynatmak yükseltir. Varsayılanlar reçeteden gelir; ölçtüğün değeri yaz.</div>';
+    +'<div style="font-size:9px;color:var(--dim);margin-top:8px;line-height:1.4">Gravity puanı × hacim ≈ sabit. Su eklemek OG düşürür, kaynatmak yükseltir. Varsayılanlar reçeteden gelir; ölçtüğün değeri yaz.</div></div>';
 })();
 
   // 5 akordiyon caller-wrap (besin değerleri opsiyonel og>1.001)
