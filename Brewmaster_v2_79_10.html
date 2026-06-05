@@ -14801,9 +14801,23 @@ function rEditorHesap(og, fg, abv, maya){
   var _meta3 = (S.primVol || '—') + ' vol';
   var _meta4 = mash + 'L';
 
+  var _kartStrike = (topMaltKg>0) ? (function(){
+  var _gt=(S.grainTemp!=null)?+S.grainTemp:20;
+  var _R=mash/topMaltKg;
+  var _T2=S.mashSc||67;
+  var _sw=((0.41/_R)*(_T2-_gt)+_T2).toFixed(1);
+  return '<div class="kart">'
+    +'<div style="font-size:14px;font-weight:700;color:var(--kahve);margin-bottom:8px">🌡️ Mash Strike Suyu Sıcaklığı</div>'
+    +'<span class="etiket">Tahıl Sıcaklığı (°C)</span>'
+    +'<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px"><input type="number" class="inp" style="width:80px;text-align:center;font-weight:600" min="0" max="35" step="1" value="'+_gt+'" onchange="S.grainTemp=this.value!==\'\'?parseInt(this.value):null;render()"><span style="font-size:12px;color:var(--soluk)">oda/depo sıcaklığı</span></div>'
+    +'<div style="background:var(--sa);border:1px solid var(--bor);border-left:4px solid var(--sk);border-radius:10px;padding:16px;text-align:center"><div style="font-size:10px;color:var(--soluk);font-weight:700;letter-spacing:1.5px;text-transform:uppercase">Strike suyu sıcaklığı</div><div style="font-size:50px;font-weight:600;color:var(--bakir);line-height:1.1;font-family:var(--font-display);margin-top:4px">'+_sw+'°C</div><div style="font-size:11px;color:var(--soluk);margin-top:4px">hedef mash '+_T2+'°C · oran '+_R.toFixed(1)+' L/kg</div></div>'
+    +'<div style="font-size:9px;color:var(--dim);margin-top:8px;line-height:1.4">Palmer formülü: Tw=(0.41/R)(T2−T1)+T2. Tüm su mayışta (all-in-one/BIAB) varsayılır; soğuk kazan için +1-2°C ekle.</div>';
+})() : '<div class="kart"><div style="font-size:14px;font-weight:700;color:var(--kahve);margin-bottom:8px">🌡️ Mash Strike Suyu Sıcaklığı</div><div style="font-size:11px;color:var(--dim)">Tahıl eklendiğinde hesaplanır (ekstrakt demlemede gerekmez).</div></div>';
+
   // 5 akordiyon caller-wrap (besin değerleri opsiyonel og>1.001)
   return _bmAccWrap('hesap-bath',    '🥃', 'Batç Hacmi',           _meta1, _kartBatch,   true)
        + _bmAccWrap('hesap-su',      '💧', 'Su Hesabı',            _meta4, _kartSu,      true)
+       + _bmAccWrap('hesap-strike', '', 'Mash Strike Sıcaklığı', '', _kartStrike, false)
        + _bmAccWrap('hesap-priming', '🍾', 'Priming / Şişeleme',   _meta3, _kartPriming, false)
        + (_kartNutri ? _bmAccWrap('hesap-nutri', '🧬', 'Besin Değerleri', _meta5, _kartNutri, false) : '')
        + _bmAccWrap('hesap-export',  '📤', 'Reçete Dışa Aktarma',  '',     _kartExport,  false);
