@@ -12744,8 +12744,7 @@ function rEditorTakvim(maya, maya2, tv){
         +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:11px;color:var(--kahve)">'
           +'<div>Hedef CO₂: <b>'+_co2H.toFixed(1)+' vol</b></div>'
           +'<div>Sıcaklık: <b>'+_primTemp+'°C</b></div>'
-          +'<div>🍬 Dekstroz: <b>'+_dekstroz+'g</b></div>'
-          +'<div>🍚 Sakkaroz: <b>'+_sakkaroz+'g</b></div>'
+          +'<div style="grid-column:1/-1">'+(function(){var _y=S.primYontem||'Dekstroz';if(_y==='Sıvı CO₂ Şekeri')return '💧 Sıvı CO₂ Şekeri: <b>'+(_dekstroz*1.35).toFixed(0)+' mL</b>';if(_y==='Beyaz Şeker')return '🍚 Beyaz Şeker: <b>'+(_dekstroz*0.9575).toFixed(0)+' g</b>';return '🍬 Dekstroz: <b>'+_dekstroz+' g</b>';})()+'</div>'
         +'</div>'
         +'<div style="font-size:10px;color:var(--soluk);margin-top:4px;font-style:italic">Hesap sekmesinden detaylı priming ayarı yapabilirsin.</div>'
         +'</div>';
