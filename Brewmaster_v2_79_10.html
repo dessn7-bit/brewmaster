@@ -14814,10 +14814,31 @@ function rEditorHesap(og, fg, abv, maya){
     +'<div style="font-size:9px;color:var(--dim);margin-top:8px;line-height:1.4">Palmer formülü: Tw=(0.41/R)(T2−T1)+T2. Tüm su mayışta (all-in-one/BIAB) varsayılır; soğuk kazan için +1-2°C ekle.</div>';
 })() : '<div class="kart"><div style="font-size:14px;font-weight:700;color:var(--kahve);margin-bottom:8px">🌡️ Mash Strike Suyu Sıcaklığı</div><div style="font-size:11px;color:var(--dim)">Tahıl eklendiğinde hesaplanır (ekstrakt demlemede gerekmez).</div></div>';
 
+  var _kartSeyreltme = (function(){
+  var _v=(S.seyHacim!=null)?+S.seyHacim:hacim;
+  var _on=(S.seyOG!=null)?+S.seyOG:og;
+  var _ot=(S.seyHedef!=null)?+S.seyHedef:og;
+  var _gn=(_on-1)*1000,_gt=(_ot-1)*1000,_res;
+  if(!(_gn>0)||!(_gt>0)){_res='<div style="font-size:13px;color:var(--dim)">Geçerli OG değerleri gir (>1.000).</div>';}
+  else if(Math.abs(_gn-_gt)<0.5){_res='<div style="font-size:15px;color:#2A6A2A;font-weight:700">✓ Hedefte — düzeltme gerekmez</div>';}
+  else if(_gt<_gn){var _add=_v*(_gn/_gt-1);_res='<div style="font-size:10px;color:var(--soluk);font-weight:700;letter-spacing:1.5px;text-transform:uppercase">Su Ekle</div><div style="font-size:50px;font-weight:600;color:var(--bakir);line-height:1.1;font-family:var(--font-display);margin-top:4px">+'+_add.toFixed(1)+' L</div><div style="font-size:11px;color:var(--soluk);margin-top:4px">→ '+(_v+_add).toFixed(1)+' L @ '+_ot.toFixed(3)+' (OG düşür)</div>';}
+  else{var _boil=_v*(1-_gn/_gt);_res='<div style="font-size:10px;color:var(--soluk);font-weight:700;letter-spacing:1.5px;text-transform:uppercase">Kaynat / Buharlaştır</div><div style="font-size:50px;font-weight:600;color:var(--bakir);line-height:1.1;font-family:var(--font-display);margin-top:4px">'+_boil.toFixed(1)+' L</div><div style="font-size:11px;color:var(--soluk);margin-top:4px">→ '+(_v-_boil).toFixed(1)+' L @ '+_ot.toFixed(3)+' (OG yükselt)</div>';}
+  return '<div class="kart">'
+    +'<div style="font-size:14px;font-weight:700;color:var(--kahve);margin-bottom:8px">💧 Seyreltme / Gravity Düzeltme</div>'
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">'
+    +'<div><span class="etiket">Mevcut Hacim (L)</span><input type="number" class="inp" style="width:78px" min="1" step="0.1" value="'+_v+'" onchange="S.seyHacim=this.value!==\'\'?parseFloat(this.value):null;render()"></div>'
+    +'<div><span class="etiket">Ölçülen OG</span><input type="number" class="inp" style="width:90px" min="1" max="1.2" step="0.001" value="'+_on.toFixed(3)+'" onchange="S.seyOG=this.value!==\'\'?parseFloat(this.value):null;render()"></div>'
+    +'<div><span class="etiket">Hedef OG</span><input type="number" class="inp" style="width:90px" min="1" max="1.2" step="0.001" value="'+_ot.toFixed(3)+'" onchange="S.seyHedef=this.value!==\'\'?parseFloat(this.value):null;render()"></div>'
+    +'</div>'
+    +'<div style="background:var(--sa);border:1px solid var(--bor);border-left:4px solid var(--sk);border-radius:10px;padding:14px;text-align:center">'+_res+'</div>'
+    +'<div style="font-size:9px;color:var(--dim);margin-top:8px;line-height:1.4">Gravity puanı × hacim ≈ sabit. Su eklemek OG düşürür, kaynatmak yükseltir. Varsayılanlar reçeteden gelir; ölçtüğün değeri yaz.</div>';
+})();
+
   // 5 akordiyon caller-wrap (besin değerleri opsiyonel og>1.001)
   return _bmAccWrap('hesap-bath',    '🥃', 'Batç Hacmi',           _meta1, _kartBatch,   true)
        + _bmAccWrap('hesap-su',      '💧', 'Su Hesabı',            _meta4, _kartSu,      true)
        + _bmAccWrap('hesap-strike', '', 'Mash Strike Sıcaklığı', '', _kartStrike, false)
+       + _bmAccWrap('hesap-seyreltme', '', 'Seyreltme / Gravity Düzeltme', '', _kartSeyreltme, false)
        + _bmAccWrap('hesap-priming', '🍾', 'Priming / Şişeleme',   _meta3, _kartPriming, false)
        + (_kartNutri ? _bmAccWrap('hesap-nutri', '🧬', 'Besin Değerleri', _meta5, _kartNutri, false) : '')
        + _bmAccWrap('hesap-export',  '📤', 'Reçete Dışa Aktarma',  '',     _kartExport,  false);
