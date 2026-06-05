@@ -14803,10 +14803,10 @@ function rEditorHesap(og, fg, abv, maya){
 
   // 5 akordiyon caller-wrap (besin değerleri opsiyonel og>1.001)
   return _bmAccWrap('hesap-bath',    '🥃', 'Batç Hacmi',           _meta1, _kartBatch,   true)
-       + _bmAccWrap('hesap-export',  '📤', 'Reçete Dışa Aktarma',  '',     _kartExport,  false)
-       + _bmAccWrap('hesap-priming', '🍾', 'Priming / Şişeleme',   _meta3, _kartPriming, false)
        + _bmAccWrap('hesap-su',      '💧', 'Su Hesabı',            _meta4, _kartSu,      true)
-       + (_kartNutri ? _bmAccWrap('hesap-nutri', '🧬', 'Besin Değerleri', _meta5, _kartNutri, false) : '');
+       + _bmAccWrap('hesap-priming', '🍾', 'Priming / Şişeleme',   _meta3, _kartPriming, false)
+       + (_kartNutri ? _bmAccWrap('hesap-nutri', '🧬', 'Besin Değerleri', _meta5, _kartNutri, false) : '')
+       + _bmAccWrap('hesap-export',  '📤', 'Reçete Dışa Aktarma',  '',     _kartExport,  false);
 }
 
 
