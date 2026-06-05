@@ -14855,12 +14855,32 @@ function rEditorHesap(og, fg, abv, maya){
     +'</div>';
 })();
 
+  var _kartVerim = (function(){
+  var _ev=(S.verim!=null)?+S.verim:61;
+  var _eog=(S.effOG!=null)?+S.effOG:og;
+  var _evol=(S.effVol!=null)?+S.effVol:hacim;
+  var _eP=(og-1)*1000,_mP=(_eog-1)*1000,_res;
+  if(!(_eP>0)){_res='<div style="font-size:13px;color:var(--dim)">Tahıllı reçete + geçerli tasarım OG gerekir (ekstrakt/boşta hesaplanmaz).</div>';}
+  else if(!(_mP>0)){_res='<div style="font-size:13px;color:var(--dim)">Ölçülen OG gir (>1.000).</div>';}
+  else{var _gvR=Math.round(_ev*(_mP*_evol)/(_eP*hacim));_res='<div style="font-size:10px;color:var(--soluk);font-weight:700;letter-spacing:1.5px;text-transform:uppercase">Gerçek Verim</div><div style="font-size:50px;font-weight:600;color:var(--bakir);line-height:1.1;font-family:var(--font-display);margin-top:4px">%'+_gvR+'</div><div style="font-size:11px;color:var(--soluk);margin-top:4px">ayarlı: %'+_ev+(Math.abs(_gvR-_ev)>=1?' · <span onclick="S.verim='+_gvR+';render()" style="color:var(--bakir);font-weight:700;cursor:pointer;text-decoration:underline">Verimi %'+_gvR+' yap</span>':' (eşleşiyor)')+'</div>';}
+  return '<div class="kart">'
+    +'<div style="font-size:14px;font-weight:700;color:var(--kahve);margin-bottom:8px">⚙️ Verim (Brewhouse) Geri-Hesabı</div>'
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">'
+    +'<div><span class="etiket">Ölçülen OG</span><input type="number" class="inp" style="width:90px" min="1" max="1.2" step="0.001" value="'+_eog.toFixed(3)+'" onchange="S.effOG=this.value!==\'\'?parseFloat(this.value):null;render()"></div>'
+    +'<div><span class="etiket">Ölçülen Hacim (L)</span><input type="number" class="inp" style="width:84px" min="1" step="0.1" value="'+_evol+'" onchange="S.effVol=this.value!==\'\'?parseFloat(this.value):null;render()"></div>'
+    +'</div>'
+    +'<div style="background:var(--sa);border:1px solid var(--bor);border-left:4px solid var(--sk);border-radius:10px;padding:14px;text-align:center">'+_res+'</div>'
+    +'<div style="font-size:9px;color:var(--dim);margin-top:8px;line-height:1.4">Verim, gravity-puanı × hacim ile doğrusaldır. Tasarım OG (%'+_ev+' verimde) ile ölçüleni karşılaştırır. Butonla ayarı güncelle; sonraki OG tahminleri düzelir.</div>'
+    +'</div>';
+})();
+
   // 5 akordiyon caller-wrap (besin değerleri opsiyonel og>1.001)
   return _bmAccWrap('hesap-bath',    '🥃', 'Batç Hacmi',           _meta1, _kartBatch,   true)
        + _bmAccWrap('hesap-renk', '', 'Renk / SRM', '', _kartRenk, false)
        + _bmAccWrap('hesap-su',      '💧', 'Su Hesabı',            _meta4, _kartSu,      true)
        + _bmAccWrap('hesap-strike', '', 'Mash Strike Sıcaklığı', '', _kartStrike, false)
        + _bmAccWrap('hesap-seyreltme', '', 'Seyreltme / Gravity Düzeltme', '', _kartSeyreltme, false)
+       + _bmAccWrap('hesap-verim', '', 'Verim Geri-Hesabı', '', _kartVerim, false)
        + _bmAccWrap('hesap-priming', '🍾', 'Priming / Şişeleme',   _meta3, _kartPriming, false)
        + (_kartNutri ? _bmAccWrap('hesap-nutri', '🧬', 'Besin Değerleri', _meta5, _kartNutri, false) : '')
        + _bmAccWrap('hesap-export',  '📤', 'Reçete Dışa Aktarma',  '',     _kartExport,  false);
