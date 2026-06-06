@@ -4680,7 +4680,7 @@ const MINERALLER=[
   {id:"nacl",ad:"NaCl — Sofra Tuzu",birim:"g",etki:[0,0,104,160,0,0],aciklama:"Na ve Cl artırır. İçicilik ve dolgunluk."},
   {id:"nahco3",ad:"NaHCO₃ — Sodyum Bikarbonat",birim:"g",etki:[0,0,72,0,0,192],aciklama:"Na ve HCO₃ artırır. pH yükseltir. Dark biralar için."},
   {id:"caco3",ad:"CaCO₃ — Kireç (Kalsiyum Karbonat)",birim:"g",etki:[106,0,0,0,0,158],aciklama:"Ca artırır, alkalinite yükseltir. Dark biralar / stout için."},
-  {id:"laktik",ad:"Laktik Asit %88 (mL)",birim:"mL",etki:[0,0,0,0,0,-188],aciklama:"pH düşürür. Asitlik katmaz. Mash/sparge için. (1mL/gal ≈ -188 ppm HCO₃)"},
+  {id:"laktik",ad:"Laktik Asit %88 (mL)",birim:"mL",etki:[0,0,0,0,0,-157.5],aciklama:"pH düşürür. Asitlik katmaz. Mash/sparge için. (1mL/gal ≈ -188 ppm HCO₃)"},
 ];
 
 // Su profilleri — PPM cinsinden [Ca, Mg, Na, Cl, SO4, HCO3]
@@ -4824,7 +4824,7 @@ function suProfilOneri(kaynakIyon, hedefIyon, hacim) {
   // Laktik asit: sadece kaynak HCO3 > hedef ise (gerçekten asit gerekli)
   const hco3Fark = hedefIyon[5] - (kaynakIyon[5] || 0);
   if (hco3Fark < -30) {
-    const ml = Math.abs(hco3Fark) * h / 340; // 1mL %88 laktik ≈ 340 mg HCO3 nötralize
+    const ml = Math.abs(hco3Fark) * h / 715; // 1mL %88 laktik ≈ 715 mg HCO3 nötralize
     if (ml > 0.1) oneriler.push({id: "laktik", miktar: +ml.toFixed(2)});
   }
   
