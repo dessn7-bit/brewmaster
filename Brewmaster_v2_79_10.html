@@ -13939,18 +13939,32 @@ function rEditorSu(){
       }
       
       // Grist ağırlıklı ortalama pH
-      let topKg = 0, topPH = 0;
+      function maltBuf(malt){
+        if(!malt||!malt.id) return 42;
+        var id=(malt.id||'').toLowerCase();
+        var Lv=malt.r||2;
+        if(id.includes('acid')||id.includes('sauer')) return 0;
+        if(malt.phc==='chocolate'||malt.phc==='roasted_barley'||malt.phc==='black') return 58;
+        if(/black_patent|patent_black|black_malt|\bblack\b|roasted_barley|roast_barley|chocolate|choc_|roast_wheat|black_wheat|dingemans_roast|simp_roasted/i.test(id)) return 58;
+        if(malt.phc==='crystal'||/crystal|caramel|cara_|caramunich|carapils|carared|caraaroma|cara_aroma|cararye|cara_rye|cara_wheat|cara_red/i.test(id)) return Math.min(90, 40 + 0.4*Lv);
+        return 42;
+      }
+      let topKg = 0, topPHB = 0, B_total = 0, acidMaltKg = 0;
       (S.maltlar||[]).forEach(m => {
         if (!m || !m.id) return;
         const mo = MALTLAR.find(x => x && x.id === m.id);
         if (!mo) return;
         // Şekerler (candy, sugar, honey) grist pH'ına dahil değil — fermente olur, mash'i etkilemez
         if (mo.g==='Şeker') return;
+        var _bid=(mo.id||'').toLowerCase();
+        if(_bid.includes('acid')||_bid.includes('sauer')){ acidMaltKg += (m.kg||0); return; }
+        var _Bi = maltBuf(mo);
         topKg += (m.kg||0);
-        topPH += maltPH(mo) * (m.kg||0);
+        B_total += _Bi * (m.kg||0);
+        topPHB += maltPH(mo) * _Bi * (m.kg||0);
       });
-      if (topKg === 0) return '';
-      const gristPH = topPH / topKg;
+      if (topKg === 0 || B_total === 0) return '';
+      const gristPH = topPHB / B_total;
       
       // Asit malt %
       const acidKg = (S.maltlar||[]).reduce((s,m)=>{
@@ -13972,11 +13986,10 @@ function rEditorSu(){
       
       // Mash pH tahmini (iyileştirilmiş Kaiser/Palmer + Troester parçalı malt DI-pH)
       // Sabitler doğrulandı: Palmer "How to Brew" 4. baskı + Kai Troester wiki
-      const su_etkisi = RA * 0.00168;                      // 100 ppm RA ≈ +0.168 pH (Kolbach)
-      const asit_etkisi = acidPct * 0.1;                  // %1 acid malt ≈ -0.1 pH (Weyermann)
-      const laktik_etkisi = (laktikMl / (S.hacim||11)) * 0.38;  // 1mL/L %88 laktik ≈ -0.38 pH (mEq hesabı)
-      
-      const pH_tahmin = gristPH + su_etkisi - asit_etkisi - laktik_etkisi;
+      const base_mEq = (RA * (S.hacim||11)) / 50;
+      const acid_mEq = (laktikMl * 11.7) + (acidMaltKg * 330);
+      const A_net = base_mEq - acid_mEq;
+      const pH_tahmin = gristPH + (B_total > 0 ? (A_net / B_total) : 0);
       
       // Hedef: 5.2-5.5 (ideal 5.35)
       const ideal = 5.35;
