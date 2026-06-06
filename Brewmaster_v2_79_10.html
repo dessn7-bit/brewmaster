@@ -13972,7 +13972,7 @@ function rEditorSu(){
       
       // Mash pH tahmini (iyileştirilmiş Kaiser/Palmer + Troester parçalı malt DI-pH)
       // Sabitler doğrulandı: Palmer "How to Brew" 4. baskı + Kai Troester wiki
-      const su_etkisi = RA * 0.0007;                      // 100 ppm RA ≈ +0.07 pH (Palmer)
+      const su_etkisi = RA * 0.00168;                      // 100 ppm RA ≈ +0.168 pH (Kolbach)
       const asit_etkisi = acidPct * 0.1;                  // %1 acid malt ≈ -0.1 pH (Weyermann)
       const laktik_etkisi = (laktikMl / (S.hacim||11)) * 0.38;  // 1mL/L %88 laktik ≈ -0.38 pH (mEq hesabı)
       
@@ -13999,7 +13999,7 @@ function rEditorSu(){
       } else if (pH_tahmin < 5.2) {
         // pH düşük — alkalinite ekle
         const fazlaPH = 5.2 - pH_tahmin;
-        const ekNaHCO3 = (fazlaPH / 0.0007) / 0.82 * (S.hacim || 11) / 192;
+        const ekNaHCO3 = (fazlaPH / 0.00168) / 0.82 * (S.hacim || 11) * 0.264172 / 192;
         oneri = `💡 pH yükseltmek için: <b>+${ekNaHCO3.toFixed(2)}g NaHCO₃</b> (sodyum bikarbonat)`;
       } else {
         oneri = `✓ pH ideal aralıkta (5.2-5.5). Enzim aktivitesi için optimum.`;
