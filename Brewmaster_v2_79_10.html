@@ -14003,16 +14003,15 @@ function rEditorSu(){
       if (pH_tahmin > 5.6) {
         // pH yüksek — asitlik ekle
         const eksikPH = pH_tahmin - ideal;
-        // Asit malt %1 ≈ -0.1 pH → %(eksikPH×10)
-        const acidMaltPct = eksikPH * 10;
-        const ekAcidKg = (acidMaltPct / 100) * topKg;
-        // Veya laktik: eksikPH / 0.38 × hacim mL (güncel katsayı)
-        const ekLaktikMl = (eksikPH / 0.38) * (S.hacim || 11);
+        // Buffer modeli: dpH gereken mEq = dpH * B_total. Asit malt ~330 mEq/kg, laktik %88 ~11.7 mEq/mL
+        const ekAcidKg = (eksikPH * B_total) / 330;
+        const acidMaltPct = topKg > 0 ? (ekAcidKg / topKg) * 100 : 0;
+        const ekLaktikMl = (eksikPH * B_total) / 11.7;
         oneri = `💡 pH düşürmek için: <b>+${(ekAcidKg*1000).toFixed(0)}g Asit Malt</b> (%${acidMaltPct.toFixed(1)} grist) VEYA <b>+${ekLaktikMl.toFixed(1)}mL laktik asit</b>`;
       } else if (pH_tahmin < 5.4) {
         // pH düşük — alkalinite ekle
         const fazlaPH = ideal - pH_tahmin;
-        const ekNaHCO3 = (fazlaPH / 0.00168) / 0.82 * (S.hacim || 11) * 0.264172 / 192;
+        const ekNaHCO3 = (fazlaPH * B_total) / 11.92;
         oneri = `💡 pH yükseltmek için: <b>+${ekNaHCO3.toFixed(2)}g NaHCO₃</b> (sodyum bikarbonat)`;
       } else {
         oneri = `✓ pH ideal aralıkta (5.4-5.6). Enzim aktivitesi için optimum.`;
