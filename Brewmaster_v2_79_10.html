@@ -4726,7 +4726,7 @@ function suToplamIyon(kaynakIyon, mineraller, hacim) {
     if (!min || !m.miktar) return;
     // Her mineral g başına PPM/L katkı verir. Mineral.etki 1g/L için etkisi.
     // Dolayısıyla: katkı PPM = (mineral.etki[i] * m.miktar) / h
-    const faktor = m.miktar / h;
+    const faktor = m.miktar / (h * 0.264172);
     min.etki.forEach((et, i) => sonuc[i] += et * faktor);
   });
   return sonuc;
@@ -4747,7 +4747,7 @@ function suProfilOneri(kaynakIyon, hedefIyon, hacim) {
   for (const mid of mineralSira) {
     const m = MINERALLER.find(x=>x&&x.id===mid);
     if (!m) continue;
-    for (let i = 0; i < 6; i++) A[i].push(m.etki[i] / h);
+    for (let i = 0; i < 6; i++) A[i].push(m.etki[i] / (h * 0.264172));
   }
   
   // b vektörü: hedef - kaynak (eklenecek ppm)
@@ -4811,7 +4811,7 @@ function suProfilOneri(kaynakIyon, hedefIyon, hacim) {
   oneriler.forEach(mo => {
     const min = MINERALLER.find(x=>x&&x.id===mo.id);
     if (!min) return;
-    min.etki.forEach((et, i) => sim[i] += et * mo.miktar / h);
+    min.etki.forEach((et, i) => sim[i] += et * mo.miktar / (h * 0.264172));
   });
   hedefIyon.forEach((hv, i) => {
     const sapma = sim[i] - hv;
