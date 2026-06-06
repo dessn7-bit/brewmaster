@@ -13991,16 +13991,16 @@ function rEditorSu(){
       const A_net = base_mEq - acid_mEq;
       const pH_tahmin = gristPH + (B_total > 0 ? (A_net / B_total) : 0);
       
-      // Hedef: 5.2-5.5 (ideal 5.35)
-      const ideal = 5.35;
-      const inRange = pH_tahmin >= 5.2 && pH_tahmin <= 5.5;
+      // Hedef: 5.4-5.6 oda sicakligi (mas sicakliginda ~5.1-5.3); ideal 5.5
+      const ideal = 5.5;
+      const inRange = pH_tahmin >= 5.4 && pH_tahmin <= 5.6;
       const durumRenk = inRange ? 'var(--yk)' : 'var(--sk)';
       const durumBg = inRange ? 'var(--kahve-bg)' : '#F0E4BC';
       const durumIkon = inRange ? '✅' : '⚠️';
       
       // Öneri hesabı
       let oneri = '';
-      if (pH_tahmin > 5.5) {
+      if (pH_tahmin > 5.6) {
         // pH yüksek — asitlik ekle
         const eksikPH = pH_tahmin - ideal;
         // Asit malt %1 ≈ -0.1 pH → %(eksikPH×10)
@@ -14009,9 +14009,9 @@ function rEditorSu(){
         // Veya laktik: eksikPH / 0.38 × hacim mL (güncel katsayı)
         const ekLaktikMl = (eksikPH / 0.38) * (S.hacim || 11);
         oneri = `💡 pH düşürmek için: <b>+${(ekAcidKg*1000).toFixed(0)}g Asit Malt</b> (%${acidMaltPct.toFixed(1)} grist) VEYA <b>+${ekLaktikMl.toFixed(1)}mL laktik asit</b>`;
-      } else if (pH_tahmin < 5.2) {
+      } else if (pH_tahmin < 5.4) {
         // pH düşük — alkalinite ekle
-        const fazlaPH = 5.2 - pH_tahmin;
+        const fazlaPH = ideal - pH_tahmin;
         const ekNaHCO3 = (fazlaPH / 0.00168) / 0.82 * (S.hacim || 11) * 0.264172 / 192;
         oneri = `💡 pH yükseltmek için: <b>+${ekNaHCO3.toFixed(2)}g NaHCO₃</b> (sodyum bikarbonat)`;
       } else {
@@ -14022,17 +14022,15 @@ function rEditorSu(){
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
           <div style="font-size:13px;font-weight:700;color:var(--kahve)">🧪 Tahmini Mash pH</div>
           <div style="font-size:22px;font-weight:700;color:${durumRenk}">${pH_tahmin.toFixed(2)}</div>
-          <div style="font-size:11px;color:var(--soluk)">${durumIkon} Hedef: 5.2-5.5</div>
+          <div style="font-size:11px;color:var(--soluk)">${durumIkon} Hedef: 5.4-5.6 (oda)</div>
         </div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:10px;color:var(--dim);margin-bottom:8px">
           <div><b>Grist pH:</b> ${gristPH.toFixed(2)} <span style="color:var(--soluk)">(maltlar)</span></div>
           <div><b>RA:</b> ${RA.toFixed(0)} ppm CaCO₃ <span style="color:var(--soluk)">(su alk.)</span></div>
-          <div><b>Asit etki:</b> ${(acidPct > 0 ? '-' + (acidPct*0.1).toFixed(2) : '—')}${acidPct > 0 ? ' pH' : ''}</div>
+          <div><b>Mas °C:</b> ~${(pH_tahmin-0.3).toFixed(2)} <span style="color:var(--soluk)">(-0.3)</span></div>
         </div>
         <div style="font-size:11px;color:var(--kahve);background:var(--card);padding:8px 10px;border-radius:6px;line-height:1.5;border:1px solid var(--bor)">${oneri}</div>
-        <div style="font-size:9px;color:var(--dim);margin-top:6px;line-height:1.4">
-          Tahmini değer — Kaiser pH modeli (malt Lovibond + RA). Gerçek pH için mash sırasında pH metre ile ölçün.
-        </div>
+        <div style="font-size:9px;color:var(--dim);margin-top:6px;line-height:1.4">Tahmini değer (±0.1-0.2 pH) — buffer-weighted model (Riffe/deLange, oda °C). Kesin sonuç için mash sırasında pH metreyle ölçün.</div>
       </div>`;
     })();
 
