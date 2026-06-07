@@ -13855,8 +13855,8 @@ function rEditorSu(){
 
   var _suMashPHHTML = (()=>{
       // ═══ TAHMİNİ MASH pH HESABI ═══
-      // Palmer formülü: RA = Alk(CaCO3) - Ca/1.4 - Mg/1.7
-      // Mash pH tahmini: grist pH (malt ağırlıklı ort) + su etkisi - asit etkisi
+      // RA = Alk(CaCO3) - Ca/1.4 - Mg/1.7 (buffer modeli A_net girdisi, base_mEq = RA*hacim/50)
+      // Mash pH = pHG (buffer-ağırlıklı grist DI-pH) + (A_net / B_total)
       
       if (!S.maltlar || S.maltlar.length === 0) return '';
       
@@ -13984,8 +13984,8 @@ function rEditorSu(){
       const Alk_CaCO3 = ppm.HCO3 * 0.82;
       const RA = Alk_CaCO3 - ppm.Ca / 1.4 - ppm.Mg / 1.7;
       
-      // Mash pH tahmini (iyileştirilmiş Kaiser/Palmer + Troester parçalı malt DI-pH)
-      // Sabitler doğrulandı: Palmer "How to Brew" 4. baskı + Kai Troester wiki
+      // buffer-weighted model (Riffe/deLange Eq.4): pHG = Σ(pHi*B*kg)/Σ(B*kg), shift = A_net / B_total
+      // Malt DI-pH: Troester/Braukaiser; buffer kapasitesi maltBuf kategori B (mEq/(kg·pH))
       const base_mEq = (RA * (S.hacim||11)) / 50;
       const acid_mEq = (acidMaltKg * 330);  // laktik RA/HCO3 yolunda hesaplaniyor; cift sayim onlendi
       const A_net = base_mEq - acid_mEq;
