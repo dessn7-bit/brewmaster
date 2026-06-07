@@ -13601,9 +13601,6 @@ function rEditorSu(){
   const _ra=(ppm.HCO3/61.0)-((ppm.Ca/100)+(ppm.Mg/35.1));
   // Sprint 2.1 fix: ortak helper'a sar — editor/kart/sticky ayni kaynaga baglansin.
   const _pH_est=(typeof __bm_estPH==='function')?__bm_estPH(S.suMineralleri,S.hacim,S.suKaynak):+(5.72+0.04*_ra).toFixed(2);
-  const _pH_str=(_pH_est>=5.2&&_pH_est<=5.5)?(_pH_est+' ✅ hedef aralıkta 5.2-5.5'):
-    (_pH_est<5.2)?(_pH_est+' ⚠️ çok asidik'):
-    (_pH_est<=5.8)?(_pH_est+' ⚠️ yüksek'):(_pH_est+' ⚠️ çok yüksek');
   // Su profil önerisi — tarife göre dinamik
   // ── Su profil öneri sistemi ──────────────────────────────
   // srm (hesaplanmış renk), maya.tip ve ibu kullanarak akıllı öneri
