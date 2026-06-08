@@ -5001,6 +5001,9 @@ const _KR_GRUP = {
 };
 // Sprint 2.1 fix (pH-aware): editor + defter kart + sticky aktif_pigment'a ayni Kolbach mash pH'ini gecsin.
 // Eskiden kart/sticky sabit 4.3 veriyordu, editor _pH_est kullaniyordu -> sour + mavi_kelebek recetelerde uyusmazlik.
+// NOT (2026-06): RENK motoru proxy'si. aktif_pigment/mavi_kelebek finished-beer pH (~4.0-4.5) bekler, mash pH degil.
+// Buffer-weighted mash pH motoru (maltPH/maltBuf, _suMashPHHTML IIFE) AYRI ve KASITLI olarak buraya baglanmamistir:
+// farkli buyukluk (mash ~5.4 vs finished-beer ~4.2). Renk motorunu mash pH ile beslemek kategori hatasi olur.
 function __bm_estPH(suMineralleri, hacim, suKaynak){
   try {
     if (typeof suProfiliHesapla !== 'function') return 4.3;
