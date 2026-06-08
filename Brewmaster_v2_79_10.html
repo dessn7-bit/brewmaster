@@ -4237,8 +4237,8 @@ window.beerXmlExport=beerXmlExport;
 // ═══ VERİ TABANLARI ═══════════════════════════════════════
 const MALTLAR=[
   {id:"pale_ale",ad:"Pale Ale Malt",gu:304,r:3,g:"Base",mo:"Weyermann, Crisp, Simpsons, Hitit (yerli)"},
-  {id:"pilsner",ad:"Pilsner Malt",gu:310,r:2,g:"Base",mo:"Weyermann, BestMalz, Hitit (yerli)"},
-  {id:"maris",ad:"Maris Otter",gu:316,r:3,g:"Base",mo:"Crisp, Simpsons, Fawcett, Muntons"},
+  {id:"pilsner",ad:"Pilsner Malt",gu:310,r:2,g:"Base",mo:"Weyermann, BestMalz, Hitit (yerli)",bufKap:34},
+  {id:"maris",ad:"Maris Otter",gu:316,r:3,g:"Base",mo:"Crisp, Simpsons, Fawcett, Muntons",bufKap:51},
   {id:"bel_pils",ad:"Belgian Pilsner",gu:305,r:2,g:"Base",mo:"Castle, Dingemans"},
   {id:"wheat",ad:"Buğday Maltı",gu:315,r:2,g:"Base",mo:"Weyermann, BestMalz, Muntons, Hitit (yerli)"},
   {id:"dark_wheat",ad:"Koyu Buğday Maltı",gu:311,r:7,g:"Base",mo:"Weyermann"},
@@ -4287,7 +4287,7 @@ const MALTLAR=[
   {id:"crf1",ad:"Carafa I (Debittered)",gu:250,r:337,g:"Koyu",mo:"Weyermann",phc:"chocolate"},
   {id:"crf2",ad:"Carafa II (Debittered)",gu:250,r:430,g:"Koyu",mo:"Weyermann",phc:"chocolate"},
   {id:"crf3",ad:"Carafa Special III (Debittered)",gu:250,r:525,g:"Koyu",mo:"Weyermann",phc:"chocolate"},
-  {id:"roast",ad:"Roasted Barley",gu:235,r:500,g:"Koyu",mo:"Crisp, Simpsons, Hitit Kara Malt No:3 (yerli)",phc:"roasted_barley"},
+  {id:"roast",ad:"Roasted Barley",gu:235,r:500,g:"Koyu",mo:"Crisp, Simpsons, Hitit Kara Malt No:3 (yerli)",phc:"roasted_barley",bufKap:59},
   {id:"black",ad:"Black Malt (Patent Malt)",gu:275,r:605,g:"Koyu",mo:"Crisp, Simpsons"},
   {id:"midnight",ad:"Midnight Wheat",gu:270,r:550,g:"Koyu",mo:"Briess",phc:"chocolate"},
   // ── Weyermann Base ─────────────────────────────────────────
@@ -13940,7 +13940,7 @@ function rEditorSu(){
         if(!malt||!malt.id) return 42;
         var id=(malt.id||'').toLowerCase();
         var Lv=malt.r||2;
-        if(id.includes('acid')||id.includes('sauer')) return 0;
+        if(id.includes('acid')||id.includes('sauer')) return 0; if(malt.bufKap!=null) return malt.bufKap;
         if(malt.phc==='chocolate'||malt.phc==='roasted_barley'||malt.phc==='black') return 58;
         if(/black_patent|patent_black|black_malt|\bblack\b|roasted_barley|roast_barley|chocolate|choc_|roast_wheat|black_wheat|dingemans_roast|simp_roasted/i.test(id)) return 58;
         if(malt.phc==='crystal'||/crystal|caramel|cara_|caramunich|carapils|carared|caraaroma|cara_aroma|cararye|cara_rye|cara_wheat|cara_red/i.test(id)) return Math.min(90, 40 + 0.4*Lv);
