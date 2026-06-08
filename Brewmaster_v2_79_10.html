@@ -4999,21 +4999,8 @@ const _KR_GRUP = {
   ahududu:         {rgb:[200,20,80],  max:600, tr:"Patlıcan",      en:"Eggplant"},
   cilek:           {rgb:[200,40,60],  max:900, tr:"Mercan",        en:"Coral"}
 };
-// Sprint 2.1 fix (pH-aware): editor + defter kart + sticky aktif_pigment'a ayni Kolbach mash pH'ini gecsin.
-// Eskiden kart/sticky sabit 4.3 veriyordu, editor _pH_est kullaniyordu -> sour + mavi_kelebek recetelerde uyusmazlik.
-// NOT (2026-06): RENK motoru proxy'si. aktif_pigment/mavi_kelebek finished-beer pH (~4.0-4.5) bekler, mash pH degil.
-// Buffer-weighted mash pH motoru (maltPH/maltBuf, _suMashPHHTML IIFE) AYRI ve KASITLI olarak buraya baglanmamistir:
-// farkli buyukluk (mash ~5.4 vs finished-beer ~4.2). Renk motorunu mash pH ile beslemek kategori hatasi olur.
-function __bm_finishedPH(maya,stil){try{var s=(stil||'');if(/sour|lambic|gueuze|kriek|framboise|wild ale|flanders|oud bruin|berliner|gose|catharina|lichtenhainer|kvass/i.test(s))return 3.4;if(maya&&typeof MAYALAR!=='undefined'){var mid=(typeof maya==='object'&&maya)?(maya.id||''):maya;var mt=(typeof maya==='object'&&maya&&maya.tip)?maya.tip:'';if(!mt&&mid){var mo=MAYALAR.find(function(m){return m.id===mid;});mt=(mo&&mo.tip)||'';}if(mt==='sour')return 3.4;}return 4.3;}catch(e){return 4.3;}}function __bm_estPH(suMineralleri, hacim, suKaynak){
-  try {
-    if (typeof suProfiliHesapla !== 'function') return 4.3;
-    var ppm = suProfiliHesapla(suMineralleri, hacim||11, suKaynak);
-    if (!ppm) return 4.3;
-    var ra = (ppm.HCO3/61.0) - ((ppm.Ca/100) + (ppm.Mg/35.1));
-    var v = +(5.72 + 0.04*ra).toFixed(2);
-    return (isFinite(v) && v > 0 && v < 14) ? v : 4.3;
-  } catch(e) { return 4.3; }
-}
+// NOT (2026-06): Renk motoru finished-beer pH'i __bm_finishedPH(maya,stil)'den alir (sour-stil/maya -> 3.4, normal -> 4.3). Eski mash-proxy __bm_estPH artik kullanilmiyordu, kaldirildi. Buffer-weighted mash pH motoru (maltPH/maltBuf, _suMashPHHTML IIFE) AYRI kalir.
+function __bm_finishedPH(maya,stil){try{var s=(stil||'');if(/sour|lambic|gueuze|kriek|framboise|wild ale|flanders|oud bruin|berliner|gose|catharina|lichtenhainer|kvass/i.test(s))return 3.4;if(maya&&typeof MAYALAR!=='undefined'){var mid=(typeof maya==='object'&&maya)?(maya.id||''):maya;var mt=(typeof maya==='object'&&maya&&maya.tip)?maya.tip:'';if(!mt&&mid){var mo=MAYALAR.find(function(m){return m.id===mid;});mt=(mo&&mo.tip)||'';}if(mt==='sour')return 3.4;}return 4.3;}catch(e){return 4.3;}}
 function aktif_pigment(katkilar, hacim, pH){
   let enYuksek=null, enYuksekOran=0;
   const oranMap={};
