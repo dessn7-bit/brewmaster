@@ -14860,7 +14860,7 @@ ${batchOlcekKartHtml()}
 
   var _kartRenk = (function(){
   var _srmV=(typeof hSRM==='function')?hSRM(S.maltlar||[],S.katkilar||[],hacim):0;
-  var _pigV=(typeof aktif_pigment==='function'&&typeof _pigKatkiGramMap==='function')?aktif_pigment(_pigKatkiGramMap(S.katkilar||[]),hacim,4.3):null;
+  var _pigV=(typeof aktif_pigment==='function'&&typeof _pigKatkiGramMap==='function')?aktif_pigment(_pigKatkiGramMap(S.katkilar||[]),hacim,__bm_finishedPH(S.mayaId,S.stil||S.stilTah||'')):null;
   var _hexV=(typeof aktif_renk_hex==='function')?aktif_renk_hex(_srmV,_pigV):'#cb8d00';
   var _adTr=(typeof renk_band_tr==='function')?renk_band_tr(_srmV,_pigV):'';
   var _adEn=(typeof renk_band_en==='function')?renk_band_en(_srmV,_pigV):'';
