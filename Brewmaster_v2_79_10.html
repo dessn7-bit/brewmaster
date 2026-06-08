@@ -12014,7 +12014,7 @@ function rListe(){
   function tarifKart(t){
     const ozet=t.ozet||{};
     const srmVal=parseFloat(ozet.srm)||0;
-    const _pigDurum=aktif_pigment(_pigKatkiGramMap(t.katkilar),t.hacim||11,__bm_finishedPH(t.maya,''));
+    const _pigDurum=aktif_pigment(_pigKatkiGramMap(t.katkilar),t.hacim||11,__bm_finishedPH(t.mayaId,t.stil||t.stilTah||''));
     const _kartHex=aktif_renk_hex(srmVal,_pigDurum); // sol serit + gradyan icin pigment-aware hex
     const renkAdi=renk_band_tr(srmVal,_pigDurum);   // SRM TR + pigment overlay
     const bjcpAdi=renk_band_en(srmVal,_pigDurum);   // SRM EN + pigment overlay
@@ -13590,7 +13590,7 @@ function rEditorSu(){
   // pH tahmini Kolbach/RA yöntemi
   const _ra=(ppm.HCO3/61.0)-((ppm.Ca/100)+(ppm.Mg/35.1));
   // Sprint 2.1 fix: ortak helper'a sar — editor/kart/sticky ayni kaynaga baglansin.
-  const _pH_est=(typeof __bm_finishedPH==='function')?__bm_finishedPH(S.maya,S.stil||S.stilTah):4.3;
+  const _pH_est=(typeof __bm_finishedPH==='function')?__bm_finishedPH(S.mayaId,S.stil||S.stilTah):4.3;
   // Su profil önerisi — tarife göre dinamik
   // ── Su profil öneri sistemi ──────────────────────────────
   // srm (hesaplanmış renk), maya.tip ve ibu kullanarak akıllı öneri
@@ -20193,7 +20193,7 @@ function rEditor(){
   <div class="bm-sticky-summary" id="bm-summary">
     <div class="bm-ss-stil">
       <span class="bm-ss-renk" id="ss-renk" style="background:${typeof srmR==='function'?srmR(Math.round(parseFloat(srm)||0)):'#888'}"></span>
-      <span class="bm-ss-renk-ad" id="ss-renk-ad" style="font-size:0.9em">${(()=>{const _phI=(typeof __bm_finishedPH==='function')?__bm_finishedPH(window.S&&window.S.maya,window.S&&(window.S.stil||window.S.stilTah)):4.3;const pd=(typeof aktif_pigment==='function'&&typeof _pigKatkiGramMap==='function')?aktif_pigment(_pigKatkiGramMap((window.S&&window.S.katkilar)||[]),(window.S&&window.S.hacim)||11,_phI):{mode:'izli'};const sn=parseFloat(srm)||0;return (typeof renk_band_tr==='function'?esc(renk_band_tr(sn,pd)):'')+(typeof renk_band_en==='function'?' <span style="opacity:0.6;font-size:0.85em">· '+esc(renk_band_en(sn,pd))+'</span>':'');})()}</span>
+      <span class="bm-ss-renk-ad" id="ss-renk-ad" style="font-size:0.9em">${(()=>{const _phI=(typeof __bm_finishedPH==='function')?__bm_finishedPH(window.S&&window.S.mayaId,window.S&&(window.S.stil||window.S.stilTah)):4.3;const pd=(typeof aktif_pigment==='function'&&typeof _pigKatkiGramMap==='function')?aktif_pigment(_pigKatkiGramMap((window.S&&window.S.katkilar)||[]),(window.S&&window.S.hacim)||11,_phI):{mode:'izli'};const sn=parseFloat(srm)||0;return (typeof renk_band_tr==='function'?esc(renk_band_tr(sn,pd)):'')+(typeof renk_band_en==='function'?' <span style="opacity:0.6;font-size:0.85em">· '+esc(renk_band_en(sn,pd))+'</span>':'');})()}</span>
       <span class="bm-ss-label" id="ss-stil"><span class="bm-stil-adi">${esc((S&&S.stil)||(S&&S.stilTah)||(S&&S.biraAd)||'Stil hesaplanıyor...')}</span></span>
     </div>
     <div class="bm-ss-stats">
@@ -24237,7 +24237,7 @@ syncBaslat();
         var renkAdEl = document.getElementById('ss-renk-ad');
         if (renkAdEl && srmRound != null && typeof renk_band_tr === 'function' && typeof renk_band_en === 'function') {
           var _pigDurumD = (typeof aktif_pigment === 'function' && typeof _pigKatkiGramMap === 'function')
-            ? aktif_pigment(_pigKatkiGramMap((window.S && window.S.katkilar) || []), (window.S && window.S.hacim) || 11, (typeof __bm_finishedPH === 'function' ? __bm_finishedPH(window.S && window.S.maya, window.S && (window.S.stil||window.S.stilTah)) : 4.3))
+            ? aktif_pigment(_pigKatkiGramMap((window.S && window.S.katkilar) || []), (window.S && window.S.hacim) || 11, (typeof __bm_finishedPH === 'function' ? __bm_finishedPH(window.S && window.S.mayaId, window.S && (window.S.stil||window.S.stilTah)) : 4.3))
             : {mode:'izli'};
           renkAdEl.innerHTML = renk_band_tr(srmRound, _pigDurumD) + ' <span style="opacity:0.6;font-size:0.85em">· ' + renk_band_en(srmRound, _pigDurumD) + '</span>';
         }
