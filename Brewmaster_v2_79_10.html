@@ -13941,9 +13941,9 @@ function rEditorSu(){
         var id=(malt.id||'').toLowerCase();
         var Lv=malt.r||2;
         if(id.includes('acid')||id.includes('sauer')) return 0; if(malt.bufKap!=null) return malt.bufKap;
-        if(malt.phc==='chocolate'||malt.phc==='roasted_barley'||malt.phc==='black') return 58;
-        if(/black_patent|patent_black|black_malt|\bblack\b|roasted_barley|roast_barley|chocolate|choc_|roast_wheat|black_wheat|dingemans_roast|simp_roasted/i.test(id)) return 58;
-        if(malt.phc==='crystal'||/crystal|caramel|cara_|caramunich|carapils|carared|caraaroma|cara_aroma|cararye|cara_rye|cara_wheat|cara_red|carafoam|c_?\d+|^c\d+$/i.test(id)) return Math.min(90, 40 + 0.4*Lv);
+        if(malt.phc==='chocolate'||malt.phc==='roasted_barley'||malt.phc==='black') return 68;
+        if(/black_patent|patent_black|black_malt|\bblack\b|roasted_barley|roast_barley|chocolate|choc_|roast_wheat|black_wheat|dingemans_roast|simp_roasted/i.test(id)) return 68;
+        if(malt.phc==='crystal'||/crystal|caramel|cara_|caramunich|carapils|carared|caraaroma|cara_aroma|cararye|cara_rye|cara_wheat|cara_red|carafoam|c_?\d+|^c\d+$/i.test(id)) return Math.min(75, 7 + 40.7*Math.log10(Math.max(1,Lv)));
         return 42;
       }
       let topKg = 0, topPHB = 0, B_total = 0, acidMaltKg = 0;
