@@ -20193,7 +20193,7 @@ function rEditor(){
   <div class="bm-sticky-summary" id="bm-summary">
     <div class="bm-ss-stil">
       <span class="bm-ss-renk" id="ss-renk" style="background:${typeof srmR==='function'?srmR(Math.round(parseFloat(srm)||0)):'#888'}"></span>
-      <span class="bm-ss-renk-ad" id="ss-renk-ad" style="font-size:0.9em">${(()=>{const _phI=(typeof __bm_finishedPH==='function')?__bm_finishedPH(window.S&&window.S.mayaId,window.S&&(window.S.stil||window.S.stilTah)):4.3;const pd=(typeof aktif_pigment==='function'&&typeof _pigKatkiGramMap==='function')?aktif_pigment(_pigKatkiGramMap((window.S&&window.S.katkilar)||[]),(window.S&&window.S.hacim)||11,_phI):{mode:'izli'};const sn=parseFloat(srm)||0;return (typeof renk_band_tr==='function'?esc(renk_band_tr(sn,pd)):'')+(typeof renk_band_en==='function'?' <span style="opacity:0.6;font-size:0.85em">· '+esc(renk_band_en(sn,pd))+'</span>':'');})()}</span>
+      <span class="bm-ss-renk-ad" id="ss-renk-ad" style="font-size:0.9em">${(()=>{const _phI=(typeof __bm_finishedPH==='function')?__bm_finishedPH(S&&S.mayaId,S&&(S.stil||S.stilTah)):4.3;const pd=(typeof aktif_pigment==='function'&&typeof _pigKatkiGramMap==='function')?aktif_pigment(_pigKatkiGramMap((S&&S.katkilar)||[]),(S&&S.hacim)||11,_phI):{mode:'izli'};const sn=parseFloat(srm)||0;return (typeof renk_band_tr==='function'?esc(renk_band_tr(sn,pd)):'')+(typeof renk_band_en==='function'?' <span style="opacity:0.6;font-size:0.85em">· '+esc(renk_band_en(sn,pd))+'</span>':'');})()}</span>
       <span class="bm-ss-label" id="ss-stil"><span class="bm-stil-adi">${esc((S&&S.stil)||(S&&S.stilTah)||(S&&S.biraAd)||'Stil hesaplanıyor...')}</span></span>
     </div>
     <div class="bm-ss-stats">
@@ -24219,17 +24219,17 @@ syncBaslat();
       var renkEl = document.getElementById('ss-renk');
       if (stilEl) {
         // S.stil (manuel) > S.stilTah (auto) > biraAd fallback
-        var stil = (window.S && window.S.stil) || (window.S && window.S.stilTah) || (window.S && window.S.biraAd) || '';
+        var stil = (S && S.stil) || (S && S.stilTah) || (S && S.biraAd) || '';
         if (stil) {
           // Sprint 2.7c+6: stil/slug ad harf-donusumunden muaf (.bm-stil-adi)
           var safe = String(stil).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
           stilEl.innerHTML = '<span class="bm-stil-adi">'+safe+'</span>';
         }
       }
-      if (renkEl && typeof srmR === 'function' && window.S) {
-        var srmVal = parseFloat(window.S.srm) || (typeof _lastSrm !== 'undefined' ? _lastSrm : null);
+      if (renkEl && typeof srmR === 'function' && S) {
+        var srmVal = parseFloat(S.srm) || (typeof _lastSrm !== 'undefined' ? _lastSrm : null);
         // Fallback: ozet'ten oku
-        if (srmVal == null && window.S && window.S.maltlar) {
+        if (srmVal == null && S && S.maltlar) {
           try { var _c = calc(); srmVal = parseFloat(_c.srm) || 0; } catch(_){}
         }
         var srmRound = srmVal != null ? Math.round(srmVal) : null;
@@ -24237,7 +24237,7 @@ syncBaslat();
         var renkAdEl = document.getElementById('ss-renk-ad');
         if (renkAdEl && srmRound != null && typeof renk_band_tr === 'function' && typeof renk_band_en === 'function') {
           var _pigDurumD = (typeof aktif_pigment === 'function' && typeof _pigKatkiGramMap === 'function')
-            ? aktif_pigment(_pigKatkiGramMap((window.S && window.S.katkilar) || []), (window.S && window.S.hacim) || 11, (typeof __bm_finishedPH === 'function' ? __bm_finishedPH(window.S && window.S.mayaId, window.S && (window.S.stil||window.S.stilTah)) : 4.3))
+            ? aktif_pigment(_pigKatkiGramMap((S && S.katkilar) || []), (S && S.hacim) || 11, (typeof __bm_finishedPH === 'function' ? __bm_finishedPH(S && S.mayaId, S && (S.stil||S.stilTah)) : 4.3))
             : {mode:'izli'};
           renkAdEl.innerHTML = renk_band_tr(srmRound, _pigDurumD) + ' <span style="opacity:0.6;font-size:0.85em">· ' + renk_band_en(srmRound, _pigDurumD) + '</span>';
         }
