@@ -12066,7 +12066,7 @@ function rListe(){
       '<div class="bm-recete-metric"><span class="bm-recete-metric-etiket">ABV</span><span class="bm-recete-metric-deger">'+abvV+'</span></div>'+
       '<div class="bm-recete-metric"><span class="bm-recete-metric-etiket">IBU</span><span class="bm-recete-metric-deger">'+ibuV+'</span></div>'+
       '<div class="bm-recete-metric"><span class="bm-recete-metric-etiket">SRM</span><span class="bm-recete-metric-deger">'+srmV+'</span></div>'+
-      '<div class="bm-recete-renk-chip"><span class="bm-recete-renk-dot" style="background:'+renkHex+'"></span><span>'+_esc131B(renkAdi)+' <span style="opacity:0.6;font-size:0.85em">(<span class="bm-stil-adi">'+_esc131B(bjcpAdi)+'</span>)</span></span></div>';
+      '<div class="bm-recete-renk-chip"><span class="bm-recete-renk-dot" style="background:'+_kartHex+'"></span><span>'+_esc131B(renkAdi)+' <span style="opacity:0.6;font-size:0.85em">· <span class="bm-stil-adi">'+_esc131B(bjcpAdi)+'</span></span></span></div>';
     // Malzeme onizleme (max 3 malt)
     const malzemeHtml = (t.maltlar && t.maltlar.length)
       ? '<div class="bm-recete-malzeme">'+t.maltlar.slice(0,3).map(function(m){
@@ -19726,7 +19726,7 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
           ).join(' ');
           const _grAcik=_gorselRenk.map(e=>e.acik).join(' · ');
           // Adim 137-G Asama 4: GORSEL RENK 3 parca — chip'ler (deger) / acik metin (sonuc) / verdict.
-          profRows.push(["🌈 Görsel Renk", _grHtml + '<div style="margin-top:4px;font-size:10px;color:var(--dim);font-style:italic">' + _grAcik + '</div><div style="margin-top:3px;font-size:10px;color:var(--ok)">✓ Görsel renk katkısı profile yansıyor.</div>']);
+          profRows.push(["🌈 Eklenen Pigment", _grHtml + '<div style="margin-top:4px;font-size:10px;color:var(--dim);font-style:italic">' + _grAcik + '</div><div style="margin-top:3px;font-size:10px;color:var(--ok)">✓ Görsel renk katkısı profile yansıyor.</div>']);
         }
 
         const mD=[];
@@ -20202,7 +20202,7 @@ function rEditor(){
   <!-- Adim 132-E: Sticky ozet paneli global (eh disinda, her tab'da gorunur). srmR(srm) renk. -->
   <div class="bm-sticky-summary" id="bm-summary">
     <div class="bm-ss-stil">
-      <span class="bm-ss-renk" id="ss-renk" style="background:${typeof srmR==='function'?srmR(Math.round(parseFloat(srm)||0)):'#888'}"></span>
+      <span class="bm-ss-renk" id="ss-renk" style="background:${(()=>{const _phI2=(typeof __bm_finishedPH==='function')?__bm_finishedPH(S&&S.mayaId,S&&(S.stil||S.stilTah)):4.3;const pd2=(typeof aktif_pigment==='function'&&typeof _pigKatkiGramMap==='function')?aktif_pigment(_pigKatkiGramMap((S&&S.katkilar)||[]),(S&&S.hacim)||11,_phI2):{mode:'izli'};return (typeof aktif_renk_hex==='function')?aktif_renk_hex(parseFloat(srm)||0,pd2):(typeof srmR==='function'?srmR(Math.round(parseFloat(srm)||0)):'#888');})()}"></span>
       <span class="bm-ss-renk-ad" id="ss-renk-ad" style="font-size:0.9em">${(()=>{const _phI=(typeof __bm_finishedPH==='function')?__bm_finishedPH(S&&S.mayaId,S&&(S.stil||S.stilTah)):4.3;const pd=(typeof aktif_pigment==='function'&&typeof _pigKatkiGramMap==='function')?aktif_pigment(_pigKatkiGramMap((S&&S.katkilar)||[]),(S&&S.hacim)||11,_phI):{mode:'izli'};const sn=parseFloat(srm)||0;return (typeof _camRenkAdTr==='function'?esc(_camRenkAdTr(sn,pd)):'')+(typeof _camRenkAdEn==='function'?' <span style="opacity:0.6;font-size:0.85em">· '+esc(_camRenkAdEn(sn,pd))+'</span>':'');})()}</span>
       <span class="bm-ss-label" id="ss-stil"><span class="bm-stil-adi">${esc((S&&S.stil)||(S&&S.stilTah)||(S&&S.biraAd)||'Stil hesaplanıyor...')}</span></span>
     </div>
@@ -24243,12 +24243,12 @@ syncBaslat();
           try { var _c = calc(); srmVal = parseFloat(_c.srm) || 0; } catch(_){}
         }
         var srmRound = srmVal != null ? Math.round(srmVal) : null;
-        if (srmRound != null) renkEl.style.background = srmR(srmRound);
+        var _pigDurumD = (typeof aktif_pigment === 'function' && typeof _pigKatkiGramMap === 'function')
+          ? aktif_pigment(_pigKatkiGramMap((S && S.katkilar) || []), (S && S.hacim) || 11, (typeof __bm_finishedPH === 'function' ? __bm_finishedPH(S && S.mayaId, S && (S.stil||S.stilTah)) : 4.3))
+          : {mode:'izli'};
+        if (srmRound != null) renkEl.style.background = (typeof aktif_renk_hex === 'function') ? aktif_renk_hex(srmRound, _pigDurumD) : srmR(srmRound);
         var renkAdEl = document.getElementById('ss-renk-ad');
         if (renkAdEl && srmRound != null && typeof renk_band_tr === 'function' && typeof renk_band_en === 'function') {
-          var _pigDurumD = (typeof aktif_pigment === 'function' && typeof _pigKatkiGramMap === 'function')
-            ? aktif_pigment(_pigKatkiGramMap((S && S.katkilar) || []), (S && S.hacim) || 11, (typeof __bm_finishedPH === 'function' ? __bm_finishedPH(S && S.mayaId, S && (S.stil||S.stilTah)) : 4.3))
-            : {mode:'izli'};
           renkAdEl.innerHTML = _camRenkAdTr(srmRound, _pigDurumD) + ' <span style="opacity:0.6;font-size:0.85em">· ' + _camRenkAdEn(srmRound, _pigDurumD) + '</span>';
         }
         var ssSrmEl = document.getElementById('ss-srm');
