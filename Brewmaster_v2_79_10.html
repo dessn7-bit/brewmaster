@@ -5038,6 +5038,16 @@ function renk_band_en(srm, pigDurum){
   if(!pigDurum||pigDurum.mode==='izli'||!pigDurum.oranMap) return srmAdi;
   try{ return motorRenk(srm, pigDurum.oranMap, pigDurum.pH).nameEn; }catch(e){ return srmAdi; }
 }
+// Ekran adi yuzey helper'lari: birincil = pigment-aware (motorRenk), farkliysa SRM adi parantezde.
+// Pigmentsiz reçetede renk_band_* fallback'i renk_adi(srm)/bjcp_adi(srm) verir -> c===s -> tek isim, parantez yok.
+function _camRenkAdTr(srm, pigDurum){
+  const c=renk_band_tr(srm, pigDurum); const s=renk_adi(Math.round(srm||0));
+  return c===s ? c : c+' ('+s+')';
+}
+function _camRenkAdEn(srm, pigDurum){
+  const c=renk_band_en(srm, pigDurum); const s=bjcp_adi(Math.round(srm||0));
+  return c===s ? c : c+' ('+s+')';
+}
 // Helper: S.katkilar/t.katkilar (array) -> {kid: gram} map. Only _KR_GRUP keys included.
 function _pigKatkiGramMap(katkilarArr){
   const m={};
@@ -12016,8 +12026,8 @@ function rListe(){
     const srmVal=parseFloat(ozet.srm)||0;
     const _pigDurum=aktif_pigment(_pigKatkiGramMap(t.katkilar),t.hacim||11,__bm_finishedPH(t.mayaId,t.stil||t.stilTah||''));
     const _kartHex=aktif_renk_hex(srmVal,_pigDurum); // sol serit + gradyan icin pigment-aware hex
-    const renkAdi=renk_band_tr(srmVal,_pigDurum);   // SRM TR + pigment overlay
-    const bjcpAdi=renk_band_en(srmVal,_pigDurum);   // SRM EN + pigment overlay
+    const renkAdi=_camRenkAdTr(srmVal,_pigDurum);   // Birincil pigment-aware + farkliysa SRM adi parantez
+    const bjcpAdi=_camRenkAdEn(srmVal,_pigDurum);   // EN paralel
     const renkHex=rk(t);                            // SRM->hex
     // Banner sinifi (SRM bazli): <12 light (turuncu), <22 medium (koyu turuncu), >=22 dark (gradient kahve)
     const bannerCls = srmVal<12 ? 'light' : (srmVal<22 ? 'medium' : 'dark');
@@ -14862,8 +14872,8 @@ ${batchOlcekKartHtml()}
   var _srmV=(typeof hSRM==='function')?hSRM(S.maltlar||[],S.katkilar||[],hacim):0;
   var _pigV=(typeof aktif_pigment==='function'&&typeof _pigKatkiGramMap==='function')?aktif_pigment(_pigKatkiGramMap(S.katkilar||[]),hacim,__bm_finishedPH(S.mayaId,S.stil||S.stilTah||'')):null;
   var _hexV=(typeof aktif_renk_hex==='function')?aktif_renk_hex(_srmV,_pigV):'#cb8d00';
-  var _adTr=(typeof renk_band_tr==='function')?renk_band_tr(_srmV,_pigV):'';
-  var _adEn=(typeof renk_band_en==='function')?renk_band_en(_srmV,_pigV):'';
+  var _adTr=(typeof _camRenkAdTr==='function')?_camRenkAdTr(_srmV,_pigV):'';
+  var _adEn=(typeof _camRenkAdEn==='function')?_camRenkAdEn(_srmV,_pigV):'';
   var _ebcV=Math.round((_srmV||0)*1.97);
   return '<div class="kart">'
     +'<div style="font-size:14px;font-weight:700;color:var(--kahve);margin-bottom:10px">🎨 Renk / SRM</div>'
@@ -19701,7 +19711,7 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
                         :                            'berrak görünür';
           var _pigDurumP = aktif_pigment(_pigKatkiGramMap(S.katkilar||[]), _hacim||11, (typeof _pH_est!=="undefined"?_pH_est:4.3));
           var _srmF = parseFloat(_srm)||0;
-          var renkC1 = renk_band_tr(_srmF, _pigDurumP) + ' / ' + renk_band_en(_srmF, _pigDurumP) + ' (SRM ' + _srm + ') · ' + _rEBC + ' EBC' + _katRenkMCU + '.';
+          var renkC1 = _camRenkAdTr(_srmF, _pigDurumP) + ' / ' + _camRenkAdEn(_srmF, _pigDurumP) + ' (SRM ' + _srm + ') · ' + _rEBC + ' EBC' + _katRenkMCU + '.';
           var renkC2 = renkSebep.charAt(0).toUpperCase() + renkSebep.slice(1) + '; ' + berraklik + '.';
           var renkC3 = '✓ Renk profili tutarlı.';
           _ps("🎨 Renk", renkC1 + ' ' + renkC2 + ' ' + renkC3, profRows);
@@ -20193,7 +20203,7 @@ function rEditor(){
   <div class="bm-sticky-summary" id="bm-summary">
     <div class="bm-ss-stil">
       <span class="bm-ss-renk" id="ss-renk" style="background:${typeof srmR==='function'?srmR(Math.round(parseFloat(srm)||0)):'#888'}"></span>
-      <span class="bm-ss-renk-ad" id="ss-renk-ad" style="font-size:0.9em">${(()=>{const _phI=(typeof __bm_finishedPH==='function')?__bm_finishedPH(S&&S.mayaId,S&&(S.stil||S.stilTah)):4.3;const pd=(typeof aktif_pigment==='function'&&typeof _pigKatkiGramMap==='function')?aktif_pigment(_pigKatkiGramMap((S&&S.katkilar)||[]),(S&&S.hacim)||11,_phI):{mode:'izli'};const sn=parseFloat(srm)||0;return (typeof renk_band_tr==='function'?esc(renk_band_tr(sn,pd)):'')+(typeof renk_band_en==='function'?' <span style="opacity:0.6;font-size:0.85em">· '+esc(renk_band_en(sn,pd))+'</span>':'');})()}</span>
+      <span class="bm-ss-renk-ad" id="ss-renk-ad" style="font-size:0.9em">${(()=>{const _phI=(typeof __bm_finishedPH==='function')?__bm_finishedPH(S&&S.mayaId,S&&(S.stil||S.stilTah)):4.3;const pd=(typeof aktif_pigment==='function'&&typeof _pigKatkiGramMap==='function')?aktif_pigment(_pigKatkiGramMap((S&&S.katkilar)||[]),(S&&S.hacim)||11,_phI):{mode:'izli'};const sn=parseFloat(srm)||0;return (typeof _camRenkAdTr==='function'?esc(_camRenkAdTr(sn,pd)):'')+(typeof _camRenkAdEn==='function'?' <span style="opacity:0.6;font-size:0.85em">· '+esc(_camRenkAdEn(sn,pd))+'</span>':'');})()}</span>
       <span class="bm-ss-label" id="ss-stil"><span class="bm-stil-adi">${esc((S&&S.stil)||(S&&S.stilTah)||(S&&S.biraAd)||'Stil hesaplanıyor...')}</span></span>
     </div>
     <div class="bm-ss-stats">
@@ -24239,7 +24249,7 @@ syncBaslat();
           var _pigDurumD = (typeof aktif_pigment === 'function' && typeof _pigKatkiGramMap === 'function')
             ? aktif_pigment(_pigKatkiGramMap((S && S.katkilar) || []), (S && S.hacim) || 11, (typeof __bm_finishedPH === 'function' ? __bm_finishedPH(S && S.mayaId, S && (S.stil||S.stilTah)) : 4.3))
             : {mode:'izli'};
-          renkAdEl.innerHTML = renk_band_tr(srmRound, _pigDurumD) + ' <span style="opacity:0.6;font-size:0.85em">· ' + renk_band_en(srmRound, _pigDurumD) + '</span>';
+          renkAdEl.innerHTML = _camRenkAdTr(srmRound, _pigDurumD) + ' <span style="opacity:0.6;font-size:0.85em">· ' + _camRenkAdEn(srmRound, _pigDurumD) + '</span>';
         }
         var ssSrmEl = document.getElementById('ss-srm');
         if (ssSrmEl && srmRound != null) ssSrmEl.textContent = srmRound;
