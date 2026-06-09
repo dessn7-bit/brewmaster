@@ -116,3 +116,15 @@ _cf_worker/*.json
 verify-*.png
 screenshot-*.png
 _font_facegen.css
+
+# ── Adım 145: Playwright test screenshot pattern'leri (repo köküne yazılan diagnostic PNG'ler) ──
+# Not: brewmaster-dev skill kuralı — yeni testler .playwright-mcp/ altına yazmalı; bu pattern'ler
+# eski kök-PNG'leri yakalamak için. Tracked PWA icon'ları (icon-192.png/icon-512.png) etkilenmez.
+*-pH*.png
+*-swatch*.png
+fix*-*.png
+karadut-*.png
+old-*.png
+new-*.png
+postfix-*.png
+stale-ref-*.png
