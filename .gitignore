@@ -6,7 +6,7 @@ _mmum_raw/
 _mmum_preflight/
 _recipator_raw/
 _recipator_listings/
-.claude/
+.claude/*
 .netlify/
 _braureka_raw/
 _twortwat_raw/
@@ -132,3 +132,11 @@ stale-ref-*.png
 # ── Adım 146: skills CLI artifact'leri (npx skills add ile yerel kurulum) ──
 .agents/
 skills-lock.json
+
+# ── Adım 147: brewmaster-dev skill dosyasını track et (.claude/ geri kalanı ignore'da kalsın) ──
+# Git kurali: parent dir ignore'liyken re-include icin nested traversal lazim (her seviyede '*' + '!').
+!.claude/skills/
+.claude/skills/*
+!.claude/skills/brewmaster-dev/
+.claude/skills/brewmaster-dev/*
+!.claude/skills/brewmaster-dev/SKILL.md
