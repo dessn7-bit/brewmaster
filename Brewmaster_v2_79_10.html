@@ -14095,7 +14095,7 @@ function rEditorSurec(){
   var _hazirToplam=Object.keys(_hazir).length;
   var _hazirGecer=Object.values(_hazir).filter(Boolean).length;
   var _hazirYuzde=Math.round(_hazirGecer/_hazirToplam*100);
-  var _hazirRenk=_hazirYuzde===100?'#2A7A2A':_hazirYuzde>=80?'#7A5A20':'#A02020';
+  var _hazirRenk=_hazirYuzde===100?'var(--yk)':_hazirYuzde>=80?'#7A5A20':'var(--kk)';
   var _hazirHTML=`<div class="kart" style="margin-bottom:10px;border-left:4px solid ${_hazirRenk}">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
       <div style="font-size:13px;font-weight:700;color:var(--kahve)">📋 Reçete Hazırlık</div>
@@ -14104,22 +14104,22 @@ function rEditorSurec(){
     <div style="display:flex;flex-wrap:wrap;gap:4px;font-size:10px">
       ${[['malt','Malt'],['hop','Hop'],['maya','Maya'],['hacim','Hacim'],['mashSc','Mash T'],['kaynatma','Kaynatma']].map(([k,l])=>{
         const ok=_hazir[k];
-        return `<span style="padding:2px 8px;border-radius:4px;background:${ok?'#E8F4E8':'#FDE0E0'};color:${ok?'#2A5A2A':'#7A2020'};font-weight:600">${ok?'✓':'✗'} ${l}</span>`;
+        return `<span style="padding:2px 8px;border-radius:4px;background:${ok?'var(--ya)':'var(--ka)'};color:${ok?'var(--yk)':'var(--kk)'};font-weight:600">${ok?'✓':'✗'} ${l}</span>`;
       }).join('')}
     </div>
-    ${_hazirYuzde<100?'<div style="font-size:10px;color:var(--dim);margin-top:6px;line-height:1.4">Eksik bölümleri tamamla. Brewday\'de reçete tam olmalı.</div>':'<div style="font-size:10px;color:#2A5A2A;margin-top:6px;font-weight:600">🎉 Reçete tam — brewday\'e hazır!</div>'}
+    ${_hazirYuzde<100?'<div style="font-size:10px;color:var(--dim);margin-top:6px;line-height:1.4">Eksik bölümleri tamamla. Brewday\'de reçete tam olmalı.</div>':'<div style="font-size:10px;color:var(--yk);margin-top:6px;font-weight:600">🎉 Reçete tam — brewday\'e hazır!</div>'}
   </div>`;
   var _adimHTML=_mAdimlar.map(function(adim,i){
     var scOc="if(!S.mashAdimlar.length)S.mashAdimlar=[{sc:S.mashSc,dk:S.mashDk}];S.mashAdimlar["+i+"].sc=parseFloat(this.value);render()";
     var dkOc="if(!S.mashAdimlar.length)S.mashAdimlar=[{sc:S.mashSc,dk:S.mashDk}];S.mashAdimlar["+i+"].dk=parseInt(this.value);render()";
     var silBtn=(S.mashAdimlar&&S.mashAdimlar.length>1)?'<button onclick="S.mashAdimlar.splice('+i+',1);render()" style="background:none;border:none;color:#bbb;font-size:16px;cursor:pointer;padding:0 4px;margin-left:auto">✕</button>':'';
-    return '<div style="position:relative;margin-bottom:8px"><div style="position:absolute;left:-19px;top:12px;width:10px;height:10px;border-radius:50%;background:var(--altin);border:2px solid #fff"></div><div style="background:var(--bg2);border:1px solid var(--bor);border-radius:8px;padding:8px 10px"><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><input aria-label="Adım sıcaklığı (°C)" type="number" value="'+adim.sc+'" min="50" max="80" step="0.5" onchange="'+scOc+'" style="width:65px;font-size:13px;font-weight:700;padding:4px 6px;border:1px solid var(--bor);border-radius:6px;background:var(--card);color:var(--yazi)"><span style="font-size:12px;color:var(--soluk)">°C</span><input aria-label="Adım süresi (dk)" type="number" value="'+adim.dk+'" min="5" max="180" step="5" onchange="'+dkOc+'" style="width:55px;font-size:12px;padding:4px 6px;border:1px solid var(--bor);border-radius:6px;background:var(--card);color:var(--yazi)"><span style="font-size:12px;color:var(--soluk)">dk</span>'+silBtn+'</div><div style="font-size:10px;color:var(--soluk);margin-top:3px">'+_acikla(adim.sc)+'</div></div></div>';
+    return '<div style="position:relative;margin-bottom:8px"><div style="position:absolute;left:-19px;top:12px;width:10px;height:10px;border-radius:50%;background:var(--altin);border:2px solid #fff"></div><div style="background:var(--bg2);border:1px solid var(--bor);border-radius:8px;padding:8px 10px"><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><input aria-label="Adım sıcaklığı (°C)" type="number" value="'+adim.sc+'" min="50" max="80" step="0.5" onchange="'+scOc+'" style="width:65px;font-size:13px;font-weight:700;padding:4px 6px;border:1px solid var(--bor);border-radius:6px;background:var(--card);color:var(--metin)"><span style="font-size:12px;color:var(--soluk)">°C</span><input aria-label="Adım süresi (dk)" type="number" value="'+adim.dk+'" min="5" max="180" step="5" onchange="'+dkOc+'" style="width:55px;font-size:12px;padding:4px 6px;border:1px solid var(--bor);border-radius:6px;background:var(--card);color:var(--metin)"><span style="font-size:12px;color:var(--soluk)">dk</span>'+silBtn+'</div><div style="font-size:10px;color:var(--soluk);margin-top:3px">'+_acikla(adim.sc)+'</div></div></div>';
   }).join('');
   var _evs=[];
   (S.hoplar||[]).forEach(function(h){if(h.tur==='dry_hop')return;var hp=HOPLAR.find(function(x){return x.id===h.id;});var _whT=h.whT!=null?h.whT:(h.tur==='whirlpool'&&h.dk>=60&&h.dk<=100?h.dk:85);var _whDk=h.tur==='whirlpool'?(h.whT!=null?(h.dk||15):15):h.dk;_evs.push({dk:h.tur==='whirlpool'?0:h.dk,ad:h._ad||(hp&&hp.ad)||h.id,detay:h.g+'g — '+(h.tur==='whirlpool'?'Whirlpool '+_whT+'°C / '+_whDk+'dk':'Kaynatma '+h.dk+'dk'),renk:'var(--vintage)',ikon:'🌿'});});
   (S.katkilar||[]).forEach(function(k,ki){var _kz=(k.zaman||'');var _kaynatmaDa=_kz==='Kaynatmada'||_kz.toLowerCase().includes('kaynat');if(k.dk==null&&!_kaynatmaDa)return;_evs.push({dk:k.dk!=null?k.dk:0,ad:k.ad,detay:(k.miktar||'')+' '+(k.birim||'')+(k.zaman?' — '+k.zaman:''),renk:'var(--bakir)',ikon:'🧪',isKatki:true,katki_idx:ki});});
   _evs.sort(function(a,b){return b.dk-a.dk;});
-  var _tl=_evs.length>0?'<div style="position:relative;padding-left:28px"><div style="position:absolute;left:11px;top:0;bottom:0;width:2px;background:var(--bor)"></div>'+_evs.map(function(ev){var _dkBadge=ev.isKatki?'<div style="display:inline-flex;align-items:center;background:rgba(0,0,0,.07);border-radius:8px;padding:2px 8px;gap:3px"><input aria-label="Katkı zamanı (dk)" class="bm-surec-dk-inp" type="number" value="'+ev.dk+'" min="0" max="120" step="5" onchange="setSurecKDk('+ev.katki_idx+',this.value)" oninput="this.style.width=Math.max(12,this.value.length*7)+\'px\'" style="width:'+Math.max(12,String(ev.dk).length*7)+'px;font-size:11px;font-weight:600;text-align:right;border:none;background:transparent;color:var(--bakir);padding:0;-moz-appearance:textfield"><span style="font-size:11px;color:var(--bakir);font-weight:600">dk</span></div>':'<span style="font-size:11px;background:rgba(0,0,0,.07);padding:2px 8px;border-radius:8px;color:var(--bakir);font-weight:600">'+ev.dk+' dk</span>';return '<div style="position:relative;margin-bottom:10px"><div style="position:absolute;left:-21px;top:10px;width:12px;height:12px;border-radius:50%;background:'+ev.renk+';border:2px solid #fff"></div><div style="background:var(--card);border:1px solid var(--bor);border-radius:10px;padding:8px 10px"><div style="display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:6px"><span>'+ev.ikon+'</span><span style="font-size:12px;font-weight:700;color:var(--kahve)">'+esc(ev.ad)+'</span></div>'+_dkBadge+'</div><div style="font-size:11px;color:var(--soluk);margin-top:3px">'+esc(ev.detay)+'</div></div></div>';}).join('')+'</div>':'<div style="text-align:center;padding:16px;color:var(--dim);font-size:12px">Hop veya katkı ekle</div>';
+  var _tl=_evs.length>0?'<div style="position:relative;padding-left:28px"><div style="position:absolute;left:11px;top:0;bottom:0;width:2px;background:var(--bor)"></div>'+_evs.map(function(ev){var _dkBadge=ev.isKatki?'<div style="display:inline-flex;align-items:center;background:var(--bg-sunken);border-radius:8px;padding:2px 8px;gap:3px"><input aria-label="Katkı zamanı (dk)" class="bm-surec-dk-inp" type="number" value="'+ev.dk+'" min="0" max="120" step="5" onchange="setSurecKDk('+ev.katki_idx+',this.value)" oninput="this.style.width=Math.max(12,this.value.length*7)+\'px\'" style="width:'+Math.max(12,String(ev.dk).length*7)+'px;font-size:11px;font-weight:600;text-align:right;border:none;background:transparent;color:var(--bakir);padding:0;-moz-appearance:textfield"><span style="font-size:11px;color:var(--bakir);font-weight:600">dk</span></div>':'<span style="font-size:11px;background:var(--bg-sunken);padding:2px 8px;border-radius:8px;color:var(--bakir);font-weight:600">'+ev.dk+' dk</span>';return '<div style="position:relative;margin-bottom:10px"><div style="position:absolute;left:-21px;top:10px;width:12px;height:12px;border-radius:50%;background:'+ev.renk+';border:2px solid #fff"></div><div style="background:var(--card);border:1px solid var(--bor);border-radius:10px;padding:8px 10px"><div style="display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:6px"><span>'+ev.ikon+'</span><span style="font-size:12px;font-weight:700;color:var(--kahve)">'+esc(ev.ad)+'</span></div>'+_dkBadge+'</div><div style="font-size:11px;color:var(--soluk);margin-top:3px">'+esc(ev.detay)+'</div></div></div>';}).join('')+'</div>':'<div style="text-align:center;padding:16px;color:var(--dim);font-size:12px">Hop veya katkı ekle</div>';
   var _dhl=(S.hoplar||[]).filter(function(h){return h.tur==='dry_hop';});
   // Brewday ölçüm değerleri — calc()'tan hesaplanmış OG/FG referansı
   var _cC=calc();
@@ -14183,7 +14183,7 @@ function rEditorSurec(){
 
   // Block 3: Brewday Ölçümleri (Pre-boil OG + manuel OG/FG + correction tools)
   var _surecOlcum = `
-  <div class="kart" style="margin-bottom:10px;background:${(_ogKyn==="manuel"||_fgKyn==="manuel")?"#EFFFEF":"var(--card)"};border-color:${(_ogKyn==="manuel"||_fgKyn==="manuel")?"#60C060":"var(--bor)"}">
+  <div class="kart" style="margin-bottom:10px;background:${(_ogKyn==="manuel"||_fgKyn==="manuel")?"var(--ya)":"var(--card)"};border-color:${(_ogKyn==="manuel"||_fgKyn==="manuel")?"var(--yk)":"var(--bor)"}">
     <div style="font-size:13px;font-weight:700;color:var(--kahve);margin-bottom:4px">📏 Brewday Ölçümleri</div>
     <div style="font-size:10px;color:var(--dim);margin-bottom:8px">Gerçek ölçüm girince ABV ve fermentasyon tahminleri ona göre hesaplanır. Boş bırakırsan reçeteden tahmin edilir.</div>
     ${(()=>{
@@ -14211,8 +14211,8 @@ function rEditorSurec(){
           const hedef=(preOGHedef-1)*1000;
           const sapma=((gercek-hedef)/hedef*100);
           const gercekVerim=((S.verim||61)*gercek/hedef).toFixed(0);
-          if(Math.abs(sapma)<3)return `<div style="margin-top:5px;padding:4px 8px;background:#E8F4E8;color:#2A5A2A;border-radius:4px;font-size:10px;font-weight:600">✓ Verim hedefte (%${S.verim||61}). Sapma %${sapma.toFixed(1)}.</div>`;
-          if(sapma>0)return `<div style="margin-top:5px;padding:4px 8px;background:#E8F4E8;color:#2A5A2A;border-radius:4px;font-size:10px;font-weight:600">🟢 Verim yüksek! Gerçek ~%${gercekVerim} (reçete %${S.verim||61}). Hedef OG de yüksek olacak.</div>`;
+          if(Math.abs(sapma)<3)return `<div style="margin-top:5px;padding:4px 8px;background:var(--ya);color:var(--yk);border-radius:4px;font-size:10px;font-weight:600">✓ Verim hedefte (%${S.verim||61}). Sapma %${sapma.toFixed(1)}.</div>`;
+          if(sapma>0)return `<div style="margin-top:5px;padding:4px 8px;background:var(--ya);color:var(--yk);border-radius:4px;font-size:10px;font-weight:600">🟢 Verim yüksek! Gerçek ~%${gercekVerim} (reçete %${S.verim||61}). Hedef OG de yüksek olacak.</div>`;
           return `<div style="margin-top:5px;padding:4px 8px;background:#FDF4E0;color:#7A5020;border-radius:4px;font-size:10px;font-weight:600">⚠️ Düşük verim: ~%${gercekVerim} (reçete %${S.verim||61}). OG düşük kalacak. DME ekleyebilir veya kabul et.</div>`;
         })():''}
       </div>`;
@@ -14247,7 +14247,7 @@ function rEditorSurec(){
       const _og=parseFloat(S.ogManuel), _fg=parseFloat(S.fgManuel);
       if(isNaN(_og)||isNaN(_fg))return '';
       if(_fg>=_og){
-        return `<div style="margin-top:8px;padding:8px 12px;background:#FDE0E0;border-left:3px solid var(--kk);border-radius:6px;font-size:11px;color:#7A2020">
+        return `<div style="margin-top:8px;padding:8px 12px;background:var(--ka);border-left:3px solid var(--kk);border-radius:6px;font-size:11px;color:var(--kk)">
           <b>⚠️ FG (${_fg.toFixed(3)}) ≥ OG (${_og.toFixed(3)})</b> — Fermantasyon henüz bitmemiş veya ölçüm hatası. Normal fermantasyon OG-FG farkı en az 0.008 olmalı. Kontrol et: hydrometre sıcaklığı, yüzey tortusu, maya ölüm.
         </div>`;
       }
@@ -14307,9 +14307,9 @@ function rEditorSurec(){
       ${_adimHTML}
     </div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
-      <button onclick="S.mashAdimlar=[{sc:67,dk:60}];S.mashSc=67;render()" style="background:var(--card);border:1px solid var(--bor);border-radius:6px;padding:3px 8px;font-size:10px;cursor:pointer;color:var(--yazi)">Tek adım 67°C</button>
-      <button onclick="S.mashAdimlar=[{sc:63,dk:30},{sc:72,dk:20}];S.mashSc=63;render()" style="background:var(--card);border:1px solid var(--bor);border-radius:6px;padding:3px 8px;font-size:10px;cursor:pointer;color:var(--yazi)">63+72°C</button>
-      <button onclick="S.mashAdimlar=[{sc:50,dk:15},{sc:63,dk:30},{sc:72,dk:20},{sc:76,dk:10}];S.mashSc=63;render()" style="background:var(--card);border:1px solid var(--bor);border-radius:6px;padding:3px 8px;font-size:10px;cursor:pointer;color:var(--yazi)">4 adım</button>
+      <button onclick="S.mashAdimlar=[{sc:67,dk:60}];S.mashSc=67;render()" style="background:var(--card);border:1px solid var(--bor);border-radius:6px;padding:3px 8px;font-size:10px;cursor:pointer;color:var(--metin)">Tek adım 67°C</button>
+      <button onclick="S.mashAdimlar=[{sc:63,dk:30},{sc:72,dk:20}];S.mashSc=63;render()" style="background:var(--card);border:1px solid var(--bor);border-radius:6px;padding:3px 8px;font-size:10px;cursor:pointer;color:var(--metin)">63+72°C</button>
+      <button onclick="S.mashAdimlar=[{sc:50,dk:15},{sc:63,dk:30},{sc:72,dk:20},{sc:76,dk:10}];S.mashSc=63;render()" style="background:var(--card);border:1px solid var(--bor);border-radius:6px;padding:3px 8px;font-size:10px;cursor:pointer;color:var(--metin)">4 adım</button>
     </div>
   </div>`;
 
@@ -14318,7 +14318,7 @@ function rEditorSurec(){
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
       <div style="font-size:13px;font-weight:700;color:var(--kahve)">⏱️ Kaynatma</div>
       <div style="display:flex;align-items:center;gap:6px">
-        <input aria-label="Kaynatma süresi (dk)" type="number" value="${_kSure}" min="30" max="120" step="5" onchange="S.kaynatmaSure=parseInt(this.value);render()" style="width:55px;text-align:center;font-size:12px;padding:4px 6px;border:1px solid var(--bor);border-radius:6px;background:var(--card);color:var(--yazi)">
+        <input aria-label="Kaynatma süresi (dk)" type="number" value="${_kSure}" min="30" max="120" step="5" onchange="S.kaynatmaSure=parseInt(this.value);render()" style="width:55px;text-align:center;font-size:12px;padding:4px 6px;border:1px solid var(--bor);border-radius:6px;background:var(--card);color:var(--metin)">
         <span style="font-size:11px;color:var(--soluk)">dk</span>
       </div>
     </div>
@@ -14382,7 +14382,7 @@ function rEditorSurec(){
           var logGun=logE?_gunH(logE.tarih):null;
           var planGun=(!isDH&&k.gun!=null)?k.gun:null;
           if(logGun!==null){
-            badge='<span style="font-size:11px;background:rgba(45,122,45,.15);color:#1D7A1D;padding:3px 10px;border-radius:10px;font-weight:700;border:1px solid rgba(45,122,45,.3)">✅ Gün '+logGun+'</span>';
+            badge='<span style="font-size:11px;background:var(--ya);color:var(--yk);padding:3px 10px;border-radius:10px;font-weight:700;border:1px solid var(--yk)">✅ Gün '+logGun+'</span>';
           } else if(_GUN_K.indexOf(a.key)!==-1){
             if(planGun!==null){
               badge='<span style="font-size:11px;background:rgba(0,90,139,.1);color:#005A8B;padding:3px 10px;border-radius:10px;font-weight:700">📅 Gün '+planGun+'</span>';
@@ -18933,7 +18933,7 @@ return `
               var disp = (window.bmSlugToBjcp ? window.bmSlugToBjcp(r.slug, r.displayTR) : null) || r.displayTR || r.slug;
               return '<div style="display:flex;align-items:center;gap:6px;font-size:11px;padding:2px 0">'+
                 '<span style="font-weight:700;color:var(--soluk);width:14px;text-align:right">'+(i+1)+'.</span>'+
-                '<span style="flex:1;color:var(--yazi)'+(i===0?';font-weight:600':'')+'">'+disp+'</span>'+
+                '<span style="flex:1;color:var(--metin)'+(i===0?';font-weight:600':'')+'">'+disp+'</span>'+
                 '<span style="color:var(--soluk);font-size:10px;width:36px;text-align:right">%'+pct+'</span>'+
                 '</div>';
             }).join('');
@@ -21435,7 +21435,7 @@ window.brewdayBitir=function(){
     modal.style.cssText = 'position:fixed;inset:0;background:rgba(61,40,23,.94);z-index:99997;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(6px)';
     modal.innerHTML = 
       '<div style="max-width:420px;width:100%;background:linear-gradient(145deg,#4A2F1A 0%,#6B4428 100%);border:2px solid rgba(245,215,153,.45);border-radius:16px;padding:26px 22px;box-shadow:0 12px 48px rgba(0,0,0,.5);color:#FEFBF2">'
-      +'<div style="text-align:center;font-size:11px;color:rgba(254,251,242,.55);letter-spacing:1.5px;font-weight:700;margin-bottom:6px">⏰ FERMANTASYON ALARMI</div>'
+      +'<div style="text-align:center;font-size:11px;color:rgba(254,251,242,.75);letter-spacing:1.5px;font-weight:700;margin-bottom:6px">⏰ FERMANTASYON ALARMI</div>'
       +'<div style="text-align:center;font-size:26px;font-weight:800;margin:10px 0 6px;color:#F5D799">'+escapeH(al.aksiyon||'Alarm')+'</div>'
       +'<div style="text-align:center;font-size:12px;color:rgba(254,251,242,.65);margin-bottom:14px">'+escapeH(receteAd||'')+' · '+gunText+(tip?' · '+tip:'')+'</div>'
       +(al.aciklama?'<div style="background:rgba(245,215,153,.08);border:1px solid rgba(245,215,153,.2);border-radius:10px;padding:12px 14px;font-size:13px;line-height:1.5;margin-bottom:18px;color:#FEFBF2">'+escapeH(al.aciklama)+'</div>':'')
