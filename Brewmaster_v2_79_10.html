@@ -20949,14 +20949,15 @@ window.brewdayModalKapat=function(){
 // A11Y-MODAL Escape + minimal Tab trap (capture: input/sidebar handler'larindan once kosar;
 // input/textarea/select odaktayken karismaz — o alanlarin kendi Escape akisi korunur)
 document.addEventListener('keydown', function(e){
-  var m = document.getElementById('brewdayEventModal') || document.getElementById('brewdayOnayModal');
+  var m = document.getElementById('_alarmModal') || document.getElementById('brewdayEventModal') || document.getElementById('brewdayOnayModal');
   if(!m) return;
   if(e.key === 'Escape'){
     var t = e.target;
     if(t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT')) return;
     e.stopPropagation();
     e.preventDefault();
-    if(m.id === 'brewdayEventModal') window.brewdayModalKapat(); else window.brewdayOnayKapat();
+    if(m.id === '_alarmModal'){ m.remove(); var p = window._bmModalPrevFocus; window._bmModalPrevFocus = null; if(p && p.focus && document.contains(p)) p.focus(); }
+    else if(m.id === 'brewdayEventModal') window.brewdayModalKapat(); else window.brewdayOnayKapat();
     return;
   }
   if(e.key === 'Tab'){
@@ -21425,6 +21426,10 @@ window.brewdayBitir=function(){
     const gunText = 'Gün '+al.g;
     const modal = document.createElement('div');
     modal.id = '_alarmModal';
+    modal.setAttribute('role','dialog');
+    modal.setAttribute('aria-modal','true');
+    modal.setAttribute('aria-label','Fermantasyon alarmı');
+    modal.setAttribute('tabindex','-1');
     modal.style.cssText = 'position:fixed;inset:0;background:rgba(61,40,23,.94);z-index:99997;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(6px)';
     modal.innerHTML = 
       '<div style="max-width:420px;width:100%;background:linear-gradient(145deg,#4A2F1A 0%,#6B4428 100%);border:2px solid rgba(245,215,153,.45);border-radius:16px;padding:26px 22px;box-shadow:0 12px 48px rgba(0,0,0,.5);color:#FEFBF2">'
@@ -21438,7 +21443,9 @@ window.brewdayBitir=function(){
       +'</div>'
       +'<button onclick="_alarmAksiyon(\''+receteId+'\','+al.g+',\'atla\')" style="width:100%;background:transparent;border:1px solid rgba(254,251,242,.2);color:rgba(254,251,242,.65);border-radius:10px;padding:10px;font-size:12px;font-weight:600;cursor:pointer">Atla (bu alarmı gör tamamlandı olarak işaretle)</button>'
       +'</div>';
+    window._bmModalPrevFocus = document.activeElement;
     document.body.appendChild(modal);
+    modal.focus();
   };
 
   // Kontrol alarmı — sade toast (sağ altta)
