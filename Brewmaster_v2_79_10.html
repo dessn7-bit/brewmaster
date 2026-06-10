@@ -386,6 +386,7 @@ input[type="checkbox"]:disabled,input[type="radio"]:disabled{opacity:.5;cursor:n
 .bm-header-search input{background:rgba(255,255,255,.06);color:var(--tip-b-col, #F6EAD7);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:7px 30px 7px 32px;font-family:var(--font-govde);font-size:calc(var(--fs-sm) * var(--tip-b-scale, 1));width:260px;outline:none;transition:border-color .12s,background .12s;font-variant-caps:var(--tip-b-fvc, normal);font-style:var(--tip-b-fst, normal);text-transform:var(--tip-b-tt, none);letter-spacing:var(--tip-b-ls, normal)}
 .bm-header-search input::placeholder{color:#A98E73}
 .bm-header-search input:focus{border-color:var(--vintage);background:rgba(255,255,255,.10)}
+.bm-header-search input:focus-visible{outline:2px solid var(--masthead-ink);outline-offset:2px}
 .bm-header-search-clear{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:#A98E73;font-size:16px;line-height:1;cursor:pointer;padding:2px 4px}
 .bm-header-actions{display:flex;align-items:center;gap:8px}
 .bm-header-iconbtn{position:relative;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:var(--masthead-ink);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:border-color .12s,color .12s,background .12s}
@@ -431,7 +432,7 @@ input[type="checkbox"]:disabled,input[type="radio"]:disabled{opacity:.5;cursor:n
 @media (hover:hover){.bm-stat-kart:hover{border-color:var(--vintage);transform:translateZ(0) translateY(-1px);box-shadow:0 4px 10px rgba(0,0,0,.06)}.bm-stat-kart:active{transform:translateZ(0);box-shadow:0 1px 3px rgba(0,0,0,.05)}}
 .bm-stat-kart:focus-visible{outline:2px solid var(--vintage);outline-offset:2px}
 .bm-stat-kart.active{border-color:var(--vintage)}
-.bm-stat-baslik{font-family:var(--font-baslik);font-size:11px;font-weight:500;letter-spacing:.6px;color:#888780;font-variant-caps:var(--tip-h-fvc, normal);text-transform:var(--tip-h-tt, uppercase)}
+.bm-stat-baslik{font-family:var(--font-baslik);font-size:11px;font-weight:500;letter-spacing:.6px;color:var(--metin-soluk);font-variant-caps:var(--tip-h-fvc, normal);text-transform:var(--tip-h-tt, uppercase)}
 .bm-stat-sayi-wrap{display:flex;align-items:baseline;gap:6px;margin-top:4px}
 .bm-stat-sayi{font-size:24px;font-weight:500;line-height:1}
 .bm-stat-sayi.turuncu{color:var(--vintage)}
@@ -712,7 +713,7 @@ button:disabled:hover,.btn:disabled:hover,.btn.bm-disabled:hover{background:inhe
 
 /* Adim 134-G: bm-toast vintage komponenti (flash + alert dönüşüm). z-index 1900 (sync modal 2000 altında). */
 #bm-toast-container{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column-reverse;gap:8px;z-index:1900;pointer-events:none;max-width:380px}
-.bm-toast{pointer-events:auto;padding:12px 16px;border-radius:10px;border:1.5px solid var(--vintage);background:var(--kahve-bg);color:var(--tip-b-col, var(--kahve-koyu));font-size:calc(13px * var(--tip-b-scale, 1));line-height:var(--tip-b-lh, 1.4);box-shadow:0 4px 16px rgba(184,118,63,.20);cursor:pointer;opacity:0;transform:translateY(10px);transition:opacity .2s ease-out,transform .2s ease-out;font-family:var(--font-body);font-variant-caps:var(--tip-b-fvc, normal);font-style:var(--tip-b-fst, normal);text-transform:var(--tip-b-tt, none);letter-spacing:var(--tip-b-ls, normal)}
+.bm-toast{pointer-events:auto;padding:12px 16px;border-radius:10px;border:1.5px solid var(--vintage);background:var(--kahve-bg);color:var(--tip-b-col, var(--kahve-koyu));font-size:calc(13px * var(--tip-b-scale, 1));line-height:var(--tip-b-lh, 1.4);box-shadow:var(--elv-2);cursor:pointer;opacity:0;transform:translateY(10px);transition:opacity .2s ease-out,transform .2s ease-out;font-family:var(--font-body);font-variant-caps:var(--tip-b-fvc, normal);font-style:var(--tip-b-fst, normal);text-transform:var(--tip-b-tt, none);letter-spacing:var(--tip-b-ls, normal)}
 .bm-toast.bm-toast--show{opacity:1;transform:translateY(0)}
 .bm-toast.bm-toast--leave{opacity:0;transform:translateY(10px);transition:opacity .3s ease-in,transform .3s ease-in}
 .bm-toast--info{background:var(--kahve-bg);border-color:var(--vintage);color:var(--kahve-koyu)}
