@@ -14157,7 +14157,7 @@ function rEditorSurec(){
       ${(window._brewday && window._brewday.aktif) ? '🔥 Brewday Aktif — Timeline\'a Dön →' : '🔥 Brewday\'i Başlat →'}
     </button>
     ${(window._brewday && window._brewday.aktif) ? '<button onclick="brewdayZorlaSifirla()" style="width:100%;background:rgba(200,80,80,.15);color:#FFB0B0;border:1px solid rgba(200,80,80,.3);border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;margin-top:6px">⟲ Brewday\'i Sıfırla (Acil Kurtarma)</button>' : ''}
-    <div style="font-size:10px;color:rgba(254,251,242,.55);margin-top:6px;line-height:1.5;text-align:center">Ekran açık kalır · Wake Lock · Tam ekran bildirim · Mash/Hop/Katkı/Whirlpool otomatik sıralı</div>
+    <div style="font-size:10px;color:rgba(254,251,242,.9);margin-top:6px;line-height:1.5;text-align:center">Ekran açık kalır · Wake Lock · Tam ekran bildirim · Mash/Hop/Katkı/Whirlpool otomatik sıralı</div>
   </div>
   <div class="kart" style="margin-bottom:10px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
@@ -14173,7 +14173,7 @@ function rEditorSurec(){
         <button onclick="brewTimerDur()" id="_btStop" style="background:var(--kk);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;display:none">⏹ Dur</button>
         <button onclick="brewBildirimIzin()" style="background:var(--card);color:var(--bakir);border:1px solid var(--bor);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer">🔔 İzin Ver</button>
       </div>
-      <div style="font-size:9px;color:var(--dim);margin-top:8px;line-height:1.5">
+      <div style="font-size:var(--fs-xs);color:var(--dim);margin-top:8px;line-height:1.5">
         Tam hop zamanında: 2 beep + titreme + bildirim<br>
         5 dk kala: 1 beep + kısa titreme · Bitince: 3 beep + uzun titreme<br>
         <b>⚠️ Sekme açık kalmalı</b> — tarayıcıyı kapatma. Ekran kilitli olabilir.
@@ -14204,7 +14204,7 @@ function rEditorSurec(){
           <input aria-label="Ölçülen pre-boil OG" type="number" class="inp" style="flex:1;font-weight:700;font-size:13px;text-align:center" placeholder="${preOGHedef.toFixed(3)}" value="${S.preboilOG||''}" min="1.020" max="1.100" step="0.001" onchange="S.preboilOG=this.value?parseFloat(this.value):null;render()">
           ${S.preboilOG?`<button class="btn" style="background:none;color:var(--kk);font-size:12px;padding:2px 6px" onclick="S.preboilOG=null;render()">✕</button>`:''}
         </div>
-        <div style="font-size:9px;color:var(--dim);margin-top:3px">Hedef: ${preOGHedef.toFixed(3)} (${preHacim.toFixed(1)}L pre-boil)</div>
+        <div style="font-size:var(--fs-xs);color:var(--dim);margin-top:3px">Hedef: ${preOGHedef.toFixed(3)} (${preHacim.toFixed(1)}L pre-boil)</div>
         ${S.preboilOG?(()=>{
           // Verim sapması: gerçek_points / hedef_points
           const gercek=(S.preboilOG-1)*1000;
@@ -14227,7 +14227,7 @@ function rEditorSurec(){
             onchange="S.ogManuel=this.value?parseFloat(this.value):null;render()">
           ${_ogKyn==="manuel"?`<button class="btn" style="background:none;color:var(--kk);font-size:12px;padding:2px 6px" onclick="S.ogManuel=null;render()">✕</button>`:""}
         </div>
-        <div style="font-size:9px;color:var(--dim);margin-top:3px">Reçete: ${_ogHsp}</div>
+        <div style="font-size:var(--fs-xs);color:var(--dim);margin-top:3px">Reçete: ${_ogHsp}</div>
       </div>
       <div>
         <div class="etiket" style="margin-bottom:4px">✏️ Gerçek FG</div>
@@ -14238,7 +14238,7 @@ function rEditorSurec(){
             onchange="S.fgManuel=this.value?this.value:null;render()">
           ${_fgKyn==="manuel"?`<button class="btn" style="background:none;color:var(--kk);font-size:12px;padding:2px 6px" onclick="S.fgManuel=null;render()">✕</button>`:""}
         </div>
-        <div style="font-size:9px;color:var(--dim);margin-top:3px">Reçete: ${_fgHsp}</div>
+        <div style="font-size:var(--fs-xs);color:var(--dim);margin-top:3px">Reçete: ${_fgHsp}</div>
       </div>
     </div>
     ${(()=>{
