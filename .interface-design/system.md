@@ -28,6 +28,8 @@ Marka adı: **Kabeer** (`.bm-sidebar-title`), ana sayfa hero sloganı: **"HER B�
 | `--ink` | `#2E2620` | gövde metni (daha koyu nötr) |
 | `--metin-soluk` | `#7A6E60` | soluk metin — Adım 137-A: `#8A7E70`→`#7A6E60` WCAG AA (bg-card 4.97:1 PASS) |
 
+> **Kontrast notu (CILA-2b, 2026-06-11):** bg-app (`#F7F3EC`) zemininde `--metin-soluk` 4.49:1 ile AA sınırının altında kalır — bu zeminde metin için bakır aile (`--vintage-mid` 5.28:1) veya koyu tonlar kullanılır; `--metin-soluk` yalnız bg-card (beyaz) zemininde PASS (4.97:1).
+
 ### Vintage vurgu
 | Token | Değer | Rol |
 |---|---|---|
