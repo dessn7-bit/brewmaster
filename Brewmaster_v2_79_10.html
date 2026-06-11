@@ -12432,7 +12432,7 @@ function rEditorTakvim(maya, maya2, tv){
         const ii=_bl.length-1-ri;
         return _buildLogRow(e, ii);
       }).join('')
-      +'<div style="display:flex;gap:0"><div style="width:26px;display:flex;justify-content:center"><div style="width:8px;height:8px;border-radius:50%;background:#ddd;margin-top:4px"></div></div><div style="padding:4px 8px;font-size:10px;color:#ccc">Baslangic</div></div>'
+      +'<div style="display:flex;gap:0"><div style="width:26px;display:flex;justify-content:center"><div style="width:8px;height:8px;border-radius:50%;background:#ddd;margin-top:4px"></div></div><div style="padding:4px 8px;font-size:var(--fs-xs);color:#ccc">Baslangic</div></div>'
     : '<div style="text-align:center;padding:16px;color:var(--dim);font-size:12px">Henuz kayit yok — asagidan ekle</div>';
 
   // Log bölümü HTML
@@ -12450,7 +12450,7 @@ function rEditorTakvim(maya, maya2, tv){
           +'<span style="font-size:18px">⏱️</span>'
           +'<div>'
             +'<div style="font-size:12px;font-weight:700;color:var(--kahve)">Fermentasyon '+_gun+'. Gün</div>'
-            +'<div style="font-size:10px;color:var(--dim)">Pitching: '+_pE.tarih+'</div>'
+            +'<div style="font-size:var(--fs-xs);color:var(--dim)">Pitching: '+_pE.tarih+'</div>'
           +'</div>'
         +'</div>';
       }
@@ -12467,7 +12467,7 @@ function rEditorTakvim(maya, maya2, tv){
       var _h0=+(1+(_o0-1)*(1-_a0/100)).toFixed(3);
       var _sF=parseFloat(_fgKayitlar[_fgKayitlar.length-1].deger);
       var _pc=Math.min(100,Math.max(0,Math.round(((_o0-_sF)/(_o0-_h0))*100)));
-      var _pR=_pc>=100?'#4CAF50':_pc>=80?'#8BC34A':_pc>=50?'#FFC107':'#FF9800';
+      var _pR=_pc>=100?'var(--ok)':_pc>=80?'var(--yk)':_pc>=50?'var(--sk)':'var(--kk)';
       _progressHtml='<div style="padding:7px 12px;background:#F8F9FA;border-bottom:1px solid var(--bor)">'
         +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'
           +'<span style="font-size:11px;font-weight:700;color:var(--kahve)">🧬 Fermentasyon İlerlemesi</span>'
@@ -12477,9 +12477,9 @@ function rEditorTakvim(maya, maya2, tv){
           +'<div style="width:'+_pc+'%;height:100%;background:'+_pR+';border-radius:6px"></div>'
         +'</div>'
         +'<div style="display:flex;justify-content:space-between;margin-top:3px">'
-          +'<span style="font-size:10px;color:#999">OG '+_o0.toFixed(3)+'</span>'
-          +'<span style="font-size:10px;color:#666">Son: '+_sF.toFixed(3)+'</span>'
-          +'<span style="font-size:10px;color:#999">Hedef: '+_h0+'</span>'
+          +'<span style="font-size:var(--fs-xs);color:#999">OG '+_o0.toFixed(3)+'</span>'
+          +'<span style="font-size:var(--fs-xs);color:#666">Son: '+_sF.toFixed(3)+'</span>'
+          +'<span style="font-size:var(--fs-xs);color:#999">Hedef: '+_h0+'</span>'
         +'</div>'
       +'</div>';
     }
@@ -12569,7 +12569,7 @@ function rEditorTakvim(maya, maya2, tv){
       }
 
       _scGrafik='<div style="padding:4px 8px 0;background:#FAFBFC;border-bottom:1px solid var(--bor)">'
-        +'<div style="font-size:10px;color:var(--dim);margin-bottom:2px;display:flex;justify-content:space-between"><span>🌡️ Sıcaklık Takibi</span>'+(_bugunHedefT!==null?'<span style="font-size:9px;color:var(--soluk)">Bugün hedef: <b style="color:var(--kahve)">'+_bugunHedefT+'°C</b></span>':'')+'</div>'
+        +'<div style="font-size:var(--fs-xs);color:var(--dim);margin-bottom:2px;display:flex;justify-content:space-between"><span>🌡️ Sıcaklık Takibi</span>'+(_bugunHedefT!==null?'<span style="font-size:var(--fs-xs);color:var(--soluk)">Bugün hedef: <b style="color:var(--kahve)">'+_bugunHedefT+'°C</b></span>':'')+'</div>'
         +'<svg width="100%" viewBox="0 0 '+W+' '+H+'">'
           // ÜST TEHLİKE (aralık üstü) — hafif kırmızı zemin
           +'<rect x="'+pL+'" y="'+pT+'" width="'+gW+'" height="'+(redTop-pT)+'" fill="#FFEBEE" opacity="0.5"/>'
@@ -12587,7 +12587,7 @@ function rEditorTakvim(maya, maya2, tv){
           +circs+xlbl+_idealNokta
         +'</svg>'
         // Legend
-        +'<div style="display:flex;gap:8px;font-size:8px;color:var(--soluk);padding:2px 0 4px;flex-wrap:wrap">'
+        +'<div style="display:flex;gap:8px;font-size:var(--fs-xs);color:var(--soluk);padding:2px 0 4px;flex-wrap:wrap">'
           +'<span><span style="display:inline-block;width:8px;height:8px;background:#C8E6C9;border-radius:2px;vertical-align:middle;margin-right:2px"></span>İdeal</span>'
           +'<span><span style="display:inline-block;width:8px;height:8px;background:#FFF9C4;border-radius:2px;vertical-align:middle;margin-right:2px"></span>Tolerans (maya aralığı)</span>'
           +'<span><span style="display:inline-block;width:8px;height:8px;background:#FFEBEE;border-radius:2px;vertical-align:middle;margin-right:2px"></span>Tehlike</span>'
@@ -12623,10 +12623,10 @@ function rEditorTakvim(maya, maya2, tv){
       var pts=_fgG.map(function(_,i){return xP(i)+','+yP(_fV[i]);}).join(' ');
       // Renk: son deger hedefe ulasti mi?
       var _son=_fV[_fV.length-1];
-      var _renk=_fgHedef&&_son<=_fgHedef+0.003?'#4CAF50':'#E08020';
+      var _renk=_fgHedef&&_son<=_fgHedef+0.003?'var(--ok)':'var(--sk)';
       var circs=_fgG.map(function(e,i){
         var ok=_fgHedef&&_fV[i]<=_fgHedef+0.003;
-        return '<circle cx="'+xP(i)+'" cy="'+yP(_fV[i])+'" r="3.5" fill="'+(ok?'#4CAF50':'#E08020')+'" stroke="#fff" stroke-width="1.5"/>';
+        return '<circle cx="'+xP(i)+'" cy="'+yP(_fV[i])+'" r="3.5" style="fill:'+(ok?'var(--ok)':'var(--sk)')+'" stroke="#fff" stroke-width="1.5"/>';
       }).join('');
       var xlbl=_fgG.map(function(e,i){
         if(_fgG.length<=4||i===0||i===_fgG.length-1)
@@ -12639,14 +12639,14 @@ function rEditorTakvim(maya, maya2, tv){
       }).join('');
       // Hedef cizgisi
       var hedefCizgi = _fgHedef
-        ? '<line x1="'+pL+'" y1="'+yP(_fgHedef)+'" x2="'+(W-pR)+'" y2="'+yP(_fgHedef)+'" stroke="#4CAF50" stroke-width="1" stroke-dasharray="3,2" opacity="0.7"/>'
-          +'<text x="'+(W-pR+1)+'" y="'+(yP(_fgHedef)+3)+'" font-size="7" fill="#4CAF50">hdf</text>'
+        ? '<line x1="'+pL+'" y1="'+yP(_fgHedef)+'" x2="'+(W-pR)+'" y2="'+yP(_fgHedef)+'" style="stroke:var(--ok)" stroke-width="1" stroke-dasharray="3,2" opacity="0.7"/>'
+          +'<text x="'+(W-pR+1)+'" y="'+(yP(_fgHedef)+3)+'" font-size="10" style="fill:var(--ok)">hdf</text>'
         : '';
       _fgGrafik = '<div style="padding:4px 8px 0;background:#FAFBFC;border-bottom:1px solid var(--bor)">'
-        +'<div style="font-size:10px;color:var(--dim);margin-bottom:2px">📈 FG Takibi</div>'
+        +'<div style="font-size:var(--fs-xs);color:var(--dim);margin-bottom:2px">📈 FG Takibi</div>'
         +'<svg width="100%" viewBox="0 0 '+W+' '+H+'">'
           +hedefCizgi
-          +'<polyline points="'+pts+'" fill="none" stroke="'+_renk+'" stroke-width="1.5" stroke-linejoin="round"/>'
+          +'<polyline points="'+pts+'" fill="none" style="stroke:'+_renk+'" stroke-width="1.5" stroke-linejoin="round"/>'
           +circs+xlbl+ylbl
         +'</svg></div>';
     }
@@ -12707,9 +12707,9 @@ function rEditorTakvim(maya, maya2, tv){
     }
     if(_hat){
       _hatirlatici='<div style="margin:6px 8px;background:'+_hBg+';border:1.5px solid '+_hBor+';border-radius:10px;padding:8px 12px">'
-        +'<div style="font-size:10px;color:'+_hRenk+';opacity:.7;margin-bottom:2px;text-transform:uppercase;letter-spacing:.5px">⏰ Bugün Ne Yapmalısın?</div>'
+        +'<div style="font-size:var(--fs-xs);color:'+_hRenk+';opacity:.7;margin-bottom:2px;text-transform:uppercase;letter-spacing:.5px">⏰ Bugün Ne Yapmalısın?</div>'
         +'<div style="font-size:12px;font-weight:600;color:'+_hRenk+'">'+_hat+'</div>'
-        +(_bugunKayit?'<div style="font-size:10px;color:'+_hRenk+';opacity:.6;margin-top:3px">✓ Bugün kayıt girildi</div>':'')
+        +(_bugunKayit?'<div style="font-size:var(--fs-xs);color:'+_hRenk+';opacity:.6;margin-top:3px">✓ Bugün kayıt girildi</div>':'')
         +'</div>';
     }
   } catch(e){ _hatirlatici=''; }
@@ -12733,7 +12733,7 @@ function rEditorTakvim(maya, maya2, tv){
           _oi='🎉';_obt='Tebrikler!';_ob='#FFF0F8';_obr='#E090C0';
           _om='Şişeleme tamamlandı. Kondisyon için bekle ve sabırlı ol.';
         } else if(_hC){
-          _oi='⏳';_obt='Cold Crash Devam Ediyor';_ob='#F0F4FF';_obr='#90A8F0';
+          _oi='⏳';_obt='Cold Crash Devam Ediyor';_ob='#F0F4FF';_obr='var(--mk)';
           _om='48–72 saat bekle. Sonra şişeleme yapabilirsin.';
         } else if(_hD&&!_hC){
           var _de=_bl.filter(function(x){return x.tip==='dry_hop';}).pop();
@@ -12752,10 +12752,10 @@ function rEditorTakvim(maya, maya2, tv){
           var _pg=_pe?_gf(_pe.tarih):0;
           if(_pg>=4){_oi='📊';_obt='FG Ölçüm Zamanı!';_ob='#F0F8F0';_obr='#80C080';_or='#1a4a1a';
             _om='Pitching\'den '+_pg+' gün geçti — ilk FG ölçümünü yap!';}
-          else{_oi='🧬';_obt='Aktif Fermentasyon';_ob='#EEF6FF';_obr='#90C0F0';
+          else{_oi='🧬';_obt='Aktif Fermentasyon';_ob='#EEF6FF';_obr='var(--mk)';
             _om=_pg+'. gün. '+(_pg<2?'İlk 24–48 saat en aktif dönem.':'3–4. günden itibaren FG ölçümü başlayabilirsin.');}
         } else {
-          _oi='▶️';_obt='Başlayalım';_ob='#F8F8F8';_obr='#C0C0C0';
+          _oi='▶️';_obt='Başlayalım';_ob='#F8F8F8';_obr='var(--mk)';
           _om='Brew günlüğüne başlamak için Pitching kaydı ekle.';
         }
       } catch(e2){}
@@ -12805,13 +12805,13 @@ function rEditorTakvim(maya, maya2, tv){
       // Sakkaroz dekstrozdan %95 etkili (mol CO2 verimi: glucose 0.489, sucrose 0.515)
       var _sakkaroz = Math.round(_dekstroz * 0.95 * 10) / 10;
       _primingHtml = '<div style="margin:4px 8px 6px;background:var(--bg2);border:1px solid var(--bor);border-left:3px solid var(--sk);border-radius:10px;padding:8px 12px">'
-        +'<div style="font-size:11px;font-weight:700;color:var(--kahve);margin-bottom:5px;font-family:var(--font-display)">🧮 Priming Hesabı ('+_hacim+'L için)</div>'+(S.stilTah?'<div style="font-size:10px;color:var(--soluk);margin-bottom:4px">🎯 Stil: <b class="bm-stil-adi">'+S.stilTah+'</b> → CO₂: '+_co2Min2+'–'+_co2Max2+' vol (hedef: <b>'+_co2H+'</b>)</div>':'')
+        +'<div style="font-size:11px;font-weight:700;color:var(--kahve);margin-bottom:5px;font-family:var(--font-display)">🧮 Priming Hesabı ('+_hacim+'L için)</div>'+(S.stilTah?'<div style="font-size:var(--fs-xs);color:var(--soluk);margin-bottom:4px">🎯 Stil: <b class="bm-stil-adi">'+S.stilTah+'</b> → CO₂: '+_co2Min2+'–'+_co2Max2+' vol (hedef: <b>'+_co2H+'</b>)</div>':'')
         +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:11px;color:var(--kahve)">'
           +'<div>Hedef CO₂: <b>'+_co2H.toFixed(1)+' vol</b></div>'
           +'<div>Sıcaklık: <b>'+_primTemp+'°C</b></div>'
           +'<div style="grid-column:1/-1">'+(function(){var _y=S.primYontem||'Dekstroz';if(_y==='Sıvı CO₂ Şekeri')return '💧 Sıvı CO₂ Şekeri: <b>'+(_dekstroz*1.35).toFixed(0)+' mL</b>';if(_y==='Beyaz Şeker')return '🍚 Beyaz Şeker: <b>'+(_dekstroz*0.9575).toFixed(0)+' g</b>';return '🍬 Dekstroz: <b>'+_dekstroz+' g</b>';})()+'</div>'
         +'</div>'
-        +'<div style="font-size:10px;color:var(--soluk);margin-top:4px;font-style:italic">Hesap sekmesinden detaylı priming ayarı yapabilirsin.</div>'
+        +'<div style="font-size:var(--fs-xs);color:var(--soluk);margin-top:4px;font-style:italic">Hesap sekmesinden detaylı priming ayarı yapabilirsin.</div>'
         +'</div>';
     }
   } catch(e){ _primingHtml=''; }
@@ -12839,7 +12839,7 @@ function rEditorTakvim(maya, maya2, tv){
         var _ay=_cur.getMonth(), _yi=_cur.getFullYear();
         var _ig=(new Date(_yi,_ay,1).getDay()+6)%7;
         var _ag=new Date(_yi,_ay+1,0).getDate();
-        var _gh=_gA.map(function(g){return '<div style="font-size:9px;color:var(--dim);text-align:center">'+g+'</div>';}).join('');
+        var _gh=_gA.map(function(g){return '<div style="font-size:var(--fs-xs);color:var(--dim);text-align:center">'+g+'</div>';}).join('');
         var _ch='';
         for(var i=0;i<_ig;i++) _ch+='<div></div>';
         for(var d=1;d<=_ag;d++){
@@ -12847,15 +12847,15 @@ function rEditorTakvim(maya, maya2, tv){
           var _bg2=_tarihMap[_td]?(_tRenk[_tarihMap[_td][0]]||'#C0C0C0'):'';
           var _n=_tarihMap[_td]?_tarihMap[_td].length:0;
           _ch+='<div style="text-align:center;padding:2px 1px;border-radius:3px;'+(_bug===_td?'outline:1.5px solid var(--altin);':'')+(_bg2?'background:'+_bg2+';':'')+'">'
-            +'<span style="font-size:10px;color:'+(_bg2?'#333':'var(--dim)')+'">'+d+'</span>'
-            +(_n>1?'<div style="font-size:6px;color:#555;line-height:1">+'+(_n-1)+'</div>':'')
+            +'<span style="font-size:var(--fs-xs);color:'+(_bg2?'#333':'var(--dim)')+'">'+d+'</span>'
+            +(_n>1?'<div style="font-size:var(--fs-xs);color:var(--ink);line-height:1">+'+(_n-1)+'</div>':'')
             +'</div>';
         }
         _ayH+='<div style="margin-bottom:10px"><div style="font-size:11px;font-weight:700;color:var(--kahve);margin-bottom:4px">'+_mA[_ay]+' '+_yi+'</div>'
           +'<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px">'+_gh+_ch+'</div></div>';
         _cur.setMonth(_cur.getMonth()+1);
       }
-      var _lH='<div style="display:flex;flex-wrap:wrap;gap:5px;padding:4px 0">'+Object.keys(_tRenk).map(function(k){return '<div style="display:flex;align-items:center;gap:2px"><div style="width:8px;height:8px;border-radius:2px;background:'+_tRenk[k]+'"></div><span style="font-size:9px;color:var(--dim)">'+(_tAd[k]||k)+'</span></div>';}).join('')+'</div>';
+      var _lH='<div style="display:flex;flex-wrap:wrap;gap:5px;padding:4px 0">'+Object.keys(_tRenk).map(function(k){return '<div style="display:flex;align-items:center;gap:2px"><div style="width:8px;height:8px;border-radius:2px;background:'+_tRenk[k]+'"></div><span style="font-size:var(--fs-xs);color:var(--dim)">'+(_tAd[k]||k)+'</span></div>';}).join('')+'</div>';
       _takGorunu='<div style="background:var(--bg2);border-bottom:1px solid var(--bor)">'
         +'<div onclick="toggleTakGor()" style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;cursor:pointer">'
           +'<span style="font-size:11px;font-weight:700;color:var(--kahve)">📅 Takvim Görünümü</span>'
@@ -12956,7 +12956,7 @@ function rEditorTakvim(maya, maya2, tv){
       _scOzet = '<div style="display:flex;align-items:center;gap:6px;font-size:11px;margin-top:2px">'
         +'<span style="font-weight:700;color:'+_durumRenk+'">'+_scVal.toFixed(1)+'°C</span>'
         +'<span style="color:'+_scDurumRenk+';font-weight:600">'+_scDurum+'</span>'
-        +'<span style="color:var(--soluk);font-size:10px">· '+_sonSc.tarih+'</span>'
+        +'<span style="color:var(--soluk);font-size:var(--fs-xs)">· '+_sonSc.tarih+'</span>'
       +'</div>';
     }
 
@@ -12970,7 +12970,7 @@ function rEditorTakvim(maya, maya2, tv){
     _ustDurum = '<div style="background:var(--card);border:1px solid var(--bor);border-left:5px solid '+_durumRenk+';border-radius:12px;padding:14px 16px;margin-bottom:10px;box-shadow:var(--golge)">'
       +'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px">'
         +'<div style="flex:1;min-width:0">'
-          +'<div style="font-size:10px;color:'+_durumRenk+';font-weight:700;letter-spacing:.8px;text-transform:uppercase">'+(maya?maya.ad:'Bira Durumu')+'</div>'
+          +'<div style="font-size:var(--fs-xs);color:'+_durumRenk+';font-weight:700;letter-spacing:.8px;text-transform:uppercase">'+(maya?maya.ad:'Bira Durumu')+'</div>'
           +'<div style="font-size:17px;font-weight:700;color:var(--kahve);margin-top:2px;font-family:var(--font-display)">'+_durumBaslik+'</div>'
           +'<div style="font-size:11px;color:var(--soluk);margin-top:2px">'+_durumAlt+'</div>'
           +_scOzet+_fgOzet
@@ -13084,7 +13084,7 @@ function rEditorTakvim(maya, maya2, tv){
           var _tip_adlar = {pitching:'Pitching',dry_hop:'Dry Hop',cold_crash:'Cold Crash',siseleme:'Şişeleme',sicaklik:'Sıcaklık',fg_olcum:'FG ölçüm',katki:'Katkı',og_olcum:'OG',tadim:'Tadım',filtrasyon:'Filtrasyon'};
           _title += ' · ' + _olay.map(function(t){return _tip_adlar[t]||t;}).join(', ');
         }
-        var _ikonH = _olay && _olay.length ? '<div style="font-size:8px;line-height:1;position:absolute;top:-10px;left:0;right:0;text-align:center">'+(_olayIkon[_olay[0]]||'●')+'</div>' : '';
+        var _ikonH = _olay && _olay.length ? '<div style="font-size:var(--fs-xs);line-height:1;position:absolute;top:-10px;left:0;right:0;text-align:center">'+(_olayIkon[_olay[0]]||'●')+'</div>' : '';
 
         // Şişeleme sınırında ayırıcı çizgi
         var _borderL = (_siGunI !== null && g === _siGunI) ? 'border-left:2px solid var(--altin);' : '';
@@ -13138,7 +13138,7 @@ function rEditorTakvim(maya, maya2, tv){
         + _kabul.map(function(et){
           var _sol = (et.g / _sonGun * 100);
           var _bugunEt = (et.g === _bugunGunI);
-          return '<div style="position:absolute;left:'+_sol+'%;transform:translateX(-50%);font-size:9px;color:'+(_bugunEt?'var(--bakir)':'var(--dim)')+';font-weight:'+(_bugunEt?'700':'500')+';white-space:nowrap">'+et.etiket+'</div>';
+          return '<div style="position:absolute;left:'+_sol+'%;transform:translateX(-50%);font-size:var(--fs-xs);color:'+(_bugunEt?'var(--bakir)':'var(--dim)')+';font-weight:'+(_bugunEt?'700':'500')+';white-space:nowrap">'+et.etiket+'</div>';
         }).join('')
       +'</div>';
 
@@ -13184,7 +13184,7 @@ function rEditorTakvim(maya, maya2, tv){
           +'<span style="margin-left:auto">🧬 Pitch · 🌿 DH · ❄️ CC · 🍺 Şişe</span>'
         +'</div>'
         +(_siGunI !== null ?
-          '<div style="margin-top:8px;padding:6px 10px;background:var(--bg2);border-left:3px solid #9C27B0;border-radius:6px;font-size:10px;color:var(--soluk)">'
+          '<div style="margin-top:8px;padding:6px 10px;background:var(--bg2);border-left:3px solid #9C27B0;border-radius:6px;font-size:var(--fs-xs);color:var(--soluk)">'
             +'<b style="color:var(--kahve)">Kondisyon Hedefi:</b> Min '+_kondH.min+' hf · İdeal '+_kondH.ideal+' hf · Zirve '+_kondH.zirve+' hf'
             +(_kondH.aciklama?' <span style="font-style:italic"> — '+_kondH.aciklama+'</span>':'')
           +'</div>'
@@ -13225,7 +13225,7 @@ function rEditorTakvim(maya, maya2, tv){
   var _grafikKart = '';
   if(_scGrafik || _fgGrafik){
     _grafikKart='<div style="background:#fff;border:1px solid var(--bor);border-radius:12px;padding:12px;margin-bottom:14px;box-shadow:var(--golge)">'
-      +'<div style="font-size:10px;font-weight:700;color:var(--kahve);margin-bottom:8px;letter-spacing:.6px">📊 TREND</div>'
+      +'<div style="font-size:var(--fs-xs);font-weight:700;color:var(--kahve);margin-bottom:8px;letter-spacing:.6px">📊 TREND</div>'
       +(_scGrafik?'<div style="margin-bottom:6px">'+_scGrafik.replace(/background:#FAFBFC/g,'background:var(--bg2)').replace(/border-bottom:1px solid var\(--bor\)/g,'border:1px solid var(--bor);border-radius:8px')+'</div>':'')
       +(_fgGrafik?'<div>'+_fgGrafik.replace(/background:#FAFBFC/g,'background:var(--bg2)').replace(/border-bottom:1px solid var\(--bor\)/g,'border:1px solid var(--bor);border-radius:8px')+'</div>':'')
     +'</div>';
@@ -13247,7 +13247,7 @@ function rEditorTakvim(maya, maya2, tv){
   if(!_stilTanindi_forTak){
     // Stil tanınmadıysa fallback olarak göster (maya-bazlı)
     _takvimKart='<div style="background:#fff;border:1px solid var(--bor);border-radius:12px;margin-bottom:10px;box-shadow:var(--golge);overflow:hidden">'
-      +'<div style="padding:10px 14px;background:var(--bg2);border-bottom:1px solid var(--bor);font-size:10px;font-weight:700;color:var(--kahve);letter-spacing:.6px">📅 MAYA TAKVIMI'+(maya?' · '+maya.ad:'')+(maya2?' + '+maya2.ad:'')+'</div>'
+      +'<div style="padding:10px 14px;background:var(--bg2);border-bottom:1px solid var(--bor);font-size:var(--fs-xs);font-weight:700;color:var(--kahve);letter-spacing:.6px">📅 MAYA TAKVIMI'+(maya?' · '+maya.ad:'')+(maya2?' + '+maya2.ad:'')+'</div>'
       +'<div style="padding:4px 0">'+sl3+'</div>'
     +'</div>';
   }
@@ -13256,7 +13256,7 @@ function rEditorTakvim(maya, maya2, tv){
   var _detaylarKart = '';
   if(_takGorunu){
     _detaylarKart='<div style="background:#fff;border:1px solid var(--bor);border-radius:12px;margin-bottom:10px;box-shadow:var(--golge);overflow:hidden">'
-      +'<div style="padding:10px 14px;background:var(--bg2);border-bottom:1px solid var(--bor);font-size:10px;font-weight:700;color:var(--kahve);letter-spacing:.6px">📅 AYLIK GÖRÜNÜM</div>'
+      +'<div style="padding:10px 14px;background:var(--bg2);border-bottom:1px solid var(--bor);font-size:var(--fs-xs);font-weight:700;color:var(--kahve);letter-spacing:.6px">📅 AYLIK GÖRÜNÜM</div>'
       +'<div style="padding:4px">'
         +(_takGorunu||'')
       +'</div>'
@@ -13292,7 +13292,7 @@ function rEditorTakvim(maya, maya2, tv){
         var rlogs = _gruplar[t].map(function(x){
           return _buildLogRow(x.e, x.idx);
         }).join('');
-        return '<div style="padding:8px 10px 4px;font-size:10px;font-weight:700;color:var(--soluk);letter-spacing:.8px;text-transform:uppercase;background:var(--bg2);border-bottom:1px solid var(--bor)">'+etiket+' · '+t+'</div>'
+        return '<div style="padding:8px 10px 4px;font-size:var(--fs-xs);font-weight:700;color:var(--soluk);letter-spacing:.8px;text-transform:uppercase;background:var(--bg2);border-bottom:1px solid var(--bor)">'+etiket+' · '+t+'</div>'
           +rlogs;
       }).join('');
     }
@@ -13301,8 +13301,8 @@ function rEditorTakvim(maya, maya2, tv){
   // ── 8) LOG FORM — Yeni kayıt ekleme (toplu, açılabilir) ──
   var _logFormKart='<div style="background:#fff;border:1px solid var(--bor);border-radius:12px;margin-bottom:10px;box-shadow:var(--golge);overflow:hidden">'
     +'<div style="padding:10px 14px;background:var(--bg2);border-bottom:1px solid var(--bor);display:flex;align-items:center;justify-content:space-between">'
-      +'<span style="font-size:10px;font-weight:700;color:var(--kahve);letter-spacing:.6px">🗓️ FERMANTASYON GÜNLÜĞÜ'+(_bl.length?' · '+_bl.length+' kayıt':'')+'</span>'
-      +(_bl.length?'<button onclick="logExport()" style="background:var(--card);border:1px solid var(--bor);color:var(--kahve);font-size:10px;padding:3px 8px;border-radius:6px;cursor:pointer;font-weight:600">📋 Kopyala</button>':'')
+      +'<span style="font-size:var(--fs-xs);font-weight:700;color:var(--kahve);letter-spacing:.6px">🗓️ FERMANTASYON GÜNLÜĞÜ'+(_bl.length?' · '+_bl.length+' kayıt':'')+'</span>'
+      +(_bl.length?'<button onclick="logExport()" style="background:var(--card);border:1px solid var(--bor);color:var(--kahve);font-size:var(--fs-xs);padding:3px 8px;border-radius:6px;cursor:pointer;font-weight:600">📋 Kopyala</button>':'')
     +'</div>'
     +(_bl.length?'<div id="logListeCont" style="max-height:500px;overflow-y:auto">'+_gruppedLog+'</div>':'<div style="padding:20px;text-align:center;color:var(--dim);font-size:12px">Henüz kayıt yok — aşağıdan ekle</div>')
     +'<div class="bm-edit-only" style="border-top:1px solid var(--bor)">'
@@ -13390,7 +13390,7 @@ function rEditorTakvim(maya, maya2, tv){
     if(_bugunIdealAksiyon){
       var _geldiMi = _bugunIdealGun >= 0 && _bugunIdealGun <= _prof.toplamGun;
       _bugunKart = '<div style="background:var(--bg2);border-left:3px solid #66BB6A;border-radius:6px;padding:10px 12px;margin-bottom:8px">'
-        +'<div style="font-size:9px;font-weight:700;color:#2E7D32;letter-spacing:.6px;margin-bottom:3px">BUGÜN · '+_bugunIdealGun+'. GÜN · İDEAL</div>'
+        +'<div style="font-size:var(--fs-xs);font-weight:700;color:var(--yk);letter-spacing:.6px;margin-bottom:3px">BUGÜN · '+_bugunIdealGun+'. GÜN · İDEAL</div>'
         +'<div style="font-size:13px;font-weight:700;color:var(--kahve);font-family:var(--font-display)">'+_bugunIdealAksiyon.aksiyon+'</div>'
         +(_bugunIdealAksiyon.t!==null?'<div style="font-size:11px;color:#2E7D32;margin-top:2px;font-weight:600">Hedef: '+_bugunIdealAksiyon.t+'°C</div>':'')
         +'<div style="font-size:11px;color:var(--soluk);margin-top:4px;line-height:1.5">'+_bugunIdealAksiyon.aciklama+'</div>'
@@ -13421,16 +13421,16 @@ function rEditorTakvim(maya, maya2, tv){
       }
 
       return '<div style="display:flex;gap:10px;padding:8px 10px;background:'+_bg+';border-radius:6px;margin-bottom:3px;opacity:'+_ops+'">'
-        +'<div style="flex-shrink:0;width:42px;font-size:10px;font-weight:700;color:'+_renk+';text-align:center;padding-top:2px">'
+        +'<div style="flex-shrink:0;width:42px;font-size:var(--fs-xs);font-weight:700;color:'+_renk+';text-align:center;padding-top:2px">'
           +(_bugun3?'🔸 ':'')+'G'+p.g
-          +(_plTarih?'<div style="font-size:9px;color:var(--dim);font-weight:500">'+_plTarih+'</div>':'')
+          +(_plTarih?'<div style="font-size:var(--fs-xs);color:var(--dim);font-weight:500">'+_plTarih+'</div>':'')
         +'</div>'
         +'<div style="flex-shrink:0;width:44px;font-size:11px;font-weight:700;color:'+_renk+';padding-top:2px">'
           +(p.t!==null?p.t+'°C':'—')
         +'</div>'
         +'<div style="flex:1;min-width:0">'
           +'<div style="font-size:11px;font-weight:700;color:'+_renk+'">'+p.aksiyon+'</div>'
-          +'<div style="font-size:10px;color:var(--soluk);margin-top:1px;line-height:1.4">'+p.aciklama+'</div>'
+          +'<div style="font-size:var(--fs-xs);color:var(--soluk);margin-top:1px;line-height:1.4">'+p.aciklama+'</div>'
         +'</div>'
       +'</div>';
     }).join('');
@@ -13438,18 +13438,18 @@ function rEditorTakvim(maya, maya2, tv){
     _stilIdealKart = '<div style="background:#fff;border:1px solid var(--bor);border-radius:12px;margin-bottom:8px;box-shadow:var(--golge);overflow:hidden">'
       +'<div onclick="toggleStilIdeal()" style="padding:10px 14px;background:var(--bg2);border-bottom:1px solid var(--bor);cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between;border-left:3px solid #66BB6A">'
         +'<div>'
-          +'<div style="font-size:10px;font-weight:700;color:var(--kahve);letter-spacing:.6px">📖 STİL-İDEAL TAKVİM</div>'
-          +'<div style="font-size:10px;color:var(--soluk);margin-top:2px">'+_prof.baslik+' · '+_prof.toplamGun+' gün'+(_prof.sise?' · Şişele G'+_prof.sise:'')+'</div>'
+          +'<div style="font-size:var(--fs-xs);font-weight:700;color:var(--kahve);letter-spacing:.6px">📖 STİL-İDEAL TAKVİM</div>'
+          +'<div style="font-size:var(--fs-xs);color:var(--soluk);margin-top:2px">'+_prof.baslik+' · '+_prof.toplamGun+' gün'+(_prof.sise?' · Şişele G'+_prof.sise:'')+'</div>'
         +'</div>'
         +'<span id="stilIdealArr" style="font-size:12px;color:var(--dim)">▼</span>'
       +'</div>'
       +'<div style="padding:10px 12px">'
         +_bugunKart
-        +'<div style="font-size:10px;color:var(--soluk);margin-bottom:6px;line-height:1.5;font-style:italic;padding:0 4px">'+_prof.aciklama+'</div>'
+        +'<div style="font-size:var(--fs-xs);color:var(--soluk);margin-bottom:6px;line-height:1.5;font-style:italic;padding:0 4px">'+_prof.aciklama+'</div>'
         +'<div id="stilIdealGunler" style="display:none">'
-          +'<div style="font-size:9px;color:var(--dim);margin:8px 4px 4px;letter-spacing:.5px;font-weight:700">GÜN GÜN REHBER</div>'
+          +'<div style="font-size:var(--fs-xs);color:var(--dim);margin:8px 4px 4px;letter-spacing:.5px;font-weight:700">GÜN GÜN REHBER</div>'
           +_gunlerListe
-          +'<div style="font-size:9px;color:var(--dim);margin-top:8px;padding:6px 8px;background:var(--bg2);border-radius:6px;line-height:1.5">'
+          +'<div style="font-size:var(--fs-xs);color:var(--dim);margin-top:8px;padding:6px 8px;background:var(--bg2);border-radius:6px;line-height:1.5">'
             +'<b>Kaynaklar:</b> BYO (Fermenting Belgian-Style Beers, Belgian Dubbel Techniques), Brew Like a Monk, Craft Beer & Brewing, Brewfather. '
             +'Her parti farklıdır — son karar senin ölçümlerinle. FG ve sıcaklık trendlerini takip et.'
           +'</div>'
@@ -13472,19 +13472,19 @@ function rEditorTakvim(maya, maya2, tv){
       _kaliteKart = '<div style="background:#fff;border:1px solid var(--bor);border-left:3px solid '+_ksRenk2+';border-radius:12px;padding:10px 14px;margin-bottom:8px;box-shadow:var(--golge)">'
         +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">'
           +'<div style="flex:1">'
-            +'<div style="font-size:9px;font-weight:700;color:var(--kahve);letter-spacing:.6px">🏆 KALİTE SKORU</div>'
-            +'<div style="font-size:10px;color:'+_ksRenk2+';font-weight:600;margin-top:1px">'+_ks2.seviye+'</div>'
+            +'<div style="font-size:var(--fs-xs);font-weight:700;color:var(--kahve);letter-spacing:.6px">🏆 KALİTE SKORU</div>'
+            +'<div style="font-size:var(--fs-xs);color:'+_ksRenk2+';font-weight:600;margin-top:1px">'+_ks2.seviye+'</div>'
           +'</div>'
           +'<div style="font-size:22px;font-weight:700;color:'+_ksRenk2+';font-family:var(--font-display);line-height:1">'+_ks2.toplam+'<span style="font-size:11px;color:var(--soluk);font-weight:500">/100</span></div>'
         +'</div>'
         +'<div style="display:flex;gap:6px;align-items:center">'
-          +'<span style="font-size:9px;color:var(--soluk);min-width:16px" title="Sıcaklık Stabilitesi">🌡️</span>'+_barMini(_ks2.sicaklikStab)
-          +'<span style="font-size:9px;color:var(--soluk);min-width:16px;margin-left:6px" title="Profil Uyumu">📖</span>'+_barMini(_ks2.profilUyum)
-          +'<span style="font-size:9px;color:var(--soluk);min-width:16px;margin-left:6px" title="Attenüasyon">📊</span>'+_barMini(_ks2.atten)
-          +'<span style="font-size:9px;color:var(--soluk);min-width:16px;margin-left:6px" title="Veri Kalitesi">📝</span>'+_barMini(_ks2.veriKal)
+          +'<span style="font-size:var(--fs-xs);color:var(--soluk);min-width:16px" title="Sıcaklık Stabilitesi">🌡️</span>'+_barMini(_ks2.sicaklikStab)
+          +'<span style="font-size:var(--fs-xs);color:var(--soluk);min-width:16px;margin-left:6px" title="Profil Uyumu">📖</span>'+_barMini(_ks2.profilUyum)
+          +'<span style="font-size:var(--fs-xs);color:var(--soluk);min-width:16px;margin-left:6px" title="Attenüasyon">📊</span>'+_barMini(_ks2.atten)
+          +'<span style="font-size:var(--fs-xs);color:var(--soluk);min-width:16px;margin-left:6px" title="Veri Kalitesi">📝</span>'+_barMini(_ks2.veriKal)
         +'</div>'
-        +(_ks2.notlar.length?'<div onclick="toggleKaliteDetay()" style="margin-top:8px;cursor:pointer;user-select:none;font-size:10px;color:var(--kahve);display:flex;align-items:center;justify-content:space-between"><span>💡 '+_ks2.notlar.length+' geribildirim</span><span id="_ksArr" style="color:var(--dim)">▼</span></div>':'')
-        +(_ks2.notlar.length?'<div id="_ksDetay" style="display:none;margin-top:6px;padding:6px 8px;background:var(--bg2);border-radius:6px">'+_ks2.notlar.map(function(n){return '<div style="font-size:10px;color:var(--kahve);line-height:1.5;margin-top:3px">• '+n+'</div>';}).join('')+'</div>':'')
+        +(_ks2.notlar.length?'<div onclick="toggleKaliteDetay()" style="margin-top:8px;cursor:pointer;user-select:none;font-size:var(--fs-xs);color:var(--kahve);display:flex;align-items:center;justify-content:space-between"><span>💡 '+_ks2.notlar.length+' geribildirim</span><span id="_ksArr" style="color:var(--dim)">▼</span></div>':'')
+        +(_ks2.notlar.length?'<div id="_ksDetay" style="display:none;margin-top:6px;padding:6px 8px;background:var(--bg2);border-radius:6px">'+_ks2.notlar.map(function(n){return '<div style="font-size:var(--fs-xs);color:var(--kahve);line-height:1.5;margin-top:3px">• '+n+'</div>';}).join('')+'</div>':'')
       +'</div>';
     }
   } catch(e){ _kaliteKart=''; }
