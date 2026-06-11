@@ -12581,7 +12581,7 @@ function rEditorTakvim(maya, maya2, tv){
         // Legend
         +'<div style="display:flex;gap:8px;font-size:var(--fs-xs);color:var(--soluk);padding:2px 0 4px;flex-wrap:wrap">'
           +'<span><span style="display:inline-block;width:8px;height:8px;background:var(--ya);border-radius:2px;vertical-align:middle;margin-right:2px"></span>İdeal</span>'
-          +'<span><span style="display:inline-block;width:8px;height:8px;background:var(--ma);border-radius:2px;vertical-align:middle;margin-right:2px"></span>Tolerans (maya aralığı)</span>'
+          +'<span><span style="display:inline-block;width:8px;height:8px;background:var(--ma);border-radius:2px;vertical-align:middle;margin-right:2px"></span>Tolerans (gün hedefi)</span>'
           +'<span><span style="display:inline-block;width:8px;height:8px;background:var(--crit-bg);border-radius:2px;vertical-align:middle;margin-right:2px"></span>Tehlike</span>'
           +(_bugunHedefT!==null?'<span style="margin-left:auto">🎯 Hedef</span>':'')
         +'</div>'
@@ -12960,6 +12960,24 @@ function rEditorTakvim(maya, maya2, tv){
       var _kondIdealGun = _kondH.ideal * 7;
       var _kondZirveGun = _kondH.zirve * 7;
 
+      // FEAT-PLAN-TL: profil AKSIYON olaylari plan cipi olur (ilk gecis gunu; rutin kontrol/olcum almaz)
+      var _planGunler = [];
+      try {
+        if(typeof fermentasyonProfili==='function' && _stilForKond){
+          var _profPlan = fermentasyonProfili(_stilForKond, _ogForKond, _mayaTipForKond, maya);
+          if(_profPlan && _profPlan.gunler){
+            _profPlan.gunler.forEach(function(ev){
+              var _ak = String(ev.aksiyon||'').toLowerCase();
+              var _ikon = null;
+              if(_ak.indexOf('dry hop')!==-1 && _ak.indexOf('devam')===-1) _ikon='🌿';
+              else if((_ak.indexOf('cold crash')!==-1 || _ak.indexOf('cold başla')!==-1) && _ak.indexOf('devam')===-1) _ikon='❄️';
+              else if(_ak.indexOf('şişele')!==-1) _ikon='🍺';
+              if(_ikon && !_planGunler.some(function(p){return p.ikon===_ikon;})) _planGunler.push({g:ev.g|0, ikon:_ikon});
+            });
+          }
+        }
+      } catch(ePl){}
+
       // Faz 1 (fermentasyon) + Faz 2 (kondisyon) toplam gün
       var _ferGun, _kondGun, _sonGun;
       if(_siGunI !== null){
@@ -13050,6 +13068,13 @@ function rEditorTakvim(maya, maya2, tv){
       if(_bugunGunI >= 0 && _bugunGunI <= _sonGun){
         _etiketler.push({g:_bugunGunI, etiket:'🔸', oncelik:9});
       }
+      // FEAT-PLAN-TL: plan cipleri — gunde gercek olay (brewLog) varsa eklenmez (gerceklesen kazanir);
+      // _sonGun disindaki plan gunu islenmez (✨/🎯 emsali: aralik BUYUTULMEZ)
+      _planGunler.forEach(function(p){
+        if(p.g > _sonGun || p.g < 0) return;
+        if(_olaylar[p.g]) return;
+        _etiketler.push({g:p.g, etiket:p.ikon, oncelik:5, plan:true});
+      });
       // Düzenli sayı etiketleri (düşük öncelik)
       var _step;
       if(_sonGun > 120) _step = 28;      // aylık
@@ -13081,7 +13106,10 @@ function rEditorTakvim(maya, maya2, tv){
         + _kabul.map(function(et){
           var _sol = (et.g / _sonGun * 100);
           var _bugunEt = (et.g === _bugunGunI);
-          return '<div style="position:absolute;left:'+_sol+'%;transform:translateX(-50%);font-size:var(--fs-xs);color:'+(_bugunEt?'var(--bakir)':'var(--dim)')+';font-weight:'+(_bugunEt?'700':'500')+';white-space:nowrap">'+et.etiket+'</div>';
+          var _etStil = et.plan
+            ? 'background:var(--ma);color:var(--mk);border:1px solid var(--mk);border-radius:6px;padding:0 3px;font-weight:600'
+            : 'color:'+(_bugunEt?'var(--bakir)':'var(--dim)')+';font-weight:'+(_bugunEt?'700':'500');
+          return '<div style="position:absolute;left:'+_sol+'%;transform:translateX(-50%);font-size:var(--fs-xs);'+_etStil+';white-space:nowrap">'+et.etiket+'</div>';
         }).join('')
       +'</div>';
 
@@ -13124,6 +13152,7 @@ function rEditorTakvim(maya, maya2, tv){
           +'<span><span style="display:inline-block;width:10px;height:10px;background:#A8C478;border-radius:2px;vertical-align:middle;margin-right:3px"></span>Fermantasyon</span>'
           +(_siGunI !== null ? '<span><span style="display:inline-block;width:10px;height:10px;background:rgba(139,106,26,.5);border-radius:2px;vertical-align:middle;margin-right:3px"></span>Kondisyon</span>':'')
           +'<span><span style="display:inline-block;width:10px;height:10px;background:#D4A04A;border-radius:2px;vertical-align:middle;margin-right:3px"></span>Bugün</span>'
+          +'<span><span style="display:inline-block;width:10px;height:10px;background:var(--ma);border:1px solid var(--mk);border-radius:2px;vertical-align:middle;margin-right:3px"></span>Planlı</span>'
           +'<span style="margin-left:auto">🧬 Pitch · 🌿 DH · ❄️ CC · 🍺 Şişe</span>'
         +'</div>'
         +(_siGunI !== null ?
