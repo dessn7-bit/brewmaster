@@ -724,8 +724,8 @@ button:disabled:hover,.btn:disabled:hover,.btn.bm-disabled:hover{background:inhe
 .bm-muadil-inline-chip:hover{background:var(--kahve-light);border-color:var(--vintage)}
 @media (max-width:480px){.bm-muadil-inline{gap:4px;padding:6px 8px}.bm-muadil-inline-chip{padding:2px 7px;font-size:calc(10.5px * var(--tip-b-scale, 1));font-variant-caps:var(--tip-b-fvc, normal);font-style:var(--tip-b-fst, normal);text-transform:var(--tip-b-tt, none);letter-spacing:var(--tip-b-ls, normal)}}
 
-/* Adim 134-G: bm-toast vintage komponenti (flash + alert dönüşüm). z-index 1900 (sync modal 2000 altında). */
-#bm-toast-container{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column-reverse;gap:8px;z-index:1900;pointer-events:none;max-width:380px}
+/* Adim 134-G: bm-toast vintage komponenti. FEAT-BREWDAY-TOAST: z 10500 — brewday katmanlari (timeline 9998, modal 9999, event-modal 10000) USTU, alarm modali (99997) ALTI. Sync paneli (2000) ustune cikar (bilincli). */
+#bm-toast-container{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column-reverse;gap:8px;z-index:10500;pointer-events:none;max-width:380px}
 .bm-toast{pointer-events:auto;padding:12px 16px;border-radius:10px;border:1.5px solid var(--vintage);background:var(--kahve-bg);color:var(--tip-b-col, var(--kahve-koyu));font-size:calc(13px * var(--tip-b-scale, 1));line-height:var(--tip-b-lh, 1.4);box-shadow:var(--elv-2);cursor:pointer;opacity:0;transform:translateY(10px);transition:opacity .2s ease-out,transform .2s ease-out;font-family:var(--font-body);font-variant-caps:var(--tip-b-fvc, normal);font-style:var(--tip-b-fst, normal);text-transform:var(--tip-b-tt, none);letter-spacing:var(--tip-b-ls, normal)}
 .bm-toast.bm-toast--show{opacity:1;transform:translateY(0)}
 .bm-toast.bm-toast--leave{opacity:0;transform:translateY(10px);transition:opacity .3s ease-in,transform .3s ease-in}
@@ -734,6 +734,10 @@ button:disabled:hover,.btn:disabled:hover,.btn.bm-disabled:hover{background:inhe
 .bm-toast--warning{background:#FFF4D0;border-color:var(--kahve-border);color:var(--bakir)}
 .bm-toast--error{background:#FAECEC;border-color:#C62828;color:#7A1A1A}
 @media (max-width:480px){#bm-toast-container{bottom:12px;left:12px;right:12px;max-width:none}.bm-toast{font-size:calc(13px * var(--tip-b-scale, 1));padding:12px 14px;font-variant-caps:var(--tip-b-fvc, normal);font-style:var(--tip-b-fst, normal);text-transform:var(--tip-b-tt, none);letter-spacing:var(--tip-b-ls, normal)}}
+
+/* FEAT-BREWDAY-TOAST: brewday overlay acikken toast yukari sabitlenir (footer Bitir butonunu ortmesin). Overlay remove() ile kalkar -> :has aninda false. */
+body:has(.brewday-timeline) #bm-toast-container{top:20px;bottom:auto}
+@media (max-width:480px){body:has(.brewday-timeline) #bm-toast-container{top:12px;bottom:auto}}
 
 /* Adim 132-C: Editor breadcrumb (Defter / Klasor / Bira adi). "‹" geri butonun fonksiyonu "← Defter" link'inde. */
 /* Adim 134-GERI: 132-C breadcrumb UX karmaşası → tek "← Geri" tuşu */
