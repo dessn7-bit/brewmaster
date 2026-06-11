@@ -53,6 +53,8 @@ Marka adı: **Kabeer** (`.bm-sidebar-title`), ana sayfa hero sloganı: **"HER B�
 - `--crit: #BC4533` / `--crit-bg: #FBEDEA`, `--warn: #C08A2E`, `--ok: #4A7C59`
 - Badge çiftleri (koyu/açık): `--yk:#5A6B2A`/`--ya:#E8E4C8`, `--kk:#8B3A1A`/`--ka:#F0D8C8`, `--mk:#4A5970`/`--ma:#DAE0E4`, `--sk:#8B6A1A`/`--sa:#F0E4BC`
 
+> **Faz/durum renk dili (SUREC-FAZ-RENK 76a0499, 2026-06-11):** aktif-sıcak faz = zeytin çift (`--yk`/`--ya`), soğuk faz = kurşuni çift (`--mk`/`--ma`), planlı/bekleyen = kurşuni açık zemin (`--ma`) + `--mk` metin. Soğuk aile hex'leri (mavi/mor/teal) kullanılmaz. Not: `--sk`/`--sa` altın çifti 11px normal metinde 3.96:1 ile AA-altı kalır — küçük metin rozetlerinde kullanma.
+
 ### Malt kategori renkleri (I1)
 - `--kat-base:#8B9D3D` (zeytin — tahıl tarlası), `--kat-ozel:#C8A040` (altın — karakter),
   `--kat-koyu:#5D341A` (kahve — kavurma), `--kat-ek:#A8896B` (sıcak bej — Adjunct/Ek Tahıl),
