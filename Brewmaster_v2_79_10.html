@@ -12915,20 +12915,20 @@ function rEditorTakvim(maya, maya2, tv){
       var _hasDHUst = _bl.some(function(x){return x.tip==='dry_hop';});
       
       if(_hasSisUst){
-        _faz='kondisyon'; _durumBaslik='Kondisyon'; _durumRenk='#8B3A8B';
+        _faz='kondisyon'; _durumBaslik='Kondisyon'; _durumRenk='var(--sk)';
         var _sisE = _bl.filter(function(x){return x.tip==='siseleme';}).pop();
         if(_sisE){
           var _sisGun = Math.floor((new Date()-new Date(_sisE.tarih))/(864e5));
           _durumAlt='Şişeleme: '+_sisE.tarih+' · '+_sisGun+'. gün';
         }
       } else if(_hasColdUst){
-        _faz='cold'; _durumBaslik='Cold Crash / Dinlendirme'; _durumRenk='#005A8B';
+        _faz='cold'; _durumBaslik='Cold Crash / Dinlendirme'; _durumRenk='var(--mk)';
         _durumAlt=_bugunGun+'. gün · Pitching: '+_pTarihForUst;
       } else if(_hasDHUst){
-        _faz='dryhop'; _durumBaslik='Dry Hop · '+_bugunGun+'. Gün'; _durumRenk='#2D5A00';
+        _faz='dryhop'; _durumBaslik='Dry Hop · '+_bugunGun+'. Gün'; _durumRenk='var(--yk)';
         _durumAlt='Pitching: '+_pTarihForUst;
       } else {
-        _faz='primary'; _durumBaslik='Primary Fermantasyon · '+_bugunGun+'. Gün'; _durumRenk='#2D7A2D';
+        _faz='primary'; _durumBaslik='Primary Fermantasyon · '+_bugunGun+'. Gün'; _durumRenk='var(--ok)';
         _durumAlt='Pitching: '+_pTarihForUst+(maya?' · '+maya.ad:'');
       }
     } else {
@@ -12941,13 +12941,13 @@ function rEditorTakvim(maya, maya2, tv){
     var _scOzet = '';
     if(_sonSc){
       var _scVal = parseFloat(_sonSc.deger);
-      var _scDurum = '', _scDurumRenk = '#2A7A2A';
+      var _scDurum = '', _scDurumRenk = 'var(--ok)';
       if(maya && maya.sc){
         if(_scVal < maya.sc[0]) { _scDurum='🚨 Aralık altı'; _scDurumRenk='#A02020'; }
         else if(_scVal > maya.sc[1]) { _scDurum='🚨 Aralık üstü'; _scDurumRenk='#A02020'; }
         else if(_scVal < maya.ideal-2) { _scDurum='🌡️ İdeal altı'; _scDurumRenk='#A05020'; }
         else if(_scVal > maya.ideal+2) { _scDurum='🌡️ İdeal üstü'; _scDurumRenk='#A05020'; }
-        else { _scDurum='✓ İdealde'; _scDurumRenk='#2A7A2A'; }
+        else { _scDurum='✓ İdealde'; _scDurumRenk='var(--ok)'; }
       }
       _scOzet = '<div style="display:flex;align-items:center;gap:6px;font-size:11px;margin-top:2px">'
         +'<span style="font-weight:700;color:'+_durumRenk+'">'+_scVal.toFixed(1)+'°C</span>'
@@ -13142,7 +13142,7 @@ function rEditorTakvim(maya, maya2, tv){
       var _faz_str, _faz_renk_txt, _faz_ozet = '';
       if(_siGunI !== null && _bugunGunI >= _siGunI){
         var _kondGunSayisi = _bugunGunI - _siGunI;
-        _faz_renk_txt = '#9C27B0';
+        _faz_renk_txt = 'var(--sk)';
         if(_kondGunSayisi < _kondMinGun){
           _faz_str = 'Kondisyon · '+_kondGunSayisi+'. gün';
           _faz_ozet = '⏳ '+(_kondMinGun-_kondGunSayisi)+' gün sonra içilebilir';
@@ -13157,11 +13157,11 @@ function rEditorTakvim(maya, maya2, tv){
           _faz_ozet = '🎯 Zirve geçti (' + Math.floor(_kondGunSayisi/7) + ' hafta)';
         }
       } else if(_ccMs && _ccMs.tarih && _bugunGunI >= Math.floor((new Date(_ccMs.tarih)-_pTar)/864e5)){
-        _faz_str = 'Cold Crash · '+_bugunGunI+'. gün'; _faz_renk_txt = '#005A8B';
+        _faz_str = 'Cold Crash · '+_bugunGunI+'. gün'; _faz_renk_txt = 'var(--mk)';
       } else if(_dhMs && _dhMs.tarih && _bugunGunI >= Math.floor((new Date(_dhMs.tarih)-_pTar)/864e5)){
-        _faz_str = 'Dry Hop · '+_bugunGunI+'. gün'; _faz_renk_txt = '#2D5A00';
+        _faz_str = 'Dry Hop · '+_bugunGunI+'. gün'; _faz_renk_txt = 'var(--yk)';
       } else {
-        _faz_str = 'Primary · '+_bugunGunI+'. gün'; _faz_renk_txt = '#2A7A2A';
+        _faz_str = 'Primary · '+_bugunGunI+'. gün'; _faz_renk_txt = 'var(--ok)';
       }
 
       // 135-M: outer container + header/faz/legend token migrate. DATA hex (_faz_renk/_faz_renk_txt) INTACT.
@@ -14167,7 +14167,7 @@ function rEditorSurec(){
     <button onclick="brewdayBaslatEkran()" style="width:100%;background:rgba(246,234,215,.15);color:var(--masthead-ink);border:1.5px solid rgba(246,234,215,.35);border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.3px">
       ${(window._brewday && window._brewday.aktif) ? '🔥 Brewday Aktif — Timeline\'a Dön →' : '🔥 Brewday\'i Başlat →'}
     </button>
-    ${(window._brewday && window._brewday.aktif) ? '<button onclick="brewdayZorlaSifirla()" style="width:100%;background:rgba(200,80,80,.15);color:#FFB0B0;border:1px solid rgba(200,80,80,.3);border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;margin-top:6px">⟲ Brewday\'i Sıfırla (Acil Kurtarma)</button>' : ''}
+    ${(window._brewday && window._brewday.aktif) ? '<button onclick="brewdayZorlaSifirla()" style="width:100%;background:rgba(200,80,80,.15);color:var(--crit-bg);border:1px solid rgba(200,80,80,.3);border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;margin-top:6px">⟲ Brewday\'i Sıfırla (Acil Kurtarma)</button>' : ''}
     <div style="font-size:10px;color:rgba(246,234,215,.9);margin-top:6px;line-height:1.5;text-align:center">Ekran açık kalır · Wake Lock · Tam ekran bildirim · Mash/Hop/Katkı/Whirlpool otomatik sıralı</div>
   </div>
   <div class="kart" style="margin-bottom:10px">
@@ -14356,11 +14356,11 @@ function rEditorSurec(){
       {key:"Whirlpool'da",ikon:'🌀',label:'Whirlpool',renk:'var(--yk)'},
       {key:'Fermentasyonda',ikon:'🫧',label:'Fermantasyon',renk:'#2D7A2D'},
       {key:'Fermentere ekle',ikon:'🫧',label:'Fermantasyon (gün 0)',renk:'#1D6A1D'},
-      {key:"Secondary'de",ikon:'🧫',label:'Secondary',renk:'#5A2D8B'},
+      {key:"Secondary'de",ikon:'🧫',label:'Secondary',renk:'var(--mk)'},
       {key:'Fermentasyon sonunda (soğuk)',ikon:'🧫',label:'Secondary (soğuk)',renk:'var(--mk)'},
       {key:'Dry Hop',ikon:'🌿',label:'Dry Hop',renk:'#2D5A00'},
-      {key:'Cold crash sonrası (5°C)',ikon:'❄️',label:'Cold Crash',renk:'#005A5A'},
-      {key:'Cold crash sırasında (5°C)',ikon:'❄️',label:'Cold Crash (başlangıcı)',renk:'#006A6A'},
+      {key:'Cold crash sonrası (5°C)',ikon:'❄️',label:'Cold Crash',renk:'var(--mk)'},
+      {key:'Cold crash sırasında (5°C)',ikon:'❄️',label:'Cold Crash (başlangıcı)',renk:'var(--mk)'},
       {key:'Şişelemede',ikon:'🍾',label:'Şişeleme',renk:'#8B2D00'},
       {key:'Şişelemede veya fıçıda',ikon:'🍾',label:'Şişeleme/Fıçı',renk:'#9B3D10'},
       {key:'Servis öncesi',ikon:'🥂',label:'Servis',renk:'#5A3000'}
