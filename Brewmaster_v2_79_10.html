@@ -14351,6 +14351,23 @@ function rEditorSurec(){
       for(var i=0;i<_bl.length;i++){var e=_bl[i];if(e.tip==='dry_hop'&&e.not&&e.not.includes(ad))return e;}
       return null;
     }
+    // FEAT-DH-GUN: dry hop plan gunu — _alarmPlaniKur ekleGun turetimiyle SENKRON
+    // (prof.gunler icinde ilk 'dry hop' && !'devam' aksiyonun g'si, yoksa 5). Orasi degisirse burasi da guncellenmeli.
+    function _dhPlanGun(){
+      try{
+        if(typeof fermentasyonProfili==='function'){
+          var _m=(typeof MAYALAR!=='undefined'&&S.mayaId)?MAYALAR.find(function(x){return x&&x.id===S.mayaId;}):null;
+          var _prof=fermentasyonProfili(S.stil||'', S.ogManuel||S.preboilOG||1.050, _m?_m.tip:'ale', _m);
+          if(_prof&&Array.isArray(_prof.gunler)){
+            for(var _i=0;_i<_prof.gunler.length;_i++){
+              var _ak=String(_prof.gunler[_i].aksiyon||'').toLowerCase();
+              if(_ak.includes('dry hop')&&!_ak.includes('devam'))return _prof.gunler[_i].g|0;
+            }
+          }
+        }
+      }catch(_e){}
+      return 5;
+    }
     var _ASM=[
       {key:'Kaynatmada',ikon:'☀️',label:'Kaynatma',renk:'var(--bakir)'},
       {key:"Whirlpool'da",ikon:'🌀',label:'Whirlpool',renk:'var(--yk)'},
@@ -14391,12 +14408,12 @@ function rEditorSurec(){
           // Diğer kategoriler: log'dan gün hesapla
           var logE=isDH?_dhLogBul(k):_kLogBul(k);
           var logGun=logE?_gunH(logE.tarih):null;
-          var planGun=(!isDH&&k.gun!=null)?k.gun:null;
+          var planGun=isDH?_dhPlanGun():((k.gun!=null)?k.gun:null);
           if(logGun!==null){
-            badge='<span style="font-size:11px;background:var(--ya);color:var(--yk);padding:3px 10px;border-radius:10px;font-weight:700;border:1px solid var(--yk)">✅ Gün '+logGun+'</span>';
+            badge='<span style="font-size:11px;background:var(--ya);color:var(--yk);padding:3px 10px;border-radius:10px;font-weight:700;border:1px solid var(--yk)">✅ Gün '+logGun+'</span>'+(isDH&&logGun!==planGun?'<span style="font-size:10px;color:var(--mk);font-weight:600">(plan '+planGun+')</span>':'');
           } else if(_GUN_K.indexOf(a.key)!==-1){
             if(planGun!==null){
-              badge='<span style="font-size:11px;background:var(--ma);color:var(--mk);padding:3px 10px;border-radius:10px;font-weight:700">📅 Gün '+planGun+'</span>';
+              badge='<span style="font-size:11px;background:var(--ma);color:var(--mk);padding:3px 10px;border-radius:10px;font-weight:700">📅 Gün '+planGun+(isDH?' planlı':'')+'</span>';
             } else {
               badge='<span style="font-size:11px;color:var(--dim);padding:3px 6px">— gün</span>';
             }
