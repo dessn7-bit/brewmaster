@@ -698,6 +698,18 @@ button:disabled:hover,.btn:disabled:hover,.btn.bm-disabled:hover{background:inhe
 .bm-acc[aria-expanded="false"] .bm-acc-chevron{transform:rotate(-90deg)}
 .bm-acc-body{padding:0 var(--sp-4) var(--sp-4);max-height:5000px;opacity:1;transition:max-height .3s ease,opacity .2s ease,padding .2s ease;overflow:hidden}
 .bm-acc[aria-expanded="false"] .bm-acc-body{max-height:0;opacity:0;padding-top:0;padding-bottom:0}
+/* SUREC-2KOLON (2026-06-11): Surec sekmesi >=1280px iki kolon — hazirlik tam serit + 2x2 (sol plan, sag operasyon).
+   <1280 default block = sifir davranis degisimi. DOM sirasi korunur, yerlesim data-acc-id ile (5 akordiyon kosulsuz render).
+   Grid margin-collapse yapmadigi icin child margin 0 + row-gap sp-2 — bugunku 8px dusey ritim birebir. */
+@media (min-width:1280px){
+.surec-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--sp-2) var(--sp-4);align-items:start}
+.surec-grid>.bm-acc{margin:0}
+.surec-grid>[data-acc-id="surec-hazirlik"]{grid-column:1/-1;grid-row:1}
+.surec-grid>[data-acc-id="surec-mash"]{grid-column:1;grid-row:2}
+.surec-grid>[data-acc-id="surec-kaynatma"]{grid-column:1;grid-row:3}
+.surec-grid>[data-acc-id="surec-brewday"]{grid-column:2;grid-row:2}
+.surec-grid>[data-acc-id="surec-olcum"]{grid-column:2;grid-row:3}
+}
 @media (max-width:768px){.bm-acc-meta{max-width:110px;font-size:calc(var(--fs-xs) * var(--tip-b-scale, 1));font-variant-caps:var(--tip-b-fvc, normal);font-style:var(--tip-b-fst, normal);text-transform:var(--tip-b-tt, none);letter-spacing:var(--tip-b-ls, normal)}.bm-acc-title{font-size:calc(var(--fs-sm) * var(--tip-h-scale, 1));font-variant-caps:var(--tip-h-fvc, normal);font-style:var(--tip-h-fst, normal);text-transform:var(--tip-h-tt, none);letter-spacing:var(--tip-h-ls, normal)}}
 /* Adim 135-J (2026-05-20): .bm-acc-feature — Stil Tahmini accordion KONTEYNER subtle feature.
    135-C base intact (radius/shadow/header/body), SADECE krem gradient bg ile diger accordion'lardan ayrisir.
@@ -14414,11 +14426,11 @@ function rEditorSurec(){
   var _meta4 = ((S.mashAdimlar||[]).length||1) + ' adım · ' + _mToplam + ' dk';
   var _meta5 = _kSure + ' dk';
 
-  return _bmAccWrap('surec-hazirlik','🔧','Hazırlık Kontrolü',_meta1,_hazirHTML,true)
+  return '<div class="surec-grid">' + _bmAccWrap('surec-hazirlik','🔧','Hazırlık Kontrolü',_meta1,_hazirHTML,true)
        + _bmAccWrap('surec-brewday','🍺','Brewday Modu',_meta2,_surecBrewday,_brewdayAktif)
        + _bmAccWrap('surec-olcum','📏','Brewday Ölçümleri',_meta3,_surecOlcum,false)
        + _bmAccWrap('surec-mash','🌾','Mash Süreci',_meta4,_surecMash,false)
-       + _bmAccWrap('surec-kaynatma','🔥','Kaynatma + Hop Timeline',_meta5,_surecKaynatma,false);
+       + _bmAccWrap('surec-kaynatma','🔥','Kaynatma + Hop Timeline',_meta5,_surecKaynatma,false) + '</div>';
 }
 
 
