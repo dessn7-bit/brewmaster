@@ -12472,34 +12472,49 @@ function rEditorTakvim(maya, maya2, tv){
       var _idMin=_idMerkez-1;
       var _idMax=_idMerkez+1;
 
-      // Stil-İdeal fazına göre bugünkü hedef (varsa daha değerli)
-      var _bugunHedefT = null; // stil-ideal bugünkü hedef nokta
+      // FEAT-TEMP-BANT: profil bir kez cozulur; hedefler GUN-BAZLI (her olcumun kendi gununun profil t'si)
+      var _bugunHedefT = null;
+      var _profSc = null, _pTar_sc = null;
       try {
         var _pE_sc = _bl.filter(function(x){return x.tip==='pitching';}).pop();
         if(_pE_sc && _pE_sc.tarih && typeof fermentasyonProfili==='function'){
           var _stilForSc = (S&&S.stilTah)||(S&&S.stil)||(S&&S.biraAd)||'';
           if(_stilForSc){
             var _cCsc=(typeof calc==='function')?calc():{og:1.050};
-            var _profSc = fermentasyonProfili(_stilForSc, _cCsc.og||1.050, maya?maya.tip:'ale', maya);
-            if(_profSc && _profSc.gunler){
-              var _pTar_sc = new Date(_pE_sc.tarih); _pTar_sc.setHours(0,0,0,0);
-              var _bg_sc = new Date(); _bg_sc.setHours(0,0,0,0);
-              var _gIdx = Math.floor((_bg_sc-_pTar_sc)/864e5);
-              var _bgP = _profSc.gunler.find(function(p){return p.g===_gIdx;});
-              if(_bgP && _bgP.t!==null){
-                _bugunHedefT = _bgP.t;
-                // İdeal bant bugünkü hedefin etrafında daralsın (±1°C)
-                _idMin = _bugunHedefT-1;
-                _idMax = _bugunHedefT+1;
-              }
-            }
+            var _pTmp = fermentasyonProfili(_stilForSc, _cCsc.og||1.050, maya?maya.tip:'ale', maya);
+            if(_pTmp && _pTmp.gunler){ _profSc=_pTmp; _pTar_sc=new Date(_pE_sc.tarih); _pTar_sc.setHours(0,0,0,0); }
           }
         }
       } catch(eS){}
+      // Gun hedefi: profilde o gunun t'si varsa ideal=t±1, tolerans=t±(maya yarim-araligi); yoksa maya tabani
+      var _tolSpan=(_tolMax-_tolMin)/2;
+      var _hedefFor=function(tarihStr){
+        try {
+          if(_profSc && _pTar_sc && tarihStr){
+            var _d=new Date(tarihStr); _d.setHours(0,0,0,0);
+            var _gp=_profSc.gunler.find(function(p){return p.g===Math.floor((_d-_pTar_sc)/864e5);});
+            if(_gp && _gp.t!==null) return {idLo:_gp.t-1,idHi:_gp.t+1,tolLo:_gp.t-_tolSpan,tolHi:_gp.t+_tolSpan};
+          }
+        } catch(eH){}
+        return {idLo:_idMin,idHi:_idMax,tolLo:_tolMin,tolHi:_tolMax};
+      };
+      var _hedefler=_scG.map(function(x){return _hedefFor(x.tarih);});
+      var _durumClr=function(v,hh){ // gun-parametreli durum — tek tuketici circs (ust panel _scDurumRenk AYRI mantik)
+        if(v<hh.tolLo||v>hh.tolHi) return 'var(--crit)';
+        if(v<hh.idLo||v>hh.idHi) return 'var(--sk)';
+        return 'var(--ok)';
+      };
+      try {
+        if(_profSc && _pTar_sc){
+          var _bg_sc = new Date(); _bg_sc.setHours(0,0,0,0);
+          var _bgP = _profSc.gunler.find(function(p){return p.g===Math.floor((_bg_sc-_pTar_sc)/864e5);});
+          if(_bgP && _bgP.t!==null) _bugunHedefT = _bgP.t;
+        }
+      } catch(eB){}
 
       // Grafik eksen sınırları — tehlike kenarı dahil (±2°C daha geniş)
-      var _altKenar=Math.min.apply(null, _gV.concat([_tolMin-1]))-1;
-      var _ustKenar=Math.max.apply(null, _gV.concat([_tolMax+1]))+1;
+      var _altKenar=Math.min.apply(null, _gV.concat(_hedefler.map(function(hh){return hh.idLo;})).concat([_tolMin-1]))-1;
+      var _ustKenar=Math.max.apply(null, _gV.concat(_hedefler.map(function(hh){return hh.idHi;})).concat([_tolMax+1]))+1;
       var W=280,H=90,pL=30,pR=6,pT=5,pB=16,gW=W-pL-pR,gH=H-pT-pB;
       var xP=function(i){return _scG.length<=1?pL+gW/2:pL+(i/(_scG.length-1))*gW;};
       var yP=function(v){return pT+gH-((v-_altKenar)/(_ustKenar-_altKenar))*gH;};
@@ -12507,10 +12522,7 @@ function rEditorTakvim(maya, maya2, tv){
 
       // Noktalar — bant durumuna göre renk (3 seviye: ideal/tolerans/tehlike)
       var circs=_scG.map(function(e,i){
-        var v=_gV[i], clr;
-        if(v<_tolMin||v>_tolMax) clr='var(--crit)'; // tehlike (maya aralığı dışı)
-        else if(v<_idMin||v>_idMax) clr='var(--sk)'; // tolerans (maya içinde, ideal dışı)
-        else clr='var(--ok)'; // ideal
+        var v=_gV[i], clr=_durumClr(v,_hedefler[i]); // gun-bazli hedefle yargi (bantla ayni eksen)
         return '<circle cx="'+xP(i)+'" cy="'+yP(v)+'" r="3" style="fill:'+clr+'" stroke="#fff" stroke-width="1.5"/>';
       }).join('');
       var xlbl=_scG.map(function(e,i){
@@ -12530,9 +12542,23 @@ function rEditorTakvim(maya, maya2, tv){
           +'<text x="'+(pL-5)+'" y="'+(yP(e.v)+3)+'" text-anchor="end" font-size="10" style="fill:var(--bakir)">'+e.txt+'</text>';
       }).join('');
 
-      // Kırmızı kenar çizgileri (tehlike bölgesi sınırları)
-      var redBottom = yP(_tolMin);
-      var redTop = yP(_tolMax);
+      // FEAT-TEMP-BANT: ardisik ayni-hedefli gunler segmentlenir; segment basina 4 katman rect (sinirlar grafige clamp)
+      var _yC=function(v){return Math.max(pT,Math.min(pT+gH,yP(v)));};
+      var _segs=[];
+      for(var _si=0;_si<_hedefler.length;_si++){
+        var _hh=_hedefler[_si], _ls=_segs[_segs.length-1];
+        if(_ls && _ls.h.idLo===_hh.idLo && _ls.h.idHi===_hh.idHi && _ls.h.tolLo===_hh.tolLo && _ls.h.tolHi===_hh.tolHi) _ls.b=_si;
+        else _segs.push({a:_si,b:_si,h:_hh});
+      }
+      var _bantlar=_segs.map(function(s){
+        var x0=(s.a===0)?pL:(xP(s.a-1)+xP(s.a))/2;
+        var x1=(s.b===_hedefler.length-1)?(pL+gW):(xP(s.b)+xP(s.b+1))/2;
+        var w=x1-x0, rT=_yC(s.h.tolHi), rB=_yC(s.h.tolLo), iT=_yC(s.h.idHi), iB=_yC(s.h.idLo);
+        return '<rect x="'+x0+'" y="'+pT+'" width="'+w+'" height="'+(rT-pT)+'" style="fill:var(--crit-bg)" opacity="0.5"/>'
+          +'<rect x="'+x0+'" y="'+rB+'" width="'+w+'" height="'+(pT+gH-rB)+'" style="fill:var(--ka)" opacity="0.5"/>'
+          +'<rect x="'+x0+'" y="'+rT+'" width="'+w+'" height="'+(rB-rT)+'" style="fill:var(--ma)" opacity="0.6"/>'
+          +'<rect x="'+x0+'" y="'+iT+'" width="'+w+'" height="'+(iB-iT)+'" style="fill:var(--ya)" opacity="0.75"/>';
+      }).join('');
 
       // Son nokta göstergesi (bugünkü hedef ideal noktası — küçük altın yıldız)
       var _idealNokta = '';
@@ -12544,14 +12570,7 @@ function rEditorTakvim(maya, maya2, tv){
       _scGrafik='<div style="padding:4px 8px 0;background:var(--bg-sunken);border-bottom:1px solid var(--bor)">'
         +'<div style="font-size:var(--fs-xs);color:var(--dim);margin-bottom:2px;display:flex;justify-content:space-between"><span>🌡️ Sıcaklık Takibi</span>'+(_bugunHedefT!==null?'<span style="font-size:var(--fs-xs);color:var(--soluk)">Bugün hedef: <b style="color:var(--kahve)">'+_bugunHedefT+'°C</b></span>':'')+'</div>'
         +'<svg width="100%" viewBox="0 0 '+W+' '+H+'">'
-          // ÜST TEHLİKE (aralık üstü) — hafif kırmızı zemin
-          +'<rect x="'+pL+'" y="'+pT+'" width="'+gW+'" height="'+(redTop-pT)+'" fill="#FFEBEE" opacity="0.5"/>'
-          // ALT TEHLİKE (aralık altı)
-          +'<rect x="'+pL+'" y="'+redBottom+'" width="'+gW+'" height="'+(gH+pT-redBottom)+'" fill="#E3F2FD" opacity="0.5"/>'
-          // TOLERANS BANT (sarımsı)
-          +'<rect x="'+pL+'" y="'+redTop+'" width="'+gW+'" height="'+(redBottom-redTop)+'" fill="#FFF9C4" opacity="0.6"/>'
-          // İDEAL BANT (yeşil — daha belirgin)
-          +'<rect x="'+pL+'" y="'+yP(_idMax)+'" width="'+gW+'" height="'+(yP(_idMin)-yP(_idMax))+'" style="fill:var(--ya)" opacity="0.75"/>'
+          +_bantlar
           // Y ekseni çizgisi
           +'<line x1="'+pL+'" y1="'+pT+'" x2="'+pL+'" y2="'+(pT+gH)+'" stroke="#ddd" stroke-width="0.5"/>'
           +ylbl
@@ -12562,8 +12581,8 @@ function rEditorTakvim(maya, maya2, tv){
         // Legend
         +'<div style="display:flex;gap:8px;font-size:var(--fs-xs);color:var(--soluk);padding:2px 0 4px;flex-wrap:wrap">'
           +'<span><span style="display:inline-block;width:8px;height:8px;background:var(--ya);border-radius:2px;vertical-align:middle;margin-right:2px"></span>İdeal</span>'
-          +'<span><span style="display:inline-block;width:8px;height:8px;background:#FFF9C4;border-radius:2px;vertical-align:middle;margin-right:2px"></span>Tolerans (maya aralığı)</span>'
-          +'<span><span style="display:inline-block;width:8px;height:8px;background:#FFEBEE;border-radius:2px;vertical-align:middle;margin-right:2px"></span>Tehlike</span>'
+          +'<span><span style="display:inline-block;width:8px;height:8px;background:var(--ma);border-radius:2px;vertical-align:middle;margin-right:2px"></span>Tolerans (maya aralığı)</span>'
+          +'<span><span style="display:inline-block;width:8px;height:8px;background:var(--crit-bg);border-radius:2px;vertical-align:middle;margin-right:2px"></span>Tehlike</span>'
           +(_bugunHedefT!==null?'<span style="margin-left:auto">🎯 Hedef</span>':'')
         +'</div>'
       +'</div>';
