@@ -12377,16 +12377,16 @@ function rEditorTakvim(maya, maya2, tv){
 
   // Tip renk/ikon — vintage muted sepia ailesi, kategoriler için hafif varyasyon
   const _tipR = {
-    og_olcum: {bg:'#E0D6DC',bor:'#8A7890',ikon:'🔬',ad:'OG Ölçüm'},
-    pitching:  {bg:'#D8DCE0',bor:'#6A7888',ikon:'🧬',ad:'Pitching'},
-    sicaklik:  {bg:'#E8DAB0',bor:'#A67B32',ikon:'🌡️',ad:'Sicaklik'},
-    fg_olcum:  {bg:'#DEDDC0',bor:'#727A4A',ikon:'📊',ad:'FG Olcum'},
-    dry_hop:   {bg:'#D8DFBC',bor:'#6A7838',ikon:'🌿',ad:'Dry Hop'},
-    cold_crash:{bg:'#D2D6DC',bor:'#6A7888',ikon:'❄️',ad:'Cold Crash'},
-    siseleme:  {bg:'#E8D0C8',bor:'#9A6858',ikon:'🍺',ad:'Siseleme'},
-    tadim:     {bg:'#E6D4A8',bor:'#A07E32',ikon:'👅',ad:'Tadim'},
-    katki:     {bg:'#DCD0DC',bor:'#7E6888',ikon:'🧪',ad:'Katki'},
-    diger:     {bg:'#DDD5C6',bor:'#9C8A70',ikon:'📝',ad:'Not'},
+    og_olcum: {bg:'var(--ma)',bor:'var(--mk)',ikon:'🔬',ad:'OG Ölçüm'},
+    pitching:  {bg:'var(--ya)',bor:'var(--ok)',ikon:'🧬',ad:'Pitching'},
+    sicaklik:  {bg:'var(--ma)',bor:'var(--mk)',ikon:'🌡️',ad:'Sicaklik'},
+    fg_olcum:  {bg:'var(--ma)',bor:'var(--mk)',ikon:'📊',ad:'FG Olcum'},
+    dry_hop:   {bg:'var(--ya)',bor:'var(--yk)',ikon:'🌿',ad:'Dry Hop'},
+    cold_crash:{bg:'var(--ma)',bor:'var(--mk)',ikon:'❄️',ad:'Cold Crash'},
+    siseleme:  {bg:'var(--sa)',bor:'var(--sk)',ikon:'🍺',ad:'Siseleme'},
+    tadim:     {bg:'var(--sa)',bor:'var(--sk)',ikon:'👅',ad:'Tadim'},
+    katki:     {bg:'var(--ya)',bor:'var(--yk)',ikon:'🧪',ad:'Katki'},
+    diger:     {bg:'var(--bg-sunken)',bor:'var(--metin-soluk)',ikon:'📝',ad:'Not'},
   };
 
   // Log kayıtları HTML
@@ -12457,33 +12457,6 @@ function rEditorTakvim(maya, maya2, tv){
     }
   } catch(e){ _gunSayaci=''; }
 
-  // ── Fermentasyon ilerleme çubuğu ─────────────────────────
-  var _progressHtml = '';
-  try {
-    var _fgKayitlar = _bl.filter(function(x){return x.tip==='fg_olcum'&&x.deger;});
-    if(_fgKayitlar.length && maya){
-      var _c0=calc(), _o0=_c0.og;
-      var _a0=maya.atu?(maya.atu[0]+maya.atu[1])/2:73;
-      var _h0=+(1+(_o0-1)*(1-_a0/100)).toFixed(3);
-      var _sF=parseFloat(_fgKayitlar[_fgKayitlar.length-1].deger);
-      var _pc=Math.min(100,Math.max(0,Math.round(((_o0-_sF)/(_o0-_h0))*100)));
-      var _pR=_pc>=100?'var(--ok)':_pc>=80?'var(--yk)':_pc>=50?'var(--sk)':'var(--kk)';
-      _progressHtml='<div style="padding:7px 12px;background:#F8F9FA;border-bottom:1px solid var(--bor)">'
-        +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'
-          +'<span style="font-size:11px;font-weight:700;color:var(--kahve)">🧬 Fermentasyon İlerlemesi</span>'
-          +'<span style="font-size:11px;font-weight:700;color:'+_pR+'">%'+_pc+'</span>'
-        +'</div>'
-        +'<div style="background:#E0E0E0;border-radius:6px;height:7px;overflow:hidden">'
-          +'<div style="width:'+_pc+'%;height:100%;background:'+_pR+';border-radius:6px"></div>'
-        +'</div>'
-        +'<div style="display:flex;justify-content:space-between;margin-top:3px">'
-          +'<span style="font-size:var(--fs-xs);color:#999">OG '+_o0.toFixed(3)+'</span>'
-          +'<span style="font-size:var(--fs-xs);color:#666">Son: '+_sF.toFixed(3)+'</span>'
-          +'<span style="font-size:var(--fs-xs);color:#999">Hedef: '+_h0+'</span>'
-        +'</div>'
-      +'</div>';
-    }
-  } catch(e){ _progressHtml=''; }
 
   // ── Sıcaklık grafiği ─────────────────────────────────────
   var _scGrafik = '';
@@ -12535,14 +12508,14 @@ function rEditorTakvim(maya, maya2, tv){
       // Noktalar — bant durumuna göre renk (3 seviye: ideal/tolerans/tehlike)
       var circs=_scG.map(function(e,i){
         var v=_gV[i], clr;
-        if(v<_tolMin||v>_tolMax) clr='#C62828'; // tehlike (maya aralığı dışı)
-        else if(v<_idMin||v>_idMax) clr='#E65100'; // tolerans (maya içinde, ideal dışı)
-        else clr='#2E7D32'; // ideal
-        return '<circle cx="'+xP(i)+'" cy="'+yP(v)+'" r="3" fill="'+clr+'" stroke="#fff" stroke-width="1.5"/>';
+        if(v<_tolMin||v>_tolMax) clr='var(--crit)'; // tehlike (maya aralığı dışı)
+        else if(v<_idMin||v>_idMax) clr='var(--sk)'; // tolerans (maya içinde, ideal dışı)
+        else clr='var(--ok)'; // ideal
+        return '<circle cx="'+xP(i)+'" cy="'+yP(v)+'" r="3" style="fill:'+clr+'" stroke="#fff" stroke-width="1.5"/>';
       }).join('');
       var xlbl=_scG.map(function(e,i){
         if(_scG.length<=4||i===0||i===_scG.length-1)
-          return '<text x="'+xP(i)+'" y="'+(H-3)+'" text-anchor="middle" font-size="8" fill="#999">'+e.tarih.slice(5)+'</text>';
+          return '<text x="'+xP(i)+'" y="'+(H-3)+'" text-anchor="middle" font-size="10" style="fill:var(--bakir)">'+e.tarih.slice(5)+'</text>';
         return '';
       }).join('');
 
@@ -12554,7 +12527,7 @@ function rEditorTakvim(maya, maya2, tv){
       ];
       var ylbl=_yEtiketler.map(function(e){
         return '<line x1="'+pL+'" y1="'+yP(e.v)+'" x2="'+(pL-3)+'" y2="'+yP(e.v)+'" stroke="#ccc" stroke-width="0.5"/>'
-          +'<text x="'+(pL-5)+'" y="'+(yP(e.v)+3)+'" text-anchor="end" font-size="8" fill="#888">'+e.txt+'</text>';
+          +'<text x="'+(pL-5)+'" y="'+(yP(e.v)+3)+'" text-anchor="end" font-size="10" style="fill:var(--bakir)">'+e.txt+'</text>';
       }).join('');
 
       // Kırmızı kenar çizgileri (tehlike bölgesi sınırları)
@@ -12568,7 +12541,7 @@ function rEditorTakvim(maya, maya2, tv){
           +'<text x="'+(xP(_scG.length-1)+8)+'" y="'+(yP(_bugunHedefT)+3)+'" font-size="7" fill="var(--bakir)" font-weight="700">🎯</text>';
       }
 
-      _scGrafik='<div style="padding:4px 8px 0;background:#FAFBFC;border-bottom:1px solid var(--bor)">'
+      _scGrafik='<div style="padding:4px 8px 0;background:var(--bg-sunken);border-bottom:1px solid var(--bor)">'
         +'<div style="font-size:var(--fs-xs);color:var(--dim);margin-bottom:2px;display:flex;justify-content:space-between"><span>🌡️ Sıcaklık Takibi</span>'+(_bugunHedefT!==null?'<span style="font-size:var(--fs-xs);color:var(--soluk)">Bugün hedef: <b style="color:var(--kahve)">'+_bugunHedefT+'°C</b></span>':'')+'</div>'
         +'<svg width="100%" viewBox="0 0 '+W+' '+H+'">'
           // ÜST TEHLİKE (aralık üstü) — hafif kırmızı zemin
@@ -12578,17 +12551,17 @@ function rEditorTakvim(maya, maya2, tv){
           // TOLERANS BANT (sarımsı)
           +'<rect x="'+pL+'" y="'+redTop+'" width="'+gW+'" height="'+(redBottom-redTop)+'" fill="#FFF9C4" opacity="0.6"/>'
           // İDEAL BANT (yeşil — daha belirgin)
-          +'<rect x="'+pL+'" y="'+yP(_idMax)+'" width="'+gW+'" height="'+(yP(_idMin)-yP(_idMax))+'" fill="#C8E6C9" opacity="0.75"/>'
+          +'<rect x="'+pL+'" y="'+yP(_idMax)+'" width="'+gW+'" height="'+(yP(_idMin)-yP(_idMax))+'" style="fill:var(--ya)" opacity="0.75"/>'
           // Y ekseni çizgisi
           +'<line x1="'+pL+'" y1="'+pT+'" x2="'+pL+'" y2="'+(pT+gH)+'" stroke="#ddd" stroke-width="0.5"/>'
           +ylbl
           // Veri çizgisi (en az 2 nokta varsa)
-          +(_scG.length>=2?'<polyline points="'+pts+'" fill="none" stroke="#8D6E63" stroke-width="1.5" stroke-linejoin="round"/>':'')
+          +(_scG.length>=2?'<polyline points="'+pts+'" fill="none" style="stroke:var(--bakir)" stroke-width="1.5" stroke-linejoin="round"/>':'')
           +circs+xlbl+_idealNokta
         +'</svg>'
         // Legend
         +'<div style="display:flex;gap:8px;font-size:var(--fs-xs);color:var(--soluk);padding:2px 0 4px;flex-wrap:wrap">'
-          +'<span><span style="display:inline-block;width:8px;height:8px;background:#C8E6C9;border-radius:2px;vertical-align:middle;margin-right:2px"></span>İdeal</span>'
+          +'<span><span style="display:inline-block;width:8px;height:8px;background:var(--ya);border-radius:2px;vertical-align:middle;margin-right:2px"></span>İdeal</span>'
           +'<span><span style="display:inline-block;width:8px;height:8px;background:#FFF9C4;border-radius:2px;vertical-align:middle;margin-right:2px"></span>Tolerans (maya aralığı)</span>'
           +'<span><span style="display:inline-block;width:8px;height:8px;background:#FFEBEE;border-radius:2px;vertical-align:middle;margin-right:2px"></span>Tehlike</span>'
           +(_bugunHedefT!==null?'<span style="margin-left:auto">🎯 Hedef</span>':'')
@@ -12630,19 +12603,19 @@ function rEditorTakvim(maya, maya2, tv){
       }).join('');
       var xlbl=_fgG.map(function(e,i){
         if(_fgG.length<=4||i===0||i===_fgG.length-1)
-          return '<text x="'+xP(i)+'" y="'+(H-2)+'" text-anchor="middle" font-size="8" fill="#bbb">'+e.tarih.slice(5)+'</text>';
+          return '<text x="'+xP(i)+'" y="'+(H-2)+'" text-anchor="middle" font-size="10" style="fill:var(--bakir)">'+e.tarih.slice(5)+'</text>';
         return '';
       }).join('');
       // Y ekseni etiketleri
       var ylbl=[_fMin,(_fMin+_fMax)/2,_fMax].map(function(v){
-        return '<text x="'+(pL-3)+'" y="'+(yP(v)+3)+'" text-anchor="end" font-size="8" fill="#aaa">'+v.toFixed(3)+'</text>';
+        return '<text x="'+(pL-3)+'" y="'+(yP(v)+3)+'" text-anchor="end" font-size="10" style="fill:var(--bakir)">'+v.toFixed(3)+'</text>';
       }).join('');
       // Hedef cizgisi
       var hedefCizgi = _fgHedef
         ? '<line x1="'+pL+'" y1="'+yP(_fgHedef)+'" x2="'+(W-pR)+'" y2="'+yP(_fgHedef)+'" style="stroke:var(--ok)" stroke-width="1" stroke-dasharray="3,2" opacity="0.7"/>'
           +'<text x="'+(W-pR+1)+'" y="'+(yP(_fgHedef)+3)+'" font-size="10" style="fill:var(--ok)">hdf</text>'
         : '';
-      _fgGrafik = '<div style="padding:4px 8px 0;background:#FAFBFC;border-bottom:1px solid var(--bor)">'
+      _fgGrafik = '<div style="padding:4px 8px 0;background:var(--bg-sunken);border-bottom:1px solid var(--bor)">'
         +'<div style="font-size:var(--fs-xs);color:var(--dim);margin-bottom:2px">📈 FG Takibi</div>'
         +'<svg width="100%" viewBox="0 0 '+W+' '+H+'">'
           +hedefCizgi
@@ -12669,27 +12642,27 @@ function rEditorTakvim(maya, maya2, tv){
       if(_hCC){
         var _ccE=_bl.filter(function(x){return x.tip==='cold_crash';}).pop();
         var _ccG=_ccE?_gF(_ccE.tarih):0;
-        if(_ccG>=2){_hat='🍺 Cold crash '+_ccG+'. günde — şişeleme zamanı!';_hBg='#F0FFF0';_hBor='#70C070';_hRenk='#1a4a1a';}
+        if(_ccG>=2){_hat='🍺 Cold crash '+_ccG+'. günde — şişeleme zamanı!';_hBg='#F0FFF0';_hBor='#70C070';_hRenk='var(--yk)';}
         else{_hat='❄️ Cold crash devam ediyor ('+(2-_ccG)+' gün daha bekle).';}
       } else if(_dhE){
         var _dhG=_gF(_dhE.tarih);
-        if(_dhG>=5){_hat='⚡ Dry hop '+_dhG+'. günde — cold crash zamanı!';_hBg='#F0FFF0';_hBor='#70C070';_hRenk='#1a4a1a';}
+        if(_dhG>=5){_hat='⚡ Dry hop '+_dhG+'. günde — cold crash zamanı!';_hBg='#F0FFF0';_hBor='#70C070';_hRenk='var(--yk)';}
         else{_hat='🌿 Dry hop devam ediyor ('+_dhG+'. gün). '+(5-_dhG)+' gün daha bekle.';}
       } else if(_fgL.length>0){
         var _sFG=parseFloat(_fgL[_fgL.length-1].deger), _fgH2=null;
         try{var _cr=calc(),_og=_cr.og,_ah=maya&&maya.atu?(maya.atu[0]+maya.atu[1])/2:73;_fgH2=+(1+(_og-1)*(1-_ah/100)).toFixed(3);}catch(e2){}
         if(_fgH2&&_sFG<=parseFloat(_fgH2)+0.003){
           var _sg=_gF(_fgL[_fgL.length-1].tarih);
-          if(_sg>=1){_hat='✅ FG hedefe ulaştı! Dün de aynıysa şişeleme zamanı.';_hBg='#F0FFF0';_hBor='#70C070';_hRenk='#1a4a1a';}
+          if(_sg>=1){_hat='✅ FG hedefe ulaştı! Dün de aynıysa şişeleme zamanı.';_hBg='#F0FFF0';_hBor='#70C070';_hRenk='var(--yk)';}
           else{_hat='📊 FG hedefe ulaştı — yarın tekrar ölç, sabitlendiyse şişele.';}
         } else {
           var _sg2=_gF(_fgL[_fgL.length-1].tarih);
-          if(_sg2>=3){_hat='📊 Son FG ölçümünden '+_sg2+' gün geçti — tekrar ölçme zamanı!';_hBg='#F0F8F0';_hBor='#80C080';_hRenk='#1a4a1a';}
+          if(_sg2>=3){_hat='📊 Son FG ölçümünden '+_sg2+' gün geçti — tekrar ölçme zamanı!';_hBg='#F0F8F0';_hBor='#80C080';_hRenk='var(--yk)';}
           else{_hat='⏳ Fermentasyon devam ediyor — '+(3-_sg2)+' gün sonra tekrar ölç.';}
         }
       } else if(_pE){
         var _pG=_gF(_pE.tarih);
-        if(_pG>=4){_hat='📊 Pitchingden '+_pG+' gün geçti — ilk FG ölçümü zamanı!';_hBg='#F0F8F0';_hBor='#80C080';_hRenk='#1a4a1a';}
+        if(_pG>=4){_hat='📊 Pitchingden '+_pG+' gün geçti — ilk FG ölçümü zamanı!';_hBg='#F0F8F0';_hBor='#80C080';_hRenk='var(--yk)';}
         else{_hat='🧬 Fermentasyon '+_pG+'. günde — '+(_pG<2?'ilk 24-48 saat en aktif dönem.':'3-4. günde FG ölçümü başlayabilirsin.');}
       } else if(_bl.length===0){
         _hat='▶️ Brew günlüğüne başlamak için Pitching kaydı ekle.';
@@ -12703,7 +12676,7 @@ function rEditorTakvim(maya, maya2, tv){
         // Gelecek tarihli şişeleme kaydı (planlanmış)
         _hat='📅 Şişeleme planlandı: '+Math.abs(_sG)+' gün sonra. Şu an fermentasyondasın.';
       } else if(_sG<_mK){_hat='🍺 Şişelemeden '+_sG+' gün geçti — kondisyon için '+(_mK-_sG)+' gün daha bekle.';}
-      else{_hat='🎉 Kondisyon tamamlandı! Soğutup servis edebilirsin.';_hBg='#FFF0F8';_hBor='#E090C0';_hRenk='#5a0030';}
+      else{_hat='🎉 Kondisyon tamamlandı! Soğutup servis edebilirsin.';_hBg='var(--sa)';_hBor='var(--sk)';_hRenk='var(--vintage-koyu)';}
     }
     if(_hat){
       _hatirlatici='<div style="margin:6px 8px;background:'+_hBg+';border:1.5px solid '+_hBor+';border-radius:10px;padding:8px 12px">'
@@ -12715,55 +12688,6 @@ function rEditorTakvim(maya, maya2, tv){
   } catch(e){ _hatirlatici=''; }
 
   // ── "Şu an ne yapmalısın?" kartı ──────────────────────────
-  var _oneri = '';
-  try {
-    if(maya){
-      var _hP=_bl.some(function(x){return x.tip==='pitching';});
-      var _hD=_bl.some(function(x){return x.tip==='dry_hop';});
-      var _hC=_bl.some(function(x){return x.tip==='cold_crash';});
-      var _hS=_bl.some(function(x){return x.tip==='siseleme';});
-      var _fL=_bl.filter(function(x){return x.tip==='fg_olcum'&&x.deger;});
-      var _lF=_fL.length?parseFloat(_fL[_fL.length-1].deger):null;
-      var _gf=function(t){try{return Math.floor((new Date()-new Date(t))/(864e5));}catch(e){return 0;}};
-      var _ob='var(--bg2)',_obr='var(--bor2)',_oi='💡',_obt='Tavsiye',_om='',_or='#334';
-      try {
-        var _c1=calc(),_o1=_c1.og,_a1=maya.atu?(maya.atu[0]+maya.atu[1])/2:73;
-        var _h1=+(1+(_o1-1)*(1-_a1/100)).toFixed(3);
-        if(_hS){
-          _oi='🎉';_obt='Tebrikler!';_ob='#FFF0F8';_obr='#E090C0';
-          _om='Şişeleme tamamlandı. Kondisyon için bekle ve sabırlı ol.';
-        } else if(_hC){
-          _oi='⏳';_obt='Cold Crash Devam Ediyor';_ob='#F0F4FF';_obr='var(--mk)';
-          _om='48–72 saat bekle. Sonra şişeleme yapabilirsin.';
-        } else if(_hD&&!_hC){
-          var _de=_bl.filter(function(x){return x.tip==='dry_hop';}).pop();
-          var _dg=_de?_gf(_de.tarih):0;
-          if(_dg>=5){_oi='⚡';_obt='Cold Crash Zamanı!';_ob='#F0FFF0';_obr='#70C070';_or='#1a4a1a';
-            _om='Dry hop\'tan '+_dg+' gün geçti — hemen cold crash başlat (2–4°C).';}
-          else{_oi='🌿';_obt='Dry Hop Devam Ediyor';_ob='#F4FEF0';_obr='#90D070';
-            _om=_dg+'. günde. '+(5-_dg)+' gün daha bekle, sonra cold crash.';}
-        } else if(_lF!==null){
-          if(_lF>_h1+0.005){_oi='⏳';_obt='Fermentasyon Devam Ediyor';_ob='var(--kahve-bg)';_obr='var(--kahve-border)';
-            _om='FG: '+_lF.toFixed(3)+' / Hedef: '+_h1+'. '+Math.round((_lF-_h1)*1000)+' puan kaldı.';}
-          else{_oi='✅';_obt='FG Hedefe Ulaştı!';_ob='#F0FFF0';_obr='#70C070';_or='#1a4a1a';
-            _om='Fermentasyon tamam! '+(_hD?'Cold crash başlat (2–4°C, 48 saat), sonra şişele.':'Dry hop ekleyeceksen şimdi tam vakti, eklemeyeceksen cold crash başlat.');}
-        } else if(_hP){
-          var _pe=_bl.filter(function(x){return x.tip==='pitching';}).pop();
-          var _pg=_pe?_gf(_pe.tarih):0;
-          if(_pg>=4){_oi='📊';_obt='FG Ölçüm Zamanı!';_ob='#F0F8F0';_obr='#80C080';_or='#1a4a1a';
-            _om='Pitching\'den '+_pg+' gün geçti — ilk FG ölçümünü yap!';}
-          else{_oi='🧬';_obt='Aktif Fermentasyon';_ob='#EEF6FF';_obr='var(--mk)';
-            _om=_pg+'. gün. '+(_pg<2?'İlk 24–48 saat en aktif dönem.':'3–4. günden itibaren FG ölçümü başlayabilirsin.');}
-        } else {
-          _oi='▶️';_obt='Başlayalım';_ob='#F8F8F8';_obr='var(--mk)';
-          _om='Brew günlüğüne başlamak için Pitching kaydı ekle.';
-        }
-      } catch(e2){}
-      if(_om) _oneri='<div style="margin:6px 8px;background:'+_ob+';border:1.5px solid '+_obr+';border-radius:10px;padding:8px 12px">'
-        +'<div style="font-size:11px;font-weight:700;color:'+_or+';margin-bottom:2px">'+_oi+' '+_obt+'</div>'
-        +'<div style="font-size:11px;color:'+_or+';line-height:1.5">'+_om+'</div></div>';
-    }
-  } catch(e){ _oneri=''; }
 
   // ── Brew özeti (şişelemede) ───────────────────────────────
   var _brewOzeti = '';
@@ -12827,7 +12751,7 @@ function rEditorTakvim(maya, maya2, tv){
         if(!_tarihMap[e.tarih]) _tarihMap[e.tarih] = [];
         _tarihMap[e.tarih].push(e.tip);
       });
-      var _tRenk = {pitching:'#90C0F0',sicaklik:'#F0C070',fg_olcum:'#80C080',dry_hop:'#90D070',cold_crash:'#90A8F0',siseleme:'#E090C0',tadim:'#E8C090',katki:'#C090E0',diger:'#C0C0C0'};
+      var _tRenk = {pitching:'var(--ya)',sicaklik:'var(--ma)',fg_olcum:'var(--ma)',dry_hop:'var(--ya)',cold_crash:'var(--ma)',siseleme:'var(--sa)',tadim:'var(--sa)',katki:'var(--ya)',diger:'var(--ma)'};
       var _tAd = {pitching:'Pitching',sicaklik:'Sıcaklık',fg_olcum:'FG',dry_hop:'Dry Hop',cold_crash:'Cold Crash',siseleme:'Şişeleme',tadim:'Tadım',katki:'Katkı',diger:'Diğer'};
       var _gA = ['Pt','Sa','Ça','Pe','Cu','Ct','Pz'];
       var _mA = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
@@ -12844,7 +12768,7 @@ function rEditorTakvim(maya, maya2, tv){
         for(var i=0;i<_ig;i++) _ch+='<div></div>';
         for(var d=1;d<=_ag;d++){
           var _td=_yi+'-'+String(_ay+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-          var _bg2=_tarihMap[_td]?(_tRenk[_tarihMap[_td][0]]||'#C0C0C0'):'';
+          var _bg2=_tarihMap[_td]?(_tRenk[_tarihMap[_td][0]]||'var(--ma)'):'';
           var _n=_tarihMap[_td]?_tarihMap[_td].length:0;
           _ch+='<div style="text-align:center;padding:2px 1px;border-radius:3px;'+(_bug===_td?'outline:1.5px solid var(--altin);':'')+(_bg2?'background:'+_bg2+';':'')+'">'
             +'<span style="font-size:var(--fs-xs);color:'+(_bg2?'#333':'var(--dim)')+'">'+d+'</span>'
@@ -13052,13 +12976,13 @@ function rEditorTakvim(maya, maya2, tv){
           return '#E8EDD8'; // fermentasyon gelecek = soluk yeşil (neredeyse krem)
         }
         // Kondisyon fazı
-        if(g < _bugunGunI) return '#9B6B8F'; // kondisyon geçmiş = sakin mor (az doygun)
+        if(g < _bugunGunI) return 'rgba(139,106,26,.75)'; // kondisyon geçmiş = sakin mor (az doygun)
         // Kondisyon gelecek — hazırlık seviyesine göre tonla (tema uyumlu sakin tonlar)
         var gunSonrasiSise = g - _siGunI;
-        if(gunSonrasiSise < _kondMinGun) return '#E8D8E3'; // henüz taze
-        if(gunSonrasiSise < _kondIdealGun) return '#D8BFD0'; // olgunlaşıyor
-        if(gunSonrasiSise < _kondZirveGun) return '#B890A8'; // zirve aralığı
-        return '#A07892'; // zirve sonrası (yaşlı)
+        if(gunSonrasiSise < _kondMinGun) return 'rgba(139,106,26,.2)'; // henüz taze
+        if(gunSonrasiSise < _kondIdealGun) return 'rgba(139,106,26,.35)'; // olgunlaşıyor
+        if(gunSonrasiSise < _kondZirveGun) return 'rgba(139,106,26,.5)'; // zirve aralığı
+        return 'rgba(139,106,26,.65)'; // zirve sonrası (yaşlı)
       };
 
       var _olayIkon = {pitching:'🧬',dry_hop:'🌿',cold_crash:'❄️',siseleme:'🍺',sicaklik:'🌡️',fg_olcum:'📊',katki:'🧪',og_olcum:'🔬',tadim:'👅',filtrasyon:'🔆'};
@@ -13179,7 +13103,7 @@ function rEditorTakvim(maya, maya2, tv){
         +_etiketH
         +'<div style="display:flex;gap:var(--sp-2);font-family:var(--font-govde);font-size:var(--fs-xs);color:var(--metin-soluk);margin-top:var(--sp-2);flex-wrap:wrap">'
           +'<span><span style="display:inline-block;width:10px;height:10px;background:#A8C478;border-radius:2px;vertical-align:middle;margin-right:3px"></span>Fermantasyon</span>'
-          +(_siGunI !== null ? '<span><span style="display:inline-block;width:10px;height:10px;background:#B890A8;border-radius:2px;vertical-align:middle;margin-right:3px"></span>Kondisyon</span>':'')
+          +(_siGunI !== null ? '<span><span style="display:inline-block;width:10px;height:10px;background:rgba(139,106,26,.5);border-radius:2px;vertical-align:middle;margin-right:3px"></span>Kondisyon</span>':'')
           +'<span><span style="display:inline-block;width:10px;height:10px;background:#D4A04A;border-radius:2px;vertical-align:middle;margin-right:3px"></span>Bugün</span>'
           +'<span style="margin-left:auto">🧬 Pitch · 🌿 DH · ❄️ CC · 🍺 Şişe</span>'
         +'</div>'
@@ -13389,10 +13313,10 @@ function rEditorTakvim(maya, maya2, tv){
     var _bugunKart = '';
     if(_bugunIdealAksiyon){
       var _geldiMi = _bugunIdealGun >= 0 && _bugunIdealGun <= _prof.toplamGun;
-      _bugunKart = '<div style="background:var(--bg2);border-left:3px solid #66BB6A;border-radius:6px;padding:10px 12px;margin-bottom:8px">'
+      _bugunKart = '<div style="background:var(--bg2);border-left:3px solid var(--yk);border-radius:6px;padding:10px 12px;margin-bottom:8px">'
         +'<div style="font-size:var(--fs-xs);font-weight:700;color:var(--yk);letter-spacing:.6px;margin-bottom:3px">BUGÜN · '+_bugunIdealGun+'. GÜN · İDEAL</div>'
         +'<div style="font-size:13px;font-weight:700;color:var(--kahve);font-family:var(--font-display)">'+_bugunIdealAksiyon.aksiyon+'</div>'
-        +(_bugunIdealAksiyon.t!==null?'<div style="font-size:11px;color:#2E7D32;margin-top:2px;font-weight:600">Hedef: '+_bugunIdealAksiyon.t+'°C</div>':'')
+        +(_bugunIdealAksiyon.t!==null?'<div style="font-size:11px;color:var(--yk);margin-top:2px;font-weight:600">Hedef: '+_bugunIdealAksiyon.t+'°C</div>':'')
         +'<div style="font-size:11px;color:var(--soluk);margin-top:4px;line-height:1.5">'+_bugunIdealAksiyon.aciklama+'</div>'
         +_sapmaUyari
       +'</div>';
@@ -13409,7 +13333,7 @@ function rEditorTakvim(maya, maya2, tv){
       var _gelecek = _bugunIdealGun===null || p.g > _bugunIdealGun;
       var _bg, _renk, _ops;
       if(_bugun3){ _bg='#FFF9C4'; _renk='var(--bakir)'; _ops='1'; }
-      else if(_gecmis){ _bg='#F1F8E9'; _renk='#558B2F'; _ops='0.7'; }
+      else if(_gecmis){ _bg='#F1F8E9'; _renk='var(--yk)'; _ops='0.7'; }
       else { _bg='#FAFAFA'; _renk='#666'; _ops='0.9'; }
 
       // Planlanan tarih
@@ -13436,7 +13360,7 @@ function rEditorTakvim(maya, maya2, tv){
     }).join('');
 
     _stilIdealKart = '<div style="background:#fff;border:1px solid var(--bor);border-radius:12px;margin-bottom:8px;box-shadow:var(--golge);overflow:hidden">'
-      +'<div onclick="toggleStilIdeal()" style="padding:10px 14px;background:var(--bg2);border-bottom:1px solid var(--bor);cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between;border-left:3px solid #66BB6A">'
+      +'<div onclick="toggleStilIdeal()" style="padding:10px 14px;background:var(--bg2);border-bottom:1px solid var(--bor);cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between;border-left:3px solid var(--yk)">'
         +'<div>'
           +'<div style="font-size:var(--fs-xs);font-weight:700;color:var(--kahve);letter-spacing:.6px">📖 STİL-İDEAL TAKVİM</div>'
           +'<div style="font-size:var(--fs-xs);color:var(--soluk);margin-top:2px">'+_prof.baslik+' · '+_prof.toplamGun+' gün'+(_prof.sise?' · Şişele G'+_prof.sise:'')+'</div>'
@@ -13464,7 +13388,7 @@ function rEditorTakvim(maya, maya2, tv){
     var _cCK = (typeof calc==='function')?calc():{og:1.050,fg:1.012};
     var _ks2 = kaliteSkoru(S, maya, _cCK.og||1.050, _cCK.fg||1.012, (S&&S.stilTah)||(S&&S.stil)||(S&&S.biraAd)||'');
     if(_ks2.acik){
-      var _ksRenk2 = _ks2.toplam>=75?'#558B2F':_ks2.toplam>=60?'#8D6E63':_ks2.toplam>=40?'#E65100':'#C62828';
+      var _ksRenk2 = _ks2.toplam>=75?'var(--ok)':_ks2.toplam>=60?'var(--yk)':_ks2.toplam>=40?'var(--sk)':'var(--crit)';
       var _barMini = function(val){
         var pct = val/25*100;
         return '<div style="flex:1;background:rgba(0,0,0,.06);height:4px;border-radius:2px;overflow:hidden;min-width:20px"><div style="width:'+pct+'%;background:'+_ksRenk2+';height:100%"></div></div>';
