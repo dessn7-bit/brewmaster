@@ -15292,8 +15292,8 @@ function rEditorNot(){
   try {
     if(_stilAdi && typeof BJCP!=='undefined' && BJCP[_stilAdi]){
       var _bj=BJCP[_stilAdi];
-      _stilIpucu = '<div style="font-size:10px;color:var(--soluk);margin-top:4px;line-height:1.5">'
-        +'<b style="color:var(--kahve)">BJCP '+_stilAdi+'</b> <span style="color:var(--dim);font-size:9px">('+_stilKaynak+')</span><br>'
+      _stilIpucu = '<div style="font-size:var(--fs-xs);color:var(--soluk);margin-top:4px;line-height:1.5">'
+        +'<b style="color:var(--kahve)">BJCP '+_stilAdi+'</b> <span style="color:var(--dim);font-size:var(--fs-xs)">('+_stilKaynak+')</span><br>'
         +'OG '+_bj.og[0].toFixed(3)+'–'+_bj.og[1].toFixed(3)+' · '
         +'FG '+_bj.fg[0].toFixed(3)+'–'+_bj.fg[1].toFixed(3)+' · '
         +'ABV '+_bj.abv[0]+'–'+_bj.abv[1]+'% · '
@@ -15301,7 +15301,7 @@ function rEditorNot(){
         +'SRM '+_bj.srm[0]+'–'+_bj.srm[1]
       +'</div>';
     } else if(_stilAdi){
-      _stilIpucu = '<div style="font-size:10px;color:var(--dim);margin-top:4px;font-style:italic">Stil: '+_stilAdi+' — BJCP veritabanında bulunamadı</div>';
+      _stilIpucu = '<div style="font-size:var(--fs-xs);color:var(--dim);margin-top:4px;font-style:italic">Stil: '+_stilAdi+' — BJCP veritabanında bulunamadı</div>';
     }
   } catch(e){}
 
@@ -15327,7 +15327,7 @@ function rEditorNot(){
         +'<button onclick="tadimInc(\''+id+'\',-1,'+max+')" style="width:34px;height:34px;border-radius:8px;border:1px solid var(--bor);background:var(--bg2);color:var(--kahve);font-size:18px;font-weight:700;cursor:pointer;user-select:none;-webkit-tap-highlight-color:rgba(139,90,43,.2)">−</button>'
         +'<input type="number" id="_tin_'+id+'" aria-label="'+label+' puanı" value="'+v+'" min="0" max="'+max+'" oninput="tadimSet(\''+id+'\',this.value)" style="width:52px;text-align:center;font-size:14px;font-weight:700;padding:6px 4px;border:1px solid var(--bor);border-radius:8px;color:var(--bakir);background:#fff">'
         +'<button onclick="tadimInc(\''+id+'\',1,'+max+')" style="width:34px;height:34px;border-radius:8px;border:1px solid var(--bor);background:var(--bg2);color:var(--kahve);font-size:18px;font-weight:700;cursor:pointer;user-select:none;-webkit-tap-highlight-color:rgba(139,90,43,.2)">+</button>'
-        +'<span style="font-size:10px;color:var(--soluk);min-width:28px;text-align:right">/'+max+'</span>'
+        +'<span style="font-size:var(--fs-xs);color:var(--soluk);min-width:28px;text-align:right">/'+max+'</span>'
       +'</div>'
       +(acik?'<textarea id="_tdnot_'+id+'" aria-label="'+label+' notu" class="inp" rows="2" style="width:100%;margin-top:6px;font-size:11px;padding:6px 8px;resize:vertical;box-sizing:border-box;background:var(--bg2)" placeholder="'+detay+'" oninput="tadimSetNot(\''+id+'_not\',this.value)">'+(_T[id+'_not']||'')+'</textarea>':'')
     +'</div>';
@@ -15335,8 +15335,8 @@ function rEditorNot(){
 
   var _tOffHtml = _tOff.map(function(k){
     var checked=_T.offList&&_T.offList[k];
-    return '<label id="_tOffLbl_'+k+'" style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--kahve);margin:3px 6px 3px 0;cursor:pointer;padding:4px 10px;background:'+(checked?'#FFEBEE':'var(--bg2)')+';border-radius:12px;border:1px solid '+(checked?'#E57373':'var(--bor)')+';transition:background 0.15s,border-color 0.15s">'
-      +'<input type="checkbox" '+(checked?'checked':'')+' onchange="tadimOff(\''+k+'\',this.checked)" style="accent-color:#C62828;margin:0"> '+_tOffAd[k]
+    return '<label id="_tOffLbl_'+k+'" style="display:inline-flex;align-items:center;gap:4px;font-size:var(--fs-xs);color:var(--kahve);margin:3px 6px 3px 0;cursor:pointer;padding:4px 10px;background:'+(checked?'var(--crit-bg)':'var(--bg2)')+';border-radius:12px;border:1px solid '+(checked?'var(--crit)':'var(--bor)')+';transition:background 0.15s,border-color 0.15s">'
+      +'<input type="checkbox" '+(checked?'checked':'')+' onchange="tadimOff(\''+k+'\',this.checked)" style="accent-color:var(--crit);margin:0"> '+_tOffAd[k]
     +'</label>';
   }).join('');
 
@@ -15349,17 +15349,17 @@ function rEditorNot(){
         var sev = o.toplam>=45?'Outstanding':o.toplam>=38?'Excellent':o.toplam>=30?'Very Good':o.toplam>=21?'Good':o.toplam>=14?'Fair':'Problematic';
         var offActive = Object.keys(o.offList||{}).filter(function(k){return o.offList[k];});
         return '<div style="background:var(--bg2);border:1px solid var(--bor);border-radius:8px;padding:10px;margin-bottom:6px;position:relative">'
-          +'<button onclick="tadimOturumSil('+idx+')" style="position:absolute;top:6px;right:8px;background:none;border:none;color:#bbb;font-size:14px;cursor:pointer;padding:2px 4px">✕</button>'
+          +((typeof window!=='undefined'&&window._tadimSilOnay===idx)?'<span style="position:absolute;top:6px;right:8px;display:flex;gap:4px;align-items:center"><button onclick="tadimOturumSil('+idx+')" aria-label="'+esc(o.tarih)+' tadım oturumunu sil — onayla" style="background:var(--crit);color:#fff;border:none;border-radius:6px;font-size:var(--fs-xs);font-weight:700;cursor:pointer;padding:3px 8px">Sil</button><button onclick="tadimSilVazgec()" aria-label="Silmekten vazgeç" style="background:var(--bg2);color:var(--kahve);border:1px solid var(--bor);border-radius:6px;font-size:var(--fs-xs);cursor:pointer;padding:3px 8px">Vazgeç</button></span>':'<button onclick="tadimSilSor('+idx+')" aria-label="'+esc(o.tarih)+' tadım oturumunu sil" style="position:absolute;top:6px;right:8px;background:none;border:none;color:var(--crit);font-size:14px;cursor:pointer;padding:2px 4px">✕</button>')
           +'<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:4px">'
             +'<span style="font-size:15px;font-weight:700;color:var(--bakir);font-family:var(--font-display)">'+o.toplam+'/50</span>'
-            +'<span style="font-size:10px;color:var(--kahve);font-weight:600">'+sev+'</span>'
-            +'<span style="font-size:10px;color:var(--soluk);margin-left:auto">'+o.tarih+'</span>'
+            +'<span style="font-size:var(--fs-xs);color:var(--kahve);font-weight:600">'+sev+'</span>'
+            +'<span style="font-size:var(--fs-xs);color:var(--soluk);margin-left:auto">'+o.tarih+'</span>'
           +'</div>'
-          +'<div style="font-size:10px;color:var(--soluk);line-height:1.5">'
+          +'<div style="font-size:var(--fs-xs);color:var(--soluk);line-height:1.5">'
             +'Aroma '+o.aroma+'/12 · Tat '+o.tat+'/20 · Görünüm '+o.gorunum+'/3 · Ağız '+o.agizH+'/5 · Genel '+o.genel+'/10'
           +'</div>'
-          +(offActive.length?'<div style="font-size:9px;color:#C62828;margin-top:3px">⚠️ '+offActive.map(function(k){return _tOffAd[k]||k;}).join(', ')+'</div>':'')
-          +(o.tadimNot?'<div style="font-size:10px;color:var(--kahve);margin-top:4px;padding:4px 6px;background:#fff;border-radius:4px;font-style:italic">"'+esc(o.tadimNot)+'"</div>':'')
+          +(offActive.length?'<div style="font-size:var(--fs-xs);color:var(--kk);margin-top:3px">⚠️ '+offActive.map(function(k){return _tOffAd[k]||k;}).join(', ')+'</div>':'')
+          +(o.tadimNot?'<div style="font-size:var(--fs-xs);color:var(--kahve);margin-top:4px;padding:4px 6px;background:#fff;border-radius:4px;font-style:italic">"'+esc(o.tadimNot)+'"</div>':'')
         +'</div>';
       }).join('')
     +'</div>';
@@ -15367,29 +15367,29 @@ function rEditorNot(){
 
   var _tadimKart = '<div style="background:#fff;border:1px solid var(--bor);border-radius:12px;padding:14px;margin:0;box-shadow:var(--golge)'+(!_hasSis?';opacity:.55':'')+'">'
     +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;flex-wrap:wrap;gap:8px">'
-      +'<div style="font-size:10px;font-weight:700;color:var(--kahve);letter-spacing:.6px">👅 TADIM DEĞERLENDİRMESİ (BJCP 50 puan)</div>'
-      +'<div id="_tadimToplam" style="font-size:14px;font-weight:700;color:var(--bakir);font-family:var(--font-display)">'+(_tadimToplam>0?_tadimToplam+'/50 · <span style="font-size:10px;color:var(--soluk);font-weight:500">'+_tadimSeviye+'</span>':'')+'</div>'
+      +'<div style="font-size:var(--fs-xs);font-weight:700;color:var(--kahve);letter-spacing:.6px">👅 TADIM DEĞERLENDİRMESİ (BJCP 50 puan)</div>'
+      +'<div id="_tadimToplam" style="font-size:14px;font-weight:700;color:var(--bakir);font-family:var(--font-display)">'+(_tadimToplam>0?_tadimToplam+'/50 · <span style="font-size:var(--fs-xs);color:var(--soluk);font-weight:500">'+_tadimSeviye+'</span>':'')+'</div>'
     +'</div>'
     +_stilIpucu
-    +(!_hasSis?'<div style="background:var(--bg2);border-left:3px solid var(--vintage);border-radius:6px;padding:8px 10px;margin:10px 0;font-size:10px;color:var(--soluk)">🔒 Şişeleme kaydı yapılınca aktifleşir — taze bira tadım için hazır değil.</div>':'<div style="height:8px"></div>')
+    +(!_hasSis?'<div style="background:var(--bg2);border-left:3px solid var(--vintage);border-radius:6px;padding:8px 10px;margin:10px 0;font-size:var(--fs-xs);color:var(--soluk)">🔒 Şişeleme kaydı yapılınca aktifleşir — taze bira tadım için hazır değil.</div>':'<div style="height:8px"></div>')
     +_tadimInput('aroma', _T.aroma, 12, '👃 Aroma', 'Hangi aromalar öne çıkıyor? (muz, karanfil, karamel, sitrus, kuru meyve...)')
     +_tadimInput('gorunum', _T.gorunum, 3, '👁️ Görünüm', null)
     +_tadimInput('tat', _T.tat, 20, '👅 Tat', 'Malt/hop dengesi, tatlılık, acılık, aftertaste...')
     +_tadimInput('agizH', _T.agizH, 5, '🫧 Ağız hissi', 'Gövde (hafif/orta/dolgun), karbonasyon (düşük/orta/yüksek), ısı hissi...')
     +_tadimInput('genel', _T.genel, 10, '⭐ Genel izlenim', null)
     +'<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bor)">'
-      +'<div style="font-size:10px;font-weight:700;color:var(--kahve);letter-spacing:.5px;margin-bottom:6px">⚠️ OFF-FLAVOR KONTROLÜ</div>'
+      +'<div style="font-size:var(--fs-xs);font-weight:700;color:var(--kahve);letter-spacing:.5px;margin-bottom:6px">⚠️ OFF-FLAVOR KONTROLÜ</div>'
       +'<div style="line-height:1.9">'+_tOffHtml+'</div>'
     +'</div>'
     +'<div style="margin-top:10px">'
-      +'<label style="font-size:10px;font-weight:700;color:var(--kahve);letter-spacing:.5px">📝 GENEL TADIM NOTU</label>'
+      +'<label style="font-size:var(--fs-xs);font-weight:700;color:var(--kahve);letter-spacing:.5px">📝 GENEL TADIM NOTU</label>'
       +'<textarea aria-label="Genel tadım notu" id="tadimNot" class="inp" rows="3" style="width:100%;margin-top:4px;font-size:12px;padding:8px;resize:vertical;box-sizing:border-box;background:var(--bg2)" placeholder="Bu tadım oturumunun özeti — stile uygunluk, en güçlü/zayıf yön, sonraki partide değiştirecekler..." oninput="tadimSetNot(\'tadimNot\',this.value)">'+(_T.tadimNot||'')+'</textarea>'
     +'</div>'
     +(_hasSis?'<button class="btn" style="width:100%;margin-top:10px;padding:10px;background:var(--altin);color:#fff;border-color:var(--altin);font-weight:700" onclick="tadimOturumKaydet()">💾 Bu Tadım Oturumunu Arşive Kaydet</button>':'')
   +'</div>';
 
   var _serbestKart = '<div style="background:#fff;border:1px solid var(--bor);border-radius:12px;padding:14px;margin:0;box-shadow:var(--golge)">'
-    +'<div style="font-size:10px;font-weight:700;color:var(--kahve);letter-spacing:.6px;margin-bottom:6px">📝 SERBEST NOTLAR — '+(S.biraAd||"bu tarife")+'</div>'
+    +'<div style="font-size:var(--fs-xs);font-weight:700;color:var(--kahve);letter-spacing:.6px;margin-bottom:6px">📝 SERBEST NOTLAR — '+(S.biraAd||"bu tarife")+'</div>'
     +'<textarea aria-label="Reçete notları" id="notText" class="inp" rows="10" style="resize:vertical;line-height:1.7;font-size:12px;padding:10px;background:var(--bg2);width:100%;box-sizing:border-box" onblur="S.notlar=this.value" placeholder="Brew day gözlemleri, denemeler, su profili, mash notları...\n\nÖr: Mash 65°C 60 dk — çok iyi çalıştı.\nDry hop 4. günde eklendi — aroma mükemmeldi.\nBir sonraki seferde SO4 biraz artır.">'+(S.notlar||'')+'</textarea>'
     +'<button class="btn" style="background:var(--altin);color:#fff;width:100%;margin-top:8px;padding:10px" onclick="notu_kaydet()">Notu Kaydet</button>'
   +'</div>';
@@ -22560,12 +22560,16 @@ window.tadimOturumKaydet=tadimOturumKaydet;
 
 function tadimOturumSil(idx){
   if(!S.tadim||!S.tadim.oturumlar)return;
-  if(!confirm('Bu tadım oturumunu sil?'))return;
   S.tadim.oturumlar.splice(idx,1);
+  if(typeof window!=='undefined') window._tadimSilOnay=null;
   try{saveDraft();}catch(e){}
   render();
 }
 window.tadimOturumSil=tadimOturumSil;
+// DEFTER-CILA: iki-aşamalı inline onay (confirm() WebView-güvenilmez, 21843 emsali)
+function tadimSilSor(idx){ if(typeof window!=='undefined') window._tadimSilOnay=idx; render(); }
+function tadimSilVazgec(){ if(typeof window!=='undefined') window._tadimSilOnay=null; render(); }
+window.tadimSilSor=tadimSilSor; window.tadimSilVazgec=tadimSilVazgec;
 
 // Kalite skoru detaylar accordion
 function toggleKaliteDetay(){
