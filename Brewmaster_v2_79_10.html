@@ -15583,6 +15583,7 @@ function gristOlcekHTML(curOG,curHac){
 }
 
 function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
+  var _stokCipMap={};try{if(typeof STOK!=='undefined'&&Array.isArray(STOK)&&STOK.length>0&&typeof _stokMalBul==='function'){MALTLAR.forEach(function(m){if(!m)return;var _six=_stokMalBul(m.id,m.ad);if(_six>-1&&STOK[_six])_stokCipMap[m.id]=(STOK[_six].miktar||0)+(STOK[_six].birim||'g');});}}catch(_e){} // MALT-STOK-ROZET: stok çip haritası (Katkı/Hop emsali, _stokMalBul refId>ad, render başına tek)
   // Kombine base ve en büyük base bir kere hesapla (rol hesabı için)
   const _baseTopKg=S.maltlar.reduce((s,m2)=>{const ml2=MALTLAR.find(x=>x&&x.id===m2.id);return (ml2&&ml2.g==="Base"&&m2.id!=="rice_hulls"&&m2.id!=="rice")?s+m2.kg:s;},0);
   const _basePct=topMalt>0?(_baseTopKg/topMalt*100):0;
@@ -15663,7 +15664,7 @@ function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
       <div style="display:flex;align-items:center;gap:8px;padding:8px 10px">
         <div style="width:14px;height:14px;border-radius:50%;background:${srmR(ml?ml.r:0)};border:2px solid rgba(0,0,0,.1);flex-shrink:0"></div>
         <div style="flex:1;min-width:0">
-          <div style="font-size:13px;font-weight:600;color:var(--kahve);display:flex;align-items:center;gap:5px;flex-wrap:wrap"><span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:var(--fs-xs);font-weight:700;background:${_kat.bg};color:${_kat.tx};letter-spacing:.3px">${_kat.ad}</span>${ml?ml.ad:m.id}</div>
+          <div style="font-size:13px;font-weight:600;color:var(--kahve);display:flex;align-items:center;gap:5px;flex-wrap:wrap"><span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:var(--fs-xs);font-weight:700;background:${_kat.bg};color:${_kat.tx};letter-spacing:.3px">${_kat.ad}</span>${ml?ml.ad:m.id}${_stokCipMap[m.id]?` <span style="font-size:var(--fs-xs);background:var(--ma);color:var(--mk);padding:1px 4px;border-radius:3px;font-weight:700">📦 ${_stokCipMap[m.id]}</span>`:''}</div>
           <div style="font-size:var(--fs-xs);color:var(--soluk);margin-top:2px">${ml?ml.r+"°L":""} · +${kt} GU${_mcu>0?` · <span style="color:var(--bakir)">+${_mcu} MCU</span>`:''} · <b>%${_pct}</b>${m.marka?` · <span class="pill">${m.marka}</span>`:""}</div>
         </div>
         <input aria-label="Malt miktarı (kg)" type="number" value="${m.kg}" min=".01" step=".01" class="inp" style="width:78px;text-align:center;font-weight:600" onchange="S.maltlar[${i}].kg=Math.max(0.01,parseFloat(this.value)||0.01);render()">
@@ -15720,7 +15721,7 @@ function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
       var sel = yM.id === m.id;
       return '<div class="satir" style="cursor:pointer;margin-bottom:4px;'+(sel?'border-color:var(--altin);background:var(--sa);':'')+'" onclick="yM.id=&quot;'+esc(m.id)+'&quot;;render()">'
         +'<div style="flex:1;min-width:0">'
-        +'<div style="font-size:12px;font-weight:600;color:'+(sel?'var(--bakir)':'var(--kahve)')+'">'+esc(m.ad)+'</div>'
+        +'<div style="font-size:12px;font-weight:600;color:'+(sel?'var(--bakir)':'var(--kahve)')+'">'+esc(m.ad)+(_stokCipMap[m.id]?' <span style="font-size:var(--fs-xs);background:var(--ma);color:var(--mk);padding:1px 4px;border-radius:3px;font-weight:700">📦 '+_stokCipMap[m.id]+'</span>':'')+'</div>'
         +'<div style="font-size:var(--fs-xs);color:var(--dim)">GU:'+m.gu+' · '+m.r+'°L'+(m.mo?' · '+m.mo.slice(0,40):'')+'</div>'+(TANIM[m.id]?'<div style="font-size:var(--fs-xs);color:var(--dim);margin-top:3px;line-height:1.4;opacity:.9;white-space:pre-wrap">'+esc(TANIM[m.id])+'</div>':'')
         +'</div>'
         +'<div style="font-size:var(--fs-xs);background:'+(m.gu>0?'var(--ya)':'var(--bg-sunken)')+';color:'+(m.gu>0?'var(--yk)':'var(--dim)')+';padding:2px 6px;border-radius:4px;flex-shrink:0">'+(m.gu>0?'OG↑':'OG±0')+'</div>'
@@ -21730,7 +21731,7 @@ window.brewdayBitir=function(){
           +'</div>'
           +(al.durum==='bekliyor'||al.durum==='gosterildi' ? 
             '<div style="display:flex;gap:4px;flex-shrink:0">'
-              +'<button onclick="_alarmAksiyon(\''+hedefRid+'\','+al.g+',\'tamamlandi\')" style="background:#E8F4E8;border:1px solid #2D7A2D;color:#2D7A2D;border-radius:6px;padding:4px 8px;font-size:10px;font-weight:700;cursor:pointer">✓</button>'
+              +'<button onclick="_alarmAksiyon(\''+hedefRid+'\','+al.g+',\'tamamlandi\')" style="background:var(--ya);border:1px solid var(--yk);color:var(--yk);border-radius:6px;padding:4px 8px;font-size:10px;font-weight:700;cursor:pointer">✓</button>'
               +(al.ts <= simdi ? '<button onclick="_alarmAksiyon(\''+hedefRid+'\','+al.g+',\'ertele\')" style="background:var(--card);border:1px solid var(--bor);color:var(--kahve);border-radius:6px;padding:4px 8px;font-size:10px;font-weight:600;cursor:pointer">⏰</button>' : '')
             +'</div>'
             : (al.durum==='tamamlandi' ? '<span style="font-size:10px;color:#2D7A2D;font-weight:700">✓</span>' : 
