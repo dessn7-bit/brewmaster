@@ -5131,14 +5131,14 @@ function katAd(g){return g==='Adjunct'?'Ek Tahıl':g;}
 // Belçika: altın (karmaşık), Saison: tarım yeşili, Kveik: turuncu (sıcak), Sour: mor (ekşi)
 function mayaRenk(tip){
   const m={
-    'ale':'var(--bakir)',       // kahve
-    'lager':'#4A7A9D',     // mavi (soğuk)
-    'wheat':'#C8A040',     // buğday sarısı
-    'wit':'#E8C870',       // açık buğday
-    'belcika':'#B8874E',   // altın (bakır tonu)
-    'saison':'#8B9D3D',    // tarım yeşili
-    'kveik':'#D9823C',     // turuncu (yüksek ısı)
-    'sour':'#9D6B8B'       // mor-krem (ekşi)
+    'ale':'#8B5A2B',       // --bakir literal (RENK-FN: alpha-concat +22 bug fix)
+    'lager':'#4A5970',     // --mk (soğuk mavi tasfiye, eaa5902)
+    'wheat':'#7A5F0F',     // --kat-ozel-t
+    'wit':'#6B5A48',       // --kat-ek-t
+    'belcika':'#5C3A0E',   // --vintage-koyu (kontrast 2.78 FAIL→8.09)
+    'saison':'#5A6B2A',    // --yk
+    'kveik':'#2E2620',     // --ink
+    'sour':'#8B3A1A'       // --kk (mor tasfiye)
   };
   return m[tip]||'var(--bor2)';
 }
