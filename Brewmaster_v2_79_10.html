@@ -5635,16 +5635,16 @@ function mayaValidate(mayalar){
 // Meşe: kahve · Berraklaştırıcı: açık mavi · Fermantasyon: gri-mavi · Proses: bej
 function katkiRenk(g){
   const m={
-    'Şeker':'#C8A040',          // altın
+    'Şeker':'#7A5F0F',          // altın koyu (= --kat-ozel-t, KATKI-ROZET)
     'Meyve':'#A04050',          // bordo-kırmızı
-    'Baharat':'#D9823C',        // yanmış turuncu
-    'Aroma':'#8B9D3D',          // zeytin yeşili
+    'Baharat':'#8B3A1A',        // kiremit koyu (= --kk, KATKI-ROZET; --kat-seker-t 4.42 FAIL)
+    'Aroma':'#5A6B2A',          // zeytin koyu (= --yk, KATKI-ROZET)
     'Meşe':'#6B4A2A',           // koyu kahve
     'Berraklaştırıcı':'#4A5970', // kurşuni koyu (= --mk, KATKI-RENK)
-    'Fermantasyon':'#5A6B2A',   // zeytin koyu (= --yk, KATKI-RENK)
-    'Adjunct':'#A8896B',        // sıcak bej (Malt'taki Ek Tahıl ile uyumlu)
-    'Proses':'#A09080',         // bej
-    'Egzotik':'#8B3A1A',        // kiremit koyu (= --kk, KATKI-RENK)
+    'Fermantasyon':'#5C3A0E',   // espresso (= --vintage-koyu, KATKI-ROZET; --yk Aroma'ya)
+    'Adjunct':'#6B5A48',        // koyu bej (= --kat-ek-t, Malt Ek Tahıl metin tonu)
+    'Proses':'#2E2620',         // nötr koyu (= --ink, KATKI-ROZET)
+    'Egzotik':'#8B5A2B',        // bakır (= --bakir, KATKI-ROZET; n=0, --kk Baharat'a)
     'Kahve & Çikolata':'#4A2E1A' // çok koyu kahve
   };
   return m[g]||'var(--bor2)';
@@ -15030,7 +15030,7 @@ function rEditorKatki(){
         }
         if(kDB.srm > 0){
           var _srmArt = (kDB.srm * kt.miktar/1000 / _hac).toFixed(1);
-          if(parseFloat(_srmArt) >= 0.1) _parts.push('<span style="color:#7A3A20">+'+_srmArt+' SRM</span>');
+          if(parseFloat(_srmArt) >= 0.1) _parts.push('<span style="color:var(--vintage-koyu)">+'+_srmArt+' SRM</span>');
         }
         if(_parts.length) _etkiSat = '<div style="font-size:var(--fs-xs);color:var(--soluk);margin-top:1px;line-height:1.2">'+_parts.join(' · ')+'</div>';
       }
@@ -15097,15 +15097,15 @@ function rEditorKatki(){
       if(!_defMik) _defMik = 50; // Fallback
       // I-K2: Özellik rozetleri — tek satır, kompakt
       var _ozellik='';
-      if(k.gu>0) _ozellik+='<span style="font-size:var(--fs-xs);background:#E8F4E8;color:var(--yk);padding:1px 4px;border-radius:3px;font-weight:700">+'+k.gu+'GU/kg</span>';
-      if(k.srm>10) _ozellik+=' <span style="font-size:var(--fs-xs);background:#F4E8D8;color:#7A3A20;padding:1px 4px;border-radius:3px;font-weight:700">'+k.srm+'°L</span>';
-      if(k.ibu_dk60>0.1) _ozellik+=' <span style="font-size:var(--fs-xs);background:#E8EDD8;color:#5A6A20;padding:1px 4px;border-radius:3px;font-weight:700">🌿IBU</span>';
-      if(k.fermente===true) _ozellik+=' <span style="font-size:var(--fs-xs);background:#F0E8DC;color:var(--vintage-koyu);padding:1px 4px;border-radius:3px;font-weight:700">🧬ferm.</span>';
-      if(k.fermente===false&&k.gu>0) _ozellik+=' <span style="font-size:var(--fs-xs);background:#F0DDDD;color:var(--vintage-koyu);padding:1px 4px;border-radius:3px;font-weight:700">⚠️FG</span>';
+      if(k.gu>0) _ozellik+='<span style="font-size:var(--fs-xs);background:var(--ya);color:var(--yk);padding:1px 4px;border-radius:3px;font-weight:700">+'+k.gu+'GU/kg</span>';
+      if(k.srm>10) _ozellik+=' <span style="font-size:var(--fs-xs);background:var(--sa);color:var(--vintage-koyu);padding:1px 4px;border-radius:3px;font-weight:700">'+k.srm+'°L</span>';
+      if(k.ibu_dk60>0.1) _ozellik+=' <span style="font-size:var(--fs-xs);background:var(--ya);color:var(--yk);padding:1px 4px;border-radius:3px;font-weight:700">🌿IBU</span>';
+      if(k.fermente===true) _ozellik+=' <span style="font-size:var(--fs-xs);background:var(--bg-sunken);color:var(--vintage-koyu);padding:1px 4px;border-radius:3px;font-weight:700">🧬ferm.</span>';
+      if(k.fermente===false&&k.gu>0) _ozellik+=' <span style="font-size:var(--fs-xs);background:var(--ka);color:var(--kk);padding:1px 4px;border-radius:3px;font-weight:700">⚠️FG</span>';
       // Fiyat rozeti
       if(k.fiyat){
         var _fSym = k.fiyat==='ucuz'?'₺':k.fiyat==='orta'?'₺₺':'₺₺₺';
-        var _fRnk = k.fiyat==='ucuz'?'#E0F0E0':k.fiyat==='orta'?'var(--kahve-bg)':'var(--crit-bg)';
+        var _fRnk = k.fiyat==='ucuz'?'var(--ya)':k.fiyat==='orta'?'var(--kahve-bg)':'var(--crit-bg)';
         var _fTxt = k.fiyat==='ucuz'?'var(--yk)':k.fiyat==='orta'?'var(--vintage-koyu)':'var(--crit)';
         _ozellik+=' <span style="font-size:var(--fs-xs);background:'+_fRnk+';color:'+_fTxt+';padding:1px 4px;border-radius:3px;font-weight:700">'+_fSym+'</span>';
       }
@@ -15212,9 +15212,9 @@ function rEditorKatki(){
         var _oneriler=KATKILAR.filter(function(k){return k&&k.tags&&k.tags.some(function(t){return _stilTag.indexOf(t)>-1;});}).slice(0,12);
         if(_oneriler.length>0){
           h+='<div style="background:linear-gradient(135deg,var(--kahve-bg) 0%,var(--kahve-light) 100%);border:1px solid var(--vintage);border-radius:10px;padding:8px 10px;margin-bottom:8px">'
-           +'<div style="font-size:var(--fs-xs);font-weight:700;color:#3A5A20;letter-spacing:.4px;margin-bottom:6px">🎯 '+esc(_stilAd.toUpperCase())+' İÇİN UYGUN</div>'
+           +'<div style="font-size:var(--fs-xs);font-weight:700;color:var(--vintage-koyu);letter-spacing:.4px;margin-bottom:6px">🎯 '+esc(_stilAd.toUpperCase())+' İÇİN UYGUN</div>'
            +'<div style="display:flex;gap:6px;flex-wrap:wrap">'
-           +_oneriler.map(function(k){return '<button onclick="katki_ekle_tarif(\''+k.id+'\')" style="background:#fff;border:1px solid var(--vintage);border-radius:8px;padding:4px 8px;font-size:11px;color:#3A5A20;cursor:pointer;font-weight:500">'+esc(k.ad.split(' (')[0])+' +</button>';}).join('')
+           +_oneriler.map(function(k){return '<button onclick="katki_ekle_tarif(\''+k.id+'\')" style="background:#fff;border:1px solid var(--vintage);border-radius:8px;padding:4px 8px;font-size:11px;color:var(--yk);cursor:pointer;font-weight:500">'+esc(k.ad.split(' (')[0])+' +</button>';}).join('')
            +'</div></div>';
         }
       }
