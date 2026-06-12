@@ -15932,7 +15932,7 @@ function rEditorHop(og, ibu, seciHop){
         <div style="flex:1"><span class="etiket">Whirlpool Sıcaklığı</span><select aria-label="Whirlpool sıcaklığı (°C)" class="inp" onchange="yH.whT=parseInt(this.value);render()">${wpTO}</select></div>
         <div style="flex:1"><span class="etiket">Whirlpool Süresi</span><select aria-label="Whirlpool süresi (dk)" class="inp" onchange="yH.dk=parseInt(this.value);render()">${wpDkO}</select></div>
       </div>
-      <div style="font-size:10px;color:var(--dim);margin-top:-4px;margin-bottom:8px">Aktif whirlpool: ısı kontrol altında, sıcaklık sabit. 85°C/15dk tipik.</div>`
+      <div style="font-size:var(--fs-xs);color:var(--dim);margin-top:-4px;margin-bottom:8px">Aktif whirlpool: ısı kontrol altında, sıcaklık sabit. 85°C/15dk tipik.</div>`
     :yH.tur==="hop_stand"
     ?(()=>{
        const hsTO=[90,85,80,75,70].map(t=>`<option value="${t}"${(yH.whT||80)===t?" selected":""}>${t}°C</option>`).join("");
@@ -15941,24 +15941,24 @@ function rEditorHop(og, ibu, seciHop){
          <div style="flex:1"><span class="etiket">Başlangıç Sıcaklığı</span><select aria-label="Hop stand sıcaklığı (°C)" class="inp" onchange="yH.whT=parseInt(this.value);render()">${hsTO}</select></div>
          <div style="flex:1"><span class="etiket">Bekleme Süresi</span><select aria-label="Hop stand süresi (dk)" class="inp" onchange="yH.dk=parseInt(this.value);render()">${hsDkO}</select></div>
        </div>
-       <div style="margin-bottom:8px;padding:8px 10px;background:#F0EDDE;border-left:3px solid var(--bakir);border-radius:6px;font-size:11px;color:var(--kahve);line-height:1.5">
+       <div style="margin-bottom:8px;padding:8px 10px;background:var(--accent-soft);border-left:3px solid var(--bakir);border-radius:6px;font-size:11px;color:var(--kahve);line-height:1.5">
          <b>Hop Stand (pasif bekleme)</b> — flameout sonrası ısı kapalı, hop wort'ta bekler. Sıcaklık zamanla düşer → aroma/flavor baskın, acılık whirlpool'dan %15 daha az.
-         <div style="font-size:10px;color:var(--soluk);margin-top:3px">NEIPA, Juicy IPA, Pale Ale'de aroma için standart. 80°C/30dk tipik.</div>
+         <div style="font-size:var(--fs-xs);color:var(--soluk);margin-top:3px">NEIPA, Juicy IPA, Pale Ale'de aroma için standart. 80°C/30dk tipik.</div>
        </div>`;
       })()
     :yH.tur==="dry_hop"
     ?`<div style="margin-bottom:8px"><span class="etiket">Fermanterde Kalma Süresi</span><select aria-label="Dry hop gün sayısı" class="inp" onchange="yH.dryDays=parseInt(this.value)">${dryDO}</select>
-      <div style="font-size:10px;color:var(--dim);margin-top:4px">Fermantasyon bitince eklenir, belirtilen gün kadar temas eder, sonra şişelenir. 3-5 gün tipik. &gt;7 gün ot/yeşil tat riski + diacetyl oluşabilir (hop creep).</div>
+      <div style="font-size:var(--fs-xs);color:var(--dim);margin-top:4px">Fermantasyon bitince eklenir, belirtilen gün kadar temas eder, sonra şişelenir. 3-5 gün tipik. &gt;7 gün ot/yeşil tat riski + diacetyl oluşabilir (hop creep).</div>
      </div>`
     :yH.tur==="fwh"
-    ?`<div style="margin-bottom:8px;padding:8px 10px;background:#F5EDD8;border-left:3px solid var(--altin);border-radius:6px;font-size:11px;color:var(--kahve);line-height:1.5">
+    ?`<div style="margin-bottom:8px;padding:8px 10px;background:var(--sa);border-left:3px solid var(--altin);border-radius:6px;font-size:11px;color:var(--kahve);line-height:1.5">
        <b>First Wort Hop</b> — mash sonunda (lauter edilen wort'a) eklenir, kaynatma başlar ve 60 dk kaynamaya bağlı şekilde. Acılık 60 dk boil ile benzer ama daha <b>yumuşak, yuvarlak</b> karakterli.
-       <div style="font-size:10px;color:var(--soluk);margin-top:3px">Alman Pilsner, Kölsch, Czech Pilsner ve Belgian stil geleneksel uygulaması. IBU hesabı 60 dk boil eşdeğeri.</div>
+       <div style="font-size:var(--fs-xs);color:var(--soluk);margin-top:3px">Alman Pilsner, Kölsch, Czech Pilsner ve Belgian stil geleneksel uygulaması. IBU hesabı 60 dk boil eşdeğeri.</div>
      </div>`
     :"";
   // I-H1: Hop grup → renk haritası (Malt'taki gibi ama hop aileleri)
   const _hopRenk=g=>{
-    const m={'Amerikan':'#8B9D3D','Alman':'#4A7A9D','Çek':'#9B7D3D','İngiliz':'var(--bakir)','NZ':'#7D4A9D','Avustralya':'#B87A3D','Türk':'#C8A040','Cryo':'#5B8DB8','Ekstrakt':'#A8896B','Karışım':'#9D6B5A','Slovenya':'#6B8B9D','Polonya':'#9D8B6B'};
+    const m={'Amerikan':'#5A6B2A','Alman':'#4A5970','Çek':'#7A5F0F','İngiliz':'#8B5A2B','NZ':'#8B3A1A','Avustralya':'#5C3A0E','Türk':'#7A5F0F','Cryo':'#5D341A','Ekstrakt':'#6B5A48','Karışım':'#2E2620','Slovenya':'#4A5970','Polonya':'#6B5A48'}; // HOP-TOKEN: token hex'leri (=yk/mk/kat-ozel-t/bakir/kk/vintage-koyu/kat-koyu-t/kat-ek-t/ink; alpha-concat +22 için literal); paylaşım: Türk=Çek, Slovenya=Alman, Polonya=Ekstrakt (nadir aile)
     return m[g]||'var(--bor2)';
   };
   // I-H4: BU:GU oranı
@@ -15991,8 +15991,8 @@ function rEditorHop(og, ibu, seciHop){
     const _muadilH = (typeof MUADIL!=='undefined' && MUADIL[h.id]) ? MUADIL[h.id].slice(0,3) : [];
     return`<div class="satir" style="border-left:4px solid ${_gRenk};display:block;padding:0">
       <div style="display:flex;align-items:center;gap:8px;padding:10px 12px">
-        <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--kahve)">${hp?hp.ad:h.id}${_formIkon}${_grup?` <span style="font-size:9px;color:${_gRenk};background:${_gRenk}22;padding:1px 5px;border-radius:3px;font-weight:700;letter-spacing:.3px;vertical-align:middle">${_grup.toUpperCase()}</span>`:''}</div>
-        <div style="font-size:10px;color:var(--soluk);margin-top:2px">${_turEtiket} · ${aa}% AA</div></div>
+        <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--kahve)">${hp?hp.ad:h.id}${_formIkon}${_grup?` <span style="font-size:var(--fs-xs);color:${_gRenk};background:${_gRenk}22;padding:1px 5px;border-radius:3px;font-weight:700;letter-spacing:.3px;vertical-align:middle">${_grup.toUpperCase()}</span>`:''}</div>
+        <div style="font-size:var(--fs-xs);color:var(--soluk);margin-top:2px">${_turEtiket} · ${aa}% AA</div></div>
         <div style="text-align:right"><div style="font-size:12px;font-weight:600;color:${ik>0?"var(--bakir)":"var(--yk)"}">${ik>0?"+"+ik.toFixed(1)+" IBU":"🌿 Aroma"}</div><div style="font-size:11px;color:var(--soluk)">${h.g} g</div></div>
         <div style="display:flex;flex-direction:column;gap:1px;margin-left:2px">
           <button style="background:none;border:none;color:${i===0?'var(--dim)':'var(--bakir)'};font-size:11px;padding:0 3px;line-height:1;cursor:${i===0?'not-allowed':'pointer'};opacity:${i===0?'.4':'1'}" onclick="hopUp(${i})" ${i===0?'disabled':''}>▲</button>
@@ -16009,15 +16009,15 @@ function rEditorHop(og, ibu, seciHop){
   }).join("");
   // I-H3: toplam gram + I-H4: BU:GU + M-H5: anormal IBU uyarısı
   const _topHopG=S.hoplar.reduce((s,h)=>s+(h.g||0),0);
-  const _ibuAlarm=ibu>150?'<div style="background:#FFE0E0;border:1px solid var(--kk);color:var(--kk);padding:6px 10px;border-radius:6px;font-size:11px;margin-top:6px;font-weight:600">⚠️ IBU '+ibu.toFixed(0)+' — aşırı yüksek. Tat alıcılar ~100 IBU\'da doyar. Hop gramını gözden geçir.</div>':'';
-  const tibu=S.hoplar.length?`<div style="margin-top:8px;padding:12px 14px;background:var(--ya);border-radius:10px;border:1px solid #A0D0A0">
+  const _ibuAlarm=ibu>150?'<div style="background:var(--crit-bg);border:1px solid var(--kk);color:var(--kk);padding:6px 10px;border-radius:6px;font-size:11px;margin-top:6px;font-weight:600">⚠️ IBU '+ibu.toFixed(0)+' — aşırı yüksek. Tat alıcılar ~100 IBU\'da doyar. Hop gramını gözden geçir.</div>':'';
+  const tibu=S.hoplar.length?`<div style="margin-top:8px;padding:12px 14px;background:var(--ya);border-radius:10px;border:1px solid var(--yk)">
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-      <div style="font-size:10px;color:var(--yk);font-weight:700">TOPLAM IBU</div>
+      <div style="font-size:var(--fs-xs);color:var(--yk);font-weight:700">TOPLAM IBU</div>
       <div style="font-size:28px;font-weight:700;color:var(--yk)">${ibu.toFixed(1)}</div>
       <div style="font-size:12px;color:var(--yk)">${ibu>70?"Çok bitter":ibu>45?"Bitter":ibu>25?"Dengeli":ibu>10?"Hafif acı":"Minimal"}</div>
       <div style="margin-left:auto;display:flex;gap:10px;align-items:baseline">
-        <div><span style="font-size:9px;color:var(--soluk);font-weight:700;letter-spacing:.5px">TOPLAM HOP</span> <b style="color:var(--bakir);font-size:14px">${_topHopG}g</b></div>
-        <div><span style="font-size:9px;color:var(--soluk);font-weight:700;letter-spacing:.5px">BU:GU</span> <b style="color:var(--bakir);font-size:14px">${_buGu}</b>${_buGuEt?` <span style="font-size:9px;color:var(--soluk)">${_buGuEt}</span>`:''}</div>
+        <div><span style="font-size:var(--fs-xs);color:var(--soluk);font-weight:700;letter-spacing:.5px">TOPLAM HOP</span> <b style="color:var(--bakir);font-size:14px">${_topHopG}g</b></div>
+        <div><span style="font-size:var(--fs-xs);color:var(--soluk);font-weight:700;letter-spacing:.5px">BU:GU</span> <b style="color:var(--bakir);font-size:14px">${_buGu}</b>${_buGuEt?` <span style="font-size:var(--fs-xs);color:var(--soluk)">${_buGuEt}</span>`:''}</div>
       </div>
     </div>
     ${_ibuAlarm}
@@ -16034,12 +16034,12 @@ function rEditorHop(og, ibu, seciHop){
     var g=hE[0],hs=hE[1];
     var hih=hs.map(function(h){
       var sel = yH.id === h.id;
-      return '<div class="satir" style="cursor:pointer;margin-bottom:4px;'+(sel?'border-color:var(--altin);background:#FFF8E8;':'')+'" onclick="yH.id=&quot;'+esc(h.id)+'&quot;;render()">'
+      return '<div class="satir" style="cursor:pointer;margin-bottom:4px;'+(sel?'border-color:var(--altin);background:var(--sa);':'')+'" onclick="yH.id=&quot;'+esc(h.id)+'&quot;;render()">'
         +'<div style="flex:1;min-width:0">'
         +'<div style="font-size:12px;font-weight:600;color:'+(sel?'var(--bakir)':'var(--kahve)')+'">'+esc(h.ad)+'</div>'
-        +'<div style="font-size:10px;color:var(--dim)">AA:'+h.aa+'% '+(h.sc?h.sc.slice(0,3).join(', '):'')+'</div>'+(TANIM[h.id]?'<div style="font-size:10px;color:var(--dim);margin-top:3px;line-height:1.4;opacity:.9;white-space:pre-wrap">'+esc(TANIM[h.id])+'</div>':'')
+        +'<div style="font-size:var(--fs-xs);color:var(--dim)">AA:'+h.aa+'% '+(h.sc?h.sc.slice(0,3).join(', '):'')+'</div>'+(TANIM[h.id]?'<div style="font-size:var(--fs-xs);color:var(--dim);margin-top:3px;line-height:1.4;opacity:.9;white-space:pre-wrap">'+esc(TANIM[h.id])+'</div>':'')
         +'</div>'
-        +'<div style="font-size:10px;background:var(--ya);color:var(--yk);padding:2px 6px;border-radius:4px;flex-shrink:0">AA '+h.aa+'</div>'
+        +'<div style="font-size:var(--fs-xs);background:var(--ya);color:var(--yk);padding:2px 6px;border-radius:4px;flex-shrink:0">AA '+h.aa+'</div>'
         +'</div>';
     }).join('');
     _hopKatHtml+=accGrup((g||'Diğer')+' ('+hs.length+')',hih,'hop_'+g.replace(/\s+/g,'_'),gi<2,_hopRenk(g));
@@ -16049,8 +16049,8 @@ function rEditorHop(og, ibu, seciHop){
   const _hEkleDefault = (yH._editIdx!=null) ? 'expanded' : (S.hoplar.length ? 'collapsed' : 'expanded');
   const _hEkleAria = (yH._editIdx!=null) ? 'true' : (S.hoplar.length ? 'false' : 'true');
   return `
-    ${(typeof _sonSilinenHop!=='undefined'&&_sonSilinenHop)?`<div style="padding:8px 12px;background:#FFF8E8;border:1px solid #E8C070;border-radius:8px;margin-bottom:10px;display:flex;align-items:center;gap:10px"><span style="font-size:11px;color:#7a4a00;flex:1">✕ Son silinen: <b>${(()=>{const _hp=HOPLAR.find(x=>x&&x.id===_sonSilinenHop.item.id);return _hp?_hp.ad:_sonSilinenHop.item.id;})()}</b> (${_sonSilinenHop.item.g} g)</span><button onclick="hopGeriAl()" style="background:#7a4a00;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer">↶ Geri Al</button></div>`:''}
-    ${S.hoplar.length?`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><span class="etiket" style="margin-bottom:0">Hop Listesi (${S.hoplar.length})</span>${S.hoplar.length>=2?`<button class="btn" style="background:var(--bg2);color:var(--bakir);border:1px solid var(--bor);font-size:10px;padding:4px 10px" onclick="hopAutoSort()" title="Süreç sırasına göre diz: FWH → Boil(60→15) → Whirlpool → Hop Stand → Dry Hop">📋 Sırala</button>`:''}</div>${sl2}${tibu}`:`<div style="text-align:center;padding:20px;color:var(--dim);font-size:13px">Henüz hop eklenmedi — aşağıdan ekle</div>`}
+    ${(typeof _sonSilinenHop!=='undefined'&&_sonSilinenHop)?`<div style="padding:8px 12px;background:var(--sa);border:1px solid var(--altin);border-radius:8px;margin-bottom:10px;display:flex;align-items:center;gap:10px"><span style="font-size:11px;color:var(--vintage-koyu);flex:1">✕ Son silinen: <b>${(()=>{const _hp=HOPLAR.find(x=>x&&x.id===_sonSilinenHop.item.id);return _hp?_hp.ad:_sonSilinenHop.item.id;})()}</b> (${_sonSilinenHop.item.g} g)</span><button onclick="hopGeriAl()" style="background:var(--vintage-koyu);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer">↶ Geri Al</button></div>`:''}
+    ${S.hoplar.length?`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><span class="etiket" style="margin-bottom:0">Hop Listesi (${S.hoplar.length})</span>${S.hoplar.length>=2?`<button class="btn" style="background:var(--bg2);color:var(--bakir);border:1px solid var(--bor);font-size:var(--fs-xs);padding:4px 10px" onclick="hopAutoSort()" title="Süreç sırasına göre diz: FWH → Boil(60→15) → Whirlpool → Hop Stand → Dry Hop">📋 Sırala</button>`:''}</div>${sl2}${tibu}`:`<div style="text-align:center;padding:20px;color:var(--dim);font-size:13px">Henüz hop eklenmedi — aşağıdan ekle</div>`}
     ${(function(){try{return hopTimeline(S.hoplar,HOPLAR);}catch(_e){return '';}})()}
     ${(function(){try{return _hopDenetimRender(hopDenetim(S.hoplar,HOPLAR,(S.stil||null),(typeof BJCP!=='undefined'?BJCP:null),ibu,og,S.hacim||11));}catch(_e){return '';}})()}
     ${(function(){try{return (typeof hopOlcekHTML==='function')?hopOlcekHTML(og,ibu,S.hacim||11):'';}catch(_e){return '';}})()}
@@ -16075,7 +16075,7 @@ function rEditorHop(og, ibu, seciHop){
         <div style="margin-bottom:8px">
           <span class="etiket">Hop Formu</span>
           <div style="display:flex;gap:4px">
-            ${[['pellet','🌾 Pellet','1.0x (standart)'],['leaf','🍃 Whole Leaf','0.9x (düşük bitter)'],['cryo','❄️ Cryo','1.1x (konsantre)']].map(([v,ad,aciklama])=>{const ak=(yH.form||'pellet')===v;return `<button class="btn" style="flex:1;padding:7px 4px;border:1.5px solid ${ak?'var(--altin)':'var(--bor)'};background:${ak?'var(--sa)':'var(--card)'};color:${ak?'var(--bakir)':'var(--soluk)'};font-size:11px;font-weight:${ak?700:500};line-height:1.2" onclick="yH.form='${v}';render()"><div>${ad}</div><div style="font-size:9px;font-weight:400;margin-top:2px;opacity:.75">${aciklama}</div></button>`;}).join('')}
+            ${[['pellet','🌾 Pellet','1.0x (standart)'],['leaf','🍃 Whole Leaf','0.9x (düşük bitter)'],['cryo','❄️ Cryo','1.1x (konsantre)']].map(([v,ad,aciklama])=>{const ak=(yH.form||'pellet')===v;return `<button class="btn" style="flex:1;padding:7px 4px;border:1.5px solid ${ak?'var(--altin)':'var(--bor)'};background:${ak?'var(--sa)':'var(--card)'};color:${ak?'var(--bakir)':'var(--soluk)'};font-size:11px;font-weight:${ak?700:500};line-height:1.2" onclick="yH.form='${v}';render()"><div>${ad}</div><div style="font-size:var(--fs-xs);font-weight:400;margin-top:2px;opacity:.75">${aciklama}</div></button>`;}).join('')}
           </div>
         </div>
         ${ekO}
@@ -16083,7 +16083,7 @@ function rEditorHop(og, ibu, seciHop){
           <span class="etiket">Özel Alpha Asit % — Opsiyonel</span>
           <input aria-label="Alfa asit (%)" type="number" id="yhAA" class="inp" placeholder="Boş = varsayılan (${seciHop?.aa||"?"}%) — paketindeki farklıysa gir" step=".1" min="1" max="30" value="${yH.cAA||""}" onchange="yH.cAA=this.value?parseFloat(this.value):null">
         </div>
-        <button class="btn" style="background:var(--yk);color:#C0F0C0;width:100%;margin-bottom:6px;padding:10px" onclick="hopEkle()">${yH._editIdx!=null?'✓ Güncelle':'+ Hop Ekle'}</button>${yH._editIdx!=null?'<button class="btn" style="background:none;border:1px solid var(--bor);color:var(--soluk);width:100%;margin-bottom:6px;padding:8px" onclick="hopDuzenleVazgec()">Vazgeç</button>':''}
+        <button class="btn" style="background:var(--yk);color:var(--ya);width:100%;margin-bottom:6px;padding:10px" onclick="hopEkle()">${yH._editIdx!=null?'✓ Güncelle':'+ Hop Ekle'}</button>${yH._editIdx!=null?'<button class="btn" style="background:none;border:1px solid var(--bor);color:var(--soluk);width:100%;margin-bottom:6px;padding:8px" onclick="hopDuzenleVazgec()">Vazgeç</button>':''}
       </div>
     </div>`;
 }
