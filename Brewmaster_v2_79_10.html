@@ -15516,7 +15516,7 @@ function _gristDenetimRender(gd){
   if(!gd||!gd.dagilim) return '';
   const d=gd.dagilim;
   const seg=(w,c,lbl)=> w>0?('<div style="width:'+w+'%;background:'+c+'" title="'+lbl+' %'+w+'"></div>'):'';
-  const bar='<div style="display:flex;height:14px;border-radius:7px;overflow:hidden;margin-bottom:6px;border:1px solid #E0D6BA">'+seg(d.base,'#E3B23C','Base')+seg(d.ozel,'#C8782D','Özel')+seg(d.koyu,'#5A3A22','Koyu')+seg(d.adjunct,'#9AA760','Adjunct')+seg(d.seker,'#D9C5A0','Şeker')+'</div>';
+  const bar='<div style="display:flex;height:14px;border-radius:7px;overflow:hidden;margin-bottom:6px;border:1px solid var(--bor)">'+seg(d.base,'var(--kat-base)','Base')+seg(d.ozel,'var(--kat-ozel)','Özel')+seg(d.koyu,'var(--kat-koyu)','Koyu')+seg(d.adjunct,'var(--kat-ek)','Adjunct')+seg(d.seker,'var(--kat-seker)','Şeker')+'</div>';
   const lej='<div style="font-size:11px;color:var(--dim);margin-bottom:8px">Base %'+d.base+' · Özel %'+d.ozel+' · Koyu %'+d.koyu+' · Adjunct %'+d.adjunct+' · Şeker %'+d.seker+'</div>';
   const sty={kritik:['⛔','#A02020'],orta:['⚠️','#B26B00'],bilgi:['✓','#2D7A2D']};
   const bul=gd.bulgular.map(b=>{const s=sty[b.onem]||sty.bilgi;return '<div style="color:'+s[1]+';font-size:12px;padding:3px 0;line-height:1.4">'+s[0]+' '+b.msg+'</div>';}).join('');
@@ -15663,8 +15663,8 @@ function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
       <div style="display:flex;align-items:center;gap:8px;padding:8px 10px">
         <div style="width:14px;height:14px;border-radius:50%;background:${srmR(ml?ml.r:0)};border:2px solid rgba(0,0,0,.1);flex-shrink:0"></div>
         <div style="flex:1;min-width:0">
-          <div style="font-size:13px;font-weight:600;color:var(--kahve);display:flex;align-items:center;gap:5px;flex-wrap:wrap"><span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:9px;font-weight:700;background:${_kat.bg};color:${_kat.tx};letter-spacing:.3px">${_kat.ad}</span>${ml?ml.ad:m.id}</div>
-          <div style="font-size:10px;color:var(--soluk);margin-top:2px">${ml?ml.r+"°L":""} · +${kt} GU${_mcu>0?` · <span style="color:var(--bakir)">+${_mcu} MCU</span>`:''} · <b>%${_pct}</b>${m.marka?` · <span class="pill">${m.marka}</span>`:""}</div>
+          <div style="font-size:13px;font-weight:600;color:var(--kahve);display:flex;align-items:center;gap:5px;flex-wrap:wrap"><span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:var(--fs-xs);font-weight:700;background:${_kat.bg};color:${_kat.tx};letter-spacing:.3px">${_kat.ad}</span>${ml?ml.ad:m.id}</div>
+          <div style="font-size:var(--fs-xs);color:var(--soluk);margin-top:2px">${ml?ml.r+"°L":""} · +${kt} GU${_mcu>0?` · <span style="color:var(--bakir)">+${_mcu} MCU</span>`:''} · <b>%${_pct}</b>${m.marka?` · <span class="pill">${m.marka}</span>`:""}</div>
         </div>
         <input aria-label="Malt miktarı (kg)" type="number" value="${m.kg}" min=".01" step=".01" class="inp" style="width:78px;text-align:center;font-weight:600" onchange="S.maltlar[${i}].kg=Math.max(0.01,parseFloat(this.value)||0.01);render()">
         <span style="font-size:11px;color:var(--dim)">kg</span>
@@ -15678,9 +15678,9 @@ function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
         <span class="bm-muadil-inline-label">↔ Muadil:</span>
         ${_muadilM.map(mu=>`<span class="bm-muadil-inline-chip" data-muadil-id="${esc(mu.id)}" onclick="bmToast(this.dataset.muadilTip,'info')" data-muadil-tip="${esc(mu.ad)}${mu.fark?(' — '+esc((mu.fark||'').replace(/^[✅⚠️ℹ️🟡]+\s*/,''))):''}">${esc((mu.ad||'').split(' (')[0])}</span>`).join('')}
       </div>`:''}
-      ${_ozet||_rol?`<div onclick="(function(el){var c=el.nextElementSibling;var o=c.style.maxHeight==='0px'||!c.style.maxHeight;c.style.maxHeight=o?c.scrollHeight+'px':'0px';c.style.opacity=o?'1':'0';el.querySelector('.md-t').textContent=o?'▲':'▼';})(this)" style="border-top:1px solid var(--bor);padding:5px 10px;background:var(--bg2);cursor:pointer;user-select:none;display:flex;align-items:center;gap:6px;font-size:10px;color:var(--soluk)">
+      ${_ozet||_rol?`<div onclick="(function(el){var c=el.nextElementSibling;var o=c.style.maxHeight==='0px'||!c.style.maxHeight;c.style.maxHeight=o?c.scrollHeight+'px':'0px';c.style.opacity=o?'1':'0';el.querySelector('.md-t').textContent=o?'▲':'▼';})(this)" style="border-top:1px solid var(--bor);padding:5px 10px;background:var(--bg2);cursor:pointer;user-select:none;display:flex;align-items:center;gap:6px;font-size:var(--fs-xs);color:var(--soluk)">
         <span>ℹ️ Bu malt ne yapıyor?</span>
-        <span class="md-t" style="margin-left:auto;font-size:9px">▼</span>
+        <span class="md-t" style="margin-left:auto;font-size:var(--fs-xs)">▼</span>
       </div>
       <div style="max-height:0;opacity:0;overflow:hidden;transition:max-height .3s,opacity .2s">
         <div style="padding:8px 12px;background:var(--bg);font-size:11px;color:var(--kahve);line-height:1.55;border-top:1px solid var(--bor)">
@@ -15705,7 +15705,7 @@ function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
   const katkilarNonFerm=(S.katkilar||[]).filter(k=>{const kat=KATKILAR.find(a=>a&&a.id===k.id);return kat&&kat.gu===0&&kat.fermente===false;});
   const ts=S.maltlar.length?`<div class="serit">
     <span style="font-size:12px"><span style="color:var(--soluk)">Malt:</span> <b style="color:var(--bakir)">${topMalt.toFixed(2)} kg</b></span>
-    <span style="font-size:12px"><span style="color:var(--soluk)">OG:</span> <b style="color:${ogKaynak==="manuel"?"#1A5A1A":"var(--bakir)"}">${ogKaynak==="manuel"?"✏ ":""}${og.toFixed(3)}</b></span>
+    <span style="font-size:12px"><span style="color:var(--soluk)">OG:</span> <b style="color:${ogKaynak==="manuel"?"var(--yk)":"var(--bakir)"}">${ogKaynak==="manuel"?"✏ ":""}${og.toFixed(3)}</b></span>
     <span style="font-size:12px"><span style="color:var(--soluk)">Mash:</span> <b style="color:var(--bakir)">${S.mashSc||67}°C</b></span>
     <span style="display:flex;align-items:center;gap:6px;font-size:12px"><span style="color:var(--soluk)">Renk:</span><span style="width:18px;height:18px;border-radius:50%;background:${rk};border:2px solid rgba(0,0,0,.1);display:inline-block"></span><b style="color:var(--bakir)">${srm} SRM</b></span>
     ${katkilarFermente.length?`<span style="font-size:11px;color:var(--yk)">⬆️ ${katkilarFermente.map(k=>k.ad).join(", ")} OG'yi etkiliyor</span>`:""}
@@ -15718,12 +15718,12 @@ function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
     var _gAd=katAd(g); // I2: Adjunct → Ek Tahıl
     var mih=ms.map(function(m){
       var sel = yM.id === m.id;
-      return '<div class="satir" style="cursor:pointer;margin-bottom:4px;'+(sel?'border-color:var(--altin);background:#FFF8E8;':'')+'" onclick="yM.id=&quot;'+esc(m.id)+'&quot;;render()">'
+      return '<div class="satir" style="cursor:pointer;margin-bottom:4px;'+(sel?'border-color:var(--altin);background:var(--sa);':'')+'" onclick="yM.id=&quot;'+esc(m.id)+'&quot;;render()">'
         +'<div style="flex:1;min-width:0">'
         +'<div style="font-size:12px;font-weight:600;color:'+(sel?'var(--bakir)':'var(--kahve)')+'">'+esc(m.ad)+'</div>'
-        +'<div style="font-size:10px;color:var(--dim)">GU:'+m.gu+' · '+m.r+'°L'+(m.mo?' · '+m.mo.slice(0,40):'')+'</div>'+(TANIM[m.id]?'<div style="font-size:10px;color:var(--dim);margin-top:3px;line-height:1.4;opacity:.9;white-space:pre-wrap">'+esc(TANIM[m.id])+'</div>':'')
+        +'<div style="font-size:var(--fs-xs);color:var(--dim)">GU:'+m.gu+' · '+m.r+'°L'+(m.mo?' · '+m.mo.slice(0,40):'')+'</div>'+(TANIM[m.id]?'<div style="font-size:var(--fs-xs);color:var(--dim);margin-top:3px;line-height:1.4;opacity:.9;white-space:pre-wrap">'+esc(TANIM[m.id])+'</div>':'')
         +'</div>'
-        +'<div style="font-size:10px;background:'+(m.gu>0?'#E8F4E8':'#F0F0F0')+';color:'+(m.gu>0?'var(--yk)':'var(--dim)')+';padding:2px 6px;border-radius:4px;flex-shrink:0">'+(m.gu>0?'OG↑':'OG±0')+'</div>'
+        +'<div style="font-size:var(--fs-xs);background:'+(m.gu>0?'var(--ya)':'var(--bg-sunken)')+';color:'+(m.gu>0?'var(--yk)':'var(--dim)')+';padding:2px 6px;border-radius:4px;flex-shrink:0">'+(m.gu>0?'OG↑':'OG±0')+'</div>'
         +'</div>';
     }).join('');
     _maltKatHtml+=accGrup((_mKI[g]||'•')+' '+_gAd+' ('+ms.length+')',mih,'malt_'+g.replace(/\s+/g,'_'),gi<2,katKodu(g).renk);
@@ -15733,9 +15733,9 @@ function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
   const _mEkleDefault = S.maltlar.length ? 'collapsed' : 'expanded';
   const _mEkleAria = S.maltlar.length ? 'false' : 'true';
   return `
-    ${(typeof _sonSilinenMalt!=='undefined'&&_sonSilinenMalt)?`<div style="padding:8px 12px;background:#FFF8E8;border:1px solid #E8C070;border-radius:8px;margin-bottom:10px;display:flex;align-items:center;gap:10px">
-      <span style="font-size:11px;color:#7a4a00;flex:1">✕ Son silinen: <b>${(()=>{const _ml=MALTLAR.find(x=>x&&x.id===_sonSilinenMalt.item.id);return _ml?_ml.ad:_sonSilinenMalt.item.id;})()}</b> (${_sonSilinenMalt.item.kg} kg)</span>
-      <button onclick="maltGeriAl()" style="background:#7a4a00;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer">↶ Geri Al</button>
+    ${(typeof _sonSilinenMalt!=='undefined'&&_sonSilinenMalt)?`<div style="padding:8px 12px;background:var(--sa);border:1px solid var(--altin);border-radius:8px;margin-bottom:10px;display:flex;align-items:center;gap:10px">
+      <span style="font-size:11px;color:var(--vintage-koyu);flex:1">✕ Son silinen: <b>${(()=>{const _ml=MALTLAR.find(x=>x&&x.id===_sonSilinenMalt.item.id);return _ml?_ml.ad:_sonSilinenMalt.item.id;})()}</b> (${_sonSilinenMalt.item.kg} kg)</span>
+      <button onclick="maltGeriAl()" style="background:var(--vintage-koyu);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer">↶ Geri Al</button>
     </div>`:''}
     ${ts}
     <!-- verim-fix (c15e0c7/Adim 132-J cerrahi geri alma): Sistem Verimi akordeon DISINA alindi — standalone, Duzenle+Goruntule her iki modda gorunur (bm-edit-only-acc YOK). "Yeni Malt Ekle" akordeonu (malt arama/kategori/ekle) kapali-default KORUNDU. -->
@@ -15748,7 +15748,7 @@ function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
       <div style="margin-bottom:12px">
         <div onclick="(function(el){var c=el.nextElementSibling;var o=c.style.maxHeight==='0px'||!c.style.maxHeight;c.style.maxHeight=o?c.scrollHeight+'px':'0px';c.style.opacity=o?'1':'0';el.querySelector('.ok-t').textContent=o?'▲':'▼';})(this)" style="display:flex;align-items:center;gap:6px;padding:7px 10px;background:var(--bg2);border:1px solid var(--bor);border-radius:8px;cursor:pointer;user-select:none;font-size:11px;color:var(--soluk);font-weight:600">
           <span>💡</span><span style="flex:1">Verimi nasıl ölçersiniz?</span>
-          <span class="ok-t" style="font-size:10px;color:var(--dim)">▼</span>
+          <span class="ok-t" style="font-size:var(--fs-xs);color:var(--dim)">▼</span>
         </div>
         <div style="max-height:0;opacity:0;overflow:hidden;transition:max-height .3s,opacity .2s">
           <div class="uybox uy-s" style="font-size:11px;margin-top:6px;margin-bottom:0">
@@ -15777,8 +15777,8 @@ function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
         <span class="etiket">Marka (Opsiyonel)</span>
         <input aria-label="Malt markası" type="text" id="ymMarka" class="inp" style="margin-bottom:3px" placeholder="Weyermann, Crisp, Simpsons..." value="${yM.marka}" onblur="yM.marka=this.value">
         <div style="display:flex;gap:6px;margin-bottom:8px">
-          <div id="moIpucu" style="font-size:10px;color:var(--dim);flex:1">${seciMalt?.mo||""}</div>
-          ${seciMalt?`<div style="font-size:10px;padding:3px 8px;border-radius:4px;font-weight:600;background:${seciMalt.gu>0?"#E8F4E8":"#FFF0F0"};color:${seciMalt.gu>0?"var(--yk)":"var(--kk)"}">GU: ${seciMalt.gu} · ${seciMalt.r}°L</div>`:""}
+          <div id="moIpucu" style="font-size:var(--fs-xs);color:var(--dim);flex:1">${seciMalt?.mo||""}</div>
+          ${seciMalt?`<div style="font-size:var(--fs-xs);padding:3px 8px;border-radius:4px;font-weight:600;background:${seciMalt.gu>0?"var(--ya)":"var(--crit-bg)"};color:${seciMalt.gu>0?"var(--yk)":"var(--kk)"}">GU: ${seciMalt.gu} · ${seciMalt.r}°L</div>`:""}
         </div>
       </div>
     </div>
