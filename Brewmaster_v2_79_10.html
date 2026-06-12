@@ -15917,6 +15917,7 @@ function hopOlcekHTML(curOG,curIBU,curHac){
 }
 
 function rEditorHop(og, ibu, seciHop){
+  var _stokCipMap={};try{if(typeof STOK!=='undefined'&&Array.isArray(STOK)&&STOK.length>0&&typeof _stokMalBul==='function'){HOPLAR.forEach(function(h){if(!h)return;var _six=_stokMalBul(h.id,h.ad);if(_six>-1&&STOK[_six])_stokCipMap[h.id]=(STOK[_six].miktar||0)+(STOK[_six].birim||'g');});}}catch(_e){} // HOP-STOK-ROZET: stok çip haritası (Katkı FEAT-STOK-ROZET emsali, _stokMalBul refId>ad, render başına tek)
   const dkO=[90,75,60,45,30,20,15,10,5,1].map(d=>`<option value="${d}"${yH.dk===d?" selected":""}>${d} dk</option>`).join("");
   // Whirlpool iki input: sıcaklık (°C) + süre (dk). Default: 85°C / 15dk.
   const yHwhT=yH.whT!=null?yH.whT:85;
@@ -15991,7 +15992,7 @@ function rEditorHop(og, ibu, seciHop){
     const _muadilH = (typeof MUADIL!=='undefined' && MUADIL[h.id]) ? MUADIL[h.id].slice(0,3) : [];
     return`<div class="satir" style="border-left:4px solid ${_gRenk};display:block;padding:0">
       <div style="display:flex;align-items:center;gap:8px;padding:10px 12px">
-        <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--kahve)">${hp?hp.ad:h.id}${_formIkon}${_grup?` <span style="font-size:var(--fs-xs);color:${_gRenk};background:${_gRenk}22;padding:1px 5px;border-radius:3px;font-weight:700;letter-spacing:.3px;vertical-align:middle">${_grup.toUpperCase()}</span>`:''}</div>
+        <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--kahve)">${hp?hp.ad:h.id}${_formIkon}${_stokCipMap[h.id]?` <span style="font-size:var(--fs-xs);background:var(--ma);color:var(--mk);padding:1px 4px;border-radius:3px;font-weight:700">📦 ${_stokCipMap[h.id]}</span>`:''}${_grup?` <span style="font-size:var(--fs-xs);color:${_gRenk};background:${_gRenk}22;padding:1px 5px;border-radius:3px;font-weight:700;letter-spacing:.3px;vertical-align:middle">${_grup.toUpperCase()}</span>`:''}</div>
         <div style="font-size:var(--fs-xs);color:var(--soluk);margin-top:2px">${_turEtiket} · ${aa}% AA</div></div>
         <div style="text-align:right"><div style="font-size:12px;font-weight:600;color:${ik>0?"var(--bakir)":"var(--yk)"}">${ik>0?"+"+ik.toFixed(1)+" IBU":"🌿 Aroma"}</div><div style="font-size:11px;color:var(--soluk)">${h.g} g</div></div>
         <div style="display:flex;flex-direction:column;gap:1px;margin-left:2px">
@@ -16036,7 +16037,7 @@ function rEditorHop(og, ibu, seciHop){
       var sel = yH.id === h.id;
       return '<div class="satir" style="cursor:pointer;margin-bottom:4px;'+(sel?'border-color:var(--altin);background:var(--sa);':'')+'" onclick="yH.id=&quot;'+esc(h.id)+'&quot;;render()">'
         +'<div style="flex:1;min-width:0">'
-        +'<div style="font-size:12px;font-weight:600;color:'+(sel?'var(--bakir)':'var(--kahve)')+'">'+esc(h.ad)+'</div>'
+        +'<div style="font-size:12px;font-weight:600;color:'+(sel?'var(--bakir)':'var(--kahve)')+'">'+esc(h.ad)+(_stokCipMap[h.id]?' <span style="font-size:var(--fs-xs);background:var(--ma);color:var(--mk);padding:1px 4px;border-radius:3px;font-weight:700">📦 '+_stokCipMap[h.id]+'</span>':'')+'</div>'
         +'<div style="font-size:var(--fs-xs);color:var(--dim)">AA:'+h.aa+'% '+(h.sc?h.sc.slice(0,3).join(', '):'')+'</div>'+(TANIM[h.id]?'<div style="font-size:var(--fs-xs);color:var(--dim);margin-top:3px;line-height:1.4;opacity:.9;white-space:pre-wrap">'+esc(TANIM[h.id])+'</div>':'')
         +'</div>'
         +'<div style="font-size:var(--fs-xs);background:var(--ya);color:var(--yk);padding:2px 6px;border-radius:4px;flex-shrink:0">AA '+h.aa+'</div>'
