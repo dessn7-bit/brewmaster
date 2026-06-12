@@ -14962,6 +14962,7 @@ function rEditorKatki(){
 
   // ═══ EKLENEN KATKILAR PANELİ (en üst) ═══
   var _hac = S.hacim || 11;
+  var _stokCipMap={};try{if(typeof STOK!=='undefined'&&Array.isArray(STOK)&&STOK.length>0&&typeof _stokMalBul==='function'){KATKILAR.forEach(function(k){if(!k)return;var _six=_stokMalBul(k.id,k.ad);if(_six>-1&&STOK[_six])_stokCipMap[k.id]=(STOK[_six].miktar||0)+(STOK[_six].birim||'g');});}}catch(_e){} // FEAT-STOK-ROZET: stok çip haritası — eşleştirici _stokMalBul tek kaynak (refId>normalize ad), render başına tek hazırlık, kartlar O(1)
   // Kapsamlı overdose eşikleri — literatür bazlı (g/L veya adet cinsinden)
   // Kaynaklar yorum satırlarında belirtilmiş. "bulamadım" = kaynak yok, atla.
   function _katkiUyari(kt, kDB, hacimL){
@@ -15043,7 +15044,7 @@ function rEditorKatki(){
         // Üst satır: ad/etki + sil butonu
         +'<div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:6px">'
           +'<div style="flex:1;min-width:0">'
-            +'<div style="font-size:12px;font-weight:600;color:var(--kahve);line-height:1.25">'+(_ozel?'✏️ ':'')+esc(kt.ad)+_alerjenBadge+'</div>'
+            +'<div style="font-size:12px;font-weight:600;color:var(--kahve);line-height:1.25">'+(_ozel?'✏️ ':'')+esc(kt.ad)+_alerjenBadge+(kt.id&&_stokCipMap[kt.id]?' <span style="font-size:var(--fs-xs);background:var(--ma);color:var(--mk);padding:1px 4px;border-radius:3px;font-weight:700">📦 '+_stokCipMap[kt.id]+'</span>':'')+'</div>'
             +_etkiSat
             +(_uyari?'<div style="font-size:var(--fs-xs);color:'+_uyariRenk+';margin-top:2px;line-height:1.3">'+_uyari+'</div>':'')
           +'</div>'
@@ -15131,7 +15132,7 @@ function rEditorKatki(){
          +'<div style="font-size:12px;font-weight:600;color:var(--kahve);flex:1">'+esc(k.ad)+'</div>'
          +'<button onclick="katkiFavToggle(\''+k.id+'\')" title="'+(_isFav?'Favorilerden çıkar':'Favorilere ekle')+'" style="background:none;border:none;font-size:16px;cursor:pointer;padding:2px 4px;color:'+(_isFav?'var(--vintage)':'#D0C8B8')+'">'+(_isFav?'⭐':'☆')+'</button>'
          +'</div>'
-         +(_ozellik?'<div style="margin-bottom:4px">'+_ozellik+'</div>':'')
+         +((_ozellik||_stokCipMap[k.id])?'<div style="margin-bottom:4px">'+_ozellik+(_stokCipMap[k.id]?' <span style="font-size:var(--fs-xs);background:var(--ma);color:var(--mk);padding:1px 4px;border-radius:3px;font-weight:700">📦 '+_stokCipMap[k.id]+'</span>':'')+'</div>':'')
          +'<div style="font-size:var(--fs-xs);color:var(--dim);margin-bottom:6px">'+(k.etki||'')+'</div>'
          +_tagStr
          +'<div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">'
