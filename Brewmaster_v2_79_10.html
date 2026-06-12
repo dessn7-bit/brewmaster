@@ -15343,7 +15343,38 @@ function rEditorNot(){
   // Aktif oturumlar — kendi accordion grubuna çıkıyor (134-E)
   var _oturumlarHtml = '';
   if(_T.oturumlar && _T.oturumlar.length > 0){
+    var _deltaKart = '';
+    if(_T.oturumlar.length >= 2){
+      var _oc=_T.oturumlar, _prev=_oc[_oc.length-2], _last=_oc[_oc.length-1];
+      var _ddmm=function(t){return (t&&t.length>=10)?(t.slice(8,10)+'.'+t.slice(5,7)):(t||'?');};
+      var _eksenSat=function(ad,a,b){var d=b-a;
+        if(d===0) return ad+' '+a+' <span style="color:var(--soluk)">=</span>';
+        var renk=d>0?'var(--yk)':'var(--kk)', ok=d>0?'↑':'↓';
+        return ad+' '+a+' → '+b+' <span style="color:'+renk+';font-weight:700">('+ok+Math.abs(d)+')</span>';};
+      var _tD=_last.toplam-_prev.toplam;
+      var _tRenk=_tD>0?'var(--yk)':_tD<0?'var(--kk)':'var(--soluk)', _tOk=_tD>0?'↑':_tD<0?'↓':'=';
+      var _pOff=_prev.offList||{}, _lOff=_last.offList||{};
+      var _cozulen=Object.keys(_pOff).filter(function(k){return _pOff[k]&&!_lOff[k];}).map(function(k){return _tOffAd[k]||k;});
+      var _yeni=Object.keys(_lOff).filter(function(k){return _lOff[k]&&!_pOff[k];}).map(function(k){return _tOffAd[k]||k;});
+      _deltaKart='<div style="background:#fff;border:1px solid var(--bor);border-left:3px solid var(--vintage);border-radius:8px;padding:10px;margin-bottom:8px">'
+        +'<div style="font-size:var(--fs-xs);font-weight:700;color:var(--kahve);letter-spacing:.4px;margin-bottom:6px">📊 SON İKİ OTURUM: '+_ddmm(_prev.tarih)+' → '+_ddmm(_last.tarih)+'</div>'
+        +'<div style="font-size:var(--fs-xs);color:var(--kahve);margin-bottom:4px">Toplam '+_prev.toplam+'/50 → <b>'+_last.toplam+'/50</b> <span style="color:'+_tRenk+';font-weight:700">'+_tOk+(_tD!==0?Math.abs(_tD):'')+'</span></div>'
+        +'<div style="font-size:var(--fs-xs);color:var(--kahve);line-height:1.7">'
+          +_eksenSat('Aroma',_prev.aroma,_last.aroma)+'<br>'
+          +_eksenSat('Görünüm',_prev.gorunum,_last.gorunum)+'<br>'
+          +_eksenSat('Tat',_prev.tat,_last.tat)+'<br>'
+          +_eksenSat('Ağız',_prev.agizH,_last.agizH)+'<br>'
+          +_eksenSat('Genel',_prev.genel,_last.genel)
+        +'</div>'
+        +((_cozulen.length||_yeni.length)?'<div style="font-size:var(--fs-xs);margin-top:6px;line-height:1.6">'
+          +(_cozulen.length?'<span style="color:var(--yk)">✓ çözüldü: '+_cozulen.join(', ')+'</span>'+(_yeni.length?'<br>':''):'')
+          +(_yeni.length?'<span style="color:var(--kk)">⚠️ yeni: '+_yeni.join(', ')+'</span>':'')
+        +'</div>':'')
+        +(_oc.length>=3?'<div style="font-size:var(--fs-xs);color:var(--soluk);margin-top:6px;padding-top:6px;border-top:1px solid var(--bor)">Toplam seyri: '+_oc.map(function(o){return o.toplam;}).join(' → ')+'</div>':'')
+      +'</div>';
+    }
     _oturumlarHtml = '<div style="padding:4px 0">'
+      + _deltaKart
       +_T.oturumlar.slice().reverse().map(function(o,revIdx){
         var idx = _T.oturumlar.length-1-revIdx;
         var sev = o.toplam>=45?'Outstanding':o.toplam>=38?'Excellent':o.toplam>=30?'Very Good':o.toplam>=21?'Good':o.toplam>=14?'Fair':'Problematic';
@@ -22422,10 +22453,10 @@ function logExport(){
     }else{_fbKpy(metin);}
   }catch(e){flash("Hata");}
 }
-function _fbKpy(m){
+function _fbKpy(m,msg){
   var t=document.createElement("textarea");t.value=m;t.style.position="fixed";t.style.opacity="0";
   document.body.appendChild(t);t.select();
-  try{document.execCommand("copy");flash("Gunluk kopyalandi");}catch(e){}
+  try{document.execCommand("copy");flash(msg||"Gunluk kopyalandi");}catch(e){}
   document.body.removeChild(t);
 }
 window.logExport=logExport;
@@ -22590,8 +22621,8 @@ function tadimExport(){
     }
     var metin=sat.join('\n').replace(/\n+$/,'')+'\n';
     if(navigator.clipboard){
-      navigator.clipboard.writeText(metin).then(function(){flash('Tadım raporu kopyalandı');}).catch(function(){_fbKpy(metin);});
-    }else{_fbKpy(metin);}
+      navigator.clipboard.writeText(metin).then(function(){flash('Tadım raporu kopyalandı');}).catch(function(){_fbKpy(metin,'Tadım raporu kopyalandı');});
+    }else{_fbKpy(metin,'Tadım raporu kopyalandı');}
   }catch(e){flash('Hata');}
 }
 window.tadimExport=tadimExport;
