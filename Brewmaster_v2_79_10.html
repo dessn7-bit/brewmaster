@@ -224,7 +224,7 @@ input[type=number]::-webkit-inner-spin-button{opacity:.5}
 .btn:active{transform:scale(.96);opacity:.85}
 .inp{background:var(--bg-card);color:var(--tip-b-col, var(--ink));border:1px solid var(--cizgi-arac);border-radius:var(--r-sm);padding:var(--sp-2) var(--sp-3);width:100%;font-family:var(--font-govde);font-size:calc(var(--fs-base) * var(--tip-b-scale, 1));transition:border-color .15s,box-shadow .15s;font-variant-caps:var(--tip-b-fvc, normal);font-style:var(--tip-b-fst, normal);text-transform:var(--tip-b-tt, none);letter-spacing:var(--tip-b-ls, normal)}
 .inp:focus{outline:none;border-color:var(--vintage);box-shadow:0 0 0 2px rgba(184,118,63,.18)}
-.bm-biraad-inp:focus-visible,.bm-surec-dk-inp:focus-visible{outline:2px solid var(--vintage);outline-offset:2px}
+.bm-biraad-inp:focus-visible,.bm-surec-dk-inp:focus-visible,.bm-surec-gun-inp:focus-visible{outline:2px solid var(--vintage);outline-offset:2px}
 .inp:hover:not(:focus):not(:disabled){border-color:rgba(184,118,63,.5)}
 .inp:disabled,.inp[disabled]{opacity:.6;cursor:not-allowed;background:var(--bg-sunken)}
 /* Adim 134-H: Number input arrows gizle (textfield clean look, Kaan numeric pattern) */
@@ -7122,8 +7122,8 @@ const KATKILAR=[
   {id:"limon_otu",ad:"Limon Otu (Lemongrass)",g:"Aroma",gu:0,fermente:false,ibu_dk60:0.01,srm:0,etki:"OG/SRM'ye etkisi yok. Citrus-limon aroması.",acik:"5-15g/10L. Flameout veya kuru.",kullanim:"Flameout veya dry hop",birim:"g",tags:["Citrus", "Saison", "Wit", "Light"],varsayDozgL:2,maxDozgL:5,maxUyari:"Sabun-zencefil baskın",onerilenZaman:["Fermantasyon sonu", "Kaynatma sonu"],fiyat:"orta",alerjen:[]},
   {id:"kuru_lime",ad:"Kurutulmuş Lime (Kabuk)",g:"Aroma",gu:0,fermente:false,ibu_dk60:0.02,srm:0,etki:"OG'ye etkisi yok. Lime-citrus nüansı.",acik:"5-10g/10L. Taze beyaz kısmını alma.",kullanim:"Flameout veya dry hop",birim:"g",tags:["Citrus", "Sour", "Lime", "Mexican"],varsayDozgL:1,maxDozgL:3,maxUyari:"Keskin ekşi, pH düşük",onerilenZaman:["Kaynatma sonu", "Fermantasyon sonu"],fiyat:"orta",alerjen:[]},
   {id:"mavi_kelebek",ad:"Mavi Kelebek Çayı",g:"Aroma",gu:0,fermente:false,ibu_dk60:0,srm:4,etki:"Mavi-mor renk verir (alkali ortamda pembeye döner).",acik:"Renk değişimi: mor→pembe. 2-5g/10L.",kullanim:"Dry hop veya flameout",birim:"g",tags:["Renk", "Egzotik", "Pigment", "Mavi"],varsayDozgL:0.5,maxDozgL:2,maxUyari:"Zemin toprak tadı",onerilenZaman:["Fermantasyon sonu"],fiyat:"pahali",alerjen:[]},
-  {id:"mese_cipsi",ad:"Meşe Cipsi (Oak Chips)",g:"Meşe",gu:0,fermente:false,ibu_dk60:0.03,srm:22,etki:"OG/IBU'ya etkisi yok. Vanilya-meşe aroması, hafif renk.",acik:"5-15g/10L. 24-72 saat. Önceden alkol ile yıka.",kullanim:"Fermentasyonda veya soğukta",birim:"g",tags:["Meşe", "Tanen", "Ahşap", "Stout"],varsayDozgL:2,maxDozgL:4,maxUyari:"Tanen aşımı (MoreBeer: 1-3g/L)",onerilenZaman:["Secondary"],fiyat:"orta",alerjen:[]},
-  {id:"viski_mese",ad:"Viskide Meşe Yongası",g:"Meşe",gu:0,fermente:false,ibu_dk60:0.02,srm:35,etki:"Viski-meşe aroması. Rengi biraz koyulaştırır.",acik:"Viski aroması emdirilmiş. 5-10g/10L. 1-3 hafta soğukta.",kullanim:"Secondary fermentation veya conditioning",birim:"g",tags:["Meşe", "Viski", "Whisky", "Barrel"],varsayDozgL:3,maxDozgL:5,maxUyari:"Alkol + tanin baskın",onerilenZaman:["Secondary"],fiyat:"orta",alerjen:[]},
+  {id:"mese_cipsi",sureGun:10,ad:"Meşe Cipsi (Oak Chips)",g:"Meşe",gu:0,fermente:false,ibu_dk60:0.03,srm:22,etki:"OG/IBU'ya etkisi yok. Vanilya-meşe aroması, hafif renk.",acik:"5-15g/10L. 24-72 saat. Önceden alkol ile yıka.",kullanim:"Fermentasyonda veya soğukta",birim:"g",tags:["Meşe", "Tanen", "Ahşap", "Stout"],varsayDozgL:2,maxDozgL:4,maxUyari:"Tanen aşımı (MoreBeer: 1-3g/L)",onerilenZaman:["Secondary"],fiyat:"orta",alerjen:[]},
+  {id:"viski_mese",sureGun:10,ad:"Viskide Meşe Yongası",g:"Meşe",gu:0,fermente:false,ibu_dk60:0.02,srm:35,etki:"Viski-meşe aroması. Rengi biraz koyulaştırır.",acik:"Viski aroması emdirilmiş. 5-10g/10L. 1-3 hafta soğukta.",kullanim:"Secondary fermentation veya conditioning",birim:"g",tags:["Meşe", "Viski", "Whisky", "Barrel"],varsayDozgL:3,maxDozgL:5,maxUyari:"Alkol + tanin baskın",onerilenZaman:["Secondary"],fiyat:"orta",alerjen:[]},
   // Şeker — Koyu Candy
   {id:"koyu_candy",ad:"Koyu Candi (D-180)",g:"Şeker",gu:267,fermente:true,ibu_dk60:0.01,srm:180,etki:"OG artar, kuru bitiş. Koyu meyvemsi-karamelli aroma. SRM belirgin artar.",acik:"Belçika stili koyu candy; tamamen fermente olur. 100-300g/10L. Tripel, Dubbel, Stout için.",kullanim:"Kaynatmada (son 10 dk)",birim:"g",tags:["Şeker", "Belgian", "Dubbel", "Quad", "Dark"],varsayDozgL:30,maxDozgL:60,maxUyari:"Aşırı şeker, balans bozulur",onerilenZaman:["Kaynatmada"],fiyat:"pahali",alerjen:[]},
   // Meyve
@@ -7188,9 +7188,9 @@ const KATKILAR=[
   {id:"black_pepper",ad:"Siyah/Beyaz Biber (Kırık Tane)",g:"Baharat",gu:0,fermente:false,ibu_dk60:0.04,srm:0,etki:"Keskin biber acılığı, baharat",acik:"Saison ve farmhouse\'da karakteristik biber nüansı. 2-6g/10L. (NOT: #24 karabiber ile benzer; siyah/beyaz kurutma farkı.)",kullanim:"Son 5 dk kaynatma veya dry-hop",birim:"g",zaman:"Kaynatma sonu",tags:["Baharat", "Pepper", "Saison", "Strong"],varsayDozgL:0.5,maxDozgL:1,maxUyari:"Terpenic baskın",onerilenZaman:["Kaynatma sonu"],fiyat:"ucuz",alerjen:[]},
 
   // ── MEŞE & AHŞAP ──────────────────────────────────────────────
-  {id:"mese_spiral",ad:"Meşe Spirali (Oak Spiral)",g:"Meşe",gu:0,fermente:false,ibu_dk60:0.03,srm:8,etki:"Konsantre meşe, yoğun tanen, vanilya",acik:"Chip ve cubelara göre daha kolay dozaj. 3-8g/10L (1 küçük spiral ≈7g). American veya French oak seçin.",kullanim:"Secondary, 1-4 hafta",birim:"g",zaman:"Secondary",tags:["Meşe", "Spiral", "Ahşap", "Strong"],varsayDozgL:0.1,maxDozgL:0.5,maxUyari:"Adet bazlı: >8g/L aşırı",onerilenZaman:["Secondary"],fiyat:"orta",alerjen:[]},
-  {id:"bourbon_mese",ad:"Bourbon'da Bekletilmiş Meşe",g:"Meşe",gu:0,fermente:false,ibu_dk60:0.02,srm:15,etki:"Bourbon + meşe + vanilya + karamel",acik:"Imperial stout ve barleywine için. 5-15g meşe + 100-200mL bourbon/10L. Meşe yongasını bourbona 1 hafta bekletin.",kullanim:"Secondary, 1-3 hafta",birim:"g",zaman:"Secondary",tags:["Meşe", "Bourbon", "Barrel", "Strong"],varsayDozgL:3,maxDozgL:5,maxUyari:"Alkol + vanilin baskın",onerilenZaman:["Secondary"],fiyat:"pahali",alerjen:[]},
-  {id:"rum_mese",ad:"Rum'da Bekletilmiş Meşe",g:"Meşe",gu:0,fermente:false,ibu_dk60:0.02,srm:12,etki:"Rum + tropikal + meşe karmaşıklığı",acik:"Baltic porter ve imperial stout için. 5-15g meşe + 100-200mL rum/10L. Rum fıçı karakteri verir.",kullanim:"Secondary, 1-3 hafta",birim:"g",zaman:"Secondary",tags:["Meşe", "Rum", "Barrel", "Caribbean"],varsayDozgL:3,maxDozgL:5,maxUyari:"Melas + alkol baskın",onerilenZaman:["Secondary"],fiyat:"pahali",alerjen:[]},
+  {id:"mese_spiral",sureGun:42,ad:"Meşe Spirali (Oak Spiral)",g:"Meşe",gu:0,fermente:false,ibu_dk60:0.03,srm:8,etki:"Konsantre meşe, yoğun tanen, vanilya",acik:"Chip ve cubelara göre daha kolay dozaj. 3-8g/10L (1 küçük spiral ≈7g). American veya French oak seçin.",kullanim:"Secondary, 1-4 hafta",birim:"g",zaman:"Secondary",tags:["Meşe", "Spiral", "Ahşap", "Strong"],varsayDozgL:0.1,maxDozgL:0.5,maxUyari:"Adet bazlı: >8g/L aşırı",onerilenZaman:["Secondary"],fiyat:"orta",alerjen:[]},
+  {id:"bourbon_mese",sureGun:10,ad:"Bourbon'da Bekletilmiş Meşe",g:"Meşe",gu:0,fermente:false,ibu_dk60:0.02,srm:15,etki:"Bourbon + meşe + vanilya + karamel",acik:"Imperial stout ve barleywine için. 5-15g meşe + 100-200mL bourbon/10L. Meşe yongasını bourbona 1 hafta bekletin.",kullanim:"Secondary, 1-3 hafta",birim:"g",zaman:"Secondary",tags:["Meşe", "Bourbon", "Barrel", "Strong"],varsayDozgL:3,maxDozgL:5,maxUyari:"Alkol + vanilin baskın",onerilenZaman:["Secondary"],fiyat:"pahali",alerjen:[]},
+  {id:"rum_mese",sureGun:10,ad:"Rum'da Bekletilmiş Meşe",g:"Meşe",gu:0,fermente:false,ibu_dk60:0.02,srm:12,etki:"Rum + tropikal + meşe karmaşıklığı",acik:"Baltic porter ve imperial stout için. 5-15g meşe + 100-200mL rum/10L. Rum fıçı karakteri verir.",kullanim:"Secondary, 1-3 hafta",birim:"g",zaman:"Secondary",tags:["Meşe", "Rum", "Barrel", "Caribbean"],varsayDozgL:3,maxDozgL:5,maxUyari:"Melas + alkol baskın",onerilenZaman:["Secondary"],fiyat:"pahali",alerjen:[]},
 
   // ── EGZOTİK ───────────────────────────────────────────────────
   {id:"matcha",ad:"Matcha (Yeşil Çay Tozu)",g:"Aroma",gu:0,fermente:false,ibu_dk60:0.04,srm:2,etki:"Bitkisel, çimensi, umami, yeşil renk",acik:"Green tea beer ve witbier\'de. 5-15g/10L (ceremonial matcha daha yoğun). Soğuk suda çöz, fermantasyon sonunda ekle.",kullanim:"Fermantasyon sonu",birim:"g",zaman:"Fermantasyon sonu",tags:["Çay", "Matcha", "Green", "Japan"],varsayDozgL:1,maxDozgL:3,maxUyari:"Sabun-yosun baskın",onerilenZaman:["Fermantasyon sonu"],fiyat:"pahali",alerjen:[]},
@@ -7236,10 +7236,10 @@ const KATKILAR=[
   {id:"uzun_biber",ad:"Uzun Biber (Long Pepper)",g:"Baharat",gu:0,fermente:false,ibu_dk60:0.05,srm:0,etki:"Karmaşık baharat, çiçeksi-acı",acik:"Saison ve farmhouse\'da egzotik baharat. 1-4g/10L (karabiberden yoğun).",kullanim:"Son 5dk kaynatma",birim:"g",zaman:"Kaynatma sonu",tags:["Baharat", "Long Pepper", "Egzotik", "Warm"],varsayDozgL:0.3,maxDozgL:0.8,maxUyari:"Sıcak-karmaşık baskın",onerilenZaman:["Kaynatma sonu"],fiyat:"pahali",alerjen:[]},
   {id:"kiraz_ahsap",ad:"Kiraz Ağacı Yongası (Cherry Wood)",g:"Meşe",gu:0,fermente:false,ibu_dk60:0.01,srm:4,etki:"Meyve + hafif duman + tatlı ahşap",acik:"Stout ve porter\'da meyve-ahşap füzyon. 5-15g/10L (meşeden daha az tanen).",kullanim:"Secondary 1-3 hafta",birim:"g",zaman:"Secondary",tags:["Meşe", "Cherry Wood", "Fruit", "Smoky"],varsayDozgL:2,maxDozgL:4,maxUyari:"Tanen aşımı",onerilenZaman:["Secondary"],fiyat:"orta",alerjen:[]},
   {id:"elma_ahsap",ad:"Elma Ağacı Yongası (Apple Wood)",g:"Meşe",gu:0,fermente:false,ibu_dk60:0.01,srm:3,etki:"Meyve + hafif duman, Amerikan BBQ",acik:"Smoked ale ve porter\'da hafif meyve-duman. 5-15g/10L.",kullanim:"Secondary 1-3 hafta",birim:"g",zaman:"Secondary",tags:["Meşe", "Apple Wood", "Fruit", "Smoky"],varsayDozgL:2,maxDozgL:4,maxUyari:"Tanen aşımı",onerilenZaman:["Secondary"],fiyat:"orta",alerjen:[]},
-  {id:"gin_mese",ad:"Gin'de Bekletilmiş Meşe",g:"Meşe",gu:0,fermente:false,ibu_dk60:0.02,srm:6,etki:"Juniper + tahıl + meşe",acik:"IPA ve saison\'da gin botanik karakteri. 5-15g meşe + 100-200mL gin/10L.",kullanim:"Secondary 1-2 hafta",birim:"g",zaman:"Secondary",tags:["Meşe", "Gin", "Barrel", "Juniper"],varsayDozgL:3,maxDozgL:5,maxUyari:"Juniper + alkol baskın",onerilenZaman:["Secondary"],fiyat:"pahali",alerjen:[]},
+  {id:"gin_mese",sureGun:10,ad:"Gin'de Bekletilmiş Meşe",g:"Meşe",gu:0,fermente:false,ibu_dk60:0.02,srm:6,etki:"Juniper + tahıl + meşe",acik:"IPA ve saison\'da gin botanik karakteri. 5-15g meşe + 100-200mL gin/10L.",kullanim:"Secondary 1-2 hafta",birim:"g",zaman:"Secondary",tags:["Meşe", "Gin", "Barrel", "Juniper"],varsayDozgL:3,maxDozgL:5,maxUyari:"Juniper + alkol baskın",onerilenZaman:["Secondary"],fiyat:"pahali",alerjen:[]},
   {id:"port_mese",ad:"Porto Şarabı Fıçısı Meşe",g:"Meşe",gu:0,fermente:false,ibu_dk60:0.01,srm:10,etki:"Koyu meyve + tatlı meşe + tanen",acik:"Imperial stout ve barleywine için. 10-25g/10L (port emdirilmiş meşe yongası).",kullanim:"Secondary 2-4 hafta",birim:"g",zaman:"Secondary",tags:["Meşe", "Port", "Barrel", "Wine"],varsayDozgL:3,maxDozgL:5,maxUyari:"Şarap + oksidatif",onerilenZaman:["Secondary"],fiyat:"pahali",alerjen:["sulfit"]},
   {id:"sherry_mese",ad:"Sherry Fıçısı Meşe Yongası",g:"Meşe",gu:0,fermente:false,ibu_dk60:0.02,srm:6,etki:"Kuru meyve + fındık + oksitlenmiş",acik:"English barleywine ve old ale için. 10-25g/10L (sherry emdirilmiş meşe yongası).",kullanim:"Secondary 2-4 hafta",birim:"g",zaman:"Secondary",tags:["Meşe", "Sherry", "Oxidative", "Old Ale"],varsayDozgL:3,maxDozgL:5,maxUyari:"Fındık + oksidatif baskın",onerilenZaman:["Secondary"],fiyat:"pahali",alerjen:["sulfit"]},
-  {id:"tequila_mese",ad:"Tequila Fıçısı Meşe",g:"Meşe",gu:0,fermente:false,ibu_dk60:0.02,srm:5,etki:"Agave + citrus + meşe",acik:"Mexican lager ve saison için egzotik meşe. 5-15g/10L.",kullanim:"Secondary 1-3 hafta",birim:"g",zaman:"Secondary",tags:["Meşe", "Tequila", "Agave", "Mexican"],varsayDozgL:3,maxDozgL:5,maxUyari:"Agave + mezkal baskın",onerilenZaman:["Secondary"],fiyat:"pahali",alerjen:[]},
+  {id:"tequila_mese",sureGun:10,ad:"Tequila Fıçısı Meşe",g:"Meşe",gu:0,fermente:false,ibu_dk60:0.02,srm:5,etki:"Agave + citrus + meşe",acik:"Mexican lager ve saison için egzotik meşe. 5-15g/10L.",kullanim:"Secondary 1-3 hafta",birim:"g",zaman:"Secondary",tags:["Meşe", "Tequila", "Agave", "Mexican"],varsayDozgL:3,maxDozgL:5,maxUyari:"Agave + mezkal baskın",onerilenZaman:["Secondary"],fiyat:"pahali",alerjen:[]},
   {id:"demerera",ad:"Demerara / Turbinado Ham Şeker",g:"Şeker",gu:378,fermente:true,ibu_dk60:0,srm:4,etki:"Ham esmer şeker, hafif melasımsı",acik:"English ale ve porter için kısmi melasımsı karmaşıklık. 100-500g/10L (grist %5-20).",kullanim:"Kaynatmada",birim:"g",zaman:"Kaynatma",tags:["Şeker", "Demerara", "Raw", "Amber"],varsayDozgL:30,maxDozgL:80,maxUyari:"Alkol sıcaklığı",onerilenZaman:["Kaynatmada"],fiyat:"ucuz",alerjen:[]},
   {id:"jaggery",ad:"Jaggery (Palmiye Şekeri)",g:"Şeker",gu:360,fermente:true,ibu_dk60:0,srm:4,etki:"Palmiye tatlılığı, egzotik karamel",acik:"Farmhouse ve Hint tarzı için. 100-300g/10L. Çok aromatik.",kullanim:"Kaynatmada",birim:"g",zaman:"Kaynatma",tags:["Şeker", "Jaggery", "Palm", "Indian"],varsayDozgL:25,maxDozgL:60,maxUyari:"Karakteristik palm+melas",onerilenZaman:["Kaynatmada"],fiyat:"orta",alerjen:[]},
   {id:"piloncillo",ad:"Piloncillo / Panela (Koyu Ham Şeker)",g:"Şeker",gu:370,fermente:true,ibu_dk60:0,srm:6,etki:"Koyu melas, Meksika karakteri",acik:"Mexican ale ve dark lager için egzotik tatlılık. 100-300g/10L.",kullanim:"Kaynatmada",birim:"g",zaman:"Kaynatma",tags:["Şeker", "Piloncillo", "Panela", "Mexican"],varsayDozgL:25,maxDozgL:60,maxUyari:"Rum + melas baskın",onerilenZaman:["Kaynatmada"],fiyat:"orta",alerjen:[]},
@@ -14385,13 +14385,14 @@ function rEditorSurec(){
           var logE=isDH?_dhLogBul(k):_kLogBul(k);
           var logGun=logE?_gunH(logE.tarih):null;
           var planGun=isDH?_dhPlanGun():((k.gun!=null)?k.gun:null);
+          var _gInp=(!isDH)?'<input aria-label="Plan günü" type="number" class="bm-surec-gun-inp" value="'+(k.gun!=null?k.gun:'')+'" min="0" max="120" step="1" placeholder="gün" onchange="katki_guncelle('+ki+',\'gun\',this.value)" style="width:52px;font-size:12px;font-weight:700;text-align:center;padding:3px 5px;border:1.5px solid var(--altin);border-radius:8px;background:var(--card);color:var(--kahve);margin-left:6px">':''; // FEAT-KATKI-GUN: plan günü girişi (yalnız katkılar)
           if(logGun!==null){
             badge='<span style="font-size:11px;background:var(--ya);color:var(--yk);padding:3px 10px;border-radius:10px;font-weight:700;border:1px solid var(--yk)">✅ Gün '+logGun+'</span>'+(isDH&&logGun!==planGun?'<span style="font-size:10px;color:var(--mk);font-weight:600">(plan '+planGun+')</span>':'');
           } else if(_GUN_K.indexOf(a.key)!==-1){
             if(planGun!==null){
-              badge='<span style="font-size:11px;background:var(--ma);color:var(--mk);padding:3px 10px;border-radius:10px;font-weight:700">📅 Gün '+planGun+(isDH?' planlı':'')+'</span>';
+              badge='<span style="font-size:11px;background:var(--ma);color:var(--mk);padding:3px 10px;border-radius:10px;font-weight:700">📅 Gün '+planGun+(isDH?' planlı':'')+'</span>'+_gInp;
             } else {
-              badge='<span style="font-size:11px;color:var(--dim);padding:3px 6px">— gün</span>';
+              badge='<span style="font-size:11px;color:var(--dim);padding:3px 6px">— gün</span>'+_gInp;
             }
           }
         }
@@ -21307,6 +21308,35 @@ window.brewdayBitir=function(){
         alarmlar.sort((a,b) => a.g - b.g);
       }
     } catch(_dhE){ console.warn('[Alarm] dry hop enjeksiyonu:', _dhE); }
+    // FEAT-KATKI-GUN — k.gun planlı pitch-sonrası katkılar: ekleme alarmı; Meşe + sureGun: çıkarma alarmı (DH kalıbı)
+    try {
+      const gunluKatkilar = (S.katkilar||[]).filter(k => k && k.gun != null && !/mash|kaynat|whirlpool|flame/i.test(k.zaman||''));
+      gunluKatkilar.forEach(k => {
+        const kat = (typeof KATKILAR !== 'undefined' && Array.isArray(KATKILAR)) ? KATKILAR.find(x => x && x.id === k.id) : null;
+        const kAd = k.ad || (kat && kat.ad) || k.id || 'katkı';
+        alarmlar.push({
+          g: k.gun,
+          ts: _alarmTsHesapla(pitchTs, k.gun, saat),
+          tip: 'kritik',
+          aksiyon: '🧪 ' + kAd + ' ekle',
+          aciklama: (k.miktar||'') + (k.birim||'g') + ' · ' + (k.zaman||'') + ' — Katkı Takvimi planı (Gün ' + k.gun + ')',
+          sicaklik: null,
+          durum: 'bekliyor'
+        });
+        if (kat && kat.g === 'Meşe' && kat.sureGun != null) {
+          alarmlar.push({
+            g: k.gun + kat.sureGun,
+            ts: _alarmTsHesapla(pitchTs, k.gun + kat.sureGun, saat),
+            tip: 'kritik',
+            aksiyon: '🪵 ' + kAd + ' çıkar',
+            aciklama: kat.sureGun + ' gündür temasta — tanen/over-oak riski. Tat kontrolüyle çıkar.',
+            sicaklik: null,
+            durum: 'bekliyor'
+          });
+        }
+      });
+      if (gunluKatkilar.length) alarmlar.sort((a,b) => a.g - b.g);
+    } catch(_kgE){ console.warn('[Alarm] katkı gün enjeksiyonu:', _kgE); }
 
     const tum = _alarmlariOku();
     tum[receteId] = {
@@ -22221,6 +22251,10 @@ function katki_guncelle(idx, alan, val){
     S.katkilar[idx].miktar=sayi;
   } else if(alan==='zaman'){
     S.katkilar[idx].zaman=val;
+  } else if(alan==='gun'){
+    // FEAT-KATKI-GUN: plan günü — boş değer planı temizler; 0-120 tam sayı
+    if(val===''||val==null){ delete S.katkilar[idx].gun; }
+    else { var _g=parseInt(val,10); if(isNaN(_g)||_g<0||_g>120) return; S.katkilar[idx].gun=_g; }
   }
   try{saveDraft();}catch(e){}
   // Sadece güncelleme yeterli — render() uyarıyı yeniler
