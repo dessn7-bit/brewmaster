@@ -22523,8 +22523,8 @@ function tadimOff(kod, aktif){
   try{
     var lbl=document.getElementById('_tOffLbl_'+kod);
     if(lbl){
-      lbl.style.background=aktif?'#FFEBEE':'var(--bg2)';
-      lbl.style.borderColor=aktif?'#E57373':'var(--bor)';
+      lbl.style.background=aktif?'var(--crit-bg)':'var(--bg2)';
+      lbl.style.borderColor=aktif?'var(--crit)':'var(--bor)';
     }
   }catch(e){}
 }
