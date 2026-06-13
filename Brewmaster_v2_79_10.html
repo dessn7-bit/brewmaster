@@ -13683,19 +13683,19 @@ function rEditorSu(){
         <div style="font-size:13px;font-weight:700;color:var(--soluk)">🎯 Tarifinize Özel Öneri</div>
         <div style="font-size:15px;font-weight:700;color:var(--kahve);margin-top:2px;font-family:var(--font-display)">${_profAd}</div>
       </div>
-      <div style="font-size:9px;background:var(--card);color:var(--soluk);padding:4px 8px;border-radius:6px;text-align:center;line-height:1.4;border:1px solid var(--bor);font-style:italic">${_neden}</div>
+      <div style="font-size:var(--fs-xs);background:var(--card);color:var(--soluk);padding:4px 8px;border-radius:6px;text-align:center;line-height:1.4;border:1px solid var(--bor);font-style:italic">${_neden}</div>
     </div>
     <div style="font-size:11px;color:var(--soluk);margin-bottom:10px;padding:6px 8px;background:var(--card);border-radius:6px;border:1px solid var(--bor)">${_profAcik}</div>
     <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-bottom:8px">
       ${["Ca","Mg","Na","Cl","SO4","HCO3"].map(ion=>`<div style="background:var(--card);border-radius:7px;padding:6px 4px;text-align:center;border:1px solid var(--bor)">
-        <div style="font-size:9px;color:var(--soluk);font-weight:700">${ion}</div>
+        <div style="font-size:var(--fs-xs);color:var(--soluk);font-weight:700">${ion}</div>
         <div style="font-size:14px;font-weight:700;color:var(--bakir);font-family:var(--font-display)">${_prof[ion]}</div>
-        <div style="font-size:9px;font-weight:700;color:${_farkRenk(ion)}">${S.suMineralleri.length?_fark(ion):""}</div>
+        <div style="font-size:var(--fs-xs);font-weight:700;color:${_farkRenk(ion)}">${S.suMineralleri.length?_fark(ion):""}</div>
       </div>`).join("")}
     </div>
-    ${S.suMineralleri.length?`<div style="font-size:9px;color:var(--soluk)">🟢 Hedefe yakın · 🔴 Artır · 🔵 Azalt (ppm farkı)</div>`:`<div style="font-size:10px;color:var(--soluk)">💡 Mineral ekleyerek bu profili hedefleyebilirsin.</div>`}
+    ${S.suMineralleri.length?`<div style="font-size:var(--fs-xs);color:var(--soluk)">🟢 Hedefe yakın · 🔴 Artır · 🔵 Azalt (ppm farkı)</div>`:`<div style="font-size:var(--fs-xs);color:var(--soluk)">💡 Mineral ekleyerek bu profili hedefleyebilirsin.</div>`}
     <button onclick="suProfilUygula()" style="margin-top:8px;width:100%;padding:9px;background:var(--bakir);color:var(--card);border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-display);letter-spacing:.5px">⚗️ Bu Profile Ulaş — RO Suyundan Hesapla</button>
-    <div style="font-size:10px;color:var(--soluk);margin-top:4px;text-align:center;font-style:italic">RO / damıtılmış su baz alınır — mevcut mineraller sıfırlanır · Değerler yaklaşık, ±10 ppm sapma normal</div>
+    <div style="font-size:var(--fs-xs);color:var(--soluk);margin-top:4px;text-align:center;font-style:italic">RO / damıtılmış su baz alınır — mevcut mineraller sıfırlanır · Değerler yaklaşık, ±10 ppm sapma normal</div>
   </div>`:"";
   function ppmSinif(ion,val){
     const sinir={Ca:[0,200],Mg:[0,30],Na:[0,150],Cl:[0,200],SO4:[0,350],HCO3:[0,250]};
@@ -13706,12 +13706,12 @@ function rEditorSu(){
     <div class="ppm-box">
       <div class="ppm-etiket">${ion}</div>
       <div class="ppm-deger ${ppmSinif(ion,val)}">${val.toFixed(0)}</div>
-      <div style="font-size:8px;color:var(--dim)">ppm</div>
+      <div style="font-size:var(--fs-xs);color:var(--dim)">ppm</div>
     </div>`).join("");
   const minSatirlar=S.suMineralleri.map((m,i)=>{
     const min=MINERALLER.find(x=>x&&x.id===m.id);
     return`<div class="satir">
-      <div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--kahve)">${min?min.ad:m.id}</div><div style="font-size:10px;color:var(--soluk);margin-top:2px">${min?min.aciklama:""}</div></div>
+      <div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--kahve)">${min?min.ad:m.id}</div><div style="font-size:var(--fs-xs);color:var(--soluk);margin-top:2px">${min?min.aciklama:""}</div></div>
       <input aria-label="Mineral miktarı (g)" type="number" value="${m.miktar}" min=".1" step=".1" class="inp" style="width:68px;text-align:center;font-weight:600" onchange="S.suMineralleri[${i}].miktar=parseFloat(this.value)||0;render()">
       <span style="font-size:11px;color:var(--dim)">${min?min.birim:"g"}</span>
       <button class="btn" style="background:none;color:var(--kk);font-size:20px;padding:0 4px;line-height:1" onclick="S.suMineralleri.splice(${i},1);render()">×</button>
@@ -13749,10 +13749,10 @@ function rEditorSu(){
       const oneriIdFromStil = S.stil ? stildenSuProfili(S.stil) : null;
       const oneriProfil = oneriIdFromStil ? SU_PROFILLERI.find(p=>p&&p.id===oneriIdFromStil) : null;
       const stilOneriHTML = (S.stil && oneriProfil && !S.suHedef) ? `
-        <div style="background:var(--ya);border:1px solid #A8A870;border-left:4px solid var(--yk);border-radius:8px;padding:10px;margin-bottom:8px">
-          <div style="font-size:11px;color:#2A5A2A;font-weight:700;margin-bottom:3px">💡 <b class="bm-stil-adi">${S.stil}</b> için önerilen su:</div>
-          <div style="font-size:13px;color:#1A4A1A;font-weight:700;margin-bottom:2px">${oneriProfil.ad}</div>
-          <div style="font-size:10px;color:#4A6A4A">${oneriProfil.not||''}</div>
+        <div style="background:var(--ya);border:1px solid var(--yk);border-left:4px solid var(--yk);border-radius:8px;padding:10px;margin-bottom:8px">
+          <div style="font-size:11px;color:var(--yk);font-weight:700;margin-bottom:3px">💡 <b class="bm-stil-adi">${S.stil}</b> için önerilen su:</div>
+          <div style="font-size:13px;color:var(--yk);font-weight:700;margin-bottom:2px">${oneriProfil.ad}</div>
+          <div style="font-size:var(--fs-xs);color:var(--yk)">${oneriProfil.not||''}</div>
         </div>` : '';
       let hedefBlok = '';
       // Hedef profil var VEYA stilden çıkarım var ise buton göster
@@ -13763,13 +13763,13 @@ function rEditorSu(){
           const kaynak = SU_PROFILLERI.find(p=>p&&p.id===S.suKaynak);
           const kaynakIyon = kaynak ? kaynak.iyon : [0,0,0,0,0,0];
           const onRes = suProfilOneri(kaynakIyon, hedef.iyon, S.hacim||11);
-          const uyH = onRes.uyarilar.length ? `<div style="margin-top:8px;font-size:11px;color:#A0601A;line-height:1.5">${onRes.uyarilar.map(u=>'⚠️ '+u).join('<br>')}</div>` : '';
-          const oneriH = onRes.oneriler.length ? `<div style="margin-top:6px;font-size:11px;color:#2A5A2A">Öneri: ${onRes.oneriler.map(o=>{const m=MINERALLER.find(x=>x&&x.id===o.id);return `${m?m.ad.split(' — ')[0]:o.id} ${o.miktar}${m?m.birim:'g'}`;}).join(', ')}</div>` : '';
+          const uyH = onRes.uyarilar.length ? `<div style="margin-top:8px;font-size:11px;color:var(--kk);line-height:1.5">${onRes.uyarilar.map(u=>'⚠️ '+u).join('<br>')}</div>` : '';
+          const oneriH = onRes.oneriler.length ? `<div style="margin-top:6px;font-size:11px;color:var(--yk)">Öneri: ${onRes.oneriler.map(o=>{const m=MINERALLER.find(x=>x&&x.id===o.id);return `${m?m.ad.split(' — ')[0]:o.id} ${o.miktar}${m?m.birim:'g'}`;}).join(', ')}</div>` : '';
           hedefBlok = `
-            <div style="margin-top:10px;background:#F8F3E8;border:1.5px solid #D5C89A;border-radius:8px;padding:10px">
+            <div style="margin-top:10px;background:var(--kahve-bg);border:1.5px solid var(--altin);border-radius:8px;padding:10px">
               <div style="font-size:12px;color:var(--kahve);font-weight:700;margin-bottom:4px">📍 ${hedef.ad}</div>
-              <div style="font-size:10px;color:var(--dim);margin-bottom:4px">${hedef.not}</div>
-              <div style="font-size:10px;color:var(--soluk);margin-bottom:8px">Hedef iyon (ppm): Ca:${hedef.iyon[0]} Mg:${hedef.iyon[1]} Na:${hedef.iyon[2]} Cl:${hedef.iyon[3]} SO4:${hedef.iyon[4]} HCO3:${hedef.iyon[5]}</div>
+              <div style="font-size:var(--fs-xs);color:var(--dim);margin-bottom:4px">${hedef.not}</div>
+              <div style="font-size:var(--fs-xs);color:var(--soluk);margin-bottom:8px">Hedef iyon (ppm): Ca:${hedef.iyon[0]} Mg:${hedef.iyon[1]} Na:${hedef.iyon[2]} Cl:${hedef.iyon[3]} SO4:${hedef.iyon[4]} HCO3:${hedef.iyon[5]}</div>
               <button class="btn" onclick="suProfilOneriUygula('${efektifHedefId}')" style="background:var(--kahve);color:#fff;font-size:12px;padding:7px 14px;cursor:pointer;border-radius:6px">⚗️ Otomatik Mineral Öner &amp; Uygula</button>
               ${oneriH}${uyH}
             </div>`;
@@ -13798,10 +13798,10 @@ function rEditorSu(){
       </div>`;
     })();
 
-  var _suHesapHTML = `<div class="kart" style="background:var(--ma);border-color:#B0C8E0;margin-bottom:10px">
+  var _suHesapHTML = `<div class="kart" style="background:var(--ma);border-color:var(--mk);margin-bottom:10px">
       <div style="font-size:13px;font-weight:700;color:var(--mk);margin-bottom:8px">Su Profili — Sonuçlar (${S.hacim||11}L için ppm)</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap">${ppmSatirlar}</div>
-      <div style="font-size:10px;color:var(--dim);margin-top:8px">
+      <div style="font-size:var(--fs-xs);color:var(--dim);margin-top:8px">
         🟢 İyi aralık · 🟡 Dikkat · 🔴 Fazla<br>
         Ca: 50-200 ideal · Mg: max 30 · Na: max 150 · Cl: max 200 · SO4: max 350 · HCO3: max 250
       </div>
@@ -13829,18 +13829,18 @@ function rEditorSu(){
         const _tip=(typeof maya!=='undefined'&&maya)?maya.tip:'ale';
         const _min=_tip==='lager'?30:50;
         if(ppm.Ca>=_min)return '';
-        return `<div style="margin-top:8px;padding:8px 12px;background:#FDF4E0;border-left:3px solid #E0A060;border-radius:6px;font-size:11px;color:#7A5020">
+        return `<div style="margin-top:8px;padding:8px 12px;background:var(--sa);border-left:3px solid var(--sk);border-radius:6px;font-size:11px;color:var(--vintage-koyu)">
           <b>⚠️ Kalsiyum düşük (${ppm.Ca.toFixed(0)} ppm)</b> — ${_tip==='lager'?'Lager maya':'Ale maya'} için minimum ${_min} ppm öneriliyor (Palmer "Water"). Düşük Ca → zayıf flokulasyon, yetersiz pH düşüşü, bulanıklık riski. <b>Çözüm:</b> CaCl₂ (malt-forward) veya CaSO₄ (hop-forward) ekle.
         </div>`;
       })()}
       ${(()=>{
         // M-S1 ek: Aşırı Mg uyarısı (>30 ppm metalik tat)
-        if(ppm.Mg>30)return `<div style="margin-top:6px;padding:6px 10px;background:#FDF4E0;border-left:3px solid #E0A060;border-radius:6px;font-size:11px;color:#7A5020">⚠️ Mg ${ppm.Mg.toFixed(0)} ppm — 30+ üstünde metalik/acımsı tat riski (BA önerisi: max 20-30).</div>`;
+        if(ppm.Mg>30)return `<div style="margin-top:6px;padding:6px 10px;background:var(--sa);border-left:3px solid var(--sk);border-radius:6px;font-size:11px;color:var(--vintage-koyu)">⚠️ Mg ${ppm.Mg.toFixed(0)} ppm — 30+ üstünde metalik/acımsı tat riski (BA önerisi: max 20-30).</div>`;
         return '';
       })()}
       ${(()=>{
         // M-S1 ek: Aşırı Na uyarısı (>150 tuzlu)
-        if(ppm.Na>150)return `<div style="margin-top:6px;padding:6px 10px;background:#FDF4E0;border-left:3px solid #E0A060;border-radius:6px;font-size:11px;color:#7A5020">⚠️ Na ${ppm.Na.toFixed(0)} ppm — 150+ üstünde belirgin tuzlu tat. Gose için OK, diğer stiller için fazla.</div>`;
+        if(ppm.Na>150)return `<div style="margin-top:6px;padding:6px 10px;background:var(--sa);border-left:3px solid var(--sk);border-radius:6px;font-size:11px;color:var(--vintage-koyu)">⚠️ Na ${ppm.Na.toFixed(0)} ppm — 150+ üstünde belirgin tuzlu tat. Gose için OK, diğer stiller için fazla.</div>`;
         return '';
       })()}
     </div>`;
@@ -13848,7 +13848,7 @@ function rEditorSu(){
   var _suEkleHTML = `<div class="kart">
       <div style="font-size:13px;font-weight:700;color:var(--kahve);margin-bottom:10px">Mineral Ekle</div>
       <select aria-label="Mineral seç" class="inp" style="margin-bottom:6px" id="yMinId" onchange="yMin.id=this.value;document.getElementById('minAcik').textContent=MINERALLER.find(x=>x&&x.id===this.value)?.aciklama||''">${minOpts}</select>
-      <div id="minAcik" style="font-size:10px;color:var(--dim);margin-bottom:6px">${seciMin?.aciklama||""}</div>
+      <div id="minAcik" style="font-size:var(--fs-xs);color:var(--dim);margin-bottom:6px">${seciMin?.aciklama||""}</div>
       <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center">
         <input aria-label="Mineral miktarı (g)" type="number" id="yMinMiktar" class="inp" style="width:90px;text-align:center;font-weight:600" value="${yMin.miktar}" min=".1" step=".1" onchange="yMin.miktar=parseFloat(this.value)||0">
         <span style="color:var(--soluk);font-size:13px">${seciMin?.birim||"g"} / ${S.hacim||11}L</span>
@@ -13999,7 +13999,7 @@ function rEditorSu(){
       const ideal = 5.5;
       const inRange = pH_tahmin >= 5.4 && pH_tahmin <= 5.6;
       const durumRenk = inRange ? 'var(--yk)' : 'var(--sk)';
-      const durumBg = inRange ? 'var(--kahve-bg)' : '#F0E4BC';
+      const durumBg = inRange ? 'var(--kahve-bg)' : 'var(--sa)';
       const durumIkon = inRange ? '✅' : '⚠️';
       
       // Öneri hesabı
@@ -14027,13 +14027,13 @@ function rEditorSu(){
           <div style="font-size:22px;font-weight:700;color:${durumRenk}">${pH_tahmin.toFixed(2)}</div>
           <div style="font-size:11px;color:var(--soluk)">${durumIkon} Hedef: 5.4-5.6 (oda)</div>
         </div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:10px;color:var(--dim);margin-bottom:8px">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:var(--fs-xs);color:var(--dim);margin-bottom:8px">
           <div><b>Grist pH:</b> ${gristPH.toFixed(2)} <span style="color:var(--soluk)">(maltlar)</span></div>
           <div><b>RA:</b> ${RA.toFixed(0)} ppm CaCO₃ <span style="color:var(--soluk)">(su alk.)</span></div>
           <div><b>Mas °C:</b> ~${(pH_tahmin-0.3).toFixed(2)} <span style="color:var(--soluk)">(-0.3)</span></div>
         </div>
         <div style="font-size:11px;color:var(--kahve);background:var(--card);padding:8px 10px;border-radius:6px;line-height:1.5;border:1px solid var(--bor)">${oneri}</div>
-        <div style="font-size:9px;color:var(--dim);margin-top:6px;line-height:1.4">Tahmini değer (±0.1-0.2 pH) — buffer-weighted model (Riffe/deLange, oda °C). Kesin sonuç için mash sırasında pH metreyle ölçün.</div>
+        <div style="font-size:var(--fs-xs);color:var(--dim);margin-top:6px;line-height:1.4">Tahmini değer (±0.1-0.2 pH) — buffer-weighted model (Riffe/deLange, oda °C). Kesin sonuç için mash sırasında pH metreyle ölçün.</div>
       </div>`;
     })();
 
