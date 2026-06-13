@@ -10907,7 +10907,7 @@ function stokKontrolHTML(){
   ];
 
   let html='<div style="background:#fff;border:1px solid var(--cizgi-arac);border-radius:12px;overflow:hidden;margin-bottom:10px">';
-  html+=`<div style="padding:10px 14px;background:var(--bg-sunken);border-bottom:1px solid var(--cizgi-arac);font-size:12px;font-weight:700;color:var(--metin)">${_stokVar?'📦 Stok Durumu & Muadiller':'↔ Malzeme Muadilleri'}</div>`;
+  /* ic baslik bm-acc basligina tasindi (GENEL-IKON-DEADCODE) */
 
   // Son muadil değişikliği geri al banner'ı
   if(typeof _muadilSonDegis!=='undefined'&&_muadilSonDegis){
@@ -18927,19 +18927,19 @@ return `
                 btn('V12', 'V12 (V19) ⭐', 'var(--vintage)', 'V12 DEFAULT — V19 XGBoost (Adim 58 + V28f Hefeweizen + V28g Rye Ale + V28h_v2 Dunkelweizen + V28i Witbier + V28j_a Filtre A AWB->Hefe wider 202 reslug + base_score fix, 91 slug, slug t1 0.5706 / 14cat 0.6995, gap 4.90 PASS)');
               if (SHOW_ARCHIVE_MOTORS) {
                 // Arsiv motor btn'lari (gelecek aktivasyon icin korundu, model dosyalari archive/'de):
-                html += btn('V101', 'V10.1', '#0D47A1', 'V10.1 (8061 recete, +Roerstok+Amervallei NL kulupleri)');
-                html += btn('V10',  'V10',   '#1B5E20', 'BETA V10 (~8000 recete, +twortwat NL Hollanda toplulugu)');
-                html += btn('V9',   'V9',    '#7B1FA2', 'BETA V9 (7783 recete, +%34 V8.5)');
-                html += btn('V85',  'V8.5',  '#C88A13', 'BETA V8.5 (5847 recete)');
+                html += btn('V101', 'V10.1', 'var(--mk)', 'V10.1 (8061 recete, +Roerstok+Amervallei NL kulupleri)');
+                html += btn('V10',  'V10',   'var(--yk)', 'BETA V10 (~8000 recete, +twortwat NL Hollanda toplulugu)');
+                html += btn('V9',   'V9',    'var(--kk)', 'BETA V9 (7783 recete, +%34 V8.5)');
+                html += btn('V85',  'V8.5',  'var(--sk)', 'BETA V8.5 (5847 recete)');
               }
               return html + '</span>';
             })() : '')+
           '</div>'+
           ((_v5TopBjcp && ['V85','V9','V10','V101','V12'].indexOf(localStorage.getItem('bm_motor_version') || 'V12')>=0) ? (function(){
             var m = localStorage.getItem('bm_motor_version') || 'V12';
-            var bgC  = m==='V12' ? '#F3E6DC' : (m==='V101' ? '#E4E9ED' : (m==='V10' ? '#EBEEE0' : (m==='V9' ? '#F0E8EC' : '#F2EDE4')));
-            var brdC = m==='V12' ? '#CB9270' : (m==='V101' ? '#8094A4' : (m==='V10' ? '#93A06F' : (m==='V9' ? '#A78A96' : '#BAAB95')));
-            var txtC = m==='V12' ? '#A9683F' : (m==='V101' ? '#5E7384' : (m==='V10' ? '#6F7D4C' : (m==='V9' ? '#856070' : '#8C7B62')));
+            var bgC  = m==='V12' ? '#F3E6DC' : (m==='V101' ? 'var(--ma)' : (m==='V10' ? 'var(--ya)' : (m==='V9' ? 'var(--ka)' : 'var(--sa)')));
+            var brdC = m==='V12' ? '#CB9270' : (m==='V101' ? 'var(--mk)' : (m==='V10' ? 'var(--yk)' : (m==='V9' ? 'var(--kk)' : 'var(--sk)')));
+            var txtC = m==='V12' ? '#A9683F' : (m==='V101' ? 'var(--mk)' : (m==='V10' ? 'var(--yk)' : (m==='V9' ? 'var(--kk)' : 'var(--sk)')));
             var lbl = m==='V12' ? 'V12 (V19) DEFAULT (Adim 58 + V28f Hefeweizen + V28g Rye Ale + V28h_v2 Dunkelweizen + V28i Witbier + V28j_a Filtre A AWB->Hefe wider 202 reslug + base_score fix, 91 slug, slug t1 0.5706 / 14cat 0.6995, gap 4.90 PASS)' :
                       m==='V101' ? 'V10.1 (8061 reçete, +Roerstok+Amervallei NL kulüpleri)' :
                       m==='V10' ? 'BETA V10 aktif (~8000 reçete, +twortwat NL Hollanda topluluğu)' :
@@ -20126,11 +20126,11 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
       '</div>';
     })():""}
     ${(()=>{var _h=stokKontrolHTML();if(!_h)return '';
-      return '<div style="border:1px solid var(--cizgi-arac);border-radius:12px;overflow:hidden;margin-bottom:10px">'+
-        '<div onclick="(function(el){var c=el.nextElementSibling;var o=c.style.display===\'none\';c.style.display=o?\'block\':\'none\';el.querySelector(\'.sk-a\').textContent=o?\'▲\':\'▼\';})(this)" style="padding:10px 14px;background:var(--bg-sunken);display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none">'+
-        '<span>📦</span><span style="font-size:12px;font-weight:700;color:var(--metin);flex:1">Stok Durumu & Muadiller</span>'+
-        '<span class="sk-a" style="font-size:11px;color:var(--metin-soluk)">▲</span></div>'+
-        '<div style="display:block">'+_h+'</div></div>';
+      return '<div class="bm-acc" data-acc-id="stok-muadil" data-acc-default="expanded" aria-expanded="true">'+
+        '<button class="bm-acc-header" type="button" aria-expanded="true" onclick="bmAccToggle(\'stok-muadil\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();bmAccToggle(\'stok-muadil\')}">'+
+        '<span class="bm-acc-title">'+((STOK&&STOK.length>0)?'📦 Stok Durumu & Muadiller':'↔ Malzeme Muadilleri')+'</span>'+
+        '<span class="bm-acc-meta" data-acc-meta="stok-muadil"></span><span class="bm-acc-chevron">▾</span></button>'+
+        '<div class="bm-acc-body">'+_h+'</div></div>';
     })()}
       </div>
     </div>
