@@ -10906,14 +10906,14 @@ function stokKontrolHTML(){
     })},
   ];
 
-  let html='<div style="background:#fff;border:1px solid var(--bor);border-radius:12px;overflow:hidden;margin-bottom:10px">';
-  html+=`<div style="padding:10px 14px;background:var(--bg2);border-bottom:1px solid var(--bor);font-size:12px;font-weight:700;color:var(--kahve)">${_stokVar?'📦 Stok Durumu & Muadiller':'↔ Malzeme Muadilleri'}</div>`;
+  let html='<div style="background:#fff;border:1px solid var(--cizgi-arac);border-radius:12px;overflow:hidden;margin-bottom:10px">';
+  html+=`<div style="padding:10px 14px;background:var(--bg-sunken);border-bottom:1px solid var(--cizgi-arac);font-size:12px;font-weight:700;color:var(--metin)">${_stokVar?'📦 Stok Durumu & Muadiller':'↔ Malzeme Muadilleri'}</div>`;
 
   // Son muadil değişikliği geri al banner'ı
   if(typeof _muadilSonDegis!=='undefined'&&_muadilSonDegis){
-    html+=`<div style="padding:8px 14px;background:#FFF8E8;border-bottom:1px solid #E8C070;display:flex;align-items:center;gap:10px">
-      <span style="font-size:11px;color:#7a4a00;flex:1">↶ Son muadil değişikliği aktif</span>
-      <button onclick="muadilGeriAl()" style="background:#7a4a00;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer">↶ Geri Al</button>
+    html+=`<div style="padding:8px 14px;background:var(--accent-soft);border-bottom:1px solid var(--altin);display:flex;align-items:center;gap:10px">
+      <span style="font-size:11px;color:var(--vintage-koyu);flex:1">↶ Son muadil değişikliği aktif</span>
+      <button onclick="muadilGeriAl()" style="background:var(--vintage-koyu);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer">↶ Geri Al</button>
     </div>`;
   }
   // Manuel OG/FG kilidi uyarısı — brewLog ölçümü veya manuel giriş nedeniyle hesap kilitli ise
@@ -10922,9 +10922,9 @@ function stokKontrolHTML(){
     const _uyar=[];
     if(S.ogManuel) _uyar.push(`OG manuel: <b>${S.ogManuel}</b>`);
     if(S.fgManuel) _uyar.push(`FG manuel: <b>${S.fgManuel}</b>`);
-    html+=`<div style="padding:8px 14px;background:#FFE8E8;border-bottom:1px solid #D89090;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-      <span style="font-size:11px;color:#7a0000;flex:1">⚠️ Manuel override aktif — ${_uyar.join(', ')}. Muadil/malt değişimi OG'yi güncellese de manuel değer kilitli kalır.</span>
-      <button onclick="S.ogManuel=null;S.fgManuel=null;flash('Manuel OG/FG temizlendi','ok');render()" style="background:#7a0000;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer">Temizle</button>
+    html+=`<div style="padding:8px 14px;background:var(--crit-bg);border-bottom:1px solid var(--crit);display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <span style="font-size:11px;color:var(--kk);flex:1">⚠️ Manuel override aktif — ${_uyar.join(', ')}. Muadil/malt değişimi OG'yi güncellese de manuel değer kilitli kalır.</span>
+      <button onclick="S.ogManuel=null;S.fgManuel=null;flash('Manuel OG/FG temizlendi','ok');render()" style="background:var(--kk);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer">Temizle</button>
     </div>`;
   }
 
@@ -10932,7 +10932,7 @@ function stokKontrolHTML(){
 
   kategoriler.forEach(kat=>{
     if(!kat.items||kat.items.length===0)return;
-    satirlar+=`<div style="padding:5px 14px;background:rgba(0,0,0,0.025);font-size:10px;font-weight:700;color:var(--dim);letter-spacing:0.5px;border-top:1px solid var(--bor)">${kat.isim}</div>`;
+    satirlar+=`<div style="padding:5px 14px;background:rgba(0,0,0,0.025);font-size:var(--fs-xs);font-weight:700;color:var(--metin-soluk);letter-spacing:0.5px;border-top:1px solid var(--cizgi-arac)">${kat.isim}</div>`;
     kat.items.forEach(item=>{
       const stokItem=stokBul(item.id,item.ad);
       const varMi=!!stokItem;
@@ -10952,15 +10952,15 @@ function stokKontrolHTML(){
 
       // Ana satır
       if(!_stokVar&&(!tumMuadiller||tumMuadiller.length===0)){satirlar+='';return;}
-      satirlar+=`<div style="padding:8px 14px;border-top:1px solid var(--bor)">`;
+      satirlar+=`<div style="padding:8px 14px;border-top:1px solid var(--cizgi-arac)">`;
       satirlar+=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:${tumMuadiller.length?'6':'0'}px">`;
       if(_stokVar) satirlar+=`<span style="font-size:14px;flex-shrink:0">${varMi?'✅':'❌'}</span>`;
       satirlar+=`<div style="flex:1;min-width:0">`;
       satirlar+=`<div style="font-size:12px;font-weight:600;color:var(--metin)">${esc(item.ad)}</div>`;
-      satirlar+=`<div style="font-size:10px;color:var(--dim)">Reçete: ${esc(item.miktar)}`;
+      satirlar+=`<div style="font-size:var(--fs-xs);color:var(--metin-soluk)">Reçete: ${esc(item.miktar)}`;
       if(varMi) satirlar+=` &nbsp;·&nbsp; Stokta: <b>${stokItem.miktar}${stokItem.birim}</b>`;
       satirlar+=`</div></div>`;
-      if(_stokVar&&!varMi) satirlar+=`<span style="font-size:10px;padding:2px 8px;border-radius:10px;background:var(--ka);color:var(--kk);font-weight:600;flex-shrink:0;border:1px solid #C49080">Stokta Yok</span>`;
+      if(_stokVar&&!varMi) satirlar+=`<span style="font-size:var(--fs-xs);padding:2px 8px;border-radius:10px;background:var(--ka);color:var(--kk);font-weight:600;flex-shrink:0;border:1px solid var(--kk)">Stokta Yok</span>`;
       satirlar+=`</div>`;
 
       // Muadiller — Top 3, stil uyumuna göre sırala, gramaj önerisi
@@ -11074,7 +11074,7 @@ function stokKontrolHTML(){
                            kat.isim.includes('Mineral')?'mineral':'';
         satirlar+=`<div class="bm-muadil-wrap">`;
         satirlar+=`<div class="bm-muadil-row">`;
-        satirlar+=`<span class="bm-muadil-label">MUADIL${_aktifStil?' <span style="font-weight:500;color:var(--dim);text-transform:none;letter-spacing:0">('+esc(_aktifStil)+')</span>':''}</span>`;
+        satirlar+=`<span class="bm-muadil-label">MUADIL${_aktifStil?' <span style="font-weight:500;color:var(--metin-soluk);text-transform:none;letter-spacing:0">('+esc(_aktifStil)+')</span>':''}</span>`;
         _muadilGoster.forEach(function(m){
           var mStokC=stokBul(m.id,m.ad);
           var stokVarC=!!mStokC;
@@ -11097,21 +11097,21 @@ function stokKontrolHTML(){
         }
         satirlar+=`</div>`;
         // Full panel (default gizli) — eski büyük muadil paneli intact
-        satirlar+=`<div class="bm-muadil-panel-full" style="display:none;padding:6px 10px;background:${varMi?'var(--ya)':'var(--ma)'};border-radius:8px;border:1px solid ${varMi?'#ABB078':'#98A2AE'}">`;
-        satirlar+=`<div style="font-size:10px;font-weight:700;color:${varMi?'#666633':'#0066CC'};margin-bottom:5px">↔ Muadil Seçenekleri${_aktifStil?' <span style=\"font-weight:400;color:var(--dim)\">('+_aktifStil+' için en uygun)</span>':''}:</div>`;
+        satirlar+=`<div class="bm-muadil-panel-full" style="display:none;padding:6px 10px;background:${varMi?'var(--ya)':'var(--ma)'};border-radius:8px;border:1px solid ${varMi?'var(--yk)':'var(--mk)'}">`;
+        satirlar+=`<div style="font-size:var(--fs-xs);font-weight:700;color:${varMi?'var(--yk)':'var(--mk)'};margin-bottom:5px">↔ Muadil Seçenekleri${_aktifStil?' <span style=\"font-weight:400;color:var(--metin-soluk)\">('+_aktifStil+' için en uygun)</span>':''}:</div>`;
         
         function renderMuadil(m,mi){
           const mStok=stokBul(m.id,m.ad);
           const stokVar=!!mStok;
           let _uyumIcon='',_uyumNote='';
-          if(m._uyum===1){_uyumIcon='<span style="color:var(--yk);font-size:10px;font-weight:700;margin-left:4px">✓ stile uygun</span>';}
-          else if(m._uyum===-1){_uyumIcon='<span style="color:var(--sk);font-size:10px;margin-left:4px">⚠ stile aykırı</span>';_uyumNote=' <span style="color:'+(varMi?'var(--yk)':'var(--mk)')+';font-size:9px;font-style:italic">(genellikle: '+esc(m._stiller.slice(0,60))+(m._stiller.length>60?'...':'')+')</span>';}
+          if(m._uyum===1){_uyumIcon='<span style="color:var(--yk);font-size:var(--fs-xs);font-weight:700;margin-left:4px">✓ stile uygun</span>';}
+          else if(m._uyum===-1){_uyumIcon='<span style="color:var(--sk);font-size:var(--fs-xs);margin-left:4px">⚠ stile aykırı</span>';_uyumNote=' <span style="color:'+(varMi?'var(--yk)':'var(--mk)')+';font-size:var(--fs-xs);font-style:italic">(genellikle: '+esc(m._stiller.slice(0,60))+(m._stiller.length>60?'...':'')+')</span>';}
           let s=`<div style="display:flex;gap:6px;align-items:flex-start;${mi>0?'margin-top:7px;padding-top:7px;border-top:1px solid rgba(0,0,0,0.06)':''}">`;
           s+=`<span style="font-size:12px;flex-shrink:0;margin-top:1px">${stokVar?'✅':'⬜'}</span>`;
           s+=`<div style="flex:1;min-width:0">`;
-          s+=`<div style="font-size:11px;font-weight:600;color:var(--kahve)">${esc(m.ad)}`;
-          if(stokVar) s+=` <span style="font-size:10px;color:var(--yk);font-weight:400">(Stokta: ${mStok.miktar}${mStok.birim})</span>`;
-          else s+=` <span style="font-size:10px;color:${varMi?'var(--yk)':'var(--mk)'};font-weight:400">(stokta yok)</span>`;
+          s+=`<div style="font-size:11px;font-weight:600;color:var(--metin)">${esc(m.ad)}`;
+          if(stokVar) s+=` <span style="font-size:var(--fs-xs);color:var(--yk);font-weight:400">(Stokta: ${mStok.miktar}${mStok.birim})</span>`;
+          else s+=` <span style="font-size:var(--fs-xs);color:${varMi?'var(--yk)':'var(--mk)'};font-weight:400">(stokta yok)</span>`;
           s+=_uyumIcon;
           s+=`</div>`;
           // Gramaj önerisi — belirgin, bakır renk + "Kullan" butonu
@@ -11127,14 +11127,14 @@ function stokKontrolHTML(){
                            kat.isim.includes('Katkı')?'katki':
                            kat.isim.includes('Mineral')?'mineral':'';
             s+=`<div style="display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap">`;
-            s+=`<div style="font-size:11px;color:var(--bakir);font-weight:700;padding:3px 8px;background:var(--card);border-radius:4px">⚖️ <b>${esc(m._oneriMik)}</b></div>`;
+            s+=`<div style="font-size:11px;color:var(--bakir);font-weight:700;padding:3px 8px;background:var(--bg-card);border-radius:4px">⚖️ <b>${esc(m._oneriMik)}</b></div>`;
             if(_katKodu&&_oSayi>0){
-              s+=`<button onclick="muadilSec(this)" data-src="${esc(item.id)}" data-tgt="${esc(m.id)}" data-kat="${_katKodu}" data-mik="${_oSayi}" data-birim="${esc(_oBir)}" style="background:var(--altin);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:10px;font-weight:700;cursor:pointer;box-shadow:0 1px 3px rgba(139,90,43,.25)">→ Bunu Kullan</button>`;
+              s+=`<button onclick="muadilSec(this)" data-src="${esc(item.id)}" data-tgt="${esc(m.id)}" data-kat="${_katKodu}" data-mik="${_oSayi}" data-birim="${esc(_oBir)}" style="background:var(--altin);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:var(--fs-xs);font-weight:700;cursor:pointer;box-shadow:0 1px 3px rgba(139,90,43,.25)">→ Bunu Kullan</button>`;
             }
             s+=`</div>`;
           }
-          if(m.fark) s+=`<div style="font-size:10px;color:#444;margin-top:3px">${esc(m.fark)}${_uyumNote}</div>`;
-          if(m.detay) s+=`<div style="font-size:9px;color:${varMi?'var(--yk)':'var(--mk)'};margin-top:1px;font-style:italic">${esc(m.detay)}</div>`;
+          if(m.fark) s+=`<div style="font-size:var(--fs-xs);color:var(--metin);margin-top:3px">${esc(m.fark)}${_uyumNote}</div>`;
+          if(m.detay) s+=`<div style="font-size:var(--fs-xs);color:${varMi?'var(--yk)':'var(--mk)'};margin-top:1px;font-style:italic">${esc(m.detay)}</div>`;
           s+=`</div></div>`;
           return s;
         }
@@ -11144,7 +11144,7 @@ function stokKontrolHTML(){
         // Gizli muadiller
         if(_muadilGizli.length>0){
           const _gid='muadilEk_'+item.id+'_'+Math.random().toString(36).slice(2,7);
-          satirlar+=`<div onclick="(function(el){var c=document.getElementById('${_gid}');var o=c.style.display==='none';c.style.display=o?'block':'none';el.querySelector('.mu-t').textContent=o?'▲ Daha az göster':'▼ Daha fazla muadil ('+${_muadilGizli.length}+')';})(this)" style="margin-top:7px;padding:5px;background:var(--card);border:1px dashed var(--bor);border-radius:6px;text-align:center;font-size:10px;color:var(--soluk);cursor:pointer;user-select:none"><span class="mu-t">▼ Daha fazla muadil (${_muadilGizli.length})</span></div>`;
+          satirlar+=`<div onclick="(function(el){var c=document.getElementById('${_gid}');var o=c.style.display==='none';c.style.display=o?'block':'none';el.querySelector('.mu-t').textContent=o?'▲ Daha az göster':'▼ Daha fazla muadil ('+${_muadilGizli.length}+')';})(this)" style="margin-top:7px;padding:5px;background:var(--bg-card);border:1px dashed var(--cizgi-arac);border-radius:6px;text-align:center;font-size:var(--fs-xs);color:var(--metin-soluk);cursor:pointer;user-select:none"><span class="mu-t">▼ Daha fazla muadil (${_muadilGizli.length})</span></div>`;
           satirlar+=`<div id="${_gid}" style="display:none;margin-top:4px">`;
           _muadilGizli.forEach((m,mi)=>{satirlar+=renderMuadil(m,mi);});
           satirlar+=`</div>`;
@@ -20119,10 +20119,10 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
       const _k100=((6.9*(_abv*0.789*10)+4.0*(_re3*_fg*10))/10).toFixed(0);
       const _c330=(_re3*_fg*0.96*3.3).toFixed(1);
       const _k330=((6.9*(_abv*0.789*10)+4.0*(_re3*_fg*10))*0.33).toFixed(0);
-      return '<div style="background:var(--kahve-bg);border:1px solid var(--bor);border-left:4px solid var(--yk);border-radius:10px;padding:10px;margin-bottom:10px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">'+
-        '<div style="text-align:center;background:var(--card);border-radius:8px;padding:8px 6px;border:1px solid var(--bor)"><div style="font-size:9px;color:var(--soluk);font-weight:700;letter-spacing:.5px">KARBONHİDRAT</div><div style="font-size:20px;font-weight:700;color:var(--bakir);font-family:var(--font-display)">'+_c100+'</div><div style="font-size:9px;color:var(--soluk)">g / 100mL</div></div>'+
-        '<div style="text-align:center;background:var(--card);border-radius:8px;padding:8px 6px;border:1px solid var(--bor)"><div style="font-size:9px;color:var(--soluk);font-weight:700;letter-spacing:.5px">KALORİ</div><div style="font-size:20px;font-weight:700;color:var(--bakir);font-family:var(--font-display)">'+_k100+'</div><div style="font-size:9px;color:var(--soluk)">kcal / 100mL</div></div>'+
-        '<div style="text-align:center;background:var(--card);border-radius:8px;padding:8px 6px;border:1px solid var(--bor)"><div style="font-size:9px;color:var(--soluk);font-weight:700;letter-spacing:.5px">🍺 330mL</div><div style="font-size:15px;font-weight:700;color:var(--bakir);font-family:var(--font-display)">'+_c330+'g</div><div style="font-size:9px;color:var(--soluk)">'+_k330+' kcal</div></div>'+
+      return '<div style="background:var(--accent-soft);border:1px solid var(--cizgi-arac);border-left:4px solid var(--yk);border-radius:10px;padding:10px;margin-bottom:10px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">'+
+        '<div style="text-align:center;background:var(--bg-card);border-radius:8px;padding:8px 6px;border:1px solid var(--cizgi-arac)"><div style="font-size:var(--fs-xs);color:var(--metin-soluk);font-weight:700;letter-spacing:.5px">KARBONHİDRAT</div><div style="font-size:20px;font-weight:700;color:var(--bakir);font-family:var(--font-display)">'+_c100+'</div><div style="font-size:var(--fs-xs);color:var(--metin-soluk)">g / 100mL</div></div>'+
+        '<div style="text-align:center;background:var(--bg-card);border-radius:8px;padding:8px 6px;border:1px solid var(--cizgi-arac)"><div style="font-size:var(--fs-xs);color:var(--metin-soluk);font-weight:700;letter-spacing:.5px">KALORİ</div><div style="font-size:20px;font-weight:700;color:var(--bakir);font-family:var(--font-display)">'+_k100+'</div><div style="font-size:var(--fs-xs);color:var(--metin-soluk)">kcal / 100mL</div></div>'+
+        '<div style="text-align:center;background:var(--bg-card);border-radius:8px;padding:8px 6px;border:1px solid var(--cizgi-arac)"><div style="font-size:var(--fs-xs);color:var(--metin-soluk);font-weight:700;letter-spacing:.5px">🍺 330mL</div><div style="font-size:15px;font-weight:700;color:var(--bakir);font-family:var(--font-display)">'+_c330+'g</div><div style="font-size:var(--fs-xs);color:var(--metin-soluk)">'+_k330+' kcal</div></div>'+
       '</div>';
     })():""}
     ${(()=>{var _h=stokKontrolHTML();if(!_h)return '';
