@@ -19548,8 +19548,8 @@ return `
           };
           var _durumLabel = function(d){ return d==='kırmızı' ? 'Kritik' : (d==='sarı' ? 'Uyarı' : 'Bilgi'); };
 
-          return '<div style="background:var(--card);border:1px solid var(--bor);border-left:4px solid var(--bakir);border-radius:10px;padding:10px 12px;margin:8px 0;">'+
-            '<div style="font-size:13px;font-weight:700;color:var(--kahve);margin-bottom:8px">💊 Reçete Doktoru — Stile uyum için öneriler</div>'+
+          return '<div style="background:var(--bg-card);border:1px solid var(--cizgi-arac);border-left:4px solid var(--bakir);border-radius:10px;padding:10px 12px;margin:8px 0;">'+
+            '<div style="font-size:13px;font-weight:700;color:var(--metin);margin-bottom:8px">💊 Reçete Doktoru — Stile uyum için öneriler</div>'+
             oneriler.map(function(o){
               var p = _doctorParse(o.coz);
               return '<div class="bm-doctor-kart bm-doctor-'+o.durum+'">'+
@@ -19587,7 +19587,7 @@ return `
           '</div>';
         })()}
 ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştırma kaldırıldı. V5 Top-3 + feedback üst şeritte. */''}
-            ${S.durum==="arsiv"?'<div style="font-size:10px;background:var(--bg2);color:var(--soluk);padding:2px 8px;border:1px solid var(--bor);border-radius:4px;display:inline-block;margin-top:4px">📦 Arşiv</div>':S.durum==="istek"?'<div style="font-size:10px;background:var(--kahve-light);color:var(--bakir);padding:2px 8px;border:1px solid var(--kahve-border);border-radius:4px;display:inline-block;margin-top:4px">⭐ İstek Listesi</div>':""}
+            ${S.durum==="arsiv"?'<div style="font-size:var(--fs-xs);background:var(--bg-sunken);color:var(--metin-soluk);padding:2px 8px;border:1px solid var(--cizgi-arac);border-radius:4px;display:inline-block;margin-top:4px">📦 Arşiv</div>':S.durum==="istek"?'<div style="font-size:var(--fs-xs);background:var(--kahve-light);color:var(--bakir);padding:2px 8px;border:1px solid var(--cizgi-arac);border-radius:4px;display:inline-block;margin-top:4px">⭐ İstek Listesi</div>':""}
         </div>
         <!-- Adim 135-A POC: 4 stat mini-kart token migration (eski tarz: 9px label / 15px değer / var(--golge), yeni: token sistem) -->
         <div class="bm-statmini-grid">
@@ -19619,8 +19619,8 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
       <button class="bm-acc-header" type="button" aria-expanded="false" onclick="bmAccToggle('recete-profili')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmAccToggle('recete-profili')}"><span class="bm-acc-title">📊 Reçete Profili</span><span class="bm-acc-meta" data-acc-meta="recete-profili"></span><span class="bm-acc-chevron">▾</span></button>
       <div class="bm-acc-body">
     <div class="kart" style="margin-bottom:10px">
-      <div style="font-size:13px;font-weight:700;color:var(--kahve);margin-bottom:10px;font-family:var(--font-display)">🎯 Tahmini Bira Profili</div>
-      ${S.maltlar.length===0?'<div style="text-align:center;padding:16px;color:var(--dim);font-size:12px">Malt ekleyince profil oluşur</div>':(()=>{
+      <div style="font-size:13px;font-weight:700;color:var(--metin);margin-bottom:10px;font-family:var(--font-display)">🎯 Tahmini Bira Profili</div>
+      ${S.maltlar.length===0?'<div style="text-align:center;padding:16px;color:var(--metin-soluk);font-size:12px">Malt ekleyince profil oluşur</div>':(()=>{
         const _ps=(e,d,rows)=>{ if(d&&String(d).trim()) rows.push([e,d]); };
         const profRows=[];
 
@@ -20104,13 +20104,13 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
         }
 
         return profRows.map(([e,d])=>
-          '<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--bor)">'+
-            '<span style="font-size:11px;font-weight:700;color:var(--kahve);white-space:nowrap;min-width:115px">'+e+'</span>'+
-            '<span style="font-size:11px;color:var(--soluk);flex:1;line-height:1.6">'+d+'</span>'+
+          '<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--cizgi-arac)">'+
+            '<span style="font-size:11px;font-weight:700;color:var(--metin);white-space:nowrap;min-width:115px">'+e+'</span>'+
+            '<span style="font-size:11px;color:var(--metin-soluk);flex:1;line-height:1.6">'+d+'</span>'+
           '</div>'
         ).join('');
       })()}
-      <div style="font-size:9px;color:var(--dim);margin-top:8px;text-align:center">Tahmini profil — bileşenlere göre otomatik güncellenir</div>
+      <div style="font-size:var(--fs-xs);color:var(--metin-soluk);margin-top:8px;text-align:center">Tahmini profil — bileşenlere göre otomatik güncellenir</div>
     </div>
     ${og>1.001?(()=>{
       const _toP3=sg=>bmOgPlato(sg);
@@ -20126,10 +20126,10 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
       '</div>';
     })():""}
     ${(()=>{var _h=stokKontrolHTML();if(!_h)return '';
-      return '<div style="border:1px solid var(--bor);border-radius:12px;overflow:hidden;margin-bottom:10px">'+
-        '<div onclick="(function(el){var c=el.nextElementSibling;var o=c.style.display===\'none\';c.style.display=o?\'block\':\'none\';el.querySelector(\'.sk-a\').textContent=o?\'▲\':\'▼\';})(this)" style="padding:10px 14px;background:var(--bg2);display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none">'+
-        '<span>📦</span><span style="font-size:12px;font-weight:700;color:var(--kahve);flex:1">Stok Durumu & Muadiller</span>'+
-        '<span class="sk-a" style="font-size:11px;color:var(--dim)">▲</span></div>'+
+      return '<div style="border:1px solid var(--cizgi-arac);border-radius:12px;overflow:hidden;margin-bottom:10px">'+
+        '<div onclick="(function(el){var c=el.nextElementSibling;var o=c.style.display===\'none\';c.style.display=o?\'block\':\'none\';el.querySelector(\'.sk-a\').textContent=o?\'▲\':\'▼\';})(this)" style="padding:10px 14px;background:var(--bg-sunken);display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none">'+
+        '<span>📦</span><span style="font-size:12px;font-weight:700;color:var(--metin);flex:1">Stok Durumu & Muadiller</span>'+
+        '<span class="sk-a" style="font-size:11px;color:var(--metin-soluk)">▲</span></div>'+
         '<div style="display:block">'+_h+'</div></div>';
     })()}
       </div>
