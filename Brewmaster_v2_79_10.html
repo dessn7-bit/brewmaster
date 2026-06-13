@@ -11105,13 +11105,13 @@ function stokKontrolHTML(){
           const stokVar=!!mStok;
           let _uyumIcon='',_uyumNote='';
           if(m._uyum===1){_uyumIcon='<span style="color:var(--yk);font-size:10px;font-weight:700;margin-left:4px">✓ stile uygun</span>';}
-          else if(m._uyum===-1){_uyumIcon='<span style="color:var(--sk);font-size:10px;margin-left:4px">⚠ stile aykırı</span>';_uyumNote=' <span style="color:var(--dim);font-size:9px;font-style:italic">(genellikle: '+esc(m._stiller.slice(0,60))+(m._stiller.length>60?'...':'')+')</span>';}
+          else if(m._uyum===-1){_uyumIcon='<span style="color:var(--sk);font-size:10px;margin-left:4px">⚠ stile aykırı</span>';_uyumNote=' <span style="color:'+(varMi?'var(--yk)':'var(--mk)')+';font-size:9px;font-style:italic">(genellikle: '+esc(m._stiller.slice(0,60))+(m._stiller.length>60?'...':'')+')</span>';}
           let s=`<div style="display:flex;gap:6px;align-items:flex-start;${mi>0?'margin-top:7px;padding-top:7px;border-top:1px solid rgba(0,0,0,0.06)':''}">`;
           s+=`<span style="font-size:12px;flex-shrink:0;margin-top:1px">${stokVar?'✅':'⬜'}</span>`;
           s+=`<div style="flex:1;min-width:0">`;
           s+=`<div style="font-size:11px;font-weight:600;color:var(--kahve)">${esc(m.ad)}`;
           if(stokVar) s+=` <span style="font-size:10px;color:var(--yk);font-weight:400">(Stokta: ${mStok.miktar}${mStok.birim})</span>`;
-          else s+=` <span style="font-size:10px;color:var(--dim);font-weight:400">(stokta yok)</span>`;
+          else s+=` <span style="font-size:10px;color:${varMi?'var(--yk)':'var(--mk)'};font-weight:400">(stokta yok)</span>`;
           s+=_uyumIcon;
           s+=`</div>`;
           // Gramaj önerisi — belirgin, bakır renk + "Kullan" butonu
@@ -11134,7 +11134,7 @@ function stokKontrolHTML(){
             s+=`</div>`;
           }
           if(m.fark) s+=`<div style="font-size:10px;color:#444;margin-top:3px">${esc(m.fark)}${_uyumNote}</div>`;
-          if(m.detay) s+=`<div style="font-size:9px;color:var(--dim);margin-top:1px;font-style:italic">${esc(m.detay)}</div>`;
+          if(m.detay) s+=`<div style="font-size:9px;color:${varMi?'var(--yk)':'var(--mk)'};margin-top:1px;font-style:italic">${esc(m.detay)}</div>`;
           s+=`</div></div>`;
           return s;
         }
