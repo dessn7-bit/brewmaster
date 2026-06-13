@@ -4990,7 +4990,7 @@ function hSRM(ml,katkilar,hacim){
     } else if(!_inBoil&&k.dk==null&&!_isSeker){
       // Post-boil/fermantasyon/dry-hop/cold crash eklemeler → renk katkısı %30
       // Fermantasyonda pigmentler kısmen parçalanır, kaynatmadaki ekstraksiyon olmaz
-      if(/fermant|dry\s*hop|cold|post|secondary|servis|soğuk|crash|şişele/i.test(k.zaman||""))_dkFactor=0.3;
+      if(/ferment|dry\s*hop|cold|post|secondary|servis|soğuk|crash|şişele|fıçıla/i.test(k.zaman||""))_dkFactor=0.3;
     }
     m+=(kat.srm*sm*2.20462)/L*_dkFactor;
   });
@@ -13600,7 +13600,7 @@ function rEditorSu(){
   }
   // ═════════════════════════════════════════════════════════
   
-  const _topKgSu=(S.maltlar||[]).reduce((s,m)=>{if(!m||!m.id)return s;const ml=MALTLAR.find(x=>x&&x.id===m.id);return ml&&ml.g!=='Şeker'?s+(m.kg||0):s;},0);
+  const _topKgSu=(S.maltlar||[]).reduce((s,m)=>{if(!m||!m.id)return s;const ml=MALTLAR.find(x=>x&&x.id===m.id);return ml&&ml.g!=='Şeker'&&m.id!=='rice'&&m.id!=='rice_hulls'?s+(m.kg||0):s;},0);
   const _whtKgSu=(S.maltlar||[]).reduce((s,m)=>{if(!m||!m.id)return s;const ml=MALTLAR.find(x=>x&&x.id===m.id);return ml&&['wheat','dark_wheat','rwh','torr_wh','flaked_wheat'].includes(m.id)?s+(m.kg||0):s;},0);
   const _topKg=_topKgSu; const _whtPct=_topKgSu>0?_whtKgSu/_topKgSu*100:0;
   const ppm=suProfiliHesapla(S.suMineralleri, S.hacim||11, S.suKaynak);
