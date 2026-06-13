@@ -4022,19 +4022,19 @@ window.batchOlcekKart=batchOlcekKart;
 function batchOlcekKartHtml(){
   var mev=S.hacim||11;
   var hed=(S.olcekHedef!=null)?+S.olcekHedef:mev;
-  var h='<div style="border-top:1px solid var(--bor);padding-top:10px;margin-top:4px">';
-  h+='<div style="font-size:11px;color:var(--dim);margin-bottom:8px">Reçete Ölçekleme — hedef hacmi gir, önizle, uygula. OG/IBU/SRM korunur; sadece miktarlar oranlanır.</div>';
+  var h='<div style="border-top:1px solid var(--cizgi-arac);padding-top:10px;margin-top:4px">';
+  h+='<div style="font-size:11px;color:var(--metin-soluk);margin-bottom:8px">Reçete Ölçekleme — hedef hacmi gir, önizle, uygula. OG/IBU/SRM korunur; sadece miktarlar oranlanır.</div>';
   h+='<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px"><span class="etiket" style="margin:0">Hedef Hacim (L)</span><input aria-label="Ölçek hedef hacmi (L)" type="number" class="inp" style="width:90px" min="0.5" step="0.5" value="'+hed+'" onchange="S.olcekHedef=+this.value;render()"></div>';
-  if(!hed||hed<=0||hed===mev){h+='<div style="font-size:11px;color:var(--soluk)">Mevcut: '+mev+'L. Farklı bir hedef hacim gir.</div></div>';return h;}
+  if(!hed||hed<=0||hed===mev){h+='<div style="font-size:11px;color:var(--metin-soluk)">Mevcut: '+mev+'L. Farklı bir hedef hacim gir.</div></div>';return h;}
   var oran=hed/mev;
   var rows='';
-  (S.maltlar||[]).forEach(function(m){rows+='<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span>'+esc(m.ad)+'</span><span style="color:var(--dim)">'+(+m.kg).toFixed(3)+' → <b style="color:var(--kahve)">'+(+(m.kg*oran).toFixed(3))+'</b> kg</span></div>';});
-  (S.hoplar||[]).forEach(function(hp){rows+='<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span>'+esc(hp.ad)+'</span><span style="color:var(--dim)">'+(+hp.g).toFixed(1)+' → <b style="color:var(--kahve)">'+(+(hp.g*oran).toFixed(1))+'</b> g</span></div>';});
-  (S.suMineralleri||[]).forEach(function(mn){rows+='<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span>'+esc(mn.ad||mn.id||'mineral')+'</span><span style="color:var(--dim)">'+(+mn.miktar).toFixed(2)+' → <b style="color:var(--kahve)">'+(+(mn.miktar*oran).toFixed(2))+'</b> g</span></div>';});
-  if(!rows)rows='<div style="font-size:11px;color:var(--soluk)">Ölçeklenecek malzeme yok.</div>';
+  (S.maltlar||[]).forEach(function(m){rows+='<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span>'+esc(m.ad)+'</span><span style="color:var(--metin-soluk)">'+(+m.kg).toFixed(3)+' → <b style="color:var(--metin)">'+(+(m.kg*oran).toFixed(3))+'</b> kg</span></div>';});
+  (S.hoplar||[]).forEach(function(hp){rows+='<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span>'+esc(hp.ad)+'</span><span style="color:var(--metin-soluk)">'+(+hp.g).toFixed(1)+' → <b style="color:var(--metin)">'+(+(hp.g*oran).toFixed(1))+'</b> g</span></div>';});
+  (S.suMineralleri||[]).forEach(function(mn){rows+='<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span>'+esc(mn.ad||mn.id||'mineral')+'</span><span style="color:var(--metin-soluk)">'+(+mn.miktar).toFixed(2)+' → <b style="color:var(--metin)">'+(+(mn.miktar*oran).toFixed(2))+'</b> g</span></div>';});
+  if(!rows)rows='<div style="font-size:11px;color:var(--metin-soluk)">Ölçeklenecek malzeme yok.</div>';
   var nk=(S.katkilar||[]).length;
-  var katkiNot=nk?'<div style="font-size:10px;color:var(--soluk);margin-top:4px">+ '+nk+' katkı da oranlanır (adet/tablet gibi sayılabilir birimler hariç)</div>':'';
-  h+='<div style="background:#FAF6EF;border:1px solid var(--bor);border-radius:8px;padding:8px 10px;margin-bottom:10px"><div style="font-size:10px;color:var(--soluk);margin-bottom:4px">Önizleme (oran '+oran.toFixed(3)+') · '+mev+'L → '+hed+'L</div>'+rows+katkiNot+'</div>';
+  var katkiNot=nk?'<div style="font-size:var(--fs-xs);color:var(--metin-soluk);margin-top:4px">+ '+nk+' katkı da oranlanır (adet/tablet gibi sayılabilir birimler hariç)</div>':'';
+  h+='<div style="background:var(--bg-card);border:1px solid var(--cizgi-arac);border-radius:8px;padding:8px 10px;margin-bottom:10px"><div style="font-size:var(--fs-xs);color:var(--metin-soluk);margin-bottom:4px">Önizleme (oran '+oran.toFixed(3)+') · '+mev+'L → '+hed+'L</div>'+rows+katkiNot+'</div>';
   h+='<button class="btn" onclick="batchOlcekKart()" style="background:var(--bakir);color:#fff;padding:8px 14px;font-size:13px;width:100%">'+mev+'L → '+hed+'L Uygula</button>';
   h+='</div>';
   return h;
@@ -14799,43 +14799,43 @@ function rEditorHesap(og, fg, abv, maya){
 
   // 5 kart içerikleri (mevcut HTML, sadece dış accordion wrap'a sarılır)
   var _kartBatch = `<div class="kart">
-      <div style="font-size:14px;font-weight:700;color:var(--kahve);margin-bottom:12px">⚗️ Batç Hacmi</div>
+      <div style="font-size:14px;font-weight:700;color:var(--metin);margin-bottom:12px">🥃 Batç Hacmi</div>
       <span class="etiket">Hedef Şişeleme Hacmi</span>
       <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
-        ${[5,8,10,11,12,15,19,20,25].map(v=>`<button class="btn" style="padding:7px 12px;border:1.5px solid ${S.hacim===v?"var(--altin)":"var(--bor)"};background:${S.hacim===v?"var(--kahve-bg)":"#fff"};color:${S.hacim===v?"var(--bakir)":"var(--soluk)"};font-weight:${S.hacim===v?700:500}" onclick="S.hacim=${v};render()">${v}L</button>`).join("")}
+        ${[5,8,10,11,12,15,19,20,25].map(v=>`<button class="btn" style="padding:7px 12px;border:1.5px solid ${S.hacim===v?"var(--altin)":"var(--cizgi-arac)"};background:${S.hacim===v?"var(--accent-soft)":"#fff"};color:${S.hacim===v?"var(--bakir)":"var(--metin-soluk)"};font-weight:${S.hacim===v?700:500}" onclick="S.hacim=${v};render()">${v}L</button>`).join("")}
       </div>
 ${batchOlcekKartHtml()}
     </div>`;
 
   var _kartExport = `<div class="kart">
-      <div style="font-size:14px;font-weight:700;color:var(--kahve);margin-bottom:10px">📤 Reçete Dışa Aktarma</div>
-      <div style="font-size:11px;color:var(--dim);margin-bottom:10px;line-height:1.5">BeerXML 1.0 standart formatı. <b>BeerSmith, Brewfather, Brewer's Friend, BeerTools</b> uygulamalarına import edilebilir.</div>
+      <div style="font-size:14px;font-weight:700;color:var(--metin);margin-bottom:10px">📤 Reçete Dışa Aktarma</div>
+      <div style="font-size:11px;color:var(--metin-soluk);margin-bottom:10px;line-height:1.5">BeerXML 1.0 standart formatı. <b>BeerSmith, Brewfather, Brewer's Friend, BeerTools</b> uygulamalarına import edilebilir.</div>
       <button class="btn" onclick="beerXmlExport()" style="background:var(--altin);color:#fff;padding:10px 14px;font-size:13px;width:100%;font-weight:600">🍺 BeerXML Olarak İndir</button>
-      <div style="font-size:9px;color:var(--soluk);margin-top:6px;text-align:center">Malt, hop, maya, mash, su, katkılar — tümü dahil</div>
+      <div style="font-size:var(--fs-xs);color:var(--metin-soluk);margin-top:6px;text-align:center">Malt, hop, maya, mash, su, katkılar — tümü dahil</div>
     </div>`;
 
   var _kartPriming = `<div class="kart">
-      <div style="font-size:14px;font-weight:700;color:var(--kahve);margin-bottom:12px">🍾 Priming / Şişeleme</div>
+      <div style="font-size:14px;font-weight:700;color:var(--metin);margin-bottom:12px">🍾 Priming / Şişeleme</div>
       <span class="etiket">Hedef CO₂ (vol)</span>
       <input aria-label="Hedef CO₂ (vol)" type="number" class="inp" value="${S.primVol}" min="1.5" max="5" step=".1" style="margin-bottom:5px" onchange="S.primVol=parseFloat(this.value)||2.4;S._primVolAuto=false;render()">
-      ${_co2Range?"<div style='background:var(--sa);border:1px solid var(--bor);border-radius:8px;padding:6px 10px;margin-bottom:8px'>"+"<div style='font-size:10px;color:var(--dim);margin-bottom:2px'>🎯 Stile Göre Tavsiye"+(S.stilTah?" — <b>"+S.stilTah+"</b>":"")+"</div>"+"<div style='display:flex;align-items:center;gap:8px'>"+"<div style='flex:1;background:#E0E0E0;border-radius:4px;height:6px;overflow:hidden'>"+"<div style='height:100%;background:var(--altin);border-radius:4px;width:"+Math.round((_co2Ideal-1.5)/(4.5-1.5)*100)+"%'></div>"+"</div>"+"<span style='font-size:11px;font-weight:700;color:var(--bakir)'>"+_co2Ideal+" vol</span>"+"</div>"+"<div style='font-size:10px;color:var(--dim);margin-top:2px'>Aralık: "+_co2Min+"–"+_co2Max+" vol"+"<button onclick='S.primVol="+_co2Ideal+";render()' style='margin-left:8px;background:var(--altin);color:#fff;border:none;border-radius:4px;padding:2px 8px;font-size:10px;cursor:pointer'>Uygula</button>"+"</div>"+"</div>":""}<div style="font-size:10px;color:var(--dim);margin-bottom:10px">Ale: 2.0–2.4 · Lager: 2.4–2.8 · Hefeweizen: 3.5–4.0 · Gose: 3.0–3.5</div>
+      ${_co2Range?"<div style='background:var(--sa);border:1px solid var(--cizgi-arac);border-radius:8px;padding:6px 10px;margin-bottom:8px'>"+"<div style='font-size:var(--fs-xs);color:var(--metin-soluk);margin-bottom:2px'>🎯 Stile Göre Tavsiye"+(S.stilTah?" — <b>"+S.stilTah+"</b>":"")+"</div>"+"<div style='display:flex;align-items:center;gap:8px'>"+"<div style='flex:1;background:var(--bg-sunken);border-radius:4px;height:6px;overflow:hidden'>"+"<div style='height:100%;background:var(--altin);border-radius:4px;width:"+Math.round((_co2Ideal-1.5)/(4.5-1.5)*100)+"%'></div>"+"</div>"+"<span style='font-size:11px;font-weight:700;color:var(--bakir)'>"+_co2Ideal+" vol</span>"+"</div>"+"<div style='font-size:var(--fs-xs);color:var(--metin-soluk);margin-top:2px'>Aralık: "+_co2Min+"–"+_co2Max+" vol"+"<button onclick='S.primVol="+_co2Ideal+";render()' style='margin-left:8px;background:var(--altin);color:#fff;border:none;border-radius:4px;padding:2px 8px;font-size:var(--fs-xs);cursor:pointer'>Uygula</button>"+"</div>"+"</div>":""}<div style="font-size:var(--fs-xs);color:var(--metin-soluk);margin-bottom:10px">Ale: 2.0–2.4 · Lager: 2.4–2.8 · Hefeweizen: 3.5–4.0 · Gose: 3.0–3.5</div>
       <span class="etiket">Priming Yöntemi</span>
       <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
-        ${["Dekstroz","Beyaz Şeker","Sıvı CO₂ Şekeri"].map(y=>`<button class="btn" style="flex:1;padding:7px 8px;font-size:12px;border:1.5px solid ${(S.primYontem||'Dekstroz')===y?'var(--altin)':'var(--bor)'};background:${(S.primYontem||'Dekstroz')===y?'var(--kahve-bg)':'#fff'};color:${(S.primYontem||'Dekstroz')===y?'var(--bakir)':'var(--soluk)'}" onclick="S.primYontem='${y}';render()">${y}</button>`).join("")}
+        ${["Dekstroz","Beyaz Şeker","Sıvı CO₂ Şekeri"].map(y=>`<button class="btn" style="flex:1;padding:7px 8px;font-size:12px;border:1.5px solid ${(S.primYontem||'Dekstroz')===y?'var(--altin)':'var(--cizgi-arac)'};background:${(S.primYontem||'Dekstroz')===y?'var(--accent-soft)':'#fff'};color:${(S.primYontem||'Dekstroz')===y?'var(--bakir)':'var(--metin-soluk)'}" onclick="S.primYontem='${y}';render()">${y}</button>`).join("")}
       </div>
       <span class="etiket">Şişeleme Sıcaklığı (°C)</span>
       <input aria-label="Şişeleme sıcaklığı (°C)" type="number" class="inp" value="${S.primTemp}" min="5" max="25" style="margin-bottom:14px" onchange="S.primTemp=parseInt(this.value)||18;render()">
-      <div style="background:var(--sa);border:1px solid var(--bor);border-left:4px solid var(--sk);border-radius:10px;padding:16px;text-align:center">
-        <div style="font-size:10px;color:var(--soluk);font-weight:700;letter-spacing:1.5px;text-transform:uppercase">${hacim}L için ${S.primYontem||'Dekstroz'}</div>
+      <div style="background:var(--sa);border:1px solid var(--cizgi-arac);border-left:4px solid var(--sk);border-radius:10px;padding:16px;text-align:center">
+        <div style="font-size:var(--fs-xs);color:var(--bakir);font-weight:700;letter-spacing:1.5px;text-transform:uppercase">${hacim}L için ${S.primYontem||'Dekstroz'}</div>
         <div style="font-size:50px;font-weight:600;color:var(--bakir);line-height:1.1;font-family:var(--font-display);margin-top:4px">${(()=>{const y=S.primYontem||'Dekstroz';if(y==='Sıvı CO₂ Şekeri')return (pg*1.35).toFixed(0)+'mL';if(y==='Beyaz Şeker')return (pg*0.9575).toFixed(0)+'g';return pg.toFixed(0)+'g';})()}</div>
-        <div style="font-size:11px;color:var(--soluk);margin-top:4px;font-style:italic">${(()=>{const y=S.primYontem||'Dekstroz';if(y==='Sıvı CO₂ Şekeri')return 'Konsantre sıvı — ürüne göre değişir, etiket talimatına bak';if(y==='Beyaz Şeker')return 'Dekstroz: '+(pg).toFixed(0)+'g';return 'Beyaz Şeker: '+(pg*.9575).toFixed(0)+'g';})()}</div>
+        <div style="font-size:11px;color:var(--metin-soluk);margin-top:4px;font-style:italic">${(()=>{const y=S.primYontem||'Dekstroz';if(y==='Sıvı CO₂ Şekeri')return 'Konsantre sıvı — ürüne göre değişir, etiket talimatına bak';if(y==='Beyaz Şeker')return 'Dekstroz: '+(pg).toFixed(0)+'g';return 'Beyaz Şeker: '+(pg*.9575).toFixed(0)+'g';})()}</div>
       </div>
     </div>`;
 
-  var _kartSu = `<div class="kart" style="background:var(--kahve-bg);border:1px solid var(--bor);border-left:4px solid var(--mk)">
-      <div style="font-size:14px;font-weight:700;color:var(--kahve);margin-bottom:12px;font-family:var(--font-display)">💧 Su Hesabı (${hacim}L hedef)</div>
+  var _kartSu = `<div class="kart" style="background:var(--accent-soft);border:1px solid var(--cizgi-arac);border-left:4px solid var(--mk)">
+      <div style="font-size:14px;font-weight:700;color:var(--metin);margin-bottom:12px;font-family:var(--font-display)">💧 Su Hesabı (${hacim}L hedef)</div>
       ${[["Hedef şişeleme",hacim+"L"],["+ Trub & transfer","+0.9L"],["Post-boil hedef",pb+"L"],["+ Kaynatma kaybı ("+_kSure+"dk)","+"+kb+"L"],["Pre-boil hedef",pre+"L"],["+ Malt emilimi (0.7L/kg)","+"+em+"L"],["TOPLAM SU",mash+"L"]].map(([e,d],i)=>`<div class="hs" style="${i===6?"color:var(--bakir);font-size:14px;font-weight:700":""}"><span>${e}</span><span>${d}</span></div>`).join("")}
-      <div style="margin-top:10px;padding:8px 12px;background:var(--card);border:1px solid var(--bor);border-radius:8px;font-size:11px;color:var(--soluk)">
+      <div style="margin-top:10px;padding:8px 12px;background:var(--bg-card);border:1px solid var(--cizgi-arac);border-radius:8px;font-size:11px;color:var(--metin-soluk)">
         Strike: ~${Math.round(mash*0.65)}L · Sparge: ~${Math.round(mash*0.35)}L
       </div>
     </div>`;
@@ -14850,19 +14850,19 @@ ${batchOlcekKartHtml()}
     const _k330=hKalori(og,fg,abv,330);
     const _k500=hKalori(og,fg,abv,500);
     _meta5 = _k330 + ' kcal/330mL';
-    _kartNutri = '<div class="kart" style="background:var(--kahve-bg);border:1px solid var(--bor);border-left:4px solid var(--yk)">'+
-      '<div style="font-size:14px;font-weight:700;color:var(--kahve);margin-bottom:12px;font-family:var(--font-display)">🧬 Besin Değerleri (Tahmini)</div>'+
+    _kartNutri = '<div class="kart" style="background:var(--accent-soft);border:1px solid var(--cizgi-arac);border-left:4px solid var(--yk)">'+
+      '<div style="font-size:14px;font-weight:700;color:var(--metin);margin-bottom:12px;font-family:var(--font-display)">🧬 Besin Değerleri (Tahmini)</div>'+
       '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">'+
-        '<div style="background:var(--card);border-radius:10px;padding:10px;text-align:center;border:1px solid var(--bor)"><div style="font-size:9px;color:var(--soluk);font-weight:700;letter-spacing:.5px">KARBONHİDRAT</div><div style="font-size:24px;font-weight:600;color:var(--bakir);font-family:var(--font-display)">'+_c100+'</div><div style="font-size:9px;color:var(--soluk)">g / 100mL</div></div>'+
-        '<div style="background:var(--card);border-radius:10px;padding:10px;text-align:center;border:1px solid var(--bor)"><div style="font-size:9px;color:var(--soluk);font-weight:700;letter-spacing:.5px">KALORİ</div><div style="font-size:24px;font-weight:600;color:var(--bakir);font-family:var(--font-display)">'+_k100+'</div><div style="font-size:9px;color:var(--soluk)">kcal / 100mL</div></div>'+
-        '<div style="background:var(--card);border-radius:10px;padding:10px;text-align:center;border:1px solid var(--bor)"><div style="font-size:9px;color:var(--soluk);font-weight:700;letter-spacing:.5px">ALKOL</div><div style="font-size:24px;font-weight:600;color:var(--bakir);font-family:var(--font-display)">%'+abv.toFixed(2)+'</div><div style="font-size:9px;color:var(--soluk)">ABV</div></div>'+
+        '<div style="background:var(--bg-card);border-radius:10px;padding:10px;text-align:center;border:1px solid var(--cizgi-arac)"><div style="font-size:var(--fs-xs);color:var(--metin-soluk);font-weight:700;letter-spacing:.5px">KARBONHİDRAT</div><div style="font-size:24px;font-weight:600;color:var(--bakir);font-family:var(--font-display)">'+_c100+'</div><div style="font-size:var(--fs-xs);color:var(--metin-soluk)">g / 100mL</div></div>'+
+        '<div style="background:var(--bg-card);border-radius:10px;padding:10px;text-align:center;border:1px solid var(--cizgi-arac)"><div style="font-size:var(--fs-xs);color:var(--metin-soluk);font-weight:700;letter-spacing:.5px">KALORİ</div><div style="font-size:24px;font-weight:600;color:var(--bakir);font-family:var(--font-display)">'+_k100+'</div><div style="font-size:var(--fs-xs);color:var(--metin-soluk)">kcal / 100mL</div></div>'+
+        '<div style="background:var(--bg-card);border-radius:10px;padding:10px;text-align:center;border:1px solid var(--cizgi-arac)"><div style="font-size:var(--fs-xs);color:var(--metin-soluk);font-weight:700;letter-spacing:.5px">ALKOL</div><div style="font-size:24px;font-weight:600;color:var(--bakir);font-family:var(--font-display)">%'+abv.toFixed(2)+'</div><div style="font-size:var(--fs-xs);color:var(--metin-soluk)">ABV</div></div>'+
       '</div>'+
-      '<div style="background:var(--card);border-radius:10px;border:1px solid var(--bor);overflow:hidden;margin-bottom:6px">'+
-        '<div style="display:flex;background:var(--kahve-light);padding:6px 12px;border-bottom:1px solid var(--bor)"><span style="flex:1;font-size:10px;font-weight:700;color:var(--kahve);letter-spacing:.5px">Porsiyon</span><span style="flex:1;text-align:center;font-size:10px;font-weight:700;color:var(--kahve);letter-spacing:.5px">Karbonhidrat</span><span style="flex:1;text-align:right;font-size:10px;font-weight:700;color:var(--kahve);letter-spacing:.5px">Kalori</span></div>'+
-        '<div style="display:flex;padding:9px 12px;border-bottom:1px solid var(--bor)"><span style="flex:1;font-size:13px;color:var(--kahve)">🍺 330mL</span><span style="flex:1;font-size:14px;font-weight:700;color:var(--bakir);text-align:center;font-family:var(--font-display)">'+_c330+'g</span><span style="flex:1;font-size:14px;font-weight:700;color:var(--bakir);text-align:right;font-family:var(--font-display)">'+_k330+' kcal</span></div>'+
-        '<div style="display:flex;padding:9px 12px"><span style="flex:1;font-size:13px;color:var(--kahve)">🍺 500mL</span><span style="flex:1;font-size:14px;font-weight:700;color:var(--bakir);text-align:center;font-family:var(--font-display)">'+_c500+'g</span><span style="flex:1;font-size:14px;font-weight:700;color:var(--bakir);text-align:right;font-family:var(--font-display)">'+_k500+' kcal</span></div>'+
+      '<div style="background:var(--bg-card);border-radius:10px;border:1px solid var(--cizgi-arac);overflow:hidden;margin-bottom:6px">'+
+        '<div style="display:flex;background:var(--kahve-light);padding:6px 12px;border-bottom:1px solid var(--cizgi-arac)"><span style="flex:1;font-size:var(--fs-xs);font-weight:700;color:var(--metin);letter-spacing:.5px">Porsiyon</span><span style="flex:1;text-align:center;font-size:var(--fs-xs);font-weight:700;color:var(--metin);letter-spacing:.5px">Karbonhidrat</span><span style="flex:1;text-align:right;font-size:var(--fs-xs);font-weight:700;color:var(--metin);letter-spacing:.5px">Kalori</span></div>'+
+        '<div style="display:flex;padding:9px 12px;border-bottom:1px solid var(--cizgi-arac)"><span style="flex:1;font-size:13px;color:var(--metin)">🍺 330mL</span><span style="flex:1;font-size:14px;font-weight:700;color:var(--bakir);text-align:center;font-family:var(--font-display)">'+_c330+'g</span><span style="flex:1;font-size:14px;font-weight:700;color:var(--bakir);text-align:right;font-family:var(--font-display)">'+_k330+' kcal</span></div>'+
+        '<div style="display:flex;padding:9px 12px"><span style="flex:1;font-size:13px;color:var(--metin)">🍺 500mL</span><span style="flex:1;font-size:14px;font-weight:700;color:var(--bakir);text-align:center;font-family:var(--font-display)">'+_c500+'g</span><span style="flex:1;font-size:14px;font-weight:700;color:var(--bakir);text-align:right;font-family:var(--font-display)">'+_k500+' kcal</span></div>'+
       '</div>'+
-      '<div style="font-size:9px;color:var(--soluk);text-align:center;font-style:italic">ASBC · Real Extract · Balling Plato</div>'+
+      '<div style="font-size:var(--fs-xs);color:var(--metin-soluk);text-align:center;font-style:italic">ASBC · Real Extract · Balling Plato</div>'+
     '</div>';
   }
 
@@ -14877,31 +14877,31 @@ ${batchOlcekKartHtml()}
   var _T2=S.mashSc||67;
   var _sw=((0.41/_R)*(_T2-_gt)+_T2).toFixed(1);
   return '<div class="kart">'
-    +'<div style="font-size:14px;font-weight:700;color:var(--kahve);margin-bottom:8px">🌡️ Mash Strike Suyu Sıcaklığı</div>'
+    +'<div style="font-size:14px;font-weight:700;color:var(--metin);margin-bottom:8px">🌡️ Mash Strike Suyu Sıcaklığı</div>'
     +'<span class="etiket">Tahıl Sıcaklığı (°C)</span>'
-    +'<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px"><input aria-label="Tahıl sıcaklığı (°C)" type="number" class="inp" style="width:80px;text-align:center;font-weight:600" min="0" max="35" step="1" value="'+_gt+'" onchange="S.grainTemp=this.value!==\'\'?parseInt(this.value):null;render()"><span style="font-size:12px;color:var(--soluk)">oda/depo sıcaklığı</span></div>'
-    +'<div style="background:var(--sa);border:1px solid var(--bor);border-left:4px solid var(--sk);border-radius:10px;padding:16px;text-align:center"><div style="font-size:10px;color:var(--soluk);font-weight:700;letter-spacing:1.5px;text-transform:uppercase">Strike suyu sıcaklığı</div><div style="font-size:50px;font-weight:600;color:var(--bakir);line-height:1.1;font-family:var(--font-display);margin-top:4px">'+_sw+'°C</div><div style="font-size:11px;color:var(--soluk);margin-top:4px">hedef mash '+_T2+'°C · oran '+_R.toFixed(1)+' L/kg</div></div>'
-    +'<div style="font-size:9px;color:var(--dim);margin-top:8px;line-height:1.4">Palmer formülü: Tw=(0.41/R)(T2−T1)+T2. Tüm su mayışta (all-in-one/BIAB) varsayılır; soğuk kazan için +1-2°C ekle.</div></div>';
-})() : '<div class="kart"><div style="font-size:14px;font-weight:700;color:var(--kahve);margin-bottom:8px">🌡️ Mash Strike Suyu Sıcaklığı</div><div style="font-size:11px;color:var(--dim)">Tahıl eklendiğinde hesaplanır (ekstrakt demlemede gerekmez).</div></div>';
+    +'<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px"><input aria-label="Tahıl sıcaklığı (°C)" type="number" class="inp" style="width:80px;text-align:center;font-weight:600" min="0" max="35" step="1" value="'+_gt+'" onchange="S.grainTemp=this.value!==\'\'?parseInt(this.value):null;render()"><span style="font-size:12px;color:var(--metin-soluk)">oda/depo sıcaklığı</span></div>'
+    +'<div style="background:var(--sa);border:1px solid var(--cizgi-arac);border-left:4px solid var(--sk);border-radius:10px;padding:16px;text-align:center"><div style="font-size:var(--fs-xs);color:var(--bakir);font-weight:700;letter-spacing:1.5px;text-transform:uppercase">Strike suyu sıcaklığı</div><div style="font-size:50px;font-weight:600;color:var(--bakir);line-height:1.1;font-family:var(--font-display);margin-top:4px">'+_sw+'°C</div><div style="font-size:11px;color:var(--metin-soluk);margin-top:4px">hedef mash '+_T2+'°C · oran '+_R.toFixed(1)+' L/kg</div></div>'
+    +'<div style="font-size:var(--fs-xs);color:var(--metin-soluk);margin-top:8px;line-height:1.4">Palmer formülü: Tw=(0.41/R)(T2−T1)+T2. Tüm su mayışta (all-in-one/BIAB) varsayılır; soğuk kazan için +1-2°C ekle.</div></div>';
+})() : '<div class="kart"><div style="font-size:14px;font-weight:700;color:var(--metin);margin-bottom:8px">🌡️ Mash Strike Suyu Sıcaklığı</div><div style="font-size:11px;color:var(--metin-soluk)">Tahıl eklendiğinde hesaplanır (ekstrakt demlemede gerekmez).</div></div>';
 
   var _kartSeyreltme = (function(){
   var _v=(S.seyHacim!=null)?+S.seyHacim:hacim;
   var _on=(S.seyOG!=null)?+S.seyOG:og;
   var _ot=(S.seyHedef!=null)?+S.seyHedef:og;
   var _gn=(_on-1)*1000,_gt=(_ot-1)*1000,_res;
-  if(!(_gn>0)||!(_gt>0)){_res='<div style="font-size:13px;color:var(--dim)">Geçerli OG değerleri gir (>1.000).</div>';}
-  else if(Math.abs(_gn-_gt)<0.5){_res='<div style="font-size:15px;color:#2A6A2A;font-weight:700">✓ Hedefte — düzeltme gerekmez</div>';}
-  else if(_gt<_gn){var _add=_v*(_gn/_gt-1);_res='<div style="font-size:10px;color:var(--soluk);font-weight:700;letter-spacing:1.5px;text-transform:uppercase">Su Ekle</div><div style="font-size:50px;font-weight:600;color:var(--bakir);line-height:1.1;font-family:var(--font-display);margin-top:4px">+'+_add.toFixed(1)+' L</div><div style="font-size:11px;color:var(--soluk);margin-top:4px">→ '+(_v+_add).toFixed(1)+' L @ '+_ot.toFixed(3)+' (OG düşür)</div>';}
-  else{var _boil=_v*(1-_gn/_gt);_res='<div style="font-size:10px;color:var(--soluk);font-weight:700;letter-spacing:1.5px;text-transform:uppercase">Kaynat / Buharlaştır</div><div style="font-size:50px;font-weight:600;color:var(--bakir);line-height:1.1;font-family:var(--font-display);margin-top:4px">'+_boil.toFixed(1)+' L</div><div style="font-size:11px;color:var(--soluk);margin-top:4px">→ '+(_v-_boil).toFixed(1)+' L @ '+_ot.toFixed(3)+' (OG yükselt)</div>';}
+  if(!(_gn>0)||!(_gt>0)){_res='<div style="font-size:13px;color:var(--metin-soluk)">Geçerli OG değerleri gir (>1.000).</div>';}
+  else if(Math.abs(_gn-_gt)<0.5){_res='<div style="font-size:15px;color:var(--yk);font-weight:700">✓ Hedefte — düzeltme gerekmez</div>';}
+  else if(_gt<_gn){var _add=_v*(_gn/_gt-1);_res='<div style="font-size:var(--fs-xs);color:var(--bakir);font-weight:700;letter-spacing:1.5px;text-transform:uppercase">Su Ekle</div><div style="font-size:50px;font-weight:600;color:var(--bakir);line-height:1.1;font-family:var(--font-display);margin-top:4px">+'+_add.toFixed(1)+' L</div><div style="font-size:11px;color:var(--metin-soluk);margin-top:4px">→ '+(_v+_add).toFixed(1)+' L @ '+_ot.toFixed(3)+' (OG düşür)</div>';}
+  else{var _boil=_v*(1-_gn/_gt);_res='<div style="font-size:var(--fs-xs);color:var(--bakir);font-weight:700;letter-spacing:1.5px;text-transform:uppercase">Kaynat / Buharlaştır</div><div style="font-size:50px;font-weight:600;color:var(--bakir);line-height:1.1;font-family:var(--font-display);margin-top:4px">'+_boil.toFixed(1)+' L</div><div style="font-size:11px;color:var(--metin-soluk);margin-top:4px">→ '+(_v-_boil).toFixed(1)+' L @ '+_ot.toFixed(3)+' (OG yükselt)</div>';}
   return '<div class="kart">'
-    +'<div style="font-size:14px;font-weight:700;color:var(--kahve);margin-bottom:8px">💧 Seyreltme / Gravity Düzeltme</div>'
+    +'<div style="font-size:14px;font-weight:700;color:var(--metin);margin-bottom:8px">⚖️ Seyreltme / Gravity Düzeltme</div>'
     +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">'
     +'<div><span class="etiket">Mevcut Hacim (L)</span><input aria-label="Seyreltme hacmi (L)" type="number" class="inp" style="width:78px" min="1" step="0.1" value="'+_v+'" onchange="S.seyHacim=this.value!==\'\'?parseFloat(this.value):null;render()"></div>'
     +'<div><span class="etiket">Ölçülen OG</span><input aria-label="Mevcut OG" type="number" class="inp" style="width:90px" min="1" max="1.2" step="0.001" value="'+_on.toFixed(3)+'" onchange="S.seyOG=this.value!==\'\'?parseFloat(this.value):null;render()"></div>'
     +'<div><span class="etiket">Hedef OG</span><input aria-label="Hedef OG" type="number" class="inp" style="width:90px" min="1" max="1.2" step="0.001" value="'+_ot.toFixed(3)+'" onchange="S.seyHedef=this.value!==\'\'?parseFloat(this.value):null;render()"></div>'
     +'</div>'
-    +'<div style="background:var(--sa);border:1px solid var(--bor);border-left:4px solid var(--sk);border-radius:10px;padding:14px;text-align:center">'+_res+'</div>'
-    +'<div style="font-size:9px;color:var(--dim);margin-top:8px;line-height:1.4">Gravity puanı × hacim ≈ sabit. Su eklemek OG düşürür, kaynatmak yükseltir. Varsayılanlar reçeteden gelir; ölçtüğün değeri yaz.</div></div>';
+    +'<div style="background:var(--sa);border:1px solid var(--cizgi-arac);border-left:4px solid var(--sk);border-radius:10px;padding:14px;text-align:center">'+_res+'</div>'
+    +'<div style="font-size:var(--fs-xs);color:var(--metin-soluk);margin-top:8px;line-height:1.4">Gravity puanı × hacim ≈ sabit. Su eklemek OG düşürür, kaynatmak yükseltir. Varsayılanlar reçeteden gelir; ölçtüğün değeri yaz.</div></div>';
 })();
 
   var _kartRenk = (function(){
@@ -14912,16 +14912,16 @@ ${batchOlcekKartHtml()}
   var _adEn=(typeof _camRenkAdEn==='function')?_camRenkAdEn(_srmV,_pigV):'';
   var _ebcV=Math.round((_srmV||0)*1.97);
   return '<div class="kart">'
-    +'<div style="font-size:14px;font-weight:700;color:var(--kahve);margin-bottom:10px">🎨 Renk / SRM</div>'
+    +'<div style="font-size:14px;font-weight:700;color:var(--metin);margin-bottom:10px">🎨 Renk / SRM</div>'
     +'<div style="display:flex;align-items:center;gap:14px">'
     +'<div style="width:64px;height:64px;border-radius:10px;flex-shrink:0;border:2px solid rgba(0,0,0,.15);background:'+_hexV+'"></div>'
     +'<div>'
-    +'<div style="font-size:32px;font-weight:600;color:var(--bakir);font-family:var(--font-display);line-height:1">'+(_srmV||0).toFixed(1)+' <span style="font-size:14px;color:var(--soluk)">SRM</span></div>'
-    +'<div style="font-size:12px;color:var(--soluk);margin-top:2px">'+_ebcV+' EBC</div>'
-    +'<div style="font-size:13px;color:var(--kahve);font-weight:600;margin-top:4px">'+_adTr+(_adEn&&_adEn!==_adTr?' <span style="color:var(--soluk);font-weight:400">/ '+_adEn+'</span>':'')+'</div>'
+    +'<div style="font-size:32px;font-weight:600;color:var(--bakir);font-family:var(--font-display);line-height:1">'+(_srmV||0).toFixed(1)+' <span style="font-size:14px;color:var(--metin-soluk)">SRM</span></div>'
+    +'<div style="font-size:12px;color:var(--metin-soluk);margin-top:2px">'+_ebcV+' EBC</div>'
+    +'<div style="font-size:13px;color:var(--metin);font-weight:600;margin-top:4px">'+_adTr+(_adEn&&_adEn!==_adTr?' <span style="color:var(--metin-soluk);font-weight:400">/ '+_adEn+'</span>':'')+'</div>'
     +'</div>'
     +'</div>'
-    +'<div style="font-size:9px;color:var(--dim);margin-top:10px;line-height:1.4">SRM tahıl/katkı renk katkısından; renk motoru pigment+pH ile hex üretir. EBC = SRM × 1.97.</div>'
+    +'<div style="font-size:var(--fs-xs);color:var(--metin-soluk);margin-top:10px;line-height:1.4">SRM tahıl/katkı renk katkısından; renk motoru pigment+pH ile hex üretir. EBC = SRM × 1.97.</div>'
     +'</div>';
 })();
 
@@ -14930,27 +14930,27 @@ ${batchOlcekKartHtml()}
   var _eog=(S.effOG!=null)?+S.effOG:og;
   var _evol=(S.effVol!=null)?+S.effVol:hacim;
   var _eP=(og-1)*1000,_mP=(_eog-1)*1000,_res;
-  if(!(_eP>0)){_res='<div style="font-size:13px;color:var(--dim)">Tahıllı reçete + geçerli tasarım OG gerekir (ekstrakt/boşta hesaplanmaz).</div>';}
-  else if(!(_mP>0)){_res='<div style="font-size:13px;color:var(--dim)">Ölçülen OG gir (>1.000).</div>';}
-  else{var _gvR=Math.round(_ev*(_mP*_evol)/(_eP*hacim));_res='<div style="font-size:10px;color:var(--soluk);font-weight:700;letter-spacing:1.5px;text-transform:uppercase">Gerçek Verim</div><div style="font-size:50px;font-weight:600;color:var(--bakir);line-height:1.1;font-family:var(--font-display);margin-top:4px">%'+_gvR+'</div><div style="font-size:11px;color:var(--soluk);margin-top:4px">ayarlı: %'+_ev+(Math.abs(_gvR-_ev)>=1?' · <span onclick="S.verim='+_gvR+';render()" style="color:var(--bakir);font-weight:700;cursor:pointer;text-decoration:underline">Verimi %'+_gvR+' yap</span>':' (eşleşiyor)')+'</div>';}
+  if(!(_eP>0)){_res='<div style="font-size:13px;color:var(--metin-soluk)">Tahıllı reçete + geçerli tasarım OG gerekir (ekstrakt/boşta hesaplanmaz).</div>';}
+  else if(!(_mP>0)){_res='<div style="font-size:13px;color:var(--metin-soluk)">Ölçülen OG gir (>1.000).</div>';}
+  else{var _gvR=Math.round(_ev*(_mP*_evol)/(_eP*hacim));_res='<div style="font-size:var(--fs-xs);color:var(--bakir);font-weight:700;letter-spacing:1.5px;text-transform:uppercase">Gerçek Verim</div><div style="font-size:50px;font-weight:600;color:var(--bakir);line-height:1.1;font-family:var(--font-display);margin-top:4px">%'+_gvR+'</div><div style="font-size:11px;color:var(--metin-soluk);margin-top:4px">ayarlı: %'+_ev+(Math.abs(_gvR-_ev)>=1?' · <span onclick="S.verim='+_gvR+';render()" style="color:var(--bakir);font-weight:700;cursor:pointer;text-decoration:underline">Verimi %'+_gvR+' yap</span>':' (eşleşiyor)')+'</div>';}
   return '<div class="kart">'
-    +'<div style="font-size:14px;font-weight:700;color:var(--kahve);margin-bottom:8px">⚙️ Verim (Brewhouse) Geri-Hesabı</div>'
+    +'<div style="font-size:14px;font-weight:700;color:var(--metin);margin-bottom:8px">⚙️ Verim (Brewhouse) Geri-Hesabı</div>'
     +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">'
     +'<div><span class="etiket">Ölçülen OG</span><input aria-label="Ölçülen OG" type="number" class="inp" style="width:90px" min="1" max="1.2" step="0.001" value="'+_eog.toFixed(3)+'" onchange="S.effOG=this.value!==\'\'?parseFloat(this.value):null;render()"></div>'
     +'<div><span class="etiket">Ölçülen Hacim (L)</span><input aria-label="Kazan hacmi (L)" type="number" class="inp" style="width:84px" min="1" step="0.1" value="'+_evol+'" onchange="S.effVol=this.value!==\'\'?parseFloat(this.value):null;render()"></div>'
     +'</div>'
-    +'<div style="background:var(--sa);border:1px solid var(--bor);border-left:4px solid var(--sk);border-radius:10px;padding:14px;text-align:center">'+_res+'</div>'
-    +'<div style="font-size:9px;color:var(--dim);margin-top:8px;line-height:1.4">Verim, gravity-puanı × hacim ile doğrusaldır. Tasarım OG (%'+_ev+' verimde) ile ölçüleni karşılaştırır. Butonla ayarı güncelle; sonraki OG tahminleri düzelir.</div>'
+    +'<div style="background:var(--sa);border:1px solid var(--cizgi-arac);border-left:4px solid var(--sk);border-radius:10px;padding:14px;text-align:center">'+_res+'</div>'
+    +'<div style="font-size:var(--fs-xs);color:var(--metin-soluk);margin-top:8px;line-height:1.4">Verim, gravity-puanı × hacim ile doğrusaldır. Tasarım OG (%'+_ev+' verimde) ile ölçüleni karşılaştırır. Butonla ayarı güncelle; sonraki OG tahminleri düzelir.</div>'
     +'</div>';
 })();
 
   // 5 akordiyon caller-wrap (besin değerleri opsiyonel og>1.001)
   return _bmAccWrap('hesap-bath',    '🥃', 'Batç Hacmi',           _meta1, _kartBatch,   true)
-       + _bmAccWrap('hesap-renk', '', 'Renk / SRM', '', _kartRenk, false)
+       + _bmAccWrap('hesap-renk', '🎨', 'Renk / SRM', '', _kartRenk, false)
        + _bmAccWrap('hesap-su',      '💧', 'Su Hesabı',            _meta4, _kartSu,      true)
-       + _bmAccWrap('hesap-strike', '', 'Mash Strike Sıcaklığı', '', _kartStrike, false)
-       + _bmAccWrap('hesap-seyreltme', '', 'Seyreltme / Gravity Düzeltme', '', _kartSeyreltme, false)
-       + _bmAccWrap('hesap-verim', '', 'Verim Geri-Hesabı', '', _kartVerim, false)
+       + _bmAccWrap('hesap-strike', '🌡️', 'Mash Strike Sıcaklığı', '', _kartStrike, false)
+       + _bmAccWrap('hesap-seyreltme', '⚖️', 'Seyreltme / Gravity Düzeltme', '', _kartSeyreltme, false)
+       + _bmAccWrap('hesap-verim', '⚙️', 'Verim Geri-Hesabı', '', _kartVerim, false)
        + _bmAccWrap('hesap-priming', '🍾', 'Priming / Şişeleme',   _meta3, _kartPriming, false)
        + (_kartNutri ? _bmAccWrap('hesap-nutri', '🧬', 'Besin Değerleri', _meta5, _kartNutri, false) : '')
        + _bmAccWrap('hesap-export',  '📤', 'Reçete Dışa Aktarma',  '',     _kartExport,  false);
