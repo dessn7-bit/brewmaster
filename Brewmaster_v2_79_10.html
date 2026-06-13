@@ -1418,7 +1418,7 @@ function matchSubstyles(recipe, topParentSlug) {
 
 window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, subs };
 
-  console.log('[BM_ENGINE] yuklendi:', Object.keys(__BM_DEFS).length, 'stil,', Object.keys(__BM_FAMS.familyMap||{}).length, 'aile etiketi');
+  /* [BM_ENGINE] yuklendi residue log — temizlendi (FIX-TARAMA) */
 })();
 
 </script>
@@ -5653,7 +5653,7 @@ function katkiKisaKat(g){
   const m={'Şeker':'ŞEKER','Meyve':'MEYVE','Baharat':'BAHARAT','Aroma':'AROMA','Meşe':'MEŞE','Berraklaştırıcı':'BERRAK','Fermantasyon':'FERM','Adjunct':'EK TAHIL','Proses':'PROSES','Egzotik':'EGZOTİK','Kahve & Çikolata':'KAHVE/ÇİK'};
   return m[g]||g.toUpperCase();
 }
-function tin(dk,og){const d=+dk||0;return 1.65*Math.pow(.000125,og-1)*(1-Math.exp(-.04*d))/4.15;}
+function tin(dk,og){const d=Math.max(0,+dk||0);return 1.65*Math.pow(.000125,og-1)*(1-Math.exp(-.04*d))/4.15;}
 // Whirlpool izomerizasyon sıcaklık faktörü (100°C = 1.0 referans)
 // Malowicki (2005) Arrhenius kinetiği: k(T) = 7.9e11 × exp(-11858/T_K)
 // Tinseth 100°C için kalibre; whirlpool'da sıcaklığa göre ölçeklenir
@@ -15363,7 +15363,7 @@ function rEditorNot(){
     if(_T.oturumlar.length >= 2){
       var _oc=_T.oturumlar, _prev=_oc[_oc.length-2], _last=_oc[_oc.length-1];
       var _ddmm=function(t){return (t&&t.length>=10)?(t.slice(8,10)+'.'+t.slice(5,7)):(t||'?');};
-      var _eksenSat=function(ad,a,b){var d=b-a;
+      var _eksenSat=function(ad,a,b){a=a||0;b=b||0;var d=b-a;
         if(d===0) return ad+' '+a+' <span style="color:var(--soluk)">=</span>';
         var renk=d>0?'var(--yk)':'var(--kk)', ok=d>0?'↑':'↓';
         return ad+' '+a+' → '+b+' <span style="color:'+renk+';font-weight:700">('+ok+Math.abs(d)+')</span>';};
@@ -15403,7 +15403,7 @@ function rEditorNot(){
             +'<span style="font-size:var(--fs-xs);color:var(--soluk);margin-left:auto">'+o.tarih+'</span>'
           +'</div>'
           +'<div style="font-size:var(--fs-xs);color:var(--soluk);line-height:1.5">'
-            +'Aroma '+o.aroma+'/12 · Tat '+o.tat+'/20 · Görünüm '+o.gorunum+'/3 · Ağız '+o.agizH+'/5 · Genel '+o.genel+'/10'
+            +'Aroma '+(o.aroma||0)+'/12 · Tat '+(o.tat||0)+'/20 · Görünüm '+(o.gorunum||0)+'/3 · Ağız '+(o.agizH||0)+'/5 · Genel '+(o.genel||0)+'/10'
           +'</div>'
           +(offActive.length?'<div style="font-size:var(--fs-xs);color:var(--kk);margin-top:3px">⚠️ '+offActive.map(function(k){return _tOffAd[k]||k;}).join(', ')+'</div>':'')
           +(o.tadimNot?'<div style="font-size:var(--fs-xs);color:var(--kahve);margin-top:4px;padding:4px 6px;background:#fff;border-radius:4px;font-style:italic">"'+esc(o.tadimNot)+'"</div>':'')
@@ -22597,7 +22597,7 @@ function tadimOturumKaydet(){
   if(!T.oturumlar) T.oturumlar=[];
   T.oturumlar.push({
     tarih: new Date().toISOString().slice(0,10),
-    aroma:T.aroma, gorunum:T.gorunum, tat:T.tat, agizH:T.agizH, genel:T.genel,
+    aroma:T.aroma||0, gorunum:T.gorunum||0, tat:T.tat||0, agizH:T.agizH||0, genel:T.genel||0,
     toplam:toplam,
     offList: Object.assign({}, T.offList||{}),
     aroma_not:T.aroma_not||'', tat_not:T.tat_not||'', agizH_not:T.agizH_not||'',
@@ -23329,7 +23329,7 @@ async function syncAl(){
       if(yts > gts) yeniKR.push(y);            // yerel daha yeni
       else yeniKR.push(g);                      // gelen daha yeni veya eşit (deterministik)
     });
-    console.log('syncAl: merge — Firebase:'+gelenKR.length+' yerel:'+yerelKR.length+' → '+yeniKR.length);
+    /* syncAl merge residue log — temizlendi (FIX-TARAMA) */
 
     // STOK merge — aynı mantık
     // Fallback: id yoksa ad+birim birleşimiyle eşleştir (eski stok item'ları id'siz olabilir)
