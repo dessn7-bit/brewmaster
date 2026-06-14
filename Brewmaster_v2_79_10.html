@@ -10913,7 +10913,7 @@ function stokKontrolHTML(){
   if(typeof _muadilSonDegis!=='undefined'&&_muadilSonDegis){
     html+=`<div style="padding:8px 14px;background:var(--accent-soft);border-bottom:1px solid var(--altin);display:flex;align-items:center;gap:10px">
       <span style="font-size:11px;color:var(--vintage-koyu);flex:1">↶ Son muadil değişikliği aktif</span>
-      <button onclick="muadilGeriAl()" style="background:var(--vintage-koyu);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer">↶ Geri Al</button>
+      <button onclick="muadilGeriAl()" aria-label="Son muadil değişikliğini geri al" style="background:var(--vintage-koyu);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer">↶ Geri Al</button>
     </div>`;
   }
   // Manuel OG/FG kilidi uyarısı — brewLog ölçümü veya manuel giriş nedeniyle hesap kilitli ise
@@ -11439,7 +11439,7 @@ function _stokAnaTabBarHTML(){
 function _stokHeaderHTML(){
   // 135-K: 135-I app banner emsali — koyu kahve gradient .header CSS + cream serif baslik title + sade icon button.
   return '<div class="header" style="display:flex;align-items:center;gap:10px">'+
-    '<button class="btn" onclick="stokEkranKapat()" style="background:rgba(255,255,255,.07);color:#F6EAD7;font-size:22px;padding:2px 8px;border-radius:var(--r-sm);line-height:1;border:1px solid rgba(255,255,255,.12)">‹</button>'+
+    '<button class="btn" onclick="stokEkranKapat()" aria-label="Stok ekranını kapat" style="background:rgba(255,255,255,.07);color:#F6EAD7;font-size:22px;padding:2px 8px;border-radius:var(--r-sm);line-height:1;border:1px solid rgba(255,255,255,.12)">‹</button>'+
     '<div style="font-family:var(--font-baslik);font-size:var(--fs-md);font-weight:var(--fw-semibold);color:#F6EAD7;flex:1">📦 Stok Yönetimi</div>'+
   '</div>';
 }
@@ -11808,7 +11808,7 @@ function renderHeader(){
     '<div class="bm-header-search">'+
       '<span class="bm-header-search-icon">'+BM_SVG.search+'</span>'+
       '<input aria-label="Tarif, malt, hop ara" id="aramaInp" type="text" placeholder="Tarif, malt, hop ara..." value="'+_esc131B(aramaVal)+'" onchange="aramaMetni=this.value;render()" onkeyup="aramaGuncelle(this)">'+
-      (aramaVal ? '<button class="bm-header-search-clear" onclick="clearArama()" title="Temizle">&times;</button>' : '')+
+      (aramaVal ? '<button class="bm-header-search-clear" onclick="clearArama()" aria-label="Aramayı temizle" title="Temizle">&times;</button>' : '')+
     '</div>';
 
   hdr.innerHTML =
@@ -11974,8 +11974,8 @@ function renderKlasorChip(){
         var nT = KR.filter(function(t){ return (t.klasor||'') === k; }).length;
         return '<span class="bm-klasor-chip-silonay">'+
             '<span>Sil? '+(nT > 0 ? nT + ' tarif' : 'boş')+'</span>'+
-            '<button class="evet" onclick="klasorSilOnay(true)">&#10003;</button>'+
-            '<button class="hayir" onclick="klasorSilOnay(false)">&#10005;</button>'+
+            '<button class="evet" onclick="klasorSilOnay(true)" aria-label="Klasör silmeyi onayla">&#10003;</button>'+
+            '<button class="hayir" onclick="klasorSilOnay(false)" aria-label="Klasör silmekten vazgeç">&#10005;</button>'+
           '</span>';
       }
       var bosKlasor = !k;
@@ -11983,7 +11983,7 @@ function renderKlasorChip(){
       var label = bosKlasor ? 'Tümü' : _esc131B(k);
       // Aktif non-bos klasor -> chip icinde inline x button (mevcut UX intact)
       var silBtn = (ak && !bosKlasor)
-        ? '<button class="bm-klasor-chip-sil" onclick="event.stopPropagation();klasorSilIste('+ki+')" title="Sil">&times;</button>'
+        ? '<button class="bm-klasor-chip-sil" onclick="event.stopPropagation();klasorSilIste('+ki+')" aria-label="'+label+' klasörünü sil" title="Sil">&times;</button>'
         : '';
       return '<button class="bm-klasor-chip'+(ak ? ' active' : '')+'" onclick="setAktifKlasor('+ki+')">'+
           BM_SVG[iconKey]+
@@ -11996,8 +11996,8 @@ function renderKlasorChip(){
   var addBlock = window._yeniKlasorEkleniyor
     ? '<span class="bm-klasor-chip-input-wrap">'+
         '<input aria-label="Klasör adı" id="yeniKlasorInp" type="text" onkeydown="yeniKlasorKlavye(this,event)" placeholder="Klasor adi...">'+
-        '<button class="bm-klasor-chip-input-btn ok" onclick="yeniKlasorKaydet()" title="Kaydet">&#10003;</button>'+
-        '<button class="bm-klasor-chip-input-btn no" onclick="yeniKlasorIptal()" title="Iptal">&#10005;</button>'+
+        '<button class="bm-klasor-chip-input-btn ok" onclick="yeniKlasorKaydet()" aria-label="Yeni klasörü kaydet" title="Kaydet">&#10003;</button>'+
+        '<button class="bm-klasor-chip-input-btn no" onclick="yeniKlasorIptal()" aria-label="Yeni klasör oluşturmaktan vazgeç" title="Iptal">&#10005;</button>'+
       '</span>'
     : '<button class="bm-klasor-chip-add" onclick="yeniKlasorAc()">'+BM_SVG.plus+'<span>Yeni klasör</span></button>';
   return '<div class="bm-klasor-bar">'+inner+addBlock+'</div>';
@@ -13303,7 +13303,7 @@ function rEditorTakvim(maya, maya2, tv){
         +(_ktOptsHtml?'<div id="logKTSec" style="display:none;margin-bottom:6px"><select aria-label="Katkı seçimi" id="logKTVal" class="inp" style="width:100%;font-size:12px;padding:6px 8px" onchange="_setLogNot(this.value)">'+_ktOptsHtml+'</select></div>':'')
         +'<input aria-label="Ölçüm değeri" type="number" id="logDeger" class="inp" placeholder="Değer (°C · gravity · vb.)" step="0.001" style="width:100%;font-size:12px;padding:6px 8px;margin-bottom:6px;box-sizing:border-box">'
         +'<textarea aria-label="Log notu" id="logNot" class="inp" placeholder="Not — katkı adı, gözlem, tadım notu..." rows="2" style="width:100%;font-size:12px;padding:6px 8px;resize:none;margin-bottom:6px;box-sizing:border-box"></textarea>'
-        +'<div id="logDuzenleBar" style="display:none;background:var(--kahve-bg);border:1px solid var(--kahve-border);border-radius:8px;padding:6px 10px;font-size:11px;color:#806020;margin-bottom:8px">✏️ Kayıt düzenleniyor <button onclick="logDuzenleSifirla()" style="float:right;background:none;border:none;color:#C07020;cursor:pointer;font-size:12px">✕ İptal</button></div>'
+        +'<div id="logDuzenleBar" style="display:none;background:var(--kahve-bg);border:1px solid var(--kahve-border);border-radius:8px;padding:6px 10px;font-size:11px;color:#806020;margin-bottom:8px">✏️ Kayıt düzenleniyor <button onclick="logDuzenleSifirla()" aria-label="Kayıt düzenlemeyi iptal et" style="float:right;background:none;border:none;color:#C07020;cursor:pointer;font-size:12px">✕ İptal</button></div>'
         +'<input type="hidden" id="logDuzenleIdx" value="">'
         +'<button id="logKaydetBtn" class="btn" style="width:100%;padding:10px;font-size:13px;font-weight:700;background:var(--altin);color:#fff;border-color:var(--altin)" onclick="logEkle()">✓ Kaydet</button>'
       +'</div>'
@@ -15736,7 +15736,7 @@ function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
   return `
     ${(typeof _sonSilinenMalt!=='undefined'&&_sonSilinenMalt)?`<div style="padding:8px 12px;background:var(--sa);border:1px solid var(--altin);border-radius:8px;margin-bottom:10px;display:flex;align-items:center;gap:10px">
       <span style="font-size:11px;color:var(--vintage-koyu);flex:1">✕ Son silinen: <b>${(()=>{const _ml=MALTLAR.find(x=>x&&x.id===_sonSilinenMalt.item.id);return _ml?_ml.ad:_sonSilinenMalt.item.id;})()}</b> (${_sonSilinenMalt.item.kg} kg)</span>
-      <button onclick="maltGeriAl()" style="background:var(--vintage-koyu);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer">↶ Geri Al</button>
+      <button onclick="maltGeriAl()" aria-label="Son silinen ${esc((()=>{const _ml=MALTLAR.find(x=>x&&x.id===_sonSilinenMalt.item.id);return _ml?_ml.ad:_sonSilinenMalt.item.id;})())} maltını geri al" style="background:var(--vintage-koyu);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer">↶ Geri Al</button>
     </div>`:''}
     ${ts}
     <!-- verim-fix (c15e0c7/Adim 132-J cerrahi geri alma): Sistem Verimi akordeon DISINA alindi — standalone, Duzenle+Goruntule her iki modda gorunur (bm-edit-only-acc YOK). "Yeni Malt Ekle" akordeonu (malt arama/kategori/ekle) kapali-default KORUNDU. -->
@@ -16051,7 +16051,7 @@ function rEditorHop(og, ibu, seciHop){
   const _hEkleDefault = (yH._editIdx!=null) ? 'expanded' : (S.hoplar.length ? 'collapsed' : 'expanded');
   const _hEkleAria = (yH._editIdx!=null) ? 'true' : (S.hoplar.length ? 'false' : 'true');
   return `
-    ${(typeof _sonSilinenHop!=='undefined'&&_sonSilinenHop)?`<div style="padding:8px 12px;background:var(--sa);border:1px solid var(--altin);border-radius:8px;margin-bottom:10px;display:flex;align-items:center;gap:10px"><span style="font-size:11px;color:var(--vintage-koyu);flex:1">✕ Son silinen: <b>${(()=>{const _hp=HOPLAR.find(x=>x&&x.id===_sonSilinenHop.item.id);return _hp?_hp.ad:_sonSilinenHop.item.id;})()}</b> (${_sonSilinenHop.item.g} g)</span><button onclick="hopGeriAl()" style="background:var(--vintage-koyu);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer">↶ Geri Al</button></div>`:''}
+    ${(typeof _sonSilinenHop!=='undefined'&&_sonSilinenHop)?`<div style="padding:8px 12px;background:var(--sa);border:1px solid var(--altin);border-radius:8px;margin-bottom:10px;display:flex;align-items:center;gap:10px"><span style="font-size:11px;color:var(--vintage-koyu);flex:1">✕ Son silinen: <b>${(()=>{const _hp=HOPLAR.find(x=>x&&x.id===_sonSilinenHop.item.id);return _hp?_hp.ad:_sonSilinenHop.item.id;})()}</b> (${_sonSilinenHop.item.g} g)</span><button onclick="hopGeriAl()" aria-label="Son silinen ${esc((()=>{const _hp=HOPLAR.find(x=>x&&x.id===_sonSilinenHop.item.id);return _hp?_hp.ad:_sonSilinenHop.item.id;})())} hopunu geri al" style="background:var(--vintage-koyu);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer">↶ Geri Al</button></div>`:''}
     ${S.hoplar.length?`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><span class="etiket" style="margin-bottom:0">Hop Listesi (${S.hoplar.length})</span>${S.hoplar.length>=2?`<button class="btn" style="background:var(--bg2);color:var(--bakir);border:1px solid var(--bor);font-size:var(--fs-xs);padding:4px 10px" onclick="hopAutoSort()" title="Süreç sırasına göre diz: FWH → Boil(60→15) → Whirlpool → Hop Stand → Dry Hop">📋 Sırala</button>`:''}</div>${sl2}${tibu}`:`<div style="text-align:center;padding:20px;color:var(--dim);font-size:13px">Henüz hop eklenmedi — aşağıdan ekle</div>`}
     ${(function(){try{return hopTimeline(S.hoplar,HOPLAR);}catch(_e){return '';}})()}
     ${(function(){try{return _hopDenetimRender(hopDenetim(S.hoplar,HOPLAR,(S.stil||null),(typeof BJCP!=='undefined'?BJCP:null),ibu,og,S.hacim||11));}catch(_e){return '';}})()}
@@ -20764,7 +20764,7 @@ window.brewdayRender=function(){
   h+='<div class="brewday-timeline-header">';
   h+='<div style="flex:1"><div style="font-size:11px;color:rgba(254,251,242,.6);letter-spacing:2px;text-transform:uppercase">Brewday Aktif · Faz: '+faz.toUpperCase()+'</div>';
   h+='<div style="font-size:18px;font-weight:700;color:#F5D799;margin-top:2px">'+esc(S.biraAd||'Reçete')+'</div></div>';
-  h+='<button onclick="brewdayTimelineGizle()" style="background:rgba(254,251,242,.15);color:#fff;border:none;border-radius:50%;width:34px;height:34px;font-size:18px;cursor:pointer" title="Geçici gizle">✕</button>';
+  h+='<button onclick="brewdayTimelineGizle()" aria-label="Brewday panelini geçici gizle" style="background:rgba(254,251,242,.15);color:#fff;border:none;border-radius:50%;width:34px;height:34px;font-size:18px;cursor:pointer" title="Geçici gizle">✕</button>';
   h+='</div>';
 
   // Büyük timer (aktif timer varsa gösterilir + kontrol butonları)
@@ -24266,7 +24266,7 @@ syncBaslat();
     let toplam=0,geçti=0,kaldı=0;
     const panel=document.createElement('div');
     panel.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:#FAF6ED;z-index:99999;overflow:auto;padding:16px;font-family:-apple-system,sans-serif;font-size:14px;color:#5D341A';
-    let html='<div style="max-width:680px;margin:0 auto"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h2 style="margin:0;color:var(--bakir)">🧪 Brewmaster Test Paneli</h2><button onclick="this.closest(\'div[style*=fixed]\').remove()" style="background:#A02020;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;cursor:pointer;font-weight:600">✕ Kapat</button></div>';
+    let html='<div style="max-width:680px;margin:0 auto"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h2 style="margin:0;color:var(--bakir)">🧪 Brewmaster Test Paneli</h2><button onclick="this.closest(\'div[style*=fixed]\').remove()" aria-label="Test panelini kapat" style="background:#A02020;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;cursor:pointer;font-weight:600">✕ Kapat</button></div>';
     html+='<div id="_test_sonuc" style="text-align:center;padding:20px;color:#8b7355">⏳ Testler çalışıyor...</div></div>';
     panel.innerHTML=html;
     document.body.appendChild(panel);
