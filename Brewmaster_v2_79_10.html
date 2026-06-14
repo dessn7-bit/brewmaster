@@ -21510,8 +21510,8 @@ window.brewdayBitir=function(){
       +'<div style="text-align:center;font-size:12px;color:rgba(254,251,242,.65);margin-bottom:14px">'+escapeH(receteAd||'')+' · '+gunText+(tip?' · '+tip:'')+'</div>'
       +(al.aciklama?'<div style="background:rgba(245,215,153,.08);border:1px solid rgba(245,215,153,.2);border-radius:10px;padding:12px 14px;font-size:13px;line-height:1.5;margin-bottom:18px;color:#FEFBF2">'+escapeH(al.aciklama)+'</div>':'')
       +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'
-        +'<button onclick="_alarmAksiyon(\''+receteId+'\','+al.g+',\'tamamlandi\')" style="background:linear-gradient(135deg,#2D7A2D 0%,#1F5A1F 100%);color:#fff;border:none;border-radius:10px;padding:14px;font-size:14px;font-weight:700;cursor:pointer">✓ Tamamlandım</button>'
-        +'<button onclick="_alarmAksiyon(\''+receteId+'\','+al.g+',\'ertele\')" style="background:rgba(254,251,242,.08);border:1px solid rgba(254,251,242,.2);color:#FEFBF2;border-radius:10px;padding:14px;font-size:14px;font-weight:600;cursor:pointer">⏰ 1 saat ertele</button>'
+        +'<button onclick="_alarmAksiyon(\''+receteId+'\','+al.g+',\'tamamlandi\')" style="background:linear-gradient(135deg,#2D7A2D 0%,#1F5A1F 100%);color:#fff;border:none;border-radius:10px;padding:14px;font-size:14px;font-weight:700;cursor:pointer" aria-label="'+escapeH(al.aksiyon||'Alarm')+' alarmını tamamlandı işaretle">✓ Tamamlandım</button>'
+        +'<button onclick="_alarmAksiyon(\''+receteId+'\','+al.g+',\'ertele\')" style="background:rgba(254,251,242,.08);border:1px solid rgba(254,251,242,.2);color:#FEFBF2;border-radius:10px;padding:14px;font-size:14px;font-weight:600;cursor:pointer" aria-label="'+escapeH(al.aksiyon||'Alarm')+' alarmını 1 saat ertele">⏰ 1 saat ertele</button>'
       +'</div>'
       +'<button onclick="_alarmAksiyon(\''+receteId+'\','+al.g+',\'atla\')" style="width:100%;background:transparent;border:1px solid rgba(254,251,242,.2);color:rgba(254,251,242,.65);border-radius:10px;padding:10px;font-size:12px;font-weight:600;cursor:pointer">Atla (bu alarmı gör tamamlandı olarak işaretle)</button>'
       +'</div>';
@@ -21532,7 +21532,7 @@ window.brewdayBitir=function(){
     toast.innerHTML = 
       '<div style="display:flex;justify-content:space-between;align-items:start;gap:10px;margin-bottom:4px">'
         +'<div style="font-size:14px;font-weight:700;color:#F5D799">'+escapeH(al.aksiyon||'Alarm')+'</div>'
-        +'<button onclick="event.stopPropagation();_alarmAksiyon(\''+receteId+'\','+al.g+',\'tamamlandi\')" style="background:rgba(245,215,153,.15);border:1px solid rgba(245,215,153,.3);color:#F5D799;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer">✓</button>'
+        +'<button onclick="event.stopPropagation();_alarmAksiyon(\''+receteId+'\','+al.g+',\'tamamlandi\')" style="background:rgba(245,215,153,.15);border:1px solid rgba(245,215,153,.3);color:#F5D799;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer" aria-label="'+escapeH(al.aksiyon||'Alarm')+' alarmını tamamlandı işaretle">✓</button>'
       +'</div>'
       +'<div style="font-size:11px;color:rgba(254,251,242,.65);margin-bottom:4px">'+escapeH(receteAd||'')+' · Gün '+al.g+'</div>'
       +(al.aciklama?'<div style="font-size:12px;color:rgba(254,251,242,.85);line-height:1.4">'+escapeH(al.aciklama)+'</div>':'');
@@ -21731,8 +21731,8 @@ window.brewdayBitir=function(){
           +'</div>'
           +(al.durum==='bekliyor'||al.durum==='gosterildi' ? 
             '<div style="display:flex;gap:4px;flex-shrink:0">'
-              +'<button onclick="_alarmAksiyon(\''+hedefRid+'\','+al.g+',\'tamamlandi\')" style="background:var(--ya);border:1px solid var(--yk);color:var(--yk);border-radius:6px;padding:4px 8px;font-size:10px;font-weight:700;cursor:pointer">✓</button>'
-              +(al.ts <= simdi ? '<button onclick="_alarmAksiyon(\''+hedefRid+'\','+al.g+',\'ertele\')" style="background:var(--card);border:1px solid var(--bor);color:var(--kahve);border-radius:6px;padding:4px 8px;font-size:10px;font-weight:600;cursor:pointer">⏰</button>' : '')
+              +'<button onclick="_alarmAksiyon(\''+hedefRid+'\','+al.g+',\'tamamlandi\')" style="background:var(--ya);border:1px solid var(--yk);color:var(--yk);border-radius:6px;padding:4px 8px;font-size:10px;font-weight:700;cursor:pointer" aria-label="'+escapeH(al.aksiyon)+' alarmını tamamlandı işaretle">✓</button>'
+              +(al.ts <= simdi ? '<button onclick="_alarmAksiyon(\''+hedefRid+'\','+al.g+',\'ertele\')" style="background:var(--card);border:1px solid var(--bor);color:var(--kahve);border-radius:6px;padding:4px 8px;font-size:10px;font-weight:600;cursor:pointer" aria-label="'+escapeH(al.aksiyon)+' alarmını 1 saat ertele">⏰</button>' : '')
             +'</div>'
             : (al.durum==='tamamlandi' ? '<span style="font-size:10px;color:#2D7A2D;font-weight:700">✓</span>' : 
                (al.durum==='atlandi' ? '<span style="font-size:10px;color:var(--soluk)">⤵</span>' : '')))
@@ -21765,7 +21765,7 @@ window.brewdayBitir=function(){
       +'<span style="font-size:11px;font-weight:600;color:var(--soluk)">🔔 Bildirim saati:</span>'
       +'<input aria-label="Bildirim saati" type="time" value="'+saat+'" onchange="_alarmSaatiAyarla(this.value)" style="background:#fff;border:1px solid var(--bor);border-radius:6px;padding:4px 8px;font-size:12px;color:var(--kahve);width:100px">'
       +'<span style="flex:1"></span>'
-      +'<button onclick="_alarmPlaniYenile()" style="background:var(--card);border:1px solid var(--bor);color:var(--kahve);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer" title="Pitch tarihine göre alarmları yeniden hesapla">↻ Yenile</button>'
+      +'<button onclick="_alarmPlaniYenile()" style="background:var(--card);border:1px solid var(--bor);color:var(--kahve);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer" title="Pitch tarihine göre alarmları yeniden hesapla" aria-label="Alarm planını yenile">↻ Yenile</button>'
     +'</div>';
 
     return '<div style="background:#fff;border:1px solid var(--bor);border-radius:12px;margin-bottom:10px;box-shadow:var(--golge);overflow:hidden">'
