@@ -4601,7 +4601,7 @@ const MAYALAR=[
   {id:"bb_belc2",ad:"BB Belçika No2",atu:[78,84],sc:[18,28],ideal:22,e:"Kompleks Belçika. Meyve-spicy-fenolik.",tip:"belcika",ek:"isitici"},
   {id:"bb_belc3",ad:"BB Belçika No3",atu:[78,84],sc:[18,30],ideal:24,e:"Güçlü Belçika. Yüksek alkol toleranslı.",tip:"belcika",ek:"isitici"},
   {id:"bb_abbaye",ad:"BB Abbaye (Manastır Birası)",atu:[80,84],sc:[17,25],ideal:20,e:"Manastır stili. Kompleks meyve-baharat.",tip:"belcika",ek:"oda"},
-  {id:"bb_philly",ad:"BB Philly Sour (Lachancea)",atu:[78,82],sc:[20,35],ideal:28,e:"⚠ Doğal laktik asit üretir. Sour ale için.",tip:"sour",ek:"isitici"},
+  {id:"bb_philly",ad:"BB Philly Sour (Lachancea)",atu:[78,82],sc:[20,35],ideal:28,e:"⚠️ Doğal laktik asit üretir. Sour ale için.",tip:"sour",ek:"isitici"},
   {id:"bb_new_lager",ad:"BB New Lager",atu:[80,85],sc:[10,20],ideal:14,e:"Yeni nesil lager. Ale sıcaklığında temiz lager karakteri.",tip:"lager",ek:"dolap"},
   {id:"bb35",ad:"BB-35 Amerikan Ale (=US-05)",atu:[78,82],sc:[15,24],ideal:20,e:"Temiz Amerikan ale. ButikBira resmi: US-05 eşdeğeri.",tip:"ale",ek:"dolap"},
   {id:"bb22a",ad:"BB-22 Kveik No1",atu:[77,82],sc:[25,42],ideal:35,e:"Hızlı. Narenciye-tropikal. Inkbird şart.",tip:"kveik",ek:"isitici"},
@@ -7001,7 +7001,7 @@ function _stokListeGuncelle(){
             '<input aria-label="Stok adım miktarı" type="number" class="inp" value="'+(s.adim||1)+'" min="1" style="width:50px;text-align:center;font-size:12px;padding:4px" onchange="STOK['+idx+'].adim=parseInt(this.value)||10">'+
             '<button class="btn" style="background:var(--ya);color:var(--yk);font-size:16px;padding:3px 9px;line-height:1;border:1px solid #A0D0A0" onclick="stokGuncelle('+idx+',1)">+</button>'+
           '</div>'+
-          '<button class="btn" style="background:none;color:var(--kk);font-size:18px;padding:0 4px;line-height:1" onclick="stokSil('+idx+')">×</button>'+
+          '<button class="btn" style="background:none;color:var(--kk);font-size:18px;padding:0 4px;line-height:1" onclick="stokSil('+idx+')" aria-label="'+esc(s.ad)+' stok kalemini sil" title="Sil">✕</button>'+
         '</div>';
       }).join('')+
     '</div>';
@@ -11105,7 +11105,7 @@ function stokKontrolHTML(){
           const stokVar=!!mStok;
           let _uyumIcon='',_uyumNote='';
           if(m._uyum===1){_uyumIcon='<span style="color:var(--yk);font-size:var(--fs-xs);font-weight:700;margin-left:4px">✓ stile uygun</span>';}
-          else if(m._uyum===-1){_uyumIcon='<span style="color:var(--sk);font-size:var(--fs-xs);margin-left:4px">⚠ stile aykırı</span>';_uyumNote=' <span style="color:'+(varMi?'var(--yk)':'var(--mk)')+';font-size:var(--fs-xs);font-style:italic">(genellikle: '+esc(m._stiller.slice(0,60))+(m._stiller.length>60?'...':'')+')</span>';}
+          else if(m._uyum===-1){_uyumIcon='<span style="color:var(--sk);font-size:var(--fs-xs);margin-left:4px">⚠️ stile aykırı</span>';_uyumNote=' <span style="color:'+(varMi?'var(--yk)':'var(--mk)')+';font-size:var(--fs-xs);font-style:italic">(genellikle: '+esc(m._stiller.slice(0,60))+(m._stiller.length>60?'...':'')+')</span>';}
           let s=`<div style="display:flex;gap:6px;align-items:flex-start;${mi>0?'margin-top:7px;padding-top:7px;border-top:1px solid rgba(0,0,0,0.06)':''}">`;
           s+=`<span style="font-size:12px;flex-shrink:0;margin-top:1px">${stokVar?'✅':'⬜'}</span>`;
           s+=`<div style="flex:1;min-width:0">`;
@@ -11265,7 +11265,7 @@ function tkv(maya,og,fg,abv,hoplar,maya2,stil){
         var _L2 = [];
         // Başlık
         _L2.push('📖 '+_prof.baslik+(maya2?' (2 mayalı)':''));
-        if(_prof.aciklama) _L2.push('   ℹ '+_prof.aciklama);
+        if(_prof.aciklama) _L2.push('   ℹ️ '+_prof.aciklama);
         _L2.push('');
         // Rehydration önerisi (kuru maya için)
         var _isSivi2=/^(wy|wlp|oyl|imp_)/.test(maya.id);
@@ -11284,7 +11284,7 @@ function tkv(maya,og,fg,abv,hoplar,maya2,stil){
         var _kH = (typeof kondisyonHedef==='function')?kondisyonHedef(og,stil,maya.tip):null;
         if(_kH) _L2.push('Kondisyon: Min '+_kH.min+' hf · İdeal '+_kH.ideal+' hf · Zirve '+_kH.zirve+' hf');
         if(maya2){
-          _L2.push('   ℹ 2. Maya: '+maya2.ad+' ('+maya2.sc[0]+'-'+maya2.sc[1]+'°C) — FG ortalaması iki mayadan');
+          _L2.push('   ℹ️ 2. Maya: '+maya2.ad+' ('+maya2.sc[0]+'-'+maya2.sc[1]+'°C) — FG ortalaması iki mayadan');
           const _scK2=(typeof bmMayaSicKesisim==='function')?bmMayaSicKesisim(maya,maya2):null;
           if(_scK2) _L2.push(_scK2.ortak?('   🌡️ Ortak sıcaklık penceresi: '+_scK2.low+'-'+_scK2.high+'°C — fermantasyonu burada tut'):('   ⚠️ Sıcaklık aralıkları örtüşmüyor — kademeli fermantasyon düşün'));
         }
@@ -11319,7 +11319,7 @@ function tkv(maya,og,fg,abv,hoplar,maya2,stil){
     L.push(`~Gün ${lag+5+lag2*7}: Şişele`);
   }else if(maya.tip==="kveik"){
     L.push(`⚠️ Kveik 30°C+ sıcaklık gerektirir — Inkbird + ısıtıcı ZORUNLU`);
-    L.push(`   ℹ Kveik hızlı: 24-72 saatte tamamen biter. FG'yi her gün kontrol et`);
+    L.push(`   ℹ️ Kveik hızlı: 24-72 saatte tamamen biter. FG'yi her gün kontrol et`);
     L.push(`Gün 0: Pitching — Hedef sıcaklık: ${maya.ideal}°C (Kveik direkt pitch — rehydration gerekmez)`);
     L.push(`Gün 0-3: Aktif fermentasyon — ${maya.sc[0]}-${maya.sc[1]}°C`);
     L.push(`Gün 3: FG kontrol — Hedef: ${fg.toFixed(3)}`);
@@ -11329,9 +11329,9 @@ function tkv(maya,og,fg,abv,hoplar,maya2,stil){
   }else if(maya.tip==="sour"){
     // Philly Sour / Lachancea — sour ale protokolü
     L.push(`Gün 0: Pitching — Hedef sıcaklık: ${maya.ideal}°C`);
-    L.push(`   ⚠ Philly Sour laktik asit üretir — ayrı ekipman önerilir!`);
+    L.push(`   ⚠️ Philly Sour laktik asit üretir — ayrı ekipman önerilir!`);
     L.push(`Gün 1-5: Aktif fermentasyon — ${maya.sc[0]}-${maya.sc[1]}°C`);
-    L.push(`   ℹ pH takibi yap: hedef 3.2-3.8. Ekşilik 3-5. günde oluşur.`);
+    L.push(`   ℹ️ pH takibi yap: hedef 3.2-3.8. Ekşilik 3-5. günde oluşur.`);
     L.push(`Gün 5: FG kontrol — Hedef: ${fg.toFixed(3)}`);
     L.push(`Gün 6: Cold crash — 5°C; 48 saat`);
     L.push(`Gün 8: Şişele`);
@@ -11359,7 +11359,7 @@ function tkv(maya,og,fg,abv,hoplar,maya2,stil){
   }else if(maya.tip==="wheat"||maya.tip==="wit"){
     L.push(`Gün 0: Pitching — Dolap ${maya.ideal||17}°C`);
     L.push(`Gün 1-7: ${maya.sc[0]}-18°C dolabta sabit tut`);
-    L.push(`   ⚠ Oda 24°C — dolabtan çıkartma!`);
+    L.push(`   ⚠️ Oda 24°C — dolabtan çıkartma!`);
     L.push(`Gün 7: FG kontrol — Hedef: ${fg.toFixed(3)}`);
     L.push(`Gün 8: Cold crash hafif — 10°C; 24 saat`);
     L.push(`Gün 9: Şişele — 4.0 vol CO₂`);
@@ -11379,7 +11379,7 @@ function tkv(maya,og,fg,abv,hoplar,maya2,stil){
     L.push(`Gün 1-3: Aktif fermentasyon — köpük ve aktivite normal`);
     L.push(`Gün 3-${fs}: Fermentasyon yavaşlıyor — sıcaklık sabit tut (${sc}°C)`);
     L.push(`Gün ${fs}: FG kontrol — Hedef: ${fg.toFixed(3)}`);
-    L.push(`   ℹ 2 gün arayla iki ölçüm al, değer sabitlendi mi kontrol et`);
+    L.push(`   ℹ️ 2 gün arayla iki ölçüm al, değer sabitlendi mi kontrol et`);
     if(dh.length>0){
       L.push(`Gün ${fs+1}: Dry Hop — ${dh.map(h=>h._ad||h.id).join(", ")}; ${sc}°C'de 3-4 gün`);
       L.push(`   ✓ Biyotransformasyon için fermantasyon sıcaklığında beklet`);
@@ -11393,8 +11393,8 @@ function tkv(maya,og,fg,abv,hoplar,maya2,stil){
   }
   // 2. maya notu ekle
   if(maya2){
-    L.push("   ℹ 2. Maya: "+maya2.ad+" ("+maya2.sc[0]+"-"+maya2.sc[1]+"°C)");
-    L.push("   ℹ FG ortalaması her iki mayadan hesaplandı.");
+    L.push("   ℹ️ 2. Maya: "+maya2.ad+" ("+maya2.sc[0]+"-"+maya2.sc[1]+"°C)");
+    L.push("   ℹ️ FG ortalaması her iki mayadan hesaplandı.");
   }
   return L;
 }
@@ -11556,7 +11556,7 @@ function rStok(){
         +'<button class="btn" style="background:none;color:var(--metin-soluk);font-size:16px;padding:0 6px;box-shadow:none" onclick="stokGuncelle('+idx+',-1)">−</button>'
         +'<input aria-label="Stok adım miktarı" id="adim_'+idx+'" type="number" value="'+(s.adim||1)+'" min="1" style="width:40px;text-align:center;font-size:var(--fs-xs);padding:2px" class="inp">'
         +'<button class="btn" style="background:none;color:var(--ok);font-size:16px;padding:0 6px;box-shadow:none" onclick="stokGuncelle('+idx+',1)">+</button>'
-        +'<button class="btn" style="background:none;color:var(--crit);font-size:18px;padding:0 4px;box-shadow:none" onclick="stokSil('+idx+')">×</button>'
+        +'<button class="btn" style="background:none;color:var(--crit);font-size:18px;padding:0 4px;box-shadow:none" onclick="stokSil('+idx+')" aria-label="'+esc(s.ad)+' stok kalemini sil" title="Sil">✕</button>'
         +'</div></div>';
     }).join('');
     return accGrup((_sI[g]||'📦')+' '+g+' ('+items.length+')',ih,'stok_'+g.replace(/\s+/g,'_'),true);
@@ -11652,7 +11652,7 @@ function rStok(){
         var tipRenk = h.tip==='dusum'?'var(--crit)':h.tip==='iade'?'var(--ok)':h.tip==='manuel_dusum'?'var(--warn)':'var(--metin-soluk)';
         var tipAd = h.tip==='dusum'?'Yapıma alındı — Düşüm':h.tip==='iade'?'Yapımdan çıkarıldı — İade':h.tip==='manuel_dusum'?'Manuel düşüm':h.tip==='manuel_ekle'?'Manuel ekle':'İşlem';
         var malzListe = (h.malzemeler||[]).map(function(m){
-          if(m.bulundu===false) return '<span style="color:var(--crit)">⚠ '+esc(m.ad)+' (bulunamadı)</span>';
+          if(m.bulundu===false) return '<span style="color:var(--crit)">⚠️ '+esc(m.ad)+' (bulunamadı)</span>';
           return esc(m.ad);
         }).join(' · ');
         return '<div style="background:var(--bg-card);border:1px solid var(--cizgi-arac);border-left:3px solid '+tipRenk+';border-radius:var(--r-sm);padding:var(--sp-2) var(--sp-3);margin-bottom:var(--sp-1);box-shadow:var(--elv-1)">'
@@ -12418,7 +12418,7 @@ function rEditorTakvim(maya, maya2, tv){
           +'</div>'
           +'<div>'
           +'<button class="bm-edit-only" onclick="logDuzenle('+ii+')" style="background:none;border:none;color:#90b;font-size:12px;cursor:pointer;padding:2px 4px">✏️</button>'
-          +'<button class="bm-edit-only" onclick="logSilIdx('+ii+')" style="background:none;border:none;color:#bbb;font-size:14px;cursor:pointer;padding:2px 4px">✕</button>'
+          +'<button class="bm-edit-only" onclick="logSilIdx('+ii+')" style="background:none;border:none;color:#bbb;font-size:14px;cursor:pointer;padding:2px 4px" aria-label="Günlük kaydını sil" title="Sil">✕</button>'
           +'</div>'
         +'</div>'
         +(e.not&&e.tip!=='katki'&&e.tip!=='tadim'?'<div style="font-size:11px;color:var(--vintage-koyu);margin-top:3px">'+esc(e.not)+'</div>':'')
@@ -13714,7 +13714,7 @@ function rEditorSu(){
       <div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--kahve)">${min?min.ad:m.id}</div><div style="font-size:var(--fs-xs);color:var(--soluk);margin-top:2px">${min?min.aciklama:""}</div></div>
       <input aria-label="Mineral miktarı (g)" type="number" value="${m.miktar}" min=".1" step=".1" class="inp" style="width:68px;text-align:center;font-weight:600" onchange="S.suMineralleri[${i}].miktar=parseFloat(this.value)||0;render()">
       <span style="font-size:11px;color:var(--dim)">${min?min.birim:"g"}</span>
-      <button class="btn" style="background:none;color:var(--kk);font-size:20px;padding:0 4px;line-height:1" onclick="S.suMineralleri.splice(${i},1);render()">×</button>
+      <button class="btn" style="background:none;color:var(--kk);font-size:20px;padding:0 4px;line-height:1" onclick="S.suMineralleri.splice(${i},1);render()" aria-label="${esc(min?min.ad:m.id)} mineralini kaldır" title="Kaldır">✕</button>
     </div>`;
   }).join("");
   // Adim 134-B: 5 alan caller-level accordion wrap (132-F pattern). İç render+handler DOKUNULMAZ.
@@ -14100,7 +14100,7 @@ function rEditorSurec(){
   var _adimHTML=_mAdimlar.map(function(adim,i){
     var scOc="if(!S.mashAdimlar.length)S.mashAdimlar=[{sc:S.mashSc,dk:S.mashDk}];S.mashAdimlar["+i+"].sc=parseFloat(this.value);render()";
     var dkOc="if(!S.mashAdimlar.length)S.mashAdimlar=[{sc:S.mashSc,dk:S.mashDk}];S.mashAdimlar["+i+"].dk=parseInt(this.value);render()";
-    var silBtn=(S.mashAdimlar&&S.mashAdimlar.length>1)?'<button onclick="S.mashAdimlar.splice('+i+',1);render()" style="background:none;border:none;color:#bbb;font-size:16px;cursor:pointer;padding:0 4px;margin-left:auto">✕</button>':'';
+    var silBtn=(S.mashAdimlar&&S.mashAdimlar.length>1)?'<button onclick="S.mashAdimlar.splice('+i+',1);render()" style="background:none;border:none;color:#bbb;font-size:16px;cursor:pointer;padding:0 4px;margin-left:auto" aria-label="Mash adımını sil" title="Sil">✕</button>':'';
     return '<div style="position:relative;margin-bottom:8px"><div style="position:absolute;left:-19px;top:12px;width:10px;height:10px;border-radius:50%;background:var(--altin);border:2px solid #fff"></div><div style="background:var(--bg2);border:1px solid var(--bor);border-radius:8px;padding:8px 10px"><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><input aria-label="Adım sıcaklığı (°C)" type="number" value="'+adim.sc+'" min="50" max="80" step="0.5" onchange="'+scOc+'" style="width:65px;font-size:13px;font-weight:700;padding:4px 6px;border:1px solid var(--bor);border-radius:6px;background:var(--card);color:var(--metin)"><span style="font-size:12px;color:var(--soluk)">°C</span><input aria-label="Adım süresi (dk)" type="number" value="'+adim.dk+'" min="5" max="180" step="5" onchange="'+dkOc+'" style="width:55px;font-size:12px;padding:4px 6px;border:1px solid var(--bor);border-radius:6px;background:var(--card);color:var(--metin)"><span style="font-size:12px;color:var(--soluk)">dk</span>'+silBtn+'</div><div style="font-size:10px;color:var(--soluk);margin-top:3px">'+_acikla(adim.sc)+'</div></div></div>';
   }).join('');
   var _evs=[];
@@ -14189,7 +14189,7 @@ function rEditorSurec(){
         </div>
         <div style="display:flex;gap:6px;align-items:center">
           <input aria-label="Ölçülen pre-boil OG" type="number" class="inp" style="flex:1;font-weight:700;font-size:13px;text-align:center" placeholder="${preOGHedef.toFixed(3)}" value="${S.preboilOG||''}" min="1.020" max="1.100" step="0.001" onchange="S.preboilOG=this.value?parseFloat(this.value):null;render()">
-          ${S.preboilOG?`<button class="btn" style="background:none;color:var(--kk);font-size:12px;padding:2px 6px" onclick="S.preboilOG=null;render()">✕</button>`:''}
+          ${S.preboilOG?`<button class="btn" style="background:none;color:var(--kk);font-size:12px;padding:2px 6px" onclick="S.preboilOG=null;render()" aria-label="Pre-boil OG değerini temizle" title="Temizle">✕</button>`:''}
         </div>
         <div style="font-size:var(--fs-xs);color:var(--dim);margin-top:3px">Hedef: ${preOGHedef.toFixed(3)} (${preHacim.toFixed(1)}L pre-boil)</div>
         ${S.preboilOG?(()=>{
@@ -14212,7 +14212,7 @@ function rEditorSurec(){
             placeholder="${_ogHsp}" value="${S.ogManuel||""}"
             min="1.001" max="1.200" step="0.001"
             onchange="S.ogManuel=this.value?parseFloat(this.value):null;render()">
-          ${_ogKyn==="manuel"?`<button class="btn" style="background:none;color:var(--kk);font-size:12px;padding:2px 6px" onclick="S.ogManuel=null;render()">✕</button>`:""}
+          ${_ogKyn==="manuel"?`<button class="btn" style="background:none;color:var(--kk);font-size:12px;padding:2px 6px" onclick="S.ogManuel=null;render()" aria-label="Manuel OG değerini temizle" title="Temizle">✕</button>`:""}
         </div>
         <div style="font-size:var(--fs-xs);color:var(--dim);margin-top:3px">Reçete: ${_ogHsp}</div>
       </div>
@@ -14223,7 +14223,7 @@ function rEditorSurec(){
             placeholder="${_fgHsp}" value="${S.fgManuel||""}"
             min="1.000" max="1.200" step="0.001"
             onchange="S.fgManuel=this.value?this.value:null;render()">
-          ${_fgKyn==="manuel"?`<button class="btn" style="background:none;color:var(--kk);font-size:12px;padding:2px 6px" onclick="S.fgManuel=null;render()">✕</button>`:""}
+          ${_fgKyn==="manuel"?`<button class="btn" style="background:none;color:var(--kk);font-size:12px;padding:2px 6px" onclick="S.fgManuel=null;render()" aria-label="Manuel FG değerini temizle" title="Temizle">✕</button>`:""}
         </div>
         <div style="font-size:var(--fs-xs);color:var(--dim);margin-top:3px">Reçete: ${_fgHsp}</div>
       </div>
@@ -14486,7 +14486,7 @@ function rEditorMaya(og, fg, abv, maya, maya2, fgKaynak, fgHesap){
       if(_safBakteri){
         return `<div style="background:var(--crit-bg);border-left:3px solid var(--crit);padding:8px 12px;margin-bottom:10px;font-size:11px;color:var(--vintage-koyu);border-radius:4px">
           <b>🦠 Saf bakteri — ikinci maya şart</b> — ${maya.ad} maya değildir, laktik asit bakterisidir. Şekeri ekşitir ama fermente etmez. <b>Mutlaka ayrıca ale mayası</b> (S-04, US-05, Nottingham vb.) ekle. 
-          ${S.maya2Id?'<div style="margin-top:6px;color:var(--yk);font-weight:600">✓ İkinci maya seçili: '+((MAYALAR.find(x=>x&&x.id===S.maya2Id)||{}).ad||'')+'</div>':'<div style="margin-top:6px;color:var(--crit);font-weight:600">⚠ Henüz ikinci maya seçilmedi — aşağıdan ekle</div>'}
+          ${S.maya2Id?'<div style="margin-top:6px;color:var(--yk);font-weight:600">✓ İkinci maya seçili: '+((MAYALAR.find(x=>x&&x.id===S.maya2Id)||{}).ad||'')+'</div>':'<div style="margin-top:6px;color:var(--crit);font-weight:600">⚠️ Henüz ikinci maya seçilmedi — aşağıdan ekle</div>'}
           <div style="margin-top:4px;font-size:var(--fs-xs)">Kettle souring (24-48 saat 35-42°C bakteri fermentasyonu) → kaynat → normal mayayla fermente et. Veya bakteri + maya birlikte (co-pitch) uzun sour fermentasyon (6-12 ay).</div>
         </div>`;
       } else {
@@ -14552,7 +14552,7 @@ function rEditorMaya(og, fg, abv, maya, maya2, fgKaynak, fgHesap){
       <div style="background:var(--bg);border-radius:6px;padding:8px;border:1px solid var(--bor)"><div class="etiket" style="margin-bottom:2px">Sıcaklık</div><div style="font-weight:600">${maya2.sc[0]}-${maya2.sc[1]}°C</div></div>
     </div>
     <div style="font-size:11px;color:var(--soluk);margin-top:6px">${maya2.e}</div>
-    <button class="btn" style="background:none;color:var(--kk);font-size:11px;padding:4px 0;margin-top:4px" onclick="S.maya2Id='';render()">× 2. Mayayı Kaldır</button>
+    <button class="btn" style="background:none;color:var(--kk);font-size:11px;padding:4px 0;margin-top:4px" onclick="S.maya2Id='';render()">✕ 2. Mayayı Kaldır</button>
   </div>`:"";
   const mopts2=`<option value="">── 2. Maya yok ──</option>`+g2.map(([tp,ad])=>`<optgroup label="── ${ad} ──">${MAYALAR.filter(m=>m.tip===tp).map(m=>`<option value="${m.id}"${S.maya2Id===m.id?" selected":""}>${(m.ideal>=30)?"🔴 ":(m.ek==="dolap")?"🟢 ":"🟡 "}${m.ad}</option>`).join("")}</optgroup>`).join("");
   // Maya filtrele
@@ -14746,7 +14746,7 @@ function rEditorMaya(og, fg, abv, maya, maya2, fgKaynak, fgHesap){
             <div style="display:flex;gap:8px;align-items:center">
               <input aria-label="Sıvı maya yaşı (ay)" type="number" class="inp" style="width:70px;text-align:center;font-weight:600" min="0" max="24" step="1" placeholder="0" value="${S.mayaYasAy||''}" onchange="S.mayaYasAy=this.value?parseInt(this.value):null;render()">
               <span style="font-size:12px;color:var(--kahve)">ay</span>
-              ${_yasAy!=null&&_yasAy>=3?`<span style="font-size:var(--fs-xs);color:var(--kk);font-weight:600;margin-left:6px">⚠ Hücre kaybı: ${_viabPct}% canlı — ${sivieParketAyarli.toFixed(1)} vial veya starter öneriliyor</span>`:''}
+              ${_yasAy!=null&&_yasAy>=3?`<span style="font-size:var(--fs-xs);color:var(--kk);font-weight:600;margin-left:6px">⚠️ Hücre kaybı: ${_viabPct}% canlı — ${sivieParketAyarli.toFixed(1)} vial veya starter öneriliyor</span>`:''}
             </div>
             <div style="font-size:var(--fs-xs);color:var(--dim);margin-top:4px">Chris White "Yeast" kitabı: sıvı mayalar aylık ~%22 hücre kaybeder. Boş bırakırsan taze kabul edilir.</div>
           </div>`:''}
@@ -15055,7 +15055,7 @@ function rEditorKatki(){
       // Alerjen uyarısı
       var _alerjenBadge = '';
       if(kDB && kDB.alerjen && kDB.alerjen.length > 0){
-        _alerjenBadge = ' <span title="Alerjen: '+kDB.alerjen.join(', ')+'" style="font-size:var(--fs-xs);background:var(--ka);color:var(--kk);padding:1px 4px;border-radius:3px;font-weight:700">⚠ '+kDB.alerjen[0]+'</span>';
+        _alerjenBadge = ' <span title="Alerjen: '+kDB.alerjen.join(', ')+'" style="font-size:var(--fs-xs);background:var(--ka);color:var(--kk);padding:1px 4px;border-radius:3px;font-weight:700">⚠️ '+kDB.alerjen[0]+'</span>';
       }
       return '<div style="padding:8px 10px;border-bottom:1px solid var(--bor);background:'+(i%2===0?'#fff':'var(--bg2)')+'">'
         // Üst satır: ad/etki + sil butonu
@@ -15129,7 +15129,7 @@ function rEditorKatki(){
       }
       // Alerjen rozeti
       if(k.alerjen && k.alerjen.length>0){
-        _ozellik+=' <span title="Alerjen: '+k.alerjen.join(', ')+'" style="font-size:var(--fs-xs);background:var(--ka);color:var(--kk);padding:1px 4px;border-radius:3px;font-weight:700">⚠ '+k.alerjen[0]+'</span>';
+        _ozellik+=' <span title="Alerjen: '+k.alerjen.join(', ')+'" style="font-size:var(--fs-xs);background:var(--ka);color:var(--kk);padding:1px 4px;border-radius:3px;font-weight:700">⚠️ '+k.alerjen[0]+'</span>';
       }
       // Aranabilir tag'leri göster (ilk 3 tane)
       var _tagStr = '';
@@ -15203,7 +15203,7 @@ function rEditorKatki(){
           oninput="sekmeArama.katki=this.value;rO()"
           style="width:100%;padding-left:32px;font-size:12px">
       </div>
-      ${sekmeArama.katki?`<button class="btn" style="background:var(--ka);color:var(--kk);padding:8px 12px;font-size:16px;line-height:1" onclick="sekmeArama.katki='';render()">✕</button>`:""}
+      ${sekmeArama.katki?`<button class="btn" style="background:var(--ka);color:var(--kk);padding:8px 12px;font-size:16px;line-height:1" onclick="sekmeArama.katki='';render()" aria-label="Aramayı temizle" title="Temizle">✕</button>`:""}
     </div>
     ${(function(){
       var favIds=katkiFavYukle();
@@ -15673,7 +15673,7 @@ function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
           <button style="background:none;border:none;color:${i===0?'var(--dim)':'var(--bakir)'};font-size:11px;padding:0 3px;line-height:1;cursor:${i===0?'not-allowed':'pointer'};opacity:${i===0?'.4':'1'}" onclick="maltUp(${i})" ${i===0?'disabled':''}>▲</button>
           <button style="background:none;border:none;color:${i===S.maltlar.length-1?'var(--dim)':'var(--bakir)'};font-size:11px;padding:0 3px;line-height:1;cursor:${i===S.maltlar.length-1?'not-allowed':'pointer'};opacity:${i===S.maltlar.length-1?'.4':'1'}" onclick="maltDown(${i})" ${i===S.maltlar.length-1?'disabled':''}>▼</button>
         </div>
-        <button class="btn" style="background:none;color:var(--kk);font-size:20px;padding:0 4px;line-height:1" onclick="maltSil(${i})">×</button>
+        <button class="btn" style="background:none;color:var(--kk);font-size:20px;padding:0 4px;line-height:1" onclick="maltSil(${i})" aria-label="${esc(ml?ml.ad:m.id)} maltını sil" title="Sil">✕</button>
       </div>
       ${_muadilM.length>0?`<div class="bm-muadil-inline" data-bm-muadil-malt="${esc(m.id)}">
         <span class="bm-muadil-inline-label">↔ Muadil:</span>
@@ -15706,7 +15706,7 @@ function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
   const katkilarNonFerm=(S.katkilar||[]).filter(k=>{const kat=KATKILAR.find(a=>a&&a.id===k.id);return kat&&kat.gu===0&&kat.fermente===false;});
   const ts=S.maltlar.length?`<div class="serit">
     <span style="font-size:12px"><span style="color:var(--soluk)">Malt:</span> <b style="color:var(--bakir)">${topMalt.toFixed(2)} kg</b></span>
-    <span style="font-size:12px"><span style="color:var(--soluk)">OG:</span> <b style="color:${ogKaynak==="manuel"?"var(--yk)":"var(--bakir)"}">${ogKaynak==="manuel"?"✏ ":""}${og.toFixed(3)}</b></span>
+    <span style="font-size:12px"><span style="color:var(--soluk)">OG:</span> <b style="color:${ogKaynak==="manuel"?"var(--yk)":"var(--bakir)"}">${ogKaynak==="manuel"?"✏️ ":""}${og.toFixed(3)}</b></span>
     <span style="font-size:12px"><span style="color:var(--soluk)">Mash:</span> <b style="color:var(--bakir)">${S.mashSc||67}°C</b></span>
     <span style="display:flex;align-items:center;gap:6px;font-size:12px"><span style="color:var(--soluk)">Renk:</span><span style="width:18px;height:18px;border-radius:50%;background:${rk};border:2px solid rgba(0,0,0,.1);display:inline-block"></span><b style="color:var(--bakir)">${srm} SRM</b></span>
     ${katkilarFermente.length?`<span style="font-size:11px;color:var(--yk)">⬆️ ${katkilarFermente.map(k=>k.ad).join(", ")} OG'yi etkiliyor</span>`:""}
@@ -16001,7 +16001,7 @@ function rEditorHop(og, ibu, seciHop){
           <button style="background:none;border:none;color:${i===S.hoplar.length-1?'var(--dim)':'var(--bakir)'};font-size:11px;padding:0 3px;line-height:1;cursor:${i===S.hoplar.length-1?'not-allowed':'pointer'};opacity:${i===S.hoplar.length-1?'.4':'1'}" onclick="hopDown(${i})" ${i===S.hoplar.length-1?'disabled':''}>▼</button>
         </div>
         <button class="btn" style="background:none;color:var(--bakir);font-size:14px;padding:0 4px;line-height:1" onclick="hopDuzenleBasla(${i})" title="Düzenle">✏️</button>
-        <button class="btn" style="background:none;color:var(--kk);font-size:20px;padding:0 4px;line-height:1" onclick="hopSil(${i})">×</button>
+        <button class="btn" style="background:none;color:var(--kk);font-size:20px;padding:0 4px;line-height:1" onclick="hopSil(${i})" aria-label="${esc(hp?hp.ad:h.id)} hopunu sil" title="Sil">✕</button>
       </div>
       ${_muadilH.length>0?`<div class="bm-muadil-inline" data-bm-muadil-hop="${esc(h.id)}">
         <span class="bm-muadil-inline-label">↔ Muadil:</span>
