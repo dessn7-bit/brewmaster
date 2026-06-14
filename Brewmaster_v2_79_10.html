@@ -5018,7 +5018,7 @@ const _KR_GRUP = {
   cilek:           {rgb:[200,40,60],  max:900, tr:"Mercan",        en:"Coral"}
 };
 // NOT (2026-06): Renk motoru finished-beer pH'i __bm_finishedPH(maya,stil)'den alir (sour-stil/maya -> 3.4, normal -> 4.3). Eski mash-proxy __bm_estPH artik kullanilmiyordu, kaldirildi. Buffer-weighted mash pH motoru (maltPH/maltBuf, _suMashPHHTML IIFE) AYRI kalir.
-function __bm_finishedPH(maya,stil){try{var s=(stil||'');if(/sour|lambic|gueuze|kriek|framboise|wild ale|flanders|oud bruin|berliner|gose|catharina|lichtenhainer|kvass/i.test(s))return 3.4;if(maya&&typeof MAYALAR!=='undefined'){var mid=(typeof maya==='object'&&maya)?(maya.id||''):maya;var mt=(typeof maya==='object'&&maya&&maya.tip)?maya.tip:'';if(!mt&&mid){var mo=MAYALAR.find(function(m){return m.id===mid;});mt=(mo&&mo.tip)||'';}if(mt==='sour')return 3.4;}return 4.3;}catch(e){return 4.3;}}
+function __bm_finishedPH(maya,stil){try{var s=(stil||'');if(/sour|lambic|gueuze|kriek|framboise|wild ale|flanders|oud bruin|berliner|gose|catharina|lichtenhainer|kvass/i.test(s))return 3.4;if(maya&&typeof MAYALAR!=='undefined'){var mid=(typeof maya==='object'&&maya)?(maya.id||''):maya;var mt=(typeof maya==='object'&&maya&&maya.tip)?maya.tip:'';if(!mt&&mid){var mo=MAYALAR.find(function(m){return m&&m.id===mid;});mt=(mo&&mo.tip)||'';}if(mt==='sour')return 3.4;}return 4.3;}catch(e){return 4.3;}}
 function aktif_pigment(katkilar, hacim, pH){
   let enYuksek=null, enYuksekOran=0;
   const oranMap={};
@@ -5227,7 +5227,7 @@ function kaliteSkoru(S, maya, og, fgHedef, stil){
     try {
       if(typeof fermentasyonProfili==='function' && stil){
         var prof=fermentasyonProfili(stil, og, maya.tip, maya);
-        var bugunProf=prof.gunler.find(function(p){return p.g===gunPitch;});
+        var bugunProf=prof.gunler.find(function(p){return p&&p.g===gunPitch;});
         if(bugunProf&&bugunProf.t!==null) idealT=bugunProf.t;
       }
     } catch(e){}
@@ -6950,7 +6950,7 @@ function restoreDraft(){
   var d=window._pendingDraft;if(!d||!d.s)return;
   // Mevcut KR'deki durum — draft'tan farklıysa KR'dekini koru
   var _kid=d.editId;
-  var _kr=_kid?KR.find(function(k){return k.id===_kid;}):null;
+  var _kr=_kid?KR.find(function(k){return k&&k.id===_kid;}):null;
   var _s={...BOS,...d.s};
   if(_kr&&_kr.durum&&_s.durum!==_kr.durum){_s.durum=_kr.durum;}
   S=_s;_editId=d.editId||null;
@@ -7733,7 +7733,7 @@ let KR=yl();
     // sadece Kaydet'e basıp çıktı ama saveDraft() Kaydet sonrası render'da
     // tekrar yazmış olabilir) → gösterme, sessizce sil.
     if(d.editId){
-      var _m = KR.find(function(k){return k.id===d.editId;});
+      var _m = KR.find(function(k){return k&&k.id===d.editId;});
       if(_m){
         var _clone = Object.assign({}, _m);
         delete _clone.id; delete _clone.tarih; delete _clone.ozet;
@@ -7876,7 +7876,7 @@ function mineralOnerisiHesapla(hedef, mevcutPpm, hacim) {
     var gCaEks = gH(d.Ca - caToplam, 72);
     if(gCaEks > 0.1) {
       caToplam += g2p(gCaEks, 72);
-      var mev = sonuc.find(function(x){return x.id==='cacl2';});
+      var mev = sonuc.find(function(x){return x&&x.id==='cacl2';});
       if(mev) mev.g += gCaEks;
       else sonuc.push({id:'cacl2', g:gCaEks});
     }
@@ -7892,8 +7892,8 @@ function suProfilUygula(){
     // RO su baz alınarak sıfırdan hesapla — tüm mineraller replace edilecek
     var srmF=parseFloat(srm)||0;
     var mayaTip=maya?maya.tip:'ale';
-    var whtKg=S.maltlar.reduce(function(s,m){var ml=MALTLAR.find(function(x){return x.id===m.id;});return ml&&['wheat','dark_wheat','rwh','torr_wh','flaked_wheat'].includes(m.id)?s+m.kg:s;},0);
-    var topKg=S.maltlar.reduce(function(s,m){var ml=MALTLAR.find(function(x){return x.id===m.id;});return ml&&ml.g!=='Şeker'&&m.id!=='rice'?s+m.kg:s;},0);
+    var whtKg=S.maltlar.reduce(function(s,m){var ml=MALTLAR.find(function(x){return x&&x.id===m.id;});return ml&&['wheat','dark_wheat','rwh','torr_wh','flaked_wheat'].includes(m.id)?s+m.kg:s;},0);
+    var topKg=S.maltlar.reduce(function(s,m){var ml=MALTLAR.find(function(x){return x&&x.id===m.id;});return ml&&ml.g!=='Şeker'&&m.id!=='rice'?s+m.kg:s;},0);
     var whtPct=topKg>0?whtKg/topKg:0;
     var ibuN=parseFloat(ibu)||0;
     var _prof;
@@ -11504,7 +11504,7 @@ function rStok(){
     // Ad eşleşmesi
     var sNorm = _n(s.ad);
     if(sNorm && _rezTab['ad:'+sNorm]){
-      _rezTab['ad:'+sNorm].forEach(function(r){ if(!out.find(function(x){return x.tarifAd===r.tarifAd&&x.miktar===r.miktar;})) out.push(r); });
+      _rezTab['ad:'+sNorm].forEach(function(r){ if(!out.find(function(x){return x&&x.tarifAd===r.tarifAd&&x.miktar===r.miktar;})) out.push(r); });
     }
     return out;
   }
@@ -12492,7 +12492,7 @@ function rEditorTakvim(maya, maya2, tv){
         try {
           if(_profSc && _pTar_sc && tarihStr){
             var _d=new Date(tarihStr); _d.setHours(0,0,0,0);
-            var _gp=_profSc.gunler.find(function(p){return p.g===Math.floor((_d-_pTar_sc)/864e5);});
+            var _gp=_profSc.gunler.find(function(p){return p&&p.g===Math.floor((_d-_pTar_sc)/864e5);});
             if(_gp && _gp.t!==null) return {idLo:_gp.t-1,idHi:_gp.t+1,tolLo:_gp.t-_tolSpan,tolHi:_gp.t+_tolSpan};
           }
         } catch(eH){}
@@ -12507,7 +12507,7 @@ function rEditorTakvim(maya, maya2, tv){
       try {
         if(_profSc && _pTar_sc){
           var _bg_sc = new Date(); _bg_sc.setHours(0,0,0,0);
-          var _bgP = _profSc.gunler.find(function(p){return p.g===Math.floor((_bg_sc-_pTar_sc)/864e5);});
+          var _bgP = _profSc.gunler.find(function(p){return p&&p.g===Math.floor((_bg_sc-_pTar_sc)/864e5);});
           if(_bgP && _bgP.t!==null) _bugunHedefT = _bgP.t;
         }
       } catch(eB){}
@@ -12818,7 +12818,7 @@ function rEditorTakvim(maya, maya2, tv){
     if(_dhList.length){
       _dhOptsHtml='<option value="">-- Reçeteden seç --</option>'
         +_dhList.map(function(h){
-          var hp=HOPLAR.find(function(x){return x.id===h.id;});
+          var hp=HOPLAR.find(function(x){return x&&x.id===h.id;});
           var ad=hp?hp.ad:(h._ad||h.id);
           var val=ad+' ('+h.g+'g)';
           return '<option value="'+val+'">🌿 '+ad+' · '+h.g+'g'+(h.dk?' · '+h.dk+'dk':'')+'</option>';
@@ -13090,7 +13090,7 @@ function rEditorTakvim(maya, maya2, tv){
       var _minMesafe = _sonGun * 0.05; // %5 genişlik
       var _kabul = [];
       _etiketler.forEach(function(et){
-        var _cakisma = _kabul.find(function(k){return Math.abs(k.g-et.g) < _minMesafe;});
+        var _cakisma = _kabul.find(function(k){return k&&Math.abs(k.g-et.g) < _minMesafe;});
         if(!_cakisma){
           _kabul.push(et);
         } else if(et.oncelik > _cakisma.oncelik){
@@ -13333,7 +13333,7 @@ function rEditorTakvim(maya, maya2, tv){
       var _gunX = Math.floor((_bugun2 - _pitchTar2)/864e5);
       _bugunIdealGun = _gunX;
       // Profilde bugüne karşılık gelen gün var mı?
-      _bugunIdealAksiyon = _prof.gunler.find(function(p){return p.g===_gunX;});
+      _bugunIdealAksiyon = _prof.gunler.find(function(p){return p&&p.g===_gunX;});
       if(!_bugunIdealAksiyon && _gunX >= _prof.toplamGun){
         _bugunIdealAksiyon = {g:_gunX, t:null, aksiyon:'✓ Profil tamamlandı', aciklama:'Fermentasyon profili '+_prof.toplamGun+' günde bitti. Kondisyon sürecindesin.'};
       }
@@ -14104,7 +14104,7 @@ function rEditorSurec(){
     return '<div style="position:relative;margin-bottom:8px"><div style="position:absolute;left:-19px;top:12px;width:10px;height:10px;border-radius:50%;background:var(--altin);border:2px solid #fff"></div><div style="background:var(--bg2);border:1px solid var(--bor);border-radius:8px;padding:8px 10px"><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><input aria-label="Adım sıcaklığı (°C)" type="number" value="'+adim.sc+'" min="50" max="80" step="0.5" onchange="'+scOc+'" style="width:65px;font-size:13px;font-weight:700;padding:4px 6px;border:1px solid var(--bor);border-radius:6px;background:var(--card);color:var(--metin)"><span style="font-size:12px;color:var(--soluk)">°C</span><input aria-label="Adım süresi (dk)" type="number" value="'+adim.dk+'" min="5" max="180" step="5" onchange="'+dkOc+'" style="width:55px;font-size:12px;padding:4px 6px;border:1px solid var(--bor);border-radius:6px;background:var(--card);color:var(--metin)"><span style="font-size:12px;color:var(--soluk)">dk</span>'+silBtn+'</div><div style="font-size:10px;color:var(--soluk);margin-top:3px">'+_acikla(adim.sc)+'</div></div></div>';
   }).join('');
   var _evs=[];
-  (S.hoplar||[]).forEach(function(h){if(h.tur==='dry_hop')return;var hp=HOPLAR.find(function(x){return x.id===h.id;});var _whT=h.whT!=null?h.whT:(h.tur==='whirlpool'&&h.dk>=60&&h.dk<=100?h.dk:85);var _whDk=h.tur==='whirlpool'?(h.whT!=null?(h.dk||15):15):h.dk;_evs.push({dk:h.tur==='whirlpool'?0:h.dk,ad:h._ad||(hp&&hp.ad)||h.id,detay:h.g+'g — '+(h.tur==='whirlpool'?'Whirlpool '+_whT+'°C / '+_whDk+'dk':'Kaynatma '+h.dk+'dk'),renk:'var(--vintage)',ikon:'🌿'});});
+  (S.hoplar||[]).forEach(function(h){if(h.tur==='dry_hop')return;var hp=HOPLAR.find(function(x){return x&&x.id===h.id;});var _whT=h.whT!=null?h.whT:(h.tur==='whirlpool'&&h.dk>=60&&h.dk<=100?h.dk:85);var _whDk=h.tur==='whirlpool'?(h.whT!=null?(h.dk||15):15):h.dk;_evs.push({dk:h.tur==='whirlpool'?0:h.dk,ad:h._ad||(hp&&hp.ad)||h.id,detay:h.g+'g — '+(h.tur==='whirlpool'?'Whirlpool '+_whT+'°C / '+_whDk+'dk':'Kaynatma '+h.dk+'dk'),renk:'var(--vintage)',ikon:'🌿'});});
   (S.katkilar||[]).forEach(function(k,ki){var _kz=(k.zaman||'');var _kaynatmaDa=_kz==='Kaynatmada'||_kz.toLowerCase().includes('kaynat');if(k.dk==null&&!_kaynatmaDa)return;_evs.push({dk:k.dk!=null?k.dk:0,ad:k.ad,detay:(k.miktar||'')+' '+(k.birim||'')+(k.zaman?' — '+k.zaman:''),renk:'var(--bakir)',ikon:'🧪',isKatki:true,katki_idx:ki});});
   _evs.sort(function(a,b){return b.dk-a.dk;});
   var _tl=_evs.length>0?'<div style="position:relative;padding-left:28px"><div style="position:absolute;left:11px;top:0;bottom:0;width:2px;background:var(--bor)"></div>'+_evs.map(function(ev){var _dkBadge=ev.isKatki?'<div style="display:inline-flex;align-items:center;background:var(--bg-sunken);border-radius:8px;padding:2px 8px;gap:3px"><input aria-label="Katkı zamanı (dk)" class="bm-surec-dk-inp" type="number" value="'+ev.dk+'" min="0" max="120" step="5" onchange="setSurecKDk('+ev.katki_idx+',this.value)" oninput="this.style.width=Math.max(12,this.value.length*7)+\'px\'" style="width:'+Math.max(12,String(ev.dk).length*7)+'px;font-size:11px;font-weight:600;text-align:right;border:none;background:transparent;color:var(--bakir);padding:0;-moz-appearance:textfield"><span style="font-size:11px;color:var(--bakir);font-weight:600">dk</span></div>':'<span style="font-size:11px;background:var(--bg-sunken);padding:2px 8px;border-radius:8px;color:var(--bakir);font-weight:600">'+ev.dk+' dk</span>';return '<div style="position:relative;margin-bottom:10px"><div style="position:absolute;left:-21px;top:10px;width:12px;height:12px;border-radius:50%;background:'+ev.renk+';border:2px solid #fff"></div><div style="background:var(--card);border:1px solid var(--bor);border-radius:10px;padding:8px 10px"><div style="display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:6px"><span>'+ev.ikon+'</span><span style="font-size:12px;font-weight:700;color:var(--kahve)">'+esc(ev.ad)+'</span></div>'+_dkBadge+'</div><div style="font-size:11px;color:var(--soluk);margin-top:3px">'+esc(ev.detay)+'</div></div></div>';}).join('')+'</div>':'<div style="text-align:center;padding:16px;color:var(--dim);font-size:12px">Hop veya katkı ekle</div>';
@@ -14322,7 +14322,7 @@ function rEditorSurec(){
       return null;
     }
     function _dhLogBul(h){
-      var hp=HOPLAR.find(function(x){return x.id===h.id;});
+      var hp=HOPLAR.find(function(x){return x&&x.id===h.id;});
       var ad=h._ad||(hp&&hp.ad)||h.id;
       for(var i=0;i<_bl.length;i++){var e=_bl[i];if(e.tip==='dry_hop'&&e.not&&e.not.includes(ad))return e;}
       return null;
@@ -14369,8 +14369,8 @@ function rEditorSurec(){
       if(!grup.length)return '';
       var satirlar=grup.map(function(x){
         var k=x.k,isDH=x.isDH,ki=x._i;
-        var hp=isDH?HOPLAR.find(function(p){return p.id===k.id;}):null;
-        var ad=isDH?(k._ad||(hp&&hp.ad)||k.id):(k.ad||(KATKILAR.find(function(p){return p.id===k.id;})||{}).ad||k.id);
+        var hp=isDH?HOPLAR.find(function(p){return p&&p.id===k.id;}):null;
+        var ad=isDH?(k._ad||(hp&&hp.ad)||k.id):(k.ad||(KATKILAR.find(function(p){return p&&p.id===k.id;})||{}).ad||k.id);
         var miktar=isDH?(k.g+'g'):(k.miktar+(k.birim||'g'));
         var badge='';
         if(a.key==='Kaynatmada'){
@@ -21408,7 +21408,7 @@ window.brewdayBitir=function(){
   window._alarmDurumGuncelle = function(receteId, gun, yeniDurum){
     const tum = _alarmlariOku();
     if(!tum[receteId] || !Array.isArray(tum[receteId].alarmlar)) return false;
-    const al = tum[receteId].alarmlar.find(a => a.g === gun);
+    const al = tum[receteId].alarmlar.find(a => a&&a.g === gun);
     if(!al) return false;
     al.durum = yeniDurum;
     _alarmlariYaz(tum);
@@ -21419,7 +21419,7 @@ window.brewdayBitir=function(){
   window._alarmErtele = function(receteId, gun, ekMs){
     const tum = _alarmlariOku();
     if(!tum[receteId] || !Array.isArray(tum[receteId].alarmlar)) return false;
-    const al = tum[receteId].alarmlar.find(a => a.g === gun);
+    const al = tum[receteId].alarmlar.find(a => a&&a.g === gun);
     if(!al) return false;
     al.ts = Date.now() + (ekMs || 3600000); // varsayılan 1 saat
     al.durum = 'bekliyor';
@@ -21608,7 +21608,7 @@ window.brewdayBitir=function(){
       if(document.getElementById('_alarmModal')) return;
       
       // Kritik varsa önce onu göster
-      const kritik = bekleyenler.find(b => b.alarm.tip === 'kritik');
+      const kritik = bekleyenler.find(b => b&&b.alarm.tip === 'kritik');
       if(kritik){
         // Son tetikten en az 30 sn geçmişse göster
         const anahtar = kritik.receteId+'_'+kritik.alarm.g;
@@ -22716,7 +22716,7 @@ function logEkle(){
   if(sec)sec.style.display='none';
   // Pitching girilince tarifeyi otomatik "Aktif" yap
   if(_tip==='pitching'){
-    var _t=KR.find(function(k){return k.id===_editId;});
+    var _t=KR.find(function(k){return k&&k.id===_editId;});
     if(_t&&(_t.durum||'aktif')==='aktif'){
       _t.durum='yapimda';
       S.durum='yapimda';
@@ -25859,7 +25859,7 @@ syncBaslat();
           // non-bypass case'inde topVoteCluster === tc oldugu icin override etkisiz
           hybaCluster = hh.topVoteCluster || tc;
           // hybaClusterProb: bypass case'inde B1 top-3'te canonical cluster prob bul, yoksa tc.score
-          var canonicalEntry = (top3 || []).find(function(c){ return c.cluster === hybaCluster; });
+          var canonicalEntry = (top3 || []).find(function(c){ return c&&c.cluster === hybaCluster; });
           hybaClusterProb = canonicalEntry ? +canonicalEntry.score : tcp;
           hybaRank = hi + 1;
           // Adim 103 DEBUG: PASS break
