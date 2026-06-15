@@ -14763,6 +14763,39 @@ function rEditorMaya(og, fg, abv, maya, maya2, fgKaynak, fgHesap){
 
 
 // ═══ EDITOR: HESAP SEKMESİ ══════════════════════════════
+// ─── BESİN GRID tek kaynak (FIX-BESIN-DRY) — hKalori/hKarb motoru kanonik ───
+// İki çağrı yeri: rEditorHesap (variant 'full') + rEditorGenel (variant 'compact').
+// Görsel varyasyon variant ile korunur; hesap mantığı TEK yerde (motor).
+function _besinGridHTML(og, fg, abv, variant){
+  var _c100=hKarb(og,fg,100).toFixed(1);
+  var _c330=hKarb(og,fg,330).toFixed(1);
+  var _c500=hKarb(og,fg,500).toFixed(1);
+  var _k100=hKalori(og,fg,abv,100);
+  var _k330=hKalori(og,fg,abv,330);
+  var _k500=hKalori(og,fg,abv,500);
+  if(variant==='compact'){
+    return '<div style="background:var(--accent-soft);border:1px solid var(--cizgi-arac);border-left:4px solid var(--yk);border-radius:10px;padding:10px;margin-bottom:10px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">'+
+      '<div style="text-align:center;background:var(--bg-card);border-radius:8px;padding:8px 6px;border:1px solid var(--cizgi-arac)"><div style="font-size:var(--fs-xs);color:var(--metin-soluk);font-weight:700;letter-spacing:.5px">KARBONHİDRAT</div><div style="font-size:20px;font-weight:700;color:var(--bakir);font-family:var(--font-display)">'+_c100+'</div><div style="font-size:var(--fs-xs);color:var(--metin-soluk)">g / 100mL</div></div>'+
+      '<div style="text-align:center;background:var(--bg-card);border-radius:8px;padding:8px 6px;border:1px solid var(--cizgi-arac)"><div style="font-size:var(--fs-xs);color:var(--metin-soluk);font-weight:700;letter-spacing:.5px">KALORİ</div><div style="font-size:20px;font-weight:700;color:var(--bakir);font-family:var(--font-display)">'+_k100+'</div><div style="font-size:var(--fs-xs);color:var(--metin-soluk)">kcal / 100mL</div></div>'+
+      '<div style="text-align:center;background:var(--bg-card);border-radius:8px;padding:8px 6px;border:1px solid var(--cizgi-arac)"><div style="font-size:var(--fs-xs);color:var(--metin-soluk);font-weight:700;letter-spacing:.5px">🍺 330mL</div><div style="font-size:15px;font-weight:700;color:var(--bakir);font-family:var(--font-display)">'+_c330+'g</div><div style="font-size:var(--fs-xs);color:var(--metin-soluk)">'+_k330+' kcal</div></div>'+
+    '</div>';
+  }
+  return '<div class="kart" style="background:var(--accent-soft);border:1px solid var(--cizgi-arac);border-left:4px solid var(--yk)">'+
+    '<div style="font-size:14px;font-weight:700;color:var(--metin);margin-bottom:12px;font-family:var(--font-display)">🧬 Besin Değerleri (Tahmini)</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">'+
+      '<div style="background:var(--bg-card);border-radius:10px;padding:10px;text-align:center;border:1px solid var(--cizgi-arac)"><div style="font-size:var(--fs-xs);color:var(--metin-soluk);font-weight:700;letter-spacing:.5px">KARBONHİDRAT</div><div style="font-size:24px;font-weight:600;color:var(--bakir);font-family:var(--font-display)">'+_c100+'</div><div style="font-size:var(--fs-xs);color:var(--metin-soluk)">g / 100mL</div></div>'+
+      '<div style="background:var(--bg-card);border-radius:10px;padding:10px;text-align:center;border:1px solid var(--cizgi-arac)"><div style="font-size:var(--fs-xs);color:var(--metin-soluk);font-weight:700;letter-spacing:.5px">KALORİ</div><div style="font-size:24px;font-weight:600;color:var(--bakir);font-family:var(--font-display)">'+_k100+'</div><div style="font-size:var(--fs-xs);color:var(--metin-soluk)">kcal / 100mL</div></div>'+
+      '<div style="background:var(--bg-card);border-radius:10px;padding:10px;text-align:center;border:1px solid var(--cizgi-arac)"><div style="font-size:var(--fs-xs);color:var(--metin-soluk);font-weight:700;letter-spacing:.5px">ALKOL</div><div style="font-size:24px;font-weight:600;color:var(--bakir);font-family:var(--font-display)">%'+abv.toFixed(2)+'</div><div style="font-size:var(--fs-xs);color:var(--metin-soluk)">ABV</div></div>'+
+    '</div>'+
+    '<div style="background:var(--bg-card);border-radius:10px;border:1px solid var(--cizgi-arac);overflow:hidden;margin-bottom:6px">'+
+      '<div style="display:flex;background:var(--kahve-light);padding:6px 12px;border-bottom:1px solid var(--cizgi-arac)"><span style="flex:1;font-size:var(--fs-xs);font-weight:700;color:var(--metin);letter-spacing:.5px">Porsiyon</span><span style="flex:1;text-align:center;font-size:var(--fs-xs);font-weight:700;color:var(--metin);letter-spacing:.5px">Karbonhidrat</span><span style="flex:1;text-align:right;font-size:var(--fs-xs);font-weight:700;color:var(--metin);letter-spacing:.5px">Kalori</span></div>'+
+      '<div style="display:flex;padding:9px 12px;border-bottom:1px solid var(--cizgi-arac)"><span style="flex:1;font-size:13px;color:var(--metin)">🍺 330mL</span><span style="flex:1;font-size:14px;font-weight:700;color:var(--bakir);text-align:center;font-family:var(--font-display)">'+_c330+'g</span><span style="flex:1;font-size:14px;font-weight:700;color:var(--bakir);text-align:right;font-family:var(--font-display)">'+_k330+' kcal</span></div>'+
+      '<div style="display:flex;padding:9px 12px"><span style="flex:1;font-size:13px;color:var(--metin)">🍺 500mL</span><span style="flex:1;font-size:14px;font-weight:700;color:var(--bakir);text-align:center;font-family:var(--font-display)">'+_c500+'g</span><span style="flex:1;font-size:14px;font-weight:700;color:var(--bakir);text-align:right;font-family:var(--font-display)">'+_k500+' kcal</span></div>'+
+    '</div>'+
+    '<div style="font-size:var(--fs-xs);color:var(--metin-soluk);text-align:center;font-style:italic">ASBC · Real Extract · Balling Plato</div>'+
+  '</div>';
+}
+
 function rEditorHesap(og, fg, abv, maya){
   const hacim=S.hacim||11;
   // Stil bazlı CO2 tavsiyesi — önce primVol'u güncelle
@@ -14843,27 +14876,8 @@ ${batchOlcekKartHtml()}
   var _kartNutri = '';
   var _meta5 = '';
   if (og > 1.001) {
-    const _c100=hKarb(og,fg,100).toFixed(1);
-    const _c330=hKarb(og,fg,330).toFixed(1);
-    const _c500=hKarb(og,fg,500).toFixed(1);
-    const _k100=hKalori(og,fg,abv,100);
-    const _k330=hKalori(og,fg,abv,330);
-    const _k500=hKalori(og,fg,abv,500);
-    _meta5 = _k330 + ' kcal/330mL';
-    _kartNutri = '<div class="kart" style="background:var(--accent-soft);border:1px solid var(--cizgi-arac);border-left:4px solid var(--yk)">'+
-      '<div style="font-size:14px;font-weight:700;color:var(--metin);margin-bottom:12px;font-family:var(--font-display)">🧬 Besin Değerleri (Tahmini)</div>'+
-      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">'+
-        '<div style="background:var(--bg-card);border-radius:10px;padding:10px;text-align:center;border:1px solid var(--cizgi-arac)"><div style="font-size:var(--fs-xs);color:var(--metin-soluk);font-weight:700;letter-spacing:.5px">KARBONHİDRAT</div><div style="font-size:24px;font-weight:600;color:var(--bakir);font-family:var(--font-display)">'+_c100+'</div><div style="font-size:var(--fs-xs);color:var(--metin-soluk)">g / 100mL</div></div>'+
-        '<div style="background:var(--bg-card);border-radius:10px;padding:10px;text-align:center;border:1px solid var(--cizgi-arac)"><div style="font-size:var(--fs-xs);color:var(--metin-soluk);font-weight:700;letter-spacing:.5px">KALORİ</div><div style="font-size:24px;font-weight:600;color:var(--bakir);font-family:var(--font-display)">'+_k100+'</div><div style="font-size:var(--fs-xs);color:var(--metin-soluk)">kcal / 100mL</div></div>'+
-        '<div style="background:var(--bg-card);border-radius:10px;padding:10px;text-align:center;border:1px solid var(--cizgi-arac)"><div style="font-size:var(--fs-xs);color:var(--metin-soluk);font-weight:700;letter-spacing:.5px">ALKOL</div><div style="font-size:24px;font-weight:600;color:var(--bakir);font-family:var(--font-display)">%'+abv.toFixed(2)+'</div><div style="font-size:var(--fs-xs);color:var(--metin-soluk)">ABV</div></div>'+
-      '</div>'+
-      '<div style="background:var(--bg-card);border-radius:10px;border:1px solid var(--cizgi-arac);overflow:hidden;margin-bottom:6px">'+
-        '<div style="display:flex;background:var(--kahve-light);padding:6px 12px;border-bottom:1px solid var(--cizgi-arac)"><span style="flex:1;font-size:var(--fs-xs);font-weight:700;color:var(--metin);letter-spacing:.5px">Porsiyon</span><span style="flex:1;text-align:center;font-size:var(--fs-xs);font-weight:700;color:var(--metin);letter-spacing:.5px">Karbonhidrat</span><span style="flex:1;text-align:right;font-size:var(--fs-xs);font-weight:700;color:var(--metin);letter-spacing:.5px">Kalori</span></div>'+
-        '<div style="display:flex;padding:9px 12px;border-bottom:1px solid var(--cizgi-arac)"><span style="flex:1;font-size:13px;color:var(--metin)">🍺 330mL</span><span style="flex:1;font-size:14px;font-weight:700;color:var(--bakir);text-align:center;font-family:var(--font-display)">'+_c330+'g</span><span style="flex:1;font-size:14px;font-weight:700;color:var(--bakir);text-align:right;font-family:var(--font-display)">'+_k330+' kcal</span></div>'+
-        '<div style="display:flex;padding:9px 12px"><span style="flex:1;font-size:13px;color:var(--metin)">🍺 500mL</span><span style="flex:1;font-size:14px;font-weight:700;color:var(--bakir);text-align:center;font-family:var(--font-display)">'+_c500+'g</span><span style="flex:1;font-size:14px;font-weight:700;color:var(--bakir);text-align:right;font-family:var(--font-display)">'+_k500+' kcal</span></div>'+
-      '</div>'+
-      '<div style="font-size:var(--fs-xs);color:var(--metin-soluk);text-align:center;font-style:italic">ASBC · Real Extract · Balling Plato</div>'+
-    '</div>';
+    _kartNutri = _besinGridHTML(og, fg, abv, 'full');
+    _meta5 = hKalori(og,fg,abv,330) + ' kcal/330mL';
   }
 
   // Meta hesaplamalar
@@ -20112,19 +20126,7 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
       })()}
       <div style="font-size:var(--fs-xs);color:var(--metin-soluk);margin-top:8px;text-align:center">Tahmini profil — bileşenlere göre otomatik güncellenir</div>
     </div>
-    ${og>1.001?(()=>{
-      const _toP3=sg=>bmOgPlato(sg);
-      const _re3=0.1808*_toP3(_og)+0.8192*_toP3(_fg);
-      const _c100=(_re3*_fg*0.96).toFixed(1);
-      const _k100=((6.9*(_abv*0.789*10)+4.0*(_re3*_fg*10))/10).toFixed(0);
-      const _c330=(_re3*_fg*0.96*3.3).toFixed(1);
-      const _k330=((6.9*(_abv*0.789*10)+4.0*(_re3*_fg*10))*0.33).toFixed(0);
-      return '<div style="background:var(--accent-soft);border:1px solid var(--cizgi-arac);border-left:4px solid var(--yk);border-radius:10px;padding:10px;margin-bottom:10px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">'+
-        '<div style="text-align:center;background:var(--bg-card);border-radius:8px;padding:8px 6px;border:1px solid var(--cizgi-arac)"><div style="font-size:var(--fs-xs);color:var(--metin-soluk);font-weight:700;letter-spacing:.5px">KARBONHİDRAT</div><div style="font-size:20px;font-weight:700;color:var(--bakir);font-family:var(--font-display)">'+_c100+'</div><div style="font-size:var(--fs-xs);color:var(--metin-soluk)">g / 100mL</div></div>'+
-        '<div style="text-align:center;background:var(--bg-card);border-radius:8px;padding:8px 6px;border:1px solid var(--cizgi-arac)"><div style="font-size:var(--fs-xs);color:var(--metin-soluk);font-weight:700;letter-spacing:.5px">KALORİ</div><div style="font-size:20px;font-weight:700;color:var(--bakir);font-family:var(--font-display)">'+_k100+'</div><div style="font-size:var(--fs-xs);color:var(--metin-soluk)">kcal / 100mL</div></div>'+
-        '<div style="text-align:center;background:var(--bg-card);border-radius:8px;padding:8px 6px;border:1px solid var(--cizgi-arac)"><div style="font-size:var(--fs-xs);color:var(--metin-soluk);font-weight:700;letter-spacing:.5px">🍺 330mL</div><div style="font-size:15px;font-weight:700;color:var(--bakir);font-family:var(--font-display)">'+_c330+'g</div><div style="font-size:var(--fs-xs);color:var(--metin-soluk)">'+_k330+' kcal</div></div>'+
-      '</div>';
-    })():""}
+    ${og>1.001?_besinGridHTML(_og, _fg, _abv, 'compact'):""}
     ${(()=>{var _h=stokKontrolHTML();if(!_h)return '';
       return '<div class="bm-acc" data-acc-id="stok-muadil" data-acc-default="expanded" aria-expanded="true">'+
         '<button class="bm-acc-header" type="button" aria-expanded="true" onclick="bmAccToggle(\'stok-muadil\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();bmAccToggle(\'stok-muadil\')}">'+
