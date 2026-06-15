@@ -665,7 +665,7 @@
 // bump v131-159 -> v131-160.
 // olu-kod-temizligi-batch (2026-05-27): eski UI yenilemesinden kalma kullanilmayan render degiskenleri silindi — mOpts/mOpts2/hOpts/maltKatBar (+ yetim maltKatlar) ve zincir def'leri (const mg={}/const hg={}). minOpts korundu (4 yerde canli). node --check PASS, MALTLAR=184.
 // bump v131-160 -> v131-161.
-const CACHE_VERSION = 'bm-cache-v131-322';
+const CACHE_VERSION = 'bm-cache-v131-323';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
@@ -1219,4 +1219,36 @@ self.addEventListener('fetch', function(event) {
   }
 
   // Diger cross-origin: default network (SW geçişsiz)
+});
+
+// ═══ Faz 1 POC: Web Push alıcı (install/activate/fetch INTACT — bu pasif eklemeler) ═══
+// Subscription olmadan push gelmez → davranış-nötr (mevcut kullanıcılar etkilenmez).
+self.addEventListener('push', function(event) {
+  var data = {};
+  try { data = event.data ? event.data.json() : {}; }
+  catch (e) { data = { baslik: 'Brewmaster', body: (event.data && event.data.text && event.data.text()) || '' }; }
+  var title = data.baslik || '🍺 Brewmaster';
+  var opts = {
+    body: data.body || '',
+    icon: data.icon || 'icon-192.png',
+    badge: data.badge || 'icon-192.png',
+    tag: data.tag || 'bm-push',
+    data: data.data || {},
+    vibrate: [200, 100, 200],
+    renotify: true
+  };
+  event.waitUntil(self.registration.showNotification(title, opts));
+});
+
+self.addEventListener('notificationclick', function(event) {
+  event.notification.close();
+  var url = (event.notification.data && event.notification.data.url) || 'Brewmaster_v2_79_10.html';
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(cl) {
+      for (var i = 0; i < cl.length; i++) {
+        if (cl[i].url.indexOf('Brewmaster') > -1 && 'focus' in cl[i]) return cl[i].focus();
+      }
+      if (clients.openWindow) return clients.openWindow(url);
+    })
+  );
 });
