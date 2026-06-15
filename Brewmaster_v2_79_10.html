@@ -13545,7 +13545,7 @@ function rEditorTakvim(maya, maya2, tv){
 function rEditorSu(){
   // seciMin ve minOpts su sekmesi içinde kullanılıyor - burada tanımlayalım
   const seciMin = (typeof MINERALLER!=='undefined' && yMin && yMin.id) ? MINERALLER.find(x=>x && x.id===yMin.id) : null;
-  const minOpts = (typeof MINERALLER!=='undefined') ? MINERALLER.map(m=>`<option value="${m.id}">${m.ad}</option>`).join("") : "";
+  const minOpts = (typeof MINERALLER!=='undefined') ? MINERALLER.filter(m=>m).map(m=>`<option value="${m.id}">${m.ad}</option>`).join("") : "";
   // Su bloğu için gerekli değişkenler
   const {og:ogSu,srm:srmSu,ibu:ibuSu,maya:mayaSu,fg:fgSu,abv:abvSu}=calc();
   const _mayaTip=mayaSu?mayaSu.tip:'ale';
@@ -14451,7 +14451,7 @@ function rEditorMaya(og, fg, abv, maya, maya2, fgKaynak, fgHesap){
   const myArama=sekmeArama.maya.toLowerCase();
   const myKat=sekmKat.maya;
   const mayaKatlar=[["ale","🍺 Ale"],["wheat","🌾 Buğday"],["wit","🍋 Wit"],["lager","🥶 Lager"],["belcika","⚜️ Belçika"],["saison","🌻 Saison"],["kveik","⚡ Kveik"],["sour","🍋 Sour"]];
-  const mayaKatBar=mayaKatlar.map(([kt,etiket])=>{const n=MAYALAR.filter(m=>m.tip===kt).length;const ak=myKat===kt;return`<button onclick="setSekmKat('maya','${kt}')" style="flex-shrink:0;padding:4px 10px;border-radius:14px;border:1.5px solid ${ak?"var(--altin)":"var(--bor)"};background:${ak?"var(--sa)":"var(--card)"};color:${ak?"var(--bakir)":"var(--soluk)"};font-size:11px;font-weight:600;cursor:pointer">${etiket} (${n})</button>`;}).join("");
+  const mayaKatBar=mayaKatlar.map(([kt,etiket])=>{const n=MAYALAR.filter(m=>m&&m.tip===kt).length;const ak=myKat===kt;return`<button onclick="setSekmKat('maya','${kt}')" style="flex-shrink:0;padding:4px 10px;border-radius:14px;border:1.5px solid ${ak?"var(--altin)":"var(--bor)"};background:${ak?"var(--sa)":"var(--card)"};color:${ak?"var(--bakir)":"var(--soluk)"};font-size:11px;font-weight:600;cursor:pointer">${etiket} (${n})</button>`;}).join("");
   const _atenHist = (typeof attenHistory==='function') ? attenHistory(S.mayaId) : null;
   const _atenHist2 = (typeof attenHistory==='function' && S.maya2Id) ? attenHistory(S.maya2Id) : null;
   const _atenHistHTML = _atenHist ? `<div style="background:var(--ya);border:1px solid var(--yk);border-radius:8px;padding:8px 10px;margin-bottom:10px;font-size:12px">
@@ -14459,7 +14459,7 @@ function rEditorMaya(og, fg, abv, maya, maya2, fgKaynak, fgHesap){
     <div style="color:var(--vintage-koyu)">${_atenHist.count} batch — Ortalama gerçek atten: <b>%${_atenHist.avg}</b> (tahmin: %${maya?((maya.atu[0]+maya.atu[1])/2).toFixed(0):'—'})</div>
     ${Math.abs(_atenHist.avg - (maya?((maya.atu[0]+maya.atu[1])/2):0)) > 3 ? `<div style="color:var(--kk);margin-top:3px;font-size:11px">⚠️ Gerçek atten tahminden <b>${(_atenHist.avg > (maya.atu[0]+maya.atu[1])/2 ? '+':'')}${(_atenHist.avg - (maya.atu[0]+maya.atu[1])/2).toFixed(1)}%</b> farklı — bu mayayla ekstre/verim tekrar kontrol et</div>`:''}
   </div>` : '';
-  const mopts=g2.map(([tp,ad])=>`<optgroup label="── ${ad} ──">${MAYALAR.filter(m=>m.tip===tp).map(m=>`<option value="${m.id}"${S.mayaId===m.id?" selected":""}>${(m.ideal>=30)?"🔴 ":(m.ek==="dolap")?"🟢 ":"🟡 "}${m.ad}</option>`).join("")}</optgroup>`).join("");
+  const mopts=g2.map(([tp,ad])=>`<optgroup label="── ${ad} ──">${MAYALAR.filter(m=>m&&m.tip===tp).map(m=>`<option value="${m.id}"${S.mayaId===m.id?" selected":""}>${(m.ideal>=30)?"🔴 ":(m.ek==="dolap")?"🟢 ":"🟡 "}${m.ad}</option>`).join("")}</optgroup>`).join("");
   const det=maya?`<div class="kart" style="margin-top:10px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
       <div style="font-size:15px;font-weight:700;color:var(--kahve)">${maya.ad}</div>
@@ -14554,13 +14554,13 @@ function rEditorMaya(og, fg, abv, maya, maya2, fgKaynak, fgHesap){
     <div style="font-size:11px;color:var(--soluk);margin-top:6px">${maya2.e}</div>
     <button class="btn" style="background:none;color:var(--kk);font-size:11px;padding:4px 0;margin-top:4px" onclick="S.maya2Id='';render()">✕ 2. Mayayı Kaldır</button>
   </div>`:"";
-  const mopts2=`<option value="">── 2. Maya yok ──</option>`+g2.map(([tp,ad])=>`<optgroup label="── ${ad} ──">${MAYALAR.filter(m=>m.tip===tp).map(m=>`<option value="${m.id}"${S.maya2Id===m.id?" selected":""}>${(m.ideal>=30)?"🔴 ":(m.ek==="dolap")?"🟢 ":"🟡 "}${m.ad}</option>`).join("")}</optgroup>`).join("");
+  const mopts2=`<option value="">── 2. Maya yok ──</option>`+g2.map(([tp,ad])=>`<optgroup label="── ${ad} ──">${MAYALAR.filter(m=>m&&m.tip===tp).map(m=>`<option value="${m.id}"${S.maya2Id===m.id?" selected":""}>${(m.ideal>=30)?"🔴 ":(m.ek==="dolap")?"🟢 ":"🟡 "}${m.ad}</option>`).join("")}</optgroup>`).join("");
   // Maya filtrele
-  const moptsFiltreliOpts=g2.filter(([tp])=>!myKat||tp===myKat).map(([tp,ad])=>`<optgroup label="── ${ad} ──">${MAYALAR.filter(m=>m.tip===tp&&(!myArama||m.ad.toLowerCase().includes(myArama))).map(m=>`<option value="${m.id}"${S.mayaId===m.id?" selected":""}>${(m.ideal>=30)?"🔴 ":(m.ek==="dolap")?"🟢 ":"🟡 "}${m.ad}</option>`).join("")}</optgroup>`).join("");
+  const moptsFiltreliOpts=g2.filter(([tp])=>!myKat||tp===myKat).map(([tp,ad])=>`<optgroup label="── ${ad} ──">${MAYALAR.filter(m=>m&&m.tip===tp&&(!myArama||m.ad.toLowerCase().includes(myArama))).map(m=>`<option value="${m.id}"${S.mayaId===m.id?" selected":""}>${(m.ideal>=30)?"🔴 ":(m.ek==="dolap")?"🟢 ":"🟡 "}${m.ad}</option>`).join("")}</optgroup>`).join("");
   var _mayaKatHtml='';
   mayaKatlar.forEach(function(kt,gi){
     var tip=kt[0], etiket=kt[1];
-    var filtMayalar=MAYALAR.filter(function(m){return m.tip===tip&&(!myArama||m.ad.toLowerCase().includes(myArama));});
+    var filtMayalar=MAYALAR.filter(function(m){return m&&m.tip===tip&&(!myArama||m.ad.toLowerCase().includes(myArama));});
     if(!filtMayalar.length)return;
     var tipRenk=mayaRenk(tip);
     var tipRozet=mayaKisaTip(tip);
@@ -15106,9 +15106,9 @@ function rEditorKatki(){
 
   const kArama=sekmeArama.katki.toLowerCase();
   const kKat=sekmKat.katki;
-  const katAdi=[...new Set(KATKILAR.map(k=>k.g))];
-  const katKatBar=katAdi.map(k=>{const n=KATKILAR.filter(x=>x.g===k).length;const ak=kKat===k;return`<button onclick="setSekmKat('katki','${k}')" style="flex-shrink:0;padding:4px 10px;border-radius:14px;border:1.5px solid ${ak?"var(--altin)":"var(--bor)"};background:${ak?"var(--sa)":"var(--card)"};color:${ak?"var(--bakir)":"var(--soluk)"};font-size:11px;font-weight:600;cursor:pointer">${k} (${n})</button>`;}).join("");
-  const katkilarFiltreli=KATKILAR.filter(k=>(!kArama||(k.ad.toLowerCase().includes(kArama)||k.g.toLowerCase().includes(kArama)||(k.acik||'').toLowerCase().includes(kArama)||(k.etki||'').toLowerCase().includes(kArama)||(k.tags||[]).some(t=>t.toLowerCase().includes(kArama))))&&(!kKat||k.g===kKat));
+  const katAdi=[...new Set(KATKILAR.filter(k=>k).map(k=>k.g))];
+  const katKatBar=katAdi.map(k=>{const n=KATKILAR.filter(x=>x&&x.g===k).length;const ak=kKat===k;return`<button onclick="setSekmKat('katki','${k}')" style="flex-shrink:0;padding:4px 10px;border-radius:14px;border:1.5px solid ${ak?"var(--altin)":"var(--bor)"};background:${ak?"var(--sa)":"var(--card)"};color:${ak?"var(--bakir)":"var(--soluk)"};font-size:11px;font-weight:600;cursor:pointer">${k} (${n})</button>`;}).join("");
+  const katkilarFiltreli=KATKILAR.filter(k=>k&&(!kArama||(k.ad.toLowerCase().includes(kArama)||k.g.toLowerCase().includes(kArama)||(k.acik||'').toLowerCase().includes(kArama)||(k.etki||'').toLowerCase().includes(kArama)||(k.tags||[]).some(t=>t.toLowerCase().includes(kArama))))&&(!kKat||k.g===kKat));
   const gruplar={};katkilarFiltreli.forEach(k=>{(gruplar[k.g]=gruplar[k.g]||[]).push(k);});
   const _kI={'Şeker':'🍬','Adjunct':'🌾','Fermantasyon':'🧬','Berraklaştırıcı':'✨','Aroma':'🌺','Meşe':'🪵','Meyve':'🍇','Baharat':'🌶️','Kahve & Çikolata':'☕','Proses':'⚗️','Egzotik':'🌟','Diğer':'📦'};
   var _gH='';
@@ -15555,7 +15555,7 @@ function _olcekOnizlemeHTML(){
   const H_t=(window._olcekHac!=null&&!isNaN(window._olcekHac))?window._olcekHac:curHac;
   const r=_gristOlcekHesapla(S.maltlar,S.katkilar,V,OG_t,H_t);
   if(r.err) return '<div style="color:#A02020;font-size:12px;padding:6px 0">⛔ '+r.err+'</div>';
-  const idx={};MALTLAR.forEach(m=>idx[m.id]=m);
+  const idx={};MALTLAR.forEach(m=>m&&(idx[m.id]=m));
   const rows=S.maltlar.map((m,i)=>{const ad=idx[m.id]?idx[m.id].ad:m.id;return '<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0;color:var(--soluk)"><span>'+ad+(m.marka?(' ('+m.marka+')'):'')+'</span><span><b>'+(+m.kg).toFixed(2)+'</b> → <b style="color:var(--bakir)">'+r.yeni[i].kg.toFixed(2)+'</b> kg</span></div>';}).join('');
   const topEski=S.maltlar.reduce((s,m)=>s+(+m.kg),0),topYeni=r.yeni.reduce((s,m)=>s+m.kg,0);
   const ogYeni=hOG(r.yeni,V,S.katkilar,H_t);
@@ -16040,9 +16040,9 @@ function rEditorHop(og, ibu, seciHop){
   </div>`:"";
   const _hAr=sekmeArama.hop.toLowerCase();
   const _hKat=sekmKat.hop;
-  const hopKatlar=[...new Set(HOPLAR.map(h=>h.g))].sort();
-  const hopKatBar=hopKatlar.map(k=>{const n=HOPLAR.filter(h=>h.g===k).length;const ak=_hKat===k;return`<button onclick="setSekmKat('hop','${k}')" style="flex-shrink:0;padding:4px 10px;border-radius:14px;border:1.5px solid ${ak?"var(--altin)":"var(--bor)"};background:${ak?"var(--sa)":"var(--card)"};color:${ak?"var(--bakir)":"var(--soluk)"};font-size:11px;font-weight:600;cursor:pointer">${k} (${n})</button>`;}).join("");
-  const _hFg=HOPLAR.filter(h=>(!_hAr||h.ad.toLowerCase().includes(_hAr))&&(!_hKat||h.g===_hKat));
+  const hopKatlar=[...new Set(HOPLAR.filter(h=>h).map(h=>h.g))].sort();
+  const hopKatBar=hopKatlar.map(k=>{const n=HOPLAR.filter(h=>h&&h.g===k).length;const ak=_hKat===k;return`<button onclick="setSekmKat('hop','${k}')" style="flex-shrink:0;padding:4px 10px;border-radius:14px;border:1.5px solid ${ak?"var(--altin)":"var(--bor)"};background:${ak?"var(--sa)":"var(--card)"};color:${ak?"var(--bakir)":"var(--soluk)"};font-size:11px;font-weight:600;cursor:pointer">${k} (${n})</button>`;}).join("");
+  const _hFg=HOPLAR.filter(h=>h&&(!_hAr||h.ad.toLowerCase().includes(_hAr))&&(!_hKat||h.g===_hKat));
   const _hFg2={};_hFg.forEach(h=>{(_hFg2[h.g]=_hFg2[h.g]||[]).push(h);});
   const hOptsFiltreli=Object.entries(_hFg2).map(([g,hs])=>`<optgroup label="── ${g} ──">${hs.map(h=>`<option value="${h.id}">${h.ad} (${h.aa}% AA)</option>`).join("")}</optgroup>`).join("");
   var _hopKatHtml='';
@@ -20156,7 +20156,7 @@ function rEditor(){
   if(og>1.080&&!maya)uy+=`<div class="uybox uy-k">⚠️ OG 1.080+ — starter hazırla</div>`;
   if(ibu>0&&ibu<10&&S.maltlar.length)uy+=`<div class="uybox uy-k">⚠️ IBU ${ibu.toFixed(1)} — çok düşük (< 10 IBU enfeksiyon riski artar)</div>`;
 
-  const minOpts=MINERALLER.map(m=>`<option value="${m.id}">${m.ad}</option>`).join("");
+  const minOpts=MINERALLER.filter(m=>m).map(m=>`<option value="${m.id}">${m.ad}</option>`).join("");
   const seciMalt=MALTLAR.find(x=>x&&x.id===yM.id);
   const seciHop=HOPLAR.find(x=>x&&x.id===yH.id);
   const seciMin=MINERALLER.find(x=>x&&x.id===yMin.id);
