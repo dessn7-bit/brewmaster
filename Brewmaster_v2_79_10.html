@@ -14158,7 +14158,7 @@ function rEditorSurec(){
       <div style="display:flex;gap:6px;margin-top:10px;justify-content:center;flex-wrap:wrap">
         <button onclick="brewTimerBaslat()" id="_btStart" style="background:var(--altin);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer">▶️ Başlat</button>
         <button onclick="brewTimerDur()" id="_btStop" style="background:var(--kk);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;display:none">⏹ Dur</button>
-        <button onclick="brewBildirimIzin()" style="background:var(--card);color:var(--bakir);border:1px solid var(--bor);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer">🔔 İzin Ver</button>
+        <button onclick="brewBildirimIzin()" style="background:var(--card);color:var(--bakir);border:1px solid var(--bor);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer">🔔 İzin Ver</button><button onclick="brewPushTest()" style="background:var(--card);color:var(--bakir);border:1px solid var(--bor);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer">🧪 Test push</button>
       </div>
       <div style="font-size:var(--fs-xs);color:var(--dim);margin-top:8px;line-height:1.5">
         Tam hop zamanında: 2 beep + titreme + bildirim<br>
@@ -22061,15 +22061,48 @@ window._brewTitleFlash=function(mesaj,ms){
 window.brewBildirimIzin=function(){
   try{
     if(typeof Notification==='undefined'){flash('Tarayıcı bildirim desteklemiyor','err');return;}
-    if(Notification.permission==='granted'){flash('Bildirim zaten açık ✓','ok');return;}
+    if(Notification.permission==='granted'){flash('Bildirim zaten açık ✓','ok');brewPushAbone();return;}
     if(Notification.permission==='denied'){flash('İzin reddedilmiş — tarayıcı ayarlarından aç','err');return;}
     Notification.requestPermission().then(p=>{
       if(p==='granted'){
         flash('🔔 Bildirim izni verildi','ok');
-        new Notification('Brewmaster',{body:'Kaynatma bildirimleri aktif ✓',icon:'🍺'});
+        new Notification('Brewmaster',{body:'Kaynatma bildirimleri aktif ✓',icon:'🍺'});brewPushAbone();
       }else flash('İzin verilmedi','err');
     });
   }catch(e){}
+};
+
+window.brewPushAbone=function(){
+  if(!('serviceWorker' in navigator)||!('PushManager' in window)){flash('Bu tarayıcı push bildirimi desteklemiyor','err');return Promise.resolve(null);}
+  var _vapid='BAwdDDBhFd2iWYZxpNpGEc11FbNmKANLwrCj1eFNBQzau0nuubDUxpEIukeuARPwZWk_THmfwe8ffwX_kuYCRew';
+  function _u8(s){var p='==='.slice((s.length+3)%4);var b=atob((s+p).replace(/-/g,'+').replace(/_/g,'/'));var a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a;}
+  return navigator.serviceWorker.ready.then(function(reg){
+    return reg.pushManager.getSubscription().then(function(sub){
+      if(sub)return sub;
+      return reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:_u8(_vapid)});
+    });
+  }).then(function(sub){
+    try{localStorage.setItem('bm_push_sub',JSON.stringify(sub));}catch(_e){}
+    flash('🔔 Push bildirimi aktif ✓','ok');
+    return sub;
+  }).catch(function(e){
+    flash('Push aboneliği başarısız: '+((e&&e.message)||e),'err');
+    return null;
+  });
+};
+
+window.brewPushTest=function(){
+  if(!('serviceWorker' in navigator)||!('PushManager' in window)){flash('Bu tarayıcı push desteklemiyor','err');return;}
+  function _gonder(sub){
+    flash('🧪 Test push gönderiliyor...','ok');
+    fetch('https://brewmaster-models.dessn7.workers.dev/push-test',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub,baslik:'🍺 Brewmaster',body:'Test bildirimi — push çalışıyor ✓',tag:'bm-test'})}).then(function(r){return r.json().catch(function(){return {};});}).then(function(j){
+      if(j&&typeof j.pushStatus==='number'&&j.pushStatus>=200&&j.pushStatus<300)flash('✅ Push gönderildi — bildirim birazdan düşecek','ok');
+      else flash('Push hata: '+((j&&(j.error||j.pushStatusText))||(j&&j.pushStatus)||'bilinmiyor'),'err');
+    }).catch(function(e){flash('İstek başarısız: '+((e&&e.message)||e),'err');});
+  }
+  var _raw=null;try{_raw=localStorage.getItem('bm_push_sub');}catch(_e){}
+  if(_raw){try{_gonder(JSON.parse(_raw));}catch(_e2){flash('Kayıtlı abonelik bozuk — önce 🔔 İzin Ver','err');}}
+  else{brewPushAbone().then(function(sub){if(sub)_gonder(sub);else flash('Önce 🔔 İzin Ver ile abone ol','err');});}
 };
 
 window.brewTimerBaslat=function(){
