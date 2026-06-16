@@ -22096,8 +22096,11 @@ window.brewPushTest=function(){
   function _gonder(sub){
     flash('🧪 Test push gönderiliyor...','ok');
     fetch('https://brewmaster-models.dessn7.workers.dev/push-test',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub,baslik:'🍺 Brewmaster',body:'Test bildirimi — push çalışıyor ✓',tag:'bm-test'})}).then(function(r){return r.json().catch(function(){return {};});}).then(function(j){
-      if(j&&typeof j.pushStatus==='number'&&j.pushStatus>=200&&j.pushStatus<300)flash('✅ Push gönderildi — bildirim birazdan düşecek','ok');
-      else flash('Push hata: '+((j&&(j.error||j.pushStatusText))||(j&&j.pushStatus)||'bilinmiyor'),'err');
+      var st=(j&&j.pushStatus!=null)?j.pushStatus:(j&&j.error?('ERR:'+j.error):'?');
+      var iyi=(typeof st==='number'&&st>=200&&st<300);
+      var kisa='pushStatus='+st+' · '+(((j&&(j.body||j.error||j.pushStatusText))||'')+'').slice(0,100);
+      flash((iyi?'✅ ':'⚠️ ')+kisa+' (panoya kopyalandı)',iyi?'ok':'err');
+      try{navigator.clipboard.writeText('BM-PUSH-DIAG '+JSON.stringify({resp:j,sub:sub}));}catch(_c){}
     }).catch(function(e){flash('İstek başarısız: '+((e&&e.message)||e),'err');});
   }
   var _raw=null;try{_raw=localStorage.getItem('bm_push_sub');}catch(_e){}
