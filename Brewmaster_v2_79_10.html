@@ -14158,7 +14158,7 @@ function rEditorSurec(){
       <div style="display:flex;gap:6px;margin-top:10px;justify-content:center;flex-wrap:wrap">
         <button onclick="brewTimerBaslat()" id="_btStart" style="background:var(--altin);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer">▶️ Başlat</button>
         <button onclick="brewTimerDur()" id="_btStop" style="background:var(--kk);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;display:none">⏹ Dur</button>
-        <button onclick="brewBildirimIzin()" style="background:var(--card);color:var(--bakir);border:1px solid var(--bor);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer">🔔 İzin Ver</button><button onclick="brewPushTest()" style="background:var(--card);color:var(--bakir);border:1px solid var(--bor);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer">🧪 Test push</button><button onclick="brewSwDurum()" style="background:var(--card);color:var(--bakir);border:1px solid var(--bor);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer">🩺 SW durumu</button>
+        <button onclick="brewBildirimIzin()" style="background:var(--card);color:var(--bakir);border:1px solid var(--bor);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer">🔔 İzin Ver</button><button onclick="brewPushTest()" style="background:var(--card);color:var(--bakir);border:1px solid var(--bor);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer">🧪 Test push</button><button onclick="brewSwDurum()" style="background:var(--card);color:var(--bakir);border:1px solid var(--bor);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer">🩺 SW durumu</button><button onclick="brewSwSifirla()" style="background:var(--card);color:var(--bakir);border:1px solid var(--bor);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer">🔄 SW sıfırla</button>
       </div>
       <div style="font-size:var(--fs-xs);color:var(--dim);margin-top:8px;line-height:1.5">
         Tam hop zamanında: 2 beep + titreme + bildirim<br>
@@ -22130,6 +22130,17 @@ window.brewSwDurum=function(){
     flash((iyi?'✅ ':'⚠️ ')+msg,iyi?'ok':'err');
     try{navigator.clipboard.writeText('BM-SW-DIAG '+msg);}catch(_c){}
   });
+};
+
+window.brewSwSifirla=function(){
+  if(!navigator.serviceWorker){flash('Bu tarayıcı SW desteklemiyor','err');return;}
+  flash('🔄 Eski SW siliniyor, sayfa birazdan yenilenecek...','ok');
+  navigator.serviceWorker.getRegistrations().then(function(rs){
+    return Promise.all((rs||[]).map(function(r){return r.unregister();}));
+  }).then(function(){
+    try{localStorage.removeItem('bm_push_sub');}catch(_e){}
+    setTimeout(function(){location.reload();},1500);
+  }).catch(function(e){flash('Sıfırlama hatası: '+((e&&e.message)||e),'err');});
 };
 
 window.brewTimerBaslat=function(){
