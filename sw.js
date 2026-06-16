@@ -665,7 +665,7 @@
 // bump v131-159 -> v131-160.
 // olu-kod-temizligi-batch (2026-05-27): eski UI yenilemesinden kalma kullanilmayan render degiskenleri silindi — mOpts/mOpts2/hOpts/maltKatBar (+ yetim maltKatlar) ve zincir def'leri (const mg={}/const hg={}). minOpts korundu (4 yerde canli). node --check PASS, MALTLAR=184.
 // bump v131-160 -> v131-161.
-const CACHE_VERSION = 'bm-cache-v131-325';
+const CACHE_VERSION = 'bm-cache-v131-326';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
@@ -1237,7 +1237,11 @@ self.addEventListener('push', function(event) {
     vibrate: [200, 100, 200],
     renotify: true
   };
-  event.waitUntil(self.registration.showNotification(title, opts));
+  event.waitUntil((async function(){
+    try{ var c=await caches.open('bm-diag'); await c.put('lastpush',new Response(new Date().toISOString()+' | '+title+' | '+(data.body||''))); }catch(_e){}
+    try{ await self.registration.showNotification(title, opts); }
+    catch(e){ try{ var c2=await caches.open('bm-diag'); await c2.put('lasterr',new Response('showNotification FAIL: '+((e&&e.message)||e))); }catch(_e2){} }
+  })());
 });
 
 self.addEventListener('notificationclick', function(event) {
@@ -1251,4 +1255,16 @@ self.addEventListener('notificationclick', function(event) {
       if (clients.openWindow) return clients.openWindow(url);
     })
   );
+});
+
+
+// Faz 2 debug: aktif SW surumu + son push izi sorgusu (BM_DIAG)
+self.addEventListener('message', function(event){
+  if(event.data && event.data.type==='BM_DIAG' && event.ports && event.ports[0]){
+    event.waitUntil((async function(){
+      var lp='(hic push yok)', le='';
+      try{ var c=await caches.open('bm-diag'); var r=await c.match('lastpush'); if(r)lp=await r.text(); var r2=await c.match('lasterr'); if(r2)le=await r2.text(); }catch(_e){}
+      try{ event.ports[0].postMessage({ ver: CACHE_VERSION, lastPush: lp, lastErr: le }); }catch(_p){}
+    })());
+  }
 });

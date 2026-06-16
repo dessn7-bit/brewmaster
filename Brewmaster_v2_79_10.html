@@ -14158,7 +14158,7 @@ function rEditorSurec(){
       <div style="display:flex;gap:6px;margin-top:10px;justify-content:center;flex-wrap:wrap">
         <button onclick="brewTimerBaslat()" id="_btStart" style="background:var(--altin);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer">▶️ Başlat</button>
         <button onclick="brewTimerDur()" id="_btStop" style="background:var(--kk);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;display:none">⏹ Dur</button>
-        <button onclick="brewBildirimIzin()" style="background:var(--card);color:var(--bakir);border:1px solid var(--bor);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer">🔔 İzin Ver</button><button onclick="brewPushTest()" style="background:var(--card);color:var(--bakir);border:1px solid var(--bor);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer">🧪 Test push</button>
+        <button onclick="brewBildirimIzin()" style="background:var(--card);color:var(--bakir);border:1px solid var(--bor);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer">🔔 İzin Ver</button><button onclick="brewPushTest()" style="background:var(--card);color:var(--bakir);border:1px solid var(--bor);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer">🧪 Test push</button><button onclick="brewSwDurum()" style="background:var(--card);color:var(--bakir);border:1px solid var(--bor);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer">🩺 SW durumu</button>
       </div>
       <div style="font-size:var(--fs-xs);color:var(--dim);margin-top:8px;line-height:1.5">
         Tam hop zamanında: 2 beep + titreme + bildirim<br>
@@ -22106,6 +22106,30 @@ window.brewPushTest=function(){
   var _raw=null;try{_raw=localStorage.getItem('bm_push_sub');}catch(_e){}
   if(_raw){try{_gonder(JSON.parse(_raw));}catch(_e2){flash('Kayıtlı abonelik bozuk — önce 🔔 İzin Ver','err');}}
   else{brewPushAbone().then(function(sub){if(sub)_gonder(sub);else flash('Önce 🔔 İzin Ver ile abone ol','err');});}
+};
+
+window._swDiag=function(){return new Promise(function(res){
+  try{
+    if(!navigator.serviceWorker){res({ver:'SW-API-yok'});return;}
+    navigator.serviceWorker.ready.then(function(reg){
+      var sw=reg.active;if(!sw){res({ver:'aktif-SW-yok'});return;}
+      var ch=new MessageChannel();var done=false;
+      ch.port1.onmessage=function(e){done=true;res(e.data||{});};
+      sw.postMessage({type:'BM_DIAG'},[ch.port2]);
+      setTimeout(function(){if(!done)res({ver:'yanitsiz-ESKI-SW'});},2500);
+    }).catch(function(){res({ver:'ready-hata'});});
+  }catch(_e){res({ver:'probe-hata'});}
+});};
+
+window.brewSwDurum=function(){
+  _swDiag().then(function(d){
+    var perm=(typeof Notification!=='undefined')?Notification.permission:'?';
+    var ctrl=(navigator.serviceWorker&&navigator.serviceWorker.controller)?'var':'YOK';
+    var msg='SW='+(d.ver||'?')+' · izin='+perm+' · controller='+ctrl+' · sonPush='+(d.lastPush||'-')+(d.lastErr?(' · HATA:'+d.lastErr):'');
+    var iyi=/^bm-cache-v131-[0-9]+$/.test(d.ver||'');
+    flash((iyi?'✅ ':'⚠️ ')+msg,iyi?'ok':'err');
+    try{navigator.clipboard.writeText('BM-SW-DIAG '+msg);}catch(_c){}
+  });
 };
 
 window.brewTimerBaslat=function(){
