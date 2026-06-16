@@ -23513,6 +23513,13 @@ function syncPanelAc(){
         placeholder="Telefon veya Tablet"
         value="${mevcut.cihaz||''}">
 
+      <div style="font-size:10px;font-weight:700;color:#6A4A00;letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px">Oda Token (cihazlar arası aynı)</div>
+      <div style="display:flex;gap:6px;margin-bottom:10px">
+        <input aria-label="Oda token" id="syncTokenInp" class="inp" style="flex:1;font-size:11px;font-family:monospace" placeholder="Üret → diğer cihazlara yapıştır" value="${mevcut.odaToken||''}">
+        <button type="button" class="btn" style="background:var(--kahve-koyu);color:var(--kahve-light);padding:8px 10px;font-size:11px" onclick="syncTokenUret()">Üret</button>
+        <button type="button" class="btn" style="background:var(--kahve-bg);color:var(--kahve-koyu);padding:8px 10px;font-size:11px" onclick="syncTokenKopyala()">📋</button>
+      </div>
+
       <div id="syncDiag" style="font-size:9px;color:var(--soluk);background:var(--kahve-bg);border-radius:6px;padding:8px;margin-bottom:10px;line-height:1.5;word-break:break-all">
         NODE: ${syncUrl() || '(oda/url eksik)'}<br>
         DURUM: ${syncPollTimer ? '🟡 polling aktif' : '⚫ kapali'}<br>
@@ -23540,12 +23547,29 @@ function syncPanelAc(){
   document.body.appendChild(el.firstElementChild);
 }
 
+window.syncTokenUret = function(){
+  try{
+    var a = new Uint8Array(16);
+    crypto.getRandomValues(a);
+    var t = Array.prototype.map.call(a, function(b){ return ('0'+b.toString(16)).slice(-2); }).join('');
+    var inp = document.getElementById('syncTokenInp');
+    if(inp) inp.value = t;
+    if(typeof bmToast==='function') bmToast('Token üretildi — diğer cihazlara kopyala','ok');
+  }catch(e){ if(typeof bmToast==='function') bmToast('Token üretilemedi','warning'); }
+};
+window.syncTokenKopyala = function(){
+  var inp = document.getElementById('syncTokenInp');
+  if(!inp || !inp.value){ if(typeof bmToast==='function') bmToast('Önce Üret','warning'); return; }
+  try{ navigator.clipboard.writeText(inp.value); if(typeof bmToast==='function') bmToast('📋 Token kopyalandı','ok'); }
+  catch(e){ try{ inp.select(); }catch(_){} }
+};
 function syncKaydetVeBaslat(){
   const url = (document.getElementById('syncUrlInp')?.value||'').trim();
   const oda = (document.getElementById('syncOdaInp')?.value||'').trim().replace(/[^a-z0-9\-]/gi,'').toLowerCase();
   const cihaz = (document.getElementById('syncCihazInp')?.value||'').trim() || 'A';
   if(!url||!oda){ bmToast('URL ve Oda Kodu zorunlu!','warning'); return; }
-  syncCfg = {url, oda, cihaz};
+  const odaToken = (document.getElementById('syncTokenInp')?.value||'').trim();
+  syncCfg = {url, oda, cihaz, odaToken};
   syncKaydet(syncCfg);
   document.querySelector('[onclick="this.remove()"]')?.remove();
   syncBaslat();
