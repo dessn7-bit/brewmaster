@@ -13,6 +13,14 @@ export default {
       return new Response('Method not allowed', { status: 405 });
     }
 
+    // ── Faz 3: KV-tabanlı alarm + subscription deposu (TOFU oda-token) ──
+    {
+      const _kvp = new URL(request.url).pathname;
+      if (_kvp === '/push-sub' || _kvp === '/alarms-sync' || _kvp === '/kv-peek') {
+        return handleKvRoute(_kvp, request, env);
+      }
+    }
+
     const origin = request.headers.get('Origin') || '';
     const corsAllowed = origin === ALLOWED_ORIGIN;
 
@@ -132,5 +140,108 @@ async function handlePushTest(request, env) {
     return new Response(JSON.stringify({ pushStatus: res.status, pushStatusText: res.statusText, body: txt.slice(0, 300) }), { status: 200, headers: cors });
   } catch (e) {
     return new Response(JSON.stringify({ error: String((e && e.message) || e) }), { status: 500, headers: cors });
+  }
+}
+
+// ═══ Faz 3: KV alarm + subscription deposu (TOFU oda-token) ═══
+// /push-sub, /alarms-sync, /kv-peek — Faz 4 cron bu KV'yi okuyup push atacak.
+const _KV_CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, X-BM-Token',
+  'Access-Control-Max-Age': '3600'
+};
+function _kvJson(obj, status) {
+  return new Response(JSON.stringify(obj), { status: status || 200, headers: { ..._KV_CORS, 'Content-Type': 'application/json' } });
+}
+const _slug = s => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'x';
+const _TERMINAL = { tamamlandi: 1, atlandi: 1 };
+
+async function _checkToken(oda, token, env, peek) {
+  if (!oda || !token) return { ok: false, res: _kvJson({ error: 'oda + token gerekli' }, 400) };
+  const cur = await env.BM_KV.get('roomtoken:' + oda);
+  if (cur === null) {
+    if (peek) return { ok: false, res: _kvJson({ error: 'oda yok' }, 404) };
+    await env.BM_KV.put('roomtoken:' + oda, token); // TOFU: ilk-yazımda kilitle
+    return { ok: true, claimed: true };
+  }
+  if (cur !== token) return { ok: false, res: _kvJson({ error: 'token eşleşmiyor' }, 403) };
+  return { ok: true };
+}
+
+// alarmId = receteId-g-slug(aksiyon) deterministik; terminal durum (tamamlandi/atlandi) geri açılamaz; cron pushedTs korunur.
+function _mergeAlarms(existing, incoming) {
+  const out = {};
+  for (const rid in existing) out[rid] = existing[rid];
+  for (const rid in incoming) {
+    const inc = incoming[rid] || {};
+    const incAlarms = Array.isArray(inc.alarmlar) ? inc.alarmlar : [];
+    const exGroup = out[rid] || {};
+    const exAlarms = Array.isArray(exGroup.alarmlar) ? exGroup.alarmlar : [];
+    const exById = {};
+    for (const a of exAlarms) if (a && a.alarmId) exById[a.alarmId] = a;
+    const mergedAlarms = incAlarms.map(a => {
+      const alarmId = rid + '-' + (a.g | 0) + '-' + _slug(a.aksiyon);
+      const ex = exById[alarmId];
+      const o = { alarmId, g: a.g | 0, ts: a.ts, tip: a.tip, aksiyon: a.aksiyon, aciklama: a.aciklama, durum: a.durum };
+      if (ex) {
+        if (_TERMINAL[ex.durum] && !_TERMINAL[o.durum]) o.durum = ex.durum; // tamamlananı bekliyor'a düşürme
+        if (ex.pushedTs) o.pushedTs = ex.pushedTs; // cron izini koru
+      }
+      return o;
+    });
+    out[rid] = {
+      receteAd: inc.receteAd || exGroup.receteAd || '',
+      pitchTs: (inc.pitchTs != null) ? inc.pitchTs : (exGroup.pitchTs != null ? exGroup.pitchTs : null),
+      durum: inc.durum || exGroup.durum || 'aktif',
+      alarmlar: mergedAlarms
+    };
+  }
+  return out;
+}
+
+async function handleKvRoute(path, request, env) {
+  if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: _KV_CORS });
+  if (!env.BM_KV) return _kvJson({ error: 'KV binding tanımlı değil' }, 500);
+  try {
+    if (path === '/kv-peek') {
+      if (request.method !== 'GET') return _kvJson({ error: 'GET gerekli' }, 405);
+      const u = new URL(request.url);
+      const oda = u.searchParams.get('oda') || '';
+      const token = request.headers.get('X-BM-Token') || '';
+      const chk = await _checkToken(oda, token, env, true);
+      if (!chk.ok) return chk.res;
+      const sub = JSON.parse((await env.BM_KV.get('sub:' + oda)) || '[]');
+      const alarm = JSON.parse((await env.BM_KV.get('alarm:' + oda)) || '{}');
+      return _kvJson({ oda, sub, alarm });
+    }
+    if (request.method !== 'POST') return _kvJson({ error: 'POST gerekli' }, 405);
+    const body = await request.json().catch(() => ({}));
+    const oda = body.oda || '';
+    const token = request.headers.get('X-BM-Token') || body.token || '';
+    const chk = await _checkToken(oda, token, env);
+    if (!chk.ok) return chk.res;
+
+    if (path === '/push-sub') {
+      const sub = body.subscription;
+      if (!sub || !sub.endpoint || !sub.keys) return _kvJson({ error: 'subscription (endpoint+keys) gerekli' }, 400);
+      const cihaz = String(body.cihaz || 'A');
+      const list = JSON.parse((await env.BM_KV.get('sub:' + oda)) || '[]');
+      const next = list.filter(x => x && x.cihaz !== cihaz); // cihaz-keyed upsert
+      next.push({ endpoint: sub.endpoint, keys: sub.keys, cihaz, ts: Date.now() });
+      await env.BM_KV.put('sub:' + oda, JSON.stringify(next));
+      return _kvJson({ ok: true, count: next.length, claimed: !!chk.claimed });
+    }
+
+    if (path === '/alarms-sync') {
+      const existing = JSON.parse((await env.BM_KV.get('alarm:' + oda)) || '{}');
+      const merged = _mergeAlarms(existing, body.alarms || {});
+      await env.BM_KV.put('alarm:' + oda, JSON.stringify(merged));
+      let n = 0; for (const r in merged) n += (merged[r].alarmlar || []).length;
+      return _kvJson({ ok: true, receteler: Object.keys(merged).length, alarmlar: n, claimed: !!chk.claimed });
+    }
+    return _kvJson({ error: 'bilinmeyen yol' }, 404);
+  } catch (e) {
+    return _kvJson({ error: String((e && e.message) || e) }, 500);
   }
 }
