@@ -59,6 +59,11 @@ export default {
 
     return new Response(request.method === 'HEAD' ? null : obj.body, { headers });
   },
+
+  // ── Faz 4: Cloudflare Cron — zamanı gelen alarmları push'la (idempotent: pushedTs) ──
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(_cronTick(env));
+  },
 };
 
 // ═══ Faz 1 POC: saf crypto.subtle Web Push (RFC 8291 aes128gcm + RFC 8292 VAPID) ═══
@@ -101,7 +106,7 @@ async function vapidJwt(aud, env) {
   return si + '.' + b64uEnc(sig);
 }
 
-async function sendWebPush(sub, payloadStr, env) {
+async function sendWebPush(sub, payloadStr, env, opts) {
   const uaPublic = b64uDec(sub.keys.p256dh);
   const auth = b64uDec(sub.keys.auth);
   const eph = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveBits']);
@@ -109,16 +114,14 @@ async function sendWebPush(sub, payloadStr, env) {
   const salt = crypto.getRandomValues(new Uint8Array(16));
   const cipher = await encryptBody(payloadStr, uaPublic, auth, eph.privateKey, asPublic, salt, 4096);
   const jwt = await vapidJwt(new URL(sub.endpoint).origin, env);
-  return fetch(sub.endpoint, {
-    method: 'POST',
-    headers: {
-      'TTL': '60',
-      'Content-Encoding': 'aes128gcm',
-      'Content-Type': 'application/octet-stream',
-      'Authorization': 'vapid t=' + jwt + ', k=' + VAPID_PUBLIC
-    },
-    body: cipher
-  });
+  const _h = {
+    'TTL': String((opts && opts.ttl) || 60),
+    'Content-Encoding': 'aes128gcm',
+    'Content-Type': 'application/octet-stream',
+    'Authorization': 'vapid t=' + jwt + ', k=' + VAPID_PUBLIC
+  };
+  if (opts && opts.urgency) _h['Urgency'] = opts.urgency;
+  return fetch(sub.endpoint, { method: 'POST', headers: _h, body: cipher });
 }
 
 async function handlePushTest(request, env) {
@@ -243,5 +246,86 @@ async function handleKvRoute(path, request, env) {
     return _kvJson({ error: 'bilinmeyen yol' }, 404);
   } catch (e) {
     return _kvJson({ error: String((e && e.message) || e) }, 500);
+  }
+}
+
+// ═══ Faz 4: Cloudflare Cron — KV alarm:* tarar, zamanı geleni push'lar ═══
+// */5dk tetiklenir. Idempotent: pushedTs işaretli alarm tekrar gönderilmez. TTL 24h + Urgency:high (Doze/app-kapalı).
+async function _cronTick(env) {
+  if (!env.BM_KV) return;
+  const now = Date.now();
+  let cursor;
+  do {
+    const lst = await env.BM_KV.list({ prefix: 'alarm:', cursor });
+    cursor = lst.list_complete ? undefined : lst.cursor;
+    await Promise.allSettled((lst.keys || []).map(k => _cronOda(k.name.slice('alarm:'.length), env, now)));
+  } while (cursor);
+}
+
+function _cronPayload(receteAd, a) {
+  let body = (receteAd ? receteAd + ' · ' : '') + 'Gün ' + (a.g | 0);
+  if (a.sicaklik != null) body += ' · ' + a.sicaklik + '°C';     // sicaklik su an KV'de yok; varsa eklenir (defansif)
+  if (a.aciklama) body += ' · ' + a.aciklama;
+  return { baslik: a.aksiyon || '🍺 Brewmaster', body: body, tag: a.alarmId || ('bm-' + (a.g | 0)), data: { url: 'Brewmaster_v2_79_10.html' } };
+}
+
+async function _cronOda(oda, env, now) {
+  if (!oda) return;
+  const raw = await env.BM_KV.get('alarm:' + oda);
+  if (!raw) return;
+  let obj; try { obj = JSON.parse(raw) || {}; } catch (e) { return; }
+  const due = [];
+  for (const rid in obj) {
+    const grp = obj[rid];
+    if (!grp || typeof grp !== 'object') continue;
+    if ((grp.durum || 'aktif') !== 'aktif') continue;                       // arşiv/biten reçete atla
+    const arr = Array.isArray(grp.alarmlar) ? grp.alarmlar : [];
+    for (const a of arr) {
+      if (!a) continue;
+      if (a.tip !== 'kritik' && a.tip !== 'kontrol') continue;             // pasif atla
+      if (a.durum !== 'bekliyor') continue;                                // tamamlandi/atlandi atla
+      if (a.pushedTs) continue;                                            // zaten push'landı (idempotent)
+      if (!(typeof a.ts === 'number' && a.ts <= now)) continue;            // zamanı gelmedi
+      due.push({ rid: rid, receteAd: grp.receteAd || '', a: a });
+    }
+  }
+  if (!due.length) return;
+  let subs;
+  try { subs = JSON.parse((await env.BM_KV.get('sub:' + oda)) || '[]') || []; } catch (e) { subs = []; }
+  if (!Array.isArray(subs) || !subs.length) return;                        // abone yok -> pushedTs işaretleme (sonra abone olursa kaçmasın)
+  const dead = new Set();
+  const pushedIds = [];
+  for (const d of due) {
+    const payload = JSON.stringify(_cronPayload(d.receteAd, d.a));
+    const results = await Promise.allSettled(subs.map(s => sendWebPush(s, payload, env, { ttl: 86400, urgency: 'high' })));
+    let okCount = 0;
+    results.forEach((r, i) => {
+      if (r.status === 'fulfilled') {
+        const st = r.value && r.value.status;
+        if (st >= 200 && st < 300) okCount++;
+        else if (st === 404 || st === 410) dead.add(subs[i].endpoint);     // ölü subscription
+      }
+      // rejected veya 429/5xx: geçici -> sub kalır, pushedTs yazılmaz (sonraki cron retry)
+    });
+    if (okCount > 0 && d.a.alarmId) pushedIds.push(d.a.alarmId);
+  }
+  // ölü sub buda
+  if (dead.size) {
+    const next = subs.filter(s => s && !dead.has(s.endpoint));
+    if (next.length !== subs.length) { try { await env.BM_KV.put('sub:' + oda, JSON.stringify(next)); } catch (e) {} }
+  }
+  // pushedTs yaz — dar read-modify-write (client /alarms-sync race penceresini küçült)
+  if (pushedIds.length) {
+    let obj2; try { obj2 = JSON.parse((await env.BM_KV.get('alarm:' + oda)) || '{}') || {}; } catch (e) { obj2 = obj; }
+    const idset = new Set(pushedIds);
+    let changed = false;
+    for (const rid in obj2) {
+      const g = obj2[rid];
+      if (!g || !Array.isArray(g.alarmlar)) continue;
+      for (const a of g.alarmlar) {
+        if (a && a.alarmId && idset.has(a.alarmId) && !a.pushedTs) { a.pushedTs = now; changed = true; }
+      }
+    }
+    if (changed) { try { await env.BM_KV.put('alarm:' + oda, JSON.stringify(obj2)); } catch (e) {} }
   }
 }
