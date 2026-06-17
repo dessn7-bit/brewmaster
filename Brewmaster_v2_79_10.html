@@ -22124,7 +22124,7 @@ function _alarmBulutaSyncSend(){
     var srcA=Array.isArray(grp.alarmlar)?grp.alarmlar:[], aktif=[];
     for(var i=0;i<srcA.length;i++){
       var a=srcA[i]; if(!a||a.tip==='pasif') continue; // pasif client-side filtrele (cron pasif'i atliyor, payload kuculur)
-      aktif.push({g:a.g|0, ts:a.ts, tip:a.tip, aksiyon:String(a.aksiyon||''), aciklama:String(a.aciklama||''), durum:a.durum||'bekliyor'});
+      aktif.push({g:a.g|0, ts:a.ts, tip:a.tip, aksiyon:String(a.aksiyon||''), aciklama:String(a.aciklama||''), durum:a.durum||'bekliyor', sicaklik:(a.sicaklik!=null?a.sicaklik:null)});
     }
     if(!aktif.length) continue; // gonderilecek aktif (kritik/kontrol) alarm yoksa receteyi atla
     alarms[rid]={receteAd:String(grp.receteAd||''), pitchTs:(grp.pitchTs!=null?grp.pitchTs:null), durum:grp.durum||'aktif', alarmlar:aktif}; n++;
