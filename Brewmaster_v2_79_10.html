@@ -21268,7 +21268,7 @@ window.brewdayBitir=function(){
   };
 
   window._alarmlariYaz = function(obj){
-    try { localStorage.setItem(_ALARM_SK, JSON.stringify(obj||{})); return true; } catch(e) { console.warn('alarmYaz fail',e); return false; }
+    try { localStorage.setItem(_ALARM_SK, JSON.stringify(obj||{})); try{if(window._alarmBulutaSyncDebounced)window._alarmBulutaSyncDebounced();}catch(_se){} return true; } catch(e) { console.warn('alarmYaz fail',e); return false; }
   };
 
   window._alarmTsHesapla = function(pitchTs, gun, saat){
@@ -22099,6 +22099,55 @@ function _pushBuluta(sub){
     if(_to)clearTimeout(_to);
     var _ab=(e&&e.name==='AbortError');
     flash('☁️ Buluta ulaşılamadı'+(_ab?' (zaman aşımı)':'')+' — yalnız bu cihazda','err');
+  });
+}
+
+// Faz 3 Adim 4 (client): alarm mutasyonlarini buluta senkronla (debounce). Lokal bm_alarms_v1 INTACT; buluta EK kayit.
+// _alarmlariYaz (tek choke point) cagrilinca tetiklenir -> 1.5sn debounce -> son hali POST /alarms-sync.
+// On-kosul guard: bm_sync_v1'de oda+odaToken yoksa buluta YAZMA (alarm yazimi sik -> sessiz). Hata graceful + 30sn cooldown.
+// alarmId Worker'da uretilir (rid-g-slug(aksiyon)); client aksiyon/g'yi VERBATIM gonderir -> slug stabil -> merge eslesir.
+var _alarmSyncT=null, _alarmSyncErrTs=0;
+window._alarmBulutaSyncDebounced=function(){
+  try{ if(_alarmSyncT) clearTimeout(_alarmSyncT); _alarmSyncT=setTimeout(_alarmBulutaSyncSend,1500); }catch(_t){ try{_alarmBulutaSyncSend();}catch(_t2){} }
+};
+function _alarmSyncErr(msg){ var now=Date.now(); if(now-_alarmSyncErrTs<=30000) return; _alarmSyncErrTs=now; try{flash(msg,'err');}catch(_f){} }
+function _alarmBulutaSyncSend(){
+  var cfg=null;
+  try{ cfg=JSON.parse(localStorage.getItem('bm_sync_v1')||'null'); }catch(_e){ cfg=null; }
+  var oda=cfg&&cfg.oda, tok=cfg&&cfg.odaToken, cihaz=(cfg&&cfg.cihaz)||'A';
+  if(!oda||!tok) return; // guard: lokal-only, sessiz
+  var tum=null;
+  try{ tum=JSON.parse(localStorage.getItem('bm_alarms_v1')||'{}')||{}; }catch(_e2){ tum={}; }
+  var alarms={}, n=0;
+  for(var rid in tum){
+    var grp=tum[rid]; if(!grp||typeof grp!=='object') continue;
+    var srcA=Array.isArray(grp.alarmlar)?grp.alarmlar:[], aktif=[];
+    for(var i=0;i<srcA.length;i++){
+      var a=srcA[i]; if(!a||a.tip==='pasif') continue; // pasif client-side filtrele (cron pasif'i atliyor, payload kuculur)
+      aktif.push({g:a.g|0, ts:a.ts, tip:a.tip, aksiyon:String(a.aksiyon||''), aciklama:String(a.aciklama||''), durum:a.durum||'bekliyor'});
+    }
+    if(!aktif.length) continue; // gonderilecek aktif (kritik/kontrol) alarm yoksa receteyi atla
+    alarms[rid]={receteAd:String(grp.receteAd||''), pitchTs:(grp.pitchTs!=null?grp.pitchTs:null), durum:grp.durum||'aktif', alarmlar:aktif}; n++;
+  }
+  if(!n) return; // gonderilecek bir sey yok
+  var _to=null,_ctrl=null;
+  try{ _ctrl=new AbortController(); _to=setTimeout(function(){ try{_ctrl.abort();}catch(_a){} },8000); }catch(_c){ _ctrl=null; }
+  fetch('https://brewmaster-models.dessn7.workers.dev/alarms-sync',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({oda:oda, cihaz:cihaz, token:tok, alarms:alarms}),
+    signal:(_ctrl?_ctrl.signal:undefined)
+  }).then(function(r){
+    if(_to)clearTimeout(_to);
+    return r.json().catch(function(){return {};}).then(function(j){ return {st:r.status, j:j}; });
+  }).then(function(o){
+    if(o.st>=200&&o.st<300) return; // sessiz basari (alarm yazimi sik; flash spam yok)
+    if(o.st===403) _alarmSyncErr("☁️ Alarm bulut sync: oda token eşleşmiyor — Bulut Senkron'u kontrol et");
+    else _alarmSyncErr('☁️ Alarm bulut sync başarısız (HTTP '+o.st+') — yalnız bu cihazda');
+  }).catch(function(e){
+    if(_to)clearTimeout(_to);
+    var _ab=(e&&e.name==='AbortError');
+    _alarmSyncErr('☁️ Alarm bulut sync'+(_ab?' zaman aşımı':' ulaşılamadı')+' — yalnız bu cihazda');
   });
 }
 
