@@ -22072,6 +22072,36 @@ window.brewBildirimIzin=function(){
   }catch(e){}
 };
 
+// Faz 3 Adim 2 (client): basarili push aboneligini buluta da yaz. Lokal bm_push_sub INTACT; buluta EK kayit.
+// On-kosul guard: bm_sync_v1'de oda+odaToken yoksa buluta YAZMA, lokal-only davran (Faz 1+2 calisir) + nazik ipucu.
+// Hata (network/403/timeout) graceful: cokme yok (H1 dersi), lokal abonelik korunur, kullaniciya flash.
+function _pushBuluta(sub){
+  if(!sub) return;
+  var cfg=null;
+  try{ cfg=JSON.parse(localStorage.getItem('bm_sync_v1')||'null'); }catch(_e){ cfg=null; }
+  var oda=cfg&&cfg.oda, tok=cfg&&cfg.odaToken, cihaz=(cfg&&cfg.cihaz)||'A';
+  if(!oda||!tok){ flash("☁️ Bulut bildirimi için Bulut Senkron'da oda+token kur (şimdilik yalnız bu cihazda)",'ok'); return; }
+  var _to=null,_ctrl=null;
+  try{ _ctrl=new AbortController(); _to=setTimeout(function(){ try{_ctrl.abort();}catch(_a){} },8000); }catch(_c){ _ctrl=null; }
+  fetch('https://brewmaster-models.dessn7.workers.dev/push-sub',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({oda:oda, cihaz:cihaz, token:tok, subscription:sub}),
+    signal:(_ctrl?_ctrl.signal:undefined)
+  }).then(function(r){
+    if(_to)clearTimeout(_to);
+    return r.json().catch(function(){return {};}).then(function(j){ return {st:r.status, j:j}; });
+  }).then(function(o){
+    if(o.st>=200&&o.st<300){ flash('☁️ Bulut bildirimine kaydoldun ✓','ok'); }
+    else if(o.st===403){ flash("☁️ Oda token eşleşmiyor — Bulut Senkron token'ını kontrol et",'err'); }
+    else { var _em=(o.j&&o.j.error)?(' · '+o.j.error):''; flash('☁️ Bulut kaydı başarısız (HTTP '+o.st+')'+_em+' — yalnız bu cihazda','err'); }
+  }).catch(function(e){
+    if(_to)clearTimeout(_to);
+    var _ab=(e&&e.name==='AbortError');
+    flash('☁️ Buluta ulaşılamadı'+(_ab?' (zaman aşımı)':'')+' — yalnız bu cihazda','err');
+  });
+}
+
 window.brewPushAbone=function(){
   if(!('serviceWorker' in navigator)||!('PushManager' in window)){flash('Bu tarayıcı push bildirimi desteklemiyor','err');return Promise.resolve(null);}
   var _vapid='BAwdDDBhFd2iWYZxpNpGEc11FbNmKANLwrCj1eFNBQzau0nuubDUxpEIukeuARPwZWk_THmfwe8ffwX_kuYCRew';
@@ -22083,7 +22113,7 @@ window.brewPushAbone=function(){
     });
   }).then(function(sub){
     try{localStorage.setItem('bm_push_sub',JSON.stringify(sub));}catch(_e){}
-    flash('🔔 Push bildirimi aktif ✓','ok');
+    flash('🔔 Push bildirimi aktif ✓','ok'); try{_pushBuluta(sub);}catch(_pe){}
     return sub;
   }).catch(function(e){
     flash('Push aboneliği başarısız: '+((e&&e.message)||e),'err');
