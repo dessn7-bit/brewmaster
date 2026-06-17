@@ -187,6 +187,7 @@ function _mergeAlarms(existing, incoming) {
       const alarmId = rid + '-' + (a.g | 0) + '-' + _slug(a.aksiyon);
       const ex = exById[alarmId];
       const o = { alarmId, g: a.g | 0, ts: a.ts, tip: a.tip, aksiyon: a.aksiyon, aciklama: a.aciklama, durum: a.durum };
+      if (a.sicaklik != null) o.sicaklik = a.sicaklik; else if (ex && ex.sicaklik != null) o.sicaklik = ex.sicaklik; // İyileştirme 1: sicaklik koru (alarmId DEĞİŞMEZ)
       if (ex) {
         if (_TERMINAL[ex.durum] && !_TERMINAL[o.durum]) o.durum = ex.durum; // tamamlananı bekliyor'a düşürme
         if (ex.pushedTs) o.pushedTs = ex.pushedTs; // cron izini koru
