@@ -5177,6 +5177,13 @@ function bmHasatSave(a){try{localStorage.setItem('bm_maya_hasat',JSON.stringify(
 function bmHasatEkle(ad,nesil,tarih,mayaId,esik){if(!ad||!String(ad).trim())return;var a=bmHasatList();a.push({id:'h'+Date.now(),mayaId:mayaId||'',ad:String(ad).trim(),nesil:Math.max(1,Math.min(30,+nesil||1)),tarih:tarih||new Date().toISOString().slice(0,10),esik:(esik!=null&&String(esik).trim()!==''&&+esik>0)?Math.round(+esik):null});bmHasatSave(a);try{if(window._mayaTazelikSync)_mayaTazelikSync();}catch(_e){}if(typeof render==='function')render();}
 function bmHasatSil(id){bmHasatSave(bmHasatList().filter(function(x){return x.id!==id;}));try{if(window._mayaTazelikSync)_mayaTazelikSync();}catch(_e){}if(typeof render==='function')render();}
 function bmHasatYas(tarih){if(!tarih)return null;var d=new Date(tarih+'T00:00:00');if(isNaN(d.getTime()))return null;return Math.max(0,Math.round((Date.now()-d.getTime())/86400000));}
+// Sprint4 — manuel hatırlatma store (bm_manuel_alarm) + planlı demleme tarihi
+function bmManuelList(){try{var a=JSON.parse(localStorage.getItem('bm_manuel_alarm')||'[]');return Array.isArray(a)?a:[];}catch(e){return [];}}
+function bmManuelSave(a){try{localStorage.setItem('bm_manuel_alarm',JSON.stringify(a));}catch(e){}}
+function bmManuelEkle(baslik,tarih,saat,not){ if(!baslik||!String(baslik).trim()||!tarih){ if(typeof flash==='function')flash('Başlık + tarih gerekli','err'); return false; } var d=new Date(tarih+'T'+((/^\d{1,2}:\d{2}$/.test(saat||''))?saat:'10:00')+':00'); if(isNaN(d.getTime())){ if(typeof flash==='function')flash('Geçersiz tarih','err'); return false; } var a=bmManuelList(); a.push({id:'m'+Date.now(), baslik:String(baslik).trim(), ts:d.getTime(), not:String(not||'').trim()}); bmManuelSave(a); try{if(window._manuelAlarmSync)_manuelAlarmSync();}catch(_e){} if(typeof flash==='function')flash('🔔 Hatırlatma eklendi','ok'); if(typeof render==='function')render(); return true; }
+function bmManuelSil(id){ bmManuelSave(bmManuelList().filter(function(x){return x.id!==id;})); try{if(window._manuelAlarmSync)_manuelAlarmSync();}catch(_e){} if(typeof render==='function')render(); }
+window.bmManuelEkleUI=function(){ var b=document.getElementById('bm-manuel-baslik'), t=document.getElementById('bm-manuel-tarih'), sa=document.getElementById('bm-manuel-saat'); if(!b||!t) return; if(bmManuelEkle(b.value, t.value, sa?sa.value:'10:00', '')){ b.value=''; } };
+window.bmPlanBrewSet=function(val){ try{ if(typeof S==='undefined'||!S) return; S.planBrewTarih = (val&&/^\d{4}-\d{2}-\d{2}$/.test(val)) ? val : null; if(S.biraAd&&S.biraAd.trim()&&typeof tarifeKaydet==='function'){ tarifeKaydet(); } try{if(window._planPrepSync)_planPrepSync();}catch(_e){} if(typeof render==='function')render(); }catch(e){ console.warn('bmPlanBrewSet',e); } };
 function bmOgPlato(og){return (og>1)?(-616.868+1111.14*og-630.272*og*og+135.997*og*og*og):0;}
 function bmPitchHedef(tip,og){if(tip==='kveik')return{rate:0.5,ad:'Kveik (düşük pitch)'};if(tip==='lager')return{rate:1.5,ad:'Lager (düşük fermentasyon)'};if(og>=1.070)return{rate:1.25,ad:'Yüksek OG ale (>1.070)'};return{rate:0.75,ad:'Standart ale'};}
 function bmMayaSicKesisim(m1,m2){if(!m1||!m2||!m1.sc||!m2.sc)return null;const low=Math.max(m1.sc[0],m2.sc[0]);const high=Math.min(m1.sc[1],m2.sc[1]);return{low,high,ortak:low<=high};}
@@ -11420,7 +11427,7 @@ function _stokAnaTabBarHTML(){
       var _al = _alarmlariOku();
       var _simdi = Date.now();
       Object.keys(_al).forEach(function(rid){
-        if(/^(maya|stok):/.test(rid)) return; // pseudo-key: stok düşük zaten ayrı sayılıyor, maya modal/toast'ta
+        if(/^(maya|stok|manuel|plan):/.test(rid)) return; // pseudo-key: ayrı sayılıyor / modal'da
         var rec = _al[rid];
         if (!rec || rec.durum !== 'aktif') return;
         (rec.alarmlar||[]).forEach(function(a){
@@ -14146,6 +14153,10 @@ function rEditorSurec(){
     </button>
     ${(window._brewday && window._brewday.aktif) ? '<button onclick="brewdayZorlaSifirla()" style="width:100%;background:rgba(200,80,80,.15);color:var(--crit-bg);border:1px solid rgba(200,80,80,.3);border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;margin-top:6px">⟲ Brewday\'i Sıfırla (Acil Kurtarma)</button>' : ''}
     <div style="font-size:10px;color:rgba(246,234,215,.9);margin-top:6px;line-height:1.5;text-align:center">Ekran açık kalır · Wake Lock · Tam ekran bildirim · Mash/Hop/Katkı/Whirlpool otomatik sıralı</div>
+    <div style="margin-top:8px;padding:8px 10px;background:rgba(246,234,215,.1);border-radius:8px">
+      <div style="font-size:11px;font-weight:600;color:var(--masthead-ink);margin-bottom:4px">📅 Planlı demleme tarihi <span style="font-weight:400;opacity:.7">(opsiyonel — hazırlık hatırlatmaları)</span></div>
+      <input aria-label="Planlı demleme tarihi" type="date" value="${S.planBrewTarih||''}" onchange="bmPlanBrewSet(this.value)" style="background:rgba(255,255,255,.9);border:1px solid rgba(246,234,215,.4);border-radius:6px;padding:4px 8px;font-size:12px;color:var(--kahve)">
+    </div>
   </div>
   <div class="kart" style="margin-bottom:10px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
@@ -21200,6 +21211,7 @@ window.brewdayBaslat=async function(){
   _brewBeep(660,0.3,0.4);
   _brewTitret([200,100,200]);
   // Ana sayfayı da render et (buton metni değişsin)
+  try { if(window._planPrepSync) _planPrepSync(); } catch(_e){} // Sprint4: brewday başladı -> plan prep kapanır
   if(typeof render==='function')render();
 };
 
@@ -21292,7 +21304,9 @@ window.brewdayBitir=function(){
     if(a && a.kategori) return a.kategori;
     if(/^maya:/.test(rid||'')) return 'C';
     if(/^stok:/.test(rid||'')) return 'B';
+    if(/^(manuel|plan):/.test(rid||'')) return 'E';
     var ak = (a && a.aksiyon || '').toLowerCase();
+    if(ak.indexOf('sanitize') >= 0) return 'E';
     return (ak.indexOf('karbonasyon') >= 0 || ak.indexOf('olgunlaş') >= 0) ? 'D' : 'A';
   };
   window._alarmKatAcik = function(kat){
@@ -21301,6 +21315,7 @@ window.brewdayBitir=function(){
     if(kat === 'D') return p.catKarbonasyon !== false;
     if(kat === 'C') return p.catMaya !== false;
     if(kat === 'B') return p.catStok !== false;
+    if(kat === 'E') return p.catHazirlik !== false;
     return true;
   };
   // sessiz saat: ts sessiz aralıktaysa aralık bitişine kaydır (gece sarması destekli)
@@ -21478,6 +21493,18 @@ window.brewdayBitir=function(){
         durum: 'bekliyor',
         _sonrasiGun: _icimeOffset
       });
+      // Sprint4: şişeleme öncesi sanitize (kategori E — _alarmKatBul 'sanitize'→E; otomatik, kapatılabilir)
+      if(_siseGun > 1){
+        alarmlar.push({
+          g: _siseGun - 1,
+          ts: _alarmTsHesapla(pitchTs, _siseGun - 1, saat),
+          tip: 'kontrol',
+          aksiyon: '🧼 Şişeleri sanitize et',
+          aciklama: 'Yarın şişeleme. Şişeleri + ekipmanı temizle/sanitize et (StarSan vb.), hazır beklet.',
+          sicaklik: null,
+          durum: 'bekliyor'
+        });
+      }
       // A.2: aktif fermentasyon fazında periyodik gravity kontrol (uzun profil >10 gün; sadece
       // ölçüm-boşluğu olan profillerde — yoğun günlük profillerde collision-skip ile hiç eklenmez).
       if((prof.toplamGun || 0) > 10){
@@ -21624,7 +21651,7 @@ window.brewdayBitir=function(){
       KR_list = _migrateAllRecipes(JSON.parse(localStorage.getItem('bm_v6') || '[]') || []);
     } catch(e){}
     Object.keys(tum).forEach(rid => {
-      if(/^(maya|stok):/.test(rid)) return; // pseudo-key: _mayaTazelikSync/_stokDusukSync sahibi, orphan değil
+      if(/^(maya|stok|manuel|plan):/.test(rid)) return; // pseudo-key: reconcile sahibi, orphan değil
       const bulundu = KR_list.some(r => r && String(r.id) === String(rid));
       // v2.78.84 H7: Aktif _editId veya S.id kontrolü — kaydedilmemiş brewday olmuş reçeteler için
       // _editId KR ID'si (S.id tasarım gereği atanmıyor)
@@ -21741,6 +21768,70 @@ window.brewdayBitir=function(){
       if(degisti) _alarmlariYaz(tum);
       return degisti;
     } catch(e){ console.warn('[Alarm] stok düşük sync:', e); return false; }
+  };
+
+  // E (Sprint4) — manuel hatırlatma: bm_manuel_alarm -> manuel:<id>. ts kullanıcı seçti -> sessiz saat BYPASS (ham ts).
+  window._manuelAlarmSync = function(){
+    try {
+      if(typeof bmManuelList !== 'function') return false;
+      var liste = bmManuelList() || [];
+      var tum = _alarmlariOku();
+      var degisti = false, gecerli = {};
+      liste.forEach(function(h){
+        if(!h || !h.id || !(h.ts > 0)) return;
+        var key = 'manuel:' + h.id; gecerli[key] = 1;
+        var baslik = String(h.baslik || 'Hatırlatma');
+        var desired = [{ g:0, ts:h.ts, tip:'kontrol', sicaklik:null, kategori:'E', aksiyon:'🔔 ' + baslik, aciklama:String(h.not || 'Manuel hatırlatma.') }];
+        desired.forEach(function(_d){ _d.vibrate = _alarmVibPattern(_d.tip); });
+        var ex = tum[key];
+        var merged = _pseudoMergeAlarmlar(ex, desired);
+        if(!ex || ex.receteAd !== baslik || _pseudoGrupSig(ex.alarmlar) !== _pseudoGrupSig(merged)){
+          tum[key] = { receteAd:baslik, pitchTs:null, durum:'aktif', alarmlar:merged };
+          degisti = true;
+        }
+      });
+      Object.keys(tum).forEach(function(k){ if(k.indexOf('manuel:') === 0 && !gecerli[k]){ delete tum[k]; degisti = true; } });
+      if(degisti) _alarmlariYaz(tum);
+      return degisti;
+    } catch(e){ console.warn('[Alarm] manuel sync:', e); return false; }
+  };
+
+  // E (Sprint4) — planlı demleme hazırlık: KR planBrewTarih -> plan:<id> (−2/−1/0). brewday başladıysa kalkar, geçmiş prep eklenmez.
+  window._planPrepSync = function(){
+    try {
+      var saat = (typeof _alarmSaatiAl === 'function') ? _alarmSaatiAl() : '10:00';
+      var KR_list = [];
+      try { KR_list = _migrateAllRecipes(JSON.parse(localStorage.getItem('bm_v6') || '[]') || []); } catch(_k){}
+      var tum = _alarmlariOku();
+      var degisti = false, gecerli = {}, simdi = Date.now();
+      KR_list.forEach(function(r){
+        if(!r || !r.id || !r.planBrewTarih || !/^\d{4}-\d{2}-\d{2}$/.test(r.planBrewTarih)) return;
+        var brewBasladi = Array.isArray(r.brewLog) && r.brewLog.some(function(x){ return x && x.tip === 'brewday_start'; });
+        if(!brewBasladi){ var aktifRid = (typeof _editId!=='undefined'&&_editId)?_editId:(typeof S!=='undefined'&&S&&S.id); if(String(aktifRid)===String(r.id) && typeof S!=='undefined' && S && Array.isArray(S.brewLog) && S.brewLog.some(function(x){return x&&x.tip==='brewday_start';})) brewBasladi=true; }
+        if(brewBasladi) return; // brewday başladı -> prep anlamsız
+        var baseTs = new Date(r.planBrewTarih + 'T00:00:00').getTime();
+        if(isNaN(baseTs)) return;
+        var key = 'plan:' + r.id; gecerli[key] = 1;
+        var ad = String(r.biraAd || r.ad || '(isimsiz)');
+        var cand = [
+          { g:0, ts:_alarmTsHesapla(baseTs, -2, saat), tip:'kontrol', sicaklik:null, kategori:'E', aksiyon:'📋 Demleme 2 gün sonra — ' + ad, aciklama:'Planı gözden geçir: malzeme/maya/su kontrol, eksik varsa tedarik et.' },
+          { g:1, ts:_alarmTsHesapla(baseTs, -1, saat), tip:'kritik', sicaklik:null, kategori:'E', aksiyon:'💧 Yarın demleme — su + ekipman + sanitize hazırla', aciklama: ad + ' için su hazırla, ekipmanı temizle/sanitize et, mayayı oda sıcaklığına çıkar.' },
+          { g:2, ts:_alarmTsHesapla(baseTs, 0, saat), tip:'kritik', sicaklik:null, kategori:'E', aksiyon:'🔥 Bugün demleme günü — ' + ad, aciklama:'Demleme günü. Brewday modunu başlat.' }
+        ];
+        var desired = cand.filter(function(c){ return c.ts > simdi - 3600000; }); // geçmiş prep (1 saat tolerans) eklenmez
+        desired.forEach(function(_d){ _d.vibrate = _alarmVibPattern(_d.tip); });
+        if(desired.length === 0){ if(tum[key]){ delete tum[key]; degisti = true; } return; }
+        var ex = tum[key];
+        var merged = _pseudoMergeAlarmlar(ex, desired);
+        if(!ex || ex.receteAd !== ad || _pseudoGrupSig(ex.alarmlar) !== _pseudoGrupSig(merged)){
+          tum[key] = { receteAd:ad, pitchTs:baseTs, durum:'aktif', alarmlar:merged };
+          degisti = true;
+        }
+      });
+      Object.keys(tum).forEach(function(k){ if(k.indexOf('plan:') === 0 && !gecerli[k]){ delete tum[k]; degisti = true; } });
+      if(degisti) _alarmlariYaz(tum);
+      return degisti;
+    } catch(e){ console.warn('[Alarm] plan prep sync:', e); return false; }
   };
 
   // ═══ TETİKLEME ═══
@@ -21864,6 +21955,8 @@ window.brewdayBitir=function(){
 
       try { if(window._mayaTazelikSync) _mayaTazelikSync(); } catch(e){}   // C: maya tazelik reconcile
       try { if(window._stokDusukSync) _stokDusukSync(); } catch(e){}       // B: stok düşük reconcile
+      try { if(window._manuelAlarmSync) _manuelAlarmSync(); } catch(e){}   // E: manuel hatırlatma reconcile
+      try { if(window._planPrepSync) _planPrepSync(); } catch(e){}         // E: planlı demleme hazırlık reconcile
 
       const bekleyenler = _alarmBekleyenleri();
       if(bekleyenler.length === 0) return;
@@ -23226,7 +23319,7 @@ window.stokAnaTabSet = function(tab){
 // Bildirim tercihleri — default tum acik. bm_bildirim_tercih LS persist.
 window.bmBildirimTercihOku = function(){
   // Sprint3 yeni şema. Eski {alarm,dusukStok} -> kategori şemasına migrate (değerler korunur).
-  var def = { catFermentasyon:true, catKarbonasyon:true, catMaya:true, catStok:true, vib:true, sessizBasla:'22:00', sessizBit:'08:00' };
+  var def = { catFermentasyon:true, catKarbonasyon:true, catMaya:true, catStok:true, catHazirlik:true, vib:true, sessizBasla:'22:00', sessizBit:'08:00' };
   try {
     var raw = localStorage.getItem('bm_bildirim_tercih');
     if (raw) {
@@ -23459,7 +23552,7 @@ window.rStokBildirim = function(){
       var _al = _alarmlariOku();
       var simdi = Date.now();
       Object.keys(_al).forEach(function(rid){
-        if(/^(maya|stok):/.test(rid)) return; // pseudo-key: stok 'düşük stok' bölümünde, maya alarm modal/toast'ta
+        if(/^(maya|stok|manuel|plan):/.test(rid)) return; // pseudo-key: manuel kendi bölümünde, plan/maya modal/toast'ta
         var rec = _al[rid];
         if (!rec || rec.durum !== 'aktif') return;
         var recAd = (function(){ var t = (KR||[]).find(function(x){return x&&x.id===rid;}); return t ? (t.biraAd||t.ad||'(adsız)') : '(silinmiş tarif)'; })();
@@ -23521,6 +23614,7 @@ window.rStokBildirim = function(){
       _katSatir('catKarbonasyon', pref.catKarbonasyon!==false, '🫧 Karbonasyon & olgunlaşma', 'Şişeleme sonrası karbonasyon + içime hazır')+
       _katSatir('catMaya', pref.catMaya!==false, '🧬 Maya tazelik', 'Hasat yaşı / canlılık hatırlatması')+
       _katSatir('catStok', pref.catStok!==false, '📦 Düşük stok', 'Stok ≤ uyarı eşiği')+
+      _katSatir('catHazirlik', pref.catHazirlik!==false, '🔔 Hazırlık & hatırlatma', 'Manuel hatırlatma + demleme hazırlığı + sanitize')+
       _katSatir('vib', pref.vib!==false, '📳 Titreşim', 'Push bildiriminde titreşim deseni')+
       '<div class="bm-ayar-satir" style="gap:8px;align-items:center;flex-wrap:wrap">'+
         '<span style="font-size:13px;font-weight:600">🌙 Sessiz saat</span>'+
@@ -23530,7 +23624,26 @@ window.rStokBildirim = function(){
         '<small style="flex:1;min-width:120px;color:var(--soluk);font-size:10px">Bu aralıkta bildirim ertelenir</small>'+
       '</div>'+
     '</div>';
-  return liste + tercihBlok;
+  // Sprint4: manuel hatırlatma bölümü (📌 Hatırlatmalarım)
+  var _mlist = (typeof bmManuelList==='function') ? bmManuelList() : [];
+  var _mbugun = new Date().toISOString().slice(0,10);
+  var manuelSatirlar = _mlist.slice().sort(function(a,b){return a.ts-b.ts;}).map(function(m){
+    var d=new Date(m.ts); var ds=String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+    var gecti = m.ts <= Date.now();
+    return '<div class="bm-ayar-satir" style="justify-content:space-between;gap:8px;'+(gecti?'opacity:.5;':'')+'"><span style="flex:1;font-size:12px"><strong>'+String(m.baslik||'').replace(/</g,'&lt;')+'</strong> <small style="color:var(--soluk)">'+ds+(m.not?' · '+String(m.not).replace(/</g,'&lt;'):'')+'</small></span><button onclick="bmManuelSil(\''+m.id+'\')" aria-label="Hatırlatmayı sil" style="background:var(--crit-bg);border:1px solid var(--crit);color:var(--crit);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer">✕</button></div>';
+  }).join('');
+  var manuelBlok =
+    '<div class="bm-ayar-kart">'+
+      '<div class="bm-ayar-kart-baslik">📌 Hatırlatmalarım</div>'+
+      (manuelSatirlar || '<div style="font-size:11px;color:var(--dim);padding:4px 0">Henüz hatırlatma yok.</div>')+
+      '<div class="bm-ayar-satir" style="gap:5px;flex-wrap:wrap;align-items:center;margin-top:6px">'+
+        '<input aria-label="Hatırlatma metni" id="bm-manuel-baslik" class="inp" style="flex:1;min-width:120px;font-size:11px" placeholder="Hatırlatma (örn: keg yıka)">'+
+        '<input aria-label="Hatırlatma tarihi" id="bm-manuel-tarih" class="inp" type="date" value="'+_mbugun+'" style="font-size:11px">'+
+        '<input aria-label="Hatırlatma saati" id="bm-manuel-saat" class="inp" type="time" value="10:00" style="font-size:11px">'+
+        '<span style="display:inline-block;padding:4px 10px;background:var(--ya);border:1px solid var(--yk);color:var(--yk);border-radius:6px;font-size:11px;font-weight:700;cursor:pointer" onclick="bmManuelEkleUI()">+ Ekle</span>'+
+      '</div>'+
+    '</div>';
+  return liste + manuelBlok + tercihBlok;
 };
 window.setSurecKDk=function(idx,val){
   if(S.katkilar&&S.katkilar[idx]!==undefined){
