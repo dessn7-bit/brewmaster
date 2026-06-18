@@ -188,6 +188,7 @@ function _mergeAlarms(existing, incoming) {
       const ex = exById[alarmId];
       const o = { alarmId, g: a.g | 0, ts: a.ts, tip: a.tip, aksiyon: a.aksiyon, aciklama: a.aciklama, durum: a.durum };
       if (a.sicaklik != null) o.sicaklik = a.sicaklik; else if (ex && ex.sicaklik != null) o.sicaklik = ex.sicaklik; // İyileştirme 1: sicaklik koru (alarmId DEĞİŞMEZ)
+      if (a.vibrate != null) o.vibrate = a.vibrate; else if (ex && ex.vibrate != null) o.vibrate = ex.vibrate; // Sprint3: titreşim deseni koru (tip-bazlı, client üretir)
       if (ex) {
         if (_TERMINAL[ex.durum] && !_TERMINAL[o.durum]) o.durum = ex.durum; // tamamlananı bekliyor'a düşürme
         if (ex.pushedTs) o.pushedTs = ex.pushedTs; // cron izini koru
@@ -267,7 +268,9 @@ function _cronPayload(receteAd, a) {
   let body = (receteAd ? receteAd + ' · ' : '') + 'Gün ' + (a.g | 0);
   if (a.sicaklik != null) body += ' · ' + a.sicaklik + '°C';     // sicaklik su an KV'de yok; varsa eklenir (defansif)
   if (a.aciklama) body += ' · ' + a.aciklama;
-  return { baslik: a.aksiyon || '🍺 Brewmaster', body: body, tag: a.alarmId || ('bm-' + (a.g | 0)), data: { url: 'Brewmaster_v2_79_10.html' } };
+  const _p = { baslik: a.aksiyon || '🍺 Brewmaster', body: body, tag: a.alarmId || ('bm-' + (a.g | 0)), data: { url: 'Brewmaster_v2_79_10.html' } };
+  if (a.vibrate != null) _p.vibrate = a.vibrate; // Sprint3: tip-bazlı titreşim deseni sw'ye geçir (vib OFF -> [])
+  return _p;
 }
 
 async function _cronOda(oda, env, now) {
