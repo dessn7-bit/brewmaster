@@ -21239,6 +21239,10 @@ window.brewdayBitir=function(){
     if(a.includes('cold crash')) return takipAlarmi ? 'pasif' : 'kritik';
     if(a.includes('şişele') || a.includes('sisele')) return 'kritik'; // tek günlük aksiyon
     if(a.includes('lagering başla')) return 'kritik'; // tek günlük aksiyon
+    if(a.includes('lagering')) return takipAlarmi ? 'pasif' : 'kontrol'; // A.1: lagering hold günü kontrol (eski: 'lag' substring -> pasif)
+    if(a.includes('karbonasyon')) return 'kontrol'; // D: şişele+14 karbonasyon kontrol -> push (şişele kontrolü ÜSTTE -> 'Şişele (yüksek karbonasyon)' kritik kalır)
+    if(a.includes('olgunlaş')) return 'kontrol'; // D: içime hazır (İ-safe: 'olgunlaş' eşleşir, 'içime' İ->i̇ sorunlu)
+    if(a.includes('gravity')) return 'kontrol'; // A.2: periyodik gravity kontrol -> push
 
     // Kontrol — önemli, geniş pencere (toast)
     if(a.includes('pitch')) return 'kontrol';
@@ -21391,6 +21395,77 @@ window.brewdayBitir=function(){
       if (gunluKatkilar.length) alarmlar.sort((a,b) => a.g - b.g);
     } catch(_kgE){ console.warn('[Alarm] katkı gün enjeksiyonu:', _kgE); }
 
+    // ── D (karbonasyon/olgunlaşma) + A.2 (periyodik gravity) — ts-bazlı, sise/pitch anchor'lı ──
+    // Profil 'Şişele'de susuyordu. Tahmini anchor: pitchTs + prof.sise. Şişeleme brewLog'a girince
+    // _alarmSiselemKontrol gerçek tarihe re-anchor eder (_sonrasiGun offset). Kondisyon süresi =
+    // line 12311 'sure' ABV haritasının yeniden kullanımı (ABV stil-korelasyonlu).
+    try {
+      var _siseGun = (typeof prof.sise === 'number' && prof.sise > 0) ? prof.sise
+                   : (prof.toplamGun ? Math.max(1, prof.toplamGun - 1) : 11);
+      var _abv = 0;
+      try { if(typeof calc === 'function'){ var _cr = calc(); var _av = parseFloat(_cr && _cr.abv); if(_av > 0) _abv = _av; } } catch(_ce){}
+      if(!(_abv > 0)){
+        var _atu = (maya && maya.atu && maya.atu.length === 2) ? ((maya.atu[0] + maya.atu[1]) / 2 / 100) : 0.75;
+        var _fgT = og - (og - 1) * _atu;
+        _abv = Math.max(0, (og - _fgT) * 131.25);
+      }
+      if(!(_abv > 0)) _abv = 5;
+      // line 12311 'sure' ABV->kondisyon (üst sınır gün = en iyi/en dengeli nokta)
+      var _kondGun = _abv > 10 ? 84 : _abv > 8 ? 56 : _abv > 6 ? 42 : _abv > 4 ? 21 : 14;
+      var _icimeOffset = Math.max(_kondGun, 16); // karbonasyon(+14) sonrasında kalsın
+      var _stilAd = String(S.stil || prof.baslik || 'bira').trim() || 'bira';
+      // D-1: karbonasyon kontrol (şişele +14)
+      alarmlar.push({
+        g: _siseGun + 14,
+        ts: _alarmTsHesapla(pitchTs, _siseGun + 14, saat),
+        tip: 'kontrol',
+        aksiyon: '🫧 Karbonasyon kontrol — bir şişe test et',
+        aciklama: 'Şişelemeden ~2 hafta sonra. Bir şişeyi soğut, aç: köpük/karbonasyon oturmuş mu? Az ise birkaç gün daha bekle (priming mayası çalışıyor).',
+        sicaklik: null,
+        durum: 'bekliyor',
+        _sonrasiGun: 14
+      });
+      // D-2: içime hazır (şişele + kondisyon)
+      alarmlar.push({
+        g: _siseGun + _icimeOffset,
+        ts: _alarmTsHesapla(pitchTs, _siseGun + _icimeOffset, saat),
+        tip: 'kontrol',
+        aksiyon: '🍺 İçime hazır — ' + _stilAd + ' olgunlaştı',
+        aciklama: 'Kondisyon süresi (~ABV %' + _abv.toFixed(1) + ') doldu. ' + _stilAd + ' olgunlaştı — en dengeli nokta. Afiyet olsun.',
+        sicaklik: null,
+        durum: 'bekliyor',
+        _sonrasiGun: _icimeOffset
+      });
+      // A.2: aktif fermentasyon fazında periyodik gravity kontrol (uzun profil >10 gün; sadece
+      // ölçüm-boşluğu olan profillerde — yoğun günlük profillerde collision-skip ile hiç eklenmez).
+      if((prof.toplamGun || 0) > 10){
+        var _aktifSon = _siseGun;
+        for(var _ai = 0; _ai < alarmlar.length; _ai++){
+          var _ax = (alarmlar[_ai].aksiyon || '').toLowerCase();
+          if(_ax.indexOf('cold crash') >= 0 || _ax.indexOf('soğut') >= 0 || _ax.indexOf('sogut') >= 0 || _ax.indexOf('lagering') >= 0 || _ax.indexOf('cold başla') >= 0 || _ax.indexOf('cold basla') >= 0){
+            if((alarmlar[_ai].g | 0) < _aktifSon) _aktifSon = alarmlar[_ai].g | 0;
+          }
+        }
+        var _doluGun = {}; // sadece non-pasif (gerçek hatırlatıcı) günler — pasif hold günlerine gravity konabilir
+        alarmlar.forEach(function(a){ if(a && a.tip !== 'pasif') _doluGun[a.g | 0] = 1; });
+        var _step = Math.max(3, Math.ceil(_aktifSon / 6)); // max ~6 kontrol; uzun profilde aralık büyür
+        for(var _g = _step; _g < _aktifSon; _g += _step){
+          if(_doluGun[_g] || _doluGun[_g - 1] || _doluGun[_g + 1]) continue; // mevcut ölçüm gününe yakınsa atla
+          alarmlar.push({
+            g: _g,
+            ts: _alarmTsHesapla(pitchTs, _g, saat),
+            tip: 'kontrol',
+            aksiyon: '📊 Gravity kontrol',
+            aciklama: 'Ara ölçüm: hidrometre/refraktometre ile yoğunluğu kaydet. Düşüş duruyorsa fermentasyon bitiyor demektir.',
+            sicaklik: null,
+            durum: 'bekliyor'
+          });
+          _doluGun[_g] = 1;
+        }
+      }
+      alarmlar.sort(function(a, b){ return a.g - b.g; });
+    } catch(_dakE){ console.warn('[Alarm] D/A.2 enjeksiyonu:', _dakE); }
+
     const tum = _alarmlariOku();
     tum[receteId] = {
       receteAd: String(S.biraAd || '(isimsiz)'),
@@ -21448,18 +21523,48 @@ window.brewdayBitir=function(){
     return true;
   };
 
-  // Şişeleme yapıldıysa alarmları bitti'ye çevir
+  // Şişeleme: PRE-bottle alarmları bitti, POST-bottle (karbonasyon/içime hazır) KORUNUR +
+  // gerçek şişeleme tarihine re-anchor (D — profil artık Şişele'de susmuyor).
   window._alarmSiselemKontrol = function(receteId, brewLog){
     if(!receteId || !Array.isArray(brewLog)) return false;
-    const siseVar = brewLog.some(x => x && (x.tip==='siseleme' || x.tip==='sise' || x.tip==='bottle'));
-    if(!siseVar) return false;
-    const tum = _alarmlariOku();
-    if(!tum[receteId]) return false;
-    if(tum[receteId].durum === 'bitti') return false;
-    tum[receteId].durum = 'bitti';
-    (tum[receteId].alarmlar||[]).forEach(a => { if(a.durum === 'bekliyor') a.durum = 'bitti'; });
-    _alarmlariYaz(tum);
-    return true;
+    var siseEntry = null;
+    for(var _i = 0; _i < brewLog.length; _i++){
+      var _x = brewLog[_i];
+      if(_x && (_x.tip==='siseleme' || _x.tip==='sise' || _x.tip==='bottle')) siseEntry = _x; // sonuncu
+    }
+    if(!siseEntry) return false;
+    var tum = _alarmlariOku();
+    if(!tum[receteId] || !Array.isArray(tum[receteId].alarmlar)) return false;
+    if(tum[receteId].durum === 'bitti') return false; // finalize edilmiş
+    // gerçek şişeleme ts: tarih 'YYYY-MM-DD' -> yerel gece yarısı; yoksa entry.id (oluşturma ts); yoksa now
+    var _bottleTs = NaN;
+    if(siseEntry.tarih){ var _bd = new Date(siseEntry.tarih + 'T00:00:00'); _bottleTs = _bd.getTime(); }
+    if(!(typeof _bottleTs === 'number' && !isNaN(_bottleTs))){
+      var _idn = parseInt(siseEntry.id, 10); _bottleTs = (!isNaN(_idn) && _idn > 0) ? _idn : Date.now();
+    }
+    var _saat = (typeof _alarmSaatiAl === 'function') ? _alarmSaatiAl() : '10:00';
+    var _degisti = false, _postBekleyen = false;
+    tum[receteId].alarmlar.forEach(function(a){
+      if(!a) return;
+      var _ak = (a.aksiyon || '').toLowerCase();
+      var _post = (a._sonrasiGun != null) || _ak.indexOf('karbonasyon') >= 0 || _ak.indexOf('olgunlaş') >= 0;
+      if(_post){
+        if(a.durum === 'bekliyor'){
+          if(a._sonrasiGun != null){
+            var _yeniTs = _alarmTsHesapla(_bottleTs, a._sonrasiGun | 0, _saat);
+            if(a.ts !== _yeniTs){ a.ts = _yeniTs; _degisti = true; }
+          }
+          _postBekleyen = true;
+        }
+      } else if(a.durum === 'bekliyor'){
+        a.durum = 'bitti'; _degisti = true; // pre-bottle: tamamlandı say
+      }
+    });
+    // post-bottle bekleyen varsa grup AKTİF kalsın (cron karbonasyon/içime-hazır'ı push'lasın); yoksa bitti
+    var _yeniDurum = _postBekleyen ? 'aktif' : 'bitti';
+    if(tum[receteId].durum !== _yeniDurum){ tum[receteId].durum = _yeniDurum; _degisti = true; }
+    if(_degisti) _alarmlariYaz(tum);
+    return _degisti;
   };
 
   // Orphan temizlik — KR'de olmayan reçete alarmlarını sil
