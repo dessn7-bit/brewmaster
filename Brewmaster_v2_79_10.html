@@ -11414,7 +11414,7 @@ function _stokAnaTabBarHTML(){
   var bildirimSay = 0;
   try {
     if (typeof STOK !== 'undefined' && Array.isArray(STOK)) {
-      bildirimSay += STOK.filter(function(s){ return s && s.uyari>0 && (s.miktar||0) <= s.uyari; }).length;
+      if(typeof bmBildirimTercihOku!=='function' || bmBildirimTercihOku().catStok!==false) bildirimSay += STOK.filter(function(s){ return s && s.uyari>0 && (s.miktar||0) <= s.uyari; }).length;
     }
     if (typeof _alarmlariOku === 'function') {
       var _al = _alarmlariOku();
@@ -11424,7 +11424,7 @@ function _stokAnaTabBarHTML(){
         var rec = _al[rid];
         if (!rec || rec.durum !== 'aktif') return;
         (rec.alarmlar||[]).forEach(function(a){
-          if (a && (a.durum==='bekliyor'||a.durum==='gosterildi') && a.tip!=='pasif' && a.ts <= _simdi) bildirimSay++;
+          if (a && (a.durum==='bekliyor'||a.durum==='gosterildi') && a.tip!=='pasif' && a.ts <= _simdi && (typeof _alarmKatAcik!=='function' || _alarmKatAcik(_alarmKatBul(rid,a)))) bildirimSay++;
         });
       });
     }
@@ -21283,7 +21283,48 @@ window.brewdayBitir=function(){
     const d = new Date(pitchTs);
     d.setDate(d.getDate() + (gun||0));
     d.setHours(saatH, saatM, 0, 0);
-    return d.getTime();
+    return _bildirimTsAyarla(d.getTime());
+  };
+
+  // ═══ Sprint3: bildirim kategori + titreşim + sessiz saat yardımcıları ═══
+  window._alarmVibPattern = function(tip){ return (tip === 'kritik') ? [300,150,300,150,300] : [200,100,200]; };
+  window._alarmKatBul = function(rid, a){
+    if(a && a.kategori) return a.kategori;
+    if(/^maya:/.test(rid||'')) return 'C';
+    if(/^stok:/.test(rid||'')) return 'B';
+    var ak = (a && a.aksiyon || '').toLowerCase();
+    return (ak.indexOf('karbonasyon') >= 0 || ak.indexOf('olgunlaş') >= 0) ? 'D' : 'A';
+  };
+  window._alarmKatAcik = function(kat){
+    var p = (typeof bmBildirimTercihOku === 'function') ? bmBildirimTercihOku() : {};
+    if(kat === 'A') return p.catFermentasyon !== false;
+    if(kat === 'D') return p.catKarbonasyon !== false;
+    if(kat === 'C') return p.catMaya !== false;
+    if(kat === 'B') return p.catStok !== false;
+    return true;
+  };
+  // sessiz saat: ts sessiz aralıktaysa aralık bitişine kaydır (gece sarması destekli)
+  window._bildirimTsAyarla = function(ts){
+    try {
+      if(typeof ts !== 'number' || isNaN(ts)) return ts;
+      var p = (typeof bmBildirimTercihOku === 'function') ? bmBildirimTercihOku() : {};
+      var mb = /^(\d{1,2}):(\d{2})$/.exec(p.sessizBasla||''), me = /^(\d{1,2}):(\d{2})$/.exec(p.sessizBit||'');
+      if(!mb || !me) return ts;
+      var bMin = (+mb[1])*60 + (+mb[2]), eMin = (+me[1])*60 + (+me[2]);
+      if(bMin === eMin) return ts;
+      var d = new Date(ts), tMin = d.getHours()*60 + d.getMinutes();
+      var inQ = (bMin < eMin) ? (tMin >= bMin && tMin < eMin) : (tMin >= bMin || tMin < eMin);
+      if(!inQ) return ts;
+      var out = new Date(ts);
+      if(bMin >= eMin && tMin >= bMin) out.setDate(out.getDate()+1); // gece sarması, akşam kısmı -> ertesi gün bitiş
+      out.setHours(+me[1], +me[2], 0, 0);
+      return out.getTime();
+    } catch(_e){ return ts; }
+  };
+  // tek alarmı sustur (durum:'sessiz' — cron bekliyor-only atlar, gri görünür)
+  window._alarmSustur = function(receteId, gun){
+    try { if(typeof _alarmDurumGuncelle === 'function') _alarmDurumGuncelle(receteId, gun, 'sessiz'); } catch(_e){}
+    try { if(typeof render === 'function') render(); } catch(_e2){}
   };
 
   // Brewday bitince çağrılır — fermentasyonProfili'nden alarm listesi üret
@@ -21466,6 +21507,12 @@ window.brewdayBitir=function(){
       }
       alarmlar.sort(function(a, b){ return a.g - b.g; });
     } catch(_dakE){ console.warn('[Alarm] D/A.2 enjeksiyonu:', _dakE); }
+    // Sprint3: kalıcı kategori (A/D) + tip-bazlı titreşim her alarma
+    alarmlar.forEach(function(a){
+      if(!a) return;
+      if(a.kategori == null) a.kategori = _alarmKatBul(receteId, a);
+      if(a.vibrate == null) a.vibrate = _alarmVibPattern(a.tip);
+    });
 
     const tum = _alarmlariOku();
     tum[receteId] = {
@@ -21601,7 +21648,7 @@ window.brewdayBitir=function(){
     var h = m ? parseInt(m[1],10) : 10, mn = m ? parseInt(m[2],10) : 0;
     var d = new Date(); d.setHours(h, mn, 0, 0);
     if(d.getTime() <= Date.now()) d.setDate(d.getDate() + 1); // bugünkü saat geçtiyse yarın (gece push yok)
-    return d.getTime();
+    return _bildirimTsAyarla(d.getTime());
   }
   // desired alarmları mevcut grupla birleştir: durum + ts KORUNUR (B dedup/reset + tamamlandı koru)
   function _pseudoMergeAlarmlar(exGrp, desired){
@@ -21610,11 +21657,12 @@ window.brewdayBitir=function(){
     return desired.map(function(d){
       var ex = exBy[(d.g|0)+'|'+(d.aksiyon||'')];
       var o = { g:d.g|0, ts:d.ts, tip:d.tip, aksiyon:d.aksiyon, aciklama:d.aciklama, sicaklik:(d.sicaklik!=null?d.sicaklik:null), durum:'bekliyor' };
+      if(d.kategori!=null) o.kategori = d.kategori; if(d.vibrate!=null) o.vibrate = d.vibrate;
       if(ex){ if(ex.durum) o.durum = ex.durum; if(ex.ts != null) o.ts = ex.ts; }
       return o;
     });
   }
-  function _pseudoGrupSig(arr){ return JSON.stringify((arr||[]).map(function(a){ return a ? [a.g|0, a.ts, a.tip, a.aksiyon, a.durum] : null; })); }
+  function _pseudoGrupSig(arr){ return JSON.stringify((arr||[]).map(function(a){ return a ? [a.g|0, a.ts, a.tip, a.aksiyon, a.durum, a.kategori||null, a.vibrate||null] : null; })); }
 
   // C: bm_maya_hasat -> maya:<hasatId> grupları. Default 90 (starter düşün) + 180 (viability) gün; hasat.esik varsa tek özel eşik.
   window._mayaTazelikSync = function(){
@@ -21648,6 +21696,7 @@ window.brewdayBitir=function(){
               aciklama: recAd + ' ~6 aylık. Canlılık ciddi düşük. Canlılık testi yap, büyük starter ile yeniden besle ya da at.' }
           ];
         }
+        desired.forEach(function(_d){ _d.kategori='C'; _d.vibrate=_alarmVibPattern(_d.tip); });
         var ex = tum[key];
         var merged = _pseudoMergeAlarmlar(ex, desired);
         if(!ex || ex.receteAd !== recAd || _pseudoGrupSig(ex.alarmlar) !== _pseudoGrupSig(merged)){
@@ -21669,7 +21718,7 @@ window.brewdayBitir=function(){
       var pref = (typeof bmBildirimTercihOku === 'function') ? bmBildirimTercihOku() : { dusukStok:true };
       var tum = _alarmlariOku();
       var degisti = false, gecerli = {};
-      if(pref && pref.dusukStok){
+      if(true){ // Sprint3: kategori gate sync'te; üretim eşik-altında her zaman
         STOK.forEach(function(it){
           if(!it || !it.id) return;
           if(!(it.uyari > 0)) return;
@@ -21679,6 +21728,7 @@ window.brewdayBitir=function(){
           var desired = [{ g:0, ts:_sonrakiBildirimTs(), tip:'kontrol', sicaklik:null,
             aksiyon:'📦 Stok azaldı — ' + ad,
             aciklama: ad + ' stoğu eşiğin altına indi (eşik ' + it.uyari + birim + '). Kontrol et / sipariş ver.' }];
+          desired.forEach(function(_d){ _d.kategori='B'; _d.vibrate=_alarmVibPattern(_d.tip); });
           var ex = tum[key];
           var merged = _pseudoMergeAlarmlar(ex, desired);
           if(!ex || ex.receteAd !== ad || _pseudoGrupSig(ex.alarmlar) !== _pseudoGrupSig(merged)){
@@ -21786,6 +21836,7 @@ window.brewdayBitir=function(){
       (r.alarmlar||[]).forEach(al => {
         if(al.durum !== 'bekliyor') return;
         if(al.tip === 'pasif') return;
+        if(typeof _alarmKatAcik==='function' && !_alarmKatAcik(_alarmKatBul(rid,al))) return; // kategori-OFF
         if(al.ts <= simdi) sonuc.push({receteId:rid, receteAd:r.receteAd, alarm:al});
       });
     });
@@ -21933,7 +21984,7 @@ window.brewdayBitir=function(){
       const saatStr = String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
       const tipEmo = al.tip==='kritik' ? '🔴' : (al.tip==='kontrol' ? '🟡' : '⚪');
       const sicAr = al.sicaklik ? ' · '+al.sicaklik+'°C' : '';
-      const opaq = (al.durum==='tamamlandi'||al.durum==='atlandi') ? 'opacity:.45;' : '';
+      const opaq = (al.durum==='tamamlandi'||al.durum==='atlandi'||al.durum==='sessiz') ? 'opacity:.45;' : '';
       const bgRenk = klas==='kacirilan' ? 'background:#FAECEC;border-left:3px solid #A02020;' : (klas==='bugun' ? 'background:#FFF8E8;border-left:3px solid #C8860A;' : '');
       return '<div style="padding:8px 12px;border-bottom:1px solid var(--bor);'+bgRenk+opaq+'">'
         +'<div style="display:flex;justify-content:space-between;align-items:start;gap:8px">'
@@ -21946,9 +21997,11 @@ window.brewdayBitir=function(){
             '<div style="display:flex;gap:4px;flex-shrink:0">'
               +'<button onclick="_alarmAksiyon(\''+hedefRid+'\','+al.g+',\'tamamlandi\')" style="background:var(--ya);border:1px solid var(--yk);color:var(--yk);border-radius:6px;padding:4px 8px;font-size:10px;font-weight:700;cursor:pointer" aria-label="'+escapeH(al.aksiyon)+' alarmını tamamlandı işaretle">✓</button>'
               +(al.ts <= simdi ? '<button onclick="_alarmAksiyon(\''+hedefRid+'\','+al.g+',\'ertele\')" style="background:var(--card);border:1px solid var(--bor);color:var(--kahve);border-radius:6px;padding:4px 8px;font-size:10px;font-weight:600;cursor:pointer" aria-label="'+escapeH(al.aksiyon)+' alarmını 1 saat ertele">⏰</button>' : '')
+              +'<button onclick="_alarmSustur(\''+hedefRid+'\','+al.g+')" style="background:var(--card);border:1px solid var(--bor);color:var(--soluk);border-radius:6px;padding:4px 8px;font-size:10px;font-weight:600;cursor:pointer" aria-label="'+escapeH(al.aksiyon)+' alarmını sustur">🔕</button>'
             +'</div>'
             : (al.durum==='tamamlandi' ? '<span style="font-size:10px;color:#2D7A2D;font-weight:700">✓</span>' : 
-               (al.durum==='atlandi' ? '<span style="font-size:10px;color:var(--soluk)">⤵</span>' : '')))
+               (al.durum==='atlandi' ? '<span style="font-size:10px;color:var(--soluk)">⤵</span>' : 
+               (al.durum==='sessiz' ? '<span style="font-size:10px;color:var(--soluk)" title="Susturuldu">🔕</span>' : ''))))
         +'</div>'
       +'</div>';
     }
@@ -22330,14 +22383,21 @@ function _alarmBulutaSyncSend(){
   var tum=null;
   try{ tum=JSON.parse(localStorage.getItem('bm_alarms_v1')||'{}')||{}; }catch(_e2){ tum={}; }
   var alarms={}, n=0;
+  var _vibPref = (function(){ try{ return bmBildirimTercihOku().vib !== false; }catch(_e){ return true; } })();
   for(var rid in tum){
     var grp=tum[rid]; if(!grp||typeof grp!=='object') continue;
-    var srcA=Array.isArray(grp.alarmlar)?grp.alarmlar:[], aktif=[];
+    var srcA=Array.isArray(grp.alarmlar)?grp.alarmlar:[], aktif=[], nonPasif=0;
     for(var i=0;i<srcA.length;i++){
-      var a=srcA[i]; if(!a||a.tip==='pasif') continue; // pasif client-side filtrele (cron pasif'i atliyor, payload kuculur)
-      aktif.push({g:a.g|0, ts:a.ts, tip:a.tip, aksiyon:String(a.aksiyon||''), aciklama:String(a.aciklama||''), durum:a.durum||'bekliyor', sicaklik:(a.sicaklik!=null?a.sicaklik:null)});
+      var a=srcA[i]; if(!a||a.tip==='pasif') continue; // pasif filtrele
+      nonPasif++;
+      var _kat=(typeof _alarmKatBul==='function')?_alarmKatBul(rid,a):'A';
+      if(typeof _alarmKatAcik==='function' && !_alarmKatAcik(_kat)) continue; // KATEGORİ-OFF -> sync'leme (gerçek gate)
+      var _o={g:a.g|0, ts:a.ts, tip:a.tip, aksiyon:String(a.aksiyon||''), aciklama:String(a.aciklama||''), durum:a.durum||'bekliyor', sicaklik:(a.sicaklik!=null?a.sicaklik:null), kategori:_kat};
+      _o.vibrate = _vibPref ? (a.vibrate || (typeof _alarmVibPattern==='function'?_alarmVibPattern(a.tip):null)) : []; // vib OFF -> [] titreşim yok
+      aktif.push(_o);
     }
-    if(!aktif.length) continue; // gonderilecek aktif (kritik/kontrol) alarm yoksa receteyi atla
+    // tombstone: tümü pasif değilse boş bile gönder (kategori-OFF/emptied grup -> KV temizlenir, pushedTs sıfırlanır)
+    if(!aktif.length && nonPasif===0 && srcA.length>0) continue; // sadece all-pasif grup -> atla
     alarms[rid]={receteAd:String(grp.receteAd||''), pitchTs:(grp.pitchTs!=null?grp.pitchTs:null), durum:grp.durum||'aktif', alarmlar:aktif}; n++;
   }
   if(!n) return; // gonderilecek bir sey yok
@@ -23165,10 +23225,16 @@ window.stokAnaTabSet = function(tab){
 
 // Bildirim tercihleri — default tum acik. bm_bildirim_tercih LS persist.
 window.bmBildirimTercihOku = function(){
-  var def = { alarm:true, dusukStok:true };
+  // Sprint3 yeni şema. Eski {alarm,dusukStok} -> kategori şemasına migrate (değerler korunur).
+  var def = { catFermentasyon:true, catKarbonasyon:true, catMaya:true, catStok:true, vib:true, sessizBasla:'22:00', sessizBit:'08:00' };
   try {
     var raw = localStorage.getItem('bm_bildirim_tercih');
-    if (raw) { var p = JSON.parse(raw); return Object.assign(def, p||{}); }
+    if (raw) {
+      var p = JSON.parse(raw) || {};
+      if (p.alarm != null && p.catFermentasyon == null) { p.catFermentasyon = p.alarm; p.catKarbonasyon = p.alarm; }
+      if (p.dusukStok != null && p.catStok == null) { p.catStok = p.dusukStok; }
+      return Object.assign(def, p);
+    }
   } catch(e){}
   return def;
 };
@@ -23179,8 +23245,15 @@ window.bmBildirimTercihToggle = function(key){
   var p = window.bmBildirimTercihOku();
   p[key] = !p[key];
   window.bmBildirimTercihKaydet(p);
+  try{ if(window._alarmBulutaSyncDebounced) window._alarmBulutaSyncDebounced(); }catch(_e){} // kategori/vib OFF -> KV güncelle (tombstone)
   if (ekran === 'stok') { document.getElementById('ekran').innerHTML = rStok(); }
   if (typeof bmToast === 'function') bmToast('Tercih kaydedildi', 'info');
+};
+window.bmBildirimSessizSet = function(alan, val){
+  if(!/^\d{1,2}:\d{2}$/.test(val||'')) return;
+  var p = window.bmBildirimTercihOku(); p[alan] = val; window.bmBildirimTercihKaydet(p);
+  try{ if(window._alarmBulutaSyncDebounced) window._alarmBulutaSyncDebounced(); }catch(_e){}
+  if (typeof bmToast === 'function') bmToast('Sessiz saat güncellendi', 'info');
 };
 
 // Cache temizle — SW caches.delete + reload
@@ -23381,7 +23454,7 @@ window.rStokBildirim = function(){
   var bekleyenSatir = [];
   var yakSatir = [];
   // Alarmlar
-  if (pref.alarm && typeof _alarmlariOku === 'function') {
+  if (typeof _alarmlariOku === 'function') {
     try {
       var _al = _alarmlariOku();
       var simdi = Date.now();
@@ -23392,7 +23465,8 @@ window.rStokBildirim = function(){
         var recAd = (function(){ var t = (KR||[]).find(function(x){return x&&x.id===rid;}); return t ? (t.biraAd||t.ad||'(adsız)') : '(silinmiş tarif)'; })();
         (rec.alarmlar||[]).forEach(function(a){
           if (!a) return;
-          if (a.durum==='tamamlandi' || a.durum==='atlandi' || a.tip==='pasif') return;
+          if (a.durum==='tamamlandi' || a.durum==='atlandi' || a.durum==='sessiz' || a.tip==='pasif') return;
+          if (typeof _alarmKatAcik==='function' && !_alarmKatAcik(_alarmKatBul(rid,a))) return; // kategori-OFF
           var d = new Date(a.ts);
           var gun = String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0');
           var saat = String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
@@ -23410,7 +23484,7 @@ window.rStokBildirim = function(){
     } catch(e){ console.warn('[rStokBildirim alarm]', e); }
   }
   // Dusuk stok
-  if (pref.dusukStok && typeof STOK !== 'undefined' && Array.isArray(STOK)) {
+  if (pref.catStok !== false && typeof STOK !== 'undefined' && Array.isArray(STOK)) {
     STOK.forEach(function(s){
       if (!s || !(s.uyari>0)) return;
       if ((s.miktar||0) <= s.uyari) {
@@ -23439,20 +23513,21 @@ window.rStokBildirim = function(){
   var liste = _grup('🔴 Kritik (geçti)', kritikSatir) + _grup('⚠️ Aktif', bekleyenSatir) + _grup('📅 Yaklaşan', yakSatir);
   if (!liste) liste = '<div style="text-align:center;padding:30px;color:var(--dim);font-size:13px">🔔 Aktif bildirim yok.<br><span style="font-size:11px;opacity:.75">Brewday alarmları, düşük stok ve diğer uyarılar burada görünür.</span></div>';
   // Tercih toggle bloku
+  var _katSatir = function(key, on, baslik, alt){ return '<div class="bm-ayar-satir"><label class="bm-pref-toggle bm-ayar-satir-text"><input type="checkbox" '+(on?'checked':'')+' onchange="window.bmBildirimTercihToggle(\''+key+'\')"><span>'+baslik+' <small>'+alt+'</small></span></label></div>'; };
   var tercihBlok =
     '<div class="bm-ayar-kart">'+
       '<div class="bm-ayar-kart-baslik">⚙️ Bildirim tercihleri</div>'+
-      '<div class="bm-ayar-satir">'+
-        '<label class="bm-pref-toggle bm-ayar-satir-text">'+
-          '<input type="checkbox" '+(pref.alarm?'checked':'')+' onchange="window.bmBildirimTercihToggle(\'alarm\')">'+
-          '<span>Fermantasyon alarmları <small>Brewday sonrası kurulan alarmlar</small></span>'+
-        '</label>'+
-      '</div>'+
-      '<div class="bm-ayar-satir">'+
-        '<label class="bm-pref-toggle bm-ayar-satir-text">'+
-          '<input type="checkbox" '+(pref.dusukStok?'checked':'')+' onchange="window.bmBildirimTercihToggle(\'dusukStok\')">'+
-          '<span>Düşük stok uyarıları <small>Stok ≤ uyarı eşiği</small></span>'+
-        '</label>'+
+      _katSatir('catFermentasyon', pref.catFermentasyon!==false, '🌡️ Fermantasyon alarmları', 'Pitch / FG / sıcaklık / lagering / gravity')+
+      _katSatir('catKarbonasyon', pref.catKarbonasyon!==false, '🫧 Karbonasyon & olgunlaşma', 'Şişeleme sonrası karbonasyon + içime hazır')+
+      _katSatir('catMaya', pref.catMaya!==false, '🧬 Maya tazelik', 'Hasat yaşı / canlılık hatırlatması')+
+      _katSatir('catStok', pref.catStok!==false, '📦 Düşük stok', 'Stok ≤ uyarı eşiği')+
+      _katSatir('vib', pref.vib!==false, '📳 Titreşim', 'Push bildiriminde titreşim deseni')+
+      '<div class="bm-ayar-satir" style="gap:8px;align-items:center;flex-wrap:wrap">'+
+        '<span style="font-size:13px;font-weight:600">🌙 Sessiz saat</span>'+
+        '<input aria-label="Sessiz başlangıç" type="time" value="'+(pref.sessizBasla||'22:00')+'" onchange="window.bmBildirimSessizSet(\'sessizBasla\',this.value)" style="font-size:12px;padding:3px 6px;border:1px solid var(--bor);border-radius:6px">'+
+        '<span style="font-size:12px;color:var(--soluk)">–</span>'+
+        '<input aria-label="Sessiz bitiş" type="time" value="'+(pref.sessizBit||'08:00')+'" onchange="window.bmBildirimSessizSet(\'sessizBit\',this.value)" style="font-size:12px;padding:3px 6px;border:1px solid var(--bor);border-radius:6px">'+
+        '<small style="flex:1;min-width:120px;color:var(--soluk);font-size:10px">Bu aralıkta bildirim ertelenir</small>'+
       '</div>'+
     '</div>';
   return liste + tercihBlok;
