@@ -5174,8 +5174,8 @@ function bmFermSic(){try{var v=localStorage.getItem('bm_ferm_sicaklik');return (
 function bmFermSicSet(v){try{if(v==null||v===''||isNaN(+v))localStorage.removeItem('bm_ferm_sicaklik');else localStorage.setItem('bm_ferm_sicaklik',Math.round(+v));}catch(e){}}
 function bmHasatList(){try{var a=JSON.parse(localStorage.getItem('bm_maya_hasat')||'[]');return Array.isArray(a)?a:[];}catch(e){return [];}}
 function bmHasatSave(a){try{localStorage.setItem('bm_maya_hasat',JSON.stringify(a));}catch(e){}}
-function bmHasatEkle(ad,nesil,tarih,mayaId){if(!ad||!String(ad).trim())return;var a=bmHasatList();a.push({id:'h'+Date.now(),mayaId:mayaId||'',ad:String(ad).trim(),nesil:Math.max(1,Math.min(30,+nesil||1)),tarih:tarih||new Date().toISOString().slice(0,10)});bmHasatSave(a);if(typeof render==='function')render();}
-function bmHasatSil(id){bmHasatSave(bmHasatList().filter(function(x){return x.id!==id;}));if(typeof render==='function')render();}
+function bmHasatEkle(ad,nesil,tarih,mayaId,esik){if(!ad||!String(ad).trim())return;var a=bmHasatList();a.push({id:'h'+Date.now(),mayaId:mayaId||'',ad:String(ad).trim(),nesil:Math.max(1,Math.min(30,+nesil||1)),tarih:tarih||new Date().toISOString().slice(0,10),esik:(esik!=null&&String(esik).trim()!==''&&+esik>0)?Math.round(+esik):null});bmHasatSave(a);try{if(window._mayaTazelikSync)_mayaTazelikSync();}catch(_e){}if(typeof render==='function')render();}
+function bmHasatSil(id){bmHasatSave(bmHasatList().filter(function(x){return x.id!==id;}));try{if(window._mayaTazelikSync)_mayaTazelikSync();}catch(_e){}if(typeof render==='function')render();}
 function bmHasatYas(tarih){if(!tarih)return null;var d=new Date(tarih+'T00:00:00');if(isNaN(d.getTime()))return null;return Math.max(0,Math.round((Date.now()-d.getTime())/86400000));}
 function bmOgPlato(og){return (og>1)?(-616.868+1111.14*og-630.272*og*og+135.997*og*og*og):0;}
 function bmPitchHedef(tip,og){if(tip==='kveik')return{rate:0.5,ad:'Kveik (düşük pitch)'};if(tip==='lager')return{rate:1.5,ad:'Lager (düşük fermentasyon)'};if(og>=1.070)return{rate:1.25,ad:'Yüksek OG ale (>1.070)'};return{rate:0.75,ad:'Standart ale'};}
@@ -11420,6 +11420,7 @@ function _stokAnaTabBarHTML(){
       var _al = _alarmlariOku();
       var _simdi = Date.now();
       Object.keys(_al).forEach(function(rid){
+        if(/^(maya|stok):/.test(rid)) return; // pseudo-key: stok düşük zaten ayrı sayılıyor, maya modal/toast'ta
         var rec = _al[rid];
         if (!rec || rec.durum !== 'aktif') return;
         (rec.alarmlar||[]).forEach(function(a){
@@ -14757,7 +14758,7 @@ function rEditorMaya(og, fg, abv, maya, maya2, fgKaynak, fgHesap){
         </div>
       </div>`,false);
     })()}
-    ${(function(){var L=(typeof bmHasatList==='function')?bmHasatList():[];var BST='display:inline-block;padding:2px 8px;font-size:var(--fs-xs);border:1px solid var(--sk);background:var(--sa);color:var(--vintage-koyu);border-radius:5px;cursor:pointer';var rows=L.slice().sort(function(a,b){return (b.tarih||'').localeCompare(a.tarih||'');}).map(function(j){var y=(typeof bmHasatYas==='function')?bmHasatYas(j.tarih):null;var via=(y!=null&&typeof mayaViabilite==='function')?Math.round(mayaViabilite(y/30)*100):null;var _ay=(y!=null)?Math.max(0,Math.round(y/30)):null;var w='',wc='';if(j.nesil>=10){w='🔴 taze öner';wc='var(--kk)';}else if(y!=null&&y>90){w='⚠️ eski — starter';wc='var(--kk)';}else if(j.nesil>=5){w='🟠 drift riski';wc='var(--kk)';}return '<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-top:1px solid var(--bor);font-size:11px;flex-wrap:wrap"><span style="font-weight:600;color:var(--kahve);flex:1;min-width:90px">'+j.ad+' <span style="color:var(--vintage-koyu)">G'+j.nesil+'</span></span><span style="color:var(--soluk)">'+(j.tarih||'')+'</span>'+(y!=null?'<span style="color:var(--soluk)">'+y+'g</span>':'')+(via!=null?'<span style="font-weight:600;color:'+(via<30?'var(--kk)':(via<50?'var(--kk)':'var(--yk)'))+'">~%'+via+'</span>':'')+(w?'<span style="font-weight:600;color:'+wc+'">'+w+'</span>':'')+(_ay!=null?'<span style="'+BST+';border-color:var(--yk);background:var(--ya);color:var(--yk)" onclick="S.mayaYasAy='+_ay+';render()" title="Bu kavanozun yasini ustteki pitch/starter hesabina gonder">→ Pitch ('+_ay+' ay)</span>':'')+'<span style="'+BST+';border-color:var(--crit);background:var(--crit-bg);color:var(--crit)" onclick="if(confirm(\'Bu hasat kaydını sil?\'))bmHasatSil(\''+j.id+'\')">Sil</span></div>';}).join('');var bugun=new Date().toISOString().slice(0,10);var quick=maya?'<div style="margin-top:6px"><span style="'+BST+';background:var(--ya);border-color:var(--yk);color:var(--yk)" data-ad="'+maya.ad+'" data-mid="'+maya.id+'" onclick="bmHasatEkle(this.dataset.ad,1,\'\',this.dataset.mid)">+ Bu reçetenin mayasını hasat et (G1)</span></div>':'';return _bmAccWrap('maya-hasat','🧫','Maya Hasadı',(L.length?L.length+' kayıt':''),'<div class="kart" style="margin-top:10px;background:var(--bg-sunken);border:1.5px solid var(--altin);padding:10px 12px"><div style="font-size:13px;font-weight:700;color:var(--vintage-koyu);margin-bottom:4px">🧫 Maya Hasadı & Nesil</div><div style="font-size:var(--fs-xs);color:var(--dim);margin-bottom:4px">Slurry/nesil envanteri — reçeteden bağımsız, kişisel.</div>'+(rows||'<div style="font-size:var(--fs-xs);color:var(--dim);padding:4px 0">Henüz hasat kaydı yok.</div>')+'<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:5px;align-items:center"><input aria-label="Maya adı" id="bm-hasat-ad" class="inp" style="flex:1;min-width:100px;font-size:11px" placeholder="Maya adı (US-05)"><input id="bm-hasat-nesil" class="inp" type="number" min="1" max="30" value="2" title="Nesil" style="width:48px;font-size:11px"><input aria-label="Hasat tarihi" id="bm-hasat-tarih" class="inp" type="date" value="'+bugun+'" style="font-size:11px"><span style="'+BST+'" onclick="bmHasatEkle(document.getElementById(\'bm-hasat-ad\').value,document.getElementById(\'bm-hasat-nesil\').value,document.getElementById(\'bm-hasat-tarih\').value)">Ekle</span></div>'+quick+'</div>',false);})()}
+    ${(function(){var L=(typeof bmHasatList==='function')?bmHasatList():[];var BST='display:inline-block;padding:2px 8px;font-size:var(--fs-xs);border:1px solid var(--sk);background:var(--sa);color:var(--vintage-koyu);border-radius:5px;cursor:pointer';var rows=L.slice().sort(function(a,b){return (b.tarih||'').localeCompare(a.tarih||'');}).map(function(j){var y=(typeof bmHasatYas==='function')?bmHasatYas(j.tarih):null;var via=(y!=null&&typeof mayaViabilite==='function')?Math.round(mayaViabilite(y/30)*100):null;var _ay=(y!=null)?Math.max(0,Math.round(y/30)):null;var w='',wc='';if(j.nesil>=10){w='🔴 taze öner';wc='var(--kk)';}else if(y!=null&&y>90){w='⚠️ eski — starter';wc='var(--kk)';}else if(j.nesil>=5){w='🟠 drift riski';wc='var(--kk)';}return '<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-top:1px solid var(--bor);font-size:11px;flex-wrap:wrap"><span style="font-weight:600;color:var(--kahve);flex:1;min-width:90px">'+j.ad+' <span style="color:var(--vintage-koyu)">G'+j.nesil+'</span></span><span style="color:var(--soluk)">'+(j.tarih||'')+'</span>'+(y!=null?'<span style="color:var(--soluk)">'+y+'g</span>':'')+(via!=null?'<span style="font-weight:600;color:'+(via<30?'var(--kk)':(via<50?'var(--kk)':'var(--yk)'))+'">~%'+via+'</span>':'')+(w?'<span style="font-weight:600;color:'+wc+'">'+w+'</span>':'')+(_ay!=null?'<span style="'+BST+';border-color:var(--yk);background:var(--ya);color:var(--yk)" onclick="S.mayaYasAy='+_ay+';render()" title="Bu kavanozun yasini ustteki pitch/starter hesabina gonder">→ Pitch ('+_ay+' ay)</span>':'')+'<span style="'+BST+';border-color:var(--crit);background:var(--crit-bg);color:var(--crit)" onclick="if(confirm(\'Bu hasat kaydını sil?\'))bmHasatSil(\''+j.id+'\')">Sil</span></div>';}).join('');var bugun=new Date().toISOString().slice(0,10);var quick=maya?'<div style="margin-top:6px"><span style="'+BST+';background:var(--ya);border-color:var(--yk);color:var(--yk)" data-ad="'+maya.ad+'" data-mid="'+maya.id+'" onclick="bmHasatEkle(this.dataset.ad,1,\'\',this.dataset.mid)">+ Bu reçetenin mayasını hasat et (G1)</span></div>':'';return _bmAccWrap('maya-hasat','🧫','Maya Hasadı',(L.length?L.length+' kayıt':''),'<div class="kart" style="margin-top:10px;background:var(--bg-sunken);border:1.5px solid var(--altin);padding:10px 12px"><div style="font-size:13px;font-weight:700;color:var(--vintage-koyu);margin-bottom:4px">🧫 Maya Hasadı & Nesil</div><div style="font-size:var(--fs-xs);color:var(--dim);margin-bottom:4px">Slurry/nesil envanteri — reçeteden bağımsız, kişisel.</div>'+(rows||'<div style="font-size:var(--fs-xs);color:var(--dim);padding:4px 0">Henüz hasat kaydı yok.</div>')+'<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:5px;align-items:center"><input aria-label="Maya adı" id="bm-hasat-ad" class="inp" style="flex:1;min-width:100px;font-size:11px" placeholder="Maya adı (US-05)"><input id="bm-hasat-nesil" class="inp" type="number" min="1" max="30" value="2" title="Nesil" style="width:48px;font-size:11px"><input aria-label="Hasat tarihi" id="bm-hasat-tarih" class="inp" type="date" value="'+bugun+'" style="font-size:11px"><input aria-label="Tazelik eşiği (gün, opsiyonel)" id="bm-hasat-esik" class="inp" type="number" min="1" max="999" placeholder="eşik?" title="Maya tazelik alarmı eşiği (gün) — boşsa 90/180 varsayılan" style="width:62px;font-size:11px"><span style="'+BST+'" onclick="bmHasatEkle(document.getElementById(\'bm-hasat-ad\').value,document.getElementById(\'bm-hasat-nesil\').value,document.getElementById(\'bm-hasat-tarih\').value,\'\',document.getElementById(\'bm-hasat-esik\').value)">Ekle</span></div>'+quick+'</div>',false);})()}
 `;
 }
 
@@ -21576,6 +21577,7 @@ window.brewdayBitir=function(){
       KR_list = _migrateAllRecipes(JSON.parse(localStorage.getItem('bm_v6') || '[]') || []);
     } catch(e){}
     Object.keys(tum).forEach(rid => {
+      if(/^(maya|stok):/.test(rid)) return; // pseudo-key: _mayaTazelikSync/_stokDusukSync sahibi, orphan değil
       const bulundu = KR_list.some(r => r && String(r.id) === String(rid));
       // v2.78.84 H7: Aktif _editId veya S.id kontrolü — kaydedilmemiş brewday olmuş reçeteler için
       // _editId KR ID'si (S.id tasarım gereği atanmıyor)
@@ -21588,6 +21590,107 @@ window.brewdayBitir=function(){
     });
     if(silinen > 0) _alarmlariYaz(tum);
     return silinen;
+  };
+
+  // ═══ C/B PSEUDO-KEY ALARMLAR (maya tazelik + stok düşük) — ts-bazlı, reconcile ═══
+  // Worker oda bazında alarm:<oda>'yı tarar, rid'i OPAK işler (receteId doğrulamaz) → maya:/stok: uyumlu.
+  // _alarmlariYaz tek choke point → debounce → /alarms-sync → KV → cron */5dk push (zincir DEĞİŞMEZ).
+  function _sonrakiBildirimTs(){
+    var saat = (typeof _alarmSaatiAl === 'function') ? _alarmSaatiAl() : '10:00';
+    var m = /^(\d{1,2}):(\d{2})$/.exec(saat || '10:00');
+    var h = m ? parseInt(m[1],10) : 10, mn = m ? parseInt(m[2],10) : 0;
+    var d = new Date(); d.setHours(h, mn, 0, 0);
+    if(d.getTime() <= Date.now()) d.setDate(d.getDate() + 1); // bugünkü saat geçtiyse yarın (gece push yok)
+    return d.getTime();
+  }
+  // desired alarmları mevcut grupla birleştir: durum + ts KORUNUR (B dedup/reset + tamamlandı koru)
+  function _pseudoMergeAlarmlar(exGrp, desired){
+    var exBy = {};
+    if(exGrp && Array.isArray(exGrp.alarmlar)) exGrp.alarmlar.forEach(function(a){ if(a) exBy[(a.g|0)+'|'+(a.aksiyon||'')] = a; });
+    return desired.map(function(d){
+      var ex = exBy[(d.g|0)+'|'+(d.aksiyon||'')];
+      var o = { g:d.g|0, ts:d.ts, tip:d.tip, aksiyon:d.aksiyon, aciklama:d.aciklama, sicaklik:(d.sicaklik!=null?d.sicaklik:null), durum:'bekliyor' };
+      if(ex){ if(ex.durum) o.durum = ex.durum; if(ex.ts != null) o.ts = ex.ts; }
+      return o;
+    });
+  }
+  function _pseudoGrupSig(arr){ return JSON.stringify((arr||[]).map(function(a){ return a ? [a.g|0, a.ts, a.tip, a.aksiyon, a.durum] : null; })); }
+
+  // C: bm_maya_hasat -> maya:<hasatId> grupları. Default 90 (starter düşün) + 180 (viability) gün; hasat.esik varsa tek özel eşik.
+  window._mayaTazelikSync = function(){
+    try {
+      if(typeof bmHasatList !== 'function') return false;
+      var liste = bmHasatList() || [];
+      var saat = (typeof _alarmSaatiAl === 'function') ? _alarmSaatiAl() : '10:00';
+      var tum = _alarmlariOku();
+      var degisti = false, gecerli = {};
+      liste.forEach(function(h){
+        if(!h || !h.id || !h.tarih) return;
+        var tarihTs = new Date(h.tarih + 'T00:00:00').getTime();
+        if(isNaN(tarihTs)) return;
+        var key = 'maya:' + h.id; gecerli[key] = 1;
+        var ad = String(h.ad || 'Maya');
+        var nesilStr = h.nesil ? (' (G' + h.nesil + ')') : '';
+        var recAd = ad + nesilStr;
+        var ov = (h.esik != null && +h.esik > 0) ? Math.round(+h.esik) : null;
+        var desired;
+        if(ov){
+          desired = [{ g:ov, ts:_alarmTsHesapla(tarihTs, ov, saat), tip:'kontrol', sicaklik:null,
+            aksiyon:'🧬 Maya tazeliği — ' + ad + ' (' + ov + ' gün)',
+            aciklama: recAd + ' ' + ov + ' günlük (özel eşik). Canlılık testi yap / starter düşün / gerekirse at.' }];
+        } else {
+          desired = [
+            { g:90, ts:_alarmTsHesapla(tarihTs, 90, saat), tip:'kontrol', sicaklik:null,
+              aksiyon:'🧬 Maya tazeliği — starter düşün',
+              aciklama: recAd + ' ~3 aylık. Sıvı maya aylık ~%22 canlılık kaybeder (White "Yeast"). Pitch öncesi starter düşün.' },
+            { g:180, ts:_alarmTsHesapla(tarihTs, 180, saat), tip:'kontrol', sicaklik:null,
+              aksiyon:'🧬 Maya viability düşük — test et / yeniden besle / at',
+              aciklama: recAd + ' ~6 aylık. Canlılık ciddi düşük. Canlılık testi yap, büyük starter ile yeniden besle ya da at.' }
+          ];
+        }
+        var ex = tum[key];
+        var merged = _pseudoMergeAlarmlar(ex, desired);
+        if(!ex || ex.receteAd !== recAd || _pseudoGrupSig(ex.alarmlar) !== _pseudoGrupSig(merged)){
+          tum[key] = { receteAd:recAd, pitchTs:tarihTs, durum:'aktif', alarmlar:merged };
+          degisti = true;
+        }
+      });
+      Object.keys(tum).forEach(function(k){ if(k.indexOf('maya:') === 0 && !gecerli[k]){ delete tum[k]; degisti = true; } });
+      if(degisti) _alarmlariYaz(tum);
+      return degisti;
+    } catch(e){ console.warn('[Alarm] maya tazelik sync:', e); return false; }
+  };
+
+  // B: STOK -> stok:<itemId> (yalnız eşik altı + tercih dusukStok ON). Dedup: aksiyon STABİL (miktar yok),
+  // mevcutsa ts korunur (alarm kaymaz). Eşik üstüne çıkar/silinir/tercih OFF -> grup kalkar (reset).
+  window._stokDusukSync = function(){
+    try {
+      if(typeof STOK === 'undefined' || !Array.isArray(STOK)) return false;
+      var pref = (typeof bmBildirimTercihOku === 'function') ? bmBildirimTercihOku() : { dusukStok:true };
+      var tum = _alarmlariOku();
+      var degisti = false, gecerli = {};
+      if(pref && pref.dusukStok){
+        STOK.forEach(function(it){
+          if(!it || !it.id) return;
+          if(!(it.uyari > 0)) return;
+          if(!((it.miktar || 0) <= it.uyari)) return; // eşik üstü -> alarm yok (reset)
+          var key = 'stok:' + it.id; gecerli[key] = 1;
+          var ad = String(it.ad || '?'), birim = String(it.birim || '');
+          var desired = [{ g:0, ts:_sonrakiBildirimTs(), tip:'kontrol', sicaklik:null,
+            aksiyon:'📦 Stok azaldı — ' + ad,
+            aciklama: ad + ' stoğu eşiğin altına indi (eşik ' + it.uyari + birim + '). Kontrol et / sipariş ver.' }];
+          var ex = tum[key];
+          var merged = _pseudoMergeAlarmlar(ex, desired);
+          if(!ex || ex.receteAd !== ad || _pseudoGrupSig(ex.alarmlar) !== _pseudoGrupSig(merged)){
+            tum[key] = { receteAd:ad, pitchTs:null, durum:'aktif', alarmlar:merged };
+            degisti = true;
+          }
+        });
+      }
+      Object.keys(tum).forEach(function(k){ if(k.indexOf('stok:') === 0 && !gecerli[k]){ delete tum[k]; degisti = true; } });
+      if(degisti) _alarmlariYaz(tum);
+      return degisti;
+    } catch(e){ console.warn('[Alarm] stok düşük sync:', e); return false; }
   };
 
   // ═══ TETİKLEME ═══
@@ -21707,6 +21810,9 @@ window.brewdayBitir=function(){
           if(r && r.id && Array.isArray(r.brewLog)) _alarmSiselemKontrol(r.id, r.brewLog);
         });
       } catch(e){}
+
+      try { if(window._mayaTazelikSync) _mayaTazelikSync(); } catch(e){}   // C: maya tazelik reconcile
+      try { if(window._stokDusukSync) _stokDusukSync(); } catch(e){}       // B: stok düşük reconcile
 
       const bekleyenler = _alarmBekleyenleri();
       if(bekleyenler.length === 0) return;
@@ -23273,6 +23379,7 @@ window.rStokBildirim = function(){
       var _al = _alarmlariOku();
       var simdi = Date.now();
       Object.keys(_al).forEach(function(rid){
+        if(/^(maya|stok):/.test(rid)) return; // pseudo-key: stok 'düşük stok' bölümünde, maya alarm modal/toast'ta
         var rec = _al[rid];
         if (!rec || rec.durum !== 'aktif') return;
         var recAd = (function(){ var t = (KR||[]).find(function(x){return x&&x.id===rid;}); return t ? (t.biraAd||t.ad||'(adsız)') : '(silinmiş tarif)'; })();
@@ -23774,7 +23881,7 @@ function syncTemizle(){
 const _origKy = ky;
 window.ky = function(a){ const _r=_origKy(a); _bmDirty=true; _syncGonderDebounced(); return _r; };
 const _origStokKaydet = stokKaydet;
-window.stokKaydet = function(a){ _origStokKaydet(a); _syncGonderDebounced(); };
+window.stokKaydet = function(a){ _origStokKaydet(a); _syncGonderDebounced(); try{ if(window._stokDusukSync) _stokDusukSync(); }catch(_e){} };
 window.syncPanelAc = syncPanelAc;
 window.syncKaydetVeBaslat = syncKaydetVeBaslat;
 window.syncTemizle = syncTemizle;
