@@ -22424,12 +22424,19 @@ window.brewSwDurum=function(){
 
 window.brewSwSifirla=function(){
   if(!navigator.serviceWorker){flash('Bu tarayıcı SW desteklemiyor','err');return;}
-  flash('🔄 Eski SW siliniyor, sayfa birazdan yenilenecek...','ok');
-  navigator.serviceWorker.getRegistrations().then(function(rs){
+  flash('🔄 SW + cache temizleniyor, sayfa yenilenecek...','ok');
+  var _pReg = navigator.serviceWorker.getRegistrations().then(function(rs){
     return Promise.all((rs||[]).map(function(r){return r.unregister();}));
-  }).then(function(){
+  }).catch(function(){});
+  var _pCache = (window.caches && caches.keys) ? caches.keys().then(function(ks){
+    return Promise.all((ks||[]).map(function(k){return caches.delete(k);}));
+  }).catch(function(){}) : Promise.resolve();
+  Promise.all([_pReg,_pCache]).then(function(){
     try{localStorage.removeItem('bm_push_sub');}catch(_e){}
-    setTimeout(function(){location.reload();},1500);
+    setTimeout(function(){
+      try{ location.replace(location.pathname + '?swreset=' + Date.now()); }
+      catch(_r){ location.reload(); }
+    },800);
   }).catch(function(e){flash('Sıfırlama hatası: '+((e&&e.message)||e),'err');});
 };
 
