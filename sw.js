@@ -665,7 +665,7 @@
 // bump v131-159 -> v131-160.
 // olu-kod-temizligi-batch (2026-05-27): eski UI yenilemesinden kalma kullanilmayan render degiskenleri silindi — mOpts/mOpts2/hOpts/maltKatBar (+ yetim maltKatlar) ve zincir def'leri (const mg={}/const hg={}). minOpts korundu (4 yerde canli). node --check PASS, MALTLAR=184.
 // bump v131-160 -> v131-161.
-const CACHE_VERSION = 'bm-cache-v131-337';
+const CACHE_VERSION = 'bm-cache-v131-338';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
@@ -1223,6 +1223,28 @@ self.addEventListener('fetch', function(event) {
 
 // ═══ Faz 1 POC: Web Push alıcı (install/activate/fetch INTACT — bu pasif eklemeler) ═══
 // Subscription olmadan push gelmez → davranış-nötr (mevcut kullanıcılar etkilenmez).
+// Sprint5: bildirim geçmişi — düşen push'u IndexedDB'ye yaz (app-kapalı). Client panel açılınca çeker + localStorage'a katar.
+function _bmGecmisIDB(rec){
+  return new Promise(function(resolve){
+    try{
+      var rq = indexedDB.open('bm-gecmis', 1);
+      rq.onupgradeneeded = function(e){ try{ var db=e.target.result; if(!db.objectStoreNames.contains('items')) db.createObjectStore('items',{keyPath:'id',autoIncrement:true}); }catch(_u){} };
+      rq.onerror = function(){ resolve(false); };
+      rq.onsuccess = function(e){
+        try{
+          var db=e.target.result;
+          if(!db.objectStoreNames.contains('items')){ resolve(false); return; }
+          var tx=db.transaction('items','readwrite'); var st=tx.objectStore('items');
+          st.add(rec);
+          var cnt=st.count();
+          cnt.onsuccess=function(){ var fazla=cnt.result-80; if(fazla>0){ var cur=st.openCursor(); cur.onsuccess=function(ev){ var c=ev.target.result; if(c && fazla>0){ c.delete(); fazla--; c.continue(); } }; } };
+          tx.oncomplete=function(){ resolve(true); };
+          tx.onerror=function(){ resolve(false); };
+        }catch(_t){ resolve(false); }
+      };
+    }catch(_o){ resolve(false); }
+  });
+}
 self.addEventListener('push', function(event) {
   var data = {};
   try { data = event.data ? event.data.json() : {}; }
@@ -1240,6 +1262,7 @@ self.addEventListener('push', function(event) {
   };
   event.waitUntil((async function(){
     try{ var c=await caches.open('bm-diag'); await c.put('lastpush',new Response(new Date().toISOString()+' | '+title+' | '+(data.body||''))); }catch(_e){}
+    try{ await _bmGecmisIDB({ ts: Date.now(), baslik: title, body: (data.body||''), tip: (data.tip||''), kaynak:'push' }); }catch(_eg){}
     try{ await self.registration.showNotification(title, opts); }
     catch(e){ try{ var c2=await caches.open('bm-diag'); await c2.put('lasterr',new Response('showNotification FAIL: '+((e&&e.message)||e))); }catch(_e2){} }
   })());
