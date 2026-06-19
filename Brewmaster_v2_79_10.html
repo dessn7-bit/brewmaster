@@ -14155,7 +14155,7 @@ function rEditorSurec(){
     <div style="font-size:10px;color:rgba(246,234,215,.9);margin-top:6px;line-height:1.5;text-align:center">Ekran açık kalır · Wake Lock · Tam ekran bildirim · Mash/Hop/Katkı/Whirlpool otomatik sıralı</div>
     <div style="margin-top:8px;padding:8px 10px;background:rgba(246,234,215,.1);border-radius:8px">
       <div style="font-size:11px;font-weight:600;color:var(--masthead-ink);margin-bottom:4px">📅 Planlı demleme tarihi <span style="font-weight:400;opacity:.7">(opsiyonel — hazırlık hatırlatmaları)</span></div>
-      <input aria-label="Planlı demleme tarihi" type="date" value="${S.planBrewTarih||''}" onchange="bmPlanBrewSet(this.value)" style="background:rgba(255,255,255,.9);border:1px solid rgba(246,234,215,.4);border-radius:6px;padding:4px 8px;font-size:12px;color:var(--kahve)">
+      <input aria-label="Planlı demleme tarihi" type="date" value="${S.planBrewTarih||''}" onchange="bmPlanBrewSet(this.value)" style="background:rgba(255,255,255,.9);border:1px solid rgba(246,234,215,.4);border-radius:var(--r-sm);padding:var(--sp-1) var(--sp-2);font-size:var(--fs-sm);color:var(--kahve)">
     </div>
   </div>
   <div class="kart" style="margin-bottom:10px">
@@ -14769,7 +14769,7 @@ function rEditorMaya(og, fg, abv, maya, maya2, fgKaynak, fgHesap){
         </div>
       </div>`,false);
     })()}
-    ${(function(){var L=(typeof bmHasatList==='function')?bmHasatList():[];var BST='display:inline-block;padding:2px 8px;font-size:var(--fs-xs);border:1px solid var(--sk);background:var(--sa);color:var(--vintage-koyu);border-radius:5px;cursor:pointer';var rows=L.slice().sort(function(a,b){return (b.tarih||'').localeCompare(a.tarih||'');}).map(function(j){var y=(typeof bmHasatYas==='function')?bmHasatYas(j.tarih):null;var via=(y!=null&&typeof mayaViabilite==='function')?Math.round(mayaViabilite(y/30)*100):null;var _ay=(y!=null)?Math.max(0,Math.round(y/30)):null;var w='',wc='';if(j.nesil>=10){w='🔴 taze öner';wc='var(--kk)';}else if(y!=null&&y>90){w='⚠️ eski — starter';wc='var(--kk)';}else if(j.nesil>=5){w='🟠 drift riski';wc='var(--kk)';}return '<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-top:1px solid var(--bor);font-size:11px;flex-wrap:wrap"><span style="font-weight:600;color:var(--kahve);flex:1;min-width:90px">'+j.ad+' <span style="color:var(--vintage-koyu)">G'+j.nesil+'</span></span><span style="color:var(--soluk)">'+(j.tarih||'')+'</span>'+(y!=null?'<span style="color:var(--soluk)">'+y+'g</span>':'')+(via!=null?'<span style="font-weight:600;color:'+(via<30?'var(--kk)':(via<50?'var(--kk)':'var(--yk)'))+'">~%'+via+'</span>':'')+(w?'<span style="font-weight:600;color:'+wc+'">'+w+'</span>':'')+(_ay!=null?'<span style="'+BST+';border-color:var(--yk);background:var(--ya);color:var(--yk)" onclick="S.mayaYasAy='+_ay+';render()" title="Bu kavanozun yasini ustteki pitch/starter hesabina gonder">→ Pitch ('+_ay+' ay)</span>':'')+'<span style="'+BST+';border-color:var(--crit);background:var(--crit-bg);color:var(--crit)" onclick="if(confirm(\'Bu hasat kaydını sil?\'))bmHasatSil(\''+j.id+'\')">Sil</span></div>';}).join('');var bugun=new Date().toISOString().slice(0,10);var quick=maya?'<div style="margin-top:6px"><span style="'+BST+';background:var(--ya);border-color:var(--yk);color:var(--yk)" data-ad="'+maya.ad+'" data-mid="'+maya.id+'" onclick="bmHasatEkle(this.dataset.ad,1,\'\',this.dataset.mid)">+ Bu reçetenin mayasını hasat et (G1)</span></div>':'';return _bmAccWrap('maya-hasat','🧫','Maya Hasadı',(L.length?L.length+' kayıt':''),'<div class="kart" style="margin-top:10px;background:var(--bg-sunken);border:1.5px solid var(--altin);padding:10px 12px"><div style="font-size:13px;font-weight:700;color:var(--vintage-koyu);margin-bottom:4px">🧫 Maya Hasadı & Nesil</div><div style="font-size:var(--fs-xs);color:var(--dim);margin-bottom:4px">Slurry/nesil envanteri — reçeteden bağımsız, kişisel.</div>'+(rows||'<div style="font-size:var(--fs-xs);color:var(--dim);padding:4px 0">Henüz hasat kaydı yok.</div>')+'<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:5px;align-items:center"><input aria-label="Maya adı" id="bm-hasat-ad" class="inp" style="flex:1;min-width:100px;font-size:11px" placeholder="Maya adı (US-05)"><input id="bm-hasat-nesil" class="inp" type="number" min="1" max="30" value="2" title="Nesil" style="width:48px;font-size:11px"><input aria-label="Hasat tarihi" id="bm-hasat-tarih" class="inp" type="date" value="'+bugun+'" style="font-size:11px"><input aria-label="Tazelik eşiği (gün, opsiyonel)" id="bm-hasat-esik" class="inp" type="number" min="1" max="999" placeholder="eşik?" title="Maya tazelik alarmı eşiği (gün) — boşsa 90/180 varsayılan" style="width:62px;font-size:11px"><span style="'+BST+'" onclick="bmHasatEkle(document.getElementById(\'bm-hasat-ad\').value,document.getElementById(\'bm-hasat-nesil\').value,document.getElementById(\'bm-hasat-tarih\').value,\'\',document.getElementById(\'bm-hasat-esik\').value)">Ekle</span></div>'+quick+'</div>',false);})()}
+    ${(function(){var L=(typeof bmHasatList==='function')?bmHasatList():[];var BST='display:inline-block;padding:2px 8px;font-size:var(--fs-xs);border:1px solid var(--sk);background:var(--sa);color:var(--vintage-koyu);border-radius:5px;cursor:pointer';var rows=L.slice().sort(function(a,b){return (b.tarih||'').localeCompare(a.tarih||'');}).map(function(j){var y=(typeof bmHasatYas==='function')?bmHasatYas(j.tarih):null;var via=(y!=null&&typeof mayaViabilite==='function')?Math.round(mayaViabilite(y/30)*100):null;var _ay=(y!=null)?Math.max(0,Math.round(y/30)):null;var w='',wc='';if(j.nesil>=10){w='🔴 taze öner';wc='var(--kk)';}else if(y!=null&&y>90){w='⚠️ eski — starter';wc='var(--kk)';}else if(j.nesil>=5){w='🟠 drift riski';wc='var(--kk)';}return '<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-top:1px solid var(--bor);font-size:11px;flex-wrap:wrap"><span style="font-weight:600;color:var(--kahve);flex:1;min-width:90px">'+j.ad+' <span style="color:var(--vintage-koyu)">G'+j.nesil+'</span></span><span style="color:var(--soluk)">'+(j.tarih||'')+'</span>'+(y!=null?'<span style="color:var(--soluk)">'+y+'g</span>':'')+(via!=null?'<span style="font-weight:600;color:'+(via<30?'var(--kk)':(via<50?'var(--kk)':'var(--yk)'))+'">~%'+via+'</span>':'')+(w?'<span style="font-weight:600;color:'+wc+'">'+w+'</span>':'')+(_ay!=null?'<span style="'+BST+';border-color:var(--yk);background:var(--ya);color:var(--yk)" onclick="S.mayaYasAy='+_ay+';render()" title="Bu kavanozun yasini ustteki pitch/starter hesabina gonder">→ Pitch ('+_ay+' ay)</span>':'')+'<span style="'+BST+';border-color:var(--crit);background:var(--crit-bg);color:var(--crit)" onclick="if(confirm(\'Bu hasat kaydını sil?\'))bmHasatSil(\''+j.id+'\')">Sil</span></div>';}).join('');var bugun=new Date().toISOString().slice(0,10);var quick=maya?'<div style="margin-top:6px"><span style="'+BST+';background:var(--ya);border-color:var(--yk);color:var(--yk)" data-ad="'+maya.ad+'" data-mid="'+maya.id+'" onclick="bmHasatEkle(this.dataset.ad,1,\'\',this.dataset.mid)">+ Bu reçetenin mayasını hasat et (G1)</span></div>':'';return _bmAccWrap('maya-hasat','🧫','Maya Hasadı',(L.length?L.length+' kayıt':''),'<div class="kart" style="margin-top:10px;background:var(--bg-sunken);border:1.5px solid var(--altin);padding:10px 12px"><div style="font-size:13px;font-weight:700;color:var(--vintage-koyu);margin-bottom:4px">🧫 Maya Hasadı & Nesil</div><div style="font-size:var(--fs-xs);color:var(--dim);margin-bottom:4px">Slurry/nesil envanteri — reçeteden bağımsız, kişisel.</div>'+(rows||'<div style="font-size:var(--fs-xs);color:var(--dim);padding:4px 0">Henüz hasat kaydı yok.</div>')+'<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:5px;align-items:center"><input aria-label="Maya adı" id="bm-hasat-ad" class="inp" style="flex:1;min-width:100px;font-size:11px" placeholder="Maya adı (US-05)"><input id="bm-hasat-nesil" class="inp" type="number" min="1" max="30" value="2" title="Nesil" style="width:48px;font-size:11px"><input aria-label="Hasat tarihi" id="bm-hasat-tarih" class="inp" type="date" value="'+bugun+'" style="font-size:11px"><input aria-label="Tazelik eşiği (gün, opsiyonel)" id="bm-hasat-esik" class="inp" type="number" min="1" max="999" placeholder="eşik?" title="Maya tazelik alarmı eşiği (gün) — boşsa 90/180 varsayılan" style="width:62px;font-size:var(--fs-sm)"><span style="'+BST+'" onclick="bmHasatEkle(document.getElementById(\'bm-hasat-ad\').value,document.getElementById(\'bm-hasat-nesil\').value,document.getElementById(\'bm-hasat-tarih\').value,\'\',document.getElementById(\'bm-hasat-esik\').value)">Ekle</span></div>'+quick+'</div>',false);})()}
 `;
 }
 
@@ -22035,7 +22035,7 @@ window.brewdayBitir=function(){
     m.style.top = (y + 10) + 'px';
     [['15 dk','ertele15'],['1 saat','ertele60'],['Yarın','erteleYarin']].forEach(function(o){
       var b = document.createElement('button'); b.textContent = o[0];
-      b.style.cssText = 'background:var(--ya,#eee);border:1px solid var(--yk,#999);color:var(--yk,#333);border-radius:6px;padding:6px 10px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap';
+      b.style.cssText = 'background:var(--ya,#eee);border:1px solid var(--yk,#999);color:var(--yk,#333);border-radius:var(--r-sm);padding:6px 10px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap';
       b.onclick = function(e){ try{ e.stopPropagation(); }catch(_b){} _alarmAksiyon(receteId, gun, o[1]); m.remove(); };
       m.appendChild(b);
     });
@@ -22217,9 +22217,9 @@ window.brewdayBitir=function(){
           +'</div>'
           +(al.durum==='bekliyor'||al.durum==='gosterildi' ? 
             '<div style="display:flex;gap:4px;flex-shrink:0">'
-              +'<button onclick="_alarmAksiyon(\''+hedefRid+'\','+al.g+',\'tamamlandi\')" style="background:var(--ya);border:1px solid var(--yk);color:var(--yk);border-radius:6px;padding:4px 8px;font-size:10px;font-weight:700;cursor:pointer" aria-label="'+escapeH(al.aksiyon)+' alarmını tamamlandı işaretle">✓</button>'
-              +(al.ts <= simdi ? '<button onclick="event.stopPropagation();_alarmSnoozeMenu(\''+hedefRid+'\','+al.g+',event)" style="background:var(--card);border:1px solid var(--bor);color:var(--kahve);border-radius:6px;padding:4px 8px;font-size:10px;font-weight:600;cursor:pointer" aria-label="'+escapeH(al.aksiyon)+' alarmını ertele (15dk/1sa/yarın)">⏰</button>' : '')
-              +'<button onclick="_alarmSustur(\''+hedefRid+'\','+al.g+')" style="background:var(--card);border:1px solid var(--bor);color:var(--soluk);border-radius:6px;padding:4px 8px;font-size:10px;font-weight:600;cursor:pointer" aria-label="'+escapeH(al.aksiyon)+' alarmını sustur">🔕</button>'
+              +'<button onclick="_alarmAksiyon(\''+hedefRid+'\','+al.g+',\'tamamlandi\')" style="background:var(--ya);border:1px solid var(--yk);color:var(--yk);border-radius:var(--r-sm);padding:4px 8px;font-size:10px;font-weight:700;cursor:pointer" aria-label="'+escapeH(al.aksiyon)+' alarmını tamamlandı işaretle">✓</button>'
+              +(al.ts <= simdi ? '<button onclick="event.stopPropagation();_alarmSnoozeMenu(\''+hedefRid+'\','+al.g+',event)" style="background:var(--card);border:1px solid var(--bor);color:var(--kahve);border-radius:var(--r-sm);padding:4px 8px;font-size:10px;font-weight:600;cursor:pointer" aria-label="'+escapeH(al.aksiyon)+' alarmını ertele (15dk/1sa/yarın)">⏰</button>' : '')
+              +'<button onclick="_alarmSustur(\''+hedefRid+'\','+al.g+')" style="background:var(--card);border:1px solid var(--bor);color:var(--soluk);border-radius:var(--r-sm);padding:4px 8px;font-size:10px;font-weight:600;cursor:pointer" aria-label="'+escapeH(al.aksiyon)+' alarmını sustur">🔕</button>'
             +'</div>'
             : (al.durum==='tamamlandi' ? '<span style="font-size:10px;color:#2D7A2D;font-weight:700">✓</span>' : 
                (al.durum==='atlandi' ? '<span style="font-size:10px;color:var(--soluk)">⤵</span>' : 
@@ -23741,9 +23741,9 @@ window.rStokBildirim = function(){
         var d=new Date(g.ts||0);
         var ds=String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
         var ki=(g.kaynak==='push')?'📲':'📱';
-        return '<div style="padding:7px 12px;border-bottom:1px solid var(--bor);font-size:12px">'+
-          '<div style="font-weight:600;color:var(--kahve)">'+ki+' '+escapeH(g.baslik||'')+'</div>'+
-          '<div style="font-size:10px;color:var(--soluk);margin-top:2px">'+ds+(g.body?' · '+escapeH(g.body):'')+'</div>'+
+        return '<div class="bm-bildirim-satir">'+
+          '<span class="bm-bildirim-ikon">'+ki+'</span>'+
+          '<div class="bm-bildirim-icerik"><strong>'+escapeH(g.baslik||'')+'</strong><small>'+ds+(g.body?' · '+escapeH(g.body):'')+'</small></div>'+
         '</div>';
       }).join('');
       liste += '<div class="bm-bildirim-grup"><div class="bm-bildirim-grup-baslik">🕓 Geçmiş ('+_gec.length+')</div>'+_gh+'</div>';
@@ -23763,11 +23763,11 @@ window.rStokBildirim = function(){
       _katSatir('vib', pref.vib!==false, '📳 Titreşim', 'Push bildiriminde titreşim deseni')+
       _katSatir('ses', pref.ses!==false, '🔊 Uygulama içi ses', 'Uygulama açıkken alarm bip sesi (sessiz saatte susar)')+
       '<div class="bm-ayar-satir" style="gap:8px;align-items:center;flex-wrap:wrap">'+
-        '<span style="font-size:13px;font-weight:600">🌙 Sessiz saat</span>'+
-        '<input aria-label="Sessiz başlangıç" type="time" value="'+(pref.sessizBasla||'22:00')+'" onchange="window.bmBildirimSessizSet(\'sessizBasla\',this.value)" style="font-size:12px;padding:3px 6px;border:1px solid var(--bor);border-radius:6px">'+
-        '<span style="font-size:12px;color:var(--soluk)">–</span>'+
-        '<input aria-label="Sessiz bitiş" type="time" value="'+(pref.sessizBit||'08:00')+'" onchange="window.bmBildirimSessizSet(\'sessizBit\',this.value)" style="font-size:12px;padding:3px 6px;border:1px solid var(--bor);border-radius:6px">'+
-        '<small style="flex:1;min-width:120px;color:var(--soluk);font-size:10px">Bu aralıkta bildirim ertelenir</small>'+
+        '<span class="bm-ayar-satir-text" style="flex:0 0 auto;font-weight:var(--fw-semibold)">🌙 Sessiz saat</span>'+
+        '<input aria-label="Sessiz başlangıç" type="time" value="'+(pref.sessizBasla||'22:00')+'" onchange="window.bmBildirimSessizSet(\'sessizBasla\',this.value)" class="inp" style="width:auto;font-size:var(--fs-sm)">'+
+        '<span style="font-size:var(--fs-sm);color:var(--soluk)">–</span>'+
+        '<input aria-label="Sessiz bitiş" type="time" value="'+(pref.sessizBit||'08:00')+'" onchange="window.bmBildirimSessizSet(\'sessizBit\',this.value)" class="inp" style="width:auto;font-size:var(--fs-sm)">'+
+        '<small style="flex:1;min-width:120px;color:var(--soluk);font-size:var(--fs-xs)">Bu aralıkta bildirim ertelenir</small>'+
       '</div>'+
     '</div>';
   // Sprint4: manuel hatırlatma bölümü (📌 Hatırlatmalarım)
@@ -23783,11 +23783,11 @@ window.rStokBildirim = function(){
       '<div class="bm-ayar-kart-baslik">📌 Hatırlatmalarım</div>'+
       (manuelSatirlar || '<div style="font-size:11px;color:var(--dim);padding:4px 0">Henüz hatırlatma yok.</div>')+
       '<div class="bm-ayar-satir" style="gap:5px;flex-wrap:wrap;align-items:center;margin-top:6px">'+
-        '<input aria-label="Hatırlatma metni" id="bm-manuel-baslik" class="inp" style="flex:1;min-width:120px;font-size:11px" placeholder="Hatırlatma (örn: keg yıka)">'+
-        '<input aria-label="Hatırlatma tarihi" id="bm-manuel-tarih" class="inp" type="date" value="'+_mbugun+'" style="font-size:11px">'+
-        '<input aria-label="Hatırlatma saati" id="bm-manuel-saat" class="inp" type="time" value="10:00" style="font-size:11px">'+
-        '<select aria-label="Tekrar" id="bm-manuel-tekrar" class="inp" style="flex:0 0 auto;width:auto;font-size:11px"><option value="yok">Bir kez</option><option value="hafta">Haftalık</option><option value="ay">Aylık</option></select>'+
-        '<span style="display:inline-block;padding:4px 10px;background:var(--ya);border:1px solid var(--yk);color:var(--yk);border-radius:6px;font-size:11px;font-weight:700;cursor:pointer" onclick="bmManuelEkleUI()">+ Ekle</span>'+
+        '<input aria-label="Hatırlatma metni" id="bm-manuel-baslik" class="inp" style="flex:1;min-width:120px;font-size:var(--fs-sm)" placeholder="Hatırlatma (örn: keg yıka)">'+
+        '<input aria-label="Hatırlatma tarihi" id="bm-manuel-tarih" class="inp" type="date" value="'+_mbugun+'" style="font-size:var(--fs-sm)">'+
+        '<input aria-label="Hatırlatma saati" id="bm-manuel-saat" class="inp" type="time" value="10:00" style="font-size:var(--fs-sm)">'+
+        '<select aria-label="Tekrar" id="bm-manuel-tekrar" class="inp" style="flex:0 0 auto;width:auto;font-size:var(--fs-sm)"><option value="yok">Bir kez</option><option value="hafta">Haftalık</option><option value="ay">Aylık</option></select>'+
+        '<button type="button" class="bm-ayar-btn" onclick="bmManuelEkleUI()">+ Ekle</button>'+
       '</div>'+
     '</div>';
   return liste + manuelBlok + tercihBlok;
