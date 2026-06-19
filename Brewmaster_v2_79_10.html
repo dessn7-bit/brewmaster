@@ -5180,9 +5180,9 @@ function bmHasatYas(tarih){if(!tarih)return null;var d=new Date(tarih+'T00:00:00
 // Sprint4 — manuel hatırlatma store (bm_manuel_alarm) + planlı demleme tarihi
 function bmManuelList(){try{var a=JSON.parse(localStorage.getItem('bm_manuel_alarm')||'[]');return Array.isArray(a)?a:[];}catch(e){return [];}}
 function bmManuelSave(a){try{localStorage.setItem('bm_manuel_alarm',JSON.stringify(a));}catch(e){}}
-function bmManuelEkle(baslik,tarih,saat,not){ if(!baslik||!String(baslik).trim()||!tarih){ if(typeof flash==='function')flash('Başlık + tarih gerekli','err'); return false; } var d=new Date(tarih+'T'+((/^\d{1,2}:\d{2}$/.test(saat||''))?saat:'10:00')+':00'); if(isNaN(d.getTime())){ if(typeof flash==='function')flash('Geçersiz tarih','err'); return false; } var a=bmManuelList(); a.push({id:'m'+Date.now(), baslik:String(baslik).trim(), ts:d.getTime(), not:String(not||'').trim()}); bmManuelSave(a); try{if(window._manuelAlarmSync)_manuelAlarmSync();}catch(_e){} if(typeof flash==='function')flash('🔔 Hatırlatma eklendi','ok'); if(typeof render==='function')render(); return true; }
+function bmManuelEkle(baslik,tarih,saat,not,tekrar){ if(!baslik||!String(baslik).trim()||!tarih){ if(typeof flash==='function')flash('Başlık + tarih gerekli','err'); return false; } var d=new Date(tarih+'T'+((/^\d{1,2}:\d{2}$/.test(saat||''))?saat:'10:00')+':00'); if(isNaN(d.getTime())){ if(typeof flash==='function')flash('Geçersiz tarih','err'); return false; } var a=bmManuelList(); a.push({id:'m'+Date.now(), baslik:String(baslik).trim(), ts:d.getTime(), not:String(not||'').trim(), tekrar:(tekrar==='hafta'||tekrar==='ay')?tekrar:'yok'}); bmManuelSave(a); try{if(window._manuelAlarmSync)_manuelAlarmSync();}catch(_e){} if(typeof flash==='function')flash('🔔 Hatırlatma eklendi','ok'); if(typeof render==='function')render(); return true; }
 function bmManuelSil(id){ bmManuelSave(bmManuelList().filter(function(x){return x.id!==id;})); try{if(window._manuelAlarmSync)_manuelAlarmSync();}catch(_e){} if(typeof render==='function')render(); }
-window.bmManuelEkleUI=function(){ var b=document.getElementById('bm-manuel-baslik'), t=document.getElementById('bm-manuel-tarih'), sa=document.getElementById('bm-manuel-saat'); if(!b||!t) return; if(bmManuelEkle(b.value, t.value, sa?sa.value:'10:00', '')){ b.value=''; } };
+window.bmManuelEkleUI=function(){ var b=document.getElementById('bm-manuel-baslik'), t=document.getElementById('bm-manuel-tarih'), sa=document.getElementById('bm-manuel-saat'), tk=document.getElementById('bm-manuel-tekrar'); if(!b||!t) return; if(bmManuelEkle(b.value, t.value, sa?sa.value:'10:00', '', tk?tk.value:'yok')){ b.value=''; } };
 window.bmPlanBrewSet=function(val){ try{ if(typeof S==='undefined'||!S) return; S.planBrewTarih = (val&&/^\d{4}-\d{2}-\d{2}$/.test(val)) ? val : null; if(S.biraAd&&S.biraAd.trim()&&typeof tarifeKaydet==='function'){ tarifeKaydet(); } try{if(window._planPrepSync)_planPrepSync();}catch(_e){} if(typeof render==='function')render(); }catch(e){ console.warn('bmPlanBrewSet',e); } };
 function bmOgPlato(og){return (og>1)?(-616.868+1111.14*og-630.272*og*og+135.997*og*og*og):0;}
 function bmPitchHedef(tip,og){if(tip==='kveik')return{rate:0.5,ad:'Kveik (düşük pitch)'};if(tip==='lager')return{rate:1.5,ad:'Lager (düşük fermentasyon)'};if(og>=1.070)return{rate:1.25,ad:'Yüksek OG ale (>1.070)'};return{rate:0.75,ad:'Standart ale'};}
@@ -21850,15 +21850,37 @@ window.brewdayBitir=function(){
   };
 
   // E (Sprint4) — manuel hatırlatma: bm_manuel_alarm -> manuel:<id>. ts kullanıcı seçti -> sessiz saat BYPASS (ham ts).
+  // Sprint6: tekrarlayan hatırlatma — bir sonraki periyod ts'i (en yakın gelecek; kaçan periyotları atla, spam yok)
+  window._manuelSonrakiTs = function(ts, tk, simdi){
+    var d = new Date(ts), guard = 0;
+    while(d.getTime() <= simdi && guard < 600){
+      if(tk === 'hafta') d.setDate(d.getDate() + 7);
+      else if(tk === 'ay') d.setMonth(d.getMonth() + 1);
+      else break;
+      guard++;
+    }
+    return d.getTime();
+  };
   window._manuelAlarmSync = function(){
     try {
       if(typeof bmManuelList !== 'function') return false;
       var liste = bmManuelList() || [];
+      var simdi = Date.now(), storeDegisti = false;
       var tum = _alarmlariOku();
       var degisti = false, gecerli = {};
       liste.forEach(function(h){
         if(!h || !h.id || !(h.ts > 0)) return;
         var key = 'manuel:' + h.id; gecerli[key] = 1;
+        // Sprint6: tekrarlayan re-arm — bu periyot işlendiyse (durum≠bekliyor) + ts geçmiş → en yakın gelecek periyoda atla + fresh rebuild (yeni ts+bekliyor → worker pushedTs sıfır → re-push)
+        var _tk = (h.tekrar==='hafta'||h.tekrar==='ay') ? h.tekrar : 'yok';
+        if(_tk !== 'yok' && h.ts <= simdi){
+          var _exG = tum[key];
+          var _exD = (_exG && Array.isArray(_exG.alarmlar) && _exG.alarmlar[0]) ? _exG.alarmlar[0].durum : null;
+          if(_exD && _exD !== 'bekliyor'){
+            var _yeni = _manuelSonrakiTs(h.ts, _tk, simdi);
+            if(_yeni > h.ts){ h.ts = _yeni; storeDegisti = true; delete tum[key]; }
+          }
+        }
         var baslik = String(h.baslik || 'Hatırlatma');
         var desired = [{ g:0, ts:h.ts, tip:'kontrol', sicaklik:null, kategori:'E', aksiyon:'🔔 ' + baslik, aciklama:String(h.not || 'Manuel hatırlatma.') }];
         desired.forEach(function(_d){ _d.vibrate = _alarmVibPattern(_d.tip); });
@@ -21870,6 +21892,7 @@ window.brewdayBitir=function(){
         }
       });
       Object.keys(tum).forEach(function(k){ if(k.indexOf('manuel:') === 0 && !gecerli[k]){ delete tum[k]; degisti = true; } });
+      if(storeDegisti && typeof bmManuelSave==='function') bmManuelSave(liste); // tekrarlayan re-arm ts'lerini persist et
       if(degisti) _alarmlariYaz(tum);
       return degisti;
     } catch(e){ console.warn('[Alarm] manuel sync:', e); return false; }
@@ -23753,7 +23776,7 @@ window.rStokBildirim = function(){
   var manuelSatirlar = _mlist.slice().sort(function(a,b){return a.ts-b.ts;}).map(function(m){
     var d=new Date(m.ts); var ds=String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
     var gecti = m.ts <= Date.now();
-    return '<div class="bm-ayar-satir" style="justify-content:space-between;gap:8px;'+(gecti?'opacity:.5;':'')+'"><span style="flex:1;font-size:12px"><strong>'+String(m.baslik||'').replace(/</g,'&lt;')+'</strong> <small style="color:var(--soluk)">'+ds+(m.not?' · '+String(m.not).replace(/</g,'&lt;'):'')+'</small></span><button onclick="bmManuelSil(\''+m.id+'\')" aria-label="Hatırlatmayı sil" style="background:var(--crit-bg);border:1px solid var(--crit);color:var(--crit);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer">✕</button></div>';
+    return '<div class="bm-ayar-satir" style="justify-content:space-between;gap:8px;'+(gecti?'opacity:.5;':'')+'"><span style="flex:1;font-size:12px"><strong>'+String(m.baslik||'').replace(/</g,'&lt;')+'</strong>'+((m.tekrar==='hafta'||m.tekrar==='ay')?' <span style="font-size:9px;color:var(--yk);background:var(--ya);border-radius:4px;padding:1px 6px;font-weight:600;white-space:nowrap">🔁 '+(m.tekrar==='ay'?'aylık':'haftalık')+'</span>':'')+' <small style="color:var(--soluk)">'+ds+(m.not?' · '+String(m.not).replace(/</g,'&lt;'):'')+'</small></span><button onclick="bmManuelSil(\''+m.id+'\')" aria-label="Hatırlatmayı sil" style="background:var(--crit-bg);border:1px solid var(--crit);color:var(--crit);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer">✕</button></div>';
   }).join('');
   var manuelBlok =
     '<div class="bm-ayar-kart">'+
@@ -23763,6 +23786,7 @@ window.rStokBildirim = function(){
         '<input aria-label="Hatırlatma metni" id="bm-manuel-baslik" class="inp" style="flex:1;min-width:120px;font-size:11px" placeholder="Hatırlatma (örn: keg yıka)">'+
         '<input aria-label="Hatırlatma tarihi" id="bm-manuel-tarih" class="inp" type="date" value="'+_mbugun+'" style="font-size:11px">'+
         '<input aria-label="Hatırlatma saati" id="bm-manuel-saat" class="inp" type="time" value="10:00" style="font-size:11px">'+
+        '<select aria-label="Tekrar" id="bm-manuel-tekrar" class="inp" style="flex:0 0 auto;width:auto;font-size:11px"><option value="yok">Bir kez</option><option value="hafta">Haftalık</option><option value="ay">Aylık</option></select>'+
         '<span style="display:inline-block;padding:4px 10px;background:var(--ya);border:1px solid var(--yk);color:var(--yk);border-radius:6px;font-size:11px;font-weight:700;cursor:pointer" onclick="bmManuelEkleUI()">+ Ekle</span>'+
       '</div>'+
     '</div>';
