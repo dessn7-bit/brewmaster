@@ -595,6 +595,8 @@ body[data-mode="view"] .bm-chip{pointer-events:none;opacity:.6}
 .bm-ayar-btn-sec:hover{background:var(--accent-soft);color:var(--vintage-koyu)}
 .bm-ayar-btn-uyari{background:var(--crit);color:#FFFFFF;box-shadow:var(--elv-1)}
 .bm-ayar-btn-uyari:hover{background:#A53A2C;box-shadow:var(--elv-2)}
+/* Sprint 136: Bulut Senkron modal etiketi — eski bespoke 10px/#6A4A00 yerine token (--fs-xs/--kahve-koyu) */
+.bm-sync-label{font-family:var(--font-govde);font-size:var(--fs-xs);font-weight:var(--fw-semibold);color:var(--kahve-koyu);letter-spacing:.8px;text-transform:uppercase;margin-bottom:var(--sp-1)}
 /* Adim 135-K: .bm-bildirim-* token migrate — bg-card + cizgi-arac + r-sm + sp + font-govde + ink/muted */
 .bm-bildirim-grup{margin-bottom:var(--sp-4)}
 .bm-bildirim-grup-baslik{font-family:var(--font-govde);font-size:calc(var(--fs-xs) * var(--tip-b-scale, 1));font-weight:var(--tip-b-fw, var(--fw-semibold));color:var(--tip-b-col, var(--metin-soluk));text-transform:var(--tip-b-tt, uppercase);letter-spacing:var(--tip-b-ls, .6px);margin-bottom:var(--sp-1);padding:0 2px;font-variant-caps:var(--tip-b-fvc, normal);font-style:var(--tip-b-fst, normal)}
@@ -24126,46 +24128,53 @@ function syncPanelAc(){
   syncYukle();
   const mevcut = syncCfg || {};
   const html = `
-  <div style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:flex;align-items:center;justify-content:center;padding:16px" onclick="this.remove()">
-    <div style="background:#fff;border-radius:16px;padding:20px;width:100%;max-width:380px;box-shadow:0 8px 32px rgba(0,0,0,.3)" onclick="event.stopPropagation()">
-      <div style="font-size:16px;font-weight:700;color:var(--kahve-koyu);margin-bottom:4px">☁️ Bulut Senkron</div>
-      <div style="font-size:11px;color:var(--soluk);margin-bottom:16px">Telefon ve tablet arasında otomatik senkronizasyon</div>
+  <div id="syncModalOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:flex;align-items:center;justify-content:center;padding:var(--sp-4)" onclick="this.remove()">
+    <div style="background:var(--bg-card);border-radius:var(--r-md);padding:var(--sp-5);width:100%;max-width:380px;box-shadow:var(--elv-2);max-height:90vh;overflow-y:auto" onclick="event.stopPropagation()">
+      <div style="display:flex;align-items:flex-start;gap:var(--sp-2);margin-bottom:var(--sp-3)">
+        <div style="flex:1;min-width:0">
+          <div style="font-family:var(--font-baslik);font-size:var(--fs-md);font-weight:var(--fw-semibold);color:var(--kahve-koyu)">☁️ Bulut Senkron</div>
+          <div style="font-size:var(--fs-xs);color:var(--metin-soluk);margin-top:2px">Telefon ve tablet arasında otomatik senkronizasyon</div>
+        </div>
+        <button type="button" aria-label="Pencereyi kapat" onclick="document.getElementById('syncModalOverlay').remove()" style="background:transparent;border:none;color:var(--metin-soluk);font-size:var(--fs-lg);line-height:1;cursor:pointer;padding:var(--sp-1);border-radius:var(--r-sm);flex-shrink:0">✕</button>
+      </div>
 
-      <div style="font-size:10px;font-weight:700;color:#6A4A00;letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px">Firebase Veritabanı URL</div>
-      <input aria-label="Firebase veritabanı URL" id="syncUrlInp" class="inp" style="margin-bottom:10px;font-size:12px"
+      <div class="bm-sync-label">Firebase Veritabanı URL</div>
+      <input aria-label="Firebase veritabanı URL" id="syncUrlInp" class="inp" style="margin-bottom:var(--sp-2)"
         placeholder="https://proje-xxx-default-rtdb.firebaseio.com"
         value="${mevcut.url||''}">
 
-      <div style="font-size:10px;font-weight:700;color:#6A4A00;letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px">Oda Kodu</div>
-      <input aria-label="Oda kodu" id="syncOdaInp" class="inp" style="margin-bottom:10px;font-size:12px"
+      <div class="bm-sync-label">Oda Kodu</div>
+      <input aria-label="Oda kodu" id="syncOdaInp" class="inp" style="margin-bottom:var(--sp-2)"
         placeholder="örn: kaan-bira  (her cihazda aynı olmalı)"
         value="${mevcut.oda||''}">
 
-      <div style="font-size:10px;font-weight:700;color:#6A4A00;letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px">Bu Cihaz Adı</div>
-      <input aria-label="Cihaz adı" id="syncCihazInp" class="inp" style="margin-bottom:14px;font-size:12px"
+      <div class="bm-sync-label">Bu Cihaz Adı</div>
+      <input aria-label="Cihaz adı" id="syncCihazInp" class="inp" style="margin-bottom:var(--sp-3)"
         placeholder="Telefon veya Tablet"
         value="${mevcut.cihaz||''}">
 
-      <div style="font-size:10px;font-weight:700;color:#6A4A00;letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px">Oda Token (cihazlar arası aynı)</div>
-      <div style="display:flex;gap:6px;margin-bottom:10px">
-        <input aria-label="Oda token" id="syncTokenInp" class="inp" style="flex:1;font-size:11px;font-family:monospace" placeholder="Üret → diğer cihazlara yapıştır" value="${mevcut.odaToken||''}">
-        <button type="button" class="btn" style="background:var(--kahve-koyu);color:var(--kahve-light);padding:8px 10px;font-size:11px" onclick="syncTokenUret()">Üret</button>
-        <button type="button" class="btn" style="background:var(--kahve-bg);color:var(--kahve-koyu);padding:8px 10px;font-size:11px" onclick="syncTokenKopyala()">📋</button>
+      <div class="bm-sync-label">Oda Token (cihazlar arası aynı)</div>
+      <div style="display:flex;gap:var(--sp-2);margin-bottom:var(--sp-2)">
+        <input aria-label="Oda token" id="syncTokenInp" class="inp" style="flex:1;font-family:monospace" placeholder="Üret → diğer cihazlara yapıştır" value="${mevcut.odaToken||''}">
+        <button type="button" class="bm-ayar-btn" onclick="syncTokenUret()">Üret</button>
+        <button type="button" class="bm-ayar-btn-sec" aria-label="Token kopyala" onclick="syncTokenKopyala()">📋</button>
       </div>
 
-      <div id="syncDiag" style="font-size:9px;color:var(--soluk);background:var(--kahve-bg);border-radius:6px;padding:8px;margin-bottom:10px;line-height:1.5;word-break:break-all">
+      <div id="syncDiag" style="font-size:var(--fs-xs);color:var(--metin-soluk);background:var(--bg-sunken);border-radius:var(--r-sm);padding:var(--sp-2);margin-bottom:var(--sp-2);line-height:1.5;word-break:break-all">
         NODE: ${syncUrl() || '(oda/url eksik)'}<br>
         DURUM: ${syncPollTimer ? '🟡 polling aktif' : '⚫ kapali'}<br>
         LAST_TS: ${syncSonGuncelle ? new Date(syncSonGuncelle).toLocaleString('tr-TR',{timeZone:'Europe/Istanbul'}) : 'hic'}<br>
         SW: ${navigator.serviceWorker && navigator.serviceWorker.controller ? 'aktif' : 'yok'}
       </div>
 
-      <div style="display:flex;gap:8px;margin-bottom:12px">
-        <button class="btn" style="flex:1;background:var(--kahve-koyu);color:var(--kahve-light);padding:10px" onclick="syncKaydetVeBaslat()">✓ Kaydet & Bağlan</button>
-        <button class="btn" style="background:#FAE8E8;color:#7A1A1A;padding:10px" onclick="syncTemizle()">Kapat</button>
+      <div id="syncCihazlar" style="margin-bottom:var(--sp-3)"></div>
+
+      <div style="display:flex;gap:var(--sp-2);margin-bottom:var(--sp-3)">
+        <button class="bm-ayar-btn" style="flex:1" onclick="syncKaydetVeBaslat()">✓ Kaydet & Bağlan</button>
+        <button class="bm-ayar-btn bm-ayar-btn-uyari" onclick="syncBaglantiKes()">🔌 Bağlantıyı Kes</button>
       </div>
 
-      <div style="font-size:10px;color:var(--soluk);background:var(--kahve-bg);border-radius:8px;padding:10px;line-height:1.6">
+      <div style="font-size:var(--fs-xs);color:var(--metin-soluk);background:var(--bg-sunken);border-radius:var(--r-sm);padding:var(--sp-3);line-height:1.6">
         <b>Kurulum (5 dakika):</b><br>
         1. <a href="https://console.firebase.google.com" target="_blank" style="color:var(--kahve-koyu)">console.firebase.google.com</a> → Proje oluştur<br>
         2. Build → Realtime Database → Oluştur → Test modu<br>
@@ -24178,6 +24187,7 @@ function syncPanelAc(){
   const el = document.createElement('div');
   el.innerHTML = html;
   document.body.appendChild(el.firstElementChild);
+  try{ syncCihazlariYukle(); }catch(_e){}
 }
 
 window.syncTokenUret = function(){
@@ -24211,12 +24221,101 @@ function syncKaydetVeBaslat(){
 }
 
 function syncTemizle(){
-  document.querySelector('[onclick="this.remove()"]')?.remove();
+  var _ov=document.getElementById('syncModalOverlay');
+  if(_ov){ _ov.remove(); } else { var _x=document.querySelector('[onclick="this.remove()"]'); if(_x)_x.remove(); }
   if(syncPollTimer){ clearInterval(syncPollTimer); syncPollTimer=null; }
   syncCfg = null;
   localStorage.removeItem(SYNC_SK);
   syncDurumGuncelle('kapali');
 }
+
+// Sprint 136 P1: destrüktif "Bağlantıyı Kes" — onaysız asla silinmez (eski "Kapat" tuzağı fix).
+// syncTemizle çekirdeği (config sil + polling durdur) AYNI; sadece confirm kapısı + pencere ×/overlay'den AYRI.
+window.syncBaglantiKes = function(){
+  if(!confirm('Senkron bağlantısı kesilecek; oda kodu ve token bu cihazdan silinecek, senkron duracak.\n\nEmin misin?')) return;
+  syncTemizle();
+  if(typeof bmToast==='function') bmToast('🔌 Senkron bağlantısı kesildi','ok');
+};
+
+// Sprint 136: Bağlı cihaz listesi — sub:<oda>'yı mevcut /kv-peek (oda-token korumalı) ile oku.
+window.syncCihazlariYukle = function(){
+  var box=document.getElementById('syncCihazlar'); if(!box) return;
+  var _hdr=function(msg,renk){ return '<div class="bm-sync-label" style="margin-bottom:var(--sp-1)">📱 Bağlı Cihazlar</div><div style="font-size:var(--fs-xs);color:'+(renk||'var(--metin-soluk)')+';padding:var(--sp-1) 0">'+msg+'</div>'; };
+  var cfg=syncCfg||{}; var oda=cfg.oda, tok=cfg.odaToken;
+  if(!oda||!tok){ box.innerHTML=_hdr('Oda + token kurulunca bağlı cihazlar burada listelenir'); return; }
+  box.innerHTML=_hdr('Yükleniyor…');
+  var _to=null,_ctrl=null;
+  try{ _ctrl=new AbortController(); _to=setTimeout(function(){try{_ctrl.abort();}catch(_a){}},8000); }catch(_c){ _ctrl=null; }
+  fetch('https://brewmaster-models.dessn7.workers.dev/kv-peek?oda='+encodeURIComponent(oda),{
+    headers:{'X-BM-Token':tok}, signal:(_ctrl?_ctrl.signal:undefined)
+  }).then(function(r){ if(_to)clearTimeout(_to); return r.json().catch(function(){return{};}).then(function(j){return {st:r.status,j:j};}); })
+  .then(function(o){
+    if(o.st===403){ box.innerHTML=_hdr('Token eşleşmiyor — kontrol et','var(--crit)'); return; }
+    if(o.st===404){ box.innerHTML=_hdr('Henüz kayıt yok — bir cihazda 🔔 İzin Ver ile abone ol'); return; }
+    if(o.st<200||o.st>=300){ box.innerHTML=_hdr('Liste alınamadı (HTTP '+o.st+')'); return; }
+    var subs=(o.j&&Array.isArray(o.j.sub))?o.j.sub:[];
+    syncCihazlariYaz(subs);
+  }).catch(function(e){
+    if(_to)clearTimeout(_to);
+    var _ab=(e&&e.name==='AbortError');
+    box.innerHTML=_hdr('Buluta ulaşılamadı'+(_ab?' (zaman aşımı)':''));
+  });
+};
+
+// Bağlı cihaz listesini çiz — "bu cihaz" korumalı (sil butonu yok). Diğerleri için onaylı Sil.
+window.syncCihazlariYaz = function(subs){
+  var box=document.getElementById('syncCihazlar'); if(!box) return;
+  subs=Array.isArray(subs)?subs:[];
+  var cfg=syncCfg||{}; var buAd=String(cfg.cihaz||'A');
+  var localEp=''; try{ var _ls=JSON.parse(localStorage.getItem('bm_push_sub')||'null'); localEp=(_ls&&_ls.endpoint)||''; }catch(_e){}
+  var h='<div class="bm-sync-label" style="margin-bottom:var(--sp-1)">📱 Bağlı Cihazlar ('+subs.length+')</div>';
+  if(!subs.length){ box.innerHTML=h+'<div style="font-size:var(--fs-xs);color:var(--metin-soluk);padding:var(--sp-1) 0">Henüz abone cihaz yok</div>'; return; }
+  for(var i=0;i<subs.length;i++){
+    var s=subs[i]||{};
+    var ad=esc(String(s.cihaz||'?'));
+    var ep=String(s.endpoint||'');
+    var bu=(String(s.cihaz||'')===buAd)||(!!localEp&&ep===localEp);
+    var zaman=''; try{ if(s.ts) zaman=new Date(s.ts).toLocaleDateString('tr-TR',{day:'numeric',month:'short'}); }catch(_z){}
+    h+='<div class="bm-ayar-satir" style="border-bottom:1px solid var(--cizgi-arac)">'+
+        '<div class="bm-ayar-satir-text">'+ad+(bu?' <span style="color:var(--kahve-koyu);font-weight:var(--fw-semibold)">· bu cihaz</span>':'')+(zaman?' <small>'+zaman+'</small>':'')+'</div>'+
+        (bu? '<span style="font-size:var(--fs-xs);color:var(--metin-soluk);flex-shrink:0">korumalı</span>'
+           : '<button type="button" class="bm-ayar-btn bm-ayar-btn-uyari" data-ep="'+esc(ep)+'" data-ad="'+ad+'" onclick="syncCihazSil(this)">Sil</button>')+
+      '</div>';
+  }
+  box.innerHTML=h;
+};
+
+// Cihaz aboneliğini sil — onaylı + bu-cihaz çift-koruma + worker /sub-remove (oda-token guard).
+window.syncCihazSil = function(btn){
+  if(!btn) return;
+  var ep=btn.getAttribute('data-ep')||''; var ad=btn.getAttribute('data-ad')||'cihaz';
+  var cfg=syncCfg||{}; var oda=cfg.oda, tok=cfg.odaToken;
+  if(!oda||!tok){ if(typeof bmToast==='function')bmToast('Oda/token yok','warning'); return; }
+  if(!ep){ if(typeof bmToast==='function')bmToast('Cihaz tanımlanamadı','warning'); return; }
+  var localEp=''; try{ var _ls=JSON.parse(localStorage.getItem('bm_push_sub')||'null'); localEp=(_ls&&_ls.endpoint)||''; }catch(_e){}
+  if(String(ad)===String(cfg.cihaz||'A')||(!!localEp&&ep===localEp)){ if(typeof bmToast==='function')bmToast('Bu cihazı buradan silemezsin','warning'); return; }
+  if(!confirm('"'+ad+'" aboneliği silinecek; o cihaz artık bildirim almayacak.\n\nEmin misin?')) return;
+  btn.disabled=true; var _old=btn.textContent; btn.textContent='…';
+  var _to=null,_ctrl=null;
+  try{ _ctrl=new AbortController(); _to=setTimeout(function(){try{_ctrl.abort();}catch(_a){}},8000); }catch(_c){ _ctrl=null; }
+  fetch('https://brewmaster-models.dessn7.workers.dev/sub-remove',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','X-BM-Token':tok},
+    body:JSON.stringify({oda:oda, token:tok, endpoint:ep}),
+    signal:(_ctrl?_ctrl.signal:undefined)
+  }).then(function(r){ if(_to)clearTimeout(_to); return r.json().catch(function(){return{};}).then(function(j){return {st:r.status,j:j};}); })
+  .then(function(o){
+    if(o.st>=200&&o.st<300){ if(typeof bmToast==='function')bmToast('🗑️ '+ad+' silindi','ok'); syncCihazlariYukle(); return; }
+    btn.disabled=false; btn.textContent=_old;
+    if(o.st===403){ if(typeof bmToast==='function')bmToast('Token eşleşmiyor','warning'); }
+    else if(o.st===404||o.st===405){ if(typeof bmToast==='function')bmToast('Silme servisi henüz aktif değil (worker güncellenecek)','warning'); }
+    else { if(typeof bmToast==='function')bmToast('Silinemedi (HTTP '+o.st+')','warning'); }
+  }).catch(function(e){
+    if(_to)clearTimeout(_to); btn.disabled=false; btn.textContent=_old;
+    var _ab=(e&&e.name==='AbortError');
+    if(typeof bmToast==='function')bmToast('Buluta ulaşılamadı'+(_ab?' (zaman aşımı)':''),'warning');
+  });
+};
 
 // Senkronu tarifeKaydet ve stokKaydet/Sil/Guncelle ile entegre et
 // v2.78.91 Q3 — setTimeout yerine _syncGonderDebounced (clearTimeout collapse)
