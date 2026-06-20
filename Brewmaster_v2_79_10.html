@@ -23538,7 +23538,7 @@ window.bmVeriExport = function(){
         dump[k] = localStorage.getItem(k);
       }
     }
-    var meta = { exportTs: Date.now(), version: 'v2.79.10', keys: Object.keys(dump).length };
+    var meta = { exportTs: Date.now(), version: APP_VERSION, keys: Object.keys(dump).length };
     var payload = { meta: meta, data: dump };
     var blob = new Blob([JSON.stringify(payload, null, 2)], { type:'application/json' });
     var d = new Date();
@@ -23560,43 +23560,59 @@ window.bmVeriImport = function(inputEl){
   try {
     var file = inputEl && inputEl.files && inputEl.files[0];
     if (!file) return;
+    var ALLOW = /^(bm_|kabir_|_orig|KR$)/; // Sprint 138: export ile SİMETRİK allowlist (asimetri bitti)
     var reader = new FileReader();
     reader.onload = function(ev){
       try {
         var p = JSON.parse(ev.target.result);
         if (!p || !p.data || typeof p.data !== 'object') throw new Error('Geçersiz format (data alanı yok)');
-        var keyCount = Object.keys(p.data).length;
-        var msg = '⚠️ DİKKAT: '+keyCount+' anahtar mevcut verinin ÜZERİNE YAZILACAK.\n\nYedek tarihi: '+(p.meta && p.meta.exportTs ? new Date(p.meta.exportTs).toLocaleString('tr-TR') : '?')+'\n\nDevam edilsin mi?';
-        if (!confirm(msg)) {
-          if (typeof bmToast === 'function') bmToast('Import iptal edildi', 'info');
-          inputEl.value = '';
-          return;
-        }
-        var ok = 0;
+        // 1) VALIDATION (yazımdan ÖNCE — atomik): app-key + string tip + JSON değerler parse-edilebilir
+        var temiz = {}, atlanan = [], yabanci = 0;
         Object.keys(p.data).forEach(function(k){
-          try { localStorage.setItem(k, p.data[k]); ok++; } catch(e){ console.warn('LS set fail', k, e); }
+          var v = p.data[k];
+          if (!ALLOW.test(k)) { yabanci++; return; }                       // app-dışı key → yok say (güvenlik)
+          if (typeof v !== 'string') { atlanan.push(k+' (tip)'); return; }  // LS değeri hep string
+          var t = v.trim();
+          if (t && (t.charAt(0)==='{' || t.charAt(0)==='[')) {
+            try { JSON.parse(v); } catch(_pe){ atlanan.push(k+' (bozuk JSON)'); return; } // app-kıran değer YAZMA
+          }
+          temiz[k] = v;
         });
-        if (typeof bmToast === 'function') bmToast('Import tamamlandı ('+ok+'/'+keyCount+' anahtar) — yeniden yükleniyor', 'success');
+        var yazKeys = Object.keys(temiz);
+        if (!yazKeys.length) { if (typeof bmToast==='function') bmToast('İçe aktarılacak geçerli veri yok','error'); inputEl.value=''; return; }
+        // 2) bozuk değer varsa: app-kıran veri yazma — uyar, devamda SADECE geçerliler
+        if (atlanan.length) {
+          if (!confirm('⚠️ '+atlanan.length+' anahtar bozuk/uyumsuz, atlanacak:\n'+atlanan.slice(0,8).join('\n')+(atlanan.length>8?'\n…':'')+'\n\nSadece geçerli '+yazKeys.length+' anahtar içe aktarılsın mı?')) { inputEl.value=''; return; }
+        }
+        // 3) REPLACE onayı (geri-alınamaz, allowlist-sınırlı tam değiştirme)
+        var tarih = (p.meta && p.meta.exportTs) ? new Date(p.meta.exportTs).toLocaleString('tr-TR') : '?';
+        var msg = '⚠️ DİKKAT — GERİ ALINAMAZ\n\nMevcut TÜM uygulama verin (reçete, stok, alarm, ayar) yedektekiyle DEĞİŞTİRİLİR. Yedekte olmayan mevcut veriler SİLİNİR.\n\nYedek tarihi: '+tarih+'\nYazılacak: '+yazKeys.length+' anahtar'+(yabanci?'\n('+yabanci+' app-dışı anahtar yok sayıldı)':'')+'\n\nDevam edilsin mi?';
+        if (!confirm(msg)) { if (typeof bmToast==='function') bmToast('İçe aktarma iptal edildi','info'); inputEl.value=''; return; }
+        // 4) REPLACE: önce mevcut app key'lerini sil (allowlist-sınırlı), sonra yedeği yaz (validation bitti → app-dışına dokunma)
+        var sil = [];
+        for (var i=0;i<localStorage.length;i++){ var ek=localStorage.key(i); if (ek && ALLOW.test(ek)) sil.push(ek); }
+        sil.forEach(function(ek){ try{ localStorage.removeItem(ek); }catch(_d){} });
+        var ok=0;
+        yazKeys.forEach(function(k){ try{ localStorage.setItem(k, temiz[k]); ok++; }catch(e){ console.warn('LS set fail', k, e); } });
+        if (typeof bmToast==='function') bmToast('İçe aktarıldı ('+ok+'/'+yazKeys.length+' anahtar) — yeniden yükleniyor','success');
         setTimeout(function(){ location.reload(); }, 1200);
       } catch(e) {
         console.warn('[bmVeriImport parse]', e);
-        if (typeof bmToast === 'function') bmToast('Import hata: '+e.message, 'error');
+        if (typeof bmToast==='function') bmToast('İçe aktarma hata: '+e.message,'error');
       }
-      inputEl.value = '';
+      inputEl.value='';
     };
     reader.readAsText(file);
   } catch(e){
     console.warn('[bmVeriImport]', e);
-    if (typeof bmToast === 'function') bmToast('Hata: '+e.message, 'error');
+    if (typeof bmToast==='function') bmToast('Hata: '+e.message,'error');
   }
 };
 
 // Ayarlar sekmesi render
 window.rStokAyarlar = function(){
-  var swVer = '?';
-  try {
-    if (typeof CACHE_VERSION === 'string') swVer = CACHE_VERSION;
-  } catch(e){}
+  // Sprint 138: swVer kaldırıldı — CACHE_VERSION sayfa kapsamında YOK (sw.js'te), her zaman '?' veriyordu.
+  // Sürüm = APP_VERSION (tek-kaynak); canlı SW sürümü Gelişmiş ▸ SW durumu (brewSwDurum) ile.
   var lsKayit = 0, lsBoyut = 0;
   try {
     for (var i=0; i<localStorage.length; i++){
@@ -23628,13 +23644,6 @@ window.rStokAyarlar = function(){
       '</div>'+
     '</div>'+
     '<div class="bm-ayar-kart">'+
-      '<div class="bm-ayar-kart-baslik">🎨 Tema</div>'+
-      '<div class="bm-ayar-satir">'+
-        '<div class="bm-ayar-satir-text">Vintage Amber <small>Tek tema (Sprint 134 görsel kimlik)</small></div>'+
-        '<div style="width:24px;height:24px;border-radius:50%;background:var(--vintage);border:2px solid var(--kahve-border)"></div>'+
-      '</div>'+
-    '</div>'+
-    '<div class="bm-ayar-kart">'+
       '<div class="bm-ayar-kart-baslik">☁️ Senkronizasyon</div>'+
       '<div class="bm-ayar-satir">'+
         '<div class="bm-ayar-satir-text">Firebase sync <small>Durum: '+syncDurum+'</small></div>'+
@@ -23644,31 +23653,39 @@ window.rStokAyarlar = function(){
     '<div class="bm-ayar-kart">'+
       '<div class="bm-ayar-kart-baslik">💾 Veri</div>'+
       '<div class="bm-ayar-satir">'+
-        '<div class="bm-ayar-satir-text">Yedek dışa aktar <small>'+lsKayit+' anahtar · '+boyutKB+' KB JSON</small></div>'+
+        '<div class="bm-ayar-satir-text">Yedek dışa aktar <small>'+lsKayit+' anahtar · '+boyutKB+' KB · reçete, stok, alarm, ayar</small></div>'+
         '<button class="bm-ayar-btn" onclick="window.bmVeriExport()">İndir</button>'+
       '</div>'+
       '<div class="bm-ayar-satir">'+
-        '<div class="bm-ayar-satir-text">Yedek içe aktar <small>JSON dosya seç — onay sonrası restore</small></div>'+
+        '<div class="bm-ayar-satir-text">Yedek içe aktar <small>JSON seç — mevcut veriyi yedektekiyle DEĞİŞTİRİR (onaylı · geri alınamaz)</small></div>'+
         '<label class="bm-ayar-btn-sec" style="cursor:pointer;display:inline-flex">Seç<input type="file" accept="application/json,.json" onchange="window.bmVeriImport(this)" style="display:none"></label>'+
-      '</div>'+
-    '</div>'+
-    '<div class="bm-ayar-kart">'+
-      '<div class="bm-ayar-kart-baslik">🧹 Cache</div>'+
-      '<div class="bm-ayar-satir">'+
-        '<div class="bm-ayar-satir-text">Service Worker güncelle <small>Yeni sürümü zorla indir + reload</small></div>'+
-        '<button class="bm-ayar-btn-sec" onclick="window.bmSwGuncelle()">Güncelle</button>'+
-      '</div>'+
-      '<div class="bm-ayar-satir">'+
-        '<div class="bm-ayar-satir-text">Tüm cache temizle <small>SW caches.delete + reload (LS korunur)</small></div>'+
-        '<button class="bm-ayar-btn bm-ayar-btn-uyari" onclick="window.bmCacheTemizle()">Temizle</button>'+
       '</div>'+
     '</div>'+
     '<div class="bm-ayar-kart">'+
       '<div class="bm-ayar-kart-baslik">ℹ️ Uygulama</div>'+
       '<div class="bm-ayar-satir">'+
-        '<div class="bm-ayar-satir-text">Versiyon <small>HTML v2.79.10 · SW '+swVer+'</small></div>'+
+        '<div class="bm-ayar-satir-text">Tema <small>Vintage Amber · tek tema (Sprint 134 görsel kimlik)</small></div>'+
+        '<div style="width:18px;height:18px;border-radius:50%;background:var(--vintage);border:1px solid var(--cizgi-arac);flex-shrink:0"></div>'+
       '</div>'+
-    '</div>';
+      '<div class="bm-ayar-satir">'+
+        '<div class="bm-ayar-satir-text">Sürüm <small>'+APP_VERSION+' <span style="color:var(--metin-soluk)">· canlı SW için Gelişmiş ▸ SW durumu</span></small></div>'+
+      '</div>'+
+    '</div>'+
+    '<details class="bm-ayar-kart">'+
+      '<summary class="bm-ayar-kart-baslik" style="cursor:pointer">🔧 Gelişmiş / Tanı</summary>'+
+      '<div class="bm-ayar-satir">'+
+        '<div class="bm-ayar-satir-text">Service Worker durumu <small>Canlı SW sürümü · izin · controller</small></div>'+
+        '<button class="bm-ayar-btn-sec" onclick="if(typeof brewSwDurum===\'function\')brewSwDurum()">Kontrol</button>'+
+      '</div>'+
+      '<div class="bm-ayar-satir">'+
+        '<div class="bm-ayar-satir-text">Service Worker güncelle <small>Yeni sürümü zorla indir + reload</small></div>'+
+        '<button class="bm-ayar-btn-sec" onclick="window.bmSwGuncelle()">Güncelle</button>'+
+      '</div>'+
+      '<div class="bm-ayar-satir">'+
+        '<div class="bm-ayar-satir-text">Tüm cache temizle <small>SW caches.delete + reload · veriler korunur</small></div>'+
+        '<button class="bm-ayar-btn bm-ayar-btn-uyari" onclick="window.bmCacheTemizle()">Temizle</button>'+
+      '</div>'+
+    '</details>';
 };
 
 // Bildirim sekmesi render — alarmlar + dusuk stok + tercihler
