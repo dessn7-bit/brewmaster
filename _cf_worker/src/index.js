@@ -16,7 +16,7 @@ export default {
     // ── Faz 3: KV-tabanlı alarm + subscription deposu (TOFU oda-token) ──
     {
       const _kvp = new URL(request.url).pathname;
-      if (_kvp === '/push-sub' || _kvp === '/alarms-sync' || _kvp === '/kv-peek') {
+      if (_kvp === '/push-sub' || _kvp === '/alarms-sync' || _kvp === '/kv-peek' || _kvp === '/sub-remove') {
         return handleKvRoute(_kvp, request, env);
       }
     }
@@ -244,6 +244,19 @@ async function handleKvRoute(path, request, env) {
       await env.BM_KV.put('alarm:' + oda, JSON.stringify(merged));
       let n = 0; for (const r in merged) n += (merged[r].alarmlar || []).length;
       return _kvJson({ ok: true, receteler: Object.keys(merged).length, alarmlar: n, claimed: !!chk.claimed });
+    }
+
+    // Sprint 136: cihaz aboneliğini manuel sil (kullanıcı Bulut Senkron'dan). Yalnız kendi odası (token guard yukarıda).
+    // endpoint öncelikli (kesin), yoksa cihaz adıyla (push-sub cihaz-keyed upsert ile tutarlı). Cron'un 404/410 oto-budamasından ayrı.
+    if (path === '/sub-remove') {
+      const ep = String(body.endpoint || '');
+      const cihaz = String(body.cihaz || '');
+      if (!ep && !cihaz) return _kvJson({ error: 'endpoint veya cihaz gerekli' }, 400);
+      const list = JSON.parse((await env.BM_KV.get('sub:' + oda)) || '[]');
+      const next = list.filter(x => x && (ep ? x.endpoint !== ep : x.cihaz !== cihaz));
+      const removed = list.length - next.length;
+      if (removed > 0) await env.BM_KV.put('sub:' + oda, JSON.stringify(next));
+      return _kvJson({ ok: true, removed, count: next.length, claimed: !!chk.claimed });
     }
     return _kvJson({ error: 'bilinmeyen yol' }, 404);
   } catch (e) {
