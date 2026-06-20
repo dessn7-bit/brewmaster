@@ -665,7 +665,7 @@
 // bump v131-159 -> v131-160.
 // olu-kod-temizligi-batch (2026-05-27): eski UI yenilemesinden kalma kullanilmayan render degiskenleri silindi — mOpts/mOpts2/hOpts/maltKatBar (+ yetim maltKatlar) ve zincir def'leri (const mg={}/const hg={}). minOpts korundu (4 yerde canli). node --check PASS, MALTLAR=184.
 // bump v131-160 -> v131-161.
-const CACHE_VERSION = 'bm-cache-v131-341';
+const CACHE_VERSION = 'bm-cache-v131-342';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.

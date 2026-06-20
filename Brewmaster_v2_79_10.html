@@ -24124,9 +24124,12 @@ function syncBaslat(){
   syncDinle();    // İlk kontrol (1.5sn) + 5sn polling
 }
 
+var _syncSonCihazlar = [], _syncSilinen = {};   // Sprint 137: çakışma-uyarısı cache + optimistik-silme tombstone (session)
+
 function syncPanelAc(){
   syncYukle();
   const mevcut = syncCfg || {};
+  const kurulu = !!(mevcut.oda && mevcut.odaToken);
   const html = `
   <div id="syncModalOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:flex;align-items:center;justify-content:center;padding:var(--sp-4)" onclick="this.remove()">
     <div style="background:var(--bg-card);border-radius:var(--r-md);padding:var(--sp-5);width:100%;max-width:380px;box-shadow:var(--elv-2);max-height:90vh;overflow-y:auto" onclick="event.stopPropagation()">
@@ -24137,61 +24140,87 @@ function syncPanelAc(){
         </div>
         <button type="button" aria-label="Pencereyi kapat" onclick="document.getElementById('syncModalOverlay').remove()" style="background:transparent;border:none;color:var(--metin-soluk);font-size:var(--fs-lg);line-height:1;cursor:pointer;padding:var(--sp-1);border-radius:var(--r-sm);flex-shrink:0">✕</button>
       </div>
-
-      <div class="bm-sync-label">Firebase Veritabanı URL</div>
-      <input aria-label="Firebase veritabanı URL" id="syncUrlInp" class="inp" style="margin-bottom:var(--sp-2)"
-        placeholder="https://proje-xxx-default-rtdb.firebaseio.com"
-        value="${mevcut.url||''}">
-
-      <div class="bm-sync-label">Oda Kodu</div>
-      <input aria-label="Oda kodu" id="syncOdaInp" class="inp" style="margin-bottom:var(--sp-2)"
-        placeholder="örn: kaan-bira  (her cihazda aynı olmalı)"
-        value="${mevcut.oda||''}">
-
-      <div class="bm-sync-label">Bu Cihaz Adı</div>
-      <input aria-label="Cihaz adı" id="syncCihazInp" class="inp" style="margin-bottom:var(--sp-3)"
-        placeholder="Telefon veya Tablet"
-        value="${mevcut.cihaz||''}">
-
-      <div class="bm-sync-label">Oda Token (cihazlar arası aynı)</div>
-      <div style="display:flex;gap:var(--sp-2);margin-bottom:var(--sp-2)">
-        <input aria-label="Oda token" id="syncTokenInp" class="inp" style="flex:1;font-family:monospace" placeholder="Üret → diğer cihazlara yapıştır" value="${mevcut.odaToken||''}">
-        <button type="button" class="bm-ayar-btn" onclick="syncTokenUret()">Üret</button>
-        <button type="button" class="bm-ayar-btn-sec" aria-label="Token kopyala" onclick="syncTokenKopyala()">📋</button>
-      </div>
-
-      <div id="syncDiag" style="font-size:var(--fs-xs);color:var(--metin-soluk);background:var(--bg-sunken);border-radius:var(--r-sm);padding:var(--sp-2);margin-bottom:var(--sp-2);line-height:1.5;word-break:break-all">
-        NODE: ${syncUrl() || '(oda/url eksik)'}<br>
-        DURUM: ${syncPollTimer ? '🟡 polling aktif' : '⚫ kapali'}<br>
-        LAST_TS: ${syncSonGuncelle ? new Date(syncSonGuncelle).toLocaleString('tr-TR',{timeZone:'Europe/Istanbul'}) : 'hic'}<br>
-        SW: ${navigator.serviceWorker && navigator.serviceWorker.controller ? 'aktif' : 'yok'}
-      </div>
-
-      <div id="syncCihazlar" style="margin-bottom:var(--sp-3)"></div>
-
-      <div style="display:flex;gap:var(--sp-2);margin-bottom:var(--sp-3)">
-        <button class="bm-ayar-btn" style="flex:1" onclick="syncKaydetVeBaslat()">✓ Kaydet & Bağlan</button>
-        <button class="bm-ayar-btn bm-ayar-btn-uyari" onclick="syncBaglantiKes()">🔌 Bağlantıyı Kes</button>
-      </div>
-
-      <div style="font-size:var(--fs-xs);color:var(--metin-soluk);background:var(--bg-sunken);border-radius:var(--r-sm);padding:var(--sp-3);line-height:1.6">
-        <b>Kurulum (5 dakika):</b><br>
-        1. <a href="https://console.firebase.google.com" target="_blank" style="color:var(--kahve-koyu)">console.firebase.google.com</a> → Proje oluştur<br>
-        2. Build → Realtime Database → Oluştur → Test modu<br>
-        3. Database URL'yi buraya yapıştır<br>
-        4. Her iki cihaza aynı URL ve oda kodunu gir<br>
-        5. Oda kodu gizli kalır — paylaşma
-      </div>
+      <div id="syncModalBody"></div>
     </div>
   </div>`;
   const el = document.createElement('div');
   el.innerHTML = html;
   document.body.appendChild(el.firstElementChild);
-  try{ syncCihazlariYukle(); }catch(_e){}
+  syncModalRender(kurulu ? 'A' : 'B');
 }
 
-window.syncTokenUret = function(){
+// Sprint 137: A-modu insan-okur durum satırı (DURUM+LAST_TS reframe) + teknik tanı (katlı).
+function _syncDurumSatiri(){
+  var cfg=syncCfg||{};
+  if(!cfg.oda||!cfg.odaToken) return '⚫ Kurulu değil';
+  var durum = syncPollTimer ? '🟢 Bağlı' : '🟡 Bağlanıyor…';
+  var son=' · henüz senkron olmadı';
+  try{ if(typeof syncSonGuncelle!=='undefined' && syncSonGuncelle){ var dk=Math.round((Date.now()-syncSonGuncelle)/60000); son=' · son senkron '+(dk<1?'az önce':(dk<60?dk+' dk önce':Math.round(dk/60)+' saat önce')); } }catch(_e){}
+  return durum + son;
+}
+function _syncTaniHTML(){
+  var node='?'; try{ node=syncUrl()||'(oda/url eksik)'; }catch(_e){}
+  var dur = syncPollTimer ? '🟡 polling aktif' : '⚫ kapali';
+  var lts='?'; try{ lts=(typeof syncSonGuncelle!=='undefined'&&syncSonGuncelle)?new Date(syncSonGuncelle).toLocaleString('tr-TR',{timeZone:'Europe/Istanbul'}):'hic'; }catch(_e){}
+  var sw=(navigator.serviceWorker && navigator.serviceWorker.controller)?'aktif':'yok';
+  return 'NODE: '+esc(node)+'<br>DURUM: '+dur+'<br>LAST_TS: '+esc(lts)+'<br>SW: '+sw;
+}
+
+// Sprint 137: iki-durumlu gövde — A=yapılandırılmış (yalın) / B=kurulum-düzenle (tam form). State türetilir, localStorage'a yazılmaz.
+window.syncModalRender = function(mod){
+  var body=document.getElementById('syncModalBody'); if(!body) return;
+  var cfg=syncCfg||{};
+  if(mod==='A'){
+    body.innerHTML =
+      '<div style="display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-2) var(--sp-3);background:var(--bg-sunken);border-radius:var(--r-sm);margin-bottom:var(--sp-3);font-size:var(--fs-sm);color:var(--ink)">'+_syncDurumSatiri()+'</div>'+
+      '<div id="syncCihazlar" style="margin-bottom:var(--sp-2)"></div>'+
+      '<div class="bm-ayar-satir" style="border-bottom:none;padding:var(--sp-2) 0">'+
+        '<div class="bm-ayar-satir-text" style="font-size:var(--fs-xs);color:var(--metin-soluk)">Oda: <b style="color:var(--ink)">'+esc(String(cfg.oda||'-'))+'</b> · Cihaz: <b style="color:var(--ink)">'+esc(String(cfg.cihaz||'-'))+'</b></div>'+
+        '<button type="button" class="bm-ayar-btn-sec" onclick="syncModalRender(\'B\')">⚙️ Düzenle</button>'+
+      '</div>'+
+      '<details style="margin-bottom:var(--sp-3)"><summary style="cursor:pointer;font-size:var(--fs-xs);color:var(--metin-soluk);padding:var(--sp-1) 0">Tanı</summary>'+
+        '<div style="font-size:var(--fs-xs);color:var(--metin-soluk);background:var(--bg-sunken);border-radius:var(--r-sm);padding:var(--sp-2);margin-top:var(--sp-1);line-height:1.5;word-break:break-all">'+_syncTaniHTML()+'</div>'+
+      '</details>'+
+      '<button class="bm-ayar-btn bm-ayar-btn-uyari" style="width:100%" onclick="syncBaglantiKes()">🔌 Bağlantıyı Kes</button>';
+    try{ syncCihazlariYukle(); }catch(_e){}
+  } else {
+    var m=cfg;
+    var tokenDolu = !!(m.odaToken);
+    body.innerHTML =
+      '<div class="bm-sync-label">Firebase Veritabanı URL</div>'+
+      '<input aria-label="Firebase veritabanı URL" id="syncUrlInp" class="inp" style="margin-bottom:var(--sp-2)" placeholder="https://proje-xxx-default-rtdb.firebaseio.com" value="'+esc(String(m.url||''))+'">'+
+      '<div class="bm-sync-label">Oda Kodu</div>'+
+      '<input aria-label="Oda kodu" id="syncOdaInp" class="inp" style="margin-bottom:var(--sp-2)" placeholder="örn: kaan-bira  (her cihazda aynı olmalı)" value="'+esc(String(m.oda||''))+'">'+
+      '<div class="bm-sync-label">Bu Cihaz Adı <span style="color:var(--crit)">*</span></div>'+
+      '<input aria-label="Cihaz adı" id="syncCihazInp" class="inp" style="margin-bottom:var(--sp-3)" placeholder="örn: Telefon, Tablet (zorunlu · benzersiz)" value="'+esc(String(m.cihaz||''))+'">'+
+      '<div class="bm-sync-label">Oda Token (cihazlar arası aynı)</div>'+
+      '<div style="display:flex;gap:var(--sp-2);margin-bottom:var(--sp-3)">'+
+        '<input aria-label="Oda token" id="syncTokenInp" class="inp" style="flex:1;font-family:monospace" placeholder="Üret → diğer cihazlara yapıştır" value="'+esc(String(m.odaToken||''))+'">'+
+        (tokenDolu
+          ? '<button type="button" class="bm-ayar-btn-sec" onclick="syncTokenUret(true)">Yenile</button>'
+          : '<button type="button" class="bm-ayar-btn" onclick="syncTokenUret(false)">Üret</button>')+
+        '<button type="button" class="bm-ayar-btn-sec" aria-label="Token kopyala" onclick="syncTokenKopyala()">📋</button>'+
+      '</div>'+
+      '<details style="margin-bottom:var(--sp-3)"><summary style="cursor:pointer;font-size:var(--fs-xs);color:var(--metin-soluk);padding:var(--sp-1) 0">Kurulum yardımı</summary>'+
+        '<div style="font-size:var(--fs-xs);color:var(--metin-soluk);background:var(--bg-sunken);border-radius:var(--r-sm);padding:var(--sp-3);margin-top:var(--sp-1);line-height:1.6">'+
+          '<b>Kurulum (5 dakika):</b><br>'+
+          '1. <a href="https://console.firebase.google.com" target="_blank" style="color:var(--kahve-koyu)">console.firebase.google.com</a> → Proje oluştur<br>'+
+          '2. Build → Realtime Database → Oluştur → Test modu<br>'+
+          '3. Database URL\'yi buraya yapıştır<br>'+
+          '4. Her iki cihaza aynı URL ve oda kodunu gir<br>'+
+          '5. Oda kodu gizli kalır — paylaşma'+
+        '</div>'+
+      '</details>'+
+      '<div style="display:flex;gap:var(--sp-2)">'+
+        '<button class="bm-ayar-btn" style="flex:1" onclick="syncKaydetVeBaslat()">✓ Kaydet & Bağlan</button>'+
+        ((cfg.oda&&cfg.odaToken)?'<button type="button" class="bm-ayar-btn-sec" onclick="syncModalRender(\'A\')">Vazgeç</button>':'')+
+      '</div>';
+  }
+};
+
+window.syncTokenUret = function(yenile){
   try{
+    if(yenile){ if(!confirm('Yeni token ÜRETMEK tüm bağlı cihazları koparır — hepsini bu yeni token ile yeniden kurman gerekir.\n\nEmin misin?')) return; }
     var a = new Uint8Array(16);
     crypto.getRandomValues(a);
     var t = Array.prototype.map.call(a, function(b){ return ('0'+b.toString(16)).slice(-2); }).join('');
@@ -24209,15 +24238,23 @@ window.syncTokenKopyala = function(){
 function syncKaydetVeBaslat(){
   const url = (document.getElementById('syncUrlInp')?.value||'').trim();
   const oda = (document.getElementById('syncOdaInp')?.value||'').trim().replace(/[^a-z0-9\-]/gi,'').toLowerCase();
-  const cihaz = (document.getElementById('syncCihazInp')?.value||'').trim() || 'A';
+  const cihaz = (document.getElementById('syncCihazInp')?.value||'').trim();
   if(!url||!oda){ bmToast('URL ve Oda Kodu zorunlu!','warning'); return; }
+  if(!cihaz){ bmToast('Bu cihaza bir ad ver (zorunlu) — aynı odadaki cihazlar farklı ad taşımalı','warning'); try{ document.getElementById('syncCihazInp')?.focus(); }catch(_f){} return; }
+  // Sprint 137: çakışma uyarısı — başka cihaz bu adı kullanıyorsa (kendi endpoint'imiz hariç) → sessiz ezme riski
+  try{
+    var _localEp=''; try{ var _ls=JSON.parse(localStorage.getItem('bm_push_sub')||'null'); _localEp=(_ls&&_ls.endpoint)||''; }catch(_e){}
+    var _carp=(Array.isArray(_syncSonCihazlar)?_syncSonCihazlar:[]).some(function(s){ return s && String(s.cihaz)===cihaz && !(_localEp && s.endpoint===_localEp); });
+    if(_carp && !confirm('"'+cihaz+'" adı bu odada zaten başka bir cihazda kullanılıyor. Aynı adı kaydedersen o cihazın aboneliği ezilir (bildirim almayı durdurur).\n\nFarklı bir ad önerilir — yine de devam et?')) return;
+  }catch(_c){}
   const odaToken = (document.getElementById('syncTokenInp')?.value||'').trim();
   syncCfg = {url, oda, cihaz, odaToken};
   syncKaydet(syncCfg);
-  document.querySelector('[onclick="this.remove()"]')?.remove();
   syncBaslat();
   // İlk senkron — yerel veriyi gönder
   setTimeout(syncGonder, 2500); // race fix: önce pull (1500ms) tamamlansın, sonra push
+  if(typeof bmToast==='function') bmToast('☁️ Kaydedildi & bağlanıldı','ok');
+  syncModalRender('A'); // Sprint 137: kapat YERİNE yalın görünüme geç + cihaz listesi/durum görünsün (modal açık kalır)
 }
 
 function syncTemizle(){
@@ -24266,7 +24303,9 @@ window.syncCihazlariYukle = function(){
 window.syncCihazlariYaz = function(subs){
   var box=document.getElementById('syncCihazlar'); if(!box) return;
   subs=Array.isArray(subs)?subs:[];
-  var cfg=syncCfg||{}; var buAd=String(cfg.cihaz||'A');
+  subs=subs.filter(function(s){ return !(s && _syncSilinen && _syncSilinen[s.endpoint]); }); // Sprint 137: optimistik-silme tombstone (edge-cache ~60s stale re-add önle)
+  _syncSonCihazlar=subs; // çakışma-uyarısı cache
+  var cfg=syncCfg||{}; var buAd=String(cfg.cihaz||'');
   var localEp=''; try{ var _ls=JSON.parse(localStorage.getItem('bm_push_sub')||'null'); localEp=(_ls&&_ls.endpoint)||''; }catch(_e){}
   var h='<div class="bm-sync-label" style="margin-bottom:var(--sp-1)">📱 Bağlı Cihazlar ('+subs.length+')</div>';
   if(!subs.length){ box.innerHTML=h+'<div style="font-size:var(--fs-xs);color:var(--metin-soluk);padding:var(--sp-1) 0">Henüz abone cihaz yok</div>'; return; }
@@ -24274,7 +24313,7 @@ window.syncCihazlariYaz = function(subs){
     var s=subs[i]||{};
     var ad=esc(String(s.cihaz||'?'));
     var ep=String(s.endpoint||'');
-    var bu=(String(s.cihaz||'')===buAd)||(!!localEp&&ep===localEp);
+    var bu=(!!buAd&&String(s.cihaz||'')===buAd)||(!!localEp&&ep===localEp);
     var zaman=''; try{ if(s.ts) zaman=new Date(s.ts).toLocaleDateString('tr-TR',{day:'numeric',month:'short'}); }catch(_z){}
     h+='<div class="bm-ayar-satir" style="border-bottom:1px solid var(--cizgi-arac)">'+
         '<div class="bm-ayar-satir-text">'+ad+(bu?' <span style="color:var(--kahve-koyu);font-weight:var(--fw-semibold)">· bu cihaz</span>':'')+(zaman?' <small>'+zaman+'</small>':'')+'</div>'+
@@ -24305,7 +24344,7 @@ window.syncCihazSil = function(btn){
     signal:(_ctrl?_ctrl.signal:undefined)
   }).then(function(r){ if(_to)clearTimeout(_to); return r.json().catch(function(){return{};}).then(function(j){return {st:r.status,j:j};}); })
   .then(function(o){
-    if(o.st>=200&&o.st<300){ if(typeof bmToast==='function')bmToast('🗑️ '+ad+' silindi','ok'); syncCihazlariYukle(); return; }
+    if(o.st>=200&&o.st<300){ if(_syncSilinen)_syncSilinen[ep]=true; try{ var _row=btn.closest('.bm-ayar-satir'); if(_row)_row.remove(); }catch(_r){} if(typeof bmToast==='function')bmToast('🗑️ '+ad+' silindi','ok'); try{ syncCihazlariYukle(); }catch(_e){} return; }
     btn.disabled=false; btn.textContent=_old;
     if(o.st===403){ if(typeof bmToast==='function')bmToast('Token eşleşmiyor','warning'); }
     else if(o.st===404||o.st===405){ if(typeof bmToast==='function')bmToast('Silme servisi henüz aktif değil (worker güncellenecek)','warning'); }
