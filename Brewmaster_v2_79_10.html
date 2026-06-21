@@ -6834,7 +6834,7 @@ let sekmeArama={malt:'',hop:'',maya:'',katki:'',stok:''};
 let sekmKat={malt:'',hop:'',maya:'',katki:'',stok:''}; // aktif kategori filtresi
 let stokEkranTab='liste'; // 'liste' | 'gecmis'
 // Adim 134-AYAR: Stok sayfasi 3 ana sekme [Stok|Ayarlar|Bildirimler]. Default 'stok'. LS persist.
-let stokAnaTab=(function(){try{var v=localStorage.getItem('bm_stok_ana_tab');return (v==='ayarlar'||v==='bildirim')?v:'stok';}catch(e){return 'stok';}})();
+/* Sprint 139: stokAnaTab KALDIRILDI -> Ayarlar/Bildirim top-level ekran. */
 let yM={id:"pale_ale",kg:1.0,marka:""},yH={id:"citra",g:15,dk:60,tur:"boil",cAA:null,dryDays:5,form:"pellet"};
 let yMin={id:"caso4",miktar:1.0};
 let kayitMsg="",silOnay=null;
@@ -11411,39 +11411,7 @@ function tkv(maya,og,fg,abv,hoplar,maya2,stil){
 
 // ═══ STOK EKRANI ════════════════════════════════════════════
 // Adim 134-AYAR: Ana sekme bar HTML — Stok / Ayarlar / Bildirimler. 'aktif' class CSS'le stilize.
-function _stokAnaTabBarHTML(){
-  function _tab(id,ikon,label,badge){
-    var ak = stokAnaTab===id;
-    var bHtml = (badge && badge>0) ? '<span class="bm-anatab-badge">'+badge+'</span>' : '';
-    return '<button type="button" class="bm-stok-anatab'+(ak?' aktif':'')+'" onclick="window.stokAnaTabSet(\''+id+'\')" data-anatab="'+id+'">'+
-      '<span>'+ikon+'</span><span>'+label+'</span>'+bHtml+
-    '</button>';
-  }
-  // Bildirim badge — bekleyen alarm + dusuk stok sayisi
-  var bildirimSay = 0;
-  try {
-    if (typeof STOK !== 'undefined' && Array.isArray(STOK)) {
-      if(typeof bmBildirimTercihOku!=='function' || bmBildirimTercihOku().catStok!==false) bildirimSay += STOK.filter(function(s){ return s && s.uyari>0 && (s.miktar||0) <= s.uyari; }).length;
-    }
-    if (typeof _alarmlariOku === 'function') {
-      var _al = _alarmlariOku();
-      var _simdi = Date.now();
-      Object.keys(_al).forEach(function(rid){
-        if(/^(maya|stok|manuel|plan):/.test(rid)) return; // pseudo-key: ayrı sayılıyor / modal'da
-        var rec = _al[rid];
-        if (!rec || rec.durum !== 'aktif') return;
-        (rec.alarmlar||[]).forEach(function(a){
-          if (a && (a.durum==='bekliyor'||a.durum==='gosterildi') && a.tip!=='pasif' && a.ts <= _simdi && (typeof _alarmKatAcik!=='function' || _alarmKatAcik(_alarmKatBul(rid,a)))) bildirimSay++;
-        });
-      });
-    }
-  } catch(e){}
-  return '<div class="bm-stok-anatabs">'+
-    _tab('stok','📦','Stok',0)+
-    _tab('ayarlar','⚙️','Ayarlar',0)+
-    _tab('bildirim','🔔','Bildirimler',bildirimSay)+
-  '</div>';
-}
+// Sprint 139: _stokAnaTabBarHTML KALDIRILDI (anatab bar -> top-level Ayarlar/Bildirim ekranlari).
 
 // Adim 134-AYAR: Stok header HTML — ayarlar/bildirim sekmesinde de paylasilan ust banner.
 function _stokHeaderHTML(){
@@ -11454,14 +11422,26 @@ function _stokHeaderHTML(){
   '</div>';
 }
 
+// Sprint 139: Ayarlar/Bildirim top-level ekran header — geri tusu home'a (bmAnaSayfaAc).
+function _ayarBildirimHeaderHTML(baslik){
+  return '<div class="header" style="display:flex;align-items:center;gap:10px">'+
+    '<button class="btn" onclick="bmAnaSayfaAc()" aria-label="Geri" style="background:rgba(255,255,255,.07);color:#F6EAD7;font-size:22px;padding:2px 8px;border-radius:var(--r-sm);line-height:1;border:1px solid rgba(255,255,255,.12)">\u2039</button>'+
+    '<div style="font-family:var(--font-baslik);font-size:var(--fs-md);font-weight:var(--fw-semibold);color:#F6EAD7;flex:1">'+baslik+'</div>'+
+  '</div>';
+}
+// Sprint 139: top-level Ayarlar ekrani. Icerik fn rStokAyarlar (tarihsel 'stok' isim, icerik genel).
+function rAyarlarEkran(){
+  var ic = (typeof rStokAyarlar === 'function') ? rStokAyarlar() : '';
+  return _ayarBildirimHeaderHTML('\u2699\uFE0F Ayarlar') + '<div class="bm-stok-icerik">' + ic + '</div>';
+}
+// Sprint 139: top-level Bildirimler ekrani. Icerik fn rStokBildirim (tarihsel 'stok' isim, icerik genel).
+function rBildirimEkran(){
+  var ic = (typeof rStokBildirim === 'function') ? rStokBildirim() : '';
+  return _ayarBildirimHeaderHTML('\uD83D\uDD14 Bildirimler') + '<div class="bm-stok-icerik">' + ic + '</div>';
+}
 function rStok(){
   // Adim 134-AYAR: ana sekme dispatch — ayarlar/bildirim erken donus, 'stok' mevcut akis.
-  if (stokAnaTab === 'ayarlar' && typeof rStokAyarlar === 'function') {
-    return _stokHeaderHTML() + _stokAnaTabBarHTML() + '<div class="bm-stok-icerik">' + rStokAyarlar() + '</div>';
-  }
-  if (stokAnaTab === 'bildirim' && typeof rStokBildirim === 'function') {
-    return _stokHeaderHTML() + _stokAnaTabBarHTML() + '<div class="bm-stok-icerik">' + rStokBildirim() + '</div>';
-  }
+  // Sprint 139: ayarlar/bildirim erken-donus KALDIRILDI -> top-level ekranlar (rAyarlarEkran/rBildirimEkran).
   const sArama=sekmeArama.stok.toLowerCase();
   const stokKat=sekmKat.stok;
   const stokGruplari=[...new Set(STOK.map(s=>s.g||"Diğer"))].sort();
@@ -11677,12 +11657,10 @@ function rStok(){
       gecmisIc += '<div style="text-align:center;margin-top:var(--sp-2)"><button class="bm-ayar-btn bm-ayar-btn-uyari" onclick="stokHistTemizle()" style="font-size:var(--fs-xs);padding:var(--sp-1) var(--sp-3)">🗑️ Geçmişi Temizle</button></div>';
     }
     return _stokHeaderHTML()+
-    _stokAnaTabBarHTML()+
     _tabBar+
     '<div style="padding:12px">'+gecmisIc+'</div>';
   }
   return _stokHeaderHTML()+
-  _stokAnaTabBarHTML()+
   _tabBar+
   stokAramaKutu+
   '<div style="padding:12px">'+stokEkleForm+'<div id="stokListeDiv">'+stokListesi+'</div></div>';
@@ -11767,7 +11745,7 @@ function renderSidebar(){
     '<div class="bm-sidebar-user">'+
       '<div class="bm-sidebar-user-avatar">K</div>'+
       '<div class="bm-sidebar-user-name">Kaan</div>'+
-      '<button class="bm-sidebar-user-settings" title="Ayarlar" onclick="window.stokAnaTabSet(\'ayarlar\');if(typeof closeSidebar===\'function\')closeSidebar()">'+BM_SVG.settings+'</button>'+
+      '<button class="bm-sidebar-user-settings" title="Ayarlar" onclick="window.bmAnaAyarlar();if(typeof closeSidebar===\'function\')closeSidebar()">'+BM_SVG.settings+'</button>'+
     '</div>';
 }
 // Local escape helper (mevcut esc'i sarmalar — eger varsa kullan)
@@ -11808,7 +11786,7 @@ function renderHeader(){
         '<div class="bm-bildirim-baslik">Bildirimler</div>'+
         '<div class="bm-bildirim-bos">Henüz bildirim yok</div>'+
         '<div style="border-top:1px solid #E8E4DA;margin-top:6px;padding-top:6px;text-align:center">'+
-          '<button onclick="_bildirimPanelAcik=false;window.stokAnaTabSet(\'bildirim\')" style="background:none;border:none;color:var(--vintage);font-size:12px;font-weight:600;cursor:pointer;padding:4px 8px">Tümünü gör →</button>'+
+          '<button onclick="_bildirimPanelAcik=false;window.bmAnaBildirim()" style="background:none;border:none;color:var(--vintage);font-size:12px;font-weight:600;cursor:pointer;padding:4px 8px">Tümünü gör →</button>'+
         '</div>'+
       '</div>'
     : '';
@@ -11832,7 +11810,7 @@ function renderHeader(){
       '<div class="bm-header-actions">'+
         '<button class="bm-header-iconbtn" onclick="syncPanelAc()" title="Sync">'+BM_SVG.cloud+'<span class="bm-header-sync-dot"></span></button>'+
         '<button class="bm-header-iconbtn" onclick="stokEkranAc()" title="Stok">'+BM_SVG.package+'</button>'+
-        '<button class="bm-header-iconbtn" onclick="bildirimPanelToggle(event)" title="Bildirimler">'+BM_SVG.bell+bellBadgeHtml+'</button>'+
+        '<button class="bm-header-iconbtn" onclick="bmAnaBildirim()" title="Bildirimler">'+BM_SVG.bell+bellBadgeHtml+'</button>'+
       '</div>'+
       dropdownHtml+
     '</div>';
@@ -20367,7 +20345,7 @@ function render(){
   }:null;
 
   try{
-    document.getElementById("ekran").innerHTML=ekran==="ana"?rAnasayfa():ekran==="liste"?rListe():ekran==="stok"?rStok():rEditor();
+    document.getElementById("ekran").innerHTML=ekran==="ana"?rAnasayfa():ekran==="liste"?rListe():ekran==="stok"?rStok():ekran==="ayarlar"?rAyarlarEkran():ekran==="bildirim"?rBildirimEkran():rEditor();
     try{ renderSidebar(); }catch(e){ console.warn("renderSidebar fail:", e); }
     try{ renderHeader(); }catch(e){ console.warn("renderHeader fail:", e); }
     // Adim 132-A: render sonrasi --bm-header-h CSS var guncelle (sticky-summary top hizalama)
@@ -23044,7 +23022,7 @@ window.bmAnaSayfaAc=function(){ ekran='ana'; render(); };
           else { ekran='liste'; if(typeof render==='function') render(); }
           return;
         }
-        if(typeof ekran!=='undefined' && (ekran==='liste' || ekran==='stok')){
+        if(typeof ekran!=='undefined' && (ekran==='liste' || ekran==='stok' || ekran==='ayarlar' || ekran==='bildirim')){
           if(typeof window.bmAnaSayfaAc==='function') window.bmAnaSayfaAc();
           else { ekran='ana'; if(typeof render==='function') render(); }
           return;
@@ -23056,8 +23034,8 @@ window.bmAnaSayfaAc=function(){ ekran='ana'; render(); };
     window.addEventListener('popstate', function(){ _geri(); _sentinel(); });
     _sentinel(); // ilk sentinel: geri tusu artik hep yakalanir, ana'da bile cikis olmaz
   })();
-window.bmAnaBildirim=function(){ ekran='stok'; stokAnaTabSet('bildirim'); render(); };
-window.bmAnaAyarlar =function(){ ekran='stok'; stokAnaTabSet('ayarlar');  render(); };
+window.bmAnaBildirim=function(){ ekran='bildirim'; render(); };
+window.bmAnaAyarlar =function(){ ekran='ayarlar'; render(); };
 function logDuzenle(idx){
   if(!S.brewLog||idx<0||idx>=S.brewLog.length)return;
   var e=S.brewLog[idx];
@@ -23439,13 +23417,7 @@ window.stokTabSet=function(tab){ stokEkranTab=tab; if(ekran==='stok'){document.g
 window.stokHistTemizle=function(){ if(confirm('📜 Tüm stok hareket geçmişi silinsin mi? (Geri alınamaz)')){ stokHistKaydet([]); if(ekran==='stok'){document.getElementById('ekran').innerHTML=rStok();}else render(); flash('Geçmiş temizlendi ✓'); } };
 
 // ═══ Adim 134-AYAR: Stok ana sekme handlers + Ayarlar/Bildirim render ════════════════════════════
-window.stokAnaTabSet = function(tab){
-  if (tab !== 'stok' && tab !== 'ayarlar' && tab !== 'bildirim') return;
-  stokAnaTab = tab;
-  try { localStorage.setItem('bm_stok_ana_tab', tab); } catch(e){}
-  if (ekran === 'stok') { document.getElementById('ekran').innerHTML = rStok(); }
-  else { ekran = 'stok'; render(); }
-};
+/* Sprint 139: stokAnaTabSet KALDIRILDI -> entryler dogrudan ekran=ayarlar/bildirim (bmAnaAyarlar/bmAnaBildirim). */
 
 // Bildirim tercihleri — default tum acik. bm_bildirim_tercih LS persist.
 window.bmBildirimTercihOku = function(){
