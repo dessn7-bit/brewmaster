@@ -21811,7 +21811,7 @@ window.brewdayBitir=function(){
           if(!((it.miktar || 0) <= it.uyari)) return; // eşik üstü -> alarm yok (reset)
           var key = 'stok:' + it.id; gecerli[key] = 1;
           var ad = String(it.ad || '?'), birim = String(it.birim || '');
-          var desired = [{ g:0, ts:_sonrakiBildirimTs(), tip:'kontrol', sicaklik:null,
+          var desired = [{ g:0, ts:_bildirimTsAyarla(Date.now()), tip:'kontrol', sicaklik:null,
             aksiyon:'📦 Stok azaldı — ' + ad,
             aciklama: ad + ' stoğu eşiğin altına indi (eşik ' + it.uyari + birim + '). Kontrol et / sipariş ver.' }];
           desired.forEach(function(_d){ _d.kategori='B'; _d.vibrate=_alarmVibPattern(_d.tip); });
