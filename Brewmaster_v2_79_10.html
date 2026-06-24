@@ -21649,6 +21649,7 @@ window.brewdayBitir=function(){
   };
   window._alarmSnoozeTs = function(islem){
     var now = Date.now();
+    if(islem && islem.indexOf('ozel:')===0){ var _ms = parseInt(islem.slice(5),10); return (_ms>0 ? _ms : 0); }
     if(islem === 'ertele15') return now + 900000;
     if(islem === 'erteleYarin'){
       var saat = (typeof _alarmSaatiAl === 'function') ? _alarmSaatiAl() : '10:00';
@@ -21967,10 +21968,11 @@ window.brewdayBitir=function(){
       +'<div style="text-align:center;font-size:12px;color:rgba(254,251,242,.65);margin-bottom:14px">'+escapeH(receteAd||'')+' · '+gunText+(tip?' · '+tip:'')+'</div>'
       +(al.aciklama?'<div style="background:rgba(245,215,153,.08);border:1px solid rgba(245,215,153,.2);border-radius:10px;padding:12px 14px;font-size:13px;line-height:1.5;margin-bottom:18px;color:#FEFBF2">'+escapeH(al.aciklama)+'</div>':'')
       +'<button onclick="_alarmAksiyon(\''+receteId+'\','+al.g+',\'tamamlandi\')" style="width:100%;background:linear-gradient(135deg,#2D7A2D 0%,#1F5A1F 100%);color:#fff;border:none;border-radius:10px;padding:14px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px" aria-label="'+escapeH(al.aksiyon||'Alarm')+' alarmını tamamlandı işaretle">✓ Tamamlandım</button>'
-      +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">'
         +'<button onclick="_alarmAksiyon(\''+receteId+'\','+al.g+',\'ertele15\')" style="background:rgba(254,251,242,.08);border:1px solid rgba(254,251,242,.2);color:#FEFBF2;border-radius:10px;padding:12px 4px;font-size:13px;font-weight:600;cursor:pointer" aria-label="'+escapeH(al.aksiyon||'Alarm')+' alarmını 15 dakika ertele">⏰ 15dk</button>'
         +'<button onclick="_alarmAksiyon(\''+receteId+'\','+al.g+',\'ertele60\')" style="background:rgba(254,251,242,.08);border:1px solid rgba(254,251,242,.2);color:#FEFBF2;border-radius:10px;padding:12px 4px;font-size:13px;font-weight:600;cursor:pointer" aria-label="'+escapeH(al.aksiyon||'Alarm')+' alarmını 1 saat ertele">⏰ 1sa</button>'
         +'<button onclick="_alarmAksiyon(\''+receteId+'\','+al.g+',\'erteleYarin\')" style="background:rgba(254,251,242,.08);border:1px solid rgba(254,251,242,.2);color:#FEFBF2;border-radius:10px;padding:12px 4px;font-size:13px;font-weight:600;cursor:pointer" aria-label="'+escapeH(al.aksiyon||'Alarm')+' alarmını yarına ertele">⏰ Yarın</button>'
+        +'<button onclick="_alarmOzelErtele(\''+receteId+'\','+al.g+',event)" style="background:rgba(254,251,242,.08);border:1px solid rgba(254,251,242,.2);color:#FEFBF2;border-radius:10px;padding:12px 4px;font-size:13px;font-weight:600;cursor:pointer" aria-label="'+escapeH(al.aksiyon||'Alarm')+' alarmını özel tarih/saate ertele">⏰ Özel</button>'
       +'</div>'
       +'<button onclick="_alarmAksiyon(\''+receteId+'\','+al.g+',\'atla\')" style="width:100%;background:transparent;border:1px solid rgba(254,251,242,.2);color:rgba(254,251,242,.65);border-radius:10px;padding:10px;font-size:12px;font-weight:600;cursor:pointer">Atla (bu alarmı gör tamamlandı olarak işaretle)</button>'
       +'</div>';
@@ -22011,10 +22013,18 @@ window.brewdayBitir=function(){
     if(islem === 'tamamlandi'){
       _alarmDurumGuncelle(receteId, gun, 'tamamlandi');
       if(typeof flash === 'function') flash('✓ Alarm tamamlandı','ok');
-    } else if(islem === 'ertele' || islem === 'ertele15' || islem === 'ertele60' || islem === 'erteleYarin'){
-      var _snz = (islem === 'ertele') ? 'ertele60' : islem;
+    } else if(islem === 'ertele' || islem === 'ertele15' || islem === 'ertele60' || islem === 'erteleYarin' || (islem && islem.indexOf('ozel:')===0)){
+      var _ozel = (islem && islem.indexOf('ozel:')===0);
+      var _snz = _ozel ? islem : ((islem === 'ertele') ? 'ertele60' : islem);
       _alarmErteleTs(receteId, gun, _alarmSnoozeTs(_snz));
-      var _et = (_snz === 'ertele15') ? '15 dakika' : (_snz === 'erteleYarin' ? 'yarına' : '1 saat');
+      var _et;
+      if(_ozel){
+        var _od = new Date(parseInt(islem.slice(5),10));
+        var _ay = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'][_od.getMonth()];
+        _et = _od.getDate()+' '+_ay+' '+String(_od.getHours()).padStart(2,'0')+':'+String(_od.getMinutes()).padStart(2,'0');
+      } else {
+        _et = (_snz === 'ertele15') ? '15 dakika' : (_snz === 'erteleYarin' ? 'yarına' : '1 saat');
+      }
       if(typeof flash === 'function') flash('⏰ '+_et+' ertelendi','ok');
     } else if(islem === 'atla'){
       _alarmDurumGuncelle(receteId, gun, 'atlandi');
@@ -22033,16 +22043,42 @@ window.brewdayBitir=function(){
     var m = document.createElement('div'); m.id = '_snoozeMenu';
     m.style.cssText = 'position:fixed;z-index:99998;background:var(--card,#fff);border:1px solid var(--bor,#ccc);border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.28);padding:5px;display:flex;gap:5px';
     var x = (ev && ev.clientX) || 120, y = (ev && ev.clientY) || 120;
-    m.style.left = Math.max(8, Math.min(x, window.innerWidth - 190)) + 'px';
+    m.style.left = Math.max(8, Math.min(x, window.innerWidth - 260)) + 'px';
     m.style.top = (y + 10) + 'px';
-    [['15 dk','ertele15'],['1 saat','ertele60'],['Yarın','erteleYarin']].forEach(function(o){
+    [['15 dk','ertele15'],['1 saat','ertele60'],['Yarın','erteleYarin'],['Özel…','OZEL']].forEach(function(o){
       var b = document.createElement('button'); b.textContent = o[0];
       b.style.cssText = 'background:var(--ya,#eee);border:1px solid var(--yk,#999);color:var(--yk,#333);border-radius:var(--r-sm);padding:6px 10px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap';
-      b.onclick = function(e){ try{ e.stopPropagation(); }catch(_b){} _alarmAksiyon(receteId, gun, o[1]); m.remove(); };
+      if(o[1] === 'OZEL'){ b.onclick = function(e){ try{ e.stopPropagation(); }catch(_b){} _alarmOzelErtele(receteId, gun, e); }; }
+      else { b.onclick = function(e){ try{ e.stopPropagation(); }catch(_b){} _alarmAksiyon(receteId, gun, o[1]); m.remove(); }; }
       m.appendChild(b);
     });
     document.body.appendChild(m);
     setTimeout(function(){ var h = function(){ if(m.parentNode) m.remove(); document.removeEventListener('click', h); }; document.addEventListener('click', h); }, 30);
+  };
+  // Sprint2: snooze "Özel…" — datetime-local ile esnek erteleme (modal + Takvim menüsü ortak helper). Worker/SW DOKUNULMADI (ts degisimi mevcut sync zinciri ile tasinir).
+  window._alarmOzelErtele = function(receteId, gun, ev){
+    try { if(ev && ev.stopPropagation) ev.stopPropagation(); } catch(_e){}
+    var pad = function(n){ return String(n).padStart(2,'0'); };
+    var fmt = function(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes()); };
+    var inp = document.createElement('input');
+    inp.type = 'datetime-local';
+    inp.min = fmt(new Date(Date.now() + 60000)); // su an + 1dk (cift guvence; asil kontrol onchange'de)
+    var x = (ev && ev.clientX) || 120, y = (ev && ev.clientY) || 120;
+    inp.style.cssText = 'position:fixed;left:'+Math.max(8, Math.min(x, window.innerWidth-220))+'px;top:'+(y+10)+'px;z-index:99999;opacity:0;width:1px;height:1px;border:0;padding:0;margin:0';
+    inp.onchange = function(){
+      var ms = inp.value ? new Date(inp.value).getTime() : NaN;
+      if(isNaN(ms) || ms <= Date.now()){
+        if(typeof flash === 'function') flash('⏰ Geçmiş bir zaman seçilemez','hata');
+      } else {
+        _alarmAksiyon(receteId, gun, 'ozel:'+ms);
+      }
+      try { inp.remove(); } catch(_r){}
+      var mm = document.getElementById('_snoozeMenu'); if(mm) mm.remove();
+    };
+    inp.addEventListener('blur', function(){ setTimeout(function(){ try { if(inp.parentNode) inp.remove(); } catch(_b){} }, 250); });
+    document.body.appendChild(inp);
+    try { if(typeof inp.showPicker === 'function'){ inp.showPicker(); } else { inp.focus(); inp.click(); } }
+    catch(_p){ try { inp.focus(); inp.click(); } catch(_q){} }
   };
   // Zamanı gelmiş pending alarmları bul
   window._alarmBekleyenleri = function(){
