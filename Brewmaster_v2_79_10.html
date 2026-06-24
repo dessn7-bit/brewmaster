@@ -5186,6 +5186,10 @@ function bmManuelEkle(baslik,tarih,saat,not,tekrar){ if(!baslik||!String(baslik)
 function bmManuelSil(id){ bmManuelSave(bmManuelList().filter(function(x){return x.id!==id;})); try{if(window._manuelAlarmSync)_manuelAlarmSync();}catch(_e){} if(typeof render==='function')render(); }
 window.bmManuelEkleUI=function(){ var b=document.getElementById('bm-manuel-baslik'), t=document.getElementById('bm-manuel-tarih'), sa=document.getElementById('bm-manuel-saat'), tk=document.getElementById('bm-manuel-tekrar'); if(!b||!t) return; if(bmManuelEkle(b.value, t.value, sa?sa.value:'10:00', '', tk?tk.value:'yok')){ b.value=''; } };
 window.bmPlanBrewSet=function(val){ try{ if(typeof S==='undefined'||!S) return; S.planBrewTarih = (val&&/^\d{4}-\d{2}-\d{2}$/.test(val)) ? val : null; if(S.biraAd&&S.biraAd.trim()&&typeof tarifeKaydet==='function'){ tarifeKaydet(); } try{if(window._planPrepSync)_planPrepSync();}catch(_e){} if(typeof render==='function')render(); }catch(e){ console.warn('bmPlanBrewSet',e); } };
+window.bmPlanHatirlatmaEkle=function(){ try{ if(typeof S==='undefined'||!S) return; if(!Array.isArray(S.planBrewHatirlatmalar)) S.planBrewHatirlatmalar=[]; S.planBrewHatirlatmalar.push({gun:1,metin:''}); if(S.biraAd&&S.biraAd.trim()&&typeof tarifeKaydet==='function'){ tarifeKaydet(); } try{if(window._planPrepSync)_planPrepSync();}catch(_e){} if(typeof render==='function')render(); }catch(e){ console.warn('bmPlanHatirlatmaEkle',e); } };
+window.bmPlanHatirlatmaSil=function(i){ try{ if(typeof S==='undefined'||!S||!Array.isArray(S.planBrewHatirlatmalar)) return; i=parseInt(i,10); if(isNaN(i)||i<0||i>=S.planBrewHatirlatmalar.length) return; S.planBrewHatirlatmalar.splice(i,1); if(S.biraAd&&S.biraAd.trim()&&typeof tarifeKaydet==='function'){ tarifeKaydet(); } try{if(window._planPrepSync)_planPrepSync();}catch(_e){} if(typeof render==='function')render(); }catch(e){ console.warn('bmPlanHatirlatmaSil',e); } };
+window.bmPlanHatirlatmaGunSet=function(i,val){ try{ if(typeof S==='undefined'||!S) return; if(!Array.isArray(S.planBrewHatirlatmalar)) S.planBrewHatirlatmalar=[]; i=parseInt(i,10); if(isNaN(i)||i<0||i>=S.planBrewHatirlatmalar.length) return; var g=parseInt(val,10); if(isNaN(g)||g<0) g=0; S.planBrewHatirlatmalar[i].gun=g; if(S.biraAd&&S.biraAd.trim()&&typeof tarifeKaydet==='function'){ tarifeKaydet(); } try{if(window._planPrepSync)_planPrepSync();}catch(_e){} }catch(e){ console.warn('bmPlanHatirlatmaGunSet',e); } };
+window.bmPlanHatirlatmaMetinSet=function(i,val){ try{ if(typeof S==='undefined'||!S) return; if(!Array.isArray(S.planBrewHatirlatmalar)) S.planBrewHatirlatmalar=[]; i=parseInt(i,10); if(isNaN(i)||i<0||i>=S.planBrewHatirlatmalar.length) return; S.planBrewHatirlatmalar[i].metin=String(val||'').slice(0,80); if(S.biraAd&&S.biraAd.trim()&&typeof tarifeKaydet==='function'){ tarifeKaydet(); } try{if(window._planPrepSync)_planPrepSync();}catch(_e){} }catch(e){ console.warn('bmPlanHatirlatmaMetinSet',e); } };
 function bmOgPlato(og){return (og>1)?(-616.868+1111.14*og-630.272*og*og+135.997*og*og*og):0;}
 function bmPitchHedef(tip,og){if(tip==='kveik')return{rate:0.5,ad:'Kveik (düşük pitch)'};if(tip==='lager')return{rate:1.5,ad:'Lager (düşük fermentasyon)'};if(og>=1.070)return{rate:1.25,ad:'Yüksek OG ale (>1.070)'};return{rate:0.75,ad:'Standart ale'};}
 function bmMayaSicKesisim(m1,m2){if(!m1||!m2||!m1.sc||!m2.sc)return null;const low=Math.max(m1.sc[0],m2.sc[0]);const high=Math.min(m1.sc[1],m2.sc[1]);return{low,high,ortak:low<=high};}
@@ -6783,7 +6787,7 @@ function suProfiliHesapla(mineraller, hacim, kaynakId){
 }
 
 // ═══ DURUM ══════════════════════════════════════════════════
-const BOS={biraAd:"",stil:"",verim:61,hacim:11,mashSc:67,mashDk:60,kaynatmaSure:60,mashAdimlar:[],maltlar:[],hoplar:[],mayaId:"",maya2Id:"",mayaYasAy:null,fgManuel:null,ogManuel:null,preboilOG:null,durum:"aktif",klasor:"",brewLog:[],primVol:2.4,primTemp:18,_primVolAuto:true,primYontem:"Dekstroz",notlar:"",suMineralleri:[],suKaynak:"distile",suHedef:"",katkilar:[],tadim:null};
+const BOS={biraAd:"",stil:"",verim:61,hacim:11,mashSc:67,mashDk:60,kaynatmaSure:60,mashAdimlar:[],maltlar:[],hoplar:[],mayaId:"",maya2Id:"",mayaYasAy:null,fgManuel:null,ogManuel:null,preboilOG:null,durum:"aktif",klasor:"",brewLog:[],primVol:2.4,primTemp:18,_primVolAuto:true,primYontem:"Dekstroz",notlar:"",suMineralleri:[],suKaynak:"distile",suHedef:"",katkilar:[],tadim:null,planBrewHatirlatmalar:[]};
 let S={...BOS};
   // ══════ v2.79.6 Turkish-character ID migration (backward compatibility) ══════
   // Eski kayıtlarda Turkish karakterli KATKI ID'leri vardı — ASCII'ye dönüştür
@@ -14133,10 +14137,6 @@ function rEditorSurec(){
     </button>
     ${(window._brewday && window._brewday.aktif) ? '<button onclick="brewdayZorlaSifirla()" style="width:100%;background:rgba(200,80,80,.15);color:var(--crit-bg);border:1px solid rgba(200,80,80,.3);border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;margin-top:6px">⟲ Brewday\'i Sıfırla (Acil Kurtarma)</button>' : ''}
     <div style="font-size:10px;color:rgba(246,234,215,.9);margin-top:6px;line-height:1.5;text-align:center">Ekran açık kalır · Wake Lock · Tam ekran bildirim · Mash/Hop/Katkı/Whirlpool otomatik sıralı</div>
-    <div style="margin-top:8px;padding:8px 10px;background:rgba(246,234,215,.1);border-radius:8px">
-      <div style="font-size:11px;font-weight:600;color:var(--masthead-ink);margin-bottom:4px">📅 Planlı demleme tarihi <span style="font-weight:400;opacity:.7">(opsiyonel — hazırlık hatırlatmaları)</span></div>
-      <input aria-label="Planlı demleme tarihi" type="date" value="${S.planBrewTarih||''}" onchange="bmPlanBrewSet(this.value)" style="background:rgba(255,255,255,.9);border:1px solid rgba(246,234,215,.4);border-radius:var(--r-sm);padding:var(--sp-1) var(--sp-2);font-size:var(--fs-sm);color:var(--kahve)">
-    </div>
   </div>
   <div class="kart" style="margin-bottom:10px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
@@ -18736,6 +18736,26 @@ try {
 } catch(e){ _fermDurum=''; }
 
 return `
+    <!-- Sprint 1: Planli Demleme & Hazirlik karti — kullanici-tanimli coklu hatirlatma (Surec sekmesinden tasindi) -->
+    <div class="kart" style="margin-bottom:10px">
+      <div style="font-size:13px;font-weight:700;color:var(--kahve);margin-bottom:8px">📅 Planlı Demleme & Hazırlık</div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <label style="font-size:var(--fs-sm);color:var(--soluk);flex-shrink:0">Demleme tarihi</label>
+        <input aria-label="Planlı demleme tarihi" type="date" value="${S.planBrewTarih||''}" onchange="bmPlanBrewSet(this.value)" class="inp" style="width:auto;max-width:175px">
+      </div>
+      ${ (S.planBrewTarih) ? `
+      <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">
+        ${ (Array.isArray(S.planBrewHatirlatmalar)?S.planBrewHatirlatmalar:[]).map((h,i)=>`
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+          <input type="number" min="0" step="1" aria-label="Demlemeden kac gun once" value="${(h&&h.gun!=null)?h.gun:0}" onchange="bmPlanHatirlatmaGunSet(${i},this.value)" class="inp" style="width:62px;flex-shrink:0;text-align:center">
+          <span style="font-size:var(--fs-xs);color:var(--soluk);flex-shrink:0">gün önce</span>
+          <input type="text" aria-label="Hatirlatma metni" value="${esc((h&&h.metin)||'')}" placeholder="ör. maltları kır" onchange="bmPlanHatirlatmaMetinSet(${i},this.value)" class="inp" style="flex:1;min-width:130px">
+          <button type="button" aria-label="Hatirlatmayi sil" title="Sil" onclick="bmPlanHatirlatmaSil(${i})" class="bm-ayar-btn-sec" style="padding:var(--sp-1) var(--sp-2);line-height:1">🗑</button>
+        </div>`).join('') }
+        <button type="button" onclick="bmPlanHatirlatmaEkle()" class="bm-ayar-btn-sec" style="align-self:flex-start;margin-top:2px">+ Hatırlatma ekle</button>
+      </div>` : `
+      <div style="margin-top:8px;font-size:var(--fs-xs);color:var(--soluk);font-style:italic">Önce demleme tarihi seç — sonra istediğin kadar hazırlık hatırlatması ekleyebilirsin (ör. "2 gün önce — maltları kır").</div>` }
+    </div>
     <!-- Adim 132-E: Sticky ozet paneli rEditor wrapper'a tasindi, tab disinda global. -->
     <!-- Adim 132-D: Accordion #1 - Stil Tahmini (eski big gradient card refactor) -->
     <div class="bm-acc bm-acc-feature" data-acc-id="stil-tahmin" data-acc-default="expanded" aria-expanded="true">
@@ -21895,11 +21915,13 @@ window.brewdayBitir=function(){
         if(isNaN(baseTs)) return;
         var key = 'plan:' + r.id; gecerli[key] = 1;
         var ad = String(r.biraAd || r.ad || '(isimsiz)');
-        var cand = [
-          { g:0, ts:_alarmTsHesapla(baseTs, -2, saat), tip:'kontrol', sicaklik:null, kategori:'E', aksiyon:'📋 Demleme 2 gün sonra — ' + ad, aciklama:'Planı gözden geçir: malzeme/maya/su kontrol, eksik varsa tedarik et.' },
-          { g:1, ts:_alarmTsHesapla(baseTs, -1, saat), tip:'kritik', sicaklik:null, kategori:'E', aksiyon:'💧 Yarın demleme — su + ekipman + sanitize hazırla', aciklama: ad + ' için su hazırla, ekipmanı temizle/sanitize et, mayayı oda sıcaklığına çıkar.' },
-          { g:2, ts:_alarmTsHesapla(baseTs, 0, saat), tip:'kritik', sicaklik:null, kategori:'E', aksiyon:'🔥 Bugün demleme günü — ' + ad, aciklama:'Demleme günü. Brewday modunu başlat.' }
-        ];
+        var liste = Array.isArray(r.planBrewHatirlatmalar) ? r.planBrewHatirlatmalar : [];
+        var cand = liste.map(function(h, idx){
+          var gunOnce = Math.max(0, parseInt(h && h.gun, 10) || 0);
+          var metin = (h && h.metin && String(h.metin).trim()) ? String(h.metin).trim() : 'Demleme hazırlığı';
+          var aksiyon = '🔔 ' + ad + ': ' + metin + (gunOnce > 0 ? ' (demlemeye ' + gunOnce + ' gün)' : ' (bugün demleme)');
+          return { g: idx, ts: _alarmTsHesapla(baseTs, -gunOnce, saat), tip: (gunOnce === 0 ? 'kritik' : 'kontrol'), sicaklik: null, aksiyon: aksiyon, aciklama: '', durum: 'bekliyor', kategori: 'E' };
+        });
         var desired = cand.filter(function(c){ return c.ts > simdi - 3600000; }); // geçmiş prep (1 saat tolerans) eklenmez
         desired.forEach(function(_d){ _d.vibrate = _alarmVibPattern(_d.tip); });
         if(desired.length === 0){ if(tum[key]){ delete tum[key]; degisti = true; } return; }
