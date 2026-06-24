@@ -6130,6 +6130,34 @@ window.bmSlugToBjcp = function(slug, displayTR){
   return _bmFuzzySlugToBjcp(slug, displayTR);
 };
 window.SLUG_TO_BJCP = SLUG_TO_BJCP;
+// ═══ Sprint 3: Reçete eksik-kontrolü (tamamlık) — editör rozeti + plan bildirimi ═══
+// Hop-bastırma stilleri = SOUR_FAMILY (postProcessSour'daki orijinal BOZULMADAN ayrı global kopya).
+const _NO_HOP_SLUGS = ['gueuze','classic_gueuze','belgian_lambic','belgian_fruit_lambic','gose','straight_sour_or_unblended_lambic','mixed_fermentation_sour_beer','flanders_red','flanders_brown_or_oud_bruin','berliner_weisse','american_sour_or_funky_ale','brett_beer','french_belgian_saison','specialty_saison'];
+// slug -> BJCP adı (rec.stil BJCP adı taşır); bir kez kurulur.
+const _NO_HOP_BJCP = (function(){ var s = {}; _NO_HOP_SLUGS.forEach(function(slug){ var b = SLUG_TO_BJCP[slug]; if(b) s[b] = 1; }); return s; })();
+window._NO_HOP_SLUGS = _NO_HOP_SLUGS; window._NO_HOP_BJCP = _NO_HOP_BJCP;
+// rec (S veya kayıtlı r) eksik alanları — Türkçe etiket dizisi; eski reçetede guard'lı, boşsa [].
+window._receteEksikler = function(rec){
+  var eks = [];
+  try {
+    if(!rec) return eks;
+    var maltOk = Array.isArray(rec.maltlar) && rec.maltlar.some(function(m){ return m && (parseFloat(m.kg)||0) > 0; });
+    if(!maltOk) eks.push('Malt');
+    if(!rec.mayaId) eks.push('Maya');
+    var hopOk = Array.isArray(rec.hoplar) && rec.hoplar.some(function(h){ return h && (parseFloat(h.g)||0) > 0; });
+    if(!hopOk){
+      var stil = (rec.stil && String(rec.stil).trim()) ? String(rec.stil).trim() : '';
+      if(stil){
+        // Hop opsiyonel mi? (1) BJCP IBU alt-sınırı <=5 (veri-tabanlı, TÜM sour/gose/lambic'i kapsar; Sour IPA gibi hoplu stiller min>5 => eksik kalır) VEYA (2) _NO_HOP_BJCP slug eşleşmesi (Brett/Saison fallback).
+        var _bj = (typeof BJCP!=='undefined' && BJCP[stil]) ? BJCP[stil] : null;
+        var lowHopOk = (_bj && Array.isArray(_bj.ibu) && (parseFloat(_bj.ibu[0])||99) <= 5) || !!_NO_HOP_BJCP[stil];
+        if(!lowHopOk) eks.push('Hop');
+      }
+      // stil boş (Otomatik) => konservatif, hop eksik sayma.
+    }
+  } catch(e){ /* eski reçete / bozuk veri guard */ }
+  return eks;
+};
 
 // ═══ V15 SLUG → FAMILY TABLE (Adım 51 Bug 4 fix — same-family ribbon filter) ═══
 // 13 family × 77 slug. Kaan onayı 2026-04-28: K1=wheat, K2=american_pale, K3=strong_ale,
@@ -18738,7 +18766,7 @@ try {
 return `
     <!-- Sprint 1: Planli Demleme & Hazirlik karti — kullanici-tanimli coklu hatirlatma (Surec sekmesinden tasindi) -->
     <div class="kart" style="margin-bottom:10px">
-      <div style="font-size:13px;font-weight:700;color:var(--kahve);margin-bottom:8px">📅 Planlı Demleme & Hazırlık</div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px"><div style="font-size:13px;font-weight:700;color:var(--kahve)">📅 Planlı Demleme & Hazırlık</div>${(()=>{ var _eks=(typeof _receteEksikler==='function')?_receteEksikler(S):[]; return _eks.length ? '<span class="bm-ensemble-badge" style="background:var(--warn-bg,#FBEDEA);color:var(--crit,#BC4533);border:1px solid var(--crit)">⚠ Eksik: '+esc(_eks.join(', '))+'</span>' : ''; })()}</div>
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
         <label style="font-size:var(--fs-sm);color:var(--soluk);flex-shrink:0">Demleme tarihi</label>
         <input aria-label="Planlı demleme tarihi" type="date" value="${S.planBrewTarih||''}" onchange="bmPlanBrewSet(this.value)" class="inp" style="width:auto;max-width:175px">
@@ -21916,11 +21944,12 @@ window.brewdayBitir=function(){
         if(isNaN(baseTs)) return;
         var key = 'plan:' + r.id; gecerli[key] = 1;
         var ad = String(r.biraAd || r.ad || '(isimsiz)');
+        var _eks = (typeof _receteEksikler==='function') ? _receteEksikler(r) : []; var eksikStr = _eks.length ? '  ⚠ Eksik: ' + _eks.join(', ') : '';
         var liste = Array.isArray(r.planBrewHatirlatmalar) ? r.planBrewHatirlatmalar : [];
         var cand = liste.map(function(h, idx){
           var gunOnce = Math.max(0, parseInt(h && h.gun, 10) || 0);
           var metin = (h && h.metin && String(h.metin).trim()) ? String(h.metin).trim() : 'Demleme hazırlığı';
-          var aksiyon = '🔔 ' + ad + ': ' + metin + (gunOnce > 0 ? ' (demlemeye ' + gunOnce + ' gün)' : ' (bugün demleme)');
+          var aksiyon = '🔔 ' + ad + ': ' + metin + (gunOnce > 0 ? ' (demlemeye ' + gunOnce + ' gün)' : ' (bugün demleme)') + eksikStr;
           return { g: idx, ts: _alarmTsHesapla(baseTs, -gunOnce, saat), tip: (gunOnce === 0 ? 'kritik' : 'kontrol'), sicaklik: null, aksiyon: aksiyon, aciklama: '', durum: 'bekliyor', kategori: 'E' };
         });
         var desired = cand.filter(function(c){ return c.ts > simdi - 3600000; }); // geçmiş prep (1 saat tolerans) eklenmez
