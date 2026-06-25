@@ -21759,7 +21759,7 @@ window.brewdayBitir=function(){
       KR_list = _migrateAllRecipes(JSON.parse(localStorage.getItem('bm_v6') || '[]') || []);
     } catch(e){}
     Object.keys(tum).forEach(rid => {
-      if(/^(maya|stok|manuel|plan):/.test(rid)) return; // pseudo-key: reconcile sahibi, orphan değil
+      if(/^(maya|stok|manuel|plan|stuck):/.test(rid)) return; // pseudo-key: reconcile sahibi, orphan değil
       const bulundu = KR_list.some(r => r && String(r.id) === String(rid));
       // v2.78.84 H7: Aktif _editId veya S.id kontrolü — kaydedilmemiş brewday olmuş reçeteler için
       // _editId KR ID'si (S.id tasarım gereği atanmıyor)
@@ -21968,6 +21968,73 @@ window.brewdayBitir=function(){
     } catch(e){ console.warn('[Alarm] plan prep sync:', e); return false; }
   };
 
+  // A (Sprint4) — stuck fermentation: pitch sonrasi FG olcumu yoksa pitch+3/+7 uyari.
+  // FG (brewLog fg_olcum VEYA editor fgManuel) girilince iptal. A.2 periyodik gravity ile cakismaz (collision-skip).
+  window._stuckFermSync = function(){
+    try {
+      var saat = (typeof _alarmSaatiAl === 'function') ? _alarmSaatiAl() : '10:00';
+      var KR_list = [];
+      try { KR_list = _migrateAllRecipes(JSON.parse(localStorage.getItem('bm_v6') || '[]') || []); } catch(_k){}
+      var tum = _alarmlariOku();
+      var degisti = false, gecerli = {}, simdi = Date.now();
+      function _stuckFgVar(rec, anchorTs){
+        var bl = Array.isArray(rec.brewLog) ? rec.brewLog : [];
+        var blVar = bl.some(function(x){
+          if(!x || x.tip!=='fg_olcum' || !x.deger) return false;
+          var v = parseFloat(x.deger); if(!(v>1.000 && v<1.200)) return false;
+          var t = x.tarih ? new Date(x.tarih+'T00:00:00').getTime() : NaN;
+          return isNaN(t) || t >= (anchorTs - 864e5);
+        });
+        if(blVar) return true;
+        if(rec.fgManuel){ var fm = parseFloat(rec.fgManuel); if(fm>1.000 && fm<1.200) return true; }
+        return false;
+      }
+      KR_list.forEach(function(r){
+        if(!r || !r.id) return;
+        // 1) PITCH ANCHOR — uclu fallback (alarm grubu pitchTs -> pitching log -> brewday_start ts)
+        var grp = tum[String(r.id)];
+        var pitchTs = (grp && grp.pitchTs) ? grp.pitchTs : null;
+        if(!pitchTs){ var pE=(r.brewLog||[]).filter(function(x){return x&&x.tip==='pitching';}).pop(); if(pE&&pE.tarih){ var dp=new Date(pE.tarih+'T00:00:00'); if(!isNaN(dp.getTime())) pitchTs=dp.getTime(); } }
+        if(!pitchTs){ var bs=(r.brewLog||[]).filter(function(x){return x&&x.tip==='brewday_start';}).pop(); if(bs&&bs.ts) pitchTs=bs.ts; }
+        if(!pitchTs) return; // anchor yok -> kurulamaz (gecerli set etme -> temizlenir)
+        // 2) BITIS KONTROLU — fermentasyon bitti -> stuck anlamsiz
+        var bitti = (r.brewLog||[]).some(function(x){return x&&(x.tip==='siseleme'||x.tip==='sise'||x.tip==='bottle'||x.tip==='brewday_end');});
+        if(bitti) return;
+        // 3) FG OLCUM KONTROLU — iki kaynak (brewLog fg_olcum VEYA editor fgManuel) -> olcum varsa iptal
+        if(_stuckFgVar(r, pitchTs)) return;
+        // 4) DESIRED (pitch+3 / pitch+7) — A.2 periyodik gravity ile collision-skip
+        function _aGravityVar(gun){
+          return grp && Array.isArray(grp.alarmlar) && grp.alarmlar.some(function(a){
+            if(!a || a.durum!=='bekliyor') return false;
+            return ((a.aksiyon||'').toLowerCase().indexOf('gravity')>=0) && Math.abs((a.g|0)-gun)<=1;
+          });
+        }
+        var cand = [];
+        if(!_aGravityVar(3)) cand.push({ g:3, ts:_alarmTsHesapla(pitchTs,3,saat), tip:'kontrol', sicaklik:null, kategori:'A',
+          aksiyon:'🔍 Fermentasyon kontrol — gravity ölç',
+          aciklama:"Pitch'ten 3 gün geçti, hâlâ ölçüm yok. Hidrometre ile yoğunluğa bak — fermentasyon başlamadıysa erken yakala." });
+        if(!_aGravityVar(7)) cand.push({ g:7, ts:_alarmTsHesapla(pitchTs,7,saat), tip:'kontrol', sicaklik:null, kategori:'A',
+          aksiyon:'⚠️ Fermentasyon takılmış olabilir',
+          aciklama:"Pitch'ten 7 gün geçti, hâlâ FG ölçümü yok. Gravity ölç — takıldıysa (stuck) maya/sıcaklık müdahalesi gerekebilir." });
+        var desired = cand.filter(function(c){ return c.ts > simdi - 3600000; }); // gecmis offset eklenmez (1sa tolerans)
+        desired.forEach(function(_d){ _d.durum='bekliyor'; _d.vibrate=_alarmVibPattern(_d.tip); });
+        var key = 'stuck:'+r.id;
+        if(desired.length===0){ if(tum[key]){ delete tum[key]; degisti=true; } return; }
+        gecerli[key]=1;
+        var ad = String(r.biraAd||r.ad||'(isimsiz)');
+        var ex = tum[key];
+        var merged = _pseudoMergeAlarmlar(ex, desired);
+        if(!ex || ex.receteAd !== ad || _pseudoGrupSig(ex.alarmlar) !== _pseudoGrupSig(merged)){
+          tum[key] = { receteAd:ad, pitchTs:pitchTs, durum:'aktif', alarmlar:merged };
+          degisti = true;
+        }
+      });
+      Object.keys(tum).forEach(function(k){ if(k.indexOf('stuck:') === 0 && !gecerli[k]){ delete tum[k]; degisti = true; } });
+      if(degisti) _alarmlariYaz(tum);
+      return degisti;
+    } catch(e){ console.warn('[Alarm] stuck ferm sync:', e); return false; }
+  };
+
   // ═══ TETİKLEME ═══
 
   // Kritik alarm modalı — tam ekran, bip, titreşim
@@ -22150,6 +22217,7 @@ window.brewdayBitir=function(){
       try { if(window._stokDusukSync) _stokDusukSync(); } catch(e){}       // B: stok düşük reconcile
       try { if(window._manuelAlarmSync) _manuelAlarmSync(); } catch(e){}   // E: manuel hatırlatma reconcile
       try { if(window._planPrepSync) _planPrepSync(); } catch(e){}         // E: planlı demleme hazırlık reconcile
+      try { if(window._stuckFermSync) _stuckFermSync(); } catch(e){}        // A: stuck fermentation reconcile
       try { if(window.bmGecmisIDBCek) bmGecmisIDBCek(function(degisti){ if(degisti && typeof ekran!=='undefined' && ekran==='stok'){ try{ var _e=document.getElementById('ekran'); if(_e && typeof rStok==='function') _e.innerHTML=rStok(); }catch(_r){} } }); } catch(e){} // Sprint5: push geçmişini IDB'den çek
 
       const bekleyenler = _alarmBekleyenleri();
@@ -23444,6 +23512,8 @@ function logEkle(){
     }
   }
   if(S.biraAd&&S.biraAd.trim())tarifeKaydet(); else render();
+  // Sprint4: olcum/pitch/siseleme log'u stuck-fermentation grubunu aninda yeniden degerlendirir (kur/iptal). tarifeKaydet sonrasi -> localStorage guncel.
+  try { if(window._stuckFermSync) _stuckFermSync(); } catch(_sfe){}
   // Kayıt eklendikten sonra log bölümüne scroll
   setTimeout(function(){
     var ekranEl=document.getElementById('ekran');
@@ -23759,7 +23829,7 @@ window.rStokBildirim = function(){
       var _al = _alarmlariOku();
       var simdi = Date.now();
       Object.keys(_al).forEach(function(rid){
-        if(/^(maya|stok|manuel|plan):/.test(rid)) return; // pseudo-key: manuel kendi bölümünde, plan/maya modal/toast'ta
+        if(/^(maya|stok|manuel|plan|stuck):/.test(rid)) return; // pseudo-key: manuel kendi bölümünde, plan/maya modal/toast'ta
         var rec = _al[rid];
         if (!rec || rec.durum !== 'aktif') return;
         var recAd = (function(){ var t = (KR||[]).find(function(x){return x&&x.id===rid;}); return t ? (t.biraAd||t.ad||'(adsız)') : '(silinmiş tarif)'; })();
