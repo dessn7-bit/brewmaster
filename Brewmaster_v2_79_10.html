@@ -21428,6 +21428,48 @@ window.brewdayBitir=function(){
     try { if(typeof render === 'function') render(); } catch(_e2){}
   };
 
+  // Sprint5 — ayni g+ts+kategori dusen A-alarmlarini TEK birlesik alarma indirge (storage->worker->in-app otomatik birlesik).
+  // MUAF (tek basina gecer): gravity (stuck _aGravityVar + A.2 _doluGun korunur), _sonrasiGun (D re-anchor), pasif (aktive olmasin).
+  // Kategori KATI: sanitize 'E' / karbonasyon-olgunlas 'D' / diger 'A' -> sadece ayni kategori birlesir (E-toggle A'yi gizlemesin).
+  window._alarmGunBirlestir = function(alarmlar){
+    try {
+      if(!Array.isArray(alarmlar) || alarmlar.length < 2) return alarmlar;
+      function _kat(a){
+        if(a && a.kategori) return a.kategori;
+        var ak = (a && a.aksiyon || '').toLowerCase();
+        if(ak.indexOf('sanitize') >= 0) return 'E';
+        if(ak.indexOf('karbonasyon') >= 0 || ak.indexOf('olgunlas') >= 0 || ak.indexOf('olgunlaş') >= 0) return 'D';
+        return 'A';
+      }
+      var gruplar = {}, sira = [], muaf = [];
+      alarmlar.forEach(function(a){
+        if(!a){ return; }
+        var ak = (a.aksiyon || '').toLowerCase();
+        if(ak.indexOf('gravity') >= 0 || a._sonrasiGun != null || a.tip === 'pasif'){ muaf.push(a); return; }
+        var key = (a.g|0) + '|' + a.ts + '|' + _kat(a);
+        if(!gruplar[key]){ gruplar[key] = []; sira.push(key); }
+        gruplar[key].push(a);
+      });
+      var sonuc = [];
+      sira.forEach(function(key){
+        var grp = gruplar[key];
+        if(grp.length === 1){ sonuc.push(grp[0]); return; }
+        var ref = grp[0];
+        var tipOnc = grp.some(function(x){ return x.tip === 'kritik'; }) ? 'kritik' : 'kontrol';
+        var parcalar = grp.map(function(x){ return String(x.aksiyon || ''); });
+        var tam = parcalar.join(' + ');
+        var birlesikAksiyon = (tam.length <= 60) ? tam : (parcalar.slice(0,2).join(' + ') + ' +' + (parcalar.length - 2) + ' daha');
+        var birlesikAciklama = grp.map(function(x){ return '• ' + String(x.aksiyon || '') + (x.aciklama ? ': ' + String(x.aciklama) : ''); }).join('\n');
+        var sic = null; for(var i = 0; i < grp.length; i++){ if(grp[i].sicaklik != null){ sic = grp[i].sicaklik; break; } }
+        var dur = grp.some(function(x){ return x.durum === 'bekliyor'; }) ? 'bekliyor' : (ref.durum || 'bekliyor');
+        sonuc.push({ g: ref.g, ts: ref.ts, tip: tipOnc, aksiyon: birlesikAksiyon, aciklama: birlesikAciklama, sicaklik: sic, durum: dur });
+      });
+      muaf.forEach(function(a){ sonuc.push(a); });
+      sonuc.sort(function(a,b){ return (a.g|0) - (b.g|0); });
+      return sonuc;
+    } catch(e){ console.warn('[Alarm] gün birleştir:', e); return alarmlar; }
+  };
+
   // Brewday bitince çağrılır — fermentasyonProfili'nden alarm listesi üret
   window._alarmPlaniKur = function(receteId, pitchTs){
     if(!receteId || !pitchTs) return {hata:'receteId/pitchTs eksik'};
@@ -21446,7 +21488,7 @@ window.brewdayBitir=function(){
     catch(e){ return {hata:'profil hatası: '+e.message}; }
     if(!prof || !Array.isArray(prof.gunler)) return {hata:'profil geçersiz'};
     const saat = _alarmSaatiAl();
-    const alarmlar = prof.gunler.map(ev => ({
+    let alarmlar = prof.gunler.map(ev => ({
       g: ev.g|0,
       ts: _alarmTsHesapla(pitchTs, ev.g|0, saat),
       tip: _alarmTipBelirle(ev.aksiyon),
@@ -21620,6 +21662,8 @@ window.brewdayBitir=function(){
       }
       alarmlar.sort(function(a, b){ return a.g - b.g; });
     } catch(_dakE){ console.warn('[Alarm] D/A.2 enjeksiyonu:', _dakE); }
+    // Sprint5: aynı g+ts+kategori düşen alarmları tek bildirimde birleştir (gravity/_sonrasiGun/pasif muaf). A.2/_doluGun ÖNCE çalıştı → bozulmaz.
+    alarmlar = _alarmGunBirlestir(alarmlar);
     // Sprint3: kalıcı kategori (A/D) + tip-bazlı titreşim her alarma
     alarmlar.forEach(function(a){
       if(!a) return;
