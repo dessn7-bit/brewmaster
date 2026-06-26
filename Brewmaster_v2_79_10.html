@@ -7496,6 +7496,27 @@ function stokYetersizlikKontrol(tarif){
   return {yetersiz, eksik};
 }
 
+// Sprint 6 — Malt/hop stok yeterliligi (maya/katki/mineral MUAF). stokYetersizlikKontrol DOKUNULMAZ; ciktisi recetenin malt+hop id'lerine suzulur.
+window.stokYetersizMaltHop = function(tarif){
+  if(typeof stokYetersizlikKontrol!=='function' || !tarif) return {yetersiz:[],eksik:[]};
+  var k = stokYetersizlikKontrol(tarif);
+  var izin = {};
+  (tarif.maltlar||[]).forEach(function(m){ if(m&&m.id) izin[m.id]=1; });
+  (tarif.hoplar ||[]).forEach(function(h){ if(h&&h.id) izin[h.id]=1; });
+  return {
+    yetersiz: (k.yetersiz||[]).filter(function(it){ return izin[it.refId]; }),
+    eksik:    (k.eksik   ||[]).filter(function(it){ return izin[it.refId]; })
+  };
+};
+// Sprint 6 — ortak metin (rozet title + plan bildirimi ayni format): "Pilsner Malt yok, Magnum (15g eksik)"
+window._stokYetersizMetin = function(st){
+  if(!st || (!st.yetersiz.length && !st.eksik.length)) return '';
+  var parts = [];
+  (st.eksik||[]).forEach(function(it){ parts.push(String(it.ad) + ' yok'); });
+  (st.yetersiz||[]).forEach(function(it){ parts.push(String(it.ad) + ' (' + it.eksikMik + (it.birim||'') + ' eksik)'); });
+  return parts.join(', ');
+};
+
 function stoktenDus(tarif){
   // v2.78.96 H13 — _stokMalBul ve _stokBirimCevir ortak helper'lar kullanılır.
   // Önceki sürümde malBul içindeki `startsWith` partial match "Weizen Malt" ↔
@@ -18766,7 +18787,7 @@ try {
 return `
     <!-- Sprint 1: Planli Demleme & Hazirlik karti — kullanici-tanimli coklu hatirlatma (Surec sekmesinden tasindi) -->
     <div class="kart" style="margin-bottom:10px">
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px"><div style="font-size:13px;font-weight:700;color:var(--kahve)">📅 Planlı Demleme & Hazırlık</div>${(()=>{ var _eks=(typeof _receteEksikler==='function')?_receteEksikler(S):[]; return _eks.length ? '<span class="bm-ensemble-badge" style="background:var(--warn-bg,#FBEDEA);color:var(--crit,#BC4533);border:1px solid var(--crit)">⚠ Eksik: '+esc(_eks.join(', '))+'</span>' : ''; })()}</div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px"><div style="font-size:13px;font-weight:700;color:var(--kahve)">📅 Planlı Demleme & Hazırlık</div>${(()=>{ var _eks=(typeof _receteEksikler==='function')?_receteEksikler(S):[]; return _eks.length ? '<span class="bm-ensemble-badge" style="background:var(--warn-bg,#FBEDEA);color:var(--crit,#BC4533);border:1px solid var(--crit)">⚠ Eksik: '+esc(_eks.join(', '))+'</span>' : ''; })()}${(()=>{ var _st = (typeof stokYetersizMaltHop==='function') ? stokYetersizMaltHop(S) : {yetersiz:[],eksik:[]}; var n = _st.yetersiz.length + _st.eksik.length; return n ? '<span class="bm-ensemble-badge" style="background:var(--warn-bg,#FBF3E5);color:var(--warn,#C08A2E);border:1px solid var(--warn,#C08A2E)" title="'+esc(_stokYetersizMetin(_st))+'">📦 Stok yetersiz ('+n+' kalem)</span>' : ''; })()}</div>
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
         <label style="font-size:var(--fs-sm);color:var(--soluk);flex-shrink:0">Demleme tarihi</label>
         <input aria-label="Planlı demleme tarihi" type="date" value="${S.planBrewTarih||''}" onchange="bmPlanBrewSet(this.value)" class="inp" style="width:auto;max-width:175px">
@@ -21989,11 +22010,13 @@ window.brewdayBitir=function(){
         var key = 'plan:' + r.id; gecerli[key] = 1;
         var ad = String(r.biraAd || r.ad || '(isimsiz)');
         var _eks = (typeof _receteEksikler==='function') ? _receteEksikler(r) : []; var eksikStr = _eks.length ? '  ⚠ Eksik: ' + _eks.join(', ') : '';
+        var _st = (typeof stokYetersizMaltHop==='function') ? stokYetersizMaltHop(r) : {yetersiz:[],eksik:[]};
+        var stokStr = (typeof _stokYetersizMetin==='function' && (_st.yetersiz.length||_st.eksik.length)) ? '  📦 Stok: ' + _stokYetersizMetin(_st) : '';
         var liste = Array.isArray(r.planBrewHatirlatmalar) ? r.planBrewHatirlatmalar : [];
         var cand = liste.map(function(h, idx){
           var gunOnce = Math.max(0, parseInt(h && h.gun, 10) || 0);
           var metin = (h && h.metin && String(h.metin).trim()) ? String(h.metin).trim() : 'Demleme hazırlığı';
-          var aksiyon = '🔔 ' + ad + ': ' + metin + (gunOnce > 0 ? ' (demlemeye ' + gunOnce + ' gün)' : ' (bugün demleme)') + eksikStr;
+          var aksiyon = '🔔 ' + ad + ': ' + metin + (gunOnce > 0 ? ' (demlemeye ' + gunOnce + ' gün)' : ' (bugün demleme)') + eksikStr + stokStr;
           return { g: idx, ts: _alarmTsHesapla(baseTs, -gunOnce, saat), tip: (gunOnce === 0 ? 'kritik' : 'kontrol'), sicaklik: null, aksiyon: aksiyon, aciklama: '', durum: 'bekliyor', kategori: 'E' };
         });
         var desired = cand.filter(function(c){ return c.ts > simdi - 3600000; }); // geçmiş prep (1 saat tolerans) eklenmez
