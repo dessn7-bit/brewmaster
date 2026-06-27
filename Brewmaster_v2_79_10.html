@@ -7517,6 +7517,95 @@ window._stokYetersizMetin = function(st){
   return parts.join(', ');
 };
 
+// ─────────────────────────────────────────────────────────────────
+// Sprint 7 — Maya stok yeterliligi (esdeger-KOD koprusu). MUADIL/MAYALAR/STOK SALT-OKUNUR.
+// Recete mayasinin stokta karsiligi var mi? Kademeli kontrol (ilk bulan "var" der):
+//   1) DOGRUDAN ad eslesme, 2) FORWARD ✅-muadil, 3) ESDEGER-KOD, 4) REVERSE ✅.
+// Hicbiri bulamazsa o maya EKSIK; var olanlar sessiz (ciktiya girmez). SADECE maya (katki/mineral MUAF).
+function _mayaKodFromAd(ad){
+  if(!ad) return null;
+  var s = String(ad);
+  var ex = s.match(/\(=\s*([A-Z0-9][A-Z0-9\/-]*)\s*\)/i);   // "(=WB-06)" acik etiket — en guvenilir
+  if(ex) return ex[1].toUpperCase();
+  var k = s.match(/\b([A-Z]{1,3}-\d{2,3}(?:\/\d{1,3})?)\b/); // metin-ici kanonik kod ("Fermentis WB-06", "W-34/70")
+  if(k) return k[1].toUpperCase();
+  return null;
+}
+window._mayaKod = function(katalogId){
+  if(!katalogId || typeof MAYALAR==='undefined' || !Array.isArray(MAYALAR)) return null;
+  var m = MAYALAR.find(function(x){ return x && x.id===katalogId; });
+  if(!m) return null;
+  var own = _mayaKodFromAd(m.ad);
+  if(own) return own;
+  if(typeof MUADIL!=='undefined' && Array.isArray(MUADIL[katalogId])){   // ✅-muadil zinciri (tek seviye, dongusuz)
+    var lst = MUADIL[katalogId];
+    for(var i=0;i<lst.length;i++){
+      var mu = lst[i];
+      if(mu && mu.id && typeof mu.fark==='string' && String(mu.fark).trim().indexOf('✅')===0){
+        var mm = MAYALAR.find(function(x){ return x && x.id===mu.id; });
+        var kk = mm ? _mayaKodFromAd(mm.ad) : null;
+        if(kk) return kk;
+      }
+    }
+  }
+  return null;
+};
+window.stokYetersizMaya = function(tarif){
+  var out = { eksik: [] };
+  if(!tarif || typeof MAYALAR==='undefined' || !Array.isArray(MAYALAR)) return out;
+  if(typeof STOK==='undefined' || !Array.isArray(STOK)) return out;
+  // Stokta MEVCUT katalog mayalari + kodlari — recete basina tek hazirlik (g==='Maya' guard ile maya-disi sizmasi yok)
+  var stokMayaIds = {}, stokKodlar = {};
+  MAYALAR.forEach(function(y){
+    if(!y || !y.id) return;
+    var idx = _stokMalBul(y.id, y.ad);
+    if(idx > -1 && STOK[idx] && STOK[idx].g === 'Maya'){
+      stokMayaIds[y.id] = true;
+      var kk = _mayaKod(y.id); if(kk) stokKodlar[kk] = true;
+    }
+  });
+  STOK.forEach(function(s){   // katalog-disi custom maya guvencesi: adindaki "(=KOD)" de gecerli
+    if(!s || s.g !== 'Maya') return;
+    var ex = String(s.ad||'').match(/\(=\s*([A-Z0-9][A-Z0-9\/-]*)\s*\)/i);
+    if(ex) stokKodlar[ex[1].toUpperCase()] = true;
+  });
+  [tarif.mayaId, tarif.maya2Id].filter(Boolean).forEach(function(mid){
+    var maya = MAYALAR.find(function(x){ return x && x.id===mid; });
+    if(!maya) return;   // katalog-disi maya -> belirlenemez, atla (stokYetersizlikKontrol emsali)
+    var bulundu = false;
+    var idx = _stokMalBul(mid, maya.ad);                                       // 1) DOGRUDAN ad eslesme
+    if(idx > -1 && STOK[idx] && STOK[idx].g === 'Maya') bulundu = true;
+    if(!bulundu && typeof MUADIL!=='undefined' && Array.isArray(MUADIL[mid])){ // 2) FORWARD ✅-muadil
+      MUADIL[mid].forEach(function(mu){
+        if(bulundu || !mu || !mu.id || typeof mu.fark!=='string' || String(mu.fark).trim().indexOf('✅')!==0) return;
+        var m2 = MAYALAR.find(function(x){ return x && x.id===mu.id; });
+        var i2 = _stokMalBul(mu.id, m2 ? m2.ad : mu.id);
+        if(i2 > -1 && STOK[i2] && STOK[i2].g === 'Maya') bulundu = true;
+      });
+    }
+    if(!bulundu){ var kod = _mayaKod(mid); if(kod && stokKodlar[kod]) bulundu = true; } // 3) ESDEGER-KOD
+    if(!bulundu && typeof MUADIL!=='undefined'){                               // 4) REVERSE ✅ (stok mayasi bu mayayi ✅-listeler mi)
+      Object.keys(stokMayaIds).forEach(function(sid){
+        if(bulundu || !Array.isArray(MUADIL[sid])) return;
+        MUADIL[sid].forEach(function(mu){
+          if(mu && mu.id===mid && typeof mu.fark==='string' && String(mu.fark).trim().indexOf('✅')===0) bulundu = true;
+        });
+      });
+    }
+    if(!bulundu) out.eksik.push({ ad: maya.ad, birim:'pk', refId: mid, _tip:'maya' });
+  });
+  return out;
+};
+// Sprint 7 — birlesik tek cagri noktasi: malt/hop (Sprint 6) eksikleri + maya (Sprint 7) eksikleri.
+window.stokYetersizTam = function(tarif){
+  var mh = (typeof stokYetersizMaltHop==='function') ? stokYetersizMaltHop(tarif) : {yetersiz:[],eksik:[]};
+  var my = (typeof stokYetersizMaya==='function') ? stokYetersizMaya(tarif) : {eksik:[]};
+  return {
+    yetersiz: (mh.yetersiz||[]).slice(),
+    eksik: (mh.eksik||[]).concat(my.eksik||[])
+  };
+};
+
 function stoktenDus(tarif){
   // v2.78.96 H13 — _stokMalBul ve _stokBirimCevir ortak helper'lar kullanılır.
   // Önceki sürümde malBul içindeki `startsWith` partial match "Weizen Malt" ↔
@@ -18787,7 +18876,7 @@ try {
 return `
     <!-- Sprint 1: Planli Demleme & Hazirlik karti — kullanici-tanimli coklu hatirlatma (Surec sekmesinden tasindi) -->
     <div class="kart" style="margin-bottom:10px">
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px"><div style="font-size:13px;font-weight:700;color:var(--kahve)">📅 Planlı Demleme & Hazırlık</div>${(()=>{ var _eks=(typeof _receteEksikler==='function')?_receteEksikler(S):[]; return _eks.length ? '<span class="bm-ensemble-badge" style="background:var(--warn-bg,#FBEDEA);color:var(--crit,#BC4533);border:1px solid var(--crit)">⚠ Eksik: '+esc(_eks.join(', '))+'</span>' : ''; })()}${(()=>{ var _st = (typeof stokYetersizMaltHop==='function') ? stokYetersizMaltHop(S) : {yetersiz:[],eksik:[]}; var n = _st.yetersiz.length + _st.eksik.length; return n ? '<span class="bm-ensemble-badge" style="background:var(--warn-bg,#FBF3E5);color:var(--warn,#C08A2E);border:1px solid var(--warn,#C08A2E)" title="'+esc(_stokYetersizMetin(_st))+'">📦 Stok yetersiz ('+n+' kalem)</span>' : ''; })()}</div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px"><div style="font-size:13px;font-weight:700;color:var(--kahve)">📅 Planlı Demleme & Hazırlık</div>${(()=>{ var _eks=(typeof _receteEksikler==='function')?_receteEksikler(S):[]; return _eks.length ? '<span class="bm-ensemble-badge" style="background:var(--warn-bg,#FBEDEA);color:var(--crit,#BC4533);border:1px solid var(--crit)">⚠ Eksik: '+esc(_eks.join(', '))+'</span>' : ''; })()}${(()=>{ var _st = (typeof stokYetersizTam==='function') ? stokYetersizTam(S) : {yetersiz:[],eksik:[]}; var n = _st.yetersiz.length + _st.eksik.length; return n ? '<span class="bm-ensemble-badge" style="background:var(--warn-bg,#FBF3E5);color:var(--warn,#C08A2E);border:1px solid var(--warn,#C08A2E)" title="'+esc(_stokYetersizMetin(_st))+'">📦 Stok yetersiz ('+n+' kalem)</span>' : ''; })()}</div>
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
         <label style="font-size:var(--fs-sm);color:var(--soluk);flex-shrink:0">Demleme tarihi</label>
         <input aria-label="Planlı demleme tarihi" type="date" value="${S.planBrewTarih||''}" onchange="bmPlanBrewSet(this.value)" class="inp" style="width:auto;max-width:175px">
@@ -22010,7 +22099,7 @@ window.brewdayBitir=function(){
         var key = 'plan:' + r.id; gecerli[key] = 1;
         var ad = String(r.biraAd || r.ad || '(isimsiz)');
         var _eks = (typeof _receteEksikler==='function') ? _receteEksikler(r) : []; var eksikStr = _eks.length ? '  ⚠ Eksik: ' + _eks.join(', ') : '';
-        var _st = (typeof stokYetersizMaltHop==='function') ? stokYetersizMaltHop(r) : {yetersiz:[],eksik:[]};
+        var _st = (typeof stokYetersizTam==='function') ? stokYetersizTam(r) : {yetersiz:[],eksik:[]};
         var stokStr = (typeof _stokYetersizMetin==='function' && (_st.yetersiz.length||_st.eksik.length)) ? '  📦 Stok: ' + _stokYetersizMetin(_st) : '';
         var liste = Array.isArray(r.planBrewHatirlatmalar) ? r.planBrewHatirlatmalar : [];
         var cand = liste.map(function(h, idx){
