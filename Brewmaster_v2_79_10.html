@@ -183,7 +183,7 @@
   --cizgi-arac:#E9E1D2;      /* ince ayrac (mockup --line) */
   /* Semantic — 135-A2 yeni mockup token'lari */
   --crit:#BC4533; --crit-bg:#FBEDEA;
-  --warn:#C08A2E;
+  --warn:#C08A2E; --warn-bg:#FBF3E5;
   --ok:#4A7C59;
   /* B. Elevation iki-kademe shadow — mockup kahve tonlu rgba(74,53,38) */
   --elv-1:0 1px 2px rgba(74,53,38,.05),0 1px 3px rgba(74,53,38,.06);
@@ -6155,7 +6155,7 @@ window._receteEksikler = function(rec){
       }
       // stil boş (Otomatik) => konservatif, hop eksik sayma.
     }
-  } catch(e){ /* eski reçete / bozuk veri guard */ }
+  } catch(e){ console.warn('_receteEksikler:', e); }
   return eks;
 };
 
@@ -18878,7 +18878,7 @@ try {
 return `
     <!-- Sprint 1: Planli Demleme & Hazirlik karti — kullanici-tanimli coklu hatirlatma (Surec sekmesinden tasindi) -->
     <div class="kart" style="margin-bottom:10px">
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px"><div style="font-size:13px;font-weight:700;color:var(--kahve)">📅 Planlı Demleme & Hazırlık</div>${(()=>{ var _eks=(typeof _receteEksikler==='function')?_receteEksikler(S):[]; return _eks.length ? '<span class="bm-ensemble-badge" style="background:var(--warn-bg,#FBEDEA);color:var(--crit,#BC4533);border:1px solid var(--crit)">⚠ Eksik: '+esc(_eks.join(', '))+'</span>' : ''; })()}${(()=>{ var _st = (typeof stokYetersizTam==='function') ? stokYetersizTam(S) : {yetersiz:[],eksik:[]}; var n = _st.yetersiz.length + _st.eksik.length; return n ? '<span class="bm-ensemble-badge" style="background:var(--warn-bg,#FBF3E5);color:var(--warn,#C08A2E);border:1px solid var(--warn,#C08A2E)" title="'+esc(_stokYetersizMetin(_st))+'">📦 Stok yetersiz ('+n+' kalem)</span>' : ''; })()}</div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px"><div style="font-size:var(--fs-sm);font-weight:700;color:var(--kahve)">📅 Planlı Demleme & Hazırlık</div>${(()=>{ var _eks=(typeof _receteEksikler==='function')?_receteEksikler(S):[]; return _eks.length ? '<span class="bm-ensemble-badge" style="background:var(--crit-bg);color:var(--crit,#BC4533);border:1px solid var(--crit)">⚠ Eksik: '+esc(_eks.join(', '))+'</span>' : ''; })()}${(()=>{ var _st = (typeof stokYetersizTam==='function') ? stokYetersizTam(S) : {yetersiz:[],eksik:[]}; var n = _st.yetersiz.length + _st.eksik.length; return n ? '<span class="bm-ensemble-badge" style="background:var(--warn-bg);color:var(--warn,#C08A2E);border:1px solid var(--warn,#C08A2E)" title="'+esc(_stokYetersizMetin(_st))+'">📦 Stok yetersiz ('+n+' kalem)</span>' : ''; })()}</div>
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
         <label style="font-size:var(--fs-sm);color:var(--soluk);flex-shrink:0">Demleme tarihi</label>
         <input aria-label="Planlı demleme tarihi" type="date" value="${S.planBrewTarih||''}" onchange="bmPlanBrewSet(this.value)" class="inp" style="width:auto;max-width:175px">
@@ -18890,7 +18890,7 @@ return `
           <input type="number" min="0" step="1" aria-label="Demlemeden kac gun once" value="${(h&&h.gun!=null)?h.gun:0}" onchange="bmPlanHatirlatmaGunSet(${i},this.value)" class="inp" style="width:62px;flex-shrink:0;text-align:center">
           <span style="font-size:var(--fs-xs);color:var(--soluk);flex-shrink:0">gün önce</span>
           <input type="text" aria-label="Hatirlatma metni" value="${esc((h&&h.metin)||'')}" placeholder="ör. maltları kır" onchange="bmPlanHatirlatmaMetinSet(${i},this.value)" class="inp" style="flex:1;min-width:130px">
-          <button type="button" aria-label="Hatirlatmayi sil" title="Sil" onclick="bmPlanHatirlatmaSil(${i})" class="bm-ayar-btn-sec" style="padding:var(--sp-1) var(--sp-2);line-height:1">🗑</button>
+          <button type="button" aria-label="Hatirlatmayi sil" title="Sil" onclick="bmPlanHatirlatmaSil(${i})" class="bm-ayar-btn-sec" style="padding:var(--sp-1) var(--sp-2);line-height:1;min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center">🗑</button>
         </div>`).join('') }
         <button type="button" onclick="bmPlanHatirlatmaEkle()" class="bm-ayar-btn-sec" style="align-self:flex-start;margin-top:2px">+ Hatırlatma ekle</button>
       </div>` : `
@@ -22297,13 +22297,13 @@ window.brewdayBitir=function(){
     try { if(ev && ev.stopPropagation) ev.stopPropagation(); } catch(_e){}
     var eski = document.getElementById('_snoozeMenu'); if(eski) eski.remove();
     var m = document.createElement('div'); m.id = '_snoozeMenu';
-    m.style.cssText = 'position:fixed;z-index:99998;background:var(--card,#fff);border:1px solid var(--bor,#ccc);border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.28);padding:5px;display:flex;gap:5px';
+    m.style.cssText = 'position:fixed;z-index:99998;background:var(--card,#fff);border:1px solid var(--bor,#ccc);border-radius:var(--r-sm);box-shadow:0 6px 20px rgba(0,0,0,.28);padding:var(--sp-1);display:flex;gap:var(--sp-1)';
     var x = (ev && ev.clientX) || 120, y = (ev && ev.clientY) || 120;
     m.style.left = Math.max(8, Math.min(x, window.innerWidth - 260)) + 'px';
     m.style.top = (y + 10) + 'px';
     [['15 dk','ertele15'],['1 saat','ertele60'],['Yarın','erteleYarin'],['Özel…','OZEL']].forEach(function(o){
       var b = document.createElement('button'); b.textContent = o[0];
-      b.style.cssText = 'background:var(--ya,#eee);border:1px solid var(--yk,#999);color:var(--yk,#333);border-radius:var(--r-sm);padding:6px 10px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap';
+      b.style.cssText = 'background:var(--accent-soft);border:1px solid var(--kahve-light);color:var(--kahve-koyu);border-radius:var(--r-sm);padding:var(--sp-2) var(--sp-3);font-size:var(--fs-xs);font-weight:600;cursor:pointer;white-space:nowrap;min-height:44px;display:inline-flex;align-items:center;justify-content:center';
       if(o[1] === 'OZEL'){ b.onclick = function(e){ try{ e.stopPropagation(); }catch(_b){} _alarmOzelErtele(receteId, gun, e); }; }
       else { b.onclick = function(e){ try{ e.stopPropagation(); }catch(_b){} _alarmAksiyon(receteId, gun, o[1]); m.remove(); }; }
       m.appendChild(b);
