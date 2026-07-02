@@ -395,9 +395,6 @@ input[type="checkbox"]:disabled,input[type="radio"]:disabled{opacity:.5;cursor:n
 .bm-header-iconbtn .ti{width:15px;height:15px;stroke-width:1.8}
 .bm-header-sync-dot{position:absolute;top:2px;right:2px;width:7px;height:7px;border-radius:50%;background:#3FBF73;border:1.5px solid #FFFFFF;box-sizing:content-box}
 .bm-header-bell-badge{position:absolute;top:-2px;right:-2px;min-width:14px;height:14px;padding:0 4px;border-radius:7px;background:#E04E2B;color:#FFFFFF;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1;border:1.5px solid #FFFFFF;box-sizing:content-box}
-.bm-bildirim-dropdown{position:absolute;top:42px;right:0;width:220px;background:#FFFFFF;border:1px solid #E8E4DA;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.10);padding:10px 12px;z-index:50;font-family:inherit}
-.bm-bildirim-baslik{font-size:11px;color:#8E8B86;font-weight:600;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
-.bm-bildirim-bos{font-size:13px;color:#5F5E5A;padding:8px 2px;text-align:center}
 @media (max-width:768px){.bm-header{padding:10px 12px;gap:8px}.bm-header-right{flex:1;min-width:0;justify-content:flex-end}.bm-header-search{flex:1;min-width:0}.bm-header-search input{width:100%;font-variant-caps:var(--tip-b-fvc, normal);font-style:var(--tip-b-fst, normal);text-transform:var(--tip-b-tt, none);letter-spacing:var(--tip-b-ls, normal)}.bm-header-title{font-size:calc(18px * var(--tip-h-scale, 1));font-variant-caps:var(--tip-h-fvc, normal);font-style:var(--tip-h-fst, normal);text-transform:var(--tip-h-tt, none);letter-spacing:var(--tip-h-ls, normal)}.bm-header-search-icon{left:10px}.bm-header-iconbtn{width:34px;height:34px}.bm-header-iconbtn .ti{width:18px;height:18px}.bm-header-actions{gap:5px}.bm-header-left{flex-shrink:1;min-width:0}.bm-header-breadcrumb{display:none;font-variant-caps:var(--tip-b-fvc, normal);font-style:var(--tip-b-fst, normal);text-transform:var(--tip-b-tt, none);letter-spacing:var(--tip-b-ls, normal)}}
 /* Adim 137-G cila (Parca 1, 2026-05-21): Mobil kalici "Kabeer" marka seridi V4.
    Onceki ince band hissi (logo 20px, fs-sm, var(--metin) espresso, padding sp-2 sp-3,
@@ -565,19 +562,11 @@ body[data-mode="view"] .bm-chip{pointer-events:none;opacity:.6}
 /* Adim 134-AYAR: Stok sayfasi 3 ana sekme bar (Stok / Ayarlar / Bildirimler).
    Stok header'in altinda full-width tab bar, vintage palet. Aktif: vintage bg + cream text + alt cubuk.
    Pasif: transparent + bakir text. Hover: kahve-bg subtle. Internal stokEkranTab (Liste/Hareketler) ALTINDA kalir. */
-/* Adim 135-K: .bm-stok-anatabs 3 ana sekme — 135-E .sb-btn emsali (aktif vintage alt-çizgi, dolgu YOK) */
-.bm-stok-anatabs{display:flex;background:var(--bg-card);border-bottom:1px solid var(--cizgi-arac);font-family:var(--font-govde);font-variant-caps:var(--tip-b-fvc, normal);font-style:var(--tip-b-fst, normal);text-transform:var(--tip-b-tt, none);letter-spacing:var(--tip-b-ls, normal)}
-.bm-stok-anatab{flex:1;padding:var(--sp-3) var(--sp-2);border:none;background:transparent;color:var(--metin-soluk);font-size:var(--fs-sm);font-weight:var(--fw-semibold);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:var(--sp-1);line-height:1;border-bottom:2.5px solid transparent;transition:color .15s,border-color .15s;font-family:inherit;-webkit-tap-highlight-color:transparent;position:relative}
-.bm-stok-anatab:hover:not(.aktif){color:var(--ink)}
-.bm-stok-anatab.aktif{background:transparent;color:var(--vintage-mid);border-bottom-color:var(--vintage);font-weight:var(--fw-semibold)}
-.bm-stok-anatab .bm-anatab-badge{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--crit);color:#FFFFFF;font-size:var(--fs-xs);font-weight:var(--fw-bold);line-height:1}
-.bm-stok-anatab.aktif .bm-anatab-badge{background:var(--vintage)}
 /* Adim 135-K: Stok iç tab bar (Liste/Hareketler) — anatabs ile uyumlu sade */
 .bm-stok-ictab-bar{display:flex;background:var(--bg-sunken);border-bottom:1px solid var(--cizgi-arac);font-family:var(--font-govde);font-variant-caps:var(--tip-b-fvc, normal);font-style:var(--tip-b-fst, normal);text-transform:var(--tip-b-tt, none);letter-spacing:var(--tip-b-ls, normal)}
 .bm-stok-ictab{flex:1;padding:var(--sp-2) var(--sp-3);border:none;background:transparent;color:var(--metin-soluk);font-family:inherit;font-size:var(--fs-sm);font-weight:var(--fw-semibold);cursor:pointer;border-bottom:2.5px solid transparent;transition:color .15s,background .15s,border-color .15s;-webkit-tap-highlight-color:transparent}
 .bm-stok-ictab:hover:not(.aktif){color:var(--ink)}
 .bm-stok-ictab.aktif{background:var(--bg-card);color:var(--vintage-mid);border-bottom-color:var(--vintage)}
-@media (max-width:768px){.bm-stok-anatab{padding:9px 6px;font-size:11.5px;gap:4px}}
 
 /* Adim 134-AYAR: Ayarlar/Bildirim icerik karti (form list pattern, 134-G/H vintage uyumlu). */
 .bm-stok-icerik{padding:14px}
@@ -1139,16 +1128,6 @@ function inRange(v, zone) {
 
 // Specificity: dar safe zone = daha spesifik stil = daha yüksek bonus
 // Formula: typical_width / actual_width, clamp 0.7-1.6
-const TYPICAL_WIDTHS = { srm: 8, ibu: 15, abv: 2, og: 0.020, yeast: 0 };
-function specificityMult(zone, key) {
-  if (!zone || zone.min == null || zone.max == null) return 1;
-  const typical = TYPICAL_WIDTHS[key];
-  if (!typical) return 1;
-  const width = zone.max - zone.min;
-  if (width <= 0) return 1;
-  const factor = typical / width;
-  return Math.max(0.7, Math.min(1.6, factor));
-}
 
 function mkRegex(obj) {
   if (!obj || !obj.__regex) return null;
@@ -1527,7 +1506,6 @@ window.BM_ENGINE = { styleMatchScore, findBestMatches, matchSubstyles, defs, sub
     for (let i=0;i<numClass;i++) exps[i] /= sum;
     return exps;
   }
-  function predictRaw(features) { return predictRawWith(cache.model, features); }
   // V12 buildFeatures — Adım 61 P2 (Adım 2.7) self-contained rewrite
   // V85 bağımlılığı YOK. 89 feature, V19 model uyumlu.
   // KATKI bug fix: KATKI_SIG regex KATKILAR.ad string'inde çalışır (id'ler Türkçe abbreviation).
@@ -4732,25 +4710,7 @@ const SU_PROFILLERI=[
 
 // === SU PROFİLİ YARDIMCI FONKSİYONLAR ===
 
-// İki profil arasındaki iyon farkı (hedef - mevcut) — her biri [Ca,Mg,Na,Cl,SO4,HCO3]
-function suProfilFark(mevcut, hedef) {
-  return hedef.map((v, i) => v - (mevcut[i] || 0));
-}
 
-// Mevcut minerallerden sonra toplam iyon profilini hesapla
-function suToplamIyon(kaynakIyon, mineraller, hacim) {
-  const h = hacim || 11;
-  const sonuc = [...kaynakIyon];
-  (mineraller || []).forEach(m => {
-    const min = MINERALLER.find(x=>x&&x.id===m.id);
-    if (!min || !m.miktar) return;
-    // Her mineral g başına PPM/L katkı verir. Mineral.etki 1g/L için etkisi.
-    // Dolayısıyla: katkı PPM = (mineral.etki[i] * m.miktar) / h
-    const faktor = m.miktar / (h * 0.264172);
-    min.etki.forEach((et, i) => sonuc[i] += et * faktor);
-  });
-  return sonuc;
-}
 
 // Hedef profile ulaşmak için NNLS (Non-Negative Least Squares) ile optimum mineral önerisi
 // 6 iyon hedefi, 7 mineral değişkeni — ağırlıklı least squares ile global optimum
@@ -6942,21 +6902,6 @@ function _writeBoth(key,str){
   try{window._bmIDB.put(key,str);}catch(e){console.warn('IDB yedek fail',e);}
   return okLS;
 }
-/* Storage okuma: localStorage boşsa IDB'den restore et (senkron garantisi için async restore + flag) */
-function _readWithRestore(key,cb){
-  var ls=null;
-  try{ls=localStorage.getItem(key);}catch(e){}
-  if(ls!=null){ cb(ls,false); return; }
-  // localStorage boş — IDB'den getir
-  window._bmIDB.get(key,function(idbVal){
-    if(idbVal!=null){
-      try{localStorage.setItem(key,idbVal);}catch(e){}
-      cb(idbVal,true);
-    }else{
-      cb(null,false);
-    }
-  });
-}
 
 function saveDraft(){
   try{
@@ -7076,18 +7021,6 @@ window._stokAra=function(val){
 };
 // ──────────────────────────────────────────────────────
 
-window.stokAramaGuncelle=function(val){
-  sekmeArama.stok=String(val||'');
-  const html=rStok();
-  document.getElementById('ekran').innerHTML=html;
-  const inp=document.getElementById('stokAramaInp');
-  if(inp){
-    inp.value=sekmeArama.stok;
-    inp.focus();
-    const l=sekmeArama.stok.length;
-    try{inp.setSelectionRange(l,l);}catch(e){}
-  }
-};
 let _aramaTimer=null;
 window.aramaGuncelle=function(el){
   aramaMetni=el.value;
@@ -8221,7 +8154,6 @@ function tarifKlonla(srcId){
 window.tarifKlonla=tarifKlonla;
 // Adim 132-C: Breadcrumb klasor link helper. _kl listesinden index aramak yerine direkt assign+render
 // (setAktifKlasor mevcut sidebar drawer + render() yapar ama window._kl liste sayfasinda set, editor'de stale olabilir).
-window._bcKlasorAc=function(k){aktifKlasor=k||'';window.aktifKlasor=aktifKlasor;ekran='liste';render();};
 // Adim 134-GERI: 132-C breadcrumb → tek "← Geri" tuşu. S.klasor varsa o klasöre dön, yoksa defter ana sayfa.
 window.bmGeriDon=function(){
   try {
@@ -11906,7 +11838,6 @@ function _esc131B(s){
 // ═══ ADIM 131-C: UST HEADER (Image 2 stili) ════════════════════
 // Sayfa basligi + breadcrumb + arama + 3 ikon (bulut/paket/zil)
 // Mevcut handler'lar korunur: aramaInp ID, aramaGuncelle, syncPanelAc, stokEkranAc
-var _bildirimPanelAcik = false;
 function renderHeader(){
   var hdr = document.getElementById('bm-header');
   if(!hdr) return;
@@ -11927,16 +11858,6 @@ function renderHeader(){
   var bellBadgeCount = 0;
   var bellBadgeHtml = bellBadgeCount > 0
     ? '<span class="bm-header-bell-badge">'+bellBadgeCount+'</span>'
-    : '';
-  // Bildirim dropdown (acik durumda) — Adim 134-AYAR: "Tumunu gor" link Bildirimler sekmesine
-  var dropdownHtml = _bildirimPanelAcik
-    ? '<div class="bm-bildirim-dropdown" id="bm-bildirim-dropdown">'+
-        '<div class="bm-bildirim-baslik">Bildirimler</div>'+
-        '<div class="bm-bildirim-bos">Henüz bildirim yok</div>'+
-        '<div style="border-top:1px solid #E8E4DA;margin-top:6px;padding-top:6px;text-align:center">'+
-          '<button onclick="_bildirimPanelAcik=false;window.bmAnaBildirim()" style="background:none;border:none;color:var(--vintage);font-size:12px;font-weight:600;cursor:pointer;padding:4px 8px">Tümünü gör →</button>'+
-        '</div>'+
-      '</div>'
     : '';
   // Arama input — mevcut aramaInp ID + handler'lar KORUNDU
   // onchange / onkeyup orijinal rListe'deki ile bire bir ayni
@@ -11960,7 +11881,6 @@ function renderHeader(){
         '<button class="bm-header-iconbtn" onclick="stokEkranAc()" title="Stok">'+BM_SVG.package+'</button>'+
         '<button class="bm-header-iconbtn" onclick="bmAnaBildirim()" title="Bildirimler">'+BM_SVG.bell+bellBadgeHtml+'</button>'+
       '</div>'+
-      dropdownHtml+
     '</div>';
 }
 
@@ -12008,27 +11928,6 @@ document.addEventListener('keydown', function(e){
   else document.addEventListener('DOMContentLoaded', add);
 })();
 
-// Bildirim dropdown toggle — dis tikla kapan
-window.bildirimPanelToggle = function(ev){
-  if(ev) ev.stopPropagation();
-  _bildirimPanelAcik = !_bildirimPanelAcik;
-  renderHeader();
-  if(_bildirimPanelAcik){
-    setTimeout(function(){
-      document.addEventListener('click', _bildirimDisTikla, { once:true });
-    }, 0);
-  }
-};
-function _bildirimDisTikla(e){
-  var dd = document.getElementById('bm-bildirim-dropdown');
-  if(dd && !dd.contains(e.target)){
-    _bildirimPanelAcik = false;
-    renderHeader();
-  } else if(_bildirimPanelAcik){
-    // hala acik — bir sonraki dis tiklamayi yakala
-    document.addEventListener('click', _bildirimDisTikla, { once:true });
-  }
-}
 window.renderHeader = renderHeader;
 
 // ═══ ADIM 131-D: YAPIM AŞAMASINDA vurgu + 4 stat kart helper'lar ════
@@ -20576,15 +20475,6 @@ function render(){
 }
 // FLICKER FIX: Birden fazla render çağrısını tek frame'e batch et
 // Aynı tick'te 3-4 render çağrılırsa sadece 1 tanesi çalışır
-window._renderPending=false;
-function renderBatch(){
-  if(window._renderPending)return;
-  window._renderPending=true;
-  requestAnimationFrame(()=>{
-    window._renderPending=false;
-    render();
-  });
-}
 function rO(){clearTimeout(window._rt);window._rt=setTimeout(render,400);}
 
 // ── MALT SİLME UNDO ─────────────────────────────────────────────────────
@@ -21112,43 +21002,6 @@ window.brewdayTimerTik=function(){
   }
 };
 
-// ═══════════════════════════════════════════════════════════════════════════
-// EVENT MODAL — Full-screen "ŞİMDİ" alarmı
-// ═══════════════════════════════════════════════════════════════════════════
-window.brewdayModalAc=function(){
-  const b=window._brewday;
-  const ev=b.ajanda[b.aktifIdx];
-  if(!ev)return;
-  brewdayModalKapat(); // varsa eskiyi sil
-  let h='<div id="brewdayEventModal" class="brewday-event-modal" role="dialog" aria-modal="true" aria-label="Brewday etkinliği" tabindex="-1">';
-  h+='<div class="brewday-event-modal-icerik">';
-  h+='<div style="font-size:72px;text-align:center;line-height:1">'+(ev.ikon||'•')+'</div>';
-  h+='<div style="font-size:11px;text-align:center;color:rgba(245,215,153,.6);letter-spacing:3px;text-transform:uppercase;margin-top:12px">ŞİMDİ</div>';
-  h+='<div style="font-size:26px;text-align:center;color:#F5D799;font-weight:700;font-family:var(--font-display);margin-top:6px;line-height:1.2">'+esc(ev.baslik)+'</div>';
-  if(ev.detay)h+='<div style="font-size:13px;text-align:center;color:rgba(254,251,242,.75);margin-top:10px;line-height:1.5">'+esc(ev.detay)+'</div>';
-  h+='<div style="display:flex;gap:10px;margin-top:28px">';
-  h+='<button onclick="brewdayAktifOnayla()" style="flex:1;background:var(--altin);color:#fff;border:none;border-radius:10px;padding:16px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(139,90,43,.4)">✓ Ekledim</button>';
-  h+='</div>';
-  h+='<button onclick="brewdayModalKapat()" style="margin-top:10px;width:100%;background:transparent;color:rgba(254,251,242,.5);border:none;padding:8px;font-size:12px;cursor:pointer">Modal\'ı kapat (henüz eklemedim)</button>';
-  h+='</div></div>';
-  document.body.insertAdjacentHTML('beforeend',h);
-  b.modalAcik=true;
-  window._bmModalPrevFocus=document.activeElement;
-  var _bmEM=document.getElementById('brewdayEventModal');
-  if(_bmEM)_bmEM.focus();
-  // Uyarılar
-  _brewBeep(1200,0.25,0.5);
-  setTimeout(()=>_brewBeep(1200,0.25,0.5),300);
-  setTimeout(()=>_brewBeep(1500,0.4,0.5),650);
-  _brewTitret([250,150,250,150,500]);
-  _brewBildirim('🔔 '+ev.baslik,ev.detay||'Brewmaster — eklemeyi unutma');
-  _brewTitleFlash('🔔 '+ev.baslik,10000);
-};
-window.brewdayModalKapat=function(){
-  const m=document.getElementById('brewdayEventModal');
-  if(m){m.remove();var p=window._bmModalPrevFocus;window._bmModalPrevFocus=null;if(p&&p.focus&&document.contains(p))p.focus();}
-  window._brewday.modalAcik=false;
-};
 // A11Y-MODAL Escape + minimal Tab trap (capture: input/sidebar handler'larindan once kosar;
 // input/textarea/select odaktayken karismaz — o alanlarin kendi Escape akisi korunur)
 document.addEventListener('keydown', function(e){
@@ -21160,7 +21013,7 @@ document.addEventListener('keydown', function(e){
     e.stopPropagation();
     e.preventDefault();
     if(m.id === '_alarmModal'){ m.remove(); var p = window._bmModalPrevFocus; window._bmModalPrevFocus = null; if(p && p.focus && document.contains(p)) p.focus(); }
-    else if(m.id === 'brewdayEventModal') window.brewdayModalKapat(); else window.brewdayOnayKapat();
+    else window.brewdayOnayKapat();
     return;
   }
   if(e.key === 'Tab'){
@@ -21200,8 +21053,6 @@ window.brewdayAktifOnayla=function(){
   if(ev.tip==='kaynatma_end' && typeof brewTimerDur==='function' && window._brewTimerT0){
     try { brewTimerDur(); } catch(e){}
   }
-  // Modal'ı kapat
-  brewdayModalKapat();
   // Bip + titreme
   _brewBeep(880,0.1,0.2);
   _brewTitret([50]);
@@ -21815,17 +21666,6 @@ window.brewdayBitir=function(){
     return true;
   };
 
-  // Alarm ertele (ms kadar) — ts'i kaydır, durumu 'ertelendi' yap kısa bir süre
-  window._alarmErtele = function(receteId, gun, ekMs){
-    const tum = _alarmlariOku();
-    if(!tum[receteId] || !Array.isArray(tum[receteId].alarmlar)) return false;
-    const al = tum[receteId].alarmlar.find(a => a&&a.g === gun);
-    if(!al) return false;
-    al.ts = Date.now() + (ekMs || 3600000); // varsayılan 1 saat
-    al.durum = 'bekliyor';
-    _alarmlariYaz(tum);
-    return true;
-  };
 
   // Sprint5: snooze hedef ts setter (absolute) + süre hesap (15dk/1sa/yarın)
   window._alarmErteleTs = function(receteId, gun, yeniTs){
@@ -21848,15 +21688,6 @@ window.brewdayBitir=function(){
       return (typeof _bildirimTsAyarla === 'function') ? _bildirimTsAyarla(d.getTime()) : d.getTime();
     }
     return now + 3600000; // ertele60 / ertele (default 1 saat)
-  };
-  // Reçetenin tüm pending alarmlarını iptal et
-  window._alarmIptalEt = function(receteId){
-    const tum = _alarmlariOku();
-    if(!tum[receteId]) return false;
-    tum[receteId].durum = 'iptal';
-    (tum[receteId].alarmlar||[]).forEach(a => { if(a.durum === 'bekliyor') a.durum = 'iptal'; });
-    _alarmlariYaz(tum);
-    return true;
   };
 
   // Reçete silindi — alarmları temizle
@@ -21939,14 +21770,6 @@ window.brewdayBitir=function(){
   // ═══ C/B PSEUDO-KEY ALARMLAR (maya tazelik + stok düşük) — ts-bazlı, reconcile ═══
   // Worker oda bazında alarm:<oda>'yı tarar, rid'i OPAK işler (receteId doğrulamaz) → maya:/stok: uyumlu.
   // _alarmlariYaz tek choke point → debounce → /alarms-sync → KV → cron */5dk push (zincir DEĞİŞMEZ).
-  function _sonrakiBildirimTs(){
-    var saat = (typeof _alarmSaatiAl === 'function') ? _alarmSaatiAl() : '10:00';
-    var m = /^(\d{1,2}):(\d{2})$/.exec(saat || '10:00');
-    var h = m ? parseInt(m[1],10) : 10, mn = m ? parseInt(m[2],10) : 0;
-    var d = new Date(); d.setHours(h, mn, 0, 0);
-    if(d.getTime() <= Date.now()) d.setDate(d.getDate() + 1); // bugünkü saat geçtiyse yarın (gece push yok)
-    return _bildirimTsAyarla(d.getTime());
-  }
   // desired alarmları mevcut grupla birleştir: durum + ts KORUNUR (B dedup/reset + tamamlandı koru)
   function _pseudoMergeAlarmlar(exGrp, desired){
     var exBy = {};
@@ -22663,7 +22486,6 @@ window.brewdayTamamla=function(){
     }
   } catch(_alE){ console.warn('alarmPlaniKur hata:', _alE); }
   // DOM temizle
-  brewdayModalKapat();
   const eski=document.getElementById('brewdayTimeline');
   if(eski)eski.remove();
   // Takvim sekmesine geç
@@ -22690,7 +22512,6 @@ window.brewdayZorlaSifirla=function(sessiz){
     // State'i sıfırla
     window._brewday={aktif:false,ajanda:[],aktifIdx:-1,timerT0:null,timerSure:0,timerInt:null,timerBitti:false,wakeLock:null,modalAcik:false};
     // DOM temizliği (tüm brewday artıkları)
-    try { brewdayModalKapat(); } catch(e){}
     ['brewdayTimeline','brewdayOnayModal','brewdayEventModal','_alarmModal'].forEach(id=>{
       const el=document.getElementById(id);
       if(el) el.remove();
@@ -22723,7 +22544,6 @@ window.brewdayAtla=function(){
     tip:'brewday_event_atlandi', deger:ev.baslik,
     not:'(Atlandı) '+(ev.detay||''), ts:Date.now()
   });
-  brewdayModalKapat();
   _brewBeep(440,0.1,0.2);
   _brewTitret([30]);
   // Sonraki aktif event
@@ -23328,7 +23148,7 @@ window.bmAnaSayfaAc=function(){ ekran='ana'; render(); };
       try{
         // 1) Brewday alt-modallari (alarm/onay) acik mi -> once onlari kapat
         var _em=document.getElementById('brewdayEventModal');
-        if(_em){ if(typeof window.brewdayModalKapat==='function') window.brewdayModalKapat(); else _em.remove(); return; }
+        if(_em){ _em.remove(); return; }
         var _om=document.getElementById('brewdayOnayModal');
         if(_om){ _om.remove(); return; }
         // 2) Aktif brewday oturumu -> islevsiz (kazara aktif brew'u kapatma; kullanici "Bitir" kullanir)
@@ -23465,16 +23285,6 @@ function toggleStilIdeal(){
 }
 window.toggleStilIdeal=toggleStilIdeal;
 
-// Gün Gün Takvim (maya-bazlı) accordion aç/kapa
-function toggleGunGunTakvim(){
-  var g=document.getElementById('gunGunIcerik');
-  var a=document.getElementById('gunGunArr');
-  if(!g)return;
-  var open=g.style.display!=='none';
-  g.style.display=open?'none':'block';
-  if(a)a.textContent=open?'▼':'▲';
-}
-window.toggleGunGunTakvim=toggleGunGunTakvim;
 
 // ═══ TADIM SETTER FONKSİYONLARI (Not sekmesi) ═══
 // FLICKER FIX: Render ÇAĞIRMAZ. DOM'u hedefli güncelle (slider cerrahi).
@@ -23660,9 +23470,6 @@ function logEkle(){
   }
   if(notEl)notEl.value='';
   if(degerEl)degerEl.value='';
-  // Form seçiciyi sıfırla
-  var sec=document.getElementById('logDinamikSec');
-  if(sec)sec.style.display='none';
   // Pitching girilince tarifeyi otomatik "Aktif" yap
   if(_tip==='pitching'){
     var _t=KR.find(function(k){return k&&k.id===_editId;});
@@ -23706,9 +23513,7 @@ function logSilIdx(idx){
     }
   },200);
 }
-window.setSilOnay=function(id){silOnay=id;render();};
 window.tarifAcById=function(el){const id=el.closest('[data-tid]')?.dataset?.tid;if(id)tarifAc(id);};
-window.durumuDegistir=function(el,durum){const id=el.closest('[data-tid]')?.dataset?.tid;const d=durum||el.dataset.durum;if(id&&d)tarifDurumDegistir(id,d);};
 window.klasoruDegistir=function(el,yk){const id=el.closest('[data-tid]')?.dataset?.tid;if(id)klasorDegistir(id,yk||el.value);};
 function silOnayBar(id){
   if(silOnay!==id) return '';
@@ -23718,7 +23523,6 @@ function silOnayBar(id){
     '<button class="btn" style="background:#fff;color:var(--soluk);border:1px solid var(--bor);font-size:12px;padding:6px 12px" onclick="silOnay=null;render()">Vazgeç</button>'+
   '</div>';
 }
-window.yeniKlasorGir=function(ev,el){if(ev.key!=='Enter')return;const v=el.value.trim();if(!v)return;const id=el.closest('[data-tid]')?.dataset?.tid;if(id){klasorDegistir(id,v);el.value='';}};
 window.yeniKlasorAc=function(){window._yeniKlasorEkleniyor=true;render();setTimeout(function(){var el=document.getElementById('yeniKlasorInp');if(el)el.focus();},50);};
 window.yeniKlasorIptal=function(){window._yeniKlasorEkleniyor=false;render();};
 window.yeniKlasorKaydet=function(){var el=document.getElementById('yeniKlasorInp');if(!el){window._yeniKlasorEkleniyor=false;render();return;}var v=el.value.trim();if(v){window._pendingKlasor=window._pendingKlasor||[];if(!window._pendingKlasor.includes(v)&&!getKlasorler().includes(v))window._pendingKlasor.push(v);aktifKlasor=v;}window._yeniKlasorEkleniyor=false;render();};
@@ -24150,13 +23954,6 @@ window.setSurecKDk=function(idx,val){
     render();
   }
 };
-window.setSurecKZaman=function(idx,z){
-  if(S.katkilar&&S.katkilar[idx]!==undefined){
-    S.katkilar[idx].zaman=z;
-    if(z!=='Kaynatmada')S.katkilar[idx].dk=null;
-    render();
-  }
-};
 window.logSilIdx=logSilIdx;
 window.tarifeKaydet=tarifeKaydet;window.tarifAc=tarifAc;window.tarifSil=tarifSil;
 window.setSekme=setSekme;window.yeniTarif=yeniTarif;window.maltEkle=maltEkle;window.hopEkle=hopEkle;
@@ -24169,7 +23966,7 @@ window.addEventListener('beforeunload', function(){
 window.addEventListener('pagehide', function(){
   try{saveDraft();}catch(e){}
   try{_syncGonderKeepalive();}catch(e){}
-});window.STOK=STOK;window.KATKILAR=KATKILAR;window.MALTLAR_DB=MALTLAR;
+});window.STOK=STOK;window.KATKILAR=KATKILAR;
 window.MALTLAR=MALTLAR;window.MINERALLER=MINERALLER;
 
 // Sadece sayısal inputlar için canlı render; metin alanlarını atla
@@ -24289,14 +24086,11 @@ async function syncGonder(){
     if(res.ok){
       _bmDirty=false;
       _syncTsKaydet(data.ts);
-      syncDurumGuncelle('ok');
     } else {
-      syncDurumGuncelle('hata');
       _syncErrorToast('gönderim', null, res.status);
     }
   } catch(e){
     console.warn('syncGonder:', e);
-    syncDurumGuncelle('hata');
     _syncErrorToast('gönderim', e);
   }
   syncBusy = false;
@@ -24410,12 +24204,10 @@ async function syncAl(){
     _origStokKaydet(STOK);
     _syncTsKaydet(data.ts);
     render();
-    syncDurumGuncelle('guncel');
   } catch(e){
     // v2.78.91 Q5 — sessiz yutma kaldırıldı. Network/parse/auth hatası bilinebilir olsun.
     // 134-S: bmToast error (cooldown'lu polling spam onleme)
     console.warn('syncAl:', e);
-    syncDurumGuncelle('hata');
     _syncErrorToast('alım', e);
   }
 }
@@ -24425,7 +24217,7 @@ function syncDinle(){
   // SSE yerine polling: daha basit, her tarayıcıda çalışır
   if(syncPollTimer){ clearInterval(syncPollTimer); syncPollTimer=null; }
   const url = syncUrl();
-  if(!url){ syncDurumGuncelle('kapali'); return; }
+  if(!url) return;
   
   // İlk anlık kontrol — Dubbel auto-load + render tamamlansın diye gecikmeli
   // Faz 2.5a: pull-first — önce syncAl (merge yerel-yeniyi korur), sonra hâlâ dirty ise push.
@@ -24443,28 +24235,12 @@ function syncDinle(){
   
   // 5 saniyede bir kontrol et
   syncPollTimer = setInterval(()=>{ syncAl(); }, 5000);
-  syncDurumGuncelle('bagli');
 }
 
-function syncDurumGuncelle(durum){
-  const el = document.getElementById('syncDurum');
-  if(!el) return;
-  const durumlar = {
-    'ok':          ['🟢','Senkron edildi'],
-    'guncel':      ['🔵','Güncelleme alındı'],
-    'bagli':       ['🟡','Bağlı — 5sn polling'],
-    'hata':        ['🔴','Bağlantı hatası'],
-    'baglanti-yok':['🔴','Bağlantı kesildi'],
-    'kapali':      ['⚫','Senkron kapalı'],
-  };
-  const [ikon, metin] = durumlar[durum] || ['⚫',''];
-  el.textContent = ikon + ' ' + metin;
-}
 
 function syncBaslat(){
   syncYukle();
   if(!syncCfg||!syncCfg.url||!syncCfg.oda){
-    syncDurumGuncelle('kapali');
     return;
   }
   // v2.78.91 Q2 — Önceki sürümde burada syncAl() direkt çağrılıyordu; syncDinle
@@ -24614,7 +24390,6 @@ function syncTemizle(){
   localStorage.removeItem(SYNC_SK);
   localStorage.removeItem(SYNC_TS_SK); // Sprint D (D4): bayat ts yeni bağlantıda pull'u bastırmasın
   syncSonGuncelle = 0;
-  syncDurumGuncelle('kapali');
 }
 
 // Sprint 136 P1: destrüktif "Bağlantıyı Kes" — onaysız asla silinmez (eski "Kapat" tuzağı fix).
@@ -24717,15 +24492,9 @@ window.syncPanelAc = syncPanelAc;
 window.syncKaydetVeBaslat = syncKaydetVeBaslat;
 window.syncTemizle = syncTemizle;
 
-// v2.78.91 Q4 — Network durumu dinleyicisi. Offline olunca UI bilgilenir, online
-// olunca otomatik yeniden bağlanır. Önceki sürümde 'baglanti-yok' durumu tanımlıydı
-// ama hiçbir yerde tetiklenmiyordu (dead code).
-window.addEventListener('offline', function(){
-  if(syncCfg) syncDurumGuncelle('baglanti-yok');
-});
+// v2.78.91 Q4 — Network dinleyicisi: online olunca otomatik yeniden bağlanır (pull-first).
 window.addEventListener('online', function(){
   if(syncCfg){
-    syncDurumGuncelle('bagli');
     // Faz 2.5a: pull-first — offline'da atlananları çek (syncAl), sonra hâlâ dirty ise push.
     setTimeout(function(){
       try {
@@ -26560,15 +26329,6 @@ syncBaslat();
     }, 500);
   };
 
-  // D-1.9g-fix2: Retry handler — error state'ten kullanici yeniden baslatabilir
-  window.bmB1Retry = function(){
-    sessionPromise = null;
-    setProgress('idle', 0, '');
-    try { if (typeof calc === 'function') calc(); } catch(e){}
-    loadSession().then(function(){
-      try { if (typeof calc === 'function') calc(); } catch(e){}
-    }).catch(function(){});
-  };
 
   // Auto-preload defer (V12 active ise + ilk calc sonras- 2sn bekle)
   if (window.BM_V12 && window.BM_V12.isV12Active && window.BM_V12.isV12Active()) {
