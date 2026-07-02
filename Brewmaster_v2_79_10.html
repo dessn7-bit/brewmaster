@@ -8214,7 +8214,7 @@ function tarifKlonla(srcId){
   KR.unshift(yeni); // Listenin başına, tarifeKaydet emsali
   try{_origKy(KR);}catch(e){console.warn('tarifKlonla _origKy:',e);}
   // Firebase sync — _origKy çağrımı zaten _syncGonderDebounced'i tetiklemez (direct çağrı), manuel push
-  try{if(typeof _syncGonderDebounced==='function')_syncGonderDebounced();}catch(e){}
+  try{if(typeof _bmDirty!=='undefined')_bmDirty=true;if(typeof _syncGonderDebounced==='function')_syncGonderDebounced();}catch(e){}
   flash('Kopya oluşturuldu: '+yeni.biraAd);
   tarifAc(yeni.id);
 }
@@ -8240,6 +8240,8 @@ function tarifSil(id){
   silOnay=null;
   // v2.78.94 H11 — Reçete silinince alarmları da anında temizle (orphan bekleme yok)
   try { if(typeof window._alarmTemizle === 'function') window._alarmTemizle(id); } catch(e){}
+  // Sprint D (D5): reçeteye özgü mode anahtarı yetim kalmasın
+  try { localStorage.removeItem('bm_recete_mode_'+id); } catch(e){}
   // Aktif düzenlenen reçeteyse _editId'yi de null yap
   try { if(typeof _editId !== 'undefined' && _editId === id) { _editId = null; } } catch(e){}
   render();
@@ -22380,7 +22382,7 @@ window.brewdayBitir=function(){
       try { if(window._manuelAlarmSync) _manuelAlarmSync(); } catch(e){}   // E: manuel hatırlatma reconcile
       try { if(window._planPrepSync) _planPrepSync(); } catch(e){}         // E: planlı demleme hazırlık reconcile
       try { if(window._stuckFermSync) _stuckFermSync(); } catch(e){}        // A: stuck fermentation reconcile
-      try { if(window.bmGecmisIDBCek) bmGecmisIDBCek(function(degisti){ if(degisti && typeof ekran!=='undefined' && ekran==='stok'){ try{ var _e=document.getElementById('ekran'); if(_e && typeof rStok==='function') _e.innerHTML=rStok(); }catch(_r){} } }); } catch(e){} // Sprint5: push geçmişini IDB'den çek
+      try { if(window.bmGecmisIDBCek) bmGecmisIDBCek(function(degisti){ if(degisti && typeof ekran!=='undefined' && ekran==='bildirim'){ try{ var _e=document.getElementById('ekran'); if(_e && typeof rBildirimEkran==='function') _e.innerHTML=rBildirimEkran(); }catch(_r){} } }); } catch(e){} // Sprint5: push geçmişini IDB'den çek (Sprint D D1: hedef stok→bildirim — 🕓 Geçmiş paneli Sprint139'da oraya taşınmıştı)
 
       const bekleyenler = _alarmBekleyenleri();
       if(bekleyenler.length === 0) return;
@@ -22993,7 +22995,7 @@ window.brewSwDurum=function(){
     var perm=(typeof Notification!=='undefined')?Notification.permission:'?';
     var ctrl=(navigator.serviceWorker&&navigator.serviceWorker.controller)?'var':'YOK';
     var msg='SW='+(d.ver||'?')+' · izin='+perm+' · controller='+ctrl+' · sonPush='+(d.lastPush||'-')+(d.lastErr?(' · HATA:'+d.lastErr):'');
-    var iyi=/^bm-cache-v131-[0-9]+$/.test(d.ver||'');
+    var iyi=/^bm-cache-v[0-9]+-[0-9]+$/.test(d.ver||''); // Sprint D (D8): major-agnostik (v132 gününde yanlış ⚠️ vermesin)
     flash((iyi?'✅ ':'⚠️ ')+msg,iyi?'ok':'err');
     try{navigator.clipboard.writeText('BM-SW-DIAG '+msg);}catch(_c){}
   });
@@ -23822,8 +23824,8 @@ window.bmVeriExport = function(){
     for (var i=0; i<localStorage.length; i++){
       var k = localStorage.key(i);
       if (!k) continue;
-      // Sadece app-related: bm_, kabir_, _orig, KR backup keys
-      if (/^(bm_|kabir_|_orig|KR$)/.test(k)) {
+      // Sadece app-related: bm_, kabir_, _orig, acc_ (akordiyon durumu, Sprint D), KR backup keys
+      if (/^(bm_|kabir_|_orig|acc_|KR$)/.test(k)) {
         dump[k] = localStorage.getItem(k);
       }
     }
@@ -23849,7 +23851,7 @@ window.bmVeriImport = function(inputEl){
   try {
     var file = inputEl && inputEl.files && inputEl.files[0];
     if (!file) return;
-    var ALLOW = /^(bm_|kabir_|_orig|KR$)/; // Sprint 138: export ile SİMETRİK allowlist (asimetri bitti)
+    var ALLOW = /^(bm_|kabir_|_orig|acc_|KR$)/; // Sprint 138: export ile SİMETRİK allowlist (asimetri bitti; Sprint D: +acc_)
     var reader = new FileReader();
     reader.onload = function(ev){
       try {
@@ -23877,12 +23879,16 @@ window.bmVeriImport = function(inputEl){
         var tarih = (p.meta && p.meta.exportTs) ? new Date(p.meta.exportTs).toLocaleString('tr-TR') : '?';
         var msg = '⚠️ DİKKAT — GERİ ALINAMAZ\n\nMevcut TÜM uygulama verin (reçete, stok, alarm, ayar) yedektekiyle DEĞİŞTİRİLİR. Yedekte olmayan mevcut veriler SİLİNİR.\n\nYedek tarihi: '+tarih+'\nYazılacak: '+yazKeys.length+' anahtar'+(yabanci?'\n('+yabanci+' app-dışı anahtar yok sayıldı)':'')+'\n\nDevam edilsin mi?';
         if (!confirm(msg)) { if (typeof bmToast==='function') bmToast('İçe aktarma iptal edildi','info'); inputEl.value=''; return; }
+        // Sprint D (D3): cihaza-özgü kimlik anahtarları — MEVCUT cihazın değeri import'tan korunur (yoksa yedektekine dokunulmaz)
+        var cihazKoru = {};
+        ['bm_push_sub','bm_sync_v1','bm_sync_ts_v1'].forEach(function(ck){ try{ var cv=localStorage.getItem(ck); if(cv!=null) cihazKoru[ck]=cv; }catch(_ck){} });
         // 4) REPLACE: önce mevcut app key'lerini sil (allowlist-sınırlı), sonra yedeği yaz (validation bitti → app-dışına dokunma)
         var sil = [];
         for (var i=0;i<localStorage.length;i++){ var ek=localStorage.key(i); if (ek && ALLOW.test(ek)) sil.push(ek); }
         sil.forEach(function(ek){ try{ localStorage.removeItem(ek); }catch(_d){} });
         var ok=0;
         yazKeys.forEach(function(k){ try{ localStorage.setItem(k, temiz[k]); ok++; }catch(e){ console.warn('LS set fail', k, e); } });
+        Object.keys(cihazKoru).forEach(function(ck){ try{ localStorage.setItem(ck, cihazKoru[ck]); }catch(_ck){} }); // Sprint D (D3): cihaz kimliği geri
         if (typeof bmToast==='function') bmToast('İçe aktarıldı ('+ok+'/'+yazKeys.length+' anahtar) — yeniden yükleniyor','success');
         setTimeout(function(){ location.reload(); }, 1200);
       } catch(e) {
@@ -23907,7 +23913,7 @@ window.rStokAyarlar = function(){
     for (var i=0; i<localStorage.length; i++){
       var k = localStorage.key(i);
       if (!k) continue;
-      if (/^(bm_|kabir_|_orig|KR$)/.test(k)) {
+      if (/^(bm_|kabir_|_orig|acc_|KR$)/.test(k)) {
         lsKayit++;
         lsBoyut += (localStorage.getItem(k) || '').length;
       }
@@ -24088,7 +24094,7 @@ window.rStokBildirim = function(){
         var ki=(g.kaynak==='push')?'📲':'📱';
         return '<div class="bm-bildirim-satir">'+
           '<span class="bm-bildirim-ikon">'+ki+'</span>'+
-          '<div class="bm-bildirim-icerik"><strong>'+escapeH(g.baslik||'')+'</strong><small>'+ds+(g.body?' · '+escapeH(g.body):'')+'</small></div>'+
+          '<div class="bm-bildirim-icerik"><strong>'+esc(g.baslik||'')+'</strong><small>'+ds+(g.body?' · '+esc(g.body):'')+'</small></div>'+ // Sprint D (D1b): escapeH alarm-IIFE-lokal, burada ReferenceError->catch yutuyordu (panel HIC render olmuyordu) -> global esc()
         '</div>';
       }).join('');
       liste += '<div class="bm-bildirim-grup"><div class="bm-bildirim-grup-baslik">🕓 Geçmiş ('+_gec.length+')</div>'+_gh+'</div>';
@@ -24606,6 +24612,8 @@ function syncTemizle(){
   if(syncPollTimer){ clearInterval(syncPollTimer); syncPollTimer=null; }
   syncCfg = null;
   localStorage.removeItem(SYNC_SK);
+  localStorage.removeItem(SYNC_TS_SK); // Sprint D (D4): bayat ts yeni bağlantıda pull'u bastırmasın
+  syncSonGuncelle = 0;
   syncDurumGuncelle('kapali');
 }
 

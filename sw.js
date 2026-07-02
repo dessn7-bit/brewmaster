@@ -3,7 +3,7 @@
 //   - Same-origin HTML (navigate): Network First, fallback cache (deploy guncelleme yansir)
 //   - Same-origin static (JSON/JS/WASM/MJS): Stale While Revalidate (cache hit instant + background revalidate)
 //   - ML modeller (brewmaster-models.dessn7.workers.dev): Cache First (versioned URL `_<sha8>.json`, immutable)
-//   - CDN (cdn.jsdelivr.net + www.gstatic.com): Cache First (versioned)
+//   - CDN (cdn.jsdelivr.net): Cache First (versioned) — gstatic dali Sprint D'de kaldirildi (HTML'de gstatic istegi yok)
 //   - Firebase Realtime DB (*.firebaseio.com/firebaseapp.com): Network Only (anlik veri, offline yazma fail)
 //
 // CACHE_VERSION her major deploy'da artirilir, eski cache'ler activate event'inde silinir.
@@ -665,7 +665,7 @@
 // bump v131-159 -> v131-160.
 // olu-kod-temizligi-batch (2026-05-27): eski UI yenilemesinden kalma kullanilmayan render degiskenleri silindi — mOpts/mOpts2/hOpts/maltKatBar (+ yetim maltKatlar) ve zincir def'leri (const mg={}/const hg={}). minOpts korundu (4 yerde canli). node --check PASS, MALTLAR=184.
 // bump v131-160 -> v131-161.
-const CACHE_VERSION = 'bm-cache-v131-356';
+const CACHE_VERSION = 'bm-cache-v131-357';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
@@ -1172,8 +1172,7 @@ self.addEventListener('fetch', function(event) {
 
   // ML modeller + CDN: Cache First (versioned URL, immutable)
   if (url.hostname === 'brewmaster-models.dessn7.workers.dev' ||
-      url.hostname === 'cdn.jsdelivr.net' ||
-      url.hostname === 'www.gstatic.com') {
+      url.hostname === 'cdn.jsdelivr.net') {
     event.respondWith(
       caches.match(event.request).then(function(hit) {
         if (hit) return hit;
@@ -1212,8 +1211,9 @@ self.addEventListener('fetch', function(event) {
           return caches.match(event.request).then(function(hit) {
             if (hit) return hit;
             // Navigation fallback: HTML cache yoksa critical asset HTML'i dondur
-            return caches.match('./Brewmaster_v2_79_10.html')
-              || new Response('Offline (cache miss)', { status: 504, statusText: 'Offline' });
+            return caches.match('./Brewmaster_v2_79_10.html').then(function(r) {
+              return r || new Response('Offline (cache miss)', { status: 504, statusText: 'Offline' });
+            });
           });
         })
       );
