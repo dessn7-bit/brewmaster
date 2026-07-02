@@ -8185,6 +8185,8 @@ function tarifeKaydet(){
       clearDraft();
       const _lc=S.brewLog?S.brewLog.length:0;
       flash("Kaydedildi ✓"+((_lc>0)?" ("+_lc+" kayıt)":""));
+      // Sprint C (K2): kayıt başarılı → bulut sync push (tarifKlonla L8215 emsali; debounce pencere korunur)
+      try{if(typeof _bmDirty!=='undefined')_bmDirty=true;if(typeof _syncGonderDebounced==='function')_syncGonderDebounced();}catch(_se){}
     } else {
       flash("⚠️ Kayıt hatası — localStorage kontrol edin","hata");
     }
@@ -19076,15 +19078,15 @@ return `
             '<span style="font-weight:700;color:var(--kahve);font-size:11px">BJCP (<span class="bm-stil-adi">'+_stKey+'</span>)</span>'+
             (_v5TopBjcp ? (function(){
               // Adim 133-A-3: Motor toggle sadelestirme. V12 tek aktif motor. Arsiv motor btn'lari
-              // SHOW_ARCHIVE_MOTORS=false ile dormant — true'ya cevirince 5-buton UI geri acilir.
+              // SHOW_ARCHIVE_MOTORS=false ile dormant. Sprint C: bmSetMotor tanimsizdi -> btn() PASIF etiket uretir (onclick yok); reaktivasyon gercek handler gerektirir.
               // Gelecek motor (V13 vs) eklemek icin sadece btn() cagrisi + flag uzerinden ekle.
               var SHOW_ARCHIVE_MOTORS = false;
               var motor = localStorage.getItem('bm_motor_version') || 'V12';
               function btn(v, label, bg, title) {
                 var active = (motor === v);
-                var style = 'font-size:9px;border:1px solid '+bg+';padding:2px 5px;border-radius:3px;cursor:pointer;font-family:inherit;letter-spacing:.3px;'+
+                var style = 'font-size:9px;border:1px solid '+bg+';padding:2px 5px;border-radius:3px;font-family:inherit;letter-spacing:.3px;'+
                   (active ? 'background:'+bg+';color:#fff;font-weight:700' : 'background:#fff;color:'+bg+';font-weight:500');
-                return '<button onclick="window.bmSetMotor(\''+v+'\')" title="'+title+'" style="'+style+'">'+(active?'✓ ':'')+label+'</button>';
+                return '<span title="'+title+'" style="'+style+'">'+(active?'✓ ':'')+label+'</span>';
               }
               // Adım 51 toggle temizliği — V8.5/V9/V10/V10.1 UI'dan kaldırıldı, model dosyaları archive/ klasöründe.
               // D-1.9m: V6 (KNN) IIFE kaldırıldı (V6 vs B1 head-to-head B1 14/14 üstün). UI butonu da bu satırda silindi.
@@ -19112,7 +19114,7 @@ return `
                       m==='V9' ? 'BETA V9 aktif (7783 reçete, +%34 V8.5)' :
                                  'BETA V8.5 aktif (5847 reçete)';
             var prefix = m==='V12' ? '⭐' : '⚠️';
-            return '<div style="font-size:9px;color:'+txtC+';background:'+bgC+';border:1px solid '+brdC+';border-radius:4px;padding:3px 6px;margin-bottom:4px;line-height:1.3">'+prefix+' <b>'+lbl+'</b> — 14 ana kategori tahmini (slug yerine küme). BJCP karşılaştırması V6 stiliyle yapılır. Geri bildirim için ✓ butonlarını kullan.</div>';
+            return '<div style="font-size:9px;color:'+txtC+';background:'+bgC+';border:1px solid '+brdC+';border-radius:4px;padding:3px 6px;margin-bottom:4px;line-height:1.3">'+prefix+' <b>'+lbl+'</b> — 14 ana kategori tahmini (slug yerine küme). BJCP karşılaştırması V6 stiliyle yapılır.</div>';
           })() : '')+
           '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;font-size:10px">'+
             '<div>'+_icon(_inOG)+' <b>OG:</b> '+_stRef.og[0].toFixed(3)+'-'+_stRef.og[1].toFixed(3)+'</div>'+
@@ -20587,7 +20589,7 @@ function rO(){clearTimeout(window._rt);window._rt=setTimeout(render,400);}
 // Son silinen maltı tut — üst banner'da "Geri Al" göster.
 let _sonSilinenMalt=null;
 // Duzeltme A (D3) — malzeme (malt/hop) eklenip-cikarildiginda kayitli receteyi sessizce persist edip plan bildirimini yeniden senkronlar (rozet[S] <-> bildirim[localStorage] tutarliligi). Adsiz recetede no-op.
-window._receteYazSync = function(){ try{ if(typeof S==='undefined'||!S||!S.biraAd||!String(S.biraAd).trim()) return; if(typeof _commitOpenRecipe==='function') _commitOpenRecipe(); if(typeof _origKy==='function') _origKy(KR); if(window._planPrepSync) _planPrepSync(); }catch(_e){ console.warn('_receteYazSync',_e); } };
+window._receteYazSync = function(){ try{ if(typeof S==='undefined'||!S||!S.biraAd||!String(S.biraAd).trim()) return; if(typeof _commitOpenRecipe==='function') _commitOpenRecipe(); if(typeof _origKy==='function') _origKy(KR); if(typeof _bmDirty!=='undefined')_bmDirty=true; if(typeof _syncGonderDebounced==='function')_syncGonderDebounced(); if(window._planPrepSync) _planPrepSync(); }catch(_e){ console.warn('_receteYazSync',_e); } };
 window.maltSil=function(idx){
   if(idx<0||idx>=S.maltlar.length) return;
   _sonSilinenMalt={idx,item:{...S.maltlar[idx]}};
@@ -21326,7 +21328,7 @@ window.brewdayBaslat=async function(){
         };
         if(typeof KR !== 'undefined' && Array.isArray(KR)){
           KR.unshift(_kayit);
-          try { if(typeof _origKy === 'function') _origKy(KR); else if(typeof ky === 'function') ky(KR); } catch(e){ console.warn('KR kayıt:',e); }
+          try { if(typeof _origKy === 'function'){ _origKy(KR); if(typeof _bmDirty!=='undefined')_bmDirty=true; if(typeof _syncGonderDebounced==='function')_syncGonderDebounced(); } else if(typeof ky === 'function') ky(KR); } catch(e){ console.warn('KR kayıt:',e); }
         }
         _editId = _yeniId;
         setTimeout(()=>flash('💾 Reçete otomatik kaydedildi','ok'), 300);
@@ -24702,7 +24704,7 @@ window.syncCihazSil = function(btn){
 const _origKy = ky;
 window.ky = function(a){ const _r=_origKy(a); _bmDirty=true; _syncGonderDebounced(); return _r; };
 const _origStokKaydet = stokKaydet;
-window.stokKaydet = function(a){ _origStokKaydet(a); _syncGonderDebounced(); try{ if(window._stokDusukSync) _stokDusukSync(); }catch(_e){} };
+window.stokKaydet = function(a){ _origStokKaydet(a); _bmDirty=true; _syncGonderDebounced(); try{ if(window._stokDusukSync) _stokDusukSync(); }catch(_e){} };
 window.syncPanelAc = syncPanelAc;
 window.syncKaydetVeBaslat = syncKaydetVeBaslat;
 window.syncTemizle = syncTemizle;
