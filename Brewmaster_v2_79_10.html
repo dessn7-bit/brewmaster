@@ -834,6 +834,24 @@ body:has(.brewday-timeline) #bm-toast-container{top:20px;bottom:auto}
 .bm-ana-kn{font-family:'Cinzel',serif;font-weight:500;font-size:16px;letter-spacing:1.2px;color:#2E2218}
 .bm-ana-kd{font-size:11.5px;color:#998A73;margin-top:4px}
 .bm-ana-kc{color:#CABDA1;display:flex}
+.bm-demle{background:#fff;border:1px solid #EAE0CC;border-radius:14px;flex-shrink:0;overflow:hidden;width:100%}
+.bm-demle .bm-ana-kc{transition:transform .2s}
+.bm-demle[open]>summary .bm-ana-kc{transform:rotate(180deg)}
+.bm-demle>summary{display:flex;align-items:center;gap:15px;padding:16px 17px;cursor:pointer;list-style:none}
+.bm-demle>summary::-webkit-details-marker{display:none}
+.bm-demle-sum{font-size:11.5px;color:#998A73;margin-top:4px}
+.bm-demle-body{padding:2px 17px 14px}
+.bm-demle-h{font-family:'Cinzel',serif;font-size:11px;letter-spacing:1px;color:#9A7A47;margin:12px 0 4px;text-transform:uppercase}
+.bm-demle-row{display:flex;align-items:center;gap:8px;min-height:44px;padding:6px 2px;width:100%;text-align:left;background:none;border:none;border-bottom:1px solid #F5EFE1;cursor:pointer;font-family:inherit}
+.bm-demle-row:last-child{border-bottom:none}
+.bm-demle-rn{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}
+.bm-demle-rt{font-size:14px;color:#2E2218;word-break:break-word}
+.bm-demle-rs{font-size:11.5px;color:#998A73;word-break:break-word}
+.bm-demle-badge{font-size:10px;color:#7A6A4A;background:#F0E8D6;border-radius:6px;padding:2px 7px;white-space:nowrap}
+.bm-demle-cok{font-size:12px;color:#998A73;padding:10px 2px 2px}
+.bm-demle-alis{margin-top:12px;background:#FBF6EC;border-radius:10px;padding:8px 12px 10px}
+.bm-demle-alis pre{font-family:inherit;font-size:12.5px;color:#2E2218;white-space:pre-wrap;word-break:break-word;margin:4px 0 0;line-height:1.55}
+.bm-demle-bos{font-size:12.5px;color:#998A73;padding:6px 2px}
 .bm-ana-kc svg{width:18px;height:18px;transform:rotate(-90deg)}
 .bm-ana-logo{margin-top:auto;display:flex;justify-content:center;padding:14px 0 20px}
 .bm-ana-logo img{width:80px;height:80px;display:block}
@@ -7539,6 +7557,75 @@ window.stokYetersizTam = function(tarif){
     yetersiz: (mh.yetersiz||[]).slice(),
     eksik: (mh.eksik||[]).concat(my.eksik||[])
   };
+};
+
+// ═══ "Ne Demleyebilirim?" — stok-güdümlü reçete keşfi (SALT-OKUR: KR/STOK/MAYALAR değişmez) ═══
+// stokYetersizTam'ı yapımda-olmayan tüm reçetelere uygular → HAZIR/AZ-EKSİK/ÇOK-EKSİK kova.
+window.bmDemlenebilirAnaliz = function(){
+  var out = { hazir:[], azEksik:[], cokEksikSay:0, alisveris:[] };
+  try {
+    if(typeof KR==='undefined' || !KR) return out;
+    var list = Array.isArray(KR) ? KR : Object.values(KR);
+    var agg = {};
+    list.forEach(function(r){
+      if(!r || !r.id) return;
+      if((r.durum||'aktif')==='yapimda') return;                       // yapımda hariç (Sprint spec)
+      var st = (typeof stokYetersizTam==='function') ? stokYetersizTam(r) : {yetersiz:[],eksik:[]};
+      var yet = st.yetersiz||[], eks = st.eksik||[];
+      var toplam = yet.length + eks.length;
+      var ad = String(r.biraAd||'(adsız)');
+      var planTarih = (r.planBrewTarih && /^\d{4}-\d{2}-\d{2}$/.test(r.planBrewTarih)) ? r.planBrewTarih : null;
+      if(toplam===0){
+        out.hazir.push({ id:r.id, ad:ad, planTarih:planTarih });
+      } else if(toplam<=2){
+        var eksikStr = (typeof _stokYetersizMetin==='function') ? _stokYetersizMetin(st) : '';
+        out.azEksik.push({ id:r.id, ad:ad, eksikStr:eksikStr, eksikSay:toplam, planTarih:planTarih });
+        yet.forEach(function(it){ if(!it) return; var k=String(it.ad||''); if(!k) return;
+          if(!agg[k]) agg[k]={ ad:k, mik:0, birim:(it.birim||'') };
+          agg[k].mik += (+it.eksikMik||0); if(!agg[k].birim) agg[k].birim=it.birim||''; });
+        eks.forEach(function(it){ if(!it) return; var k=String(it.ad||''); if(!k) return;
+          if(!agg[k]) agg[k]={ ad:k, mik:0, birim:(it.birim||'') }; });        // "yok" kalem: miktarsız (mik 0 kalır)
+      } else {
+        out.cokEksikSay++;
+      }
+    });
+    out.azEksik.sort(function(a,b){ return a.eksikSay - b.eksikSay; });          // eksikSay artan
+    out.alisveris = Object.keys(agg).map(function(k){ var a=agg[k];
+      return { ad:a.ad, mik:(a.mik>0?Math.round(a.mik*1000)/1000:0), birim:a.birim||'' }; });
+    out.alisveris.sort(function(a,b){ return a.ad<b.ad?-1:(a.ad>b.ad?1:0); });
+  } catch(e){ try{console.warn('bmDemlenebilirAnaliz',e);}catch(_){} }
+  return out;
+};
+window.bmDemleKartHTML = function(){
+  try {
+    if(typeof KR==='undefined' || !KR) return '';
+    var krLen = Array.isArray(KR) ? KR.length : Object.keys(KR).length;
+    if(!krLen) return '';                                                        // KR boş → kart hiç çıkmaz
+    var a = bmDemlenebilirAnaliz();
+    var esc = function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
+    var escId = function(s){ return String(s==null?'':s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); };
+    var planBadge = function(pt){ if(!pt) return ''; var p=String(pt).split('-'); return ' <span class="bm-demle-badge">📅 '+esc(p[2]+'.'+p[1])+'</span>'; };
+    var row = function(r,sub){ return '<button type="button" class="bm-demle-row" onclick="tarifAc(\''+escId(r.id)+'\')" aria-label="'+esc(r.ad)+' reçetesini aç">'+
+      '<span class="bm-demle-rn"><span class="bm-demle-rt">'+esc(r.ad)+planBadge(r.planTarih)+'</span>'+(sub?'<span class="bm-demle-rs">'+sub+'</span>':'')+'</span></button>'; };
+    var nH=a.hazir.length, nA=a.azEksik.length;
+    var ozet = (nH>0||nA>0) ? (nH+' reçete hazır · '+nA+' az-eksik')
+                            : ('Stok yeni reçete için yetersiz'+(a.cokEksikSay>0?' · '+a.cokEksikSay+' çok-eksik':''));
+    var body='';
+    if(nH>0){ body+='<div class="bm-demle-h">🍺 Hazır ('+nH+')</div>'; a.hazir.forEach(function(r){ body+=row(r,''); }); }
+    if(nA>0){ body+='<div class="bm-demle-h">🛒 Az-eksik ('+nA+')</div>'; a.azEksik.forEach(function(r){ body+=row(r, r.eksikSay+' eksik: '+esc(r.eksikStr)); }); }
+    if(a.cokEksikSay>0){ body+='<div class="bm-demle-cok">+'+a.cokEksikSay+' reçete için stok çok eksik</div>'; }
+    if(nA>0 && a.alisveris.length){
+      var satir = a.alisveris.map(function(x){ return x.mik>0 ? (x.ad+' — '+x.mik+(x.birim||'')) : x.ad; }).join('\n');
+      body+='<div class="bm-demle-alis"><div class="bm-demle-h" style="margin-top:0">🛒 Eksik listesi</div><pre>'+esc(satir)+'</pre></div>';
+    }
+    if(!body) body='<div class="bm-demle-bos">Şu an demlenebilir reçete yok.</div>';
+    var chevron = (typeof BM_SVG!=='undefined' && BM_SVG['chevron-down']) ? BM_SVG['chevron-down'] : '▾';
+    return '<details class="bm-demle">'+
+      '<summary><span class="bm-ana-ki" style="font-size:20px">🍺</span>'+
+      '<span class="bm-ana-kt"><span class="bm-ana-kn">NE DEMLEYEBİLİRİM?</span><span class="bm-demle-sum">'+esc(ozet)+'</span></span>'+
+      '<span class="bm-ana-kc">'+chevron+'</span></summary>'+
+      '<div class="bm-demle-body">'+body+'</div></details>';
+  } catch(e){ try{console.warn('bmDemleKartHTML',e);}catch(_){} return ''; }
 };
 
 function stoktenDus(tarif){
@@ -20366,6 +20453,7 @@ function rAnasayfa(){
       <span class="bm-ana-kt"><span class="bm-ana-kn">YENİ REÇETE</span><span class="bm-ana-kd">Yeni bir mit yaz</span></span>
       <span class="bm-ana-kc">${BM_SVG['chevron-down']}</span>
     </button>
+    ${(typeof bmDemleKartHTML==='function'?bmDemleKartHTML():'')}
     <div class="bm-ana-logo"><img src="${BM_LOGO_DATAURL}" alt="Kabir" width="80" height="80"></div>
   </div>`;
 }
