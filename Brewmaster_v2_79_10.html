@@ -22478,7 +22478,6 @@ window.brewdayBitir=function(){
         +'</div>';
     }
     const hedefRid = Object.keys(tum).find(k => tum[k] === hedef);
-    const saat = hedef.bildirimSaati || _alarmSaatiAl();
     const alarmlar = (hedef.alarmlar||[]).slice().sort((a,b) => a.ts - b.ts);
     const gecmis = alarmlar.filter(a => a.durum==='tamamlandi' || a.durum==='atlandi');
     const bekleyen = alarmlar.filter(a => a.durum==='bekliyor' || a.durum==='gosterildi');
@@ -22545,8 +22544,7 @@ window.brewdayBitir=function(){
     }
 
     const saatInput = '<div style="padding:10px 14px;background:var(--bg2);border-top:1px solid var(--bor);display:flex;align-items:center;gap:8px">'
-      +'<span style="font-size:11px;font-weight:600;color:var(--soluk)">🔔 Bildirim saati:</span>'
-      +'<input aria-label="Bildirim saati" type="time" value="'+saat+'" onchange="_alarmSaatiAyarla(this.value)" style="background:#fff;border:1px solid var(--bor);border-radius:6px;padding:4px 8px;font-size:12px;color:var(--kahve);width:100px">'
+      +'<span style="font-size:11px;font-weight:600;color:var(--soluk)">🔔 Alarm planı:</span>'
       +'<span style="flex:1"></span>'
       +'<button onclick="_alarmPlaniYenile()" style="background:var(--card);border:1px solid var(--bor);color:var(--kahve);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer" title="Pitch tarihine göre alarmları yeniden hesapla" aria-label="Alarm planını yenile">↻ Yenile</button>'
     +'</div>';
@@ -23759,7 +23757,7 @@ window.bmBildirimTercihToggle = function(key){
   p[key] = !p[key];
   window.bmBildirimTercihKaydet(p);
   try{ if(window._alarmBulutaSyncDebounced) window._alarmBulutaSyncDebounced(); }catch(_e){} // kategori/vib OFF -> KV güncelle (tombstone)
-  if (ekran === 'stok') { document.getElementById('ekran').innerHTML = rStok(); }
+  if (ekran === 'bildirim') { document.getElementById('ekran').innerHTML = rBildirimEkran(); }
   if (typeof bmToast === 'function') bmToast('Tercih kaydedildi', 'info');
 };
 window.bmBildirimSessizSet = function(alan, val){
@@ -23924,6 +23922,16 @@ window.rStokAyarlar = function(){
       syncDurum = 'pasif';
     }
   } catch(e){}
+  // Bildirim & Tanı durum özeti (client-only, senkron) — cihaz sayısı HARİÇ (worker gerekir)
+  var _bIzin = (typeof Notification!=='undefined') ? Notification.permission : 'yok';
+  var _bIzinStr = _bIzin==='granted' ? '✓ Verildi' : (_bIzin==='denied' ? '✗ Reddedildi' : (_bIzin==='yok' ? 'Desteklenmiyor' : 'Sorulmadı'));
+  var _bAbone=false; try{ _bAbone=!!localStorage.getItem('bm_push_sub'); }catch(e){}
+  var _bBekleyen=0; try{ _bBekleyen=(typeof _alarmBekleyenleri==='function')?_alarmBekleyenleri().length:0; }catch(e){}
+  var _bSonStr='Henüz yok';
+  try{ var _bg=(typeof bmGecmisOku==='function')?bmGecmisOku():[]; if(_bg&&_bg.length){ var _bson=_bg.slice().sort(function(a,b){return (b.ts||0)-(a.ts||0);})[0]; var _bdk=Math.round((Date.now()-(_bson.ts||0))/60000); _bSonStr=_bdk<1?'az önce':(_bdk<60?_bdk+' dk önce':(_bdk<1440?Math.round(_bdk/60)+' saat önce':Math.round(_bdk/1440)+' gün önce')); } }catch(e){}
+  var _bPref=(typeof bmBildirimTercihOku==='function')?bmBildirimTercihOku():{};
+  var _bSessizStr='Kapalı';
+  if(_bPref.sessizBasla&&_bPref.sessizBit&&_bPref.sessizBasla!==_bPref.sessizBit){ var _bSessizNow=(typeof _sessizSaatteMi==='function'&&_sessizSaatteMi()); _bSessizStr='🌙 '+_bPref.sessizBasla+'–'+_bPref.sessizBit+(_bSessizNow?' (şu an sessizde)':''); }
   return ''+
     '<div class="bm-ayar-kart">'+
       '<div class="bm-ayar-kart-baslik">🔤 Tipografi</div>'+
@@ -23958,6 +23966,33 @@ window.rStokAyarlar = function(){
       '</div>'+
       '<div class="bm-ayar-satir">'+
         '<div class="bm-ayar-satir-text">Sürüm <small>'+APP_VERSION+' <span style="color:var(--metin-soluk)">· canlı SW için Gelişmiş ▸ SW durumu</span></small></div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="bm-ayar-kart">'+
+      '<div class="bm-ayar-kart-baslik">🔔 Bildirim &amp; Tanı</div>'+
+      '<div class="bm-ayar-satir">'+
+        '<div class="bm-ayar-satir-text">🔔 Günlük bildirim saati <small>Tüm günlük hatırlatmaların saati</small></div>'+
+        '<input aria-label="Günlük bildirim saati" type="time" value="'+(typeof _alarmSaatiAl==='function'?_alarmSaatiAl():'10:00')+'" onchange="_alarmSaatiAyarla(this.value)" class="inp" style="width:auto;font-size:var(--fs-sm)">'+
+      '</div>'+
+      '<div class="bm-ayar-satir">'+
+        '<div class="bm-ayar-satir-text">🔔 Test bildirimi <small>Push sisteminin çalıştığını doğrula'+(_bIzin!=='granted'?' · önce izin gerekli':'')+'</small></div>'+
+        '<div style="display:flex;gap:6px;flex-shrink:0">'+
+          (_bIzin!=='granted'?'<button class="bm-ayar-btn" onclick="if(typeof brewBildirimIzin===\'function\')brewBildirimIzin()">İzin ver</button>':'')+
+          '<button class="bm-ayar-btn-sec" onclick="if(typeof brewPushTest===\'function\')brewPushTest()">Gönder</button>'+
+        '</div>'+
+      '</div>'+
+      '<div class="bm-ayar-satir">'+
+        '<div class="bm-ayar-satir-text">📊 Durum özeti'+
+          '<small>Bildirim izni: '+_bIzinStr+'</small>'+
+          '<small>'+(_bAbone?'✓ Bu cihaz abone':'Bu cihaz abone değil')+'</small>'+
+          '<small>Bekleyen alarm: '+_bBekleyen+'</small>'+
+          '<small>Son bildirim: '+_bSonStr+'</small>'+
+          '<small>Sessiz saat: '+_bSessizStr+'</small>'+
+        '</div>'+
+      '</div>'+
+      '<div class="bm-ayar-satir">'+
+        '<div class="bm-ayar-satir-text">🔔 Bildirim tercihleri <small>Kategoriler, sessiz saat, titreşim, ses</small></div>'+
+        '<button class="bm-ayar-btn-sec" onclick="if(typeof bmAnaBildirim===\'function\')bmAnaBildirim()">Aç →</button>'+
       '</div>'+
     '</div>'+
     '<details class="bm-ayar-kart">'+
