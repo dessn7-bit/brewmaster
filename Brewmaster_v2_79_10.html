@@ -7628,6 +7628,223 @@ window.bmDemleKartHTML = function(){
   } catch(e){ try{console.warn('bmDemleKartHTML',e);}catch(_){} return ''; }
 };
 
+// ═══ 📖 DEMLEME GÜNLÜĞÜ → KİŞİSEL PROFİL (bm_profil_v1) ═══════════════════════
+// Her demleme başlangıcında (brewday_start / pitching) reçetenin O ANKİ tahminleri
+// bir profil kaydına DONDURULUR (snapshot) — reçete sonradan değişse de kayıt sabit.
+// Gerçek ölçümler (ogManuel/fgManuel/siseleme) geldikçe gercek.* dolar, türetilmişler
+// (atten/verim/ogSapma/fgSapma) hesaplanır. Sync: Firebase payload'ında opsiyonel
+// PROFIL alanı — eski cihaz payload'ında alan yoksa yerel profil KORUNUR.
+var _PROFIL_SK = 'bm_profil_v1';
+window.bmProfilData = function(){
+  try{
+    var d = JSON.parse(localStorage.getItem(_PROFIL_SK) || 'null');
+    if(!d || !Array.isArray(d.kayitlar)) return {kayitlar:[], v:1};
+    return d;
+  }catch(e){ return {kayitlar:[], v:1}; }
+};
+window._bmProfilYazRaw = function(d){
+  // Sync TETİKLEMEDEN yaz (syncAl merge'i bunun üzerinden — _origKy emsali)
+  try{ localStorage.setItem(_PROFIL_SK, JSON.stringify({kayitlar:(d&&d.kayitlar)||[], v:1})); }
+  catch(e){ console.warn('profil yaz', e); }
+};
+window.bmProfilKaydet = function(d){
+  _bmProfilYazRaw(d);
+  // P4: mevcut dirty/debounce kalıbına dahil (tarifeKaydet L8209 emsali)
+  try{ if(typeof _bmDirty!=='undefined')_bmDirty=true; if(typeof _syncGonderDebounced==='function')_syncGonderDebounced(); }catch(e){}
+};
+window._bmProfilForSync = function(){
+  try{ return bmProfilData(); }catch(e){ return undefined; }
+};
+window._profilTuret = function(k){
+  // Türetilmişler: OG varsa ogSapma+verim, OG+FG varsa atten+fgSapma. Sapmalar punto (binde).
+  var t = {atten:null, verim:null, ogSapma:null, fgSapma:null};
+  try{
+    var sn = k.snapshot||{}, ge = k.gercek||{};
+    var og = parseFloat(ge.og), fg = parseFloat(ge.fg);
+    if(ge.og!=null && og>1 && og<1.2){
+      if(sn.og!=null && +sn.og>1){
+        t.ogSapma = Math.round((og - sn.og)*1000);
+        // Motor verim formülünün tersi (preboil kartı L14322 emsali): gu·kg lineer → verim ∝ (og-1)
+        if(sn.verim!=null) t.verim = Math.round(+sn.verim * (og-1)/(sn.og-1));
+      }
+    }
+    if(ge.og!=null && ge.fg!=null && og>1 && fg>=1 && fg<og){
+      t.atten = Math.round((og-fg)/(og-1)*1000)/10;
+      if(sn.fg!=null && +sn.fg>=1) t.fgSapma = Math.round((fg - sn.fg)*1000);
+    }
+  }catch(e){}
+  k.turetilmis = t;
+  return k;
+};
+// P1 — SNAPSHOT: demleme başlangıcında tahminleri dondur.
+// Çift kayıt önleme: aynı reçetenin AÇIK (şişelenmemiş) kaydı varsa yenisi AÇILMAZ;
+// şişeleme sonrası aynı reçete tekrar demlenirse YENİ kayıt (her demleme ayrı satır).
+window._profilSnapshotEkle = function(s, rid){
+  try{
+    if(!s) return null;
+    rid = (rid!=null && rid!=='') ? String(rid) : ((typeof _editId!=='undefined' && _editId) ? String(_editId) : null);
+    if(!rid) return null;
+    var d = bmProfilData();
+    var acik = d.kayitlar.some(function(k){ return k && k.receteId===rid && (!k.gercek || k.gercek.siseTs==null); });
+    if(acik) return null;
+    var og=null, fg=null;
+    try{ var c = calc(); if(c && c.og>1) og = Math.round(c.og*1000)/1000; if(c && c.fg>=1) fg = Math.round(c.fg*1000)/1000; }catch(e){}
+    var maya = null;
+    try{ if(typeof MAYALAR!=='undefined' && s.mayaId) maya = MAYALAR.find(function(x){ return x && x.id===s.mayaId; }) || null; }catch(e){}
+    var kayit = {
+      id: 'p'+Date.now(),
+      receteId: rid,
+      receteAd: String(s.biraAd||''),
+      stil: String(s.stil||''),
+      tarih: Date.now(),
+      mayaId: String(s.mayaId||''),
+      mayaAd: maya ? String(maya.ad||'') : '',
+      snapshot: { og: og, fg: fg, verim: (s.verim!=null?+s.verim:61),
+                  attenAralik: (maya && Array.isArray(maya.atu)) ? [maya.atu[0], maya.atu[1]] : null },
+      gercek: { og:null, fg:null, siseTs:null },
+      turetilmis: { atten:null, verim:null, ogSapma:null, fgSapma:null },
+      guncelleme: Date.now()
+    };
+    d.kayitlar.push(kayit);
+    bmProfilKaydet(d);
+    return kayit;
+  }catch(e){ console.warn('_profilSnapshotEkle', e); return null; }
+};
+// P2 — GERÇEK: açık reçetenin ölçümlerini (S.ogManuel / S.fgManuel / siseleme log'u)
+// en yeni profil kaydına aynala. Kayıt yoksa (istek reçetede hedef zorlaması) SESSİZ —
+// istek reçetelerdeki ogManuel/fgManuel profili KİRLETMEZ.
+window._profilGercekSync = function(s, rid){
+  try{
+    if(!s) return;
+    rid = (rid!=null && rid!=='') ? String(rid) : ((typeof _editId!=='undefined' && _editId) ? String(_editId) : null);
+    if(!rid) return;
+    var d = bmProfilData();
+    var adaylar = d.kayitlar.filter(function(k){ return k && k.receteId===rid; });
+    if(!adaylar.length) return;
+    adaylar.sort(function(a,b){ return (b.tarih||0)-(a.tarih||0); });
+    var k = adaylar[0];
+    var oncesi = JSON.stringify([k.gercek, k.turetilmis]);
+    var ov = parseFloat(s.ogManuel), fv = parseFloat(s.fgManuel);
+    k.gercek = k.gercek || {};
+    k.gercek.og = (ov>1.000 && ov<1.200) ? Math.round(ov*1000)/1000 : null;
+    k.gercek.fg = (fv>1.000 && fv<1.200) ? Math.round(fv*1000)/1000 : null;
+    try{
+      var sis = (s.brewLog||[]).find(function(x){ return x && (x.tip==='siseleme'||x.tip==='sise'||x.tip==='bottle'); });
+      k.gercek.siseTs = sis ? (sis.ts || (sis.tarih ? Date.parse(sis.tarih) : null) || null) : (k.gercek.siseTs||null);
+    }catch(e){}
+    _profilTuret(k);
+    if(JSON.stringify([k.gercek, k.turetilmis]) !== oncesi){
+      k.guncelleme = Date.now();
+      bmProfilKaydet(d);
+    }
+  }catch(e){ console.warn('_profilGercekSync', e); }
+};
+// P5 — GERİYE DOLDURMA: mevcut brewLog'lu reçeteleri TEK SEFERLİK kayda çevir.
+// Deterministik id (migr_<receteId>_<ts>) → iki cihaz da migre etse sync union'da tek kayıt.
+// Demleme kanıtı = pitching/brewday_start; istek reçeteler (kanıtsız ogManuel/fgManuel) ATLANIR.
+window._profilMigrasyon = function(){
+  try{
+    if(localStorage.getItem('bm_profil_migr_v1')) return;
+    localStorage.setItem('bm_profil_migr_v1','1');
+    if(typeof KR==='undefined' || !Array.isArray(KR)) return;
+    var d = bmProfilData(), n=0;
+    KR.forEach(function(r){
+      if(!r || !r.id || !Array.isArray(r.brewLog)) return;
+      var pit = r.brewLog.find(function(x){ return x && (x.tip==='pitching'||x.tip==='brewday_start'); });
+      if(!pit) return;
+      var ts = pit.ts || (pit.tarih ? Date.parse(pit.tarih) : null) || Date.now();
+      var kid = 'migr_'+r.id+'_'+ts;
+      if(d.kayitlar.some(function(k){ return k && k.id===kid; })) return;
+      var maya=null;
+      try{ if(typeof MAYALAR!=='undefined' && r.mayaId) maya=MAYALAR.find(function(x){return x&&x.id===r.mayaId;})||null; }catch(e){}
+      var oz = r.ozet||{};
+      var ov = parseFloat(r.ogManuel), fv = parseFloat(r.fgManuel);
+      var sis = r.brewLog.find(function(x){ return x && (x.tip==='siseleme'||x.tip==='sise'||x.tip==='bottle'); });
+      var ozOg = parseFloat(oz.og), ozFg = parseFloat(oz.fg);
+      var kayit = {
+        id: kid, receteId: String(r.id), receteAd: String(r.biraAd||''), stil: String(r.stil||''),
+        tarih: ts, mayaId: String(r.mayaId||''), mayaAd: maya?String(maya.ad||''):'',
+        // NOT: gerçek dondurulmuş snapshot bu sprintten önce YOKTU; en iyi eldeki =
+        // reçetenin güncel ozet'i. migr:true ile işaretli (kaynak belli olsun).
+        snapshot: { og: (ozOg>1?Math.round(ozOg*1000)/1000:null),
+                    fg: (ozFg>=1?Math.round(ozFg*1000)/1000:null),
+                    verim: (r.verim!=null?+r.verim:61),
+                    attenAralik: (maya&&Array.isArray(maya.atu))?[maya.atu[0],maya.atu[1]]:null },
+        gercek: { og: (ov>1.000&&ov<1.200)?Math.round(ov*1000)/1000:null,
+                  fg: (fv>1.000&&fv<1.200)?Math.round(fv*1000)/1000:null,
+                  siseTs: sis ? (sis.ts || (sis.tarih?Date.parse(sis.tarih):null) || null) : null },
+        turetilmis: { atten:null, verim:null, ogSapma:null, fgSapma:null },
+        migr: true,
+        guncelleme: Date.now()
+      };
+      _profilTuret(kayit);
+      d.kayitlar.push(kayit); n++;
+    });
+    if(n) bmProfilKaydet(d);
+    try{ console.log('[BM profil] geriye doldurma: '+n+' kayıt'); }catch(_){}
+  }catch(e){ console.warn('_profilMigrasyon', e); }
+};
+// P3 — ANA EKRAN KARTI: Ne Demleyebilirim (bmDemleKartHTML) ikizi, aynı bm-demle-* CSS.
+window.bmProfilKartHTML = function(){
+  try{
+    var d = bmProfilData();
+    var ks = (d.kayitlar||[]).filter(function(k){ return !!k; }).slice();
+    ks.sort(function(a,b){ return (b.tarih||0)-(a.tarih||0); });
+    var esc = function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
+    var escId = function(s){ return String(s==null?'':s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); };
+    var tamam = ks.filter(function(k){ return k.gercek && k.gercek.og!=null && k.gercek.fg!=null; });
+    var chevron = (typeof BM_SVG!=='undefined' && BM_SVG['chevron-down']) ? BM_SVG['chevron-down'] : '▾';
+    var sum, body='';
+    if(!ks.length){
+      sum = 'İlk demlemenle profilin başlar 🌱';
+      body = '<div class="bm-demle-bos">Brewday başlattığında (veya günlüğe pitching girdiğinde) o anki tahminler buraya dondurulur; OG/FG ölçümlerini girdikçe kişisel demleme profilin oluşur. 🌱</div>';
+    } else {
+      sum = ks.length+' demleme · '+tamam.length+' tamam';
+      if(tamam.length>=3){
+        var ort=function(a){ return a.length ? a.reduce(function(x,y){return x+y;},0)/a.length : null; };
+        var gv=ort(tamam.map(function(k){return k.turetilmis&&k.turetilmis.verim;}).filter(function(x){return x!=null;}));
+        var mv=ort(tamam.map(function(k){return k.snapshot&&k.snapshot.verim!=null?+k.snapshot.verim:null;}).filter(function(x){return x!=null;}));
+        var fsO=ort(tamam.map(function(k){return k.turetilmis&&k.turetilmis.fgSapma;}).filter(function(x){return x!=null;}));
+        var stilSay={}; ks.forEach(function(k){ var s2=k.stil||'(stilsiz)'; stilSay[s2]=(stilSay[s2]||0)+1; });
+        var topStil=Object.keys(stilSay).sort(function(a,b){ return stilSay[b]-stilSay[a]; })[0];
+        var mayaAgg={}; tamam.forEach(function(k){ if(!k.mayaAd||!k.turetilmis||k.turetilmis.atten==null) return;
+          (mayaAgg[k.mayaAd]=mayaAgg[k.mayaAd]||[]).push(k.turetilmis.atten); });
+        var L=[];
+        if(gv!=null&&mv!=null){ var frk=Math.round(gv-mv); L.push('Gerçek verim ort: %'+Math.round(gv)+' (motor varsayımı %'+Math.round(mv)+', fark '+(frk>=0?'+':'')+frk+')'); }
+        if(fsO!=null){ var fso=Math.round(fsO*10)/10; L.push('FG sapma eğilimi: ort '+(fso>=0?'+':'')+fso+' punto'); }
+        if(topStil) L.push('En çok demlenen stil: '+topStil+' ('+stilSay[topStil]+')');
+        Object.keys(mayaAgg).forEach(function(m){ var a=mayaAgg[m]; L.push(m+': gerçekleşen atten ort %'+(Math.round(ort(a)*10)/10)+' ('+a.length+' demleme)'); });
+        body += '<div class="bm-demle-alis" style="margin-top:0"><div class="bm-demle-h" style="margin-top:0">📊 Profil özeti — '+tamam.length+' tamamlanmış</div><pre>'+esc(L.join('\n'))+'</pre></div>';
+      }
+      ks.forEach(function(k){
+        var dt = k.tarih ? new Date(k.tarih) : null;
+        var gg = dt ? (('0'+dt.getDate()).slice(-2)+'.'+('0'+(dt.getMonth()+1)).slice(-2)) : '?';
+        var tam = k.gercek && k.gercek.og!=null && k.gercek.fg!=null;
+        var baslik = (tam?'✓ ':'⏳ ')+(k.receteAd||'(adsız)')+' · '+gg+(k.stil?' — '+k.stil:'');
+        var sub='';
+        if(tam){
+          var t=k.turetilmis||{}, sn=k.snapshot||{}, p=[];
+          if(sn.fg!=null&&t.fgSapma!=null) p.push('FG '+(+k.gercek.fg).toFixed(3)+' (tahmin '+(+sn.fg).toFixed(3)+', '+(t.fgSapma>=0?'+':'')+t.fgSapma+')');
+          else p.push('FG '+(+k.gercek.fg).toFixed(3));
+          if(t.atten!=null){ var ar=sn.attenAralik; var ok=(ar&&t.atten>=ar[0]&&t.atten<=ar[1])?'✓':'⚠';
+            p.push('Atten %'+t.atten+(ar?' (aralık '+ar[0]+'-'+ar[1]+' '+ok+')':'')); }
+          if(t.verim!=null) p.push('Verim %'+t.verim);
+          sub=p.join(' · ');
+        } else {
+          sub='⏳ ölçüm bekliyor'+((k.gercek&&k.gercek.og!=null)?' — OG '+(+k.gercek.og).toFixed(3)+' girildi':'');
+        }
+        body += '<button type="button" class="bm-demle-row" onclick="tarifAc(\''+escId(k.receteId)+'\')" aria-label="'+esc(k.receteAd||'kayıt')+' reçetesini aç">'+
+          '<span class="bm-demle-rn"><span class="bm-demle-rt">'+esc(baslik)+'</span>'+(sub?'<span class="bm-demle-rs">'+esc(sub)+'</span>':'')+'</span></button>';
+      });
+    }
+    return '<details class="bm-demle bm-profil-kart">'+
+      '<summary><span class="bm-ana-ki" style="font-size:20px">📖</span>'+
+      '<span class="bm-ana-kt"><span class="bm-ana-kn">DEMLEME GÜNLÜĞÜM</span><span class="bm-demle-sum">'+esc(sum)+'</span></span>'+
+      '<span class="bm-ana-kc">'+chevron+'</span></summary>'+
+      '<div class="bm-demle-body">'+body+'</div></details>';
+  }catch(e){ try{console.warn('bmProfilKartHTML',e);}catch(_){} return ''; }
+};
+
 function stoktenDus(tarif){
   // v2.78.96 H13 — _stokMalBul ve _stokBirimCevir ortak helper'lar kullanılır.
   // Önceki sürümde malBul içindeki `startsWith` partial match "Weizen Malt" ↔
@@ -14333,7 +14550,7 @@ function rEditorSurec(){
           <input aria-label="Gerçek OG" type="number" class="inp" style="flex:1;font-weight:700;font-size:14px;text-align:center"
             placeholder="${_ogHsp}" value="${S.ogManuel||""}"
             min="1.001" max="1.200" step="0.001"
-            onchange="S.ogManuel=this.value?parseFloat(this.value):null;render()">
+            onchange="S.ogManuel=this.value?parseFloat(this.value):null;window._profilGercekSync&&window._profilGercekSync(S);render()">
           ${_ogKyn==="manuel"?`<button class="btn" style="background:none;color:var(--kk);font-size:12px;padding:2px 6px" onclick="S.ogManuel=null;render()" aria-label="Manuel OG değerini temizle" title="Temizle">✕</button>`:""}
         </div>
         <div style="font-size:var(--fs-xs);color:var(--dim);margin-top:3px">Reçete: ${_ogHsp}</div>
@@ -14344,7 +14561,7 @@ function rEditorSurec(){
           <input aria-label="Gerçek FG" type="number" class="inp" style="flex:1;font-weight:700;font-size:14px;text-align:center"
             placeholder="${_fgHsp}" value="${S.fgManuel||""}"
             min="1.000" max="1.200" step="0.001"
-            onchange="S.fgManuel=this.value?this.value:null;render()">
+            onchange="S.fgManuel=this.value?this.value:null;window._profilGercekSync&&window._profilGercekSync(S);render()">
           ${_fgKyn==="manuel"?`<button class="btn" style="background:none;color:var(--kk);font-size:12px;padding:2px 6px" onclick="S.fgManuel=null;render()" aria-label="Manuel FG değerini temizle" title="Temizle">✕</button>`:""}
         </div>
         <div style="font-size:var(--fs-xs);color:var(--dim);margin-top:3px">Reçete: ${_fgHsp}</div>
@@ -14655,7 +14872,7 @@ function rEditorMaya(og, fg, abv, maya, maya2, fgKaynak, fgHesap){
           placeholder="${fgHesap.toFixed(3)}"
           value="${S.fgManuel||""}"
           min="1.000" max="${(og-0.001).toFixed(3)}" step="0.001"
-          onchange="S.fgManuel=this.value?this.value:null;render()">
+          onchange="S.fgManuel=this.value?this.value:null;window._profilGercekSync&&window._profilGercekSync(S);render()">
         <div style="flex:1;font-size:11px;color:var(--soluk)">
           ${fgKaynak==="manuel"?"Gerçek FG kullanılıyor. ABV ve takvim buna göre.":"Fermantasyon durursa veya ölçüm yaptıysan gir."}
         </div>
@@ -20454,6 +20671,7 @@ function rAnasayfa(){
       <span class="bm-ana-kc">${BM_SVG['chevron-down']}</span>
     </button>
     ${(typeof bmDemleKartHTML==='function'?bmDemleKartHTML():'')}
+    ${(typeof bmProfilKartHTML==='function'?bmProfilKartHTML():'')}
     <div class="bm-ana-logo"><img src="${BM_LOGO_DATAURL}" alt="Kabir" width="80" height="80"></div>
   </div>`;
 }
@@ -21290,6 +21508,8 @@ window.brewdayBaslat=async function(){
     tip:'brewday_start', deger:'', not:'Brewday başladı — '+b.ajanda.length+' adım',
     ts:Date.now()
   });
+  // Profil sprinti P1: brewday başlarken tahminleri profil kaydına dondur (çift kayıt korumalı)
+  try{ if(window._profilSnapshotEkle) _profilSnapshotEkle(S, (typeof _editId!=='undefined'?_editId:null)); }catch(_pf){}
   // İlk event'i render ve başlat
   brewdayRender();
   flash('🔥 Brewday başladı','ok');
@@ -23539,6 +23759,7 @@ function logEkle(){
     S.brewLog[_editIdx]=Object.assign({},S.brewLog[_editIdx],{tip:_tip2,tarih:tarihEl.value,deger:_deg2,not:(notEl?.value||'').trim()});
     S.brewLog.sort((a,b)=>a.tarih.localeCompare(b.tarih));
     if(_tip2==='fg_olcum'&&_deg2){const _fv=parseFloat(_deg2);if(_fv>1.000&&_fv<1.200)S.fgManuel=_deg2;}
+    try{ if(window._profilGercekSync) _profilGercekSync(S, (typeof _editId!=='undefined'?_editId:null)); }catch(_pfe2){}
     logDuzenleSifirla();
     if(S.biraAd&&S.biraAd.trim())tarifeKaydet(); else render();
     return;
@@ -23578,6 +23799,11 @@ function logEkle(){
   if(S.biraAd&&S.biraAd.trim())tarifeKaydet(); else render();
   // Sprint4: olcum/pitch/siseleme log'u stuck-fermentation grubunu aninda yeniden degerlendirir (kur/iptal). tarifeKaydet sonrasi -> localStorage guncel.
   try { if(window._stuckFermSync) _stuckFermSync(); } catch(_sfe){}
+  // Profil sprinti: pitching → snapshot (brewday'siz demleme yolu); ölçümler → gerçek alan aynası
+  try{
+    if(_tip==='pitching' && window._profilSnapshotEkle) _profilSnapshotEkle(S, (typeof _editId!=='undefined'?_editId:null));
+    if(window._profilGercekSync) _profilGercekSync(S, (typeof _editId!=='undefined'?_editId:null));
+  }catch(_pfe){}
   // Kayıt eklendikten sonra log bölümüne scroll
   setTimeout(function(){
     var ekranEl=document.getElementById('ekran');
@@ -24102,6 +24328,8 @@ window.MALTLAR=MALTLAR;window.MINERALLER=MINERALLER;
   }catch(e){console.warn('Dubbel:',e.message);}
 })();
 
+// Profil sprinti P5: tek-seferlik geriye doldurma — İLK render ÖNCESİ (kart ilk boyamada dolu gelsin)
+try{ if(window._profilMigrasyon) _profilMigrasyon(); }catch(_pmg){ console.warn('_profilMigrasyon',_pmg); }
 render();
 
 // ═══ BULUT SENKRON ══════════════════════════════════════════
@@ -24171,7 +24399,8 @@ async function syncGonder(){
       KR: JSON.parse(JSON.stringify(KR)),
       STOK: JSON.parse(JSON.stringify(STOK)),
       ts: Date.now(),
-      cihaz: syncCfg.cihaz||"A"
+      cihaz: syncCfg.cihaz||"A",
+      PROFIL: (typeof _bmProfilForSync==='function'?_bmProfilForSync():undefined)
     };
     const res = await fetch(url, {
       method:'PUT',
@@ -24207,7 +24436,8 @@ function _syncGonderKeepalive(){
       KR: JSON.parse(JSON.stringify(KR)),
       STOK: JSON.parse(JSON.stringify(STOK)),
       ts: Date.now(),
-      cihaz: syncCfg.cihaz||"A"
+      cihaz: syncCfg.cihaz||"A",
+      PROFIL: (typeof _bmProfilForSync==='function'?_bmProfilForSync():undefined)
     };
     fetch(url, {method:'PUT', body: JSON.stringify(data), keepalive: true});
   } catch(e){}
@@ -24292,6 +24522,21 @@ async function syncAl(){
     } else {
       yeniSTOK = gelenSTOK;
     }
+
+        // Profil sprinti P4 — geriye uyumlu merge: payload'da PROFIL YOKSA yerel korunur
+    // (eski cihaz payload'ı profili silemez); varsa kayıt-id bazlı LWW (guncelleme, KR emsali).
+    try{
+      if(data.PROFIL && Array.isArray(data.PROFIL.kayitlar) && typeof bmProfilData==='function'){
+        var _pm = {};
+        bmProfilData().kayitlar.forEach(function(k){ if(k&&k.id) _pm[k.id]=k; });
+        data.PROFIL.kayitlar.forEach(function(k){
+          if(!k||!k.id) return;
+          var y=_pm[k.id];
+          if(!y || (k.guncelleme||0) >= (y.guncelleme||0)) _pm[k.id]=k;
+        });
+        _bmProfilYazRaw({ kayitlar: Object.keys(_pm).map(function(i){ return _pm[i]; }), v:1 });
+      }
+    }catch(_pe){ console.warn('syncAl profil:', _pe); }
 
     KR = yeniKR;
     STOK = yeniSTOK;
@@ -24629,7 +24874,7 @@ window.addEventListener('pageshow', function(){
   }
 });
 
-// Başlat
+// Başlat
 syncBaslat();
 
 // 137-F: Dark Belgian Dubbel sample reçete init bloğu render() öncesine taşındı (sat ~21553).
