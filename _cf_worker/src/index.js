@@ -1,5 +1,21 @@
 const ALLOWED_ORIGIN = 'https://dessn7-bit.github.io';
 
+// #6 Sertlestirme: origin allowlist (Origin varsa) + shared-secret (env.WORKER_SECRET).
+// Secret AYARLI DEGILSE fail-open (kod deploy edilip secret henuz eklenmediyse app KIRILMASIN); eklenince zorunlu.
+// Origin YOKSA (curl/CC) origin katmani atlanir; secret ayarliysa X-BM-Auth yine gerekir.
+function _bmAuthGate(request, env) {
+  const origin = request.headers.get('Origin') || '';
+  if (origin && origin !== ALLOWED_ORIGIN && origin.indexOf('http://localhost') !== 0) {
+    return new Response(JSON.stringify({ error: 'origin reddedildi' }), { status: 403, headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' } });
+  }
+  const need = env.WORKER_SECRET;
+  if (need) {
+    const got = request.headers.get('X-BM-Auth') || '';
+    if (got !== need) return new Response(JSON.stringify({ error: 'auth gerekli' }), { status: 401, headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' } });
+  }
+  return null;
+}
+
 export default {
   async fetch(request, env) {
     // ── Faz 1 POC: web-push test endpoint (Faz 5'te güvenlik + kaldırma) ──
@@ -7,9 +23,9 @@ export default {
       if (request.method === 'OPTIONS') {
         return new Response(null, { status: 204, headers: {
           'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'POST, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type', 'Access-Control-Max-Age': '3600' } });
+          'Access-Control-Allow-Headers': 'Content-Type, X-BM-Auth', 'Access-Control-Max-Age': '3600' } });
       }
-      if (request.method === 'POST') return handlePushTest(request, env);
+      if (request.method === 'POST') { const _g = _bmAuthGate(request, env); if (_g) return _g; return handlePushTest(request, env); }
       return new Response('Method not allowed', { status: 405 });
     }
 
@@ -151,7 +167,7 @@ async function handlePushTest(request, env) {
 const _KV_CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, X-BM-Token',
+  'Access-Control-Allow-Headers': 'Content-Type, X-BM-Token, X-BM-Auth',
   'Access-Control-Max-Age': '3600'
 };
 function _kvJson(obj, status) {
@@ -207,6 +223,7 @@ function _mergeAlarms(existing, incoming) {
 
 async function handleKvRoute(path, request, env) {
   if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: _KV_CORS });
+  { const _g = _bmAuthGate(request, env); if (_g) return _g; }
   if (!env.BM_KV) return _kvJson({ error: 'KV binding tanımlı değil' }, 500);
   try {
     if (path === '/kv-peek') {
