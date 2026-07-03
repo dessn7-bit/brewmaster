@@ -7662,15 +7662,64 @@ window._brewSnapshotYaz = function(s, rid){
       hacim: (s.hacim!=null?+s.hacim:11)
     };
     s.brewSnapshot = snap;
+    try{ if(s.brewSonuc) delete s.brewSonuc; }catch(_bsd){}     // yeni demleme → önceki brewSonuc düşer (çift eşleşmez)
     // Mevcut kayıt yolu: reçete KR'deyse aynala + ky() (sync mevcut zincirle, payload dokunulmaz)
     try{
       if(rid!=null && rid!=='' && typeof KR!=='undefined' && Array.isArray(KR)){
         var t = KR.find(function(k){return k&&k.id===String(rid);});
-        if(t){ t.brewSnapshot = JSON.parse(JSON.stringify(snap)); t.guncelleme = Date.now(); if(typeof ky==='function') ky(KR); }
+        if(t){ t.brewSnapshot = JSON.parse(JSON.stringify(snap)); try{ if(t.brewSonuc) delete t.brewSonuc; }catch(_bse){} t.guncelleme = Date.now(); if(typeof ky==='function') ky(KR); }
       }
     }catch(e){ console.warn('_brewSnapshotYaz persist', e); }
     return snap;
   }catch(e){ console.warn('_brewSnapshotYaz', e); return null; }
+};
+// ═══ F1 — ÖLÇÜM DONDURMA (brewSonuc): tamamlanma anında gerçekler donar ═══════
+// Şişeleme log'u yazılırken r.brewSonuc = {ts, ogG, fgG, kaynak:{og,fg:'olcum'|'manuel'}}
+// dondurulur; profil tamamlanmış demlemede CANLI kaynaklara bakmaz → fgManuel sonradan
+// silinse de değer durur. brewday_end BİLİNÇLİ kanca DEĞİL: o event demleme GÜNÜNÜN sonu
+// (fermantasyon öncesi); demlemenin tamamlanma sinyali şişelemedir. Sonradan girilen og/fg
+// boş alanı TEK SEFERLİK doldurur (dolu alan asla ezilmez). Yeni brewSnapshot eski sonucu düşürür.
+window._brewSonucCanli = function(s){
+  // canlı ikili yol — bmProfilAnaliz ile AYNI kural: brewLog eventi (son geçerli) > editör alanı
+  var _num = function(v){ var f=parseFloat(v); return (f>1.000 && f<1.200) ? Math.round(f*1000)/1000 : null; };
+  var bl = Array.isArray(s.brewLog) ? s.brewLog : [];
+  var ogE=null, fgE=null;
+  for(var i=bl.length-1;i>=0;i--){ var x=bl[i]; if(!x) continue;
+    if(ogE==null && x.tip==='og_olcum') ogE=_num(x.deger);
+    if(fgE==null && x.tip==='fg_olcum') fgE=_num(x.deger);
+  }
+  var om=_num(s.ogManuel), fm=_num(s.fgManuel);
+  return { og:(ogE!=null)?ogE:om, ogKay:(ogE!=null)?'olcum':(om!=null?'manuel':null),
+           fg:(fgE!=null)?fgE:fm, fgKay:(fgE!=null)?'olcum':(fm!=null?'manuel':null) };
+};
+function _brewSonucPersist(s, rid){
+  try{
+    rid = (rid!=null && rid!=='') ? String(rid) : ((typeof _editId!=='undefined' && _editId) ? String(_editId) : null);
+    if(rid==null || typeof KR==='undefined' || !Array.isArray(KR)) return;
+    var t = KR.find(function(k){ return k && k.id===rid; });
+    if(t){ t.brewSonuc = JSON.parse(JSON.stringify(s.brewSonuc)); t.guncelleme = Date.now(); if(typeof ky==='function') ky(KR); }
+  }catch(e){}
+}
+window._brewSonucYaz = function(s, rid){
+  try{
+    if(!s) return null;
+    if(s.brewSonuc && s.brewSonuc.ts) return null;               // çift-tamamlama guard'ı (ezme yok)
+    var d = _brewSonucCanli(s);
+    s.brewSonuc = { ts: Date.now(), ogG: d.og, fgG: d.fg, kaynak: { og: d.ogKay, fg: d.fgKay } };
+    _brewSonucPersist(s, rid);
+    return s.brewSonuc;
+  }catch(e){ console.warn('_brewSonucYaz', e); return null; }
+};
+window._brewSonucTamamla = function(s, rid){
+  try{
+    if(!s || !s.brewSonuc) return;                               // sonuc yoksa devam-eden ayna (dokunma)
+    var son = s.brewSonuc;
+    if(son.ogG!=null && son.fgG!=null) return;                   // dolu — ezme yok
+    var d = _brewSonucCanli(s), degisti=false;
+    if(son.ogG==null && d.og!=null){ son.ogG=d.og; son.kaynak=son.kaynak||{}; son.kaynak.og=d.ogKay; degisti=true; }
+    if(son.fgG==null && d.fg!=null){ son.fgG=d.fg; son.kaynak=son.kaynak||{}; son.kaynak.fg=d.fgKay; degisti=true; }
+    if(degisti) _brewSonucPersist(s, rid);
+  }catch(e){ console.warn('_brewSonucTamamla', e); }
 };
 window.bmProfilAnaliz = function(){
   var out = { kayitlar: [], ozet: null };
@@ -7695,8 +7744,15 @@ window.bmProfilAnaliz = function(){
         if(ogE==null && x.tip==='og_olcum') ogE=_num(x.deger);
         if(fgE==null && x.tip==='fg_olcum') fgE=_num(x.deger);
       }
-      var ogG = (ogE!=null)?ogE:_num(r.ogManuel);
-      var fgG = (fgE!=null)?fgE:_num(r.fgManuel);
+      var son = r.brewSonuc || null;
+      var ogG, fgG;
+      if(son){
+        // F1: tamamlanmış demlemenin DONMUŞ ölçümleri — canlı kaynaklara bakılmaz (silinme etkilemez)
+        ogG = _num(son.ogG); fgG = _num(son.fgG);
+      } else {
+        ogG = (ogE!=null)?ogE:_num(r.ogManuel);
+        fgG = (fgE!=null)?fgE:_num(r.fgManuel);
+      }
       // Durum: başlangıç sonrası şişeleme = tamam (1 gün tolerans: manuel tarih gece-yarısı çözünür)
       var tamam = bl.some(function(x){
         if(!x || (x.tip!=='siseleme' && x.tip!=='sise' && x.tip!=='bottle')) return false;
@@ -14507,7 +14563,7 @@ function rEditorSurec(){
           <input aria-label="Gerçek OG" type="number" class="inp" style="flex:1;font-weight:700;font-size:14px;text-align:center"
             placeholder="${_ogHsp}" value="${S.ogManuel||""}"
             min="1.001" max="1.200" step="0.001"
-            onchange="S.ogManuel=this.value?parseFloat(this.value):null;render()">
+            onchange="S.ogManuel=this.value?parseFloat(this.value):null;window._brewSonucTamamla&&window._brewSonucTamamla(S);render()">
           ${_ogKyn==="manuel"?`<button class="btn" style="background:none;color:var(--kk);font-size:12px;padding:2px 6px" onclick="S.ogManuel=null;render()" aria-label="Manuel OG değerini temizle" title="Temizle">✕</button>`:""}
         </div>
         <div style="font-size:var(--fs-xs);color:var(--dim);margin-top:3px">Reçete: ${_ogHsp}</div>
@@ -14518,7 +14574,7 @@ function rEditorSurec(){
           <input aria-label="Gerçek FG" type="number" class="inp" style="flex:1;font-weight:700;font-size:14px;text-align:center"
             placeholder="${_fgHsp}" value="${S.fgManuel||""}"
             min="1.000" max="1.200" step="0.001"
-            onchange="S.fgManuel=this.value?this.value:null;render()">
+            onchange="S.fgManuel=this.value?this.value:null;window._brewSonucTamamla&&window._brewSonucTamamla(S);render()">
           ${_fgKyn==="manuel"?`<button class="btn" style="background:none;color:var(--kk);font-size:12px;padding:2px 6px" onclick="S.fgManuel=null;render()" aria-label="Manuel FG değerini temizle" title="Temizle">✕</button>`:""}
         </div>
         <div style="font-size:var(--fs-xs);color:var(--dim);margin-top:3px">Reçete: ${_fgHsp}</div>
@@ -14829,7 +14885,7 @@ function rEditorMaya(og, fg, abv, maya, maya2, fgKaynak, fgHesap){
           placeholder="${fgHesap.toFixed(3)}"
           value="${S.fgManuel||""}"
           min="1.000" max="${(og-0.001).toFixed(3)}" step="0.001"
-          onchange="S.fgManuel=this.value?this.value:null;render()">
+          onchange="S.fgManuel=this.value?this.value:null;window._brewSonucTamamla&&window._brewSonucTamamla(S);render()">
         <div style="flex:1;font-size:11px;color:var(--soluk)">
           ${fgKaynak==="manuel"?"Gerçek FG kullanılıyor. ABV ve takvim buna göre.":"Fermantasyon durursa veya ölçüm yaptıysan gir."}
         </div>
@@ -23716,6 +23772,7 @@ function logEkle(){
     S.brewLog[_editIdx]=Object.assign({},S.brewLog[_editIdx],{tip:_tip2,tarih:tarihEl.value,deger:_deg2,not:(notEl?.value||'').trim()});
     S.brewLog.sort((a,b)=>a.tarih.localeCompare(b.tarih));
     if(_tip2==='fg_olcum'&&_deg2){const _fv=parseFloat(_deg2);if(_fv>1.000&&_fv<1.200)S.fgManuel=_deg2;}
+    try{ if(window._brewSonucTamamla) _brewSonucTamamla(S, (typeof _editId!=='undefined'?_editId:null)); }catch(_bst2){}
     logDuzenleSifirla();
     if(S.biraAd&&S.biraAd.trim())tarifeKaydet(); else render();
     return;
@@ -23745,6 +23802,9 @@ function logEkle(){
   // Pitching girilince tarifeyi otomatik "Aktif" yap
   // Profil P1: pitching = brewday'siz demleme başlangıcı → snapshot (tarifeKaydet persist eder)
   if(_tip==='pitching'){ try{ if(window._brewSnapshotYaz) _brewSnapshotYaz(S, (typeof _editId!=='undefined'?_editId:null)); }catch(_bs2){} }
+  // Profil F1: şişeleme = tamamlanma → ölçümleri dondur; sonradan og/fg → boş alanı tek-seferlik doldur
+  if(_tip==='siseleme'){ try{ if(window._brewSonucYaz) _brewSonucYaz(S, (typeof _editId!=='undefined'?_editId:null)); }catch(_bso){} }
+  if(_tip==='fg_olcum'||_tip==='og_olcum'){ try{ if(window._brewSonucTamamla) _brewSonucTamamla(S, (typeof _editId!=='undefined'?_editId:null)); }catch(_bst){} }
   if(_tip==='pitching'){
     var _t=KR.find(function(k){return k&&k.id===_editId;});
     if(_t&&(_t.durum||'aktif')==='aktif'){
