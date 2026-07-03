@@ -7639,7 +7639,12 @@ window._brewSnapshotYaz = function(s, rid){
     // Üzerine-yazma guard'ı: mevcut snapshot ancak o demleme TAMAMLANDIYSA
     // (snapshot'tan SONRA siseleme varsa) yenilenir — aynı demlemenin ikinci start'ı EZEMEZ.
     if(s.brewSnapshot && s.brewSnapshot.ts){
-      var _oncekiTamam = (s.brewLog||[]).some(function(x){
+      // F1 (denetim Bulgu 1, rev2): tamamlanmanın KANONİK kanıtı brewSonuc'un VARLIĞI — şişeleme
+      // anında yazılır, gün-çözünürlüğü sorunu yok (aynı gün şişele→aynı gün yeni demleme açılır).
+      // İlk deneme (siseleme tarihini gün-SONUNA çözmek) KARŞI-TESTİ bozdu: önceki demlemenin
+      // aynı-gün şişelemesi, devam eden YENİ demlemenin ikinci start'ında guard'ı yanlış açıyordu.
+      // Tarih karşılaştırması yalnız LEGACY fallback (v363 öncesi snapshot'lı ama brewSonuc'suz pencere).
+      var _oncekiTamam = !!(s.brewSonuc && s.brewSonuc.ts) || (s.brewLog||[]).some(function(x){
         if(!x || (x.tip!=='siseleme' && x.tip!=='sise' && x.tip!=='bottle')) return false;
         var t = x.ts || (x.tarih ? Date.parse(x.tarih) : 0) || 0;
         return t > s.brewSnapshot.ts;
@@ -8499,6 +8504,11 @@ function tarifKlonla(srcId){
   yeni.olusturma=Date.now();
   yeni.guncelleme=Date.now();
   yeni.durum='aktif'; // Planlananlar sekmesi (display label)
+  // F2 (denetim Bulgu 2): klon = TARİF kopyasıdır, demleme geçmişi/ölçümü/planı DEĞİL.
+  // DİKKAT: yeni brewday/ölçüm/plan alanı eklersen bu listeye de ekle. (planBrewHatirlatmalar
+  // BİLİNÇLİ korunur: tarih olmadan inert şablon — tarif süreç notu sayılır.)
+  var _KLON_GECMIS_SIFIRLA=[['brewLog',[]],['brewSnapshot',void 0],['brewSonuc',void 0],['ogManuel',null],['fgManuel',null],['preboilOG',null],['effOG',void 0],['effVol',void 0],['mayaYasAy',null],['tadim',null],['planBrewTarih',void 0]];
+  _KLON_GECMIS_SIFIRLA.forEach(function(p){ if(p[1]===void 0) delete yeni[p[0]]; else yeni[p[0]]=p[1]; });
   // tarih: src'den kopyalandı (deep clone), kullanıcı editör'de güncellesin
   KR.unshift(yeni); // Listenin başına, tarifeKaydet emsali
   try{_origKy(KR);}catch(e){console.warn('tarifKlonla _origKy:',e);}
