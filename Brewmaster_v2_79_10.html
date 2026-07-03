@@ -7628,6 +7628,180 @@ window.bmDemleKartHTML = function(){
   } catch(e){ try{console.warn('bmDemleKartHTML',e);}catch(_){} return ''; }
 };
 
+// ═══ 📖 DEMLEME GÜNLÜĞÜM — ölçüm tabanlı kişisel profil (saf türetilmiş) ═══════
+// P1: demleme başlangıcında (brewday_start / logEkle pitching) reçeteye r.brewSnapshot
+//     yazılır — o ANKİ tahminler donar; reçete sonradan değişse de profil bunları gösterir.
+//     KR içinde yaşadığı için sync'e OTOMATİK biner (payload/push-pull DEĞİŞMEZ).
+// P2: bmProfilAnaliz() her çağrıda KR'den türetir; snapshot dışında hiçbir şey saklanmaz.
+window._brewSnapshotYaz = function(s, rid){
+  try{
+    if(!s) return null;
+    // Üzerine-yazma guard'ı: mevcut snapshot ancak o demleme TAMAMLANDIYSA
+    // (snapshot'tan SONRA siseleme varsa) yenilenir — aynı demlemenin ikinci start'ı EZEMEZ.
+    if(s.brewSnapshot && s.brewSnapshot.ts){
+      var _oncekiTamam = (s.brewLog||[]).some(function(x){
+        if(!x || (x.tip!=='siseleme' && x.tip!=='sise' && x.tip!=='bottle')) return false;
+        var t = x.ts || (x.tarih ? Date.parse(x.tarih) : 0) || 0;
+        return t > s.brewSnapshot.ts;
+      });
+      if(!_oncekiTamam) return null;
+    }
+    var og=null, fg=null;
+    try{ var c = calc(); if(c && c.og>1) og=Math.round(c.og*1000)/1000; if(c && c.fg>=1) fg=Math.round(c.fg*1000)/1000; }catch(e){}
+    var maya=null;
+    try{ if(typeof MAYALAR!=='undefined' && s.mayaId) maya = MAYALAR.find(function(x){return x&&x.id===s.mayaId;})||null; }catch(e){}
+    var snap = {
+      ts: Date.now(),
+      ogT: og, fgT: fg,
+      verimVarsayim: (s.verim!=null?+s.verim:61),
+      mayaId: String(s.mayaId||''),
+      mayaAd: maya?String(maya.ad||''):'',
+      attenMin: (maya&&Array.isArray(maya.atu))?maya.atu[0]:null,
+      attenMax: (maya&&Array.isArray(maya.atu))?maya.atu[1]:null,
+      stil: String(s.stil||''),
+      hacim: (s.hacim!=null?+s.hacim:11)
+    };
+    s.brewSnapshot = snap;
+    // Mevcut kayıt yolu: reçete KR'deyse aynala + ky() (sync mevcut zincirle, payload dokunulmaz)
+    try{
+      if(rid!=null && rid!=='' && typeof KR!=='undefined' && Array.isArray(KR)){
+        var t = KR.find(function(k){return k&&k.id===String(rid);});
+        if(t){ t.brewSnapshot = JSON.parse(JSON.stringify(snap)); t.guncelleme = Date.now(); if(typeof ky==='function') ky(KR); }
+      }
+    }catch(e){ console.warn('_brewSnapshotYaz persist', e); }
+    return snap;
+  }catch(e){ console.warn('_brewSnapshotYaz', e); return null; }
+};
+window.bmProfilAnaliz = function(){
+  var out = { kayitlar: [], ozet: null };
+  try{
+    if(typeof KR==='undefined' || !Array.isArray(KR)) return out;
+    var _num = function(v){ var f=parseFloat(v); return (f>1.000 && f<1.200) ? Math.round(f*1000)/1000 : null; };
+    KR.forEach(function(r){
+      if(!r || !r.id) return;
+      var bl = Array.isArray(r.brewLog) ? r.brewLog : [];
+      var start = bl.find(function(x){ return x && (x.tip==='brewday_start' || x.tip==='pitching'); });
+      if(!start && !r.brewSnapshot) return;                      // demleme başlamamış
+      var snap = r.brewSnapshot || null;
+      var startTs = (start ? (start.ts || (start.tarih?Date.parse(start.tarih):null)) : null) || (snap?snap.ts:null) || null;
+      // Tahmin kaynağı: snapshot (donmuş) > güncel ozet + sonradan bayrağı (geriye uyum: Dubbel)
+      var sonradan = !snap;
+      var ogT = snap ? snap.ogT : (r.ozet ? _num(r.ozet.og) : null);
+      var fgT = snap ? snap.fgT : (r.ozet ? _num(r.ozet.fg) : null);
+      var verimVars = snap ? snap.verimVarsayim : (r.verim!=null?+r.verim:61);
+      // Gerçek ölçüm: brewLog eventi > editör alanı (Sprint4 ikili-kaynak kalıbı; en son geçerli event)
+      var ogE=null, fgE=null;
+      for(var i=bl.length-1;i>=0;i--){ var x=bl[i]; if(!x) continue;
+        if(ogE==null && x.tip==='og_olcum') ogE=_num(x.deger);
+        if(fgE==null && x.tip==='fg_olcum') fgE=_num(x.deger);
+      }
+      var ogG = (ogE!=null)?ogE:_num(r.ogManuel);
+      var fgG = (fgE!=null)?fgE:_num(r.fgManuel);
+      // Durum: başlangıç sonrası şişeleme = tamam (1 gün tolerans: manuel tarih gece-yarısı çözünür)
+      var tamam = bl.some(function(x){
+        if(!x || (x.tip!=='siseleme' && x.tip!=='sise' && x.tip!=='bottle')) return false;
+        var t = x.ts || (x.tarih?Date.parse(x.tarih):0) || 0;
+        return startTs ? (t >= startTs - 86400000) : true;
+      });
+      // Türetilmişler — eksik ölçüm = null (UYDURMA YOK)
+      var atten = (ogG!=null && fgG!=null && ogG>1 && fgG<ogG) ? Math.round((ogG-fgG)/(ogG-1)*1000)/10 : null;
+      var fgSapma = (fgG!=null && fgT!=null) ? Math.round((fgG-fgT)*1000)/1000 : null;
+      var verimG = null;
+      try{
+        // Motorun verim formülünün GERÇEK tersi: hOG v'de lineer →
+        // sabit pay F = hOG(v=0) (şeker+katkı), eğim M = (hOG(v=100)-hOG(v=0))/100.
+        if(ogG!=null && typeof hOG==='function' && Array.isArray(r.maltlar) && r.maltlar.length){
+          var hc = (snap&&snap.hacim!=null)?+snap.hacim:(r.hacim!=null?+r.hacim:11);
+          var F = hOG(r.maltlar, 0, r.katkilar||[], hc) - 1;
+          var M = (hOG(r.maltlar, 100, r.katkilar||[], hc) - 1 - F) / 100;
+          if(M > 0){ var v = (ogG - 1 - F) / M; if(isFinite(v) && v > 0) verimG = Math.round(v*10)/10; }
+        }
+      }catch(e){}
+      out.kayitlar.push({ id:String(r.id), ad:String(r.biraAd||'(adsız)'),
+        stil:String((snap&&snap.stil)||r.stil||''), tarih:startTs,
+        ogT:ogT, fgT:fgT, ogG:ogG, fgG:fgG, verimVarsayim:verimVars,
+        atten:atten, fgSapma:fgSapma, verimG:verimG,
+        attenMin:(snap?snap.attenMin:null), attenMax:(snap?snap.attenMax:null),
+        mayaAd:(snap?snap.mayaAd:''), sonradan:sonradan, durum:(tamam?'tamam':'devam') });
+    });
+    out.kayitlar.sort(function(a,b){ return (b.tarih||0)-(a.tarih||0); });
+    var tam = out.kayitlar.filter(function(k){ return k.durum==='tamam'; });
+    if(tam.length >= 2){
+      var ort = function(a){ return a.length ? a.reduce(function(x,y){return x+y;},0)/a.length : null; };
+      var aL = tam.map(function(k){return k.atten;}).filter(function(x){return x!=null;});
+      var fL = tam.map(function(k){return k.fgSapma;}).filter(function(x){return x!=null;});
+      var vL = tam.map(function(k){return k.verimG;}).filter(function(x){return x!=null;});
+      var stiller = {};
+      out.kayitlar.forEach(function(k){ var s2=k.stil||'(stilsiz)'; stiller[s2]=(stiller[s2]||0)+1; });
+      out.ozet = { tamamN: tam.length,
+        ortAtten: aL.length?Math.round(ort(aL)*10)/10:null,
+        ortFgSapma: fL.length?Math.round(ort(fL)*1000)/1000:null,
+        ortVerim: vL.length?Math.round(ort(vL)*10)/10:null,
+        stiller: stiller };
+    }
+  }catch(e){ try{console.warn('bmProfilAnaliz',e);}catch(_){} }
+  return out;
+};
+// P3 — Ana ekran kartı: Ne Demleyebilirim kalıbının ikizi (bm-demle-* token/CSS, sıfır yeni stil)
+window.bmProfilKartHTML = function(){
+  try{
+    var a = bmProfilAnaliz(), ks = a.kayitlar;
+    var esc = function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
+    var escId = function(s){ return String(s==null?'':s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); };
+    var chevron = (typeof BM_SVG!=='undefined' && BM_SVG['chevron-down']) ? BM_SVG['chevron-down'] : '▾';
+    var f3 = function(v){ return v==null ? '—' : (+v).toFixed(3); };
+    var tam = ks.filter(function(k){ return k.durum==='tamam'; });
+    var vL = tam.map(function(k){return k.verimG;}).filter(function(x){return x!=null;});
+    var ortV = vL.length ? Math.round(vL.reduce(function(x,y){return x+y;},0)/vL.length) : null;
+    var sum, body='';
+    if(!ks.length){
+      sum = 'İlk demlemenle profilin başlayacak';
+      var plan = null;
+      try{
+        var bugun = new Date().toISOString().slice(0,10);
+        (Array.isArray(KR)?KR:[]).forEach(function(r){
+          if(r && r.planBrewTarih && /^\d{4}-\d{2}-\d{2}$/.test(r.planBrewTarih) && r.planBrewTarih>=bugun){
+            if(!plan || r.planBrewTarih<plan.t) plan={t:r.planBrewTarih, ad:String(r.biraAd||'')};
+          }
+        });
+      }catch(e){}
+      body = '<div class="bm-demle-bos">Demlemeye başladığında (brewday ya da günlüğe pitching) o günkü tahminler donar; OG/FG ölçümlerini girdikçe kişisel profilin burada oluşur. 🌱'+
+             (plan?('<br>📅 '+esc(plan.ad)+' hazır bekliyor ('+esc(plan.t.split('-').reverse().join('.'))+')'):'')+'</div>';
+    } else {
+      sum = tam.length ? (tam.length+' demleme'+(ortV!=null?' · ort. verim %'+ortV:'')) : (ks.length+' demleme · 🔄 devam ediyor');
+      ks.forEach(function(k){
+        var dt = k.tarih ? new Date(k.tarih) : null;
+        var gg = dt ? (('0'+dt.getDate()).slice(-2)+'.'+('0'+(dt.getMonth()+1)).slice(-2)) : '—';
+        var rozet = (k.sonradan?' <span class="bm-demle-badge">≈tahmin</span>':'') +
+                    (k.durum==='devam'?' <span class="bm-demle-badge">🔄 devam ediyor</span>':'');
+        var p = ['OG '+f3(k.ogT)+'→'+f3(k.ogG), 'FG '+f3(k.fgT)+'→'+f3(k.fgG),
+                 'Atten '+(k.atten!=null?'%'+k.atten:'—')];
+        if(k.verimG!=null) p.push('Verim %'+Math.round(k.verimG));
+        body += '<button type="button" class="bm-demle-row" onclick="tarifAc(\''+escId(k.id)+'\')" aria-label="'+esc(k.ad)+' reçetesini aç">'+
+          '<span class="bm-demle-rn"><span class="bm-demle-rt">'+esc(gg+' · '+k.ad+(k.stil?' — '+k.stil:''))+rozet+'</span>'+
+          '<span class="bm-demle-rs">'+esc(p.join(' · '))+'</span></span></button>';
+      });
+      if(tam.length>=2 && a.ozet){
+        var L=[];
+        if(a.ozet.ortVerim!=null) L.push('Ortalama gerçek verim: %'+a.ozet.ortVerim);
+        if(a.ozet.ortFgSapma!=null){ var s3=a.ozet.ortFgSapma;
+          L.push(s3===0 ? 'FG\'ler tahminle uyumlu (ort sapma 0)' :
+            'FG\'ler tahminden ort '+(s3>0?'+':'')+s3.toFixed(3)+' '+(s3>0?'yüksek':'düşük')); }
+        if(a.ozet.ortAtten!=null) L.push('Ortalama gerçek attenuation: %'+a.ozet.ortAtten);
+        var st = Object.keys(a.ozet.stiller).sort(function(x,y){return a.ozet.stiller[y]-a.ozet.stiller[x];})
+          .map(function(s2){return s2+' ('+a.ozet.stiller[s2]+')';}).join(', ');
+        if(st) L.push('Stiller: '+st);
+        body += '<div class="bm-demle-alis"><div class="bm-demle-h" style="margin-top:0">📊 Özet — '+tam.length+' tamamlanmış demleme</div><pre>'+esc(L.join('\n'))+'</pre></div>';
+      }
+    }
+    return '<details class="bm-demle bm-profil-kart">'+
+      '<summary><span class="bm-ana-ki" style="font-size:20px">📖</span>'+
+      '<span class="bm-ana-kt"><span class="bm-ana-kn">DEMLEME GÜNLÜĞÜM</span><span class="bm-demle-sum">'+esc(sum)+'</span></span>'+
+      '<span class="bm-ana-kc">'+chevron+'</span></summary>'+
+      '<div class="bm-demle-body">'+body+'</div></details>';
+  }catch(e){ try{console.warn('bmProfilKartHTML',e);}catch(_){} return ''; }
+};
+
 function stoktenDus(tarif){
   // v2.78.96 H13 — _stokMalBul ve _stokBirimCevir ortak helper'lar kullanılır.
   // Önceki sürümde malBul içindeki `startsWith` partial match "Weizen Malt" ↔
@@ -20454,6 +20628,7 @@ function rAnasayfa(){
       <span class="bm-ana-kc">${BM_SVG['chevron-down']}</span>
     </button>
     ${(typeof bmDemleKartHTML==='function'?bmDemleKartHTML():'')}
+    ${(typeof bmProfilKartHTML==='function'?bmProfilKartHTML():'')}
     <div class="bm-ana-logo"><img src="${BM_LOGO_DATAURL}" alt="Kabir" width="80" height="80"></div>
   </div>`;
 }
@@ -21290,6 +21465,8 @@ window.brewdayBaslat=async function(){
     tip:'brewday_start', deger:'', not:'Brewday başladı — '+b.ajanda.length+' adım',
     ts:Date.now()
   });
+  // Profil P1: demleme anı tahmin dondurma (üzerine-yazma korumalı, KR+ky mevcut yol)
+  try{ if(window._brewSnapshotYaz) _brewSnapshotYaz(S, (typeof _editId!=='undefined'?_editId:null)); }catch(_bs){}
   // İlk event'i render ve başlat
   brewdayRender();
   flash('🔥 Brewday başladı','ok');
@@ -23566,6 +23743,8 @@ function logEkle(){
   if(notEl)notEl.value='';
   if(degerEl)degerEl.value='';
   // Pitching girilince tarifeyi otomatik "Aktif" yap
+  // Profil P1: pitching = brewday'siz demleme başlangıcı → snapshot (tarifeKaydet persist eder)
+  if(_tip==='pitching'){ try{ if(window._brewSnapshotYaz) _brewSnapshotYaz(S, (typeof _editId!=='undefined'?_editId:null)); }catch(_bs2){} }
   if(_tip==='pitching'){
     var _t=KR.find(function(k){return k&&k.id===_editId;});
     if(_t&&(_t.durum||'aktif')==='aktif'){
