@@ -7726,6 +7726,7 @@ window.bmProfilAnaliz = function(){
   try{
     if(typeof KR==='undefined' || !Array.isArray(KR)) return out;
     var _num = function(v){ var f=parseFloat(v); return (f>1.000 && f<1.200) ? Math.round(f*1000)/1000 : null; };
+    var _numS = function(v){ var f=parseFloat(v); return (f>0.990 && f<1.200) ? Math.round(f*1000)/1000 : null; };   // brewSonuc/düzeltme aralığı
     KR.forEach(function(r){
       if(!r || !r.id) return;
       var bl = Array.isArray(r.brewLog) ? r.brewLog : [];
@@ -7748,7 +7749,7 @@ window.bmProfilAnaliz = function(){
       var ogG, fgG;
       if(son){
         // F1: tamamlanmış demlemenin DONMUŞ ölçümleri — canlı kaynaklara bakılmaz (silinme etkilemez)
-        ogG = _num(son.ogG); fgG = _num(son.fgG);
+        ogG = _numS(son.ogG); fgG = _numS(son.fgG);
       } else {
         ogG = (ogE!=null)?ogE:_num(r.ogManuel);
         fgG = (fgE!=null)?fgE:_num(r.fgManuel);
@@ -7778,7 +7779,7 @@ window.bmProfilAnaliz = function(){
         ogT:ogT, fgT:fgT, ogG:ogG, fgG:fgG, verimVarsayim:verimVars,
         atten:atten, fgSapma:fgSapma, verimG:verimG,
         attenMin:(snap?snap.attenMin:null), attenMax:(snap?snap.attenMax:null),
-        mayaAd:(snap?snap.mayaAd:''), sonradan:sonradan, durum:(tamam?'tamam':'devam') });
+        mayaAd:(snap?snap.mayaAd:''), sonucVar: !!son, sonradan:sonradan, durum:(tamam?'tamam':'devam') });
     });
     out.kayitlar.sort(function(a,b){ return (b.tarih||0)-(a.tarih||0); });
     var tam = out.kayitlar.filter(function(k){ return k.durum==='tamam'; });
@@ -7797,6 +7798,41 @@ window.bmProfilAnaliz = function(){
     }
   }catch(e){ try{console.warn('bmProfilAnaliz',e);}catch(_){} }
   return out;
+};
+// G1 — SONUCU DÜZELT: yazım hatası kurtarma. Donmuş brewSonuc'a TEK bilinçli istisna;
+// otomatik yazım guard'ları (ezilmezlik) AYNEN kalır. kaynak:'duzeltme' + duzeltmeTs iz bırakır.
+window.bmSonucDuzelt = function(rid){
+  try{
+    if(typeof KR==='undefined' || !Array.isArray(KR)) return;
+    var r = KR.find(function(k){ return k && k.id===String(rid); });
+    if(!r || !r.brewSonuc){ if(typeof flash==='function') flash('Bu demlemede donmuş ölçüm yok','hata'); return; }
+    var son = r.brewSonuc;
+    var _f3 = function(v){ return v==null ? '—' : (+v).toFixed(3); };
+    if(!confirm('Bu demlemenin donmuş ölçümlerini düzeltmek üzeresin (OG '+_f3(son.ogG)+' / FG '+_f3(son.fgG)+'). Yeni değerleri gir.')) return;
+    var _oku = function(ad, mevcut){
+      var g = prompt('Yeni '+ad+' (boş bırak = mevcut kalsın: '+_f3(mevcut)+')', '');
+      if(g===null) return {iptal:true};
+      g = String(g).trim().replace(',','.');
+      if(g==='') return {deger:mevcut, degisti:false};
+      var f = parseFloat(g);
+      if(isNaN(f) || f<0.990 || f>1.200) return {hata:ad+' geçersiz (0.990–1.200): '+g};
+      return {deger:Math.round(f*1000)/1000, degisti:true};
+    };
+    var o = _oku('OG', son.ogG); if(o.iptal) return; if(o.hata){ flash('✕ '+o.hata,'hata'); return; }
+    var f = _oku('FG', son.fgG); if(f.iptal) return; if(f.hata){ flash('✕ '+f.hata,'hata'); return; }
+    if(!o.degisti && !f.degisti){ if(typeof flash==='function') flash('Değişiklik yok'); return; }
+    if(o.deger!=null && f.deger!=null && f.deger > o.deger){ flash('✕ FG ('+_f3(f.deger)+') OG\'den ('+_f3(o.deger)+') büyük olamaz','hata'); return; }
+    son.kaynak = son.kaynak || {};
+    if(o.degisti){ son.ogG = o.deger; son.kaynak.og = 'duzeltme'; }
+    if(f.degisti){ son.fgG = f.deger; son.kaynak.fg = 'duzeltme'; }
+    son.duzeltmeTs = Date.now();
+    r.guncelleme = Date.now();
+    // Açık editör buffer'ı da aynala — sonraki Kaydet eski sonucu geri getirmesin
+    try{ if(typeof S!=='undefined' && S && typeof _editId!=='undefined' && String(_editId)===String(rid)) S.brewSonuc = JSON.parse(JSON.stringify(son)); }catch(_se){}
+    if(typeof ky==='function') ky(KR);
+    if(typeof flash==='function') flash('✏️ Donmuş ölçümler güncellendi (OG '+_f3(son.ogG)+' / FG '+_f3(son.fgG)+')','ok');
+    if(typeof render==='function') render();
+  }catch(e){ console.warn('bmSonucDuzelt', e); }
 };
 // P3 — Ana ekran kartı: Ne Demleyebilirim kalıbının ikizi (bm-demle-* token/CSS, sıfır yeni stil)
 window.bmProfilKartHTML = function(){
@@ -7833,9 +7869,12 @@ window.bmProfilKartHTML = function(){
         var p = ['OG '+f3(k.ogT)+'→'+f3(k.ogG), 'FG '+f3(k.fgT)+'→'+f3(k.fgG),
                  'Atten '+(k.atten!=null?'%'+k.atten:'—')];
         if(k.verimG!=null) p.push('Verim %'+Math.round(k.verimG));
-        body += '<button type="button" class="bm-demle-row" onclick="tarifAc(\''+escId(k.id)+'\')" aria-label="'+esc(k.ad)+' reçetesini aç">'+
+        var duzBtn = (k.durum==='tamam' && k.sonucVar)
+          ? '<button type="button" class="bm-demle-row" style="flex:0 0 auto;width:auto" onclick="bmSonucDuzelt(\''+escId(k.id)+'\')" aria-label="'+esc(k.ad)+' donmuş ölçümlerini düzelt" title="Donmuş ölçümleri düzelt">✏️</button>' : '';
+        body += '<div style="display:flex;align-items:stretch;gap:4px">'+
+          '<button type="button" class="bm-demle-row" style="flex:1" onclick="tarifAc(\''+escId(k.id)+'\')" aria-label="'+esc(k.ad)+' reçetesini aç">'+
           '<span class="bm-demle-rn"><span class="bm-demle-rt">'+esc(gg+' · '+k.ad+(k.stil?' — '+k.stil:''))+rozet+'</span>'+
-          '<span class="bm-demle-rs">'+esc(p.join(' · '))+'</span></span></button>';
+          '<span class="bm-demle-rs">'+esc(p.join(' · '))+'</span></span></button>'+duzBtn+'</div>';
       });
       if(tam.length>=2 && a.ozet){
         var L=[];
