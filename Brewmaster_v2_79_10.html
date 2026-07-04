@@ -7653,7 +7653,8 @@ window._brewSnapshotYaz = function(s, rid){
       if(!_oncekiTamam) return null;
     }
     var og=null, fg=null;
-    try{ var c = calc(); if(c && c.og>1) og=Math.round(c.og*1000)/1000; if(c && c.fg>=1) fg=Math.round(c.fg*1000)/1000; }catch(e){}
+    // SPRINT I I3: SAF tahmin dondurulur (ogHesap/fgHesap) — ölçüm override'lı c.og/c.fg tahmini kontamine etmesin (sapma hep 0 çıkıyordu)
+    try{ var c = calc(); if(c && c.ogHesap>1) og=Math.round(c.ogHesap*1000)/1000; if(c && c.fgHesap>=1) fg=Math.round(c.fgHesap*1000)/1000; }catch(e){}
     var maya=null;
     try{ if(typeof MAYALAR!=='undefined' && s.mayaId) maya = MAYALAR.find(function(x){return x&&x.id===s.mayaId;})||null; }catch(e){}
     var snap = {
@@ -7669,11 +7670,12 @@ window._brewSnapshotYaz = function(s, rid){
     };
     s.brewSnapshot = snap;
     try{ if(s.brewSonuc) delete s.brewSonuc; }catch(_bsd){}     // yeni demleme → önceki brewSonuc düşer (çift eşleşmez)
+    s.ogManuel=null; s.fgManuel=null; // SPRINT I I1: önceki batch'in editör ölçümleri yeni batch'e taşınmaz (log girişleri silinmez — _batchSinir dışlar)
     // Mevcut kayıt yolu: reçete KR'deyse aynala + ky() (sync mevcut zincirle, payload dokunulmaz)
     try{
       if(rid!=null && rid!=='' && typeof KR!=='undefined' && Array.isArray(KR)){
         var t = KR.find(function(k){return k&&k.id===String(rid);});
-        if(t){ t.brewSnapshot = JSON.parse(JSON.stringify(snap)); try{ if(t.brewSonuc) delete t.brewSonuc; }catch(_bse){} t.guncelleme = Date.now(); if(typeof ky==='function') ky(KR); }
+        if(t){ t.brewSnapshot = JSON.parse(JSON.stringify(snap)); try{ if(t.brewSonuc) delete t.brewSonuc; }catch(_bse){} t.ogManuel=null; t.fgManuel=null; t.guncelleme = Date.now(); if(typeof ky==='function') ky(KR); }
       }
     }catch(e){ console.warn('_brewSnapshotYaz persist', e); }
     return snap;
@@ -7687,14 +7689,14 @@ window._brewSnapshotYaz = function(s, rid){
 // boş alanı TEK SEFERLİK doldurur (dolu alan asla ezilmez). Yeni brewSnapshot eski sonucu düşürür.
 window._brewSonucCanli = function(s){
   // canlı ikili yol — bmProfilAnaliz ile AYNI kural: brewLog eventi (son geçerli) > editör alanı
-  var _num = function(v){ var f=parseFloat(v); return (f>1.000 && f<1.200) ? Math.round(f*1000)/1000 : null; };
+  var sinir = _batchSinir(Array.isArray(s.brewLog)?s.brewLog:[], s.brewSnapshot ? s.brewSnapshot.ts : 0); // SPRINT I I1+I2: aktif pencere + tek aralık (_sgNum)
   var bl = Array.isArray(s.brewLog) ? s.brewLog : [];
   var ogE=null, fgE=null;
-  for(var i=bl.length-1;i>=0;i--){ var x=bl[i]; if(!x) continue;
-    if(ogE==null && x.tip==='og_olcum') ogE=_num(x.deger);
-    if(fgE==null && x.tip==='fg_olcum') fgE=_num(x.deger);
+  for(var i=bl.length-1;i>=0;i--){ var x=bl[i]; if(!x) continue; if(sinir && _logGirisTs(x)<=sinir) continue;
+    if(ogE==null && x.tip==='og_olcum') ogE=_sgNum(x.deger);
+    if(fgE==null && x.tip==='fg_olcum') fgE=_sgNum(x.deger);
   }
-  var om=_num(s.ogManuel), fm=_num(s.fgManuel);
+  var om=_sgNum(s.ogManuel), fm=_sgNum(s.fgManuel);
   return { og:(ogE!=null)?ogE:om, ogKay:(ogE!=null)?'olcum':(om!=null?'manuel':null),
            fg:(fgE!=null)?fgE:fm, fgKay:(fgE!=null)?'olcum':(fm!=null?'manuel':null) };
 };
@@ -7727,6 +7729,35 @@ window._brewSonucTamamla = function(s, rid){
     if(degisti) _brewSonucPersist(s, rid);
   }catch(e){ console.warn('_brewSonucTamamla', e); }
 };
+// ═══ SPRINT I — PROFİL BATCH-PENCERE + TEK SG ARALIĞI ════════════════════════
+// I2: tüm yollar (otomatik donma, ✏️ düzeltme, analiz okuma, ogManuel/fgManuel backfill)
+// TEK aralık kullanır: [_SG_MIN, _SG_MAX] SINIR DAHİL. Eski tutarsızlık: otomatik yol
+// >1.000 idi (diastaticus FG 0.998 donmuyordu), okuma >0.990 strict idi (0.990 → "—").
+var _SG_MIN = 0.990, _SG_MAX = 1.200;
+function _sgNum(v){ var f = parseFloat(v); return (f >= _SG_MIN && f <= _SG_MAX) ? Math.round(f*1000)/1000 : null; }
+// I1: log girişinin GİRİŞ ZAMANI — ts (brewday) > 13-haneli id (logEkle id'si Date.now) >
+// tarih (yalnız legacy fallback; gün çözünürlüğü kaba). Tarih düzenlemesi id/ts'i DEĞİŞTİRMEZ:
+// pencere "ne zaman girildi"ye göredir, "hangi güne yazıldı"ya değil.
+function _logGirisTs(e){
+  if(!e) return 0;
+  if(e.ts) return +e.ts || 0;
+  if(e.id != null && /^\d{13}$/.test(String(e.id))) return +e.id;
+  return e.tarih ? (Date.parse(e.tarih) || 0) : 0;
+}
+// I1: aktif batch penceresinin başı = aktif snapshot'tan ÖNCEKİ son şişeleme girişi (önceki
+// batch'in kapanışı). Start-çıpası SINIR DEĞİL: pitching'ten önce girilen OG kaybolmasın.
+// Snapshot yoksa 0 → filtre yok (ilk batch / legacy sonradan-kayıt). Eski og/fg LOG girişleri
+// SİLİNMEZ (günlük tarihçedir + Sprint G brewLog-koruması); bu pencere onları analizden dışlar.
+function _batchSinir(bl, snapTs){
+  if(!snapTs || !Array.isArray(bl)) return 0;
+  var s = 0;
+  bl.forEach(function(x){
+    if(!x || (x.tip!=='siseleme' && x.tip!=='sise' && x.tip!=='bottle')) return;
+    var t = _logGirisTs(x); if(t && t < snapTs && t > s) s = t; // kesin <: eşik eşitliğinde şişeleme önceki-kapanış SAYILMAZ (gerçek akışta sise ile snapshot asla aynı zincirde yazılmaz; belirsizlikte veri-dahil tarafı seçilir)
+  });
+  return s;
+}
+window._sgNum=_sgNum; window._logGirisTs=_logGirisTs; window._batchSinir=_batchSinir;
 // ═══ SPRINT G (K1+M8) — DONMUŞ DEMLEME VERİSİ KORUMASI ═══════════════════════
 // Donmuş/geçmiş alanlar hiçbir commit (bayat editör-S → KR) veya sync (LWW) yolundan
 // kaybolamaz. KR OTORİTEDİR: yazıcılar (brewday/günlük/✏️ düzeltme) KR'ye aynalı yazar;
@@ -7783,23 +7814,25 @@ window.bmProfilAnaliz = function(){
   var out = { kayitlar: [], ozet: null };
   try{
     if(typeof KR==='undefined' || !Array.isArray(KR)) return out;
-    var _num = function(v){ var f=parseFloat(v); return (f>1.000 && f<1.200) ? Math.round(f*1000)/1000 : null; };
-    var _numS = function(v){ var f=parseFloat(v); return (f>0.990 && f<1.200) ? Math.round(f*1000)/1000 : null; };   // brewSonuc/düzeltme aralığı
+    var _num=_sgNum, _numS=_sgNum;   // SPRINT I I2: tek SG aralığı (sınır dahil, _SG_MIN–_SG_MAX)
+    /* _numS → _sgNum alias'ına katlandı (SPRINT I I2) */
     KR.forEach(function(r){
       if(!r || !r.id) return;
       var bl = Array.isArray(r.brewLog) ? r.brewLog : [];
-      var start = bl.find(function(x){ return x && (x.tip==='brewday_start' || x.tip==='pitching'); });
+      var start=null; // SPRINT I I1: SON start = aktif batch (İLK event eski batch'in çıpasıydı → tarih/durum kirliliği)
+      for(var _si=bl.length-1;_si>=0;_si--){ var _sx=bl[_si]; if(_sx && (_sx.tip==='brewday_start' || _sx.tip==='pitching')){ start=_sx; break; } }
       if(!start && !r.brewSnapshot) return;                      // demleme başlamamış
       var snap = r.brewSnapshot || null;
-      var startTs = (start ? (start.ts || (start.tarih?Date.parse(start.tarih):null)) : null) || (snap?snap.ts:null) || null;
+      var startTs = (start ? (_logGirisTs(start)||null) : null) || (snap?snap.ts:null) || null;
       // Tahmin kaynağı: snapshot (donmuş) > güncel ozet + sonradan bayrağı (geriye uyum: Dubbel)
       var sonradan = !snap;
       var ogT = snap ? snap.ogT : (r.ozet ? _num(r.ozet.og) : null);
       var fgT = snap ? snap.fgT : (r.ozet ? _num(r.ozet.fg) : null);
       var verimVars = snap ? snap.verimVarsayim : (r.verim!=null?+r.verim:61);
       // Gerçek ölçüm: brewLog eventi > editör alanı (Sprint4 ikili-kaynak kalıbı; en son geçerli event)
+      var sinir=_batchSinir(bl, snap?snap.ts:0); // SPRINT I I1: eski batch girişleri pencere dışı
       var ogE=null, fgE=null;
-      for(var i=bl.length-1;i>=0;i--){ var x=bl[i]; if(!x) continue;
+      for(var i=bl.length-1;i>=0;i--){ var x=bl[i]; if(!x) continue; if(sinir && _logGirisTs(x)<=sinir) continue;
         if(ogE==null && x.tip==='og_olcum') ogE=_num(x.deger);
         if(fgE==null && x.tip==='fg_olcum') fgE=_num(x.deger);
       }
@@ -7813,8 +7846,12 @@ window.bmProfilAnaliz = function(){
         fgG = (fgE!=null)?fgE:_num(r.fgManuel);
       }
       // Durum: başlangıç sonrası şişeleme = tamam (1 gün tolerans: manuel tarih gece-yarısı çözünür)
-      var tamam = bl.some(function(x){
+      // SPRINT I I7+I1: kanonik tamamlanma kanıtı brewSonuc VARLIĞI (F1 guard ile aynı) —
+      // şişeleme logu silinse de sonuçlu satır 'tamam' kalır (✏️ hakkı korunur, zombi 'devam' yok).
+      // Log araması sonucsuz legacy fallback; aktif pencere dışındaki eski şişeleme 'tamam' saymaz.
+      var tamam = !!son || bl.some(function(x){
         if(!x || (x.tip!=='siseleme' && x.tip!=='sise' && x.tip!=='bottle')) return false;
+        if(sinir && _logGirisTs(x)<=sinir) return false;
         var t = x.ts || (x.tarih?Date.parse(x.tarih):0) || 0;
         return startTs ? (t >= startTs - 86400000) : true;
       });
@@ -7873,7 +7910,7 @@ window.bmSonucDuzelt = function(rid){
       g = String(g).trim().replace(',','.');
       if(g==='') return {deger:mevcut, degisti:false};
       var f = parseFloat(g);
-      if(isNaN(f) || f<0.990 || f>1.200) return {hata:ad+' geçersiz (0.990–1.200): '+g};
+      if(isNaN(f) || f<_SG_MIN || f>_SG_MAX) return {hata:ad+' geçersiz ('+_SG_MIN.toFixed(3)+'–'+_SG_MAX.toFixed(3)+'): '+g}; // SPRINT I I2: tek aralık sabiti
       return {deger:Math.round(f*1000)/1000, degisti:true};
     };
     var o = _oku('OG', son.ogG); if(o.iptal) return; if(o.hata){ flash('✕ '+o.hata,'hata'); return; }
@@ -23874,12 +23911,16 @@ function logEkle(){
   const _hiEl=document.getElementById('logDuzenleIdx');
   const _editIdx=_hiEl&&_hiEl.value!==''?parseInt(_hiEl.value):-1;
   if(_editIdx>=0&&_editIdx<S.brewLog.length){
-    const _tip2=tipEl.value, _deg2=(degerEl?.value||'').trim();
+    var _eskiTip=(S.brewLog[_editIdx]&&S.brewLog[_editIdx].tip)||'';
+    // SPRINT I I5: brewday_* tipleri logTip select'inde yok → düzenleme tip'i boşaltıp profil
+    // start-çıpasını kaybediyordu. Orijinal tip korunur (select'e brewday seçeneği eklemekten az invaziv).
+    const _tip2=(_eskiTip.indexOf('brewday_')===0 ? _eskiTip : (tipEl.value||_eskiTip)), _deg2=(degerEl?.value||'').trim();
     var _leskiK=_logAnahtar(S.brewLog[_editIdx]); // SPRINT G K1: düzenleme anahtarı değişirse KR'deki eski kopya birleşimde çift üretmesin
     S.brewLog[_editIdx]=Object.assign({},S.brewLog[_editIdx],{tip:_tip2,tarih:tarihEl.value,deger:_deg2,not:(notEl?.value||'').trim()});
     try{ if(_leskiK && typeof _editId!=='undefined' && _editId){ var _ledit=Array.isArray(KR)?KR.find(function(k){return k&&k.id===_editId;}):null; if(_ledit && Array.isArray(_ledit.brewLog)){ _ledit.brewLog=_ledit.brewLog.filter(function(e){ return !e || _logAnahtar(e)!==_leskiK; }); } } }catch(_lee){}
     S.brewLog.sort((a,b)=>a.tarih.localeCompare(b.tarih));
-    if(_tip2==='fg_olcum'&&_deg2){const _fv=parseFloat(_deg2);if(_fv>1.000&&_fv<1.200)S.fgManuel=_deg2;}
+    if(_tip2==='fg_olcum'&&_deg2){if(_sgNum(_deg2)!=null)S.fgManuel=_deg2;} // SPRINT I I2: tek aralık
+    if(_tip2==='og_olcum'&&_deg2){var _ov3=_sgNum(_deg2);if(_ov3!=null)S.ogManuel=_ov3;} // SPRINT I I4: og_olcum→ogManuel backfill simetrisi (fg'de vardı, og'de yoktu)
     try{ if(window._brewSonucTamamla) _brewSonucTamamla(S, (typeof _editId!=='undefined'?_editId:null)); }catch(_bst2){}
     logDuzenleSifirla();
     if(S.biraAd&&S.biraAd.trim())tarifeKaydet(); else render();
@@ -23892,12 +23933,12 @@ function logEkle(){
   S.brewLog.sort((a,b)=>a.tarih.localeCompare(b.tarih));
   // FG ölçümü girilince header'ı güncelle
   if(_tip==='fg_olcum'&&_deger){
-    const _fv=parseFloat(_deger);
-    if(_fv>1.000&&_fv<1.200) S.fgManuel=_deger;
+    const _fv=_sgNum(_deger); // SPRINT I I2: tek aralık
+    if(_fv!=null) S.fgManuel=_deger;
   }
   if(_tip==='og_olcum'&&_deger){
-    const _ov=parseFloat(_deger);
-    if(_ov>1.000&&_ov<1.200){
+    const _ov=_sgNum(_deger); // SPRINT I I2: tek aralık
+    if(_ov!=null){
       S.ogManuel=_ov;
       // NOT: Daha önce S.fgManuel de otomatik set ediliyordu (beklenen FG).
       // Bu yanlıştı: kullanıcı henüz gerçek FG ölçmedi, sadece OG girdi.
