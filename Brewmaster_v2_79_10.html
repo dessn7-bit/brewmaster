@@ -6957,6 +6957,7 @@ function restoreDraft(){
   var _kr=_kid?KR.find(function(k){return k&&k.id===_kid;}):null;
   var _s={...BOS,...d.s};
   if(_kr&&_kr.durum&&_s.durum!==_kr.durum){_s.durum=_kr.durum;}
+  if(_kr) _krOtoriterUygula(_s,_kr); // SPRINT G K1: draft bayat olabilir — donmuş alanlar KR'den (brewLog birleşim)
   S=_s;_editId=d.editId||null;
   sekme='genel';ekran='editor';
   window._pendingDraft=null;clearDraft();render();
@@ -7726,6 +7727,58 @@ window._brewSonucTamamla = function(s, rid){
     if(degisti) _brewSonucPersist(s, rid);
   }catch(e){ console.warn('_brewSonucTamamla', e); }
 };
+// ═══ SPRINT G (K1+M8) — DONMUŞ DEMLEME VERİSİ KORUMASI ═══════════════════════
+// Donmuş/geçmiş alanlar hiçbir commit (bayat editör-S → KR) veya sync (LWW) yolundan
+// kaybolamaz. KR OTORİTEDİR: yazıcılar (brewday/günlük/✏️ düzeltme) KR'ye aynalı yazar;
+// commit yolları (tarifeKaydet/_commitOpenRecipe/restoreDraft) bu alanları S'ten DEĞİL
+// KR'deki güncel kayıttan alır. brewLog İSTİSNA: S-taban ∪ KR-fazlası birleşimi (günlük
+// ekleme S-yolundan akar, düz KR-kopya taze girişi düşürürdü; silme/düzenleme logSilIdx/
+// logEkle'de KR-aynalı ki birleşim silineni geri getirmesin).
+// DİKKAT: yeni donmuş/geçmiş alan eklersen bu listeye de ekle (bkz. _KLON_GECMIS_SIFIRLA).
+var _KR_OTORITER_ALANLAR = ['brewSnapshot','brewSonuc','brewLog'];
+function _logAnahtar(e){ if(!e) return ''; if(e.id!=null) return 'i:'+e.id; if(e.ts!=null) return 't:'+e.ts; return 'k:'+(e.tip||'')+'|'+(e.tarih||'')+'|'+(e.deger||'')+'|'+(e.not||''); }
+function _brewLogBirlesim(taban, kr){
+  var a = Array.isArray(taban) ? taban.slice() : [];
+  var b = Array.isArray(kr) ? kr : [];
+  if(!b.length) return a;
+  var g = {}; a.forEach(function(e){ if(e) g[_logAnahtar(e)] = 1; });
+  b.forEach(function(e){ if(e && !g[_logAnahtar(e)]) a.push(JSON.parse(JSON.stringify(e))); });
+  return a;
+}
+function _krOtoriterUygula(hedef, kr){
+  try{
+    if(!hedef || !kr) return hedef;
+    _KR_OTORITER_ALANLAR.forEach(function(al){
+      if(al==='brewLog'){ hedef.brewLog = _brewLogBirlesim(hedef.brewLog, kr.brewLog); return; }
+      if(kr[al]!=null) hedef[al] = JSON.parse(JSON.stringify(kr[al]));   // KR'de var → KR kazanır
+      else if(al in hedef) delete hedef[al];                             // KR'de yok → yokluk da otoriter (zombi önlenir)
+    });
+  }catch(e){ console.warn('_krOtoriterUygula', e); }
+  return hedef;
+}
+// M8 — syncAl LWW graft'ı (filo hükmü): kazanan kayıtta donmuş veri eksikse kaybedenden taşı.
+// K1 kuralı: kazananda brewSnapshot YOK + kaybedende VAR → snapshot+sonuc çifti birlikte
+//   kopyalanır (+ kazananın kendi günlüğü boş/yoksa brewLog da — tema: günlük de donmuş veri).
+// K2 kuralı: kazananda snapshot VAR + sonuc YOK → yalnız iki snapshot.ts EŞİTSE sonuc
+//   kopyalanır; ts farklı = bilinçli silme/yeni demleme → KOPYALAMA YOK (zombi önlenir).
+// guncelleme damgasına ASLA dokunulmaz (LWW sırası değişmez).
+function _syncSonucGraft(kazanan, kaybeden){
+  try{
+    if(!kazanan || !kaybeden) return kazanan;
+    if(!kazanan.brewSnapshot && kaybeden.brewSnapshot){
+      kazanan.brewSnapshot = JSON.parse(JSON.stringify(kaybeden.brewSnapshot));
+      if(kaybeden.brewSonuc) kazanan.brewSonuc = JSON.parse(JSON.stringify(kaybeden.brewSonuc));
+      if((!Array.isArray(kazanan.brewLog) || !kazanan.brewLog.length) && Array.isArray(kaybeden.brewLog) && kaybeden.brewLog.length)
+        kazanan.brewLog = JSON.parse(JSON.stringify(kaybeden.brewLog));
+    } else if(kazanan.brewSnapshot && !kazanan.brewSonuc && kaybeden.brewSonuc &&
+              kaybeden.brewSnapshot && kaybeden.brewSnapshot.ts === kazanan.brewSnapshot.ts){
+      kazanan.brewSonuc = JSON.parse(JSON.stringify(kaybeden.brewSonuc));
+    }
+  }catch(e){ console.warn('_syncSonucGraft', e); }
+  return kazanan;
+}
+window._logAnahtar=_logAnahtar; window._brewLogBirlesim=_brewLogBirlesim;
+window._krOtoriterUygula=_krOtoriterUygula; window._syncSonucGraft=_syncSonucGraft;
 window.bmProfilAnaliz = function(){
   var out = { kayitlar: [], ozet: null };
   try{
@@ -8068,7 +8121,9 @@ function _commitOpenRecipe(){
     const t=KR.find(k=>k&&k.id===_editId);
     if(!t) return false;
     const snap=JSON.parse(JSON.stringify(S)); // S'te id/tarih/ozet YOK (tarifAc destructure) → t.id/t.tarih korunur
+    _krOtoriterUygula(snap, t); // SPRINT G K1: bayat-S commit donmuş alanları düşürmesin — KR (t) otoriter
     Object.keys(snap).forEach(function(key){ t[key]=snap[key]; });
+    _krOtoriterUygula(S, t);    // geri-ayna: açık editör S bayat kalmasın
     try{const r=calc();t.ozet={og:r.og.toFixed(3),fg:r.fg.toFixed(3),abv:r.abv.toFixed(2),ibu:r.ibu.toFixed(0),srm:r.srm.toFixed(0)};}catch(e){}
     return true;
   }catch(e){ console.warn('_commitOpenRecipe:',e); return false; }
@@ -8472,6 +8527,8 @@ function tarifeKaydet(){
     ...JSON.parse(JSON.stringify(S)),
     guncelleme: Date.now(),
     ozet:{og:og.toFixed(3),fg:fg.toFixed(3),abv:abv.toFixed(2),ibu:ibu.toFixed(0),srm:srm.toFixed(0)}};
+  // SPRINT G K1: bayat-S Kaydet donmuş alanları düşürmesin — KR otoriter (yokluk dahil) + S'e geri-ayna
+  if(_mevcutIdx>=0){ _krOtoriterUygula(t, KR[_mevcutIdx]); _krOtoriterUygula(S, t); }
   if(_mevcutIdx>=0){KR[_mevcutIdx]=t;}else{KR.unshift(t);}
   _editId=t.id; // Kaydet sonrası ID'yi koru
   try{
@@ -23818,7 +23875,9 @@ function logEkle(){
   const _editIdx=_hiEl&&_hiEl.value!==''?parseInt(_hiEl.value):-1;
   if(_editIdx>=0&&_editIdx<S.brewLog.length){
     const _tip2=tipEl.value, _deg2=(degerEl?.value||'').trim();
+    var _leskiK=_logAnahtar(S.brewLog[_editIdx]); // SPRINT G K1: düzenleme anahtarı değişirse KR'deki eski kopya birleşimde çift üretmesin
     S.brewLog[_editIdx]=Object.assign({},S.brewLog[_editIdx],{tip:_tip2,tarih:tarihEl.value,deger:_deg2,not:(notEl?.value||'').trim()});
+    try{ if(_leskiK && typeof _editId!=='undefined' && _editId){ var _ledit=Array.isArray(KR)?KR.find(function(k){return k&&k.id===_editId;}):null; if(_ledit && Array.isArray(_ledit.brewLog)){ _ledit.brewLog=_ledit.brewLog.filter(function(e){ return !e || _logAnahtar(e)!==_leskiK; }); } } }catch(_lee){}
     S.brewLog.sort((a,b)=>a.tarih.localeCompare(b.tarih));
     if(_tip2==='fg_olcum'&&_deg2){const _fv=parseFloat(_deg2);if(_fv>1.000&&_fv<1.200)S.fgManuel=_deg2;}
     try{ if(window._brewSonucTamamla) _brewSonucTamamla(S, (typeof _editId!=='undefined'?_editId:null)); }catch(_bst2){}
@@ -23883,7 +23942,9 @@ function logEkle(){
 function logSilIdx(idx){
   if(!S.brewLog){flash('brewLog yok!','hata');return;}
   if(idx<0||idx>=S.brewLog.length){flash('idx hatası: '+idx+'/'+S.brewLog.length,'hata');return;}
-  S.brewLog.splice(idx,1);
+  var _lsil=S.brewLog.splice(idx,1)[0];
+  // SPRINT G K1: commit birleşimi (KR-fazlası) silineni geri getirmesin → KR aynasından da düş
+  try{ if(_lsil && typeof _editId!=='undefined' && _editId){ var _lt=Array.isArray(KR)?KR.find(function(k){return k&&k.id===_editId;}):null; if(_lt && Array.isArray(_lt.brewLog)){ var _lk=_logAnahtar(_lsil); _lt.brewLog=_lt.brewLog.filter(function(e){ return !e || _logAnahtar(e)!==_lk; }); } } }catch(_lse){}
   flash('Silindi → kalan: '+S.brewLog.length+' kayıt');
   if(S.biraAd&&S.biraAd.trim())tarifeKaydet(); else render();
   setTimeout(function(){
@@ -24560,8 +24621,12 @@ async function syncAl(){
       if(g && !y){ yeniKR.push(g); return; }   // sadece gelen
       const gts = (g.guncelleme || 0);
       const yts = (y.guncelleme || 0);
-      if(yts > gts) yeniKR.push(y);            // yerel daha yeni
-      else yeniKR.push(g);                      // gelen daha yeni veya eşit (deterministik)
+      // SPRINT G M8: LWW kazananına donmuş-veri graft'ı (K1/K2 kuralları — _syncSonucGraft)
+      var _kz = (yts > gts) ? y : g;            // yerel daha yeni / gelen daha yeni veya eşit (deterministik)
+      _syncSonucGraft(_kz, (_kz===y) ? g : y);
+      // Kazanan açık reçeteyse S'e de aynala (bayat editör-S penceresi kapanır; brewLog birleşim)
+      try{ if(typeof _editId!=='undefined' && _editId && String(_kz.id)===String(_editId) && typeof S!=='undefined' && S) _krOtoriterUygula(S, _kz); }catch(_ge){}
+      yeniKR.push(_kz);
     });
     /* syncAl merge residue log — temizlendi (FIX-TARAMA) */
 
