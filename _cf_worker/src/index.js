@@ -188,6 +188,23 @@ async function _checkToken(oda, token, env, peek) {
   return { ok: true };
 }
 
+// SPRINT K K-PING: otomatik pseudo alarmlar ts'lerini cihaz-yerel girdilerden üretir
+// (stok: tespit-anı Date.now; plan/stuck/maya: cihaz-yerel alarm-saati ayarı + sessiz-saat
+// kaydırması + anchor fallback'i — bunlar Firebase'le SYNC'LENMEZ) → aynı mantıksal alarm
+// için cihazlar farklı ts hesaplar → her çapraz sync'te ts değişir → pushedTs sıfırlanır
+// (mükerrer push ping-pong) + Sprint H ts-eşit latch'i çözülür (terminal diriliş).
+// Çözüm: aynı-nesil penceresi içinde ex.ts SABİT (ilk yazan kazanır) → alttaki pushedTs/durum
+// kuralları ts-eşit görür. Pencere DIŞI fark = gerçek reschedule (mevcut davranış).
+// stok: nesil sınırı grubun yaşam döngüsüdür (stok dolunca client grubu siler, K-TOMB
+// KV'den düşürür; yeni düşüş = yeni grup) → sınırsız pencere. plan/stuck/maya: 12 saat —
+// cihaz saat-ayarı farkını yutar, 1 günlük gerçek plan kaydırmasını (24h) YUTMAZ.
+// 'manuel:' ve gerçek reçete alarmları KAPSAM DIŞI (snooze/re-arm/reschedule aynen).
+const _PSEUDO_TOL_12H = 43200000;
+function _pseudoTsTol(rid) {
+  if (String(rid).indexOf('stok:') === 0) return Infinity;
+  if (String(rid).indexOf('plan:') === 0 || String(rid).indexOf('stuck:') === 0 || String(rid).indexOf('maya:') === 0) return _PSEUDO_TOL_12H;
+  return 0;
+}
 // alarmId = receteId-g-slug(aksiyon) deterministik; terminal durum (tamamlandi/atlandi) geri açılamaz; cron pushedTs korunur.
 function _mergeAlarms(existing, incoming) {
   const out = {};
@@ -206,6 +223,8 @@ function _mergeAlarms(existing, incoming) {
       if (a.sicaklik != null) o.sicaklik = a.sicaklik; else if (ex && ex.sicaklik != null) o.sicaklik = ex.sicaklik; // İyileştirme 1: sicaklik koru (alarmId DEĞİŞMEZ)
       if (a.vibrate != null) o.vibrate = a.vibrate; else if (ex && ex.vibrate != null) o.vibrate = ex.vibrate; // Sprint3: titreşim deseni koru (tip-bazlı, client üretir)
       if (ex) {
+        var _ktol = _pseudoTsTol(rid);
+        if (_ktol && typeof o.ts === 'number' && typeof ex.ts === 'number' && o.ts !== ex.ts && Math.abs(o.ts - ex.ts) <= _ktol) o.ts = ex.ts; // SPRINT K K-PING: cihaz-farkı normalize — alttaki iki kural ts-eşit görür
         if (_TERMINAL[ex.durum] && !_TERMINAL[o.durum] && o.ts === ex.ts) o.durum = ex.durum; // tamamlananı bekliyor'a düşürme — YALNIZ ts AYNIYSA (Sprint H K2: ts değişti = meşru re-arm/reschedule → latch kırılır, tekrarlayan hatırlatma sonraki periyotta yeniden push'lanır; alttaki pushedTs kuralıyla aynı dil)
         if (ex.pushedTs && o.ts === ex.ts) o.pushedTs = ex.pushedTs; // cron izini koru — YALNIZ ts AYNIYSA (Sprint5: ts değişti=reschedule/snooze → pushedTs sıfırla → cron re-push)
       }
@@ -258,9 +277,13 @@ async function handleKvRoute(path, request, env) {
     if (path === '/alarms-sync') {
       const existing = JSON.parse((await env.BM_KV.get('alarm:' + oda)) || '{}');
       const merged = _mergeAlarms(existing, body.alarms || {});
+      // SPRINT K K-TOMB: client'ın sildiği gruplar (reçete silindi, stuck çözüldü, stok doldu, plan kalktı)
+      // KV'den de düşer — cron hayalet push üretmesin. Oda-token guard yukarıda; bilinmeyen rid no-op.
+      let silinen = 0;
+      (Array.isArray(body.sil) ? body.sil : []).forEach(function(rid){ if (rid && merged[String(rid)] !== undefined) { delete merged[String(rid)]; silinen++; } });
       await env.BM_KV.put('alarm:' + oda, JSON.stringify(merged));
       let n = 0; for (const r in merged) n += (merged[r].alarmlar || []).length;
-      return _kvJson({ ok: true, receteler: Object.keys(merged).length, alarmlar: n, claimed: !!chk.claimed });
+      return _kvJson({ ok: true, receteler: Object.keys(merged).length, alarmlar: n, silinen: silinen, claimed: !!chk.claimed });
     }
 
     // Sprint 136: cihaz aboneliğini manuel sil (kullanıcı Bulut Senkron'dan). Yalnız kendi odası (token guard yukarıda).

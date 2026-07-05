@@ -23225,19 +23225,26 @@ function _alarmBulutaSyncSend(){
     if(!aktif.length && nonPasif===0 && srcA.length>0) continue; // sadece all-pasif grup -> atla
     alarms[rid]={receteAd:String(grp.receteAd||''), pitchTs:(grp.pitchTs!=null?grp.pitchTs:null), durum:grp.durum||'aktif', alarmlar:aktif}; n++;
   }
-  if(!n) return; // gonderilecek bir sey yok
+  // SPRINT K K-TOMB: bu cihazın daha önce gönderip artık SİLMİŞ olduğu gruplar (reçete silme,
+  // stuck çözüldü [FG girildi], stok doldu, plan kalktı) worker'a 'sil' listesiyle bildirilir —
+  // KV'de hayalet grup kalmasın (cron silinmiş kaynağa push atmasın).
+  var _oncekiler = [];
+  try{ _oncekiler = JSON.parse(localStorage.getItem('bm_alarm_sentkeys_v1')||'[]')||[]; }catch(_pk){ _oncekiler=[]; }
+  var _simdikiler = Object.keys(alarms);
+  var _sil = _oncekiler.filter(function(k){ return _simdikiler.indexOf(k) === -1; });
+  if(!n && !_sil.length) return; // gonderilecek bir sey yok (tombstone da yok)
   var _to=null,_ctrl=null;
   try{ _ctrl=new AbortController(); _to=setTimeout(function(){ try{_ctrl.abort();}catch(_a){} },8000); }catch(_c){ _ctrl=null; }
   fetch('https://brewmaster-models.dessn7.workers.dev/alarms-sync',{
     method:'POST',
     headers:{'Content-Type':'application/json','X-BM-Auth':BM_WORKER_AUTH},
-    body:JSON.stringify({oda:oda, cihaz:cihaz, token:tok, alarms:alarms}),
+    body:JSON.stringify({oda:oda, cihaz:cihaz, token:tok, alarms:alarms, sil:_sil}),
     signal:(_ctrl?_ctrl.signal:undefined)
   }).then(function(r){
     if(_to)clearTimeout(_to);
     return r.json().catch(function(){return {};}).then(function(j){ return {st:r.status, j:j}; });
   }).then(function(o){
-    if(o.st>=200&&o.st<300) return; // sessiz basari (alarm yazimi sik; flash spam yok)
+    if(o.st>=200&&o.st<300){ try{ localStorage.setItem('bm_alarm_sentkeys_v1', JSON.stringify(_simdikiler)); }catch(_sk){} return; } // sessiz basari + SPRINT K: gönderilen-anahtar izi (yalnız başarıda — başarısızlıkta tombstone sonraki denemede tekrar gider)
     if(o.st===403) _alarmSyncErr("☁️ Alarm bulut sync: oda token eşleşmiyor — Bulut Senkron'u kontrol et");
     else _alarmSyncErr('☁️ Alarm bulut sync başarısız (HTTP '+o.st+') — yalnız bu cihazda');
   }).catch(function(e){
