@@ -6794,7 +6794,7 @@ function suProfiliHesapla(mineraller, hacim, kaynakId){
 
 // ═══ DURUM ══════════════════════════════════════════════════
 const BOS={biraAd:"",stil:"",verim:61,hacim:11,mashSc:67,mashDk:60,kaynatmaSure:60,mashAdimlar:[],maltlar:[],hoplar:[],mayaId:"",maya2Id:"",mayaYasAy:null,fgManuel:null,ogManuel:null,preboilOG:null,durum:"aktif",klasor:"",brewLog:[],primVol:2.4,primTemp:18,_primVolAuto:true,primYontem:"Dekstroz",notlar:"",suMineralleri:[],suKaynak:"distile",suHedef:"",katkilar:[],tadim:null,planBrewHatirlatmalar:[]};
-let S={...BOS};
+let S=JSON.parse(JSON.stringify(BOS)); // SPRINT J: shallow spread S.brewLog===BOS.brewLog referansını paylaşıyordu — adsız reçetede log push BOS şablonunu kirletirdi
   // ══════ v2.79.6 Turkish-character ID migration (backward compatibility) ══════
   // Eski kayıtlarda Turkish karakterli KATKI ID'leri vardı — ASCII'ye dönüştür
   const LEGACY_KATKI_ID_MAP = {
@@ -6955,7 +6955,7 @@ function restoreDraft(){
   // Mevcut KR'deki durum — draft'tan farklıysa KR'dekini koru
   var _kid=d.editId;
   var _kr=_kid?KR.find(function(k){return k&&k.id===_kid;}):null;
-  var _s={...BOS,...d.s};
+  var _s=JSON.parse(JSON.stringify({...BOS,...d.s})); // SPRINT J: BOS referans-tipli alan paylaşımı kır (derin kopya)
   if(_kr&&_kr.durum&&_s.durum!==_kr.durum){_s.durum=_kr.durum;}
   if(_kr) _krOtoriterUygula(_s,_kr); // SPRINT G K1: draft bayat olabilir — donmuş alanlar KR'den (brewLog birleşim)
   S=_s;_editId=d.editId||null;
@@ -7504,12 +7504,11 @@ window._mayaKod = function(katalogId){
 };
 // Duzeltme A (D1) — plan bildirimi yapisal detay: baslik kisa kalir, eksik/stok GOVDEYE newline'li gecer; maya 🧬 ayri / malt-hop 📦 ayri; ad cozulemezse (id sizintisi) kalem duser; her grup max 3 + 'N daha'.
 window._planBildirimDetay = function(eks, st){ var lines=[]; if(eks&&eks.length) lines.push('⚠ Eksik alan: '+eks.join(', ')); function grupMetin(arr,onek){ var adlar=[]; (arr||[]).forEach(function(it){ if(!it) return; var ad=String(it.ad||''); if(!ad||ad===String(it.refId||'')) return; adlar.push(ad); }); if(!adlar.length) return null; var ilk=adlar.slice(0,3); var fazla=adlar.length-ilk.length; return onek+ilk.join(', ')+(fazla>0?' +'+fazla+' daha':''); } st=st||{}; var mhEksik=(st.eksik||[]).filter(function(it){ return it&&it._tip!=='maya'; }); var mh=(st.yetersiz||[]).concat(mhEksik); var mhLine=grupMetin(mh,'📦 Malt/Hop stok yok: '); if(mhLine) lines.push(mhLine); var myEksik=(st.eksik||[]).filter(function(it){ return it&&it._tip==='maya'; }); var myLine=grupMetin(myEksik,'🧬 Maya stok yok: '); if(myLine) lines.push(myLine); return lines.join(String.fromCharCode(10)); };
-window.stokYetersizMaya = function(tarif){
-  var out = { eksik: [] };
-  if(!tarif || typeof MAYALAR==='undefined' || !Array.isArray(MAYALAR)) return out;
-  if(typeof STOK==='undefined' || !Array.isArray(STOK)) return out;
-  // Stokta MEVCUT katalog mayalari + kodlari — recete basina tek hazirlik (g==='Maya' guard ile maya-disi sizmasi yok)
+// SPRINT J J12: maya stok-eşleşme hazırlığı (katalog+kod tarama) tek fonksiyona çıkarıldı —
+// keşif kartı döngüsü reçete başına yeniden kurmak yerine BİR KEZ kurup paylaşır. Sonuç aynı.
+window._stokMayaHazirlik = function(){
   var stokMayaIds = {}, stokKodlar = {};
+  if(typeof MAYALAR==='undefined' || !Array.isArray(MAYALAR) || typeof STOK==='undefined' || !Array.isArray(STOK)) return { stokMayaIds: stokMayaIds, stokKodlar: stokKodlar };
   MAYALAR.forEach(function(y){
     if(!y || !y.id) return;
     var idx = _stokMalBul(y.id, y.ad);
@@ -7523,6 +7522,14 @@ window.stokYetersizMaya = function(tarif){
     var ex = String(s.ad||'').match(/\(=\s*([A-Z0-9][A-Z0-9\/-]*)\s*\)/i);
     if(ex) stokKodlar[ex[1].toUpperCase()] = true;
   });
+  return { stokMayaIds: stokMayaIds, stokKodlar: stokKodlar };
+};
+window.stokYetersizMaya = function(tarif, hazirlik){
+  var out = { eksik: [] };
+  if(!tarif || typeof MAYALAR==='undefined' || !Array.isArray(MAYALAR)) return out;
+  if(typeof STOK==='undefined' || !Array.isArray(STOK)) return out;
+  var _hz = (hazirlik && hazirlik.stokMayaIds) ? hazirlik : _stokMayaHazirlik(); // SPRINT J J12
+  var stokMayaIds = _hz.stokMayaIds, stokKodlar = _hz.stokKodlar;
   [tarif.mayaId, tarif.maya2Id].filter(Boolean).forEach(function(mid){
     var maya = MAYALAR.find(function(x){ return x && x.id===mid; });
     if(!maya) return;   // katalog-disi maya -> belirlenemez, atla (stokYetersizlikKontrol emsali)
@@ -7551,9 +7558,9 @@ window.stokYetersizMaya = function(tarif){
   return out;
 };
 // Sprint 7 — birlesik tek cagri noktasi: malt/hop (Sprint 6) eksikleri + maya (Sprint 7) eksikleri.
-window.stokYetersizTam = function(tarif){
+window.stokYetersizTam = function(tarif, hazirlik){ // SPRINT J J12: hazırlık geçişi (opsiyonel, geriye-uyumlu)
   var mh = (typeof stokYetersizMaltHop==='function') ? stokYetersizMaltHop(tarif) : {yetersiz:[],eksik:[]};
-  var my = (typeof stokYetersizMaya==='function') ? stokYetersizMaya(tarif) : {eksik:[]};
+  var my = (typeof stokYetersizMaya==='function') ? stokYetersizMaya(tarif, hazirlik) : {eksik:[]};
   return {
     yetersiz: (mh.yetersiz||[]).slice(),
     eksik: (mh.eksik||[]).concat(my.eksik||[])
@@ -7568,10 +7575,11 @@ window.bmDemlenebilirAnaliz = function(){
     if(typeof KR==='undefined' || !KR) return out;
     var list = Array.isArray(KR) ? KR : Object.values(KR);
     var agg = {};
+    var _mhz = (typeof _stokMayaHazirlik==='function') ? _stokMayaHazirlik() : null; // SPRINT J J12: maya hazırlığı döngü DIŞI (reçete başına tekrar kurulum bitti)
     list.forEach(function(r){
       if(!r || !r.id) return;
       if((r.durum||'aktif')==='yapimda') return;                       // yapımda hariç (Sprint spec)
-      var st = (typeof stokYetersizTam==='function') ? stokYetersizTam(r) : {yetersiz:[],eksik:[]};
+      var st = (typeof stokYetersizTam==='function') ? stokYetersizTam(r, _mhz) : {yetersiz:[],eksik:[]};
       var yet = st.yetersiz||[], eks = st.eksik||[];
       var toplam = yet.length + eks.length;
       var ad = String(r.biraAd||'(adsız)');
@@ -7604,7 +7612,7 @@ window.bmDemleKartHTML = function(){
     if(!krLen) return '';                                                        // KR boş → kart hiç çıkmaz
     var a = bmDemlenebilirAnaliz();
     var esc = function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
-    var escId = function(s){ return String(s==null?'':s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); };
+    var escId = function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;'); }; // SPRINT J J6: çift-tırnak/& attribute enjeksiyonu kapatıldı (import/sync kaynaklı kötü id yüzeyi)
     var planBadge = function(pt){ if(!pt) return ''; var p=String(pt).split('-'); return ' <span class="bm-demle-badge">📅 '+esc(p[2]+'.'+p[1])+'</span>'; };
     var row = function(r,sub){ return '<button type="button" class="bm-demle-row" onclick="tarifAc(\''+escId(r.id)+'\')" aria-label="'+esc(r.ad)+' reçetesini aç">'+
       '<span class="bm-demle-rn"><span class="bm-demle-rt">'+esc(r.ad)+planBadge(r.planTarih)+'</span>'+(sub?'<span class="bm-demle-rs">'+sub+'</span>':'')+'</span></button>'; };
@@ -7884,7 +7892,7 @@ window.bmProfilAnaliz = function(){
       var fL = tam.map(function(k){return k.fgSapma;}).filter(function(x){return x!=null;});
       var vL = tam.map(function(k){return k.verimG;}).filter(function(x){return x!=null;});
       var stiller = {};
-      out.kayitlar.forEach(function(k){ var s2=k.stil||'(stilsiz)'; stiller[s2]=(stiller[s2]||0)+1; });
+      tam.forEach(function(k){ var s2=k.stil||'(stilsiz)'; stiller[s2]=(stiller[s2]||0)+1; }); // SPRINT J: başlık 'N tamamlanmış' derken sayım devam-edenleri de içeriyordu — aynı küme (tam) sayılır
       out.ozet = { tamamN: tam.length,
         ortAtten: aL.length?Math.round(ort(aL)*10)/10:null,
         ortFgSapma: fL.length?Math.round(ort(fL)*1000)/1000:null,
@@ -7924,6 +7932,8 @@ window.bmSonucDuzelt = function(rid){
     r.guncelleme = Date.now();
     // Açık editör buffer'ı da aynala — sonraki Kaydet eski sonucu geri getirmesin
     try{ if(typeof S!=='undefined' && S && typeof _editId!=='undefined' && String(_editId)===String(rid)) S.brewSonuc = JSON.parse(JSON.stringify(son)); }catch(_se){}
+    // SPRINT J: LS draft'ı da aynala — düzeltme sonrası draft-restore eski sonucu geri getirmesin (yalnız BU reçetenin draft'ı varsa)
+    try{ var _dr=localStorage.getItem(SK_DRAFT); if(_dr){ var _dp=JSON.parse(_dr); if(_dp && _dp.s && String(_dp.editId)===String(rid)){ _dp.s.brewSonuc=JSON.parse(JSON.stringify(son)); _dp.ts=Date.now(); localStorage.setItem(SK_DRAFT, JSON.stringify(_dp)); } } }catch(_dre){}
     if(typeof ky==='function') ky(KR);
     if(typeof flash==='function') flash('✏️ Donmuş ölçümler güncellendi (OG '+_f3(son.ogG)+' / FG '+_f3(son.fgG)+')','ok');
     if(typeof render==='function') render();
@@ -7934,7 +7944,7 @@ window.bmProfilKartHTML = function(){
   try{
     var a = bmProfilAnaliz(), ks = a.kayitlar;
     var esc = function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
-    var escId = function(s){ return String(s==null?'':s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); };
+    var escId = function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;'); }; // SPRINT J J6: çift-tırnak/& attribute enjeksiyonu kapatıldı (import/sync kaynaklı kötü id yüzeyi)
     var chevron = (typeof BM_SVG!=='undefined' && BM_SVG['chevron-down']) ? BM_SVG['chevron-down'] : '▾';
     var f3 = function(v){ return v==null ? '—' : (+v).toFixed(3); };
     var tam = ks.filter(function(k){ return k.durum==='tamam'; });
@@ -7945,7 +7955,8 @@ window.bmProfilKartHTML = function(){
       sum = 'İlk demlemenle profilin başlayacak';
       var plan = null;
       try{
-        var bugun = new Date().toISOString().slice(0,10);
+        var _dg = new Date(); // SPRINT J: UTC 'bugün' 00:00-03:00 TRT'de gün kaydırıyordu — YEREL gün sınırı
+        var bugun = _dg.getFullYear()+'-'+('0'+(_dg.getMonth()+1)).slice(-2)+'-'+('0'+_dg.getDate()).slice(-2);
         (Array.isArray(KR)?KR:[]).forEach(function(r){
           if(r && r.planBrewTarih && /^\d{4}-\d{2}-\d{2}$/.test(r.planBrewTarih) && r.planBrewTarih>=bugun){
             if(!plan || r.planBrewTarih<plan.t) plan={t:r.planBrewTarih, ad:String(r.biraAd||'')};
@@ -23659,7 +23670,13 @@ function logDuzenle(idx){
   var hi=document.getElementById('logDuzenleIdx');if(hi)hi.value=idx;
   var btn=document.getElementById('logKaydetBtn');if(btn)btn.textContent='✓ Güncelle';
   var tEl=document.getElementById('logTarih');if(tEl)tEl.value=e.tarih||'';
-  var tipEl=document.getElementById('logTip');if(tipEl)tipEl.value=e.tip||'diger';
+  var tipEl=document.getElementById('logTip');
+  if(tipEl){ // SPRINT J: brewday_* select'te yok — boş görünmek yerine görsel etiketli geçici option + kilit (yazımı I5 koruması zaten sağlar)
+    if(e.tip && String(e.tip).indexOf('brewday_')===0){
+      if(!tipEl.querySelector('option[value="'+e.tip+'"]')){ var _bo=document.createElement('option'); _bo.value=e.tip; _bo.textContent='🔥 Brewday kaydı'; tipEl.appendChild(_bo); }
+      tipEl.value=e.tip; tipEl.disabled=true;
+    } else { tipEl.disabled=false; tipEl.value=e.tip||'diger'; }
+  }
   var dEl=document.getElementById('logDeger');if(dEl)dEl.value=e.deger||'';
   var nEl=document.getElementById('logNot');if(nEl)nEl.value=e.not||'';
   f.scrollIntoView({behavior:'smooth',block:'nearest'});
@@ -23668,6 +23685,7 @@ window.logDuzenle=logDuzenle;
 
 function logDuzenleSifirla(){
   var bar=document.getElementById('logDuzenleBar');if(bar)bar.style.display='none';
+  var _tk=document.getElementById('logTip');if(_tk)_tk.disabled=false; // SPRINT J: brewday düzenleme kilidini çöz
   var hi=document.getElementById('logDuzenleIdx');if(hi)hi.value='';
   var btn=document.getElementById('logKaydetBtn');if(btn)btn.textContent='✓ Kaydet';
 }
@@ -23933,7 +23951,8 @@ function logEkle(){
   const _tip=tipEl.value;
   const _deger=(degerEl?.value||'').trim();
   S.brewLog.push({tip:_tip,tarih:tarihEl.value,deger:_deger,not:(notEl?.value||'').trim(),id:Date.now().toString()});
-  flash('Eklendi: '+_tip+' ('+S.brewLog.length+' kayıt)');
+  if(S.biraAd&&S.biraAd.trim()) flash('Eklendi: '+_tip+' ('+S.brewLog.length+' kayıt)');
+  else flash('⚠️ Eklendi ama KALICI DEĞİL — reçete adsız. Genel sekmesinden ad verip kaydet','hata'); // SPRINT J J8: adsızda log RAM-only (saveDraft biraAd-guard'lı, draft da yazmaz) — sessiz kayıp yerine açık uyarı
   S.brewLog.sort((a,b)=>a.tarih.localeCompare(b.tarih));
   // FG ölçümü girilince header'ı güncelle
   if(_tip==='fg_olcum'&&_deger){
@@ -24151,14 +24170,14 @@ window.bmVeriImport = function(inputEl){
         var p = JSON.parse(ev.target.result);
         if (!p || !p.data || typeof p.data !== 'object') throw new Error('Geçersiz format (data alanı yok)');
         // 1) VALIDATION (yazımdan ÖNCE — atomik): app-key + string tip + JSON değerler parse-edilebilir
-        var temiz = {}, atlanan = [], yabanci = 0;
+        var temiz = {}, atlanan = [], atlananK = {}, yabanci = 0; // SPRINT J J9: bozuk anahtarlar sil-adımında korunacak
         Object.keys(p.data).forEach(function(k){
           var v = p.data[k];
           if (!ALLOW.test(k)) { yabanci++; return; }                       // app-dışı key → yok say (güvenlik)
-          if (typeof v !== 'string') { atlanan.push(k+' (tip)'); return; }  // LS değeri hep string
+          if (typeof v !== 'string') { atlanan.push(k+' (tip)'); atlananK[k]=1; return; }  // LS değeri hep string
           var t = v.trim();
           if (t && (t.charAt(0)==='{' || t.charAt(0)==='[')) {
-            try { JSON.parse(v); } catch(_pe){ atlanan.push(k+' (bozuk JSON)'); return; } // app-kıran değer YAZMA
+            try { JSON.parse(v); } catch(_pe){ atlanan.push(k+' (bozuk JSON)'); atlananK[k]=1; return; } // app-kıran değer YAZMA
           }
           temiz[k] = v;
         });
@@ -24166,7 +24185,7 @@ window.bmVeriImport = function(inputEl){
         if (!yazKeys.length) { if (typeof bmToast==='function') bmToast('İçe aktarılacak geçerli veri yok','error'); inputEl.value=''; return; }
         // 2) bozuk değer varsa: app-kıran veri yazma — uyar, devamda SADECE geçerliler
         if (atlanan.length) {
-          if (!confirm('⚠️ '+atlanan.length+' anahtar bozuk/uyumsuz, atlanacak:\n'+atlanan.slice(0,8).join('\n')+(atlanan.length>8?'\n…':'')+'\n\nSadece geçerli '+yazKeys.length+' anahtar içe aktarılsın mı?')) { inputEl.value=''; return; }
+          if (!confirm('⚠️ '+atlanan.length+' anahtar bozuk/uyumsuz, atlanacak:\n'+atlanan.slice(0,8).join('\n')+(atlanan.length>8?'\n…':'')+'\n(bozukların cihazdaki mevcut kopyaları KORUNACAK)\n\nSadece geçerli '+yazKeys.length+' anahtar içe aktarılsın mı?')) { inputEl.value=''; return; }
         }
         // 3) REPLACE onayı (geri-alınamaz, allowlist-sınırlı tam değiştirme)
         var tarih = (p.meta && p.meta.exportTs) ? new Date(p.meta.exportTs).toLocaleString('tr-TR') : '?';
@@ -24178,7 +24197,7 @@ window.bmVeriImport = function(inputEl){
         // 4) REPLACE: önce mevcut app key'lerini sil (allowlist-sınırlı), sonra yedeği yaz (validation bitti → app-dışına dokunma)
         var sil = [];
         for (var i=0;i<localStorage.length;i++){ var ek=localStorage.key(i); if (ek && ALLOW.test(ek)) sil.push(ek); }
-        sil.forEach(function(ek){ try{ localStorage.removeItem(ek); }catch(_d){} });
+        sil.forEach(function(ek){ if(atlananK[ek]) return; /* SPRINT J J9: bozuk-yedek anahtarının cihazdaki MEVCUT kopyası KORUNUR (bozuk bm_v6 = tüm reçeteler gitmesin) */ try{ localStorage.removeItem(ek); }catch(_d){} });
         var ok=0;
         yazKeys.forEach(function(k){ try{ localStorage.setItem(k, temiz[k]); ok++; }catch(e){ console.warn('LS set fail', k, e); } });
         Object.keys(cihazKoru).forEach(function(ck){ try{ localStorage.setItem(ck, cihazKoru[ck]); }catch(_ck){} }); // Sprint D (D3): cihaz kimliği geri
@@ -24480,7 +24499,7 @@ window.MALTLAR=MALTLAR;window.MINERALLER=MINERALLER;
       return;
     }
     const _prevS2 = S ? {...S} : null;
-    S = {...BOS, ...dubbel};
+    S = JSON.parse(JSON.stringify({...BOS, ...dubbel})); // SPRINT J: geçici calc-S şablon (BOS/dubbel) referanslarını paylaşmasın
     try{
       const {og,srm,ibu,fg,abv}=calc();
       dubbel.ozet={og:og.toFixed(3),srm:srm.toFixed(1),ibu:ibu.toFixed(0),fg:fg.toFixed(3),abv:abv.toFixed(2)};
