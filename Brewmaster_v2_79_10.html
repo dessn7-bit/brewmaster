@@ -23149,6 +23149,10 @@ window.brewBildirimIzin=function(){
 // Faz 3 Adim 2 (client): basarili push aboneligini buluta da yaz. Lokal bm_push_sub INTACT; buluta EK kayit.
 // On-kosul guard: bm_sync_v1'de oda+odaToken yoksa buluta YAZMA, lokal-only davran (Faz 1+2 calisir) + nazik ipucu.
 // Hata (network/403/timeout) graceful: cokme yok (H1 dersi), lokal abonelik korunur, kullaniciya flash.
+// SPRINT H2: worker yazma uçları (/push-sub /alarms-sync /kv-peek /sub-remove /push-test) soft-gate
+// header'ı. Worker'daki WORKER_SECRET env ile EŞLEŞMELİ — değiştirirsen Cloudflare secret'ını da güncelle.
+// Model GET yolları public, onlara EKLENMEZ. Worker fail-open'ken zararsız; secret girilince zorunlu olur.
+var BM_WORKER_AUTH = 'bmw_we67btpQTXpntswbjWwrNbxD3jh-z5NUwIpT34KkKHE0';
 function _pushBuluta(sub){
   if(!sub) return;
   var cfg=null;
@@ -23159,7 +23163,7 @@ function _pushBuluta(sub){
   try{ _ctrl=new AbortController(); _to=setTimeout(function(){ try{_ctrl.abort();}catch(_a){} },8000); }catch(_c){ _ctrl=null; }
   fetch('https://brewmaster-models.dessn7.workers.dev/push-sub',{
     method:'POST',
-    headers:{'Content-Type':'application/json'},
+    headers:{'Content-Type':'application/json','X-BM-Auth':BM_WORKER_AUTH},
     body:JSON.stringify({oda:oda, cihaz:cihaz, token:tok, subscription:sub}),
     signal:(_ctrl?_ctrl.signal:undefined)
   }).then(function(r){
@@ -23215,7 +23219,7 @@ function _alarmBulutaSyncSend(){
   try{ _ctrl=new AbortController(); _to=setTimeout(function(){ try{_ctrl.abort();}catch(_a){} },8000); }catch(_c){ _ctrl=null; }
   fetch('https://brewmaster-models.dessn7.workers.dev/alarms-sync',{
     method:'POST',
-    headers:{'Content-Type':'application/json'},
+    headers:{'Content-Type':'application/json','X-BM-Auth':BM_WORKER_AUTH},
     body:JSON.stringify({oda:oda, cihaz:cihaz, token:tok, alarms:alarms}),
     signal:(_ctrl?_ctrl.signal:undefined)
   }).then(function(r){
@@ -23255,7 +23259,7 @@ window.brewPushTest=function(){
   if(!('serviceWorker' in navigator)||!('PushManager' in window)){flash('Bu tarayıcı push desteklemiyor','err');return;}
   function _gonder(sub){
     flash('🧪 Test push gönderiliyor...','ok');
-    fetch('https://brewmaster-models.dessn7.workers.dev/push-test',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subscription:sub,baslik:'🍺 Brewmaster',body:'Test bildirimi — push çalışıyor ✓',tag:'bm-test'})}).then(function(r){return r.json().catch(function(){return {};});}).then(function(j){
+    fetch('https://brewmaster-models.dessn7.workers.dev/push-test',{method:'POST',headers:{'Content-Type':'application/json','X-BM-Auth':BM_WORKER_AUTH},body:JSON.stringify({subscription:sub,baslik:'🍺 Brewmaster',body:'Test bildirimi — push çalışıyor ✓',tag:'bm-test'})}).then(function(r){return r.json().catch(function(){return {};});}).then(function(j){
       var st=(j&&j.pushStatus!=null)?j.pushStatus:(j&&j.error?('ERR:'+j.error):'?');
       var iyi=(typeof st==='number'&&st>=200&&st<300);
       var kisa='pushStatus='+st+' · '+(((j&&(j.body||j.error||j.pushStatusText))||'')+'').slice(0,100);
@@ -24899,7 +24903,7 @@ window.syncCihazlariYukle = function(){
   var _to=null,_ctrl=null;
   try{ _ctrl=new AbortController(); _to=setTimeout(function(){try{_ctrl.abort();}catch(_a){}},8000); }catch(_c){ _ctrl=null; }
   fetch('https://brewmaster-models.dessn7.workers.dev/kv-peek?oda='+encodeURIComponent(oda),{
-    headers:{'X-BM-Token':tok}, signal:(_ctrl?_ctrl.signal:undefined)
+    headers:{'X-BM-Token':tok,'X-BM-Auth':BM_WORKER_AUTH}, signal:(_ctrl?_ctrl.signal:undefined)
   }).then(function(r){ if(_to)clearTimeout(_to); return r.json().catch(function(){return{};}).then(function(j){return {st:r.status,j:j};}); })
   .then(function(o){
     if(o.st===403){ box.innerHTML=_hdr('Token eşleşmiyor — kontrol et','var(--crit)'); return; }
@@ -24954,7 +24958,7 @@ window.syncCihazSil = function(btn){
   try{ _ctrl=new AbortController(); _to=setTimeout(function(){try{_ctrl.abort();}catch(_a){}},8000); }catch(_c){ _ctrl=null; }
   fetch('https://brewmaster-models.dessn7.workers.dev/sub-remove',{
     method:'POST',
-    headers:{'Content-Type':'application/json','X-BM-Token':tok},
+    headers:{'Content-Type':'application/json','X-BM-Token':tok,'X-BM-Auth':BM_WORKER_AUTH},
     body:JSON.stringify({oda:oda, token:tok, endpoint:ep}),
     signal:(_ctrl?_ctrl.signal:undefined)
   }).then(function(r){ if(_to)clearTimeout(_to); return r.json().catch(function(){return{};}).then(function(j){return {st:r.status,j:j};}); })
