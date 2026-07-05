@@ -206,7 +206,7 @@ function _mergeAlarms(existing, incoming) {
       if (a.sicaklik != null) o.sicaklik = a.sicaklik; else if (ex && ex.sicaklik != null) o.sicaklik = ex.sicaklik; // İyileştirme 1: sicaklik koru (alarmId DEĞİŞMEZ)
       if (a.vibrate != null) o.vibrate = a.vibrate; else if (ex && ex.vibrate != null) o.vibrate = ex.vibrate; // Sprint3: titreşim deseni koru (tip-bazlı, client üretir)
       if (ex) {
-        if (_TERMINAL[ex.durum] && !_TERMINAL[o.durum]) o.durum = ex.durum; // tamamlananı bekliyor'a düşürme
+        if (_TERMINAL[ex.durum] && !_TERMINAL[o.durum] && o.ts === ex.ts) o.durum = ex.durum; // tamamlananı bekliyor'a düşürme — YALNIZ ts AYNIYSA (Sprint H K2: ts değişti = meşru re-arm/reschedule → latch kırılır, tekrarlayan hatırlatma sonraki periyotta yeniden push'lanır; alttaki pushedTs kuralıyla aynı dil)
         if (ex.pushedTs && o.ts === ex.ts) o.pushedTs = ex.pushedTs; // cron izini koru — YALNIZ ts AYNIYSA (Sprint5: ts değişti=reschedule/snooze → pushedTs sıfırla → cron re-push)
       }
       return o;
