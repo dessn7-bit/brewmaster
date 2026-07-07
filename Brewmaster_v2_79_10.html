@@ -6921,6 +6921,21 @@ function _writeBoth(key,str){
   return okLS;
 }
 
+// SPRINT N (Sprint L Bulgu 4): draft ↔ KR içerik kıyası — TEK NOKTA.
+// guncelleme LWW sync damgasıdır, içerik değil: tarifeKaydet her seferinde yeniler,
+// tarifAc ise eski değeri S'e sızdırır → kıyas hep false → Kaydet sonrası render'da
+// draft gereksiz geri yazılırdı (ghost taslak). İKİ taraftan da düşülür (S'te de var).
+// id/tarih/ozet KR-meta. duzeltmeTs BİLEREK düşülmez (✏️ düzeltme gerçek içerik farkı;
+// nested alan zaten stringify'da kalır). Yeni volatil alan eklersen SADECE burayı güncelle.
+function _draftKrAyniMi(kr, s){
+  try{
+    var a = Object.assign({}, kr), b = Object.assign({}, s);
+    delete a.id; delete a.tarih; delete a.ozet; delete a.guncelleme;
+    delete b.id; delete b.tarih; delete b.ozet; delete b.guncelleme;
+    return JSON.stringify(a) === JSON.stringify(b);
+  }catch(e){ return false; }
+}
+
 function saveDraft(){
   try{
     if(ekran!=='editor'||!S.biraAd||!S.biraAd.trim())return;
@@ -6932,13 +6947,7 @@ function saveDraft(){
     try{
       if(_editId && typeof KR!=='undefined' && Array.isArray(KR)){
         var _mevcut = KR.find(function(k){return k && k.id===_editId;});
-        if(_mevcut){
-          var _clone = Object.assign({}, _mevcut);
-          delete _clone.id; delete _clone.tarih; delete _clone.ozet;
-          var a = JSON.stringify(_clone);
-          var b = JSON.stringify(S);
-          if(a === b) _ayniMi = true;
-        }
+        if(_mevcut && _draftKrAyniMi(_mevcut, S)) _ayniMi = true; // SPRINT N: tek-nokta kıyas
       }
     }catch(_cmpErr){ _ayniMi = false; }
     if(_ayniMi){
@@ -8320,13 +8329,9 @@ let KR=yl();
     // tekrar yazmış olabilir) → gösterme, sessizce sil.
     if(d.editId){
       var _m = KR.find(function(k){return k&&k.id===d.editId;});
-      if(_m){
-        var _clone = Object.assign({}, _m);
-        delete _clone.id; delete _clone.tarih; delete _clone.ozet;
-        if(JSON.stringify(_clone) === JSON.stringify(d.s)){
-          try{localStorage.removeItem(SK_DRAFT);}catch(e){}
-          return;
-        }
+      if(_m && _draftKrAyniMi(_m, d.s)){ // SPRINT N: tek-nokta kıyas (guncelleme-only fark = ghost değil)
+        try{localStorage.removeItem(SK_DRAFT);}catch(e){}
+        return;
       }
     }
     window._pendingDraft=d;
