@@ -8802,9 +8802,25 @@ window.bmGeriDon=function(){
     if (typeof render === 'function') render();
   } catch(e){ console.warn('[bmGeriDon]',e); }
 };
+// ═══ SPRINT S: KR silme tombstone (design_kr_tombstone şeması) ═══
+// Silme cihazlar arası yayılsın: silinen {id, silmeTs} izi LS'te (bm_kr_sil_v1) tutulur,
+// syncGonder payload'ına KRSil alanı olarak biner, syncAl merge'inde GRAFT'TAN ÖNCE filtre olur
+// (silinen id LWW/_syncSonucGraft'a hiç girmez → diriliş yapısal olarak imkânsız; Sprint G koduna dokunulmaz).
+// Kural: silmeTs > kaydın guncelleme'si → silme otoriter; aksi = bilinçli geri-getirme (tombstone düşer).
+// TTL 90 gün (silme nadir — liste küçük kalır). Eski istemci KRSil'i yok sayar (fail-open, kademeli dağıtım güvenli).
+// NOT: Bu KR/Firebase reçete tombstone'u — Sprint K'nın KV/worker alarm tombstone'u (K-TOMB) AYRI sistemdir.
+const _KRSIL_SK = 'bm_kr_sil_v1';
+const _KRSIL_TTL = 90 * 86400000; // 90 gün
+function _krSilOku(){ try{ var a = JSON.parse(localStorage.getItem(_KRSIL_SK) || '[]'); return Array.isArray(a) ? a : []; }catch(e){ return []; } }
+function _krSilYaz(a){ try{ localStorage.setItem(_KRSIL_SK, JSON.stringify(a || [])); }catch(e){} }
+function _krSilSupur(a){ var esik = Date.now() - _KRSIL_TTL; return (a || []).filter(function(t){ return t && t.id != null && typeof t.ts === 'number' && t.ts > esik; }); }
+function _krSilEkle(id){ var a = _krSilSupur(_krSilOku()); a = a.filter(function(t){ return String(t.id) !== String(id); }); a.push({ id: id, ts: Date.now() }); _krSilYaz(a); }
+window._krSilOku = _krSilOku; window._krSilEkle = _krSilEkle; window._krSilSupur = _krSilSupur; window._krSilYaz = _krSilYaz;
+
 function tarifSil(id){
   if(typeof _editId!=='undefined'&&_editId&&_editId!==id) _commitOpenRecipe(); // silinen ≠ açık reçete ise açık edits'i koru
   KR=KR.filter(k=>k.id!==id);
+  try{ _krSilEkle(id); }catch(_tsw){} // SPRINT S: silme tombstone — diğer cihazlarda diriliş engellenir (ky→sync push KRSil taşır)
   ky(KR);
   silOnay=null;
   // v2.78.94 H11 — Reçete silinince alarmları da anında temizle (orphan bekleme yok)
@@ -24945,6 +24961,7 @@ async function syncGonder(){
     const data = {
       KR: JSON.parse(JSON.stringify(KR)),
       STOK: JSON.parse(JSON.stringify(STOK)),
+      KRSil: _krSilSupur(_krSilOku()), // SPRINT S: silme tombstone yayılımı (iki PUT yazarı da taşımalı — alan kaybolmasın)
       ts: Date.now(),
       cihaz: syncCfg.cihaz||"A"
     };
@@ -24981,6 +24998,7 @@ function _syncGonderKeepalive(){
     const data = {
       KR: JSON.parse(JSON.stringify(KR)),
       STOK: JSON.parse(JSON.stringify(STOK)),
+      KRSil: _krSilSupur(_krSilOku()), // SPRINT S: silme tombstone yayılımı (iki PUT yazarı da taşımalı — alan kaybolmasın)
       ts: Date.now(),
       cihaz: syncCfg.cihaz||"A"
     };
@@ -25039,10 +25057,24 @@ async function syncAl(){
     const idSet = new Set();
     gelenMap.forEach(function(_, id){ idSet.add(id); });
     yerelMap.forEach(function(_, id){ idSet.add(id); });
+    // SPRINT S: birleşik tombstone T = yerel bm_kr_sil_v1 ∪ gelen KRSil (id başına en yeni ts).
+    // Eski istemci payload'ında KRSil yok → boş katkı (fail-open); bozuk alan try/catch ile yutulur.
+    var _tsMap = {};
+    try{
+      _krSilSupur(_krSilOku()).forEach(function(t){ var k = String(t.id); _tsMap[k] = Math.max(_tsMap[k] || 0, t.ts); });
+      (Array.isArray(data.KRSil) ? data.KRSil : []).forEach(function(t){ if(t && t.id != null && typeof t.ts === 'number'){ var k = String(t.id); _tsMap[k] = Math.max(_tsMap[k] || 0, t.ts); } });
+    }catch(_tse){ _tsMap = {}; }
     const yeniKR = [];
     idSet.forEach(function(id){
       const g = gelenMap.get(id);
       const y = yerelMap.get(id);
+      // SPRINT S: tombstone filtresi — GRAFT'TAN ÖNCE (silinen id LWW/_syncSonucGraft'a hiç girmez → diriliş imkânsız)
+      var _tsT = _tsMap[String(id)];
+      if(_tsT){
+        var _maxG = Math.max((g && g.guncelleme) || 0, (y && y.guncelleme) || 0);
+        if(_tsT > _maxG) return;                    // silme otoriter — kayıt merge sonucuna GİRMEZ
+        delete _tsMap[String(id)];                   // guncelleme >= silmeTs → bilinçli geri-getirme, tombstone düşer
+      }
       if(!g && y){ yeniKR.push(y); return; }   // sadece yerel
       if(g && !y){ yeniKR.push(g); return; }   // sadece gelen
       const gts = (g.guncelleme || 0);
@@ -25055,6 +25087,8 @@ async function syncAl(){
       yeniKR.push(_kz);
     });
     /* syncAl merge residue log — temizlendi (FIX-TARAMA) */
+    // SPRINT S: tombstone birleşimi iki yönlü yayılır (geri-getirmede düşenler hariç, TTL süpürülmüş)
+    try{ _krSilYaz(_krSilSupur(Object.keys(_tsMap).map(function(k){ return { id: k, ts: _tsMap[k] }; }))); }catch(_tsy){}
 
     // STOK merge — aynı mantık
     // Fallback: id yoksa ad+birim birleşimiyle eşleştir (eski stok item'ları id'siz olabilir)

@@ -47,6 +47,12 @@ Süre: ~15-20 sn (19 case).
 | R-OLCUM | R | FG/gravity onayı → otomatik log YOK; kısayol toast → takvim + fg_olcum formu |
 | R-SUREC | R | sanitize/karbonasyon/içime-hazır/pasif/pseudo → log YOK, çökme yok |
 | R-IDEM | R | çift onay + snooze re-arm (ts değişti) → almKey ile TEK log |
+| S-ANA | S | silme tombstone iki yön: yerel tombstone dirilişi engeller + PUT KRSil taşır; gelen KRSil yereli siler |
+| S-GRAFT | S | tombstone filtresi graft ÖNCESİ: sonuçlu silinen dirilmez, yaşayanlarda G graft aynen |
+| S-GERI | S | bilinçli geri-getirme: guncelleme>silmeTs → kayıt yaşar + tombstone düşer |
+| S-TTL | S | tombstone TTL 90 gün süpürme |
+| S-ESKI | S | fail-open: KRSil'siz eski istemci + bozuk KRSil payload'ları çökmez |
+| S-IMPORT | S | bm_kr_sil_v1 import round-trip (allowlist) |
 | H-LATCH-1..3 | H | worker `_mergeAlarms`: terminal latch (ts-eşit), re-arm (ts-fark), pushedTs koruma |
 | K-PING-1..2 | K | worker pseudo-ts toleransı: 12h içi normalize (latch korunur) / dışı reschedule |
 

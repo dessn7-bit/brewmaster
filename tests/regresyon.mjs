@@ -743,6 +743,155 @@ const CASELER = [
       __REG.ok('g: re-arm (ts değişti) sonrası onay → YİNE tek giriş', kr.brewLog.filter(x => x && x.tip === 'dry_hop').length === 1);
       return __REG.al();
     })
+  },
+
+  // ── SPRINT S: KR silme tombstone ──
+  // Ortak kalıp: syncCfg + fetch stub'ıyla GERÇEK syncAl/syncGonder yolları koşulur (iki-cihaz simülasyonu).
+  // sanal(uzak): PUT gövdesini window.__put'a yakalar, GET uzak payload'ı döndürür.
+  {
+    kod: 'S-ANA', ad: 'silme yayılımı iki yön: yerel tombstone dirilişi engeller + PUT KRSil taşır; gelen KRSil yereli siler',
+    calistir: (page) => page.evaluate(async () => {
+      const sanal = (uzak) => {
+        syncCfg = { url: 'https://sahte.test', oda: 'regtest', cihaz: 'T' };
+        window.__put = null;
+        window.fetch = async (u, o) => {
+          if (o && o.method === 'PUT') { window.__put = JSON.parse(o.body); return { ok: true }; }
+          return { ok: true, json: async () => uzak };
+        };
+      };
+      sanal(null);
+      const id = __REG.yeniKayit('REGTEST S-ANA'); yeniTarif();
+      const t0 = KR.find(x => x && x.id === id); t0.guncelleme = Date.now() - 86400000; _origKy(KR);
+      const kr0 = JSON.parse(JSON.stringify(t0));
+      tarifSil(id);
+      if (_syncGonderTimer) { clearTimeout(_syncGonderTimer); _syncGonderTimer = null; } // debounce determinizmi
+      __REG.ok('silme → KR düştü + tombstone yazıldı', !KR.find(x => x && x.id === id) && _krSilOku().some(t => String(t.id) === String(id)));
+      sanal({ KR: [kr0], STOK: [], ts: Date.now() + 60000, cihaz: 'B' }); // B'de reçete hâlâ var, KRSil yok
+      await syncAl();
+      __REG.ok('a: uzak eski kopya DİRİLEMEDİ (yerel tombstone otoriter)', !KR.find(x => x && x.id === id));
+      await syncGonder();
+      __REG.ok('a: PUT payload KRSil taşıyor', window.__put && Array.isArray(window.__put.KRSil) && window.__put.KRSil.some(t => String(t.id) === String(id)));
+      __REG.ok('a: PUT KR silineni içermiyor (push dirilişi yok)', window.__put && !window.__put.KR.some(x => x && x.id === id));
+      // B rolü: uzaktan KRSil geldi, yerelde reçete VAR → düşer + tombstone yayılır
+      const id2 = __REG.yeniKayit('REGTEST S-ANA-B'); yeniTarif();
+      const k2 = KR.find(x => x && x.id === id2); k2.guncelleme = Date.now() - 86400000; _origKy(KR);
+      if (_syncGonderTimer) { clearTimeout(_syncGonderTimer); _syncGonderTimer = null; }
+      sanal({ KR: [kr0], STOK: [], ts: Date.now() + 120000, cihaz: 'A', KRSil: [{ id: id2, ts: Date.now() }] });
+      await syncAl();
+      __REG.ok('a: gelen KRSil yerel kopyayı SİLDİ (yayılım)', !KR.find(x => x && x.id === id2));
+      __REG.ok('a: tombstone yerel listeye katıldı (iki yönlü)', _krSilOku().some(t => String(t.id) === String(id2)));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'S-GRAFT', ad: 'graft etkileşimi: sonuçlu silinen reçete graft ile DİRİLMEZ; yaşayanlarda G graft AYNEN çalışır',
+    calistir: (page) => page.evaluate(async () => {
+      const sanal = (uzak) => {
+        syncCfg = { url: 'https://sahte.test', oda: 'regtest', cihaz: 'T' };
+        window.fetch = async (u, o) => (o && o.method === 'PUT') ? { ok: true } : { ok: true, json: async () => uzak };
+      };
+      sanal(null);
+      const idOlu = __REG.yeniKayit('REGTEST S-GRAFT-OLU', { brewSnapshot: { ts: 100 }, brewSonuc: { ts: 110, ogG: 1.05, fgG: 1.012 } });
+      yeniTarif();
+      const oluKr = KR.find(x => x && x.id === idOlu); oluKr.guncelleme = Date.now() - 86400000; _origKy(KR);
+      const oluUzak = JSON.parse(JSON.stringify(oluKr));
+      tarifSil(idOlu);
+      if (_syncGonderTimer) { clearTimeout(_syncGonderTimer); _syncGonderTimer = null; }
+      const idCanli = __REG.yeniKayit('REGTEST S-GRAFT-CANLI'); yeniTarif();
+      const c = KR.find(x => x && x.id === idCanli);
+      delete c.brewSnapshot; delete c.brewSonuc; c.guncelleme = Date.now(); _origKy(KR);
+      if (_syncGonderTimer) { clearTimeout(_syncGonderTimer); _syncGonderTimer = null; }
+      const canliUzak = JSON.parse(JSON.stringify(c));
+      canliUzak.guncelleme = c.guncelleme - 5000;
+      canliUzak.brewSnapshot = { ts: 200 }; canliUzak.brewSonuc = { ts: 210, ogG: 1.06, fgG: 1.014 };
+      sanal({ KR: [oluUzak, canliUzak], STOK: [], ts: Date.now() + 60000, cihaz: 'B' });
+      await syncAl();
+      __REG.ok('b: SONUÇLU silinen reçete graft ile DİRİLMEDİ (filtre graft öncesi)', !KR.find(x => x && x.id === idOlu));
+      const cs = KR.find(x => x && x.id === idCanli);
+      __REG.ok('b: yaşayan reçetede G graft AYNEN (K1: sonuc+snapshot aşılandı)', cs && cs.brewSonuc && cs.brewSonuc.ts === 210 && cs.brewSnapshot && cs.brewSnapshot.ts === 200);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'S-GERI', ad: 'bilinçli geri-getirme: guncelleme > silmeTs → kayıt yaşar + tombstone düşer',
+    calistir: (page) => page.evaluate(async () => {
+      const sanal = (uzak) => {
+        syncCfg = { url: 'https://sahte.test', oda: 'regtest', cihaz: 'T' };
+        window.fetch = async (u, o) => (o && o.method === 'PUT') ? { ok: true } : { ok: true, json: async () => uzak };
+      };
+      sanal(null);
+      const id = __REG.yeniKayit('REGTEST S-GERI'); yeniTarif();
+      const kr = KR.find(x => x && x.id === id); kr.guncelleme = Date.now(); _origKy(KR);
+      if (_syncGonderTimer) { clearTimeout(_syncGonderTimer); _syncGonderTimer = null; }
+      _krSilYaz(_krSilOku().concat([{ id: id, ts: Date.now() - 3600000 }])); // silinmiş → SONRA düzenlenmiş
+      sanal({ KR: [JSON.parse(JSON.stringify(kr))], STOK: [], ts: Date.now() + 60000, cihaz: 'B' });
+      await syncAl();
+      __REG.ok('c: kayıt YAŞIYOR (tombstone engellemedi)', !!KR.find(x => x && x.id === id));
+      __REG.ok('c: tombstone düştü (zombi-silme önlendi)', !_krSilOku().some(t => String(t.id) === String(id)));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'S-TTL', ad: 'TTL 90 gün: eski tombstone düşer, tazeler durur',
+    calistir: (page) => page.evaluate(() => {
+      _krSilYaz([{ id: 'eski-91g', ts: Date.now() - 91 * 86400000 }, { id: 'taze', ts: Date.now() - 86400000 }]);
+      _krSilEkle('yeni-x');
+      const L = _krSilOku();
+      __REG.ok('d: 91 günlük tombstone DÜŞTÜ', !L.some(t => t.id === 'eski-91g'));
+      __REG.ok('d: taze + yeni duruyor', L.some(t => t.id === 'taze') && L.some(t => t.id === 'yeni-x'));
+      __REG.ok('d: süpürücü sınırı (89g kalır / 91g düşer)', _krSilSupur([{ id: 'a', ts: Date.now() - 89 * 86400000 }]).length === 1 && _krSilSupur([{ id: 'a', ts: Date.now() - 91 * 86400000 }]).length === 0);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'S-ESKI', ad: 'fail-open: KRSil\'siz (eski istemci) ve bozuk KRSil payload\'ları — çökme yok, sync normal',
+    calistir: (page) => page.evaluate(async () => {
+      const sanal = (uzak) => {
+        syncCfg = { url: 'https://sahte.test', oda: 'regtest', cihaz: 'T' };
+        window.fetch = async (u, o) => (o && o.method === 'PUT') ? { ok: true } : { ok: true, json: async () => uzak };
+      };
+      sanal(null);
+      const id = __REG.yeniKayit('REGTEST S-ESKI'); yeniTarif();
+      if (_syncGonderTimer) { clearTimeout(_syncGonderTimer); _syncGonderTimer = null; }
+      const kopya = () => JSON.parse(JSON.stringify(KR.find(x => x && x.id === id)));
+      sanal({ KR: [kopya()], STOK: [], ts: Date.now() + 60000, cihaz: 'B' }); // KRSil alanı YOK
+      await syncAl();
+      __REG.ok('e: KRSil\'siz payload — sync normal, kayıt yaşıyor', !!KR.find(x => x && x.id === id));
+      sanal({ KR: [kopya()], STOK: [], ts: Date.now() + 120000, cihaz: 'B', KRSil: 'bozuk-string' });
+      await syncAl();
+      __REG.ok('e: KRSil=string — çökme yok', !!KR.find(x => x && x.id === id));
+      sanal({ KR: [kopya()], STOK: [], ts: Date.now() + 180000, cihaz: 'B', KRSil: [{ id: id, ts: 'abc' }, null, 42] });
+      await syncAl();
+      __REG.ok('e: bozuk KRSil öğeleri (ts=string/null/sayı) yutuldu — kayıt yaşıyor', !!KR.find(x => x && x.id === id));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'S-IMPORT', ad: 'tombstone import round-trip: bm_kr_sil_v1 allowlist ile taşınır',
+    calistir: async (page) => {
+      const c1 = await page.evaluate(() => {
+        __REG.ok('f: bm_kr_sil_v1 export allowlist\'inde', /^(bm_|kabir_|_orig|acc_|KR$)/.test('bm_kr_sil_v1'));
+        return __REG.al();
+      });
+      const nav = page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 20000 });
+      await page.evaluate(() => {
+        const yedek = { meta: { exportTs: Date.now(), version: 'regtest', keys: 2 }, data: {
+          'bm_kr_sil_v1': JSON.stringify([{ id: 'import-tomb', ts: Date.now() - 1000 }]),
+          'bm_ferm_sicaklik': '19'
+        } };
+        const dosya = new File([JSON.stringify(yedek)], 'regtest_tomb.json', { type: 'application/json' });
+        window.bmVeriImport({ files: [dosya], value: '' });
+      });
+      await nav;
+      await page.waitForFunction(() => typeof render === 'function' && Array.isArray(KR), { timeout: 30000 });
+      const c2 = await page.evaluate(() => {
+        window.__REG = window.__REG || { chk: [], ok(a, k, d) { this.chk.push({ ad: a, ok: !!k, detay: d === undefined ? '' : String(d) }); }, al() { const c = this.chk; this.chk = []; return c; } };
+        const L = JSON.parse(localStorage.getItem('bm_kr_sil_v1') || '[]');
+        __REG.ok('f: import sonrası tombstone taşındı', L.some(t => t && t.id === 'import-tomb'));
+        return __REG.al();
+      });
+      return c1.concat(c2);
+    }
   }
 ];
 
