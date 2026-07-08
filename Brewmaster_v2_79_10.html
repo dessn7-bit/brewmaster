@@ -897,6 +897,56 @@ body:has(.brewday-timeline) #bm-toast-container{top:20px;bottom:auto}
 .bm-stil-adi{text-transform:none !important;font-variant-caps:normal !important}
 @media (max-width:768px){.bm-tipo-overlay{padding:0;align-items:stretch}.bm-tipo-panel{max-height:100vh;border-radius:0;max-width:100%}.bm-tipo-onizleme{padding:var(--sp-2) var(--sp-3)}}
 </style>
+<script id="bm-hata-boot">
+/* ═══ Sprint O: GLOBAL HATA GÜNLÜĞÜ ═══
+   Kasıtlı olarak İLK script — sonraki tüm scriptlerin uncaught hatalarını + unhandled rejection'larını yakalar.
+   Gizlilik: yalnız hata teşhisi kaydedilir (mesaj/kaynak/stack/ekran/sürüm) — reçete/stok/ölçüm objesi ASLA serialize edilmez.
+   Görünüm + panoya kopyala: Ayarlar ▸ 🔔 Bildirim & Tanı ▸ ⚠️ Son Hatalar (bmHataKopyala/bmHataTemizle ana script'te). */
+(function(){
+'use strict';
+var KEY='bm_hata_log_v1', MAX=50;
+var swVer='?';
+function kes(s,n){ s=(s==null?'':String(s)); return s.length>n ? s.slice(0,n)+'…' : s; }
+function oku(){ try{ var a=JSON.parse(localStorage.getItem(KEY)||'[]'); return Array.isArray(a)?a:[]; }catch(_e){ return []; } }
+function kaydet(rec){
+  try{
+    var a=oku(), son=a[a.length-1];
+    /* ardışık aynı hata = tek kayıt + tekrar sayacı (döngü hatası tüm tamponu silmesin) */
+    if(son && son.tip===rec.tip && son.mesaj===rec.mesaj && son.kaynak===rec.kaynak){ son.n=(son.n||1)+1; son.ts=rec.ts; }
+    else { a.push(rec); if(a.length>MAX) a=a.slice(a.length-MAX); }
+    localStorage.setItem(KEY, JSON.stringify(a));
+  }catch(_e){} /* log yazarken hata = sessiz düş (LS dolu/kapalı olabilir) — uygulama akışı ASLA bozulmaz */
+}
+function kayit(tip, mesaj, kaynak, stack){
+  try{
+    var ekr='?'; try{ ekr=(typeof ekran==='string')?ekran:'?'; }catch(_e1){}
+    var ver='?'; try{ ver=(typeof APP_VERSION==='string')?APP_VERSION:'?'; }catch(_e2){}
+    kaydet({ ts:Date.now(), tip:tip, mesaj:kes(mesaj,250), kaynak:kes(kaynak,200), stack:kes(stack,500), ekran:ekr, surum:ver, sw:swVer });
+  }catch(_e){}
+}
+window.bmHataLogOku = oku;
+window.bmHataLogSil = function(){ try{ localStorage.removeItem(KEY); }catch(_e){} };
+window.onerror = function(msg, src, line, col, err){
+  kayit('error', msg, (src ? src+':'+(line||0)+':'+(col||0) : ''), err && err.stack);
+  /* return yok — hata konsola normal akışıyla düşmeye devam eder */
+};
+window.addEventListener('unhandledrejection', function(ev){
+  var r = ev && ev.reason, m = 'bilinmeyen sebep', st = '';
+  try{
+    if (r && r.message) { m = r.message; st = r.stack || ''; }
+    else if (typeof r === 'string') { m = r; }
+    else if (r != null) { m = Object.prototype.toString.call(r); } /* obje sebep serialize EDİLMEZ (gizlilik) */
+  }catch(_e){}
+  kayit('rejection', m, '', st);
+});
+/* SW sürümü tembel: load sonrası _swDiag (ana script tanımlar) bir kez sorgulanır; sonraki kayıtlara işlenir */
+window.addEventListener('load', function(){
+  setTimeout(function(){
+    try{ if(typeof window._swDiag==='function') window._swDiag().then(function(d){ if(d && d.ver) swVer=String(d.ver); }); }catch(_e){}
+  }, 3000);
+});
+})();
+</script>
 <script id="bm-tipografi-boot">
 (function(){
 'use strict';
@@ -24265,6 +24315,62 @@ window.bmVeriImport = function(inputEl){
   }
 };
 
+// ═══ Sprint O: Hata günlüğü UI — kayıt/okuma bm-hata-boot script'inde (bmHataLogOku/bmHataLogSil) ═══
+window._bmHataTsStr = function(ts){
+  try{
+    var d = new Date(ts||0);
+    var p = function(x){ return String(x).padStart(2,'0'); };
+    return p(d.getDate())+'.'+p(d.getMonth()+1)+'.'+d.getFullYear()+' '+p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds());
+  }catch(_e){ return String(ts); }
+};
+window._bmHataMetni = function(){
+  var a = (typeof bmHataLogOku==='function') ? bmHataLogOku() : [];
+  var s = 'BREWMASTER HATA GÜNLÜĞÜ — '+a.length+' kayıt · '+APP_VERSION+' · alındı: '+window._bmHataTsStr(Date.now())+'\n';
+  a.forEach(function(h,i){
+    s += '\n─── ['+(i+1)+'] '+window._bmHataTsStr(h.ts)+' · '+(h.tip||'?')+(h.n>1 ? ' · ×'+h.n+' tekrar' : '')+' ───\n';
+    s += 'Mesaj : '+(h.mesaj||'-')+'\n';
+    if (h.kaynak) s += 'Kaynak: '+h.kaynak+'\n';
+    s += 'Ekran : '+(h.ekran||'?')+' · Sürüm: '+(h.surum||'?')+' · SW: '+(h.sw||'?')+'\n';
+    if (h.stack) s += 'Stack :\n'+h.stack+'\n';
+  });
+  return s;
+};
+window.bmHataKopyala = function(){
+  var txt = window._bmHataMetni();
+  function elleKopyala(){
+    try{
+      var esk=document.getElementById('bm-hata-kopya-ov'); if(esk) esk.remove();
+      var ov=document.createElement('div');
+      ov.id='bm-hata-kopya-ov';
+      ov.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px';
+      ov.innerHTML='<div style="background:var(--bg-card);border:1px solid var(--cizgi-arac);border-radius:var(--r-sm);max-width:520px;width:100%;padding:14px;display:flex;flex-direction:column;gap:8px">'+
+        '<b>⚠️ Panoya otomatik kopyalanamadı</b>'+
+        '<small>Metin aşağıda seçili — elle kopyala (uzun bas → Kopyala veya Ctrl+C), sonra Kapat.</small>'+
+        '<textarea readonly id="bm-hata-kopya-ta" style="width:100%;height:220px;font-size:11px;font-family:monospace"></textarea>'+
+        '<button class="bm-ayar-btn-sec" onclick="document.getElementById(\'bm-hata-kopya-ov\').remove()">Kapat</button>'+
+      '</div>';
+      document.body.appendChild(ov);
+      var ta=document.getElementById('bm-hata-kopya-ta');
+      ta.value=txt; ta.focus(); ta.select();
+      flash('⚠️ Otomatik kopyalama olmadı — metni elle kopyala','err');
+    }catch(_e){ flash('Kopyalama başarısız','err'); }
+  }
+  try{
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(
+        function(){ flash('📋 Hata günlüğü panoya kopyalandı','ok'); },
+        elleKopyala
+      );
+    } else elleKopyala();
+  }catch(_e){ elleKopyala(); }
+};
+window.bmHataTemizle = function(){
+  if (!confirm('Hata günlüğü temizlensin mi?\n\nTüm hata kayıtları silinir — geri alınamaz.')) return;
+  if (typeof bmHataLogSil==='function') bmHataLogSil();
+  flash('🗑️ Hata günlüğü temizlendi','ok');
+  try{ if (ekran==='ayarlar' && typeof render==='function') render(); }catch(_e){}
+};
+
 // Ayarlar sekmesi render
 window.rStokAyarlar = function(){
   // Sprint 138: swVer kaldırıldı — CACHE_VERSION sayfa kapsamında YOK (sw.js'te), her zaman '?' veriyordu.
@@ -24301,6 +24407,29 @@ window.rStokAyarlar = function(){
   var _bPref=(typeof bmBildirimTercihOku==='function')?bmBildirimTercihOku():{};
   var _bSessizStr='Kapalı';
   if(_bPref.sessizBasla&&_bPref.sessizBit&&_bPref.sessizBasla!==_bPref.sessizBit){ var _bSessizNow=(typeof _sessizSaatteMi==='function'&&_sessizSaatteMi()); _bSessizStr='🌙 '+_bPref.sessizBasla+'–'+_bPref.sessizBit+(_bSessizNow?' (şu an sessizde)':''); }
+  // Sprint O: hata günlüğü özeti (kayıt bm-hata-boot ring buffer — bm_hata_log_v1)
+  var _bHata=[]; try{ _bHata=(typeof bmHataLogOku==='function')?bmHataLogOku():[]; }catch(e){}
+  var _bHataHtml='';
+  if (!_bHata.length) {
+    _bHataHtml='<div class="bm-ayar-satir"><div class="bm-ayar-satir-text">⚠️ Son Hatalar <small style="color:var(--ok)">✓ Hata kaydı yok</small></div></div>';
+  } else {
+    var _bHEsc=function(s){ return String(s==null?'':s).replace(/[<>&"]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c];}); };
+    var _bHataList=_bHata.slice(-5).reverse().map(function(h){
+      var d=new Date(h.ts||0);
+      var t=String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+      var m=((h.tip==='rejection'?'promise':'hata')+': '+(h.mesaj||'-')).slice(0,160);
+      return '<small style="display:block;padding:2px 0;border-bottom:1px dotted var(--cizgi-arac)">'+t+' · '+_bHEsc(m)+(h.n>1?' <b>×'+h.n+'</b>':'')+'</small>';
+    }).join('');
+    _bHataHtml='<details class="bm-ayar-satir" style="display:block">'+
+      '<summary class="bm-ayar-satir-text" style="cursor:pointer">⚠️ Son Hatalar ('+_bHata.length+') <small>son 5 kayıt · tümünü panoya kopyala</small></summary>'+
+      '<div style="padding:6px 0 2px">'+_bHataList+
+        '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">'+
+          '<button class="bm-ayar-btn-sec" onclick="window.bmHataKopyala()">📋 Panoya Kopyala</button>'+
+          '<button class="bm-ayar-btn bm-ayar-btn-uyari" onclick="window.bmHataTemizle()">🗑️ Günlüğü Temizle</button>'+
+        '</div>'+
+      '</div>'+
+    '</details>';
+  }
   return ''+
     '<div class="bm-ayar-kart">'+
       '<div class="bm-ayar-kart-baslik">🔤 Tipografi</div>'+
@@ -24359,6 +24488,7 @@ window.rStokAyarlar = function(){
           '<small>Sessiz saat: '+_bSessizStr+'</small>'+
         '</div>'+
       '</div>'+
+      _bHataHtml+
       '<div class="bm-ayar-satir">'+
         '<div class="bm-ayar-satir-text">🔔 Bildirim tercihleri <small>Kategoriler, sessiz saat, titreşim, ses</small></div>'+
         '<button class="bm-ayar-btn-sec" onclick="if(typeof bmAnaBildirim===\'function\')bmAnaBildirim()">Aç →</button>'+
