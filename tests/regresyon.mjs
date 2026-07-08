@@ -540,6 +540,209 @@ const CASELER = [
       __REG.ok('sticky özet OG motor değeri (render sonrası)', (function(){ render(); const e = document.getElementById('ss-og'); return e && e.textContent === calc().og.toFixed(3); })());
       return __REG.al();
     })
+  },
+
+  // ── SPRINT R: alarm onayı → brewLog köprüsü ──
+  // Ortak kalıp: __REG.yeniKayit ile reçete + bm_alarms_v1'e sentetik alarm grubu, sonra
+  // _alarmAksiyon(rid, g, 'tamamlandi') gerçek onay boğazından köprü tetiklenir.
+  {
+    kod: 'R-DH', ad: 'dry hop ekle/çıkar onayı → dry_hop log + iz; faz göstergesi son-giriş not-bazlı',
+    calistir: (page) => page.evaluate(() => {
+      const gun = 86400000, simdi = Date.now();
+      const id = __REG.yeniKayit('REGTEST R-DH'); // tarifAc ile AÇIK reçete yolu (S + tarifeKaydet zinciri)
+      const tum = JSON.parse(localStorage.getItem('bm_alarms_v1') || '{}');
+      tum[id] = { receteAd: 'REGTEST R-DH', pitchTs: simdi - 7 * gun, durum: 'aktif', alarmlar: [
+        { g: 5, ts: simdi - 2 * gun, tip: 'kritik', aksiyon: '🌿 Dry hop ekle', aciklama: '50g Citra · FG ~%75 civarıysa ideal.', durum: 'bekliyor' },
+        { g: 10, ts: simdi - 1 * gun, tip: 'kritik', aksiyon: '🌿 Dry hop çıkar', aciklama: '50g Citra — 5 gündür içerde.', durum: 'bekliyor' }
+      ] };
+      localStorage.setItem('bm_alarms_v1', JSON.stringify(tum));
+      _alarmAksiyon(id, 5, 'tamamlandi');
+      let bl = S.brewLog.filter(x => x && x.tip === 'dry_hop');
+      __REG.ok('a: ekle → dry_hop girişi', bl.length === 1);
+      __REG.ok('a: not "eklendi" + hop + iz', bl[0] && bl[0].not.indexOf('eklendi') === 0 && bl[0].not.indexOf('50g Citra') > -1 && bl[0].not.indexOf('⏰ alarm onayından') > -1, bl[0] && bl[0].not);
+      __REG.ok('a: almKey doğru', bl[0] && bl[0].almKey === id + '|5');
+      __REG.ok('a: log ts = alarm ts (olay günü)', bl[0] && bl[0].ts === simdi - 2 * gun);
+      __REG.ok('a: alarm durumu tamamlandi (mevcut davranış intact)', JSON.parse(localStorage.getItem('bm_alarms_v1'))[id].alarmlar[0].durum === 'tamamlandi');
+      sekme = 'takvim'; render();
+      const fazAcik = Array.from(document.querySelectorAll('[data-acc-meta]')).some(e => e.textContent.trim() === 'Dry Hop');
+      __REG.ok('a: faz göstergesi AÇIK (Dry Hop)', fazAcik);
+      _alarmAksiyon(id, 10, 'tamamlandi');
+      bl = S.brewLog.filter(x => x && x.tip === 'dry_hop');
+      __REG.ok('b: çıkar → ikinci dry_hop girişi ("çıkarıldı")', bl.length === 2 && bl.some(x => x.not.indexOf('çıkarıldı') === 0));
+      sekme = 'takvim'; render();
+      const fazKapali = !Array.from(document.querySelectorAll('[data-acc-meta]')).some(e => e.textContent.trim() === 'Dry Hop');
+      __REG.ok('b: ekle+çıkar ardışık → faz KAPALI', fazKapali);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'R-CC-KATKI', ad: 'cold crash / katkı / meşe onayı → doğru tip + iz; "devam" pasif logsuz',
+    calistir: (page) => page.evaluate(() => {
+      const gun = 86400000, simdi = Date.now();
+      const id = __REG.yeniKayit('REGTEST R-CC');
+      yeniTarif(); // reçeteyi KAPAT (kapalı-reçete KR yolu test edilsin)
+      const tum = JSON.parse(localStorage.getItem('bm_alarms_v1') || '{}');
+      tum[id] = { receteAd: 'REGTEST R-CC', pitchTs: simdi - 9 * gun, durum: 'aktif', alarmlar: [
+        { g: 7, ts: simdi - 2 * gun, tip: 'kritik', aksiyon: '❄️ Cold crash', aciklama: '2-4°C', durum: 'bekliyor' },
+        { g: 8, ts: simdi - 1 * gun, tip: 'pasif', aksiyon: '❄️ Cold crash devam', aciklama: '', durum: 'bekliyor' },
+        { g: 3, ts: simdi - 6 * gun, tip: 'kritik', aksiyon: '🧪 Vanilya çubuğu ekle', aciklama: '2adet · secondary', durum: 'bekliyor' },
+        { g: 9, ts: simdi - 12 * 3600000, tip: 'kritik', aksiyon: '🪵 Meşe çipi çıkar', aciklama: '6 gündür temasta', durum: 'bekliyor' }
+      ] };
+      localStorage.setItem('bm_alarms_v1', JSON.stringify(tum));
+      [7, 8, 3, 9].forEach(g => _alarmAksiyon(id, g, 'tamamlandi'));
+      const kr = KR.find(x => x && x.id === id);
+      const cc = kr.brewLog.filter(x => x && x.tip === 'cold_crash');
+      const kt = kr.brewLog.filter(x => x && x.tip === 'katki');
+      __REG.ok('c: cold crash → 1 giriş ("devam" pasif LOG ÜRETMEDİ)', cc.length === 1);
+      __REG.ok('c: cold crash izli', cc[0] && cc[0].not.indexOf('⏰ alarm onayından') > -1);
+      __REG.ok('c: katkı ekle → "Vanilya çubuğu eklendi"', kt.some(x => x.not.indexOf('Vanilya çubuğu eklendi') === 0));
+      __REG.ok('c: meşe çıkar → "Meşe çipi çıkarıldı"', kt.some(x => x.not.indexOf('Meşe çipi çıkarıldı') === 0));
+      __REG.ok('c: LS persist (kapalı-reçete ky yolu)', JSON.parse(localStorage.getItem('bm_v6')).find(x => x && x.id === id).brewLog.filter(x => x.tip === 'katki').length === 2);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'R-SISELE', ad: 'şişele onayı: litre girildi VE boş geçildi — iki durumda da siseleme log + brewSonuc dondu (Sprint Q beslemesi)',
+    calistir: (page) => page.evaluate(() => {
+      const gun = 86400000, simdi = Date.now();
+      const kur = (ad) => {
+        const id = __REG.yeniKayit(ad, {
+          brewSnapshot: { ts: simdi - 14 * gun, ogT: 1.05, fgT: 1.012, verimVarsayim: 61 },
+          ogManuel: 1.05, fgManuel: 1.012
+        });
+        yeniTarif(); // kapat
+        const tum = JSON.parse(localStorage.getItem('bm_alarms_v1') || '{}');
+        tum[id] = { receteAd: ad, pitchTs: simdi - 14 * gun, durum: 'aktif', alarmlar: [
+          { g: 14, ts: simdi - gun, tip: 'kritik', aksiyon: '🍺 Şişele', aciklama: 'Priming hesapla', durum: 'bekliyor' }
+        ] };
+        localStorage.setItem('bm_alarms_v1', JSON.stringify(tum));
+        return id;
+      };
+      // (i) litre girildi
+      const id1 = kur('REGTEST R-SIS-1');
+      window.prompt = () => '10.5';
+      _alarmAksiyon(id1, 14, 'tamamlandi');
+      const k1 = KR.find(x => x && x.id === id1);
+      const s1 = (k1.brewLog || []).filter(x => x && x.tip === 'siseleme');
+      __REG.ok('d-i: siseleme log + deger=10.5', s1.length === 1 && s1[0].deger === '10.5', s1[0] && s1[0].deger);
+      __REG.ok('d-i: brewSonuc DONDU (ogG 1.05)', k1.brewSonuc && k1.brewSonuc.ts && k1.brewSonuc.ogG === 1.05);
+      const p1 = bmProfilAnaliz().kayitlar.find(x => x.id === String(id1));
+      __REG.ok('d-i: Sprint Q beslemesi — profil batch\'i TAMAM saydı', p1 && p1.durum === 'tamam');
+      // (ii) boş geçildi (cancel)
+      const id2 = kur('REGTEST R-SIS-2');
+      window.prompt = () => null;
+      _alarmAksiyon(id2, 14, 'tamamlandi');
+      const k2 = KR.find(x => x && x.id === id2);
+      const s2 = (k2.brewLog || []).filter(x => x && x.tip === 'siseleme');
+      __REG.ok('d-ii: boş geçildi → log YİNE yazıldı (deger boş)', s2.length === 1 && s2[0].deger === '');
+      __REG.ok('d-ii: brewSonuc yine dondu', k2.brewSonuc && !!k2.brewSonuc.ts);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'R-PITCH', ad: 'pitching onayı (confirm tek-tık): log + snapshot + durum=yapimda',
+    calistir: (page) => page.evaluate(() => {
+      const gun = 86400000, simdi = Date.now();
+      const id = __REG.yeniKayit('REGTEST R-PITCH');
+      yeniTarif();
+      const tum = JSON.parse(localStorage.getItem('bm_alarms_v1') || '{}');
+      tum[id] = { receteAd: 'REGTEST R-PITCH', pitchTs: simdi, durum: 'aktif', alarmlar: [
+        { g: 0, ts: simdi - 3600000, tip: 'kontrol', aksiyon: '🧬 Pitching', aciklama: 'Maya at', durum: 'bekliyor' }
+      ] };
+      localStorage.setItem('bm_alarms_v1', JSON.stringify(tum));
+      window.confirm = () => true;
+      _alarmAksiyon(id, 0, 'tamamlandi');
+      const kr = KR.find(x => x && x.id === id);
+      __REG.ok('pitching log yazıldı', (kr.brewLog || []).some(x => x && x.tip === 'pitching' && x.almKey === id + '|0'));
+      __REG.ok('snapshot dondu', kr.brewSnapshot && !!kr.brewSnapshot.ts);
+      __REG.ok('durum yapimda', kr.durum === 'yapimda');
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'R-OLCUM', ad: 'FG/gravity onayı → otomatik log YOK, "Ölçüm gir" kısayolu fg_olcum formunu açar',
+    calistir: async (page) => {
+      const c1 = await page.evaluate(() => {
+        const gun = 86400000, simdi = Date.now();
+        const id = __REG.yeniKayit('REGTEST R-OLCUM');
+        yeniTarif();
+        const tum = JSON.parse(localStorage.getItem('bm_alarms_v1') || '{}');
+        tum[id] = { receteAd: 'REGTEST R-OLCUM', pitchTs: simdi - 4 * gun, durum: 'aktif', alarmlar: [
+          { g: 4, ts: simdi - 3600000, tip: 'kontrol', aksiyon: '📊 FG kontrol', aciklama: 'Gravity ölç', durum: 'bekliyor' }
+        ] };
+        localStorage.setItem('bm_alarms_v1', JSON.stringify(tum));
+        window.__regOlcumId = id;
+        _alarmAksiyon(id, 4, 'tamamlandi');
+        const kr = KR.find(x => x && x.id === id);
+        __REG.ok('e: otomatik log YOK', (kr.brewLog || []).length === 0);
+        __REG.ok('e: kısayol toast göründü', !!document.getElementById('bm-olcum-toast'));
+        const btn = document.querySelector('#bm-olcum-toast button');
+        if (btn) btn.click();
+        return __REG.al();
+      });
+      await page.waitForFunction(() => {
+        const t = document.getElementById('logTip');
+        return typeof sekme !== 'undefined' && sekme === 'takvim' && t && t.value === 'fg_olcum';
+      }, { timeout: 5000 });
+      const c2 = await page.evaluate(() => {
+        __REG.ok('e: kısayol → takvim sekmesi + logTip=fg_olcum + doğru reçete', sekme === 'takvim' && document.getElementById('logTip').value === 'fg_olcum' && _editId === window.__regOlcumId);
+        return __REG.al();
+      });
+      return c1.concat(c2);
+    }
+  },
+  {
+    kod: 'R-SUREC', ad: 'sanitize/karbonasyon/içime-hazır/pasif/pseudo onayı → log YOK, çökme yok',
+    calistir: (page) => page.evaluate(() => {
+      const gun = 86400000, simdi = Date.now();
+      const id = __REG.yeniKayit('REGTEST R-SUREC');
+      yeniTarif();
+      const tum = JSON.parse(localStorage.getItem('bm_alarms_v1') || '{}');
+      tum[id] = { receteAd: 'REGTEST R-SUREC', pitchTs: simdi - 15 * gun, durum: 'aktif', alarmlar: [
+        { g: 13, ts: simdi - 2 * gun, tip: 'kontrol', aksiyon: '🧼 Şişeleri sanitize et', aciklama: '', durum: 'bekliyor' },
+        { g: 28, ts: simdi - gun, tip: 'kontrol', aksiyon: '🫧 Karbonasyon kontrol — bir şişe test et', aciklama: '', durum: 'bekliyor' },
+        { g: 35, ts: simdi - 3600000, tip: 'kontrol', aksiyon: '🍺 İçime hazır — Dubbel olgunlaştı', aciklama: '', durum: 'bekliyor' },
+        { g: 1, ts: simdi - 14 * gun, tip: 'pasif', aksiyon: '⏳ Lag + aktivasyon', aciklama: '', durum: 'bekliyor' }
+      ] };
+      tum['manuel:regtest'] = { receteAd: 'Manuel', pitchTs: simdi, durum: 'aktif', alarmlar: [
+        { g: 0, ts: simdi - 60000, tip: 'kontrol', aksiyon: '🔔 Su al', aciklama: '', durum: 'bekliyor' }
+      ] };
+      localStorage.setItem('bm_alarms_v1', JSON.stringify(tum));
+      [13, 28, 35, 1].forEach(g => _alarmAksiyon(id, g, 'tamamlandi'));
+      _alarmAksiyon('manuel:regtest', 0, 'tamamlandi'); // pseudo aile — çökmemeli
+      const kr = KR.find(x => x && x.id === id);
+      __REG.ok('f: süreç/pasif alarmları LOG ÜRETMEDİ', (kr.brewLog || []).length === 0);
+      __REG.ok('f: "Şişeleri sanitize" siseleme SANILMADI', !(kr.brewLog || []).some(x => x && x.tip === 'siseleme'));
+      __REG.ok('f+h: pseudo/şişele-alarmsız akış — çökme yok, app ayakta', typeof render === 'function' && (render() === undefined || true) && !!document.getElementById('ekran'));
+      const al = JSON.parse(localStorage.getItem('bm_alarms_v1'))[id].alarmlar;
+      __REG.ok('f: alarm durumları yine tamamlandi (onay bozulmadı)', al.every(a => a.durum === 'tamamlandi'));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'R-IDEM', ad: 'idempotency: çift onay + snooze re-arm (ts değişti) → TEK log (almKey, ts anahtarda değil)',
+    calistir: (page) => page.evaluate(() => {
+      const gun = 86400000, simdi = Date.now();
+      const id = __REG.yeniKayit('REGTEST R-IDEM');
+      yeniTarif();
+      const tum = JSON.parse(localStorage.getItem('bm_alarms_v1') || '{}');
+      tum[id] = { receteAd: 'REGTEST R-IDEM', pitchTs: simdi - 6 * gun, durum: 'aktif', alarmlar: [
+        { g: 5, ts: simdi - gun, tip: 'kritik', aksiyon: '🌿 Dry hop ekle', aciklama: '30g Saaz', durum: 'bekliyor' }
+      ] };
+      localStorage.setItem('bm_alarms_v1', JSON.stringify(tum));
+      _alarmAksiyon(id, 5, 'tamamlandi');
+      _alarmAksiyon(id, 5, 'tamamlandi'); // çift tık
+      let kr = KR.find(x => x && x.id === id);
+      __REG.ok('g: çift onay → TEK giriş', kr.brewLog.filter(x => x && x.tip === 'dry_hop').length === 1);
+      // snooze re-arm simülasyonu: ts değişir + durum bekliyor'a döner, sonra yeniden onay
+      const t2 = JSON.parse(localStorage.getItem('bm_alarms_v1'));
+      t2[id].alarmlar[0].ts = simdi + 3600000; t2[id].alarmlar[0].durum = 'bekliyor';
+      localStorage.setItem('bm_alarms_v1', JSON.stringify(t2));
+      _alarmAksiyon(id, 5, 'tamamlandi');
+      kr = KR.find(x => x && x.id === id);
+      __REG.ok('g: re-arm (ts değişti) sonrası onay → YİNE tek giriş', kr.brewLog.filter(x => x && x.tip === 'dry_hop').length === 1);
+      return __REG.al();
+    })
   }
 ];
 

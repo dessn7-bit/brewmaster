@@ -40,6 +40,13 @@ Süre: ~15-20 sn (19 case).
 | Q-CLAMP | Q | n=5: w=1.0 clamp, kalibre = gerçek ortalama |
 | Q-BANT | Q | akıl bandı: |ort−61|>15 puan veya |fgSapma|>0.010 → uygulanmaz, uyarı gösterilir |
 | Q-SEFFAF | Q | köprü aktifken motor ogHesap/sticky özet değişmez (override değil) |
+| R-DH | R | dry hop ekle/çıkar onayı → dry_hop log+iz; faz göstergesi son-giriş not-bazlı (açık/kapalı) |
+| R-CC-KATKI | R | cold crash/katkı/meşe onayı → doğru tip+iz; pasif "devam" logsuz; kapalı-reçete ky yolu |
+| R-SISELE | R | şişele onayı litre'li ve boş — iki durumda da siseleme log + brewSonuc + profil 'tamam' (Q beslemesi) |
+| R-PITCH | R | pitching onayı (confirm) → log + snapshot + durum=yapimda |
+| R-OLCUM | R | FG/gravity onayı → otomatik log YOK; kısayol toast → takvim + fg_olcum formu |
+| R-SUREC | R | sanitize/karbonasyon/içime-hazır/pasif/pseudo → log YOK, çökme yok |
+| R-IDEM | R | çift onay + snooze re-arm (ts değişti) → almKey ile TEK log |
 | H-LATCH-1..3 | H | worker `_mergeAlarms`: terminal latch (ts-eşit), re-arm (ts-fark), pushedTs koruma |
 | K-PING-1..2 | K | worker pseudo-ts toleransı: 12h içi normalize (latch korunur) / dışı reschedule |
 

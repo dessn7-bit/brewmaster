@@ -14151,7 +14151,8 @@ function rEditorTakvim(maya, maya2, tv){
     try {
       if(_bl.some(function(x){return x.tip==='siseleme';})) return 'Kondisyon';
       if(_bl.some(function(x){return x.tip==='cold_crash';})) return 'Cold Crash';
-      if(_bl.some(function(x){return x.tip==='dry_hop';})) return 'Dry Hop';
+      var _dhSon=_bl.filter(function(x){return x&&x.tip==='dry_hop';}).pop(); // SPRINT R: varlık değil SON giriş — 'çıkarıldı' ise dry-hop fazı bitti
+      if(_dhSon && !/çıkar/i.test(_dhSon.not||'')) return 'Dry Hop';
       var _p = _bl.filter(function(x){return x.tip==='pitching';}).pop();
       if(_p && _p.tarih){
         var _g = Math.floor((new Date()-new Date(_p.tarih))/(864e5));
@@ -22739,11 +22740,117 @@ window.brewdayBitir=function(){
   };
 
   // Merkezi alarm aksiyon handler'ı (modal/toast butonlarından çağrılır)
+  // ═══ SPRINT R: Alarm onayı → brewLog köprüsü ═══
+  // Onay boğazı _alarmAksiyon'un tamamlandi dalından çağrılır (üç UI yüzeyi de oradan akar).
+  // OLAY alarmları otomatik loglanır (dry hop ekle/çıkar, cold crash, katkı/meşe);
+  // Şişele tek-tık (litre opsiyonel prompt — boş geçilse de YAZILIR; siseleme→_brewSonucYaz→Sprint Q beslemesi);
+  // Pitching tek-tık confirm (ağır yan etki: snapshot + durum=yapimda);
+  // ÖLÇÜM alarmları (FG/Gravity/stuck) ASLA otomatik yazmaz — yalnız "Ölçüm gir" kısayol toast'u;
+  // süreç adımları (sanitize/karbonasyon kontrol/içime hazır/rest/rise/soğut/lagering/pasif) log ÜRETMEZ.
+  // Yan-etki zinciri elle logEkle ile AYNI tek-nokta yardımcılar üzerinden: _brewSnapshotYaz (pitching),
+  // _brewSonucYaz (siseleme), persist (tarifeKaydet/ky) + _stuckFermSync. logEkle DOM+S-bağımlı olduğu
+  // (form elemanları okur, yalnız açık reçeteye yazar) ve alarm reçetesi kapalı olabileceği için
+  // ÇAĞRILMAZ — zincir, logEkle'nin kullandığı aynı yardımcılarla birebir kurulur.
+  // Idempotency: almKey='<rid>|<g>' — ts BİLEREK anahtara katılmaz (snooze/re-arm ts değiştirir;
+  // aynı görevin ikinci onayı çift giriş üretmesin). Log tarihi = alarm ts günü (onay günü değil).
+  function _bmAlarmLogEsle(al){
+    var a = String((al && al.aksiyon) || '');
+    var ac = String((al && al.aciklama) || '');
+    // dry hop özeti aciklama'nın ilk segmentinde ('50g Citra + ...') — yalnız gram-listesiyse al
+    var seg = ac.split(/[·—]/)[0].trim();
+    var dhEk = /^\d+g /.test(seg) ? ' — ' + seg : '';
+    if (a.indexOf('Dry hop ekle') !== -1)  return { tip: 'dry_hop', not: 'eklendi' + dhEk };
+    if (a.indexOf('Dry hop çıkar') !== -1) return { tip: 'dry_hop', not: 'çıkarıldı' + dhEk };
+    if (a.indexOf('Cold crash') !== -1 && a.toLowerCase().indexOf('devam') === -1) return { tip: 'cold_crash', not: '' };
+    if (a.indexOf('🧪') === 0 && /\sekle$/.test(a))  return { tip: 'katki', not: a.replace(/^🧪\s*/, '').replace(/\sekle$/, '') + ' eklendi' };
+    if (a.indexOf('🪵') === 0 && /\sçıkar$/.test(a)) return { tip: 'katki', not: a.replace(/^🪵\s*/, '').replace(/\sçıkar$/, '') + ' çıkarıldı' };
+    if (a.indexOf('🍺 Şişele') === 0) return { tip: 'siseleme', litreSor: true };
+    if (a.indexOf('Pitching') !== -1) return { tip: 'pitching', onaySor: true };
+    if (a.indexOf('📊') === 0 && (a.indexOf('FG') !== -1 || a.indexOf('Gravity kontrol') !== -1)) return { kisayol: true };
+    return null; // sanitize / karbonasyon kontrol / içime hazır / rest / rise / soğut / lagering / pasif
+  }
+  window._bmOlcumGirKisayol = function(rid){
+    try{
+      if (typeof tarifAc === 'function') tarifAc(rid);
+      if (typeof setSekme === 'function') setSekme('takvim'); // log formu rEditorTakvim içinde
+      setTimeout(function(){
+        try{
+          var t = document.getElementById('logTip');
+          if (t) { t.value = 'fg_olcum'; if (typeof logTipDegisti === 'function') logTipDegisti('fg_olcum'); }
+          var dg = document.getElementById('logDeger');
+          if (dg) { dg.focus(); if (dg.scrollIntoView) dg.scrollIntoView({ block: 'center' }); }
+        }catch(_e){}
+      }, 150);
+    }catch(_e){}
+  };
+  function _bmOlcumToast(rid){
+    try{
+      var esk = document.getElementById('bm-olcum-toast'); if (esk) esk.remove();
+      var d = document.createElement('div');
+      d.id = 'bm-olcum-toast';
+      d.style.cssText = 'position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--bg-card);border:1px solid var(--cizgi-arac);border-radius:10px;padding:10px 14px;display:flex;gap:10px;align-items:center;box-shadow:0 4px 16px rgba(0,0,0,.25);font-size:13px';
+      var rTemiz = String(rid).replace(/[^\w:.-]/g, '');
+      d.innerHTML = '<span>📊 Ölçümü şimdi girmek ister misin?</span>' +
+        '<button class="btn" style="background:var(--altin);color:#fff;border:none;border-radius:6px;padding:6px 12px;font-weight:700;cursor:pointer" onclick="window._bmOlcumGirKisayol(\'' + rTemiz + '\');this.parentNode.remove()">Ölçüm gir</button>' +
+        '<button class="btn" style="background:transparent;border:1px solid var(--cizgi-arac);border-radius:6px;padding:6px 10px;cursor:pointer" onclick="this.parentNode.remove()">Kapat</button>';
+      document.body.appendChild(d);
+      setTimeout(function(){ try{ var x = document.getElementById('bm-olcum-toast'); if (x) x.remove(); }catch(_e){} }, 12000);
+    }catch(_e){}
+  }
+  window._bmAlarmOnayKoprusu = function(receteId, gun){
+    try{
+      var rid = String(receteId || '');
+      if (/^(maya|stok|manuel|plan):/.test(rid)) return;                      // reçete-dışı pseudo aileler: log YOK
+      if (rid.indexOf('stuck:') === 0) { _bmOlcumToast(rid.slice(6)); return; } // stuck onayı = ölçüm görevi → yalnız kısayol
+      var tum = _alarmlariOku();
+      var grup = tum[rid]; if (!grup || !Array.isArray(grup.alarmlar)) return;
+      var al = grup.alarmlar.find(function(x){ return x && x.g === gun; });
+      if (!al) return;
+      var es = _bmAlarmLogEsle(al);
+      if (!es) return;
+      if (es.kisayol) { _bmOlcumToast(rid); return; }                          // ölçüm: otomatik değer ASLA
+      var acik = (typeof _editId !== 'undefined' && _editId === rid && typeof S !== 'undefined');
+      var hedef = acik ? S : (Array.isArray(KR) ? KR.find(function(k){ return k && k.id === rid; }) : null);
+      if (!hedef) return;
+      if (!Array.isArray(hedef.brewLog)) hedef.brewLog = [];
+      var almKey = rid + '|' + gun;
+      if (hedef.brewLog.some(function(x){ return x && x.almKey === almKey; })) return; // idempotent (çift onay / re-arm)
+      if (es.onaySor && !confirm('🧬 Pitching günlüğe yazılsın mı?\n\nTahmin snapshot\'ı donar, reçete Yapımda\'ya geçer.')) return;
+      var deger = '';
+      if (es.litreSor) {
+        var v = prompt('🍺 Şişelenen hacim (litre) — opsiyonel, boş bırakabilirsin', '');
+        if (v != null) { var f = parseFloat(String(v).replace(',', '.')); if (isFinite(f) && f > 0 && f < 1000) deger = String(f); }
+      }
+      var dt = new Date(al.ts || Date.now()); // log tarihi = ALARM günü (geriye dönük onayda olay günü)
+      var tarih = dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
+      hedef.brewLog.push({ tip: es.tip, tarih: tarih, deger: deger, not: (es.not ? es.not + ' · ' : '') + '⏰ alarm onayından', id: Date.now().toString(), ts: (al.ts || Date.now()), almKey: almKey });
+      hedef.brewLog.sort(function(x, y){ return String(x.tarih || '').localeCompare(String(y.tarih || '')); });
+      // logEkle ile AYNI yan-etki zinciri (tek-nokta yardımcılar):
+      if (es.tip === 'pitching') {
+        try{ if (window._brewSnapshotYaz) _brewSnapshotYaz(hedef, rid, { preboilAktar: true }); }catch(_b1){}
+        try{
+          if ((hedef.durum || 'aktif') === 'aktif') {
+            hedef.durum = 'yapimda';
+            var kr2 = Array.isArray(KR) ? KR.find(function(k){ return k && k.id === rid; }) : null;
+            if (kr2) kr2.durum = 'yapimda';
+            if (typeof listeSekme !== 'undefined') listeSekme = 'yapimda';
+          }
+        }catch(_b2){}
+      }
+      if (es.tip === 'siseleme') { try{ if (window._brewSonucYaz) _brewSonucYaz(hedef, rid); }catch(_b3){} }
+      if (acik && hedef.biraAd && hedef.biraAd.trim() && typeof tarifeKaydet === 'function') tarifeKaydet();
+      else if (typeof ky === 'function') ky(KR);
+      try{ if (window._stuckFermSync) _stuckFermSync(); }catch(_b4){}
+      if (typeof flash === 'function') flash('📖 Günlüğe eklendi: ' + es.tip + (deger ? ' (' + deger + 'L)' : ''), 'ok');
+    }catch(_e){ try{ console.warn('[alarm→log köprüsü]', _e); }catch(_c){} }
+  };
+
   window._alarmAksiyon = function(receteId, gun, islem){
     const modal = document.getElementById('_alarmModal');
     const toast = document.getElementById('_alarmToast_'+receteId+'_'+gun);
     if(islem === 'tamamlandi'){
       _alarmDurumGuncelle(receteId, gun, 'tamamlandi');
+      try{ if(window._bmAlarmOnayKoprusu) _bmAlarmOnayKoprusu(receteId, gun); }catch(_kop){} // SPRINT R: onay → brewLog köprüsü (köprü hatası onayı BOZMAZ)
       if(typeof flash === 'function') flash('✓ Alarm tamamlandı','ok');
     } else if(islem === 'ertele' || islem === 'ertele15' || islem === 'ertele60' || islem === 'erteleYarin' || (islem && islem.indexOf('ozel:')===0)){
       var _ozel = (islem && islem.indexOf('ozel:')===0);
