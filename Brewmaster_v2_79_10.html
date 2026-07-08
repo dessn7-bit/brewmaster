@@ -7997,6 +7997,81 @@ window.bmProfilAnaliz = function(){
   }catch(e){ try{console.warn('bmProfilAnaliz',e);}catch(_){} }
   return out;
 };
+
+// ═══ SPRINT Q: Kişisel kalibrasyon köprüsü (design_a1_kalibrasyon şeması) ═══
+// MOTOR DEĞİŞMEZ — köprü bmProfilAnaliz'i OKUR, tahminin YANINA kalibre satır üretir (override değil).
+// Üçlü sigorta (n=1 zararı): (1) eşik: tamamN<2 → köprü tamamen kapalı (ozet zaten null → sıfır davranış değişikliği);
+// (2) ağırlık w=min(1,(n-1)/4) — n=2→0.25, n=3→0.5, n=5+→1.0 (tek uç değer sönümlü);
+// (3) akıl bandı: |ortVerim−61|>15 puan veya |ortFgSapma|>0.010 → o metrik uygulanmaz (ölçüm hatası şüphesi).
+// bm_kaan_profil_v1 TÜRETİLMİŞ depodur: her hesapta yeniden yazılır (değiştiyse), kaybolursa yeniden türetilir,
+// export/import bm_ allowlist'iyle taşınır — sync'lenmesi şart değil.
+var _BM_VARSAYILAN_VERIM = 61; // BOS.verim ile aynı — köprünün referans varsayılanı
+window._bmKisiselProfil = function(){
+  var bos = { aktif:false, n:0, w:0, verimOrt:null, verimKalibre:null, verimBantDisi:false, fgOfset:null, fgBantDisi:false, attenOrt:null };
+  try{
+    var a = (typeof bmProfilAnaliz==='function') ? bmProfilAnaliz() : null;
+    var oz = a && a.ozet;
+    if(!oz || !oz.tamamN || oz.tamamN < 2) return bos;              // sigorta 1: eşik
+    var n = oz.tamamN, w = Math.min(1, (n-1)/4);                    // sigorta 2: ağırlık
+    var out = { aktif:false, n:n, w:w, verimOrt:oz.ortVerim, verimKalibre:null, verimBantDisi:false, fgOfset:null, fgBantDisi:false, attenOrt:oz.ortAtten };
+    if(oz.ortVerim != null){
+      if(Math.abs(oz.ortVerim - _BM_VARSAYILAN_VERIM) > 15) out.verimBantDisi = true;  // sigorta 3 (verim)
+      else { out.verimKalibre = Math.round((_BM_VARSAYILAN_VERIM*(1-w) + oz.ortVerim*w)*10)/10; out.aktif = true; }
+    }
+    if(oz.ortFgSapma != null){
+      if(Math.abs(oz.ortFgSapma) > 0.010) out.fgBantDisi = true;                       // sigorta 3 (FG)
+      else { out.fgOfset = Math.round(oz.ortFgSapma*w*1000)/1000; out.aktif = true; }
+    }
+    try{ // türetilmiş depo — değişmediyse yazma (her render'da gereksiz LS yazımı olmasın)
+      var depo = { ver:1, guncelTs:Date.now(), n:n, verim:oz.ortVerim, fgOfset:oz.ortFgSapma, atten:oz.ortAtten, mayaBazli:{} };
+      var eskiRaw = localStorage.getItem('bm_kaan_profil_v1');
+      var eski = eskiRaw ? JSON.parse(eskiRaw) : null;
+      if(!eski || eski.n!==depo.n || eski.verim!==depo.verim || eski.fgOfset!==depo.fgOfset || eski.atten!==depo.atten)
+        localStorage.setItem('bm_kaan_profil_v1', JSON.stringify(depo));
+    }catch(_d){}
+    return out;
+  }catch(e){ return bos; }
+};
+// Hesap sekmesi "Sana göre" satırı — motor satırı (sticky özet + kartlar) DOKUNULMAZ, bu EK karttır.
+window._bmKisiselSatirHtml = function(){
+  try{
+    var kp = window._bmKisiselProfil();
+    if(!kp || kp.n < 2) return '';                                   // n<2 → sıfır UI
+    if(!kp.aktif){
+      if(!(kp.verimBantDisi || kp.fgBantDisi)) return '';
+      return '<div class="kart" style="padding:8px 12px;font-size:12px;color:var(--metin-soluk)">📊 Kişisel kalibrasyon: veri tutarsız görünüyor ('+kp.n+' demleme — ölçümleri kontrol et), varsayılan tahmin kullanılıyor.</div>';
+    }
+    var par = [];
+    if(kp.verimKalibre != null){
+      var ogK = null;
+      try{ ogK = hOG(S.maltlar, kp.verimKalibre, S.katkilar||[], S.hacim||11); }catch(_o){}
+      if(ogK && ogK > 1) par.push('OG '+ogK.toFixed(3)+' <span style="color:var(--metin-soluk)">(verim %'+kp.verimKalibre+')</span>');
+    }
+    if(kp.fgOfset != null){
+      var c2 = null; try{ c2 = calc(); }catch(_c){}
+      if(c2 && c2.fgHesap >= 1) par.push('FG '+(Math.round((c2.fgHesap + kp.fgOfset)*1000)/1000).toFixed(3));
+    }
+    if(!par.length) return '';
+    var uyari = (kp.verimBantDisi || kp.fgBantDisi) ? ' · <span style="color:var(--bakir)">bir metrik bant dışı (uygulanmadı)</span>' : '';
+    return '<div class="kart" style="padding:8px 12px;font-size:12px">📊 <b>Sana göre:</b> '+par.join(' · ')+' <span style="color:var(--metin-soluk)">(senin ort. — '+kp.n+' demleme, ağırlık %'+Math.round(kp.w*100)+')'+uyari+'</span></div>';
+  }catch(_e){ return ''; }
+};
+// Malt sekmesi verim öneri-chip'i — KULLANICI ONAYLI (otomatik yazmaz; design_a1 ilkesi).
+window._bmVerimChipHtml = function(){
+  try{
+    var kp = window._bmKisiselProfil();
+    if(!kp || kp.n < 2) return '';                                   // n<2 → sıfır UI
+    if(kp.verimBantDisi) return '<div style="margin-bottom:6px;font-size:11px;color:var(--metin-soluk)">📊 Gerçek ortalaman %'+kp.verimOrt+' ('+kp.n+' demleme) — <b>bant dışı</b>, kalibrasyona alınmadı (ölçümleri kontrol et).</div>';
+    if(kp.verimKalibre == null) return '';
+    var oneri = Math.round(kp.verimKalibre);
+    if(S.verim === oneri) return '<div style="margin-bottom:6px;font-size:11px;color:var(--metin-soluk)">📊 Verim %'+S.verim+' — kişisel kalibrasyonla uyumlu (senin ort. %'+kp.verimOrt+', '+kp.n+' demleme).</div>';
+    return '<div style="margin-bottom:6px;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--metin-soluk)">'+
+      '<span style="flex:1">📊 Gerçek ortalaman %'+kp.verimOrt+' ('+kp.n+' demleme) → kalibre öneri <b>%'+oneri+'</b></span>'+
+      '<button class="btn" onclick="S.verim='+oneri+';render()" style="padding:4px 10px;font-size:11px;background:var(--altin);color:#fff;border:none;border-radius:6px;font-weight:700;cursor:pointer">Uygula</button>'+
+    '</div>';
+  }catch(_e){ return ''; }
+};
+
 // G1 — SONUCU DÜZELT: yazım hatası kurtarma. Donmuş brewSonuc'a TEK bilinçli istisna;
 // otomatik yazım guard'ları (ezilmezlik) AYNEN kalır. kaynak:'duzeltme' + duzeltmeTs iz bırakır.
 window.bmSonucDuzelt = function(rid){
@@ -15556,7 +15631,7 @@ ${batchOlcekKartHtml()}
 })();
 
   // 5 akordiyon caller-wrap (besin değerleri opsiyonel og>1.001)
-  return _bmAccWrap('hesap-bath',    '🥃', 'Batç Hacmi',           _meta1, _kartBatch,   true)
+  return (typeof _bmKisiselSatirHtml==='function'?_bmKisiselSatirHtml():'') + _bmAccWrap('hesap-bath',    '🥃', 'Batç Hacmi',           _meta1, _kartBatch,   true)
        + _bmAccWrap('hesap-renk', '🎨', 'Renk / SRM', '', _kartRenk, false)
        + _bmAccWrap('hesap-su',      '💧', 'Su Hesabı',            _meta4, _kartSu,      true)
        + _bmAccWrap('hesap-strike', '🌡️', 'Mash Strike Sıcaklığı', '', _kartStrike, false)
@@ -16357,6 +16432,7 @@ function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
         ${[55,60,61,62,65,70].map(v=>`<button class="btn" style="flex:1;min-width:50px;padding:7px 0;border:1.5px solid ${S.verim===v?"var(--altin)":"var(--bor)"};background:${S.verim===v?"var(--sa)":"var(--card)"};color:${S.verim===v?"var(--bakir)":"var(--soluk)"};font-weight:${S.verim===v?700:500}" onclick="S.verim=${v};render()">%${v}</button>`).join("")}
         <input aria-label="Verim (%)" type="number" class="inp" style="width:70px;text-align:center;font-weight:${![55,60,61,62,65,70].includes(S.verim)?700:500};${![55,60,61,62,65,70].includes(S.verim)?'border:1.5px solid var(--altin);background:var(--sa);color:var(--bakir);':''}" placeholder="Özel" min="30" max="95" value="${![55,60,61,62,65,70].includes(S.verim)?S.verim:''}" onchange="var v=parseInt(this.value);if(v>=30&&v<=95){S.verim=v;render();}">
       </div>
+      ${typeof _bmVerimChipHtml==='function'?_bmVerimChipHtml():''}
       <div style="margin-bottom:12px">
         <div onclick="(function(el){var c=el.nextElementSibling;var o=c.style.maxHeight==='0px'||!c.style.maxHeight;c.style.maxHeight=o?c.scrollHeight+'px':'0px';c.style.opacity=o?'1':'0';el.querySelector('.ok-t').textContent=o?'▲':'▼';})(this)" style="display:flex;align-items:center;gap:6px;padding:7px 10px;background:var(--bg2);border:1px solid var(--bor);border-radius:8px;cursor:pointer;user-select:none;font-size:11px;color:var(--soluk);font-weight:600">
           <span>💡</span><span style="flex:1">Verimi nasıl ölçersiniz?</span>

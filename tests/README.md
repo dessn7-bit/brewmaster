@@ -35,6 +35,11 @@ Süre: ~15-20 sn (19 case).
 | N1 | N | `_draftKrAyniMi`: guncelleme-only=AYNI, duzeltmeTs/içerik=FARKLI |
 | N2 | N | ghost-draft entegrasyon: sync damgası draft yazdırmaz, gerçek fark yazdırır |
 | O1 | O | bm-hata-boot ilk script, boot temiz, uncaught hata ring buffer'a düşer, temizle çalışır |
+| Q-ESIK | Q | n<2: kalibrasyon köprüsü kapalı, sıfır yeni UI, varsayılan %61 |
+| Q-W25 | Q | n=2: w=0.25, kalibre=61·(1-w)+ort·w, gösterge görünür, onay-chip otomatik yazmaz |
+| Q-CLAMP | Q | n=5: w=1.0 clamp, kalibre = gerçek ortalama |
+| Q-BANT | Q | akıl bandı: |ort−61|>15 puan veya |fgSapma|>0.010 → uygulanmaz, uyarı gösterilir |
+| Q-SEFFAF | Q | köprü aktifken motor ogHesap/sticky özet değişmez (override değil) |
 | H-LATCH-1..3 | H | worker `_mergeAlarms`: terminal latch (ts-eşit), re-arm (ts-fark), pushedTs koruma |
 | K-PING-1..2 | K | worker pseudo-ts toleransı: 12h içi normalize (latch korunur) / dışı reschedule |
 

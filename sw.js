@@ -667,7 +667,9 @@
 // bump v131-160 -> v131-161.
 // Sprint O (2026-07-08): global hata gunlugu — bm-hata-boot (window.onerror + unhandledrejection -> bm_hata_log_v1 ring 50)
 // + Tani kartinda "Son Hatalar" / panoya kopyala / temizle. bump v131-373 -> v131-374.
-const CACHE_VERSION = 'bm-cache-v131-374';
+// Sprint Q (2026-07-08): kisisel kalibrasyon koprusu — _bmKisiselProfil (esik n>=2 + w=(n-1)/4 + akil bandi),
+// Hesap "Sana gore" satiri + Malt verim oneri-chip (onayli). Motor degismedi. bump v131-374 -> v131-375.
+const CACHE_VERSION = 'bm-cache-v131-375';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.

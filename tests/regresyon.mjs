@@ -409,6 +409,137 @@ const CASELER = [
       });
       return c1.concat(c2);
     }
+  },
+
+  // ── SPRINT Q: kişisel kalibrasyon köprüsü ──
+  // Sentetik tamamlanmış demleme kurucusu her case içinde: fixture'ın maltlı reçetesinden
+  // F/M (hOG lineer) türetilir, hedef verime denk ogG ile brewSonuc'lu kayıtlar üretilir.
+  {
+    kod: 'Q-ESIK', ad: 'n<2 (gerçek yedek): köprü kapalı, sıfır yeni UI, varsayılan %61',
+    calistir: (page) => page.evaluate(() => {
+      const kp = _bmKisiselProfil();
+      __REG.ok('köprü kapalı (aktif=false)', kp && kp.aktif === false && kp.verimKalibre === null, 'n=' + kp.n);
+      __REG.ok('Hesap satırı boş', _bmKisiselSatirHtml() === '');
+      __REG.ok('Malt chip boş', _bmVerimChipHtml() === '');
+      __REG.ok('varsayılan verim 61 (BOS)', BOS.verim === 61);
+      const src = KR.find(r => r && Array.isArray(r.maltlar) && r.maltlar.length > 0);
+      __REG.ok('fixture reçetesi var', !!src);
+      if (src) { tarifAc(src.id); __REG.ok('Hesap sekmesinde "Sana göre" YOK', rEditorHesap(calc().og, calc().fg, calc().abv, calc().maya).indexOf('Sana göre') === -1); }
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'Q-W25', ad: 'n=2 sentetik: w=0.25, kalibre=61·0.75+ort·0.25, gösterge görünür, onay-chip otomatik YAZMAZ',
+    calistir: (page) => page.evaluate(() => {
+      const src = KR.find(r => r && Array.isArray(r.maltlar) && r.maltlar.length > 0);
+      const h = src.hacim != null ? +src.hacim : 11;
+      const F = hOG(src.maltlar, 0, src.katkilar || [], h) - 1;
+      const M = (hOG(src.maltlar, 100, src.katkilar || [], h) - 1 - F) / 100;
+      KR.length = 0; // izole context — fixture'ın kendi tamamlanmışları n'i kirletmesin
+      for (let i = 0; i < 2; i++) {
+        const ogG = Math.round((1 + F + M * 69) * 1000) / 1000;
+        KR.unshift({ id: 'regq2-' + i, biraAd: 'REGTEST Q2 ' + i, durum: 'arsiv', hacim: h, verim: 61,
+          maltlar: JSON.parse(JSON.stringify(src.maltlar)), katkilar: JSON.parse(JSON.stringify(src.katkilar || [])),
+          brewSnapshot: { ts: 1000 + i, ogT: Math.round((1 + F + M * 61) * 1000) / 1000, fgT: 1.012, verimVarsayim: 61, hacim: h },
+          brewSonuc: { ts: 2000 + i, ogG: ogG, fgG: 1.016, kaynak: { og: 'olcum', fg: 'olcum' } },
+          brewLog: [{ id: 'rq2' + i, ts: 1500 + i, tip: 'og_olcum', deger: String(ogG) }] });
+      }
+      _origKy(KR);
+      const kp = _bmKisiselProfil();
+      __REG.ok('n=2 algılandı', kp.n === 2, 'n=' + kp.n);
+      __REG.ok('w=0.25', kp.w === 0.25);
+      __REG.ok('ortVerim ≈ 69 (±1.5 — ogG 3hane yuvarlama)', kp.verimOrt != null && Math.abs(kp.verimOrt - 69) < 1.5, String(kp.verimOrt));
+      const beklenen = Math.round((61 * 0.75 + kp.verimOrt * 0.25) * 10) / 10;
+      __REG.ok('kalibre formülü doğru', kp.verimKalibre === beklenen, kp.verimKalibre + ' vs ' + beklenen);
+      __REG.ok('fgOfset = ort×0.25 (0.004×0.25=0.001)', kp.fgOfset === 0.001, String(kp.fgOfset));
+      const chip = _bmVerimChipHtml();
+      __REG.ok('chip "Gerçek ortalaman" + Uygula butonu', chip.indexOf('Gerçek ortalaman') > -1 && chip.indexOf('Uygula') > -1);
+      tarifAc(KR[0].id);
+      __REG.ok('onay-chip OTOMATİK YAZMADI (S.verim hâlâ 61)', S.verim === 61);
+      __REG.ok('Hesap "Sana göre" satırı görünür', _bmKisiselSatirHtml().indexOf('Sana göre') > -1);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'Q-CLAMP', ad: 'n=5 sentetik: w=1.0 clamp, kalibre = gerçek ortalama',
+    calistir: (page) => page.evaluate(() => {
+      const src = KR.find(r => r && Array.isArray(r.maltlar) && r.maltlar.length > 0);
+      const h = src.hacim != null ? +src.hacim : 11;
+      const F = hOG(src.maltlar, 0, src.katkilar || [], h) - 1;
+      const M = (hOG(src.maltlar, 100, src.katkilar || [], h) - 1 - F) / 100;
+      KR.length = 0;
+      for (let i = 0; i < 5; i++) {
+        const ogG = Math.round((1 + F + M * 69) * 1000) / 1000;
+        KR.unshift({ id: 'regq5-' + i, biraAd: 'REGTEST Q5 ' + i, durum: 'arsiv', hacim: h, verim: 61,
+          maltlar: JSON.parse(JSON.stringify(src.maltlar)), katkilar: JSON.parse(JSON.stringify(src.katkilar || [])),
+          brewSnapshot: { ts: 1000 + i, ogT: 1.05, fgT: 1.012, verimVarsayim: 61, hacim: h },
+          brewSonuc: { ts: 2000 + i, ogG: ogG, fgG: 1.016, kaynak: { og: 'olcum', fg: 'olcum' } },
+          brewLog: [{ id: 'rq5' + i, ts: 1500 + i, tip: 'og_olcum', deger: String(ogG) }] });
+      }
+      _origKy(KR);
+      const kp = _bmKisiselProfil();
+      __REG.ok('n=5, w=1.0 clamp', kp.n === 5 && kp.w === 1, 'n=' + kp.n + ' w=' + kp.w);
+      __REG.ok('kalibre = gerçek ort (w=1)', kp.verimKalibre === kp.verimOrt, kp.verimKalibre + ' vs ' + kp.verimOrt);
+      __REG.ok('fgOfset tam ağırlıklı (0.004)', kp.fgOfset === 0.004, String(kp.fgOfset));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'Q-BANT', ad: 'akıl bandı: absürt ort verim (%120 hedefli) → kalibrasyona ALINMAZ, varsayılan korunur',
+    calistir: (page) => page.evaluate(() => {
+      const src = KR.find(r => r && Array.isArray(r.maltlar) && r.maltlar.length > 0);
+      const h = src.hacim != null ? +src.hacim : 11;
+      const F = hOG(src.maltlar, 0, src.katkilar || [], h) - 1;
+      const M = (hOG(src.maltlar, 100, src.katkilar || [], h) - 1 - F) / 100;
+      KR.length = 0;
+      for (let i = 0; i < 3; i++) {
+        const ogG = Math.round((1 + F + M * 120) * 1000) / 1000; // absürt: %120 verime denk ölçüm
+        KR.unshift({ id: 'regqb-' + i, biraAd: 'REGTEST QB ' + i, durum: 'arsiv', hacim: h, verim: 61,
+          maltlar: JSON.parse(JSON.stringify(src.maltlar)), katkilar: JSON.parse(JSON.stringify(src.katkilar || [])),
+          brewSnapshot: { ts: 1000 + i, ogT: 1.05, fgT: 1.012, verimVarsayim: 61, hacim: h },
+          brewSonuc: { ts: 2000 + i, ogG: ogG, fgG: 1.042, kaynak: { og: 'olcum', fg: 'olcum' } }, // fgSapma 0.030 da bant dışı
+          brewLog: [{ id: 'rqb' + i, ts: 1500 + i, tip: 'og_olcum', deger: String(ogG) }] });
+      }
+      _origKy(KR);
+      const kp = _bmKisiselProfil();
+      __REG.ok('verim bant dışı işaretlendi', kp.verimBantDisi === true && kp.verimKalibre === null, 'ort=' + kp.verimOrt);
+      __REG.ok('FG bant dışı işaretlendi', kp.fgBantDisi === true && kp.fgOfset === null);
+      __REG.ok('köprü uygulanmadı (aktif=false)', kp.aktif === false);
+      __REG.ok('chip "bant dışı" uyarısı (Uygula YOK)', _bmVerimChipHtml().indexOf('bant dışı') > -1 && _bmVerimChipHtml().indexOf('Uygula') === -1);
+      __REG.ok('Hesap satırı "veri tutarsız" bilgisi', _bmKisiselSatirHtml().indexOf('veri tutarsız') > -1);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'Q-SEFFAF', ad: 'şeffaflık: köprü aktifken motor tahmini (ogHesap/sticky) DEĞİŞMEZ — override değil kalibrasyon',
+    calistir: (page) => page.evaluate(() => {
+      const src = KR.find(r => r && Array.isArray(r.maltlar) && r.maltlar.length > 0);
+      const h = src.hacim != null ? +src.hacim : 11;
+      const F = hOG(src.maltlar, 0, src.katkilar || [], h) - 1;
+      const M = (hOG(src.maltlar, 100, src.katkilar || [], h) - 1 - F) / 100;
+      KR.length = 0;
+      for (let i = 0; i < 5; i++) {
+        const ogG = Math.round((1 + F + M * 69) * 1000) / 1000;
+        KR.unshift({ id: 'regqs-' + i, biraAd: 'REGTEST QS ' + i, durum: 'arsiv', hacim: h, verim: 61,
+          maltlar: JSON.parse(JSON.stringify(src.maltlar)), katkilar: JSON.parse(JSON.stringify(src.katkilar || [])),
+          brewSnapshot: { ts: 1000 + i, ogT: 1.05, fgT: 1.012, verimVarsayim: 61, hacim: h },
+          brewSonuc: { ts: 2000 + i, ogG: ogG, fgG: 1.016, kaynak: { og: 'olcum', fg: 'olcum' } },
+          brewLog: [{ id: 'rqs' + i, ts: 1500 + i, tip: 'og_olcum', deger: String(ogG) }] });
+      }
+      _origKy(KR);
+      tarifAc(KR[0].id);
+      const onceOg = calc().ogHesap, onceVerim = S.verim;
+      const satir = _bmKisiselSatirHtml(); // köprü hesabı çalışsın
+      const sonraOg = calc().ogHesap;
+      __REG.ok('köprü aktif ("Sana göre" üretildi)', satir.indexOf('Sana göre') > -1);
+      __REG.ok('motor ogHesap DEĞİŞMEDİ', onceOg === sonraOg, onceOg + ' vs ' + sonraOg);
+      __REG.ok('S.verim DEĞİŞMEDİ (onaysız yazım yok)', S.verim === onceVerim && S.verim === 61);
+      const hesapHtml = rEditorHesap(calc().og, calc().fg, calc().abv, calc().maya);
+      __REG.ok('motor kartları duruyor (Batç Hacmi)', hesapHtml.indexOf('Batç Hacmi') > -1);
+      __REG.ok('"Sana göre" EK satır olarak eklendi', hesapHtml.indexOf('Sana göre') > -1);
+      __REG.ok('sticky özet OG motor değeri (render sonrası)', (function(){ render(); const e = document.getElementById('ss-og'); return e && e.textContent === calc().og.toFixed(3); })());
+      return __REG.al();
+    })
   }
 ];
 
