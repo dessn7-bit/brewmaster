@@ -13018,7 +13018,7 @@ function rEditorTakvim(maya, maya2, tv){
               if(n.includes('tatl')||n.includes('seker'))
                 lines.push({i:'💡', t:'Tatlılık: Fermentasyon henüz bitmemiş olabilir — FG ölçümü önerilir.'});
               if(n.includes('tereyag')||n.includes('yag')||n.includes('diacetyl'))
-                lines.push({i:'⚠️', t:'Tereyağı notu = diacetyl. Çözüm: 1–2 gün daha fermente et, sıcaklığı 18–20°C ye çık (diacetyl rest).'});
+                lines.push({i:'⚠️', t:'Tereyağı notu = diacetyl. '+(window._bmOffKisaCozum?window._bmOffKisaCozum('diacetyl'):'Çözüm: 18–20°C diacetyl rest.')});
               if(n.includes('bulanik')||n.includes('tortu'))
                 lines.push({i:'💡', t:'Bulanıklık: Soğukta (2–4°C) 24–48 saat daha beklet.'});
               if(n.includes('asit')||n.includes('eksi'))
@@ -16025,8 +16025,9 @@ function rEditorNot(){
   } catch(e){}
 
   // Off-flavor listesi
-  var _tOff = ['diacetyl','DMS','acetaldehyde','fusel','oxidized','astringent','light-struck','solvent'];
-  var _tOffAd = {diacetyl:'Diacetyl (tereyağı)',DMS:'DMS (haşlanmış mısır)',acetaldehyde:'Acetaldehyde (yeşil elma)',fusel:'Fusel (solvent/alkol)',oxidized:'Oksidasyon (kartonvari)',astringent:'Astringent (tanen)','light-struck':'Işık hasarı (skunk)',solvent:'Solvent (aseton)'};
+  var _tOff = (window._OFF_KODLAR && window._OFF_KODLAR.length) ? window._OFF_KODLAR.slice() : ['diacetyl','DMS','acetaldehyde','fusel','oxidized','astringent','light-struck','solvent'];
+  var _tOffAd = {};
+  _tOff.forEach(function(k){ _tOffAd[k] = (window._OFF_TESHIS && window._OFF_TESHIS[k] && window._OFF_TESHIS[k].ad) || k; });
   var _tadimToplam = (_T.aroma||0)+(_T.gorunum||0)+(_T.tat||0)+(_T.agizH||0)+(_T.genel||0);
 
   var _tadimSeviye = '';
@@ -16054,9 +16055,12 @@ function rEditorNot(){
 
   var _tOffHtml = _tOff.map(function(k){
     var checked=_T.offList&&_T.offList[k];
-    return '<label id="_tOffLbl_'+k+'" style="display:inline-flex;align-items:center;gap:4px;font-size:var(--fs-xs);color:var(--kahve);margin:3px 6px 3px 0;cursor:pointer;padding:4px 10px;background:'+(checked?'var(--crit-bg)':'var(--bg2)')+';border-radius:12px;border:1px solid '+(checked?'var(--crit)':'var(--bor)')+';transition:background 0.15s,border-color 0.15s">'
-      +'<input type="checkbox" '+(checked?'checked':'')+' onchange="tadimOff(\''+k+'\',this.checked)" style="accent-color:var(--crit);margin:0"> '+_tOffAd[k]
-    +'</label>';
+    return '<span style="display:inline-flex;align-items:center;gap:3px;margin:3px 6px 3px 0;vertical-align:middle">'
+      +'<label id="_tOffLbl_'+k+'" style="display:inline-flex;align-items:center;gap:4px;font-size:var(--fs-xs);color:var(--kahve);cursor:pointer;padding:4px 10px;background:'+(checked?'var(--crit-bg)':'var(--bg2)')+';border-radius:12px;border:1px solid '+(checked?'var(--crit)':'var(--bor)')+';transition:background 0.15s,border-color 0.15s">'
+        +'<input type="checkbox" '+(checked?'checked':'')+' onchange="tadimOff(\''+k+'\',this.checked)" style="accent-color:var(--crit);margin:0"> '+_tOffAd[k]
+      +'</label>'
+      +'<button type="button" onclick="bmOffTeshis(\''+k+'\')" aria-label="'+_tOffAd[k]+' teşhis bilgisi — neden ve çözüm" title="Teşhis: neden, çözüm, önleme" style="flex:none;width:22px;height:22px;border-radius:50%;font-size:12px;font-weight:700;color:var(--bakir);background:var(--bg2);border:1px solid var(--bor);cursor:pointer;line-height:1;padding:0">?</button>'
+    +'</span>';
   }).join('');
 
   // Aktif oturumlar — kendi accordion grubuna çıkıyor (134-E)
@@ -16129,6 +16133,7 @@ function rEditorNot(){
     +_tadimInput('genel', _T.genel, 10, '⭐ Genel izlenim', null)
     +'<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bor)">'
       +'<div style="font-size:var(--fs-xs);font-weight:700;color:var(--kahve);letter-spacing:.5px;margin-bottom:6px">⚠️ OFF-FLAVOR KONTROLÜ</div>'
+      +'<div style="font-size:var(--fs-xs);color:var(--soluk);margin-bottom:6px;line-height:1.4">İşaretle · her etiketin <b>?</b> düğmesi olası neden, çözüm ve önlemi gösterir</div>'
       +'<div style="line-height:1.9">'+_tOffHtml+'</div>'
     +'</div>'
     +'<div style="margin-top:10px">'
@@ -24252,6 +24257,191 @@ function tadimInc(alan, delta, max){
 }
 window.tadimInc=tadimInc;
 
+// ═══════════════════════════════════════════════════════════════════════════
+// SPRINT U1a — OFF-FLAVOR TEŞHİS BİLGİ TABANI + STATİK TEŞHİS KARTI
+// Kaynak: design_offflavor_teshis (14 aile, adversaryal doğrulanmış — Weizen karanfil-sıcaklık
+// yönü, asetaldehit Zymomonas/Acetobacter, kükürt maya geri-emilimi, asetik≠yeşil elma vb. HAKEM
+// tarafından düzeltilmiş; buradaki içerik o düzeltilmiş bilgidir, değiştirme). Tag kodları tadım
+// offList ile BİREBİR aynı (geriye uyumlu). v1a STATİK — batch-verisi (sıcaklık/maya/FG) okumaz (U2).
+// NOT: kaliteSkoru sıcaklık-std→risk (satır ~5256) bir PUANLAMA motoru; bilinçli AYRI bırakıldı
+// (bozma riski). Timeline diacetyl keyword (~13021) buradaki _bmOffKisaCozum'a yönlendirildi (tek kaynak).
+// ═══════════════════════════════════════════════════════════════════════════
+window._OFF_KODLAR = ['diacetyl','DMS','acetaldehyde','fusel','oxidized','astringent','light-struck','solvent','acetic','chlorophenol','sulfur','metallic','infection','phenolic'];
+window._OFF_TESHIS = {
+  diacetyl: {
+    ad: "Diacetyl (tereyağı)",
+    trDil: ["tereyağı gibi","sinema/patlamış mısır tereyağı","butterscotch (karamelize tereyağ-şeker)","kaygan-yağlı ağız hissi","margarin gibi"],
+    kokNeden: ["Erken şişeleme/soğutma + diacetyl rest atlanması (en sık): maya alfa-asetolaktatı diacetile çevirip temizleyemedi","Zayıf/az maya (düşük pitch, eski/bitkin maya)","Maya suşu bazılarını geç temizler (İngiliz Ringwood tipi)","Bakteriyel enfeksiyon — asıl üretici Pediococcus (Lactobacillus daha az üretir)"],
+    kurtarilir: { seviye:"kısmen", nasil:"Fermentördeyse: 18–21°C'ye çıkar + mayayı hafif rouse, 2–5 gün bekle (klasik diacetyl rest, gerçekten işe yarar). Şişede canlı maya varsa ılık kondisyon (18–21°C, 1–3 hafta) kısmen indirebilir — garantisiz. Maya bittiyse veya enfeksiyonsa: HAYIR, kurtarılamaz." },
+    onlem: ["Fermantasyonun son çeyreğinde (SG hedefe ~2–5 puan kala) 2–3 gün 18–21°C diacetyl rest yap; cold-crash'ten ÖNCE","Erken şişeleme yapma; gravity 2–3 gün üst üste sabit olsun","Yeterli ve taze/sağlıklı maya at (doğru pitch rate)","Sıkı sanitasyon — Pedio/Lacto enfeksiyonu şişe-sonrası tereyağının tek kalkanı"],
+    ayiriciSoru: ["Tereyağı ZAMANLA artıyor mu (bira yaşlandıkça daha tereyağlı)? Ekşilik/bulanıklık/yağ-film eşlik ediyor mu? → EVET ise bakteriyel enfeksiyon (Pediococcus), kurtarılamaz. Sabit/baştan beri varsa fermantasyon kaynaklı VDK, kurtarılabilir."],
+    stilNotu: "Geleneksel Çek/Bohemian Pilsner ve bazı İngiliz Bitter/Scottish Ale'de eşik-altı hafif tereyağ kabul edilir. Weizen/Weizenbock, Belçika Dubbel ve temiz lager/ale'de açık kusur."
+  },
+  DMS: {
+    ad: "DMS (haşlanmış mısır)",
+    trDil: ["haşlanmış mısır","konserve mısır","kremalı mısır (creamed corn)","haşlanmış lahana","konserve sebze suyu"],
+    kokNeden: ["Zayıf/kapaklı kaynatma (en sık): SMM ısıyla DMS'e döner, ancak GÜÇLÜ KAPAKSIZ kaynatmada buharla uçar; kapakta kondensat DMS'i geri damlatır","Yavaş soğutma / no-chill: wort 60°C altına inene kadar DMS üretilir ama artık uçmaz, birikir","Yüksek-SMM açık malt (Pilsner/pale) — all-Pilsner grist'te 60 dk yetmez, 90 dk kaynat","Bakteriyel bulaşma (Obesumbacterium): DMSO→DMS; fermantasyon SONRASI çıkan DMS bunu işaret eder"],
+    kurtarilir: { seviye:"hayır", nasil:"Şişedeki belirgin DMS uçurulamaz — kurtarılamaz. Hâlâ fermentördeyse aktif fermantasyon CO2'si bir miktar sıyırır (kısmi, garantisiz). Kaynatma sonrası henüz fark edildiyse: 10–15 dk güçlü açık ek kaynatma + hemen hızlı soğutma tek kurtarma penceresidir." },
+    onlem: ["Güçlü, görünür kaynayan, KAPAKSIZ en az 60 dk kaynat (%8+ buharlaşma); kapağı asla tam kapatma","All-Pilsner/pale grist'te kaynatmayı 90 dk'ya çıkar","Kaynatma biter bitmez HIZLI soğut (60°C altına en kısa sürede); wort'u sıcak-yavaş bekletme","Soğutulmuş worta hızlı sağlıklı maya + sıkı sanitasyon (bakteriyel rotayı engeller)"],
+    ayiriciSoru: ["DMS fermantasyondan ÖNCE mi vardı (kaynatma/soğutma kaynaklı, en olası) yoksa fermantasyon SONRASI mı çıktı (bakteriyel bulaşma, farklı sorun)? Haşlanmış mısır DMS'tir; çürük yumurta/kibrit ise kükürttür (ayrı aile)."],
+    stilNotu: "Düşük seviye DMS pale lager/Pilsner/Helles'te kusur DEĞİL, stil-uyumlu olabilir. Tüm ale stillerinde ve yoğun seviyede kusur. Weizen/Belçika stillerinde istenmez."
+  },
+  acetaldehyde: {
+    ad: "Acetaldehyde (yeşil elma)",
+    trDil: ["yeşil elma","ham/olmamış elma","elma şarabı gibi (cidery)","taze kesilmiş kabak","boya/latex kokusu"],
+    kokNeden: ["Erken şişeleme / yeşil bira (en sık): fermantasyon+olgunlaşma bitmeden maya asetaldehiti henüz etanole indirgemedi","Zayıf maya / yetersiz pitch — temizlik fazını tamamlayamıyor","Fermantasyonu erken soğutup durdurma (stuck) veya dalgalı/stresli sıcaklık","Fermantasyon SONRASI oksijen teması — etanolün asetaldehite geri oksidasyonu (bayat birada)"],
+    kurtarilir: { seviye:"kısmen", nasil:"Yeşil bira kaynaklıysa (maya hâlâ canlı ve temiz): birayı maya üzerinde 18–20°C'de 1–2 hafta beklet — maya asetaldehiti tekrar etanole indirger. AMA oksidasyon kaynaklıysa (bayat, O2 kapmış): KALICI, kurtarılamaz." },
+    onlem: ["FG 2–3 gün üst üste sabit olmadan şişeleme","Fermantasyon sonu 2–3 gün 18–20°C'ye çıkar (asetaldehit+diasetil+H2S birlikte temizlenir)","Yeterli taze/sağlıklı maya at (underpitch'ten kaçın), wort'u iyi oksijenle","Transfer/şişelemede oksijen kapmayı minimize et"],
+    ayiriciSoru: ["Bira çok TAZE/genç mi (maya var) → kurtarılabilir yeşil bira. Yaşlı/oksitlenmiş, kartonsu notlarla mı → kalıcı oksidasyon asetaldehiti. Boya/latex + kabak notu asetaldehide özgüdür (esterle karışmaz)."],
+    stilNotu: "Düşük seviye asetaldehit American/International Light Lager ve Kellerbier'de to-style olabilir. Weizen/Dubbel gibi stillerde istenmez, temiz olmalı."
+  },
+  fusel: {
+    ad: "Fusel (solvent/alkol)",
+    trDil: ["çözücü/tiner gibi","yakıcı sıcak alkol","boğazı/dili yakan","ispirto/kolonya gibi","ucuz votka/rakı gibi sert"],
+    kokNeden: ["Yüksek fermantasyon sıcaklığı (en yaygın ve en güvenilir): >22–24°C, özellikle ilk 2–3 günün ekzotermik pikinde bira kendini ısıtır","Yetersiz maya (underpitch)/düşük maya sağlığı — büyüme fazı uzar, daha çok fusel","Pitch öncesi yetersiz oksijenlenme","Yüksek OG / bol basit şeker (ozmotik+besin stresi)"],
+    kurtarilir: { seviye:"hayır", nasil:"Fuseller uçmaz, oluştu mu tam geri dönüş yok — bu batch düzelmez. Uzun soğuk/oda-ısısı yaşlandırma (haftalar-aylar) bir kısmını esterleşmeyle yumuşatır (güçlü biralarda belirgin fayda). Temiz batch ile blend seyreltir. Çok soğuk servis algıyı geçici bastırır." },
+    onlem: ["Fermantasyonu maya aralığının alt-orta bandında tut (nötr ale için 18–20°C); ilk 3 gün sıcaklığı sıkı kontrol et — en etkili tek önlem","Yeterli sağlıklı maya at (yüksek OG'de starter)","Wort'u pitch öncesi iyi oksijenle","OG'yi makul tut, aşırı basit şeker/bal ekleme"],
+    ayiriciSoru: ["Yakıcı-sıcak alkol hissi mi (fusel) yoksa oje/aseton kokusu mu (o daha çok etil asetat = ester/solvent ailesi)? İkisi karışabilir ama ayrı eksendir."],
+    stilNotu: "Her stilde kusur; yüksek-ABV stillerde (Weizenbock, Dubbel, Barleywine) düşük seviye ısı-hissi tolere edilir. Fuseller büyüme fazında oluşur — sonradan tortu-beklemesi YENİ fusel üretmez."
+  },
+  oxidized: {
+    ad: "Oksidasyon (kartonvari)",
+    trDil: ["ıslak/nemli karton","mukavva/eski kağıt","bayat, tazeliğini yitirmiş","havasını kaçırmış yavan","sherry/şarap gibi (koyu birada)","ballanmış (yaşlanmış)"],
+    kokNeden: ["Soğuk-taraf oksijen teması (homebrew'de en baskın): transfer/şişelemede sıçratma, çalkalama, hava kapma","Şişe boyun boşluğu (headspace) O2 + yetersiz dolum","Uzun ve/veya sıcak depolama — ISI bayatlamayı üstel hızlandırır (asıl hızlandırıcı)","Demir/bakır ekipmandan geçiş metalleri katalizör (paslanmaz/camda küçük)"],
+    kurtarilir: { seviye:"hayır", nasil:"Kimyasal olarak geri döndürülemez, bira eskidikçe kötüleşir. Tek gerçekçi hamle: hafifse buzdolabında (2–4°C) tut ve hızla tüket — soğuk reaksiyonu yavaşlatır, geri almaz." },
+    onlem: ["Soğuk-taraf O2'yi minimize et: sifon ucunu kabın dibine indir, yavaş akıt, ASLA sıçratma; kapalı transfer","Şişeyi boyuna kadar doldur, headspace'i küçült; kapatmadan önce köpük oluştur (cap on foam)","Soğuk ve karanlık depola, taze iç (pale/hoppy 4–8 hafta içinde)","Paslanmaz/cam kullan, demir-bakırdan kaçın"],
+    ayiriciSoru: ["Kartonsu şikayeti mi (oksidasyon = O2+ısı+zaman) yoksa kokarca/skunk mı (o AYRI = ışık-çarpması, kartonsu değil)? Işığı oksidasyon nedeni sanma. Sıcak-taraf (HSA) homebrew'de saptanamaz; cold-side (şişeleme) O2 baskındır."],
+    stilNotu: "Koyu-güçlü yıllandırılmış stillerde (Barleywine, Old Ale, Imperial Stout) düşük sherry karakteri kusur DEĞİL, olgunlaşma sayılır. Pale/hoppy/lager'da net kusur."
+  },
+  astringent: {
+    ad: "Astringent (tanen)",
+    trDil: ["ağzım buruştu","kekremsi","demli/fazla demlenmiş çay","ağız kuruması","dişleri kamaştıran","tahıl kabuğu / ham üzüm gibi"],
+    kokNeden: ["Aşırı sparge / son şırayı çok seyreltme (en sık): gravite ~1.010 altına inip sparge pH>6 olunca kabuk tanenleri çözünür (asıl tetik pH)","Yüksek sparge suyu pH'ı (>6) + yüksek sparge sıcaklığı (>76°C) birlikte","Yüksek mash pH (>5.8), özellikle koyu maltlarda","Tahılın aşırı ince öğütülmesi (parçalanmış kabuk); ağır dry-hop (geçici hop-burn)"],
+    kurtarilir: { seviye:"hayır", nasil:"Orta-şiddetli astrenjan pratikte kurtarılamaz (tanen-protein bağı kalıcı). Hafifse 2–4 hafta soğuk olgunlaşma bir miktar polifenol-protein kompleksini çöktürüp yumuşatabilir (garantisiz). PVPP/jelatin finings kısmen bağlar." },
+    onlem: ["Mash pH'ı 5.2–5.6 tut; sparge suyunu laktik/fosforik asitle pH<6'ya çek (en etkili tavsiye — asıl tetik pH)","Sparge suyu sıcaklığını 76°C altında tut","Son şıra ~1.010'a inince sparge'ı durdur (no-sparge/BIAB riski büyük ölçüde kaldırır)","Değirmeni kabukları bütün bırakacak şekilde ayarla; Mg'yi ~30 mg/L altında tut"],
+    ayiriciSoru: ["Gerçek buruk/ağız-kuruması mı, yoksa metalik (bozuk para/demir) mı? İkisi SIK karışır, kök nedenleri farklı. 'Buruk' bazen yüksek karbonasyon, aşırı acılık (IBU) veya sülfat-ağırlıklı sudan da gelir — saf tanen değil. Astrenjan pratikte sık AŞIRI-teşhis edilir."],
+    stilNotu: "Kavrulmuş stout'ta hafif kuru-roast kenar, taze ağır dry-hop IPA'da geçici hop-burn, bazı ekşi/fıçı biralarda tolere. Çoğu temiz stilde kusur."
+  },
+  "light-struck": {
+    ad: "Işık hasarı (skunk)",
+    trDil: ["kokarca gibi","güneşte/ışıkta kalmış bira","yeşil şişe birası kokusu","keskin ot/esrar-benzeri (skunk-weed)","kükürtlü-lastiksi keskin"],
+    kokNeden: ["Doğrudan ışık teması (birincil, neredeyse tek neden): güneş VEYA floresan/LED; en etkilisi mavi/UV (350–500 nm); reaksiyon dakikalar içinde olur","Şeffaf (~%0 blok) ve yeşil (~%20) cam ışık geçirir; kahverengi (amber) cam ~%98 bloklar","Aydınlık depolama (pencere kenarı, açık raf); kısa maruziyet bile yeter","Ön koşul her zaman var: hop iso-alfa-asitleri + riboflavin — yani ışık + hoplu bira yeterli, ekstra hata gerekmez"],
+    kurtarilir: { seviye:"hayır", nasil:"MBT oluştuktan sonra evde giderilemez (tersinmez, ppt-eşik). Kalan şişeleri derhal tam karanlığa al ki daha fazla oluşmasın; hâlihazırda oluşan koku kalır. Sağlık riski yok, sadece aroma bozuk." },
+    onlem: ["Şişelemede kahverengi (amber) cam kullan; yeşil ve şeffaf şişeden kaçın","En garantili: keg / alüminyum can / crowler (ışığı %100 bloklar)","Şişe ve fermenteri karanlıkta sakla (kapalı dolap, karton, örtü); floresan/LED de tetikler","Serviste güneş altında uzun bekletme"],
+    ayiriciSoru: ["Bira hiç ışık gördü mü? Amber şişe + karanlık depoysa lightstruck OLAMAZ → 'kokarca/kükürt' büyük olasılıkla maya H2S / DMS / otoliz (farklı teşhis). Önce 'bu bira ışığa maruz kaldı mı?' sorusunu sor."],
+    stilNotu: "Yoğun-hoplu stiller (IPA, Pilsner) çok duyarlı; koyu/düşük-IBU stiller (Weizen, bazı Belçika) dayanıklı. Düşük-hop + amber şişe + karanlık depo pratiğinde olasılık düşüktür."
+  },
+  solvent: {
+    ad: "Solvent (aseton/oje)",
+    trDil: ["oje / oje çıkarıcı","aseton","tiner / çözücü","sahte meyve-çözücü karışık","keskin uçucu kimyasal"],
+    kokNeden: ["Yüksek etil asetat — genelde yüksek fermantasyon sıcaklığı + maya stresi","Yetersiz oksijenlenme / semi-anaerobik fermantasyon esteri artırır","Kontaminasyon (en dikkatli olunacak): wild yeast (Brett/Pichia/Hansenula) aerobik koşulda bol etil asetat; Acetobacter etanol+asetik asidi etil asetata çevirir","Aşırı fusel alkolün yakıcı-çözücü hissiyle örtüşebilir (ayrı eksen)"],
+    kurtarilir: { seviye:"hayır", nasil:"Yüksek etil asetat / çözücü karakteri kalıcıdır ve çoğu zaman kontaminasyon/oksidasyon işaretidir — bu batch içilebilir ama düzelmez. Temiz batch ile blend seyreltir." },
+    onlem: ["Fermantasyonu alt-orta sıcaklıkta tut (ilk 3 gün kritik)","Wort'u iyi oksijenle; sağlıklı maya çoğalması esteri düşürür","Sıkı sanitasyon — wild yeast/Acetobacter girişini önle; hava/oksijen kaçağını ekarte et","Ekipmanı iyi temizle, çizik plastiği değiştir"],
+    ayiriciSoru: ["Oje/aseton kokusu mu (etil asetat = ester ailesi, kontaminasyon şüphesi) yoksa yakıcı-sıcak alkol mu (fusel)? Aseton belirginse sanitasyon/enfeksiyon geçmişini sorgula."],
+    stilNotu: "Düşük seviye meyvemsi ester birçok stilde normaldir; belirgin oje/aseton (çözücü) her stilde kusurdur ve sıklıkla kontaminasyon / aşırı sıcak ferment / oksidasyon işaretidir."
+  },
+  acetic: {
+    ad: "Asetik (sirke)",
+    trDil: ["sirke gibi","keskin batıcı ekşi","turşu suyu","elma sirkesi","burun yakan ekşi"],
+    kokNeden: ["Asetik asit bakterisi (Acetobacter/Gluconobacter) + OKSİJEN (zorunlu aerob): headspace hava, gevşek kapak, kuru/sızdıran airlock","Fermantasyon sonrası oksijen kapma (çalkalayarak transfer, kötü conta)","Sanitasyon kusuru — özellikle MEYVE SİNEKLERİ Acetobacter'in klasik vektörüdür","Uzun/ılık ikincil olgunlaşma veya meşe-fıçı ile havalı temas"],
+    kurtarilir: { seviye:"hayır", nasil:"Oluşmuş sirke (asetik asit) biradan uzaklaştırılamaz, süreç tek yönlü. Çok erken yakaladıysan oksijeni tamamen kes (CO2 purge / ağzına kadar doldur, soğuğa al) — bakteriyi yavaşlatır ama var olan asetik asidi geri almaz. Temiz batch ile blend seyreltir." },
+    onlem: ["Fermantasyon sonrası oksijeni minimize et (sıçratmadan transfer, CO2 purge, headspace küçült)","Sıvı dolu/çalışır airlock veya sıkı conta; kuru/gevşek airlock hava kaçırır","Sıkı sanitasyon; fermentörü kapalı tut, MEYVE SİNEKLERİNİ demleme alanından uzak tut","Fermantasyon bitince gecikmeden şişele"],
+    ayiriciSoru: ["Sirke (asetik asit) mi yoksa oje/tiner (etil asetat) mi? İkisi aynı oksijen+mikrop tablosundan doğar ama farklı bileşiktir. 'Yeşil elma' ise bu asetik DEĞİL = asetaldehit (ayrı aile)."],
+    stilNotu: "Flanders/Lambic/Gueuze'de düşük-kontrollü asetik istenir. Temiz stillerde (Weizen, Dubbel) kusur, batch büyük olasılıkla kayıp."
+  },
+  chlorophenol: {
+    ad: "Klorofenol (yara bandı)",
+    trDil: ["yara bandı gibi","plastik / yanık plastik","ilaç / tıbbi","dezenfektan / antiseptik","çamaşır suyu / havuz suyu / musluk klor","gargara / batikon"],
+    kokNeden: ["Klorlu/kloraminli işlenmemiş musluk suyu (birincil neden)","Klor bazlı sanitizer / çamaşır suyu kalıntısı (yetersiz durulama)","'Kaynatma kloru giderir' yanılgısı — kloramin UÇMAZ","Çizik/gözenekli plastikte klor birikimi"],
+    kurtarilir: { seviye:"hayır", nasil:"Klorofenol fenole kalıcı kovalent bağlıdır; olgunlaşma/karbon/filtrasyonla temizlenemez — batch dökülür." },
+    onlem: ["Her batch demleme suyuna Campden (potasyum/sodyum metabisülfit) ekle — klor + kloramini anında nötralize eder (10–12L için çeyrek tablet yeter)","Alternatif: RO/damıtık su veya iyi bir aktif karbon filtre","Klor-sanitizer/çamaşır suyu yerine durulama gerektirmeyen Star San / iyodofor kullan","Çizilmiş plastik fermentör/hortumları değiştir"],
+    ayiriciSoru: ["Yara bandı/plastik/ilaç mı (klorofenol = su/klor) yoksa karanfil/baharat mı (o POF+ maya karakteri, farklı — özellikle Weizen/Belçika'da normal)? Aynı band-aid notu bazı Brett suşları (4-etilfenol) klordan bağımsız da verebilir."],
+    stilNotu: "Her stilde kusur (fenol-öne-çıkan stiller dahil). NOT: musluk suyu + Campden bilgisi programda henüz kayıtlı değil — bu teşhis su/klor geçmişini sana sormalı."
+  },
+  sulfur: {
+    ad: "Kükürt (çürük yumurta)",
+    trDil: ["çürük/bozuk yumurta","kibrit çakması / barut","lağım / kanalizasyon","doğalgaz","kaplıca / kükürt","yanık lastik (SO2)"],
+    kokNeden: ["Maya suşu — özellikle LAGER mayaları doğal olarak daha çok H2S/SO2 üretir; genç lagerde normaldir","Erken şişeleme/genç bira: fermantasyon sonunda sağlıklı maya H2S'i GERİ EMER; mayayı erken devreden çıkarmak kükürdü hapseder","Maya sağlığı / düşük pitch / besin (FAN, çinko) eksikliği — stresli maya kükürt üretir","Otoliz (tortu üstünde uzun+sıcak) veya enfeksiyon (kalıcı lağım/merkaptan)"],
+    kurtarilir: { seviye:"kısmen", nasil:"Çoğu kusurun aksine kısmen kurtarılabilir. Fermentördeyse: 1–2°C ısıt + mayayı hafif rouse — yeniden süspanse maya H2S'i GERİ EMER (asıl mekanizma bu; CO2 sıyırması değil). Lager: uzun soğuk kondisyon. Temiz bakır teması H2S'i bağlar (ölçülü). Enfeksiyon veya metabisülfit-fazlası SO2 kaynaklıysa: kurtarılamaz." },
+    onlem: ["Kükürt istemiyorsan temiz/düşük-kükürt maya seç (lager doğal daha çok üretir → uzun kondisyona hazırlan)","Doğru pitch + iyi oksijen + çinkolu maya besini (stresli/aç maya kükürt yapar)","Erken şişeleme yapma; mayaya kükürdü geri emmesi için birkaç hafta tanı","Mayayı tortu üstünde uzun+sıcak bırakma (otoliz); sıkı sanitasyon"],
+    ayiriciSoru: ["Bileşik alt-tipi ne? Çürük yumurta/lağım (H2S, maya kaynaklı, genç lagerde normal) mı, kibrit/barut (SO2, genelde metabisülfit fazlası, zor solar) mı, yoksa haşlanmış mısır mı (o DMS, AYRI aile)? Kalıcı lağım + ekşilik + bulanıklık = enfeksiyon şüphesi."],
+    stilNotu: "Yalnız çok taze pale lagerde geçici maya-kükürdü kabul edilebilir; BJCP Çek Pale Lager 'No sulfur' der. Burton/Alman Pils 'kükürt'ü su-sülfat MİNERAL karakteridir (H2S değil). Güven: orta — kök neden koku alt-tipine bağlı."
+  },
+  metallic: {
+    ad: "Metalik (bozuk para)",
+    trDil: ["metalik tat","bozuk para / madeni para","demir / kan tadı","teneke","mürekkep","pil ucu / diş dolgusu"],
+    kokNeden: ["Yüksek demir/manganez su (en sık): eski/paslı şebeke veya kuyu suyu — eşik çok düşük, az demir bile yeter","Korozyona uğramış ekipman: çip/çatlak atmış emaye tencere (altındaki çelik açığa çıkar), paslanmış/pasifleştirilmemiş paslanmaz","Bayat/kötü saklanmış malt — lipit hidrolizi → ransit/metalik","Fe-katalizli oksidasyon (Fenton) — sıcak-yan / uzun-sıcak depoda metalik+kartonsu birlikte"],
+    kurtarilir: { seviye:"hayır", nasil:"Metalik kusur şişedeki birada geri alınamaz (metal iyonu fiziksel olarak içeride). Tek fayda: kaynağı teşhis edip SONRAKİ batchte gidermek. Soğuk olgunlaşma + iyi karbonasyon hafif vakada algıyı biraz maskeler, çözmez." },
+    onlem: ["Demir/manganez şüphesi varsa suyu test et; yüksekse RO/damıtık/şişe su + demirsiz brewing tuzları (jips/CaCl2)","Çip/çatlak atmış emaye tencereyi kullanma; pasifleştirilmiş paslanmaz kullan","Taze malt al, serin-kuru-kapalı sakla","Sıcak wort'u sıçratmadan aktar; uzun-sıcak depolama yapma"],
+    ayiriciSoru: ["Metalik (bozuk para/demir) mi yoksa astrenjan (buruk/tanenli/ağız-kuruması) mı? İkisi SIK karışır, kök nedenleri ve düzeltmeleri farklıdır — yanlış teşhis sonraki batchte yanlış düzeltme demektir. Emin olmak için demir kaynağı (su/tencere) hipotezini çapraz kontrol et."],
+    stilNotu: "Hiçbir stilde istenmez, her zaman kusur. Metalik algı çoğunlukla demirin katalizlediği lipit-oksidasyon ketonlarının (1-okten-3-on) retronazal algısıdır, doğrudan demir tadı değil."
+  },
+  infection: {
+    ad: "Enfeksiyon (ekşi/funk)",
+    trDil: ["ekşimiş / bozulmuş","yoğurt gibi ekşi","at ahırı / at battaniyesi","terli çorap / eski peynir","bebek kusmuğu (butirik)","üstünde zar/deri (pellicle) / ip-gibi akan / gusher"],
+    kokNeden: ["Soğuk-taraf sanitasyon açığı (en yaygın): çizik plastik fermentör, hortum, oto-sifon, şişe kapakları","Fermantasyon sonrası oksijen teması — Acetobacter / aerobik Brett + yüzey pelliklesi","Uzun/ılık olgunlaşma — Brett yavaş çalışır, gizli mikroplara ifade zamanı verir","Ekşi/wild ekipmanın temiz-birayla paylaşımı (plastik/hortum/conta Lacto/Pedio/Brett'i kalıcı tutar)"],
+    kurtarilir: { seviye:"hayır", nasil:"Yerleşmiş enfeksiyon genelde geri döndürülemez — hedeflenen temiz bira kurtarılamaz. Hafif funk hoşuna gidiyorsa aylarca ılık yaşlandırıp wild/sour ale gibi değerlendir. GÜVENLİK: enfekte şişeler fermente etmeyi sürdürür → gusher/patlayan şişe; buzdolabına al, kapalı kutuda sakla, dikkatli aç." },
+    onlem: ["Soğuk-tarafta her şeyi no-rinse sanitizer (Star San) ile yeterli temasla sanitize et; sanitizeri musluk suyuyla durulama","Çizik plastiği değiştir, cam/paslanmaz tercih et; ekşi bira için AYRI adanmış takım","Post-ferm oksijeni minimize et; yeterli TAZE maya at (hızlı fermantasyon yaban organizmayı bastırır)","Conta/o-ring/hortumları periyodik değiştir; kuru hop/meyveyi aktif fermantasyonda ekle"],
+    ayiriciSoru: ["'Terli/eski peynir' TEK BAŞINA ise çoğunlukla oksitlenmiş HOP'tan gelir, enfeksiyon değil — çözüm sanitasyon değil TAZE HOP. Ama at ahırı (4-EP) + yüzey zarı (pellicle) + artan ekşilik üçlüsü kesin enfeksiyon imzasıdır. Tek başına bulanıklık enfeksiyon KANITI değildir."],
+    stilNotu: "Ekşilik/funk/pellicle Lambic, Gueuze, Flanders, Berliner Weisse, Gose'de bilerek hedeflenir — kusur DEĞİL. Yalnız temiz/nötr stil (Weizen, Dubbel, IPA) hedeflendiyse kusur."
+  },
+  phenolic: {
+    ad: "Fenolik-baharat (karanfil)",
+    trDil: ["karanfil gibi","baharatlı / baharat","biberli / karabiber keskin","diş macunu / dişçi (karanfil çağrışımı)","dumanlı-baharat (Brett 4-EG varyantı)"],
+    kokNeden: ["Yanlış stilde POF+ maya (en olası): temiz stilde (lager/IPA/blonde) Weizen/Belçika/Saison mayası kullanmak — temiz ale/lager POF- olduğu için karanfil yapmaz","POF+ maya × fermantasyon sıcaklığı — YÖN MAYAYA BAĞLI (stil notuna bak)","Vahşi maya / Brettanomyces: 4-etilfenol (tıbbi/ahır) / 4-etilguaiacol (dumanlı) — zamanla kötüleşir + ekşilik eşlik eder","Ferulik asit mash resti (43–45°C) — TEK BAŞINA yetmez, yalnız POF+ maya varsa 4-VG'ye döner"],
+    kurtarilir: { seviye:"hayır", nasil:"4-VG karanfil pratikte geri alınamaz. POF+ maya kaynaklıysa bira 'bozuk' değil, yanlış stilde — Hefeweizen/Belçika gibi kabul edip iç. Brett/vahşi kontaminasyonsa: zamanla kötüleşir, batch'i kayıp say, ekipmanı derin sanitize et (yoksa sonraki batchlere bulaşır)." },
+    onlem: ["Stile uygun maya seç: temiz stiller için POF- (fenolik yapmayan) maya (üretici datasheet POF durumunu belirtir)","Weizen dengesi: karanfil İSTİYORSAN ferulik rest (43–45°C) + DAHA SOĞUK ferment; muz istiyorsan DAHA SICAK ferment. Belçika/Saison'da yön TERSİNE: sıcak = daha fenolik","Sıkı sanitasyon — vahşi maya/Brett girişini önle","Su: klor/kloramin varsa Campden ile gider (klorofenol=plastik/tıbbi ayrı önlemi)"],
+    ayiriciSoru: ["Karanfil/biberli mi (4-VG, POF+ maya — Weizen/Belçika'da NORMAL) yoksa band-aid/plastik/eczane mi (o klorofenol = su/klor VEYA Brett 4-EP, farklı aile)? Karanfil ZAMANLA artıyor + ekşilik varsa Brett kontaminasyonu. Muz ile birlikteyse Weizen maya imzası, kusur değil."],
+    stilNotu: "Hefeweizen/Weizenbock/Rauchbier ve bazı Belçika stillerinde karanfil-baharat İSTENEN karakterdir — bu stilleri seviyorsan otomatik kusur SAYMA. Yalnız temiz stilde (lager/pale/IPA/blonde) kusur. SICAKLIK YÖNÜ: Weizen'de soğuk=karanfil / sıcak=muz (ters ilişki); Belçika/Saison'da sıcak=daha fenolik."
+  }
+};
+// Kısa çözüm — timeline ve diğer yerlerden tek-kaynak (kurtarilir.nasil ilk cümlesi)
+window._bmOffKisaCozum = function(kod){
+  var d = window._OFF_TESHIS && window._OFF_TESHIS[kod];
+  if(!d || !d.kurtarilir || !d.kurtarilir.nasil) return '';
+  var s = String(d.kurtarilir.nasil);
+  var i = s.indexOf('. ');
+  return 'Çözüm: ' + (i > 0 ? s.slice(0, i + 1) : s);
+};
+// Statik teşhis kartı — bir off-flavor tag'inin ? düğmesi açar (batch-verisi YOK, v1a genel)
+window.bmOffTeshis = function(kod){
+  try{
+    var d = window._OFF_TESHIS && window._OFF_TESHIS[kod];
+    if(!d) return;
+    var esk = document.getElementById('bmOffModal'); if(esk) esk.remove();
+    var _liste = function(arr){ return '<ol style="margin:4px 0 0 0;padding-left:18px;font-size:12px;color:var(--kahve);line-height:1.55">' + (arr||[]).map(function(x){ return '<li style="margin-bottom:3px">' + x + '</li>'; }).join('') + '</ol>'; };
+    var _sev = d.kurtarilir && d.kurtarilir.seviye;
+    var _sevRenk = _sev==='evet' ? '#1E6B3A' : (_sev==='kısmen' ? '#7A5020' : 'var(--kk)');
+    var _sevBg = _sev==='evet' ? '#E0F5E0' : (_sev==='kısmen' ? '#FDF4E0' : 'var(--ka)');
+    var _sevAd = _sev==='evet' ? 'EVET, kurtarılabilir' : (_sev==='kısmen' ? 'KISMEN kurtarılabilir' : 'HAYIR, kurtarılamaz');
+    var _bolum = function(b, ic){ return '<div style="margin-top:12px"><div style="font-size:11px;font-weight:700;color:var(--kahve);letter-spacing:.4px;margin-bottom:2px">' + b + '</div>' + ic + '</div>'; };
+    var h = '';
+    h += '<div id="bmOffModal" role="dialog" aria-modal="true" aria-label="' + d.ad + ' teşhis" tabindex="-1" style="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center" onclick="if(event.target===this)bmOffTeshisKapat()">';
+    h += '<div style="background:#fff;width:100%;max-width:520px;max-height:88vh;overflow-y:auto;border-radius:16px 16px 0 0;padding:16px;box-shadow:0 -4px 24px rgba(0,0,0,.3)">';
+    h += '<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:2px">';
+    h += '<div style="flex:1;font-size:16px;font-weight:700;color:var(--bakir);font-family:var(--font-display)">🔬 ' + d.ad + '</div>';
+    h += '<button onclick="bmOffTeshisKapat()" aria-label="Teşhis kartını kapat" style="background:var(--bg2);border:1px solid var(--bor);border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;color:var(--kahve);flex:none">✕</button>';
+    h += '</div>';
+    h += '<div style="font-size:11px;color:var(--soluk);margin-bottom:6px;line-height:1.5">Böyle tarif edilir: ' + (d.trDil||[]).join(' · ') + '</div>';
+    h += _bolum('OLASI NEDENLER (en sıktan)', _liste(d.kokNeden));
+    h += _bolum('KURTARILABİLİR Mİ?', '<div style="background:' + _sevBg + ';border-radius:8px;padding:8px 10px;margin-top:2px"><div style="font-size:12px;font-weight:700;color:' + _sevRenk + ';margin-bottom:2px">' + _sevAd + '</div><div style="font-size:12px;color:var(--kahve);line-height:1.5">' + ((d.kurtarilir && d.kurtarilir.nasil) || '') + '</div></div>');
+    h += _bolum('SONRAKİ BATCH — ÖNLEM', _liste(d.onlem));
+    if(d.ayiriciSoru && d.ayiriciSoru.length){
+      h += '<div style="margin-top:12px;background:#FFF6E0;border-left:3px solid var(--vintage);border-radius:6px;padding:8px 10px"><div style="font-size:11px;font-weight:700;color:var(--kahve);margin-bottom:3px">⚠️ EMİN MİSİN? (ayırt et)</div><div style="font-size:12px;color:var(--kahve);line-height:1.55">' + d.ayiriciSoru.join('<br><br>') + '</div></div>';
+    }
+    if(d.stilNotu){
+      h += '<div style="margin-top:12px;font-size:11px;color:var(--soluk);line-height:1.55;border-top:1px solid var(--bor);padding-top:8px"><b style="color:var(--kahve)">Stil notu:</b> ' + d.stilNotu + '</div>';
+    }
+    h += '<div style="margin-top:10px;font-size:10px;color:var(--dim);font-style:italic">Bu genel bir teşhistir — kesin karar değil. Batch verine özel değerlendirme (sıcaklık, maya, FG) sonraki sürümde gelecek.</div>';
+    h += '</div></div>';
+    document.body.insertAdjacentHTML('beforeend', h);
+    document.addEventListener('keydown', _bmOffEsc);
+    var _m = document.getElementById('bmOffModal'); if(_m && _m.focus) _m.focus();
+  }catch(e){ console.warn('[bmOffTeshis]', e); }
+};
+window.bmOffTeshisKapat = function(){ var m = document.getElementById('bmOffModal'); if(m) m.remove(); document.removeEventListener('keydown', _bmOffEsc); };
+function _bmOffEsc(e){ if(e && e.key==='Escape'){ try{ e.stopPropagation(); }catch(_){} bmOffTeshisKapat(); } }
+
 function tadimOff(kod, aktif){
   if(!S.tadim) S.tadim = {aroma:0,gorunum:0,tat:0,agizH:0,genel:0,offList:{},tadimNot:'',oturumlar:[]};
   if(!S.tadim.offList) S.tadim.offList = {};
@@ -24302,7 +24492,7 @@ function tadimExport(){
     var oturumlar=T.oturumlar||[];
     var notlar=((S&&S.notlar)||'').trim();
     if(!oturumlar.length && !notlar){ flash('Kopyalanacak tadım/not yok'); return; }
-    var offAd={diacetyl:'Diacetyl (tereyağı)',DMS:'DMS (haşlanmış mısır)',acetaldehyde:'Acetaldehyde (yeşil elma)',fusel:'Fusel (solvent/alkol)',oxidized:'Oksidasyon (kartonvari)',astringent:'Astringent (tanen)','light-struck':'Işık hasarı (skunk)',solvent:'Solvent (aseton)'};
+    var offAd={}; (window._OFF_KODLAR||['diacetyl','DMS','acetaldehyde','fusel','oxidized','astringent','light-struck','solvent']).forEach(function(k){ offAd[k]=(window._OFF_TESHIS&&window._OFF_TESHIS[k]&&window._OFF_TESHIS[k].ad)||k; });
     var sevAd=function(t){return t>=45?'Outstanding':t>=38?'Excellent':t>=30?'Very Good':t>=21?'Good':t>=14?'Fair':'Problematic';};
     var sat=[];
     var bas=((S&&S.biraAd)||'Bira')+' — Tadım Raporu';

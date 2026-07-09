@@ -1001,6 +1001,83 @@ const CASELER = [
       __REG.ok('refrakDuzelt hesaplayıcısı DURUYOR (bilinçli dokunulmadı)', typeof window.refrakDuzelt === 'function');
       return __REG.al();
     })
+  },
+
+  // ── SPRINT U1a: off-flavor teşhis motoru v1a (bilgi tabanı + tag 8→14 + statik teşhis kartı) ──
+  {
+    kod: 'U1-KB', ad: 'bilgi tabanı: 14 aile + zorunlu alanlar + adversaryal-düzeltilmiş domain gerçekleri',
+    calistir: (page) => page.evaluate(() => {
+      const T = window._OFF_TESHIS, K = window._OFF_KODLAR;
+      __REG.ok('_OFF_KODLAR 14 aile (8 eski + 6 yeni)', Array.isArray(K) && K.length === 14 &&
+        ['diacetyl','DMS','acetaldehyde','fusel','oxidized','astringent','light-struck','solvent'].every(k => K.includes(k)) &&
+        ['acetic','chlorophenol','sulfur','metallic','infection','phenolic'].every(k => K.includes(k)), K && K.length);
+      __REG.ok('her aile zorunlu alanlara sahip', K.every(k => { const d = T[k]; return d && d.ad && d.trDil.length && d.kokNeden.length && ['evet','kısmen','hayır'].includes(d.kurtarilir.seviye) && d.kurtarilir.nasil && d.onlem.length && Array.isArray(d.ayiriciSoru) && d.stilNotu; }));
+      // hakem düzeltmeleri — kendi (düzeltilmemiş) bilgiden DEĞİL, belgeden AYNEN
+      __REG.ok('Fenolik: Weizen soğuk=karanfil (ters ilişki)', /soğuk=karanfil/.test(T.phenolic.stilNotu));
+      __REG.ok('Asetaldehit KISMEN kurtarılır (maya üstünde)', T.acetaldehyde.kurtarilir.seviye === 'kısmen' && /maya üzerinde/.test(T.acetaldehyde.kurtarilir.nasil));
+      __REG.ok('Kükürt: maya geri-emer, CO2 sıyırması DEĞİL', /CO2 sıyırması değil/.test(T.sulfur.kurtarilir.nasil));
+      __REG.ok('Asetik trDil yeşil elma İÇERMEZ (asetaldehit ayrımı)', !T.acetic.trDil.some(x => /yeşil elma/i.test(x)));
+      __REG.ok('KISMEN kurtarılır tam = diacetyl+acetaldehyde+sulfur', JSON.stringify(K.filter(k => T[k].kurtarilir.seviye === 'kısmen').sort()) === JSON.stringify(['acetaldehyde','diacetyl','sulfur']));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'U1-CARD', ad: 'teşhis kartı: ? düğmesi modal açar (eski+yeni kod), içerik doğru, kapat + Escape',
+    calistir: async (page) => {
+      const c1 = await page.evaluate(() => {
+        bmOffTeshis('diacetyl');
+        const m = document.getElementById('bmOffModal');
+        __REG.ok('modal açıldı', !!m);
+        const t = m ? m.textContent : '';
+        __REG.ok('başlık + kurtarılabilir(KISMEN) + neden/önlem bölümleri', /Diacetyl \(tereyağı\)/.test(t) && /KURTARILABİLİR/.test(t) && /KISMEN/.test(t) && /OLASI NEDENLER/.test(t) && /ÖNLEM/.test(t));
+        __REG.ok('ayırıcı soru (emin misin — zamanla artıyor mu)', /EMİN MİSİN/.test(t) && /ZAMANLA artıyor/.test(t));
+        __REG.ok('v1a statik uyarısı (batch-verisi yok, genel teşhis)', /genel bir teşhis/.test(t));
+        bmOffTeshisKapat();
+        __REG.ok('kapat modalı kaldırdı', !document.getElementById('bmOffModal'));
+        bmOffTeshis('sulfur'); // YENİ kod
+        __REG.ok('yeni kod (kükürt) modalı açtı', !!document.getElementById('bmOffModal') && /Kükürt/.test(document.getElementById('bmOffModal').textContent));
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+        return __REG.al();
+      });
+      await page.waitForFunction(() => !document.getElementById('bmOffModal'), { timeout: 3000 });
+      const c2 = await page.evaluate(() => { __REG.ok('Escape modalı kapattı', !document.getElementById('bmOffModal')); return __REG.al(); });
+      return c1.concat(c2);
+    }
+  },
+  {
+    kod: 'U1-COMPAT', ad: 'tag 8→14 render + eski tadım geriye-uyumlu + delta yeni kodları kapsar',
+    calistir: (page) => page.evaluate(() => {
+      const id = __REG.yeniKayit('REGTEST U1-COMPAT', {
+        brewLog: [{ id: 'u1s', ts: 1000, tip: 'siseleme', tarih: '2026-06-01' }],
+        tadim: {
+          aroma: 8, gorunum: 2, tat: 14, agizH: 4, genel: 7,
+          offList: { diacetyl: false, sulfur: true },
+          oturumlar: [
+            { tarih: '2026-06-01', aroma: 6, gorunum: 2, tat: 10, agizH: 3, genel: 5, toplam: 26, offList: { diacetyl: true } }, // ESKİ: yalnız eski kod (yeni 6 tag YOK)
+            { tarih: '2026-06-15', aroma: 8, gorunum: 2, tat: 14, agizH: 4, genel: 7, toplam: 35, offList: { sulfur: true } }   // YENİ: diacetyl çözüldü, YENİ kod çıktı
+          ]
+        }
+      });
+      tarifAc(id);
+      const h = rEditorNot();
+      __REG.ok('14 tag render edildi (? teşhis düğmeleri)', (h.split('bmOffTeshis(').length - 1) === 14, String(h.split('bmOffTeshis(').length - 1));
+      __REG.ok('eski 8 + yeni 6 etiket mevcut', /_tOffLbl_diacetyl/.test(h) && /_tOffLbl_solvent/.test(h) && /_tOffLbl_sulfur/.test(h) && /_tOffLbl_phenolic/.test(h) && /_tOffLbl_infection/.test(h));
+      __REG.ok('yeni tag TR adları render', /Kükürt/.test(h) && /Klorofenol/.test(h) && /Fenolik-baharat/.test(h));
+      __REG.ok('geriye-uyumlu delta: eski oturum (yalnız eski kod) → ÇÖZÜLDÜ Diacetyl', /çözüldü:[^<]*Diacetyl/.test(h));
+      __REG.ok('delta YENİ kodu kapsıyor: yeni Kükürt', /yeni:[^<]*Kükürt/.test(h));
+      __REG.ok('eski offList render çökmedi (undefined tag yok)', h.indexOf('_tOffLbl_undefined') === -1);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'U1-KAYNAK', ad: 'tek kaynak: _bmOffKisaCozum timeline yönlendirmesi tablodan besleniyor',
+    calistir: (page) => page.evaluate(() => {
+      __REG.ok('_bmOffKisaCozum fonksiyon', typeof window._bmOffKisaCozum === 'function');
+      const c = window._bmOffKisaCozum('diacetyl');
+      __REG.ok('diacetyl kısa çözüm "Çözüm:" ile başlar + tablodan (rest)', /^Çözüm: /.test(c) && /diacetyl rest/i.test(c), c);
+      __REG.ok('bilinmeyen kod boş döner (güvenli)', window._bmOffKisaCozum('yok') === '');
+      return __REG.al();
+    })
   }
 ];
 

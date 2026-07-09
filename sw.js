@@ -675,7 +675,10 @@
 // filtresi GRAFT ONCESI (dirilis imkansiz), bilinçli geri-getirme (guncelleme>=silmeTs), TTL 90g, fail-open. bump v131-376 -> v131-377.
 // Sprint T (2026-07-09): brewday inline olcum — mash_end pre-boil OG + pitch OG kartlara input (deger S'te,
 // teardown-guvenli), opsiyonel hidrometre sicaklik duzeltmesi (Lyons, kalibrasyon 20°C), metinler arac-notr. bump v131-377 -> v131-378.
-const CACHE_VERSION = 'bm-cache-v131-378';
+// Sprint U1a (2026-07-09): off-flavor teshis motoru v1a — _OFF_TESHIS 14-aile bilgi tabani (adversaryal-dogrulanmis
+// domain), tadim tag 8->14, ? dugmesi statik teshis karti (neden/kurtarilir/onlem/ayirici-soru/stil), timeline
+// diacetyl merkezilestirme (_bmOffKisaCozum). Batch-verisi keskinlestirme U2. bump v131-378 -> v131-379.
+const CACHE_VERSION = 'bm-cache-v131-379';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
