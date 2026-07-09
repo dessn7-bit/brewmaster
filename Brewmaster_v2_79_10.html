@@ -6043,6 +6043,113 @@ const BJCP = {
     "Smoked Beer / Rauchbier":        {og:[1.050,1.057],fg:[1.012,1.016],ibu:[20,30],srm:[12,22],abv:[4.8,6.0]},
 };
 
+// ═══ SPRINT V1a: STİLDEN REÇETE BAŞLATMA — oran-bazlı iskelet + ölçekleme motoru ═══
+// design_sprintV_stilden_recete: B katmanı (küratörlü ~20 stil). Miktar SABİT DEĞİL —
+// grist (maltId+pct toplam 100) + hop {id,dk,rol:'aci'|'aroma'|'kuru',gL} oran/hedef bazlı;
+// seçilince S.hacim'e + BJCP hedef OG/IBU'suna ölçeklenir. Her ID KATALOG-DOĞRULANMIŞ,
+// her iskelet tutarlılık kapısından geçer (calc() OG+IBU+SRM ∈ BJCP aralığı — tests V-ISKELET).
+const STIL_ISKELET = {
+  "American IPA":                  {grist:[['pale_ale',88],['munich',5],['c40',7]], hop:[{id:'columbus',dk:60,rol:'aci'},{id:'centn',dk:10,rol:'aroma',gL:1.5},{id:'citra',rol:'kuru',gL:3},{id:'simcoe',rol:'kuru',gL:2}], mayaId:'us05', mashSc:66},
+  "American Pale Ale":             {grist:[['pale_ale',90],['munich',4],['c40',6]], hop:[{id:'magnum',dk:60,rol:'aci'},{id:'cascade',dk:10,rol:'aroma',gL:1.5},{id:'cascade',rol:'kuru',gL:2}], mayaId:'us05', mashSc:66},
+  "NEIPA / Hazy IPA":              {grist:[['pale_ale',70],['wheat',15],['oat',15]], hop:[{id:'magnum',dk:60,rol:'aci'},{id:'citra',dk:10,rol:'aroma',gL:2},{id:'mosaic',dk:10,rol:'aroma',gL:2},{id:'citra',rol:'kuru',gL:4},{id:'mosaic',rol:'kuru',gL:3}], mayaId:'wy1318', mashSc:67},
+  "American Amber Ale / Red Ale":  {grist:[['pale_ale',80],['munich',9],['c60',9],['c120',2]], hop:[{id:'centn',dk:60,rol:'aci'},{id:'cascade',dk:10,rol:'aroma',gL:1}], mayaId:'us05', mashSc:67},
+  "American Brown Ale":            {grist:[['pale_ale',78],['munich',8],['c60',7],['brown',4],['choc',3]], hop:[{id:'nbrewer',dk:60,rol:'aci'},{id:'ekg',dk:10,rol:'aroma',gL:0.8}], mayaId:'us05', mashSc:67},
+  "Dry Irish Stout":               {grist:[['maris',79],['oat',8],['carapils',5],['roast',8]], hop:[{id:'ekg',dk:60,rol:'aci'}], mayaId:'wy1084', mashSc:67},
+  "Oatmeal Stout":                 {grist:[['maris',71],['oat',12],['munich',4],['c60',5],['choc',5],['roast',3]], hop:[{id:'ekg',dk:60,rol:'aci'}], mayaId:'s04', mashSc:68},
+  "American Porter":               {grist:[['pale_ale',76],['munich',7],['c60',7],['choc',6],['pale_choc',4]], hop:[{id:'nbrewer',dk:60,rol:'aci'},{id:'ekg',dk:10,rol:'aroma',gL:0.8}], mayaId:'us05', mashSc:67},
+  "Weizen / Weissbier":            {grist:[['wheat',55],['pilsner',43],['carapils',2]], hop:[{id:'hrtau',dk:60,rol:'aci'}], mayaId:'wy3068', mashSc:67},
+  "Dunkelweizen":                  {grist:[['dark_wheat',50],['munich',25],['pilsner',17],['cara_munich2',6],['choc',2]], hop:[{id:'hrtau',dk:60,rol:'aci'}], mayaId:'wy3068', mashSc:67},
+  "Weizenbock":                    {grist:[['dark_wheat',55],['munich',28],['pilsner',12],['cara_munich2',5]], hop:[{id:'hrtau',dk:60,rol:'aci'}], mayaId:'wy3068', mashSc:68},
+  "Witbier / Belgian White":       {grist:[['pilsner',50],['wheat',40],['oat',10]], hop:[{id:'saaz',dk:60,rol:'aci'}], mayaId:'wy3944', mashSc:66},
+  "Dubbel":                        {grist:[['pilsner',87],['munich',6],['specb',3],['candy_amb',4]], hop:[{id:'saaz',dk:60,rol:'aci'}], mayaId:'wy3787', mashSc:67},
+  "Tripel":                        {grist:[['pilsner',85],['candy_clr',13],['aromatic',2]], hop:[{id:'saaz',dk:60,rol:'aci'},{id:'styrian',dk:15,rol:'aroma',gL:0.5}], mayaId:'wy3787', mashSc:66},
+  "Saison / Farmhouse Ale":        {grist:[['pilsner',80],['wheat',10],['munich',5],['candy_clr',5]], hop:[{id:'magnum',dk:60,rol:'aci'},{id:'styrian',dk:10,rol:'aroma',gL:1}], mayaId:'wy3711', mashSc:65},
+  "German Pils":                   {grist:[['pilsner',93],['munich',4],['carapils',3]], hop:[{id:'magnum',dk:60,rol:'aci'},{id:'saaz',dk:10,rol:'aroma',gL:1.5}], mayaId:'w3470', mashSc:66},
+  "Helles / Münchner Hell":        {grist:[['pilsner',90],['munich',8],['carapils',2]], hop:[{id:'hrtau',dk:60,rol:'aci'}], mayaId:'w3470', mashSc:67},
+  "Munich Märzen / Oktoberfest":   {grist:[['munich',45],['vienna',30],['pilsner',20],['cara_munich2',5]], hop:[{id:'hrtau',dk:60,rol:'aci'},{id:'tettn',dk:10,rol:'aroma',gL:0.5}], mayaId:'wy2124', mashSc:67},
+  "Kölsch":                        {grist:[['pilsner',90],['wheat',6],['munich',4]], hop:[{id:'hrtau',dk:60,rol:'aci'},{id:'spalt',dk:10,rol:'aroma',gL:0.5}], mayaId:'la_koln', mashSc:66},
+  "Blonde Ale / Cream Ale":        {grist:[['pale_ale',84],['pilsner',10],['carapils',6]], hop:[{id:'hrtau',dk:60,rol:'aci'}], mayaId:'us05', mashSc:66}
+};
+window.STIL_ISKELET = STIL_ISKELET;
+
+// Oran→miktar ölçekleme motoru — mevcut hOG/hIBU'yu TERSİNDEN kullanır (yeniden yazmaz).
+// OG-1 ve IBU miktara DOĞRUSAL → deneme hesabı + hedefe lineer ölçek. Dönüş: {malts,hops,mayaId,mashSc,hedef} | null.
+window._stilIskeletHesap = function(bjcpAd, hacim, verim){
+  try{
+    var isk = (typeof STIL_ISKELET!=='undefined') ? STIL_ISKELET[bjcpAd] : null; if(!isk) return null;
+    var bj = (typeof BJCP!=='undefined') ? BJCP[bjcpAd] : null; if(!bj) return null;
+    var h = (hacim>0)?hacim:11, v = (verim>0)?verim:61;
+    var ogMid=(bj.og[0]+bj.og[1])/2, ibuMid=(bj.ibu[0]+bj.ibu[1])/2;
+    // GRIST: 1kg deneme → hedef OG'ye lineer ölçekle (hOG'nin tersi)
+    var trial = isk.grist.map(function(g){ return {id:g[0], kg:g[1]/100}; });
+    var trialOG = hOG(trial, v, [], h);
+    var scale = (trialOG>1) ? (ogMid-1)/(trialOG-1) : 1;
+    var malts = isk.grist.map(function(g){ var mo=MALTLAR.find(function(m){return m&&m.id===g[0];}); return {id:g[0], kg:+(g[1]/100*scale).toFixed(3), marka:'', _ad:(mo?mo.ad:g[0])}; });
+    var og = hOG(malts, v, [], h);
+    // HOP: aroma/kuru sabit gL (hacme ölçek), aci hedef IBU'ya ölçek (hIBU'nun tersi)
+    var gec=[]; (isk.hop||[]).forEach(function(hp){
+      var ho=HOPLAR.find(function(x){return x&&x.id===hp.id;});
+      if(hp.rol==='aroma') gec.push({id:hp.id, g:+((hp.gL||1)*h).toFixed(1), dk:(hp.dk!=null?hp.dk:10), tur:'boil', cAA:null, form:'pellet', _ad:(ho?ho.ad:hp.id)});
+      else if(hp.rol==='kuru') gec.push({id:hp.id, g:+((hp.gL||2)*h).toFixed(1), dk:0, tur:'dry_hop', dryDays:5, cAA:null, form:'pellet', _ad:(ho?ho.ad:hp.id)});
+    });
+    var gecIBU = hIBU(gec, og, h, []);
+    var needBitter = Math.max(1, ibuMid - gecIBU);
+    var aciDef = (isk.hop||[]).filter(function(hp){return hp.rol==='aci';});
+    var aciTrial = aciDef.map(function(hp){ return {id:hp.id, g:(hp.pay||1)*10, dk:(hp.dk!=null?hp.dk:60), tur:'boil'}; });
+    var aciTrialIBU = hIBU(aciTrial, og, h, []);
+    var f = (aciTrialIBU>0) ? needBitter/aciTrialIBU : 0;
+    var aciFinal = aciDef.map(function(hp){ var ho=HOPLAR.find(function(x){return x&&x.id===hp.id;}); return {id:hp.id, g:+((hp.pay||1)*10*f).toFixed(1), dk:(hp.dk!=null?hp.dk:60), tur:'boil', cAA:null, form:'pellet', _ad:(ho?ho.ad:hp.id)}; });
+    var hops = aciFinal.concat(gec);
+    return { malts:malts, hops:hops, mayaId:(isk.mayaId||''), mashSc:(isk.mashSc||67),
+             hedef:{ og:+og.toFixed(3), ibu:Math.round(hIBU(hops,og,h,[])), srm:hSRM(malts,[],h), fg:(bj.fg?+(((bj.fg[0]+bj.fg[1])/2).toFixed(3)):null) } };
+  }catch(e){ try{console.warn('_stilIskeletHesap',e);}catch(_){} return null; }
+};
+
+// Stil→katalog maya önerisi (C katmanı fallback). Keyword tabanlı, katalog-ID döner.
+window._stilMayaOner = function(bjcpAd){
+  var s = String(bjcpAd||'').toLowerCase();
+  if(/weizen|weiss|hefe/.test(s)) return 'wy3068';
+  if(/wit|belgian white|blanche/.test(s)) return 'wy3944';
+  if(/saison|farmhouse|grisette|bière de|biere de/.test(s)) return 'wy3711';
+  if(/dubbel|tripel|quad|abbey|trappist|belgian strong|belgian blonde|belgian gold|belgian pale|belgian amber|flemish/.test(s)) return 'wy3787';
+  if(/kveik/.test(s)) return 'kveikv';
+  if(/kölsch|kolsch|altbier/.test(s)) return 'la_koln';
+  if(/lager|pils|helles|dunkel|schwarz|bock|märzen|marzen|oktober|vienna|festbier|dortmund|baltic porter|california common|steam|rauch|keller/.test(s)) return 'w3470';
+  if(/stout|porter|english|british|bitter|\besb\b|mild|irish|scottish|wee heavy|barleywine|old ale|london|brown ale/.test(s)) return 's04';
+  return 'us05'; // varsayılan nötr amerikan ale
+};
+
+// UI: "İskeleti Doldur" — B katmanı iskelet doldur (boş→direkt, dolu→onay) VEYA C katmanı (yalnız maya önerisi).
+window.bmStilIskeletDoldur = function(){
+  try{
+    if(typeof S==='undefined'||!S) return;
+    var st = S.stil;
+    if(!st){ if(typeof flash==='function')flash("Önce hedef stil seç","err"); return; }
+    var isk = (typeof STIL_ISKELET!=='undefined')?STIL_ISKELET[st]:null;
+    var doluMu = (Array.isArray(S.maltlar)&&S.maltlar.length) || (Array.isArray(S.hoplar)&&S.hoplar.length);
+    if(!isk){
+      // C KATMANI: hazır iskelet yok → yalnız maya önerisi (malt/hop UYDURMA)
+      var my = window._stilMayaOner ? _stilMayaOner(st) : '';
+      var setMaya = (my && !S.mayaId);
+      if(setMaya) S.mayaId = my;
+      if(typeof _receteYazSync==='function')_receteYazSync();
+      if(typeof render==='function')render();
+      if(typeof flash==='function')flash("Bu stil için hazır iskelet yok — BJCP hedefleri + maya önerisi hazır, malt/hop'u sen ekle","ok");
+      return;
+    }
+    if(doluMu && typeof confirm==='function' && !confirm("Mevcut malt/hop/maya bu stilin iskeletiyle DEĞİŞTİRİLECEK. Emin misin?")) return;
+    var r = window._stilIskeletHesap ? _stilIskeletHesap(st, (S.hacim>0?S.hacim:11), (S.verim>0?S.verim:61)) : null;
+    if(!r || !r.malts || !r.malts.length){ if(typeof flash==='function')flash("İskelet hesaplanamadı","err"); return; }
+    S.maltlar = r.malts;
+    S.hoplar = r.hops;
+    if(r.mayaId) S.mayaId = r.mayaId;
+    if(r.mashSc) S.mashSc = r.mashSc;
+    if(typeof _receteYazSync==='function')_receteYazSync();
+    if(typeof render==='function')render();
+    if(typeof flash==='function')flash("📋 "+st+" iskeleti "+(S.hacim>0?S.hacim:11)+"L'ye ölçeklenip dolduruldu — başlangıç noktası, serbestçe değiştir","ok");
+  }catch(e){ try{console.warn('bmStilIskeletDoldur',e);}catch(_){} }
+};
+
 // ═══ V15 SLUG → BJCP KEY EXPLICIT MAPPING (Adım 51 fix) ═══
 // V15 slug encoder (77 slug) → BJCP[key] 1-to-1 deterministik tablo.
 // V12 motoru için SADECE bu tablo kullanılır — fuzzy match YOK (yanlış map'leri önler).
@@ -20973,6 +21080,7 @@ function rEditor(){
       <option value=""${!S.stil?" selected":""}>── Otomatik (bileşenlerden) ──</option>
       ${typeof BJCP!=='undefined'?Object.keys(BJCP).sort().map(sn=>`<option value="${sn}"${S.stil===sn?" selected":""}>${sn}</option>`).join(""):""}
     </select>
+    <button type="button" onclick="bmStilIskeletDoldur()" title="Seçili stilin tipik malt/hop/maya iskeletini bu batch boyutuna ölçekleyip doldur" style="background:var(--bakir);color:#fff;border:none;border-radius:var(--r-sm);font-size:var(--fs-xs);padding:4px 10px;white-space:nowrap;cursor:pointer;font-family:var(--font-govde)">📋 İskeleti Doldur</button>
   </div>
   </div><!-- Adim 132-J-2: editor üst kahve header 6 stat duplicate KALDIRILDI (sticky özet 132-A+E zaten gosteriyor, KH J-2'de sticky'ye eklendi) -->
   ${uy?`<div style="padding:8px 12px 0">${uy}</div>`:""}

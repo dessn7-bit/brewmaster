@@ -1209,6 +1209,122 @@ const CASELER = [
       __REG.ok('temkinli dil kullanılıyor (muhtemel/aday/olabilir)', /muhtemel|aday|olabilir/.test(f));
       return __REG.al();
     })
+  },
+
+  // ── SPRINT V1a: stilden reçete başlatma (küratörlü iskelet + ölçekleme + tutarlılık kapısı) ──
+  {
+    kod: 'V-ISKELET-GATE', ad: 'TUTARLILIK KAPISI: her STIL_ISKELET → calc() OG/IBU/SRM BJCP aralığında + tüm ID katalogda (bozuk iskelet koruması)',
+    calistir: (page) => page.evaluate(() => {
+      const styles = Object.keys(window.STIL_ISKELET || {});
+      __REG.ok('STIL_ISKELET 20 küratörlü stil', styles.length === 20, String(styles.length));
+      yeniTarif();
+      let idFail = [], rangeFail = [], pctFail = [];
+      styles.forEach(st => {
+        const isk = window.STIL_ISKELET[st];
+        const bj = BJCP[st];
+        if (!bj) { rangeFail.push(st + ':BJCP-YOK'); return; }
+        // grist % toplam 100
+        const pctSum = isk.grist.reduce((a, g) => a + g[1], 0);
+        if (Math.abs(pctSum - 100) > 0.01) pctFail.push(st + '=' + pctSum);
+        // her ID katalogda
+        isk.grist.forEach(g => { if (!MALTLAR.find(m => m && m.id === g[0])) idFail.push(st + ':malt:' + g[0]); });
+        (isk.hop || []).forEach(hp => { if (!HOPLAR.find(x => x && x.id === hp.id)) idFail.push(st + ':hop:' + hp.id); });
+        if (isk.mayaId && !MAYALAR.find(m => m && m.id === isk.mayaId)) idFail.push(st + ':maya:' + isk.mayaId);
+        // ölçekle + GERÇEK calc() ile aralık kontrolü
+        const r = window._stilIskeletHesap(st, 11, 61);
+        if (!r || !r.malts.length) { rangeFail.push(st + ':hesap-null'); return; }
+        S.hacim = 11; S.verim = 61; S.maltlar = r.malts; S.hoplar = r.hops; S.mayaId = r.mayaId; S.ogManuel = null; S.fgManuel = null; S.katkilar = []; S.maya2Id = '';
+        const c = calc();
+        const srm = (c.srm != null) ? +c.srm : hSRM(S.maltlar, [], 11);
+        if (!(c.og >= bj.og[0] && c.og <= bj.og[1])) rangeFail.push(st + ':OG=' + c.og.toFixed(3) + '[' + bj.og + ']');
+        if (!(c.ibu >= bj.ibu[0] && c.ibu <= bj.ibu[1])) rangeFail.push(st + ':IBU=' + Math.round(c.ibu) + '[' + bj.ibu + ']');
+        if (!(srm >= bj.srm[0] && srm <= bj.srm[1])) rangeFail.push(st + ':SRM=' + srm + '[' + bj.srm + ']');
+      });
+      __REG.ok('grist %% toplamı 100 (tüm iskelet)', pctFail.length === 0, pctFail.slice(0, 4).join(' | '));
+      __REG.ok('tüm ID katalogda (malt/hop/maya) — sahte ID yok', idFail.length === 0, idFail.slice(0, 5).join(' | '));
+      __REG.ok('tüm iskelet calc() OG+IBU+SRM BJCP aralığında — bozuk iskelet yok', rangeFail.length === 0, rangeFail.slice(0, 5).join(' | '));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'V-DOLDUR', ad: 'boş reçetede iskelet doldur (Weizen): malt/hop/maya/mash doldu + calc() BJCP Weizen aralığında',
+    calistir: (page) => page.evaluate(() => {
+      yeniTarif();
+      S.stil = 'Weizen / Weissbier'; S.hacim = 11; S.verim = 61;
+      __REG.ok('başlangıçta boş (malt/hop yok)', S.maltlar.length === 0 && S.hoplar.length === 0);
+      bmStilIskeletDoldur();
+      __REG.ok('malt dolduruldu (buğday + pilsner)', S.maltlar.length >= 2 && S.maltlar.some(m => m.id === 'wheat'));
+      __REG.ok('hop dolduruldu', S.hoplar.length >= 1);
+      __REG.ok('maya dolduruldu (wy3068 Weizen)', S.mayaId === 'wy3068');
+      __REG.ok('mash sıcaklığı ayarlandı', S.mashSc === 67);
+      const c = calc(); const bj = BJCP['Weizen / Weissbier'];
+      __REG.ok('calc() OG BJCP Weizen aralığında', c.og >= bj.og[0] && c.og <= bj.og[1], 'OG=' + c.og.toFixed(3));
+      __REG.ok('calc() IBU BJCP Weizen aralığında', c.ibu >= bj.ibu[0] && c.ibu <= bj.ibu[1], 'IBU=' + Math.round(c.ibu));
+      __REG.ok('her malt ID katalogda (demlenebilir)', S.maltlar.every(m => !!MALTLAR.find(x => x && x.id === m.id)));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'V-SCALE', ad: 'ÖLÇEKLEME: aynı iskelet 11L vs 22L → miktar ~2x, oran + OG/IBU hedefi korunur',
+    calistir: (page) => page.evaluate(() => {
+      const r11 = window._stilIskeletHesap('American IPA', 11, 61);
+      const r22 = window._stilIskeletHesap('American IPA', 22, 61);
+      const kg11 = r11.malts.reduce((a, m) => a + m.kg, 0), kg22 = r22.malts.reduce((a, m) => a + m.kg, 0);
+      __REG.ok('22L malt miktarı ~2x 11L', Math.abs(kg22 / kg11 - 2) < 0.03, '11L=' + kg11.toFixed(2) + ' 22L=' + kg22.toFixed(2));
+      __REG.ok('malt ORANI korundu (ilk malt payı sabit)', Math.abs((r11.malts[0].kg / kg11) - (r22.malts[0].kg / kg22)) < 0.005);
+      __REG.ok('OG hedefi ölçekten bağımsız (aynı)', Math.abs(r11.hedef.og - r22.hedef.og) < 0.002, r11.hedef.og + ' vs ' + r22.hedef.og);
+      __REG.ok('IBU hedefi ölçekten bağımsız (aynı)', Math.abs(r11.hedef.ibu - r22.hedef.ibu) <= 1, r11.hedef.ibu + ' vs ' + r22.hedef.ibu);
+      const hop22 = r22.hops[0].g, hop11 = r11.hops[0].g;
+      __REG.ok('hop miktarı da ölçeklendi (~2x)', Math.abs(hop22 / hop11 - 2) < 0.05, hop11 + ' vs ' + hop22);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'V-CONFIRM', ad: 'dolu reçetede onay: reddedilirse mevcut korunur, kabul edilirse iskeletle değişir',
+    calistir: (page) => page.evaluate(() => {
+      const _oldConfirm = window.confirm;
+      yeniTarif();
+      S.stil = 'American IPA'; S.hacim = 11;
+      S.maltlar = [{ id: 'maris', kg: 5, marka: '', _ad: 'Maris Otter' }]; // kullanıcının mevcut işi
+      window.confirm = () => false; // REDDET
+      bmStilIskeletDoldur();
+      __REG.ok('onay reddedildi → mevcut malt KORUNDU (maris tek, ezilmedi)', S.maltlar.length === 1 && S.maltlar[0].id === 'maris');
+      window.confirm = () => true; // KABUL ET
+      bmStilIskeletDoldur();
+      __REG.ok('onay kabul → iskelet mevcut malzemeyi değiştirdi (pale_ale bazlı)', S.maltlar.length >= 2 && S.maltlar.some(m => m.id === 'pale_ale') && !S.maltlar.some(m => m.id === 'maris'));
+      window.confirm = _oldConfirm;
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'V-CLAYER', ad: 'C katmanı: iskeleti OLMAYAN stil (Doppelbock) → maya önerisi dolar, malt/hop BOŞ kalır (sahte iskelet UYDURMA)',
+    calistir: (page) => page.evaluate(() => {
+      __REG.ok('Doppelbock BJCP\'de var ama STIL_ISKELET\'te YOK', !!BJCP['Doppelbock'] && !window.STIL_ISKELET['Doppelbock']);
+      yeniTarif();
+      S.stil = 'Doppelbock'; S.hacim = 11;
+      bmStilIskeletDoldur();
+      __REG.ok('maya önerisi dolduruldu (lager → w3470)', S.mayaId === 'w3470');
+      __REG.ok('malt BOŞ kaldı (sahte malzeme uydurulmadı)', S.maltlar.length === 0);
+      __REG.ok('hop BOŞ kaldı (sahte malzeme uydurulmadı)', S.hoplar.length === 0);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'V-FREEDOM', ad: 'iskelet KİLİT DEĞİL: doldurduktan sonra kullanıcı serbestçe malt değiştirebilir',
+    calistir: (page) => page.evaluate(() => {
+      yeniTarif();
+      S.stil = 'German Pils'; S.hacim = 11;
+      bmStilIskeletDoldur();
+      const oncekiN = S.maltlar.length;
+      __REG.ok('iskelet doldu', oncekiN >= 1);
+      // kullanıcı bir malt daha ekler (serbestçe)
+      S.maltlar.push({ id: 'munich', kg: 0.5, marka: '', _ad: 'Munich Malt' });
+      __REG.ok('kullanıcı malt ekleyebildi (kilit yok)', S.maltlar.length === oncekiN + 1);
+      // ve bir maltı çıkarabilir
+      S.maltlar.splice(0, 1);
+      __REG.ok('kullanıcı malt çıkarabildi', S.maltlar.length === oncekiN);
+      return __REG.al();
+    })
   }
 ];
 
