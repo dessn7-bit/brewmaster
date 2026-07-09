@@ -673,7 +673,9 @@
 // olay=otomatik / sisele=litre-prompt / pitching=confirm / olcum=kisayol-toast; almKey idempotency; faz not-ayrimi. bump v131-375 -> v131-376.
 // Sprint S (2026-07-08): KR silme tombstone — bm_kr_sil_v1 + Firebase KRSil (iki PUT yazari), syncAl merge
 // filtresi GRAFT ONCESI (dirilis imkansiz), bilinçli geri-getirme (guncelleme>=silmeTs), TTL 90g, fail-open. bump v131-376 -> v131-377.
-const CACHE_VERSION = 'bm-cache-v131-377';
+// Sprint T (2026-07-09): brewday inline olcum — mash_end pre-boil OG + pitch OG kartlara input (deger S'te,
+// teardown-guvenli), opsiyonel hidrometre sicaklik duzeltmesi (Lyons, kalibrasyon 20°C), metinler arac-notr. bump v131-377 -> v131-378.
+const CACHE_VERSION = 'bm-cache-v131-378';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.

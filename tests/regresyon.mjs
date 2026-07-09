@@ -892,6 +892,115 @@ const CASELER = [
       });
       return c1.concat(c2);
     }
+  },
+
+  // ── SPRINT T: brewday inline ölçüm (mash_end pre-boil + pitch OG) ──
+  // Referans değerler tests dışında node ile kanıtlandı: Lyons polinomu 0–100°C'de CRC su
+  // yoğunluğu oranından max 0.00022 SG sapıyor; 1.040@50°C→1.051, 1.050@30°C→1.053.
+  {
+    kod: 'T-DUZELT', ad: 'hidrometre sıcaklık düzeltmesi: 20°C kimlik + referans değerler + absürt aralık reddi',
+    calistir: (page) => page.evaluate(() => {
+      __REG.ok('kimlik: kalibrasyon 20°C → değer değişmez', _bmHidroDuzelt(1.050, 20) === 1.05, String(_bmHidroDuzelt(1.050, 20)));
+      __REG.ok('referans: 1.040 @ 50°C → 1.051 (su yoğunluk oranı ρ20/ρ50≈1.0103)', _bmHidroDuzelt(1.040, 50) === 1.051, String(_bmHidroDuzelt(1.040, 50)));
+      __REG.ok('referans: 1.050 @ 30°C → 1.053', _bmHidroDuzelt(1.050, 30) === 1.053, String(_bmHidroDuzelt(1.050, 30)));
+      __REG.ok('soğuk örnek aşağı düzeltir: 1.040 @ 0°C → 1.038', _bmHidroDuzelt(1.040, 0) === 1.038, String(_bmHidroDuzelt(1.040, 0)));
+      __REG.ok('absürt sıcaklık reddi: 101°C ve -1°C → null', _bmHidroDuzelt(1.040, 101) === null && _bmHidroDuzelt(1.040, -1) === null);
+      __REG.ok('sınırlar geçerli: 0°C ve 100°C düzeltme üretir', _bmHidroDuzelt(1.040, 0) != null && _bmHidroDuzelt(1.040, 100) != null);
+      __REG.ok('geçersiz SG → null', _bmHidroDuzelt('x', 20) === null && _bmHidroDuzelt(0.5, 20) === null);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'T-PB', ad: 'brewday mash_end inline pre-boil: değer S\'te + M2 donması + teardown/timer dayanıklı + °C düzeltme + reset temizliği',
+    calistir: (page) => page.evaluate(async () => {
+      const my = (typeof MAYALAR !== 'undefined' && MAYALAR.find(m => m && m.id)) || null;
+      const id = __REG.yeniKayit('REGTEST T-PB', my ? { mayaId: my.id } : null);
+      await brewdayBaslat();
+      __REG.ok('brewday aktif + timeline DOM', window._brewday.aktif === true && !!document.getElementById('brewdayTimeline'));
+      // timer çiftlenme riski: mash_step timer'ı çalışırken re-render interval'ı DEĞİŞTİRMEMELİ
+      const t1 = window._brewday.timerInt;
+      brewdayRender();
+      __REG.ok('re-render timer interval ÇİFTLEMEDİ', window._brewday.timerInt === t1);
+      brewdayAktifOnayla(); // mash_step tamam → mash_end aktif
+      const ev = window._brewday.ajanda[window._brewday.aktifIdx];
+      __REG.ok('aktif kart mash_end', ev && ev.tip === 'mash_end', ev && ev.tip);
+      const inp = document.getElementById('bdPbSG');
+      __REG.ok('inline pre-boil inputu kartta', !!inp);
+      inp.value = '1.040'; inp.dispatchEvent(new Event('change'));
+      __REG.ok('değer S\'te yaşıyor: S.preboilOG=1.04', S.preboilOG === 1.04, String(S.preboilOG));
+      __REG.ok('M2: snapshot.preboilOG dondu', S.brewSnapshot && S.brewSnapshot.preboilOG === 1.04);
+      __REG.ok('KR aynası dondu', (KR.find(x => x && x.id === id) || {}).brewSnapshot.preboilOG === 1.04);
+      // teardown re-render dayanıklılığı (brewdayRender = TAM teardown) + tik zararsız
+      brewdayRender(); brewdayRender(); brewdayTimerTik();
+      const inp2 = document.getElementById('bdPbSG');
+      __REG.ok('çifte teardown sonrası değer duruyor (state\'ten basıldı)', !!inp2 && parseFloat(inp2.value) === 1.04, inp2 && inp2.value);
+      __REG.ok('mikro-onay göstergesi', document.getElementById('brewdayTimeline').textContent.indexOf('Kaydedildi: 1.040') > -1);
+      // °C girildi → DÜZELTİLMİŞ değer S'e/M2'ye; ham+düzeltilmiş şeffaf gösterim
+      const tc = document.getElementById('bdPbC');
+      tc.value = '50'; tc.dispatchEvent(new Event('change'));
+      __REG.ok('50°C → S.preboilOG=1.051 (düzeltilmiş kaydedildi)', S.preboilOG === 1.051, String(S.preboilOG));
+      __REG.ok('M2 düzeltilmişle güncellendi', S.brewSnapshot.preboilOG === 1.051);
+      __REG.ok('şeffaflık: ham @ °C → düzeltilmiş görünür', document.getElementById('brewdayTimeline').textContent.indexOf('1.040 @ 50°C → 1.051') > -1);
+      // absürt °C → düzeltme YOK, ham kaydedilir + uyarı
+      const tc2 = document.getElementById('bdPbC');
+      tc2.value = '130'; tc2.dispatchEvent(new Event('change'));
+      __REG.ok('absürt °C → ham kaydedildi', S.preboilOG === 1.04, String(S.preboilOG));
+      __REG.ok('absürt °C uyarısı görünür', document.getElementById('brewdayTimeline').textContent.indexOf('0–100°C dışında') > -1);
+      // reset: inline elementler timeline çocuğu → artık bırakmaz; staging düşer; ölçüm S/KR\'de kalır
+      brewdayZorlaSifirla(true);
+      __REG.ok('reset: timeline + input + staging temizlendi', !document.getElementById('bdPbSG') && !document.getElementById('brewdayTimeline') && !window._brewday.olcum);
+      __REG.ok('reset ölçümü SİLMEDİ (S kalıcı)', S.preboilOG === 1.04);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'T-OG', ad: 'brewday pitch inline OG: og_olcum log + ogManuel + KR persist + tek-giriş güncelleme + boş geçiş serbest + Q beslemesi',
+    calistir: (page) => page.evaluate(async () => {
+      const my = (typeof MAYALAR !== 'undefined' && MAYALAR.find(m => m && m.id)) || null;
+      __REG.ok('maya kataloğu var (pitch kartı önkoşulu)', !!my);
+      const id = __REG.yeniKayit('REGTEST T-OG', { mayaId: my.id });
+      await brewdayBaslat();
+      brewdayAktifOnayla(); // mash_step → mash_end aktif
+      // OPSİYONELLİK: mash_end hiçbir şey girmeden onaylanır, hata yok
+      brewdayAktifOnayla();
+      __REG.ok('boş geçiş: mash_end inputsuz onaylandı, preboil boş kaldı', S.preboilOG == null && window._brewday.ajanda.some(e => e.tip === 'mash_end' && e._tamamlandi));
+      // pitch kartına atla
+      let guard = 0;
+      while (guard++ < 30) { const e = window._brewday.ajanda[window._brewday.aktifIdx]; if (!e || e.tip === 'pitch') break; brewdayAtla(); }
+      const ev = window._brewday.ajanda[window._brewday.aktifIdx];
+      __REG.ok('aktif kart pitch', ev && ev.tip === 'pitch', ev && ev.tip);
+      const inp = document.getElementById('bdOgSG');
+      __REG.ok('inline OG inputu kartta', !!inp);
+      inp.value = '1.052'; inp.dispatchEvent(new Event('change'));
+      let logs = S.brewLog.filter(x => x && x.tip === 'og_olcum');
+      __REG.ok('og_olcum log yazıldı (deger 1.052)', logs.length === 1 && logs[0].deger === '1.052', logs.length + ' ' + (logs[0] && logs[0].deger));
+      __REG.ok('ogManuel backfill (elle girişle aynı yol)', S.ogManuel === 1.052, String(S.ogManuel));
+      __REG.ok('KR persist (tarifeKaydet zinciri)', ((KR.find(x => x && x.id === id) || {}).brewLog || []).some(x => x && x.tip === 'og_olcum' && x.deger === '1.052'));
+      // değer düzeltildi → İKİNCİ giriş DEĞİL, aynı kaydın güncellenmesi
+      const inp2 = document.getElementById('bdOgSG');
+      inp2.value = '1.054'; inp2.dispatchEvent(new Event('change'));
+      logs = S.brewLog.filter(x => x && x.tip === 'og_olcum');
+      __REG.ok('değer değişti → TEK giriş (çift yok), deger güncel', logs.length === 1 && logs[0].deger === '1.054');
+      __REG.ok('ogManuel güncellendi', S.ogManuel === 1.054);
+      // Sprint Q beslemesi: şişelemede donacak canlı ikili ölçümü GÖRÜYOR
+      const d = _brewSonucCanli(S);
+      __REG.ok('Q beslemesi: _brewSonucCanli og_olcum\'u okuyor (kaynak=olcum)', d.og === 1.054 && d.ogKay === 'olcum', d.og + '/' + d.ogKay);
+      // pitch onayı normal ilerler (input zorunlu değil) → brewday sonuna kadar akış sağlam
+      brewdayAktifOnayla();
+      __REG.ok('pitch onayı normal geçti', window._brewday.ajanda.some(e => e.tip === 'pitch' && e._tamamlandi));
+      __REG.ok('app ayakta (brewday akışı bozulmadı)', typeof render === 'function' && !!document.getElementById('ekran'));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'T-METIN', ad: 'araç-nötr ölçüm metinleri: mash_end + gravity ara-ölçüm alarmı refraktometre dayatmaz; refrakDuzelt duruyor',
+    calistir: (page) => page.evaluate(() => {
+      __REG.ok('brewdayAjandaUret refraktometre içermiyor', String(brewdayAjandaUret).indexOf('refraktometre') === -1);
+      __REG.ok('mash_end metni ölçümü karta yönlendiriyor', String(brewdayAjandaUret).indexOf('karttaki alana girebilirsin') > -1);
+      __REG.ok('_alarmPlaniKur ara-ölçüm metni araç-nötr', String(window._alarmPlaniKur).indexOf('refraktometre') === -1 && String(window._alarmPlaniKur).indexOf('yoğunluğu (SG) ölçüp kaydet') > -1);
+      __REG.ok('refrakDuzelt hesaplayıcısı DURUYOR (bilinçli dokunulmadı)', typeof window.refrakDuzelt === 'function');
+      return __REG.al();
+    })
   }
 ];
 

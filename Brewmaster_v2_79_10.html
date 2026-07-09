@@ -21323,7 +21323,7 @@ window.brewdayAjandaUret=function(){
   a.push({
     tip:'mash_end', faz:'mash',
     ikon:'💧', baslik:'Mash bitti — Sparge + Kaynatmaya geç',
-    detay:'Sparge suyu 76°C\'de 5-10 L. Ön-kaynatma OG kontrolü için refraktometre örneği al.'
+    detay:'Sparge suyu 76°C\'de 5-10 L. Ön-kaynatma OG\'yi ölçüp karttaki alana girebilirsin (opsiyonel).'
   });
   // Kaynatma başlangıcı — v2.78.82: sure + timerTur eklendi (büyük timer geri sayım için)
   const kSure=S.kaynatmaSure||60;
@@ -21449,6 +21449,141 @@ window.brewdayOnKontrol=function(){
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
+// SPRINT T — BREWDAY INLINE ÖLÇÜM (mash_end: pre-boil OG · pitch: OG)
+// Değer DOM'da DEĞİL state'te yaşar: staging _brewday.olcum (RAM — brewdayZorlaSifirla
+// _brewday'i komple değiştirdiği için staging otomatik düşer); kalıcı değer MEVCUT zincirlerde:
+// pre-boil → S.preboilOG + _preboilSnapDondur (M2 dondurma/kilit AYNEN);
+// OG → og_olcum log + S.ogManuel backfill + _brewSonucTamamla (logEkle ile aynı yol).
+// Teardown-re-render güvenli: brewdayRender input value'larını staging'den basar;
+// brewdayTimerTik'e DOKUNULMADI (tik re-render yapmaz → focus/değer kaybı yok).
+// ═══════════════════════════════════════════════════════════════════════════
+window._bdOlcum=function(){
+  const b=window._brewday;
+  if(!b.olcum)b.olcum={pbSG:null,pbC:null,pbSon:null,pbUyari:'',ogSG:null,ogC:null,ogSon:null,ogUyari:'',ogLogId:null};
+  return b.olcum;
+};
+// T2 — Hidrometre sıcaklık düzeltmesi (OPSİYONEL: °C boşsa hiç çağrılmaz, ham SG aynen kaydedilir).
+// Standart formül (Lyons polinomu, °F — BrewersFriend/Vinolab ile aynı katsayılar):
+//   ρ(T°F) = 1.00130346 − 1.34722124e-4·T + 2.04052596e-6·T² − 2.32820948e-9·T³
+//   SG_düzeltilmiş = SG_ölçülen × ρ(T_örnek) / ρ(T_kalibrasyon)
+// Kalibrasyon 20°C (68°F) — modern hidrometre standardı. Sayısal kanıt: 0–100°C'de CRC su
+// yoğunluğu oranından max sapma 0.00022 SG (okuma çözünürlüğü 0.001'in altında).
+// Akıl bandı: örnek sıcaklığı 0–100°C dışı absürt → null (çağıran ham değeri kaydedip uyarır).
+window._bmHidroDuzelt=function(sg,tC){
+  const g=_sgNum(sg);
+  const t=parseFloat(tC);
+  if(g==null||!isFinite(t)||t<0||t>100)return null;
+  const rho=function(f){return 1.00130346-1.34722124e-4*f+2.04052596e-6*f*f-2.32820948e-9*f*f*f;};
+  return _sgNum(g*rho(t*9/5+32)/rho(68));
+};
+// Ortak düzeltme sarıcı: {kayit, duzeltildi, uyari}
+window._bdDuzeltHesapla=function(raw,tC){
+  let duz=null,uyari='';
+  if(tC!=null){
+    duz=_bmHidroDuzelt(raw,tC);
+    if(duz==null)uyari=(tC<0||tC>100)?'⚠️ Örnek sıcaklığı 0–100°C dışında — düzeltme yapılmadı, ham SG kaydedildi.':'⚠️ Düzeltme geçersiz sonuç verdi — ham SG kaydedildi.';
+  }
+  return {kayit:(duz!=null?duz:raw),duzeltildi:(duz!=null),uyari:uyari};
+};
+// Inline input onchange girişi — değer anında state'e (tur: 'pb'|'og', alan: 'sg'|'c')
+window._bdOlcumGir=function(tur,alan,deger){
+  try{
+    const o=_bdOlcum();
+    let v=(deger==null||String(deger).trim()==='')?null:parseFloat(String(deger).replace(',','.'));
+    if(v!=null&&!isFinite(v))v=null;
+    if(tur==='pb'){
+      if(alan==='sg'){o.pbSG=v;_bdPreboilCommit(true);}
+      else{o.pbC=v;if(o.pbSG!=null)_bdPreboilCommit(false);else brewdayRender();}
+    }else{
+      if(alan==='sg')o.ogSG=v;else o.ogC=v;
+      if(o.ogSG!=null)_bdPitchOGCommit();else brewdayRender();
+    }
+  }catch(e){console.warn('[Brewday] inline ölçüm',e);}
+};
+// Pre-boil commit — Süreç sekmesi kalıbının aynısı: S.preboilOG + _preboilSnapDondur + render
+window._bdPreboilCommit=function(sgDegisti){
+  const o=_bdOlcum();
+  const raw=_sgNum(o.pbSG);
+  o.pbUyari='';o.pbSon=null;
+  if(raw==null){
+    if(o.pbSG!=null)o.pbUyari='⚠️ Geçersiz SG — 0.990–1.200 aralığında gir.';
+    else if(sgDegisti){
+      S.preboilOG=null; // alan bilinçli boşaltıldı → Süreç ✕ semantiği
+      if(window._preboilSnapDondur)_preboilSnapDondur(S,typeof _editId!=='undefined'?_editId:null);
+    }
+  }else{
+    const d=_bdDuzeltHesapla(raw,o.pbC);
+    S.preboilOG=d.kayit;
+    if(window._preboilSnapDondur)_preboilSnapDondur(S,typeof _editId!=='undefined'?_editId:null);
+    o.pbSon={ham:raw,c:(d.duzeltildi?o.pbC:null),kayit:d.kayit};
+    o.pbUyari=d.uyari;
+  }
+  brewdayRender();
+  try{if(typeof render==='function')render();}catch(e){}
+};
+// Pitch OG commit — logEkle og_olcum yolu ile AYNI zincir + oturum-içi güncelleme (çift giriş yok)
+window._bdPitchOGCommit=function(){
+  const o=_bdOlcum();
+  const raw=_sgNum(o.ogSG);
+  o.ogUyari='';
+  if(raw==null){
+    if(o.ogSG!=null)o.ogUyari='⚠️ Geçersiz SG — 0.990–1.200 aralığında gir.';
+    brewdayRender();
+    return;
+  }
+  const d=_bdDuzeltHesapla(raw,o.ogC);
+  const degerStr=d.kayit.toFixed(3);
+  const not='Brewday ölçümü'+(d.duzeltildi?(' — ham '+raw.toFixed(3)+' @ '+o.ogC+'°C, 20°C\'ye düzeltildi'):'');
+  if(!S.brewLog)S.brewLog=[];
+  const eski=o.ogLogId?S.brewLog.find(function(x){return x&&x.id===o.ogLogId;}):null;
+  if(eski){eski.deger=degerStr;eski.not=not;} // aynı id → KR birleşimi tekil, çift üretmez
+  else{
+    const yeniId=Date.now().toString();
+    S.brewLog.push({tip:'og_olcum',tarih:new Date().toISOString().slice(0,10),deger:degerStr,not:not,id:yeniId});
+    o.ogLogId=yeniId;
+  }
+  S.brewLog.sort(function(a,b){return String(a.tarih||'').localeCompare(String(b.tarih||''));});
+  S.ogManuel=d.kayit; // Sprint I I4 backfill simetrisi (logEkle 'og_olcum' ile aynı)
+  try{if(window._brewSonucTamamla)_brewSonucTamamla(S,typeof _editId!=='undefined'?_editId:null);}catch(e){}
+  try{if(S.biraAd&&S.biraAd.trim()&&typeof tarifeKaydet==='function')tarifeKaydet();else if(typeof ky==='function')ky(KR);}catch(e){} // Sprint R köprü persist kalıbı
+  try{if(window._stuckFermSync)_stuckFermSync();}catch(e){}
+  o.ogSon={ham:raw,c:(d.duzeltildi?o.ogC:null),kayit:d.kayit};
+  brewdayRender();
+};
+// Kart-içi ölçüm bloğu HTML'i — yalnız AKTİF mash_end/pitch kartı (brewdayRender çağırır).
+// Elementler #brewdayTimeline çocuğu → brewdayZorlaSifirla DOM temizlik listesine ek GEREKMEZ.
+window._bdOlcumBlokHTML=function(tur){
+  const o=_bdOlcum();
+  const pb=(tur==='pb');
+  const sgVal=pb?(o.pbSG!=null?o.pbSG:(S.preboilOG!=null?S.preboilOG:'')):(o.ogSG!=null?o.ogSG:'');
+  const cVal=pb?(o.pbC!=null?o.pbC:''):(o.ogC!=null?o.ogC:'');
+  let hedef='';
+  try{
+    const c=calc();
+    if(c&&c.og>1){
+      if(pb){const _h=S.hacim||11,_ks=S.kaynatmaSure||60,_ph=_h+0.9+_h*0.12*_ks/60;hedef=(1+((c.og-1)*_h/_ph)).toFixed(3);}
+      else hedef=c.og.toFixed(3);
+    }
+  }catch(e){}
+  const inp='background:rgba(254,251,242,.08);color:#F5D799;border:1px solid rgba(245,215,153,.3);border-radius:6px;padding:8px;font-size:14px;font-weight:700;text-align:center';
+  let h='<div style="margin-top:8px;padding:8px;background:rgba(254,251,242,.06);border:1px solid rgba(245,215,153,.18);border-radius:8px">';
+  h+='<div style="font-size:11px;font-weight:700;color:#F5D799;margin-bottom:5px">🔬 '+(pb?'Pre-boil OG':'OG ölçümü')+' <span style="font-weight:400;color:rgba(245,215,153,.6)">(opsiyonel'+(hedef?' · hedef '+hedef:'')+')</span></div>';
+  h+='<div style="display:flex;gap:6px;align-items:center">';
+  h+='<input id="bd'+(pb?'Pb':'Og')+'SG" aria-label="'+(pb?'Pre-boil OG':'OG')+' ölçümü (opsiyonel)" type="number" step="0.001" min="0.990" max="1.200" placeholder="'+(hedef||'1.048')+'" value="'+sgVal+'" style="flex:1;min-width:0;'+inp+'" onchange="_bdOlcumGir(\''+tur+'\',\'sg\',this.value)">';
+  h+='<input id="bd'+(pb?'Pb':'Og')+'C" aria-label="Örnek sıcaklığı °C (opsiyonel)" type="number" step="1" placeholder="°C" title="Örnek sıcaklığı — boş bırakırsan düzeltme yapılmaz" value="'+cVal+'" style="width:64px;'+inp+'" onchange="_bdOlcumGir(\''+tur+'\',\'c\',this.value)">';
+  h+='</div>';
+  const son=pb?o.pbSon:o.ogSon,uyari=pb?o.pbUyari:o.ogUyari;
+  if(son){
+    h+='<div style="margin-top:5px;font-size:11px;font-weight:600;color:#8FD48F">✓ '+(son.c!=null?(son.ham.toFixed(3)+' @ '+son.c+'°C → '+son.kayit.toFixed(3)+' (20°C\'ye düzeltildi)'):('Kaydedildi: '+son.kayit.toFixed(3)))+(pb?'':' — günlüğe yazıldı')+'</div>';
+  }else if(pb&&S.preboilOG!=null){
+    h+='<div style="margin-top:5px;font-size:11px;color:rgba(245,215,153,.65)">Kayıtlı: '+(+S.preboilOG).toFixed(3)+'</div>';
+  }
+  if(uyari)h+='<div style="margin-top:4px;font-size:10px;font-weight:600;color:#FFC08A">'+uyari+'</div>';
+  h+='<div style="margin-top:4px;font-size:10px;color:rgba(254,251,242,.45)">Boş bırakılabilir. Sıcak örnek ölçtüysen °C gir — hidrometre 20°C\'ye düzeltilir.</div>';
+  h+='</div>';
+  return h;
+};
+// ═══════════════════════════════════════════════════════════════════════════
 // RENDER — Tek fonksiyon, tüm UI'ı çizer. Her state değişiminden sonra çağrılır.
 // ═══════════════════════════════════════════════════════════════════════════
 window.brewdayRender=function(){
@@ -21507,7 +21642,10 @@ window.brewdayRender=function(){
       h+='<button class="brewdayBtnAtla" style="background:rgba(254,251,242,.12);color:rgba(245,215,153,.7);border:1px solid rgba(245,215,153,.2);border-radius:6px;padding:7px 12px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;user-select:none;-webkit-user-select:none;touch-action:manipulation">⏭ Atla</button>';
       h+='</div>';
     }
-    h+='</div></div>';
+    h+='</div>';
+    // SPRINT T: aktif mash_end/pitch kartına inline ölçüm bloğu (değer S'te yaşar, DOM'da değil)
+    if(akt&&!ok&&(ev.tip==='mash_end'||ev.tip==='pitch'))h+=_bdOlcumBlokHTML(ev.tip==='mash_end'?'pb':'og');
+    h+='</div>';
   });
   h+='</div>';
 
@@ -22281,7 +22419,7 @@ window.brewdayBitir=function(){
             ts: _alarmTsHesapla(pitchTs, _g, saat),
             tip: 'kontrol',
             aksiyon: '📊 Gravity kontrol',
-            aciklama: 'Ara ölçüm: hidrometre/refraktometre ile yoğunluğu kaydet. Düşüş duruyorsa fermentasyon bitiyor demektir.',
+            aciklama: 'Ara ölçüm: yoğunluğu (SG) ölçüp kaydet. Düşüş duruyorsa fermentasyon bitiyor demektir.',
             sicaklik: null,
             durum: 'bekliyor'
           });
