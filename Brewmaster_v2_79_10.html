@@ -24266,7 +24266,7 @@ window.tadimInc=tadimInc;
 // NOT: kaliteSkoru sıcaklık-std→risk (satır ~5256) bir PUANLAMA motoru; bilinçli AYRI bırakıldı
 // (bozma riski). Timeline diacetyl keyword (~13021) buradaki _bmOffKisaCozum'a yönlendirildi (tek kaynak).
 // ═══════════════════════════════════════════════════════════════════════════
-window._OFF_KODLAR = ['diacetyl','DMS','acetaldehyde','fusel','oxidized','astringent','light-struck','solvent','acetic','chlorophenol','sulfur','metallic','infection','phenolic'];
+window._OFF_KODLAR = ['diacetyl','DMS','acetaldehyde','fusel','oxidized','astringent','light-struck','solvent','acetic','chlorophenol','sulfur','metallic','infection','phenolic','ester'];
 window._OFF_TESHIS = {
   diacetyl: {
     ad: "Diacetyl (tereyağı)",
@@ -24393,6 +24393,15 @@ window._OFF_TESHIS = {
     onlem: ["Stile uygun maya seç: temiz stiller için POF- (fenolik yapmayan) maya (üretici datasheet POF durumunu belirtir)","Weizen dengesi: karanfil İSTİYORSAN ferulik rest (43–45°C) + DAHA SOĞUK ferment; muz istiyorsan DAHA SICAK ferment. Belçika/Saison'da yön TERSİNE: sıcak = daha fenolik","Sıkı sanitasyon — vahşi maya/Brett girişini önle","Su: klor/kloramin varsa Campden ile gider (klorofenol=plastik/tıbbi ayrı önlemi)"],
     ayiriciSoru: ["Karanfil/biberli mi (4-VG, POF+ maya — Weizen/Belçika'da NORMAL) yoksa band-aid/plastik/eczane mi (o klorofenol = su/klor VEYA Brett 4-EP, farklı aile)? Karanfil ZAMANLA artıyor + ekşilik varsa Brett kontaminasyonu. Muz ile birlikteyse Weizen maya imzası, kusur değil."],
     stilNotu: "Hefeweizen/Weizenbock/Rauchbier ve bazı Belçika stillerinde karanfil-baharat İSTENEN karakterdir — bu stilleri seviyorsan otomatik kusur SAYMA. Yalnız temiz stilde (lager/pale/IPA/blonde) kusur. SICAKLIK YÖNÜ: Weizen'de soğuk=karanfil / sıcak=muz (ters ilişki); Belçika/Saison'da sıcak=daha fenolik."
+  },
+  ester: {
+    ad: "Ester-aşırı (muz)",
+    trDil: ["muz / olgun muz","muz şekeri / muzlu şeker","muzlu kek","abartılı meyvemsi","yapay / sahte meyve","olgun armut / armut şekeri","sakız (Juicy Fruit) gibi"],
+    kokNeden: ["Yüksek fermantasyon sıcaklığı (en yaygın ve en güvenilir): asetat esterleri (muz/izoamil asetat) sıcaklıkla katlanır; üretim ilk 1–4 günün büyüme fazında tepe yapar — o günlerin sıcaklığı kritik","Maya suşu — Hefeweizen/Belçika suşları doğal yüksek ester üreticisidir (STİL-BAĞIMLI, hedef olabilir)","Düşük O2 / semi-anaerobik fermantasyon esteri artırır","Yüksek OG / bol basit şeker; basınçsız fermantasyon (CO2 basıncı asetat esterlerini bastırır, yoksa artar)","Pitch rate ZAYIF ve çelişkili bir kaldıraç — kontrollü deneyler under/over-pitch farkını çoğu kez ayırt edemedi; sıcaklık ve suştan sonra gelir, tek başına suçlama"],
+    kurtarilir: { seviye:"hayır", nasil:"Şişelenmiş batchte ester profili büyük ölçüde sabittir; muz (izoamil asetat) inatçıdır, kaybolmaz. Uzun soğuk olgunlaşma bazı esterleri algısal yatıştırabilir ama muzu güvenilir silmez. Temiz batch ile blend seyreltir. Bol muz + malty gövde varsa Weizenbock/Dubbel gibi değerlendir — kusuru özellik say." },
+    onlem: ["Fermantasyonu maya aralığının alt-orta bandında tut (nötr ale için 18–20°C); ilk 3 gün sıcaklığı sıkı kontrol et — en etkili tek önlem","Maya seçimini hedefe göre yap: muz istemiyorsan nötr suş (US-05, Nottingham); muz istiyorsan Weizen suşu + biraz daha sıcak ferment","Wort'u iyi oksijenle; OG'yi makul tut, aşırı basit şeker/bal ekleme","İmkan varsa spunding / basınç altı fermantasyon (asetat esterlerini bastırır)"],
+    ayiriciSoru: ["Muzlu-meyvemsi mi (ester) yoksa yakıcı-sıcak alkol / oje-aseton mu (fusel veya etil asetat = solvent ailesi)? Muz + malt gövde Weizen/Belçika maya imzasıdır. Karanfil ile birlikteyse Weizen maya karakteri (kusur değil, stil imzası)."],
+    stilNotu: "Muz (izoamil asetat) Hefeweizen/Weizenbock/Belçika Dubbel-Tripel'de İSTENEN karakterdir (~3–5 ppm normal); aynı seviye pale ale/lager/pilsner'da kusurdur. Weizen seviyorsan muzu otomatik kusur SAYMA — hedef stile göre değerlendir. Kaldıraç sırası: SICAKLIK > MAYA SUŞU > oksijen/OG > (pitch rate en zayıf)."
   }
 };
 // Kısa çözüm — timeline ve diğer yerlerden tek-kaynak (kurtarilir.nasil ilk cümlesi)
@@ -24403,7 +24412,93 @@ window._bmOffKisaCozum = function(kod){
   var i = s.indexOf('. ');
   return 'Çözüm: ' + (i > 0 ? s.slice(0, i + 1) : s);
 };
-// Statik teşhis kartı — bir off-flavor tag'inin ? düğmesi açar (batch-verisi YOK, v1a genel)
+// Teşhis kartı — ? düğmesi: statik bilgi + _bmOffBatchIpucu(kod) batch-farkında satır (U2)
+// U2: teshis kartina batch-farkinda "senin verinde" satiri — acik recetenin (S) verisiyle keskinlestirir; veri yoksa bos doner (statik kart korunur, graceful)
+window._bmOffBatchIpucu = function(kod){
+  try{
+    if(typeof S==='undefined' || !S) return '';
+    var _tipAdlar={ale:"nötr ale suşu",wheat:"buğday/Weizen suşu",wit:"Wit suşu",belcika:"Belçika suşu",saison:"Saison suşu",lager:"lager suşu",kveik:"kveik suşu",sour:"sour/wild kültür",brett:"Brett kültürü"};
+    var maya=null;
+    try{ if(typeof MAYALAR!=='undefined' && S.mayaId) maya = MAYALAR.find(function(x){return x&&x.id===S.mayaId;})||null; }catch(_e){}
+    var mtip = (maya&&maya.tip)?String(maya.tip):'';
+    var mad = (maya&&maya.ad)?String(maya.ad):'mayan';
+    var tipAd = _tipAdlar[mtip] || (mtip?(mtip+" suşu"):"suş");
+    var mideal = (maya&&maya.ideal!=null)?+maya.ideal:null;
+    var pofPlus = (mtip==='wheat'||mtip==='wit'||mtip==='belcika'||mtip==='saison');
+    var lagerish = (mtip==='lager');
+    // sıcaklık ölçümleri (kaliteSkoru ile AYNI kaynak: brewLog tip='sicaklik' — yeniden hesaplamıyoruz, aynı diziyi okuyoruz)
+    var bl = Array.isArray(S.brewLog)?S.brewLog:[];
+    var tArr = bl.filter(function(x){return x&&x.tip==='sicaklik'&&x.deger!=null&&x.deger!=='';}).map(function(x){return parseFloat(x.deger);}).filter(function(v){return isFinite(v);});
+    var tN=tArr.length, tOrt=null, tStd=null, tMax=null;
+    if(tN){
+      tOrt=tArr.reduce(function(a,b){return a+b;},0)/tN; tMax=Math.max.apply(null,tArr);
+      if(tN>=2){ var vv=tArr.reduce(function(a,b){return a+Math.pow(b-tOrt,2);},0)/tN; tStd=Math.sqrt(vv); }
+      tOrt=Math.round(tOrt*10)/10;
+    }
+    // FG sapması (gerçek − hedef): gerçek=_brewSonucCanli, hedef=brewday snapshot SAF tahmini — calc() manuel FG override alır (fgT==fgG olur), o yüzden snapshot.fgT (bmProfilAnaliz ile AYNI kaynak)
+    var fgSap=null, fgG=null, fgT=null;
+    try{
+      var canli = window._brewSonucCanli?window._brewSonucCanli(S):null;
+      fgG = (canli&&canli.fg!=null)?+canli.fg:null;
+      fgT = (S.brewSnapshot && S.brewSnapshot.fgT!=null)?+S.brewSnapshot.fgT:null;
+      if(fgG!=null&&fgT!=null) fgSap=Math.round((fgG-fgT)*1000)/1000;
+    }catch(_e2){}
+    var sicakLim = (mideal!=null)?(mideal+2):((maya&&maya.sc&&maya.sc[1]!=null)?+maya.sc[1]:null);
+    var cokSicak = (tMax!=null&&sicakLim!=null&&tMax>sicakLim);
+    var dalgali = (tStd!=null&&tStd>=1.5);
+    var idealTxt = (mideal!=null)?(" (ideal ~"+mideal+"°C)"):"";
+    var _fg = function(v){ return (v!=null)?(Math.round(v*1000)/1000).toFixed(3):"?"; };
+    var L=[];
+    switch(kod){
+      case 'ester':
+        if(pofPlus){
+          L.push("Mayan <b>"+mad+"</b> ("+tipAd+") doğal ester üreticisi — <b>muz bu stilde karakterdir, kusur değil</b>.");
+          if(cokSicak) L.push("Ama fermantasyonun "+tMax+"°C'ye çıkmış"+idealTxt+" — muz beklenenden <b>aşırı</b> olabilir; sonraki sefer ilk 3 günü daha serin tut.");
+          else if(tOrt!=null) L.push("Ortalama "+tOrt+"°C"+idealTxt+" — muz aşırı değilse endişelenme, stilin parçası.");
+        } else if(maya){
+          L.push("Mayan <b>"+mad+"</b> nötr bir suş — bu profilde belirgin muz <b>beklenmez</b>, ester kusur işareti.");
+          if(cokSicak) L.push("Fermantasyon "+tMax+"°C'ye çıkmış"+idealTxt+" — yüksek sıcaklık muz-esterin en güçlü nedeni; <b>muhtemel sebep bu</b>.");
+          else if(tOrt!=null) L.push("Sıcaklık kontrollü görünüyor ("+tOrt+"°C) — yine de muz varsa kısa sıcaklık sıçraması ya da yüksek OG olabilir.");
+        }
+        break;
+      case 'phenolic':
+        if(pofPlus){
+          L.push("Mayan <b>"+mad+"</b> ("+tipAd+") POF+ bir suş — <b>karanfil/baharat bu stilde beklenen karakter</b>, otomatik kusur sayma.");
+          if(mtip==='wheat'||mtip==='wit') L.push("Weizen/Wit'te yön ters: <b>daha soğuk = daha karanfil</b>, daha sıcak = daha muz. Karanfil çoksa fermenti biraz ısıt.");
+          else L.push("Belçika/Saison'da <b>daha sıcak = daha fenolik</b>. Fenol fazlaysa fermenti biraz serinlet.");
+        } else if(maya){
+          L.push("Mayan <b>"+mad+"</b> temiz (POF−) bir suş — teoride karanfil <b>yapmaz</b>. Alıyorsan: ya suda klor/kloramin var (klorofenol) ya da yanlış maya kaçmış; ayırıcı soruya bak.");
+        }
+        break;
+      case 'fusel':
+        if(cokSicak) L.push("Fermantasyon <b>"+tMax+"°C</b>'ye çıkmış"+idealTxt+" — yüksek sıcaklık fuselin en güçlü nedeni; <b>muhtemel sebep bu</b>.");
+        else if(dalgali) L.push("Sıcaklık ~"+tStd.toFixed(1)+"°C oynamış — sıçramalar fusel üretebilir, güçlü aday.");
+        else if(tOrt!=null) L.push("Sıcaklık kontrollü görünüyor ("+tOrt+"°C"+(tStd!=null?(", sapma "+tStd.toFixed(1)+"°C"):"")+") — fusel düşük ihtimal; OG çok yüksek ya da pitch düşük müydü diye bak.");
+        break;
+      case 'diacetyl':
+        if(fgSap!=null&&fgSap>0.002) L.push("FG hedefin ("+_fg(fgT)+") <b>üstünde</b> kalmış ("+_fg(fgG)+") — maya işini bitirmemiş, diacetyl temizlenmemiş olabilir; <b>güçlü aday</b>. Birkaç gün daha ılıkta beklet (diacetyl resti).");
+        if(mideal!=null&&tOrt!=null&&tOrt<mideal-1) L.push("Ortalama "+tOrt+"°C mayanın idealinin ("+mideal+"°C) altında — soğuk fermantasyon diacetyl temizliğini yavaşlatır.");
+        break;
+      case 'acetaldehyde':
+        if(fgSap!=null&&fgSap>0.002) L.push("FG hedefe ("+_fg(fgT)+") inmemiş ("+_fg(fgG)+") — erken alma/şişeleme yeşil-elmayı bırakır; <b>muhtemel sebep bu</b>. Maya üstünde birkaç gün daha beklet (kısmen kurtarılır).");
+        break;
+      case 'DMS':
+        if(lagerish) L.push("Mayan <b>"+mad+"</b> lager suşu — Pils malt + soğuk ferment DMS'e daha yatkındır. Ama asıl kaynak <b>kaynatma</b>: kapağı kapatma, en az 60 dk güçlü kaynat, sonra hızlı soğut.");
+        break;
+      case 'sulfur':
+        if(lagerish) L.push("Mayan <b>"+mad+"</b> lager suşu — <b>kükürt lagerlerde normaldir</b> ve olgunlaşmada maya çoğunu geri emer. Büyük olasılıkla geçici; birkaç hafta soğukta beklet.");
+        else if(maya) L.push("Mayan <b>"+mad+"</b> ale suşu — belirgin kükürt ale'de daha az beklenir; stresli maya / düşük besin ya da kontaminasyon olabilir. Ayırıcı soruya bak.");
+        break;
+      case 'solvent':
+        if(cokSicak) L.push("Fermantasyon <b>"+tMax+"°C</b>'ye çıkmış"+idealTxt+" — yüksek sıcaklık etil asetat/solvent üretebilir; güçlü aday.");
+        break;
+    }
+    if(!L.length) return '';
+    return '<div style="margin-top:10px;background:var(--bg2);border-left:3px solid var(--bakir);border-radius:6px;padding:9px 11px">'
+      + '<div style="font-size:11px;font-weight:700;color:var(--bakir);letter-spacing:.4px;margin-bottom:4px">📊 SENİN VERİNDE</div>'
+      + '<div style="font-size:12px;color:var(--kahve);line-height:1.6">' + L.join('<br>') + '</div></div>';
+  }catch(e){ try{console.warn('[_bmOffBatchIpucu]',e);}catch(_e3){} return ''; }
+};
 window.bmOffTeshis = function(kod){
   try{
     var d = window._OFF_TESHIS && window._OFF_TESHIS[kod];
@@ -24423,6 +24518,7 @@ window.bmOffTeshis = function(kod){
     h += '<button onclick="bmOffTeshisKapat()" aria-label="Teşhis kartını kapat" style="background:var(--bg2);border:1px solid var(--bor);border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;color:var(--kahve);flex:none">✕</button>';
     h += '</div>';
     h += '<div style="font-size:11px;color:var(--soluk);margin-bottom:6px;line-height:1.5">Böyle tarif edilir: ' + (d.trDil||[]).join(' · ') + '</div>';
+    h += (window._bmOffBatchIpucu ? window._bmOffBatchIpucu(kod) : '');
     h += _bolum('OLASI NEDENLER (en sıktan)', _liste(d.kokNeden));
     h += _bolum('KURTARILABİLİR Mİ?', '<div style="background:' + _sevBg + ';border-radius:8px;padding:8px 10px;margin-top:2px"><div style="font-size:12px;font-weight:700;color:' + _sevRenk + ';margin-bottom:2px">' + _sevAd + '</div><div style="font-size:12px;color:var(--kahve);line-height:1.5">' + ((d.kurtarilir && d.kurtarilir.nasil) || '') + '</div></div>');
     h += _bolum('SONRAKİ BATCH — ÖNLEM', _liste(d.onlem));
@@ -24432,7 +24528,7 @@ window.bmOffTeshis = function(kod){
     if(d.stilNotu){
       h += '<div style="margin-top:12px;font-size:11px;color:var(--soluk);line-height:1.55;border-top:1px solid var(--bor);padding-top:8px"><b style="color:var(--kahve)">Stil notu:</b> ' + d.stilNotu + '</div>';
     }
-    h += '<div style="margin-top:10px;font-size:10px;color:var(--dim);font-style:italic">Bu genel bir teşhistir — kesin karar değil. Batch verine özel değerlendirme (sıcaklık, maya, FG) sonraki sürümde gelecek.</div>';
+    h += '<div style="margin-top:10px;font-size:10px;color:var(--dim);font-style:italic">Teşhis kesin karar değil — tat algın ve motor önceliklidir. Yukarıdaki batch verisi (varsa) olasılığı keskinleştirir, kanıtlamaz.</div>';
     h += '</div></div>';
     document.body.insertAdjacentHTML('beforeend', h);
     document.addEventListener('keydown', _bmOffEsc);

@@ -1005,12 +1005,12 @@ const CASELER = [
 
   // ── SPRINT U1a: off-flavor teşhis motoru v1a (bilgi tabanı + tag 8→14 + statik teşhis kartı) ──
   {
-    kod: 'U1-KB', ad: 'bilgi tabanı: 14 aile + zorunlu alanlar + adversaryal-düzeltilmiş domain gerçekleri',
+    kod: 'U1-KB', ad: 'bilgi tabanı: 15 aile (U2 +ester) + zorunlu alanlar + adversaryal-düzeltilmiş domain gerçekleri',
     calistir: (page) => page.evaluate(() => {
       const T = window._OFF_TESHIS, K = window._OFF_KODLAR;
-      __REG.ok('_OFF_KODLAR 14 aile (8 eski + 6 yeni)', Array.isArray(K) && K.length === 14 &&
+      __REG.ok('_OFF_KODLAR 15 aile (8 eski + 6 U1 + 1 U2 ester)', Array.isArray(K) && K.length === 15 &&
         ['diacetyl','DMS','acetaldehyde','fusel','oxidized','astringent','light-struck','solvent'].every(k => K.includes(k)) &&
-        ['acetic','chlorophenol','sulfur','metallic','infection','phenolic'].every(k => K.includes(k)), K && K.length);
+        ['acetic','chlorophenol','sulfur','metallic','infection','phenolic','ester'].every(k => K.includes(k)), K && K.length);
       __REG.ok('her aile zorunlu alanlara sahip', K.every(k => { const d = T[k]; return d && d.ad && d.trDil.length && d.kokNeden.length && ['evet','kısmen','hayır'].includes(d.kurtarilir.seviye) && d.kurtarilir.nasil && d.onlem.length && Array.isArray(d.ayiriciSoru) && d.stilNotu; }));
       // hakem düzeltmeleri — kendi (düzeltilmemiş) bilgiden DEĞİL, belgeden AYNEN
       __REG.ok('Fenolik: Weizen soğuk=karanfil (ters ilişki)', /soğuk=karanfil/.test(T.phenolic.stilNotu));
@@ -1018,6 +1018,9 @@ const CASELER = [
       __REG.ok('Kükürt: maya geri-emer, CO2 sıyırması DEĞİL', /CO2 sıyırması değil/.test(T.sulfur.kurtarilir.nasil));
       __REG.ok('Asetik trDil yeşil elma İÇERMEZ (asetaldehit ayrımı)', !T.acetic.trDil.some(x => /yeşil elma/i.test(x)));
       __REG.ok('KISMEN kurtarılır tam = diacetyl+acetaldehyde+sulfur', JSON.stringify(K.filter(k => T[k].kurtarilir.seviye === 'kısmen').sort()) === JSON.stringify(['acetaldehyde','diacetyl','sulfur']));
+      // U2 ester (muz) girdisi
+      __REG.ok('U2 Ester: muz=izoamil asetat + Weizende İSTENEN karakter', /izoamil asetat/.test(T.ester.kokNeden.join(' ')) && /İSTENEN karakter/.test(T.ester.stilNotu) && T.ester.kurtarilir.seviye === 'hayır');
+      __REG.ok('U2 Ester: kaldıraç sırası SICAKLIK>MAYA>O2/OG>pitch (pitch zayıf)', /SICAKLIK > MAYA SUŞU/.test(T.ester.stilNotu) && T.ester.kokNeden.some(x => /pitch rate ZAYIF/i.test(x)));
       return __REG.al();
     })
   },
@@ -1031,7 +1034,7 @@ const CASELER = [
         const t = m ? m.textContent : '';
         __REG.ok('başlık + kurtarılabilir(KISMEN) + neden/önlem bölümleri', /Diacetyl \(tereyağı\)/.test(t) && /KURTARILABİLİR/.test(t) && /KISMEN/.test(t) && /OLASI NEDENLER/.test(t) && /ÖNLEM/.test(t));
         __REG.ok('ayırıcı soru (emin misin — zamanla artıyor mu)', /EMİN MİSİN/.test(t) && /ZAMANLA artıyor/.test(t));
-        __REG.ok('v1a statik uyarısı (batch-verisi yok, genel teşhis)', /genel bir teşhis/.test(t));
+        __REG.ok('U2 uyarısı: kesin karar değil + tat/motor öncelikli (dil disiplini)', /kesin karar değil/.test(t) && !/sonraki sürümde gelecek/.test(t));
         bmOffTeshisKapat();
         __REG.ok('kapat modalı kaldırdı', !document.getElementById('bmOffModal'));
         bmOffTeshis('sulfur'); // YENİ kod
@@ -1045,7 +1048,7 @@ const CASELER = [
     }
   },
   {
-    kod: 'U1-COMPAT', ad: 'tag 8→14 render + eski tadım geriye-uyumlu + delta yeni kodları kapsar',
+    kod: 'U1-COMPAT', ad: 'tag 8→15 render + eski tadım geriye-uyumlu + delta yeni kodları kapsar',
     calistir: (page) => page.evaluate(() => {
       const id = __REG.yeniKayit('REGTEST U1-COMPAT', {
         brewLog: [{ id: 'u1s', ts: 1000, tip: 'siseleme', tarih: '2026-06-01' }],
@@ -1060,7 +1063,7 @@ const CASELER = [
       });
       tarifAc(id);
       const h = rEditorNot();
-      __REG.ok('14 tag render edildi (? teşhis düğmeleri)', (h.split('bmOffTeshis(').length - 1) === 14, String(h.split('bmOffTeshis(').length - 1));
+      __REG.ok('15 tag render edildi (? teşhis düğmeleri)', (h.split('bmOffTeshis(').length - 1) === 15, String(h.split('bmOffTeshis(').length - 1));
       __REG.ok('eski 8 + yeni 6 etiket mevcut', /_tOffLbl_diacetyl/.test(h) && /_tOffLbl_solvent/.test(h) && /_tOffLbl_sulfur/.test(h) && /_tOffLbl_phenolic/.test(h) && /_tOffLbl_infection/.test(h));
       __REG.ok('yeni tag TR adları render', /Kükürt/.test(h) && /Klorofenol/.test(h) && /Fenolik-baharat/.test(h));
       __REG.ok('geriye-uyumlu delta: eski oturum (yalnız eski kod) → ÇÖZÜLDÜ Diacetyl', /çözüldü:[^<]*Diacetyl/.test(h));
@@ -1076,6 +1079,134 @@ const CASELER = [
       const c = window._bmOffKisaCozum('diacetyl');
       __REG.ok('diacetyl kısa çözüm "Çözüm:" ile başlar + tablodan (rest)', /^Çözüm: /.test(c) && /diacetyl rest/i.test(c), c);
       __REG.ok('bilinmeyen kod boş döner (güvenli)', window._bmOffKisaCozum('yok') === '');
+      return __REG.al();
+    })
+  },
+
+  // ── SPRINT U2: batch-farkında keskinleştirme ("senin verinde" + stil/maya-tip farkı) ──
+  {
+    kod: 'U2-STYLE-WEIZEN', ad: 'stil-farkında: Weizen mayası (wheat) + muz/ester → KARAKTER, kusur değil (Kaan yanılmasın)',
+    calistir: (page) => page.evaluate(() => {
+      const id = __REG.yeniKayit('REGTEST U2-WEIZEN', { mayaId: 'wy3068' });
+      tarifAc(id);
+      const box = window._bmOffBatchIpucu('ester');
+      __REG.ok('batch kutusu üretildi (maya var)', typeof box === 'string' && box.length > 0);
+      __REG.ok('muz KARAKTERDİR kusur değil (defect DAMGALAMA yok)', /karakterdir, kusur değil/i.test(box) && !/kusur işareti/.test(box));
+      __REG.ok('Weizen mayası tanındı', /Weizen/.test(box));
+      bmOffTeshis('ester');
+      const t = document.getElementById('bmOffModal').textContent;
+      __REG.ok('kartta SENİN VERİNDE bölümü + kusur değil mesajı', /SENİN VERİNDE/.test(t) && /kusur değil/.test(t));
+      bmOffTeshisKapat();
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'U2-STYLE-CLEAN', ad: 'stil-farkında: nötr ale (us05) + muz/ester → kusur işareti + yüksek sıcaklık nedeni',
+    calistir: (page) => page.evaluate(() => {
+      const id = __REG.yeniKayit('REGTEST U2-CLEAN', {
+        mayaId: 'us05',
+        brewLog: [ { id: 'c1', ts: 1, tip: 'sicaklik', deger: '25', tarih: '2026-06-01' }, { id: 'c2', ts: 2, tip: 'sicaklik', deger: '26', tarih: '2026-06-02' } ]
+      });
+      tarifAc(id);
+      const box = window._bmOffBatchIpucu('ester');
+      __REG.ok('nötr suşta muz BEKLENMEZ (kusur işareti)', /beklenmez/.test(box) && /kusur işareti/.test(box));
+      __REG.ok('yüksek sıcaklık (26°C > ideal 20+2) muhtemel sebep', /26°C/.test(box) && /muhtemel sebep bu/.test(box));
+      __REG.ok('Weizen "karakterdir" olumlaması ÇIKMAZ (yanlış olumlama yok)', !/karakterdir, kusur değil/.test(box));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'U2-PHENOLIC-WEIZEN', ad: 'stil-farkında fenolik: Weizen + karanfil → beklenen karakter + soğuk=karanfil yönü',
+    calistir: (page) => page.evaluate(() => {
+      const id = __REG.yeniKayit('REGTEST U2-PH-WEIZEN', { mayaId: 'wy3068' });
+      tarifAc(id);
+      const box = window._bmOffBatchIpucu('phenolic');
+      __REG.ok('karanfil beklenen karakter (POF+ suş)', /beklenen karakter/.test(box) && /POF\+/.test(box));
+      __REG.ok('Weizen yön: daha soğuk = daha karanfil', /daha soğuk = daha karanfil/.test(box));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'U2-PHENOLIC-CLEAN', ad: 'stil-farkında fenolik: temiz ale + karanfil → POF− yapmaz, klor/yanlış maya',
+    calistir: (page) => page.evaluate(() => {
+      const id = __REG.yeniKayit('REGTEST U2-PH-CLEAN', { mayaId: 'us05' });
+      tarifAc(id);
+      const box = window._bmOffBatchIpucu('phenolic');
+      __REG.ok('temiz suş → karanfil yapmaz (POF− dalı)', /POF/.test(box) && /yapmaz/.test(box) && !/beklenen karakter/.test(box));
+      __REG.ok('klor/yanlış maya yönlendirmesi', /klor/.test(box));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'U2-FUSEL-TEMP', ad: 'batch sıcaklık: yüksek fermantasyon + fusel → sıcaklık güçlü/muhtemel aday',
+    calistir: (page) => page.evaluate(() => {
+      const id = __REG.yeniKayit('REGTEST U2-FUSEL', {
+        mayaId: 'us05',
+        brewLog: [ { id: 'f1', ts: 1, tip: 'sicaklik', deger: '27', tarih: '2026-06-01' }, { id: 'f2', ts: 2, tip: 'sicaklik', deger: '28', tarih: '2026-06-02' } ]
+      });
+      tarifAc(id);
+      const box = window._bmOffBatchIpucu('fusel');
+      __REG.ok('yüksek sıcaklık (28°C) fuselin muhtemel nedeni', /28°C/.test(box) && /muhtemel sebep bu/.test(box));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'U2-FGSAPMA-DIACETYL', ad: 'batch FG: hedef üstü FG (düşük attenüasyon) + diacetyl → temizlenmemiş güçlü aday',
+    calistir: (page) => page.evaluate(() => {
+      // hedef FG = brewday snapshot SAF tahmini (manuel FG override sızmaz); gerçek FG = fgManuel ölçümü hedefin belirgin üstünde
+      const id = __REG.yeniKayit('REGTEST U2-FGSAP', {
+        mayaId: 'us05',
+        brewSnapshot: { ts: 1000, ogT: 1.055, fgT: 1.012 },
+        fgManuel: '1.028'
+      });
+      tarifAc(id);
+      const box = window._bmOffBatchIpucu('diacetyl');
+      __REG.ok('gerçek FG (1.028) hedef snapshot.fgT (1.012) üstünde → underattenuation', /üstünde/.test(box) && /güçlü aday/.test(box), 'box=' + JSON.stringify(box).slice(0, 100));
+      __REG.ok('hedef FG snapshot.fgT-den geldi (calc override değil)', /1\.012/.test(box) && /1\.028/.test(box));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'U2-SULFUR-LAGER', ad: 'maya-tip: lager mayası + kükürt → NORMAL, olgunlaşmada geri emer',
+    calistir: (page) => page.evaluate(() => {
+      const id = __REG.yeniKayit('REGTEST U2-SULFUR', { mayaId: 'w3470' });
+      tarifAc(id);
+      const box = window._bmOffBatchIpucu('sulfur');
+      __REG.ok('lagerde kükürt normaldir + geri emer', /lagerlerde normaldir/.test(box) && /geri emer/.test(box));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'U2-GRACEFUL', ad: 'graceful: batch-mantığı olmayan aile (oxidized) + veri-yok ester → boş kutu (statik korunur, çökme yok)',
+    calistir: (page) => page.evaluate(() => {
+      const id = __REG.yeniKayit('REGTEST U2-GRACE', { mayaId: 'us05' });
+      tarifAc(id);
+      __REG.ok('oxidized: batch mantığı yok → boş kutu (graceful)', window._bmOffBatchIpucu('oxidized') === '');
+      S.mayaId = null; // maya-yok → ester stil-farkı üretemez
+      __REG.ok('maya-yok ester → boş kutu (statik karta düşer)', window._bmOffBatchIpucu('ester') === '');
+      bmOffTeshis('oxidized');
+      __REG.ok('batch kutusu boşken statik kart yine açılır (SENİN VERİNDE yok)', !!document.getElementById('bmOffModal') && !/SENİN VERİNDE/.test(document.getElementById('bmOffModal').textContent));
+      bmOffTeshisKapat();
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'U2-DIL', ad: 'dil disiplini: batch kutuları "kesin" iddia etmez (aday/muhtemel/olabilir dili — Sprint Q ruhu)',
+    calistir: (page) => page.evaluate(() => {
+      const id = __REG.yeniKayit('REGTEST U2-DIL', {
+        mayaId: 'us05',
+        brewSnapshot: { ts: 1000, ogT: 1.055, fgT: 1.012 },
+        fgManuel: '1.028',
+        brewLog: [ { id: 'd1', ts: 1, tip: 'sicaklik', deger: '27', tarih: '2026-06-01' }, { id: 'd2', ts: 2, tip: 'sicaklik', deger: '28', tarih: '2026-06-02' } ]
+      });
+      tarifAc(id);
+      const kodlar = ['ester', 'phenolic', 'fusel', 'diacetyl', 'acetaldehyde', 'sulfur', 'solvent', 'DMS'];
+      const yasak = /kesinlikle|kesin sebep|kesin bu|kesin neden|%100|garanti/i;
+      let hepsiTemiz = true, ornek = '';
+      kodlar.forEach(k => { const b = window._bmOffBatchIpucu(k) || ''; if (yasak.test(b)) { hepsiTemiz = false; ornek = k; } });
+      __REG.ok('hiçbir batch kutusu kesinlik iddia etmiyor', hepsiTemiz, ornek);
+      const f = window._bmOffBatchIpucu('fusel');
+      __REG.ok('temkinli dil kullanılıyor (muhtemel/aday/olabilir)', /muhtemel|aday|olabilir/.test(f));
       return __REG.al();
     })
   }
