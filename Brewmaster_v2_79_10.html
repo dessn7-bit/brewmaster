@@ -6048,27 +6048,36 @@ const BJCP = {
 // grist (maltId+pct toplam 100) + hop {id,dk,rol:'aci'|'aroma'|'kuru',gL} oran/hedef bazlı;
 // seçilince S.hacim'e + BJCP hedef OG/IBU'suna ölçeklenir. Her ID KATALOG-DOĞRULANMIŞ,
 // her iskelet tutarlılık kapısından geçer (calc() OG+IBU+SRM ∈ BJCP aralığı — tests V-ISKELET).
+// V1b: A katmanı (dataset çıkarımı, kaynak:'cikarim'+n) blok sonunda — üretici: _v1b_cikarim.js.
 const STIL_ISKELET = {
-  "American IPA":                  {grist:[['pale_ale',88],['munich',5],['c40',7]], hop:[{id:'columbus',dk:60,rol:'aci'},{id:'centn',dk:10,rol:'aroma',gL:1.5},{id:'citra',rol:'kuru',gL:3},{id:'simcoe',rol:'kuru',gL:2}], mayaId:'us05', mashSc:66},
-  "American Pale Ale":             {grist:[['pale_ale',90],['munich',4],['c40',6]], hop:[{id:'magnum',dk:60,rol:'aci'},{id:'cascade',dk:10,rol:'aroma',gL:1.5},{id:'cascade',rol:'kuru',gL:2}], mayaId:'us05', mashSc:66},
-  "NEIPA / Hazy IPA":              {grist:[['pale_ale',70],['wheat',15],['oat',15]], hop:[{id:'magnum',dk:60,rol:'aci'},{id:'citra',dk:10,rol:'aroma',gL:2},{id:'mosaic',dk:10,rol:'aroma',gL:2},{id:'citra',rol:'kuru',gL:4},{id:'mosaic',rol:'kuru',gL:3}], mayaId:'wy1318', mashSc:67},
-  "American Amber Ale / Red Ale":  {grist:[['pale_ale',80],['munich',9],['c60',9],['c120',2]], hop:[{id:'centn',dk:60,rol:'aci'},{id:'cascade',dk:10,rol:'aroma',gL:1}], mayaId:'us05', mashSc:67},
-  "American Brown Ale":            {grist:[['pale_ale',78],['munich',8],['c60',7],['brown',4],['choc',3]], hop:[{id:'nbrewer',dk:60,rol:'aci'},{id:'ekg',dk:10,rol:'aroma',gL:0.8}], mayaId:'us05', mashSc:67},
-  "Dry Irish Stout":               {grist:[['maris',79],['oat',8],['carapils',5],['roast',8]], hop:[{id:'ekg',dk:60,rol:'aci'}], mayaId:'wy1084', mashSc:67},
-  "Oatmeal Stout":                 {grist:[['maris',71],['oat',12],['munich',4],['c60',5],['choc',5],['roast',3]], hop:[{id:'ekg',dk:60,rol:'aci'}], mayaId:'s04', mashSc:68},
-  "American Porter":               {grist:[['pale_ale',76],['munich',7],['c60',7],['choc',6],['pale_choc',4]], hop:[{id:'nbrewer',dk:60,rol:'aci'},{id:'ekg',dk:10,rol:'aroma',gL:0.8}], mayaId:'us05', mashSc:67},
-  "Weizen / Weissbier":            {grist:[['wheat',55],['pilsner',43],['carapils',2]], hop:[{id:'hrtau',dk:60,rol:'aci'}], mayaId:'wy3068', mashSc:67},
-  "Dunkelweizen":                  {grist:[['dark_wheat',50],['munich',25],['pilsner',17],['cara_munich2',6],['choc',2]], hop:[{id:'hrtau',dk:60,rol:'aci'}], mayaId:'wy3068', mashSc:67},
-  "Weizenbock":                    {grist:[['dark_wheat',55],['munich',28],['pilsner',12],['cara_munich2',5]], hop:[{id:'hrtau',dk:60,rol:'aci'}], mayaId:'wy3068', mashSc:68},
-  "Witbier / Belgian White":       {grist:[['pilsner',50],['wheat',40],['oat',10]], hop:[{id:'saaz',dk:60,rol:'aci'}], mayaId:'wy3944', mashSc:66},
-  "Dubbel":                        {grist:[['pilsner',87],['munich',6],['specb',3],['candy_amb',4]], hop:[{id:'saaz',dk:60,rol:'aci'}], mayaId:'wy3787', mashSc:67},
-  "Tripel":                        {grist:[['pilsner',85],['candy_clr',13],['aromatic',2]], hop:[{id:'saaz',dk:60,rol:'aci'},{id:'styrian',dk:15,rol:'aroma',gL:0.5}], mayaId:'wy3787', mashSc:66},
-  "Saison / Farmhouse Ale":        {grist:[['pilsner',80],['wheat',10],['munich',5],['candy_clr',5]], hop:[{id:'magnum',dk:60,rol:'aci'},{id:'styrian',dk:10,rol:'aroma',gL:1}], mayaId:'wy3711', mashSc:65},
-  "German Pils":                   {grist:[['pilsner',93],['munich',4],['carapils',3]], hop:[{id:'magnum',dk:60,rol:'aci'},{id:'saaz',dk:10,rol:'aroma',gL:1.5}], mayaId:'w3470', mashSc:66},
-  "Helles / Münchner Hell":        {grist:[['pilsner',90],['munich',8],['carapils',2]], hop:[{id:'hrtau',dk:60,rol:'aci'}], mayaId:'w3470', mashSc:67},
-  "Munich Märzen / Oktoberfest":   {grist:[['munich',45],['vienna',30],['pilsner',20],['cara_munich2',5]], hop:[{id:'hrtau',dk:60,rol:'aci'},{id:'tettn',dk:10,rol:'aroma',gL:0.5}], mayaId:'wy2124', mashSc:67},
-  "Kölsch":                        {grist:[['pilsner',90],['wheat',6],['munich',4]], hop:[{id:'hrtau',dk:60,rol:'aci'},{id:'spalt',dk:10,rol:'aroma',gL:0.5}], mayaId:'la_koln', mashSc:66},
-  "Blonde Ale / Cream Ale":        {grist:[['pale_ale',84],['pilsner',10],['carapils',6]], hop:[{id:'hrtau',dk:60,rol:'aci'}], mayaId:'us05', mashSc:66}
+  "American IPA":                  {grist:[['pale_ale',88],['munich',5],['c40',7]], hop:[{id:'columbus',dk:60,rol:'aci'},{id:'centn',dk:10,rol:'aroma',gL:1.5},{id:'citra',rol:'kuru',gL:3},{id:'simcoe',rol:'kuru',gL:2}], mayaId:'us05', mashSc:66, kaynak:'kurator'},
+  "American Pale Ale":             {grist:[['pale_ale',90],['munich',4],['c40',6]], hop:[{id:'magnum',dk:60,rol:'aci'},{id:'cascade',dk:10,rol:'aroma',gL:1.5},{id:'cascade',rol:'kuru',gL:2}], mayaId:'us05', mashSc:66, kaynak:'kurator'},
+  "NEIPA / Hazy IPA":              {grist:[['pale_ale',70],['wheat',15],['oat',15]], hop:[{id:'magnum',dk:60,rol:'aci'},{id:'citra',dk:10,rol:'aroma',gL:2},{id:'mosaic',dk:10,rol:'aroma',gL:2},{id:'citra',rol:'kuru',gL:4},{id:'mosaic',rol:'kuru',gL:3}], mayaId:'wy1318', mashSc:67, kaynak:'kurator'},
+  "American Amber Ale / Red Ale":  {grist:[['pale_ale',80],['munich',9],['c60',9],['c120',2]], hop:[{id:'centn',dk:60,rol:'aci'},{id:'cascade',dk:10,rol:'aroma',gL:1}], mayaId:'us05', mashSc:67, kaynak:'kurator'},
+  "American Brown Ale":            {grist:[['pale_ale',78],['munich',8],['c60',7],['brown',4],['choc',3]], hop:[{id:'nbrewer',dk:60,rol:'aci'},{id:'ekg',dk:10,rol:'aroma',gL:0.8}], mayaId:'us05', mashSc:67, kaynak:'kurator'},
+  "Dry Irish Stout":               {grist:[['maris',79],['oat',8],['carapils',5],['roast',8]], hop:[{id:'ekg',dk:60,rol:'aci'}], mayaId:'wy1084', mashSc:67, kaynak:'kurator'},
+  "Oatmeal Stout":                 {grist:[['maris',71],['oat',12],['munich',4],['c60',5],['choc',5],['roast',3]], hop:[{id:'ekg',dk:60,rol:'aci'}], mayaId:'s04', mashSc:68, kaynak:'kurator'},
+  "American Porter":               {grist:[['pale_ale',76],['munich',7],['c60',7],['choc',6],['pale_choc',4]], hop:[{id:'nbrewer',dk:60,rol:'aci'},{id:'ekg',dk:10,rol:'aroma',gL:0.8}], mayaId:'us05', mashSc:67, kaynak:'kurator'},
+  "Weizen / Weissbier":            {grist:[['wheat',55],['pilsner',43],['carapils',2]], hop:[{id:'hrtau',dk:60,rol:'aci'}], mayaId:'wy3068', mashSc:67, kaynak:'kurator'},
+  "Dunkelweizen":                  {grist:[['dark_wheat',50],['munich',25],['pilsner',17],['cara_munich2',6],['choc',2]], hop:[{id:'hrtau',dk:60,rol:'aci'}], mayaId:'wy3068', mashSc:67, kaynak:'kurator'},
+  "Weizenbock":                    {grist:[['dark_wheat',55],['munich',28],['pilsner',12],['cara_munich2',5]], hop:[{id:'hrtau',dk:60,rol:'aci'}], mayaId:'wy3068', mashSc:68, kaynak:'kurator'},
+  "Witbier / Belgian White":       {grist:[['pilsner',50],['wheat',40],['oat',10]], hop:[{id:'saaz',dk:60,rol:'aci'}], mayaId:'wy3944', mashSc:66, kaynak:'kurator'},
+  "Dubbel":                        {grist:[['pilsner',87],['munich',6],['specb',3],['candy_amb',4]], hop:[{id:'saaz',dk:60,rol:'aci'}], mayaId:'wy3787', mashSc:67, kaynak:'kurator'},
+  "Tripel":                        {grist:[['pilsner',85],['candy_clr',13],['aromatic',2]], hop:[{id:'saaz',dk:60,rol:'aci'},{id:'styrian',dk:15,rol:'aroma',gL:0.5}], mayaId:'wy3787', mashSc:66, kaynak:'kurator'},
+  "Saison / Farmhouse Ale":        {grist:[['pilsner',80],['wheat',10],['munich',5],['candy_clr',5]], hop:[{id:'magnum',dk:60,rol:'aci'},{id:'styrian',dk:10,rol:'aroma',gL:1}], mayaId:'wy3711', mashSc:65, kaynak:'kurator'},
+  "German Pils":                   {grist:[['pilsner',93],['munich',4],['carapils',3]], hop:[{id:'magnum',dk:60,rol:'aci'},{id:'saaz',dk:10,rol:'aroma',gL:1.5}], mayaId:'w3470', mashSc:66, kaynak:'kurator'},
+  "Helles / Münchner Hell":        {grist:[['pilsner',90],['munich',8],['carapils',2]], hop:[{id:'hrtau',dk:60,rol:'aci'}], mayaId:'w3470', mashSc:67, kaynak:'kurator'},
+  "Munich Märzen / Oktoberfest":   {grist:[['munich',45],['vienna',30],['pilsner',20],['cara_munich2',5]], hop:[{id:'hrtau',dk:60,rol:'aci'},{id:'tettn',dk:10,rol:'aroma',gL:0.5}], mayaId:'wy2124', mashSc:67, kaynak:'kurator'},
+  "Kölsch":                        {grist:[['pilsner',90],['wheat',6],['munich',4]], hop:[{id:'hrtau',dk:60,rol:'aci'},{id:'spalt',dk:10,rol:'aroma',gL:0.5}], mayaId:'la_koln', mashSc:66, kaynak:'kurator'},
+  "Blonde Ale / Cream Ale":        {grist:[['pale_ale',84],['pilsner',10],['carapils',6]], hop:[{id:'hrtau',dk:60,rol:'aci'}], mayaId:'us05', mashSc:66, kaynak:'kurator'},
+  // ── V1b A KATMANI (dataset çıkarımı): _v1b_cikarim.js BUILD-TIME üretti — kaynak _ground_truth_v2.json
+  // (199 katalog-eşlenmiş reçete). Eşik n>=5, medyan grist + alias-normalize hop modu + maya modu
+  // (İngiliz jenerik-kova düzeltmesi kanıtlı), tutarlılık kapısı build-time PASS. Küratörlüyle çakışan
+  // stil girmez (kurator kazanır). Bu blok elle düzenlenmez — değişiklik = script yeniden koşulur.
+  "Czech Premium Pale Lager":      {grist:[['pilsner',100]], hop:[{id:'saaz',dk:60,rol:'aci'},{id:'sterling',dk:10,rol:'aroma',gL:0.5}], mayaId:'wy2124', mashSc:67, kaynak:'cikarim', n:8},
+  "Festbier / Wiesn":              {grist:[['pilsner',88],['munich',12]], hop:[{id:'hrtau',dk:60,rol:'aci'},{id:'tettn',dk:10,rol:'aroma',gL:0.5}], mayaId:'wy2124', mashSc:67, kaynak:'cikarim', n:6},
+  "American Barleywine":           {grist:[['pale_ale',92],['c60',8]], hop:[{id:'fuggles',dk:60,rol:'aci'}], mayaId:'s04', mashSc:67, kaynak:'cikarim', n:5},
+  "English Brown Ale":             {grist:[['maris',93],['c120',7]], hop:[{id:'fuggles',dk:60,rol:'aci'}], mayaId:'s04', mashSc:67, kaynak:'cikarim', n:5}
 };
 window.STIL_ISKELET = STIL_ISKELET;
 
@@ -6146,7 +6155,7 @@ window.bmStilIskeletDoldur = function(){
     if(r.mashSc) S.mashSc = r.mashSc;
     if(typeof _receteYazSync==='function')_receteYazSync();
     if(typeof render==='function')render();
-    if(typeof flash==='function')flash("📋 "+st+" iskeleti "+(S.hacim>0?S.hacim:11)+"L'ye ölçeklenip dolduruldu — başlangıç noktası, serbestçe değiştir","ok");
+    if(typeof flash==='function')flash("📋 "+st+" iskeleti "+(S.hacim>0?S.hacim:11)+"L'ye ölçeklenip dolduruldu"+(isk.kaynak==='cikarim'&&isk.n?" ("+isk.n+" gerçek reçeteden türetildi)":"")+" — başlangıç noktası, serbestçe değiştir","ok");
   }catch(e){ try{console.warn('bmStilIskeletDoldur',e);}catch(_){} }
 };
 

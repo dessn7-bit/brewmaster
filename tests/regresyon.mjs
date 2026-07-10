@@ -1216,7 +1216,7 @@ const CASELER = [
     kod: 'V-ISKELET-GATE', ad: 'TUTARLILIK KAPISI: her STIL_ISKELET → calc() OG/IBU/SRM BJCP aralığında + tüm ID katalogda (bozuk iskelet koruması)',
     calistir: (page) => page.evaluate(() => {
       const styles = Object.keys(window.STIL_ISKELET || {});
-      __REG.ok('STIL_ISKELET 20 küratörlü stil', styles.length === 20, String(styles.length));
+      __REG.ok('STIL_ISKELET 24 stil (20 küratörlü + 4 V1b çıkarım)', styles.length === 24, String(styles.length));
       yeniTarif();
       let idFail = [], rangeFail = [], pctFail = [];
       styles.forEach(st => {
@@ -1323,6 +1323,63 @@ const CASELER = [
       // ve bir maltı çıkarabilir
       S.maltlar.splice(0, 1);
       __REG.ok('kullanıcı malt çıkarabildi', S.maltlar.length === oncekiN);
+      return __REG.al();
+    })
+  },
+
+  // ── SPRINT V1b: A katmanı — dataset çıkarımı (eşik + kaynak izi + küratör-önceliği + şeffaflık) ──
+  {
+    kod: 'V1B-KAYNAK', ad: 'kaynak izi: her iskelet kurator|cikarim etiketli, 20+4 dağılım, her çıkarım n>=5 (eşik kanıtı)',
+    calistir: (page) => page.evaluate(() => {
+      const entries = Object.entries(window.STIL_ISKELET || {});
+      __REG.ok('her iskelette kaynak izi var (kurator|cikarim)', entries.length > 0 && entries.every(([, i]) => i.kaynak === 'kurator' || i.kaynak === 'cikarim'));
+      const kur = entries.filter(([, i]) => i.kaynak === 'kurator'), cik = entries.filter(([, i]) => i.kaynak === 'cikarim');
+      __REG.ok('20 küratörlü + 4 çıkarım', kur.length === 20 && cik.length === 4, kur.length + '+' + cik.length);
+      __REG.ok('her çıkarım iskeleti n>=5 taşır (eşik-altı çıkarım YOK)', cik.every(([, i]) => typeof i.n === 'number' && i.n >= 5), cik.map(([a, i]) => a + ':n=' + i.n).join(' | '));
+      __REG.ok('beklenen 4 çıkarım stili', ['Czech Premium Pale Lager', 'Festbier / Wiesn', 'American Barleywine', 'English Brown Ale'].every(a => window.STIL_ISKELET[a] && window.STIL_ISKELET[a].kaynak === 'cikarim'));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'V1B-ESIK', ad: 'veri-dürüstlük: eşik-altı (n=4 DIPA/Milk Stout, n=3 Vienna/Doppelbock) ve kapı-düşenler (West Coast maya-tip, Imperial Stout SRM) tabloya GİRMEDİ',
+    calistir: (page) => page.evaluate(() => {
+      // hepsi BJCP'de VAR (yokluk anlamlı) ama STIL_ISKELET'te YOK
+      const esikAlti = ['Imperial IPA / DIPA', 'Milk Stout / Sweet Stout', 'Vienna Lager', 'Doppelbock'];
+      const kapiDusen = ['West Coast IPA', 'Imperial / Russian Imperial Stout'];
+      __REG.ok('kontrol stilleri BJCP otoritesinde mevcut', esikAlti.concat(kapiDusen).every(a => !!BJCP[a]));
+      __REG.ok('eşik-altı (n<5) stiller çıkarıma girmedi — tek/az reçete kopyalanmadı', esikAlti.every(a => !window.STIL_ISKELET[a]));
+      __REG.ok('kapı-düşenler tabloda yok (West Coast: lager-maya örneklem sapması; Imp Stout: SRM 53>40)', kapiDusen.every(a => !window.STIL_ISKELET[a]));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'V1B-KURATOR-WINS', ad: 'çakışma kuralı: veri-güçlü stiller (AIPA n=14, Saison n=10, Weizen n=7, APA n=6) KÜRATÖRLÜ kaldı — çıkarım ezmedi',
+    calistir: (page) => page.evaluate(() => {
+      const dort = ['American IPA', 'Saison / Farmhouse Ale', 'Weizen / Weissbier', 'American Pale Ale'];
+      __REG.ok('4 veri-güçlü stil kaynak=kurator', dort.every(a => window.STIL_ISKELET[a] && window.STIL_ISKELET[a].kaynak === 'kurator'));
+      const aipa = window.STIL_ISKELET['American IPA'];
+      __REG.ok('AIPA grist V1a küratörlü değerinde (pale_ale 88)', aipa.grist[0][0] === 'pale_ale' && aipa.grist[0][1] === 88);
+      __REG.ok('AIPA çıkarım-meta (n) taşımıyor', aipa.n === undefined);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'V1B-DOLDUR', ad: 'V1b iskeleti uçtan uca: Czech Premium doldur → calc() BJCP aralığında + flash "8 gerçek reçeteden türetildi" şeffaflığı',
+    calistir: (page) => page.evaluate(() => {
+      yeniTarif();
+      S.stil = 'Czech Premium Pale Lager'; S.hacim = 11; S.verim = 61;
+      const isk = window.STIL_ISKELET['Czech Premium Pale Lager'];
+      __REG.ok('V1b iskeleti kaynak izi cikarim(n=8)', !!isk && isk.kaynak === 'cikarim' && isk.n === 8);
+      let msg = ''; const _f = window.flash; window.flash = (m) => { msg = String(m); };
+      bmStilIskeletDoldur();
+      window.flash = _f;
+      __REG.ok('malt dolduruldu (pilsner bazlı — 8 reçete medyanı)', S.maltlar.length >= 1 && S.maltlar[0].id === 'pilsner');
+      __REG.ok('hop dolduruldu (saaz acı + sterling aroma)', S.hoplar.length === 2 && S.hoplar.some(h => h.id === 'saaz'));
+      __REG.ok('maya wy2124 (8/8 veri modu)', S.mayaId === 'wy2124');
+      __REG.ok('şeffaflık: flash "(8 gerçek reçeteden türetildi)" içeriyor', msg.includes('(8 gerçek reçeteden türetildi)'), msg);
+      const c = calc(); const bj = BJCP['Czech Premium Pale Lager'];
+      __REG.ok('calc() OG BJCP aralığında', c.og >= bj.og[0] && c.og <= bj.og[1], 'OG=' + c.og.toFixed(3));
+      __REG.ok('calc() IBU BJCP aralığında', c.ibu >= bj.ibu[0] && c.ibu <= bj.ibu[1], 'IBU=' + Math.round(c.ibu));
       return __REG.al();
     })
   }
