@@ -1382,6 +1382,129 @@ const CASELER = [
       __REG.ok('calc() IBU BJCP aralığında', c.ibu >= bj.ibu[0] && c.ibu <= bj.ibu[1], 'IBU=' + Math.round(c.ibu));
       return __REG.al();
     })
+  },
+
+  // ── SPRINT W1: off-flavor öğrenen — onay-kapılı soft recall (zehirlenme koruması) ──
+  {
+    kod: 'W1-BEKLENEN', ad: 'STİL-BEKLENEN FİLTRESİ: Weizen muz/karanfil BLOKE (Kaan favorisi asla girmez), Weizen diaseytil öğrenilebilir, lager kükürt BLOKE',
+    calistir: (page) => page.evaluate(() => {
+      __REG.ok('ester × wheat maya → BEKLENEN (bloke, muz öğrenilmez)', window._offBeklenenMi('ester', 'wheat', 'Weizen / Weissbier') === true);
+      __REG.ok('phenolic × belcika → BEKLENEN (karanfil karakter)', window._offBeklenenMi('phenolic', 'belcika', 'Dubbel') === true);
+      __REG.ok('diacetyl × wheat/Weizen → BEKLENMEZ (öğrenilebilir)', window._offBeklenenMi('diacetyl', 'wheat', 'Weizen / Weissbier') === false);
+      __REG.ok('sulfur × lager → BEKLENEN', window._offBeklenenMi('sulfur', 'lager', 'German Pils') === true);
+      __REG.ok('diacetyl × Czech Pils (stilKw) → BEKLENEN', window._offBeklenenMi('diacetyl', 'lager', 'Czech Premium Pale Lager') === true);
+      __REG.ok('metallic → hiçbir stilde beklenmez', window._offBeklenenMi('metallic', 'ale', 'American IPA') === false);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'W1-YAZ-AYRI-KEY', ad: 'ONAY YAZIMI + ayrı key: Weizen ester BLOKE, Weizen diaseytil zengin yazılır, calc() sonrası SİLİNMEZ (mayaBazli tuzağı çözüldü)',
+    calistir: (page) => page.evaluate(() => {
+      localStorage.removeItem('bm_off_ogren_v1');
+      yeniTarif();
+      S.mayaId = 'wy3068'; S.stil = 'Weizen / Weissbier'; S.biraAd = 'Muzo';
+      S.brewLog = [{ tip: 'sicaklik', deger: '24' }, { tip: 'sicaklik', deger: '25' }];
+      S.brewSnapshot = { ts: 1000, fgT: 1.012 }; S.brewSonuc = { ts: 1000 + 14 * 86400000, fgG: 1.016 };
+      window.bmOffOgren('ester'); // stil-beklenen → BLOKE
+      __REG.ok('Weizen ester BLOKE (havuz boş — muz asla profile girmez)', window._bmOffOgrenOku().length === 0);
+      window.bmOffOgren('diacetyl'); // beklenmez → yazılır
+      const arr = window._bmOffOgrenOku();
+      __REG.ok('Weizen diaseytil yazıldı (n=1)', arr.length === 1);
+      const g = arr[0] || {};
+      __REG.ok('gözlem ZENGİN dondu (maya/tip/stil/sıcaklık/fgSapma)', g.mayaId === 'wy3068' && g.mayaTip === 'wheat' && g.bjcpStil === 'Weizen / Weissbier' && g.fermSicaklikOrt === 24.5 && g.fgSapma === 0.004, JSON.stringify(g));
+      // KRİTİK: calc() + derived profil recompute sonrası gözlem SİLİNMEZ (ayrı key)
+      calc();
+      localStorage.setItem('bm_kaan_profil_v1', JSON.stringify({ ver: 1, n: 2, verim: 60, mayaBazli: {} })); // derived recompute simülasyonu
+      __REG.ok('KRİTİK: bm_off_ogren_v1 calc/recompute sonrası DOKUNULMADI (ayrı key kanıtı)', window._bmOffOgrenOku().length === 1);
+      __REG.ok('kaan_profil.mayaBazli hâlâ boş (off oraya YAZMADI)', Object.keys(JSON.parse(localStorage.getItem('bm_kaan_profil_v1')).mayaBazli).length === 0);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'W1-MEKANIZMA', ad: 'MEKANİZMA FİLTRESİ: zengin dondur, disiplinli göster — ester recall sıcaklık söyler FG söylemez; diaseytil sıcaklık+FG',
+    calistir: (page) => page.evaluate(() => {
+      localStorage.removeItem('bm_off_ogren_v1');
+      yeniTarif();
+      S.mayaId = 'us05'; S.stil = 'American IPA'; S.biraAd = 'Hazy';
+      S.brewLog = [{ tip: 'sicaklik', deger: '26' }]; S.brewSnapshot = { ts: 1, fgT: 1.010 }; S.brewSonuc = { ts: 1 + 10 * 86400000, fgG: 1.018 };
+      window.bmOffOgren('ester');
+      const gE = window._bmOffOgrenOku().find(x => x.offKod === 'ester');
+      const rE = window._bmOffRecallSatir(gE, 'maya');
+      __REG.ok('ester gözlemi fgSapma ZENGİN dondu (0.008)', gE.fgSapma === 0.008, 'fg=' + gE.fgSapma);
+      __REG.ok('ester recall SICAKLIK söyler', /°C/.test(rE) && /sıcaklık/.test(rE), rE);
+      __REG.ok('ester recall FG sapmasını SÖYLEMEZ (mekanizma sıcaklık — alakasız korelasyon gizli)', !/FG/.test(rE), rE);
+      yeniTarif();
+      S.mayaId = 'wy3068'; S.stil = 'Weizen / Weissbier'; S.brewLog = [{ tip: 'sicaklik', deger: '16' }]; S.brewSnapshot = { ts: 1, fgT: 1.012 }; S.brewSonuc = { ts: 1 + 20 * 86400000, fgG: 1.018 };
+      window.bmOffOgren('diacetyl');
+      const gD = window._bmOffOgrenOku().find(x => x.offKod === 'diacetyl');
+      const rD = window._bmOffRecallSatir(gD, 'maya');
+      __REG.ok('diaseytil recall sıcaklık+FG söyler (mekanizması ikisi)', /°C/.test(rD) && /FG/.test(rD), rD);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'W1-RECALL-SOFT', ad: 'SOFT RECALL iki-yer-tek-havuz: maya kartı + iskelet-doldur satır; gözlemsizde SESSİZ; hiçbir default/iskelet DEĞİŞMEZ',
+    calistir: (page) => page.evaluate(() => {
+      localStorage.setItem('bm_off_ogren_v1', JSON.stringify([{ offKod: 'diacetyl', offAd: 'Diacetyl (tereyağı)', mayaId: 'wy3068', mayaAd: 'WY3068', mayaTip: 'wheat', bjcpStil: 'Weizen / Weissbier', fermSicaklikOrt: 16, fgSapma: 0.006, dondurmaTs: 1 }]));
+      yeniTarif();
+      S.mayaId = 'wy3068'; S.stil = 'Weizen / Weissbier';
+      __REG.ok('maya kartı recall (gözlemli maya) satır üretir', /Geçmiş/.test(window._bmOffRecallMayaHtml()));
+      __REG.ok('maya recall "salt hatırlatma" disiplin notu içerir', /değiştirmez/.test(window._bmOffRecallMayaHtml()));
+      __REG.ok('iskelet-doldur recall (gözlemli stil) dolu', window._bmOffStilRecallStr('Weizen / Weissbier').indexOf('Geçmiş') >= 0);
+      // gözlemli stille iskelet doldur → recall çıkar AMA iskelet değişmez (sadece hatırlatma)
+      let msg = ''; const _f = window.flash; window.flash = (m) => { msg = String(m); };
+      const oncekiMalt = S.maltlar.length;
+      bmStilIskeletDoldur(); // Weizen küratörlü iskelet
+      window.flash = _f;
+      __REG.ok('iskelet-doldur flash recall içeriyor (📊 Geçmiş)', msg.indexOf('📊 Geçmiş') >= 0, msg);
+      __REG.ok('iskelet DOLDU (recall bunu engellemedi)', S.maltlar.length > oncekiMalt);
+      // gözlemsiz maya → sessiz
+      yeniTarif(); S.mayaId = 'w3470'; S.stil = 'Helles / Münchner Hell';
+      __REG.ok('gözlemsiz maya → recall SESSİZ (boş)', window._bmOffRecallMayaHtml() === '');
+      __REG.ok('gözlemsiz stil → iskelet recall boş', window._bmOffStilRecallStr('Kölsch') === '');
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'W1-DEDUP-GERIAL', ad: 'dedup (aynı kod+maya+stil sayı artmaz, bağlam güncellenir) + geri-al (yanlış onay çıkarılır) + export allowlist (bm_ prefix)',
+    calistir: (page) => page.evaluate(() => {
+      localStorage.removeItem('bm_off_ogren_v1');
+      yeniTarif();
+      S.mayaId = 'us05'; S.stil = 'American IPA'; S.brewLog = [{ tip: 'sicaklik', deger: '26' }]; S.brewSnapshot = { ts: 1, fgT: 1.010 }; S.brewSonuc = { ts: 1 + 10 * 86400000, fgG: 1.018 };
+      window.bmOffOgren('fusel');
+      const n1 = window._bmOffOgrenOku().length;
+      S.brewLog = [{ tip: 'sicaklik', deger: '28' }]; // aynı reçete, farklı bağlam
+      window.bmOffOgren('fusel');
+      __REG.ok('dedup: aynı kod+maya+stil tekrar → sayı ARTMADI', window._bmOffOgrenOku().length === n1);
+      __REG.ok('dedup: bağlam GÜNCELLENDİ (28°C)', window._bmOffOgrenOku().find(x => x.offKod === 'fusel').fermSicaklikMax === 28);
+      window.bmOffOgrenSil('fusel');
+      __REG.ok('geri-al: yanlış gözlem çıkarıldı', !window._bmOffOgrenOku().some(x => x.offKod === 'fusel'));
+      __REG.ok('export allowlist: bm_off_ogren_v1 bm_ prefix (senkronize olur)', /^(bm_|kabir_|_orig|acc_|KR$)/.test('bm_off_ogren_v1'));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'W1-MODAL-BUTON', ad: 'teşhis kartı UI (birincil giriş): beklenmeyen off → "📌 Profilime ekle" render; Weizen ester → "beklenen karakter" (düğme yok); eklendikten sonra "Geri al"',
+    calistir: (page) => page.evaluate(() => {
+      localStorage.removeItem('bm_off_ogren_v1');
+      yeniTarif();
+      S.mayaId = 'wy3068'; S.stil = 'Weizen / Weissbier'; S.brewLog = [{ tip: 'sicaklik', deger: '16' }]; S.brewSnapshot = { ts: 1, fgT: 1.012 }; S.brewSonuc = { ts: 1 + 20 * 86400000, fgG: 1.018 };
+      bmOffTeshis('diacetyl'); // beklenmeyen → ekle düğmesi
+      let modal = document.getElementById('bmOffModal');
+      __REG.ok('teşhis modalı açıldı', !!modal);
+      __REG.ok('beklenmeyen off → "Profilime ekle" düğmesi render edildi', !!modal && modal.innerHTML.indexOf('Profilime ekle') >= 0);
+      bmOffTeshisKapat();
+      bmOffTeshis('ester'); // Weizen ester → beklenen karakter
+      modal = document.getElementById('bmOffModal');
+      __REG.ok('Weizen ester → "beklenen karakter" notu (muz asla öğrenilmez)', !!modal && modal.innerHTML.indexOf('beklenen karakter') >= 0);
+      __REG.ok('Weizen ester → "Profilime ekle" düğmesi YOK (yazımın önünde bloke)', !!modal && modal.innerHTML.indexOf('Profilime ekle') < 0);
+      bmOffTeshisKapat();
+      bmOffOgren('diacetyl'); // yazar + modalı tazeler
+      modal = document.getElementById('bmOffModal');
+      __REG.ok('eklendikten sonra modal "Geri al" düğmesi gösterir', !!modal && modal.innerHTML.indexOf('Geri al') >= 0);
+      bmOffTeshisKapat();
+      return __REG.al();
+    })
   }
 ];
 

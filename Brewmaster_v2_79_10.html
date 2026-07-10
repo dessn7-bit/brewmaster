@@ -6155,7 +6155,7 @@ window.bmStilIskeletDoldur = function(){
     if(r.mashSc) S.mashSc = r.mashSc;
     if(typeof _receteYazSync==='function')_receteYazSync();
     if(typeof render==='function')render();
-    if(typeof flash==='function')flash("📋 "+st+" iskeleti "+(S.hacim>0?S.hacim:11)+"L'ye ölçeklenip dolduruldu"+(isk.kaynak==='cikarim'&&isk.n?" ("+isk.n+" gerçek reçeteden türetildi)":"")+" — başlangıç noktası, serbestçe değiştir","ok");
+    if(typeof flash==='function')flash("📋 "+st+" iskeleti "+(S.hacim>0?S.hacim:11)+"L'ye ölçeklenip dolduruldu"+(isk.kaynak==='cikarim'&&isk.n?" ("+isk.n+" gerçek reçeteden türetildi)":"")+" — başlangıç noktası, serbestçe değiştir"+(window._bmOffStilRecallStr?_bmOffStilRecallStr(st):""),"ok");
   }catch(e){ try{console.warn('bmStilIskeletDoldur',e);}catch(_){} }
 };
 
@@ -15408,6 +15408,7 @@ function rEditorMaya(og, fg, abv, maya, maya2, fgKaynak, fgHesap){
         (_starter?'<span style="color:var(--kk);margin-left:6px;font-weight:600">'+_starter+'</span>':'')+
       '</div>';
     })():""}
+    ${maya && typeof _bmOffRecallMayaHtml==='function' ? _bmOffRecallMayaHtml() : ''}
     ${det || (!maya?'<div style="text-align:center;padding:20px;color:var(--dim);font-size:13px">Henüz maya seçilmedi — aşağıdan seç</div>':'')}
     ${maya && S.maya2Id ? ('<div style="margin-top:10px"><span class="etiket">2. Maya</span>'+det2+'<div style="margin-top:8px"><span class="etiket" style="margin-bottom:4px">Ko-pitch oranı (ana / 2.)</span><div style="display:flex;gap:5px;flex-wrap:wrap">'+[[0.5,'50/50'],[0.6,'60/40'],[0.7,'70/30'],[0.8,'80/20'],[0.9,'90/10']].map(function(p){var sel=(S.kopitchOran!=null?S.kopitchOran:0.5)===p[0];return '<button class="btn" style="flex:1;min-width:56px;padding:6px 4px;font-size:11px;border:1.5px solid '+(sel?'var(--altin)':'var(--bor)')+';background:'+(sel?'var(--kahve-bg)':'#fff')+';color:'+(sel?'var(--bakir)':'var(--soluk)')+'" onclick="S.kopitchOran='+p[0]+';render()">'+p[1]+'</button>';}).join('')+'</div><div style="font-size:var(--fs-xs);color:var(--dim);margin-top:3px">FG bu orana göre ağırlıklı</div></div></div>') : ''}
     ${maya && maya.tip==='lager' ? `<div class="kart" style="margin-top:10px;background:var(--ma);border:1px solid var(--mk);padding:10px 12px"><label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:13px;color:var(--mk);line-height:1.4"><input type="checkbox" ${S.lagering!==false?'checked':''} onchange="S.lagering=this.checked;render()" style="width:18px;height:18px;cursor:pointer;flex:none;margin-top:1px"><span><b>Lagering yaptım</b> <span style="color:var(--mk);font-size:11px">(soğuk uzun dinlendirme). İşaretliyse gerçek lager stilleri; kapalıysa California Common.</span></span></label></div>` : ''}
@@ -24636,6 +24637,21 @@ window.bmOffTeshis = function(kod){
     h += '</div>';
     h += '<div style="font-size:11px;color:var(--soluk);margin-bottom:6px;line-height:1.5">Böyle tarif edilir: ' + (d.trDil||[]).join(' · ') + '</div>';
     h += (window._bmOffBatchIpucu ? window._bmOffBatchIpucu(kod) : '');
+    // SPRINT W1: onay kapısı — stil-beklenen değilse "📌 Profilime ekle" (otomatik yazma yok)
+    h += (function(){
+      try{
+        var _maya = (typeof S!=='undefined'&&S&&S.mayaId&&typeof MAYALAR!=='undefined') ? MAYALAR.find(function(x){return x&&x.id===S.mayaId;}) : null;
+        var _mtip = _maya?String(_maya.tip||''):'';
+        var _stil = (typeof S!=='undefined'&&S)?String(S.stil||S.stilTah||''):'';
+        if(window._offBeklenenMi && window._offBeklenenMi(kod, _mtip, _stil))
+          return '<div style="margin-top:12px;background:#EAF5EA;border-left:3px solid #2D7A2D;border-radius:6px;padding:8px 10px;font-size:12px;color:#1E6B3A;line-height:1.5">✓ Bu stilde <b>beklenen karakter</b> — kusur değil, profile eklenmez (öğrenme atlanır).</div>';
+        if(!(typeof S!=='undefined'&&S&&S.mayaId))
+          return '<div style="margin-top:12px;font-size:11px;color:var(--dim);font-style:italic">Profiline eklemek için önce reçetede maya seç (gözlem mayaya bağlanır).</div>';
+        if(window._bmOffOgrenZatenVar && window._bmOffOgrenZatenVar(kod, S.mayaId, _stil))
+          return '<div style="margin-top:12px;display:flex;align-items:center;gap:8px;background:#EAF5EA;border-radius:8px;padding:8px 10px"><span style="flex:1;font-size:12px;color:#1E6B3A;font-weight:600">✓ Profiline eklendi — gelecek reçetelerde hatırlatılır.</span><button onclick="bmOffOgrenSil(&#39;'+kod+'&#39;)" style="background:#fff;border:1px solid var(--bor);border-radius:6px;padding:5px 10px;font-size:11px;color:var(--kk);cursor:pointer">Geri al</button></div>';
+        return '<div style="margin-top:12px"><button onclick="bmOffOgren(&#39;'+kod+'&#39;)" style="width:100%;background:var(--bakir);color:#fff;border:none;border-radius:8px;padding:10px;font-size:13px;font-weight:700;cursor:pointer">📌 Profilime ekle — bu mayayla gelecekte hatırlat</button><div style="font-size:10px;color:var(--dim);margin-top:4px;text-align:center;font-style:italic">Otomatik değişiklik yapmaz; yalnız gelecekte hatırlatır (geri alınabilir).</div></div>';
+      }catch(_e){ return ''; }
+    })();
     h += _bolum('OLASI NEDENLER (en sıktan)', _liste(d.kokNeden));
     h += _bolum('KURTARILABİLİR Mİ?', '<div style="background:' + _sevBg + ';border-radius:8px;padding:8px 10px;margin-top:2px"><div style="font-size:12px;font-weight:700;color:' + _sevRenk + ';margin-bottom:2px">' + _sevAd + '</div><div style="font-size:12px;color:var(--kahve);line-height:1.5">' + ((d.kurtarilir && d.kurtarilir.nasil) || '') + '</div></div>');
     h += _bolum('SONRAKİ BATCH — ÖNLEM', _liste(d.onlem));
@@ -24654,6 +24670,146 @@ window.bmOffTeshis = function(kod){
 };
 window.bmOffTeshisKapat = function(){ var m = document.getElementById('bmOffModal'); if(m) m.remove(); document.removeEventListener('keydown', _bmOffEsc); };
 function _bmOffEsc(e){ if(e && e.key==='Escape'){ try{ e.stopPropagation(); }catch(_){} bmOffTeshisKapat(); } }
+// ═══════════════════════════════════════════════════════════════════════════
+// SPRINT W1 — OFF-FLAVOR ÖĞRENEN: onay-kapılı soft recall (design_offflavor_v2_yazim)
+// Ayrı user-authored key bm_off_ogren_v1 — DERIVED bm_kaan_profil_v1'e YAZMAZ
+// (o her calc'ta mayaBazli:{} boşaltır, satır ~8142). Yalnız kullanıcı onayıyla yazılır/silinir.
+// Dört-katman zehirlenme koruması: (1) stil-beklenen filtresi YAZIMIN ÖNÜNDE
+// (Weizen muzu/karanfili ASLA girmez), (2) onay kapısı (otomatik yazma yok),
+// (3) mekanizma filtresi (zengin dondur, recall yalnız mekanizma-ilişkili bağlamı söyler),
+// (4) geri-alınabilir. n=1 SOFT recall — hiçbir default/sıcaklık/iskelet DEĞİŞMEZ (W2/W3).
+// ═══════════════════════════════════════════════════════════════════════════
+// Stil-beklenen tablosu (U2 karttaki pofPlus mantığı YAZIMA taşındı, makine-okunur):
+// bir off-flavor bu maya-tipinde/stilde BEKLENENSE öğrenilmez (karakter, kusur değil).
+window._OFF_BEKLENEN = {
+  ester:        { tip:['wheat','wit','belcika','saison'] },                                 // muz: POF+ maya karakteri
+  phenolic:     { tip:['wheat','wit','belcika','saison'], stilKw:['rauch','smoke','dumanlı'] }, // karanfil
+  DMS:          { tip:['lager'], stilKw:['pils','helles','pale lager'] },                   // düşük seviye to-style
+  sulfur:       { tip:['lager'] },                                                          // genç lagerde geçici normal
+  acetaldehyde: { stilKw:['light lager','kellerbier'] },                                    // düşük seviye
+  diacetyl:     { stilKw:['czech','bohemian','bitter','scottish'] },                        // eşik-altı kabul
+  oxidized:     { stilKw:['barleywine','old ale','imperial stout'] },                       // sherry = olgunlaşma
+  acetic:       { stilKw:['lambic','gueuze','flanders','gose','berliner'] },
+  infection:    { stilKw:['lambic','gueuze','flanders','gose','berliner','brett'] }
+  // fusel/solvent/astringent/chlorophenol/metallic/light-struck: hiçbir stilde beklenmez → her zaman öğrenilebilir
+};
+// Mekanizma tablosu: recall'da HANGİ bağlam gösterilir (kokNeden ile eşleşir).
+// zengin dondur / disiplinli göster — alakasız korelasyonu (örn DMS×sıcaklık) SÖYLEMEZ.
+window._OFF_MEKANIZMA = {
+  ester:'sicaklik', fusel:'sicaklik', solvent:'sicaklik', phenolic:'sicaklik',
+  diacetyl:'sicaklik_fg', acetaldehyde:'fg',
+  DMS:'surec', oxidized:'surec', astringent:'surec', 'light-struck':'surec', acetic:'surec', infection:'surec',
+  sulfur:'maya', chlorophenol:'su', metallic:'su'
+};
+window._offBeklenenMi = function(kod, mtip, stil){
+  try{
+    var b = window._OFF_BEKLENEN && window._OFF_BEKLENEN[kod];
+    if(!b) return false;
+    if(b.tip && mtip && b.tip.indexOf(mtip)>=0) return true;
+    if(b.stilKw && stil){ var s=String(stil).toLowerCase(); for(var i=0;i<b.stilKw.length;i++){ if(s.indexOf(b.stilKw[i])>=0) return true; } }
+    return false;
+  }catch(_e){ return false; }
+};
+// ── Depo (bm_off_ogren_v1) — user-authored gözlem listesi (halka-tampon DEĞİL; silmesi kullanıcıya ait) ──
+var _BM_OFF_OGREN_KEY = 'bm_off_ogren_v1', _BM_OFF_OGREN_MAX = 200;
+window._bmOffOgrenOku = function(){
+  try{ var a = JSON.parse(localStorage.getItem(_BM_OFF_OGREN_KEY)||'[]'); return Array.isArray(a)?a:[]; }catch(_e){ return []; }
+};
+window._bmOffOgrenYaz = function(arr){
+  try{
+    if(!Array.isArray(arr)) return;
+    if(arr.length > _BM_OFF_OGREN_MAX){ arr = arr.slice(-_BM_OFF_OGREN_MAX); if(typeof flash==='function') flash('Off-flavor gözlem sınırı ('+_BM_OFF_OGREN_MAX+') aşıldı — en eskiler düştü','warning'); }
+    localStorage.setItem(_BM_OFF_OGREN_KEY, JSON.stringify(arr));
+  }catch(_e){}
+};
+// Onay anında ZENGİN, SELF-CONTAINED gözlem dondur (decoupling: tadım/batch/snapshot sonradan
+// değişse/silinse gözlem yaşar). Dedup (offKod+mayaId+stil) — tek temsili gözlem.
+window.bmOffOgren = function(kod){
+  try{
+    if(typeof S==='undefined'||!S) return;
+    if(!S.mayaId){ if(typeof flash==='function') flash('Önce maya seç (gözlem mayaya bağlanır)','err'); return; }
+    var maya = (typeof MAYALAR!=='undefined') ? MAYALAR.find(function(x){return x&&x.id===S.mayaId;}) : null;
+    var mtip = maya?String(maya.tip||''):'';
+    var stil = String(S.stil||S.stilTah||'');
+    if(window._offBeklenenMi(kod, mtip, stil)){ if(typeof flash==='function') flash('Bu stilde karakter — öğrenmeye gerek yok','warning'); return; } // stil-beklenen: yazımın ÖNÜNDE
+    var bl = Array.isArray(S.brewLog)?S.brewLog:[];
+    var tArr = bl.filter(function(x){return x&&x.tip==='sicaklik'&&x.deger!=null&&x.deger!=='';}).map(function(x){return parseFloat(x.deger);}).filter(function(v){return isFinite(v);});
+    var tOrt=null,tStd=null,tMax=null;
+    if(tArr.length){ tOrt=tArr.reduce(function(a,b){return a+b;},0)/tArr.length; tMax=Math.max.apply(null,tArr); if(tArr.length>=2){ var vv=tArr.reduce(function(a,b){return a+Math.pow(b-tOrt,2);},0)/tArr.length; tStd=Math.round(Math.sqrt(vv)*10)/10; } tOrt=Math.round(tOrt*10)/10; }
+    var fgSap=null;
+    try{ var fgG=(S.brewSonuc&&S.brewSonuc.fgG!=null)?+S.brewSonuc.fgG:null; if(fgG==null){ var canli=window._brewSonucCanli?window._brewSonucCanli(S):null; fgG=(canli&&canli.fg!=null)?+canli.fg:null; } var fgT=(S.brewSnapshot&&S.brewSnapshot.fgT!=null)?+S.brewSnapshot.fgT:null; if(fgG!=null&&fgT!=null) fgSap=Math.round((fgG-fgT)*1000)/1000; }catch(_e){}
+    var son=(S.brewSonuc&&S.brewSonuc.ts)?S.brewSonuc.ts:null, basla=(S.brewSnapshot&&S.brewSnapshot.ts)?S.brewSnapshot.ts:null;
+    var sureGun=(son&&basla&&son>basla)?Math.round((son-basla)/86400000):null;
+    var d = window._OFF_TESHIS && window._OFF_TESHIS[kod];
+    var g = {
+      offKod: kod, offAd: (d&&d.ad)||kod,
+      mayaId: S.mayaId, mayaAd: maya?String(maya.ad||''):'', mayaTip: mtip,
+      bjcpStil: stil, receteAd: String(S.biraAd||''),
+      rid: (typeof _editId!=='undefined'&&_editId)?String(_editId):'',
+      fermSicaklikOrt: tOrt, fermSicaklikStd: tStd, fermSicaklikMax: tMax,
+      fgSapma: fgSap, fermentSure: sureGun, tamamlandi: !!son,
+      dondurmaTs: Date.now()
+    };
+    var arr = window._bmOffOgrenOku();
+    var ix = arr.findIndex(function(x){ return x&&x.offKod===kod&&x.mayaId===g.mayaId&&(x.bjcpStil||'')===stil; });
+    if(ix>=0) arr[ix]=g; else arr.push(g);   // dedup: tek temsili gözlem
+    window._bmOffOgrenYaz(arr);
+    if(typeof flash==='function') flash('✓ '+g.offAd+' profiline eklendi ('+(maya?maya.ad:S.mayaId)+')','ok');
+    if(typeof bmOffTeshis==='function') bmOffTeshis(kod);   // modalı tazele (geri-al düğmesi çıksın)
+  }catch(e){ try{console.warn('bmOffOgren',e);}catch(_){} }
+};
+window.bmOffOgrenSil = function(kod){
+  try{
+    if(typeof S==='undefined'||!S||!S.mayaId) return;
+    var stil = String(S.stil||S.stilTah||'');
+    var arr = window._bmOffOgrenOku();
+    var yeni = arr.filter(function(x){ return !(x&&x.offKod===kod&&x.mayaId===S.mayaId&&(x.bjcpStil||'')===stil); });
+    window._bmOffOgrenYaz(yeni);
+    if(typeof flash==='function') flash('Gözlem profilden çıkarıldı','ok');
+    if(typeof bmOffTeshis==='function') bmOffTeshis(kod);
+  }catch(e){ try{console.warn('bmOffOgrenSil',e);}catch(_){} }
+};
+window._bmOffOgrenZatenVar = function(kod, mayaId, stil){
+  var arr = window._bmOffOgrenOku(); stil = String(stil||'');
+  return arr.some(function(x){ return x&&x.offKod===kod&&x.mayaId===mayaId&&(x.bjcpStil||'')===stil; });
+};
+// Recall satırı — MEKANİZMA FİLTRESİ: yalnız mekanizma-ilişkili bağlamı söyle (alakasız korelasyonu değil).
+window._bmOffRecallSatir = function(g, kaynak){
+  try{
+    var mek = (window._OFF_MEKANIZMA && window._OFF_MEKANIZMA[g.offKod]) || '';
+    var ad = g.offAd || g.offKod, ctx='';
+    if(mek==='sicaklik' && g.fermSicaklikOrt!=null) ctx = g.fermSicaklikOrt+'°C fermentte — sıcaklık ana kaldıraç';
+    else if(mek==='sicaklik_fg'){ var p=[]; if(g.fermSicaklikOrt!=null)p.push(g.fermSicaklikOrt+'°C'); if(g.fgSapma!=null&&g.fgSapma>0)p.push('FG hedef üstü'); if(p.length) ctx=p.join(' + ')+' — soğuk/erken alma'; }
+    else if(mek==='fg' && g.fgSapma!=null && g.fgSapma>0) ctx = 'FG hedefe inmemiş — erken alma/yeşil bira';
+    else if(mek==='maya') ctx = (g.mayaAd||'maya')+' suşu kaynaklı';
+    else if(mek==='su') ctx = 'su/mineral kaynaklı';
+    else if(mek==='surec') ctx = 'kaynatma/süreç kaynaklı';
+    var ozne = (kaynak==='stil') ? 'bu stille' : 'bu mayayla';
+    return '📊 Geçmiş: '+ozne+' <b>'+ad+'</b> gözlemin vardı'+(ctx?' ('+ctx+')':'');
+  }catch(_e){ return ''; }
+};
+// Maya kartı recall (seçili maya için havuz) — SALT hatırlatma, hiçbir şeyi değiştirmez.
+window._bmOffRecallMayaHtml = function(){
+  try{
+    if(typeof S==='undefined'||!S||!S.mayaId) return '';
+    var arr = window._bmOffOgrenOku().filter(function(x){ return x&&x.mayaId===S.mayaId; });
+    if(!arr.length) return '';
+    var sat = arr.slice(-3).map(function(g){ return window._bmOffRecallSatir(g,'maya'); }).filter(Boolean);
+    if(!sat.length) return '';
+    return '<div class="kart" style="padding:8px 12px;font-size:12px;background:var(--bg2);border-left:3px solid var(--bakir);margin-bottom:8px;line-height:1.6">'+sat.join('<br>')+'<div style="font-size:10px;color:var(--dim);margin-top:3px;font-style:italic">Salt hatırlatma — sıcaklığı/iskeleti/mayayı değiştirmez.</div></div>';
+  }catch(_e){ return ''; }
+};
+// İskelet-doldur recall (seçili stil için havuz) — doldurma flash'ına eklenir (değiştirmez, hatırlatır).
+window._bmOffStilRecallStr = function(stil){
+  try{
+    stil = String(stil||''); if(!stil) return '';
+    var arr = window._bmOffOgrenOku().filter(function(x){ return x&&(x.bjcpStil||'')===stil; });
+    if(!arr.length) return '';
+    var s = window._bmOffRecallSatir(arr[arr.length-1],'stil');
+    return s ? (' · '+s.replace(/<\/?b>/g,'')) : '';
+  }catch(_e){ return ''; }
+};
+
 
 function tadimOff(kod, aktif){
   if(!S.tadim) S.tadim = {aroma:0,gorunum:0,tat:0,agizH:0,genel:0,offList:{},tadimNot:'',oturumlar:[]};
