@@ -6077,7 +6077,32 @@ const STIL_ISKELET = {
   "Czech Premium Pale Lager":      {grist:[['pilsner',100]], hop:[{id:'saaz',dk:60,rol:'aci'},{id:'sterling',dk:10,rol:'aroma',gL:0.5}], mayaId:'wy2124', mashSc:67, kaynak:'cikarim', n:8},
   "Festbier / Wiesn":              {grist:[['pilsner',88],['munich',12]], hop:[{id:'hrtau',dk:60,rol:'aci'},{id:'tettn',dk:10,rol:'aroma',gL:0.5}], mayaId:'wy2124', mashSc:67, kaynak:'cikarim', n:6},
   "American Barleywine":           {grist:[['pale_ale',92],['c60',8]], hop:[{id:'fuggles',dk:60,rol:'aci'}], mayaId:'s04', mashSc:67, kaynak:'cikarim', n:5},
-  "English Brown Ale":             {grist:[['maris',93],['c120',7]], hop:[{id:'fuggles',dk:60,rol:'aci'}], mayaId:'s04', mashSc:67, kaynak:'cikarim', n:5}
+  "English Brown Ale":             {grist:[['maris',93],['c120',7]], hop:[{id:'fuggles',dk:60,rol:'aci'}], mayaId:'s04', mashSc:67, kaynak:'cikarim', n:5},
+  // ── V2 A KATMANI (batch parser): _v2_parser.js BUILD-TIME üretti — kaynak
+  // _ground_truth_v2_batch1-8.json (817 grist-parse-edilebilir ham reçete). Deterministik
+  // alias + assert-once ID kilidi (uydurma-ID=0), maya-tip ön-filtre + homojenlik eşiği
+  // (Cold-IPA lager kirliliği elenir — tutarlılık kapısı bunu YAKALAMAZ), dedup/alias
+  // birleştirme (küratör/v1b kazanır), motor-renk kalibrasyonu (app hSRM koyu-sıcak → V1a
+  // küratörü gibi koyu malt kısıldı), tutarlılık kapısı build-time PASS. Elle düzenlenmez
+  // — değişiklik = _v2_parser.js yeniden koşulur. kaynak:'cikarim_v2', n, maya-tip.
+  "Imperial IPA / DIPA":            {grist:[['pale_ale',90],['dex',5],['munich',5]], hop:[{id:'columbus',dk:60,rol:'aci'},{id:'centn',dk:10,rol:'aroma',gL:2.2},{id:'centn',rol:'kuru',gL:3}], mayaId:'us05', mashSc:67, kaynak:'cikarim_v2', n:14, maya:'ale'},
+  "Altbier / Düsseldorf Altbier":   {grist:[['munich',64],['pilsner',29],['cara_munich2',7]], hop:[{id:'spalt',dk:60,rol:'aci'},{id:'hrtau',dk:10,rol:'aroma',gL:0.7}], mayaId:'us05', mashSc:67, kaynak:'cikarim_v2', n:14, maya:'ale'},
+  "Belgian Dark Strong Ale":        {grist:[['pilsner',85],['munich',10],['candy_drk',4],['specb',1]], hop:[{id:'styrian',dk:60,rol:'aci'}], mayaId:'wy3787', mashSc:67, kaynak:'cikarim_v2', n:13, maya:'belcika'},
+  "International Pale Lager":       {grist:[['pilsner',82],['corn',18]], hop:[{id:'saaz',dk:60,rol:'aci'}], mayaId:'wy2124', mashSc:67, kaynak:'cikarim_v2', n:13, maya:'lager'},
+  "Belgian Quadrupel / Abt":        {grist:[['pilsner',83],['munich',11],['candy_drk',4],['specb',2]], hop:[{id:'styrian',dk:60,rol:'aci'}], mayaId:'wy3787', mashSc:67, kaynak:'cikarim_v2', n:8, maya:'belcika'},
+  "Best Bitter":                    {grist:[['maris',87],['c60',10],['flaked_wheat',3]], hop:[{id:'fuggles',dk:60,rol:'aci'},{id:'ekg',dk:10,rol:'aroma',gL:1.1}], mayaId:'s04', mashSc:67, kaynak:'cikarim_v2', n:7, maya:'ale'},
+  "Vienna Lager":                   {grist:[['vienna',39],['pilsner',33],['munich',20],['cara_munich2',8]], hop:[{id:'hrtau',dk:60,rol:'aci'},{id:'cascade',dk:10,rol:'aroma',gL:0.8},{id:'cascade',rol:'kuru',gL:0.7}], mayaId:'wy2124', mashSc:67, kaynak:'cikarim_v2', n:7, maya:'lager'},
+  "Belgian Blonde Ale":             {grist:[['pilsner',84],['candy_clr',8],['vienna',4],['wheat',4]], hop:[{id:'styrian',dk:60,rol:'aci'}], mayaId:'be256', mashSc:67, kaynak:'cikarim_v2', n:6, maya:'belcika'},
+  "Baltic Porter":                  {grist:[['pilsner',82],['munich',10],['choc',4],['c80',3],['brown',1]], hop:[{id:'hrtau',dk:60,rol:'aci'}], mayaId:'w3470', mashSc:67, kaynak:'cikarim_v2', n:7, maya:'lager'},
+  "Winter Warmer / Old Ale":        {grist:[['pale_ale',84],['munich',10],['choc',2],['cara_munich2',2],['bal',2]], hop:[{id:'nbrewer',dk:60,rol:'aci'},{id:'fuggles',dk:10,rol:'aroma',gL:0.7}], mayaId:'us05', mashSc:67, kaynak:'cikarim_v2', n:7, maya:'ale'},
+  "Scottish Ale / Wee Heavy":       {grist:[['maris',96],['c120',2],['choc',2]], hop:[{id:'fuggles',dk:60,rol:'aci'},{id:'fuggles',dk:10,rol:'aroma',gL:0.7}], mayaId:'wy1728', mashSc:67, kaynak:'cikarim_v2', n:6, maya:'ale'},
+  "Dortmunder Export":              {grist:[['pilsner',73],['vienna',14],['munich',13]], hop:[{id:'hrtau',dk:60,rol:'aci'},{id:'tettn',dk:10,rol:'aroma',gL:1.1}], mayaId:'w3470', mashSc:67, kaynak:'cikarim_v2', n:7, maya:'lager'},
+  "Schwarzbier":                    {grist:[['munich',63],['pilsner',30],['crf3',4],['cara_munich2',3]], hop:[{id:'hrtau',dk:60,rol:'aci'},{id:'tettn',dk:10,rol:'aroma',gL:0.5}], mayaId:'wy2206', mashSc:67, kaynak:'cikarim_v2', n:10, maya:'lager'},
+  "Milk Stout / Sweet Stout":       {grist:[['maris',73],['oat',9],['roast',9],['lak',5],['c80',4]], hop:[{id:'fuggles',dk:60,rol:'aci'}], mayaId:'s04', mashSc:67, kaynak:'cikarim_v2', n:8, maya:'ale'},
+  "English Barleywine":             {grist:[['maris',86],['c80',7],['munich',4],['invert2',3]], hop:[{id:'challenger',dk:60,rol:'aci'},{id:'ekg',dk:10,rol:'aroma',gL:2.2}], mayaId:'s04', mashSc:67, kaynak:'cikarim_v2', n:6, maya:'ale'},
+  "Session IPA":                    {grist:[['pale_ale',96],['c20',4]], hop:[{id:'columbus',dk:60,rol:'aci'},{id:'citra',dk:10,rol:'aroma',gL:1.5},{id:'mosaic',rol:'kuru',gL:1.5}], mayaId:'us05', mashSc:67, kaynak:'cikarim_v2', n:5, maya:'ale'},
+  "Doppelbock":                     {grist:[['munich',69],['pilsner',22],['cara_munich2',4],['vienna',4],['crf2',1]], hop:[{id:'hrtau',dk:60,rol:'aci'}], mayaId:'wy2206', mashSc:67, kaynak:'cikarim_v2', n:7, maya:'lager'},
+  "English IPA":                    {grist:[['maris',92],['c60',5],['sek',3]], hop:[{id:'ekg',dk:60,rol:'aci'},{id:'ekg',dk:10,rol:'aroma',gL:1.3},{id:'ekg',rol:'kuru',gL:1.5}], mayaId:'wy1318', mashSc:67, kaynak:'cikarim_v2', n:5, maya:'ale'}
 };
 window.STIL_ISKELET = STIL_ISKELET;
 
@@ -6155,7 +6180,7 @@ window.bmStilIskeletDoldur = function(){
     if(r.mashSc) S.mashSc = r.mashSc;
     if(typeof _receteYazSync==='function')_receteYazSync();
     if(typeof render==='function')render();
-    if(typeof flash==='function')flash("📋 "+st+" iskeleti "+(S.hacim>0?S.hacim:11)+"L'ye ölçeklenip dolduruldu"+(isk.kaynak==='cikarim'&&isk.n?" ("+isk.n+" gerçek reçeteden türetildi)":"")+" — başlangıç noktası, serbestçe değiştir"+(window._bmOffStilRecallStr?_bmOffStilRecallStr(st):""),"ok");
+    if(typeof flash==='function')flash("📋 "+st+" iskeleti "+(S.hacim>0?S.hacim:11)+"L'ye ölçeklenip dolduruldu"+((isk.kaynak==='cikarim'||isk.kaynak==='cikarim_v2')&&isk.n?" ("+isk.n+" gerçek reçeteden türetildi"+(isk.maya?", "+isk.maya+" maya":"")+")":"")+" — başlangıç noktası, serbestçe değiştir"+(window._bmOffStilRecallStr?_bmOffStilRecallStr(st):""),"ok");
   }catch(e){ try{console.warn('bmStilIskeletDoldur',e);}catch(_){} }
 };
 

@@ -1216,7 +1216,7 @@ const CASELER = [
     kod: 'V-ISKELET-GATE', ad: 'TUTARLILIK KAPISI: her STIL_ISKELET → calc() OG/IBU/SRM BJCP aralığında + tüm ID katalogda (bozuk iskelet koruması)',
     calistir: (page) => page.evaluate(() => {
       const styles = Object.keys(window.STIL_ISKELET || {});
-      __REG.ok('STIL_ISKELET 24 stil (20 küratörlü + 4 V1b çıkarım)', styles.length === 24, String(styles.length));
+      __REG.ok('STIL_ISKELET 42 stil (20 küratörlü + 4 V1b + 18 V2 batch)', styles.length === 42, String(styles.length));
       yeniTarif();
       let idFail = [], rangeFail = [], pctFail = [];
       styles.forEach(st => {
@@ -1297,11 +1297,12 @@ const CASELER = [
     })
   },
   {
-    kod: 'V-CLAYER', ad: 'C katmanı: iskeleti OLMAYAN stil (Doppelbock) → maya önerisi dolar, malt/hop BOŞ kalır (sahte iskelet UYDURMA)',
+    kod: 'V-CLAYER', ad: 'C katmanı: iskeleti OLMAYAN stil (Munich Dunkel, V2 eşik-altı n<5) → maya önerisi dolar, malt/hop BOŞ kalır (sahte iskelet UYDURMA)',
     calistir: (page) => page.evaluate(() => {
-      __REG.ok('Doppelbock BJCP\'de var ama STIL_ISKELET\'te YOK', !!BJCP['Doppelbock'] && !window.STIL_ISKELET['Doppelbock']);
+      // Munich Dunkel: BJCP'de var, V2'de örneklem yetersiz (n=3<5) → STIL_ISKELET'te YOK, C katmanı kalır
+      __REG.ok('Munich Dunkel BJCP\'de var ama STIL_ISKELET\'te YOK', !!BJCP['Munich Dunkel'] && !window.STIL_ISKELET['Munich Dunkel']);
       yeniTarif();
-      S.stil = 'Doppelbock'; S.hacim = 11;
+      S.stil = 'Munich Dunkel'; S.hacim = 11;
       bmStilIskeletDoldur();
       __REG.ok('maya önerisi dolduruldu (lager → w3470)', S.mayaId === 'w3470');
       __REG.ok('malt BOŞ kaldı (sahte malzeme uydurulmadı)', S.maltlar.length === 0);
@@ -1332,23 +1333,24 @@ const CASELER = [
     kod: 'V1B-KAYNAK', ad: 'kaynak izi: her iskelet kurator|cikarim etiketli, 20+4 dağılım, her çıkarım n>=5 (eşik kanıtı)',
     calistir: (page) => page.evaluate(() => {
       const entries = Object.entries(window.STIL_ISKELET || {});
-      __REG.ok('her iskelette kaynak izi var (kurator|cikarim)', entries.length > 0 && entries.every(([, i]) => i.kaynak === 'kurator' || i.kaynak === 'cikarim'));
-      const kur = entries.filter(([, i]) => i.kaynak === 'kurator'), cik = entries.filter(([, i]) => i.kaynak === 'cikarim');
-      __REG.ok('20 küratörlü + 4 çıkarım', kur.length === 20 && cik.length === 4, kur.length + '+' + cik.length);
-      __REG.ok('her çıkarım iskeleti n>=5 taşır (eşik-altı çıkarım YOK)', cik.every(([, i]) => typeof i.n === 'number' && i.n >= 5), cik.map(([a, i]) => a + ':n=' + i.n).join(' | '));
-      __REG.ok('beklenen 4 çıkarım stili', ['Czech Premium Pale Lager', 'Festbier / Wiesn', 'American Barleywine', 'English Brown Ale'].every(a => window.STIL_ISKELET[a] && window.STIL_ISKELET[a].kaynak === 'cikarim'));
+      __REG.ok('her iskelette kaynak izi var (kurator|cikarim|cikarim_v2)', entries.length > 0 && entries.every(([, i]) => i.kaynak === 'kurator' || i.kaynak === 'cikarim' || i.kaynak === 'cikarim_v2'));
+      const kur = entries.filter(([, i]) => i.kaynak === 'kurator'), cik = entries.filter(([, i]) => i.kaynak === 'cikarim'), cik2 = entries.filter(([, i]) => i.kaynak === 'cikarim_v2');
+      __REG.ok('20 küratörlü + 4 V1b çıkarım + 18 V2 batch', kur.length === 20 && cik.length === 4 && cik2.length === 18, kur.length + '+' + cik.length + '+' + cik2.length);
+      __REG.ok('her V1b/V2 çıkarım iskeleti n>=5 taşır (eşik-altı çıkarım YOK)', cik.concat(cik2).every(([, i]) => typeof i.n === 'number' && i.n >= 5), cik.concat(cik2).filter(([, i]) => !(i.n >= 5)).map(([a, i]) => a + ':n=' + i.n).join(' | '));
+      __REG.ok('beklenen 4 V1b çıkarım stili', ['Czech Premium Pale Lager', 'Festbier / Wiesn', 'American Barleywine', 'English Brown Ale'].every(a => window.STIL_ISKELET[a] && window.STIL_ISKELET[a].kaynak === 'cikarim'));
       return __REG.al();
     })
   },
   {
-    kod: 'V1B-ESIK', ad: 'veri-dürüstlük: eşik-altı (n=4 DIPA/Milk Stout, n=3 Vienna/Doppelbock) ve kapı-düşenler (West Coast maya-tip, Imperial Stout SRM) tabloya GİRMEDİ',
+    kod: 'V1B-ESIK', ad: 'veri-dürüstlük: V1b eşik-altı stiller V2 batch (817 reçete) ile qualified; kalıcı dışlananlar (West Coast maya-tip, Imperial Stout renk-sıcak) hâlâ dışarıda',
     calistir: (page) => page.evaluate(() => {
-      // hepsi BJCP'de VAR (yokluk anlamlı) ama STIL_ISKELET'te YOK
-      const esikAlti = ['Imperial IPA / DIPA', 'Milk Stout / Sweet Stout', 'Vienna Lager', 'Doppelbock'];
-      const kapiDusen = ['West Coast IPA', 'Imperial / Russian Imperial Stout'];
-      __REG.ok('kontrol stilleri BJCP otoritesinde mevcut', esikAlti.concat(kapiDusen).every(a => !!BJCP[a]));
-      __REG.ok('eşik-altı (n<5) stiller çıkarıma girmedi — tek/az reçete kopyalanmadı', esikAlti.every(a => !window.STIL_ISKELET[a]));
-      __REG.ok('kapı-düşenler tabloda yok (West Coast: lager-maya örneklem sapması; Imp Stout: SRM 53>40)', kapiDusen.every(a => !window.STIL_ISKELET[a]));
+      // V1b'de (199 reçete) eşik-altıydı; V2 batch parser (817 reçete) daha çok veriyle qualified etti
+      const v2Promoted = ['Imperial IPA / DIPA', 'Milk Stout / Sweet Stout', 'Vienna Lager', 'Doppelbock'];
+      // V2'de de KALICI dışlanan — kategorik/kalibrasyon güvenlik (tutarlılık kapısı tek başına yakalamaz)
+      const kaliciDisla = ['West Coast IPA', 'Imperial / Russian Imperial Stout'];
+      __REG.ok('kontrol stilleri BJCP otoritesinde mevcut', v2Promoted.concat(kaliciDisla).every(a => !!BJCP[a]));
+      __REG.ok('V1b eşik-altı stiller V2 batch parser ile qualified (kaynak cikarim_v2)', v2Promoted.every(a => window.STIL_ISKELET[a] && window.STIL_ISKELET[a].kaynak === 'cikarim_v2'), v2Promoted.filter(a => !window.STIL_ISKELET[a]).join(' | '));
+      __REG.ok('kalıcı dışlananlar V2\'de de tabloda YOK (West Coast: lager-maya ön-filtre; Imp Stout: motor-renk >1.9×BJCP-max)', kaliciDisla.every(a => !window.STIL_ISKELET[a]));
       return __REG.al();
     })
   },
@@ -1380,6 +1382,57 @@ const CASELER = [
       const c = calc(); const bj = BJCP['Czech Premium Pale Lager'];
       __REG.ok('calc() OG BJCP aralığında', c.og >= bj.og[0] && c.og <= bj.og[1], 'OG=' + c.og.toFixed(3));
       __REG.ok('calc() IBU BJCP aralığında', c.ibu >= bj.ibu[0] && c.ibu <= bj.ibu[1], 'IBU=' + Math.round(c.ibu));
+      return __REG.al();
+    })
+  },
+
+  // ── SPRINT V2: batch parser — deterministik alias + maya-tip disiplini + renk kalibrasyonu ──
+  {
+    kod: 'V2-KAYNAK', ad: 'kaynak izi: 18 V2 iskelet kaynak=cikarim_v2 + maya-tip alanı + n>=5; Kaan favorileri (Doppelbock/Schwarzbier/Belgian Dark Strong/Quad/Vienna/Baltic Porter/Wee Heavy/Best Bitter) mevcut',
+    calistir: (page) => page.evaluate(() => {
+      const v2 = Object.entries(window.STIL_ISKELET || {}).filter(([, i]) => i.kaynak === 'cikarim_v2');
+      __REG.ok('18 V2 batch iskeleti', v2.length === 18, String(v2.length));
+      __REG.ok('her V2 iskeleti kaynak izi taşır (cikarim_v2 + n>=5 + maya-tip)', v2.every(([, i]) => i.kaynak === 'cikarim_v2' && typeof i.n === 'number' && i.n >= 5 && typeof i.maya === 'string' && i.maya.length), v2.filter(([, i]) => !(i.n >= 5 && i.maya)).map(([a]) => a).join(' | '));
+      const favori = ['Doppelbock', 'Schwarzbier', 'Belgian Dark Strong Ale', 'Belgian Quadrupel / Abt', 'Vienna Lager', 'Baltic Porter', 'Scottish Ale / Wee Heavy', 'Best Bitter'];
+      __REG.ok('Kaan favorileri V2 ile eklendi (kaynak cikarim_v2)', favori.every(a => window.STIL_ISKELET[a] && window.STIL_ISKELET[a].kaynak === 'cikarim_v2'), favori.filter(a => !window.STIL_ISKELET[a]).join(' | '));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'V2-MAYA-HOMOJEN', ad: 'MAYA-TİP DİSİPLİNİ (spec kalbi): her V2 iskeletin maya alanı, mayaId\'nin katalog tip\'iyle tutarlı (tutarlılık kapısı bunu YAKALAMAZ); lager stili→lager maya, Belçika→belcika; sour/West Coast dışlandı',
+    calistir: (page) => page.evaluate(() => {
+      const v2 = Object.entries(window.STIL_ISKELET || {}).filter(([, i]) => i.kaynak === 'cikarim_v2');
+      // KRİTİK: her V2 mayaId'nin katalog tip'i, deklare edilen maya-tip alanıyla EŞLEŞMELİ (kategorik güvenlik)
+      const tipMismatch = v2.filter(([, i]) => { const my = MAYALAR.find(m => m && m.id === i.mayaId); return !my || my.tip !== i.maya; });
+      __REG.ok('her V2 mayaId katalog tip\'i == deklare maya-tip (Cold-IPA lager-in-ale sızması engellendi)', tipMismatch.length === 0, tipMismatch.map(([a, i]) => a + ':maya=' + i.maya + '/mayaId=' + i.mayaId).join(' | '));
+      // lager stilleri lager maya taşır (kategorik doğruluk)
+      const lagerStil = ['Doppelbock', 'Schwarzbier', 'Vienna Lager', 'Baltic Porter', 'International Pale Lager', 'Dortmunder Export'];
+      __REG.ok('lager stilleri lager-tip maya (ale-maya sızması yok)', lagerStil.every(a => { const i = window.STIL_ISKELET[a]; return i && i.maya === 'lager' && MAYALAR.find(m => m && m.id === i.mayaId).tip === 'lager'; }));
+      __REG.ok('Belçika stilleri belcika-tip maya', ['Belgian Dark Strong Ale', 'Belgian Quadrupel / Abt', 'Belgian Blonde Ale'].every(a => { const i = window.STIL_ISKELET[a]; return i && i.maya === 'belcika'; }));
+      // sour/wild + West Coast (Cold-IPA lager) V2'ye GİRMEDİ (blend-maya / maya-tip ön-filtre)
+      const disla = ['West Coast IPA', 'Gose', 'Flanders Red Ale', 'Lambic / Gueuze', 'Berliner Weisse', 'American Wild Ale'];
+      __REG.ok('sour/wild + West Coast IPA V2 kapsam dışı (tabloda yok)', disla.every(a => !window.STIL_ISKELET[a] || window.STIL_ISKELET[a].kaynak !== 'cikarim_v2'));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'V2-DOLDUR-KALIBRE', ad: 'V2 uçtan uca: koyu favori Schwarzbier doldur → calc() BJCP aralığında (renk-kalibrasyonu app hSRM ile) + lager maya + şeffaflık flash "(n reçeteden türetildi, lager maya)"',
+    calistir: (page) => page.evaluate(() => {
+      yeniTarif();
+      S.stil = 'Schwarzbier'; S.hacim = 11; S.verim = 61;
+      const isk = window.STIL_ISKELET['Schwarzbier'];
+      __REG.ok('Schwarzbier V2 iskeleti (cikarim_v2, n=10, lager)', !!isk && isk.kaynak === 'cikarim_v2' && isk.n === 10 && isk.maya === 'lager');
+      let msg = ''; const _f = window.flash; window.flash = (m) => { msg = String(m); };
+      bmStilIskeletDoldur();
+      window.flash = _f;
+      __REG.ok('malt dolduruldu (munich bazlı — koyu lager)', S.maltlar.length >= 2 && S.maltlar[0].id === 'munich');
+      __REG.ok('maya wy2206 (lager, veri modu)', S.mayaId === 'wy2206');
+      __REG.ok('şeffaflık: flash "(10 gerçek reçeteden türetildi, lager maya)"', msg.includes('(10 gerçek reçeteden türetildi, lager maya)'), msg);
+      const c = calc(); const bj = BJCP['Schwarzbier'];
+      const srm = (c.srm != null) ? +c.srm : hSRM(S.maltlar, [], 11);
+      __REG.ok('calc() OG BJCP Schwarzbier aralığında', c.og >= bj.og[0] && c.og <= bj.og[1], 'OG=' + c.og.toFixed(3));
+      __REG.ok('calc() IBU BJCP aralığında', c.ibu >= bj.ibu[0] && c.ibu <= bj.ibu[1], 'IBU=' + Math.round(c.ibu));
+      __REG.ok('calc() SRM BJCP aralığında (renk kalibrasyonu koyu-sıcak motora göre)', srm >= bj.srm[0] && srm <= bj.srm[1], 'SRM=' + srm + ' [' + bj.srm + ']');
       return __REG.al();
     })
   },
