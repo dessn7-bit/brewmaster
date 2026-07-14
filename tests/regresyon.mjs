@@ -1451,6 +1451,22 @@ const CASELER = [
     })
   },
 
+  // ── SPRINT X2b: EBC eş kural + üst-yön SRM uyarı bastırma (koyu stil) ──
+  {
+    kod: 'X2B-EBC-UYARI', ad: 'EBC eş kural (35→69, 65→79+) + üst-yön SRM uyarısı SRM>40+koyu-stilde BASTIRILIR; alt-yön + açık-stil + sayısal bölge AYNEN',
+    calistir: (page) => page.evaluate(() => {
+      __REG.ok('ebcGoster(35) = "69" (sayısal bölge ham görünüm)', typeof window.ebcGoster === 'function' && ebcGoster(35) === '69', String(typeof window.ebcGoster === 'function' && ebcGoster(35)));
+      __REG.ok('ebcGoster(65) = "79+" (bantlı)', ebcGoster(65) === '79+', ebcGoster(65));
+      const koyuGrist = [{ id: 'pale_ale', kg: 5 }, { id: 'choc', kg: 0.5 }];
+      const bul = (stil, srm) => JSON.stringify(gristDenetim(koyuGrist, MALTLAR, stil, BJCP, srm, null).bulgular);
+      __REG.ok('RIS (tavan 40) + SRM 80 → "Renk stile göre koyu" YOK (bastırıldı)', !bul('Imperial / Russian Imperial Stout', 80).includes('Renk stile göre koyu'));
+      __REG.ok('RIS + SRM 20 → "Renk stile göre açık" VAR (alt-yön aynen)', bul('Imperial / Russian Imperial Stout', 20).includes('Renk stile göre açık'));
+      __REG.ok('German Pils (tavan<30) + SRM 50 → "Renk stile göre koyu" VAR (açık stilde katı)', bul('German Pils', 50).includes('Renk stile göre koyu'));
+      __REG.ok('Baltic Porter (tavan 30) + SRM 38 → uyarı VAR (40 altı sayısal bölge aynen)', bul('Baltic Porter', 38).includes('Renk stile göre koyu'));
+      return __REG.al();
+    })
+  },
+
   // ── SPRINT W1: off-flavor öğrenen — onay-kapılı soft recall (zehirlenme koruması) ──
   {
     kod: 'W1-BEKLENEN', ad: 'STİL-BEKLENEN FİLTRESİ: Weizen muz/karanfil BLOKE (Kaan favorisi asla girmez), Weizen diaseytil öğrenilebilir, lager kükürt BLOKE',

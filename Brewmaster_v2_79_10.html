@@ -5027,6 +5027,7 @@ function hSRM(ml,katkilar,hacim){
   return m===0?0:+(1.4922*Math.pow(m,.6859)).toFixed(1);
 }
 function srmGoster(s,uzun){const v=parseFloat(s)||0;return v>40?(uzun?'40+ (siyah/opak)':'40+'):String(Math.round(v));} // X1: SRM>40 görsel siyah/opak — sayısal ayrım anlamsız; ham değer hesap/kayıtta korunur
+function ebcGoster(s){const v=parseFloat(s)||0;return v>40?'79+':String(Math.round(v*1.97));} // X2b: EBC eş kural (40 SRM ≈ 79 EBC bandı) — srmGoster ile tutarlı, ham değer korunur
 function srmR(s){const r=[[3,"#dbb74b"],[4,"#d5a429"],[5,"#cb8d00"],[7,"#bd7200"],[9,"#af5d00"],[11,"#9e4700"],[14,"#8c3200"],[17,"#7f2500"],[19,"#721900"],[22,"#650d00"],[25,"#560100"],[30,"#460000"],[35,"#3a0000"],[40,"#2b0000"],[50,"#170000"]];for(let i=r.length-1;i>=0;i--)if(s>=r[i][0])return r[i][1];return"#e2d589";}
 function renk_adi(s){const t=[[3,"Buğday"],[4,"Altın Sarısı"],[5,"Bal"],[7,"Kehribar"],[9,"Bakır"],[11,"Koyu Bakır"],[14,"Kızıl Bakır"],[17,"Yakut Kırmızısı"],[19,"Kızıl Kahve"],[22,"Kestane"],[25,"Çikolata"],[30,"Yakut"],[35,"Koyu Kahve"],[40,"Siyah"],[50,"Kara Amber"]];for(let i=t.length-1;i>=0;i--)if(s>=t[i][0])return t[i][1];return"Saman";}
 function bjcp_adi(s){const t=[[3,"Straw"],[4,"Pale Gold"],[5,"Deep Gold"],[7,"Pale Amber"],[9,"Pale Amber"],[11,"Medium Amber"],[14,"Deep Amber"],[17,"Amber Brown"],[19,"Brown"],[22,"Ruby Brown"],[25,"Ruby Brown"],[30,"Deep Brown"],[35,"Black"],[40,"Black"],[50,"Black"]];for(let i=t.length-1;i>=0;i--)if(s>=t[i][0])return t[i][1];return"Pale Straw";}
@@ -15756,7 +15757,7 @@ ${batchOlcekKartHtml()}
   var _hexV=(typeof aktif_renk_hex==='function')?aktif_renk_hex(_srmV,_pigV):'#cb8d00';
   var _adTr=(typeof _camRenkAdTr==='function')?_camRenkAdTr(_srmV,_pigV):'';
   var _adEn=(typeof _camRenkAdEn==='function')?_camRenkAdEn(_srmV,_pigV):'';
-  var _ebcV=Math.round((_srmV||0)*1.97);
+  var _ebcV=((_srmV||0)>40?'79+':Math.round((_srmV||0)*1.97));
   return '<div class="kart">'
     +'<div style="font-size:14px;font-weight:700;color:var(--metin);margin-bottom:10px">🎨 Renk / SRM</div>'
     +'<div style="display:flex;align-items:center;gap:14px">'
@@ -16348,7 +16349,7 @@ function gristDenetim(maltlar, MALTLAR, stilAdi, BJCP, srm, og){
   if(st){
     if(st.srm && srm!=null){ const a=st.srm[0],bv=st.srm[1];
       if(srm < a*0.85){ ekle('orta','Renk stile göre açık (SRM ~'+(+srm.toFixed(1))+', '+stilAdi+' hedefi '+a+'-'+bv+').'+(d.koyu<1?' Koyu malt ekleyerek koyulaştırabilirsin.':'')); }
-      else if(srm > bv*1.15){ ekle('orta','Renk stile göre koyu (SRM ~'+(+srm.toFixed(1))+' > '+bv+').'+(d.koyu>0?' Koyu maltı azaltabilirsin.':'')); } }
+      else if(srm > bv*1.15 && !(srm>40 && bv>=30)){ ekle('orta','Renk stile göre koyu (SRM ~'+(+srm.toFixed(1))+' > '+bv+').'+(d.koyu>0?' Koyu maltı azaltabilirsin.':'')); } }
     if(st.og && og!=null){ const a=st.og[0],bv=st.og[1];
       if(og < a-0.003){ ekle('orta','Yerçekimi stile göre düşük (OG '+og.toFixed(3)+', hedef '+a.toFixed(3)+'-'+bv.toFixed(3)+'): base/şeker artır veya verim.'); }
       else if(og > bv+0.003){ ekle('orta','Yerçekimi stile göre yüksek (OG '+og.toFixed(3)+' > '+bv.toFixed(3)+').'); } }
@@ -19628,7 +19629,7 @@ return `
         })()}
         <div style="margin-bottom:14px">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:2px">
-            <div style="width:40px;height:40px;border-radius:50%;background:${renk_hex};border:2.5px solid var(--bor2);flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;color:#FEFBF2;font-family:var(--font-display);font-weight:700;text-shadow:0 1px 2px rgba(0,0,0,.4)"><span style="font-size:14px;line-height:1">${(parseFloat(srm)*1.97).toFixed(0)}</span></div>
+            <div style="width:40px;height:40px;border-radius:50%;background:${renk_hex};border:2.5px solid var(--bor2);flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;color:#FEFBF2;font-family:var(--font-display);font-weight:700;text-shadow:0 1px 2px rgba(0,0,0,.4)"><span style="font-size:14px;line-height:1">${ebcGoster(srm)}</span></div>
             <div style="flex:1;min-width:0">${(()=>{
               // Bug 1: V12 slug top-1 → kart başlığı (DRY window.bmSlugToBjcp)
               // Bug 5: "Belirsiz" SADECE slug-model-ready + slug confidence < 20. Cluster fallback'te tetiklenmez.
@@ -20131,7 +20132,7 @@ return `
                   • <b>Münih malt</b> (%10-30 grist) — malty-toasty nüans, hafif renklendirici<br>
                   → Hedef SRM ~${Math.round(tSRM)}`
               });
-            } else if(srmF>_stRef.srm[1]+TOL_SRM){
+            } else if(srmF>_stRef.srm[1]+TOL_SRM && !(srmF>40 && _stRef.srm[1]>=30)){
               oneriler.push({
                 durum:'sarı', ikon:'🎨',
                 baslik:`SRM yüksek: ${_srm} — ${_stKey} hedefi ${_stRef.srm[0]}-${_stRef.srm[1]} (renk koyu)`,
@@ -20630,7 +20631,7 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
         const _katRenkMCU=_katSRM_toplam>0.5?' · katkı +'+_katSRM_toplam.toFixed(1)+' MCU':'';
         // Adim 137-G P4 fix-3 (Asama 2): RENK — 3 parca (deger / grist sebep + berraklik / verdict).
         {
-          var _rEBC = (parseFloat(_srm)*1.97).toFixed(0);
+          var _rEBC = ebcGoster(_srm);
           var renkSebep = (_roastPct>=5) ? 'koyu renk kavurma maltlarından geliyor, yanık kahve tonları belirgin'
                         : (_chocPct>=5)  ? 'çikolata maltı renge derinlik veriyor'
                         : (_crsPct>=15)  ? 'crystal/karamel maltı renge bakır-kehribar veriyor'
