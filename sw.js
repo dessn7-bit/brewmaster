@@ -678,7 +678,7 @@
 // Sprint U1a (2026-07-09): off-flavor teshis motoru v1a — _OFF_TESHIS 14-aile bilgi tabani (adversaryal-dogrulanmis
 // domain), tadim tag 8->14, ? dugmesi statik teshis karti (neden/kurtarilir/onlem/ayirici-soru/stil), timeline
 // diacetyl merkezilestirme (_bmOffKisaCozum). Batch-verisi keskinlestirme U2. bump v131-378 -> v131-379.
-const CACHE_VERSION = 'bm-cache-v131-384';
+const CACHE_VERSION = 'bm-cache-v131-385';
 
 // Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
 // — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.

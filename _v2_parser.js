@@ -210,6 +210,10 @@ const CRYSTAL_FAM = new Set(['c10', 'c20', 'c40', 'c60', 'c80', 'c120', 'c150'])
 // delta'yı emen açık baz maltlar (renksiz backbone); munich/vienna renk taşır → emici DEĞİL
 const BAZ_EMICI = new Set(['pilsner', 'pale_ale', 'maris', 'bel_pils', 'golden_promise', 'wheat', 'rwh', 'oat', 'corn', 'rice_flaked', 'flaked_wheat', 'torr_wh', 'fbar']);
 const RENK_ESIK = 20; // r>=20 = kalibre edilebilir renk malt (crystal/caramunich/roast/specialty)
+const KOYU_SMAX = 30; // X2 (design_srm_motor_teshis): BJCP srm-tavanı >=30 = siyah/opak görsel bandı. Tavan GÖRSEL
+// konvansiyon, hesap-SRM değil (otantik RIS hesabı 60-90). Bu stillerde SRM ÜST-yönü serbest: üst-yön kalibrasyon +
+// tooHot + kapı-üst kontrolü devre dışı; ALT kontrol ve OG/IBU (sayısal-anlamlı) AYNEN. DİKKAT: gelecek koşuda koyu
+// stil medyan gristi trimlenmeden geçer — GT koyu srm/grist alanları şişik olabilir, koşu öncesi göz-kontrolü şart.
 
 // aile konsolidasyonu: yığılmış alternatifleri (temiz reçetelerden) TEK mode temsilciye
 // indir; temsilcinin %'si = reçete-başı-aile-toplamının medyanı. gerçek gristler tek
@@ -238,16 +242,16 @@ function motorHedef(ad, grFloat, hop, mayaId) {
 // yakınsa. Renk malt %'sini (r>=RENK_ESIK) ölçekler, delta'yı en büyük açık baz malta
 // taşır (V1a küratörünün elle "koyu malt kısıldı" işleminin otomatik + tersinir hali).
 function renkKalibre(ad, grFloat, hop, mayaId) {
-  const bj = BJCP[ad], smin = bj.srm[0], smax = bj.srm[1];
+  const bj = BJCP[ad], smin = bj.srm[0], smax = bj.srm[1], koyu = smax >= KOYU_SMAX;
   const hed0 = motorHedef(ad, grFloat, hop, mayaId);
   if (!hed0) return { gr: grFloat, srm: null, motorNull: true };
   const srm0 = hed0.srm;
-  if (srm0 > 1.9 * smax) return { gr: grFloat, srm: srm0, srm0, tooHot: true }; // >1.9×max: koyu karakteri BJCP'ye sığdırmak stili gutlar → DÜŞÜR (gerçek RIS ~2× BJCP-max koyu, defining kavurma kaybolur)
+  if (!koyu && srm0 > 1.9 * smax) return { gr: grFloat, srm: srm0, srm0, tooHot: true }; // >1.9×max: koyu karakteri BJCP'ye sığdırmak stili gutlar → DÜŞÜR (gerçek RIS ~2× BJCP-max koyu, defining kavurma kaybolur)
   // İÇ-BANT: yalnız sınıra yakın/dışında olanları düzelt; comfortably-içerideki grist KORUNUR
   // (DIPA 7.1 SRM pale kalmalı, mid'e koyulaştırılmamalı). Sınır düzeltmesinde YAKIN kenara
   // niş — koyu stiller koyu ucta, açık stiller açık ucta; tam-sayı yuvarlamasına tampon.
   let margin = Math.max(0.6, 0.12 * (smax - smin));
-  let safeLo = smin + margin, safeHi = smax - margin;
+  let safeLo = smin + margin, safeHi = koyu ? Infinity : smax - margin; // koyu: üst-yön kalibrasyon YOK (gutlama önlenir)
   if (safeLo >= safeHi) { safeLo = smin; safeHi = smax; } // dar aralık: iç-bant yok
   let gr = grFloat.map(g => [g[0], g[1]]);
   const target = (srm0 < safeLo) ? safeLo : (srm0 > safeHi ? safeHi : srm0); // içerideyse target=srm0 (kullanılmaz, döngü girmez)
@@ -274,7 +278,7 @@ function renkKalibre(ad, grFloat, hop, mayaId) {
 // koyu stilde 1 renk-malt ±%1 ≈ ±2 SRM) GERÇEK tam-sayı gristte düzelt. En büyük renk maltı ±1,
 // en büyük baz malt ∓1 (toplam 100 korunur). Motorla doğrula; 5 adımda yakınsamazsa gate düşürür.
 function intNudge(ad, gr, hop, mayaId) {
-  const bj = BJCP[ad], smin = bj.srm[0], smax = bj.srm[1];
+  const bj = BJCP[ad], smin = bj.srm[0], smax = (bj.srm[1] >= KOYU_SMAX ? Infinity : bj.srm[1]); // koyu: üst-nudge yok
   for (let k = 0; k < 6; k++) {
     const h = motorHedef(ad, gr, hop, mayaId);
     if (!h || (h.srm >= smin && h.srm <= smax)) break;
@@ -486,7 +490,7 @@ Object.entries(adaylar).forEach(([ad, a]) => {
   const h = [];
   if (!(og >= bj.og[0] && og <= bj.og[1])) h.push('OG=' + og.toFixed(3) + '∉[' + bj.og + ']');
   if (!(ibu >= bj.ibu[0] && ibu <= bj.ibu[1])) h.push('IBU=' + Math.round(ibu) + '∉[' + bj.ibu + ']');
-  if (!(srm >= bj.srm[0] && srm <= bj.srm[1])) h.push('SRM=' + srm + '∉[' + bj.srm + ']');
+  if (!(srm >= bj.srm[0] && (bj.srm[1] >= KOYU_SMAX || srm <= bj.srm[1]))) h.push('SRM=' + srm + '∉[' + bj.srm + ']');
   const pct = a.entry.grist.reduce((s, g) => s + g[1], 0);
   if (Math.abs(pct - 100) > 0.01) h.push('grist%=' + pct);
   if (h.length) { dusen.push('"' + ad + '" [' + a.etiket + '] KAPI DÜŞTÜ: ' + h.join(' ')); return; }

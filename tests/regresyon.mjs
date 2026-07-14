@@ -1213,7 +1213,7 @@ const CASELER = [
 
   // ── SPRINT V1a: stilden reçete başlatma (küratörlü iskelet + ölçekleme + tutarlılık kapısı) ──
   {
-    kod: 'V-ISKELET-GATE', ad: 'TUTARLILIK KAPISI: her STIL_ISKELET → calc() OG/IBU/SRM BJCP aralığında + tüm ID katalogda (bozuk iskelet koruması)',
+    kod: 'V-ISKELET-GATE', ad: 'TUTARLILIK KAPISI: her STIL_ISKELET → calc() OG/IBU/SRM BJCP aralığında (X2: koyu stil srm-tavan>=30 SRM üst serbest) + tüm ID katalogda (bozuk iskelet koruması)',
     calistir: (page) => page.evaluate(() => {
       const styles = Object.keys(window.STIL_ISKELET || {});
       __REG.ok('STIL_ISKELET 42 stil (20 küratörlü + 4 V1b + 18 V2 batch)', styles.length === 42, String(styles.length));
@@ -1238,7 +1238,7 @@ const CASELER = [
         const srm = (c.srm != null) ? +c.srm : hSRM(S.maltlar, [], 11);
         if (!(c.og >= bj.og[0] && c.og <= bj.og[1])) rangeFail.push(st + ':OG=' + c.og.toFixed(3) + '[' + bj.og + ']');
         if (!(c.ibu >= bj.ibu[0] && c.ibu <= bj.ibu[1])) rangeFail.push(st + ':IBU=' + Math.round(c.ibu) + '[' + bj.ibu + ']');
-        if (!(srm >= bj.srm[0] && srm <= bj.srm[1])) rangeFail.push(st + ':SRM=' + srm + '[' + bj.srm + ']');
+        if (!(srm >= bj.srm[0] && (bj.srm[1] >= 30 || srm <= bj.srm[1]))) rangeFail.push(st + ':SRM=' + srm + '[' + bj.srm + ']');
       });
       __REG.ok('grist %% toplamı 100 (tüm iskelet)', pctFail.length === 0, pctFail.slice(0, 4).join(' | '));
       __REG.ok('tüm ID katalogda (malt/hop/maya) — sahte ID yok', idFail.length === 0, idFail.slice(0, 5).join(' | '));
@@ -1433,6 +1433,20 @@ const CASELER = [
       __REG.ok('calc() OG BJCP Schwarzbier aralığında', c.og >= bj.og[0] && c.og <= bj.og[1], 'OG=' + c.og.toFixed(3));
       __REG.ok('calc() IBU BJCP aralığında', c.ibu >= bj.ibu[0] && c.ibu <= bj.ibu[1], 'IBU=' + Math.round(c.ibu));
       __REG.ok('calc() SRM BJCP aralığında (renk kalibrasyonu koyu-sıcak motora göre)', srm >= bj.srm[0] && srm <= bj.srm[1], 'SRM=' + srm + ' [' + bj.srm + ']');
+      return __REG.al();
+    })
+  },
+
+  // ── SPRINT X: SRM>40 gösterim (X1) — ham değer korunur, salt görsel katman ──
+  {
+    kod: 'X-SRM-GOSTER', ad: 'SRM>40 GÖSTERİM: srmGoster 35→"35", 65→"40+" (uzun "40+ (siyah/opak)"), sınır 40 dahil değil; hSRM HAM sayısal >40 döner (motor değişmedi)',
+    calistir: (page) => page.evaluate(() => {
+      __REG.ok('srmGoster(35) = "35" (40 altı normal sayı)', typeof window.srmGoster === 'function' && srmGoster(35) === '35', String(typeof window.srmGoster === 'function' && srmGoster(35)));
+      __REG.ok('srmGoster(65) = "40+" (kısa form)', srmGoster(65) === '40+', srmGoster(65));
+      __REG.ok('srmGoster(65,1) = "40+ (siyah/opak)" (uzun form)', srmGoster(65, 1) === '40+ (siyah/opak)', srmGoster(65, 1));
+      __REG.ok('srmGoster(40) = "40" (sınır: yalnız >40)', srmGoster(40) === '40', srmGoster(40));
+      const ham = hSRM([{ id: 'pale_ale', kg: 5 }, { id: 'roast', kg: 0.5 }, { id: 'black', kg: 0.3 }, { id: 'choc', kg: 0.3 }], [], 11);
+      __REG.ok('hSRM RIS-vari grist → HAM sayısal >40 (gösterim hesabı bozmadı)', typeof ham === 'number' && ham > 40, String(ham));
       return __REG.al();
     })
   },

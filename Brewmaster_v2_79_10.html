@@ -5026,6 +5026,7 @@ function hSRM(ml,katkilar,hacim){
   });
   return m===0?0:+(1.4922*Math.pow(m,.6859)).toFixed(1);
 }
+function srmGoster(s,uzun){const v=parseFloat(s)||0;return v>40?(uzun?'40+ (siyah/opak)':'40+'):String(Math.round(v));} // X1: SRM>40 görsel siyah/opak — sayısal ayrım anlamsız; ham değer hesap/kayıtta korunur
 function srmR(s){const r=[[3,"#dbb74b"],[4,"#d5a429"],[5,"#cb8d00"],[7,"#bd7200"],[9,"#af5d00"],[11,"#9e4700"],[14,"#8c3200"],[17,"#7f2500"],[19,"#721900"],[22,"#650d00"],[25,"#560100"],[30,"#460000"],[35,"#3a0000"],[40,"#2b0000"],[50,"#170000"]];for(let i=r.length-1;i>=0;i--)if(s>=r[i][0])return r[i][1];return"#e2d589";}
 function renk_adi(s){const t=[[3,"Buğday"],[4,"Altın Sarısı"],[5,"Bal"],[7,"Kehribar"],[9,"Bakır"],[11,"Koyu Bakır"],[14,"Kızıl Bakır"],[17,"Yakut Kırmızısı"],[19,"Kızıl Kahve"],[22,"Kestane"],[25,"Çikolata"],[30,"Yakut"],[35,"Koyu Kahve"],[40,"Siyah"],[50,"Kara Amber"]];for(let i=t.length-1;i>=0;i--)if(s>=t[i][0])return t[i][1];return"Saman";}
 function bjcp_adi(s){const t=[[3,"Straw"],[4,"Pale Gold"],[5,"Deep Gold"],[7,"Pale Amber"],[9,"Pale Amber"],[11,"Medium Amber"],[14,"Deep Amber"],[17,"Amber Brown"],[19,"Brown"],[22,"Ruby Brown"],[25,"Ruby Brown"],[30,"Deep Brown"],[35,"Black"],[40,"Black"],[50,"Black"]];for(let i=t.length-1;i>=0;i--)if(s>=t[i][0])return t[i][1];return"Pale Straw";}
@@ -12924,7 +12925,7 @@ function rListe(){
     const ogV = (ozet.og !== undefined && ozet.og !== null && ozet.og !== '') ? ozet.og : '—';
     const abvV = (ozet.abv !== undefined && ozet.abv !== null && ozet.abv !== '') ? ('%'+ozet.abv) : '—';
     const ibuV = (ozet.ibu !== undefined && ozet.ibu !== null && ozet.ibu !== '') ? ozet.ibu : '—';
-    const srmV = (ozet.srm !== undefined && ozet.srm !== null && ozet.srm !== '') ? ozet.srm : '—';
+    const srmV = (ozet.srm !== undefined && ozet.srm !== null && ozet.srm !== '') ? srmGoster(ozet.srm) : '—';
     const metricHtml =
       '<div class="bm-recete-metric"><span class="bm-recete-metric-etiket">OG</span><span class="bm-recete-metric-deger">'+ogV+'</span></div>'+
       '<div class="bm-recete-metric"><span class="bm-recete-metric-etiket">ABV</span><span class="bm-recete-metric-deger">'+abvV+'</span></div>'+
@@ -15761,7 +15762,7 @@ ${batchOlcekKartHtml()}
     +'<div style="display:flex;align-items:center;gap:14px">'
     +'<div style="width:64px;height:64px;border-radius:10px;flex-shrink:0;border:2px solid rgba(0,0,0,.15);background:'+_hexV+'"></div>'
     +'<div>'
-    +'<div style="font-size:32px;font-weight:600;color:var(--bakir);font-family:var(--font-display);line-height:1">'+(_srmV||0).toFixed(1)+' <span style="font-size:14px;color:var(--metin-soluk)">SRM</span></div>'
+    +'<div style="font-size:32px;font-weight:600;color:var(--bakir);font-family:var(--font-display);line-height:1">'+((_srmV||0)>40?'40+':(_srmV||0).toFixed(1))+' <span style="font-size:14px;color:var(--metin-soluk)">SRM</span></div>'
     +'<div style="font-size:12px;color:var(--metin-soluk);margin-top:2px">'+_ebcV+' EBC</div>'
     +'<div style="font-size:13px;color:var(--metin);font-weight:600;margin-top:4px">'+_adTr+(_adEn&&_adEn!==_adTr?' <span style="color:var(--metin-soluk);font-weight:400">/ '+_adEn+'</span>':'')+'</div>'
     +'</div>'
@@ -16558,7 +16559,7 @@ function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
     <span style="font-size:12px"><span style="color:var(--soluk)">Malt:</span> <b style="color:var(--bakir)">${topMalt.toFixed(2)} kg</b></span>
     <span style="font-size:12px"><span style="color:var(--soluk)">OG:</span> <b style="color:${ogKaynak==="manuel"?"var(--yk)":"var(--bakir)"}">${ogKaynak==="manuel"?"✏️ ":""}${og.toFixed(3)}</b></span>
     <span style="font-size:12px"><span style="color:var(--soluk)">Mash:</span> <b style="color:var(--bakir)">${S.mashSc||67}°C</b></span>
-    <span style="display:flex;align-items:center;gap:6px;font-size:12px"><span style="color:var(--soluk)">Renk:</span><span style="width:18px;height:18px;border-radius:50%;background:${rk};border:2px solid rgba(0,0,0,.1);display:inline-block"></span><b style="color:var(--bakir)">${srm} SRM</b></span>
+    <span style="display:flex;align-items:center;gap:6px;font-size:12px"><span style="color:var(--soluk)">Renk:</span><span style="width:18px;height:18px;border-radius:50%;background:${rk};border:2px solid rgba(0,0,0,.1);display:inline-block"></span><b style="color:var(--bakir)">${srmGoster(srm)} SRM</b></span>
     ${katkilarFermente.length?`<span style="font-size:11px;color:var(--yk)">⬆️ ${katkilarFermente.map(k=>k.ad).join(", ")} OG'yi etkiliyor</span>`:""}
     ${katkilarNonFerm.length?`<span style="font-size:11px;color:var(--soluk)">⊘ ${katkilarNonFerm.map(k=>k.ad).join(", ")} OG'ye etkisiz</span>`:""}
   </div>`:"";
@@ -20470,7 +20471,7 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
             const rows=[
               ['BU:GU',bG,bGt],
               ['Attenüasyon',aaA,''],
-              ['SRM',srm.toFixed(0),'ABD birimi'],
+              ['SRM',srmGoster(srm),(parseFloat(srm)||0)>40?'siyah/opak':'ABD birimi'],
               ['Hacim',_hacim+'L','']
             ];
             return rows.map(([e,d,alt])=>
@@ -20642,7 +20643,7 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
                         :                            'berrak görünür';
           var _pigDurumP = aktif_pigment(_pigKatkiGramMap(S.katkilar||[]), _hacim||11, (typeof _pH_est!=="undefined"?_pH_est:4.3));
           var _srmF = parseFloat(_srm)||0;
-          var renkC1 = _camRenkAdTr(_srmF, _pigDurumP) + ' / ' + _camRenkAdEn(_srmF, _pigDurumP) + ' (SRM ' + _srm + ') · ' + _rEBC + ' EBC' + _katRenkMCU + '.';
+          var renkC1 = _camRenkAdTr(_srmF, _pigDurumP) + ' / ' + _camRenkAdEn(_srmF, _pigDurumP) + ' (SRM ' + srmGoster(_srm) + ') · ' + _rEBC + ' EBC' + _katRenkMCU + '.';
           var renkC2 = renkSebep.charAt(0).toUpperCase() + renkSebep.slice(1) + '; ' + berraklik + '.';
           var renkC3 = '✓ Renk profili tutarlı.';
           _ps("🎨 Renk", renkC1 + ' ' + renkC2 + ' ' + renkC3, profRows);
@@ -20968,7 +20969,7 @@ ${/* UI temizlik 2026-04-24: alt sarı BETA V5 kutusu ve V4/V3/V2 karşılaştı
           if (_crsPct >= 20 && _ibu < 30) pairs.push('karamel tatlılar, fıstık ezmesi (karamel-malt eşleşmesi)');
           if (pairs.length === 0)       pairs.push('pizza, sandviç, beyaz et (çok yönlü dengeli eşleşme)');
           pairs = pairs.slice(0, 3);
-          var yC1 = 'Acılık ' + Math.round(_ibu) + ' IBU, ABV %' + _abv.toFixed(1) + ', SRM ' + _srm + '.';
+          var yC1 = 'Acılık ' + Math.round(_ibu) + ' IBU, ABV %' + _abv.toFixed(1) + ', SRM ' + srmGoster(_srm,1) + '.';
           var yC2 = pairs.join('; ') + '.';
           var yC3 = '✓ Eşleşme önerisi reçete profilinden.';
           _ps("🍽️ Yiyecek", yC1.charAt(0).toUpperCase() + yC1.slice(1) + ' ' + yC2.charAt(0).toUpperCase() + yC2.slice(1) + ' ' + yC3, profRows);
@@ -21131,7 +21132,7 @@ function rEditor(){
       <div class="bm-ss-stat"><span class="ss-label">FG</span><span class="ss-val" id="ss-fg">${fg.toFixed(3)}</span></div>
       <div class="bm-ss-stat"><span class="ss-label">ABV</span><span class="ss-val" id="ss-abv">${abv.toFixed(1)}%</span></div>
       <div class="bm-ss-stat"><span class="ss-label">IBU</span><span class="ss-val" id="ss-ibu">${Math.round(ibu)}</span></div>
-      <div class="bm-ss-stat"><span class="ss-label">SRM</span><span class="ss-val" id="ss-srm">${Math.round(parseFloat(srm)||0)}</span></div>
+      <div class="bm-ss-stat"><span class="ss-label">SRM</span><span class="ss-val" id="ss-srm">${srmGoster(srm)}</span></div>
       <div class="bm-ss-stat"><span class="ss-label">KH</span><span class="ss-val" id="ss-kh">${(typeof hKarb==='function'?hKarb(og,fg,330):'-')}g</span></div>
     </div>
   </div>
