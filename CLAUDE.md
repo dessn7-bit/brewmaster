@@ -59,17 +59,15 @@ Faz 2a tamamlandı. styleMatchScore motoru JSON'da çalışıyor. Top-1 %70-80, 
 - Magnet counter-exclusion (American Brown vb. British yeast exclude) → regresyon (%33→%31). Revert.
 - **Sonuç:** Kural-tabanlı motor fundamental olarak rule-limitli. Marker vs scalar dengesizliği rule-based ile çözülemiyor. Gerçek çözüm ML veya hibrit ML+rule.
 
-**Faz 3 Feedback Loop UI TAMAM (2026-04-23):**
-- V2c kutusunda her stilin yanında ✓ butonu + "Başka stil" butonu
-- `bm_v2c_feedback` localStorage key'ine override kayıt
-- Format: `{ts, recipeSig, oldTop1, correctSlug, correctLabel}`
-- `window.bmV2cShowFeedback()` — console'da tablo görünür
-- `window.bmV2cExportFeedback()` — JSON download
-- Son düzeltme kutuda görünür ("Son düzeltme: X → Y")
+**⚠️ Faz 3 Feedback Loop — STİL KOLU KOPUK (düzeltme 2026-07-16, Sprint Y).**
+Buradaki eski kayıt "TAMAM / veri birikiyor" diyordu — **YANLIŞ**. Dış-kıyas denetiminde (2026-07-15) ölçüldü:
+- `bm_v2c_feedback` · `bmV2cShowFeedback` · `bmV2cExportFeedback` → canlı HTML'de **0 geçiş**. UI ve kayıt yolu yok.
+- `stilSec` (kullanıcının motor önerisinden stil seçmesi) **yalnızca `S.stil`'i yazıyor** — yani "motor X dedi, Kaan Y seçti" düzeltme sinyali **hiçbir yere kaydedilmiyor**.
+- Sonuç: ML vizyonunun (Faz 3→6) **veri kaynağı akmıyor**; feedback verisi 2026-04'ten beri birikmedi.
 
-**Bu veri birikiyor. Kaan her kullanımda feedback verebilir. İleride motor için ML training veri kaynağı.**
+Öğrenen sistemin diğer 3 kolu **çalışıyor**: `bm_kaan_profil_v1` (verim/FG, Sprint Q) · `bm_maya_kalibrasyon` (maya attenuation) · `bm_off_ogren_v1` (off-flavor, Sprint W1). Kopuk olan yalnız stil kolu.
 
-SIRADAKİ: Kaan gerçek kullanımda biriktirsin. Sonra motor patch döngüsü feedback'e göre.
+SIRADAKİ (açık iş): stil düzeltme sinyalini kaydet — `stilSec`'e ayrı bir user-authored key ekle (W1'in `bm_off_ogren_v1` deseni: onay-kapılı, DERIVED profile yazmaz). Bu yapılmadan motor patch döngüsü feedback'e dayanamaz.
 
 **ML Pipeline tamam (2026-04-24): 1016 reçete + V5 Multi-Ensemble motor production'da.**
 - LOOCV top-3 %76.6, top-5 %80.3 (rule başlangıcına göre +30 puan top-3)
@@ -77,8 +75,18 @@ SIRADAKİ: Kaan gerçek kullanımda biriktirsin. Sonra motor patch döngüsü fe
 - V5 = 1016 KNN örneği + 50 RF ağacı (depth 15, rf=10), α=0.4 KNN + 0.6 RF + 0.0 rule
 - Sıradaki kazanım: slug alias normalize (gueuze↔lambic, koelsch↔kolsch, hefeweizen↔weissbier)
 
+**STİL SAYISI — tek "203" yok, 4 ayrı otorite var (ölçüldü 2026-07-15/16):**
+| Kaynak | Sayı | Rol |
+|---|---|---|
+| `BJCP` (HTML içi, dropdown + bant kontrolü) | **239** | **OTORİTE** — kullanıcının gördüğü, hedef stil seçimi + uygunluk göstergesi |
+| `STYLE_DEFINITIONS.json` (repo) | 202 | V2c motorunun kaynağı; motor HTML'den kaldırıldı (Sprint Y), dosya repoda yaşıyor |
+| V12 ML motoru | 91 slug | Otomatik stil tahmini (top-3 öneri) |
+| `STIL_ISKELET` | 42 | Stilden-reçete iskeleti (Sprint V1/V2) |
+| `SUBSTYLE_VARIANTS.json` | 58 | Alt-stil; **UI'da ölü** — `matchSubstyles` hiç çağrılmıyordu |
+Eski "203 stil" ifadesi hiçbir kaynağa uymuyordu, kaldırıldı. Bir sayı yazarken hangi otoriteden bahsedildiği belirtilmeli.
+
 **Temel dosyalar** (C:\Users\Kaan\brewmaster\):
-- `STYLE_DEFINITIONS.json` — 203 stil, BA 2026 + BJCP 2021 hibrit, thresholds zone mantığıyla
+- `STYLE_DEFINITIONS.json` — 202 stil, BA 2026 + BJCP 2021 hibrit, thresholds zone mantığıyla
 - `SUBSTYLE_VARIANTS.json` — 58 alt-stil (Pastry Stout, Kveik NEIPA, Piña Colada Gose vs.)
 - `STYLE_FAMILIES.json` — 33 aile + discriminator konfigi (Faz 2b)
 - `style_engine.js` — Ana motor (findBestMatches, styleMatchScore, matchSubstyles)

@@ -678,454 +678,63 @@
 // Sprint U1a (2026-07-09): off-flavor teshis motoru v1a — _OFF_TESHIS 14-aile bilgi tabani (adversaryal-dogrulanmis
 // domain), tadim tag 8->14, ? dugmesi statik teshis karti (neden/kurtarilir/onlem/ayirici-soru/stil), timeline
 // diacetyl merkezilestirme (_bmOffKisaCozum). Batch-verisi keskinlestirme U2. bump v131-378 -> v131-379.
-const CACHE_VERSION = 'bm-cache-v131-386';
+// Sprint Y (2026-07-16): CACHE BOLUMLEME (Y1). Kok neden: TEK cache + activate'in "bm-cache-* ve
+// guncel olmayan her sey silinir" filtresi -> her HTML deploy'unda DEGISMEYEN varliklar da
+// (417 font 9.15MB + ikonlar + SHA-immutable ML modelleri ~113MB) siliniyor ve yeniden iniyordu.
+// GitHub Pages her deploy'da ETag'i yeniledigi icin 304 yolu da kapali -> tam govde iniyordu.
+// Cozum: AYRI ONEKLI kalici cache'ler. activate filtresi 'bm-cache-' onekine bakiyor, bu yuzden
+// farkli onekli cache'ler bump'ta SILINMEZ (emsal: asagidaki 'bm-diag' cache'i zaten boyle yasiyor).
+// Icerik gercekten degisirse cache adindaki surumu artir (v1 -> v2); eski surum activate'te GC edilir.
+const CACHE_VERSION = 'bm-cache-v131-387';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
+const ASSET_CACHE   = 'bm-assets-v1';        // font + ikon + manifest — KALICI, bump'ta silinmez
+const MODEL_CACHE   = 'bm-models-v1';        // workers.dev + jsdelivr — SHA'li/immutable URL, KALICI
 
-// Same-origin pre-cache. Adim 135-B: Fraunces + Hanken Grotesk woff2 eklendi (4 dosya, 180KB total)
-// — Google Fonts CDN <link> kaldirildi, offline PWA tam destek.
-const CRITICAL_LOCAL = [
+// Sprint Y2 (2026-07-16): FONT PRECACHE DARALTMA. Olcum: fonts/ altindaki 417 woff2'nin TAMAMI
+// precache'teydi (9.593.908 byte = 9.15MB) ve her install'da kosulsuz iniyordu. Oysa VARSAYILAN
+// durumda tarayici bunlardan SADECE 1'ini yukluyor: Cinzel.woff2 — CSS'te .bm-sidebar-title /
+// .bm-header-title / .bm-ana-hl gibi HER EKRANDA gorunen secicilere hardcoded (degisken uzerinden
+// degil), yani tipografi tercihinden bagimsiz her zaman gerekli.
+// Ana govde/baslik fontlari (Cormorant Garamond + Mulish, 128.164B) HTML'e base64 GOMULU -> ag YOK.
+// Kalan 414 font YALNIZCA kullanici Ayarlar > Tipografi'den tema/font secerse gerekir. 419/419
+// @font-face 'font-display:swap' oldugu icin font yoksa sistem fontuna duser (METIN KAYBOLMAZ);
+// ilk kullanimda SWR ile inip ASSET_CACHE'e yazilir ve orada KALICI kalir (bir daha inmez).
+// (HankenGrotesk-latin*.woff2 diskte var ama HTML'de referansi YOK = olu; precache'e alinmadi.)
+const CRITICAL_HTML = [
   './Brewmaster_v2_79_10.html',
+];
+// Degismeyen varliklar -> ASSET_CACHE (kalici). Nisan/Haziran'dan beri degismediler.
+const CRITICAL_ASSETS = [
   './manifest.webmanifest',
   './icon-192.png',
   './icon-512.png',
-  './fonts/Fraunces-latin.woff2',
-  './fonts/Fraunces-latin-ext.woff2',
-  './fonts/HankenGrotesk-latin.woff2',
-  './fonts/HankenGrotesk-latin-ext.woff2',
   './fonts/Cinzel.woff2',
-  './fonts/EBGaramond-latin-ext.woff2',
-  './fonts/EBGaramond-latin.woff2',
-  './fonts/PlayfairDisplay-latin-ext.woff2',
-  './fonts/PlayfairDisplay-latin.woff2',
-  './fonts/Lora-latin-ext.woff2',
-  './fonts/Lora-latin.woff2',
-  './fonts/Spectral-w300-latin-ext.woff2',
-  './fonts/Spectral-w300-latin.woff2',
-  './fonts/Spectral-w400-latin-ext.woff2',
-  './fonts/Spectral-w400-latin.woff2',
-  './fonts/Spectral-w600-latin-ext.woff2',
-  './fonts/Spectral-w600-latin.woff2',
-  './fonts/Spectral-w700-latin-ext.woff2',
-  './fonts/Spectral-w700-latin.woff2',
-  './fonts/LibreBaskerville-latin-ext.woff2',
-  './fonts/LibreBaskerville-latin.woff2',
-  './fonts/CrimsonPro-latin-ext.woff2',
-  './fonts/CrimsonPro-latin.woff2',
-  './fonts/Marcellus-w400-latin-ext.woff2',
-  './fonts/Marcellus-w400-latin.woff2',
-  './fonts/DMSerifDisplay-w400-latin-ext.woff2',
-  './fonts/DMSerifDisplay-w400-latin.woff2',
-  './fonts/ZillaSlab-w300-latin-ext.woff2',
-  './fonts/ZillaSlab-w300-latin.woff2',
-  './fonts/ZillaSlab-w400-latin-ext.woff2',
-  './fonts/ZillaSlab-w400-latin.woff2',
-  './fonts/ZillaSlab-w600-latin-ext.woff2',
-  './fonts/ZillaSlab-w600-latin.woff2',
-  './fonts/ZillaSlab-w700-latin-ext.woff2',
-  './fonts/ZillaSlab-w700-latin.woff2',
-  './fonts/Oswald-latin-ext.woff2',
-  './fonts/Oswald-latin.woff2',
-  './fonts/Poppins-w300-latin-ext.woff2',
-  './fonts/Poppins-w300-latin.woff2',
-  './fonts/Poppins-w400-latin-ext.woff2',
-  './fonts/Poppins-w400-latin.woff2',
-  './fonts/Poppins-w600-latin-ext.woff2',
-  './fonts/Poppins-w600-latin.woff2',
-  './fonts/Poppins-w700-latin-ext.woff2',
-  './fonts/Poppins-w700-latin.woff2',
-  './fonts/SpaceGrotesk-latin-ext.woff2',
-  './fonts/SpaceGrotesk-latin.woff2',
-  './fonts/Quicksand-latin-ext.woff2',
-  './fonts/Quicksand-latin.woff2',
-  './fonts/BricolageGrotesque-latin-ext.woff2',
-  './fonts/BricolageGrotesque-latin.woff2',
-  './fonts/IBMPlexSans-latin-ext.woff2',
-  './fonts/IBMPlexSans-latin.woff2',
-  './fonts/Alegreya-latin-ext.woff2',
-  './fonts/Alegreya-latin.woff2',
-  './fonts/Baloo2-latin-ext.woff2',
-  './fonts/Baloo2-latin.woff2',
-  './fonts/Anton-latin-ext.woff2',
-  './fonts/Anton-latin.woff2',
-  './fonts/ArchivoBlack-latin-ext.woff2',
-  './fonts/ArchivoBlack-latin.woff2',
-  './fonts/BebasNeue-latin-ext.woff2',
-  './fonts/BebasNeue-latin.woff2',
-  './fonts/LeagueGothic-latin-ext.woff2',
-  './fonts/LeagueGothic-latin.woff2',
-  './fonts/FjallaOne-latin-ext.woff2',
-  './fonts/FjallaOne-latin.woff2',
-  './fonts/Teko-latin-ext.woff2',
-  './fonts/Teko-latin.woff2',
-  './fonts/Staatliches-latin-ext.woff2',
-  './fonts/Staatliches-latin.woff2',
-  './fonts/AlfaSlabOne-latin-ext.woff2',
-  './fonts/AlfaSlabOne-latin.woff2',
-  './fonts/Bevan-latin-ext.woff2',
-  './fonts/Bevan-latin.woff2',
-  './fonts/Ultra-latin-ext.woff2',
-  './fonts/Ultra-latin.woff2',
-  './fonts/BowlbyOneSC-latin-ext.woff2',
-  './fonts/BowlbyOneSC-latin.woff2',
-  './fonts/Forum-latin-ext.woff2',
-  './fonts/Forum-latin.woff2',
-  './fonts/Trocchi-latin-ext.woff2',
-  './fonts/Trocchi-latin.woff2',
-  './fonts/CinzelDecorative-latin-ext.woff2',
-  './fonts/CinzelDecorative-latin.woff2',
-  './fonts/RozhaOne-latin-ext.woff2',
-  './fonts/RozhaOne-latin.woff2',
-  './fonts/BodoniModa-latin-ext.woff2',
-  './fonts/BodoniModa-latin.woff2',
-  './fonts/YesevaOne-latin-ext.woff2',
-  './fonts/YesevaOne-latin.woff2',
-  './fonts/PaytoneOne-latin-ext.woff2',
-  './fonts/PaytoneOne-latin.woff2',
-  './fonts/LuckiestGuy-latin-ext.woff2',
-  './fonts/LuckiestGuy-latin.woff2',
-  './fonts/Bungee-latin-ext.woff2',
-  './fonts/Bungee-latin.woff2',
-  './fonts/KaushanScript-latin-ext.woff2',
-  './fonts/KaushanScript-latin.woff2',
-  './fonts/Pacifico-latin-ext.woff2',
-  './fonts/Pacifico-latin.woff2',
-  './fonts/Caveat-latin-ext.woff2',
-  './fonts/Caveat-latin.woff2',
-  './fonts/DancingScript-latin-ext.woff2',
-  './fonts/DancingScript-latin.woff2',
-  './fonts/Sacramento-latin-ext.woff2',
-  './fonts/Sacramento-latin.woff2',
-  './fonts/GreatVibes-latin-ext.woff2',
-  './fonts/GreatVibes-latin.woff2',
-  './fonts/Lobster-latin-ext.woff2',
-  './fonts/Lobster-latin.woff2',
-  './fonts/Courgette-latin-ext.woff2',
-  './fonts/Courgette-latin.woff2',
-  './fonts/Yellowtail-latin-ext.woff2',
-  './fonts/Yellowtail-latin.woff2',
-  './fonts/BarlowCondensed-latin-ext.woff2',
-  './fonts/BarlowCondensed-latin.woff2',
-  './fonts/SairaCondensed-latin-ext.woff2',
-  './fonts/SairaCondensed-latin.woff2',
-  './fonts/BigShouldersDisplay-latin-ext.woff2',
-  './fonts/BigShouldersDisplay-latin.woff2',
-  './fonts/PathwayGothicOne-latin-ext.woff2',
-  './fonts/PathwayGothicOne-latin.woff2',
-  './fonts/Khand-latin-ext.woff2',
-  './fonts/Khand-latin.woff2',
-  './fonts/RussoOne-latin-ext.woff2',
-  './fonts/RussoOne-latin.woff2',
-  './fonts/Audiowide-latin-ext.woff2',
-  './fonts/Audiowide-latin.woff2',
-  './fonts/SigmarOne-latin-ext.woff2',
-  './fonts/SigmarOne-latin.woff2',
-  './fonts/Monoton-latin-ext.woff2',
-  './fonts/Monoton-latin.woff2',
-  './fonts/BlackOpsOne-latin-ext.woff2',
-  './fonts/BlackOpsOne-latin.woff2',
-  './fonts/RacingSansOne-latin-ext.woff2',
-  './fonts/RacingSansOne-latin.woff2',
-  './fonts/Rajdhani-latin-ext.woff2',
-  './fonts/Rajdhani-latin.woff2',
-  './fonts/Saira-latin-ext.woff2',
-  './fonts/Saira-latin.woff2',
-  './fonts/Oxanium-latin-ext.woff2',
-  './fonts/Oxanium-latin.woff2',
-  './fonts/Michroma-latin-ext.woff2',
-  './fonts/Michroma-latin.woff2',
-  './fonts/ChakraPetch-latin-ext.woff2',
-  './fonts/ChakraPetch-latin.woff2',
-  './fonts/Megrim-latin-ext.woff2',
-  './fonts/Megrim-latin.woff2',
-  './fonts/MarcellusSC-latin-ext.woff2',
-  './fonts/MarcellusSC-latin.woff2',
-  './fonts/CormorantSC-latin-ext.woff2',
-  './fonts/CormorantSC-latin.woff2',
-  './fonts/OldStandardTT-latin-ext.woff2',
-  './fonts/OldStandardTT-latin.woff2',
-  './fonts/BreeSerif-latin-ext.woff2',
-  './fonts/BreeSerif-latin.woff2',
-  './fonts/SortsMillGoudy-latin-ext.woff2',
-  './fonts/SortsMillGoudy-latin.woff2',
-  './fonts/Eczar-latin-ext.woff2',
-  './fonts/Eczar-latin.woff2',
-  './fonts/Bellefair-latin-ext.woff2',
-  './fonts/Bellefair-latin.woff2',
-  './fonts/Yrsa-latin-ext.woff2',
-  './fonts/Yrsa-latin.woff2',
-  './fonts/Bentham-latin-ext.woff2',
-  './fonts/Bentham-latin.woff2',
-  './fonts/GildaDisplay-latin-ext.woff2',
-  './fonts/GildaDisplay-latin.woff2',
-  './fonts/InknutAntiqua-latin-ext.woff2',
-  './fonts/InknutAntiqua-latin.woff2',
-  './fonts/Amita-latin-ext.woff2',
-  './fonts/Amita-latin.woff2',
-  './fonts/PinyonScript-latin-ext.woff2',
-  './fonts/PinyonScript-latin.woff2',
-  './fonts/Allura-latin-ext.woff2',
-  './fonts/Allura-latin.woff2',
-  './fonts/AlexBrush-latin-ext.woff2',
-  './fonts/AlexBrush-latin.woff2',
-  './fonts/MarckScript-latin-ext.woff2',
-  './fonts/MarckScript-latin.woff2',
-  './fonts/BadScript-latin-ext.woff2',
-  './fonts/BadScript-latin.woff2',
-  './fonts/PatrickHand-latin-ext.woff2',
-  './fonts/PatrickHand-latin.woff2',
-  './fonts/IndieFlower-latin-ext.woff2',
-  './fonts/IndieFlower-latin.woff2',
-  './fonts/ShadowsIntoLight-latin-ext.woff2',
-  './fonts/ShadowsIntoLight-latin.woff2',
-  './fonts/ArchitectsDaughter-latin-ext.woff2',
-  './fonts/ArchitectsDaughter-latin.woff2',
-  './fonts/Kalam-latin-ext.woff2',
-  './fonts/Kalam-latin.woff2',
-  './fonts/AmaticSC-latin-ext.woff2',
-  './fonts/AmaticSC-latin.woff2',
-  './fonts/Damion-latin-ext.woff2',
-  './fonts/Damion-latin.woff2',
-  './fonts/GrandHotel-latin-ext.woff2',
-  './fonts/GrandHotel-latin.woff2',
-  './fonts/Pattaya-latin-ext.woff2',
-  './fonts/Pattaya-latin.woff2',
-  './fonts/BerkshireSwash-latin-ext.woff2',
-  './fonts/BerkshireSwash-latin.woff2',
-  './fonts/Parisienne-latin-ext.woff2',
-  './fonts/Parisienne-latin.woff2',
-  './fonts/Sriracha-latin-ext.woff2',
-  './fonts/Sriracha-latin.woff2',
-  './fonts/BungeeShade-latin-ext.woff2',
-  './fonts/BungeeShade-latin.woff2',
-  './fonts/Fascinate-latin-ext.woff2',
-  './fonts/Fascinate-latin.woff2',
-  './fonts/Sancreek-latin-ext.woff2',
-  './fonts/Sancreek-latin.woff2',
-  './fonts/Modak-latin-ext.woff2',
-  './fonts/Modak-latin.woff2',
-  './fonts/Shrikhand-latin-ext.woff2',
-  './fonts/Shrikhand-latin.woff2',
-  './fonts/PirataOne-latin-ext.woff2',
-  './fonts/PirataOne-latin.woff2',
-  './fonts/GrenzeGotisch-latin-ext.woff2',
-  './fonts/GrenzeGotisch-latin.woff2',
-  './fonts/MedievalSharp-latin-ext.woff2',
-  './fonts/MedievalSharp-latin.woff2',
-  './fonts/NewRocker-latin-ext.woff2',
-  './fonts/NewRocker-latin.woff2',
-  './fonts/Rowdies-latin-ext.woff2',
-  './fonts/Rowdies-latin.woff2',
-  './fonts/PressStart2P-latin-ext.woff2',
-  './fonts/PressStart2P-latin.woff2',
-  './fonts/Righteous-latin-ext.woff2',
-  './fonts/Righteous-latin.woff2',
-  './fonts/Zeyada-latin-ext.woff2',
-  './fonts/Zeyada-latin.woff2',
-  './fonts/Bangers-latin-ext.woff2',
-  './fonts/Bangers-latin.woff2',
-  './fonts/SpecialElite-latin-ext.woff2',
-  './fonts/SpecialElite-latin.woff2',
-  './fonts/Gabarito-latin-ext.woff2',
-  './fonts/Gabarito-latin.woff2',
-  './fonts/RammettoOne-latin-ext.woff2',
-  './fonts/RammettoOne-latin.woff2',
-  './fonts/Eater-latin-ext.woff2',
-  './fonts/Eater-latin.woff2',
-  './fonts/Playball-latin-ext.woff2',
-  './fonts/Playball-latin.woff2',
-  './fonts/GloriaHallelujah-latin-ext.woff2',
-  './fonts/GloriaHallelujah-latin.woff2',
-  './fonts/PoiretOne-latin-ext.woff2',
-  './fonts/PoiretOne-latin.woff2',
-  './fonts/Merienda-latin-ext.woff2',
-  './fonts/Merienda-latin.woff2',
-  './fonts/DelaGothicOne-latin-ext.woff2',
-  './fonts/DelaGothicOne-latin.woff2',
-  './fonts/Italianno-latin-ext.woff2',
-  './fonts/Italianno-latin.woff2',
-  './fonts/Goldman-latin-ext.woff2',
-  './fonts/Goldman-latin.woff2',
-  './fonts/CaveatBrush-latin-ext.woff2',
-  './fonts/CaveatBrush-latin.woff2',
-  './fonts/Pangolin-latin-ext.woff2',
-  './fonts/Pangolin-latin.woff2',
-  './fonts/UnicaOne-latin-ext.woff2',
-  './fonts/UnicaOne-latin.woff2',
-  './fonts/Allison-latin-ext.woff2',
-  './fonts/Allison-latin.woff2',
-  './fonts/Calistoga-latin-ext.woff2',
-  './fonts/Calistoga-latin.woff2',
-  './fonts/MsMadi-latin-ext.woff2',
-  './fonts/MsMadi-latin.woff2',
-  './fonts/Limelight-latin-ext.woff2',
-  './fonts/Limelight-latin.woff2',
-  './fonts/LaBelleAurore-latin-ext.woff2',
-  './fonts/LaBelleAurore-latin.woff2',
-  './fonts/CoveredByYourGrace-latin-ext.woff2',
-  './fonts/CoveredByYourGrace-latin.woff2',
-  './fonts/Charm-latin-ext.woff2',
-  './fonts/Charm-latin.woff2',
-  './fonts/JustAnotherHand-latin-ext.woff2',
-  './fonts/JustAnotherHand-latin.woff2',
-  './fonts/Lemonada-latin-ext.woff2',
-  './fonts/Lemonada-latin.woff2',
-  './fonts/MuseoModerno-latin-ext.woff2',
-  './fonts/MuseoModerno-latin.woff2',
-  './fonts/PottaOne-latin-ext.woff2',
-  './fonts/PottaOne-latin.woff2',
-  './fonts/PixelifySans-latin-ext.woff2',
-  './fonts/PixelifySans-latin.woff2',
-  './fonts/Coda-latin-ext.woff2',
-  './fonts/Coda-latin.woff2',
-  './fonts/Aboreto-latin-ext.woff2',
-  './fonts/Aboreto-latin.woff2',
-  './fonts/Barriecito-latin-ext.woff2',
-  './fonts/Barriecito-latin.woff2',
-  './fonts/Grandstander-latin-ext.woff2',
-  './fonts/Grandstander-latin.woff2',
-  './fonts/BalsamiqSans-latin-ext.woff2',
-  './fonts/BalsamiqSans-latin.woff2',
-  './fonts/YatraOne-latin-ext.woff2',
-  './fonts/YatraOne-latin.woff2',
-  './fonts/TiltWarp-latin-ext.woff2',
-  './fonts/TiltWarp-latin.woff2',
-  './fonts/BellotaText-latin-ext.woff2',
-  './fonts/BellotaText-latin.woff2',
-  './fonts/RedRose-latin-ext.woff2',
-  './fonts/RedRose-latin.woff2',
-  './fonts/Corben-latin-ext.woff2',
-  './fonts/Corben-latin.woff2',
-  './fonts/Jersey25-latin-ext.woff2',
-  './fonts/Jersey25-latin.woff2',
-  './fonts/DynaPuff-latin-ext.woff2',
-  './fonts/DynaPuff-latin.woff2',
-  './fonts/Tektur-latin-ext.woff2',
-  './fonts/Tektur-latin.woff2',
-  './fonts/ShadowsIntoLightTwo-latin-ext.woff2',
-  './fonts/ShadowsIntoLightTwo-latin.woff2',
-  './fonts/NovaSquare-latin-ext.woff2',
-  './fonts/NovaSquare-latin.woff2',
-  './fonts/VinaSans-latin-ext.woff2',
-  './fonts/VinaSans-latin.woff2',
-  './fonts/Honk-latin-ext.woff2',
-  './fonts/Honk-latin.woff2',
-  './fonts/BigShoulders-latin-ext.woff2',
-  './fonts/BigShoulders-latin.woff2',
-  './fonts/FunnelDisplay-latin-ext.woff2',
-  './fonts/FunnelDisplay-latin.woff2',
-  './fonts/ProtestRevolution-latin-ext.woff2',
-  './fonts/ProtestRevolution-latin.woff2',
-  './fonts/BalooDa2-latin-ext.woff2',
-  './fonts/BalooDa2-latin.woff2',
-  './fonts/Norican-latin-ext.woff2',
-  './fonts/Norican-latin.woff2',
-  './fonts/Ephesis-latin-ext.woff2',
-  './fonts/Ephesis-latin.woff2',
-  './fonts/OoohBaby-latin-ext.woff2',
-  './fonts/OoohBaby-latin.woff2',
-  './fonts/Kablammo-latin-ext.woff2',
-  './fonts/Kablammo-latin.woff2',
-  './fonts/FuzzyBubbles-latin-ext.woff2',
-  './fonts/FuzzyBubbles-latin.woff2',
-  './fonts/Quintessential-latin-ext.woff2',
-  './fonts/Quintessential-latin.woff2',
-  './fonts/Agbalumo-latin-ext.woff2',
-  './fonts/Agbalumo-latin.woff2',
-  './fonts/Chonburi-latin-ext.woff2',
-  './fonts/Chonburi-latin.woff2',
-  './fonts/StyleScript-latin-ext.woff2',
-  './fonts/StyleScript-latin.woff2',
-  './fonts/PlaypenSans-latin-ext.woff2',
-  './fonts/PlaypenSans-latin.woff2',
-  './fonts/Arizonia-latin-ext.woff2',
-  './fonts/Arizonia-latin.woff2',
-  './fonts/Mansalva-latin-ext.woff2',
-  './fonts/Mansalva-latin.woff2',
-  './fonts/Metamorphous-latin-ext.woff2',
-  './fonts/Metamorphous-latin.woff2',
-  './fonts/PetitFormalScript-latin-ext.woff2',
-  './fonts/PetitFormalScript-latin.woff2',
-  './fonts/Amarante-latin-ext.woff2',
-  './fonts/Amarante-latin.woff2',
-  './fonts/WaitingfortheSunrise-latin-ext.woff2',
-  './fonts/WaitingfortheSunrise-latin.woff2',
-  './fonts/AnnieUseYourTelescope-latin-ext.woff2',
-  './fonts/AnnieUseYourTelescope-latin.woff2',
-  './fonts/FasterOne-latin-ext.woff2',
-  './fonts/FasterOne-latin.woff2',
-  './fonts/BalooThambi2-latin-ext.woff2',
-  './fonts/BalooThambi2-latin.woff2',
-  './fonts/OvertheRainbow-latin-ext.woff2',
-  './fonts/OvertheRainbow-latin.woff2',
-  './fonts/QwitcherGrypen-latin-ext.woff2',
-  './fonts/QwitcherGrypen-latin.woff2',
-  './fonts/SedgwickAveDisplay-latin-ext.woff2',
-  './fonts/SedgwickAveDisplay-latin.woff2',
-  './fonts/FlowCircular-latin-ext.woff2',
-  './fonts/FlowCircular-latin.woff2',
-  './fonts/TiltNeon-latin-ext.woff2',
-  './fonts/TiltNeon-latin.woff2',
-  './fonts/RubikGlitch-latin-ext.woff2',
-  './fonts/RubikGlitch-latin.woff2',
-  './fonts/Coiny-latin-ext.woff2',
-  './fonts/Coiny-latin.woff2',
-  './fonts/LoveYaLikeASister-latin-ext.woff2',
-  './fonts/LoveYaLikeASister-latin.woff2',
-  './fonts/Fondamento-latin-ext.woff2',
-  './fonts/Fondamento-latin.woff2',
-  './fonts/Ribeye-latin-ext.woff2',
-  './fonts/Ribeye-latin.woff2',
-  './fonts/TurretRoad-latin-ext.woff2',
-  './fonts/TurretRoad-latin.woff2',
-  './fonts/CroissantOne-latin-ext.woff2',
-  './fonts/CroissantOne-latin.woff2',
-  './fonts/Yesteryear-latin-ext.woff2',
-  './fonts/Yesteryear-latin.woff2',
-  './fonts/VujahdayScript-latin-ext.woff2',
-  './fonts/VujahdayScript-latin.woff2',
-  './fonts/Birthstone-latin-ext.woff2',
-  './fonts/Birthstone-latin.woff2',
-  './fonts/Hurricane-latin-ext.woff2',
-  './fonts/Hurricane-latin.woff2',
-  './fonts/ViaodaLibre-latin-ext.woff2',
-  './fonts/ViaodaLibre-latin.woff2',
-  './fonts/EagleLake-latin-ext.woff2',
-  './fonts/EagleLake-latin.woff2',
-  './fonts/Corinthia-latin-ext.woff2',
-  './fonts/Corinthia-latin.woff2',
-  './fonts/Whisper-latin-ext.woff2',
-  './fonts/Whisper-latin.woff2',
-  './fonts/Meddon-latin-ext.woff2',
-  './fonts/Meddon-latin.woff2',
-  './fonts/Licorice-latin-ext.woff2',
-  './fonts/Licorice-latin.woff2',
-  './fonts/WindSong-latin-ext.woff2',
-  './fonts/WindSong-latin.woff2',
-  './fonts/MeowScript-latin-ext.woff2',
-  './fonts/MeowScript-latin.woff2',
-  './fonts/Kavivanar-latin-ext.woff2',
-  './fonts/Kavivanar-latin.woff2',
 ];
 
 self.addEventListener('install', function(event) {
   console.log('[BM SW] install start ' + CACHE_VERSION);
   event.waitUntil((async function(){
-    var cache;
+    // HTML -> versiyonlu cache: her deploy'da taze inmeli (network-first zaten, bu offline fallback).
     try {
-      cache = await caches.open(CACHE_VERSION);
-    } catch (e) {
-      console.error('[BM SW] caches.open FAIL: ' + (e && e.message));
-      return;
-    }
-    // Sequential for-loop try/catch — her asset ayri (allSettled SW edge case fix)
-    for (var i = 0; i < CRITICAL_LOCAL.length; i++) {
-      var url = CRITICAL_LOCAL[i];
-      try {
-        await cache.add(url);
-        console.log('[BM SW] cached: ' + url);
-      } catch (err) {
-        console.error('[BM SW] cache FAIL: ' + url + ' — ' + (err && err.message));
+      var cache = await caches.open(CACHE_VERSION);
+      for (var i = 0; i < CRITICAL_HTML.length; i++) {
+        try { await cache.add(CRITICAL_HTML[i]); console.log('[BM SW] cached(html): ' + CRITICAL_HTML[i]); }
+        catch (err) { console.error('[BM SW] cache FAIL: ' + CRITICAL_HTML[i] + ' — ' + (err && err.message)); }
       }
-    }
+    } catch (e) { console.error('[BM SW] caches.open(CACHE_VERSION) FAIL: ' + (e && e.message)); }
+    // Sprint Y1: degismeyen varliklar -> KALICI cache. Zaten cache'te olan TEKRAR INDIRILMEZ
+    // (match hit -> continue). Ikinci ve sonraki deploy'larda bu dongu sifir ag trafigi yapar.
+    try {
+      var acache = await caches.open(ASSET_CACHE);
+      for (var j = 0; j < CRITICAL_ASSETS.length; j++) {
+        var aurl = CRITICAL_ASSETS[j];
+        try {
+          var hit = await acache.match(aurl);
+          if (hit) { console.log('[BM SW] asset zaten cache-te (indirilmedi): ' + aurl); continue; }
+          await acache.add(aurl);
+          console.log('[BM SW] cached(asset): ' + aurl);
+        } catch (err2) { console.error('[BM SW] asset cache FAIL: ' + aurl + ' — ' + (err2 && err2.message)); }
+      }
+    } catch (e2) { console.error('[BM SW] caches.open(ASSET_CACHE) FAIL: ' + (e2 && e2.message)); }
     console.log('[BM SW] install done ' + CACHE_VERSION);
   })());
   self.skipWaiting();
@@ -1136,7 +745,15 @@ self.addEventListener('activate', function(event) {
   event.waitUntil(
     caches.keys().then(function(keys) {
       return Promise.all(
-        keys.filter(function(k) { return k.indexOf('bm-cache-') === 0 && k !== CACHE_VERSION; })
+        // Sprint Y1: her onek KENDI guncel surumu disindakini siler. bm-assets-v1 / bm-models-v1
+      // guncel oldugu surece DOKUNULMAZ -> font/ikon/model deploy'lar arasi hayatta kalir.
+      // Cache adindaki surum artirilirsa (v1 -> v2) eski surum burada GC edilir (sizinti yok).
+      keys.filter(function(k) {
+        if (k.indexOf('bm-cache-')  === 0) return k !== CACHE_VERSION;
+        if (k.indexOf('bm-assets-') === 0) return k !== ASSET_CACHE;
+        if (k.indexOf('bm-models-') === 0) return k !== MODEL_CACHE;
+        return false; // bm-diag vb. yabanci cache'lere dokunma
+      })
             .map(function(k) {
               console.log('[BM SW] eski cache silindi: ' + k);
               return caches.delete(k);
@@ -1147,12 +764,15 @@ self.addEventListener('activate', function(event) {
 });
 
 // Stale While Revalidate: cache hit instant + background revalidate (cache yoksa fetch'i bekle)
-function _staleWhileRevalidate(request) {
+// Sprint Y1: hedef cache parametreli — degismeyen varliklar ASSET_CACHE'e (kalici), digerleri
+// versiyonlu cache'e yazilir. Okuma tarafi caches.match(request) cache adi ALMADIGI icin TUM
+// cache'leri tarar; bolumleme okumayi bozmaz.
+function _staleWhileRevalidate(request, cacheName) {
   return caches.match(request).then(function(cached) {
     var networkFetch = fetch(request).then(function(networkResp) {
       if (networkResp && networkResp.status === 200) {
         var clone = networkResp.clone();
-        caches.open(CACHE_VERSION).then(function(c) {
+        caches.open(cacheName || CACHE_VERSION).then(function(c) {
           c.put(request, clone).catch(function(){});
         });
       }
@@ -1184,6 +804,8 @@ self.addEventListener('fetch', function(event) {
   }
 
   // ML modeller + CDN: Cache First (versioned URL, immutable)
+  // Sprint Y1: MODEL_CACHE'e (kalici) yazilir. URL'ler SHA8-immutable oldugu icin surum bump'inda
+  // silinmeleri saf israfti: her deploy ~113MB yeniden iniyordu. Artik deploy'lar arasi kalirlar.
   if (url.hostname === 'brewmaster-models.dessn7.workers.dev' ||
       url.hostname === 'cdn.jsdelivr.net') {
     event.respondWith(
@@ -1192,7 +814,7 @@ self.addEventListener('fetch', function(event) {
         return fetch(event.request).then(function(res) {
           if (res && (res.status === 200 || res.type === 'opaque')) {
             var clone = res.clone();
-            caches.open(CACHE_VERSION).then(function(c) {
+            caches.open(MODEL_CACHE).then(function(c) {
               c.put(event.request, clone).catch(function(){});
             });
           }
@@ -1233,7 +855,34 @@ self.addEventListener('fetch', function(event) {
       return;
     }
     // Same-origin static (JSON, JS, WASM, MJS, png, webmanifest): Stale While Revalidate
-    event.respondWith(_staleWhileRevalidate(event.request));
+    // Sprint Y1: DEGISMEYEN varliklar (font/ikon/manifest) KALICI ASSET_CACHE'e; digerleri
+    // (ornegin _v20_alpha_030_14cat.json gibi same-origin model verisi) versiyonlu cache'e.
+    var _kalici = (pathname.indexOf('/fonts/') !== -1) || /\.woff2?$/.test(pathname) ||
+                  /icon-\d+\.png$/.test(pathname) || pathname.endsWith('.webmanifest');
+    if (_kalici) {
+      // Sprint Y1: DEGISMEYEN varliklar -> CACHE FIRST + KALICI cache (SWR DEGIL).
+      // Neden SWR degil: SWR, cache HIT olsa bile arka planda fetch atip dosyayi yeniden indirir.
+      // Deploy simulasyonunda olculdu: bolumleme sonrasi bile her acilista font+ikon tekrar iniyordu
+      // (kullanici beklemiyordu ama mobil veri yaniyordu). Bu dosyalar pratikte hic degismiyor
+      // (ikonlar Nisan, fontlar Haziran). Icerik gercekten degisirse ASSET_CACHE surumu artirilir
+      // (bm-assets-v1 -> bm-assets-v2); activate eski surumu GC eder ve dosyalar bir kez yeniden iner.
+      event.respondWith(
+        caches.match(event.request).then(function(hit) {
+          if (hit) return hit;
+          return fetch(event.request).then(function(res) {
+            if (res && res.status === 200) {
+              var _c = res.clone();
+              caches.open(ASSET_CACHE).then(function(c) { c.put(event.request, _c).catch(function(){}); });
+            }
+            return res;
+          }).catch(function() {
+            return new Response('Offline (asset cache miss)', { status: 504, statusText: 'Offline' });
+          });
+        })
+      );
+      return;
+    }
+    event.respondWith(_staleWhileRevalidate(event.request, CACHE_VERSION));
     return;
   }
 
