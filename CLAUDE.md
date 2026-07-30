@@ -59,15 +59,15 @@ Faz 2a tamamlandı. styleMatchScore motoru JSON'da çalışıyor. Top-1 %70-80, 
 - Magnet counter-exclusion (American Brown vb. British yeast exclude) → regresyon (%33→%31). Revert.
 - **Sonuç:** Kural-tabanlı motor fundamental olarak rule-limitli. Marker vs scalar dengesizliği rule-based ile çözülemiyor. Gerçek çözüm ML veya hibrit ML+rule.
 
-**⚠️ Faz 3 Feedback Loop — STİL KOLU KOPUK (düzeltme 2026-07-16, Sprint Y).**
-Buradaki eski kayıt "TAMAM / veri birikiyor" diyordu — **YANLIŞ**. Dış-kıyas denetiminde (2026-07-15) ölçüldü:
-- `bm_v2c_feedback` · `bmV2cShowFeedback` · `bmV2cExportFeedback` → canlı HTML'de **0 geçiş**. UI ve kayıt yolu yok.
-- `stilSec` (kullanıcının motor önerisinden stil seçmesi) **yalnızca `S.stil`'i yazıyor** — yani "motor X dedi, Kaan Y seçti" düzeltme sinyali **hiçbir yere kaydedilmiyor**.
-- Sonuç: ML vizyonunun (Faz 3→6) **veri kaynağı akmıyor**; feedback verisi 2026-04'ten beri birikmedi.
+**✅ Faz 3 Feedback Loop — STİL KOLU BAĞLANDI (Sprint Z, 2026-07-30, commit 656b9a4, SW v131-388).**
+Tarihçe: eski kayıt "TAMAM / veri birikiyor" diyordu (YANLIŞ, 2026-07-16'da düzeltildi); dış-kıyas denetimi (2026-07-15) kolu kopuk ölçtü (`bm_v2c_feedback` 0 geçiş, `stilSec` yalnız `S.stil` yazıyordu). Sprint Z v1 onarımı:
+- **`bm_stil_ogren_v1`** (yeni user-authored key, cap 500): kayıt anında (`tarifeKaydet`) "motor ne dedi + Kaan ne seçti" sessizce dondurulur — rid-dedup son-yazan, DERIVED profile yazmaz.
+- **4 kapı** (gürültü/zehirlenme): stil dolu + slug-seviye tahmin (`slugBranchHit`) + reçete tam (`_receteEksikler`) + tazelik İÇERİK-bazlı (malt-imza+maya+OG ±0.003). "İskeleti Doldur" = NİYET, sinyal yazılmaz.
+- `uyumSira` AD-düzeyi (1=onay, 2-3=sıra yanlış, null) + `kapsamda` ayrımı (BJCP 239 > V12 91 slug) + kaynak bayrağı (stilSec/dropdown/null).
+- Ayarlar ▸ Bildirim & Tanı: "🎯 Stil motoru isabet" satırı — motorun İLK gerçek-kullanım benchmark'ı.
+- v1 SALT kayıt+ölçüm; öneri beslemesi **Z2** (n≥2 + soft recall, W2 dengi) açık iş.
 
-Öğrenen sistemin diğer 3 kolu **çalışıyor**: `bm_kaan_profil_v1` (verim/FG, Sprint Q) · `bm_maya_kalibrasyon` (maya attenuation) · `bm_off_ogren_v1` (off-flavor, Sprint W1). Kopuk olan yalnız stil kolu.
-
-SIRADAKİ (açık iş): stil düzeltme sinyalini kaydet — `stilSec`'e ayrı bir user-authored key ekle (W1'in `bm_off_ogren_v1` deseni: onay-kapılı, DERIVED profile yazmaz). Bu yapılmadan motor patch döngüsü feedback'e dayanamaz.
+Öğrenen sistemin 4 kolu da artık **canlı**: `bm_kaan_profil_v1` (verim/FG, Sprint Q) · `bm_maya_kalibrasyon` (maya attenuation) · `bm_off_ogren_v1` (off-flavor, Sprint W1) · `bm_stil_ogren_v1` (stil, Sprint Z).
 
 **ML Pipeline tamam (2026-04-24): 1016 reçete + V5 Multi-Ensemble motor production'da.**
 - LOOCV top-3 %76.6, top-5 %80.3 (rule başlangıcına göre +30 puan top-3)
