@@ -4257,9 +4257,9 @@ const HOPLAR=[
 // Maya: ek = "dolap" | "oda" | "isitici"
 // idealSc = en iyi sonuç için önerilen sıcaklık
 const MAYALAR=[
-  {id:"us05",ad:"Fermentis US-05",atu:[78,82],sc:[15,24],ideal:20,e:"Temiz / Nötr",tip:"ale",ek:"dolap"},
-  {id:"s04",ad:"Fermentis S-04",atu:[75,82],sc:[15,24],ideal:18,e:"Hafif meyve-topraksı",tip:"ale",ek:"dolap"},
-  {id:"s33",ad:"Fermentis S-33",atu:[65,70],sc:[15,22],ideal:20,e:"Hafif Belçika ester/fenolik",tip:"belcika",ek:"dolap"},
+  {id:"us05",ad:"Fermentis US-05",atu:[78,82],sc:[15,24],ideal:20,e:"Temiz / Nötr",tip:"ale",ek:"dolap",form:'dry',tol:11},
+  {id:"s04",ad:"Fermentis S-04",atu:[75,82],sc:[15,24],ideal:18,e:"Hafif meyve-topraksı",tip:"ale",ek:"dolap",form:'dry',tol:11},
+  {id:"s33",ad:"Fermentis S-33",atu:[65,70],sc:[15,22],ideal:20,e:"Hafif Belçika ester/fenolik",tip:"belcika",ek:"dolap",form:'dry',tol:11},
   {id:"wy1056",ad:"WY1056 American Ale",atu:[73,77],sc:[15,22],ideal:19,e:"Çok temiz / nötr",tip:"ale",ek:"dolap"},
   {id:"wy1272",ad:"WY1272 American Ale II",atu:[72,76],sc:[15,22],ideal:19,e:"Hafif meyve",tip:"ale",ek:"dolap"},
   {id:"wy1318",ad:"WY1318 London Ale III",atu:[71,75],sc:[18,23],ideal:20,e:"Hafif meyve / İngiliz",tip:"ale",ek:"dolap"},
@@ -4274,13 +4274,13 @@ const MAYALAR=[
   {id:"bb16",ad:"BB-16 Wheat Ale (=WB-06)",atu:[84,89],sc:[17,22],ideal:20,e:"Temiz buğday. ButikBira resmi: WB-06 eşdeğeri.",tip:"wheat",ek:"dolap"},
   {id:"la_munich",ad:"Lallemand Munich Classic",atu:[75,80],sc:[17,22],ideal:20,e:"Muz-karanfil",tip:"wheat",ek:"dolap"},
   {id:"wy3944",ad:"WY3944 Belgian Wit",atu:[72,76],sc:[17,22],ideal:20,e:"Spicy-fenolik",tip:"wit",ek:"dolap"},
-  {id:"w3470",ad:"W-34/70 Lager (Saflager)",atu:[80,84],sc:[9,15],ideal:12,e:"Çok temiz",tip:"lager",ek:"dolap"},
+  {id:"w3470",ad:"W-34/70 Lager (Saflager)",atu:[80,84],sc:[9,15],ideal:12,e:"Çok temiz",tip:"lager",ek:"dolap",form:'dry',tol:11},
   {id:"s189",ad:"Fermentis S-189 Lager",atu:[80,84],sc:[9,15],ideal:12,e:"Temiz",tip:"lager",ek:"dolap"},
   {id:"wy2206",ad:"WY2206 Bavarian Lager",atu:[73,77],sc:[10,15],ideal:12,e:"Malt öne çıkar",tip:"lager",ek:"dolap"},
   {id:"wy2308",ad:"WY2308 Munich Lager",atu:[73,77],sc:[8,14],ideal:11,e:"Malt / karamel",tip:"lager",ek:"dolap"},
   {id:"wy2124",ad:"WY2124 Bohemian Lager",atu:[73,77],sc:[8,15],ideal:12,e:"Çiçeksi / nazik",tip:"lager",ek:"dolap"},
   {id:"la_koln",ad:"Lallemand Köln (Kölsch)",atu:[75,82],sc:[15,20],ideal:19,e:"Temiz / hafif meyve",tip:"ale",ek:"dolap"},
-  {id:"t58",ad:"Fermentis T-58",atu:[70,75],sc:[15,24],ideal:22,e:"Baharat / fenolik",tip:"belcika",ek:"oda"},
+  {id:"t58",ad:"Fermentis T-58",atu:[70,75],sc:[15,24],ideal:22,e:"Baharat / fenolik",tip:"belcika",ek:"oda",form:'dry',tol:11},
   {id:"wy3522",ad:"WY3522 Belgian Ardennes",atu:[72,76],sc:[18,25],ideal:21,e:"Spicy-meyve",tip:"belcika",ek:"oda"},
   {id:"wy3787",ad:"WY3787 Trappist High Grav",atu:[74,78],sc:[18,26],ideal:22,e:"Kompleks-meyve",tip:"belcika",ek:"isitici"},
   {id:"wy3711",ad:"WY3711 French Saison",atu:[77,83],sc:[18,28],ideal:24,e:"Biber / tropikal ester",tip:"saison",ek:"isitici"},
@@ -4289,10 +4289,10 @@ const MAYALAR=[
   {id:"kveiko",ad:"Kveik Oslo",atu:[75,82],sc:[25,40],ideal:32,e:"Nötr-temiz",tip:"kveik",ek:"isitici"},
   {id:"kveik_fg",ad:"Kveik Hornindal",atu:[75,82],sc:[25,40],ideal:32,e:"Tropikal-meyve",tip:"kveik",ek:"isitici"},
   // Fermentis eksikler
-  {id:"wb06",ad:"Fermentis WB-06 (Buğday Ale)",atu:[84,89],sc:[15,24],ideal:20,e:"Muz-baharat",tip:"wheat",ek:"dolap"},
-  {id:"s23",ad:"Fermentis S-23 (Lager)",atu:[80,84],sc:[9,22],ideal:13,e:"Temiz lager",tip:"lager",ek:"dolap"},
-  {id:"be256",ad:"Fermentis BE-256 (Abbey/Tripel)",atu:[82,87],sc:[15,28],ideal:22,e:"Meyve-baharat",tip:"belcika",ek:"isitici"},
-  {id:"be134",ad:"Fermentis BE-134 (Saison)",atu:[89,93],sc:[15,30],ideal:24,e:"Biber-tropikal",tip:"saison",ek:"isitici"},
+  {id:"wb06",ad:"Fermentis WB-06 (Buğday Ale)",atu:[84,89],sc:[15,24],ideal:20,e:"Muz-baharat",tip:"wheat",ek:"dolap",form:'dry',tol:11},
+  {id:"s23",ad:"Fermentis S-23 (Lager)",atu:[80,84],sc:[9,22],ideal:13,e:"Temiz lager",tip:"lager",ek:"dolap",form:'dry',tol:11},
+  {id:"be256",ad:"Fermentis BE-256 (Abbey/Tripel)",atu:[82,87],sc:[15,28],ideal:22,e:"Meyve-baharat",tip:"belcika",ek:"isitici",form:'dry',tol:13},
+  {id:"be134",ad:"Fermentis BE-134 (Saison)",atu:[89,93],sc:[15,30],ideal:24,e:"Biber-tropikal",tip:"saison",ek:"isitici",form:'dry',tol:13},
   // BiraBurada markalı (eşdeğerleri belirtilmiş)
   {id:"bb_ale",ad:"BiraBurada Maya Amerikan Ale (=US-05)",atu:[78,82],sc:[15,24],ideal:20,e:"Temiz-nötr",tip:"ale",ek:"dolap"},
   {id:"bb_wheat",ad:"BiraBurada Maya Alman Weisbier (=WB-06)",atu:[84,89],sc:[15,24],ideal:20,e:"Muz-baharat",tip:"wheat",ek:"dolap"},
@@ -4332,7 +4332,7 @@ const MAYALAR=[
   {id:"la_abbaye",ad:"Lallemand Abbaye",atu:[80,84],sc:[17,25],ideal:22,e:"Belçika manastır tarzı. Meyve-baharat-fenolik.",tip:"belcika",ek:"isitici"},
   {id:"la_farmhouse",ad:"Lallemand Farmhouse",atu:[78,84],sc:[18,28],ideal:22,e:"Farmhouse/Saison. Spicy-tropikal.",tip:"saison",ek:"isitici"},
   // ── Fermentis Eksikler ─────────────────────────────────────
-  {id:"k97",ad:"Fermentis K-97 (German Ale)",atu:[80,84],sc:[12,25],ideal:18,e:"Alman ale. Hafif meyve. Kölsch/Alt tipi.",tip:"ale",ek:"dolap"},
+  {id:"k97",ad:"Fermentis K-97 (German Ale)",atu:[80,84],sc:[12,25],ideal:18,e:"Alman ale. Hafif meyve. Kölsch/Alt tipi.",tip:"ale",ek:"dolap",form:'dry',tol:11},
   {id:"ha18",ad:"Fermentis SafAle HA-18 (High Attenuation)",atu:[82,86],sc:[15,25],ideal:20,e:"Yüksek attenüasyon ale mayası. Brut IPA, Dry biralarda. Glukoamilaz enzimi içerir.",tip:"ale",ek:"oda"},
   {id:"f2",ad:"Fermentis SafAle F-2 (Şişe Kondisyon)",atu:[70,75],sc:[15,25],ideal:20,e:"Şişe kondisyonu. Yüksek alkol toleranslı.",tip:"ale",ek:"oda"},
   {id:"lc_rye",ad:"LalBrew Rye (Lallemand)",atu:[74,80],sc:[15,22],ideal:18,e:"Çavdar mayası. Hafif spicy-meyve.",tip:"ale",ek:"dolap"},
@@ -6971,7 +6971,29 @@ window.aramaGuncelle=function(el){
 };
 window.setListeSekme=function(si){listeSekme=["aktif","yapimda","arsiv","istek"][si]||"aktif";aramaMetni="";window.listeSekme=listeSekme;render();setTimeout(function(){if(typeof window.closeSidebar==='function')window.closeSidebar();},0);};
 window.setAktifKlasor=function(ki){aktifKlasor=(window._kl||[])[ki]||"";window.aktifKlasor=aktifKlasor;render();setTimeout(function(){if(typeof window.closeSidebar==='function')window.closeSidebar();},0);};
-function stokYukle(){try{return _migrateLegacyKatkiIds(JSON.parse(localStorage.getItem(SK_STOK)||"[]"))||[];}catch{return[];}}
+// SPRINT AH1: mevcut refId'siz stok kalemlerine katalog-id backfill. İsim-eşleşmesinin ÇÖZDÜĞÜ id'yi
+// yazar → _stokMalBul sonucu DEĞİŞMEZ, yalnız kırılganlık (isim-değişimi/yazım-hatası) kalkar.
+// YALNIZ temiz grup (Malt/Hop/Maya) + TEK-eşleşme; belirsiz(>1)/diğer grup → atla (isim fallback korunur).
+// İdempotent (refId'li atlanır, her yükte re-uygular — sync-overwrite sonrası self-healing); persist YOK
+// (sonraki stok işleminde stokKaydet yazar). refId TÜRETİLEBİLİR → sync ile kaybolsa bile isim eşleşir.
+window._bmStokRefIdBackfill = function(arr){
+  try{
+    if(!Array.isArray(arr)) return arr;
+    var norm = (typeof window!=='undefined'&&window._normAd) ? window._normAd : function(s){ return (s||'').toString().toLowerCase().replace(/[ıİ]/g,'i').replace(/[şŞ]/g,'s').replace(/[çÇ]/g,'c').replace(/[ğĞ]/g,'g').replace(/[öÖ]/g,'o').replace(/[üÜ]/g,'u').replace(/\s+/g,' ').trim(); };
+    var parCik = function(s){ return (s||'').replace(/\([^)]*\)/g,'').trim(); };
+    var grupKat = { 'Malt':(typeof MALTLAR!=='undefined'?MALTLAR:null), 'Hop':(typeof HOPLAR!=='undefined'?HOPLAR:null), 'Maya':(typeof MAYALAR!=='undefined'?MAYALAR:null) };
+    arr.forEach(function(s){
+      if(!s || s.refId) return;                 // zaten refId → dokunma (idempotent)
+      var kat = grupKat[s.g];                    // yalnız temiz grup (Şeker/Katkı/Mineral/Diğer → belirsiz katalog, atla)
+      if(!Array.isArray(kat)) return;
+      var sN = norm(s.ad), sNp = norm(parCik(s.ad));
+      var esl = kat.filter(function(c){ if(!c||!c.ad) return false; var cN=norm(c.ad), cNp=norm(parCik(c.ad)); return cN===sN||cN===sNp||cNp===sN||cNp===sNp; });
+      if(esl.length===1){ s.refId = esl[0].id; s.refTip = s.g; } // TEK-eşleşme; belirsiz(>1) atla → sonuç değişmez
+    });
+    return arr;
+  }catch(e){ return arr; }
+};
+function stokYukle(){try{return _bmStokRefIdBackfill(_migrateLegacyKatkiIds(JSON.parse(localStorage.getItem(SK_STOK)||"[]"))||[]);}catch{return[];}}
 function stokKaydet(a){
   // v2.78.90 F4: Sessiz hata yutma kaldırıldı - quota dolarsa kullanıcı bilsin
   try{
@@ -7998,7 +8020,7 @@ window._bmYilOzet = function(tamKayitlar){
     var enMaya = Object.keys(mayaSay).sort(function(x,y){return mayaSay[y]-mayaSay[x];})[0]||null;
     var stilSay = {}; yl.forEach(function(k){ var s2=k.stil||'(stilsiz)'; stilSay[s2]=(stilSay[s2]||0)+1; });
     var stilStr = Object.keys(stilSay).sort(function(x,y){return stilSay[y]-stilSay[x];}).slice(0,5).map(function(s2){return s2+' ('+stilSay[s2]+')';}).join(', ');
-    var L = [yl.length+' demleme'+(litre>0?' · ~'+Math.round(litre)+' L':'')];
+    var L = [yl.length+' demleme'+(litre>0?' · ~'+Math.round(litre)+' L (tasarım hacmi)':'')];
     if(ort(vL)!=null) L.push('ort. verim %'+ort(vL));
     if(ort(aL)!=null) L.push('ort. attenuation %'+ort(aL));
     if(enMaya) L.push('en çok maya: '+enMaya);
@@ -16042,6 +16064,7 @@ function rEditorNot(){
           +'<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:4px">'
             +'<span style="font-size:15px;font-weight:700;color:var(--bakir);font-family:var(--font-display)">'+o.toplam+'/50</span>'
             +'<span style="font-size:var(--fs-xs);color:var(--kahve);font-weight:600">'+sev+'</span>'
+            +(o.puanKaynak==='hizli'?'<span style="font-size:9px;color:var(--dim);background:var(--card);border:1px solid var(--bor);border-radius:4px;padding:1px 5px">hızlı kayıt</span>':'')
             +'<span style="font-size:var(--fs-xs);color:var(--soluk);margin-left:auto">'+o.tarih+'</span>'
           +'</div>'
           +'<div style="font-size:var(--fs-xs);color:var(--soluk);line-height:1.5">'

@@ -2194,6 +2194,106 @@ const CASELER = [
       __REG.ok('ARŞİV KORUNDU: liste 3 oturumu da gösterir (hızlı dahil)', dom.indexOf('👅 Hızlı') >= 0 || oturumSay >= 3, 'oturum işareti=' + oturumSay);
       return __REG.al();
     })
+  },
+
+  // ── SPRINT AH: stok refId backfill (AH1) + maya form/tol (AH2) + etiketler (AH3) ──
+  {
+    kod: 'AH1-BACKFILL', ad: 'STOK refId BACKFILL: refId\'siz kalem (isim-eşleşen) → refId yazılır; SONUÇ DEĞİŞMEZ (_stokMalBul aynı); temiz-grup+tek-eşleşme; belirsiz/diğer atla; refId isim-değişimine dayanıklı',
+    calistir: (page) => page.evaluate(() => {
+      const malt = MALTLAR.find(m => m && m.ad);
+      const hop = HOPLAR.find(h => h && h.ad);
+      // refId'siz stok (Kaan emsali: timestamp id, katalog-adı)
+      STOK.length = 0;
+      STOK.push({ id: '9990001', ad: malt.ad, g: 'Malt', miktar: 5, birim: 'kg' });
+      STOK.push({ id: '9990002', ad: hop.ad, g: 'Hop', miktar: 100, birim: 'g' });
+      STOK.push({ id: '9990003', ad: 'Bilinmeyen XYZ Malt', g: 'Malt', miktar: 3, birim: 'kg' });
+      // backfill ÖNCESİ: isim-eşleşme sonucu
+      const onceIdx = _stokMalBul(malt.id, malt.ad);
+      __REG.ok('backfill ÖNCESİ: malt isim-eşleşiyor', onceIdx === 0, 'idx=' + onceIdx);
+      // backfill uygula
+      _bmStokRefIdBackfill(STOK);
+      __REG.ok('temiz grup tek-eşleşme → refId = katalog malt id yazıldı', STOK[0].refId === malt.id, 'refId=' + STOK[0].refId + ' beklenen=' + malt.id);
+      __REG.ok('hop refId = katalog hop id', STOK[1].refId === hop.id);
+      __REG.ok('eşleşmeyen (Bilinmeyen XYZ) → refId YOK (isim fallback korunur)', !STOK[2].refId);
+      // SONUÇ-KORUYAN: backfill sonrası _stokMalBul AYNI index
+      __REG.ok('SONUÇ DEĞİŞMEZ: backfill sonrası malt hâlâ index 0 (refId ile eşleşir)', _stokMalBul(malt.id, malt.ad) === 0);
+      // kırılganlık çözüldü: isim değişse bile refId eşleşir
+      STOK[0].ad = 'İSİM DEĞİŞTİ';
+      __REG.ok('KIRILGANLIK ÇÖZÜLDÜ: isim değişti ama refId ile hâlâ eşleşir', _stokMalBul(malt.id, malt.ad) === 0);
+      STOK.length = 0;
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AH1-REGRESYON', ad: 'AH1 REGRESYON (KRİTİK): backfill sonrası bmDemlenebilirAnaliz + alışveriş listesi + stokYetersizTam AYNEN çalışıyor (eşleşme mantığı değişti, SONUÇ değişmemeli)',
+    calistir: (page) => page.evaluate(() => {
+      // izole: yalnız bu case reçeteleri, boş stok → deterministik
+      KR.length = 0; STOK.length = 0;
+      __REG.yeniKayit('AH1REG Cok', { maltlar: [{ id: 'pilsner', kg: 3 }, { id: 'munich', kg: 1 }, { id: 'vienna', kg: 0.5 }, { id: 'wheat', kg: 0.5 }], hoplar: [], mayaId: '' });
+      __REG.yeniKayit('AH1REG Az', { maltlar: [{ id: 'pilsner', kg: 4 }], hoplar: [], mayaId: '' });
+      // ÖNCE (boş stok): analiz sonucu
+      const a1 = bmDemlenebilirAnaliz();
+      const cok1 = a1.cokEksik.length, az1 = a1.azEksik.length, alis1 = a1.alisveris.length;
+      // backfill çağır (boş stokta no-op ama fn çökmemeli)
+      _bmStokRefIdBackfill(STOK);
+      // SONRA: aynı sonuç
+      const a2 = bmDemlenebilirAnaliz();
+      __REG.ok('bmDemlenebilirAnaliz SONUÇ AYNEN (cokEksik/azEksik/alışveriş sayısı değişmedi)', a2.cokEksik.length === cok1 && a2.azEksik.length === az1 && a2.alisveris.length === alis1, cok1 + '/' + az1 + '/' + alis1);
+      // stokYetersizTam maya köprüsü çökmüyor
+      const r = KR.find(x => x && x.biraAd === 'AH1REG Cok');
+      const st = stokYetersizTam(r);
+      __REG.ok('stokYetersizTam çalışıyor (backfill sonrası çökme yok)', st && Array.isArray(st.eksik));
+      KR.length = 0; STOK.length = 0;
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AH2-FORMTOL', ad: 'MAYA form/tol AÇIK ALAN (10 Fermentis): s33/t58 tol=11 belcika-band 13\'ü DÜZELTİR (AC datasheet) → AC uyarısı doğru; dolmayan maya fallback (uydurma yok); AA1 starter doğru',
+    calistir: (page) => page.evaluate(() => {
+      const M = (id) => MAYALAR.find(m => m.id === id);
+      __REG.ok('s33 açık tol=11 (belcika-tip, band 13 düzeltildi)', bmMayaTol(M('s33')) === 11);
+      __REG.ok('t58 açık tol=11', bmMayaTol(M('t58')) === 11);
+      __REG.ok('be256 tol=13 (datasheet=band)', bmMayaTol(M('be256')) === 13);
+      __REG.ok('wb06 form=dry açık alan', mayaFormu(M('wb06')) === 'dry');
+      __REG.ok('DOLMAYAN maya (wy3068) → fallback (uydurma yok)', mayaFormu(M('wy3068')) === 'liquid' && bmMayaTol(M('wy3068')) === 11);
+      // KRİTİK: s33 band-düzeltme AC uyarısında görünür (Belgian %12 + S-33 → aşıyor)
+      __REG.yeniKayit('AH2 Belgian', { maltlar: [{ id: 'pilsner', kg: 8 }], mayaId: 's33', ogManuel: 1.096, fgManuel: 1.010 });
+      ekran = 'editor'; sekme = 'genel';
+      const abv = calc().abv;
+      render();
+      const dom = document.getElementById('ekran').innerHTML;
+      __REG.ok('KRİTİK: yüksek ABV + S-33 (açık tol 11) → tolerans uyarısı (band 13 sessiz kaçardı)', abv >= 11 && dom.indexOf('alkol toleransını') >= 0, 'abv=' + abv.toFixed(1));
+      // AA1 starter: s33 kuru → "starter yapılmaz" (form=dry doğru)
+      const maya = M('s33');
+      const hMaya = rEditorMaya(1.096, 1.010, abv, maya, null, 'hesap', 1.010);
+      __REG.ok('AA1: S-33 (form=dry) yüksek OG → starter yapılmaz (Starter öneriliyor YOK)', hMaya.indexOf('Starter öneriliyor') < 0);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AH3-ETIKET', ad: 'ETİKETLER: hızlı tadım oturumu arşivde "hızlı kayıt" etiketli; yıl raporu litre "(tasarım hacmi)" netliği',
+    calistir: (page) => page.evaluate(() => {
+      // AH3-a: hızlı oturum etiketi
+      __REG.yeniKayit('AH3 Bira', {});
+      S.brewLog = [{ tip: 'siseleme', tarih: '2026-07-01', id: 's1', ts: 1 }];
+      S.tadim = { aroma: 0, gorunum: 0, tat: 0, agizH: 0, genel: 0, offList: {}, tadimNot: '', oturumlar: [
+        { tarih: '2026-07-10', aroma: 0, gorunum: 0, tat: 0, agizH: 0, genel: 8, toplam: 8, offList: {}, puanKaynak: 'hizli' },
+        { tarih: '2026-07-12', aroma: 9, gorunum: 3, tat: 16, agizH: 4, genel: 8, toplam: 40, offList: {}, puanKaynak: 'detay' }
+      ] };
+      ekran = 'editor'; sekme = 'not'; render();
+      const dom = document.getElementById('ekran').innerHTML;
+      __REG.ok('hızlı oturum arşivde "hızlı kayıt" etiketli', dom.indexOf('hızlı kayıt') >= 0);
+      __REG.ok('detay oturum etiketsiz (yalnız hızlı işaretli)', (dom.match(/hızlı kayıt/g) || []).length === 1);
+      // AH3-b: yıl raporu (tasarım hacmi)
+      const yil = new Date().getFullYear();
+      const t0 = new Date(yil, 5, 1).getTime(), t1 = new Date(yil, 7, 1).getTime();
+      const rapor = _bmYilOzet([
+        { tarih: t0, hacim: 11, stil: 'X', mayaAd: 'A', verimG: 65, atten: 80 },
+        { tarih: t1, hacim: 20, stil: 'Y', mayaAd: 'A', verimG: 61, atten: 78 }
+      ]);
+      __REG.ok('yıl raporu litre "(tasarım hacmi)" netliği', rapor.indexOf('(tasarım hacmi)') >= 0, rapor.slice(0, 60));
+      return __REG.al();
+    })
   }
 ];
 
