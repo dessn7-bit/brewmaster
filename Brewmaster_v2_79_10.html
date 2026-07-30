@@ -5830,6 +5830,7 @@ window.bmStilIskeletDoldur = function(){
       var my = window._stilMayaOner ? _stilMayaOner(st) : '';
       var setMaya = (my && !S.mayaId);
       if(setMaya) S.mayaId = my;
+      window.__stilSecKaynak='iskelet'; // Sprint Z: stilden-reçete = NİYET (düzeltme sinyali değil)
       if(typeof _receteYazSync==='function')_receteYazSync();
       if(typeof render==='function')render();
       if(typeof flash==='function')flash("Bu stil için hazır iskelet yok — BJCP hedefleri + maya önerisi hazır, malt/hop'u sen ekle","ok");
@@ -5842,6 +5843,7 @@ window.bmStilIskeletDoldur = function(){
     S.hoplar = r.hops;
     if(r.mayaId) S.mayaId = r.mayaId;
     if(r.mashSc) S.mashSc = r.mashSc;
+    window.__stilSecKaynak='iskelet'; // Sprint Z: stilden-reçete = NİYET (düzeltme sinyali değil)
     if(typeof _receteYazSync==='function')_receteYazSync();
     if(typeof render==='function')render();
     if(typeof flash==='function')flash("📋 "+st+" iskeleti "+(S.hacim>0?S.hacim:11)+"L'ye ölçeklenip dolduruldu"+((isk.kaynak==='cikarim'||isk.kaynak==='cikarim_v2')&&isk.n?" ("+isk.n+" gerçek reçeteden türetildi"+(isk.maya?", "+isk.maya+" maya":"")+")":"")+" — başlangıç noktası, serbestçe değiştir"+(window._bmOffStilRecallStr?_bmOffStilRecallStr(st):""),"ok");
@@ -8550,6 +8552,7 @@ function tarifeKaydet(){
   if(_mevcutIdx>=0){ _krOtoriterUygula(t, KR[_mevcutIdx]); _krOtoriterUygula(S, t); }
   if(_mevcutIdx>=0){KR[_mevcutIdx]=t;}else{KR.unshift(t);}
   _editId=t.id; // Kaydet sonrası ID'yi koru
+  try{ if(typeof window._bmStilSinyalYaz==='function') window._bmStilSinyalYaz(t.id, og); }catch(_zs){} // Sprint Z: stil feedback sinyali (4 kapı fonksiyon içinde, sessiz-atlar)
   try{
     if(_origKy(KR)){
       clearDraft();
@@ -20781,7 +20784,7 @@ function rEditor(){
   </div>
   <div class="bm-edit-only" style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
     <span style="font-size:var(--fs-xs);color:var(--metin-soluk);font-weight:var(--fw-semibold)">🎯 Hedef Stil:</span>
-    <select aria-label="Hedef stil" onchange="S.stil=this.value;render()" style="background:var(--bg-card);color:var(--ink);border:1px solid var(--cizgi-arac);border-radius:var(--r-sm);font-size:var(--fs-xs);padding:4px 8px;flex:1;outline:none;font-family:var(--font-govde);cursor:pointer">
+    <select aria-label="Hedef stil" onchange="S.stil=this.value;window.__stilSecKaynak='dropdown';render()" style="background:var(--bg-card);color:var(--ink);border:1px solid var(--cizgi-arac);border-radius:var(--r-sm);font-size:var(--fs-xs);padding:4px 8px;flex:1;outline:none;font-family:var(--font-govde);cursor:pointer">
       <option value=""${!S.stil?" selected":""}>── Otomatik (bileşenlerden) ──</option>
       ${typeof BJCP!=='undefined'?Object.keys(BJCP).sort().map(sn=>`<option value="${sn}"${S.stil===sn?" selected":""}>${sn}</option>`).join(""):""}
     </select>
@@ -24506,6 +24509,107 @@ window._bmOffStilRecallStr = function(stil){
 };
 
 
+// ═══ SPRINT Z: stil feedback sinyali — öğrenen sistemin 4. kolu (2026-07-30) ═══
+// "Motor X dedi, Kaan Y seçti" olayı KAYIT ANINDA (tarifeKaydet) sessizce dondurulur.
+// Ayrı user-authored key bm_stil_ogren_v1 — DERIVED bm_kaan_profil_v1'e YAZMAZ (W1 dersi:
+// o depo her analizde baştan yazılır). Motor-UI'dan bağımsız boğaz: eski kol (bm_v2c_feedback)
+// V2c beta kutusuna gömülüydü, motor sadeleşince birlikte silindi — bu kol motor değişse de yaşar.
+// v1 SALT KAYIT + Tanı istatistiği: hiçbir öneri/default DEĞİŞMEZ (öneri beslemesi Z2, n>=2 + soft).
+var _BM_STIL_OGREN_KEY = 'bm_stil_ogren_v1', _BM_STIL_OGREN_MAX = 500;
+window._bmStilOgrenOku = function(){
+  try{ var a = JSON.parse(localStorage.getItem(_BM_STIL_OGREN_KEY)||'[]'); return Array.isArray(a)?a:[]; }catch(_e){ return []; }
+};
+window._bmStilOgrenYaz = function(arr){
+  try{
+    if(!Array.isArray(arr)) return;
+    if(arr.length > _BM_STIL_OGREN_MAX) arr = arr.slice(-_BM_STIL_OGREN_MAX); // üst sınır: en eski düşer (telemetri, kullanıcı-verisi değil)
+    localStorage.setItem(_BM_STIL_OGREN_KEY, JSON.stringify(arr));
+  }catch(_e){}
+};
+// Sinyal yazıcı — tarifeKaydet'ten çağrılır (rid + o anki hesap OG'si). DÖRT KAPI: hepsi sessiz-atlama, sıfır UI.
+window._bmStilSinyalYaz = function(rid, ogNow){
+  try{
+    if(typeof S==='undefined'||!S||!rid) return;
+    // KAPI 1: hedef stil seçilmiş olmalı (BJCP otoritesinde).
+    var secilen = (S.stil && String(S.stil).trim()) ? String(S.stil).trim() : '';
+    if(!secilen || typeof BJCP==='undefined' || !BJCP[secilen]) return;
+    // Stilden-reçete akışı: stil NİYET olarak seçildi (motor önerisi görülmeden) — düzeltme sinyali DEĞİL.
+    if(window.__stilSecKaynak==='iskelet') return;
+    // KAPI 2: slug-seviye tahmin var VE SON dispatch'e ait. __lastV12Result eski reçeteden KALABİLİR;
+    // slugBranchHit her dispatcher koşusu başında false'a yazılıp yalnız slug dalında true olur →
+    // true ise __lastV12Result son koşunun ürünü. Cluster-fallback (14 aile) 239-BJCP seçimiyle kıyaslanamaz, kayıt yok.
+    var di = window.__bmV12DispatchInfo, res = window.__lastV12Result;
+    if(!di || di.slugBranchHit!==true || !res) return;
+    var topArr = res.topN || res.top3;
+    if(!Array.isArray(topArr) || !topArr.length) return;
+    // KAPI 3: reçete tam (yarım gristte motor tahmini çöp — sahte "düzeltme" üretir).
+    if(typeof window._receteEksikler==='function' && window._receteEksikler(S).length) return;
+    // KAPI 4 (TAZELİK — içerik-bazlı): dispatcher render'da koşar, tarifeKaydet yalnız calc çağırır →
+    // eldeki tahmin "son render"ın tahmini. Zaman eşiği YANLIŞ ölçü (boşta bekleyip kaydetmek tahmini
+    // bayatlatmaz; içerik değişimi bayatlatır). slugBranchHit + __lastV12Recipe aynı dispatcher koşusunda
+    // kurulur → malt-imza + maya + OG (±0.003) eşleşiyorsa tahmin kaydedilen reçeteye aittir.
+    var lr = window.__lastV12Recipe;
+    if(!lr) return;
+    var imzaS = (S.maltlar||[]).map(function(m){return m&&m.id;}).filter(Boolean).join(',');
+    var imzaL = (lr.maltIds||[]).join(',');
+    if(imzaS !== imzaL) return;
+    if(String(lr.mayaId||'') !== String(S.mayaId||'')) return;
+    if(typeof ogNow==='number' && typeof lr._og==='number' && Math.abs(ogNow - lr._og) > 0.003) return;
+    // ── Sinyal dondur (self-contained; W1 decoupling emsali — reçete sonra değişse/silinse kayıt yaşar) ──
+    var S2B = window.SLUG_TO_BJCP || {};
+    var motorTop3 = topArr.slice(0,3).map(function(r){
+      return { slug: String((r&&r.slug)||''), bjcp: (r&&r.slug&&S2B[r.slug]!=null)?S2B[r.slug]:null, pct: (r&&typeof r.normalized==='number')?r.normalized:null };
+    });
+    // uyumSira AD-DÜZEYİNDE: SLUG_TO_BJCP çoktan-bire olabilir → slug değil BJCP adı karşılaştırılır.
+    var uyum = null, i;
+    for(i=0;i<motorTop3.length;i++){ if(motorTop3[i].bjcp===secilen){ uyum=i+1; break; } }
+    // kapsamda: seçilen stil motorun 91-slug menzilinde mi (değilse "yanıldı" değil "kapsam dışı").
+    var kapsam = false, ks = Object.keys(S2B);
+    for(i=0;i<ks.length;i++){ if(S2B[ks[i]]===secilen){ kapsam=true; break; } }
+    var g = {
+      rid: String(rid), ts: Date.now(),
+      secilenStil: secilen, receteAdi: String(S.biraAd||''),
+      kaynak: (window.__stilSecKaynak==='stilSec'||window.__stilSecKaynak==='dropdown') ? window.__stilSecKaynak : null,
+      kapsamda: kapsam, uyumSira: kapsam ? uyum : null,
+      motorTop3: motorTop3,
+      motorAd: (function(){ try{ return localStorage.getItem('bm_motor_version')||'V12'; }catch(_m){ return 'V12'; } })(),
+      dispatchTs: (typeof di.timestamp==='number') ? di.timestamp : null,
+      og: (typeof ogNow==='number') ? Math.round(ogNow*1000)/1000 : null
+    };
+    var arr = window._bmStilOgrenOku();
+    var ix = -1, j;
+    for(j=0;j<arr.length;j++){ if(arr[j]&&arr[j].rid===g.rid){ ix=j; break; } }
+    if(ix>=0) arr[ix]=g; else arr.push(g); // rid-dedup: son-yazan-kazanır (aynı reçete çoğalmaz, güncellenir)
+    window._bmStilOgrenYaz(arr);
+  }catch(e){ try{console.warn('_bmStilSinyalYaz',e);}catch(_){} }
+};
+// Tanı kartı satırı — motorun İLK gerçek-kullanım isabet ölçümü (önceki tüm benchmark'lar GT dataset'iydi).
+// Kapsam-dışı AYRI sayılır: motorun tahmin edemeyeceği stil "yanıldı" istatistiğini kirletmez.
+window._bmStilMotorStatHtml = function(){
+  try{
+    var arr = window._bmStilOgrenOku();
+    var ic;
+    if(!arr.length){
+      ic = 'Henüz veri yok — stil seçip reçete kaydettikçe birikir';
+    } else {
+      var kd = 0, deg = 0, t1 = 0, t3 = 0, i;
+      for(i=0;i<arr.length;i++){
+        var x = arr[i]; if(!x) continue;
+        if(x.kapsamda===false){ kd++; continue; }
+        deg++;
+        if(x.uyumSira===1) t1++;
+        if(x.uyumSira>=1 && x.uyumSira<=3) t3++;
+      }
+      if(!deg){
+        ic = arr.length+' kayıt — tümü kapsam dışı (motor 91 stil tahmin eder, seçtiklerin menzil dışında)';
+      } else {
+        ic = deg+' reçetede top-1 %'+Math.round(t1/deg*100)+' · top-3 %'+Math.round(t3/deg*100)+(kd?(' · kapsam dışı: '+kd):'');
+      }
+    }
+    return '<div class="bm-ayar-satir"><div class="bm-ayar-satir-text">🎯 Stil motoru isabet <small>'+ic+'</small><small style="color:var(--metin-soluk)">Kaydettiğin reçetelerde motor tahmini vs senin seçimin — salt ölçüm, hiçbir öneriyi değiştirmez</small></div></div>';
+  }catch(_e){ return ''; }
+};
+
 function tadimOff(kod, aktif){
   if(!S.tadim) S.tadim = {aroma:0,gorunum:0,tat:0,agizH:0,genel:0,offList:{},tadimNot:'',oturumlar:[]};
   if(!S.tadim.offList) S.tadim.offList = {};
@@ -24724,7 +24828,7 @@ window.yeniKlasorAc=function(){window._yeniKlasorEkleniyor=true;render();setTime
 window.yeniKlasorIptal=function(){window._yeniKlasorEkleniyor=false;render();};
 window.yeniKlasorKaydet=function(){var el=document.getElementById('yeniKlasorInp');if(!el){window._yeniKlasorEkleniyor=false;render();return;}var v=el.value.trim();if(v){window._pendingKlasor=window._pendingKlasor||[];if(!window._pendingKlasor.includes(v)&&!getKlasorler().includes(v))window._pendingKlasor.push(v);aktifKlasor=v;}window._yeniKlasorEkleniyor=false;render();};
 window.yeniKlasorKlavye=function(el,ev){if(ev.key==='Enter'){ev.preventDefault();window.yeniKlasorKaydet();}else if(ev.key==='Escape'){ev.preventDefault();window.yeniKlasorIptal();}};
-window.stilSec=function(el){const s=el.getAttribute('data-stil');if(!s)return;S.stil=(S.stil===s)?'':s;render();};
+window.stilSec=function(el){const s=el.getAttribute('data-stil');if(!s)return;S.stil=(S.stil===s)?'':s;window.__stilSecKaynak='stilSec';render();};
 window.klasorSilIste=function(ki){const k=(window._kl||[])[ki];if(!k)return;window._klasorSilOnayi=k;render();};
 window.klasorSilOnay=function(onaylandi){const k=window._klasorSilOnayi;window._klasorSilOnayi=null;if(!onaylandi||!k){render();return;}_commitOpenRecipe();KR.forEach(t=>{if((t.klasor||"")===k){t.klasor="";t.guncelleme=Date.now();}});if(typeof _editId!=='undefined'&&_editId){const _et=KR.find(x=>x&&x.id===_editId);if(_et&&typeof S!=='undefined'&&S)S.klasor=_et.klasor;}if(window._pendingKlasor)window._pendingKlasor=window._pendingKlasor.filter(x=>x!==k);if(aktifKlasor===k)aktifKlasor="";ky(KR);render();};
 window.silOnayById=function(el){const id=el.closest('[data-tid]')?.dataset?.tid;if(id){silOnay=id;render();}};
@@ -25079,6 +25183,7 @@ window.rStokAyarlar = function(){
           '<small>Sessiz saat: '+_bSessizStr+'</small>'+
         '</div>'+
       '</div>'+
+      ((typeof window._bmStilMotorStatHtml==='function')?window._bmStilMotorStatHtml():'')+
       _bHataHtml+
       '<div class="bm-ayar-satir">'+
         '<div class="bm-ayar-satir-text">🔔 Bildirim tercihleri <small>Kategoriler, sessiz saat, titreşim, ses</small></div>'+

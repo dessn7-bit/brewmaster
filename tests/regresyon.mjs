@@ -1588,6 +1588,170 @@ const CASELER = [
       bmOffTeshisKapat();
       return __REG.al();
     })
+  },
+
+  // ── SPRINT Z: stil feedback sinyali (kayıt-anı, 4 kapı, ayrı user-authored key) ──
+  {
+    kod: 'Z-KAPI', ad: 'SİNYAL KAPILARI: stil boş / slug-tahmin yok / yarım reçete / bayat tahmin (malt-imza + OG>0.003) → YAZILMAZ; 4 kapı geçince YAZILIR',
+    calistir: (page) => page.evaluate(() => {
+      localStorage.removeItem('bm_stil_ogren_v1');
+      __REG.yeniKayit('REGTEST ZKAPI', {});
+      const S2B = window.SLUG_TO_BJCP;
+      const slugA = Object.keys(S2B).find(k => S2B[k] && BJCP[S2B[k]]);
+      const nameA = S2B[slugA];
+      S.maltlar = [{ id: 'pilsner', kg: 4 }];
+      S.mayaId = 'us05';
+      S.hoplar = [{ id: HOPLAR[0].id, g: 20, dk: 60 }];
+      const mockla = () => {
+        window.__stilSecKaynak = 'dropdown';
+        window.__bmV12DispatchInfo = { slugBranchHit: true, timestamp: 4242 };
+        window.__lastV12Result = { topN: [{ slug: slugA, normalized: 60 }] };
+        const r = calc();
+        window.__lastV12Recipe = { _og: r.og, maltIds: S.maltlar.map(m => m.id), mayaId: S.mayaId };
+      };
+      mockla(); S.stil = '';
+      tarifeKaydet();
+      __REG.ok('KAPI 1: stil boş → sinyal yok', _bmStilOgrenOku().length === 0);
+      mockla(); S.stil = nameA; window.__bmV12DispatchInfo = { slugBranchHit: false };
+      tarifeKaydet();
+      __REG.ok('KAPI 2: slugBranchHit=false (cluster fallback) → sinyal yok', _bmStilOgrenOku().length === 0);
+      mockla(); S.stil = nameA; const _m = S.maltlar; S.maltlar = [];
+      tarifeKaydet();
+      __REG.ok('KAPI 3: yarım reçete (malt yok) → sinyal yok', _bmStilOgrenOku().length === 0);
+      S.maltlar = _m;
+      mockla(); S.stil = nameA; window.__lastV12Recipe.maltIds = ['baska_malt'];
+      tarifeKaydet();
+      __REG.ok('KAPI 4a: malt-imza farklı (bayat tahmin) → sinyal yok', _bmStilOgrenOku().length === 0);
+      mockla(); S.stil = nameA; window.__lastV12Recipe._og = window.__lastV12Recipe._og + 0.01;
+      tarifeKaydet();
+      __REG.ok('KAPI 4b: OG sapması >0.003 (bayat tahmin) → sinyal yok', _bmStilOgrenOku().length === 0);
+      mockla(); S.stil = nameA;
+      tarifeKaydet();
+      __REG.ok('KONTROL: 4 kapı geçti → sinyal YAZILDI', _bmStilOgrenOku().length === 1);
+      localStorage.removeItem('bm_stil_ogren_v1');
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'Z-YAZ-DEDUP', ad: 'YAZIM + AYRI KEY: uyumSira AD-DÜZEYİ (1=onay, 2=sıra-yanlış), rid-dedup son-yazan, calc()+profil SONRASI YAŞAR (derived tuzağı yok), allowlist',
+    calistir: (page) => page.evaluate(() => {
+      localStorage.removeItem('bm_stil_ogren_v1');
+      const id = __REG.yeniKayit('REGTEST ZYAZ', {});
+      const S2B = window.SLUG_TO_BJCP;
+      const secilmis = []; const adlar = {};
+      for (const k of Object.keys(S2B)) {
+        if (S2B[k] && BJCP[S2B[k]] && !adlar[S2B[k]]) { secilmis.push(k); adlar[S2B[k]] = 1; }
+        if (secilmis.length === 3) break;
+      }
+      const slugA = secilmis[0], slugB = secilmis[1], slugC = secilmis[2];
+      S.maltlar = [{ id: 'pilsner', kg: 4 }];
+      S.mayaId = 'us05';
+      S.hoplar = [{ id: HOPLAR[0].id, g: 20, dk: 60 }];
+      const mockla = () => {
+        window.__stilSecKaynak = 'dropdown';
+        window.__bmV12DispatchInfo = { slugBranchHit: true, timestamp: 4242 };
+        window.__lastV12Result = { topN: [{ slug: slugA, normalized: 60 }, { slug: slugB, normalized: 25 }, { slug: slugC, normalized: 10 }] };
+        const r = calc();
+        window.__lastV12Recipe = { _og: r.og, maltIds: S.maltlar.map(m => m.id), mayaId: S.mayaId };
+      };
+      mockla(); S.stil = S2B[slugA];
+      tarifeKaydet();
+      let h = _bmStilOgrenOku();
+      __REG.ok('sinyal yazıldı: rid=_editId + şema tam (kapsamda/motorAd/dispatchTs)', h.length === 1 && h[0].rid === String(id) && h[0].secilenStil === S2B[slugA] && h[0].kapsamda === true && h[0].motorAd === 'V12' && h[0].dispatchTs === 4242, JSON.stringify(h[0]));
+      __REG.ok('uyumSira=1 (motor top-1 onaylandı)', h[0].uyumSira === 1);
+      __REG.ok('motorTop3 dondu (slug+bjcp+pct)', h[0].motorTop3.length === 3 && h[0].motorTop3[0].slug === slugA && h[0].motorTop3[0].bjcp === S2B[slugA] && h[0].motorTop3[1].pct === 25);
+      __REG.ok('kaynak=dropdown dondu', h[0].kaynak === 'dropdown');
+      calc();
+      if (typeof _bmKisiselProfil === 'function') { try { _bmKisiselProfil(); } catch (e) {} }
+      h = _bmStilOgrenOku();
+      __REG.ok('DERIVED TUZAĞI YOK: calc()+profil sonrası sinyal YAŞIYOR (ayrı key kanıtı)', h.length === 1);
+      mockla(); S.stil = S2B[slugB];
+      tarifeKaydet();
+      h = _bmStilOgrenOku();
+      __REG.ok('rid-dedup: tek kayıt, son-yazan-kazanır', h.length === 1 && h[0].secilenStil === S2B[slugB]);
+      __REG.ok('uyumSira=2 AD-DÜZEYİ (motor 2. sırada demişti = sıra-yanlış düzeltme)', h[0].uyumSira === 2);
+      __REG.ok('export allowlist: bm_stil_ogren_v1 bm_ prefix (senkronize olur)', /^(bm_|kabir_|_orig|acc_|KR$)/.test('bm_stil_ogren_v1'));
+      localStorage.removeItem('bm_stil_ogren_v1');
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'Z-KAPSAM-STAT', ad: 'KAPSAM-DIŞI AYRIMI + TANI SATIRI: 91-slug menzili dışı stil → kapsamda:false + uyumSira:null; boş havuz "Henüz veri yok"; yüzdeler + rStokAyarlar entegrasyonu',
+    calistir: (page) => page.evaluate(() => {
+      localStorage.removeItem('bm_stil_ogren_v1');
+      __REG.ok('boş havuz → "Henüz veri yok"', _bmStilMotorStatHtml().indexOf('Henüz veri yok') >= 0);
+      __REG.yeniKayit('REGTEST ZKAPSAM', {});
+      const S2B = window.SLUG_TO_BJCP;
+      const kapsamli = {};
+      Object.keys(S2B).forEach(k => { if (S2B[k]) kapsamli[S2B[k]] = 1; });
+      const disari = Object.keys(BJCP).find(n => !kapsamli[n]);
+      __REG.ok('BJCP 239 > slug menzili: kapsam-dışı stil mevcut', !!disari, disari);
+      S.maltlar = [{ id: 'pilsner', kg: 4 }];
+      S.mayaId = 'us05';
+      S.hoplar = [{ id: HOPLAR[0].id, g: 20, dk: 60 }];
+      window.__stilSecKaynak = 'dropdown';
+      window.__bmV12DispatchInfo = { slugBranchHit: true, timestamp: 4242 };
+      const slugA = Object.keys(S2B).find(k => S2B[k] && BJCP[S2B[k]]);
+      window.__lastV12Result = { topN: [{ slug: slugA, normalized: 60 }] };
+      const r = calc();
+      window.__lastV12Recipe = { _og: r.og, maltIds: S.maltlar.map(m => m.id), mayaId: S.mayaId };
+      S.stil = disari;
+      tarifeKaydet();
+      const h = _bmStilOgrenOku();
+      __REG.ok('kapsam-dışı stil: kayıt VAR ama kapsamda=false + uyumSira=null ("yanıldı" sayılmaz)', h.length === 1 && h[0].kapsamda === false && h[0].uyumSira === null, JSON.stringify(h[0]));
+      _bmStilOgrenYaz([
+        { rid: 'a', kapsamda: true, uyumSira: 1 },
+        { rid: 'b', kapsamda: true, uyumSira: 3 },
+        { rid: 'c', kapsamda: true, uyumSira: null },
+        { rid: 'd', kapsamda: false, uyumSira: null }
+      ]);
+      const st = _bmStilMotorStatHtml();
+      __REG.ok('istatistik: 3 reçetede top-1 %33 / top-3 %67 / kapsam dışı: 1', st.indexOf('3 reçetede top-1 %33') >= 0 && st.indexOf('top-3 %67') >= 0 && st.indexOf('kapsam dışı: 1') >= 0, st);
+      const kart = (typeof rStokAyarlar === 'function') ? rStokAyarlar() : '';
+      __REG.ok('Ayarlar Tanı kartı satırı içeriyor (rStokAyarlar)', kart.indexOf('Stil motoru isabet') >= 0);
+      localStorage.removeItem('bm_stil_ogren_v1');
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'Z-KAYNAK', ad: 'KAYNAK BAYRAĞI: stilSec çipi → stilSec; dropdown change → dropdown; İskeleti Doldur → iskelet (NİYET) → tam reçetede bile sinyal YAZILMAZ',
+    calistir: (page) => page.evaluate(() => {
+      localStorage.removeItem('bm_stil_ogren_v1');
+      __REG.yeniKayit('REGTEST ZKAYNAK', {});
+      const S2B = window.SLUG_TO_BJCP;
+      const slugA = Object.keys(S2B).find(k => S2B[k] && BJCP[S2B[k]]);
+      const nameA = S2B[slugA];
+      window.__stilSecKaynak = null; S.stil = '';
+      const b = document.createElement('button');
+      b.setAttribute('data-stil', nameA);
+      stilSec(b);
+      __REG.ok('stilSec çipi → S.stil yazıldı + kaynak=stilSec', S.stil === nameA && window.__stilSecKaynak === 'stilSec');
+      const sel = document.querySelector('select[aria-label="Hedef stil"]');
+      __REG.ok("Hedef stil dropdown DOM'da bulundu", !!sel);
+      if (sel) {
+        window.__stilSecKaynak = null;
+        const opt = Array.from(sel.options).find(o => o.value && o.value !== nameA);
+        sel.value = opt.value;
+        sel.dispatchEvent(new Event('change'));
+        __REG.ok('dropdown change → S.stil yazıldı + kaynak=dropdown', S.stil === opt.value && window.__stilSecKaynak === 'dropdown');
+      }
+      const iskYok = Object.keys(BJCP).find(n => typeof STIL_ISKELET !== 'undefined' && !STIL_ISKELET[n]);
+      S.stil = iskYok || nameA;
+      bmStilIskeletDoldur();
+      __REG.ok('İskeleti Doldur → kaynak=iskelet (NİYET işareti)', window.__stilSecKaynak === 'iskelet');
+      S.stil = nameA;
+      S.maltlar = [{ id: 'pilsner', kg: 4 }];
+      S.mayaId = 'us05';
+      S.hoplar = [{ id: HOPLAR[0].id, g: 20, dk: 60 }];
+      window.__bmV12DispatchInfo = { slugBranchHit: true, timestamp: 4242 };
+      window.__lastV12Result = { topN: [{ slug: slugA, normalized: 60 }] };
+      const r = calc();
+      window.__lastV12Recipe = { _og: r.og, maltIds: S.maltlar.map(m => m.id), mayaId: S.mayaId };
+      tarifeKaydet();
+      __REG.ok('iskelet-niyet: 4 kapı geçse bile sinyal YAZILMADI (düzeltme değil)', _bmStilOgrenOku().length === 0);
+      localStorage.removeItem('bm_stil_ogren_v1');
+      return __REG.al();
+    })
   }
 ];
 
