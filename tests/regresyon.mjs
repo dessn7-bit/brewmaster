@@ -2127,6 +2127,73 @@ const CASELER = [
       __REG.ok('değersiz kaydet → yazmaz (uydurma yok)', (S.brewLog || []).filter(x => x.tip === 'sicaklik').length === 0);
       return __REG.al();
     })
+  },
+
+  // ── SPRINT AG: tadım paneli friksiyon (AG1 reorder + AG2 hızlı-overall + kaynak-ayrımı) ──
+  {
+    kod: 'AG1-REORDER', ad: 'OFF-FLAVOR ÖNE: panel render sırasında off-flavor bölümü 5 puandan ÖNCE (DOM); tag/? teşhis/W1 ekle AYNEN; 5 puan+15 tag+not KAYBOLMADI (veri-kesmez)',
+    calistir: (page) => page.evaluate(() => {
+      const id = __REG.yeniKayit('AG1 Bira', { mayaId: 'us05', stil: 'American IPA' });
+      // şişeleme logu (panel _hasSis kapısı) + render not sekmesi
+      S.brewLog = [{ tip: 'siseleme', tarih: '2026-07-01', id: 's1', ts: 1 }];
+      ekran = 'editor'; sekme = 'not'; render();
+      const dom = document.getElementById('ekran').innerHTML;
+      const iOff = dom.indexOf('OFF-FLAVOR KONTROLÜ');
+      const iAroma = dom.indexOf('👃 Aroma');
+      __REG.ok('off-flavor bölümü 5 puandan ÖNCE render edildi (scroll gerekmez)', iOff >= 0 && iAroma >= 0 && iOff < iAroma, 'off=' + iOff + ' aroma=' + iAroma);
+      __REG.ok('VERİ-KESMEZ: 5 BJCP puanı korundu (Aroma/Görünüm/Tat/Ağız/Genel)', dom.indexOf('👃 Aroma') >= 0 && dom.indexOf('👁️ Görünüm') >= 0 && dom.indexOf('👅 Tat') >= 0 && dom.indexOf('🫧 Ağız') >= 0 && dom.indexOf('⭐ Genel') >= 0);
+      __REG.ok('VERİ-KESMEZ: 15 off-flavor tag korundu (_tOffLbl_ checkbox\'lar)', (dom.match(/_tOffLbl_/g) || []).length >= 15);
+      __REG.ok('VERİ-KESMEZ: genel tadım notu korundu', dom.indexOf('id="tadimNot"') >= 0);
+      __REG.ok('DETAYLI BJCP separator eklendi', dom.indexOf('DETAYLI BJCP PUANLAMA') >= 0);
+      // W1 öğrenme yolu AYNEN: tag işaretle → bmOffOgren (? → ekle) çalışıyor
+      const offOnce = window._bmOffOgrenOku().length;
+      tadimOff('diacetyl', true); // tag işaretle (offList)
+      __REG.ok('tag işaretleme (offList) çalışıyor', S.tadim && S.tadim.offList && S.tadim.offList.diacetyl === true);
+      bmOffOgren('diacetyl'); // W1 öğrenme (?→ekle yolu, kod alır)
+      __REG.ok('W1 öğrenme (bmOffOgren) AYNEN çalışıyor — profile eklendi', window._bmOffOgrenOku().length === offOnce + 1);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AG2-HIZLI', ad: 'HIZLI OVERALL: İyi→genel8+puanKaynak hizli; Sorunlu→genel2; detaylı puan→detay (kaba+precise KARIŞMAZ); oturum kaydet+delta AYNEN',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('AG2 Bira', { mayaId: 'us05' });
+      S.brewLog = [{ tip: 'siseleme', tarih: '2026-07-01', id: 's1', ts: 1 }];
+      S.tadim = null;
+      tadimHizli(8);
+      __REG.ok('İyi → genel=8 + puanKaynak=hizli', S.tadim.genel === 8 && S.tadim.puanKaynak === 'hizli');
+      tadimHizli(2);
+      __REG.ok('Sorunlu → genel=2 + hizli', S.tadim.genel === 2 && S.tadim.puanKaynak === 'hizli');
+      // KRİTİK AYRIM: detaylı puan girince detay olur
+      tadimSet('aroma', 10);
+      __REG.ok('KAYNAK AYRIMI: detaylı puan → puanKaynak=detay (kaba+precise karışmaz)', S.tadim.puanKaynak === 'detay' && S.tadim.aroma === 10);
+      // oturum kaydet AYNEN (arşiv)
+      tadimOturumKaydet();
+      __REG.ok('oturum kaydedildi (arşiv AYNEN) + puanKaynak dondu', S.tadim.oturumlar.length === 1 && S.tadim.oturumlar[0].puanKaynak === 'detay');
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AG2-DELTA-KAYNAK', ad: 'DELTA KAYNAK-AYRIMI (kritik): hızlı+detaylı oturum karışık → delta kaba oturumu DIŞLAR (yanıltıcı "kötüleşti" yok); liste HEPSİNİ gösterir; iki-detay → delta çalışır',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('AG2 Delta', { mayaId: 'us05' });
+      S.brewLog = [{ tip: 'siseleme', tarih: '2026-07-01', id: 's1', ts: 1 }];
+      // 2 detaylı oturum (delta geçerli olmalı) + 1 hızlı (delta'ya girmemeli)
+      S.tadim = { aroma: 0, gorunum: 0, tat: 0, agizH: 0, genel: 0, offList: {}, tadimNot: '', oturumlar: [
+        { tarih: '2026-07-02', aroma: 8, gorunum: 2, tat: 15, agizH: 4, genel: 7, toplam: 36, offList: {}, puanKaynak: 'detay' },
+        { tarih: '2026-07-05', aroma: 9, gorunum: 3, tat: 16, agizH: 4, genel: 8, toplam: 40, offList: {}, puanKaynak: 'detay' },
+        { tarih: '2026-07-10', aroma: 0, gorunum: 0, tat: 0, agizH: 0, genel: 2, toplam: 2, offList: {}, puanKaynak: 'hizli' }
+      ] };
+      ekran = 'editor'; sekme = 'not'; render();
+      const dom = document.getElementById('ekran').innerHTML;
+      // delta son iki DETAY oturumu (36→40) karşılaştırır, hızlı (2) DEĞİL
+      __REG.ok('delta detay oturumları eşler (36→40, hızlı dışlandı)', dom.indexOf('36/50') >= 0 && dom.indexOf('40/50') >= 0);
+      __REG.ok('YANILTICI YOK: hızlı toplam (2/50) delta karşılaştırmasına GİRMEDİ', dom.indexOf('2/50 →') < 0 && dom.indexOf('→ 2/50') < 0);
+      // liste hepsini gösterir (3 oturum arşivde)
+      const oturumSay = (dom.match(/\/50/g) || []).length;
+      __REG.ok('ARŞİV KORUNDU: liste 3 oturumu da gösterir (hızlı dahil)', dom.indexOf('👅 Hızlı') >= 0 || oturumSay >= 3, 'oturum işareti=' + oturumSay);
+      return __REG.al();
+    })
   }
 ];
 

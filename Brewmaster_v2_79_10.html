@@ -15980,7 +15980,11 @@ function rEditorNot(){
         +'<span style="font-size:var(--fs-xs);color:var(--soluk);min-width:28px;text-align:right">/'+max+'</span>'
       +'</div>'
       +(acik?'<textarea id="_tdnot_'+id+'" aria-label="'+label+' notu" class="inp" rows="2" style="width:100%;margin-top:6px;font-size:11px;padding:6px 8px;resize:vertical;box-sizing:border-box;background:var(--bg2)" placeholder="'+detay+'" oninput="tadimSetNot(\''+id+'_not\',this.value)">'+(_T[id+'_not']||'')+'</textarea>':'')
-    +'</div>';
+    +'</div>';  };
+  // SPRINT AG2: hızlı-overall buton üreticisi (İyi/İdare/Sorunlu → genel'e kaba değer). _T scope'unda.
+  var _hzBtn = function(g, etiket){
+    var akt = (_T.puanKaynak==='hizli' && (_T.genel||0)===g);
+    return '<button type="button" onclick="tadimHizli('+g+')" style="padding:5px 12px;border-radius:14px;border:1.5px solid '+(akt?'var(--altin)':'var(--bor)')+';background:'+(akt?'var(--sa)':'var(--card)')+';color:var(--kahve);font-size:12px;cursor:pointer;font-weight:'+(akt?'700':'500')+'">'+etiket+'</button>';
   };
 
   var _tOffHtml = _tOff.map(function(k){
@@ -15997,8 +16001,9 @@ function rEditorNot(){
   var _oturumlarHtml = '';
   if(_T.oturumlar && _T.oturumlar.length > 0){
     var _deltaKart = '';
-    if(_T.oturumlar.length >= 2){
-      var _oc=_T.oturumlar, _prev=_oc[_oc.length-2], _last=_oc[_oc.length-1];
+    var _oc=_T.oturumlar.filter(function(o){return o&&(o.puanKaynak||'detay')!=='hizli';}); // AG2: delta yalnız detaylı BJCP oturumu eşler (hızlı genel-only toplam kıyaslanamaz; liste hepsini gösterir)
+    if(_oc.length >= 2){
+      var _prev=_oc[_oc.length-2], _last=_oc[_oc.length-1];
       var _ddmm=function(t){return (t&&t.length>=10)?(t.slice(8,10)+'.'+t.slice(5,7)):(t||'?');};
       var _eksenSat=function(ad,a,b){a=a||0;b=b||0;var d=b-a;
         if(d===0) return ad+' '+a+' <span style="color:var(--soluk)">=</span>';
@@ -16056,16 +16061,22 @@ function rEditorNot(){
     +'</div>'
     +_stilIpucu
     +(!_hasSis?'<div style="background:var(--bg2);border-left:3px solid var(--vintage);border-radius:6px;padding:8px 10px;margin:10px 0;font-size:var(--fs-xs);color:var(--soluk)">🔒 Şişeleme kaydı yapılınca aktifleşir — taze bira tadım için hazır değil.</div>':'<div style="height:8px"></div>')
+    +'<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px;margin-bottom:4px">'
+      +'<span style="font-size:var(--fs-xs);font-weight:700;color:var(--kahve)">👅 Hızlı:</span>'
+      +_hzBtn(8,'🙂 İyi')+_hzBtn(5,'😐 İdare')+_hzBtn(2,'☹️ Sorunlu')
+      +'<span style="font-size:10px;color:var(--dim)">tek-dokunuş kaba not · detaylı puan altta</span>'
+    +'</div>'
+    +'<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bor)">'
+      +'<div style="font-size:var(--fs-xs);font-weight:700;color:var(--kahve);letter-spacing:.5px;margin-bottom:6px">⚠️ OFF-FLAVOR KONTROLÜ <span style="font-weight:400;color:var(--dim)">— kusuru işaretle + ? ile öğren</span></div>'
+      +'<div style="font-size:var(--fs-xs);color:var(--soluk);margin-bottom:6px;line-height:1.4">İşaretle · her etiketin <b>?</b> düğmesi olası neden, çözüm ve önlemi gösterir</div>'
+      +'<div style="line-height:1.9">'+_tOffHtml+'</div>'
+    +'</div>'
+    +'<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bor);font-size:var(--fs-xs);font-weight:700;color:var(--kahve);letter-spacing:.5px">🎯 DETAYLI BJCP PUANLAMA <span style="font-weight:400;color:var(--dim)">— isteğe bağlı, 50 puan</span></div>'
     +_tadimInput('aroma', _T.aroma, 12, '👃 Aroma', 'Hangi aromalar öne çıkıyor? (muz, karanfil, karamel, sitrus, kuru meyve...)')
     +_tadimInput('gorunum', _T.gorunum, 3, '👁️ Görünüm', null)
     +_tadimInput('tat', _T.tat, 20, '👅 Tat', 'Malt/hop dengesi, tatlılık, acılık, aftertaste...')
     +_tadimInput('agizH', _T.agizH, 5, '🫧 Ağız hissi', 'Gövde (hafif/orta/dolgun), karbonasyon (düşük/orta/yüksek), ısı hissi...')
     +_tadimInput('genel', _T.genel, 10, '⭐ Genel izlenim', null)
-    +'<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bor)">'
-      +'<div style="font-size:var(--fs-xs);font-weight:700;color:var(--kahve);letter-spacing:.5px;margin-bottom:6px">⚠️ OFF-FLAVOR KONTROLÜ</div>'
-      +'<div style="font-size:var(--fs-xs);color:var(--soluk);margin-bottom:6px;line-height:1.4">İşaretle · her etiketin <b>?</b> düğmesi olası neden, çözüm ve önlemi gösterir</div>'
-      +'<div style="line-height:1.9">'+_tOffHtml+'</div>'
-    +'</div>'
     +'<div style="margin-top:10px">'
       +'<label style="font-size:var(--fs-xs);font-weight:700;color:var(--kahve);letter-spacing:.5px">📝 GENEL TADIM NOTU</label>'
       +'<textarea aria-label="Genel tadım notu" id="tadimNot" class="inp" rows="3" style="width:100%;margin-top:4px;font-size:12px;padding:8px;resize:vertical;box-sizing:border-box;background:var(--bg2)" placeholder="Bu tadım oturumunun özeti — stile uygunluk, en güçlü/zayıf yön, sonraki partide değiştirecekler..." oninput="tadimSetNot(\'tadimNot\',this.value)">'+(_T.tadimNot||'')+'</textarea>'
@@ -24206,6 +24217,7 @@ window.toggleStilIdeal=toggleStilIdeal;
 function tadimSet(alan, val){
   if(!S.tadim) S.tadim = {aroma:0,gorunum:0,tat:0,agizH:0,genel:0,offList:{},tadimNot:'',aroma_not:'',tat_not:'',agizH_not:'',oturumlar:[]};
   S.tadim[alan] = parseInt(val,10)||0;
+  S.tadim.puanKaynak = 'detay'; // AG2: manuel BJCP puanı → detaylı kaynak
   try{saveDraft();}catch(e){}
   // Cerrahi güncelleme: toplam skor + seviye
   try{
@@ -24226,6 +24238,17 @@ function tadimSet(alan, val){
   }catch(e){}
 }
 window.tadimSet=tadimSet;
+// SPRINT AG2: hızlı overall — genel puana kaba değer (İyi=8/İdare=5/Sorunlu=2) + kaynak işareti 'hizli'.
+// Detaylı BJCP formu (tadimSet) puanKaynak'ı 'detay' yapar → delta kaba+precise KARIŞTIRMAZ.
+function tadimHizli(g){
+  if(!S.tadim) S.tadim = {aroma:0,gorunum:0,tat:0,agizH:0,genel:0,offList:{},tadimNot:'',aroma_not:'',tat_not:'',agizH_not:'',oturumlar:[]};
+  S.tadim.genel = g;
+  S.tadim.puanKaynak = 'hizli';
+  try{saveDraft();}catch(e){}
+  if(typeof render==='function') render();
+  if(g<=2){ setTimeout(function(){ try{var el=document.getElementById('_tOffLbl_diacetyl'); if(el&&el.scrollIntoView)el.scrollIntoView({block:'center'});}catch(_e){} }, 60); } // Sorunlu → off-flavor odak
+}
+window.tadimHizli=tadimHizli;
 
 // Artış/azalış — butonla. DOM'dan oku, delta uygula, kırp, güncelle
 function tadimInc(alan, delta, max){
@@ -24809,7 +24832,7 @@ function tadimOturumKaydet(){
   T.oturumlar.push({
     tarih: new Date().toISOString().slice(0,10),
     aroma:T.aroma||0, gorunum:T.gorunum||0, tat:T.tat||0, agizH:T.agizH||0, genel:T.genel||0,
-    toplam:toplam,
+    toplam:toplam, puanKaynak:(T.puanKaynak||'detay'),
     offList: Object.assign({}, T.offList||{}),
     aroma_not:T.aroma_not||'', tat_not:T.tat_not||'', agizH_not:T.agizH_not||'',
     tadimNot:T.tadimNot||''
