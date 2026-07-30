@@ -4862,6 +4862,20 @@ function mayaViabilite(ayYas){
 // ─ Maya yardımcıları (maya sekmesi) ──
 const BM_KURU_PAKET_B=220; // kuru maya paket bazı (Lallemand 11g ≈ 220B)
 const BM_SIVI_GML=1.3; // sıvı katkı yoğunluğu g/mL (candi şurup bazı) — hOG/hSRM/kalori tek kaynak
+// ═══ SPRINT AA2: kaynatma buharlaşma oranı — kettle başına GLOBAL ayar (per-reçete değil) ═══
+// Emsal: bmMayaKalib LS getter/setter. Varsayılan %12/saat (Palmer); anahtar YOKKEN 0.12 döner →
+// mevcut tüm reçeteler byte-özdeş kalır (geriye uyum). Kapalı all-in-one (Bulldog) tipik ~%5-8.
+// TEK KAYNAK: hesap motorundaki 3 buharlaşma noktası (pre-boil hedef, su kırılımı, kv-hedef) bunu okur.
+function bmBoilOff(){ // kesir (0.12); akıl bandı %2-25 dışı → varsayılan
+  try{ var v=parseInt(localStorage.getItem('bm_boiloff_v1'),10); return (isFinite(v)&&v>=2&&v<=25)?v/100:0.12; }catch(e){ return 0.12; }
+}
+function bmBoilOffPct(){ return Math.round(bmBoilOff()*100); } // UI yüzdesi
+function bmBoilOffSet(v){ // v = yüzde; 12/geçersiz → anahtar sil (temiz LS + varsayılan), 2-25 → yaz, dışı → yok say (akıl bandı)
+  try{ v=parseInt(v,10);
+    if(!isFinite(v)||v===12){ localStorage.removeItem('bm_boiloff_v1'); }
+    else if(v>=2&&v<=25){ localStorage.setItem('bm_boiloff_v1', String(v)); }
+  }catch(e){}
+}
 function bmMayaKalib(id){try{const o=JSON.parse(localStorage.getItem('bm_maya_kalibrasyon')||'{}');const v=o[id];return (typeof v==='number'&&v>0)?v:null;}catch(e){return null;}}
 function bmMayaKalibSet(id,v){try{const o=JSON.parse(localStorage.getItem('bm_maya_kalibrasyon')||'{}');if(v==null||!(+v>0))delete o[id];else o[id]=Math.round(+v);localStorage.setItem('bm_maya_kalibrasyon',JSON.stringify(o));}catch(e){}}
 function bmFermSic(){try{var v=localStorage.getItem('bm_ferm_sicaklik');return (v==null||v==='')?null:+v;}catch(e){return null;}}
@@ -5064,7 +5078,7 @@ function fermentasyonProfili(stil, og, mayaTip, maya){
     var hedefT = maya&&maya.sc?Math.min(maya.sc[1],32):30; // Dupont 32, French ~26
     var mid = Math.round((pitchT + hedefT) / 2);
     prof.gunler=[
-      {g:0, t:pitchT, aksiyon:'🧬 Pitching', aciklama:'Pitch '+pitchT+'°C\'de. Bol O₂ (yüksek attenüasyon için maya sağlığı şart). Starter önerilir.'},
+      {g:0, t:pitchT, aksiyon:'🧬 Pitching', aciklama:'Pitch '+pitchT+'°C\'de. Bol O₂ (yüksek attenüasyon için maya sağlığı şart). '+(mayaFormu(maya)==='liquid'?'Sıvı mayada starter önerilir.':'Kuru mayada yeterli paket at (starter gerekmez).')},
       {g:1, t:pitchT+1, aksiyon:'⏳ Lag + aktivasyon', aciklama:(pitchT+1)+'°C\'ye çık. Airlock yavaş başlıyor.'},
       {g:2, t:pitchT+2, aksiyon:'🫧 Aktif fermentasyon', aciklama:(pitchT+2)+'°C. Aggressive ester patlaması başlıyor.'},
       {g:3, t:mid, aksiyon:'📈 Free rise başla', aciklama:mid+'°C\'ye çık. Markowski: stuck fermentasyon önlemek için erken sıcaklık artışı şart.'},
@@ -5111,7 +5125,7 @@ function fermentasyonProfili(stil, og, mayaTip, maya){
     prof.aciklama='Daha uzun fermentasyon. Yüksek ABV maya stresi — dikkatli free rise.';
     pitchT=18;
     prof.gunler=[
-      {g:0, t:18, aksiyon:'🧬 Pitching (düşük)', aciklama:'18°C pitch. Starter şart. Bol O₂.'},
+      {g:0, t:18, aksiyon:'🧬 Pitching (düşük)', aciklama:'18°C pitch. '+(mayaFormu(maya)==='liquid'?'Yüksek ABV — sıvı mayada starter şart.':'Yüksek ABV — kuru mayada 2+ paket at (starter gerekmez).')+' Bol O₂.'},
       {g:1, t:18, aksiyon:'⏳ Yavaş başla', aciklama:'18°C tut. Yüksek ABV = yavaş başlangıç.'},
       {g:2, t:19, aksiyon:'🫧 Aktivasyon', aciklama:'19°C\'ye çık. Aktivite başladı.'},
       {g:3, t:20, aksiyon:'🫧 Aktif', aciklama:'20°C. Günlük 1°C artış.'},
@@ -14675,7 +14689,7 @@ function rEditorSurec(){
       // Hedef pre-boil OG: Final OG × (final_hacim / pre_boil_hacim)
       const hacim=S.hacim||11;
       const _kSure=S.kaynatmaSure||60;
-      const kb=hacim*0.12*_kSure/60; // Kaynatma kaybı
+      const kb=hacim*bmBoilOff()*_kSure/60; // Kaynatma kaybı (AA2: kettle ayarı, tek kaynak)
       const preHacim=hacim+0.9+kb; // Post-boil + trub + kaynatma
       const _ogHspF=parseFloat(_ogHsp);
       const preOGHedef=1+((_ogHspF-1)*hacim/preHacim);
@@ -15093,7 +15107,7 @@ function rEditorMaya(og, fg, abv, maya, maya2, fgKaynak, fgHesap){
       const _cellsM=_pitchRate*_ogP2*(S.hacim||11)*1000;
       const _cellsB=(_cellsM/1000).toFixed(0);
       const _paketler=Math.ceil(_cellsM/(BM_KURU_PAKET_B*1000));
-      const _starter=_cellsM>BM_KURU_PAKET_B*1000*2?"✅ Starter önerilir":"";
+      const _starter=(mayaFormu(maya)==='liquid'&&_cellsM>BM_KURU_PAKET_B*1000*2)?"✅ Starter önerilir":"";
       return '<div style="background:var(--sa);border:1px solid var(--altin);border-radius:8px;padding:8px 12px;margin-bottom:8px;font-size:11px">'+
         '<span style="font-weight:700;color:var(--sk)">🧬 Pitch Rate: </span>'+
         '<span style="color:var(--kahve)">'+_pitchRate+'M hücre/mL/°P → '+_cellsB+'B hücre · '+_paketler+' paket</span>'+
@@ -15158,7 +15172,7 @@ function rEditorMaya(og, fg, abv, maya, maya2, fgKaynak, fgHesap){
       
       // Uyarı: çok düşük/yüksek?
       const kritikDusuk = kuruPaket < 0.5; // < 0.5 paket — yetersiz
-      const kritikYuksek = kuruPaket > 3; // > 3 paket — starter gerek
+      const kritikYuksek = kuruPaket > 3; // > 3 paket — sıvıda starter, kuruda paket sayısı (AA1)
       
       // M-M3: DME Starter hesabı (Chris White "Yeast")
       // Hedef: 100B hücre başlangıç (1 vial taze), starter wort ~1.037 (40g DME/L)
@@ -15187,7 +15201,7 @@ function rEditorMaya(og, fg, abv, maya, maya2, fgKaynak, fgHesap){
       const _starter=_dmeStarter();
       
       let uyari = '';
-      if (kritikYuksek||(_form==='liquid'&&_starter)){
+      if (_form==='liquid' && (kritikYuksek||_starter)){
         uyari = `<div style="background:var(--sa);border-left:3px solid var(--sk);padding:8px 12px;margin-top:6px;font-size:11px;color:var(--vintage-koyu);border-radius:4px">
           ⚠️ <b>Starter öneriliyor</b>${kritikYuksek?` — ${kuruPaket.toFixed(1)} kuru paket çok fazla (overpitch maliyetli).`:'.'}
           ${_starter?`<div style="margin-top:6px;padding:6px 8px;background:rgba(255,255,255,.6);border-radius:4px;color:var(--kahve)">
@@ -15200,6 +15214,16 @@ function rEditorMaya(og, fg, abv, maya, maya2, fgKaynak, fgHesap){
               • Şişeledikten 12-24 saat sonra brewday
             </div>
           </div>`:'Sıvı maya + 1.5L DME starter.'}
+        </div>`;
+      } else if (_form==='dry' && kritikYuksek) {
+        // AA1: KURU mayaya STARTER YAPILMAZ — paket zaten yeterli hücre + besin rezervi (sterol/trehalose)
+        // taşır; starter bu rezervi tüketip maya sağlığını bozar. Doğru yol: paket sayısı + opsiyonel rehydrate.
+        uyari = `<div style="background:var(--sa);border-left:3px solid var(--sk);padding:8px 12px;margin-top:6px;font-size:11px;color:var(--vintage-koyu);border-radius:4px">
+          📦 <b>${kuruPaket.toFixed(1)} paket kuru maya</b> gerekiyor (yüksek OG/hacim).
+          <div style="margin-top:5px;padding:6px 8px;background:rgba(255,255,255,.6);border-radius:4px;color:var(--kahve);line-height:1.5">
+            Kuru mayaya <b>starter yapılmaz</b> — paket zaten yeterli hücre + besin rezervi (sterol/trehalose) taşır; starter bu rezervi tüketip maya sağlığını bozar.
+            Doğru yol: <b>${Math.ceil(kuruPaket)} paket</b> doğrudan at (opsiyonel: ~25–30°C suda 15 dk rehydrate). Maliyet yüksekse taze slurry hasadı düşün.
+          </div>
         </div>`;
       } else if (kritikDusuk) {
         uyari = `<div style="background:var(--ya);border-left:3px solid var(--yk);padding:6px 10px;margin-top:6px;font-size:11px;color:var(--yk);border-radius:4px">
@@ -15304,9 +15328,9 @@ function rEditorHesap(og, fg, abv, maya){
   const _cAuto=_co2Ideal; // otomatik hedef
   const topMaltKg=S.maltlar.reduce((s,m)=>{const ml=MALTLAR.find(x=>x&&x.id===m.id);return (!ml||ml.g==="Şeker"||(m.id==="rice"||m.id==="rice_hulls"))?s:s+m.kg;},0);
   const em=+(topMaltKg*.7).toFixed(1);
-  // Kaynatma kaybı: %12/saat (Palmer), süreye göre orantılı
+  // Kaynatma kaybı: bmBoilOff() (varsayılan %12/saat, Palmer), süreye orantılı — AA2 tek kaynak
   const _kSure = S.kaynatmaSure || 60;
-  const kb=+(hacim*0.12*_kSure/60).toFixed(1);
+  const kb=+(hacim*bmBoilOff()*_kSure/60).toFixed(1);
   const pb=+(hacim+0.9).toFixed(1);
   const pre=+(parseFloat(pb)+parseFloat(kb)).toFixed(1);
   const mash=+(parseFloat(pre)+parseFloat(em)).toFixed(1);
@@ -16278,6 +16302,14 @@ function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
           </div>
         </div>
       </div>
+    </div>
+    <div style="margin-top:10px">
+      <span class="etiket">Kaynatma Buharlaşması <span style="font-weight:400;color:var(--dim);font-size:11px">(kettle\x27ına göre — su/pre-boil hesabı)</span></span>
+      <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap">
+        ${[6,8,10,12,15].map(function(v){return '<button class="btn" style="flex:1;min-width:50px;padding:7px 0;border:1.5px solid '+(bmBoilOffPct()===v?"var(--altin)":"var(--bor)")+';background:'+(bmBoilOffPct()===v?"var(--sa)":"var(--card)")+';color:'+(bmBoilOffPct()===v?"var(--bakir)":"var(--soluk)")+';font-weight:'+(bmBoilOffPct()===v?700:500)+'" onclick="bmBoilOffSet('+v+');render()">%'+v+'/sa</button>';}).join("")}
+        <input aria-label="Kaynatma buharlaşması (%/saat)" type="number" class="inp" style="width:70px;text-align:center;font-weight:${![6,8,10,12,15].includes(bmBoilOffPct())?700:500};${![6,8,10,12,15].includes(bmBoilOffPct())?'border:1.5px solid var(--altin);background:var(--sa);color:var(--bakir);':''}" placeholder="Özel" min="2" max="25" value="${![6,8,10,12,15].includes(bmBoilOffPct())?bmBoilOffPct():''}" onchange="var v=parseInt(this.value);if(v>=2&&v<=25){bmBoilOffSet(v);render();}else{if(typeof flash==='function')flash('Buharlaşma %2–25 aralığında olmalı','err');render();}">
+      </div>
+      <div style="font-size:11px;color:var(--dim);line-height:1.4">Varsayılan %12/saat (Palmer). Kapalı all-in-one kazan (Bulldog) tipik ~%5–8; açık kazan daha yüksek. Su miktarı ve pre-boil OG hedefini etkiler; OG tahminini değiştirmez.</div>
     </div>
     ${(function(){try{return _gristDenetimRender(gristDenetim(S.maltlar,MALTLAR,(S.stil||null),(typeof BJCP!=='undefined'?BJCP:null),srm,og));}catch(_e){return '';}})()}
     ${(function(){try{return (typeof gristOlcekHTML==='function')?gristOlcekHTML(og,S.hacim||11):'';}catch(_e){return '';}})()}
@@ -20683,7 +20715,7 @@ function rEditor(){
   const rye=S.maltlar.find(m=>m&&m.id==="rye");
   if(rye&&topMalt>0&&(rye.kg/topMalt)>0.15&&!S.maltlar.find(m=>m&&(m.id==="rice"||m.id==="rice_hulls")))uy+=`<div class="uybox uy-s">⚠️ Çavdar >%${Math.round(rye.kg/topMalt*100)} — Pirinç kabuğu (150-200g) ekle!</div>`;
   if((S.maltlar.find(m=>m&&m.id==="lak")||{kg:0}).kg>0.4)uy+=`<div class="uybox uy-s">⚠️ Laktoz yüksek — max 0.4 kg önerilir</div>`;
-  if(og>1.080&&!maya)uy+=`<div class="uybox uy-k">⚠️ OG 1.080+ — starter hazırla</div>`;
+  if(og>1.080&&!maya)uy+=`<div class="uybox uy-k">⚠️ OG 1.080+ — bol maya hazırla (sıvıda starter, kuruda ekstra paket)</div>`;
   if(ibu>0&&ibu<10&&S.maltlar.length)uy+=`<div class="uybox uy-k">⚠️ IBU ${ibu.toFixed(1)} — çok düşük (< 10 IBU enfeksiyon riski artar)</div>`;
 
   const minOpts=MINERALLER.filter(m=>m).map(m=>`<option value="${m.id}">${m.ad}</option>`).join("");
@@ -21382,7 +21414,7 @@ window._bdOlcumBlokHTML=function(tur){
   try{
     const c=calc();
     if(c&&c.og>1){
-      if(pb){const _h=S.hacim||11,_ks=S.kaynatmaSure||60,_ph=_h+0.9+_h*0.12*_ks/60;hedef=(1+((c.og-1)*_h/_ph)).toFixed(3);}
+      if(pb){const _h=S.hacim||11,_ks=S.kaynatmaSure||60,_ph=_h+0.9+_h*bmBoilOff()*_ks/60;hedef=(1+((c.og-1)*_h/_ph)).toFixed(3);}
       else hedef=c.og.toFixed(3);
     }
   }catch(e){}

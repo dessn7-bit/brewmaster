@@ -1752,6 +1752,94 @@ const CASELER = [
       localStorage.removeItem('bm_stil_ogren_v1');
       return __REG.al();
     })
+  },
+
+  // ── SPRINT AA: maya starter form-farkındalığı (AA1) + boil-off ayarı (AA2) ──
+  {
+    kod: 'AA1-FORM', ad: 'MAYA STARTER FORM-FARKINDA: KURU maya yüksek OG → "starter yapılmaz" + paket sayısı (Starter öneriliyor/önerilir YOK); SIVI maya → starter + DME reçetesi (geçerli, korundu)',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('REGTEST AAFORM', {});
+      S.hacim = 30; S.maltlar = [{ id: 'pilsner', kg: 9 }]; S.hoplar = [{ id: HOPLAR[0].id, g: 20, dk: 60 }];
+      const og = 1.090, fg = 1.018, abv = 9.5;
+      // KURU maya (US-05) — mayaFormu id-prefix ile 'dry'
+      const mDry = MAYALAR.find(m => m.id === 'us05');
+      S.mayaId = 'us05';
+      const hDry = rEditorMaya(og, fg, abv, mDry, null, 'hesap', fg);
+      __REG.ok('KURU: pitch kartı "Starter öneriliyor" YOK (yanlış mesaj bitti)', hDry.indexOf('Starter öneriliyor') < 0);
+      __REG.ok('KURU: "starter yapılmaz" doğru mesaj VAR', hDry.indexOf('starter yapılmaz') >= 0);
+      __REG.ok('KURU: paket sayısı önerisi VAR (eyleme-dönük)', hDry.indexOf('paket') >= 0);
+      __REG.ok('KURU: quick-strip "✅ Starter önerilir" YOK', hDry.indexOf('Starter önerilir') < 0);
+      // SIVI maya (WY1056) — 'liquid', starter geçerli KALIR
+      const mLiq = MAYALAR.find(m => m.id === 'wy1056');
+      S.mayaId = 'wy1056';
+      const hLiq = rEditorMaya(og, fg, abv, mLiq, null, 'hesap', fg);
+      __REG.ok('SIVI: "Starter öneriliyor" VAR (geçerli öneri korundu)', hLiq.indexOf('Starter öneriliyor') >= 0);
+      __REG.ok('SIVI: DME Starter Reçetesi VAR', hLiq.indexOf('DME Starter') >= 0);
+      __REG.ok('SIVI: quick-strip "✅ Starter önerilir" VAR', hLiq.indexOf('Starter önerilir') >= 0);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AA1-TIMELINE', ad: 'BREWDAY TIMELINE form-farkında: Saison/Tripel day-0 pitch açıklaması KURU mayada "starter gerekmez", SIVI mayada "starter önerilir/şart"',
+    calistir: (page) => page.evaluate(() => {
+      const mDry = MAYALAR.find(m => m.id === 'us05');
+      const mLiq = MAYALAR.find(m => m.id === 'wy1056');
+      const sDry = fermentasyonProfili('Saison', 1.055, 'saison', mDry);
+      __REG.ok('Saison KURU: "starter gerekmez" (yanlış "Starter önerilir" YOK)', sDry.gunler[0].aciklama.indexOf('gerekmez') >= 0 && sDry.gunler[0].aciklama.indexOf('Starter önerilir') < 0);
+      const sLiq = fermentasyonProfili('Saison', 1.055, 'saison', mLiq);
+      __REG.ok('Saison SIVI: "starter önerilir" (geçerli)', sLiq.gunler[0].aciklama.indexOf('starter önerilir') >= 0);
+      const tDry = fermentasyonProfili('Belgian Tripel', 1.080, 'belcika', mDry);
+      __REG.ok('Tripel KURU: "starter gerekmez" (Starter şart YOK)', tDry.gunler[0].aciklama.indexOf('gerekmez') >= 0 && tDry.gunler[0].aciklama.indexOf('Starter şart') < 0);
+      const tLiq = fermentasyonProfili('Belgian Tripel', 1.080, 'belcika', mLiq);
+      __REG.ok('Tripel SIVI: "starter şart" (yüksek ABV, geçerli)', tLiq.gunler[0].aciklama.indexOf('starter şart') >= 0);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AA2-HESAP', ad: 'BOIL-OFF HESAP: varsayılan %12 → su/OG DEĞİŞMEDİ (KRİTİK regresyon); %6 → su azaldı (buharlaşma az) + final OG hedefi TUTUYOR (calc.og sabit); akıl bandı %50 reddedilir',
+    calistir: (page) => page.evaluate(() => {
+      localStorage.removeItem('bm_boiloff_v1');
+      __REG.ok('varsayılan (anahtar yok) → bmBoilOff()===0.12 (eski hardcoded birebir)', bmBoilOff() === 0.12);
+      __REG.yeniKayit('REGTEST AAHESAP', {});
+      S.hacim = 11; S.kaynatmaSure = 60; S.maltlar = [{ id: 'pilsner', kg: 4 }]; S.mayaId = 'us05'; S.hoplar = [{ id: HOPLAR[0].id, g: 20, dk: 60 }];
+      const m = MAYALAR.find(x => x.id === 'us05');
+      const suTotal = (h) => { const mm = h.match(/TOPLAM SU<\/span><span>([\d.]+)L/); return mm ? parseFloat(mm[1]) : null; };
+      const ogBefore = calc().og;
+      const totalDef = suTotal(rEditorHesap(calc().og, calc().fg, calc().abv, m));
+      __REG.ok('varsayılan su hesabı üretildi (TOPLAM SU okunur)', totalDef != null, String(totalDef));
+      bmBoilOffSet(6);
+      __REG.ok('set %6 → bmBoilOff()===0.06', bmBoilOff() === 0.06);
+      const total6 = suTotal(rEditorHesap(calc().og, calc().fg, calc().abv, m));
+      __REG.ok('%6: TOPLAM SU AZALDI (daha az buharlaşma → daha az su)', total6 != null && total6 < totalDef, total6 + ' < ' + totalDef);
+      __REG.ok('%6: final OG hedefi TUTUYOR (calc.og DEĞİŞMEDİ)', calc().og === ogBefore, calc().og + ' vs ' + ogBefore);
+      bmBoilOffSet(8); bmBoilOffSet(50);
+      __REG.ok('akıl bandı: %50 (>25) REDDEDİLDİ, %8 korundu', bmBoilOffPct() === 8, String(bmBoilOffPct()));
+      localStorage.removeItem('bm_boiloff_v1');
+      __REG.ok('temizlik → tekrar varsayılan 0.12 (regresyon güvenli)', bmBoilOff() === 0.12);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AA2-UI-EXPORT', ad: 'BOIL-OFF UI + EXPORT: Malt sekmesinde "Kaynatma Buharlaşması" bloğu render + aktif preset + export allowlist (bm_ prefix) round-trip',
+    calistir: (page) => page.evaluate(() => {
+      localStorage.removeItem('bm_boiloff_v1');
+      __REG.yeniKayit('REGTEST AAUI', {});
+      S.maltlar = [{ id: 'pilsner', kg: 4 }]; S.mayaId = 'us05';
+      bmBoilOffSet(6);
+      ekran = 'editor'; sekme = 'malt'; render();
+      const dom = document.getElementById('ekran').innerHTML;
+      __REG.ok('Malt sekmesinde "Kaynatma Buharlaşması" bloğu render edildi', dom.indexOf('Kaynatma Buharlaşması') >= 0);
+      __REG.ok('boil-off preset düğmeleri render (bmBoilOffSet çağrısı DOM\'da)', dom.indexOf('bmBoilOffSet(6)') >= 0);
+      __REG.ok('export allowlist: bm_boiloff_v1 bm_ prefix (senkronize + yedeğe girer)', /^(bm_|kabir_|_orig|acc_|KR$)/.test('bm_boiloff_v1'));
+      // round-trip: yaz → oku
+      bmBoilOffSet(7);
+      const saved = localStorage.getItem('bm_boiloff_v1');
+      localStorage.removeItem('bm_boiloff_v1');
+      localStorage.setItem('bm_boiloff_v1', saved);
+      __REG.ok('round-trip: %7 kaydı geri yüklendi → 0.07', bmBoilOff() === 0.07, saved);
+      localStorage.removeItem('bm_boiloff_v1');
+      return __REG.al();
+    })
   }
 ];
 
