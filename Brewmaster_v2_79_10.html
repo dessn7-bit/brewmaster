@@ -4354,7 +4354,7 @@ const MAYALAR=[
 
   // ── White Labs (WLP) — Referans dünya mayası ──────────────────
   {id:"wlp001",ad:"WLP001 California Ale",atu:[73,80],sc:[19,22],ideal:20,e:"Temiz Amerikan ale. US-05/WY1056 eşdeğeri likit.",tip:"ale",ek:"dolap"},
-  {id:"wlp002",ad:"WLP002 English Ale",atu:[63,70],sc:[18,20],ideal:19,e:"Klasik İngiliz ale. Çok yüksek çökelme. Meyve ester.",tip:"ale",ek:"dolap"},
+  {id:"wlp002",ad:"WLP002 English Ale",atu:[63,70],sc:[18,20],ideal:19,e:"Klasik İngiliz ale. Çok yüksek çökelme. Meyve ester.",tip:"ale",ek:"dolap",tol:10},
   {id:"wlp004",ad:"WLP004 Irish Ale",atu:[69,74],sc:[18,20],ideal:19,e:"Stout/Porter için. Tatlı meyve, hafif tart. Guinness soy.",tip:"ale",ek:"dolap"},
   {id:"wlp007",ad:"WLP007 Dry English Ale",atu:[70,80],sc:[18,20],ideal:19,e:"Yüksek attenüasyon İngiliz. ESB, Porter. Nötr.",tip:"ale",ek:"dolap"},
   {id:"wlp029",ad:"WLP029 Kölsch/German Ale",atu:[72,78],sc:[18,20],ideal:19,e:"Kölsch. Temiz, hafif üzüm. Düşük sıcaklıkta çalışır.",tip:"ale",ek:"dolap"},
@@ -4369,16 +4369,16 @@ const MAYALAR=[
   {id:"wlp830",ad:"WLP830 German Lager",atu:[74,79],sc:[10,13],ideal:11,e:"Klasik German Pils. Temiz, crisp.",tip:"lager",ek:"dolap"},
   {id:"wlp838",ad:"WLP838 Southern German Lager",atu:[68,76],sc:[10,13],ideal:11,e:"Malt karakterli. Münih Helles/Bock için.",tip:"lager",ek:"dolap"},
   // ── Omega Yeast (OYL) — Referans dünya mayası ─────────────────
-  {id:"oyl004",ad:"Omega OYL-004 West Coast Ale I",atu:[73,80],sc:[18,22],ideal:20,e:"Chico soy (US-05 benzeri). West Coast IPA.",tip:"ale",ek:"dolap"},
-  {id:"oyl011",ad:"Omega OYL-011 British Ale V",atu:[71,75],sc:[18,20],ideal:19,e:"London III benzeri. Meyve+yumuşak. NEIPA için.",tip:"ale",ek:"dolap"},
-  {id:"oyl016",ad:"Omega OYL-016 Extra Special",atu:[67,71],sc:[19,21],ideal:20,e:"ESB/English Bitter. Malt karakterli.",tip:"ale",ek:"dolap"},
-  {id:"oyl057",ad:"Omega OYL-057 HotHead Ale",atu:[75,82],sc:[21,38],ideal:32,e:"Oslo-related kveik. Yüksek sıcaklıkta temiz profil. Geniş sıcaklık aralığı.",tip:"kveik",ek:"isitici"},
-  {id:"oyl061",ad:"Omega OYL-061 Voss Kveik",atu:[75,82],sc:[25,38],ideal:32,e:"Klasik Voss. Narenciye-tropikal. 24 saat.",tip:"kveik",ek:"isitici"},
-  {id:"oyl091",ad:"Omega OYL-091 Hornindal Kveik",atu:[75,82],sc:[21,37],ideal:30,e:"Hornindal klonu. Tropikal-meyveli (ananas, şeftali, mango).",tip:"kveik",ek:"isitici"},
-  {id:"oyl200",ad:"Omega OYL-200 Tropical IPA",atu:[75,80],sc:[19,22],ideal:20,e:"NEIPA için hibrit. Tropikal aroma.",tip:"ale",ek:"dolap"},
-  {id:"oyl090",ad:"Omega OYL-090 Espe Kveik",atu:[75,82],sc:[25,35],ideal:30,e:"Espe Kveik. Narenciye-orman.",tip:"kveik",ek:"isitici"},
-  {id:"oyl071",ad:"Omega OYL-071 Lutra Kveik",atu:[75,82],sc:[21,37],ideal:30,e:"Nötr Kveik. 'Clean Kveik'. Lager-benzeri ale sıcaklığında.",tip:"kveik",ek:"isitici"},
-  {id:"oyl500",ad:"Omega OYL-500 Saisonstein",atu:[80,90],sc:[21,30],ideal:25,e:"Saison. Yüksek attenüasyon. Kuru bitiş.",tip:"saison",ek:"isitici"},
+  {id:"oyl004",ad:"Omega OYL-004 West Coast Ale I",atu:[73,80],sc:[18,22],ideal:20,e:"Chico soy (US-05 benzeri). West Coast IPA.",tip:"ale",ek:"dolap",form:'liquid'},
+  {id:"oyl011",ad:"Omega OYL-011 British Ale V",atu:[71,75],sc:[18,20],ideal:19,e:"London III benzeri. Meyve+yumuşak. NEIPA için.",tip:"ale",ek:"dolap",form:'liquid'},
+  {id:"oyl016",ad:"Omega OYL-016 Extra Special",atu:[67,71],sc:[19,21],ideal:20,e:"ESB/English Bitter. Malt karakterli.",tip:"ale",ek:"dolap",form:'liquid'},
+  {id:"oyl057",ad:"Omega OYL-057 HotHead Ale",atu:[75,82],sc:[21,38],ideal:32,e:"Oslo-related kveik. Yüksek sıcaklıkta temiz profil. Geniş sıcaklık aralığı.",tip:"kveik",ek:"isitici",form:'liquid'},
+  {id:"oyl061",ad:"Omega OYL-061 Voss Kveik",atu:[75,82],sc:[25,38],ideal:32,e:"Klasik Voss. Narenciye-tropikal. 24 saat.",tip:"kveik",ek:"isitici",form:'liquid'},
+  {id:"oyl091",ad:"Omega OYL-091 Hornindal Kveik",atu:[75,82],sc:[21,37],ideal:30,e:"Hornindal klonu. Tropikal-meyveli (ananas, şeftali, mango).",tip:"kveik",ek:"isitici",form:'liquid'},
+  {id:"oyl200",ad:"Omega OYL-200 Tropical IPA",atu:[75,80],sc:[19,22],ideal:20,e:"NEIPA için hibrit. Tropikal aroma.",tip:"ale",ek:"dolap",form:'liquid'},
+  {id:"oyl090",ad:"Omega OYL-090 Espe Kveik",atu:[75,82],sc:[25,35],ideal:30,e:"Espe Kveik. Narenciye-orman.",tip:"kveik",ek:"isitici",form:'liquid'},
+  {id:"oyl071",ad:"Omega OYL-071 Lutra Kveik",atu:[75,82],sc:[21,37],ideal:30,e:"Nötr Kveik. 'Clean Kveik'. Lager-benzeri ale sıcaklığında.",tip:"kveik",ek:"isitici",form:'liquid'},
+  {id:"oyl500",ad:"Omega OYL-500 Saisonstein",atu:[80,90],sc:[21,30],ideal:25,e:"Saison. Yüksek attenüasyon. Kuru bitiş.",tip:"saison",ek:"isitici",form:'liquid'},
   // ── Imperial Yeast — Referans dünya mayası ────────────────────
   {id:"imp_a01",ad:"Imperial A01 House",atu:[73,78],sc:[17,21],ideal:19,e:"Chico soy (US-05 benzeri). Temiz American Ale.",tip:"ale",ek:"dolap"},
   {id:"imp_a04",ad:"Imperial A04 Barbarian",atu:[73,76],sc:[18,22],ideal:20,e:"Vermont/Conan soy. NEIPA için biyotransform.",tip:"ale",ek:"dolap"},
@@ -4846,6 +4846,7 @@ function mayaKisaTip(tip){
 // Imperial Yeast: sıvı (organic pouch)
 function mayaFormu(maya){
   if(!maya||!maya.id)return 'dry';
+  if(maya.form==='dry'||maya.form==='liquid')return maya.form; // AD1: açık katalog alanı öncelikli (heuristik fallback)
   const id=maya.id.toLowerCase();
   const ad=(maya.ad||'').toLowerCase();
   if(id.startsWith('wy')||id.startsWith('wlp')||ad.includes('wyeast')||ad.includes('whitelabs')||ad.includes('imperial'))return 'liquid';
@@ -4860,6 +4861,7 @@ function mayaFormu(maya){
 //   'yüksek alkol tolerans'), şarap/seltzer mayaları (Türk rebrand, datasheet yok), bilinmeyen tip.
 function bmMayaTol(maya){
   if(!maya) return null;
+  if(typeof maya.tol==='number' && maya.tol>0) return maya.tol; // AD1: açık datasheet tol alanı öncelikli (tip-bandı fallback)
   var e = String(maya.e||'').toLowerCase(), ad = String(maya.ad||'').toLowerCase();
   if(/yüksek alkol tolerans|şişe kondisyon/.test(e) || /şarap|seltzer|wine|pamona|şampanya/.test(ad)) return null; // beyan-yüksek / şarap → sessiz
   var t = maya.tip||'';
@@ -7826,7 +7828,7 @@ window.bmProfilAnaliz = function(){
         ogT:ogT, fgT:fgT, ogG:ogG, fgG:fgG, verimVarsayim:verimVars,
         atten:atten, fgSapma:fgSapma, verimG:verimG,
         attenMin:(snap?snap.attenMin:null), attenMax:(snap?snap.attenMax:null),
-        mayaAd:(snap?snap.mayaAd:''), sonucVar: !!son, sonradan:sonradan, durum:(tamam?'tamam':'devam') });
+        mayaAd:(snap?snap.mayaAd:''), sonucVar: !!son, sonradan:sonradan, durum:(tamam?'tamam':'devam'), hacim:(r.hacim!=null?+r.hacim:null) });
     });
     out.kayitlar.sort(function(a,b){ return (b.tarih||0)-(a.tarih||0); });
     var tam = out.kayitlar.filter(function(k){ return k.durum==='tamam'; });
@@ -7959,6 +7961,31 @@ window.bmSonucDuzelt = function(rid){
   }catch(e){ console.warn('bmSonucDuzelt', e); }
 };
 // P3 — Ana ekran kartı: Ne Demleyebilirim kalıbının ikizi (bm-demle-* token/CSS, sıfır yeni stil)
+// ═══ SPRINT AD4: yıl sonu demleme raporu — salt-okunur türetilmiş (bmProfilAnaliz kayıtları) ═══
+// Yalnız TAMAMLANMIŞ demleme (durum==='tamam', brewSonuc'lu — Sprint Q/I batch-pencere tutarlı). <2 → sessiz.
+window._bmYilOzet = function(tamKayitlar){
+  try{
+    if(!Array.isArray(tamKayitlar) || tamKayitlar.length<2) return '';
+    var yil = new Date().getFullYear();
+    var yl = tamKayitlar.filter(function(k){ return k && k.tarih && new Date(k.tarih).getFullYear()===yil; });
+    if(yl.length < 2) return ''; // bu yıl yeterli veri yok → sessiz
+    var esc = function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+    var ort = function(a){ return a.length ? Math.round(a.reduce(function(x,y){return x+y;},0)/a.length) : null; };
+    var litre = yl.reduce(function(s,k){ return s + (k.hacim!=null && isFinite(k.hacim) ? +k.hacim : 0); }, 0);
+    var vL = yl.map(function(k){return k.verimG;}).filter(function(x){return x!=null;});
+    var aL = yl.map(function(k){return k.atten;}).filter(function(x){return x!=null;});
+    var mayaSay = {}; yl.forEach(function(k){ var m=k.mayaAd||''; if(m) mayaSay[m]=(mayaSay[m]||0)+1; });
+    var enMaya = Object.keys(mayaSay).sort(function(x,y){return mayaSay[y]-mayaSay[x];})[0]||null;
+    var stilSay = {}; yl.forEach(function(k){ var s2=k.stil||'(stilsiz)'; stilSay[s2]=(stilSay[s2]||0)+1; });
+    var stilStr = Object.keys(stilSay).sort(function(x,y){return stilSay[y]-stilSay[x];}).slice(0,5).map(function(s2){return s2+' ('+stilSay[s2]+')';}).join(', ');
+    var L = [yl.length+' demleme'+(litre>0?' · ~'+Math.round(litre)+' L':'')];
+    if(ort(vL)!=null) L.push('ort. verim %'+ort(vL));
+    if(ort(aL)!=null) L.push('ort. attenuation %'+ort(aL));
+    if(enMaya) L.push('en çok maya: '+enMaya);
+    if(stilStr) L.push('stiller: '+stilStr);
+    return '<div class="bm-demle-alis"><div class="bm-demle-h" style="margin-top:0">📅 '+yil+' yılı</div><pre>'+esc(L.join('\n'))+'</pre></div>';
+  }catch(_e){ return ''; }
+};
 window.bmProfilKartHTML = function(){
   try{
     var a = bmProfilAnaliz(), ks = a.kayitlar;
@@ -8012,6 +8039,7 @@ window.bmProfilKartHTML = function(){
           .map(function(s2){return s2+' ('+a.ozet.stiller[s2]+')';}).join(', ');
         if(st) L.push('Stiller: '+st);
         body += '<div class="bm-demle-alis"><div class="bm-demle-h" style="margin-top:0">📊 Özet — '+tam.length+' tamamlanmış demleme</div><pre>'+esc(L.join('\n'))+'</pre></div>';
+        body += (typeof _bmYilOzet==='function'? _bmYilOzet(tam):''); // AD4: yıl raporu (bu yıl <2 → sessiz)
       }
     }
     return '<details class="bm-demle bm-profil-kart">'+
@@ -12643,6 +12671,7 @@ function rListe(){
       : '';
     // Banner badges
     const renkBadge='<span class="bm-recete-badge"><b>'+_esc131B(renkAdi)+'</b> <span style="opacity:0.6;font-size:0.85em">· <span class="bm-stil-adi">'+_esc131B(bjcpAdi)+'</span></span></span>';
+    const klonBadge = (t.klonKaynak && t.klonKaynak.id) ? '<span class="bm-recete-badge" style="background:rgba(180,120,20,.14);color:var(--bakir)" title="Klon reçete — ebeveyn editörde görünür">↳ klon</span>' : ''; // AD2
     const taslakBadge = !t.durum ? '<span class="bm-recete-badge taslak">TASLAK</span>' : '';
     // Meta satiri: tarih + klasor (varsa)
     const metaParts=[];
@@ -12669,7 +12698,7 @@ function rListe(){
       : '';
     return '<div class="bm-recete-kart fade" data-tid="'+t.id+'" style="border-left:6px solid '+_kartHex+';background:linear-gradient(to right, '+_kartHex+'24, '+_kartHex+'0A 30%, var(--bg-card))">'+
         '<div class="bm-recete-banner '+bannerCls+'">'+
-          '<div class="bm-recete-badge-row">'+renkBadge+taslakBadge+'</div>'+
+          '<div class="bm-recete-badge-row">'+renkBadge+taslakBadge+klonBadge+'</div>'+
           '<div class="bm-recete-baslik">'+_esc131B(t.biraAd||'(adsiz)')+'</div>'+
           metaHtml+
           '<button class="bm-recete-ac-btn" onclick="tarifAcById(this)">Aç &rarr;</button>'+
@@ -15476,7 +15505,7 @@ ${batchOlcekKartHtml()}
   if(!(_gn>0)||!(_gt>0)){_res='<div style="font-size:13px;color:var(--metin-soluk)">Geçerli OG değerleri gir (>1.000).</div>';}
   else if(Math.abs(_gn-_gt)<0.5){_res='<div style="font-size:15px;color:var(--yk);font-weight:700">✓ Hedefte — düzeltme gerekmez</div>';}
   else if(_gt<_gn){var _add=_v*(_gn/_gt-1);_res='<div style="font-size:var(--fs-xs);color:var(--bakir);font-weight:700;letter-spacing:1.5px;text-transform:uppercase">Su Ekle</div><div style="font-size:50px;font-weight:600;color:var(--bakir);line-height:1.1;font-family:var(--font-display);margin-top:4px">+'+_add.toFixed(1)+' L</div><div style="font-size:11px;color:var(--metin-soluk);margin-top:4px">→ '+(_v+_add).toFixed(1)+' L @ '+_ot.toFixed(3)+' (OG düşür)</div>';}
-  else{var _boil=_v*(1-_gn/_gt);_res='<div style="font-size:var(--fs-xs);color:var(--bakir);font-weight:700;letter-spacing:1.5px;text-transform:uppercase">Kaynat / Buharlaştır</div><div style="font-size:50px;font-weight:600;color:var(--bakir);line-height:1.1;font-family:var(--font-display);margin-top:4px">'+_boil.toFixed(1)+' L</div><div style="font-size:11px;color:var(--metin-soluk);margin-top:4px">→ '+(_v-_boil).toFixed(1)+' L @ '+_ot.toFixed(3)+' (OG yükselt)</div>';}
+  else{var _boil=_v*(1-_gn/_gt);var _dme=Math.round((_gt-_gn)*_v/367*1000);_res='<div style="font-size:var(--fs-xs);color:var(--bakir);font-weight:700;letter-spacing:1.5px;text-transform:uppercase">Kaynat / Buharlaştır</div><div style="font-size:50px;font-weight:600;color:var(--bakir);line-height:1.1;font-family:var(--font-display);margin-top:4px">'+_boil.toFixed(1)+' L</div><div style="font-size:11px;color:var(--metin-soluk);margin-top:4px">→ '+(_v-_boil).toFixed(1)+' L @ '+_ot.toFixed(3)+' (OG yükselt)</div>'+'<div style="font-size:11px;color:var(--metin-soluk);margin-top:8px;padding-top:8px;border-top:1px dashed var(--cizgi-arac)">veya <b>DME ekle: +'+_dme+' g</b> — kuru malt ekstraktı (~44 PPG); kaynatmadan OG yükseltir, hacim ~sabit</div>';}
   return '<div class="kart">'
     +'<div style="font-size:14px;font-weight:700;color:var(--metin);margin-bottom:8px">⚖️ Seyreltme / Gravity Düzeltme</div>'
     +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">'
@@ -15485,7 +15514,7 @@ ${batchOlcekKartHtml()}
     +'<div><span class="etiket">Hedef OG</span><input aria-label="Hedef OG" type="number" class="inp" style="width:90px" min="1" max="1.2" step="0.001" value="'+_ot.toFixed(3)+'" onchange="S.seyHedef=this.value!==\'\'?parseFloat(this.value):null;render()"></div>'
     +'</div>'
     +'<div style="background:var(--sa);border:1px solid var(--cizgi-arac);border-left:4px solid var(--sk);border-radius:10px;padding:14px;text-align:center">'+_res+'</div>'
-    +'<div style="font-size:var(--fs-xs);color:var(--metin-soluk);margin-top:8px;line-height:1.4">Gravity puanı × hacim ≈ sabit. Su eklemek OG düşürür, kaynatmak yükseltir. Varsayılanlar reçeteden gelir; ölçtüğün değeri yaz.</div></div>';
+    +'<div style="font-size:var(--fs-xs);color:var(--metin-soluk);margin-top:8px;line-height:1.4">Gravity puanı × hacim ≈ sabit. Su eklemek OG düşürür; kaynatmak veya DME eklemek yükseltir. Varsayılanlar reçeteden gelir; ölçtüğün değeri yaz.</div></div>';
 })();
 
   var _kartRenk = (function(){
@@ -26061,8 +26090,8 @@ syncBaslat();
   // ─── whFaktor() M5 ───
   grup('whFaktor() — M5 Malowicki whirlpool',()=>{
     test('100°C = 1.0 referans',()=>aY(1.0,whFaktor(100),0.001,'whFaktor(100)'));
-    test('85°C tipik flameout = 0.24',()=>aY(0.24,whFaktor(85),0.001,'whFaktor(85)'));
-    test('70°C düşük = 0.04',()=>aY(0.04,whFaktor(70),0.001,'whFaktor(70)'));
+    test('85°C flameout = 0.264 (M5 Malowicki Arrhenius)',()=>aY(0.264,whFaktor(85),0.003,'whFaktor(85)'));
+    test('70°C düşük = 0.062 (M5 Malowicki Arrhenius)',()=>aY(0.062,whFaktor(70),0.002,'whFaktor(70)'));
     test('Monotonik artış 70→100',()=>{assert(whFaktor(70)<whFaktor(80)&&whFaktor(80)<whFaktor(90)&&whFaktor(90)<whFaktor(100),'monotonik bozuldu');});
     test('60°C altı ihmal (<0.05)',()=>assert(whFaktor(50)<0.05,'60°C altı düşük olmalı'));
   });
@@ -26124,8 +26153,8 @@ syncBaslat();
     test('HOPLAR >50 kayıt',()=>assert(Array.isArray(HOPLAR)&&HOPLAR.length>50,'HOPLAR: '+(typeof HOPLAR!=='undefined'?HOPLAR.length:'null')));
     test('KATKILAR sparse slot yok',()=>{const s=KATKILAR.filter(k=>!k||!k.id).length;assert(s===0,s+' sparse');});
     test('MAYALAR >50 kayıt',()=>assert(Array.isArray(MAYALAR)&&MAYALAR.length>50,'MAYALAR: '+MAYALAR.length));
-    test('BJCP Dark Belgian Dubbel var',()=>assert(BJCP['Dark Belgian Dubbel'],'Dubbel yok'));
-    test('BJCP Dubbel OG 1.065-1.085',()=>{const s=BJCP['Dark Belgian Dubbel'];assert(s.og[0]===1.065&&s.og[1]===1.085,JSON.stringify(s.og));});
+    test('BJCP Dubbel var',()=>assert(BJCP['Dubbel'],'Dubbel yok'));
+    test('BJCP Dubbel OG 1.062-1.075',()=>{const s=BJCP['Dubbel'];assert(s.og[0]===1.062&&s.og[1]===1.075,JSON.stringify(s.og));});
     test('MUADIL_ORAN ≥20',()=>{const n=Object.keys(MUADIL_ORAN).length;assert(n>=20,'MUADIL_ORAN: '+n);});
   });
 

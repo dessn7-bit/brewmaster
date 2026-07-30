@@ -1962,6 +1962,101 @@ const CASELER = [
       __REG.ok('düşük ABV (~%4) + WB-06 → SESSİZ (uyarı yok)', !asiyor(domL) && !yakin(domL), 'abv=' + calc().abv.toFixed(1));
       return __REG.al();
     })
+  },
+
+  // ── SPRINT AD: temizlik paketi (form/tol alanı + klon rozeti + DME + yıl raporu) ──
+  {
+    kod: 'AD1-FIELD', ad: 'MAYA form/tol AÇIK ALAN önceliği: Omega form=liquid (heuristik dry\'ı düzeltir) + fallback korundu; wlp002 tol=10 (WhiteLabs, tip-bandı 11\'den farklı) + fallback band; AC uyarısı açık tol\'u kullanır',
+    calistir: (page) => page.evaluate(() => {
+      const M = (id) => MAYALAR.find(m => m.id === id);
+      __REG.ok('Omega oyl061 → liquid (AÇIK form alanı; id oyl heuristikte yok)', mayaFormu(M('oyl061')) === 'liquid');
+      __REG.ok('fallback: us05 (form yok) → heuristik dry', mayaFormu(M('us05')) === 'dry');
+      __REG.ok('fallback: wy1056 (form yok) → heuristik liquid', mayaFormu(M('wy1056')) === 'liquid');
+      __REG.ok('wlp002 tol=10 AÇIK ALAN (tip-bandı 11 verirdi — alan önceliği)', bmMayaTol(M('wlp002')) === 10);
+      __REG.ok('fallback: us05 (tol yok) → tip-bandı 11', bmMayaTol(M('us05')) === 11);
+      __REG.ok('fallback: be256 (tol yok) → tip-bandı 13', bmMayaTol(M('be256')) === 13);
+      // AC uyarısı wlp002'nin AÇIK tol=10'unu kullanır: %10.5 ABV → aşıyor (band 11 olsaydı sessiz)
+      __REG.yeniKayit('REGTEST AD1', { maltlar: [{ id: 'pilsner', kg: 8 }], hoplar: [], mayaId: 'wlp002', ogManuel: 1.096, fgManuel: 1.016 });
+      ekran = 'editor'; sekme = 'genel';
+      const abv = calc().abv;
+      render();
+      const dom = document.getElementById('ekran').innerHTML;
+      // wlp002 tol=10; abv ~10.5 → >=10 aşıyor
+      __REG.ok('AC uyarısı wlp002 AÇIK tol=10 kullanır (abv=' + abv.toFixed(1) + ' >=10 → aşıyor; ~%10)', abv >= 10 && dom.indexOf('~%10') >= 0, 'abv=' + abv.toFixed(1));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AD2-KLON-ROZET', ad: 'LİSTE KARTI klon rozeti: klon reçete tarifKart\'ta "↳ klon" rozetli; normal reçete rozetsiz (kart kalabalıklaşmaz)',
+    calistir: (page) => page.evaluate(() => {
+      KR.length = 0;
+      const id = __REG.yeniKayit('AD2 Ebeveyn', {});
+      tarifKlonla(id);
+      const klon = KR.find(x => x && x.klonKaynak);
+      __REG.ok('klon oluştu (klonKaynak var)', !!klon);
+      ekran = 'liste'; listeSekme = 'aktif'; aktifKlasor = ''; aramaMetni = '';
+      render();
+      const dom = document.getElementById('ekran').innerHTML;
+      __REG.ok('klon reçete kartında "↳ klon" rozeti VAR', dom.indexOf('↳ klon') >= 0);
+      // normal (klonKaynak yok) reçete: ebeveyn 'AD2 Ebeveyn' — rozeti olmamalı. Sayı: 1 klon → 1 rozet
+      __REG.ok('rozet SADECE klonlarda (1 klon → 1 rozet, normal reçetede yok)', dom.split('↳ klon').length - 1 === 1, 'rozet sayısı=' + (dom.split('↳ klon').length - 1));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AD3-DME', ad: 'GRAVITY DÜZELTME DME kolu: OG hedeften DÜŞÜK → "DME ekle: +X g" (mevcut gu/384 altyapısı, 44 PPG); OG yüksek → su ekle (DME yok); miktar makul',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('REGTEST AD3', { maltlar: [{ id: 'pilsner', kg: 5 }], hoplar: [] });
+      ekran = 'editor'; sekme = 'hesap';
+      // OG hedeften DÜŞÜK: mevcut 1.040, hedef 1.050 → DME gerekir
+      S.seyHacim = 20; S.seyOG = 1.040; S.seyHedef = 1.050;
+      render();
+      let dom = document.getElementById('ekran').innerHTML;
+      __REG.ok('OG düşük → "DME ekle: +X g" önerisi VAR', dom.indexOf('DME ekle: +') >= 0);
+      __REG.ok('OG düşük → "Kaynat / Buharlaştır" da VAR (iki seçenek)', dom.indexOf('Kaynat / Buharlaştır') >= 0);
+      // miktar: 10 puan × 20 L / 367 × 1000 ≈ 545 g
+      const mm = dom.match(/DME ekle: \+(\d+) g/);
+      __REG.ok('DME miktarı makul (~545 g, homebrew 2.7 g/L/puan)', mm && Math.abs(parseInt(mm[1]) - 545) < 20, mm ? mm[1] + ' g' : 'bulunamadı');
+      // OG YÜKSEK → su ekle, DME YOK
+      S.seyOG = 1.060; S.seyHedef = 1.050;
+      render();
+      dom = document.getElementById('ekran').innerHTML;
+      __REG.ok('OG yüksek → "Su Ekle" (DME kolu bu yönde YOK)', dom.indexOf('Su Ekle') >= 0 && dom.indexOf('DME ekle: +') < 0);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AD4-YIL', ad: 'YIL SONU RAPORU: tamamlanmış demlemeler (bu yıl) → litre/verim/atten/en-çok-maya; geçen yıl HARİÇ; <2 → sessiz; profil kartına entegre',
+    calistir: (page) => page.evaluate(() => {
+      const yil = new Date().getFullYear();
+      const t0 = new Date(yil, 5, 1).getTime(), t1 = new Date(yil, 7, 1).getTime();
+      // _bmYilOzet doğrudan (tamamlanmış kayıt şekli)
+      const rapor = _bmYilOzet([
+        { tarih: t0, hacim: 11, stil: 'Dubbel', mayaAd: 'BE-256', verimG: 65, atten: 80 },
+        { tarih: t1, hacim: 20, stil: 'Weizen', mayaAd: 'BE-256', verimG: 61, atten: 78 }
+      ]);
+      __REG.ok('rapor: bu yıl başlığı + 2 demleme + litre', rapor.indexOf('📅 ' + yil + ' yılı') >= 0 && rapor.indexOf('2 demleme') >= 0 && rapor.indexOf('~31 L') >= 0, rapor.slice(0, 90));
+      __REG.ok('rapor: ort verim/atten + en çok maya', rapor.indexOf('ort. verim %63') >= 0 && rapor.indexOf('en çok maya: BE-256') >= 0);
+      __REG.ok('<2 kayıt → sessiz', _bmYilOzet([{ tarih: t0, hacim: 11, verimG: 65 }]) === '');
+      // profil kartı entegrasyonu: bmProfilKartHTML çağrısı çökmez + _bmYilOzet fonksiyonu bağlı
+      __REG.ok('_bmYilOzet global fonksiyon', typeof _bmYilOzet === 'function');
+      const kart = bmProfilKartHTML();
+      __REG.ok('bmProfilKartHTML render çökmez (yıl bloğu entegre)', typeof kart === 'string' && kart.indexOf('DEMLEME GÜNLÜĞÜM') >= 0);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AD5-HARNESS', ad: 'GÖMÜLÜ HARNESS senkron: whFaktor 85→0.264 / 70→0.062 (Malowicki M5 — kod doğru), BJCP Dubbel og [1.062,1.075] (2021 anahtar) — 4 çürük test artık kod-uyumlu',
+    calistir: (page) => page.evaluate(() => {
+      // whFaktor kod değerleri (harness'ın senkronlandığı gerçek çıktı)
+      __REG.ok('whFaktor(85) ≈ 0.264 (Malowicki Arrhenius, kod doğru)', Math.abs(whFaktor(85) - 0.264) < 0.003, whFaktor(85).toFixed(4));
+      __REG.ok('whFaktor(70) ≈ 0.062', Math.abs(whFaktor(70) - 0.062) < 0.002, whFaktor(70).toFixed(4));
+      __REG.ok('whFaktor(100)=1.0 referans korundu', Math.abs(whFaktor(100) - 1.0) < 0.001);
+      // BJCP Dubbel doğru anahtar + değer
+      __REG.ok('BJCP["Dubbel"] var (eski "Dark Belgian Dubbel" değil)', !!BJCP['Dubbel'] && !BJCP['Dark Belgian Dubbel']);
+      __REG.ok('BJCP Dubbel og [1.062, 1.075] (BJCP 2021)', BJCP['Dubbel'].og[0] === 1.062 && BJCP['Dubbel'].og[1] === 1.075, JSON.stringify(BJCP['Dubbel'].og));
+      return __REG.al();
+    })
   }
 ];
 
