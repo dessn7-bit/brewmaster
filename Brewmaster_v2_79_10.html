@@ -7450,7 +7450,7 @@ window.stokYetersizTam = function(tarif, hazirlik){ // SPRINT J J12: hazırlık 
 // ═══ "Ne Demleyebilirim?" — stok-güdümlü reçete keşfi (SALT-OKUR: KR/STOK/MAYALAR değişmez) ═══
 // stokYetersizTam'ı yapımda-olmayan tüm reçetelere uygular → HAZIR/AZ-EKSİK/ÇOK-EKSİK kova.
 window.bmDemlenebilirAnaliz = function(){
-  var out = { hazir:[], azEksik:[], cokEksikSay:0, alisveris:[] };
+  var out = { hazir:[], azEksik:[], cokEksik:[], cokEksikSay:0, alisveris:[] };
   try {
     if(typeof KR==='undefined' || !KR) return out;
     var list = Array.isArray(KR) ? KR : Object.values(KR);
@@ -7475,10 +7475,19 @@ window.bmDemlenebilirAnaliz = function(){
         eks.forEach(function(it){ if(!it) return; var k=String(it.ad||''); if(!k) return;
           if(!agg[k]) agg[k]={ ad:k, mik:0, birim:(it.birim||'') }; });        // "yok" kalem: miktarsız (mik 0 kalır)
       } else {
+        var eksikStrC = (typeof _stokYetersizMetin==='function') ? _stokYetersizMetin(st) : '';
+        out.cokEksik.push({ id:r.id, ad:ad, eksikStr:eksikStrC, eksikSay:toplam, planTarih:planTarih });
         out.cokEksikSay++;
+        // AB1: 3+ eksik reçetenin malzemeleri de BİRLEŞİK alışveriş listesine girer (asıl alışveriş bunlar; eski kod yalnız sayıyordu)
+        yet.forEach(function(it){ if(!it) return; var k=String(it.ad||''); if(!k) return;
+          if(!agg[k]) agg[k]={ ad:k, mik:0, birim:(it.birim||'') };
+          agg[k].mik += (+it.eksikMik||0); if(!agg[k].birim) agg[k].birim=it.birim||''; });
+        eks.forEach(function(it){ if(!it) return; var k=String(it.ad||''); if(!k) return;
+          if(!agg[k]) agg[k]={ ad:k, mik:0, birim:(it.birim||'') }; });
       }
     });
     out.azEksik.sort(function(a,b){ return a.eksikSay - b.eksikSay; });          // eksikSay artan
+    out.cokEksik.sort(function(a,b){ return a.eksikSay - b.eksikSay; });          // AB1: 3+ grup eksikSay artan
     out.alisveris = Object.keys(agg).map(function(k){ var a=agg[k];
       return { ad:a.ad, mik:(a.mik>0?Math.round(a.mik*1000)/1000:0), birim:a.birim||'' }; });
     out.alisveris.sort(function(a,b){ return a.ad<b.ad?-1:(a.ad>b.ad?1:0); });
@@ -7496,14 +7505,17 @@ window.bmDemleKartHTML = function(){
     var planBadge = function(pt){ if(!pt) return ''; var p=String(pt).split('-'); return ' <span class="bm-demle-badge">📅 '+esc(p[2]+'.'+p[1])+'</span>'; };
     var row = function(r,sub){ return '<button type="button" class="bm-demle-row" onclick="tarifAc(\''+escId(r.id)+'\')" aria-label="'+esc(r.ad)+' reçetesini aç">'+
       '<span class="bm-demle-rn"><span class="bm-demle-rt">'+esc(r.ad)+planBadge(r.planTarih)+'</span>'+(sub?'<span class="bm-demle-rs">'+sub+'</span>':'')+'</span></button>'; };
-    var nH=a.hazir.length, nA=a.azEksik.length;
-    var ozet = (nH>0||nA>0) ? (nH+' reçete hazır · '+nA+' az-eksik')
+    var nH=a.hazir.length, nA=a.azEksik.length, nC=a.cokEksik.length;
+    var ozet = (nH>0||nA>0) ? (nH+' reçete hazır · '+nA+' az-eksik'+(nC>0?' · '+nC+' çok-eksik':''))
                             : ('Stok yeni reçete için yetersiz'+(a.cokEksikSay>0?' · '+a.cokEksikSay+' çok-eksik':''));
     var body='';
     if(nH>0){ body+='<div class="bm-demle-h">🍺 Hazır ('+nH+')</div>'; a.hazir.forEach(function(r){ body+=row(r,''); }); }
     if(nA>0){ body+='<div class="bm-demle-h">🛒 Az-eksik ('+nA+')</div>'; a.azEksik.forEach(function(r){ body+=row(r, r.eksikSay+' eksik: '+esc(r.eksikStr)); }); }
-    if(a.cokEksikSay>0){ body+='<div class="bm-demle-cok">+'+a.cokEksikSay+' reçete için stok çok eksik</div>'; }
-    if(nA>0 && a.alisveris.length){
+    if(nC>0){
+      var cokRows = a.cokEksik.map(function(r){ return row(r, r.eksikSay+' eksik: '+esc(r.eksikStr)); }).join('');
+      body+='<details class="bm-demle-cokgrup"><summary class="bm-demle-h" style="cursor:pointer">🛒 Daha fazla eksik ('+nC+') <span style="font-weight:400;color:var(--dim);font-size:11px">— 3+ malzeme, katlanabilir</span></summary><div class="bm-demle-cokbody">'+cokRows+'</div></details>';
+    }
+    if((nA>0||nC>0) && a.alisveris.length){
       var satir = a.alisveris.map(function(x){ return x.mik>0 ? (x.ad+' — '+x.mik+(x.birim||'')) : x.ad; }).join('\n');
       body+='<div class="bm-demle-alis"><div class="bm-demle-h" style="margin-top:0">🛒 Eksik listesi</div><pre>'+esc(satir)+'</pre></div>';
     }
@@ -8602,6 +8614,8 @@ function tarifKlonla(srcId){
   // BİLİNÇLİ korunur: tarih olmadan inert şablon — tarif süreç notu sayılır.)
   var _KLON_GECMIS_SIFIRLA=[['brewLog',[]],['brewSnapshot',void 0],['brewSonuc',void 0],['ogManuel',null],['fgManuel',null],['preboilOG',null],['effOG',void 0],['effVol',void 0],['mayaYasAy',null],['tadim',null],['planBrewTarih',void 0]];
   _KLON_GECMIS_SIFIRLA.forEach(function(p){ if(p[1]===void 0) delete yeni[p[0]]; else yeni[p[0]]=p[1]; });
+  // AB2: ebeveyn izi (soyağacı) — SIFIRLAMA listesinden SONRA (geçmiş değil KİMLİK, silinmez). src.klonKaynak deep-clone ile inherit edildiyse ÜZERİNE yaz → tek-nesil doğru ebeveyn.
+  yeni.klonKaynak = { id: src.id, ad: String(src.biraAd||'(adsız)'), ts: Date.now() };
   // tarih: src'den kopyalandı (deep clone), kullanıcı editör'de güncellesin
   KR.unshift(yeni); // Listenin başına, tarifeKaydet emsali
   try{_origKy(KR);}catch(e){console.warn('tarifKlonla _origKy:',e);}
@@ -8611,6 +8625,24 @@ function tarifKlonla(srcId){
   tarifAc(yeni.id);
 }
 window.tarifKlonla=tarifKlonla;
+// AB2: klon soyağacı göstergesi — editörde "↳ [Ebeveyn] reçetesinden klonlandı".
+// Ebeveyn silinmişse iz KALIR (Sprint S tombstone-tutarlı: yetim kalmaz, kayıtlı ad'ı gösterir).
+window._bmKlonKaynakHtml = function(rec){
+  try{
+    if(!rec || !rec.klonKaynak || !rec.klonKaynak.id) return '';
+    var kk = rec.klonKaynak;
+    var liste = (typeof KR!=='undefined' && Array.isArray(KR)) ? KR : [];
+    var ebeveyn = liste.find(function(k){ return k && k.id===kk.id; });
+    var esc = function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
+    var ad = (ebeveyn && ebeveyn.biraAd) ? ebeveyn.biraAd : (kk.ad || '(adsız)');
+    var kutu = 'font-size:11px;color:var(--metin-soluk);margin:2px 0 8px;display:flex;align-items:center;gap:4px;flex-wrap:wrap';
+    if(ebeveyn){
+      var escId = function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;'); };
+      return '<div class="bm-klon-iz" style="'+kutu+'">\u21b3 <button type="button" onclick="tarifAc(\''+escId(kk.id)+'\')" title="Ebeveyn reçeteye git" style="background:none;border:none;color:var(--bakir);font-weight:600;cursor:pointer;padding:0;font-family:inherit;font-size:11px;text-decoration:underline">'+esc(ad)+'</button> reçetesinden klonlandı</div>';
+    }
+    return '<div class="bm-klon-iz" style="'+kutu+'">\u21b3 <b>'+esc(ad)+'</b> reçetesinden klonlandı <span style="color:var(--dim)">(ebeveyn silinmiş)</span></div>';
+  }catch(e){ return ''; }
+};
 // Adim 132-C: Breadcrumb klasor link helper. _kl listesinden index aramak yerine direkt assign+render
 // (setAktifKlasor mevcut sidebar drawer + render() yapar ama window._kl liste sayfasinda set, editor'de stale olabilir).
 // Adim 134-GERI: 132-C breadcrumb → tek "← Geri" tuşu. S.klasor varsa o klasöre dön, yoksa defter ana sayfa.
@@ -20814,6 +20846,7 @@ function rEditor(){
     <button class="btn bm-edit-only" onclick="tarifeKaydet()" style="background:${kbg};color:${kclr};border:1px solid ${kbrd};font-size:var(--fs-sm);padding:var(--sp-2) var(--sp-4);white-space:nowrap">${kayitMsg||"💾 Kaydet"}</button>
     ${_editId?`<button class="bm-btn-primary" onclick="tarifKlonla('${_editId}')" title="Bu tarifin kopyasını oluştur">📑 Klonla</button>`:''}
   </div>
+  ${(typeof _bmKlonKaynakHtml==='function')?_bmKlonKaynakHtml(S):''}
   <div class="bm-edit-only" style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
     <span style="font-size:var(--fs-xs);color:var(--metin-soluk);font-weight:var(--fw-semibold)">🎯 Hedef Stil:</span>
     <select aria-label="Hedef stil" onchange="S.stil=this.value;window.__stilSecKaynak='dropdown';render()" style="background:var(--bg-card);color:var(--ink);border:1px solid var(--cizgi-arac);border-radius:var(--r-sm);font-size:var(--fs-xs);padding:4px 8px;flex:1;outline:none;font-family:var(--font-govde);cursor:pointer">

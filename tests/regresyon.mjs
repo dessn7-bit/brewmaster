@@ -1840,6 +1840,73 @@ const CASELER = [
       localStorage.removeItem('bm_boiloff_v1');
       return __REG.al();
     })
+  },
+
+  // ── SPRINT AB: alışveriş listesi çok-eksik kapsama (AB1) + klon soyağacı (AB2) ──
+  {
+    kod: 'AB1-ALIS', ad: 'ALIŞVERİŞ LİSTESİ ÇOK-EKSİK: 3+ eksik reçete ARTIK cokEksik dizisinde + malzemesi birleşik alışveriş listesinde (eski: HİÇ yoktu); ≤2 ayrı grup; birleşik dedup; yapımda hariç; collapse UI',
+    calistir: (page) => page.evaluate(() => {
+      KR.length = 0; STOK.length = 0; // izole: yalnız bu case'in reçeteleri + her malzeme eksik (deterministik, gerçek stokYetersizTam)
+      const idCok = __REG.yeniKayit('REGTEST ABCok', { maltlar: [{ id: 'pilsner', kg: 3 }, { id: 'munich', kg: 1 }, { id: 'vienna', kg: 0.5 }, { id: 'wheat', kg: 0.5 }], hoplar: [], mayaId: '' });
+      const idAz = __REG.yeniKayit('REGTEST ABAz', { maltlar: [{ id: 'pilsner', kg: 4 }], hoplar: [], mayaId: '' });
+      const idYap = __REG.yeniKayit('REGTEST ABYap', { maltlar: [{ id: 'pilsner', kg: 1 }, { id: 'munich', kg: 1 }, { id: 'vienna', kg: 1 }], mayaId: '' });
+      const rYap = KR.find(x => x && x.id === idYap); rYap.durum = 'yapimda'; _origKy(KR);
+      const a = bmDemlenebilirAnaliz();
+      const cokIds = a.cokEksik.map(x => x.id), azIds = a.azEksik.map(x => x.id);
+      __REG.ok('4-malt reçete cokEksik DİZİSİNDE (eski: sadece sayı, listeye hiç girmezdi)', cokIds.includes(idCok), cokIds.join(','));
+      __REG.ok('1-malt reçete azEksik grubunda (≤2, öncelikli grup ayrı)', azIds.includes(idAz));
+      __REG.ok('yapımda reçete HİÇBİR grupta (mevcut davranış korundu)', !cokIds.includes(idYap) && !azIds.includes(idYap) && !a.hazir.some(x => x.id === idYap));
+      __REG.ok('cokEksikSay geriye-uyumlu (=cokEksik.length)', a.cokEksikSay === a.cokEksik.length && a.cokEksikSay === 1);
+      __REG.ok('alışveriş listesi 4+ benzersiz malt (çok-eksik dahil; eski: yalnız az-eksik=1 pilsner)', a.alisveris.length >= 4, a.alisveris.length + ' kalem');
+      const pilsN = a.alisveris.map(x => x.ad).filter(n => n.toLowerCase().includes('pils')).length;
+      __REG.ok('BİRLEŞİK dedup: pilsner iki reçetede eksik → alışverişte TEK satır', pilsN === 1, 'pilsner satır=' + pilsN);
+      __REG.ok('çok-eksik-only malzeme alışverişte (azEksik yalnız pilsner-di → pilsner-dışı kalem = çok-eksikten)', a.alisveris.some(x => !x.ad.toLowerCase().includes('pils')));
+      const kart = bmDemleKartHTML();
+      __REG.ok('UI: "Daha fazla eksik" collapsible <details> render (3+ grup, default kapalı)', kart.indexOf('Daha fazla eksik') >= 0 && kart.indexOf('bm-demle-cokgrup') >= 0);
+      __REG.ok('UI: çok-eksik reçete adı collapse bölümünde görünür', kart.indexOf('REGTEST ABCok') >= 0);
+      __REG.ok('UI: birleşik "Eksik listesi" render (çok-eksik dahil)', kart.indexOf('Eksik listesi') >= 0);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AB2-KLON', ad: 'KLON SOYAĞACI: klonKaynak izi (id+ad+ts) + gösterge "klonlandı"+link; SPRINT F REGRESYON (iz eklemek geçmiş sıfırlamasını BOZMADI); 2. nesil bir üst nesli gösterir',
+    calistir: (page) => page.evaluate(() => {
+      const id = __REG.yeniKayit('Weizen v1', {
+        brewLog: [{ id: 'x', ts: 1, tip: 'og_olcum', deger: '1.05' }], brewSnapshot: { ts: 1 }, brewSonuc: { ts: 2 },
+        ogManuel: 1.05, fgManuel: 1.01, preboilOG: 1.04, mayaYasAy: 3, tadim: { puan: 4 }, effOG: 0.7, effVol: 11, planBrewTarih: '2026-07-01'
+      });
+      tarifKlonla(id);
+      const klon = KR[0];
+      __REG.ok('klon oluştu, id farklı', klon && klon.id !== id);
+      __REG.ok('AB2: klonKaynak izi var (id + ad + ts)', klon.klonKaynak && klon.klonKaynak.id === id && /Weizen v1/.test(klon.klonKaynak.ad) && typeof klon.klonKaynak.ts === 'number', JSON.stringify(klon.klonKaynak));
+      __REG.ok('SPRINT F REGRESYON: brewLog boş (ebeveyn izi sıfırlamayı bozmadı)', Array.isArray(klon.brewLog) && klon.brewLog.length === 0);
+      __REG.ok('SPRINT F: snapshot/sonuc/effOG/effVol/planBrewTarih silindi', klon.brewSnapshot === undefined && klon.brewSonuc === undefined && klon.effOG === undefined && klon.effVol === undefined && klon.planBrewTarih === undefined);
+      __REG.ok('SPRINT F: ölçüm/tadım null', klon.ogManuel === null && klon.fgManuel === null && klon.preboilOG === null && klon.mayaYasAy === null && klon.tadim === null);
+      __REG.ok('klonKaynak SIFIRLAMA listesine GİRMEDİ (kimlik yaşıyor, geçmiş değil)', klon.klonKaynak !== undefined);
+      const iz = _bmKlonKaynakHtml(klon);
+      __REG.ok('gösterge: ebeveyn adı + "klonlandı" + tarifAc linki (ebeveyn KR\'de var)', iz.indexOf('Weizen v1') >= 0 && iz.indexOf('klonlandı') >= 0 && iz.indexOf('tarifAc') >= 0, iz.slice(0, 90));
+      tarifKlonla(klon.id);
+      const klon2 = KR[0];
+      __REG.ok('AB2: 2. nesil klonKaynak bir ÜST nesli (klon) gösterir, çökmez (v1 kapsam dışı)', klon2.klonKaynak && klon2.klonKaynak.id === klon.id, JSON.stringify(klon2.klonKaynak));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AB2-YETIM', ad: 'KLON YETİM DİRENCİ: ebeveyn silinince (Sprint S tombstone) klon YAŞAR, gösterge kayıtlı ad + "silinmiş" (link yok), çökme yok',
+    calistir: (page) => page.evaluate(() => {
+      const id = __REG.yeniKayit('Ebeveyn Sil', {});
+      tarifKlonla(id);
+      const klon = KR[0], klonId = klon.id;
+      __REG.ok('klon ebeveyn izi var', klon.klonKaynak && klon.klonKaynak.id === id && /Ebeveyn Sil/.test(klon.klonKaynak.ad));
+      tarifSil(id);
+      __REG.ok('ebeveyn silindi (KR\'de yok, Sprint S)', !KR.find(x => x && x.id === id));
+      const klonSonra = KR.find(x => x && x.id === klonId);
+      __REG.ok('klon ebeveyn silinince YAŞIYOR (yetim kalmadı, iz duruyor)', !!klonSonra && klonSonra.klonKaynak && klonSonra.klonKaynak.id === id);
+      const iz = _bmKlonKaynakHtml(klonSonra);
+      __REG.ok('gösterge: kayıtlı ad + "silinmiş" + tarifAc linki YOK (çökme yok)', iz.indexOf('Ebeveyn Sil') >= 0 && iz.indexOf('silinmiş') >= 0 && iz.indexOf('tarifAc') < 0, iz.slice(0, 100));
+      __REG.ok('klonKaynak yok reçetede gösterge boş (regresyon: normal reçete etkilenmez)', _bmKlonKaynakHtml(klonSonra ? { id: 'z', biraAd: 'x' } : {}) === '');
+      return __REG.al();
+    })
   }
 ];
 
