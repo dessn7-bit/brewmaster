@@ -1907,6 +1907,61 @@ const CASELER = [
       __REG.ok('klonKaynak yok reçetede gösterge boş (regresyon: normal reçete etkilenmez)', _bmKlonKaynakHtml(klonSonra ? { id: 'z', biraAd: 'x' } : {}) === '');
       return __REG.al();
     })
+  },
+
+  // ── SPRINT AC: maya alkol toleransı → FG/takılma uyarısı ──
+  {
+    kod: 'AC-TOL', ad: 'MAYA TOLERANS TABLOSU (datasheet-kaynaklı): ale/lager/wheat→11, belcika/saison→13, kveik→12; sour/şarap/yüksek-tolerans-beyan/bilinmeyen → null (SESSİZ, uydurma yok)',
+    calistir: (page) => page.evaluate(() => {
+      __REG.ok('bmMayaTol global fonksiyon', typeof bmMayaTol === 'function');
+      const M = (id) => MAYALAR.find(m => m.id === id);
+      __REG.ok('US-05 (ale) → 11', bmMayaTol(M('us05')) === 11);
+      __REG.ok('WB-06 (wheat) → 11', bmMayaTol(M('wb06')) === 11);
+      __REG.ok('BE-256 (belcika) → 13 (Fermentis "champion for strong ales")', bmMayaTol(M('be256')) === 13);
+      __REG.ok('BE-134 (saison) → 13', bmMayaTol(M('be134')) === 13);
+      __REG.ok('W-34/70 (lager) → 11', bmMayaTol(M('w3470')) === 11);
+      __REG.ok('Voss Kveik → 12 (Lallemand datasheet)', bmMayaTol(M('kveikv')) === 12);
+      __REG.ok('WY3787 Trappist (belcika) → 13 (11-15% çapraz-doğrulama)', bmMayaTol(M('wy3787')) === 13);
+      __REG.ok('SESSİZ: Philly Sour (sour bakteri) → null', bmMayaTol(M('bb_philly')) === null);
+      __REG.ok('SESSİZ: bb_sarap (şarap/seltzer, datasheet yok) → null', bmMayaTol(M('bb_sarap')) === null);
+      __REG.ok('SESSİZ: la_cbc1 (şişe kondisyon + yüksek-tolerans beyan) → null', bmMayaTol(M('la_cbc1')) === null);
+      __REG.ok('SESSİZ: null maya → null', bmMayaTol(null) === null);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AC-UYARI', ad: 'TOLERANS UYARISI (render entegrasyon): ABV vs maya toleransı — aşıyor/yakın/sessiz DOM seviyeleri hesapla uyumlu; WHEAT eşiği BELÇIKA\'dan sıkı (yanlış-alarm önleme); reaktif; bilinmeyen→sessiz; dil muhafazakâr',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('REGTEST AC', { maltlar: [{ id: 'pilsner', kg: 9 }], hoplar: [], mayaId: 'wb06', ogManuel: 1.108, fgManuel: 1.010 });
+      ekran = 'editor'; sekme = 'genel';
+      const abv = calc().abv;
+      __REG.ok('yüksek ABV zorlandı (>=11, aşım testine uygun)', abv >= 11, 'abv=' + abv.toFixed(1));
+      const asiyor = (h) => h.indexOf('alkol toleransını') >= 0;   // uy-k "aşıyor" dalı
+      const yakin = (h) => h.indexOf('toleransına yakın') >= 0;     // uy-s "yakın" dalı
+      const lvl = (a, t) => a >= t ? 2 : (a >= t - 1.5 ? 1 : 0);    // 2=aşıyor 1=yakın 0=sessiz
+      const domLvl = (h) => asiyor(h) ? 2 : (yakin(h) ? 1 : 0);
+      // WB-06 (wheat, tol 11)
+      S.mayaId = 'wb06'; render();
+      const domW = document.getElementById('ekran').innerHTML;
+      __REG.ok('WB-06 (11) DOM seviyesi = hesaplanan seviye (abv=' + abv.toFixed(1) + ')', domLvl(domW) === lvl(abv, 11), 'dom=' + domLvl(domW) + ' bek=' + lvl(abv, 11));
+      __REG.ok('WB-06 yüksek ABV → AŞIYOR uyarısı DOM\'da (doğru değerlerle)', asiyor(domW) && domW.indexOf('~%11') >= 0);
+      // BE-256 (belcika, tol 13) — aynı ABV, DAHA yüksek eşik
+      S.mayaId = 'be256'; render();
+      const domB = document.getElementById('ekran').innerHTML;
+      __REG.ok('BE-256 (13) DOM seviyesi = hesaplanan (aynı ABV, Belçika daha yüksek eşik)', domLvl(domB) === lvl(abv, 13), 'dom=' + domLvl(domB) + ' bek=' + lvl(abv, 13));
+      __REG.ok('YANLIŞ-ALARM ÖNLEME: aynı ABV\'de WHEAT seviyesi >= BELÇIKA seviyesi (belcika daha toleranslı)', domLvl(domW) >= domLvl(domB));
+      // dil disiplini (muhafazakâr)
+      __REG.ok('dil: "takılabilir"/"önemli" var, "kesinlikle" YOK', (domW + domB).indexOf('takılabilir') >= 0 && (domW + domB).indexOf('kesinlikle takılır') < 0);
+      // reaktif: sour maya (null tolerans) → uyarı YOK
+      S.mayaId = 'bb_philly'; render();
+      const domS = document.getElementById('ekran').innerHTML;
+      __REG.ok('REAKTİF + SESSİZ: tolerans bilinmeyen (sour) yüksek ABV\'de bile uyarı YOK (uydurma yok)', !asiyor(domS) && !yakin(domS));
+      // düşük ABV + WB-06 → sessiz
+      S.mayaId = 'wb06'; S.ogManuel = 1.042; S.fgManuel = 1.010; render();
+      const domL = document.getElementById('ekran').innerHTML;
+      __REG.ok('düşük ABV (~%4) + WB-06 → SESSİZ (uyarı yok)', !asiyor(domL) && !yakin(domL), 'abv=' + calc().abv.toFixed(1));
+      return __REG.al();
+    })
   }
 ];
 

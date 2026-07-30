@@ -4851,6 +4851,22 @@ function mayaFormu(maya){
   if(id.startsWith('wy')||id.startsWith('wlp')||ad.includes('wyeast')||ad.includes('whitelabs')||ad.includes('imperial'))return 'liquid';
   return 'dry';
 }
+// ═══ SPRINT AC: maya alkol toleransı — tip-bandı (üretici datasheet KAYNAKLI) + kaynak-yok SESSİZ ═══
+// Kaynaklar (2026-07): Fermentis alcohol-tolerance kategorileri — US-05/S-04/K-97/T-58/WB-06/S-33/
+//   W-34-70/S-189/S-23 → 9-11% tavan; BE-256/BE-134 → 13% (14% sayfası 404 = tavan 13). Lallemand Voss
+//   datasheet kveik ~12%. Wyeast 3787 (11-15%) + WhiteLabs WLP530 (10-15%) çapraz-doğrulama → belcika/
+//   saison ~13%. Bant = üreticinin yayınladığı ÜST (max) tolerans; ABV >= tol → aşım.
+// SESSİZ (uydurma yok): sour bakteri (ABV metriği anlamsız), yüksek-tolerans BEYAN eden (şişe kondisyon /
+//   'yüksek alkol tolerans'), şarap/seltzer mayaları (Türk rebrand, datasheet yok), bilinmeyen tip.
+function bmMayaTol(maya){
+  if(!maya) return null;
+  var e = String(maya.e||'').toLowerCase(), ad = String(maya.ad||'').toLowerCase();
+  if(/yüksek alkol tolerans|şişe kondisyon/.test(e) || /şarap|seltzer|wine|pamona|şampanya/.test(ad)) return null; // beyan-yüksek / şarap → sessiz
+  var t = maya.tip||'';
+  if(t==='sour') return null; // Lachancea/bakteri — kettle sour, ABV toleransı anlamlı metrik değil
+  var band = { ale:11, lager:11, wheat:11, wit:11, belcika:13, saison:13, kveik:12 };
+  return (band[t]!=null) ? band[t] : null; // bilinmeyen tip → sessiz
+}
 // Maya viyabilite (sıvı maya üretim tarihinden yaş bazlı hücre kaybı)
 // Chris White & Jamil Zainasheff "Yeast" kitabı: aylık ~%20-25 kayıp
 // Örnek: 100B vial + 3 ay → 100 × (1-0.22)^3 ≈ 47B
@@ -20749,6 +20765,12 @@ function rEditor(){
   if((S.maltlar.find(m=>m&&m.id==="lak")||{kg:0}).kg>0.4)uy+=`<div class="uybox uy-s">⚠️ Laktoz yüksek — max 0.4 kg önerilir</div>`;
   if(og>1.080&&!maya)uy+=`<div class="uybox uy-k">⚠️ OG 1.080+ — bol maya hazırla (sıvıda starter, kuruda ekstra paket)</div>`;
   if(ibu>0&&ibu<10&&S.maltlar.length)uy+=`<div class="uybox uy-k">⚠️ IBU ${ibu.toFixed(1)} — çok düşük (< 10 IBU enfeksiyon riski artar)</div>`;
+  // SPRINT AC: hesaplanan ABV vs maya alkol toleransı (bmMayaTol datasheet-kaynaklı). Muhafazakâr dil (X2/W1):
+  // "takılabilir/düşün", "kesin" DEME. Tolerans bilinmiyorsa (null) SESSİZ. Bilgilendirici — iskelet kapısı DEĞİL.
+  if(maya && abv>0 && typeof bmMayaTol==='function'){ var _tolAC=bmMayaTol(maya); if(_tolAC!=null){
+    if(abv>=_tolAC) uy+=`<div class="uybox uy-k">⚠️ Hedef ABV %${abv.toFixed(1)} bu mayanın alkol toleransını (~%${_tolAC}) aşıyor — fermentasyon takılabilir. Sağlıklı pitch (yeterli hücre) + besin/O₂, gerekirse yüksek-toleranslı maya ya da adım-besleme düşün.</div>`;
+    else if(abv>=_tolAC-1.5) uy+=`<div class="uybox uy-s">ℹ️ Hedef ABV %${abv.toFixed(1)} mayanın toleransına yakın (~%${_tolAC}) — sağlıklı pitch + yeterli besin/oksijen önemli.</div>`;
+  } }
 
   const minOpts=MINERALLER.filter(m=>m).map(m=>`<option value="${m.id}">${m.ad}</option>`).join("");
   const seciMalt=MALTLAR.find(x=>x&&x.id===yM.id);
