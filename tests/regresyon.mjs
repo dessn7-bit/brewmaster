@@ -2057,6 +2057,76 @@ const CASELER = [
       __REG.ok('BJCP Dubbel og [1.062, 1.075] (BJCP 2021)', BJCP['Dubbel'].og[0] === 1.062 && BJCP['Dubbel'].og[1] === 1.075, JSON.stringify(BJCP['Dubbel'].og));
       return __REG.al();
     })
+  },
+
+  // ── SPRINT AF: girdi-yakalama uçlandırma (tadım + sıcaklık) ──
+  {
+    kod: 'AF1-TADIM', ad: 'TADIM UÇLANDIRMA: "içime hazır" alarm onayı → tadım toast + kısayol (sekme=not); OTOMATİK log YAZILMAZ (kullanıcı yargısı); R eşlemesi (dry-hop/FG/sanitize) bozulmadı',
+    calistir: (page) => page.evaluate(() => {
+      const id = __REG.yeniKayit('AF1 Bira', {});
+      // içime-hazır alarmı kur (D-2 alarm şekli)
+      const store = {}; store[id] = { alarmlar: [{ g: 40, ts: Date.now(), tip: 'kontrol', aksiyon: '🍺 İçime hazır — Dubbel olgunlaştı', aciklama: 'olgunlaştı', durum: 'bekliyor' }] };
+      _alarmlariYaz(store);
+      const krBefore = KR.find(x => x && x.id === id);
+      const logBefore = (krBefore.brewLog || []).length;
+      var eskiToast = document.getElementById('bm-tadim-toast'); if (eskiToast) eskiToast.remove();
+      // alarm onayı → köprü
+      _bmAlarmOnayKoprusu(id, 40);
+      const toast = document.getElementById('bm-tadim-toast');
+      __REG.ok('içime-hazır onayı → 👅 tadım toast çıktı', !!toast && toast.textContent.indexOf('Tadım zamanı') >= 0);
+      __REG.ok('AF1 DİSİPLİN: otomatik tadım/log YAZILMADI (kullanıcı yargısı, uydurma yok)', (KR.find(x => x && x.id === id).brewLog || []).length === logBefore);
+      // kısayol → reçete + tadım sekmesi
+      _bmTadimGirKisayol(id);
+      __REG.ok('tadım kısayolu → sekme="not" (tadım paneli rEditorNot)', sekme === 'not');
+      if (toast) toast.remove();
+      // R eşlemesi REGRESYON: içime-hazır ile şişele karışmaz + dry-hop otomatik log korundu
+      const store2 = {}; store2[id] = { alarmlar: [{ g: 3, ts: Date.now(), tip: 'kontrol', aksiyon: '🌿 Dry hop ekle', aciklama: '50g Citra', durum: 'bekliyor' }] };
+      _alarmlariYaz(store2);
+      tarifAc(id);
+      const l0 = (S.brewLog || []).length;
+      _bmAlarmOnayKoprusu(id, 3);
+      __REG.ok('R KORUNDU: dry-hop alarmı hâlâ OTOMATİK log yazıyor (tadım değil)', (S.brewLog || []).some(x => x.tip === 'dry_hop'));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AF2-SICAKLIK', ad: 'SICAKLIK UÇLANDIRMA: pitch-input → brewLog sicaklik (R köprü deseni) → kaliteSkoru 50-puan blok CANLANDI (sicaklikStab); U2 batch-ipucu görüyor; n>=2 yeter',
+    calistir: (page) => page.evaluate(() => {
+      const id = __REG.yeniKayit('AF2 Bira', { mayaId: 'us05' });
+      // pitching gerekli (kaliteSkoru erken-return guard)
+      S.brewLog = [{ tip: 'pitching', tarih: new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10), deger: '', id: 'p1', ts: Date.now() - 7 * 86400000 }];
+      const maya = MAYALAR.find(m => m.id === 'us05');
+      // sıcaklık YOK → sicaklikStab 0
+      const ks0 = kaliteSkoru(S, maya, 1.050, 1.012, S.biraAd);
+      __REG.ok('sıcaklık logu YOKken sicaklikStab=0 (blok kör)', ks0.sicaklikStab === 0, 'ks0=' + ks0.sicaklikStab);
+      // pitch-input → kaydet (1. ölçüm)
+      bmFermSicSet(18); _bmSicaklikLogla();
+      __REG.ok('AF2: brewLog sicaklik kaydı düştü (deger=18)', (S.brewLog || []).some(x => x.tip === 'sicaklik' && x.deger === '18'));
+      // 2. ölçüm (n>=2 kaliteSkoru std için yeter)
+      bmFermSicSet(19); _bmSicaklikLogla();
+      __REG.ok('iki ölçüm birikti (n>=2)', (S.brewLog || []).filter(x => x.tip === 'sicaklik').length === 2);
+      const ks = kaliteSkoru(S, maya, 1.050, 1.012, S.biraAd);
+      __REG.ok('KRİTİK: kaliteSkoru sıcaklık logunu GÖRDÜ — sicaklikStab>0 (50-puan blok CANLANDI)', ks.sicaklikStab > 0, 'sicaklikStab=' + ks.sicaklikStab);
+      __REG.ok('kaliteSkoru toplamı arttı (sıcaklık girdisiyle)', ks.toplam > ks0.toplam, ks0.toplam + ' → ' + ks.toplam);
+      // U2 batch-ipucu sıcaklığı görüyor mu (aynı brewLog sicaklik kaynağı)
+      const ipucu = (typeof _bmOffBatchIpucu === 'function') ? _bmOffBatchIpucu('fusel') : '';
+      __REG.ok('U2 batch-ipucu sıcaklık verisini kullanıyor (°C geçiyor)', ipucu.indexOf('°C') >= 0 || ipucu.indexOf('sıcaklık') >= 0, ipucu ? 'dolu' : 'boş');
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AF2-OPTIN', ad: 'SICAKLIK OPSİYONELLİĞİ: "kaydet" BASILMADAN → transient global (eski davranış) korunur, brewLog\'a YAZILMAZ',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('AF2 optin', { mayaId: 'us05' });
+      S.brewLog = [];
+      bmFermSicSet(20); // yalnız transient — _bmSicaklikLogla ÇAĞRILMADI
+      __REG.ok('transient global set (eski davranış): bmFermSic()=20', bmFermSic() === 20);
+      __REG.ok('kaydet basılmadan → brewLog sicaklik YOK (opsiyonellik korundu)', (S.brewLog || []).filter(x => x.tip === 'sicaklik').length === 0);
+      // değersiz kaydet → yazmaz
+      bmFermSicSet(''); _bmSicaklikLogla();
+      __REG.ok('değersiz kaydet → yazmaz (uydurma yok)', (S.brewLog || []).filter(x => x.tip === 'sicaklik').length === 0);
+      return __REG.al();
+    })
   }
 ];
 

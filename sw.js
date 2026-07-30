@@ -685,7 +685,7 @@
 // Cozum: AYRI ONEKLI kalici cache'ler. activate filtresi 'bm-cache-' onekine bakiyor, bu yuzden
 // farkli onekli cache'ler bump'ta SILINMEZ (emsal: asagidaki 'bm-diag' cache'i zaten boyle yasiyor).
 // Icerik gercekten degisirse cache adindaki surumu artir (v1 -> v2); eski surum activate'te GC edilir.
-const CACHE_VERSION = 'bm-cache-v131-392';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
+const CACHE_VERSION = 'bm-cache-v131-393';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
 const ASSET_CACHE   = 'bm-assets-v1';        // font + ikon + manifest — KALICI, bump'ta silinmez
 const MODEL_CACHE   = 'bm-models-v1';        // workers.dev + jsdelivr — SHA'li/immutable URL, KALICI
 

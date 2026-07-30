@@ -4898,6 +4898,26 @@ function bmMayaKalib(id){try{const o=JSON.parse(localStorage.getItem('bm_maya_ka
 function bmMayaKalibSet(id,v){try{const o=JSON.parse(localStorage.getItem('bm_maya_kalibrasyon')||'{}');if(v==null||!(+v>0))delete o[id];else o[id]=Math.round(+v);localStorage.setItem('bm_maya_kalibrasyon',JSON.stringify(o));}catch(e){}}
 function bmFermSic(){try{var v=localStorage.getItem('bm_ferm_sicaklik');return (v==null||v==='')?null:+v;}catch(e){return null;}}
 function bmFermSicSet(v){try{if(v==null||v===''||isNaN(+v))localStorage.removeItem('bm_ferm_sicaklik');else localStorage.setItem('bm_ferm_sicaklik',Math.round(+v));}catch(e){}}
+// SPRINT AF2: pitch-kartı sıcaklık input'unu brewLog'a uçlandır. bmFermSic (transient global)
+// değerini kaydet → kaliteSkoru/U2/W1 görür. OPSİYONEL (kullanıcı basar); R köprü deseni (çıplak
+// push değil, logEkle yan-etki zinciri: sort + persist + _stuckFermSync). Otomatik değer ASLA.
+window._bmSicaklikLogla = function(){
+  try{
+    if(typeof S==='undefined'||!S) return;
+    var v = (typeof bmFermSic==='function') ? bmFermSic() : null;
+    if(v==null || !isFinite(v)){ if(typeof flash==='function')flash('Önce sıcaklık gir (°C)','err'); return; }
+    if(!Array.isArray(S.brewLog)) S.brewLog=[];
+    var dt=new Date();
+    var tarih=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
+    S.brewLog.push({ tip:'sicaklik', tarih:tarih, deger:String(v), not:'', id:Date.now().toString(), ts:Date.now() });
+    S.brewLog.sort(function(x,y){ return String(x.tarih||'').localeCompare(String(y.tarih||'')); });
+    if(S.biraAd && S.biraAd.trim() && typeof tarifeKaydet==='function') tarifeKaydet();
+    else if(typeof ky==='function' && typeof KR!=='undefined') ky(KR);
+    try{ if(window._stuckFermSync) _stuckFermSync(); }catch(_ss){}
+    if(typeof flash==='function') flash('📖 '+v+'°C günlüğe kaydedildi','ok');
+    if(typeof render==='function') render();
+  }catch(e){ try{console.warn('_bmSicaklikLogla',e);}catch(_){} }
+};
 function bmHasatList(){try{var a=JSON.parse(localStorage.getItem('bm_maya_hasat')||'[]');return Array.isArray(a)?a:[];}catch(e){return [];}}
 function bmHasatSave(a){try{localStorage.setItem('bm_maya_hasat',JSON.stringify(a));}catch(e){}}
 function bmHasatEkle(ad,nesil,tarih,mayaId,esik){if(!ad||!String(ad).trim())return;var a=bmHasatList();a.push({id:'h'+Date.now(),mayaId:mayaId||'',ad:String(ad).trim(),nesil:Math.max(1,Math.min(30,+nesil||1)),tarih:tarih||new Date().toISOString().slice(0,10),esik:(esik!=null&&String(esik).trim()!==''&&+esik>0)?Math.round(+esik):null});bmHasatSave(a);try{if(window._mayaTazelikSync)_mayaTazelikSync();}catch(_e){}if(typeof render==='function')render();}
@@ -15308,7 +15328,7 @@ function rEditorMaya(og, fg, abv, maya, maya2, fgKaynak, fgHesap){
         </div>`;
       }
       
-      return _bmAccWrap('maya-pitchgunu','🧬','Pitch Günü',(maya.ideal+'°C ideal · '+kuruPaket.toFixed(1)+' paket'),`<div class="kart" style="margin-top:12px;background:var(--bg-sunken);border:1.5px solid var(--altin);padding:10px 12px"><div style="font-size:13px;font-weight:700;color:var(--vintage-koyu);margin-bottom:6px">🌡️ Sıcaklık Kontrolü</div><div style="display:flex;gap:6px;align-items:center"><span style="font-size:11px;color:var(--soluk)">Şu anki sıcaklığım:</span><input aria-label="Fermantasyon sıcaklığı (°C)" type="number" class="inp" style="width:64px;text-align:center;font-weight:600" min="0" max="45" step="1" value="${(typeof bmFermSic==='function'&&bmFermSic()!=null)?bmFermSic():''}" placeholder="${maya.ideal}" onchange="bmFermSicSet(this.value);render()"><span style="font-size:11px;color:var(--soluk)">°C</span></div>${(function(){var X=(typeof bmFermSic==='function')?bmFermSic():null;if(X==null)return '<div style="font-size:var(--fs-xs);color:var(--dim);margin-top:4px">Sıcaklığını gir, maya idealine göre ne yapman gerektiğini söyleyeyim.</div>';var lo=maya.sc[0],hi=maya.sc[1],id=maya.ideal,msg,col;if(X<lo){msg='❄️ Çok soğuk — maya min '+lo+'°C. +'+(lo-X)+'°C ısıtman gerek.';col='var(--mk)';}else if(X>hi){msg='🔥 Çok sıcak — maya max '+hi+'°C. '+(X-hi)+'°C soğutman gerek (fusel/off-flavor riski).';col='var(--kk)';}else if(Math.abs(X-id)<=1){msg='✓ İdeale çok yakın ('+id+'°C).';col='var(--yk)';}else if(X<id){msg='🌡️ İdealin altında (ideal '+id+'°C) — +'+(id-X)+'°C ile hızlanır, ester biraz artar.';col='var(--vintage-koyu)';}else{msg='🌡️ İdealin üstünde (ideal '+id+'°C) — '+(X-id)+'°C soğutursan daha temiz.';col='var(--vintage-koyu)';}return '<div style="font-size:11px;color:'+col+';margin-top:5px;font-weight:600">'+msg+'</div>';})()}</div><div class="kart" style="margin-top:12px;background:var(--accent-soft);border:1.5px solid var(--vintage);padding:10px 12px"><div style="font-size:13px;font-weight:700;color:var(--vintage-koyu);margin-bottom:6px">🧪 Maya Besini & Oksijen</div><div style="font-size:11px;color:var(--kahve);line-height:1.5"><b>O2/Aerasyon:</b> ${og>=1.075?'Yüksek — saf O2 ~60-90 sn; çok yüksek OG değerlerinde 12-18 saatte tekrar oksijenle.':og>=1.060?'Artırılmış — saf O2 ~30-45 sn ya da uzun çalkalama.':'Standart aerasyon (çalkalama/splash) yeterli (~8 ppm).'}${maya.tip==='lager'?' Lager: O2 ve hücre ihtiyacı daha yüksek.':maya.tip==='kveik'?' Kveik: düşük O2 toleranslı, az aerasyon yeterli.':''}</div><div style="font-size:11px;color:var(--kahve);line-height:1.5;margin-top:5px"><b>Besin:</b> ${og>=1.075?'Maya besini önerilir — yüksek OG mayanın azot/FAN ihtiyacını artırır; şeker/şurup adjunktu varsa daha da önemli. Dozaj için üretici talimatı (Fermaid-O / DAP).':'Tüm-malt normal OG: malt yeterli FAN sağlar, besin opsiyonel. Bol şeker/şurup adjunktu kullanıyorsan yine de besin düşün.'}</div></div><div class="kart" style="margin-top:12px;background:var(--accent-soft);border:1.5px solid var(--altin)">
+      return _bmAccWrap('maya-pitchgunu','🧬','Pitch Günü',(maya.ideal+'°C ideal · '+kuruPaket.toFixed(1)+' paket'),`<div class="kart" style="margin-top:12px;background:var(--bg-sunken);border:1.5px solid var(--altin);padding:10px 12px"><div style="font-size:13px;font-weight:700;color:var(--vintage-koyu);margin-bottom:6px">🌡️ Sıcaklık Kontrolü</div><div style="display:flex;gap:6px;align-items:center"><span style="font-size:11px;color:var(--soluk)">Şu anki sıcaklığım:</span><input aria-label="Fermantasyon sıcaklığı (°C)" type="number" class="inp" style="width:64px;text-align:center;font-weight:600" min="0" max="45" step="1" value="${(typeof bmFermSic==='function'&&bmFermSic()!=null)?bmFermSic():''}" placeholder="${maya.ideal}" onchange="bmFermSicSet(this.value);render()"><span style="font-size:11px;color:var(--soluk)">°C</span><button type="button" onclick="window._bmSicaklikLogla()" title="Bu sıcaklığı fermantasyon günlüğüne ekle (kalite skoru için)" style="margin-left:6px;font-size:10px;padding:3px 8px;border:1px solid var(--altin);background:var(--sa);color:var(--bakir);border-radius:6px;cursor:pointer;font-weight:600">📖 kaydet</button></div><div style="font-size:10px;color:var(--dim);margin-top:3px">Birkaç kez kaydetmen yeter — 2+ ölçüm kalite skorunu (sıcaklık stabilitesi) açar. Kaydetmezsen yalnız anlık gösterim.</div>${(function(){var X=(typeof bmFermSic==='function')?bmFermSic():null;if(X==null)return '<div style="font-size:var(--fs-xs);color:var(--dim);margin-top:4px">Sıcaklığını gir, maya idealine göre ne yapman gerektiğini söyleyeyim.</div>';var lo=maya.sc[0],hi=maya.sc[1],id=maya.ideal,msg,col;if(X<lo){msg='❄️ Çok soğuk — maya min '+lo+'°C. +'+(lo-X)+'°C ısıtman gerek.';col='var(--mk)';}else if(X>hi){msg='🔥 Çok sıcak — maya max '+hi+'°C. '+(X-hi)+'°C soğutman gerek (fusel/off-flavor riski).';col='var(--kk)';}else if(Math.abs(X-id)<=1){msg='✓ İdeale çok yakın ('+id+'°C).';col='var(--yk)';}else if(X<id){msg='🌡️ İdealin altında (ideal '+id+'°C) — +'+(id-X)+'°C ile hızlanır, ester biraz artar.';col='var(--vintage-koyu)';}else{msg='🌡️ İdealin üstünde (ideal '+id+'°C) — '+(X-id)+'°C soğutursan daha temiz.';col='var(--vintage-koyu)';}return '<div style="font-size:11px;color:'+col+';margin-top:5px;font-weight:600">'+msg+'</div>';})()}</div><div class="kart" style="margin-top:12px;background:var(--accent-soft);border:1.5px solid var(--vintage);padding:10px 12px"><div style="font-size:13px;font-weight:700;color:var(--vintage-koyu);margin-bottom:6px">🧪 Maya Besini & Oksijen</div><div style="font-size:11px;color:var(--kahve);line-height:1.5"><b>O2/Aerasyon:</b> ${og>=1.075?'Yüksek — saf O2 ~60-90 sn; çok yüksek OG değerlerinde 12-18 saatte tekrar oksijenle.':og>=1.060?'Artırılmış — saf O2 ~30-45 sn ya da uzun çalkalama.':'Standart aerasyon (çalkalama/splash) yeterli (~8 ppm).'}${maya.tip==='lager'?' Lager: O2 ve hücre ihtiyacı daha yüksek.':maya.tip==='kveik'?' Kveik: düşük O2 toleranslı, az aerasyon yeterli.':''}</div><div style="font-size:11px;color:var(--kahve);line-height:1.5;margin-top:5px"><b>Besin:</b> ${og>=1.075?'Maya besini önerilir — yüksek OG mayanın azot/FAN ihtiyacını artırır; şeker/şurup adjunktu varsa daha da önemli. Dozaj için üretici talimatı (Fermaid-O / DAP).':'Tüm-malt normal OG: malt yeterli FAN sağlar, besin opsiyonel. Bol şeker/şurup adjunktu kullanıyorsan yine de besin düşün.'}</div></div><div class="kart" style="margin-top:12px;background:var(--accent-soft);border:1.5px solid var(--altin)">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
           <div style="font-size:13px;font-weight:700;color:var(--kahve)">🧬 Pitch Rate Hesabı</div>
           <div style="font-size:11px;color:var(--dim)">${tipAd}</div>
@@ -22858,7 +22878,8 @@ window.brewdayBitir=function(){
     if (a.indexOf('🍺 Şişele') === 0) return { tip: 'siseleme', litreSor: true };
     if (a.indexOf('Pitching') !== -1) return { tip: 'pitching', onaySor: true };
     if (a.indexOf('📊') === 0 && (a.indexOf('FG') !== -1 || a.indexOf('Gravity kontrol') !== -1)) return { kisayol: true };
-    return null; // sanitize / karbonasyon kontrol / içime hazır / rest / rise / soğut / lagering / pasif
+    if (a.indexOf('İçime hazır') !== -1) return { tadimKisayol: true }; // SPRINT AF1: içime-hazır → tadım kısayolu (log YOK)
+    return null; // sanitize / karbonasyon kontrol / rest / rise / soğut / lagering / pasif
   }
   window._bmOlcumGirKisayol = function(rid){
     try{
@@ -22888,6 +22909,34 @@ window.brewdayBitir=function(){
       setTimeout(function(){ try{ var x = document.getElementById('bm-olcum-toast'); if (x) x.remove(); }catch(_e){} }, 12000);
     }catch(_e){}
   }
+  // SPRINT AF1: tadım kısayolu — 'içime hazır' alarmı onayında reçeteyi aç + tadım panelini (sekme='not') hazırla.
+  // _bmOlcumGirKisayol aynası. Tadım OTOMATİK yazılmaz (kullanıcı yargısı) — yalnız navigasyon/yönlendirme.
+  window._bmTadimGirKisayol = function(rid){
+    try{
+      if (typeof tarifAc === 'function') tarifAc(rid);
+      if (typeof setSekme === 'function') setSekme('not'); // tadım paneli rEditorNot içinde
+      setTimeout(function(){
+        try{
+          var el = document.getElementById('_tin_aroma') || document.getElementById('_tOffLbl_diacetyl');
+          if (el && el.scrollIntoView) el.scrollIntoView({ block: 'center' });
+        }catch(_e){}
+      }, 150);
+    }catch(_e){}
+  };
+  function _bmTadimToast(rid){
+    try{
+      var esk = document.getElementById('bm-tadim-toast'); if (esk) esk.remove();
+      var d = document.createElement('div');
+      d.id = 'bm-tadim-toast';
+      d.style.cssText = 'position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--bg-card);border:1px solid var(--cizgi-arac);border-radius:10px;padding:10px 14px;display:flex;gap:10px;align-items:center;box-shadow:0 4px 16px rgba(0,0,0,.25);font-size:13px';
+      var rTemiz = String(rid).replace(/[^\w:.-]/g, '');
+      d.innerHTML = '<span>👅 Tadım zamanı — nasıl olmuş?</span>' +
+        '<button class="btn" style="background:var(--altin);color:#fff;border:none;border-radius:6px;padding:6px 12px;font-weight:700;cursor:pointer" onclick="window._bmTadimGirKisayol(\'' + rTemiz + '\');this.parentNode.remove()">Tadım gir</button>' +
+        '<button class="btn" style="background:transparent;border:1px solid var(--cizgi-arac);border-radius:6px;padding:6px 10px;cursor:pointer" onclick="this.parentNode.remove()">Kapat</button>';
+      document.body.appendChild(d);
+      setTimeout(function(){ try{ var x = document.getElementById('bm-tadim-toast'); if (x) x.remove(); }catch(_e){} }, 12000);
+    }catch(_e){}
+  }
   window._bmAlarmOnayKoprusu = function(receteId, gun){
     try{
       var rid = String(receteId || '');
@@ -22900,6 +22949,7 @@ window.brewdayBitir=function(){
       var es = _bmAlarmLogEsle(al);
       if (!es) return;
       if (es.kisayol) { _bmOlcumToast(rid); return; }                          // ölçüm: otomatik değer ASLA
+      if (es.tadimKisayol) { _bmTadimToast(rid); return; }                     // SPRINT AF1: tadım kısayolu, otomatik kayıt ASLA
       var acik = (typeof _editId !== 'undefined' && _editId === rid && typeof S !== 'undefined');
       var hedef = acik ? S : (Array.isArray(KR) ? KR.find(function(k){ return k && k.id === rid; }) : null);
       if (!hedef) return;
