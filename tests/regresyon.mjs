@@ -1216,7 +1216,7 @@ const CASELER = [
     kod: 'V-ISKELET-GATE', ad: 'TUTARLILIK KAPISI: her STIL_ISKELET → calc() OG/IBU/SRM BJCP aralığında (X2: koyu stil srm-tavan>=30 SRM üst serbest) + tüm ID katalogda (bozuk iskelet koruması)',
     calistir: (page) => page.evaluate(() => {
       const styles = Object.keys(window.STIL_ISKELET || {});
-      __REG.ok('STIL_ISKELET 42 stil (20 küratörlü + 4 V1b + 18 V2 batch)', styles.length === 42, String(styles.length));
+      __REG.ok('STIL_ISKELET 63 stil (20 küratörlü + 4 V1b + 18 V2 + 21 V3/AL)', styles.length === 63, String(styles.length));
       yeniTarif();
       let idFail = [], rangeFail = [], pctFail = [];
       styles.forEach(st => {
@@ -1297,14 +1297,19 @@ const CASELER = [
     })
   },
   {
-    kod: 'V-CLAYER', ad: 'C katmanı: iskeleti OLMAYAN stil (Munich Dunkel, V2 eşik-altı n<5) → maya önerisi dolar, malt/hop BOŞ kalır (sahte iskelet UYDURMA)',
+    kod: 'V-CLAYER', ad: 'C katmanı: iskeleti OLMAYAN stil → maya önerisi dolar, malt/hop BOŞ kalır (sahte iskelet UYDURMA)',
     calistir: (page) => page.evaluate(() => {
-      // Munich Dunkel: BJCP'de var, V2'de örneklem yetersiz (n=3<5) → STIL_ISKELET'te YOK, C katmanı kalır
-      __REG.ok('Munich Dunkel BJCP\'de var ama STIL_ISKELET\'te YOK', !!BJCP['Munich Dunkel'] && !window.STIL_ISKELET['Munich Dunkel']);
+      // Sprint AL NOTU: eskiden sabit "Munich Dunkel" kullanılıyordu; V3 çıkarımı ona
+      // iskelet ürettiği için örnek DİNAMİK seçilir — test gelecekteki iskelet
+      // eklemelerine dayanıklı olsun (sabit isim = her sprintte bayatlayan test).
+      const iskeletsiz = Object.keys(BJCP).filter(a => !window.STIL_ISKELET[a]);
+      __REG.ok('iskeleti olmayan BJCP stili hâlâ var (C katmanı canlı)', iskeletsiz.length > 0, iskeletsiz.length + ' stil');
+      const hedef = iskeletsiz[0];
+      const beklenenMaya = window._stilMayaOner ? window._stilMayaOner(hedef) : '';
       yeniTarif();
-      S.stil = 'Munich Dunkel'; S.hacim = 11;
+      S.stil = hedef; S.hacim = 11;
       bmStilIskeletDoldur();
-      __REG.ok('maya önerisi dolduruldu (lager → w3470)', S.mayaId === 'w3470');
+      __REG.ok('maya önerisi dolduruldu (_stilMayaOner ile aynı)', !!S.mayaId && S.mayaId === beklenenMaya, hedef + ' → ' + S.mayaId);
       __REG.ok('malt BOŞ kaldı (sahte malzeme uydurulmadı)', S.maltlar.length === 0);
       __REG.ok('hop BOŞ kaldı (sahte malzeme uydurulmadı)', S.hoplar.length === 0);
       return __REG.al();
@@ -1333,10 +1338,14 @@ const CASELER = [
     kod: 'V1B-KAYNAK', ad: 'kaynak izi: her iskelet kurator|cikarim etiketli, 20+4 dağılım, her çıkarım n>=5 (eşik kanıtı)',
     calistir: (page) => page.evaluate(() => {
       const entries = Object.entries(window.STIL_ISKELET || {});
-      __REG.ok('her iskelette kaynak izi var (kurator|cikarim|cikarim_v2)', entries.length > 0 && entries.every(([, i]) => i.kaynak === 'kurator' || i.kaynak === 'cikarim' || i.kaynak === 'cikarim_v2'));
-      const kur = entries.filter(([, i]) => i.kaynak === 'kurator'), cik = entries.filter(([, i]) => i.kaynak === 'cikarim'), cik2 = entries.filter(([, i]) => i.kaynak === 'cikarim_v2');
-      __REG.ok('20 küratörlü + 4 V1b çıkarım + 18 V2 batch', kur.length === 20 && cik.length === 4 && cik2.length === 18, kur.length + '+' + cik.length + '+' + cik2.length);
+      const IZLER = ['kurator', 'cikarim', 'cikarim_v2', 'cikarim_v3'];
+      __REG.ok('her iskelette kaynak izi var (kurator|cikarim|cikarim_v2|cikarim_v3)', entries.length > 0 && entries.every(([, i]) => IZLER.indexOf(i.kaynak) >= 0));
+      const kur = entries.filter(([, i]) => i.kaynak === 'kurator'), cik = entries.filter(([, i]) => i.kaynak === 'cikarim'),
+        cik2 = entries.filter(([, i]) => i.kaynak === 'cikarim_v2'), cik3 = entries.filter(([, i]) => i.kaynak === 'cikarim_v3');
+      __REG.ok('20 küratörlü + 4 V1b + 18 V2 batch + 21 V3/AL (376K korpus)', kur.length === 20 && cik.length === 4 && cik2.length === 18 && cik3.length === 21, kur.length + '+' + cik.length + '+' + cik2.length + '+' + cik3.length);
       __REG.ok('her V1b/V2 çıkarım iskeleti n>=5 taşır (eşik-altı çıkarım YOK)', cik.concat(cik2).every(([, i]) => typeof i.n === 'number' && i.n >= 5), cik.concat(cik2).filter(([, i]) => !(i.n >= 5)).map(([a, i]) => a + ':n=' + i.n).join(' | '));
+      // V3 eşiği çok daha yüksek: ön-filtre SONRASI havuz n>=40 (376K korpusta V2'nin 5'i anlamsız düşük kalır)
+      __REG.ok('her V3 iskeleti n>=40 + maya-tip izi taşır', cik3.every(([, i]) => typeof i.n === 'number' && i.n >= 40 && !!i.maya), cik3.filter(([, i]) => !(i.n >= 40 && i.maya)).map(([a, i]) => a + ':n=' + i.n).join(' | '));
       __REG.ok('beklenen 4 V1b çıkarım stili', ['Czech Premium Pale Lager', 'Festbier / Wiesn', 'American Barleywine', 'English Brown Ale'].every(a => window.STIL_ISKELET[a] && window.STIL_ISKELET[a].kaynak === 'cikarim'));
       return __REG.al();
     })
@@ -1346,11 +1355,17 @@ const CASELER = [
     calistir: (page) => page.evaluate(() => {
       // V1b'de (199 reçete) eşik-altıydı; V2 batch parser (817 reçete) daha çok veriyle qualified etti
       const v2Promoted = ['Imperial IPA / DIPA', 'Milk Stout / Sweet Stout', 'Vienna Lager', 'Doppelbock'];
-      // V2'de de KALICI dışlanan — kategorik/kalibrasyon güvenlik (tutarlılık kapısı tek başına yakalamaz)
-      const kaliciDisla = ['West Coast IPA', 'Imperial / Russian Imperial Stout'];
+      // MAYA-TİP gerekçesiyle dışlanan KALICIDIR (veri sorunu değil, kategorik güvenlik)
+      const kaliciDisla = ['West Coast IPA'];
       __REG.ok('kontrol stilleri BJCP otoritesinde mevcut', v2Promoted.concat(kaliciDisla).every(a => !!BJCP[a]));
       __REG.ok('V1b eşik-altı stiller V2 batch parser ile qualified (kaynak cikarim_v2)', v2Promoted.every(a => window.STIL_ISKELET[a] && window.STIL_ISKELET[a].kaynak === 'cikarim_v2'), v2Promoted.filter(a => !window.STIL_ISKELET[a]).join(' | '));
-      __REG.ok('kalıcı dışlananlar V2\'de de tabloda YOK (West Coast: lager-maya ön-filtre; Imp Stout: motor-renk >1.9×BJCP-max)', kaliciDisla.every(a => !window.STIL_ISKELET[a]));
+      __REG.ok('MAYA-TİP dışlaması KALICI (West Coast IPA: Cold-IPA lager-maya kirliliği, ön-filtre)', kaliciDisla.every(a => !window.STIL_ISKELET[a]));
+      // Sprint AL: Imperial Stout V2'de "motor-renk >1.9×BJCP-max" diye düşmüştü. Sprint X2'nin
+      // KOYU_SMAX=30 toleransı (srm-tavanı>=30 stillerde üst-yön serbest) bu engeli KALDIRDI →
+      // V3'te otantik koyu grist ile GEÇTİ. Bu bir gevşetme DEĞİL: alt sınır ve OG/IBU aynen zorunlu.
+      const IS = window.STIL_ISKELET['Imperial / Russian Imperial Stout'];
+      __REG.ok('Imperial Stout ARTIK tabloda (X2 KOYU_SMAX toleransı, kaynak cikarim_v3)', !!IS && IS.kaynak === 'cikarim_v3', IS ? IS.kaynak + ' n=' + IS.n : 'YOK');
+      __REG.ok('Imperial Stout gristi otantik koyu kavurma içeriyor', !!IS && IS.grist.some(g => /choc|roast|black|crf/.test(g[0])), IS ? JSON.stringify(IS.grist) : '-');
       return __REG.al();
     })
   },
@@ -2508,9 +2523,19 @@ const CASELER = [
     calistir: (page) => page.evaluate(() => {
       __REG.yeniKayit('AK İskeletsiz', {});
       S.hacim = 11; S.maltlar = []; S.hoplar = []; S.mayaId = '';
-      const key = 'cokkoyu|dengeli|dolgun';
-      const idx = window._PROFIL_STIL[key][1].findIndex(x => !STIL_ISKELET[x[0]]);
-      __REG.ok('kovada iskeletsiz öneri var', idx >= 0, idx >= 0 ? window._PROFIL_STIL[key][1][idx][0] : 'yok');
+      // Sprint AL NOTU: sabit kova kullanılıyordu; V3 iskeletleri o kovanın TÜM önerilerini
+      // doldurulabilir yaptı (kapsama %75→%97) → test çöküyordu. Artık iskeletsiz öneri
+      // TÜM kovalarda aranır; hiç kalmadıysa bu bir BAŞARIDIR, test onu da doğrular.
+      let key = null, idx = -1;
+      for (const k of Object.keys(window._PROFIL_STIL)) {
+        const i = window._PROFIL_STIL[k][1].findIndex(x => !STIL_ISKELET[x[0]]);
+        if (i >= 0) { key = k; idx = i; break; }
+      }
+      if (idx < 0) {
+        __REG.ok('profil tablosundaki TÜM öneriler artık doldurulabilir (C katmanı yolu V-CLAYER ile ayrıca test ediliyor)', true, 'iskeletsiz öneri kalmadı');
+        return __REG.al();
+      }
+      __REG.ok('iskeletsiz öneri bulundu (C katmanı yolu test edilebilir)', idx >= 0, key + ' → ' + window._PROFIL_STIL[key][1][idx][0]);
       const ad = window._PROFIL_STIL[key][1][idx][0];
       _bmProfilStilUygula(key, idx, true);
       __REG.ok('S.stil kuruldu', S.stil === ad, S.stil);
@@ -2520,7 +2545,8 @@ const CASELER = [
       __REG.ok('BJCP hedefi çözülebilir', !!BJCP[ad] && Array.isArray(BJCP[ad].og), JSON.stringify(BJCP[ad] && BJCP[ad].og));
       // DOM iddiası için profil çipleri de seçili olmalı — kart ancak 3 eksen seçilince sonuç listeler
       ekran = 'editor'; sekme = 'genel';
-      _bmProfilSec('renk', 'cokkoyu'); _bmProfilSec('aci', 'dengeli'); _bmProfilSec('govde', 'dolgun');
+      const [kR, kA, kG] = key.split('|');
+      _bmProfilSec('renk', kR); _bmProfilSec('aci', kA); _bmProfilSec('govde', kG);
       const dom = document.getElementById('ekran').innerHTML;
       __REG.ok('UI\'da "🎯 Hedef yap" düğmesi (Doldur değil)', dom.indexOf('🎯 Hedef yap') >= 0);
       __REG.ok('düğme açıklaması: malt/hop uydurulmaz', dom.indexOf('malt/hop uydurulmaz') >= 0);
@@ -2566,6 +2592,145 @@ const CASELER = [
       // profil yolu Sprint Z ayrımını bozmuyor: NİYET (iskelet), düzeltme sinyali değil
       _bmProfilStilUygula('koyu|dengeli|dolgun', 0, false);
       __REG.ok('profil yolu __stilSecKaynak=iskelet (öğrenme kolu zehirlenmez)', window.__stilSecKaynak === 'iskelet', window.__stilSecKaynak);
+      return __REG.al();
+    })
+  },
+
+  // ── SPRINT AL — V3 ÇIKARIM: 376K korpustan 21 yeni iskelet ──
+  {
+    kod: 'AL1-URETIM', ad: 'V3 ÜRETİM: 21 yeni iskelet kaynak izi cikarim_v3 + n>=40 + maya-tip; MEVCUT 42 iskelet EZİLMEDİ (küratör/V1b/V2 kazanır)',
+    calistir: (page) => page.evaluate(() => {
+      const K = window.STIL_ISKELET, adlar = Object.keys(K);
+      const v3 = adlar.filter(a => K[a].kaynak === 'cikarim_v3');
+      const eski = adlar.filter(a => K[a].kaynak !== 'cikarim_v3');
+      __REG.ok('toplam 63 iskelet (42 + 21)', adlar.length === 63, adlar.length);
+      __REG.ok('21 yeni V3 iskeleti', v3.length === 21, v3.length);
+      __REG.ok('MEVCUT 42 iskelet KORUNDU (çakışmada mevcut kazanır)', eski.length === 42, eski.length);
+      __REG.ok('her V3 kaydı n>=40 taşır (V2 eşiği 5 → 376K korpusta 8×)', v3.every(a => K[a].n >= 40), v3.filter(a => !(K[a].n >= 40)).join(','));
+      __REG.ok('her V3 kaydı maya-tip izi taşır (şeffaflık)', v3.every(a => !!K[a].maya), v3.filter(a => !K[a].maya).join(','));
+      __REG.ok('her V3 gristi %100', v3.every(a => Math.abs(K[a].grist.reduce((s, g) => s + g[1], 0) - 100) < 0.01));
+      // beklenen çekirdek stiller (spec: Robust Porter / Imperial Stout / ESB / Irish Red / Dark Mild)
+      ['Robust Porter', 'Imperial / Russian Imperial Stout', 'Strong Bitter / ESB', 'Irish Red Ale', 'English Mild / Dark Mild']
+        .forEach(a => __REG.ok('spec adayı üretildi: ' + a, !!K[a] && K[a].kaynak === 'cikarim_v3', K[a] ? 'n=' + K[a].n : 'YOK'));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AL2-KAPI', ad: 'TUTARLILIK KAPISI + ASSERT-ONCE: 21 V3 iskeletinin HEPSİ calc() ile BJCP aralığında; hiçbir malt/hop/maya ID katalog-dışı (uydurma-ID=0)',
+    calistir: (page) => page.evaluate(() => {
+      const K = window.STIL_ISKELET;
+      const v3 = Object.keys(K).filter(a => K[a].kaynak === 'cikarim_v3');
+      const KOYU_SMAX = 30;
+      const maltIds = new Set(MALTLAR.filter(m => m).map(m => m.id));
+      const hopIds = new Set(HOPLAR.filter(x => x).map(x => x.id));
+      const mayaIds = new Set(MAYALAR.filter(x => x).map(x => x.id));
+      let idKotu = [], kapiKotu = [];
+      v3.forEach(a => {
+        K[a].grist.forEach(g => { if (!maltIds.has(g[0])) idKotu.push(a + ':malt:' + g[0]); });
+        K[a].hop.forEach(x => { if (!hopIds.has(x.id)) idKotu.push(a + ':hop:' + x.id); });
+        if (!mayaIds.has(K[a].mayaId)) idKotu.push(a + ':maya:' + K[a].mayaId);
+        const r = window._stilIskeletHesap(a, 11, 61);
+        if (!r || !r.malts || !r.malts.length) { kapiKotu.push(a + ':hesap-null'); return; }
+        const bj = BJCP[a], c = calcIskelet(r);
+        if (!(c.og >= bj.og[0] && c.og <= bj.og[1])) kapiKotu.push(a + ':OG=' + c.og.toFixed(3));
+        if (!(c.ibu >= bj.ibu[0] && c.ibu <= bj.ibu[1])) kapiKotu.push(a + ':IBU=' + Math.round(c.ibu));
+        if (!(c.srm >= bj.srm[0] && (bj.srm[1] >= KOYU_SMAX || c.srm <= bj.srm[1]))) kapiKotu.push(a + ':SRM=' + c.srm);
+      });
+      function calcIskelet(r) {
+        const og = hOG(r.malts, 61, [], 11);
+        return { og, ibu: hIBU(r.hops, og, 11, []), srm: hSRM(r.malts, [], 11) };
+      }
+      __REG.ok('UYDURMA-ID = 0 (assert-once, katalog-ID tuzağı 4. kez)', idKotu.length === 0, idKotu.join(' | ') || '0');
+      __REG.ok('21/21 iskelet tutarlılık kapısını GEÇİYOR', kapiKotu.length === 0, kapiKotu.join(' | ') || '21/21');
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AL3-IMPSTOUT', ad: 'IMPERIAL STOUT (spec): V2\'de motor-renk >1.9×BJCP-max diye DÜŞMÜŞTÜ; X2 KOYU_SMAX toleransı sayesinde ARTIK GEÇİYOR — otantik koyu grist korundu, kapı gevşetilmedi',
+    calistir: (page) => page.evaluate(() => {
+      const ad = 'Imperial / Russian Imperial Stout', K = window.STIL_ISKELET[ad];
+      __REG.ok('Imperial Stout iskeleti VAR (V2\'de yoktu)', !!K && K.kaynak === 'cikarim_v3', K ? K.kaynak : 'YOK');
+      __REG.ok('grist otantik koyu kavurma içeriyor', !!K && K.grist.some(g => /choc|roast|black|crf/.test(g[0])), K ? JSON.stringify(K.grist) : '-');
+      const r = window._stilIskeletHesap(ad, 11, 61);
+      const og = hOG(r.malts, 61, [], 11), srm = hSRM(r.malts, [], 11), bj = BJCP[ad];
+      __REG.ok('SRM BJCP tavanının ÜSTÜNDE (koyu karakter gutlanmadı)', srm > bj.srm[1], 'SRM=' + srm + ' tavan=' + bj.srm[1]);
+      __REG.ok('BJCP srm tavanı >= 30 → X2 kuralı gereği üst-yön serbest', bj.srm[1] >= 30, bj.srm[1]);
+      __REG.ok('ALT sınır YİNE zorunlu (kapı gevşetilmedi)', srm >= bj.srm[0], srm + ' >= ' + bj.srm[0]);
+      __REG.ok('OG BJCP aralığında (sayısal-anlamlı eksen aynen zorunlu)', og >= bj.og[0] && og <= bj.og[1], og.toFixed(3) + ' ∈ [' + bj.og + ']');
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AL4-MAYA', ad: 'MAYA-TİP DİSİPLİNİ (kapı bunu GÖRMEZ — ayrı katman): V3 iskeletlerinde lager/ale çelişkisi yok; kaydedilen maya-tip gerçek katalog tipiyle tutuyor',
+    calistir: (page) => page.evaluate(() => {
+      const K = window.STIL_ISKELET;
+      const v3 = Object.keys(K).filter(a => K[a].kaynak === 'cikarim_v3');
+      const mById = {}; MAYALAR.filter(m => m).forEach(m => mById[m.id] = m);
+      const celiski = [];
+      v3.forEach(a => {
+        const m = mById[K[a].mayaId]; if (!m) return;
+        const hibrit = /kölsch|altbier|california common|steam|cream ale/i.test(a);
+        if (hibrit) return;
+        const lagerStil = /lager|pils|bock|märzen|oktoberfest|festbier|schwarz|dunkel|dortmund/i.test(a);
+        if (lagerStil && m.tip !== 'lager') celiski.push(a + ' lager-stili×' + m.tip);
+        if (!lagerStil && m.tip === 'lager') celiski.push(a + ' ale-stili×lager');
+      });
+      __REG.ok('lager/ale stil-maya çelişkisi YOK', celiski.length === 0, celiski.join(' | ') || '0');
+      __REG.ok('kaydedilen maya-tip = katalog tipi', v3.every(a => { const m = mById[K[a].mayaId]; return !m || m.tip === K[a].maya; }),
+        v3.filter(a => { const m = mById[K[a].mayaId]; return m && m.tip !== K[a].maya; }).join(','));
+      __REG.ok('ESB → İngiliz maya s04', K['Strong Bitter / ESB'].mayaId === 's04', K['Strong Bitter / ESB'].mayaId);
+      __REG.ok('Belgian Strong Golden → belcika tipi maya', mById[K['Belgian Strong Golden Ale'].mayaId].tip === 'belcika', K['Belgian Strong Golden Ale'].mayaId);
+      __REG.ok('California Common → lager maya (hibrit stil, doğru istisna)', mById[K['California Common / Steam Beer'].mayaId].tip === 'lager', K['California Common / Steam Beer'].mayaId);
+      __REG.ok('Munich Dunkel → lager maya (stil-aile katmanı)', mById[K['Munich Dunkel'].mayaId].tip === 'lager', K['Munich Dunkel'].mayaId);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AL5-AK-ENTEGRASYON', ad: 'AK ENTEGRASYONU (sprintin asıl değeri): profil seçicide "🎯 Hedef yap" satırları "📋 Doldur"a döndü — kapsama ölçülüyor',
+    calistir: (page) => page.evaluate(() => {
+      const T = window._PROFIL_STIL, K = window.STIL_ISKELET;
+      let oneri = 0, iskSonra = 0, iskOnce = 0;
+      Object.values(T).forEach(v => v[1].forEach(x => {
+        oneri++;
+        if (K[x[0]]) iskSonra++;
+        if (K[x[0]] && K[x[0]].kaynak !== 'cikarim_v3') iskOnce++;
+      }));
+      __REG.ok('profil önerilerinin >=%95\'i artık doldurulabilir', iskSonra / oneri >= 0.95, iskSonra + '/' + oneri + ' = %' + Math.round(100 * iskSonra / oneri));
+      __REG.ok('AL öncesi oran ~%75 idi → net kazanç', iskOnce / oneri < 0.80 && iskSonra > iskOnce, '%' + Math.round(100 * iskOnce / oneri) + ' → %' + Math.round(100 * iskSonra / oneri) + ' (+' + (iskSonra - iskOnce) + ' satır)');
+      // koyu+dengeli+dolgun kovası: AK'da Robust Porter "Hedef yap" idi, artık "Doldur"
+      const koyu = T['koyu|dengeli|dolgun'][1].map(x => x[0]);
+      __REG.ok('Robust Porter bu kovada öneriliyor', koyu.indexOf('Robust Porter') >= 0, koyu.join(' · '));
+      __REG.ok('Robust Porter artık İSKELETLİ (AK\'da değildi)', !!K['Robust Porter'] && K['Robust Porter'].kaynak === 'cikarim_v3');
+      // UI kanıtı: o kovada "Hedef yap" düğmesi kalmadı
+      __REG.yeniKayit('AL5 Bira', {});
+      ekran = 'editor'; sekme = 'genel';
+      _bmProfilSec('renk', 'koyu'); _bmProfilSec('aci', 'dengeli'); _bmProfilSec('govde', 'dolgun');
+      const dom = document.getElementById('ekran').innerHTML;
+      const tumIskeletli = koyu.every(a => !!K[a]);
+      __REG.ok('kovadaki TÜM öneriler iskeletli', tumIskeletli, koyu.filter(a => !K[a]).join(',') || 'hepsi');
+      __REG.ok('UI: bu kovada "🎯 Hedef yap" düğmesi KALMADI', tumIskeletli ? dom.indexOf('🎯 Hedef yap') < 0 : true);
+      __REG.ok('UI: "📋 Doldur" düğmeleri var', (dom.match(/📋 Doldur/g) || []).length >= 5, (dom.match(/📋 Doldur/g) || []).length);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AL6-DOLDUR', ad: 'YENİ İSKELET UÇTAN UCA: V3 iskeleti reçeteyi gerçekten dolduruyor + 11L/22L ölçekleniyor + BJCP hedefinde kalıyor',
+    calistir: (page) => page.evaluate(() => {
+      const K = window.STIL_ISKELET;
+      const ad = 'Robust Porter';
+      __REG.yeniKayit('AL6 Bira', {});
+      S.hacim = 11; S.verim = 61; S.maltlar = []; S.hoplar = []; S.mayaId = '';
+      S.stil = ad; bmStilIskeletDoldur();
+      __REG.ok('malt doldu', (S.maltlar || []).length > 0, (S.maltlar || []).length);
+      __REG.ok('hop doldu', (S.hoplar || []).length > 0, (S.hoplar || []).length);
+      __REG.ok('maya kuruldu (İngiliz ale)', S.mayaId === K[ad].mayaId, S.mayaId);
+      const c = calc(), bj = BJCP[ad];
+      __REG.ok('OG BJCP aralığında', c.og >= bj.og[0] - 0.003 && c.og <= bj.og[1] + 0.003, c.og.toFixed(3) + ' ∈ [' + bj.og + ']');
+      __REG.ok('IBU BJCP aralığında', c.ibu >= bj.ibu[0] - 3 && c.ibu <= bj.ibu[1] + 3, Math.round(c.ibu) + ' ∈ [' + bj.ibu + ']');
+      const kg11 = (S.maltlar || []).reduce((a, m) => a + (m.kg || 0), 0);
+      S.maltlar = []; S.hoplar = []; S.hacim = 22; bmStilIskeletDoldur();
+      const kg22 = (S.maltlar || []).reduce((a, m) => a + (m.kg || 0), 0);
+      __REG.ok('11L → 22L ölçekleme ~2×', kg22 > kg11 * 1.8 && kg22 < kg11 * 2.2, kg11.toFixed(2) + ' → ' + kg22.toFixed(2));
       return __REG.al();
     })
   }

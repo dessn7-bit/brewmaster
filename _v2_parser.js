@@ -322,7 +322,11 @@ const LAGER_STYLES = new Set([
 // Test/başka modüller için dışa aç (assert-once + alias tabloları + motor)
 module.exports = { maltId, hopIdAlias, mayaTip, yeastId, bjcpAdi, sourMu, med, TIP_KANONIK,
   LAGER_STYLES, MALT_ALIAS, HOP_ALIAS, catIds, hopIds, mayaById, MALTLAR, HOPLAR, MAYALAR,
-  BJCP, SLUG_TO_BJCP, STIL_ISKELET, ctx, HACIM, VERIM, ESIK, DOM_ORAN, FAM_MIN };
+  BJCP, SLUG_TO_BJCP, STIL_ISKELET, ctx, HACIM, VERIM, ESIK, DOM_ORAN, FAM_MIN,
+  // Sprint AL (v3) EKI — SALT DISA-ACMA, davranis degismedi (CLI yolu require.main guard'i
+  // ile korunuyor). V3 ayni renk-kalibrasyonu/konsolidasyon/nudge'i KULLANIR, yeniden yazmaz.
+  renkKalibre, konsolideAile, motorHedef, intNudge, crystalYakin,
+  DARK_FAM, CRYSTAL_FAM, BAZ_EMICI, maltRById, CRYSTAL_LIVE, KOYU_SMAX, RENK_ESIK, BATCH_L };
 if (require.main !== module) return; // require ile yüklenince yalnız tablo/fonksiyon; CLI çalışmaz
 
 // ── 6. HAM VERİ: 817 parse-edilebilir reçete → deterministik parse ──

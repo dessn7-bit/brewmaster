@@ -5818,7 +5818,40 @@ const STIL_ISKELET = {
   "English Barleywine":             {grist:[['maris',86],['c80',7],['munich',4],['invert2',3]], hop:[{id:'challenger',dk:60,rol:'aci'},{id:'ekg',dk:10,rol:'aroma',gL:2.2}], mayaId:'s04', mashSc:67, kaynak:'cikarim_v2', n:6, maya:'ale'},
   "Session IPA":                    {grist:[['pale_ale',96],['c20',4]], hop:[{id:'columbus',dk:60,rol:'aci'},{id:'citra',dk:10,rol:'aroma',gL:1.5},{id:'mosaic',rol:'kuru',gL:1.5}], mayaId:'us05', mashSc:67, kaynak:'cikarim_v2', n:5, maya:'ale'},
   "Doppelbock":                     {grist:[['munich',69],['pilsner',22],['cara_munich2',4],['vienna',4],['crf2',1]], hop:[{id:'hrtau',dk:60,rol:'aci'}], mayaId:'wy2206', mashSc:67, kaynak:'cikarim_v2', n:7, maya:'lager'},
-  "English IPA":                    {grist:[['maris',92],['c60',5],['sek',3]], hop:[{id:'ekg',dk:60,rol:'aci'},{id:'ekg',dk:10,rol:'aroma',gL:1.3},{id:'ekg',rol:'kuru',gL:1.5}], mayaId:'wy1318', mashSc:67, kaynak:'cikarim_v2', n:5, maya:'ale'}
+  "English IPA":                    {grist:[['maris',92],['c60',5],['sek',3]], hop:[{id:'ekg',dk:60,rol:'aci'},{id:'ekg',dk:10,rol:'aroma',gL:1.3},{id:'ekg',rol:'kuru',gL:1.5}], mayaId:'wy1318', mashSc:67, kaynak:'cikarim_v2', n:5, maya:'ale'},
+
+  // ── SPRINT AL — V3 ÇIKARIM (build-time, _v3_cikarim.js) ────────────────────
+  // Kaynak: 376.810 reçetelik korpus (working/_step105_dataset_v8_clean.json).
+  // Boru hattı Sprint V2'nin (_v2_parser.js) hattıdır — require ile kullanılır,
+  // yeniden yazılmadı: deterministik alias + ASSERT-ONCE ID kilidi (uydurma-ID=0),
+  // maya-tip ön-filtre + homojenlik + stil-aile katmanları (tutarlılık kapısı
+  // maya-tip hatasını GÖRMEZ), aile konsolidasyonu, motor-renk kalibrasyonu,
+  // tutarlılık kapısı. V3 farkı: (a) grist AİLE-TOPLAMI medyanı + baz=100−uzmanlık
+  // (V1b yapısı) — bu ölçekte ID-başına medyan 0'a çöküyordu, (b) crystal seçimi
+  // lovibond SAYISIYLA (ad-regex değil), (c) hop g/L reçetenin gerçek hacminden.
+  // 27 aday → 24 üretildi → 21 kapı-PASS. Elle düzenlenmez — değişiklik =
+  // _v3_cikarim.js yeniden koşulur. kaynak:'cikarim_v3', n, maya-tip.
+  "American Amber IPA / Red IPA":       {grist:[['pale_ale',76],['c20',24]], hop:[{id:'simcoe',dk:60,rol:'aci'},{id:'cascade',dk:10,rol:'aroma',gL:1.4},{id:'citra',rol:'kuru',gL:1.5}], mayaId:'us05', mashSc:67, kaynak:'cikarim_v3', n:140, maya:'ale'},
+  "American Stout":                     {grist:[['pale_ale',84],['choc',11],['c120',5]], hop:[{id:'magnum',dk:60,rol:'aci'},{id:'cascade',dk:10,rol:'aroma',gL:1.4}], mayaId:'us05', mashSc:67, kaynak:'cikarim_v3', n:2578, maya:'ale'},
+  "American Strong Ale":                {grist:[['pale_ale',96],['c40',4]], hop:[{id:'chinook',dk:60,rol:'aci'},{id:'chinook',dk:10,rol:'aroma',gL:1.4}], mayaId:'us05', mashSc:67, kaynak:'cikarim_v3', n:88, maya:'ale'},
+  "Belgian Strong Golden Ale":          {grist:[['pilsner',90],['sek',10]], hop:[{id:'saaz',dk:60,rol:'aci'},{id:'saaz',dk:10,rol:'aroma',gL:1.2}], mayaId:'wy1388', mashSc:67, kaynak:'cikarim_v3', n:359, maya:'belcika'},
+  "Black IPA / Cascadian Dark Ale":     {grist:[['pale_ale',88],['crf3',7],['c60',5]], hop:[{id:'columbus',dk:60,rol:'aci'},{id:'citra',dk:10,rol:'aroma',gL:1.2},{id:'citra',rol:'kuru',gL:1.5}], mayaId:'us05', mashSc:67, kaynak:'cikarim_v3', n:225, maya:'ale'},
+  "Bock":                               {grist:[['munich',50],['pilsner',34],['c40',10],['mel',6]], hop:[{id:'hrtau',dk:60,rol:'aci'},{id:'hrtau',dk:10,rol:'aroma',gL:0.8}], mayaId:'w3470', mashSc:67, kaynak:'cikarim_v3', n:304, maya:'lager'},
+  "Brown Porter":                       {grist:[['pale_ale',83],['choc',9],['c60',8]], hop:[{id:'fuggles',dk:60,rol:'aci'},{id:'fuggles',dk:10,rol:'aroma',gL:0.7}], mayaId:'s04', mashSc:67, kaynak:'cikarim_v3', n:999, maya:'ale'},
+  "California Common / Steam Beer":     {grist:[['pale_ale',91],['c60',9]], hop:[{id:'nbrewer',dk:60,rol:'aci'},{id:'nbrewer',dk:10,rol:'aroma',gL:1}], mayaId:'w3470', mashSc:67, kaynak:'cikarim_v3', n:872, maya:'lager'},
+  "English Mild / Dark Mild":           {grist:[['maris',85],['c60',10],['choc',5]], hop:[{id:'ekg',dk:60,rol:'aci'},{id:'ekg',dk:10,rol:'aroma',gL:0.7}], mayaId:'s04', mashSc:67, kaynak:'cikarim_v3', n:1424, maya:'ale'},
+  "Foreign Extra Stout":                {grist:[['pale_ale',85],['roast',11],['c60',4]], hop:[{id:'ekg',dk:60,rol:'aci'},{id:'ekg',dk:10,rol:'aroma',gL:1.3}], mayaId:'s04', mashSc:67, kaynak:'cikarim_v3', n:459, maya:'ale'},
+  "Imperial / Russian Imperial Stout":  {grist:[['pale_ale',85],['choc',11],['c120',4]], hop:[{id:'magnum',dk:60,rol:'aci'}], mayaId:'us05', mashSc:67, kaynak:'cikarim_v3', n:2397, maya:'ale'},
+  "Irish Red Ale":                      {grist:[['pale_ale',86],['c40',14]], hop:[{id:'ekg',dk:60,rol:'aci'},{id:'ekg',dk:10,rol:'aroma',gL:0.8}], mayaId:'s04', mashSc:67, kaynak:'cikarim_v3', n:2535, maya:'ale'},
+  "London Porter":                      {grist:[['pale_ale',84],['choc',9],['c60',7]], hop:[{id:'ekg',dk:60,rol:'aci'},{id:'ekg',dk:10,rol:'aroma',gL:0.9}], mayaId:'s04', mashSc:67, kaynak:'cikarim_v3', n:454, maya:'ale'},
+  "Maibock / Helles Bock":              {grist:[['pilsner',82],['munich',18]], hop:[{id:'hrtau',dk:60,rol:'aci'},{id:'hrtau',dk:10,rol:'aroma',gL:1.4}], mayaId:'w3470', mashSc:67, kaynak:'cikarim_v3', n:471, maya:'lager'},
+  "Munich Dunkel":                      {grist:[['munich',62],['pilsner',35],['choc',3]], hop:[{id:'hrtau',dk:60,rol:'aci'},{id:'hrtau',dk:10,rol:'aroma',gL:0.7}], mayaId:'w3470', mashSc:67, kaynak:'cikarim_v3', n:396, maya:'lager'},
+  "Old Ale":                            {grist:[['pale_ale',94],['c60',6]], hop:[{id:'ekg',dk:60,rol:'aci'},{id:'ekg',dk:10,rol:'aroma',gL:1.4}], mayaId:'s04', mashSc:67, kaynak:'cikarim_v3', n:642, maya:'ale'},
+  "Pre-Prohibition Lager":              {grist:[['pilsner',100]], hop:[{id:'saaz',dk:60,rol:'aci'},{id:'saaz',dk:10,rol:'aroma',gL:1.4}], mayaId:'w3470', mashSc:67, kaynak:'cikarim_v3', n:333, maya:'lager'},
+  "Robust Porter":                      {grist:[['pale_ale',84],['choc',9],['c60',7]], hop:[{id:'ekg',dk:60,rol:'aci'},{id:'ekg',dk:10,rol:'aroma',gL:1}], mayaId:'s04', mashSc:67, kaynak:'cikarim_v3', n:3255, maya:'ale'},
+  "Scottish Ale / 80 Shilling":         {grist:[['maris',65],['c40',26],['hml',9]], hop:[{id:'ekg',dk:60,rol:'aci'},{id:'ekg',dk:10,rol:'aroma',gL:0.8}], mayaId:'wy1728', mashSc:67, kaynak:'cikarim_v3', n:958, maya:'ale'},
+  "Session Ale / Ordinary Bitter":      {grist:[['maris',90],['c60',10]], hop:[{id:'ekg',dk:60,rol:'aci'},{id:'ekg',dk:10,rol:'aroma',gL:0.8}], mayaId:'s04', mashSc:67, kaynak:'cikarim_v3', n:834, maya:'ale'},
+  "Strong Bitter / ESB":                {grist:[['maris',93],['c60',7]], hop:[{id:'ekg',dk:60,rol:'aci'},{id:'ekg',dk:10,rol:'aroma',gL:1.2}], mayaId:'s04', mashSc:67, kaynak:'cikarim_v3', n:2962, maya:'ale'}
 };
 window.STIL_ISKELET = STIL_ISKELET;
 
