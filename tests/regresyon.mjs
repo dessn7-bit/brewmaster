@@ -2294,6 +2294,136 @@ const CASELER = [
       __REG.ok('yıl raporu litre "(tasarım hacmi)" netliği', rapor.indexOf('(tasarım hacmi)') >= 0, rapor.slice(0, 60));
       return __REG.al();
     })
+  },
+
+  // ── SPRINT AJ — MASH NEDEN-SONUÇ BİLGİ TABANI ──
+  {
+    kod: 'AJ1-TABLO', ad: 'MASH BİLGİ TABANI: 7 kol grubu × 7 zorunlu alan dolu; 4 kanıt etiketi geçerli; belgeden gelen kritik atamalar (sülfat:klorür KANITLI, gövde ÖLÇÜLDÜ, mash-out/dekoksiyon/kaynar-sparge FOLKLOR)',
+    calistir: (page) => page.evaluate(() => {
+      const B = window._MASH_BILGI, K = window._MASH_KANIT;
+      __REG.ok('_MASH_BILGI tablosu yüklü', !!B && Object.keys(B).length >= 20, B ? Object.keys(B).length + ' kol' : 'YOK');
+      __REG.ok('4 kanıt etiketi tanımlı', !!K && ['KANITLI', 'OLCULDU', 'FOLKLOR', 'TARTISMALI'].every(k => K[k] && K[k].rozet));
+      const zorunlu = ['kol', 'etki', 'mekanizma', 'kanitDurumu', 'buyukluk', 'stilBaglami', 'kaynak'];
+      let eksik = 0, gecersiz = 0; const gruplar = {};
+      Object.keys(B).forEach(k => {
+        const d = B[k];
+        zorunlu.forEach(f => { if (!d[f] || !String(d[f]).trim()) eksik++; });
+        if (!K[d.kanitDurumu]) gecersiz++;
+        gruplar[d.grup] = 1;
+      });
+      __REG.ok('her kolda 7 zorunlu alan dolu', eksik === 0, eksik);
+      __REG.ok('her kolda geçerli kanıt etiketi', gecersiz === 0, gecersiz);
+      __REG.ok('7 mash kol grubu da temsil ediliyor', Object.keys(gruplar).length === 7, Object.keys(gruplar).sort().join(','));
+      // Belgeden (design_recete_danismanligi) gelen kritik etiketler — uydurma yok
+      __REG.ok('sülfat:klorür KANITLI (p=0.003)', B.su_sulfatKlorur.kanitDurumu === 'KANITLI' && B.su_sulfatKlorur.buyukluk.indexOf('p=0.003') >= 0);
+      __REG.ok('pH ölçüm sıcaklığı KANITLI (~0.3 birim)', B.ph_olcumSicakligi.kanitDurumu === 'KANITLI' && B.ph_olcumSicakligi.buyukluk.indexOf('0.3 birim') >= 0);
+      __REG.ok('gövde algısı ÖLÇÜLDÜ·GÖSTERİLEMEDİ (p=0.42)', B.sc_govde.kanitDurumu === 'OLCULDU' && B.sc_govde.buyukluk.indexOf('p=0.42') >= 0);
+      __REG.ok('mash-out FOLKLOR', B.step_mashOut.kanitDurumu === 'FOLKLOR');
+      __REG.ok('dekoksiyon (modern malt) FOLKLOR', B.step_dekoksiyon.kanitDurumu === 'FOLKLOR');
+      __REG.ok('kaynar sparge FOLKLOR (p=0.74)', B.sparge_sicaklik.kanitDurumu === 'FOLKLOR');
+      __REG.ok('ferulik rest ÖLÇÜLDÜ (preskriptif "yapma" YOK)', B.step_ferulik.kanitDurumu === 'OLCULDU' && B.step_ferulik.kanitNot.indexOf('YETMİYOR') >= 0);
+      __REG.ok('fermentasyon sıcaklığı KANITLI — karanfilin gerçek kolu', B.step_fermSicaklik.kanitDurumu === 'KANITLI' && B.step_fermSicaklik.buyukluk.indexOf('p=0.002') >= 0);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AJ1-DIL', ad: 'DİL DİSİPLİNİ (kritik): kullanıcıya giden metin "gösterilemedi" diyor; "algılanmıyor/algılanmaz" kesinliği YOK; "fark yok" yalnız tırnaklı negasyon içinde; OG konfoundu (apparent attenuation) belirtiliyor',
+    calistir: (page) => page.evaluate(() => {
+      const kart = window._bmMashBilgiKart(68, []);
+      __REG.ok('kart üretiliyor', typeof kart === 'string' && kart.length > 3000, kart.length + ' karakter');
+      __REG.ok('"gösterilemedi" dili kullanılıyor', (kart.match(/gösterilemedi/g) || []).length >= 5, (kart.match(/gösterilemedi/g) || []).length + ' kez');
+      __REG.ok('"algılanmıyor" kesinliği YOK', kart.indexOf('algılanmıyor') < 0);
+      __REG.ok('"algılanmaz" kesinliği YOK', kart.indexOf('algılanmaz') < 0);
+      let kotu = 0, i = 0;
+      while ((i = kart.indexOf('fark yok', i)) >= 0) {
+        if (kart[i - 1] !== '"' || !/^"\s*(demek|kanıtı)/.test(kart.slice(i + 8, i + 30))) kotu++;
+        i += 8;
+      }
+      __REG.ok('negasyon dışı "fark yok" kesinliği YOK', kotu === 0, kotu);
+      __REG.ok('OG konfoundu belirtiliyor (apparent attenuation)', kart.indexOf('apparent attenuation') >= 0);
+      __REG.ok('rozet metni "GÖSTERİLEMEDİ" taşıyor', window._MASH_KANIT.OLCULDU.rozet.indexOf('GÖSTERİLEMEDİ') >= 0, window._MASH_KANIT.OLCULDU.rozet);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AJ2-UI', ad: 'MASH UI: sıcaklık değişince bilgi göstergesi güncelleniyor (band + FG puanı); "Boşuna uğraşma" folklor listesi ve "Gerçekten fark yaratanlar" KANITLI listesi DOM\'da; enzim etiketleri gövde İDDİASI içermiyor',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('AJ2 Bira', {});
+      ekran = 'editor'; sekme = 'surec';
+      S.mashSc = 72; S.mashAdimlar = []; render();
+      let dom = document.getElementById('ekran').innerHTML;
+      __REG.ok('72°C → α-amilaz bandı gösteriliyor', dom.indexOf('α-amilaz ağırlıklı') >= 0);
+      __REG.ok('72°C → FG hesabı +6.0 puan', dom.indexOf('FG hesabı +6.0 puan') >= 0);
+      __REG.ok('"Boşuna uğraşma" bölümü var', dom.indexOf('Boşuna uğraşma') >= 0);
+      __REG.ok('"Gerçekten fark yaratanlar" bölümü var', dom.indexOf('Gerçekten fark yaratanlar') >= 0);
+      __REG.ok('KANITLI vurgusu: sülfat:klorür p=0.003 DOM\'da', dom.indexOf('p=0.003') >= 0);
+      __REG.ok('KANITLI vurgusu: pH ölçüm sıcaklığı 0.3 birim DOM\'da', dom.indexOf('0.3 birim') >= 0);
+      __REG.ok('folklor kolları DOM\'da (mash-out / dekoksiyon / kaynar sparge)',
+        dom.indexOf('Mash-out (76-79°C)') >= 0 && dom.indexOf('Dekoksiyon — modern') >= 0 && dom.indexOf('kaynar su') >= 0);
+      S.mashSc = 63; render();
+      dom = document.getElementById('ekran').innerHTML;
+      __REG.ok('63°C → β-amilaz bandı (reaktif)', dom.indexOf('β-amilaz ağırlıklı') >= 0 && dom.indexOf('α-amilaz ağırlıklı') < 0);
+      __REG.ok('63°C → FG hesabı -2.0 puan', dom.indexOf('FG hesabı -2.0 puan') >= 0);
+      S.mashSc = 67; render();
+      dom = document.getElementById('ekran').innerHTML;
+      __REG.ok('67°C → nötr band, FG etkisi yok', dom.indexOf('Dengeli band') >= 0 && dom.indexOf('nötr band') >= 0);
+      __REG.ok('adım etiketleri gövde İDDİASI içermiyor (dekstrinli/nötr band)',
+        dom.indexOf('Alfa+Beta — dolgun') < 0 && dom.indexOf('Alfa-amilaz — tam gövde') < 0 && dom.indexOf('Dengeli — orta gövde') < 0);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AJ2-WEIZEN', ad: 'WEIZEN KARANFİL YÖNLENDİRMESİ: Weizen bağlamında ferulik rest p=0.86 gösterilemedi + gerçek kol fermentasyon sıcaklığı (16 vs 22°C, p=0.002, OG/FG aynı); Weizen olmayan reçetede kutu ÇIKMAZ',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('AJ Weizen', {});
+      ekran = 'editor'; sekme = 'surec';
+      S.stil = 'American IPA'; S.mayaId = 'us05'; render();
+      __REG.ok('IPA → Weizen kutusu YOK (bağlam-dışı gürültü yok)', document.getElementById('ekran').innerHTML.indexOf('kol MASH DEĞİL') < 0);
+      S.stil = 'Weizen / Weissbier'; render();
+      const dom = document.getElementById('ekran').innerHTML;
+      __REG.ok('Weizen → karanfil kutusu VAR', dom.indexOf('kol MASH DEĞİL') >= 0);
+      __REG.ok('ferulik rest: p=0.86 + "gösterilemedi"', dom.indexOf('p=0.86') >= 0 && dom.indexOf('gösterilemedi') >= 0);
+      __REG.ok('gerçek kol: fermentasyon sıcaklığı 16°C vs 22°C, p=0.002', dom.indexOf('16°C vs 22°C') >= 0 && dom.indexOf('p=0.002') >= 0);
+      __REG.ok('Maya sekmesine yönlendiriyor (mash adımına DEĞİL)', dom.indexOf('Maya sekmesinde fermentasyon sıcaklığını düşür') >= 0);
+      // buğday mayası tipi de bağlamı açar (stil boş olsa bile)
+      const wm = (typeof MAYALAR !== 'undefined') && MAYALAR.find(x => x && String(x.tip || '') === 'wheat');
+      if (wm) { S.stil = ''; S.mayaId = wm.id; render(); __REG.ok('buğday mayası (tip=wheat) → kutu VAR', document.getElementById('ekran').innerHTML.indexOf('kol MASH DEĞİL') >= 0, wm.id); }
+      else { __REG.ok('katalogda wheat tipi maya var', false, 'wheat maya bulunamadı'); }
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AJ2-FG-MOTOR', ad: 'MOTOR TUTARLILIĞI (kritik): gösterilen FG puanı calc() mash düzeltmesiyle BİREBİR aynı (8597-8606 bozulmadı); 65-68°C nötr band korunuyor',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('AJ FG Motor', {});
+      S.maltlar = [{ id: 'pale_ale', kg: 3 }]; S.mayaId = 'us05'; S.hacim = 11; S.verim = 61;
+      S.mashAdimlar = []; S.fgManuel = '';
+      const fgAt = (t) => { S.mashSc = t; const c = calc(); return c.fgHesap; };
+      const f67 = fgAt(67), f72 = fgAt(72), f63 = fgAt(63), f65 = fgAt(65), f68 = fgAt(68);
+      __REG.ok('65-68°C nötr band: FG aynı', Math.abs(f65 - f67) < 1e-9 && Math.abs(f68 - f67) < 1e-9, f65 + '/' + f67 + '/' + f68);
+      const d72 = f72 - f67, d63 = f63 - f67;
+      __REG.ok('72°C motor farkı = UI göstergesi (+0.0060)', Math.abs(d72 - window._bmMashFGEtki(72)) < 1e-9, 'motor=' + d72.toFixed(5) + ' ui=' + window._bmMashFGEtki(72).toFixed(5));
+      __REG.ok('63°C motor farkı = UI göstergesi (-0.0020)', Math.abs(d63 - window._bmMashFGEtki(63)) < 1e-9, 'motor=' + d63.toFixed(5) + ' ui=' + window._bmMashFGEtki(63).toFixed(5));
+      __REG.ok('yön doğru: yüksek mash → yüksek FG', f72 > f67 && f63 < f67, f63 + ' < ' + f67 + ' < ' + f72);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AJ3-MASHSTEPS', ad: 'ÖLÜ ÖZNİTELİK FIX: ML girdisinde mash_steps artık (S.mashAdimlar||[]).length okuyor — S.mashSteps hiçbir yerde yazılmıyordu (bayrak daima 1/0 sabitti)',
+    calistir: (page) => page.evaluate(() => {
+      const src = Array.from(document.querySelectorAll('script')).map(s => s.textContent).join('\n');
+      __REG.ok('ölü "S.mashSteps" okuması KALDIRILDI', src.indexOf('mash_steps: (S.mashSteps || 1)') < 0);
+      __REG.ok('mash_steps → mashAdimlar.length', src.indexOf('mash_steps: ((S.mashAdimlar||[]).length || 1)') >= 0);
+      __REG.yeniKayit('AJ3 Bira', {});
+      S.mashAdimlar = [{ sc: 63, dk: 30 }, { sc: 72, dk: 20 }];
+      __REG.ok('2 adımlı step mash → mash_steps=2', ((S.mashAdimlar || []).length || 1) === 2);
+      __REG.ok('S.mashSteps hâlâ tanımsız (ölü alan doğrulandı)', typeof S.mashSteps === 'undefined');
+      S.mashAdimlar = [];
+      __REG.ok('adım yok → 1 (fallback korunuyor)', ((S.mashAdimlar || []).length || 1) === 1);
+      delete S.mashAdimlar;
+      __REG.ok('mashAdimlar tanımsız → 1 (patlamıyor)', ((S.mashAdimlar || []).length || 1) === 1);
+      return __REG.al();
+    })
   }
 ];
 

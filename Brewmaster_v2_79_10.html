@@ -14700,7 +14700,7 @@ function rEditorSurec(){
   if(!S.mashAdimlar)S.mashAdimlar=[];
   const _mAdimlar=S.mashAdimlar.length>0?S.mashAdimlar:[{sc:_mSc,dk:_mDk}];
   const _mToplam=_mAdimlar.reduce(function(s,a){return s+(a.dk||0);},0);
-  const _acikla=function(sc){return sc<=62?'Protein rest':sc<=64?'Beta-amilaz — kuru':sc<=68?'Dengeli — orta gövde':sc<=70?'Alfa+Beta — dolgun':sc<=73?'Alfa-amilaz — tam gövde':'Mash out';};
+  const _acikla=function(sc){return sc<=62?'Protein rest':sc<=64?'Beta-amilaz — kuru':sc<=68?'Dengeli — nötr band':sc<=70?'Alfa+Beta — dekstrinli':sc<=73?'Alfa-amilaz — en dekstrinli':'Mash out';};
   // I-P2: Reçete hazırlık kontrolü — brewday öncesi son bakış
   var _hazir={
     malt:(S.maltlar||[]).length>0,
@@ -14919,6 +14919,7 @@ function rEditorSurec(){
       <input aria-label="Mash sıcaklığı (°C)" type="number" value="${_mSc}" min="60" max="76" step="0.5" onchange="S.mashSc=parseFloat(this.value);render()" style="width:60px;text-align:center;font-size:13px;font-weight:700;padding:3px 6px;border:1px solid var(--kahve-border);border-radius:6px;background:#fff;color:var(--kahve)">
       <span style="font-size:12px;color:var(--bakir);font-weight:600">°C</span>
     </div>
+    ${(window._bmMashBilgiKart?window._bmMashBilgiKart(_mSc,_mAdimlar):'')}
     <div style="position:relative;padding-left:24px">
       <div style="position:absolute;left:9px;top:0;bottom:0;width:2px;background:var(--bor)"></div>
       ${_adimHTML}
@@ -18939,7 +18940,7 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
         katkilar: S.katkilar || [],
         hacim:    S.hacim    || 0,
         og:       _og,
-        mash_steps: (S.mashSteps || 1),
+        mash_steps: ((S.mashAdimlar||[]).length || 1),
         verim:    (S.verim || 0)
       });
       window.BM_B1.predictCluster(_b1Input).then(function(r){
@@ -24295,6 +24296,377 @@ window.tadimInc=tadimInc;
 // (bozma riski). Timeline diacetyl keyword (~13021) buradaki _bmOffKisaCozum'a yönlendirildi (tek kaynak).
 // ═══════════════════════════════════════════════════════════════════════════
 window._OFF_KODLAR = ['diacetyl','DMS','acetaldehyde','fusel','oxidized','astringent','light-struck','solvent','acetic','chlorophenol','sulfur','metallic','infection','phenolic','ester'];
+// ═══ SPRINT AJ — MASH SÜRECİ NEDEN-SONUÇ BİLGİ TABANI ══════════════════════
+// Kaynak: Sprint AI keşfi — 6 mash konusu × (araştırma + adversaryal denetim),
+// Brülosophy exBEERiment'leri tam metin, Troester 2008 / NHC 2010 PDF'leri
+// pdftotext ile okundu. Denetimde UYDURMA KAYNAK BULUNMADI, 12 etiket değişti.
+//
+// KANIT ETİKETLERİ (4 kategori):
+//   KANITLI                        → kör tadım veya ölçüm ilişkiyi destekliyor
+//   ÖLÇÜLEBİLİR AMA ALGILANMADI    → sayı değişiyor, kör tadımda gösterilemedi
+//   FOLKLOR                        → yaygın inanç, kontrollü kanıt zayıf/negatif
+//   TARTIŞMALI                     → kanıtlar çelişiyor veya koşula bağlı
+// (enum anahtarları ASCII tutuldu — grep/replace güvenliği; görünen metin Türkçe)
+//
+// ⚠ DİL DİSİPLİNİ — BU TABLONUN EN ÖNEMLİ KURALI:
+// Kör tadımda "anlamsız" çıkan sonuç, "fark YOK"u KANITLAMAZ. O panel gücünde
+// farkın algılandığının GÖSTERİLEMEDİĞİNİ söyler (Tip II hata). Brülosophy
+// deneylerinin çoğu tek batch çifti, replikasyonsuz, n=17-33 arası. Bu yüzden
+// metinlerde bu tür kesinlik ifadeleri BİLİNÇLİ OLARAK kullanılmadı;
+// "gösterilemedi" dili kullanıldı.
+//
+// ⚠ ÖLÇÜM UYARISI: Brülosophy'nin mash-sıcaklığı deneylerinin hiçbirinde iki
+// batch'in OG'si eşleşmemiş (yüksek mash HER SEFERİNDE daha yüksek OG verdi).
+// Dolayısıyla dolaşan "FG +15 puan" rakamı attenuation farkı + OG farkının
+// toplamıdır. Dürüst metrik FG puanı DEĞİL, apparent attenuation.
+window._MASH_KANIT = {
+  KANITLI:      { rozet:'KANITLI',                     bg:'var(--ya)', fg:'var(--yk)', ac:'Kör tadım veya ölçüm ilişkiyi destekliyor.' },
+  OLCULDU:      { rozet:'ÖLÇÜLDÜ · GÖSTERİLEMEDİ',     bg:'var(--ma)', fg:'var(--mk)', ac:'Sayısal fark ölçüldü; kör tadımda farkın algılandığı GÖSTERİLEMEDİ. Bu "fark yok" demek değildir — o panel gücünde gösterilemedi (kategori: ÖLÇÜLEBİLİR AMA ALGILANMADI).' },
+  FOLKLOR:      { rozet:'FOLKLOR',                     bg:'var(--ka)', fg:'var(--kk)', ac:'Yaygın inanç; kontrollü kanıt zayıf veya negatif çıktı.' },
+  TARTISMALI:   { rozet:'TARTIŞMALI',                  bg:'var(--sa)', fg:'var(--sk)', ac:'Kanıtlar çelişiyor veya koşula bağlı.' }
+};
+
+// Her kayıt: {kol, etki, mekanizma, kanitDurumu, buyukluk, stilBaglami, kaynak}
+// grup: 'sicaklik' | 'sure' | 'ph' | 'oran' | 'step' | 'sparge' | 'su'
+window._MASH_BILGI = {
+  sc_fermentabilite: {
+    grup:'sicaklik', kol:'Mash sıcaklığı 63-64°C → 70-73°C (fermente olabilirlik)',
+    etki:'FG yükselir, apparent attenuation düşer, bira daha az fermente biter. ABV genelde düşer.',
+    mekanizma:'Düşük bantta β-amilaz baskın — mayanın yiyebildiği maltoz üretir. Yüksek bantta α-amilaz baskın — mayanın yiyemediği dekstrin bırakır.',
+    kanitDurumu:'KANITLI', kanitNot:'yön KANITLI; büyüklük TARTIŞMALI (OG konfoundu)',
+    buyukluk:'Braukaiser eğimi: +1°C ≈ attenuation limitinde −%4. Munich Helles 64→73°C: attenuation %82→%52. Beş bağımsız deneyin beşi de aynı yönde. ÖLÇÜM UYARISI: bu deneylerde iki batch OG\'si eşleşmemiş — dürüst metrik FG puanı değil apparent attenuation.',
+    stilBaglami:'Kuru İrlanda stoutu, Saison ve Belçika güçlüleri düşük banda; dolgun İngiliz ale, Bock ve Milk Stout yüksek banda oturur.',
+    kaynak:'Brülosophy: Munich Helles 2018, German Pils 2022, Blonde Ale 2015, Belgian Golden Strong 2020, English Porter 2020 · Braukaiser (Kai Troester)'
+  },
+  sc_abv: {
+    grup:'sicaklik', kol:'Aynı kol → ABV',
+    etki:'Yüksek mash aynı OG\'den daha az alkol verir. Reçete hesaplayıcıları sabit attenuation varsaydığı için bunu genelde kaçırır.',
+    mekanizma:'Fermente olabilen şeker azalınca etanol de azalır — bu ayrı bir olay değil, fermentabilite kolunun aritmetik sonucu.',
+    kanitDurumu:'KANITLI', kanitNot:'bağımsız kol değil, yukarıdakinin türevi',
+    buyukluk:'Helles %4.9→%3.3 · English Porter %5.4→%3.9 · Blonde %4.4→%3.4. AMA evrensel değil: German Pils\'te attenuation %86→%60 çökmesine rağmen ABV iki batch\'te de %5.51 çıktı (OG\'ler farklı olduğu için).',
+    stilBaglami:'Düşük alkollü bira hedefliyorsan mash sıcaklığı gerçek bir kol; Springer 2022 bunu 72°C sabit mash ile doğruladı.',
+    kaynak:'Brülosophy aynı seri · Springer, Eur Food Res Technol 248:1457 (2022)'
+  },
+  sc_govde: {
+    grup:'sicaklik', kol:'Yüksek mash → "dolgun gövde" beklentisi',
+    etki:'Wort daha dekstrinli oluyor — bu ölçülüyor. Ama ağızda algılanan gövde farkı kör üçgen testlerinde gösterilemedi.',
+    mekanizma:'Dekstrinin viskozite yoluyla ağız dolgunluğu verdiği varsayılır. Ragot 1989: algılanabilir viskozite artışı için biraya 50 g/L\'den fazla dekstrin gerekiyor; %50 Carapils\'li aşırı-dekstrinli deneysel bir bira bile 41 g/L\'de kalıyor.',
+    kanitDurumu:'OLCULDU',
+    buyukluk:'FG 15 puan farkla bile dört tam panelin dördü de anlamsız: Munich Helles n=33, 12 doğru, p=0.42 · Blonde n=20, p=0.134 · Belgian Golden Strong n=23, p=0.21 · Czech Premium Pale Lager n=25, p=0.88.',
+    stilBaglami:'"Gövde istiyorum" hedefi için mash sıcaklığı zayıf bir kol. Gövdeyi grist ile kur: yulaf, buğday, crystal, karbonhidrat bırakan malt.',
+    kaynak:'Brülosophy 4 tam panel (2015-2020) · Ragot 1989 (Scott Janish derlemesi)'
+  },
+  sc_tatlilik: {
+    grup:'sicaklik', kol:'Yüksek mash → "tatlı bira" beklentisi',
+    etki:'FG yükselse bile biranın tatlı algılandığı gösterilemedi.',
+    mekanizma:'Geride kalan şeker basit şeker değil maltodekstrin. Maltodekstrinin tatlılık eşiği yüksektir — dilde şeker gibi okunmaz.',
+    kanitDurumu:'FOLKLOR',
+    buyukluk:'Belgian Golden Strong 2020 (FG 1.014 vs 1.020): "hiçbir bira özellikle tatlı tatmadı". Saison 2024: katılımcılar tatlılığı ayırt edici bulmadı. Bu iddiayı DESTEKLEYEN kör kanıt bulunamadı.',
+    stilBaglami:'Tatlılık istiyorsan gerçek kol laktoz, düşük-attenuation maya veya durdurulmuş fermentasyondur — mash sıcaklığı değil.',
+    kaynak:'Brülosophy Belgian Golden Strong 2020 · Saison 2024'
+  },
+  sc_sapma: {
+    grup:'sicaklik', kol:'±2°C sapma (65°C → 67°C) — termometre hatası, mash tun soğuması',
+    etki:'Pratikte önemsiz. Bu, ev üreticisinin en çok paniklediği ama en az önemli olan sapma.',
+    mekanizma:'Bu genişlikte enzim dengesi belirgin kaymıyor.',
+    kanitDurumu:'OLCULDU',
+    buyukluk:'FG farkı 1 puan, attenuation farkı %2.1. Kör üçgen: n=25, 6 doğru, p=0.88 — serinin şansa en yakın sonucu. Deneyi yapanın kendi ifadesi: "mash temperature may not be as powerful a knob".',
+    stilBaglami:'Her stil. Mash 2°C kaydı diye batch atma veya reçeteyi değiştirme.',
+    kaynak:'Brülosophy Czech Premium Pale Lager 2016 (149°F vs 153°F)'
+  },
+  sure_kisa: {
+    grup:'sure', kol:'Mash süresi 60 dk → 30 dk',
+    etki:'Modern iyi-modifiye maltta ölçülen fark 1 gravite puanı düzeyinde kaldı.',
+    mekanizma:'Nişasta dönüşümünün büyük kısmı ilk 15-30 dakikada tamamlanıyor; kalan süre ekstraktın son yüzdelerini topluyor.',
+    kanitDurumu:'OLCULDU',
+    buyukluk:'OG farkı 0.001 (1.053→1.052), FG 1 puan, ABV aynı (%5.51). Kör tadımda ayırt edilemedi. Troester: nişasta-negatif wort 15-30 dakikada elde edilebiliyor.',
+    stilBaglami:'Kısa demleme günü istiyorsan mash süresi kesilebilecek ilk yer. Az-modifiye malt veya yoğun adjunct varsa süreyi koru.',
+    kaynak:'Brülosophy Blonde Ale 2022 · American Stout 2023 · Troester 2008'
+  },
+  sure_iyot: {
+    grup:'sure', kol:'"İyot testi negatif çıktı, mash bitti, süzebilirim"',
+    etki:'Erken süzersen verim kaybedersin — dönüşüm bitmiş olabilir ama çözünme bitmemiştir.',
+    mekanizma:'İyot testi yalnız nişastanın kalmadığını gösterir; taneden worta madde geçişi (ekstraksiyon) ayrı ve daha yavaş bir süreçtir.',
+    kanitDurumu:'FOLKLOR',
+    buyukluk:'Braukaiser ölçümü (68°C, 3.5 L/kg): 30. dakikada iyot negatif, ama o anda tanenin ekstrakt potansiyelinin yalnız ~%90\'ı worta geçmiş durumda.',
+    stilBaglami:'Her stil. İyot testini "bitti" sinyali değil, "nişasta kalmadı" sinyali olarak oku.',
+    kaynak:'Braukaiser — Conversion progress in a single infusion mash (2011)'
+  },
+  ph_band: {
+    grup:'ph', kol:'Mash pH 5.2 → 5.6 (hedef bandın İÇİNDE ince ayar)',
+    etki:'Küçük bir attenuation oynaması var; tat/koku/gövde/acılık algısında fark gösterilemedi.',
+    mekanizma:'Enzim aktivite optimumu bant içinde hafif kayar.',
+    kanitDurumu:'OLCULDU',
+    buyukluk:'Oatmeal Stout: OG her iki batch\'te 1.056; FG 1.018 (pH 5.2) vs 1.015 (pH 5.6) = 3 puan. Kör üçgen n=22, 8 doğru, p=0.46.',
+    stilBaglami:'5.2-5.6 bandına gir, yeter. Bant içinde 0.1\'lik hassasiyet peşinde koşmanın karşılığı gösterilememiş.',
+    kaynak:'Brülosophy — slaked lime ile mash pH, Oatmeal Stout (2025)'
+  },
+  ph_olcumSicakligi: {
+    grup:'ph', kol:'pH\'ı mash sıcaklığında mı, oda sıcaklığında mı ölçüyorsun?',
+    etki:'Aynı mash için iki farklı sayı okursun. Yanlış referansla hedef uygularsan sistematik olarak bandın dışına çıkarsın.',
+    mekanizma:'pH ölçümü sıcaklığa bağlıdır; sıcak wort daha düşük pH okutur.',
+    kanitDurumu:'KANITLI',
+    buyukluk:'Sistematik ~0.3 birim kayma (deLange 0.2-0.35 · Brungard ~0.3 · BYO 0.2-0.4). Oda sıcaklığında 5.5 ≈ mash sıcaklığında 5.2. Hedef bandı "5.2-5.6" ODA SICAKLIĞI içindir.',
+    stilBaglami:'Her stil. pH ölçüyorsan örneği soğut, ya da hangi referansta olduğunu bil. Pratikte pH kolunun en işe yarar bilgisi bu.',
+    kaynak:'A.J. deLange · Martin Brungard (Bru\'n Water) · BYO — üç bağımsız otorite aynı büyüklükte'
+  },
+  ph_tanin: {
+    grup:'ph', kol:'"Yüksek pH tanin çeker, bira burukaşır"',
+    etki:'Mekanizma kitapta var ama kontrollü testte doğrulanamadı.',
+    mekanizma:'Polifenol çözünürlüğü pH ile artar — teorik olarak sağlam.',
+    kanitDurumu:'FOLKLOR', kanitNot:'denetim TARTIŞMALI\'dan düşürdü',
+    buyukluk:'Mash pH 6.39\'a çıkarıldığında (tanin eşiği denen 6.0\'ın açıkça üstü) kör üçgende hiçbir anlamlı fark çıkmadı: n=20, 8 doğru, p=0.34. Deneyi yapan kendi ön-yargısının yanlış çıktığını yazıyor.',
+    stilBaglami:'Astrenjan avlıyorsan önce başka nedenlere bak (aşırı öğütme, tane sıkma, uzun sparge). pH\'ı tek suçlu sayma.',
+    kaynak:'Brülosophy — yüksek mash pH, American IPA (2017)'
+  },
+  su_sulfatKlorur: {
+    grup:'su', kol:'Sülfat : klorür oranını ters çevirmek (150:50 ↔ 50:150 ppm)',
+    etki:'Kör tadımda güvenilir şekilde algılanan tat ve ağız-hissi farkı. Sülfat ağırlıklı: daha iddialı, kuru, crisp acılık. Klorür ağırlıklı: daha yumuşak, ağız kaplayıcı, hop karakteri kısılmış.',
+    mekanizma:'İyonlar acılık ve ağız hissi algısını doğrudan değiştirir.',
+    kanitDurumu:'KANITLI',
+    buyukluk:'American IPA n=22, 14 doğru, p=0.003 ANLAMLI · British Brown Ale 9/10, p=0.0004. Su kolunun kör tadımda net sonuç veren tek kolu bu.',
+    stilBaglami:'Hoppy stilde sülfata, malt-odaklı stilde klorüre yaslan. Toplam mineral YÜKÜNÜ artırmanın (oran sabitken ~4 kat) karşılığı ise gösterilemedi (n=22, p=0.46).',
+    kaynak:'Brülosophy sülfat:klorür — American IPA 2016 · British Brown Ale 2022'
+  },
+  oran_verim: {
+    grup:'oran', kol:'Mash\'i inceltmek: 2.5 L/kg → 4-5 L/kg (verim kolu)',
+    etki:'Verim belirgin artar. Tat/gövde/FG üzerinde doğrudan etkisi yok — aynı tahıldan daha çok şekere ulaşırsın.',
+    mekanizma:'Daha çok su, dönüşen şekeri daha iyi çözüp taşıyor.',
+    kanitDurumu:'KANITLI',
+    buyukluk:'Troester 2008: kalın mash (2.57 L/kg) verimi %58-60\'ta sabitlenirken ince mash (5 L/kg) her sıcaklıkta daha iyi, tepe %68 (+8 puan). Briggs 2004: 2 L/kg\'da ekstrakt %71.7, 4 L/kg\'da %80.',
+    stilBaglami:'Her stil. Verim düşükse bakılacak ilk yerlerden biri; öğütme ve sparge ile birlikte değerlendir.',
+    kaynak:'Kai Troester 2008 (PDF tam metin) · Briggs 2004'
+  },
+  oran_betaAmilaz: {
+    grup:'oran', kol:'"İnce mash β-amilazı korur, daha kuru bira verir"',
+    etki:'İddia edildiği gibi FG düşmüyor.',
+    mekanizma:'Ev-uretimi literatüründe çok yaygın; BYO\'nun kendi makalesi bile hem "kalın mash enzimi korur" hem "ince mash daha fermente-olabilir" diyerek kendi içinde çelişiyor.',
+    kanitDurumu:'FOLKLOR',
+    buyukluk:'Troester 2008, 2.57 L/kg vs 5 L/kg: ölçülen attenuation farkı bulunamadı, tüm veri noktaları sıcaklık serisinin aynı eğrisi üzerine düştü. Kendi ifadesi: "Contrary to common belief…".',
+    stilBaglami:'Fermente olabilirliği ayarlamak istiyorsan kol mash SICAKLIĞI, su oranı değil.',
+    kaynak:'Kai Troester 2008 (PDF tam metin)'
+  },
+  oran_algi: {
+    grup:'oran', kol:'Standart 2.6 L/kg → ince 5.2 L/kg (algı kolu)',
+    etki:'Küçük bir ölçüm farkı var; kör tadımda gösterilemedi.',
+    mekanizma:'—',
+    kanitDurumu:'OLCULDU',
+    buyukluk:'OG 1.052/1.051, FG 1.010 vs 1.012, attenuation %80 vs %78.3. Kör üçgen n=24, 5 doğru, p=0.90.',
+    stilBaglami:'Su oranını ekipmanına göre seç (BIAB tam hacim dahil); algı kaygısıyla değiştirme.',
+    kaynak:'Brülosophy — liquor-to-grist ratio, American Pale Ale (2016)'
+  },
+  oran_sicaklikKaybi: {
+    grup:'oran', kol:'BIAB / ince mash → mash sıcaklığını tutamama (ASIL RİSK)',
+    etki:'Sıcaklık düşerse mash bandı kayar, FG beklediğinden farklı gelir. İncelik değil, ısı kaybı asıl risk.',
+    mekanizma:'Küçük ve ince mash\'in ısı kütlesi düşük; 60 dakikada belirgin soğuyabiliyor.',
+    kanitDurumu:'KANITLI',
+    buyukluk:'BIAB partisi 60 dakikada 6°F (~3.3°C) düştü, no-sparge partisi yalnız 1.5°F; sonuçta FG 1.011 vs 1.013. Troester: hacim büyüdükçe sıcaklık kaybı 5°C\'den 2°C\'ye iniyor.',
+    stilBaglami:'Küçük parti (10-12 L) demliyorsan geçerli. Kazanı örtmek/yalıtmak, mash ortasında sıcaklığı ölçmek bu kolu kapatır.',
+    kaynak:'Brülosophy BIAB vs no-sparge, Vienna Lager 2018 · Troester 2008'
+  },
+  oran_ph: {
+    grup:'oran', kol:'"İnce mash pH\'ı 0.3 birim yükseltir"',
+    etki:'Dolaşımdaki bu rakam birincil bir ölçüme bağlanamadı.',
+    mekanizma:'İlişkinin yönü teknik olarak tartışılabilir ama büyüklüğü kaynaksız.',
+    kanitDurumu:'FOLKLOR', kanitNot:'denetimde çürütüldü',
+    buyukluk:'"0.3 pH" rakamının birincil kaynağı izlenemedi; yalnız blog/forum tekrarında yaşıyor. Adversaryal denetim bu iddiayı çürüttü.',
+    stilBaglami:'Su oranını değiştirdiğinde pH\'ı yeniden hesapla diye panik yapma; ölçebiliyorsan ölç.',
+    kaynak:'— (birincil kaynak bulunamadı)'
+  },
+  step_ferulik: {
+    grup:'step', kol:'Ferulik asit rest (43-45°C) → Weizen\'de karanfil (4VG)',
+    etki:'Kimyasal olarak 4VG artıyor; kör üçgen testinde fark gösterilemedi.',
+    mekanizma:'Ferulik asit, POF+ mayanın 4-vinil guaiakole (karanfil) çevirdiği öncü maddedir; düşük sıcaklıkta rest onu serbestleştirir.',
+    kanitDurumu:'OLCULDU', kanitNot:'güven düşük-orta — "yapma" demeye kanıt YETMİYOR',
+    buyukluk:'Kimyada 45°C yerine 55°C\'de mash-in yapmak 4VG\'yi ~%30 düşürüyor. Ama kör üçgen: n=24, 6 doğru, p=0.86. Yani rest\'in karanfili artırdığı bu panelde gösterilemedi.',
+    stilBaglami:'Weizen/Weissbier. Ferulik rest yapmak istiyorsan yap — zararı gösterilmedi; ama karanfil garantisi olarak sayma.',
+    kaynak:'Brülosophy — ferulic acid rest, Weissbier (2019)'
+  },
+  step_fermSicaklik: {
+    grup:'step', kol:'Karanfilin GERÇEK kolu: fermentasyon sıcaklığı (22°C → 16°C, Weizen mayası)',
+    etki:'16°C: bastırılmış ester, az muz, belirgin karanfil ve beyaz biber fenolü. 22°C: yoğun muz, neredeyse hiç algılanabilir fenol yok.',
+    mekanizma:'Weizen mayasının ester/fenol dengesi sıcaklıkla kayar. Bu bir şeker kolu değil, saf aroma kolu.',
+    kanitDurumu:'KANITLI', kanitNot:'fark algılanır; muz↔karanfil yönü tarif düzeyinde',
+    buyukluk:'Kör üçgen n=32, 19 doğru, p=0.002 ANLAMLI. Kritik nokta: OG (1.046) ve FG (1.009) İKİ BATCH\'TE DE AYNI — yani fark şekerden değil, tamamen fermentasyondan geliyor.',
+    stilBaglami:'Weizen/Weissbier/Weizenbock. Karanfil istiyorsan mash adımıyla değil, fermentasyon sıcaklığıyla oyna.',
+    kaynak:'Brülosophy — WLP300 fermentasyon sıcaklığı, Weissbier (2017)'
+  },
+  step_proteinRest: {
+    grup:'step', kol:'Protein rest (50-55°C) modern iyi-modifiye maltta',
+    etki:'"Köpüğü bozar" uyarısı testte doğrulanmadı; ama karşı tarafta kurumsal otorite var.',
+    mekanizma:'Proteoliz köpük-aktif proteinleri kırabilir (Oxford Companion). Modern malt zaten iyi modifiye olduğu için rest\'in ek katkısı tartışmalı.',
+    kanitDurumu:'TARTISMALI', kanitNot:'denetim FOLKLOR\'dan yükseltti',
+    buyukluk:'American Wheat: n=22, 7 doğru, p=0.64; köpük bozulmadı, hatta protein rest yapılan bira 3 dakika sonra biraz daha büyük köpük tuttu. Ölçüm görsel, nicel değil.',
+    stilBaglami:'Modern malt kullanıyorsan gerekli olduğuna dair kanıt yok; yoğun buğday/yulaf/çavdarda ayrı gerekçe (akış) olabilir.',
+    kaynak:'Brülosophy protein rest, American Wheat 2018 · Oxford Companion to Beer, "proteolysis"'
+  },
+  step_mashOut: {
+    grup:'step', kol:'Mash-out (76-79°C) — düşük viskoziteli grist\'te',
+    etki:'Ölçülebilir hiçbir etki bulunamadı.',
+    mekanizma:'Enzimleri durdurup şeker profilini "kilitlemesi" ve süzmeyi kolaylaştırması beklenir.',
+    kanitDurumu:'FOLKLOR', kanitNot:'yalnız düşük-viskoziteli grist için; "süzme kolaylaşır" alt-iddiası TEST EDİLMEDİ',
+    buyukluk:'Czech Premium Pale Lager: OG 1.061=1.061, FG 1.010=1.010, ABV %6.69=%6.69, SRM 4.8=4.8 — dört ölçümün dördü birebir aynı. Kör üçgen n=23, 9 doğru, p=0.35.',
+    stilBaglami:'Basit pale grist\'te atlayabilirsin. Yoğun buğday/yulaf/çavdarda akış gerekçesi ayrıca değerlendirilmeli.',
+    kaynak:'Brülosophy mash-out, Czech Premium Pale Lager (2019)'
+  },
+  step_dekoksiyon: {
+    grup:'step', kol:'Dekoksiyon — modern iyi-modifiye maltla',
+    etki:'Beklenen melanoidin/malt derinliği ne tadımda ne ölçümde çıktı.',
+    mekanizma:'Mash\'in bir kısmını kaynatmak melanoidin üretip malt derinliği katar (iddia).',
+    kanitDurumu:'FOLKLOR', kanitNot:'p=0.10 marjinal — "güçlü null" DENMEZ',
+    buyukluk:'Üçlü dekoksiyon vs tek infüzyon, German Pils: OG 1.052=1.052, FG 1.010 vs 1.0105, renk görsel olarak ayırt edilemez. Kör panel n=33, 15 doğru, p=0.10 (anlamsız ama sınırda).',
+    stilBaglami:'Az-modifiye / floor-malted malt kullanıyorsan durum farklı olabilir — orada dönüşüm ve gravite artıyor, ama o deneyde de fark büyük ölçüde gravite farkından geliyor (TARTIŞMALI).',
+    kaynak:'Brülosophy üçlü dekoksiyon, German Pils (2016)'
+  },
+  step_betaGlukan: {
+    grup:'step', kol:'β-glukan rest (40-45°C) — yoğun buğday/yulaf/çavdar grist\'inde',
+    etki:'Süzme akışını iyileştirmesi beklenir; ev ölçeğinde kontrollü ölçüm yok.',
+    mekanizma:'β-glukan wort viskozitesini artırır; rest onu parçalar.',
+    kanitDurumu:'TARTISMALI', kanitNot:'doğrudan kanıt YOK — dürüstçe zayıf tutuldu',
+    buyukluk:'Akış hızı (sn/L) olarak ölçülmüş A/B testi bulunamadı. Referans nokta: BYO, yulaflı stout\'ta sparge süresinin geleneksel ale\'lere göre iki katına kadar çıkabildiğini söylüyor.',
+    stilBaglami:'Weizen, Witbier, yulaflı stout, çavdar birası. BIAB\'de süzme sorunu genelde yaşanmadığı için bu kolun pratik değeri düşük olabilir.',
+    kaynak:'BYO — Oatmeal Stout'
+  },
+  sparge_sicaklik: {
+    grup:'sparge', kol:'Sparge suyu sıcaklığı 77°C → 100°C (kaynar su)',
+    etki:'"Sıcak sparge tanin çeker" korkusu en uç noktada test edildi ve doğrulanmadı.',
+    mekanizma:'Yüksek sıcaklığın polifenol/tanin ekstraksiyonunu artırdığı varsayılır.',
+    kanitDurumu:'FOLKLOR',
+    buyukluk:'Kölsch: 77°C sparge OG 1.052/FG 1.008 vs KAYNAR sparge OG 1.053/FG 1.009, ikisinde de ABV %5.78. Kör üçgen n=24, 7 doğru, p=0.74. Astrenjanlık farkı raporlanmadı.',
+    stilBaglami:'Her stil. Sparge suyunu 76°C\'ye getirmek için demleme gününü uzatma.',
+    kaynak:'Brülosophy — kaynar suyla batch sparge, Kölsch (2024)'
+  },
+  sparge_verim: {
+    grup:'sparge', kol:'No-sparge → batch sparge (verim kolu)',
+    etki:'Verim artar; aynı OG için daha az malt gerekir.',
+    mekanizma:'Sparge, tanede kalan şekeri yıkayarak alır.',
+    kanitDurumu:'KANITLI',
+    buyukluk:'Troester (NHC 2010): no-sparge → 1 sparge ≈ +%8 lauter verimi; 1 → 2 sparge daha küçük ek kazanç. Yaygın "−%10-15" rakamı normal gravitedeki biralar için ABARTILI.',
+    stilBaglami:'No-sparge tercih ediyorsan sorun değil — reçetenin malt miktarını verime göre ayarla, yeter.',
+    kaynak:'Kai Troester, NHC 2010 sunumu (PDF tam metin)'
+  },
+  sparge_kesme: {
+    grup:'sparge', kol:'"Sparge sonu gravite 1.010\'un altına inerse kes"',
+    etki:'Bu eşiğin tanin gerekçesi zayıf.',
+    mekanizma:'Seyrelen wort\'un pH\'ı yükselip polifenol çektiği varsayılır.',
+    kanitDurumu:'FOLKLOR',
+    buyukluk:'Kuralın kendisine bağlanmış kontrollü kör tadım bulunamadı. Runoff pH\'ının yükselmesiyle polifenol ilişkisi ayrı ve TARTIŞMALI bir kol.',
+    stilBaglami:'Verim hedefine göre karar ver; 1.010 rakamını mutlak sınır sayma.',
+    kaynak:'— (kontrollü kanıt bulunamadı)'
+  }
+};
+
+// Mash sıcaklığı bandı — enzim rejimi (algı iddiası DEĞİL, wort bileşimi)
+window._bmMashBand = function(sc){
+  sc = +sc || 67;
+  if(sc <= 62) return { ad:'Protein rest bandı', not:'Sakarifikasyon bandının altı — tek başına kullanılmaz.' };
+  if(sc <= 64) return { ad:'β-amilaz ağırlıklı', not:'Daha fermente olabilir wort — FG düşer, bira kuru biter.' };
+  if(sc <= 68) return { ad:'Dengeli band', not:'FG hesabında nötr kabul edilen band (65-68°C).' };
+  if(sc <= 70) return { ad:'α+β karışık', not:'Dekstrin payı artıyor — FG yükselir.' };
+  if(sc <= 73) return { ad:'α-amilaz ağırlıklı', not:'En dekstrinli wort — FG en yüksek, ABV düşer.' };
+  return { ad:'Mash-out bandı', not:'Enzimler durur; sakarifikasyon beklenmez.' };
+};
+
+// calc() 8597-8606 ile BİREBİR aynı formül — gösterilen sayı hesaplananla aynı olmalı
+window._bmMashFGEtki = function(sc){
+  sc = +sc || 67;
+  if(sc < 65)  return (sc - 65) * 0.001;
+  if(sc > 68)  return (sc - 68) * 0.0015;
+  return 0;
+};
+
+// Weizen bağlamı: POF+ buğday mayası veya Weizen adı → karanfil yönlendirmesi anlamlı
+window._bmMashWeizenMi = function(){
+  try{
+    var st = String((typeof S!=='undefined' && S ? (S.stil || S.stilTah || '') : '')).toLowerCase();
+    if(/weizen|weiss|weiße|hefe/.test(st)) return true;
+    if(typeof S!=='undefined' && S && S.mayaId && typeof MAYALAR!=='undefined'){
+      var m = MAYALAR.find(function(x){ return x && x.id === S.mayaId; });
+      if(m && String(m.tip||'') === 'wheat') return true;
+    }
+  }catch(_e){}
+  return false;
+};
+
+// ── Sunum: mash kartına gömülen bilgi bloğu (AJ2) ──────────────────────────
+window._bmMashBilgiKart = function(mSc, mAdimlar){
+  try{
+    var K = window._MASH_KANIT, B = window._MASH_BILGI;
+    if(!K || !B) return '';
+    var _e = (typeof esc === 'function') ? esc : function(s){ return String(s==null?'':s); };
+    var band = window._bmMashBand(mSc);
+    var dFG = window._bmMashFGEtki(mSc);
+    var dTxt = dFG === 0 ? 'FG hesabına etkisi yok (nötr band)'
+             : (dFG > 0 ? 'FG hesabı +' : 'FG hesabı ') + (dFG*1000).toFixed(1) + ' puan';
+
+    function rozet(kd){
+      var k = K[kd] || K.TARTISMALI;
+      return '<span style="display:inline-block;background:'+k.bg+';color:'+k.fg+';font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;letter-spacing:.2px;white-space:nowrap">'+k.rozet+'</span>';
+    }
+    function satir(key){
+      var d = B[key]; if(!d) return '';
+      return '<div style="border-top:1px solid var(--bor);padding:7px 0">'
+        + '<div style="display:flex;gap:6px;align-items:flex-start;flex-wrap:wrap;margin-bottom:3px">'
+        +   '<span style="font-size:11px;font-weight:700;color:var(--kahve);flex:1;min-width:150px">'+_e(d.kol)+'</span>'+rozet(d.kanitDurumu)
+        + '</div>'
+        + (d.kanitNot ? '<div style="font-size:9px;color:var(--dim);margin-bottom:3px">('+_e(d.kanitNot)+')</div>' : '')
+        + '<div style="font-size:11px;color:var(--metin);line-height:1.45;margin-bottom:3px">'+_e(d.etki)+'</div>'
+        + '<div style="font-size:10px;color:var(--soluk);line-height:1.4"><b>Neden:</b> '+_e(d.mekanizma)+'</div>'
+        + '<div style="font-size:10px;color:var(--soluk);line-height:1.4;margin-top:2px"><b>Ne kadar:</b> '+_e(d.buyukluk)+'</div>'
+        + '<div style="font-size:10px;color:var(--soluk);line-height:1.4;margin-top:2px"><b>Stil:</b> '+_e(d.stilBaglami)+'</div>'
+        + '<div style="font-size:9px;color:var(--dim);margin-top:3px">Kaynak: '+_e(d.kaynak)+'</div>'
+      + '</div>';
+    }
+    function grup(keys){ return keys.map(satir).join(''); }
+    function det(baslik, ozet, keys){
+      var icerik = (arguments.length > 3 ? arguments[3] : '') + grup(keys);
+      ozet = keys.length + ' kol' + (ozet ? ' · ' + ozet : '');
+      return '<details class="bm-mash-bilgi-det" style="margin-top:6px">'
+        + '<summary style="cursor:pointer;font-size:11px;font-weight:700;color:var(--kahve);padding:5px 8px;background:var(--bg2);border:1px solid var(--bor);border-radius:6px;list-style:none">'
+        +   _e(baslik) + (ozet ? ' <span style="font-weight:400;color:var(--dim);font-size:10px">— '+_e(ozet)+'</span>' : '')
+        + '</summary>'
+        + '<div style="padding:2px 8px 6px">'+icerik+'</div>'
+      + '</details>';
+    }
+
+    // 1) Seçili sıcaklığın canlı özeti
+    var ust = '<div style="background:var(--bg2);border:1px solid var(--bor);border-radius:8px;padding:8px 10px;margin-top:8px">'
+      + '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:4px">'
+      +   '<span style="font-size:12px;font-weight:700;color:var(--kahve)">'+(+mSc||67)+'°C · '+_e(band.ad)+'</span>'
+      +   '<span style="font-size:10px;color:var(--bakir);font-weight:600">'+_e(dTxt)+'</span>'
+      + '</div>'
+      + '<div style="font-size:10px;color:var(--soluk);line-height:1.45">'+_e(band.not)+'</div>'
+      + '<div style="display:flex;gap:5px;align-items:flex-start;margin-top:5px">'+rozet('OLCULDU')
+      +   '<span style="font-size:10px;color:var(--soluk);line-height:1.45;flex:1">Gövde farkının kör tadımda algılandığı <b>gösterilemedi</b> (4 panel, p&gt;0.05) — bu "fark yok" demek değil. ±2°C sapma pratikte önemsiz (p=0.88).</span>'
+      + '</div>'
+    + '</div>';
+
+    // 2) Weizen bağlamı — karanfilin gerçek kolu
+    var weizen = '';
+    if(window._bmMashWeizenMi()){
+      weizen = '<div style="background:var(--ya);border:1px solid var(--yk);border-radius:8px;padding:8px 10px;margin-top:6px">'
+        + '<div style="font-size:11px;font-weight:700;color:var(--yk);margin-bottom:3px">🍌 Karanfil (buğday mayası): kol MASH DEĞİL</div>'
+        + '<div style="font-size:10px;color:var(--metin);line-height:1.45">Ferulik asit rest\'in karanfili artırdığı kör tadımda <b>gösterilemedi</b> (n=24, p=0.86). Buna karşılık fermentasyon sıcaklığı <b>16°C vs 22°C</b> anlamlı fark verdi (n=32, 19 doğru, <b>p=0.002</b>) — üstelik OG ve FG iki batch\'te de aynıydı, yani fark tamamen fermentasyondan geliyor. Karanfil için <b>Maya sekmesinde fermentasyon sıcaklığını düşür</b>.</div>'
+      + '</div>';
+    }
+
+    // 3) Detaylar (progressive disclosure)
+    var det1 = det('🔬 Mash sıcaklığı — ne değişir, ne değişmez', '',
+      ['sc_fermentabilite','sc_abv','sc_govde','sc_tatlilik','sc_sapma']);
+    var det2 = det('⚠️ Boşuna uğraşma', 'kanıtı zayıf yaygın inanç',
+      ['step_mashOut','step_dekoksiyon','sparge_sicaklik','sc_tatlilik','sure_iyot','oran_betaAmilaz','oran_ph','ph_tanin','sparge_kesme'],
+      '<div style="font-size:10px;color:var(--soluk);line-height:1.4;padding:5px 0">Aşağıdakiler yaygın inanç ama kontrollü testte doğrulanmadı. "Kesinlikle etkisiz" demiyoruz — <b>etkili olduğu gösterilemedi</b>. Demleme gününü bunlar için uzatmadan önce iki kez düşün.</div>');
+    var det3 = det('✅ Gerçekten fark yaratanlar', 'kör tadım/ölçüm destekli',
+      ['su_sulfatKlorur','ph_olcumSicakligi','step_fermSicaklik','oran_verim','oran_sicaklikKaybi','sparge_verim']);
+    var det4 = det('🧭 Süre · pH · su oranı · step mash', 'kalan',
+      ['sure_kisa','ph_band','oran_algi','step_ferulik','step_proteinRest','step_betaGlukan']);
+
+    return '<div class="bm-mash-bilgi" style="margin-top:4px">' + ust + weizen + det1 + det2 + det3 + det4
+      + '<div style="font-size:9px;color:var(--dim);margin-top:6px;line-height:1.4">Kaynak: Brülosophy exBEERiment kör üçgen testleri, Kai Troester (Braukaiser) ve Briggs ölçümleri. Etiketler adversaryal denetimden geçti. Kör tadımda anlamsız çıkan sonuç "fark yok" kanıtı değildir — o panel gücünde gösterilemediğini söyler.</div>'
+    + '</div>';
+  }catch(_e){ return ''; }
+};
+
 window._OFF_TESHIS = {
   diacetyl: {
     ad: "Diacetyl (tereyağı)",
