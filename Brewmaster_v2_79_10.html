@@ -20961,6 +20961,7 @@ function rEditor(){
     </select>
     <button type="button" onclick="bmStilIskeletDoldur()" title="Seçili stilin tipik malt/hop/maya iskeletini bu batch boyutuna ölçekleyip doldur" style="background:var(--bakir);color:#fff;border:none;border-radius:var(--r-sm);font-size:var(--fs-xs);padding:4px 10px;white-space:nowrap;cursor:pointer;font-family:var(--font-govde)">📋 İskeleti Doldur</button>
   </div>
+  ${(typeof _bmProfilStilKart==='function')?_bmProfilStilKart():''}
   </div><!-- Adim 132-J-2: editor üst kahve header 6 stat duplicate KALDIRILDI (sticky özet 132-A+E zaten gosteriyor, KH J-2'de sticky'ye eklendi) -->
   ${uy?`<div style="padding:8px 12px 0">${uy}</div>`:""}
   <!-- Adim 132-E: Sticky ozet paneli global (eh disinda, her tab'da gorunur). srmR(srm) renk. -->
@@ -24296,6 +24297,229 @@ window.tadimInc=tadimInc;
 // (bozma riski). Timeline diacetyl keyword (~13021) buradaki _bmOffKisaCozum'a yönlendirildi (tek kaynak).
 // ═══════════════════════════════════════════════════════════════════════════
 window._OFF_KODLAR = ['diacetyl','DMS','acetaldehyde','fusel','oxidized','astringent','light-struck','solvent','acetic','chlorophenol','sulfur','metallic','infection','phenolic','ester'];
+// ═══ SPRINT AK — PROFİL SEÇİCİ → STİL ÖNERİSİ ══════════════════════════════
+// Kaan'ın C isteği: "stilin adını bilmiyorum, istediğim birayı tarif edeyim".
+// KAYNAK: Sprint AI keşfi (design_recete_danismanligi, Eksen 4) + build-time
+// çıkarım (_step105_dataset_v8_clean.json, 376.810 reçete → 333.428 geçerli).
+//
+// HÜKÜM (keşif kanıtı): profil → STİL çalışır, profil → REÇETE ÇALIŞMAZ.
+// Naif "her malt ailesinin medyanını al" yaklaşımı denendi: yüzdeler toplanmıyor
+// (%8-25) ve profil eksenleri kültürel aileyi ayırmadığı için amber+malt-ağır
+// kovası İskoç+Alman+Belçika'yı aynı kaba koyup Frankenstein üretiyor.
+// Buna karşılık BASKIN STİL LİSTESİ her kovada tutarlı. Bu yüzden burada
+// yalnız STİL önerilir; reçete üretimi mevcut STIL_ISKELET yoluna devredilir.
+//
+// GÖVDE VEKİLİ (kritik): dataset FG'sinin %91.9'u formülden türetilmiş (sahte:
+// fg = og−(og−1)×attenuation) → gövde ekseni FG'den KURULAMAZ. Vekil GRIST'ten:
+//   crystal ×1.0 (fermente olmayan dekstrin) + oats ×0.8 (beta-glukan, ağız
+//   hissi) + wheat ×0.5 + rye ×0.5 (protein) − şeker ×1.2 (tamamen fermente,
+//   inceltir). Maya attenuation'ı BİLİNÇLİ olarak dışarıda: sahte FG'nin
+//   türetildiği girdi tam olarak o.
+//
+// ─ Tablo biçimi: 'renk|acılık|gövde': [kovaToplamN, [[bjcpAd, n], ...]]
+// ─ Katch-all slug'lar (Specialty/Fruit/Herb&Spice/Wood-Aged) ÇIKARILDI: bunlar
+//   bir profili değil bir MALZEME kararını tanımlar, profilden önerilmesi anlamsız.
+// ─ Sıralama: n × (iskelet varsa 1.35). İskelet bir EŞLEŞME KALİTESİ sinyali
+//   değil KOLAYLIK sinyalidir; büyük n farkını ezmemeli (spec'ten ölçülü sapma).
+window._PROFIL_STIL = {
+  'acik|malt|ince':[6215,[["Blonde Ale / Cream Ale",1128],["Tripel",747],["American Lager / Light Lager",819],["American Pale Ale",519],["Belgian Blonde Ale",509],["Belgian Strong Golden Ale",537]]],
+  'acik|malt|orta':[2132,[["Blonde Ale / Cream Ale",565],["Saison / Farmhouse Ale",279],["American Pale Ale",169],["Belgian Blonde Ale",140],["American Lager / Light Lager",136],["Tripel",94]]],
+  'acik|malt|dolgun':[12166,[["Weizen / Weissbier",4555],["Witbier / Belgian White",2015],["American Wheat Beer",1463],["Berliner Weisse",1238],["Saison / Farmhouse Ale",432],["Blonde Ale / Cream Ale",399]]],
+  'acik|dengeli|ince':[13541,[["Blonde Ale / Cream Ale",2865],["Saison / Farmhouse Ale",1530],["American Pale Ale",1294],["Kölsch",1101],["Tripel",884],["German Pils",874]]],
+  'acik|dengeli|orta':[6840,[["Blonde Ale / Cream Ale",1590],["Saison / Farmhouse Ale",1434],["Kölsch",899],["American Pale Ale",892],["Belgian Blonde Ale",270],["German Pils",240]]],
+  'acik|dengeli|dolgun':[11943,[["American Wheat Beer",4149],["Saison / Farmhouse Ale",1592],["Witbier / Belgian White",1495],["Blonde Ale / Cream Ale",1081],["American Pale Ale",877],["Weizen / Weissbier",514]]],
+  'acik|hop|ince':[10536,[["American Pale Ale",2954],["German Pils",1954],["American IPA",1352],["Blonde Ale / Cream Ale",881],["Saison / Farmhouse Ale",622],["Kölsch",338]]],
+  'acik|hop|orta':[6316,[["American Pale Ale",2384],["American IPA",1228],["Blonde Ale / Cream Ale",482],["German Pils",473],["Saison / Farmhouse Ale",471],["Kölsch",237]]],
+  'acik|hop|dolgun':[7405,[["American Pale Ale",1979],["American IPA",1183],["American Wheat Beer",1482],["Saison / Farmhouse Ale",663],["Blonde Ale / Cream Ale",345],["Witbier / Belgian White",306]]],
+  'acik|cokaci|ince':[9739,[["American IPA",3754],["American Pale Ale",2617],["Imperial IPA / DIPA",806],["German Pils",648],["Blonde Ale / Cream Ale",314],["Saison / Farmhouse Ale",227]]],
+  'acik|cokaci|orta':[6415,[["American IPA",2998],["American Pale Ale",1655],["Imperial IPA / DIPA",720],["Blonde Ale / Cream Ale",162],["German Pils",149],["Saison / Farmhouse Ale",149]]],
+  'acik|cokaci|dolgun':[6752,[["American IPA",2741],["American Pale Ale",1757],["American Wheat Beer",652],["Saison / Farmhouse Ale",265],["Imperial IPA / DIPA",247],["Weizen / Weissbier",160]]],
+  'altin|malt|ince':[2983,[["Tripel",327],["Munich Märzen / Oktoberfest",259],["Belgian Blonde Ale",214],["Saison / Farmhouse Ale",197],["Dubbel",193],["American Pale Ale",181]]],
+  'altin|malt|orta':[1410,[["American Pale Ale",142],["Saison / Farmhouse Ale",134],["Munich Märzen / Oktoberfest",100],["American IPA",89],["Belgian Blonde Ale",77],["American Amber Ale / Red Ale",71]]],
+  'altin|malt|dolgun':[2836,[["Weizen / Weissbier",670],["American Wheat Beer",267],["American Pale Ale",174],["Weizenbock",169],["Saison / Farmhouse Ale",156],["American IPA",119]]],
+  'altin|dengeli|ince':[8388,[["Munich Märzen / Oktoberfest",1054],["American Pale Ale",1045],["Saison / Farmhouse Ale",864],["Belgian Blonde Ale",677],["Tripel",415],["American Amber Ale / Red Ale",409]]],
+  'altin|dengeli|orta':[5859,[["American Pale Ale",1093],["Saison / Farmhouse Ale",638],["Munich Märzen / Oktoberfest",515],["American Amber Ale / Red Ale",453],["Strong Bitter / ESB",450],["American IPA",330]]],
+  'altin|dengeli|dolgun':[7494,[["American Pale Ale",1444],["Saison / Farmhouse Ale",741],["American Wheat Beer",741],["American Amber Ale / Red Ale",538],["American IPA",444],["Belgian Blonde Ale",332]]],
+  'altin|hop|ince':[9279,[["American Pale Ale",2701],["American IPA",2191],["Imperial IPA / DIPA",515],["American Amber Ale / Red Ale",422],["Strong Bitter / ESB",524],["Saison / Farmhouse Ale",348]]],
+  'altin|hop|orta':[10388,[["American Pale Ale",3238],["American IPA",3062],["Strong Bitter / ESB",874],["Imperial IPA / DIPA",493],["American Amber Ale / Red Ale",397],["Best Bitter",395]]],
+  'altin|hop|dolgun':[12554,[["American Pale Ale",4260],["American IPA",3400],["Strong Bitter / ESB",878],["American Amber Ale / Red Ale",566],["Imperial IPA / DIPA",447],["English IPA",384]]],
+  'altin|cokaci|ince':[12542,[["American IPA",5695],["Imperial IPA / DIPA",2404],["American Pale Ale",2101],["English IPA",360],["American Amber Ale / Red Ale",335],["Strong Bitter / ESB",349]]],
+  'altin|cokaci|orta':[13335,[["American IPA",7062],["Imperial IPA / DIPA",2412],["American Pale Ale",2128],["English IPA",364],["Strong Bitter / ESB",292]]],
+  'altin|cokaci|dolgun':[16099,[["American IPA",8409],["American Pale Ale",3198],["Imperial IPA / DIPA",1849],["English IPA",469],["American Amber Ale / Red Ale",336],["Strong Bitter / ESB",412]]],
+  'amber|malt|ince':[3731,[["Dubbel",946],["Belgian Dark Strong Ale",582],["Doppelbock",285],["Scottish Ale / Wee Heavy",236],["Winter Warmer / Old Ale",155],["Flanders Red Ale",142]]],
+  'amber|malt|orta':[2025,[["Scottish Ale / Wee Heavy",286],["Irish Red Ale",192],["Dubbel",133],["Doppelbock",105],["Scottish Ale / 80 Shilling",133],["Flanders Red Ale",128]]],
+  'amber|malt|dolgun':[3418,[["Dunkelweizen",798],["Weizenbock",349],["Roggenbier / Rye Beer",244],["Irish Red Ale",216],["Scottish Ale / Wee Heavy",156],["American Amber Ale / Red Ale",150]]],
+  'amber|dengeli|ince':[5778,[["Dubbel",504],["American Amber Ale / Red Ale",456],["American Brown Ale",406],["Irish Red Ale",506],["Belgian Dark Strong Ale",348],["English Brown Ale",327]]],
+  'amber|dengeli|orta':[5421,[["Irish Red Ale",928],["American Amber Ale / Red Ale",521],["English Brown Ale",489],["American Brown Ale",402],["Scottish Ale / 80 Shilling",282],["English Mild / Dark Mild",260]]],
+  'amber|dengeli|dolgun':[7460,[["American Amber Ale / Red Ale",1290],["Irish Red Ale",1138],["American Brown Ale",490],["English Brown Ale",479],["English Mild / Dark Mild",494],["American Pale Ale",272]]],
+  'amber|hop|ince':[3757,[["American Amber Ale / Red Ale",468],["American IPA",367],["American Brown Ale",300],["American Pale Ale",270],["Altbier / Düsseldorf Altbier",263],["American Barleywine",204]]],
+  'amber|hop|orta':[3798,[["American Amber Ale / Red Ale",568],["American IPA",370],["Strong Bitter / ESB",369],["American Pale Ale",272],["American Brown Ale",258],["Altbier / Düsseldorf Altbier",244]]],
+  'amber|hop|dolgun':[6365,[["American Amber Ale / Red Ale",1468],["American IPA",877],["American Pale Ale",552],["Strong Bitter / ESB",601],["American Brown Ale",337],["Irish Red Ale",397]]],
+  'amber|cokaci|ince':[3600,[["American IPA",988],["Imperial IPA / DIPA",607],["American Amber Ale / Red Ale",301],["American Pale Ale",241],["American Barleywine",216],["American Brown Ale",201]]],
+  'amber|cokaci|orta':[3034,[["American IPA",952],["Imperial IPA / DIPA",492],["American Amber Ale / Red Ale",313],["American Pale Ale",182],["American Barleywine",169],["American Brown Ale",139]]],
+  'amber|cokaci|dolgun':[5691,[["American IPA",2020],["American Amber Ale / Red Ale",756],["Imperial IPA / DIPA",741],["American Pale Ale",444],["American Brown Ale",212],["Strong Bitter / ESB",239]]],
+  'koyu|malt|ince':[2832,[["Belgian Dark Strong Ale",921],["Dubbel",407],["Scottish Ale / Wee Heavy",194],["Doppelbock",170],["American Brown Ale",138],["Winter Warmer / Old Ale",115]]],
+  'koyu|malt|orta':[1514,[["Scottish Ale / Wee Heavy",285],["Doppelbock",132],["Belgian Dark Strong Ale",114],["Baltic Porter",107],["American Brown Ale",60],["Winter Warmer / Old Ale",53]]],
+  'koyu|malt|dolgun':[2376,[["Dunkelweizen",346],["Scottish Ale / Wee Heavy",202],["Weizenbock",188],["American Brown Ale",163],["Oatmeal Stout",113],["English Mild / Dark Mild",123]]],
+  'koyu|dengeli|ince':[5155,[["American Brown Ale",656],["Belgian Dark Strong Ale",546],["Robust Porter",599],["Milk Stout / Sweet Stout",419],["Dubbel",273],["Brown Porter",293]]],
+  'koyu|dengeli|orta':[5128,[["American Brown Ale",714],["Robust Porter",880],["Schwarzbier",343],["Oatmeal Stout",280],["Brown Porter",348],["Baltic Porter",251]]],
+  'koyu|dengeli|dolgun':[7484,[["American Brown Ale",1251],["Oatmeal Stout",998],["Robust Porter",1088],["Brown Porter",529],["English Mild / Dark Mild",411],["Milk Stout / Sweet Stout",281]]],
+  'koyu|hop|ince':[3376,[["American Brown Ale",522],["Dry Irish Stout",474],["Robust Porter",498],["Milk Stout / Sweet Stout",210],["American Stout",196],["Brown Porter",174]]],
+  'koyu|hop|orta':[3283,[["Robust Porter",672],["American Brown Ale",421],["American IPA",216],["Dry Irish Stout",185],["American Stout",232],["Oatmeal Stout",152]]],
+  'koyu|hop|dolgun':[4890,[["American Brown Ale",789],["Robust Porter",803],["Oatmeal Stout",562],["American IPA",329],["American Stout",320],["Dry Irish Stout",201]]],
+  'koyu|cokaci|ince':[2187,[["American IPA",326],["American Brown Ale",260],["Dry Irish Stout",242],["Robust Porter",269],["American Stout",160],["Imperial IPA / DIPA",96]]],
+  'koyu|cokaci|orta':[2177,[["American IPA",584],["American Brown Ale",224],["Robust Porter",243],["Imperial IPA / DIPA",172],["Dry Irish Stout",105],["American Stout",126]]],
+  'koyu|cokaci|dolgun':[2964,[["American IPA",782],["American Brown Ale",323],["Imperial IPA / DIPA",212],["Robust Porter",230],["American Stout",172],["Oatmeal Stout",106]]],
+  'cokkoyu|malt|ince':[1209,[["Milk Stout / Sweet Stout",327],["Belgian Dark Strong Ale",199],["Imperial / Russian Imperial Stout",134],["American Stout",91],["Dubbel",52],["Robust Porter",52]]],
+  'cokkoyu|malt|orta':[950,[["Milk Stout / Sweet Stout",184],["Imperial / Russian Imperial Stout",195],["American Stout",115],["Oatmeal Stout",68],["Robust Porter",89],["Baltic Porter",57]]],
+  'cokkoyu|malt|dolgun':[1309,[["Oatmeal Stout",222],["Milk Stout / Sweet Stout",191],["Imperial / Russian Imperial Stout",189],["American Stout",151],["Robust Porter",133],["Baltic Porter",62]]],
+  'cokkoyu|dengeli|ince':[3261,[["Milk Stout / Sweet Stout",948],["Imperial / Russian Imperial Stout",740],["American Stout",330],["Robust Porter",296],["Belgian Dark Strong Ale",147],["Dry Irish Stout",126]]],
+  'cokkoyu|dengeli|orta':[3561,[["Imperial / Russian Imperial Stout",1073],["Milk Stout / Sweet Stout",505],["Robust Porter",500],["American Stout",449],["Oatmeal Stout",292],["Baltic Porter",108]]],
+  'cokkoyu|dengeli|dolgun':[5822,[["Oatmeal Stout",1458],["Imperial / Russian Imperial Stout",1096],["Milk Stout / Sweet Stout",728],["American Stout",708],["Robust Porter",662],["Baltic Porter",150]]],
+  'cokkoyu|hop|ince':[2864,[["Imperial / Russian Imperial Stout",878],["Dry Irish Stout",435],["Milk Stout / Sweet Stout",341],["American Stout",439],["Robust Porter",221],["Foreign Extra Stout",136]]],
+  'cokkoyu|hop|orta':[3120,[["Imperial / Russian Imperial Stout",1036],["American Stout",625],["Robust Porter",346],["Dry Irish Stout",208],["Milk Stout / Sweet Stout",177],["Oatmeal Stout",132]]],
+  'cokkoyu|hop|dolgun':[4684,[["Imperial / Russian Imperial Stout",1098],["American Stout",1036],["Oatmeal Stout",655],["Robust Porter",430],["Milk Stout / Sweet Stout",253],["Dry Irish Stout",226]]],
+  'cokkoyu|cokaci|ince':[1774,[["Imperial / Russian Imperial Stout",469],["American Stout",303],["Dry Irish Stout",219],["American IPA",151],["Robust Porter",150],["Milk Stout / Sweet Stout",107]]],
+  'cokkoyu|cokaci|orta':[1669,[["Imperial / Russian Imperial Stout",436],["American IPA",280],["American Stout",329],["Imperial IPA / DIPA",129],["Dry Irish Stout",75],["Robust Porter",100]]],
+  'cokkoyu|cokaci|dolgun':[2594,[["American IPA",514],["Imperial / Russian Imperial Stout",473],["American Stout",454],["Imperial IPA / DIPA",194],["Oatmeal Stout",172],["Robust Porter",168]]]
+};
+
+window._AK_EKSEN = {
+  renk:  { ad:'Renk',   ikon:'🎨', secenekler:[['acik','Açık',4],['altin','Altın',9],['amber','Amber',16],['koyu','Koyu',27],['cokkoyu','Çok koyu',40]] },
+  aci:   { ad:'Acılık', ikon:'🌿', secenekler:[['malt','Malt ağırlıklı'],['dengeli','Dengeli'],['hop','Hop ağırlıklı'],['cokaci','Çok acı']] },
+  govde: { ad:'Gövde',  ikon:'🥛', secenekler:[['ince','İnce'],['orta','Orta'],['dolgun','Dolgun']] }
+};
+
+// Seçim GEÇİCİ: reçete nesnesine (S) YAZILMAZ — bu bir keşif aracı, reçete verisi değil.
+window.__akProfil = { renk:'', aci:'', govde:'' };
+
+window._bmProfilSec = function(eksen, deger){
+  try{
+    if(!window.__akProfil) window.__akProfil = { renk:'', aci:'', govde:'' };
+    window.__akProfil[eksen] = (window.__akProfil[eksen] === deger) ? '' : deger; // tekrar tık = temizle
+    if(typeof render === 'function') render();
+  }catch(_e){}
+};
+
+window._bmProfilSifirla = function(){
+  window.__akProfil = { renk:'', aci:'', govde:'' };
+  if(typeof render === 'function') render();
+};
+
+// Seçili profilin kovasını çöz → [toplamN, [[ad,n],...]] veya null
+window._bmProfilKova = function(){
+  var p = window.__akProfil || {};
+  if(!p.renk || !p.aci || !p.govde) return null;
+  var k = p.renk + '|' + p.aci + '|' + p.govde;
+  var v = window._PROFIL_STIL && window._PROFIL_STIL[k];
+  return v ? { key:k, toplam:v[0], stiller:v[1] } : { key:k, toplam:0, stiller:[] };
+};
+
+// Öneriyi uygula: hedef stili kur + mevcut iskelet yoluna devret.
+// doldur=true  → bmStilIskeletDoldur() (iskelet varsa B katmanı, yoksa C katmanı:
+//                BJCP hedefleri + maya önerisi, malt/hop UYDURULMAZ — V1a dersi)
+// doldur=false → yalnız hedef stil (dropdown ile aynı sonuç)
+window._bmProfilStilUygula = function(kovaKey, idx, doldur){
+  try{
+    var v = window._PROFIL_STIL && window._PROFIL_STIL[kovaKey];
+    if(!v || !v[1] || !v[1][idx]) return;
+    var ad = v[1][idx][0];
+    if(typeof S === 'undefined' || !S) return;
+    S.stil = ad;
+    if(doldur && typeof window.bmStilIskeletDoldur === 'function'){
+      // __stilSecKaynak='iskelet' bmStilIskeletDoldur içinde kurulur (Sprint Z:
+      // stilden-reçete = NİYET, düzeltme sinyali DEĞİL → stil öğrenme kolu zehirlenmez)
+      window.bmStilIskeletDoldur();
+      return;
+    }
+    window.__stilSecKaynak = 'iskelet'; // profil-güdümlü seçim de NİYET sayılır
+    if(typeof _receteYazSync === 'function') _receteYazSync();
+    if(typeof render === 'function') render();
+    if(typeof flash === 'function') flash('🎯 Hedef stil: ' + ad, 'ok');
+  }catch(e){ try{ console.warn('_bmProfilStilUygula', e); }catch(_){} }
+};
+
+// ── Sunum: "Hedef Stil" dropdown'unun ALTINA açılır panel (dropdown AYNEN kalır)
+window._bmProfilStilKart = function(){
+  try{
+    var E = window._AK_EKSEN, T = window._PROFIL_STIL;
+    if(!E || !T) return '';
+    var _e = (typeof esc === 'function') ? esc : function(s){ return String(s==null?'':s); };
+    var p = window.__akProfil || { renk:'', aci:'', govde:'' };
+    // __akAcik: kullanicinin panelidegin actigi bilgisi (render'lar arasi korunur;
+    // cip secili degilken bile panel kapanmasin diye). Gecici, S'ye yazilmaz.
+    var acik = !!(p.renk || p.aci || p.govde) || !!window.__akAcik;
+
+    function cipSatir(anahtar){
+      var e = E[anahtar];
+      var cips = e.secenekler.map(function(o){
+        var sec = p[anahtar] === o[0];
+        var nokta = '';
+        if(o[2] != null && typeof srmR === 'function'){
+          nokta = '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:' + srmR(o[2]) + ';margin-right:4px;vertical-align:-1px;border:1px solid rgba(0,0,0,.15)"></span>';
+        }
+        return '<button type="button" onclick="_bmProfilSec(\'' + anahtar + '\',\'' + o[0] + '\')" '
+          + 'aria-pressed="' + (sec ? 'true' : 'false') + '" '
+          + 'style="background:' + (sec ? 'var(--bakir)' : 'var(--card)') + ';color:' + (sec ? '#fff' : 'var(--metin)')
+          + ';border:1px solid ' + (sec ? 'var(--bakir)' : 'var(--bor)') + ';border-radius:14px;padding:4px 10px;font-size:11px;'
+          + 'font-weight:' + (sec ? '700' : '500') + ';cursor:pointer;font-family:var(--font-govde);white-space:nowrap">'
+          + nokta + _e(o[1]) + '</button>';
+      }).join('');
+      return '<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;flex-wrap:wrap">'
+        + '<span style="font-size:10px;color:var(--soluk);font-weight:600;min-width:62px">' + e.ikon + ' ' + _e(e.ad) + '</span>'
+        + '<div style="display:flex;gap:4px;flex-wrap:wrap;flex:1">' + cips + '</div>'
+        + '</div>';
+    }
+
+    var kova = window._bmProfilKova();
+    var sonuc = '';
+    if(!kova){
+      var kalan = ['renk','aci','govde'].filter(function(k){ return !p[k]; }).map(function(k){ return E[k].ad.toLowerCase(); });
+      sonuc = '<div style="font-size:10px;color:var(--dim);padding:6px 2px">Üç ekseni de seç — eksik: ' + _e(kalan.join(', ')) + '</div>';
+    } else if(!kova.stiller.length){
+      sonuc = '<div style="font-size:10px;color:var(--dim);padding:6px 2px">Bu profilde korpusta yeterli reçete yok.</div>';
+    } else {
+      var satirlar = kova.stiller.map(function(st, i){
+        var ad = st[0], n = st[1];
+        var iskVar = (typeof STIL_ISKELET !== 'undefined') && !!STIL_ISKELET[ad];
+        var bj = (typeof BJCP !== 'undefined') ? BJCP[ad] : null;
+        var bant = (bj && bj.abv) ? ('%' + bj.abv[0] + '–' + bj.abv[1] + ' ABV') : '';
+        var pay = kova.toplam ? Math.round(100 * n / kova.toplam) : 0;
+        return '<div style="display:flex;align-items:center;gap:6px;padding:6px 0;border-top:1px solid var(--bor)">'
+          + '<div style="flex:1;min-width:0">'
+          +   '<div style="font-size:12px;font-weight:700;color:var(--kahve);line-height:1.25">' + _e(ad)
+          +     (iskVar ? ' <span style="font-size:9px;background:var(--ya);color:var(--yk);padding:1px 5px;border-radius:4px;font-weight:700;vertical-align:1px">iskelet</span>' : '')
+          +   '</div>'
+          +   '<div style="font-size:9.5px;color:var(--soluk);margin-top:1px">' + n.toLocaleString('tr-TR') + ' reçete bu profilde (%' + pay + ')' + (bant ? ' · ' + bant : '') + '</div>'
+          + '</div>'
+          + '<button type="button" onclick="_bmProfilStilUygula(\'' + kova.key + '\',' + i + ',true)" '
+          +   'style="background:' + (iskVar ? 'var(--bakir)' : 'var(--card)') + ';color:' + (iskVar ? '#fff' : 'var(--kahve)')
+          +   ';border:1px solid ' + (iskVar ? 'var(--bakir)' : 'var(--bor)') + ';border-radius:6px;padding:4px 8px;font-size:10px;'
+          +   'font-weight:600;cursor:pointer;white-space:nowrap;font-family:var(--font-govde)" '
+          +   'title="' + (iskVar ? 'Bu stilin iskeletini batch boyutuna ölçekleyip doldur' : 'Hedef stili kur — BJCP hedefleri + maya önerisi (malt/hop uydurulmaz)') + '">'
+          +   (iskVar ? '📋 Doldur' : '🎯 Hedef yap') + '</button>'
+          + '</div>';
+      }).join('');
+      sonuc = '<div style="margin-top:4px">'
+        + '<div style="font-size:9.5px;color:var(--dim);margin-bottom:2px">Bu profilde korpusta <b>' + kova.toplam.toLocaleString('tr-TR') + '</b> reçete var — en yakın ' + kova.stiller.length + ' stil:</div>'
+        + satirlar
+        + '<div style="font-size:9px;color:var(--dim);margin-top:6px;line-height:1.4">Sayılar 333.428 ev-üretimi reçetenin dağılımıdır — <b>kalite değerlendirmesi değil</b>, "kaç kişi böyle demlemiş" bilgisi. Gövde ekseni grist bileşiminden türetilir (dataset FG\'si güvenilmez). Öneri = başlangıç noktası; reçeteyi serbestçe değiştir.</div>'
+        + '</div>';
+    }
+
+    return '<details class="bm-profil-sec bm-edit-only"' + (acik ? ' open' : '') + ' ontoggle="window.__akAcik=this.open" style="margin:-4px 0 8px">'
+      + '<summary style="cursor:pointer;font-size:11px;font-weight:600;color:var(--kahve);padding:4px 8px;background:var(--bg2);border:1px solid var(--bor);border-radius:6px;list-style:none">'
+      +   '🔎 Stilin adını bilmiyorum — <span style="font-weight:400;color:var(--soluk)">istediğim birayı tarif edeyim</span>'
+      + '</summary>'
+      + '<div style="padding:7px 8px 2px">'
+      +   cipSatir('renk') + cipSatir('aci') + cipSatir('govde')
+      +   (acik ? '<button type="button" onclick="_bmProfilSifirla()" style="background:none;border:none;color:var(--dim);font-size:9.5px;cursor:pointer;padding:2px 0;text-decoration:underline;font-family:var(--font-govde)">seçimi temizle</button>' : '')
+      +   sonuc
+      + '</div>'
+      + '</details>';
+  }catch(e){ try{ console.warn('_bmProfilStilKart', e); }catch(_){} return ''; }
+};
+
 // ═══ SPRINT AJ — MASH SÜRECİ NEDEN-SONUÇ BİLGİ TABANI ══════════════════════
 // Kaynak: Sprint AI keşfi — 6 mash konusu × (araştırma + adversaryal denetim),
 // Brülosophy exBEERiment'leri tam metin, Troester 2008 / NHC 2010 PDF'leri

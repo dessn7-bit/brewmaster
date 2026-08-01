@@ -2424,6 +2424,150 @@ const CASELER = [
       __REG.ok('mashAdimlar tanımsız → 1 (patlamıyor)', ((S.mashAdimlar || []).length || 1) === 1);
       return __REG.al();
     })
+  },
+
+  // ── SPRINT AK — PROFİL SEÇİCİ → STİL ÖNERİSİ ──
+  {
+    kod: 'AK1-TABLO', ad: 'PROFİL TABLOSU: 5×4×3 = 60 kovanın hepsi dolu (min n≥200); her öneri BJCP anahtarında VAR (sarkan referans yok); gövde ekseni FG\'den DEĞİL grist\'ten (dataset FG\'si %91.9 türetilmiş)',
+    calistir: (page) => page.evaluate(() => {
+      const T = window._PROFIL_STIL;
+      __REG.ok('_PROFIL_STIL yüklü', !!T && Object.keys(T).length === 60, T ? Object.keys(T).length + ' kova' : 'YOK');
+      const R = ['acik', 'altin', 'amber', 'koyu', 'cokkoyu'], A = ['malt', 'dengeli', 'hop', 'cokaci'], G = ['ince', 'orta', 'dolgun'];
+      let eksik = 0, minKova = 1e9, bozukAd = 0, oneri = 0, iskeletli = 0;
+      R.forEach(r => A.forEach(a => G.forEach(g => {
+        const v = T[r + '|' + a + '|' + g];
+        if (!v) { eksik++; return; }
+        if (v[0] < minKova) minKova = v[0];
+        v[1].forEach(p => { oneri++; if (!BJCP[p[0]]) bozukAd++; if (STIL_ISKELET[p[0]]) iskeletli++; });
+      })));
+      __REG.ok('60 kombinasyonun HEPSİ dolu', eksik === 0, eksik);
+      __REG.ok('en seyrek kova bile n≥200 (keşif iddiası)', minKova >= 200, 'min=' + minKova);
+      __REG.ok('her öneri BJCP anahtarında var (sarkan referans yok)', bozukAd === 0, bozukAd);
+      __REG.ok('önerilerin çoğunda hazır iskelet var', iskeletli / oneri > 0.6, iskeletli + '/' + oneri);
+      // Gövde vekili grist-tabanlı — kaynak kanıtı
+      const src = Array.from(document.querySelectorAll('script')).map(s => s.textContent).join('\n');
+      const ak = src.slice(src.indexOf('SPRINT AK — PROFİL SEÇİCİ'), src.indexOf('SPRINT AJ — MASH SÜRECİ'));
+      __REG.ok('blok FG\'nin kullanılamayacağını belgeliyor', /FG.{0,40}(sahte|KURULAMAZ|güvenilmez)/i.test(ak));
+      __REG.ok('vekil grist bileşenleri (crystal/oats/wheat/rye/şeker)',
+        ['crystal', 'oats', 'wheat', 'rye', 'şeker'].every(x => ak.indexOf(x) >= 0));
+      __REG.ok('AK kodu S.fg / fgHesap OKUMUYOR', ak.indexOf('S.fg') < 0 && ak.indexOf('fgHesap') < 0);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AK2-PROFIL', ad: 'PROFİL SEÇİMİ (koyu+dengeli+dolgun): brown ale / porter / oatmeal stout ailesi öneriliyor; korpus desteği (N reçete) ve kova toplamı şeffaf gösteriliyor',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('AK2 Bira', {});
+      ekran = 'editor'; sekme = 'genel';
+      window.__akProfil = { renk: '', aci: '', govde: '' }; render();
+      let dom = document.getElementById('ekran').innerHTML;
+      __REG.ok('giriş noktası görünür (dropdown alternatifi)', dom.indexOf('Stilin adını bilmiyorum') >= 0);
+      __REG.ok('seçim yokken yönlendirme var, sonuç yok', dom.indexOf('Üç ekseni de seç') >= 0);
+      _bmProfilSec('renk', 'koyu'); _bmProfilSec('aci', 'dengeli'); _bmProfilSec('govde', 'dolgun');
+      dom = document.getElementById('ekran').innerHTML;
+      const adlar = window._PROFIL_STIL['koyu|dengeli|dolgun'][1].map(x => x[0]);
+      __REG.ok('brown ale önerisi', adlar.some(x => /Brown Ale/i.test(x)), adlar.join(' · '));
+      __REG.ok('porter önerisi', adlar.some(x => /Porter/i.test(x)));
+      __REG.ok('oatmeal stout önerisi', adlar.some(x => /Oatmeal Stout/i.test(x)));
+      __REG.ok('öneriler DOM\'a basıldı', adlar.every(a => dom.indexOf(a) >= 0));
+      __REG.ok('korpus desteği "N reçete bu profilde" gösteriliyor', (dom.match(/reçete bu profilde/g) || []).length >= 5, (dom.match(/reçete bu profilde/g) || []).length);
+      __REG.ok('kova toplamı şeffaf', /korpusta <b>[\d.]+<\/b> reçete/.test(dom));
+      __REG.ok('kalite-değil uyarısı (dürüstlük)', dom.indexOf('kalite değerlendirmesi değil') >= 0);
+      __REG.ok('seçim S\'ye YAZILMIYOR (reçete verisi değil)', typeof S.profil === 'undefined' && typeof S.akProfil === 'undefined');
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AK2-ISKELET', ad: 'İSKELETLİ ÖNERİ: "📋 Doldur" → S.stil kurulur + V1a/V2 iskelet akışı çalışır (malt/hop dolar, hacme ölçeklenir, tutarlılık korunur)',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('AK İskelet', {});
+      S.hacim = 11; S.verim = 61; S.maltlar = []; S.hoplar = []; S.mayaId = '';
+      const key = 'koyu|dengeli|dolgun';
+      const idx = window._PROFIL_STIL[key][1].findIndex(x => !!STIL_ISKELET[x[0]]);
+      const ad = window._PROFIL_STIL[key][1][idx][0];
+      __REG.ok('kovada iskeletli öneri var', idx >= 0, ad);
+      _bmProfilStilUygula(key, idx, true);
+      __REG.ok('S.stil önerilen stile kuruldu', S.stil === ad, S.stil);
+      __REG.ok('malt DOLDU (V1a/V2 iskelet akışı)', (S.maltlar || []).length > 0, (S.maltlar || []).length + ' malt');
+      __REG.ok('hop DOLDU', (S.hoplar || []).length > 0, (S.hoplar || []).length + ' hop');
+      __REG.ok('maya kuruldu', !!S.mayaId, S.mayaId);
+      const c = calc();
+      const bj = BJCP[ad];
+      __REG.ok('OG BJCP bandında (tutarlılık korundu)', c.og >= bj.og[0] - 0.004 && c.og <= bj.og[1] + 0.004, c.og.toFixed(3) + ' vs ' + JSON.stringify(bj.og));
+      // ölçekleme: 22L'de malt ~2x
+      const kg11 = (S.maltlar || []).reduce((a, m) => a + (m.kg || 0), 0);
+      S.maltlar = []; S.hoplar = []; S.hacim = 22;
+      _bmProfilStilUygula(key, idx, true);
+      const kg22 = (S.maltlar || []).reduce((a, m) => a + (m.kg || 0), 0);
+      __REG.ok('hacimle ölçekleniyor (11L→22L ≈ 2×)', kg22 > kg11 * 1.7 && kg22 < kg11 * 2.3, kg11.toFixed(2) + ' → ' + kg22.toFixed(2));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AK2-ISKELETSIZ', ad: 'İSKELETSİZ ÖNERİ (kritik): stil seçilebilir, BJCP hedefi + maya önerisi gelir AMA malt/hop BOŞ KALIR — SAHTE İSKELET ÜRETİLMEZ (V1a dersi)',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('AK İskeletsiz', {});
+      S.hacim = 11; S.maltlar = []; S.hoplar = []; S.mayaId = '';
+      const key = 'cokkoyu|dengeli|dolgun';
+      const idx = window._PROFIL_STIL[key][1].findIndex(x => !STIL_ISKELET[x[0]]);
+      __REG.ok('kovada iskeletsiz öneri var', idx >= 0, idx >= 0 ? window._PROFIL_STIL[key][1][idx][0] : 'yok');
+      const ad = window._PROFIL_STIL[key][1][idx][0];
+      _bmProfilStilUygula(key, idx, true);
+      __REG.ok('S.stil kuruldu', S.stil === ad, S.stil);
+      __REG.ok('malt BOŞ KALDI (sahte iskelet yok)', (S.maltlar || []).length === 0, (S.maltlar || []).length);
+      __REG.ok('hop BOŞ KALDI', (S.hoplar || []).length === 0, (S.hoplar || []).length);
+      __REG.ok('maya ÖNERİLDİ (C katmanı)', !!S.mayaId, S.mayaId);
+      __REG.ok('BJCP hedefi çözülebilir', !!BJCP[ad] && Array.isArray(BJCP[ad].og), JSON.stringify(BJCP[ad] && BJCP[ad].og));
+      // DOM iddiası için profil çipleri de seçili olmalı — kart ancak 3 eksen seçilince sonuç listeler
+      ekran = 'editor'; sekme = 'genel';
+      _bmProfilSec('renk', 'cokkoyu'); _bmProfilSec('aci', 'dengeli'); _bmProfilSec('govde', 'dolgun');
+      const dom = document.getElementById('ekran').innerHTML;
+      __REG.ok('UI\'da "🎯 Hedef yap" düğmesi (Doldur değil)', dom.indexOf('🎯 Hedef yap') >= 0);
+      __REG.ok('düğme açıklaması: malt/hop uydurulmaz', dom.indexOf('malt/hop uydurulmaz') >= 0);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AK2-FARKLI', ad: 'FARKLI PROFİL FARKLI SONUÇ: açık/altın + çok acı + ince → IPA/Pale Ale ailesi; açık + malt ağırlıklı + dolgun → buğday ailesi (eksenler gerçekten ayırıyor)',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('AK Farklı', {});
+      ekran = 'editor'; sekme = 'genel';
+      const T = window._PROFIL_STIL;
+      const hop = T['altin|cokaci|ince'][1].map(x => x[0]);
+      __REG.ok('altın+çok acı+ince → IPA ailesi', hop.some(x => /IPA/i.test(x)), hop.join(' · '));
+      __REG.ok('altın+çok acı+ince → Pale Ale de var', hop.some(x => /Pale Ale/i.test(x)));
+      const wheat = T['acik|malt|dolgun'][1].map(x => x[0]);
+      __REG.ok('açık+malt+dolgun → buğday ailesi (Weizen/Witbier)',
+        wheat.some(x => /Weizen|Weissbier/i.test(x)) && wheat.some(x => /Witbier|Wheat/i.test(x)), wheat.join(' · '));
+      __REG.ok('iki profil ÖRTÜŞMÜYOR (eksenler ayırıyor)', hop.filter(x => wheat.indexOf(x) >= 0).length <= 1);
+      // reaktiflik: profil değişince DOM değişir
+      _bmProfilSec('renk', 'altin'); _bmProfilSec('aci', 'cokaci'); _bmProfilSec('govde', 'ince');
+      const d1 = document.getElementById('ekran').innerHTML;
+      _bmProfilSec('renk', 'acik'); _bmProfilSec('aci', 'malt');
+      const d2 = document.getElementById('ekran').innerHTML;
+      __REG.ok('profil değişince öneri listesi değişiyor (reaktif)', d1 !== d2 && d1.indexOf('American IPA') >= 0);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AK3-DROPDOWN', ad: 'REGRESYON: mevcut "🎯 Hedef Stil" dropdown\'u AYNEN çalışıyor (profil seçici ALTERNATİF giriş, replacement DEĞİL); __stilSecKaynak ayrımı korunuyor',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('AK Dropdown', {});
+      ekran = 'editor'; sekme = 'genel'; render();
+      const dom = document.getElementById('ekran').innerHTML;
+      __REG.ok('dropdown DOM\'da duruyor', dom.indexOf('🎯 Hedef Stil:') >= 0);
+      __REG.ok('dropdown 239 BJCP stilini listeliyor', (dom.match(/<option value="/g) || []).length >= 200, (dom.match(/<option value="/g) || []).length);
+      __REG.ok('dropdown yanındaki "İskeleti Doldur" duruyor', dom.indexOf('bmStilIskeletDoldur()') >= 0);
+      // dropdown yolu: kaynak 'dropdown'
+      S.stil = 'Dry Irish Stout'; window.__stilSecKaynak = 'dropdown';
+      S.maltlar = []; S.hoplar = []; S.mayaId = ''; S.hacim = 11;
+      bmStilIskeletDoldur();
+      __REG.ok('dropdown → İskeleti Doldur hâlâ malt dolduruyor', (S.maltlar || []).length > 0, (S.maltlar || []).length);
+      // profil yolu Sprint Z ayrımını bozmuyor: NİYET (iskelet), düzeltme sinyali değil
+      _bmProfilStilUygula('koyu|dengeli|dolgun', 0, false);
+      __REG.ok('profil yolu __stilSecKaynak=iskelet (öğrenme kolu zehirlenmez)', window.__stilSecKaynak === 'iskelet', window.__stilSecKaynak);
+      return __REG.al();
+    })
   }
 ];
 
