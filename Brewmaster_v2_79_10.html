@@ -24333,7 +24333,7 @@ window._OFF_KODLAR = ['diacetyl','DMS','acetaldehyde','fusel','oxidized','astrin
 // ═══ SPRINT AK — PROFİL SEÇİCİ → STİL ÖNERİSİ ══════════════════════════════
 // Kaan'ın C isteği: "stilin adını bilmiyorum, istediğim birayı tarif edeyim".
 // KAYNAK: Sprint AI keşfi (design_recete_danismanligi, Eksen 4) + build-time
-// çıkarım (_step105_dataset_v8_clean.json, 376.810 reçete → 333.428 geçerli).
+// çıkarım (_step105_dataset_v8_clean.json, 376.810 reçete → 336.149 geçerli; Sprint AM: common_beer dahil).
 //
 // HÜKÜM (keşif kanıtı): profil → STİL çalışır, profil → REÇETE ÇALIŞMAZ.
 // Naif "her malt ailesinin medyanını al" yaklaşımı denendi: yüzdeler toplanmıyor
@@ -24352,69 +24352,75 @@ window._OFF_KODLAR = ['diacetyl','DMS','acetaldehyde','fusel','oxidized','astrin
 // ─ Tablo biçimi: 'renk|acılık|gövde': [kovaToplamN, [[bjcpAd, n], ...]]
 // ─ Katch-all slug'lar (Specialty/Fruit/Herb&Spice/Wood-Aged) ÇIKARILDI: bunlar
 //   bir profili değil bir MALZEME kararını tanımlar, profilden önerilmesi anlamsız.
+// ─ Sprint AM: common_beer katch-all listesinden ÇIKARILDI — SLUG_TO_BJCP onu
+//   California Common / Steam Beer'e eşler (gerçek stil, AL iskeleti VAR); 2.721
+//   kaydı artık kova toplamlarına sayılır. Veri gerçeği: hiçbir kovada top-6'ya
+//   giremiyor (en iyisi altin|hop|dolgun 8. sıra, n=358) — listeye ZORLA SOKULMADI;
+//   dropdown + İskeleti Doldur yolu zaten çalışıyor. Tablo AL'in 63 iskeletiyle
+//   yeniden üretildi (V3 stilleri de ×1.35 boost alır).
 // ─ Sıralama: n × (iskelet varsa 1.35). İskelet bir EŞLEŞME KALİTESİ sinyali
 //   değil KOLAYLIK sinyalidir; büyük n farkını ezmemeli (spec'ten ölçülü sapma).
 window._PROFIL_STIL = {
-  'acik|malt|ince':[6215,[["Blonde Ale / Cream Ale",1128],["Tripel",747],["American Lager / Light Lager",819],["American Pale Ale",519],["Belgian Blonde Ale",509],["Belgian Strong Golden Ale",537]]],
-  'acik|malt|orta':[2132,[["Blonde Ale / Cream Ale",565],["Saison / Farmhouse Ale",279],["American Pale Ale",169],["Belgian Blonde Ale",140],["American Lager / Light Lager",136],["Tripel",94]]],
-  'acik|malt|dolgun':[12166,[["Weizen / Weissbier",4555],["Witbier / Belgian White",2015],["American Wheat Beer",1463],["Berliner Weisse",1238],["Saison / Farmhouse Ale",432],["Blonde Ale / Cream Ale",399]]],
-  'acik|dengeli|ince':[13541,[["Blonde Ale / Cream Ale",2865],["Saison / Farmhouse Ale",1530],["American Pale Ale",1294],["Kölsch",1101],["Tripel",884],["German Pils",874]]],
-  'acik|dengeli|orta':[6840,[["Blonde Ale / Cream Ale",1590],["Saison / Farmhouse Ale",1434],["Kölsch",899],["American Pale Ale",892],["Belgian Blonde Ale",270],["German Pils",240]]],
-  'acik|dengeli|dolgun':[11943,[["American Wheat Beer",4149],["Saison / Farmhouse Ale",1592],["Witbier / Belgian White",1495],["Blonde Ale / Cream Ale",1081],["American Pale Ale",877],["Weizen / Weissbier",514]]],
-  'acik|hop|ince':[10536,[["American Pale Ale",2954],["German Pils",1954],["American IPA",1352],["Blonde Ale / Cream Ale",881],["Saison / Farmhouse Ale",622],["Kölsch",338]]],
-  'acik|hop|orta':[6316,[["American Pale Ale",2384],["American IPA",1228],["Blonde Ale / Cream Ale",482],["German Pils",473],["Saison / Farmhouse Ale",471],["Kölsch",237]]],
-  'acik|hop|dolgun':[7405,[["American Pale Ale",1979],["American IPA",1183],["American Wheat Beer",1482],["Saison / Farmhouse Ale",663],["Blonde Ale / Cream Ale",345],["Witbier / Belgian White",306]]],
-  'acik|cokaci|ince':[9739,[["American IPA",3754],["American Pale Ale",2617],["Imperial IPA / DIPA",806],["German Pils",648],["Blonde Ale / Cream Ale",314],["Saison / Farmhouse Ale",227]]],
-  'acik|cokaci|orta':[6415,[["American IPA",2998],["American Pale Ale",1655],["Imperial IPA / DIPA",720],["Blonde Ale / Cream Ale",162],["German Pils",149],["Saison / Farmhouse Ale",149]]],
-  'acik|cokaci|dolgun':[6752,[["American IPA",2741],["American Pale Ale",1757],["American Wheat Beer",652],["Saison / Farmhouse Ale",265],["Imperial IPA / DIPA",247],["Weizen / Weissbier",160]]],
-  'altin|malt|ince':[2983,[["Tripel",327],["Munich Märzen / Oktoberfest",259],["Belgian Blonde Ale",214],["Saison / Farmhouse Ale",197],["Dubbel",193],["American Pale Ale",181]]],
-  'altin|malt|orta':[1410,[["American Pale Ale",142],["Saison / Farmhouse Ale",134],["Munich Märzen / Oktoberfest",100],["American IPA",89],["Belgian Blonde Ale",77],["American Amber Ale / Red Ale",71]]],
-  'altin|malt|dolgun':[2836,[["Weizen / Weissbier",670],["American Wheat Beer",267],["American Pale Ale",174],["Weizenbock",169],["Saison / Farmhouse Ale",156],["American IPA",119]]],
-  'altin|dengeli|ince':[8388,[["Munich Märzen / Oktoberfest",1054],["American Pale Ale",1045],["Saison / Farmhouse Ale",864],["Belgian Blonde Ale",677],["Tripel",415],["American Amber Ale / Red Ale",409]]],
-  'altin|dengeli|orta':[5859,[["American Pale Ale",1093],["Saison / Farmhouse Ale",638],["Munich Märzen / Oktoberfest",515],["American Amber Ale / Red Ale",453],["Strong Bitter / ESB",450],["American IPA",330]]],
-  'altin|dengeli|dolgun':[7494,[["American Pale Ale",1444],["Saison / Farmhouse Ale",741],["American Wheat Beer",741],["American Amber Ale / Red Ale",538],["American IPA",444],["Belgian Blonde Ale",332]]],
-  'altin|hop|ince':[9279,[["American Pale Ale",2701],["American IPA",2191],["Imperial IPA / DIPA",515],["American Amber Ale / Red Ale",422],["Strong Bitter / ESB",524],["Saison / Farmhouse Ale",348]]],
-  'altin|hop|orta':[10388,[["American Pale Ale",3238],["American IPA",3062],["Strong Bitter / ESB",874],["Imperial IPA / DIPA",493],["American Amber Ale / Red Ale",397],["Best Bitter",395]]],
-  'altin|hop|dolgun':[12554,[["American Pale Ale",4260],["American IPA",3400],["Strong Bitter / ESB",878],["American Amber Ale / Red Ale",566],["Imperial IPA / DIPA",447],["English IPA",384]]],
-  'altin|cokaci|ince':[12542,[["American IPA",5695],["Imperial IPA / DIPA",2404],["American Pale Ale",2101],["English IPA",360],["American Amber Ale / Red Ale",335],["Strong Bitter / ESB",349]]],
-  'altin|cokaci|orta':[13335,[["American IPA",7062],["Imperial IPA / DIPA",2412],["American Pale Ale",2128],["English IPA",364],["Strong Bitter / ESB",292]]],
-  'altin|cokaci|dolgun':[16099,[["American IPA",8409],["American Pale Ale",3198],["Imperial IPA / DIPA",1849],["English IPA",469],["American Amber Ale / Red Ale",336],["Strong Bitter / ESB",412]]],
-  'amber|malt|ince':[3731,[["Dubbel",946],["Belgian Dark Strong Ale",582],["Doppelbock",285],["Scottish Ale / Wee Heavy",236],["Winter Warmer / Old Ale",155],["Flanders Red Ale",142]]],
-  'amber|malt|orta':[2025,[["Scottish Ale / Wee Heavy",286],["Irish Red Ale",192],["Dubbel",133],["Doppelbock",105],["Scottish Ale / 80 Shilling",133],["Flanders Red Ale",128]]],
-  'amber|malt|dolgun':[3418,[["Dunkelweizen",798],["Weizenbock",349],["Roggenbier / Rye Beer",244],["Irish Red Ale",216],["Scottish Ale / Wee Heavy",156],["American Amber Ale / Red Ale",150]]],
-  'amber|dengeli|ince':[5778,[["Dubbel",504],["American Amber Ale / Red Ale",456],["American Brown Ale",406],["Irish Red Ale",506],["Belgian Dark Strong Ale",348],["English Brown Ale",327]]],
-  'amber|dengeli|orta':[5421,[["Irish Red Ale",928],["American Amber Ale / Red Ale",521],["English Brown Ale",489],["American Brown Ale",402],["Scottish Ale / 80 Shilling",282],["English Mild / Dark Mild",260]]],
-  'amber|dengeli|dolgun':[7460,[["American Amber Ale / Red Ale",1290],["Irish Red Ale",1138],["American Brown Ale",490],["English Brown Ale",479],["English Mild / Dark Mild",494],["American Pale Ale",272]]],
-  'amber|hop|ince':[3757,[["American Amber Ale / Red Ale",468],["American IPA",367],["American Brown Ale",300],["American Pale Ale",270],["Altbier / Düsseldorf Altbier",263],["American Barleywine",204]]],
-  'amber|hop|orta':[3798,[["American Amber Ale / Red Ale",568],["American IPA",370],["Strong Bitter / ESB",369],["American Pale Ale",272],["American Brown Ale",258],["Altbier / Düsseldorf Altbier",244]]],
-  'amber|hop|dolgun':[6365,[["American Amber Ale / Red Ale",1468],["American IPA",877],["American Pale Ale",552],["Strong Bitter / ESB",601],["American Brown Ale",337],["Irish Red Ale",397]]],
-  'amber|cokaci|ince':[3600,[["American IPA",988],["Imperial IPA / DIPA",607],["American Amber Ale / Red Ale",301],["American Pale Ale",241],["American Barleywine",216],["American Brown Ale",201]]],
-  'amber|cokaci|orta':[3034,[["American IPA",952],["Imperial IPA / DIPA",492],["American Amber Ale / Red Ale",313],["American Pale Ale",182],["American Barleywine",169],["American Brown Ale",139]]],
-  'amber|cokaci|dolgun':[5691,[["American IPA",2020],["American Amber Ale / Red Ale",756],["Imperial IPA / DIPA",741],["American Pale Ale",444],["American Brown Ale",212],["Strong Bitter / ESB",239]]],
-  'koyu|malt|ince':[2832,[["Belgian Dark Strong Ale",921],["Dubbel",407],["Scottish Ale / Wee Heavy",194],["Doppelbock",170],["American Brown Ale",138],["Winter Warmer / Old Ale",115]]],
-  'koyu|malt|orta':[1514,[["Scottish Ale / Wee Heavy",285],["Doppelbock",132],["Belgian Dark Strong Ale",114],["Baltic Porter",107],["American Brown Ale",60],["Winter Warmer / Old Ale",53]]],
-  'koyu|malt|dolgun':[2376,[["Dunkelweizen",346],["Scottish Ale / Wee Heavy",202],["Weizenbock",188],["American Brown Ale",163],["Oatmeal Stout",113],["English Mild / Dark Mild",123]]],
-  'koyu|dengeli|ince':[5155,[["American Brown Ale",656],["Belgian Dark Strong Ale",546],["Robust Porter",599],["Milk Stout / Sweet Stout",419],["Dubbel",273],["Brown Porter",293]]],
-  'koyu|dengeli|orta':[5128,[["American Brown Ale",714],["Robust Porter",880],["Schwarzbier",343],["Oatmeal Stout",280],["Brown Porter",348],["Baltic Porter",251]]],
-  'koyu|dengeli|dolgun':[7484,[["American Brown Ale",1251],["Oatmeal Stout",998],["Robust Porter",1088],["Brown Porter",529],["English Mild / Dark Mild",411],["Milk Stout / Sweet Stout",281]]],
-  'koyu|hop|ince':[3376,[["American Brown Ale",522],["Dry Irish Stout",474],["Robust Porter",498],["Milk Stout / Sweet Stout",210],["American Stout",196],["Brown Porter",174]]],
-  'koyu|hop|orta':[3283,[["Robust Porter",672],["American Brown Ale",421],["American IPA",216],["Dry Irish Stout",185],["American Stout",232],["Oatmeal Stout",152]]],
-  'koyu|hop|dolgun':[4890,[["American Brown Ale",789],["Robust Porter",803],["Oatmeal Stout",562],["American IPA",329],["American Stout",320],["Dry Irish Stout",201]]],
-  'koyu|cokaci|ince':[2187,[["American IPA",326],["American Brown Ale",260],["Dry Irish Stout",242],["Robust Porter",269],["American Stout",160],["Imperial IPA / DIPA",96]]],
-  'koyu|cokaci|orta':[2177,[["American IPA",584],["American Brown Ale",224],["Robust Porter",243],["Imperial IPA / DIPA",172],["Dry Irish Stout",105],["American Stout",126]]],
-  'koyu|cokaci|dolgun':[2964,[["American IPA",782],["American Brown Ale",323],["Imperial IPA / DIPA",212],["Robust Porter",230],["American Stout",172],["Oatmeal Stout",106]]],
-  'cokkoyu|malt|ince':[1209,[["Milk Stout / Sweet Stout",327],["Belgian Dark Strong Ale",199],["Imperial / Russian Imperial Stout",134],["American Stout",91],["Dubbel",52],["Robust Porter",52]]],
-  'cokkoyu|malt|orta':[950,[["Milk Stout / Sweet Stout",184],["Imperial / Russian Imperial Stout",195],["American Stout",115],["Oatmeal Stout",68],["Robust Porter",89],["Baltic Porter",57]]],
-  'cokkoyu|malt|dolgun':[1309,[["Oatmeal Stout",222],["Milk Stout / Sweet Stout",191],["Imperial / Russian Imperial Stout",189],["American Stout",151],["Robust Porter",133],["Baltic Porter",62]]],
-  'cokkoyu|dengeli|ince':[3261,[["Milk Stout / Sweet Stout",948],["Imperial / Russian Imperial Stout",740],["American Stout",330],["Robust Porter",296],["Belgian Dark Strong Ale",147],["Dry Irish Stout",126]]],
-  'cokkoyu|dengeli|orta':[3561,[["Imperial / Russian Imperial Stout",1073],["Milk Stout / Sweet Stout",505],["Robust Porter",500],["American Stout",449],["Oatmeal Stout",292],["Baltic Porter",108]]],
-  'cokkoyu|dengeli|dolgun':[5822,[["Oatmeal Stout",1458],["Imperial / Russian Imperial Stout",1096],["Milk Stout / Sweet Stout",728],["American Stout",708],["Robust Porter",662],["Baltic Porter",150]]],
-  'cokkoyu|hop|ince':[2864,[["Imperial / Russian Imperial Stout",878],["Dry Irish Stout",435],["Milk Stout / Sweet Stout",341],["American Stout",439],["Robust Porter",221],["Foreign Extra Stout",136]]],
-  'cokkoyu|hop|orta':[3120,[["Imperial / Russian Imperial Stout",1036],["American Stout",625],["Robust Porter",346],["Dry Irish Stout",208],["Milk Stout / Sweet Stout",177],["Oatmeal Stout",132]]],
-  'cokkoyu|hop|dolgun':[4684,[["Imperial / Russian Imperial Stout",1098],["American Stout",1036],["Oatmeal Stout",655],["Robust Porter",430],["Milk Stout / Sweet Stout",253],["Dry Irish Stout",226]]],
-  'cokkoyu|cokaci|ince':[1774,[["Imperial / Russian Imperial Stout",469],["American Stout",303],["Dry Irish Stout",219],["American IPA",151],["Robust Porter",150],["Milk Stout / Sweet Stout",107]]],
-  'cokkoyu|cokaci|orta':[1669,[["Imperial / Russian Imperial Stout",436],["American IPA",280],["American Stout",329],["Imperial IPA / DIPA",129],["Dry Irish Stout",75],["Robust Porter",100]]],
-  'cokkoyu|cokaci|dolgun':[2594,[["American IPA",514],["Imperial / Russian Imperial Stout",473],["American Stout",454],["Imperial IPA / DIPA",194],["Oatmeal Stout",172],["Robust Porter",168]]]
+  'acik|malt|ince':[6243,[["Blonde Ale / Cream Ale",1128],["Tripel",747],["American Lager / Light Lager",819],["Belgian Strong Golden Ale",537],["American Pale Ale",519],["Belgian Blonde Ale",509]]],
+  'acik|malt|orta':[2137,[["Blonde Ale / Cream Ale",565],["Saison / Farmhouse Ale",279],["American Pale Ale",169],["Belgian Blonde Ale",140],["American Lager / Light Lager",136],["Tripel",94]]],
+  'acik|malt|dolgun':[12187,[["Weizen / Weissbier",4555],["Witbier / Belgian White",2015],["American Wheat Beer",1463],["Berliner Weisse",1238],["Saison / Farmhouse Ale",432],["Blonde Ale / Cream Ale",399]]],
+  'acik|dengeli|ince':[13584,[["Blonde Ale / Cream Ale",2865],["Saison / Farmhouse Ale",1530],["American Pale Ale",1294],["Kölsch",1101],["Tripel",884],["German Pils",874]]],
+  'acik|dengeli|orta':[6868,[["Blonde Ale / Cream Ale",1590],["Saison / Farmhouse Ale",1434],["Kölsch",899],["American Pale Ale",892],["Belgian Blonde Ale",270],["German Pils",240]]],
+  'acik|dengeli|dolgun':[11971,[["American Wheat Beer",4149],["Saison / Farmhouse Ale",1592],["Witbier / Belgian White",1495],["Blonde Ale / Cream Ale",1081],["American Pale Ale",877],["Weizen / Weissbier",514]]],
+  'acik|hop|ince':[10585,[["American Pale Ale",2954],["German Pils",1954],["American IPA",1352],["Blonde Ale / Cream Ale",881],["Saison / Farmhouse Ale",622],["Kölsch",338]]],
+  'acik|hop|orta':[6355,[["American Pale Ale",2384],["American IPA",1228],["Blonde Ale / Cream Ale",482],["German Pils",473],["Saison / Farmhouse Ale",471],["Kölsch",237]]],
+  'acik|hop|dolgun':[7430,[["American Pale Ale",1979],["American IPA",1183],["American Wheat Beer",1482],["Saison / Farmhouse Ale",663],["Blonde Ale / Cream Ale",345],["Witbier / Belgian White",306]]],
+  'acik|cokaci|ince':[9795,[["American IPA",3754],["American Pale Ale",2617],["Imperial IPA / DIPA",806],["German Pils",648],["Blonde Ale / Cream Ale",314],["Saison / Farmhouse Ale",227]]],
+  'acik|cokaci|orta':[6434,[["American IPA",2998],["American Pale Ale",1655],["Imperial IPA / DIPA",720],["Blonde Ale / Cream Ale",162],["German Pils",149],["Saison / Farmhouse Ale",149]]],
+  'acik|cokaci|dolgun':[6775,[["American IPA",2741],["American Pale Ale",1757],["American Wheat Beer",652],["Saison / Farmhouse Ale",265],["Imperial IPA / DIPA",247],["Weizen / Weissbier",160]]],
+  'altin|malt|ince':[3009,[["Tripel",327],["Munich Märzen / Oktoberfest",259],["Belgian Blonde Ale",214],["Saison / Farmhouse Ale",197],["Dubbel",193],["American Pale Ale",181]]],
+  'altin|malt|orta':[1423,[["American Pale Ale",142],["Saison / Farmhouse Ale",134],["Munich Märzen / Oktoberfest",100],["American IPA",89],["Belgian Blonde Ale",77],["American Amber Ale / Red Ale",71]]],
+  'altin|malt|dolgun':[2853,[["Weizen / Weissbier",670],["American Wheat Beer",267],["American Pale Ale",174],["Weizenbock",169],["Saison / Farmhouse Ale",156],["American IPA",119]]],
+  'altin|dengeli|ince':[8500,[["Munich Märzen / Oktoberfest",1054],["American Pale Ale",1045],["Saison / Farmhouse Ale",864],["Belgian Blonde Ale",677],["Tripel",415],["American Amber Ale / Red Ale",409]]],
+  'altin|dengeli|orta':[5959,[["American Pale Ale",1093],["Saison / Farmhouse Ale",638],["Munich Märzen / Oktoberfest",515],["American Amber Ale / Red Ale",453],["Strong Bitter / ESB",450],["American IPA",330]]],
+  'altin|dengeli|dolgun':[7608,[["American Pale Ale",1444],["Saison / Farmhouse Ale",741],["American Wheat Beer",741],["American Amber Ale / Red Ale",538],["American IPA",444],["Strong Bitter / ESB",365]]],
+  'altin|hop|ince':[9497,[["American Pale Ale",2701],["American IPA",2191],["Strong Bitter / ESB",524],["Imperial IPA / DIPA",515],["American Amber Ale / Red Ale",422],["Saison / Farmhouse Ale",348]]],
+  'altin|hop|orta':[10622,[["American Pale Ale",3238],["American IPA",3062],["Strong Bitter / ESB",874],["Imperial IPA / DIPA",493],["American Amber Ale / Red Ale",397],["Best Bitter",395]]],
+  'altin|hop|dolgun':[12912,[["American Pale Ale",4260],["American IPA",3400],["Strong Bitter / ESB",878],["American Amber Ale / Red Ale",566],["Imperial IPA / DIPA",447],["English IPA",384]]],
+  'altin|cokaci|ince':[12688,[["American IPA",5695],["Imperial IPA / DIPA",2404],["American Pale Ale",2101],["English IPA",360],["Strong Bitter / ESB",349],["American Amber Ale / Red Ale",335]]],
+  'altin|cokaci|orta':[13464,[["American IPA",7062],["Imperial IPA / DIPA",2412],["American Pale Ale",2128],["English IPA",364],["Strong Bitter / ESB",292]]],
+  'altin|cokaci|dolgun':[16276,[["American IPA",8409],["American Pale Ale",3198],["Imperial IPA / DIPA",1849],["English IPA",469],["Strong Bitter / ESB",412],["American Amber Ale / Red Ale",336]]],
+  'amber|malt|ince':[3742,[["Dubbel",946],["Belgian Dark Strong Ale",582],["Doppelbock",285],["Scottish Ale / Wee Heavy",236],["Winter Warmer / Old Ale",155],["Bock",120]]],
+  'amber|malt|orta':[2030,[["Scottish Ale / Wee Heavy",286],["Irish Red Ale",192],["Dubbel",133],["Scottish Ale / 80 Shilling",133],["Doppelbock",105],["Flanders Red Ale",128]]],
+  'amber|malt|dolgun':[3434,[["Dunkelweizen",798],["Weizenbock",349],["Irish Red Ale",216],["Roggenbier / Rye Beer",244],["Scottish Ale / Wee Heavy",156],["American Amber Ale / Red Ale",150]]],
+  'amber|dengeli|ince':[5807,[["Irish Red Ale",506],["Dubbel",504],["American Amber Ale / Red Ale",456],["American Brown Ale",406],["Belgian Dark Strong Ale",348],["English Brown Ale",327]]],
+  'amber|dengeli|orta':[5466,[["Irish Red Ale",928],["American Amber Ale / Red Ale",521],["English Brown Ale",489],["American Brown Ale",402],["Scottish Ale / 80 Shilling",282],["English Mild / Dark Mild",260]]],
+  'amber|dengeli|dolgun':[7513,[["American Amber Ale / Red Ale",1290],["Irish Red Ale",1138],["English Mild / Dark Mild",494],["American Brown Ale",490],["English Brown Ale",479],["Scottish Ale / 80 Shilling",318]]],
+  'amber|hop|ince':[3838,[["American Amber Ale / Red Ale",468],["American IPA",367],["American Brown Ale",300],["American Pale Ale",270],["Altbier / Düsseldorf Altbier",263],["Strong Bitter / ESB",234]]],
+  'amber|hop|orta':[3877,[["American Amber Ale / Red Ale",568],["American IPA",370],["Strong Bitter / ESB",369],["American Pale Ale",272],["American Brown Ale",258],["Altbier / Düsseldorf Altbier",244]]],
+  'amber|hop|dolgun':[6499,[["American Amber Ale / Red Ale",1468],["American IPA",877],["Strong Bitter / ESB",601],["American Pale Ale",552],["Irish Red Ale",397],["American Brown Ale",337]]],
+  'amber|cokaci|ince':[3647,[["American IPA",988],["Imperial IPA / DIPA",607],["American Amber Ale / Red Ale",301],["American Pale Ale",241],["American Barleywine",216],["American Brown Ale",201]]],
+  'amber|cokaci|orta':[3068,[["American IPA",952],["Imperial IPA / DIPA",492],["American Amber Ale / Red Ale",313],["American Pale Ale",182],["American Barleywine",169],["American Brown Ale",139]]],
+  'amber|cokaci|dolgun':[5753,[["American IPA",2020],["American Amber Ale / Red Ale",756],["Imperial IPA / DIPA",741],["American Pale Ale",444],["Strong Bitter / ESB",239],["American Brown Ale",212]]],
+  'koyu|malt|ince':[2837,[["Belgian Dark Strong Ale",921],["Dubbel",407],["Scottish Ale / Wee Heavy",194],["Doppelbock",170],["American Brown Ale",138],["Winter Warmer / Old Ale",115]]],
+  'koyu|malt|orta':[1517,[["Scottish Ale / Wee Heavy",285],["Doppelbock",132],["Belgian Dark Strong Ale",114],["Baltic Porter",107],["Robust Porter",61],["American Brown Ale",60]]],
+  'koyu|malt|dolgun':[2383,[["Dunkelweizen",346],["Scottish Ale / Wee Heavy",202],["Weizenbock",188],["American Brown Ale",163],["English Mild / Dark Mild",123],["Oatmeal Stout",113]]],
+  'koyu|dengeli|ince':[5164,[["American Brown Ale",656],["Robust Porter",599],["Belgian Dark Strong Ale",546],["Milk Stout / Sweet Stout",419],["Brown Porter",293],["Dubbel",273]]],
+  'koyu|dengeli|orta':[5136,[["Robust Porter",880],["American Brown Ale",714],["Brown Porter",348],["Schwarzbier",343],["Oatmeal Stout",280],["Baltic Porter",251]]],
+  'koyu|dengeli|dolgun':[7494,[["American Brown Ale",1251],["Robust Porter",1088],["Oatmeal Stout",998],["Brown Porter",529],["English Mild / Dark Mild",411],["Milk Stout / Sweet Stout",281]]],
+  'koyu|hop|ince':[3385,[["American Brown Ale",522],["Robust Porter",498],["Dry Irish Stout",474],["Milk Stout / Sweet Stout",210],["American Stout",196],["Brown Porter",174]]],
+  'koyu|hop|orta':[3291,[["Robust Porter",672],["American Brown Ale",421],["American Stout",232],["American IPA",216],["Dry Irish Stout",185],["Brown Porter",171]]],
+  'koyu|hop|dolgun':[4901,[["Robust Porter",803],["American Brown Ale",789],["Oatmeal Stout",562],["American IPA",329],["American Stout",320],["Brown Porter",252]]],
+  'koyu|cokaci|ince':[2188,[["American IPA",326],["Robust Porter",269],["American Brown Ale",260],["Dry Irish Stout",242],["American Stout",160],["Imperial IPA / DIPA",96]]],
+  'koyu|cokaci|orta':[2181,[["American IPA",584],["Robust Porter",243],["American Brown Ale",224],["Imperial IPA / DIPA",172],["American Stout",126],["Dry Irish Stout",105]]],
+  'koyu|cokaci|dolgun':[2970,[["American IPA",782],["American Brown Ale",323],["Robust Porter",230],["Imperial IPA / DIPA",212],["American Stout",172],["Black IPA / Cascadian Dark Ale",106]]],
+  'cokkoyu|malt|ince':[1210,[["Milk Stout / Sweet Stout",327],["Belgian Dark Strong Ale",199],["Imperial / Russian Imperial Stout",134],["American Stout",91],["Dubbel",52],["Robust Porter",52]]],
+  'cokkoyu|malt|orta':[951,[["Imperial / Russian Imperial Stout",195],["Milk Stout / Sweet Stout",184],["American Stout",115],["Robust Porter",89],["Oatmeal Stout",68],["Baltic Porter",57]]],
+  'cokkoyu|malt|dolgun':[1313,[["Oatmeal Stout",222],["Milk Stout / Sweet Stout",191],["Imperial / Russian Imperial Stout",189],["American Stout",151],["Robust Porter",133],["Baltic Porter",62]]],
+  'cokkoyu|dengeli|ince':[3263,[["Milk Stout / Sweet Stout",948],["Imperial / Russian Imperial Stout",740],["American Stout",330],["Robust Porter",296],["Belgian Dark Strong Ale",147],["Dry Irish Stout",126]]],
+  'cokkoyu|dengeli|orta':[3563,[["Imperial / Russian Imperial Stout",1073],["Milk Stout / Sweet Stout",505],["Robust Porter",500],["American Stout",449],["Oatmeal Stout",292],["Foreign Extra Stout",142]]],
+  'cokkoyu|dengeli|dolgun':[5825,[["Oatmeal Stout",1458],["Imperial / Russian Imperial Stout",1096],["Milk Stout / Sweet Stout",728],["American Stout",708],["Robust Porter",662],["Foreign Extra Stout",168]]],
+  'cokkoyu|hop|ince':[2866,[["Imperial / Russian Imperial Stout",878],["American Stout",439],["Dry Irish Stout",435],["Milk Stout / Sweet Stout",341],["Robust Porter",221],["Foreign Extra Stout",136]]],
+  'cokkoyu|hop|orta':[3122,[["Imperial / Russian Imperial Stout",1036],["American Stout",625],["Robust Porter",346],["Dry Irish Stout",208],["Milk Stout / Sweet Stout",177],["Oatmeal Stout",132]]],
+  'cokkoyu|hop|dolgun':[4693,[["Imperial / Russian Imperial Stout",1098],["American Stout",1036],["Oatmeal Stout",655],["Robust Porter",430],["Milk Stout / Sweet Stout",253],["Dry Irish Stout",226]]],
+  'cokkoyu|cokaci|ince':[1775,[["Imperial / Russian Imperial Stout",469],["American Stout",303],["Dry Irish Stout",219],["American IPA",151],["Robust Porter",150],["Milk Stout / Sweet Stout",107]]],
+  'cokkoyu|cokaci|orta':[1671,[["Imperial / Russian Imperial Stout",436],["American Stout",329],["American IPA",280],["Imperial IPA / DIPA",129],["Robust Porter",100],["Dry Irish Stout",75]]],
+  'cokkoyu|cokaci|dolgun':[2601,[["American IPA",514],["Imperial / Russian Imperial Stout",473],["American Stout",454],["Imperial IPA / DIPA",194],["Oatmeal Stout",172],["Robust Porter",168]]]
 };
 
 window._AK_EKSEN = {
@@ -24536,7 +24542,7 @@ window._bmProfilStilKart = function(){
       sonuc = '<div style="margin-top:4px">'
         + '<div style="font-size:9.5px;color:var(--dim);margin-bottom:2px">Bu profilde korpusta <b>' + kova.toplam.toLocaleString('tr-TR') + '</b> reçete var — en yakın ' + kova.stiller.length + ' stil:</div>'
         + satirlar
-        + '<div style="font-size:9px;color:var(--dim);margin-top:6px;line-height:1.4">Sayılar 333.428 ev-üretimi reçetenin dağılımıdır — <b>kalite değerlendirmesi değil</b>, "kaç kişi böyle demlemiş" bilgisi. Gövde ekseni grist bileşiminden türetilir (dataset FG\'si güvenilmez). Öneri = başlangıç noktası; reçeteyi serbestçe değiştir.</div>'
+        + '<div style="font-size:9px;color:var(--dim);margin-top:6px;line-height:1.4">Sayılar 336.149 ev-üretimi reçetenin dağılımıdır — <b>kalite değerlendirmesi değil</b>, "kaç kişi böyle demlemiş" bilgisi. Gövde ekseni grist bileşiminden türetilir (dataset FG\'si güvenilmez). Öneri = başlangıç noktası; reçeteyi serbestçe değiştir.</div>'
         + '</div>';
     }
 

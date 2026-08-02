@@ -2733,6 +2733,61 @@ const CASELER = [
       __REG.ok('11L → 22L ölçekleme ~2×', kg22 > kg11 * 1.8 && kg22 < kg11 * 2.2, kg11.toFixed(2) + ' → ' + kg22.toFixed(2));
       return __REG.al();
     })
+  },
+
+  // ── SPRINT AM — _PROFIL_STIL YENİDEN ÜRETİMİ (AL'in 63 iskeletiyle) ──
+  {
+    kod: 'AM1-YENIDEN', ad: 'SPRINT AM: tablo AL\'in 63 iskeletiyle senkron — sıralama n×1.35 GÜNCEL iskelet setiyle tutarlı (AK-dönemi tabloda bozuktu); V3 kapsaması 10→12; şema korundu (60 kova, ≤6 öneri)',
+    calistir: (page) => page.evaluate(() => {
+      const T = window._PROFIL_STIL, K = window.STIL_ISKELET;
+      __REG.ok('60 kova + kova başına 1-6 öneri (MAX_ONERI şeması korundu)',
+        Object.keys(T).length === 60 && Object.values(T).every(v => v[1].length >= 1 && v[1].length <= 6));
+      // AM'in asıl kilidi: her kovada n×(iskelet?1.35:1) AZALAN. AK-dönemi tabloda
+      // bu bozuktu — V3 stilleri boost almamıştı (koyu|dengeli|dolgun'da Oatmeal 998
+      // boost'lu, Robust Porter 1088 boost'suz sıralanmıştı).
+      let bozukSira = [];
+      Object.keys(T).forEach(k => {
+        const L = T[k][1];
+        for (let i = 1; i < L.length; i++) {
+          const p = L[i - 1][1] * (K[L[i - 1][0]] ? 1.35 : 1), q = L[i][1] * (K[L[i][0]] ? 1.35 : 1);
+          if (q > p + 1e-9) bozukSira.push(k + '#' + i);
+        }
+      });
+      __REG.ok('her kovada sıralama n×1.35 (güncel iskelet seti) ile tutarlı', bozukSira.length === 0, bozukSira.slice(0, 4).join(' | ') || 'tutarlı');
+      const v3 = Object.keys(K).filter(a => K[a].kaynak === 'cikarim_v3');
+      const stiller = new Set(); Object.values(T).forEach(v => v[1].forEach(x => stiller.add(x[0])));
+      __REG.ok('V3 iskeletli stillerden ≥12 tabloda (AM öncesi 10 idi)', v3.filter(a => stiller.has(a)).length >= 12, v3.filter(a => stiller.has(a)).length + '/' + v3.length);
+      __REG.ok('Bock tabloya girdi (boost kanıtı)', stiller.has('Bock'));
+      __REG.ok('Black IPA tabloya girdi (boost kanıtı)', stiller.has('Black IPA / Cascadian Dark Ale'));
+      let oneri = 0, isk = 0, tam = 0;
+      Object.values(T).forEach(v => { let t = true; v[1].forEach(x => { oneri++; if (K[x[0]]) isk++; else t = false; }); if (t) tam++; });
+      __REG.ok('önerilerin ≥%96\'sı "📋 Doldur" (348/359 ölçüldü)', isk / oneri >= 0.96, isk + '/' + oneri);
+      __REG.ok('tam doldurulabilir kova ≥50 (AM öncesi 49)', tam >= 50, tam + '/60');
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AM2-COMMON', ad: 'SPRINT AM: common_beer katch-all DEĞİL — 2.721 kaydı kova toplamlarına sayılıyor; California Common hiçbir kovada top-6\'ya girmiyor (VERİ gerçeği, zorla sokulmadı) ama iskeleti dropdown+Doldur ile UÇTAN UCA çalışıyor',
+    calistir: (page) => page.evaluate(() => {
+      const T = window._PROFIL_STIL;
+      const ad = 'California Common / Steam Beer';
+      const src = Array.from(document.querySelectorAll('script')).map(s => s.textContent).join('\n');
+      const ak = src.slice(src.indexOf('SPRINT AK — PROFİL SEÇİCİ'), src.indexOf('SPRINT AJ — MASH SÜRECİ'));
+      __REG.ok('blok common_beer düzeltmesini + veri gerçeğini belgeliyor', ak.indexOf('common_beer') >= 0 && ak.indexOf('ZORLA SOKULMADI') >= 0);
+      __REG.ok('kova toplamları CC kayıtlarıyla büyüdü (altin|hop|dolgun 12554→12912)', T['altin|hop|dolgun'][0] === 12912, T['altin|hop|dolgun'][0]);
+      __REG.ok('CC iskeleti VAR (dropdown yolu erişilebilir)', !!STIL_ISKELET[ad] && STIL_ISKELET[ad].kaynak === 'cikarim_v3');
+      __REG.yeniKayit('AM2 Bira', {});
+      S.hacim = 11; S.verim = 61; S.maltlar = []; S.hoplar = []; S.mayaId = '';
+      S.stil = ad; window.__stilSecKaynak = 'dropdown';
+      bmStilIskeletDoldur();
+      __REG.ok('California Common malt dolduruyor', (S.maltlar || []).length > 0, (S.maltlar || []).length + ' malt');
+      __REG.ok('hop dolduruyor', (S.hoplar || []).length > 0, (S.hoplar || []).length + ' hop');
+      const my = MAYALAR.find(m => m && m.id === S.mayaId);
+      __REG.ok('maya lager (hibrit istisna, AL4 ile tutarlı)', !!my && my.tip === 'lager', S.mayaId);
+      const c = calc(), bj = BJCP[ad];
+      __REG.ok('OG BJCP aralığında', c.og >= bj.og[0] - 0.003 && c.og <= bj.og[1] + 0.003, c.og.toFixed(3) + ' ∈ [' + bj.og + ']');
+      return __REG.al();
+    })
   }
 ];
 
