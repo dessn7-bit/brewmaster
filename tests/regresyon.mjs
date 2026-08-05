@@ -2788,6 +2788,232 @@ const CASELER = [
       __REG.ok('OG BJCP aralığında', c.og >= bj.og[0] - 0.003 && c.og <= bj.og[1] + 0.003, c.og.toFixed(3) + ' ∈ [' + bj.og + ']');
       return __REG.al();
     })
+  },
+
+  // ── SPRINT AN — TOPLULUK DAĞILIMI (Reçete Doktoru 4. öneri sınıfı) ──
+  {
+    kod: 'AN1-DAGILIM', ad: 'SPRINT AN: topluluk dağılımı gözlemi — Dubbel\'de şeker yok → "3.705 reçetenin %75\'i şeker kullanıyor" (sayılar build-time tabloyla BİREBİR, uydurma yok); tablo n≥200 eşiğini taşıyor',
+    calistir: (page) => page.evaluate(() => {
+      const D = window._TOPLULUK_DAGILIM;
+      __REG.ok('tablo yüklü (68 stil)', !!D && Object.keys(D).length === 68, D && Object.keys(D).length);
+      __REG.ok('TÜM stiller n≥200 (spec eşiği)', Object.values(D).every(v => v[0] >= 200));
+      __REG.ok('tüm stiller BJCP otoritesinde', Object.keys(D).every(a => !!BJCP[a]));
+      __REG.ok('persentiller monoton (p10≤p25≤med≤p75≤p90)',
+        Object.values(D).every(v => Object.values(v[1]).every(x => x[1] <= x[2] && x[2] <= x[3] && x[3] <= x[4] && x[4] <= x[5])));
+      // Dubbel iskeletini doldur, sonra ŞEKERİ ÇIKAR → "yaygın ama sende yok" dalı
+      __REG.yeniKayit('AN1 Dubbel', {});
+      ekran = 'editor'; sekme = 'genel';
+      S.hacim = 11; S.verim = 61; S.stil = 'Dubbel';
+      bmStilIskeletDoldur();
+      const sekerIds = MALTLAR.filter(m => m && m.g === 'Şeker').map(m => m.id);
+      const oncekiSeker = (S.maltlar || []).filter(m => sekerIds.indexOf(m.id) >= 0).length;
+      __REG.ok('Dubbel iskeleti şeker İÇERİYORDU (testin ön koşulu)', oncekiSeker > 0, oncekiSeker + ' şeker kalemi');
+      S.maltlar = (S.maltlar || []).filter(m => sekerIds.indexOf(m.id) < 0);
+      render();
+      const dom = document.getElementById('ekran').innerHTML;
+      __REG.ok('topluluk bölümü basıldı', dom.indexOf('bm-topluluk') >= 0);
+      __REG.ok('Dubbel n=3.705 tabloda', D['Dubbel'][0] === 3705, D['Dubbel'][0]);
+      __REG.ok('şeker oranı tabloda %75', D['Dubbel'].su ? false : D['Dubbel'][1].su[0] === 75, D['Dubbel'][1].su[0]);
+      __REG.ok('DOM\'da gerçek sayı: "%75"', dom.indexOf('%75') >= 0);
+      __REG.ok('DOM\'da korpus n\'i şeffaf: "3.705"', dom.indexOf('3.705') >= 0);
+      __REG.ok('şeker gözlemi metinde', /şeker\/şeker malt/i.test(dom));
+      // Motor birim testi — DOM'dan bağımsız
+      const c = calc();
+      const f = window.__bmBuildFeaturesV12(window.__recipeV2 || {});
+      const gs = window._bmToplulukGozlem('Dubbel', f, { og: c.og, ibu: c.ibu, srm: parseFloat(c.srm), abv: c.abv }, BJCP['Dubbel']);
+      __REG.ok('gözlem üretildi (≤4 — gürültü kapısı)', gs.length >= 1 && gs.length <= 4, gs.length + ' gözlem');
+      const su = gs.find(g => g.k === 'su');
+      __REG.ok('şeker gözlemi "yaygın ama sende yok" dalında', !!su && su.tur === 'yok', su && su.tur);
+      __REG.ok('gözlem metni tabloyla tutarlı (%75 + medyan)', !!su && su.metin.indexOf('%75') >= 0 && su.metin.indexOf('8,6') >= 0, su && su.metin);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AN2-ESIK', ad: 'SPRINT AN: az örneklemli stilde SESSİZ — n<200 olan BJCP stilinde tek bir istatistik cümlesi bile kurulmaz (uydurma yok); 239 BJCP stilinin yalnız 68\'i tabloda',
+    calistir: (page) => page.evaluate(() => {
+      const D = window._TOPLULUK_DAGILIM;
+      const disarda = Object.keys(BJCP).filter(a => !D[a]);
+      __REG.ok('BJCP\'nin çoğu tablo DIŞINDA (eşik gerçekten uygulanıyor)', disarda.length >= 150, disarda.length + '/' + Object.keys(BJCP).length + ' stil tablosuz');
+      __REG.yeniKayit('AN2 Esik', {});
+      ekran = 'editor'; sekme = 'genel';
+      S.hacim = 11; S.verim = 61;
+      // Tabloda OLMAYAN ama iskeleti olan bir stil seç (grist gerçek kalsın)
+      const hedef = Object.keys(STIL_ISKELET).find(a => !D[a] && BJCP[a]);
+      __REG.ok('test için tablosuz+iskeletli stil bulundu', !!hedef, hedef);
+      S.stil = hedef; bmStilIskeletDoldur(); render();
+      const dom = document.getElementById('ekran').innerHTML;
+      __REG.ok('topluluk bölümü BASILMADI (sessiz)', dom.indexOf('bm-topluluk') < 0);
+      __REG.ok('"reçete" istatistik cümlesi de yok', dom.indexOf('📊 Topluluk') < 0);
+      const c = calc();
+      const f = window.__bmBuildFeaturesV12(window.__recipeV2 || {});
+      __REG.ok('motor da boş dönüyor', window._bmToplulukGozlem(hedef, f, { og: c.og, ibu: c.ibu, srm: parseFloat(c.srm), abv: c.abv }, BJCP[hedef]).length === 0);
+      __REG.ok('bölüm render\'ı da boş', window._bmToplulukBolum(hedef, BJCP[hedef], f, { og: c.og, ibu: c.ibu, srm: parseFloat(c.srm), abv: c.abv }, true) === '');
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AN3-MADALYA', ad: 'SPRINT AN: madalyalı örnekler ÖRNEK olarak sunuluyor — "kural değil" + "elenen reçeteler bu veride yok" çerçevesi + örneklem sayısı ŞEFFAF (gizlenmiyor)',
+    calistir: (page) => page.evaluate(() => {
+      const M = window._TOPLULUK_MADALYA;
+      __REG.ok('madalya tablosu yüklü (45 stil)', !!M && Object.keys(M).length === 45, M && Object.keys(M).length);
+      __REG.ok('toplam = altın+gümüş+bronz (sayım tutarlı)', Object.values(M).every(v => v[0][0] === v[0][1] + v[0][2] + v[0][3]));
+      __REG.ok('stil başına en çok 3 örnek', Object.values(M).every(v => v[1].length >= 1 && v[1].length <= 3));
+      __REG.ok('gösterilen ≤ mevcut (şişirme yok)', Object.values(M).every(v => v[1].length <= v[0][0]));
+      __REG.yeniKayit('AN3 Weizen', {});
+      ekran = 'editor'; sekme = 'genel';
+      S.hacim = 11; S.verim = 61; S.stil = 'Weizen / Weissbier';
+      bmStilIskeletDoldur(); render();
+      const dom = document.getElementById('ekran').innerHTML;
+      const el = document.querySelector('.bm-topluluk');
+      __REG.ok('topluluk bölümü var', !!el);
+      const t = el ? el.textContent : '';
+      __REG.ok('madalya başlığı + gerçek sayı (11 reçete)', t.indexOf('madalya almış 11 reçete') >= 0, t.slice(t.indexOf('madalya almış'), t.indexOf('madalya almış') + 60));
+      __REG.ok('altın/gümüş/bronz kırılımı şeffaf', /9 alt[ıi]n/.test(t) && /1 g[üu]m[üu][şs]/.test(t));
+      __REG.ok('ÖRNEK çerçevesi açık ("kural değil")', t.indexOf('kural değil') >= 0);
+      __REG.ok('KAYBEDEN YOK uyarısı (çıkarım yapılamaz)', t.indexOf('elenen') >= 0 && t.indexOf('çıkarılamaz') >= 0);
+      __REG.ok('örnek grist gösteriliyor', /wheat malt|Pilsner malt/i.test(t));
+      __REG.ok('n=1 olan stiller de gizlenmiyor', Object.values(M).some(v => v[0][0] === 1));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AN4-MADALYASIZ', ad: 'SPRINT AN: madalyası olmayan stilde madalya bölümü SESSİZ (uydurma yok) — dağılım gözlemi çalışmaya devam eder; 25/68 stil bu durumda',
+    calistir: (page) => page.evaluate(() => {
+      const D = window._TOPLULUK_DAGILIM, M = window._TOPLULUK_MADALYA;
+      const madalyasiz = Object.keys(D).filter(a => !M[a]);
+      __REG.ok('dağılımda olup madalyasız stil VAR (25 ölçüldü)', madalyasiz.length === 25, madalyasiz.length);
+      __REG.ok('Robust Porter madalyasız (test hedefi)', madalyasiz.indexOf('Robust Porter') >= 0);
+      __REG.yeniKayit('AN4 Porter', {});
+      ekran = 'editor'; sekme = 'genel';
+      S.hacim = 11; S.verim = 61; S.stil = 'Robust Porter';
+      bmStilIskeletDoldur();
+      // Kavrulmuş maltı çıkar → dağılım gözlemi TETİKLENSİN (topluluğun %95'i kullanıyor)
+      S.maltlar = (S.maltlar || []).filter(m => ['choc', 'roast', 'black', 'crf1', 'crf2', 'crf3'].indexOf(m.id) < 0);
+      render();
+      const el = document.querySelector('.bm-topluluk');
+      __REG.ok('topluluk bölümü VAR (dağılım çalışıyor)', !!el);
+      const t = el ? el.textContent : '';
+      __REG.ok('madalya bölümü YOK (sessiz)', t.indexOf('madalya almış') < 0);
+      __REG.ok('🏅 ikonu hiç basılmadı', t.indexOf('🏅') < 0);
+      __REG.ok('dağılım gözlemi yine de var', t.indexOf('Topluluk') >= 0 && /%\d/.test(t));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AN5-DIL', ad: 'SPRINT AN DİL DİSİPLİNİ (kritik): topluluk bölümünde KALİTE İDDİASI kuran tek kelime yok — "daha iyi/yapmalısın/hatalı/yanlış/olmalı" = 0. Veri bunu desteklemiyor (kaybeden örneklem yok); tipiklik ≠ iyilik',
+    calistir: (page) => page.evaluate(() => {
+      // YASAK: kalite iddiası veya emir kipi. Sapma bir HATA değil, bir SEÇİM olabilir.
+      const YASAK = ['daha iyi', 'daha kötü', 'yapmalısın', 'yapmalisin', 'yapmalı', 'hatalı', 'hatali',
+        'yanlış', 'yanlis', 'olmalı', 'olmali', 'gerekir', 'gereklidir', 'tavsiye', 'öneriyoruz',
+        'düzelt', 'duzelt', 'kötü', 'kotu', 'başarılı', 'basarili', 'kazanmak için', 'kazandıran',
+        'ideal', 'doğrusu', 'dogrusu', 'eksik'];
+      const bul = (metin, nerede) => {
+        const l = String(metin || '').toLocaleLowerCase('tr-TR');
+        return YASAK.filter(k => l.indexOf(k) >= 0).map(k => nerede + ':"' + k + '"');
+      };
+      let ihlal = [];
+      // 1) Statik kaynak: motor blokunun ÜRETTİĞİ metin şablonları (yorum satırları hariç)
+      const src = Array.from(document.querySelectorAll('script')).map(s => s.textContent).join('\n');
+      const bas = src.indexOf('window._TD_BOYUT = {');
+      const son = src.indexOf('// ═══ SPRINT AK');
+      __REG.ok('AN motor bloğu kaynakta bulundu', bas > 0 && son > bas);
+      const blok = src.slice(bas, son).split('\n').filter(l => !/^\s*\/\//.test(l)).join('\n');
+      ihlal = ihlal.concat(bul(blok, 'kaynak'));
+      // 2) Canlı DOM — üç ayrı reçete durumunda görünür metin
+      const senaryolar = [
+        ['Dubbel', ms => ms.filter(m => ['candy_amb', 'candy_clr', 'candy_drk', 'dex', 'sek'].indexOf(m.id) < 0)],
+        ['Weizen / Weissbier', ms => ms],
+        ['American IPA', ms => ms]
+      ];
+      senaryolar.forEach(([stil, don]) => {
+        __REG.yeniKayit('AN5 ' + stil, {});
+        ekran = 'editor'; sekme = 'genel';
+        S.hacim = 11; S.verim = 61; S.stil = stil;
+        if (STIL_ISKELET[stil]) bmStilIskeletDoldur();
+        S.maltlar = don(S.maltlar || []);
+        render();
+        const el = document.querySelector('.bm-topluluk');
+        if (el) ihlal = ihlal.concat(bul(el.textContent, stil));
+      });
+      __REG.ok('topluluk metninde YASAK kelime YOK (kalite iddiası kurulmuyor)', ihlal.length === 0, ihlal.slice(0, 6).join(' | ') || 'temiz');
+      // Nötr gözlem dilinin GERÇEKTEN kullanıldığı — negatif testin karşılığı
+      __REG.yeniKayit('AN5 poz', {});
+      ekran = 'editor'; sekme = 'genel';
+      S.hacim = 11; S.verim = 61; S.stil = 'Dubbel'; bmStilIskeletDoldur();
+      S.maltlar = (S.maltlar || []).filter(m => ['candy_amb'].indexOf(m.id) < 0);
+      render();
+      const el2 = document.querySelector('.bm-topluluk');
+      const t2 = el2 ? el2.textContent : '';
+      __REG.ok('"kullanıyor" (gözlem) dili kullanılıyor', t2.indexOf('kullanıyor') >= 0);
+      __REG.ok('BJCP standardı DEĞİL uyarısı var (otorite ayrımı)', t2.indexOf('BJCP standardı değil') >= 0);
+      __REG.ok('"bir seçim olabilir" çerçevesi var (sapma = hata değil)', t2.indexOf('seçim olabilir') >= 0);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AN6-DOKTOR', ad: 'SPRINT AN REGRESYON: Reçete Doktoru\'nun 27 kuralı + BJCP sapma çipleri AYNEN çalışıyor; topluluk bölümü görsel olarak AYRI ve ÇİP ÜRETMİYOR (bilgilendirici, preskriptif değil)',
+    calistir: (page) => page.evaluate(() => {
+      const src = Array.from(document.querySelectorAll('script')).map(s => s.textContent).join('\n');
+      const bas = src.indexOf('REÇETE DOKTORU v2');
+      const son = src.indexOf('UI temizlik 2026-04-24');
+      __REG.ok('Doktor bloğu bulundu', bas > 0 && son > bas);
+      const blok = src.slice(bas, son);
+      __REG.ok('27 öneri kuralı korundu', (blok.match(/oneriler\.push\(/g) || []).length === 27, (blok.match(/oneriler\.push\(/g) || []).length);
+      __REG.ok('BJCP sapma blokları duruyor (OG/FG/IBU/SRM)',
+        blok.indexOf('OG düşük:') > 0 && blok.indexOf('FG yüksek:') > 0 && blok.indexOf('IBU düşük:') > 0);
+      __REG.ok('tıklanabilir çip altyapısı bozulmadı', typeof window.bmDoctorChipClick === 'function' && typeof window.bmDoctorChipParse === 'function');
+      // BJCP sapması TETİKLE: OG'yi bilerek düşür → kırmızı kart + çip çıkmalı
+      __REG.yeniKayit('AN6 Doktor', {});
+      ekran = 'editor'; sekme = 'genel';
+      S.hacim = 11; S.verim = 61; S.stil = 'Dubbel'; bmStilIskeletDoldur();
+      S.maltlar = (S.maltlar || []).map(m => ({ ...m, kg: (m.kg || 0) * 0.45 }));   // OG bandın ALTINA
+      render();
+      const dom = document.getElementById('ekran').innerHTML;
+      __REG.ok('BJCP sapma önerisi hâlâ üretiliyor', dom.indexOf('OG düşük') >= 0);
+      __REG.ok('Doktor başlığı görünür', dom.indexOf('Reçete Doktoru') >= 0);
+      __REG.ok('BJCP tarafında tıklanabilir çip VAR', dom.indexOf('bm-doctor-cozum-chip') >= 0);
+      const el = document.querySelector('.bm-topluluk');
+      __REG.ok('topluluk bölümü AYRI kutuda', !!el);
+      __REG.ok('topluluk bölümünde ÇİP YOK (preskriptif değil)', !el || el.querySelectorAll('.bm-doctor-cozum-chip').length === 0);
+      __REG.ok('topluluk bölümünde tıklanabilir eleman YOK', !el || el.querySelectorAll('[onclick],button,[role=button]').length === 0);
+      __REG.ok('iki otorite ayrımı metinde açık', !!el && el.textContent.indexOf('yalnız bilgilendirir') >= 0);
+      // BJCP ÇAKIŞMA KAPISI: OG bandın dışında → topluluk OG hakkında SUSMALI
+      const c = calc();
+      const f = window.__bmBuildFeaturesV12(window.__recipeV2 || {});
+      const gs = window._bmToplulukGozlem('Dubbel', f, { og: c.og, ibu: c.ibu, srm: parseFloat(c.srm), abv: c.abv }, BJCP['Dubbel']);
+      __REG.ok('OG BJCP bandının dışında (ön koşul)', c.og < BJCP['Dubbel'].og[0], c.og.toFixed(3));
+      __REG.ok('topluluk OG boyutunda SUSUYOR (çift uyarı yok)', !gs.some(g => g.k === 'og'), gs.map(g => g.k).join(','));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AN7-GUVEN', ad: 'SPRINT AN GÜVEN KAPISI: stil manuel seçilmemiş ve motor güveni yetersizken topluluk bölümü SESSİZ — yanlış stile göre prevalans cümlesi kurulmaz (keşif ŞÜPHE 4: Kaan manuel stil 1/7 seçiyor)',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('AN7 Guven', {});
+      ekran = 'editor'; sekme = 'genel';
+      S.hacim = 11; S.verim = 61; S.stil = 'Dubbel'; bmStilIskeletDoldur();
+      S.maltlar = (S.maltlar || []).filter(m => m.id !== 'candy_amb');
+      render();
+      __REG.ok('manuel stil varken bölüm GÖRÜNÜR (ön koşul)', !!document.querySelector('.bm-topluluk'));
+      // Manuel stili KALDIR — motor tahminine düşer; test ortamında ML modeli yok
+      S.stil = ''; render();
+      const el = document.querySelector('.bm-topluluk');
+      __REG.ok('manuel stil YOKKEN + motor slug-hazır değilken SESSİZ', !el);
+      const slugHazir = !!(window.BM_V12 && window.BM_V12.isSlugReady && window.BM_V12.isSlugReady());
+      // SINIR — DÜRÜSTÇE: test ortamında ağ kesik → ML slug modeli yüklenmiyor, yani
+      // "güven ≥%50" kolu CANLI modelle koşturulamıyor. Kapının üç şartı statik
+      // kaynaktan kilitlenir: biri silinirse bu case kırılır (sessiz gevşeme olmaz).
+      const src = Array.from(document.querySelectorAll('script')).map(s => s.textContent).join('\n');
+      __REG.ok('güven eşiği kaynakta kilitli (normalized >= 50)', src.indexOf('__top3V12_engine[0].normalized >= 50') >= 0);
+      __REG.ok('slug-seviye şartı kilitli (cluster fallback YETMEZ)', src.indexOf('window.BM_V12.isSlugReady()') >= 0);
+      __REG.ok('motor top-1 = _stKey şartı kilitli (başka stile göre konuşmaz)', src.indexOf('_anBj === _stKey') >= 0);
+      __REG.ok('canlı ortamda slugReady=' + slugHazir + ' (test ortamı ağsız — bu kol statik kilitle korunuyor)', true);
+      // Malt kapısı: grist yokken karşılaştırma anlamsız → sessiz
+      S.stil = 'Dubbel'; S.maltlar = []; render();
+      __REG.ok('grist boşken SESSİZ (malt kapısı)', !document.querySelector('.bm-topluluk'));
+      __REG.ok('_receteEksikler malt eksikliğini görüyor', window._receteEksikler(S).indexOf('Malt') >= 0, window._receteEksikler(S).join(','));
+      return __REG.al();
+    })
   }
 ];
 
