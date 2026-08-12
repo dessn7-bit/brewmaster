@@ -3014,6 +3014,123 @@ const CASELER = [
       __REG.ok('_receteEksikler malt eksikliğini görüyor', window._receteEksikler(S).indexOf('Malt') >= 0, window._receteEksikler(S).join(','));
       return __REG.al();
     })
+  },
+
+  // ═══════════ SPRINT AO: biriken küçük işler (AO1-AO6) ═══════════
+  {
+    kod: 'AO1-SLUG', ad: 'SPRINT AO1: SLUG_TO_BJCP sarkan giriş = 0 (TÜM değerler BJCP anahtarı) — 3 eski sarkan slug gerçek ada çözülür; _NO_HOP davranışı değişmedi',
+    calistir: (page) => page.evaluate(() => {
+      const S2B = window.SLUG_TO_BJCP;
+      const sarkan = Object.keys(S2B).filter(k => !BJCP[S2B[k]]);
+      __REG.ok('INVARIANT: sarkan giriş 0 (önce 3 idi)', sarkan.length === 0, sarkan.join(','));
+      __REG.ok('american_wheat_ale → American Wheat Beer (AK EK_ESLEME ile aynı)', window.bmSlugToBjcp('american_wheat_ale', null) === 'American Wheat Beer');
+      __REG.ok('english_pale_ale → Strong Bitter / ESB (BJCP 2008 8C dengi)', window.bmSlugToBjcp('english_pale_ale', null) === 'Strong Bitter / ESB');
+      __REG.ok('specialty_saison → Saison / Farmhouse Ale (aile üstü, çoktan-bire)', window.bmSlugToBjcp('specialty_saison', null) === 'Saison / Farmhouse Ale');
+      __REG.ok('üç hedef adın ÜÇÜ de BJCP bant tablosunda (sessiz düşme kapandı)', !!BJCP['American Wheat Beer'] && !!BJCP['Strong Bitter / ESB'] && !!BJCP['Saison / Farmhouse Ale']);
+      // _NO_HOP_BJCP: gerçek stiller için davranış AYNI — Saison zaten sette (french_belgian_saison),
+      // hayalet 'Specialty Saison' girişi ise hiçbir rec.stil ile eşleşemezdi, düşmesi etkisiz.
+      __REG.ok('_NO_HOP_BJCP: Saison / Farmhouse Ale sette (davranış değişmedi)', !!window._NO_HOP_BJCP['Saison / Farmhouse Ale']);
+      __REG.ok('_NO_HOP_BJCP: hayalet Specialty Saison girişi kalktı', !window._NO_HOP_BJCP['Specialty Saison']);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AO2-SU', ad: 'SPRINT AO2/AO3: su kartı bölüşüm satırı İSİMLENDİRİLDİ (öneri + tam-hacim yolu), hesap DEĞİŞMEDİ (mash+sparge=toplam, XML INFUSE_AMOUNT formülü aynı); AO3 kararı kaynakta belgeli',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('AO2 Su', {});
+      S.hacim = 11; S.maltlar = [{ id: 'pilsner', kg: 4 }]; S.mayaId = 'us05'; S.hoplar = [];
+      ekran = 'editor'; sekme = 'hesap'; render();
+      const govde = document.body.textContent;
+      __REG.ok('yeni isimlendirme: "Klasik iki-kademe bölüşüm önerisi" görünür', govde.indexOf('Klasik iki-kademe bölüşüm önerisi') >= 0);
+      __REG.ok('all-in-one tam hacim yolu görünür (Bulldog gerçeği)', govde.indexOf("tümü mash'e girer") >= 0);
+      __REG.ok('eski belirsiz "Strike: ~" etiketi KALKTI', govde.indexOf('Strike: ~') < 0);
+      const m = govde.match(/Mash ~(\d+)L \+ Sparge ~(\d+)L/);
+      const t = govde.match(/TOPLAM SU([\d.]+)L/);
+      __REG.ok('bölüşüm sayıları toplamı = TOPLAM SU (hesap değişmedi; ±1 yuvarlama)', !!m && !!t && Math.abs((+m[1] + +m[2]) - +t[1]) <= 1, m && t ? m[1]+'+'+m[2]+' vs '+t[1] : 'match yok');
+      // XML INFUSE_AMOUNT regresyonu: formül max(hacim, grist×2.6) AYNEN (blob intercept)
+      let yak = null;
+      const oc = URL.createObjectURL; URL.createObjectURL = b => { yak = b; return 'blob:f'; };
+      const ok = HTMLAnchorElement.prototype.click; HTMLAnchorElement.prototype.click = function(){};
+      try { beerXmlExport(); } catch (e) {}
+      URL.createObjectURL = oc; HTMLAnchorElement.prototype.click = ok;
+      const src = Array.from(document.querySelectorAll('script')).map(s => s.textContent).join('\n');
+      __REG.ok('XML formülü kaynakta kilitli: Math.max(h, _gristKg*2.6)', src.indexOf('Math.max(h, _gristKg*2.6)') >= 0);
+      __REG.ok('AO3 kararı kaynakta belgeli (ayar EKLENMEDİ — display-only)', src.indexOf('AO3 KARARI') >= 0);
+      if (!yak) { __REG.ok('XML blob yakalandı', false); return __REG.al(); }
+      return yak.text().then(x => {
+        const im = x.match(/<INFUSE_AMOUNT>([\d.]+)<\/INFUSE_AMOUNT>/);
+        __REG.ok('INFUSE_AMOUNT = max(11, 4×2.6)=11.0 (değer regresyonu)', !!im && im[1] === '11.0', im && im[1]);
+        return __REG.al();
+      });
+    })
+  },
+  {
+    kod: 'AO4-PH', ad: 'SPRINT AO4: mash pH ölçüm girişi — opsiyonel (boş=bağlam yok), S\'te yaşar (kaydet/aç korunur), oda/mash sıcaklığı ayrımı (~0.3 birim KANITLI), bağlam bilgi tabanıyla tutarlı (tanin iddiası KURULMAZ)',
+    calistir: (page) => page.evaluate(() => {
+      const id = __REG.yeniKayit('AO4 Ph', {});
+      S.maltlar = [{ id: 'pilsner', kg: 4 }]; S.mayaId = 'us05'; S.hoplar = []; S.stil = '';
+      ekran = 'editor'; sekme = 'surec'; render();
+      __REG.ok('BOS şablonunda mashPh:null (yeni reçete boş başlar)', BOS.mashPh === null && BOS.mashPhSic === 'oda');
+      __REG.ok('pH girişi Mash Süreci bloğunda var', !!document.querySelector('input[aria-label="Ölçülen mash pH"]'));
+      const kartHtml = () => document.querySelector('.bm-mash-bilgi').innerHTML;
+      __REG.ok('BOŞKEN bağlam kutusu YOK (opsiyonellik)', kartHtml().indexOf('Ölçtüğün pH') < 0);
+      S.mashPh = 5.4; S.mashPhSic = 'oda'; render();
+      __REG.ok('oda 5.4 → bant içi mesajı', kartHtml().indexOf('bandındasın') >= 0);
+      S.mashPh = 5.2; S.mashPhSic = 'mash'; render();
+      const h1 = kartHtml();
+      __REG.ok('mash sıcaklığında 5.2 → oda karşılığı 5.50 (KANITLI ~0.3 kayma) + bant içi', h1.indexOf('5.50') >= 0 && h1.indexOf('bandındasın') >= 0 && h1.indexOf('sistematik kayma') >= 0);
+      S.mashPh = 5.9; S.mashPhSic = 'oda'; render();
+      const h2 = kartHtml();
+      __REG.ok('oda 5.9 → bant üstü; tanin İDDİASI kurulmaz (FOLKLOR koluna sadık: "doğrulanamadı")', h2.indexOf('Bandın üstünde') >= 0 && h2.indexOf('doğrulanamadı') >= 0);
+      // persist: kaydet → başka reçete aç → geri aç → değer korunur
+      S.mashPh = 5.4; S.mashPhSic = 'mash';
+      tarifeKaydet();
+      const baska = KR.find(k => k && k.id !== id);
+      if (baska) tarifAc(baska.id);
+      tarifAc(id);
+      __REG.ok('kaydet/aç turu: mashPh + ölçüm sıcaklığı KORUNUR (S alanı — Sprint T preboilOG deseni)', S.mashPh === 5.4 && S.mashPhSic === 'mash');
+      sekme = 'surec'; render(); // tarifAc sekmeyi 'genel'e döndürür — kart kontrolü için geri dön
+      S.mashPh = null; render();
+      __REG.ok('temizlenince bağlam kaybolur', kartHtml().indexOf('Ölçtüğün pH') < 0);
+      // KAPSAM SINIRI: pH TAHMİN motoru ayrı ve dokunulmadı — bağlam fonksiyonu yalnız ölçülen değeri okur
+      const src = Array.from(document.querySelectorAll('script')).map(s => s.textContent).join('\n');
+      __REG.ok('_bmMashPhBaglam pH tahmini YAPMAZ (kaynakta belgeli) + maltPH motoru duruyor', src.indexOf('pH TAHMİN ETMEZ') >= 0 && src.indexOf('maltPH') >= 0);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AO5-KART', ad: 'SPRINT AO5: mash bilgi kartı — üst şerit AÇIK, 4 bölüm + dipnot TEK "ℹ️ Mash bilgisi" çatısında (kapalı yükseklik düşer, içerik kaybolmaz)',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('AO5 Kart', {});
+      S.maltlar = [{ id: 'pilsner', kg: 4 }]; S.mayaId = 'us05'; S.hoplar = []; S.stil = ''; S.mashPh = null;
+      ekran = 'editor'; sekme = 'surec'; render();
+      const k = document.querySelector('.bm-mash-bilgi');
+      __REG.ok('kart render oldu', !!k);
+      const ana = k.querySelectorAll('details.bm-mash-bilgi-ana');
+      __REG.ok('TEK ana çatı details (ℹ️ Mash bilgisi)', ana.length === 1 && k.innerHTML.indexOf('Mash bilgisi') >= 0);
+      __REG.ok('4 iç bölüm ana çatının İÇİNDE', k.querySelectorAll('details.bm-mash-bilgi-ana details').length === 4);
+      __REG.ok('üst şerit (enzim bandı + FG puanı) çatının DIŞINDA açık', k.firstElementChild.tagName === 'DIV' && k.firstElementChild.textContent.indexOf('°C') >= 0);
+      __REG.ok('içerik kaybolmadı: 4 bölüm başlığı + kaynak dipnotu duruyor', ['ne değişir', 'Boşuna uğraşma', 'fark yaratanlar', 'step mash', 'Braukaiser'].every(t => k.innerHTML.indexOf(t) >= 0));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AO6-WEIZEN', ad: 'SPRINT AO6: Weizen/karanfil kutusu bağlam-farkında — açık stil buğday-ailesi değilse maya tek başına tetiklemez (buğday mayalı IPA vakası); stil boşsa maya ipucu korunur; gerçek Weizen/Witbier aynen',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('AO6 Weizen', {});
+      S.maltlar = [{ id: 'pilsner', kg: 4 }]; S.hoplar = [];
+      const dene = (stil, maya) => { S.stil = stil; S.stilTah = ''; S.mayaId = maya; return window._bmMashWeizenMi(); };
+      __REG.ok('stil BOŞ + buğday mayası (wb06) → kutu VAR (maya ipucu korundu)', dene('', 'wb06') === true);
+      __REG.ok('IPA stili + buğday mayası → kutu YOK (bağlam-dışı vaka KAPANDI)', dene('American IPA', 'wb06') === false);
+      __REG.ok('Weizen stili → kutu VAR (maya ne olursa olsun)', dene('Weizen / Weissbier', 'us05') === true);
+      __REG.ok('Witbier stili → kutu VAR (buğday ailesi genişletildi)', dene('Witbier / Belgian White', 'us05') === true);
+      __REG.ok('stil BOŞ + temiz maya → kutu YOK', dene('', 'us05') === false);
+      // render katmanı: IPA + wheat mayada kutunun DOM\'da da olmadığı (tek kaynak _bmMashWeizenMi)
+      S.stil = 'American IPA'; S.stilTah = ''; S.mayaId = 'wb06';
+      ekran = 'editor'; sekme = 'surec'; render();
+      __REG.ok('DOM kanıtı: IPA reçetesinde karanfil kutusu render edilmiyor', document.querySelector('.bm-mash-bilgi').innerHTML.indexOf('kol MASH DEĞİL') < 0);
+      return __REG.al();
+    })
   }
 ];
 

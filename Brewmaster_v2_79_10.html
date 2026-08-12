@@ -3837,7 +3837,7 @@ function beerXmlExport(){
   
   // Mash steps
   const mashSc=S.mashSc||66, mashDk=S.mashDk||60;
-  // Strike water = grist kg × 2.6 L/kg (Palmer); en az bira hacmi kadar
+  // INFUSE_AMOUNT (XML mash adımı suyu) = grist kg × 2.6 L/kg (Palmer); all-in-one tabanı: en az batch hacmi. AO2 NOT: hesap kartındaki %65/35 satırı TOPLAM suyun bölüşüm ÖNERİSİDİR — ayrı kavram, iki sayının farklı olması tutarsızlık değil.
   const _gristKg=(S.maltlar||[]).reduce((s,m)=>{if(!m||!m.id)return s;const x=MALTLAR.find(a=>a&&a.id===m.id);return (!x||x.g==="Şeker")?s:s+(m.kg||0);},0);
   const _strikeL=Math.max(h, _gristKg*2.6);
   const mashSteps=`    <MASH_STEP>
@@ -5948,7 +5948,7 @@ const SLUG_TO_BJCP = {
   'american_lager':               'American Lager / Light Lager',
   'american_pale_ale':            'American Pale Ale',
   'american_strong_pale_ale':     'American Strong Ale',
-  'american_wheat_ale':           'American Wheat Ale',
+  'american_wheat_ale':           'American Wheat Beer', // AO1: sarkan ad düzeltildi — BJCP tablosunda "American Wheat Ale" anahtarı yok (AK EK_ESLEME ile aynı hedef)
   'american_wheat_beer':          'American Wheat Beer',
   'baltic_porter':                'Baltic Porter',
   'bamberg_maerzen_rauchbier':    'Rauchbier / Bamberg Smoked',
@@ -5973,7 +5973,7 @@ const SLUG_TO_BJCP = {
   'dortmunder_european_export':   'Dortmunder Export',
   'double_ipa':                   'Imperial IPA / DIPA',
   'dunkles_bock':                 'Bock',
-  'english_pale_ale':             'English Pale Ale',
+  'english_pale_ale':             'Strong Bitter / ESB', // AO1: BJCP tablosunda "English Pale Ale" anahtarı yok; BJCP 2008 8C = Extra Special/Strong Bitter (English Pale Ale) — çoktan-bire (extra_special_bitter ile), bant birebir uyar
   'experimental_beer':            'Wood-Aged Beer / Barrel Aged',
   'extra_special_bitter':         'Strong Bitter / ESB',
   'french_belgian_saison':        'Saison / Farmhouse Ale',
@@ -6013,7 +6013,7 @@ const SLUG_TO_BJCP = {
   'south_german_weizenbock':      'Weizenbock',
   'special_bitter_or_best_bitter':'Best Bitter',
   'specialty_beer':               'Belgian Specialty Ale',
-  'specialty_saison':             'Specialty Saison',
+  'specialty_saison':             'Saison / Farmhouse Ale', // AO1: BJCP tablosunda "Specialty Saison" anahtarı yok — aile üstüne (french_belgian_saison ile çoktan-bire; _NO_HOP_BJCP değişmez, ad zaten sette)
   'stout':                        'American Stout',
   'sweet_stout':                  'Milk Stout / Sweet Stout',
   'vienna_lager':                 'Vienna Lager',
@@ -6735,7 +6735,7 @@ function suProfiliHesapla(mineraller, hacim, kaynakId){
 }
 
 // ═══ DURUM ══════════════════════════════════════════════════
-const BOS={biraAd:"",stil:"",verim:61,hacim:11,mashSc:67,mashDk:60,kaynatmaSure:60,mashAdimlar:[],maltlar:[],hoplar:[],mayaId:"",maya2Id:"",mayaYasAy:null,fgManuel:null,ogManuel:null,preboilOG:null,durum:"aktif",klasor:"",brewLog:[],primVol:2.4,primTemp:18,_primVolAuto:true,primYontem:"Dekstroz",notlar:"",suMineralleri:[],suKaynak:"distile",suHedef:"",katkilar:[],tadim:null,planBrewHatirlatmalar:[]};
+const BOS={biraAd:"",stil:"",verim:61,hacim:11,mashSc:67,mashDk:60,kaynatmaSure:60,mashAdimlar:[],maltlar:[],hoplar:[],mayaId:"",maya2Id:"",mayaYasAy:null,fgManuel:null,ogManuel:null,preboilOG:null,mashPh:null,mashPhSic:"oda",durum:"aktif",klasor:"",brewLog:[],primVol:2.4,primTemp:18,_primVolAuto:true,primYontem:"Dekstroz",notlar:"",suMineralleri:[],suKaynak:"distile",suHedef:"",katkilar:[],tadim:null,planBrewHatirlatmalar:[]};
 let S=JSON.parse(JSON.stringify(BOS)); // SPRINT J: shallow spread S.brewLog===BOS.brewLog referansını paylaşıyordu — adsız reçetede log push BOS şablonunu kirletirdi
   // ══════ v2.79.6 Turkish-character ID migration (backward compatibility) ══════
   // Eski kayıtlarda Turkish karakterli KATKI ID'leri vardı — ASCII'ye dönüştür
@@ -14952,6 +14952,14 @@ function rEditorSurec(){
       <input aria-label="Mash sıcaklığı (°C)" type="number" value="${_mSc}" min="60" max="76" step="0.5" onchange="S.mashSc=parseFloat(this.value);render()" style="width:60px;text-align:center;font-size:13px;font-weight:700;padding:3px 6px;border:1px solid var(--kahve-border);border-radius:6px;background:#fff;color:var(--kahve)">
       <span style="font-size:12px;color:var(--bakir);font-weight:600">°C</span>
     </div>
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;padding:7px 10px;background:var(--kahve-bg);border-radius:8px;border:1px solid var(--kahve-border);flex-wrap:wrap">
+      <span style="font-size:11px;color:var(--soluk);flex:1;min-width:110px">🧪 Ölçtüğün mash pH <span style="opacity:.65">(ops.)</span>:</span>
+      <input aria-label="Ölçülen mash pH" type="number" value="${S.mashPh!=null?S.mashPh:''}" min="4" max="7" step="0.05" placeholder="—" onchange="S.mashPh=this.value===''?null:parseFloat(this.value);render()" style="width:62px;text-align:center;font-size:13px;font-weight:700;padding:3px 6px;border:1px solid var(--kahve-border);border-radius:6px;background:#fff;color:var(--kahve)">
+      <span style="display:inline-flex;border:1px solid var(--kahve-border);border-radius:6px;overflow:hidden">
+        <button aria-label="pH oda sıcaklığında ölçüldü" onclick="S.mashPhSic='oda';render()" style="border:none;padding:3px 8px;font-size:10px;cursor:pointer;background:${(S.mashPhSic||'oda')==='oda'?'var(--altin)':'var(--card)'};color:${(S.mashPhSic||'oda')==='oda'?'#fff':'var(--soluk)'}">Oda sıc.</button>
+        <button aria-label="pH mash sıcaklığında ölçüldü" onclick="S.mashPhSic='mash';render()" style="border:none;padding:3px 8px;font-size:10px;cursor:pointer;background:${(S.mashPhSic||'oda')==='mash'?'var(--altin)':'var(--card)'};color:${(S.mashPhSic||'oda')==='mash'?'#fff':'var(--soluk)'}">Mash sıc.</button>
+      </span>
+    </div>
     ${(window._bmMashBilgiKart?window._bmMashBilgiKart(_mSc,_mAdimlar):'')}
     <div style="position:relative;padding-left:24px">
       <div style="position:absolute;left:9px;top:0;bottom:0;width:2px;background:var(--bor)"></div>
@@ -15540,11 +15548,15 @@ ${batchOlcekKartHtml()}
       </div>
     </div>`;
 
+  // AO2: aşağıdaki %65/35 satırı TOPLAM suyun klasik mash+sparge BÖLÜŞÜM ÖNERİSİDİR — yalnız gösterim, hiçbir hesabı
+  // beslemez (tek kullanım burası). BeerXML INFUSE_AMOUNT (grist×2.6, min hacim) AYRI kavram: XML mash adımı suyu.
+  // AO3 KARARI: %65/35 ayarlanabilir YAPILMADI — display-only değer için LS ayarı aşırı-ayar friksiyonu (AA2 boil-off'un
+  // aksine hesap zincirinde değil). Bulldog all-in-one tam-hacim yolu metinde açıkça gösterildi.
   var _kartSu = `<div class="kart" style="background:var(--accent-soft);border:1px solid var(--cizgi-arac);border-left:4px solid var(--mk)">
       <div style="font-size:14px;font-weight:700;color:var(--metin);margin-bottom:12px;font-family:var(--font-display)">💧 Su Hesabı (${hacim}L hedef)</div>
       ${[["Hedef şişeleme",hacim+"L"],["+ Trub & transfer","+0.9L"],["Post-boil hedef",pb+"L"],["+ Kaynatma kaybı ("+_kSure+"dk)","+"+kb+"L"],["Pre-boil hedef",pre+"L"],["+ Malt emilimi (0.7L/kg)","+"+em+"L"],["TOPLAM SU",mash+"L"]].map(([e,d],i)=>`<div class="hs" style="${i===6?"color:var(--bakir);font-size:14px;font-weight:700":""}"><span>${e}</span><span>${d}</span></div>`).join("")}
       <div style="margin-top:10px;padding:8px 12px;background:var(--bg-card);border:1px solid var(--cizgi-arac);border-radius:8px;font-size:11px;color:var(--metin-soluk)">
-        Strike: ~${Math.round(mash*0.65)}L · Sparge: ~${Math.round(mash*0.35)}L
+        Klasik iki-kademe bölüşüm önerisi: Mash ~${Math.round(mash*0.65)}L + Sparge ~${Math.round(mash*0.35)}L<br>All-in-one/BIAB tam hacim: ${mash}L'nin tümü mash'e girer
       </div>
     </div>`;
 
@@ -25237,11 +25249,45 @@ window._bmMashFGEtki = function(sc){
   return 0;
 };
 
+// AO4: Ölçülen mash pH bağlamı — _MASH_BILGI ile TUTARLI (ph_band OLCULDU · ph_olcumSicakligi KANITLI · ph_tanin FOLKLOR).
+// Band 5.2-5.6 ODA SICAKLIĞI referansıdır; mash sıcaklığındaki okuma ~0.3 birim DÜŞÜK gelir (deLange 0.2-0.35 ·
+// Brungard ~0.3 · BYO 0.2-0.4). Bu fonksiyon pH TAHMİN ETMEZ — yalnız kullanıcının ölçtüğü değeri banda oturtur.
+// Mash pH motoru (maltPH/maltBuf, _suMashPHHTML) AYRIDIR ve dokunulmamıştır.
+window._bmMashPhBaglam = function(ph, sic){
+  try{
+    ph = parseFloat(ph);
+    if(!isFinite(ph) || ph < 3 || ph > 9) return '';
+    var mashRef = (sic === 'mash');
+    var oda = mashRef ? +(ph + 0.3).toFixed(2) : ph;
+    var sicNot = mashRef
+      ? 'Mash sıcaklığında ölçtün → oda karşılığı ≈ ' + oda.toFixed(2) + ' (~0.3 birim sistematik kayma — KANITLI: deLange · Brungard · BYO). 5.2-5.6 hedef bandı ODA referansıdır.'
+      : 'Oda sıcaklığında ölçtün — 5.2-5.6 hedef bandı bu referans içindir. (Aynı mash, mash sıcaklığında ~0.3 düşük okur.)';
+    var durum, renk;
+    if(oda >= 5.2 && oda <= 5.6){
+      durum = '✓ 5.2-5.6 bandındasın' + (mashRef ? ' (oda karşılığıyla)' : '') + '. Bant içinde 0.1\'lik ince ayar peşinde koşma — karşılığı kör tadımda gösterilemedi.';
+      renk = 'var(--bakir)';
+    } else if(oda > 5.6){
+      durum = '▲ Bandın üstünde (oda referansı ' + oda.toFixed(2) + '). Bandın gerekçesi enzim aktivitesi; "yüksek pH tanin çeker" iddiası ise kör testte doğrulanamadı — buruk tat avlıyorsan pH\'ı tek suçlu sayma.';
+      renk = '#7A5020';
+    } else {
+      durum = '▼ Bandın altında (oda referansı ' + oda.toFixed(2) + '). Asidik malt / asit ekini azaltmayı düşün.';
+      renk = '#7A5020';
+    }
+    return '<div style="margin-top:6px;padding:6px 8px;background:var(--bg2);border:1px solid var(--bor);border-radius:6px">'
+      + '<div style="font-size:10px;font-weight:700;color:' + renk + ';margin-bottom:2px">🧪 Ölçtüğün pH ' + ph.toFixed(2) + (mashRef ? ' (mash sıcaklığında)' : ' (oda sıcaklığında)') + '</div>'
+      + '<div style="font-size:10px;color:var(--metin);line-height:1.45">' + durum + '</div>'
+      + '<div style="font-size:9px;color:var(--dim);margin-top:2px">' + sicNot + '</div>'
+    + '</div>';
+  }catch(_e){ return ''; }
+};
+
 // Weizen bağlamı: POF+ buğday mayası veya Weizen adı → karanfil yönlendirmesi anlamlı
 window._bmMashWeizenMi = function(){
   try{
     var st = String((typeof S!=='undefined' && S ? (S.stil || S.stilTah || '') : '')).toLowerCase();
-    if(/weizen|weiss|weiße|hefe/.test(st)) return true;
+    if(/weizen|weiss|weiße|hefe|witbier|roggen/.test(st)) return true;
+    var stManuel = String((typeof S!=='undefined' && S && S.stil) ? S.stil : '').toLowerCase();
+    if(stManuel) return false; // AO6: MANUEL seçilmiş stil buğday-ailesi DEĞİL → maya tek başına tetiklemez (buğday mayalı IPA vakası). stilTah (motor tahmini) BASTIRMAZ — render her koşumda stilTah yazar, tahmin gürültüsü stil-seçilmemiş gerçek Weizen'in kutusunu kapatmasın (AJ2 sözleşmesi: stil boşsa maya ipucu korunur).
     if(typeof S!=='undefined' && S && S.mayaId && typeof MAYALAR!=='undefined'){
       var m = MAYALAR.find(function(x){ return x && x.id === S.mayaId; });
       if(m && String(m.tip||'') === 'wheat') return true;
@@ -25323,9 +25369,17 @@ window._bmMashBilgiKart = function(mSc, mAdimlar){
     var det4 = det('🧭 Süre · pH · su oranı · step mash', 'kalan',
       ['sure_kisa','ph_band','oran_algi','step_ferulik','step_proteinRest','step_betaGlukan']);
 
-    return '<div class="bm-mash-bilgi" style="margin-top:4px">' + ust + weizen + det1 + det2 + det3 + det4
-      + '<div style="font-size:9px;color:var(--dim);margin-top:6px;line-height:1.4">Kaynak: Brülosophy exBEERiment kör üçgen testleri, Kai Troester (Braukaiser) ve Briggs ölçümleri. Etiketler adversaryal denetimden geçti. Kör tadımda anlamsız çıkan sonuç "fark yok" kanıtı değildir — o panel gücünde gösterilemediğini söyler.</div>'
-    + '</div>';
+    // AO4: ölçülen pH bağlamı — üst şeridin hemen altında, HER ZAMAN görünür (katlanır bölüme gömülmez)
+    var phB = '';
+    try{ if(typeof S!=='undefined' && S && S.mashPh!=null && window._bmMashPhBaglam) phB = window._bmMashPhBaglam(S.mashPh, S.mashPhSic||'oda'); }catch(_p){}
+    // AO5: dört katlanır bölüm + kaynak dipnotu TEK 'ℹ️ Mash bilgisi' çatısı altında — kapalı kart yüksekliği düşer,
+    // içerik kaybolmaz (üst şerit + pH bağlamı + weizen kutusu AÇIK kalır).
+    var dip = '<div style="font-size:9px;color:var(--dim);margin-top:6px;line-height:1.4">Kaynak: Brülosophy exBEERiment kör üçgen testleri, Kai Troester (Braukaiser) ve Briggs ölçümleri. Etiketler adversaryal denetimden geçti. Kör tadımda anlamsız çıkan sonuç "fark yok" kanıtı değildir — o panel gücünde gösterilemediğini söyler.</div>';
+    var icDetay = '<details class="bm-mash-bilgi-det bm-mash-bilgi-ana" style="margin-top:6px">'
+      + '<summary style="cursor:pointer;font-size:11px;font-weight:700;color:var(--kahve);padding:5px 8px;background:var(--bg2);border:1px solid var(--bor);border-radius:6px;list-style:none">ℹ️ Mash bilgisi <span style="font-weight:400;color:var(--dim);font-size:10px">— 4 bölüm · kanıt etiketli</span></summary>'
+      + '<div style="padding:2px 0 0">' + det1 + det2 + det3 + det4 + dip + '</div>'
+    + '</details>';
+    return '<div class="bm-mash-bilgi" style="margin-top:4px">' + ust + phB + weizen + icDetay + '</div>';
   }catch(_e){ return ''; }
 };
 

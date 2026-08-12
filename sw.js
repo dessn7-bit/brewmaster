@@ -690,7 +690,7 @@
 // (45 stil, 539 AHA madalyasindan 122 ornek). Runtime'da korpus YUKLENMEZ.
 // Dil disiplini: tipiklik != iyilik — kalite iddiasi YOK (havuzda kaybeden yok).
 // HTML degisti -> KURAL 12.3 CACHE_VERSION bump v131-399 -> v131-400.
-const CACHE_VERSION = 'bm-cache-v131-400';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
+const CACHE_VERSION = 'bm-cache-v131-401';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
 const ASSET_CACHE   = 'bm-assets-v1';        // font + ikon + manifest — KALICI, bump'ta silinmez
 const MODEL_CACHE   = 'bm-models-v1';        // workers.dev + jsdelivr — SHA'li/immutable URL, KALICI
 
