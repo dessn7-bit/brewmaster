@@ -690,7 +690,10 @@
 // (45 stil, 539 AHA madalyasindan 122 ornek). Runtime'da korpus YUKLENMEZ.
 // Dil disiplini: tipiklik != iyilik — kalite iddiasi YOK (havuzda kaybeden yok).
 // HTML degisti -> KURAL 12.3 CACHE_VERSION bump v131-399 -> v131-400.
-const CACHE_VERSION = 'bm-cache-v131-401';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
+// Sprint AQ1 (2026-08-15): kayip-veri ailesi — tadim/not KALICI kayit (tarifeKaydet yolu),
+// calc hatasi ring+sahte-ozet engeli, _draftKrAyniMi BOS-otomatik-normalize, import LS+IDB aynasi.
+// HTML degisti -> KURAL 12.3 CACHE_VERSION bump v131-401 -> v131-402.
+const CACHE_VERSION = 'bm-cache-v131-402';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
 const ASSET_CACHE   = 'bm-assets-v1';        // font + ikon + manifest — KALICI, bump'ta silinmez
 const MODEL_CACHE   = 'bm-models-v1';        // workers.dev + jsdelivr — SHA'li/immutable URL, KALICI
 

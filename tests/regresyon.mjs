@@ -3131,6 +3131,177 @@ const CASELER = [
       __REG.ok('DOM kanıtı: IPA reçetesinde karanfil kutusu render edilmiyor', document.querySelector('.bm-mash-bilgi').innerHTML.indexOf('kol MASH DEĞİL') < 0);
       return __REG.al();
     })
+  },
+
+  // ── SPRINT AQ1: kayıp-veri ailesi (AP hata avı #1/#3/#4/#6) ──
+  {
+    kod: 'AQ1-TADIM', ad: 'TADIM KALICI (AP K2-AKIS-1 KRİTİK): oturum kaydet → reçeteyi KAPAT + YENİDEN AÇ → tadım DURUYOR (eski bug: yalnız taslağa yazıp tarifAc\'ta siliniyordu, ✓ sahteydi)',
+    calistir: (page) => page.evaluate(() => {
+      const id = __REG.yeniKayit('AQ1 Tadım Bira', { mayaId: 'us05' });
+      S.brewLog = [{ tip: 'siseleme', tarih: '2026-08-01', id: 's1', ts: 1 }];
+      S.tadim = null;
+      tadimSet('aroma', 8); tadimSet('genel', 7);
+      tadimOturumKaydet();
+      const kr = KR.find(x => x && x.id === id);
+      __REG.ok('KR kaydında oturum KALICI (taslak değil)', kr && kr.tadim && Array.isArray(kr.tadim.oturumlar) && kr.tadim.oturumlar.length === 1, 'oturum=' + (kr && kr.tadim && kr.tadim.oturumlar ? kr.tadim.oturumlar.length : 'yok'));
+      const ls = JSON.parse(localStorage.getItem('bm_v6') || '[]').find(x => x && x.id === id);
+      __REG.ok('localStorage bm_v6 içinde oturum var (reload-kalıcı)', ls && ls.tadim && ls.tadim.oturumlar.length === 1);
+      // AP runtime repro'sunun tersi: KAPAT + YENİDEN AÇ (tarifAc clearDraft çağırır — eski kayıp yolu)
+      ekran = 'liste'; render();
+      tarifAc(id);
+      __REG.ok('KAPAT-AÇ TURU: tadım DURUYOR (oturum + puan birebir)', S.tadim && S.tadim.oturumlar.length === 1 && S.tadim.oturumlar[0].aroma === 8 && S.tadim.oturumlar[0].toplam === 15);
+      __REG.ok('şişeleme brewLog girişi de korundu (G birleşim bozulmadı)', (S.brewLog || []).some(x => x && x.tip === 'siseleme'));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AQ1-TADIM-ESKI', ad: 'MEVCUT TADIM VERİSİ KAYBOLMAZ: KR\'de eski oturum varken yeni oturum kaydet → 2 oturum, eski alanlar birebir',
+    calistir: (page) => page.evaluate(() => {
+      const id = __REG.yeniKayit('AQ1 Eski Tadım', { tadim: { aroma: 0, gorunum: 0, tat: 0, agizH: 0, genel: 0, offList: {}, tadimNot: '', oturumlar: [{ tarih: '2026-07-01', aroma: 7, gorunum: 2, tat: 14, agizH: 3, genel: 6, toplam: 32, offList: {}, puanKaynak: 'detay' }] } });
+      __REG.ok('açılışta eski oturum S\'te', S.tadim && S.tadim.oturumlar.length === 1);
+      tadimSet('genel', 8);
+      tadimOturumKaydet();
+      const kr = KR.find(x => x && x.id === id);
+      __REG.ok('yeni oturum eklendi, ESKİSİ KAYBOLMADI (2 oturum)', kr && kr.tadim && kr.tadim.oturumlar.length === 2, 'oturum=' + (kr && kr.tadim ? kr.tadim.oturumlar.length : 'yok'));
+      __REG.ok('eski oturum alanları birebir (toplam 32, tarih korundu)', kr.tadim.oturumlar[0].toplam === 32 && kr.tadim.oturumlar[0].tarih === '2026-07-01');
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AQ1-NOT', ad: 'NOT KALICI (AP K2-AKIS-2): "Notu Kaydet" KR\'ye yazar + kapat-aç turu; adsız reçetede sahte kalıcılık YOK',
+    calistir: (page) => page.evaluate(() => {
+      const id = __REG.yeniKayit('AQ1 Not Bira');
+      sekme = 'not'; render();
+      const el = document.getElementById('notText');
+      __REG.ok('notText alanı render edildi', !!el);
+      if (el) { el.value = 'AQ1 kalıcı not kanıtı'; }
+      notu_kaydet();
+      const kr = KR.find(x => x && x.id === id);
+      __REG.ok('KR kaydında not KALICI', kr && kr.notlar === 'AQ1 kalıcı not kanıtı', 'notlar=' + (kr && kr.notlar));
+      ekran = 'liste'; render(); tarifAc(id);
+      __REG.ok('KAPAT-AÇ TURU: not duruyor', S.notlar === 'AQ1 kalıcı not kanıtı');
+      // adsız reçete: KALICI olamaz → KR kirletilmez (sahte ✓ yerine dürüst uyarı yolu)
+      const krSayi = KR.length;
+      yeniTarif(); sekme = 'not'; render();
+      const el2 = document.getElementById('notText');
+      if (el2) { el2.value = 'adsız not'; notu_kaydet(); }
+      __REG.ok('adsız: KR\'ye YAZILMADI (yeni kayıt açılmadı, sahte kalıcılık yok)', KR.length === krSayi && !KR.some(x => x && x.notlar === 'adsız not'));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AQ1-CALC', ad: 'CALC HATASI YUTULMAZ (AP K1-SESSIZ-1): sahte 1.000/0.00 özet YAZILMAZ (son geçerli korunur), ring\'e düşer, reçete metni yine kaydedilir; yeni reçetede özet null',
+    calistir: (page) => page.evaluate(() => {
+      const id = __REG.yeniKayit('AQ1 Calc Bira');
+      S.maltlar = [{ id: 'pilsner', kg: 4 }];
+      tarifeKaydet();
+      const kr = KR.find(x => x && x.id === id);
+      const eskiOg = kr.ozet && kr.ozet.og;
+      __REG.ok('ön koşul: geçerli özet oluştu (og>1.000)', !!eskiOg && parseFloat(eskiOg) > 1.0, 'og=' + eskiOg);
+      // calc'ı KASITLI patlat (AP senaryosu)
+      const _oc = window.calc; window.calc = function () { throw new Error('AQ1-SENTETIK-CALC'); };
+      bmHataLogSil();
+      S.notlar = 'AQ1 calc-hatası sırasında metin';
+      const don = tarifeKaydet();
+      const kr2 = KR.find(x => x && x.id === id);
+      __REG.ok('SAHTE ÖZET YAZILMADI: og son geçerli değerde kaldı (1.000 DEĞİL)', kr2.ozet && kr2.ozet.og === eskiOg, 'og=' + (kr2.ozet && kr2.ozet.og));
+      __REG.ok('reçete METNİ yine kaydedildi + kayıt akışı kırılmadı (dönüş=true)', kr2.notlar === 'AQ1 calc-hatası sırasında metin' && don === true);
+      const ring = bmHataLogOku();
+      __REG.ok('hata RING\'e düştü (Sprint O günlüğünde görünür)', ring.length >= 1 && ring.some(h => h.tip === 'calc' && /AQ1-SENTETIK-CALC/.test(h.mesaj)), JSON.stringify(ring.map(h => h.tip + ':' + h.mesaj)).slice(0, 140));
+      const toastDom = (document.getElementById('bm-toast-container') || {}).innerHTML || '';
+      __REG.ok('KULLANICI BİLGİLENDİRİLDİ: toast "hesap hatası" diyor (sahte "Kaydedildi ✓" DEĞİL)', toastDom.indexOf('hesap hatası') >= 0, toastDom.slice(0, 120));
+      // yeni reçete + bozuk calc → özet NULL (sahte üretim YASAK); render'sız kur (bozuk calc'la render'a girilmez)
+      S = JSON.parse(JSON.stringify(BOS)); _editId = null; S.biraAd = 'AQ1 CalcYeni';
+      tarifeKaydet();
+      const kr3 = KR.find(x => x && x.biraAd === 'AQ1 CalcYeni');
+      __REG.ok('yeni reçete + calc bozuk → özet NULL (1.000/0.00 üretilmedi)', !!kr3 && kr3.ozet === null, 'ozet=' + JSON.stringify(kr3 && kr3.ozet));
+      window.calc = _oc; bmHataLogSil();
+      ekran = 'liste'; render();
+      __REG.ok('özet-null reçeteyle liste render ÇÖKMEDİ', (document.getElementById('ekran').innerHTML || '').indexOf('AQ1 CalcYeni') >= 0);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AQ1-BOS-NORM', ad: 'BOS\'A ALAN EKLEME DRAFT-KIYASINI KIRMAZ (AP K2-AKIS-3, KALICI KURAL): eski kayıt (mashPh alansız) SALT AÇMAK ghost draft üretmez; SENTETİK gelecek-alan da kırmaz (otomatik normalize, elle liste değil); gerçek fark drafta yazılır',
+    calistir: (page) => page.evaluate(() => {
+      const id = __REG.yeniKayit('AQ1 Ghost Bira');
+      // AO-öncesi kayıt simülasyonu: KR kaydından mashPh/mashPhSic alanlarını düşür
+      const kr = KR.find(x => x && x.id === id);
+      delete kr.mashPh; delete kr.mashPhSic; _origKy(KR);
+      localStorage.removeItem('bm_draft_v1');
+      tarifAc(id); // SALT AÇ — değişiklik yok
+      saveDraft();
+      __REG.ok('SALT AÇMAK ghost draft üretmez (mashPh alansız eski kayıt)', localStorage.getItem('bm_draft_v1') === null, 'draft=' + (localStorage.getItem('bm_draft_v1') || 'null').slice(0, 40));
+      // GELECEK SPRINT SİMÜLASYONU: BOS'a sentetik yeni alan ekle → kıyas KIRILMAMALI
+      BOS.__aq1YeniAlan = 'varsayilan';
+      S.__aq1YeniAlan = 'varsayilan'; // tarifAc {...BOS,...d} etkisi
+      saveDraft();
+      __REG.ok('SENTETİK gelecek-alan kıyası KIRMAZ (otomatik BOS-normalize kanıtı)', localStorage.getItem('bm_draft_v1') === null);
+      // KARŞI-TEST (Sprint N davranışı): gerçek içerik farkı drafta YAZILIR
+      S.hacim = (parseFloat(S.hacim) || 10) + 1;
+      saveDraft();
+      const d = JSON.parse(localStorage.getItem('bm_draft_v1') || 'null');
+      __REG.ok('KARŞI-TEST: gerçek fark → draft YAZILIR (editId doğru)', !!d && d.editId === id);
+      // sentetik alanda gerçek fark da yakalanır
+      S.hacim = S.hacim - 1; S.__aq1YeniAlan = 'degisti';
+      saveDraft();
+      __REG.ok('sentetik alanda GERÇEK fark da yakalanır (normalize farkları maskelemez)', !!localStorage.getItem('bm_draft_v1'));
+      delete BOS.__aq1YeniAlan; localStorage.removeItem('bm_draft_v1');
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AQ1-IMPORT-IDB', ad: 'IMPORT KALICI (AP K1-VERI-1): içe aktarım LS + IDB aynasına BİRLİKTE yazar; LS boşalırsa (eviction) kurtarma BAYAT değil İTHAL veriyi getirir',
+    calistir: async (page) => {
+      // 0) BAYAT IDB ön-durumu (AP runtime senaryosu): import öncesi IDB'de eski bm_v6
+      await page.evaluate(() => new Promise((coz) => {
+        window._bmIDB.put('bm_v6', JSON.stringify([{ id: 'bayat1', biraAd: 'BAYAT ESKI', maltlar: [], hoplar: [], brewLog: [] }]));
+        const kontrol = () => window._bmIDB.get('bm_v6', v => { if (v && v.indexOf('bayat1') >= 0) coz(true); else setTimeout(kontrol, 50); });
+        kontrol();
+      }));
+      // 1) import: sentetik yedek (confirm'ler runner'da auto-accept).
+      // dubbel_2024 DAHİL: uygulama örnek Dubbel'i bm_v6'da yoksa açılışta kendisi ekler (Adim 137-F IIFE)
+      // — gerçek yedeklerde de dubbel bulunur; dahil etmek testi o tasarım davranışından bağımsız kılar.
+      await page.evaluate(() => {
+        const yedek = { meta: { exportTs: 1750000000000 }, data: {
+          bm_v6: JSON.stringify([
+            { id: 'aqimp1', biraAd: 'AQ1 Import Bira', tarih: '1.8.2026', guncelleme: 1, ozet: null, maltlar: [], hoplar: [], brewLog: [] },
+            { id: 'dubbel_2024', biraAd: 'Dark Belgian Dubbel', tarih: '13.04.2026', guncelleme: 0, ozet: null, maltlar: [], hoplar: [], brewLog: [] }
+          ]),
+          bm_ferm_sicaklik: '23'
+        } };
+        const f = new File([JSON.stringify(yedek)], 'yedek.json', { type: 'application/json' });
+        const dt = new DataTransfer(); dt.items.add(f);
+        const inp = document.createElement('input'); inp.type = 'file'; inp.files = dt.files;
+        window.bmVeriImport(inp);
+      });
+      await page.waitForFunction(() => (localStorage.getItem('bm_v6') || '').indexOf('aqimp1') >= 0, { timeout: 10000 });
+      // import kendi reload'unu 1200ms'de tetikler
+      await page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 20000 }).catch(() => {});
+      await page.waitForFunction(() => typeof render === 'function' && Array.isArray(KR), { timeout: 30000 });
+      const c1 = await page.evaluate(() => new Promise((coz) => {
+        const out = [];
+        out.push({ ad: 'reload sonrası KR = ithal set (aqimp1+dubbel, fixture temizlendi)', ok: Array.isArray(KR) && KR.length === 2 && KR.some(r => r && r.id === 'aqimp1') && KR.some(r => r && r.id === 'dubbel_2024'), detay: 'KR=' + KR.length + ' idler=' + KR.map(r => r && r.id).join(',') });
+        window._bmIDB.get('bm_v6', v => {
+          out.push({ ad: 'IDB aynası İTHAL bm_v6 (bayat DEĞİL — put kanıtı)', ok: typeof v === 'string' && v.indexOf('aqimp1') >= 0 && v.indexOf('bayat1') < 0, detay: (v || 'null').slice(0, 60) });
+          coz(out);
+        });
+      }));
+      // 2) LS eviction simülasyonu: yalnız bm_v6 düşür (__bm_reg_seed kalır → yeniden-seed olmaz) + reload
+      await page.evaluate(() => localStorage.removeItem('bm_v6'));
+      await page.reload({ waitUntil: 'domcontentloaded', timeout: 45000 });
+      await page.waitForFunction(() => typeof render === 'function' && Array.isArray(KR), { timeout: 30000 });
+      // kurtarma ASYNC (IDB get kuyruğu) + Dubbel IIFE önce KR'ye örnek basabilir → İTHAL reçetenin gelmesini bekle
+      let kurtarildi = true;
+      await page.waitForFunction(() => Array.isArray(KR) && KR.some(r => r && r.id === 'aqimp1'), { timeout: 10000 }).catch(() => { kurtarildi = false; });
+      const c2 = await page.evaluate((k) => {
+        const out = [];
+        out.push({ ad: 'EVICTION SONRASI: kurtarma İTHAL veriyi getirdi (bayat import\'u GERİ ALMADI)', ok: k && Array.isArray(KR) && KR.some(r => r && r.id === 'aqimp1') && !KR.some(r => r && r.id === 'bayat1'), detay: 'KR=' + (Array.isArray(KR) ? KR.map(r => r && r.id).join(',') : '?') });
+        out.push({ ad: 'LS bm_v6 kurtarmayla geri yazıldı (ithal içerik)', ok: (localStorage.getItem('bm_v6') || '').indexOf('aqimp1') >= 0 && (localStorage.getItem('bm_v6') || '').indexOf('bayat1') < 0 });
+        return out;
+      }, kurtarildi);
+      return c1.concat(c2);
+    }
   }
 ];
 
