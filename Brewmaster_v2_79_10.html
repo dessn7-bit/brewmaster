@@ -928,7 +928,14 @@ function kayit(tip, mesaj, kaynak, stack){
 window.bmHataLogOku = oku;
 window.bmHataLogSil = function(){ try{ localStorage.removeItem(KEY); }catch(_e){} };
 /* AQ1-2: yakalanan (caught) hatalar da ring'e düşebilsin — boş catch köreltmesine son */
-window.bmHataKaydet = function(tip, err, kaynak){ try{ var m=(err&&err.message)?err.message:String(err); kayit(tip||'caught', m, kaynak||'', (err&&err.stack)||''); }catch(_e){} };
+window.bmHataKaydet = function(tip, err, kaynak){ try{
+  var m=(err&&err.message)?err.message:String(err);
+  /* AQ3: gürültü kontrolü — aynı tip+kaynak 60sn içinde tekrar gelirse yeni satır AÇMAZ, son eşleşen kaydın
+     n/ts'i artar (sık tetiklenen catch ring'i doldurup GERÇEK hatayı ezemez; kayit() ardışık-dedup'ının üstünde 2. kat) */
+  var a=oku(), now=Date.now(), i;
+  for(i=a.length-1;i>=0;i--){ if(a[i]&&a[i].tip===(tip||'caught')&&a[i].kaynak===kes(kaynak||'',200)&&(now-(a[i].ts||0))<60000){ a[i].n=(a[i].n||1)+1; a[i].ts=now; try{localStorage.setItem(KEY,JSON.stringify(a));}catch(_w){} return; } }
+  kayit(tip||'caught', m, kaynak||'', (err&&err.stack)||'');
+}catch(_e){} };
 window.onerror = function(msg, src, line, col, err){
   kayit('error', msg, (src ? src+':'+(line||0)+':'+(col||0) : ''), err && err.stack);
   /* return yok — hata konsola normal akışıyla düşmeye devam eder */
@@ -4919,7 +4926,7 @@ window._bmSicaklikLogla = function(){
     try{ if(window._stuckFermSync) _stuckFermSync(); }catch(_ss){}
     if(typeof flash==='function') flash('📖 '+v+'°C günlüğe kaydedildi','ok');
     if(typeof render==='function') render();
-  }catch(e){ try{console.warn('_bmSicaklikLogla',e);}catch(_){} }
+  }catch(e){ try{console.warn('_bmSicaklikLogla',e);}catch(_){} if(window.bmHataKaydet)bmHataKaydet('persist',e,'_bmSicaklikLogla'); }
 };
 function bmHasatList(){try{var a=JSON.parse(localStorage.getItem('bm_maya_hasat')||'[]');return Array.isArray(a)?a:[];}catch(e){return [];}}
 function bmHasatSave(a){try{localStorage.setItem('bm_maya_hasat',JSON.stringify(a));}catch(e){}}
@@ -6935,7 +6942,7 @@ function restoreDraft(){
   var _s=JSON.parse(JSON.stringify({...BOS,...d.s})); // SPRINT J: BOS referans-tipli alan paylaşımı kır (derin kopya)
   if(_kr&&_kr.durum&&_s.durum!==_kr.durum){_s.durum=_kr.durum;}
   if(_kr) _krOtoriterUygula(_s,_kr); // SPRINT G K1: draft bayat olabilir — donmuş alanlar KR'den (brewLog birleşim)
-  S=_s;_editId=d.editId||null;
+  window.__stilSecKaynak=null;/*AQ3-2 Z-bayrak reset*/S=_s;_editId=d.editId||null;
   sekme='genel';ekran='editor';
   window._pendingDraft=null;clearDraft();render();
 }
@@ -7683,7 +7690,7 @@ window._brewSnapshotYaz = function(s, rid, opts){
               }
             }
           }
-        }catch(_pbe){}
+        }catch(_pbe){if(window.bmHataKaydet)bmHataKaydet('persist',_pbe,'_brewSnapshotYaz/preboilKR');}
         return null;
       }
     }
@@ -7946,7 +7953,7 @@ window.bmProfilAnaliz = function(){
         ortVerim: vL.length?Math.round(ort(vL)*10)/10:null,
         stiller: stiller };
     }
-  }catch(e){ try{console.warn('bmProfilAnaliz',e);}catch(_){} }
+  }catch(e){ try{console.warn('bmProfilAnaliz',e);}catch(_){} if(window.bmHataKaydet)bmHataKaydet('ogrenme',e,'bmProfilAnaliz'); }
   return out;
 };
 
@@ -8053,9 +8060,9 @@ window.bmSonucDuzelt = function(rid){
     son.duzeltmeTs = Date.now();
     r.guncelleme = Date.now();
     // Açık editör buffer'ı da aynala — sonraki Kaydet eski sonucu geri getirmesin
-    try{ if(typeof S!=='undefined' && S && typeof _editId!=='undefined' && String(_editId)===String(rid)) S.brewSonuc = JSON.parse(JSON.stringify(son)); }catch(_se){}
+    try{ if(typeof S!=='undefined' && S && typeof _editId!=='undefined' && String(_editId)===String(rid)) S.brewSonuc = JSON.parse(JSON.stringify(son)); }catch(_se){if(window.bmHataKaydet)bmHataKaydet('persist',_se,'bmSonucDuzelt/S-ayna');}
     // SPRINT J: LS draft'ı da aynala — düzeltme sonrası draft-restore eski sonucu geri getirmesin (yalnız BU reçetenin draft'ı varsa)
-    try{ var _dr=localStorage.getItem(SK_DRAFT); if(_dr){ var _dp=JSON.parse(_dr); if(_dp && _dp.s && String(_dp.editId)===String(rid)){ _dp.s.brewSonuc=JSON.parse(JSON.stringify(son)); _dp.ts=Date.now(); localStorage.setItem(SK_DRAFT, JSON.stringify(_dp)); } } }catch(_dre){}
+    try{ var _dr=localStorage.getItem(SK_DRAFT); if(_dr){ var _dp=JSON.parse(_dr); if(_dp && _dp.s && String(_dp.editId)===String(rid)){ _dp.s.brewSonuc=JSON.parse(JSON.stringify(son)); _dp.ts=Date.now(); localStorage.setItem(SK_DRAFT, JSON.stringify(_dp)); } } }catch(_dre){if(window.bmHataKaydet)bmHataKaydet('persist',_dre,'bmSonucDuzelt/draft-ayna');}
     if(typeof ky==='function') ky(KR);
     if(typeof flash==='function') flash('✏️ Donmuş ölçümler güncellendi (OG '+_f3(son.ogG)+' / FG '+_f3(son.fgG)+')','ok');
     if(typeof render==='function') render();
@@ -8456,7 +8463,7 @@ let KR=yl();
         try {
           var parsed = JSON.parse(val);
           if(Array.isArray(parsed) && parsed.length > 0){
-            try { localStorage.setItem(SK, val); } catch(e){}
+            try { localStorage.setItem(SK, val); } catch(e){if(window.bmHataKaydet)bmHataKaydet('kurtarma',e,'_kurtarmaKontrol/KR-LS');}
             KR = parsed;
             if(typeof flash === 'function'){
               setTimeout(function(){ flash('⚠️ Yedekten '+parsed.length+' reçete kurtarıldı','ok'); }, 800);
@@ -8475,7 +8482,7 @@ let KR=yl();
         try {
           var parsed = JSON.parse(val);
           if(Array.isArray(parsed) && parsed.length > 0){
-            try { localStorage.setItem(SK_STOK, val); } catch(e){}
+            try { localStorage.setItem(SK_STOK, val); } catch(e){if(window.bmHataKaydet)bmHataKaydet('kurtarma',e,'_kurtarmaKontrol/STOK-LS');}
             STOK = parsed;
             if(typeof flash === 'function'){
               setTimeout(function(){ flash('⚠️ Yedekten '+parsed.length+' stok kalemi kurtarıldı','ok'); }, 1600);
@@ -8735,7 +8742,7 @@ function tarifeKaydet(){
       const _lc=S.brewLog?S.brewLog.length:0;
       if(_calcOk){flash("Kaydedildi ✓"+((_lc>0)?" ("+_lc+" kayıt)":""));}else{flash("Kaydedildi — ⚠️ hesap hatası, özet güncellenemedi (son geçerli özet korundu)","hata");} // AQ1-2: sahte onay yasak
       // Sprint C (K2): kayıt başarılı → bulut sync push (tarifKlonla L8215 emsali; debounce pencere korunur)
-      try{if(typeof _bmDirty!=='undefined')_bmDirty=true;if(typeof _syncGonderDebounced==='function')_syncGonderDebounced();}catch(_se){}
+      try{if(typeof _bmDirty!=='undefined')_bmDirty=true;if(typeof _syncGonderDebounced==='function')_syncGonderDebounced();}catch(_se){if(window.bmHataKaydet)bmHataKaydet('sync',_se,'tarifeKaydet/sync-push');}
       return true; // AQ1-1: kalıcı kayıt KANITI — tadım/not persist çağrıları bunu bekler
     } else {
       flash("⚠️ Kayıt hatası — localStorage kontrol edin","hata");return false;
@@ -8744,7 +8751,7 @@ function tarifeKaydet(){
     flash("⚠️ Kayıt hatası: "+(_ke&&_ke.message||_ke),"hata");return false;
   }
 }
-function tarifAc(id){const t=KR.find(k=>k&&k.id===id);if(!t)return;clearDraft();_editId=t.id;const{id:_,tarih,ozet,...d}=t;S=JSON.parse(JSON.stringify({...BOS,...d}));sekme="genel";ekran="editor";render();}
+function tarifAc(id){const t=KR.find(k=>k&&k.id===id);if(!t)return;window.__stilSecKaynak=null;/*AQ3-2 Z-bayrak reset*/clearDraft();_editId=t.id;const{id:_,tarih,ozet,...d}=t;S=JSON.parse(JSON.stringify({...BOS,...d}));sekme="genel";ekran="editor";render();}
 // Adim 132-B: Klonla — deep clone + yeni id + " (kopya)" + Planlananlar (durum=aktif) + editöre yönlendir.
 // Not: User spec'inde durum='planlananlar' yaziyordu; gerçek internal value 'aktif' (sat ~10770'te
 // statTanim id='aktif' et='Planlananlar'). 'planlananlar' kullansak rec hiçbir sekmede görünmez.
@@ -8825,14 +8832,14 @@ window._krSilOku = _krSilOku; window._krSilEkle = _krSilEkle; window._krSilSupur
 function tarifSil(id){
   if(typeof _editId!=='undefined'&&_editId&&_editId!==id) _commitOpenRecipe(); // silinen ≠ açık reçete ise açık edits'i koru
   KR=KR.filter(k=>k.id!==id);
-  try{ _krSilEkle(id); }catch(_tsw){} // SPRINT S: silme tombstone — diğer cihazlarda diriliş engellenir (ky→sync push KRSil taşır)
+  try{ _krSilEkle(id); }catch(_tsw){if(window.bmHataKaydet)bmHataKaydet('persist',_tsw,'tarifSil/tombstone');} // SPRINT S: silme tombstone — diğer cihazlarda diriliş engellenir (ky→sync push KRSil taşır)
   // AQ2-4 (AP K1Y-1): silinen reçetenin taslağı da gitsin — draft'tan aynı id'yle dirilme + tombstone düşmesi biter
   try{var _dd=loadDraft();if(_dd&&_dd.editId===id)clearDraft();}catch(_dcl){}
   try{if(window._pendingDraft&&window._pendingDraft.editId===id)window._pendingDraft=null;}catch(_dpd){}
   ky(KR);
   silOnay=null;
   // v2.78.94 H11 — Reçete silinince alarmları da anında temizle (orphan bekleme yok)
-  try { if(typeof window._alarmTemizle === 'function') window._alarmTemizle(id); } catch(e){}
+  try { if(typeof window._alarmTemizle === 'function') window._alarmTemizle(id); } catch(e){if(window.bmHataKaydet)bmHataKaydet('persist',e,'tarifSil/alarmTemizle');}
   // Sprint D (D5): reçeteye özgü mode anahtarı yetim kalmasın
   try { localStorage.removeItem('bm_recete_mode_'+id); } catch(e){}
   // Aktif düzenlenen reçeteyse _editId'yi de null yap
@@ -11955,7 +11962,7 @@ window.bmToast = function(msg, tip){
   return t;
 };
 function flash(msg,tip){ try { window.bmToast(msg, tip); } catch(_){} }
-function yeniTarif(){S=JSON.parse(JSON.stringify(BOS));_editId=null;sekme="genel";ekran="editor";render();}
+function yeniTarif(){window.__stilSecKaynak=null;/*AQ3-2 Z-bayrak reset*/S=JSON.parse(JSON.stringify(BOS));_editId=null;sekme="genel";ekran="editor";render();}
 function setSekme(s){
   const notEl=document.getElementById("notText");
   if(notEl)S.notlar=notEl.value;
@@ -21657,8 +21664,8 @@ window._bdPitchOGCommit=function(){
   }
   S.brewLog.sort(function(a,b){return String(a.tarih||'').localeCompare(String(b.tarih||''));});
   S.ogManuel=d.kayit; // Sprint I I4 backfill simetrisi (logEkle 'og_olcum' ile aynı)
-  try{if(window._brewSonucTamamla)_brewSonucTamamla(S,typeof _editId!=='undefined'?_editId:null);}catch(e){}
-  try{if(S.biraAd&&S.biraAd.trim()&&typeof tarifeKaydet==='function')tarifeKaydet();else if(typeof ky==='function')ky(KR);}catch(e){} // Sprint R köprü persist kalıbı
+  try{if(window._brewSonucTamamla)_brewSonucTamamla(S,typeof _editId!=='undefined'?_editId:null);}catch(e){if(window.bmHataKaydet)bmHataKaydet('persist',e,'_bdPitchOGCommit/sonucTamamla');}
+  try{if(S.biraAd&&S.biraAd.trim()&&typeof tarifeKaydet==='function')tarifeKaydet();else if(typeof ky==='function')ky(KR);}catch(e){if(window.bmHataKaydet)bmHataKaydet('persist',e,'_bdPitchOGCommit/kayit');} // Sprint R köprü persist kalıbı
   try{if(window._stuckFermSync)_stuckFermSync();}catch(e){}
   o.ogSon={ham:raw,c:(d.duzeltildi?o.ogC:null),kayit:d.kayit};
   brewdayRender();
@@ -22111,7 +22118,7 @@ window.brewdayBaslat=async function(){
     ts:Date.now()
   });
   // Profil P1: demleme anı tahmin dondurma (üzerine-yazma korumalı, KR+ky mevcut yol)
-  try{ if(window._brewSnapshotYaz) _brewSnapshotYaz(S, (typeof _editId!=='undefined'?_editId:null)); }catch(_bs){}
+  try{ if(window._brewSnapshotYaz) _brewSnapshotYaz(S, (typeof _editId!=='undefined'?_editId:null)); }catch(_bs){if(window.bmHataKaydet)bmHataKaydet('persist',_bs,'brewdayBaslat/snapshot');}
   // İlk event'i render ve başlat
   brewdayRender();
   flash('🔥 Brewday başladı','ok');
@@ -23124,7 +23131,7 @@ window.brewdayBitir=function(){
       hedef.brewLog.sort(function(x, y){ return String(x.tarih || '').localeCompare(String(y.tarih || '')); });
       // logEkle ile AYNI yan-etki zinciri (tek-nokta yardımcılar):
       if (es.tip === 'pitching') {
-        try{ if (window._brewSnapshotYaz) _brewSnapshotYaz(hedef, rid, { preboilAktar: true }); }catch(_b1){}
+        try{ if (window._brewSnapshotYaz) _brewSnapshotYaz(hedef, rid, { preboilAktar: true }); }catch(_b1){if(window.bmHataKaydet)bmHataKaydet('kopru',_b1,'alarmKoprusu/pitching-snapshot');}
         try{
           if ((hedef.durum || 'aktif') === 'aktif') {
             hedef.durum = 'yapimda';
@@ -23132,14 +23139,14 @@ window.brewdayBitir=function(){
             if (kr2) kr2.durum = 'yapimda';
             if (typeof listeSekme !== 'undefined') listeSekme = 'yapimda';
           }
-        }catch(_b2){}
+        }catch(_b2){if(window.bmHataKaydet)bmHataKaydet('kopru',_b2,'alarmKoprusu/durum');}
       }
-      if (es.tip === 'siseleme') { try{ if (window._brewSonucYaz) _brewSonucYaz(hedef, rid); }catch(_b3){} }
+      if (es.tip === 'siseleme') { try{ if (window._brewSonucYaz) _brewSonucYaz(hedef, rid); }catch(_b3){if(window.bmHataKaydet)bmHataKaydet('kopru',_b3,'alarmKoprusu/siseleme-sonuc');} }
       if (acik && hedef.biraAd && hedef.biraAd.trim() && typeof tarifeKaydet === 'function') tarifeKaydet();
       else if (typeof ky === 'function') ky(KR);
       try{ if (window._stuckFermSync) _stuckFermSync(); }catch(_b4){}
       if (typeof flash === 'function') flash('📖 Günlüğe eklendi: ' + es.tip + (deger ? ' (' + deger + 'L)' : ''), 'ok');
-    }catch(_e){ try{ console.warn('[alarm→log köprüsü]', _e); }catch(_c){} }
+    }catch(_e){ try{ console.warn('[alarm→log köprüsü]', _e); }catch(_c){} if(window.bmHataKaydet)bmHataKaydet('kopru',_e,'alarmKoprusu'); }
   };
 
   window._alarmAksiyon = function(receteId, gun, islem){
@@ -25803,7 +25810,7 @@ window.bmOffOgren = function(kod){
     window._bmOffOgrenYaz(arr);
     if(typeof flash==='function') flash('✓ '+g.offAd+' profiline eklendi ('+(maya?maya.ad:S.mayaId)+')','ok');
     if(typeof bmOffTeshis==='function') bmOffTeshis(kod);   // modalı tazele (geri-al düğmesi çıksın)
-  }catch(e){ try{console.warn('bmOffOgren',e);}catch(_){} }
+  }catch(e){ try{console.warn('bmOffOgren',e);}catch(_){} if(window.bmHataKaydet)bmHataKaydet('ogrenme',e,'bmOffOgren'); }
 };
 window.bmOffOgrenSil = function(kod){
   try{
@@ -25930,7 +25937,7 @@ window._bmStilSinyalYaz = function(rid, ogNow){
     for(j=0;j<arr.length;j++){ if(arr[j]&&arr[j].rid===g.rid){ ix=j; break; } }
     if(ix>=0) arr[ix]=g; else arr.push(g); // rid-dedup: son-yazan-kazanır (aynı reçete çoğalmaz, güncellenir)
     window._bmStilOgrenYaz(arr);
-  }catch(e){ try{console.warn('_bmStilSinyalYaz',e);}catch(_){} }
+  }catch(e){ try{console.warn('_bmStilSinyalYaz',e);}catch(_){} if(window.bmHataKaydet)bmHataKaydet('ogrenme',e,'_bmStilSinyalYaz'); }
 };
 // Tanı kartı satırı — motorun İLK gerçek-kullanım isabet ölçümü (önceki tüm benchmark'lar GT dataset'iydi).
 // Kapsam-dışı AYRI sayılır: motorun tahmin edemeyeceği stil "yanıldı" istatistiğini kirletmez.
@@ -26084,11 +26091,11 @@ function logEkle(){
     const _tip2=(_eskiTip.indexOf('brewday_')===0 ? _eskiTip : (tipEl.value||_eskiTip)), _deg2=(degerEl?.value||'').trim();
     var _leskiK=_logAnahtar(S.brewLog[_editIdx]); // SPRINT G K1: düzenleme anahtarı değişirse KR'deki eski kopya birleşimde çift üretmesin
     S.brewLog[_editIdx]=Object.assign({},S.brewLog[_editIdx],{tip:_tip2,tarih:tarihEl.value,deger:_deg2,not:(notEl?.value||'').trim()});
-    try{ if(_leskiK && typeof _editId!=='undefined' && _editId){ var _ledit=Array.isArray(KR)?KR.find(function(k){return k&&k.id===_editId;}):null; if(_ledit && Array.isArray(_ledit.brewLog)){ _ledit.brewLog=_ledit.brewLog.filter(function(e){ return !e || _logAnahtar(e)!==_leskiK; }); } } }catch(_lee){}
+    try{ if(_leskiK && typeof _editId!=='undefined' && _editId){ var _ledit=Array.isArray(KR)?KR.find(function(k){return k&&k.id===_editId;}):null; if(_ledit && Array.isArray(_ledit.brewLog)){ _ledit.brewLog=_ledit.brewLog.filter(function(e){ return !e || _logAnahtar(e)!==_leskiK; }); } } }catch(_lee){if(window.bmHataKaydet)bmHataKaydet('persist',_lee,'logEkle/KR-ayna');}
     S.brewLog.sort((a,b)=>a.tarih.localeCompare(b.tarih));
     if(_tip2==='fg_olcum'&&_deg2){if(_sgNum(_deg2)!=null)S.fgManuel=_deg2;} // SPRINT I I2: tek aralık
     if(_tip2==='og_olcum'&&_deg2){var _ov3=_sgNum(_deg2);if(_ov3!=null)S.ogManuel=_ov3;} // SPRINT I I4: og_olcum→ogManuel backfill simetrisi (fg'de vardı, og'de yoktu)
-    try{ if(window._brewSonucTamamla) _brewSonucTamamla(S, (typeof _editId!=='undefined'?_editId:null)); }catch(_bst2){}
+    try{ if(window._brewSonucTamamla) _brewSonucTamamla(S, (typeof _editId!=='undefined'?_editId:null)); }catch(_bst2){if(window.bmHataKaydet)bmHataKaydet('persist',_bst2,'logEkle/sonucTamamla');}
     logDuzenleSifirla();
     if(S.biraAd&&S.biraAd.trim())tarifeKaydet(); else render();
     return;
@@ -26118,10 +26125,10 @@ function logEkle(){
   if(degerEl)degerEl.value='';
   // Pitching girilince tarifeyi otomatik "Aktif" yap
   // Profil P1: pitching = brewday'siz demleme başlangıcı → snapshot (tarifeKaydet persist eder)
-  if(_tip==='pitching'){ try{ if(window._brewSnapshotYaz) _brewSnapshotYaz(S, (typeof _editId!=='undefined'?_editId:null), {preboilAktar:true}); }catch(_bs2){} } // SPRINT M M2: brewday'siz başlangıç — o anki pre-boil ölçümü bu batch'in
+  if(_tip==='pitching'){ try{ if(window._brewSnapshotYaz) _brewSnapshotYaz(S, (typeof _editId!=='undefined'?_editId:null), {preboilAktar:true}); }catch(_bs2){if(window.bmHataKaydet)bmHataKaydet('persist',_bs2,'logEkle/pitching-snapshot');} } // SPRINT M M2: brewday'siz başlangıç — o anki pre-boil ölçümü bu batch'in
   // Profil F1: şişeleme = tamamlanma → ölçümleri dondur; sonradan og/fg → boş alanı tek-seferlik doldur
-  if(_tip==='siseleme'){ try{ if(window._brewSonucYaz) _brewSonucYaz(S, (typeof _editId!=='undefined'?_editId:null)); }catch(_bso){} }
-  if(_tip==='fg_olcum'||_tip==='og_olcum'){ try{ if(window._brewSonucTamamla) _brewSonucTamamla(S, (typeof _editId!=='undefined'?_editId:null)); }catch(_bst){} }
+  if(_tip==='siseleme'){ try{ if(window._brewSonucYaz) _brewSonucYaz(S, (typeof _editId!=='undefined'?_editId:null)); }catch(_bso){if(window.bmHataKaydet)bmHataKaydet('persist',_bso,'logEkle/siseleme-sonuc');} }
+  if(_tip==='fg_olcum'||_tip==='og_olcum'){ try{ if(window._brewSonucTamamla) _brewSonucTamamla(S, (typeof _editId!=='undefined'?_editId:null)); }catch(_bst){if(window.bmHataKaydet)bmHataKaydet('persist',_bst,'logEkle/fg-tamamla');} }
   if(_tip==='pitching'){
     var _t=KR.find(function(k){return k&&k.id===_editId;});
     if(_t&&(_t.durum||'aktif')==='aktif'){
@@ -26464,7 +26471,7 @@ window.rStokAyarlar = function(){
     var _bHataList=_bHata.slice(-5).reverse().map(function(h){
       var d=new Date(h.ts||0);
       var t=String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
-      var m=((h.tip==='rejection'?'promise':'hata')+': '+(h.mesaj||'-')).slice(0,160);
+      var m=((h.tip==='rejection'?'promise':(h.tip&&h.tip!=='error'?h.tip:'hata'))+': '+(h.mesaj||'-')+(h.kaynak?' · '+h.kaynak:'')).slice(0,160); // AQ3-3: yakalanan hatalarda tip+kaynak görünür
       return '<small style="display:block;padding:2px 0;border-bottom:1px dotted var(--cizgi-arac)">'+t+' · '+_bHEsc(m)+(h.n>1?' <b>×'+h.n+'</b>':'')+'</small>';
     }).join('');
     _bHataHtml='<details class="bm-ayar-satir" style="display:block">'+
@@ -26932,12 +26939,12 @@ async function syncAl(){
       var _kz = (yts > gts) ? y : g;            // yerel daha yeni / gelen daha yeni veya eşit (deterministik)
       _syncSonucGraft(_kz, (_kz===y) ? g : y);
       // Kazanan açık reçeteyse S'e de aynala (bayat editör-S penceresi kapanır; brewLog birleşim)
-      try{ if(typeof _editId!=='undefined' && _editId && String(_kz.id)===String(_editId) && typeof S!=='undefined' && S) _krOtoriterUygula(S, _kz); }catch(_ge){}
+      try{ if(typeof _editId!=='undefined' && _editId && String(_kz.id)===String(_editId) && typeof S!=='undefined' && S) _krOtoriterUygula(S, _kz); }catch(_ge){if(window.bmHataKaydet)bmHataKaydet('sync',_ge,'syncAl/S-ayna');}
       yeniKR.push(_kz);
     });
     /* syncAl merge residue log — temizlendi (FIX-TARAMA) */
     // SPRINT S: tombstone birleşimi iki yönlü yayılır (geri-getirmede düşenler hariç, TTL süpürülmüş)
-    try{ _krSilYaz(_krSilSupur(Object.keys(_tsMap).map(function(k){ return { id: k, ts: _tsMap[k] }; }))); }catch(_tsy){}
+    try{ _krSilYaz(_krSilSupur(Object.keys(_tsMap).map(function(k){ return { id: k, ts: _tsMap[k] }; }))); }catch(_tsy){if(window.bmHataKaydet)bmHataKaydet('sync',_tsy,'syncAl/tombstone');}
 
     // STOK merge — aynı mantık
     // Fallback: id yoksa ad+birim birleşimiyle eşleştir (eski stok item'ları id'siz olabilir)

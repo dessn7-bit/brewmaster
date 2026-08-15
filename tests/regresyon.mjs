@@ -3439,6 +3439,109 @@ const CASELER = [
       localStorage.removeItem('bm_draft_v1');
       return __REG.al();
     })
+  },
+
+  // ── SPRINT AQ3: sessiz-hata altyapısı (AP #5 + ring kör noktası) ──
+  {
+    kod: 'AQ3-CATCH', ad: 'BAĞLANAN CATCH RING\'E DÜŞER: tombstone yazıcısı kasıtlı patlatılır → ring\'de persist/tarifSil-tombstone kaydı; silme akışı BOZULMAZ (catch semantiği korunur)',
+    calistir: (page) => page.evaluate(() => {
+      const id = __REG.yeniKayit('AQ3 Catch Bira');
+      ekran = 'liste'; render();
+      bmHataLogSil();
+      const orig = window._krSilEkle;
+      window._krSilEkle = function () { throw new Error('AQ3-TOMB-SENTETIK'); };
+      tarifSil(id);
+      window._krSilEkle = orig;
+      __REG.ok('silme akışı BOZULMADI (reçete KR\'den gitti)', !KR.some(k => k && k.id === id));
+      const ring = bmHataLogOku();
+      __REG.ok('catch RING\'e düştü: tip=persist, kaynak=tarifSil/tombstone', ring.some(h => h.tip === 'persist' && h.kaynak === 'tarifSil/tombstone' && /AQ3-TOMB-SENTETIK/.test(h.mesaj)), JSON.stringify(ring.map(h => h.tip + ':' + h.kaynak)).slice(0, 140));
+      bmHataLogSil();
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AQ3-SESSIZ', ad: 'GÜRÜLTÜ YOK (kritik): normal kullanım turu (aç/düzenle/hesapla/kaydet/sekme gez/sil) → ring BOŞ kalır — yanlış-pozitif ring\'i işe yaramaz yapardı',
+    calistir: (page) => page.evaluate(() => {
+      bmHataLogSil();
+      const id = __REG.yeniKayit('AQ3 Sessiz Bira');
+      S.maltlar = [{ id: 'pilsner', kg: 3 }]; S.mayaId = 'us05';
+      calc(); tarifeKaydet();
+      ['malt', 'maya', 'hop', 'not', 'takvim', 'surec', 'genel'].forEach(function (sk) { sekme = sk; render(); });
+      tarifAc(id); ekran = 'liste'; render();
+      const id2 = __REG.yeniKayit('AQ3 Sessiz Sil'); ekran = 'liste'; render(); tarifSil(id2);
+      ekran = 'ayarlar'; render(); ekran = 'liste'; render();
+      const ring = bmHataLogOku();
+      __REG.ok('TAM TUR sonrası ring BOŞ (26 bağlantı noktasından sıfır yanlış-pozitif)', ring.length === 0, JSON.stringify(ring.map(h => h.tip + ':' + h.kaynak + ':' + h.mesaj)).slice(0, 200));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AQ3-THROTTLE', ad: 'GÜRÜLTÜ KONTROLÜ: aynı tip+kaynak 60sn içinde tek satırda birikir (n sayacı) — sık tetiklenen catch ring\'i doldurup GERÇEK hatayı ezemez; onerror yolu etkilenmez',
+    calistir: (page) => page.evaluate(() => {
+      bmHataLogSil();
+      for (var i = 0; i < 8; i++) window.bmHataKaydet('sync', new Error('AQ3-TEKRAR-' + i), 'test/sik-kaynak');
+      var r1 = bmHataLogOku();
+      __REG.ok('8 çağrı → 1 satır + n=8 (ring dolmadı)', r1.length === 1 && r1[0].n === 8, 'len=' + r1.length + ' n=' + (r1[0] && r1[0].n));
+      window.bmHataKaydet('persist', new Error('AQ3-GERCEK-HATA'), 'test/baska-kaynak');
+      for (var j = 0; j < 5; j++) window.bmHataKaydet('sync', new Error('AQ3-TEKRAR2'), 'test/sik-kaynak');
+      var r2 = bmHataLogOku();
+      __REG.ok('GERÇEK hata ezilmedi: 2 satır (sık-kaynak n birikti, gerçek hata duruyor)', r2.length === 2 && r2.some(h => /AQ3-GERCEK-HATA/.test(h.mesaj)) && r2.some(h => h.n === 13), JSON.stringify(r2.map(h => h.kaynak + ' n=' + (h.n || 1))));
+      bmHataLogSil();
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AQ3-ZBAYRAK', ad: 'Z-SİNYAL SIZINTISI KAPANDI (AP #5): iskelet bayrağı reçete değişiminde sıfırlanır — iskelet yolunda sinyal YOK (Z kuralı), yeniden açılan reçetenin kaydında sinyal VAR (sızıntı bitti)',
+    calistir: (page) => page.evaluate(() => {
+      localStorage.removeItem('bm_stil_ogren_v1');
+      const id = __REG.yeniKayit('AQ3 Z Bira');
+      S.maltlar = [{ id: 'pilsner', kg: 4 }]; S.mayaId = 'us05'; S.hoplar = [{ id: 'hallertau', g: 20, dk: 60, tur: 'boil' }];
+      // gerçek slug→BJCP çifti seç (kapsamda/uyum alanları da doğrulanabilsin)
+      const slug = Object.keys(SLUG_TO_BJCP).find(k => SLUG_TO_BJCP[k] && typeof BJCP !== 'undefined' && BJCP[SLUG_TO_BJCP[k]]);
+      S.stil = SLUG_TO_BJCP[slug];
+      const stubKur = () => {
+        const og = calc().og;
+        window.__bmV12DispatchInfo = { slugBranchHit: true, timestamp: Date.now() };
+        window.__lastV12Result = { topN: [{ slug: slug, normalized: 80 }, { slug: slug, normalized: 10 }] };
+        window.__lastV12Recipe = { maltIds: ['pilsner'], mayaId: 'us05', _og: og };
+      };
+      // 1) İSKELET NİYETİ: sinyal YAZILMAZ (Sprint Z kuralı AYNEN)
+      stubKur(); window.__stilSecKaynak = 'iskelet';
+      tarifeKaydet();
+      __REG.ok('iskelet yolu: sinyal YAZILMADI (Z kuralı korundu)', _bmStilOgrenOku().length === 0);
+      // 2) REÇETE DEĞİŞİMİ bayrağı sıfırlar (eski bug: takılı kalıyordu, sonraki kayıtların sinyali düşüyordu)
+      tarifAc(id);
+      __REG.ok('tarifAc → bayrak SIFIRLANDI', window.__stilSecKaynak === null, 'bayrak=' + window.__stilSecKaynak);
+      stubKur(); // render dispatcher'ı stub'ı ezmiş olabilir — kayıt öncesi tazele (tarifeKaydet render çağırmaz)
+      tarifeKaydet();
+      const arr = _bmStilOgrenOku();
+      __REG.ok('SIZINTI BİTTİ: yeniden açılan reçetenin kaydında sinyal YAZILDI', arr.length === 1 && arr[0].rid === String(id), 'n=' + arr.length);
+      __REG.ok('sinyal alanları doğru: kaynak=null (çip/dropdown değil) + kapsamda + uyumSira=1', arr.length === 1 && arr[0].kaynak === null && arr[0].kapsamda === true && arr[0].uyumSira === 1, JSON.stringify(arr[0] && { k: arr[0].kaynak, kap: arr[0].kapsamda, u: arr[0].uyumSira }));
+      // 3) yeniTarif de sıfırlar
+      window.__stilSecKaynak = 'iskelet'; yeniTarif();
+      __REG.ok('yeniTarif → bayrak SIFIRLANDI', window.__stilSecKaynak === null);
+      localStorage.removeItem('bm_stil_ogren_v1');
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AQ3-UI', ad: 'RING GÖRÜNÜRLÜĞÜ (Sprint O tamamlama): Tanı kartı sayacı yeni tipleri sayar, satırda tip+kaynak görünür, Panoya Kopyala metni okunabilir (Kaynak satırı)',
+    calistir: (page) => page.evaluate(() => {
+      bmHataLogSil();
+      window.bmHataKaydet('persist', new Error('AQ3-UI-SENTETIK'), 'test/ui-kaynak');
+      ekran = 'ayarlar'; render();
+      const dom = document.getElementById('ekran').innerHTML;
+      __REG.ok('Tanı kartı sayacı: "Son Hatalar (1)"', dom.indexOf('Son Hatalar (1)') >= 0);
+      __REG.ok('satırda TİP görünür (persist — "hata" genellemesi değil)', dom.indexOf('persist: AQ3-UI-SENTETIK') >= 0);
+      __REG.ok('satırda KAYNAK görünür', dom.indexOf('test/ui-kaynak') >= 0);
+      const txt = window._bmHataMetni();
+      __REG.ok('Panoya Kopyala metni: tip + Kaynak satırı + mesaj okunabilir', txt.indexOf('persist') >= 0 && txt.indexOf('Kaynak: test/ui-kaynak') >= 0 && txt.indexOf('AQ3-UI-SENTETIK') >= 0, txt.slice(0, 120));
+      bmHataLogSil();
+      ekran = 'ayarlar'; render();
+      __REG.ok('temizle sonrası kart "✓ Hata kaydı yok"', document.getElementById('ekran').innerHTML.indexOf('Hata kaydı yok') >= 0);
+      ekran = 'liste'; render();
+      return __REG.al();
+    })
   }
 ];
 

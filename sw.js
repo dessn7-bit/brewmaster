@@ -696,7 +696,10 @@
 // Sprint AQ2 (2026-08-15): gorunur bulgular — accordion 5000px kirpmasi kalkti (max-content+interpolate-size),
 // bos-recete kapisi (_bmBosOtoMu: ribbon/baslik/cip/Doktor sus + FG=OG mayasiz), TAKIP SKORU faz-farkinda
 // (siselemede donar, durust ad), tarifSil draft temizligi. KURAL 12.3 bump v131-402 -> v131-403.
-const CACHE_VERSION = 'bm-cache-v131-403';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
+// Sprint AQ3 (2026-08-16): sessiz-hata altyapisi — 26 kritik catch ring'e baglandi (persist/sync/kopru/
+// ogrenme/kurtarma), bmHataKaydet 60sn tip+kaynak throttle, __stilSecKaynak recete degisiminde sifirlanir
+// (Z sinyal sizintisi), Tani karti tip+kaynak gosterir. KURAL 12.3 bump v131-403 -> v131-404.
+const CACHE_VERSION = 'bm-cache-v131-404';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
 const ASSET_CACHE   = 'bm-assets-v1';        // font + ikon + manifest — KALICI, bump'ta silinmez
 const MODEL_CACHE   = 'bm-models-v1';        // workers.dev + jsdelivr — SHA'li/immutable URL, KALICI
 
