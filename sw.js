@@ -693,7 +693,10 @@
 // Sprint AQ1 (2026-08-15): kayip-veri ailesi — tadim/not KALICI kayit (tarifeKaydet yolu),
 // calc hatasi ring+sahte-ozet engeli, _draftKrAyniMi BOS-otomatik-normalize, import LS+IDB aynasi.
 // HTML degisti -> KURAL 12.3 CACHE_VERSION bump v131-401 -> v131-402.
-const CACHE_VERSION = 'bm-cache-v131-402';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
+// Sprint AQ2 (2026-08-15): gorunur bulgular — accordion 5000px kirpmasi kalkti (max-content+interpolate-size),
+// bos-recete kapisi (_bmBosOtoMu: ribbon/baslik/cip/Doktor sus + FG=OG mayasiz), TAKIP SKORU faz-farkinda
+// (siselemede donar, durust ad), tarifSil draft temizligi. KURAL 12.3 bump v131-402 -> v131-403.
+const CACHE_VERSION = 'bm-cache-v131-403';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
 const ASSET_CACHE   = 'bm-assets-v1';        // font + ikon + manifest — KALICI, bump'ta silinmez
 const MODEL_CACHE   = 'bm-models-v1';        // workers.dev + jsdelivr — SHA'li/immutable URL, KALICI
 

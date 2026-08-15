@@ -687,7 +687,8 @@ button:disabled:hover,.btn:disabled:hover,.btn.bm-disabled:hover{background:inhe
 .bm-acc-meta{font-size:calc(var(--fs-sm) * var(--tip-b-scale, 1));line-height:var(--tip-b-lh, var(--lh-tight));font-weight:var(--tip-b-fw, var(--fw-medium));color:var(--tip-b-col, var(--metin-soluk));font-family:var(--font-govde);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0;font-variant-caps:var(--tip-b-fvc, normal);font-style:var(--tip-b-fst, normal);text-transform:var(--tip-b-tt, none);letter-spacing:var(--tip-b-ls, normal)}
 .bm-acc-chevron{font-size:var(--fs-sm);color:var(--metin-soluk);transition:transform .2s;flex-shrink:0;line-height:1}
 .bm-acc[aria-expanded="false"] .bm-acc-chevron{transform:rotate(-90deg)}
-.bm-acc-body{padding:0 var(--sp-4) var(--sp-4);max-height:5000px;opacity:1;transition:max-height .3s ease,opacity .2s ease,padding .2s ease;overflow:hidden}
+/* AQ2-1: max-height 5000px kirpmasi KALDIRILDI (malt katalogu 17170px'ti - 69/193 oge ERISILEMEZDI, maya 46/139). max-content sinirsiz; interpolate-size (Chrome 129+) 0<->max-content animasyonunu korur; eski cozucude animasyon duser ama ERISIM tam kalir. */
+.bm-acc-body{padding:0 var(--sp-4) var(--sp-4);interpolate-size:allow-keywords;max-height:max-content;opacity:1;transition:max-height .3s ease,opacity .2s ease,padding .2s ease;overflow:hidden}
 .bm-acc[aria-expanded="false"] .bm-acc-body{max-height:0;opacity:0;padding-top:0;padding-bottom:0}
 /* SUREC-2KOLON (2026-06-11): Surec sekmesi >=1280px iki kolon — hazirlik tam serit + 2x2 (sol plan, sag operasyon).
    <1280 default block = sifir davranis degisimi. DOM sirasi korunur, yerlesim data-acc-id ile (5 akordiyon kosulsuz render).
@@ -4949,7 +4950,7 @@ function bmMayaSicKesisim(m1,m2){if(!m1||!m2||!m1.sc||!m2.sc)return null;const l
 // - BrewMyBeer: "80% of off-flavors from improper fermentation temps"
 // 4 bileşen: Sıcaklık stabilitesi + Profil uyumu + Attenüasyon + Veri kalitesi
 function kaliteSkoru(S, maya, og, fgHedef, stil){
-  var r={toplam:0, sicaklikStab:0, profilUyum:0, atten:0, veriKal:0, seviye:'Veri Yok', notlar:[], acik:false};
+  var r={toplam:0, sicaklikStab:0, profilUyum:0, atten:0, veriKal:0, seviye:'Veri Yok', notlar:[], acik:false, tamam:false};
   if(!S||!S.brewLog||S.brewLog.length===0) return r;
   var bl=S.brewLog;
   var pitchE=bl.filter(function(x){return x.tip==='pitching';}).pop();
@@ -4958,7 +4959,14 @@ function kaliteSkoru(S, maya, og, fgHedef, stil){
 
   var pitchTar=new Date(pitchE.tarih); pitchTar.setHours(0,0,0,0);
   var bugun=new Date(); bugun.setHours(0,0,0,0);
-  var gunPitch=Math.max(1, Math.floor((bugun-pitchTar)/864e5));
+  // AQ2-3 (AP K2-7): FAZ-FARKINDALIK — tamamlanmış batch'te (şişeleme kaydı / brewSonuc.ts, 7649 F1a kalıbı)
+  // takip penceresi ŞİŞELEMEDE DONAR: skor kondisyon haftalarında düşmeye devam etmez (şişelenmiş Dubbel 3/100 vakası).
+  var _sisE=bl.filter(function(x){return x&&x.tip==='siseleme'&&x.tarih;}).pop();
+  r.tamam=!!_sisE||!!(S.brewSonuc&&S.brewSonuc.ts);
+  var _son=bugun;
+  if(_sisE){var _st=new Date(_sisE.tarih);_st.setHours(0,0,0,0);if(_st>=pitchTar&&_st<bugun)_son=_st;}
+  else if(r.tamam){var _bt=new Date(S.brewSonuc.ts);_bt.setHours(0,0,0,0);if(_bt>=pitchTar&&_bt<bugun)_son=_bt;}
+  var gunPitch=Math.max(1, Math.floor((_son-pitchTar)/864e5));
   var sicaklikOlcumler=bl.filter(function(x){return x.tip==='sicaklik'&&x.deger;}).map(function(x){return parseFloat(x.deger);});
   var fgOlcumler=bl.filter(function(x){return x.tip==='fg_olcum'&&x.deger;}).map(function(x){return parseFloat(x.deger);});
 
@@ -5031,7 +5039,17 @@ function kaliteSkoru(S, maya, og, fgHedef, stil){
 
   r.toplam=r.sicaklikStab+r.profilUyum+r.atten+r.veriKal;
 
-  if(r.toplam>=90) r.seviye='Mükemmel · Yarışma kalitesi';
+  if(r.tamam){
+    // AQ2-3: TAMAMLANMIŞ batch = aksiyon dili YASAK (müdahale edilecek şey kalmadı) + düşük kayıt ≠ kötü bira.
+    // Skor bira kalitesini DEĞİL takip/kayıt yoğunluğunu ölçer — etiket bunu dürüstçe söyler (AJ/AN dil disiplini).
+    if(r.toplam>=90) r.seviye='Mükemmel takip · Yarışma düzeyi kayıt';
+    else if(r.toplam>=75) r.seviye='Çok iyi takip';
+    else if(r.toplam>=60) r.seviye='İyi takip';
+    else if(r.toplam>=40) r.seviye='Orta düzey takip';
+    else if(r.toplam>=20) r.seviye='Az kayıt tutuldu';
+    else r.seviye='Çok az kayıt · Takip skoru bira kalitesi değildir';
+    r.notlar=r.notlar.map(function(nt){return nt.replace(' — sıcaklığı 2°C artır','').replace(' — rota düzelt','').replace(' — günde 1 ölç.','.').replace(' — günde 1 ölçüm al.','.');}); // emir-kipi tamamlanmışta anlamsız
+  } else if(r.toplam>=90) r.seviye='Mükemmel · Yarışma kalitesi';
   else if(r.toplam>=75) r.seviye='Çok İyi';
   else if(r.toplam>=60) r.seviye='İyi Gidiyor';
   else if(r.toplam>=40) r.seviye='Orta · Geliştirilebilir';
@@ -8608,6 +8626,9 @@ function suProfilUygula(){
 window.suProfilUygula=suProfilUygula;
 
 
+// AQ2-2: boş-reçete kapısı — malt YOK ve manuel stil YOK ise otomatik stil kolu (ribbon/başlık/çip/Doktor) susar.
+// Manuel stil seçiliyse kapı AÇIK kalır (AK iskeletsiz akışı: BJCP hedefi + maya önerisi gelmeli — AK2-ISKELETSIZ).
+window._bmBosOtoMu=function(){try{return !(S&&S.maltlar&&S.maltlar.length)&&!(S&&S.stil&&typeof BJCP!=='undefined'&&BJCP[S.stil]);}catch(_e){return false;}};
 function calc(){
   const katkilar=S.katkilar||[];
   const h=S.hacim||11;
@@ -8644,7 +8665,9 @@ function calc(){
   const _ms=S.mashSc||67;
   if(_ms<65) mashFGDuzeltme=(_ms-65)*0.001;      // her 1°C düşüş: FG -1 puan
   else if(_ms>68) mashFGDuzeltme=(_ms-68)*0.0015; // her 1°C artış: FG +1.5 puan
-  fgHesap=Math.min(og-0.001,Math.max(1.000,fgHesap+mashFGDuzeltme));
+  // AQ2-2 (AP K1-CALC-1): maya yokken fermantasyon yok — FG=OG (mash düzeltmesi de girmez, hayalet alkol biter);
+  // og-0.001 üst klempi 1.000'in altına inemez (boş reçetede FG 0.999 + sahte ABV üretiyordu)
+  fgHesap=maya?Math.min(Math.max(1.000,og-0.001),Math.max(1.000,fgHesap+mashFGDuzeltme)):og;
   // Manuel FG override: kullanıcı kendi ölçtüğü değeri girebilir
   const fgManuelVal=S.fgManuel?parseFloat(S.fgManuel):null;
   const fg=(fgManuelVal&&fgManuelVal>1.000&&fgManuelVal<og)?fgManuelVal:fgHesap;
@@ -8803,6 +8826,9 @@ function tarifSil(id){
   if(typeof _editId!=='undefined'&&_editId&&_editId!==id) _commitOpenRecipe(); // silinen ≠ açık reçete ise açık edits'i koru
   KR=KR.filter(k=>k.id!==id);
   try{ _krSilEkle(id); }catch(_tsw){} // SPRINT S: silme tombstone — diğer cihazlarda diriliş engellenir (ky→sync push KRSil taşır)
+  // AQ2-4 (AP K1Y-1): silinen reçetenin taslağı da gitsin — draft'tan aynı id'yle dirilme + tombstone düşmesi biter
+  try{var _dd=loadDraft();if(_dd&&_dd.editId===id)clearDraft();}catch(_dcl){}
+  try{if(window._pendingDraft&&window._pendingDraft.editId===id)window._pendingDraft=null;}catch(_dpd){}
   ky(KR);
   silOnay=null;
   // v2.78.94 H11 — Reçete silinince alarmları da anında temizle (orphan bekleme yok)
@@ -14107,7 +14133,7 @@ function rEditorTakvim(maya, maya2, tv){
     var _cCK = (typeof calc==='function')?calc():{og:1.050,fg:1.012};
     var _ks2 = kaliteSkoru(S, maya, _cCK.og||1.050, _cCK.fg||1.012, (S&&S.stilTah)||(S&&S.stil)||(S&&S.biraAd)||'');
     if(_ks2.acik){
-      var _ksRenk2 = _ks2.toplam>=75?'var(--ok)':_ks2.toplam>=60?'var(--yk)':_ks2.toplam>=40?'var(--sk)':'var(--crit)';
+      var _ksRenk2 = _ks2.toplam>=75?'var(--ok)':_ks2.toplam>=60?'var(--yk)':_ks2.toplam>=40?'var(--sk)':(_ks2.tamam?'var(--dim)':'var(--crit)'); // AQ2-3: tamamlanmış batch'te düşük kayıt = nötr gri, kırmızı 'Kritik' değil
       var _barMini = function(val){
         var pct = val/25*100;
         return '<div style="flex:1;background:rgba(0,0,0,.06);height:4px;border-radius:2px;overflow:hidden;min-width:20px"><div style="width:'+pct+'%;background:'+_ksRenk2+';height:100%"></div></div>';
@@ -14115,7 +14141,7 @@ function rEditorTakvim(maya, maya2, tv){
       _kaliteKart = '<div style="background:#fff;border:1px solid var(--bor);border-left:3px solid '+_ksRenk2+';border-radius:12px;padding:10px 14px;margin-bottom:8px;box-shadow:var(--golge)">'
         +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">'
           +'<div style="flex:1">'
-            +'<div style="font-size:var(--fs-xs);font-weight:700;color:var(--kahve);letter-spacing:.6px">🏆 KALİTE SKORU</div>'
+            +'<div style="font-size:var(--fs-xs);font-weight:700;color:var(--kahve);letter-spacing:.6px">📋 TAKİP SKORU'+(_ks2.tamam?' <span style="font-weight:500;color:var(--soluk)">· batch tamam</span>':'')+'</div>' // AQ2-3: dürüst ad — ölçtüğü şey takip/kayıt yoğunluğu, bira kalitesi değil
             +'<div style="font-size:var(--fs-xs);color:'+_ksRenk2+';font-weight:600;margin-top:1px">'+_ks2.seviye+'</div>'
           +'</div>'
           +'<div style="font-size:22px;font-weight:700;color:'+_ksRenk2+';font-family:var(--font-display);line-height:1">'+_ks2.toplam+'<span style="font-size:11px;color:var(--soluk);font-weight:500">/100</span></div>'
@@ -14209,7 +14235,7 @@ function rEditorTakvim(maya, maya2, tv){
        + _bmAccWrap('takvim-milestone', '📊', 'Milestone Timeline',    _bmF_milestoneMeta,                                    _milestoneTl,                                       true)
        + _bmAccWrap('takvim-alarm',     '🚨', 'Alarmlar',              _bmF_alarmSayisi > 0 ? (_bmF_alarmSayisi + ' aktif') : '—', _alarmKart,                                    _bmF_alarmSayisi > 0)
        + _bmAccWrap('takvim-log',       '📝', 'Fermantasyon Günlüğü',  _bmF_logSayisi + ' kayıt',                              _logFormKart,                                       true)
-       + _bmAccWrap('takvim-grafik',    '📈', 'Grafikler & Kalite',    _bmF_kaliteMeta || '—',                                _grafikKart + _kaliteKart,                          false)
+       + _bmAccWrap('takvim-grafik',    '📈', 'Grafikler & Takip',    _bmF_kaliteMeta || '—',                                _grafikKart + _kaliteKart,                          false)
        + _bmAccWrap('takvim-detay',     '📅', 'Detay Takvimler',       '',                                                    _stilIdealKart + _takvimKart + _detaylarKart,       false);
 }
 
@@ -19068,6 +19094,7 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
     else if(_mayaTip==='wit' && !/wit|witbier/i.test(stil_tah)) stil_tah='Witbier';
   }
   // Global state'e yaz — diğer sekmelerin (Su, Maya vb.) erişebilmesi için
+  if(window._bmBosOtoMu&&window._bmBosOtoMu()) stil_tah=''; // AQ2-2: boş reçetede motor tahmini (Kvass) global state'e/sticky özete sızmaz
   S.stilTah=stil_tah;
   // Stil grubu — maya tipi bazlı ana kategori
   var stil_grup="";
@@ -19501,6 +19528,7 @@ return `
           // Adim 120: B1 LightGBM + V12 XGBoost cluster ribbon'lari BIRLESTIRILDI -> tek hibrit ribbon.
           // Formul (B1_cal[i] + V12[i]) / 2, kanonik 14-class. Strategy C dispatcher aynı hibrit top-3 kullanir.
           // Placeholder, updateRibbon('hybrid-cluster') Strategy C predict.then()'de gercek deger yazar.
+          if(window._bmBosOtoMu&&window._bmBosOtoMu())return ''; // AQ2-2: boş reçetede tahmin ribbonu basılmaz
           return '<div class="bm-tahmin-ribbon" data-ribbon="hybrid-cluster">'+
                  '<span class="bm-tahmin-label">Cluster (B1+V12 Hibrit):</span>'+
                  '<span class="bm-tahmin-placeholder">Tahmin yapılıyor...</span>'+
@@ -19511,6 +19539,7 @@ return `
           // ESKİ global değeri okuma — placeholder yaz. updateRibbon (Hotfix-v2) predict.then()
           // bittiğinde gerçek değeri innerHTML ile yazacak. Eski stale değer hiç görünmez.
           // data-ribbon="strategy-c" attribute korunur (Hotfix-v2 querySelector hedefi).
+          if(window._bmBosOtoMu&&window._bmBosOtoMu())return ''; // AQ2-2: boş reçetede tahmin ribbonu basılmaz
           return '<div class="bm-tahmin-ribbon" data-ribbon="strategy-c">'+
                  '<span class="bm-tahmin-label">Strategy C (Hibrit <span class="bm-stil-adi">Hierarchical</span>):</span>'+
                  '<span class="bm-tahmin-placeholder">Tahmin yapılıyor...</span>'+
@@ -19520,6 +19549,7 @@ return `
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:2px">
             <div style="width:40px;height:40px;border-radius:50%;background:${renk_hex};border:2.5px solid var(--bor2);flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;color:#FEFBF2;font-family:var(--font-display);font-weight:700;text-shadow:0 1px 2px rgba(0,0,0,.4)"><span style="font-size:14px;line-height:1">${ebcGoster(srm)}</span></div>
             <div style="flex:1;min-width:0">${(()=>{
+              if(window._bmBosOtoMu&&window._bmBosOtoMu()) return '<span class="bm-stil-adi" style="font-size:15px;font-weight:700;color:var(--soluk);font-family:var(--font-display)">Reçete boş</span><div style="font-size:11px;color:var(--soluk);margin-top:2px">Önce malt ekle — stil tahmini malzemeyle başlar.</div>'; // AQ2-2: boş reçetede motor-tahmin (Kvass) başlığı basılmaz
               // Bug 1: V12 slug top-1 → kart başlığı (DRY window.bmSlugToBjcp)
               // Bug 5: "Belirsiz" SADECE slug-model-ready + slug confidence < 20. Cluster fallback'te tetiklenmez.
               // Bug 6: Manuel mode (S.stil && BJCP[S.stil]) → kart başlığı kullanıcı seçimi, V12 ne olursa olsun.
@@ -19577,6 +19607,7 @@ return `
             })()}</div>
           </div>
         ${(()=>{
+          if(window._bmBosOtoMu&&window._bmBosOtoMu()) return ''; // AQ2-2: boş reçetede bant çipleri (sahte Kritik'ler) basılmaz
           const _bjcp=BJCP;
           // V5/V12 top-3 → BJCP key eşleşmesi — DRY tek fonksiyon (window.bmSlugToBjcp)
           // Bug 4: V12 mod'da same-family filter (top-1 ailesi referans). Cross-family slot'lara 🔀 rozet.
@@ -19725,6 +19756,7 @@ return `
           // Strategy C dispatcher V12+V20+Hibrit 3-sinyal agreement için window.__lastV12SlugResult /
           // __lastV20SlugResult okumaya devam eder. Sadece UI kartları kaldırıldı.
           // V12 ana kart başlığı + BJCP karşılaştırması üstte zaten render edildi (post-process'li).
+          if(window._bmBosOtoMu&&window._bmBosOtoMu()) return ''; // AQ2-2: boş reçetede hibrit slug kutusu basılmaz
           var _f1r  = window.__lastF1HybridSlugResult;
           if (!_f1r || !_f1r.top3 || _f1r.top3.length === 0) return '';
 
@@ -19757,6 +19789,8 @@ return `
           '</div>';
         })()}
         ${(()=>{
+          // AQ2-2 (AP K2-2): boş reçetede 11-adımlık panik listesi yerine TEK nazik mesaj
+          if(window._bmBosOtoMu&&window._bmBosOtoMu()) return '<div style="background:var(--bg2);border:1px dashed var(--bor);border-radius:8px;padding:10px 12px;margin-top:8px;font-size:12px;color:var(--soluk)">🧪 Reçete henüz boş — malt ekleyince stil tahmini ve Doktor önerileri burada belirir.</div>';
           // ═══ REÇETE DOKTORU v2 — Tolerance + Specialty stil önerileri ═══
           const _bjcp=BJCP;
           // Kullanıcı manuel seçim S.stil > motor tahmini (Adım 13b)
@@ -23965,7 +23999,7 @@ window.brewTimerTik=function(){
 
 // ── Genel malzeme arama type-ahead (Malt + Hop + Maya, TEK helper — kopya/drift yok).
 // Secim = ilgili sekmenin MEVCUT mekanizmasi: malt yM.id + render, hop yH.id + render, maya S.mayaId + render.
-// Panel akis-ici (akordeon CSS max-height:5000px), render()'dan bagimsiz (focus kaybi yok).
+// Panel akis-ici (akordeon CSS max-height:max-content, AQ2-1), render()'dan bagimsiz (focus kaybi yok).
 var _bmAramaTimer=null;
 function _bmTrNorm(s){return (s||'').toString().toLocaleLowerCase('tr-TR').replace(/ı/g,'i').replace(/İ/g,'i').replace(/ş/g,'s').replace(/ğ/g,'g').replace(/ü/g,'u').replace(/ö/g,'o').replace(/ç/g,'c').replace(/â/g,'a').replace(/î/g,'i').replace(/û/g,'u').trim();}
 var _bmAramaCfg={

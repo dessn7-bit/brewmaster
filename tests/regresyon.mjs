@@ -3302,6 +3302,143 @@ const CASELER = [
       }, kurtarildi);
       return c1.concat(c2);
     }
+  },
+
+  // ── SPRINT AQ2: görünür bulgular (AP #2/#7/#8 + K1Y-1) ──
+  {
+    kod: 'AQ2-ACC', ad: 'KATALOG TAM ERİŞİM (AP #2 KRİTİK): malt-ekle (>5000px içerik) ve maya-seç accordion KIRPMASIZ — Abbey Malt erişilebilir; animasyon (max-height transition) hâlâ çalışıyor',
+    calistir: async (page) => {
+      const c1 = await page.evaluate(() => {
+        __REG.ok('ortam: interpolate-size destekli (Chrome 129+)', CSS.supports('interpolate-size', 'allow-keywords'));
+        const src = KR.find(r => r && Array.isArray(r.maltlar) && r.maltlar.length > 0);
+        tarifAc(src.id); sekme = 'malt'; render();
+        bmAccToggle('malt-ekle', true);
+        const body = document.querySelector('[data-acc-id="malt-ekle"] .bm-acc-body');
+        __REG.ok('malt kataloğu içerik >5000px (bulgu koşulu hâlâ geçerli)', body.scrollHeight > 5000, 'scrollH=' + body.scrollHeight);
+        __REG.ok('KIRPMA YOK: clientHeight === scrollHeight', Math.abs(body.scrollHeight - body.clientHeight) <= 1, body.clientHeight + ' vs ' + body.scrollHeight);
+        __REG.ok('yeni kural aktif: computed max-height = max-content', getComputedStyle(body).maxHeight === 'max-content', getComputedStyle(body).maxHeight);
+        // AP'nin ilk kırpılan öğesi: Abbey Malt — artık body sınırları İÇİNDE (GÖRÜNÜR eşleşme; option gibi 0-height düğümler elenir)
+        const abbey = Array.from(body.querySelectorAll('*')).filter(e => e.children.length === 0 && /Abbey/i.test(e.textContent || '')).find(e => e.getBoundingClientRect().height > 0);
+        const bR = body.getBoundingClientRect();
+        __REG.ok('Abbey Malt GÖRÜNÜR ve body sınırları içinde (erişilebilir)', !!abbey && abbey.getBoundingClientRect().bottom <= bR.bottom + 1, abbey ? 'bottom=' + Math.round(abbey.getBoundingClientRect().bottom) + '/' + Math.round(bR.bottom) : 'görünür abbey YOK');
+        sekme = 'maya'; render();
+        bmAccToggle('maya-sec', true);
+        const mBody = document.querySelector('[data-acc-id="maya-sec"] .bm-acc-body');
+        __REG.ok('maya-seç kataloğu da KIRPMASIZ', !!mBody && Math.abs(mBody.scrollHeight - mBody.clientHeight) <= 1, mBody ? mBody.clientHeight + ' vs ' + mBody.scrollHeight : 'body yok');
+        return __REG.al();
+      });
+      // animasyon kanıtı — DETERMİNİSTİK: app'in GERÇEK .bm-acc-body CSS kuralı, #ekran DIŞI sentinel düğümde ölçülür
+      // (uygulamanın async render'ları #ekran içini tazeleyip in-app ölçümü yarışa sokuyordu — flake kaynağı)
+      const animOk = await page.evaluate(() => new Promise((coz) => {
+        const acc = document.createElement('div');
+        acc.className = 'bm-acc'; acc.setAttribute('aria-expanded', 'true');
+        acc.style.cssText = 'position:absolute;left:-9999px;top:0;width:300px';
+        acc.innerHTML = '<div class="bm-acc-body"><div style="height:9000px"></div></div>';
+        document.body.appendChild(acc);
+        const body = acc.querySelector('.bm-acc-body');
+        let done = false;
+        const bitir = (v) => { if (!done) { done = true; try { acc.remove(); } catch (_e) {} coz(v); } };
+        body.addEventListener('transitionstart', (e) => { if (e.propertyName === 'max-height') bitir(true); });
+        requestAnimationFrame(() => requestAnimationFrame(() => { acc.setAttribute('aria-expanded', 'false'); }));
+        setTimeout(() => bitir(false), 1500);
+      }));
+      const c2 = await page.evaluate((a) => {
+        __REG.ok('ANİMASYON ÇALIŞIYOR: app CSS kuralıyla 9000px içerikte max-height transition başladı (5000px tavan yok)', a === true);
+        sekme = 'malt'; render(); // c1 maya sekmesinde bırakmıştı — malt-ekle DOM'a geri gelsin
+        const body = document.querySelector('[data-acc-id="malt-ekle"] .bm-acc-body');
+        __REG.ok('gerçek katalog body\'sinde transition-property max-height içeriyor (kural bağı)', !!body && getComputedStyle(body).transitionProperty.indexOf('max-height') >= 0, body ? getComputedStyle(body).transitionProperty : 'body yok');
+        bmAccToggle('malt-ekle', false);
+        const acc = document.querySelector('[data-acc-id="malt-ekle"]');
+        __REG.ok('toggle işlevi: accordion kapandı (aria-expanded=false)', acc.getAttribute('aria-expanded') === 'false');
+        return __REG.al();
+      }, animOk);
+      return c1.concat(c2);
+    }
+  },
+  {
+    kod: 'AQ2-BOS', ad: 'BOŞ REÇETE (AP #7): FG 0.999/hayalet ABV YOK (FG=OG); Doktor tek nazik mesaj (panik listesi yok); ML tahmin/ribbon/çip sessiz; stilTah sızmaz; mayasız-maltlıda da FG=OG',
+    calistir: (page) => page.evaluate(() => {
+      yeniTarif();
+      const c = calc();
+      __REG.ok('boş reçete: FG=1.000 (0.999 DEĞİL) + ABV=0 (hayalet alkol yok)', c.fg === 1.000 && c.abv === 0 && c.og === 1.000, 'og=' + c.og + ' fg=' + c.fg + ' abv=' + c.abv);
+      __REG.ok('kapı açık: _bmBosOtoMu()=true', window._bmBosOtoMu() === true);
+      const dom = document.getElementById('ekran').innerHTML;
+      __REG.ok('Doktor: TEK nazik mesaj var', dom.indexOf('Reçete henüz boş') >= 0);
+      __REG.ok('panik listesi YOK: "Reçete Doktoru — Stile uyum" başlığı basılmadı', dom.indexOf('Reçete Doktoru — Stile uyum') < 0);
+      __REG.ok('Kritik/Uyarı çip rozetleri YOK', dom.indexOf('bm-doctor-durum-badge') < 0);
+      __REG.ok('ML ribbonları YOK (Tahmin yapılıyor... dahi basılmaz)', document.querySelector('[data-ribbon]') === null && dom.indexOf('Tahmin yapılıyor') < 0);
+      __REG.ok('başlıkta motor tahmini yerine "Reçete boş"', dom.indexOf('Reçete boş') >= 0);
+      __REG.ok('stilTah global state\'e sızmadı (Kvass vakası)', (S.stilTah || '') === '', 'stilTah=' + S.stilTah);
+      // mayasız ama MALTLI reçete: OG gerçek, FG=OG, ABV=0 (mash 63°C düzeltmesi de hayalet üretmez)
+      S.maltlar = [{ id: 'pilsner', kg: 4 }]; S.mayaId = ''; S.maya2Id = ''; S.mashSc = 63;
+      const c2 = calc();
+      __REG.ok('mayasız+maltlı: OG gerçek (>1.02), FG=OG, ABV=0', c2.og > 1.02 && c2.fg === c2.og && c2.abv === 0, 'og=' + c2.og + ' fg=' + c2.fg + ' abv=' + c2.abv);
+      __REG.ok('malt eklenince kapı kapandı (Doktor çalışabilir)', window._bmBosOtoMu() === false);
+      // mayalı normal reçete: FG < OG aynen (regresyon)
+      S.mayaId = 'us05'; S.mashSc = 67;
+      const c3 = calc();
+      __REG.ok('KARŞI-TEST: mayalı reçetede FG<OG + ABV>0 AYNEN', c3.fg < c3.og && c3.fg >= 1.000 && c3.abv > 0, 'fg=' + c3.fg + ' abv=' + c3.abv.toFixed(1));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AQ2-BOS-MANUEL', ad: 'KARŞI-TEST (AK iskeletsiz akışı): boş reçete + MANUEL stil → BJCP hedef bantları + Doktor önerileri GELİYOR (kapı manuel stilde açık kalır)',
+    calistir: (page) => page.evaluate(() => {
+      yeniTarif();
+      S.stil = 'American IPA'; render();
+      __REG.ok('manuel stil → kapı kapalı', window._bmBosOtoMu() === false);
+      const dom = document.getElementById('ekran').innerHTML;
+      __REG.ok('BJCP hedef bantları görünür (<b>OG:</b> aralığı)', dom.indexOf('<b>OG:</b>') >= 0);
+      __REG.ok('nazik boş-mesaj YOK (Doktor kolu aktif)', dom.indexOf('Reçete henüz boş') < 0);
+      __REG.ok('manuel stil başlıkta (motor değil kullanıcı seçimi)', dom.indexOf('American IPA') >= 0);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AQ2-SKOR', ad: 'TAKİP SKORU FAZ-FARKINDA (AP #8): şişelenmiş batch\'te "Müdahale gerekli" YOK + pencere şişelemede donar + dürüst ad (TAKİP); devam eden sorunlu batch\'te uyarı AYNEN',
+    calistir: (page) => page.evaluate(() => {
+      const gun = (n) => { const d = new Date(Date.now() - n * 864e5); return d.toISOString().slice(0, 10); };
+      __REG.yeniKayit('AQ2 Skor Bira', { mayaId: '' });
+      // az kayıtlı, 60 gün önce pitch — TAMAMLANMIŞ (şişeleme 48g önce + brewSonuc)
+      S.brewLog = [{ tip: 'pitching', tarih: gun(60), id: 'p1', ts: 1 }, { tip: 'sicaklik', deger: '20', tarih: gun(59), id: 't1', ts: 2 }, { tip: 'siseleme', tarih: gun(48), id: 's1', ts: 3 }];
+      S.brewSonuc = { ts: Date.now() - 48 * 864e5, ogG: 1.05, fgG: 1.012, kaynak: { og: 'olcum', fg: 'olcum' } };
+      ekran = 'editor'; sekme = 'takvim'; render();
+      const dom = document.getElementById('ekran').innerHTML;
+      __REG.ok('dürüst ad: "TAKİP SKORU" (KALİTE SKORU değil)', dom.indexOf('TAKİP SKORU') >= 0 && dom.indexOf('KALİTE SKORU') < 0);
+      __REG.ok('"batch tamam" ibaresi görünür', dom.indexOf('batch tamam') >= 0);
+      __REG.ok('ŞİŞELENMİŞ batch\'te "Müdahale gerekli" YOK (az kayıt ≠ kötü bira)', dom.indexOf('Müdahale gerekli') < 0 && dom.indexOf('Kritik ·') < 0);
+      __REG.ok('accordion başlığı: Grafikler & Takip', dom.indexOf('Grafikler &amp; Takip') >= 0 || dom.indexOf('Grafikler & Takip') >= 0);
+      // KARŞI-TEST: aynı az-kayıt DEVAM EDEN batch (şişeleme yok) → eski dürüst uyarı AYNEN
+      S.brewLog = [{ tip: 'pitching', tarih: gun(60), id: 'p1', ts: 1 }, { tip: 'sicaklik', deger: '20', tarih: gun(59), id: 't1', ts: 2 }];
+      S.brewSonuc = null; render();
+      const dom2 = document.getElementById('ekran').innerHTML;
+      __REG.ok('DEVAM EDEN az-kayıtlı batch: "Kritik · Müdahale gerekli" AYNEN (yanlış bastırma yok)', dom2.indexOf('Kritik · Müdahale gerekli') >= 0);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AQ2-SIL', ad: 'tarifSil DRAFT TEMİZLİĞİ (AP K1Y-1): silinen reçetenin taslağı + bekleyen restore da gider (dirilme yok); BAŞKA reçetenin taslağına dokunulmaz',
+    calistir: (page) => page.evaluate(() => {
+      const id = __REG.yeniKayit('AQ2 Sil Bira');
+      const id2 = __REG.yeniKayit('AQ2 Sil Sahit');
+      ekran = 'liste'; render(); // saveDraft editör-dışı no-op → test deterministik
+      localStorage.setItem('bm_draft_v1', JSON.stringify({ s: { biraAd: 'AQ2 Sil Bira', hacim: 12 }, editId: id, ts: Date.now() }));
+      window._pendingDraft = { s: { biraAd: 'AQ2 Sil Bira' }, editId: id };
+      tarifSil(id);
+      __REG.ok('silinen reçetenin taslağı SİLİNDİ (dirilme yok)', localStorage.getItem('bm_draft_v1') === null);
+      __REG.ok('bekleyen restore (_pendingDraft) da temizlendi', window._pendingDraft === null);
+      __REG.ok('reçete KR\'den gitti', !KR.some(k => k && k.id === id));
+      // KARŞI-TEST: taslak BAŞKA reçeteye aitken silme ona DOKUNMAZ
+      // (sıra önemli: yeniKayit→tarifAc clearDraft çağırır — draft, kurban yaratıldıktan SONRA yazılır)
+      const id3 = __REG.yeniKayit('AQ2 Sil Kurban');
+      ekran = 'liste'; render();
+      localStorage.setItem('bm_draft_v1', JSON.stringify({ s: { biraAd: 'AQ2 Sil Sahit', hacim: 13 }, editId: id2, ts: Date.now() }));
+      tarifSil(id3);
+      const d = JSON.parse(localStorage.getItem('bm_draft_v1') || 'null');
+      __REG.ok('başka reçetenin taslağı KORUNDU', !!d && d.editId === id2, 'draft=' + (d ? d.editId : 'null'));
+      localStorage.removeItem('bm_draft_v1');
+      return __REG.al();
+    })
   }
 ];
 
