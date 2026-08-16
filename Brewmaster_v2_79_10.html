@@ -6762,7 +6762,7 @@ function suProfiliHesapla(mineraller, hacim, kaynakId){
 }
 
 // ═══ DURUM ══════════════════════════════════════════════════
-const BOS={biraAd:"",stil:"",verim:61,hacim:11,mashSc:67,mashDk:60,kaynatmaSure:60,mashAdimlar:[],maltlar:[],hoplar:[],mayaId:"",maya2Id:"",mayaYasAy:null,fgManuel:null,ogManuel:null,preboilOG:null,mashPh:null,mashPhSic:"oda",durum:"aktif",klasor:"",brewLog:[],primVol:2.4,primTemp:18,_primVolAuto:true,primYontem:"Dekstroz",notlar:"",suMineralleri:[],suKaynak:"distile",suHedef:"",katkilar:[],tadim:null,planBrewHatirlatmalar:[]};
+const BOS={biraAd:"",stil:"",verim:61,hacim:11,mashSc:67,mashDk:60,kaynatmaSure:60,mashAdimlar:[],maltlar:[],hoplar:[],mayaId:"",maya2Id:"",mayaYasAy:null,fgManuel:null,ogManuel:null,preboilOG:null,spargeL:null,mashPh:null,mashPhSic:"oda",durum:"aktif",klasor:"",brewLog:[],primVol:2.4,primTemp:18,_primVolAuto:true,primYontem:"Dekstroz",notlar:"",suMineralleri:[],suKaynak:"distile",suHedef:"",katkilar:[],tadim:null,planBrewHatirlatmalar:[]};
 let S=JSON.parse(JSON.stringify(BOS)); // SPRINT J: shallow spread S.brewLog===BOS.brewLog referansını paylaşıyordu — adsız reçetede log push BOS şablonunu kirletirdi
   // ══════ v2.79.6 Turkish-character ID migration (backward compatibility) ══════
   // Eski kayıtlarda Turkish karakterli KATKI ID'leri vardı — ASCII'ye dönüştür
@@ -7904,8 +7904,13 @@ window.bmProfilAnaliz = function(){
         // F1: tamamlanmış demlemenin DONMUŞ ölçümleri — canlı kaynaklara bakılmaz (silinme etkilemez)
         ogG = _numS(son.ogG); fgG = _numS(son.fgG);
       } else {
-        ogG = (ogE!=null)?ogE:_num(r.ogManuel);
-        fgG = (fgE!=null)?fgE:_num(r.fgManuel);
+        // SPRINT AT5: editor-alani fallback yalniz snapshot'li batch'te guvenilir — snapshot yazimi
+        // (Sprint M M2) alanlari start aninda sifirlar; dolu alan = start SONRASI gercek olcum.
+        // Snapshot'siz (legacy / geriye-donuk log) recetede demleme-ONCESI girilmis hedef deger
+        // olcum sanilmasin (Pumpkin/Kestane vakasi). Veri SILINMEZ — yalniz profilden dislanir.
+        var _alanOk = !!(r.brewSnapshot && r.brewSnapshot.ts);
+        ogG = (ogE!=null)?ogE:(_alanOk?_num(r.ogManuel):null);
+        fgG = (fgE!=null)?fgE:(_alanOk?_num(r.fgManuel):null);
       }
       // Durum: başlangıç sonrası şişeleme = tamam (1 gün tolerans: manuel tarih gece-yarısı çözünür)
       // SPRINT I I7+I1: kanonik tamamlanma kanıtı brewSonuc VARLIĞI (F1 guard ile aynı) —
@@ -7974,7 +7979,12 @@ window._bmKisiselProfil = function(){
     var n = oz.tamamN, w = Math.min(1, (n-1)/4);                    // sigorta 2: ağırlık
     var out = { aktif:false, n:n, w:w, verimOrt:oz.ortVerim, verimKalibre:null, verimBantDisi:false, fgOfset:null, fgBantDisi:false, attenOrt:oz.ortAtten };
     if(oz.ortVerim != null){
-      if(Math.abs(oz.ortVerim - _BM_VARSAYILAN_VERIM) > 15) out.verimBantDisi = true;  // sigorta 3 (verim)
+      // SPRINT AT4: akil bandi 'varsayilana mesafe' degil MUTLAK fizik araligi sorar — %30-85.
+      // Kaynak: BIAB full-volume tipik %70-80 (homebrewtalk 650168/701635, BYO brew-in-a-bag-efficiency);
+      // no-sparge + kaba kirim %40'lara iner (Muzo gercek olcumu %40.5, design_og_sapma_teshis);
+      // iyi 3-vessel ust uc ~%85. Disi = olcum/veri hatasi suphesi. Eski |ort-61|>15 bandi
+      // Kaan'in gercek verimini kalici disliyordu (kopru hic acilmiyordu).
+      if(oz.ortVerim < 30 || oz.ortVerim > 85) out.verimBantDisi = true;  // sigorta 3 (verim, mutlak aralik)
       else { out.verimKalibre = Math.round((_BM_VARSAYILAN_VERIM*(1-w) + oz.ortVerim*w)*10)/10; out.aktif = true; }
     }
     if(oz.ortFgSapma != null){
@@ -8653,15 +8663,25 @@ function calc(){
   function _atuAgrlk(a){ return (a[0]*2 + a[1]) / 3; }
   // Katkı attenuation boost (glucoamylase +15, amilaz +5, vs.) — TÜM senaryolarda uygulanır
   const _eBoost=(katkilar||[]).reduce((s,k)=>{const kk=KATKILAR.find(a=>a&&a.id===k.id);return s+((kk&&kk.attenBoost)?kk.attenBoost:0);},0);
+  // SPRINT AT7: %100 fermente sekerler (dekstroz/sukroz/candi/meyve sekeri) maya attenuation'ina
+  // TABI DEGIL — FG'de kalinti birakmaz (basit sekerler tamamen fermente olur, gorunur attenuation
+  // yukselir; onceki model seker payini da maya atu'suyla suzuyordu -> FG ~3-4 puan siskin,
+  // design_og_sapma_teshis AS-3). Kapsam: MALT 'Şeker' grubu (laktoz haric — fermente olmaz,
+  // hNFGravity'de) + KATKILAR fermente:true && gu>0. Birim donusumu hOG ile birebir.
+  const _sfHam=(function(){try{let sg=0;
+    (S.maltlar||[]).forEach(m=>{const x=MALTLAR.find(a=>a&&a.id===m.id);if(!x||x.g!=='Şeker'||m.id==='lak')return;sg+=x.gu*(+m.kg||0);});
+    (katkilar||[]).forEach(k=>{const kat=KATKILAR.find(a=>a&&a.id===k.id);if(!kat||!kat.gu||kat.fermente!==true)return;const km=k.birim==='kg'?k.miktar:k.birim==='L'?k.miktar*BM_SIVI_GML:k.birim==='mL'?k.miktar/1000*BM_SIVI_GML:(k.birim==='adet'||k.birim==='tablet'||k.birim==='parça'||k.birim==='dal'||k.birim==='yaprak')?0:k.miktar/1000;sg+=kat.gu*km;});
+    return sg/(h*1000);}catch(_e){return 0;}})();
+  const _sf=Math.max(0,Math.min(_sfHam,(og-1-(_nfg||0)))); // og'yi asamaz (manuel dusuk og klempi)
   let fgHesap=og;
   if(maya&&maya2){
     const w=(typeof S!=='undefined'&&S.kopitchOran!=null)?S.kopitchOran:0.5;
     const a1=Math.min(98,(bmMayaKalib(maya.id)??_atuAgrlk(maya.atu))+_eBoost), a2=Math.min(98,(bmMayaKalib(maya2.id)??_atuAgrlk(maya2.atu))+_eBoost);
     const aEff=a1*w+a2*(1-w);
-    fgHesap=+(1+(_nfg||0)+((og-1-(_nfg||0))*(1-aEff/100))).toFixed(4);
+    fgHesap=+(1+(_nfg||0)+((og-1-(_nfg||0)-_sf)*(1-aEff/100))).toFixed(4);
   }else if(maya){
     const atu=Math.min(98,(bmMayaKalib(maya.id)??_atuAgrlk(maya.atu))+_eBoost);
-    fgHesap=atu>0?+(1+(_nfg||0)+((og-1-(_nfg||0))*(1-atu/100))).toFixed(4):og;
+    fgHesap=atu>0?+(1+(_nfg||0)+((og-1-(_nfg||0)-_sf)*(1-atu/100))).toFixed(4):og;
   }
   // Mash sıcaklığı FG düzeltmesi — SADECE ekstrem değerlerde:
   // 65-68°C "sweet spot" kabul edilir (Brülosophy 2015 deneyi bu aralıkta algısal fark bulamadı).
@@ -14897,6 +14917,12 @@ function rEditorSurec(){
           ${S.preboilOG?`<button class="btn" style="background:none;color:var(--kk);font-size:12px;padding:2px 6px" onclick="S.preboilOG=null;if(window._preboilSnapDondur)_preboilSnapDondur(S,typeof _editId!=='undefined'?_editId:null);render()" aria-label="Pre-boil OG değerini temizle" title="Temizle">✕</button>`:''}
         </div>
         <div style="font-size:var(--fs-xs);color:var(--dim);margin-top:3px">Hedef: ${preOGHedef.toFixed(3)} (${preHacim.toFixed(1)}L pre-boil)</div>
+        <div style="display:flex;gap:6px;align-items:center;margin-top:6px">
+          <span style="font-size:11px;color:var(--soluk);flex:1">💧 Sparge suyu <span style="color:var(--dim)">(opsiyonel)</span></span>
+          <input aria-label="Sparge suyu (L)" type="number" class="inp" style="width:74px;text-align:center;font-weight:700" placeholder="—" value="${S.spargeL!=null?S.spargeL:''}" min="0" max="20" step="0.5" onchange="S.spargeL=this.value!==''?parseFloat(this.value):null;render()">
+          <span style="font-size:11px;color:var(--soluk)">L</span>
+        </div>
+        ${S.spargeL!=null&&S.spargeL<3?`<div style="font-size:var(--fs-xs);color:#7A5020;margin-top:3px">💧 Sparge ${S.spargeL} L — düşük/atlanan sparge verimi düşürebilir (şekerin bir kısmı tahıl yatağında kalır).</div>`:''}
         ${S.preboilOG?(()=>{
           // Verim sapması: gerçek_points / hedef_points
           const gercek=(S.preboilOG-1)*1000;
@@ -14905,7 +14931,7 @@ function rEditorSurec(){
           const gercekVerim=((S.verim||61)*gercek/hedef).toFixed(0);
           if(Math.abs(sapma)<3)return `<div style="margin-top:5px;padding:4px 8px;background:var(--ya);color:var(--yk);border-radius:4px;font-size:10px;font-weight:600">✓ Verim hedefte (%${S.verim||61}). Sapma %${sapma.toFixed(1)}.</div>`;
           if(sapma>0)return `<div style="margin-top:5px;padding:4px 8px;background:var(--ya);color:var(--yk);border-radius:4px;font-size:10px;font-weight:600">🟢 Verim yüksek! Gerçek ~%${gercekVerim} (reçete %${S.verim||61}). Hedef OG de yüksek olacak.</div>`;
-          return `<div style="margin-top:5px;padding:4px 8px;background:#FDF4E0;color:#7A5020;border-radius:4px;font-size:10px;font-weight:600">⚠️ Düşük verim: ~%${gercekVerim} (reçete %${S.verim||61}). OG düşük kalacak. DME ekleyebilir veya kabul et.</div>`;
+          return `<div style="margin-top:5px;padding:4px 8px;background:#FDF4E0;color:#7A5020;border-radius:4px;font-size:10px;font-weight:600">⚠️ Düşük verim: ~%${gercekVerim} (reçete %${S.verim||61}). OG düşük kalacak. DME ekleyebilir veya kabul et.${S.spargeL!=null&&S.spargeL<3?` Düşük sparge (${S.spargeL} L) bununla ilişkili olabilir.`:''}</div>`;
         })():''}
       </div>`;
     })()}
@@ -16231,7 +16257,14 @@ const MALT_DP={
   oat_malt:30,fawcett_oat:30
 };
 
-function gristDenetim(maltlar, MALTLAR, stilAdi, BJCP, srm, og){
+// ═══ SPRINT AT1: kavuzsuz (huskless/yapiskan) grist kimlikleri — suzulme/sikisma denetimi ═══
+// MALTLAR'da tip/kavuz alani YOK (alanlar: id,ad,gu,r,g,mo,bufKap,phc — olculdu) -> acik ID listesi.
+// Kavuzlu antik bugdaylar (spelt/einkorn/emmer) LISTE DISI (kavuzlari harmanla gelir). rice_hulls
+// cozumun kendisi — sayilmaz. Esik kaynaklari: AHA '5 Tips for Avoiding a Stuck Sparge' (rice hulls
+// grist'in %2-5'i); howtohomebrewbeers.com + beerkitbrewer.com merdiveni: <=%20 kavuzsuz -> gerek yok,
+// %20-40 -> 100-150 g/kg yapiskan tahil, >%40 -> 150-200 g/kg; Brulosophy xBmt 2026-06 (American Wheat).
+var _BM_KAVUZSUZ_IDS=['wheat','dark_wheat','best_heidel_wheat','best_wheat','chateau_wheat','thracian_wheat','cara_wheat','flaked_wheat','rwh','torr_wh','midnight','roast_wheat','black_wheat','smoked_oak','buckwheat','rye','cara_rye','flaked_rye','kizil_rye','oat','oat_malt','fawcett_oat','raw_oat','fbar','corn','rice_flaked','corn_grits','potato_fl'];
+function gristDenetim(maltlar, MALTLAR, stilAdi, BJCP, srm, og, verim){
   const out={dagilim:null,bulgular:[]};
   const list=(maltlar||[]).filter(m=>m&&m.id&&(+m.kg>0));
   if(!list.length){return out;}
@@ -16253,6 +16286,17 @@ function gristDenetim(maltlar, MALTLAR, stilAdi, BJCP, srm, og){
   else if(d.seker>20){ ekle('orta','Şeker %'+d.seker+' — yüksek (tipik ≤%20; Belçika güçlü stilleri hariç).'); }
   const nonmalt=+(d.adjunct+d.seker).toFixed(1);
   if(nonmalt>30){ ekle('orta','Malt-dışı (adjunct+şeker) %'+nonmalt+' — yüksek (tipik ≤~%30). FAN/enzim/gövde.'); }
+  // SPRINT AT1+AT6: kavuzsuz oran — fiziksel suzulebilirlik (esik kaynaklari _BM_KAVUZSUZ_IDS ustunde)
+  let _kvzKg=0,_hullsVar=false;
+  list.forEach(m=>{ if(m.id==='rice_hulls'){_hullsVar=true;return;} if(_BM_KAVUZSUZ_IDS.indexOf(m.id)>-1)_kvzKg+=(+m.kg); });
+  const _kvzPct=Math.round(_kvzKg/top*100);
+  if(_kvzPct>=20&&!_hullsVar){
+    const _rhG=Math.round(_kvzKg*(_kvzPct>=40?150:100));
+    if(_kvzPct>=40) ekle('orta','Kavuzsuz tahıl %'+_kvzPct+' (buğday/çavdar/yulaf/flaked) — sepette süzülme sıkışabilir, verim düşebilir. Çeltik kavuzu önerilir: ~'+_rhG+' g (yapışkan tahılın 150-200 g/kg\u0027ı ≈ grist %2-5).');
+    else ekle('orta','Kavuzsuz tahıl %'+_kvzPct+' — süzülme yavaşlayabilir. Çeltik kavuzu (~'+_rhG+' g, 100-150 g/kg) süzülmeyi rahatlatır.');
+  } else if(_kvzPct>=20&&_hullsVar){ ekle('bilgi','Kavuzsuz tahıl %'+_kvzPct+' — çeltik kavuzu gristte var, süzülme desteği yerinde.'); }
+  // AT6: kavuzsuz-agir grist'te verim varsayimi uyarisi (OTOMATIK DEGISTIRME YOK — Sprint Q onay disiplini)
+  if(_kvzPct>=40&&verim!=null&&+verim>=55){ ekle('orta','Verim varsayımı %'+verim+' bu grist için iyimser olabilir — kavuzsuz-ağır grist süzülme kaybıyla daha düşük gerçekleşebilir. Pre-boil OG ile doğrula.'); }
   const st = stilAdi && BJCP && BJCP[stilAdi];
   if(st){
     if(st.srm && srm!=null){ const a=st.srm[0],bv=st.srm[1];
@@ -16530,7 +16574,7 @@ function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
       </div>
       <div style="font-size:11px;color:var(--dim);line-height:1.4">Varsayılan %12/saat (Palmer). Kapalı all-in-one kazan (Bulldog) tipik ~%5–8; açık kazan daha yüksek. Su miktarı ve pre-boil OG hedefini etkiler; OG tahminini değiştirmez.</div>
     </div>
-    ${(function(){try{return _gristDenetimRender(gristDenetim(S.maltlar,MALTLAR,(S.stil||null),(typeof BJCP!=='undefined'?BJCP:null),srm,og));}catch(_e){return '';}})()}
+    ${(function(){try{return _gristDenetimRender(gristDenetim(S.maltlar,MALTLAR,(S.stil||null),(typeof BJCP!=='undefined'?BJCP:null),srm,og,S.verim));}catch(_e){return '';}})()}
     ${(function(){try{return (typeof gristOlcekHTML==='function')?gristOlcekHTML(og,S.hacim||11):'';}catch(_e){return '';}})()}
     <div class="bm-acc bm-edit-only-acc" data-acc-id="malt-ekle" data-acc-default="${_mEkleDefault}" aria-expanded="${_mEkleAria}" style="margin-top:10px">
       <button class="bm-acc-header" type="button" aria-expanded="${_mEkleAria}" onclick="bmAccToggle('malt-ekle')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmAccToggle('malt-ekle')}"><span class="bm-acc-title">➕ Yeni Malt Ekle</span><span class="bm-acc-chevron">▾</span></button>
@@ -21734,7 +21778,13 @@ window.brewdayRender=function(){
   h+='<div id="brewdayTimerText" style="font-size:42px;font-weight:700;color:#F5D799;font-family:var(--font-display);line-height:1">—:—</div>';
   h+='<div id="brewdayTimerLabel" style="font-size:12px;color:rgba(245,215,153,.7);margin-top:4px">Sonraki adımı aç</div>';
   // Timer kontrol butonları (sadece aktif timer'da görünür)
-  const _timerAktif=!!(aktifEv && aktifEv.timerTur && aktifEv.sure>0);
+  const _onayBekliyor=(typeof _bdOnayGerekli==='function')&&_bdOnayGerekli(aktifEv);
+  const _timerAktif=!!(aktifEv && aktifEv.timerTur && aktifEv.sure>0 && !_onayBekliyor);
+  if(_onayBekliyor){
+    const _obMetin=aktifEv.timerTur==='mash'?'🌡️ Sıcaklık tamam, malt içeride — Sayacı başlat':'🔥 Kaynama başladı — Sayacı başlat';
+    h+='<div style="margin-top:10px"><button onclick="brewdayTimerOnayla()" style="background:var(--altin);color:#fff;border:none;border-radius:8px;padding:12px 18px;font-size:13px;font-weight:700;cursor:pointer">'+_obMetin+'</button>';
+    h+='<div style="font-size:10px;color:rgba(254,251,242,.55);margin-top:5px">Süre onaya kadar sayılmaz — ısınmayı bekleyebilirsin.</div></div>';
+  }
   if(_timerAktif){
     h+='<div style="display:flex;gap:6px;justify-content:center;margin-top:10px;flex-wrap:wrap">';
     h+='<button id="brewdayBtnMinus" style="background:rgba(254,251,242,.1);color:#F5D799;border:1px solid rgba(245,215,153,.25);border-radius:6px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation">−1 dk</button>';
@@ -21852,7 +21902,7 @@ window.brewdayRender=function(){
 
 
   // Aktif event'in timer'ı varsa DOM'a basıldıktan sonra başlat
-  if(aktifEv && aktifEv.timerTur && aktifEv.sure>0 && !b.timerInt){
+  if(aktifEv && aktifEv.timerTur && aktifEv.sure>0 && !b.timerInt && !((typeof _bdOnayGerekli==='function')&&_bdOnayGerekli(aktifEv))){ // AT3: onay bekleyen adimda baslatma
     // Timer zaten çalışıyor mu kontrol et (örn. refresh sonrası)
     brewdayTimerBaslat(aktifIdx);
   }else if(b.timerT0){
@@ -21861,6 +21911,19 @@ window.brewdayRender=function(){
   }
 };
 
+// ═══ SPRINT AT3: mash/kaynatma sayaci KULLANICI ONAYIYLA baslar (isinma suresi sayilmaz) ═══
+// mash_step detayi zaten 'Sicakliga ulastiginda onayla' diyordu — davranis artik metinle uyumlu.
+// Whirlpool sure-tabanli (ekleme ani = karta gecis) -> otomatik baslar, DOKUNULMADI. Onay yoksa
+// adim suresiz bekler; otomatik baslatma YOK. Tek baslatma noktasi brewdayRender sonu (ciftlenme yok).
+window._bdOnayGerekli=function(ev){
+  return !!(ev && ev.sure>0 && (ev.timerTur==='mash'||ev.timerTur==='kaynatma') && !ev._timerOnay && !ev._tamamlandi);
+};
+window.brewdayTimerOnayla=function(){
+  const b=window._brewday; const ev=b&&b.ajanda&&b.ajanda[b.aktifIdx];
+  if(!ev||!_bdOnayGerekli(ev))return;
+  ev._timerOnay=true; ev._timerOnayTs=Date.now();
+  brewdayRender();
+};
 // ═══════════════════════════════════════════════════════════════════════════
 // TIMER — Aktif event'in geri sayımı. DOM lookup defensive.
 // ═══════════════════════════════════════════════════════════════════════════
@@ -23627,7 +23690,7 @@ window.brewdayTimerAyarla=function(deltaSn){
   // Timer henüz başlamadıysa aktif event'in timer'ını başlat
   if(!b.timerT0){
     const ev=b.ajanda[b.aktifIdx];
-    if(ev && ev.timerTur && ev.sure>0){
+    if(ev && ev.timerTur && ev.sure>0 && !((typeof _bdOnayGerekli==='function')&&_bdOnayGerekli(ev))){ // AT3 sigorta: onaysiz baslatma bypass'i yok
       brewdayTimerBaslat(b.aktifIdx);
     }else{
       return;
@@ -23649,7 +23712,7 @@ window.brewdayTimerBitir=function(){
   // Timer henüz başlamadıysa aktif event'in timer'ını başlat
   if(!b.timerT0){
     const ev=b.ajanda[b.aktifIdx];
-    if(ev && ev.timerTur && ev.sure>0){
+    if(ev && ev.timerTur && ev.sure>0 && !((typeof _bdOnayGerekli==='function')&&_bdOnayGerekli(ev))){ // AT3 sigorta: onaysiz baslatma bypass'i yok
       brewdayTimerBaslat(b.aktifIdx);
     }else{
       return;

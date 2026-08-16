@@ -699,7 +699,7 @@
 // Sprint AQ3 (2026-08-16): sessiz-hata altyapisi — 26 kritik catch ring'e baglandi (persist/sync/kopru/
 // ogrenme/kurtarma), bmHataKaydet 60sn tip+kaynak throttle, __stilSecKaynak recete degisiminde sifirlanir
 // (Z sinyal sizintisi), Tani karti tip+kaynak gosterir. KURAL 12.3 bump v131-403 -> v131-404.
-const CACHE_VERSION = 'bm-cache-v131-404';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
+const CACHE_VERSION='bm-cache-v131-406';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
 const ASSET_CACHE   = 'bm-assets-v1';        // font + ikon + manifest — KALICI, bump'ta silinmez
 const MODEL_CACHE   = 'bm-models-v1';        // workers.dev + jsdelivr — SHA'li/immutable URL, KALICI
 
