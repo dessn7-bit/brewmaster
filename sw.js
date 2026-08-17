@@ -699,7 +699,12 @@
 // Sprint AQ3 (2026-08-16): sessiz-hata altyapisi — 26 kritik catch ring'e baglandi (persist/sync/kopru/
 // ogrenme/kurtarma), bmHataKaydet 60sn tip+kaynak throttle, __stilSecKaynak recete degisiminde sifirlanir
 // (Z sinyal sizintisi), Tani karti tip+kaynak gosterir. KURAL 12.3 bump v131-403 -> v131-404.
-const CACHE_VERSION='bm-cache-v131-406';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
+// Sprint AU1 (2026-08-18): brewday kalicilik + 6 duzeltme — onay/atlama/baslangic/tamamlamada hedefli KR
+// aynasi (_bdLogKrAynala: brewLog+guncelleme+ky, tarifeKaydet DEGIL) + saveDraft; timer bitis alarmi
+// DOM-bagimsiz (panel gizliyken de calar); strike ilk mash adimi + mash payi; sure tahmini adim toplami;
+// sparge uyari kosulu >0; bolusum yuvarlama kacagi; pitch maya sc/ideal; hop>kaynatma uyarisi.
+// KURAL 12.3 bump v131-406 -> v131-407.
+const CACHE_VERSION='bm-cache-v131-407';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
 const ASSET_CACHE   = 'bm-assets-v1';        // font + ikon + manifest — KALICI, bump'ta silinmez
 const MODEL_CACHE   = 'bm-models-v1';        // workers.dev + jsdelivr — SHA'li/immutable URL, KALICI
 

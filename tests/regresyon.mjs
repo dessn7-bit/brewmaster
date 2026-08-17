@@ -3044,9 +3044,11 @@ const CASELER = [
       __REG.ok('yeni isimlendirme: "Klasik iki-kademe bölüşüm önerisi" görünür', govde.indexOf('Klasik iki-kademe bölüşüm önerisi') >= 0);
       __REG.ok('all-in-one tam hacim yolu görünür (Bulldog gerçeği)', govde.indexOf("tümü mash'e girer") >= 0);
       __REG.ok('eski belirsiz "Strike: ~" etiketi KALKTI', govde.indexOf('Strike: ~') < 0);
-      const m = govde.match(/Mash ~(\d+)L \+ Sparge ~(\d+)L/);
+      // BEKLENTİ DEĞİŞİKLİĞİ (Sprint AU1-6): bölüşüm artık tam sayıya yuvarlanmıyor (çift Math.round
+      // 15.6L'yi 10+5=15'e düşürüyor, 0.6 L sessizce kayboluyordu). Toplam ARTIK BİREBİR korunuyor.
+      const m = govde.match(/Mash ~([\d.]+)L \+ Sparge ~([\d.]+)L/);
       const t = govde.match(/TOPLAM SU([\d.]+)L/);
-      __REG.ok('bölüşüm sayıları toplamı = TOPLAM SU (hesap değişmedi; ±1 yuvarlama)', !!m && !!t && Math.abs((+m[1] + +m[2]) - +t[1]) <= 1, m && t ? m[1]+'+'+m[2]+' vs '+t[1] : 'match yok');
+      __REG.ok('bölüşüm sayıları toplamı = TOPLAM SU (AU1-6: yuvarlama kaçağı yok, birebir)', !!m && !!t && Math.abs((+m[1] + +m[2]) - +t[1]) < 0.05, m && t ? m[1]+'+'+m[2]+' vs '+t[1] : 'match yok');
       // XML INFUSE_AMOUNT regresyonu: formül max(hacim, grist×2.6) AYNEN (blob intercept)
       let yak = null;
       const oc = URL.createObjectURL; URL.createObjectURL = b => { yak = b; return 'blob:f'; };
@@ -3540,6 +3542,236 @@ const CASELER = [
       ekran = 'ayarlar'; render();
       __REG.ok('temizle sonrası kart "✓ Hata kaydı yok"', document.getElementById('ekran').innerHTML.indexOf('Hata kaydı yok') >= 0);
       ekran = 'liste'; render();
+      return __REG.al();
+    })
+  },
+
+  // ── SPRINT AU1: brewday kalıcılık + 6 hata düzeltmesi (AU keşif maddesi 5 + D1-D6) ──
+  {
+    kod: 'AU1-KALICI', ad: 'BREWDAY KALICILIK (AU keşif KIRMIZI): start/onay/atlama/tamamlama KR\'ye (bm_v6+disk) yazar; ÖZET yeniden hesaplanmaz (tarifeKaydet DEĞİL), Z stil sinyali tetiklenmez, brewday logları id\'SİZ kalır',
+    calistir: (page) => page.evaluate(async () => {
+      const malt = MALTLAR.find(m => m && m.id && m.g !== 'Şeker' && m.id !== 'rice_hulls');
+      const my = MAYALAR.find(m => m && m.id);
+      const id = __REG.yeniKayit('REGTEST AU1-KALICI', { mayaId: my.id, maltlar: [{ id: malt.id, kg: 3 }] });
+      const kr0 = KR.find(x => x && x.id === id);
+      const ozet0 = JSON.stringify(kr0.ozet || null);
+      const krLogOnce = (kr0.brewLog || []).length;
+      // Özet kıyasını ANLAMLI yap: S'i değiştir ama KAYDETME. tarifeKaydet çalışsaydı özet DEĞİŞİRDİ.
+      S.hacim = 25;
+      const cNow = calc();
+      __REG.ok('kontrol: hacim değişimi özeti değiştirirdi (kıyas anlamlı)', !kr0.ozet || cNow.og.toFixed(3) !== kr0.ozet.og, (kr0.ozet && kr0.ozet.og) + ' vs ' + cNow.og.toFixed(3));
+      const zOnce = localStorage.getItem('bm_stil_ogren_v1');
+      await brewdayBaslat();
+      __REG.ok('brewday_start KR\'ye düştü (eski davranış: yalnız taslak)', (KR.find(x => x && x.id === id).brewLog || []).some(x => x && x.tip === 'brewday_start'));
+      brewdayAktifOnayla();
+      __REG.ok('onay anında KR\'de (brewday_event)', (KR.find(x => x && x.id === id).brewLog || []).some(x => x && x.tip === 'brewday_event'));
+      _bmDirty = false;
+      brewdayAtla();
+      __REG.ok('atlama anında KR\'de (brewday_event_atlandi)', (KR.find(x => x && x.id === id).brewLog || []).some(x => x && x.tip === 'brewday_event_atlandi'));
+      __REG.ok('sync kuyruğu tetiklendi (ky sarmalayıcısı: _bmDirty)', _bmDirty === true);
+      let g = 0; while (g++ < 40 && window._brewday.aktif) brewdayAtla();
+      __REG.ok('brewday tamamlandı', window._brewday.aktif === false);
+      const kr = KR.find(x => x && x.id === id);
+      __REG.ok('brewday_end KR\'de', (kr.brewLog || []).some(x => x && x.tip === 'brewday_end'));
+      __REG.ok('KR log sayısı = S log sayısı (kayıp yok)', (kr.brewLog || []).length === (S.brewLog || []).length && (kr.brewLog || []).length > krLogOnce, (kr.brewLog || []).length + '/' + (S.brewLog || []).length);
+      __REG.ok('brewday logları id\'SİZ (_logAnahtar t: dalı → KR birleşiminde çiftleme yok)', (kr.brewLog || []).filter(x => x && String(x.tip || '').indexOf('brewday') === 0 && x.id != null).length === 0);
+      __REG.ok('ÖZET yeniden hesaplanmadı (tarifeKaydet çağrılmadı)', JSON.stringify(kr.ozet || null) === ozet0, ozet0 + ' → ' + JSON.stringify(kr.ozet || null));
+      __REG.ok('KR.hacim dokunulmadı (yalnız brewLog+guncelleme yazıldı)', kr.hacim !== 25, String(kr.hacim));
+      __REG.ok('Sprint Z stil sinyali TETİKLENMEDİ', localStorage.getItem('bm_stil_ogren_v1') === zOnce, String(localStorage.getItem('bm_stil_ogren_v1')));
+      __REG.ok('guncelleme damgası tazelendi (LWW sırası doğru)', kr.guncelleme >= kr0.guncelleme);
+      const lsK = (JSON.parse(localStorage.getItem('bm_v6') || '[]')).find(x => x && x.id === id);
+      __REG.ok('DİSKTE (bm_v6) brewday logu var — telefon kapansa kayıp yok', !!lsK && (lsK.brewLog || []).some(x => x && x.tip === 'brewday_end'));
+      const idbOk = await new Promise(res => {
+        let bitti = false;
+        try { window._bmIDB.get('bm_v6', function (v) { bitti = true; try { const a = JSON.parse(v || '[]'); const k = a.find(x => x && x.id === id); res(!!k && (k.brewLog || []).some(x => x && x.tip === 'brewday_end')); } catch (e) { res(false); } }); } catch (e) { res(false); }
+        setTimeout(() => { if (!bitti) res(false); }, 3000);
+      });
+      __REG.ok('IndexedDB aynası da taşıyor (bm_backup/kv — LS eviction kurtarma yolu)', idbOk === true);
+      // Çiftleme karşı-testi: aynı ayna iki kez koşarsa log ÇOĞALMAZ
+      const nOnce = (kr.brewLog || []).length;
+      window._bdLogKrAynala('test'); window._bdLogKrAynala('test');
+      __REG.ok('ayna tekrar koşunca log ÇOĞALMADI (birleşim tekil)', (KR.find(x => x && x.id === id).brewLog || []).length === nOnce, nOnce + ' → ' + (KR.find(x => x && x.id === id).brewLog || []).length);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AU1-TASLAK', ad: 'TASLAK SİGORTASI + GHOST-DRAFT: KR aynası yazamazsa onay taslağa düşer (oturum-içi koruma); ayna yazdığında taslak temizlenir (Sprint N ghost uyarısı çıkmaz)',
+    calistir: (page) => page.evaluate(async () => {
+      const my = MAYALAR.find(m => m && m.id);
+      const id = __REG.yeniKayit('REGTEST AU1-TASLAK', { mayaId: my.id });
+      localStorage.removeItem('bm_draft_v1');
+      S.notlar = 'AU1 taslak farkı'; // S ≠ KR → taslak yazılmalı
+      await brewdayBaslat();
+      brewdayAktifOnayla();
+      const d = JSON.parse(localStorage.getItem('bm_draft_v1') || 'null');
+      __REG.ok('onay taslağa yazıldı (S≠KR iken oturum-içi çökme koruması)', !!d && ((d.s || {}).brewLog || []).some(x => x && x.tip === 'brewday_event'), d ? 'draft var' : 'draft YOK');
+      // KR yolu kapanırsa (kayıt silinmiş) taslak TEK sigorta olarak kalmalı
+      const kesik = KR.findIndex(x => x && x.id === id);
+      const yedek = KR.splice(kesik, 1)[0];
+      brewdayAktifOnayla();
+      const d2 = JSON.parse(localStorage.getItem('bm_draft_v1') || 'null');
+      __REG.ok('KR kaydı yokken ayna sessizce durur, taslak yazmaya devam eder', !!d2 && ((d2.s || {}).brewLog || []).filter(x => x && x.tip === 'brewday_event').length >= 2, d2 ? String(((d2.s || {}).brewLog || []).length) : 'draft YOK');
+      __REG.ok('ayna false döndü (yazacak kayıt yok)', window._bdLogKrAynala('test') === false);
+      KR.splice(kesik, 0, yedek); _origKy(KR);
+      // S==KR halinde ghost taslak kalmamalı
+      const id2 = __REG.yeniKayit('REGTEST AU1-GHOST', { mayaId: my.id });
+      localStorage.removeItem('bm_draft_v1');
+      await brewdayBaslat();
+      let g = 0; while (g++ < 40 && window._brewday.aktif) brewdayAtla();
+      const kr2 = KR.find(x => x && x.id === id2);
+      __REG.ok('brewday tamam + KR aynası yazdı', !window._brewday.aktif && (kr2.brewLog || []).some(x => x && x.tip === 'brewday_end'));
+      __REG.ok('GHOST TASLAK YOK (ayna sonrası S==KR → saveDraft temizledi)', !localStorage.getItem('bm_draft_v1'), String(localStorage.getItem('bm_draft_v1')).slice(0, 80));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AU1-RID', ad: 'RID KAPISI: brewday sürerken BAŞKA reçete açılırsa ayna YAZMAZ (yanlış reçeteye giren log birleşimden geri alınamaz) — durum ring\'e düşer',
+    calistir: (page) => page.evaluate(async () => {
+      const my = MAYALAR.find(m => m && m.id);
+      const id = __REG.yeniKayit('REGTEST AU1-RID-A', { mayaId: my.id });
+      await brewdayBaslat();
+      __REG.ok('b.rid brewday başında donduruldu', window._brewday.rid === String(id), String(window._brewday.rid));
+      bmHataLogSil();
+      const id2 = __REG.yeniKayit('REGTEST AU1-RID-B', { mayaId: my.id }); // tarifAc → _editId değişti
+      __REG.ok('başka reçete açıldı (_editId değişti)', String(_editId) === String(id2) && window._brewday.rid !== String(id2));
+      brewdayAktifOnayla();
+      const krB = KR.find(x => x && x.id === id2);
+      __REG.ok('YABANCI reçetenin KR\'sine brewday logu YAZILMADI', !(krB.brewLog || []).some(x => x && String(x.tip || '').indexOf('brewday') === 0), JSON.stringify((krB.brewLog || []).map(x => x.tip)));
+      const ring = JSON.parse(localStorage.getItem('bm_hata_log_v1') || '[]');
+      __REG.ok('sessiz kalmadı: ring\'de _bdLogKrAynala kaydı var', ring.some(x => x && String(x.kaynak || '').indexOf('_bdLogKrAynala') === 0), JSON.stringify(ring.map(x => x && x.kaynak)));
+      bmHataLogSil();
+      brewdayZorlaSifirla(true);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AU1-ALARM', ad: 'TIMER ALARMI DOM\'DAN BAĞIMSIZ (keşif B6): ✕ ile panel gizliyken süre dolunca alarm ÇALAR; tek sefer (çiftlenme yok); AT3 onay kapısı + interval tekilliği korunur',
+    calistir: (page) => page.evaluate(async () => {
+      const say = { beep: 0, titret: 0, bildirim: 0, title: 0 };
+      const _b = window._brewBeep, _t = window._brewTitret, _n = window._brewBildirim, _f = window._brewTitleFlash;
+      window._brewBeep = function () { say.beep++; };
+      window._brewTitret = function () { say.titret++; };
+      window._brewBildirim = function () { say.bildirim++; };
+      window._brewTitleFlash = function () { say.title++; };
+      try {
+        const my = MAYALAR.find(m => m && m.id);
+        __REG.yeniKayit('REGTEST AU1-ALARM', { mayaId: my.id });
+        await brewdayBaslat();
+        const ev = window._brewday.ajanda[window._brewday.aktifIdx];
+        __REG.ok('AT3 kapısı duruyor: mash adımı ONAY bekliyor, sayaç kendiliğinden başlamadı', _bdOnayGerekli(ev) === true && !window._brewday.timerInt);
+        brewdayTimerOnayla();
+        const intOnce = window._brewday.timerInt;
+        __REG.ok('AT3: onaydan SONRA sayaç çalışıyor', !!intOnce && !!window._brewday.timerT0);
+        brewdayTimelineGizle();
+        __REG.ok('panel ✕ ile gizlendi (timer DOM\'u yok)', !document.getElementById('brewdayTimerText') && !document.getElementById('brewdayTimerLabel'));
+        __REG.ok('gizleme sayacı durdurmadı (interval aynı)', window._brewday.timerInt === intOnce);
+        const b0 = say.beep, t0 = say.titret, n0 = say.bildirim;
+        window._brewday.timerT0 = Date.now() - (window._brewday.timerSure * 1000) - 1000; // süre doldu
+        brewdayTimerTik();
+        __REG.ok('DOM YOKKEN alarm çaldı: bip + titreşim + bildirim', say.beep > b0 && say.titret > t0 && say.bildirim > n0, JSON.stringify(say));
+        __REG.ok('timerBitti damgası kondu (tekillik kapısı)', window._brewday.timerBitti === true);
+        const b1 = say.beep, n1 = say.bildirim;
+        brewdayTimerTik(); brewdayTimerTik();
+        __REG.ok('alarm ÇİFTLENMEDİ (sonraki tik\'ler sessiz)', say.beep === b1 && say.bildirim === n1, JSON.stringify(say));
+        brewdayRender();
+        const lbl = document.getElementById('brewdayTimerLabel');
+        __REG.ok('panel geri açılınca "SÜRE DOLDU" etiketi doğru', !!lbl && lbl.textContent.indexOf('SÜRE DOLDU') > -1, lbl && lbl.textContent);
+        __REG.ok('re-render sayaç interval\'ini ÇİFTLEMEDİ', window._brewday.timerInt === intOnce);
+        brewdayZorlaSifirla(true);
+      } finally {
+        window._brewBeep = _b; window._brewTitret = _t; window._brewBildirim = _n; window._brewTitleFlash = _f;
+      }
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AU1-STRIKE', ad: 'D1/D4 STRIKE + BÖLÜŞÜM (Muzo geometrisi 3.16kg · 11L · 70dk · 46→67→72→76): strike ≈49.3°C (eski 70.9 YOK), oran mash payından, bölüşüm 10.1+5.5=15.6 (eski 10+5=15), yaklaşıklık işareti var',
+    calistir: (page) => page.evaluate(() => {
+      const malt = MALTLAR.find(m => m && m.id && m.g !== 'Şeker' && m.id !== 'rice_hulls');
+      __REG.yeniKayit('REGTEST AU1-STRIKE', {});
+      S.hacim = 11; S.kaynatmaSure = 70; S.grainTemp = 20; S.spargeL = null;
+      S.maltlar = [{ id: malt.id, kg: 3.16 }];
+      S.mashSc = 67; S.mashDk = 60;
+      S.mashAdimlar = [{ sc: 46, dk: 15 }, { sc: 67, dk: 45 }, { sc: 72, dk: 25 }, { sc: 76, dk: 15 }];
+      sekme = 'hesap'; render();
+      const t = () => document.getElementById('ekran').textContent;
+      __REG.ok('TOPLAM SU 15.6L (keşif ölçümüyle birebir)', t().indexOf('15.6L') > -1);
+      __REG.ok('D4: bölüşüm 10.1 + 5.5 (çift Math.round kalktı, 0.6L kaçak kapandı)', t().indexOf('Mash ~10.1L + Sparge ~5.5L') > -1, t().slice(t().indexOf('bölüşüm önerisi'), t().indexOf('bölüşüm önerisi') + 60));
+      __REG.ok('D4: eski yuvarlanmış "Mash ~10L + Sparge ~5L" YOK', t().indexOf('Mash ~10L + Sparge ~5L') === -1);
+      __REG.ok('D1: strike ≈49.3°C (ilk mash adımı 46°C + mash payı)', t().indexOf('≈49.3°C') > -1);
+      __REG.ok('D1: eski yanlış 70.9°C YOK (25°C sapma kapandı)', t().indexOf('70.9') === -1);
+      __REG.ok('D1: hedefin İLK adım olduğu görünür', t().indexOf('hedef mash 46°C (1. adım)') > -1);
+      __REG.ok('D1: mash suyu + kaynağı şeffaf', t().indexOf('mash suyu 10.1L (%65 bölüşüm önerisi)') > -1);
+      __REG.ok('D1 ŞÜPHE: kazan ısı kaybı modellenmediği yazılı (sahte kesinlik yok)', t().indexOf('Kazan ısı kaybı modellenmez') > -1);
+      __REG.ok('D1 ŞÜPHE: varsayım halinde tek-dokunuş çıkış yolu gösteriliyor (sparge gir / tam hacim 0)', t().indexOf('Sparge litresini Süreç sekmesinde girersen') > -1);
+      // sparge girilirse mash payı ondan gelir
+      S.spargeL = 3; render();
+      __REG.ok('sparge 3L girilince mash payı 12.6L → ≈48.7°C', t().indexOf('≈48.7°C') > -1 && t().indexOf('mash suyu 12.6L (toplam − sparge 3L)') > -1);
+      __REG.ok('sparge girilince varsayım ipucu SUSAR (artık varsayım değil)', t().indexOf('Sparge litresini Süreç sekmesinde girersen') === -1);
+      // bilinçli tam hacim (sparge 0) = tüm su mash'te
+      S.spargeL = 0; render();
+      __REG.ok('sparge 0 (bilinçli tam hacim) → mash suyu 15.6L, ≈48.2°C', t().indexOf('≈48.2°C') > -1 && t().indexOf('mash suyu 15.6L (tam hacim (sparge yok))') > -1);
+      // tek adımlı reçete: eski davranış (S.mashSc) korunur
+      S.spargeL = null; S.mashAdimlar = []; render();
+      __REG.ok('adımsız reçetede S.mashSc kullanılır (regresyon yok)', t().indexOf('hedef mash 67°C') > -1 && t().indexOf('(1. adım)') === -1);
+      sekme = 'genel'; render();
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AU1-AJANDA', ad: 'D2/D5/D6 AJANDA: süre tahmini mash ADIM TOPLAMINDAN (175→215, ısınma hariç yazılı); pitch sıcaklığı gerçek maya sc/ideal (lager 9-15, sabit 18-22 YOK); hop dk > kaynatma UYARISI',
+    calistir: (page) => page.evaluate(() => {
+      const malt = MALTLAR.find(m => m && m.id && m.g !== 'Şeker' && m.id !== 'rice_hulls');
+      const hop = HOPLAR.find(h => h && h.id);
+      __REG.yeniKayit('REGTEST AU1-AJANDA', {});
+      S.hacim = 11; S.kaynatmaSure = 70; S.mashSc = 67; S.mashDk = 60;
+      S.mashAdimlar = [{ sc: 46, dk: 15 }, { sc: 67, dk: 45 }, { sc: 72, dk: 25 }, { sc: 76, dk: 15 }]; // toplam 100 dk
+      S.maltlar = [{ id: malt.id, kg: 3.16 }];
+      S.hoplar = [{ id: hop.id, g: 4, dk: 75, tur: 'boil' }]; // 75 > 70 → fiziken imkânsız
+      S.mayaId = 'w3470'; // lager: sc [9,15], ideal 12
+      // D5 — pitch sıcaklığı
+      let a = brewdayAjandaUret();
+      const pitch = a.find(x => x.tip === 'pitch');
+      __REG.ok('D5: pitch detayı gerçek maya aralığı (9-15°C) + ideal 12°C', !!pitch && pitch.detay.indexOf('9-15°C (ideal 12°C)') > -1, pitch && pitch.detay);
+      __REG.ok('D5: her mayada sabit "18-22°C" talimatı YOK', !pitch || pitch.detay.indexOf('18-22°C') === -1);
+      __REG.ok('D5: olmayan alan artık okunmuyor (my?.sic_min çağrısı yok)', String(brewdayAjandaUret).indexOf('my?.sic_min') === -1 && String(brewdayAjandaUret).indexOf('my?.sic_max') === -1);
+      S.mayaId = 'us05'; a = brewdayAjandaUret();
+      __REG.ok('D5 karşı-test: ale mayasında 15-24°C (ideal 20°C)', a.find(x => x.tip === 'pitch').detay.indexOf('15-24°C (ideal 20°C)') > -1);
+      // D6 — hop > kaynatma uyarısı
+      const hopEv = a.find(x => x.tip === 'hop_add');
+      __REG.ok('D6: hop 75 dk > kaynatma 70 dk uyarısı ajandada', !!hopEv && hopEv.detay.indexOf('75 dk > kaynatma 70 dk') > -1, hopEv && hopEv.detay);
+      __REG.ok('D6: uyarı "hop alarmı eşleşmez" gerçeğini söylüyor', hopEv.detay.indexOf('hop alarmı eşleşmez') > -1);
+      __REG.ok('D6: clamp YOK — reçetenin gerçeği (dkKalan 75) değişmedi', hopEv.dkKalan === 75, String(hopEv.dkKalan));
+      S.hoplar = [{ id: hop.id, g: 4, dk: 60, tur: 'boil' }];
+      const hopEv2 = brewdayAjandaUret().find(x => x.tip === 'hop_add');
+      __REG.ok('D6 karşı-test: 60 ≤ 70 → uyarı YOK (yanlış-pozitif yok)', hopEv2.detay.indexOf('sığmıyor') === -1 && hopEv2.detay.indexOf('Kaynatma bitişine 60 dk kala') > -1, hopEv2.detay);
+      // D2 — başlangıç modalindeki süre tahmini
+      brewdayBaslatEkran();
+      const modal = document.getElementById('brewdayOnayModal');
+      __REG.ok('başlangıç modali açıldı', !!modal);
+      __REG.ok('D2: süre 215 dk (mash adım toplamı 100 + kaynatma 70 + 45)', modal.textContent.indexOf('yaklaşık 215 dk') > -1, modal.textContent.slice(0, 160));
+      __REG.ok('D2: eski 175 dk (S.mashDk tek adım) YOK', modal.textContent.indexOf('175 dk') === -1);
+      __REG.ok('D2 dürüstlük: ısınma/soğutma hariç olduğu yazılı (Muzo gerçeği 272 dk)', modal.textContent.indexOf('ısınma/soğutma hariç') > -1);
+      brewdayOnayKapat();
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AU1-SPARGE', ad: 'D3 DÜŞÜK-SPARGE UYARISI: koşul >0 && <3 — boşta (undefined) sessiz, 0\'da (bilinçli tam hacim) SAHTE ALARM YOK, 2L\'de uyarı çıkar',
+    calistir: (page) => page.evaluate(() => {
+      const malt = MALTLAR.find(m => m && m.id && m.g !== 'Şeker' && m.id !== 'rice_hulls');
+      __REG.yeniKayit('REGTEST AU1-SPARGE', {});
+      S.hacim = 11; S.maltlar = [{ id: malt.id, kg: 3.16 }]; S.mashSc = 67;
+      const uyariVar = () => document.getElementById('ekran').textContent.indexOf('düşük/atlanan sparge') > -1;
+      S.spargeL = null; sekme = 'surec'; render();
+      __REG.ok('spargeL boş → uyarı YOK (Muzo\'da zaten tetiklenmiyordu)', !uyariVar());
+      S.spargeL = 0; render();
+      __REG.ok('spargeL=0 (bilinçli tam hacim) → SAHTE ALARM YOK (yeni davranış)', !uyariVar());
+      S.spargeL = 2; render();
+      __REG.ok('spargeL=2 → uyarı ÇIKAR (gerçek düşük sparge)', uyariVar());
+      S.spargeL = 5.5; render();
+      __REG.ok('spargeL=5.5 → uyarı YOK', !uyariVar());
+      S.spargeL = null; sekme = 'genel'; render();
       return __REG.al();
     })
   }
