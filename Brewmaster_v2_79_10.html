@@ -5930,11 +5930,14 @@ window._stilMayaOner = function(bjcpAd){
 };
 
 // UI: "İskeleti Doldur" — B katmanı iskelet doldur (boş→direkt, dolu→onay) VEYA C katmanı (yalnız maya önerisi).
-window.bmStilIskeletDoldur = function(){
+// SPRINT AV1: opsiyonel `sessiz` — çağıran kendi özet mesajını kuracaksa flash BASTIRILIR ve
+// {katman:'B'|'C', mesaj} döner. Parametresiz çağrılar (dropdown butonu, AK 'Doldur', testler)
+// AYNEN eski davranışı alır — imza geriye dönük uyumlu.
+window.bmStilIskeletDoldur = function(sessiz){
   try{
     if(typeof S==='undefined'||!S) return;
     var st = S.stil;
-    if(!st){ if(typeof flash==='function')flash("Önce hedef stil seç","err"); return; }
+    if(!st){ if(typeof flash==='function')flash("Önce hedef stil seç","err"); return null; }
     var isk = (typeof STIL_ISKELET!=='undefined')?STIL_ISKELET[st]:null;
     var doluMu = (Array.isArray(S.maltlar)&&S.maltlar.length) || (Array.isArray(S.hoplar)&&S.hoplar.length);
     if(!isk){
@@ -5945,12 +5948,13 @@ window.bmStilIskeletDoldur = function(){
       window.__stilSecKaynak='iskelet'; // Sprint Z: stilden-reçete = NİYET (düzeltme sinyali değil)
       if(typeof _receteYazSync==='function')_receteYazSync();
       if(typeof render==='function')render();
-      if(typeof flash==='function')flash("Bu stil için hazır iskelet yok — BJCP hedefleri + maya önerisi hazır, malt/hop'u sen ekle","ok");
-      return;
+      var _mC="Bu stil için hazır iskelet yok — BJCP hedefleri + maya önerisi hazır, malt/hop'u sen ekle";
+      if(!sessiz && typeof flash==='function')flash(_mC,"ok");
+      return {katman:'C', mesaj:_mC};
     }
-    if(doluMu && typeof confirm==='function' && !confirm("Mevcut malt/hop/maya bu stilin iskeletiyle DEĞİŞTİRİLECEK. Emin misin?")) return;
+    if(!sessiz && doluMu && typeof confirm==='function' && !confirm("Mevcut malt/hop/maya bu stilin iskeletiyle DEĞİŞTİRİLECEK. Emin misin?")) return null;
     var r = window._stilIskeletHesap ? _stilIskeletHesap(st, (S.hacim>0?S.hacim:11), (S.verim>0?S.verim:61)) : null;
-    if(!r || !r.malts || !r.malts.length){ if(typeof flash==='function')flash("İskelet hesaplanamadı","err"); return; }
+    if(!r || !r.malts || !r.malts.length){ if(typeof flash==='function')flash("İskelet hesaplanamadı","err"); return null; }
     S.maltlar = r.malts;
     S.hoplar = r.hops;
     if(r.mayaId) S.mayaId = r.mayaId;
@@ -5958,8 +5962,110 @@ window.bmStilIskeletDoldur = function(){
     window.__stilSecKaynak='iskelet'; // Sprint Z: stilden-reçete = NİYET (düzeltme sinyali değil)
     if(typeof _receteYazSync==='function')_receteYazSync();
     if(typeof render==='function')render();
-    if(typeof flash==='function')flash("📋 "+st+" iskeleti "+(S.hacim>0?S.hacim:11)+"L'ye ölçeklenip dolduruldu"+((isk.kaynak==='cikarim'||isk.kaynak==='cikarim_v2')&&isk.n?" ("+isk.n+" gerçek reçeteden türetildi"+(isk.maya?", "+isk.maya+" maya":"")+")":"")+" — başlangıç noktası, serbestçe değiştir"+(window._bmOffStilRecallStr?_bmOffStilRecallStr(st):""),"ok");
+    var _mB=("📋 "+st+" iskeleti "+(S.hacim>0?S.hacim:11)+"L'ye ölçeklenip dolduruldu"+((isk.kaynak==='cikarim'||isk.kaynak==='cikarim_v2')&&isk.n?" ("+isk.n+" gerçek reçeteden türetildi"+(isk.maya?", "+isk.maya+" maya":"")+")":"")+" — başlangıç noktası, serbestçe değiştir"+(window._bmOffStilRecallStr?_bmOffStilRecallStr(st):""));
+    if(!sessiz && typeof flash==='function')flash(_mB,"ok");
+    return {katman:'B', mesaj:_mB};
   }catch(e){ try{console.warn('bmStilIskeletDoldur',e);}catch(_){} }
+};
+
+// ═══ SPRINT AV1: ÖNERİDEN DOĞRUDAN YENİ REÇETE ═══════════════════════════════
+// Kaan'ın isteği: "en iyi 3 reçete geliyor ya, ben bu reçeteyi yapmak istediğimde
+// üstüne basayım ve yeni reçete oluştursun." Mevcut "📋 Doldur" AÇIK reçeteyi
+// dolduruyordu — önce boş reçete açmak gerekiyordu. Bu yol tek dokunuşta:
+// açık işi güvenceye al → yeniTarif() → ad + stil → MEVCUT iskelet yolu → kaydet.
+//
+// YENİ HESAP YOK: doldurma tamamen bmStilIskeletDoldur (V1a/V2 ölçekleme + tutarlılık
+// kapısı + AL/AM'in 63 iskeleti). İskeleti olmayan stilde C katmanı aynen geçerli —
+// malt/hop BOŞ kalır, sahte iskelet ÜRETİLMEZ (V1a dersi).
+
+// Ad çakışmasını çözer: "Robust Porter" → varsa "Robust Porter — 19.8.2026" → varsa "(2)".
+window._bmYeniReceteAd = function(base){
+  try{
+    var ad = String(base||'Yeni Reçete').trim() || 'Yeni Reçete';
+    var varMi = function(a){
+      if(typeof KR==='undefined' || !Array.isArray(KR)) return false;
+      var n = a.trim().toLowerCase();
+      return KR.some(function(k){ return k && String(k.biraAd||'').trim().toLowerCase() === n; });
+    };
+    if(!varMi(ad)) return ad;
+    var d = new Date();
+    var aday = ad + ' — ' + d.getDate() + '.' + (d.getMonth()+1) + '.' + d.getFullYear();
+    if(!varMi(aday)) return aday;
+    for(var i=2;i<60;i++){ if(!varMi(aday+' ('+i+')')) return aday+' ('+i+')'; }
+    return aday + ' (' + Date.now() + ')';
+  }catch(e){ if(window.bmHataKaydet)bmHataKaydet('calc',e,'_bmYeniReceteAd'); return String(base||'Yeni Reçete'); }
+};
+
+// Açık editördeki işi YENİ reçeteye geçmeden önce güvenceye alır.
+// Dönen: {yol:'kayitli'|'adli'|'adsiz'|'bos', ad:'...'}
+// KURAL (AU-1 dersi): taslak tek başına kalıcılık katmanı DEĞİLDİR. yeni reçete
+// kaydedilince clearDraft() koşar → adsız çalışmanın taslağı da giderdi. O yüzden
+// iş burada KR'ye yazılır; native confirm() KULLANILMAZ (AU2-5a: WebView'da güvenilmez,
+// false dönerse kullanıcı akışı hiç kullanamazdı).
+window._bmAcikIsiGuvenceyeAl = function(){
+  try{
+    if(typeof S==='undefined' || !S) return {yol:'bos', ad:''};
+    var ad = String(S.biraAd||'').trim();
+    var dolu = !!(ad || (S.maltlar||[]).length || (S.hoplar||[]).length || S.mayaId ||
+                  String(S.notlar||'').trim() || (S.brewLog||[]).length || S.tadim);
+    if(!dolu) return {yol:'bos', ad:''};
+    // (a) KR'de kayıtlı reçete → mevcut commit yolu ("Doldur" da bunu kullanıyor)
+    if(typeof _editId!=='undefined' && _editId && ad){
+      if(typeof _receteYazSync==='function') _receteYazSync();
+      return {yol:'kayitli', ad:ad};
+    }
+    // (b) adı VAR ama hiç kaydedilmemiş → kendi reçetesi olarak kaydet (kayıp yok)
+    if(ad){
+      var ok = (typeof tarifeKaydet==='function') ? tarifeKaydet() : false;
+      return {yol: ok?'adli':'bos', ad:ad};
+    }
+    // (c) ADSIZ ama içerik var → saveDraft adsız reçeteye zaten taslak yazmıyor
+    //     (bugün de korumasız). Sessizce yok etmek yerine üretilmiş adla kaydedilir;
+    //     kullanıcıya adı söylenir, istemezse silebilir.
+    var d = new Date();
+    S.biraAd = window._bmYeniReceteAd('Adsız çalışma — ' + d.getDate() + '.' + (d.getMonth()+1) + '.' + d.getFullYear());
+    var ok2 = (typeof tarifeKaydet==='function') ? tarifeKaydet() : false;
+    return {yol: ok2?'adsiz':'bos', ad:S.biraAd};
+  }catch(e){ if(window.bmHataKaydet)bmHataKaydet('persist',e,'_bmAcikIsiGuvenceyeAl'); return {yol:'bos', ad:''}; }
+};
+
+// Stil adından YENİ reçete üretir ve editörde açar. Dönen: yeni reçete id'si veya null.
+window._bmStildenYeniRecete = function(stilAd){
+  try{
+    var st = String(stilAd||'').trim();
+    if(!st){ if(typeof flash==='function')flash('Stil adı yok','err'); return null; }
+    if(typeof BJCP==='undefined' || !BJCP[st]){ if(typeof flash==='function')flash('Bilinmeyen stil: '+st,'err'); return null; }
+    if(typeof yeniTarif!=='function'){ if(typeof flash==='function')flash('Yeni reçete açılamadı','err'); return null; }
+    // 1) Kullanıcının SİSTEM parametreleri yeni reçeteye taşınır (reçete verisi değil,
+    //    ekipman gerçeği): iskelet bu hacme ölçeklenir. Batch boyutu her seferinde
+    //    11L'ye düşseydi öneri Kaan'ın 10-12L sistemine uymazdı.
+    var _hacim = (+S.hacim>0) ? +S.hacim : null;
+    var _verim = (+S.verim>0) ? +S.verim : null;
+    // 2) Açık işi güvenceye al (KAYIP YOK) — yeni reçetenin kaydı clearDraft() koşar
+    var kor = window._bmAcikIsiGuvenceyeAl();
+    // 3) Temiz sayfa (yeniTarif __stilSecKaynak'ı da sıfırlar)
+    yeniTarif();
+    if(_hacim!=null) S.hacim = _hacim;
+    if(_verim!=null) S.verim = _verim;
+    S.biraAd = window._bmYeniReceteAd(st);
+    S.stil = st;
+    // 4) MEVCUT iskelet yolu — yeni hesap yazılmadı. Boş reçetede `doluMu` false →
+    //    onay sorusu çıkmaz (tek dokunuş). __stilSecKaynak='iskelet' burada kurulur →
+    //    Sprint Z stil sinyali tarifeKaydet'te SUSAR (stilden-reçete = NİYET).
+    var sonuc = window.bmStilIskeletDoldur ? window.bmStilIskeletDoldur(true) : null;
+    // 5) KALICI: taslak kalıcılık katmanı değildir (AU-1 dersi) → KR + LS + IDB + sync
+    var kaydOk = (typeof tarifeKaydet==='function') ? tarifeKaydet() : false;
+    if(typeof render==='function') render();
+    var msj = '✨ Yeni reçete: "' + S.biraAd + '" · ' + (S.hacim>0?S.hacim:11) + 'L';
+    if(sonuc && sonuc.katman==='B') msj += ' · iskelet dolduruldu';
+    else if(sonuc && sonuc.katman==='C') msj += ' · hazır iskelet yok — BJCP hedefi + maya hazır, malt/hop\'u sen ekle';
+    if(kor.yol==='kayitli') msj += ' · önceki reçete kaydedildi';
+    else if(kor.yol==='adli') msj += ' · "' + kor.ad + '" kaydedildi';
+    else if(kor.yol==='adsiz') msj += ' · adsız çalışman "' + kor.ad + '" olarak kaydedildi';
+    if(!kaydOk) msj += ' · ⚠️ kaydedilemedi';
+    if(typeof flash==='function') flash(msj, kaydOk?'ok':'hata');
+    return (typeof _editId!=='undefined') ? _editId : null;
+  }catch(e){ if(window.bmHataKaydet)bmHataKaydet('calc',e,'_bmStildenYeniRecete'); try{console.warn('_bmStildenYeniRecete',e);}catch(_){} return null; }
 };
 
 // ═══ V15 SLUG → BJCP KEY EXPLICIT MAPPING (Adım 51 fix) ═══
@@ -25458,6 +25564,16 @@ window._bmProfilStilUygula = function(kovaKey, idx, doldur){
   }catch(e){ try{ console.warn('_bmProfilStilUygula', e); }catch(_){} }
 };
 
+// SPRINT AV1: öneri satırından DOĞRUDAN yeni reçete (Kaan: "üstüne basayım ve yeni reçete
+// oluşsun"). _bmProfilStilUygula (mevcut "Doldur") AYNEN durur — bu AYRI bir eylem.
+window._bmProfilYeniRecete = function(kovaKey, idx){
+  try{
+    var v = window._PROFIL_STIL && window._PROFIL_STIL[kovaKey];
+    if(!v || !v[1] || !v[1][idx]) return null;
+    return window._bmStildenYeniRecete ? window._bmStildenYeniRecete(v[1][idx][0]) : null;
+  }catch(e){ if(window.bmHataKaydet)bmHataKaydet('calc',e,'_bmProfilYeniRecete'); return null; }
+};
+
 // ── Sunum: "Hedef Stil" dropdown'unun ALTINA açılır panel (dropdown AYNEN kalır)
 window._bmProfilStilKart = function(){
   try{
@@ -25511,12 +25627,22 @@ window._bmProfilStilKart = function(){
           +   '</div>'
           +   '<div style="font-size:9.5px;color:var(--soluk);margin-top:1px">' + n.toLocaleString('tr-TR') + ' reçete bu profilde (%' + pay + ')' + (bant ? ' · ' + bant : '') + '</div>'
           + '</div>'
-          + '<button type="button" onclick="_bmProfilStilUygula(\'' + kova.key + '\',' + i + ',true)" '
-          +   'style="background:' + (iskVar ? 'var(--bakir)' : 'var(--card)') + ';color:' + (iskVar ? '#fff' : 'var(--kahve)')
-          +   ';border:1px solid ' + (iskVar ? 'var(--bakir)' : 'var(--bor)') + ';border-radius:6px;padding:4px 8px;font-size:10px;'
-          +   'font-weight:600;cursor:pointer;white-space:nowrap;font-family:var(--font-govde)" '
-          +   'title="' + (iskVar ? 'Bu stilin iskeletini batch boyutuna ölçekleyip doldur' : 'Hedef stili kur — BJCP hedefleri + maya önerisi (malt/hop uydurulmaz)') + '">'
-          +   (iskVar ? '📋 Doldur' : '🎯 Hedef yap') + '</button>'
+          // SPRINT AV1: iki eylem, karışmayacak biçimde. BİRİNCİL = "Yeni reçete" (Kaan'ın
+          // istediği tek dokunuş: öneriye bas → yeni reçete oluşsun). İKİNCİL = mevcut "Doldur"
+          // (AÇIK reçeteyi doldurmak isteyen için — davranışı DEĞİŞMEDİ). Dikey yığın: 390px'te
+          // yan yana iki buton metin sütununu ezerdi.
+          + '<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">'
+          +   '<button type="button" onclick="_bmProfilYeniRecete(\'' + kova.key + '\',' + i + ')" '
+          +     'style="background:var(--bakir);color:#fff;border:1px solid var(--bakir);border-radius:6px;padding:5px 8px;'
+          +     'font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:var(--font-govde)" '
+          +     'title="' + (iskVar ? 'Bu stilden YENİ reçete oluştur — iskelet batch boyutuna ölçeklenir (açık reçete korunur)' : 'Bu stilden YENİ reçete oluştur — hazır iskelet yok: BJCP hedefi + maya gelir, malt/hop boş kalır') + '">'
+          +     '✨ Yeni reçete</button>'
+          +   '<button type="button" onclick="_bmProfilStilUygula(\'' + kova.key + '\',' + i + ',true)" '
+          +     'style="background:var(--card);color:var(--kahve);border:1px solid var(--bor);border-radius:6px;padding:4px 8px;font-size:9.5px;'
+          +     'font-weight:600;cursor:pointer;white-space:nowrap;font-family:var(--font-govde)" '
+          +     'title="' + (iskVar ? 'AÇIK reçeteyi bu stilin iskeletiyle doldur' : 'AÇIK reçetenin hedef stilini kur — BJCP hedefleri + maya önerisi (malt/hop uydurulmaz)') + '">'
+          +     (iskVar ? '📋 Doldur' : '🎯 Hedef yap') + '</button>'
+          + '</div>'
           + '</div>';
       }).join('');
       sonuc = '<div style="margin-top:4px">'

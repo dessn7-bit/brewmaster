@@ -710,7 +710,12 @@
 // satir, tam liste tek dokunus, sayac kutusu kosullu); AYRI SPARGE KARTI (yalniz spargeL>0, timerTur
 // YOK); kart dili (adima ozel fiziksel iddia, 48px, Atla ayrik, AA tipografi); sifirlama onayi +
 // gec-yakalama seridi; spargeL de KR aynasina. KURAL 12.3 bump v131-407 -> v131-408.
-const CACHE_VERSION='bm-cache-v131-408';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
+// Sprint AV (2026-08-19): oneriden DOGRUDAN yeni recete — AK profil secici oneri satirinda
+// BIRINCIL '✨ Yeni recete' (_bmProfilYeniRecete -> _bmStildenYeniRecete: acik isi guvenceye al ->
+// yeniTarif -> ad+stil -> MEVCUT iskelet yolu -> tarifeKaydet); IKINCIL 'Doldur' davranisi AYNEN.
+// bmStilIskeletDoldur'a opsiyonel `sessiz` (geriye donuk uyumlu, {katman,mesaj} doner).
+// KURAL 12.3 bump v131-408 -> v131-409.
+const CACHE_VERSION='bm-cache-v131-409';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
 const ASSET_CACHE   = 'bm-assets-v1';        // font + ikon + manifest — KALICI, bump'ta silinmez
 const MODEL_CACHE   = 'bm-models-v1';        // workers.dev + jsdelivr — SHA'li/immutable URL, KALICI
 

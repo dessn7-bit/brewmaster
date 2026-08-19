@@ -4077,6 +4077,142 @@ const CASELER = [
       brewdayZorlaSifirla(true);
       return __REG.al();
     })
+  },
+  // ── SPRINT AV: öneriden DOĞRUDAN yeni reçete ──
+  {
+    kod: 'AV1-YENI', ad: 'ÖNERİDEN YENİ REÇETE (Kaan\'ın isteği): profil önerisine basınca yeniTarif + iskelet + editör TEK AKIŞTA; ad otomatik önerilir, batch boyutu taşınır, kayıt KR+LS+IDB\'ye düşer (taslak kalıcılık katmanı değil)',
+    calistir: (page) => page.evaluate(async () => {
+      const id0 = __REG.yeniKayit('REGTEST AV1 KAYNAK', {});
+      S.hacim = 10; S.verim = 45; tarifeKaydet();          // kullanıcının gerçek sistem parametreleri
+      const n0 = KR.length, zOnce = localStorage.getItem('bm_stil_ogren_v1');
+      const key = 'koyu|dengeli|dolgun';
+      const idx = window._PROFIL_STIL[key][1].findIndex(x => !!STIL_ISKELET[x[0]]);
+      const ad = window._PROFIL_STIL[key][1][idx][0];
+      __REG.ok('kovada iskeletli öneri var', idx >= 0, ad);
+      const yid = _bmProfilYeniRecete(key, idx);
+      __REG.ok('YENİ reçete oluştu (KR +1)', KR.length === n0 + 1 && !!yid, n0 + ' → ' + KR.length);
+      __REG.ok('editör YENİ reçetede açık (_editId yeni kayıt)', String(_editId) === String(yid) && ekran === 'editor', ekran + '/' + _editId);
+      __REG.ok('ad OTOMATİK önerildi (stil adı)', String(S.biraAd || '').indexOf(ad) === 0, S.biraAd);
+      __REG.ok('hedef stil kuruldu', S.stil === ad, S.stil);
+      __REG.ok('iskelet DOLDU (V1a/V2 yolu — yeni hesap yazılmadı)', (S.maltlar || []).length > 0 && (S.hoplar || []).length > 0 && !!S.mayaId, (S.maltlar || []).length + ' malt / ' + (S.hoplar || []).length + ' hop / ' + S.mayaId);
+      __REG.ok('BATCH BOYUTU taşındı (11 varsayılanına düşmedi)', S.hacim === 10 && S.verim === 45, S.hacim + 'L / %' + S.verim);
+      const bj = BJCP[ad], c = calc();
+      __REG.ok('ölçekleme tutarlı: OG BJCP bandında', c.og >= bj.og[0] - 0.004 && c.og <= bj.og[1] + 0.004, c.og.toFixed(3) + ' vs ' + JSON.stringify(bj.og));
+      __REG.ok('IBU BJCP bandında', c.ibu >= bj.ibu[0] * 0.8 && c.ibu <= bj.ibu[1] * 1.2, Math.round(c.ibu) + ' vs ' + JSON.stringify(bj.ibu));
+      const kr = KR.find(x => x && x.id === yid);
+      __REG.ok('KALICI: KR kaydında malt/hop/stil var (AU-1 dersi — taslağa bırakılmadı)', !!kr && (kr.maltlar || []).length > 0 && kr.stil === ad, kr ? (kr.maltlar || []).length + ' malt' : 'KR YOK');
+      const lsK = (JSON.parse(localStorage.getItem('bm_v6') || '[]')).find(x => x && x.id === yid);
+      __REG.ok('DİSKTE (bm_v6) de var', !!lsK && (lsK.maltlar || []).length > 0);
+      const idbOk = await new Promise(res => { let t = false; try { window._bmIDB.get('bm_v6', function (v) { t = true; try { res((JSON.parse(v || '[]')).some(x => x && x.id === yid)); } catch (e) { res(false); } }); } catch (e) { res(false); } setTimeout(() => { if (!t) res(false); }, 3000); });
+      __REG.ok('IndexedDB aynası da taşıyor', idbOk === true);
+      __REG.ok('GHOST TASLAK YOK (tarifeKaydet clearDraft koştu)', !localStorage.getItem('bm_draft_v1'), String(localStorage.getItem('bm_draft_v1')).slice(0, 50));
+      __REG.ok('Sprint Z stil sinyali TETİKLENMEDİ (stilden-reçete = NİYET)', localStorage.getItem('bm_stil_ogren_v1') === zOnce && window.__stilSecKaynak === 'iskelet', String(window.__stilSecKaynak));
+      // ad çakışması: aynı öneri ikinci kez
+      const yid2 = _bmProfilYeniRecete(key, idx);
+      __REG.ok('ikinci kez: ad ÇAKIŞMADI (tarih eki)', String(S.biraAd) !== ad && String(S.biraAd).indexOf(ad) === 0 && yid2 !== yid, S.biraAd);
+      __REG.ok('kaynak reçete KR\'de duruyor (üzerine yazılmadı)', !!KR.find(x => x && x.id === id0), String(id0));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AV2-KORUMA', ad: 'AÇIK İŞ KAYBOLMAZ: kayıtlı reçetenin edit\'i KR\'ye commit edilir; adı olup hiç kaydedilmemiş çalışma kendi reçetesi olarak kaydedilir; ADSIZ çalışma üretilmiş adla kurtarılır (native confirm KULLANILMAZ — AU2 dersi)',
+    calistir: (page) => page.evaluate(async () => {
+      const key = 'koyu|dengeli|dolgun';
+      const idx = window._PROFIL_STIL[key][1].findIndex(x => !!STIL_ISKELET[x[0]]);
+      // (a) KAYITLI reçetede kaydedilmemiş edit
+      const id = __REG.yeniKayit('REGTEST AV2 KAYITLI', {});
+      S.notlar = 'AV2 kaydedilmemiş not'; S.verim = 52;
+      _bmProfilYeniRecete(key, idx);
+      const kr = KR.find(x => x && x.id === id);
+      __REG.ok('(a) kayıtlı reçetenin kaydedilmemiş edit\'i KR\'ye COMMIT edildi', kr && kr.notlar === 'AV2 kaydedilmemiş not' && kr.verim === 52, kr ? kr.notlar + '/' + kr.verim : 'KR YOK');
+      // (b) adı VAR, hiç kaydedilmemiş
+      yeniTarif();
+      S.biraAd = 'AV2 ADLI KAYITSIZ';
+      S.maltlar = [{ id: MALTLAR.find(m => m && m.g !== 'Şeker' && m.id !== 'rice_hulls').id, kg: 2.5 }];
+      __REG.ok('(b) önkoşul: KR\'de yok (kaydedilmemiş)', !KR.some(x => x && x.biraAd === 'AV2 ADLI KAYITSIZ') && !_editId);
+      _bmProfilYeniRecete(key, idx);
+      const b = KR.find(x => x && x.biraAd === 'AV2 ADLI KAYITSIZ');
+      __REG.ok('(b) adlı-kayıtsız çalışma KENDİ reçetesi olarak kaydedildi (kayıp yok)', !!b && (b.maltlar || []).length === 1, b ? (b.maltlar || []).length + ' malt' : 'KAYBOLDU');
+      // (c) ADSIZ ama içerik var
+      yeniTarif();
+      S.maltlar = [{ id: MALTLAR.find(m => m && m.g !== 'Şeker' && m.id !== 'rice_hulls').id, kg: 3.7 }];
+      S.notlar = 'AV2 adsız iş';
+      const nOnce = KR.length;
+      _bmProfilYeniRecete(key, idx);
+      const c = KR.find(x => x && x.notlar === 'AV2 adsız iş');
+      __REG.ok('(c) ADSIZ çalışma üretilmiş adla KURTARILDI (bugün sessizce kaybolurdu)', !!c && /Adsız çalışma/.test(c.biraAd || '') && (c.maltlar || [])[0] && (c.maltlar || [])[0].kg === 3.7, c ? c.biraAd : 'KAYBOLDU');
+      __REG.ok('(c) KR +2 (kurtarılan + yeni reçete)', KR.length === nOnce + 2, nOnce + ' → ' + KR.length);
+      // (d) BOŞ reçetede gereksiz kayıt ÜRETİLMEZ
+      yeniTarif();
+      const nBos = KR.length;
+      _bmProfilYeniRecete(key, idx);
+      __REG.ok('(d) boş reçeteden geçince YALNIZ yeni reçete oluşur (çöp kayıt yok)', KR.length === nBos + 1, nBos + ' → ' + KR.length);
+      __REG.ok('AU2 DERSİ: yol native confirm() KULLANMIYOR (WebView\'da güvenilmez, akış kilitlenirdi)', String(window._bmAcikIsiGuvenceyeAl).indexOf('confirm(') === -1 && String(window._bmStildenYeniRecete).indexOf('confirm(') === -1);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AV3-ISKELETSIZ', ad: 'İSKELETSİZ STİLDE SAHTE İSKELET ÜRETİLMEZ (V1a dersi): yeni reçete oluşur, BJCP hedefi + maya önerisi gelir, malt/hop BOŞ kalır',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('REGTEST AV3', {});
+      let bul = null;
+      Object.keys(window._PROFIL_STIL).some(k => {
+        const j = window._PROFIL_STIL[k][1].findIndex(x => !STIL_ISKELET[x[0]]);
+        if (j >= 0) { bul = { k: k, j: j, ad: window._PROFIL_STIL[k][1][j][0] }; return true; }
+        return false;
+      });
+      __REG.ok('kovalarda iskeletsiz öneri VAR (kapsama %100 değil)', !!bul, bul ? bul.ad : 'YOK');
+      if (!bul) return __REG.al();
+      const n0 = KR.length;
+      const yid = _bmProfilYeniRecete(bul.k, bul.j);
+      __REG.ok('yeni reçete YİNE oluştu (iskelet yokluğu akışı durdurmaz)', KR.length === n0 + 1 && !!yid, n0 + ' → ' + KR.length);
+      __REG.ok('BJCP hedefi kuruldu', S.stil === bul.ad && !!BJCP[S.stil], S.stil);
+      __REG.ok('maya önerisi geldi (C katmanı)', !!S.mayaId && !!MAYALAR.find(m => m && m.id === S.mayaId), S.mayaId);
+      __REG.ok('SAHTE İSKELET YOK: malt BOŞ', (S.maltlar || []).length === 0, (S.maltlar || []).length + ' malt');
+      __REG.ok('SAHTE İSKELET YOK: hop BOŞ', (S.hoplar || []).length === 0, (S.hoplar || []).length + ' hop');
+      const kr = KR.find(x => x && x.id === yid);
+      __REG.ok('KR kaydı da boş grist ile yazıldı (uydurma kalıcılaşmadı)', !!kr && (kr.maltlar || []).length === 0 && kr.stil === bul.ad);
+      __REG.ok('ad önerildi', String(S.biraAd || '').indexOf(bul.ad) === 0, S.biraAd);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AV4-DOLDUR-REGRESYON', ad: 'MEVCUT "📋 Doldur" DAVRANIŞI KORUNDU: AÇIK reçeteyi doldurur, YENİ reçete OLUŞTURMAZ; bmStilIskeletDoldur parametresiz çağrıda eski gibi davranır; öneri satırında İKİ eylem de var',
+    calistir: async (page) => {
+      await page.setViewport({ width: 390, height: 844 });
+      return page.evaluate(() => {
+        const key = 'koyu|dengeli|dolgun';
+        const idx = window._PROFIL_STIL[key][1].findIndex(x => !!STIL_ISKELET[x[0]]);
+        const ad = window._PROFIL_STIL[key][1][idx][0];
+        const id = __REG.yeniKayit('REGTEST AV4', {});
+        S.hacim = 11; S.verim = 61; S.maltlar = []; S.hoplar = []; S.mayaId = '';
+        const n0 = KR.length;
+        _bmProfilStilUygula(key, idx, true);
+        __REG.ok('YENİ reçete OLUŞTURMADI (KR sabit)', KR.length === n0, n0 + ' → ' + KR.length);
+        __REG.ok('AÇIK reçetede kaldı (_editId değişmedi)', String(_editId) === String(id), String(_editId));
+        __REG.ok('açık reçete DOLDU (eski davranış birebir)', S.stil === ad && (S.maltlar || []).length > 0 && (S.hoplar || []).length > 0, S.stil + ' / ' + (S.maltlar || []).length + ' malt');
+        // parametresiz bmStilIskeletDoldur eski davranış (flash + dönüş)
+        S.maltlar = []; S.hoplar = [];
+        const r = bmStilIskeletDoldur();
+        __REG.ok('bmStilIskeletDoldur() parametresiz: iskelet yine doluyor', (S.maltlar || []).length > 0 && r && r.katman === 'B', r ? r.katman : String(r));
+        __REG.ok('sessiz mod flash\'ı bastırıyor ama davranışı DEĞİŞTİRMİYOR', String(bmStilIskeletDoldur).indexOf('if(!sessiz && typeof flash') > -1);
+        // UI: iki eylem de basılıyor
+        tarifAc(id); sekme = 'genel'; window.__akProfil = { renk: 'koyu', aci: 'dengeli', govde: 'dolgun' }; window.__akAcik = true; render();
+        const yeni = Array.from(document.querySelectorAll('#ekran button')).filter(b => /Yeni reçete/.test(b.innerText));
+        const dold = Array.from(document.querySelectorAll('#ekran button')).filter(b => /^(📋 Doldur|🎯 Hedef yap)$/.test(b.innerText.trim()));
+        const drop = Array.from(document.querySelectorAll('#ekran button')).filter(b => /İskeleti Doldur/.test(b.innerText));
+        const sat = window._PROFIL_STIL[key][1].length;
+        __REG.ok('her öneri satırında "✨ Yeni reçete" var', yeni.length === sat, yeni.length + '/' + sat);
+        __REG.ok('"Doldur/Hedef yap" ikincil eylem KORUNDU (satır başına 1)', dold.length === sat, dold.length + '/' + sat);
+        __REG.ok('BİRİNCİL = Yeni reçete (dolu bakır zemin), ikincil outline', getComputedStyle(yeni[0]).backgroundColor !== getComputedStyle(dold[0]).backgroundColor && parseFloat(getComputedStyle(yeni[0]).fontWeight) >= 700, getComputedStyle(yeni[0]).backgroundColor + ' vs ' + getComputedStyle(dold[0]).backgroundColor);
+        __REG.ok('AK3 REGRESYONU: dropdown + "İskeleti Doldur" AYNEN yerinde', !!document.querySelector('select[aria-label="Hedef stil"]') && drop.length === 1, 'dropdown butonu ' + drop.length);
+        // öneri satırları panelin genişliğini taşırmıyor (yeni sütun mobilde metni ezmiyor)
+        const panel = document.querySelector('.bm-profil-sec');
+        const tasan = Array.from(panel.querySelectorAll('*')).filter(e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.right > panel.getBoundingClientRect().right + 1; });
+        __REG.ok('390px: profil panelinde yatay taşma YOK', tasan.length === 0, tasan.length + ' taşan');
+        return __REG.al();
+      });
+    }
   }
 ];
 
