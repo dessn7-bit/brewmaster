@@ -4213,6 +4213,119 @@ const CASELER = [
         return __REG.al();
       });
     }
+  },
+
+  // ═════════════ SPRINT AW — MADALYALI ÖRNEKTEN REÇETE (orta yol) ═════════════
+  {
+    kod: 'AW1-ORNEK', ad: 'SPRINT AW: MADALYALI ÖRNEKTEN REÇETE — örnek satırından yeni reçete: AV yolu + iskelet, örneğin OG/IBU\'su ölçek hedefi olur, orijinal grist/hop/maya METNİ not alanına AYNEN yazılır; gramaj/oran UYDURULMAZ, ad ödül iması taşımaz',
+    calistir: (page) => page.evaluate(() => {
+      const M = window._TOPLULUK_MADALYA;
+      __REG.ok('45 madalya anahtarının HEPSİ BJCP otoritesinde (buton hiçbir stilde ölü değil)', Object.keys(M).length === 45 && Object.keys(M).every(k => !!BJCP[k]), Object.keys(M).filter(k => !BJCP[k]).join(','));
+      __REG.yeniKayit('REGTEST AW1', {});
+      S.hacim = 10; S.verim = 45; tarifeKaydet();
+      const stil = 'Altbier / Düsseldorf Altbier', o = M[stil][1][0];
+      __REG.ok('önkoşul: iskeletli stil + 4 ölçüsü dolu örnek', !!STIL_ISKELET[stil] && o.og === 1.071 && o.ib === 25 && o.sr === 19 && o.ab === 7.5 && o.yil === 2024);
+      const n0 = KR.length;
+      const yid = _bmMadalyaYeniRecete(stil, 0);
+      __REG.ok('YENİ reçete oluştu (KR +1)', KR.length === n0 + 1 && !!yid, n0 + ' → ' + KR.length);
+      __REG.ok('stil + iskelet AV yolundan (yeni kod yolu YOK)', S.stil === stil && (S.maltlar || []).length > 0 && (S.hoplar || []).length > 0 && !!S.mayaId, (S.maltlar || []).length + ' malt / ' + (S.hoplar || []).length + ' hop');
+      __REG.ok('batch boyutu taşındı', S.hacim === 10 && S.verim === 45, S.hacim + 'L / %' + S.verim);
+      const c = calc(), ogMidB = (BJCP[stil].og[0] + BJCP[stil].og[1]) / 2;
+      __REG.ok('HEDEF KURULDU: OG örneğe ölçeklendi (BJCP ortasına DEĞİL)', Math.abs(c.og - o.og) <= 0.004 && Math.abs(c.og - ogMidB) > 0.008, c.og.toFixed(3) + ' vs örnek ' + o.og + ' / mid ' + ogMidB.toFixed(3));
+      __REG.ok('HEDEF KURULDU: IBU örneğe ölçeklendi', Math.abs(c.ibu - o.ib) <= 4, Math.round(c.ibu) + ' vs ' + o.ib);
+      const n = String(S.notlar || '');
+      __REG.ok('NOT: kaynak şeffaf (AHA + derece + yıl + giriş sayısı)', n.indexOf('AHA yarışmasında altın almış') >= 0 && n.indexOf('(2024, kategoride 77 giriş)') >= 0, n.split('\n')[0]);
+      __REG.ok('NOT: çerçeve — elenen yok + kural değil + miktarlar iskeletten', n.indexOf('Elenen reçeteler bu veride yok') >= 0 && n.indexOf('kural değil') >= 0 && n.indexOf('stil iskeletinden geliyor') >= 0);
+      __REG.ok('NOT: örneğin 4 ölçüsü de yazıldı', n.indexOf('OG 1.071') >= 0 && n.indexOf('IBU 25') >= 0 && n.indexOf('SRM 19') >= 0 && n.indexOf('ABV %7.5') >= 0);
+      __REG.ok('NOT: grist orijinal yüzdelerle AYNEN (artık baz malta itilmedi)', n.indexOf('%56 Munich II malt + %35 German Vienna malt + %7 CaraMunich II malt + %1 Carafa II') >= 0);
+      const hopSatiri = n.split('\n').find(s => s.indexOf('Hop (') === 0) || 'x';
+      __REG.ok('NOT: hop ad+dakika AYNEN + gramaj-yok uyarısı; GRAM UYDURULMADI', hopSatiri === 'Hop (gramaj kaynakta YOK — kendi hesabını yap): German Magnum @60dk' && !/\d+(\.\d+)?\s*g(r|ram)?\b/i.test(hopSatiri), hopSatiri);
+      __REG.ok('NOT: maya orijinal serbest metniyle', n.indexOf('Maya (orijinal metin): WLP 833 German Bock lager yeast') >= 0);
+      __REG.ok('AD: stil + yıl + örneğinden; ödül iması YOK', S.biraAd.indexOf(stil + ' — 2024 örneğinden') === 0 && !/ödül|madalya|şampiyon|birinci|kazanan/i.test(S.biraAd), S.biraAd);
+      __REG.ok('DİL: notta kalite iddiası yok', !/kazan[ıi]rs[ıi]n|en iyi|daha iyi|bunu demle|yapmal[ıi]/i.test(n));
+      const kr = KR.find(x => x && x.id === yid);
+      __REG.ok('KALICI: not + iskelet + stil KR kaydında', !!kr && String(kr.notlar || '').indexOf('AHA') >= 0 && (kr.maltlar || []).length > 0 && kr.stil === stil);
+      const yid2 = _bmMadalyaYeniRecete(stil, 0);
+      __REG.ok('ikinci basış: ad ÇAKIŞMADI (AV ad mantığı korunur)', !!yid2 && yid2 !== yid && S.biraAd.indexOf(stil + ' — 2024 örneğinden') === 0 && S.biraAd !== (stil + ' — 2024 örneğinden'), S.biraAd);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AW2-BOS-ISKELETSIZ', ad: 'SPRINT AW: DOLU OLMAYAN ALAN UYDURULMAZ + İSKELETSİZ STİLDE SAHTE İSKELET YOK — ib/sr boş örnekte not o ölçüleri atlar ve IBU düz iskelet doluşuyla AYNI kalır; iskeletsiz stilde malt/hop BOŞ ama not YİNE yazılır',
+    calistir: (page) => page.evaluate(() => {
+      const M = window._TOPLULUK_MADALYA;
+      // (a) iskeletli stil + ib/sr boş örnek
+      __REG.yeniKayit('REGTEST AW2a', {});
+      S.hacim = 10; S.verim = 45;
+      const st1 = 'Maibock / Helles Bock', o1 = M[st1][1][1];
+      __REG.ok('(a) önkoşul: iskeletli stil, örnekte ib+sr BOŞ, og+ab dolu', !!STIL_ISKELET[st1] && !o1.ib && !o1.sr && o1.og > 1 && o1.ab > 0, JSON.stringify([o1.og, o1.ib, o1.sr, o1.ab]));
+      _bmMadalyaYeniRecete(st1, 1);
+      const c1 = calc();
+      __REG.ok('(a) dolu alan (OG) yine örneğe ölçeklendi', Math.abs(c1.og - o1.og) <= 0.004, c1.og.toFixed(3) + ' vs ' + o1.og);
+      const n1 = String(S.notlar || '');
+      __REG.ok('(a) notta IBU ve SRM satırı YOK (boş bırakıldı, uydurulmadı)', n1.indexOf('IBU') < 0 && n1.indexOf('SRM') < 0, n1.split('\n').find(s => s.indexOf('Örneğin') === 0) || '');
+      __REG.ok('(a) notta dolu alanlar (OG/ABV) VAR', n1.indexOf('OG ' + o1.og.toFixed(3)) >= 0 && n1.indexOf('ABV %' + o1.ab) >= 0);
+      // IBU davranışı düz iskelet doluşuyla BİREBİR (örnek IBU vermedi → BJCP ortası, mevcut yol)
+      const ibuOrnekli = c1.ibu;
+      yeniTarif(); S.hacim = 10; S.verim = 45; S.stil = st1;
+      bmStilIskeletDoldur(true);
+      const ibuDuz = calc().ibu;
+      __REG.ok('(a) IBU UYDURULMADI: örnekli doluş = düz iskelet doluşu (aynı IBU)', Math.abs(ibuOrnekli - ibuDuz) <= 2, ibuOrnekli.toFixed(1) + ' vs ' + ibuDuz.toFixed(1));
+      // (b) iskeletsiz madalyalı stil
+      __REG.yeniKayit('REGTEST AW2b', {});
+      const st2 = 'Berliner Weisse', o2 = M[st2][1][0];
+      __REG.ok('(b) önkoşul: iskeletsiz madalyalı stil + ib boş örnek', !STIL_ISKELET[st2] && !!BJCP[st2] && !o2.ib, JSON.stringify([o2.og, o2.ib, o2.sr, o2.ab]));
+      const nb = KR.length;
+      const yid2 = _bmMadalyaYeniRecete(st2, 0);
+      __REG.ok('(b) reçete YİNE oluştu (iskelet yokluğu akışı durdurmaz)', KR.length === nb + 1 && !!yid2, nb + ' → ' + KR.length);
+      __REG.ok('(b) SAHTE İSKELET YOK: malt/hop BOŞ', (S.maltlar || []).length === 0 && (S.hoplar || []).length === 0, (S.maltlar || []).length + '/' + (S.hoplar || []).length);
+      __REG.ok('(b) BJCP hedefi + maya önerisi (C katmanı)', S.stil === st2 && !!S.mayaId, S.stil + ' / ' + S.mayaId);
+      const n2 = String(S.notlar || '');
+      __REG.ok('(b) not YİNE yazıldı (kaynak + orijinal metin)', n2.indexOf('AHA yarışmasında') >= 0 && n2.indexOf('Grist (orijinal yüzdeler):') >= 0);
+      __REG.ok('(b) notta IBU yok (boş alan), SRM var (dolu alan)', n2.indexOf('IBU') < 0 && n2.indexOf('SRM ' + o2.sr) >= 0);
+      const kr2 = KR.find(x => x && x.id === yid2);
+      __REG.ok('(b) KR kaydı boş grist + notla yazıldı (uydurma kalıcılaşmadı)', !!kr2 && (kr2.maltlar || []).length === 0 && String(kr2.notlar || '').indexOf('AHA') >= 0);
+      yeniTarif();
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AW3-UI-DIL', ad: 'SPRINT AW UI + DİL: her örnek satırında "Bu örnekten yola çık", blok başlığında AYRI stil-iskelet butonu; etiket/title kalite iması taşımaz; gerçek tıklama çalışır (onclick kaçışı); AV yolu opts\'suz BİREBİR (not sızmaz)',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('REGTEST AW3', {});
+      ekran = 'editor'; sekme = 'genel';
+      S.hacim = 11; S.verim = 61; S.stil = 'Weizen / Weissbier';
+      bmStilIskeletDoldur(); render();
+      const el = document.querySelector('.bm-topluluk');
+      __REG.ok('topluluk bölümü var', !!el);
+      const btnler = el ? Array.from(el.querySelectorAll('button')) : [];
+      const ornekBtn = btnler.filter(b => /Bu örnekten yola çık/.test(b.innerText));
+      const stilBtn = btnler.filter(b => /Stil iskeletinden yeni reçete/.test(b.innerText));
+      const nOrnek = window._TOPLULUK_MADALYA['Weizen / Weissbier'][1].length;
+      __REG.ok('AW1: örnek başına 1 buton', ornekBtn.length === nOrnek, ornekBtn.length + '/' + nOrnek);
+      __REG.ok('AW2: blok başlığında TEK stil-düzeyi buton (örnek butonundan ayrı)', stilBtn.length === 1, String(stilBtn.length));
+      const etiket = btnler.map(b => b.innerText + '|' + (b.getAttribute('title') || '')).join(' ');
+      __REG.ok('DİL: etiket/title kalite iddiasız (kazan/en iyi/bunu demle/ödül YOK)', !/kazan|en iyi|daha iyi|bunu demle|ödül|şampiyon/i.test(etiket), etiket.slice(0, 160));
+      __REG.ok('AW2 etiketi İSKELET diyor, madalya/örnek iması yok', stilBtn.length === 1 && /iskelet/i.test(stilBtn[0].innerText) && !/madalya|örnekten/i.test(stilBtn[0].innerText), stilBtn.length ? stilBtn[0].innerText : '');
+      // GERÇEK TIKLAMA — AW2 başlık butonu = düz AV davranışı (not YOK)
+      const n0 = KR.length;
+      stilBtn[0].click();
+      __REG.ok('AW2 tıklama: yeni reçete + stil kuruldu, NOT YAZILMADI (düz AV)', KR.length === n0 + 1 && S.stil === 'Weizen / Weissbier' && String(S.notlar || '') === '' && S.biraAd.indexOf('Weizen / Weissbier') === 0 && S.biraAd.indexOf('örneğinden') < 0, S.biraAd + ' | not:' + String(S.notlar || '').length);
+      // yeni reçetenin genel sekmesi de butonları basıyor → örnek butonuna GERÇEK TIKLAMA
+      const el2 = document.querySelector('.bm-topluluk');
+      const ob2 = el2 ? Array.from(el2.querySelectorAll('button')).filter(b => /Bu örnekten yola çık/.test(b.innerText)) : [];
+      __REG.ok('tıklama sonrası örnek butonları yine var', ob2.length === nOrnek, String(ob2.length));
+      const n1 = KR.length;
+      ob2[0].click();
+      __REG.ok('AW1 tıklama (onclick kaçışı sağlam): yeni reçete + NOT dolu + ad örneğinden', KR.length === n1 + 1 && String(S.notlar || '').indexOf('AHA yarışmasında') >= 0 && /örneğinden/.test(S.biraAd), S.biraAd);
+      // AV REGRESYONU: profil önerisi yolu opts'suz — not sızmaz, ad stil adıyla
+      const key = 'koyu|dengeli|dolgun';
+      const idx = window._PROFIL_STIL[key][1].findIndex(x => !!STIL_ISKELET[x[0]]);
+      const avAd = window._PROFIL_STIL[key][1][idx][0];
+      _bmProfilYeniRecete(key, idx);
+      __REG.ok('AV REGRESYONU: opts\'suz yolda not YAZILMAZ + ad stil adıyla', String(S.notlar || '') === '' && S.biraAd.indexOf(avAd) === 0, S.biraAd + ' | not:' + String(S.notlar || '').length);
+      return __REG.al();
+    })
   }
 ];
 

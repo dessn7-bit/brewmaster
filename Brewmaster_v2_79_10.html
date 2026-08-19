@@ -5884,12 +5884,13 @@ window.STIL_ISKELET = STIL_ISKELET;
 
 // Oran→miktar ölçekleme motoru — mevcut hOG/hIBU'yu TERSİNDEN kullanır (yeniden yazmaz).
 // OG-1 ve IBU miktara DOĞRUSAL → deneme hesabı + hedefe lineer ölçek. Dönüş: {malts,hops,mayaId,mashSc,hedef} | null.
-window._stilIskeletHesap = function(bjcpAd, hacim, verim){
+window._stilIskeletHesap = function(bjcpAd, hacim, verim, hedefO){
   try{
     var isk = (typeof STIL_ISKELET!=='undefined') ? STIL_ISKELET[bjcpAd] : null; if(!isk) return null;
     var bj = (typeof BJCP!=='undefined') ? BJCP[bjcpAd] : null; if(!bj) return null;
     var h = (hacim>0)?hacim:11, v = (verim>0)?verim:61;
-    var ogMid=(bj.og[0]+bj.og[1])/2, ibuMid=(bj.ibu[0]+bj.ibu[1])/2;
+    // SPRINT AW: dolu gelen örnek hedefi ölçek hedefi olur; gelmeyen alan BJCP orta noktasında kalır (uydurulmaz)
+    var ogMid=(hedefO&&+hedefO.og>1)?+hedefO.og:(bj.og[0]+bj.og[1])/2, ibuMid=(hedefO&&+hedefO.ibu>0)?+hedefO.ibu:(bj.ibu[0]+bj.ibu[1])/2;
     // GRIST: 1kg deneme → hedef OG'ye lineer ölçekle (hOG'nin tersi)
     var trial = isk.grist.map(function(g){ return {id:g[0], kg:g[1]/100}; });
     var trialOG = hOG(trial, v, [], h);
@@ -5933,7 +5934,7 @@ window._stilMayaOner = function(bjcpAd){
 // SPRINT AV1: opsiyonel `sessiz` — çağıran kendi özet mesajını kuracaksa flash BASTIRILIR ve
 // {katman:'B'|'C', mesaj} döner. Parametresiz çağrılar (dropdown butonu, AK 'Doldur', testler)
 // AYNEN eski davranışı alır — imza geriye dönük uyumlu.
-window.bmStilIskeletDoldur = function(sessiz){
+window.bmStilIskeletDoldur = function(sessiz, hedefO){
   try{
     if(typeof S==='undefined'||!S) return;
     var st = S.stil;
@@ -5953,7 +5954,7 @@ window.bmStilIskeletDoldur = function(sessiz){
       return {katman:'C', mesaj:_mC};
     }
     if(!sessiz && doluMu && typeof confirm==='function' && !confirm("Mevcut malt/hop/maya bu stilin iskeletiyle DEĞİŞTİRİLECEK. Emin misin?")) return null;
-    var r = window._stilIskeletHesap ? _stilIskeletHesap(st, (S.hacim>0?S.hacim:11), (S.verim>0?S.verim:61)) : null;
+    var r = window._stilIskeletHesap ? _stilIskeletHesap(st, (S.hacim>0?S.hacim:11), (S.verim>0?S.verim:61), hedefO||null) : null;
     if(!r || !r.malts || !r.malts.length){ if(typeof flash==='function')flash("İskelet hesaplanamadı","err"); return null; }
     S.maltlar = r.malts;
     S.hoplar = r.hops;
@@ -6030,7 +6031,9 @@ window._bmAcikIsiGuvenceyeAl = function(){
 };
 
 // Stil adından YENİ reçete üretir ve editörde açar. Dönen: yeni reçete id'si veya null.
-window._bmStildenYeniRecete = function(stilAd){
+// SPRINT AW opsiyonel opts: {hedef:{og,ibu}} iskelet ölçek hedefi (yalnız B katmanında etkili),
+// {not} kayıttan önce S.notlar'a eklenir, {adBase} ad tabanını değiştirir. opts'suz = AV davranışı BİREBİR.
+window._bmStildenYeniRecete = function(stilAd, opts){
   try{
     var st = String(stilAd||'').trim();
     if(!st){ if(typeof flash==='function')flash('Stil adı yok','err'); return null; }
@@ -6047,18 +6050,23 @@ window._bmStildenYeniRecete = function(stilAd){
     yeniTarif();
     if(_hacim!=null) S.hacim = _hacim;
     if(_verim!=null) S.verim = _verim;
-    S.biraAd = window._bmYeniReceteAd(st);
+    S.biraAd = window._bmYeniReceteAd((opts&&opts.adBase)?String(opts.adBase):st);
     S.stil = st;
     // 4) MEVCUT iskelet yolu — yeni hesap yazılmadı. Boş reçetede `doluMu` false →
     //    onay sorusu çıkmaz (tek dokunuş). __stilSecKaynak='iskelet' burada kurulur →
     //    Sprint Z stil sinyali tarifeKaydet'te SUSAR (stilden-reçete = NİYET).
-    var sonuc = window.bmStilIskeletDoldur ? window.bmStilIskeletDoldur(true) : null;
+    var sonuc = window.bmStilIskeletDoldur ? window.bmStilIskeletDoldur(true, (opts&&opts.hedef)||null) : null;
+    // SPRINT AW: kaynak örneğin orijinal metni NOT alanına aynen taşınır (reçete verisi uydurulmaz).
+    // Genel sekmesinden tetiklenir → DOM'da notText yok → tarifeKaydet S.notlar'ı ezmez.
+    if(opts&&opts.not) S.notlar = (S.notlar?String(S.notlar)+'\n\n':'') + String(opts.not);
     // 5) KALICI: taslak kalıcılık katmanı değildir (AU-1 dersi) → KR + LS + IDB + sync
     var kaydOk = (typeof tarifeKaydet==='function') ? tarifeKaydet() : false;
     if(typeof render==='function') render();
     var msj = '✨ Yeni reçete: "' + S.biraAd + '" · ' + (S.hacim>0?S.hacim:11) + 'L';
     if(sonuc && sonuc.katman==='B') msj += ' · iskelet dolduruldu';
     else if(sonuc && sonuc.katman==='C') msj += ' · hazır iskelet yok — BJCP hedefi + maya hazır, malt/hop\'u sen ekle';
+    if(opts&&opts.hedef&&(opts.hedef.og||opts.hedef.ibu)&&sonuc&&sonuc.katman==='B') msj += ' · ölçek hedefi kaynak örnekten';
+    if(opts&&opts.not) msj += ' · örneğin orijinal metni not alanında';
     if(kor.yol==='kayitli') msj += ' · önceki reçete kaydedildi';
     else if(kor.yol==='adli') msj += ' · "' + kor.ad + '" kaydedildi';
     else if(kor.yol==='adsiz') msj += ' · adsız çalışman "' + kor.ad + '" olarak kaydedildi';
@@ -25349,7 +25357,7 @@ window._TD_BOYUT = {
     if(s[1]) parca.push(s[1] + ' altın');
     if(s[2]) parca.push(s[2] + ' gümüş');
     if(s[3]) parca.push(s[3] + ' bronz');
-    var satirlar = ornekler.map(function(o){
+    var satirlar = ornekler.map(function(o, oi){
       var olc = [];
       if(o.og) olc.push('OG ' + Number(o.og).toFixed(3).replace('.', ','));
       if(o.ib) olc.push('IBU ' + Math.round(o.ib));
@@ -25368,12 +25376,20 @@ window._TD_BOYUT = {
         + (grist ? '<div style="font-size:10.5px;color:var(--metin);margin-top:1px">🌾 ' + grist + '</div>' : '')
         + (hop ? '<div style="font-size:10px;color:var(--metin);margin-top:1px">🌿 ' + hop + '</div>' : '')
         + (o.y ? '<div style="font-size:10px;color:var(--metin);margin-top:1px">🧪 ' + esc(o.y) + '</div>' : '')
+        + '<div style="margin-top:4px"><button type="button" onclick="_bmMadalyaYeniRecete(\'' + jsq(stilAd) + '\',' + oi + ')" '
+        +   'title="Yeni reçete: stil iskeleti + örneğin OG/IBU ölçüleri; grist/hop/maya metni orijinal biçimiyle not alanına yazılır" '
+        +   'style="background:transparent;color:var(--bakir);border:1px solid var(--bakir);border-radius:12px;padding:3px 9px;font-size:10px;font-weight:700;cursor:pointer;font-family:var(--font-govde)">✨ Bu örnekten yola çık</button></div>'
         + '</div>';
     }).join('');
     var gizli = s[0] - ornekler.length;
     return '<div style="margin-top:8px;padding-top:6px;border-top:1px solid var(--bor)">'
-      + '<div style="font-size:11px;font-weight:700;color:var(--kahve)">🏅 Bu stilde madalya almış '
-      +   s[0] + ' reçete' + (parca.length ? ' (' + parca.join(' · ') + ')' : '') + '</div>'
+      + '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">'
+      +   '<div style="font-size:11px;font-weight:700;color:var(--kahve);flex:1;min-width:150px">🏅 Bu stilde madalya almış '
+      +     s[0] + ' reçete' + (parca.length ? ' (' + parca.join(' · ') + ')' : '') + '</div>'
+      +   '<button type="button" onclick="_bmStildenYeniRecete(\'' + jsq(stilAd) + '\')" '
+      +     'title="Madalya verisinden bağımsız: bu stilin iskeletiyle yeni reçete açar" '
+      +     'style="background:transparent;color:var(--soluk);border:1px solid var(--bor);border-radius:12px;padding:3px 9px;font-size:10px;font-weight:600;cursor:pointer;font-family:var(--font-govde);white-space:nowrap">✨ Stil iskeletinden yeni reçete</button>'
+      + '</div>'
       + '<div style="font-size:9.5px;color:var(--dim);line-height:1.45;margin:2px 0 1px">'
       +   'Aşağıdakiler <b>örnek</b>, kural değil: AHA yarışmalarında <b>elenen</b> reçeteler bu veride yok. '
       +   'Kazananları kaybedenlerden ayıran şeyin ne olduğu bu havuzdan çıkarılamaz — bunlar yalnızca '
@@ -25382,6 +25398,45 @@ window._TD_BOYUT = {
       + satirlar
       + '</div>';
   }
+
+  // ── SPRINT AW — MADALYALI ÖRNEKTEN REÇETE (orta yol) ─────────────────────
+  // Örnek-başına tam dönüştürme YAPILMAZ: kaynakta hop gramajı yok, grist ilk-5'e
+  // kırpılmış — malzeme dönüştürmek uydurmak olurdu (AN disiplini). Bunun yerine:
+  // AV yolu (_bmStildenYeniRecete) + stil iskeleti; örneğin OG/IBU'su ölçek hedefi
+  // olur (yalnız DOLU alanlar), örneğin orijinal metni NOT alanına aynen yazılır.
+  // Katalog notu: bazı hop adları (Horizon, Glacier, Summit, Liberty, Hersbrucker,
+  // Mt. Rainier) katalogda yok — bu yol malzeme dönüştürmediği için sorun üretmez;
+  // metin olduğu gibi taşınır. Katalog genişletme AYRI iş.
+  var jsq = function(s){ return String(s==null?'':s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); };
+  var DERECE_AD = { 1:'altın', 2:'gümüş', 3:'bronz' };
+  function madalyaNotu(stilAd, o){
+    var p = [];
+    p.push('🏅 KAYNAK: AHA yarışmasında ' + (DERECE_AD[o.m]||'madalya') + ' almış bir ' + stilAd + ' örneği' + (o.yil ? ' (' + o.yil + (o.e ? ', kategoride ' + o.e + ' giriş' : '') + ')' : '') + '.');
+    p.push('Elenen reçeteler bu veride yok; bu bir "şöyle yapmışlar" kaydı, kural değil. Reçetedeki malt/hop miktarları bu örnekten DEĞİL, stil iskeletinden geliyor.');
+    var olc = [];
+    if(o.og) olc.push('OG ' + Number(o.og).toFixed(3));
+    if(o.ib) olc.push('IBU ' + Math.round(o.ib));
+    if(o.sr) olc.push('SRM ' + o.sr);
+    if(o.ab) olc.push('ABV %' + o.ab);
+    if(olc.length) p.push('Örneğin ölçüleri: ' + olc.join(' · '));
+    var grist = (o.g||[]).map(function(x){ return '%' + x[1] + ' ' + x[0]; }).join(' + ');
+    if(grist) p.push('Grist (orijinal yüzdeler): ' + grist);
+    var hop = (o.h||[]).map(function(x){ return x[0] + (x[1]!=null ? ' @' + x[1] + 'dk' : '') + (x[2] ? ' (' + x[2] + ')' : ''); }).join(', ');
+    if(hop) p.push('Hop (gramaj kaynakta YOK — kendi hesabını yap): ' + hop);
+    if(o.y) p.push('Maya (orijinal metin): ' + o.y);
+    return p.join('\n');
+  }
+  window._bmMadalyaYeniRecete = function(stilAd, idx){
+    try{
+      var M = window._TOPLULUK_MADALYA; var v = M && M[stilAd];
+      var o = v && v[1] && v[1][idx]; if(!o) return null;
+      var hedef = {};
+      if(+o.og > 1) hedef.og = +o.og;
+      if(+o.ib > 0) hedef.ibu = +o.ib;
+      var adBase = stilAd + ' — ' + (o.yil ? o.yil + ' ' : '') + 'örneğinden';
+      return window._bmStildenYeniRecete ? window._bmStildenYeniRecete(stilAd, { hedef: hedef, not: madalyaNotu(stilAd, o), adBase: adBase }) : null;
+    }catch(e){ if(window.bmHataKaydet)bmHataKaydet('calc',e,'_bmMadalyaYeniRecete'); return null; }
+  };
 
   // ── Bölüm render'ı. izin=false ise HİÇBİR ŞEY basmaz (sessiz kalma kapısı).
   window._bmToplulukBolum = function(stilAd, stRef, f, olcum, izin){

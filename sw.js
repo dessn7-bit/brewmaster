@@ -715,7 +715,9 @@
 // yeniTarif -> ad+stil -> MEVCUT iskelet yolu -> tarifeKaydet); IKINCIL 'Doldur' davranisi AYNEN.
 // bmStilIskeletDoldur'a opsiyonel `sessiz` (geriye donuk uyumlu, {katman,mesaj} doner).
 // KURAL 12.3 bump v131-408 -> v131-409.
-const CACHE_VERSION='bm-cache-v131-409';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
+// Sprint AW: madalyali ornekten recete — Genel sekmesi topluluk bloguna 2 buton + iskelet hedef override.
+// HTML degisti -> KURAL 12.3 CACHE_VERSION bump v131-409 -> v131-410.
+const CACHE_VERSION='bm-cache-v131-410';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
 const ASSET_CACHE   = 'bm-assets-v1';        // font + ikon + manifest — KALICI, bump'ta silinmez
 const MODEL_CACHE   = 'bm-models-v1';        // workers.dev + jsdelivr — SHA'li/immutable URL, KALICI
 
