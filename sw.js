@@ -717,7 +717,9 @@
 // KURAL 12.3 bump v131-408 -> v131-409.
 // Sprint AW: madalyali ornekten recete — Genel sekmesi topluluk bloguna 2 buton + iskelet hedef override.
 // HTML degisti -> KURAL 12.3 CACHE_VERSION bump v131-409 -> v131-410.
-const CACHE_VERSION='bm-cache-v131-410';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
+// Sprint AX: NHC altin madalya tablosu (29 stil, 74 kayit, gercek gramaj+mash) + AW1 NHC yolu.
+// HTML degisti -> KURAL 12.3 CACHE_VERSION bump v131-410 -> v131-411.
+const CACHE_VERSION='bm-cache-v131-411';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
 const ASSET_CACHE   = 'bm-assets-v1';        // font + ikon + manifest — KALICI, bump'ta silinmez
 const MODEL_CACHE   = 'bm-models-v1';        // workers.dev + jsdelivr — SHA'li/immutable URL, KALICI
 

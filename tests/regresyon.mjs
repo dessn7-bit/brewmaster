@@ -2886,12 +2886,22 @@ const CASELER = [
     })
   },
   {
-    kod: 'AN4-MADALYASIZ', ad: 'SPRINT AN: madalyası olmayan stilde madalya bölümü SESSİZ (uydurma yok) — dağılım gözlemi çalışmaya devam eder; 25/68 stil bu durumda',
+    kod: 'AN4-MADALYASIZ', ad: 'SPRINT AN (AX güncellemesi): HER İKİ madalya tablosunda da olmayan stilde madalya bölümü SESSİZ (uydurma yok); Robust Porter artık NHC altınlarıyla dolu (GERÇEK veri, uydurma değil) — dağılım gözlemi çalışmaya devam eder',
     calistir: (page) => page.evaluate(() => {
-      const D = window._TOPLULUK_DAGILIM, M = window._TOPLULUK_MADALYA;
-      const madalyasiz = Object.keys(D).filter(a => !M[a]);
-      __REG.ok('dağılımda olup madalyasız stil VAR (25 ölçüldü)', madalyasiz.length === 25, madalyasiz.length);
-      __REG.ok('Robust Porter madalyasız (test hedefi)', madalyasiz.indexOf('Robust Porter') >= 0);
+      const D = window._TOPLULUK_DAGILIM, M = window._TOPLULUK_MADALYA, NH = window._NHC_MADALYA || {};
+      const madalyasiz = Object.keys(D).filter(a => !M[a] && !NH[a]);
+      __REG.ok('dağılımda olup HER İKİ tabloda da olmayan stil VAR', madalyasiz.length > 0, madalyasiz.length + ' stil');
+      // (a) SESSİZLİK: iki tabloda da olmayan stilde madalya bölümü BASILMAZ
+      const hedefStil = madalyasiz[0];
+      __REG.yeniKayit('AN4 Sessiz', {});
+      ekran = 'editor'; sekme = 'genel';
+      S.hacim = 11; S.verim = 61; S.stil = hedefStil;
+      bmStilIskeletDoldur(); render();
+      const el0 = document.querySelector('.bm-topluluk');
+      const t0 = el0 ? el0.textContent : '';
+      __REG.ok('(a) madalya bölümü YOK (uydurma yok)', t0.indexOf('madalya almış') < 0 && t0.indexOf('🏅') < 0 && t0.indexOf('NHC') < 0, hedefStil);
+      // (b) Robust Porter: eski tabloda yok ama NHC altınları VAR (AX) → gerçek veriyle dolu
+      __REG.ok('(b) önkoşul: Robust Porter eski tabloda yok + NHC tablosunda var', !M['Robust Porter'] && !!NH['Robust Porter']);
       __REG.yeniKayit('AN4 Porter', {});
       ekran = 'editor'; sekme = 'genel';
       S.hacim = 11; S.verim = 61; S.stil = 'Robust Porter';
@@ -2900,11 +2910,10 @@ const CASELER = [
       S.maltlar = (S.maltlar || []).filter(m => ['choc', 'roast', 'black', 'crf1', 'crf2', 'crf3'].indexOf(m.id) < 0);
       render();
       const el = document.querySelector('.bm-topluluk');
-      __REG.ok('topluluk bölümü VAR (dağılım çalışıyor)', !!el);
+      __REG.ok('(b) topluluk bölümü VAR (dağılım çalışıyor)', !!el);
       const t = el ? el.textContent : '';
-      __REG.ok('madalya bölümü YOK (sessiz)', t.indexOf('madalya almış') < 0);
-      __REG.ok('🏅 ikonu hiç basılmadı', t.indexOf('🏅') < 0);
-      __REG.ok('dağılım gözlemi yine de var', t.indexOf('Topluluk') >= 0 && /%\d/.test(t));
+      __REG.ok('(b) NHC madalya bölümü VAR — kaynak etiketli (gerçek veri)', t.indexOf('NHC finalinde altın almış') >= 0 && t.indexOf('nhc-homebrew-data') >= 0);
+      __REG.ok('(b) dağılım gözlemi yine de var', t.indexOf('Topluluk') >= 0 && /%\d/.test(t));
       return __REG.al();
     })
   },
@@ -4301,7 +4310,7 @@ const CASELER = [
       const btnler = el ? Array.from(el.querySelectorAll('button')) : [];
       const ornekBtn = btnler.filter(b => /Bu örnekten yola çık/.test(b.innerText));
       const stilBtn = btnler.filter(b => /Stil iskeletinden yeni reçete/.test(b.innerText));
-      const nOrnek = window._TOPLULUK_MADALYA['Weizen / Weissbier'][1].length;
+      const nOrnek = window._NHC_MADALYA['Weizen / Weissbier'][1].length; // AX: Weizen örnekleri artık NHC altınlarından
       __REG.ok('AW1: örnek başına 1 buton', ornekBtn.length === nOrnek, ornekBtn.length + '/' + nOrnek);
       __REG.ok('AW2: blok başlığında TEK stil-düzeyi buton (örnek butonundan ayrı)', stilBtn.length === 1, String(stilBtn.length));
       const etiket = btnler.map(b => b.innerText + '|' + (b.getAttribute('title') || '')).join(' ');
@@ -4317,13 +4326,111 @@ const CASELER = [
       __REG.ok('tıklama sonrası örnek butonları yine var', ob2.length === nOrnek, String(ob2.length));
       const n1 = KR.length;
       ob2[0].click();
-      __REG.ok('AW1 tıklama (onclick kaçışı sağlam): yeni reçete + NOT dolu + ad örneğinden', KR.length === n1 + 1 && String(S.notlar || '').indexOf('AHA yarışmasında') >= 0 && /örneğinden/.test(S.biraAd), S.biraAd);
+      __REG.ok('AW1 tıklama (onclick kaçışı sağlam): yeni reçete + NOT dolu + ad örneğinden', KR.length === n1 + 1 && /AHA (yarışmasında|NHC finalinde)/.test(String(S.notlar || '')) && /örneğinden/.test(S.biraAd), S.biraAd);
       // AV REGRESYONU: profil önerisi yolu opts'suz — not sızmaz, ad stil adıyla
       const key = 'koyu|dengeli|dolgun';
       const idx = window._PROFIL_STIL[key][1].findIndex(x => !!STIL_ISKELET[x[0]]);
       const avAd = window._PROFIL_STIL[key][1][idx][0];
       _bmProfilYeniRecete(key, idx);
       __REG.ok('AV REGRESYONU: opts\'suz yolda not YAZILMAZ + ad stil adıyla', String(S.notlar || '') === '' && S.biraAd.indexOf(avAd) === 0, S.biraAd + ' | not:' + String(S.notlar || '').length);
+      return __REG.al();
+    })
+  },
+
+  // ═════════════ SPRINT AX — NHC ALTIN MADALYA TABLOSU (gerçek gramajlı) ═════════════
+  {
+    kod: 'AX1-TABLO', ad: 'SPRINT AX: NHC tablosu YALNIZ OLGU — 29 stil/74 kayıt, tüm anahtarlar BJCP+dağılım içinde (uydurma eşleme yok), talimat düzyazısı GÖMÜLMEMİŞ, alan bantları sağlam, AN5 yasak-kelime taraması tabloyu da geçiyor, boyut makul',
+    calistir: (page) => page.evaluate(() => {
+      const N = window._NHC_MADALYA;
+      __REG.ok('tablo yüklü: 29 stil', !!N && Object.keys(N).length === 29, N && Object.keys(N).length);
+      const kayitlar = Object.values(N).map(v => v[1]).reduce((a, b) => a.concat(b), []);
+      __REG.ok('74 gömülü kayıt (stil başına 1-3)', kayitlar.length === 74 && Object.values(N).every(v => v[1].length >= 1 && v[1].length <= 3), kayitlar.length);
+      __REG.ok('gösterilen ≤ toplam (şişirme yok)', Object.values(N).every(v => v[1].length <= v[0]));
+      __REG.ok('TÜM anahtarlar BJCP otoritesinde', Object.keys(N).every(k => !!BJCP[k]), Object.keys(N).filter(k => !BJCP[k]).join(','));
+      __REG.ok('TÜM anahtarlar dağılım kapsamında (görünürlük kapısıyla tutarlı — ölü veri yok)', Object.keys(N).every(k => !!window._TOPLULUK_DAGILIM[k]));
+      __REG.ok('kategori-düzeyi UYDURMA eşleme yok (Stout/IPA/Pilsner kategorileri tabloda değil)', !N['American IPA'] && !N['German Pils'] && !N['Imperial / Russian Imperial Stout'] && !N['Stout / Porter'] && !N['Sour Ale / Kettle Sour']);
+      __REG.ok('her kayıt: OG+hacim+grist dolu, bantlar sağlam', kayitlar.every(o => o.og >= 1.02 && o.og <= 1.15 && o.L > 0 && o.L <= 250 && Array.isArray(o.g) && o.g.length > 0 && o.g.every(x => x[1] > 0 && x[1] < 60000)));
+      __REG.ok('HOP GRAMAJI: 74/74 kayıtta gramlı hop satırı (eski tabloda hiç yoktu)', kayitlar.every(o => Array.isArray(o.h) && o.h.length > 0 && o.h.every(x => x[1] > 0 && x[1] < 2000)));
+      __REG.ok('mash °C yalnız 60-74 şekerleme bandında', kayitlar.every(o => o.ms == null || (o.ms >= 60 && o.ms <= 74)));
+      const dump = JSON.stringify(N);
+      let uzun = 0; JSON.parse(dump, (k, v) => { if (typeof v === 'string' && v.length > 90) uzun++; return v; });
+      __REG.ok('DÜZYAZI GÖMÜLMEMİŞ: string ≤90 karakter + talimat kalıbı 0', uzun === 0 && !/ferment at|mash at|boil for|sparge with|rack to|pitch the/i.test(dump), uzun + ' uzun string');
+      const YASAK = ['daha iyi', 'yapmalı', 'hatalı', 'yanlış', 'olmalı', 'gerekir', 'tavsiye', 'öneriyoruz', 'düzelt', 'kötü', 'başarılı', 'kazanmak için', 'kazandıran', 'ideal', 'doğrusu', 'eksik'];
+      const ld = dump.toLocaleLowerCase('tr-TR');
+      __REG.ok('AN5-DIL: tablo metinlerinde yasak kelime 0', YASAK.every(k => ld.indexOf(k) < 0), YASAK.filter(k => ld.indexOf(k) >= 0).join(','));
+      __REG.ok('boyut makul (<30KB — AK 11.5KB / AN 68KB emsali arası)', dump.length < 30000, dump.length + ' bayt');
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AX2-UI', ad: 'SPRINT AX UI: NHC\'li stilde örnekler NHC\'den (kaynak etiketli + GERÇEK gramaj + mash görünür; eski örnekler gizli — çift listeleme yok; eski toplam başlığı korunur); yalnız-eski-veri stilinde AW davranışı BİREBİR',
+    calistir: (page) => page.evaluate(() => {
+      // (a) NHC'li stil: Weizen (eski tabloda da var → başlık eskiden, örnekler NHC'den)
+      __REG.yeniKayit('AX2 Weizen', {});
+      ekran = 'editor'; sekme = 'genel';
+      S.hacim = 11; S.verim = 61; S.stil = 'Weizen / Weissbier';
+      bmStilIskeletDoldur(); render();
+      const el = document.querySelector('.bm-topluluk');
+      __REG.ok('(a) topluluk bölümü var', !!el);
+      const t = el ? el.textContent : '';
+      __REG.ok('(a) NHC kaynak etiketi + atıf görünür', t.indexOf('NHC') >= 0 && t.indexOf('nhc-homebrew-data') >= 0);
+      __REG.ok('(a) GERÇEK gramaj görünür (kg/g)', /\d+(,\d+)?\s?(kg|g)\s/.test(t), (t.match(/\d+(,\d+)?\s?(kg|g)\s\S+/) || [''])[0]);
+      __REG.ok('(a) eski örnekler GİZLİ (çift listeleme yok: "kategoride ... giriş" markörü 0)', t.indexOf('kategoride') < 0);
+      __REG.ok('(a) eski toplam başlığı KORUNDU (11 reçete · 9 altın)', t.indexOf('madalya almış 11 reçete') >= 0 && /9 alt[ıi]n/.test(t));
+      // (a2) mash görünürlüğü: ms'li kaydı olan bir NHC stili
+      const N = window._NHC_MADALYA;
+      const msStil = Object.keys(N).find(k => N[k][1].some(o => o.ms));
+      __REG.yeniKayit('AX2 mash', {});
+      ekran = 'editor'; sekme = 'genel';
+      S.hacim = 11; S.verim = 61; S.stil = msStil;
+      bmStilIskeletDoldur(); render();
+      const t2 = (document.querySelector('.bm-topluluk') || {}).textContent || '';
+      __REG.ok('(a2) mash °C satırda görünür (' + msStil + ')', /mash \d+(,\d+)?°C/.test(t2), (t2.match(/mash [\d,]+°C/) || [''])[0]);
+      // (b) yalnız-eski-veri stili: American IPA (NHC kaynağında IPA kategori-düzeyi → dürüstçe atlandı)
+      __REG.ok('(b) önkoşul: American IPA NHC\'de YOK + eski tabloda VAR', !N['American IPA'] && !!window._TOPLULUK_MADALYA['American IPA']);
+      __REG.yeniKayit('AX2 AIPA', {});
+      ekran = 'editor'; sekme = 'genel';
+      S.hacim = 11; S.verim = 61; S.stil = 'American IPA';
+      bmStilIskeletDoldur(); render();
+      const t3 = (document.querySelector('.bm-topluluk') || {}).textContent || '';
+      __REG.ok('(b) AW davranışı AYNEN: eski örnekler basılı, NHC etiketi yok, buton duruyor', t3.indexOf('madalya almış') >= 0 && t3.indexOf('NHC') < 0 && t3.indexOf('Bu örnekten yola çık') >= 0, t3.slice(0, 60));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AX3-YOL', ad: 'SPRINT AX YOL: NHC örneğinden yeni reçete — OG/IBU örneğe ölçeklenir, mash S.mashSc\'ye taşınır (AJ kartı okur), notta GERÇEK gramajlar + mash + hacim uyarısı; "gramaj kaynakta YOK" YAZILMAZ; eski-tablo yolu BİREBİR korunur',
+    calistir: (page) => page.evaluate(() => {
+      const N = window._NHC_MADALYA;
+      __REG.yeniKayit('REGTEST AX3', {});
+      S.hacim = 10; S.verim = 45; tarifeKaydet();
+      const stil = 'Altbier / Düsseldorf Altbier', o = N[stil][1][1];
+      __REG.ok('önkoşul: NHC 2012 örneği dolu (og+ib+ms+gramlı hop)', o.yil === 2012 && o.og === 1.051 && o.ib === 42 && o.ms === 66 && o.h.length >= 4, JSON.stringify([o.yil, o.og, o.ib, o.ms]));
+      const n0 = KR.length;
+      const yid = _bmNhcYeniRecete(stil, 1);
+      __REG.ok('yeni reçete oluştu + iskelet doldu (AV yolu)', KR.length === n0 + 1 && !!yid && S.stil === stil && (S.maltlar || []).length > 0 && (S.hoplar || []).length > 0);
+      __REG.ok('batch boyutu taşındı', S.hacim === 10 && S.verim === 45);
+      const c = calc();
+      __REG.ok('HEDEF: OG örneğe ölçeklendi', Math.abs(c.og - o.og) <= 0.004, c.og.toFixed(3) + ' vs ' + o.og);
+      __REG.ok('HEDEF: IBU örneğe ölçeklendi', Math.abs(c.ibu - o.ib) <= 4, Math.round(c.ibu) + ' vs ' + o.ib);
+      __REG.ok('HEDEF: mash S.mashSc\'ye taşındı (AJ mash kartı bu alanı okur)', S.mashSc === 66, String(S.mashSc));
+      const n = String(S.notlar || '');
+      __REG.ok('NOT: NHC kaynağı + atıf şeffaf', n.indexOf('AHA NHC finalinde altın almış bir ' + stil + ' örneği (2012)') >= 0 && n.indexOf('nhc-homebrew-data') >= 0, n.split('\n')[0]);
+      __REG.ok('NOT: AN çerçevesi (elenen yok + kural değil + miktarlar iskeletten)', n.indexOf('Elenen reçeteler bu veride yok') >= 0 && n.indexOf('kural değil') >= 0 && n.indexOf('stil iskeletinden geliyor') >= 0);
+      __REG.ok('NOT: GERÇEK hop gramajları', n.indexOf('Hop (orijinal gramajlar): 57 g Tettnanger @60dk') >= 0, (n.split('\n').find(s => s.indexOf('Hop (') === 0) || '').slice(0, 90));
+      __REG.ok('NOT: "gramaj kaynakta YOK" satırı YAZILMADI', n.indexOf('gramaj kaynakta YOK') < 0);
+      __REG.ok('NOT: orijinal hacim uyarısı + mash satırı', n.indexOf('Orijinal batch 68.1 L') >= 0 && n.indexOf('Mash: 66°C') >= 0);
+      __REG.ok('NOT: grist gerçek miktarlarla (kg)', n.indexOf('Grist (orijinal miktarlar): 11.34 kg German Pilsner malt') >= 0, (n.split('\n').find(s => s.indexOf('Grist') === 0) || '').slice(0, 80));
+      __REG.ok('AD: NHC yıl + örneğinden (ödül iması yok)', S.biraAd.indexOf(stil + ' — NHC 2012 örneğinden') === 0 && !/ödül|madalya|şampiyon|kazanan/i.test(S.biraAd), S.biraAd);
+      __REG.ok('DİL: notta kalite iddiası yok', !/kazan[ıi]rs[ıi]n|en iyi|daha iyi|bunu demle|yapmal[ıi]/i.test(n));
+      const kr = KR.find(x => x && x.id === yid);
+      __REG.ok('KALICI: not + mashSc KR kaydında', !!kr && String(kr.notlar || '').indexOf('NHC') >= 0 && kr.mashSc === 66);
+      // ── ESKİ YOL REGRESYONU: aynı stil, eski tablo örneği ──
+      const iskSc = STIL_ISKELET[stil] ? (STIL_ISKELET[stil].mashSc || 67) : 67;
+      _bmMadalyaYeniRecete(stil, 0);
+      const n2 = String(S.notlar || '');
+      __REG.ok('ESKİ YOL: "gramaj kaynakta YOK — kendi hesabını yap" AYNEN duruyor', n2.indexOf('gramaj kaynakta YOK — kendi hesabını yap') >= 0);
+      __REG.ok('ESKİ YOL: mashSc iskelet varsayılanında (örnekte mash verisi yok — taşınacak şey yok)', S.mashSc === iskSc, S.mashSc + ' vs ' + iskSc);
+      __REG.ok('ESKİ YOL: ad eski biçimde (NHC ibaresi yok)', /örneğinden/.test(S.biraAd) && S.biraAd.indexOf('NHC') < 0, S.biraAd);
       return __REG.al();
     })
   }

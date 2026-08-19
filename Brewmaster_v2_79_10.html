@@ -6031,7 +6031,8 @@ window._bmAcikIsiGuvenceyeAl = function(){
 };
 
 // Stil adından YENİ reçete üretir ve editörde açar. Dönen: yeni reçete id'si veya null.
-// SPRINT AW opsiyonel opts: {hedef:{og,ibu}} iskelet ölçek hedefi (yalnız B katmanında etkili),
+// SPRINT AW opsiyonel opts: {hedef:{og,ibu,mash}} — og/ibu iskelet ölçek hedefi (yalnız B
+// katmanında etkili), mash (AX) S.mashSc'ye yazılır (60-74°C bandı dışı yok sayılır);
 // {not} kayıttan önce S.notlar'a eklenir, {adBase} ad tabanını değiştirir. opts'suz = AV davranışı BİREBİR.
 window._bmStildenYeniRecete = function(stilAd, opts){
   try{
@@ -6056,6 +6057,9 @@ window._bmStildenYeniRecete = function(stilAd, opts){
     //    onay sorusu çıkmaz (tek dokunuş). __stilSecKaynak='iskelet' burada kurulur →
     //    Sprint Z stil sinyali tarifeKaydet'te SUSAR (stilden-reçete = NİYET).
     var sonuc = window.bmStilIskeletDoldur ? window.bmStilIskeletDoldur(true, (opts&&opts.hedef)||null) : null;
+    // SPRINT AX: örneğin ölçülmüş mash sıcaklığı reçetenin mash alanına taşınır —
+    // AJ mash bilgi kartı ve mash pH zinciri S.mashSc'yi zaten okur (bağlantı otomatik).
+    if(opts&&opts.hedef&&+opts.hedef.mash>=60&&+opts.hedef.mash<=74) S.mashSc = Math.round(+opts.hedef.mash);
     // SPRINT AW: kaynak örneğin orijinal metni NOT alanına aynen taşınır (reçete verisi uydurulmaz).
     // Genel sekmesinden tetiklenir → DOM'da notText yok → tarifeKaydet S.notlar'ı ezmez.
     if(opts&&opts.not) S.notlar = (S.notlar?String(S.notlar)+'\n\n':'') + String(opts.not);
@@ -25212,6 +25216,20 @@ window._TOPLULUK_MADALYA = {
   "Witbier / Belgian White":[[6,6,0,0],[{"m":1,"og":1.05,"ib":18,"sr":3,"ab":5,"g":[["flaked wheat",56],["Briess pale two-row malt",42],["flaked oats",2]],"h":[["Amarillo",20,""],["Amarillo",15,""],["Amarillo",0,""],["freshly ground coriander",5,""]],"y":"Wyeast 3944 Belgian Witbier, 1 L starter","yil":2018,"e":null},{"m":1,"og":1.051,"ib":14,"sr":null,"ab":5.4,"g":[["Pilsner malt",43],["flaked winter wheat",21],["unmalted spring wheat",21],["flaked oats",7],["acidulated malt",7]],"h":[["Hallertauer",60,""],["Sterling",5,""]],"y":"White Labs WLP410 Belgian Wit II","yil":2021,"e":145},{"m":1,"og":1.058,"ib":18,"sr":15,"ab":6.3,"g":[["raw white wheat",44],["Belgian pils malt",44],["flaked barley",9],["rice hulls (in mash)",2]],"h":[["Mt. Rainier",60,""],["Mt. Rainier",15,""],["Mt. Rainier",5,""]],"y":"White Labs WLP500 Trappist and WLP530 Abbey ale ","yil":2011,"e":null}]]
 };
 
+// ═══ SPRINT AX — NHC ALTIN MADALYA ÖRNEKLERİ (gerçek gramajlı) ═══════════════
+// Kaynak: AHA National Homebrew Competition final sonuçları (2005-2014 altın),
+// github.com/thcipriani/nhc-homebrew-data derlemesi üzerinden. Build:
+// working/_ax_build_nhc.js — 280 kayıt → 52 mead/cider + 100 kategori-düzeyi etiket
+// (alt-stil bilinemez, uydurma eşleme YAPILMAZ) + 7 OG/hacim boş + 2 kırpık +
+// 1 iç-tutarsız + 15 dağılım-kapısı dışı elendi → 29 stil, stil başına en yeni ≤3 (74 gömülü).
+// YALNIZ OLGU gömülüdür: stil/yıl/hacim/malzeme adı+gram/maya/OG-FG-IBU-SRM-ABV/mash °C.
+// Talimat düzyazısı ve kişi adları GÖMÜLMEZ (repo public — telif + kişisel veri).
+// Alanlar: L=hacim(L) · ms=mash°C (yalnız TEK belirgin şekerleme sıcaklığı bulunanlarda)
+// · g=[[ad,gram]] · h=[[ad,gram,dk,AA%]] (dk: sayı|'FWH'|'kuru'|'wp'|null)
+// · ekN=listelenmeyen ek kalem sayısı (baharat/katkı — sessiz yutulmadı, sayısı burada).
+// Elle düzenlenmez — değişiklik = build script yeniden koşulur.
+window._NHC_MADALYA = {"Altbier / Düsseldorf Altbier":[6,[{"yil":2014,"L":19.9,"og":1.052,"fg":1.011,"ab":5.38,"g":[["German Pilsner malt",3630],["Munich malt",900],["aromatic malt",450],["Cara-Munich II malt",227],["Carafa malt",113]],"h":[["Herkules",24,60,15.7],["Hallertau",14,15,7.9]],"y":"Wyeast 1007 German Ale yeast, starter","ekN":1},{"yil":2012,"L":68.1,"og":1.051,"fg":1.01,"ab":5.38,"ib":42,"sr":12.4,"ms":66,"g":[["German Pilsner malt",11340],["Munich malt",2720],["Briess aromatic malt",1360],["Wyermann Caramunich malt",450],["White wheat malt",450],["Wyermann Carafa Special II malt",227]],"h":[["Tettnanger",57,60,4.5],["Tettnanger",57,30,4.5],["Saaz",113,20,4],["Saaz",113,15,4],["Tettnanger",113,15,4.5]],"y":"Wyeast 1007 German ale yeast (starter)","ekN":2},{"yil":2011,"L":20.8,"og":1.051,"fg":1.01,"ab":5.38,"ms":64,"g":[["German Pilsner malt",3060],["Belgian Munich malt",790],["German Vienna malt",450],["Belgian Biscuit malt",227],["dextrin malt",227],["US chocolate malt",113]],"h":[["Tettnanger",28,"FWH",null],["German Tradition",37,60,6.9],["Tettnanger",28,30,null],["Tettnanger",28,20,null],["Mt. Hood",14,0,5.9]],"y":"White Labs WLP029 German Ale/Kolsch (1 pint starter)","ekN":3}]],"American Amber Ale / Red Ale":[2,[{"yil":2012,"L":20.8,"og":1.067,"fg":1.015,"ab":6.83,"ib":66,"sr":16,"ms":66.5,"g":[["U.K. pale ale malt",5560],["Munich malt",450],["40° L crystal malt",450],["120° L crystal malt",227],["victory malt",227],["pale chocolate malt",85]],"h":[["Horizon",31,60,13],["Cascade",28,10,6],["Centennial",28,10,9],["Cascade",28,0,6],["Centennial",28,0,9]],"y":"White Labs WLP001 California ale yeast (1 L starter)","ekN":2},{"yil":2011,"L":18.9,"og":1.062,"fg":1.014,"ab":6.3,"ib":19,"sr":17,"ms":66.5,"g":[["pale malt",6050],["40˚ L crystal malt",490],["120˚ L crystal malt",249],["Victory malt",249],["pale chocolate malt",95]],"h":[["Horizon",34,60,13],["Cascade",31,10,6],["Centennial",31,10,9],["Cascade",31,0,6],["Centennial",31,0,9]],"y":"White Labs WLP001 California ale yeast (800 mL starter)"}]],"American Brown Ale":[1,[{"yil":2014,"L":22.7,"og":1.062,"fg":1.014,"ab":6.3,"g":[["U.S. pale two-row malt",4350],["10° L Munich malt",816],["60° L crystal malt",272],["chocolate malt",272]],"h":[["Cascade",9,60,7.3],["Cascade",9,30,7.3],["Willamette",28,15,5.3],["Cascade",28,15,7.3],["Willamette",14,5,5.3],["Cascade",14,5,7.3],["Willamette",9,1,5.3],["Cascade",9,1,7.3]],"y":"Wyeast 1056 American ale yeast","ekN":2}]],"American Lager / Light Lager":[4,[{"yil":2013,"L":18.9,"og":1.048,"fg":1.008,"ab":5.3,"ib":2,"ms":65,"g":[["two-row pale malt",3760],["flaked rice",900]],"h":[["Hallertauer",20,60,null]],"y":"White Labs American lager (4 L starter)","ekN":1},{"yil":2009,"L":22.7,"og":1.056,"fg":1.006,"ab":3.54,"ms":64.5,"g":[["American two-row pale malt",5440],["flaked rice",450]],"h":[["Hallertau",35,60,4.2]],"y":"Wyeast No. 2007 Pilsen lager yeast","ekN":1},{"yil":2008,"L":20.8,"og":1.045,"fg":1.007,"ab":4.99,"ms":65,"g":[["[[US 6-row]] malt",2720],["rice [syrup] solids, in kettle",1360]],"h":[["[Hallertauer]",8.5,null,4],["Hallertauer",8.5,60,4]],"y":"Wyeast No. 2007 Pilsen lager yeast (4L starter)","ekN":2}]],"American Pale Ale":[7,[{"yil":2013,"L":22.7,"og":1.052,"fg":1.011,"ab":5.5,"ib":27,"sr":9.3,"ms":68,"g":[["pale two-row malt",4500],["20° L crystal",340],["80° L crystal malt malt",227],["CaraVienne malt",227],["wheat malt",227]],"h":[["Nugget",14,60,13],["Cascade",28,5,5.5],["Nelson Sauvin",14,5,12.5],["Cascade",28,null,5.5],["Nelson Sauvin",28,null,12.5]],"y":"White Labs WLP001 California ale yeast"},{"yil":2010,"L":22.7,"og":1.06,"fg":1.013,"ab":6,"ib":53,"sr":8.6,"ms":67,"g":[["pale malt",5900],["biscuit malt",450],["20° L crystal malt",450],["torrified wheat",450]],"h":[["Centennial",28,30,8],["Simcoe",28,30,12],["Centennial",28,10,8],["Simcoe",28,10,12],["Centennial",28,0,8],["Simcoe",28,0,12],["Centennial",28,null,8],["Simcoe",28,null,12]],"y":"Wyeast No. 1056 ale yeast (starter)","ekN":2},{"yil":2009,"L":87,"og":1.05,"fg":1.011,"ab":5.12,"ms":67,"g":[["pale malt",15420],["Munich malt",1360],["15L crystal malt",227]],"h":[["Goldings",85,60,4.3],["Fuggle",71,30,4.2],["Amarillo",92,10,8.3],["Amarillo",92,5,8.3],["Cascade",28,1,6],["Fuggle",28,1,4.2]],"y":"White Labs WLP002 English ale yeast (800 mL starter)"}]],"Belgian Dark Strong Ale":[3,[{"yil":2012,"L":24.6,"og":1.088,"fg":1.009,"ab":10.37,"ib":24,"sr":25,"g":[["Pilsner malt",6410],["Special B malt",1220],["dark caramelized table sugar",1080],["Wyermann Carafa III malt",57]],"h":[["Challenger",28,60,7],["Cluster",14,60,7],["Willamette",14,20,4.8],["Willamette",14,10,4.8]],"y":"Wyeast 3739 Flanders Golden ale yeast and Wyeast 3787 Trappist High Gravity ale yeast (1.5","ekN":4},{"yil":2006,"L":22.7,"og":1.103,"ms":67,"g":[["Pilsner malt",6800],["Munich malt",1360],["aromatic malt",450],["Special B malt",450],["caramel Munich malt",450],["wheat malt",227],["melanoidin malt",227],["cane sugar",450]],"h":[["Hallertau",62,null,4.4]],"y":"White Labs WLP 570 Belgian Golden ale yeast"},{"yil":2005,"L":21.8,"og":1.107,"fg":1.022,"ab":11.16,"ms":71,"g":[["DWC pale malt",9530],["wheat malt",227],["DWC aromatic malt",900],["Special B malt",450],["biscuit malt",450],["dextrin malt",227],["caramel Munich malt",113],["chocolate malt",113]],"h":[["Golding",57,null,6.3],["Golding",28,null,6.3]],"y":"White Labs Trappist ale yeast (1 qt)"}]],"Best Bitter":[3,[{"yil":2014,"L":24.6,"og":1.053,"fg":1.01,"ab":5.64,"ms":66.5,"g":[["Fawcett Pearl malt",3630],["Vienna malt",450],["CaraRed malt",450],["60° L crystal malt",450],["20° L crystal malt",227],["wheat malt",227]],"h":[["Wye Challenger",28,60,8.2],["E.K. Goldings",21,15,4.5]],"y":"Wyeast 1028 London Ale yeast (1.5 L starter)"},{"yil":2006,"L":22.7,"og":1.04,"fg":1.01,"ab":3.94,"ms":65.5,"g":[["two-row pale malt",3400],["amber malt",450],["55° L crystal malt",227],["Special B malt",113]],"h":[["Goldings",14,null,4.75],["Fuggles",14,null,5],["Goldings",14,null,4.75],["Fuggles",14,null,5],["Goldings",14,null,4.75],["Fuggles",14,null,5],["Goldings",14,null,4.75],["Fuggles",14,null,5]],"y":"1.05 qt (1 L) Wyeast No. 1099 Whitbread ale yeast starter","ekN":2},{"yil":2005,"L":22.7,"og":1.052,"fg":1.011,"ab":5.38,"ms":66.5,"g":[["Fawcett\u0019s Maris Otter pale malt",4300],["Briess 40° L crystal malt",181],["Briess 60° L crystal malt",499]],"h":[["Kent Goldings",32,null,5],["Challenger",24,null,7]],"y":"Wyeast No. 1028 London ale yeast (200 mL)","ekN":1}]],"California Common / Steam Beer":[1,[{"yil":2010,"L":22.3,"og":1.054,"fg":1.011,"ab":5.5,"ib":40,"sr":11,"g":[["Crisp Maris Otter pale malt",1870],["Rahr two-row malt",1360],["Weyermann Munich malt",680],["Briess Victory malt",227],["pale chocolate malt",57]],"h":[["Northern Brewer",33,60,6],["Northern Brewer",40,15,6],["Northern Brewer",40,1,6]],"y":"1 pint thick slurry (with trub) of DLC SafAle K-97 Dry Yeast","ekN":1}]],"Doppelbock":[3,[{"yil":2014,"L":75.7,"og":1.077,"fg":1.018,"ab":7.74,"ms":68,"g":[["Munich malt",22670],["Pilsner malt",7030],["Caramunich I malt",2630]],"h":[["Bravo",45,60,14.2],["Hallertau",85,30,4.2]],"y":"WLP833 German Bock lager yeast (6 L starter)","ekN":2},{"yil":2012,"L":22.7,"og":1.086,"fg":1.02,"ab":8.66,"ib":30,"sr":21,"ms":65.5,"g":[["Ireks Munich malt",5670],["Weyermann Pilsner malt",1360],["Weyermann Vienna malt",1360],["Weyermann CaraMunich III malt",340],["Weyermann Carafa Special III malt",113]],"h":[["Hallertau Hersbrucker , 4",57,60,2]],"y":"1 tsb yeast energizer (10 min)","ekN":2},{"yil":2007,"L":22.7,"og":1.086,"g":[["German Pilsner malt",1800],["German Munich malt",6350],["caramel Munich malt",900]],"h":[["Hallertauer",40.5,60,4.4],["Hallertauer",8.2,30,4.4]],"y":"White Labs WLP 833 German Bock lager yeast"}]],"English Brown Ale":[4,[{"yil":2012,"L":22.7,"og":1.051,"fg":1.013,"ab":4.99,"ib":27,"sr":18.2,"ms":66.5,"g":[["Maris Otter pale ale malt",4540],["Vienna malt",1360],["Special Roast malt",340],["Victory malt",227],["brown malt",227],["77° L Crystal malt",227],["pale chocolate malt",170]],"h":[["E.K. Goldings",42,60,4.7],["E.K. Goldings",7,5,4.7],["Styrian Goldings",7,5,4.3]],"y":"Wyeast 1469-PC West Yorkshire Ale (1800ml starter on stir plate","ekN":5},{"yil":2011,"L":18.9,"og":1.056,"fg":1.018,"ab":4.99,"g":[["British pale ale malt",3630],["dextrin malt",450],["75˚ L crystal malt",900],["Munich malt",450],["brown malt",227],["biscuit malt",227],["Briess Special Roast malt",113],["chocolate malt",113],["Victory malt",113]],"h":[["Northern Brewer",28,60,null],["Willamette",28,30,null],["Fuggle",28,15,null],["U.K. Golding",28,5,null]],"y":"White Labs WLP002 English ale yeast"},{"yil":2008,"L":18.2,"og":1.047,"fg":1.016,"ab":4.07,"ms":68,"g":[["Maris Otter pale malt",3400],["40° L crystal malt",340],["roasted two-row malt",227],["60° L crystal malt",72],["Special B malt",59],["chocolate malt",59]],"h":[["Northern Brewer",14,null,8],["Goldings",7,null,5.2],["Goldings",7,null,5.2],["Goldings",7,null,5.2]],"y":"Wyeast No. 1098 British ale yeast (1.75 pint starter)","ekN":4}]],"English Mild / Dark Mild":[4,[{"yil":2014,"L":41.6,"og":1.048,"fg":1.015,"ab":4.33,"ib":18,"sr":18,"ms":68,"g":[["Maris Otter pale ale malt",7260],["60° L caramel malt",450],["120° L caramel malt",340],["dextrin malt",227],["200° L chocolate malt",227],["300° L roast barley",113],["500° L black malt",60]],"h":[["E.K. Goldings",57,60,5]],"y":"Wyeast 1968 London ale yeast","ekN":2},{"yil":2013,"L":11.4,"og":1.04,"fg":1.008,"ab":4.3,"ib":19,"sr":19,"ms":65.5,"g":[["Simpsons Maris Otter pale malt",1590],["Crisp brown malt",340],["Fawcett pale chocolate malt",113],["Simpsons Golden Naked Oats (mash)",113],["Simpsons Medium Crystal (mash)",113],["flaked barley (Mash)",113]],"h":[["East Kent Goldings",14,60,5.8]],"y":"White Labs WLP007 English ale yeast","ekN":1},{"yil":2010,"L":18.9,"og":1.037,"fg":1.01,"ab":3.54,"ms":68,"g":[["Maris Otter pale malt",3180],["75L crystal malt",450],["chocolate malt",170],["Victory malt",170],["Carafa III",28]],"h":[["East Kent Goldings",14,60,5],["East Kent Goldings",14,15,5]],"y":"White Labs WLP002 ale yeast","ekN":1}]],"Helles / Münchner Hell":[3,[{"yil":2012,"L":26.5,"og":1.051,"fg":1.01,"ab":5.38,"ib":20,"sr":4.6,"ms":68,"g":[["German Pils malt",6460],["Munich malt",200],["biscuit malt",73],["melanoidin malt",73],["MgSO",1]],"h":[["Hallertau Mittelfrüh",52,"FWH",null]],"y":"Wyeast No. 2308 Munich lager yeast (starter)","ekN":1},{"yil":2011,"L":41.6,"og":1.048,"fg":1.012,"ab":4.73,"g":[["German Pilsner malt",8160],["dextrin malt",900]],"h":[["Hallertau Hersbrucker",56,60,4.6],["Hallertau Hersbrucker",28,1,4.6],["Hallertau Hersbrucker",42,0,4.6]],"y":"Wyeast No. 2206 Bavarian Lager yeast (3500 mL starter)","ekN":1},{"yil":2007,"L":45.4,"og":1.05,"fg":1.012,"ab":4.99,"g":[["Spitz malt",11340]],"h":[["Tettnanger",113,null,4.7]],"y":"Wyeast No. 2308 Munich lager yeast"}]],"Lambic / Gueuze":[1,[{"yil":2006,"L":37.8,"og":1.05,"fg":1.01,"ab":5.25,"ms":66,"g":[["Weyermann&#39;s Pilsner malt",7230],["Briess raw wheat",6350]],"h":[["aged , (boil)",84,null,null]],"y":"Airborne yeast","ekN":1}]],"Maibock / Helles Bock":[3,[{"yil":2013,"L":36,"og":1.07,"fg":1.017,"ab":7.1,"ib":24,"ms":69,"g":[["( 7.37 kg) Pilsner malt",7370],["Munich malt",3800]],"h":[["Magnum",34,60,13.1]],"y":"Wyeast 2308 Munich lager (1,040 billion cells)","ekN":4},{"yil":2008,"L":41.6,"og":1.072,"fg":1.016,"ab":7.35,"g":[["Pilsner malt",8620],["Munich malt",4200]],"h":[["Perle",57,null,6],["Spalt",4.9,null,4.9]],"y":"Wyeast No. 2206 Bavarian lager yeast"},{"yil":2005,"L":37.8,"og":1.064,"fg":1.014,"ab":6.56,"ms":63,"g":[["Briess Pilsner malt",11800],["Ashburne Mild malt",450],["Victory malt",450],["melanoidin malt",450]],"h":[["Golding",14,"FWH",5],["Hersbrucker",42,null,2.9],["Zatek",57,null,3],["Hersbrucker",28,null,2.9],["Mt. Hood",14,null,6]],"y":"Wyeast No. 2278 Czech Pilsner lager yeast"}]],"Munich Dunkel":[3,[{"yil":2014,"L":13.3,"og":1.055,"fg":1.012,"ab":5.64,"ib":25,"sr":16,"g":[["20° L Munich malt (60%)",2040],["Pilsner malt (20%)",680],["10° L Munich malt (19%)",650],["pale chocolate malt (1%)",28]],"h":[["Liberty",31,60,5]],"y":"WLP833 German Bock lager yeast (starter)"},{"yil":2012,"L":22.7,"og":1.063,"fg":1.022,"ab":5.38,"ib":31,"g":[["8-10° L Munich malt",5440],["Weyermann Carafa III malt",57]],"h":[["Hallertau",43,60,6.4],["Hallertau",28,20,6.4]],"y":"Wyeast 2206 Bavarian lager yeast","ekN":1},{"yil":2010,"L":18.9,"og":1.06,"fg":1.02,"ab":5.25,"g":[["Munich malt",3630],["Pilsner malt",900],["chocolate malt",113]],"h":[["Hallertau",19,45,3],["Hallertau",9,15,3]],"y":"Wyeast No. 2206 Bavarian lager yeast (1 qt starter)","ekN":2}]],"Munich Märzen / Oktoberfest":[6,[{"yil":2014,"L":20.8,"og":1.056,"fg":1.012,"ab":5.78,"g":[["Weyermann Vienna malt",4540],["Weyermann Munich II malt",1590],["Weyermann acid malt",136]],"h":[["Hallertau Perle",28,60,7.8]],"y":"WLP833 German Bock lager yeast (4 L starter)","ekN":3},{"yil":2013,"L":22.7,"og":1.056,"fg":1.014,"ab":5.51,"ib":25,"sr":7,"g":[["Weyermann floor malted Bohemian Pilsner malt",2270],["Weyermann 5-7° L Munich malt",1810],["Weyermann 3.5° L Vienna malt",1590]],"h":[["Millennium",7,"FWH",16.8],["Tettnanger",21,30,4.8],["Tettnanger",14,10,4.8]],"y":"Wyeast 2633 Oktoberfest Blend lager yeast (1600 mL starter)","ekN":3},{"yil":2010,"L":20.8,"og":1.058,"fg":1.014,"ab":5.8,"ib":21,"sr":6,"ms":66.5,"g":[["Vienna malt",4540],["Munich malt",113],["dextrin malt",113],["melanoidin malt",113],["acid malt",113]],"h":[["Centennial",14,"FWH",11.3],["Hallertau",14,15,3.9],["Hallertau",14,5,3.9]],"y":"White Labs WLP833 German Bock lager yeast starter","ekN":1}]],"Robust Porter":[5,[{"yil":2011,"L":45.4,"og":1.069,"fg":1.012,"ab":7.48,"ib":37,"sr":35.6,"ms":69,"g":[["U.S. pale malt",11790],["British chocolate malt",1130],["60° L crystal malt",680]],"h":[["Cluster",57,60,7],["Cluster",57,30,7],["Cascade",57,5,4.9]],"y":"White Labs WLP001 California ale yeast"},{"yil":2009,"L":17,"og":1.061,"ms":66,"g":[["Maris Otter pale malt",3630],["Briess Bonlander Munich malt",450],["Fawcett brown malt",450],["Fawcett chocolate malt",340],["Briess dark chocolate malt",227],["Fawcett pale chocolate malt",227],["Weyermann pale chocolate malt",227],["Fawcett 65L crystal malt",227]],"h":[["E.K. Goldings",21,"FWH",4],["Summit",11,60,16.7],["E.K. Goldings",21,8,4]],"y":"Wyeast No. 1318 London ale III yeast","ekN":1},{"yil":2008,"L":45.4,"og":1.064,"fg":1.012,"ab":6.83,"ms":66.5,"g":[["pale malt",11230],["Vienna malt",1460],["40° L crystal malt",1460],["350°L chocolate malt",830],["black patent malt",420]],"h":[["Magnum",35,null,12.9],["Crystal",42,null,3.25]],"y":"White Labs WLP001 California ale yeast (2L starter)","ekN":1}]],"Roggenbier / Rye Beer":[3,[{"yil":2011,"L":30.3,"og":1.056,"fg":1.015,"ab":5.38,"ib":18,"sr":14.5,"ms":66,"g":[["rye malt",4370],["Munich malt",1470],["US pale malt",1590],["80˚ L crystal malt",737],["flaked rice",737],["wheat malt",737],["rice hulls (in mash)",907]],"h":[["Hallertauer",17,60,4.8],["Hallertauer",28,60,3.8],["Hallertauer",28,10,4.3],["Hallertauer",28,2,4.3]],"y":"White Labs WLP 380 Weihenstephan IV ale yeast","ekN":2},{"yil":2010,"L":18.9,"og":1.06,"fg":1.013,"ab":5.55,"ib":19,"sr":14.2,"ms":74,"g":[["rye malt",2720],["Durst pilsner malt",900],["pale malt",900],["80° L crystal malt",450],["flaked rice",450],["wheat malt",450],["rice hulls, in mash",450]],"h":[["Hallertau",28,60,3.9],["Hallertau",28,10,3.9],["Hallertau Hersbrucker",28,2,2.4]],"y":"White Labs WLP 380 ale yeast"},{"yil":2006,"L":21.2,"og":1.061,"fg":1.013,"ab":6.3,"ms":70,"g":[["rye malt",2490],["Munich malt",900],["Vienna malt",900],["pale ale malt",680],["150° L crystal malt",172],["melanoidin malt",227],["Carafa II malt",27]],"h":[["Northern Brewer",15,null,7.6],["Sterling",11,null,6.7],["Sterling",15,null,6.7]],"y":"White Labs WLP300 Hefeweizen ale yeast","ekN":1}]],"Saison / Farmhouse Ale":[2,[{"yil":2013,"L":18.9,"og":1.053,"fg":1.002,"ab":6.8,"ib":24,"sr":4,"ms":66.5,"g":[["Franco-Belges Pilsner malt",4540],["Vienna malt",450]],"h":[["Hallertau Mittlefruh",37,30,4],["Czech Saaz",23,30,3.2],["Hallertau Mittlefruh",23,5,4],["Czech Saaz",14,5,3.2],["Hallertau Mittlefruh",28,0,4],["Czech Saaz",23,0,3.2]],"y":"Wyeast 3724 Belgian Saison and 3711 French Saison blend, ~200 billion cells","ekN":2},{"yil":2007,"L":19,"og":1.063,"fg":1.014,"ab":6.43,"g":[["German pilsner malt",4310],["wheat malt",450],["sucrose",566]],"h":[["Styrian Goldings (90 min.)",35,null,null],["E K Goldings (15 min.)",7,null,null],["Saaz (2 min.)",7,null,null]],"y":"White Labs WLP 565 Saison ale yeast (2 qt starter)","ekN":3}]],"Schwarzbier":[3,[{"yil":2013,"L":23.8,"og":1.048,"fg":1.012,"ab":4.8,"ib":21,"sr":23,"g":[["Pilsner malt",4080],["Carafa Special",227],["Munich malt",227],["Caramunich malt",227]],"h":[["Tettnang",37,60,4.5],["Hallertauer",8.5,15,4],["Tettnang",8.5,15,4.5],["Hallertauer",8.5,1,4],["Tettnang",8.5,1,4.5]],"y":"Wyeast 2124 Bohemian Lager (1 quart of slurry)","ekN":3},{"yil":2011,"L":28.4,"og":1.054,"fg":1.014,"ab":5.38,"ms":67,"g":[["Weyermann Munich II malt",3180],["Weyermann pils malt",2720],["Weyermann Cara-Munich malt",227],["Weyermann Carafa I malt",340]],"h":[["Tettnang",42,"FWH",4.5],["Tettnang",14,10,4.5]],"y":"Fermentis S-23 lager yeast (1 qt starter)"},{"yil":2007,"L":75.7,"og":1.055,"fg":1.016,"ab":5.12,"ms":67,"g":[["Weyermann Munich I malt",9070],["Weyermann Pilsner malt",5900],["Weyermann caramel Munich II",1130],["Weyermann Carafa II",950],["Weyermann melanoidin malt",1360],["Briess dextrin malt",800]],"h":[["Tettnanger",92,90,4.5],["Mt. Hood",56,45,6.5],["Tettnanger",28,15,4.5]],"y":"Wyeast No. 2308 Munich lager","ekN":1}]],"Scottish Ale / 80 Shilling":[1,[{"yil":2013,"L":26.5,"og":1.069,"fg":1.019,"ab":6.7,"ib":14,"ms":70,"g":[["Maris Otter pale malt",6130],["40° L crystal malt",623],["honey malt",313],["10° L Munich malt",313],["120° L crystal malt",172],["pale chocolate malt",113],["rice hulls (mash)",450]],"h":[["East Kent Goldings",28,60,6.4]],"y":"White Labs WLP001 California Ale, 1.8 L starter"}]],"Scottish Ale / Wee Heavy":[3,[{"yil":2012,"L":22.7,"og":1.085,"fg":1.023,"ab":8.14,"ib":22,"sr":18,"ms":68.5,"g":[["Rahr pale ale malt",5780],["dextrin malt",900],["Weyermann Rauch malt",269],["biscuit malt",269],["victory malt",269],["60° L crystal malt",269],["roasted barley",142]],"h":[["Summit",17,75,18.5],["Kent Golding",7,15,5],["Kent Golding",7,5,5]],"y":"White Labs WLP028 Edinburgh Scottish ale yeast (repitched slurry)","ekN":1},{"yil":2010,"L":18.9,"og":1.101,"fg":1.024,"ab":10.11,"ms":69,"g":[["pale malt",6350],["malted wheat",450],["aromatic",450],["Munich",450],["roasted barley",149]],"h":[["Magnum",14,60,14],["Fuggles",7,10,4.2]],"y":"Wyeast 1728 Scottish Ale yeast","ekN":1},{"yil":2008,"L":41.6,"og":1.096,"fg":1.018,"ab":10.24,"ms":67,"g":[["Golden Promise pale malt",10886],["60° L crystal malt",1810],["Munich malt",1810],["wheat malt",900],["120° L crystal malt",680],["roast barley",170]],"h":[["East Kent Goldings",85,null,5],["East Kent Goldings",14,30,5]],"y":"White Labs WLP028 Edinburgh ale yeast (0.5 gallon starter)","ekN":1}]],"Session Ale / Ordinary Bitter":[3,[{"yil":2013,"L":20.8,"og":1.037,"fg":1.012,"ab":3.3,"ib":20,"sr":8.3,"ms":66.5,"g":[["Maris Otter malt",2060],["15° L crystal malt",254],["Fawcett 85° L dark crystal malt",199],["Dinegmans biscuit malt",141]],"h":[["U.S. Goldings",20,"FWH",4.7],["U.S Goldings",17,60,4.7],["(14 g) Fuggles",14,20,4.5],["U.S. Goldings",17,10,4.7],["(14 g) Fuggles",14,0,4.5],["U.S. Goldings",11,0,4.7]],"y":"Wyeast 1469 West Yorkshire ale yeast","ekN":1},{"yil":2012,"L":18.9,"og":1.04,"fg":1.01,"ab":3.94,"ib":34,"sr":4,"ms":65,"g":[["Maris Otter malt",3060],["torrified wheat",113]],"h":[["Target",15,60,10.7],["Northdown",7,15,8.5],["Challenger",7,15,7.5],["East Kent Goldings",14,null,4.5],["East Kent Goldings",14,null,4.5]],"y":"Wyeast 1275 Thames Valley ale yeast","ekN":4},{"yil":2008,"L":18.9,"og":1.046,"fg":1.006,"ab":5.25,"ms":66,"g":[["English Gold pale malt",3600],["English crystal malt",227],["Belgian pale malt",113]],"h":[["Fuggles",22,null,6],["Kent Goldings",13,null,5.2],["Kent Goldings",14,null,5.2],["Kent Goldings",14,null,5.2]],"y":"Wyeast No. 1318 London ale III yeast","ekN":1}]],"Strong Bitter / ESB":[4,[{"yil":2011,"L":22.7,"og":1.055,"fg":1.014,"ab":4.73,"ib":37,"ms":65.5,"g":[["Optic pale malt",4540],["torrified wheat",450],["English crystal malt I",227],["English crystal malt II",113],["Victory malt",113]],"h":[["Target",28,60,8.6],["East Kent Golding",35,1,5],["East Kent Golding",28,null,4.8]],"y":"White Labs WLP002 English ale yeast (2 L starter)","ekN":3},{"yil":2010,"L":19.9,"og":1.064,"fg":1.017,"ab":6.1,"ib":44,"sr":11,"ms":68,"g":[["Golden Promise pale malt",4080],["40°L crystal malt",450],["toasted (~25°L) Maris Otter malt",227],["honey malt",227],["flaked barley",227]],"h":[["Styrian Goldings",28,"FWH",5.2],["Willamette",35,60,6.4],["Willamette",28,5,6.4],["Styrian Goldings",35,0,5.2]],"y":"White Labs WLP 011 European ale yeast starter","ekN":2},{"yil":2009,"L":22.7,"og":1.06,"fg":1.017,"ab":5.64,"ms":68,"g":[["Maris Otter pale malt",5440],["10L crystal malt",570],["40L crystal malt",570]],"h":[["East Kent Goldings",28,60,4.8],["East Kent Goldings",35,30,4.8],["East Kent Goldings",28,10,4.8],["East Kent Goldings",35,10,4.8]],"y":"Wyeast No. 1768 VSS-PC English Special Bitter ale yeast (2 L starter)","ekN":1}]],"Tripel":[2,[{"yil":2013,"L":18.9,"og":1.079,"fg":1.01,"ab":9.2,"ib":26,"sr":6.8,"ms":66.5,"g":[["Dingemans Pils malt",5330],["Dingemans biscuit malt (Mout Roost 50)",59],["aromatic malt (Amber 50)",59],["white table sugar (boil)",794],["honey (boil)",113],["light brown sugar (in primary)",113],["fresh pink grapefruit (in primary)",450]],"h":[["Tettnanger",42,60,4.5],["Tettnanger",14,15,4.5],["Czech Saaz",14.2,15,3],["Czech Saaz",14.2,1,3]],"y":"White Labs WLP500 Trappist Ale, 270 billion cells","ekN":1},{"yil":2008,"L":41.6,"og":1.076,"fg":1.009,"ab":8.79,"g":[["Castle Pils malt",12250],["corn sugar in boil",1700]],"h":[["Styrian Goldings",92,null,4.7],["Saaz",57,null,3.5],["Saaz",57,null,3.5]],"y":"Wyeast No. 1214 Belgian ale yeast (2 L starter)","ekN":2}]],"Vienna Lager":[4,[{"yil":2012,"L":37.9,"og":1.065,"fg":1.017,"ab":6.3,"ib":25,"sr":10,"g":[["Pilsner malt",7710],["dextrin malt",680],["caramel Vienna malt",680],["caramel Munich malt",680],["white wheat malt",450]],"h":[["Saaz Premiant",28,60,8],["Vanguard",42,30,4.8],["Vanguard",14,15,4.8]],"y":"Wyeast 2124 Bohemian lager yeast (2 L starter)","ekN":1},{"yil":2011,"L":37.9,"og":1.055,"fg":1.013,"ab":5.51,"ib":25,"sr":14,"ms":66.5,"g":[["Pils malt",2720],["10L Munich malt",2380],["Vienna malt",3960],["Caramel Munich malt",227],["Carafa II malt",99]],"h":[["Hallertau",71,60,4.1],["Hallertau Hersbrucker",28,10,4.1]],"y":"Wyeast No. 2308 Munich Lager yeast (1.5 gallon starter)"},{"yil":2008,"L":11.4,"og":1.046,"fg":1.012,"ab":4.46,"ms":65,"g":[["Vienna malt",2040],["melanoidin malt",113],["debittered black malt",57],["dextrose to carbonate",45]],"h":[["Premiant",7,null,8],["Hallertauer",7,null,4]],"y":"White Labs WLP 830 German lager yeast (600 mL starter)","ekN":3}]],"Weizen / Weissbier":[4,[{"yil":2013,"L":20.8,"og":1.052,"fg":1.012,"ab":5.3,"ib":8,"sr":3,"g":[["German Pilsner malt",1650],["German wheat malt",2540]],"h":[["Hallertauer Mittelfruh",23,60,3.4]],"y":"Wyeast 3068 Weihenstephan Weizen ale yeast, 1 quart"},{"yil":2009,"L":20.8,"og":1.05,"fg":1.014,"ab":4.73,"g":[["Durst wheat malt",2720],["Durst pilsner malt",1810]],"h":[["Sterling",19,60,6.2]],"y":"Wyeast 3068 Weihenstephan Weizen ale yeast"},{"yil":2008,"L":20.8,"og":1.053,"fg":1.014,"ab":5.12,"g":[["wheat malt",2720],["pils malt",2040]],"h":[["Hallertau",15,null,4.4]],"y":"White Labs WLP380 Hefeweizen IV ale yeast, 1 L starter"}]],"Weizenbock":[2,[{"yil":2014,"L":18.9,"og":1.072,"fg":1.018,"ab":7.09,"ms":67,"g":[["white wheat malt",3130],["pale malt",2000],["10° L Munich malt",227],["pale chocolate malt",181],["Caramunich I malt",136],["Caramunich III malt",136],["melanoidin malt",136]],"h":[["Hallertau",28,"FWH",4],["Hallertau",8.5,15,4]],"y":"WLP380 Hefeweizen IV ale yeast (2 vials)"},{"yil":2012,"L":18.9,"og":1.078,"fg":1.02,"ab":7.61,"g":[["German Munich malt",3180],["German dark wheat malt",3180],["Wyermann CaraAroma malt",227],["Wyermann Carafa Special II malt",28]],"h":[["Hallertau Mittelfruh",14,"FWH",3],["Hallertau Tradition",28,60,6]],"y":"Wyeast 3333 German Wheat ale yeast (big slurry)"}]],"Witbier / Belgian White":[2,[{"yil":2011,"L":18.9,"og":1.058,"fg":1.01,"ab":6.3,"ib":18,"sr":15,"g":[["raw white wheat",2270],["Belgian pils malt",2270],["flaked barley",450],["rice hulls (in mash)",113]],"h":[["Mt. Rainier",28,60,6.8],["Mt. Rainier",14,15,6.8],["Mt. Rainier",14,5,6.8]],"y":"White Labs WLP500 Trappist and WLP530 Abbey ale yeast"},{"yil":2005,"L":20.8,"og":1.052,"fg":1.008,"ab":5.78,"g":[["Pilsner malt",2040],["flaked wheat",2040],["flaked oats",227],["acidulated malt",227]],"h":[["Hallertauer",28,null,3.9],["Saaz (15 min.)",14,null,null],["bitter orange peel",14,15,null]],"y":"Wyeast No. 3944 Belgian Witbier ale yeast (1 qt)","ekN":1}]]};
+
 // Boyut meta — anahtar tabloyla, `al` runtime feature vektörüyle eşleşir.
 // tip 'oran'  : "kullanılıyor mu" anlamlı; persentiller YALNIZ kullananlar arasında.
 // tip 'skalar': her reçetede tanımlı; persentil tüm kayıtlarda.
@@ -25350,42 +25368,88 @@ window._TD_BOYUT = {
   // örneklem sayısını GİZLEMEZ (n=1 olan stillerde de n=1 yazar).
   var MADALYA_IKON = { 1:'🥇', 2:'🥈', 3:'🥉' };
   function madalyaHTML(stilAd, esc){
-    var M = window._TOPLULUK_MADALYA; if(!M) return '';
-    var v = M[stilAd]; if(!v || !v[1] || !v[1].length) return '';
-    var s = v[0], ornekler = v[1];              // s = [toplam, altın, gümüş, bronz]
-    var parca = [];
-    if(s[1]) parca.push(s[1] + ' altın');
-    if(s[2]) parca.push(s[2] + ' gümüş');
-    if(s[3]) parca.push(s[3] + ' bronz');
-    var satirlar = ornekler.map(function(o, oi){
-      var olc = [];
-      if(o.og) olc.push('OG ' + Number(o.og).toFixed(3).replace('.', ','));
-      if(o.ib) olc.push('IBU ' + Math.round(o.ib));
-      if(o.sr) olc.push('SRM ' + String(o.sr).replace('.', ','));
-      var grist = (o.g || []).map(function(x){ return '%' + x[1] + ' ' + esc(x[0]); }).join(' + ');
-      var hop = (o.h || []).map(function(x){
-        return esc(x[0]) + (x[1] != null ? '@' + x[1] + 'dk' : '') + (x[2] ? ' (' + esc(x[2]) + ')' : '');
-      }).join(', ');
-      var kunye = [];
-      if(o.yil) kunye.push(o.yil);
-      if(o.e) kunye.push('kategoride ' + o.e.toLocaleString('tr-TR') + ' giriş arasından');
-      return '<div style="padding:5px 0;border-top:1px dotted var(--bor)">'
-        + '<div style="font-size:10px;color:var(--soluk)">' + (MADALYA_IKON[o.m] || '🏅')
-        +   (kunye.length ? ' ' + esc(kunye.join(' · ')) : '')
-        +   (olc.length ? ' · ' + esc(olc.join(' · ')) : '') + '</div>'
-        + (grist ? '<div style="font-size:10.5px;color:var(--metin);margin-top:1px">🌾 ' + grist + '</div>' : '')
-        + (hop ? '<div style="font-size:10px;color:var(--metin);margin-top:1px">🌿 ' + hop + '</div>' : '')
-        + (o.y ? '<div style="font-size:10px;color:var(--metin);margin-top:1px">🧪 ' + esc(o.y) + '</div>' : '')
-        + '<div style="margin-top:4px"><button type="button" onclick="_bmMadalyaYeniRecete(\'' + jsq(stilAd) + '\',' + oi + ')" '
-        +   'title="Yeni reçete: stil iskeleti + örneğin OG/IBU ölçüleri; grist/hop/maya metni orijinal biçimiyle not alanına yazılır" '
-        +   'style="background:transparent;color:var(--bakir);border:1px solid var(--bakir);border-radius:12px;padding:3px 9px;font-size:10px;font-weight:700;cursor:pointer;font-family:var(--font-govde)">✨ Bu örnekten yola çık</button></div>'
-        + '</div>';
-    }).join('');
-    var gizli = s[0] - ornekler.length;
+    var M = window._TOPLULUK_MADALYA;
+    var v = (M && M[stilAd] && M[stilAd][1] && M[stilAd][1].length) ? M[stilAd] : null;
+    var N = window._NHC_MADALYA;
+    var nv = (N && N[stilAd] && N[stilAd][1] && N[stilAd][1].length) ? N[stilAd] : null;
+    if(!v && !nv) return '';
+    // ── SPRINT AX: NHC finali altınları varsa örnekler ORADAN gelir (gerçek gramaj +
+    // mash — daha zengin); eski AN2 örnekleri o stilde gizlenir (iki havuz da AHA
+    // kaynaklı, aynı reçete iki kez listelenmesin). NHC yoksa eski yol AYNEN.
+    var satirlar;
+    if(nv){
+      satirlar = nv[1].map(function(o, oi){
+        var olc = [];
+        if(o.og) olc.push('OG ' + Number(o.og).toFixed(3).replace('.', ','));
+        if(o.fg) olc.push('FG ' + Number(o.fg).toFixed(3).replace('.', ','));
+        if(o.ib) olc.push('IBU ' + Math.round(o.ib));
+        if(o.sr) olc.push('SRM ' + String(o.sr).replace('.', ','));
+        if(o.ab) olc.push('ABV %' + String(o.ab).replace('.', ','));
+        var grist = (o.g || []).map(function(x){ return nhcGramTR(x[1]) + ' ' + esc(x[0]); }).join(' + ');
+        var hop = (o.h || []).map(function(x){
+          return nhcGramTR(x[1]) + ' ' + esc(x[0]) + esc(nhcDkStr(x[2])) + (x[3] ? ' (%' + String(x[3]).replace('.', ',') + ' AA)' : '');
+        }).join(', ');
+        return '<div style="padding:5px 0;border-top:1px dotted var(--bor)">'
+          + '<div style="font-size:10px;color:var(--soluk)">🥇 NHC ' + o.yil + ' · ' + String(o.L).replace('.', ',') + ' L'
+          +   (o.ms ? ' · mash ' + String(o.ms).replace('.', ',') + '°C' : '')
+          +   (olc.length ? ' · ' + esc(olc.join(' · ')) : '') + '</div>'
+          + (grist ? '<div style="font-size:10.5px;color:var(--metin);margin-top:1px">🌾 ' + grist + '</div>' : '')
+          + (hop ? '<div style="font-size:10px;color:var(--metin);margin-top:1px">🌿 ' + hop + '</div>' : '')
+          + (o.y ? '<div style="font-size:10px;color:var(--metin);margin-top:1px">🧪 ' + esc(o.y) + '</div>' : '')
+          + (o.ekN ? '<div style="font-size:9.5px;color:var(--dim);margin-top:1px">+' + o.ekN + ' ek kalem (baharat/katkı) kaynakta var — burada listelenmedi</div>' : '')
+          + '<div style="margin-top:4px"><button type="button" onclick="_bmNhcYeniRecete(\'' + jsq(stilAd) + '\',' + oi + ')" '
+          +   'title="Yeni reçete: stil iskeleti + örneğin OG/IBU/mash hedefleri; orijinal gramajlı grist/hop/maya not alanına yazılır" '
+          +   'style="background:transparent;color:var(--bakir);border:1px solid var(--bakir);border-radius:12px;padding:3px 9px;font-size:10px;font-weight:700;cursor:pointer;font-family:var(--font-govde)">✨ Bu örnekten yola çık</button></div>'
+          + '</div>';
+      }).join('');
+    } else {
+      var ornekler = v[1];
+      satirlar = ornekler.map(function(o, oi){
+        var olc = [];
+        if(o.og) olc.push('OG ' + Number(o.og).toFixed(3).replace('.', ','));
+        if(o.ib) olc.push('IBU ' + Math.round(o.ib));
+        if(o.sr) olc.push('SRM ' + String(o.sr).replace('.', ','));
+        var grist = (o.g || []).map(function(x){ return '%' + x[1] + ' ' + esc(x[0]); }).join(' + ');
+        var hop = (o.h || []).map(function(x){
+          return esc(x[0]) + (x[1] != null ? '@' + x[1] + 'dk' : '') + (x[2] ? ' (' + esc(x[2]) + ')' : '');
+        }).join(', ');
+        var kunye = [];
+        if(o.yil) kunye.push(o.yil);
+        if(o.e) kunye.push('kategoride ' + o.e.toLocaleString('tr-TR') + ' giriş arasından');
+        return '<div style="padding:5px 0;border-top:1px dotted var(--bor)">'
+          + '<div style="font-size:10px;color:var(--soluk)">' + (MADALYA_IKON[o.m] || '🏅')
+          +   (kunye.length ? ' ' + esc(kunye.join(' · ')) : '')
+          +   (olc.length ? ' · ' + esc(olc.join(' · ')) : '') + '</div>'
+          + (grist ? '<div style="font-size:10.5px;color:var(--metin);margin-top:1px">🌾 ' + grist + '</div>' : '')
+          + (hop ? '<div style="font-size:10px;color:var(--metin);margin-top:1px">🌿 ' + hop + '</div>' : '')
+          + (o.y ? '<div style="font-size:10px;color:var(--metin);margin-top:1px">🧪 ' + esc(o.y) + '</div>' : '')
+          + '<div style="margin-top:4px"><button type="button" onclick="_bmMadalyaYeniRecete(\'' + jsq(stilAd) + '\',' + oi + ')" '
+          +   'title="Yeni reçete: stil iskeleti + örneğin OG/IBU ölçüleri; grist/hop/maya metni orijinal biçimiyle not alanına yazılır" '
+          +   'style="background:transparent;color:var(--bakir);border:1px solid var(--bakir);border-radius:12px;padding:3px 9px;font-size:10px;font-weight:700;cursor:pointer;font-family:var(--font-govde)">✨ Bu örnekten yola çık</button></div>'
+          + '</div>';
+      }).join('');
+    }
+    var baslik;
+    if(v){
+      var s = v[0];
+      var parca = [];
+      if(s[1]) parca.push(s[1] + ' altın');
+      if(s[2]) parca.push(s[2] + ' gümüş');
+      if(s[3]) parca.push(s[3] + ' bronz');
+      baslik = '🏅 Bu stilde madalya almış ' + s[0] + ' reçete' + (parca.length ? ' (' + parca.join(' · ') + ')' : '');
+    } else {
+      baslik = '🏅 NHC finalinde altın almış ' + nv[0] + ' reçete (2005-2014)';
+    }
+    var gosterim;
+    if(nv){
+      gosterim = ' Örnekler AHA NHC finali altınlarından' + (nv[0] > nv[1].length ? ' (' + nv[0] + ' kayıttan ' + nv[1].length + '’ü)' : '') + ' — gerçek gramajlı; veri: nhc-homebrew-data derlemesi.';
+    } else {
+      var gizli = v[0][0] - v[1].length;
+      gosterim = (gizli > 0 ? ' ' + v[0][0] + ' kayıttan ' + v[1].length + '’ü gösteriliyor.' : '');
+    }
     return '<div style="margin-top:8px;padding-top:6px;border-top:1px solid var(--bor)">'
       + '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">'
-      +   '<div style="font-size:11px;font-weight:700;color:var(--kahve);flex:1;min-width:150px">🏅 Bu stilde madalya almış '
-      +     s[0] + ' reçete' + (parca.length ? ' (' + parca.join(' · ') + ')' : '') + '</div>'
+      +   '<div style="font-size:11px;font-weight:700;color:var(--kahve);flex:1;min-width:150px">' + baslik + '</div>'
       +   '<button type="button" onclick="_bmStildenYeniRecete(\'' + jsq(stilAd) + '\')" '
       +     'title="Madalya verisinden bağımsız: bu stilin iskeletiyle yeni reçete açar" '
       +     'style="background:transparent;color:var(--soluk);border:1px solid var(--bor);border-radius:12px;padding:3px 9px;font-size:10px;font-weight:600;cursor:pointer;font-family:var(--font-govde);white-space:nowrap">✨ Stil iskeletinden yeni reçete</button>'
@@ -25393,7 +25457,7 @@ window._TD_BOYUT = {
       + '<div style="font-size:9.5px;color:var(--dim);line-height:1.45;margin:2px 0 1px">'
       +   'Aşağıdakiler <b>örnek</b>, kural değil: AHA yarışmalarında <b>elenen</b> reçeteler bu veride yok. '
       +   'Kazananları kaybedenlerden ayıran şeyin ne olduğu bu havuzdan çıkarılamaz — bunlar yalnızca '
-      +   '"şöyle yapmışlar" kaydıdır.' + (gizli > 0 ? ' ' + s[0] + ' kayıttan ' + ornekler.length + '’ü gösteriliyor.' : '')
+      +   '"şöyle yapmışlar" kaydıdır.' + gosterim
       + '</div>'
       + satirlar
       + '</div>';
@@ -25436,6 +25500,49 @@ window._TD_BOYUT = {
       var adBase = stilAd + ' — ' + (o.yil ? o.yil + ' ' : '') + 'örneğinden';
       return window._bmStildenYeniRecete ? window._bmStildenYeniRecete(stilAd, { hedef: hedef, not: madalyaNotu(stilAd, o), adBase: adBase }) : null;
     }catch(e){ if(window.bmHataKaydet)bmHataKaydet('calc',e,'_bmMadalyaYeniRecete'); return null; }
+  };
+
+  // ── SPRINT AX — NHC ALTININDAN REÇETE (gerçek gramajlı kaynak) ────────────
+  // AW yolunun NHC varyantı. FARK: kaynakta hop gramajı VAR → "gramaj kaynakta
+  // YOK" satırı yazılmaz, gerçek gramajlar yazılır. Mash °C hem nota hem
+  // opts.hedef.mash ile S.mashSc'ye taşınır (AJ mash kartı + mash pH zinciri
+  // mashSc'yi zaten okur — bağlantı otomatik). AN çerçevesi AYNEN: NHC de
+  // winners-only, kalite iddiası kurulamaz.
+  function nhcGramTR(g){ return g >= 1000 ? (String(+(g/1000).toFixed(2)).replace('.', ',') + ' kg') : (String(g).replace('.', ',') + ' g'); }
+  function nhcGramStr(g){ return g >= 1000 ? ((+(g/1000).toFixed(2)) + ' kg') : (g + ' g'); }
+  function nhcDkStr(dk){ if(dk == null) return ''; if(dk === 'FWH') return ' @FWH'; if(dk === 'kuru') return ' (kuru hop)'; if(dk === 'wp') return ' (whirlpool)'; return ' @' + dk + 'dk'; }
+  function nhcNotu(stilAd, o){
+    var p = [];
+    p.push('🥇 KAYNAK: AHA NHC finalinde altın almış bir ' + stilAd + ' örneği (' + o.yil + '). Veri: nhc-homebrew-data derlemesi.');
+    p.push('Elenen reçeteler bu veride yok; bu bir "şöyle yapmışlar" kaydı, kural değil. Reçetedeki malt/hop miktarları bu örnekten DEĞİL, stil iskeletinden geliyor.');
+    var olc = [];
+    if(o.og) olc.push('OG ' + Number(o.og).toFixed(3));
+    if(o.fg) olc.push('FG ' + Number(o.fg).toFixed(3));
+    if(o.ib) olc.push('IBU ' + Math.round(o.ib));
+    if(o.sr) olc.push('SRM ' + o.sr);
+    if(o.ab) olc.push('ABV %' + o.ab);
+    if(olc.length) p.push('Örneğin ölçüleri: ' + olc.join(' · '));
+    p.push('Orijinal batch ' + o.L + ' L — aşağıdaki miktarlar o hacim için, kendi hacmine oranla.');
+    var grist = (o.g||[]).map(function(x){ return nhcGramStr(x[1]) + ' ' + x[0]; }).join(' + ');
+    if(grist) p.push('Grist (orijinal miktarlar): ' + grist);
+    var hop = (o.h||[]).map(function(x){ return nhcGramStr(x[1]) + ' ' + x[0] + nhcDkStr(x[2]) + (x[3] ? ' (%' + x[3] + ' AA)' : ''); }).join(', ');
+    if(hop) p.push('Hop (orijinal gramajlar): ' + hop);
+    if(o.y) p.push('Maya (orijinal metin): ' + o.y);
+    if(o.ms) p.push('Mash: ' + o.ms + '°C (kaynak metninden okunan şekerleme sıcaklığı)');
+    if(o.ekN) p.push('Kaynakta ' + o.ekN + ' ek kalem daha var (baharat/katkı gibi) — burada listelenmedi.');
+    return p.join('\n');
+  }
+  window._bmNhcYeniRecete = function(stilAd, idx){
+    try{
+      var N = window._NHC_MADALYA; var v = N && N[stilAd];
+      var o = v && v[1] && v[1][idx]; if(!o) return null;
+      var hedef = {};
+      if(+o.og > 1) hedef.og = +o.og;
+      if(+o.ib > 0) hedef.ibu = +o.ib;
+      if(+o.ms >= 60 && +o.ms <= 74) hedef.mash = +o.ms;
+      var adBase = stilAd + ' — NHC ' + o.yil + ' örneğinden';
+      return window._bmStildenYeniRecete ? window._bmStildenYeniRecete(stilAd, { hedef: hedef, not: nhcNotu(stilAd, o), adBase: adBase }) : null;
+    }catch(e){ if(window.bmHataKaydet)bmHataKaydet('calc',e,'_bmNhcYeniRecete'); return null; }
   };
 
   // ── Bölüm render'ı. izin=false ise HİÇBİR ŞEY basmaz (sessiz kalma kapısı).
