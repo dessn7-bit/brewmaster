@@ -14868,7 +14868,7 @@ function rEditorSurec(){
     <button onclick="brewdayBaslatEkran()" style="width:100%;background:rgba(246,234,215,.15);color:var(--masthead-ink);border:1.5px solid rgba(246,234,215,.35);border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.3px">
       ${(window._brewday && window._brewday.aktif) ? '🔥 Brewday Aktif — Timeline\'a Dön →' : '🔥 Brewday\'i Başlat →'}
     </button>
-    ${(window._brewday && window._brewday.aktif) ? '<button onclick="brewdayZorlaSifirla()" style="width:100%;background:rgba(200,80,80,.15);color:var(--crit-bg);border:1px solid rgba(200,80,80,.3);border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;margin-top:6px">⟲ Brewday\'i Sıfırla (Acil Kurtarma)</button>' : ''}
+    ${(window._brewday && window._brewday.aktif) ? '<button onclick="brewdayZorlaSifirlaSor()" style="width:100%;background:rgba(200,80,80,.15);color:var(--crit-bg);border:1px solid rgba(200,80,80,.3);border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;margin-top:6px">⟲ Brewday\'i Sıfırla (Acil Kurtarma)</button>' : ''}
     <div style="font-size:10px;color:rgba(246,234,215,.9);margin-top:6px;line-height:1.5;text-align:center">Ekran açık kalır · Wake Lock · Tam ekran bildirim · Mash/Hop/Katkı/Whirlpool otomatik sıralı</div>
   </div>
   <div class="kart" style="margin-bottom:10px">
@@ -15547,6 +15547,53 @@ function _besinGridHTML(og, fg, abv, variant){
   '</div>';
 }
 
+// ═══ SPRINT AU2-1: SU PLANI / STRIKE — TEK KAYNAK ═══
+// Kesif bulgusu: Muzo'nun su plani DORT ayri sekmeye dagilmisti ve brewday hicbirini
+// gostermiyordu. Ayni sayiyi iki yerde ayri ayri hesaplamak (hesap karti + brewday brifingi)
+// kacinilmaz olarak celisir; bu yuzden formuller BURADA tek kez yasar ve iki ekran da bunu okur.
+// Formuller AU1-6'da duzeltilmis haliyle korunur (cift Math.round YOK, toplam korunur).
+window._bdSuPlan=function(){
+  const hacim=(S.hacim||11);
+  const topMaltKg=(S.maltlar||[]).reduce((s,m)=>{const ml=MALTLAR.find(x=>x&&x.id===m.id);return (!ml||ml.g==="Şeker"||(m.id==="rice"||m.id==="rice_hulls"))?s:s+m.kg;},0);
+  const em=+(topMaltKg*.7).toFixed(1);
+  const kSure=S.kaynatmaSure||60;
+  const kb=+(hacim*bmBoilOff()*kSure/60).toFixed(1);
+  const pb=+(hacim+0.9).toFixed(1);
+  const pre=+(pb+kb).toFixed(1);
+  const toplam=+(pre+em).toFixed(1);
+  const mashOner=+(toplam*0.65).toFixed(1);
+  return {hacim:hacim,topMaltKg:topMaltKg,em:em,kSure:kSure,kb:kb,pb:pb,pre:pre,toplam:toplam,mashOner:mashOner,spargeOner:+(toplam-mashOner).toFixed(1)};
+};
+// Mash payi: sparge girildiyse toplam−sparge, bilincli tam hacim (0) ise toplam, bilinmiyorsa
+// %65 bolusum ONERISI (AU1-3). Kaynak metni ekranda YAZILI — varsayim gizli kalmaz.
+window._bdMashPayi=function(){
+  const p=_bdSuPlan();
+  const spL=(S.spargeL!=null&&isFinite(+S.spargeL))?+S.spargeL:null;
+  if(spL!=null&&spL>0&&spL<p.toplam)return {spL:spL,mashSu:+(p.toplam-spL).toFixed(1),kaynak:'toplam − sparge '+spL+'L'};
+  if(spL===0)return {spL:0,mashSu:p.toplam,kaynak:'tam hacim (sparge yok)'};
+  return {spL:spL,mashSu:p.mashOner,kaynak:'%65 bölüşüm önerisi'};
+};
+// AU2-1: "iki kademe" dalinin sparge litresi — TEK KAYNAK (modal metni ile brewdayBaslat'in
+// yazdigi deger cakismaz). Kullanici Surec sekmesinde kendi degerini girdiyse O kazanir:
+// catal kullanicinin olcusunu SESSIZCE ezmez. Aksi halde %65 bolusum onerisi.
+window._bdSpargeOneri=function(){
+  try{
+    const p=_bdSuPlan();
+    const v=(S.spargeL!=null&&isFinite(+S.spargeL))?+S.spargeL:null;
+    return (v!=null&&v>0&&v<p.toplam)?{L:v,kullanici:true}:{L:p.spargeOner,kullanici:false};
+  }catch(e){ if(window.bmHataKaydet)bmHataKaydet('calc',e,'_bdSpargeOneri'); return {L:null,kullanici:false}; }
+};
+// Palmer: Tw=(0.41/R)(T2−T1)+T2 — R = MASH PAYI/grist. Grist yoksa null (ekstrakt demleme).
+window._bdStrike=function(mashSuL){
+  const p=_bdSuPlan();
+  if(!(p.topMaltKg>0))return null;
+  const mashSu=(mashSuL!=null&&isFinite(+mashSuL)&&+mashSuL>0)?+mashSuL:p.toplam;
+  const gt=(S.grainTemp!=null)?+S.grainTemp:20;
+  const a0=(S.mashAdimlar&&S.mashAdimlar.length&&S.mashAdimlar[0]&&S.mashAdimlar[0].sc!=null)?S.mashAdimlar[0]:null;
+  const T2=a0?+a0.sc:(S.mashSc||67);
+  const R=mashSu/p.topMaltKg;
+  return {mashSu:mashSu,gt:gt,T2:T2,cokAdim:!!(S.mashAdimlar&&S.mashAdimlar.length>1),R:R,sw:((0.41/R)*(T2-gt)+T2).toFixed(1)};
+};
 function rEditorHesap(og, fg, abv, maya){
   const hacim=S.hacim||11;
   // Stil bazlı CO2 tavsiyesi — önce primVol'u güncelle
@@ -15555,14 +15602,16 @@ function rEditorHesap(og, fg, abv, maya){
   const pg=prim(S.primVol,S.primTemp,hacim);
   const _co2Min=_co2Range[0], _co2Ideal=_co2Range[1], _co2Max=_co2Range[2];
   const _cAuto=_co2Ideal; // otomatik hedef
-  const topMaltKg=S.maltlar.reduce((s,m)=>{const ml=MALTLAR.find(x=>x&&x.id===m.id);return (!ml||ml.g==="Şeker"||(m.id==="rice"||m.id==="rice_hulls"))?s:s+m.kg;},0);
-  const em=+(topMaltKg*.7).toFixed(1);
-  // Kaynatma kaybı: bmBoilOff() (varsayılan %12/saat, Palmer), süreye orantılı — AA2 tek kaynak
-  const _kSure = S.kaynatmaSure || 60;
-  const kb=+(hacim*bmBoilOff()*_kSure/60).toFixed(1);
-  const pb=+(hacim+0.9).toFixed(1);
-  const pre=+(parseFloat(pb)+parseFloat(kb)).toFixed(1);
-  const mash=+(parseFloat(pre)+parseFloat(em)).toFixed(1);
+  // SPRINT AU2-1: su hesabi artik _bdSuPlan() — brewday brifingiyle TEK KAYNAK.
+  // (Kaynatma kaybi bmBoilOff(), varsayilan %12/saat Palmer, sureye orantili — AA2 tek kaynak.)
+  const _sp=_bdSuPlan();
+  const topMaltKg=_sp.topMaltKg;
+  const em=_sp.em;
+  const _kSure=_sp.kSure;
+  const kb=_sp.kb;
+  const pb=_sp.pb;
+  const pre=_sp.pre;
+  const mash=_sp.toplam;
   // Adim 134-A: 5 kart caller-level accordion wrap (132-F/E pattern). İç render bloklar DOKUNULMAZ.
   // Local _bmAccWrap helper (rEditorTakvim emsali, lokal kopya — gelecek global çıkarım opsiyonel).
   function _bmAccWrap(id, icon, title, meta, content, defaultOpen){
@@ -15623,7 +15672,7 @@ ${batchOlcekKartHtml()}
   // SPRINT AU1-6 (keşif): çift Math.round 15.6L'yi 10+5=15'e düşürüyordu — 0.6 L sessiz kayıp,
   // üstelik "15" Muzo'da Kaan'ın kazana koyduğu litreyle birebir çakıştı. Toplam artık korunur
   // (sparge = toplam − mash) ve AYNI sayı strike kartında da kullanılır (iki kart çelişmez).
-  var _mashOner=+(mash*0.65).toFixed(1), _spargeOner=+(mash-_mashOner).toFixed(1);
+  var _mashOner=_sp.mashOner, _spargeOner=_sp.spargeOner;
   var _kartSu = `<div class="kart" style="background:var(--accent-soft);border:1px solid var(--cizgi-arac);border-left:4px solid var(--mk)">
       <div style="font-size:14px;font-weight:700;color:var(--metin);margin-bottom:12px;font-family:var(--font-display)">💧 Su Hesabı (${hacim}L hedef)</div>
       ${[["Hedef şişeleme",hacim+"L"],["+ Trub & transfer","+0.9L"],["Post-boil hedef",pb+"L"],["+ Kaynatma kaybı ("+_kSure+"dk)","+"+kb+"L"],["Pre-boil hedef",pre+"L"],["+ Malt emilimi (0.7L/kg)","+"+em+"L"],["TOPLAM SU",mash+"L"]].map(([e,d],i)=>`<div class="hs" style="${i===6?"color:var(--bakir);font-size:14px;font-weight:700":""}"><span>${e}</span><span>${d}</span></div>`).join("")}
@@ -15645,21 +15694,13 @@ ${batchOlcekKartHtml()}
   var _meta4 = mash + 'L';
 
   var _kartStrike = (topMaltKg>0) ? (function(){
-  var _gt=(S.grainTemp!=null)?+S.grainTemp:20;
-  // SPRINT AU1-3 (keşif B1/B2): hedef sıcaklık mash'in İLK adımı — S.mashSc step-mash'te ilk adımı
-  // temsil etmiyordu (Muzo 46→67→72→76'da 70.9°C yazıyordu, doğrusu 49.3°C: 25°C sapma). Oran da
-  // TOPLAM su değil MASH PAYI/grist: sparge girildiyse toplam−sparge, bilinçli tam hacim (sparge 0)
-  // ise toplam, bilinmiyorsa su kartıyla AYNI %65 bölüşüm önerisi.
-  var _mAd0=(S.mashAdimlar&&S.mashAdimlar.length&&S.mashAdimlar[0]&&S.mashAdimlar[0].sc!=null)?S.mashAdimlar[0]:null;
-  var _T2=_mAd0?+_mAd0.sc:(S.mashSc||67);
-  var _cokAdim=!!(S.mashAdimlar&&S.mashAdimlar.length>1);
-  var _spL=(S.spargeL!=null&&isFinite(+S.spargeL))?+S.spargeL:null;
-  var _mashSu, _mashSuKaynak;
-  if(_spL!=null&&_spL>0&&_spL<mash){ _mashSu=+(mash-_spL).toFixed(1); _mashSuKaynak='toplam − sparge '+_spL+'L'; }
-  else if(_spL===0){ _mashSu=mash; _mashSuKaynak='tam hacim (sparge yok)'; }
-  else { _mashSu=_mashOner; _mashSuKaynak='%65 bölüşüm önerisi'; }
-  var _R=_mashSu/topMaltKg;
-  var _sw=((0.41/_R)*(_T2-_gt)+_T2).toFixed(1);
+  // SPRINT AU2-1: strike + mash payi TEK KAYNAK (_bdMashPayi/_bdStrike) — brewday baslangic
+  // brifingi AYNI fonksiyonlari okur, iki ekran celismez. AU1-3 gerekcesi korunur: hedef mash'in
+  // ILK adimi (Muzo 46→67→72→76'da 70.9 yerine 49.3 — 25°C sapma), oran MASH PAYI/grist.
+  var _mp=_bdMashPayi();
+  var _spL=_mp.spL, _mashSu=_mp.mashSu, _mashSuKaynak=_mp.kaynak;
+  var _stK=_bdStrike(_mashSu);
+  var _gt=_stK.gt, _T2=_stK.T2, _cokAdim=_stK.cokAdim, _R=_stK.R, _sw=_stK.sw;
   return '<div class="kart">'
     +'<div style="font-size:14px;font-weight:700;color:var(--metin);margin-bottom:8px">🌡️ Mash Strike Suyu Sıcaklığı</div>'
     +'<span class="etiket">Tahıl Sıcaklığı (°C)</span>'
@@ -21486,23 +21527,68 @@ window._normAd=window._normAd||function(s){
 };
 
 // ── Ajanda Üretici ──────────────────────────────────────────────────────────
+// ═══ SPRINT AU2-3: AYRI SPARGE KARTI — metin tek kaynak ═══
+// Kesif (KIRMIZI): Muzo'da sparge yalniz mash_end kartinin 10px / 3.09:1 kontrastli detay
+// satirindaydi; mash4 onayindan 10.1 sn sonraki tek refleks dokunus hem sparge'i hem pre-boil
+// OG olcumunu ayni anda oldurdu (%60 varsayim vs %40.5 gercek = 20 puan verim).
+// %8 rakami uygulamanin KENDI bilgi tabaninda var (_BM_BILGI sparge_verim, Troester NHC 2010).
+window._bdSpargeMetin=function(spL){
+  var pre=null; try{ pre=_bdSuPlan().pre; }catch(e){ if(window.bmHataKaydet)bmHataKaydet('calc',e,'_bdSpargeMetin'); }
+  return {
+    baslik:'Sparge — '+spL+' L @ 76 °C',
+    detay:'Kenarda beklettiğin '+spL+' L sıcak suyu tahıl yatağından geçir.'+(pre!=null?(' Hedef pre-boil hacmi '+pre+' L.'):'')+' ATLARSAN verim ~%8 düşer (Troester, NHC 2010) — reçetenin %'+(S.verim||61)+' verim varsayımı sparge\'lı.'
+  };
+};
+// ═══ SPRINT AU2-1: ILK MASH KARTINDA SU + STRIKE + TUZ ═══
+// Kesif envanteri: brewday'de su miktari, strike sicakligi, grist, tuz — HICBIRI yoktu; Muzo'nun
+// su plani DORT ayri sekmede yasiyordu. Baslangic brifingi kararı sorar, bu satir kararin
+// SAYISINI adimin YANINDA tutar (panel kapanip acilsa da kaybolmaz).
+// TUZ ayri ADIM DEGIL SATIR: tuz atmak ile suyu isitmak AYNI fiziksel an; ayri adim fazladan
+// refleks dokunusu uretirdi (Muzo'nun hastaligi). MINERALLER'de kaynakli "zaman" alani YOK
+// (4/4 olculdu) — bu yuzden talimat "malt girmeden suya" ile SINIRLI, tore adimi yapilmadi.
+window._bdMashIlkSatir=function(){
+  try{
+    const mp=_bdMashPayi();
+    const st=_bdStrike(mp.mashSu);
+    if(!st)return '';   // grist yok (ekstrakt demleme) — su/strike anlamsiz, sahte sayi basilmaz
+    let s='Kazana '+mp.mashSu+' L su koy, ≈'+st.sw+' °C\'ye ısıt — '+mp.kaynak+'. ';
+    const mn=(S.suMineralleri||[]).filter(function(x){return x&&x.id&&+x.miktar>0;});
+    if(mn.length&&typeof MINERALLER!=='undefined'){
+      const ad=function(id){const m=MINERALLER.find(function(y){return y&&y.id===id;});return m?String(m.ad).split('—')[0].trim():id;};
+      const br=function(id){const m=MINERALLER.find(function(y){return y&&y.id===id;});return (m&&m.birim)||'g';};
+      s+='🧂 Tuzları suya at (malt girmeden): '+mn.map(function(x){return ad(x.id)+' '+(+x.miktar)+' '+br(x.id);}).join(' · ')+(mn.some(function(x){return x.id==='caco3';})?' — CaCO₃ zor çözünür, sıcak suda karıştır.':'.')+' ';
+    }
+    return s;
+  }catch(e){ if(window.bmHataKaydet)bmHataKaydet('calc',e,'_bdMashIlkSatir'); return ''; }
+};
 window.brewdayAjandaUret=function(){
   const a=[];
   const mashAdim=S.mashAdimlar&&S.mashAdimlar.length?S.mashAdimlar:[{sc:S.mashSc||66,dk:S.mashDk||60}];
   // Mash adımları
   mashAdim.forEach((adim,i)=>{
+    // AU2-1: YALNIZ ilk adim su/strike/tuz satirini tasir (sonraki adimlar sicaklik rampasi).
+    const _ilk=(i===0)?_bdMashIlkSatir():'';
     a.push({
       tip:'mash_step', faz:'mash',
       ikon:'🌡️', baslik:'Mash adım '+(i+1)+': '+adim.sc+'°C · '+adim.dk+' dk',
-      detay:'Sıcaklığa ulaştığında onayla. '+adim.dk+' dk geri sayım başlar.',
+      detay:_ilk+'Sıcaklığa ulaştığında onayla. '+adim.dk+' dk geri sayım başlar.',
       sure:adim.dk*60, timerTur:'mash'
     });
   });
-  // Mash → kaynatma geçişi
+  // SPRINT AU2-3: AYRI SPARGE KARTI — YALNIZ S.spargeL>0 iken uretilir.
+  // EMNIYET (AU-1'de olculdu): spargeL alani gercek yedekteki 7/7 recetede YOK — kart uretilmezse
+  // mevcut recetelerin ajandasi BIREBIR ayni kalir (tek yeni adim, tek yeni davranis dali).
+  // sure/timerTur BILINCLI YOK: AT3 onay-kapisi whitelist'ine dusmez, yeni sayac otoritesi dogmaz.
+  const _spL=(S.spargeL!=null&&isFinite(+S.spargeL))?+S.spargeL:null;
+  if(_spL>0){
+    const _sm=_bdSpargeMetin(_spL);
+    a.push({tip:'sparge', faz:'mash', ikon:'🚿', baslik:_sm.baslik, detay:_sm.detay});
+  }
+  // Mash → kaynatma geçişi (mash_end TIP OLARAK KALIR — Sprint T pre-boil OG blogu buna kilitli)
   a.push({
     tip:'mash_end', faz:'mash',
-    ikon:'💧', baslik:'Mash bitti — Sparge + Kaynatmaya geç',
-    detay:'Sparge suyu 76°C\'de 5-10 L. Ön-kaynatma OG\'yi ölçüp karttaki alana girebilirsin (opsiyonel).'
+    ikon:'💧', baslik:(_spL!=null)?'Mash bitti — Kaynatmaya geç':'Mash bitti — Sparge + Kaynatmaya geç',
+    detay:(_spL>0?'Sparge tamam — tahıl sepetini çıkar, ocağı aç. ':(_spL===0?'Sparge YOK (tam hacim seçtin) — tahıl sepetini çıkar, ocağı aç. ':'Sparge suyu 76°C\'de 5-10 L. '))+'Ön-kaynatma OG\'yi ölçüp karttaki alana girebilirsin (opsiyonel).'
   });
   // Kaynatma başlangıcı — v2.78.82: sure + timerTur eklendi (büyük timer geri sayım için)
   const kSure=S.kaynatmaSure||60;
@@ -21755,25 +21841,94 @@ window._bdOlcumBlokHTML=function(tur){
   }catch(e){}
   const inp='background:rgba(254,251,242,.08);color:#F5D799;border:1px solid rgba(245,215,153,.3);border-radius:6px;padding:8px;font-size:14px;font-weight:700;text-align:center';
   let h='<div style="margin-top:8px;padding:8px;background:rgba(254,251,242,.06);border:1px solid rgba(245,215,153,.18);border-radius:8px">';
-  h+='<div style="font-size:11px;font-weight:700;color:#F5D799;margin-bottom:5px">🔬 '+(pb?'Pre-boil OG':'OG ölçümü')+' <span style="font-weight:400;color:rgba(245,215,153,.6)">(opsiyonel'+(hedef?' · hedef '+hedef:'')+')</span></div>';
+  h+='<div style="font-size:12px;font-weight:700;color:#F5D799;margin-bottom:5px">🔬 '+(pb?'Pre-boil OG':'OG ölçümü')+' <span style="font-weight:400;color:rgba(245,215,153,.8)">(opsiyonel'+(hedef?' · hedef '+hedef:'')+')</span></div>';
   h+='<div style="display:flex;gap:6px;align-items:center">';
   h+='<input id="bd'+(pb?'Pb':'Og')+'SG" aria-label="'+(pb?'Pre-boil OG':'OG')+' ölçümü (opsiyonel)" type="number" step="0.001" min="0.990" max="1.200" placeholder="'+(hedef||'1.048')+'" value="'+sgVal+'" style="flex:1;min-width:0;'+inp+'" onchange="_bdOlcumGir(\''+tur+'\',\'sg\',this.value)">';
   h+='<input id="bd'+(pb?'Pb':'Og')+'C" aria-label="Örnek sıcaklığı °C (opsiyonel)" type="number" step="1" placeholder="°C" title="Örnek sıcaklığı — boş bırakırsan düzeltme yapılmaz" value="'+cVal+'" style="width:64px;'+inp+'" onchange="_bdOlcumGir(\''+tur+'\',\'c\',this.value)">';
   h+='</div>';
   const son=pb?o.pbSon:o.ogSon,uyari=pb?o.pbUyari:o.ogUyari;
   if(son){
-    h+='<div style="margin-top:5px;font-size:11px;font-weight:600;color:#8FD48F">✓ '+(son.c!=null?(son.ham.toFixed(3)+' @ '+son.c+'°C → '+son.kayit.toFixed(3)+' (20°C\'ye düzeltildi)'):('Kaydedildi: '+son.kayit.toFixed(3)))+(pb?'':' — günlüğe yazıldı')+'</div>';
+    h+='<div style="margin-top:5px;font-size:12px;font-weight:600;color:#8FD48F">✓ '+(son.c!=null?(son.ham.toFixed(3)+' @ '+son.c+'°C → '+son.kayit.toFixed(3)+' (20°C\'ye düzeltildi)'):('Kaydedildi: '+son.kayit.toFixed(3)))+(pb?'':' — günlüğe yazıldı')+'</div>';
   }else if(pb&&S.preboilOG!=null){
-    h+='<div style="margin-top:5px;font-size:11px;color:rgba(245,215,153,.65)">Kayıtlı: '+(+S.preboilOG).toFixed(3)+'</div>';
+    h+='<div style="margin-top:5px;font-size:12px;color:rgba(245,215,153,.8)">Kayıtlı: '+(+S.preboilOG).toFixed(3)+'</div>';
   }
-  if(uyari)h+='<div style="margin-top:4px;font-size:10px;font-weight:600;color:#FFC08A">'+uyari+'</div>';
-  h+='<div style="margin-top:4px;font-size:10px;color:rgba(254,251,242,.45)">Boş bırakılabilir. Sıcak örnek ölçtüysen °C gir — hidrometre 20°C\'ye düzeltilir.</div>';
+  if(uyari)h+='<div style="margin-top:4px;font-size:12px;font-weight:600;color:#FFC08A">'+uyari+'</div>';
+  h+='<div style="margin-top:4px;font-size:12px;color:rgba(254,251,242,.78);line-height:1.4">Boş bırakılabilir. Sıcak örnek ölçtüysen °C gir — hidrometre 20°C\'ye düzeltilir.</div>';
   h+='</div>';
   return h;
 };
 // ═══════════════════════════════════════════════════════════════════════════
 // RENDER — Tek fonksiyon, tüm UI'ı çizer. Her state değişiminden sonra çağrılır.
 // ═══════════════════════════════════════════════════════════════════════════
+// ═══ SPRINT AU2-4: ONAY BUTONU METNI — jenerik degil FIZIKSEL IDDIA ═══
+// Kesif: 13 kartta ayni "✓ Ekledim" vardi; mash4 ile sparge onay butonlarinin merkezleri arasi
+// 18px. Refleks dokunus jenerik etikete kolay, YALAN IDDIAYA zordur. onclick AYNI — sifir
+// davranis riski, yalnizca etiket adima ozel.
+window._bdOnayMetni=function(ev){
+  if(!ev)return '✓ Yaptım';
+  switch(ev.tip){
+    case 'mash_step': return '✓ Bu mash adımı bitti';
+    case 'sparge': return '✓ Sparge suyunu döktüm';
+    case 'mash_end': return '✓ Kaynatmaya geçtim';
+    case 'kaynatma_start': return '✓ Kaynama başladı';
+    case 'hop_add': return '✓ Hop\'u attım';
+    case 'katki_add': return '✓ Katkıyı attım';
+    case 'kaynatma_end': return '✓ Ocağı kapattım';
+    case 'whirlpool_hop': return '✓ Whirlpool hopunu attım';
+    case 'whirlpool_standard': return '✓ Whirlpool\'u yaptım';
+    case 'transfer': return '✓ Fermentere aktardım';
+    case 'pitch': case 'pitch2': return '✓ Mayayı ektim';
+    case 'bitti': return '✓ Brewday\'i bitir';
+    default: return '✓ Yaptım';
+  }
+};
+// AU2-3: sparge kartinin GERCEK-OLCUM girisi. Deger S.spargeL'de yasar (mevcut alan, yeni sema
+// YOK); strike/verim/dusuk-sparge kapilari ayni alani okur. Ajanda metni de guncellenir ki
+// gunluge dusen "deger" gercek litreyi tasisin.
+window._bdSpargeBlokHTML=function(){
+  const v=(S.spargeL!=null&&isFinite(+S.spargeL))?+S.spargeL:'';
+  const inp='background:rgba(254,251,242,.08);color:#F5D799;border:1px solid rgba(245,215,153,.3);border-radius:6px;padding:8px;font-size:14px;font-weight:700;text-align:center';
+  let h='<div style="margin-top:10px;padding:9px;background:rgba(254,251,242,.06);border:1px solid rgba(245,215,153,.18);border-radius:8px">';
+  h+='<div style="font-size:12px;font-weight:700;color:#F5D799;margin-bottom:6px">🚿 Gerçekte kaç litre döktün?</div>';
+  h+='<div style="display:flex;gap:8px;align-items:center">';
+  h+='<input id="bdSpargeL" aria-label="Dökülen sparge suyu (L)" type="number" step="0.1" min="0" max="30" value="'+v+'" style="flex:1;min-width:0;'+inp+'" onchange="_bdSpargeGir(this.value)">';
+  h+='<span style="font-size:14px;font-weight:700;color:rgba(245,215,153,.85)">L</span>';
+  h+='</div>';
+  h+='<div style="font-size:12px;color:rgba(254,251,242,.78);margin-top:5px">Planlanandan farklıysa düzelt — strike ve verim hesapları bu sayıyı okur.</div>';
+  h+='</div>';
+  return h;
+};
+window._bdSpargeGir=function(v){
+  try{
+    const b=window._brewday;
+    const n=(v!==''&&v!=null&&isFinite(+v))?+v:null;
+    S.spargeL=n;
+    const ev=b&&b.ajanda&&b.ajanda[b.aktifIdx];
+    if(ev&&ev.tip==='sparge'&&n!=null&&n>0){ const _y=_bdSpargeMetin(n); ev.baslik=_y.baslik; ev.detay=_y.detay; }
+    // AU2-3: olcum yalniz taslaga yazilirsa tarifAc onu siler (Muzo dersi) → _bdKalicilik
+    // (KR aynasi + taslak, rid kapili). saveDraft tek basina KALICILIK KATMANI DEGILDIR.
+    try{ if(typeof window._bdKalicilik==='function')window._bdKalicilik('sparge'); else if(typeof saveDraft==='function')saveDraft(); }catch(_d){ if(window.bmHataKaydet)bmHataKaydet('persist',_d,'_bdSpargeGir/kalicilik'); }
+    brewdayRender();
+  }catch(e){ if(window.bmHataKaydet)bmHataKaydet('calc',e,'_bdSpargeGir'); }
+};
+// AU2-2: odak <-> tam liste. RAM'de yasar (b.tumAdimlar) — yeni LS anahtari/sema yuzeyi YOK.
+window._bdTumAdimlar=function(ac){ const b=window._brewday; if(!b)return; b.tumAdimlar=!!ac; b._sonIdx=null; brewdayRender(); };
+// AU2-5b: gec-yakalama seridi. BLOKE ETMEZ — kapatilir ya da adim geri acilir.
+window._bdHizliKapat=function(){ const b=window._brewday; if(b)b.hizliUyari=null; brewdayRender(); };
+window._bdHizliGeriDon=function(){
+  const b=window._brewday;
+  if(!b)return;
+  const u=b.hizliUyari; b.hizliUyari=null;
+  if(!u||u.idx==null||!b.ajanda||!b.ajanda[u.idx]){ brewdayRender(); return; }
+  const ev=b.ajanda[u.idx];
+  ev._tamamlandi=false; ev._atlandi=false; ev._tamamZaman=null; ev._timerOnay=false;
+  b.aktifIdx=u.idx;
+  // Gunluk kaydi SILINMEZ: KR birlesimi (_brewLogBirlesim) silmeyi tasimaz, silinen kayit
+  // sonraki senkronda geri gelirdi. Adim yeniden onaylandiginda ayri ts'li ikinci kayit duser
+  // — tarihce "once onayladim, sonra geri aldim" gercegini oldugu gibi tasir.
+  brewdayTimerDur();
+  brewdayRender();
+};
 window.brewdayRender=function(){
   // Her render: önce mevcut DOM'u temizle
   const eski=document.getElementById('brewdayTimeline');
@@ -21797,17 +21952,26 @@ window.brewdayRender=function(){
   h+='<button onclick="brewdayTimelineGizle()" aria-label="Brewday panelini geçici gizle" style="background:rgba(254,251,242,.15);color:#fff;border:none;border-radius:50%;width:34px;height:34px;font-size:18px;cursor:pointer" title="Geçici gizle">✕</button>';
   h+='</div>';
 
-  // Büyük timer (aktif timer varsa gösterilir + kontrol butonları)
-  h+='<div id="brewdayBigTimer" class="brewday-big-timer">';
-  h+='<div id="brewdayTimerText" style="font-size:42px;font-weight:700;color:#F5D799;font-family:var(--font-display);line-height:1">—:—</div>';
-  h+='<div id="brewdayTimerLabel" style="font-size:12px;color:rgba(245,215,153,.7);margin-top:4px">Sonraki adımı aç</div>';
-  // Timer kontrol butonları (sadece aktif timer'da görünür)
+  // ═══ SPRINT AU2-2: SAYAC KUTUSU KOSULLU ═══
+  // Kesif olcumu: kutu baslangicta 199px, mash_end aninda 112px yer yiyordu (ilk ekranin
+  // %24-35'i) ve "—:—" sifir bilgi tasiyordu. Artik YALNIZ sayaci olan adimda (ya da sayac
+  // surerken) basilir. brewdayTimerTik/Dur DOM-defansif (AU1-2) — kutu yokken alarm zinciri saglam.
+  const _sayacVar=!!(aktifEv&&aktifEv.sure>0)||!!b.timerT0;
   const _onayBekliyor=(typeof _bdOnayGerekli==='function')&&_bdOnayGerekli(aktifEv);
   const _timerAktif=!!(aktifEv && aktifEv.timerTur && aktifEv.sure>0 && !_onayBekliyor);
+  if(_sayacVar){
+  h+='<div id="brewdayBigTimer" class="brewday-big-timer"'+(_onayBekliyor?' style="padding:14px"':'')+'>';
+  // AU2-2: AT3 onayi beklenirken 42px "—:—" + "Sonraki adimi ac" SIFIR bilgi tasiyip 66px
+  // yiyordu; o halde yalniz onay butonu basilir. Sayac basladiginda rakamlar geri gelir.
+  // (brewdayTimerTik/Dur DOM-defansif — element yokken alarm/state zinciri bozulmaz, AU1-2.)
+  if(!_onayBekliyor){
+  h+='<div id="brewdayTimerText" style="font-size:42px;font-weight:700;color:#F5D799;font-family:var(--font-display);line-height:1">—:—</div>';
+  h+='<div id="brewdayTimerLabel" style="font-size:12px;color:rgba(245,215,153,.7);margin-top:4px">Sonraki adımı aç</div>';
+  }
   if(_onayBekliyor){
     const _obMetin=aktifEv.timerTur==='mash'?'🌡️ Sıcaklık tamam, malt içeride — Sayacı başlat':'🔥 Kaynama başladı — Sayacı başlat';
-    h+='<div style="margin-top:10px"><button onclick="brewdayTimerOnayla()" style="background:var(--altin);color:#fff;border:none;border-radius:8px;padding:12px 18px;font-size:13px;font-weight:700;cursor:pointer">'+_obMetin+'</button>';
-    h+='<div style="font-size:10px;color:rgba(254,251,242,.55);margin-top:5px">Süre onaya kadar sayılmaz — ısınmayı bekleyebilirsin.</div></div>';
+    h+='<div><button id="bdTimerOnayBtn" onclick="brewdayTimerOnayla()" style="display:block;width:100%;min-height:48px;background:var(--altin);color:#fff;border:none;border-radius:8px;padding:12px 14px;font-size:14px;font-weight:700;cursor:pointer">'+_obMetin+'</button>';
+    h+='<div style="font-size:12px;color:rgba(254,251,242,.78);margin-top:5px;line-height:1.4">Süre onaya kadar sayılmaz — ısınmayı bekleyebilirsin.</div></div>';
   }
   if(_timerAktif){
     h+='<div style="display:flex;gap:6px;justify-content:center;margin-top:10px;flex-wrap:wrap">';
@@ -21817,30 +21981,79 @@ window.brewdayRender=function(){
     h+='</div>';
   }
   h+='</div>';
+  }
 
-  // Ajanda event listesi
+  // ═══ SPRINT AU2-2: ODAK MODU — "su an ne yapmaliyim" ═══
+  // Kesif: 12 kart = 1.42 ekran (360x640'ta 1.91) ve her render scrollTop'u 0'a cekiyordu.
+  // Bu "daha fazla ekran" degil: ekrandaki bilginin %90'ini KATLAYIP kalan %10'u buyutmek.
+  // Bilgi GIZLENMEZ, RUTBELENIR — tamamlananlar tek satir ozet, sonraki tek satir onizleme,
+  // tam liste TEK DOKUNUS arkasinda (b.tumAdimlar, RAM; yeni LS/sema yuzeyi yok).
   h+='<div class="brewday-ajanda">';
+  const _tumu=!!b.tumAdimlar;
+  const _tamamSay=ajanda.filter(function(e){return e&&e._tamamlandi;}).length;
+  if(!_tumu&&_tamamSay>0){
+    h+='<button id="bdTamamOzet" onclick="_bdTumAdimlar(true)" style="display:block;width:100%;text-align:left;background:rgba(245,215,153,.06);color:rgba(245,215,153,.78);border:1px solid rgba(245,215,153,.16);border-radius:10px;padding:10px 12px;font-size:13px;font-weight:600;cursor:pointer">✓ '+_tamamSay+' adım tamam <span style="float:right;opacity:.85">▸</span></button>';
+  }
+  // AU2-5b — gec-yakalama seridi (BLOKE ETMEZ). Muzo'nun 10.1 sn'lik sparge dokunusu birebir
+  // tetiklerdi. Zorlamadan hatirlatir (R/T/AG disiplini: kullaniciyi kapiya dayamak yok).
+  if(b.hizliUyari&&aktifEv){
+    const _hu=b.hizliUyari;
+    h+='<div id="bdHizliSerit" style="background:rgba(255,200,120,.14);border:1px solid rgba(255,200,120,.45);border-radius:10px;padding:10px 12px">';
+    h+='<div style="font-size:13px;font-weight:600;color:#FFD8A0;line-height:1.45">⏱ <b>'+esc(_hu.baslik)+'</b> adımını '+((_hu.sn<1)?'anında':(_hu.sn+' sn\'de'))+' geçtin — gerçekten yaptın mı?</div>';
+    h+='<div style="display:flex;gap:12px;margin-top:9px">';
+    h+='<button id="bdHizliEvet" onclick="_bdHizliKapat()" style="flex:1;min-height:42px;background:rgba(245,215,153,.16);color:#F5D799;border:1px solid rgba(245,215,153,.35);border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">Evet, yaptım</button>';
+    h+='<button id="bdHizliHayir" onclick="_bdHizliGeriDon()" style="flex:1;min-height:42px;background:rgba(255,140,140,.14);color:#FFB0B0;border:1px solid rgba(255,140,140,.4);border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">Hayır — geri dön</button>';
+    h+='</div>';
+    h+='<div style="font-size:12px;color:rgba(254,251,242,.78);margin-top:6px;line-height:1.4">Bu uyarı ilerlemeyi durdurmaz — istersen yok say.</div>';
+    h+='</div>';
+  }
   ajanda.forEach((ev,i)=>{
     const ok=ev._tamamlandi;
     const akt=(i===aktifIdx);
-    h+='<div class="brewday-event '+(ok?'tamam':'')+' '+(akt?'aktif':'')+'">';
-    h+='<div style="display:flex;align-items:flex-start;gap:8px">';
-    h+='<span style="font-size:20px;line-height:1;margin-top:2px">'+(ev.ikon||'•')+'</span>';
-    h+='<div style="flex:1;min-width:0">';
-    h+='<div style="font-size:13px;font-weight:600;color:'+(ok?'rgba(245,215,153,.5)':'#F5D799')+';'+(ok?'text-decoration:line-through':'')+'">'+esc(ev.baslik)+'</div>';
-    h+='<div style="font-size:10px;color:rgba(254,251,242,.5);margin-top:1px">'+esc(ev.detay||'')+'</div></div>';
-    if(ok)h+='<span style="font-size:16px;color:#4A8">✓</span>';
-    else if(akt){
-      h+='<div style="display:flex;flex-direction:column;gap:4px">';
-      h+='<button onclick="brewdayAktifOnayla()" style="background:var(--altin);color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">✓ Ekledim</button>';
-      h+='<button class="brewdayBtnAtla" style="background:rgba(254,251,242,.12);color:rgba(245,215,153,.7);border:1px solid rgba(245,215,153,.2);border-radius:6px;padding:7px 12px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;user-select:none;-webkit-user-select:none;touch-action:manipulation">⏭ Atla</button>';
-      h+='</div>';
+    const _snr=(i===aktifIdx+1);
+    if(!_tumu&&!akt&&!(_snr&&!ok))return;   // odak modu: yalniz aktif + sonraki
+    if(!_tumu&&_snr&&!akt){
+      // Sonraki adim: TEK SATIR onizleme (ne geldigini bilmek, simdiki isi bolmeden)
+      h+='<div id="bdSonrakiSatir" class="brewday-event" style="padding:9px 12px;opacity:.75"><div style="display:flex;align-items:center;gap:8px;min-width:0">';
+      h+='<span style="font-size:15px;line-height:1">'+(ev.ikon||'•')+'</span>';
+      h+='<span style="font-size:12px;color:rgba(254,251,242,.78);letter-spacing:1px;text-transform:uppercase;flex-shrink:0">Sonraki</span>';
+      h+='<span style="font-size:13px;font-weight:600;color:rgba(245,215,153,.82);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(ev.baslik)+'</span>';
+      h+='</div></div>';
+      return;
     }
+    h+='<div'+(akt?' id="bdAktifKart"':'')+' class="brewday-event '+(ok?'tamam':'')+' '+(akt?'aktif':'')+'"'+(akt?' style="padding:14px"':'')+'>';
+    h+='<div style="display:flex;align-items:flex-start;gap:'+(akt?'10px':'8px')+'">';
+    h+='<span style="font-size:'+(akt?'26px':'20px')+';line-height:1;margin-top:2px">'+(ev.ikon||'•')+'</span>';
+    h+='<div style="flex:1;min-width:0">';
+    h+='<div style="font-size:'+(akt?'17px':'13px')+';font-weight:'+(akt?'700':'600')+';color:'+(ok?'rgba(245,215,153,.5)':'#F5D799')+';'+(ok?'text-decoration:line-through':'')+';line-height:1.3">'+esc(ev.baslik)+'</div>';
+    // AU2-4: detay 10px / rgba(...,.5) idi — kontrast 3.09:1, WCAG AA altinda ve eylemi tasiyan
+    // cumle tam orada duruyordu. Aktif kartta 13px/.85, digerlerinde 12px/.78 (ikisi de AA ustu).
+    if(ev.detay)h+='<div '+(akt?'id="bdAktifDetay" ':'')+'style="font-size:'+(akt?'13px':'12px')+';color:rgba(254,251,242,'+(akt?'.85':'.78')+');margin-top:4px;line-height:1.45">'+esc(ev.detay)+'</div>';
+    h+='</div>';
+    if(ok)h+='<span style="font-size:16px;color:#4A8">✓</span>';
     h+='</div>';
     // SPRINT T: aktif mash_end/pitch kartına inline ölçüm bloğu (değer S'te yaşar, DOM'da değil)
     if(akt&&!ok&&(ev.tip==='mash_end'||ev.tip==='pitch'))h+=_bdOlcumBlokHTML(ev.tip==='mash_end'?'pb':'og');
+    // AU2-3: aktif sparge kartında gerçek-ölçüm girişi
+    if(akt&&!ok&&ev.tip==='sparge')h+=_bdSpargeBlokHTML();
+    if(akt&&!ok){
+      // AU2-4: birincil buton TAM GENISLIK x48px, metin adima ozel fiziksel iddia.
+      // AT3 onayi bekleniyorsa (isinma) sirali birincil eylem "Sayaci baslat"tir -> bu buton
+      // IKINCIL stile duser ("bir ekranda iki birincil buton olmaz"), ama ERISILEBILIR kalir.
+      const _ikincil=(typeof _bdOnayGerekli==='function')&&_bdOnayGerekli(ev);
+      h+='<button id="bdOnayBtn" onclick="brewdayAktifOnayla()" style="display:block;width:100%;min-height:48px;margin-top:12px;'+(_ikincil?'background:transparent;color:#F5D799;border:1.5px solid rgba(245,215,153,.5);':'background:var(--altin);color:#fff;border:none;')+'border-radius:10px;padding:12px 14px;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:.2px">'+_bdOnayMetni(ev)+'</button>';
+      // "Atla" >=16px ayrık (kesif: aralarinda 4px vardi — bas parmak yer degistirmiyordu)
+      h+='<div style="margin-top:20px">';
+      h+='<button class="brewdayBtnAtla" id="bdAtlaBtn" style="display:block;width:100%;min-height:40px;background:rgba(254,251,242,.10);color:rgba(245,215,153,.75);border:1px solid rgba(245,215,153,.22);border-radius:8px;padding:9px 12px;font-size:13px;font-weight:600;cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation">⏭ Bu adımı atla</button>';
+      h+='</div>';
+    }
     h+='</div>';
   });
+  if(!_tumu){
+    h+='<button id="bdTumAdimlarBtn" onclick="_bdTumAdimlar(true)" style="display:block;width:100%;margin-top:4px;background:transparent;color:rgba(245,215,153,.72);border:1px dashed rgba(245,215,153,.28);border-radius:10px;padding:10px;font-size:12px;font-weight:600;cursor:pointer">☰ Tüm adımlar ('+ajanda.length+')</button>';
+  }else{
+    h+='<button id="bdOdakBtn" onclick="_bdTumAdimlar(false)" style="display:block;width:100%;margin-top:4px;background:transparent;color:rgba(245,215,153,.72);border:1px dashed rgba(245,215,153,.28);border-radius:10px;padding:10px;font-size:12px;font-weight:600;cursor:pointer">◂ Odak moduna dön</button>';
+  }
   h+='</div>';
 
   // Footer: Bitir butonu
@@ -21850,6 +22063,17 @@ window.brewdayRender=function(){
   h+='</div></div>';
 
   document.body.insertAdjacentHTML('beforeend',h);
+
+  // SPRINT AU2-2: tam-liste modunda aktif karti gorunur kil — YALNIZ adim DEGISTIYSE.
+  // Kosulsuz scroll Sprint T inline inputuyla yarisir (deger girince odak kaybi + basa sarma,
+  // kesifte olculdu: bdPbSG -> BODY). Odak modunda hic cagrilmaz: aktif kart zaten en ustte.
+  try{
+    if(b.tumAdimlar && b._sonIdx!==aktifIdx){
+      const _ak=document.getElementById('bdAktifKart');
+      if(_ak&&_ak.scrollIntoView)_ak.scrollIntoView({block:'center'});
+    }
+  }catch(_si){}
+  b._sonIdx=aktifIdx;
 
   // Timer +/- butonları: tek tık = 1dk, uzun bas = 10dk hızlı artış
   const _bagla=function(btnId,deltaShort,deltaLong){
@@ -22013,7 +22237,7 @@ window.brewdayTimerTik=function(){
 // A11Y-MODAL Escape + minimal Tab trap (capture: input/sidebar handler'larindan once kosar;
 // input/textarea/select odaktayken karismaz — o alanlarin kendi Escape akisi korunur)
 document.addEventListener('keydown', function(e){
-  var m = document.getElementById('_alarmModal') || document.getElementById('brewdayEventModal') || document.getElementById('brewdayOnayModal');
+  var m = document.getElementById('_alarmModal') || document.getElementById('brewdayEventModal') || document.getElementById('brewdayOnayModal') || document.getElementById('bdSifirlaOnayModal');
   if(!m) return;
   if(e.key === 'Escape'){
     var t = e.target;
@@ -22021,6 +22245,7 @@ document.addEventListener('keydown', function(e){
     e.stopPropagation();
     e.preventDefault();
     if(m.id === '_alarmModal'){ m.remove(); var p = window._bmModalPrevFocus; window._bmModalPrevFocus = null; if(p && p.focus && document.contains(p)) p.focus(); }
+    else if(m.id === 'bdSifirlaOnayModal'){ window.brewdayZorlaSifirlaKapat(); }   // AU2-5a
     else window.brewdayOnayKapat();
     return;
   }
@@ -22055,10 +22280,21 @@ window._bdLogKrAynala=function(kaynak){
     if(typeof KR==='undefined'||!Array.isArray(KR))return false;
     const t=KR.find(function(k){return k&&k.id===rid;});
     if(!t)return false;
-    if(!Array.isArray(S.brewLog)||!S.brewLog.length)return false;
-    const yeni=JSON.stringify(_brewLogBirlesim(S.brewLog,t.brewLog));
-    if(JSON.stringify(Array.isArray(t.brewLog)?t.brewLog:[])===yeni)return false; // degisiklik yok → yazim yok
-    t.brewLog=JSON.parse(yeni);
+    let _yazdi=false;
+    // ═══ SPRINT AU2: SU YOLU KARARI + GERCEK SPARGE OLCUMU DE AYNALANIR ═══
+    // AU1'in dersi ("taslak kalicilik katmani DEGILDIR") brewLog'a ozeldi; AU2 ayni riski yeni
+    // bir alana tasidi: su catali ve sparge kartinin girisi S.spargeL'e yaziyor, taslak ise
+    // tarifAc'ta siliniyor — Muzo'nun 13 kaydini yok eden mekanizmanin BIREBIR aynisi.
+    // spargeL brewday'in URETTIGI olcumdur → ayni rid kapisindan KR'ye duser. tarifeKaydet
+    // DEGIL: ozet yeniden hesaplanmaz, Sprint Z stil sinyali tetiklenmez (AU1 disiplini).
+    // null/gecersizse DOKUNULMAZ (bos deger var olan olcumu ezmez); 0 GECERLI bir degerdir
+    // ("bilincli tam hacim" = sparge yapmadim beyani, D3 kapisi bunu okur).
+    if(S.spargeL!=null&&isFinite(+S.spargeL)&&t.spargeL!==+S.spargeL){ t.spargeL=+S.spargeL; _yazdi=true; }
+    if(Array.isArray(S.brewLog)&&S.brewLog.length){
+      const yeni=JSON.stringify(_brewLogBirlesim(S.brewLog,t.brewLog));
+      if(JSON.stringify(Array.isArray(t.brewLog)?t.brewLog:[])!==yeni){ t.brewLog=JSON.parse(yeni); _yazdi=true; }
+    }
+    if(!_yazdi)return false; // degisiklik yok → yazim yok
     t.guncelleme=Date.now();
     if(typeof ky==='function')ky(KR);
     return true;
@@ -22082,6 +22318,16 @@ window.brewdayAktifOnayla=function(){
   if(!ev||ev._tamamlandi)return;
   ev._tamamlandi=true;
   ev._tamamZaman=Date.now();
+  // ═══ SPRINT AU2-5b: GEC-YAKALAMA ═══
+  // Bir adim oncekinden <20 sn sonra onaylandiysa BLOKE ETMEYEN serit cikar. Muzo'nun gercek
+  // logunda sparge, mash4'ten 10.1 sn sonra onaylanmisti (bas parmak yer degistirmedi, 13 kartta
+  // ayni "Ekledim" vardi) — bu esik o vakayi birebir yakalar. Terminal adim (bitti) haric.
+  try{
+    const _once=b.sonOnayTs||0;
+    const _fark=_once?Math.round((Date.now()-_once)/1000):null;
+    b.hizliUyari=(ev.tip!=='bitti'&&_fark!=null&&_fark<20)?{baslik:ev.baslik,sn:_fark,idx:b.aktifIdx}:null;
+    b.sonOnayTs=Date.now();
+  }catch(_hu){ if(window.bmHataKaydet)bmHataKaydet('calc',_hu,'brewdayAktifOnayla/hizli'); }
   // Timer'ı durdur
   brewdayTimerDur();
   // BrewLog kaydı
@@ -22165,9 +22411,92 @@ window.brewdayBaslatEkran=function(){
   // gerçekte 100 dk mash). Toplam artık mashAdimlar üzerinden. Isınma/soğutma modellenmiyor —
   // metinde açıkça yazıyor (Muzo gerçeği 272 dk, modellenen 215 dk).
   const _mDkTop=(function(){var _a=(S.mashAdimlar&&S.mashAdimlar.length)?S.mashAdimlar:[{dk:S.mashDk||60}];return _a.reduce(function(x,y){return x+(+(y&&y.dk)||0);},0);})();
+  // ═══ SPRINT AU2-1: BUGUNKU PLAN — "en bastan ne olacaksa yazsin" ═══
+  // Kesif envanteri: brewday, S'in 33 alanindan yalniz 9'unu okuyordu. Su miktari, strike,
+  // grist kg, tuz/mineral, hedef OG, verim, kavuz uyarisi — HICBIRI brewday'de yoktu; Muzo'nun
+  // su plani DORT ayri sekmeye dagilmisti. Bu blok SALT OKUR (state yazmaz); calc() try-wrap +
+  // ring (AQ3) ile korunur — hesap patlarsa brifing eksilir, brewday baslamayi engellemez.
+  var _sp=null; try{ _sp=_bdSuPlan(); }catch(_e1){ if(window.bmHataKaydet)bmHataKaydet('calc',_e1,'brewdayBaslatEkran/suplan'); }
+  // Catal YALNIZ gerçek grist varsa anlamlidir: ekstrakt demlemede "mash suyu / sparge" ayrimi
+  // yoktur, sahte bir karar sordurmak yerine tek buton kalir.
+  var _catalVar=!!(_sp&&_sp.topMaltKg>0);
+  // AU2-1 DURUSTLUK: sparge karti S.spargeL>0 iken uretildigi icin catalin IKI DALI FARKLI
+  // adim sayisi verir. Secim yapilmadan tek sayi yazmak, en otoriter ekranda yanlis sayi
+  // yazmak olurdu — aralik yazilir.
+  var _spSimdi=(S.spargeL!=null&&isFinite(+S.spargeL)&&+S.spargeL>0);
+  var _adimTam=ajanda.length-(_spSimdi?1:0), _adimIki=_adimTam+1;
+  var _adimStr=_catalVar?(_adimTam+'–'+_adimIki+' adım'):(ajanda.length+' adım');
   let h='<div id="brewdayOnayModal" class="brewday-modal" role="dialog" aria-modal="true" aria-label="Brewday başlatma onayı" tabindex="-1"><div class="brewday-modal-icerik">';
   h+='<h2 style="margin:0 0 8px 0;color:var(--kahve);display:flex;align-items:center;gap:8px">🔥 Brewday Başlatılıyor</h2>';
-  h+='<div style="font-size:12px;color:var(--soluk);margin-bottom:14px">'+esc(S.biraAd||'Reçete')+' · '+ajanda.length+' adım · yaklaşık '+Math.round(_mDkTop+(S.kaynatmaSure||60)+45)+' dk (ısınma/soğutma hariç)</div>';
+  h+='<div style="font-size:12px;color:var(--soluk);margin-bottom:14px">'+esc(S.biraAd||'Reçete')+' · '+_adimStr+' · yaklaşık '+Math.round(_mDkTop+(S.kaynatmaSure||60)+45)+' dk (ısınma/soğutma hariç)</div>';
+  var _cOG=null; try{ var _cc=calc(); if(_cc&&_cc.og>1)_cOG=_cc.og.toFixed(3); }catch(_e2){ if(window.bmHataKaydet)bmHataKaydet('calc',_e2,'brewdayBaslatEkran/og'); }
+  h+='<div id="bdPlanOzet" style="background:var(--sa);border:1px solid var(--cizgi-arac);border-left:4px solid var(--sk);border-radius:10px;padding:11px 12px;margin-bottom:12px">';
+  h+='<div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--bakir);margin-bottom:5px">Bugünkü plan</div>';
+  var _pz=[];
+  if(_sp&&_sp.topMaltKg>0)_pz.push('<b>'+_sp.topMaltKg.toFixed(2)+' kg</b> grist');
+  _pz.push('<b>'+(S.hacim||11)+' L</b> hedef');
+  if(_cOG)_pz.push('hedef OG <b>'+_cOG+'</b>');
+  if(S.verim!=null)_pz.push('verim <b>%'+S.verim+'</b>');
+  h+='<div style="font-size:13px;color:var(--metin);line-height:1.55">'+_pz.join(' · ')+'</div>';
+  var _mAdStr=(S.mashAdimlar&&S.mashAdimlar.length)?S.mashAdimlar.map(function(x){return (x&&x.sc!=null)?x.sc:'?';}).join('→'):String(S.mashSc||67);
+  h+='<div style="font-size:13px;color:var(--metin);line-height:1.55">'+_mAdStr+' °C · mash '+_mDkTop+' dk · kaynatma '+(S.kaynatmaSure||60)+' dk</div>';
+  // TUZ: ayri ADIM degil SATIR — tuz atmak ile suyu isitmak AYNI fiziksel an; ayri adim
+  // fazladan refleks dokunusu (Muzo'nun hastaligi) uretirdi. MINERALLER'de zaman alani YOK
+  // (4/4 olculdu) — bu yuzden tek kanitli talimat "malt girmeden suya" ile sinirli tutuldu.
+  var _min=(S.suMineralleri||[]).filter(function(x){return x&&x.id&&+x.miktar>0;});
+  if(_min.length){
+    var _mAd=function(id){var m=MINERALLER.find(function(y){return y&&y.id===id;});return m?String(m.ad).split('—')[0].trim():id;};
+    var _mBr=function(id){var m=MINERALLER.find(function(y){return y&&y.id===id;});return (m&&m.birim)||'g';};
+    h+='<div id="bdPlanTuz" style="font-size:13px;color:var(--metin);line-height:1.55;margin-top:3px">🧂 <b>Tuzları suya at</b> (malt girmeden): '+_min.map(function(x){return esc(_mAd(x.id))+' '+(+x.miktar)+' '+_mBr(x.id);}).join(' · ')+(_min.some(function(x){return x.id==='caco3';})?' — CaCO₃ zor çözünür, sıcak suda karıştır.':'')+'</div>';
+  }
+  // Kavuz (AT1) + verim-iyimserligi (AT6) uyarilari GRIST DENETIMINDEN gelir (tek kaynak,
+  // esikleri kaynakli); hop>kaynatma (D6) burada yeniden turetilir.
+  var _uy=[];
+  try{
+    var _gd=(typeof gristDenetim==='function')?gristDenetim(S.maltlar,MALTLAR,null,null,null,null,S.verim):null;
+    if(_gd&&_gd.bulgular)_gd.bulgular.forEach(function(bb){ if(bb&&bb.msg&&(/kavuz/i.test(bb.msg)||/Verim varsayımı/.test(bb.msg)))_uy.push(bb.msg); });
+  }catch(_e3){ if(window.bmHataKaydet)bmHataKaydet('calc',_e3,'brewdayBaslatEkran/grist'); }
+  var _kSr=S.kaynatmaSure||60;
+  (S.hoplar||[]).forEach(function(hh){
+    if(hh&&hh.tur==='boil'&&hh.dk!=null&&isFinite(+hh.dk)&&+hh.dk>_kSr){
+      var _hp=HOPLAR.find(function(x){return x&&x.id===hh.id;});
+      _uy.push((hh._ad||(_hp&&_hp.ad)||hh.id)+' '+(+hh.dk)+' dk > kaynatma '+_kSr+' dk — bu ekleme kaynatmaya sığmıyor (hop alarmı eşleşmez).');
+    }
+  });
+  if(_uy.length){
+    h+='<div id="bdPlanUyari" style="margin-top:7px;padding-top:7px;border-top:1px dashed var(--cizgi-arac)">'+_uy.map(function(m){return '<div style="font-size:12px;color:#7A2020;line-height:1.5">⚠️ '+esc(m)+'</div>';}).join('')+'</div>';
+  }
+  h+='</div>';
+  // ═══ SPRINT AU2-1: SU YOLU CATALI ═══
+  // Kesif kok neden: uygulama hem "iki kademe bol" hem "all-in-one tumu mash'e" diyor ama KARARI
+  // HIC SORMUYOR; %60 verim varsayimi sessizce sparge'i varsayiyor. Kaan 15 L'yi tamamen mash'e
+  // koydu (ekrandaki EN BUYUK su sayisi TOPLAM su idi, bolusum 11px gri nottaydi) — kaybettigi
+  // hacim degil DURULAMA idi. Notr secenek YOK; dokunus sayisi DEGISMEZ (1) ama karar tasir.
+  // ALGEBRA NOTU: bolusum hacim dengesini degistirmez (mashL+spargeL=toplam, pre=toplam−em);
+  // yalniz mash yogunlugunu (L/kg) ve sekerin durulanmasini belirler.
+  if(_catalVar){
+    // Sparge litresi TEK KAYNAKTAN (_bdSpargeOneri): kullanici Surec'te kendi olcusunu
+    // girdiyse catal onu ezmez, mash payi ona gore hesaplanir.
+    var _so=_bdSpargeOneri(), _top=_sp.toplam;
+    var _spOn=(_so&&_so.L!=null)?_so.L:_sp.spargeOner;
+    var _mOn=+(_top-_spOn).toFixed(1);
+    var _stIki=null,_stTam=null;
+    try{ _stIki=_bdStrike(_mOn); _stTam=_bdStrike(_top); }catch(_e4){ if(window.bmHataKaydet)bmHataKaydet('calc',_e4,'brewdayBaslatEkran/strike'); }
+    h+='<div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--kahve);margin:2px 0 8px">Suyu nasıl bölüyorsun?</div>';
+    h+='<button id="bdSuIki" onclick="brewdayBaslat(\'iki\')" style="display:block;width:100%;text-align:left;background:var(--altin);color:#fff;border:none;border-radius:10px;padding:13px 14px;margin-bottom:8px;cursor:pointer;min-height:48px">';
+    h+='<div style="font-size:13px;font-weight:700;letter-spacing:.3px">🔥 İKİ KADEME — sparge yaparım</div>';
+    h+='<div style="font-size:22px;font-weight:700;font-family:var(--font-display);line-height:1.15;margin-top:4px">'+_mOn+' L'+(_stIki?' @ ≈'+_stIki.sw+' °C':'')+'</div>';
+    h+='<div style="font-size:12px;opacity:.94;margin-top:2px;line-height:1.4">kazana ŞİMDİ bu kadar · kenarda '+_spOn+' L @ 76 °C sparge için dursun'+((_so&&_so.kullanici)?' <i>(Süreç&#39;te girdiğin değer)</i>':'')+'</div>';
+    h+='</button>';
+    h+='<button id="bdSuTam" onclick="brewdayBaslat(\'tam\')" style="display:block;width:100%;text-align:left;background:var(--bg2);color:var(--kahve);border:1.5px solid var(--bor);border-radius:10px;padding:13px 14px;cursor:pointer;min-height:48px">';
+    h+='<div style="font-size:13px;font-weight:700;letter-spacing:.3px">🔥 TAM HACİM — sparge yok (all-in-one/BIAB)</div>';
+    h+='<div style="font-size:22px;font-weight:700;font-family:var(--font-display);line-height:1.15;margin-top:4px;color:var(--bakir)">'+_top+' L'+(_stTam?' @ ≈'+_stTam.sw+' °C':'')+'</div>';
+    h+='<div style="font-size:12px;color:#7A5020;margin-top:2px;line-height:1.4">⚠️ durulama yok → verim ~%8 düşer, OG hedefin altında kalabilir</div>';
+    h+='</button>';
+    h+='<div style="font-size:11px;color:var(--metin-soluk);margin:6px 0 12px;line-height:1.5">Toplam '+_top+' L = '+(S.hacim||11)+' hedef + 0.9 trub/transfer + '+_sp.kb+' kaynatma buharı + '+_sp.em+' malt emilimi. Bölüşüm <b>toplam hacmi değiştirmez</b>, şekerin <b>durulanmasını</b> değiştirir — ~%8 kaynağı: Troester, NHC 2010; reçetenin %'+(S.verim||61)+' verim varsayımı sparge\'lı. Strike ≈ ile verilir: kazan ısı kaybı modellenmez (±2-3 °C), soğuk kazanda +1-2 °C ekle. Verim OTOMATİK değişmez — seçim yalnız sonucu söyler.</div>';
+  }else{
+    h+='<button onclick="brewdayBaslat()" style="display:block;width:100%;background:var(--altin);color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:12px;min-height:48px">🔥 Brewday\'i Başlat</button>';
+  }
   // Ön kontrol
   if(rapor){
     const eksik=[];
@@ -22197,9 +22526,9 @@ window.brewdayBaslatEkran=function(){
     h+='<button onclick="brewBildirimIzin()" style="background:#C8A040;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer">İzin Ver</button>';
     h+='</div>';
   }
+  // AU2-1: birincil eylem artik SU YOLU CATALI (yukarida). Bir ekranda iki birincil buton olmaz.
   h+='<div style="display:flex;gap:8px;margin-top:14px">';
   h+='<button onclick="brewdayOnayKapat()" style="flex:1;background:var(--bg2);color:var(--dim);border:1px solid var(--bor);border-radius:8px;padding:12px;font-size:13px;cursor:pointer">Vazgeç</button>';
-  h+='<button onclick="brewdayBaslat()" style="flex:2;background:var(--altin);color:#fff;border:none;border-radius:8px;padding:12px;font-size:13px;font-weight:700;cursor:pointer">🔥 Brewday\'i Başlat</button>';
   h+='</div>';
   h+='</div></div>';
   document.body.insertAdjacentHTML('beforeend',h);
@@ -22213,9 +22542,23 @@ window.brewdayOnayKapat=function(){
   if(m){m.remove();var p=window._bmModalPrevFocus;window._bmModalPrevFocus=null;if(p&&p.focus&&document.contains(p))p.focus();}
 };
 
-window.brewdayBaslat=async function(){
+window.brewdayBaslat=async function(suMod){
   brewdayOnayKapat();
   const b=window._brewday;
+  // ═══ SPRINT AU2-1: SU YOLU KARARI — modal butonundan gelir ═══
+  // S.spargeL'e YAZAR: AU-1'in %65 bolusum VARSAYIMI boylece kalkar (strike gercek plana oturur,
+  // D3 dusuk-sparge kapisi dogru dalda calisir, AU2-3 sparge karti "iki kademe"de uretilir).
+  // VERIMI OTOMATIK DEGISTIRMEZ (AT6 disiplini: motor kullanicinin yerine karar vermez).
+  // suMod verilmezse (dolayli/eski cagri, testler) S.spargeL'e DOKUNULMAZ — davranis aynen kalir.
+  if(suMod==='iki'||suMod==='tam'){
+    try{
+      // "Iki kademe" litresi modal metniyle AYNI kaynaktan (_bdSpargeOneri) gelir — ekranda
+      // yazan sayi ile S'e yazilan sayi cakisamaz (kullanici kendi olcusunu girdiyse o kazanir).
+      const _so=_bdSpargeOneri();
+      S.spargeL=(suMod==='iki')?((_so&&_so.L!=null)?_so.L:_bdSuPlan().spargeOner):0;
+      b.suMod=suMod;
+    }catch(_esm){ if(window.bmHataKaydet)bmHataKaydet('calc',_esm,'brewdayBaslat/suMod'); }
+  }
   // v2.78.84 H7: _editId garantisi — brewday başlarken reçete KR'de değilse otomatik kaydet
   // Alarm sisteminin doğru receteId ile çalışması için şart. Aksi takdirde uygulama kapanınca
   // alarmlar orphan kalıp _alarmOrphanTemizle tarafından silinir.
@@ -22248,6 +22591,9 @@ window.brewdayBaslat=async function(){
   b.timerT0=null;
   b.timerSure=0;
   b.timerBitti=false;
+  // AU2-2/AU2-5b: odak modu ve gec-yakalama state'i her brewday'de temiz baslar. sonOnayTs
+  // BASLANGICA kurulur — ilk adimi 20 sn icinde onaylamak da yakalanmali (mash gerceklesmedi).
+  b.tumAdimlar=false; b._sonIdx=null; b.hizliUyari=null; b.sonOnayTs=Date.now();
   await window._brewdayWakeLockAc();
   // BrewLog
   if(!S.brewLog)S.brewLog=[];
@@ -23698,6 +24044,28 @@ window.brewdayTamamla=function(){
   if(typeof render==='function')render();
 };
 
+// ═══ SPRINT AU2-5a: SIFIRLAMA ONAYI (in-app) ═══
+// Kesif: Muzo'da 3x brewday_start var, ilerleme 2 kez sifirlandi. Otomatik reload elendi
+// (controllerchange 0, sw reload mesaji yok, hata ring'i bos) — ~%80 olasilikli kok:
+// brewdayZorlaSifirla HICBIR ONAY SORMUYOR (v2.78.81'de native confirm() WebView guvenilmez
+// diye kaldirilmis) ve kirmizi buton altin "Timeline'a Don" butonunun 6 px altinda.
+// Cozum native confirm DEGIL (ayni guvenilmezlik): in-app modal. Birincil buton VAZGEC.
+// brewdayZorlaSifirla'nin imzasi/davranisi DEGISMEDI (sessiz cagrilar ve testler etkilenmez).
+window.brewdayZorlaSifirlaSor=function(){
+  if(document.getElementById('bdSifirlaOnayModal'))return;
+  const b=window._brewday;
+  const _n=(b&&Array.isArray(b.ajanda))?b.ajanda.filter(function(e){return e&&e._tamamlandi;}).length:0;
+  let h='<div id="bdSifirlaOnayModal" class="brewday-modal" role="dialog" aria-modal="true" aria-label="Brewday sıfırlama onayı" tabindex="-1"><div class="brewday-modal-icerik" style="max-width:400px">';
+  h+='<h2 style="margin:0 0 8px 0;color:#7A2020;font-size:18px">⟲ Brewday\'i sıfırla?</h2>';
+  h+='<div style="font-size:13px;color:var(--metin);line-height:1.55;margin-bottom:14px">Ajanda ve sayaçlar SIFIRDAN başlar'+(_n>0?(' — <b>'+_n+' tamamlanmış adım</b> ekrandan gider'):'')+'. Demleme günlüğüne yazılmış kayıtlar silinmez.</div>';
+  h+='<div style="display:flex;gap:8px">';
+  h+='<button id="bdSifirlaVazgec" onclick="brewdayZorlaSifirlaKapat()" style="flex:2;min-height:48px;background:var(--altin);color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:700;cursor:pointer">Vazgeç — devam ediyorum</button>';
+  h+='<button id="bdSifirlaOnay" onclick="brewdayZorlaSifirlaKapat();brewdayZorlaSifirla()" style="flex:1;min-height:48px;background:#fff;color:#7A2020;border:1.5px solid #D88060;border-radius:8px;padding:12px;font-size:13px;font-weight:700;cursor:pointer">Evet, sıfırla</button>';
+  h+='</div></div></div>';
+  document.body.insertAdjacentHTML('beforeend',h);
+  const _m=document.getElementById('bdSifirlaOnayModal'); if(_m)_m.focus();
+};
+window.brewdayZorlaSifirlaKapat=function(){ const m=document.getElementById('bdSifirlaOnayModal'); if(m)m.remove(); };
 window.brewdayZorlaSifirla=function(sessiz){
   // v2.78.81 — confirm() kaldırıldı (WebView'da güvenilmez, sıfırla direkt çalışsın)
   try {
@@ -23713,7 +24081,7 @@ window.brewdayZorlaSifirla=function(sessiz){
     // State'i sıfırla
     window._brewday={aktif:false,ajanda:[],aktifIdx:-1,timerT0:null,timerSure:0,timerInt:null,timerBitti:false,wakeLock:null,modalAcik:false};
     // DOM temizliği (tüm brewday artıkları)
-    ['brewdayTimeline','brewdayOnayModal','brewdayEventModal','_alarmModal'].forEach(id=>{
+    ['brewdayTimeline','brewdayOnayModal','brewdayEventModal','_alarmModal','bdSifirlaOnayModal'].forEach(id=>{
       const el=document.getElementById(id);
       if(el) el.remove();
     });
@@ -23738,6 +24106,9 @@ window.brewdayAtla=function(){
   ev._tamamlandi=true;
   ev._atlandi=true;
   ev._tamamZaman=Date.now();
+  // AU2-5b: atlama BILINCLI "yapmadim" beyanidir — uyari uretmez ama damgayi tazeler
+  // (bir sonraki hizli onay dogru araligi olcsun) ve bayat serit susar.
+  b.sonOnayTs=Date.now(); b.hizliUyari=null;
   brewdayTimerDur();
   if(!S.brewLog)S.brewLog=[];
   S.brewLog.push({

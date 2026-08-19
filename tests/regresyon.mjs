@@ -923,6 +923,11 @@ const CASELER = [
       __REG.ok('re-render timer interval ÇİFTLEMEDİ', window._brewday.timerInt === t1);
       brewdayAktifOnayla(); // mash_step tamam → mash_end aktif
       const ev = window._brewday.ajanda[window._brewday.aktifIdx];
+      // AU2-3 BEKLENTİ GÜNCELLEMESİ: sparge kartı YALNIZ S.spargeL>0 iken üretilir. Bu reçetede
+      // spargeL yok (BOS varsayılanı) → 1. onaydan sonra aktif kart HÂLÂ mash_end. Bu iddia artık
+      // tesadüf değil, AU2-3 emniyetinin kanıtı: kart araya girmediği için mevcut reçetelerin
+      // ajandası birebir aynı kalır (bkz. AU2-SPARGE-KART).
+      __REG.ok('AU2-3 emniyet önkoşulu: bu reçetede spargeL yok (sparge kartı üretilmez)', S.spargeL == null, String(S.spargeL));
       __REG.ok('aktif kart mash_end', ev && ev.tip === 'mash_end', ev && ev.tip);
       const inp = document.getElementById('bdPbSG');
       __REG.ok('inline pre-boil inputu kartta', !!inp);
@@ -997,6 +1002,10 @@ const CASELER = [
     calistir: (page) => page.evaluate(() => {
       __REG.ok('brewdayAjandaUret refraktometre içermiyor', String(brewdayAjandaUret).indexOf('refraktometre') === -1);
       __REG.ok('mash_end metni ölçümü karta yönlendiriyor', String(brewdayAjandaUret).indexOf('karttaki alana girebilirsin') > -1);
+      // AU2-3 BEKLENTİ GÜNCELLEMESİ: mash_end detayı artık ÜÇ DALLI (sparge kartı var / bilinçli
+      // tam hacim / sparge bilinmiyor) ama araç-nötr ölçüm cümlesi TEK ve PAYLAŞILAN kalır —
+      // dallardan birinde düşmesi sessiz bir gerileme olurdu.
+      __REG.ok('AU2-3: araç-nötr ölçüm cümlesi tek ve tüm dallarda paylaşımlı', (String(brewdayAjandaUret).match(/karttaki alana girebilirsin/g) || []).length === 1, String((String(brewdayAjandaUret).match(/karttaki alana girebilirsin/g) || []).length));
       __REG.ok('_alarmPlaniKur ara-ölçüm metni araç-nötr', String(window._alarmPlaniKur).indexOf('refraktometre') === -1 && String(window._alarmPlaniKur).indexOf('yoğunluğu (SG) ölçüp kaydet') > -1);
       __REG.ok('refrakDuzelt hesaplayıcısı DURUYOR (bilinçli dokunulmadı)', typeof window.refrakDuzelt === 'function');
       return __REG.al();
@@ -3772,6 +3781,300 @@ const CASELER = [
       S.spargeL = 5.5; render();
       __REG.ok('spargeL=5.5 → uyarı YOK', !uyariVar());
       S.spargeL = null; sekme = 'genel'; render();
+      return __REG.al();
+    })
+  },
+  // ── SPRINT AU2: brewday UI yeniden tasarımı (AU keşif maddeleri 1/2/3/4/6) ──
+  // Keşfin kritik tespiti: "testler geçse bile Kaan'ın şikâyet ettiği hiçbir şey yakalanmıyor"
+  // — mevcut paket veri zincirini koruyordu, TASARIMI değil. Aşağıdaki 6 case tam o kör noktayı
+  // hedefler: rütbe (hangi sayı ne büyüklükte), refleks (butonlar arası mesafe), görünürlük
+  // (aktif kart viewport içinde mi) ve karar (su yolu soruldu mu).
+  {
+    kod: 'AU2-CATAL', ad: 'SU YOLU ÇATALI (AU keşif #1): tek "Başlat" İKİ SU BUTONUNA bölündü — seçim S.spargeL\'e yazılır ve %65 bölüşüm VARSAYIMI kalkar; modal grist/OG/verim/tuz/kavuz/hop uyarılarını taşır; VERİM otomatik değişmez',
+    calistir: (page) => page.evaluate(async () => {
+      // brewdayBaslat b.aktif'i wake-lock await'inden ONCE set ediyor: bayragi beklemek
+      // render/KR-aynasi ile YARISIR. Timeline DOM'u beklenir (ayna+render ondan SONRA).
+      const bekle = async () => { for (let i = 0; i < 200 && !document.getElementById('brewdayTimeline'); i++) await new Promise(r => setTimeout(r, 20)); };
+      const malt = MALTLAR.find(m => m && m.id && m.g !== 'Şeker' && m.id !== 'rice_hulls');
+      const hop = HOPLAR.find(h => h && h.id);
+      __REG.yeniKayit('REGTEST AU2-CATAL', {});
+      S.hacim = 11; S.kaynatmaSure = 70; S.grainTemp = 20; S.spargeL = null; S.verim = 60; S.mayaId = 'us05';
+      // Muzo geometrisi: %61 kavuzsuz buğday — AT1 uyarısının GERÇEK tetikleyicisi
+      const bug = MALTLAR.find(m => m && m.id === 'wheat') || MALTLAR.find(m => m && _BM_KAVUZSUZ_IDS.indexOf(m.id) > -1);
+      S.maltlar = [{ id: bug.id, kg: 2 }, { id: malt.id, kg: 1.16 }];
+      S.mashAdimlar = [{ sc: 46, dk: 15 }, { sc: 67, dk: 45 }, { sc: 72, dk: 25 }, { sc: 76, dk: 15 }];
+      S.hoplar = [{ id: hop.id, g: 4, dk: 75, tur: 'boil' }];   // 75 > 70 → D6 uyarısı
+      S.suMineralleri = [{ id: 'cacl2', miktar: 1.1 }, { id: 'caco3', miktar: 0.95 }];
+      const plan = _bdSuPlan();
+      const ajBase = brewdayAjandaUret().length;
+      brewdayBaslatEkran();
+      const m = document.getElementById('brewdayOnayModal');
+      __REG.ok('başlangıç modali açıldı', !!m);
+      const iki = document.getElementById('bdSuIki'), tam = document.getElementById('bdSuTam');
+      __REG.ok('İKİ su butonu var — karar SORULUYOR (eski: tek nötr "Başlat")', !!iki && !!tam);
+      __REG.ok('nötr tek-buton yolu modalde YOK (bir ekranda iki birincil buton olmaz)', m.innerHTML.indexOf('brewdayBaslat()') === -1);
+      __REG.ok('iki kademe butonu mash payını + sparge payını LİTRE ile yazıyor', iki.innerText.indexOf(plan.mashOner + ' L') > -1 && iki.innerText.indexOf(plan.spargeOner + ' L') > -1, iki.innerText.replace(/\s+/g, ' '));
+      __REG.ok('tam hacim butonu TOPLAM suyu yazıyor', tam.innerText.indexOf(plan.toplam + ' L') > -1, tam.innerText.replace(/\s+/g, ' '));
+      __REG.ok('tam hacim dalında ~%8 verim kaybı SÖYLENİYOR (uygulamanın kendi bilgi tabanı)', /%8/.test(tam.innerText));
+      __REG.ok('iki buton da dokunulabilir yükseklikte (≥48px)', iki.getBoundingClientRect().height >= 48 && tam.getBoundingClientRect().height >= 48, Math.round(iki.getBoundingClientRect().height) + '/' + Math.round(tam.getBoundingClientRect().height));
+      const oz = document.getElementById('bdPlanOzet');
+      __REG.ok('BUGÜNKÜ PLAN kutusu: grist kg + hedef hacim + hedef OG + verim', !!oz && /3\.16 kg/.test(oz.innerText) && /11 L/.test(oz.innerText) && /hedef OG 1\.\d{3}/.test(oz.innerText) && /verim %60/.test(oz.innerText), oz && oz.innerText.replace(/\s+/g, ' ').slice(0, 140));
+      __REG.ok('mash basamakları + kaynatma süresi planda', /46→67→72→76/.test(oz.innerText) && /kaynatma 70 dk/.test(oz.innerText));
+      const tz = document.getElementById('bdPlanTuz');
+      __REG.ok('TUZ ayrı adım değil SATIR — "malt girmeden suya" + miktarlar', !!tz && /CaCl₂ 1\.1 g/.test(tz.innerText) && /CaCO₃ 0\.95 g/.test(tz.innerText) && /malt girmeden/.test(tz.innerText), tz && tz.innerText.replace(/\s+/g, ' '));
+      __REG.ok('TUZ: yalnız kanıtlı talimat verilir (CaCO₃ çözünürlük notu)', /zor çözünür/.test(tz.innerText));
+      const uy = document.getElementById('bdPlanUyari');
+      __REG.ok('AT1 kavuzsuz uyarısı brewday brifingine taşındı', !!uy && /[Kk]avuzsuz/.test(uy.innerText), uy && uy.innerText.replace(/\s+/g, ' ').slice(0, 120));
+      __REG.ok('D6 hop>kaynatma uyarısı brifingde (75 dk > kaynatma 70 dk)', !!uy && uy.innerText.indexOf('75 dk > kaynatma 70 dk') > -1);
+      __REG.ok('DÜRÜSTLÜK: adım sayısı ARALIK (çatalın iki dalı farklı sayı üretir)', new RegExp(ajBase + '–' + (ajBase + 1) + ' adım').test(m.innerText), m.innerText.slice(0, 120).replace(/\s+/g, ' '));
+      // ── İKİ KADEME dalı ──
+      iki.click(); await bekle();
+      __REG.ok('İKİ KADEME → S.spargeL = önerilen sparge litresi', S.spargeL === plan.spargeOner, String(S.spargeL) + ' vs ' + plan.spargeOner);
+      __REG.ok('seçim state\'te işaretli (b.suMod)', window._brewday.suMod === 'iki', String(window._brewday.suMod));
+      __REG.ok('AU-1\'in %65 VARSAYIMI KALKTI — mash payı gerçek plandan', _bdMashPayi().kaynak.indexOf('toplam − sparge') === 0, _bdMashPayi().kaynak);
+      __REG.ok('strike artık varsayıma değil seçime oturdu', Math.abs(+_bdStrike(_bdMashPayi().mashSu).sw - +_bdStrike(plan.mashOner).sw) < 0.6, _bdStrike(_bdMashPayi().mashSu).sw + ' vs ' + _bdStrike(plan.mashOner).sw);
+      __REG.ok('AT6 DİSİPLİNİ: verim OTOMATİK değişmedi (motor kullanıcı yerine karar vermez)', S.verim === 60, String(S.verim));
+      brewdayZorlaSifirla(true);
+      // ── TAM HACİM dalı ──
+      S.spargeL = null;
+      brewdayBaslatEkran(); document.getElementById('bdSuTam').click(); await bekle();
+      __REG.ok('TAM HACİM → S.spargeL = 0 (bilinçli "sparge yok" beyanı)', S.spargeL === 0, String(S.spargeL));
+      __REG.ok('mash payı = tam hacim (varsayım yok)', _bdMashPayi().kaynak === 'tam hacim (sparge yok)' && _bdMashPayi().mashSu === plan.toplam, _bdMashPayi().kaynak);
+      __REG.ok('verim yine otomatik değişmedi', S.verim === 60, String(S.verim));
+      brewdayZorlaSifirla(true);
+      // ── kullanıcının kendi ölçüsü EZİLMEZ ──
+      S.spargeL = 4;
+      brewdayBaslatEkran();
+      __REG.ok('Süreç\'te girilen 4 L çatalda görünüyor (öneri değil kullanıcı değeri)', document.getElementById('bdSuIki').innerText.indexOf('4 L') > -1 && /Süreç.{0,3}te girdiğin/.test(document.getElementById('bdSuIki').innerText), document.getElementById('bdSuIki').innerText.replace(/\s+/g, ' '));
+      document.getElementById('bdSuIki').click(); await bekle();
+      __REG.ok('çatal kullanıcının sayısını SESSİZCE ezmedi', S.spargeL === 4, String(S.spargeL));
+      brewdayZorlaSifirla(true);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AU2-SPARGE-KART', ad: 'AYRI SPARGE KARTI (AU keşif #3 KIRMIZI): tip \'sparge\' YALNIZ spargeL>0 iken üretilir (emniyet: yok/0 ise ajanda BİREBİR aynı); timerTur/sure YOK (AT3 whitelist\'ine düşmez); mash_end tip olarak KALIR',
+    calistir: (page) => page.evaluate(() => {
+      const malt = MALTLAR.find(m => m && m.id && m.g !== 'Şeker' && m.id !== 'rice_hulls');
+      const hop = HOPLAR.find(h => h && h.id);
+      __REG.yeniKayit('REGTEST AU2-SPARGE-KART', {});
+      S.hacim = 11; S.kaynatmaSure = 60; S.mayaId = 'us05';
+      S.maltlar = [{ id: malt.id, kg: 3.16 }];
+      S.mashAdimlar = [{ sc: 46, dk: 15 }, { sc: 67, dk: 45 }];
+      S.hoplar = [{ id: hop.id, g: 20, dk: 60, tur: 'boil' }];
+      const tipler = () => brewdayAjandaUret().map(e => e.tip);
+      // EMNİYET: gerçek yedekteki 7/7 reçetede spargeL alanı YOK (AU-1'de ölçüldü)
+      S.spargeL = null;
+      const bosTip = JSON.stringify(tipler());
+      __REG.ok('spargeL YOKken sparge kartı ÜRETİLMEZ (mevcut reçetelerin ajandası birebir aynı)', bosTip.indexOf('sparge') === -1, bosTip);
+      S.spargeL = 0;
+      __REG.ok('spargeL=0 (bilinçli tam hacim) → yine kart YOK, tip dizisi BİREBİR aynı', JSON.stringify(tipler()) === bosTip, JSON.stringify(tipler()));
+      const mEnd0 = brewdayAjandaUret().find(e => e.tip === 'mash_end');
+      __REG.ok('tam hacimde mash_end "Sparge YOK (tam hacim seçtin)" diyor (sahte sparge talimatı yok)', /Sparge YOK \(tam hacim seçtin\)/.test(mEnd0.detay), mEnd0.detay);
+      // sparge girilince kart doğar
+      S.spargeL = 5.5;
+      const aj = brewdayAjandaUret();
+      const iSp = aj.findIndex(e => e.tip === 'sparge'), iEnd = aj.findIndex(e => e.tip === 'mash_end');
+      __REG.ok('spargeL=5.5 → AYRI sparge kartı üretildi', iSp > -1);
+      __REG.ok('sparge kartı mash_end\'in HEMEN ÖNÜNDE (tek refleks dokunuş ikisini birden öldüremez)', iSp === iEnd - 1, iSp + '/' + iEnd);
+      __REG.ok('tip dizisi YALNIZ bir adım büyüdü (başka hiçbir adım değişmedi)', JSON.stringify(tipler().filter(t => t !== 'sparge')) === bosTip, JSON.stringify(tipler()));
+      const sp = aj[iSp];
+      __REG.ok('KIRMIZI KURAL: yeni adıma timerTur VERİLMEDİ (AT3 onay whitelist\'ine düşmez)', sp.timerTur === undefined && sp.sure === undefined, String(sp.timerTur) + '/' + String(sp.sure));
+      __REG.ok('AT3 kapısı sparge kartında kapalı (yeni sayaç otoritesi doğmadı)', _bdOnayGerekli(sp) === false);
+      __REG.ok('başlıkta GERÇEK litre + 76 °C', sp.baslik.indexOf('5.5 L') > -1 && sp.baslik.indexOf('76') > -1, sp.baslik);
+      __REG.ok('detayda ~%8 verim kaybı + kaynak (Troester, NHC 2010)', /~%8/.test(sp.detay) && /Troester/.test(sp.detay), sp.detay);
+      __REG.ok('detayda hedef pre-boil hacmi', /Hedef pre-boil hacmi/.test(sp.detay));
+      __REG.ok('brewday logları id ALANI ALMADI (KIRMIZI: _logAnahtar t:→i: çiftlemesi)', aj.filter(e => e.id !== undefined).length === 0);
+      const mEnd = aj[iEnd];
+      __REG.ok('mash_end TİP OLARAK KALDI (Sprint T pre-boil OG bloğu buna kilitli)', mEnd.tip === 'mash_end');
+      __REG.ok('mash_end araç-nötr ölçüm cümlesini KORUDU', mEnd.detay.indexOf('karttaki alana girebilirsin') > -1, mEnd.detay);
+      __REG.ok('sparge varken mash_end sparge talimatını TEKRARLAMIYOR', mEnd.detay.indexOf('Sparge suyu 76') === -1 && /Sparge tamam/.test(mEnd.detay), mEnd.detay);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AU2-ODAK', ad: 'ODAK MODU (AU keşif #2, 390×844 gerçek mobil): yalnız AKTİF adım tam boy + sonraki tek satır; 13 adımlık ajanda ≤1 ekrana indi; bilgi GİZLENMEZ (tam liste tek dokunuş); sayaçsız adımda sayaç kutusu BASILMAZ',
+    calistir: async (page) => {
+      await page.setViewport({ width: 390, height: 844 });
+      return page.evaluate(async () => {
+        // brewdayBaslat b.aktif'i wake-lock await'inden ONCE set ediyor: bayragi beklemek
+        // render/KR-aynasi ile YARISIR. Timeline DOM'u beklenir (ayna+render ondan SONRA).
+        const bekle = async () => { for (let i = 0; i < 200 && !document.getElementById('brewdayTimeline'); i++) await new Promise(r => setTimeout(r, 20)); };
+        const malt = MALTLAR.find(m => m && m.id && m.g !== 'Şeker' && m.id !== 'rice_hulls');
+        const hop = HOPLAR.find(h => h && h.id);
+        __REG.yeniKayit('REGTEST AU2-ODAK', {});
+        S.hacim = 11; S.kaynatmaSure = 70; S.mayaId = 'us05'; S.suMineralleri = [];
+        S.maltlar = [{ id: malt.id, kg: 3.16 }];
+        S.mashAdimlar = [{ sc: 46, dk: 15 }, { sc: 67, dk: 45 }, { sc: 72, dk: 25 }, { sc: 76, dk: 15 }];
+        S.hoplar = [{ id: hop.id, g: 20, dk: 60, tur: 'boil' }, { id: hop.id, g: 20, dk: 10, tur: 'boil' }];
+        brewdayBaslatEkran(); document.getElementById('bdSuIki').click(); await bekle();
+        const b = window._brewday, tl = document.getElementById('brewdayTimeline');
+        __REG.ok('ajanda gerçekten uzun (keşif koşulu: 12 kart = 1.42 ekran)', b.ajanda.length >= 12, String(b.ajanda.length));
+        __REG.ok('ODAK: yalnız 2 kart basıldı (aktif + sonraki önizleme)', tl.querySelectorAll('.brewday-event').length === 2, String(tl.querySelectorAll('.brewday-event').length));
+        __REG.ok('ODAK: panel ≤1 ekran (kaydırma gerekmiyor)', tl.scrollHeight <= tl.clientHeight + 4, tl.scrollHeight + '/' + tl.clientHeight);
+        const ak = document.getElementById('bdAktifKart'), r = ak.getBoundingClientRect();
+        __REG.ok('aktif kart TAMAMEN viewport içinde (390×844)', r.top >= 0 && r.bottom <= innerHeight, Math.round(r.top) + '→' + Math.round(r.bottom) + ' / ' + innerHeight);
+        __REG.ok('aktif kart başlığı büyütüldü (rütbe: eylem 13px değil)', parseFloat(getComputedStyle(ak.querySelector('div>div>div')).fontSize) >= 16, getComputedStyle(ak.querySelector('div>div>div')).fontSize);
+        const snr = document.getElementById('bdSonrakiSatir');
+        __REG.ok('SONRAKİ adım tek satır önizleme (ne geldiği belli, şimdiki iş bölünmüyor)', !!snr && snr.getBoundingClientRect().height < 60, snr ? Math.round(snr.getBoundingClientRect().height) + 'px' : 'YOK');
+        __REG.ok('AU2-1: ilk mash adımının GÖRÜNÜR metninde su miktarı var (litre + ısıt)', /\d+([.,]\d+)?\s*L/.test(ak.innerText) && /ısıt/.test(ak.innerText), ak.innerText.replace(/\s+/g, ' ').slice(0, 110));
+        __REG.ok('suMineralleri BOŞken tuz satırı YOK (uydurma talimat üretilmez)', ak.innerText.indexOf('🧂') === -1);
+        __REG.ok('sayacı OLAN adımda sayaç kutusu basılıyor', !!document.getElementById('brewdayBigTimer') && b.ajanda[b.aktifIdx].sure > 0);
+        let g = 0;
+        while (g++ < 40 && window._brewday.aktif && b.ajanda[b.aktifIdx].tip !== 'sparge') { if (_bdOnayGerekli(b.ajanda[b.aktifIdx])) brewdayTimerOnayla(); brewdayAktifOnayla(); }
+        __REG.ok('sparge adımına gelindi', b.ajanda[b.aktifIdx].tip === 'sparge', b.ajanda[b.aktifIdx].tip);
+        __REG.ok('SAYAÇSIZ adımda sayaç kutusu HİÇ BASILMIYOR (boş "—:—" ilk ekranın %24-35\'ini yiyordu)', !document.getElementById('brewdayBigTimer'));
+        const oz = document.getElementById('bdTamamOzet');
+        __REG.ok('tamamlananlar tek satıra katlandı (silinmedi — özet sayıyı taşıyor)', !!oz && /4 adım tamam/.test(oz.innerText), oz ? oz.innerText : 'YOK');
+        // BİLGİ GİZLENMİYOR: tek dokunuş
+        const odakYuk = tl.scrollHeight;
+        document.getElementById('bdTumAdimlarBtn').click();
+        const tl2 = document.getElementById('brewdayTimeline');
+        __REG.ok('TEK DOKUNUŞ: tüm adımlar açıldı — hiçbir bilgi kaybolmadı', tl2.querySelectorAll('.brewday-event').length === b.ajanda.length, tl2.querySelectorAll('.brewday-event').length + '/' + b.ajanda.length);
+        __REG.ok('kazanç GERÇEK: tam liste odak modundan belirgin uzun', tl2.scrollHeight > odakYuk * 1.3, tl2.scrollHeight + ' vs ' + odakYuk);
+        const ak2 = document.getElementById('bdAktifKart').getBoundingClientRect();
+        __REG.ok('tam listede aktif kart hâlâ görünür (koşullu scrollIntoView)', ak2.top >= 0 && ak2.top < innerHeight, Math.round(ak2.top));
+        document.getElementById('bdOdakBtn').click();
+        __REG.ok('odak moduna geri dönülebiliyor', document.getElementById('brewdayTimeline').querySelectorAll('.brewday-event').length === 2);
+        brewdayZorlaSifirla(true);
+        return __REG.al();
+      });
+    }
+  },
+  {
+    kod: 'AU2-DIL', ad: 'KART DİLİ (AU keşif #4): onay butonu JENERİK DEĞİL FİZİKSEL İDDİA (13 kartta aynı "✓ Ekledim" bitti); tam genişlik ×48px; "Atla" ≥16px ayrık; aktif kartta 12px/α.75 altı metin YOK (eski detay 3.09:1)',
+    calistir: async (page) => {
+      await page.setViewport({ width: 390, height: 844 });
+      return page.evaluate(async () => {
+        // brewdayBaslat b.aktif'i wake-lock await'inden ONCE set ediyor: bayragi beklemek
+        // render/KR-aynasi ile YARISIR. Timeline DOM'u beklenir (ayna+render ondan SONRA).
+        const bekle = async () => { for (let i = 0; i < 200 && !document.getElementById('brewdayTimeline'); i++) await new Promise(r => setTimeout(r, 20)); };
+        const alfa = (c) => { const m = /rgba?\(([^)]+)\)/.exec(c); if (!m) return 1; const p = m[1].split(','); return p.length > 3 ? parseFloat(p[3]) : 1; };
+        const tara = (kok) => { const kotu = []; kok.querySelectorAll('*').forEach(e => { if (!Array.from(e.childNodes).some(n => n.nodeType === 3 && n.textContent.trim())) return; const cs = getComputedStyle(e), fs = parseFloat(cs.fontSize), a = alfa(cs.color); if (fs < 12 || a < 0.75) kotu.push(Math.round(fs) + 'px/' + a.toFixed(2) + ' "' + e.textContent.trim().slice(0, 30) + '"'); }); return kotu; };
+        const malt = MALTLAR.find(m => m && m.id && m.g !== 'Şeker' && m.id !== 'rice_hulls');
+        const hop = HOPLAR.find(h => h && h.id);
+        __REG.yeniKayit('REGTEST AU2-DIL', {});
+        S.hacim = 11; S.kaynatmaSure = 70; S.mayaId = 'us05';
+        S.maltlar = [{ id: malt.id, kg: 3.16 }];
+        S.mashAdimlar = [{ sc: 66, dk: 60 }];
+        S.hoplar = [{ id: hop.id, g: 20, dk: 60, tur: 'boil' }];
+        const metinler = ['mash_step', 'sparge', 'mash_end', 'kaynatma_start', 'hop_add', 'pitch', 'bitti'].map(t => _bdOnayMetni({ tip: t }));
+        __REG.ok('her adım tipinde FARKLI fiziksel iddia (tekrar yok)', new Set(metinler).size === metinler.length, JSON.stringify(metinler));
+        __REG.ok('jenerik "✓ Ekledim" artık render\'da YOK', String(window.brewdayRender).indexOf('✓ Ekledim') === -1);
+        __REG.ok('sparge onayı fiziksel iddia ("döktüm")', /döktüm/.test(_bdOnayMetni({ tip: 'sparge' })), _bdOnayMetni({ tip: 'sparge' }));
+        __REG.ok('pitch onayı fiziksel iddia ("ektim")', /ektim/.test(_bdOnayMetni({ tip: 'pitch' })), _bdOnayMetni({ tip: 'pitch' }));
+        brewdayBaslatEkran(); document.getElementById('bdSuIki').click(); await bekle();
+        const b = window._brewday;
+        const ob = document.getElementById('bdOnayBtn'), ab = document.getElementById('bdAtlaBtn'), ak = document.getElementById('bdAktifKart');
+        __REG.ok('onay butonu ekrandaki adımın metnini taşıyor', ob.innerText.trim() === _bdOnayMetni(b.ajanda[b.aktifIdx]), ob.innerText.trim());
+        __REG.ok('birincil buton ≥48px yükseklik', ob.getBoundingClientRect().height >= 48, Math.round(ob.getBoundingClientRect().height) + 'px');
+        __REG.ok('birincil buton TAM GENİŞLİK (kartın ≥%90\'ı)', ob.getBoundingClientRect().width >= ak.getBoundingClientRect().width * 0.9, Math.round(ob.getBoundingClientRect().width) + '/' + Math.round(ak.getBoundingClientRect().width));
+        __REG.ok('"Atla" ≥16px ayrık (keşif: aralarında 4px vardı, baş parmak yer değiştirmiyordu)', ab.getBoundingClientRect().top - ob.getBoundingClientRect().bottom >= 16, Math.round(ab.getBoundingClientRect().top - ob.getBoundingClientRect().bottom) + 'px');
+        __REG.ok('AT3 sigortası: class="brewdayBtnAtla" korundu (21868 querySelector bağı)', ab.className.indexOf('brewdayBtnAtla') > -1, ab.className);
+        __REG.ok('aktif kartta 12px altı VEYA α<0.75 metin YOK (eski: 10px/.5 = 3.09:1, AA altı)', tara(ak).length === 0, JSON.stringify(tara(ak).slice(0, 5)));
+        let g = 0;
+        while (g++ < 40 && window._brewday.aktif && b.ajanda[b.aktifIdx].tip !== 'mash_end') { if (_bdOnayGerekli(b.ajanda[b.aktifIdx])) brewdayTimerOnayla(); brewdayAktifOnayla(); }
+        __REG.ok('SPRINT T KORUNDU: mash_end kartında pre-boil OG girişi var', !!document.getElementById('bdPbSG'));
+        __REG.ok('#bdPbSG sayfada EN FAZLA 1 adet (odak modu kopya üretmedi)', document.querySelectorAll('#bdPbSG').length === 1, String(document.querySelectorAll('#bdPbSG').length));
+        __REG.ok('Sprint T ölçüm bloğunun altyazıları da AA üstü (keşifte 2.80:1 ölçülmüştü)', tara(document.getElementById('bdAktifKart')).length === 0, JSON.stringify(tara(document.getElementById('bdAktifKart')).slice(0, 5)));
+        brewdayZorlaSifirla(true);
+        return __REG.al();
+      });
+    }
+  },
+  {
+    kod: 'AU2-SIGORTA', ad: 'İKİ SİGORTA (AU keşif #6): "⟲ Sıfırla" artık in-app ONAY istiyor (3× brewday_start vakasının ~%80 kökü); kritik adım <20 sn\'de onaylanırsa BLOKE ETMEYEN şerit (Muzo\'nun 10.1 sn\'si birebir tetiklerdi)',
+    calistir: (page) => page.evaluate(async () => {
+      // brewdayBaslat b.aktif'i wake-lock await'inden ONCE set ediyor: bayragi beklemek
+      // render/KR-aynasi ile YARISIR. Timeline DOM'u beklenir (ayna+render ondan SONRA).
+      const bekle = async () => { for (let i = 0; i < 200 && !document.getElementById('brewdayTimeline'); i++) await new Promise(r => setTimeout(r, 20)); };
+      const malt = MALTLAR.find(m => m && m.id && m.g !== 'Şeker' && m.id !== 'rice_hulls');
+      __REG.yeniKayit('REGTEST AU2-SIGORTA', {});
+      S.hacim = 11; S.mayaId = 'us05'; S.maltlar = [{ id: malt.id, kg: 3.16 }]; S.mashAdimlar = [{ sc: 66, dk: 60 }];
+      brewdayBaslatEkran(); document.getElementById('bdSuIki').click(); await bekle();
+      const b = window._brewday;
+      // (a) SIFIRLAMA ONAYI
+      __REG.ok('kırmızı buton artık doğrudan sıfırlamıyor (onay sorucusuna bağlı)', String(rEditorSurec).indexOf('brewdayZorlaSifirlaSor()') > -1 && String(rEditorSurec).indexOf('"brewdayZorlaSifirla()"') === -1);
+      if (_bdOnayGerekli(b.ajanda[b.aktifIdx])) brewdayTimerOnayla();
+      brewdayAktifOnayla();   // en az 1 tamamlanmış adım olsun — kayıp somut yazılsın
+      brewdayZorlaSifirlaSor();
+      const sm = document.getElementById('bdSifirlaOnayModal');
+      __REG.ok('in-app onay modali açıldı (native confirm DEĞİL — WebView\'da güvenilmez)', !!sm);
+      __REG.ok('brewday HÂLÂ aktif (soru sorulurken ilerleme silinmedi)', b.aktif === true);
+      __REG.ok('kayıp somut yazılıyor (kaç adım gidecek)', /1 tamamlanmış adım/.test(sm.innerText) && /SIFIRDAN/.test(sm.innerText), sm.innerText.replace(/\s+/g, ' ').slice(0, 120));
+      __REG.ok('günlüğüne yazılanların silinmeyeceği söyleniyor (yanlış panik yok)', /günlüğüne yazılmış kayıtlar silinmez/i.test(sm.innerText));
+      __REG.ok('BİRİNCİL buton VAZGEÇ (yıkıcı eylem ikincil)', document.getElementById('bdSifirlaVazgec').getBoundingClientRect().width > document.getElementById('bdSifirlaOnay').getBoundingClientRect().width, Math.round(document.getElementById('bdSifirlaVazgec').getBoundingClientRect().width) + ' vs ' + Math.round(document.getElementById('bdSifirlaOnay').getBoundingClientRect().width));
+      brewdayZorlaSifirlaKapat();
+      __REG.ok('VAZGEÇ → modal kapandı, brewday korundu', !document.getElementById('bdSifirlaOnayModal') && window._brewday.aktif === true);
+      // (b) GEÇ-YAKALAMA ŞERİDİ
+      if (_bdOnayGerekli(b.ajanda[b.aktifIdx])) brewdayTimerOnayla();
+      b.sonOnayTs = Date.now() - 25000;   // 25 sn önce → normal tempo
+      brewdayAktifOnayla();
+      __REG.ok('≥20 sn sonra onay → şerit YOK (yanlış-pozitif gürültü yok)', !document.getElementById('bdHizliSerit'));
+      const geriIdx = b.aktifIdx, geriTip = b.ajanda[geriIdx].tip;
+      brewdayAktifOnayla();   // hemen ardından → <20 sn
+      const sr = document.getElementById('bdHizliSerit');
+      __REG.ok('<20 sn sonra onay → şerit ÇIKTI (Muzo\'nun 10.1 sn\'si birebir bu)', !!sr, sr ? sr.innerText.replace(/\s+/g, ' ').slice(0, 100) : 'YOK');
+      __REG.ok('şerit BLOKE ETMİYOR: sonraki adım aktif ve onay butonu erişilebilir', b.aktifIdx > geriIdx && !!document.getElementById('bdOnayBtn'), geriIdx + '→' + b.aktifIdx);
+      __REG.ok('şeritte iki çıkış var (Evet / geri dön) + "durdurmaz" yazılı', !!document.getElementById('bdHizliEvet') && !!document.getElementById('bdHizliHayir') && /durdurmaz/.test(sr.innerText));
+      const logOnce = (S.brewLog || []).length;
+      document.getElementById('bdHizliHayir').click();
+      __REG.ok('"Hayır — geri dön" adımı yeniden AÇTI', b.aktifIdx === geriIdx && b.ajanda[geriIdx]._tamamlandi === false && b.ajanda[geriIdx].tip === geriTip, b.aktifIdx + '/' + geriIdx);
+      __REG.ok('şerit kapandı', !document.getElementById('bdHizliSerit'));
+      __REG.ok('GÜNLÜK KAYDI SİLİNMEDİ (birleşim silmeyi taşımaz — silinen kayıt senkronda geri gelirdi)', (S.brewLog || []).length === logOnce, logOnce + '→' + (S.brewLog || []).length);
+      // gerçekten sıfırlama
+      brewdayZorlaSifirlaSor(); document.getElementById('bdSifirlaOnay').click();
+      __REG.ok('"Evet, sıfırla" → brewday gerçekten sıfırlandı + modal temizlendi', window._brewday.aktif === false && !document.getElementById('bdSifirlaOnayModal'));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AU2-KALICI-SPARGE', ad: 'AU1 DERSİ YENİ ALANA UYGULANDI: su yolu kararı + gerçek sparge ölçümü KR\'ye (bm_v6+IDB) düşer — taslak tek başına kalıcılık katmanı değil; rid kapısı bu alanı da tutar; özet/Z sinyali tetiklenmez',
+    calistir: (page) => page.evaluate(async () => {
+      // brewdayBaslat b.aktif'i wake-lock await'inden ONCE set ediyor: bayragi beklemek
+      // render/KR-aynasi ile YARISIR. Timeline DOM'u beklenir (ayna+render ondan SONRA).
+      const bekle = async () => { for (let i = 0; i < 200 && !document.getElementById('brewdayTimeline'); i++) await new Promise(r => setTimeout(r, 20)); };
+      const malt = MALTLAR.find(m => m && m.id && m.g !== 'Şeker' && m.id !== 'rice_hulls');
+      const my = MAYALAR.find(m => m && m.id);
+      const id = __REG.yeniKayit('REGTEST AU2-KALICI', { mayaId: my.id, maltlar: [{ id: malt.id, kg: 3.16 }], hacim: 11, kaynatmaSure: 60, mashAdimlar: [{ sc: 66, dk: 60 }] });
+      // Gerçek kullanım hizası: reçete editörde KAYDEDİLMİŞ halde başlar (türetilmiş alanlar —
+      // ozet/stilTah — KR'de de yazılı). yeniKayit'in graft'ı bu alanları KR'ye koymadığı için
+      // kaydetmeden ghost-draft kıyası AU2 D IŞI bir farkla (stilTah) kırılıyordu.
+      tarifeKaydet();
+      const kr0 = KR.find(x => x && x.id === id);
+      const ozet0 = JSON.stringify(kr0.ozet || null);
+      const zOnce = localStorage.getItem('bm_stil_ogren_v1');
+      localStorage.removeItem('bm_draft_v1');
+      __REG.ok('kontrol: başlangıçta S == KR (ghost kıyası anlamlı — önkoşul sessizce kayarsa yakalanır)', _draftKrAyniMi(kr0, S) === true);
+      __REG.ok('başlangıçta KR\'de sparge yok (fixture gerçeği: 7/7 reçetede alan YOK)', kr0.spargeL == null, String(kr0.spargeL));
+      brewdayBaslatEkran(); document.getElementById('bdSuIki').click(); await bekle();
+      const kr1 = KR.find(x => x && x.id === id);
+      __REG.ok('SU YOLU KARARI KR\'ye düştü (taslak silinse bile yaşar)', kr1.spargeL === S.spargeL && kr1.spargeL > 0, String(kr1.spargeL));
+      __REG.ok('ÖZET yeniden hesaplanmadı (tarifeKaydet DEĞİL)', JSON.stringify(kr1.ozet || null) === ozet0, ozet0 + ' → ' + JSON.stringify(kr1.ozet || null));
+      __REG.ok('Sprint Z stil sinyali TETİKLENMEDİ', localStorage.getItem('bm_stil_ogren_v1') === zOnce);
+      __REG.ok('GHOST TASLAK YOK (S==KR → saveDraft temizledi)', !localStorage.getItem('bm_draft_v1'), String(localStorage.getItem('bm_draft_v1')).slice(0, 60));
+      // sparge kartında GERÇEK ölçüm girişi
+      const b = window._brewday;
+      let g = 0;
+      while (g++ < 40 && window._brewday.aktif && b.ajanda[b.aktifIdx].tip !== 'sparge') { if (_bdOnayGerekli(b.ajanda[b.aktifIdx])) brewdayTimerOnayla(); brewdayAktifOnayla(); }
+      __REG.ok('sparge kartı aktif + ölçüm girişi ekranda', b.ajanda[b.aktifIdx].tip === 'sparge' && !!document.getElementById('bdSpargeL'));
+      _bdSpargeGir('4.2');
+      __REG.ok('girilen gerçek litre S\'te', S.spargeL === 4.2, String(S.spargeL));
+      __REG.ok('girilen gerçek litre KR\'de (ölçüm kolu artık AÇ değil)', KR.find(x => x && x.id === id).spargeL === 4.2, String(KR.find(x => x && x.id === id).spargeL));
+      __REG.ok('kart metni gerçek ölçüme güncellendi', b.ajanda[b.aktifIdx].baslik.indexOf('4.2 L') > -1, b.ajanda[b.aktifIdx].baslik);
+      const lsK = (JSON.parse(localStorage.getItem('bm_v6') || '[]')).find(x => x && x.id === id);
+      __REG.ok('DİSKTE (bm_v6) da var', !!lsK && lsK.spargeL === 4.2, String(lsK && lsK.spargeL));
+      const idbOk = await new Promise(res => { let t = false; try { window._bmIDB.get('bm_v6', function (v) { t = true; try { const a = JSON.parse(v || '[]'); const k = a.find(x => x && x.id === id); res(!!k && k.spargeL === 4.2); } catch (e) { res(false); } }); } catch (e) { res(false); } setTimeout(() => { if (!t) res(false); }, 3000); });
+      __REG.ok('IndexedDB aynası da taşıyor (LS eviction kurtarma yolu)', idbOk === true);
+      // rid kapısı bu alanı da tutar
+      bmHataLogSil();
+      const id2 = __REG.yeniKayit('REGTEST AU2-KALICI-B', { mayaId: my.id });
+      S.spargeL = 9.9;
+      window._bdLogKrAynala('test');
+      __REG.ok('RID KAPISI: yabancı reçetenin KR\'sine spargeL YAZILMADI', KR.find(x => x && x.id === id2).spargeL !== 9.9, String(KR.find(x => x && x.id === id2).spargeL));
+      __REG.ok('sessiz kalmadı: ring\'de _bdLogKrAynala kaydı var', (JSON.parse(localStorage.getItem('bm_hata_log_v1') || '[]')).some(x => x && String(x.kaynak || '').indexOf('_bdLogKrAynala') === 0));
+      bmHataLogSil();
+      brewdayZorlaSifirla(true);
       return __REG.al();
     })
   }

@@ -704,7 +704,13 @@
 // DOM-bagimsiz (panel gizliyken de calar); strike ilk mash adimi + mash payi; sure tahmini adim toplami;
 // sparge uyari kosulu >0; bolusum yuvarlama kacagi; pitch maya sc/ideal; hop>kaynatma uyarisi.
 // KURAL 12.3 bump v131-406 -> v131-407.
-const CACHE_VERSION='bm-cache-v131-407';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
+// Sprint AU2 (2026-08-19): brewday UI yeniden tasarimi (AU kesif maddeleri 1/2/3/4/6) — baslangic
+// modalinde SU YOLU CATALI (iki kademe / tam hacim -> S.spargeL, %65 varsayimi kalkar) + bugunku plan
+// ozeti (grist/OG/verim/tuz/kavuz/hop uyarilari); ODAK MODU (yalniz aktif kart tam boy, sonraki tek
+// satir, tam liste tek dokunus, sayac kutusu kosullu); AYRI SPARGE KARTI (yalniz spargeL>0, timerTur
+// YOK); kart dili (adima ozel fiziksel iddia, 48px, Atla ayrik, AA tipografi); sifirlama onayi +
+// gec-yakalama seridi; spargeL de KR aynasina. KURAL 12.3 bump v131-407 -> v131-408.
+const CACHE_VERSION='bm-cache-v131-408';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
 const ASSET_CACHE   = 'bm-assets-v1';        // font + ikon + manifest — KALICI, bump'ta silinmez
 const MODEL_CACHE   = 'bm-models-v1';        // workers.dev + jsdelivr — SHA'li/immutable URL, KALICI
 
