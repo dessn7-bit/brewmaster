@@ -719,7 +719,9 @@
 // HTML degisti -> KURAL 12.3 CACHE_VERSION bump v131-409 -> v131-410.
 // Sprint AX: NHC altin madalya tablosu (29 stil, 74 kayit, gercek gramaj+mash) + AW1 NHC yolu.
 // HTML degisti -> KURAL 12.3 CACHE_VERSION bump v131-410 -> v131-411.
-const CACHE_VERSION='bm-cache-v131-411';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
+// Sprint AY: fermentasyon profillerine merkezi OG kapisi (profOgKapisi: +3/+7/+14) + Tripel taban 18 + FG sise-bombasi supabi.
+// HTML degisti -> KURAL 12.3 CACHE_VERSION bump v131-411 -> v131-412.
+const CACHE_VERSION='bm-cache-v131-412';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
 const ASSET_CACHE   = 'bm-assets-v1';        // font + ikon + manifest — KALICI, bump'ta silinmez
 const MODEL_CACHE   = 'bm-models-v1';        // workers.dev + jsdelivr — SHA'li/immutable URL, KALICI
 

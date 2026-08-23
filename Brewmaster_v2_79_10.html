@@ -5121,6 +5121,43 @@ function kondisyonHedef(og, stil, mayaTip){
 // - Westmalle/Westvleteren/Achel gerçek profiller
 // - Brewfather fermentation profiles
 // ═══════════════════════════════════════════════════════════
+// ═══ SPRINT AY — OG KAPISI ═══════════════════════════════════
+// Sabit profiller ayni ailenin buyuk varyantlarinda (Weizenbock, Quad,
+// Imperial Stout, Barleywine→default) eksik fermente sisleme onerisine yol
+// aciyordu — sise bombasi + yesil bira riski. Merkezi kural (sise gunune ek):
+//   og<1.060 → +0 · 1.060-1.075 → +3 · 1.075-1.090 → +7 · ≥1.090 → +14
+// Muaf: Kveik (yuksek OG'de de hizli biter), Lambic/Flanders (zaten 180g),
+// Lager (28g; lagerleme ayri mekanizma). Kapanis blogu (sogutma/cold crash/
+// sisele) +N gun otelenir, araya FG-stabilite emniyet adimlari girer.
+// Kaynak: AHA Weizenbock (primary 7-10g + secondary 10-14g), HomebrewTalk
+// Tripel konsensusu (min 2-3 hafta primary), BJCP 2021 OG bantlari.
+function profOgKapisi(prof, og){
+  try {
+    var o = parseFloat(og) || 0;
+    if(!prof || !Array.isArray(prof.gunler) || !prof.gunler.length) return prof;
+    if(/Kveik|Lager|Lambic/.test(prof.baslik||'')) return prof; // muafiyet
+    var ek = o>=1.090 ? 14 : o>=1.075 ? 7 : o>=1.060 ? 3 : 0;
+    if(!ek) return prof;
+    // Kapanis blogu: sondan geriye sisele/cold crash/sogutma zinciri
+    var i = prof.gunler.length - 1;
+    while(i >= 0 && /şişele|cold|soğut|sanitize/.test(String(prof.gunler[i].aksiyon||'').toLowerCase())) i--;
+    var q = i + 1;
+    if(q >= prof.gunler.length) return prof; // kapanis bulunamadi — dokunma
+    var eskiQg = prof.gunler[q].g;
+    var oncekiT = q > 0 ? prof.gunler[q-1].t : null;
+    for(var j = q; j < prof.gunler.length; j++) prof.gunler[j].g += ek;
+    // FG-stabilite emniyet supabi (sise bombasi korumasi)
+    prof.gunler.push(
+      {g: eskiQg, t: oncekiT, aksiyon:'📊 FG ölç (yüksek OG — uzatılmış program)', aciklama:'OG '+o.toFixed(3)+' — fermentasyon planlanandan uzun sürer. FG hâlâ düşüyorsa sabırlı ol, takvimi değil ölçümü dinle.'},
+      {g: eskiQg + Math.max(1, ek - 2), t: oncekiT, aksiyon:'📊 FG onay — şişe bombası kontrolü', aciklama:'İki gün üst üste AYNI FG değilse ŞİŞELEME — 2 gün daha bekle. Eksik fermente şişeleme = şişe bombası riski.'}
+    );
+    prof.gunler.sort(function(a,b){return a.g - b.g;});
+    if(typeof prof.sise === 'number') prof.sise += ek;
+    prof.toplamGun += ek;
+    prof.aciklama = (prof.aciklama||'') + ' ⏱️ OG ' + o.toFixed(3) + ': program +' + ek + ' gün uzatıldı (yüksek yoğunluk — FG stabil olmadan şişeleme).';
+  } catch(e){}
+  return prof;
+}
 function fermentasyonProfili(stil, og, mayaTip, maya){
   var s = (stil||'').toLowerCase();
   var tip = mayaTip || 'ale';
@@ -5187,7 +5224,7 @@ function fermentasyonProfili(stil, og, mayaTip, maya){
   // ═══ BELÇIKA TRIPEL/QUAD ═══
   else if(s.includes('tripel') || s.includes('quad') || (tip==='belcika' && og>=1.075)){
     prof.baslik='Belgian Strong Ale Profili';
-    prof.aciklama='Daha uzun fermentasyon. Yüksek ABV maya stresi — dikkatli free rise.';
+    prof.aciklama='Uzun fermentasyon (literatür: min 2-3 hafta primary — HomebrewTalk konsensusu). Yüksek ABV maya stresi — dikkatli free rise. FG stabil olmadan şişeleme = şişe bombası riski.';
     pitchT=18;
     prof.gunler=[
       {g:0, t:18, aksiyon:'🧬 Pitching (düşük)', aciklama:'18°C pitch. '+(mayaFormu(maya)==='liquid'?'Yüksek ABV — sıvı mayada starter şart.':'Yüksek ABV — kuru mayada 2+ paket at (starter gerekmez).')+' Bol O₂.'},
@@ -5199,20 +5236,23 @@ function fermentasyonProfili(stil, og, mayaTip, maya){
       {g:6, t:23, aksiyon:'📈 Hedef', aciklama:'23-24°C hold. FG düşüyor.'},
       {g:7, t:24, aksiyon:'🌡️ D-rest', aciklama:'24°C tut. Diacetyl temizle.'},
       {g:8, t:24, aksiyon:'🌡️ D-rest', aciklama:'24°C devam. FG ölç.'},
-      {g:9, t:24, aksiyon:'📊 FG kontrol', aciklama:'FG aynıysa bitti.'},
-      {g:10, t:24, aksiyon:'📊 Son onay', aciklama:'İki stabil FG. Hazır.'},
-      {g:11, t:20, aksiyon:'🧊 Yavaş soğut', aciklama:'20°C\'ye düşür. Maya strese girmesin.'},
-      {g:12, t:10, aksiyon:'❄️ Cold başla', aciklama:'10°C\'ye kademeli.'},
-      {g:13, t:5, aksiyon:'❄️ Cold crash', aciklama:'5°C. 48 saat.'},
-      {g:14, t:3, aksiyon:'🍺 Şişele', aciklama:'Yeni maya ekle (yüksek ABV\'de eski maya bitik).'}
+      {g:9, t:24, aksiyon:'📊 FG kontrol', aciklama:'FG aynıysa bitiyor — ama yüksek OG\'de acele etme.'},
+      {g:11, t:24, aksiyon:'📊 FG ölç', aciklama:'Yüksek OG yavaş biter. FG hâlâ düşüyorsa bekle.'},
+      {g:13, t:24, aksiyon:'📊 FG onay', aciklama:'İki gün üst üste AYNI FG değilse ŞİŞELEME — 2 gün daha bekle.'},
+      {g:14, t:24, aksiyon:'📊 Son onay', aciklama:'İki stabil FG. Hazır.'},
+      {g:15, t:20, aksiyon:'🧊 Yavaş soğut', aciklama:'20°C\'ye düşür. Maya strese girmesin.'},
+      {g:16, t:10, aksiyon:'❄️ Cold başla', aciklama:'10°C\'ye kademeli.'},
+      {g:17, t:5, aksiyon:'❄️ Cold crash', aciklama:'5°C. 48 saat.'},
+      {g:18, t:3, aksiyon:'🍺 Şişele', aciklama:'Yeni maya ekle (yüksek ABV\'de eski maya bitik). FG stabil değilse şişeleme — şişe bombası riski.'}
     ];
-    prof.toplamGun=15;
-    prof.sise=14;
+    prof.toplamGun=19;
+    prof.sise=18;
   }
   // ═══ WEIZEN/WIT ═══
   else if(s.includes('weizen') || s.includes('wit') || s.includes('weiss') || tip==='wheat' || tip==='wit'){
     prof.baslik='Buğday Bira Profili';
     prof.aciklama='Düşük sıcaklıkta pitch = muz az, karanfil çok. Yüksek = muz çok.';
+    if(parseFloat(og)>=1.064) prof.aciklama+=' ⚠️ Bu bir Weizenbock — Weissbier değil; doppelbock gücünde. Uzatılmış program uygulanır (AHA: primary 7-10 gün + secondary 10-14 gün).';
     pitchT=18;
     prof.gunler=[
       {g:0, t:18, aksiyon:'🧬 Pitch', aciklama:'18°C pitch. (Muz/karanfil dengesi).'},
@@ -5297,6 +5337,7 @@ function fermentasyonProfili(stil, og, mayaTip, maya){
   else if(s.includes('stout') || s.includes('porter')){
     prof.baslik='Stout / Porter Profili';
     prof.aciklama='Orta sıcaklık, temiz fermentasyon. Uzun kondisyon Maillard için şart.';
+    if(parseFloat(og)>=1.075) prof.aciklama+=' ⚠️ Imperial güçte — uzatılmış program. FG stabil olmadan şişeleme = şişe bombası riski.';
     pitchT=18;
     prof.gunler=[
       {g:0, t:18, aksiyon:'🧬 Pitch', aciklama:'18°C pitch. S-04 / WY1084 ideal.'},
@@ -5381,7 +5422,7 @@ function fermentasyonProfili(stil, og, mayaTip, maya){
     prof.toplamGun=11;
     prof.sise=10;
   }
-  return prof;
+  return profOgKapisi(prof, og);
 }
 // M-M1 — Maya kayıtları için runtime validation (yeni maya eklerken/DB değişirken)
 // Geri dönen: {valid:boolean, hatalar:[string]}. Kullanım: mayaValid(maya) veya mayaValidate(MAYALAR)
@@ -28679,8 +28720,8 @@ syncBaslat();
     test('fermentasyonProfili fonksiyonu global',()=>{
       assert(typeof fermentasyonProfili==='function','global');
     });
-    test('Dubbel profili: 14 gün, şişeleme 13. gün',()=>{
-      const p=fermentasyonProfili('Dark Belgian Dubbel',1.065,'belcika',{sc:[18,22],ideal:20});
+    test('Dubbel profili (OG 1.055 — kapı altı): 14 gün, şişeleme 13. gün',()=>{
+      const p=fermentasyonProfili('Dark Belgian Dubbel',1.055,'belcika',{sc:[18,22],ideal:20});
       assert(p.toplamGun===14&&p.sise===13,'Dubbel: '+p.toplamGun+'g şişe='+p.sise);
     });
     test('Dubbel profilinde pitch 20°C (BYO)',()=>{
@@ -28717,6 +28758,32 @@ syncBaslat();
     test('Weizen profili kısa (9 gün)',()=>{
       const p=fermentasyonProfili('Hefeweizen',1.050,'wheat',{sc:[18,22],ideal:20});
       assert(p.toplamGun===9,'Weizen: '+p.toplamGun);
+    });
+    test('AY: Weizenbock (OG 1.075) uzatıldı — şişele 15/toplam 16 + not',()=>{
+      const p=fermentasyonProfili('Weizenbock',1.075,'wheat',{sc:[18,22],ideal:20});
+      assert(p.sise===15&&p.toplamGun===16&&p.aciklama.includes('Weizenbock'),'WB: '+p.toplamGun+'g şişe='+p.sise);
+    });
+    test('AY: Tripel 1.080 şişele 25 (18+7) / Quad 1.095 şişele 32 (18+14)',()=>{
+      const t=fermentasyonProfili('Tripel',1.080,'belcika',{sc:[18,24],ideal:21});
+      const q=fermentasyonProfili('Quadrupel',1.095,'belcika',{sc:[18,26],ideal:22});
+      assert(t.sise===25&&q.sise===32,'T='+t.sise+' Q='+q.sise);
+    });
+    test('AY: Imperial Stout 1.100 şişele 25 + Imperial notu; normal Stout 1.050 AYNEN 11',()=>{
+      const i=fermentasyonProfili('Imperial Stout',1.100,'ale',{sc:[18,22],ideal:20});
+      const n=fermentasyonProfili('Oatmeal Stout',1.050,'ale',{sc:[18,22],ideal:20});
+      assert(i.sise===25&&i.aciklama.includes('Imperial')&&n.sise===11,'imp='+i.sise+' norm='+n.sise);
+    });
+    test('AY: muafiyet — Kveik 1.090 şişele 6, Lager 1.080 şişele 28, Lambic 1.070 gün 180',()=>{
+      const k=fermentasyonProfili('Kveik IPA',1.090,'kveik',{sc:[25,40],ideal:32});
+      const l=fermentasyonProfili('Doppelbock',1.080,'lager',{sc:[8,13],ideal:10});
+      const b=fermentasyonProfili('Lambic',1.070,'ale',{sc:[18,22],ideal:20});
+      assert(k.sise===6&&l.sise===28&&b.sise===180,'k='+k.sise+' l='+l.sise+' b='+b.sise);
+    });
+    test('AY: uzatılmış profilde FG şişe-bombası supabı + şişele son adim',()=>{
+      const p=fermentasyonProfili('Weizenbock',1.078,'wheat',null);
+      const son=p.gunler[p.gunler.length-1];
+      assert(p.gunler.some(x=>(x.aciklama||'').includes('AYNI FG değilse ŞİŞELEME')),'supap yok');
+      assert(son.aksiyon.includes('Şişele')&&son.g===p.sise,'son='+son.aksiyon+' g='+son.g);
     });
     test('Default ale profili: 11 gün',()=>{
       const p=fermentasyonProfili('','1.050','ale',{sc:[18,22],ideal:20});

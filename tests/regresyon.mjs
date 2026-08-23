@@ -4433,6 +4433,57 @@ const CASELER = [
       __REG.ok('ESKİ YOL: ad eski biçimde (NHC ibaresi yok)', /örneğinden/.test(S.biraAd) && S.biraAd.indexOf('NHC') < 0, S.biraAd);
       return __REG.al();
     })
+  },
+  {
+    kod: 'AY1-OGKAPI', ad: 'SPRINT AY: OG kapisi — Weizenbock/Tripel/Quad/ImpStout uzatilir (+3/+7/+14), Muzo-Hefeweizen/Kveik/Lager/Lambic AYNEN; FG sise-bombasi supabi; alarm zinciri yeni sise gununu izler',
+    calistir: (page) => page.evaluate(() => {
+      const m20 = { sc: [18, 22], ideal: 20 };
+      // i) Muzo'nun gercek girdileri — DEGISMEDI
+      const muzo = fermentasyonProfili('Weizen / Weissbier', 1.055, 'wheat', m20);
+      __REG.ok('Muzo (Weizen 1.055): sise 8 / toplam 9 AYNEN', muzo.sise === 8 && muzo.toplamGun === 9, muzo.sise + '/' + muzo.toplamGun);
+      const w = fermentasyonProfili('Hefeweizen', 1.050, 'wheat', m20);
+      __REG.ok('Hefeweizen 1.050: sise 8 (kapi pasif)', w.sise === 8 && w.toplamGun === 9);
+      const wb = fermentasyonProfili('Weizenbock', 1.075, 'wheat', m20);
+      __REG.ok('Weizenbock 1.075: sise 15 (8+7), toplam 16, aciklamada not', wb.sise === 15 && wb.toplamGun === 16 && /Weizenbock/.test(wb.aciklama), wb.sise + '/' + wb.toplamGun);
+      const t3 = fermentasyonProfili('Tripel', 1.080, 'belcika', m20);
+      __REG.ok('Tripel 1.080: sise 25 (18+7)', t3.sise === 25, String(t3.sise));
+      const q4 = fermentasyonProfili('Quadrupel', 1.095, 'belcika', m20);
+      __REG.ok('Quad 1.095: sise 32 (18+14)', q4.sise === 32, String(q4.sise));
+      const ist = fermentasyonProfili('Imperial Stout', 1.100, 'ale', m20);
+      __REG.ok('ImpStout 1.100: sise 25 (11+14) + Imperial notu', ist.sise === 25 && /Imperial/.test(ist.aciklama), String(ist.sise));
+      const st = fermentasyonProfili('Oatmeal Stout', 1.050, 'ale', m20);
+      __REG.ok('Normal Stout 1.050: sise 11 / toplam 12 AYNEN', st.sise === 11 && st.toplamGun === 12);
+      const kv = fermentasyonProfili('Kveik IPA', 1.090, 'kveik', { sc: [25, 40], ideal: 32 });
+      __REG.ok('Kveik 1.090 MUAF: sise 6 / toplam 7', kv.sise === 6 && kv.toplamGun === 7);
+      const lb = fermentasyonProfili('Lambic', 1.070, 'ale', m20);
+      __REG.ok('Lambic 1.070 MUAF: 180', lb.sise === 180);
+      const lg = fermentasyonProfili('Doppelbock', 1.080, 'lager', { sc: [8, 13], ideal: 10 });
+      __REG.ok('Lager tipi 1.080 MUAF: sise 28', lg.sise === 28);
+      const bw = fermentasyonProfili('English Barleywine', 1.100, 'ale', m20);
+      __REG.ok('Barleywine (default dala duser) 1.100: sise 24 (10+14)', bw.sise === 24, String(bw.sise));
+      // h) og>=1.060 uzatilan HER profilde supap + sisele SON + g tekil-artan
+      const yuksekler = [wb, t3, q4, ist, bw, fermentasyonProfili('Saison', 1.065, 'saison', m20), fermentasyonProfili('American IPA', 1.062, 'ale', m20), fermentasyonProfili('Dubbel', 1.065, 'belcika', m20)];
+      __REG.ok('uzatilmis TUM profillerde sise-bombasi FG supabi', yuksekler.every(p => p.gunler.some(x => /AYNI FG değilse ŞİŞELEME/.test(x.aciklama || ''))));
+      __REG.ok('uzatilmis TUM profillerde son adim Sisele + g kesin artan', yuksekler.every(p => {
+        const son = p.gunler[p.gunler.length - 1];
+        const gs = p.gunler.map(x => x.g);
+        return /Şişele/.test(son.aksiyon) && son.g === p.sise && gs.every((g, i) => i === 0 || g > gs[i - 1]);
+      }));
+      // alarm zinciri: _alarmPlaniKur yeni sise gununu izliyor
+      __REG.yeniKayit('REGTEST AY1', { stil: 'Tripel', ogManuel: 1.080 });
+      S.stil = 'Tripel'; S.ogManuel = 1.080;
+      const plan = _alarmPlaniKur(_editId, Date.now());
+      __REG.ok('alarm plani kuruldu (ok:true)', !!(plan && plan.ok), JSON.stringify(plan));
+      const grup = JSON.parse(localStorage.getItem('bm_alarms_v1') || '{}')[_editId];
+      const al = grup && Array.isArray(grup.alarmlar) ? grup.alarmlar : [];
+      const siseA = al.find(a => /Şişele/.test(a.aksiyon) && !/sanitize/i.test(a.aksiyon));
+      const sanit = al.find(a => /sanitize/i.test(a.aksiyon));
+      const karb = al.find(a => /Karbonasyon/.test(a.aksiyon));
+      __REG.ok('alarm: sisele g25', !!siseA && siseA.g === 25, siseA && ('g=' + siseA.g));
+      __REG.ok('alarm: sanitize g24 (sise-1)', !!sanit && sanit.g === 24, sanit && ('g=' + sanit.g));
+      __REG.ok('alarm: karbonasyon g39 (sise+14)', !!karb && karb.g === 39, karb && ('g=' + karb.g));
+      return __REG.al();
+    })
   }
 ];
 
