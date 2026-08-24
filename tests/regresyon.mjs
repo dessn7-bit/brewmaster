@@ -4940,6 +4940,96 @@ const CASELER = [
       __REG.ok('içime-hazır offset 21 + gelecekte bekliyor', icime._sonrasiGun === 21 && icime.durum === 'bekliyor' && icime.ts > Date.now());
       return __REG.al();
     })
+  },
+
+  // ── SPRINT BE3: giriş doğrulama paketi (BD F8 hattı — 12 alan; priming GÜVENLİK sınırı kaynaklı) ──
+  {
+    kod: 'BE3-PRIM', ad: 'priming güvenlik sınırı (kaynaklı): vol=10 REDDEDİLİR + tehlike dili; Weizen 4.0 KABUL + kalın-şişe uyarısı; 2.5 sessiz kabul; temp 0 (cold-crash) artık MEŞRU',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('BE3 Prim', {});
+      const mesajlar = []; const eskiF = window.flash;
+      window.flash = function (m) { mesajlar.push(String(m)); try { return eskiF.apply(this, arguments); } catch (_e) {} };
+      try {
+        S.primVol = 2.4;
+        _bmPrimVolGir('10');
+        __REG.ok('vol=10 REDDEDİLDİ (değer korundu)', S.primVol === 2.4, String(S.primVol));
+        __REG.ok('tehlike dili net (PATLA...)', mesajlar.some(m => /PATLA/i.test(m) && /⛔/.test(m)), mesajlar.join('|').slice(0, 80));
+        mesajlar.length = 0;
+        _bmPrimVolGir('4.0');
+        __REG.ok('Weizen 4.0 KABUL (meşru uç engellenmedi)', S.primVol === 4, String(S.primVol));
+        __REG.ok('kalın-şişe güvenlik uyarısı verildi', mesajlar.some(m => /kalın|ağır şişe/i.test(m)));
+        mesajlar.length = 0;
+        _bmPrimVolGir('2.5');
+        __REG.ok('2.5 sessiz kabul (normal aralık uyarısız)', S.primVol === 2.5 && mesajlar.length === 0, mesajlar.join('|').slice(0, 40));
+        _bmPrimVolGir('0.5');
+        __REG.ok('0.5 alt sınır altı REDDEDİLDİ', S.primVol === 2.5);
+        _bmPrimTempGir('0');
+        __REG.ok('temp 0°C (cold-crash şişeleme) MEŞRU — eski ||18 ikamesi bitti', S.primTemp === 0, String(S.primTemp));
+        _bmPrimTempGir('40');
+        __REG.ok('temp 40 REDDEDİLDİ (0 korundu)', S.primTemp === 0);
+      } finally { window.flash = eskiF; }
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BE3-ALAN', ad: '12 alan kapısı: malt/hop/AA/mineral/stok RED+uyarı; mash 100°C RED ama 35-78 meşru; kaynatma [15,240]; verim uyarılı; sparge; gelecek-pitching metni',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('BE3 Alan', {});
+      const mesajlar = []; const eskiF = window.flash;
+      window.flash = function (m) { mesajlar.push(String(m)); try { return eskiF.apply(this, arguments); } catch (_e) {} };
+      try {
+        // mash: absürt RED + meşru uçlar KABUL
+        S.mashSc = 67;
+        _bmMashScGir('100');
+        __REG.ok('mash 100°C REDDEDİLDİ (67 korundu)', S.mashSc === 67 && mesajlar.some(m => /35–80/.test(m)));
+        _bmMashScGir('78'); __REG.ok('mash-out 78°C MEŞRU', S.mashSc === 78);
+        _bmMashScGir('35'); __REG.ok('asit dinlenmesi 35°C MEŞRU', S.mashSc === 35);
+        // kaynatma
+        S.kaynatmaSure = 60;
+        _bmKaynatmaSureGir('-30');
+        __REG.ok('negatif kaynatma REDDEDİLDİ', S.kaynatmaSure === 60);
+        _bmKaynatmaSureGir('180'); __REG.ok('uzun kaynatma 180 dk MEŞRU', S.kaynatmaSure === 180);
+        // sparge
+        _bmSpargeGir('-3');
+        __REG.ok('negatif sparge REDDEDİLDİ (alan temiz)', S.spargeL === null);
+        _bmSpargeGir('0'); __REG.ok('sparge 0 (bilinçli tam-hacim) MEŞRU', S.spargeL === 0);
+        // maltEkle: boş kg RED (1 kg sessiz ikamesi bitti)
+        setSekme('malt'); if (typeof render === 'function') render();
+        const n0 = S.maltlar.length;
+        yM.id = 'pilsner'; const kgEl = document.getElementById('ymKg'); if (kgEl) kgEl.value = '';
+        mesajlar.length = 0; maltEkle();
+        __REG.ok('boş kg: malt EKLENMEDİ + uyarı', S.maltlar.length === n0 && mesajlar.some(m => /kg > 0/.test(m)), mesajlar.join('|').slice(0, 60));
+        // hop AA: 90 → katalog + uyarı; IBU negatif imkansız (inputlar HOP sekmesinde)
+        setSekme('hop'); if (typeof render === 'function') render();
+        const h0 = S.hoplar.length;
+        yH.id = 'magnum'; yH.tur = 'boil'; yH.dk = 60;
+        const gEl = document.getElementById('yhG'); if (gEl) gEl.value = '30';
+        const aaEl = document.getElementById('yhAA'); if (aaEl) aaEl.value = '90';
+        __REG.ok('hop form DOM hazır', !!gEl && !!aaEl);
+        mesajlar.length = 0; hopEkle();
+        const sonHop = S.hoplar[S.hoplar.length - 1];
+        __REG.ok('AA=90: hop eklendi ama cAA=null (katalog) + uyarı', S.hoplar.length === h0 + 1 && sonHop.cAA === null && mesajlar.some(m => /1-30/.test(m)), JSON.stringify({ cAA: sonHop && sonHop.cAA }));
+        // hop dk > kaynatma uyarısı
+        S.kaynatmaSure = 30; yH.id = 'magnum'; yH.dk = 90;
+        if (gEl) gEl.value = '10'; if (aaEl) aaEl.value = '';
+        mesajlar.length = 0; hopEkle();
+        __REG.ok('dk 90 > kaynatma 30: kabul + GÖRÜNÜR uyarı', mesajlar.some(m => /kaynatma süresinden/.test(m)));
+        // mineral 0 RED
+        setSekme('su'); if (typeof render === 'function') render();
+        const mn0 = S.suMineralleri.length;
+        const minEl = document.getElementById('yMinMiktar'); if (minEl) minEl.value = '0';
+        yMin.id = 'cacl2'; mesajlar.length = 0; mineralEkle();
+        __REG.ok('mineral 0: EKLENMEDİ + uyarı (0→1 ikamesi bitti)', S.suMineralleri.length === mn0 && mesajlar.some(m => />0/.test(m)));
+        // gelecek-tarihli pitching: '-3. gün' yerine anlamlı metin
+        const d = new Date(Date.now() + 3 * 864e5);
+        const ileri = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        S.brewLog = [{ tip: 'pitching', tarih: ileri, deger: '', id: 'p1' }];
+        setSekme('takvim'); if (typeof render === 'function') render();
+        const metin = document.getElementById('ekran') ? document.getElementById('ekran').innerText : document.body.innerText;
+        __REG.ok("gelecek pitching: 'gün SONRA' metni + negatif gün YOK (iki yazımda da)", /gün SONRA/.test(metin) && !/Ferman?tasyon[^\n]{0,15}-\d/.test(metin), (metin.match(/(Ferman?tasyon[^\n]{0,25}|gün SONRA)/) || [])[0]);
+      } finally { window.flash = eskiF; }
+      return __REG.al();
+    })
   }
 ];
 

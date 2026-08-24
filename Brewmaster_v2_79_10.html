@@ -8014,6 +8014,76 @@ window._bmPreboilGir = function(deger){
     if(typeof render === 'function') render();
   }catch(_e){ if(window.bmHataKaydet) bmHataKaydet('giris', _e, '_bmPreboilGir'); }
 };
+// ═══ SPRINT BE3 (BD F8 hattı): sayısal giriş kapıları — BC deseni ile TUTARLI ═══
+// Kural: aralık dışı REDDEDİLİR + NET uyarı + mevcut değer KORUNUR (render input'u S'ten geri çizer);
+// boş alan = alanın varsayılan semantiği (bilgi verilir). Sessiz kabul/ikame YASAK.
+// Aralıklar gerçek brewing pratiğini kapsar (muhafazakâr: meşru uçlar engellenmez).
+window._bmMashScGir = function(deger){
+  try{
+    var s = String(deger == null ? '' : deger).trim().replace(',', '.');
+    if(!s){ S.mashSc = 67; if(typeof flash === 'function') flash('Mash sıcaklığı boş — varsayılan 67°C alındı', 'ok'); render(); return; }
+    var v = parseFloat(s);
+    // [35,80]: 35-45 asit/protein dinlenmesi MEŞRU, 78-80 mash-out üstü; 80+ enzim ölümü/haşlama, 100 fiziksel saçma (BD F8-5: FG 1.041'e fırlıyordu)
+    if(!isFinite(v) || v < 35 || v > 80){ if(typeof flash === 'function') flash('⚠️ Mash sıcaklığı 35–80°C aralığında olmalı — mevcut ' + (S.mashSc || 67) + '°C korunuyor', 'err'); render(); return; }
+    S.mashSc = v; render();
+  }catch(_e){ if(window.bmHataKaydet) bmHataKaydet('giris', _e, '_bmMashScGir'); }
+};
+window._bmKaynatmaSureGir = function(deger){
+  try{
+    var s = String(deger == null ? '' : deger).trim();
+    if(!s){ S.kaynatmaSure = 60; if(typeof flash === 'function') flash('Kaynatma süresi boş — varsayılan 60 dk alındı', 'ok'); render(); return; }
+    var v = parseInt(s, 10);
+    // [15,240]: 15 dk raw-ale/kısa kaynatma ucu, 240 dk uzun-kaynatma (Scotch ale/dekoksiyon) ucu; negatif fiziksel imkansız (BD F8-7: pre-boil < post-boil üretiyordu)
+    if(!isFinite(v) || v < 15 || v > 240){ if(typeof flash === 'function') flash('⚠️ Kaynatma süresi 15–240 dk aralığında olmalı — mevcut ' + (S.kaynatmaSure || 60) + ' dk korunuyor', 'err'); render(); return; }
+    S.kaynatmaSure = v; render();
+  }catch(_e){ if(window.bmHataKaydet) bmHataKaydet('giris', _e, '_bmKaynatmaSureGir'); }
+};
+window._bmSpargeGir = function(deger){
+  try{
+    var s = String(deger == null ? '' : deger).trim().replace(',', '.');
+    if(!s){ S.spargeL = null; render(); return; } // boş = otomatik bölüşüm (mevcut '—' semantiği)
+    var v = parseFloat(s);
+    if(!isFinite(v) || v < 0 || v > 30){ if(typeof flash === 'function') flash('⚠️ Sparge 0–30 L aralığında olmalı (0 = bilinçli tam-hacim) — alan temizlendi', 'err'); S.spargeL = null; render(); return; }
+    S.spargeL = v;
+    // BD F8-6: alan absürdü gösterip plan sessizce %65'e düşüyordu — alan-tarafı görünür bilgi
+    if(v > 0 && v >= ((+S.hacim || 11) + 8) && typeof flash === 'function') flash('⚠️ ' + v + ' L sparge toplam su ihtiyacını aşıyor görünüyor — brewday planı %65 bölüşüme düşebilir', 'err');
+    render();
+  }catch(_e){ if(window.bmHataKaydet) bmHataKaydet('giris', _e, '_bmSpargeGir'); }
+};
+// SPRINT BE3-1 (BD F8-8) — PRIMING GÜVENLİK SINIRI (kaynaklı, uydurma değil):
+// · Standart 12oz/50cl şişe ~3.0 vol "güvenli" konsensüsü; şişeler 60-100 psi'de patlamaya başlar,
+//   50 psi güvenlik marjı 24°C'de ≈3.6 vol'e denk gelir; 4.5 vol MUTLAK üst sınır — üstü standart
+//   cam şişede PATLAMA riski (yaralanma). Kaynaklar:
+//   homebrewtalk.com/threads/bottling-priming-c02-volume-vs-bottle-pressure-limits.598264
+//   homebrewtalk.com/threads/maximum-safe-carbonation-for-bottling.104956
+//   homebrewtalk.com/threads/light-vs-heavy-glass-safe-levels-of-carbonation.671689 (~65-75 g cam / vol CO₂)
+// · Stil aralıkları: İngiliz cask 1.2-1.8 · çoğu ale 1.8-2.5 · Belçika 2.5-3.5 · Weizen 3.5-4.5
+//   (3.5+ YALNIZ kalın/ağır şişeyle meşru → kabul + sarı güvenlik uyarısı; reddedilmez).
+// GÜVENLİK DİLİ bilinçli sert (AJ/AN yumuşak-dil disiplini burada geçerli değil).
+window._bmPrimVolGir = function(deger){
+  try{
+    var s = String(deger == null ? '' : deger).trim().replace(',', '.');
+    if(!s){ S.primVol = 2.4; S._primVolAuto = false; if(typeof flash === 'function') flash('CO₂ hedefi boş — varsayılan 2.4 vol alındı', 'ok'); render(); return; }
+    var v = parseFloat(s);
+    if(!isFinite(v) || v < 1 || v > 4.5){
+      if(typeof flash === 'function') flash('⛔ ' + s + ' vol REDDEDİLDİ — 4.5 vol üstü karbonasyon standart cam şişede ŞİŞE PATLAMASI riski taşır (yaralanma tehlikesi). Aralık 1.0–4.5: çoğu ale 1.8-2.5 · Weizen 3.5-4.5 (kalın şişe). Mevcut ' + S.primVol + ' vol korunuyor', 'err');
+      render(); return;
+    }
+    S.primVol = v; S._primVolAuto = false;
+    if(v >= 3.5 && typeof flash === 'function') flash('⚠️ ' + v + ' vol YÜKSEK karbonasyon — yalnız kalın/ağır şişe kullan (Weizen/Belçika şişesi). Standart şişe ~3.0 vol üstünde patlayabilir', 'err');
+    render();
+  }catch(_e){ if(window.bmHataKaydet) bmHataKaydet('giris', _e, '_bmPrimVolGir'); }
+};
+window._bmPrimTempGir = function(deger){
+  try{
+    var s = String(deger == null ? '' : deger).trim();
+    if(!s){ S.primTemp = 18; if(typeof flash === 'function') flash('Şişeleme sıcaklığı boş — varsayılan 18°C alındı', 'ok'); render(); return; }
+    var v = parseInt(s, 10);
+    // [0,35]: 0-4°C cold-crash sonrası şişeleme MEŞRU (eski ||18 ikamesi 0'ı imkansız kılıyordu)
+    if(!isFinite(v) || v < 0 || v > 35){ if(typeof flash === 'function') flash('⚠️ Şişeleme sıcaklığı 0–35°C aralığında olmalı — mevcut ' + (S.primTemp || 18) + '°C korunuyor', 'err'); render(); return; }
+    S.primTemp = v; render();
+  }catch(_e){ if(window.bmHataKaydet) bmHataKaydet('giris', _e, '_bmPrimTempGir'); }
+};
 // I1: log girişinin GİRİŞ ZAMANI — ts (brewday) > 13-haneli id (logEkle id'si Date.now) >
 // tarih (yalnız legacy fallback; gün çözünürlüğü kaba). Tarih düzenlemesi id/ts'i DEĞİŞTİRMEZ:
 // pencere "ne zaman girildi"ye göredir, "hangi güne yazıldı"ya değil.
@@ -13401,7 +13471,7 @@ function rEditorTakvim(maya, maya2, tv){
         _gunSayaci = '<div style="display:flex;align-items:center;gap:8px;padding:7px 12px;background:var(--bg2);border-bottom:1px solid var(--bor)">'
           +'<span style="font-size:18px">⏱️</span>'
           +'<div>'
-            +'<div style="font-size:12px;font-weight:700;color:var(--kahve)">Fermentasyon '+_gun+'. Gün</div>'
+            +'<div style="font-size:12px;font-weight:700;color:var(--kahve)">'+(_gun>=0?('Fermentasyon '+_gun+'. Gün'):('📅 Pitching '+Math.abs(_gun)+' gün SONRA (gelecek tarihli kayıt)'))+'</div>'
             +'<div style="font-size:var(--fs-xs);color:var(--dim)">Pitching: '+_pE.tarih+'</div>'
           +'</div>'
         +'</div>';
@@ -13633,7 +13703,8 @@ function rEditorTakvim(maya, maya2, tv){
         }
       } else if(_pE){
         var _pG=_gF(_pE.tarih);
-        if(_pG>=4){_hat='📊 Pitchingden '+_pG+' gün geçti — ilk FG ölçümü zamanı!';_hBg='var(--ya)';_hBor='var(--yk)';_hRenk='var(--yk)';}
+        if(_pG<0){_hat='📅 Pitching '+Math.abs(_pG)+' gün sonra (gelecek tarihli kayıt) — planlanmış demleme.';} // SPRINT BE3 (BD F8-11): negatif gün metni
+        else if(_pG>=4){_hat='📊 Pitchingden '+_pG+' gün geçti — ilk FG ölçümü zamanı!';_hBg='var(--ya)';_hBor='var(--yk)';_hRenk='var(--yk)';}
         else{_hat='🧬 Fermentasyon '+_pG+'. günde — '+(_pG<2?'ilk 24-48 saat en aktif dönem.':'3-4. günde FG ölçümü başlayabilirsin.');}
       } else if(_bl.length===0){
         _hat='▶️ Brew günlüğüne başlamak için Pitching kaydı ekle.';
@@ -13827,7 +13898,7 @@ function rEditorTakvim(maya, maya2, tv){
         _faz='dryhop'; _durumBaslik='Dry Hop · '+_bugunGun+'. Gün'; _durumRenk='var(--yk)';
         _durumAlt='Pitching: '+_pTarihForUst;
       } else {
-        _faz='primary'; _durumBaslik='Primary Fermantasyon · '+_bugunGun+'. Gün'; _durumRenk='var(--ok)';
+        _faz='primary'; _durumBaslik=(_bugunGun>=0?('Primary Fermantasyon · '+_bugunGun+'. Gün'):('📅 Pitching '+Math.abs(_bugunGun)+' gün SONRA')); _durumRenk='var(--ok)'; // SPRINT BE3 (BD F8-11)
         _durumAlt='Pitching: '+_pTarihForUst+(maya?' · '+maya.ad:'');
       }
     } else {
@@ -15147,7 +15218,7 @@ function rEditorSurec(){
         <div style="font-size:var(--fs-xs);color:var(--dim);margin-top:3px">Hedef: ${preOGHedef.toFixed(3)} (${preHacim.toFixed(1)}L pre-boil)</div>
         <div style="display:flex;gap:6px;align-items:center;margin-top:6px">
           <span style="font-size:11px;color:var(--soluk);flex:1">💧 Sparge suyu <span style="color:var(--dim)">(opsiyonel)</span></span>
-          <input aria-label="Sparge suyu (L)" type="number" class="inp" style="width:74px;text-align:center;font-weight:700" placeholder="—" value="${S.spargeL!=null?S.spargeL:''}" min="0" max="20" step="0.5" onchange="S.spargeL=this.value!==''?parseFloat(this.value):null;render()">
+          <input aria-label="Sparge suyu (L)" type="number" class="inp" style="width:74px;text-align:center;font-weight:700" placeholder="—" value="${S.spargeL!=null?S.spargeL:''}" min="0" max="20" step="0.5" onchange="window._bmSpargeGir(this.value)">
           <span style="font-size:11px;color:var(--soluk)">L</span>
         </div>
         ${S.spargeL>0&&S.spargeL<3?`<div style="font-size:var(--fs-xs);color:#7A5020;margin-top:3px">💧 Sparge ${S.spargeL} L — düşük/atlanan sparge verimi düşürebilir (şekerin bir kısmı tahıl yatağında kalır).</div>`:''}
@@ -15245,7 +15316,7 @@ function rEditorSurec(){
     </div>
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:7px 10px;background:var(--kahve-bg);border-radius:8px;border:1px solid var(--kahve-border)">
       <span style="font-size:11px;color:var(--soluk);flex:1">⚗️ FG hesabı — ana mash:</span>
-      <input aria-label="Mash sıcaklığı (°C)" type="number" value="${_mSc}" min="60" max="76" step="0.5" onchange="S.mashSc=parseFloat(this.value);render()" style="width:60px;text-align:center;font-size:13px;font-weight:700;padding:3px 6px;border:1px solid var(--kahve-border);border-radius:6px;background:#fff;color:var(--kahve)">
+      <input aria-label="Mash sıcaklığı (°C)" type="number" value="${_mSc}" min="60" max="76" step="0.5" onchange="window._bmMashScGir(this.value)" style="width:60px;text-align:center;font-size:13px;font-weight:700;padding:3px 6px;border:1px solid var(--kahve-border);border-radius:6px;background:#fff;color:var(--kahve)">
       <span style="font-size:12px;color:var(--bakir);font-weight:600">°C</span>
     </div>
     <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;padding:7px 10px;background:var(--kahve-bg);border-radius:8px;border:1px solid var(--kahve-border);flex-wrap:wrap">
@@ -15273,7 +15344,7 @@ function rEditorSurec(){
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
       <div style="font-size:13px;font-weight:700;color:var(--kahve)">⏱️ Kaynatma</div>
       <div style="display:flex;align-items:center;gap:6px">
-        <input aria-label="Kaynatma süresi (dk)" type="number" value="${_kSure}" min="30" max="120" step="5" onchange="S.kaynatmaSure=parseInt(this.value);render()" style="width:55px;text-align:center;font-size:12px;padding:4px 6px;border:1px solid var(--bor);border-radius:6px;background:var(--card);color:var(--metin)">
+        <input aria-label="Kaynatma süresi (dk)" type="number" value="${_kSure}" min="30" max="120" step="5" onchange="window._bmKaynatmaSureGir(this.value)" style="width:55px;text-align:center;font-size:12px;padding:4px 6px;border:1px solid var(--bor);border-radius:6px;background:var(--card);color:var(--metin)">
         <span style="font-size:11px;color:var(--soluk)">dk</span>
       </div>
     </div>
@@ -15878,14 +15949,14 @@ ${batchOlcekKartHtml()}
   var _kartPriming = `<div class="kart">
       <div style="font-size:14px;font-weight:700;color:var(--metin);margin-bottom:12px">🍾 Priming / Şişeleme</div>
       <span class="etiket">Hedef CO₂ (vol)</span>
-      <input aria-label="Hedef CO₂ (vol)" type="number" class="inp" value="${S.primVol}" min="1.5" max="5" step=".1" style="margin-bottom:5px" onchange="S.primVol=parseFloat(this.value)||2.4;S._primVolAuto=false;render()">
+      <input aria-label="Hedef CO₂ (vol)" type="number" class="inp" value="${S.primVol}" min="1.5" max="5" step=".1" style="margin-bottom:5px" onchange="window._bmPrimVolGir(this.value)">
       ${_co2Range?"<div style='background:var(--sa);border:1px solid var(--cizgi-arac);border-radius:8px;padding:6px 10px;margin-bottom:8px'>"+"<div style='font-size:var(--fs-xs);color:var(--metin-soluk);margin-bottom:2px'>🎯 Stile Göre Tavsiye"+(S.stilTah?" — <b>"+S.stilTah+"</b>":"")+"</div>"+"<div style='display:flex;align-items:center;gap:8px'>"+"<div style='flex:1;background:var(--bg-sunken);border-radius:4px;height:6px;overflow:hidden'>"+"<div style='height:100%;background:var(--altin);border-radius:4px;width:"+Math.round((_co2Ideal-1.5)/(4.5-1.5)*100)+"%'></div>"+"</div>"+"<span style='font-size:11px;font-weight:700;color:var(--bakir)'>"+_co2Ideal+" vol</span>"+"</div>"+"<div style='font-size:var(--fs-xs);color:var(--metin-soluk);margin-top:2px'>Aralık: "+_co2Min+"–"+_co2Max+" vol"+"<button onclick='S.primVol="+_co2Ideal+";render()' style='margin-left:8px;background:var(--altin);color:#fff;border:none;border-radius:4px;padding:2px 8px;font-size:var(--fs-xs);cursor:pointer'>Uygula</button>"+"</div>"+"</div>":""}<div style="font-size:var(--fs-xs);color:var(--metin-soluk);margin-bottom:10px">Ale: 2.0–2.4 · Lager: 2.4–2.8 · Hefeweizen: 3.5–4.0 · Gose: 3.0–3.5</div>
       <span class="etiket">Priming Yöntemi</span>
       <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
         ${["Dekstroz","Beyaz Şeker","Sıvı CO₂ Şekeri"].map(y=>`<button class="btn" style="flex:1;padding:7px 8px;font-size:12px;border:1.5px solid ${(S.primYontem||'Dekstroz')===y?'var(--altin)':'var(--cizgi-arac)'};background:${(S.primYontem||'Dekstroz')===y?'var(--accent-soft)':'#fff'};color:${(S.primYontem||'Dekstroz')===y?'var(--bakir)':'var(--metin-soluk)'}" onclick="S.primYontem='${y}';render()">${y}</button>`).join("")}
       </div>
       <span class="etiket">Şişeleme Sıcaklığı (°C)</span>
-      <input aria-label="Şişeleme sıcaklığı (°C)" type="number" class="inp" value="${S.primTemp}" min="5" max="25" style="margin-bottom:14px" onchange="S.primTemp=parseInt(this.value)||18;render()">
+      <input aria-label="Şişeleme sıcaklığı (°C)" type="number" class="inp" value="${S.primTemp}" min="5" max="25" style="margin-bottom:14px" onchange="window._bmPrimTempGir(this.value)">
       <div style="background:var(--sa);border:1px solid var(--cizgi-arac);border-left:4px solid var(--sk);border-radius:10px;padding:16px;text-align:center">
         <div style="font-size:var(--fs-xs);color:var(--bakir);font-weight:700;letter-spacing:1.5px;text-transform:uppercase">${hacim}L için ${S.primYontem||'Dekstroz'}</div>
         <div style="font-size:50px;font-weight:600;color:var(--bakir);line-height:1.1;font-family:var(--font-display);margin-top:4px">${(()=>{const y=S.primYontem||'Dekstroz';if(y==='Sıvı CO₂ Şekeri')return (pg*1.35).toFixed(0)+'mL';if(y==='Beyaz Şeker')return (pg*0.9575).toFixed(0)+'g';return pg.toFixed(0)+'g';})()}</div>
@@ -16832,7 +16903,7 @@ function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
       <span class="etiket">Sistem Verimi</span>
       <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap">
         ${[55,60,61,62,65,70].map(v=>`<button class="btn" style="flex:1;min-width:50px;padding:7px 0;border:1.5px solid ${S.verim===v?"var(--altin)":"var(--bor)"};background:${S.verim===v?"var(--sa)":"var(--card)"};color:${S.verim===v?"var(--bakir)":"var(--soluk)"};font-weight:${S.verim===v?700:500}" onclick="S.verim=${v};render()">%${v}</button>`).join("")}
-        <input aria-label="Verim (%)" type="number" class="inp" style="width:70px;text-align:center;font-weight:${![55,60,61,62,65,70].includes(S.verim)?700:500};${![55,60,61,62,65,70].includes(S.verim)?'border:1.5px solid var(--altin);background:var(--sa);color:var(--bakir);':''}" placeholder="Özel" min="30" max="95" value="${![55,60,61,62,65,70].includes(S.verim)?S.verim:''}" onchange="var v=parseInt(this.value);if(v>=30&&v<=95){S.verim=v;render();}">
+        <input aria-label="Verim (%)" type="number" class="inp" style="width:70px;text-align:center;font-weight:${![55,60,61,62,65,70].includes(S.verim)?700:500};${![55,60,61,62,65,70].includes(S.verim)?'border:1.5px solid var(--altin);background:var(--sa);color:var(--bakir);':''}" placeholder="Özel" min="30" max="95" value="${![55,60,61,62,65,70].includes(S.verim)?S.verim:''}" onchange="var v=parseInt(this.value);if(v>=30&&v<=95){S.verim=v;render();}else if(this.value!==''){flash('⚠️ Verim %30-95 aralığında olmalı — mevcut %'+S.verim+' korunuyor','err');render();}">
       </div>
       ${typeof _bmVerimChipHtml==='function'?_bmVerimChipHtml():''}
       <div style="margin-bottom:12px">
@@ -17180,7 +17251,7 @@ function rEditorHop(og, ibu, seciHop){
         ${ekO}
         <div style="margin-bottom:10px">
           <span class="etiket">Özel Alpha Asit % — Opsiyonel</span>
-          <input aria-label="Alfa asit (%)" type="number" id="yhAA" class="inp" placeholder="Boş = varsayılan (${seciHop?.aa||"?"}%) — paketindeki farklıysa gir" step=".1" min="1" max="30" value="${yH.cAA||""}" onchange="yH.cAA=this.value?parseFloat(this.value):null">
+          <input aria-label="Alfa asit (%)" type="number" id="yhAA" class="inp" placeholder="Boş = varsayılan (${seciHop?.aa||"?"}%) — paketindeki farklıysa gir" step=".1" min="1" max="30" value="${yH.cAA||""}" onchange="var v=this.value?parseFloat(this.value):null;if(v!=null&&(!isFinite(v)||v<1||v>30)){flash('⚠️ Alfa asit %1-30 aralığında olmalı — katalog değeri kullanılacak','err');this.value='';yH.cAA=null;}else yH.cAA=v">
         </div>
         <button class="btn" style="background:var(--yk);color:var(--ya);width:100%;margin-bottom:6px;padding:10px" onclick="hopEkle()">${yH._editIdx!=null?'✓ Güncelle':'+ Hop Ekle'}</button>${yH._editIdx!=null?'<button class="btn" style="background:none;border:1px solid var(--bor);color:var(--soluk);width:100%;margin-bottom:6px;padding:8px" onclick="hopDuzenleVazgec()">Vazgeç</button>':''}
       </div>
@@ -19814,7 +19885,7 @@ try {
     var _fgLG = _blG.filter(function(x){return x.tip==='fg_olcum'&&x.deger;});
     var _sonG = _blG[_blG.length-1];
     var _satirlar = '';
-    if(_gunG!==null) _satirlar += '<div style="font-size:12px;font-weight:700;color:var(--kahve);margin-bottom:6px;font-family:var(--font-display)">⏱️ Fermentasyon '+_gunG+'. Günde</div>';
+    if(_gunG!==null) _satirlar += '<div style="font-size:12px;font-weight:700;color:var(--kahve);margin-bottom:6px;font-family:var(--font-display)">'+(_gunG>=0?('⏱️ Fermentasyon '+_gunG+'. Günde'):('📅 Pitching '+Math.abs(_gunG)+' gün SONRA (gelecek tarihli kayıt)'))+'</div>'; // SPRINT BE3 (BD F8-11): negatif gün metni
     // Son kayıt FG ise Son FG ayrı gösterme — redundant
     var _sonIsFG = _sonG && _sonG.tip==='fg_olcum';
     if(_fgLG.length && !_sonIsFG) _satirlar += '<div style="font-size:11px;color:var(--soluk);margin-bottom:3px">📊 Son FG: <b>'+_fgLG[_fgLG.length-1].deger+'</b> — '+_fgLG[_fgLG.length-1].tarih+'</div>';
@@ -25086,9 +25157,13 @@ if(typeof document!=='undefined'&&!window.__bmAramaOutside){window.__bmAramaOuts
 
 function maltEkle(){
   const id=yM.id;
-  const kg=parseFloat(document.getElementById("ymKg")?.value)||1;
+  // SPRINT BE3 (BD F8-1): boş/0 kg sessizce 1 kg oluyordu, negatif sessizce yutuluyordu — reddet + NET uyarı
+  const _kgRaw=parseFloat(document.getElementById("ymKg")?.value);
+  if(!isFinite(_kgRaw)||_kgRaw<=0){flash("Geçerli malt miktarı gir (kg > 0)","err");return;}
+  if(_kgRaw>50){flash("⚠️ "+_kgRaw+" kg ev ölçeği için gerçekçi değil (üst sınır 50 kg)","err");return;}
+  const kg=_kgRaw;
   const marka=(document.getElementById("ymMarka")?.value||"").trim();
-  if(!id||kg<=0)return;
+  if(!id){flash("Önce listeden bir malt seç","err");return;}
   const ml=MALTLAR.find(x=>x&&x.id===id);
   // Aynı malt zaten varsa kg'ları birleştir (ayrı satır olarak 2 kez girmeyi önle)
   const _mevcutIdx=S.maltlar.findIndex(m=>m&&m.id===id&&(m.marka||"")===marka);
@@ -25107,12 +25182,21 @@ function maltEkle(){
 function hopEkle(){
   const id=yH.id;
   const _rawG=parseFloat(document.getElementById("yhG")?.value);
-  const g=isNaN(_rawG)?15:_rawG;
-  const cAA=document.getElementById("yhAA")?.value?parseFloat(document.getElementById("yhAA").value):null;
+  // SPRINT BE3 (BD F8-2): boş gram sessizce 15 g oluyordu — reddet + uyarı
+  if(!isFinite(_rawG)){flash("Hop gramı gir — boş bırakılamaz","err");return;}
+  const g=_rawG;
+  let cAA=document.getElementById("yhAA")?.value?parseFloat(document.getElementById("yhAA").value):null;
+  // SPRINT BE3 (BD F8-3): özel AA [1,30] dışı REDDEDİLİR (AA=-5 negatif IBU, AA=90 → 566 IBU üretiyordu).
+  // Boş = katalog değeri (mevcut doğru davranış, BD çürütmesinde onaylı). Üst 30: ticari pelletler ~2-20,
+  // süper-alfa (Polaris) ~23; 30 üstü pellet gerçekçi değil.
+  if(cAA!=null&&(!isFinite(cAA)||cAA<1||cAA>30)){flash("⚠️ Alfa asit %1-30 aralığında olmalı — katalog değeri ("+((HOPLAR.find(x=>x&&x.id===id)||{}).aa||"?")+"%) kullanılacak","err");cAA=null;}
   if(g<=0){flash("Geçerli gram gir (>0)","err");return;}
   if(g>500){flash("Hop 500g üstü olamaz","err");return;}
   const hp=HOPLAR.find(x=>x&&x.id===id);
   if(!id||!hp){flash("Önce listeden bir hop seç","err");return;}
+  // SPRINT BE3 (BD F8-4): kaynatmadan uzun hop süresi sessizce kabul ediliyordu — kabul + GÖRÜNÜR uyarı
+  // (reddetme değil: kullanıcı kaynatma süresini sonradan uzatabilir; IBU hesabına BİLEREK dokunulmadı)
+  if(yH.tur==="boil"&&isFinite(+yH.dk)&&(+yH.dk)>((+S.kaynatmaSure)||60)){flash("⚠️ Hop süresi ("+yH.dk+" dk) kaynatma süresinden ("+((+S.kaynatmaSure)||60)+" dk) uzun — süreyi veya kaynatmayı düzelt","err");}
   // Whirlpool ise sıcaklık; Dry hop ise gün; form her hop için
   const _obj={id,g,dk:yH.dk,tur:yH.tur,cAA,form:yH.form||"pellet",_ad:hp?hp.ad:id};
   if(yH.tur==="whirlpool") _obj.whT=yH.whT!=null?yH.whT:85;
@@ -25124,8 +25208,10 @@ function hopEkle(){
 }
 function mineralEkle(){
   const id=document.getElementById("yMinId")?.value||yMin.id;
-  const miktar=parseFloat(document.getElementById("yMinMiktar")?.value)||1;
-  if(miktar<=0)return;
+  // SPRINT BE3 (BD F8-10): 0 girişi ||1 yüzünden sessizce 1'e dönüyordu (guard ölü koddu) — reddet + uyarı
+  const _mRaw=parseFloat(document.getElementById("yMinMiktar")?.value);
+  if(!isFinite(_mRaw)||_mRaw<=0){flash("Geçerli mineral miktarı gir (>0 g)","err");return;}
+  const miktar=_mRaw;
   S.suMineralleri.push({id,miktar});
   render();
 }
@@ -25224,11 +25310,20 @@ function stokSecimGuncelle(val){
 
 function stokEkle(){
   const ad=(document.getElementById("stokAd")?.value||"").trim();
-  const miktar=parseFloat(document.getElementById("stokMiktar")?.value)||0;
+  // SPRINT BE3 (BD F8-9): negatif miktar/eşik sessizce kabul ediliyor, 'abc' 0'a dönüyordu — reddet + uyarı.
+  // Boş miktar = 0 (tükenmiş kalem kaydı MEŞRU); eşik 0/boş = bildirim kapalı (bilgi verilir, _stokDusukSync uyari>0 şartı).
+  const _mikStr=(document.getElementById("stokMiktar")?.value||"").trim();
+  const _mikRaw=parseFloat(_mikStr);
+  if(_mikStr!==''&&(!isFinite(_mikRaw)||_mikRaw<0)){flash("Geçerli stok miktarı gir (0 veya üstü)","err");return;}
+  const miktar=(_mikStr!==''&&isFinite(_mikRaw))?_mikRaw:0;
   const birim=document.getElementById("stokBirim")?.value||"g";
   const g=document.getElementById("stokGrup")?.value||"Diğer";
-  const uyari=parseFloat(document.getElementById("stokUyari")?.value)||0;
-  if(!ad)return;
+  const _uyStr=(document.getElementById("stokUyari")?.value||"").trim();
+  const _uyRaw=parseFloat(_uyStr);
+  if(_uyStr!==''&&(!isFinite(_uyRaw)||_uyRaw<0)){flash("Geçerli uyarı eşiği gir (0 = bildirim kapalı)","err");return;}
+  const uyari=(_uyStr!==''&&isFinite(_uyRaw))?_uyRaw:0;
+  if(_uyStr!==''&&_uyRaw===0){flash("ℹ️ Eşik 0 — bu kalem için düşük-stok bildirimi KAPALI","ok");}
+  if(!ad){flash("Stok adı gir","err");return;}
   const marka=(document.getElementById("stokMarka")?.value||"").trim();
   const adTam = marka ? ad+" ("+marka+")" : ad;
   var rec = {id:Date.now().toString(),ad:adTam,miktar,birim,g,uyari};
@@ -27317,6 +27412,18 @@ function logEkle(){
   const degerEl=document.getElementById('logDeger');
   if(!tipEl||!tarihEl){flash('Form elemanı yok!','hata');return;}
   if(!tarihEl.value){flash('Tarih seçin!','hata');return;}
+  // SPRINT BE3 (BD F8-11): tarih kronolojisi artık GÖRÜNÜR. Gelecek tarih REDDEDİLMEZ (gelecek şişeleme
+  // planlaması meşru — 'Şişeleme planlandı' akışı bunu destekliyor) ama bilgi verilir; ters kronoloji uyarılır.
+  var _krUyari=null; // sona ertelenir — 'Eklendi' flash'ı tarafından ezilmesin (son flash görünür)
+  try{
+    var _btT=new Date(); _btT.setHours(0,0,0,0);
+    var _giT=new Date(tarihEl.value+'T00:00:00');
+    if(isFinite(_giT.getTime())&&_giT.getTime()>_btT.getTime()) _krUyari=['📅 Gelecek tarihli kayıt ('+tarihEl.value+') — planlama için normal, yanlışsa düzenle','ok'];
+    if(tipEl.value==='siseleme'){
+      var _sonP=(S.brewLog||[]).filter(function(x){return x&&x.tip==='pitching'&&x.tarih;}).pop();
+      if(_sonP&&tarihEl.value<_sonP.tarih) _krUyari=['⚠️ Şişeleme tarihi pitching\'den ('+_sonP.tarih+') ÖNCE — kronoloji ters, kontrol et','err'];
+    }
+  }catch(_krE){}
   if(!S.brewLog)S.brewLog=[];
   // Düzenleme modu
   const _hiEl=document.getElementById('logDuzenleIdx');
@@ -27342,6 +27449,7 @@ function logEkle(){
     try{ if(window._brewSonucTamamla) _brewSonucTamamla(S, (typeof _editId!=='undefined'?_editId:null)); }catch(_bst2){if(window.bmHataKaydet)bmHataKaydet('persist',_bst2,'logEkle/sonucTamamla');}
     logDuzenleSifirla();
     if(S.biraAd&&S.biraAd.trim())tarifeKaydet(); else _bmAdsizLogKaydet(); // SPRINT BE1-3
+    if(_krUyari) flash(_krUyari[0],_krUyari[1]); // SPRINT BE3: kronoloji uyarısı düzenleme yolunda da
     return;
   }
   const _tip=tipEl.value;
@@ -27362,6 +27470,7 @@ function logEkle(){
   if(S.biraAd&&S.biraAd.trim()) flash('Eklendi: '+_tip+' ('+S.brewLog.length+' kayıt)');
   else flash('Eklendi: '+_tip); // SPRINT BE1-3: adsız dalın kalıcılık mesajı aşağıdaki gerçek-kayıt bloğunda (eski J8 uyarısı yalnız kayıt BAŞARISIZSA döner)
   if(_bcMesaj) flash(_bcMesaj[0],_bcMesaj[1]); // BC uyarısı/bilgisi 'Eklendi'yi ezsin (son flash görünür)
+  if(_krUyari) flash(_krUyari[0],_krUyari[1]); // SPRINT BE3: kronoloji bilgisi/uyarısı en sona
   S.brewLog.sort((a,b)=>a.tarih.localeCompare(b.tarih));
   // FG ölçümü girilince header'ı güncelle
   if(_tip==='fg_olcum'&&_deger){
