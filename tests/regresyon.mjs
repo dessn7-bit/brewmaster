@@ -4690,6 +4690,76 @@ const CASELER = [
       div.remove();
       return __REG.al();
     })
+  },
+
+  // ── SPRINT BC: gravity giriş formatı toleransı + sessiz reddetme sonu (Kaan'ın "1054" vakası) ──
+  {
+    kod: 'BC1-NORM', ad: '_sgNormalize matrisi: 1.054 aynen · 1054 binde · 54 puan · belirsizler (5.5/0.5/1.54/54.5) REDDEDİLİR · _sgNum (I2) DEĞİŞMEDİ',
+    calistir: (page) => page.evaluate(() => {
+      const N = window._sgNormalize;
+      __REG.ok('1.054 → aynen', N('1.054').v === 1.054 && N('1.054').donusum === null);
+      __REG.ok('1054 → 1.054 (binde)', N('1054').v === 1.054 && N('1054').donusum === 'binde');
+      __REG.ok('54 → 1.054 (puan)', N('54').v === 1.054 && N('54').donusum === 'puan');
+      __REG.ok('12 → 1.012 (FG puanı)', N('12').v === 1.012);
+      __REG.ok('1,054 → virgül toleransı', N('1,054').v === 1.054);
+      __REG.ok('5.5 REDDEDİLİR (ondalıklı puan belirsiz)', N('5.5').v === null && N('5.5').neden === 'aralik');
+      __REG.ok('0.5 REDDEDİLİR', N('0.5').v === null);
+      __REG.ok('1.54 REDDEDİLİR (pencere dışı — yazım hatası maskelenmez)', N('1.54').v === null);
+      __REG.ok('54.5 REDDEDİLİR (ondalıklı puan)', N('54.5').v === null);
+      __REG.ok('abc → bozuk', N('abc').v === null && N('abc').neden === 'bozuk');
+      __REG.ok('boş → bos', N('').v === null && N('').neden === 'bos');
+      // I2 KİLİDİ: _sgNum aralık kapısı AYNEN — 1054 hâlâ null (normalize İÇ yollara sızmadı)
+      __REG.ok('I2 korundu: _sgNum(1054)=null', _sgNum('1054') === null);
+      __REG.ok('I2 korundu: _sgNum(1.054)=1.054', _sgNum('1.054') === 1.054);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BC2-YUZEY', ad: 'üç yüzeyde tutarlı: logEkle 1054→1.054 kaydeder+ogManuel dolar; bozuk değer kayıt tutulur+UYARI (sessiz yutma yok); editör alanı + brewday inline aynı',
+    calistir: (page) => page.evaluate(() => {
+      const id = __REG.yeniKayit('REGTEST BC2', {});
+      // flash spy — sessiz yutma bitti iddiası ölçülebilir olsun
+      const mesajlar = [];
+      const eskiFlash = window.flash;
+      window.flash = function(m, t){ mesajlar.push(String(m)); try{ return eskiFlash.apply(this, arguments); }catch(_e){} };
+      try {
+        // 1) logEkle yüzeyi — DOM formu üzerinden (gerçek yol)
+        setSekme('takvim');
+        if (typeof render === 'function') render();
+        const tipEl = document.getElementById('logTip'), tarihEl = document.getElementById('logTarih'), degerEl = document.getElementById('logDeger');
+        __REG.ok('log formu DOM\'da', !!tipEl && !!tarihEl && !!degerEl);
+        tipEl.value = 'og_olcum'; tarihEl.value = '2026-08-24'; degerEl.value = '1054';
+        logEkle();
+        const kayit1 = (S.brewLog || []).find(e => e && e.tip === 'og_olcum');
+        __REG.ok('logEkle: 1054 → "1.054" olarak KAYDEDİLDİ', !!kayit1 && kayit1.deger === '1.054', kayit1 && kayit1.deger);
+        __REG.ok('logEkle: ogManuel DOLDU (hesaba akıyor)', S.ogManuel === 1.054, String(S.ogManuel));
+        __REG.ok('logEkle: dönüşüm bilgisi verildi', mesajlar.some(m => m.indexOf('1054') >= 0 && m.indexOf('1.054') >= 0));
+        // 2) bozuk değer: kayıt tutulur ama UYARI verilir + hesap kirlenmez
+        mesajlar.length = 0;
+        tipEl.value = 'fg_olcum'; tarihEl.value = '2026-08-24'; degerEl.value = '5.5';
+        logEkle();
+        const kayit2 = (S.brewLog || []).find(e => e && e.tip === 'fg_olcum');
+        __REG.ok('bozuk değer: kayıt TUTULDU (veri silinmez)', !!kayit2 && kayit2.deger === '5.5');
+        __REG.ok('bozuk değer: fgManuel KİRLENMEDİ', !S.fgManuel, String(S.fgManuel));
+        __REG.ok('bozuk değer: UYARI verildi (sessiz yutma bitti)', mesajlar.some(m => m.indexOf('anlaşılamadı') >= 0), mesajlar.join('|').slice(0, 80));
+        // 3) editör alanı yüzeyi
+        mesajlar.length = 0;
+        _bmSgManuelGir('og', '1055');
+        __REG.ok('editör: 1055 → ogManuel 1.055', S.ogManuel === 1.055, String(S.ogManuel));
+        _bmSgManuelGir('fg', '12');
+        __REG.ok('editör: 12 → fgManuel "1.012"', S.fgManuel === '1.012', String(S.fgManuel));
+        _bmSgManuelGir('og', '5.5');
+        __REG.ok('editör: 5.5 → ogManuel BOŞ + uyarı', S.ogManuel === null && mesajlar.some(m => m.indexOf('anlaşılamadı') >= 0));
+        // 4) brewday inline yüzeyi — normalize state'e akar, bozukta mevcut Geçersiz-SG uyarısı korunur
+        window._brewday = window._brewday || {}; window._brewday.olcum = null;
+        _bdOlcumGir('og', 'sg', '1054');
+        __REG.ok('brewday inline: 1054 → 1.054 state\'e', Math.abs(_bdOlcum().ogSG - 1.054) < 1e-9, String(_bdOlcum().ogSG));
+        window._brewday.olcum = null;
+        _bdOlcumGir('og', 'sg', '5.5');
+        __REG.ok('brewday inline: 5.5 HAM kalır → mevcut Geçersiz-SG uyarısı devrede', _bdOlcum().ogSG === 5.5 && /Geçersiz SG/.test(_bdOlcum().ogUyari || ''), (_bdOlcum().ogUyari || '').slice(0, 40));
+      } finally { window.flash = eskiFlash; }
+      return __REG.al();
+    })
   }
 ];
 

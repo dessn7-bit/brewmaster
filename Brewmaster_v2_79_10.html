@@ -7956,6 +7956,44 @@ window._brewSonucTamamla = function(s, rid){
 // >1.000 idi (diastaticus FG 0.998 donmuyordu), okuma >0.990 strict idi (0.990 → "—").
 var _SG_MIN = 0.990, _SG_MAX = 1.200;
 function _sgNum(v){ var f = parseFloat(v); return (f >= _SG_MIN && f <= _SG_MAX) ? Math.round(f*1000)/1000 : null; }
+// SPRINT BC1: gravity GİRİŞ normalizasyonu — _sgNum'un ÖNÜNDE, yalnız giriş yüzeylerinde
+// (log formu, editör ölçüm alanları, brewday inline). I2 tek-aralık kapısı _sgNum DEĞİŞMEDİ;
+// iç okuma/hesap yolları bu fonksiyonu görmez. Kanıt vakası: Kaan gerçek OG'sini "1054" girdi,
+// kayıt kabul edildi ama _sgNum reddettiği için hesaplara hiç akmadı ve UYARI da verilmedi.
+// Homebrewer yazımları — YALNIZ KESİN dönüşümler:
+//   1.054 → aynen ([0.990,1.200])
+//   1054  → ÷1000 ([990,1200]: hiçbir gerçek SG bu aralıkta olamaz, tek makul yorum binde yazımı)
+//   54    → 1+n/1000 (puan; YALNIZ TAM SAYI [2,200] — '5.5'/'54.5' gibi ondalıklar BİLEREK
+//           dönüştürülmez: puan kısaltması pratikte tam sayıdır, ondalıklısı belirsizdir)
+//   1.54  → hiçbir pencereye girmez (1.200<1.54<990) → dönüşüm YOK, uyarıyla reddedilir
+//           (yazım hatası olasılığı dönüşümle maskelenmez).
+function _sgNormalize(v){
+  var s = String(v == null ? '' : v).trim().replace(',', '.');
+  if(!s) return { v: null, neden: 'bos' };
+  var n = parseFloat(s);
+  if(!isFinite(n)) return { v: null, neden: 'bozuk' };
+  if(n >= _SG_MIN && n <= _SG_MAX) return { v: Math.round(n * 1000) / 1000, donusum: null };
+  if(n >= 990 && n <= 1200) return { v: Math.round(n) / 1000, donusum: 'binde' };
+  if(n >= 2 && n <= 200 && /^\d+$/.test(s)) return { v: Math.round(1000 + n) / 1000, donusum: 'puan' };
+  return { v: null, neden: 'aralik' };
+}
+// SPRINT BC2: editör "Ölçülen OG/FG" alanları — eskiden parseFloat/ham atamaydı (doğrulamasız,
+// sessiz): 1054 girilir, S.ogManuel=1054 olur, tüm _sgNum okumaları sessizce reddederdi.
+// Artık: normalize + kabul; anlaşılamayan değer ALINMAZ + net uyarı (sessiz yutma YASAK).
+window._bmSgManuelGir = function(alan, deger){
+  try{
+    var s = String(deger == null ? '' : deger).trim();
+    if(!s){ if(alan === 'og') S.ogManuel = null; else S.fgManuel = null; return; }
+    var nz = _sgNormalize(s);
+    if(nz.v != null){
+      if(alan === 'og') S.ogManuel = nz.v; else S.fgManuel = String(nz.v);
+      if(nz.donusum && typeof flash === 'function') flash('📏 ' + s + ' → ' + nz.v + ' olarak alındı', 'ok');
+    } else {
+      if(alan === 'og') S.ogManuel = null; else S.fgManuel = null;
+      if(typeof flash === 'function') flash('⚠️ "' + s + '" gravity olarak anlaşılamadı (0.990–1.200) — alan boş bırakıldı', 'err');
+    }
+  }catch(_e){ if(window.bmHataKaydet) bmHataKaydet('giris', _e, '_bmSgManuelGir'); }
+};
 // I1: log girişinin GİRİŞ ZAMANI — ts (brewday) > 13-haneli id (logEkle id'si Date.now) >
 // tarih (yalnız legacy fallback; gün çözünürlüğü kaba). Tarih düzenlemesi id/ts'i DEĞİŞTİRMEZ:
 // pencere "ne zaman girildi"ye göredir, "hangi güne yazıldı"ya değil.
@@ -7978,7 +8016,7 @@ function _batchSinir(bl, snapTs){
   });
   return s;
 }
-window._sgNum=_sgNum; window._logGirisTs=_logGirisTs; window._batchSinir=_batchSinir;
+window._sgNum=_sgNum; window._sgNormalize=_sgNormalize; window._logGirisTs=_logGirisTs; window._batchSinir=_batchSinir;
 // ═══ SPRINT G (K1+M8) — DONMUŞ DEMLEME VERİSİ KORUMASI ═══════════════════════
 // Donmuş/geçmiş alanlar hiçbir commit (bayat editör-S → KR) veya sync (LWW) yolundan
 // kaybolamaz. KR OTORİTEDİR: yazıcılar (brewday/günlük/✏️ düzeltme) KR'ye aynalı yazar;
@@ -15101,7 +15139,7 @@ function rEditorSurec(){
           <input aria-label="Gerçek OG" type="number" class="inp" style="flex:1;font-weight:700;font-size:14px;text-align:center"
             placeholder="${_ogHsp}" value="${S.ogManuel||""}"
             min="1.001" max="1.200" step="0.001"
-            onchange="S.ogManuel=this.value?parseFloat(this.value):null;window._brewSonucTamamla&&window._brewSonucTamamla(S);render()">
+            onchange="window._bmSgManuelGir('og',this.value);window._brewSonucTamamla&&window._brewSonucTamamla(S);render()">
           ${_ogKyn==="manuel"?`<button class="btn" style="background:none;color:var(--kk);font-size:12px;padding:2px 6px" onclick="S.ogManuel=null;render()" aria-label="Manuel OG değerini temizle" title="Temizle">✕</button>`:""}
         </div>
         <div style="font-size:var(--fs-xs);color:var(--dim);margin-top:3px">Reçete: ${_ogHsp}</div>
@@ -15112,7 +15150,7 @@ function rEditorSurec(){
           <input aria-label="Gerçek FG" type="number" class="inp" style="flex:1;font-weight:700;font-size:14px;text-align:center"
             placeholder="${_fgHsp}" value="${S.fgManuel||""}"
             min="1.000" max="1.200" step="0.001"
-            onchange="S.fgManuel=this.value?this.value:null;window._brewSonucTamamla&&window._brewSonucTamamla(S);render()">
+            onchange="window._bmSgManuelGir('fg',this.value);window._brewSonucTamamla&&window._brewSonucTamamla(S);render()">
           ${_fgKyn==="manuel"?`<button class="btn" style="background:none;color:var(--kk);font-size:12px;padding:2px 6px" onclick="S.fgManuel=null;render()" aria-label="Manuel FG değerini temizle" title="Temizle">✕</button>`:""}
         </div>
         <div style="font-size:var(--fs-xs);color:var(--dim);margin-top:3px">Reçete: ${_fgHsp}</div>
@@ -15432,7 +15470,7 @@ function rEditorMaya(og, fg, abv, maya, maya2, fgKaynak, fgHesap){
           placeholder="${fgHesap.toFixed(3)}"
           value="${S.fgManuel||""}"
           min="1.000" max="${(og-0.001).toFixed(3)}" step="0.001"
-          onchange="S.fgManuel=this.value?this.value:null;window._brewSonucTamamla&&window._brewSonucTamamla(S);render()">
+          onchange="window._bmSgManuelGir('fg',this.value);window._brewSonucTamamla&&window._brewSonucTamamla(S);render()">
         <div style="flex:1;font-size:11px;color:var(--soluk)">
           ${fgKaynak==="manuel"?"Gerçek FG kullanılıyor. ABV ve takvim buna göre.":"Fermantasyon durursa veya ölçüm yaptıysan gir."}
         </div>
@@ -21922,8 +21960,20 @@ window._bdDuzeltHesapla=function(raw,tC){
 window._bdOlcumGir=function(tur,alan,deger){
   try{
     const o=_bdOlcum();
-    let v=(deger==null||String(deger).trim()==='')?null:parseFloat(String(deger).replace(',','.'));
-    if(v!=null&&!isFinite(v))v=null;
+    // SPRINT BC1: SG alanında giriş normalizasyonu (1054/54 → 1.054). Anlaşılamayan değer HAM bırakılır
+    // → commit'teki mevcut "⚠️ Geçersiz SG" uyarısı AYNEN çalışır (bu yüzeyde sessiz yutma zaten yoktu).
+    // °C alanı normalize EDİLMEZ (sıcaklık, gravity değil).
+    let v=null;
+    const _sTrim=(deger==null)?'':String(deger).trim();
+    if(_sTrim!==''){
+      if(alan==='sg' && typeof _sgNormalize==='function'){
+        const _nzBd=_sgNormalize(_sTrim);
+        v=(_nzBd.v!=null)?_nzBd.v:parseFloat(_sTrim.replace(',','.'));
+      } else {
+        v=parseFloat(_sTrim.replace(',','.'));
+      }
+      if(v!=null&&!isFinite(v))v=null;
+    }
     if(tur==='pb'){
       if(alan==='sg'){o.pbSG=v;_bdPreboilCommit(true);}
       else{o.pbC=v;if(o.pbSG!=null)_bdPreboilCommit(false);else brewdayRender();}
@@ -27114,7 +27164,14 @@ function logEkle(){
     var _eskiTip=(S.brewLog[_editIdx]&&S.brewLog[_editIdx].tip)||'';
     // SPRINT I I5: brewday_* tipleri logTip select'inde yok → düzenleme tip'i boşaltıp profil
     // start-çıpasını kaybediyordu. Orijinal tip korunur (select'e brewday seçeneği eklemekten az invaziv).
-    const _tip2=(_eskiTip.indexOf('brewday_')===0 ? _eskiTip : (tipEl.value||_eskiTip)), _deg2=(degerEl?.value||'').trim();
+    const _tip2=(_eskiTip.indexOf('brewday_')===0 ? _eskiTip : (tipEl.value||_eskiTip)); let _deg2=(degerEl?.value||'').trim();
+    // SPRINT BC: düzenleme yolunda da aynı normalize + uyarı (Muzo'nun mevcut "1054" kaydı
+    // buradan düzeltilecek: aç → kaydet → 1.054 olur)
+    if((_tip2==='og_olcum'||_tip2==='fg_olcum') && _deg2 && typeof _sgNormalize==='function'){
+      var _bcNz2=_sgNormalize(_deg2);
+      if(_bcNz2.v!=null){ if(_bcNz2.donusum){ flash('📏 '+_deg2+' → '+_bcNz2.v+' olarak kaydedildi','ok'); _deg2=String(_bcNz2.v); } }
+      else if(_bcNz2.neden!=='bos') flash('⚠️ "'+_deg2+'" gravity olarak anlaşılamadı (0.990–1.200) — kayıt tutuldu ama HESAPLARA GİRMEYECEK','hata');
+    }
     var _leskiK=_logAnahtar(S.brewLog[_editIdx]); // SPRINT G K1: düzenleme anahtarı değişirse KR'deki eski kopya birleşimde çift üretmesin
     S.brewLog[_editIdx]=Object.assign({},S.brewLog[_editIdx],{tip:_tip2,tarih:tarihEl.value,deger:_deg2,not:(notEl?.value||'').trim()});
     try{ if(_leskiK && typeof _editId!=='undefined' && _editId){ var _ledit=Array.isArray(KR)?KR.find(function(k){return k&&k.id===_editId;}):null; if(_ledit && Array.isArray(_ledit.brewLog)){ _ledit.brewLog=_ledit.brewLog.filter(function(e){ return !e || _logAnahtar(e)!==_leskiK; }); } } }catch(_lee){if(window.bmHataKaydet)bmHataKaydet('persist',_lee,'logEkle/KR-ayna');}
@@ -27127,10 +27184,23 @@ function logEkle(){
     return;
   }
   const _tip=tipEl.value;
-  const _deger=(degerEl?.value||'').trim();
+  let _deger=(degerEl?.value||'').trim();
+  // SPRINT BC: gravity girişi normalize (1054/54 → 1.054) + sessiz reddetme BİTTİ.
+  // Kayıt her durumda tutulur (kullanıcı verisi silinmez/reddedilmez) ama anlaşılamayan
+  // değerde NET uyarı verilir — eskiden 1054 sessizce kaydedilip hesap dışında kalıyordu.
+  var _bcMesaj=null;
+  if((_tip==='og_olcum'||_tip==='fg_olcum') && _deger && typeof _sgNormalize==='function'){
+    var _bcNz=_sgNormalize(_deger);
+    if(_bcNz.v!=null){
+      if(_bcNz.donusum){ _bcMesaj=['📏 '+_deger+' → '+_bcNz.v+' olarak kaydedildi','ok']; _deger=String(_bcNz.v); }
+    } else if(_bcNz.neden!=='bos'){
+      _bcMesaj=['⚠️ "'+_deger+'" gravity olarak anlaşılamadı (0.990–1.200) — kayıt tutuldu ama HESAPLARA GİRMEYECEK','hata'];
+    }
+  }
   S.brewLog.push({tip:_tip,tarih:tarihEl.value,deger:_deger,not:(notEl?.value||'').trim(),id:Date.now().toString()});
   if(S.biraAd&&S.biraAd.trim()) flash('Eklendi: '+_tip+' ('+S.brewLog.length+' kayıt)');
   else flash('⚠️ Eklendi ama KALICI DEĞİL — reçete adsız. Genel sekmesinden ad verip kaydet','hata'); // SPRINT J J8: adsızda log RAM-only (saveDraft biraAd-guard'lı, draft da yazmaz) — sessiz kayıp yerine açık uyarı
+  if(_bcMesaj) flash(_bcMesaj[0],_bcMesaj[1]); // BC uyarısı/bilgisi 'Eklendi'yi ezsin (son flash görünür)
   S.brewLog.sort((a,b)=>a.tarih.localeCompare(b.tarih));
   // FG ölçümü girilince header'ı güncelle
   if(_tip==='fg_olcum'&&_deger){
