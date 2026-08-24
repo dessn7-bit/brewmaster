@@ -4612,6 +4612,53 @@ const CASELER = [
       __REG.ok('B: bayrak kapandı', localStorage.getItem('bm_az_onarim_v1') === '2');
       return __REG.al();
     })
+  },
+
+  // ── SPRINT BA: ölü push aboneliği yönetimi ──
+  {
+    kod: 'BA2-OLU', ad: 'durum özeti dürüstlüğü: 410 işleyici LS bayrağını düşürür → özet "abone değil"e döner; satır id\'li (async doğrulama hedefi); Yenile fonksiyonu tanımlı',
+    calistir: (page) => page.evaluate(() => {
+      localStorage.setItem('bm_push_sub', JSON.stringify({ endpoint: 'https://x/dead', keys: { p256dh: 'a', auth: 'b' } }));
+      const h1 = rStokAyarlar();
+      __REG.ok('sahte abonelikle özet "✓ Bu cihaz abone" diyor (mevcut yalan)', h1.indexOf('✓ Bu cihaz abone') >= 0);
+      _bmPushOluIsle({ endpoint: 'https://x/dead' });
+      __REG.ok('410 işleyici bm_push_sub bayrağını sildi', !localStorage.getItem('bm_push_sub'));
+      const h2 = rStokAyarlar();
+      __REG.ok('özet artık DÜRÜST: "abone değil"', h2.indexOf('Bu cihaz abone değil') >= 0 && h2.indexOf('✓ Bu cihaz abone') < 0);
+      __REG.ok('durum satırı id\'li (bmPushDurumSatir)', h2.indexOf('bmPushDurumSatir') >= 0);
+      __REG.ok('brewPushYenile tanımlı (tek dokunuş yenileme)', typeof brewPushYenile === 'function');
+      __REG.ok('_bmPushDurumDogrula tanımlı + SW\'siz ortamda sessiz', (function(){ try { _bmPushDurumDogrula(); return true; } catch (e) { return false; } })());
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BA3-TOAST', ad: 'sessiz-kaçırma koruması: due alarm → oturumda TEK bilgi toast\'ı (modal değil); ikinci tetikte YOK; kritik-modal akışı AYNEN (AZ5 regresyonu)',
+    calistir: (page) => page.evaluate(() => {
+      const id = __REG.yeniKayit('REGTEST BA3', {});
+      const st = {}; st[id] = { receteAd: 'BA3', pitchTs: Date.now() - 3 * 864e5, durum: 'aktif', alarmlar: [
+        { g: 1, ts: Date.now() - 2 * 864e5, tip: 'kontrol', aksiyon: '📊 Gravity kontrol', aciklama: '', durum: 'bekliyor' },
+        { g: 2, ts: Date.now() - 1 * 864e5, tip: 'kontrol', aksiyon: '🌡️ D-rest', aciklama: '', durum: 'bekliyor' }] };
+      _alarmlariYaz(st);
+      window._bmKacirilanBilgiVerildi = false;
+      var esk = document.getElementById('bm-kacirilan-toast'); if (esk) esk.remove();
+      var em0 = document.getElementById('_alarmModal'); if (em0) em0.remove();
+      _alarmKontrolEt();
+      const t = document.getElementById('bm-kacirilan-toast');
+      __REG.ok('bilgi toast\'ı çıktı', !!t);
+      __REG.ok('sayı metinde (2 alarm)', !!t && /2 alarm/.test(t.textContent), t && t.textContent.slice(0, 60));
+      if (t) t.remove();
+      _alarmKontrolEt();
+      __REG.ok('oturumda İKİNCİ toast YOK (fırtına yok)', !document.getElementById('bm-kacirilan-toast'));
+      // AZ5 regresyonu: kritik alarm modalı AYNEN açılıyor (mevcut akışa dokunulmadı)
+      const st2 = {}; st2[id] = { receteAd: 'BA3', pitchTs: Date.now() - 3 * 864e5, durum: 'aktif', alarmlar: [
+        { g: 3, ts: Date.now() - 1000, tip: 'kritik', aksiyon: '❄️ Cold crash', aciklama: '', durum: 'bekliyor' }] };
+      _alarmlariYaz(st2);
+      var em = document.getElementById('_alarmModal'); if (em) em.remove();
+      _alarmKontrolEt();
+      __REG.ok('kritik modal AYNEN açılıyor', !!document.getElementById('_alarmModal'));
+      var em2 = document.getElementById('_alarmModal'); if (em2) em2.remove();
+      return __REG.al();
+    })
   }
 ];
 
@@ -4693,6 +4740,44 @@ const WORKER_CASELER = [
       return [
         { ad: 'ts incoming kaldı (reschedule)', ok: a.ts === 100 + 13 * 3600000, detay: String(a.ts) },
         { ad: 'latch kırıldı', ok: a.durum === 'bekliyor', detay: a.durum }
+      ];
+    }
+  },
+  {
+    // SPRINT BA1: worker DEĞİŞMEDİ — mevcut cron budama davranışı REGRESYON KİLİDİ altına alındı
+    // (410/404 = kalıcı ölü → KV'den silinir; 429/5xx/rejected = geçici → sub kalır + pushedTs yazılmaz).
+    kod: 'BA1-PRUNE', ad: 'cron ölü-abonelik budaması: 410 KV\'den silinir, 429 geçici (kalır + pushedTs yok), 2xx pushedTs yazar',
+    calistir: async () => {
+      const yol = path.join(KOK, '_cf_worker', 'src', 'index.js');
+      if (!fs.existsSync(yol)) return [{ ad: 'worker kaynağı yok', ok: false }];
+      const src = fs.readFileSync(yol, 'utf8');
+      const bas = src.indexOf('async function _cronOda');
+      if (bas < 0) return [{ ad: '_cronOda anchor bulunamadı — dilimi güncelle', ok: false }];
+      const sb = { console };
+      vm.createContext(sb);
+      sb._cronPayload = () => ({});
+      sb.sendWebPush = async (s) => ({ status: s.__st });
+      vm.runInContext(src.slice(bas), sb);
+      function kvYap(alarm, subs) {
+        const store = { 'alarm:o': JSON.stringify(alarm), 'sub:o': JSON.stringify(subs) };
+        return { store, env: { BM_KV: { get: async k => (k in store ? store[k] : null), put: async (k, v) => { store[k] = v; } } } };
+      }
+      const now = Date.now();
+      const alarmSeed = () => ({ r1: { receteAd: 'X', durum: 'aktif', alarmlar: [{ alarmId: 'r1-3-x', g: 3, ts: now - 1000, tip: 'kontrol', durum: 'bekliyor', aksiyon: 'x' }] } });
+      // senaryo 1: 2xx + 410 + 429 karışık
+      const k1 = kvYap(alarmSeed(), [{ endpoint: 'ok', keys: {}, __st: 201 }, { endpoint: 'olu', keys: {}, __st: 410 }, { endpoint: 'gecici', keys: {}, __st: 429 }]);
+      await sb._cronOda('o', k1.env, now);
+      const s1 = JSON.parse(k1.store['sub:o']); const a1 = JSON.parse(k1.store['alarm:o']);
+      // senaryo 2: yalnız 429 (geçici)
+      const k2 = kvYap(alarmSeed(), [{ endpoint: 'gecici', keys: {}, __st: 429 }]);
+      await sb._cronOda('o', k2.env, now);
+      const s2 = JSON.parse(k2.store['sub:o']); const a2 = JSON.parse(k2.store['alarm:o']);
+      return [
+        { ad: '410 endpoint KV\'den SİLİNDİ', ok: s1.length === 2 && !s1.some(x => x.endpoint === 'olu'), detay: JSON.stringify(s1.map(x => x.endpoint)) },
+        { ad: '429 geçici — sub KALDI', ok: s1.some(x => x.endpoint === 'gecici') },
+        { ad: '2xx varken pushedTs yazıldı', ok: !!a1.r1.alarmlar[0].pushedTs },
+        { ad: 'yalnız 429: sub SİLİNMEDİ', ok: s2.length === 1, detay: JSON.stringify(s2.map(x => x.endpoint)) },
+        { ad: 'yalnız 429: pushedTs YAZILMADI (sonraki cron retry)', ok: !a2.r1.alarmlar[0].pushedTs }
       ];
     }
   }
@@ -4790,7 +4875,7 @@ async function main() {
         let checks;
         if (c.tur === 'worker') {
           if (workerM.skip) { sonuclar.push({ kod: c.kod, ad: c.ad, durum: 'SKIP', sebep: workerM.skip }); console.log(`⏭️  ${c.kod} — SKIP (${workerM.skip})`); continue; }
-          checks = c.calistir(workerM.m);
+          checks = await c.calistir(workerM.m); // SPRINT BA: async worker case desteği (sync case'lere etkisiz)
         } else {
           checks = await browserCaseKos(browser, fx.seed, c);
         }

@@ -23750,6 +23750,22 @@ window.brewdayBitir=function(){
       setTimeout(function(){ try{ var x = document.getElementById('bm-tadim-toast'); if (x) x.remove(); }catch(_e){} }, 12000);
     }catch(_e){}
   }
+  // SPRINT BA3: sessiz-kaçırma koruması — oturum-başına TEK, bloke etmeyen bilgi toast'ı
+  // (_bmOlcumToast kalıbı; z-index 9998 → kritik modal 9999 üstte kalır). Push kaçmış olsa bile
+  // (ölü abonelik / cihaz kapalıydı) uygulama açılınca toplam zamanı-geçmiş alarm sayısı görünür.
+  function _bmKacirilanToast(n){
+    try{
+      var esk = document.getElementById('bm-kacirilan-toast'); if (esk) esk.remove();
+      var d = document.createElement('div');
+      d.id = 'bm-kacirilan-toast';
+      d.style.cssText = 'position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:9998;background:var(--bg-card);border:1px solid var(--cizgi-arac);border-radius:10px;padding:10px 14px;display:flex;gap:10px;align-items:center;box-shadow:0 4px 16px rgba(0,0,0,.25);font-size:13px;max-width:92vw';
+      d.innerHTML = '<span>⏰ ' + (n|0) + ' alarmın zamanı geçmiş — reçetenin Takvim sekmesinden bakabilirsin</span>' +
+        '<button class="btn" style="background:transparent;border:1px solid var(--cizgi-arac);border-radius:6px;padding:6px 10px;cursor:pointer;flex-shrink:0" onclick="this.parentNode.remove()">Kapat</button>';
+      document.body.appendChild(d);
+      setTimeout(function(){ try{ var x = document.getElementById('bm-kacirilan-toast'); if (x) x.remove(); }catch(_e){} }, 12000);
+    }catch(_e){}
+  }
+
   window._bmAlarmOnayKoprusu = function(receteId, gun){
     try{
       var rid = String(receteId || '');
@@ -23990,6 +24006,12 @@ window.brewdayBitir=function(){
       try { if(window.bmGecmisIDBCek) bmGecmisIDBCek(function(degisti){ if(degisti && typeof ekran!=='undefined' && ekran==='bildirim'){ try{ var _e=document.getElementById('ekran'); if(_e && typeof rBildirimEkran==='function') _e.innerHTML=rBildirimEkran(); }catch(_r){} } }); } catch(e){} // Sprint5: push geçmişini IDB'den çek (Sprint D D1: hedef stok→bildirim — 🕓 Geçmiş paneli Sprint139'da oraya taşınmıştı)
 
       const bekleyenler = _alarmBekleyenleri();
+      // SPRINT BA3: due alarm varsa oturumda BİR KEZ bilgi toast'ı — ZORLAMA YOK (AZ5 dersi:
+      // modal fırtınası yasak); mevcut kritik-modal/kontrol-toast akışına DOKUNULMAZ, bu yalnız ek bilgi.
+      if(bekleyenler.length > 0 && !window._bmKacirilanBilgiVerildi){
+        window._bmKacirilanBilgiVerildi = true;
+        try{ _bmKacirilanToast(bekleyenler.length); }catch(_kbt){}
+      }
       if(bekleyenler.length === 0) return;
       
       // Zaten açık bir modal varsa yeni açma
@@ -24625,12 +24647,68 @@ window.brewPushTest=function(){
       var iyi=(typeof st==='number'&&st>=200&&st<300);
       var kisa='pushStatus='+st+' · '+(((j&&(j.body||j.error||j.pushStatusText))||'')+'').slice(0,100);
       flash((iyi?'✅ ':'⚠️ ')+kisa+' (panoya kopyalandı)',iyi?'ok':'err');
+      // SPRINT BA2: 410 Gone / 404 Not Found = abonelik KALICI ölü (Web Push standardı) → anında işle.
+      // 429/5xx geçici — dokunma (worker cron'u da aynı ayrımı yapıyor, index.js:363-365).
+      if(st===410||st===404){ try{ if(window._bmPushOluIsle) _bmPushOluIsle(sub); }catch(_olu){} }
       try{navigator.clipboard.writeText('BM-PUSH-DIAG '+JSON.stringify({resp:j,sub:sub}));}catch(_c){}
     }).catch(function(e){flash('İstek başarısız: '+((e&&e.message)||e),'err');});
   }
   var _raw=null;try{_raw=localStorage.getItem('bm_push_sub');}catch(_e){}
   if(_raw){try{_gonder(JSON.parse(_raw));}catch(_e2){flash('Kayıtlı abonelik bozuk — önce 🔔 İzin Ver','err');}}
   else{brewPushAbone().then(function(sub){if(sub)_gonder(sub);else flash('Önce 🔔 İzin Ver ile abone ol','err');});}
+};
+
+// ═══ SPRINT BA2: ölü push aboneliği yönetimi ═══
+// Kaan'ın gerçek vakası: /push-test → 410 "unsubscribed or expired" AMA durum özeti "✓ Bu cihaz abone"
+// diyordu (salt LS bayrağı, hiç doğrulanmıyordu). Worker ZATEN standarda uygun (cron 404/410'u KV'den
+// buduyor, 429/5xx geçici — _cf_worker/src/index.js:363-372) → worker DEĞİŞMEDİ, fix client'ta:
+// 1) 410/404 sinyali anında işlenir: LS bayrağı düşer + KV'de aynı endpoint /sub-remove ile budanır
+//    (oda+token varsa; yoksa sessiz) + durum satırı anında düzelir.
+// 2) Ayarlar açılışında SIFIR-AĞ yerel doğrulama: pushManager.getSubscription() ↔ LS kıyası —
+//    tarayıcı kaydı yoksa "ölü" uyarısı; endpoint değişmişse sessiz self-heal (LS + bulut tazele).
+//    Periyodik sunucu kontrolü BİLEREK reddedildi (yeni uç + trafik; 410 zaten client'a ulaşıyor).
+// 3) "↻ Yenile": tek dokunuş — eski tarayıcı kaydını bırak, yeniden abone ol, buluta yaz.
+window._bmPushOluIsle=function(sub){
+  try{localStorage.removeItem('bm_push_sub');}catch(_e){}
+  try{
+    var cfg=null; try{cfg=JSON.parse(localStorage.getItem('bm_sync_v1')||'null');}catch(_c){}
+    if(cfg&&cfg.oda&&cfg.odaToken&&sub&&sub.endpoint){
+      fetch('https://brewmaster-models.dessn7.workers.dev/sub-remove',{method:'POST',headers:{'Content-Type':'application/json','X-BM-Token':cfg.odaToken,'X-BM-Auth':BM_WORKER_AUTH},body:JSON.stringify({oda:cfg.oda,endpoint:sub.endpoint})}).catch(function(){});
+    }
+  }catch(_f){}
+  try{ var el=document.getElementById('bmPushDurumSatir'); if(el){ el.textContent='⚠️ Abonelik ölmüş (410) — ↻ Yenile ile tazele'; el.style.color='var(--crit)'; } }catch(_d){}
+  if(typeof flash==='function') flash('🔔 Push aboneliği ölmüş (süresi dolmuş) — durum düzeltildi. Ayarlar ▸ ↻ Yenile ile tek dokunuşta tazele','err');
+};
+window.brewPushYenile=function(){
+  if(!('serviceWorker' in navigator)||!('PushManager' in window)){flash('Bu tarayıcı push desteklemiyor','err');return;}
+  flash('↻ Push aboneliği tazeleniyor...','ok');
+  navigator.serviceWorker.ready.then(function(reg){
+    return reg.pushManager.getSubscription().then(function(sub){ return sub ? sub.unsubscribe().catch(function(){return false;}) : true; });
+  }).then(function(){
+    try{localStorage.removeItem('bm_push_sub');}catch(_e){}
+    return brewPushAbone(); // subscribe + LS + _pushBuluta (mevcut tek yol — çift akış yok)
+  }).then(function(sub){
+    if(sub&&typeof window._bmPushDurumDogrula==='function') setTimeout(window._bmPushDurumDogrula,300);
+  }).catch(function(e){ flash('Yenileme başarısız: '+((e&&e.message)||e)+' — izin verilmemişse önce İzin Ver','err'); });
+};
+window._bmPushDurumDogrula=function(){
+  try{
+    var el=document.getElementById('bmPushDurumSatir'); if(!el) return;
+    var raw=null; try{raw=localStorage.getItem('bm_push_sub');}catch(_e){}
+    if(!raw) return; // "abone değil" zaten dürüst
+    if(!('serviceWorker' in navigator)||!('PushManager' in window)) return;
+    var localEp=''; try{ localEp=(JSON.parse(raw)||{}).endpoint||''; }catch(_p){}
+    navigator.serviceWorker.ready.then(function(reg){ return reg.pushManager.getSubscription(); }).then(function(sub){
+      var el2=document.getElementById('bmPushDurumSatir'); if(!el2) return;
+      if(!sub){ el2.textContent='⚠️ Abonelik ölü (tarayıcı kaydı yok) — ↻ Yenile ile tazele'; el2.style.color='var(--crit)'; }
+      else if(localEp && sub.endpoint && sub.endpoint!==localEp){
+        // tarayıcıda CANLI kayıt var ama LS bayat → sessiz self-heal: gerçeği yaz + buluta bildir
+        try{localStorage.setItem('bm_push_sub',JSON.stringify(sub));}catch(_s){}
+        try{_pushBuluta(sub);}catch(_pb){}
+        el2.textContent='✓ Bu cihaz abone (kayıt tazelendi)';
+      }
+    }).catch(function(){});
+  }catch(_e){}
 };
 
 window._swDiag=function(){return new Promise(function(res){
@@ -27390,6 +27468,7 @@ window.rStokAyarlar = function(){
   var _bIzin = (typeof Notification!=='undefined') ? Notification.permission : 'yok';
   var _bIzinStr = _bIzin==='granted' ? '✓ Verildi' : (_bIzin==='denied' ? '✗ Reddedildi' : (_bIzin==='yok' ? 'Desteklenmiyor' : 'Sorulmadı'));
   var _bAbone=false; try{ _bAbone=!!localStorage.getItem('bm_push_sub'); }catch(e){}
+  try{ setTimeout(function(){ if(window._bmPushDurumDogrula) window._bmPushDurumDogrula(); },400); }catch(_pv){} // SPRINT BA2: render sonrası sıfır-ağ abonelik doğrulaması (#bmPushDurumSatir)
   var _bBekleyen=0; try{ _bBekleyen=(typeof _alarmBekleyenleri==='function')?_alarmBekleyenleri().length:0; }catch(e){}
   var _bSonStr='Henüz yok';
   try{ var _bg=(typeof bmGecmisOku==='function')?bmGecmisOku():[]; if(_bg&&_bg.length){ var _bson=_bg.slice().sort(function(a,b){return (b.ts||0)-(a.ts||0);})[0]; var _bdk=Math.round((Date.now()-(_bson.ts||0))/60000); _bSonStr=_bdk<1?'az önce':(_bdk<60?_bdk+' dk önce':(_bdk<1440?Math.round(_bdk/60)+' saat önce':Math.round(_bdk/1440)+' gün önce')); } }catch(e){}
@@ -27466,12 +27545,13 @@ window.rStokAyarlar = function(){
         '<div style="display:flex;gap:6px;flex-shrink:0">'+
           (_bIzin!=='granted'?'<button class="bm-ayar-btn" onclick="if(typeof brewBildirimIzin===\'function\')brewBildirimIzin()">İzin ver</button>':'')+
           '<button class="bm-ayar-btn-sec" onclick="if(typeof brewPushTest===\'function\')brewPushTest()">Gönder</button>'+
+          (_bIzin==='granted'?'<button class="bm-ayar-btn-sec" onclick="if(typeof brewPushYenile===\'function\')brewPushYenile()" title="Aboneliği yeniden kur — ölü/bayat abonelik için tek dokunuş">↻ Yenile</button>':'')+
         '</div>'+
       '</div>'+
       '<div class="bm-ayar-satir">'+
         '<div class="bm-ayar-satir-text">📊 Durum özeti'+
           '<small>Bildirim izni: '+_bIzinStr+'</small>'+
-          '<small>'+(_bAbone?'✓ Bu cihaz abone':'Bu cihaz abone değil')+'</small>'+
+          '<small id="bmPushDurumSatir">'+(_bAbone?'✓ Bu cihaz abone':'Bu cihaz abone değil')+'</small>'+
           '<small>Bekleyen alarm: '+_bBekleyen+'</small>'+
           '<small>Son bildirim: '+_bSonStr+'</small>'+
           '<small>Sessiz saat: '+_bSessizStr+'</small>'+
