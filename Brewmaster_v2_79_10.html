@@ -8206,7 +8206,10 @@ window.bmProfilAnaliz = function(){
       var tamam = !!son || bl.some(function(x){
         if(!x || (x.tip!=='siseleme' && x.tip!=='sise' && x.tip!=='bottle')) return false;
         if(sinir && _logGirisTs(x)<=sinir) return false;
-        var t = x.ts || (x.tarih?Date.parse(x.tarih):0) || 0;
+        // SPRINT BE4 (BD F7-3): kıyasın İKİ tarafı da aynı saat tabanında (_logGirisTs: ts > 13-hane id > tarih).
+        // Eski karışık taban (ts||Date.parse) retro girilmiş günlükte (Dubbel) şişelemeyi start'tan ÖNCE
+        // sanıp batch'i sonsuza dek 'devam' bırakıyordu.
+        var t = _logGirisTs(x) || 0;
         return startTs ? (t >= startTs - 86400000) : true;
       });
       // Türetilmişler — eksik ölçüm = null (UYDURMA YOK)
@@ -8233,13 +8236,25 @@ window.bmProfilAnaliz = function(){
     out.kayitlar.sort(function(a,b){ return (b.tarih||0)-(a.tarih||0); });
     var tam = out.kayitlar.filter(function(k){ return k.durum==='tamam'; });
     if(tam.length >= 2){
-      var ort = function(a){ return a.length ? a.reduce(function(x,y){return x+y;},0)/a.length : null; };
+      // SPRINT BE4-2: ortalama → MEDYAN. Gerekçe: AT4 mutlak bandı ([30,85]) absürtleri keser ama
+      // BANT İÇİ tek uç (örn. %41,%42 yanında bir %75) n=3'te ortalamayı 10+ puan çeker; medyan
+      // dayanıklı, n=2'de iki değerin ortalamasına eşit (davranış değişmez), maliyeti sıfır.
+      // Alan adları 'ort*' KALDI (depo/UI şeması değişmesin) — içerik medyandır.
+      var ort = function(a){
+        if(!a.length) return null;
+        var s = a.slice().sort(function(x,y){return x-y;});
+        var m = Math.floor(s.length/2);
+        return (s.length%2) ? s[m] : (s[m-1]+s[m])/2;
+      };
       var aL = tam.map(function(k){return k.atten;}).filter(function(x){return x!=null;});
       var fL = tam.map(function(k){return k.fgSapma;}).filter(function(x){return x!=null;});
       var vL = tam.map(function(k){return k.verimG;}).filter(function(x){return x!=null;});
       var stiller = {};
       tam.forEach(function(k){ var s2=k.stil||'(stilsiz)'; stiller[s2]=(stiller[s2]||0)+1; }); // SPRINT J: başlık 'N tamamlanmış' derken sayım devam-edenleri de içeriyordu — aynı küme (tam) sayılır
+      // SPRINT BE4-1: metrik başına GERÇEK ÖLÇÜM sayıları — köprü ağırlığı/eşiği bunlara bağlanır
+      // (BD F7-1: ölçümsüz 'tamam' batch n/w'yi şişiriyordu; ölçümsüzler kartta BİLGİ olarak kalır)
       out.ozet = { tamamN: tam.length,
+        nA: aL.length, nF: fL.length, nV: vL.length,
         ortAtten: aL.length?Math.round(ort(aL)*10)/10:null,
         ortFgSapma: fL.length?Math.round(ort(fL)*1000)/1000:null,
         ortVerim: vL.length?Math.round(ort(vL)*10)/10:null,
@@ -8262,27 +8277,34 @@ window._bmKisiselProfil = function(){
   try{
     var a = (typeof bmProfilAnaliz==='function') ? bmProfilAnaliz() : null;
     var oz = a && a.ozet;
-    if(!oz || !oz.tamamN || oz.tamamN < 2) return bos;              // sigorta 1: eşik
-    var n = oz.tamamN, w = Math.min(1, (n-1)/4);                    // sigorta 2: ağırlık
-    var out = { aktif:false, n:n, w:w, verimOrt:oz.ortVerim, verimKalibre:null, verimBantDisi:false, fgOfset:null, fgBantDisi:false, attenOrt:oz.ortAtten };
-    if(oz.ortVerim != null){
+    if(!oz || !oz.tamamN || oz.tamamN < 2) return bos;              // sigorta 1: eşik (tamam batch)
+    // SPRINT BE4-1 (BD F7-1): eşik ve ağırlık METRİK BAŞINA GERÇEK ÖLÇÜM sayısına bağlı — ölçümsüz
+    // 'tamam' batch (ogG/fgG null) n/w'yi ŞİŞİREMEZ. Kriter: verim kolu = ogG ölçümlü batch sayısı (nV),
+    // FG kolu = fgSapma'lı batch sayısı (nF). Tahmin/varsayım değerleri zaten listelere hiç girmiyordu
+    // ('UYDURMA YOK'); açık kalan delik ağırlık paydasıydı. AT5 disiplininin devamı.
+    var n = oz.tamamN;
+    var nV = oz.nV || 0, nF = oz.nF || 0;
+    if(nV < 2 && nF < 2) return bos;                                // hiçbir metrikte 2 gerçek ölçüm yok
+    var wV = Math.min(1, (nV-1)/4), wF = Math.min(1, (nF-1)/4);     // sigorta 2: metrik-başına ağırlık
+    var out = { aktif:false, n:n, nV:nV, nF:nF, w:wV, wF:wF, verimOrt:oz.ortVerim, verimKalibre:null, verimBantDisi:false, fgOfset:null, fgBantDisi:false, attenOrt:oz.ortAtten };
+    if(oz.ortVerim != null && nV >= 2){
       // SPRINT AT4: akil bandi 'varsayilana mesafe' degil MUTLAK fizik araligi sorar — %30-85.
       // Kaynak: BIAB full-volume tipik %70-80 (homebrewtalk 650168/701635, BYO brew-in-a-bag-efficiency);
       // no-sparge + kaba kirim %40'lara iner (Muzo gercek olcumu %40.5, design_og_sapma_teshis);
       // iyi 3-vessel ust uc ~%85. Disi = olcum/veri hatasi suphesi. Eski |ort-61|>15 bandi
       // Kaan'in gercek verimini kalici disliyordu (kopru hic acilmiyordu).
       if(oz.ortVerim < 30 || oz.ortVerim > 85) out.verimBantDisi = true;  // sigorta 3 (verim, mutlak aralik)
-      else { out.verimKalibre = Math.round((_BM_VARSAYILAN_VERIM*(1-w) + oz.ortVerim*w)*10)/10; out.aktif = true; }
+      else { out.verimKalibre = Math.round((_BM_VARSAYILAN_VERIM*(1-wV) + oz.ortVerim*wV)*10)/10; out.aktif = true; }
     }
-    if(oz.ortFgSapma != null){
+    if(oz.ortFgSapma != null && nF >= 2){
       if(Math.abs(oz.ortFgSapma) > 0.010) out.fgBantDisi = true;                       // sigorta 3 (FG)
-      else { out.fgOfset = Math.round(oz.ortFgSapma*w*1000)/1000; out.aktif = true; }
+      else { out.fgOfset = Math.round(oz.ortFgSapma*wF*1000)/1000; out.aktif = true; }
     }
     try{ // türetilmiş depo — değişmediyse yazma (her render'da gereksiz LS yazımı olmasın)
-      var depo = { ver:1, guncelTs:Date.now(), n:n, verim:oz.ortVerim, fgOfset:oz.ortFgSapma, atten:oz.ortAtten, mayaBazli:{} };
+      var depo = { ver:1, guncelTs:Date.now(), n:n, nV:nV, nF:nF, verim:oz.ortVerim, fgOfset:oz.ortFgSapma, atten:oz.ortAtten, mayaBazli:{} }; // SPRINT BE4: nV/nF = ölçümlü sayılar
       var eskiRaw = localStorage.getItem('bm_kaan_profil_v1');
       var eski = eskiRaw ? JSON.parse(eskiRaw) : null;
-      if(!eski || eski.n!==depo.n || eski.verim!==depo.verim || eski.fgOfset!==depo.fgOfset || eski.atten!==depo.atten)
+      if(!eski || eski.n!==depo.n || eski.nV!==depo.nV || eski.nF!==depo.nF || eski.verim!==depo.verim || eski.fgOfset!==depo.fgOfset || eski.atten!==depo.atten)
         localStorage.setItem('bm_kaan_profil_v1', JSON.stringify(depo));
     }catch(_d){}
     return out;
@@ -8309,7 +8331,7 @@ window._bmKisiselSatirHtml = function(){
     }
     if(!par.length) return '';
     var uyari = (kp.verimBantDisi || kp.fgBantDisi) ? ' · <span style="color:var(--bakir)">bir metrik bant dışı (uygulanmadı)</span>' : '';
-    return '<div class="kart" style="padding:8px 12px;font-size:12px">📊 <b>Sana göre:</b> '+par.join(' · ')+' <span style="color:var(--metin-soluk)">(senin ort. — '+kp.n+' demleme, ağırlık %'+Math.round(kp.w*100)+')'+uyari+'</span></div>';
+    return '<div class="kart" style="padding:8px 12px;font-size:12px">📊 <b>Sana göre:</b> '+par.join(' · ')+' <span style="color:var(--metin-soluk)">(senin ort. — '+(kp.nV||kp.n)+' ölçümlü demleme, ağırlık %'+Math.round(kp.w*100)+')'+uyari+'</span></div>';
   }catch(_e){ return ''; }
 };
 // Malt sekmesi verim öneri-chip'i — KULLANICI ONAYLI (otomatik yazmaz; design_a1 ilkesi).
@@ -8317,12 +8339,16 @@ window._bmVerimChipHtml = function(){
   try{
     var kp = window._bmKisiselProfil();
     if(!kp || kp.n < 2) return '';                                   // n<2 → sıfır UI
-    if(kp.verimBantDisi) return '<div style="margin-bottom:6px;font-size:11px;color:var(--metin-soluk)">📊 Gerçek ortalaman %'+kp.verimOrt+' ('+kp.n+' demleme) — <b>bant dışı</b>, kalibrasyona alınmadı (ölçümleri kontrol et).</div>';
+    if(kp.verimBantDisi) return '<div style="margin-bottom:6px;font-size:11px;color:var(--metin-soluk)">📊 Gerçek ortalaman %'+kp.verimOrt+' ('+(kp.nV||kp.n)+' ölçümlü demleme) — <b>bant dışı</b>, kalibrasyona alınmadı (ölçümleri kontrol et).</div>';
     if(kp.verimKalibre == null) return '';
-    var oneri = Math.round(kp.verimKalibre);
-    if(S.verim === oneri) return '<div style="margin-bottom:6px;font-size:11px;color:var(--metin-soluk)">📊 Verim %'+S.verim+' — kişisel kalibrasyonla uyumlu (senin ort. %'+kp.verimOrt+', '+kp.n+' demleme).</div>';
+    // SPRINT BE4 (BD F7-2): uyum kıyası GERÇEK ortalamaya (±3 puan) — eski kalibre-harmana tam-eşitlik
+    // kıyası hiç 'uyumlu' demiyor, %41 gerçeğe karşı '%56 uygula' basıyordu. Öneri değeri de HARMAN değil
+    // gerçek ortalama: chip zaten kullanıcı-onaylı (otomatik yazmaz), kademeli fren burada ikinci bir
+    // katman değil yanıltmaydı; 'Sana göre' satırının tahmin yumuşatması (verimKalibre) AYNEN duruyor.
+    var oneri = Math.round(kp.verimOrt);
+    if(Math.abs(S.verim - kp.verimOrt) <= 3) return '<div style="margin-bottom:6px;font-size:11px;color:var(--metin-soluk)">📊 Verim %'+S.verim+' — kişisel kalibrasyonla uyumlu (senin ort. %'+kp.verimOrt+', '+(kp.nV||kp.n)+' ölçümlü demleme).</div>';
     return '<div style="margin-bottom:6px;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--metin-soluk)">'+
-      '<span style="flex:1">📊 Gerçek ortalaman %'+kp.verimOrt+' ('+kp.n+' demleme) → kalibre öneri <b>%'+oneri+'</b></span>'+
+      '<span style="flex:1">📊 Gerçek ortalaman %'+kp.verimOrt+' ('+(kp.nV||kp.n)+' ölçümlü demleme) → öneri <b>%'+oneri+'</b></span>'+
       '<button class="btn" onclick="S.verim='+oneri+';render()" style="padding:4px 10px;font-size:11px;background:var(--altin);color:#fff;border:none;border-radius:6px;font-weight:700;cursor:pointer">Uygula</button>'+
     '</div>';
   }catch(_e){ return ''; }
@@ -27911,8 +27937,8 @@ window.rStokAyarlar = function(){
             try{ var _a1=JSON.parse(localStorage.getItem('bm_off_ogren_v1')||'[]'); _oOff=Array.isArray(_a1)?_a1.length:0; }catch(_e1){}
             try{ var _a2=JSON.parse(localStorage.getItem('bm_stil_ogren_v1')||'[]'); _oStil=Array.isArray(_a2)?_a2.length:0; }catch(_e2){}
             try{ var _a3=JSON.parse(localStorage.getItem('bm_maya_kalibrasyon')||'{}'); _oMaya=Object.keys(_a3||{}).length; }catch(_e3){}
-            try{ var _a4=JSON.parse(localStorage.getItem('bm_kaan_profil_v1')||'null'); _oVerim=(_a4&&_a4.n)?_a4.n:0; }catch(_e4){}
-            return '<small>Öğrenme (bu cihazda): off-flavor '+_oOff+' · stil '+_oStil+' · maya '+_oMaya+' suş · verim n='+_oVerim+'</small>';
+            try{ var _a4=JSON.parse(localStorage.getItem('bm_kaan_profil_v1')||'null'); _oVerim=(_a4&&_a4.nV!=null)?_a4.nV:((_a4&&_a4.n)?_a4.n:0); }catch(_e4){} // SPRINT BE4-3: ölçümlü sayı
+            return '<small>Öğrenme (bu cihazda): off-flavor '+_oOff+' · stil '+_oStil+' · maya '+_oMaya+' suş · verim '+_oVerim+' ölçümlü demleme</small>';
           }catch(_og){ return ''; } })()+
           '<small>Son bildirim: '+_bSonStr+'</small>'+
           '<small>Sessiz saat: '+_bSessizStr+'</small>'+

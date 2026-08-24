@@ -5030,6 +5030,94 @@ const CASELER = [
       } finally { window.flash = eskiF; }
       return __REG.al();
     })
+  },
+
+  // ── SPRINT BE4: öğrenme doğruluğu (BD F7-1/F7-2/F7-3 + medyan) ──
+  {
+    kod: 'BE4-OLCUM', ad: 'ölçümsüz-şişme bitti: nV/wV metrik-bazlı (ölçümsüz tamam batch ağırlığı şişiremez); medyan uç değere dayanıklı; chip uyumu verimOrt±3 + öneri=gerçek ort (harman değil); retro-tamam tanınır',
+    calistir: (page) => page.evaluate(() => {
+      const src = KR.find(r => r && Array.isArray(r.maltlar) && r.maltlar.length > 0);
+      const h = src.hacim != null ? +src.hacim : 11;
+      const F = hOG(src.maltlar, 0, src.katkilar || [], h) - 1;
+      const M = (hOG(src.maltlar, 100, src.katkilar || [], h) - 1 - F) / 100;
+      const olculu = (i, hedefV) => ({ id: 'be4-' + i, biraAd: 'BE4 ' + i, durum: 'arsiv', hacim: h, verim: 41,
+        maltlar: JSON.parse(JSON.stringify(src.maltlar)), katkilar: JSON.parse(JSON.stringify(src.katkilar || [])),
+        brewSnapshot: { ts: 1000 + i, ogT: 1.05, fgT: 1.012, verimVarsayim: 41, hacim: h },
+        brewSonuc: { ts: 2000 + i, ogG: Math.round((1 + F + M * hedefV) * 1000) / 1000, fgG: 1.012, kaynak: { og: 'olcum', fg: 'olcum' } },
+        brewLog: [] });
+      KR.length = 0;
+      // 1 ölçümlü + 1 ÖLÇÜMSÜZ-tamam (retro şişeleme loglu, aynı saat tabanı — F7-3 kilidi)
+      KR.unshift(olculu(1, 41));
+      KR.unshift({ id: 'be4-olcumsuz', biraAd: 'BE4 Ölçümsüz', durum: 'arsiv', hacim: h, verim: 61,
+        maltlar: JSON.parse(JSON.stringify(src.maltlar)),
+        brewLog: [
+          { tip: 'pitching', tarih: '2026-04-12', id: '1780000000000' },
+          { tip: 'siseleme', tarih: '2026-05-02', id: '1780000060000' }] });
+      _origKy(KR);
+      const a1 = bmProfilAnaliz();
+      const olcumsuzK = a1.kayitlar.find(k => k.id === 'be4-olcumsuz');
+      __REG.ok('F7-3: retro günlüklü batch TAMAM tanındı (bilgi kaybolmadı)', !!olcumsuzK && olcumsuzK.durum === 'tamam', olcumsuzK && olcumsuzK.durum);
+      __REG.ok('özet: tamamN=2 ama nV=1 (ölçümsüz sayılMADI)', a1.ozet && a1.ozet.tamamN === 2 && a1.ozet.nV === 1, JSON.stringify(a1.ozet && { tamamN: a1.ozet.tamamN, nV: a1.ozet.nV }));
+      const kp1 = _bmKisiselProfil();
+      __REG.ok('BE4-1: köprü KAPALI (eski kod n=2 diye açardı)', kp1.aktif === false && kp1.verimKalibre === null, JSON.stringify({ aktif: kp1.aktif }));
+      // 2. ölçümlü → nV=2, tamamN=3: ağırlık nV'den (0.25), tamamN'den (0.5) DEĞİL
+      KR.unshift(olculu(2, 42)); _origKy(KR);
+      const kp2 = _bmKisiselProfil();
+      __REG.ok('nV=2 → aktif; wV=0.25 (tamamN=3 olsa da ağırlık ölçümlüden)', kp2.aktif === true && kp2.n === 3 && kp2.nV === 2 && kp2.w === 0.25, JSON.stringify({ n: kp2.n, nV: kp2.nV, w: kp2.w }));
+      // medyan: 3. ölçümlü %75 (bant içi uç) → ortalama ~52.7 olurdu, medyan ~42 kalmalı
+      KR.unshift(olculu(3, 75)); _origKy(KR);
+      const kp3 = _bmKisiselProfil();
+      __REG.ok('BE4-2 MEDYAN: bant-içi uç (%75) merkezi çekemedi (~42)', kp3.verimOrt != null && Math.abs(kp3.verimOrt - 42) < 1.6, String(kp3.verimOrt));
+      // chip: S.verim=41 → UYUMLU (Uygula yok); S.verim=61 → öneri = round(verimOrt) (harman %5x DEĞİL)
+      tarifAc(KR.find(k => k.id === 'be4-1').id);
+      S.verim = 41;
+      const chipUyum = _bmVerimChipHtml();
+      __REG.ok('F7-2: %41 gerçeğe karşı UYUMLU (Uygula yok — %56 şişmesi bitti)', chipUyum.indexOf('uyumlu') > -1 && chipUyum.indexOf('Uygula') < 0, chipUyum.replace(/<[^>]+>/g, '').slice(0, 80));
+      S.verim = 61;
+      const chipOneri = _bmVerimChipHtml();
+      const beklenenOneri = Math.round(kp3.verimOrt);
+      __REG.ok('öneri = GERÇEK ortalama (' + beklenenOneri + '), harman değil', chipOneri.indexOf('öneri <b>%' + beklenenOneri + '</b>') > -1, chipOneri.replace(/<[^>]+>/g, '').slice(0, 90));
+      __REG.ok('depo nV taşıyor (Ayarlar sayacı ölçümlü sayıyı görür)', (JSON.parse(localStorage.getItem('bm_kaan_profil_v1') || '{}').nV) === 3);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BE4-MUZO', ad: 'Muzo gerçek-akış simülasyonu: "1054" aç-kaydet ile düzelir → FG 1.016 + şişeleme → brewSonuc ölçümlü donar, şeker ayrımı doğru (verimG malt-bazlı ~%41), batch nV\'ye girer',
+    calistir: (page) => page.evaluate(() => {
+      const MID = '1775830924009';
+      let mr = KR.find(k => k && String(k.id) === MID);
+      __REG.ok('fixture Muzo var', !!mr);
+      // bulut GÜNCEL durumu birebir kur (24 Ağu 17:30 anlık görüntüsü)
+      mr.maltlar = [{ id: 'wheat', kg: 2 }, { id: 'pilsner', kg: 1 }, { id: 'acid', kg: 0.16 }];
+      mr.katkilar = [{ ad: 'Maltodextrin', birim: 'g', id: 'maltodex', miktar: 100, zaman: 'Kaynatmada' },
+                     { ad: 'Corn Sugar (Dextrose Monohydrate)', birim: 'g', id: 'corn_sugar', miktar: 450, zaman: 'Kaynatmada' }];
+      mr.hacim = 11; mr.verim = 41; mr.durum = 'yapimda';
+      mr.brewSnapshot = { ts: 1787581793799, ogT: 1.054, fgT: 1.013, verimVarsayim: 41, hacim: 11, mayaId: 'bb_alman_bugday1' };
+      mr.brewLog = [
+        { tip: 'pitching', tarih: '2026-08-16', deger: '', id: '1787581793798', not: '' },
+        { tip: 'og_olcum', tarih: '2026-08-16', deger: '1054', id: '1787581800860', not: '' }];
+      delete mr.brewSonuc; delete mr.ogManuel; delete mr.fgManuel;
+      _origKy(KR);
+      tarifAc(MID); setSekme('takvim'); if (typeof render === 'function') render();
+      // 1) Kaan'ın düzeltme akışı: "1054" kaydını aç → Kaydet (BC edit yolu normalize eder)
+      const ogIdx = S.brewLog.findIndex(e => e && e.tip === 'og_olcum');
+      logDuzenle(ogIdx); logEkle();
+      __REG.ok('aç-kaydet: 1054 → "1.054" + ogManuel dolu', S.brewLog.find(e => e.tip === 'og_olcum').deger === '1.054' && S.ogManuel === 1.054, JSON.stringify({ d: S.brewLog.find(e => e.tip === 'og_olcum').deger, m: S.ogManuel }));
+      // 2) FG 1.016 + şişeleme (bugün)
+      const tipEl = document.getElementById('logTip'), tarihEl = document.getElementById('logTarih'), degerEl = document.getElementById('logDeger');
+      const d = new Date(); const bugun = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      tipEl.value = 'fg_olcum'; tarihEl.value = bugun; degerEl.value = '1.016'; logEkle();
+      tipEl.value = 'siseleme'; tarihEl.value = bugun; degerEl.value = ''; logEkle();
+      const mr2 = KR.find(k => k && String(k.id) === MID);
+      __REG.ok('brewSonuc ÖLÇÜMLÜ dondu {1.054, 1.016}', !!mr2.brewSonuc && mr2.brewSonuc.ogG === 1.054 && mr2.brewSonuc.fgG === 1.016, JSON.stringify(mr2.brewSonuc && { og: mr2.brewSonuc.ogG, fg: mr2.brewSonuc.fgG }));
+      // 3) analiz: batch tamam + ölçümlü + şeker ayrımı (verimG MALT-bazlı — 550g şeker F sabitinde)
+      const a = bmProfilAnaliz();
+      const mk = a.kayitlar.find(k => k.id === MID);
+      __REG.ok('batch TAMAM + atten hesaplandı', !!mk && mk.durum === 'tamam' && mk.atten != null, JSON.stringify(mk && { d: mk.durum, at: mk.atten }));
+      __REG.ok('AT7/şeker ayrımı: verimG malt-bazlı gerçekçi (%33-50 bandı; şeker verimi şişirmedi)', mk.verimG != null && mk.verimG > 33 && mk.verimG < 50, String(mk && mk.verimG));
+      __REG.ok('batch nV sayımına GİRDİ (ölçümlü)', a.ozet == null || a.ozet.nV >= 1, JSON.stringify(a.ozet && { tamamN: a.ozet.tamamN, nV: a.ozet.nV }));
+      return __REG.al();
+    })
   }
 ];
 
