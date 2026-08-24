@@ -916,7 +916,7 @@ function kaydet(rec){
     if(son && son.tip===rec.tip && son.mesaj===rec.mesaj && son.kaynak===rec.kaynak){ son.n=(son.n||1)+1; son.ts=rec.ts; }
     else { a.push(rec); if(a.length>MAX) a=a.slice(a.length-MAX); }
     localStorage.setItem(KEY, JSON.stringify(a));
-  }catch(_e){} /* log yazarken hata = sessiz düş (LS dolu/kapalı olabilir) — uygulama akışı ASLA bozulmaz */
+  }catch(_e){ try{ window._bmRingKayip=(window._bmRingKayip||0)+1; }catch(_e2){} } /* SPRINT BE5 (BD A7): yazılamayan kayıt SAYILIR (bellek-içi) — Ayarlar özeti gösterir; uygulama akışı ASLA bozulmaz */
 }
 function kayit(tip, mesaj, kaynak, stack){
   try{
@@ -933,7 +933,10 @@ window.bmHataKaydet = function(tip, err, kaynak){ try{
   /* AQ3: gürültü kontrolü — aynı tip+kaynak 60sn içinde tekrar gelirse yeni satır AÇMAZ, son eşleşen kaydın
      n/ts'i artar (sık tetiklenen catch ring'i doldurup GERÇEK hatayı ezemez; kayit() ardışık-dedup'ının üstünde 2. kat) */
   var a=oku(), now=Date.now(), i;
-  for(i=a.length-1;i>=0;i--){ if(a[i]&&a[i].tip===(tip||'caught')&&a[i].kaynak===kes(kaynak||'',200)&&(now-(a[i].ts||0))<60000){ a[i].n=(a[i].n||1)+1; a[i].ts=now; try{localStorage.setItem(KEY,JSON.stringify(a));}catch(_w){} return; } }
+  /* SPRINT BE5 (BD A6) REVİZE: mesaj kıyası dedup KOŞULUNA eklenmedi (AQ3 gürültü kontrolü ile çatışır —
+     değişken-mesajlı sık catch ring'i doldururdu); onun yerine eşleşen kaydın MESAJI GÜNCELLENİR:
+     son farklı hata görünür kalır, aradakiler n sayacında. */
+  for(i=a.length-1;i>=0;i--){ if(a[i]&&a[i].tip===(tip||'caught')&&a[i].kaynak===kes(kaynak||'',200)&&(now-(a[i].ts||0))<60000){ a[i].mesaj=kes(m,300); a[i].n=(a[i].n||1)+1; a[i].ts=now; try{localStorage.setItem(KEY,JSON.stringify(a));}catch(_w){} return; } }
   kayit(tip||'caught', m, kaynak||'', (err&&err.stack)||'');
 }catch(_e){} };
 window.onerror = function(msg, src, line, col, err){
@@ -4929,17 +4932,20 @@ window._bmSicaklikLogla = function(){
   }catch(e){ try{console.warn('_bmSicaklikLogla',e);}catch(_){} if(window.bmHataKaydet)bmHataKaydet('persist',e,'_bmSicaklikLogla'); }
 };
 function bmHasatList(){try{var a=JSON.parse(localStorage.getItem('bm_maya_hasat')||'[]');return Array.isArray(a)?a:[];}catch(e){return [];}}
-function bmHasatSave(a){try{localStorage.setItem('bm_maya_hasat',JSON.stringify(a));}catch(e){}}
+function bmHasatSave(a){try{localStorage.setItem('bm_maya_hasat',JSON.stringify(a));}catch(e){if(window.bmHataKaydet)bmHataKaydet('persist',e,'bmHasatSave');if(typeof flash==='function')flash('⚠️ Maya hasadı KAYDEDİLEMEDİ — depolama dolu olabilir','err');}} // SPRINT BE5 (BD B5)
 function bmHasatEkle(ad,nesil,tarih,mayaId,esik){if(!ad||!String(ad).trim())return;var a=bmHasatList();a.push({id:'h'+Date.now(),mayaId:mayaId||'',ad:String(ad).trim(),nesil:Math.max(1,Math.min(30,+nesil||1)),tarih:tarih||new Date().toISOString().slice(0,10),esik:(esik!=null&&String(esik).trim()!==''&&+esik>0)?Math.round(+esik):null});bmHasatSave(a);try{if(window._mayaTazelikSync)_mayaTazelikSync();}catch(_e){}if(typeof render==='function')render();}
 function bmHasatSil(id){bmHasatSave(bmHasatList().filter(function(x){return x.id!==id;}));try{if(window._mayaTazelikSync)_mayaTazelikSync();}catch(_e){}if(typeof render==='function')render();}
 function bmHasatYas(tarih){if(!tarih)return null;var d=new Date(tarih+'T00:00:00');if(isNaN(d.getTime()))return null;return Math.max(0,Math.round((Date.now()-d.getTime())/86400000));}
 // Sprint4 — manuel hatırlatma store (bm_manuel_alarm) + planlı demleme tarihi
 function bmManuelList(){try{var a=JSON.parse(localStorage.getItem('bm_manuel_alarm')||'[]');return Array.isArray(a)?a:[];}catch(e){return [];}}
-function bmManuelSave(a){try{localStorage.setItem('bm_manuel_alarm',JSON.stringify(a));}catch(e){}}
+function bmManuelSave(a){try{localStorage.setItem('bm_manuel_alarm',JSON.stringify(a));}catch(e){if(window.bmHataKaydet)bmHataKaydet('persist',e,'bmManuelSave');if(typeof flash==='function')flash('⚠️ Hatırlatma KAYDEDİLEMEDİ — depolama dolu olabilir','err');}} // SPRINT BE5 (BD B5)
 function bmManuelEkle(baslik,tarih,saat,not,tekrar){ if(!baslik||!String(baslik).trim()||!tarih){ if(typeof flash==='function')flash('Başlık + tarih gerekli','err'); return false; } var d=new Date(tarih+'T'+((/^\d{1,2}:\d{2}$/.test(saat||''))?saat:'10:00')+':00'); if(isNaN(d.getTime())){ if(typeof flash==='function')flash('Geçersiz tarih','err'); return false; } var a=bmManuelList(); var _tkm=(tekrar==='hafta'||tekrar==='ay')?tekrar:'yok'; var _rec={id:'m'+Date.now(), baslik:String(baslik).trim(), ts:d.getTime(), not:String(not||'').trim(), tekrar:_tkm}; if(_tkm==='ay')_rec.tekrarGun=d.getDate(); a.push(_rec); bmManuelSave(a); try{if(window._manuelAlarmSync)_manuelAlarmSync();}catch(_e){} if(typeof flash==='function')flash('🔔 Hatırlatma eklendi','ok'); if(typeof render==='function')render(); return true; }
 function bmManuelSil(id){ bmManuelSave(bmManuelList().filter(function(x){return x.id!==id;})); try{if(window._manuelAlarmSync)_manuelAlarmSync();}catch(_e){} if(typeof render==='function')render(); }
 window.bmManuelEkleUI=function(){ var b=document.getElementById('bm-manuel-baslik'), t=document.getElementById('bm-manuel-tarih'), sa=document.getElementById('bm-manuel-saat'), tk=document.getElementById('bm-manuel-tekrar'); if(!b||!t) return; if(bmManuelEkle(b.value, t.value, sa?sa.value:'10:00', '', tk?tk.value:'yok')){ b.value=''; } };
-window.bmPlanBrewSet=function(val){ try{ if(typeof S==='undefined'||!S) return; S.planBrewTarih = (val&&/^\d{4}-\d{2}-\d{2}$/.test(val)) ? val : null; if(S.biraAd&&S.biraAd.trim()&&typeof tarifeKaydet==='function'){ tarifeKaydet(); } try{if(window._planPrepSync)_planPrepSync();}catch(_e){} if(typeof render==='function')render(); }catch(e){ console.warn('bmPlanBrewSet',e); } };
+window.bmPlanBrewSet=function(val){ try{ if(typeof S==='undefined'||!S) return;
+  // SPRINT BE5 (BD A1): bozuk tarih planı SİLMEYE dönüşüyordu (sessiz doğrulama reddi) — mevcut değer KORUNUR + uyarı
+  if(val && !/^\d{4}-\d{2}-\d{2}$/.test(val)){ if(typeof flash==='function')flash('⚠️ Geçersiz tarih — plan değişmedi','err'); if(typeof render==='function')render(); return; }
+  S.planBrewTarih = val || null; if(S.biraAd&&S.biraAd.trim()&&typeof tarifeKaydet==='function'){ tarifeKaydet(); } try{if(window._planPrepSync)_planPrepSync();}catch(_e){} if(typeof render==='function')render(); }catch(e){ console.warn('bmPlanBrewSet',e); } };
 window.bmPlanHatirlatmaEkle=function(){ try{ if(typeof S==='undefined'||!S) return; if(!Array.isArray(S.planBrewHatirlatmalar)) S.planBrewHatirlatmalar=[]; S.planBrewHatirlatmalar.push({gun:1,metin:''}); if(S.biraAd&&S.biraAd.trim()&&typeof tarifeKaydet==='function'){ tarifeKaydet(); } try{if(window._planPrepSync)_planPrepSync();}catch(_e){} if(typeof render==='function')render(); }catch(e){ console.warn('bmPlanHatirlatmaEkle',e); } };
 window.bmPlanHatirlatmaSil=function(i){ try{ if(typeof S==='undefined'||!S||!Array.isArray(S.planBrewHatirlatmalar)) return; i=parseInt(i,10); if(isNaN(i)||i<0||i>=S.planBrewHatirlatmalar.length) return; S.planBrewHatirlatmalar.splice(i,1); if(S.biraAd&&S.biraAd.trim()&&typeof tarifeKaydet==='function'){ tarifeKaydet(); } try{if(window._planPrepSync)_planPrepSync();}catch(_e){} if(typeof render==='function')render(); }catch(e){ console.warn('bmPlanHatirlatmaSil',e); } };
 window.bmPlanHatirlatmaGunSet=function(i,val){ try{ if(typeof S==='undefined'||!S) return; if(!Array.isArray(S.planBrewHatirlatmalar)) S.planBrewHatirlatmalar=[]; i=parseInt(i,10); if(isNaN(i)||i<0||i>=S.planBrewHatirlatmalar.length) return; var g=parseInt(val,10); if(isNaN(g)||g<0) g=0; S.planBrewHatirlatmalar[i].gun=g; if(S.biraAd&&S.biraAd.trim()&&typeof tarifeKaydet==='function'){ tarifeKaydet(); } try{if(window._planPrepSync)_planPrepSync();}catch(_e){} }catch(e){ console.warn('bmPlanHatirlatmaGunSet',e); } };
@@ -7049,7 +7055,7 @@ window._bmIDB = (function(){
 function _writeBoth(key,str){
   var okLS=false;
   try{localStorage.setItem(key,str);okLS=true;}catch(e){throw e;}
-  try{window._bmIDB.put(key,str);}catch(e){console.warn('IDB yedek fail',e);}
+  try{window._bmIDB.put(key,str);}catch(e){console.warn('IDB yedek fail',e);if(window.bmHataKaydet)bmHataKaydet('persist',e,'_writeBoth/IDB');} // SPRINT BE5 (BD B7): bayat-IDB diriltme riski artık izli
   return okLS;
 }
 
@@ -7066,6 +7072,9 @@ function _draftKrAyniMi(kr, s){
     var a = Object.assign({}, BOS, kr), b = Object.assign({}, BOS, s);
     delete a.id; delete a.tarih; delete a.ozet; delete a.guncelleme;
     delete b.id; delete b.tarih; delete b.ozet; delete b.guncelleme;
+    // SPRINT BE5 (BD F2-6): render'ın S'e yazdığı türetilmiş alanlar (19402 stilTah / altStil) kıyası
+    // kalıcı kırıp GHOST-DRAFT üretiyordu — volatil sayılır
+    delete a.stilTah; delete a.altStil; delete b.stilTah; delete b.altStil;
     return JSON.stringify(a) === JSON.stringify(b);
   }catch(e){ return false; }
 }
@@ -7879,9 +7888,9 @@ window._brewSnapshotYaz = function(s, rid, opts){
         var t = KR.find(function(k){return k&&k.id===String(rid);});
         if(t){ t.brewSnapshot = JSON.parse(JSON.stringify(snap)); try{ if(t.brewSonuc) delete t.brewSonuc; }catch(_bse){} t.ogManuel=null; t.fgManuel=null; t.preboilOG=null; t.guncelleme = Date.now(); if(typeof ky==='function') ky(KR); }
       }
-    }catch(e){ console.warn('_brewSnapshotYaz persist', e); }
+    }catch(e){ console.warn('_brewSnapshotYaz persist', e); if(window.bmHataKaydet)bmHataKaydet('persist',e,'_brewSnapshotYaz/persist'); /* SPRINT BE5 (BD C3) */ }
     return snap;
-  }catch(e){ console.warn('_brewSnapshotYaz', e); return null; }
+  }catch(e){ console.warn('_brewSnapshotYaz', e); if(window.bmHataKaydet)bmHataKaydet('persist',e,'_brewSnapshotYaz'); return null; /* SPRINT BE5 (BD C3): AT5/Q çapası kaybı izli */ }
 };
 // SPRINT M M2: aktif (tamamlanmamış) batch'te girilen pre-boil OG anında snapshot'a donar (son-yazan-kazanır);
 // brewSonuc varsa (batch bitti) eski snapshot'a DOKUNMAZ. Çağıran: Hesap sekmesi pre-boil input/✕ (tek giriş noktası).
@@ -7936,8 +7945,15 @@ window._brewSonucYaz = function(s, rid){
     var d = _brewSonucCanli(s);
     s.brewSonuc = { ts: Date.now(), ogG: d.og, fgG: d.fg, kaynak: { og: d.ogKay, fg: d.fgKay } };
     _brewSonucPersist(s, rid);
+    // SPRINT BE5 (BD F4-2): OG boş donuyorsa (günlükte aralık-dışı og_olcum varken) GÖRÜNÜR uyarı —
+    // Muzo '1054' vakası: kullanıcı ölçtüğünü sanıyor, atten/verim öğrenimi bu batch'ten akmıyordu.
+    try{
+      if(d.og == null && (s.brewLog||[]).some(function(x){ return x && x.tip==='og_olcum' && x.deger && _sgNum(x.deger)==null; })
+         && typeof flash === 'function')
+        flash('⚠️ OG ölçümün HESABA GİRMEDİ (aralık dışı format) — günlükteki OG kaydını ✏️ ile açıp Kaydet\'e bas, sonuç kendini tamamlar','err');
+    }catch(_fu){}
     return s.brewSonuc;
-  }catch(e){ console.warn('_brewSonucYaz', e); return null; }
+  }catch(e){ console.warn('_brewSonucYaz', e); if(window.bmHataKaydet)bmHataKaydet('persist',e,'_brewSonucYaz'); return null; /* SPRINT BE5 (BD C3) */ }
 };
 window._brewSonucTamamla = function(s, rid){
   try{
@@ -7948,7 +7964,7 @@ window._brewSonucTamamla = function(s, rid){
     if(son.ogG==null && d.og!=null){ son.ogG=d.og; son.kaynak=son.kaynak||{}; son.kaynak.og=d.ogKay; degisti=true; }
     if(son.fgG==null && d.fg!=null){ son.fgG=d.fg; son.kaynak=son.kaynak||{}; son.kaynak.fg=d.fgKay; degisti=true; }
     if(degisti) _brewSonucPersist(s, rid);
-  }catch(e){ console.warn('_brewSonucTamamla', e); }
+  }catch(e){ console.warn('_brewSonucTamamla', e); if(window.bmHataKaydet)bmHataKaydet('persist',e,'_brewSonucTamamla'); /* SPRINT BE5 (BD C3) */ }
 };
 // ═══ SPRINT I — PROFİL BATCH-PENCERE + TEK SG ARALIĞI ════════════════════════
 // I2: tüm yollar (otomatik donma, ✏️ düzeltme, analiz okuma, ogManuel/fgManuel backfill)
@@ -9157,7 +9173,7 @@ window.bmGeriDon=function(){
 const _KRSIL_SK = 'bm_kr_sil_v1';
 const _KRSIL_TTL = 90 * 86400000; // 90 gün
 function _krSilOku(){ try{ var a = JSON.parse(localStorage.getItem(_KRSIL_SK) || '[]'); return Array.isArray(a) ? a : []; }catch(e){ return []; } }
-function _krSilYaz(a){ try{ localStorage.setItem(_KRSIL_SK, JSON.stringify(a || [])); }catch(e){} }
+function _krSilYaz(a){ try{ localStorage.setItem(_KRSIL_SK, JSON.stringify(a || [])); return true; }catch(e){ if(window.bmHataKaydet)bmHataKaydet('persist',e,'_krSilYaz'); return false; } } // SPRINT BE5 (BD B1): tombstone yutulması artık ring'de — silinen reçete sync'ten dirilirse iz var
 function _krSilSupur(a){ var esik = Date.now() - _KRSIL_TTL; return (a || []).filter(function(t){ return t && t.id != null && typeof t.ts === 'number' && t.ts > esik; }); }
 function _krSilEkle(id){ var a = _krSilSupur(_krSilOku()); a = a.filter(function(t){ return String(t.id) !== String(id); }); a.push({ id: id, ts: Date.now() }); _krSilYaz(a); }
 window._krSilOku = _krSilOku; window._krSilEkle = _krSilEkle; window._krSilSupur = _krSilSupur; window._krSilYaz = _krSilYaz;
@@ -12338,12 +12354,21 @@ function attenHistory(mayaId){
     if(!r) return;
     const uses = r.mayaId===mayaId || r.maya2Id===mayaId;
     if(!uses) return;
-    const og = parseFloat(r.ogManuel);
-    if(!og || og<=1 || og>1.2) return;
-    const fgLog = (r.brewLog||[]).filter(x=>x && x.tip==='fg_olcum' && x.deger);
-    if(fgLog.length===0) return;
-    const lastFg = parseFloat(fgLog[fgLog.length-1].deger);
-    if(!lastFg || lastFg>=og || lastFg<1) return;
+    // SPRINT BE5 (BD F4-3): önce DONMUŞ gerçek çift (brewSonuc.ogG/fgG) — _brewSnapshotYaz her yeni
+    // batch'te ogManuel'i sıfırladığından (M M2) maya kolu tamamlanmış batch'lerde KÖRDÜ; brewSonuc
+    // batch'e ait ölçümdür, pencere gerekmez. Legacy yol (ogManuel + son fg_olcum) fallback kalır.
+    let og, lastFg;
+    if(r.brewSonuc && _sgNum(r.brewSonuc.ogG)!=null && _sgNum(r.brewSonuc.fgG)!=null){
+      og = _sgNum(r.brewSonuc.ogG); lastFg = _sgNum(r.brewSonuc.fgG);
+      if(og<=1 || lastFg>=og) return; // og=1.000 bölme-sıfırı + ters çift koruması (legacy dal ile aynı)
+    } else {
+      og = parseFloat(r.ogManuel);
+      if(!og || og<=1 || og>1.2) return;
+      const fgLog = (r.brewLog||[]).filter(x=>x && x.tip==='fg_olcum' && x.deger);
+      if(fgLog.length===0) return;
+      lastFg = parseFloat(fgLog[fgLog.length-1].deger);
+      if(!lastFg || lastFg>=og || lastFg<1) return;
+    }
     const atten = ((og-lastFg)/(og-1))*100;
     if(atten<30 || atten>100) return;
     results.push({atten:+atten.toFixed(1), og, fg:lastFg, biraAd:r.biraAd||'İsimsiz', tarih:r.tarih});
@@ -13275,7 +13300,7 @@ function rEditorTakvim(maya, maya2, tv){
             if(!hasFGkayit)
               lines.push({i:'💡', t:'<b>Sonraki adım:</b> 3–4 günden sonra ilk FG ölçümünü yap. 2 gün üst üste aynı değer → şişelemeye hazır.'});
     
-          } else if(e.tip==='fg_olcum' && !isNaN(v)){
+          } else if(e.tip==='fg_olcum' && !isNaN(v) && _sgNum(v)!=null){ // SPRINT BE5 (BD F6-1): aralık dışı FG aşağıdaki uyarı dalına düşer
             try {
               const cr=calc(), og=cr.og;
               if(og&&og>1.001){
@@ -13308,6 +13333,10 @@ function rEditorTakvim(maya, maya2, tv){
               }
             } catch(er){ lines.push({i:'📊', t:'FG: '+v+' gravity olarak kaydedildi.'}); }
     
+          } else if((e.tip==='og_olcum'||e.tip==='fg_olcum') && !isNaN(v) && _sgNum(v)==null){
+            // SPRINT BE5 (BD F6-1): aralık dışı ham değer kartta saçma türetim basıyordu
+            // ('OG: 1054.000 · Beklenen FG ~264.25') — türetim yerine BC uyarısı
+            lines.push({i:'⚠️', t:'<b>"'+esc(String(e.deger))+'"</b> gravity olarak anlaşılamadı (0.990–1.200) — bu kayıt HESAPLARA GİRMİYOR. Kaydı ✏️ ile açıp Kaydet\'e bas (1054 → 1.054 otomatik düzelir).'});
           } else if(e.tip==='og_olcum' && !isNaN(v)){
         lines.push({i:'🔬', t:'<b>Başlangıç yoğunluğu (OG):</b> '+v.toFixed(3)+' — hesaplanan değer güncellendi.'});
         try{
@@ -22766,8 +22795,11 @@ window.brewdayBaslatEkran=function(){
       flash('🔥 Timeline yeniden açıldı','ok');
     }else{
       // Zaten ekranda görünüyor ama butona basmış, kullanıcıya sıfırla sorusu
+      // SPRINT BE5 (BD F2-7): native confirm WebView-güvenilmez (AU2-5a) — in-app onay modalına devir;
+      // onaydan sonra kullanıcı Başlat'a yeniden basar (sıfırla+başlat tek adım olmaktan çıktı, bilinçli).
+      if(typeof brewdayZorlaSifirlaSor==='function'){ brewdayZorlaSifirlaSor(); return; }
       if(confirm('Brewday zaten aktif ve timeline ekranda.\n\nYine de sıfırlayıp yeniden başlatmak istiyor musun?')){
-        brewdayZorlaSifirla(true); // sessiz sıfırlama
+        brewdayZorlaSifirla(true); // sessiz sıfırlama (fallback — modal fonksiyonu yoksa)
         // Alt akışa düş ve yeni brewday başlat
       }else{
         return;
@@ -23246,7 +23278,7 @@ window.brewdayBitir=function(){
       muaf.forEach(function(a){ sonuc.push(a); });
       sonuc.sort(function(a,b){ return (a.g|0) - (b.g|0); });
       return sonuc;
-    } catch(e){ console.warn('[Alarm] gün birleştir:', e); return alarmlar; }
+    } catch(e){ console.warn('[Alarm] gün birleştir:', e); if(window.bmHataKaydet)bmHataKaydet('alarm',e,'gunBirlestir'); return alarmlar; /* SPRINT BE5 (BD C1) */ }
   };
 
   // Brewday bitince çağrılır — fermentasyonProfili'nden alarm listesi üret
@@ -23328,7 +23360,7 @@ window.brewdayBitir=function(){
         // Gün sırasına göre yeniden sırala (raporlama tutarlılığı için)
         alarmlar.sort((a,b) => a.g - b.g);
       }
-    } catch(_dhE){ console.warn('[Alarm] dry hop enjeksiyonu:', _dhE); }
+    } catch(_dhE){ console.warn('[Alarm] dry hop enjeksiyonu:', _dhE); if(window.bmHataKaydet)bmHataKaydet('alarm',_dhE,'planiKur/dryhop'); /* SPRINT BE5 (BD C1) */ }
     // FEAT-KATKI-GUN — k.gun planlı pitch-sonrası katkılar: ekleme alarmı; Meşe + sureGun: çıkarma alarmı (DH kalıbı)
     try {
       const gunluKatkilar = (S.katkilar||[]).filter(k => k && k.gun != null && !/mash|kaynat|whirlpool|flame/i.test(k.zaman||''));
@@ -23357,7 +23389,7 @@ window.brewdayBitir=function(){
         }
       });
       if (gunluKatkilar.length) alarmlar.sort((a,b) => a.g - b.g);
-    } catch(_kgE){ console.warn('[Alarm] katkı gün enjeksiyonu:', _kgE); }
+    } catch(_kgE){ console.warn('[Alarm] katkı gün enjeksiyonu:', _kgE); if(window.bmHataKaydet)bmHataKaydet('alarm',_kgE,'planiKur/katkiGun'); /* SPRINT BE5 (BD C1) */ }
 
     // ── D (karbonasyon/olgunlaşma) + A.2 (periyodik gravity) — ts-bazlı, sise/pitch anchor'lı ──
     // Profil 'Şişele'de susuyordu. Tahmini anchor: pitchTs + prof.sise. Şişeleme brewLog'a girince
@@ -23440,7 +23472,7 @@ window.brewdayBitir=function(){
         }
       }
       alarmlar.sort(function(a, b){ return a.g - b.g; });
-    } catch(_dakE){ console.warn('[Alarm] D/A.2 enjeksiyonu:', _dakE); }
+    } catch(_dakE){ console.warn('[Alarm] D/A.2 enjeksiyonu:', _dakE); if(window.bmHataKaydet)bmHataKaydet('alarm',_dakE,'planiKur/DA2'); /* SPRINT BE5 (BD C1) */ }
     // Sprint5: aynı g+ts+kategori düşen alarmları tek bildirimde birleştir (gravity/_sonrasiGun/pasif muaf). A.2/_doluGun ÖNCE çalıştı → bozulmaz.
     alarmlar = _alarmGunBirlestir(alarmlar);
     // Sprint3: kalıcı kategori (A/D) + tip-bazlı titreşim her alarma
@@ -23653,7 +23685,7 @@ window.brewdayBitir=function(){
       Object.keys(tum).forEach(function(k){ if(k.indexOf('maya:') === 0 && !gecerli[k]){ delete tum[k]; degisti = true; } });
       if(degisti) _alarmlariYaz(tum);
       return degisti;
-    } catch(e){ console.warn('[Alarm] maya tazelik sync:', e); return false; }
+    } catch(e){ console.warn('[Alarm] maya tazelik sync:', e); if(window.bmHataKaydet)bmHataKaydet('alarm',e,'mayaTazelikSync'); return false; /* SPRINT BE5 (BD B8) */ }
   };
 
   // B: STOK -> stok:<itemId> (yalnız eşik altı + tercih dusukStok ON). Dedup: aksiyon STABİL (miktar yok),
@@ -23686,7 +23718,7 @@ window.brewdayBitir=function(){
       Object.keys(tum).forEach(function(k){ if(k.indexOf('stok:') === 0 && !gecerli[k]){ delete tum[k]; degisti = true; } });
       if(degisti) _alarmlariYaz(tum);
       return degisti;
-    } catch(e){ console.warn('[Alarm] stok düşük sync:', e); return false; }
+    } catch(e){ console.warn('[Alarm] stok düşük sync:', e); if(window.bmHataKaydet)bmHataKaydet('alarm',e,'stokDusukSync'); return false; /* SPRINT BE5 (BD B8) */ }
   };
 
   // E (Sprint4) — manuel hatırlatma: bm_manuel_alarm -> manuel:<id>. ts kullanıcı seçti -> sessiz saat BYPASS (ham ts).
@@ -23742,7 +23774,7 @@ window.brewdayBitir=function(){
       if(storeDegisti && typeof bmManuelSave==='function') bmManuelSave(liste); // tekrarlayan re-arm ts'lerini persist et
       if(degisti) _alarmlariYaz(tum);
       return degisti;
-    } catch(e){ console.warn('[Alarm] manuel sync:', e); return false; }
+    } catch(e){ console.warn('[Alarm] manuel sync:', e); if(window.bmHataKaydet)bmHataKaydet('alarm',e,'manuelAlarmSync'); return false; /* SPRINT BE5 (BD B8) */ }
   };
 
   // E (Sprint4) — planlı demleme hazırlık: KR planBrewTarih -> plan:<id> (−2/−1/0). brewday başladıysa kalkar, geçmiş prep eklenmez.
@@ -23785,7 +23817,7 @@ window.brewdayBitir=function(){
       Object.keys(tum).forEach(function(k){ if(k.indexOf('plan:') === 0 && !gecerli[k]){ delete tum[k]; degisti = true; } });
       if(degisti) _alarmlariYaz(tum);
       return degisti;
-    } catch(e){ console.warn('[Alarm] plan prep sync:', e); return false; }
+    } catch(e){ console.warn('[Alarm] plan prep sync:', e); if(window.bmHataKaydet)bmHataKaydet('alarm',e,'planPrepSync'); return false; /* SPRINT BE5 (BD B8) */ }
   };
 
   // A (Sprint4) — stuck fermentation: pitch sonrasi FG olcumu yoksa pitch+3/+7 uyari.
@@ -23852,7 +23884,7 @@ window.brewdayBitir=function(){
       Object.keys(tum).forEach(function(k){ if(k.indexOf('stuck:') === 0 && !gecerli[k]){ delete tum[k]; degisti = true; } });
       if(degisti) _alarmlariYaz(tum);
       return degisti;
-    } catch(e){ console.warn('[Alarm] stuck ferm sync:', e); return false; }
+    } catch(e){ console.warn('[Alarm] stuck ferm sync:', e); if(window.bmHataKaydet)bmHataKaydet('alarm',e,'stuckFermSync'); return false; /* SPRINT BE5 (BD B8) */ }
   };
 
   // ═══ TETİKLEME ═══
@@ -24235,7 +24267,7 @@ window.brewdayBitir=function(){
       if(mr && mr.brewSonuc && mr.brewSonuc.ts === _AZ4.BS && Object.keys(mr.brewSonuc).length === 1){
         delete mr.brewSonuc;
         try{ if(typeof S !== 'undefined' && S && typeof _editId !== 'undefined' && String(_editId) === _AZ4.RID && S.brewSonuc && S.brewSonuc.ts === _AZ4.BS) delete S.brewSonuc; }catch(_azsE){}
-        try{ if(typeof ky === 'function') ky(KR); }catch(_azkE){}
+        try{ if(typeof ky === 'function'){ if(ky(KR)===false && window.bmHataKaydet)bmHataKaydet('persist',new Error('AZ4 onarım ky başarısız'),'azOnarim/ky'); } }catch(_azkE){ if(window.bmHataKaydet)bmHataKaydet('persist',_azkE,'azOnarim/ky'); } // SPRINT BE5 (BD B3)
       }
       if(!bAcik){ try{ localStorage.setItem('bm_az_onarim_v1', '2'); }catch(_azfE){} }
     }
@@ -24260,7 +24292,7 @@ window.brewdayBitir=function(){
         KR_list.forEach(r => {
           if(r && r.id && Array.isArray(r.brewLog)) _alarmSiselemKontrol(r.id, r.brewLog);
         });
-      } catch(e){}
+      } catch(e){ if(window.bmHataKaydet)bmHataKaydet('alarm',e,'alarmKontrol/siselemeTarama'); } // SPRINT BE5 (BD B6): bozuk bm_v6 60sn'de bir sessiz yutulmasın
 
       try { if(window._mayaTazelikSync) _mayaTazelikSync(); } catch(e){}   // C: maya tazelik reconcile
       try { if(window._stokDusukSync) _stokDusukSync(); } catch(e){}       // B: stok düşük reconcile
@@ -24483,7 +24515,16 @@ window.brewdayBitir=function(){
       r.bildirimSaati = saat;
       (r.alarmlar||[]).forEach(al => {
         if(al.durum === 'bekliyor'){
-          al.ts = _alarmTsHesapla(r.pitchTs, al.g, saat);
+          // SPRINT BE5 (BD F1-4): şişeleme-sonrası re-anchor'lı alarmda (_sonrasiGun) pitch tabanına
+          // dönmek günü GERİ kaydırıyordu (salınım + KV'ye yanlış ts) — yalnız SAAT bileşeni değişir.
+          if(al._sonrasiGun != null && al.ts){
+            var _sd = new Date(al.ts);
+            var _sm = /^(\d{1,2}):(\d{2})$/.exec(saat || '10:00');
+            _sd.setHours(_sm ? +_sm[1] : 10, _sm ? +_sm[2] : 0, 0, 0);
+            al.ts = (typeof _bildirimTsAyarla === 'function') ? _bildirimTsAyarla(_sd.getTime()) : _sd.getTime();
+          } else {
+            al.ts = _alarmTsHesapla(r.pitchTs, al.g, saat);
+          }
           degisti++;
         }
       });
@@ -24506,13 +24547,20 @@ window.brewdayBitir=function(){
       return;
     }
     // Pitch'i koru, planı yeniden kur (tamamlananlar korunmalı)
-    const tamamlananGunler = (mevcut.alarmlar||[]).filter(a => a.durum==='tamamlandi' || a.durum==='atlandi').map(a => a.g);
+    // SPRINT BE5 (BD F1-5): (a) 'atlandi' artık 'tamamlandi'ya ÇEVRİLMEZ (iki durum ayrı korunur);
+    // (b) yeni planda ts'i GEÇMİŞTE kalan alarmlar 'bekliyor' değil 'atlandi' başlar — Yenile'nin
+    // geçmiş KRİTİK modalı canlandırması (AZ5 sınıfı) biter (AZ4-B'nin bugun0 kalıbı).
+    const tamamlananGunler = (mevcut.alarmlar||[]).filter(a => a.durum==='tamamlandi').map(a => a.g);
+    const atlananGunler = (mevcut.alarmlar||[]).filter(a => a.durum==='atlandi').map(a => a.g);
     const sonuc = _alarmPlaniKur(_rid, mevcut.pitchTs);
     if(sonuc.ok){
-      // Eski tamamlananları geri yaz
+      // Eski durumları geri yaz + geçmiş-ts kuralı
       const yeni = _alarmlariOku();
+      const _bugun0 = new Date(); _bugun0.setHours(0,0,0,0);
       (yeni[_rid].alarmlar||[]).forEach(a => {
         if(tamamlananGunler.includes(a.g)) a.durum = 'tamamlandi';
+        else if(atlananGunler.includes(a.g)) a.durum = 'atlandi';
+        else if(a.ts < _bugun0.getTime()) a.durum = 'atlandi';
       });
       _alarmlariYaz(yeni);
       if(typeof flash==='function') flash('↻ '+sonuc.ping+' alarm yenilendi','ok');
@@ -24528,7 +24576,7 @@ window.brewdayBitir=function(){
       if(typeof window._alarmInit === 'function' && !window._alarmInt){
         window._alarmInit();
       }
-    } catch(e){ console.warn('[Alarm] Bootstrap hatası:', e); }
+    } catch(e){ console.warn('[Alarm] Bootstrap hatası:', e); if(window.bmHataKaydet)bmHataKaydet('alarm',e,'alarmBootstrap'); /* SPRINT BE5 */ }
   }
   if(document.readyState === 'loading'){
     document.addEventListener('DOMContentLoaded', _alarmBootstrap);
@@ -24607,7 +24655,7 @@ window.brewdayTamamla=function(){
         if(_azTumP['plan:' + _receteId]){ delete _azTumP['plan:' + _receteId]; _alarmlariYaz(_azTumP); }
       }
     } catch(_azpE){ if(window.bmHataKaydet)bmHataKaydet('brewday',_azpE,'AZ2/planTemizlik'); }
-  } catch(_alE){ console.warn('alarmPlaniKur hata:', _alE); }
+  } catch(_alE){ console.warn('alarmPlaniKur hata:', _alE); if(window.bmHataKaydet)bmHataKaydet('alarm',_alE,'brewdayTamamla/planiKur-dis'); } // SPRINT BE5 (BD C1)
   // DOM temizle
   const eski=document.getElementById('brewdayTimeline');
   if(eski)eski.remove();
@@ -25543,7 +25591,11 @@ window.toggleStilIdeal=toggleStilIdeal;
 // FLICKER FIX: Render ÇAĞIRMAZ. DOM'u hedefli güncelle (slider cerrahi).
 function tadimSet(alan, val){
   if(!S.tadim) S.tadim = {aroma:0,gorunum:0,tat:0,agizH:0,genel:0,offList:{},tadimNot:'',aroma_not:'',tat_not:'',agizH_not:'',oturumlar:[]};
-  S.tadim[alan] = parseInt(val,10)||0;
+  // SPRINT BE5 (BD F3-5): klavye yolu clamp'siz (99 ve -5 kabul ediyordu) — buton yolu (tadimInc) ile aynı sınırlar
+  var _tmx = {aroma:12, gorunum:3, tat:20, agizH:5, genel:10}[alan];
+  var _tv = parseInt(val,10)||0;
+  if(_tmx != null) _tv = Math.max(0, Math.min(_tmx, _tv));
+  S.tadim[alan] = _tv;
   S.tadim.puanKaynak = 'detay'; // AG2: manuel BJCP puanı → detaylı kaynak
   try{saveDraft();}catch(e){}
   // Cerrahi güncelleme: toplam skor + seviye
@@ -27473,6 +27525,10 @@ function logEkle(){
     if(_tip2==='fg_olcum'&&_deg2){if(_sgNum(_deg2)!=null)S.fgManuel=_deg2;} // SPRINT I I2: tek aralık
     if(_tip2==='og_olcum'&&_deg2){var _ov3=_sgNum(_deg2);if(_ov3!=null)S.ogManuel=_ov3;} // SPRINT I I4: og_olcum→ogManuel backfill simetrisi (fg'de vardı, og'de yoktu)
     try{ if(window._brewSonucTamamla) _brewSonucTamamla(S, (typeof _editId!=='undefined'?_editId:null)); }catch(_bst2){if(window.bmHataKaydet)bmHataKaydet('persist',_bst2,'logEkle/sonucTamamla');}
+    // SPRINT BE5 (BD F3-4): düzenleme dalı yan-etki zincirinin eksik kopyasıydı — tip 'siseleme'ye
+    // ÇEVRİLİRSE _brewSonucYaz tetiklenir (yeni-kayıt yoluyla aynı); _stuckFermSync her düzenlemede.
+    if(_tip2==='siseleme' && _eskiTip!=='siseleme'){ try{ if(window._brewSonucYaz) _brewSonucYaz(S, (typeof _editId!=='undefined'?_editId:null)); }catch(_bso2){if(window.bmHataKaydet)bmHataKaydet('persist',_bso2,'logEkle/duzenle-sonuc');} }
+    try { if(window._stuckFermSync) _stuckFermSync(); } catch(_sfe2){}
     logDuzenleSifirla();
     if(S.biraAd&&S.biraAd.trim())tarifeKaydet(); else _bmAdsizLogKaydet(); // SPRINT BE1-3
     if(_krUyari) flash(_krUyari[0],_krUyari[1]); // SPRINT BE3: kronoloji uyarısı düzenleme yolunda da
@@ -27552,8 +27608,23 @@ function logSilIdx(idx){
   if(idx<0||idx>=S.brewLog.length){flash('idx hatası: '+idx+'/'+S.brewLog.length,'hata');return;}
   var _lsil=S.brewLog.splice(idx,1)[0];
   // SPRINT G K1: commit birleşimi (KR-fazlası) silineni geri getirmesin → KR aynasından da düş
-  try{ if(_lsil && typeof _editId!=='undefined' && _editId){ var _lt=Array.isArray(KR)?KR.find(function(k){return k&&k.id===_editId;}):null; if(_lt && Array.isArray(_lt.brewLog)){ var _lk=_logAnahtar(_lsil); _lt.brewLog=_lt.brewLog.filter(function(e){ return !e || _logAnahtar(e)!==_lk; }); } } }catch(_lse){}
+  try{ if(_lsil && typeof _editId!=='undefined' && _editId){ var _lt=Array.isArray(KR)?KR.find(function(k){return k&&k.id===_editId;}):null; if(_lt && Array.isArray(_lt.brewLog)){ var _lk=_logAnahtar(_lsil); _lt.brewLog=_lt.brewLog.filter(function(e){ return !e || _logAnahtar(e)!==_lk; }); } } }catch(_lse){if(window.bmHataKaydet)bmHataKaydet('persist',_lse,'logSilIdx/KR-ayna');} // SPRINT BE5 (BD B4): logEkle 27177 simetrisi
   flash('Silindi → kalan: '+S.brewLog.length+' kayıt');
+  // SPRINT BE5 (BD F3-3): silinen OG/FG kaydının backfill'i (ogManuel/fgManuel) hesaplara akmaya
+  // devam ediyordu — kalan AYNI-tip loglardan en son geçerli değere çekilir; yoksa temizlenir + bilgi.
+  // brewSonuc'a DOKUNULMAZ (F1 donmuş — ✏️ düzeltme hakkı bmSonucDuzelt'te).
+  try{
+    if(_lsil && (_lsil.tip==='og_olcum' || _lsil.tip==='fg_olcum')){
+      var _kalan=null;
+      for(var _ki=S.brewLog.length-1; _ki>=0; _ki--){
+        var _ke=S.brewLog[_ki];
+        if(_ke && _ke.tip===_lsil.tip && _ke.deger && _sgNum(_ke.deger)!=null){ _kalan=_ke.deger; break; }
+      }
+      if(_lsil.tip==='og_olcum'){ S.ogManuel = (_kalan!=null) ? _sgNum(_kalan) : null; }
+      else { S.fgManuel = (_kalan!=null) ? String(_sgNum(_kalan)) : null; }
+      if(_kalan==null && typeof flash==='function') flash('ℹ️ Silinen ölçümün manuel alanı da temizlendi — hesap artık tahmine döner','ok');
+    }
+  }catch(_bfE){ if(window.bmHataKaydet)bmHataKaydet('calc',_bfE,'logSilIdx/backfillGeri'); }
   if(S.biraAd&&S.biraAd.trim())tarifeKaydet(); else render();
   setTimeout(function(){
     var ekranEl=document.getElementById('ekran');
@@ -27857,8 +27928,9 @@ window.rStokAyarlar = function(){
   // Sprint O: hata günlüğü özeti (kayıt bm-hata-boot ring buffer — bm_hata_log_v1)
   var _bHata=[]; try{ _bHata=(typeof bmHataLogOku==='function')?bmHataLogOku():[]; }catch(e){}
   var _bHataHtml='';
+  var _bRingKayip=(window._bmRingKayip||0)>0?'<small style="color:var(--crit)">⚠️ '+window._bmRingKayip+' hata kaydı YAZILAMADI (depolama dolu olabilir)</small>':''; // SPRINT BE5 (BD A7): çifte körlük göstergesi
   if (!_bHata.length) {
-    _bHataHtml='<div class="bm-ayar-satir"><div class="bm-ayar-satir-text">⚠️ Son Hatalar <small style="color:var(--ok)">✓ Hata kaydı yok</small></div></div>';
+    _bHataHtml='<div class="bm-ayar-satir"><div class="bm-ayar-satir-text">⚠️ Son Hatalar <small style="color:var(--ok)">✓ Hata kaydı yok</small>'+_bRingKayip+'</div></div>';
   } else {
     var _bHEsc=function(s){ return String(s==null?'':s).replace(/[<>&"]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c];}); };
     var _bHataList=_bHata.slice(-5).reverse().map(function(h){
@@ -27868,7 +27940,7 @@ window.rStokAyarlar = function(){
       return '<small style="display:block;padding:2px 0;border-bottom:1px dotted var(--cizgi-arac)">'+t+' · '+_bHEsc(m)+(h.n>1?' <b>×'+h.n+'</b>':'')+'</small>';
     }).join('');
     _bHataHtml='<details class="bm-ayar-satir" style="display:block">'+
-      '<summary class="bm-ayar-satir-text" style="cursor:pointer">⚠️ Son Hatalar ('+_bHata.length+') <small>son 5 kayıt · tümünü panoya kopyala</small></summary>'+
+      '<summary class="bm-ayar-satir-text" style="cursor:pointer">⚠️ Son Hatalar ('+_bHata.length+') <small>son 5 kayıt · tümünü panoya kopyala</small>'+_bRingKayip+'</summary>'+
       '<div style="padding:6px 0 2px">'+_bHataList+
         '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">'+
           '<button class="bm-ayar-btn-sec" onclick="window.bmHataKopyala()">📋 Panoya Kopyala</button>'+
@@ -27888,14 +27960,16 @@ window.rStokAyarlar = function(){
     '<div class="bm-ayar-kart">'+
       '<div class="bm-ayar-kart-baslik">☁️ Senkronizasyon</div>'+
       '<div class="bm-ayar-satir">'+
-        '<div class="bm-ayar-satir-text">Firebase sync <small>Durum: '+syncDurum+'</small></div>'+
+        '<div class="bm-ayar-satir-text">Firebase sync <small>Durum: '+syncDurum+'</small>'+
+          '<small>☁️ Canlı senkron YALNIZ reçete + stok taşır. 📱 Bu cihazda kalanlar: alarm planları, taslaklar, öğrenme havuzları (verim/stil/off-flavor/maya), tercihler — başka cihaza taşımanın yolu aşağıdaki Yedek</small>'+ // SPRINT BE5-2 (BD F7-4): kapsam şeffaflığı — "alarmlarım öbür cihazda niye yok" sürprizi bitsin
+        '</div>'+
         '<button class="bm-ayar-btn-sec" onclick="if(typeof syncPanelAc===\'function\')syncPanelAc()">Panel</button>'+
       '</div>'+
     '</div>'+
     '<div class="bm-ayar-kart">'+
       '<div class="bm-ayar-kart-baslik">💾 Veri</div>'+
       '<div class="bm-ayar-satir">'+
-        '<div class="bm-ayar-satir-text">Yedek dışa aktar <small>'+lsKayit+' anahtar · '+boyutKB+' KB · reçete, stok, alarm, ayar</small></div>'+
+        '<div class="bm-ayar-satir-text">Yedek dışa aktar <small>'+lsKayit+' anahtar · '+boyutKB+' KB · reçete, stok, alarm planları, öğrenme havuzları, ayarlar — cihaz-yerel verinin TAMAMI (sync\'in taşımadıkları dahil)</small></div>'+
         '<button class="bm-ayar-btn" onclick="window.bmVeriExport()">İndir</button>'+
       '</div>'+
       '<div class="bm-ayar-satir">'+
@@ -28104,12 +28178,12 @@ window.setSekme=setSekme;window.yeniTarif=yeniTarif;window.maltEkle=maltEkle;win
 window.mineralEkle=mineralEkle;window.notu_kaydet=notu_kaydet;window.stokEkle=stokEkle;window.stokGuncelle=stokGuncelle;window.stokSil=stokSil;window.katki_ekle_ozel=katki_ekle_ozel;window.katki_ekle_tarif=katki_ekle_tarif;window.stokSecimGuncelle=stokSecimGuncelle;
 window.S=S;window.KR=KR;window.silOnay=silOnay;window.render=render;
 window.addEventListener('beforeunload', function(){
-  try{saveDraft();}catch(e){}
-  try{_syncGonderKeepalive();}catch(e){}
+  try{saveDraft();}catch(e){if(window.bmHataKaydet)bmHataKaydet('persist',e,'unload/saveDraft');} // SPRINT BE5 (BD B2): kapanış kaybı izsiz kalmasın (senkron LS yazımı çoğunlukla yetişir)
+  try{_syncGonderKeepalive();}catch(e){if(window.bmHataKaydet)bmHataKaydet('sync',e,'unload/keepalive');}
 });
 window.addEventListener('pagehide', function(){
-  try{saveDraft();}catch(e){}
-  try{_syncGonderKeepalive();}catch(e){}
+  try{saveDraft();}catch(e){if(window.bmHataKaydet)bmHataKaydet('persist',e,'unload/saveDraft');} // SPRINT BE5 (BD B2): kapanış kaybı izsiz kalmasın (senkron LS yazımı çoğunlukla yetişir)
+  try{_syncGonderKeepalive();}catch(e){if(window.bmHataKaydet)bmHataKaydet('sync',e,'unload/keepalive');}
 });window.STOK=STOK;window.KATKILAR=KATKILAR;
 window.MALTLAR=MALTLAR;window.MINERALLER=MINERALLER;
 
@@ -28235,7 +28309,7 @@ async function syncGonder(){
       _syncErrorToast('gönderim', null, res.status);
     }
   } catch(e){
-    console.warn('syncGonder:', e);
+    console.warn('syncGonder:', e); if(window.bmHataKaydet)bmHataKaydet('sync',e,'syncGonder'); // SPRINT BE5 (BD C2)
     _syncErrorToast('gönderim', e);
   }
   syncBusy = false;
@@ -28304,7 +28378,7 @@ async function syncAl(){
     // Migration: guncelleme alanı olmayan eski reçeteler 0 sayılır (en eski).
     // Guard: Firebase BOŞ + yerel DOLU → ezme reddedilir (mevcut davranış korunur).
     if(gelenKR.length === 0 && yerelKR.length > 0){
-      console.warn('syncAl: Firebase BOŞ, yerel dolu — EZME REDDEDILDI');
+      console.warn('syncAl: Firebase BOŞ, yerel dolu — EZME REDDEDILDI'); if(window.bmHataKaydet)bmHataKaydet('koruma',new Error('Firebase boş, yerel dolu — ezme reddedildi (veri koruma kararı)'),'syncAl/ezmeRed'); // SPRINT BE5 (BD C2): koruma KARARI da kayda geçer
       setTimeout(syncGonder, 200);
       return;
     }
@@ -28373,7 +28447,7 @@ async function syncAl(){
   } catch(e){
     // v2.78.91 Q5 — sessiz yutma kaldırıldı. Network/parse/auth hatası bilinebilir olsun.
     // 134-S: bmToast error (cooldown'lu polling spam onleme)
-    console.warn('syncAl:', e);
+    console.warn('syncAl:', e); if(window.bmHataKaydet)bmHataKaydet('sync',e,'syncAl'); // SPRINT BE5 (BD C2)
     _syncErrorToast('alım', e);
   }
 }

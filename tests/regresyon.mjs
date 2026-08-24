@@ -5118,6 +5118,94 @@ const CASELER = [
       __REG.ok('batch nV sayımına GİRDİ (ölçümlü)', a.ozet == null || a.ozet.nV >= 1, JSON.stringify(a.ozet && { tamamN: a.ozet.tamamN, nV: a.ozet.nV }));
       return __REG.al();
     })
+  },
+
+  // ── SPRINT BE5: sessiz altyapı — ring bağlama + sync görünürlüğü + kalan BD bulguları ──
+  {
+    kod: 'BE5-RING', ad: 'bağlanan catch ring\'e düşer (krSilYaz quota-sim); A1 plan korunur; tadım clamp; stilTah ghost-draft volatil; ring-kayıp sayacı görünür',
+    calistir: (page) => page.evaluate(() => {
+      const id = __REG.yeniKayit('BE5 Ring', {});
+      const mesajlar = []; const eskiF = window.flash;
+      window.flash = function (m) { mesajlar.push(String(m)); try { return eskiF.apply(this, arguments); } catch (_e) {} };
+      const origSet = Storage.prototype.setItem;
+      try {
+        // B1: tombstone yazımı patlat → ring'e düştü (silme akışı bozulmaz)
+        bmHataLogSil();
+        Storage.prototype.setItem = function (k, v) { if (k === 'bm_kr_sil_v1') throw new Error('QUOTA-SIM'); return origSet.apply(this, arguments); };
+        _krSilEkle('be5-x');
+        __REG.ok('B1: tombstone yutulması ring\'de', (bmHataLogOku() || []).some(h => h && /_krSilYaz/.test(h.kaynak || '')));
+      } finally { Storage.prototype.setItem = origSet; }
+      // A1: bozuk tarih planı SİLMİYOR
+      S.planBrewTarih = '2026-09-01';
+      bmPlanBrewSet('bozuk-tarih');
+      __REG.ok('A1: geçersiz tarihte plan KORUNDU + uyarı', S.planBrewTarih === '2026-09-01' && mesajlar.some(m => /Geçersiz tarih/.test(m)), S.planBrewTarih);
+      bmPlanBrewSet(''); __REG.ok('A1: boş = bilinçli temizleme AYNEN', S.planBrewTarih === null);
+      // F3-5: tadım clamp (klavye yolu)
+      tadimSet('tat', '99'); __REG.ok('tadım 99 → 20 clamp', S.tadim.tat === 20, String(S.tadim.tat));
+      tadimSet('aroma', '-5'); __REG.ok('tadım -5 → 0 clamp', S.tadim.aroma === 0);
+      // F2-6: stilTah/altStil volatil — kıyası kırmaz
+      const krK = KR.find(k => k && k.id === id);
+      const sK = JSON.parse(JSON.stringify(krK)); sK.stilTah = 'Weizen / Weissbier'; sK.altStil = '';
+      __REG.ok('F2-6: stilTah farkı ghost-draft üretmez (_draftKrAyniMi true)', _draftKrAyniMi(krK, sK) === true);
+      // A7: ring-kayıp göstergesi
+      window._bmRingKayip = 3;
+      const ayar = rStokAyarlar();
+      __REG.ok('A7: yazılamayan kayıt sayacı Ayarlar\'da', ayar.indexOf('3 hata kaydı YAZILAMADI') >= 0);
+      window._bmRingKayip = 0;
+      window.flash = eskiF;
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BE5-SYNC', ad: 'sync kapsamı ŞEFFAF: canlı senkron yalnız reçete+stok; cihaz-yerel liste (alarm/öğrenme/taslak) + Yedek yönlendirmesi görünür',
+    calistir: (page) => page.evaluate(() => {
+      const h = rStokAyarlar();
+      __REG.ok('senkron kapsamı net', h.indexOf('Canlı senkron YALNIZ reçete + stok') >= 0);
+      __REG.ok('cihaz-yerel liste net (alarm planları + öğrenme)', h.indexOf('alarm planları') >= 0 && h.indexOf('öğrenme havuzları') >= 0);
+      __REG.ok('Yedek yönlendirmesi var', /Yedek/.test(h));
+      __REG.ok('Yedek satırı sync-taşımayanları söylüyor', h.indexOf('sync\'in taşımadıkları dahil') >= 0);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BE5-KALAN', ad: 'F1-5 Yenile: atlandi korunur + geçmiş-ts yeniden-kurulanlar atlandi (modal canlanması yok); F1-4 saat değişimi re-anchor gününü korur; F4-3 attenHistory brewSonuc okur; F3-4 düzenleme→siseleme sonuç yazar',
+    calistir: (page) => page.evaluate(() => {
+      const id = __REG.yeniKayit('BE5 Kalan', { stil: 'Weizen / Weissbier', mayaId: 'bb_alman_bugday1' });
+      // F1-5: 40 gün önce pitch → çoğu alarm geçmiş
+      const plan = _alarmPlaniKur(_editId, Date.now() - 40 * 864e5);
+      __REG.ok('plan kuruldu', !!(plan && plan.ok));
+      let t = _alarmlariOku(); const g0 = t[_editId].alarmlar[0].g;
+      t[_editId].alarmlar[0].durum = 'atlandi'; _alarmlariYaz(t);
+      _alarmPlaniYenile();
+      const y = _alarmlariOku()[_editId];
+      __REG.ok('F1-5a: atlandi KORUNDU (tamamlandi olmadı)', y.alarmlar.find(a => a.g === g0).durum === 'atlandi');
+      __REG.ok('F1-5b: geçmiş-ts alarmlar bekliyor DEĞİL atlandi (kritik modal canlanmaz)', !y.alarmlar.some(a => a.durum === 'bekliyor' && a.ts < Date.now() - 864e5), JSON.stringify(y.alarmlar.filter(a => a.durum === 'bekliyor').map(a => a.g)));
+      // F1-4: _sonrasiGun'lu bekliyor alarmda saat değişimi GÜNÜ korur
+      t = _alarmlariOku();
+      const hedefGun = new Date(Date.now() + 10 * 864e5); hedefGun.setHours(10, 0, 0, 0);
+      t[_editId].alarmlar.push({ g: 99, ts: hedefGun.getTime(), tip: 'kontrol', aksiyon: '🫧 Karbonasyon kontrol — test', durum: 'bekliyor', _sonrasiGun: 14 });
+      _alarmlariYaz(t);
+      _alarmSaatiAyarla('08:30');
+      const a99 = _alarmlariOku()[_editId].alarmlar.find(a => a.g === 99);
+      const d99 = new Date(a99.ts);
+      __REG.ok('F1-4: gün AYNI kaldı, yalnız saat değişti (08:30)', d99.toDateString() === hedefGun.toDateString() && d99.getHours() === 8 && d99.getMinutes() === 30, d99.toString().slice(0, 24));
+      // F4-3: attenHistory brewSonuc'tan okur (ogManuel yokken)
+      const mr = KR.find(k => k && k.id === id);
+      mr.ogManuel = null; mr.mayaId = 'bb_alman_bugday1';
+      mr.brewSonuc = { ts: 1, ogG: 1.054, fgG: 1.014, kaynak: { og: 'olcum', fg: 'olcum' } };
+      const ah = attenHistory('bb_alman_bugday1');
+      __REG.ok('F4-3: donmuş çiftten atten hesaplandı (~74)', !!ah && ah.count >= 1 && Math.abs(ah.avg - 74.1) < 2, ah && String(ah.avg));
+      // F3-4: düzenlemeyle tip→siseleme çevrilince brewSonuc yazılır
+      delete mr.brewSonuc;
+      tarifAc(id); setSekme('takvim'); if (typeof render === 'function') render();
+      S.brewLog = [{ tip: 'cold_crash', tarih: '2026-08-20', deger: '', not: '', id: 'cc1' }];
+      if (typeof render === 'function') render();
+      logDuzenle(0);
+      const tipEl = document.getElementById('logTip'); tipEl.value = 'siseleme';
+      logEkle();
+      __REG.ok('F3-4: tip→siseleme düzenlemesi brewSonuc DONDURDU', !!(KR.find(k => k && k.id === id) || {}).brewSonuc);
+      return __REG.al();
+    })
   }
 ];
 

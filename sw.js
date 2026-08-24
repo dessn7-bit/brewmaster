@@ -729,7 +729,8 @@
 // HTML degisti (Sprint BE2) -> KURAL 12.3 CACHE_VERSION bump v131-417 -> v131-418.
 // HTML degisti (Sprint BE3) -> KURAL 12.3 CACHE_VERSION bump v131-418 -> v131-419.
 // HTML degisti (Sprint BE4) -> KURAL 12.3 CACHE_VERSION bump v131-419 -> v131-420.
-const CACHE_VERSION='bm-cache-v131-420';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
+// HTML degisti (Sprint BE5) -> KURAL 12.3 CACHE_VERSION bump v131-420 -> v131-421.
+const CACHE_VERSION='bm-cache-v131-421';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
 const ASSET_CACHE   = 'bm-assets-v1';        // font + ikon + manifest — KALICI, bump'ta silinmez
 const MODEL_CACHE   = 'bm-models-v1';        // workers.dev + jsdelivr — SHA'li/immutable URL, KALICI
 
