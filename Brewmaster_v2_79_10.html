@@ -23273,7 +23273,9 @@ window.brewdayBitir=function(){
     if(!siseEntry) return false;
     var tum = _alarmlariOku();
     if(!tum[receteId] || !Array.isArray(tum[receteId].alarmlar)) return false;
-    if(tum[receteId].durum === 'bitti') return false; // finalize edilmiş
+    // SPRINT AZ3: 'bitti' erken-çıkışı KALDIRILDI — finalize edilmiş grupta yeni bir şişeleme kaydı
+    // karbonasyon/içime-hazır alarmlarını yeniden kurabilmeli. Idempotans aşağıda ts-eşitliğiyle:
+    // aynı şişeleme döngüsünün ts'i eşleşir → dokunulmaz; eski tamamlanmış döngü (hedef geçmişte) → dokunulmaz.
     // gerçek şişeleme ts: tarih 'YYYY-MM-DD' -> yerel gece yarısı; yoksa entry.id (oluşturma ts); yoksa now
     var _bottleTs = NaN;
     if(siseEntry.tarih){ var _bd = new Date(siseEntry.tarih + 'T00:00:00'); _bottleTs = _bd.getTime(); }
@@ -23287,12 +23289,15 @@ window.brewdayBitir=function(){
       var _ak = (a.aksiyon || '').toLowerCase();
       var _post = (a._sonrasiGun != null) || _ak.indexOf('karbonasyon') >= 0 || _ak.indexOf('olgunlaş') >= 0;
       if(_post){
+        var _yeniTs = (a._sonrasiGun != null) ? _alarmTsHesapla(_bottleTs, a._sonrasiGun | 0, _saat) : null;
         if(a.durum === 'bekliyor'){
-          if(a._sonrasiGun != null){
-            var _yeniTs = _alarmTsHesapla(_bottleTs, a._sonrasiGun | 0, _saat);
-            if(a.ts !== _yeniTs){ a.ts = _yeniTs; _degisti = true; }
-          }
+          if(_yeniTs != null && a.ts !== _yeniTs){ a.ts = _yeniTs; _degisti = true; }
           _postBekleyen = true;
+        } else if(_yeniTs != null && a.ts !== _yeniTs && _yeniTs > Date.now()){
+          // SPRINT AZ3: kapanmış post-bottle alarmı FARKLI bir şişelemeye ait (ts eşleşmiyor) ve yeni
+          // hedef GELECEKTE → yeniden kur. Geçmiş hedef = eski döngü → dokunma (kaçırılmış-spam yok);
+          // ts eşleşiyor = bu döngüde kullanıcı erken tamamlamış → tamamlanmış kalır.
+          a.ts = _yeniTs; a.durum = 'bekliyor'; _degisti = true; _postBekleyen = true;
         }
       } else if(a.durum === 'bekliyor'){
         a.durum = 'bitti'; _degisti = true; // pre-bottle: tamamlandı say
@@ -23754,6 +23759,14 @@ window.brewdayBitir=function(){
       var grup = tum[rid]; if (!grup || !Array.isArray(grup.alarmlar)) return;
       var al = grup.alarmlar.find(function(x){ return x && x.g === gun; });
       if (!al) return;
+      // SPRINT AZ1: bayat-alarm kapısı — 30+ gün geçmiş alarmın onayı günlüğe YAZILMAZ ve kısayol
+      // toast'u açılmaz (o tarihe hayalet kayıt üretir: 24 Ağu 2026'da ✓'lenen 17 Haz prova planı
+      // 25 Haziran'a "siseleme" yazdı, faz kartı "Kondisyon 60. gün" dedi). ≤30 gün geriye dönük onay
+      // Sprint R gereği AYNEN alarm gününe yazılır (dün çalan alarmı bugün onaylamak meşru).
+      // "Bugüne yaz" seçeneği bilinçli REDDEDİLDİ: bayat "Şişele" onayı bugüne sahte şişeleme
+      // + _brewSonucYaz üretirdi — aynı hata sınıfının öbür yüzü.
+      var _azYasG = (al.ts && isFinite(al.ts)) ? Math.floor((Date.now() - al.ts) / 864e5) : 0;
+      if (_azYasG > 30) { if (typeof flash === 'function') flash('⏰ Alarm ' + _azYasG + ' gün eski — günlüğe yazılmadı', 'err'); return; }
       var es = _bmAlarmLogEsle(al);
       if (!es) return;
       if (es.kisayol) { _bmOlcumToast(rid); return; }                          // ölçüm: otomatik değer ASLA
@@ -23888,9 +23901,73 @@ window.brewdayBitir=function(){
     return sonuc;
   };
 
+  // ═══ SPRINT AZ4: veri onarımı + hayalet-plan hijyeni ═══
+  // Teşhis: design_muzo_alarm_ikiay_teshis (2026-08-24). İki brewday PROVASI (Muzo 17 Haz 10:15,
+  // Pumpkin 29 Haz 00:22) cihaz-yerel bm_alarms_v1'de tam fermentasyon planı bıraktı; alarm deposu
+  // cihazlar arası senkron edilmediğinden 16 Ağu'nun gerçek planı öbür cihazda kaldı.
+  // A) HİJYEN (kalıcı, her tikte): ana grup var + reçetenin brewLog'unda HİÇ brew kanıtı yok
+  //    (brewday_start/end, pitching, siseleme) + TÜM alarmlar 7+ gün geçmiş → grup silinir.
+  //    Bu, AZ5'te ölçülen sonsuz kritik-modal rotasyonunun (Pumpkin: Cold crash → 75 sn → Şişele)
+  //    kaynağını keser; gelecekteki prova artıkları da kendiliğinden temizlenir.
+  //    Alarm grubu TÜRETİLMİŞ durumdur (kullanıcı verisi değil) — silme veri kaybı sayılmaz.
+  // B) MUZO ÇAPA (bayrak-kapılı): pitchTs birebir 1781680514549 (17 Haz provası) ise gerçek pitch
+  //    1786898548757'ye (16 Ağu 19:42:28.757 = brewday_end+1ms, KV stuck-grubu kanıtı) yeniden çapala.
+  //    ÖN KOŞUL: hayalet siseleme kaydı (almKey 1775830924009|8) günlükten SİLİNMİŞ olmalı — duruyorsa
+  //    BEKLE (yoksa _alarmSiselemKontrol onarılan planı 25 Haziran'a geri bozar); Kaan kaydı silince
+  //    sonraki tik otomatik uygular. Geçmiş günler terminal (tamamlandi korunur, kalanı atlandi),
+  //    bugün+gelecek bekliyor (şişele G8 bugün meşru olarak çalar).
+  // C) BOŞ brewSonuc (bayrak-kapılı): yalnız {ts:1787573403523} (köprünün 24 Ağu boş yazımı) ise sil —
+  //    F1a "yeniden demleme izni"ne sahte kanıt bırakmasın. og_olcum 1054 BİLEREK dokunulmaz (karar Kaan'ın).
+  // Bayrak bm_az_onarim_v1='2': B kapanınca (uygulandı VEYA bu cihazda Haziran çapası yok) B+C biter; A sürer.
+  var _AZ4 = { RID:'1775830924009', ESKI:1781680514549, YENI:1786898548757, BS:1787573403523, KEY:'1775830924009|8' };
+  function _azOnarim(){
+    var tum = _alarmlariOku(), degisti = false;
+    var KRL = (typeof KR !== 'undefined' && Array.isArray(KR)) ? KR : [];
+    var simdi = Date.now();
+    Object.keys(tum).forEach(function(k){
+      if(/^(maya|stok|manuel|plan|stuck):/.test(k)) return;
+      var g = tum[k]; if(!g || !Array.isArray(g.alarmlar) || !g.alarmlar.length) return;
+      var r = KRL.find(function(x){ return x && String(x.id) === String(k); });
+      if(!r) return; // KR'de olmayan grup _alarmOrphanTemizle'nin işi
+      var kanit = Array.isArray(r.brewLog) && r.brewLog.some(function(e){ return e && /^(brewday_start|brewday_end|pitching|siseleme|sise|bottle)$/.test(e.tip); });
+      var hepsiEski = g.alarmlar.every(function(a){ return a && a.ts < simdi - 7 * 864e5; });
+      if(!kanit && hepsiEski){ delete tum[k]; degisti = true; }
+    });
+    if(localStorage.getItem('bm_az_onarim_v1') !== '2'){
+      var mg = tum[_AZ4.RID];
+      var mr = KRL.find(function(x){ return x && String(x.id) === _AZ4.RID; });
+      var bAcik = !!(mg && mg.pitchTs === _AZ4.ESKI);
+      if(bAcik){
+        var hayaletVar = !!(mr && Array.isArray(mr.brewLog) && mr.brewLog.some(function(e){ return e && e.almKey === _AZ4.KEY; }));
+        if(!hayaletVar){
+          var saat = _alarmSaatiAl();
+          var bugun0 = new Date(); bugun0.setHours(0, 0, 0, 0);
+          mg.pitchTs = _AZ4.YENI; mg.durum = 'aktif';
+          (mg.alarmlar || []).forEach(function(a){
+            if(!a) return;
+            a.ts = _alarmTsHesapla(_AZ4.YENI, a.g | 0, saat);
+            if(a.ts < bugun0.getTime()){ if(a.durum !== 'tamamlandi') a.durum = 'atlandi'; }
+            else a.durum = 'bekliyor';
+          });
+          degisti = true; bAcik = false;
+        }
+      }
+      if(mr && mr.brewSonuc && mr.brewSonuc.ts === _AZ4.BS && Object.keys(mr.brewSonuc).length === 1){
+        delete mr.brewSonuc;
+        try{ if(typeof S !== 'undefined' && S && typeof _editId !== 'undefined' && String(_editId) === _AZ4.RID && S.brewSonuc && S.brewSonuc.ts === _AZ4.BS) delete S.brewSonuc; }catch(_azsE){}
+        try{ if(typeof ky === 'function') ky(KR); }catch(_azkE){}
+      }
+      if(!bAcik){ try{ localStorage.setItem('bm_az_onarim_v1', '2'); }catch(_azfE){} }
+    }
+    if(degisti) _alarmlariYaz(tum);
+    return degisti;
+  }
+  window._azOnarim = _azOnarim;
+
   // Ana kontrol — açılışta ve 60sn'de bir
   window._alarmKontrolEt = function(){
     try {
+      try { _azOnarim(); } catch(_azoE){ if(window.bmHataKaydet)bmHataKaydet('alarm',_azoE,'AZ4/onarim'); }
       // v2.78.84 H7: Önce şişelenmiş reçetelerin alarmlarını kapat
       // Aktif S için — _editId KR ID'si, S.id asla atanmıyor (tarifAc id'yi çıkarıyor)
       try {
@@ -24190,6 +24267,22 @@ window.brewdayTamamla=function(){
         console.warn('Alarm kurulumu:', _alsonuc.hata);
       }
     }
+    // SPRINT AZ2: plan GERÇEKLEŞTİ — planlı-demleme kalıntısını düşür (Sprint F'nin brewSonuc
+    // mantığının alarm karşılığı). Bilinçli olarak brewday_start'ta DEĞİL burada: yarıda bırakılan
+    // brewday'de plan tarihi kalmalı (prep alarmlarını _planPrepSync zaten start'ta susturuyor).
+    // Kanıt (Muzo): planBrewTarih=2026-06-28 + "Maltları kır" prep alarmı 16 Ağu brewday'inden
+    // 8 gün sonra hâlâ cihazda duruyordu.
+    try {
+      if(typeof S !== 'undefined' && S && S.planBrewTarih) delete S.planBrewTarih;
+      if(typeof KR !== 'undefined' && Array.isArray(KR)){
+        var _azKrP = KR.find(function(k){ return k && String(k.id) === String(_receteId); });
+        if(_azKrP && _azKrP.planBrewTarih){ delete _azKrP.planBrewTarih; if(typeof ky === 'function') ky(KR); }
+      }
+      if(typeof _alarmlariOku === 'function' && typeof _alarmlariYaz === 'function'){
+        var _azTumP = _alarmlariOku();
+        if(_azTumP['plan:' + _receteId]){ delete _azTumP['plan:' + _receteId]; _alarmlariYaz(_azTumP); }
+      }
+    } catch(_azpE){ if(window.bmHataKaydet)bmHataKaydet('brewday',_azpE,'AZ2/planTemizlik'); }
   } catch(_alE){ console.warn('alarmPlaniKur hata:', _alE); }
   // DOM temizle
   const eski=document.getElementById('brewdayTimeline');

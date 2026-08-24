@@ -4484,6 +4484,134 @@ const CASELER = [
       __REG.ok('alarm: karbonasyon g39 (sise+14)', !!karb && karb.g === 39, karb && ('g=' + karb.g));
       return __REG.al();
     })
+  },
+
+  // ── SPRINT AZ: Muzo 2-ay kayması kök-neden fix paketi (design_muzo_alarm_ikiay_teshis) ──
+  {
+    kod: 'AZ1-BAYAT', ad: 'bayat-alarm kapısı: 60g eski onay günlüğe YAZMAZ; 2g eski onay Sprint R gibi ALARM gününe yazar',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('REGTEST AZ1', { stil: 'Weizen / Weissbier' });
+      const plan = _alarmPlaniKur(_editId, Date.now() - 60 * 864e5); // 60g önce pitch → tüm alarmlar bayat
+      __REG.ok('plan kuruldu', !!(plan && plan.ok), JSON.stringify(plan));
+      const tum = _alarmlariOku(); const grup = tum[_editId];
+      const sise = (grup.alarmlar || []).find(a => /Şişele/.test(a.aksiyon) && !/sanitize/i.test(a.aksiyon));
+      __REG.ok('şişele alarmı 30g+ bayat', !!sise && (Date.now() - sise.ts) > 30 * 864e5);
+      const n0 = (S.brewLog || []).length;
+      _bmAlarmOnayKoprusu(_editId, sise.g);
+      __REG.ok('AZ1: bayat onay günlüğe YAZMADI', (S.brewLog || []).length === n0, 'önce=' + n0 + ' sonra=' + (S.brewLog || []).length);
+      __REG.ok('AZ1: KR kopyasında da siseleme YOK', !((KR.find(k => k && k.id === _editId) || {}).brewLog || []).some(e => e && e.tip === 'siseleme'));
+      // R REGRESYONU: yakın geriye dönük onay (2g) AYNEN alarm gününe yazılmalı
+      sise.ts = Date.now() - 2 * 864e5;
+      _alarmlariYaz(tum);
+      _bmAlarmOnayKoprusu(_editId, sise.g);
+      const sisKayit = (S.brewLog || []).find(e => e && e.tip === 'siseleme');
+      __REG.ok('R korunuyor: 2g eski onay siseleme YAZDI', !!sisKayit);
+      const d2 = new Date(Date.now() - 2 * 864e5);
+      const beklenen = d2.getFullYear() + '-' + String(d2.getMonth() + 1).padStart(2, '0') + '-' + String(d2.getDate()).padStart(2, '0');
+      __REG.ok('R korunuyor: log tarihi = ALARM günü', !!sisKayit && sisKayit.tarih === beklenen, sisKayit && sisKayit.tarih);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AZ2-PLANTEMIZ', ad: 'brewdayTamamla: planBrewTarih (S+KR) ve plan: prep grubu düşer; yeni plan gerçek pitch\'e çapalı',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('REGTEST AZ2', { stil: 'Weizen / Weissbier' });
+      S.planBrewTarih = '2026-06-28';
+      const kr0 = KR.find(k => k && k.id === _editId); if (kr0) kr0.planBrewTarih = '2026-06-28';
+      const tum0 = _alarmlariOku();
+      tum0['plan:' + _editId] = { receteAd: 'REGTEST AZ2', pitchTs: 1782594000000, durum: 'aktif', alarmlar: [{ g: 0, ts: 1782543600000, tip: 'kontrol', aksiyon: '🔔 prep', aciklama: '', sicaklik: null, durum: 'bekliyor' }] };
+      _alarmlariYaz(tum0);
+      // brewday sonlandırma yan etkilerini stub'la (AU kalıbı, satır ~3670)
+      const _b = window._brewBeep, _t = window._brewTitret, _n = window._brewBildirim;
+      window._brewBeep = function () {}; window._brewTitret = function () {}; window._brewBildirim = function () {};
+      window._brewday = window._brewday || {}; window._brewday.aktif = true; window._brewday.rid = _editId;
+      const t0 = Date.now();
+      try { brewdayTamamla(); } finally { window._brewBeep = _b; window._brewTitret = _t; window._brewBildirim = _n; }
+      const tum1 = _alarmlariOku();
+      __REG.ok('AZ2: plan: prep grubu silindi', !tum1['plan:' + _editId]);
+      __REG.ok('AZ2: S.planBrewTarih düştü', S.planBrewTarih === undefined);
+      const kr1 = KR.find(k => k && k.id === _editId);
+      __REG.ok('AZ2: KR.planBrewTarih düştü', !!kr1 && kr1.planBrewTarih === undefined);
+      const g = tum1[_editId];
+      __REG.ok('yeni plan gerçek pitch\'e çapalı (±60sn)', !!g && Math.abs(g.pitchTs - t0) < 60000, g && String(g.pitchTs));
+      __REG.ok('brewday_end günlüğe düştü (zincir bozulmadı)', (S.brewLog || []).some(e => e && e.tip === 'brewday_end'));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AZ3-RESISE', ad: 'finalize (bitti) grupta YENİ şişeleme kaydı → karbonasyon/içime-hazır yeniden kurulur; idempotent',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('REGTEST AZ3', { stil: 'Weizen / Weissbier' });
+      const plan = _alarmPlaniKur(_editId, Date.now() - 10 * 864e5); // 10g önce pitch
+      __REG.ok('plan kuruldu', !!(plan && plan.ok));
+      const tum = _alarmlariOku(); const g = tum[_editId];
+      g.durum = 'bitti';
+      (g.alarmlar || []).forEach(a => { a.durum = 'tamamlandi'; }); // hayalet döngü finalize simülasyonu
+      _alarmlariYaz(tum);
+      const d = new Date();
+      const bugun = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      S.brewLog = S.brewLog || []; S.brewLog.push({ tip: 'siseleme', tarih: bugun, deger: '', not: '', id: Date.now().toString() });
+      const degisti = _alarmSiselemKontrol(_editId, S.brewLog);
+      __REG.ok('AZ3: değişiklik raporlandı', degisti === true);
+      const g2 = _alarmlariOku()[_editId];
+      const karb = (g2.alarmlar || []).find(a => /Karbonasyon/.test(a.aksiyon));
+      const icime = (g2.alarmlar || []).find(a => /İçime hazır/.test(a.aksiyon));
+      __REG.ok('karbonasyon yeniden BEKLİYOR', !!karb && karb.durum === 'bekliyor', karb && karb.durum);
+      __REG.ok('karbonasyon ts = bugünkü şişele+14 (gelecek)', !!karb && karb.ts > Date.now() + 12 * 864e5, karb && String(karb.ts));
+      __REG.ok('içime-hazır yeniden BEKLİYOR + gelecekte', !!icime && icime.durum === 'bekliyor' && icime.ts > Date.now());
+      __REG.ok('grup yeniden AKTİF', g2.durum === 'aktif', g2.durum);
+      const degisti2 = _alarmSiselemKontrol(_editId, S.brewLog);
+      __REG.ok('idempotent: ikinci çağrı no-op', degisti2 === false, String(degisti2));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AZ4-ONARIM', ad: 'onarım: hayalet-plan hijyeni (brew kanıtsız + 7g+ eski) + Muzo çapa 17Haz→16Ağu (hayalet kayıt silinince) + boş brewSonuc temizliği',
+    calistir: (page) => page.evaluate(() => {
+      // A) hayalet plan: brew kanıtı YOK + tüm alarmlar 7g+ eski → grup silinir
+      const hid = __REG.yeniKayit('REGTEST AZ4-HAYALET', {});
+      const tum0 = _alarmlariOku();
+      tum0[hid] = { receteAd: 'hayalet', pitchTs: Date.now() - 70 * 864e5, durum: 'aktif', alarmlar: [
+        { g: 0, ts: Date.now() - 70 * 864e5, tip: 'kontrol', aksiyon: '🧬 Pitch', durum: 'bekliyor' },
+        { g: 9, ts: Date.now() - 61 * 864e5, tip: 'kritik', aksiyon: '❄️ Cold crash', durum: 'bekliyor' }] };
+      // B) Muzo: fixture'daki gerçek kayıt (id sabit) hayalet-siseleme + boş brewSonuc ile donatılır
+      const MID = '1775830924009';
+      localStorage.removeItem('bm_az_onarim_v1');
+      let mr = KR.find(k => k && String(k.id) === MID);
+      __REG.ok('fixture Muzo kaydı var', !!mr);
+      mr.brewLog = [
+        { tip: 'brewday_end', tarih: '2026-08-16', ts: 1786898548756, not: '' },
+        { tip: 'siseleme', tarih: '2026-06-25', ts: 1782370800000, almKey: MID + '|8', not: '⏰ alarm onayından', id: 'x1' }
+      ];
+      mr.brewSonuc = { ts: 1787573403523 };
+      tum0[MID] = { receteAd: 'Muzo', pitchTs: 1781680514549, durum: 'bitti', alarmlar: [
+        { g: 0, ts: 1781679600000, tip: 'kontrol', aksiyon: '🧬 Pitch', durum: 'tamamlandi' },
+        { g: 8, ts: 1782370800000, tip: 'kritik', aksiyon: '🍺 Şişele', durum: 'tamamlandi' },
+        { g: 22, ts: 1783580400000, tip: 'kontrol', aksiyon: '🫧 Karbonasyon kontrol — bir şişe test et', durum: 'tamamlandi' }] };
+      _alarmlariYaz(tum0);
+      _azOnarim();
+      const t1 = _alarmlariOku();
+      __REG.ok('A: hayalet plan grubu silindi', !t1[hid]);
+      __REG.ok('B-bekleme: hayalet siseleme DURURKEN çapa değişmedi', !!t1[MID] && t1[MID].pitchTs === 1781680514549, t1[MID] && String(t1[MID].pitchTs));
+      __REG.ok('B-bekleme: bayrak kapanmadı (sonraki tik yeniden dener)', localStorage.getItem('bm_az_onarim_v1') !== '2');
+      __REG.ok('C: boş brewSonuc silindi', KR.find(k => k && String(k.id) === MID).brewSonuc === undefined);
+      // Kaan'ın hayalet kaydı elle silmesi simüle edilir → sonraki tik onarır
+      mr = KR.find(k => k && String(k.id) === MID);
+      mr.brewLog = mr.brewLog.filter(e => !e || e.almKey !== MID + '|8');
+      _azOnarim();
+      const t2 = _alarmlariOku();
+      __REG.ok('B: çapa gerçek pitch oldu (16 Ağu 19:42:28.757)', !!t2[MID] && t2[MID].pitchTs === 1786898548757, t2[MID] && String(t2[MID].pitchTs));
+      __REG.ok('B: grup aktif', t2[MID].durum === 'aktif', t2[MID].durum);
+      const saat = _alarmSaatiAl();
+      const g22 = t2[MID].alarmlar.find(a => a.g === 22);
+      const hedef22 = _alarmTsHesapla(1786898548757, 22, saat);
+      const bugun0 = new Date(); bugun0.setHours(0, 0, 0, 0);
+      __REG.ok('B: g22 ts yeniden hesaplandı (pitch+22)', !!g22 && g22.ts === hedef22, g22 && String(g22.ts));
+      __REG.ok('B: g22 durumu ts ile tutarlı (tarih-sağlam iddia)', !!g22 && g22.durum === (g22.ts >= bugun0.getTime() ? 'bekliyor' : 'atlandi'), g22 && g22.durum);
+      __REG.ok('B: g0 tamamlandi KORUNDU', t2[MID].alarmlar.find(a => a.g === 0).durum === 'tamamlandi');
+      __REG.ok('B: bayrak kapandı', localStorage.getItem('bm_az_onarim_v1') === '2');
+      return __REG.al();
+    })
   }
 ];
 

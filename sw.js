@@ -721,7 +721,8 @@
 // HTML degisti -> KURAL 12.3 CACHE_VERSION bump v131-410 -> v131-411.
 // Sprint AY: fermentasyon profillerine merkezi OG kapisi (profOgKapisi: +3/+7/+14) + Tripel taban 18 + FG sise-bombasi supabi.
 // HTML degisti -> KURAL 12.3 CACHE_VERSION bump v131-411 -> v131-412.
-const CACHE_VERSION='bm-cache-v131-412';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
+// HTML degisti (Sprint AZ) -> KURAL 12.3 CACHE_VERSION bump v131-412 -> v131-413.
+const CACHE_VERSION='bm-cache-v131-413';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
 const ASSET_CACHE   = 'bm-assets-v1';        // font + ikon + manifest — KALICI, bump'ta silinmez
 const MODEL_CACHE   = 'bm-models-v1';        // workers.dev + jsdelivr — SHA'li/immutable URL, KALICI
 
