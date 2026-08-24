@@ -7994,6 +7994,26 @@ window._bmSgManuelGir = function(alan, deger){
     }
   }catch(_e){ if(window.bmHataKaydet) bmHataKaydet('giris', _e, '_bmSgManuelGir'); }
 };
+// SPRINT BE1-5 (BD F3-1 KRİTİK): BC'nin kaçırdığı 4. gravity yüzeyi — Süreç sekmesi pre-boil OG.
+// Eskiden parseFloat doğrulamasızdı: '1054' sessizce KR'ye zehirli yazılıyordu. BC ile birebir davranış.
+window._bmPreboilGir = function(deger){
+  try{
+    var s = String(deger == null ? '' : deger).trim();
+    if(!s){ S.preboilOG = null; }
+    else {
+      var nz = _sgNormalize(s);
+      if(nz.v != null){
+        S.preboilOG = nz.v;
+        if(nz.donusum && typeof flash === 'function') flash('📏 ' + s + ' → ' + nz.v + ' olarak alındı', 'ok');
+      } else {
+        S.preboilOG = null;
+        if(typeof flash === 'function') flash('⚠️ "' + s + '" gravity olarak anlaşılamadı (0.990–1.200) — alan boş bırakıldı', 'err');
+      }
+    }
+    if(window._preboilSnapDondur) _preboilSnapDondur(S, typeof _editId !== 'undefined' ? _editId : null);
+    if(typeof render === 'function') render();
+  }catch(_e){ if(window.bmHataKaydet) bmHataKaydet('giris', _e, '_bmPreboilGir'); }
+};
 // I1: log girişinin GİRİŞ ZAMANI — ts (brewday) > 13-haneli id (logEkle id'si Date.now) >
 // tarih (yalnız legacy fallback; gün çözünürlüğü kaba). Tarih düzenlemesi id/ts'i DEĞİŞTİRMEZ:
 // pencere "ne zaman girildi"ye göredir, "hangi güne yazıldı"ya değil.
@@ -9047,6 +9067,17 @@ function _krSilEkle(id){ var a = _krSilSupur(_krSilOku()); a = a.filter(function
 window._krSilOku = _krSilOku; window._krSilEkle = _krSilEkle; window._krSilSupur = _krSilSupur; window._krSilYaz = _krSilYaz;
 
 function tarifSil(id){
+  // SPRINT BE1-4 (BD F2-3 KRİTİK): brewday'i SÜREN reçete silinemez — silinirse brewday_end hiçbir
+  // KR'ye yazılamıyor + orphan alarm planı kalıyordu. ENGEL seçildi (onay değil): native confirm
+  // WebView'da güvenilmez (AU2-5a) ve silme geri alınamaz; kullanıcı önce brewday'i bitirir/sıfırlar.
+  try{
+    const _bs=window._brewday;
+    if(_bs&&_bs.aktif&&_bs.rid&&String(_bs.rid)===String(id)){
+      if(typeof flash==='function')flash('⛔ Bu reçetede demleme devam ediyor — silmeden önce brewday\'i bitir veya sıfırla','err');
+      silOnay=null; render();
+      return;
+    }
+  }catch(_bsg){ if(window.bmHataKaydet)bmHataKaydet('brewday',_bsg,'tarifSil/brewdayGuard'); }
   if(typeof _editId!=='undefined'&&_editId&&_editId!==id) _commitOpenRecipe(); // silinen ≠ açık reçete ise açık edits'i koru
   KR=KR.filter(k=>k.id!==id);
   try{ _krSilEkle(id); }catch(_tsw){if(window.bmHataKaydet)bmHataKaydet('persist',_tsw,'tarifSil/tombstone');} // SPRINT S: silme tombstone — diğer cihazlarda diriliş engellenir (ky→sync push KRSil taşır)
@@ -15110,7 +15141,7 @@ function rEditorSurec(){
           <span style="font-size:10px;color:var(--soluk);flex:1">Kaynatma öncesi — verim kontrolü</span>
         </div>
         <div style="display:flex;gap:6px;align-items:center">
-          <input aria-label="Ölçülen pre-boil OG" type="number" class="inp" style="flex:1;font-weight:700;font-size:13px;text-align:center" placeholder="${preOGHedef.toFixed(3)}" value="${S.preboilOG||''}" min="1.020" max="1.100" step="0.001" onchange="S.preboilOG=this.value?parseFloat(this.value):null;if(window._preboilSnapDondur)_preboilSnapDondur(S,typeof _editId!=='undefined'?_editId:null);render()">
+          <input aria-label="Ölçülen pre-boil OG" type="number" class="inp" style="flex:1;font-weight:700;font-size:13px;text-align:center" placeholder="${preOGHedef.toFixed(3)}" value="${S.preboilOG||''}" min="1.020" max="1.100" step="0.001" onchange="window._bmPreboilGir(this.value)">
           ${S.preboilOG?`<button class="btn" style="background:none;color:var(--kk);font-size:12px;padding:2px 6px" onclick="S.preboilOG=null;if(window._preboilSnapDondur)_preboilSnapDondur(S,typeof _editId!=='undefined'?_editId:null);render()" aria-label="Pre-boil OG değerini temizle" title="Temizle">✕</button>`:''}
         </div>
         <div style="font-size:var(--fs-xs);color:var(--dim);margin-top:3px">Hedef: ${preOGHedef.toFixed(3)} (${preHacim.toFixed(1)}L pre-boil)</div>
@@ -21986,6 +22017,12 @@ window._bdOlcumGir=function(tur,alan,deger){
 // Pre-boil commit — Süreç sekmesi kalıbının aynısı: S.preboilOG + _preboilSnapDondur + render
 window._bdPreboilCommit=function(sgDegisti){
   const o=_bdOlcum();
+  // SPRINT BE1-2: rid kapısı — açık reçete ≠ demlenen ise yabancı S'e preboilOG/snapshot yazılmaz
+  {
+    const _gA=(typeof _editId!=='undefined'&&_editId)?String(_editId):null;
+    const _gB=window._brewday;
+    if(_gB&&_gB.rid&&_gA!==String(_gB.rid)){ o.pbUyari='⚠️ Başka reçete açık — ölçüm için demlenen reçeteye dön'; brewdayRender(); return; }
+  }
   const raw=_sgNum(o.pbSG);
   o.pbUyari='';o.pbSon=null;
   if(raw==null){
@@ -22007,6 +22044,12 @@ window._bdPreboilCommit=function(sgDegisti){
 // Pitch OG commit — logEkle og_olcum yolu ile AYNI zincir + oturum-içi güncelleme (çift giriş yok)
 window._bdPitchOGCommit=function(){
   const o=_bdOlcum();
+  // SPRINT BE1-2: rid kapısı — açık reçete ≠ demlenen ise yabancı S'e og_olcum/ogManuel yazılmaz
+  {
+    const _gA=(typeof _editId!=='undefined'&&_editId)?String(_editId):null;
+    const _gB=window._brewday;
+    if(_gB&&_gB.rid&&_gA!==String(_gB.rid)){ o.ogUyari='⚠️ Başka reçete açık — ölçüm için demlenen reçeteye dön'; brewdayRender(); return; }
+  }
   const raw=_sgNum(o.ogSG);
   o.ogUyari='';
   if(raw==null){
@@ -22513,6 +22556,37 @@ window._bdLogKrAynala=function(kaynak){
 // SIRA ONEMLI: once ayna, sonra saveDraft. Ayna basariliysa S==KR olur ve saveDraft taslagi
 // SILER (Sprint N ghost-draft disiplini: her brewday sonunda "kaydedilmemis" uyarisi cikmaz);
 // ayna yazamadiysa (rid yok/uyusmaz, KR'de kayit yok) taslak oturum-ici sigorta olarak KALIR.
+// ═══ SPRINT BE1-2: rid-kapılı MERKEZİ brewday log yazıcısı (BD F2-1 KRİTİK) ═══
+// Eski akış: onay/atlama/tamamlama S.brewLog.push yapıyordu — brewday sürerken başka reçete
+// açılırsa (tarifAc kapısı yok, timeline açık kalıyor) adım kaydı YABANCI S'e sızıyor ve onun
+// sonraki Kaydet'iyle yanlış KR'ye kalıcılaşıyordu; ayna ise rid kapısında susuyor → gerçek
+// reçeteye log HİÇ ulaşmıyordu. Seçilen tasarım: uyuşmazlıkta S'e YAZMA (yabancı kirlenmez),
+// girdiyi DOĞRUDAN demlenen reçetenin KR kaydına düşür (_bdLogKrAynala'nın birleşim deseni) +
+// AQ3 ring notu. "Hiç yazma" seçeneği reddedildi: kullanıcının onayladığı adım kaybolurdu —
+// kalıcı kayıp, kalıcı kirlilikten de kötü.
+window._bdLogYaz=function(entry,kaynak){
+  const b=window._brewday;
+  const _acik=(typeof _editId!=='undefined'&&_editId)?String(_editId):null;
+  if(b&&b.rid&&_acik!==String(b.rid)){
+    try{
+      if(typeof KR!=='undefined'&&Array.isArray(KR)){
+        const t=KR.find(function(k){return k&&String(k.id)===String(b.rid);});
+        if(t){
+          t.brewLog=_brewLogBirlesim([entry],Array.isArray(t.brewLog)?t.brewLog:[]);
+          t.guncelleme=Date.now();
+          if(typeof ky==='function')ky(KR);
+          if(window.bmHataKaydet)bmHataKaydet('brewday',new Error('rid kapısı: adım kaydı S yerine doğrudan KR['+b.rid+'] kaydına yazıldı (açık: '+_acik+')'),'_bdLogYaz/'+(kaynak||''));
+          return true;
+        }
+      }
+    }catch(e){ if(window.bmHataKaydet)bmHataKaydet('persist',e,'_bdLogYaz/'+(kaynak||'')); }
+    if(window.bmHataKaydet)bmHataKaydet('persist',new Error('rid kapısı: demlenen reçete KR\'de bulunamadı — adım kaydı YAZILAMADI'),'_bdLogYaz/'+(kaynak||''));
+    return false;
+  }
+  if(!S.brewLog)S.brewLog=[];
+  S.brewLog.push(entry);
+  return true;
+};
 window._bdKalicilik=function(kaynak){
   const r=window._bdLogKrAynala(kaynak);
   try{ if(typeof saveDraft==='function')saveDraft(); }catch(_d){ if(window.bmHataKaydet)bmHataKaydet('persist',_d,'_bdKalicilik/draft'); }
@@ -22539,13 +22613,12 @@ window.brewdayAktifOnayla=function(){
   }catch(_hu){ if(window.bmHataKaydet)bmHataKaydet('calc',_hu,'brewdayAktifOnayla/hizli'); }
   // Timer'ı durdur
   brewdayTimerDur();
-  // BrewLog kaydı
-  if(!S.brewLog)S.brewLog=[];
-  S.brewLog.push({
+  // BrewLog kaydı — SPRINT BE1-2: rid-kapılı merkezi yazıcı (uyuşmazlıkta yabancı S kirlenmez)
+  _bdLogYaz({
     tarih:new Date().toISOString().slice(0,10),
     tip:'brewday_event', deger:ev.baslik,
     not:ev.detay||'', ts:Date.now()
-  });
+  },'onay');
   _bdKalicilik('onay'); // AU1-1: taslak + hedefli KR aynasi (veri kaybi kapisi)
   // Kaynatma timer'ını başlatma isteği varsa (v2.78.88 H3: 400ms delay kaldırıldı —
   // brewTimerBaslat DOM-defensive, render sonrası doğrudan çağırmak yeterli)
@@ -24322,6 +24395,19 @@ window.brewdayBitir=function(){
 
 window.brewdayTamamla=function(){
   const b=window._brewday;
+  // ═══ SPRINT BE1-1 (BD F2-2 KRİTİK): kapanış otoritesi DEMLENEN reçete (b.rid), açık reçete değil ═══
+  // Eski akış _editId'ye kuruyordu: Bergamot demlenirken Muzo açıksa Muzo'nun gerçek pitch çapası
+  // eziliyor, planı siliniyor, Bergamot alarmsız kalıyordu (BD siminde birebir ölçüldü — Ağustos'taki
+  // iki-aylık kaymanın kuzeni). Uyuşmazlıkta ÖNCE demlenen reçeteye dönülür (tarifAc): brewday_end,
+  // alarm planı içeriği (S.stil/maya/hop) ve AZ2 temizliği doğru reçeteden/reçeteye işlensin;
+  // açık reçetenin planına hiç dokunulmaz.
+  try{
+    const _beAcik=(typeof _editId!=='undefined'&&_editId)?String(_editId):null;
+    if(b&&b.rid&&_beAcik!==String(b.rid)&&typeof tarifAc==='function'){
+      tarifAc(String(b.rid));
+      if(typeof flash==='function')flash('🍺 Demlenen reçeteye dönüldü — brewday kapanışı ona işleniyor','ok');
+    }
+  }catch(_be1){ if(window.bmHataKaydet)bmHataKaydet('brewday',_be1,'brewdayTamamla/ridDonus'); }
   b.aktif=false;
   if(b.timerInt){clearInterval(b.timerInt);b.timerInt=null;}
   window._brewdayWakeLockKapat();
@@ -24332,19 +24418,24 @@ window.brewdayTamamla=function(){
   setTimeout(()=>_brewBeep(1800,0.6,0.5),500);
   _brewTitret([500,200,500,200,800]);
   _brewBildirim('🎉 Brewday Tamamlandı','Fermentasyon başladı');
-  // BrewLog
-  if(!S.brewLog)S.brewLog=[];
-  S.brewLog.push({
+  // BrewLog — SPRINT BE1-2: merkezi yazıcı (rid-dönüşü sonrası normalde S==demlenen; kapı sigorta)
+  _bdLogYaz({
     tarih:new Date().toISOString().slice(0,10),
     tip:'brewday_end', deger:'', not:'Brewday bitti',
     ts:Date.now()
-  });
+  },'tamam');
   _bdKalicilik('tamam'); // AU1-1: brewday sonunda KR aynasi (tarifeKaydet DEGIL)
   flash('🎉 Brewday bitti — fermentasyon başladı','ok');
   // v2.78.84 H7 — Fermantasyon alarmlarını kur (S.id yerine _editId, KR ile senkron)
   try {
-    const _receteId = (typeof _editId !== 'undefined' && _editId) ? _editId : String(Date.now());
-    if(typeof window._alarmPlaniKur === 'function'){
+    // SPRINT BE1-1: öncelik b.rid (demlenen); _editId yalnız fallback (b.rid'siz eski akış).
+    // İkisi de yoksa String(Date.now()) SENTETİK anahtarı KALDIRILDI (BD F9-3: orphan plan kurulup
+    // boot temizliğinde sessizce siliniyordu) — plan kurulmaz + kullanıcı NET uyarılır (F9-16 asimetrisi).
+    const _receteId = (b && b.rid) ? String(b.rid) : ((typeof _editId !== 'undefined' && _editId) ? _editId : null);
+    if(!_receteId){
+      if(typeof flash==='function') setTimeout(()=>flash('⚠️ Alarm kurulamadı — reçete tanınamadı. Reçeteyi kaydedip Takvim ▸ ↻ Yenile ile kurabilirsin','err'), 1200);
+      if(window.bmHataKaydet)bmHataKaydet('alarm',new Error('brewdayTamamla: b.rid ve _editId yok — alarm planı kurulmadı'),'brewdayTamamla/receteYok');
+    } else if(typeof window._alarmPlaniKur === 'function'){
       const _alsonuc = window._alarmPlaniKur(_receteId, Date.now());
       if(_alsonuc && _alsonuc.ok){
         setTimeout(()=>flash('⏰ '+_alsonuc.ping+' fermantasyon alarmı kuruldu','ok'), 1200);
@@ -24447,12 +24538,12 @@ window.brewdayAtla=function(){
   // (bir sonraki hizli onay dogru araligi olcsun) ve bayat serit susar.
   b.sonOnayTs=Date.now(); b.hizliUyari=null;
   brewdayTimerDur();
-  if(!S.brewLog)S.brewLog=[];
-  S.brewLog.push({
+  // SPRINT BE1-2: rid-kapılı merkezi yazıcı
+  _bdLogYaz({
     tarih:new Date().toISOString().slice(0,10),
     tip:'brewday_event_atlandi', deger:ev.baslik,
     not:'(Atlandı) '+(ev.detay||''), ts:Date.now()
-  });
+  },'atla');
   _bdKalicilik('atla'); // AU1-1
   _brewBeep(440,0.1,0.2);
   _brewTitret([30]);
@@ -27149,6 +27240,25 @@ function toggleKaliteDetay(){
 }
 window.toggleKaliteDetay=toggleKaliteDetay;
 
+// SPRINT BE1-3 (BD F9-2 KRİTİK): adsız reçetede ölçüm/log RAM-only kalıyordu (13-kayıt vakasının
+// genel sınıfı; J8 uyarısı vardı ama veri yine kayboluyordu). AV2 kalıbı: üretilmiş adla GERÇEK
+// kayıt. AQ1 disiplini: 'kaydedildi' mesajı yalnız gerçek kayıtta — başarısızlıkta J8 uyarısı döner.
+window._bmAdsizLogKaydet=function(){
+  try{
+    var _d=new Date();
+    var _taban='Adsız çalışma — '+_d.getDate()+'.'+(_d.getMonth()+1)+'.'+_d.getFullYear();
+    S.biraAd=(typeof window._bmYeniReceteAd==='function') ? window._bmYeniReceteAd(_taban)
+      : (_taban+' '+_d.getHours()+':'+String(_d.getMinutes()).padStart(2,'0'));
+    tarifeKaydet();
+    if(typeof flash==='function')flash('💾 Reçete "'+S.biraAd+'" adıyla kaydedildi — ölçümün kalıcı. Adı Genel sekmesinden değiştirebilirsin','ok');
+    return true;
+  }catch(_ba){
+    if(window.bmHataKaydet)bmHataKaydet('persist',_ba,'logEkle/adsizKayit');
+    if(typeof flash==='function')flash('⚠️ Eklendi ama KALICI DEĞİL — reçete adsız. Genel sekmesinden ad verip kaydet','hata');
+    try{render();}catch(_r){}
+    return false;
+  }
+};
 function logEkle(){
   const tipEl=document.getElementById('logTip');
   const tarihEl=document.getElementById('logTarih');
@@ -27180,7 +27290,7 @@ function logEkle(){
     if(_tip2==='og_olcum'&&_deg2){var _ov3=_sgNum(_deg2);if(_ov3!=null)S.ogManuel=_ov3;} // SPRINT I I4: og_olcum→ogManuel backfill simetrisi (fg'de vardı, og'de yoktu)
     try{ if(window._brewSonucTamamla) _brewSonucTamamla(S, (typeof _editId!=='undefined'?_editId:null)); }catch(_bst2){if(window.bmHataKaydet)bmHataKaydet('persist',_bst2,'logEkle/sonucTamamla');}
     logDuzenleSifirla();
-    if(S.biraAd&&S.biraAd.trim())tarifeKaydet(); else render();
+    if(S.biraAd&&S.biraAd.trim())tarifeKaydet(); else _bmAdsizLogKaydet(); // SPRINT BE1-3
     return;
   }
   const _tip=tipEl.value;
@@ -27199,7 +27309,7 @@ function logEkle(){
   }
   S.brewLog.push({tip:_tip,tarih:tarihEl.value,deger:_deger,not:(notEl?.value||'').trim(),id:Date.now().toString()});
   if(S.biraAd&&S.biraAd.trim()) flash('Eklendi: '+_tip+' ('+S.brewLog.length+' kayıt)');
-  else flash('⚠️ Eklendi ama KALICI DEĞİL — reçete adsız. Genel sekmesinden ad verip kaydet','hata'); // SPRINT J J8: adsızda log RAM-only (saveDraft biraAd-guard'lı, draft da yazmaz) — sessiz kayıp yerine açık uyarı
+  else flash('Eklendi: '+_tip); // SPRINT BE1-3: adsız dalın kalıcılık mesajı aşağıdaki gerçek-kayıt bloğunda (eski J8 uyarısı yalnız kayıt BAŞARISIZSA döner)
   if(_bcMesaj) flash(_bcMesaj[0],_bcMesaj[1]); // BC uyarısı/bilgisi 'Eklendi'yi ezsin (son flash görünür)
   S.brewLog.sort((a,b)=>a.tarih.localeCompare(b.tarih));
   // FG ölçümü girilince header'ı güncelle
@@ -27234,7 +27344,7 @@ function logEkle(){
       flash('🧬 Tarife Aktif durumuna geçirildi!');
     }
   }
-  if(S.biraAd&&S.biraAd.trim())tarifeKaydet(); else render();
+  if(S.biraAd&&S.biraAd.trim())tarifeKaydet(); else _bmAdsizLogKaydet(); // SPRINT BE1-3: adsızda üretilmiş adla gerçek kayıt
   // Sprint4: olcum/pitch/siseleme log'u stuck-fermentation grubunu aninda yeniden degerlendirir (kur/iptal). tarifeKaydet sonrasi -> localStorage guncel.
   try { if(window._stuckFermSync) _stuckFermSync(); } catch(_sfe){}
   // Kayıt eklendikten sonra log bölümüne scroll

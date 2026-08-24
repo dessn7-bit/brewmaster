@@ -4760,6 +4760,72 @@ const CASELER = [
       } finally { window.flash = eskiFlash; }
       return __REG.al();
     })
+  },
+
+  // ── SPRINT BE1: brewday güvenliği — b.rid otoritesi (BD KRİTİK 1/2/5/7 + F3-1) ──
+  {
+    kod: 'BE1-RID', ad: 'b.rid otoritesi: uyuşmazlıkta adım kaydı doğrudan KR[demlenen]e (yabancı S temiz + ring); Tamamla alarmı demlenene kurar, açık reçetenin planı DOKUNULMAZ; brewday-aktif reçete silinemez',
+    calistir: (page) => page.evaluate(() => {
+      const idA = __REG.yeniKayit('BE1 Demlenen', { stil: 'Weizen / Weissbier' });
+      const idB = __REG.yeniKayit('BE1 Acik', {});
+      const st = _alarmlariOku();
+      st[idB] = { receteAd: 'BE1 Acik', pitchTs: 1786898548757, olusTs: 1, durum: 'aktif', alarmlar: [{ g: 0, ts: 1786953600000, tip: 'kontrol', aksiyon: '🧬 Pitch', durum: 'bekliyor' }] };
+      _alarmlariYaz(st);
+      window._brewday = window._brewday || {}; window._brewday.aktif = true; window._brewday.rid = String(idA);
+      tarifAc(idB);
+      // 1) adım kaydı uyuşmazlıkta: S'e değil KR[demlenen]e
+      const bLog0 = (S.brewLog || []).length;
+      const aLog0 = ((KR.find(k => k && k.id === idA) || {}).brewLog || []).length;
+      const y1 = _bdLogYaz({ tarih: '2026-08-24', tip: 'brewday_event', deger: 'BE1 test adımı', not: '', ts: Date.now() }, 'test');
+      __REG.ok('yazım KR[demlenen]e gitti', y1 === true && ((KR.find(k => k && k.id === idA) || {}).brewLog || []).length === aLog0 + 1);
+      __REG.ok('yabancı S KİRLENMEDİ', (S.brewLog || []).length === bLog0);
+      __REG.ok('rid kapısı ring\'e düştü', (bmHataLogOku() || []).some(h => h && /_bdLogYaz/.test(h.kaynak || '')));
+      // 2) brewday-aktif reçete silinemez
+      tarifSil(idA);
+      __REG.ok('demlenen reçete SİLİNEMEDİ (guard)', !!KR.find(k => k && k.id === idA));
+      // 3) Tamamla: alarm demlenene, açık reçetenin planı aynen, reçeteye dönüş
+      const _b = window._brewBeep, _t = window._brewTitret, _n = window._brewBildirim;
+      window._brewBeep = function () {}; window._brewTitret = function () {}; window._brewBildirim = function () {};
+      const t0 = Date.now();
+      try { brewdayTamamla(); } finally { window._brewBeep = _b; window._brewTitret = _t; window._brewBildirim = _n; }
+      const t1 = _alarmlariOku();
+      __REG.ok('alarm DEMLENENe (A) kuruldu, pitch=şimdi', !!t1[idA] && Math.abs(t1[idA].pitchTs - t0) < 60000, t1[idA] && String(t1[idA].pitchTs));
+      __REG.ok('açık reçetenin (B) planı DOKUNULMADI', !!t1[idB] && t1[idB].pitchTs === 1786898548757, t1[idB] && String(t1[idB].pitchTs));
+      __REG.ok('demlenen reçeteye dönüldü', typeof _editId !== 'undefined' && String(_editId) === String(idA) && S.biraAd === 'BE1 Demlenen');
+      __REG.ok('brewday_end demlenenin günlüğünde', (S.brewLog || []).some(e => e && e.tip === 'brewday_end'));
+      // 4) meşru silme aynen (brewday kapandı)
+      tarifSil(idB);
+      __REG.ok('meşru silme AYNEN çalışıyor', !KR.find(k => k && k.id === idB));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BE1-GIRIS', ad: 'adsız reçetede ölçüm ÜRETİLMİŞ adla gerçek kayıt (RAM-only + sahte-mesaj bitti); Süreç pre-boil OG BC normalize + uyarı (4. yüzey kapandı)',
+    calistir: (page) => page.evaluate(() => {
+      const mesajlar = []; const eskiF = window.flash;
+      window.flash = function (m, t) { mesajlar.push(String(m)); try { return eskiF.apply(this, arguments); } catch (_e) {} };
+      try {
+        yeniTarif();
+        setSekme('takvim'); if (typeof render === 'function') render();
+        const tipEl = document.getElementById('logTip'), tarihEl = document.getElementById('logTarih'), degerEl = document.getElementById('logDeger');
+        __REG.ok('log formu hazır (adsız reçete)', !!tipEl && !!tarihEl && !!degerEl);
+        tipEl.value = 'og_olcum'; tarihEl.value = '2026-08-24'; degerEl.value = '1.050';
+        logEkle();
+        __REG.ok('üretilmiş ad verildi', /Adsız çalışma/.test(S.biraAd || ''), S.biraAd);
+        const kayit = KR.find(k => k && k.biraAd === S.biraAd);
+        __REG.ok('KR\'ye GERÇEK kayıt düştü (RAM-only bitti)', !!kayit && (kayit.brewLog || []).some(e => e && e.tip === 'og_olcum'));
+        __REG.ok('kalıcılık mesajı verildi + eski J8 uyarısı YOK', mesajlar.some(m => /kalıcı/.test(m)) && !mesajlar.some(m => /KALICI DEĞİL/.test(m)), mesajlar.join('|').slice(0, 100));
+        mesajlar.length = 0;
+        _bmPreboilGir('1054');
+        __REG.ok('Süreç preboil: 1054 → 1.054 normalize', S.preboilOG === 1.054, String(S.preboilOG));
+        __REG.ok('dönüşüm bilgisi verildi', mesajlar.some(m => m.indexOf('1.054') >= 0));
+        _bmPreboilGir('5.5');
+        __REG.ok('bozuk değer: alan boş + uyarı (sessiz yutma yok)', S.preboilOG === null && mesajlar.some(m => /anlaşılamadı/.test(m)));
+        _bmPreboilGir('1.048');
+        __REG.ok('geçerli değer aynen', S.preboilOG === 1.048);
+      } finally { window.flash = eskiF; }
+      return __REG.al();
+    })
   }
 ];
 
