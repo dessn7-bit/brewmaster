@@ -4826,6 +4826,120 @@ const CASELER = [
       } finally { window.flash = eskiF; }
       return __REG.al();
     })
+  },
+
+  // ── SPRINT BE2: alarm dürüstlüğü (BD F1-1 KRİTİK + F9-4 + F10 sayaç ailesi + F6-2) ──
+  {
+    kod: 'BE2-LIMBO', ad: "'gosterildi' limbosu bitti: gösterim store'a yazılmaz, alarm ✓'a dek beklemede; yeni oturumda tekrar gösterilir; aynı oturumda fırtına kapısı; legacy 'gosterildi' beklemede sayılır",
+    calistir: (page) => page.evaluate(() => {
+      const id = __REG.yeniKayit('BE2 Limbo', {});
+      const st = {}; st[id] = { receteAd: 'BE2 Limbo', pitchTs: Date.now() - 3 * 864e5, durum: 'aktif', alarmlar: [
+        { g: 8, ts: Date.now() - 1000, tip: 'kritik', aksiyon: '🍺 Şişele', aciklama: '', durum: 'bekliyor' }] };
+      _alarmlariYaz(st);
+      Object.keys(window._alarmGosterimTs).forEach(k => delete window._alarmGosterimTs[k]);
+      var em0 = document.getElementById('_alarmModal'); if (em0) em0.remove();
+      window._bmKacirilanBilgiVerildi = true; // BA3 bu testte sustur
+      _alarmKontrolEt();
+      __REG.ok('kritik modal açıldı', !!document.getElementById('_alarmModal'));
+      __REG.ok("STORE'a 'gosterildi' YAZILMADI", _alarmlariOku()[id].alarmlar[0].durum === 'bekliyor', _alarmlariOku()[id].alarmlar[0].durum);
+      __REG.ok('bekleyenler hâlâ görüyor (BA3/cron körlüğü bitti)', _alarmBekleyenleri().some(x => x.receteId === id));
+      // reload simülasyonu: modal gitti + oturum belleği sıfır → TEKRAR gösterilir (kaybolmaz)
+      document.getElementById('_alarmModal').remove();
+      Object.keys(window._alarmGosterimTs).forEach(k => delete window._alarmGosterimTs[k]);
+      _alarmKontrolEt();
+      __REG.ok('yeni oturumda TEKRAR gösterildi (modal-açıkken-reload kaybı bitti)', !!document.getElementById('_alarmModal'));
+      // aynı oturumda fırtına yok (6 saat kapısı)
+      document.getElementById('_alarmModal').remove();
+      _alarmKontrolEt();
+      __REG.ok('aynı oturumda tekrar AÇILMADI (AZ5 fırtına kapısı)', !document.getElementById('_alarmModal'));
+      // onay → kalıcı kapanır
+      _alarmAksiyon(id, 8, 'tamamlandi');
+      Object.keys(window._alarmGosterimTs).forEach(k => delete window._alarmGosterimTs[k]);
+      var em2 = document.getElementById('_alarmModal'); if (em2) em2.remove();
+      _alarmKontrolEt();
+      __REG.ok('onaylandı: tamamlandi + yeni oturumda bile gelmez', _alarmlariOku()[id].alarmlar[0].durum === 'tamamlandi' && !document.getElementById('_alarmModal'));
+      // legacy 'gosterildi' (eski sürüm yazmıştı) beklemede sayılır
+      const st2 = _alarmlariOku(); st2[id].durum = 'aktif'; st2[id].alarmlar[0].durum = 'gosterildi'; _alarmlariYaz(st2);
+      __REG.ok("legacy 'gosterildi' beklemede sayılıyor", _alarmBekleyenleri().some(x => x.receteId === id));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BE2-YAZ', ad: '_alarmlariYaz başarısızlığı SESLİ: plan ok=false (sahte "kuruldu ✓" yok), onay ✓ flash yok + alarm açık kalır, ring + depoya-muhtaç-olmayan görünür uyarı',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('BE2 Yaz', { stil: 'Weizen / Weissbier' });
+      const mesajlar = []; const eskiF = window.flash;
+      window.flash = function (m) { mesajlar.push(String(m)); try { return eskiF.apply(this, arguments); } catch (_e) {} };
+      const origSet = Storage.prototype.setItem;
+      try {
+        window._alarmYazUyariTs = 0;
+        Storage.prototype.setItem = function (k, v) { if (k === 'bm_alarms_v1') throw new Error('QUOTA-SIM'); return origSet.apply(this, arguments); };
+        const plan = _alarmPlaniKur(_editId, Date.now());
+        __REG.ok('plan ok=false + hata dolu (sahte başarı yok)', !!plan && plan.ok === false && !!plan.hata, JSON.stringify({ ok: plan && plan.ok, hata: plan && plan.hata }));
+        __REG.ok('görünür uyarı basıldı', mesajlar.some(m => /KAYDEDİLEMEDİ/.test(m)), mesajlar.join('|').slice(0, 80));
+        __REG.ok('ring kaydı düştü (ring anahtarı etkilenmedi)', (bmHataLogOku() || []).some(h => h && /alarmYaz/.test(h.kaynak || '')));
+      } finally { Storage.prototype.setItem = origSet; }
+      const plan2 = _alarmPlaniKur(_editId, Date.now() - 2 * 864e5);
+      __REG.ok('normal kurulumda ok=true (regresyon)', !!plan2 && plan2.ok === true);
+      const g0 = _alarmlariOku()[_editId].alarmlar[0].g;
+      mesajlar.length = 0;
+      try {
+        Storage.prototype.setItem = function (k, v) { if (k === 'bm_alarms_v1') throw new Error('QUOTA-SIM'); return origSet.apply(this, arguments); };
+        _alarmAksiyon(_editId, g0, 'tamamlandi');
+        __REG.ok("onay yazılamadı: '✓ Alarm tamamlandı' BASILMADI + uyarı var", !mesajlar.some(m => /✓ Alarm tamamlandı/.test(m)) && mesajlar.some(m => /KAYDEDİLEMEDİ/.test(m)), mesajlar.join('|').slice(0, 100));
+      } finally { Storage.prototype.setItem = origSet; window.flash = eskiF; }
+      __REG.ok('alarm açık kaldı (store bekliyor)', _alarmlariOku()[_editId].alarmlar[0].durum === 'bekliyor', _alarmlariOku()[_editId].alarmlar[0].durum);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BE2-SAYAC', ad: 'sayaç-içerik tutarlılığı: geçmiş-pasif sayaç dışı; GEÇMİŞ kesme notu; pseudo grup kart hedefi olamaz; Ayarlar etiketi + öğrenme satırı',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('BE2 Sayac', {});
+      const st = {};
+      st[_editId] = { receteAd: 'BE2 Sayac', pitchTs: Date.now() - 30 * 864e5, olusTs: Date.now(), durum: 'aktif', alarmlar: [
+        { g: 1, ts: Date.now() - 20 * 864e5, tip: 'pasif', aksiyon: '🌙 Bekle', durum: 'bekliyor' },
+        { g: 40, ts: Date.now() + 2 * 864e5, tip: 'kontrol', aksiyon: '🫧 Karbonasyon kontrol', durum: 'bekliyor' },
+        { g: 2, ts: 1, tip: 'kontrol', aksiyon: 'A1', durum: 'tamamlandi' }, { g: 3, ts: 2, tip: 'kontrol', aksiyon: 'A2', durum: 'tamamlandi' },
+        { g: 4, ts: 3, tip: 'kontrol', aksiyon: 'A3', durum: 'tamamlandi' }, { g: 5, ts: 4, tip: 'kontrol', aksiyon: 'A4', durum: 'tamamlandi' },
+        { g: 6, ts: 5, tip: 'kontrol', aksiyon: 'A5', durum: 'tamamlandi' }, { g: 7, ts: 6, tip: 'kontrol', aksiyon: 'A6', durum: 'tamamlandi' }] };
+      _alarmlariYaz(st);
+      const html = _alarmKartRender();
+      __REG.ok('geçmiş-pasif SAYILMADI (1 bekleyen)', html.indexOf('1 bekleyen') >= 0, (html.match(/\d+ bekleyen/) || [])[0]);
+      __REG.ok('GEÇMİŞ kesme notu görünür', /GEÇMİŞ · 6/.test(html) && /son 5 gösteriliyor/.test(html));
+      const st2 = {}; st2['stok:xyz'] = { receteAd: 'Hop X', pitchTs: null, durum: 'aktif', alarmlar: [{ g: 0, ts: Date.now() - 1000, tip: 'kontrol', aksiyon: '📦 Stok azaldı — Hop X', durum: 'bekliyor' }] };
+      _alarmlariYaz(st2);
+      const html2 = _alarmKartRender();
+      __REG.ok('pseudo grup kart hedefi OLMADI', html2.indexOf('Aktif alarm planı yok') >= 0 && html2.indexOf('Hop X') < 0);
+      const ayarHtml = rStokAyarlar();
+      __REG.ok('Ayarlar etiketi doğru ada çekildi', ayarHtml.indexOf('Zamanı gelmiş alarm:') >= 0 && ayarHtml.indexOf('Bekleyen alarm:') < 0);
+      __REG.ok('öğrenme-kolları satırı görünür', /Öğrenme \(bu cihazda\)/.test(ayarHtml));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BE2-SISE', ad: 'şişeleme kayması takibi: _sonrasiGun ALANSIZ (AZ-öncesi) planda offset şişele-g farkından türetilir + kalıcılaşır; alarmlar gerçek şişeleme tarihine kayar',
+    calistir: (page) => page.evaluate(() => {
+      const id = __REG.yeniKayit('BE2 Sise', {});
+      const P = Date.now() - 11 * 864e5;
+      const st = {}; st[id] = { receteAd: 'BE2 Sise', pitchTs: P, durum: 'aktif', alarmlar: [
+        { g: 8, ts: P + 8 * 864e5, tip: 'kritik', aksiyon: '🍺 Şişele', durum: 'tamamlandi' },
+        { g: 22, ts: P + 22 * 864e5, tip: 'kontrol', aksiyon: '🫧 Karbonasyon kontrol — bir şişe test et', durum: 'bekliyor' },
+        { g: 29, ts: P + 29 * 864e5, tip: 'kontrol', aksiyon: '🍺 İçime hazır — test olgunlaştı', durum: 'bekliyor' }] };
+      _alarmlariYaz(st);
+      const d = new Date(); const bugun = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      S.brewLog = [{ tip: 'siseleme', tarih: bugun, deger: '', not: '', id: Date.now().toString() }];
+      const degisti = _alarmSiselemKontrol(id, S.brewLog);
+      __REG.ok('değişiklik raporlandı', degisti === true, String(degisti));
+      const g2 = _alarmlariOku()[id];
+      const karb = g2.alarmlar.find(a => /Karbonasyon/.test(a.aksiyon));
+      __REG.ok('offset türetildi + KALICILAŞTI (14)', karb._sonrasiGun === 14, String(karb._sonrasiGun));
+      const hedef = _alarmTsHesapla(new Date(bugun + 'T00:00:00').getTime(), 14, _alarmSaatiAl());
+      __REG.ok('karbonasyon GERÇEK şişeleme+14 gününe kaydı (plandan 3 gün geç)', karb.ts === hedef, String(karb.ts));
+      const icime = g2.alarmlar.find(a => /İçime/.test(a.aksiyon));
+      __REG.ok('içime-hazır offset 21 + gelecekte bekliyor', icime._sonrasiGun === 21 && icime.durum === 'bekliyor' && icime.ts > Date.now());
+      return __REG.al();
+    })
   }
 ];
 

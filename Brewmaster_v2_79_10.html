@@ -12788,7 +12788,7 @@ function renderHeader(){
     '<button class="bm-hamburger-btn" onclick="toggleSidebar()" title="Menu" aria-label="Menu" aria-expanded="false">'+BM_SVG.menu+'</button>'+
     '<div class="bm-header-left">'+
       '<div class="bm-header-title">'+aktifBaslik+'</div>'+
-      '<div class="bm-header-breadcrumb">'+receteSay+' reçete &middot; '+klasorSay+' klasör</div>'+
+      '<div class="bm-header-breadcrumb">'+(aramaVal?('Arama: &quot;'+_esc131B(aramaVal)+'&quot;'):(receteSay+' reçete &middot; '+klasorSay+' klasör'))+'</div>'+ // SPRINT BE2 (BD F10-7): arama aktifken sayaç görünen listeyle çelişiyordu
     '</div>'+
     '<div class="bm-header-right">'+
       aramaHtml+
@@ -14457,7 +14457,7 @@ function rEditorTakvim(maya, maya2, tv){
       var _hedef = null;
       if(_aRid && _tum[_aRid] && _tum[_aRid].durum === 'aktif') _hedef = _tum[_aRid];
       if(!_hedef){
-        var _aktifIds = Object.keys(_tum).filter(function(k){return _tum[k].durum === 'aktif';});
+        var _aktifIds = Object.keys(_tum).filter(function(k){return _tum[k].durum === 'aktif' && !/^(maya|stok|manuel|plan|stuck):/.test(k);}); // SPRINT BE2 (BD F10-4): pseudo dışla
         if(_aktifIds.length){
           _aktifIds.sort(function(a,b){return (_tum[b].olusTs||0) - (_tum[a].olusTs||0);});
           _hedef = _tum[_aktifIds[0]];
@@ -21408,7 +21408,7 @@ function rEditor(){
     ${_editId?`<button class="bm-btn-primary" onclick="tarifKlonla('${_editId}')" title="Bu tarifin kopyasını oluştur">📑 Klonla</button>`:''}
   </div>
   ${(typeof _bmKlonKaynakHtml==='function')?_bmKlonKaynakHtml(S):''}
-  <div class="bm-edit-only" style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+  <div class="bm-edit-only" style="display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap"><!-- SPRINT BE2 (BD F10-6): 390px'te buton 16px taşıyordu -->
     <span style="font-size:var(--fs-xs);color:var(--metin-soluk);font-weight:var(--fw-semibold)">🎯 Hedef Stil:</span>
     <select aria-label="Hedef stil" onchange="S.stil=this.value;window.__stilSecKaynak='dropdown';render()" style="background:var(--bg-card);color:var(--ink);border:1px solid var(--cizgi-arac);border-radius:var(--r-sm);font-size:var(--fs-xs);padding:4px 8px;flex:1;outline:none;font-family:var(--font-govde);cursor:pointer">
       <option value=""${!S.stil?" selected":""}>── Otomatik (bileşenlerden) ──</option>
@@ -22921,6 +22921,22 @@ window.brewdayBitir=function(){
   const _ALARM_CHECK_MS = 60000;
   window._alarmInt = window._alarmInt || null;
   window._alarmSonTetikTs = window._alarmSonTetikTs || {};
+  // ═══ SPRINT BE2-1 (BD F1-1 KRİTİK): 'gosterildi' limbosu bitti ═══
+  // Eski akış modal/toast açılır açılmaz STORE'a 'gosterildi' yazıyordu → _alarmBekleyenleri, BA3
+  // sayacı ve worker cron'u (durum!=='bekliyor' atlar) alarmı bir daha GÖRMÜYORDU; modal açıkken
+  // sayfa yenilenirse kritik alarm sonsuza dek kayboluyordu. Yeni kural: gösterim ONAY DEĞİLDİR —
+  // store'a hiçbir şey yazılmaz; alarm yalnız ✓/atla ile kapanır. Gösterim takibi OTURUM-İÇİ bellek:
+  // aynı alarm aynı oturumda en erken 6 saatte bir yeniden gösterilir (AZ5 dersi: modal fırtınası
+  // yasak — Pumpkin ≤75 sn'de dönüyordu), yeni açılış/reload = yeniden gösterim (kaçırılmaz).
+  var _alarmGosterimTs = {};
+  var _ALARM_TEKRAR_MS = 6 * 3600 * 1000;
+  function _alarmGosterimIzin(anahtar){
+    var t = _alarmGosterimTs[anahtar] || 0;
+    if(Date.now() - t < _ALARM_TEKRAR_MS) return false;
+    _alarmGosterimTs[anahtar] = Date.now();
+    return true;
+  }
+  window._alarmGosterimTs = _alarmGosterimTs; // tanı/test erişimi (oturum-içi)
 
   // Aksiyon metninden kritiklik belirle — v2.78.83: spesifik aksiyon kontrolleri önce,
   // "devam"/"gün N" takip günlerinde bir seviye aşağı düşür (tekrar modal spam'ını engelle)
@@ -22967,7 +22983,19 @@ window.brewdayBitir=function(){
   };
 
   window._alarmlariYaz = function(obj){
-    try { localStorage.setItem(_ALARM_SK, JSON.stringify(obj||{})); try{if(window._alarmBulutaSyncDebounced)window._alarmBulutaSyncDebounced();}catch(_se){} return true; } catch(e) { console.warn('alarmYaz fail',e); return false; }
+    try { localStorage.setItem(_ALARM_SK, JSON.stringify(obj||{})); try{if(window._alarmBulutaSyncDebounced)window._alarmBulutaSyncDebounced();}catch(_se){} return true; }
+    catch(e) {
+      // SPRINT BE2-3 (BD F9-4): 15 çağrı yerinin ORTAK çıkışı — sessiz başarısızlık bitti.
+      // Quota'da ring de yazamayabilir (çifte körlük) → DOM flash'ı depoya muhtaç değil, her durumda görünür.
+      try{ if(window.bmHataKaydet) bmHataKaydet('persist', e, 'alarmYaz'); }catch(_r){}
+      var _s = Date.now();
+      if(_s - (window._alarmYazUyariTs || 0) > 300000){ // 5 dk throttle (60sn'lik reconciler tikleri spam'lemesin)
+        window._alarmYazUyariTs = _s;
+        try{ if(typeof flash === 'function') flash('⚠️ Alarmlar KAYDEDİLEMEDİ — depolama dolu olabilir. Ayarlar ▸ Veri\'den yedek alıp yer aç','err'); }catch(_f){}
+      }
+      console.warn('alarmYaz fail',e);
+      return false;
+    }
   };
 
   window._alarmTsHesapla = function(pitchTs, gun, saat){
@@ -23336,8 +23364,9 @@ window.brewdayBitir=function(){
       durum: 'aktif',
       alarmlar: alarmlar
     };
-    _alarmlariYaz(tum);
-    return {ok:true, sayi:alarmlar.length, ping:alarmlar.filter(a=>a.tip!=='pasif').length};
+    // SPRINT BE2-3: ok bayrağı GERÇEK yazım sonucuna bağlı — sahte "kuruldu ✓" yasak (AQ1 disiplini)
+    const _yazildi = _alarmlariYaz(tum);
+    return {ok:_yazildi===true, hata:(_yazildi===true?undefined:'plan üretildi ama KAYDEDİLEMEDİ (depolama?)'), sayi:alarmlar.length, ping:alarmlar.filter(a=>a.tip!=='pasif').length};
   };
 
   // Alarm durumunu güncelle
@@ -23347,8 +23376,7 @@ window.brewdayBitir=function(){
     const al = tum[receteId].alarmlar.find(a => a&&a.g === gun);
     if(!al) return false;
     al.durum = yeniDurum;
-    _alarmlariYaz(tum);
-    return true;
+    return _alarmlariYaz(tum) === true; // SPRINT BE2-3: dönüş = gerçek yazım sonucu (çağıran sahte ✓ basmasın)
   };
 
 
@@ -23407,11 +23435,22 @@ window.brewdayBitir=function(){
     }
     var _saat = (typeof _alarmSaatiAl === 'function') ? _alarmSaatiAl() : '10:00';
     var _degisti = false, _postBekleyen = false;
+    // SPRINT BE2-4 (BD F6-2): AZ-öncesi kurulmuş planların post-bottle alarmlarında _sonrasiGun alanı
+    // YOK — şişeleme kayınca karbonasyon/içime-hazır takip edemiyordu. Fallback: grubun 'Şişele'
+    // alarmının g'sinden türet (g22−g8=14 gibi) ve alana KALICILAŞTIR (bir kez türetilir).
+    var _sisPlanG = null;
+    try{
+      for(var _sp = 0; _sp < tum[receteId].alarmlar.length; _sp++){
+        var _spa = tum[receteId].alarmlar[_sp];
+        if(_spa && /şişele/i.test(_spa.aksiyon || '') && !/sanitize/i.test(_spa.aksiyon || '')){ _sisPlanG = _spa.g | 0; break; }
+      }
+    }catch(_spE){}
     tum[receteId].alarmlar.forEach(function(a){
       if(!a) return;
       var _ak = (a.aksiyon || '').toLowerCase();
       var _post = (a._sonrasiGun != null) || _ak.indexOf('karbonasyon') >= 0 || _ak.indexOf('olgunlaş') >= 0;
       if(_post){
+        if(a._sonrasiGun == null && _sisPlanG != null && (a.g | 0) > _sisPlanG){ a._sonrasiGun = (a.g | 0) - _sisPlanG; _degisti = true; }
         var _yeniTs = (a._sonrasiGun != null) ? _alarmTsHesapla(_bottleTs, a._sonrasiGun | 0, _saat) : null;
         if(a.durum === 'bekliyor'){
           if(_yeniTs != null && a.ts !== _yeniTs){ a.ts = _yeniTs; _degisti = true; }
@@ -23762,14 +23801,14 @@ window.brewdayBitir=function(){
   };
 
   // Kontrol alarmı — sade toast (sağ altta)
-  window._alarmKontrolToast = function(al, receteId, receteAd){
+  window._alarmKontrolToast = function(al, receteId, receteAd, sira){
     try { if((typeof _appSesAcik!=='function' || _appSesAcik()) && typeof _brewBeep==='function') _brewBeep(600,0.2,0.3); } catch(e){}
     try { if(typeof _brewTitret==='function') _brewTitret([120]); } catch(e){}
     const eski = document.getElementById('_alarmToast_'+receteId+'_'+al.g);
     if(eski) eski.remove();
     const toast = document.createElement('div');
     toast.id = '_alarmToast_'+receteId+'_'+al.g;
-    toast.style.cssText = 'position:fixed;bottom:80px;right:16px;left:16px;max-width:420px;margin-left:auto;background:linear-gradient(135deg,#2C1810 0%,#5A3A1A 100%);border:1.5px solid #C8860A;border-radius:12px;padding:14px 16px;box-shadow:0 8px 28px rgba(0,0,0,.35);z-index:99996;color:#FEFBF2;cursor:pointer';
+    toast.style.cssText = 'position:fixed;bottom:'+(80+((sira|0)*100))+'px;right:16px;left:16px;max-width:420px;margin-left:auto;background:linear-gradient(135deg,#2C1810 0%,#5A3A1A 100%);border:1.5px solid #C8860A;border-radius:12px;padding:14px 16px;box-shadow:0 8px 28px rgba(0,0,0,.35);z-index:99996;color:#FEFBF2;cursor:pointer'; // BE2 (BD F1-7): sira ile dikey istif
     toast.innerHTML = 
       '<div style="display:flex;justify-content:space-between;align-items:start;gap:10px;margin-bottom:4px">'
         +'<div style="font-size:14px;font-weight:700;color:#F5D799">'+escapeH(al.aksiyon||'Alarm')+'</div>'
@@ -23950,9 +23989,12 @@ window.brewdayBitir=function(){
     const modal = document.getElementById('_alarmModal');
     const toast = document.getElementById('_alarmToast_'+receteId+'_'+gun);
     if(islem === 'tamamlandi'){
-      _alarmDurumGuncelle(receteId, gun, 'tamamlandi');
-      try{ if(window._bmAlarmOnayKoprusu) _bmAlarmOnayKoprusu(receteId, gun); }catch(_kop){} // SPRINT R: onay → brewLog köprüsü (köprü hatası onayı BOZMAZ)
-      if(typeof flash === 'function') flash('✓ Alarm tamamlandı','ok');
+      // SPRINT BE2-3: onay yazımı başarısızsa sahte "✓" basılmaz (merkezi uyarı _alarmlariYaz'da)
+      const _dgOk = _alarmDurumGuncelle(receteId, gun, 'tamamlandi');
+      if(_dgOk){
+        try{ if(window._bmAlarmOnayKoprusu) _bmAlarmOnayKoprusu(receteId, gun); }catch(_kop){} // SPRINT R: onay → brewLog köprüsü (köprü hatası onayı BOZMAZ)
+        if(typeof flash === 'function') flash('✓ Alarm tamamlandı','ok');
+      } else if(typeof flash === 'function') flash('⚠️ Onay KAYDEDİLEMEDİ — alarm açık kaldı','err');
     } else if(islem === 'ertele' || islem === 'ertele15' || islem === 'ertele60' || islem === 'erteleYarin' || (islem && islem.indexOf('ozel:')===0)){
       var _ozel = (islem && islem.indexOf('ozel:')===0);
       var _snz = _ozel ? islem : ((islem === 'ertele') ? 'ertele60' : islem);
@@ -23967,8 +24009,8 @@ window.brewdayBitir=function(){
       }
       if(typeof flash === 'function') flash('⏰ '+_et+' ertelendi','ok');
     } else if(islem === 'atla'){
-      _alarmDurumGuncelle(receteId, gun, 'atlandi');
-      if(typeof flash === 'function') flash('Atlandı','ok');
+      const _dgA = _alarmDurumGuncelle(receteId, gun, 'atlandi'); // SPRINT BE2-3
+      if(typeof flash === 'function') flash(_dgA ? 'Atlandı' : '⚠️ Kaydedilemedi — alarm açık kaldı', _dgA ? 'ok' : 'err');
     }
     if(modal) modal.remove();
     if(toast) toast.remove();
@@ -24029,7 +24071,9 @@ window.brewdayBitir=function(){
       const r = tum[rid];
       if(!r || r.durum !== 'aktif') return;
       (r.alarmlar||[]).forEach(al => {
-        if(al.durum !== 'bekliyor') return;
+        // SPRINT BE2-1: eski sürümlerin store'a yazdığı legacy 'gosterildi' de BEKLEMEDE sayılır
+        // (gösterim ≠ onay); yeni kod bu durumu artık hiç yazmıyor.
+        if(al.durum !== 'bekliyor' && al.durum !== 'gosterildi') return;
         if(al.tip === 'pasif') return;
         if(typeof _alarmKatAcik==='function' && !_alarmKatAcik(_alarmKatBul(rid,al))) return; // kategori-OFF
         if(al.ts <= simdi) sonuc.push({receteId:rid, receteAd:r.receteAd, alarm:al});
@@ -24131,7 +24175,12 @@ window.brewdayBitir=function(){
       const bekleyenler = _alarmBekleyenleri();
       // SPRINT BA3: due alarm varsa oturumda BİR KEZ bilgi toast'ı — ZORLAMA YOK (AZ5 dersi:
       // modal fırtınası yasak); mevcut kritik-modal/kontrol-toast akışına DOKUNULMAZ, bu yalnız ek bilgi.
-      if(bekleyenler.length > 0 && !window._bmKacirilanBilgiVerildi){
+      // SPRINT BE2 (BD F1-6): kritik modal aynı tikte açılacaksa/açıksa BA3 ertelenir — toast modalın
+      // altında doğup 12 sn'de görünmeden ölüyordu. Bayrak yalnız GERÇEKTEN basılınca set edilir;
+      // modal kapanıp kritik onaylanınca sonraki tikte basılır.
+      if(bekleyenler.length > 0 && !window._bmKacirilanBilgiVerildi
+         && !document.getElementById('_alarmModal')
+         && !bekleyenler.some(b => b && b.alarm.tip === 'kritik')){
         window._bmKacirilanBilgiVerildi = true;
         try{ _bmKacirilanToast(bekleyenler.length); }catch(_kbt){}
       }
@@ -24140,29 +24189,24 @@ window.brewdayBitir=function(){
       // Zaten açık bir modal varsa yeni açma
       if(document.getElementById('_alarmModal')) return;
       
-      // Kritik varsa önce onu göster
+      // Kritik varsa önce onu göster — SPRINT BE2-1: store'a 'gosterildi' YAZILMAZ, oturum-içi izin kapısı
       const kritik = bekleyenler.find(b => b&&b.alarm.tip === 'kritik');
       if(kritik){
-        // Son tetikten en az 30 sn geçmişse göster
         const anahtar = kritik.receteId+'_'+kritik.alarm.g;
-        const sonTs = _alarmSonTetikTs[anahtar] || 0;
-        if(Date.now() - sonTs < 30000) return;
-        _alarmSonTetikTs[anahtar] = Date.now();
+        if(!_alarmGosterimIzin(anahtar)) return;
         _alarmKritikModal(kritik.alarm, kritik.receteId, kritik.receteAd);
-        _alarmDurumGuncelle(kritik.receteId, kritik.alarm.g, 'gosterildi');
         try{ if(window.bmGecmisEkle) bmGecmisEkle({ts:Date.now(), baslik:kritik.alarm.aksiyon, body:(kritik.receteAd||'')+' · Gün '+kritik.alarm.g+(kritik.alarm.aciklama?' · '+kritik.alarm.aciklama:''), tip:kritik.alarm.tip, kaynak:'app'}); }catch(_g){}
         return;
       }
-      
-      // Kontrol alarmları — hepsini toast olarak göster (max 3)
+
+      // Kontrol alarmları — toast (max 3), SPRINT BE2 (BD F1-7): dikey İSTİFLİ (eskiden üst üste biniyordu)
+      let _tSira = 0;
       bekleyenler.slice(0, 3).forEach((b,i) => {
         const anahtar = b.receteId+'_'+b.alarm.g;
-        const sonTs = _alarmSonTetikTs[anahtar] || 0;
-        if(Date.now() - sonTs < 30000) return;
-        _alarmSonTetikTs[anahtar] = Date.now();
+        if(!_alarmGosterimIzin(anahtar)) return;
+        const _sira = _tSira++;
         setTimeout(()=>{
-          _alarmKontrolToast(b.alarm, b.receteId, b.receteAd);
-          _alarmDurumGuncelle(b.receteId, b.alarm.g, 'gosterildi');
+          _alarmKontrolToast(b.alarm, b.receteId, b.receteAd, _sira);
           try{ if(window.bmGecmisEkle) bmGecmisEkle({ts:Date.now(), baslik:b.alarm.aksiyon, body:(b.receteAd||'')+' · Gün '+b.alarm.g+(b.alarm.aciklama?' · '+b.alarm.aciklama:''), tip:b.alarm.tip, kaynak:'app'}); }catch(_g){}
         }, i*300);
       });
@@ -24218,7 +24262,7 @@ window.brewdayBitir=function(){
     if(aktifRid && tum[aktifRid] && tum[aktifRid].durum === 'aktif') hedef = tum[aktifRid];
     // Yoksa herhangi bir aktif reçete göster
     if(!hedef){
-      const aktifRids = Object.keys(tum).filter(k => tum[k].durum === 'aktif');
+      const aktifRids = Object.keys(tum).filter(k => tum[k].durum === 'aktif' && !/^(maya|stok|manuel|plan|stuck):/.test(k)); // SPRINT BE2 (BD F10-4): pseudo grup 'FERMANTASYON ALARMLARI' kartına hedef OLAMAZ
       if(aktifRids.length > 0){
         // En yeni
         aktifRids.sort((a,b) => (tum[b].olusTs||0) - (tum[a].olusTs||0));
@@ -24235,6 +24279,9 @@ window.brewdayBitir=function(){
     const alarmlar = (hedef.alarmlar||[]).slice().sort((a,b) => a.ts - b.ts);
     const gecmis = alarmlar.filter(a => a.durum==='tamamlandi' || a.durum==='atlandi');
     const bekleyen = alarmlar.filter(a => a.durum==='bekliyor' || a.durum==='gosterildi');
+    // SPRINT BE2 (BD F10-3): geçmiş-tarihli 'pasif' alarm hiçbir bölümde çizilmiyor (kacirilan pasif'i
+    // dışlar) — başlık sayacı da onu SAYMASIN ki 'N bekleyen' listeyle birebir olsun.
+    const bekleyenSayi = bekleyen.filter(a => !(a.tip === 'pasif' && a.ts <= simdi)).length;
     const kacirilan = bekleyen.filter(a => a.ts <= simdi && a.tip !== 'pasif');
     const bugun = bekleyen.filter(a => {
       const d = new Date(a.ts);
@@ -24289,7 +24336,7 @@ window.brewdayBitir=function(){
       }
     }
     if(yaklasan.length > 0){
-      inner += '<div style="padding:6px 14px;background:var(--bg2);font-size:10px;font-weight:700;color:var(--soluk);letter-spacing:.8px">📅 YAKLAŞAN (7 GÜN)</div>';
+      inner += '<div style="padding:6px 14px;background:var(--bg2);font-size:10px;font-weight:700;color:var(--soluk);letter-spacing:.8px">📅 YAKLAŞAN (7 GÜN)'+(yaklasan.length>10?' <span style="font-weight:400">· '+yaklasan.length+' alarmdan ilk 10</span>':'')+'</div>';
       yaklasan.slice(0, 10).forEach(a => inner += rowHTML(a,'yaklasan'));
     }
     // SPRINT BB: 7+ gün uzaktaki bekleyenler HİÇBİR bölüme girmiyordu — başlık "2 bekleyen" derken
@@ -24302,11 +24349,12 @@ window.brewdayBitir=function(){
       return (d - b) / 864e5 >= 7 && d.toDateString() !== b.toDateString();
     });
     if(ileride.length > 0){
-      inner += '<div style="padding:6px 14px;background:var(--bg2);font-size:10px;font-weight:700;color:var(--soluk);letter-spacing:.8px">📅 İLERİDE · '+ileride.length+'</div>';
+      inner += '<div style="padding:6px 14px;background:var(--bg2);font-size:10px;font-weight:700;color:var(--soluk);letter-spacing:.8px">📅 İLERİDE · '+ileride.length+(ileride.length>10?' <span style="font-weight:400">· ilk 10 gösteriliyor</span>':'')+'</div>';
       ileride.slice(0, 10).forEach(a => inner += rowHTML(a,'ileride'));
     }
     if(gecmis.length > 0){
-      inner += '<div style="padding:6px 14px;background:var(--bg2);font-size:10px;font-weight:700;color:var(--soluk);letter-spacing:.8px">✓ GEÇMİŞ · '+gecmis.length+'</div>';
+      // SPRINT BE2 (BD F10-5): kesme artık GÖRÜNÜR — 'GEÇMİŞ · 6' deyip 5 satır çizmek yanıltıyordu
+      inner += '<div style="padding:6px 14px;background:var(--bg2);font-size:10px;font-weight:700;color:var(--soluk);letter-spacing:.8px">✓ GEÇMİŞ · '+gecmis.length+(gecmis.length>5?' <span style="font-weight:400">· son 5 gösteriliyor</span>':'')+'</div>';
       gecmis.slice(-5).forEach(a => inner += rowHTML(a,'gecmis'));
     }
 
@@ -24319,7 +24367,7 @@ window.brewdayBitir=function(){
     return '<div style="background:#fff;border:1px solid var(--bor);border-radius:12px;margin-bottom:10px;box-shadow:var(--golge);overflow:hidden">'
       +'<div style="padding:10px 14px;background:var(--bg2);border-bottom:1px solid var(--bor);display:flex;justify-content:space-between;align-items:center">'
         +'<span style="font-size:10px;font-weight:700;color:var(--kahve);letter-spacing:.6px">⏰ FERMANTASYON ALARMLARI · '+escapeH(hedef.receteAd||'')+'</span>'
-        +'<span style="font-size:10px;color:var(--soluk);font-weight:600">'+bekleyen.length+' bekleyen</span>'
+        +'<span style="font-size:10px;color:var(--soluk);font-weight:600">'+bekleyenSayi+' bekleyen</span>'
       +'</div>'
       +(inner || '<div style="padding:16px;text-align:center;color:var(--dim);font-size:12px">Tüm alarmlar tamamlandı ✓</div>')
       +saatInput
@@ -24440,7 +24488,10 @@ window.brewdayTamamla=function(){
       if(_alsonuc && _alsonuc.ok){
         setTimeout(()=>flash('⏰ '+_alsonuc.ping+' fermantasyon alarmı kuruldu','ok'), 1200);
       } else if(_alsonuc && _alsonuc.hata){
+        // SPRINT BE2-3 (BD F9-16): başarısızlık da SESLİ — başarıda flash varken hatada sessizlik asimetrisi bitti
         console.warn('Alarm kurulumu:', _alsonuc.hata);
+        if(typeof flash==='function') setTimeout(()=>flash('⚠️ Alarm kurulamadı: '+_alsonuc.hata+' — Takvim ▸ ↻ Yenile ile tekrar dene','err'), 1200);
+        if(window.bmHataKaydet)bmHataKaydet('alarm',new Error(String(_alsonuc.hata)),'brewdayTamamla/planiKur');
       }
     }
     // SPRINT AZ2: plan GERÇEKLEŞTİ — planlı-demleme kalıntısını düşür (Sprint F'nin brewSonuc
@@ -27745,7 +27796,15 @@ window.rStokAyarlar = function(){
         '<div class="bm-ayar-satir-text">📊 Durum özeti'+
           '<small>Bildirim izni: '+_bIzinStr+'</small>'+
           '<small id="bmPushDurumSatir">'+(_bAbone?'✓ Bu cihaz abone':'Bu cihaz abone değil')+'</small>'+
-          '<small>Bekleyen alarm: '+_bBekleyen+'</small>'+
+          '<small>Zamanı gelmiş alarm: '+_bBekleyen+'</small>'+ // SPRINT BE2 (BD F10-1): kartın "bekleyen"iyle (gelecek dahil) FARKLI ölçü — adı doğruya çekildi
+          (function(){ try{ // SPRINT BE2 (BD F10-8): 4 öğrenme kolunun durumu ilk kez tek satırda görünür
+            var _oOff=0,_oStil=0,_oMaya=0,_oVerim=0;
+            try{ var _a1=JSON.parse(localStorage.getItem('bm_off_ogren_v1')||'[]'); _oOff=Array.isArray(_a1)?_a1.length:0; }catch(_e1){}
+            try{ var _a2=JSON.parse(localStorage.getItem('bm_stil_ogren_v1')||'[]'); _oStil=Array.isArray(_a2)?_a2.length:0; }catch(_e2){}
+            try{ var _a3=JSON.parse(localStorage.getItem('bm_maya_kalibrasyon')||'{}'); _oMaya=Object.keys(_a3||{}).length; }catch(_e3){}
+            try{ var _a4=JSON.parse(localStorage.getItem('bm_kaan_profil_v1')||'null'); _oVerim=(_a4&&_a4.n)?_a4.n:0; }catch(_e4){}
+            return '<small>Öğrenme (bu cihazda): off-flavor '+_oOff+' · stil '+_oStil+' · maya '+_oMaya+' suş · verim n='+_oVerim+'</small>';
+          }catch(_og){ return ''; } })()+
           '<small>Son bildirim: '+_bSonStr+'</small>'+
           '<small>Sessiz saat: '+_bSessizStr+'</small>'+
         '</div>'+
@@ -27801,7 +27860,7 @@ window.rStokBildirim = function(){
           var row = {
             tipSinif: '',
             ikon: '⏰',
-            icerik: '<strong>'+(a.baslik||a.tip||'Alarm')+'</strong> — '+(a.aciklama||'')+'<small>'+label+' · '+recAd+'</small>'
+            icerik: '<strong>'+(a.baslik||a.aksiyon||a.tip||'Alarm')+'</strong> — '+(a.aciklama||'')+'<small>'+label+' · '+recAd+'</small>' // SPRINT BE2 (BD F10-2): plan alarmının eylemi 'aksiyon' alanında — başlık artık 'kontrol' değil eylem adı
           };
           if (a.ts <= simdi) { row.tipSinif='kritik'; row.ikon='🔴'; kritikSatir.push(row); }
           else if ((a.ts - simdi)/864e5 < 1) { row.tipSinif='uyari'; row.ikon='⏳'; bekleyenSatir.push(row); }
