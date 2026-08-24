@@ -24142,9 +24142,9 @@ window.brewdayBitir=function(){
           +'</div>'
           +(al.durum==='bekliyor'||al.durum==='gosterildi' ? 
             '<div style="display:flex;gap:4px;flex-shrink:0">'
-              +'<button onclick="_alarmAksiyon(\''+hedefRid+'\','+al.g+',\'tamamlandi\')" style="background:var(--ya);border:1px solid var(--yk);color:var(--yk);border-radius:var(--r-sm);padding:4px 8px;font-size:10px;font-weight:700;cursor:pointer" aria-label="'+escapeH(al.aksiyon)+' alarmını tamamlandı işaretle">✓</button>'
-              +(al.ts <= simdi ? '<button onclick="event.stopPropagation();_alarmSnoozeMenu(\''+hedefRid+'\','+al.g+',event)" style="background:var(--card);border:1px solid var(--bor);color:var(--kahve);border-radius:var(--r-sm);padding:4px 8px;font-size:10px;font-weight:600;cursor:pointer" aria-label="'+escapeH(al.aksiyon)+' alarmını ertele (15dk/1sa/yarın)">⏰</button>' : '')
-              +'<button onclick="_alarmSustur(\''+hedefRid+'\','+al.g+')" style="background:var(--card);border:1px solid var(--bor);color:var(--soluk);border-radius:var(--r-sm);padding:4px 8px;font-size:10px;font-weight:600;cursor:pointer" aria-label="'+escapeH(al.aksiyon)+' alarmını sustur">🔕</button>'
+              +'<button onclick="_alarmAksiyon(\''+hedefRid+'\','+al.g+',\'tamamlandi\')" style="background:var(--ya);border:1px solid var(--yk);color:var(--yk);border-radius:var(--r-sm);padding:4px 8px;font-size:10px;font-weight:700;cursor:pointer;min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center" aria-label="'+escapeH(al.aksiyon)+' alarmını tamamlandı işaretle">✓</button>'
+              +(al.ts <= simdi ? '<button onclick="event.stopPropagation();_alarmSnoozeMenu(\''+hedefRid+'\','+al.g+',event)" style="background:var(--card);border:1px solid var(--bor);color:var(--kahve);border-radius:var(--r-sm);padding:4px 8px;font-size:10px;font-weight:600;cursor:pointer;min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center" aria-label="'+escapeH(al.aksiyon)+' alarmını ertele (15dk/1sa/yarın)">⏰</button>' : '')
+              +'<button onclick="_alarmSustur(\''+hedefRid+'\','+al.g+')" style="background:var(--card);border:1px solid var(--bor);color:var(--soluk);border-radius:var(--r-sm);padding:4px 8px;font-size:10px;font-weight:600;cursor:pointer;min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center" aria-label="'+escapeH(al.aksiyon)+' alarmını sustur">🔕</button>'
             +'</div>'
             : (al.durum==='tamamlandi' ? '<span style="font-size:10px;color:#2D7A2D;font-weight:700">✓</span>' : 
                (al.durum==='atlandi' ? '<span style="font-size:10px;color:var(--soluk)">⤵</span>' : 
@@ -24169,6 +24169,19 @@ window.brewdayBitir=function(){
       inner += '<div style="padding:6px 14px;background:var(--bg2);font-size:10px;font-weight:700;color:var(--soluk);letter-spacing:.8px">📅 YAKLAŞAN (7 GÜN)</div>';
       yaklasan.slice(0, 10).forEach(a => inner += rowHTML(a,'yaklasan'));
     }
+    // SPRINT BB: 7+ gün uzaktaki bekleyenler HİÇBİR bölüme girmiyordu — başlık "2 bekleyen" derken
+    // liste yalnız GEÇMİŞ gösteriyordu (Muzo vakası: karbonasyon +14g / içime-hazır +21g görünmezdi,
+    // Kaan butonsuz geçmiş satırlarına basıp "alarmlara basılmıyor" yaşadı). Artık her bekleyen bir
+    // bölümde: kaçırılmış / bugün / yaklaşan(7g) / İLERİDE. Kesişimsiz: diff>=7 buraya düşer.
+    const ileride = bekleyen.filter(a => {
+      const d = new Date(a.ts);
+      const b = new Date();
+      return (d - b) / 864e5 >= 7 && d.toDateString() !== b.toDateString();
+    });
+    if(ileride.length > 0){
+      inner += '<div style="padding:6px 14px;background:var(--bg2);font-size:10px;font-weight:700;color:var(--soluk);letter-spacing:.8px">📅 İLERİDE · '+ileride.length+'</div>';
+      ileride.slice(0, 10).forEach(a => inner += rowHTML(a,'ileride'));
+    }
     if(gecmis.length > 0){
       inner += '<div style="padding:6px 14px;background:var(--bg2);font-size:10px;font-weight:700;color:var(--soluk);letter-spacing:.8px">✓ GEÇMİŞ · '+gecmis.length+'</div>';
       gecmis.slice(-5).forEach(a => inner += rowHTML(a,'gecmis'));
@@ -24177,7 +24190,7 @@ window.brewdayBitir=function(){
     const saatInput = '<div style="padding:10px 14px;background:var(--bg2);border-top:1px solid var(--bor);display:flex;align-items:center;gap:8px">'
       +'<span style="font-size:11px;font-weight:600;color:var(--soluk)">🔔 Alarm planı:</span>'
       +'<span style="flex:1"></span>'
-      +'<button onclick="_alarmPlaniYenile()" style="background:var(--card);border:1px solid var(--bor);color:var(--kahve);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer" title="Pitch tarihine göre alarmları yeniden hesapla" aria-label="Alarm planını yenile">↻ Yenile</button>'
+      +'<button onclick="_alarmPlaniYenile()" style="background:var(--card);border:1px solid var(--bor);color:var(--kahve);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;min-height:44px;display:inline-flex;align-items:center" title="Pitch tarihine göre alarmları yeniden hesapla" aria-label="Alarm planını yenile">↻ Yenile</button>'
     +'</div>';
 
     return '<div style="background:#fff;border:1px solid var(--bor);border-radius:12px;margin-bottom:10px;box-shadow:var(--golge);overflow:hidden">'

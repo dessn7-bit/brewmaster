@@ -4659,6 +4659,37 @@ const CASELER = [
       var em2 = document.getElementById('_alarmModal'); if (em2) em2.remove();
       return __REG.al();
     })
+  },
+
+  // ── SPRINT BB: alarm kartı İLERİDE bölümü + dokunma hedefleri (Muzo "alarmlara basılmıyor" vakası) ──
+  {
+    kod: 'BB1-ILERIDE', ad: '7+ gün uzak bekleyenler artık görünür (İLERİDE bölümü); başlık-liste tutarlı; aksiyon butonu ≥44px; GEÇMİŞ satırları butonsuz kalır (tasarım)',
+    calistir: (page) => page.evaluate(() => {
+      const id = __REG.yeniKayit('REGTEST BB1', {});
+      const st = {}; st[id] = { receteAd: 'BB1', pitchTs: Date.now() - 8 * 864e5, durum: 'aktif', alarmlar: [
+        { g: 8, ts: Date.now() - 1 * 864e5, tip: 'kritik', aksiyon: '🍺 Şişele', aciklama: '', durum: 'tamamlandi' },
+        { g: 22, ts: Date.now() + 14 * 864e5, tip: 'kontrol', aksiyon: '🫧 Karbonasyon kontrol — bir şişe test et', aciklama: '', durum: 'bekliyor' },
+        { g: 29, ts: Date.now() + 21 * 864e5, tip: 'kontrol', aksiyon: '🍺 İçime hazır — test olgunlaştı', aciklama: '', durum: 'bekliyor' },
+        { g: 10, ts: Date.now() + 2 * 864e5, tip: 'kontrol', aksiyon: '📊 Ara kontrol', aciklama: '', durum: 'bekliyor' }] };
+      _alarmlariYaz(st);
+      const html = _alarmKartRender();
+      __REG.ok('başlık: 3 bekleyen', html.indexOf('3 bekleyen') >= 0);
+      __REG.ok('İLERİDE bölümü var (·2: karb+içime)', html.indexOf('İLERİDE · 2') >= 0);
+      __REG.ok('karbonasyon satırı GÖRÜNÜR', html.indexOf('Karbonasyon kontrol') >= 0);
+      __REG.ok('içime-hazır satırı GÖRÜNÜR', html.indexOf('İçime hazır') >= 0);
+      __REG.ok('yakın bekleyen için YAKLAŞAN bölümü de var', html.indexOf('YAKLAŞAN (7 GÜN)') >= 0);
+      // DOM ölçümü: bekleyen satırın ✓ butonu ≥44px; satır tekrarı yok (aksiyon başına ✓+🔕 = 2 buton); geçmişte buton YOK
+      const div = document.createElement('div'); div.innerHTML = html; document.body.appendChild(div);
+      __REG.ok('Ara kontrol TEK satır (✓+🔕 = 2 buton)', div.querySelectorAll('button[aria-label*="Ara kontrol"]').length === 2, String(div.querySelectorAll('button[aria-label*="Ara kontrol"]').length));
+      __REG.ok('Karbonasyon TEK satır (çift listeleme yok)', div.querySelectorAll('button[aria-label*="Karbonasyon"]').length === 2, String(div.querySelectorAll('button[aria-label*="Karbonasyon"]').length));
+      const onayBtn = Array.from(div.querySelectorAll('button')).find(b => (b.getAttribute('aria-label') || '').indexOf('tamamlandı işaretle') >= 0);
+      const r = onayBtn ? onayBtn.getBoundingClientRect() : { width: 0, height: 0 };
+      __REG.ok('✓ butonu ≥44×44 (dokunma hedefi)', r.width >= 44 && r.height >= 44, Math.round(r.width) + 'x' + Math.round(r.height));
+      const gecmisOnay = Array.from(div.querySelectorAll('button')).filter(b => (b.getAttribute('onclick') || '').indexOf("'tamamlandi'") >= 0);
+      __REG.ok('geçmiş (terminal) satırda aksiyon butonu yok — yalnız bekleyenlerde', gecmisOnay.length === 3, String(gecmisOnay.length));
+      div.remove();
+      return __REG.al();
+    })
   }
 ];
 
