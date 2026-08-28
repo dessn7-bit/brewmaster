@@ -12976,7 +12976,7 @@ function renderYapimdaVurgu(){
   var items = yapimda.slice(0, 3).map(function(t){
     var bl = t.brewLog || [];
     var son = bl.length ? bl[bl.length - 1] : null;
-    var meta = son ? ((logTipIkon[son.tip] || '📌') + ' ' + (son.tarih || '')) : '';
+    var meta = (function(){ try { var sis=null,pit=null; for(var i=0;i<bl.length;i++){ var e=bl[i]; if(!e||!e.tip||!e.tarih) continue; if(e.tip==='siseleme') sis=e; else if(e.tip==='pitching') pit=e; } var g; if(sis){ g=Math.floor((new Date()-new Date(sis.tarih))/864e5); if(g>=0) return '🍺 Kondisyon '+g+'. gün'; } if(pit){ g=Math.floor((new Date()-new Date(pit.tarih))/864e5); if(!isNaN(g)) return (g>=0?('⏱️ Fermentasyon '+g+'. gün'):('📅 Pitching '+Math.abs(g)+' gün SONRA')); } } catch(e2){} return son ? ((logTipIkon[son.tip] || '📌') + ' ' + (son.tarih || '')) : ''; })(); // SPRINT BF (gün regresyonu): kartta faz+gün — şişeleme→Kondisyon, pitching→Fermentasyon, gelecek→"Pitching N gün SONRA" (BE3 deseni); log/tarih yoksa eski ikon+tarih
     return '<div class="bm-yapimda-item" data-tid="'+t.id+'" onclick="tarifAcById(this)">'+
         '<div class="bm-yapimda-item-ad">'+_esc131B(t.biraAd)+'</div>'+
         (meta ? '<div class="bm-yapimda-item-meta">'+_esc131B(meta)+'</div>' : '')+
@@ -13926,7 +13926,7 @@ function rEditorTakvim(maya, maya2, tv){
   var _ustDurum = '';
   try {
     var _pTarihForUst = null;
-    var _pEUst = _bl.filter(function(x){return x.tip==='pitching';}).pop();
+    var _pEUst = _bl.filter(function(x){return x&&x.tip==='pitching';}).pop(); // SPRINT BF: null-guard
     if(_pEUst && _pEUst.tarih) _pTarihForUst = _pEUst.tarih;
     
     var _durumBaslik = '', _durumAlt = '', _durumRenk = 'var(--bakir)';
@@ -13941,10 +13941,10 @@ function rEditorTakvim(maya, maya2, tv){
       
       if(_hasSisUst){
         _faz='kondisyon'; _durumBaslik='Kondisyon'; _durumRenk='var(--sk)';
-        var _sisE = _bl.filter(function(x){return x.tip==='siseleme';}).pop();
+        var _sisE = _bl.filter(function(x){return x&&x.tip==='siseleme'&&x.tarih;}).pop(); // SPRINT BF: null-guard + tarihsiz kayıt atla
         if(_sisE){
           var _sisGun = Math.floor((new Date()-new Date(_sisE.tarih))/(864e5));
-          _durumAlt='Şişeleme: '+_sisE.tarih+' · '+_sisGun+'. gün';
+          if(_sisGun>=0){ _durumBaslik='Kondisyon · '+_sisGun+'. Gün'; _durumAlt='Şişeleme: '+_sisE.tarih; } else { _durumAlt='📅 Şişeleme planlandı: '+_sisE.tarih; } // SPRINT BF (gün regresyonu): kondisyon başlığına gün; gelecek tarihli şişeleme negatif gün göstermez
         }
       } else if(_hasColdUst){
         _faz='cold'; _durumBaslik='Cold Crash / Dinlendirme'; _durumRenk='var(--mk)';
@@ -14214,7 +14214,7 @@ function rEditorTakvim(maya, maya2, tv){
       } else if(_dhMs && _dhMs.tarih && _bugunGunI >= Math.floor((new Date(_dhMs.tarih)-_pTar)/864e5)){
         _faz_str = 'Dry Hop · '+_bugunGunI+'. gün'; _faz_renk_txt = 'var(--yk)';
       } else {
-        _faz_str = 'Primary · '+_bugunGunI+'. gün'; _faz_renk_txt = 'var(--ok)';
+        _faz_str = _bugunGunI>=0 ? ('Primary · '+_bugunGunI+'. gün') : ('📅 Pitching '+Math.abs(_bugunGunI)+' gün SONRA'); _faz_renk_txt = 'var(--ok)'; // SPRINT BF: BE3 negatif-gün deseni timeline fazına da
       }
 
       // 135-M: outer container + header/faz/legend token migrate. DATA hex (_faz_renk/_faz_renk_txt) INTACT.
@@ -14555,14 +14555,14 @@ function rEditorTakvim(maya, maya2, tv){
   // Meta hesaplamalar
   var _bmF_fazAd = (function(){
     try {
-      if(_bl.some(function(x){return x.tip==='siseleme';})) return 'Kondisyon';
+      var _sisF=_bl.filter(function(x){return x&&x.tip==='siseleme'&&x.tarih;}).pop(); if(_sisF){ var _gSF=Math.floor((new Date()-new Date(_sisF.tarih))/(864e5)); if(_gSF>=0) return 'Kondisyon · '+_gSF+'. gün'; } if(_bl.some(function(x){return x&&x.tip==='siseleme';})) return 'Kondisyon'; // SPRINT BF: kondisyon akordiyon metasına gün eklendi
       if(_bl.some(function(x){return x.tip==='cold_crash';})) return 'Cold Crash';
       var _dhSon=_bl.filter(function(x){return x&&x.tip==='dry_hop';}).pop(); // SPRINT R: varlık değil SON giriş — 'çıkarıldı' ise dry-hop fazı bitti
       if(_dhSon && !/çıkar/i.test(_dhSon.not||'')) return 'Dry Hop';
       var _p = _bl.filter(function(x){return x.tip==='pitching';}).pop();
       if(_p && _p.tarih){
         var _g = Math.floor((new Date()-new Date(_p.tarih))/(864e5));
-        return 'Primary · ' + _g + '. gün';
+        return _g>=0 ? ('Primary · ' + _g + '. gün') : ('📅 Pitching '+Math.abs(_g)+' gün SONRA'); // SPRINT BF: BE3 negatif-gün deseni akordiyon metasına da
       }
       return 'Hazırlık';
     } catch(e){ return ''; }
@@ -14572,7 +14572,7 @@ function rEditorTakvim(maya, maya2, tv){
       var _p = _bl.filter(function(x){return x.tip==='pitching';}).pop();
       if(!_p || !_p.tarih) return '';
       var _g = Math.floor((new Date()-new Date(_p.tarih))/(864e5));
-      return 'Gün ' + _g;
+      return _g>=0 ? ('Gün ' + _g) : ''; // SPRINT BF: gelecek pitch milestone metasında negatif göstermez
     } catch(e){ return ''; }
   })();
   var _bmF_alarmSayisi = (function(){
@@ -19935,12 +19935,12 @@ try {
   var _blG = S.brewLog||[];
   if(_blG.length > 0){
     var _tAdG={og_olcum:'🔬 OG',pitching:'🧬 Pitching',sicaklik:'🌡️ Sıcaklık',fg_olcum:'📊 FG',dry_hop:'🌿 Dry Hop',cold_crash:'❄️ Cold Crash',filtrasyon:'🔆 Filtrasyon',siseleme:'🍺 Şişeleme',tadim:'👅 Tadım',katki:'🧪 Katkı',diger:'📝 Not'};
-    var _pEG = _blG.filter(function(x){return x.tip==='pitching';}).pop();
-    var _gunG = _pEG ? Math.floor((new Date()-new Date(_pEG.tarih))/(864e5)) : null;
-    var _fgLG = _blG.filter(function(x){return x.tip==='fg_olcum'&&x.deger;});
+    var _pEG = _blG.filter(function(x){return x&&x.tip==='pitching';}).pop(); var _sisEG = _blG.filter(function(x){return x&&x.tip==='siseleme'&&x.tarih;}).pop(); // SPRINT BF: null-guard + kondisyon fazı tespiti
+    var _gunG = (_pEG&&_pEG.tarih) ? Math.floor((new Date()-new Date(_pEG.tarih))/(864e5)) : null; if(_gunG!==null&&isNaN(_gunG)) _gunG=null; // SPRINT BF: tarihsiz/bozuk pitching NaN üretmesin
+    var _fgLG = _blG.filter(function(x){return x&&x.tip==='fg_olcum'&&x.deger;}); // SPRINT BF: null-guard
     var _sonG = _blG[_blG.length-1];
     var _satirlar = '';
-    if(_gunG!==null) _satirlar += '<div style="font-size:12px;font-weight:700;color:var(--kahve);margin-bottom:6px;font-family:var(--font-display)">'+(_gunG>=0?('⏱️ Fermentasyon '+_gunG+'. Günde'):('📅 Pitching '+Math.abs(_gunG)+' gün SONRA (gelecek tarihli kayıt)'))+'</div>'; // SPRINT BE3 (BD F8-11): negatif gün metni
+    var _sisGunG = _sisEG ? Math.floor((new Date()-new Date(_sisEG.tarih))/(864e5)) : null; if(_sisGunG!==null && _sisGunG>=0){ _satirlar += '<div style="font-size:12px;font-weight:700;color:var(--kahve);margin-bottom:6px;font-family:var(--font-display)">🍺 Kondisyon '+_sisGunG+'. Günde</div>'; } else if(_gunG!==null) _satirlar += '<div style="font-size:12px;font-weight:700;color:var(--kahve);margin-bottom:6px;font-family:var(--font-display)">'+(_gunG>=0?('⏱️ Fermentasyon '+_gunG+'. Günde'):('📅 Pitching '+Math.abs(_gunG)+' gün SONRA (gelecek tarihli kayıt)'))+'</div>'; // SPRINT BE3 (BD F8-11) + SPRINT BF: şişeleme sonrası Kondisyon N. Günde
     // Son kayıt FG ise Son FG ayrı gösterme — redundant
     var _sonIsFG = _sonG && _sonG.tip==='fg_olcum';
     if(_fgLG.length && !_sonIsFG) _satirlar += '<div style="font-size:11px;color:var(--soluk);margin-bottom:3px">📊 Son FG: <b>'+_fgLG[_fgLG.length-1].deger+'</b> — '+_fgLG[_fgLG.length-1].tarih+'</div>';
@@ -21604,6 +21604,7 @@ function rAnasayfa(){
 // ═══ RENDER ══════════════════════════════════════════════════
 function render(){
   
+  try{ if(S&&Array.isArray(S.brewLog)&&S.brewLog.some(function(x){return !x||typeof x!=='object';})) S.brewLog=S.brewLog.filter(function(x){return x&&typeof x==='object';}); }catch(_eBF){} // SPRINT BF (gün regresyonu kök kalkanı): brewLog'a sızan null/bozuk kayıt tüm sekme render'ını çökertiyor ve gün sayaçlarını karartıyordu — girişte sessizce süzülür
   // FLICKER FIX: Render öncesi state'i koru
   // 1. Window scroll pozisyonu
   const _wScrollY=window.scrollY||window.pageYOffset||0;

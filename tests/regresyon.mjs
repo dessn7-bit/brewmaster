@@ -5206,6 +5206,55 @@ const CASELER = [
       __REG.ok('F3-4: tip→siseleme düzenlemesi brewSonuc DONDURDU', !!(KR.find(k => k && k.id === id) || {}).brewSonuc);
       return __REG.al();
     })
+  },
+  {
+    kod: 'BF-GUN', ad: 'SPRINT BF: gün sayacı regresyonu — 4 yüzeyde (ana ekran kartı + üst durum + akordiyon meta + Genel) faz+gün görünür; BE3 negatif-gün deseni korunur; şişeleme→Kondisyon N. gün; brewLog null kaydı render çökertmez',
+    calistir: (page) => page.evaluate(() => {
+      const MID = '1775830924009';
+      const mr = KR.find(k => k && String(k.id) === MID);
+      __REG.ok('fixture Muzo var', !!mr);
+      mr.durum = 'yapimda';
+      function isoGun(d2) { const d = new Date(); d.setDate(d.getDate() + d2); return d.toISOString().slice(0, 10); }
+      function yuzey() {
+        const kart = renderYapimdaVurgu();
+        const km = kart.match(/data-tid="1775830924009"[\s\S]*?bm-yapimda-item-meta">([^<]*)</);
+        tarifAc(mr.id); sekme = 'takvim'; render();
+        const acc = document.querySelector('[data-acc-id="takvim-faz"]');
+        const r = { kartMeta: km ? km[1] : '', fazMeta: acc ? acc.querySelector('.bm-acc-meta').innerText : '', fazKart: acc ? acc.innerText.replace(/\s+/g, ' ') : '' };
+        sekme = 'genel'; render(); r.genel = document.body.innerText;
+        return r;
+      }
+      // a) POZİTİF gün (Muzo gerçeği: pitch 12 gün önce) — bir daha kaybolmasın
+      mr.brewLog = [{ tip: 'pitching', tarih: isoGun(-12), deger: '', id: 'p1', not: '' }, { tip: 'og_olcum', tarih: isoGun(-12), deger: '1.054', id: 'o1', not: '' }];
+      const gBek = Math.floor((new Date() - new Date(isoGun(-12))) / 864e5); // uygulamayla AYNI formül — saat dilimi kaymasına dayanıklı
+      let y = yuzey();
+      __REG.ok('a1 ana kart: Fermentasyon N. gün', y.kartMeta === '⏱️ Fermentasyon ' + gBek + '. gün', y.kartMeta);
+      __REG.ok('a2 üst durum: Primary Fermantasyon · N. Gün', y.fazKart.indexOf('Primary Fermantasyon · ' + gBek + '. Gün') > -1, y.fazKart.slice(0, 120));
+      __REG.ok('a3 akordiyon meta: Primary · N. gün', y.fazMeta === 'Primary · ' + gBek + '. gün', y.fazMeta);
+      __REG.ok('a4 Genel: Fermentasyon N. Günde', y.genel.indexOf('⏱️ Fermentasyon ' + gBek + '. Günde') > -1);
+      // b) BE3 KORUNUMU: gelecek pitch → "SONRA" deseni, negatif gün hiçbir yüzeyde yok
+      mr.brewLog = [{ tip: 'pitching', tarih: isoGun(5), deger: '', id: 'p2', not: '' }];
+      y = yuzey();
+      __REG.ok('b1 ana kart: Pitching N gün SONRA', /Pitching \d+ gün SONRA/.test(y.kartMeta), y.kartMeta);
+      __REG.ok('b2 üst durum: SONRA deseni', y.fazKart.indexOf('gün SONRA') > -1, y.fazKart.slice(0, 120));
+      __REG.ok('b3 negatif gün hiçbir yüzeyde yok', !/-\d+\. [Gg]ün/.test(y.kartMeta + ' ' + y.fazMeta + ' ' + y.fazKart));
+      __REG.ok('b4 Genel: SONRA deseni', /Pitching \d+ gün SONRA/.test(y.genel));
+      // c) şişeleme → Kondisyon N. gün (faz geçişi)
+      mr.brewLog = [{ tip: 'pitching', tarih: isoGun(-15), deger: '', id: 'p3', not: '' }, { tip: 'siseleme', tarih: isoGun(-3), deger: '', id: 's3', not: '' }];
+      const kBek = Math.floor((new Date() - new Date(isoGun(-3))) / 864e5);
+      y = yuzey();
+      __REG.ok('c1 ana kart: Kondisyon N. gün', y.kartMeta === '🍺 Kondisyon ' + kBek + '. gün', y.kartMeta);
+      __REG.ok('c2 üst durum: Kondisyon · N. Gün', y.fazKart.indexOf('Kondisyon · ' + kBek + '. Gün') > -1, y.fazKart.slice(0, 120));
+      __REG.ok('c3 akordiyon meta: Kondisyon · N. gün', y.fazMeta === 'Kondisyon · ' + kBek + '. gün', y.fazMeta);
+      __REG.ok('c4 Genel: Kondisyon N. Günde', y.genel.indexOf('🍺 Kondisyon ' + kBek + '. Günde') > -1);
+      // d) KÖK KALKAN: brewLog'da null kayıt → render çökmez, gün görünür, null süzülür
+      mr.brewLog = [{ tip: 'pitching', tarih: isoGun(-12), deger: '', id: 'p4', not: '' }, null, { tip: 'og_olcum', tarih: isoGun(-12), deger: '1.054', id: 'o4', not: '' }];
+      y = yuzey();
+      __REG.ok('d1 null kayıtla ana kart gün gösterir', y.kartMeta.indexOf('Fermentasyon ' + gBek + '. gün') > -1, y.kartMeta);
+      __REG.ok('d2 null kayıtla üst durum gün gösterir', y.fazKart.indexOf('Primary Fermantasyon · ' + gBek + '. Gün') > -1, y.fazKart.slice(0, 120));
+      __REG.ok('d3 null kayıt render girişinde süzüldü (S)', Array.isArray(S.brewLog) && S.brewLog.length === 2 && S.brewLog.every(function (x) { return x && x.tip; }), JSON.stringify(S.brewLog && S.brewLog.length));
+      return __REG.al();
+    })
   }
 ];
 
