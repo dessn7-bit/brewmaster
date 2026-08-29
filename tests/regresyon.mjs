@@ -4326,7 +4326,11 @@ const CASELER = [
       __REG.ok('tıklama sonrası örnek butonları yine var', ob2.length === nOrnek, String(ob2.length));
       const n1 = KR.length;
       ob2[0].click();
-      __REG.ok('AW1 tıklama (onclick kaçışı sağlam): yeni reçete + NOT dolu + ad örneğinden', KR.length === n1 + 1 && /AHA (yarışmasında|NHC finalinde)/.test(String(S.notlar || '')) && /örneğinden/.test(S.biraAd), S.biraAd);
+      // SPRINT BG2: tıklama artık doğrudan reçete AÇMAZ — önce önizleme modalı
+      __REG.ok('BG2: tıklama doğrudan reçete açmaz — önizleme modalı açılır, KR değişmez', KR.length === n1 && !!document.getElementById('bmOrnekOnizle'), 'KR delta: ' + (KR.length - n1));
+      bmOrnekOnizleOlustur();
+      __REG.ok('AW1 oluştur (önizlemeden; onclick kaçışı sağlam): yeni reçete + NOT dolu + ad örneğinden', KR.length === n1 + 1 && /AHA (yarışmasında|NHC finalinde)/.test(String(S.notlar || '')) && /örneğinden/.test(S.biraAd), S.biraAd);
+      __REG.ok('BG2: oluşturma sonrası önizleme kapandı', !document.getElementById('bmOrnekOnizle'));
       // AV REGRESYONU: profil önerisi yolu opts'suz — not sızmaz, ad stil adıyla
       const key = 'koyu|dengeli|dolgun';
       const idx = window._PROFIL_STIL[key][1].findIndex(x => !!STIL_ISKELET[x[0]]);
@@ -5253,6 +5257,114 @@ const CASELER = [
       __REG.ok('d1 null kayıtla ana kart gün gösterir', y.kartMeta.indexOf('Fermentasyon ' + gBek + '. gün') > -1, y.kartMeta);
       __REG.ok('d2 null kayıtla üst durum gün gösterir', y.fazKart.indexOf('Primary Fermantasyon · ' + gBek + '. Gün') > -1, y.fazKart.slice(0, 120));
       __REG.ok('d3 null kayıt render girişinde süzüldü (S)', Array.isArray(S.brewLog) && S.brewLog.length === 2 && S.brewLog.every(function (x) { return x && x.tip; }), JSON.stringify(S.brewLog && S.brewLog.length));
+      return __REG.al();
+    })
+  },
+
+  // ═════════════ SPRINT BG — ÖDÜLLÜ ÖRNEK ÖNİZLEMESİ ═════════════
+  {
+    kod: 'BG1-ONIZLE', ad: 'SPRINT BG1: örnek önizlemesi — NHC örneği TAM içerik (kimlik+ölçüler+mash+gramajlı grist/hop+maya+AN çerçevesi); AHA örneği dürüst-boşluk satırları (hop gramajı/gram-kg/hacim kaynakta yok); açılış reçete OLUŞTURMAZ; Kapat hiçbir şey değiştirmez; YASAK kelime 0',
+    calistir: (page) => page.evaluate(() => {
+      const YASAK = ['daha iyi', 'daha kötü', 'yapmalısın', 'yapmalı', 'hatalı', 'yanlış', 'olmalı', 'gerekir',
+        'tavsiye', 'öneriyoruz', 'düzelt', 'kötü', 'başarılı', 'kazanmak için', 'kazandıran', 'ideal', 'doğrusu', 'eksik'];
+      const tara = (t) => YASAK.filter(k => String(t || '').toLocaleLowerCase('tr-TR').indexOf(k) >= 0);
+      __REG.yeniKayit('REGTEST BG1', {});
+      const n0 = KR.length; const ad0 = S.biraAd;
+      // (a) NHC örneği — zengin kayıt (Altbier 2012: og+fg+ib+sr+ms+gramlı hop, 68.1 L)
+      const r1 = _bmOrnekOnizle('nhc', 'Altbier / Düsseldorf Altbier', 1);
+      const m1 = document.getElementById('bmOrnekOnizle');
+      __REG.ok('(a) NHC önizleme açıldı, reçete OLUŞMADI', r1 === true && !!m1 && KR.length === n0 && S.biraAd === ad0);
+      const t1 = m1 ? m1.textContent : '';
+      __REG.ok('(a) kimlik: stil + NHC altın + yıl + orijinal hacim', t1.indexOf('Altbier / Düsseldorf Altbier') >= 0 && t1.indexOf('NHC finali altın · 2012') >= 0 && t1.indexOf('68,1 L') >= 0);
+      __REG.ok('(a) ölçüler: OG+FG+IBU+mash görünür', t1.indexOf('1,051') >= 0 && t1.indexOf('1,010') >= 0 && t1.indexOf('42') >= 0 && t1.indexOf('66°C') >= 0);
+      __REG.ok('(a) grist gramajlı + yüzde hesaplı', t1.indexOf('11,34 kg') >= 0 && t1.indexOf('German Pilsner malt') >= 0 && /%\d+/.test(t1));
+      __REG.ok('(a) hop gramajlı + dakika + AA', t1.indexOf('57 g') >= 0 && t1.indexOf('Tettnanger') >= 0 && t1.indexOf('@60dk') >= 0 && t1.indexOf('AA') >= 0);
+      __REG.ok('(a) maya + AN çerçevesi (elenen yok + kural değil)', t1.indexOf('Wyeast 1007') >= 0 && t1.indexOf('elenen') >= 0 && t1.indexOf('kural değil') >= 0);
+      __REG.ok('(a) NHC yolunda dürüst-boşluk satırı YAZILMAZ (gramaj kaynakta var)', t1.indexOf('gramajı kaynakta yok') < 0);
+      __REG.ok('(a) iki aksiyon butonu: oluştur + Kapat', !!m1.querySelector('button[onclick="bmOrnekOnizleOlustur()"]') && t1.indexOf('Yeni reçete oluştur') >= 0 && t1.indexOf('Kapat') >= 0);
+      __REG.ok('(a) AN5-DIL: NHC önizleme metninde yasak kelime 0', tara(t1).length === 0, tara(t1).join(','));
+      bmOrnekOnizleKapat();
+      __REG.ok('(a) Kapat: modal kalktı + hiçbir şey oluşmadı', !document.getElementById('bmOrnekOnizle') && KR.length === n0 && S.biraAd === ad0);
+      // (b) AHA örneği — hop gramajsız kaynak (American Barleywine eski tabloda var, NHC tablosunda yok)
+      __REG.ok('(b) önkoşul: American Barleywine yalnız eski tabloda', !!window._TOPLULUK_MADALYA['American Barleywine'] && !window._NHC_MADALYA['American Barleywine']);
+      const r2 = _bmOrnekOnizle('aha', 'American Barleywine', 0);
+      const m2 = document.getElementById('bmOrnekOnizle');
+      __REG.ok('(b) AHA önizleme açıldı, reçete OLUŞMADI', r2 === true && !!m2 && KR.length === n0);
+      const t2 = m2 ? m2.textContent : '';
+      __REG.ok('(b) dürüst boşluk: hop gramajı + gram/kg + mash + hacim "kaynakta yok"', t2.indexOf('Hop gramajı kaynakta yok') >= 0 && t2.indexOf('Gram/kg miktarı kaynakta yok') >= 0 && t2.indexOf('kaynakta yok') >= 0);
+      __REG.ok('(b) grist yüzdeleri + madalya derecesi görünür', /%\d+/.test(t2) && /alt[ıi]n|gümüş|bronz|madalya/.test(t2));
+      __REG.ok('(b) AN çerçevesi AHA yolunda da korunur', t2.indexOf('elenen') >= 0 && t2.indexOf('kural değil') >= 0);
+      __REG.ok('(b) AN5-DIL: AHA önizleme metninde yasak kelime 0', tara(t2).length === 0, tara(t2).join(','));
+      bmOrnekOnizleKapat();
+      __REG.ok('(b) kapanış temiz', !document.getElementById('bmOrnekOnizle') && KR.length === n0);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BG2-AKSIYON', ad: 'SPRINT BG2: önizlemeden "Yeni reçete oluştur" = AW/AX yolu AYNEN (iskelet+hedefler+mash+not+ad); modal kapanır; Escape reçete oluşturmaz; kapalıyken oluştur çağrısı güvenli; butonların onclick\'i artık önizleme (doğrudan-oluştur KALKTI)',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('REGTEST BG2', {});
+      S.hacim = 10; S.verim = 45; tarifeKaydet();
+      const stil = 'Altbier / Düsseldorf Altbier';
+      // (a) NHC yolu önizlemeden — AX3 davranışının aynısı
+      const n0 = KR.length;
+      _bmOrnekOnizle('nhc', stil, 1);
+      const yid = bmOrnekOnizleOlustur();
+      __REG.ok('(a) oluştur: yeni reçete + iskelet + stil (AX yolu)', KR.length === n0 + 1 && !!yid && S.stil === stil && (S.maltlar || []).length > 0 && (S.hoplar || []).length > 0);
+      __REG.ok('(a) AX AYNEN: mash taşındı + NOT NHC kaynaklı + gerçek gramajlar', S.mashSc === 66 && String(S.notlar || '').indexOf('AHA NHC finalinde altın almış') >= 0 && String(S.notlar || '').indexOf('57 g Tettnanger @60dk') >= 0);
+      __REG.ok('(a) AD örneğinden + modal kapandı', S.biraAd.indexOf(stil + ' — NHC 2012 örneğinden') === 0 && !document.getElementById('bmOrnekOnizle'));
+      // (b) AHA yolu önizlemeden — AW davranışının aynısı
+      const n1 = KR.length;
+      _bmOrnekOnizle('aha', 'American Barleywine', 0);
+      const yid2 = bmOrnekOnizleOlustur();
+      __REG.ok('(b) AW AYNEN: yeni reçete + notta "gramaj kaynakta YOK — kendi hesabını yap"', KR.length === n1 + 1 && !!yid2 && String(S.notlar || '').indexOf('gramaj kaynakta YOK — kendi hesabını yap') >= 0);
+      // (c) Escape ile kapatma — hiçbir şey oluşmaz
+      const n2 = KR.length;
+      _bmOrnekOnizle('nhc', stil, 0);
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+      __REG.ok('(c) Escape: modal kapandı + reçete OLUŞMADI', !document.getElementById('bmOrnekOnizle') && KR.length === n2);
+      // (d) modal kapalıyken oluştur çağrısı güvenli (çifte tık / bayat çağrı)
+      const n3 = KR.length;
+      const bos = bmOrnekOnizleOlustur();
+      __REG.ok('(d) kapalıyken oluştur: null döner + reçete oluşmaz', bos === null && KR.length === n3);
+      // (e) DOM kanıtı: örnek butonlarının onclick\'i artık önizleme çağırır
+      ekran = 'editor'; sekme = 'genel';
+      S.hacim = 11; S.verim = 61; S.stil = 'Weizen / Weissbier'; bmStilIskeletDoldur(); render();
+      const el = document.querySelector('.bm-topluluk');
+      const btn = el ? Array.from(el.querySelectorAll('button')).filter(b => /Bu örnekten yola çık/.test(b.innerText)) : [];
+      __REG.ok('(e) buton onclick = _bmOrnekOnizle, doğrudan-oluştur YOK', btn.length > 0 && btn.every(b => (b.getAttribute('onclick') || '').indexOf('_bmOrnekOnizle(') === 0 && (b.getAttribute('onclick') || '').indexOf('YeniRecete') < 0), btn.length ? btn[0].getAttribute('onclick') : 'buton yok');
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BG3-KAPSAM', ad: 'SPRINT BG3: ödüllü örneği OLMAYAN stilde (iki tabloda da yok) topluluk bloğu dürüst kapsam satırı basar ("ödüllü örnek verimizde yok" + gerçek havuz sayısı); uydurma örnek basılmaz; örnekli stilde satır YOK',
+    calistir: (page) => page.evaluate(() => {
+      const M = window._TOPLULUK_MADALYA, N = window._NHC_MADALYA;
+      __REG.ok('önkoşul: Dubbel iki madalya tablosunda da yok + dağılımda var', !M['Dubbel'] && !N['Dubbel'] && !!window._TOPLULUK_DAGILIM['Dubbel']);
+      __REG.yeniKayit('REGTEST BG3', {});
+      // AN6 deseni: Dubbel + OG bandın altına → topluluk bloğu kesin basılır
+      ekran = 'editor'; sekme = 'genel';
+      S.hacim = 11; S.verim = 61; S.stil = 'Dubbel'; bmStilIskeletDoldur();
+      S.maltlar = (S.maltlar || []).map(m => ({ ...m, kg: (m.kg || 0) * 0.45 }));
+      render();
+      const el = document.querySelector('.bm-topluluk');
+      __REG.ok('topluluk bloğu basıldı (gözlem var)', !!el);
+      const t = el ? el.textContent : '';
+      const u = {}; Object.keys(M).concat(Object.keys(N)).forEach(a => u[a] = 1);
+      const say = Object.keys(u).length;
+      __REG.ok('kapsam satırı: "ödüllü örnek verimizde yok" + gerçek havuz sayısı', t.indexOf('ödüllü örnek verimizde yok') >= 0 && t.indexOf(say + ' stili kapsıyor') >= 0, 'havuz=' + say);
+      __REG.ok('uydurma örnek YOK: madalya/NHC bölümü basılmadı', t.indexOf('madalya almış') < 0 && t.indexOf('NHC') < 0 && t.indexOf('🏅') < 0);
+      __REG.ok('satır yargı taşımaz (yalın kapsam dili)', t.indexOf('veri kapsamı durumu') >= 0 && t.indexOf('yargı değil') >= 0);
+      __REG.ok('kapsam satırı tıklanabilir öğe eklemez (AN6 kuralı korunur)', el.querySelectorAll('[onclick],button,[role=button]').length === 0);
+      // örnekli stilde kapsam satırı YAZILMAZ
+      __REG.yeniKayit('BG3 poz', {});
+      ekran = 'editor'; sekme = 'genel';
+      S.hacim = 11; S.verim = 61; S.stil = 'Weizen / Weissbier'; bmStilIskeletDoldur(); render();
+      const el2 = document.querySelector('.bm-topluluk');
+      const t2 = el2 ? el2.textContent : '';
+      // Weizen HEM AHA hem NHC tablosunda → başlık AHA biçiminde ('madalya almış N reçete'),
+      // 'NHC finalinde altın almış' başlığı yalnız NHC-only stillerde basılır (AX2 tasarımı)
+      __REG.ok('örnekli stilde kapsam satırı YOK + örnekler duruyor', t2.indexOf('ödüllü örnek verimizde yok') < 0 && (t2.indexOf('madalya almış') >= 0 || t2.indexOf('NHC finalinde altın almış') >= 0), t2.slice(0, 80));
       return __REG.al();
     })
   }

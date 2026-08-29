@@ -25988,8 +25988,8 @@ window._TD_BOYUT = {
           + (hop ? '<div style="font-size:10px;color:var(--metin);margin-top:1px">🌿 ' + hop + '</div>' : '')
           + (o.y ? '<div style="font-size:10px;color:var(--metin);margin-top:1px">🧪 ' + esc(o.y) + '</div>' : '')
           + (o.ekN ? '<div style="font-size:9.5px;color:var(--dim);margin-top:1px">+' + o.ekN + ' ek kalem (baharat/katkı) kaynakta var — burada listelenmedi</div>' : '')
-          + '<div style="margin-top:4px"><button type="button" onclick="_bmNhcYeniRecete(\'' + jsq(stilAd) + '\',' + oi + ')" '
-          +   'title="Yeni reçete: stil iskeleti + örneğin OG/IBU/mash hedefleri; orijinal gramajlı grist/hop/maya not alanına yazılır" '
+          + '<div style="margin-top:4px"><button type="button" onclick="_bmOrnekOnizle(\'nhc\',\'' + jsq(stilAd) + '\',' + oi + ')" '
+          +   'title="Örneğin tam içeriğini önizlemede gösterir; yeni reçete oluşturma önizlemeden yapılır" '
           +   'style="background:transparent;color:var(--bakir);border:1px solid var(--bakir);border-radius:12px;padding:3px 9px;font-size:10px;font-weight:700;cursor:pointer;font-family:var(--font-govde)">✨ Bu örnekten yola çık</button></div>'
           + '</div>';
       }).join('');
@@ -26014,8 +26014,8 @@ window._TD_BOYUT = {
           + (grist ? '<div style="font-size:10.5px;color:var(--metin);margin-top:1px">🌾 ' + grist + '</div>' : '')
           + (hop ? '<div style="font-size:10px;color:var(--metin);margin-top:1px">🌿 ' + hop + '</div>' : '')
           + (o.y ? '<div style="font-size:10px;color:var(--metin);margin-top:1px">🧪 ' + esc(o.y) + '</div>' : '')
-          + '<div style="margin-top:4px"><button type="button" onclick="_bmMadalyaYeniRecete(\'' + jsq(stilAd) + '\',' + oi + ')" '
-          +   'title="Yeni reçete: stil iskeleti + örneğin OG/IBU ölçüleri; grist/hop/maya metni orijinal biçimiyle not alanına yazılır" '
+          + '<div style="margin-top:4px"><button type="button" onclick="_bmOrnekOnizle(\'aha\',\'' + jsq(stilAd) + '\',' + oi + ')" '
+          +   'title="Örneğin tam içeriğini önizlemede gösterir; yeni reçete oluşturma önizlemeden yapılır" '
           +   'style="background:transparent;color:var(--bakir);border:1px solid var(--bakir);border-radius:12px;padding:3px 9px;font-size:10px;font-weight:700;cursor:pointer;font-family:var(--font-govde)">✨ Bu örnekten yola çık</button></div>'
           + '</div>';
       }).join('');
@@ -26136,6 +26136,95 @@ window._TD_BOYUT = {
     }catch(e){ if(window.bmHataKaydet)bmHataKaydet('calc',e,'_bmNhcYeniRecete'); return null; }
   };
 
+  // ── SPRINT BG — ÖDÜLLÜ ÖRNEK ÖNİZLEMESİ ─────────────────────────────────
+  // "Bu örnekten yola çık" artık doğrudan reçete AÇMAZ: önce örneğin tam içeriği
+  // modalda gösterilir; oluşturma oradaki tek butonla yapılır (AW/AX yolu AYNEN).
+  // Kaynak dürüstlüğü: AHA yolunda hop gramajı / mash / batch hacmi kaynakta yok
+  // — modal bunu açıkça yazar, uydurmaz. AN çerçevesi (winners-only, kural değil)
+  // modalda korunur. Modal S'e DOKUNMAZ; durum yalnız _onizleSec'te tutulur.
+  var _oe = function(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
+  var _onizleSec = null;
+  function _onizleTR(x){ return String(x == null ? '' : x).replace('.', ','); }
+  function _onizleBolum(b, ic){ return '<div style="margin-top:10px"><div style="font-size:11px;font-weight:700;color:var(--kahve);letter-spacing:.4px;margin-bottom:3px">' + b + '</div>' + ic + '</div>'; }
+  window._bmOrnekOnizle = function(kaynak, stilAd, idx){
+    try{
+      var nhc = (kaynak === 'nhc');
+      var T = nhc ? window._NHC_MADALYA : window._TOPLULUK_MADALYA;
+      var v = T && T[stilAd]; var o = v && v[1] && v[1][idx]; if(!o) return null;
+      _onizleSec = { kaynak: kaynak, stilAd: stilAd, idx: idx };
+      var esk = document.getElementById('bmOrnekOnizle'); if(esk) esk.remove();
+      var derece = nhc ? ('🥇 NHC finali altın · ' + o.yil)
+                       : ((MADALYA_IKON[o.m] || '🏅') + ' AHA ' + (DERECE_AD[o.m] || 'madalya') + (o.yil ? ' · ' + o.yil : '') + (o.e ? ' · kategoride ' + o.e.toLocaleString('tr-TR') + ' giriş' : ''));
+      var kaynakStr = nhc ? ('Veri: nhc-homebrew-data derlemesi · orijinal batch ' + _onizleTR(o.L) + ' L')
+                          : 'Veri: AHA yarışma derlemesi · batch hacmi kaynakta yok';
+      var olc = [];
+      if(o.og) olc.push(['OG', Number(o.og).toFixed(3).replace('.', ',')]);
+      if(o.fg) olc.push(['FG', Number(o.fg).toFixed(3).replace('.', ',')]);
+      if(o.ib) olc.push(['IBU', String(Math.round(o.ib))]);
+      if(o.sr) olc.push(['SRM', _onizleTR(o.sr)]);
+      if(o.ab) olc.push(['ABV', '%' + _onizleTR(o.ab)]);
+      olc.push(['Mash', (nhc && o.ms) ? (_onizleTR(o.ms) + '°C') : 'kaynakta yok']);
+      var olcHTML = olc.map(function(x){ return '<span style="display:inline-block;background:var(--bg2);border:1px solid var(--bor);border-radius:8px;padding:3px 8px;font-size:11px;color:var(--kahve);margin:0 4px 4px 0"><b>' + x[0] + '</b> ' + x[1] + '</span>'; }).join('');
+      var satirStil = 'display:flex;gap:6px;padding:3px 0;border-top:1px dotted var(--bor);font-size:12px;color:var(--metin)';
+      var gristHTML;
+      if(nhc){
+        var gTop = 0; (o.g || []).forEach(function(x){ gTop += (+x[1] || 0); });
+        gristHTML = (o.g || []).map(function(x){
+          var p = (gTop > 0 && +x[1]) ? Math.round(x[1] / gTop * 100) : null;
+          return '<div style="' + satirStil + '"><span style="flex:1;min-width:0">' + _oe(x[0]) + '</span><span style="white-space:nowrap;color:var(--kahve);font-weight:600">' + nhcGramTR(x[1]) + (p >= 1 ? ' · %' + p : '') + '</span></div>';
+        }).join('');
+      } else {
+        gristHTML = (o.g || []).map(function(x){
+          return '<div style="' + satirStil + '"><span style="flex:1;min-width:0">' + _oe(x[0]) + '</span><span style="white-space:nowrap;color:var(--kahve);font-weight:600">%' + _oe(x[1]) + '</span></div>';
+        }).join('');
+        gristHTML += '<div style="font-size:10px;color:var(--dim);margin-top:3px">Gram/kg miktarı kaynakta yok — yüzdeler kaynaktan; derleme gristi ilk 5 kalemle sınırlı verir.</div>';
+      }
+      var hopHTML;
+      if(nhc){
+        hopHTML = (o.h || []).map(function(x){
+          return '<div style="' + satirStil + '"><span style="flex:1;min-width:0">' + _oe(x[0]) + _oe(nhcDkStr(x[2])) + (x[3] ? ' <span style="color:var(--soluk)">(%' + _onizleTR(x[3]) + ' AA)</span>' : '') + '</span><span style="white-space:nowrap;color:var(--kahve);font-weight:600">' + nhcGramTR(x[1]) + '</span></div>';
+        }).join('');
+      } else {
+        hopHTML = (o.h || []).map(function(x){
+          return '<div style="' + satirStil + '"><span style="flex:1;min-width:0">' + _oe(x[0]) + (x[1] != null ? ' @' + _oe(x[1]) + 'dk' : '') + (x[2] ? ' <span style="color:var(--soluk)">(' + _oe(x[2]) + ')</span>' : '') + '</span></div>';
+        }).join('');
+        hopHTML += '<div style="font-size:10px;color:var(--dim);margin-top:3px">Hop gramajı kaynakta yok — kaynak yalnız çeşidi ve zamanı verir.</div>';
+      }
+      var h = '';
+      h += '<div id="bmOrnekOnizle" role="dialog" aria-modal="true" aria-label="Ödüllü örnek önizleme" tabindex="-1" style="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center" onclick="if(event.target===this)bmOrnekOnizleKapat()">';
+      h += '<div style="background:#fff;width:100%;max-width:520px;max-height:88vh;overflow-y:auto;border-radius:16px 16px 0 0;padding:16px;box-shadow:0 -4px 24px rgba(0,0,0,.3)">';
+      h += '<div style="display:flex;align-items:flex-start;gap:8px">';
+      h += '<div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:700;color:var(--bakir);font-family:var(--font-display);line-height:1.3">' + _oe(stilAd) + '</div>';
+      h += '<div style="font-size:11px;color:var(--kahve);margin-top:2px">' + derece + '</div>';
+      h += '<div style="font-size:10px;color:var(--soluk);margin-top:1px">' + kaynakStr + '</div></div>';
+      h += '<button type="button" onclick="bmOrnekOnizleKapat()" aria-label="Önizlemeyi kapat" style="background:var(--bg2);border:1px solid var(--bor);border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;color:var(--kahve);flex:none">✕</button>';
+      h += '</div>';
+      h += '<div style="margin-top:10px">' + olcHTML + '</div>';
+      if(gristHTML) h += _onizleBolum('🌾 GRIST', gristHTML);
+      if(hopHTML) h += _onizleBolum('🌿 HOP', hopHTML);
+      if(o.y) h += _onizleBolum('🧪 MAYA', '<div style="font-size:12px;color:var(--metin);line-height:1.5">' + _oe(o.y) + '</div>');
+      if(nhc && o.ekN) h += '<div style="font-size:10px;color:var(--dim);margin-top:8px">+' + o.ekN + ' ek kalem (baharat/katkı) kaynakta var — burada listelenmedi.</div>';
+      h += '<div style="margin-top:10px;font-size:9.5px;color:var(--dim);line-height:1.45;border-top:1px solid var(--bor);padding-top:6px">Bu bir <b>örnek</b>, kural değil: AHA yarışmalarında <b>elenen</b> reçeteler bu veride yok. Kazananları kaybedenlerden ayıran şeyin ne olduğu bu havuzdan çıkarılamaz — bu yalnızca "şöyle yapmışlar" kaydıdır.</div>';
+      h += '<div style="display:flex;gap:8px;margin-top:12px;position:sticky;bottom:-16px;background:#fff;padding:8px 0">';
+      h += '<button type="button" onclick="bmOrnekOnizleKapat()" style="flex:1;background:var(--bg2);color:var(--kahve);border:1px solid var(--bor);border-radius:10px;padding:11px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-govde)">Kapat</button>';
+      h += '<button type="button" onclick="bmOrnekOnizleOlustur()" title="Stil iskeleti + örneğin hedefleri; orijinal içerik not alanına yazılır" style="flex:2;background:var(--bakir);color:#fff;border:none;border-radius:10px;padding:11px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font-govde)">✨ Yeni reçete oluştur</button>';
+      h += '</div>';
+      h += '</div></div>';
+      document.body.insertAdjacentHTML('beforeend', h);
+      document.addEventListener('keydown', _bmOnizleEsc);
+      var mEl = document.getElementById('bmOrnekOnizle'); if(mEl && mEl.focus) mEl.focus();
+      return true;
+    }catch(e){ if(window.bmHataKaydet)bmHataKaydet('calc',e,'_bmOrnekOnizle'); return null; }
+  };
+  window.bmOrnekOnizleKapat = function(){ var m = document.getElementById('bmOrnekOnizle'); if(m) m.remove(); document.removeEventListener('keydown', _bmOnizleEsc); _onizleSec = null; };
+  function _bmOnizleEsc(e){ if(e && e.key === 'Escape'){ try{ e.stopPropagation(); }catch(_){} bmOrnekOnizleKapat(); } }
+  window.bmOrnekOnizleOlustur = function(){
+    try{
+      var sec = _onizleSec; bmOrnekOnizleKapat(); if(!sec) return null;
+      return sec.kaynak === 'nhc' ? window._bmNhcYeniRecete(sec.stilAd, sec.idx) : window._bmMadalyaYeniRecete(sec.stilAd, sec.idx);
+    }catch(e){ if(window.bmHataKaydet)bmHataKaydet('calc',e,'bmOrnekOnizleOlustur'); return null; }
+  };
+
   // ── Bölüm render'ı. izin=false ise HİÇBİR ŞEY basmaz (sessiz kalma kapısı).
   window._bmToplulukBolum = function(stilAd, stRef, f, olcum, izin){
     try{
@@ -26147,6 +26236,15 @@ window._TD_BOYUT = {
       var gs = window._bmToplulukGozlem(stilAd, f, olcum, stRef);
       var mHTML = madalyaHTML(stilAd, _e);
       if(!gs.length && !mHTML) return '';           // söylenecek bir şey yok → SESSİZ
+      // SPRINT BG3: iki madalya tablosunda da örneği olmayan stilde sessiz boşluk yerine
+      // dürüst kapsam satırı. Yalnız blok zaten basılıyorsa (gs var); n<200 sessizlik
+      // kapısı ve gözlemsiz-blok-basmama davranışı DEĞİŞMEZ.
+      var kapsamHTML = '';
+      if(!mHTML && gs.length){
+        var kapU = {};
+        Object.keys(window._TOPLULUK_MADALYA || {}).concat(Object.keys(window._NHC_MADALYA || {})).forEach(function(a){ kapU[a] = 1; });
+        kapsamHTML = '<div style="margin-top:8px;padding-top:6px;border-top:1px solid var(--bor);font-size:9.5px;color:var(--dim);line-height:1.45">Bu stil için ödüllü örnek verimizde yok — ödüllü örnek havuzu şu an ' + Object.keys(kapU).length + ' stili kapsıyor. Bu bir veri kapsamı durumu, stile dair bir yargı değil.</div>';
+      }
       var satirlar = gs.map(function(g){
         return '<div style="display:flex;gap:6px;padding:4px 0;border-top:1px dotted var(--bor)">'
           + '<span style="color:var(--soluk);font-size:11px">•</span>'
@@ -26163,7 +26261,7 @@ window._TD_BOYUT = {
         +   'bir seçim olabilir. Yukarıdaki 💊 önerileri BJCP bandına göredir; bu bölüm yalnız bilgilendirir.'
         + '</div>'
         + satirlar
-        + mHTML
+        + mHTML + kapsamHTML
         + '</div>';
     }catch(e){ try{ console.warn('_bmToplulukBolum', e); }catch(_){} return ''; }
   };
