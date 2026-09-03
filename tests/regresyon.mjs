@@ -5451,6 +5451,125 @@ const CASELER = [
       __REG.ok('(b) AN5-DIL: topluluk bloğunda yasak kelime 0', tara(t).length === 0, tara(t).join(','));
       return __REG.al();
     })
+  },
+
+  // ── SPRINT BJ1 (2026-09-03): mobil kritikler — BI denetimi #1/#2/#4 ──
+  {
+    kod: 'BJ1-SEKME', ad: "SPRINT BJ1-1: 390 ve 360 px'te 10 sekmenin hepsi kaydırmasız görünür (çubuk taşmıyor, viewport dışında sekme yok), Takvim tek dokunuşla açılır, çubuk ≤90 px; masaüstü (1024) yatay düzen korunur",
+    calistir: async (page) => {
+      let hepsi = [];
+      for (const [w, h] of [[390, 844], [360, 640]]) {
+        await page.setViewport({ width: w, height: h });
+        const c = await page.evaluate((w) => {
+          const kayit = KR.find(k => k && k.biraAd === 'BJ1 sekme');
+          if (!kayit) __REG.yeniKayit('BJ1 sekme', {}); else tarifAc(kayit.id);
+          sekme = 'genel'; render();
+          const sb = document.querySelector('.sb'); const bt = Array.from(sb.querySelectorAll('.sb-btn'));
+          const dis = bt.filter(b => { const r = b.getBoundingClientRect(); return r.left < -0.5 || r.right > innerWidth + 0.5; }).map(b => b.dataset.s);
+          __REG.ok(w + ': 10 sekme basıldı', bt.length === 10, String(bt.length));
+          __REG.ok(w + ': çubuk yatay TAŞMIYOR (scrollWidth ≤ clientWidth; eskiden 904/390)', sb.scrollWidth <= sb.clientWidth + 1, sb.scrollWidth + '/' + sb.clientWidth);
+          __REG.ok(w + ': viewport dışında sekme YOK (eskiden Su/Süreç/Takvim/Katkı/Not)', dis.length === 0, dis.join(','));
+          const tk = bt.find(b => b.dataset.s === 'takvim'); const tr = tk.getBoundingClientRect();
+          __REG.ok(w + ': Takvim düğmesi görünür ve ≥36 px yüksek', tr.left >= 0 && tr.right <= innerWidth && tr.height >= 36, Math.round(tr.left) + '-' + Math.round(tr.right) + ' h' + Math.round(tr.height));
+          __REG.ok(w + ': çubuk ≤ 90 px (2 satır)', sb.getBoundingClientRect().height <= 90, String(Math.round(sb.getBoundingClientRect().height)));
+          tk.click();
+          __REG.ok(w + ': Takvim TEK dokunuşla açıldı (yatay kaydırma yok)', sekme === 'takvim', sekme);
+          sekme = 'genel'; render();
+          return __REG.al();
+        }, w);
+        hepsi = hepsi.concat(c);
+      }
+      await page.setViewport({ width: 1024, height: 800 });
+      const d = await page.evaluate(() => { render(); const cs = getComputedStyle(document.querySelector('.sb')); __REG.ok('1024: masaüstü düzeni korundu (flex-wrap: nowrap)', cs.flexWrap === 'nowrap', cs.flexWrap); return __REG.al(); });
+      return hepsi.concat(d);
+    }
+  },
+  {
+    kod: 'BJ1-KART', ad: "SPRINT BJ1-2: Yapım Aşamasında kartı — devam eden batch (snapshot var, sonuc yok, durum 'aktif') karta girer; faz+gün BF hesabıyla AYNI (_bmFazBilgi); sıradaki alarm + gecikmiş sayısı satırı; meta 13px/600; kart ANA SAYFADA hero'nun üstünde; bitmiş batch girmez",
+    calistir: (page) => page.evaluate(() => {
+      function isoGun(d2) { const d = new Date(); d.setDate(d.getDate() + d2); return d.toISOString().slice(0, 10); }
+      const id = __REG.yeniKayit('BJ1 kart', { durum: 'aktif', brewSnapshot: { ts: Date.now() - 12 * 864e5, ogT: 1.05, fgT: 1.012, preboilOG: null }, brewLog: [{ tip: 'pitching', tarih: isoGun(-12), deger: '', id: 'bjp', not: '' }] });
+      const r = KR.find(k => k && k.id === id); delete r.brewSonuc;
+      const st = _alarmlariOku(); st[id] = { receteAd: 'BJ1 kart', pitchTs: Date.now() - 12 * 864e5, durum: 'aktif', alarmlar: [
+        { g: 8, ts: Date.now() - 4 * 864e5, tip: 'kritik', aksiyon: '🍺 Şişele', aciklama: '', durum: 'bekliyor' },
+        { g: 5, ts: Date.now() - 7 * 864e5, tip: 'kontrol', aksiyon: '📊 FG ölç', aciklama: '', durum: 'tamamlandi' },
+        { g: 22, ts: Date.now() + 4 * 864e5, tip: 'kontrol', aksiyon: '🫧 Karbonasyon kontrol', aciklama: '', durum: 'bekliyor' }] }; // aynı saat: takvim-günü farkı tam 4 (gece yarısı geçişi test saatine bağlı olmasın)
+      _alarmlariYaz(st);
+      const gBek = Math.floor((new Date() - new Date(isoGun(-12))) / 864e5);
+      const tmp = document.createElement('div'); tmp.innerHTML = renderYapimdaVurgu();
+      const it = tmp.querySelector('.bm-yapimda-item[data-tid="' + id + '"]');
+      __REG.ok("devam eden batch (durum 'aktif' + snapshot, sonuc yok) KARTA GİRDİ", !!it);
+      const meta = it && it.querySelector('.bm-yapimda-item-meta'); const snr = it && it.querySelector('.bm-yapimda-item-sonraki');
+      __REG.ok('faz+gün BF hesabıyla AYNI metin (Fermentasyon N. gün)', !!meta && meta.textContent === '⏱️ Fermentasyon ' + gBek + '. gün', meta && meta.textContent);
+      __REG.ok('_bmFazBilgi = kart metası (tek kaynak)', _bmFazBilgi(r) === (meta && meta.textContent));
+      __REG.ok('sıradaki satırı: gelecek alarm + gün + gecikmiş sayısı (tamamlanan sayılmaz)', !!snr && snr.textContent.indexOf('Sonraki: 🫧 Karbonasyon kontrol') > -1 && snr.textContent.indexOf('4 gün sonra') > -1 && snr.textContent.indexOf('1 gecikmiş') > -1, snr && snr.textContent);
+      ekran = 'liste'; render();
+      const m2 = document.querySelector('#ekran .bm-yapimda-item[data-tid="' + id + '"] .bm-yapimda-item-meta');
+      const cs = m2 && getComputedStyle(m2);
+      __REG.ok('rütbe: meta 13px ve ≥600 ağırlık (BF sınıfı 11px soluk değil)', !!cs && parseFloat(cs.fontSize) >= 13 && parseInt(cs.fontWeight, 10) >= 600, cs && (cs.fontSize + '/' + cs.fontWeight));
+      ekran = 'ana'; render();
+      const kart = document.querySelector('#ekran .bm-yapimda-vurgu'), hero = document.querySelector('#ekran .bm-ana-hero');
+      __REG.ok('ANA SAYFADA kart basıldı (0 dokunuş)', !!kart && kart.textContent.indexOf('BJ1 kart') > -1);
+      __REG.ok("kart hero'nun ÜSTÜNDE (rütbe: durum önce, dekor sonra)", !!kart && !!hero && kart.getBoundingClientRect().top < hero.getBoundingClientRect().top);
+      __REG.ok('ana sayfa metni sıradaki adımı taşıyor', document.getElementById('ekran').innerText.indexOf('Karbonasyon kontrol') > -1);
+      // gelecek alarm yok, 2 gecikmiş → "Gecikmiş: ... (+1 daha)" + kırmızı sınıf
+      st[id].alarmlar[2].durum = 'tamamlandi'; st[id].alarmlar[1].durum = 'bekliyor'; _alarmlariYaz(st);
+      tmp.innerHTML = renderYapimdaVurgu(); const s2 = tmp.querySelector('.bm-yapimda-item[data-tid="' + id + '"] .bm-yapimda-item-sonraki');
+      __REG.ok('yalnız gecikmiş varken: "Gecikmiş: 🍺 Şişele · 4 gün gecikti (+1 daha)" + gecikmis sınıfı', !!s2 && s2.classList.contains('gecikmis') && s2.textContent.indexOf('Gecikmiş: 🍺 Şişele · 4 gün gecikti (+1 daha)') > -1, s2 && s2.textContent);
+      // bitmiş batch (brewSonuc var, durum aktif) karta GİRMEZ
+      r.brewSonuc = { ts: Date.now(), ogG: 1.05, fgG: 1.012 };
+      tmp.innerHTML = renderYapimdaVurgu();
+      __REG.ok("bitmiş batch (brewSonuc var, durum 'aktif') karta GİRMEZ", !tmp.querySelector('.bm-yapimda-item[data-tid="' + id + '"]'));
+      // yapimda + alarm grubu yok → eski davranış: kart var, sıradaki satırı yok
+      delete r.brewSonuc; r.durum = 'yapimda'; delete st[id]; _alarmlariYaz(st);
+      tmp.innerHTML = renderYapimdaVurgu(); const it3 = tmp.querySelector('.bm-yapimda-item[data-tid="' + id + '"]');
+      __REG.ok("'yapimda' + alarm grubu yok: kart var, sıradaki satırı YOK (uydurma yok)", !!it3 && !it3.querySelector('.bm-yapimda-item-sonraki'));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BJ1-BAYAT', ad: "SPRINT BJ1-3: vadesi 3+ gün geçmiş kritik alarm MODAL AÇMAZ / bayat kontrol toast kartı BASMAZ; alarm 'bekliyor' kalır (BE2), bekleyenler görür, kaçırılan bilgi toast'ı basılır; 5 tikte fırtına yok (AZ5); ≤3 gün ve taze kritik modal AÇAR; BE2 6-saat kapısı korunur",
+    calistir: (page) => page.evaluate(async () => {
+      function isoGun(d2) { const d = new Date(); d.setDate(d.getDate() + d2); return d.toISOString().slice(0, 10); }
+      const bekle = ms => new Promise(r => setTimeout(r, ms));
+      const sifirla = () => { Object.keys(window._alarmGosterimTs).forEach(k => delete window._alarmGosterimTs[k]); var em = document.getElementById('_alarmModal'); if (em) em.remove(); document.querySelectorAll('[id^="_alarmToast_"]').forEach(e => e.remove()); };
+      const id = __REG.yeniKayit('BJ1 bayat', { brewLog: [{ tip: 'pitching', tarih: isoGun(-20), deger: '', id: 'bjb', not: '' }] }); // brew kanıtı: AZ4 hijyeni grubu silmesin
+      const st = _alarmlariOku(); st[id] = { receteAd: 'BJ1 bayat', pitchTs: Date.now() - 20 * 864e5, durum: 'aktif', alarmlar: [
+        { g: 7, ts: Date.now() - 10 * 864e5, tip: 'kritik', aksiyon: '❄️ Cold crash', aciklama: '', durum: 'bekliyor' },
+        { g: 5, ts: Date.now() - 12 * 864e5, tip: 'kontrol', aksiyon: '📊 FG ölç', aciklama: '', durum: 'bekliyor' },
+        { g: 30, ts: Date.now() + 10 * 864e5, tip: 'kontrol', aksiyon: '🍺 İçime hazır', aciklama: '', durum: 'bekliyor' }] };
+      _alarmlariYaz(st);
+      sifirla(); var kt = document.getElementById('bm-kacirilan-toast'); if (kt) kt.remove(); window._bmKacirilanBilgiVerildi = false;
+      __REG.ok('eşik sabiti 3 gün', window._BJ1_BAYAT_GUN === 3, String(window._BJ1_BAYAT_GUN));
+      _alarmKontrolEt(); await bekle(400);
+      __REG.ok('10 gün bayat KRİTİK → modal AÇILMADI', !document.getElementById('_alarmModal'));
+      __REG.ok('12 gün bayat KONTROL → toast kartı BASILMADI', document.querySelectorAll('[id^="_alarmToast_"]').length === 0);
+      __REG.ok("kaçırılan bilgi toast'ı (oturum-başı tek) BASILDI — bilgi kaybolmadı", !!document.getElementById('bm-kacirilan-toast'));
+      __REG.ok("alarm 'bekliyor' KALDI (BE2: onay şart, yalnız sunum değişti)", _alarmlariOku()[id].alarmlar[0].durum === 'bekliyor' && _alarmlariOku()[id].alarmlar[1].durum === 'bekliyor');
+      __REG.ok('bekleyenler listesi hâlâ görüyor (Takvim/Bildirimler/cron körlüğü yok)', _alarmBekleyenleri().filter(x => x.receteId === id).length === 2, String(_alarmBekleyenleri().filter(x => x.receteId === id).length));
+      for (let i = 0; i < 5; i++) _alarmKontrolEt(); await bekle(400);
+      __REG.ok('5 tikte fırtına YOK (modal 0, toast kartı 0)', !document.getElementById('_alarmModal') && document.querySelectorAll('[id^="_alarmToast_"]').length === 0);
+      // sınır: 2g 23s 59d geçmiş → modal (≤ eşik dahil)
+      st[id].alarmlar[0].ts = Date.now() - 3 * 864e5 + 60e3; _alarmlariYaz(st); sifirla();
+      _alarmKontrolEt(); await bekle(100);
+      __REG.ok('3 gün İÇİ (2g 23s 59d) kritik → modal AÇILDI (kritik uyarı korundu)', !!document.getElementById('_alarmModal'));
+      var em1 = document.getElementById('_alarmModal'); if (em1) em1.remove();
+      _alarmKontrolEt(); await bekle(100);
+      __REG.ok('aynı oturumda tekrar AÇILMADI (BE2 6-saat kapısı korundu)', !document.getElementById('_alarmModal'));
+      st[id].alarmlar[0].ts = Date.now() - 3 * 864e5 - 3600e3; _alarmlariYaz(st); sifirla();
+      _alarmKontrolEt(); await bekle(100);
+      __REG.ok('3 gün + 1 saat geçmiş kritik → modal YOK', !document.getElementById('_alarmModal'));
+      st[id].alarmlar[0].ts = Date.now() - 3600e3; _alarmlariYaz(st); sifirla();
+      _alarmKontrolEt(); await bekle(400);
+      __REG.ok('1 saat önce çalan kritik → modal AÇILDI', !!document.getElementById('_alarmModal'));
+      __REG.ok('bayat kontrol yine toast basmadı', document.querySelectorAll('[id^="_alarmToast_"]').length === 0);
+      // taze kontrol (dün) → toast kartı basılır (kontrol akışı bozulmadı)
+      var em2 = document.getElementById('_alarmModal'); if (em2) em2.remove();
+      st[id].alarmlar[0].durum = 'tamamlandi'; st[id].alarmlar[1].ts = Date.now() - 864e5; _alarmlariYaz(st); sifirla();
+      _alarmKontrolEt(); await bekle(500);
+      __REG.ok('dünkü KONTROL alarmı → toast kartı basıldı (kontrol akışı korundu)', document.querySelectorAll('[id^="_alarmToast_"]').length === 1, String(document.querySelectorAll('[id^="_alarmToast_"]').length));
+      return __REG.al();
+    })
   }
 ];
 

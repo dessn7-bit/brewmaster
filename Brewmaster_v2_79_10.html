@@ -257,6 +257,14 @@ input[type="checkbox"]:disabled,input[type="radio"]:disabled{opacity:.5;cursor:n
 .sb-btn{padding:var(--sp-3) var(--sp-4);font-family:var(--font-govde);font-size:calc(var(--fs-md) * var(--tip-b-scale, 1));font-weight:var(--tip-b-fw, var(--fw-semibold));border:none;border-bottom:2.5px solid transparent;cursor:pointer;background:transparent;white-space:nowrap;flex-shrink:0;margin-bottom:-1px;transition:color .15s,border-color .15s;color:var(--metin-soluk);font-variant-caps:small-caps;font-style:var(--tip-b-fst, normal);text-transform:none;letter-spacing:var(--tip-b-ls, normal)}
 .sb-btn:hover:not(.ak){color:var(--ink)}
 .sb-btn.ak{color:var(--vintage-mid);border-bottom-color:var(--vintage);background:transparent}
+/* SPRINT BJ1-1 (2026-09-03, BI denetimi #4): 390px'te sekme çubuğu yatay kayıyordu (scrollWidth 904/390; Takvim x=624, Su/Süreç/Katkı/Not
+   tamamen ekran dışı, kaydırma ipucu yok, Takvim'e ulaşmak 1 yatay kaydırma + hedefleme). Mobilde 2 satır × 5 sabit hücre: 10 sekmenin
+   hepsi kaydırmasız görünür; 360px'te hücre 70px ("📅 Takvim" 13px ≈ 62px sığar). setSekme'nin scrollLeft ortalaması wrap'te no-op.
+   Masaüstü (>768px) DOKUNULMADI. */
+@media (max-width:768px){
+  .sb{flex-wrap:wrap;overflow-x:hidden;padding:0 4px}
+  .sb-btn{flex:0 0 20%;min-width:0;padding:9px 2px;font-size:calc(13px * var(--tip-b-scale, 1));text-align:center;overflow:hidden;text-overflow:ellipsis;letter-spacing:0}
+}
 .iki{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .uc{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
 .ts{padding:8px 14px;border-bottom:1px solid var(--bor);font-size:12.5px;line-height:1.5}
@@ -414,10 +422,12 @@ input[type="checkbox"]:disabled,input[type="radio"]:disabled{opacity:.5;cursor:n
 .bm-yapimda-vurgu{background:var(--kahve-light);border:1px solid var(--kahve-border);border-left:3px solid var(--vintage);border-radius:10px;padding:12px 14px;margin:12px 12px 8px}
 .bm-yapimda-baslik{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:500;letter-spacing:.4px;color:var(--bakir);text-transform:uppercase;margin-bottom:8px}
 .bm-yapimda-baslik .ti{width:14px;height:14px;color:var(--vintage);stroke-width:2}
-.bm-yapimda-item{display:flex;align-items:center;gap:10px;padding:7px 10px;background:#FFFFFF;border:1px solid #F0E2C2;border-radius:8px;margin-top:6px;cursor:pointer;transition:background .12s,border-color .12s}
+.bm-yapimda-item{display:flex;flex-wrap:wrap;align-items:center;gap:3px 10px;padding:8px 10px;background:#FFFFFF;border:1px solid #F0E2C2;border-radius:8px;margin-top:6px;cursor:pointer;transition:background .12s,border-color .12s}
 .bm-yapimda-item:hover{background:var(--kahve-bg);border-color:var(--vintage)}
 .bm-yapimda-item-ad{flex:1;font-family:var(--font-display);font-size:calc(14px * var(--tip-h-scale, 1));font-weight:var(--tip-h-fw, 600);color:var(--tip-h-col, #3D2817);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-variant-caps:var(--tip-h-fvc, normal);font-style:var(--tip-h-fst, normal);text-transform:var(--tip-h-tt, none);letter-spacing:var(--tip-h-ls, normal)}
-.bm-yapimda-item-meta{font-size:11px;color:#8E8B86;flex-shrink:0}
+.bm-yapimda-item-meta{font-size:13px;font-weight:600;color:var(--metin);flex-shrink:0} /* SPRINT BJ1-2: 11px soluk (3.39:1) → 13px koyu; gün+faz kartın bilgisi, dekoru değil */
+.bm-yapimda-item-sonraki{flex-basis:100%;font-size:12.5px;line-height:1.35;color:var(--metin)}
+.bm-yapimda-item-sonraki.gecikmis{color:#9E2F1F}
 /* Adim 131-M: Empty state container width daralma fix (filtreliKR=[] tetikli .bm-main shrink)
    Hipotez A: flex/grid parent min-content; B: empty div wrong parent; C: innerHTML reset class kaybi.
    Defense-in-depth: wrapper'a explicit width:100% + box-sizing:border-box, empty state da aynı.
@@ -9100,7 +9110,7 @@ function tarifeKaydet(){
     flash("⚠️ Kayıt hatası: "+(_ke&&_ke.message||_ke),"hata");return false;
   }
 }
-function tarifAc(id){const t=KR.find(k=>k&&k.id===id);if(!t)return;window.__stilSecKaynak=null;/*AQ3-2 Z-bayrak reset*/clearDraft();_editId=t.id;const{id:_,tarih,ozet,...d}=t;S=JSON.parse(JSON.stringify({...BOS,...d}));sekme="genel";ekran="editor";render();}
+function tarifAc(id){const t=KR.find(k=>k&&k.id===id);if(!t)return;window.__stilSecKaynak=null;/*AQ3-2 Z-bayrak reset*/clearDraft();_editId=t.id;const{id:_,tarih,ozet,...d}=t;S=JSON.parse(JSON.stringify({...BOS,...d}));sekme="genel";ekran="editor";render();try{var _ekBJ=document.getElementById('ekran');if(_ekBJ)_ekBJ.scrollTop=0;}catch(_sBJ){} /* SPRINT BJ1-1: kaydırılmış listeden açılan reçete kaydırılmış açılıyordu → sekme çubuğu yapışkan bloğun altında kalıyordu (360×640 ölçümü); editör hep tepeden açılır — BE5 dersi: satır-sonu // aynı satırdaki } yutar, blok yorum */}
 // Adim 132-B: Klonla — deep clone + yeni id + " (kopya)" + Planlananlar (durum=aktif) + editöre yönlendir.
 // Not: User spec'inde durum='planlananlar' yaziyordu; gerçek internal value 'aktif' (sat ~10770'te
 // statTanim id='aktif' et='Planlananlar'). 'planlananlar' kullansak rec hiçbir sekmede görünmez.
@@ -12969,17 +12979,50 @@ window.renderHeader = renderHeader;
 
 // ═══ ADIM 131-D: YAPIM AŞAMASINDA vurgu + 4 stat kart helper'lar ════
 // YAPIM AŞAMASINDA vurgu kart (Image 1 stili): yapimda.length > 0 ise render, max 3 item
-function renderYapimdaVurgu(){
-  var yapimda = KR.filter(function(t){ return t.durum === 'yapimda'; });
-  if(yapimda.length === 0) return '';
+// SPRINT BJ1-2 (2026-09-03, BI denetimi #2 "bugün ne yapmalıyım?"): faz+gün hesabı Sprint BF'den AYNEN
+// _bmFazBilgi'ye taşındı (yeni hesap YOK; BF-GUN case'i aynı metni doğrular). Karta sıradaki alarm + gecikmiş
+// sayısı eklendi (_bmSonrakiAlarm, bm_alarms_v1 salt-okunur). Seçim: durum 'yapimda' VEYA devam eden batch
+// (brewSnapshot var + brewSonuc yok — F1a/F1b tanımı; brewday yapılmış ama 'Aktife Al' basılmamış Muzo gibi).
+// Kart ana sayfada da basılır (rAnasayfa) → 0 dokunuşta cevap. Rütbe: meta 13px koyu (BF'nin devamı).
+window._bmFazBilgi = function(t){
+  var bl = (t && Array.isArray(t.brewLog)) ? t.brewLog : [];
   var logTipIkon = {'pitching':'🧬','og_olcum':'🔬','fg_olcum':'📊','sicaklik':'🌡️','dry_hop':'🌿','katki':'🧪','katki_ek':'🧪','cold_crash':'❄️','filtrasyon':'🔆','siseleme':'🍺','tadim':'👅','diacetyl':'🌡️','diger':'📝'};
-  var items = yapimda.slice(0, 3).map(function(t){
-    var bl = t.brewLog || [];
-    var son = bl.length ? bl[bl.length - 1] : null;
-    var meta = (function(){ try { var sis=null,pit=null; for(var i=0;i<bl.length;i++){ var e=bl[i]; if(!e||!e.tip||!e.tarih) continue; if(e.tip==='siseleme') sis=e; else if(e.tip==='pitching') pit=e; } var g; if(sis){ g=Math.floor((new Date()-new Date(sis.tarih))/864e5); if(g>=0) return '🍺 Kondisyon '+g+'. gün'; } if(pit){ g=Math.floor((new Date()-new Date(pit.tarih))/864e5); if(!isNaN(g)) return (g>=0?('⏱️ Fermentasyon '+g+'. gün'):('📅 Pitching '+Math.abs(g)+' gün SONRA')); } } catch(e2){} return son ? ((logTipIkon[son.tip] || '📌') + ' ' + (son.tarih || '')) : ''; })(); // SPRINT BF (gün regresyonu): kartta faz+gün — şişeleme→Kondisyon, pitching→Fermentasyon, gelecek→"Pitching N gün SONRA" (BE3 deseni); log/tarih yoksa eski ikon+tarih
+  var son = bl.length ? bl[bl.length - 1] : null;
+  try { var sis=null,pit=null; for(var i=0;i<bl.length;i++){ var e=bl[i]; if(!e||!e.tip||!e.tarih) continue; if(e.tip==='siseleme') sis=e; else if(e.tip==='pitching') pit=e; } var g; if(sis){ g=Math.floor((new Date()-new Date(sis.tarih))/864e5); if(g>=0) return '🍺 Kondisyon '+g+'. gün'; } if(pit){ g=Math.floor((new Date()-new Date(pit.tarih))/864e5); if(!isNaN(g)) return (g>=0?('⏱️ Fermentasyon '+g+'. gün'):('📅 Pitching '+Math.abs(g)+' gün SONRA')); } } catch(e2){}
+  return son ? ((logTipIkon[son.tip] || '📌') + ' ' + (son.tarih || '')) : '';
+};
+window._bmSonrakiAlarm = function(rid){
+  try{
+    var tum = (typeof _alarmlariOku==='function') ? _alarmlariOku() : JSON.parse(localStorage.getItem('bm_alarms_v1')||'{}');
+    var grp = tum && tum[String(rid)];
+    if(!grp || grp.durum!=='aktif' || !Array.isArray(grp.alarmlar)) return null;
+    var simdi = Date.now();
+    var bek = grp.alarmlar.filter(function(a){ return a && a.ts && (a.durum==='bekliyor'||a.durum==='gosterildi') && a.tip!=='pasif'; }).sort(function(a,b){ return a.ts-b.ts; });
+    if(!bek.length) return null;
+    var gecmis = bek.filter(function(a){ return a.ts <= simdi; }), gelecek = bek.filter(function(a){ return a.ts > simdi; });
+    var hedef = gelecek.length ? gelecek[0] : gecmis[gecmis.length-1];
+    var d0 = new Date(simdi); d0.setHours(0,0,0,0); var d1 = new Date(hedef.ts); d1.setHours(0,0,0,0);
+    var gun = Math.round((d1 - d0)/864e5);
+    var ne = gun===0 ? 'bugün' : gun===1 ? 'yarın' : gun>1 ? (gun+' gün sonra') : ((-gun)+' gün gecikti');
+    var ad = String(hedef.aksiyon || hedef.baslik || hedef.tip || 'Alarm').split(' — ')[0].trim(); // kısa etiket: "🫧 Karbonasyon kontrol — bir şişe test et" → ilk parça (kart 1 satır; 360px'te kapılar fold içinde kalsın)
+    if(ad.length > 30) ad = ad.slice(0, 29) + '…';
+    var metin = (gelecek.length ? '⏰ Sonraki: ' : '⚠️ Gecikmiş: ') + ad + ' · ' + ne;
+    if(gelecek.length && gecmis.length) metin += ' · ⚠️ ' + gecmis.length + ' gecikmiş';
+    else if(!gelecek.length && gecmis.length > 1) metin += ' (+' + (gecmis.length-1) + ' daha)';
+    return { metin: metin, gecikmis: gecmis.length, gelecekVar: !!gelecek.length, hedef: hedef };
+  }catch(e){ return null; }
+};
+function renderYapimdaVurgu(){
+  var yapimda = KR.filter(function(t){ return t && (t.durum === 'yapimda' || (t.brewSnapshot && !t.brewSonuc)); });
+  if(yapimda.length === 0) return '';
+  var items = yapimda.map(function(t){ return { t:t, s:_bmSonrakiAlarm(t.id) }; })
+    .sort(function(a,b){ return (b.s?1:0) - (a.s?1:0); })   // bekleyen alarmı olan (canlı takip) önce
+    .slice(0, 3).map(function(x){
+    var t = x.t, meta = _bmFazBilgi(t), s = x.s;
     return '<div class="bm-yapimda-item" data-tid="'+t.id+'" onclick="tarifAcById(this)">'+
         '<div class="bm-yapimda-item-ad">'+_esc131B(t.biraAd)+'</div>'+
         (meta ? '<div class="bm-yapimda-item-meta">'+_esc131B(meta)+'</div>' : '')+
+        (s ? '<div class="bm-yapimda-item-sonraki'+(s.gelecekVar?'':' gecikmis')+'">'+_esc131B(s.metin)+'</div>' : '')+
       '</div>';
   }).join('');
   return '<div class="bm-yapimda-vurgu">'+
@@ -21576,6 +21619,7 @@ function rAnasayfa(){
         <button class="bm-ana-ib" onclick="bmAnaAyarlar()" aria-label="Ayarlar">${BM_SVG.settings}</button>
       </div>
     </div>
+    ${(typeof renderYapimdaVurgu==='function'?renderYapimdaVurgu():'')}
     <div class="bm-ana-hero">
       <div class="bm-ana-hl">HER BİRA BİR MİT</div>
       <div class="bm-ana-hs">BY KABEER</div>
@@ -24043,6 +24087,7 @@ window.brewdayBitir=function(){
     }catch(_e){}
   }
   // SPRINT BA3: sessiz-kaçırma koruması — oturum-başına TEK, bloke etmeyen bilgi toast'ı
+  // SPRINT BJ1-3 (2026-09-03): kutu pointer-events:none, yalnız Kapat dokunulur — 360×640'ta 12 sn boyunca sekme çubuğunu örtüp dokunuşu yutuyordu (BI #19 sınıfı); bilgi görünür, dokunuş alttaki hedefe gider.
   // (_bmOlcumToast kalıbı; z-index 9998 → kritik modal 9999 üstte kalır). Push kaçmış olsa bile
   // (ölü abonelik / cihaz kapalıydı) uygulama açılınca toplam zamanı-geçmiş alarm sayısı görünür.
   function _bmKacirilanToast(n){
@@ -24050,9 +24095,9 @@ window.brewdayBitir=function(){
       var esk = document.getElementById('bm-kacirilan-toast'); if (esk) esk.remove();
       var d = document.createElement('div');
       d.id = 'bm-kacirilan-toast';
-      d.style.cssText = 'position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:9998;background:var(--bg-card);border:1px solid var(--cizgi-arac);border-radius:10px;padding:10px 14px;display:flex;gap:10px;align-items:center;box-shadow:0 4px 16px rgba(0,0,0,.25);font-size:13px;max-width:92vw';
+      d.style.cssText = 'position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:9998;pointer-events:none;background:var(--bg-card);border:1px solid var(--cizgi-arac);border-radius:10px;padding:10px 14px;display:flex;gap:10px;align-items:center;box-shadow:0 4px 16px rgba(0,0,0,.25);font-size:13px;max-width:92vw';
       d.innerHTML = '<span>⏰ ' + (n|0) + ' alarmın zamanı geçmiş — reçetenin Takvim sekmesinden bakabilirsin</span>' +
-        '<button class="btn" style="background:transparent;border:1px solid var(--cizgi-arac);border-radius:6px;padding:6px 10px;cursor:pointer;flex-shrink:0" onclick="this.parentNode.remove()">Kapat</button>';
+        '<button class="btn" style="background:transparent;border:1px solid var(--cizgi-arac);border-radius:6px;pointer-events:auto;padding:6px 10px;cursor:pointer;flex-shrink:0" onclick="this.parentNode.remove()">Kapat</button>';
       document.body.appendChild(d);
       setTimeout(function(){ try{ var x = document.getElementById('bm-kacirilan-toast'); if (x) x.remove(); }catch(_e){} }, 12000);
     }catch(_e){}
@@ -24278,6 +24323,14 @@ window.brewdayBitir=function(){
   window._azOnarim = _azOnarim;
 
   // Ana kontrol — açılışta ve 60sn'de bir
+  // SPRINT BJ1-3 (2026-09-03, BI denetimi #1): BAYATLIK EŞİĞİ. Vadesi bu kadar günden fazla geçmiş bir alarm
+  // artık eylem çağrısı değil bilgidir: tam ekran modal AÇMAZ, kontrol toast kartı BASMAZ; Takvim listesinde
+  // ("KAÇIRILMIŞ"), Bildirimler ekranında ve oturum-başı kaçırılan toast'ında görünür. Alarm "bekliyor" KALIR
+  // (BE2: gösterim ≠ onay, kapanış yalnız ✓/atla) — yalnız SUNUM değişir. AZ5: bayat alarm hiçbir tikte modal
+  // açmadığı için 60 sn'lik rotasyon/fırtına da olmaz. Eşik 3 gün: bugün/dün/2 gün önce çalan adım hâlâ
+  // yapılabilir (FG 2 gün geç ölçülür, cold crash 1 gün kayar); 3+ gün geçmiş adım ya yapılmış-kaydedilmemiş
+  // ya kaçırılmıştır — 18 gün eski "Cold crash · Gün 7" modalı her açılışta dokunuşu çalıyordu (BI yol A/E).
+  window._BJ1_BAYAT_GUN = 3;
   window._alarmKontrolEt = function(){
     try {
       try { _azOnarim(); } catch(_azoE){ if(window.bmHataKaydet)bmHataKaydet('alarm',_azoE,'AZ4/onarim'); }
@@ -24303,6 +24356,7 @@ window.brewdayBitir=function(){
       try { if(window.bmGecmisIDBCek) bmGecmisIDBCek(function(degisti){ if(degisti && typeof ekran!=='undefined' && ekran==='bildirim'){ try{ var _e=document.getElementById('ekran'); if(_e && typeof rBildirimEkran==='function') _e.innerHTML=rBildirimEkran(); }catch(_r){} } }); } catch(e){} // Sprint5: push geçmişini IDB'den çek (Sprint D D1: hedef stok→bildirim — 🕓 Geçmiş paneli Sprint139'da oraya taşınmıştı)
 
       const bekleyenler = _alarmBekleyenleri();
+      const _bjSimdi = Date.now(), _bjBayatMs = (window._BJ1_BAYAT_GUN || 3) * 864e5; // SPRINT BJ1-3
       // SPRINT BA3: due alarm varsa oturumda BİR KEZ bilgi toast'ı — ZORLAMA YOK (AZ5 dersi:
       // modal fırtınası yasak); mevcut kritik-modal/kontrol-toast akışına DOKUNULMAZ, bu yalnız ek bilgi.
       // SPRINT BE2 (BD F1-6): kritik modal aynı tikte açılacaksa/açıksa BA3 ertelenir — toast modalın
@@ -24310,7 +24364,7 @@ window.brewdayBitir=function(){
       // modal kapanıp kritik onaylanınca sonraki tikte basılır.
       if(bekleyenler.length > 0 && !window._bmKacirilanBilgiVerildi
          && !document.getElementById('_alarmModal')
-         && !bekleyenler.some(b => b && b.alarm.tip === 'kritik')){
+         && !bekleyenler.some(b => b && b.alarm.tip === 'kritik' && (_bjSimdi - b.alarm.ts) <= _bjBayatMs)){ // SPRINT BJ1-3: yalnız TAZE kritik toast'ı erteler
         window._bmKacirilanBilgiVerildi = true;
         try{ _bmKacirilanToast(bekleyenler.length); }catch(_kbt){}
       }
@@ -24320,7 +24374,8 @@ window.brewdayBitir=function(){
       if(document.getElementById('_alarmModal')) return;
       
       // Kritik varsa önce onu göster — SPRINT BE2-1: store'a 'gosterildi' YAZILMAZ, oturum-içi izin kapısı
-      const kritik = bekleyenler.find(b => b&&b.alarm.tip === 'kritik');
+      // SPRINT BJ1-3: bayat kritik (vadesi 3+ gün geçmiş) modal AÇMAZ — taze olan (≤3 gün) aynen açar
+      const kritik = bekleyenler.find(b => b&&b.alarm.tip === 'kritik' && (_bjSimdi - b.alarm.ts) <= _bjBayatMs);
       if(kritik){
         const anahtar = kritik.receteId+'_'+kritik.alarm.g;
         if(!_alarmGosterimIzin(anahtar)) return;
@@ -24331,7 +24386,7 @@ window.brewdayBitir=function(){
 
       // Kontrol alarmları — toast (max 3), SPRINT BE2 (BD F1-7): dikey İSTİFLİ (eskiden üst üste biniyordu)
       let _tSira = 0;
-      bekleyenler.slice(0, 3).forEach((b,i) => {
+      bekleyenler.filter(b => b && (_bjSimdi - b.alarm.ts) <= _bjBayatMs).slice(0, 3).forEach((b,i) => { // SPRINT BJ1-3: bayat kontrol kartı basılmaz
         const anahtar = b.receteId+'_'+b.alarm.g;
         if(!_alarmGosterimIzin(anahtar)) return;
         const _sira = _tSira++;
