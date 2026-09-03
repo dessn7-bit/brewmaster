@@ -5367,6 +5367,90 @@ const CASELER = [
       __REG.ok('örnekli stilde kapsam satırı YOK + örnekler duruyor', t2.indexOf('ödüllü örnek verimizde yok') < 0 && (t2.indexOf('madalya almış') >= 0 || t2.indexOf('NHC finalinde altın almış') >= 0), t2.slice(0, 80));
       return __REG.al();
     })
+  },
+
+  // ═════════════ SPRINT BH — VERİ YAŞI ŞEFFAFLIĞI + MASH BOŞLUĞU + HAVUZ AYRIMI ═════════════
+  {
+    kod: 'BH1-YAS', ad: 'SPRINT BH1: önizlemede veri yaşı bağlamı — yıl DİNAMİK (NHC 2012/2013 kayıtları kendi yılını yazar), 2010 ve öncesinde net vurgu + yıl farkı dinamik, 2021+ kayıtta satır YOK, AHA yıllı kayıtta aynı bağlam; dil nötr: yasak kelime 0 + "kullanma/eski/geçersiz" 0',
+    calistir: (page) => page.evaluate(() => {
+      const YASAK = ['daha iyi', 'daha kötü', 'yapmalısın', 'yapmalı', 'hatalı', 'yanlış', 'olmalı', 'gerekir',
+        'tavsiye', 'öneriyoruz', 'düzelt', 'kötü', 'başarılı', 'kazanmak için', 'kazandıran', 'ideal', 'doğrusu', 'eksik'];
+      const tara = (t, L) => (L || YASAK).filter(k => String(t || '').toLocaleLowerCase('tr-TR').indexOf(k) >= 0);
+      const TON = ['kullanma', 'eski', 'geçersiz', 'güncel değil', 'modası', 'hata'];
+      const ac = (k, s, i) => { _bmOrnekOnizle(k, s, i); const m = document.getElementById('bmOrnekOnizle'); const el = m && m.querySelector('.bm-onizle-yas'); const t = el ? el.textContent : ''; bmOrnekOnizleKapat(); return t; };
+      const simdi = new Date().getFullYear();
+      const N = window._NHC_MADALYA, M = window._TOPLULUK_MADALYA;
+      __REG.ok('önkoşul: NHC Altbier#1 2012, Weizen#0 2013, Weizen#2 2008; AHA Altbier#0 2024, #1 2012',
+        N['Altbier / Düsseldorf Altbier'][1][1].yil === 2012 && N['Weizen / Weissbier'][1][0].yil === 2013 && N['Weizen / Weissbier'][1][2].yil === 2008
+        && M['Altbier / Düsseldorf Altbier'][1][0].yil === 2024 && M['Altbier / Düsseldorf Altbier'][1][1].yil === 2012);
+      const t1 = ac('nhc', 'Altbier / Düsseldorf Altbier', 1);
+      __REG.ok('(a) 2012 kaydı: satır var, yıl dinamik, nötr cümle (farklı olabilir + BJCP)', t1.indexOf('⏳ 2012 kaydı') >= 0 && t1.indexOf('farklı olabilir') >= 0 && t1.indexOf('BJCP') >= 0, t1);
+      __REG.ok('(a) 2012: net-vurgu biçimi DEĞİL', t1.indexOf('belirgin') < 0 && t1.indexOf('yıl önce') < 0, t1);
+      const t3 = ac('nhc', 'Weizen / Weissbier', 0);
+      __REG.ok('(b) 2013 kaydı: kendi yılı (dinamik), 2012 yazmaz', t3.indexOf('⏳ 2013 kaydı') >= 0 && t3.indexOf('2012') < 0, t3);
+      const t2 = ac('nhc', 'Weizen / Weissbier', 2);
+      __REG.ok('(b) 2008 kaydı: net vurgu + yıl farkı dinamik', t2.indexOf('⏳ 2008 kaydı (' + (simdi - 2008) + ' yıl önce)') >= 0 && t2.indexOf('belirgin farklı olabilir') >= 0, t2);
+      const t4 = ac('aha', 'Altbier / Düsseldorf Altbier', 0);
+      __REG.ok('(c) AHA 2024 kaydı: satır YOK (güncel dönem)', t4 === '', t4);
+      const t5 = ac('aha', 'Altbier / Düsseldorf Altbier', 1);
+      __REG.ok('(c) AHA 2012 kaydı: aynı bağlam satırı', t5.indexOf('⏳ 2012 kaydı') >= 0 && t5.indexOf('farklı olabilir') >= 0, t5);
+      const hepsi = [t1, t2, t3, t5].join(' ');
+      __REG.ok('(d) AN5-DIL: veri yaşı satırlarında yasak kelime 0', tara(hepsi).length === 0, tara(hepsi).join(','));
+      __REG.ok('(d) ton: "kullanma/eski/geçersiz/güncel değil/hata" 0 — bağlam, yargı değil', tara(hepsi, TON).length === 0, tara(hepsi, TON).join(','));
+      __REG.ok('(d) kapanış temiz', !document.getElementById('bmOrnekOnizle'));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BH2-MASH', ad: 'SPRINT BH2: mash boşluğu — mash\'siz kayıtta chip "kaynakta yok" AYNEN + AYRI satırda stil iskeleti değeri KAYNAĞIYLA ("stil iskeleti" + kürator/çıkarım etiketi + "bu örneğe ait bir ölçüm değil"); mash\'li kayıtta gerçek değer AYNEN ve iskelet satırı YOK; iskeleti olmayan stilde satır YOK (uydurma yok); "AJ tipik" iddiası YOK; yasak kelime 0',
+    calistir: (page) => page.evaluate(() => {
+      const YASAK = ['daha iyi', 'daha kötü', 'yapmalısın', 'yapmalı', 'hatalı', 'yanlış', 'olmalı', 'gerekir',
+        'tavsiye', 'öneriyoruz', 'düzelt', 'kötü', 'başarılı', 'kazanmak için', 'kazandıran', 'ideal', 'doğrusu', 'eksik'];
+      const tara = (t, L) => (L || YASAK).filter(k => String(t || '').toLocaleLowerCase('tr-TR').indexOf(k) >= 0);
+      const N = window._NHC_MADALYA, M = window._TOPLULUK_MADALYA, ISK = window.STIL_ISKELET;
+      const alt = N['Altbier / Düsseldorf Altbier'][1];
+      __REG.ok('önkoşul: Altbier#0 mash yok, #1 mash 66; iskelet Altbier mashSc 67', !alt[0].ms && alt[1].ms === 66 && !!ISK['Altbier / Düsseldorf Altbier'] && ISK['Altbier / Düsseldorf Altbier'].mashSc === 67);
+      const ac = (k, s, i) => { _bmOrnekOnizle(k, s, i); const m = document.getElementById('bmOrnekOnizle'); const t = m ? m.textContent : ''; const el = m && m.querySelector('.bm-onizle-mash-isk'); const r = { t: t, isk: el ? el.textContent : '' }; bmOrnekOnizleKapat(); return r; };
+      const a = ac('nhc', 'Altbier / Düsseldorf Altbier', 0);
+      __REG.ok('(a) mash\'siz NHC: chip "Mash kaynakta yok" AYNEN', /Mash\s*kaynakta yok/.test(a.t), a.t.slice(0, 120));
+      __REG.ok('(a) iskelet satırı: 67°C + kaynak ayrımı NET (kaynakta yok / stil iskeleti / örneğe ait ölçüm değil)', a.isk.indexOf('kaynakta yok') >= 0 && a.isk.indexOf('67°C') >= 0 && a.isk.indexOf('stil iskeleti') >= 0 && a.isk.indexOf('bu örneğe ait bir ölçüm değil') >= 0, a.isk);
+      __REG.ok('(a) iskelet kaynağı etiketli (kürator varsayılanı / topluluk çıkarımı v2)', /kürator varsayılanı|topluluk çıkarımı v2/.test(a.isk), a.isk);
+      __REG.ok('(a) "AJ" / "tipik" iddiası YOK (bilgi tabanında stil-bazlı sıcaklık yok)', a.isk.indexOf('AJ') < 0 && a.isk.toLocaleLowerCase('tr-TR').indexOf('tipik') < 0);
+      __REG.ok('(a) oluşturma yolu söyleneni yapar: iskelet hesabı mashSc 67 verir', window._stilIskeletHesap && (window._stilIskeletHesap('Altbier / Düsseldorf Altbier', 11, 61) || {}).mashSc === 67);
+      const b = ac('nhc', 'Altbier / Düsseldorf Altbier', 1);
+      __REG.ok('(b) mash\'li NHC: gerçek 66°C chip AYNEN, iskelet satırı YOK', /Mash\s*66°C/.test(b.t) && b.isk === '' && b.t.indexOf('stil iskeletinin değeri') < 0, b.t.slice(0, 120));
+      const ahaVar = Object.keys(M).find(s => ISK[s] && ISK[s].mashSc);
+      const ahaYok = Object.keys(M).find(s => !ISK[s]);
+      const c = ac('aha', ahaVar, 0);
+      __REG.ok('(c) AHA + iskeletli stil: chip "kaynakta yok" + iskelet satırı', /Mash\s*kaynakta yok/.test(c.t) && c.isk.indexOf('stil iskeleti') >= 0, ahaVar);
+      if(ahaYok){ const d = ac('aha', ahaYok, 0); __REG.ok('(c) AHA + iskeletsiz stil: yalnız "kaynakta yok", iskelet satırı YOK (uydurma yok)', /Mash\s*kaynakta yok/.test(d.t) && d.isk === '', ahaYok); }
+      else __REG.ok('(c) kapsam notu: iskeletsiz AHA stili yok', true);
+      const hepsi = [a.t, b.t, c.t].join(' ');
+      __REG.ok('(d) AN5-DIL: yasak kelime 0', tara(hepsi).length === 0, tara(hepsi).join(','));
+      __REG.ok('(d) kapanış temiz', !document.getElementById('bmOrnekOnizle'));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BH3-HAVUZ', ad: 'SPRINT BH3: topluluk bloğunda iki havuz ayrımı tek satır — "N reçete" topluluk dağılımı ile ödüllü örnekler (yarışma derlemesi) birbirinin parçası değil; tıklanabilir öğe eklemez; yasak kelime 0',
+    calistir: (page) => page.evaluate(() => {
+      const YASAK = ['daha iyi', 'daha kötü', 'yapmalısın', 'yapmalı', 'hatalı', 'yanlış', 'olmalı', 'gerekir',
+        'tavsiye', 'öneriyoruz', 'düzelt', 'kötü', 'başarılı', 'kazanmak için', 'kazandıran', 'ideal', 'doğrusu', 'eksik'];
+      const tara = (t, L) => (L || YASAK).filter(k => String(t || '').toLocaleLowerCase('tr-TR').indexOf(k) >= 0);
+      __REG.yeniKayit('REGTEST BH3', {});
+      ekran = 'editor'; sekme = 'genel';
+      S.hacim = 11; S.verim = 61; S.stil = 'Weizen / Weissbier'; bmStilIskeletDoldur();
+      S.maltlar = (S.maltlar || []).map(m => ({ ...m, kg: (m.kg || 0) * 0.45 }));
+      render();
+      const el = document.querySelector('.bm-topluluk');
+      const t = el ? el.textContent : '';
+      __REG.ok('önkoşul: Weizen topluluk bloğu + madalya listesi basıldı', !!el && t.indexOf('madalya almış') >= 0 && t.indexOf('reçete') >= 0, t.slice(0, 80));
+      const s = el && el.querySelector('.bm-havuz-ayrimi');
+      __REG.ok('(a) ayrım satırı: "Ayrı havuz" + topluluk dağılımı + yarışma derlemesi + "parçası değil"', !!s && s.textContent.indexOf('Ayrı havuz') >= 0 && s.textContent.indexOf('topluluk dağılımından') >= 0 && s.textContent.indexOf('yarışma derlemesinden') >= 0 && s.textContent.indexOf('parçası değil') >= 0, s && s.textContent);
+      __REG.ok('(a) satır tıklanabilir öğe eklemez (AN6 kuralı)', !!s && s.querySelectorAll('[onclick],button,[role=button]').length === 0);
+      __REG.ok('(b) AN5-DIL: topluluk bloğunda yasak kelime 0', tara(t).length === 0, tara(t).join(','));
+      return __REG.al();
+    })
   }
 ];
 

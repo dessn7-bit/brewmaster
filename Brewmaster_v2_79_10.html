@@ -26031,6 +26031,9 @@ window._TD_BOYUT = {
     } else {
       baslik = '🏅 NHC finalinde altın almış ' + nv[0] + ' reçete (2005-2014)';
     }
+    // ── SPRINT BH3 — İKİ HAVUZ AYRIMI: üstteki "N reçete" topluluk dağılımı (ne yaygın),
+    // buradaki örnekler yarışma derlemesi (birkaç ödüllü örnek); sayılar iç içe değil.
+    var havuzNot = ' <span class="bm-havuz-ayrimi">Ayrı havuz: yukarıdaki reçete sayısı topluluk dağılımından (ne yaygın), buradaki örnekler yarışma derlemesinden (birkaç ödüllü örnek) — biri diğerinin parçası değil.</span>';
     var gosterim;
     if(nv){
       gosterim = ' Örnekler AHA NHC finali altınlarından' + (nv[0] > nv[1].length ? ' (' + nv[0] + ' kayıttan ' + nv[1].length + '’ü)' : '') + ' — gerçek gramajlı; veri: nhc-homebrew-data derlemesi.';
@@ -26048,7 +26051,7 @@ window._TD_BOYUT = {
       + '<div style="font-size:9.5px;color:var(--dim);line-height:1.45;margin:2px 0 1px">'
       +   'Aşağıdakiler <b>örnek</b>, kural değil: AHA yarışmalarında <b>elenen</b> reçeteler bu veride yok. '
       +   'Kazananları kaybedenlerden ayıran şeyin ne olduğu bu havuzdan çıkarılamaz — bunlar yalnızca '
-      +   '"şöyle yapmışlar" kaydıdır.' + gosterim
+      +   '"şöyle yapmışlar" kaydıdır.' + gosterim + havuzNot
       + '</div>'
       + satirlar
       + '</div>';
@@ -26146,6 +26149,21 @@ window._TD_BOYUT = {
   var _onizleSec = null;
   function _onizleTR(x){ return String(x == null ? '' : x).replace('.', ','); }
   function _onizleBolum(b, ic){ return '<div style="margin-top:10px"><div style="font-size:11px;font-weight:700;color:var(--kahve);letter-spacing:.4px;margin-bottom:3px">' + b + '</div>' + ic + '</div>'; }
+  // ── SPRINT BH1 — VERİ YAŞI BAĞLAMI (nötr, yargısız) ──────────────────────
+  // NHC arşivi 2005-2014, AHA derlemesi 2005-2024. O günden bugüne maya/hop
+  // yelpazesi, BJCP (2008→2015→2021) ve pratikler değişti. Kayıt BJCP 2021'den
+  // ÖNCEYSE tek satır bağlam; 2010 ve öncesinde vurgu biraz daha net (yıl farkı
+  // dinamik). 2021+ kayıtta satır YOK. Örnek "eski, kullanma" DEĞİL — hâlâ
+  // değerli, yalnız bağlam. Metin AN5-DIL yasak listesine karşı yazıldı.
+  function _onizleYasSatiri(yil){
+    yil = parseInt(yil, 10);
+    if(!(yil > 1900) || yil >= 2021) return '';
+    var fark = new Date().getFullYear() - yil;
+    var m = (yil <= 2010)
+      ? ('⏳ ' + yil + ' kaydı (' + fark + ' yıl önce) — o dönemin malzeme ve pratikleri bugünden belirgin farklı olabilir: maya/hop yelpazesi, BJCP revizyonları (2008→2015→2021), su kimyası ve hop stand pratikleri.')
+      : ('⏳ ' + yil + ' kaydı — o dönemin malzeme ve pratikleri bugünden farklı olabilir (maya/hop yelpazesi, BJCP revizyonları).');
+    return '<div class="bm-onizle-yas" style="font-size:10.5px;color:var(--kahve);line-height:1.45;margin-top:8px;padding:5px 8px;background:var(--bg2);border:1px solid var(--bor);border-radius:8px">' + m + '</div>';
+  }
   window._bmOrnekOnizle = function(kaynak, stilAd, idx){
     try{
       var nhc = (kaynak === 'nhc');
@@ -26157,6 +26175,7 @@ window._TD_BOYUT = {
                        : ((MADALYA_IKON[o.m] || '🏅') + ' AHA ' + (DERECE_AD[o.m] || 'madalya') + (o.yil ? ' · ' + o.yil : '') + (o.e ? ' · kategoride ' + o.e.toLocaleString('tr-TR') + ' giriş' : ''));
       var kaynakStr = nhc ? ('Veri: nhc-homebrew-data derlemesi · orijinal batch ' + _onizleTR(o.L) + ' L')
                           : 'Veri: AHA yarışma derlemesi · batch hacmi kaynakta yok';
+      var yasHTML = _onizleYasSatiri(o.yil);   // BH1: yıl dinamik (NHC ve AHA)
       var olc = [];
       if(o.og) olc.push(['OG', Number(o.og).toFixed(3).replace('.', ',')]);
       if(o.fg) olc.push(['FG', Number(o.fg).toFixed(3).replace('.', ',')]);
@@ -26164,6 +26183,18 @@ window._TD_BOYUT = {
       if(o.sr) olc.push(['SRM', _onizleTR(o.sr)]);
       if(o.ab) olc.push(['ABV', '%' + _onizleTR(o.ab)]);
       olc.push(['Mash', (nhc && o.ms) ? (_onizleTR(o.ms) + '°C') : 'kaynakta yok']);
+      // ── SPRINT BH2 — MASH BOŞLUĞU: örneğin mash'i kaynakta yoksa STİL İSKELETİNİN
+      // değeri AYRI satırda, kaynağı açıkça yazılarak gösterilir. Oluşturma yolu
+      // (_stilIskeletHesap → S.mashSc) bu değeri zaten uygular; satır yalnız onu söyler.
+      // Kaynak ayrımı: chip "kaynakta yok" AYNEN kalır; iskelet değeri örneğe ait bir
+      // ölçüm olarak SUNULMAZ. AJ bilgi tabanında stil-bazlı sıcaklık YOK → "AJ tipik"
+      // iddiası uydurma olurdu, bilerek kullanılmadı. Mash'li kayıtta satır yok.
+      var mashIskHTML = '';
+      var isk = (!(nhc && o.ms) && window.STIL_ISKELET) ? window.STIL_ISKELET[stilAd] : null;
+      if(isk && +isk.mashSc >= 60 && +isk.mashSc <= 74){
+        var iskKaynak = (isk.kaynak === 'kurator') ? 'kürator varsayılanı' : (isk.kaynak === 'cikarim_v2' ? 'topluluk çıkarımı v2' : _oe(isk.kaynak || 'iskelet'));
+        mashIskHTML = '<div class="bm-onizle-mash-isk" style="font-size:10.5px;color:var(--dim);line-height:1.45;margin-top:2px">🌡️ Bu örneğin mash sıcaklığı kaynakta yok. Oluşturursan stil iskeletinin değeri <b>' + _onizleTR(isk.mashSc) + '°C</b> uygulanır — kaynağı stil iskeleti (' + iskKaynak + '), bu örneğe ait bir ölçüm değil.</div>';
+      }
       var olcHTML = olc.map(function(x){ return '<span style="display:inline-block;background:var(--bg2);border:1px solid var(--bor);border-radius:8px;padding:3px 8px;font-size:11px;color:var(--kahve);margin:0 4px 4px 0"><b>' + x[0] + '</b> ' + x[1] + '</span>'; }).join('');
       var satirStil = 'display:flex;gap:6px;padding:3px 0;border-top:1px dotted var(--bor);font-size:12px;color:var(--metin)';
       var gristHTML;
@@ -26199,7 +26230,8 @@ window._TD_BOYUT = {
       h += '<div style="font-size:10px;color:var(--soluk);margin-top:1px">' + kaynakStr + '</div></div>';
       h += '<button type="button" onclick="bmOrnekOnizleKapat()" aria-label="Önizlemeyi kapat" style="background:var(--bg2);border:1px solid var(--bor);border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;color:var(--kahve);flex:none">✕</button>';
       h += '</div>';
-      h += '<div style="margin-top:10px">' + olcHTML + '</div>';
+      h += yasHTML;
+      h += '<div style="margin-top:10px">' + olcHTML + mashIskHTML + '</div>';
       if(gristHTML) h += _onizleBolum('🌾 GRIST', gristHTML);
       if(hopHTML) h += _onizleBolum('🌿 HOP', hopHTML);
       if(o.y) h += _onizleBolum('🧪 MAYA', '<div style="font-size:12px;color:var(--metin);line-height:1.5">' + _oe(o.y) + '</div>');
