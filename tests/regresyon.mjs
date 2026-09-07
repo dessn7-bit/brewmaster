@@ -5570,6 +5570,167 @@ const CASELER = [
       __REG.ok('dünkü KONTROL alarmı → toast kartı basıldı (kontrol akışı korundu)', document.querySelectorAll('[id^="_alarmToast_"]').length === 1, String(document.querySelectorAll('[id^="_alarmToast_"]').length));
       return __REG.al();
     })
+  },
+  // ── SPRINT BJ2 (2026-09-04): mobil kullanılabilirlik 2. parti — BI denetimi #4 (ölçüm yolları), #6 (klavye), #12 + TOP 3 (hedef/krom) ──
+  {
+    kod: 'BJ2-OLCUM', ad: "SPRINT BJ2-1: 5 ölçüm yolu TEKLEŞTİ — hepsi aynı normalize (1054→1.054), aynı KALICI kayıt (KR; taslak değil), aynı zincir (brewSonuc/öğrenme) ve aynı dil; hızlı ölçüm ana ekrandan kapalı reçeteye gerçek brewLog kaydı yazar",
+    calistir: (page) => page.evaluate(() => {
+      const KRoku = (rid, alan) => { const kr = JSON.parse(localStorage.getItem('bm_v6') || '[]'); const r = kr.find(x => x && String(x.id) === String(rid)); return r ? r[alan] : undefined; };
+      const id = __REG.yeniKayit('BJ2 olcum', { brewSnapshot: { ts: Date.now() - 10 * 864e5, ogT: 1.05, fgT: 1.012, verimVarsayim: 61 } });
+      const r0 = KR.find(k => k && k.id === id); delete r0.brewSonuc; _origKy(KR); tarifAc(id);
+      window._bmSgManuelGir('og', '1054');
+      __REG.ok('(1) editör Gerçek OG: normalize 1054 -> 1.054', S.ogManuel === 1.054, String(S.ogManuel));
+      __REG.ok('(1) editör Gerçek OG: KR kaydına KALICI yazıldı (Kaydet gerekmeden; eskiden yalnız taslak)', KRoku(id, 'ogManuel') === 1.054, String(KRoku(id, 'ogManuel')));
+      window._bmSgManuelGir('fg', '12');
+      __REG.ok('(2) editör Gerçek FG: puan yazımı 12 -> 1.012', String(S.fgManuel) === '1.012', String(S.fgManuel));
+      __REG.ok('(2) editör Gerçek FG: KR KALICI', String(KRoku(id, 'fgManuel')) === '1.012', String(KRoku(id, 'fgManuel')));
+      window._bmPreboilGir('1040');
+      __REG.ok('(3) pre-boil OG: normalize + KR KALICI', S.preboilOG === 1.04 && KRoku(id, 'preboilOG') === 1.04, S.preboilOG + '/' + KRoku(id, 'preboilOG'));
+      window._bmSgManuelGir('fg', '1.54');
+      __REG.ok('(4) aralık dışı "1.54": alan boşaltılır (sessiz kabul YOK)', S.fgManuel === null, String(S.fgManuel));
+      __REG.ok('(4) aralık dışı: KR de temizlenir (hayalet ölçüm kalmaz)', (KRoku(id, 'fgManuel') === null || KRoku(id, 'fgManuel') === undefined), String(KRoku(id, 'fgManuel')));
+      S.brewLog = S.brewLog || [];
+      S.brewLog.push({ tip: 'fg_olcum', tarih: new Date().toISOString().slice(0, 10), deger: '1.014', not: '', id: 'bj2log' });
+      S.fgManuel = '1.014'; tarifeKaydet();
+      __REG.ok('(5) log formu yolu (brewLog + tarifeKaydet) BOZULMADI', String(KRoku(id, 'fgManuel')) === '1.014', String(KRoku(id, 'fgManuel')));
+      const an = bmProfilAnaliz().kayitlar.find(k => k.id === String(id));
+      __REG.ok('(6) bmProfilAnaliz KR üzerinden ölçümü GÖRÜYOR (öğrenme kolu besleniyor)', !!an && an.ogG === 1.054, an && String(an.ogG));
+      const id2 = __REG.yeniKayit('BJ2 hizli', { brewSnapshot: { ts: Date.now() - 5 * 864e5, ogT: 1.05, fgT: 1.012 } });
+      const r2 = KR.find(k => k && k.id === id2); delete r2.brewSonuc; _origKy(KR);
+      tarifAc(id);
+      window._bmHizliOlcumAc(id2, 'fg_olcum');
+      __REG.ok('(7) hızlı ölçüm modalı açıldı', !!document.getElementById('bmHizliOlcumModal'));
+      document.getElementById('bmHizliOlcumInp').value = '1013';
+      window._bmHizliOlcumKaydet();
+      const bl2 = (KRoku(id2, 'brewLog') || []).filter(e => e && e.tip === 'fg_olcum');
+      __REG.ok('(7) hızlı ölçüm: KAPALI reçetenin KR kaydına tarihli brewLog girdi', bl2.length === 1 && bl2[0].deger === '1.013', JSON.stringify(bl2));
+      __REG.ok('(7) hızlı ölçüm: fgManuel backfill (I2 simetrisi)', String(KRoku(id2, 'fgManuel')) === '1.013', String(KRoku(id2, 'fgManuel')));
+      __REG.ok('(7) hızlı ölçüm: AÇIK reçete kirlenmedi (rid kapısı)', String(KRoku(id, 'fgManuel')) === '1.014' && !((KRoku(id, 'brewLog') || []).some(e => e && e.not === 'Hızlı ölçüm (ana ekran)')));
+      __REG.ok('(7) kayıt sonrası modal kapandı', !document.getElementById('bmHizliOlcumModal'));
+      window._bmHizliOlcumAc(id2, 'og_olcum');
+      document.getElementById('bmHizliOlcumInp').value = 'abc';
+      window._bmHizliOlcumKaydet();
+      __REG.ok('(8) anlaşılamayan değer: KAYIT YOK, modal AÇIK kalır (AQ1: sahte onay yok)', !!document.getElementById('bmHizliOlcumModal') && (KRoku(id2, 'ogManuel') === null || KRoku(id2, 'ogManuel') === undefined));
+      window._bmHizliOlcumKapat();
+      __REG.ok('(8) Vazgeç/kapat modalı kaldırır', !document.getElementById('bmHizliOlcumModal'));
+      const tmp = document.createElement('div'); tmp.innerHTML = renderYapimdaVurgu();
+      const kb = tmp.querySelectorAll('.bm-yapimda-item[data-tid="' + id2 + '"] .bm-yapimda-olcum-btn');
+      __REG.ok('(9) ana ekran kartında FG/OG kısayolu (2 düğme)', kb.length === 2, String(kb.length));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BJ2-KLAVYE', ad: "SPRINT BJ2-2: klavye açıkken Kaydet erişilebilir — çubuk YALNIZ gerçek düğme görünmezken çıkar (ekranı boşuna daraltmaz), gerçek düğmeyi click'ler (kopya kayıt yolu yok), masaüstünde hiç çıkmaz, açıkken alt toast'lar yukarı kayar",
+    calistir: async (page) => {
+      await page.setViewport({ width: 390, height: 504 });
+      const a = await page.evaluate(() => {
+        __REG.yeniKayit('BJ2 klavye', {});
+        sekme = 'not'; render();
+        const bar = document.getElementById('bmKlvBar');
+        __REG.ok("çubuk DOM'da var ve varsayılan GİZLİ (ekran daraltılmaz)", !!bar && bar.hidden === true);
+        const ta = Array.from(document.querySelectorAll('#ekran textarea')).filter(e => e.getBoundingClientRect().height > 0)[0];
+        __REG.ok('Not sekmesinde metin alanı bulundu', !!ta);
+        if (ta) { ta.focus(); window._bmKlvGuncelle(); }
+        const gercek = window._bmKlvKaydetBtn(ta);
+        const gr = gercek && gercek.getBoundingClientRect();
+        __REG.ok('gerçek Kaydet düğmesi görünür alanın DIŞINDA (BI ölçümü: 504 px bant)', !!gr && gr.bottom > innerHeight, gr && Math.round(gr.top));
+        __REG.ok('çubuk AÇILDI ve etiketi gerçek düğmenin metni', bar.hidden === false && document.getElementById('bmKlvBtn').textContent.indexOf('Kaydet') > -1, document.getElementById('bmKlvBtn').textContent);
+        const br = bar.getBoundingClientRect();
+        __REG.ok('çubuk görünür alanın İÇİNDE ve hedefi ≥44 px', br.bottom <= innerHeight + 1 && document.getElementById('bmKlvBtn').getBoundingClientRect().height >= 44, Math.round(br.top) + '/' + innerHeight);
+        __REG.ok("çubuk açıkken alt toast'lar yukarı kayar (toast dokunuşu yutmasın)", document.body.classList.contains('bm-klv-acik') && getComputedStyle(document.documentElement).getPropertyValue('--bm-klv-alt').trim() !== '');
+        let tiklandi = 0; const orjClick = gercek.click.bind(gercek);
+        gercek.click = function () { tiklandi++; orjClick(); };
+        document.getElementById('bmKlvBtn').click();
+        __REG.ok("çubuk GERÇEK Kaydet düğmesini click'ledi (doğrulama/kalıcılık tek yerde)", tiklandi === 1, String(tiklandi));
+        __REG.ok('tıklama sonrası çubuk kapanır', document.getElementById('bmKlvBar').hidden === true);
+        sekme = 'malt'; render();
+        const inp = Array.from(document.querySelectorAll('#ekran input[type=number]')).filter(e => e.getBoundingClientRect().height > 0)[0];
+        if (inp) { inp.focus(); window._bmKlvGuncelle(); }
+        const bas = document.querySelector('.eh button[onclick*="tarifeKaydet"]');
+        const bsr = bas && bas.getBoundingClientRect();
+        __REG.ok('Malt sekmesinde başlık Kaydet zaten görünür (yapışkan)', !!bsr && bsr.top >= 0 && bsr.bottom <= innerHeight, bsr && Math.round(bsr.top));
+        __REG.ok('gerçek düğme görünürken çubuk ÇIKMAZ (ekran boşuna daralmaz)', document.getElementById('bmKlvBar').hidden === true);
+        return __REG.al();
+      });
+      await page.setViewport({ width: 1024, height: 800 });
+      const b = await page.evaluate(() => {
+        render();
+        const ta = Array.from(document.querySelectorAll('#ekran textarea, #ekran input[type=number]')).filter(e => e.getBoundingClientRect().height > 0)[0];
+        if (ta) { ta.focus(); window._bmKlvGuncelle(); }
+        __REG.ok('masaüstünde (1024) çubuk HİÇ çıkmaz', document.getElementById('bmKlvBar').hidden === true);
+        __REG.ok('masaüstünde CSS de gizler (display:none)', getComputedStyle(document.getElementById('bmKlvBar')).display === 'none');
+        return __REG.al();
+      });
+      await page.setViewport({ width: 390, height: 844 });
+      return a.concat(b);
+    }
+  },
+  {
+    kod: 'BJ2-HEDEF', ad: "SPRINT BJ2-3: dokunma hedefleri — <24 px 'ciddi' yığın SIFIR, ihlal oranı %25 altı, reçete adı 3 px değil; krom kaydırınca incelir (özet DEĞERLERİ kalır, sıçrama telafi edilir); yatay taşma yok; masaüstü dokunulmadı",
+    calistir: async (page) => {
+      await page.setViewport({ width: 390, height: 844 });
+      const a = await page.evaluate(() => {
+        __REG.yeniKayit('BJ2 hedef', {});
+        const SEL = 'button,[role="button"],summary,select,input:not([type=hidden]),textarea,label[for]';
+        const olc = () => {
+          const gor = e => { const r = e.getBoundingClientRect(); const c = getComputedStyle(e); return r.width > 0 && r.height > 0 && c.display !== 'none' && c.visibility !== 'hidden'; };
+          const l = Array.from(document.querySelectorAll('#ekran ' + SEL)).filter(gor).map(e => { const r = e.getBoundingClientRect(); return { w: Math.round(r.width), h: Math.round(r.height), m: (e.innerText || e.getAttribute('aria-label') || '').slice(0, 18) }; });
+          return { toplam: l.length, ihlal: l.filter(x => x.w < 44 || x.h < 44).length, ciddi: l.filter(x => x.w < 24 || x.h < 24) };
+        };
+        let ciddi = [], ihlal = 0, toplam = 0;
+        ['genel', 'malt', 'hop', 'maya', 'su', 'surec', 'takvim', 'hesap', 'katki'].forEach(function (sk) {
+          sekme = sk; render();
+          const m = olc(); toplam += m.toplam; ihlal += m.ihlal;
+          ciddi = ciddi.concat(m.ciddi.map(x => sk + ':' + x.m + ' ' + x.w + 'x' + x.h));
+        });
+        __REG.ok('9 editör sekmesinde <24 px "ciddi" hedef SIFIR', ciddi.length === 0, ciddi.slice(0, 6).join(' | '));
+        __REG.ok('ihlal oranı %25 altı (BI ölçümü %90+)', toplam > 0 && (ihlal / toplam) < 0.25, ihlal + '/' + toplam);
+        __REG.ok('yatay taşma YOK', document.documentElement.scrollWidth <= 391, String(document.documentElement.scrollWidth));
+        sekme = 'genel'; render();
+        const ad = document.querySelector('.eh .bm-biraad-inp'), ar = ad.getBoundingClientRect();
+        __REG.ok('reçete adı alanı okunabilir/dokunulabilir (eskiden 3x25 px)', ar.width >= 80 && ar.height >= 44, Math.round(ar.width) + 'x' + Math.round(ar.height));
+        const sc = document.getElementById('ekran');
+        const EH = () => document.querySelector('.eh'), SS = () => document.getElementById('bm-summary');
+        const h = e => e ? Math.round(e.getBoundingClientRect().height) : 0;
+        sc.scrollTop = 0; sc.dispatchEvent(new Event('scroll'));
+        return new Promise(function (res) {
+          setTimeout(function () {
+            const tepe = h(EH()) + h(SS());
+            sc.scrollTop = h(EH()) + 40; sc.dispatchEvent(new Event('scroll'));
+            setTimeout(function () {
+              const kucuk = h(EH()) + h(SS());
+              __REG.ok('kaydırınca yapışkan yığın en az %40 küçülür', kucuk < tepe * 0.6, tepe + ' -> ' + kucuk);
+              __REG.ok('krom sınıfı uygulandı', sc.classList.contains('bm-krom-kucuk'));
+              const stat = Array.from(SS().querySelectorAll('.bm-ss-stat')).filter(e => e.getBoundingClientRect().height > 0);
+              __REG.ok('özetin 6 DEĞERİ korunur (BI "sticky özet gerçek fayda" çürütmesi)', stat.length === 6, String(stat.length));
+              __REG.ok('daralma sıçraması telafi edildi (scrollTop >= 40, tepeye düşmedi)', sc.scrollTop >= 40, String(Math.round(sc.scrollTop)));
+              __REG.ok('kaydırınca Kaydet + reçete adı YAPIŞKAN kalır', !!document.querySelector('.eh button[onclick*="tarifeKaydet"]') && h(document.querySelector('.eh .bm-biraad-inp')) >= 44);
+              sc.scrollTop = 0; sc.dispatchEvent(new Event('scroll'));
+              setTimeout(function () {
+                __REG.ok('tepeye dönünce krom yeniden açılır', !sc.classList.contains('bm-krom-kucuk') && (h(EH()) + h(SS())) >= tepe - 2, String(h(EH()) + h(SS())));
+                res(__REG.al());
+              }, 200);
+            }, 220);
+          }, 220);
+        });
+      });
+      await page.setViewport({ width: 1024, height: 800 });
+      const b = await page.evaluate(() => {
+        sekme = 'genel'; render();
+        const sc = document.getElementById('ekran');
+        sc.scrollTop = 400; sc.dispatchEvent(new Event('scroll'));
+        return new Promise(function (res) {
+          setTimeout(function () {
+            __REG.ok('masaüstünde krom incelmesi YOK (mobil-özel)', !sc.classList.contains('bm-krom-kucuk'));
+            const arac = document.querySelector('.eh .bm-eh-arac.bm-edit-only');
+            __REG.ok('masaüstünde Hedef Stil araç satırı görünür kalır', !arac || getComputedStyle(arac).display !== 'none');
+            res(__REG.al());
+          }, 250);
+        });
+      });
+      await page.setViewport({ width: 390, height: 844 });
+      return a.concat(b);
+    }
   }
 ];
 

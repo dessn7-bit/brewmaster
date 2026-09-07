@@ -493,6 +493,79 @@ input[type="checkbox"]:disabled,input[type="radio"]:disabled{opacity:.5;cursor:n
   .eh .btn,.eh .bm-btn-primary{padding:6px 8px;font-size:11px}
   .eh input[style*="flex:1"]{min-width:0;font-size:14px !important}
 }
+/* ═══ SPRINT BJ2-3 (2026-09-04, BI denetimi bulgu 12 + TOP 3) ═══════════════════════════════
+   Olcum (390x844, gercek 08-16 yedegi, 15 ekran): 810 dokunma-hedefi ihlali; TAMAMI yukseklik
+   ihlali (yalniz-genislik ihlali 0). Ikon/yazi boyutu DEGISMEZ — sadece dokunulabilir alan buyur.
+   Muafiyetler bilincli ve raporlu: (a) dikey ▲▼ ciftinde 44x44 satiri 2'ye kirar (390px'te malt
+   adi 150→68px) → 44x30; (b) checkbox/radio 24x24 + satir 44 (44x44 kutu gorsel bozar);
+   (c) satir-ici bilgi cipleri (.bm-chip, muadil) 32px — bunlar birincil eylem degil.
+   KROM: editorde yapiskan yigin 286px (.eh 217 + ozet 69) = gorunur alanin %40'i. Kaydirinca
+   ARAC satiri (Hedef Stil + Iskeleti Doldur + profil karti) gizlenir, ozet stil satiri kapanir;
+   OG/FG/ABV/IBU/SRM/KH DEGERLERI KALIR (BI "sticky ozet gercek fayda" curutmesi korunur). */
+@media (max-width:768px){
+  #ekran button,#ekran .btn,#ekran [role="button"],#ekran summary,
+  #ekran select,#ekran input:not([type=checkbox]):not([type=radio]):not([type=hidden]),
+  .bm-header-iconbtn,.bm-ana-ib,.bm-hamburger-btn,.bm-geri{min-height:44px}
+  #ekran button,#ekran .btn,#ekran [role="button"],.bm-header-iconbtn,.bm-ana-ib,.bm-hamburger-btn{display:inline-flex;align-items:center;justify-content:center}
+  #ekran button.bm-blok,#ekran .btn.bm-blok{width:100%}
+  #ekran input[type=checkbox],#ekran input[type=radio]{min-width:24px;min-height:24px;width:24px;height:24px}
+  #ekran label{min-height:44px;display:inline-flex;align-items:center}
+  #ekran .bm-chip,#ekran .bm-muadil-inline-chip{min-height:32px;display:inline-flex;align-items:center}
+  /* dikey siralayici (malt/hop ▲▼): 17x11 → 44x30 (7x alan); 44x44 satiri kirardi */
+  #ekran .bm-siralayici>button{min-width:44px;min-height:30px;padding:0}
+  /* recete adi: flex:1 + min-width:0 -> 3x25 px olcuyordu (BI bulgu 5). Taban genislik + 44px. */
+  .eh .bm-biraad-inp{flex:1 1 130px !important;min-width:110px !important;min-height:44px}
+  /* ARAC kontrolleri (kaydirinca gizlenir) tek satirda kalsin: 38px */
+  .eh .bm-eh-arac button,.eh .bm-eh-arac select,.eh .bm-eh-arac.bm-mode-toggle,.eh .bm-eh-arac .bm-mode-btn{min-height:38px}
+  .eh>.bm-eh-arac:empty{display:none}
+  /* Hedef Stil satiri tek satirda kalsin (2 satir = +48px kalici krom) */
+  .eh .bm-eh-arac select{flex:1 1 90px !important;min-width:80px}
+  .eh .bm-eh-arac>span{font-size:11px}
+  /* genislik ihlalleri: ikon dugmeleri (satir-ici cift/uclulerde 44 tasma yapardi -> 36) */
+  #ekran button,#ekran .btn,#ekran [role="button"]{min-width:44px}
+  .bm-header-iconbtn,.bm-hamburger-btn,.bm-ana-ib{min-width:44px}
+  .bm-header-search input,#aramaInp{min-height:44px}
+  [id^="_alarm"] button,.bm-t44{min-width:44px;min-height:44px}
+  /* body-seviyesi sabit alarm/olcum toast kartlari #ekran disindadir */
+  body>div[style*="position:fixed"] button.btn{min-height:44px;min-width:44px}
+  /* akordeon basliklari birincil hedeftir (div[onclick]); satir-ici bilgi cipleri span kalir */
+  #ekran div[onclick]{min-height:44px}
+  .eh{padding:8px 12px}
+  /* krom incelmesi */
+  #ekran.bm-krom-kucuk .eh{padding-top:6px;padding-bottom:6px}
+  #ekran.bm-krom-kucuk .eh .bm-eh-arac{display:none !important}
+  #ekran.bm-krom-kucuk .bm-ss-stil{display:none}
+  #ekran.bm-krom-kucuk .bm-sticky-summary{padding:2px var(--sp-2);margin-bottom:2px}
+}
+/* SPRINT BJ2-2 (BI bulgu 6): klavye acikken form Kaydet dugmesi klavyenin altinda kaliyordu.
+   Cubuk YALNIZ (a) mobilde, (b) bir metin/sayi alani odakliyken, (c) gercek Kaydet dugmesi
+   gorsel viewport'ta DEGILKEN cizilir — aksi halde ekran daraltilmaz (bos yer kaplamaz).
+   Konum visualViewport ile duzeltilir: Chrome resizes-visual'da position:fixed layout
+   viewport'una yapisir ve klavyenin ALTINDA kalirdi. */
+.bm-klv-bar{position:fixed;left:0;right:0;bottom:0;z-index:99997;display:flex;gap:8px;padding:6px 10px;padding-bottom:calc(6px + env(safe-area-inset-bottom,0px));background:var(--bg-card);border-top:1px solid var(--cizgi-arac);box-shadow:0 -3px 12px rgba(0,0,0,.14)}
+.bm-klv-bar[hidden]{display:none !important}
+body.bm-klv-acik #bm-toast-container,body.bm-klv-acik #bm-kacirilan-toast,body.bm-klv-acik #bm-tadim-toast,body.bm-klv-acik #bm-olcum-toast{bottom:var(--bm-klv-alt,74px) !important}
+.bm-klv-btn{flex:1;min-height:44px;border:1px solid var(--vintage);background:var(--vintage);color:#fff;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--font-govde);padding:0 12px}
+.bm-klv-kapat{min-width:52px;min-height:44px;border:1px solid var(--cizgi-arac);background:var(--bg-card);color:var(--metin);border-radius:8px;font-size:15px;cursor:pointer}
+@media (min-width:769px){.bm-klv-bar{display:none !important}}
+/* SPRINT BJ2-1: ana ekrandan hizli olcum modali (kullanici tetikli; BI bulgu 1'in aksine
+   kapatilabilir: ✕ + perde dokunusu + Escape). */
+.bm-hizliolcum-perde{position:fixed;inset:0;z-index:9600;background:rgba(30,22,14,.55);display:flex;align-items:center;justify-content:center;padding:16px}
+.bm-hizliolcum-kutu{background:var(--bg-card);border:1px solid var(--cizgi-arac);border-radius:14px;box-shadow:0 10px 40px rgba(0,0,0,.3);width:100%;max-width:340px;padding:14px}
+.bm-hizliolcum-kutu h3{margin:0 0 2px;font-size:16px;font-family:var(--font-baslik);color:var(--ink)}
+.bm-hizliolcum-alt{font-size:12px;color:var(--metin-soluk);margin-bottom:10px}
+.bm-hizliolcum-tip{display:flex;gap:8px;margin-bottom:10px}
+.bm-hizliolcum-tip button{flex:1;min-height:44px;border-radius:8px;border:1.5px solid var(--cizgi-arac);background:var(--bg-sunken);color:var(--metin);font-size:14px;font-weight:600;cursor:pointer}
+.bm-hizliolcum-tip button.ak{border-color:var(--vintage);background:var(--vintage);color:#fff}
+.bm-hizliolcum-kutu input{width:100%;min-height:48px;font-size:20px;font-weight:700;text-align:center;border:1.5px solid var(--cizgi-arac);border-radius:8px;background:var(--bg-sunken);color:var(--ink);padding:6px}
+.bm-hizliolcum-eylem{display:flex;gap:8px;margin-top:12px}
+.bm-hizliolcum-eylem button{flex:1;min-height:44px;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;border:1px solid var(--cizgi-arac);background:var(--bg-sunken);color:var(--metin)}
+.bm-hizliolcum-eylem button.ana{background:var(--vintage);border-color:var(--vintage);color:#fff}
+.bm-hizliolcum-ipucu{font-size:11px;color:var(--metin-soluk);margin-top:8px;line-height:1.4}
+.bm-hizliolcum-kutu input::placeholder{color:var(--metin-soluk);opacity:.5;font-weight:400;font-size:16px}
+.bm-yapimda-olcum{display:flex;gap:6px;margin-top:7px}
+.bm-yapimda-olcum-btn{min-height:38px;flex:1;border-radius:8px;border:1px solid var(--cizgi-arac);background:var(--bg-card);color:var(--metin);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-govde)}
+@media (max-width:768px){.bm-yapimda-olcum-btn{min-height:44px}}
 /* Adim 132-J-4(b): Milestone timeline gun hucresi 380px overflow fix (6px -> 4px) */
 @media (max-width:420px){
   .bm-ms-cell{min-width:4px !important}
@@ -8006,17 +8079,74 @@ function _sgNormalize(v){
 // SPRINT BC2: editör "Ölçülen OG/FG" alanları — eskiden parseFloat/ham atamaydı (doğrulamasız,
 // sessiz): 1054 girilir, S.ogManuel=1054 olur, tüm _sgNum okumaları sessizce reddederdi.
 // Artık: normalize + kabul; anlaşılamayan değer ALINMAZ + net uyarı (sessiz yutma YASAK).
+// ═══ SPRINT BJ2-1 (BI4): ÖLÇÜM YOLLARININ TEKLEŞTİRİLMESİ ═══════════════════
+// Ölçüm (390×844, gerçek 08-16 yedeği, Muzo — fermantasyonda, brewSonuc yok): aynı gravity
+// 5 ayrı yoldan girilebiliyor. Normalize (BC) 5/5 hizalıydı; KALICILIK 2/5 idi:
+//   Süreç▸Gerçek OG · Süreç▸Gerçek FG · Maya▸Gerçek FG  →  KR'de null (yalnız S + taslak)
+//   Süreç▸Pre-boil OG (snapshot'lı) · Takvim▸log formu   →  KR'ye yazıyordu
+// Taslak KALICILIK KATMANI DEĞİLDİR (AU1 dersi): tarifAc clearDraft() koşar. Kaan'ın en sık
+// girdiği FG, 💾 Kaydet'e basılmadan başka reçete açılırsa KAYBOLUYORDU; dahası bmProfilAnaliz
+// KR'den türediği için o ölçüm hiçbir öğrenme koluna (verim / FG ofset / maya attenuation)
+// akmıyordu — "girdim ama sistem öğrenmedi" sınıfı.
+// tarifeKaydet ÇAĞRILMAZ (AU1/AU2 disiplini): özet yeniden hesaplanmaz, Sprint Z stil sinyali
+// her FG girişinde tetiklenmez. Hedefli ayna: yalnız ogManuel/fgManuel/preboilOG (+ brewSonuc).
+// _editId yoksa (henüz hiç kaydedilmemiş yeni reçete) ayna YAPILAMAZ → AQ1: sahte '✓' yerine
+// dürüst uyarı. logEkle'nin _bmAdsizLogKaydet otomatiği burada BİLİNÇLİ uygulanmaz: editör
+// alanı tasarım sırasında da doldurulur; her sayı girişinde 'Adsız çalışma' reçetesi açılmaz.
+window._bmOlcumKrAynala = function(kaynak){
+  try{
+    var rid = (typeof _editId !== 'undefined' && _editId) ? String(_editId) : null;
+    if(!rid) return false;
+    if(typeof KR === 'undefined' || !Array.isArray(KR)) return false;
+    var t = KR.find(function(k){ return k && String(k.id) === rid; });
+    if(!t) return false;
+    var alanlar = ['ogManuel','fgManuel','preboilOG'], yazdi = false, i, a, v, m;
+    for(i = 0; i < alanlar.length; i++){
+      a = alanlar[i];
+      v = (S[a] === undefined || S[a] === '') ? null : S[a];
+      m = (t[a] === undefined || t[a] === '') ? null : t[a];
+      if(String(v) !== String(m)){ t[a] = v; yazdi = true; }
+    }
+    if(S.brewSonuc && S.brewSonuc.ts && JSON.stringify(t.brewSonuc || null) !== JSON.stringify(S.brewSonuc)){ t.brewSonuc = JSON.parse(JSON.stringify(S.brewSonuc)); yazdi = true; }
+    if(!yazdi) return true;                       /* fark yok = zaten kalıcı */
+    t.guncelleme = Date.now();
+    if(typeof ky === 'function') ky(KR);
+    return true;
+  }catch(e){ if(window.bmHataKaydet) bmHataKaydet('persist', e, '_bmOlcumKrAynala/' + (kaynak || '')); return false; }
+};
+/* Ortak zincir — her editör ölçüm yüzeyi buradan geçer: brewSonuc tamamlama → KR aynası →
+   stuck-ferm senkron → TEK dil geri bildirim → render. Log formu ve brewday kendi KALICI
+   yollarını (tarifeKaydet) KORUR: davranış aynı, kod yolu ayrı — mevcut zincirler bozulmaz. */
+window._bmOlcumZincir = function(alan, deger, eski, hamGiris, donusum){
+  var rid = (typeof _editId !== 'undefined' && _editId) ? String(_editId) : null;
+  try{ if(window._brewSonucTamamla) _brewSonucTamamla(S, rid); }catch(e){ if(window.bmHataKaydet) bmHataKaydet('persist', e, '_bmOlcumZincir/sonuc'); }
+  var kalici = window._bmOlcumKrAynala(alan);
+  try{ if(window._stuckFermSync) _stuckFermSync(); }catch(e){}
+  try{
+    if(typeof flash === 'function'){
+      var etiket = (alan === 'og') ? 'OG' : (alan === 'fg') ? 'FG' : 'Pre-boil OG';
+      if(donusum) flash('📏 ' + hamGiris + ' → ' + deger + ' olarak alındı', 'ok');
+      if(deger != null && String(deger) !== String(eski == null ? '' : eski)){
+        if(kalici) flash('📏 ' + etiket + ' ' + deger + ' kaydedildi', 'ok');
+        else flash('⚠️ ' + etiket + ' alındı ama KALICI DEĞİL — reçeteye ad verip 💾 Kaydet\'e bas', 'hata');
+      }
+    }
+  }catch(e){}
+  try{ if(typeof render === 'function') render(); }catch(e){}
+};
 window._bmSgManuelGir = function(alan, deger){
   try{
     var s = String(deger == null ? '' : deger).trim();
-    if(!s){ if(alan === 'og') S.ogManuel = null; else S.fgManuel = null; return; }
+    var eski = (alan === 'og') ? S.ogManuel : S.fgManuel;
+    if(!s){ if(alan === 'og') S.ogManuel = null; else S.fgManuel = null; window._bmOlcumZincir(alan, null, eski); return; }
     var nz = _sgNormalize(s);
     if(nz.v != null){
       if(alan === 'og') S.ogManuel = nz.v; else S.fgManuel = String(nz.v);
-      if(nz.donusum && typeof flash === 'function') flash('📏 ' + s + ' → ' + nz.v + ' olarak alındı', 'ok');
+      window._bmOlcumZincir(alan, nz.v, eski, s, nz.donusum);
     } else {
       if(alan === 'og') S.ogManuel = null; else S.fgManuel = null;
       if(typeof flash === 'function') flash('⚠️ "' + s + '" gravity olarak anlaşılamadı (0.990–1.200) — alan boş bırakıldı', 'err');
+      window._bmOlcumZincir(alan, null, eski);
     }
   }catch(_e){ if(window.bmHataKaydet) bmHataKaydet('giris', _e, '_bmSgManuelGir'); }
 };
@@ -8025,19 +8155,18 @@ window._bmSgManuelGir = function(alan, deger){
 window._bmPreboilGir = function(deger){
   try{
     var s = String(deger == null ? '' : deger).trim();
+    var eski = S.preboilOG, don = null;
     if(!s){ S.preboilOG = null; }
     else {
       var nz = _sgNormalize(s);
-      if(nz.v != null){
-        S.preboilOG = nz.v;
-        if(nz.donusum && typeof flash === 'function') flash('📏 ' + s + ' → ' + nz.v + ' olarak alındı', 'ok');
-      } else {
+      if(nz.v != null){ S.preboilOG = nz.v; don = nz.donusum; }
+      else {
         S.preboilOG = null;
         if(typeof flash === 'function') flash('⚠️ "' + s + '" gravity olarak anlaşılamadı (0.990–1.200) — alan boş bırakıldı', 'err');
       }
     }
     if(window._preboilSnapDondur) _preboilSnapDondur(S, typeof _editId !== 'undefined' ? _editId : null);
-    if(typeof render === 'function') render();
+    window._bmOlcumZincir('preboil', S.preboilOG, eski, s, don);
   }catch(_e){ if(window.bmHataKaydet) bmHataKaydet('giris', _e, '_bmPreboilGir'); }
 };
 // ═══ SPRINT BE3 (BD F8 hattı): sayısal giriş kapıları — BC deseni ile TUTARLI ═══
@@ -13012,6 +13141,221 @@ window._bmSonrakiAlarm = function(rid){
     return { metin: metin, gecikmis: gecmis.length, gelecekVar: !!gelecek.length, hedef: hedef };
   }catch(e){ return null; }
 };
+// ═══ SPRINT BJ2-1: ANA EKRANDAN HIZLI ÖLÇÜM — dokunuş azaltma ═══════════════
+// Ölçüm (BI yolculuk b, 390px): FG girmek = Defter→reçete→Takvim→akordeon→Yeni Kayıt Ekle→
+// tip seç→değer→Kaydet ⇒ 8 dokunuş + 3 kaydırma + 1 yatay kaydırma. Aktif demleme kartı BJ1-2
+// ile zaten ana ekranda → ölçüm de oradan girilir (2 dokunuş + yazma).
+// Yazım logEkle ile AYNI: brewLog kaydı + ogManuel/fgManuel backfill (I2/I4) + _brewSonucTamamla
+// + _stuckFermSync + gerçek kalıcı yazım. FARK: doğrudan KR kaydına yazar — kart reçetesi açık
+// reçete olmak zorunda değil (_bdLogYaz rid-kapısı deseni). Açık editör AYNI reçeteyse S de
+// güncellenir; yoksa bayat S'in sonraki 💾 Kaydet'i ölçümü ezerdi (ogManuel KR-otoriter DEĞİL).
+window._bmHizliOlcum = null;
+window._bmHizliOlcumKapat = function(){
+  try{ var d = document.getElementById('bmHizliOlcumModal'); if(d) d.remove(); }catch(e){}
+  window._bmHizliOlcum = null;
+};
+window._bmHizliOlcumTip = function(tip){
+  if(!window._bmHizliOlcum) return;
+  window._bmHizliOlcum.tip = (tip === 'og_olcum') ? 'og_olcum' : 'fg_olcum';
+  try{
+    var k = document.getElementById('bmHizliOlcumModal');
+    if(k) k.querySelectorAll('.bm-hizliolcum-tip button').forEach(function(b){ b.classList.toggle('ak', b.getAttribute('data-tip') === window._bmHizliOlcum.tip); });
+    var i = document.getElementById('bmHizliOlcumInp'); if(i){ i.setAttribute('aria-label', (tip === 'og_olcum' ? 'OG' : 'FG') + ' ölçümü'); i.focus(); }
+  }catch(e){}
+};
+window._bmHizliOlcumAc = function(rid, tip){
+  try{
+    var t = (typeof KR !== 'undefined' && Array.isArray(KR)) ? KR.find(function(k){ return k && String(k.id) === String(rid); }) : null;
+    if(!t){ if(typeof flash === 'function') flash('⚠️ Reçete bulunamadı — ölçüm yazılmadı', 'hata'); return; }
+    window._bmHizliOlcumKapat();
+    window._bmHizliOlcum = { rid: String(rid), tip: (tip === 'og_olcum') ? 'og_olcum' : 'fg_olcum' };
+    var faz = (typeof window._bmFazBilgi === 'function') ? (window._bmFazBilgi(t) || '') : '';
+    var d = document.createElement('div');
+    d.id = 'bmHizliOlcumModal'; d.className = 'bm-hizliolcum-perde';
+    d.setAttribute('role', 'dialog'); d.setAttribute('aria-modal', 'true'); d.setAttribute('aria-label', 'Hızlı ölçüm girişi');
+    var esc2 = (typeof esc === 'function') ? esc : function(x){ return String(x == null ? '' : x); };
+    d.innerHTML = '<div class="bm-hizliolcum-kutu">' +
+      '<h3>📏 Ölçüm gir</h3>' +
+      '<div class="bm-hizliolcum-alt">' + esc2(t.biraAd || '(adsız)') + (faz ? ' · ' + esc2(faz) : '') + '</div>' +
+      '<div class="bm-hizliolcum-tip">' +
+        '<button type="button" data-tip="og_olcum" class="' + (window._bmHizliOlcum.tip === 'og_olcum' ? 'ak' : '') + '" onclick="window._bmHizliOlcumTip(\'og_olcum\')">🔬 OG</button>' +
+        '<button type="button" data-tip="fg_olcum" class="' + (window._bmHizliOlcum.tip === 'fg_olcum' ? 'ak' : '') + '" onclick="window._bmHizliOlcumTip(\'fg_olcum\')">📊 FG</button>' +
+      '</div>' +
+      '<input id="bmHizliOlcumInp" type="text" inputmode="decimal" autocomplete="off" placeholder="1.012" aria-label="Ölçüm değeri">' +
+      '<div class="bm-hizliolcum-eylem">' +
+        '<button type="button" onclick="window._bmHizliOlcumKapat()">Vazgeç</button>' +
+        '<button type="button" class="ana" onclick="window._bmHizliOlcumKaydet()">💾 Kaydet</button>' +
+      '</div>' +
+      '<div class="bm-hizliolcum-ipucu">1.012 · 1012 · 12 — üçü de aynı ölçüm olarak alınır. Günlüğe tarihli kayıt düşer.</div>' +
+    '</div>';
+    d.addEventListener('click', function(ev){ if(ev.target === d) window._bmHizliOlcumKapat(); });
+    document.body.appendChild(d);
+    var inp = document.getElementById('bmHizliOlcumInp');
+    if(inp){
+      inp.addEventListener('keydown', function(ev){ if(ev.key === 'Enter'){ ev.preventDefault(); window._bmHizliOlcumKaydet(); } });
+      setTimeout(function(){ try{ inp.focus(); }catch(e){} }, 30);
+    }
+    if(!window._bmHizliOlcumEsc){
+      window._bmHizliOlcumEsc = true;
+      document.addEventListener('keydown', function(ev){ if(ev.key === 'Escape' && document.getElementById('bmHizliOlcumModal')) window._bmHizliOlcumKapat(); });
+    }
+  }catch(e){ if(window.bmHataKaydet) bmHataKaydet('giris', e, '_bmHizliOlcumAc'); }
+};
+window._bmHizliOlcumKaydet = function(){
+  try{
+    var o = window._bmHizliOlcum; if(!o) return;
+    var inp = document.getElementById('bmHizliOlcumInp');
+    var ham = inp ? String(inp.value || '').trim() : '';
+    if(!ham){ if(typeof flash === 'function') flash('⚠️ Değer boş — ölçüm yazılmadı', 'hata'); return; }
+    var nz = (typeof _sgNormalize === 'function') ? _sgNormalize(ham) : { v: parseFloat(ham) };
+    if(nz.v == null){ if(typeof flash === 'function') flash('⚠️ "' + ham + '" gravity olarak anlaşılamadı (0.990–1.200) — kayıt YAPILMADI', 'hata'); return; }
+    var t = (typeof KR !== 'undefined' && Array.isArray(KR)) ? KR.find(function(k){ return k && String(k.id) === o.rid; }) : null;
+    if(!t){ if(typeof flash === 'function') flash('⚠️ Reçete bulunamadı — ölçüm YAZILMADI', 'hata'); return; }
+    var degerStr = String(nz.v);
+    if(!Array.isArray(t.brewLog)) t.brewLog = [];
+    t.brewLog.push({ tip: o.tip, tarih: new Date().toISOString().slice(0, 10), deger: degerStr, not: 'Hızlı ölçüm (ana ekran)', id: Date.now().toString() });
+    t.brewLog.sort(function(a, b){ return String(a.tarih || '').localeCompare(String(b.tarih || '')); });
+    if(o.tip === 'og_olcum') t.ogManuel = nz.v; else t.fgManuel = degerStr;
+    try{ if(window._brewSonucTamamla) _brewSonucTamamla(t, o.rid); }catch(e){ if(window.bmHataKaydet) bmHataKaydet('persist', e, '_bmHizliOlcumKaydet/sonuc'); }
+    t.guncelleme = Date.now();
+    var ok = (typeof ky === 'function') ? ky(KR) : false;
+    /* açık editör aynı reçete ise S de güncellenir — bayat S'in Kaydet'i ölçümü ezmesin */
+    try{
+      if(typeof _editId !== 'undefined' && _editId && String(_editId) === o.rid && typeof S !== 'undefined' && S){
+        if(!Array.isArray(S.brewLog)) S.brewLog = [];
+        S.brewLog = (typeof _brewLogBirlesim === 'function') ? _brewLogBirlesim(S.brewLog, t.brewLog) : t.brewLog.slice();
+        if(o.tip === 'og_olcum') S.ogManuel = nz.v; else S.fgManuel = degerStr;
+        if(t.brewSonuc) S.brewSonuc = JSON.parse(JSON.stringify(t.brewSonuc));
+      }
+    }catch(e){ if(window.bmHataKaydet) bmHataKaydet('persist', e, '_bmHizliOlcumKaydet/S-ayna'); }
+    try{ if(window._stuckFermSync) _stuckFermSync(); }catch(e){}
+    if(typeof flash === 'function'){
+      if(ok) flash('📏 ' + (o.tip === 'og_olcum' ? 'OG' : 'FG') + ' ' + degerStr + ' kaydedildi — ' + (t.biraAd || '') + (nz.donusum ? (' (' + ham + ' → ' + degerStr + ')') : ''), 'ok');
+      else flash('⚠️ Ölçüm KAYDEDİLEMEDİ (depolama) — tekrar dene', 'hata');
+    }
+    window._bmHizliOlcumKapat();
+    try{ if(typeof render === 'function') render(); }catch(e){}
+  }catch(e){ if(window.bmHataKaydet) bmHataKaydet('persist', e, '_bmHizliOlcumKaydet'); }
+};
+// ═══ SPRINT BJ2-2 (BI5/bulgu 6): KLAVYE ÜSTÜ KAYDET ÇUBUĞU ═══════════════════
+// Ölçüm: Not sekmesinde alan y=299 görünürken 'Notu Kaydet' y=672 (görünür alan 504) — klavye
+// açıkken ikisi aynı anda ASLA görünmüyordu. Çözüm (a)+(b): görsel viewport'un dibine sabit
+// çubuk + odaklı alanı çubuğun üstüne kaydırma. Çubuk GERÇEK düğmeyi click'ler (doğrulama,
+// kalıcılık ve mesajlar tek yerde kalır — kopya kaydetme yolu YOK).
+window._BJ2_KLV_KALIP = /(?:logEkle|notu_kaydet|tadimOturumKaydet|stokEkle|tarifeKaydet)\s*\(/;
+window._bmKlvKaydetBtn = function(el){
+  try{
+    var n = el, d = 0, i, bs, oc;
+    while(n && n !== document.body && d++ < 8){
+      if(n.querySelectorAll){
+        bs = n.querySelectorAll('button[onclick]');
+        for(i = 0; i < bs.length; i++){ oc = bs[i].getAttribute('onclick') || ''; if(window._BJ2_KLV_KALIP.test(oc)) return bs[i]; }
+      }
+      n = n.parentElement;
+    }
+    return document.querySelector('.eh button[onclick*="tarifeKaydet"]');
+  }catch(e){ return null; }
+};
+window._bmKlvGizle = function(){
+  try{
+    var bar = document.getElementById('bmKlvBar'); if(bar) bar.hidden = true;
+    document.body.classList.remove('bm-klv-acik');
+  }catch(e){}
+};
+window._bmKlvGorunurAlt = function(){ var vv = window.visualViewport; return vv ? (vv.offsetTop + vv.height) : window.innerHeight; };
+window._bmKlvKonum = function(){
+  try{
+    var bar = document.getElementById('bmKlvBar'); if(!bar || bar.hidden) return;
+    var vv = window.visualViewport;
+    var kayma = vv ? Math.max(0, Math.round(window.innerHeight - (vv.height + vv.offsetTop))) : 0;
+    window._bmKlvKayma = kayma;
+    bar.style.transform = kayma ? ('translateY(-' + kayma + 'px)') : '';
+    /* toast yigini cubugun ustune tasinir (toast z-index 10500 > cubuk 9500, pointer-events:auto) */
+    document.documentElement.style.setProperty('--bm-klv-alt', (Math.round(bar.getBoundingClientRect().height) + kayma + 12) + 'px');
+  }catch(e){}
+};
+window._bmKlvGuncelle = function(){
+  try{
+    var bar = document.getElementById('bmKlvBar');
+    if(!bar && !window._bmKlvKuruldu){ window._bmKlvCubukKur(); bar = document.getElementById('bmKlvBar'); }   /* boot kancası koşmadıysa tembel kurulum */
+    if(!bar) return;
+    var el = document.activeElement;
+    var uygun = el && /^(INPUT|TEXTAREA)$/.test(el.tagName) && !/^(checkbox|radio|button|submit|file|range|color)$/i.test(el.type || '');
+    if(!uygun || window.innerWidth > 768){ window._bmKlvGizle(); return; }
+    var btn = window._bmKlvKaydetBtn(el);
+    if(!btn){ window._bmKlvGizle(); return; }
+    var r = btn.getBoundingClientRect();
+    var ust = (window.visualViewport ? window.visualViewport.offsetTop : 0), alt = window._bmKlvGorunurAlt();
+    if(r.width > 0 && r.height > 0 && r.top >= ust && r.bottom <= alt){ window._bmKlvGizle(); return; } /* gerçek düğme erişilebilir → ekran daraltılmaz */
+    window._bmKlvHedefOc = btn.getAttribute('onclick') || '';
+    window._bmKlvHedefEl = btn;
+    var b = document.getElementById('bmKlvBtn');
+    if(b) b.textContent = ((btn.innerText || 'Kaydet').replace(/\s+/g, ' ').trim() || 'Kaydet').slice(0, 28);
+    bar.hidden = false;
+    document.body.classList.add('bm-klv-acik');
+    window._bmKlvKonum();
+    var br = bar.getBoundingClientRect(), ar = el.getBoundingClientRect(), sinir = window._bmKlvGorunurAlt() - br.height - 8;
+    if(ar.bottom > sinir){ var sc = document.getElementById('ekran') || document.scrollingElement; if(sc) sc.scrollTop += (ar.bottom - sinir); }
+  }catch(e){}
+};
+window._bmKlvCubukKur = function(){
+  try{
+    if(window._bmKlvKuruldu) return; window._bmKlvKuruldu = true;
+    var bar = document.createElement('div');
+    bar.id = 'bmKlvBar'; bar.className = 'bm-klv-bar'; bar.hidden = true;
+    bar.innerHTML = '<button type="button" id="bmKlvBtn" class="bm-klv-btn">Kaydet</button><button type="button" class="bm-klv-kapat" aria-label="Klavyeyi kapat">✕</button>';
+    document.body.appendChild(bar);
+    var b = document.getElementById('bmKlvBtn');
+    bar.addEventListener('pointerdown', function(ev){ ev.preventDefault(); }); /* odak kaybı olmadan tıkla */
+    b.addEventListener('click', function(){
+      window._bmKlvGizle();
+      var oc = window._bmKlvHedefOc || '', h = null, i, bs;
+      if(oc){ bs = document.querySelectorAll('button[onclick]'); for(i = 0; i < bs.length; i++){ if(bs[i].getAttribute('onclick') === oc){ h = bs[i]; break; } } }
+      if(!h && window._bmKlvHedefEl && document.contains(window._bmKlvHedefEl)) h = window._bmKlvHedefEl;
+      try{ if(document.activeElement && document.activeElement.blur) document.activeElement.blur(); }catch(e){}
+      if(h) h.click(); else if(typeof flash === 'function') flash('⚠️ Kaydet düğmesi bulunamadı — formdaki düğmeyi kullan', 'hata');
+    });
+    bar.querySelector('.bm-klv-kapat').addEventListener('click', function(){ window._bmKlvGizle(); try{ if(document.activeElement && document.activeElement.blur) document.activeElement.blur(); }catch(e){} });
+    document.addEventListener('focusin', function(){ setTimeout(window._bmKlvGuncelle, 60); }, true);
+    document.addEventListener('focusout', function(){ setTimeout(function(){ var a = document.activeElement; if(!a || !/^(INPUT|TEXTAREA)$/.test(a.tagName)) window._bmKlvGizle(); }, 160); }, true);
+    if(window.visualViewport){ window.visualViewport.addEventListener('resize', function(){ window._bmKlvKonum(); window._bmKlvGuncelle(); }); window.visualViewport.addEventListener('scroll', window._bmKlvKonum); }
+    window.addEventListener('resize', function(){ window._bmKlvGuncelle(); });
+  }catch(e){ if(window.bmHataKaydet) bmHataKaydet('giris', e, '_bmKlvCubukKur'); }
+};
+// ═══ SPRINT BJ2-3b: KAYDIRINCA KROM İNCELMESİ (histerezisli) ═══════════════════
+window._bmKromKur = function(){
+  try{
+    var sc = document.getElementById('ekran');
+    if(!sc || sc._bmKromBagli) return;
+    sc._bmKromBagli = true;
+    var son = false;
+    sc.addEventListener('scroll', function(){
+      if(window._bmKromKilit) return;                    /* telafi sırasında yeniden değerlendirme yok */
+      var eh = document.querySelector('.eh'), k;
+      if(window.innerWidth > 768) k = false;
+      else if(son) k = sc.scrollTop > 8;                 /* yalnız tam tepede aç (histerezis) */
+      else k = sc.scrollTop > ((eh ? eh.getBoundingClientRect().height : 216) + 24);
+      if(k === son) return;
+      var once = eh ? eh.getBoundingClientRect().height : 0;
+      son = k;
+      sc.classList.toggle('bm-krom-kucuk', k);
+      var sonra = eh ? eh.getBoundingClientRect().height : 0;
+      /* DARALMA telafisi: sticky başlık akışta yer kapladığı için alttaki içerik yukarı zıplardı */
+      if(k && once > sonra){
+        window._bmKromKilit = true;
+        sc.scrollTop = Math.max(40, sc.scrollTop - (once - sonra));
+        setTimeout(function(){ window._bmKromKilit = false; }, 0);
+      }
+      if(window._bmUpdateHeaderH) window._bmUpdateHeaderH();
+    }, { passive: true });
+  }catch(e){}
+};
+/* BJ2 kurulum: uzaktaki boot kancasına BAĞIMLI DEĞİL (regresyon ortamında koşmadığı görüldü) —
+   tanım noktasında kendi kendini kurar; iki yol da idempotent (_bmKlvKuruldu / _bmKromBagli). */
+(function(){
+  var kur = function(){ try{ if(window._bmKlvCubukKur) window._bmKlvCubukKur(); if(window._bmKromKur) window._bmKromKur(); }catch(_e){} };
+  try{ if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', kur); else setTimeout(kur, 0); }catch(_e){}
+})();
 function renderYapimdaVurgu(){
   var yapimda = KR.filter(function(t){ return t && (t.durum === 'yapimda' || (t.brewSnapshot && !t.brewSonuc)); });
   if(yapimda.length === 0) return '';
@@ -13019,10 +13363,15 @@ function renderYapimdaVurgu(){
     .sort(function(a,b){ return (b.s?1:0) - (a.s?1:0); })   // bekleyen alarmı olan (canlı takip) önce
     .slice(0, 3).map(function(x){
     var t = x.t, meta = _bmFazBilgi(t), s = x.s;
+    var _tidBJ2 = String(t.id).replace(/[^A-Za-z0-9_.:-]/g, '');   /* onclick içine güvenli id (BJ2-1) */
     return '<div class="bm-yapimda-item" data-tid="'+t.id+'" onclick="tarifAcById(this)">'+
         '<div class="bm-yapimda-item-ad">'+_esc131B(t.biraAd)+'</div>'+
         (meta ? '<div class="bm-yapimda-item-meta">'+_esc131B(meta)+'</div>' : '')+
         (s ? '<div class="bm-yapimda-item-sonraki'+(s.gelecekVar?'':' gecikmis')+'">'+_esc131B(s.metin)+'</div>' : '')+
+        '<div class="bm-yapimda-olcum">'+
+          '<button type="button" class="bm-yapimda-olcum-btn" onclick="event.stopPropagation();window._bmHizliOlcumAc(\''+_tidBJ2+'\',\'fg_olcum\')">📊 FG gir</button>'+
+          '<button type="button" class="bm-yapimda-olcum-btn" onclick="event.stopPropagation();window._bmHizliOlcumAc(\''+_tidBJ2+'\',\'og_olcum\')">🔬 OG gir</button>'+
+        '</div>'+
       '</div>';
   }).join('');
   return '<div class="bm-yapimda-vurgu">'+
@@ -15339,7 +15688,7 @@ function rEditorSurec(){
           <input aria-label="Gerçek OG" type="number" class="inp" style="flex:1;font-weight:700;font-size:14px;text-align:center"
             placeholder="${_ogHsp}" value="${S.ogManuel||""}"
             min="1.001" max="1.200" step="0.001"
-            onchange="window._bmSgManuelGir('og',this.value);window._brewSonucTamamla&&window._brewSonucTamamla(S);render()">
+            onchange="window._bmSgManuelGir('og',this.value)">
           ${_ogKyn==="manuel"?`<button class="btn" style="background:none;color:var(--kk);font-size:12px;padding:2px 6px" onclick="S.ogManuel=null;render()" aria-label="Manuel OG değerini temizle" title="Temizle">✕</button>`:""}
         </div>
         <div style="font-size:var(--fs-xs);color:var(--dim);margin-top:3px">Reçete: ${_ogHsp}</div>
@@ -15350,7 +15699,7 @@ function rEditorSurec(){
           <input aria-label="Gerçek FG" type="number" class="inp" style="flex:1;font-weight:700;font-size:14px;text-align:center"
             placeholder="${_fgHsp}" value="${S.fgManuel||""}"
             min="1.000" max="1.200" step="0.001"
-            onchange="window._bmSgManuelGir('fg',this.value);window._brewSonucTamamla&&window._brewSonucTamamla(S);render()">
+            onchange="window._bmSgManuelGir('fg',this.value)">
           ${_fgKyn==="manuel"?`<button class="btn" style="background:none;color:var(--kk);font-size:12px;padding:2px 6px" onclick="S.fgManuel=null;render()" aria-label="Manuel FG değerini temizle" title="Temizle">✕</button>`:""}
         </div>
         <div style="font-size:var(--fs-xs);color:var(--dim);margin-top:3px">Reçete: ${_fgHsp}</div>
@@ -15670,7 +16019,7 @@ function rEditorMaya(og, fg, abv, maya, maya2, fgKaynak, fgHesap){
           placeholder="${fgHesap.toFixed(3)}"
           value="${S.fgManuel||""}"
           min="1.000" max="${(og-0.001).toFixed(3)}" step="0.001"
-          onchange="window._bmSgManuelGir('fg',this.value);window._brewSonucTamamla&&window._brewSonucTamamla(S);render()">
+          onchange="window._bmSgManuelGir('fg',this.value)">
         <div style="flex:1;font-size:11px;color:var(--soluk)">
           ${fgKaynak==="manuel"?"Gerçek FG kullanılıyor. ABV ve takvim buna göre.":"Fermantasyon durursa veya ölçüm yaptıysan gir."}
         </div>
@@ -16926,7 +17275,7 @@ function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
         </div>
         <input aria-label="Malt miktarı (kg)" type="number" value="${m.kg}" min=".01" step=".01" class="inp" style="width:78px;text-align:center;font-weight:600" onchange="S.maltlar[${i}].kg=Math.max(0.01,parseFloat(this.value)||0.01);render()">
         <span style="font-size:11px;color:var(--dim)">kg</span>
-        <div style="display:flex;flex-direction:column;gap:1px;margin-left:2px">
+        <div class="bm-siralayici" style="display:flex;flex-direction:column;gap:1px;margin-left:2px">
           <button style="background:none;border:none;color:${i===0?'var(--dim)':'var(--bakir)'};font-size:11px;padding:0 3px;line-height:1;cursor:${i===0?'not-allowed':'pointer'};opacity:${i===0?'.4':'1'}" onclick="maltUp(${i})" ${i===0?'disabled':''}>▲</button>
           <button style="background:none;border:none;color:${i===S.maltlar.length-1?'var(--dim)':'var(--bakir)'};font-size:11px;padding:0 3px;line-height:1;cursor:${i===S.maltlar.length-1?'not-allowed':'pointer'};opacity:${i===S.maltlar.length-1?'.4':'1'}" onclick="maltDown(${i})" ${i===S.maltlar.length-1?'disabled':''}>▼</button>
         </div>
@@ -17262,7 +17611,7 @@ function rEditorHop(og, ibu, seciHop){
         <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--kahve)">${hp?hp.ad:h.id}${_formIkon}${_stokCipMap[h.id]?` <span style="font-size:var(--fs-xs);background:var(--ma);color:var(--mk);padding:1px 4px;border-radius:3px;font-weight:700">📦 ${_stokCipMap[h.id]}</span>`:''}${_grup?` <span style="font-size:var(--fs-xs);color:${_gRenk};background:${_gRenk}22;padding:1px 5px;border-radius:3px;font-weight:700;letter-spacing:.3px;vertical-align:middle">${_grup.toUpperCase()}</span>`:''}</div>
         <div style="font-size:var(--fs-xs);color:var(--soluk);margin-top:2px">${_turEtiket} · ${aa}% AA</div></div>
         <div style="text-align:right"><div style="font-size:12px;font-weight:600;color:${ik>0?"var(--bakir)":"var(--yk)"}">${ik>0?"+"+ik.toFixed(1)+" IBU":"🌿 Aroma"}</div><div style="font-size:11px;color:var(--soluk)">${h.g} g</div></div>
-        <div style="display:flex;flex-direction:column;gap:1px;margin-left:2px">
+        <div class="bm-siralayici" style="display:flex;flex-direction:column;gap:1px;margin-left:2px">
           <button style="background:none;border:none;color:${i===0?'var(--dim)':'var(--bakir)'};font-size:11px;padding:0 3px;line-height:1;cursor:${i===0?'not-allowed':'pointer'};opacity:${i===0?'.4':'1'}" onclick="hopUp(${i})" ${i===0?'disabled':''}>▲</button>
           <button style="background:none;border:none;color:${i===S.hoplar.length-1?'var(--dim)':'var(--bakir)'};font-size:11px;padding:0 3px;line-height:1;cursor:${i===S.hoplar.length-1?'not-allowed':'pointer'};opacity:${i===S.hoplar.length-1?'.4':'1'}" onclick="hopDown(${i})" ${i===S.hoplar.length-1?'disabled':''}>▼</button>
         </div>
@@ -21569,15 +21918,15 @@ function rEditor(){
     return (S && S.durum === 'arsiv') ? 'view' : 'edit';
   })();
   try { if (typeof document !== 'undefined') document.body.setAttribute('data-mode', _recMode); } catch(e){}
-  return`<div class="eh"><button class="bm-geri" type="button" onclick="window.bmGeriDon()" aria-label="Geri dön" title="${S.klasor?'← '+esc(S.klasor)+' klasörüne dön':'← Defter'}">← Geri</button>
-  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+  return`<div class="eh">
+  <div class="bm-eh-ust" style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap"><button class="bm-geri" type="button" onclick="window.bmGeriDon()" aria-label="Geri dön" title="${S.klasor?'← '+esc(S.klasor)+' klasörüne dön':'← Defter'}">← Geri</button>
     <input aria-label="Bira adı" class="bm-biraad-inp" value="${S.biraAd}" onblur="S.biraAd=this.value" placeholder="Bira adı..." style="background:transparent;border:none;border-bottom:1.5px solid var(--cizgi-arac);border-radius:0;font-size:var(--fs-xl);font-weight:var(--fw-bold);padding:3px 0;color:var(--metin);letter-spacing:-.01em;flex:1;font-family:var(--font-baslik)">
-    ${_editId?`<div class="bm-mode-toggle" role="tablist" aria-label="Reçete modu"><button class="bm-mode-btn ${_recMode==='edit'?'active':''}" type="button" role="tab" aria-selected="${_recMode==='edit'}" onclick="bmReceteMode('${_editId}','edit')">✏️ Düzenle</button><button class="bm-mode-btn ${_recMode==='view'?'active':''}" type="button" role="tab" aria-selected="${_recMode==='view'}" onclick="bmReceteMode('${_editId}','view')">👁️ Görüntüle</button></div>`:''}
+    ${_editId?`<div class="bm-mode-toggle bm-eh-arac" role="tablist" aria-label="Reçete modu"><button class="bm-mode-btn ${_recMode==='edit'?'active':''}" type="button" role="tab" aria-selected="${_recMode==='edit'}" onclick="bmReceteMode('${_editId}','edit')">✏️ Düzenle</button><button class="bm-mode-btn ${_recMode==='view'?'active':''}" type="button" role="tab" aria-selected="${_recMode==='view'}" onclick="bmReceteMode('${_editId}','view')">👁️ Görüntüle</button></div>`:''}
     <button class="btn bm-edit-only" onclick="tarifeKaydet()" style="background:${kbg};color:${kclr};border:1px solid ${kbrd};font-size:var(--fs-sm);padding:var(--sp-2) var(--sp-4);white-space:nowrap">${kayitMsg||"💾 Kaydet"}</button>
-    ${_editId?`<button class="bm-btn-primary" onclick="tarifKlonla('${_editId}')" title="Bu tarifin kopyasını oluştur">📑 Klonla</button>`:''}
+    ${_editId?`<button class="bm-btn-primary bm-eh-arac" onclick="tarifKlonla('${_editId}')" title="Bu tarifin kopyasını oluştur">📑 Klonla</button>`:''}
   </div>
-  ${(typeof _bmKlonKaynakHtml==='function')?_bmKlonKaynakHtml(S):''}
-  <div class="bm-edit-only" style="display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap"><!-- SPRINT BE2 (BD F10-6): 390px'te buton 16px taşıyordu -->
+  <div class="bm-eh-arac">${(typeof _bmKlonKaynakHtml==='function')?_bmKlonKaynakHtml(S):''}</div>
+  <div class="bm-edit-only bm-eh-arac" style="display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap"><!-- SPRINT BE2 (BD F10-6): 390px'te buton 16px taşıyordu -->
     <span style="font-size:var(--fs-xs);color:var(--metin-soluk);font-weight:var(--fw-semibold)">🎯 Hedef Stil:</span>
     <select aria-label="Hedef stil" onchange="S.stil=this.value;window.__stilSecKaynak='dropdown';render()" style="background:var(--bg-card);color:var(--ink);border:1px solid var(--cizgi-arac);border-radius:var(--r-sm);font-size:var(--fs-xs);padding:4px 8px;flex:1;outline:none;font-family:var(--font-govde);cursor:pointer">
       <option value=""${!S.stil?" selected":""}>── Otomatik (bileşenlerden) ──</option>
@@ -21585,7 +21934,7 @@ function rEditor(){
     </select>
     <button type="button" onclick="bmStilIskeletDoldur()" title="Seçili stilin tipik malt/hop/maya iskeletini bu batch boyutuna ölçekleyip doldur" style="background:var(--bakir);color:#fff;border:none;border-radius:var(--r-sm);font-size:var(--fs-xs);padding:4px 10px;white-space:nowrap;cursor:pointer;font-family:var(--font-govde)">📋 İskeleti Doldur</button>
   </div>
-  ${(typeof _bmProfilStilKart==='function')?_bmProfilStilKart():''}
+  <div class="bm-eh-arac">${(typeof _bmProfilStilKart==='function')?_bmProfilStilKart():''}</div>
   </div><!-- Adim 132-J-2: editor üst kahve header 6 stat duplicate KALDIRILDI (sticky özet 132-A+E zaten gosteriyor, KH J-2'de sticky'ye eklendi) -->
   ${uy?`<div style="padding:8px 12px 0">${uy}</div>`:""}
   <!-- Adim 132-E: Sticky ozet paneli global (eh disinda, her tab'da gorunur). srmR(srm) renk. -->
@@ -24053,7 +24402,7 @@ window.brewdayBitir=function(){
       var rTemiz = String(rid).replace(/[^\w:.-]/g, '');
       d.innerHTML = '<span>📊 Ölçümü şimdi girmek ister misin?</span>' +
         '<button class="btn" style="background:var(--altin);color:#fff;border:none;border-radius:6px;padding:6px 12px;font-weight:700;cursor:pointer" onclick="window._bmOlcumGirKisayol(\'' + rTemiz + '\');this.parentNode.remove()">Ölçüm gir</button>' +
-        '<button class="btn" style="background:transparent;border:1px solid var(--cizgi-arac);border-radius:6px;padding:6px 10px;cursor:pointer" onclick="this.parentNode.remove()">Kapat</button>';
+        '<button class="btn bm-t44" style="background:transparent;border:1px solid var(--cizgi-arac);border-radius:6px;padding:6px 10px;cursor:pointer" onclick="this.parentNode.remove()">Kapat</button>';
       document.body.appendChild(d);
       setTimeout(function(){ try{ var x = document.getElementById('bm-olcum-toast'); if (x) x.remove(); }catch(_e){} }, 12000);
     }catch(_e){}
@@ -24081,7 +24430,7 @@ window.brewdayBitir=function(){
       var rTemiz = String(rid).replace(/[^\w:.-]/g, '');
       d.innerHTML = '<span>👅 Tadım zamanı — nasıl olmuş?</span>' +
         '<button class="btn" style="background:var(--altin);color:#fff;border:none;border-radius:6px;padding:6px 12px;font-weight:700;cursor:pointer" onclick="window._bmTadimGirKisayol(\'' + rTemiz + '\');this.parentNode.remove()">Tadım gir</button>' +
-        '<button class="btn" style="background:transparent;border:1px solid var(--cizgi-arac);border-radius:6px;padding:6px 10px;cursor:pointer" onclick="this.parentNode.remove()">Kapat</button>';
+        '<button class="btn bm-t44" style="background:transparent;border:1px solid var(--cizgi-arac);border-radius:6px;padding:6px 10px;cursor:pointer" onclick="this.parentNode.remove()">Kapat</button>';
       document.body.appendChild(d);
       setTimeout(function(){ try{ var x = document.getElementById('bm-tadim-toast'); if (x) x.remove(); }catch(_e){} }, 12000);
     }catch(_e){}
@@ -24097,7 +24446,7 @@ window.brewdayBitir=function(){
       d.id = 'bm-kacirilan-toast';
       d.style.cssText = 'position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:9998;pointer-events:none;background:var(--bg-card);border:1px solid var(--cizgi-arac);border-radius:10px;padding:10px 14px;display:flex;gap:10px;align-items:center;box-shadow:0 4px 16px rgba(0,0,0,.25);font-size:13px;max-width:92vw';
       d.innerHTML = '<span>⏰ ' + (n|0) + ' alarmın zamanı geçmiş — reçetenin Takvim sekmesinden bakabilirsin</span>' +
-        '<button class="btn" style="background:transparent;border:1px solid var(--cizgi-arac);border-radius:6px;pointer-events:auto;padding:6px 10px;cursor:pointer;flex-shrink:0" onclick="this.parentNode.remove()">Kapat</button>';
+        '<button class="btn bm-t44" style="background:transparent;border:1px solid var(--cizgi-arac);border-radius:6px;pointer-events:auto;padding:6px 10px;cursor:pointer;flex-shrink:0" onclick="this.parentNode.remove()">Kapat</button>';
       document.body.appendChild(d);
       setTimeout(function(){ try{ var x = document.getElementById('bm-kacirilan-toast'); if (x) x.remove(); }catch(_e){} }, 12000);
     }catch(_e){}
@@ -30192,6 +30541,7 @@ syncBaslat();
   if (typeof window !== 'undefined') {
     setTimeout(function(){
       window._bmUpdateHeaderH();
+      try { if(window._bmKromKur) window._bmKromKur(); if(window._bmKlvCubukKur) window._bmKlvCubukKur(); } catch(_bj2){}   /* SPRINT BJ2-2/3 */
       try {
         if (window.ResizeObserver && !window._bmHeaderObs) {
           window._bmHeaderObs = new ResizeObserver(function(){ window._bmUpdateHeaderH(); });
