@@ -1075,9 +1075,64 @@ const CASELER = [
       __REG.ok('15 tag render edildi (? teşhis düğmeleri)', (h.split('bmOffTeshis(').length - 1) === 15, String(h.split('bmOffTeshis(').length - 1));
       __REG.ok('eski 8 + yeni 6 etiket mevcut', /_tOffLbl_diacetyl/.test(h) && /_tOffLbl_solvent/.test(h) && /_tOffLbl_sulfur/.test(h) && /_tOffLbl_phenolic/.test(h) && /_tOffLbl_infection/.test(h));
       __REG.ok('yeni tag TR adları render', /Kükürt/.test(h) && /Klorofenol/.test(h) && /Fenolik-baharat/.test(h));
-      __REG.ok('geriye-uyumlu delta: eski oturum (yalnız eski kod) → ÇÖZÜLDÜ Diacetyl', /çözüldü:[^<]*Diacetyl/.test(h));
-      __REG.ok('delta YENİ kodu kapsıyor: yeni Kükürt', /yeni:[^<]*Kükürt/.test(h));
+      /* SPRINT BN — DİL DÜZELDİ, bu iddialar da onunla güncellendi.
+         Eski hâli "çözüldü:" / "yeni:" arıyordu; o etiketler kanıtın ötesinde iddiaydı
+         (işaretsizlik = kusur yok DEĞİL; kullanıcı off bölümüne bakmamış olabilir).
+         Bu vaka eski dili DONDURUYORDU — düzeltme onu kırdı, doğrusu bu. */
+      __REG.ok('geriye-uyumlu delta: önceki oturumda işaretli Diacetyl, şimdi işaretsiz → "işaretlenmedi" dili', /bu oturumda işaretlenmedi:[^<]*Diacetyl/.test(h));
+      __REG.ok('delta YENİ kodu kapsıyor: Kükürt "bu oturumda işaretlendi"', /bu oturumda işaretlendi:[^<]*Kükürt/.test(h));
+      __REG.ok('BN: "çözüldü" iddiası ARTIK YOK (kanıt yetersizdi)', h.indexOf('çözüldü') === -1);
       __REG.ok('eski offList render çökmedi (undefined tag yok)', h.indexOf('_tOffLbl_undefined') === -1);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BN-DELTA-DIL', ad: 'AG oturum delta dili kanıta uygun: işaretsizlik "çözüldü" sayılmaz, işaretlilik uyarı kalır',
+    calistir: (page) => page.evaluate(() => {
+      const id = __REG.yeniKayit('REGTEST BN-DELTA', {
+        brewLog: [{ id: 'bns', ts: 1000, tip: 'siseleme', tarih: '2026-06-01' }],
+        tadim: {
+          aroma: 8, gorunum: 2, tat: 14, agizH: 4, genel: 7, offList: {},
+          oturumlar: [
+            // 1. oturum: diacetyl İŞARETLİ
+            { tarih: '2026-06-01', aroma: 6, gorunum: 2, tat: 10, agizH: 3, genel: 5, toplam: 26, offList: { diacetyl: true } },
+            // 2. oturum: diacetyl İŞARETSİZ (bakılmadı mı, yok mu — BİLİNMİYOR) + DMS yeni işaretli
+            { tarih: '2026-06-15', aroma: 8, gorunum: 2, tat: 14, agizH: 4, genel: 7, toplam: 35, offList: { DMS: true } }
+          ]
+        }
+      });
+      tarifAc(id);
+      const h = rEditorNot();
+      // (a) ZAYIF KANIT — işaretsizlik "çözüldü" diye SATILMAZ
+      __REG.ok('a1: "çözüldü" iddiası YOK', h.indexOf('çözüldü') === -1);
+      __REG.ok('a2: dürüst dil kullanılıyor', /bu oturumda işaretlenmedi:[^<]*Diacetyl/.test(h));
+      __REG.ok('a3: başarı yeşili (--yk) ile sunulmuyor — nötr renk', !/color:var\(--yk\)">◦ bu oturumda işaretlenmedi/.test(h));
+      __REG.ok('a4: itiraf notu var ("yok demek değil")', h.indexOf('yok demek değil') >= 0);
+      // (b) GÜÇLÜ KANIT — kullanıcı AKTİF işaretledi, uyarı korunur
+      __REG.ok('b1: işaretli kusur bildiriliyor', /bu oturumda işaretlendi:[^<]*DMS/.test(h));
+      __REG.ok('b2: uyarı rengi (--kk) korunuyor', /color:var\(--kk\)">⚠️ bu oturumda işaretlendi/.test(h));
+      __REG.ok('b3: "yeni" sözcüğü (kanıtsız kısım) kaldırıldı', !/⚠️ yeni:/.test(h));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BN-DELTA-SESSIZ', ad: 'AG delta: hiç off işaretlenmemiş iki oturumda ne "çözüldü" ne "işaretlenmedi" satırı çıkar',
+    calistir: (page) => page.evaluate(() => {
+      const id = __REG.yeniKayit('REGTEST BN-SESSIZ', {
+        brewLog: [{ id: 'bns2', ts: 1000, tip: 'siseleme', tarih: '2026-06-01' }],
+        tadim: {
+          aroma: 8, gorunum: 2, tat: 14, agizH: 4, genel: 7, offList: {},
+          oturumlar: [
+            { tarih: '2026-06-01', aroma: 6, gorunum: 2, tat: 10, agizH: 3, genel: 5, toplam: 26, offList: {} },
+            { tarih: '2026-06-15', aroma: 8, gorunum: 2, tat: 14, agizH: 4, genel: 7, toplam: 35, offList: {} }
+          ]
+        }
+      });
+      tarifAc(id);
+      const h = rEditorNot();
+      __REG.ok('delta kartı çiziliyor (iki oturum var)', h.indexOf('SON İKİ OTURUM') >= 0);
+      __REG.ok('off satırı hiç çıkmıyor — uydurma yok', h.indexOf('bu oturumda işaretlenmedi') === -1 && h.indexOf('bu oturumda işaretlendi') === -1);
+      __REG.ok('itiraf notu da çıkmıyor (gürültü yapmaz)', h.indexOf('yok demek değil') === -1);
       return __REG.al();
     })
   },

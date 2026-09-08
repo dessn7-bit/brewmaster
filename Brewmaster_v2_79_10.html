@@ -16950,8 +16950,16 @@ function rEditorNot(){
       var _tD=_last.toplam-_prev.toplam;
       var _tRenk=_tD>0?'var(--yk)':_tD<0?'var(--kk)':'var(--soluk)', _tOk=_tD>0?'↑':_tD<0?'↓':'=';
       var _pOff=_prev.offList||{}, _lOff=_last.offList||{};
-      var _cozulen=Object.keys(_pOff).filter(function(k){return _pOff[k]&&!_lOff[k];}).map(function(k){return _tOffAd[k]||k;});
-      var _yeni=Object.keys(_lOff).filter(function(k){return _lOff[k]&&!_pOff[k];}).map(function(k){return _tOffAd[k]||k;});
+      /* SPRINT BN — KANIT GÜCÜ: bu iki liste AYNI güçte DEĞİL.
+         _isaretsizKalan: önceki oturumda işaretliydi, bu oturumda DEĞİL. İşaretsizlik
+         "kusur yok" demek DEĞİL — kullanıcı off-flavor bölümüne hiç bakmamış olabilir
+         (oturum kaydı yalnız ≥1 PUAN ister, off incelemesi ZORUNLU değil). Eski etiket
+         "✓ çözüldü" kanıtın ötesinde iddiaydı. AJ/AN dil disiplini: "gösterilemedi" ≠ "yok".
+         _yeniIsaretli: bu oturumda AKTİF olarak işaretlendi — varlık kanıtı GÜÇLÜ; zayıf olan
+         yalnız "yeni" sözcüğü (öncekinde işaretsizlik, yokluk kanıtı değil). Bu yüzden uyarı
+         rengi korunur, yalnız "yeni" → "bu oturumda işaretlendi" olur. */
+      var _isaretsizKalan=Object.keys(_pOff).filter(function(k){return _pOff[k]&&!_lOff[k];}).map(function(k){return _tOffAd[k]||k;});
+      var _yeniIsaretli=Object.keys(_lOff).filter(function(k){return _lOff[k]&&!_pOff[k];}).map(function(k){return _tOffAd[k]||k;});
       _deltaKart='<div style="background:#fff;border:1px solid var(--bor);border-left:3px solid var(--vintage);border-radius:8px;padding:10px;margin-bottom:8px">'
         +'<div style="font-size:var(--fs-xs);font-weight:700;color:var(--kahve);letter-spacing:.4px;margin-bottom:6px">📊 SON İKİ OTURUM: '+_ddmm(_prev.tarih)+' → '+_ddmm(_last.tarih)+'</div>'
         +'<div style="font-size:var(--fs-xs);color:var(--kahve);margin-bottom:4px">Toplam '+_prev.toplam+'/50 → <b>'+_last.toplam+'/50</b> <span style="color:'+_tRenk+';font-weight:700">'+_tOk+(_tD!==0?Math.abs(_tD):'')+'</span></div>'
@@ -16962,9 +16970,10 @@ function rEditorNot(){
           +_eksenSat('Ağız',_prev.agizH,_last.agizH)+'<br>'
           +_eksenSat('Genel',_prev.genel,_last.genel)
         +'</div>'
-        +((_cozulen.length||_yeni.length)?'<div style="font-size:var(--fs-xs);margin-top:6px;line-height:1.6">'
-          +(_cozulen.length?'<span style="color:var(--yk)">✓ çözüldü: '+_cozulen.join(', ')+'</span>'+(_yeni.length?'<br>':''):'')
-          +(_yeni.length?'<span style="color:var(--kk)">⚠️ yeni: '+_yeni.join(', ')+'</span>':'')
+        +((_isaretsizKalan.length||_yeniIsaretli.length)?'<div style="font-size:var(--fs-xs);margin-top:6px;line-height:1.6">'
+          +(_isaretsizKalan.length?'<span style="color:var(--soluk)">◦ bu oturumda işaretlenmedi: '+_isaretsizKalan.join(', ')+'</span>'+(_yeniIsaretli.length?'<br>':''):'')
+          +(_yeniIsaretli.length?'<span style="color:var(--kk)">⚠️ bu oturumda işaretlendi: '+_yeniIsaretli.join(', ')+'</span>':'')
+          +(_isaretsizKalan.length?'<div style="color:var(--dim);font-style:italic;margin-top:3px">İşaretlenmemiş olması yok demek değil — o oturumda bakılmamış da olabilir.</div>':'')
         +'</div>':'')
         +(_oc.length>=3?'<div style="font-size:var(--fs-xs);color:var(--soluk);margin-top:6px;padding-top:6px;border-top:1px solid var(--bor)">Toplam seyri: '+_oc.map(function(o){return o.toplam;}).join(' → ')+'</div>':'')
       +'</div>';
