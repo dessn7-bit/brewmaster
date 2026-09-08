@@ -732,7 +732,8 @@
 // HTML degisti (Sprint BE5) -> KURAL 12.3 CACHE_VERSION bump v131-420 -> v131-421.
 // HTML degisti (Sprint BF) -> KURAL 12.3 CACHE_VERSION bump v131-421 -> v131-422.
 // HTML degisti (Sprint BG) -> KURAL 12.3 CACHE_VERSION bump v131-422 -> v131-423.
-const CACHE_VERSION='bm-cache-v131-426';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
+// HTML degisti (Sprint BL: SW otomatik guncelleme) -> CACHE_VERSION bump v131-426 -> v131-427.
+const CACHE_VERSION='bm-cache-v131-427';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
 const ASSET_CACHE   = 'bm-assets-v1';        // font + ikon + manifest — KALICI, bump'ta silinmez
 const MODEL_CACHE   = 'bm-models-v1';        // workers.dev + jsdelivr — SHA'li/immutable URL, KALICI
 
@@ -999,6 +1000,8 @@ self.addEventListener('notificationclick', function(event) {
 
 // Faz 2 debug: aktif SW surumu + son push izi sorgusu (BM_DIAG)
 self.addEventListener('message', function(event){
+  // Sprint BL: istemci 'yeni surum hazir' gorup itelerse waiting'ten cik (yedek kol).
+  if(event.data && event.data.type==='SKIP_WAITING'){ try{ self.skipWaiting(); }catch(_s){} return; }
   if(event.data && event.data.type==='BM_DIAG' && event.ports && event.ports[0]){
     event.waitUntil((async function(){
       var lp='(hic push yok)', le='';

@@ -31848,18 +31848,139 @@ syncBaslat();
      Kaan F12 retest install hic tetiklenmedi (browser sw.js'i HTTP cache'ten okudu, yeni indirmedi).
      Bu iki ayar her load'da sw.js'i network'ten fresh fetch + zorla update check. -->
 <script id="bm-sw-register">
+// Sprint BL — SW OTOMATIK GUNCELLEME (v131-427)
+// TESHIS (neden Kaan elle 'SW sifirla' basmak zorunda kaliyordu):
+//  1) reg.update() SADECE window 'load' aninda bir kez calisiyordu. Android PWA/WebView
+//     surecleri cogu zaman COLD START yapmaz, RESUME eder: uygulama kartini kapatip acmak
+//     mevcut sayfayi bellekten geri yukler -> yeni navigation YOK -> 'load' YOK -> update() YOK.
+//     Sayfa gunlerce yasayabilir ve hicbir guncelleme kontrolu yapilmaz.
+//  2) controllerchange/updatefound dinleyicisi HIC YOKTU (grep 0). sw.js zaten skipWaiting +
+//     clients.claim yapiyor, yani yeni SW devraliyordu — ama sayfa YENILENMEDIGI icin kullanici
+//     eski HTML/JS ile kalmaya devam ediyordu. Kullaniciya bildirim de yoktu.
+//  3) Tek cikis yolu Ayarlar > 'SW sifirla' idi; o buton TUM cache'leri siler (Sprint Y'nin
+//     kalici ~113MB model cache'i dahil) ve bm_push_sub'i siler -> push aboneligi olur.
+// COZUM: resume/focus/periyodik update kontrolu + controllerchange'de KORUMALI otomatik yenileme,
+// guvenli degilse ust banner. Reload firtinasi ve veri kaybi acikca engellendi.
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function(){
-    navigator.serviceWorker.register('sw.js', { scope: './', updateViaCache: 'none' })
-      .then(function(reg){
-        console.log('%c[BM SW] registered','background:#1976D2;color:#fff;padding:2px 6px;font-weight:700;', 'scope=' + reg.scope + ' (updateViaCache=none)');
-        // Adim 123-fix-2: Force update check (HTTP cache bypass + fresh sw.js fetch)
-        reg.update().catch(function(){});
-      })
-      .catch(function(err){
-        console.warn('[BM SW] register fail:', err && err.message);
-      });
-  });
+  (function(){
+    // Sayfa acilisinda controller VAR MIYDI? Yoksa bu ilk kurulumdur -> asla reload etme.
+    var _ilkCtrl = !!navigator.serviceWorker.controller;
+    var _reg = null, _sonKontrol = 0, _yenilendi = false;
+
+    // ── VERI KORUMA (AQ1/AU1 kalicilik disiplini): acik is varken ZORLA yenileme YOK ──
+    function _guvenliMi(){
+      try{
+        if (window._brewday && window._brewday.aktif) return false;      // brewday suruyor
+        if (window._brewday && window._brewday.timerInt) return false;   // brewday timer donuyor
+        if (window._brewTimerInt) return false;                          // kaynatma timer donuyor
+        if (document.querySelector('.brewday-modal')) return false;      // acik brewday modali
+        if (document.querySelector('[role="dialog"]')) return false;     // herhangi acik dialog
+        var ae = document.activeElement;                                 // kullanici yaziyor
+        if (ae && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName || '')) return false;
+        if (typeof ekran !== 'undefined' && ekran === 'editor') return false; // recete editoru acik
+      }catch(_e){ return false; }   // supheye dusersen YENILEME (guvenli taraf)
+      return true;
+    }
+
+    // ── RELOAD FIRTINASI KALKANI (AZ5 dersi: modal firtinasi -> burada reload firtinasi) ──
+    // sessionStorage reload'lar arasi yasar: 60sn icinde ikinci reload YOK, oturum basina en fazla 3.
+    function _stormOk(){
+      try{
+        var son = +(sessionStorage.getItem('bm_sw_reload_ts') || 0);
+        var n   = +(sessionStorage.getItem('bm_sw_reload_n')  || 0);
+        if (Date.now() - son < 60000) return false;
+        if (n >= 3) return false;
+      }catch(_e){ return false; }
+      return true;
+    }
+    function _stormIsaretle(){
+      try{
+        sessionStorage.setItem('bm_sw_reload_ts', String(Date.now()));
+        sessionStorage.setItem('bm_sw_reload_n', String((+(sessionStorage.getItem('bm_sw_reload_n')||0)) + 1));
+      }catch(_e){}
+    }
+
+    // ── Guvenli degilken: engellemeyen UST banner (alt cubuk/BJ2 klavye-ustu Kaydet'i ORTMEZ) ──
+    function _bannerGoster(){
+      if (document.getElementById('bmYeniSurumBar')) return;
+      var d = document.createElement('div');
+      d.id = 'bmYeniSurumBar';
+      d.setAttribute('role','status');
+      d.style.cssText = 'position:fixed;left:12px;right:12px;top:calc(env(safe-area-inset-top,0px) + 12px);'+
+        'z-index:99999;background:#1976D2;color:#fff;border-radius:12px;padding:10px 12px;'+
+        'display:flex;align-items:center;gap:10px;box-shadow:0 6px 20px rgba(0,0,0,.28);'+
+        'font-size:13px;font-weight:600';
+      d.innerHTML = '<span style="flex:1">\uD83D\uDD04 Yeni s\u00FCr\u00FCm haz\u0131r</span>'+
+        '<button id="bmYeniSurumYenile" style="min-height:44px;background:#fff;color:#1976D2;border:none;'+
+        'border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer">Yenile</button>'+
+        '<button id="bmYeniSurumKapat" aria-label="Kapat" style="min-height:44px;min-width:44px;'+
+        'background:transparent;color:#fff;border:none;font-size:20px;line-height:1;cursor:pointer">\u00D7</button>';
+      document.body.appendChild(d);
+      var by = document.getElementById('bmYeniSurumYenile');
+      var bk = document.getElementById('bmYeniSurumKapat');
+      if (by) by.onclick = function(){ _stormIsaretle(); _yenilendi = true; location.reload(); };
+      if (bk) bk.onclick = function(){ try{ d.remove(); }catch(_e){} };
+    }
+
+    // ── Yeni SW devraldi: yenile ya da bildir ──
+    function _devralindi(){
+      if (!_ilkCtrl) { console.log('[BM SW] ilk kurulum — reload yok'); return; }
+      if (_yenilendi) return;                       // sayfa omru boyunca en fazla bir kez
+      // Soguk acilis: HTML zaten network-first ile TAZE geldi; sadece SW surumu yetisti.
+      // Bu durumda reload GEREKSIZ olur -> sayfa yasi kisaysa sessizce gec.
+      var yas; try{ yas = performance.now(); }catch(_e){ yas = 999999; }
+      if (yas < 15000) { console.log('[BM SW] yeni SW devraldi, HTML zaten taze (' + Math.round(yas) + 'ms) — reload yok'); return; }
+      if (_guvenliMi() && _stormOk()) {
+        _yenilendi = true; _stormIsaretle();
+        console.log('[BM SW] yeni surum — otomatik yenileniyor');
+        location.reload();
+      } else {
+        console.log('[BM SW] yeni surum hazir ama acik is/kalkan var — banner gosteriliyor');
+        _bannerGoster();
+      }
+    }
+    navigator.serviceWorker.addEventListener('controllerchange', _devralindi);
+
+    // ── Guncelleme kontrolu: acilis + RESUME + focus + periyodik (60sn throttle) ──
+    function _kontrolEt(){
+      if (!_reg) return;
+      var t = Date.now();
+      if (t - _sonKontrol < 60000) return;
+      _sonKontrol = t;
+      try{ _reg.update().catch(function(){}); }catch(_e){}
+    }
+    // Android PWA/WebView RESUME yolu — asil duzeltme bu satir.
+    document.addEventListener('visibilitychange', function(){
+      if (document.visibilityState === 'visible') _kontrolEt();
+    });
+    window.addEventListener('focus', _kontrolEt);
+    window.addEventListener('pageshow', _kontrolEt);   // bfcache'ten geri donus
+    setInterval(function(){ if (document.visibilityState === 'visible') _kontrolEt(); }, 15*60*1000);
+
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('sw.js', { scope: './', updateViaCache: 'none' })
+        .then(function(reg){
+          _reg = reg;
+          console.log('%c[BM SW] registered','background:#1976D2;color:#fff;padding:2px 6px;font-weight:700;', 'scope=' + reg.scope + ' (updateViaCache=none)');
+          reg.addEventListener('updatefound', function(){
+            var nw = reg.installing;
+            if (!nw) return;
+            console.log('[BM SW] yeni surum indiriliyor...');
+            nw.addEventListener('statechange', function(){
+              // sw.js skipWaiting yapiyor; yine de 'waiting'te takilirsa iteleyelim.
+              if (nw.state === 'installed' && reg.waiting && navigator.serviceWorker.controller) {
+                try{ reg.waiting.postMessage({ type: 'SKIP_WAITING' }); }catch(_e){}
+              }
+            });
+          });
+          _sonKontrol = Date.now();
+          reg.update().catch(function(){});
+        })
+        .catch(function(err){
+          console.warn('[BM SW] register fail:', err && err.message);
+        });
+    });
+  })();
 }
 </script>
 
