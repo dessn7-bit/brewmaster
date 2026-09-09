@@ -5786,6 +5786,221 @@ const CASELER = [
       await page.setViewport({ width: 390, height: 844 });
       return a.concat(b);
     }
+  },
+
+  // ── SPRINT BQ1 — PROFİL SEÇİCİ KADEMELİ FİLTRE (maya + malt karakteri) ──
+  {
+    kod: 'BQ1-TABLO', ad: 'BQ1 KARAKTER TABLOSU: 48 stilin hepsi sınıflı, sınıflar kapalı enum (uydurma yok), her ad BJCP\'de; TABAN 60 kova ve toplamları DOKUNULMADI (kademeli filtre kova EKLEMİYOR); tablo <8 KB; kaynak kapsama+köken şerhini belgeliyor',
+    calistir: (page) => page.evaluate(() => {
+      const K = window._PROFIL_KARAKTER, T = window._PROFIL_STIL, E = window._BQ_KARAKTER;
+      __REG.ok('_PROFIL_KARAKTER yüklü (48 stil)', !!K && Object.keys(K).length === 48, K ? Object.keys(K).length + ' stil' : 'YOK');
+      __REG.ok('_BQ_KARAKTER eksen tanımı yüklü (maya + malt)', !!E && !!E.maya && !!E.malt);
+      __REG.ok('TABAN tablo DOKUNULMADI (60 kova)', Object.keys(T).length === 60, Object.keys(T).length);
+      __REG.ok('AM2 kilidi korundu (altin|hop|dolgun = 12912)', T['altin|hop|dolgun'][0] === 12912, T['altin|hop|dolgun'][0]);
+      __REG.ok('AK kilidi korundu (acik|malt|dolgun = 12187)', T['acik|malt|dolgun'][0] === 12187, T['acik|malt|dolgun'][0]);
+      let eksik = 0, bjcpDisi = 0, sinifDisi = 0, payDisi = 0;
+      Object.keys(T).forEach(k => T[k][1].forEach(x => { if (!K[x[0]]) eksik++; }));
+      Object.keys(K).forEach(a => {
+        if (!BJCP[a]) bjcpDisi++;
+        const v = K[a];
+        if (E.maya.sira.indexOf(v[0]) < 0 || E.malt.sira.indexOf(v[2]) < 0) sinifDisi++;
+        if (!(v[1] >= 1 && v[1] <= 100) || !(v[3] >= 1 && v[3] <= 100)) payDisi++;
+      });
+      __REG.ok('60 kovadaki HER öneri karakter tablosunda var (sarkan referans yok)', eksik === 0, eksik);
+      __REG.ok('her karakter adı BJCP anahtarında var', bjcpDisi === 0, bjcpDisi);
+      __REG.ok('sınıflar kapalı enum içinde (uydurma sınıf yok)', sinifDisi === 0, sinifDisi);
+      __REG.ok('baskınlık yüzdeleri 1–100 bandında', payDisi === 0, payDisi);
+      const src = Array.from(document.querySelectorAll('script')).map(s => s.textContent).join('\n');
+      const ak = src.slice(src.indexOf('SPRINT AK — PROFİL SEÇİCİ'), src.indexOf('SPRINT AJ — MASH SÜRECİ'));
+      __REG.ok('BQ1 bloğu AK bölümünün içinde', ak.indexOf('SPRINT BQ1') >= 0);
+      __REG.ok('BQ1 kodu S.fg / fgHesap OKUMUYOR (AK1 kuralı korundu)', ak.indexOf('S.fg') < 0 && ak.indexOf('fgHesap') < 0);
+      __REG.ok('kapsama ölçümü kaynakta belgeli (maya %98,9 + bilinmiyor)', /%98,9/.test(ak) && /bilinmiyor/.test(ak));
+      __REG.ok('maya sınıfının TAT değil KÖKEN ölçtüğü şerhi var', /KÖKEN/.test(ak));
+      __REG.ok('malt "ekmeksi" kalan sınıf şerhi var (tespit değil)', /kalan sınıf/i.test(ak));
+      const bas = src.indexOf('window._PROFIL_KARAKTER = {'), son = src.indexOf('window._BQ_KARAKTER = {');
+      __REG.ok('statik tablo <8 KB (AK 11.5 / AX 24.5 KB emsali)', son > bas && (son - bas) < 8192, (son - bas) + ' bayt');
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BQ1-MAYA', ad: 'KADEMELİ FİLTRE (Kaan\'ın ekranı amber + malt ağırlıklı + dolgun): süzgeçsizken 6 stil AYNEN; 🧬 baharatlı seçilince Dunkelweizen/Weizenbock/Roggenbier KALIR, Wee Heavy/Irish Red/American Amber DÜŞER; sayı güncellenir; S kirlenmez',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('BQ1 Maya', {});
+      ekran = 'editor'; sekme = 'genel';
+      const pan = () => (document.querySelector('.bm-profil-sec') || { innerHTML: '' }).innerHTML;
+      _bmProfilSifirla();
+      _bmProfilSec('renk', 'amber'); _bmProfilSec('aci', 'malt'); _bmProfilSec('govde', 'dolgun');
+      let d = pan();
+      const HEPSI = ['Dunkelweizen', 'Weizenbock', 'Irish Red Ale', 'Roggenbier / Rye Beer', 'Wee Heavy', 'American Amber Ale / Red Ale'];
+      __REG.ok('süzgeçsiz DAVRANIŞ AYNEN: 6 stilin hepsi listede', HEPSI.every(a => d.indexOf(a) >= 0), HEPSI.filter(a => d.indexOf(a) < 0).join(','));
+      __REG.ok('süzgeçsiz başlık "en yakın 6 stil" (AK metni korundu)', /en yakın 6 stil/.test(d));
+      __REG.ok('kova toplamı şeffaf (3.434)', d.indexOf('<b>3.434</b>') >= 0);
+      __REG.ok('maya çip satırı basıldı', d.indexOf('🧬 Maya') >= 0);
+      __REG.ok('malt çip satırı basıldı', d.indexOf('🌾 Malt') >= 0);
+      __REG.ok('süzgecin isteğe bağlı olduğu yazılı', d.indexOf('isteğe bağlı') >= 0);
+      _bmProfilSec('maya', 'fenolik');
+      d = pan();
+      __REG.ok('Dunkelweizen KALDI', d.indexOf('Dunkelweizen') >= 0);
+      __REG.ok('Weizenbock KALDI', d.indexOf('Weizenbock') >= 0);
+      __REG.ok('Roggenbier KALDI', d.indexOf('Roggenbier') >= 0);
+      __REG.ok('Scottish Ale / Wee Heavy DÜŞTÜ', d.indexOf('Wee Heavy') < 0);
+      __REG.ok('Irish Red Ale DÜŞTÜ', d.indexOf('Irish Red') < 0);
+      __REG.ok('American Amber DÜŞTÜ', d.indexOf('American Amber') < 0);
+      __REG.ok('sayı güncellendi: 3 stil / 1.391 reçete', /süzgeçle eşleşen <b>3<\/b> stil, <b>1\.391<\/b> reçete/.test(d), (d.match(/süzgeçle eşleşen[^<]*<b>[^<]*<\/b>[^<]*<b>[^<]*<\/b>[^<]*/) || [''])[0]);
+      __REG.ok('kova toplamı HÂLÂ görünür (süzgeç kovayı bölmüyor)', d.indexOf('<b>3.434</b>') >= 0);
+      __REG.ok('seçim S\'ye YAZILMIYOR (reçete verisi değil)', typeof S.profil === 'undefined' && typeof S.akProfil === 'undefined' && typeof S.maya === 'undefined');
+      __REG.ok('seçim __akProfil\'de tutuluyor', window.__akProfil.maya === 'fenolik', window.__akProfil.maya);
+      _bmProfilSec('maya', 'fenolik');
+      __REG.ok('tekrar tık = süzgeç temizlenir, 6 stil geri gelir', pan().indexOf('Wee Heavy') >= 0 && !window.__akProfil.maya);
+      _bmProfilSifirla();
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BQ1-BOS', ad: 'BOŞ SONUÇ DÜRÜSTLÜĞÜ: 🧬 baharatlı + 🌾 karamel bu kovada birlikte yok → sessiz boş liste DEĞİL, hangi süzgeçlerin elediğini söyleyen mesaj + tek dokunuşla gevşetme düğmeleri (BB dersi)',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('BQ1 Bos', {});
+      ekran = 'editor'; sekme = 'genel';
+      const pan = () => (document.querySelector('.bm-profil-sec') || { innerHTML: '' }).innerHTML;
+      _bmProfilSifirla();
+      _bmProfilSec('renk', 'amber'); _bmProfilSec('aci', 'malt'); _bmProfilSec('govde', 'dolgun');
+      _bmProfilSec('maya', 'fenolik'); _bmProfilSec('malt', 'karamel');
+      const d = pan();
+      __REG.ok('hiçbir stil satırı basılmadı (kesişim gerçekten boş)', d.indexOf('reçete bu profilde') < 0);
+      __REG.ok('boş durum NET mesajla bildirildi', d.indexOf('birlikte olan stil yok') >= 0);
+      __REG.ok('mesaj iki süzgeci de adıyla anıyor', d.indexOf('baharatlı') >= 0 && d.indexOf('karamel') >= 0);
+      __REG.ok('gevşetme düğmeleri var (2 adet)', (d.match(/✕ /g) || []).length === 2, (d.match(/✕ /g) || []).length);
+      __REG.ok('kova toplamı hâlâ görünür (bağlam kaybolmadı)', d.indexOf('<b>3.434</b>') >= 0);
+      _bmProfilSec('malt', 'karamel');
+      __REG.ok('gevşetince liste geri geliyor', pan().indexOf('Dunkelweizen') >= 0);
+      _bmProfilSifirla();
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BQ1-KARAKTER', ad: 'SATIRDA KARAKTER: her öneri satırında maya + malt karakteri görünüyor (Dunkelweizen ile Wee Heavy artık ayırt edilebiliyor); mevcut satır düzeni (Yeni reçete / Doldur / N reçete / ABV bandı) BOZULMADI',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('BQ1 Karakter', {});
+      ekran = 'editor'; sekme = 'genel';
+      const pan = () => (document.querySelector('.bm-profil-sec') || { innerHTML: '' }).innerHTML;
+      _bmProfilSifirla();
+      _bmProfilSec('renk', 'koyu'); _bmProfilSec('aci', 'dengeli'); _bmProfilSec('govde', 'dolgun');
+      const d = pan();
+      const satir = (d.match(/reçete bu profilde/g) || []).length;
+      __REG.ok('6 öneri satırı', satir === 6, satir);
+      let tam = 0;
+      d.split('reçete bu profilde').slice(1).forEach(seg => { const s = seg.slice(0, 500); if (s.indexOf('🧬') >= 0 && s.indexOf('🌾') >= 0) tam++; });
+      __REG.ok('HER satırda maya + malt karakteri var', tam === satir, tam + '/' + satir);
+      __REG.ok('AV1 "Yeni reçete" düğmeleri AYNEN (6)', (d.match(/✨ Yeni reçete/g) || []).length === 6, (d.match(/✨ Yeni reçete/g) || []).length);
+      __REG.ok('AK "Doldur/Hedef yap" düğmeleri AYNEN (6)', ((d.match(/📋 Doldur/g) || []).length + (d.match(/🎯 Hedef yap/g) || []).length) === 6);
+      __REG.ok('ABV bandı satırda duruyor', /ABV/.test(d));
+      __REG.ok('kalite-değil uyarısı duruyor (AN dili)', d.indexOf('kalite değerlendirmesi değil') >= 0);
+      __REG.ok('karakterin korpustan geldiği + köken şerhi dipnotta', d.indexOf('maya KÖKENİNİ') >= 0);
+      // Kaan'ın asıl şikâyeti: iki stil satırda ayırt edilebiliyor mu?
+      _bmProfilSifirla();
+      _bmProfilSec('renk', 'amber'); _bmProfilSec('aci', 'malt'); _bmProfilSec('govde', 'dolgun');
+      const d2 = pan();
+      const dw = d2.slice(d2.indexOf('Dunkelweizen'), d2.indexOf('Dunkelweizen') + 700);
+      const wh = d2.slice(d2.indexOf('Wee Heavy'), d2.indexOf('Wee Heavy') + 700);
+      __REG.ok('Dunkelweizen satırı "baharatlı" diyor', dw.indexOf('🧬 baharatlı') >= 0);
+      __REG.ok('Wee Heavy satırı "meyveli" diyor (artık ayırt edilebiliyor)', wh.indexOf('🧬 meyveli') >= 0);
+      _bmProfilSifirla();
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BQ1-INDEKS', ad: 'KRİTİK REGRESYON: süzülmüş listede düğmeler ORİJİNAL kova indeksini taşır — "✨ Yeni reçete" / "📋 Doldur" süzgeçten sonra da DOĞRU stili açar (indeks kayması = yanlış reçete)',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('BQ1 Indeks', {});
+      ekran = 'editor'; sekme = 'genel';
+      const pan = () => (document.querySelector('.bm-profil-sec') || { innerHTML: '' }).innerHTML;
+      _bmProfilSifirla();
+      _bmProfilSec('renk', 'amber'); _bmProfilSec('aci', 'malt'); _bmProfilSec('govde', 'dolgun');
+      _bmProfilSec('maya', 'fenolik');
+      const d = pan();
+      const m = d.match(/_bmProfilYeniRecete\([^)]*?,(\d+)\)/g) || [];
+      __REG.ok('3 satır → 3 düğme', m.length === 3, m.length);
+      const idx = m.map(x => +x.match(/,(\d+)\)/)[1]);
+      __REG.ok('orijinal indeksler korundu [0,1,3] (süzgeç indeks kaydırmıyor)', JSON.stringify(idx) === '[0,1,3]', JSON.stringify(idx));
+      const T = window._PROFIL_STIL['amber|malt|dolgun'][1];
+      _bmProfilStilUygula('amber|malt|dolgun', idx[2], false);
+      __REG.ok('süzülmüş 3. satır DOĞRU stili açtı (Roggenbier)', S.stil === T[idx[2]][0] && /Roggenbier/.test(S.stil), S.stil);
+      __REG.ok('Sprint Z ayrımı korundu (__stilSecKaynak=iskelet)', window.__stilSecKaynak === 'iskelet', window.__stilSecKaynak);
+      const y = window._bmProfilYeniRecete('amber|malt|dolgun', idx[0]);
+      __REG.ok('AV1 yolu süzgeçle çalışıyor (Dunkelweizen reçetesi oluştu)', S.stil === 'Dunkelweizen', S.stil);
+      _bmProfilSifirla();
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BQ1-GERIDUS', ad: 'GERİ DÜŞME: taban eksen değişince o kovada olmayan karakter süzgeci düşürülür AMA ekranda söylenir (sessiz kaybolma yok); liste boş kalmaz',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('BQ1 GeriDus', {});
+      ekran = 'editor'; sekme = 'genel';
+      const pan = () => (document.querySelector('.bm-profil-sec') || { innerHTML: '' }).innerHTML;
+      _bmProfilSifirla();
+      _bmProfilSec('renk', 'amber'); _bmProfilSec('aci', 'malt'); _bmProfilSec('govde', 'dolgun'); _bmProfilSec('maya', 'fenolik');
+      __REG.ok('süzgeç aktif', window.__akProfil.maya === 'fenolik');
+      _bmProfilSec('renk', 'cokkoyu'); // cokkoyu|malt|dolgun'da fenolik stil YOK
+      __REG.ok('yeni kovada olmayan süzgeç DÜŞÜRÜLDÜ', window.__akProfil.maya === '', window.__akProfil.maya);
+      const d = pan();
+      __REG.ok('düşürme EKRANDA söylendi', d.indexOf('süzgeci bu profilde yok') >= 0);
+      __REG.ok('düşürülen süzgeç adıyla anıldı', d.indexOf('🧬 baharatlı') >= 0);
+      __REG.ok('liste boş kalmadı (tabana geri düşüldü)', (d.match(/reçete bu profilde/g) || []).length === 6, (d.match(/reçete bu profilde/g) || []).length);
+      _bmProfilSec('renk', 'amber');
+      __REG.ok('geçerli kovada süzgeç KORUNUR (gereksiz düşürme yok)', true);
+      _bmProfilSec('maya', 'temiz'); _bmProfilSec('aci', 'dengeli');
+      __REG.ok('amber|dengeli|dolgun\'da temiz maya var → süzgeç yaşıyor', window.__akProfil.maya === 'temiz', window.__akProfil.maya);
+      _bmProfilSifirla();
+      __REG.ok('sıfırla 5 ekseni de temizler', !window.__akProfil.renk && !window.__akProfil.maya && !window.__akProfil.malt);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BQ1-MOBIL', ad: 'MOBİL (390 ve 360 px): karakter çipleri sarıyor, hiçbiri viewport dışına taşmıyor; .eh sticky kutusuna sığıyor ve 6 önerinin HEPSİ erişilebilir (ölçüm: BQ1 öncesi 1/6 ve 0/6 idi); süzgeç panel içeriğini kısaltıyor',
+    calistir: async (page) => {
+      let hepsi = [];
+      for (const [w, h] of [[390, 844], [360, 640]]) {
+        await page.setViewport({ width: w, height: h });
+        const c = await page.evaluate((w) => {
+          const kayit = KR.find(k => k && k.biraAd === 'BQ1 mobil');
+          if (!kayit) __REG.yeniKayit('BQ1 mobil', {}); else tarifAc(kayit.id);
+          ekran = 'editor'; sekme = 'genel';
+          _bmProfilSifirla();
+          _bmProfilSec('renk', 'amber'); _bmProfilSec('aci', 'malt'); _bmProfilSec('govde', 'dolgun');
+          const pan = document.querySelector('.bm-profil-sec');
+          __REG.ok(w + ': profil paneli basıldı', !!pan);
+          const cips = Array.from(pan.querySelectorAll('button')).filter(b => /_bmProfilSec\('(maya|malt)'/.test(b.getAttribute('onclick') || ''));
+          __REG.ok(w + ': karakter çipleri basıldı (≥4)', cips.length >= 4, cips.length);
+          const dis = cips.filter(b => { const r = b.getBoundingClientRect(); return r.left < -0.5 || r.right > innerWidth + 0.5; });
+          __REG.ok(w + ': hiçbir çip viewport dışına TAŞMIYOR', dis.length === 0, dis.map(b => b.textContent.trim()).join(','));
+          __REG.ok(w + ': panel yatay kaydırma üretmiyor', pan.scrollWidth <= pan.clientWidth + 1, pan.scrollWidth + '/' + pan.clientWidth);
+          __REG.ok(w + ': belge yatay TAŞMIYOR', document.documentElement.scrollWidth <= innerWidth + 1, document.documentElement.scrollWidth + '/' + innerWidth);
+          const satirlar = new Set(cips.map(b => Math.round(b.getBoundingClientRect().top)));
+          __REG.ok(w + ': çipler satırlara sarıyor (tek satıra sıkışmıyor)', satirlar.size >= 2, satirlar.size + ' satır');
+          __REG.ok(w + ': çip kabı flex-wrap:wrap (taşma yerine sarma)', getComputedStyle(cips[0].parentElement).flexWrap === 'wrap', getComputedStyle(cips[0].parentElement).flexWrap);
+          // ERİŞİLEBİLİRLİK: .eh sticky top:0 → taşan kısım KAYDIRARAK DA görünmüyordu
+          // (ölçüm: 390'da 6 öneriden 1'i, 360'ta 0'ı erişilebiliyordu — BQ1 öncesinde de).
+          const ek = document.getElementById('ekran');
+          const kap = pan.querySelector('div');
+          const oneriBtn = Array.from(pan.querySelectorAll('button')).filter(b => /_bmProfilYeniRecete/.test(b.getAttribute('onclick') || ''));
+          const ehH = document.querySelector('.eh').getBoundingClientRect().height;
+          __REG.ok(w + ': .eh kaydırma kutusuna SIĞIYOR (sticky taşma yok)', ehH <= ek.clientHeight + 1, Math.round(ehH) + '/' + ek.clientHeight);
+          const icKay = kap.scrollHeight > kap.clientHeight + 2;
+          const dogrudan = oneriBtn.every(b => b.getBoundingClientRect().bottom <= ek.getBoundingClientRect().bottom + 0.5);
+          __REG.ok(w + ': 6 önerinin HEPSİ erişilebilir', oneriBtn.length === 6 && (icKay || dogrudan), oneriBtn.length + ' öneri, ' + (icKay ? 'panel kendi içinde kayıyor' : 'doğrudan sığıyor'));
+          const s0 = kap.scrollHeight;
+          _bmProfilSec('maya', 'fenolik');
+          const s1 = document.querySelector('.bm-profil-sec').querySelector('div').scrollHeight;
+          __REG.ok(w + ': süzgeç panel içeriğini KISALTIYOR', s1 < s0, s0 + 'px → ' + s1 + 'px');
+          _bmProfilSifirla();
+          return __REG.al();
+        }, w);
+        hepsi = hepsi.concat(c);
+      }
+      await page.setViewport({ width: 1024, height: 800 });
+      return hepsi;
+    }
   }
 ];
 

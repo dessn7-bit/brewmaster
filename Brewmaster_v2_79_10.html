@@ -288,6 +288,14 @@ input[type="checkbox"]:disabled,input[type="radio"]:disabled{opacity:.5;cursor:n
    Mockup: bg linear-gradient(180deg, #FFFFFF, #FCF9F3) + cizgi-arac border + padding sp-5 sp-5 sp-4.
    Sticky davranış INTACT. İçerik inline color literal'lar render JS'te ayrıca düzeltilir. */
 .eh{background:linear-gradient(180deg,#FFFFFF 0%,#FCF9F3 100%);padding:var(--sp-5) var(--sp-5) var(--sp-4);position:sticky;top:0;z-index:100;border:1px solid var(--cizgi-arac);border-top:none;border-radius:0 0 var(--r-md) var(--r-md);box-shadow:var(--elv-1)}
+/* SPRINT BQ1 — profil paneli .eh sticky basligin ICINDE (BQ kesfi tespiti).
+   OLCULDU (390x844 / 360x640 / 1024x800, gercek yedek): tavansiz panel .eh yi
+   1374 / 1388 / 841 px yapiyor, ama #ekran kaydirma kutusu 708 / 504 / 656 px ve
+   .eh position:sticky top:0 oldugu icin tasan kisim KAYDIRARAK DA GORUNMUYOR ->
+   6 oneriden 1 / 0 / 4 tanesi erisilebiliyordu (BQ1 oncesinde de boyleydi).
+   Cozum: paneli TASIMADAN (BQ-0 Kaan karari) panel govdesine kendi kaydirmasini
+   ver -> .eh her uc genislikte kaydirma kutusuna sigiyor, 6/6 oneri erisilebilir. */
+.bm-profil-sec>div{max-height:max(240px,calc(100vh - 400px));overflow-y:auto;overscroll-behavior:contain}
 .serit{margin-top:8px;padding:10px 12px;background:var(--bg2);border-radius:10px;border:1px solid var(--bor);display:flex;gap:14px;flex-wrap:wrap;align-items:center}
 .tk-k{background:#fff;border:1px solid var(--bor);border-top:none;margin:0 8px;border-radius:0 0 12px 12px;padding:14px}
 .pill{font-size:10px;background:var(--sa);color:var(--sk);border-radius:4px;padding:1px 7px;font-weight:600;border:1px solid #C8B070;display:inline-block}
@@ -26811,19 +26819,170 @@ window._AK_EKSEN = {
   govde: { ad:'Gövde',  ikon:'🥛', secenekler:[['ince','İnce'],['orta','Orta'],['dolgun','Dolgun']] }
 };
 
+// ═══ SPRINT BQ1 — KADEMELİ FİLTRE: MAYA + MALT KARAKTERİ ═══════════════════
+// Kaan: "istediğim bira kriterleri bunlar mı, gerçekten bu kadar az seçenekten
+// mi karar veriliyor?" — 3 eksen 60 kova üretiyor, kovaların top-1 saflığı %28,5.
+// BQ keşfi (2026-09-09) ölçtü: MAYA karakteri tek başına gövde ekseninin 3 katı
+// ayırt edici (0,480 bit vs 0,157). AMA kova matematiği kesin: 4./5. eksen KOVAYA
+// EKLENEMEZ (+2 eksende seyrek hücre %16–31, boş öneri listesi ≥%40). Bu yüzden
+// burada kova BÖLÜNMEZ: 60 kova ve toplamları AYNEN kalır (AK1/AM1/AM2/AV1
+// kilitleri kırılmaz); karakter yalnız SONUÇ LİSTESİNİ süzer.
+//
+// TABLO: her stil için korpustaki BASKIN sınıf + baskınlık yüzdesi.
+//   [mayaSınıfı, mayaBaskınlık%, maltSınıfı, maltBaskınlık%]
+// Üretici: _bq1_build_karakter.js (repo kökü) — korpus 336.241 geçerli reçete.
+// Kapsama (ölçüldü): maya %98,9 sınıflandı (3.717 jenerik kuru maya = bilinmiyor),
+// malt %100,0 (grist deterministik; grist hiç olmayan 5 kayıt = bilinmiyor).
+// Eşikler UYDURULMADI — BQ keşfinin doğrulanmış sınıflandırıcıları:
+//   kavrulmuş = kavrulmuş+çikolata malt ≥%3 (çikolata baskınsa "çikolata")
+//   isli = isli malt >%5 · karamel = crystal ≥%8 · tost = Münih+Viyana+aromatik ≥%20
+//   ekmeksi = KALAN (bir tespit değil, hiçbir eşiği geçmeyen grist)
+// ŞERH (BQ Eksen 2, doğrulayıcı): maya sınıfları TAT değil MAYA KÖKENİ ölçer —
+// korpusta duyusal veri yok. Baskınlık %40 altındaysa satırda soluk "?" ile
+// gösterilir (o stilde karakter korpusta karışık).
+window._PROFIL_KARAKTER = {
+  "Altbier / Düsseldorf Altbier":["temiz",90,"tost",52],
+  "American Amber Ale / Red Ale":["temiz",71,"karamel",46],
+  "American Barleywine":["temiz",64,"ekmeksi",64],
+  "American Brown Ale":["temiz",52,"cikolata",47],
+  "American IPA":["temiz",77,"ekmeksi",65],
+  "American Lager / Light Lager":["temiz",82,"ekmeksi",72],
+  "American Pale Ale":["temiz",76,"ekmeksi",65],
+  "American Stout":["temiz",48,"kavrulmus",56],
+  "American Wheat Beer":["temiz",55,"ekmeksi",86],
+  "Baltic Porter":["temiz",52,"cikolata",44],
+  "Belgian Blonde Ale":["fenolik",86,"ekmeksi",74],
+  "Belgian Dark Strong Ale":["fenolik",94,"ekmeksi",66],
+  "Belgian Strong Golden Ale":["fenolik",92,"ekmeksi",92],
+  "Berliner Weisse":["eksi",53,"ekmeksi",95],
+  "Best Bitter":["esterli",87,"ekmeksi",62],
+  "Black IPA / Cascadian Dark Ale":["temiz",77,"ekmeksi",33],
+  "Blonde Ale / Cream Ale":["temiz",73,"ekmeksi",81],
+  "Bock":["temiz",91,"tost",59],
+  "Brown Porter":["esterli",70,"cikolata",59],
+  "Doppelbock":["temiz",88,"tost",60],
+  "Dry Irish Stout":["esterli",77,"kavrulmus",82],
+  "Dubbel":["fenolik",94,"ekmeksi",63],
+  "Dunkelweizen":["fenolik",90,"tost",38],
+  "English Brown Ale":["esterli",87,"cikolata",31],
+  "English IPA":["esterli",70,"ekmeksi",63],
+  "English Mild / Dark Mild":["esterli",86,"cikolata",44],
+  "Flanders Red Ale":["eksi",75,"tost",53],
+  "Foreign Extra Stout":["esterli",68,"kavrulmus",67],
+  "German Pils":["temiz",94,"ekmeksi",87],
+  "Imperial / Russian Imperial Stout":["temiz",47,"kavrulmus",60],
+  "Imperial IPA / DIPA":["temiz",77,"ekmeksi",69],
+  "Irish Red Ale":["esterli",71,"karamel",39],
+  "Kölsch":["temiz",94,"ekmeksi",87],
+  "Milk Stout / Sweet Stout":["esterli",68,"kavrulmus",49],
+  "Munich Märzen / Oktoberfest":["temiz",90,"tost",68],
+  "Oatmeal Stout":["esterli",76,"kavrulmus",51],
+  "Robust Porter":["esterli",62,"cikolata",62],
+  "Roggenbier / Rye Beer":["fenolik",69,"ekmeksi",42],
+  "Saison / Farmhouse Ale":["fenolik",88,"ekmeksi",79],
+  "Schwarzbier":["temiz",93,"cikolata",23],
+  "Scottish Ale / 80 Shilling":["esterli",82,"ekmeksi",38],
+  "Scottish Ale / Wee Heavy":["esterli",84,"ekmeksi",50],
+  "Strong Bitter / ESB":["esterli",88,"ekmeksi",56],
+  "Tripel":["fenolik",96,"ekmeksi",91],
+  "Weizen / Weissbier":["fenolik",92,"ekmeksi",89],
+  "Weizenbock":["fenolik",90,"ekmeksi",51],
+  "Winter Warmer / Old Ale":["esterli",47,"ekmeksi",41],
+  "Witbier / Belgian White":["fenolik",91,"ekmeksi",96]
+};
+
+window._BQ_KARAKTER = {
+  maya: { ad:'Maya', ikon:'🧬', i:0, sira:['temiz','esterli','fenolik','eksi'],
+    et:{ temiz:'temiz', esterli:'meyveli', fenolik:'baharatlı', eksi:'ekşi' },
+    uzun:{ temiz:'temiz/nötr — Amerikan ale + lager kökenli maya',
+           esterli:'meyveli-ester — İngiliz/İskoç kökenli maya',
+           fenolik:'baharatlı-fenolik — Belçika + Alman buğday kökenli maya',
+           eksi:'ekşi/brett — vahşi veya karışık fermantasyon' } },
+  malt: { ad:'Malt', ikon:'🌾', i:2, sira:['ekmeksi','tost','karamel','kavrulmus','cikolata','isli'],
+    et:{ ekmeksi:'ekmeksi', tost:'tost', karamel:'karamel', kavrulmus:'kavrulmuş', cikolata:'çikolata', isli:'isli' },
+    uzun:{ ekmeksi:'ekmeksi/bisküvi — baz malt baskın (kalan sınıf)',
+           tost:'tost/fırın — Münih+Viyana+aromatik malt ≥%20',
+           karamel:'karamel — crystal malt ≥%8',
+           kavrulmus:'kavrulmuş/kahve — kavrulmuş+çikolata malt ≥%3',
+           cikolata:'çikolata — kavrulmuş+çikolata malt ≥%3, çikolata baskın',
+           isli:'isli — isli malt >%5' } }
+};
+
+// Bir stilin karakter sınıfı ('' = tabloda yok)
+window._bmKarakterSinif = function(ad, eksen){
+  try{ var T = window._PROFIL_KARAKTER, E = window._BQ_KARAKTER;
+    var k = T && T[ad]; if(!k || !E || !E[eksen]) return '';
+    return k[E[eksen].i] || ''; }catch(_e){ return ''; }
+};
+window._bmKarakterPay = function(ad, eksen){
+  try{ var T = window._PROFIL_KARAKTER, E = window._BQ_KARAKTER;
+    var k = T && T[ad]; if(!k || !E || !E[eksen]) return 0;
+    return k[E[eksen].i + 1] || 0; }catch(_e){ return 0; }
+};
+
+// Sonuç listesini karakter süzgecinden geçir. Kova BÖLÜNMEZ — liste süzülür.
+// Dönen öğeler ORİJİNAL indeksi taşır: AV1 "Yeni reçete" ve AK "Doldur" yolları
+// _PROFIL_STIL[key][1][idx] ile çalışır — indeks kayarsa yanlış stil açılırdı.
+window._bmProfilSuz = function(stiller, haric){
+  var p = window.__akProfil || {}, out = [];
+  var f = { maya: (haric === 'maya' ? '' : (p.maya || '')), malt: (haric === 'malt' ? '' : (p.malt || '')) };
+  for(var i = 0; i < (stiller || []).length; i++){
+    var ad = stiller[i][0], ok = true;
+    if(f.maya && window._bmKarakterSinif(ad, 'maya') !== f.maya) ok = false;
+    if(f.malt && window._bmKarakterSinif(ad, 'malt') !== f.malt) ok = false;
+    if(ok) out.push({ st: stiller[i], i: i });
+  }
+  return out;
+};
+
+// Bu kovada GERÇEKTEN var olan sınıflar → ölü çip yok. Sayaç DİĞER eksenin
+// süzgeci uygulanmış hâlden gelir (çapraz seçimde 0 gösterir, kaybolmaz).
+// Dönen: [[sinif, caprazAdet, kovaAdet], ...]
+window._bmProfilKarakterSecenek = function(stiller, eksen){
+  try{
+    var E = window._BQ_KARAKTER && window._BQ_KARAKTER[eksen]; if(!E) return [];
+    var say = {}, capraz = {};
+    (stiller || []).forEach(function(st){ var c = window._bmKarakterSinif(st[0], eksen); if(c) say[c] = (say[c] || 0) + 1; });
+    window._bmProfilSuz(stiller, eksen).forEach(function(o){ var c = window._bmKarakterSinif(o.st[0], eksen); if(c) capraz[c] = (capraz[c] || 0) + 1; });
+    return E.sira.filter(function(c){ return say[c]; }).map(function(c){ return [c, capraz[c] || 0, say[c]]; });
+  }catch(_e){ return []; }
+};
+
+// Taban eksen değişince karakter süzgeci yeni kovada olmayabilir → düşürülür
+// AMA ekranda söylenir (BB dersi: sessiz boş liste yok).
+window._bmProfilKarakterDogrula = function(){
+  try{
+    var p = window.__akProfil || {}; window.__akDusen = '';
+    if(!p.maya && !p.malt) return;
+    var k = window._bmProfilKova();
+    if(!k || !k.stiller || !k.stiller.length) return;
+    ['maya','malt'].forEach(function(e){
+      var sec = p[e] || ''; if(!sec) return;
+      var v = k.stiller.some(function(st){ return window._bmKarakterSinif(st[0], e) === sec; });
+      if(!v){
+        p[e] = ''; var E = window._BQ_KARAKTER[e];
+        window.__akDusen += (window.__akDusen ? ' · ' : '') + E.ikon + ' ' + (E.et[sec] || sec);
+      }
+    });
+  }catch(_e){ window.__akDusen = ''; }
+};
 // Seçim GEÇİCİ: reçete nesnesine (S) YAZILMAZ — bu bir keşif aracı, reçete verisi değil.
-window.__akProfil = { renk:'', aci:'', govde:'' };
+window.__akProfil = { renk:'', aci:'', govde:'', maya:'', malt:'' }; // maya/malt: BQ1 karakter süzgeci
 
 window._bmProfilSec = function(eksen, deger){
   try{
-    if(!window.__akProfil) window.__akProfil = { renk:'', aci:'', govde:'' };
+    if(!window.__akProfil) window.__akProfil = { renk:'', aci:'', govde:'', maya:'', malt:'' };
     window.__akProfil[eksen] = (window.__akProfil[eksen] === deger) ? '' : deger; // tekrar tık = temizle
+    // BQ1: taban eksen değişti → karakter süzgeci yeni kovada var mı?
+    if(eksen === 'renk' || eksen === 'aci' || eksen === 'govde'){ if(typeof window._bmProfilKarakterDogrula === 'function') window._bmProfilKarakterDogrula(); }
+    else window.__akDusen = '';
     if(typeof render === 'function') render();
   }catch(_e){}
 };
 
 window._bmProfilSifirla = function(){
-  window.__akProfil = { renk:'', aci:'', govde:'' };
+  window.__akProfil = { renk:'', aci:'', govde:'', maya:'', malt:'' };
+  window.__akDusen = '';
   if(typeof render === 'function') render();
 };
 
@@ -26876,7 +27035,7 @@ window._bmProfilStilKart = function(){
     var E = window._AK_EKSEN, T = window._PROFIL_STIL;
     if(!E || !T) return '';
     var _e = (typeof esc === 'function') ? esc : function(s){ return String(s==null?'':s); };
-    var p = window.__akProfil || { renk:'', aci:'', govde:'' };
+    var p = window.__akProfil || { renk:'', aci:'', govde:'', maya:'', malt:'' };
     // __akAcik: kullanicinin panelidegin actigi bilgisi (render'lar arasi korunur;
     // cip secili degilken bile panel kapanmasin diye). Gecici, S'ye yazilmaz.
     var acik = !!(p.renk || p.aci || p.govde) || !!window.__akAcik;
@@ -26910,8 +27069,53 @@ window._bmProfilStilKart = function(){
     } else if(!kova.stiller.length){
       sonuc = '<div style="font-size:10px;color:var(--dim);padding:6px 2px">Bu profilde korpusta yeterli reçete yok.</div>';
     } else {
-      var satirlar = kova.stiller.map(function(st, i){
+      // ── SPRINT BQ1: kademeli karakter süzgeci ───────────────────────────
+      // Çipler yalnız BU KOVADA gerçekten var olan sınıflar için basılır (ölü
+      // çip yok); bir eksende tek sınıf varsa o satır hiç çizilmez — süzemez.
+      var suzEksen = ['maya','malt'].map(function(e){ return { e:e, sec:window._bmProfilKarakterSecenek(kova.stiller, e) }; })
+                       .filter(function(x){ return x.sec.length >= 2; });
+      var suzHTML = suzEksen.map(function(x){
+        var E = window._BQ_KARAKTER[x.e], secili = p[x.e] || '';
+        var cips = x.sec.map(function(o){
+          var c = o[0], nc = o[1], sec = (secili === c);
+          return '<button type="button" onclick="_bmProfilSec(\'' + x.e + '\',\'' + c + '\')" '
+            + 'aria-pressed="' + (sec ? 'true' : 'false') + '" title="' + _e(E.uzun[c] || '') + '" '
+            + 'style="background:' + (sec ? 'var(--bakir)' : 'var(--card)') + ';color:' + (sec ? '#fff' : 'var(--metin)')
+            + ';border:1px solid ' + (sec ? 'var(--bakir)' : 'var(--bor)') + ';border-radius:12px;padding:3px 8px;font-size:10.5px;'
+            + 'font-weight:' + (sec ? '700' : '500') + ';cursor:pointer;font-family:var(--font-govde);white-space:nowrap'
+            + (nc ? '' : ';opacity:.45') + '">'
+            + _e(E.et[c] || c) + ' <span style="opacity:.6;font-weight:400">' + nc + '</span></button>';
+        }).join('');
+        return '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap">'
+          + '<span style="font-size:10px;color:var(--soluk);font-weight:600;min-width:50px">' + E.ikon + ' ' + _e(E.ad) + '</span>'
+          + '<div style="display:flex;gap:4px;flex-wrap:wrap;flex:1;min-width:0">' + cips + '</div></div>';
+      }).join('');
+      var suzAktif = !!(p.maya || p.malt);
+      var goster = window._bmProfilSuz(kova.stiller);
+      var suzToplam = goster.reduce(function(a, o){ return a + o.st[1]; }, 0);
+      var dusenNot = window.__akDusen
+        ? '<div style="font-size:9.5px;color:var(--dim);background:var(--bg2);border:1px dashed var(--bor);border-radius:5px;padding:4px 6px;margin-bottom:4px">↩️ '
+            + _e(window.__akDusen) + ' süzgeci bu profilde yok — kaldırıldı.</div>'
+        : '';
+      var suzKutu = (suzHTML || dusenNot)
+        ? '<div style="margin-top:5px;padding-top:5px;border-top:1px dashed var(--bor)">'
+            + dusenNot
+            + (suzHTML ? '<div style="font-size:9.5px;color:var(--dim);margin-bottom:3px">Listeyi daralt (isteğe bağlı) — korpusta bu stilleri yapanların baskın seçimi:</div>' + suzHTML : '')
+            + '</div>'
+        : '';
+
+      var satirlar = goster.map(function(o){
+        var st = o.st, i = o.i;
         var ad = st[0], n = st[1];
+        // BQ1: satırda karakter — Kaan'ın ekranında Dunkelweizen ile Wee Heavy
+        // ayırt edilemiyordu. Baskınlık %40 altındaysa soluk + "?" (karışık).
+        var kar = ['maya','malt'].map(function(e){
+          var c = window._bmKarakterSinif(ad, e); if(!c) return '';
+          var E = window._BQ_KARAKTER[e], py = window._bmKarakterPay(ad, e);
+          return '<span title="' + _e(E.uzun[c] || '') + ' — korpus payı %' + py + '" '
+            + 'style="white-space:nowrap' + (py < 40 ? ';opacity:.6' : '') + '">'
+            + E.ikon + ' ' + _e(E.et[c] || c) + (py < 40 ? '?' : '') + '</span>';
+        }).filter(Boolean).join(' · ');
         var iskVar = (typeof STIL_ISKELET !== 'undefined') && !!STIL_ISKELET[ad];
         var bj = (typeof BJCP !== 'undefined') ? BJCP[ad] : null;
         var bant = (bj && bj.abv) ? ('%' + bj.abv[0] + '–' + bj.abv[1] + ' ABV') : '';
@@ -26921,7 +27125,7 @@ window._bmProfilStilKart = function(){
           +   '<div style="font-size:12px;font-weight:700;color:var(--kahve);line-height:1.25">' + _e(ad)
           +     (iskVar ? ' <span style="font-size:9px;background:var(--ya);color:var(--yk);padding:1px 5px;border-radius:4px;font-weight:700;vertical-align:1px">iskelet</span>' : '')
           +   '</div>'
-          +   '<div style="font-size:9.5px;color:var(--soluk);margin-top:1px">' + n.toLocaleString('tr-TR') + ' reçete bu profilde (%' + pay + ')' + (bant ? ' · ' + bant : '') + '</div>'
+          +   '<div style="font-size:9.5px;color:var(--soluk);margin-top:1px;line-height:1.45">' + n.toLocaleString('tr-TR') + ' reçete bu profilde (%' + pay + ')' + (bant ? ' · ' + bant : '') + (kar ? ' · ' + kar : '') + '</div>'
           + '</div>'
           // SPRINT AV1: iki eylem, karışmayacak biçimde. BİRİNCİL = "Yeni reçete" (Kaan'ın
           // istediği tek dokunuş: öneriye bas → yeni reçete oluşsun). İKİNCİL = mevcut "Doldur"
@@ -26941,10 +27145,30 @@ window._bmProfilStilKart = function(){
           + '</div>'
           + '</div>';
       }).join('');
+      var basSat = suzAktif
+        ? 'Bu profilde korpusta <b>' + kova.toplam.toLocaleString('tr-TR') + '</b> reçete var — süzgeçle eşleşen <b>'
+            + goster.length + '</b> stil, <b>' + suzToplam.toLocaleString('tr-TR') + '</b> reçete:'
+        : 'Bu profilde korpusta <b>' + kova.toplam.toLocaleString('tr-TR') + '</b> reçete var — en yakın ' + kova.stiller.length + ' stil:';
+      // BOŞ SONUÇ: sessiz boş liste YOK — hangi süzgecin elediği söylenir ve
+      // gevşetme düğmesi verilir (BB dersi).
+      if(!goster.length){
+        var acikSuz = ['maya','malt'].filter(function(e){ return p[e]; });
+        satirlar = '<div style="font-size:10.5px;color:var(--kahve);background:var(--bg2);border:1px solid var(--bor);border-radius:6px;padding:8px;margin-top:5px;line-height:1.5">'
+          + '⚠️ Bu profilde <b>'
+          + acikSuz.map(function(e){ var E = window._BQ_KARAKTER[e]; return E.ikon + ' ' + _e(E.et[p[e]] || p[e]); }).join('</b> + <b>')
+          + '</b> birlikte olan stil yok — süzgeci gevşet:</div>'
+          + '<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px">'
+          + acikSuz.map(function(e){ var E = window._BQ_KARAKTER[e];
+              return '<button type="button" onclick="_bmProfilSec(\'' + e + '\',\'' + p[e] + '\')" '
+                + 'style="background:var(--card);color:var(--kahve);border:1px solid var(--bor);border-radius:6px;padding:4px 9px;font-size:10px;font-weight:600;cursor:pointer;font-family:var(--font-govde)">'
+                + '✕ ' + E.ikon + ' ' + _e(E.et[p[e]] || p[e]) + '</button>'; }).join('')
+          + '</div>';
+      }
       sonuc = '<div style="margin-top:4px">'
-        + '<div style="font-size:9.5px;color:var(--dim);margin-bottom:2px">Bu profilde korpusta <b>' + kova.toplam.toLocaleString('tr-TR') + '</b> reçete var — en yakın ' + kova.stiller.length + ' stil:</div>'
+        + suzKutu
+        + '<div style="font-size:9.5px;color:var(--dim);margin:5px 0 2px">' + basSat + '</div>'
         + satirlar
-        + '<div style="font-size:9px;color:var(--dim);margin-top:6px;line-height:1.4">Sayılar 336.149 ev-üretimi reçetenin dağılımıdır — <b>kalite değerlendirmesi değil</b>, "kaç kişi böyle demlemiş" bilgisi. Gövde ekseni grist bileşiminden türetilir (dataset FG\'si güvenilmez). Öneri = başlangıç noktası; reçeteyi serbestçe değiştir.</div>'
+        + '<div style="font-size:9px;color:var(--dim);margin-top:6px;line-height:1.4">Sayılar 336.149 ev-üretimi reçetenin dağılımıdır — <b>kalite değerlendirmesi değil</b>, "kaç kişi böyle demlemiş" bilgisi. Gövde ekseni grist bileşiminden türetilir (dataset FG\'si güvenilmez). Maya/malt karakteri de aynı korpustan gelir: maya sınıfı <b>maya KÖKENİNİ</b> ölçer (tat ölçümü değil), malt "ekmeksi" bir tespit değil kalan sınıftır; soluk "?" o stilde karakterin karışık olduğunu söyler. Süzgeç sayısı listelenen stillerin toplamıdır. Öneri = başlangıç noktası; reçeteyi serbestçe değiştir.</div>'
         + '</div>';
     }
 

@@ -734,7 +734,8 @@
 // HTML degisti (Sprint BG) -> KURAL 12.3 CACHE_VERSION bump v131-422 -> v131-423.
 // HTML degisti (Sprint BL: SW otomatik guncelleme) -> CACHE_VERSION bump v131-426 -> v131-427.
 // HTML degisti (Sprint BN: AG delta dil durustlugu) -> CACHE_VERSION bump v131-427 -> v131-428.
-const CACHE_VERSION='bm-cache-v131-428';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
+// HTML degisti (Sprint BQ1: profil secici kademeli filtre - maya/malt karakteri) -> CACHE_VERSION bump v131-428 -> v131-430.
+const CACHE_VERSION='bm-cache-v131-430';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
 const ASSET_CACHE   = 'bm-assets-v1';        // font + ikon + manifest — KALICI, bump'ta silinmez
 const MODEL_CACHE   = 'bm-models-v1';        // workers.dev + jsdelivr — SHA'li/immutable URL, KALICI
 
