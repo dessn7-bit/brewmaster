@@ -288,14 +288,65 @@ input[type="checkbox"]:disabled,input[type="radio"]:disabled{opacity:.5;cursor:n
    Mockup: bg linear-gradient(180deg, #FFFFFF, #FCF9F3) + cizgi-arac border + padding sp-5 sp-5 sp-4.
    Sticky davranış INTACT. İçerik inline color literal'lar render JS'te ayrıca düzeltilir. */
 .eh{background:linear-gradient(180deg,#FFFFFF 0%,#FCF9F3 100%);padding:var(--sp-5) var(--sp-5) var(--sp-4);position:sticky;top:0;z-index:100;border:1px solid var(--cizgi-arac);border-top:none;border-radius:0 0 var(--r-md) var(--r-md);box-shadow:var(--elv-1)}
-/* SPRINT BQ1 — profil paneli .eh sticky basligin ICINDE (BQ kesfi tespiti).
-   OLCULDU (390x844 / 360x640 / 1024x800, gercek yedek): tavansiz panel .eh yi
-   1374 / 1388 / 841 px yapiyor, ama #ekran kaydirma kutusu 708 / 504 / 656 px ve
-   .eh position:sticky top:0 oldugu icin tasan kisim KAYDIRARAK DA GORUNMUYOR ->
-   6 oneriden 1 / 0 / 4 tanesi erisilebiliyordu (BQ1 oncesinde de boyleydi).
-   Cozum: paneli TASIMADAN (BQ-0 Kaan karari) panel govdesine kendi kaydirmasini
-   ver -> .eh her uc genislikte kaydirma kutusuna sigiyor, 6/6 oneri erisilebilir. */
-.bm-profil-sec>div{max-height:max(240px,calc(100vh - 400px));overflow-y:auto;overscroll-behavior:contain}
+/* SPRINT BR — "bira tarif et" TAM EKRAN secici.
+   BQ1'in .eh ici paneli KALDIRILDI: panel sticky basligin icindeydi, 390px'te
+   6 oneriden 1'i erisilebiliyordu ve maya/malt suzgeci sonuc listesinin USTUNDE
+   ikinci adim olarak duruyordu (Kaan goremedi). Artik 5 eksen tek ekranda.
+   Tam ekran #ekran'in ICINDE ama .bm-eh-arac DISINDA duruyor: krom-kucuk kurali
+   (.bm-krom-kucuk .eh .bm-eh-arac{display:none}) onu gizlerdi. #ekran icinde
+   olmasi mobil 44px kurallarinin (#ekran button{min-height:44px}) uygulanmasini
+   saglar; position:fixed oldugu icin #ekran'in overflow'u kirpmaz (ata zincirinde
+   transform/filter yok — olculdu). */
+.br-tam{position:fixed;inset:0;z-index:9700;background:var(--bg-card,#fff);display:flex;flex-direction:column;overscroll-behavior:contain}
+.br-tam-bas{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--cizgi-arac);background:var(--bg-card);flex:none}
+.br-tam-baslik{font-family:var(--font-baslik);font-size:15px;font-weight:700;color:var(--kahve);line-height:1.2}
+.br-tam-alt-yazi{font-size:10px;color:var(--soluk);line-height:1.35;margin-top:2px}
+.br-kapat{background:var(--bg2);border:1px solid var(--bor);border-radius:50%;width:38px;height:38px;font-size:16px;cursor:pointer;color:var(--kahve);flex:none}
+.br-tam-govde{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 12px 18px;overscroll-behavior:contain}
+.br-tam-alt{display:flex;align-items:center;gap:8px;padding:8px 12px;padding-bottom:calc(8px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--cizgi-arac);background:var(--bg-card);flex:none}
+.br-alt-say{flex:1;min-width:0;font-size:11px;color:var(--metin);line-height:1.3}
+.br-eksen{margin-bottom:10px}
+.br-eksen-kapali{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.br-eksen-kapali .br-eksen-ad{margin-bottom:0;flex:none}
+.br-cip-degis{font-size:11px;color:var(--soluk);background:transparent;border-style:dashed}
+.br-eksen-ad{font-size:11px;color:var(--soluk);font-weight:600;margin-bottom:4px}
+.br-cip-kap{display:flex;gap:6px;flex-wrap:wrap}
+.br-cip{display:inline-flex;align-items:center;gap:4px;min-height:34px;background:var(--card);color:var(--metin);border:1px solid var(--bor);border-radius:16px;padding:4px 11px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font-govde);white-space:nowrap}
+.br-cip-akt{background:var(--bakir);color:#fff;border-color:var(--bakir);font-weight:700}
+.br-cip-olu{opacity:.42}
+.br-cip-n{font-size:10px;font-weight:600;margin-left:5px;padding:1px 5px;border-radius:7px;background:rgba(0,0,0,.07);opacity:.8}
+.br-cip-akt .br-cip-n{background:rgba(255,255,255,.24);opacity:.95}
+.br-ayrac{border-top:1px dashed var(--bor);margin:8px 0 6px}
+.br-sonuc-bas{font-size:10.5px;color:var(--dim);margin:2px 0 2px;line-height:1.45}
+.br-satir{display:flex;align-items:center;gap:8px;padding:7px 0;border-top:1px solid var(--bor)}
+.br-satir-ad{font-size:13px;font-weight:700;color:var(--kahve);line-height:1.25}
+.br-satir-alt{font-size:10px;color:var(--soluk);margin-top:2px;line-height:1.45}
+.br-isk{font-size:9px;background:var(--ya);color:var(--yk);padding:1px 5px;border-radius:4px;font-weight:700;vertical-align:1px}
+.br-satir-btn{display:flex;flex-direction:column;gap:5px;flex:none}
+.br-btn-ana{background:var(--bakir);color:#fff;border:1px solid var(--bakir);border-radius:7px;padding:6px 10px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:var(--font-govde)}
+.br-btn-ikincil{background:var(--card);color:var(--kahve);border:1px solid var(--bor);border-radius:7px;padding:5px 10px;font-size:10.5px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:var(--font-govde)}
+.br-bos{font-size:11px;color:var(--kahve);background:var(--bg2);border:1px solid var(--bor);border-radius:8px;padding:9px 10px;line-height:1.55;margin-top:4px}
+.br-bos-btn{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+.br-cip-gevset{background:var(--card)}
+.br-dipnot{font-size:9px;color:var(--dim);margin-top:9px;line-height:1.45}
+@media (max-width:768px){
+  .br-cip{min-height:44px;padding:6px 12px}
+  .br-kapat{width:44px;height:44px}
+  .br-tam-govde{padding:10px 12px 22px}
+}
+/* MASAUSTU YERLESIMI - GORSEL DENETIMDE YAKALANDI (1024x800, gercek yedek):
+   body grid = [240px kenar cubugu | icerik]; .bm-main position:relative + z-index:1
+   KENDI YIGIN BAGLAMINI kuruyor, .bm-sidebar ise z-index:2. Yani #ekran icindeki
+   hicbir eleman z-index:9700 bile olsa kenar cubugunun USTUNE cizilemiyor -> tam
+   ekranin sol 240px'i kenar cubugu tarafindan ORTULUYORDU (stil adlari kesiliyordu).
+   Cozum: >=769px'te (uygulamanin kendi kirilma noktasi) tam ekran ICERIK SUTUNUNA
+   oturur; kenar cubugu ortulmez, kirpilma biter. <=768px'te kenar cubugu zaten
+   cekmece (translateX(-100%)) oldugu icin tam ekran GERCEKTEN tam ekran kalir. */
+@media (min-width:769px){ .br-tam{left:240px} }
+@media (min-width:900px){
+  /* ortalama: 100vw DEGIL kendi genisligine gore (sol offset'i bozmasin) */
+  .br-tam-govde,.br-tam-bas,.br-tam-alt{padding-left:max(12px,calc((100% - 860px)/2));padding-right:max(12px,calc((100% - 860px)/2))}
+}
 .serit{margin-top:8px;padding:10px 12px;background:var(--bg2);border-radius:10px;border:1px solid var(--bor);display:flex;gap:14px;flex-wrap:wrap;align-items:center}
 .tk-k{background:#fff;border:1px solid var(--bor);border-top:none;margin:0 8px;border-radius:0 0 12px 12px;padding:14px}
 .pill{font-size:10px;background:var(--sa);color:var(--sk);border-radius:4px;padding:1px 7px;font-weight:600;border:1px solid #C8B070;display:inline-block}
@@ -21953,6 +22004,7 @@ function rEditor(){
   </div>
   <div class="bm-eh-arac">${(typeof _bmProfilStilKart==='function')?_bmProfilStilKart():''}</div>
   </div><!-- Adim 132-J-2: editor üst kahve header 6 stat duplicate KALDIRILDI (sticky özet 132-A+E zaten gosteriyor, KH J-2'de sticky'ye eklendi) -->
+  ${(typeof _brTamHTML==='function')?_brTamHTML():''}<!-- SPRINT BR: tam ekran secici .eh DISINDA (krom-kucuk kurali .bm-eh-arac'i display:none yapiyor) -->
   ${uy?`<div style="padding:8px 12px 0">${uy}</div>`:""}
   <!-- Adim 132-E: Sticky ozet paneli global (eh disinda, her tab'da gorunur). srmR(srm) renk. -->
   <div class="bm-sticky-summary" id="bm-summary">
@@ -26840,51 +26892,80 @@ window._AK_EKSEN = {
 // ŞERH (BQ Eksen 2, doğrulayıcı): maya sınıfları TAT değil MAYA KÖKENİ ölçer —
 // korpusta duyusal veri yok. Baskınlık %40 altındaysa satırda soluk "?" ile
 // gösterilir (o stilde karakter korpusta karışık).
+// SPRINT BR: tablo 48 -> 73 stile genişletildi. Neden: BR tam matrisi (_BR_KOVA)
+// 73 stil içeriyor; 48'de kalsaydı 25 stil karakter süzgecinde SINIFSIZ kalıp
+// süzgeç açıkken sessizce düşerdi. Sınıflandırıcılar BQ1 ile BİREBİR; mevcut 48
+// girişin HİÇBİRİ değişmedi (üreticide ABORT kapısı, ölçüldü: 0 fark).
 window._PROFIL_KARAKTER = {
   "Altbier / Düsseldorf Altbier":["temiz",90,"tost",52],
   "American Amber Ale / Red Ale":["temiz",71,"karamel",46],
+  "American Amber IPA / Red IPA":["temiz",78,"ekmeksi",44],
   "American Barleywine":["temiz",64,"ekmeksi",64],
   "American Brown Ale":["temiz",52,"cikolata",47],
   "American IPA":["temiz",77,"ekmeksi",65],
   "American Lager / Light Lager":["temiz",82,"ekmeksi",72],
   "American Pale Ale":["temiz",76,"ekmeksi",65],
   "American Stout":["temiz",48,"kavrulmus",56],
+  "American Strong Ale":["temiz",66,"ekmeksi",61],
   "American Wheat Beer":["temiz",55,"ekmeksi",86],
   "Baltic Porter":["temiz",52,"cikolata",44],
   "Belgian Blonde Ale":["fenolik",86,"ekmeksi",74],
   "Belgian Dark Strong Ale":["fenolik",94,"ekmeksi",66],
+  "Belgian Quadrupel / Abt":["fenolik",98,"ekmeksi",72],
   "Belgian Strong Golden Ale":["fenolik",92,"ekmeksi",92],
   "Berliner Weisse":["eksi",53,"ekmeksi",95],
   "Best Bitter":["esterli",87,"ekmeksi",62],
+  "Bière de Garde":["fenolik",68,"ekmeksi",48],
   "Black IPA / Cascadian Dark Ale":["temiz",77,"ekmeksi",33],
   "Blonde Ale / Cream Ale":["temiz",73,"ekmeksi",81],
   "Bock":["temiz",91,"tost",59],
+  "Brett Beer / Farmhouse Brett":["eksi",83,"ekmeksi",77],
   "Brown Porter":["esterli",70,"cikolata",59],
+  "California Common / Steam Beer":["temiz",90,"ekmeksi",53],
   "Doppelbock":["temiz",88,"tost",60],
+  "Dortmunder Export":["temiz",95,"ekmeksi",60],
   "Dry Irish Stout":["esterli",77,"kavrulmus",82],
   "Dubbel":["fenolik",94,"ekmeksi",63],
   "Dunkelweizen":["fenolik",90,"tost",38],
+  "English Barleywine":["esterli",72,"ekmeksi",65],
   "English Brown Ale":["esterli",87,"cikolata",31],
   "English IPA":["esterli",70,"ekmeksi",63],
   "English Mild / Dark Mild":["esterli",86,"cikolata",44],
+  "Festbier / Wiesn":["temiz",96,"tost",58],
   "Flanders Red Ale":["eksi",75,"tost",53],
   "Foreign Extra Stout":["esterli",68,"kavrulmus",67],
   "German Pils":["temiz",94,"ekmeksi",87],
+  "Helles / Münchner Hell":["temiz",91,"ekmeksi",74],
   "Imperial / Russian Imperial Stout":["temiz",47,"kavrulmus",60],
   "Imperial IPA / DIPA":["temiz",77,"ekmeksi",69],
+  "International Pale Lager":["temiz",97,"ekmeksi",78],
   "Irish Red Ale":["esterli",71,"karamel",39],
+  "Kellerbier / Zwickelbier":["temiz",78,"tost",51],
   "Kölsch":["temiz",94,"ekmeksi",87],
+  "Lambic / Gueuze":["eksi",85,"ekmeksi",91],
+  "London Porter":["esterli",61,"cikolata",60],
+  "Maibock / Helles Bock":["temiz",92,"tost",49],
   "Milk Stout / Sweet Stout":["esterli",68,"kavrulmus",49],
+  "Mixed Fermentation Sour":["eksi",67,"ekmeksi",84],
+  "Munich Dunkel":["temiz",91,"tost",58],
   "Munich Märzen / Oktoberfest":["temiz",90,"tost",68],
+  "NEIPA / Hazy IPA":["esterli",64,"ekmeksi",85],
   "Oatmeal Stout":["esterli",76,"kavrulmus",51],
+  "Old Ale":["esterli",73,"ekmeksi",49],
+  "Oud Bruin":["eksi",67,"ekmeksi",30],
+  "Pre-Prohibition Lager":["temiz",92,"ekmeksi",87],
+  "Rauchbier / Bamberg Smoked":["temiz",81,"isli",83],
   "Robust Porter":["esterli",62,"cikolata",62],
   "Roggenbier / Rye Beer":["fenolik",69,"ekmeksi",42],
   "Saison / Farmhouse Ale":["fenolik",88,"ekmeksi",79],
   "Schwarzbier":["temiz",93,"cikolata",23],
   "Scottish Ale / 80 Shilling":["esterli",82,"ekmeksi",38],
   "Scottish Ale / Wee Heavy":["esterli",84,"ekmeksi",50],
+  "Session Ale / Ordinary Bitter":["esterli",85,"ekmeksi",62],
+  "Smoked Beer / Rauchbier":["temiz",56,"isli",48],
   "Strong Bitter / ESB":["esterli",88,"ekmeksi",56],
   "Tripel":["fenolik",96,"ekmeksi",91],
+  "Vienna Lager":["temiz",96,"tost",61],
   "Weizen / Weissbier":["fenolik",92,"ekmeksi",89],
   "Weizenbock":["fenolik",90,"ekmeksi",51],
   "Winter Warmer / Old Ale":["esterli",47,"ekmeksi",41],
@@ -26920,91 +27001,267 @@ window._bmKarakterPay = function(ad, eksen){
     return k[E[eksen].i + 1] || 0; }catch(_e){ return 0; }
 };
 
-// Sonuç listesini karakter süzgecinden geçir. Kova BÖLÜNMEZ — liste süzülür.
-// Dönen öğeler ORİJİNAL indeksi taşır: AV1 "Yeni reçete" ve AK "Doldur" yolları
-// _PROFIL_STIL[key][1][idx] ile çalışır — indeks kayarsa yanlış stil açılırdı.
-window._bmProfilSuz = function(stiller, haric){
-  var p = window.__akProfil || {}, out = [];
-  var f = { maya: (haric === 'maya' ? '' : (p.maya || '')), malt: (haric === 'malt' ? '' : (p.malt || '')) };
-  for(var i = 0; i < (stiller || []).length; i++){
-    var ad = stiller[i][0], ok = true;
-    if(f.maya && window._bmKarakterSinif(ad, 'maya') !== f.maya) ok = false;
-    if(f.malt && window._bmKarakterSinif(ad, 'malt') !== f.malt) ok = false;
-    if(ok) out.push({ st: stiller[i], i: i });
-  }
+// ═══ SPRINT BR — "BİRA TARİF ET" TAM EKRAN SEÇİCİ ═════════════════════════
+// Kaan (kendi sözleri): "Orada 'stil seç' olacak, oraya bastığımda bir sürü
+// seçenek olacak, ben de istediğim birayı orada tarif edip yaptıracağım."
+//
+// BR ÖNCESİ SORUN (ölçülü): AK paneli üç ekseni AYNI SAYFADA, .eh sticky
+// başlığının içinde açıyordu; BQ1'in maya/malt süzgeci ise sonuç listesinin
+// ÜSTÜNDE İKİNCİ ADIM olarak duruyordu — Kaan onları göremedi. Artık 5 eksen
+// TEK EKRANDA birlikte, sonuç CANLI, ikinci adım YOK.
+//
+// ── TAM MATRİS (_BR_KOVA) — NEDEN GEREKLİ ────────────────────────────────
+// BR'de 5 eksenin HEPSİ İSTEĞE BAĞLI. "Yalnız koyu" seçildiğinde 12 kova
+// birleşmeli. _PROFIL_STIL her kovada yalnız TOP-6 tutuyor; top-6'ları
+// toplamak YANLIŞ olurdu (her kovada 7. sırada olan stil hiç görünmezdi,
+// sayılar da eksik çıkardı). Bu yüzden kova × stil TAM matrisi gömülü:
+// 60 kova × 73 stil = 3.433 dolu hücre, kırpma YOK → kısmî toplama KESİN.
+// Üretici: _br_build_kova.js (repo kökü), korpus working/_compact3.tsv.
+//
+// KAPI (üreticide ABORT'lu): tam matrise AK/AM'in kendi algoritması
+// (MIN_N=25, MIN_PAY=%1,5, sıralama n×(iskelet?1,35:1), top-6) uygulanınca
+// 60 kovanın top-6 AD+SIRA listesi BİREBİR çıkıyor (ölçüldü: 0/60 fark).
+// Yani matris tabanla çelişmiyor, onu KAPSIYOR. Kova TOPLAMI yine
+// _PROFIL_STIL'den okunur (AK/AM/BQ1 kilitleri: 12.187 · 12.912 · 3.434).
+//
+// ── EŞİK: MIN_N=25, MIN_PAY YOK (ölçülü sapma) ───────────────────────────
+// AK tek kovada n≥25 VE pay≥%1,5 istiyordu. BR'de seçim kısmî olabildiği
+// için pay eşiği anlamını yitiriyor: hiç seçim yokken %1,5 = 5.042 reçete
+// demek ve TÜM ekşi/vahşi stiller (Lambic 523, Oud Bruin 547, Brett 94)
+// sessizce silinirdi. Bu yüzden BR yalnız n≥25 uygular. ÖLÇÜLDÜ: 60 kovanın
+// 59'unda liste AYNEN aynı; tek fark altin|cokaci|orta kovasında listenin
+// 5 satırdan 6'ya çıkması (American Amber Ale n≥25 ama kovanın %1,5'i
+// altındaydı). Satırda payı zaten yazılı → kullanıcı kendi tartar.
+//
+// ── ŞERH: sayıların anlamı DEĞİŞMEDİ ─────────────────────────────────────
+// Bu ekran "kaç kişi böyle demlemiş" gösterir, "hangisi daha iyi" DEĞİL
+// (Sprint AN: TİPİKLİK ≠ İYİLİK). Karakter eksenleri korpustan türetilmiş
+// BASKIN sınıftır; maya sınıfı TAT değil maya KÖKENİ ölçer.
+window._BR_STILAD = ["Altbier / Düsseldorf Altbier","American Amber Ale / Red Ale","American Amber IPA / Red IPA","American Barleywine","American Brown Ale","American IPA","American Lager / Light Lager","American Pale Ale","American Stout","American Strong Ale","American Wheat Beer","Baltic Porter","Belgian Blonde Ale","Belgian Dark Strong Ale","Belgian Quadrupel / Abt","Belgian Strong Golden Ale","Berliner Weisse","Best Bitter","Bière de Garde","Black IPA / Cascadian Dark Ale","Blonde Ale / Cream Ale","Bock","Brett Beer / Farmhouse Brett","Brown Porter","California Common / Steam Beer","Doppelbock","Dortmunder Export","Dry Irish Stout","Dubbel","Dunkelweizen","English Barleywine","English Brown Ale","English IPA","English Mild / Dark Mild","Festbier / Wiesn","Flanders Red Ale","Foreign Extra Stout","German Pils","Helles / Münchner Hell","Imperial / Russian Imperial Stout","Imperial IPA / DIPA","International Pale Lager","Irish Red Ale","Kellerbier / Zwickelbier","Kölsch","Lambic / Gueuze","London Porter","Maibock / Helles Bock","Milk Stout / Sweet Stout","Mixed Fermentation Sour","Munich Dunkel","Munich Märzen / Oktoberfest","NEIPA / Hazy IPA","Oatmeal Stout","Old Ale","Oud Bruin","Pre-Prohibition Lager","Rauchbier / Bamberg Smoked","Robust Porter","Roggenbier / Rye Beer","Saison / Farmhouse Ale","Schwarzbier","Scottish Ale / 80 Shilling","Scottish Ale / Wee Heavy","Session Ale / Ordinary Bitter","Smoked Beer / Rauchbier","Strong Bitter / ESB","Tripel","Vienna Lager","Weizen / Weissbier","Weizenbock","Winter Warmer / Old Ale","Witbier / Belgian White"];
+window._BR_KOVA = {
+  'acik|malt|ince':'20:1128,6:819,67:747,15:537,7:519,12:509,60:354,38:257,37:131,5:120,69:109,44:107,13:104,16:74,41:59,10:48,1:45,56:43,72:41,47:38,28:35,45:31,24:28,40:27,51:26,18:24,68:22,33:21,3:18,65:18,49:16,32:16,66:15,25:12,48:11,26:11,30:9,71:9,63:9,54:8,0:7,64:7,35:7,22:6,39:6,17:6,9:5,70:5,8:5,31:5,14:4,21:4,50:3,42:3,4:3,62:3,34:3,61:2,58:2,46:1,55:1,23:1',
+  'acik|malt|orta':'20:565,60:279,7:169,12:140,6:136,67:94,44:88,5:80,72:55,13:54,15:51,10:46,69:43,16:38,38:34,37:34,45:31,40:22,28:12,18:12,49:12,1:12,66:11,65:8,32:7,8:7,51:7,41:6,47:6,3:6,31:6,68:6,26:6,61:5,33:5,24:5,56:5,25:4,42:4,63:4,46:4,71:3,48:3,35:3,0:2,50:2,17:2,34:2,9:1,70:1,62:1,30:1,4:1',
+  'acik|malt|dolgun':'69:4555,72:2015,10:1463,16:1238,60:432,20:399,7:336,45:305,12:221,5:177,6:149,70:121,13:121,49:105,44:70,38:57,67:55,37:38,15:31,1:24,65:21,24:21,59:19,29:16,40:16,71:13,28:13,18:13,56:11,22:10,35:8,8:8,47:8,48:7,33:7,26:7,3:7,52:6,66:6,17:6,63:5,31:5,64:5,0:4,21:4,25:3,9:3,68:3,54:3,32:3,42:2,46:2,55:2,53:2,62:2,51:2,41:1,11:1,30:1,58:1,27:1',
+  'acik|dengeli|ince':'20:2865,60:1530,7:1294,44:1101,67:884,37:874,12:811,6:737,15:671,38:559,56:350,13:286,5:236,10:156,41:138,26:124,47:95,68:93,51:87,66:80,72:57,28:56,1:47,24:43,40:42,18:33,64:33,17:32,33:28,32:28,65:27,69:16,34:15,62:15,57:14,71:12,3:10,45:9,54:8,4:7,16:7,48:7,9:6,0:6,43:5,31:5,30:5,22:4,49:4,42:4,70:4,52:4,27:3,63:3,21:3,25:3,50:2,8:2,61:2,58:2,23:2,46:1,39:1,35:1,11:1',
+  'acik|dengeli|orta':'20:1590,60:1434,44:899,7:892,12:270,37:240,6:209,5:186,10:135,13:135,38:116,56:80,67:71,66:68,15:65,26:56,72:44,41:43,47:32,24:28,1:27,51:26,64:22,68:21,33:19,40:19,17:16,32:15,28:11,9:10,18:10,65:7,62:7,69:6,8:5,48:5,49:5,22:4,45:4,35:4,54:3,50:3,42:3,21:3,52:2,27:2,39:2,46:2,0:2,70:2,16:2,3:2,31:1,11:1,57:1,71:1,53:1,25:1,30:1,4:1,43:1,34:1',
+  'acik|dengeli|dolgun':'10:4149,60:1592,72:1495,20:1081,7:877,69:514,44:350,5:324,12:252,13:210,6:162,16:81,38:71,37:69,67:58,70:48,45:48,15:40,56:39,66:38,52:37,1:36,40:36,65:29,24:28,47:24,33:23,59:19,28:19,32:18,41:15,49:14,51:12,68:12,48:11,18:11,17:11,64:11,53:10,29:10,26:9,22:8,0:8,3:8,9:7,71:7,62:5,39:5,54:4,43:4,21:4,30:4,8:4,46:3,34:2,25:2,57:2,27:1,23:1,55:1,58:1,42:1',
+  'acik|hop|ince':'7:2954,37:1954,5:1352,20:881,60:622,44:338,12:271,56:260,6:245,40:193,67:166,66:153,13:148,32:140,15:114,64:113,41:109,17:102,1:55,38:51,24:49,10:36,26:33,68:24,65:21,28:20,72:20,33:16,0:15,51:13,47:12,9:10,4:10,54:9,22:8,3:8,8:7,27:6,62:6,42:5,71:5,18:5,63:4,30:4,43:3,39:3,21:3,58:3,69:3,31:2,48:2,25:2,46:1,61:1,35:1,57:1,50:1,59:1,70:1,19:1',
+  'acik|hop|orta':'7:2384,5:1228,20:482,37:473,60:471,44:237,40:126,64:95,66:87,12:85,6:84,56:80,17:75,32:66,10:56,13:55,24:39,41:34,1:22,38:21,9:18,67:16,39:12,15:11,26:10,28:10,18:6,0:6,33:6,72:6,47:6,8:5,52:4,43:4,22:4,68:4,71:4,27:3,3:3,16:3,48:2,51:2,4:2,54:2,65:2,19:1,55:1,35:1,30:1,42:1,62:1,53:1,59:1,69:1',
+  'acik|hop|dolgun':'7:1979,10:1482,5:1183,60:663,20:345,72:306,37:199,44:191,69:155,13:123,12:96,40:91,6:77,64:58,66:51,17:46,56:45,65:39,32:37,16:26,24:25,52:17,1:15,41:13,15:12,8:11,70:11,45:10,9:9,28:9,33:8,22:8,38:7,47:7,39:7,51:7,67:7,59:6,3:6,71:6,53:5,43:4,0:4,18:4,49:3,58:3,68:3,42:3,26:3,27:2,4:2,29:2,62:2,34:1,36:1,31:1,25:1',
+  'acik|cokaci|ince':'5:3754,7:2617,40:806,37:648,20:314,60:227,32:183,6:134,12:118,66:109,44:99,56:96,13:96,64:83,67:67,24:56,17:52,1:50,15:36,41:26,38:24,10:15,3:14,54:14,26:14,68:12,33:12,4:10,9:9,52:8,28:8,72:8,8:7,51:7,69:6,71:5,0:5,62:5,47:4,31:4,42:4,63:4,27:4,30:3,65:3,16:3,46:2,23:2,18:2,36:1,58:1,50:1,25:1,48:1,43:1,53:1',
+  'acik|cokaci|orta':'5:2998,7:1655,40:720,20:162,37:149,60:149,32:90,64:63,44:57,12:54,6:48,66:46,13:43,17:35,10:33,24:19,56:16,1:11,38:10,41:8,67:7,9:6,69:5,26:5,16:4,15:4,72:4,65:4,39:3,8:3,33:3,22:3,52:2,71:2,18:2,4:2,68:1,53:1,30:1,3:1,42:1,45:1,2:1,51:1,49:1,19:1',
+  'acik|cokaci|dolgun':'5:2741,7:1757,10:652,60:265,40:247,69:160,72:159,20:137,13:87,44:68,6:57,32:54,37:52,12:42,66:40,64:37,65:23,24:23,17:20,16:19,52:18,56:14,1:10,22:8,59:7,67:7,15:7,45:5,33:5,49:5,41:4,9:4,8:4,70:4,28:3,29:3,3:3,42:3,31:2,38:2,0:2,4:2,71:2,48:1,39:1,30:1,27:1,43:1,54:1,68:1,47:1,18:1,26:1,2:1,25:1',
+  'altin|malt|ince':'67:327,51:259,12:214,60:197,28:193,7:181,15:153,20:145,13:138,18:124,47:90,5:88,1:83,6:64,25:54,68:50,35:49,62:48,71:47,63:40,42:36,30:34,40:31,69:30,66:29,24:26,10:22,37:22,38:17,72:16,3:14,44:14,33:14,21:14,64:14,65:11,32:9,54:8,57:8,9:7,4:7,41:6,17:6,45:5,56:5,50:5,34:5,49:4,55:4,31:4,0:4,70:3,48:3,29:3,39:3,16:3,27:3,58:2,8:2,26:2,59:2,14:2,43:1,22:1,53:1,11:1,52:1,19:1',
+  'altin|malt|orta':'7:142,60:134,51:100,5:89,12:77,1:71,20:57,18:53,42:52,35:43,28:39,13:38,67:37,6:36,47:35,62:32,15:25,66:25,68:24,10:24,40:24,25:21,63:19,69:18,44:16,24:13,65:12,71:12,3:11,30:10,17:8,37:8,21:7,49:7,55:7,33:7,38:7,72:7,50:6,57:6,32:5,64:5,4:5,0:5,9:4,54:4,16:4,29:4,34:3,59:3,48:3,11:2,70:2,8:2,53:2,45:2,41:2,23:1,56:1,39:1,27:1,61:1,31:1,22:1',
+  'altin|malt|dolgun':'69:670,10:267,7:174,70:169,60:156,5:119,72:108,12:81,20:79,13:78,42:63,1:61,29:60,51:56,59:51,35:47,6:45,18:43,45:37,67:34,28:31,71:30,38:28,62:28,16:26,33:22,47:22,66:21,68:20,40:20,65:18,25:17,24:17,15:16,3:15,54:13,30:11,8:9,44:8,63:7,9:6,32:6,17:6,21:6,4:6,48:6,37:5,49:5,31:4,53:4,64:4,57:4,55:3,52:2,39:2,56:2,50:2,34:1,61:1,0:1,22:1',
+  'altin|dengeli|ince':'51:1054,7:1045,60:864,12:677,67:415,1:409,68:401,20:335,47:290,5:280,66:274,13:228,42:182,15:165,28:132,6:122,62:117,24:112,71:96,18:95,30:87,44:80,3:67,40:66,17:61,10:60,33:59,37:55,38:53,65:51,0:48,32:47,54:44,57:38,64:36,50:30,26:30,4:26,21:24,56:23,41:22,63:22,25:21,31:19,34:18,72:15,9:13,35:13,48:11,43:8,8:8,39:7,58:6,69:6,70:6,22:5,52:5,23:3,55:3,29:2,45:2,59:2,61:2,2:2,49:2,11:1,27:1',
+  'altin|dengeli|orta':'7:1093,60:638,51:515,1:453,66:452,5:330,12:283,42:192,20:185,68:171,47:161,17:131,13:106,24:100,6:76,62:71,40:67,32:65,67:59,18:57,33:53,10:48,30:48,64:43,3:43,0:40,71:40,44:37,54:37,28:34,15:34,65:30,37:30,31:23,35:19,4:18,9:16,57:16,63:15,34:13,26:13,56:13,41:12,38:12,21:11,25:9,39:6,43:5,48:5,8:5,70:4,72:4,52:3,50:3,59:2,36:2,45:1,55:1,14:1,53:1,23:1,49:1,46:1,69:1,22:1,2:1',
+  'altin|dengeli|dolgun':'7:1444,60:741,10:741,1:538,5:444,66:368,12:332,51:293,42:280,20:211,68:134,47:133,13:133,24:114,69:112,72:108,6:108,17:108,62:102,33:72,32:68,70:68,3:65,29:59,40:55,67:54,59:51,71:48,18:46,64:45,44:42,54:35,65:34,30:33,38:30,4:29,15:26,25:24,0:24,28:24,35:24,37:23,8:23,9:22,31:16,53:14,57:12,26:12,43:10,63:10,34:9,50:9,48:9,52:6,56:5,16:5,49:5,41:4,21:4,55:3,39:2,27:2,58:1,23:1,36:1,45:1,46:1,22:1',
+  'altin|hop|ince':'7:2701,5:2191,66:528,40:515,1:422,60:348,32:309,12:219,24:218,17:212,64:156,51:155,20:149,37:119,13:114,0:112,3:100,42:100,6:78,68:74,67:65,15:57,47:49,54:48,62:41,30:36,33:33,71:33,4:33,28:28,44:27,65:26,10:25,56:23,9:17,31:14,41:13,38:13,18:13,43:9,26:9,50:6,2:6,57:5,69:5,63:5,58:5,23:4,21:4,72:4,35:4,25:4,39:3,34:2,48:2,55:2,70:2,61:1,59:1,53:1,29:1,27:1,22:1',
+  'altin|hop|orta':'7:3238,5:3062,66:883,40:493,1:397,17:395,32:350,64:317,24:234,60:196,42:91,12:90,51:87,3:84,20:77,0:66,13:57,37:56,6:54,68:41,47:37,9:32,33:31,10:30,54:21,30:19,62:18,44:16,67:15,71:13,28:13,65:12,56:12,41:11,26:9,4:9,15:8,31:7,18:5,43:4,25:4,69:4,63:3,8:3,34:2,57:2,23:2,72:2,70:2,21:2,59:1,38:1,53:1,35:1,58:1,55:1,29:1,48:1,2:1,27:1,50:1,16:1,52:1,39:1,22:1',
+  'altin|hop|dolgun':'7:4260,5:3400,66:885,1:566,40:447,10:404,32:384,17:379,24:358,60:333,64:219,42:129,12:113,20:109,13:72,3:63,51:61,6:58,47:53,68:50,69:47,33:43,0:43,9:38,72:34,54:33,37:27,44:27,62:25,65:20,4:20,71:20,59:17,67:16,70:16,8:13,29:12,41:11,15:11,30:10,28:10,56:9,52:8,31:8,18:8,38:6,63:5,2:5,35:4,57:4,43:3,53:3,50:3,58:3,22:2,26:2,23:2,49:2,39:1,45:1,61:1,48:1,19:1,46:1',
+  'altin|cokaci|ince':'5:5695,40:2404,7:2101,32:360,66:350,1:335,24:146,17:122,3:107,60:103,13:103,64:90,12:84,6:64,37:61,42:57,20:52,0:42,67:38,51:37,54:26,4:24,33:24,15:23,68:20,71:19,10:18,30:15,44:15,28:15,47:14,65:12,62:11,9:10,18:10,2:9,56:8,31:6,25:5,41:4,21:4,8:4,26:4,63:4,38:3,70:3,69:3,27:3,34:3,36:2,39:2,48:2,72:2,50:2,61:1,59:1,35:1,58:1,29:1,57:1,23:1,55:1,52:1',
+  'altin|cokaci|orta':'5:7062,40:2412,7:2128,32:364,66:294,1:194,17:150,24:129,64:101,3:79,60:69,6:50,13:49,12:47,42:40,20:40,9:32,10:27,37:17,0:16,51:15,4:13,47:12,71:10,54:10,65:9,28:9,15:8,30:7,67:7,33:7,68:7,62:5,2:4,41:3,56:3,38:3,52:3,35:3,31:3,44:3,72:3,18:2,58:2,25:2,69:2,63:2,57:2,21:1,50:1,23:1,55:1,59:1,49:1,39:1',
+  'altin|cokaci|dolgun':'5:8409,7:3198,40:1849,32:469,66:414,1:336,10:254,24:177,64:146,17:121,60:103,12:80,42:72,13:69,69:65,6:64,20:63,3:56,9:28,72:23,47:21,0:21,4:18,54:16,59:16,37:15,51:14,71:14,65:13,68:13,44:12,62:11,33:9,15:8,28:8,2:7,70:5,29:5,67:5,56:5,63:4,18:4,30:4,52:3,57:3,41:3,49:3,25:2,34:2,31:2,8:2,22:2,43:1,45:1,16:1,35:1,58:1,38:1,50:1,23:1,48:1,11:1,19:1,53:1',
+  'amber|malt|ince':'28:946,13:582,25:285,63:236,71:155,35:142,21:120,4:105,62:99,42:87,1:77,51:74,67:68,60:61,7:60,55:55,18:53,6:46,33:41,31:40,30:38,54:36,15:32,12:28,50:28,3:21,14:20,65:20,5:18,68:16,70:15,57:11,24:11,23:10,29:10,47:8,0:7,27:7,66:6,48:6,59:6,11:5,20:5,40:5,10:5,36:5,69:4,64:3,38:3,37:3,58:2,45:2,17:2,61:2,44:2,22:1,49:1,72:1,8:1,39:1,32:1,16:1,9:1',
+  'amber|malt|orta':'63:286,42:192,28:133,62:133,35:128,25:105,21:91,1:79,4:78,13:76,31:70,71:63,55:57,33:50,51:44,6:42,7:35,50:33,54:33,30:33,18:30,60:24,29:21,12:17,66:15,20:13,5:13,3:10,0:9,70:8,23:8,47:8,68:7,40:7,57:7,17:7,67:6,58:6,65:5,59:5,24:5,49:5,10:4,61:3,37:3,11:3,46:2,8:2,27:2,72:2,15:2,48:2,41:1,16:1,26:1,14:1,39:1,53:1,44:1,38:1,64:1,9:1',
+  'amber|malt|dolgun':'29:798,70:349,59:244,42:216,35:161,63:156,1:150,28:108,62:101,33:83,25:81,7:76,4:71,13:71,71:66,55:63,21:54,31:53,6:52,60:39,69:36,51:36,18:30,5:30,10:27,72:26,30:26,3:20,20:20,66:19,24:16,54:16,40:14,65:11,12:10,50:9,47:8,67:8,68:7,45:7,11:7,15:7,32:6,17:5,16:4,58:4,49:3,61:3,0:3,57:3,23:3,22:2,48:2,53:2,8:2,14:2,2:2,38:1,37:1,44:1,39:1,27:1,9:1',
+  'amber|dengeli|ince':'42:506,28:504,1:456,4:406,13:348,31:327,51:255,62:235,71:199,33:185,63:166,7:151,54:150,30:138,50:134,68:132,66:124,3:123,60:109,12:100,0:96,21:92,67:75,18:74,57:73,6:70,25:62,5:49,65:43,55:38,23:32,47:31,24:29,35:29,40:24,15:23,17:21,58:18,32:17,48:14,20:14,61:13,29:12,11:9,10:9,41:8,14:8,59:8,70:7,43:6,8:6,27:6,37:5,64:4,44:4,56:4,38:3,46:3,53:3,69:3,9:3,34:2,72:2,45:2,49:2,39:1,36:1,16:1',
+  'amber|dengeli|orta':'42:928,1:521,31:489,4:402,62:282,33:260,63:175,66:165,54:157,50:156,71:153,30:145,51:139,3:139,7:133,68:105,0:97,28:84,60:77,13:72,5:70,21:66,57:64,6:50,12:49,24:45,65:37,61:37,18:36,17:32,23:32,55:29,25:26,35:25,40:20,47:20,32:18,58:13,64:11,11:11,29:11,20:10,53:9,67:8,37:7,27:7,10:6,46:4,34:4,70:4,39:3,8:3,9:3,59:2,43:2,48:2,15:2,72:2,22:1,26:1,41:1,49:1,19:1,2:1,36:1,16:1',
+  'amber|dengeli|dolgun':'1:1290,42:1138,33:494,4:490,31:479,62:318,7:272,29:256,66:249,51:167,54:137,60:137,59:129,71:128,63:124,3:121,5:120,70:118,30:94,13:90,0:88,68:83,10:73,28:70,55:58,50:56,6:54,24:53,12:52,35:51,17:43,23:43,65:40,21:34,40:33,18:31,57:29,58:24,25:23,32:22,47:21,69:20,72:18,64:17,61:17,20:15,11:15,53:11,48:9,2:7,67:6,44:6,45:5,37:5,46:4,43:4,15:4,38:3,8:3,9:3,34:2,36:2,52:1,49:1,56:1,27:1,39:1,26:1,41:1',
+  'amber|hop|ince':'1:468,5:367,4:300,7:270,0:263,66:234,3:204,40:171,42:155,31:138,54:124,33:91,13:84,24:81,71:76,30:72,62:62,28:62,51:58,32:57,17:54,60:48,68:31,63:31,12:28,23:27,2:25,64:24,65:22,6:21,50:20,58:19,21:17,67:10,47:10,57:9,20:9,55:9,53:8,61:8,8:8,25:7,15:7,27:7,35:6,48:5,18:5,37:4,10:4,43:3,70:2,59:2,9:2,46:2,41:1,36:1,56:1,38:1,72:1,44:1,19:1',
+  'amber|hop|orta':'1:568,5:370,66:370,7:272,4:258,0:244,3:218,42:213,40:171,31:141,54:98,17:94,24:79,30:76,32:74,33:67,71:65,62:63,51:42,64:40,63:32,68:28,60:27,13:22,28:19,2:19,23:18,50:17,6:12,21:11,12:11,9:11,27:9,65:9,58:9,55:8,20:8,25:8,11:8,47:6,70:6,10:6,61:5,48:5,37:4,53:4,8:4,57:4,35:3,18:3,29:3,59:3,19:3,43:2,36:2,15:2,46:2,67:1,41:1',
+  'amber|hop|dolgun':'1:1468,5:877,66:602,7:552,42:397,4:337,40:244,3:195,33:179,31:146,0:137,24:134,17:127,32:126,54:105,62:77,10:74,29:58,71:53,64:53,60:49,30:45,2:45,51:31,13:31,6:31,12:26,63:24,23:24,59:23,58:21,50:17,68:17,21:14,65:13,47:13,20:12,70:10,53:10,9:9,25:8,8:8,69:7,61:7,48:7,18:7,28:6,27:5,35:5,67:5,37:5,43:3,11:3,45:2,72:2,44:2,26:2,55:2,41:2,52:1,15:1,39:1,57:1,49:1,36:1',
+  'amber|cokaci|ince':'5:988,40:607,1:301,7:241,3:216,4:201,66:131,32:95,0:90,54:72,42:65,13:59,2:48,24:47,31:46,71:40,30:31,33:30,28:24,12:22,60:20,51:20,9:20,6:18,17:18,58:15,23:14,8:13,20:13,63:13,27:12,62:11,68:11,64:9,67:7,39:7,48:7,50:6,21:5,25:5,55:5,36:4,65:4,61:4,15:4,11:4,46:3,35:3,57:3,18:2,10:2,37:2,53:2,34:1,56:1,29:1,41:1,19:1,52:1,38:1',
+  'amber|cokaci|orta':'5:952,40:492,1:313,7:182,3:169,4:139,66:109,42:94,32:87,0:75,2:46,54:42,31:37,24:34,71:32,30:26,13:25,9:23,64:19,17:19,33:17,62:13,63:13,6:12,12:9,58:8,28:8,68:8,8:6,10:6,25:5,47:5,51:5,65:5,60:4,61:4,23:4,50:3,35:3,27:3,48:2,59:2,45:1,57:1,29:1,15:1,11:1,19:1,20:1,43:1',
+  'amber|cokaci|dolgun':'5:2020,1:756,40:741,7:444,66:239,4:212,42:196,3:156,32:154,2:104,10:69,17:68,24:62,0:57,54:54,71:36,31:35,13:28,64:27,33:26,30:24,9:22,6:21,60:16,59:15,62:14,29:13,63:12,12:11,23:11,51:11,58:9,20:8,70:8,65:8,8:7,47:7,28:6,68:6,35:6,69:5,25:3,48:3,37:3,19:3,50:2,18:2,57:2,56:1,53:1,21:1,61:1,27:1,36:1,72:1,11:1,15:1,39:1,55:1',
+  'koyu|malt|ince':'13:921,28:407,63:194,25:170,4:138,71:115,48:97,11:82,58:57,23:43,14:41,8:36,55:36,33:35,6:32,62:31,30:30,31:30,7:28,21:24,67:23,54:22,27:21,60:21,1:17,53:16,50:14,65:13,35:12,39:11,3:11,42:11,18:10,12:8,61:8,29:7,15:6,72:6,51:5,46:5,24:5,49:4,5:4,36:4,70:3,68:2,57:2,20:2,10:2,56:2,9:2,22:1,38:1,64:1,32:1,37:1,66:1,26:1,44:1,47:1,0:1,19:1',
+  'koyu|malt|orta':'63:285,25:132,13:114,11:107,58:61,4:60,8:53,71:53,23:51,33:46,48:42,28:39,62:38,42:34,55:33,50:32,60:30,61:27,21:26,30:26,53:22,6:19,31:18,39:17,65:15,7:14,1:13,54:12,27:10,29:10,46:9,3:8,35:8,36:7,51:6,5:6,12:5,18:3,67:3,24:3,19:3,14:2,70:2,66:2,49:2,10:1,57:1,0:1,40:1,17:1,26:1,64:1,9:1,45:1',
+  'koyu|malt|dolgun':'29:346,63:202,70:188,4:163,33:123,53:113,58:112,25:85,23:82,11:81,13:74,71:55,48:50,55:45,62:41,42:37,7:35,31:34,1:33,8:33,28:31,21:29,30:27,59:26,6:25,60:23,72:21,65:19,39:19,69:18,5:18,10:18,61:18,35:17,46:16,50:13,27:11,54:10,16:9,3:8,36:8,40:8,49:7,12:7,24:7,20:6,51:5,66:4,15:4,45:3,18:3,22:2,0:2,19:2,14:1,68:1,38:1,57:1,67:1,9:1,2:1',
+  'koyu|dengeli|ince':'4:656,58:599,13:546,48:419,23:293,28:273,11:215,63:160,31:149,71:148,33:145,27:137,8:129,61:112,54:112,46:96,53:82,60:81,50:77,39:75,30:49,62:47,36:46,25:43,42:42,7:40,3:37,67:36,65:32,1:31,21:27,6:24,55:22,5:15,14:14,51:13,57:12,12:10,66:10,20:9,24:9,47:8,68:8,41:7,18:7,0:6,44:6,15:6,29:5,9:5,49:4,37:4,35:4,32:4,22:2,70:2,40:2,17:2,72:2,64:2,19:2,43:1,59:1,26:1,2:1',
+  'koyu|dengeli|orta':'58:880,4:714,23:348,61:343,53:280,11:251,48:234,8:189,31:166,63:156,50:141,33:134,54:120,71:102,39:98,46:91,13:76,42:70,27:67,30:61,60:57,65:53,6:46,36:46,62:44,3:38,25:37,21:34,1:33,7:25,5:25,28:20,0:19,57:18,51:16,12:10,55:10,29:9,66:9,24:8,44:7,20:7,40:5,18:5,68:4,17:3,67:3,37:3,49:3,41:2,43:2,22:2,10:2,47:2,35:2,14:1,32:1,70:1,59:1,72:1,9:1',
+  'koyu|dengeli|dolgun':'4:1251,58:1088,53:998,23:529,33:411,48:281,8:252,31:243,11:188,61:164,46:155,29:147,71:144,54:114,63:114,39:110,1:95,60:88,50:85,42:71,30:69,70:69,65:67,62:63,27:62,13:61,7:59,36:47,5:42,3:41,10:41,25:39,6:34,21:33,28:32,66:22,59:20,55:20,72:18,12:15,40:14,0:11,18:10,24:10,69:9,64:7,51:5,57:5,47:5,17:5,20:4,68:3,32:3,2:3,9:3,41:2,35:2,44:2,37:2,19:2,49:2,45:1,16:1,15:1',
+  'koyu|hop|ince':'4:522,58:498,27:474,48:210,8:196,23:174,13:119,39:104,5:88,71:84,33:61,36:58,31:56,54:54,11:52,28:51,61:49,46:49,3:45,53:43,63:42,7:39,60:32,40:28,30:27,1:25,65:23,66:17,62:16,0:13,25:13,32:13,42:12,6:11,19:11,50:10,24:9,17:5,55:4,12:4,51:4,67:4,14:3,57:3,29:3,21:3,20:2,64:2,10:2,44:2,18:2,15:2,56:2,47:2,68:2,43:1,41:1,37:1,72:1,2:1,9:1',
+  'koyu|hop|orta':'58:672,4:421,8:232,5:216,27:185,23:171,53:152,39:124,48:107,61:86,54:73,46:71,3:63,40:62,36:55,7:52,31:51,71:49,11:48,33:47,65:37,1:37,30:30,63:29,62:21,42:21,66:20,19:19,60:18,13:17,0:14,32:13,50:12,6:10,25:8,24:8,37:7,64:4,17:4,21:4,57:3,12:3,44:3,28:2,47:2,72:2,2:2,51:1,29:1,10:1,9:1',
+  'koyu|hop|dolgun':'58:803,4:789,53:562,5:329,8:320,23:252,27:201,39:123,48:113,1:111,7:104,33:102,71:81,46:78,61:76,31:73,54:69,40:63,11:62,42:58,3:54,36:54,30:40,66:36,29:33,19:26,65:24,10:22,63:22,60:21,6:19,13:17,62:17,50:17,0:16,32:12,24:11,64:10,17:10,70:9,2:7,28:6,25:5,69:5,59:5,68:5,21:4,72:4,20:3,44:3,67:2,57:2,47:2,12:2,9:2,37:1,45:1,55:1,35:1,56:1',
+  'koyu|cokaci|ince':'5:326,58:269,4:260,27:242,8:160,40:96,39:88,48:66,23:60,13:57,3:55,7:51,36:51,71:47,19:37,1:30,54:24,31:21,33:20,65:17,32:16,28:15,61:15,0:14,63:14,11:14,46:12,42:11,53:10,62:9,66:8,30:7,6:7,12:6,17:6,60:6,10:5,51:5,21:4,64:4,9:4,25:3,2:3,41:2,20:2,34:1,55:1,35:1,37:1,15:1,24:1,18:1,68:1,50:1',
+  'koyu|cokaci|orta':'5:584,58:243,4:224,40:172,8:126,27:105,19:87,39:75,23:50,3:50,53:40,7:37,48:35,71:27,11:27,36:26,54:26,31:24,61:24,1:23,32:19,46:18,13:15,66:13,6:12,42:10,0:10,63:9,33:9,65:7,9:7,30:5,25:5,2:5,24:4,28:4,37:3,10:3,60:3,59:3,50:3,17:2,20:1,64:1,21:1,62:1,15:1,51:1,22:1',
+  'koyu|cokaci|dolgun':'5:782,4:323,58:230,40:212,8:172,19:106,53:106,7:96,27:90,1:88,23:76,3:68,39:64,71:57,42:51,48:44,54:36,33:33,31:25,11:23,32:23,6:23,61:21,66:21,36:19,13:17,10:16,65:15,2:15,29:14,60:11,0:10,63:9,46:9,59:6,17:6,24:6,70:5,55:5,12:4,50:4,30:4,62:4,64:3,69:3,37:3,25:3,28:2,20:2,9:2,41:1,44:1,57:1',
+  'cokkoyu|malt|ince':'48:327,13:199,39:134,8:91,28:52,58:52,71:37,11:34,53:33,27:22,36:20,25:18,23:15,63:15,14:13,46:13,7:13,67:13,6:12,4:11,60:10,3:9,65:6,30:5,42:5,12:4,55:4,54:4,5:4,62:4,40:3,1:3,31:3,57:2,21:2,61:2,15:2,51:2,20:2,19:2,45:1,16:1,59:1,10:1,18:1,72:1,24:1,47:1',
+  'cokkoyu|malt|orta':'39:195,48:184,8:115,58:89,53:68,11:57,13:37,23:19,36:17,25:16,7:15,46:14,71:13,27:11,4:11,63:10,5:9,65:9,60:7,6:7,1:5,28:5,61:3,62:3,55:3,42:3,3:3,31:3,33:2,67:2,54:2,40:2,50:2,19:2,21:2,12:1,24:1,15:1,30:1,70:1,22:1',
+  'cokkoyu|malt|dolgun':'53:222,48:191,39:189,8:151,58:133,11:62,29:30,23:29,71:28,27:23,63:22,36:21,7:20,46:18,6:15,13:14,4:14,60:13,25:10,70:9,33:8,65:7,10:7,72:6,59:6,16:6,5:5,42:5,30:5,61:5,69:4,62:4,54:4,40:4,1:4,24:4,21:3,45:2,50:2,31:2,12:1,66:1,44:1,20:1,3:1,14:1',
+  'cokkoyu|dengeli|ince':'48:948,39:740,8:330,58:296,13:147,27:126,36:113,53:104,11:89,71:47,23:41,46:36,28:33,4:32,54:18,65:17,61:15,7:13,6:11,67:10,30:9,14:9,60:8,33:8,31:7,63:7,3:5,62:5,1:5,50:4,5:4,25:3,72:3,41:2,21:2,20:2,12:2,40:2,51:2,24:2,22:1,55:1,44:1,56:1,37:1,19:1',
+  'cokkoyu|dengeli|orta':'39:1073,48:505,58:500,8:449,53:292,36:142,11:108,27:82,46:66,23:40,71:34,13:29,65:29,61:28,4:27,7:23,6:14,60:14,5:12,3:11,54:9,1:8,31:8,28:7,30:7,50:6,25:6,63:6,40:3,33:3,42:3,32:3,24:2,62:2,43:1,20:1,66:1,21:1,17:1,57:1,44:1,68:1,55:1,59:1,51:1,19:1',
+  'cokkoyu|dengeli|dolgun':'53:1458,39:1096,48:728,8:708,58:662,36:168,11:150,46:96,27:87,23:85,4:63,65:57,71:51,61:44,7:33,13:28,5:28,33:24,60:24,6:21,31:18,10:14,29:14,63:13,28:12,1:12,30:12,3:11,54:10,50:10,40:10,70:9,25:8,42:7,69:6,72:6,0:5,59:5,62:4,19:4,24:3,66:2,51:2,57:2,12:1,18:1,21:1,68:1,17:1,16:1,20:1,32:1,55:1,45:1,44:1,15:1,56:1,64:1,9:1',
+  'cokkoyu|hop|ince':'39:878,8:439,27:435,48:341,58:221,36:136,5:46,13:45,46:44,53:44,11:34,71:30,23:27,65:23,7:17,4:13,40:13,6:9,3:8,54:8,28:7,19:6,33:5,61:5,1:5,50:4,30:4,63:3,0:3,60:3,44:2,62:2,24:2,66:1,10:1,37:1,51:1',
+  'cokkoyu|hop|orta':'39:1036,8:625,58:346,27:208,48:177,53:132,36:130,5:119,46:47,40:46,11:37,61:24,65:23,7:21,23:19,4:19,71:19,19:16,6:13,13:12,3:8,54:6,1:5,31:4,32:4,60:4,33:3,62:2,18:2,28:2,66:2,9:2,24:2,10:1,0:1,63:1,37:1,2:1,25:1,50:1',
+  'cokkoyu|hop|dolgun':'39:1098,8:1036,53:655,58:430,48:253,27:226,5:213,36:193,46:66,40:64,11:50,23:46,4:42,7:40,65:36,71:32,19:30,13:28,1:16,61:15,10:15,3:12,6:11,60:10,32:9,24:9,31:6,54:6,33:5,29:5,72:3,55:3,30:3,69:3,63:3,50:3,25:2,37:2,62:2,70:2,66:2,17:1,59:1,67:1,44:1,47:1,20:1,28:1,12:1',
+  'cokkoyu|cokaci|ince':'39:469,8:303,27:219,5:151,58:150,48:107,40:79,36:71,19:32,13:24,53:23,23:22,11:20,4:20,65:13,7:9,3:8,1:8,6:8,46:6,71:5,33:4,32:2,30:2,67:2,28:2,66:1,17:1,57:1,60:1,29:1,21:1,54:1,10:1,12:1,55:1,50:1,31:1,24:1,0:1,42:1,69:1,2:1',
+  'cokkoyu|cokaci|orta':'39:436,8:329,5:280,40:129,58:100,27:75,19:70,48:46,36:45,53:38,46:20,7:15,65:13,11:10,23:10,71:7,4:7,61:5,54:5,13:5,3:5,6:3,1:3,32:2,10:2,37:2,24:2,47:1,12:1,60:1,33:1,30:1,64:1,42:1',
+  'cokkoyu|cokaci|dolgun':'5:514,39:473,8:454,40:194,53:172,58:168,27:117,19:116,7:60,48:57,36:57,11:25,71:18,23:15,46:14,6:14,10:13,1:12,4:12,61:9,32:9,3:8,65:8,29:7,54:7,24:7,33:5,13:5,60:5,66:4,59:3,12:3,2:3,31:2,70:2,0:2,22:1,15:1,30:1,50:1,62:1,9:1,42:1'
+};
+
+// Matris tek seferlik çözülür (60 satır string → [[ad,n],...])
+window._brKovaCoz = function(){
+  if(window.__brKovaP) return window.__brKovaP;
+  var out = {}, AD = window._BR_STILAD || [], K = window._BR_KOVA || {};
+  Object.keys(K).forEach(function(k){
+    out[k] = K[k] ? K[k].split(',').map(function(p){ var q = p.split(':'); return [AD[+q[0]], +q[1]]; }) : [];
+  });
+  window.__brKovaP = out;
   return out;
 };
 
-// Bu kovada GERÇEKTEN var olan sınıflar → ölü çip yok. Sayaç DİĞER eksenin
-// süzgeci uygulanmış hâlden gelir (çapraz seçimde 0 gösterir, kaybolmaz).
-// Dönen: [[sinif, caprazAdet, kovaAdet], ...]
-window._bmProfilKarakterSecenek = function(stiller, eksen){
-  try{
-    var E = window._BQ_KARAKTER && window._BQ_KARAKTER[eksen]; if(!E) return [];
-    var say = {}, capraz = {};
-    (stiller || []).forEach(function(st){ var c = window._bmKarakterSinif(st[0], eksen); if(c) say[c] = (say[c] || 0) + 1; });
-    window._bmProfilSuz(stiller, eksen).forEach(function(o){ var c = window._bmKarakterSinif(o.st[0], eksen); if(c) capraz[c] = (capraz[c] || 0) + 1; });
-    return E.sira.filter(function(c){ return say[c]; }).map(function(c){ return [c, capraz[c] || 0, say[c]]; });
-  }catch(_e){ return []; }
+// 5 eksen TEK tanımda: taban üçlü _AK_EKSEN'den, karakter ikilisi
+// _BQ_KARAKTER'den gelir — hiçbiri yeniden türetilmez (BQ1 tabloları AYNEN).
+window._brEksenler = function(){
+  var A = window._AK_EKSEN || {}, B = window._BQ_KARAKTER || {};
+  var o = [];
+  ['renk','aci','govde'].forEach(function(k){
+    if(!A[k]) return;
+    o.push({ k:k, ad:A[k].ad, ikon:A[k].ikon, sec:A[k].secenekler.map(function(s){ return [s[0], s[1], (s[2] == null ? null : s[2]), '']; }) });
+  });
+  [['maya','Maya karakteri'],['malt','Malt karakteri']].forEach(function(p){
+    var E = B[p[0]]; if(!E) return;
+    o.push({ k:p[0], ad:p[1], ikon:E.ikon, sec:E.sira.map(function(c){ return [c, E.et[c] || c, null, E.uzun[c] || '']; }) });
+  });
+  return o;
 };
 
-// Taban eksen değişince karakter süzgeci yeni kovada olmayabilir → düşürülür
-// AMA ekranda söylenir (BB dersi: sessiz boş liste yok).
-window._bmProfilKarakterDogrula = function(){
-  try{
-    var p = window.__akProfil || {}; window.__akDusen = '';
-    if(!p.maya && !p.malt) return;
-    var k = window._bmProfilKova();
-    if(!k || !k.stiller || !k.stiller.length) return;
-    ['maya','malt'].forEach(function(e){
-      var sec = p[e] || ''; if(!sec) return;
-      var v = k.stiller.some(function(st){ return window._bmKarakterSinif(st[0], e) === sec; });
-      if(!v){
-        p[e] = ''; var E = window._BQ_KARAKTER[e];
-        window.__akDusen += (window.__akDusen ? ' · ' : '') + E.ikon + ' ' + (E.et[sec] || sec);
-      }
-    });
-  }catch(_e){ window.__akDusen = ''; }
+// Kısmî seçim → kova birleşimi. SEÇİLMEYEN EKSEN SÜZMEZ (hepsi isteğe bağlı).
+// Toplam reçete sayısı _PROFIL_STIL'den okunur (tek otorite, AK ile aynı sayı).
+window._brTopla = function(p){
+  p = p || {};
+  var P = window._brKovaCoz(), T = window._PROFIL_STIL || {}, m = {}, tot = 0, kn = 0;
+  Object.keys(P).forEach(function(k){
+    var a = k.split('|');
+    if(p.renk && a[0] !== p.renk) return;
+    if(p.aci && a[1] !== p.aci) return;
+    if(p.govde && a[2] !== p.govde) return;
+    kn++;
+    tot += (T[k] ? T[k][0] : 0);
+    var L = P[k];
+    for(var i = 0; i < L.length; i++) m[L[i][0]] = (m[L[i][0]] || 0) + L[i][1];
+  });
+  return { m:m, toplam:tot, kova:kn };
 };
+
+window._BR_MIN_N = 25;      // korpus gürültü tabanı (AK ile aynı)
+window._BR_MAX_ONERI = 6;   // AK/AM şeması — >6 kararı Kaan'a sorulmadan değişmez
+
+// Canlı sonuç: seçime göre stil listesi. Karakter süzgeci TAM havuza uygulanır
+// (BQ1'de yalnız top-6'ya uygulanıyordu; o yüzden "amber+malt+dolgun+baharatlı"
+// 3 stil veriyordu, gerçekte 9 tane var).
+window._brSonuc = function(p){
+  p = p || window.__akProfil || {};
+  var r = window._brTopla(p);
+  var ISK = (typeof STIL_ISKELET !== 'undefined' && STIL_ISKELET) ? STIL_ISKELET : {};
+  var liste = Object.keys(r.m).filter(function(a){ return r.m[a] >= window._BR_MIN_N; });
+  var havuz = liste.length;
+  if(p.maya) liste = liste.filter(function(a){ return window._bmKarakterSinif(a, 'maya') === p.maya; });
+  if(p.malt) liste = liste.filter(function(a){ return window._bmKarakterSinif(a, 'malt') === p.malt; });
+  liste.sort(function(a, b){ return (r.m[b] * (ISK[b] ? 1.35 : 1)) - (r.m[a] * (ISK[a] ? 1.35 : 1)); });
+  var esl = 0; liste.forEach(function(a){ esl += r.m[a]; });
+  return { toplam:r.toplam, kova:r.kova, havuz:havuz, stiller:liste, esleseN:esl, m:r.m };
+};
+
+// Bir çip seçilseydi kaç stil kalırdı? Çipte yazılı sayı BUDUR — kullanıcı
+// çıkmaz sokağı TIKLAMADAN ÖNCE görür (0 yazan çip = boş sonuç).
+window._brCipSayi = function(eksen, deger){
+  var p = window.__akProfil || {}, q = {};
+  ['renk','aci','govde','maya','malt'].forEach(function(k){ q[k] = p[k] || ''; });
+  q[eksen] = deger;
+  return window._brSonuc(q).stiller.length;
+};
+
+// Boş sonuçta: hangi eksen daraltıyor? Her seçili ekseni TEK TEK bırakıp ölç.
+// Sessiz boşluk YOK (BB dersi) — hangi ekseni gevşetmenin ne kazandırdığı yazılır.
+window._brDaraltan = function(){
+  var p = window.__akProfil || {}, out = [];
+  ['renk','aci','govde','maya','malt'].forEach(function(e){
+    if(!p[e]) return;
+    var q = {}; ['renk','aci','govde','maya','malt'].forEach(function(k){ q[k] = p[k] || ''; });
+    q[e] = '';
+    out.push({ eksen:e, deger:p[e], kalan:window._brSonuc(q).stiller.length });
+  });
+  out.sort(function(a, b){ return b.kalan - a.kalan; });
+  return out;
+};
+
 // Seçim GEÇİCİ: reçete nesnesine (S) YAZILMAZ — bu bir keşif aracı, reçete verisi değil.
-window.__akProfil = { renk:'', aci:'', govde:'', maya:'', malt:'' }; // maya/malt: BQ1 karakter süzgeci
+window.__akProfil = { renk:'', aci:'', govde:'', maya:'', malt:'' };
+window.__brAcik = false;
 
 window._bmProfilSec = function(eksen, deger){
   try{
     if(!window.__akProfil) window.__akProfil = { renk:'', aci:'', govde:'', maya:'', malt:'' };
     window.__akProfil[eksen] = (window.__akProfil[eksen] === deger) ? '' : deger; // tekrar tık = temizle
-    // BQ1: taban eksen değişti → karakter süzgeci yeni kovada var mı?
-    if(eksen === 'renk' || eksen === 'aci' || eksen === 'govde'){ if(typeof window._bmProfilKarakterDogrula === 'function') window._bmProfilKarakterDogrula(); }
-    else window.__akDusen = '';
-    if(typeof render === 'function') render();
+    // Seçim yapıldıysa o ekseni katla (sonuç yukarı çıksın); temizlendiyse zaten açılır.
+    if(!window.__brGenis) window.__brGenis = {};
+    window.__brGenis[eksen] = false;
+    // BQ1'in "kovada yoksa süzgeci sessizce düşür" davranışı KALDIRILDI: 5 eksen
+    // de ekranda göründüğü için kullanıcının seçimini geri almak kafa karıştırır.
+    // Seçim KORUNUR, çipte 0 yazar, boş sonuç hangi eksenin daralttığını söyler.
+    if(window.__brAcik && document.getElementById('br-tam')) window._brCiz();
+    else if(typeof render === 'function') render();
   }catch(_e){}
+};
+
+window._brGenislet = function(eksen){
+  if(!window.__brGenis) window.__brGenis = {};
+  window.__brGenis[eksen] = true;
+  if(window.__brAcik && document.getElementById('br-tam')) window._brCiz();
+  else if(typeof render === 'function') render();
 };
 
 window._bmProfilSifirla = function(){
   window.__akProfil = { renk:'', aci:'', govde:'', maya:'', malt:'' };
-  window.__akDusen = '';
+  window.__brGenis = {};
+  if(window.__brAcik && document.getElementById('br-tam')) window._brCiz();
+  else if(typeof render === 'function') render();
+};
+
+window._brAc = function(){
+  window.__brAcik = true;
   if(typeof render === 'function') render();
-};
-
-// Seçili profilin kovasını çöz → [toplamN, [[ad,n],...]] veya null
-window._bmProfilKova = function(){
-  var p = window.__akProfil || {};
-  if(!p.renk || !p.aci || !p.govde) return null;
-  var k = p.renk + '|' + p.aci + '|' + p.govde;
-  var v = window._PROFIL_STIL && window._PROFIL_STIL[k];
-  return v ? { key:k, toplam:v[0], stiller:v[1] } : { key:k, toplam:0, stiller:[] };
-};
-
-// Öneriyi uygula: hedef stili kur + mevcut iskelet yoluna devret.
-// doldur=true  → bmStilIskeletDoldur() (iskelet varsa B katmanı, yoksa C katmanı:
-//                BJCP hedefleri + maya önerisi, malt/hop UYDURULMAZ — V1a dersi)
-// doldur=false → yalnız hedef stil (dropdown ile aynı sonuç)
-window._bmProfilStilUygula = function(kovaKey, idx, doldur){
   try{
-    var v = window._PROFIL_STIL && window._PROFIL_STIL[kovaKey];
-    if(!v || !v[1] || !v[1][idx]) return;
-    var ad = v[1][idx][0];
-    if(typeof S === 'undefined' || !S) return;
+    var el = document.getElementById('br-tam');
+    if(el){ window._bmModalPrevFocus = document.activeElement; el.focus(); }
+  }catch(_e){}
+};
+window._brKapat = function(){
+  window.__brAcik = false;
+  if(typeof render === 'function') render();
+  try{ var p = window._bmModalPrevFocus; window._bmModalPrevFocus = null; if(p && p.focus && document.contains(p)) p.focus(); }catch(_e){}
+};
+// Escape: input/select odaktayken karışmaz (mevcut A11Y-MODAL kuralıyla aynı)
+document.addEventListener('keydown', function(e){
+  if(e.key !== 'Escape' || !window.__brAcik) return;
+  var t = e.target;
+  if(t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT')) return;
+  try{ e.stopPropagation(); e.preventDefault(); }catch(_){}
+  window._brKapat();
+}, true);
+
+// Yalnız tam ekranı yeniden çiz (tam render kaydırma konumunu sıfırlar ve
+// tüm uygulamayı yeniden kurar — çip tıklaması bunu hak etmiyor).
+window._brCiz = function(){
+  try{
+    var el = document.getElementById('br-tam');
+    if(!el || !window.__brAcik){ if(typeof render === 'function') render(); return; }
+    var g = el.querySelector('.br-tam-govde'), st = g ? g.scrollTop : 0;
+    el.outerHTML = window._brTamHTML();
+    var g2 = document.querySelector('#br-tam .br-tam-govde');
+    if(g2) g2.scrollTop = st;
+  }catch(e){ try{ console.warn('_brCiz', e); }catch(_){} }
+};
+
+// ── Eylemler: AK/AV yolları AYNEN, yalnız stil ADIYLA çağrılabilir hâle geldi
+// (BR listesi artık tek bir kovadan gelmiyor; kova indeksi anlamsız).
+window._brStilKur = function(ad, doldur){
+  try{
+    if(!ad || typeof S === 'undefined' || !S) return;
+    window.__brAcik = false;
     S.stil = ad;
     if(doldur && typeof window.bmStilIskeletDoldur === 'function'){
       // __stilSecKaynak='iskelet' bmStilIskeletDoldur içinde kurulur (Sprint Z:
@@ -27016,99 +27273,132 @@ window._bmProfilStilUygula = function(kovaKey, idx, doldur){
     if(typeof _receteYazSync === 'function') _receteYazSync();
     if(typeof render === 'function') render();
     if(typeof flash === 'function') flash('🎯 Hedef stil: ' + ad, 'ok');
+  }catch(e){ try{ console.warn('_brStilKur', e); }catch(_){} }
+};
+window._brYeniRecete = function(ad){
+  try{
+    if(!ad) return null;
+    window.__brAcik = false;
+    return window._bmStildenYeniRecete ? window._bmStildenYeniRecete(ad) : null;
+  }catch(e){ if(window.bmHataKaydet)bmHataKaydet('calc', e, '_brYeniRecete'); return null; }
+};
+// AK/AV1 imzaları KORUNDU (kovaKey + indeks) — mevcut çağrılar aynen çalışır.
+window._bmProfilStilUygula = function(kovaKey, idx, doldur){
+  try{
+    var v = window._PROFIL_STIL && window._PROFIL_STIL[kovaKey];
+    if(!v || !v[1] || !v[1][idx]) return;
+    window._brStilKur(v[1][idx][0], doldur);
   }catch(e){ try{ console.warn('_bmProfilStilUygula', e); }catch(_){} }
 };
-
-// SPRINT AV1: öneri satırından DOĞRUDAN yeni reçete (Kaan: "üstüne basayım ve yeni reçete
-// oluşsun"). _bmProfilStilUygula (mevcut "Doldur") AYNEN durur — bu AYRI bir eylem.
 window._bmProfilYeniRecete = function(kovaKey, idx){
   try{
     var v = window._PROFIL_STIL && window._PROFIL_STIL[kovaKey];
     if(!v || !v[1] || !v[1][idx]) return null;
-    return window._bmStildenYeniRecete ? window._bmStildenYeniRecete(v[1][idx][0]) : null;
-  }catch(e){ if(window.bmHataKaydet)bmHataKaydet('calc',e,'_bmProfilYeniRecete'); return null; }
+    return window._brYeniRecete(v[1][idx][0]);
+  }catch(e){ if(window.bmHataKaydet)bmHataKaydet('calc', e, '_bmProfilYeniRecete'); return null; }
 };
+// Listedeki satır indeksiyle (ad tırnak/kaçış sorunu üretmesin diye)
+window._brYeniIx = function(i){ var L = window.__brSon || []; return L[i] ? window._brYeniRecete(L[i]) : null; };
+window._brDoldurIx = function(i, doldur){ var L = window.__brSon || []; if(L[i]) window._brStilKur(L[i], doldur !== false); };
 
-// ── Sunum: "Hedef Stil" dropdown'unun ALTINA açılır panel (dropdown AYNEN kalır)
+// ── Sunum 1: "Hedef Stil" dropdown'unun altındaki GİRİŞ (dropdown AYNEN kalır)
 window._bmProfilStilKart = function(){
   try{
-    var E = window._AK_EKSEN, T = window._PROFIL_STIL;
-    if(!E || !T) return '';
-    var _e = (typeof esc === 'function') ? esc : function(s){ return String(s==null?'':s); };
-    var p = window.__akProfil || { renk:'', aci:'', govde:'', maya:'', malt:'' };
-    // __akAcik: kullanicinin panelidegin actigi bilgisi (render'lar arasi korunur;
-    // cip secili degilken bile panel kapanmasin diye). Gecici, S'ye yazilmaz.
-    var acik = !!(p.renk || p.aci || p.govde) || !!window.__akAcik;
-
-    function cipSatir(anahtar){
-      var e = E[anahtar];
-      var cips = e.secenekler.map(function(o){
-        var sec = p[anahtar] === o[0];
-        var nokta = '';
-        if(o[2] != null && typeof srmR === 'function'){
-          nokta = '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:' + srmR(o[2]) + ';margin-right:4px;vertical-align:-1px;border:1px solid rgba(0,0,0,.15)"></span>';
-        }
-        return '<button type="button" onclick="_bmProfilSec(\'' + anahtar + '\',\'' + o[0] + '\')" '
-          + 'aria-pressed="' + (sec ? 'true' : 'false') + '" '
-          + 'style="background:' + (sec ? 'var(--bakir)' : 'var(--card)') + ';color:' + (sec ? '#fff' : 'var(--metin)')
-          + ';border:1px solid ' + (sec ? 'var(--bakir)' : 'var(--bor)') + ';border-radius:14px;padding:4px 10px;font-size:11px;'
-          + 'font-weight:' + (sec ? '700' : '500') + ';cursor:pointer;font-family:var(--font-govde);white-space:nowrap">'
-          + nokta + _e(o[1]) + '</button>';
-      }).join('');
-      return '<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px;flex-wrap:wrap">'
-        + '<span style="font-size:10px;color:var(--soluk);font-weight:600;min-width:62px">' + e.ikon + ' ' + _e(e.ad) + '</span>'
-        + '<div style="display:flex;gap:4px;flex-wrap:wrap;flex:1">' + cips + '</div>'
-        + '</div>';
+    if(!window._AK_EKSEN || !window._PROFIL_STIL) return '';
+    var _e = (typeof esc === 'function') ? esc : function(s){ return String(s == null ? '' : s); };
+    var p = window.__akProfil || {};
+    var sec = window._brEksenler().filter(function(x){ return p[x.k]; }).map(function(x){
+      var o = null; x.sec.forEach(function(s){ if(s[0] === p[x.k]) o = s; });
+      return x.ikon + ' ' + _e(o ? o[1] : p[x.k]);
+    });
+    var ozet = '';
+    if(sec.length){
+      var s = window._brSonuc(p);
+      ozet = '<div class="bm-br-ozet" style="font-size:9.5px;color:var(--soluk);margin:2px 0 6px;line-height:1.4">'
+        + sec.join(' · ') + ' → <b>' + s.stiller.length + '</b> stil'
+        + ' <button type="button" onclick="_bmProfilSifirla()" style="background:none;border:none;color:var(--dim);font-size:9.5px;cursor:pointer;padding:0 4px;text-decoration:underline;font-family:var(--font-govde)">temizle</button></div>';
     }
+    return '<button type="button" class="bm-profil-sec" onclick="_brAc()" '
+      + 'style="width:100%;text-align:left;cursor:pointer;font-size:11px;font-weight:600;color:var(--kahve);padding:6px 8px;background:var(--bg2);border:1px solid var(--bor);border-radius:6px;font-family:var(--font-govde);margin:-4px 0 4px">'
+      + '🔎 Stilin adını bilmiyorum — <span style="font-weight:400;color:var(--soluk)">istediğim birayı tarif edeyim</span>'
+      + '</button>' + ozet;
+  }catch(e){ try{ console.warn('_bmProfilStilKart', e); }catch(_){} return ''; }
+};
 
-    var kova = window._bmProfilKova();
-    var sonuc = '';
-    if(!kova){
-      var kalan = ['renk','aci','govde'].filter(function(k){ return !p[k]; }).map(function(k){ return E[k].ad.toLowerCase(); });
-      sonuc = '<div style="font-size:10px;color:var(--dim);padding:6px 2px">Üç ekseni de seç — eksik: ' + _e(kalan.join(', ')) + '</div>';
-    } else if(!kova.stiller.length){
-      sonuc = '<div style="font-size:10px;color:var(--dim);padding:6px 2px">Bu profilde korpusta yeterli reçete yok.</div>';
-    } else {
-      // ── SPRINT BQ1: kademeli karakter süzgeci ───────────────────────────
-      // Çipler yalnız BU KOVADA gerçekten var olan sınıflar için basılır (ölü
-      // çip yok); bir eksende tek sınıf varsa o satır hiç çizilmez — süzemez.
-      var suzEksen = ['maya','malt'].map(function(e){ return { e:e, sec:window._bmProfilKarakterSecenek(kova.stiller, e) }; })
-                       .filter(function(x){ return x.sec.length >= 2; });
-      var suzHTML = suzEksen.map(function(x){
-        var E = window._BQ_KARAKTER[x.e], secili = p[x.e] || '';
-        var cips = x.sec.map(function(o){
-          var c = o[0], nc = o[1], sec = (secili === c);
-          return '<button type="button" onclick="_bmProfilSec(\'' + x.e + '\',\'' + c + '\')" '
-            + 'aria-pressed="' + (sec ? 'true' : 'false') + '" title="' + _e(E.uzun[c] || '') + '" '
-            + 'style="background:' + (sec ? 'var(--bakir)' : 'var(--card)') + ';color:' + (sec ? '#fff' : 'var(--metin)')
-            + ';border:1px solid ' + (sec ? 'var(--bakir)' : 'var(--bor)') + ';border-radius:12px;padding:3px 8px;font-size:10.5px;'
-            + 'font-weight:' + (sec ? '700' : '500') + ';cursor:pointer;font-family:var(--font-govde);white-space:nowrap'
-            + (nc ? '' : ';opacity:.45') + '">'
-            + _e(E.et[c] || c) + ' <span style="opacity:.6;font-weight:400">' + nc + '</span></button>';
-        }).join('');
-        return '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap">'
-          + '<span style="font-size:10px;color:var(--soluk);font-weight:600;min-width:50px">' + E.ikon + ' ' + _e(E.ad) + '</span>'
-          + '<div style="display:flex;gap:4px;flex-wrap:wrap;flex:1;min-width:0">' + cips + '</div></div>';
+// ── Sunum 2: TAM EKRAN. render() çıktısının parçası (tam render'da kaybolmaz),
+// çip tıklamasında ise yalnız kendisi yeniden çizilir (_brCiz).
+window._brTamHTML = function(){
+  try{
+    if(!window.__brAcik) return '';
+    var _e = (typeof esc === 'function') ? esc : function(s){ return String(s == null ? '' : s); };
+    var say = function(n){ return (n || 0).toLocaleString('tr-TR'); };
+    var p = window.__akProfil || { renk:'', aci:'', govde:'', maya:'', malt:'' };
+    var s = window._brSonuc(p);
+    var karAktif = !!(p.maya || p.malt);
+
+    // ── 5 eksen, HEPSİ İSTEĞE BAĞLI, HEPSİ AYNI EKRANDA ──────────────────
+    // KATLAMA: bir eksen SEÇİLİNCE tek satıra iner (seçim + 'değiştir'), böylece
+    // sonuç yukarı çıkar. ÖLÇÜLDÜ (390×844): 5 eksen açıkken sonuç başlığı y=744,
+    // gövde 718px → her seviyede ~80px kaydırma gerekiyordu; katlamayla 3 seçimde
+    // sonuç ekrana giriyor. Eksen KAYBOLMUYOR: adı + seçimi + sayısı satırda duruyor,
+    // 'değiştir' tek dokunuşla geri açıyor. Seçimi olmayan eksen HER ZAMAN açık.
+    var genis = window.__brGenis || (window.__brGenis = {});
+    var bloklar = window._brEksenler().map(function(x){
+      var secili = p[x.k] || '';
+      var nokta = function(o){ return (o && o[2] != null && typeof srmR === 'function')
+        ? '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + srmR(o[2]) + ';margin-right:5px;border:1px solid rgba(0,0,0,.15);flex:none"></span>' : ''; };
+      if(secili && !genis[x.k]){
+        var o = null; x.sec.forEach(function(t){ if(t[0] === secili) o = t; });
+        return '<div class="br-eksen br-eksen-kapali">'
+          + '<span class="br-eksen-ad">' + x.ikon + ' ' + _e(x.ad) + '</span>'
+          + '<button type="button" class="br-cip br-cip-akt" aria-pressed="true" title="Seçimi kaldır" '
+          +   'onclick="_bmProfilSec(\'' + x.k + '\',\'' + secili + '\')">'
+          +   nokta(o) + _e(o ? o[1] : secili) + '<span class="br-cip-n">' + window._brCipSayi(x.k, secili) + '</span></button>'
+          + '<button type="button" class="br-cip br-cip-degis" onclick="_brGenislet(\'' + x.k + '\')">değiştir</button>'
+          + '</div>';
+      }
+      var secenek = [['', 'Fark etmez', null, x.ad + ' ekseni süzmesin']].concat(x.sec);
+      var cips = secenek.map(function(o){
+        var c = o[0], akt = (secili === c), kalan = window._brCipSayi(x.k, c);
+        return '<button type="button" class="br-cip' + (akt ? ' br-cip-akt' : '') + (kalan ? '' : ' br-cip-olu') + '" '
+          + 'onclick="_bmProfilSec(\'' + x.k + '\',\'' + c + '\')" aria-pressed="' + (akt ? 'true' : 'false') + '"'
+          + (o[3] ? ' title="' + _e(o[3]) + '"' : '') + '>'
+          + nokta(o) + _e(o[1]) + '<span class="br-cip-n">' + kalan + '</span></button>';
       }).join('');
-      var suzAktif = !!(p.maya || p.malt);
-      var goster = window._bmProfilSuz(kova.stiller);
-      var suzToplam = goster.reduce(function(a, o){ return a + o.st[1]; }, 0);
-      var dusenNot = window.__akDusen
-        ? '<div style="font-size:9.5px;color:var(--dim);background:var(--bg2);border:1px dashed var(--bor);border-radius:5px;padding:4px 6px;margin-bottom:4px">↩️ '
-            + _e(window.__akDusen) + ' süzgeci bu profilde yok — kaldırıldı.</div>'
-        : '';
-      var suzKutu = (suzHTML || dusenNot)
-        ? '<div style="margin-top:5px;padding-top:5px;border-top:1px dashed var(--bor)">'
-            + dusenNot
-            + (suzHTML ? '<div style="font-size:9.5px;color:var(--dim);margin-bottom:3px">Listeyi daralt (isteğe bağlı) — korpusta bu stilleri yapanların baskın seçimi:</div>' + suzHTML : '')
-            + '</div>'
-        : '';
+      return '<div class="br-eksen">'
+        + '<div class="br-eksen-ad">' + x.ikon + ' ' + _e(x.ad) + '</div>'
+        + '<div class="br-cip-kap">' + cips + '</div>'
+        + '</div>';
+    }).join('');
 
-      var satirlar = goster.map(function(o){
-        var st = o.st, i = o.i;
-        var ad = st[0], n = st[1];
-        // BQ1: satırda karakter — Kaan'ın ekranında Dunkelweizen ile Wee Heavy
-        // ayırt edilemiyordu. Baskınlık %40 altındaysa soluk + "?" (karışık).
+    // ── Canlı sonuç ──────────────────────────────────────────────────────
+    var MAX = window._BR_MAX_ONERI || 6;
+    var goster = s.stiller.slice(0, MAX);
+    window.__brSon = s.stiller.slice(0);
+    var sonucHTML;
+    if(!s.stiller.length){
+      var d = window._brDaraltan();
+      var en = d.length ? d[0] : null;
+      var eksAd = {};
+      window._brEksenler().forEach(function(x){
+        var et = {}; x.sec.forEach(function(o){ et[o[0]] = o[1]; });
+        eksAd[x.k] = { ikon:x.ikon, ad:x.ad, et:et };
+      });
+      var etiket = function(e, v){ var E = eksAd[e] || { ikon:'', et:{} }; return E.ikon + ' ' + _e((E.et && E.et[v]) || v); };
+      sonucHTML = '<div class="br-bos">'
+        + '<div style="font-weight:700;margin-bottom:4px">⚠️ Bu birleşimde stil yok</div>'
+        + (en
+            ? '<div>En çok daraltan eksen: <b>' + etiket(en.eksen, en.deger) + '</b> — bunu bırakırsan <b>' + en.kalan + '</b> stil kalır.</div>'
+            : '<div>Korpusta bu birleşimi yapan yok.</div>')
+        + '<div class="br-bos-btn">'
+        + d.map(function(o){
+            return '<button type="button" class="br-cip br-cip-gevset" onclick="_bmProfilSec(\'' + o.eksen + '\',\'' + o.deger + '\')">'
+              + '✕ ' + etiket(o.eksen, o.deger) + '<span class="br-cip-n">' + o.kalan + '</span></button>';
+          }).join('')
+        + '</div></div>';
+    } else {
+      var satirlar = goster.map(function(ad, i){
+        var n = s.m[ad] || 0;
         var kar = ['maya','malt'].map(function(e){
           var c = window._bmKarakterSinif(ad, e); if(!c) return '';
           var E = window._BQ_KARAKTER[e], py = window._bmKarakterPay(ad, e);
@@ -27119,70 +27409,52 @@ window._bmProfilStilKart = function(){
         var iskVar = (typeof STIL_ISKELET !== 'undefined') && !!STIL_ISKELET[ad];
         var bj = (typeof BJCP !== 'undefined') ? BJCP[ad] : null;
         var bant = (bj && bj.abv) ? ('%' + bj.abv[0] + '–' + bj.abv[1] + ' ABV') : '';
-        var pay = kova.toplam ? Math.round(100 * n / kova.toplam) : 0;
-        return '<div style="display:flex;align-items:center;gap:6px;padding:6px 0;border-top:1px solid var(--bor)">'
+        var pay = s.toplam ? Math.round(100 * n / s.toplam) : 0;
+        return '<div class="br-satir">'
           + '<div style="flex:1;min-width:0">'
-          +   '<div style="font-size:12px;font-weight:700;color:var(--kahve);line-height:1.25">' + _e(ad)
-          +     (iskVar ? ' <span style="font-size:9px;background:var(--ya);color:var(--yk);padding:1px 5px;border-radius:4px;font-weight:700;vertical-align:1px">iskelet</span>' : '')
+          +   '<div class="br-satir-ad">' + _e(ad)
+          +     (iskVar ? ' <span class="br-isk">iskelet</span>' : '')
           +   '</div>'
-          +   '<div style="font-size:9.5px;color:var(--soluk);margin-top:1px;line-height:1.45">' + n.toLocaleString('tr-TR') + ' reçete bu profilde (%' + pay + ')' + (bant ? ' · ' + bant : '') + (kar ? ' · ' + kar : '') + '</div>'
+          +   '<div class="br-satir-alt">' + say(n) + ' reçete bu profilde (%' + pay + ')' + (bant ? ' · ' + bant : '') + (kar ? ' · ' + kar : '') + '</div>'
           + '</div>'
-          // SPRINT AV1: iki eylem, karışmayacak biçimde. BİRİNCİL = "Yeni reçete" (Kaan'ın
-          // istediği tek dokunuş: öneriye bas → yeni reçete oluşsun). İKİNCİL = mevcut "Doldur"
-          // (AÇIK reçeteyi doldurmak isteyen için — davranışı DEĞİŞMEDİ). Dikey yığın: 390px'te
-          // yan yana iki buton metin sütununu ezerdi.
-          + '<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">'
-          +   '<button type="button" onclick="_bmProfilYeniRecete(\'' + kova.key + '\',' + i + ')" '
-          +     'style="background:var(--bakir);color:#fff;border:1px solid var(--bakir);border-radius:6px;padding:5px 8px;'
-          +     'font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:var(--font-govde)" '
+          // SPRINT AV1 ayrımı KORUNDU: BİRİNCİL "Yeni reçete", İKİNCİL "Doldur".
+          + '<div class="br-satir-btn">'
+          +   '<button type="button" class="br-btn-ana" onclick="_brYeniIx(' + i + ')" '
           +     'title="' + (iskVar ? 'Bu stilden YENİ reçete oluştur — iskelet batch boyutuna ölçeklenir (açık reçete korunur)' : 'Bu stilden YENİ reçete oluştur — hazır iskelet yok: BJCP hedefi + maya gelir, malt/hop boş kalır') + '">'
           +     '✨ Yeni reçete</button>'
-          +   '<button type="button" onclick="_bmProfilStilUygula(\'' + kova.key + '\',' + i + ',true)" '
-          +     'style="background:var(--card);color:var(--kahve);border:1px solid var(--bor);border-radius:6px;padding:4px 8px;font-size:9.5px;'
-          +     'font-weight:600;cursor:pointer;white-space:nowrap;font-family:var(--font-govde)" '
+          +   '<button type="button" class="br-btn-ikincil" onclick="_brDoldurIx(' + i + ',true)" '
           +     'title="' + (iskVar ? 'AÇIK reçeteyi bu stilin iskeletiyle doldur' : 'AÇIK reçetenin hedef stilini kur — BJCP hedefleri + maya önerisi (malt/hop uydurulmaz)') + '">'
           +     (iskVar ? '📋 Doldur' : '🎯 Hedef yap') + '</button>'
           + '</div>'
           + '</div>';
       }).join('');
-      var basSat = suzAktif
-        ? 'Bu profilde korpusta <b>' + kova.toplam.toLocaleString('tr-TR') + '</b> reçete var — süzgeçle eşleşen <b>'
-            + goster.length + '</b> stil, <b>' + suzToplam.toLocaleString('tr-TR') + '</b> reçete:'
-        : 'Bu profilde korpusta <b>' + kova.toplam.toLocaleString('tr-TR') + '</b> reçete var — en yakın ' + kova.stiller.length + ' stil:';
-      // BOŞ SONUÇ: sessiz boş liste YOK — hangi süzgecin elediği söylenir ve
-      // gevşetme düğmesi verilir (BB dersi).
-      if(!goster.length){
-        var acikSuz = ['maya','malt'].filter(function(e){ return p[e]; });
-        satirlar = '<div style="font-size:10.5px;color:var(--kahve);background:var(--bg2);border:1px solid var(--bor);border-radius:6px;padding:8px;margin-top:5px;line-height:1.5">'
-          + '⚠️ Bu profilde <b>'
-          + acikSuz.map(function(e){ var E = window._BQ_KARAKTER[e]; return E.ikon + ' ' + _e(E.et[p[e]] || p[e]); }).join('</b> + <b>')
-          + '</b> birlikte olan stil yok — süzgeci gevşet:</div>'
-          + '<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px">'
-          + acikSuz.map(function(e){ var E = window._BQ_KARAKTER[e];
-              return '<button type="button" onclick="_bmProfilSec(\'' + e + '\',\'' + p[e] + '\')" '
-                + 'style="background:var(--card);color:var(--kahve);border:1px solid var(--bor);border-radius:6px;padding:4px 9px;font-size:10px;font-weight:600;cursor:pointer;font-family:var(--font-govde)">'
-                + '✕ ' + E.ikon + ' ' + _e(E.et[p[e]] || p[e]) + '</button>'; }).join('')
-          + '</div>';
-      }
-      sonuc = '<div style="margin-top:4px">'
-        + suzKutu
-        + '<div style="font-size:9.5px;color:var(--dim);margin:5px 0 2px">' + basSat + '</div>'
-        + satirlar
-        + '<div style="font-size:9px;color:var(--dim);margin-top:6px;line-height:1.4">Sayılar 336.149 ev-üretimi reçetenin dağılımıdır — <b>kalite değerlendirmesi değil</b>, "kaç kişi böyle demlemiş" bilgisi. Gövde ekseni grist bileşiminden türetilir (dataset FG\'si güvenilmez). Maya/malt karakteri de aynı korpustan gelir: maya sınıfı <b>maya KÖKENİNİ</b> ölçer (tat ölçümü değil), malt "ekmeksi" bir tespit değil kalan sınıftır; soluk "?" o stilde karakterin karışık olduğunu söyler. Süzgeç sayısı listelenen stillerin toplamıdır. Öneri = başlangıç noktası; reçeteyi serbestçe değiştir.</div>'
-        + '</div>';
+      var bas = 'Bu profilde <b>' + say(s.toplam) + '</b> reçete · <b>' + s.stiller.length + '</b> stil'
+        + (karAktif ? ' (süzgeçle eşleşen <b>' + say(s.esleseN) + '</b> reçete)' : '')
+        + (s.stiller.length > goster.length ? ' — en yaygın ' + goster.length + ' tanesi:' : ':');
+      sonucHTML = '<div class="br-sonuc-bas">' + bas + '</div>' + satirlar;
     }
 
-    return '<details class="bm-profil-sec bm-edit-only"' + (acik ? ' open' : '') + ' ontoggle="window.__akAcik=this.open" style="margin:-4px 0 8px">'
-      + '<summary style="cursor:pointer;font-size:11px;font-weight:600;color:var(--kahve);padding:4px 8px;background:var(--bg2);border:1px solid var(--bor);border-radius:6px;list-style:none">'
-      +   '🔎 Stilin adını bilmiyorum — <span style="font-weight:400;color:var(--soluk)">istediğim birayı tarif edeyim</span>'
-      + '</summary>'
-      + '<div style="padding:7px 8px 2px">'
-      +   cipSatir('renk') + cipSatir('aci') + cipSatir('govde')
-      +   (acik ? '<button type="button" onclick="_bmProfilSifirla()" style="background:none;border:none;color:var(--dim);font-size:9.5px;cursor:pointer;padding:2px 0;text-decoration:underline;font-family:var(--font-govde)">seçimi temizle</button>' : '')
-      +   sonuc
+    var dipnot = '<div class="br-dipnot">Sayılar ' + say(336149) + ' ev-üretimi reçetenin dağılımıdır — '
+      + '<b>kalite değerlendirmesi değil</b>, "kaç kişi böyle demlemiş" bilgisi. Çiplerdeki sayı: o seçimle '
+      + 'kalan <b>stil</b> sayısı (0 = çıkmaz sokak, seçmeden önce görürsün). Gövde ekseni grist bileşiminden '
+      + 'türetilir (dataset FG\'si güvenilmez). Maya/malt karakteri de aynı korpustan gelir: maya sınıfı '
+      + '<b>maya KÖKENİNİ</b> ölçer (tat ölçümü değil), malt "ekmeksi" bir tespit değil kalan sınıftır; '
+      + 'soluk "?" o stilde karakterin karışık olduğunu söyler. Öneri = başlangıç noktası; reçeteyi serbestçe değiştir.</div>';
+
+    return '<div id="br-tam" class="br-tam" role="dialog" aria-modal="true" aria-label="İstediğin birayı tarif et" tabindex="-1">'
+      + '<div class="br-tam-bas">'
+      +   '<div style="flex:1;min-width:0"><div class="br-tam-baslik">🍺 İstediğin birayı tarif et</div>'
+      +   '<div class="br-tam-alt-yazi">Her eksen isteğe bağlı — seçmediğin eksen süzmez.</div></div>'
+      +   '<button type="button" class="br-kapat" onclick="_brKapat()" aria-label="Kapat" title="Kapat (Esc)">✕</button>'
       + '</div>'
-      + '</details>';
-  }catch(e){ try{ console.warn('_bmProfilStilKart', e); }catch(_){} return ''; }
+      + '<div class="br-tam-govde">' + bloklar + '<div class="br-ayrac"></div>' + sonucHTML + dipnot + '</div>'
+      + '<div class="br-tam-alt">'
+      +   '<div class="br-alt-say"><b>' + say(karAktif ? s.esleseN : s.toplam) + '</b> reçete · <b>' + s.stiller.length + '</b> stil</div>'
+      +   '<button type="button" class="br-btn-ikincil" onclick="_bmProfilSifirla()">Temizle</button>'
+      +   '<button type="button" class="br-btn-ana" onclick="_brKapat()">Kapat</button>'
+      + '</div>'
+      + '</div>';
+  }catch(e){ try{ console.warn('_brTamHTML', e); }catch(_){} return ''; }
 };
 
 // ═══ SPRINT AJ — MASH SÜRECİ NEDEN-SONUÇ BİLGİ TABANI ══════════════════════
