@@ -8728,6 +8728,44 @@ window._bmGercekGunleri = function(r){
   }catch(_e){ return out; }
 };
 
+// ── BREWDAY FAZ SÜRELERİ (mash / kaynatma) — DAKİKA çözünürlüğü ─────────
+// ÖLÇÜLDÜ: brewday sayacı (AT3) çalışıyor ama GEÇEN SÜREYİ SAKLAMIYOR —
+// timerT0/timerSure yalnız çalışma-anı durumu (window._brewday), kalıcı değil.
+// BUNA KARŞILIK brewday adım onayları brewLog'a GERÇEK ts ile yazılıyor
+// (23420: ts:Date.now()) — alarm köprüsünün aksine burada ts PLAN DEĞİL GÖZLEM.
+// Yani faz süreleri ARDIŞIK ONAY ts'lerinden türetilebilir; yeni kayıt gerekmez.
+// Sınırlar başlıklardan okunur (22601 / 22625 / 22672):
+//   mash     : ilk 'Mash adım' onayı → 'Kaynatmayı başlat' onayı
+//   kaynatma : 'Kaynatmayı başlat'  → 'Kaynatma bitti'
+// ŞERH (ekranda da yazılır): AT3'te sayacı başlatan 'sıcaklığa ulaştım' onayı
+// LOGLANMIYOR, bu yüzden mash süresi ISINMA/RAMPA süresini de içerir —
+// saf mash tutma süresi bu veriden AYRILAMAZ. Bu bir tahmin değil, daha
+// GENİŞ bir aralıktır ve öyle etiketlenir.
+// Küçük oynamalar gürültüdür: yalnız |fark| ≥ _BU_DK_TOLERANS bildirilir.
+window._BU_DK_TOLERANS = 5;
+window._bmBrewdayFazlari = function(r){
+  var out = { mashPlan:null, mashGercek:null, kaynatmaPlan:null, kaynatmaGercek:null };
+  try{
+    var bl = Array.isArray(r.brewLog) ? r.brewLog : [];
+    var ilkMash = null, kayBas = null, kayBit = null;
+    bl.forEach(function(e){
+      if(!e || e.tip !== 'brewday_event' || !e.ts) return;
+      var d = String(e.deger || '');
+      if(ilkMash == null && d.indexOf('Mash adım') === 0) ilkMash = +e.ts;
+      if(kayBas == null && d.indexOf('Kaynatmayı başlat') === 0) kayBas = +e.ts;
+      if(kayBit == null && d.indexOf('Kaynatma bitti') === 0) kayBit = +e.ts;
+    });
+    if(ilkMash != null && kayBas != null && kayBas > ilkMash) out.mashGercek = Math.round((kayBas - ilkMash) / 60000);
+    if(kayBas != null && kayBit != null && kayBit > kayBas) out.kaynatmaGercek = Math.round((kayBit - kayBas) / 60000);
+    // PLAN: reçetenin kendi mash adımları / kaynatma süresi
+    var ma = Array.isArray(r.mashAdimlar) ? r.mashAdimlar : [];
+    if(ma.length){ var t = 0; ma.forEach(function(a){ t += (a && +a.dk) || 0; }); if(t > 0) out.mashPlan = t; }
+    else if(+r.mashDk > 0) out.mashPlan = +r.mashDk;
+    if(+r.kaynatmaSure > 0) out.kaynatmaPlan = +r.kaynatmaSure;
+    return out;
+  }catch(_e){ return out; }
+};
+
 // ── PLAN ile GERÇEĞİ karşılaştır — YALNIZ FARK OLANLAR ───────────────────
 // DİL: fark bir HATA DEĞİL, bir SEÇİM olabilir (AJ/AN dil disiplini).
 // Yalnız "planlandı · yapıldı" denir; kalite iddiası veya emir kipi YOK.
@@ -8758,6 +8796,35 @@ window._bmPlanGercek = function(r){
       var gTop = _bmGunFark(G.pitch, G.sise);
       if(gTop >= 0) ekle('Pitch → şişeleme', P.sise, gTop, G.kaynak.sise);
     }
+    // 3b) KONDİSYON (şişeleme → içime hazır). Plan: alarm 'İçime hazır' günü.
+    // GERÇEK bitiş yalnız TADIM oturumu varsa bilinir. Tadım yoksa süre HÂLÂ
+    // AKIYOR demektir; o durumda yalnız planı AŞTIYSA bildirilir — yoksa
+    // "14 planlandı · 3 yapıldı" gibi yanıltıcı bir eksiklik yazardı.
+    if(G.sise != null && P.hazir != null && P.sise != null){
+      var planKond = P.hazir - P.sise;
+      var tadimTs = null;
+      try{
+        var ot = (r.tadim && Array.isArray(r.tadim.oturumlar)) ? r.tadim.oturumlar : [];
+        ot.forEach(function(o){ var g = o && o.tarih ? window._bmOlayGun({ tarih:o.tarih }) : null; if(g && (tadimTs == null || g.ts < tadimTs)) tadimTs = g.ts; });
+      }catch(_t){}
+      if(planKond > 0){
+        if(tadimTs != null && tadimTs >= G.sise){
+          ekle('Kondisyon', planKond, _bmGunFark(G.sise, tadimTs), 'tadim');
+        }else{
+          var bugun = _bmGunBasi(Date.now());
+          var akan = _bmGunFark(G.sise, bugun);
+          if(akan > planKond) ekle('Kondisyon', planKond, akan, 'suruyor');
+        }
+      }
+    }
+    // 3c) BREWDAY FAZLARI (dakika) — ardışık onay ts'lerinden
+    try{
+      var BF = window._bmBrewdayFazlari(r), tol = window._BU_DK_TOLERANS || 5;
+      if(BF.mashPlan != null && BF.mashGercek != null && Math.abs(BF.mashGercek - BF.mashPlan) >= tol)
+        out.satirlar.push({ faz:'Mash', plan:BF.mashPlan, gercek:BF.mashGercek, birim:'dk', kaynak:'brewday' });
+      if(BF.kaynatmaPlan != null && BF.kaynatmaGercek != null && Math.abs(BF.kaynatmaGercek - BF.kaynatmaPlan) >= tol)
+        out.satirlar.push({ faz:'Kaynatma', plan:BF.kaynatmaPlan, gercek:BF.kaynatmaGercek, birim:'dk', kaynak:'brewday' });
+    }catch(_bf){}
     // 4) OG: donmuş hedef vs ölçülen (brewSonuc — F1 dondurma)
     var snap = r.brewSnapshot || null;
     if(snap && snap.ogT && r.brewSonuc && r.brewSonuc.ogG){
@@ -8787,7 +8854,10 @@ window._bmPlanGercekKart = function(r){
       var bir = s.birim ? (' ' + s.birim) : '';
       var not = (s.kaynak === 'onay')
         ? '<span class="bu-kaynak" title="Bu olay alarm onayından geldi: günlükteki tarih alarmın PLANLANAN günüdür, elimizdeki tek gözlem onay anıdır — bu yüzden gerçekleşen bir tahmindir">≈ onay anından</span>'
-        : (s.kaynak === 'olcum' ? '<span class="bu-kaynak">ölçümden</span>' : '');
+        : (s.kaynak === 'olcum' ? '<span class="bu-kaynak">ölçümden</span>'
+        : (s.kaynak === 'brewday' ? '<span class="bu-kaynak" title="Brewday adım onayları arasında geçen süre. AT3&apos;te sayacı başlatan &quot;sıcaklığa ulaştım&quot; onayı günlüğe yazılmadığı için ısınma/rampa süresi de bu aralığın içindedir.">adım onayları arası · ısınma dahil</span>'
+        : (s.kaynak === 'suruyor' ? '<span class="bu-kaynak">bugüne dek, sürüyor</span>'
+        : (s.kaynak === 'tadim' ? '<span class="bu-kaynak">tadım gününe dek</span>' : ''))));
       return '<div class="bu-satir">'
         + '<span class="bu-faz">' + _e(s.faz) + '</span>'
         + '<span class="bu-deger"><b>' + _e(String(s.plan)) + bir + '</b> planlandı · <b>' + _e(String(s.gercek)) + bir + '</b> yapıldı</span>'

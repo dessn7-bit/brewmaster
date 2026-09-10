@@ -6974,6 +6974,100 @@ const CASELER = [
         src.indexOf('SPRINT BU') >= 0);
       return __REG.al();
     })
+  },
+  {
+    kod: 'BU4-BREWDAY', ad: 'BU1 TAMAMLAMA — mash/kaynatma GERÇEKLEŞEN süresi: brewday sayacı (AT3) geçen süreyi SAKLAMIYOR (timerT0 yalnız çalışma-anı durumu) AMA adım onayları brewLog\'a GERÇEK ts ile yazılıyor (alarm köprüsünün aksine) → faz süreleri ardışık onaylardan türetiliyor, yeni kayıt yok; ısınma/rampa ayrılamadığı için ekranda "ısınma dahil" etiketli; <5 dk oynama gürültü sayılıp bildirilmiyor',
+    calistir: (page) => page.evaluate(() => {
+      const G = t => { const p = t.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]).getTime(); };
+      const T = (t, hh, mm) => G(t) + hh * 3600e3 + mm * 60e3;
+      __REG.ok('_bmBrewdayFazlari tanımlı', typeof window._bmBrewdayFazlari === 'function');
+      __REG.ok('dakika toleransı tanımlı (5)', window._BU_DK_TOLERANS === 5, window._BU_DK_TOLERANS);
+      const id = __REG.yeniKayit('BU4 Brewday', {});
+      const r = KR.find(k => k && String(k.id) === String(id));
+      r.mashAdimlar = [{ sc: 67, dk: 30 }, { sc: 72, dk: 30 }];
+      r.kaynatmaSure = 60;
+      r.brewLog = [
+        { tip: 'brewday_event', deger: 'Mash adım 1: 67°C · 30 dk', tarih: '2026-09-01', ts: T('2026-09-01', 9, 0) },
+        { tip: 'brewday_event', deger: 'Mash adım 2: 72°C · 30 dk', tarih: '2026-09-01', ts: T('2026-09-01', 9, 40) },
+        { tip: 'brewday_event', deger: 'Kaynatmayı başlat', tarih: '2026-09-01', ts: T('2026-09-01', 10, 12) },
+        { tip: 'brewday_event', deger: 'Kaynatma bitti', tarih: '2026-09-01', ts: T('2026-09-01', 11, 25) }
+      ];
+      const BF = window._bmBrewdayFazlari(r);
+      __REG.ok('mash PLAN 60 dk (mashAdimlar toplandı)', BF.mashPlan === 60, BF.mashPlan);
+      __REG.ok('mash GERÇEK 72 dk (ilk mash onayı → kaynatma başlat)', BF.mashGercek === 72, BF.mashGercek);
+      __REG.ok('kaynatma PLAN 60 dk', BF.kaynatmaPlan === 60, BF.kaynatmaPlan);
+      __REG.ok('kaynatma GERÇEK 73 dk (başlat → bitti)', BF.kaynatmaGercek === 73, BF.kaynatmaGercek);
+      // KANIT: brewday_event GERÇEK ts taşıyor (alarm köprüsü PLAN yazıyor)
+      __REG.ok('KANIT: brewday_event girişleri ts taşıyor (23420)', r.brewLog.every(e => !!e.ts));
+      __REG.ok('  gün çözünürlüğü YETMEZ (hepsi aynı gün)', new Set(r.brewLog.map(e => e.tarih)).size === 1, r.brewLog[0].tarih);
+      const d = window._bmPlanGercek(r);
+      const m = d.satirlar.find(s => s.faz === 'Mash'), k = d.satirlar.find(s => s.faz === 'Kaynatma');
+      __REG.ok('rapora Mash satırı girdi (12 dk fark)', !!m && m.plan === 60 && m.gercek === 72, m ? m.plan + '→' + m.gercek : '-');
+      __REG.ok('rapora Kaynatma satırı girdi (13 dk fark)', !!k && k.gercek === 73, k ? k.plan + '→' + k.gercek : '-');
+      __REG.ok('birim "dk"', m && m.birim === 'dk', m ? m.birim : '-');
+      const html = window._bmPlanGercekKart(r);
+      __REG.ok('ekranda "ısınma dahil" şerhi (AT3 onayı loglanmıyor)', /ısınma dahil/.test(html));
+      __REG.ok('"60 dk planlandı · 72 dk yapıldı" kalıbı', /<b>60 dk<\/b> planlandı · <b>72 dk<\/b> yapıldı/.test(html));
+      // TOLERANS
+      r.brewLog[2].ts = T('2026-09-01', 10, 3);   // mash 63 dk → 3 dk fark
+      r.brewLog[3].ts = T('2026-09-01', 11, 3);   // kaynatma 60 dk → 0 fark
+      const d2 = window._bmPlanGercek(r);
+      __REG.ok('3 dk fark GÜRÜLTÜ sayıldı (bildirilmiyor)', !d2.satirlar.find(s => s.faz === 'Mash'), d2.satirlar.map(s => s.faz).join(','));
+      __REG.ok('0 dk fark bildirilmiyor', !d2.satirlar.find(s => s.faz === 'Kaynatma'));
+      // Kaynakta ölçüm belgeli
+      const src = Array.from(document.querySelectorAll('script')).map(s => s.textContent).join('\n');
+      const bu = src.slice(src.indexOf('SPRINT BU — PLAN vs GERÇEK'), src.indexOf('SPRINT AD4'));
+      __REG.ok('sayacın süreyi SAKLAMADIĞI ölçümü kaynakta', /GEÇEN SÜREYİ SAKLAMIYOR/.test(bu));
+      __REG.ok('ısınmanın ayrılamadığı kaynakta belgeli', /AYRILAMAZ/.test(bu));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BU5-KONDISYON', ad: 'BU1 TAMAMLAMA — kondisyon süresi: plan alarm "İçime hazır" gününden, gerçek bitiş TADIM oturumundan; tadım yoksa süre hâlâ akıyor demektir ve YALNIZ planı aşmışsa bildirilir (yoksa "14 planlandı · 3 yapıldı" gibi yanıltıcı bir eksiklik yazardı)',
+    calistir: (page) => page.evaluate(() => {
+      const G = t => { const p = t.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]).getTime(); };
+      const kur = (ad) => {
+        const id = __REG.yeniKayit(ad, {});
+        const r = KR.find(k => k && String(k.id) === String(id));
+        r.brewLog = [
+          { tip: 'pitching', tarih: '2026-08-16', id: String(G('2026-08-16')) },
+          { tip: 'siseleme', tarih: '2026-08-27', id: String(G('2026-08-27')) }
+        ];
+        const st = _alarmlariOku();
+        st[String(id)] = {
+          receteAd: ad, pitchTs: G('2026-08-16'), durum: 'aktif', alarmlar: [
+            { g: 10, ts: G('2026-08-26'), tip: 'kritik', aksiyon: '❄️ Cold crash', durum: 'tamamlandi' },
+            { g: 11, ts: G('2026-08-27'), tip: 'kritik', aksiyon: '🍺 Şişele', durum: 'tamamlandi' },
+            { g: 25, ts: G('2026-09-10'), tip: 'kontrol', aksiyon: '🍻 İçime hazır', durum: 'bekliyor' }
+          ]
+        };
+        _alarmlariYaz(st);
+        return r;
+      };
+      // (a) TADIM VAR → tamamlanmış kondisyon ölçülür
+      const r1 = kur('BU5 Tadimli');
+      r1.tadim = { oturumlar: [{ tarih: '2026-09-20' }] };
+      const d1 = window._bmPlanGercek(r1);
+      const k1 = d1.satirlar.find(s => s.faz === 'Kondisyon');
+      __REG.ok('tadım varsa kondisyon ölçülüyor: 14 planlandı · 24 yapıldı', !!k1 && k1.plan === 14 && k1.gercek === 24, k1 ? k1.plan + '→' + k1.gercek : '-');
+      __REG.ok('  kaynak "tadım gününe dek"', k1 && k1.kaynak === 'tadim', k1 ? k1.kaynak : '-');
+      __REG.ok('  ekranda etiketli', /tadım gününe dek/.test(window._bmPlanGercekKart(r1)));
+      // (b) TADIM YOK + plan AŞILDI → bildirilir ("sürüyor")
+      const r2 = kur('BU5 Suren');
+      const d2 = window._bmPlanGercek(r2);
+      const k2 = d2.satirlar.find(s => s.faz === 'Kondisyon');
+      __REG.ok('tadım yok + plan aşıldı → bildiriliyor', !!k2 && k2.kaynak === 'suruyor', k2 ? k2.plan + '→' + k2.gercek + ' (' + k2.kaynak + ')' : 'yok');
+      __REG.ok('  "bugüne dek, sürüyor" etiketi', /bugüne dek, sürüyor/.test(window._bmPlanGercekKart(r2)));
+      // (c) TADIM YOK + plan AŞILMADI → SESSİZ (yanıltıcı eksiklik yazılmaz)
+      const r3 = kur('BU5 Taze');
+      const bugun = new Date(); bugun.setDate(bugun.getDate() - 3);
+      const bs = bugun.getFullYear() + '-' + String(bugun.getMonth() + 1).padStart(2, '0') + '-' + String(bugun.getDate()).padStart(2, '0');
+      r3.brewLog = [{ tip: 'pitching', tarih: '2026-08-16', id: String(G('2026-08-16')) }, { tip: 'siseleme', tarih: bs, id: '1' }];
+      const d3 = window._bmPlanGercek(r3);
+      __REG.ok('taze şişelenmiş batch → kondisyon satırı YOK (yanıltıcı eksiklik yazılmaz)',
+        !d3.satirlar.find(s => s.faz === 'Kondisyon'), d3.satirlar.map(s => s.faz).join(','));
+      return __REG.al();
+    })
   }
 ];
 

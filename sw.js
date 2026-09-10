@@ -739,7 +739,8 @@
 // HTML degisti (Sprint BS: tum stiller + TAHIL ekseni + ekmeksi daraltmasi) -> CACHE_VERSION bump v131-431 -> v131-432.
 // HTML degisti (Sprint BT: GUC/ABV + HOP aromasi eksenleri + eksen gruplamasi) -> CACHE_VERSION bump v131-432 -> v131-433.
 // HTML degisti (Sprint BU: gerceklesen sure turetimi + plan/gercek raporu) -> CACHE_VERSION bump v131-433 -> v131-434.
-const CACHE_VERSION='bm-cache-v131-434';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
+// HTML degisti (Sprint BU tamamlama: mash/kaynatma faz sureleri + kondisyon) -> CACHE_VERSION bump v131-434 -> v131-435.
+const CACHE_VERSION='bm-cache-v131-435';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
 const ASSET_CACHE   = 'bm-assets-v1';        // font + ikon + manifest — KALICI, bump'ta silinmez
 const MODEL_CACHE   = 'bm-models-v1';        // workers.dev + jsdelivr — SHA'li/immutable URL, KALICI
 
