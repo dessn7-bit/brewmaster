@@ -5848,7 +5848,7 @@ const CASELER = [
         if (!(v[5] >= 1 && v[5] <= 100)) payDisi++;
       });
       __REG.ok('60 kovadaki HER öneri karakter tablosunda var (sarkan referans yok)', eksik === 0, eksik);
-      __REG.ok('SPRINT BS: her satır 6 alanlı [maya,%,malt,%,tahıl,%]', Object.values(K).every(v => v.length === 6));
+      __REG.ok('SPRINT BT: her satır 10 alanlı [maya,%,malt,%,tahıl,%,abv,%,hop,%]', Object.values(K).every(v => v.length === 10), (Object.values(K)[0] || []).length);
       __REG.ok('SPRINT BS: 73 stilin HEPSİ tahıl sınıflı (grist kapsaması %100)',
         Object.values(K).every(v => !!v[4]), Object.keys(K).filter(a => !K[a][4]).join(','));
       __REG.ok('her karakter adı BJCP anahtarında var', bjcpDisi === 0, bjcpDisi);
@@ -5886,9 +5886,15 @@ const CASELER = [
       const HEPSI = ['Dunkelweizen', 'Weizenbock', 'Irish Red Ale', 'Roggenbier / Rye Beer', 'Wee Heavy', 'American Amber Ale / Red Ale'];
       __REG.ok('süzgeçsiz DAVRANIŞ AYNEN: AK\'nın 6 stilinin hepsi listede', HEPSI.every(a => d.indexOf(a) >= 0), HEPSI.filter(a => d.indexOf(a) < 0).join(','));
       __REG.ok('kova toplamı şeffaf (3.434)', d.indexOf('<b>3.434</b>') >= 0);
+      // SPRINT BT: maya/tahıl/malt/hop artık DETAY grubunda (8 eksen mobilde
+      // sığmıyordu — ölçüldü). Grup düğmesi eksenleri adıyla sayar; açılınca gelirler.
+      __REG.ok('detay grubu düğmesi eksenleri adıyla listeliyor', /Detaylı tarif/.test(d) && d.indexOf('🧬 maya karakteri') >= 0 && d.indexOf('🌾 tahıl') >= 0);
+      _brDetayAc();
+      d = pan();
       __REG.ok('maya ekseni basıldı', d.indexOf('🧬 Maya karakteri') >= 0);
       __REG.ok('malt ekseni basıldı (BS: ikon 🍞, 🌾 artık tahıl ekseninin)', d.indexOf('🍞 Malt karakteri') >= 0);
       __REG.ok('tahıl ekseni basıldı (BS)', d.indexOf('🌾 Tahıl') >= 0);
+      __REG.ok('hop ekseni basıldı (BT)', d.indexOf('🍃 Hop aroması') >= 0);
       __REG.ok('eksenlerin isteğe bağlı olduğu yazılı', d.indexOf('isteğe bağlı') >= 0);
       _bmProfilSec('maya', 'fenolik');
       d = pan();
@@ -6070,21 +6076,32 @@ const CASELER = [
         kose.map(q => { const e = document.elementFromPoint(q[0], q[1]); return e ? (ov.contains(e) ? 'BR' : (e.className || e.tagName)) : 'YOK'; }).join(','));
       __REG.ok('position:fixed (kaydırma kutusuna hapsolmuyor)', getComputedStyle(ov).position === 'fixed');
       // 5 eksen AYNI ANDA — hiçbir seçim yokken bile
-      // SPRINT BS: 6. eksen (🌾 Tahıl) eklendi — maya ile malt ARASINDA
-      const eksenAd = ['🎨 Renk', '🌿 Acılık', '🥛 Gövde', '🧬 Maya karakteri', '🌾 Tahıl', '🍞 Malt karakteri'];
-      const bloklar = Array.from(ov.querySelectorAll('.br-eksen-ad')).map(e => e.textContent.trim());
-      __REG.ok('6 eksen HEPSİ aynı ekranda (seçim yokken bile)', eksenAd.every(a => bloklar.indexOf(a) >= 0) && bloklar.length === 6, bloklar.join(' | '));
-      __REG.ok('eksen sırası: renk→acılık→gövde→maya→tahıl→malt', JSON.stringify(bloklar) === JSON.stringify(eksenAd), bloklar.join('>'));
-      const fark = Array.from(ov.querySelectorAll('.br-cip')).filter(b => /Fark etmez/.test(b.textContent));
-      __REG.ok('her eksende "Fark etmez" çipi (isteğe bağlılık GÖRÜNÜR)', fark.length === 6, fark.length);
-      __REG.ok('seçim yokken 6 "Fark etmez" de etkin görünüyor', fark.every(b => b.getAttribute('aria-pressed') === 'true'), fark.map(b => b.getAttribute('aria-pressed')).join(','));
+      // SPRINT BT: 8 eksen İKİ GRUPTA — temel (renk/acılık/gövde/güç) hep açık,
+      // detay (maya/tahıl/malt/hop) katlı. 8'i birden açmak 390×844'te sonuç
+      // başlığını 328 px aşağı itiyordu (ölçüldü) — gruplama ZORUNLU oldu.
+      const temelAd = ['🎨 Renk', '🌿 Acılık', '🥛 Gövde', '💪 Güç'];
+      const detayAd = ['🧬 Maya karakteri', '🌾 Tahıl', '🍞 Malt karakteri', '🍃 Hop aroması'];
+      let bloklar = Array.from(ov.querySelectorAll('.br-eksen-ad')).map(e => e.textContent.trim());
+      __REG.ok('temel 4 eksen seçimsizken AÇIK', JSON.stringify(bloklar) === JSON.stringify(temelAd), bloklar.join(' | '));
+      const grupBtn = ov.querySelector('.br-grup');
+      __REG.ok('detay grubu düğmesi var', !!grupBtn && /Detaylı tarif/.test(grupBtn.textContent));
+      __REG.ok('grup düğmesi 4 detay eksenini ADIYLA sayıyor (keşfedilebilir)',
+        ['maya karakteri', 'tahıl', 'malt karakteri', 'hop aroması'].every(a => grupBtn.textContent.indexOf(a) >= 0), grupBtn.textContent.trim());
+      __REG.ok('grup düğmesi ≥44 px', grupBtn.getBoundingClientRect().height >= 44, Math.round(grupBtn.getBoundingClientRect().height));
+      grupBtn.click();
+      bloklar = Array.from(document.querySelectorAll('#br-tam .br-eksen-ad')).map(e => e.textContent.trim());
+      __REG.ok('açılınca 8 eksen ekranda', JSON.stringify(bloklar) === JSON.stringify(temelAd.concat(detayAd)), bloklar.join('>'));
+      const fark = Array.from(document.querySelectorAll('#br-tam .br-cip')).filter(b => /Fark etmez/.test(b.textContent));
+      __REG.ok('her eksende "Fark etmez" çipi (8)', fark.length === 8, fark.length);
+      __REG.ok('seçim yokken 8 "Fark etmez" de etkin', fark.every(b => b.getAttribute('aria-pressed') === 'true'));
+      document.querySelector('#br-tam .br-grup').click();
       __REG.ok('İKİNCİ ADIM süzgeç kutusu KALDIRILDI', ov.innerHTML.indexOf('Listeyi daralt') < 0);
       // KATLAMA: seçilen eksen tek satıra iner (sonuç yukarı çıksın) ama KAYBOLMAZ
       _bmProfilSec('renk', 'amber');
       const kapali = document.querySelector('#br-tam .br-eksen-kapali');
       __REG.ok('seçilen eksen tek satıra KATLANDI', !!kapali && /Renk/.test(kapali.textContent), kapali ? kapali.textContent.trim() : 'YOK');
       __REG.ok('katlanmış satırda seçim + sayı görünüyor', !!kapali && /Amber/.test(kapali.textContent));
-      __REG.ok('6 eksen HÂLÂ ekranda (katlanan kaybolmuyor)', document.querySelectorAll('#br-tam .br-eksen').length === 6, document.querySelectorAll('#br-tam .br-eksen').length);
+      __REG.ok('temel eksenler HÂLÂ ekranda (katlanan kaybolmuyor)', document.querySelectorAll('#br-tam .br-eksen').length === 4, document.querySelectorAll('#br-tam .br-eksen').length);
       const degis = Array.from(document.querySelectorAll('#br-tam .br-cip-degis'))[0];
       __REG.ok('"değiştir" düğmesi var (tek dokunuşla geri açılır)', !!degis);
       degis.click();
@@ -6308,7 +6325,9 @@ const CASELER = [
           __REG.ok(w + ': KAPLAMA GERÇEK (hiçbir şey üstünü örtmüyor)', kose.every(q => { const e = document.elementFromPoint(q[0], q[1]); return !!e && ov.contains(e); }),
             kose.map(q => { const e = document.elementFromPoint(q[0], q[1]); return e ? (ov.contains(e) ? 'BR' : (e.className || e.tagName)) : 'YOK'; }).join(','));
           const cips = Array.from(ov.querySelectorAll('.br-cip'));
-          __REG.ok(w + ': çipler basıldı (3 eksen katlı + 2 açık ⇒ ≥14)', cips.length >= 14, cips.length);
+          // SPRINT BT: temel 4 eksenden 3'ü katlı (3 çip) + güç açık (5 çip) = 8;
+          // detay grubu kapalı. Grup açılınca 4 eksen daha gelir (BT1-GRUP ölçüyor).
+          __REG.ok(w + ': temel çipler basıldı (3 katlı + güç açık ⇒ ≥8)', cips.length >= 8, cips.length);
           const dis = cips.filter(b => { const q = b.getBoundingClientRect(); return q.left < -0.5 || q.right > innerWidth + 0.5; });
           __REG.ok(w + ': hiçbir çip viewport dışına TAŞMIYOR', dis.length === 0, dis.map(b => b.textContent.trim()).join(','));
           const kucuk = cips.filter(b => b.getBoundingClientRect().height < 44);
@@ -6445,6 +6464,9 @@ const CASELER = [
       __REG.ok('mısır/pirinç sınıfı YOK + gerekçesi yazılı (korpus desteklemiyor)',
         E.tahil.sira.indexOf('adjunct') < 0 && /DÜŞÜRÜLDÜ|UYDURULMADI/.test(ak));
       // UI
+      // SPRINT BT: tahıl artık DETAY grubunda — grup açılınca görünür
+      __REG.ok('grup düğmesi tahılı adıyla anıyor', document.getElementById('br-tam').innerHTML.indexOf('🌾 tahıl') >= 0);
+      _brDetayAc();
       const d0 = document.getElementById('br-tam').innerHTML;
       __REG.ok('🌾 Tahıl ekseni ekranda', d0.indexOf('🌾 Tahıl') >= 0);
       __REG.ok('4 tahıl çipi + Fark etmez', ['arpa', 'buğday', 'çavdar', 'yulaf'].every(x => d0.indexOf('>' + x) >= 0 || d0.indexOf(x) >= 0));
@@ -6572,6 +6594,219 @@ const CASELER = [
       });
       __REG.ok('6 eksende çip sayısı = seçilince kalan stil (' + denenen + ' deneme)', ihlal === 0, ihlal + ' sapma');
       _bmProfilSifirla();
+      return __REG.al();
+    })
+  },
+  // ═════════════ SPRINT BT — GÜÇ (ABV) + HOP AROMASI + GRUPLAMA ═════════════
+  {
+    kod: 'BT1-ABV', ad: 'GÜÇ EKSENİ: ABV korpustan OG üzerinden türetildi (FG KULLANILMADI — %91,9\'u sahte), tek açık varsayım %75 attenuation; 4 bant (hafif <%4,5 · orta 4,5-6,5 · güçlü 6,5-9 · çok güçlü >%9); 73/73 stil sınıflı ve 71\'i BJCP ABV bandıyla örtüşüyor; "güçlü" seçilince Tripel/Weizenbock/Imperial geliyor, session biraları düşüyor',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('BT1 ABV', {});
+      ekran = 'editor'; sekme = 'genel'; _bmProfilSifirla(); _brAc();
+      const E = window._BQ_KARAKTER, K = window._PROFIL_KARAKTER;
+      __REG.ok('abv ekseni tanımlı (i=6)', !!E.abv && E.abv.i === 6, E.abv ? E.abv.i : 'YOK');
+      __REG.ok('4 bant: hafif/orta/güçlü/çok güçlü', JSON.stringify(E.abv.sira) === '["hafif","orta","guclu","cokguclu"]', JSON.stringify(E.abv.sira));
+      __REG.ok('73/73 stil ABV sınıflı', Object.values(K).every(v => !!v[6]), Object.keys(K).filter(a => !K[a][6]).join(','));
+      __REG.ok('sınıflar kapalı enum', Object.values(K).every(v => E.abv.sira.indexOf(v[6]) >= 0));
+      __REG.ok('4 bandın hepsi kullanılıyor', new Set(Object.values(K).map(v => v[6])).size === 4, new Set(Object.values(K).map(v => v[6])).size);
+      // KAYNAK ŞERHİ: FG kullanılmadığı + varsayım kaynakta yazılı
+      const src = Array.from(document.querySelectorAll('script')).map(s => s.textContent).join('\n');
+      const ak = src.slice(src.indexOf('SPRINT AK — PROFİL SEÇİCİ'), src.indexOf('SPRINT AJ — MASH SÜRECİ'));
+      __REG.ok('FG KULLANILMADIĞI kaynakta yazılı', /FG KULLANILMADI|FG KULLANILMAZ/.test(ak));
+      __REG.ok('%75 attenuation varsayımı AÇIKÇA belgeli', /%75/.test(ak) && /0,0984|0\.0984/.test(ak));
+      __REG.ok('BJCP doğrulaması belgeli (71/73)', /71/.test(ak) && /BJCP/.test(ak));
+      __REG.ok('2 sapan stil ADIYLA belgeli (dürüstlük)', /Belgian Dark Strong/.test(ak) && /Scottish/.test(ak));
+      // BJCP ÇAPRAZ DOĞRULAMA (canlı)
+      let icinde = 0, toplam = 0;
+      Object.keys(K).forEach(a => {
+        const bj = BJCP[a] && BJCP[a].abv; if (!bj) return;
+        toplam++;
+        const bant = K[a][6];
+        const bantAralik = { hafif: [0, 4.5], orta: [4.5, 6.5], guclu: [6.5, 9], cokguclu: [9, 99] }[bant];
+        if (bj[1] >= bantAralik[0] - 0.7 && bj[0] <= bantAralik[1] + 0.7) icinde++;
+      });
+      __REG.ok('BJCP bandı ile stil bandı ÖRTÜŞÜYOR (≥%90)', icinde / toplam >= 0.9, icinde + '/' + toplam);
+      // DAVRANIŞ
+      _bmProfilSec('abv', 'guclu');
+      const s = window._brSonuc();
+      ['Tripel', 'Weizenbock', 'Belgian Strong Golden Ale', 'Scottish Ale / Wee Heavy'].forEach(a =>
+        __REG.ok('  güçlü → ' + a, s.stiller.indexOf(a) >= 0));
+      ['Session Ale / Ordinary Bitter', 'Berliner Weisse', 'English Mild / Dark Mild', 'American Lager / Light Lager'].forEach(a =>
+        __REG.ok('  session/hafif bira ' + a + ' DÜŞTÜ', s.stiller.indexOf(a) < 0));
+      _bmProfilSec('abv', 'cokguclu');
+      const s2 = window._brSonuc();
+      ['Imperial / Russian Imperial Stout', 'American Barleywine', 'Belgian Quadrupel / Abt'].forEach(a =>
+        __REG.ok('  çok güçlü → ' + a, s2.stiller.indexOf(a) >= 0));
+      __REG.ok('çok güçlü ⊂ güçlü DEĞİL (bantlar ayrık)', s2.stiller.every(a => s.stiller.indexOf(a) < 0));
+      _bmProfilSec('abv', 'hafif');
+      const s3 = window._brSonuc();
+      __REG.ok('hafif → session/mild/berliner', ['Session Ale / Ordinary Bitter', 'Berliner Weisse', 'English Mild / Dark Mild'].every(a => s3.stiller.indexOf(a) >= 0), s3.stiller.join(','));
+      let toplamStil = 0;
+      ['hafif', 'orta', 'guclu', 'cokguclu'].forEach(b => { _bmProfilSifirla(); _bmProfilSec('abv', b); toplamStil += window._brSonuc().stiller.length; });
+      __REG.ok('4 bant ayrık ve tam (toplam 73)', toplamStil === 73, toplamStil);
+      _brKapat(); _bmProfilSifirla();
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BT1-HOP', ad: 'HOP AROMASI EKSENİ (veriyle karar): kaynak uygulamanın KENDİ hop kataloğu (HOPLAR[].mo); v1 "en çok geçen kelime" REDDEDİLDİ (çiçek 52/73 = catch-all), v2 "ilk geçen tanımlayıcı" kullanıldı; reçetelerin %86,9\'unda hop adı eşleşiyor, 73/73 stil sınıflı; "çamsı" HİÇBİR stilde baskın olmadığı için çip listesinde YOK (kalıcı ölü çip üretirdi); dolaylılık şerhi ekranda',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('BT1 Hop', {});
+      ekran = 'editor'; sekme = 'genel'; _bmProfilSifirla(); _brAc(); _brDetayAc();
+      const E = window._BQ_KARAKTER, K = window._PROFIL_KARAKTER;
+      __REG.ok('hop ekseni tanımlı (i=8)', !!E.hop && E.hop.i === 8, E.hop ? E.hop.i : 'YOK');
+      __REG.ok('73/73 stil hop sınıflı', Object.values(K).every(v => !!v[8]), Object.keys(K).filter(a => !K[a][8]).join(','));
+      __REG.ok('çip listesi "çamsı" İÇERMİYOR (ölü çip yok)', (window._BT_HOP_SIRA || []).indexOf('camsi') < 0, JSON.stringify(window._BT_HOP_SIRA));
+      __REG.ok('çamsı sınıfı tabloda YAŞIYOR ama hiçbir stilde baskın değil',
+        Object.values(K).every(v => v[8] !== 'camsi') && !!E.hop.et.camsi);
+      __REG.ok('çip listesindeki her sınıfın EN AZ 1 stili var',
+        (window._BT_HOP_SIRA || []).every(c => Object.values(K).some(v => v[8] === c)),
+        (window._BT_HOP_SIRA || []).filter(c => !Object.values(K).some(v => v[8] === c)).join(','));
+      // catch-all denetimi: hiçbir sınıf stillerin %70'inden fazlasını almamalı
+      const say = {}; Object.values(K).forEach(v => { say[v[8]] = (say[v[8]] || 0) + 1; });
+      const enBuyuk = Math.max.apply(null, Object.values(say));
+      __REG.ok('hiçbir hop sınıfı catch-all değil (<%70)', enBuyuk / 73 < 0.7, '%' + Math.round(100 * enBuyuk / 73) + ' — ' + JSON.stringify(say));
+      // KAYNAK + REDDEDİLEN DENEME belgeli
+      const src = Array.from(document.querySelectorAll('script')).map(s => s.textContent).join('\n');
+      const ak = src.slice(src.indexOf('SPRINT AK — PROFİL SEÇİCİ'), src.indexOf('SPRINT AJ — MASH SÜRECİ'));
+      __REG.ok('kaynak (HOPLAR[].mo) belgeli', /HOPLAR\[\]\.mo/.test(ak));
+      __REG.ok('REDDEDİLEN v1 denemesi belgeli (catch-all)', /REDDEDİLDİ/.test(ak) && /catch-all/.test(ak));
+      __REG.ok('çamsı çıkarma GEREKÇESİ belgeli', /çamsı/.test(ak) && /ölü çip|olu cip/i.test(ak));
+      __REG.ok('kapsama (%86,9) belgeli', /%86,9/.test(ak));
+      __REG.ok('DOLAYLILIK şerhi kaynakta (diğer eksenlerden farkı)', /bir adım daha dolaylı|BİR ADIM DAHA DOLAYLI/i.test(ak));
+      // DAVRANIŞ — bilinen stiller
+      __REG.ok('American IPA → narenciye', window._bmKarakterSinif('American IPA', 'hop') === 'narenciye', window._bmKarakterSinif('American IPA', 'hop'));
+      __REG.ok('NEIPA → tropik', window._bmKarakterSinif('NEIPA / Hazy IPA', 'hop') === 'tropik', window._bmKarakterSinif('NEIPA / Hazy IPA', 'hop'));
+      __REG.ok('German Pils → otsu (noble hop)', window._bmKarakterSinif('German Pils', 'hop') === 'otsu', window._bmKarakterSinif('German Pils', 'hop'));
+      _bmProfilSec('hop', 'tropik');
+      const s = window._brSonuc();
+      __REG.ok('tropik seçilince NEIPA geliyor', s.stiller.indexOf('NEIPA / Hazy IPA') >= 0, s.stiller.join(','));
+      __REG.ok('tropik seçilince German Pils DÜŞÜYOR', s.stiller.indexOf('German Pils') < 0);
+      _bmProfilSec('hop', 'narenciye');
+      __REG.ok('narenciye seçilince American IPA geliyor', window._brSonuc().stiller.indexOf('American IPA') >= 0);
+      // ekranda dolaylılık şerhi
+      const d = document.getElementById('br-tam').innerHTML;
+      __REG.ok('EKRANDA hop şerhi var (duyusal ölçüm değil)', /duyusal ölçüm değildir|hop kataloğundaki aroma tanımı/.test(d));
+      __REG.ok('EKRANDA güç şerhi var (OG tahmini)', /OG'den tahmin|%75 attenuation/.test(d));
+      __REG.ok('satırda 🍃 hop rozeti', d.indexOf('🍃 ') >= 0);
+      _brKapat(); _bmProfilSifirla();
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BT1-GRUP', ad: 'EKSEN GRUPLAMA (ölçümle zorunlu oldu): 8 eksen birden açıkken 390×844\'te sonuç başlığı 328 px aşağıda kalıyordu; temel (renk/acılık/gövde/güç) hep açık + detay (maya/tahıl/malt/hop) katlı yapıldı. 390 ve 360\'ta sonuç ARTIK seçimsizken bile görünür alanda; detay grubunda seçim varsa kendiliğinden açılır',
+    calistir: async (page) => {
+      let hepsi = [];
+      for (const [w, h] of [[390, 844], [360, 640]]) {
+        await page.setViewport({ width: w, height: h });
+        await page.waitForFunction(() => {
+          const s = document.querySelector('.bm-sidebar');
+          if (!s) return true;
+          if (getComputedStyle(s).position !== 'fixed') return true;
+          return s.getBoundingClientRect().right <= 0.5;
+        }, { timeout: 4000 });
+        const c = await page.evaluate((w) => {
+          const kayit = KR.find(k => k && k.biraAd === 'BT1 grup');
+          if (!kayit) __REG.yeniKayit('BT1 grup', {}); else tarifAc(kayit.id);
+          ekran = 'editor'; sekme = 'genel';
+          _bmProfilSifirla(); render(); _brAc();
+          const ov = () => document.getElementById('br-tam');
+          const mesafe = () => {
+            const gov = ov().querySelector('.br-tam-govde'), bas = ov().querySelector('.br-sonuc-bas');
+            return Math.round(bas.getBoundingClientRect().top - gov.getBoundingClientRect().bottom);
+          };
+          __REG.ok(w + ': seçimsizken YALNIZ 4 temel eksen açık', ov().querySelectorAll('.br-eksen').length === 4, ov().querySelectorAll('.br-eksen').length);
+          // ÖLÇÜLDÜ (gruplama sonrası): 390×844 → 0 seçimde -146 px (görünür),
+          // 360×640 → 0 seçimde +110 px (kısa kaydırma), 3 seçimde -160 px (görünür).
+          // 360'ta 4 temel eksen + başlık + alt çubuk zaten 640 px'i dolduruyor;
+          // iddia ölçülen gerçeğe göre yazıldı, ölçüm iddiaya göre DEĞİL.
+          const m0 = mesafe();
+          if (w >= 390) __REG.ok(w + ': seçim YOKKEN bile sonuç başlığı görünür alanda', m0 < 0, m0 + ' px');
+          else __REG.ok(w + ': seçim yokken başlık en fazla bir kısa kaydırma uzakta', m0 < 160, m0 + ' px');
+          _bmProfilSec('renk', 'koyu'); _bmProfilSec('aci', 'dengeli'); _bmProfilSec('govde', 'dolgun');
+          const m3 = mesafe();
+          __REG.ok(w + ': 3 seçimde sonuç başlığı GÖRÜNÜR alanda', m3 < 0, m0 + ' → ' + m3 + ' px');
+          __REG.ok(w + ': BS tabanına göre KAZANÇ (6 eksen açıkken 3 seçimde 360\'ta -70 px idi)', m3 < m0, m0 + ' → ' + m3);
+          const satir = Array.from(ov().querySelectorAll('.br-satir')).filter(e =>
+            e.getBoundingClientRect().bottom <= ov().querySelector('.br-tam-govde').getBoundingClientRect().bottom + 1).length;
+          __REG.ok(w + ': kaydırmadan en az 1 öneri satırı görünüyor', satir >= 1, satir + ' satır');
+          // detay grubu
+          const grup = ov().querySelector('.br-grup');
+          __REG.ok(w + ': grup düğmesi ≥44 px', grup.getBoundingClientRect().height >= 44, Math.round(grup.getBoundingClientRect().height));
+          __REG.ok(w + ': grup düğmesi taşmıyor', grup.getBoundingClientRect().right <= innerWidth + 0.5);
+          grup.click();
+          __REG.ok(w + ': açılınca 8 eksen', ov().querySelectorAll('.br-eksen').length === 8, ov().querySelectorAll('.br-eksen').length);
+          const cips = Array.from(ov().querySelectorAll('.br-cip'));
+          __REG.ok(w + ': tüm çipler ≥44 px', cips.every(b => b.getBoundingClientRect().height >= 44), cips.filter(b => b.getBoundingClientRect().height < 44).length + ' küçük');
+          __REG.ok(w + ': hiçbir çip taşmıyor', cips.every(b => { const r = b.getBoundingClientRect(); return r.left >= -0.5 && r.right <= innerWidth + 0.5; }));
+          __REG.ok(w + ': belge yatay taşmıyor', document.documentElement.scrollWidth <= innerWidth + 1);
+          ov().querySelector('.br-grup').click();
+          __REG.ok(w + ': tekrar tık → 4 eksene döndü', ov().querySelectorAll('.br-eksen').length === 4);
+          // detayda SEÇİM varsa kendiliğinden açılır
+          _bmProfilSec('hop', 'tropik');
+          __REG.ok(w + ': detayda seçim yapılınca grup KENDİLİĞİNDEN açık', ov().querySelectorAll('.br-eksen').length === 8, ov().querySelectorAll('.br-eksen').length);
+          __REG.ok(w + ': grup başlığı seçim sayısını gösteriyor', /1 seçili/.test(ov().querySelector('.br-grup').textContent), ov().querySelector('.br-grup').textContent.trim().slice(-24));
+          _bmProfilSifirla();
+          __REG.ok(w + ': sıfırla → grup kapandı, 4 eksen', ov().querySelectorAll('.br-eksen').length === 4);
+          _brKapat();
+          return __REG.al();
+        }, w);
+        hepsi = hepsi.concat(c);
+      }
+      await page.setViewport({ width: 1024, height: 800 });
+      return hepsi;
+    }
+  },
+  {
+    kod: 'BT2-KATKI', ad: 'KARMA KATKI ŞEKER İDDİASI ÖLÇÜLDÜ ve ÇÜRÜDÜ: kodda "sekerTipi" alanı YOK (mekanizma gu + fermente); 193 katkının HEPSİNDE fermente alanı var (eksik 0); adında karma geçen katkı 10 değil 1 (citrus zest) ve şeker taşımıyor; "bal-limon" diye bir katkı yok — bal katkılarının hepsi zaten gu>0 + fermente:true. Uydurma değer EKLENMEDİ; mekanizmanın doğru çalıştığı runtime ile kanıtlanıyor',
+    calistir: (page) => page.evaluate(() => {
+      const K = window.KATKILAR;
+      __REG.ok('katkı kataloğu yüklü (193)', Array.isArray(K) && K.length === 193, K ? K.length : 'YOK');
+      // 1. "sekerTipi" diye bir alan YOK — mekanizma gu + fermente
+      const src = Array.from(document.querySelectorAll('script')).map(s => s.textContent).join('\n');
+      __REG.ok('kodda "sekerTipi" alanı YOK (mekanizma gu + fermente)', src.indexOf('sekerTipi') < 0);
+      __REG.ok('her katkıda fermente alanı VAR (eksik 0)', K.every(k => 'fermente' in k), K.filter(k => !('fermente' in k)).map(k => k.id).join(','));
+      __REG.ok('fermente değerleri kapalı enum (true/false/partial)', K.every(k => k.fermente === true || k.fermente === false || k.fermente === 'partial'));
+      // 2. "karma" katkı sayısı
+      // NOT: ilk ölçüm betiğim 2 saymıştı — deseninde '\\+' vardı ve
+      // 'Bitter Çikolata (%70+ Kakao)' adındaki yüzde işaretini yakalıyordu.
+      // Yanlış pozitif AYIKLANDI: gerçek sayı 1.
+      const karma = K.filter(k => /karma|karışım|karisim|harman|blend|mix/i.test(String(k.ad)));
+      __REG.ok('adında karma/karışım geçen katkı 1 (iddia edilen 10 DEĞİL)', karma.length === 1, karma.length + ': ' + karma.map(k => k.ad).join(' · '));
+      __REG.ok('o katkı şeker taşımıyor (citrus zest = kabuk)', karma.every(k => !k.gu), karma.map(k => k.ad + ' gu=' + k.gu).join(','));
+      // 3. "bal-limon" yok; bal katkıları zaten doğru
+      __REG.ok('"bal-limon" diye bir katkı YOK', !K.some(k => /bal.?limon|limon.?bal/i.test(String(k.ad))));
+      const ballar = K.filter(k => /^(ham_bal|cam_bal|kestane_bal|bal_tozu)$/.test(k.id));
+      __REG.ok('4 bal katkısının hepsi gu>0 + fermente:true (zaten doğru)',
+        ballar.length === 4 && ballar.every(k => k.gu > 0 && k.fermente === true),
+        ballar.map(k => k.ad + '(gu=' + k.gu + ',' + k.fermente + ')').join(' · '));
+      // 4. Şeker grubu eksiksiz
+      const seker = K.filter(k => k.g === 'Şeker');
+      const guYok = seker.filter(k => !k.gu);
+      __REG.ok('Şeker grubunda gu=0 olan tek katkı priming çözeltisi (doğru)',
+        guYok.length === 1 && guYok[0].id === 'co2_sivi', guYok.map(k => k.ad).join(','));
+      // 5. Belirsiz olana UYDURMA değer konmadı
+      const fistik = K.find(k => k.id === 'fistik_ezmesi'), tahin = K.find(k => k.id === 'tahini');
+      __REG.ok('fıstık ezmesi gu=0 KALDI (yağ+protein tabanlı, şeker payı belirsiz)', fistik && fistik.gu === 0);
+      __REG.ok('tahin gu=0 KALDI (%50 yağ)', tahin && tahin.gu === 0);
+      // 6. RUNTIME: mekanizma gerçekten çalışıyor mu?
+      __REG.yeniKayit('BT2 Katki', {});
+      S.hacim = 11; S.verim = 61; S.maltlar = [{ id: 'pilsner', kg: 2.5 }]; S.katkilar = [];
+      const og0 = hOG(S.maltlar, S.verim, S.katkilar, S.hacim);
+      // gu>0 + fermente:true → OG YÜKSELMELİ
+      S.katkilar = [{ id: 'ham_bal', miktar: 500, birim: 'g' }];
+      const ogBal = hOG(S.maltlar, S.verim, S.katkilar, S.hacim);
+      __REG.ok('gu>0 katkı (500 g ham bal) OG\'yi YÜKSELTİYOR', ogBal > og0 + 0.005, og0.toFixed(4) + ' → ' + ogBal.toFixed(4));
+      // gu=0 → OG DEĞİŞMEMELİ (uydurma yok)
+      S.katkilar = [{ id: 'fistik_ezmesi', miktar: 500, birim: 'g' }];
+      const ogFistik = hOG(S.maltlar, S.verim, S.katkilar, S.hacim);
+      __REG.ok('gu=0 katkı (500 g fıstık ezmesi) OG\'yi DEĞİŞTİRMİYOR (uydurma yok)', Math.abs(ogFistik - og0) < 1e-9, og0.toFixed(4) + ' → ' + ogFistik.toFixed(4));
+      // fermente:false + gu>0 → OG yükselir AMA FG'de kalır
+      S.katkilar = [{ id: 'lak', miktar: 500, birim: 'g' }];
+      const ogLak = hOG(S.maltlar, S.verim, S.katkilar, S.hacim);
+      __REG.ok('laktoz (gu>0, fermente:false) OG\'yi yükseltiyor', ogLak > og0 + 0.005, ogLak.toFixed(4));
+      __REG.ok('laktoz FG\'de kalıyor (hNFGravity > 0)', hNFGravity(S.katkilar, S.maltlar, S.hacim) > 0, hNFGravity(S.katkilar, S.maltlar, S.hacim).toFixed(4));
+      S.katkilar = [];
       return __REG.al();
     })
   }

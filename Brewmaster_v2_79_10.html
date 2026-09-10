@@ -320,6 +320,7 @@ input[type="checkbox"]:disabled,input[type="radio"]:disabled{opacity:.5;cursor:n
 .br-ayrac{border-top:1px dashed var(--bor);margin:8px 0 6px}
 /* BS1: uzun listede yönünü kaybetme — sonuç başlığı kaydırırken üstte kalır */
 .br-sonuc-bas{font-size:10.5px;color:var(--dim);margin:2px 0 2px;line-height:1.45;position:sticky;top:0;z-index:2;background:var(--bg-card);padding:4px 0 3px;border-bottom:1px solid var(--bor)}
+.br-grup{display:block;width:100%;margin:2px 0 10px;min-height:44px;background:var(--bg2);color:var(--kahve);border:1px dashed var(--bor);border-radius:8px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:var(--font-govde);padding:6px 10px;text-align:left}
 .br-daha{display:block;width:100%;margin-top:8px;min-height:44px;background:var(--bg2);color:var(--kahve);border:1px dashed var(--bor);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-govde)}
 .br-satir{display:flex;align-items:center;gap:8px;padding:7px 0;border-top:1px solid var(--bor)}
 .br-satir-ad{font-size:13px;font-weight:700;color:var(--kahve);line-height:1.25}
@@ -26918,80 +26919,81 @@ window._AK_EKSEN = {
 // oy vermesin) — tahılı karışık stillerde (Oud Bruin, Mixed Fermentation Sour)
 // oy dağılımını kaydırıp ARPA tabanlı stilleri de değiştiriyordu; kapı yakaladı.
 window._PROFIL_KARAKTER = {
-  "Altbier / Düsseldorf Altbier":["temiz",90,"tost",52,"arpa",97],
-  "American Amber Ale / Red Ale":["temiz",71,"karamel",46,"arpa",95],
-  "American Amber IPA / Red IPA":["temiz",78,"ekmeksi",44,"arpa",93],
-  "American Barleywine":["temiz",64,"ekmeksi",64,"arpa",89],
-  "American Brown Ale":["temiz",52,"cikolata",47,"arpa",89],
-  "American IPA":["temiz",77,"ekmeksi",65,"arpa",89],
-  "American Lager / Light Lager":["temiz",82,"ekmeksi",72,"arpa",90],
-  "American Pale Ale":["temiz",76,"ekmeksi",65,"arpa",90],
-  "American Stout":["temiz",48,"kavrulmus",56,"arpa",69],
-  "American Strong Ale":["temiz",66,"ekmeksi",61,"arpa",90],
-  "American Wheat Beer":["temiz",55,"",0,"bugday",82],
-  "Baltic Porter":["temiz",52,"cikolata",44,"arpa",87],
-  "Belgian Blonde Ale":["fenolik",86,"ekmeksi",74,"arpa",87],
-  "Belgian Dark Strong Ale":["fenolik",94,"ekmeksi",66,"arpa",86],
-  "Belgian Quadrupel / Abt":["fenolik",98,"ekmeksi",72,"arpa",97],
-  "Belgian Strong Golden Ale":["fenolik",92,"ekmeksi",92,"arpa",93],
-  "Berliner Weisse":["eksi",53,"",0,"bugday",87],
-  "Best Bitter":["esterli",87,"ekmeksi",62,"arpa",95],
-  "Bière de Garde":["fenolik",68,"ekmeksi",48,"arpa",86],
-  "Black IPA / Cascadian Dark Ale":["temiz",77,"ekmeksi",33,"arpa",92],
-  "Blonde Ale / Cream Ale":["temiz",73,"ekmeksi",81,"arpa",90],
-  "Bock":["temiz",91,"tost",59,"arpa",96],
-  "Brett Beer / Farmhouse Brett":["eksi",83,"ekmeksi",77,"arpa",64],
-  "Brown Porter":["esterli",70,"cikolata",59,"arpa",90],
-  "California Common / Steam Beer":["temiz",90,"ekmeksi",53,"arpa",94],
-  "Doppelbock":["temiz",88,"tost",60,"arpa",92],
-  "Dortmunder Export":["temiz",95,"ekmeksi",60,"arpa",98],
-  "Dry Irish Stout":["esterli",77,"kavrulmus",82,"arpa",85],
-  "Dubbel":["fenolik",94,"ekmeksi",63,"arpa",95],
-  "Dunkelweizen":["fenolik",90,"tost",38,"bugday",93],
-  "English Barleywine":["esterli",72,"ekmeksi",65,"arpa",92],
-  "English Brown Ale":["esterli",87,"cikolata",31,"arpa",90],
-  "English IPA":["esterli",70,"ekmeksi",63,"arpa",94],
-  "English Mild / Dark Mild":["esterli",86,"cikolata",44,"arpa",89],
-  "Festbier / Wiesn":["temiz",96,"tost",58,"arpa",99],
-  "Flanders Red Ale":["eksi",75,"tost",53,"arpa",91],
-  "Foreign Extra Stout":["esterli",68,"kavrulmus",67,"arpa",78],
-  "German Pils":["temiz",94,"ekmeksi",87,"arpa",98],
-  "Helles / Münchner Hell":["temiz",91,"ekmeksi",74,"arpa",92],
-  "Imperial / Russian Imperial Stout":["temiz",47,"kavrulmus",60,"arpa",73],
-  "Imperial IPA / DIPA":["temiz",77,"ekmeksi",69,"arpa",92],
-  "International Pale Lager":["temiz",97,"ekmeksi",78,"arpa",98],
-  "Irish Red Ale":["esterli",71,"karamel",39,"arpa",96],
-  "Kellerbier / Zwickelbier":["temiz",78,"tost",51,"arpa",94],
-  "Kölsch":["temiz",94,"ekmeksi",87,"arpa",91],
-  "Lambic / Gueuze":["eksi",85,"",0,"bugday",62],
-  "London Porter":["esterli",61,"cikolata",60,"arpa",87],
-  "Maibock / Helles Bock":["temiz",92,"tost",49,"arpa",98],
-  "Milk Stout / Sweet Stout":["esterli",68,"kavrulmus",49,"arpa",73],
-  "Mixed Fermentation Sour":["eksi",67,"ekmeksi",84,"arpa",43],
-  "Munich Dunkel":["temiz",91,"tost",58,"arpa",96],
-  "Munich Märzen / Oktoberfest":["temiz",90,"tost",68,"arpa",98],
-  "NEIPA / Hazy IPA":["esterli",64,"",0,"yulaf",75],
-  "Oatmeal Stout":["esterli",76,"kavrulmus",51,"yulaf",89],
-  "Old Ale":["esterli",73,"ekmeksi",49,"arpa",92],
-  "Oud Bruin":["eksi",67,"ekmeksi",30,"arpa",87],
-  "Pre-Prohibition Lager":["temiz",92,"ekmeksi",87,"arpa",98],
-  "Rauchbier / Bamberg Smoked":["temiz",81,"isli",83,"arpa",95],
-  "Robust Porter":["esterli",62,"cikolata",62,"arpa",89],
-  "Roggenbier / Rye Beer":["fenolik",69,"",0,"cavdar",72],
-  "Saison / Farmhouse Ale":["fenolik",88,"ekmeksi",79,"arpa",76],
-  "Schwarzbier":["temiz",93,"cikolata",23,"arpa",96],
-  "Scottish Ale / 80 Shilling":["esterli",82,"ekmeksi",38,"arpa",95],
-  "Scottish Ale / Wee Heavy":["esterli",84,"ekmeksi",50,"arpa",97],
-  "Session Ale / Ordinary Bitter":["esterli",85,"ekmeksi",62,"arpa",94],
-  "Smoked Beer / Rauchbier":["temiz",56,"isli",48,"arpa",82],
-  "Strong Bitter / ESB":["esterli",88,"ekmeksi",56,"arpa",97],
-  "Tripel":["fenolik",96,"ekmeksi",91,"arpa",91],
-  "Vienna Lager":["temiz",96,"tost",61,"arpa",98],
-  "Weizen / Weissbier":["fenolik",92,"",0,"bugday",94],
-  "Weizenbock":["fenolik",90,"",0,"bugday",92],
-  "Winter Warmer / Old Ale":["esterli",47,"ekmeksi",41,"arpa",88],
-  "Witbier / Belgian White":["fenolik",91,"",0,"bugday",81]
+  "Altbier / Düsseldorf Altbier":["temiz",90,"tost",52,"arpa",97,"orta",77,"otsu",75],
+  "American Amber Ale / Red Ale":["temiz",71,"karamel",46,"arpa",95,"orta",70,"narenciye",46],
+  "American Amber IPA / Red IPA":["temiz",78,"ekmeksi",44,"arpa",93,"orta",64,"narenciye",45],
+  "American Barleywine":["temiz",64,"ekmeksi",64,"arpa",89,"cokguclu",65,"narenciye",49],
+  "American Brown Ale":["temiz",52,"cikolata",47,"arpa",89,"orta",71,"cicek",36],
+  "American IPA":["temiz",77,"ekmeksi",65,"arpa",89,"orta",60,"narenciye",46],
+  "American Lager / Light Lager":["temiz",82,"ekmeksi",72,"arpa",90,"orta",57,"otsu",40],
+  "American Pale Ale":["temiz",76,"ekmeksi",65,"arpa",90,"orta",71,"narenciye",49],
+  "American Stout":["temiz",48,"kavrulmus",56,"arpa",69,"orta",55,"cicek",29],
+  "American Strong Ale":["temiz",66,"ekmeksi",61,"arpa",90,"orta",51,"narenciye",38],
+  "American Wheat Beer":["temiz",55,"",0,"bugday",82,"orta",62,"narenciye",37],
+  "Baltic Porter":["temiz",52,"cikolata",44,"arpa",87,"guclu",61,"otsu",37],
+  "Belgian Blonde Ale":["fenolik",86,"ekmeksi",74,"arpa",87,"orta",67,"otsu",42],
+  "Belgian Dark Strong Ale":["fenolik",94,"ekmeksi",66,"arpa",86,"guclu",42,"otsu",41],
+  "Belgian Quadrupel / Abt":["fenolik",98,"ekmeksi",72,"arpa",97,"cokguclu",69,"otsu",49],
+  "Belgian Strong Golden Ale":["fenolik",92,"ekmeksi",92,"arpa",93,"guclu",69,"otsu",54],
+  "Berliner Weisse":["eksi",53,"",0,"bugday",87,"hafif",82,"otsu",57],
+  "Best Bitter":["esterli",87,"ekmeksi",62,"arpa",95,"hafif",62,"cicek",60],
+  "Bière de Garde":["fenolik",68,"ekmeksi",48,"arpa",86,"orta",48,"otsu",56],
+  "Black IPA / Cascadian Dark Ale":["temiz",77,"ekmeksi",33,"arpa",92,"guclu",48,"narenciye",48],
+  "Blonde Ale / Cream Ale":["temiz",73,"ekmeksi",81,"arpa",90,"orta",58,"narenciye",36],
+  "Bock":["temiz",91,"tost",59,"arpa",96,"guclu",52,"otsu",70],
+  "Brett Beer / Farmhouse Brett":["eksi",83,"ekmeksi",77,"arpa",64,"orta",78,"tropik",26],
+  "Brown Porter":["esterli",70,"cikolata",59,"arpa",90,"orta",65,"cicek",38],
+  "California Common / Steam Beer":["temiz",90,"ekmeksi",53,"arpa",94,"orta",73,"baharat",47],
+  "Doppelbock":["temiz",88,"tost",60,"arpa",92,"guclu",70,"otsu",67],
+  "Dortmunder Export":["temiz",95,"ekmeksi",60,"arpa",98,"orta",82,"otsu",81],
+  "Dry Irish Stout":["esterli",77,"kavrulmus",82,"arpa",85,"orta",48,"cicek",56],
+  "Dubbel":["fenolik",94,"ekmeksi",63,"arpa",95,"orta",49,"otsu",51],
+  "Dunkelweizen":["fenolik",90,"tost",38,"bugday",93,"orta",74,"otsu",77],
+  "English Barleywine":["esterli",72,"ekmeksi",65,"arpa",92,"cokguclu",64,"cicek",51],
+  "English Brown Ale":["esterli",87,"cikolata",31,"arpa",90,"orta",68,"cicek",55],
+  "English IPA":["esterli",70,"ekmeksi",63,"arpa",94,"orta",69,"cicek",35],
+  "English Mild / Dark Mild":["esterli",86,"cikolata",44,"arpa",89,"hafif",80,"cicek",52],
+  "Festbier / Wiesn":["temiz",96,"tost",58,"arpa",99,"orta",91,"otsu",66],
+  "Flanders Red Ale":["eksi",75,"tost",53,"arpa",91,"orta",76,"cicek",42],
+  "Foreign Extra Stout":["esterli",68,"kavrulmus",67,"arpa",78,"guclu",49,"cicek",42],
+  "German Pils":["temiz",94,"ekmeksi",87,"arpa",98,"orta",76,"otsu",75],
+  "Helles / Münchner Hell":["temiz",91,"ekmeksi",74,"arpa",92,"orta",80,"otsu",76],
+  "Imperial / Russian Imperial Stout":["temiz",47,"kavrulmus",60,"arpa",73,"cokguclu",53,"cicek",33],
+  "Imperial IPA / DIPA":["temiz",77,"ekmeksi",69,"arpa",92,"guclu",72,"narenciye",41],
+  "International Pale Lager":["temiz",97,"ekmeksi",78,"arpa",98,"orta",71,"otsu",66],
+  "Irish Red Ale":["esterli",71,"karamel",39,"arpa",96,"orta",69,"cicek",48],
+  "Kellerbier / Zwickelbier":["temiz",78,"tost",51,"arpa",94,"orta",96,"otsu",44],
+  "Kölsch":["temiz",94,"ekmeksi",87,"arpa",91,"orta",69,"otsu",74],
+  "Lambic / Gueuze":["eksi",85,"",0,"bugday",62,"orta",69,"otsu",54],
+  "London Porter":["esterli",61,"cikolata",60,"arpa",87,"orta",72,"cicek",39],
+  "Maibock / Helles Bock":["temiz",92,"tost",49,"arpa",98,"guclu",49,"otsu",72],
+  "Milk Stout / Sweet Stout":["esterli",68,"kavrulmus",49,"arpa",73,"orta",68,"cicek",48],
+  "Mixed Fermentation Sour":["eksi",67,"ekmeksi",84,"arpa",43,"orta",65,"otsu",29],
+  "Munich Dunkel":["temiz",91,"tost",58,"arpa",96,"orta",87,"otsu",78],
+  "Munich Märzen / Oktoberfest":["temiz",90,"tost",68,"arpa",98,"orta",82,"otsu",84],
+  "NEIPA / Hazy IPA":["esterli",64,"",0,"yulaf",75,"orta",73,"tropik",70],
+  "Oatmeal Stout":["esterli",76,"kavrulmus",51,"yulaf",89,"orta",74,"cicek",46],
+  "Old Ale":["esterli",73,"ekmeksi",49,"arpa",92,"guclu",55,"cicek",40],
+  "Oud Bruin":["eksi",67,"ekmeksi",30,"arpa",87,"orta",61,"otsu",43],
+  "Pre-Prohibition Lager":["temiz",92,"ekmeksi",87,"arpa",98,"orta",75,"otsu",52],
+  "Rauchbier / Bamberg Smoked":["temiz",81,"isli",83,"arpa",95,"orta",86,"otsu",71],
+  "Robust Porter":["esterli",62,"cikolata",62,"arpa",89,"orta",69,"cicek",40],
+  "Roggenbier / Rye Beer":["fenolik",69,"",0,"cavdar",72,"orta",79,"otsu",65],
+  "Saison / Farmhouse Ale":["fenolik",88,"ekmeksi",79,"arpa",76,"orta",71,"otsu",36],
+  "Schwarzbier":["temiz",93,"cikolata",23,"arpa",96,"orta",80,"otsu",70],
+  "Scottish Ale / 80 Shilling":["esterli",82,"ekmeksi",38,"arpa",95,"orta",51,"cicek",55],
+  "Scottish Ale / Wee Heavy":["esterli",84,"ekmeksi",50,"arpa",97,"guclu",58,"cicek",50],
+  "Session Ale / Ordinary Bitter":["esterli",85,"ekmeksi",62,"arpa",94,"hafif",85,"cicek",57],
+  "Smoked Beer / Rauchbier":["temiz",56,"isli",48,"arpa",82,"orta",55,"otsu",36],
+  "Strong Bitter / ESB":["esterli",88,"ekmeksi",56,"arpa",97,"orta",78,"cicek",58],
+  "Tripel":["fenolik",96,"ekmeksi",91,"arpa",91,"guclu",74,"otsu",57],
+  "Vienna Lager":["temiz",96,"tost",61,"arpa",98,"orta",83,"otsu",70],
+  "Weizen / Weissbier":["fenolik",92,"",0,"bugday",94,"orta",76,"otsu",71],
+  "Weizenbock":["fenolik",90,"",0,"bugday",92,"guclu",69,"otsu",67],
+  "Winter Warmer / Old Ale":["esterli",47,"ekmeksi",41,"arpa",88,"guclu",45,"otsu",29],
+  "Witbier / Belgian White":["fenolik",91,"",0,"bugday",81,"orta",66,"otsu",56]
 };
+window._BT_HOP_SIRA = ["narenciye","tropik","cicek","otsu","baharat"];
 
 window._BQ_KARAKTER = {
   maya: { ad:'Maya', ikon:'🧬', i:0, sira:['temiz','esterli','fenolik','eksi'],
@@ -27029,7 +27031,45 @@ window._BQ_KARAKTER = {
     uzun:{ arpa:'arpa — grist\'te buğday/çavdar/yulaf eşiği geçilmemiş (klasik arpa maltı tabanı)',
            bugday:'buğday — gristin ≥%21\'i buğday (Weizen · Witbier · Berliner · Lambic ailesi)',
            cavdar:'çavdar — gristin ≥%22\'si çavdar (Roggenbier / rye ailesi)',
-           yulaf:'yulaf — gristin ≥%5\'i yulaf (Oatmeal Stout · NEIPA ağız hissi)' } }
+           yulaf:'yulaf — gristin ≥%5\'i yulaf (Oatmeal Stout · NEIPA ağız hissi)' } },
+  // ═══ SPRINT BT — GÜÇ (ABV) EKSENİ ══════════════════════════════════
+  // FG KULLANILMADI (dataset FG'sinin %91,9'u formülden türetilmiş = sahte).
+  // OG'den TEK ve AÇIK varsayımla: %75 görünür attenuation →
+  //   ABV ≈ (OG−1)×1000 × 0,0984   [(OG−FG)×131,25 , FG=1+(OG−1)×0,25]
+  // Bu bir TAHMİN, ölçüm değil: her stilin korpus-medyan OG'sinden hesaplanan
+  // tipik güç. DOĞRULANDI: 73 stilin 71'inde bu medyan, stilin BJCP ABV
+  // bandıyla ±0,7 toleransla örtüşüyor (_bt_build_eksen.js, ABORT kapılı).
+  // SAPAN 2: Belgian Dark Strong (korpus %7,1 vs BJCP %8-12) ve Scottish 80/-
+  // (korpus %4,9 vs BJCP %3,3-3,9) — ev üreticileri bu iki stili BJCP bandının
+  // dışında demliyor. Bu bölüm zaten "kaç kişi böyle demlemiş"i gösterir.
+  abv: { ad:'Güç', ikon:'💪', i:6, sira:['hafif','orta','guclu','cokguclu'],
+    et:{ hafif:'hafif', orta:'orta', guclu:'güçlü', cokguclu:'çok güçlü' },
+    uzun:{ hafif:'hafif — tipik ABV %4,5 altı (session · Berliner · mild)',
+           orta:'orta — tipik ABV %4,5–6,5 (çoğu günlük stil)',
+           guclu:'güçlü — tipik ABV %6,5–9 (Tripel · Weizenbock · dubbel)',
+           cokguclu:'çok güçlü — tipik ABV %9 üstü (imperial stout · barleywine · quad)' } },
+  // ═══ SPRINT BT — HOP KARAKTERİ EKSENİ ══════════════════════════════
+  // KAYNAK FARKI (şerh): diğer 5 eksen doğrudan SAYISAL alandan türüyor;
+  // hop ekseni uygulamanın kendi hop kataloğundaki AROMA TANIMI metninden
+  // (HOPLAR[].mo) türüyor — bir adım daha dolaylı.
+  // Sınıflandırıcı v1 ("en çok geçen kelime") DENENDİ ve REDDEDİLDİ:
+  // 'çiçek' 73 stilin 52'sinde baskın çıktı = catch-all imzası (BQ1 dersi).
+  // v2: metinde İLK geçen tanımlayıcı kazanır (katalog yazarı birincil notu
+  // başa yazar). DENETİM: 'otsu' sınıfına giren 12 hop tam olarak noble/İngiliz
+  // ailesi (Saaz · Hallertau Mittelfrueh · Tettnanger · Spalt · Fuggles ...).
+  // 'çamsı' sınıfı 7 hop içeriyor (Columbus · Simcoe · Chinook · Warrior ...)
+  // ama HİÇBİR STİLDE baskın değil — çamsı hoplar acılık eklemesi olarak
+  // kullanılıyor, stilin tanımlayıcı aroması olmuyor. Kalıcı ölü çip üretmemek
+  // için çip listesinden ÇIKARILDI (sıra _BT_HOP_SIRA'dan gelir).
+  // Kapsama: reçetelerin %86,9'unda hop adı katalogla eşleşiyor; 73/73 stil sınıflı.
+  hop: { ad:'Hop aroması', ikon:'🍃', i:8, sira:['narenciye','tropik','cicek','otsu','baharat'],
+    et:{ narenciye:'narenciye', tropik:'tropik', camsi:'çamsı', cicek:'çiçeksi', otsu:'otsu/toprak', baharat:'baharatlı' },
+    uzun:{ narenciye:'narenciye — sitrus/greyfurt/limon baskın hop (Cascade · Centennial · Amarillo)',
+           tropik:'tropik — mango/passion/kavun baskın hop (Citra · Mosaic · Galaxy)',
+           camsi:'çamsı/reçineli — çam/reçine baskın hop (Columbus · Chinook · Simcoe)',
+           cicek:'çiçeksi — çiçek/lavanta baskın hop (EKG · Hallertau Blanc)',
+           otsu:'otsu/toprak — bitkisel/topraksı noble hop (Saaz · Hallertau · Tettnanger · Fuggles)',
+           baharat:'baharatlı — baharat/biber baskın hop (Northern Brewer · Perle)' } }
 };
 
 // Bir stilin karakter sınıfı ('' = tabloda yok)
@@ -27160,13 +27200,18 @@ window._brKovaCoz = function(){
 window._brEksenler = function(){
   var A = window._AK_EKSEN || {}, B = window._BQ_KARAKTER || {};
   var o = [];
+  // SPRINT BT: 8 eksen İKİ GRUPTA. 'temel' her zaman açık; 'detay' katlanabilir
+  // (içinde seçim varsa kendiliğinden açılır). Gerekçe ölçümle: 8 eksen birden
+  // açıkken 360×640'ta sonuç başlığı ekranın çok altında kalıyordu.
   ['renk','aci','govde'].forEach(function(k){
     if(!A[k]) return;
-    o.push({ k:k, ad:A[k].ad, ikon:A[k].ikon, sec:A[k].secenekler.map(function(s){ return [s[0], s[1], (s[2] == null ? null : s[2]), '']; }) });
+    o.push({ k:k, grup:'temel', ad:A[k].ad, ikon:A[k].ikon, sec:A[k].secenekler.map(function(s){ return [s[0], s[1], (s[2] == null ? null : s[2]), '']; }) });
   });
-  [['maya','Maya karakteri'],['tahil','Tahıl'],['malt','Malt karakteri']].forEach(function(p){
+  [['abv','Güç','temel'],['maya','Maya karakteri','detay'],['tahil','Tahıl','detay'],
+   ['malt','Malt karakteri','detay'],['hop','Hop aroması','detay']].forEach(function(p){
     var E = B[p[0]]; if(!E) return;
-    o.push({ k:p[0], ad:p[1], ikon:E.ikon, sec:E.sira.map(function(c){ return [c, E.et[c] || c, null, E.uzun[c] || '']; }) });
+    var sira = (p[0] === 'hop' && window._BT_HOP_SIRA) ? window._BT_HOP_SIRA : E.sira;
+    o.push({ k:p[0], grup:p[2], ad:p[1], ikon:E.ikon, sec:sira.map(function(c){ return [c, E.et[c] || c, null, E.uzun[c] || '']; }) });
   });
   return o;
 };
@@ -27210,7 +27255,9 @@ window._brSonuc = function(p){
   var liste = Object.keys(r.m).filter(function(a){ return r.m[a] >= window._BR_MIN_N; });
   var havuz = liste.length;
   if(p.maya) liste = liste.filter(function(a){ return window._bmKarakterSinif(a, 'maya') === p.maya; });
+  if(p.abv) liste = liste.filter(function(a){ return window._bmKarakterSinif(a, 'abv') === p.abv; });
   if(p.tahil) liste = liste.filter(function(a){ return window._bmKarakterSinif(a, 'tahil') === p.tahil; });
+  if(p.hop) liste = liste.filter(function(a){ return window._bmKarakterSinif(a, 'hop') === p.hop; });
   if(p.malt) liste = liste.filter(function(a){ return window._bmKarakterSinif(a, 'malt') === p.malt; });
   liste.sort(function(a, b){ return (r.m[b] * (ISK[b] ? 1.35 : 1)) - (r.m[a] * (ISK[a] ? 1.35 : 1)); });
   var esl = 0; liste.forEach(function(a){ esl += r.m[a]; });
@@ -27221,7 +27268,7 @@ window._brSonuc = function(p){
 // çıkmaz sokağı TIKLAMADAN ÖNCE görür (0 yazan çip = boş sonuç).
 window._brCipSayi = function(eksen, deger){
   var p = window.__akProfil || {}, q = {};
-  ['renk','aci','govde','maya','tahil','malt'].forEach(function(k){ q[k] = p[k] || ''; });
+  ['renk','aci','govde','abv','maya','tahil','malt','hop'].forEach(function(k){ q[k] = p[k] || ''; });
   q[eksen] = deger;
   return window._brSonuc(q).stiller.length;
 };
@@ -27230,9 +27277,9 @@ window._brCipSayi = function(eksen, deger){
 // Sessiz boşluk YOK (BB dersi) — hangi ekseni gevşetmenin ne kazandırdığı yazılır.
 window._brDaraltan = function(){
   var p = window.__akProfil || {}, out = [];
-  ['renk','aci','govde','maya','tahil','malt'].forEach(function(e){
+  ['renk','aci','govde','abv','maya','tahil','malt','hop'].forEach(function(e){
     if(!p[e]) return;
-    var q = {}; ['renk','aci','govde','maya','tahil','malt'].forEach(function(k){ q[k] = p[k] || ''; });
+    var q = {}; ['renk','aci','govde','abv','maya','tahil','malt','hop'].forEach(function(k){ q[k] = p[k] || ''; });
     q[e] = '';
     out.push({ eksen:e, deger:p[e], kalan:window._brSonuc(q).stiller.length });
   });
@@ -27241,12 +27288,12 @@ window._brDaraltan = function(){
 };
 
 // Seçim GEÇİCİ: reçete nesnesine (S) YAZILMAZ — bu bir keşif aracı, reçete verisi değil.
-window.__akProfil = { renk:'', aci:'', govde:'', maya:'', tahil:'', malt:'' };
+window.__akProfil = { renk:'', aci:'', govde:'', abv:'', maya:'', tahil:'', malt:'', hop:'' };
 window.__brAcik = false;
 
 window._bmProfilSec = function(eksen, deger){
   try{
-    if(!window.__akProfil) window.__akProfil = { renk:'', aci:'', govde:'', maya:'', tahil:'', malt:'' };
+    if(!window.__akProfil) window.__akProfil = { renk:'', aci:'', govde:'', abv:'', maya:'', tahil:'', malt:'', hop:'' };
     window.__akProfil[eksen] = (window.__akProfil[eksen] === deger) ? '' : deger; // tekrar tık = temizle
     // Seçim yapıldıysa o ekseni katla (sonuç yukarı çıksın); temizlendiyse zaten açılır.
     if(!window.__brGenis) window.__brGenis = {};
@@ -27271,6 +27318,13 @@ window._brHepsiKapat = function(){
   else if(typeof render === 'function') render();
 };
 
+// BT: detay eksen grubu aç/kapa (seçim varsa zaten açık gelir)
+window._brDetayAc = function(){
+  window.__brDetayAcik = !window.__brDetayAcik;
+  if(window.__brAcik && document.getElementById('br-tam')) window._brCiz();
+  else if(typeof render === 'function') render();
+};
+
 window._brGenislet = function(eksen){
   if(!window.__brGenis) window.__brGenis = {};
   window.__brGenis[eksen] = true;
@@ -27279,9 +27333,10 @@ window._brGenislet = function(eksen){
 };
 
 window._bmProfilSifirla = function(){
-  window.__akProfil = { renk:'', aci:'', govde:'', maya:'', tahil:'', malt:'' };
+  window.__akProfil = { renk:'', aci:'', govde:'', abv:'', maya:'', tahil:'', malt:'', hop:'' };
   window.__brGenis = {};
   window.__brHepsi = false;
+  window.__brDetayAcik = false;
   if(window.__brAcik && document.getElementById('br-tam')) window._brCiz();
   else if(typeof render === 'function') render();
 };
@@ -27397,9 +27452,9 @@ window._brTamHTML = function(){
     if(!window.__brAcik) return '';
     var _e = (typeof esc === 'function') ? esc : function(s){ return String(s == null ? '' : s); };
     var say = function(n){ return (n || 0).toLocaleString('tr-TR'); };
-    var p = window.__akProfil || { renk:'', aci:'', govde:'', maya:'', tahil:'', malt:'' };
+    var p = window.__akProfil || { renk:'', aci:'', govde:'', abv:'', maya:'', tahil:'', malt:'', hop:'' };
     var s = window._brSonuc(p);
-    var karAktif = !!(p.maya || p.tahil || p.malt);
+    var karAktif = !!(p.abv || p.maya || p.tahil || p.malt || p.hop);
 
     // ── 5 eksen, HEPSİ İSTEĞE BAĞLI, HEPSİ AYNI EKRANDA ──────────────────
     // KATLAMA: bir eksen SEÇİLİNCE tek satıra iner (seçim + 'değiştir'), böylece
@@ -27408,7 +27463,14 @@ window._brTamHTML = function(){
     // sonuç ekrana giriyor. Eksen KAYBOLMUYOR: adı + seçimi + sayısı satırda duruyor,
     // 'değiştir' tek dokunuşla geri açıyor. Seçimi olmayan eksen HER ZAMAN açık.
     var genis = window.__brGenis || (window.__brGenis = {});
-    var bloklar = window._brEksenler().map(function(x){
+    // SPRINT BT — GRUPLAMA (ÖLÇÜMLE zorunlu oldu): 8 eksen birden açıkken
+    // 390×844'te sonuç başlığı görünür alanın 328 px ALTINDA kalıyordu (BS'de
+    // 6 eksenle 3 seçimde 134 px İÇERİDEYDİ) — düpedüz regresyon. Çözüm:
+    //   temel (hep açık): renk · acılık · gövde · güç
+    //   detay (katlı)   : maya · tahıl · malt · hop
+    // Detay grubu içinde SEÇİM VARSA kendiliğinden açılır; bir kez açılınca
+    // açık kalır. Başlık eksenleri adıyla sayar → keşfedilebilirlik korunur.
+    var _cizEksen = function(x){
       var secili = p[x.k] || '';
       var nokta = function(o){ return (o && o[2] != null && typeof srmR === 'function')
         ? '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + srmR(o[2]) + ';margin-right:5px;border:1px solid rgba(0,0,0,.15);flex:none"></span>' : ''; };
@@ -27434,7 +27496,21 @@ window._brTamHTML = function(){
         + '<div class="br-eksen-ad">' + x.ikon + ' ' + _e(x.ad) + '</div>'
         + '<div class="br-cip-kap">' + cips + '</div>'
         + '</div>';
-    }).join('');
+    };
+    var _tumEksen = window._brEksenler();
+    var _temel = _tumEksen.filter(function(x){ return x.grup !== 'detay'; });
+    var _detay = _tumEksen.filter(function(x){ return x.grup === 'detay'; });
+    var _detaySecili = _detay.filter(function(x){ return p[x.k]; }).length;
+    var _detayAcik = !!window.__brDetayAcik || _detaySecili > 0;
+    var bloklar = _temel.map(_cizEksen).join('')
+      + (_detay.length
+          ? '<button type="button" class="br-grup" onclick="_brDetayAc()" aria-expanded="' + (_detayAcik ? 'true' : 'false') + '">'
+            + (_detayAcik ? '▴ ' : '▾ ') + 'Detaylı tarif: '
+            + _detay.map(function(x){ return x.ikon + ' ' + _e(x.ad).toLocaleLowerCase('tr'); }).join(' · ')
+            + (_detaySecili ? ' <b>(' + _detaySecili + ' seçili)</b>' : '')
+            + '</button>'
+          : '')
+      + (_detayAcik ? _detay.map(_cizEksen).join('') : '');
 
     // ── Canlı sonuç ──────────────────────────────────────────────────────
     // BS1: kırpma YOK. Kullanıcı "▾ N stil daha"ya basmadıkça ilk _BR_ILK_ACIK
@@ -27467,7 +27543,7 @@ window._brTamHTML = function(){
     } else {
       var satirlar = goster.map(function(ad, i){
         var n = s.m[ad] || 0;
-        var kar = ['maya','tahil','malt'].map(function(e){
+        var kar = ['maya','tahil','malt','hop'].map(function(e){
           var c = window._bmKarakterSinif(ad, e); if(!c) return '';
           var E = window._BQ_KARAKTER[e], py = window._bmKarakterPay(ad, e);
           return '<span title="' + _e(E.uzun[c] || '') + ' — korpus payı %' + py + '" '
@@ -27512,7 +27588,7 @@ window._brTamHTML = function(){
       + 'kalan <b>stil</b> sayısı (0 = çıkmaz sokak, seçmeden önce görürsün). Gövde ekseni grist bileşiminden '
       + 'türetilir (dataset FG\'si güvenilmez). Tahıl sınıfı gristteki orandan gelir (buğday ≥%21 · çavdar ≥%22 · yulaf ≥%5; eşikler BJCP tanımlı stillere karşı kalibre edildi, mısır/pirinç sınıfı korpus desteklemediği için YOK). Maya/malt karakteri de aynı korpustan gelir: maya sınıfı '
       + '<b>maya KÖKENİNİ</b> ölçer (tat ölçümü değil), malt "ekmeksi" bir tespit değil kalan sınıftır; '
-      + 'soluk "?" o stilde karakterin karışık olduğunu söyler. Öneri = başlangıç noktası; reçeteyi serbestçe değiştir.</div>';
+      + 'soluk "?" o stilde karakterin karışık olduğunu söyler. <b>Güç</b> ekseni OG\'den tahmin edilir (%75 attenuation varsayımı; dataset FG\'si güvenilmez) — satırdaki ABV bandı ise BJCP\'nindir. <b>Hop aroması</b> tek dolaylı eksendir: reçetenin hop adları uygulamanın hop kataloğundaki aroma tanımıyla eşleştirilir, duyusal ölçüm değildir. Öneri = başlangıç noktası; reçeteyi serbestçe değiştir.</div>';
 
     return '<div id="br-tam" class="br-tam" role="dialog" aria-modal="true" aria-label="İstediğin birayı tarif et" tabindex="-1">'
       + '<div class="br-tam-bas">'
