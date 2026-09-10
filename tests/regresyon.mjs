@@ -6809,6 +6809,171 @@ const CASELER = [
       S.katkilar = [];
       return __REG.al();
     })
+  },
+  // ═════════════ SPRINT BU — SÜRE KAYDI + PLAN/GERÇEK RAPORU (BL2+BL3) ═════════════
+  {
+    kod: 'BU1-SURE', ad: 'GERÇEKLEŞEN SÜRE TÜRETİMİ (BL2): süreler MEVCUT günlük tarihlerinden türetiliyor, YENİ KAYIT YOK; _logGirisTs KULLANILMIYOR (önceliği ts>id>tarih ve gerçek yedekte id toplu geriye-dönük yazım anını taşıyor — 47 gün hata); elle giren kayıtta tarih, alarm onayından gelen kayıtta onay anı kullanılıyor ve kaynağı etiketleniyor',
+    calistir: (page) => page.evaluate(() => {
+      const G = t => { const p = t.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]).getTime(); };
+      const YG = ts => { const d = new Date(ts); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+      __REG.ok('_bmOlayGun tanımlı', typeof window._bmOlayGun === 'function');
+      __REG.ok('_bmGercekGunleri tanımlı', typeof window._bmGercekGunleri === 'function');
+      __REG.ok('_bmPlanGunleri tanımlı', typeof window._bmPlanGunleri === 'function');
+      // (a) elle girilen kayıt: tarih kazanır (id yazım anıdır)
+      const elle = { tip: 'pitching', tarih: '2026-04-12', id: '1780000000000' };
+      const oe = window._bmOlayGun(elle);
+      __REG.ok('elle girişte TARİH kazanıyor (id yazım anı)', YG(oe.ts) === '2026-04-12', YG(oe.ts));
+      __REG.ok('  kaynak "gunluk" etiketli', oe.kaynak === 'gunluk', oe.kaynak);
+      // (b) alarm onayından gelen kayıt: tarih PLANDIR, onay anı kullanılır
+      const alarmdan = { tip: 'cold_crash', tarih: '2026-08-20', id: String(G('2026-08-26')), not: '⏰ alarm onayından', almKey: 'x|7' };
+      const oa = window._bmOlayGun(alarmdan);
+      __REG.ok('alarm onayında ONAY ANI kazanıyor (tarih plandır — 24562: dt=al.ts)', YG(oa.ts) === '2026-08-26', YG(oa.ts));
+      __REG.ok('  kaynak "onay" etiketli (ekranda tahmin olduğu yazılacak)', oa.kaynak === 'onay', oa.kaynak);
+      // (c) GERÇEK YEDEK: Dubbel — 5 giriş de toplu geriye-dönük yazılmış
+      const dubbel = KR.find(k => k && k.biraAd === 'Dark Belgian Dubbel');
+      __REG.ok('gerçek yedekte Dubbel var', !!dubbel && (dubbel.brewLog || []).length === 5, dubbel ? (dubbel.brewLog || []).length : 'YOK');
+      const idGun = new Set((dubbel.brewLog || []).map(e => YG(+e.id)));
+      __REG.ok('KANIT: 5 girişin id-günü AYNI (toplu geriye-dönük yazım)', idGun.size === 1, [...idGun].join(','));
+      const gg = window._bmGercekGunleri(dubbel);
+      __REG.ok('pitching gerçek günü 2026-04-12 (id günü DEĞİL)', YG(gg.pitch) === '2026-04-12', YG(gg.pitch));
+      __REG.ok('cold_crash gerçek günü 2026-04-28', YG(gg.cold) === '2026-04-28', YG(gg.cold));
+      __REG.ok('siseleme gerçek günü 2026-05-02', YG(gg.sise) === '2026-05-02', YG(gg.sise));
+      const ferm = Math.round((gg.cold - gg.pitch) / 864e5), cold = Math.round((gg.sise - gg.cold) / 864e5);
+      __REG.ok('GERÇEK fermentasyon 16 gün (türetildi)', ferm === 16, ferm);
+      __REG.ok('GERÇEK cold crash 4 gün (türetildi)', cold === 4, cold);
+      // (d) _logGirisTs ile FARK — neden kullanılmadığının kanıtı
+      const lg = (dubbel.brewLog || []).map(e => YG(window._logGirisTs(e)));
+      __REG.ok('_logGirisTs kullanılsaydı 5 olay da AYNI güne düşerdi', new Set(lg).size === 1, lg.join(','));
+      __REG.ok('  yani süre hesabı 0 gün çıkardı (yanlış olurdu)', new Set(lg).size === 1);
+      // (e) YENİ ALAN YOK
+      const src = Array.from(document.querySelectorAll('script')).map(s => s.textContent).join('\n');
+      const bu = src.slice(src.indexOf('SPRINT BU — PLAN vs GERÇEK'), src.indexOf('SPRINT AD4'));
+      __REG.ok('BU bloğu S/KR\'ye yeni alan yazmıyor (push/= yok)', bu.indexOf('brewLog.push') < 0 && bu.indexOf('S.gercek') < 0);
+      __REG.ok('YENİ VERİ TOPLANMADIĞI kaynakta belgeli', /YENİ VERİ TOPLANMIYOR/.test(bu));
+      __REG.ok('_logGirisTs\'in neden kullanılmadığı belgeli (47 gün)', /47 GÜNLÜK hata|47 gün/i.test(bu));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BU2-RAPOR', ad: 'PLAN-GERÇEK RAPORU (BL3): Kaan\'ın vakası — "Cold crash: 1 gün planlandı · 7 gün yapıldı"; YALNIZ fark olanlar basılıyor (tutan satır gürültü), fark yoksa bölüm HİÇ görünmüyor; dil nötr (AN5-DIL yasak listesi 0); Takvim sekmesine gömülü, ayrı ekran icat edilmedi',
+    calistir: (page) => page.evaluate(() => {
+      const G = t => { const p = t.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]).getTime(); };
+      const id = __REG.yeniKayit('BU2 Muzo', {});
+      const r = KR.find(k => k && String(k.id) === String(id));
+      r.stil = 'Weizen / Weissbier';
+      r.brewSnapshot = { ts: G('2026-08-16'), ogT: 1.054, fgT: 1.012, verimVarsayim: 60 };
+      r.brewSonuc = { ts: G('2026-09-02'), ogG: 1.041, kaynak: 'test' };
+      r.brewLog = [
+        { tip: 'pitching', tarih: '2026-08-16', id: String(G('2026-08-16')) },
+        { tip: 'cold_crash', tarih: '2026-08-26', id: String(G('2026-08-26')) },
+        { tip: 'siseleme', tarih: '2026-09-02', id: String(G('2026-09-02')) }
+      ];
+      // PLAN: cold crash g10, şişeleme g11 → planlanan cold crash 1 gün
+      const st = {}; st[String(id)] = {
+        receteAd: 'BU2 Muzo', pitchTs: G('2026-08-16'), durum: 'aktif', alarmlar: [
+          { g: 0, ts: G('2026-08-16'), tip: 'kontrol', aksiyon: '🧬 Pitching', durum: 'tamamlandi' },
+          { g: 10, ts: G('2026-08-26'), tip: 'kritik', aksiyon: '❄️ Cold crash', durum: 'tamamlandi' },
+          { g: 11, ts: G('2026-08-27'), tip: 'kritik', aksiyon: '🍺 Şişele', durum: 'tamamlandi' }
+        ]
+      };
+      _alarmlariYaz(st);
+      const P = window._bmPlanGunleri(r);
+      __REG.ok('plan reçetenin KENDİ alarm grubundan okundu', P.kaynak === 'alarm', P.kaynak);
+      __REG.ok('  planlanan cold crash 1 gün (g10→g11)', P.sise - P.cold === 1, P.sise - P.cold);
+      const d = window._bmPlanGercek(r);
+      const cc = d.satirlar.find(s => s.faz === 'Cold crash');
+      __REG.ok('KAAN VAKASI: cold crash satırı var', !!cc, d.satirlar.map(s => s.faz).join(','));
+      __REG.ok('  1 gün planlandı · 7 gün yapıldı', cc && cc.plan === 1 && cc.gercek === 7, cc ? cc.plan + '→' + cc.gercek : '-');
+      const fr = d.satirlar.find(s => s.faz === 'Fermentasyon');
+      __REG.ok('TUTAN satır basılmıyor (fermentasyon 10=10 → yok)', !fr, fr ? fr.plan + '→' + fr.gercek : 'yok');
+      const og = d.satirlar.find(s => s.faz === 'OG');
+      __REG.ok('OG farkı: 1.054 planlandı · 1.041 ölçüldü', !!og && og.plan === '1.054' && og.gercek === '1.041', og ? og.plan + '→' + og.gercek : '-');
+      // HTML + DİL
+      const html = window._bmPlanGercekKart(r);
+      __REG.ok('kart HTML üretildi', html.indexOf('bu-kart') >= 0);
+      __REG.ok('"planlandı · yapıldı" kalıbı', /planlandı · <b>[^<]*<\/b> yapıldı/.test(html));
+      const YASAK = ['daha iyi', 'daha kötü', 'yapmalısın', 'yapmalisin', 'yapmalı', 'hatalı', 'hatali',
+        'yanlış', 'yanlis', 'olmalı', 'olmali', 'gerekir', 'gereklidir', 'tavsiye', 'öneriyoruz',
+        'düzelt', 'duzelt', 'kötü', 'kotu', 'başarılı', 'basarili', 'kazanmak için', 'kazandıran',
+        'ideal', 'doğrusu', 'dogrusu', 'eksik'];
+      const low = html.toLocaleLowerCase('tr-TR');
+      __REG.ok('AN5-DIL: yasak kelime 0 (fark ≠ hata)', YASAK.every(k => low.indexOf(k) < 0), YASAK.filter(k => low.indexOf(k) >= 0).join(','));
+      __REG.ok('farkın bir değerlendirme OLMADIĞI yazılı', /değerlendirme değildir/.test(html));
+      __REG.ok('yeni kayıt tutulmadığı yazılı', /yeni bir kayıt tutulmaz/.test(html));
+      // TAKVİM SEKMESİNE GÖMÜLÜ (ayrı ekran YOK)
+      tarifAc(id); ekran = 'editor'; sekme = 'takvim'; render();
+      const dom = document.getElementById('ekran').innerHTML;
+      __REG.ok('Takvim sekmesinde bölüm görünüyor', dom.indexOf('takvim-plangercek') >= 0);
+      __REG.ok('  başlık "Plan & Gerçekleşen"', dom.indexOf('Plan &amp; Gerçekleşen') >= 0 || dom.indexOf('Plan & Gerçekleşen') >= 0);
+      __REG.ok('  fark sayısı başlıkta (meta)', /\d+ fark/.test(dom));
+      __REG.ok('  cold crash satırı DOM\'da', dom.indexOf('Cold crash') >= 0 && /<b>1 gün<\/b> planlandı/.test(dom));
+      __REG.ok('YENİ EKRAN icat edilmedi (mevcut akordeon deseni)', dom.indexOf('bm-acc-header') >= 0);
+      // SESSİZLİK: plana birebir uyan batch
+      const id2 = __REG.yeniKayit('BU2 Tutan', {});
+      const r2 = KR.find(k => k && String(k.id) === String(id2));
+      r2.brewSnapshot = { ts: G('2026-08-16'), ogT: 1.054, fgT: 1.012, verimVarsayim: 60 };
+      r2.brewSonuc = { ts: G('2026-08-27'), ogG: 1.054, kaynak: 'test' };
+      r2.brewLog = [
+        { tip: 'pitching', tarih: '2026-08-16', id: String(G('2026-08-16')) },
+        { tip: 'cold_crash', tarih: '2026-08-26', id: String(G('2026-08-26')) },
+        { tip: 'siseleme', tarih: '2026-08-27', id: String(G('2026-08-27')) }
+      ];
+      const st2 = _alarmlariOku(); st2[String(id2)] = JSON.parse(JSON.stringify(st[String(id)])); _alarmlariYaz(st2);
+      const d2 = window._bmPlanGercek(r2);
+      __REG.ok('SESSİZLİK: fark yoksa 0 satır', d2.satirlar.length === 0, d2.satirlar.map(s => s.faz).join(','));
+      __REG.ok('SESSİZLİK: kart HTML boş', window._bmPlanGercekKart(r2) === '');
+      tarifAc(id2); sekme = 'takvim'; render();
+      __REG.ok('SESSİZLİK: Takvim\'de bölüm HİÇ basılmıyor', document.getElementById('ekran').innerHTML.indexOf('takvim-plangercek') < 0);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BU3-OGRENME', ad: 'ÖĞRENME ETKİSİ (v1 = YALNIZ OKUMA): Q verim kolu PLAN değil ÖLÇÜLEN OG\'den türetilen gerçek verimi okuyor; rapor hiçbir öğrenme anahtarına YAZMIYOR (bm_kaan_profil_v1 / bm_maya_kalibrasyon / bm_off_ogren_v1 / bm_stil_ogren_v1 dokunulmadı); U2 off-flavor teşhisinin süre bağlamını KULLANMADIĞI ölçüldü (açık iş olarak belgeli)',
+    calistir: (page) => page.evaluate(() => {
+      const G = t => { const p = t.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]).getTime(); };
+      const id = __REG.yeniKayit('BU3 Ogrenme', {});
+      const r = KR.find(k => k && String(k.id) === String(id));
+      r.hacim = 11; r.verim = 60;
+      r.maltlar = [{ id: 'pilsner', kg: 2.5 }];
+      r.brewSnapshot = { ts: G('2026-08-16'), ogT: 1.054, fgT: 1.012, verimVarsayim: 60 };
+      r.brewSonuc = { ts: G('2026-09-02'), ogG: 1.041, kaynak: 'test' };
+      r.brewLog = [
+        { tip: 'pitching', tarih: '2026-08-16', id: String(G('2026-08-16')) },
+        { tip: 'og_olcum', tarih: '2026-08-16', deger: '1.041', id: String(G('2026-08-16') + 1) },
+        { tip: 'siseleme', tarih: '2026-09-02', id: String(G('2026-09-02')) }
+      ];
+      const an = bmProfilAnaliz();
+      const kay = an.kayitlar.find(k => String(k.id) === String(id));
+      __REG.ok('bmProfilAnaliz kaydı üretti', !!kay);
+      __REG.ok('PLAN verim varsayımı %60 okundu', kay && Math.round(kay.verimVarsayim) === 60, kay ? kay.verimVarsayim : '-');
+      __REG.ok('GERÇEK verim ÖLÇÜLEN OG\'den türetildi (plan DEĞİL)', kay && kay.verimG != null && Math.round(kay.verimG) !== 60, kay ? kay.verimG : '-');
+      __REG.ok('  gerçek verim plandan DÜŞÜK (OG 1.041 < 1.054)', kay && kay.verimG < kay.verimVarsayim, kay ? kay.verimG + ' < ' + kay.verimVarsayim : '-');
+      __REG.ok('  ogG ölçülen değer (1.041)', kay && Math.abs(kay.ogG - 1.041) < 1e-6, kay ? kay.ogG : '-');
+      // Rapor bu gerçek verimi OKUYOR (kendi hesabını kurmuyor)
+      const d = window._bmPlanGercek(r);
+      const v = d.satirlar.find(s => s.faz === 'Verim');
+      __REG.ok('rapor verim farkını bmProfilAnaliz\'den OKUYOR', !!v, d.satirlar.map(s => s.faz).join(','));
+      __REG.ok('  "%60 planlandı · %' + (kay ? Math.round(kay.verimG) : '?') + ' yapıldı"', v && v.plan === '%60' && v.gercek === '%' + Math.round(kay.verimG), v ? v.plan + '→' + v.gercek : '-');
+      // ÖĞRENME ANAHTARLARINA YAZIM YOK
+      const KEYS = ['bm_kaan_profil_v1', 'bm_maya_kalibrasyon', 'bm_off_ogren_v1', 'bm_stil_ogren_v1'];
+      const once = KEYS.map(k => String(localStorage.getItem(k)));
+      window._bmPlanGercek(r); window._bmPlanGercekKart(r);
+      tarifAc(id); sekme = 'takvim'; render();
+      const sonra = KEYS.map(k => String(localStorage.getItem(k)));
+      __REG.ok('rapor 4 öğrenme anahtarının HİÇBİRİNE yazmadı', JSON.stringify(once) === JSON.stringify(sonra),
+        KEYS.filter((k, i) => once[i] !== sonra[i]).join(',') || 'değişmedi');
+      // U2: süre bağlamı kullanılmıyor (ölçüm — açık iş)
+      const src = Array.from(document.querySelectorAll('script')).map(s => s.textContent).join('\n');
+      // Kaba karakter dilimi komşu koda taşıyordu (orada brewLog geçiyor) —
+      // nesnenin KENDİ sınırı alınır (ölçüldü: 24.955 bayt).
+      const offM = src.match(/window\._OFF_TESHIS = \{[\s\S]*?\n\};/);
+      const off = offM ? offM[0] : '';
+      __REG.ok('_OFF_TESHIS bloğu dilimlendi', off.length > 20000, off.length + ' bayt');
+      __REG.ok('ÖLÇÜM: _OFF_TESHIS statik bilgi tablosu — brewLog/süre OKUMUYOR', off.indexOf('_bmGercekGunleri') < 0 && off.indexOf('brewLog') < 0);
+      __REG.ok('  bu v1 kapsamı dışı (yalnız okuma) ve açık iş olarak belgeli',
+        src.indexOf('SPRINT BU') >= 0);
+      return __REG.al();
+    })
   }
 ];
 

@@ -738,7 +738,8 @@
 // HTML degisti (Sprint BR: "bira tarif et" tam ekran secici - 5 eksen + canli sonuc + tam kova matrisi) -> CACHE_VERSION bump v131-430 -> v131-431.
 // HTML degisti (Sprint BS: tum stiller + TAHIL ekseni + ekmeksi daraltmasi) -> CACHE_VERSION bump v131-431 -> v131-432.
 // HTML degisti (Sprint BT: GUC/ABV + HOP aromasi eksenleri + eksen gruplamasi) -> CACHE_VERSION bump v131-432 -> v131-433.
-const CACHE_VERSION='bm-cache-v131-433';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
+// HTML degisti (Sprint BU: gerceklesen sure turetimi + plan/gercek raporu) -> CACHE_VERSION bump v131-433 -> v131-434.
+const CACHE_VERSION='bm-cache-v131-434';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
 const ASSET_CACHE   = 'bm-assets-v1';        // font + ikon + manifest — KALICI, bump'ta silinmez
 const MODEL_CACHE   = 'bm-models-v1';        // workers.dev + jsdelivr — SHA'li/immutable URL, KALICI
 

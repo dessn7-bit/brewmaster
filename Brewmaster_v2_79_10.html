@@ -320,6 +320,14 @@ input[type="checkbox"]:disabled,input[type="radio"]:disabled{opacity:.5;cursor:n
 .br-ayrac{border-top:1px dashed var(--bor);margin:8px 0 6px}
 /* BS1: uzun listede yönünü kaybetme — sonuç başlığı kaydırırken üstte kalır */
 .br-sonuc-bas{font-size:10.5px;color:var(--dim);margin:2px 0 2px;line-height:1.45;position:sticky;top:0;z-index:2;background:var(--bg-card);padding:4px 0 3px;border-bottom:1px solid var(--bor)}
+/* SPRINT BU — plan & gerçekleşen farkları (Takvim sekmesi) */
+.bu-kart{background:var(--bg2);border:1px solid var(--bor);border-left:4px solid var(--soluk);border-radius:8px;padding:9px 11px;margin:2px 0 4px}
+.bu-bas{font-size:12px;font-weight:700;color:var(--metin);margin-bottom:5px}
+.bu-satir{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;padding:5px 0;border-top:1px dotted var(--bor)}
+.bu-faz{font-size:11.5px;font-weight:600;color:var(--kahve);min-width:104px}
+.bu-deger{font-size:11.5px;color:var(--metin);flex:1;min-width:0;line-height:1.45}
+.bu-kaynak{font-size:9.5px;color:var(--dim);white-space:nowrap}
+.bu-dip{font-size:9px;color:var(--dim);line-height:1.45;margin-top:7px}
 .br-grup{display:block;width:100%;margin:2px 0 10px;min-height:44px;background:var(--bg2);color:var(--kahve);border:1px dashed var(--bor);border-radius:8px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:var(--font-govde);padding:6px 10px;text-align:left}
 .br-daha{display:block;width:100%;margin-top:8px;min-height:44px;background:var(--bg2);color:var(--kahve);border:1px dashed var(--bor);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-govde)}
 .br-satir{display:flex;align-items:center;gap:8px;padding:7px 0;border-top:1px solid var(--bor)}
@@ -8610,6 +8618,192 @@ window.bmSonucDuzelt = function(rid){
   }catch(e){ console.warn('bmSonucDuzelt', e); }
 };
 // P3 — Ana ekran kartı: Ne Demleyebilirim kalıbının ikizi (bm-demle-* token/CSS, sıfır yeni stil)
+// ═══ SPRINT BU — PLAN vs GERÇEK: SÜRE TÜRETME + RAPOR (BL2 + BL3) ═════════
+// Kaan'ın vakası: cold crash 1 gün planlanmıştı, 7 gün yaptı. Alarm onaylandı,
+// kart "✓" gösterdi, KAÇ GÜN SÜRDÜĞÜ hiçbir yerde yoktu.
+// BL keşfinin özü: "sapma SKALER ise (OG/FG) sızabiliyor, SÜREÇ ise (süre,
+// miktar, sıra) hiçbir kapıdan geçemiyor."
+//
+// ── YENİ VERİ TOPLANMIYOR ────────────────────────────────────────────────
+// Süreler MEVCUT ts/tarihlerden türetilir. Ne S'ye ne KR'ye yeni alan eklenir.
+//
+// ── OLAY TARİHİ: _logGirisTs KULLANILMAZ (ölçülmüş gerekçe) ──────────────
+// _logGirisTs önceliği ts > id > tarih. GERÇEK yedekte (2026-06-26) ölçüldü:
+//   • brewLog girişlerinin HİÇBİRİNDE ts YOK
+//   • id 13 haneli Date.now() — ama Dubbel'in 5 girişinin BEŞİ DE
+//     2026-05-29 20:16–20:17 arasında yazılmış (toplu geriye-dönük giriş),
+//     olaylar ise 12 Nis – 2 May arası. id'yi süre saymakta kullanmak
+//     47 GÜNLÜK hata verir.
+// Bu yüzden BU kendi tarih çözücüsünü kullanır ve KAYNAĞINI da döndürür:
+//   • elle günlüğe girilen kayıt → tarih = kullanıcının beyan ettiği olay günü
+//   • alarm onayından gelen kayıt → tarih ALARMIN PLANLANAN günüdür (24562'de
+//     dt = new Date(al.ts)); gerçek gün BİLİNMİYOR, en yakın gözlem ONAY ANIdır (id).
+// Yani alarmdan gelen kayıtta "gerçek" bir TAHMİNDİR ve ekranda öyle etiketlenir.
+window._BU_ONAY_IZ = '⏰ alarm onayından';
+window._bmOlayGun = function(e){
+  try{
+    if(!e) return null;
+    var alarmdan = !!e.almKey || (String(e.not || '').indexOf(window._BU_ONAY_IZ) >= 0);
+    if(alarmdan && e.id != null && /^\d{13}$/.test(String(e.id))){
+      // tarih = plan; onay anı = elimizdeki tek gözlem
+      return { ts: _bmGunBasi(+e.id), kaynak: 'onay' };
+    }
+    // 'YYYY-MM-DD' Date.parse ile UTC gece yarisi olur; _bmGunBasi ise YEREL
+    // gun basina cekiyor -> UTC+3'te bir gun geriye kayiyordu (olculdu). Bu
+    // yuzden tarih parcalari YEREL tarih olarak kurulur.
+    var mt = String(e.tarih || '').match(/^(d{4})-(d{2})-(d{2})/);
+    if(mt) return { ts: new Date(+mt[1], +mt[2] - 1, +mt[3]).getTime(), kaynak: 'gunluk' };
+    var t = e.tarih ? Date.parse(e.tarih) : 0;
+    if(t) return { ts: _bmGunBasi(t), kaynak: 'gunluk' };
+    if(e.ts) return { ts: _bmGunBasi(+e.ts), kaynak: 'gunluk' };
+    return null;
+  }catch(_e){ return null; }
+};
+function _bmGunBasi(ts){ var d = new Date(ts); d.setHours(0,0,0,0); return d.getTime(); }
+window._bmGunBasi = _bmGunBasi;
+function _bmGunFark(a, b){ return Math.round((b - a) / 864e5); }
+
+// ── PLAN kaynağı ─────────────────────────────────────────────────────────
+// 1) Reçetenin KENDİ alarm grubu (varsa) — kullanıcının gerçekten kurduğu plan
+// 2) yoksa fermentasyonProfili(stil, og, mayaTip, maya) — aynı tabloyu üreten
+//    SAF fonksiyon (4 yerde zaten çağrılıyor, yan etkisi yok)
+window._bmPlanGunleri = function(r){
+  var out = { pitch:0, cold:null, sise:null, hazir:null, kaynak:'' };
+  try{
+    var G = null;
+    if(typeof _alarmlariOku === 'function'){
+      var tum = _alarmlariOku() || {};
+      G = tum[String(r.id)] || null;
+    }
+    if(G && Array.isArray(G.alarmlar) && G.alarmlar.length){
+      G.alarmlar.forEach(function(a){
+        if(!a) return;
+        var ak = String(a.aksiyon || '');
+        if(out.cold == null && ak.indexOf('Cold crash') >= 0 && ak.toLowerCase().indexOf('devam') < 0) out.cold = a.g | 0;
+        if(out.sise == null && ak.indexOf('🍺 Şişele') === 0) out.sise = a.g | 0;
+        if(out.hazir == null && ak.indexOf('İçime hazır') >= 0) out.hazir = a.g | 0;
+      });
+      if(out.cold != null || out.sise != null){ out.kaynak = 'alarm'; return out; }
+    }
+    if(typeof fermentasyonProfili !== 'function') return out;
+    var maya = (typeof MAYALAR !== 'undefined' && Array.isArray(MAYALAR))
+      ? MAYALAR.find(function(m){ return m && m.id === r.mayaId; }) : null;
+    var og = (r.brewSnapshot && r.brewSnapshot.ogT) || (r.ozet && parseFloat(r.ozet.og)) || 1.050;
+    var prof = fermentasyonProfili(r.stil || '', og, maya ? maya.tip : 'ale', maya);
+    if(!prof || !Array.isArray(prof.gunler)) return out;
+    prof.gunler.forEach(function(a){
+      var ak = String(a.aksiyon || '');
+      if(out.cold == null && ak.indexOf('Cold crash') >= 0 && ak.toLowerCase().indexOf('devam') < 0) out.cold = a.g | 0;
+    });
+    if(typeof prof.sise === 'number') out.sise = prof.sise;
+    out.kaynak = 'stil';
+    return out;
+  }catch(_e){ return out; }
+};
+
+// ── GERÇEK süreler: brewLog olay tarihlerinden ───────────────────────────
+window._bmGercekGunleri = function(r){
+  var out = { pitch:null, cold:null, sise:null, kaynak:{} };
+  try{
+    var bl = Array.isArray(r.brewLog) ? r.brewLog : [];
+    // aktif batch: SON pitching/brewday_start çıpası (bmProfilAnaliz ile aynı kural)
+    var bas = -1;
+    for(var i = bl.length - 1; i >= 0; i--){
+      var x = bl[i];
+      if(x && (x.tip === 'pitching' || x.tip === 'brewday_start')){ bas = i; break; }
+    }
+    var pencere = bas >= 0 ? bl.slice(bas) : bl;
+    function bul(tip){
+      for(var j = 0; j < pencere.length; j++){
+        if(pencere[j] && pencere[j].tip === tip) return window._bmOlayGun(pencere[j]);
+      }
+      return null;
+    }
+    var p = bul('pitching') || (bas >= 0 ? window._bmOlayGun(pencere[0]) : null);
+    var c = bul('cold_crash'), s = bul('siseleme');
+    if(p){ out.pitch = p.ts; out.kaynak.pitch = p.kaynak; }
+    if(c){ out.cold = c.ts; out.kaynak.cold = c.kaynak; }
+    if(s){ out.sise = s.ts; out.kaynak.sise = s.kaynak; }
+    return out;
+  }catch(_e){ return out; }
+};
+
+// ── PLAN ile GERÇEĞİ karşılaştır — YALNIZ FARK OLANLAR ───────────────────
+// DİL: fark bir HATA DEĞİL, bir SEÇİM olabilir (AJ/AN dil disiplini).
+// Yalnız "planlandı · yapıldı" denir; kalite iddiası veya emir kipi YOK.
+window._bmPlanGercek = function(r){
+  var out = { satirlar: [], tamam: false };
+  try{
+    if(!r) return out;
+    out.tamam = !!(r.brewSonuc && r.brewSonuc.ts);
+    var P = window._bmPlanGunleri(r), G = window._bmGercekGunleri(r);
+    function ekle(faz, planGun, gercekGun, kaynak, birim){
+      if(planGun == null || gercekGun == null) return;
+      if(planGun === gercekGun) return;         // tutan satır GÜRÜLTÜ — basılmaz
+      out.satirlar.push({ faz:faz, plan:planGun, gercek:gercekGun, kaynak:kaynak || '', birim:birim || 'gün' });
+    }
+    // 1) Fermentasyon: pitch → cold crash (yoksa pitch → şişeleme)
+    if(G.pitch != null){
+      var gFerm = (G.cold != null) ? _bmGunFark(G.pitch, G.cold) : ((G.sise != null) ? _bmGunFark(G.pitch, G.sise) : null);
+      var pFerm = (P.cold != null) ? P.cold : P.sise;
+      if(gFerm != null && gFerm >= 0) ekle('Fermentasyon', pFerm, gFerm, G.kaynak.cold || G.kaynak.sise);
+    }
+    // 2) Cold crash: cold crash → şişeleme  (Kaan'ın vakası)
+    if(G.cold != null && G.sise != null && P.cold != null && P.sise != null){
+      var gCold = _bmGunFark(G.cold, G.sise);
+      if(gCold >= 0) ekle('Cold crash', P.sise - P.cold, gCold, G.kaynak.sise);
+    }
+    // 3) Toplam (pitch → şişeleme)
+    if(G.pitch != null && G.sise != null && P.sise != null){
+      var gTop = _bmGunFark(G.pitch, G.sise);
+      if(gTop >= 0) ekle('Pitch → şişeleme', P.sise, gTop, G.kaynak.sise);
+    }
+    // 4) OG: donmuş hedef vs ölçülen (brewSonuc — F1 dondurma)
+    var snap = r.brewSnapshot || null;
+    if(snap && snap.ogT && r.brewSonuc && r.brewSonuc.ogG){
+      var oT = Math.round(snap.ogT * 1000), oG = Math.round(r.brewSonuc.ogG * 1000);
+      if(oT !== oG) out.satirlar.push({ faz:'OG', plan:(oT/1000).toFixed(3), gercek:(oG/1000).toFixed(3), birim:'', kaynak:'olcum' });
+    }
+    // 5) Verim: varsayım vs bmProfilAnaliz'in türettiği gerçek (YENİ HESAP YOK — okur)
+    try{
+      var an = (typeof bmProfilAnaliz === 'function') ? bmProfilAnaliz() : null;
+      var kay = an && Array.isArray(an.kayitlar) ? an.kayitlar.find(function(k){ return k && String(k.id) === String(r.id); }) : null;
+      if(kay && kay.verimG != null && kay.verimVarsayim != null){
+        var vP = Math.round(kay.verimVarsayim), vG = Math.round(kay.verimG);
+        if(vP !== vG) out.satirlar.push({ faz:'Verim', plan:'%' + vP, gercek:'%' + vG, birim:'', kaynak:'olcum' });
+      }
+    }catch(_v){}
+    return out;
+  }catch(e){ try{ console.warn('_bmPlanGercek', e); }catch(_){} return out; }
+};
+
+// ── Sunum: Takvim sekmesinde bölüm. FARK YOKSA HİÇ BASILMAZ (sessiz). ────
+window._bmPlanGercekKart = function(r){
+  try{
+    var d = window._bmPlanGercek(r);
+    if(!d.satirlar.length) return '';
+    var _e = (typeof esc === 'function') ? esc : function(s){ return String(s==null?'':s); };
+    var satir = d.satirlar.map(function(s){
+      var bir = s.birim ? (' ' + s.birim) : '';
+      var not = (s.kaynak === 'onay')
+        ? '<span class="bu-kaynak" title="Bu olay alarm onayından geldi: günlükteki tarih alarmın PLANLANAN günüdür, elimizdeki tek gözlem onay anıdır — bu yüzden gerçekleşen bir tahmindir">≈ onay anından</span>'
+        : (s.kaynak === 'olcum' ? '<span class="bu-kaynak">ölçümden</span>' : '');
+      return '<div class="bu-satir">'
+        + '<span class="bu-faz">' + _e(s.faz) + '</span>'
+        + '<span class="bu-deger"><b>' + _e(String(s.plan)) + bir + '</b> planlandı · <b>' + _e(String(s.gercek)) + bir + '</b> yapıldı</span>'
+        + not
+        + '</div>';
+    }).join('');
+    return '<div class="bu-kart">'
+      + '<div class="bu-bas">⏱️ Plan &amp; gerçekleşen — ' + d.satirlar.length + ' fark</div>'
+      + satir
+      + '<div class="bu-dip">Bu bölüm yalnız <b>fark olanları</b> gösterir; tutanlar yazılmaz. '
+      +   'Fark bir değerlendirme değildir — planı bilerek değiştirmiş de olabilirsin. '
+      +   'Süreler günlükteki olay tarihlerinden türetilir, yeni bir kayıt tutulmaz.</div>'
+      + '</div>';
+  }catch(e){ try{ console.warn('_bmPlanGercekKart', e); }catch(_){} return ''; }
+};
+
 // ═══ SPRINT AD4: yıl sonu demleme raporu — salt-okunur türetilmiş (bmProfilAnaliz kayıtları) ═══
 // Yalnız TAMAMLANMIŞ demleme (durum==='tamam', brewSonuc'lu — Sprint Q/I batch-pencere tutarlı). <2 → sessiz.
 window._bmYilOzet = function(tamKayitlar){
@@ -15067,7 +15261,20 @@ function rEditorTakvim(maya, maya2, tv){
     + '</div>';
   }
 
+  // SPRINT BU: plan ile gerçekleşen arasındaki farklar. FARK YOKSA bölüm
+  // hiç basılmaz (sessiz) — tutan satır gürültüdür.
+  var _buKart = '', _buFarkSayi = 0, _buFarkMeta = '';
+  try{
+    var _buR = (typeof _editId !== 'undefined' && Array.isArray(KR)) ? KR.find(function(k){ return k && String(k.id) === String(_editId); }) : null;
+    if(_buR){
+      var _buD = window._bmPlanGercek ? window._bmPlanGercek(_buR) : { satirlar: [] };
+      _buFarkSayi = _buD.satirlar.length;
+      if(_buFarkSayi){ _buKart = window._bmPlanGercekKart(_buR); _buFarkMeta = _buFarkSayi + ' fark'; }
+    }
+  }catch(_bue){ if(window.bmHataKaydet)bmHataKaydet('calc',_bue,'takvim/planGercek'); }
+
   return _bmAccWrap('takvim-faz',       '🎯', 'Faz & Sonraki Adım',    _bmF_fazAd,                                            _ustDurum + _sonrakiKart,                          true)
+       + (_buFarkSayi > 0 ? _bmAccWrap('takvim-plangercek', '⏱️', 'Plan & Gerçekleşen', _buFarkMeta, _buKart, true) : '')
        + _bmAccWrap('takvim-milestone', '📊', 'Milestone Timeline',    _bmF_milestoneMeta,                                    _milestoneTl,                                       true)
        + _bmAccWrap('takvim-alarm',     '🚨', 'Alarmlar',              _bmF_alarmSayisi > 0 ? (_bmF_alarmSayisi + ' aktif') : '—', _alarmKart,                                    _bmF_alarmSayisi > 0)
        + _bmAccWrap('takvim-log',       '📝', 'Fermantasyon Günlüğü',  _bmF_logSayisi + ' kayıt',                              _logFormKart,                                       true)
