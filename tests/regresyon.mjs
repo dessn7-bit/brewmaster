@@ -7172,6 +7172,179 @@ const CASELER = [
       __REG.ok('(d) reçete araması "liberty" → o reçete listede YOK', !/REGTEST BV Hallertau/.test(liste2));
       return __REG.al();
     })
+  },
+
+  // ── SPRINT BW — AI altyapısı (BYOK). Test ortamı dış ağı kestiği için fetch SAHTE yanıtla değiştirilir;
+  //    CORS'un GERÇEKTEN çalıştığı canlı origin'den ayrıca kanıtlandı (working/_bw_cors.mjs: başlıkla 401 okunuyor,
+  //    başlıksız TypeError). Burada: anahtar yaşam döngüsü, yedek sızıntısı, istek şekli, hata sınıfları, filtre, tanı UI.
+  {
+    kod: 'BW1-ANAHTAR', ad: 'BYOK anahtar yönetimi: anahtar yokken AI KAPALI ve NEDENİ söyleniyor (istek atılmıyor); biçimsiz anahtar kaydedilmiyor; anahtar ai_anahtar_v1\'de (bm_ öneki YOK) → yedek EXPORT\'una GİRMİYOR, içe aktarılan yedekteki sahte anahtar cihazdakini EZMİYOR, hata günlüğüne sızmıyor; güvenlik uyarısı kartta görünür',
+    calistir: (page) => page.evaluate(async () => {
+      const A = window.BM_AI, K = 'sk-ant-api03-TESTANAHTAR-BW1-abcdefghijklmnop';
+      A.anahtarSil();
+      let cagri = 0; const eskiFetch = window.fetch; window.fetch = () => { cagri++; return Promise.reject(new TypeError('olmamalı')); };
+      const h0 = A.hazirMi();
+      __REG.ok('anahtar yok → hazir:false, neden anahtar_yok, mesaj Ayarlar\'ı gösteriyor', !h0.hazir && h0.neden === 'anahtar_yok' && /Ayarlar/.test(h0.mesaj), JSON.stringify(h0));
+      const r0 = await A.sor({ kullanim: 'tani', soru: 'x' });
+      __REG.ok('anahtar yok → sor() açık hata döner, fetch HİÇ çağrılmaz (sessiz başarısızlık yok)', !r0.ok && r0.hata.tur === 'anahtar_yok' && cagri === 0, JSON.stringify(r0.hata) + ' fetch=' + cagri);
+      ekran = 'ayarlar'; render();
+      const kart = document.getElementById('bm-ai-kart');
+      __REG.ok('Ayarlar\'da 🤖 AI kartı var; anahtar yokken durum "yok" ve test düğmesi YOK', !!kart && kart.querySelector('.bm-ai-durum').dataset.durum === 'yok' && !document.getElementById('bm-ai-test-btn'));
+      const uyari = kart ? kart.querySelector('.bm-ai-uyari').textContent : '';
+      __REG.ok('güvenlik uyarısı: cihazda saklanır · paylaşılan cihazda girme · console.anthropic.com · iptal · yedeğe girmez · ücret senin hesabından',
+        /yalnız bu cihazda/.test(uyari) && /paylaşılan cihazda girme/i.test(uyari) && /console\.anthropic\.com/.test(uyari) && /iptal/.test(uyari) && /yedeğe girmez/.test(uyari) && /senin Anthropic hesabından/.test(uyari), uyari.slice(0, 80));
+      const rB = A.anahtarKaydet('abc123');
+      __REG.ok('biçimsiz anahtar REDDEDİLİR, depoya yazılmaz', !rB.ok && !localStorage.getItem('ai_anahtar_v1'), rB.mesaj);
+      const inp = document.getElementById('bm-ai-anahtar-inp'); inp.value = '  ' + K + '  ';
+      window.bmAiAnahtarKaydet();
+      __REG.ok('geçerli anahtar kırpılarak ai_anahtar_v1\'e yazıldı; giriş kutusu boşaltıldı (DOM\'da anahtar kalmaz)', localStorage.getItem('ai_anahtar_v1') === K && (document.getElementById('bm-ai-anahtar-inp') || {}).value === '');
+      __REG.ok('kart anahtarı yalnız son 4 haneyle gösteriyor, tam anahtar DOM\'da YOK', document.getElementById('bm-ai-kart').textContent.indexOf('…mnop') >= 0 && document.body.innerHTML.indexOf(K) < 0);
+      __REG.ok('anahtar varken bağlantı testi düğmesi görünür', !!document.getElementById('bm-ai-test-btn'));
+      // YEDEK: export blob'u yakala
+      let blob = null; const eskiURL = URL.createObjectURL; URL.createObjectURL = (b) => { blob = b; return 'blob:test'; };
+      window.bmVeriExport();
+      URL.createObjectURL = eskiURL;
+      const yedek = blob ? await blob.text() : '';
+      __REG.ok('EXPORT: yedekte anahtar değeri de ai_ anahtarları da YOK', !!yedek && yedek.indexOf(K) < 0 && yedek.indexOf('ai_anahtar_v1') < 0 && yedek.indexOf('ai_durum_v1') < 0, 'yedek ' + yedek.length + ' bayt');
+      // IMPORT: yedekte sahte anahtar olsa bile cihazdakini ezmez, kendisi yazılmaz
+      // İŞARET: içe aktarmanın GERÇEKTEN yazdığını kanıtlar — yoksa "anahtar korundu" içe aktarma hiç çalışmasa da geçerdi
+      const sahte = JSON.parse(yedek); sahte.data.ai_anahtar_v1 = 'sk-ant-api03-SALDIRGAN-YEDEK-000000000000'; sahte.data.bm_bw_import_isaret = 'yazildi';
+      const eskiConfirm = window.confirm; window.confirm = () => true;
+      const dosya = new File([JSON.stringify(sahte)], 'y.json', { type: 'application/json' });
+      window.bmVeriImport({ files: [dosya], value: '' });
+      await new Promise(r => { const t0 = Date.now(); (function bek(){ if (Date.now() - t0 > 5000 || localStorage.getItem('bm_bw_import_isaret') === 'yazildi') return r(); setTimeout(bek, 20); })(); });
+      window.confirm = eskiConfirm;
+      __REG.ok('IMPORT gerçekten ÇALIŞTI (yedekteki bm_ işaret anahtarı yazıldı)', localStorage.getItem('bm_bw_import_isaret') === 'yazildi');
+      __REG.ok('IMPORT: cihazdaki anahtar KORUNDU, yedekteki sahte anahtar yazılmadı', localStorage.getItem('ai_anahtar_v1') === K, localStorage.getItem('ai_anahtar_v1'));
+      localStorage.removeItem('bm_bw_import_isaret');
+      // HATA GÜNLÜĞÜ: 401 sonrası günlükte anahtar yok
+      window.fetch = () => Promise.resolve(new Response(JSON.stringify({ type: 'error', error: { type: 'authentication_error', message: 'invalid x-api-key ' + K } }), { status: 401 }));
+      await A.sor({ kullanim: 'tani', soru: 'x' });
+      const log = localStorage.getItem('bm_hata_log_v1') || '';
+      __REG.ok('HATA GÜNLÜĞÜ: ai_ kaydı düştü ama anahtar (API mesajında yankılansa bile) MASKELİ', /ai_anahtar/.test(log) && log.indexOf(K) < 0, (log.match(/"tip":"ai_[a-z]+"/g) || []).join(','));
+      window.fetch = eskiFetch; A.anahtarSil(); ekran = 'ana'; render();
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BW2-ISTEK', ad: 'istek katmanı: DOĞRUDAN api.anthropic.com (proxy YOK) + CORS başlığı + model/max_tokens KODDA SABİT (tani/esleme/ikame → Haiku 4.5, akil → Sonnet 5) + yanıt şeması API\'de zorlanıyor (cevap + kaynak tablo|genel) + önbellek varsayılan KAPALI (BK2: seyrek istek = yazma zararı) + TEK deneme (retry yok) + hata sınıfları HESAP durumunu kod hatasından ayırıyor',
+    calistir: (page) => page.evaluate(async () => {
+      const A = window.BM_AI, K = 'sk-ant-api03-TESTANAHTAR-BW2-abcdefghijklmnop';
+      A.anahtarSil(); A.anahtarKaydet(K);
+      const cagrilar = []; const eskiFetch = window.fetch;
+      let yanit = null;
+      window.fetch = (url, opt) => { cagrilar.push({ url, opt }); return Promise.resolve(yanit()); };
+      yanit = () => new Response(JSON.stringify({ content: [{ type: 'text', text: '{"cevap":"12","kaynak":"tablo"}' }], stop_reason: 'end_turn', usage: { input_tokens: 300, output_tokens: 20 } }), { status: 200, headers: { 'request-id': 'req_test' } });
+      const r = await A.sor({ kullanim: 'tani', baglam: 'HOPLAR: Citra 12', soru: 'Citra?' });
+      const c = cagrilar[0], g = JSON.parse(c.opt.body), hd = c.opt.headers;
+      __REG.ok('URL doğrudan https://api.anthropic.com/v1/messages (worker proxy YOK)', c.url === 'https://api.anthropic.com/v1/messages', c.url);
+      __REG.ok('CORS başlığı anthropic-dangerous-direct-browser-access: true + x-api-key + anthropic-version', hd['anthropic-dangerous-direct-browser-access'] === 'true' && hd['x-api-key'] === K && hd['anthropic-version'] === '2023-06-01');
+      __REG.ok('tani → claude-haiku-4-5, max_tokens 300 (sabit)', g.model === 'claude-haiku-4-5' && g.max_tokens === 300, g.model + '/' + g.max_tokens);
+      const sema = g.output_config && g.output_config.format && g.output_config.format.schema;
+      __REG.ok('yanıt şeması API\'de zorlanıyor: cevap + kaynak enum [tablo, genel], ek alan yok', !!sema && JSON.stringify(sema.properties.kaynak.enum) === '["tablo","genel"]' && sema.required.join() === 'cevap,kaynak' && sema.additionalProperties === false);
+      __REG.ok('sistem promptu 1. blok, VERİ 2. blok; soru user mesajında', g.system[0].text === A.SISTEM && /^VERİ:\nHOPLAR/.test(g.system[1].text) && g.messages.length === 1 && g.messages[0].content === 'Citra?');
+      __REG.ok('önbellek varsayılan KAPALI (cache_control yok)', !JSON.stringify(g).includes('cache_control'));
+      const gAkil = A.istekKur('akil', 'X', 'y').govde, gEs = A.istekKur('esleme', 'X', 'y').govde;
+      __REG.ok('akil → claude-sonnet-5 (dengeli), esleme/ikame → claude-haiku-4-5 (ucuz)', gAkil.model === 'claude-sonnet-5' && gEs.model === 'claude-haiku-4-5' && A.istekKur('ikame', '', 'y').govde.model === 'claude-haiku-4-5');
+      A.KULLANIM.esleme.onbellek = true; const gOn = A.istekKur('esleme', 'BÜYÜK TABLO', 'y').govde; A.KULLANIM.esleme.onbellek = false;
+      __REG.ok('önbellek AÇILAN kullanımda cache_control VERİ bloğuna gidiyor (soru dışarıda kalır)', gOn.system[1].cache_control && gOn.system[1].cache_control.type === 'ephemeral' && !gOn.system[0].cache_control);
+      __REG.ok('200 → cevap/kaynak/maliyet/istekId', r.ok && r.cevap === '12' && r.kaynak === 'tablo' && r.istekId === 'req_test' && Math.abs(r.maliyet.usd - (300 * 1 + 20 * 5) / 1e6) < 1e-12, JSON.stringify(r.maliyet));
+      const mS = A.maliyet('dengeli', { input_tokens: 1000, output_tokens: 100, cache_creation_input_tokens: 2000, cache_read_input_tokens: 5000 });
+      __REG.ok('maliyet formülü: Sonnet 5 giriş 2$ · çıkış 10$ · önbellek yazma 1,25× · okuma 0,1× (USD/1M)', Math.abs(mS.usd - (1000 * 2 + 2000 * 2.5 + 5000 * 0.2 + 100 * 10) / 1e6) < 1e-12, mS.usd);
+      // HATA SINIFLARI (platform.claude.com/docs/en/api/errors)
+      const HS = [[401, 'authentication_error', 'invalid x-api-key', null, 'anahtar'], [402, 'billing_error', 'payment', null, 'hesap'],
+        [400, 'invalid_request_error', 'Your credit balance is too low to access the Anthropic API.', null, 'hesap'],
+        [400, 'invalid_request_error', 'messages: field required', null, 'istek'], [429, 'rate_limit_error', 'spend cap', null, 'hesap'],
+        [429, 'rate_limit_error', 'rate', '12', 'hiz'], [403, 'permission_error', 'x', null, 'izin'], [404, 'not_found_error', 'model', null, 'model'],
+        [529, 'overloaded_error', 'x', null, 'sunucu'], [500, 'api_error', 'x', null, 'sunucu']];
+      const yanlis = HS.filter(([d, t, m, ra, bek]) => A.hataSinifla(d, { error: { type: t, message: m } }, ra).tur !== bek).map(x => x[0] + '/' + x[2]);
+      __REG.ok('hata sınıflama 10/10: 401 anahtar · 402/400-kredi/429-beklemesiz HESAP (kod hatası değil) · 429-bekleme hız · 403 izin · 404 model · 5xx sunucu', yanlis.length === 0, yanlis.join(' | '));
+      __REG.ok('HESAP mesajı açıkça "kod hatası DEĞİL" diyor', /kod hatası DEĞİL/.test(A.hataSinifla(402, {}, null).mesaj) && /kod hatası DEĞİL/.test(A.hataSinifla(429, {}, null).mesaj));
+      // TEK DENEME: 529'da fetch 1 kez
+      cagrilar.length = 0; yanit = () => new Response('{"type":"error","error":{"type":"overloaded_error","message":"x"}}', { status: 529 });
+      const r5 = await A.sor({ kullanim: 'tani', soru: 'x' });
+      __REG.ok('529 → retry YOK (fetch tam 1 kez), tür sunucu', cagrilar.length === 1 && !r5.ok && r5.hata.tur === 'sunucu', cagrilar.length);
+      // 401 → durum GEÇERSİZ kalıcı, kartta kırmızı satır
+      yanit = () => new Response('{"type":"error","error":{"type":"authentication_error","message":"invalid x-api-key"}}', { status: 401 });
+      await A.sor({ kullanim: 'tani', soru: 'x' });
+      ekran = 'ayarlar'; render();
+      __REG.ok('401 → durum "gecersiz" kalıcı; Ayarlar kartında "REDDEDİLDİ" satırı + hazirMi neden gecersiz', A.durumAl().durum === 'gecersiz' && document.querySelector('#bm-ai-kart .bm-ai-durum').dataset.durum === 'gecersiz' && /REDDEDİLDİ/.test(document.querySelector('#bm-ai-kart .bm-ai-durum').textContent) && A.hazirMi().neden === 'gecersiz');
+      // ağ hatası
+      window.fetch = () => Promise.reject(new TypeError('Failed to fetch'));
+      const rAg = await A.sor({ kullanim: 'tani', soru: 'x' });
+      __REG.ok('ağ/CORS reddi (TypeError) → tür "ag", açık mesaj', !rAg.ok && rAg.hata.tur === 'ag' && /bağlanılamadı/.test(rAg.hata.mesaj), JSON.stringify(rAg.hata));
+      window.fetch = eskiFetch; A.anahtarSil(); ekran = 'ana'; render();
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BW3-PROMPT-FILTRE', ad: 'sistem promptu kaynak disiplini (yalnız veriden · "Bu veride yok." · kalite iddiası YASAK + madalya gerekçesi · kaynak tablo/genel · Türkçe) + çıktı filtresi: AN5-DIL listesinin AYNISI uygulamada tek kaynak (_BM_AN5_YASAK); ihlal REDDEDİLMEZ İŞARETLENİR (alt-dizge taraması olgusal kullanımı da yakalar); kaynak etiketi eksik / red / kesilme işaretleniyor',
+    calistir: (page) => page.evaluate(() => {
+      const A = window.BM_AI, S = A.SISTEM;
+      __REG.ok('prompt: yalnız VERİ\'den + "Bu veride yok."', /Yalnız sana VERİ bölümünde verilen/.test(S) && /"Bu veride yok\."/.test(S));
+      __REG.ok('prompt: kalite iddiası YASAK + kaybeden örnek yok gerekçesi', /Kalite iddiası YASAK/.test(S) && /kaybeden örnek yok/.test(S) && /en iyisi/.test(S) && /kazanır/.test(S));
+      __REG.ok('prompt: kaynak "tablo"/"genel" + Türkçe', /"tablo"/.test(S) && /"genel"/.test(S) && /Türkçe/.test(S));
+      const AN5 = ['daha iyi', 'daha kötü', 'yapmalısın', 'yapmalisin', 'yapmalı', 'hatalı', 'hatali', 'yanlış', 'yanlis', 'olmalı', 'olmali', 'gerekir', 'gereklidir', 'tavsiye', 'öneriyoruz', 'düzelt', 'duzelt', 'kötü', 'kotu', 'başarılı', 'basarili', 'kazanmak için', 'kazandıran', 'ideal', 'doğrusu', 'dogrusu', 'eksik'];
+      __REG.ok('uygulamadaki _BM_AN5_YASAK = AN5-DIL test listesi (27 terim, sürüklenme kilidi)', JSON.stringify(window._BM_AN5_YASAK) === JSON.stringify(AN5), window._BM_AN5_YASAK.length);
+      const j = (cevap, kaynak, stop) => ({ content: [{ type: 'text', text: JSON.stringify(kaynak ? { cevap, kaynak } : { cevap }) }], stop_reason: stop || 'end_turn' });
+      const c1 = A.cevapCoz(j('Citra %12 alfa asit taşır.', 'tablo'));
+      __REG.ok('temiz cevap → bayrak YOK', c1.bayraklar.length === 0 && c1.kaynak === 'tablo');
+      const c2 = A.cevapCoz(j('Bu reçete daha iyi, ideal seçim bu.', 'genel'));
+      const b2 = c2.bayraklar.find(b => b.tip === 'yasak');
+      __REG.ok('yasak kelime YAKALANDI ve İŞARETLENDİ (cevap korunur, reddedilmez)', !!b2 && b2.kelimeler.includes('daha iyi') && b2.kelimeler.includes('ideal') && c2.cevap === 'Bu reçete daha iyi, ideal seçim bu.', b2 && b2.kelimeler.join(','));
+      const c2b = A.cevapCoz(j('BU REÇETE DAHA İYİ', 'genel'));
+      __REG.ok('TR büyük harf (İ) de yakalanıyor (toLocaleLowerCase tr-TR)', c2b.bayraklar.some(b => b.tip === 'yasak'));
+      const c3 = A.cevapCoz(j('Citra 12.', null));
+      __REG.ok('kaynak etiketi YOK → işaretlendi', c3.bayraklar.some(b => b.tip === 'kaynak_yok') && c3.kaynak === null);
+      const c4 = A.cevapCoz({ content: [{ type: 'text', text: 'düz metin, json değil' }], stop_reason: 'end_turn' });
+      __REG.ok('JSON olmayan yanıt → metin gösterilir + kaynak_yok bayrağı', c4.cevap === 'düz metin, json değil' && c4.bayraklar.some(b => b.tip === 'kaynak_yok'));
+      const c5 = A.cevapCoz({ content: [{ type: 'text', text: '{"cevap":"Cit' }], stop_reason: 'max_tokens' });
+      __REG.ok('max_tokens kesilmesi → "kesildi" + "kaynak_yok"', c5.bayraklar.some(b => b.tip === 'kesildi') && c5.bayraklar.some(b => b.tip === 'kaynak_yok'));
+      __REG.ok('refusal → "red" bayrağı', A.cevapCoz({ content: [], stop_reason: 'refusal' }).bayraklar.some(b => b.tip === 'red'));
+      __REG.ok('maskeleme: sk-ant-… deseni metinden silinir', A.maskele('anahtar sk-ant-api03-ABC_def-123 geçersiz') === 'anahtar sk-ant-*** geçersiz');
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BW4-TANI', ad: 'Ayarlar ▸ AI ▸ Bağlantı testi: (a) başarıda cevap + kaynak + token + $ maliyet görünür; (b) yasak kelimeli cevapta uyarı görünür; (c) ÇEVRİMDIŞI → net uyarı, istek ATILMAZ; (d) 401 → kırmızı "anahtarı kontrol et" + durum satırı; (e) kredi yok (400 credit balance) → "HESAP … kod hatası DEĞİL" ayrı mesaj',
+    calistir: (page) => page.evaluate(async () => {
+      const A = window.BM_AI, K = 'sk-ant-api03-TESTANAHTAR-BW4-abcdefghijklmnop';
+      A.anahtarSil(); A.anahtarKaydet(K); ekran = 'ayarlar'; render();
+      const eskiFetch = window.fetch; let cagri = 0, govde = null;
+      const ok = (metin) => () => new Response(JSON.stringify({ content: [{ type: 'text', text: metin }], stop_reason: 'end_turn', usage: { input_tokens: 412, output_tokens: 31 } }), { status: 200 });
+      let yanit = ok('{"cevap":"Tabloya göre Citra %12.","kaynak":"tablo"}');
+      window.fetch = (u, o) => { cagri++; govde = JSON.parse(o.body); return Promise.resolve(yanit()); };
+      const r = await window.bmAiBaglantiTesti();
+      const kutu = () => document.getElementById('bm-ai-test-sonuc');
+      const t = kutu().textContent;
+      __REG.ok('(a) başarı: cevap + "📋 tablo" + 412 giriş + 31 çıkış token + $ maliyet', r.ok && /Citra %12/.test(t) && /📋 tablo/.test(t) && /412 giriş \+ 31 çıkış token/.test(t) && /\$0\.00057/.test(t), t.slice(0, 160));
+      __REG.ok('(a) tanı sorusu gerçek katalogdan küçük tablo taşıyor (Citra satırı), Haiku ile', /Citra: 12/.test(govde.system[1].text) && govde.model === 'claude-haiku-4-5');
+      __REG.ok('(a) başarı sonrası durum "ok"', A.durumAl().durum === 'ok');
+      yanit = ok('{"cevap":"Bu en ideal ve başarılı hop.","kaynak":"genel"}');
+      await window.bmAiBaglantiTesti();
+      const bay = kutu().querySelector('.bm-ai-bayrak[data-tip="yasak"]');
+      __REG.ok('(b) yasak kelime → görünür uyarı (ideal, başarılı), cevap yine gösteriliyor', !!bay && /ideal/.test(bay.textContent) && /başarılı/.test(bay.textContent) && /en ideal/.test(kutu().textContent));
+      // (c) ÇEVRİMDIŞI
+      cagri = 0; const desc = Object.getOwnPropertyDescriptor(Navigator.prototype, 'onLine');
+      Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false });
+      const rOff = await window.bmAiBaglantiTesti();
+      const hOff = kutu().querySelector('.bm-ai-hata');
+      __REG.ok('(c) çevrimdışı → "çevrimdışı çalışır ama AI özellikleri internet ister", fetch HİÇ çağrılmadı', !rOff.ok && !!hOff && hOff.dataset.tur === 'cevrimdisi' && /internet ister/.test(hOff.textContent) && cagri === 0, cagri);
+      __REG.ok('(c) çevrimdışı → BM_AI.sor da istek atmıyor', (await A.sor({ kullanim: 'tani', soru: 'x' })).hata.tur === 'cevrimdisi' && cagri === 0);
+      delete navigator.onLine; if (desc) Object.defineProperty(Navigator.prototype, 'onLine', desc);
+      // (d) 401
+      yanit = () => new Response('{"type":"error","error":{"type":"authentication_error","message":"invalid x-api-key"}}', { status: 401 });
+      await window.bmAiBaglantiTesti();
+      const h401 = kutu() && kutu().querySelector('.bm-ai-hata');
+      __REG.ok('(d) 401 → render sonrası YENİ kutuda kırmızı hata (tür anahtar, "Anahtarı kontrol et") + durum satırı REDDEDİLDİ', !!h401 && h401.dataset.tur === 'anahtar' && /Anahtarı kontrol et/.test(h401.textContent) && /REDDEDİLDİ/.test(document.querySelector('#bm-ai-kart .bm-ai-durum').textContent), h401 ? h401.textContent.slice(0, 80) : 'kutu boş');
+      // (e) kredi yok (Değerlendirme erişimi hesabı)
+      yanit = () => new Response('{"type":"error","error":{"type":"invalid_request_error","message":"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits."}}', { status: 400 });
+      await window.bmAiBaglantiTesti();
+      const hK = kutu().querySelector('.bm-ai-hata');
+      __REG.ok('(e) kredi yok → tür hesap, "kod hatası DEĞİL", Billing yönlendirmesi; durum satırı HESAP', !!hK && hK.dataset.tur === 'hesap' && /kod hatası DEĞİL/.test(hK.textContent) && /Billing/.test(hK.textContent) && document.querySelector('#bm-ai-kart .bm-ai-durum').dataset.durum === 'hesap', hK ? hK.textContent.slice(0, 90) : '-');
+      window.fetch = eskiFetch; A.anahtarSil(); ekran = 'ana'; render();
+      return __REG.al();
+    })
   }
 ];
 

@@ -29369,6 +29369,237 @@ window.bmHataTemizle = function(){
   try{ if (ekran==='ayarlar' && typeof render==='function') render(); }catch(_e){}
 };
 
+// ═══ SPRINT BW: AI ALTYAPISI — BYOK (kullanıcı kendi Anthropic anahtarı, istek DOĞRUDAN api.anthropic.com) ═══
+// Worker proxy YOK (BK hükmü): proxy'de kapı şifresi public HTML'de olur → fatura internetin ölçeğinde açılır.
+// BYOK'ta anahtar yalnız bu cihazda; kredi ancak bu cihazdan harcanır.
+// CORS KANITI (2026-09-26, canlı origin, gerçek tarayıcı POST): 'anthropic-dangerous-direct-browser-access: true'
+//   başlığıyla yanıt OKUNUYOR (401 authentication_error döndü); başlıksız → TypeError (tarayıcı engelliyor).
+// ANAHTAR ADI 'ai_anahtar_v1' — bm_ öneki BİLEREK YOK: yedek export/import allowlist'i /^(bm_|kabir_|_orig|acc_|KR$)/
+//   bu anahtarı hiç görmez → yedeğe GİRMEZ, içe aktarma da SİLMEZ/EZMEZ (cihaz-yerel kişisel sır).
+// KURALLAR (BK): model + max_tokens KODA SABİT · navigator.onLine kapısı · retry YOK · hatalar bmHataKaydet('ai_*')
+//   (anahtar ASLA günlüğe/ekrana yazılmaz) · çıktı asla otomatik UYGULANMAZ, yalnız gösterilir.
+window._BM_AN5_YASAK = ['daha iyi', 'daha kötü', 'yapmalısın', 'yapmalisin', 'yapmalı', 'hatalı', 'hatali',
+  'yanlış', 'yanlis', 'olmalı', 'olmali', 'gerekir', 'gereklidir', 'tavsiye', 'öneriyoruz',
+  'düzelt', 'duzelt', 'kötü', 'kotu', 'başarılı', 'basarili', 'kazanmak için', 'kazandıran',
+  'ideal', 'doğrusu', 'dogrusu', 'eksik']; // AN5-DIL listesinin AYNISI (tests/regresyon.mjs AN5-DIL) — tek kaynak artık burası
+window.BM_AI = (function(){
+  var ANAHTAR_LS = 'ai_anahtar_v1', DURUM_LS = 'ai_durum_v1';
+  var API = 'https://api.anthropic.com/v1/messages', SURUM = '2023-06-01', ZAMAN_ASIMI = 60000;
+  // Fiyat kaynağı: platform.claude.com/docs models/overview + prompt-caching (okundu 2026-09-26). USD / 1M token.
+  // Önbellek: 5 dk yazma 1,25× giriş · okuma 0,1× giriş. Asgari önbelleklenebilir önek: Haiku 4.5 = 4.096, Sonnet 5 = 1.024 token.
+  var MODEL = {
+    ucuz:    { id: 'claude-haiku-4-5', ad: 'Haiku 4.5', gir: 1, cik: 5,  onbellekMin: 4096 },
+    dengeli: { id: 'claude-sonnet-5',  ad: 'Sonnet 5',  gir: 2, cik: 10, onbellekMin: 1024 }
+  };
+  // Kullanım → model yönlendirme. Basit eşleme/ikame = ucuz; akıl yürütme = dengeli. max_tokens SABİT.
+  // onbellek: yalnız aynı büyük bağlamın DAKİKALAR içinde tekrar gönderildiği kullanımlarda açılır. BK2 ölçümü: gerçek
+  // kullanım ~45 saatte bir istek → 5 dk TTL dolar, her istek 1,25× YAZMA öder, okuma olmaz = ZARAR. Varsayılan KAPALI.
+  var KULLANIM = {
+    tani:   { model: 'ucuz',    maxTokens: 300,  onbellek: false },
+    esleme: { model: 'ucuz',    maxTokens: 600,  onbellek: false },
+    ikame:  { model: 'ucuz',    maxTokens: 800,  onbellek: false },
+    akil:   { model: 'dengeli', maxTokens: 1500, onbellek: false }
+  };
+  var SISTEM = [
+    'Sen Brewmaster ev biracılığı uygulamasının veri asistanısın. ZORUNLU KURALLAR:',
+    '1. Yalnız sana VERİ bölümünde verilen tablolardan/veriden cevapla. Sorunun cevabı veride yoksa cevap alanına tam olarak "Bu veride yok." yaz; tahmin etme, uydurma.',
+    '2. Kalite iddiası YASAK: "iyi", "kötü", "daha iyi", "en iyisi", "kazanır", "başarılı", "ideal", "doğrusu", "yapmalısın", "olmalı", "gerekir" gibi değer yargısı veya emir kipi kullanma. Korpusta kalite etiketi yok: madalya kayıtlarının hepsi kazanan, kaybeden örnek yok; bu yüzden hiçbir reçete veya seçim "daha iyi" diye nitelenemez. Yalnız olguyu ve dağılımı söyle.',
+    '3. Kaynak belirt: kaynak alanına cevap VERİ bölümündeki tablodan geliyorsa "tablo", genel biracılık bilgisinden geliyorsa "genel" yaz. İkisi karışıyorsa "genel" yaz ve cevapta hangi kısmın tablodan olduğunu söyle.',
+    '4. Cevabı Türkçe ve kısa yaz. Sayı uydurma; tablodaki sayıyı birimiyle aktar.'
+  ].join('\n');
+  var SEMA = { type: 'json_schema', schema: { type: 'object', properties: {
+    cevap: { type: 'string' }, kaynak: { type: 'string', enum: ['tablo', 'genel'] } },
+    required: ['cevap', 'kaynak'], additionalProperties: false } };
+
+  function maskele(s){ return String(s == null ? '' : s).replace(/sk-ant-[A-Za-z0-9_\-]+/g, 'sk-ant-***'); }
+  function anahtarAl(){ try { return (localStorage.getItem(ANAHTAR_LS) || '').trim(); } catch(e){ return ''; } }
+  function bicimOk(k){ return /^sk-ant-[A-Za-z0-9_\-]{20,}$/.test(String(k || '').trim()); }
+  function sonDort(k){ k = String(k || ''); return k.length > 10 ? 'sk-ant-…' + k.slice(-4) : ''; }
+  function durumAl(){ try { return JSON.parse(localStorage.getItem(DURUM_LS) || 'null'); } catch(e){ return null; } }
+  function durumYaz(d){ try { if (d) localStorage.setItem(DURUM_LS, JSON.stringify(d)); else localStorage.removeItem(DURUM_LS); } catch(e){} }
+  function anahtarKaydet(k){
+    k = String(k || '').trim();
+    if (!bicimOk(k)) return { ok: false, mesaj: 'Bu bir Anthropic API anahtarına benzemiyor (sk-ant- ile başlamalı). Kaydedilmedi.' };
+    try { localStorage.setItem(ANAHTAR_LS, k); } catch(e){ return { ok: false, mesaj: 'Cihaz depolamasına yazılamadı: ' + maskele(e.message) }; }
+    durumYaz({ durum: 'dogrulanmadi', ts: Date.now(), mesaj: 'Kaydedildi — bağlantı testiyle doğrula.' });
+    return { ok: true };
+  }
+  function anahtarSil(){ try { localStorage.removeItem(ANAHTAR_LS); } catch(e){} durumYaz(null); }
+  // Özellikler için tek kapı: hazır değilse NEDEN'i döner — sessiz başarısızlık yok.
+  function hazirMi(){
+    if (!anahtarAl()) return { hazir: false, neden: 'anahtar_yok', mesaj: 'AI özellikleri için Ayarlar ▸ 🤖 AI özellikleri bölümünden kendi Anthropic API anahtarını gir.' };
+    var d = durumAl();
+    if (d && d.durum === 'gecersiz') return { hazir: false, neden: 'gecersiz', mesaj: 'Kayıtlı anahtar reddedildi (' + d.mesaj + '). Ayarlar ▸ 🤖 AI özellikleri: anahtarı kontrol et.' };
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) return { hazir: false, neden: 'cevrimdisi', mesaj: 'Çevrimdışısın. Uygulama çevrimdışı çalışır ama AI özellikleri internet ister.' };
+    return { hazir: true };
+  }
+  function maliyet(modelKey, u){
+    var m = MODEL[modelKey]; u = u || {};
+    var gir = +u.input_tokens || 0, cik = +u.output_tokens || 0, cw = +u.cache_creation_input_tokens || 0, cr = +u.cache_read_input_tokens || 0;
+    var usd = (gir * m.gir + cw * m.gir * 1.25 + cr * m.gir * 0.1 + cik * m.cik) / 1e6;
+    return { usd: usd, gir: gir, cik: cik, cw: cw, cr: cr, model: m.ad };
+  }
+  // API hata sınıflama (platform.claude.com/docs/en/api/errors, okundu 2026-09-26):
+  // HESAP durumları kod hatası DEĞİL: 402 billing_error · 400 + kredi/harcama-limiti mesajı · 429 retry-after'sız (katman harcama tavanı).
+  function hataSinifla(durum, govde, retryAfter){
+    var tip = govde && govde.error && govde.error.type || '', msj = maskele(govde && govde.error && govde.error.message || '');
+    var kredi = /credit|balance|billing|spend|purchase|plans? ?& ?billing|payment/i.test(msj);
+    if (durum === 401) return { tur: 'anahtar', mesaj: 'Anahtar geçersiz ya da iptal edilmiş (401). Anahtarı kontrol et: console.anthropic.com ▸ API Keys.', api: msj };
+    if (durum === 402 || (durum === 400 && kredi)) return { tur: 'hesap', mesaj: 'Hesap/kredi durumu — kod hatası DEĞİL. Anthropic hesabında kredi yok ya da harcama limitine ulaşıldı (' + durum + '). console.anthropic.com ▸ Billing.', api: msj };
+    if (durum === 429 && !retryAfter) return { tur: 'hesap', mesaj: 'Hesabın aylık harcama tavanına ulaşıldı (429, bekleme süresi yok) — kod hatası DEĞİL. console.anthropic.com ▸ Limits.', api: msj };
+    if (durum === 429) return { tur: 'hiz', mesaj: 'Hız sınırı (429) — ' + retryAfter + ' sn sonra tekrar dene.', api: msj };
+    if (durum === 403) return { tur: 'izin', mesaj: 'Anahtarın bu işlem/model için izni yok (403). Hesap/çalışma alanı ayarlarını kontrol et.', api: msj };
+    if (durum === 404) return { tur: 'model', mesaj: 'Model bulunamadı (404) — uygulama tarafı: model kimliği güncel değil olabilir.', api: msj };
+    if (durum === 413) return { tur: 'istek', mesaj: 'İstek çok büyük (413).', api: msj };
+    if (durum === 529 || durum >= 500) return { tur: 'sunucu', mesaj: 'Anthropic tarafında geçici sorun (' + durum + '). Biraz sonra tekrar dene.', api: msj };
+    return { tur: 'istek', mesaj: 'İstek reddedildi (' + durum + (tip ? ' ' + tip : '') + ') — uygulama tarafı hata olabilir.', api: msj };
+  }
+  function yasakTara(metin){
+    var l = String(metin || '').toLocaleLowerCase('tr-TR');
+    return window._BM_AN5_YASAK.filter(function(k){ return l.indexOf(k) >= 0; });
+  }
+  // ÇIKTI FİLTRESİ: yanıt REDDEDİLMEZ, İŞARETLENİR. Gerekçe: AN5 listesi alt-dizge taraması; "eksik", "kötü koku",
+  // "gerekir" gibi olgusal kullanımlar da yakalanır. Reddetmek doğru bilgiyi saklar; işaret, kullanıcıya hangi
+  // kelimenin kalite iddiası taşıyabileceğini gösterir ve kararı ona bırakır.
+  function cevapCoz(json){
+    var bayrak = [], metin = '', cevap = '', kaynak = null;
+    var bloklar = (json && json.content) || [];
+    for (var i = 0; i < bloklar.length; i++) if (bloklar[i] && bloklar[i].type === 'text') metin += bloklar[i].text || '';
+    if (json && json.stop_reason === 'refusal') bayrak.push({ tip: 'red', mesaj: 'Model yanıt vermeyi reddetti.' });
+    if (json && json.stop_reason === 'max_tokens') bayrak.push({ tip: 'kesildi', mesaj: 'Yanıt uzunluk sınırında kesildi.' });
+    try { var o = JSON.parse(metin); cevap = String(o.cevap || ''); kaynak = (o.kaynak === 'tablo' || o.kaynak === 'genel') ? o.kaynak : null; }
+    catch(e){ cevap = metin; }
+    if (!kaynak) bayrak.push({ tip: 'kaynak_yok', mesaj: 'Kaynak etiketi (tablo/genel) YOK — cevabın nereden geldiği bilinmiyor.' });
+    var y = yasakTara(cevap);
+    if (y.length) bayrak.push({ tip: 'yasak', kelimeler: y, mesaj: 'Kalite iddiası taşıyabilecek ifade: ' + y.join(', ') + ' — veri kalite etiketi taşımıyor.' });
+    return { cevap: cevap, kaynak: kaynak, bayraklar: bayrak };
+  }
+  function istekKur(kullanim, baglam, soru){
+    var k = KULLANIM[kullanim]; if (!k) throw new Error('bilinmeyen kullanım: ' + kullanim);
+    var m = MODEL[k.model];
+    var sistem = [{ type: 'text', text: SISTEM }];
+    if (baglam) {
+      var blok = { type: 'text', text: 'VERİ:\n' + String(baglam) };
+      if (k.onbellek) blok.cache_control = { type: 'ephemeral' }; // önek asgarinin altındaysa API sessizce önbelleklemez (ücret yok)
+      sistem.push(blok);
+    }
+    return { modelKey: k.model, govde: { model: m.id, max_tokens: k.maxTokens, system: sistem,
+      messages: [{ role: 'user', content: String(soru || '') }], output_config: { format: SEMA } } };
+  }
+  function hataKaydet(tur, mesaj){ try { if (typeof window.bmHataKaydet === 'function') window.bmHataKaydet('ai_' + tur, new Error(maskele(mesaj)), 'BM_AI.sor'); } catch(_h){} }
+  // sor({kullanim, baglam, soru}) → Promise<{ok, cevap, kaynak, bayraklar, maliyet, model, istekId} | {ok:false, hata:{tur, mesaj, durum}}>
+  function sor(p){
+    p = p || {};
+    var h = hazirMi();
+    if (!h.hazir && h.neden !== 'gecersiz') return Promise.resolve({ ok: false, hata: { tur: h.neden, mesaj: h.mesaj } });
+    var ist;
+    try { ist = istekKur(p.kullanim, p.baglam, p.soru); } catch(e){ return Promise.resolve({ ok: false, hata: { tur: 'istek', mesaj: e.message } }); }
+    var ac = (typeof AbortController === 'function') ? new AbortController() : null;
+    var zmn = ac ? setTimeout(function(){ ac.abort(); }, ZAMAN_ASIMI) : null;
+    return fetch(API, { method: 'POST', signal: ac ? ac.signal : undefined, headers: {
+        'content-type': 'application/json', 'x-api-key': anahtarAl(), 'anthropic-version': SURUM,
+        'anthropic-dangerous-direct-browser-access': 'true' }, body: JSON.stringify(ist.govde) })
+      .then(function(r){
+        var istekId = r.headers.get('request-id') || '', ra = r.headers.get('retry-after');
+        return r.json().catch(function(){ return null; }).then(function(j){
+          if (zmn) clearTimeout(zmn);
+          if (!r.ok) {
+            var hs = hataSinifla(r.status, j, ra); hs.durum = r.status; hs.istekId = istekId || (j && j.request_id) || '';
+            if (hs.tur === 'anahtar') durumYaz({ durum: 'gecersiz', ts: Date.now(), mesaj: '401' });
+            else if (hs.tur === 'hesap') durumYaz({ durum: 'hesap', ts: Date.now(), mesaj: String(r.status) });
+            hataKaydet(hs.tur, r.status + ' ' + (hs.api || ''));
+            return { ok: false, hata: hs };
+          }
+          durumYaz({ durum: 'ok', ts: Date.now(), mesaj: 'Son istek başarılı' });
+          var c = cevapCoz(j);
+          return { ok: true, cevap: c.cevap, kaynak: c.kaynak, bayraklar: c.bayraklar,
+            maliyet: maliyet(ist.modelKey, j && j.usage), model: MODEL[ist.modelKey].id, istekId: istekId };
+        });
+      }, function(e){
+        if (zmn) clearTimeout(zmn);
+        var cevrimdisi = typeof navigator !== 'undefined' && navigator.onLine === false;
+        var hs = (e && e.name === 'AbortError') ? { tur: 'zamanasimi', mesaj: 'Yanıt ' + (ZAMAN_ASIMI / 1000) + ' sn içinde gelmedi (zaman aşımı).' }
+          : cevrimdisi ? { tur: 'cevrimdisi', mesaj: 'Çevrimdışısın. Uygulama çevrimdışı çalışır ama AI özellikleri internet ister.' }
+          : { tur: 'ag', mesaj: 'api.anthropic.com\'a bağlanılamadı (ağ, engel ya da tarayıcı reddi).' };
+        hataKaydet(hs.tur, maskele(e && e.message));
+        return { ok: false, hata: hs };
+      });
+  }
+  return { sor: sor, hazirMi: hazirMi, anahtarKaydet: anahtarKaydet, anahtarSil: anahtarSil, anahtarAl: anahtarAl,
+    bicimOk: bicimOk, sonDort: sonDort, durumAl: durumAl, maliyet: maliyet, hataSinifla: hataSinifla, cevapCoz: cevapCoz,
+    yasakTara: yasakTara, istekKur: istekKur, maskele: maskele, MODEL: MODEL, KULLANIM: KULLANIM, SISTEM: SISTEM,
+    ANAHTAR_LS: ANAHTAR_LS, DURUM_LS: DURUM_LS };
+})();
+
+// ── Ayarlar ▸ 🤖 AI özellikleri kartı ──
+window._bmAiKartHTML = function(){
+  var A = window.BM_AI, k = A.anahtarAl(), d = A.durumAl();
+  var durumSatir;
+  if (!k) durumSatir = '<div class="bm-ai-durum" data-durum="yok" style="font-size:12px;color:var(--metin-soluk)">🔑 Anahtar girilmedi — AI özellikleri kapalı.</div>';
+  else if (d && d.durum === 'gecersiz') durumSatir = '<div class="bm-ai-durum" data-durum="gecersiz" style="font-size:12px;color:#b3261e;font-weight:600">⚠️ Kayıtlı anahtar ('+esc(A.sonDort(k))+') REDDEDİLDİ (401). Anahtarı kontrol et ya da yenisini gir.</div>';
+  else if (d && d.durum === 'hesap') durumSatir = '<div class="bm-ai-durum" data-durum="hesap" style="font-size:12px;color:#8a5a00;font-weight:600">⚠️ Anahtar ('+esc(A.sonDort(k))+') geçerli ama HESAP/KREDİ durumu istekleri engelliyor ('+esc(d.mesaj)+') — kod hatası değil. console.anthropic.com ▸ Billing.</div>';
+  else durumSatir = '<div class="bm-ai-durum" data-durum="'+esc((d && d.durum) || 'kayitli')+'" style="font-size:12px;color:var(--metin-soluk)">🔑 Anahtar kayıtlı: '+esc(A.sonDort(k))+((d && d.durum === 'ok') ? ' · son istek başarılı' : ' · henüz doğrulanmadı — bağlantı testini çalıştır')+'</div>';
+  return '<div class="bm-ayar-kart" id="bm-ai-kart">'+
+    '<div class="bm-ayar-kart-baslik">🤖 AI özellikleri <small style="font-weight:400;color:var(--metin-soluk)">(deneysel · kendi anahtarınla)</small></div>'+
+    '<div class="bm-ai-uyari" style="font-size:12px;line-height:1.5;padding:8px 10px;border:1px solid var(--cizgi-arac);border-radius:8px;background:var(--bg2);margin-bottom:8px">'+
+      '<b>🔐 Güvenlik:</b> Anahtar <b>yalnız bu cihazda</b> saklanır; yedeğe girmez, senkronlanmaz. <b>Ortak/paylaşılan cihazda girme.</b> '+
+      'İstekler doğrudan Anthropic\'e gider; ücret <b>senin Anthropic hesabından</b> düşer. Anahtarı console.anthropic.com\'dan oluşturabilir, istediğinde oradan iptal edebilirsin. '+
+      'Harcamaya tavan koymak için: console.anthropic.com ▸ Limits.'+
+    '</div>'+
+    durumSatir+
+    '<div class="bm-ayar-satir" style="gap:6px;flex-wrap:wrap">'+
+      '<input id="bm-ai-anahtar-inp" class="inp" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-…" aria-label="Anthropic API anahtarı" style="flex:1 1 180px;min-width:0;font-size:12px">'+
+      '<button class="bm-ayar-btn" onclick="window.bmAiAnahtarKaydet()">Kaydet</button>'+
+      (k ? '<button class="bm-ayar-btn" onclick="window.bmAiAnahtarSil()">Sil</button>' : '')+
+    '</div>'+
+    (k ? '<div class="bm-ayar-satir"><div class="bm-ayar-satir-text">Bağlantı testi <small>Küçük bir tabloyla soru sorar; cevap, kaynak, token ve maliyeti gösterir (Haiku 4.5, ≈ 0,001 $)</small></div>'+
+         '<button class="bm-ayar-btn" id="bm-ai-test-btn" onclick="window.bmAiBaglantiTesti()">Test et</button></div>' : '')+
+    '<div id="bm-ai-test-sonuc" aria-live="polite"></div>'+
+  '</div>';
+};
+window.bmAiAnahtarKaydet = function(){
+  var el = document.getElementById('bm-ai-anahtar-inp'); var v = el ? el.value : '';
+  var r = window.BM_AI.anahtarKaydet(v);
+  if (el) el.value = '';
+  if (!r.ok) { if (typeof bmToast === 'function') bmToast(r.mesaj, 'error'); return; }
+  if (typeof bmToast === 'function') bmToast('Anahtar bu cihaza kaydedildi — bağlantı testiyle doğrula', 'success');
+  try { render(); } catch(_e){}
+};
+window.bmAiAnahtarSil = function(){
+  if (!confirm('AI anahtarı bu cihazdan silinsin mi? (Anthropic tarafında iptal etmek için console.anthropic.com)')) return;
+  window.BM_AI.anahtarSil();
+  if (typeof bmToast === 'function') bmToast('Anahtar silindi', 'info');
+  try { render(); } catch(_e){}
+};
+// Tanı: sonucu #bm-ai-test-sonuc'a yazar ve Promise döner (test için).
+window.bmAiBaglantiTesti = function(){
+  // kutu HER yazımda yeniden bulunur: 401/hesap sonrası render() Ayarlar'ı yeniden çizer, eski referans ölür
+  var yaz = function(html){ var kutu = document.getElementById('bm-ai-test-sonuc'); if (kutu) kutu.innerHTML = html; };
+  var hata = function(h){ yaz('<div class="bm-ai-hata" data-tur="'+esc(h.tur)+'" style="font-size:12px;margin-top:8px;padding:8px 10px;border-radius:8px;border:1px solid #e0b4b0;background:#fbeceb;color:#8c1d18">⚠️ '+esc(h.mesaj)+(h.api ? '<br><small>API: '+esc(h.api)+'</small>' : '')+(h.istekId ? '<br><small>istek: '+esc(h.istekId)+'</small>' : '')+'</div>'); };
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    var hc = { tur: 'cevrimdisi', mesaj: 'Çevrimdışısın. Uygulama çevrimdışı çalışır ama AI özellikleri internet ister — bağlantı gelince tekrar dene.' };
+    hata(hc); return Promise.resolve({ ok: false, hata: hc });
+  }
+  yaz('<div style="font-size:12px;margin-top:8px;color:var(--metin-soluk)">⏳ Anthropic\'e soruluyor…</div>');
+  var btn = document.getElementById('bm-ai-test-btn'); if (btn) btn.disabled = true;
+  var baglam = 'HOPLAR (Brewmaster kataloğu, alfa asit %):\n' +
+    (HOPLAR || []).filter(function(h){ return h && (h.id === 'cascade' || h.id === 'citra' || h.id === 'saaz'); })
+      .map(function(h){ return '- ' + h.ad + ': ' + h.aa; }).join('\n');
+  return window.BM_AI.sor({ kullanim: 'tani', baglam: baglam, soru: 'Tabloya göre Citra\'nın alfa asidi yüzde kaç?' }).then(function(r){
+    if (btn) btn.disabled = false;
+    if (!r.ok) { try { render(); } catch(_e){} hata(r.hata); return r; } // önce durum satırı tazelenir, SONRA hata yeni kutuya yazılır
+    var m = r.maliyet;
+    var bayrakHTML = r.bayraklar.map(function(b){ return '<div class="bm-ai-bayrak" data-tip="'+esc(b.tip)+'" style="color:#8a5a00;margin-top:4px">⚠️ '+esc(b.mesaj)+'</div>'; }).join('');
+    yaz('<div class="bm-ai-cevap" style="font-size:12px;line-height:1.5;margin-top:8px;padding:8px 10px;border-radius:8px;border:1px solid var(--cizgi-arac);background:var(--bg-card)">'+
+      '<div><b>Cevap:</b> '+esc(r.cevap)+'</div>'+
+      '<div class="bm-ai-kaynak" style="margin-top:4px">Kaynak: '+(r.kaynak ? '<b>'+(r.kaynak === 'tablo' ? '📋 tablo' : '📚 genel bilgi')+'</b>' : '<b>belirtilmedi</b>')+'</div>'+
+      bayrakHTML+
+      '<div class="bm-ai-maliyet" style="margin-top:4px;color:var(--metin-soluk)">'+esc(m.model)+' · '+m.gir+' giriş + '+m.cik+' çıkış token'+(m.cw || m.cr ? ' · önbellek yazma '+m.cw+' / okuma '+m.cr : '')+' · ≈ $'+m.usd.toFixed(5)+'</div>'+
+    '</div>');
+    return r;
+  });
+};
+
 // Ayarlar sekmesi render
 window.rStokAyarlar = function(){
   // Sprint 138: swVer kaldırıldı — CACHE_VERSION sayfa kapsamında YOK (sw.js'te), her zaman '?' veriyordu.
@@ -29458,6 +29689,7 @@ window.rStokAyarlar = function(){
         '<label class="bm-ayar-btn-sec" style="cursor:pointer;display:inline-flex">Seç<input type="file" accept="application/json,.json" onchange="window.bmVeriImport(this)" style="display:none"></label>'+
       '</div>'+
     '</div>'+
+    window._bmAiKartHTML()+
     '<div class="bm-ayar-kart">'+
       '<div class="bm-ayar-kart-baslik">ℹ️ Uygulama</div>'+
       '<div class="bm-ayar-satir">'+
