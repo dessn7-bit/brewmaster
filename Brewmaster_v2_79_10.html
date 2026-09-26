@@ -868,6 +868,8 @@ button:disabled:hover,.btn:disabled:hover,.btn.bm-disabled:hover{background:inhe
 .bm-muadil-inline-label{color:var(--dim);font-size:10.5px;font-weight:600;letter-spacing:.3px;flex-shrink:0}
 .bm-muadil-inline-chip{padding:2px 8px;background:var(--kahve-bg);border:1px solid rgba(184,118,63,.3);border-radius:10px;font-size:calc(11px * var(--tip-b-scale, 1));color:var(--tip-b-col, var(--kahve-koyu));cursor:pointer;transition:background .15s,border-color .15s;white-space:nowrap;font-family:var(--font-body);font-variant-caps:var(--tip-b-fvc, normal);font-style:var(--tip-b-fst, normal);text-transform:var(--tip-b-tt, none);letter-spacing:var(--tip-b-ls, normal)}
 .bm-muadil-inline-chip:hover{background:var(--kahve-light);border-color:var(--vintage)}
+.bm-ikame-btn{min-height:44px;padding:6px 12px;border-radius:22px;border:1.5px solid var(--bakir);background:var(--bg-card);color:var(--bakir);font-weight:700;font-size:12px;cursor:pointer;font-family:var(--font-body);white-space:nowrap}
+.bm-ikame-btn:hover{background:var(--kahve-bg)}
 @media (max-width:480px){.bm-muadil-inline{gap:4px;padding:6px 8px}.bm-muadil-inline-chip{padding:2px 7px;font-size:calc(10.5px * var(--tip-b-scale, 1));font-variant-caps:var(--tip-b-fvc, normal);font-style:var(--tip-b-fst, normal);text-transform:var(--tip-b-tt, none);letter-spacing:var(--tip-b-ls, normal)}}
 
 /* Adim 134-G: bm-toast vintage komponenti. FEAT-BREWDAY-TOAST: z 10500 — brewday katmanlari (timeline 9998, modal 9999, event-modal 10000) USTU, alarm modali (99997) ALTI. Sync paneli (2000) ustune cikar (bilincli). */
@@ -12310,6 +12312,58 @@ const MUADIL_ORAN = {
 // ── MUADİL UYGULAMA ─────────────────────────────────────────────────────
 // Reçetedeki malzemeyi seçilen muadil ile değiştir. Tek tıklamayla hızlı deneme.
 // Önceki hal _muadilSonDegis'te saklanır — geri alma için.
+// SPRINT BX: muadilSec'in dönüşüm bloğu AYNEN buraya çıkarıldı — muadilSec (S üzerinde) ve ikame önizlemesi
+// (S'nin klonu üzerinde) AYNI fonksiyonu çağırır → önizleme ile uygulama ayrışamaz.
+// idxTercih: aynı malzeme birden çok satırdaysa hangi satırın değişeceği (geçersiz/uyuşmazsa eski davranış: ilk eşleşen).
+function _muadilDegistir(st, kat, src, tgt, mik, birim, idxTercih){
+  const _ix=parseInt(idxTercih,10);
+  const _sec=(arr)=>(!isNaN(_ix)&&arr&&arr[_ix]&&arr[_ix].id===src)?_ix:(arr||[]).findIndex(x=>x&&x.id===src);
+  if(kat==='malt'){
+    const idx=_sec(st.maltlar);
+    if(idx>=0){
+      const kayit={kat,idx,onceki:{...st.maltlar[idx]}};
+      st.maltlar[idx]={...st.maltlar[idx],id:tgt,kg:mik,marka:''};
+      const ml=MALTLAR.find(x=>x&&x.id===tgt);
+      return {ok:true,adi:ml?ml.ad:tgt,kayit};
+    }
+  } else if(kat==='hop'){
+    const idx=_sec(st.hoplar);
+    if(idx>=0){
+      const hp=HOPLAR.find(x=>x&&x.id===tgt);
+      const kayit={kat,idx,onceki:{...st.hoplar[idx]}};
+      // Yeni hop: cAA sıfırla (farklı AA), _ad güncelle
+      st.hoplar[idx]={...st.hoplar[idx],id:tgt,g:mik,cAA:null,_ad:hp?hp.ad:tgt};
+      return {ok:true,adi:hp?hp.ad:tgt,kayit};
+    }
+  } else if(kat==='maya1'){
+    const kayit={kat,onceki:st.mayaId};
+    st.mayaId=tgt;
+    const my=MAYALAR.find(x=>x&&x.id===tgt);
+    return {ok:true,adi:my?my.ad:tgt,kayit};
+  } else if(kat==='maya2'){
+    const kayit={kat,onceki:st.maya2Id};
+    st.maya2Id=tgt;
+    const my=MAYALAR.find(x=>x&&x.id===tgt);
+    return {ok:true,adi:my?my.ad:tgt,kayit};
+  } else if(kat==='katki'){
+    const idx=_sec(st.katkilar);
+    if(idx>=0){
+      const tk=(typeof KATKILAR!=='undefined')?KATKILAR.find(x=>x&&x.id===tgt):null;
+      const kayit={kat,idx,onceki:{...st.katkilar[idx]}};
+      st.katkilar[idx]={...st.katkilar[idx],id:tgt,miktar:mik,birim:birim||(tk?tk.birim:'g'),ad:tk?tk.ad:tgt};
+      return {ok:true,adi:tk?tk.ad:tgt,kayit};
+    }
+  } else if(kat==='mineral'){
+    const idx=_sec(st.suMineralleri);
+    if(idx>=0){
+      const kayit={kat,idx,onceki:{...st.suMineralleri[idx]}};
+      st.suMineralleri[idx]={...st.suMineralleri[idx],id:tgt,miktar:mik};
+      const mn=(typeof MINERALLER!=='undefined')?MINERALLER.find(x=>x&&x.id===tgt):null;
+      return {ok:true,adi:mn?mn.ad:tgt,kayit};
+    }
+  }
+  return {ok:false,adi:'',kayit:null};
+}
 let _muadilSonDegis=null;
 window.muadilSec=function(el){
   const src=el.dataset.src, tgt=el.dataset.tgt, kat=el.dataset.kat;
@@ -12317,50 +12371,9 @@ window.muadilSec=function(el){
   if(!src||!tgt||!kat||!(mik>0)) return flash('⚠️ Muadil uygulanamadı (veri eksik)','err');
   let ok=false, adi='';
   try {
-    if(kat==='malt'){
-      const idx=S.maltlar.findIndex(m=>m&&m.id===src);
-      if(idx>=0){
-        _muadilSonDegis={kat,idx,onceki:{...S.maltlar[idx]}};
-        S.maltlar[idx]={...S.maltlar[idx],id:tgt,kg:mik,marka:''};
-        const ml=MALTLAR.find(x=>x&&x.id===tgt);
-        adi=ml?ml.ad:tgt; ok=true;
-      }
-    } else if(kat==='hop'){
-      const idx=S.hoplar.findIndex(h=>h&&h.id===src);
-      if(idx>=0){
-        const hp=HOPLAR.find(x=>x&&x.id===tgt);
-        _muadilSonDegis={kat,idx,onceki:{...S.hoplar[idx]}};
-        // Yeni hop: cAA sıfırla (farklı AA), _ad güncelle
-        S.hoplar[idx]={...S.hoplar[idx],id:tgt,g:mik,cAA:null,_ad:hp?hp.ad:tgt};
-        adi=hp?hp.ad:tgt; ok=true;
-      }
-    } else if(kat==='maya1'){
-      _muadilSonDegis={kat,onceki:S.mayaId};
-      S.mayaId=tgt;
-      const my=MAYALAR.find(x=>x&&x.id===tgt);
-      adi=my?my.ad:tgt; ok=true;
-    } else if(kat==='maya2'){
-      _muadilSonDegis={kat,onceki:S.maya2Id};
-      S.maya2Id=tgt;
-      const my=MAYALAR.find(x=>x&&x.id===tgt);
-      adi=my?my.ad:tgt; ok=true;
-    } else if(kat==='katki'){
-      const idx=(S.katkilar||[]).findIndex(k=>k&&k.id===src);
-      if(idx>=0){
-        const tk=(typeof KATKILAR!=='undefined')?KATKILAR.find(x=>x&&x.id===tgt):null;
-        _muadilSonDegis={kat,idx,onceki:{...S.katkilar[idx]}};
-        S.katkilar[idx]={...S.katkilar[idx],id:tgt,miktar:mik,birim:birim||(tk?tk.birim:'g'),ad:tk?tk.ad:tgt};
-        adi=tk?tk.ad:tgt; ok=true;
-      }
-    } else if(kat==='mineral'){
-      const idx=(S.suMineralleri||[]).findIndex(m=>m&&m.id===src);
-      if(idx>=0){
-        _muadilSonDegis={kat,idx,onceki:{...S.suMineralleri[idx]}};
-        S.suMineralleri[idx]={...S.suMineralleri[idx],id:tgt,miktar:mik};
-        const mn=(typeof MINERALLER!=='undefined')?MINERALLER.find(x=>x&&x.id===tgt):null;
-        adi=mn?mn.ad:tgt; ok=true;
-      }
-    }
+    // SPRINT BX: dönüşüm _muadilDegistir'de (ikame önizlemesi AYNI fonksiyonu S'nin klonunda çağırır)
+    const _d=_muadilDegistir(S,kat,src,tgt,mik,birim,el.dataset.idx);
+    if(_d.ok){ _muadilSonDegis=_d.kayit; adi=_d.adi; ok=true; }
   } catch(e){ console.error('muadilSec',e); }
   if(ok){
     // Güvenlik: Manuel OG/FG override'larını temizle (muadil → hesap devreye girsin)
@@ -12435,6 +12448,222 @@ window.muadilGeriAl=function(){
     flash('↶ Önceki hale dönüldü','ok');
     render();
   } catch(e){ flash('⚠️ Geri alınamadı','err'); }
+};
+// ═══ SPRINT BX: İKAME PANELİ — MUADIL tablosu (deterministik, kaynaklı) + İSTEĞE BAĞLI AI sıralama/açıklama ═══
+// Kaynak: MUADIL (hop 77/77, maya 129/129, malt 181/184). AI yeni malzeme ÖNERMEZ: yalnız bu listedeki adayları
+// bu reçeteye göre sıralar ve açıklar. Yanıt şemasında id alanı aday id'lerine `enum` ile KİLİTLİ → API katalog
+// dışı id üretemez; istemci ayrıca doğrular. Anahtar yok / çevrimdışı → liste AI'sız çalışır, neden yazılır.
+// Uygulama TEK yol: muadilSec (önizleme aynı dönüşümü _muadilDegistir ile S'nin KLONUNA uygular, calc() aynen koşar).
+var _bmIkame = null; // {kat, idx, srcId, adaylar, farkliTur, ai}
+function _bmIkameKatalog(kat){ return kat === 'malt' ? MALTLAR : kat === 'hop' ? HOPLAR : MAYALAR; }
+function _bmIkameSatir(kat, idx){
+  if (kat === 'malt') return S.maltlar[idx] || null;
+  if (kat === 'hop') return S.hoplar[idx] || null;
+  var id = kat === 'maya2' ? S.maya2Id : S.mayaId;
+  return id ? { id: id } : null;
+}
+// Miktar önerisi — stok kontrol bölümüyle AYNI formüller: malt GU oranı, hop AA oranı, maya 1 paket.
+// Tek fark: hop kaynağında elle girilmiş alfa (cAA) varsa o kullanılır (IBU eşitliği gerçek alfaya göre).
+function _bmIkameMiktar(kat, satir, src, tgt){
+  if (kat === 'malt') { var kg = +satir.kg || 0; return (src && tgt && src.gu > 0 && tgt.gu > 0) ? +(kg * src.gu / tgt.gu).toFixed(2) : kg; }
+  if (kat === 'hop') { var g = +satir.g || 0, aaS = +satir.cAA || (src && src.aa) || 0; return (aaS > 0 && tgt && tgt.aa > 0) ? +(g * aaS / tgt.aa).toFixed(1) : g; }
+  return 1;
+}
+window._bmIkameAdaylar = function(kat, idx){
+  var satir = _bmIkameSatir(kat, idx); if (!satir) return null;
+  var tip = kat.indexOf('maya') === 0 ? 'maya' : kat, L = _bmIkameKatalog(tip);
+  var src = L.find(function(x){ return x && x.id === satir.id; }) || null;
+  var ham = (typeof MUADIL !== 'undefined' && Array.isArray(MUADIL[satir.id])) ? MUADIL[satir.id] : [];
+  var adaylar = [], farkliTur = [];
+  ham.forEach(function(mu){
+    var tgt = L.find(function(x){ return x && x.id === mu.id; });
+    if (!tgt) { farkliTur.push(mu.ad || mu.id); return; } // katkı/mineral hedefi: bu satırdan uygulanamaz (muadilSec türü değiştirmez)
+    var stok = false; try { stok = typeof _stokMalBul === 'function' && _stokMalBul(tgt.id, tgt.ad) >= 0; } catch(_s){}
+    adaylar.push({ id: tgt.id, ad: tgt.ad, fark: mu.fark || '', detay: mu.detay || '', kayit: tgt, stok: stok,
+      mik: _bmIkameMiktar(tip, satir, src, tgt), birim: tip === 'malt' ? 'kg' : tip === 'hop' ? 'g' : 'paket' });
+  });
+  return { kat: kat, tip: tip, idx: idx, satir: satir, src: src, adaylar: adaylar, farkliTur: farkliTur };
+};
+function _bmIkameOzellik(tip, x){
+  if (!x) return '';
+  if (tip === 'hop') return 'alfa %' + x.aa;
+  if (tip === 'malt') return x.r + '°L · GU ' + x.gu;
+  return 'att. %' + (x.atu ? x.atu[0] + '-' + x.atu[1] : '?') + (x.tip ? ' · ' + x.tip : '');
+}
+// Önizleme: S'nin derin klonuna AYNI dönüşüm (_muadilDegistir) + muadilSec'in manuel OG/FG temizliği; calc() geçici S ile.
+window._bmIkameOnizle = function(kat, idx, tgtId, mik){
+  var d = _bmIkame && _bmIkame.kat === kat && _bmIkame.idx === idx ? _bmIkame : window._bmIkameAdaylar(kat, idx);
+  if (!d) return null;
+  var once = calc(), kl = JSON.parse(JSON.stringify(S));
+  var sonuc = _muadilDegistir(kl, kat, d.satir.id, tgtId, mik, '', idx);
+  if (!sonuc.ok) return null;
+  var manuelTemizlenir = !!(kl.ogManuel || kl.fgManuel);
+  kl.ogManuel = null; kl.fgManuel = null;
+  var eski = S, sonra;
+  try { S = kl; sonra = calc(); } finally { S = eski; }
+  var ayni = (kat === 'hop' ? S.hoplar : kat === 'malt' ? S.maltlar : []).filter(function(x){ return x && x.id === d.satir.id; }).length;
+  return { once: once, sonra: sonra, manuelTemizlenir: manuelTemizlenir, ayniMalzemeSatir: ayni };
+};
+window._bmIkameBaglam = function(d){
+  var st = S.stil && typeof BJCP !== 'undefined' ? BJCP[S.stil] : null, c = null;
+  try { c = calc(); } catch(_c){}
+  var b = [];
+  b.push('REÇETE: stil ' + (S.stil || 'seçilmedi') + (st ? ' · BJCP bantları OG ' + st.og.join('-') + ', IBU ' + st.ibu.join('-') + ', SRM ' + st.srm.join('-') : ''));
+  if (c) b.push('Şu anki hesap: OG ' + c.og.toFixed(3) + ', FG ' + c.fg.toFixed(3) + ', IBU ' + Math.round(c.ibu) + ', SRM ' + Math.round(c.srm) + ', ABV %' + (c.abv || 0).toFixed(1));
+  b.push('Maltlar: ' + (S.maltlar || []).map(function(m){ var x = MALTLAR.find(function(k){ return k && k.id === m.id; }); return (x ? x.ad : m.id) + ' ' + m.kg + ' kg'; }).join('; '));
+  b.push('Hoplar: ' + (S.hoplar || []).map(function(h){ var x = HOPLAR.find(function(k){ return k && k.id === h.id; }); return (x ? x.ad : h.id) + ' ' + h.g + ' g ' + (h.tur === 'boil' ? h.dk + ' dk' : (h.tur || '')); }).join('; '));
+  var my = MAYALAR.find(function(k){ return k && k.id === S.mayaId; }); b.push('Maya: ' + (my ? my.ad : 'yok'));
+  var s = d.src, sat = d.satir;
+  b.push('DEĞİŞECEK MALZEME: ' + (s ? s.ad : sat.id) + ' (' + _bmIkameOzellik(d.tip, s) + ')' + (d.tip === 'hop' ? ' · ' + sat.g + ' g · ' + (sat.tur === 'boil' ? sat.dk + ' dk' : sat.tur) : d.tip === 'malt' ? ' · ' + sat.kg + ' kg' : '') + (s && (s.mo || s.e) ? ' · profil: ' + (s.mo || s.e) : ''));
+  b.push('ADAYLAR (Brewmaster MUADIL tablosu — YALNIZ bunlar sıralanabilir):');
+  d.adaylar.forEach(function(a){
+    b.push('- id=' + a.id + ' | ' + a.ad + ' | ' + _bmIkameOzellik(d.tip, a.kayit) + ' | aynı etki için önerilen miktar ' + a.mik + ' ' + a.birim +
+      ' | tablo notu: ' + String(a.fark).replace(/^[✅⚠️ℹ️🟡\s]+/, '') + (a.detay ? ' | ayrıntı: ' + String(a.detay).slice(0, 180) : '') +
+      ((a.kayit && (a.kayit.mo || a.kayit.e)) ? ' | profil: ' + String(a.kayit.mo || a.kayit.e).slice(0, 120) : ''));
+  });
+  return b.join('\n');
+};
+window._bmIkameSema = function(ids){
+  return { type: 'json_schema', schema: { type: 'object', properties: {
+    siralama: { type: 'array', items: { type: 'object', properties: { id: { type: 'string', enum: ids }, neden: { type: 'string' } }, required: ['id', 'neden'], additionalProperties: false } },
+    not: { type: 'string' }, kaynak: { type: 'string', enum: ['tablo', 'genel'] } },
+    required: ['siralama', 'not', 'kaynak'], additionalProperties: false } };
+};
+window._BM_IKAME_SORU = 'Adayları bu reçetenin stiline, BJCP bantlarına ve mevcut malzeme profiline göre en uygundan başlayarak sırala. ' +
+  'Her aday için 1-2 cümle yaz: neden bu sırada ve değişecek malzemeden belirgin farkı (alfa/renk/attenuation/aroma; IBU/SRM/FG etkisi, miktar değişiyorsa söyle). ' +
+  'Aday listesinde OLMAYAN malzeme adı YAZMA. "not" alanına sıralamanın genel dayanağını tek cümleyle yaz. Değer yargısı ("daha iyi", "ideal", "en iyi") kullanma; farkı olgu olarak söyle.';
+// AI yanıtını doğrula: yalnız aday id'leri, tekrar yok, eksik adaylar sona "AI sıralamadı" ile.
+window._bmIkameAiDogrula = function(adaylar, veri){
+  var izin = {}; adaylar.forEach(function(a){ izin[a.id] = a; });
+  var gor = {}, sira = [], disari = [];
+  ((veri && Array.isArray(veri.siralama)) ? veri.siralama : []).forEach(function(s){
+    if (!s || !izin[s.id]) { disari.push(s && s.id); return; }
+    if (gor[s.id]) return; gor[s.id] = 1; sira.push({ id: s.id, neden: String(s.neden || '') });
+  });
+  var eksik = adaylar.filter(function(a){ return !gor[a.id]; }).map(function(a){ return a.id; });
+  return { sira: sira, disari: disari.filter(function(x){ return x != null; }), eksik: eksik };
+};
+function _bmIkameE(s){ return esc(String(s == null ? '' : s)); }
+window.bmIkameAc = function(kat, idx, onizleId){
+  var d = window._bmIkameAdaylar(kat, idx); if (!d) return flash('⚠️ Malzeme bulunamadı', 'err');
+  _bmIkame = { kat: kat, idx: idx, srcId: d.satir.id, adaylar: d.adaylar, farkliTur: d.farkliTur, tip: d.tip, satir: d.satir, src: d.src, ai: null, aiDurum: null };
+  window.bmIkameKapat();
+  var s = d.src, sat = d.satir;
+  var baglamSatir = d.tip === 'hop' ? (sat.g + ' g · ' + (sat.tur === 'boil' ? sat.dk + ' dk' : sat.tur)) : d.tip === 'malt' ? (sat.kg + ' kg') : '';
+  var h = '<div id="bmIkame" role="dialog" aria-modal="true" aria-label="Malzeme ikamesi" tabindex="-1" style="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center" onclick="if(event.target===this)bmIkameKapat()">' +
+    '<div style="background:var(--bg-card,#fff);width:100%;max-width:520px;max-height:88vh;overflow-y:auto;border-radius:16px 16px 0 0;padding:16px;box-shadow:0 -4px 24px rgba(0,0,0,.3)">' +
+    '<div style="display:flex;align-items:flex-start;gap:8px"><div style="flex:1;min-width:0">' +
+      '<div style="font-size:15px;font-weight:700;color:var(--bakir);line-height:1.3">🔁 ' + _bmIkameE(s ? s.ad : sat.id) + ' yoksa ne kullanabilirim?</div>' +
+      '<div style="font-size:11px;color:var(--soluk);margin-top:2px">' + _bmIkameE(_bmIkameOzellik(d.tip, s)) + (baglamSatir ? ' · ' + _bmIkameE(baglamSatir) : '') + ' · kaynak: Brewmaster muadil tablosu</div></div>' +
+      '<button type="button" onclick="bmIkameKapat()" aria-label="Kapat" style="background:var(--bg2);border:1px solid var(--bor);border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;flex-shrink:0">✕</button></div>' +
+    '<div id="bmIkameAi" style="margin-top:10px"></div>' +
+    '<div id="bmIkameListe" style="margin-top:8px"></div>' +
+    '</div></div>';
+  document.body.insertAdjacentHTML('beforeend', h);
+  document.addEventListener('keydown', _bmIkameEsc);
+  _bmIkameAiCiz(); _bmIkameListeCiz(onizleId || null);
+  var el = document.getElementById('bmIkame'); if (el && el.focus) el.focus();
+  return true;
+};
+window.bmIkameKapat = function(){ var m = document.getElementById('bmIkame'); if (m) m.remove(); document.removeEventListener('keydown', _bmIkameEsc); };
+function _bmIkameEsc(e){ if (e && e.key === 'Escape') { try { e.stopPropagation(); } catch(_){} window.bmIkameKapat(); } }
+function _bmIkameAiCiz(){
+  var kutu = document.getElementById('bmIkameAi'); if (!kutu || !_bmIkame) return;
+  var d = _bmIkame, A = window.BM_AI;
+  if (!d.adaylar.length) { kutu.innerHTML = ''; return; } // aday yok → AI çağrılmaz (sıralanacak bir şey yok)
+  if (d.aiDurum === 'bekliyor') { kutu.innerHTML = '<div class="bm-ikame-ai" data-durum="bekliyor" style="font-size:12px;color:var(--metin-soluk)">⏳ 🤖 Adaylar bu reçeteye göre sıralanıyor…</div>'; return; }
+  if (d.ai && d.ai.ok) {
+    var r = d.ai, m = r.maliyet, dg = r.dogrulama;
+    var bay = r.bayraklar.map(function(b){ return '<div class="bm-ai-bayrak" data-tip="' + _bmIkameE(b.tip) + '" style="color:#8a5a00;margin-top:3px">⚠️ ' + _bmIkameE(b.mesaj) + '</div>'; }).join('');
+    if (dg.disari.length) bay += '<div class="bm-ai-bayrak" data-tip="katalog_disi" style="color:#8a5a00;margin-top:3px">⚠️ Aday listesi dışındaki ' + dg.disari.length + ' öneri ATILDI (' + _bmIkameE(dg.disari.join(', ')) + ').</div>';
+    if (dg.eksik.length) bay += '<div class="bm-ai-bayrak" data-tip="eksik_sira" style="color:var(--metin-soluk);margin-top:3px">ℹ️ AI ' + dg.eksik.length + ' adayı sıralamadı — tablo sırasıyla sonda.</div>';
+    kutu.innerHTML = '<div class="bm-ikame-ai" data-durum="ok" style="font-size:12px;line-height:1.5;padding:8px 10px;border-radius:8px;border:1px solid var(--cizgi-arac);background:var(--bg2)">' +
+      '<div><b>🤖 Bu reçeteye göre sıralandı.</b> ' + _bmIkameE((r.veri && r.veri.not) || '') + '</div>' +
+      '<div class="bm-ai-kaynak" style="margin-top:3px">Kaynak: ' + (r.kaynak ? '<b>' + (r.kaynak === 'tablo' ? '📋 tablo' : '📚 genel bilgi') + '</b>' : '<b>belirtilmedi</b>') + ' · adaylar: muadil tablosu</div>' + bay +
+      '<div class="bm-ai-maliyet" style="margin-top:3px;color:var(--metin-soluk)">' + _bmIkameE(m.model) + ' · ' + m.gir + ' giriş + ' + m.cik + ' çıkış token · ≈ $' + m.usd.toFixed(5) + '</div></div>';
+    return;
+  }
+  var neden = d.ai && !d.ai.ok ? d.ai.hata : null, hz = A ? A.hazirMi() : { hazir: false, mesaj: 'AI modülü yüklenmedi.' };
+  var bilgi = neden ? '<div class="bm-ai-hata" data-tur="' + _bmIkameE(neden.tur) + '" style="font-size:12px;margin-top:6px;padding:6px 8px;border-radius:8px;border:1px solid #e0b4b0;background:#fbeceb;color:#8c1d18">⚠️ ' + _bmIkameE(neden.mesaj) + ' — aşağıdaki liste tablo sırasıyla geçerli.</div>'
+    : (!hz.hazir ? '<div class="bm-ikame-ai-kapali" data-neden="' + _bmIkameE(hz.neden) + '" style="font-size:11px;color:var(--metin-soluk);margin-top:4px">🤖 Sıralama/açıklama kapalı: ' + _bmIkameE(hz.mesaj) + ' Aşağıdaki liste tablo sırasıyla geçerli.</div>' : '');
+  kutu.innerHTML = (hz.hazir || (neden && neden.tur !== 'anahtar_yok' && neden.tur !== 'cevrimdisi')
+    ? '<button type="button" class="bm-ayar-btn" id="bmIkameAiBtn" onclick="bmIkameAiSirala()" style="width:100%">🤖 Bu reçeteye göre sırala ve açıkla <small style="font-weight:400">(Haiku · ≈ $0,003–0,006)</small></button>' : '') + bilgi;
+}
+function _bmIkameListeCiz(acikId){
+  var kutu = document.getElementById('bmIkameListe'); if (!kutu || !_bmIkame) return;
+  var d = _bmIkame;
+  if (!d.adaylar.length) {
+    kutu.innerHTML = '<div class="bm-ikame-yok" style="font-size:12px;line-height:1.5;padding:10px;border-radius:8px;border:1px dashed var(--cizgi-arac);color:var(--metin)">Bu malzeme için katalogda yakın alternatif yok (muadil tablosunda kayıt yok). Uydurma öneri gösterilmez.' +
+      (d.farkliTur.length ? '<br><small style="color:var(--metin-soluk)">Tabloda farklı türde ' + d.farkliTur.length + ' karşılık var (' + _bmIkameE(d.farkliTur.join(', ')) + ') — bu satırdan uygulanamaz.</small>' : '') + '</div>';
+    return;
+  }
+  var sira = d.adaylar.slice(), neden = {};
+  if (d.ai && d.ai.ok) {
+    var dg = d.ai.dogrulama, byId = {}; d.adaylar.forEach(function(a){ byId[a.id] = a; });
+    sira = dg.sira.map(function(s){ neden[s.id] = s.neden; return byId[s.id]; }).concat(dg.eksik.map(function(id){ return byId[id]; }));
+  }
+  kutu.innerHTML = sira.map(function(a, i){
+    var degisim = d.tip === 'maya' ? '' : (a.mik !== (d.tip === 'hop' ? +d.satir.g : +d.satir.kg) ? ' <span style="color:var(--bakir)">(' + (d.tip === 'hop' ? 'alfa farkı' : 'GU farkı') + ' için)</span>' : ' (1:1)');
+    return '<div class="bm-ikame-aday" data-id="' + _bmIkameE(a.id) + '" style="padding:8px 0;border-top:1px solid var(--cizgi-arac)">' +
+      '<div style="display:flex;align-items:flex-start;gap:8px"><div style="flex:1;min-width:0">' +
+        '<div style="font-size:13px;font-weight:600;color:var(--metin)">' + (d.ai && d.ai.ok ? (i + 1) + '. ' : '') + _bmIkameE(a.ad) + (a.stok ? ' <span style="font-size:10px;color:var(--yk);font-weight:600">✓ stokta</span>' : '') + '</div>' +
+        '<div style="font-size:11px;color:var(--soluk)">' + _bmIkameE(_bmIkameOzellik(d.tip, a.kayit)) + (d.tip === 'maya' ? '' : ' · önerilen <b>' + a.mik + ' ' + a.birim + '</b>' + degisim) + '</div>' +
+        (neden[a.id] ? '<div class="bm-ikame-neden" style="font-size:11px;color:var(--metin);margin-top:3px">🤖 ' + _bmIkameE(neden[a.id]) + '</div>' : '') +
+        (a.fark ? '<div class="bm-ikame-fark" style="font-size:11px;color:var(--metin-soluk);margin-top:2px">📋 ' + _bmIkameE(a.fark) + '</div>' : '') +
+      '</div><button type="button" class="bm-ayar-btn bm-ikame-onizle-btn" onclick="bmIkameOnizleGoster(\'' + _bmIkameE(a.id) + '\')" style="flex-shrink:0">Önizle</button></div>' +
+      '<div class="bm-ikame-onizleme" data-id="' + _bmIkameE(a.id) + '"></div></div>';
+  }).join('') + (d.farkliTur.length ? '<div style="font-size:10px;color:var(--metin-soluk);margin-top:6px">Tabloda farklı türde ' + d.farkliTur.length + ' karşılık daha var (' + _bmIkameE(d.farkliTur.join(', ')) + ') — bu satırdan uygulanamaz.</div>' : '');
+  if (acikId) window.bmIkameOnizleGoster(acikId);
+}
+window.bmIkameOnizleGoster = function(tgtId){
+  if (!_bmIkame) return null;
+  var d = _bmIkame, a = d.adaylar.find(function(x){ return x.id === tgtId; });
+  var kutu = document.querySelector('#bmIkameListe .bm-ikame-onizleme[data-id="' + tgtId + '"]');
+  if (!a || !kutu) return null;
+  document.querySelectorAll('#bmIkameListe .bm-ikame-onizleme').forEach(function(k){ if (k !== kutu) k.innerHTML = ''; });
+  var p = window._bmIkameOnizle(d.kat, d.idx, a.id, a.mik);
+  if (!p) { kutu.innerHTML = '<div style="font-size:11px;color:#8c1d18">⚠️ Önizleme hesaplanamadı.</div>'; return null; }
+  var o = p.once, s = p.sonra;
+  var satirF = function(ad, x, y, ond){ var dx = y - x, fr = ond ? dx.toFixed(ond) : String(Math.round(dx)); var ff = (Math.abs(dx) < (ond ? Math.pow(10, -ond) / 2 : 0.5)) ? '<span style="color:var(--metin-soluk)">aynı</span>' : '<b style="color:var(--bakir)">' + (dx > 0 ? '+' : '') + fr + '</b>';
+    return '<tr><td style="padding:2px 6px 2px 0;color:var(--metin-soluk)">' + ad + '</td><td style="padding:2px 6px">' + (ond ? x.toFixed(ond) : Math.round(x)) + '</td><td>→</td><td style="padding:2px 6px">' + (ond ? y.toFixed(ond) : Math.round(y)) + '</td><td>' + ff + '</td></tr>'; };
+  var eskiMik = d.tip === 'hop' ? d.satir.g + ' g' : d.tip === 'malt' ? d.satir.kg + ' kg' : '';
+  kutu.innerHTML = '<div class="bm-ikame-onizleme-ic" style="margin-top:6px;padding:8px 10px;border-radius:8px;background:var(--bg2);font-size:11.5px">' +
+    '<div style="font-weight:600;margin-bottom:4px">Ne değişecek:</div>' +
+    '<div>' + _bmIkameE(d.src ? d.src.ad : d.srcId) + (eskiMik ? ' ' + eskiMik : '') + ' → <b>' + _bmIkameE(a.ad) + (d.tip === 'maya' ? '' : ' ' + a.mik + ' ' + a.birim) + '</b></div>' +
+    '<table class="bm-ikame-tablo" style="margin-top:4px;border-collapse:collapse;font-variant-numeric:tabular-nums">' +
+      satirF('OG', o.og, s.og, 3) + satirF('FG', o.fg, s.fg, 3) + satirF('ABV %', o.abv || 0, s.abv || 0, 1) + satirF('IBU', o.ibu, s.ibu, 0) + satirF('SRM', o.srm, s.srm, 0) + '</table>' +
+    (p.manuelTemizlenir ? '<div style="color:#8a5a00;margin-top:4px">⚠️ Elle girilmiş OG/FG temizlenecek (hesap devreye girer; geri alınca döner).</div>' : '') +
+    (p.ayniMalzemeSatir > 1 ? '<div class="bm-ikame-cift" style="color:#8a5a00;margin-top:4px">⚠️ Bu malzeme reçetede ' + p.ayniMalzemeSatir + ' satırda var — yalnız BU satır değişir; diğerleri için o satırın 🔁 düğmesini kullan.</div>' : '') +
+    '<div style="display:flex;gap:8px;margin-top:8px"><button type="button" class="bm-ayar-btn" onclick="this.closest(\'.bm-ikame-onizleme\').innerHTML=\'\'" style="flex:1">Vazgeç</button>' +
+    '<button type="button" class="bm-ayar-btn bm-ikame-uygula" onclick="bmIkameUygula(\'' + _bmIkameE(a.id) + '\')" style="flex:2;background:var(--bakir);color:#fff">Uygula</button></div></div>';
+  return p;
+};
+window.bmIkameUygula = function(tgtId){
+  if (!_bmIkame) return false;
+  var d = _bmIkame, a = d.adaylar.find(function(x){ return x.id === tgtId; }); if (!a) return false;
+  var onceAd = d.src ? d.src.ad : d.srcId;
+  window.muadilSec({ dataset: { src: d.srcId, tgt: a.id, kat: d.kat, mik: String(a.mik), birim: a.birim, idx: String(d.idx) } }); // TEK yol
+  var ok = typeof _muadilSonDegis !== 'undefined' && _muadilSonDegis && _bmIkameSatir(d.kat, d.idx) && _bmIkameSatir(d.kat, d.idx).id === a.id;
+  var kutu = document.getElementById('bmIkameListe'), c = null; try { c = calc(); } catch(_c){}
+  if (kutu) kutu.innerHTML = ok
+    ? '<div class="bm-ikame-sonuc" data-durum="uygulandi" style="font-size:12px;line-height:1.5;padding:10px;border-radius:8px;background:var(--bg2)">✓ <b>' + _bmIkameE(onceAd) + '</b> yerine <b>' + _bmIkameE(a.ad) + '</b> uygulandı.' +
+        (c ? '<br>OG ' + c.og.toFixed(3) + ' · IBU ' + Math.round(c.ibu) + ' · SRM ' + Math.round(c.srm) + ' · ABV %' + (c.abv || 0).toFixed(1) : '') +
+        '<div style="display:flex;gap:8px;margin-top:8px"><button type="button" class="bm-ayar-btn" onclick="muadilGeriAl();bmIkameKapat()" style="flex:1">↶ Geri al</button><button type="button" class="bm-ayar-btn" onclick="bmIkameKapat()" style="flex:1">Kapat</button></div></div>'
+    : '<div class="bm-ikame-sonuc" data-durum="hata" style="font-size:12px;color:#8c1d18">⚠️ Uygulanamadı — reçetede bu satır bulunamadı.</div>';
+  var ai = document.getElementById('bmIkameAi'); if (ai) ai.innerHTML = '';
+  return ok;
+};
+window.bmIkameAiSirala = function(){
+  if (!_bmIkame || !_bmIkame.adaylar.length) return Promise.resolve(null);
+  var d = _bmIkame, ids = d.adaylar.map(function(a){ return a.id; });
+  d.aiDurum = 'bekliyor'; d.ai = null; _bmIkameAiCiz();
+  return window.BM_AI.sor({ kullanim: 'ikame', baglam: window._bmIkameBaglam(d), soru: window._BM_IKAME_SORU, sema: window._bmIkameSema(ids) }).then(function(r){
+    if (_bmIkame !== d) return r; // panel bu arada kapandı/değişti
+    d.aiDurum = null;
+    if (r.ok) r.dogrulama = window._bmIkameAiDogrula(d.adaylar, r.veri);
+    d.ai = r; _bmIkameAiCiz(); _bmIkameListeCiz(null);
+    return r;
+  });
 };
 
 
@@ -16301,6 +16530,7 @@ function rEditorMaya(og, fg, abv, maya, maya2, fgKaynak, fgHesap){
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
       <div style="font-size:15px;font-weight:700;color:var(--kahve)">${maya.ad}</div>
       <span style="font-size:var(--fs-xs);background:${mayaRenk(maya.tip)}22;color:${mayaRenk(maya.tip)};padding:2px 7px;border-radius:3px;font-weight:700;letter-spacing:.4px">${mayaKisaTip(maya.tip)}</span>
+      <button type="button" class="bm-ikame-btn" data-kat="maya1" onclick="bmIkameAc('maya1',0)" style="margin-left:auto">🔁 Yoksa ne kullanırım?</button>
     </div>
     ${_atenHistHTML}
     ${(function(){var _k=bmMayaKalib(maya.id);var _kat=((maya.atu[0]*2+maya.atu[1])/3).toFixed(0);var _btn=(_atenHist&&_atenHist.count>=2)?('<button class="btn" style="margin-left:auto;font-size:var(--fs-xs);padding:5px 9px;background:var(--altin);color:#fff" onclick="bmMayaKalibSet(\''+maya.id+'\','+_atenHist.avg+');render()">Geçmişten al (%'+_atenHist.avg+')</button>'):'';var _akt=(_k!=null)?('<div style="font-size:var(--fs-xs);color:var(--yk);margin-top:3px">✓ Kişisel %'+_k+' kullanılıyor (katalog %'+maya.atu[0]+'-'+maya.atu[1]+' yerine)</div>'):'';return '<div style="background:var(--sa);border:1px solid var(--altin);border-radius:8px;padding:8px 10px;margin-bottom:10px"><div style="font-size:11px;font-weight:700;color:var(--vintage-koyu);margin-bottom:4px">🎯 Kişisel Atenüasyon Kalibrasyonu</div><div style="display:flex;gap:6px;align-items:center"><input aria-label="Sıcaklık (°C)" type="number" class="inp" style="width:70px;text-align:center;font-weight:600" min="40" max="98" step="1" placeholder="'+_kat+'" value="'+(_k!=null?_k:'')+'" onchange="bmMayaKalibSet(\''+maya.id+'\',this.value);render()"><span style="font-size:11px;color:var(--soluk)">% — FG bunu kullanır</span>'+_btn+'</div>'+_akt+'</div>';})()}
@@ -17641,10 +17871,10 @@ function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
         </div>
         <button class="btn" style="background:none;color:var(--kk);font-size:20px;padding:0 4px;line-height:1" onclick="maltSil(${i})" aria-label="${esc(ml?ml.ad:m.id)} maltını sil" title="Sil">✕</button>
       </div>
-      ${_muadilM.length>0?`<div class="bm-muadil-inline" data-bm-muadil-malt="${esc(m.id)}">
-        <span class="bm-muadil-inline-label">↔ Muadil:</span>
-        ${_muadilM.map(mu=>`<span class="bm-muadil-inline-chip" data-muadil-id="${esc(mu.id)}" onclick="bmToast(this.dataset.muadilTip,'info')" data-muadil-tip="${esc(mu.ad)}${mu.fark?(' — '+esc((mu.fark||'').replace(/^[✅⚠️ℹ️🟡]+\s*/,''))):''}">${esc((mu.ad||'').split(' (')[0])}</span>`).join('')}
-      </div>`:''}
+      ${`<div class="bm-muadil-inline" data-bm-muadil-malt="${esc(m.id)}">
+        <button type="button" class="bm-ikame-btn" data-kat="malt" onclick="bmIkameAc('malt',${i})">🔁 Yoksa ne kullanırım?</button>
+        ${_muadilM.map(mu=>`<span class="bm-muadil-inline-chip" data-muadil-id="${esc(mu.id)}" onclick="bmIkameAc('malt',${i},this.dataset.muadilId)" data-muadil-tip="${esc(mu.ad)}${mu.fark?(' — '+esc((mu.fark||'').replace(/^[✅⚠️ℹ️🟡]+\s*/,''))):''}">${esc((mu.ad||'').split(' (')[0])}</span>`).join('')}
+      </div>`}
       ${_ozet||_rol?`<div onclick="(function(el){var c=el.nextElementSibling;var o=c.style.maxHeight==='0px'||!c.style.maxHeight;c.style.maxHeight=o?c.scrollHeight+'px':'0px';c.style.opacity=o?'1':'0';el.querySelector('.md-t').textContent=o?'▲':'▼';})(this)" style="border-top:1px solid var(--bor);padding:5px 10px;background:var(--bg2);cursor:pointer;user-select:none;display:flex;align-items:center;gap:6px;font-size:var(--fs-xs);color:var(--soluk)">
         <span>ℹ️ Bu malt ne yapıyor?</span>
         <span class="md-t" style="margin-left:auto;font-size:var(--fs-xs)">▼</span>
@@ -17978,10 +18208,10 @@ function rEditorHop(og, ibu, seciHop){
         <button class="btn" style="background:none;color:var(--bakir);font-size:14px;padding:0 4px;line-height:1" onclick="hopDuzenleBasla(${i})" title="Düzenle">✏️</button>
         <button class="btn" style="background:none;color:var(--kk);font-size:20px;padding:0 4px;line-height:1" onclick="hopSil(${i})" aria-label="${esc(hp?hp.ad:h.id)} hopunu sil" title="Sil">✕</button>
       </div>
-      ${_muadilH.length>0?`<div class="bm-muadil-inline" data-bm-muadil-hop="${esc(h.id)}">
-        <span class="bm-muadil-inline-label">↔ Muadil:</span>
-        ${_muadilH.map(mu=>`<span class="bm-muadil-inline-chip" data-muadil-id="${esc(mu.id)}" onclick="bmToast(this.dataset.muadilTip,'info')" data-muadil-tip="${esc(mu.ad)}${mu.fark?(' — '+esc((mu.fark||'').replace(/^[✅⚠️ℹ️🟡]+\s*/,''))):''}">${esc((mu.ad||'').split(' (')[0])}</span>`).join('')}
-      </div>`:''}
+      ${`<div class="bm-muadil-inline" data-bm-muadil-hop="${esc(h.id)}">
+        <button type="button" class="bm-ikame-btn" data-kat="hop" onclick="bmIkameAc('hop',${i})">🔁 Yoksa ne kullanırım?</button>
+        ${_muadilH.map(mu=>`<span class="bm-muadil-inline-chip" data-muadil-id="${esc(mu.id)}" onclick="bmIkameAc('hop',${i},this.dataset.muadilId)" data-muadil-tip="${esc(mu.ad)}${mu.fark?(' — '+esc((mu.fark||'').replace(/^[✅⚠️ℹ️🟡]+\s*/,''))):''}">${esc((mu.ad||'').split(' (')[0])}</span>`).join('')}
+      </div>`}
     </div>`;
   }).join("");
   // I-H3: toplam gram + I-H4: BU:GU + M-H5: anormal IBU uyarısı
@@ -29397,7 +29627,7 @@ window.BM_AI = (function(){
   var KULLANIM = {
     tani:   { model: 'ucuz',    maxTokens: 300,  onbellek: false },
     esleme: { model: 'ucuz',    maxTokens: 600,  onbellek: false },
-    ikame:  { model: 'ucuz',    maxTokens: 800,  onbellek: false },
+    ikame:  { model: 'ucuz',    maxTokens: 1200, onbellek: false }, // BX: en çok 7 aday × 1-2 cümle; kesilen JSON = kaynaksız cevap
     akil:   { model: 'dengeli', maxTokens: 1500, onbellek: false }
   };
   var SISTEM = [
@@ -29454,6 +29684,7 @@ window.BM_AI = (function(){
     if (durum === 529 || durum >= 500) return { tur: 'sunucu', mesaj: 'Anthropic tarafında geçici sorun (' + durum + '). Biraz sonra tekrar dene.', api: msj };
     return { tur: 'istek', mesaj: 'İstek reddedildi (' + durum + (tip ? ' ' + tip : '') + ') — uygulama tarafı hata olabilir.', api: msj };
   }
+  function dizeler(o){ var out = []; (function gez(x, k){ if (typeof x === 'string') { if (k !== 'kaynak' && k !== 'id') out.push(x); } else if (Array.isArray(x)) x.forEach(function(v){ gez(v, k); }); else if (x && typeof x === 'object') Object.keys(x).forEach(function(kk){ gez(x[kk], kk); }); })(o, ''); return out; }
   function yasakTara(metin){
     var l = String(metin || '').toLocaleLowerCase('tr-TR');
     return window._BM_AN5_YASAK.filter(function(k){ return l.indexOf(k) >= 0; });
@@ -29467,14 +29698,15 @@ window.BM_AI = (function(){
     for (var i = 0; i < bloklar.length; i++) if (bloklar[i] && bloklar[i].type === 'text') metin += bloklar[i].text || '';
     if (json && json.stop_reason === 'refusal') bayrak.push({ tip: 'red', mesaj: 'Model yanıt vermeyi reddetti.' });
     if (json && json.stop_reason === 'max_tokens') bayrak.push({ tip: 'kesildi', mesaj: 'Yanıt uzunluk sınırında kesildi.' });
-    try { var o = JSON.parse(metin); cevap = String(o.cevap || ''); kaynak = (o.kaynak === 'tablo' || o.kaynak === 'genel') ? o.kaynak : null; }
-    catch(e){ cevap = metin; }
+    var veri = null;
+    try { veri = JSON.parse(metin); cevap = String(veri.cevap || veri.not || ''); kaynak = (veri.kaynak === 'tablo' || veri.kaynak === 'genel') ? veri.kaynak : null; }
+    catch(e){ veri = null; cevap = metin; }
     if (!kaynak) bayrak.push({ tip: 'kaynak_yok', mesaj: 'Kaynak etiketi (tablo/genel) YOK — cevabın nereden geldiği bilinmiyor.' });
-    var y = yasakTara(cevap);
+    var y = yasakTara(veri ? dizeler(veri).join(' \n ') : cevap); // BX: şemalı yanıtta TÜM metin alanları (neden, not…) taranır
     if (y.length) bayrak.push({ tip: 'yasak', kelimeler: y, mesaj: 'Kalite iddiası taşıyabilecek ifade: ' + y.join(', ') + ' — veri kalite etiketi taşımıyor.' });
-    return { cevap: cevap, kaynak: kaynak, bayraklar: bayrak };
+    return { cevap: cevap, kaynak: kaynak, bayraklar: bayrak, veri: veri };
   }
-  function istekKur(kullanim, baglam, soru){
+  function istekKur(kullanim, baglam, soru, sema){
     var k = KULLANIM[kullanim]; if (!k) throw new Error('bilinmeyen kullanım: ' + kullanim);
     var m = MODEL[k.model];
     var sistem = [{ type: 'text', text: SISTEM }];
@@ -29484,7 +29716,7 @@ window.BM_AI = (function(){
       sistem.push(blok);
     }
     return { modelKey: k.model, govde: { model: m.id, max_tokens: k.maxTokens, system: sistem,
-      messages: [{ role: 'user', content: String(soru || '') }], output_config: { format: SEMA } } };
+      messages: [{ role: 'user', content: String(soru || '') }], output_config: { format: sema || SEMA } } };
   }
   function hataKaydet(tur, mesaj){ try { if (typeof window.bmHataKaydet === 'function') window.bmHataKaydet('ai_' + tur, new Error(maskele(mesaj)), 'BM_AI.sor'); } catch(_h){} }
   // sor({kullanim, baglam, soru}) → Promise<{ok, cevap, kaynak, bayraklar, maliyet, model, istekId} | {ok:false, hata:{tur, mesaj, durum}}>
@@ -29493,7 +29725,7 @@ window.BM_AI = (function(){
     var h = hazirMi();
     if (!h.hazir && h.neden !== 'gecersiz') return Promise.resolve({ ok: false, hata: { tur: h.neden, mesaj: h.mesaj } });
     var ist;
-    try { ist = istekKur(p.kullanim, p.baglam, p.soru); } catch(e){ return Promise.resolve({ ok: false, hata: { tur: 'istek', mesaj: e.message } }); }
+    try { ist = istekKur(p.kullanim, p.baglam, p.soru, p.sema); } catch(e){ return Promise.resolve({ ok: false, hata: { tur: 'istek', mesaj: e.message } }); }
     var ac = (typeof AbortController === 'function') ? new AbortController() : null;
     var zmn = ac ? setTimeout(function(){ ac.abort(); }, ZAMAN_ASIMI) : null;
     return fetch(API, { method: 'POST', signal: ac ? ac.signal : undefined, headers: {
@@ -29512,7 +29744,7 @@ window.BM_AI = (function(){
           }
           durumYaz({ durum: 'ok', ts: Date.now(), mesaj: 'Son istek başarılı' });
           var c = cevapCoz(j);
-          return { ok: true, cevap: c.cevap, kaynak: c.kaynak, bayraklar: c.bayraklar,
+          return { ok: true, cevap: c.cevap, kaynak: c.kaynak, bayraklar: c.bayraklar, veri: c.veri,
             maliyet: maliyet(ist.modelKey, j && j.usage), model: MODEL[ist.modelKey].id, istekId: istekId };
         });
       }, function(e){
@@ -29538,7 +29770,7 @@ window._bmAiKartHTML = function(){
   if (!k) durumSatir = '<div class="bm-ai-durum" data-durum="yok" style="font-size:12px;color:var(--metin-soluk)">🔑 Anahtar girilmedi — AI özellikleri kapalı.</div>';
   else if (d && d.durum === 'gecersiz') durumSatir = '<div class="bm-ai-durum" data-durum="gecersiz" style="font-size:12px;color:#b3261e;font-weight:600">⚠️ Kayıtlı anahtar ('+esc(A.sonDort(k))+') REDDEDİLDİ (401). Anahtarı kontrol et ya da yenisini gir.</div>';
   else if (d && d.durum === 'hesap') durumSatir = '<div class="bm-ai-durum" data-durum="hesap" style="font-size:12px;color:#8a5a00;font-weight:600">⚠️ Anahtar ('+esc(A.sonDort(k))+') geçerli ama HESAP/KREDİ durumu istekleri engelliyor ('+esc(d.mesaj)+') — kod hatası değil. console.anthropic.com ▸ Billing.</div>';
-  else durumSatir = '<div class="bm-ai-durum" data-durum="'+esc((d && d.durum) || 'kayitli')+'" style="font-size:12px;color:var(--metin-soluk)">🔑 Anahtar kayıtlı: '+esc(A.sonDort(k))+((d && d.durum === 'ok') ? ' · son istek başarılı' : ' · henüz doğrulanmadı — bağlantı testini çalıştır')+'</div>';
+  else durumSatir = '<div class="bm-ai-durum" data-durum="'+esc((d && d.durum) || 'kayitli')+'" style="font-size:12px;color:var(--metin-soluk)">🔑 Anahtar kayıtlı: '+esc(A.sonDort(k))+((d && d.durum === 'ok') ? ' · ✓ doğrulandı' : ' · henüz doğrulanmadı — bağlantı testini çalıştır')+'</div>';
   return '<div class="bm-ayar-kart" id="bm-ai-kart">'+
     '<div class="bm-ayar-kart-baslik">🤖 AI özellikleri <small style="font-weight:400;color:var(--metin-soluk)">(deneysel · kendi anahtarınla)</small></div>'+
     '<div class="bm-ai-uyari" style="font-size:12px;line-height:1.5;padding:8px 10px;border:1px solid var(--cizgi-arac);border-radius:8px;background:var(--bg2);margin-bottom:8px">'+
@@ -29588,6 +29820,8 @@ window.bmAiBaglantiTesti = function(){
   return window.BM_AI.sor({ kullanim: 'tani', baglam: baglam, soru: 'Tabloya göre Citra\'nın alfa asidi yüzde kaç?' }).then(function(r){
     if (btn) btn.disabled = false;
     if (!r.ok) { try { render(); } catch(_e){} hata(r.hata); return r; } // önce durum satırı tazelenir, SONRA hata yeni kutuya yazılır
+    var _ds = document.querySelector('#bm-ai-kart .bm-ai-durum'); // BX4: eski "henüz doğrulanmadı" metni kalmasın
+    if (_ds) { _ds.dataset.durum = 'ok'; _ds.textContent = '🔑 Anahtar kayıtlı: ' + window.BM_AI.sonDort(window.BM_AI.anahtarAl()) + ' · ✓ doğrulandı'; }
     var m = r.maliyet;
     var bayrakHTML = r.bayraklar.map(function(b){ return '<div class="bm-ai-bayrak" data-tip="'+esc(b.tip)+'" style="color:#8a5a00;margin-top:4px">⚠️ '+esc(b.mesaj)+'</div>'; }).join('');
     yaz('<div class="bm-ai-cevap" style="font-size:12px;line-height:1.5;margin-top:8px;padding:8px 10px;border-radius:8px;border:1px solid var(--cizgi-arac);background:var(--bg-card)">'+

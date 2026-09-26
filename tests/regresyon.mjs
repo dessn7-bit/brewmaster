@@ -7345,6 +7345,164 @@ const CASELER = [
       window.fetch = eskiFetch; A.anahtarSil(); ekran = 'ana'; render();
       return __REG.al();
     })
+  },
+
+  // ── SPRINT BX — ikame paneli: MUADIL tablosu (deterministik, kaynaklı) GÖRÜNÜR + isteğe bağlı AI sıralama/açıklama.
+  //    fetch SAHTE (test ağı kapalı). AI yeni malzeme ÖNERMEZ; uygulama TEK yol muadilSec.
+  {
+    kod: 'BX1-GIRIS', ad: 'GÖRÜNÜRLÜK (asıl sorun: Kaan özelliği bulamadı, "yok" sandı): HER malt ve hop satırında "🔁 Yoksa ne kullanırım?" düğmesi (adayı olmayan satırda da — dürüst "yok" cevabına ulaşılsın), maya kartında aynı düğme; muadil çipleri artık toast DEĞİL, paneli o adayın önizlemesiyle açıyor; panel yalnız AYNI katalogdan MUADIL adaylarını listeliyor, farklı türdekileri ayrıca sayıyor',
+    calistir: (page) => page.evaluate(() => {
+      yeniTarif(); S.stil = 'German Pils'; S.maltlar = [{ id: 'pilsner', kg: 4.5 }, { id: 'best_wheat', kg: 0.3 }]; S.hoplar = [{ id: 'hrtau', g: 30, dk: 60, tur: 'boil' }, { id: 'hrtau', g: 15, dk: 15, tur: 'boil' }]; S.mayaId = 'w3470';
+      setSekme('malt'); render();
+      const mb = [...document.querySelectorAll('.bm-ikame-btn[data-kat="malt"]')];
+      __REG.ok('her malt satırında düğme (MUADIL kaydı OLMAYAN best_wheat dahil): 2/2', mb.length === 2 && mb.every(b => /Yoksa ne kullanırım/.test(b.textContent)), mb.length);
+      setSekme('hop'); render();
+      const hb = [...document.querySelectorAll('.bm-ikame-btn[data-kat="hop"]')];
+      __REG.ok('her hop satırında düğme: 2/2', hb.length === 2, hb.length);
+      __REG.ok('düğme 44 px dokunma hedefi', hb[0].getBoundingClientRect().height >= 44, Math.round(hb[0].getBoundingClientRect().height));
+      const cip = document.querySelectorAll('[data-bm-muadil-hop]')[1].querySelector('.bm-muadil-inline-chip');
+      __REG.ok('muadil çipi artık toast değil, paneli açıyor', /bmIkameAc\('hop',1,this\.dataset\.muadilId\)/.test(cip.getAttribute('onclick')), cip.getAttribute('onclick'));
+      cip.click();
+      __REG.ok('çip → panel açıldı, o adayın önizlemesi AÇIK', !!document.getElementById('bmIkame') && !!document.querySelector('#bmIkame .bm-ikame-onizleme[data-id="' + cip.dataset.muadilId + '"] .bm-ikame-onizleme-ic'));
+      const ids = [...document.querySelectorAll('#bmIkame .bm-ikame-aday')].map(e => e.dataset.id);
+      const bek = MUADIL.hrtau.filter(x => HOPLAR.some(h => h && h.id === x.id)).map(x => x.id);
+      __REG.ok('panel = MUADIL.hrtau adayları, tablo sırasıyla, katalog dışı YOK', JSON.stringify(ids) === JSON.stringify(bek) && ids.every(id => HOPLAR.some(h => h && h.id === id)), ids.join(','));
+      bmIkameKapat();
+      __REG.ok('Esc/kapat paneli kaldırıyor', !document.getElementById('bmIkame'));
+      setSekme('maya'); render();
+      const my = document.querySelector('.bm-ikame-btn[data-kat="maya1"]');
+      __REG.ok('maya kartında düğme var', !!my);
+      my.click();
+      const mIds = [...document.querySelectorAll('#bmIkame .bm-ikame-aday')].map(e => e.dataset.id);
+      __REG.ok('maya paneli = MUADIL.w3470 maya adayları', mIds.length > 0 && JSON.stringify(mIds) === JSON.stringify(MUADIL.w3470.filter(x => MAYALAR.some(m => m && m.id === x.id)).map(x => x.id)), mIds.join(','));
+      bmIkameKapat();
+      const acid = (() => { S.maltlar = [{ id: 'acid', kg: 0.1 }]; return window._bmIkameAdaylar('malt', 0); })();
+      __REG.ok('farklı türdeki karşılık (acid → laktik, mineral) aday DEĞİL, ayrıca sayılıyor', acid.adaylar.length === 0 && acid.farkliTur.length === 1, JSON.stringify(acid.farkliTur));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BX2-YOK', ad: 'UYDURMA YOK: aynı katalogda adayı olmayan malzeme (best_wheat: tabloda kayıt yok · acid: yalnız farklı tür) → "katalogda yakın alternatif yok … uydurma öneri gösterilmez"; AI düğmesi YOK ve AI çağrılamıyor (sıralanacak aday yok → istek atılmaz)',
+    calistir: (page) => page.evaluate(async () => {
+      const A = window.BM_AI; A.anahtarSil(); A.anahtarKaydet('sk-ant-api03-TESTANAHTAR-BX2-abcdefghijklmnop');
+      let cagri = 0; const eskiFetch = window.fetch; window.fetch = (u, o) => { if (String(u).indexOf('api.anthropic.com') < 0) return eskiFetch(u, o); cagri++; return Promise.reject(new TypeError('olmamalı')); }; // yalnız Anthropic sayılır
+      yeniTarif(); S.maltlar = [{ id: 'best_wheat', kg: 0.3 }, { id: 'acid', kg: 0.1 }]; setSekme('malt'); render();
+      bmIkameAc('malt', 0);
+      const y1 = document.querySelector('#bmIkame .bm-ikame-yok');
+      __REG.ok('best_wheat → "katalogda yakın alternatif yok" + "uydurma öneri gösterilmez"', !!y1 && /katalogda yakın alternatif yok/.test(y1.textContent) && /Uydurma öneri gösterilmez/.test(y1.textContent));
+      __REG.ok('AI düğmesi YOK', !document.getElementById('bmIkameAiBtn'));
+      const r = await window.bmIkameAiSirala();
+      __REG.ok('bmIkameAiSirala → null, fetch HİÇ çağrılmadı', r === null && cagri === 0, cagri);
+      bmIkameKapat(); bmIkameAc('malt', 1);
+      const y2 = document.querySelector('#bmIkame .bm-ikame-yok');
+      __REG.ok('acid → "yok" + farklı türdeki 1 karşılık adıyla (Laktik Asit) belirtiliyor, uygulanabilir sunulmuyor', !!y2 && /farklı türde 1 karşılık/.test(y2.textContent) && /Laktik/.test(y2.textContent) && !document.querySelector('#bmIkame .bm-ikame-onizle-btn'));
+      bmIkameKapat(); window.fetch = eskiFetch; A.anahtarSil();
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BX3-AI', ad: 'AI İSTEĞE BAĞLI + DİSİPLİNLİ: anahtar yok / çevrimdışı → liste AI\'sız çalışır, neden yazılır, istek YOK; anahtarla → Haiku 4.5, max_tokens 1200, bağlam = stil + BJCP bantları + mevcut hesap + malzeme listesi + değişecek malzeme + adaylar (kaynaklı); yanıt şemasında id aday listesine ENUM ile kilitli; istemci doğrulaması aday dışını ATAR, tekrarı teker, sıralanmayanı sona ekler; neden + kaynak + maliyet görünür; yasak kelime ve hesap hatası işaretlenir',
+    calistir: (page) => page.evaluate(async () => {
+      const A = window.BM_AI; A.anahtarSil();
+      let cagri = 0, govde = null, yanit = null; const eskiFetch = window.fetch;
+      window.fetch = (u, o) => { if (String(u).indexOf('api.anthropic.com') < 0) return eskiFetch(u, o); cagri++; govde = JSON.parse(o.body); return Promise.resolve(yanit()); }; // yalnız Anthropic sayılır
+      yeniTarif(); S.stil = 'German Pils'; S.maltlar = [{ id: 'pilsner', kg: 4.5 }]; S.hoplar = [{ id: 'hrtau', g: 30, dk: 60, tur: 'boil' }]; S.mayaId = 'w3470';
+      setSekme('hop'); render();
+      bmIkameAc('hop', 0);
+      const kap = document.querySelector('#bmIkame .bm-ikame-ai-kapali');
+      __REG.ok('anahtar YOK → "Sıralama/açıklama kapalı" + nedeni + liste tablo sırasıyla GÖRÜNÜR, AI düğmesi yok', !!kap && kap.dataset.neden === 'anahtar_yok' && document.querySelectorAll('#bmIkame .bm-ikame-aday').length === 3 && !document.getElementById('bmIkameAiBtn'));
+      bmIkameKapat();
+      A.anahtarKaydet('sk-ant-api03-TESTANAHTAR-BX3-abcdefghijklmnop');
+      Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false });
+      bmIkameAc('hop', 0);
+      __REG.ok('ÇEVRİMDIŞI → neden "cevrimdisi", liste görünür, istek YOK', (document.querySelector('#bmIkame .bm-ikame-ai-kapali') || {}).dataset.neden === 'cevrimdisi' && document.querySelectorAll('#bmIkame .bm-ikame-aday').length === 3 && cagri === 0);
+      delete navigator.onLine; bmIkameKapat();
+      // anahtarla: AI yanıtı — aday dışı id (cascade), tekrar (tradition), eksik (tettn), yasak kelime (ideal)
+      yanit = () => new Response(JSON.stringify({ content: [{ type: 'text', text: JSON.stringify({ siralama: [
+          { id: 'spalt', neden: 'Alman noble ailesi; alfa %5, önerilen 24 g ile IBU aynı kalır.' },
+          { id: 'cascade', neden: 'uydurma' }, { id: 'tradition', neden: 'Mittelfrüh soyu; alfa %5,5, miktar 21,8 g.' },
+          { id: 'tradition', neden: 'tekrar' }], not: 'Sıralama tablo notlarına ve alfa farkına göre; bu ideal bir seçim.', kaynak: 'tablo' }) }],
+        stop_reason: 'end_turn', usage: { input_tokens: 1864, output_tokens: 240 } }), { status: 200 });
+      bmIkameAc('hop', 0);
+      __REG.ok('anahtar varken AI düğmesi görünür (maliyet etiketiyle)', !!document.getElementById('bmIkameAiBtn') && /\$0,003–0,006/.test(document.getElementById('bmIkameAiBtn').textContent));
+      const r = await window.bmIkameAiSirala();
+      __REG.ok('istek: Haiku 4.5, max_tokens 1200, TEK çağrı', cagri === 1 && govde.model === 'claude-haiku-4-5' && govde.max_tokens === 1200, govde.model + '/' + govde.max_tokens);
+      const en = govde.output_config.format.schema.properties.siralama.items.properties.id.enum;
+      __REG.ok('şema: id ENUM = tam aday listesi (API katalog dışı id üretemez)', JSON.stringify(en) === JSON.stringify(['tradition', 'tettn', 'spalt']), JSON.stringify(en));
+      const v = govde.system[1].text;
+      __REG.ok('bağlam: stil + BJCP bantları + mevcut hesap + malt/hop/maya listesi', /stil German Pils · BJCP bantları OG 1.05-1.058, IBU 20-30, SRM 4-6/.test(v) && /Şu anki hesap: OG 1\.\d{3}, FG/.test(v) && /Maltlar: Pilsner Malt 4\.5 kg/.test(v) && /Maya: W-34\/70/.test(v), v.slice(0, 200));
+      __REG.ok('bağlam: değişecek malzeme alfa+miktar+süre+profil; 3 aday id + alfa + önerilen miktar + tablo notu', /DEĞİŞECEK MALZEME: Hallertau Mittelfrueh \(alfa %4\) · 30 g · 60 dk · profil:/.test(v) && /id=tradition \| Hallertau Tradition \| alfa %5\.5 \| aynı etki için önerilen miktar 21\.8 g \| tablo notu:/.test(v) && (v.match(/^- id=/gm) || []).length === 3);
+      const sira = [...document.querySelectorAll('#bmIkame .bm-ikame-aday')].map(e => e.dataset.id);
+      __REG.ok('istemci doğrulaması: sıra spalt, tradition (tekrar teklendi), tettn sona (AI sıralamadı); cascade ATILDI', JSON.stringify(sira) === JSON.stringify(['spalt', 'tradition', 'tettn']) && JSON.stringify(r.dogrulama.disari) === '["cascade"]' && JSON.stringify(r.dogrulama.eksik) === '["tettn"]', sira.join(',') + ' / ' + JSON.stringify(r.dogrulama));
+      const kutu = document.getElementById('bmIkameAi');
+      __REG.ok('işaretler: katalog dışı atıldı + sıralanmayan + yasak kelime (ideal)', !!kutu.querySelector('[data-tip="katalog_disi"]') && !!kutu.querySelector('[data-tip="eksik_sira"]') && /ideal/.test((kutu.querySelector('[data-tip="yasak"]') || {}).textContent || ''));
+      __REG.ok('neden metni aday altında (🤖), tablo notu korunuyor (📋)', /Alman noble ailesi/.test(document.querySelector('#bmIkame .bm-ikame-aday[data-id="spalt"] .bm-ikame-neden').textContent) && !!document.querySelector('#bmIkame .bm-ikame-aday[data-id="spalt"] .bm-ikame-fark'));
+      __REG.ok('kaynak 📋 tablo + maliyet satırı (1864 giriş + 240 çıkış, $0.00306)', /📋 tablo/.test(kutu.textContent) && /1864 giriş \+ 240 çıkış token · ≈ \$0\.00306/.test(kutu.textContent), kutu.textContent.slice(-90));
+      // kredi hatası: liste AYAKTA, hesap mesajı
+      bmIkameKapat(); bmIkameAc('hop', 0);
+      yanit = () => new Response('{"type":"error","error":{"type":"invalid_request_error","message":"Your credit balance is too low to access the Anthropic API."}}', { status: 400 });
+      await window.bmIkameAiSirala();
+      const hk = document.querySelector('#bmIkameAi .bm-ai-hata');
+      __REG.ok('kredi yok → "kod hatası DEĞİL" + liste tablo sırasıyla geçerli, 3 aday hâlâ görünür', !!hk && hk.dataset.tur === 'hesap' && /kod hatası DEĞİL/.test(hk.textContent) && /liste tablo sırasıyla geçerli/.test(hk.textContent) && document.querySelectorAll('#bmIkame .bm-ikame-aday').length === 3);
+      bmIkameKapat(); window.fetch = eskiFetch; A.anahtarSil();
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BX4-UYGULA', ad: 'UYGULAMA TEK YOL (muadilSec) + ÖNİZLEME = GERÇEK: önizleme S\'yi DEĞİŞTİRMEZ; önizlenen OG/IBU/SRM uygulama sonrası calc() ile BİREBİR aynı; aynı hop iki satırdaysa YALNIZ seçilen satır değişir (eski muadilSec ilkini değiştirirdi) ve uyarı gösterilir; hop miktarı alfa oranıyla (elle alfa cAA varsa o); malt GU oranıyla; elle OG temizlenir ve uyarılır; Geri al tam geri döner; idx\'siz eski çağrı (stok bölümü) davranışı AYNEN',
+    calistir: (page) => page.evaluate(() => {
+      yeniTarif(); S.stil = 'German Pils'; S.hacim = 20; S.maltlar = [{ id: 'pilsner', kg: 4.5 }, { id: 'c40', kg: 0.3 }]; S.hoplar = [{ id: 'hrtau', g: 30, dk: 60, tur: 'boil' }, { id: 'hrtau', g: 15, dk: 15, tur: 'boil', cAA: 5 }]; S.mayaId = 'w3470';
+      setSekme('hop'); render();
+      const once = JSON.stringify(S);
+      bmIkameAc('hop', 1);
+      const trad = _bmIkame.adaylar.find(a => a.id === 'tradition');
+      __REG.ok('hop miktarı: elle alfa 5 ile 15 g × 5 / 5,5 = 13,6 g', trad.mik === 13.6, trad.mik);
+      const p = bmIkameOnizleGoster('tradition');
+      __REG.ok('önizleme S\'yi DEĞİŞTİRMEDİ', JSON.stringify(S) === once);
+      __REG.ok('önizleme uyarısı: bu malzeme 2 satırda, yalnız BU satır', !!document.querySelector('#bmIkame .bm-ikame-cift'));
+      bmIkameUygula('tradition');
+      const c = calc();
+      __REG.ok('YALNIZ 2. satır değişti (1. hrtau aynen), 13,6 g, cAA sıfırlandı', S.hoplar[0].id === 'hrtau' && S.hoplar[0].g === 30 && S.hoplar[1].id === 'tradition' && S.hoplar[1].g === 13.6 && S.hoplar[1].cAA === null);
+      __REG.ok('ÖNİZLEME = GERÇEK: OG/IBU/SRM/FG birebir', Math.abs(p.sonra.og - c.og) < 1e-12 && Math.abs(p.sonra.ibu - c.ibu) < 1e-9 && Math.abs(p.sonra.srm - c.srm) < 1e-9 && Math.abs(p.sonra.fg - c.fg) < 1e-12, p.sonra.ibu + ' / ' + c.ibu);
+      __REG.ok('panel "uygulandı" + Geri al düğmesi', (document.querySelector('#bmIkame .bm-ikame-sonuc') || {}).dataset.durum === 'uygulandi' && /Geri al/.test(document.querySelector('#bmIkame .bm-ikame-sonuc').textContent));
+      muadilGeriAl(); bmIkameKapat();
+      __REG.ok('Geri al: S tam önceki hal', JSON.stringify(S) === once);
+      // malt: GU oranı + elle OG temizliği
+      S.ogManuel = 1.060; render();
+      bmIkameAc('malt', 1);
+      const a0 = _bmIkame.adaylar[0], src = MALTLAR.find(m => m.id === 'c40');
+      __REG.ok('malt miktarı GU oranıyla: 0,3 × GU(c40) / GU(aday)', a0.mik === +(0.3 * src.gu / a0.kayit.gu).toFixed(2), a0.id + ' ' + a0.mik);
+      const pm = bmIkameOnizleGoster(a0.id);
+      __REG.ok('elle OG varken önizleme uyarır ve hesap-sonrası değeri gösterir', pm.manuelTemizlenir && /Elle girilmiş OG\/FG temizlenecek/.test(document.querySelector('#bmIkame .bm-ikame-onizleme-ic').textContent));
+      bmIkameUygula(a0.id);
+      __REG.ok('uygulama elle OG\'yi temizledi (muadilSec davranışı) ve OG önizlemeyle aynı', S.ogManuel === null && Math.abs(calc().og - pm.sonra.og) < 1e-12);
+      muadilGeriAl(); bmIkameKapat();
+      __REG.ok('geri al elle OG\'yi de geri getirdi', S.ogManuel === 1.06);
+      // eski yol (stok kontrol bölümü): idx YOK → ilk eşleşen, davranış aynen
+      S.ogManuel = null;
+      muadilSec({ dataset: { src: 'hrtau', tgt: 'spalt', kat: 'hop', mik: '24', birim: 'g' } });
+      __REG.ok('idx\'siz muadilSec (stok bölümü) → İLK hrtau satırı değişir (eski davranış korunur)', S.hoplar[0].id === 'spalt' && S.hoplar[0].g === 24 && S.hoplar[1].id === 'hrtau');
+      muadilGeriAl();
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BX5-DOGRULANDI', ad: 'BX4 (BW kozmetiği): bağlantı testi BAŞARILI olunca üstteki durum satırı yerinde "✓ doğrulandı" olur — eski "henüz doğrulanmadı — bağlantı testini çalıştır" metni KALMAZ; sayfa yeniden açılınca da "✓ doğrulandı"',
+    calistir: (page) => page.evaluate(async () => {
+      const A = window.BM_AI; A.anahtarSil(); A.anahtarKaydet('sk-ant-api03-TESTANAHTAR-BX5-abcdefghijklmnop');
+      ekran = 'ayarlar'; render();
+      const dur = () => document.querySelector('#bm-ai-kart .bm-ai-durum');
+      __REG.ok('test öncesi: "henüz doğrulanmadı"', /henüz doğrulanmadı/.test(dur().textContent));
+      const eskiFetch = window.fetch;
+      window.fetch = () => Promise.resolve(new Response(JSON.stringify({ content: [{ type: 'text', text: '{"cevap":"Citra %12.","kaynak":"tablo"}' }], stop_reason: 'end_turn', usage: { input_tokens: 677, output_tokens: 31 } }), { status: 200 }));
+      await window.bmAiBaglantiTesti();
+      __REG.ok('test sonrası: "✓ doğrulandı", eski metin YOK, sonuç kutusu duruyor', /✓ doğrulandı/.test(dur().textContent) && !/henüz doğrulanmadı/.test(dur().textContent) && dur().dataset.durum === 'ok' && /Citra %12/.test(document.getElementById('bm-ai-test-sonuc').textContent), dur().textContent);
+      __REG.ok('Kaan\'ın ölçümüyle maliyet: 677+31 token → $0.00083', /677 giriş \+ 31 çıkış token · ≈ \$0\.00083/.test(document.getElementById('bm-ai-test-sonuc').textContent));
+      render();
+      __REG.ok('yeniden çizimde de "✓ doğrulandı"', /✓ doğrulandı/.test(dur().textContent));
+      window.fetch = eskiFetch; A.anahtarSil(); ekran = 'ana'; render();
+      return __REG.al();
+    })
   }
 ];
 
