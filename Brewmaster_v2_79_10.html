@@ -33278,6 +33278,8 @@ if ('serviceWorker' in navigator) {
     // Sayfa acilisinda controller VAR MIYDI? Yoksa bu ilk kurulumdur -> asla reload etme.
     var _ilkCtrl = !!navigator.serviceWorker.controller;
     var _reg = null, _sonKontrol = 0, _yenilendi = false;
+    // Sprint BY: yeni SW devraldı ama kalkan yüzünden yenilenemedi → sayfa ESKİ HTML'de. Güvenli ilk anda yenilenir.
+    var _bekleyenGuncelleme = false;
 
     // ── VERI KORUMA (AQ1/AU1 kalicilik disiplini): acik is varken ZORLA yenileme YOK ──
     function _guvenliMi(){
@@ -33331,7 +33333,7 @@ if ('serviceWorker' in navigator) {
       var by = document.getElementById('bmYeniSurumYenile');
       var bk = document.getElementById('bmYeniSurumKapat');
       if (by) by.onclick = function(){ _stormIsaretle(); _yenilendi = true; location.reload(); };
-      if (bk) bk.onclick = function(){ try{ d.remove(); }catch(_e){} };
+      if (bk) bk.onclick = function(){ try{ d.remove(); }catch(_e){} }; // BY: kapatmak güncellemeyi İPTAL ETMEZ — bekleyen kalır, sonraki dönüşte yeniden sorulur
     }
 
     // ── Yeni SW devraldi: yenile ya da bildir ──
@@ -33347,11 +33349,27 @@ if ('serviceWorker' in navigator) {
         console.log('[BM SW] yeni surum — otomatik yenileniyor');
         location.reload();
       } else {
-        console.log('[BM SW] yeni surum hazir ama acik is/kalkan var — banner gosteriliyor');
+        console.log('[BM SW] yeni surum hazir ama acik is/kalkan var — banner gosteriliyor (bekleyen)');
+        _bekleyenGuncelleme = true;
         _bannerGoster();
       }
     }
     navigator.serviceWorker.addEventListener('controllerchange', _devralindi);
+
+    // Sprint BY: BEKLEYEN güncellemeyi güvenli ilk anda uygula. Kalkanlar AYNEN (_guvenliMi + _stormOk): brewday/timer,
+    // açık dialog, odaklı giriş, açık editör → yenileme YOK. bannerTekrar: yalnız kullanıcı uygulamaya DÖNDÜĞÜNDE
+    // (resume/focus) banner yeniden gösterilir; periyodik kontrol banner'la rahatsız etmez.
+    function _bekleyeniDene(bannerTekrar){
+      if (!_bekleyenGuncelleme || _yenilendi) return;
+      if (_guvenliMi() && _stormOk()) {
+        _yenilendi = true; _stormIsaretle();
+        console.log('[BM SW] bekleyen surum — guvenli an, otomatik yenileniyor');
+        location.reload();
+      } else if (bannerTekrar) {
+        _bannerGoster();
+      }
+    }
+    setInterval(function(){ if (document.visibilityState === 'visible') _bekleyeniDene(false); }, 20000);
 
     // ── Guncelleme kontrolu: acilis + RESUME + focus + periyodik (60sn throttle) ──
     function _kontrolEt(){
@@ -33363,10 +33381,11 @@ if ('serviceWorker' in navigator) {
     }
     // Android PWA/WebView RESUME yolu — asil duzeltme bu satir.
     document.addEventListener('visibilitychange', function(){
-      if (document.visibilityState === 'visible') _kontrolEt();
+      if (document.visibilityState === 'visible') { _kontrolEt(); _bekleyeniDene(true); }
     });
-    window.addEventListener('focus', _kontrolEt);
-    window.addEventListener('pageshow', _kontrolEt);   // bfcache'ten geri donus
+    window.addEventListener('focus', function(){ _kontrolEt(); _bekleyeniDene(true); });
+    window.addEventListener('pageshow', function(){ _kontrolEt(); _bekleyeniDene(true); });   // bfcache'ten geri donus
+    window._bmSwBekleyen = function(){ return _bekleyenGuncelleme; }; // tanı/test
     setInterval(function(){ if (document.visibilityState === 'visible') _kontrolEt(); }, 15*60*1000);
 
     window.addEventListener('load', function(){
