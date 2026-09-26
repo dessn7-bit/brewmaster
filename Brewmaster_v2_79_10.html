@@ -4131,75 +4131,75 @@ window.beerXmlExport=beerXmlExport;
 
 // ═══ VERİ TABANLARI ═══════════════════════════════════════
 const MALTLAR=[
-  {id:"pale_ale",ad:"Pale Ale Malt",gu:304,r:3,g:"Base",mo:"Weyermann, Crisp, Simpsons, Hitit (yerli)"},
-  {id:"pilsner",ad:"Pilsner Malt",gu:310,r:2,g:"Base",mo:"Weyermann, BestMalz, Hitit (yerli)",bufKap:34},
-  {id:"maris",ad:"Maris Otter",gu:316,r:3,g:"Base",mo:"Crisp, Simpsons, Fawcett, Muntons",bufKap:51},
+  {id:"pale_ale",ad:"Pale Ale Malt",gu:304,r:3,g:"Base",mo:"Weyermann, Crisp, Simpsons, Hitit (yerli)",alias:["pale ale","pale malt","british pale","english pale","pale ale malz","crisp pale ale malt"]},
+  {id:"pilsner",ad:"Pilsner Malt",gu:310,r:2,g:"Base",mo:"Weyermann, BestMalz, Hitit (yerli)",bufKap:34,alias:["pilsen malt","pilsner malz","german pilsner","pilsen","pilsner"]},
+  {id:"maris",ad:"Maris Otter",gu:316,r:3,g:"Base",mo:"Crisp, Simpsons, Fawcett, Muntons",bufKap:51,alias:["maris otter pale","maris otter malt","marris otter","warminster floor-malted maris otter"]},
   {id:"bel_pils",ad:"Belgian Pilsner",gu:305,r:2,g:"Base",mo:"Castle, Dingemans"},
-  {id:"wheat",ad:"Buğday Maltı",gu:315,r:2,g:"Base",mo:"Weyermann, BestMalz, Muntons, Hitit (yerli)"},
-  {id:"dark_wheat",ad:"Koyu Buğday Maltı",gu:311,r:7,g:"Base",mo:"Weyermann"},
-  {id:"munich",ad:"Munich Malt",gu:300,r:6,g:"Base",mo:"Weyermann, BestMalz, Hitit (yerli 6L)"},
-  {id:"dark_munich",ad:"Munich Dark (Aroma)",gu:300,r:9,g:"Base",mo:"Weyermann"},
-  {id:"vienna",ad:"Vienna Malt",gu:304,r:3,g:"Base",mo:"Weyermann, BestMalz, Muntons, Hitit (yerli)"},
-  {id:"rye",ad:"Çavdar Maltı",gu:311,r:3,g:"Base",mo:"Weyermann, Simpsons, Muntons, Hitit (yerli)"},
-  {id:"smoked",ad:"İsli Malt — Kayın (Beech)",gu:296,r:3,g:"Base",mo:"Weyermann, Viking Malt (Polonya VK), Hitit (yerli)"},
+  {id:"wheat",ad:"Buğday Maltı",gu:315,r:2,g:"Base",mo:"Weyermann, BestMalz, Muntons, Hitit (yerli)",alias:["white wheat","wheat malt, white","white wheat malt","pale wheat malt","wheat malt","malted wheat","red wheat","wheat, red","german wheat","weizenmalz hell"]},
+  {id:"dark_wheat",ad:"Koyu Buğday Maltı",gu:311,r:7,g:"Base",mo:"Weyermann",alias:["dark wheat"]},
+  {id:"munich",ad:"Munich Malt",gu:300,r:6,g:"Base",mo:"Weyermann, BestMalz, Hitit (yerli 6L)",alias:["german munich","munich"]},
+  {id:"dark_munich",ad:"Munich Dark (Aroma)",gu:300,r:9,g:"Base",mo:"Weyermann",alias:["munich type ii","dark munich"]},
+  {id:"vienna",ad:"Vienna Malt",gu:304,r:3,g:"Base",mo:"Weyermann, BestMalz, Muntons, Hitit (yerli)",alias:["wiener malz","german vienna","vienna"]},
+  {id:"rye",ad:"Çavdar Maltı",gu:311,r:3,g:"Base",mo:"Weyermann, Simpsons, Muntons, Hitit (yerli)",alias:["rye malt","malted rye","rye"]},
+  {id:"smoked",ad:"İsli Malt — Kayın (Beech)",gu:296,r:3,g:"Base",mo:"Weyermann, Viking Malt (Polonya VK), Hitit (yerli)",alias:["smoked malt","german rauch smoked"]},
   {id:"smoked_oak",ad:"İsli Buğday — Meşe (Oak Wheat)",gu:311,r:2,g:"Base",mo:"Weyermann"},
-  {id:"oat",ad:"Yulaf (Flaked Oats)",gu:269,r:2,g:"Adjunct",mo:"Herhangi",bufKap:48.2},
-  {id:"oat_malt",ad:"Yulaf Maltı",gu:270,r:2,g:"Adjunct",mo:"Simpsons, Crisp"},
+  {id:"oat",ad:"Yulaf (Flaked Oats)",gu:269,r:2,g:"Adjunct",mo:"Herhangi",bufKap:48.2,alias:["flaked oats","oat flakes","rolled oats","quaker quick oats","haferflocken"]},
+  {id:"oat_malt",ad:"Yulaf Maltı",gu:270,r:2,g:"Adjunct",mo:"Simpsons, Crisp",alias:["oat malt"]},
   {id:"fawcett_oat",ad:"Fawcett Oat Malt",gu:231,r:3,g:"Adjunct",mo:"Thomas Fawcett"},
   {id:"fawcett_mild",ad:"Fawcett Mild Ale Malt",gu:308,r:4,g:"Base",mo:"Thomas Fawcett"},
-  {id:"rwh",ad:"Ham Buğday (Unmalted)",gu:296,r:2,g:"Adjunct",mo:"Herhangi"},
+  {id:"rwh",ad:"Ham Buğday (Unmalted)",gu:296,r:2,g:"Adjunct",mo:"Herhangi",alias:["raw wheat"]},
   {id:"torr_wh",ad:"Torrified Wheat",gu:308,r:3,g:"Adjunct",mo:"Crisp, Simpsons"},
-  {id:"fbar",ad:"Arpa (Flaked Barley)",gu:269,r:2,g:"Adjunct",mo:"Herhangi",bufKap:51.8},
-  {id:"corn",ad:"Mısır (Flaked Corn)",gu:323,r:1,g:"Adjunct",mo:"Herhangi",bufKap:9.6},
+  {id:"fbar",ad:"Arpa (Flaked Barley)",gu:269,r:2,g:"Adjunct",mo:"Herhangi",bufKap:51.8,alias:["flaked barley","barley, flaked"]},
+  {id:"corn",ad:"Mısır (Flaked Corn)",gu:323,r:1,g:"Adjunct",mo:"Herhangi",bufKap:9.6,alias:["flaked corn","corn, flaked"]},
   {id:"rice",ad:"Pirinç Kabuğu",gu:0,r:0,g:"Adjunct",mo:"—"},
-  {id:"rice_flaked",ad:"Pirinç (Flaked Rice)",gu:315,r:1,g:"Adjunct",mo:"Herhangi"},
-  {id:"dex",ad:"Dekstroz (Monohydrate)",gu:350,r:0,g:"Şeker",mo:"Herhangi"},
-  {id:"sek",ad:"Beyaz Şeker",gu:384,r:0,g:"Şeker",mo:"Herhangi"},
-  {id:"lak",ad:"Laktoz (fermente olmaz)",gu:367,r:0,g:"Şeker",mo:"Herhangi"},
-  {id:"bal",ad:"Bal",gu:290,r:2,g:"Şeker",mo:"Herhangi (Akasya, Çiçek, Kestane)"},
+  {id:"rice_flaked",ad:"Pirinç (Flaked Rice)",gu:315,r:1,g:"Adjunct",mo:"Herhangi",alias:["flaked rice","rice, flaked"]},
+  {id:"dex",ad:"Dekstroz (Monohydrate)",gu:350,r:0,g:"Şeker",mo:"Herhangi",alias:["corn sugar (dextrose)","dextrose (corn sugar)","corn sugar","dextrose"]},
+  {id:"sek",ad:"Beyaz Şeker",gu:384,r:0,g:"Şeker",mo:"Herhangi",alias:["cane sugar","sugar, table (sucrose)","sucrose (table sugar)","table sugar","white sugar"]},
+  {id:"lak",ad:"Laktoz (fermente olmaz)",gu:367,r:0,g:"Şeker",mo:"Herhangi",alias:["lactose (milk sugar)","milk sugar (lactose)","lactose"]},
+  {id:"bal",ad:"Bal",gu:290,r:2,g:"Şeker",mo:"Herhangi (Akasya, Çiçek, Kestane)",alias:["honey","clover honey","orange blossom honey","honey, clover"]},
   {id:"candy_clr",ad:"Candi Şurup Clear (Simplicity)",gu:267,r:1,g:"Şeker",mo:"Candi Syrup Inc., Simplicity"},
   {id:"candy_amb",ad:"Candi Şurup Amber (D-90)",gu:267,r:90,g:"Şeker",mo:"Candi Syrup Inc., Simplicity"},
-  {id:"candy_drk",ad:"Candi Şurup Dark (D-180)",gu:267,r:180,g:"Şeker",mo:"Candi Syrup Inc., Simplicity"},
-  {id:"c20",ad:"Crystal 20 (Briess/Simpsons)",gu:293,r:20,g:"Özel",mo:"Briess, Simpsons"},
-  {id:"c40",ad:"Crystal 40 (Briess/Simpsons)",gu:293,r:40,g:"Özel",mo:"Briess, Simpsons"},
-  {id:"c60",ad:"Crystal 60 (Briess/Simpsons)",gu:296,r:60,g:"Özel",mo:"Briess, Simpsons"},
-  {id:"c80",ad:"Crystal 80 (Briess/Simpsons)",gu:289,r:80,g:"Özel",mo:"Briess, Simpsons"},
-  {id:"c120",ad:"Crystal 120 (Briess/Simpsons)",gu:285,r:120,g:"Özel",mo:"Briess, Simpsons"},
+  {id:"candy_drk",ad:"Candi Şurup Dark (D-180)",gu:267,r:180,g:"Şeker",mo:"Candi Syrup Inc., Simplicity",alias:["candi syrup d-180"]},
+  {id:"c20",ad:"Crystal 20 (Briess/Simpsons)",gu:293,r:20,g:"Özel",mo:"Briess, Simpsons",alias:["caramel malt 20l","crystal 20l"]},
+  {id:"c40",ad:"Crystal 40 (Briess/Simpsons)",gu:293,r:40,g:"Özel",mo:"Briess, Simpsons",alias:["caramel malt 40l","crystal 40l"]},
+  {id:"c60",ad:"Crystal 60 (Briess/Simpsons)",gu:296,r:60,g:"Özel",mo:"Briess, Simpsons",alias:["caramel malt 60l","caramel/crystal 60l","crystal 60l","2-row caramel malt 60l","british crystal 50-60l"]},
+  {id:"c80",ad:"Crystal 80 (Briess/Simpsons)",gu:289,r:80,g:"Özel",mo:"Briess, Simpsons",alias:["caramel malt 80l","crystal 80l","british crystal 70-80l","dark crystal 80l"]},
+  {id:"c120",ad:"Crystal 120 (Briess/Simpsons)",gu:285,r:120,g:"Özel",mo:"Briess, Simpsons",alias:["caramel malt 120l","crystal 120l"]},
   {id:"specb",ad:"Special B",gu:285,r:115,g:"Koyu",mo:"Dingemans, Castle"},
-  {id:"bisk",ad:"Bisküvi Malt",gu:295,r:25,g:"Özel",mo:"Dingemans (orijinal), Crisp, Pauls/Boortmalt"},
-  {id:"amber",ad:"Amber Malt",gu:277,r:30,g:"Özel",mo:"Crisp, Thomas Fawcett, Muntons",bufKap:35.5},
-  {id:"brown",ad:"Brown Malt",gu:273,r:65,g:"Koyu",mo:"Crisp, Simpsons, Muntons"},
-  {id:"carapils",ad:"Carapils / Dextrin",gu:285,r:2,g:"Özel",mo:"Briess, Weyermann"},
-  {id:"mel",ad:"Melanoidin Malt",gu:288,r:27,g:"Özel",mo:"Weyermann",bufKap:68.9},
+  {id:"bisk",ad:"Bisküvi Malt",gu:295,r:25,g:"Özel",mo:"Dingemans (orijinal), Crisp, Pauls/Boortmalt",alias:["biscuit md"]},
+  {id:"amber",ad:"Amber Malt",gu:277,r:30,g:"Özel",mo:"Crisp, Thomas Fawcett, Muntons",bufKap:35.5,alias:["crisp amber"]},
+  {id:"brown",ad:"Brown Malt",gu:273,r:65,g:"Koyu",mo:"Crisp, Simpsons, Muntons",alias:["crisp brown"]},
+  {id:"carapils",ad:"Carapils / Dextrin",gu:285,r:2,g:"Özel",mo:"Briess, Weyermann",alias:["carapils malt","cara-pils/dextrine","dextrine malt (cara-pils)","carapils"]},
+  {id:"mel",ad:"Melanoidin Malt",gu:288,r:27,g:"Özel",mo:"Weyermann",bufKap:68.9,alias:["melanoidin"]},
   {id:"thracian_ruby",ad:"Thracian Ruby Melanoidin Malt",gu:309,r:27,g:"Özel",mo:"Thracian Malt (Yunanistan)"},
   {id:"muntons_caramalt",ad:"Muntons Caramalt 30",gu:290,r:12,g:"Özel",mo:"Muntons",phc:"crystal"},
-  {id:"hml",ad:"Honey Malt (Gambrinus)",gu:308,r:20,g:"Özel",mo:"Gambrinus",bufKap:95.4},
-  {id:"acid",ad:"Acidulated Malt",gu:300,r:2,g:"Özel",mo:"Weyermann, Hitit (yerli)"},
-  {id:"victory",ad:"Victory / Special Roast (Briess)",gu:289,r:28,g:"Özel",mo:"Briess",phc:"amber_biscuit",bufKap:36.8},
-  {id:"aromatic",ad:"Aromatic Malt (Dingemans)",gu:304,r:20,g:"Base",mo:"Dingemans",bufKap:64.7},
-  {id:"choc",ad:"Chocolate Malt",gu:270,r:400,g:"Koyu",mo:"Crisp, Simpsons, Briess",phc:"chocolate"},
-  {id:"pale_choc",ad:"Pale Chocolate Malt",gu:273,r:225,g:"Koyu",mo:"Simpsons, Crisp",phc:"chocolate"},
-  {id:"crf1",ad:"Carafa I (Debittered)",gu:250,r:337,g:"Koyu",mo:"Weyermann",phc:"chocolate"},
-  {id:"crf2",ad:"Carafa II (Debittered)",gu:250,r:430,g:"Koyu",mo:"Weyermann",phc:"chocolate"},
-  {id:"crf3",ad:"Carafa Special III (Debittered)",gu:250,r:525,g:"Koyu",mo:"Weyermann",phc:"chocolate"},
+  {id:"hml",ad:"Honey Malt (Gambrinus)",gu:308,r:20,g:"Özel",mo:"Gambrinus",bufKap:95.4,alias:["honey malt"]},
+  {id:"acid",ad:"Acidulated Malt",gu:300,r:2,g:"Özel",mo:"Weyermann, Hitit (yerli)",alias:["acid malt","sauermalz"]},
+  {id:"victory",ad:"Victory / Special Roast (Briess)",gu:289,r:28,g:"Özel",mo:"Briess",phc:"amber_biscuit",bufKap:36.8,alias:["victory malt","american victory"]},
+  {id:"aromatic",ad:"Aromatic Malt (Dingemans)",gu:304,r:20,g:"Base",mo:"Dingemans",bufKap:64.7,alias:["aromatic","aromatic barley malt","aromatic (munich) malt"]},
+  {id:"choc",ad:"Chocolate Malt",gu:270,r:400,g:"Koyu",mo:"Crisp, Simpsons, Briess",phc:"chocolate",alias:["chocolate","american chocolate"]},
+  {id:"pale_choc",ad:"Pale Chocolate Malt",gu:273,r:225,g:"Koyu",mo:"Simpsons, Crisp",phc:"chocolate",alias:["pale chocolate"]},
+  {id:"crf1",ad:"Carafa I (Debittered)",gu:250,r:337,g:"Koyu",mo:"Weyermann",phc:"chocolate",alias:["carafa special i"]},
+  {id:"crf2",ad:"Carafa II (Debittered)",gu:250,r:430,g:"Koyu",mo:"Weyermann",phc:"chocolate",alias:["carafa special ii","de-husked caraf ii"]},
+  {id:"crf3",ad:"Carafa Special III (Debittered)",gu:250,r:525,g:"Koyu",mo:"Weyermann",phc:"chocolate",alias:["carafa special iii","de-husked caraf iii"]},
   {id:"roast",ad:"Roasted Barley",gu:235,r:500,g:"Koyu",mo:"Crisp, Simpsons, Hitit Kara Malt No:3 (yerli)",phc:"roasted_barley",bufKap:67.5},
-  {id:"black",ad:"Black Malt (Patent Malt)",gu:275,r:605,g:"Koyu",mo:"Crisp, Simpsons"},
-  {id:"midnight",ad:"Midnight Wheat",gu:270,r:550,g:"Koyu",mo:"Briess",phc:"chocolate"},
+  {id:"black",ad:"Black Malt (Patent Malt)",gu:275,r:605,g:"Koyu",mo:"Crisp, Simpsons",alias:["black malt"]},
+  {id:"midnight",ad:"Midnight Wheat",gu:270,r:550,g:"Koyu",mo:"Briess",phc:"chocolate",alias:["midnight wheat malt"]},
   // ── Weyermann Base ─────────────────────────────────────────
   {id:"barke",ad:"Barke Pilsner (Weyermann)",gu:310,r:2,g:"Base",mo:"Weyermann"},
   {id:"bohem_pils",ad:"Bohemian Pilsner (Weyermann)",gu:308,r:2,g:"Base",mo:"Weyermann (Bohemia CZ)"},
-  {id:"bohemian",ad:"Floor-Malted Bohemian Pilsner (Weyermann)",gu:304,r:2,g:"Base",mo:"Weyermann (floor-malted CZ)"},
-  {id:"munich_light",ad:"Munich Type 1 Light (Weyermann)",gu:300,r:6,g:"Base",mo:"Weyermann"},
-  {id:"spelt",ad:"Kavuzlu Buğday (Spelt/Dinkel)",gu:306,r:2,g:"Base",mo:"Weyermann"},
+  {id:"bohemian",ad:"Floor-Malted Bohemian Pilsner (Weyermann)",gu:304,r:2,g:"Base",mo:"Weyermann (floor-malted CZ)",alias:["floor-malted bohemian pilsner"]},
+  {id:"munich_light",ad:"Munich Type 1 Light (Weyermann)",gu:300,r:6,g:"Base",mo:"Weyermann",alias:["munich light","munich type i","münchner malz typ i"]},
+  {id:"spelt",ad:"Kavuzlu Buğday (Spelt/Dinkel)",gu:306,r:2,g:"Base",mo:"Weyermann",alias:["spelt"]},
   {id:"einkorn",ad:"Siyez Buğday (Einkorn)",gu:285,r:3,g:"Base",mo:"Bestmalz, özel üretim"},
   {id:"emmer",ad:"Emmer Buğday",gu:285,r:3,g:"Base",mo:"Bestmalz, özel üretim"},
-  {id:"smoked_peat",ad:"İsli Malt Torf (Peat Smoked)",gu:312,r:2,g:"Base",mo:"Simpsons, Thomas Fawcett"},
+  {id:"smoked_peat",ad:"İsli Malt Torf (Peat Smoked)",gu:312,r:2,g:"Base",mo:"Simpsons, Thomas Fawcett",alias:["peated malt"]},
   {id:"abbey_malt",ad:"Abbey Malt",gu:288,r:18,g:"Base",mo:"Weyermann, Dingemans, Castle"},
   // ── Crisp / Simpsons / Thomas Fawcett ──────────────────────
   {id:"maris_extra",ad:"Maris Otter Extra Pale (Crisp)",gu:316,r:2,g:"Base",mo:"Crisp"},
-  {id:"golden_promise",ad:"Golden Promise (Simpsons)",gu:312,r:2,g:"Base",mo:"Simpsons"},
-  {id:"pearl",ad:"Pearl Malt (Fawcett)",gu:310,r:3,g:"Base",mo:"Thomas Fawcett"},
-  {id:"halcyon",ad:"Halcyon Malt (Fawcett)",gu:316,r:3,g:"Base",mo:"Thomas Fawcett"},
+  {id:"golden_promise",ad:"Golden Promise (Simpsons)",gu:312,r:2,g:"Base",mo:"Simpsons",alias:["golden promise"]},
+  {id:"pearl",ad:"Pearl Malt (Fawcett)",gu:310,r:3,g:"Base",mo:"Thomas Fawcett",alias:["pearl"]},
+  {id:"halcyon",ad:"Halcyon Malt (Fawcett)",gu:316,r:3,g:"Base",mo:"Thomas Fawcett",alias:["halcyon"]},
   {id:"tipple",ad:"Tipple Malt (Simpsons)",gu:312,r:3,g:"Base",mo:"Simpsons"},
   {id:"lager_malt",ad:"Lager Malt (Crisp)",gu:314,r:2,g:"Base",mo:"Crisp"},
   {id:"extra_pale",ad:"Extra Pale Malt (Crisp)",gu:314,r:2,g:"Base",mo:"Crisp"},
@@ -4211,13 +4211,13 @@ const MALTLAR=[
   {id:"viking_vienna",ad:"Viking Vienna Malt",gu:304,r:4,g:"Base",mo:"Viking Malt"},
   {id:"viking_munich",ad:"Viking Munich Malt",gu:300,r:9,g:"Base",mo:"Viking Malt"},
   {id:"best_pale",ad:"Best Pale Ale (BestMalz)",gu:310,r:3,g:"Base",mo:"BestMalz"},
-  {id:"best_munich",ad:"Best Munich (BestMalz)",gu:310,r:6,g:"Base",mo:"BestMalz"},
+  {id:"best_munich",ad:"Best Munich (BestMalz)",gu:310,r:6,g:"Base",mo:"BestMalz",alias:["best malz munich"]},
   {id:"best_vienna",ad:"BEST Vienna (BestMalz)",gu:310,r:4,g:"Base",mo:"BestMalz"},
   {id:"best_munich_dark",ad:"BEST Munich Dark (BestMalz)",gu:308,r:11,g:"Base",mo:"BestMalz"},
   {id:"best_melano",ad:"BEST Melanoidin (BestMalz)",gu:288,r:27,g:"Base",mo:"BestMalz"},
   {id:"best_melano_light",ad:"BEST Melanoidin Light (BestMalz)",gu:288,r:20,g:"Base",mo:"BestMalz"},
   {id:"best_heidel_wheat",ad:"BEST Heidelberg Wheat Malt (BestMalz)",gu:315,r:2,g:"Base",mo:"BestMalz"},
-  {id:"best_pils",ad:"Best Pilsen (BestMalz)",gu:310,r:2,g:"Base",mo:"BestMalz"},
+  {id:"best_pils",ad:"Best Pilsen (BestMalz)",gu:310,r:2,g:"Base",mo:"BestMalz",alias:["best malz pilsner"]},
   {id:"best_heidel",ad:"BestMalz Heidelberg Pale Ale",gu:310,r:2,g:"Base",mo:"BestMalz"},
   {id:"best_wheat",ad:"BestMalz Pale Wheat",gu:315,r:2,g:"Base",mo:"BestMalz"},
   {id:"best_aromatic",ad:"BestMalz Aromatic Malt",gu:288,r:21,g:"Özel",mo:"BestMalz"},
@@ -4225,16 +4225,16 @@ const MALTLAR=[
   {id:"best_special_x",ad:"BEST Special X (BestMalz)",gu:288,r:132,g:"Özel",mo:"BestMalz"},
   {id:"best_caramel_p",ad:"BEST Caramel Pils (BestMalz)",gu:288,r:2,g:"Özel",mo:"BestMalz"},
   {id:"best_caramel_h",ad:"BEST Caramel Hell (BestMalz)",gu:288,r:12,g:"Özel",mo:"BestMalz"},
-  {id:"best_redx",ad:"BestMalz Red X (Red Color Malt)",gu:304,r:13,g:"Özel",mo:"BestMalz"},
+  {id:"best_redx",ad:"BestMalz Red X (Red Color Malt)",gu:304,r:13,g:"Özel",mo:"BestMalz",alias:["red x"]},
   {id:"best_acid",ad:"BestMalz Acidulated Malt",gu:292,r:2,g:"Özel",mo:"BestMalz"},
   // ── Briess ─────────────────────────────────────────────────
-  {id:"briess_pale",ad:"Briess 2-Row Brewers Malt",gu:310,r:2,g:"Base",mo:"Briess"},
-  {id:"briess_6row",ad:"Briess 6-Row Brewers Malt",gu:290,r:2,g:"Base",mo:"Briess"},
+  {id:"briess_pale",ad:"Briess 2-Row Brewers Malt",gu:310,r:2,g:"Base",mo:"Briess",alias:["2-row brewers malt","2-row","american 2-row","pale malt, 2 row, us"]},
+  {id:"briess_6row",ad:"Briess 6-Row Brewers Malt",gu:290,r:2,g:"Base",mo:"Briess",alias:["6-row brewers malt","6-row","pale malt, 6 row, us"]},
   {id:"synergy",ad:"Synergy Select Pilsen (Briess)",gu:312,r:2,g:"Base",mo:"Briess"},
-  {id:"briess_sroast",ad:"Briess Special Roast",gu:277,r:40,g:"Özel",mo:"Briess",phc:"amber_biscuit",bufKap:99.1},
+  {id:"briess_sroast",ad:"Briess Special Roast",gu:277,r:40,g:"Özel",mo:"Briess",phc:"amber_biscuit",bufKap:99.1,alias:["special roast"]},
   // ── Castle / Dingemans ─────────────────────────────────────
-  {id:"chateau_bld",ad:"Chateau Pale Ale (Castle)",gu:312,r:4,g:"Base",mo:"Castle"},
-  {id:"chateau_pils",ad:"Chateau Pilsen 2RS (Castle)",gu:316,r:2,g:"Base",mo:"Castle"},
+  {id:"chateau_bld",ad:"Chateau Pale Ale (Castle)",gu:312,r:4,g:"Base",mo:"Castle",alias:["château pale ale 2-row"]},
+  {id:"chateau_pils",ad:"Chateau Pilsen 2RS (Castle)",gu:316,r:2,g:"Base",mo:"Castle",alias:["château pilsen 2-row"]},
   {id:"chateau_munich",ad:"Chateau Munich (Castle)",gu:312,r:10,g:"Base",mo:"Castle"},
   {id:"chateau_vienna",ad:"Chateau Vienna (Castle)",gu:308,r:3,g:"Base",mo:"Castle"},
   {id:"chateau_munich_light",ad:"Chateau Munich Light (Castle)",gu:308,r:6,g:"Base",mo:"Castle"},
@@ -4255,20 +4255,20 @@ const MALTLAR=[
   {id:"muntons_mild",ad:"Muntons Mild Malt",gu:308,r:3,g:"Base",mo:"Muntons"},
   // ── Hitit Malt (Yerli) ─────────────────────────────────────,
   // ── Weyermann Crystal/Cara ─────────────────────────────────
-  {id:"cara_aroma",ad:"CaraAroma (Weyermann)",gu:285,r:151,g:"Özel",mo:"Weyermann"},
-  {id:"cara_belge",ad:"CaraBelge (Weyermann)",gu:285,r:13,g:"Özel",mo:"Weyermann"},
+  {id:"cara_aroma",ad:"CaraAroma (Weyermann)",gu:285,r:151,g:"Özel",mo:"Weyermann",alias:["caraaroma"]},
+  {id:"cara_belge",ad:"CaraBelge (Weyermann)",gu:285,r:13,g:"Özel",mo:"Weyermann",alias:["carabelge"]},
   {id:"cara_rye",ad:"CaraRye (Weyermann)",gu:285,r:66,g:"Özel",mo:"Weyermann"},
-  {id:"cara_wheat",ad:"CaraWheat (Weyermann)",gu:262,r:46,g:"Özel",mo:"Weyermann"},
-  {id:"cara_red",ad:"CaraRed (Weyermann)",gu:285,r:20,g:"Özel",mo:"Weyermann"},
-  {id:"cara_hell",ad:"CaraHell (Weyermann)",gu:285,r:10,g:"Özel",mo:"Weyermann"},
-  {id:"cara_dark",ad:"CaraBohemian (Weyermann)",gu:281,r:72,g:"Özel",mo:"Weyermann"},
+  {id:"cara_wheat",ad:"CaraWheat (Weyermann)",gu:262,r:46,g:"Özel",mo:"Weyermann",alias:["carawheat"]},
+  {id:"cara_red",ad:"CaraRed (Weyermann)",gu:285,r:20,g:"Özel",mo:"Weyermann",alias:["carared"]},
+  {id:"cara_hell",ad:"CaraHell (Weyermann)",gu:285,r:10,g:"Özel",mo:"Weyermann",alias:["carahell"]},
+  {id:"cara_dark",ad:"CaraBohemian (Weyermann)",gu:281,r:72,g:"Özel",mo:"Weyermann",alias:["carabohemian"]},
   {id:"cara_pils_w",ad:"CaraPils (Weyermann)",gu:288,r:2,g:"Özel",mo:"Weyermann"},
-  {id:"cara_foam",ad:"CaraFoam (Weyermann)",gu:288,r:2,g:"Özel",mo:"Weyermann"},
-  {id:"cara_munich1",ad:"CaraMunich I (Weyermann)",gu:281,r:35,g:"Özel",mo:"Weyermann"},
-  {id:"cara_munich2",ad:"CaraMunich II (Weyermann)",gu:281,r:46,g:"Özel",mo:"Weyermann"},
-  {id:"cara_munich3",ad:"CaraMunich III (Weyermann / BestMalz)",gu:281,r:57,g:"Özel",mo:"Weyermann, BestMalz"},
+  {id:"cara_foam",ad:"CaraFoam (Weyermann)",gu:288,r:2,g:"Özel",mo:"Weyermann",alias:["carafoam"]},
+  {id:"cara_munich1",ad:"CaraMunich I (Weyermann)",gu:281,r:35,g:"Özel",mo:"Weyermann",alias:["caramunich i"]},
+  {id:"cara_munich2",ad:"CaraMunich II (Weyermann)",gu:281,r:46,g:"Özel",mo:"Weyermann",alias:["caramunich ii"]},
+  {id:"cara_munich3",ad:"CaraMunich III (Weyermann / BestMalz)",gu:281,r:57,g:"Özel",mo:"Weyermann, BestMalz",alias:["caramunich iii"]},
   // ── Dingemans / Castle ─────────────────────────────────────
-  {id:"cara45",ad:"Cara 45 MD (Dingemans)",gu:285,r:45,g:"Özel",mo:"Dingemans",phc:"crystal"},
+  {id:"cara45",ad:"Cara 45 MD (Dingemans)",gu:285,r:45,g:"Özel",mo:"Dingemans",phc:"crystal",alias:["cara 45l"]},
   {id:"cara120",ad:"Cara 120 MD (Dingemans) — 120 EBC",gu:285,r:45,g:"Özel",mo:"Dingemans",phc:"crystal"},
   {id:"dingemans_pale",ad:"Dingemans Pale Ale Malt",gu:308,r:4,g:"Base",mo:"Dingemans"},
   {id:"dingemans_cara8",ad:"Dingemans Cara 8 (Belçika CaraHell)",gu:288,r:8,g:"Özel",mo:"Dingemans",phc:"crystal"},
@@ -4276,10 +4276,10 @@ const MALTLAR=[
   {id:"chateau_specb",ad:"Chateau Special Belgium (Castle)",gu:285,r:110,g:"Koyu",mo:"Castle"},
   {id:"chateau_cara_blond",ad:"Chateau Cara Blond (Castle)",gu:285,r:8,g:"Özel",mo:"Castle"},
   {id:"chateau_cara_ruby",ad:"Chateau Cara Ruby (Castle)",gu:277,r:19,g:"Özel",mo:"Castle"},
-  {id:"chateau_cara_gold",ad:"Chateau Cara Gold (Castle)",gu:288,r:45,g:"Özel",mo:"Castle"},
+  {id:"chateau_cara_gold",ad:"Chateau Cara Gold (Castle)",gu:288,r:45,g:"Özel",mo:"Castle",alias:["cara gold"]},
   {id:"chateau_melano",ad:"Chateau Melano (Castle turbo Munich)",gu:293,r:30,g:"Özel",mo:"Castle"},
   {id:"chateau_black",ad:"Chateau Black (Castle)",gu:250,r:480,g:"Koyu",mo:"Castle",phc:"black"},
-  {id:"chateau_biscuit",ad:"Chateau Biscuit (Castle)",gu:293,r:19,g:"Özel",mo:"Castle"},
+  {id:"chateau_biscuit",ad:"Chateau Biscuit (Castle)",gu:293,r:19,g:"Özel",mo:"Castle",alias:["château biscuit"]},
   {id:"chateau_cara_belge",ad:"Chateau Cara Belgium (Castle)",gu:292,r:13,g:"Özel",mo:"Castle"},
   {id:"chateau_melano_light",ad:"Chateau Melano Light (Castle)",gu:300,r:16,g:"Özel",mo:"Castle"},
   {id:"chateau_cara_clair",ad:"Chateau Cara Clair (Castle)",gu:300,r:4,g:"Özel",mo:"Castle"},
@@ -4287,40 +4287,40 @@ const MALTLAR=[
   {id:"crystal_light",ad:"Pale Crystal 25 (Fawcett)",gu:277,r:25,g:"Özel",mo:"Thomas Fawcett"},
   {id:"crystal_med",ad:"Crystal II 65 (Fawcett)",gu:277,r:65,g:"Özel",mo:"Thomas Fawcett"},
   {id:"crystal_dark",ad:"Dark Crystal II 120 (Fawcett)",gu:277,r:120,g:"Koyu",mo:"Thomas Fawcett"},
-  {id:"crystal_extra",ad:"Crystal Extra Dark 160 (Simpsons/Fawcett)",gu:270,r:160,g:"Koyu",mo:"Simpsons, Thomas Fawcett"},
+  {id:"crystal_extra",ad:"Crystal Extra Dark 160 (Simpsons/Fawcett)",gu:270,r:160,g:"Koyu",mo:"Simpsons, Thomas Fawcett",alias:["extra dark crystal 160l"]},
   // ── Simpsons Crystal ───────────────────────────────────────
   {id:"simp_heritage",ad:"Heritage Crystal Medium (Simpsons)",gu:277,r:65,g:"Özel",mo:"Simpsons",phc:"crystal"},
   // ── Briess Crystal ─────────────────────────────────────────
-  {id:"c10",ad:"Crystal 10L (Briess)",gu:293,r:10,g:"Özel",mo:"Briess"},
-  {id:"c150",ad:"Crystal 150L (Briess)",gu:281,r:150,g:"Özel",mo:"Briess"},
+  {id:"c10",ad:"Crystal 10L (Briess)",gu:293,r:10,g:"Özel",mo:"Briess",alias:["caramel malt 10l","crystal 10l"]},
+  {id:"c150",ad:"Crystal 150L (Briess)",gu:281,r:150,g:"Özel",mo:"Briess",alias:["caramel/crystal 150l"]},
   // ── BiraBurada Crystal ─────────────────────────────────────,
   // ── ButikBira Crystal ──────────────────────────────────────,
   // ── Hitit Crystal ──────────────────────────────────────────,
   // ── Adjunct Ek ─────────────────────────────────────────────
-  {id:"flaked_wheat",ad:"Buğday (Flaked Wheat)",gu:296,r:2,g:"Adjunct",mo:"Herhangi",bufKap:28.2},
-  {id:"flaked_rye",ad:"Çavdar (Flaked Rye)",gu:296,r:3,g:"Adjunct",mo:"Herhangi",bufKap:29.8},
+  {id:"flaked_wheat",ad:"Buğday (Flaked Wheat)",gu:296,r:2,g:"Adjunct",mo:"Herhangi",bufKap:28.2,alias:["flaked wheat","wheat, flaked"]},
+  {id:"flaked_rye",ad:"Çavdar (Flaked Rye)",gu:296,r:3,g:"Adjunct",mo:"Herhangi",bufKap:29.8,alias:["flaked rye","rye, flaked"]},
   {id:"raw_oat",ad:"Ham Yulaf (Raw Oats)",gu:255,r:2,g:"Adjunct",mo:"Herhangi"},
   {id:"corn_grits",ad:"Mısır İrmiği (Corn Grits)",gu:308,r:1,g:"Adjunct",mo:"Herhangi"},
   {id:"potato_fl",ad:"Patates (Flaked Potato)",gu:292,r:1,g:"Adjunct",mo:"Herhangi"},
-  {id:"buckwheat",ad:"Karabuğday (Buckwheat)",gu:260,r:3,g:"Adjunct",mo:"Herhangi"},
+  {id:"buckwheat",ad:"Karabuğday (Buckwheat)",gu:260,r:3,g:"Adjunct",mo:"Herhangi",alias:["buckwheat"]},
   {id:"sorghum",ad:"Dari (Sorghum - Glutensiz)",gu:280,r:2,g:"Adjunct",mo:"Herhangi"},
   // ── Koyu Ek ────────────────────────────────────────────────
-  {id:"dehusked_black",ad:"Dehusked Black Malt",gu:250,r:550,g:"Koyu",mo:"Weyermann (Carafa III), Simpsons",phc:"chocolate"},
-  {id:"roast_wheat",ad:"Chocolate Wheat (Weyermann)",gu:250,r:395,g:"Koyu",mo:"Weyermann"},
+  {id:"dehusked_black",ad:"Dehusked Black Malt",gu:250,r:550,g:"Koyu",mo:"Weyermann (Carafa III), Simpsons",phc:"chocolate",alias:["blackprinz"]},
+  {id:"roast_wheat",ad:"Chocolate Wheat (Weyermann)",gu:250,r:395,g:"Koyu",mo:"Weyermann",alias:["chocolate wheat"]},
   {id:"pale_choc2",ad:"Chocolate Malt (Simpsons)",gu:269,r:445,g:"Koyu",mo:"Simpsons",phc:"chocolate"},
   {id:"chateau_choc",ad:"Chateau Chocolat (Castle)",gu:270,r:340,g:"Koyu",mo:"Castle",phc:"chocolate"},
-  {id:"sinamar",ad:"Sinamar Sıvı Renk Maltı (Weyermann)",gu:0,r:3148,g:"Koyu",mo:"Weyermann"},
+  {id:"sinamar",ad:"Sinamar Sıvı Renk Maltı (Weyermann)",gu:0,r:3148,g:"Koyu",mo:"Weyermann",alias:["sinamar"]},
   // ── Seker Ek ───────────────────────────────────────────────
   {id:"muscovado",ad:"Muscovado Şeker (Ham Esmer)",gu:360,r:65,g:"Şeker",mo:"Herhangi"},
-  {id:"dark_brown",ad:"Koyu Esmer Şeker",gu:370,r:40,g:"Şeker",mo:"Herhangi"},
-  {id:"light_brown",ad:"Açık Esmer Şeker",gu:375,r:20,g:"Şeker",mo:"Herhangi"},
-  {id:"molasses",ad:"Pekmez / Melas",gu:290,r:80,g:"Şeker",mo:"Herhangi"},
-  {id:"treacle",ad:"Treacle (Ingiliz Pekmez)",gu:300,r:100,g:"Şeker",mo:"Herhangi"},
-  {id:"maple",ad:"Akçaağaç Şurubu (Maple Syrup)",gu:260,r:5,g:"Şeker",mo:"Herhangi"},
-  {id:"turbinado",ad:"Turbinado (Ham Karamel Şeker)",gu:378,r:5,g:"Şeker",mo:"Herhangi"},
+  {id:"dark_brown",ad:"Koyu Esmer Şeker",gu:370,r:40,g:"Şeker",mo:"Herhangi",alias:["brown sugar, dark"]},
+  {id:"light_brown",ad:"Açık Esmer Şeker",gu:375,r:20,g:"Şeker",mo:"Herhangi",alias:["brown sugar"]},
+  {id:"molasses",ad:"Pekmez / Melas",gu:290,r:80,g:"Şeker",mo:"Herhangi",alias:["molasses"]},
+  {id:"treacle",ad:"Treacle (Ingiliz Pekmez)",gu:300,r:100,g:"Şeker",mo:"Herhangi",alias:["treacle"]},
+  {id:"maple",ad:"Akçaağaç Şurubu (Maple Syrup)",gu:260,r:5,g:"Şeker",mo:"Herhangi",alias:["maple syrup"]},
+  {id:"turbinado",ad:"Turbinado (Ham Karamel Şeker)",gu:378,r:5,g:"Şeker",mo:"Herhangi",alias:["turbinado"]},
   {id:"invert2",ad:"Invert Sugar No.2 (Amber)",gu:324,r:32,g:"Şeker",mo:"Herhangi"},
   {id:"invert3",ad:"Invert Sugar No.3 (Koyu)",gu:324,r:60,g:"Şeker",mo:"Herhangi"},
-  {id:"rice_hulls",ad:"Çeltik Kavuzu (Rice Hulls)",gu:0,r:0,g:"Adjunct",mo:"—"},
+  {id:"rice_hulls",ad:"Çeltik Kavuzu (Rice Hulls)",gu:0,r:0,g:"Adjunct",mo:"—",alias:["rice hulls"]},
   {id:"best_choc",ad:"Best Chocolate (BestMalz)",gu:289,r:340,g:"Koyu",mo:"BestMalz",phc:"chocolate"},
   {id:"bohem_choc",ad:"Bohemian Chocolate Malt (900 EBC)",gu:277,r:340,g:"Koyu",mo:"Bohemia CZ üretim (BiraBurada, üretici detayı belirtilmemiş)",phc:"chocolate"},
   {id:"bitter_roast",ad:"Bitter Kavrulmuş Arpa Maltı (Hitit)",gu:232,r:590,g:"Koyu",mo:"Hitit Malt (Türkiye)",phc:"roasted_barley"},
@@ -4339,47 +4339,47 @@ const MALTLAR=[
 ];
 
 const HOPLAR=[
-  {id:"cascade",ad:"Cascade",aa:5.5,g:"Amerikan",mo:"Sitrus, çiçek, greyfurt, hafif çam. Amerikan craft hop devriminin öncüsü (1972).",ornek:"American Pale Ale, American IPA, Blonde Ale"},
+  {id:"cascade",ad:"Cascade",aa:5.5,g:"Amerikan",mo:"Sitrus, çiçek, greyfurt, hafif çam. Amerikan craft hop devriminin öncüsü (1972).",ornek:"American Pale Ale, American IPA, Blonde Ale",alias:["cascade us","cascade (u.s.)"]},
   {id:"centn",ad:"Centennial",aa:10.0,g:"Amerikan",mo:"Greyfurt, çiçek, sitrus, hafif reçine. Cascade'den daha güçlü.",ornek:"American IPA, Pale Ale, NEIPA"},
   {id:"citra",ad:"Citra",aa:12.0,g:"Amerikan",mo:"Tropikal meyve, kavun, limon, şeftali, mango, greyfurt.",ornek:"NEIPA, Hazy IPA, American IPA"},
-  {id:"columbus",ad:"Columbus (CTZ)",aa:15.0,g:"Amerikan",mo:"Reçine, keskin, siyah biber, dank, hafif sitrus. Yüksek AA — güçlü bitter ve dank dry-hop.",ornek:"American IPA, Imperial IPA, Pale Ale"},
+  {id:"columbus",ad:"Columbus (CTZ)",aa:15.0,g:"Amerikan",mo:"Reçine, keskin, siyah biber, dank, hafif sitrus. Yüksek AA — güçlü bitter ve dank dry-hop.",ornek:"American IPA, Imperial IPA, Pale Ale",alias:["zeus","ctz","tomahawk","columbus (tomahawk)","columbus/tomahawk/zeus, ctz","colombus","columbus"]},
   {id:"simcoe",ad:"Simcoe",aa:13.0,g:"Amerikan",mo:"Çam, reçine, şeftali, tropikal, toprak. Karmaşık profil.",ornek:"American IPA, West Coast IPA, NEIPA"},
   {id:"mosaic",ad:"Mosaic",aa:12.5,g:"Amerikan",mo:"Tropikal meyve, yaban mersini, çiçek, toprak. Çok boyutlu.",ornek:"NEIPA, Hazy IPA, American IPA"},
   {id:"amarillo",ad:"Amarillo",aa:9.5,g:"Amerikan",mo:"Portakal, greyfurt, çiçek, şeftali, tropikal.",ornek:"American Pale Ale, IPA, Wheat Ale"},
-  {id:"chinook",ad:"Chinook",aa:13.0,g:"Amerikan",mo:"Çam, reçine, greyfurt, baharat. Klasik bittering hop.",ornek:"American IPA, Pale Ale, Smoked Porter"},
+  {id:"chinook",ad:"Chinook",aa:13.0,g:"Amerikan",mo:"Çam, reçine, greyfurt, baharat. Klasik bittering hop.",ornek:"American IPA, Pale Ale, Smoked Porter",alias:["chinook us"]},
   {id:"eldorado",ad:"El Dorado",aa:15.0,g:"Amerikan",mo:"Şeker kamışı, kavun, armut, tropikal meyve.",ornek:"NEIPA, Hazy IPA, American IPA"},
-  {id:"galaxy",ad:"Galaxy",aa:14.0,g:"Avustralya",mo:"Şeftali, çarkıfelek meyvesi, sitrus, tropikal. Avustralya ikonu.",ornek:"NEIPA, Hazy IPA, American IPA"},
+  {id:"galaxy",ad:"Galaxy",aa:14.0,g:"Avustralya",mo:"Şeftali, çarkıfelek meyvesi, sitrus, tropikal. Avustralya ikonu.",ornek:"NEIPA, Hazy IPA, American IPA",alias:["australian galaxy"]},
   {id:"warrior",ad:"Warrior",aa:16.0,g:"Amerikan",mo:"Temiz bitter, hafif reçine, minimal aroma. Saf IBU kaynağı.",ornek:"American IPA, West Coast IPA, Pale Ale"},
-  {id:"ekuanot",ad:"Ekuanot",aa:13.0,g:"Amerikan",mo:"Tropikal, ananas, bektaşiüzümü, çiçek, hafif limon.",ornek:"NEIPA, Hazy IPA, American IPA"},
+  {id:"ekuanot",ad:"Ekuanot",aa:13.0,g:"Amerikan",mo:"Tropikal, ananas, bektaşiüzümü, çiçek, hafif limon.",ornek:"NEIPA, Hazy IPA, American IPA",alias:["equinox"]},
   {id:"idaho7",ad:"Idaho 7",aa:13.0,g:"Amerikan",mo:"Tropikal meyve, siyah çay, reçine, kavun.",ornek:"NEIPA, Hazy IPA, American IPA, Pale Ale"},
   {id:"azacca",ad:"Azacca",aa:15.0,g:"Amerikan",mo:"Tropikal, ananas, mango, sitrus, portakal.",ornek:"NEIPA, American IPA, Pale Ale"},
   {id:"strata",ad:"Strata",aa:13.0,g:"Amerikan",mo:"Çilek, tropikal, pasyon meyvesi, çam, toprak.",ornek:"NEIPA, Hazy IPA, American IPA"},
   {id:"calypso",ad:"Calypso",aa:12.0,g:"Amerikan",mo:"Elma, armut, limonlu tropikal, hafif çiçek.",ornek:"American Pale Ale, Wheat IPA, Hazy Pale"},
   {id:"willamette",ad:"Willamette",aa:5.0,g:"Amerikan",mo:"Çiçek, meyve, toprak, bitki. Fuggles klonu.",ornek:"American Amber, Pale Ale, Porter"},
-  {id:"nbrewer",ad:"Northern Brewer",aa:9.0,g:"Alman",mo:"Baharat, çam, hafif çiçek. Çok amaçlı bittering (Alman partisi).",ornek:"California Common, Lager, ESB, Porter, Altbier"},
-  {id:"perle",ad:"Perle",aa:8.0,g:"Alman",mo:"Hafif baharatlı, çiçeksi, bitkisel, temiz bitter.",ornek:"German Lager, Altbier, Pale Ale, Porter"},
+  {id:"nbrewer",ad:"Northern Brewer",aa:9.0,g:"Alman",mo:"Baharat, çam, hafif çiçek. Çok amaçlı bittering (Alman partisi).",ornek:"California Common, Lager, ESB, Porter, Altbier",alias:["german northern brewer"]},
+  {id:"perle",ad:"Perle",aa:8.0,g:"Alman",mo:"Hafif baharatlı, çiçeksi, bitkisel, temiz bitter.",ornek:"German Lager, Altbier, Pale Ale, Porter",alias:["german perle"]},
   {id:"nelson",ad:"Nelson Sauvin",aa:12.5,g:"NZ",mo:"Beyaz şarap (Sauvignon Blanc), bektaşiüzümü, kavun, tropikal.",ornek:"American IPA, Pale Ale, Saison, NEIPA"},
   {id:"motueka",ad:"Motueka",aa:7.0,g:"NZ",mo:"Limon, limon otu, tropikal, hafif çam.",ornek:"Pale Ale, Saison, Pilsner, Wheat"},
   {id:"waiiti",ad:"Wai-iti",aa:3.0,g:"NZ",mo:"Şeftali, kayısı, çiçek, hafif sitrus. Düşük AA nazik hop.",ornek:"Pale Ale, Saison, Session Ale, Kölsch"},
   {id:"enigma",ad:"Enigma",aa:16.0,g:"Avustralya",mo:"Şarap, böğürtlen, şeftali, tropikal. Karmaşık Avustralya profil (HPA).",ornek:"American IPA, NEIPA, Pale Ale"},
-  {id:"vic_secret",ad:"Victoria Secret",aa:16.5,g:"Avustralya",mo:"Ananas, tropikal, çam, reçine. Avustralya hop.",ornek:"American IPA, NEIPA, Pale Ale, DIPA"},
-  {id:"hrtau",ad:"Hallertau Mittelfrueh",aa:4.0,g:"Alman",mo:"Bitkisel, topraksı, çiçeksi, hafif baharatlı. En klasik noble hop.",ornek:"German Pils, Helles, Märzen, Oktoberfest"},
-  {id:"tettn",ad:"Tettnanger",aa:4.5,g:"Alman",mo:"Bitkisel, baharatlı, çiçeksi, çok boyutlu noble profil.",ornek:"German Lager, Pilsner, Wheat, Märzen"},
-  {id:"spalt",ad:"Spalt (Spalter geleneksel)",aa:5.0,g:"Alman",mo:"Topraksı, baharatlı, bitkisel. Noble hop — Saaz ile çok yakın. (NOT: #68 spalt_sel Spalter Select — 1993 Hüll modern çeşit.)",ornek:"German Pils, Kölsch, Lager"},
+  {id:"vic_secret",ad:"Victoria Secret",aa:16.5,g:"Avustralya",mo:"Ananas, tropikal, çam, reçine. Avustralya hop.",ornek:"American IPA, NEIPA, Pale Ale, DIPA",alias:["vic secret"]},
+  {id:"hrtau",ad:"Hallertau Mittelfrueh",aa:4.0,g:"Alman",mo:"Bitkisel, topraksı, çiçeksi, hafif baharatlı. En klasik noble hop.",ornek:"German Pils, Helles, Märzen, Oktoberfest",alias:["hallertau","hallertauer","hallertauer mittelfrüh","hallertau mittelfrüh","hallertau mittelfruh","hallertauer mittelfruh","hallertauer mittelfrüher","hallertauer mittelfrueh","mittelfrueh"]},
+  {id:"tettn",ad:"Tettnanger",aa:4.5,g:"Alman",mo:"Bitkisel, baharatlı, çiçeksi, çok boyutlu noble profil.",ornek:"German Lager, Pilsner, Wheat, Märzen",alias:["tettnang","german tettnanger"]},
+  {id:"spalt",ad:"Spalt (Spalter geleneksel)",aa:5.0,g:"Alman",mo:"Topraksı, baharatlı, bitkisel. Noble hop — Saaz ile çok yakın. (NOT: #68 spalt_sel Spalter Select — 1993 Hüll modern çeşit.)",ornek:"German Pils, Kölsch, Lager",alias:["spalter","spalt"]},
   {id:"hrblc",ad:"Hallertau Blanc",aa:10.5,g:"Alman",mo:"Beyaz şarap, limon, kavun, çiçek. Modern Alman aromatic hop.",ornek:"Saison, Kölsch, Pilsner, Witbier"},
-  {id:"mandarina",ad:"Mandarina Bavaria",aa:8.0,g:"Alman",mo:"Portakal kabuğu, mandalina, tropikal. Güçlü narenciye aroması.",ornek:"Pale Ale, IPA, Witbier, Saison"},
-  {id:"magnum",ad:"Magnum",aa:14.0,g:"Alman",mo:"Çok temiz bitter, minimal aroma. Premium Alman bittering.",ornek:"German Lager, Pilsner, Helles, Altbier"},
+  {id:"mandarina",ad:"Mandarina Bavaria",aa:8.0,g:"Alman",mo:"Portakal kabuğu, mandalina, tropikal. Güçlü narenciye aroması.",ornek:"Pale Ale, IPA, Witbier, Saison",alias:["bavaria mandarina"]},
+  {id:"magnum",ad:"Magnum",aa:14.0,g:"Alman",mo:"Çok temiz bitter, minimal aroma. Premium Alman bittering.",ornek:"German Lager, Pilsner, Helles, Altbier",alias:["hallertauer magnum","magnum us","german magnum","us magnum"]},
   {id:"herkules",ad:"Herkules",aa:16.0,g:"Alman",mo:"Temiz bitter, hafif reçine. Yüksek AA Alman bittering hopu.",ornek:"German Lager, Pilsner, Bock"},
   {id:"polaris",ad:"Polaris",aa:20.0,g:"Alman",mo:"Nane, menthol, çam. Çok yüksek AA — dikkatli kullan.",ornek:"Spiced Beer, Imperial Stout, Bittering"},
-  {id:"saaz",ad:"Saaz (Czech)",aa:3.5,g:"Çek",mo:"Bitkisel, topraksı, baharatlı. En saf noble hop — Bohemian klasiği.",ornek:"Czech Pils, German Lager, Kölsch, Witbier"},
+  {id:"saaz",ad:"Saaz (Czech)",aa:3.5,g:"Çek",mo:"Bitkisel, topraksı, baharatlı. En saf noble hop — Bohemian klasiği.",ornek:"Czech Pils, German Lager, Kölsch, Witbier",alias:["czech saaz","saazer","saaz"]},
   {id:"kazbek",ad:"Kazbek",aa:7.0,g:"Çek",mo:"Baharatlı, tropikal, çiçeksi. Modern Çek hop.",ornek:"Czech Lager, Pale Ale, Saison"},
-  {id:"ekg",ad:"East Kent Goldings (EKG)",aa:5.5,g:"İngiliz",mo:"Bal, çiçek, lavanta, toprak, hafif baharat. İngiliz hop klasiği.",ornek:"ESB, English Bitter, Pale Ale, Stout"},
-  {id:"fuggles",ad:"Fuggles",aa:4.5,g:"İngiliz",mo:"Toprak, ahşap, bitki, hafif çiçek. İngiliz ale temel hopu.",ornek:"English Bitter, Porter, Stout, Brown Ale"},
+  {id:"ekg",ad:"East Kent Goldings (EKG)",aa:5.5,g:"İngiliz",mo:"Bal, çiçek, lavanta, toprak, hafif baharat. İngiliz hop klasiği.",ornek:"ESB, English Bitter, Pale Ale, Stout",alias:["east kent golding","east kent goldings","goldings, east kent","kent goldings","golding","goldings","ekg"]},
+  {id:"fuggles",ad:"Fuggles",aa:4.5,g:"İngiliz",mo:"Toprak, ahşap, bitki, hafif çiçek. İngiliz ale temel hopu.",ornek:"English Bitter, Porter, Stout, Brown Ale",alias:["fuggle"]},
   {id:"challenger",ad:"Challenger",aa:7.5,g:"İngiliz",mo:"Temiz bitter, hafif çiçek, yeşil bitki. Çok amaçlı İngiliz hop.",ornek:"ESB, English IPA, Bitter, Pale Ale"},
   {id:"target",ad:"Target",aa:11.0,g:"İngiliz",mo:"Reçine, baharat, çiçek, yüksek AA. İngiliz bittering hopu.",ornek:"English IPA, Barleywine, Stout, Bitter"},
   {id:"progress",ad:"Progress",aa:6.5,g:"İngiliz",mo:"Hafif çiçek, bitki, tatlı meyve. Nazik İngiliz aromatic hop.",ornek:"Mild, Bitter, Pale Ale, Saison"},
-  {id:"styrian",ad:"Styrian Goldings",aa:5.5,g:"Slovenya",mo:"Çiçek, bitki, hafif toprak, bal. Fuggles klonu (Slovenya yerli adaptasyonu — EKG değil, karışıklık yaygın).",ornek:"ESB, Saison, Belgian Ale, Pale Ale"},
-  {id:"lublin",ad:"Lublin (Lubelski)",aa:4.0,g:"Polonya",mo:"Bitkisel, topraksı, baharat. Saaz benzeri Polonya hopu.",ornek:"Czech/Polish Lager, Pilsner, Kölsch"},
+  {id:"styrian",ad:"Styrian Goldings",aa:5.5,g:"Slovenya",mo:"Çiçek, bitki, hafif toprak, bal. Fuggles klonu (Slovenya yerli adaptasyonu — EKG değil, karışıklık yaygın).",ornek:"ESB, Saison, Belgian Ale, Pale Ale",alias:["styrian golding","styrian"]},
+  {id:"lublin",ad:"Lublin (Lubelski)",aa:4.0,g:"Polonya",mo:"Bitkisel, topraksı, baharat. Saaz benzeri Polonya hopu.",ornek:"Czech/Polish Lager, Pilsner, Kölsch",alias:["polish lublin","lubelski","lublin"]},
   {id:"sabro",ad:"Sabro",aa:13.0,g:"Amerikan",mo:"Hindistan cevizi, tropikal meyve, kavun, greyfurt.",ornek:"NEIPA, Hazy IPA, American IPA"},
   {id:"callista",ad:"Callista",aa:4.0,g:"Alman",mo:"Mürver çiçeği (elderflower), armut, şeftali, çilek. Hafif noble profil.",ornek:"Pilsner, Kölsch, Wheat, Pale Ale"},
   {id:"tnt",ad:"TnT Karışım (BiraBurada)",aa:8.0,g:"Karışım",mo:"BiraBurada TnT harman: tropikal/sitrus blend. Çok amaçlı.",ornek:"Pale Ale, IPA, Saison"},
@@ -4392,7 +4392,7 @@ const HOPLAR=[
   {id:"riwaka",ad:"Riwaka",aa:5.5,g:"NZ",mo:"Bektaşiüzümü, tropikal, greyfurt, çiçek.",ornek:"Pale Ale, IPA, Saison, Session IPA"},
   {id:"cc",ad:"Cryo Citra",aa:25.0,g:"Cryo",mo:"Cryo Citra: 2x konsantre tropik ve sitrus. Çok az gramaj.",ornek:"NEIPA, Hazy IPA, Dry-Hopped IPA"},
   {id:"cm",ad:"Cryo Mosaic",aa:22.0,g:"Cryo",mo:"Cryo Mosaic: 2x konsantre tropikal, meyve, toprak.",ornek:"NEIPA, Hazy IPA, American IPA"},
-  {id:"lupulin_c",ad:"Lupulin Powder Citra",aa:30.0,g:"Cryo",mo:"Lupulin powder: tüm hop aromatiklerini konsantre toz form.",ornek:"NEIPA, Dry-Hopped Sour, Hazy IPA"},
+  {id:"lupulin_c",ad:"Lupulin Powder Citra",aa:30.0,g:"Cryo",mo:"Lupulin powder: tüm hop aromatiklerini konsantre toz form.",ornek:"NEIPA, Dry-Hopped Sour, Hazy IPA",alias:["citra lupuln2"]},
   {id:"sterling",ad:"Sterling",aa:7.5,g:"Amerikan",mo:"Bitkisel, baharatlı, çiçeksi. Saaz türevi Amerikan noble hop.",ornek:"American Pilsner, Wheat, Lager, Kölsch"},
   {id:"hop_ekstrakt",ad:"CO₂ Hop Ekstrakt",aa:62.0,g:"Ekstrakt",mo:"CO₂ ekstrakt: yüksek konsantrasyon, nötr koku. Saf IBU kaynağı.",ornek:"IBU artırımı, tüm stiller"},
   // ── Türk yerli (Bilecik/Pazaryeri — OT-GÜL Koop) ─
@@ -4403,20 +4403,20 @@ const HOPLAR=[
   {id:"tr_pazaryeri",ad:"Pazaryeri (Türk TARBES hibrit)",aa:10.0,g:"Türk",mo:"Türk dual-purpose hibriti (TARBES tescili). Coğrafi işaretli bölge adıyla. Spec tahmini — resmi PDF yok.",ornek:"Lager, Pilsner, Kölsch, Altbier"},
   // ── Türkiye'de satılan eksikler ──────────────────
   {id:"nugget",ad:"Nugget",aa:13.0,g:"Amerikan",mo:"Taze, bitkisel, baharatlı, hafif reçine. ABD Dual-purpose (1983 Oregon).",ornek:"American Pale Ale, IPA, Amber Ale, Stout"},
-  {id:"lemondrop",ad:"Lemondrop",aa:6.0,g:"Amerikan",mo:"Limon, misket limonu, hafif çay, tatlı sitrus. Cascade türevi (ADHA).",ornek:"Pale Ale, Blonde, Wheat, Saison"},
+  {id:"lemondrop",ad:"Lemondrop",aa:6.0,g:"Amerikan",mo:"Limon, misket limonu, hafif çay, tatlı sitrus. Cascade türevi (ADHA).",ornek:"Pale Ale, Blonde, Wheat, Saison",alias:["lemon drop"]},
   {id:"krush",ad:"Krush (HBC 586)",aa:12.0,g:"Amerikan",mo:"Mango, guava, şeftali, portakal, böğürtlen. 2024 yeni ticari hop.",ornek:"NEIPA, IPA, Hazy IPA, Fruit-forward Ale"},
-  {id:"yellow_sub",ad:"Yellow Sub (Barth-Haas blend)",aa:7.9,g:"Karışım",mo:"Tatlı, meyveli, kayısı, portakal, hafif böğürtlen. Barth-Haas gizli harman.",ornek:"Pale Ale, IPA, Hazy Ale"},
-  {id:"spalt_sel",ad:"Spalter Select",aa:5.0,g:"Alman",mo:"Noble baharatlı, bitkisel, çiçeksi. Spalt × Hallertau Mittelfrueh (1993 Hüll).",ornek:"German Lager, Pilsner, Altbier, Kölsch, Helles"},
+  {id:"yellow_sub",ad:"Yellow Sub (Barth-Haas blend)",aa:7.9,g:"Karışım",mo:"Tatlı, meyveli, kayısı, portakal, hafif böğürtlen. Barth-Haas gizli harman.",ornek:"Pale Ale, IPA, Hazy Ale",alias:["yellow sub"]},
+  {id:"spalt_sel",ad:"Spalter Select",aa:5.0,g:"Alman",mo:"Noble baharatlı, bitkisel, çiçeksi. Spalt × Hallertau Mittelfrueh (1993 Hüll).",ornek:"German Lager, Pilsner, Altbier, Kölsch, Helles",alias:["german spalt select"]},
   {id:"wakatu",ad:"Wakatu",aa:7.0,g:"NZ",mo:"Misket limonu, çiçek, bitkisel. NZ Hallertau akrabası.",ornek:"Pilsner, Lager, Kölsch, Saison"},
   {id:"pac_gem",ad:"Pacific Gem",aa:14.0,g:"NZ",mo:"Böğürtlen, meşe, bitkisel. NZ bittering hopu.",ornek:"IPA, Porter, Stout, Lager bittering"},
   // ── Önemli dünya hopları ─────────────────────────
   {id:"talus",ad:"Talus (HBC 692)",aa:9.0,g:"Amerikan",mo:"Çam, gül-mürver, greyfurt, üzüm. Sabro akrabası modern.",ornek:"NEIPA, Hazy IPA, American Pale Ale"},
   {id:"cashmere",ad:"Cashmere",aa:8.5,g:"Amerikan",mo:"Kavun, limon, yumuşak tropikal. Ekstra pürüzsüz.",ornek:"Pale Ale, IPA, Blonde Ale"},
-  {id:"sultana",ad:"Sultana (eski Denali)",aa:14.0,g:"Amerikan",mo:"Ananas, sitrus, çam, kavun. Yüksek AA, çok yüksek yağ. Hopsteiner #06277 — 2016'da Denali, 2019'da Sultana adıyla çıktı (aynı çeşit).",ornek:"American IPA, NEIPA, Pale Ale"},
+  {id:"sultana",ad:"Sultana (eski Denali)",aa:14.0,g:"Amerikan",mo:"Ananas, sitrus, çam, kavun. Yüksek AA, çok yüksek yağ. Hopsteiner #06277 — 2016'da Denali, 2019'da Sultana adıyla çıktı (aynı çeşit).",ornek:"American IPA, NEIPA, Pale Ale",alias:["denali","sultana"]},
   {id:"nectaron",ad:"Nectaron",aa:13.0,g:"NZ",mo:"Pasyon meyvesi, şeftali, tropikal. NZ yeni yıldız hopu.",ornek:"Hazy IPA, NEIPA, Pale Ale"},
-  {id:"saphir",ad:"Saphir",aa:3.5,g:"Alman",mo:"Mandalina, çiçek, hafif sitrus. Modern Alman aromatic noble.",ornek:"German Lager, Pilsner, Witbier, Kölsch"},
-  {id:"tradition",ad:"Hallertau Tradition",aa:5.5,g:"Alman",mo:"Bitkisel, topraksı, çiçeksi. Mittelfrueh modern dirençli çeşit (Hüll 1993).",ornek:"German Lager, Pilsner, Helles, Märzen"},
-  {id:"ella",ad:"Ella",aa:14.5,g:"Avustralya",mo:"Çiçek, anason, baharat, tropikal. Eski adı Stella (2013\'te Ella olarak yeniden adlandırıldı).",ornek:"Saison, Belgian Ale, Hefeweizen, Pale Ale"},
+  {id:"saphir",ad:"Saphir",aa:3.5,g:"Alman",mo:"Mandalina, çiçek, hafif sitrus. Modern Alman aromatic noble.",ornek:"German Lager, Pilsner, Witbier, Kölsch",alias:["saphir (german organic)"]},
+  {id:"tradition",ad:"Hallertau Tradition",aa:5.5,g:"Alman",mo:"Bitkisel, topraksı, çiçeksi. Mittelfrueh modern dirençli çeşit (Hüll 1993).",ornek:"German Lager, Pilsner, Helles, Märzen",alias:["hallertauer tradition","tradition"]},
+  {id:"ella",ad:"Ella",aa:14.5,g:"Avustralya",mo:"Çiçek, anason, baharat, tropikal. Eski adı Stella (2013\'te Ella olarak yeniden adlandırıldı).",ornek:"Saison, Belgian Ale, Hefeweizen, Pale Ale",alias:["ella (stella)"]},
   {id:"topaz",ad:"Topaz",aa:17.5,g:"Avustralya",mo:"Tropikal, reçine, baharat. Yüksek AA Avustralya bittering+aroma.",ornek:"IPA, Pale Ale, Red Ale"},
   {id:"eclipse",ad:"Eclipse",aa:15.0,g:"Avustralya",mo:"Mandalina, çam, kırmızı meyve. Avustralya dual-purpose.",ornek:"IPA, NEIPA, Pale Ale, American Ale"}
 ];
@@ -4424,42 +4424,42 @@ const HOPLAR=[
 // Maya: ek = "dolap" | "oda" | "isitici"
 // idealSc = en iyi sonuç için önerilen sıcaklık
 const MAYALAR=[
-  {id:"us05",ad:"Fermentis US-05",atu:[78,82],sc:[15,24],ideal:20,e:"Temiz / Nötr",tip:"ale",ek:"dolap",form:'dry',tol:11},
-  {id:"s04",ad:"Fermentis S-04",atu:[75,82],sc:[15,24],ideal:18,e:"Hafif meyve-topraksı",tip:"ale",ek:"dolap",form:'dry',tol:11},
-  {id:"s33",ad:"Fermentis S-33",atu:[65,70],sc:[15,22],ideal:20,e:"Hafif Belçika ester/fenolik",tip:"belcika",ek:"dolap",form:'dry',tol:11},
-  {id:"wy1056",ad:"WY1056 American Ale",atu:[73,77],sc:[15,22],ideal:19,e:"Çok temiz / nötr",tip:"ale",ek:"dolap"},
-  {id:"wy1272",ad:"WY1272 American Ale II",atu:[72,76],sc:[15,22],ideal:19,e:"Hafif meyve",tip:"ale",ek:"dolap"},
-  {id:"wy1318",ad:"WY1318 London Ale III",atu:[71,75],sc:[18,23],ideal:20,e:"Hafif meyve / İngiliz",tip:"ale",ek:"dolap"},
-  {id:"wy1028",ad:"WY1028 London Ale",atu:[73,77],sc:[15,22],ideal:19,e:"Marmelat-topraksı",tip:"ale",ek:"dolap"},
-  {id:"wy1084",ad:"WY1084 Irish Ale",atu:[71,75],sc:[17,22],ideal:20,e:"Kuru / hafif meyve",tip:"ale",ek:"dolap"},
-  {id:"wy1728",ad:"WY1728 Scottish Ale",atu:[69,73],sc:[13,24],ideal:19,e:"Topraksı / malt ön",tip:"ale",ek:"dolap"},
+  {id:"us05",ad:"Fermentis US-05",atu:[78,82],sc:[15,24],ideal:20,e:"Temiz / Nötr",tip:"ale",ek:"dolap",form:'dry',tol:11,alias:["safale us-05 (fermentis)","safale - american ale yeast us-05 (fermentis / safale)","safale us-05","fermentis safale us-05","us-05","us05"]},
+  {id:"s04",ad:"Fermentis S-04",atu:[75,82],sc:[15,24],ideal:18,e:"Hafif meyve-topraksı",tip:"ale",ek:"dolap",form:'dry',tol:11,alias:["safale s-04 (fermentis)","safale - english ale yeast s-04 (fermentis / safale)","safale s-04","fermentis safale s-04","s-04","s04"]},
+  {id:"s33",ad:"Fermentis S-33",atu:[65,70],sc:[15,22],ideal:20,e:"Hafif Belçika ester/fenolik",tip:"belcika",ek:"dolap",form:'dry',tol:11,alias:["safbrew s-33 (fermentis)","safbrew - general/belgian yeast s-33 (fermentis / safale)","s-33"]},
+  {id:"wy1056",ad:"WY1056 American Ale",atu:[73,77],sc:[15,22],ideal:19,e:"Çok temiz / nötr",tip:"ale",ek:"dolap",alias:["american ale (wyeast)","wyeast 1056","1056"]},
+  {id:"wy1272",ad:"WY1272 American Ale II",atu:[72,76],sc:[15,22],ideal:19,e:"Hafif meyve",tip:"ale",ek:"dolap",alias:["american ale ii (wyeast)","1272"]},
+  {id:"wy1318",ad:"WY1318 London Ale III",atu:[71,75],sc:[18,23],ideal:20,e:"Hafif meyve / İngiliz",tip:"ale",ek:"dolap",alias:["london ale iii (wyeast)","1318"]},
+  {id:"wy1028",ad:"WY1028 London Ale",atu:[73,77],sc:[15,22],ideal:19,e:"Marmelat-topraksı",tip:"ale",ek:"dolap",alias:["london ale (wyeast)","london ale 1028 (wyeast)","1028"]},
+  {id:"wy1084",ad:"WY1084 Irish Ale",atu:[71,75],sc:[17,22],ideal:20,e:"Kuru / hafif meyve",tip:"ale",ek:"dolap",alias:["irish ale (wyeast)","1084"]},
+  {id:"wy1728",ad:"WY1728 Scottish Ale",atu:[69,73],sc:[13,24],ideal:19,e:"Topraksı / malt ön",tip:"ale",ek:"dolap",alias:["scottish ale (wyeast)","1728"]},
   {id:"la_london",ad:"Lallemand London ESB",atu:[65,72],sc:[17,22],ideal:20,e:"Bisküvi-meyve",tip:"ale",ek:"dolap"},
   {id:"verdant",ad:"Lallemand Verdant IPA",atu:[70,80],sc:[18,23],ideal:20,e:"Tropikal / biotrans.",tip:"ale",ek:"dolap"},
-  {id:"nottm",ad:"Nottingham Dry (Lallemand)",atu:[77,83],sc:[10,22],ideal:18,e:"Temiz / kuru / hızlı",tip:"ale",ek:"oda"},
-  {id:"wy3068",ad:"WY3068 Weihenstephan",atu:[73,77],sc:[17,22],ideal:20,e:"Muz-karanfil",tip:"wheat",ek:"dolap"},
-  {id:"wy3638",ad:"WY3638 Bavarian Wheat",atu:[70,76],sc:[18,23],ideal:20,e:"Dengeli buğday",tip:"wheat",ek:"dolap"},
+  {id:"nottm",ad:"Nottingham Dry (Lallemand)",atu:[77,83],sc:[10,22],ideal:18,e:"Temiz / kuru / hızlı",tip:"ale",ek:"oda",alias:["nottingham ale yeast (danstar)","nottingham ale (danstar)","nottingham ale","nottingham ale yeast (white labs)","nottingham ale yeast (ale)","nottingham ale (ale)","lallemand nottingham","danstar nottingham ale","nottingham"]},
+  {id:"wy3068",ad:"WY3068 Weihenstephan",atu:[73,77],sc:[17,22],ideal:20,e:"Muz-karanfil",tip:"wheat",ek:"dolap",alias:["weihenstephan weizen (wyeast)","3068"]},
+  {id:"wy3638",ad:"WY3638 Bavarian Wheat",atu:[70,76],sc:[18,23],ideal:20,e:"Dengeli buğday",tip:"wheat",ek:"dolap",alias:["bavarian wheat (wyeast)","3638"]},
   {id:"bb16",ad:"BB-16 Wheat Ale (=WB-06)",atu:[84,89],sc:[17,22],ideal:20,e:"Temiz buğday. ButikBira resmi: WB-06 eşdeğeri.",tip:"wheat",ek:"dolap"},
   {id:"la_munich",ad:"Lallemand Munich Classic",atu:[75,80],sc:[17,22],ideal:20,e:"Muz-karanfil",tip:"wheat",ek:"dolap"},
-  {id:"wy3944",ad:"WY3944 Belgian Wit",atu:[72,76],sc:[17,22],ideal:20,e:"Spicy-fenolik",tip:"wit",ek:"dolap"},
-  {id:"w3470",ad:"W-34/70 Lager (Saflager)",atu:[80,84],sc:[9,15],ideal:12,e:"Çok temiz",tip:"lager",ek:"dolap",form:'dry',tol:11},
-  {id:"s189",ad:"Fermentis S-189 Lager",atu:[80,84],sc:[9,15],ideal:12,e:"Temiz",tip:"lager",ek:"dolap"},
-  {id:"wy2206",ad:"WY2206 Bavarian Lager",atu:[73,77],sc:[10,15],ideal:12,e:"Malt öne çıkar",tip:"lager",ek:"dolap"},
-  {id:"wy2308",ad:"WY2308 Munich Lager",atu:[73,77],sc:[8,14],ideal:11,e:"Malt / karamel",tip:"lager",ek:"dolap"},
-  {id:"wy2124",ad:"WY2124 Bohemian Lager",atu:[73,77],sc:[8,15],ideal:12,e:"Çiçeksi / nazik",tip:"lager",ek:"dolap"},
+  {id:"wy3944",ad:"WY3944 Belgian Wit",atu:[72,76],sc:[17,22],ideal:20,e:"Spicy-fenolik",tip:"wit",ek:"dolap",alias:["belgian wit ale (wyeast)","3944"]},
+  {id:"w3470",ad:"W-34/70 Lager (Saflager)",atu:[80,84],sc:[9,15],ideal:12,e:"Çok temiz",tip:"lager",ek:"dolap",form:'dry',tol:11,alias:["saflager w-34/70 (fermentis)","saflager - german lager yeast w-34/70 (fermentis / safale)","saflager w-34/70","fermentis saflager w-34/70","w-34/70","34/70"]},
+  {id:"s189",ad:"Fermentis S-189 Lager",atu:[80,84],sc:[9,15],ideal:12,e:"Temiz",tip:"lager",ek:"dolap",alias:["s-189"]},
+  {id:"wy2206",ad:"WY2206 Bavarian Lager",atu:[73,77],sc:[10,15],ideal:12,e:"Malt öne çıkar",tip:"lager",ek:"dolap",alias:["bavarian lager (wyeast)","2206"]},
+  {id:"wy2308",ad:"WY2308 Munich Lager",atu:[73,77],sc:[8,14],ideal:11,e:"Malt / karamel",tip:"lager",ek:"dolap",alias:["munich lager (wyeast)","munich lager 2308 (wyeast)","2308"]},
+  {id:"wy2124",ad:"WY2124 Bohemian Lager",atu:[73,77],sc:[8,15],ideal:12,e:"Çiçeksi / nazik",tip:"lager",ek:"dolap",alias:["bohemian lager (wyeast)","bohemian lager 2124 (wyeast)","2124"]},
   {id:"la_koln",ad:"Lallemand Köln (Kölsch)",atu:[75,82],sc:[15,20],ideal:19,e:"Temiz / hafif meyve",tip:"ale",ek:"dolap"},
-  {id:"t58",ad:"Fermentis T-58",atu:[70,75],sc:[15,24],ideal:22,e:"Baharat / fenolik",tip:"belcika",ek:"oda",form:'dry',tol:11},
-  {id:"wy3522",ad:"WY3522 Belgian Ardennes",atu:[72,76],sc:[18,25],ideal:21,e:"Spicy-meyve",tip:"belcika",ek:"oda"},
-  {id:"wy3787",ad:"WY3787 Trappist High Grav",atu:[74,78],sc:[18,26],ideal:22,e:"Kompleks-meyve",tip:"belcika",ek:"isitici"},
-  {id:"wy3711",ad:"WY3711 French Saison",atu:[77,83],sc:[18,28],ideal:24,e:"Biber / tropikal ester",tip:"saison",ek:"isitici"},
-  {id:"wy3724",ad:"WY3724 Belgian Saison",atu:[76,80],sc:[21,35],ideal:25,e:"Biber / ester / Dupont karakter",tip:"saison",ek:"isitici"},
+  {id:"t58",ad:"Fermentis T-58",atu:[70,75],sc:[15,24],ideal:22,e:"Baharat / fenolik",tip:"belcika",ek:"oda",form:'dry',tol:11,alias:["safbrew t-58 (fermentis)","safbrew - specialty ale yeast t-58 (fermentis / safale)","t-58"]},
+  {id:"wy3522",ad:"WY3522 Belgian Ardennes",atu:[72,76],sc:[18,25],ideal:21,e:"Spicy-meyve",tip:"belcika",ek:"oda",alias:["3522"]},
+  {id:"wy3787",ad:"WY3787 Trappist High Grav",atu:[74,78],sc:[18,26],ideal:22,e:"Kompleks-meyve",tip:"belcika",ek:"isitici",alias:["trappist high gravity (wyeast)","trappist high gravity","3787"]},
+  {id:"wy3711",ad:"WY3711 French Saison",atu:[77,83],sc:[18,28],ideal:24,e:"Biber / tropikal ester",tip:"saison",ek:"isitici",alias:["french saison (wyeast)","3711"]},
+  {id:"wy3724",ad:"WY3724 Belgian Saison",atu:[76,80],sc:[21,35],ideal:25,e:"Biber / ester / Dupont karakter",tip:"saison",ek:"isitici",alias:["belgian saison yeast (wyeast)","belgian saison (wyeast)","3724"]},
   {id:"kveikv",ad:"Kveik Voss (Lallemand)",atu:[77,82],sc:[25,40],ideal:32,e:"Narenciye",tip:"kveik",ek:"isitici"},
   {id:"kveiko",ad:"Kveik Oslo",atu:[75,82],sc:[25,40],ideal:32,e:"Nötr-temiz",tip:"kveik",ek:"isitici"},
   {id:"kveik_fg",ad:"Kveik Hornindal",atu:[75,82],sc:[25,40],ideal:32,e:"Tropikal-meyve",tip:"kveik",ek:"isitici"},
   // Fermentis eksikler
-  {id:"wb06",ad:"Fermentis WB-06 (Buğday Ale)",atu:[84,89],sc:[15,24],ideal:20,e:"Muz-baharat",tip:"wheat",ek:"dolap",form:'dry',tol:11},
-  {id:"s23",ad:"Fermentis S-23 (Lager)",atu:[80,84],sc:[9,22],ideal:13,e:"Temiz lager",tip:"lager",ek:"dolap",form:'dry',tol:11},
-  {id:"be256",ad:"Fermentis BE-256 (Abbey/Tripel)",atu:[82,87],sc:[15,28],ideal:22,e:"Meyve-baharat",tip:"belcika",ek:"isitici",form:'dry',tol:13},
-  {id:"be134",ad:"Fermentis BE-134 (Saison)",atu:[89,93],sc:[15,30],ideal:24,e:"Biber-tropikal",tip:"saison",ek:"isitici",form:'dry',tol:13},
+  {id:"wb06",ad:"Fermentis WB-06 (Buğday Ale)",atu:[84,89],sc:[15,24],ideal:20,e:"Muz-baharat",tip:"wheat",ek:"dolap",form:'dry',tol:11,alias:["safbrew wb-06 (fermentis)","safbrew - wheat beer yeast wb-06 (fermentis / safale)","fermentis wb-06 dry wheat beer yeast","wb-06"]},
+  {id:"s23",ad:"Fermentis S-23 (Lager)",atu:[80,84],sc:[9,22],ideal:13,e:"Temiz lager",tip:"lager",ek:"dolap",form:'dry',tol:11,alias:["saflager s-23 (fermentis)","saflager - german lager yeast s-23 (fermentis / safale)","s-23"]},
+  {id:"be256",ad:"Fermentis BE-256 (Abbey/Tripel)",atu:[82,87],sc:[15,28],ideal:22,e:"Meyve-baharat",tip:"belcika",ek:"isitici",form:'dry',tol:13,alias:["abbey ale (fermentis)","safbrew - abbaye yeast (fermentis / safale)","be-256"]},
+  {id:"be134",ad:"Fermentis BE-134 (Saison)",atu:[89,93],sc:[15,30],ideal:24,e:"Biber-tropikal",tip:"saison",ek:"isitici",form:'dry',tol:13,alias:["be-134"]},
   // BiraBurada markalı (eşdeğerleri belirtilmiş)
   {id:"bb_ale",ad:"BiraBurada Maya Amerikan Ale (=US-05)",atu:[78,82],sc:[15,24],ideal:20,e:"Temiz-nötr",tip:"ale",ek:"dolap"},
   {id:"bb_wheat",ad:"BiraBurada Maya Alman Weisbier (=WB-06)",atu:[84,89],sc:[15,24],ideal:20,e:"Muz-baharat",tip:"wheat",ek:"dolap"},
@@ -4488,53 +4488,53 @@ const MAYALAR=[
   {id:"bb_eng_ale",ad:"BB English Ale",atu:[74,82],sc:[15,20],ideal:18,e:"Klasik İngiliz ale. Malt ön planda.",tip:"ale",ek:"dolap"},
   {id:"bb_pilsner",ad:"BB Pilsner Mayası",atu:[80,84],sc:[9,15],ideal:12,e:"Pilsner/Lager. Temiz ve crisp bitiş.",tip:"lager",ek:"dolap"},
   // ── Lallemand Tüm Liste ────────────────────────────────────
-  {id:"la_windsor",ad:"Lallemand Windsor",atu:[68,75],sc:[15,22],ideal:20,e:"Malt-meyve. İngiliz bitter/ESB. Orta attenüasyon.",tip:"ale",ek:"dolap"},
-  {id:"la_bry97",ad:"Lallemand BRY-97 American West Coast",atu:[77,83],sc:[15,22],ideal:20,e:"Çok temiz. West Coast IPA, Pale Ale.",tip:"ale",ek:"dolap"},
+  {id:"la_windsor",ad:"Lallemand Windsor",atu:[68,75],sc:[15,22],ideal:20,e:"Malt-meyve. İngiliz bitter/ESB. Orta attenüasyon.",tip:"ale",ek:"dolap",alias:["windsor ale yeast (danstar)","danstar windsor ale","windsor yeast"]},
+  {id:"la_bry97",ad:"Lallemand BRY-97 American West Coast",atu:[77,83],sc:[15,22],ideal:20,e:"Çok temiz. West Coast IPA, Pale Ale.",tip:"ale",ek:"dolap",alias:["american west coast yeast bry-97 (danstar)","bry-97 american west coast","bry-97 american west coast (danstar)","bry-97"]},
   {id:"la_cbc1",ad:"Lallemand CBC-1 (Şişe Kondisyon)",atu:[75,85],sc:[15,28],ideal:22,e:"Şişe/fıçı kondisyonu için. Yüksek alkol toleranslı.",tip:"ale",ek:"oda"},
   {id:"la_diamond",ad:"Lallemand Diamond Lager",atu:[77,83],sc:[10,15],ideal:12,e:"Çok temiz lager. Crisp bitiş.",tip:"lager",ek:"dolap"},
-  {id:"la_belle",ad:"Lallemand Belle Saison",atu:[85,90],sc:[15,35],ideal:28,e:"Geniş sıcaklık aralığı. Tropikal-biber-çiçeksi.",tip:"saison",ek:"isitici"},
+  {id:"la_belle",ad:"Lallemand Belle Saison",atu:[85,90],sc:[15,35],ideal:28,e:"Geniş sıcaklık aralığı. Tropikal-biber-çiçeksi.",tip:"saison",ek:"isitici",alias:["belle saison (danstar)","belle saison yeast (danstar)"]},
   {id:"la_philly",ad:"Lallemand WildBrew Philly Sour",atu:[78,82],sc:[20,35],ideal:28,e:"Lachancea. Doğal laktik asit. Sour ale.",tip:"sour",ek:"isitici"},
   {id:"la_sour_pitch",ad:"Lallemand WildBrew Sour Pitch",atu:[4,8],sc:[35,45],ideal:40,e:"Laktik asit üretir. Hızlı kettle souring. 24-48 saat. Yüksek sıcaklık. Bakteri karışımı (Lb + Ped) — sonrasında ayrı ale mayası gerekir.",tip:"sour",ek:"isitici"},
   {id:"la_helveticus",ad:"Lallemand WildBrew Helveticus",atu:[4,6],sc:[35,48],ideal:42,e:"Sadece laktik asit. Kettle souring için. Maya değil — bakteri. Sonrasında ayrı ale mayası pitch'lenmeli.",tip:"sour",ek:"isitici"},
   {id:"la_abbaye",ad:"Lallemand Abbaye",atu:[80,84],sc:[17,25],ideal:22,e:"Belçika manastır tarzı. Meyve-baharat-fenolik.",tip:"belcika",ek:"isitici"},
   {id:"la_farmhouse",ad:"Lallemand Farmhouse",atu:[78,84],sc:[18,28],ideal:22,e:"Farmhouse/Saison. Spicy-tropikal.",tip:"saison",ek:"isitici"},
   // ── Fermentis Eksikler ─────────────────────────────────────
-  {id:"k97",ad:"Fermentis K-97 (German Ale)",atu:[80,84],sc:[12,25],ideal:18,e:"Alman ale. Hafif meyve. Kölsch/Alt tipi.",tip:"ale",ek:"dolap",form:'dry',tol:11},
+  {id:"k97",ad:"Fermentis K-97 (German Ale)",atu:[80,84],sc:[12,25],ideal:18,e:"Alman ale. Hafif meyve. Kölsch/Alt tipi.",tip:"ale",ek:"dolap",form:'dry',tol:11,alias:["safale - german ale yeast k-97 (fermentis / safale)","k-97"]},
   {id:"ha18",ad:"Fermentis SafAle HA-18 (High Attenuation)",atu:[82,86],sc:[15,25],ideal:20,e:"Yüksek attenüasyon ale mayası. Brut IPA, Dry biralarda. Glukoamilaz enzimi içerir.",tip:"ale",ek:"oda"},
   {id:"f2",ad:"Fermentis SafAle F-2 (Şişe Kondisyon)",atu:[70,75],sc:[15,25],ideal:20,e:"Şişe kondisyonu. Yüksek alkol toleranslı.",tip:"ale",ek:"oda"},
   {id:"lc_rye",ad:"LalBrew Rye (Lallemand)",atu:[74,80],sc:[15,22],ideal:18,e:"Çavdar mayası. Hafif spicy-meyve.",tip:"ale",ek:"dolap"},
   // ── Mangrove Jack's Tüm Liste ─────────────────────────────
-  {id:"mj_m15",ad:"MJ M15 Empire Ale",atu:[70,75],sc:[18,22],ideal:20,e:"İngiliz-Amerikan arası. Bisküvi-meyve.",tip:"ale",ek:"dolap"},
-  {id:"mj_m20",ad:"MJ M20 Bavarian Wheat",atu:[70,75],sc:[18,30],ideal:22,e:"Bavyera buğday. Muz-karanfil.",tip:"wheat",ek:"dolap"},
-  {id:"mj_m21",ad:"MJ M21 ESB",atu:[70,75],sc:[18,25],ideal:20,e:"Extra Special Bitter. Meyve-topraksı-malt.",tip:"ale",ek:"dolap"},
-  {id:"mj_m29",ad:"MJ M29 French Saison",atu:[85,90],sc:[26,32],ideal:29,e:"Fransız saison. Biber-çiçeksi-tropikal.",tip:"saison",ek:"isitici"},
-  {id:"mj_m31",ad:"MJ M31 Belgian Tripel",atu:[82,88],sc:[18,28],ideal:22,e:"Belçika Tripel. Meyve-baharat-yüksek alkol.",tip:"belcika",ek:"isitici"},
-  {id:"mj_m36",ad:"MJ M36 Liberty Bell Ale",atu:[74,78],sc:[18,23],ideal:20,e:"Amerikan tarzı. Nötr-temiz.",tip:"ale",ek:"dolap"},
-  {id:"mj_m41",ad:"MJ M41 Belgian Ale",atu:[80,85],sc:[18,28],ideal:22,e:"Belçika ale. Meyve-baharat-fenolik.",tip:"belcika",ek:"isitici"},
-  {id:"mj_m42",ad:"MJ M42 New World Strong Ale",atu:[77,82],sc:[16,22],ideal:19,e:"Güçlü ale. Yüksek alkol toleranslı.",tip:"ale",ek:"oda"},
-  {id:"mj_m44",ad:"MJ M44 US West Coast",atu:[78,82],sc:[18,23],ideal:20,e:"West Coast. Temiz-nötr. IPA/Pale Ale.",tip:"ale",ek:"dolap"},
-  {id:"mj_m47",ad:"MJ M47 Belgian Abbey",atu:[74,78],sc:[18,25],ideal:20,e:"Belçika manastır. Dubbel/Tripel.",tip:"belcika",ek:"oda"},
-  {id:"mj_m54",ad:"MJ M54 California Lager",atu:[77,82],sc:[18,20],ideal:19,e:"Ale sıcaklığında lager karakteri.",tip:"lager",ek:"dolap"},
-  {id:"mj_m66",ad:"MJ M66 Hophead Ale",atu:[74,82],sc:[18,22],ideal:20,e:"NEIPA için özel — aromatik/ester enzim takviyesi. Hazy IPA biyotransform.",tip:"ale",ek:"dolap"},
-  {id:"mj_m76",ad:"MJ M76 Bavarian Lager",atu:[72,76],sc:[10,15],ideal:12,e:"Bavyera lager. Malt öne çıkar.",tip:"lager",ek:"dolap"},
-  {id:"mj_m84",ad:"MJ M84 Bohemian Lager",atu:[72,76],sc:[10,15],ideal:12,e:"Çek lager. Nazik-çiçeksi.",tip:"lager",ek:"dolap"},
+  {id:"mj_m15",ad:"MJ M15 Empire Ale",atu:[70,75],sc:[18,22],ideal:20,e:"İngiliz-Amerikan arası. Bisküvi-meyve.",tip:"ale",ek:"dolap",alias:["m15"]},
+  {id:"mj_m20",ad:"MJ M20 Bavarian Wheat",atu:[70,75],sc:[18,30],ideal:22,e:"Bavyera buğday. Muz-karanfil.",tip:"wheat",ek:"dolap",alias:["bavarian wheat (mangrove jack's)","bavarian wheat yeast m20 (mangrove jack)","m20"]},
+  {id:"mj_m21",ad:"MJ M21 ESB",atu:[70,75],sc:[18,25],ideal:20,e:"Extra Special Bitter. Meyve-topraksı-malt.",tip:"ale",ek:"dolap",alias:["m21"]},
+  {id:"mj_m29",ad:"MJ M29 French Saison",atu:[85,90],sc:[26,32],ideal:29,e:"Fransız saison. Biber-çiçeksi-tropikal.",tip:"saison",ek:"isitici",alias:["m29"]},
+  {id:"mj_m31",ad:"MJ M31 Belgian Tripel",atu:[82,88],sc:[18,28],ideal:22,e:"Belçika Tripel. Meyve-baharat-yüksek alkol.",tip:"belcika",ek:"isitici",alias:["m31"]},
+  {id:"mj_m36",ad:"MJ M36 Liberty Bell Ale",atu:[74,78],sc:[18,23],ideal:20,e:"Amerikan tarzı. Nötr-temiz.",tip:"ale",ek:"dolap",alias:["liberty bell ale m36 (mangrove jack)","m36"]},
+  {id:"mj_m41",ad:"MJ M41 Belgian Ale",atu:[80,85],sc:[18,28],ideal:22,e:"Belçika ale. Meyve-baharat-fenolik.",tip:"belcika",ek:"isitici",alias:["belgian ale (mangrove jack's)","m41"]},
+  {id:"mj_m42",ad:"MJ M42 New World Strong Ale",atu:[77,82],sc:[16,22],ideal:19,e:"Güçlü ale. Yüksek alkol toleranslı.",tip:"ale",ek:"oda",alias:["new world strong ale m42 (mangrove jack)","m42"]},
+  {id:"mj_m44",ad:"MJ M44 US West Coast",atu:[78,82],sc:[18,23],ideal:20,e:"West Coast. Temiz-nötr. IPA/Pale Ale.",tip:"ale",ek:"dolap",alias:["u.s. west coast (mangrove jack's)","us west coast yeast m44 (mangrove jack)","us west coast yeast (mangrove jack)","m44"]},
+  {id:"mj_m47",ad:"MJ M47 Belgian Abbey",atu:[74,78],sc:[18,25],ideal:20,e:"Belçika manastır. Dubbel/Tripel.",tip:"belcika",ek:"oda",alias:["m47"]},
+  {id:"mj_m54",ad:"MJ M54 California Lager",atu:[77,82],sc:[18,20],ideal:19,e:"Ale sıcaklığında lager karakteri.",tip:"lager",ek:"dolap",alias:["californian lager m54 (mangrove jack)","m54"]},
+  {id:"mj_m66",ad:"MJ M66 Hophead Ale",atu:[74,82],sc:[18,22],ideal:20,e:"NEIPA için özel — aromatik/ester enzim takviyesi. Hazy IPA biyotransform.",tip:"ale",ek:"dolap",alias:["m66"]},
+  {id:"mj_m76",ad:"MJ M76 Bavarian Lager",atu:[72,76],sc:[10,15],ideal:12,e:"Bavyera lager. Malt öne çıkar.",tip:"lager",ek:"dolap",alias:["m76"]},
+  {id:"mj_m84",ad:"MJ M84 Bohemian Lager",atu:[72,76],sc:[10,15],ideal:12,e:"Çek lager. Nazik-çiçeksi.",tip:"lager",ek:"dolap",alias:["bohemian lager (mangrove jack's)","m84"]},
 
   // ── White Labs (WLP) — Referans dünya mayası ──────────────────
-  {id:"wlp001",ad:"WLP001 California Ale",atu:[73,80],sc:[19,22],ideal:20,e:"Temiz Amerikan ale. US-05/WY1056 eşdeğeri likit.",tip:"ale",ek:"dolap"},
-  {id:"wlp002",ad:"WLP002 English Ale",atu:[63,70],sc:[18,20],ideal:19,e:"Klasik İngiliz ale. Çok yüksek çökelme. Meyve ester.",tip:"ale",ek:"dolap",tol:10},
-  {id:"wlp004",ad:"WLP004 Irish Ale",atu:[69,74],sc:[18,20],ideal:19,e:"Stout/Porter için. Tatlı meyve, hafif tart. Guinness soy.",tip:"ale",ek:"dolap"},
-  {id:"wlp007",ad:"WLP007 Dry English Ale",atu:[70,80],sc:[18,20],ideal:19,e:"Yüksek attenüasyon İngiliz. ESB, Porter. Nötr.",tip:"ale",ek:"dolap"},
-  {id:"wlp029",ad:"WLP029 Kölsch/German Ale",atu:[72,78],sc:[18,20],ideal:19,e:"Kölsch. Temiz, hafif üzüm. Düşük sıcaklıkta çalışır.",tip:"ale",ek:"dolap"},
-  {id:"wlp300",ad:"WLP300 Hefeweizen",atu:[72,76],sc:[19,22],ideal:21,e:"Klasik Weihenstephan. Muz-karanfil dengesi.",tip:"wheat",ek:"dolap"},
-  {id:"wlp500",ad:"WLP500 Trappist Ale",atu:[75,80],sc:[19,22],ideal:21,e:"Chimay soy. Trappist karakter. Meyve-spicy.",tip:"belcika",ek:"oda"},
-  {id:"wlp550",ad:"WLP550 Belgian Ale",atu:[78,85],sc:[20,25],ideal:22,e:"Achouffe benzeri. Yüksek attenüasyon Belçika.",tip:"belcika",ek:"isitici"},
-  {id:"wlp565",ad:"WLP565 Belgian Saison I",atu:[65,75],sc:[20,25],ideal:24,e:"Dupont soy. Klasik Saison. Fermentasyon takılabilir (stuck fermentation yaygın — yüksek sıcaklıkta başlat).",tip:"saison",ek:"isitici"},
-  {id:"wlp570",ad:"WLP570 Belgian Golden",atu:[73,78],sc:[20,25],ideal:22,e:"Duvel soy. Belgian Golden Strong Ale.",tip:"belcika",ek:"isitici"},
-  {id:"wlp585",ad:"WLP585 Belgian Saison III",atu:[78,85],sc:[20,25],ideal:24,e:"Saison. Çiçek-spicy. Dupont'un variantı.",tip:"saison",ek:"isitici"},
-  {id:"wlp670",ad:"WLP670 Farmhouse Ale",atu:[75,82],sc:[21,26],ideal:24,e:"Saison + Brett karışımı. Rustic farmhouse.",tip:"saison",ek:"isitici"},
-  {id:"wlp800",ad:"WLP800 Pilsner Lager",atu:[72,77],sc:[10,13],ideal:11,e:"Pilsner Urquell soy. Klasik Bohemian Pilsner.",tip:"lager",ek:"dolap"},
-  {id:"wlp830",ad:"WLP830 German Lager",atu:[74,79],sc:[10,13],ideal:11,e:"Klasik German Pils. Temiz, crisp.",tip:"lager",ek:"dolap"},
-  {id:"wlp838",ad:"WLP838 Southern German Lager",atu:[68,76],sc:[10,13],ideal:11,e:"Malt karakterli. Münih Helles/Bock için.",tip:"lager",ek:"dolap"},
+  {id:"wlp001",ad:"WLP001 California Ale",atu:[73,80],sc:[19,22],ideal:20,e:"Temiz Amerikan ale. US-05/WY1056 eşdeğeri likit.",tip:"ale",ek:"dolap",alias:["california ale yeast (white labs)","california ale yeast wlp001 (white labs)","california ale (white labs)","wlp001"]},
+  {id:"wlp002",ad:"WLP002 English Ale",atu:[63,70],sc:[18,20],ideal:19,e:"Klasik İngiliz ale. Çok yüksek çökelme. Meyve ester.",tip:"ale",ek:"dolap",tol:10,alias:["english ale yeast (white labs)","english ale yeast wlp002 (white labs)","wlp002"]},
+  {id:"wlp004",ad:"WLP004 Irish Ale",atu:[69,74],sc:[18,20],ideal:19,e:"Stout/Porter için. Tatlı meyve, hafif tart. Guinness soy.",tip:"ale",ek:"dolap",alias:["irish ale yeast (white labs)","irish ale yeast wlp004 (white labs)","wlp004"]},
+  {id:"wlp007",ad:"WLP007 Dry English Ale",atu:[70,80],sc:[18,20],ideal:19,e:"Yüksek attenüasyon İngiliz. ESB, Porter. Nötr.",tip:"ale",ek:"dolap",alias:["dry english ale yeast (white labs)","dry english ale yeast wlp007 (white labs)","wlp007"]},
+  {id:"wlp029",ad:"WLP029 Kölsch/German Ale",atu:[72,78],sc:[18,20],ideal:19,e:"Kölsch. Temiz, hafif üzüm. Düşük sıcaklıkta çalışır.",tip:"ale",ek:"dolap",alias:["german ale/kölsch yeast (white labs)","german ale/ kölsch yeast wlp029 (white labs)","german ale/kölsch (white labs)","wlp029"]},
+  {id:"wlp300",ad:"WLP300 Hefeweizen",atu:[72,76],sc:[19,22],ideal:21,e:"Klasik Weihenstephan. Muz-karanfil dengesi.",tip:"wheat",ek:"dolap",alias:["hefeweizen ale yeast (white labs)","hefeweizen ale yeast wlp300 (white labs)","wlp300"]},
+  {id:"wlp500",ad:"WLP500 Trappist Ale",atu:[75,80],sc:[19,22],ideal:21,e:"Chimay soy. Trappist karakter. Meyve-spicy.",tip:"belcika",ek:"oda",alias:["trappist ale yeast (white labs)","trappist ale yeast wlp500 (white labs)","wlp500"]},
+  {id:"wlp550",ad:"WLP550 Belgian Ale",atu:[78,85],sc:[20,25],ideal:22,e:"Achouffe benzeri. Yüksek attenüasyon Belçika.",tip:"belcika",ek:"isitici",alias:["belgian ale yeast (white labs)","belgian ale yeast wlp550 (white labs)","wlp550"]},
+  {id:"wlp565",ad:"WLP565 Belgian Saison I",atu:[65,75],sc:[20,25],ideal:24,e:"Dupont soy. Klasik Saison. Fermentasyon takılabilir (stuck fermentation yaygın — yüksek sıcaklıkta başlat).",tip:"saison",ek:"isitici",alias:["belgian saison i yeast (white labs)","belgian saison i yeast wlp565 (white labs)","wlp565"]},
+  {id:"wlp570",ad:"WLP570 Belgian Golden",atu:[73,78],sc:[20,25],ideal:22,e:"Duvel soy. Belgian Golden Strong Ale.",tip:"belcika",ek:"isitici",alias:["belgian golden ale yeast (white labs)","belgian golden ale yeast wlp570 (white labs)","wlp570"]},
+  {id:"wlp585",ad:"WLP585 Belgian Saison III",atu:[78,85],sc:[20,25],ideal:24,e:"Saison. Çiçek-spicy. Dupont'un variantı.",tip:"saison",ek:"isitici",alias:["wlp585"]},
+  {id:"wlp670",ad:"WLP670 Farmhouse Ale",atu:[75,82],sc:[21,26],ideal:24,e:"Saison + Brett karışımı. Rustic farmhouse.",tip:"saison",ek:"isitici",alias:["american farmhouse blend (wlp670)","american farmhouse blend (wlp670) (white labs)","wlp670"]},
+  {id:"wlp800",ad:"WLP800 Pilsner Lager",atu:[72,77],sc:[10,13],ideal:11,e:"Pilsner Urquell soy. Klasik Bohemian Pilsner.",tip:"lager",ek:"dolap",alias:["pilsner lager yeast (white labs)","pilsner lager yeast wlp800 (white labs)","wlp800"]},
+  {id:"wlp830",ad:"WLP830 German Lager",atu:[74,79],sc:[10,13],ideal:11,e:"Klasik German Pils. Temiz, crisp.",tip:"lager",ek:"dolap",alias:["german lager yeast (white labs)","german lager yeast wlp830 (white labs)","wlp830"]},
+  {id:"wlp838",ad:"WLP838 Southern German Lager",atu:[68,76],sc:[10,13],ideal:11,e:"Malt karakterli. Münih Helles/Bock için.",tip:"lager",ek:"dolap",alias:["southern german lager yeast (white labs)","wlp838"]},
   // ── Omega Yeast (OYL) — Referans dünya mayası ─────────────────
   {id:"oyl004",ad:"Omega OYL-004 West Coast Ale I",atu:[73,80],sc:[18,22],ideal:20,e:"Chico soy (US-05 benzeri). West Coast IPA.",tip:"ale",ek:"dolap",form:'liquid'},
   {id:"oyl011",ad:"Omega OYL-011 British Ale V",atu:[71,75],sc:[18,20],ideal:19,e:"London III benzeri. Meyve+yumuşak. NEIPA için.",tip:"ale",ek:"dolap",form:'liquid'},
@@ -4560,11 +4560,22 @@ const MAYALAR=[
   {id:"imp_g02",ad:"Imperial G02 Kaiser",atu:[73,77],sc:[10,13],ideal:11,e:"German Pilsner Lager. Temiz crisp.",tip:"lager",ek:"dolap"},
   {id:"imp_l05",ad:"Imperial L05 Cablecar",atu:[70,74],sc:[15,20],ideal:18,e:"California Common (Steam Beer). Anchor soy.",tip:"lager",ek:"dolap"},
 
-  {id:"wy1968",ad:"WY1968 London ESB",atu:[67,71],sc:[18,22],ideal:20,e:"Klasik English ESB. Whitbread soyu. Yüksek çökelme.",tip:"ale",ek:"dolap"},
-  {id:"wy1388",ad:"WY1388 Belgian Strong Ale",atu:[73,77],sc:[18,25],ideal:22,e:"Duvel soyu. Belgian Golden Strong Ale.",tip:"belcika",ek:"isitici"},
-  {id:"wy2001",ad:"WY2001 Pilsner Urquell",atu:[72,76],sc:[10,13],ideal:11,e:"Pilsner Urquell soyu. Klasik Bohemian Pilsner.",tip:"lager",ek:"dolap"},
-  {id:"wy2112",ad:"WY2112 California Lager",atu:[67,71],sc:[14,17],ideal:16,e:"Anchor Steam soyu. California Common.",tip:"lager",ek:"dolap"},
+  {id:"wy1968",ad:"WY1968 London ESB",atu:[67,71],sc:[18,22],ideal:20,e:"Klasik English ESB. Whitbread soyu. Yüksek çökelme.",tip:"ale",ek:"dolap",alias:["london esb ale (wyeast)","1968"]},
+  {id:"wy1388",ad:"WY1388 Belgian Strong Ale",atu:[73,77],sc:[18,25],ideal:22,e:"Duvel soyu. Belgian Golden Strong Ale.",tip:"belcika",ek:"isitici",alias:["belgian strong ale (wyeast)","belgian strong ale 1388 (wyeast)","1388"]},
+  {id:"wy2001",ad:"WY2001 Pilsner Urquell",atu:[72,76],sc:[10,13],ideal:11,e:"Pilsner Urquell soyu. Klasik Bohemian Pilsner.",tip:"lager",ek:"dolap",alias:["urquell lager (wyeast)","2001"]},
+  {id:"wy2112",ad:"WY2112 California Lager",atu:[67,71],sc:[14,17],ideal:16,e:"Anchor Steam soyu. California Common.",tip:"lager",ek:"dolap",alias:["california lager (wyeast)","california lager 2112 (wyeast)","2112"]},
 ];
+// ═══ SPRINT BV: katalog arama — ad + alias (KİMLİK eşanlamlıları) ═══
+// alias = "bu ham ad BU kaydı adlandırır" (ör. "hallertauer" → Hallertau Mittelfrueh). İKAME DEĞİL:
+// "liberty" Hallertau'yu BULMAZ. Kaynak: _bv_alias_kaynak.js (V2/V3 tablolarının kimlik satırları +
+// 376K korpus frekansı, her satır korpusta görülmüş + renk/alfa/attenuation kapısından geçmiş).
+// ar: küçük harfe çevrilmiş arama terimi. Boş terim = eşleşir.
+function _bmKatEsles(x, ar){
+  if(!x) return false;
+  if(!ar) return true;
+  if(String(x.ad||'').toLowerCase().indexOf(ar)>=0) return true;
+  return Array.isArray(x.alias) && x.alias.some(function(a){ return a.indexOf(ar)>=0; });
+}
 
 // Su profili mineralleri: her birinin ppm katkısı (1g/10L)
 // [Ca, Mg, Na, Cl, SO4, HCO3]
@@ -7326,9 +7337,9 @@ window._stokAra=function(val){
   const ar=(sekmeArama.stok||'').toLowerCase().trim();
   const kaynak=document.getElementById('stokKaynak');
   if(kaynak){
-    const hFlt=ar?HOPLAR.filter(h=>h.ad.toLowerCase().includes(ar)):HOPLAR;
-    const mFlt=ar?MALTLAR.filter(m=>m.ad.toLowerCase().includes(ar)):MALTLAR;
-    const myFlt=ar?MAYALAR.filter(m=>m.ad.toLowerCase().includes(ar)):MAYALAR;
+    const hFlt=ar?HOPLAR.filter(h=>_bmKatEsles(h,ar)):HOPLAR;
+    const mFlt=ar?MALTLAR.filter(m=>_bmKatEsles(m,ar)):MALTLAR;
+    const myFlt=ar?MAYALAR.filter(m=>_bmKatEsles(m,ar)):MAYALAR;
     const mnFlt=ar?MINERALLER.filter(m=>m.ad.toLowerCase().includes(ar)):MINERALLER;
     const kFlt=ar?KATKILAR.filter(k=>k.ad.toLowerCase().includes(ar)):KATKILAR;
     let html='<option value="">── Listeden seç ──</option>';
@@ -13136,9 +13147,9 @@ function rStok(){
   }).join('');
   // Arama terimine göre dropdown filtrele
   const _sAr=sArama; // rStok başında tanımlı
-  const _hFlt=_sAr?HOPLAR.filter(h=>h.ad.toLowerCase().includes(_sAr)):HOPLAR;
-  const _mFlt=_sAr?MALTLAR.filter(m=>m.ad.toLowerCase().includes(_sAr)):MALTLAR;
-  const _myFlt=_sAr?MAYALAR.filter(m=>m.ad.toLowerCase().includes(_sAr)):MAYALAR;
+  const _hFlt=_sAr?HOPLAR.filter(h=>_bmKatEsles(h,_sAr)):HOPLAR;
+  const _mFlt=_sAr?MALTLAR.filter(m=>_bmKatEsles(m,_sAr)):MALTLAR;
+  const _myFlt=_sAr?MAYALAR.filter(m=>_bmKatEsles(m,_sAr)):MAYALAR;
   const _mnFlt=_sAr?MINERALLER.filter(m=>m.ad.toLowerCase().includes(_sAr)):MINERALLER;
   const _kFlt=_sAr?KATKILAR.filter(k=>k.ad.toLowerCase().includes(_sAr)):KATKILAR;
   const _ddToplam=_hFlt.length+_mFlt.length+_myFlt.length+_mnFlt.length+_kFlt.length;
@@ -13831,8 +13842,8 @@ function rListe(){
   const filtreliKR=arama?klasorKR.filter(t=>
     esc(t.biraAd).toLowerCase().includes(arama)||
     (t.notlar||"").toLowerCase().includes(arama)||
-    (t.maltlar||[]).some(m=>{const ml=MALTLAR.find(x=>x&&x.id===m.id);return ml&&ml.ad.toLowerCase().includes(arama);})||
-    (t.hoplar||[]).some(h=>{const hp=HOPLAR.find(x=>x&&x.id===h.id);return hp&&hp.ad.toLowerCase().includes(arama);})
+    (t.maltlar||[]).some(m=>{const ml=MALTLAR.find(x=>x&&x.id===m.id);return ml&&_bmKatEsles(ml,arama);})||
+    (t.hoplar||[]).some(h=>{const hp=HOPLAR.find(x=>x&&x.id===h.id);return hp&&_bmKatEsles(hp,arama);})
   ):klasorKR;
 
   // Adim 131-D: Eski dashboard (yapim widget) KALDIRILDI — renderYapimdaVurgu() helper'a tasindi (Image 1 stili).
@@ -16382,11 +16393,11 @@ function rEditorMaya(og, fg, abv, maya, maya2, fgKaynak, fgHesap){
   </div>`:"";
   const mopts2=`<option value="">── 2. Maya yok ──</option>`+g2.map(([tp,ad])=>`<optgroup label="── ${ad} ──">${MAYALAR.filter(m=>m&&m.tip===tp).map(m=>`<option value="${m.id}"${S.maya2Id===m.id?" selected":""}>${(m.ideal>=30)?"🔴 ":(m.ek==="dolap")?"🟢 ":"🟡 "}${m.ad}</option>`).join("")}</optgroup>`).join("");
   // Maya filtrele
-  const moptsFiltreliOpts=g2.filter(([tp])=>!myKat||tp===myKat).map(([tp,ad])=>`<optgroup label="── ${ad} ──">${MAYALAR.filter(m=>m&&m.tip===tp&&(!myArama||m.ad.toLowerCase().includes(myArama))).map(m=>`<option value="${m.id}"${S.mayaId===m.id?" selected":""}>${(m.ideal>=30)?"🔴 ":(m.ek==="dolap")?"🟢 ":"🟡 "}${m.ad}</option>`).join("")}</optgroup>`).join("");
+  const moptsFiltreliOpts=g2.filter(([tp])=>!myKat||tp===myKat).map(([tp,ad])=>`<optgroup label="── ${ad} ──">${MAYALAR.filter(m=>m&&m.tip===tp&&(!myArama||_bmKatEsles(m,myArama))).map(m=>`<option value="${m.id}"${S.mayaId===m.id?" selected":""}>${(m.ideal>=30)?"🔴 ":(m.ek==="dolap")?"🟢 ":"🟡 "}${m.ad}</option>`).join("")}</optgroup>`).join("");
   var _mayaKatHtml='';
   mayaKatlar.forEach(function(kt,gi){
     var tip=kt[0], etiket=kt[1];
-    var filtMayalar=MAYALAR.filter(function(m){return m&&m.tip===tip&&(!myArama||m.ad.toLowerCase().includes(myArama));});
+    var filtMayalar=MAYALAR.filter(function(m){return m&&m.tip===tip&&(!myArama||_bmKatEsles(m,myArama));});
     if(!filtMayalar.length)return;
     var tipRenk=mayaRenk(tip);
     var tipRozet=mayaKisaTip(tip);
@@ -16438,7 +16449,7 @@ function rEditorMaya(og, fg, abv, maya, maya2, fgKaynak, fgHesap){
       <div class="bm-acc-body">
         <span class="etiket">1. Maya</span>
         <div style="font-size:var(--fs-xs);color:var(--dim);margin-bottom:6px">🟢 Şarap dolabı · 🟡 Oda sıcaklığı · 🔴 Yüksek sıcaklık mayası</div>
-        <input aria-label="Maya ara" type="text" id="bm-arama-maya-inp" class="inp bm-arama-inp" style="margin-bottom:6px;font-size:12px" placeholder="🔍 Maya ara — yazınca öneriler çıkar (Enter: ilk eşleşeni seç)" value="${sekmeArama.maya}" oninput="bmArama('maya',this.value)" onchange="sekmeArama.maya=this.value;render()" onkeydown="if(event.key==='Escape'){var _p=document.getElementById('bm-arama-maya');if(_p)_p.innerHTML='';this.blur();return;}if(event.key==='Enter'){const q=this.value.trim();if(!q)return;const _nq=_bmTrNorm(q);const _m=MAYALAR.find(x=>x&&_bmTrNorm(x.ad).includes(_nq));if(_m){S.mayaId=_m.id;this.value='';sekmeArama.maya='';flash('Maya seçildi: '+_m.ad,'ok');var _p2=document.getElementById('bm-arama-maya');if(_p2)_p2.innerHTML='';render();}else flash('Eşleşen maya yok','err');event.preventDefault();}">
+        <input aria-label="Maya ara" type="text" id="bm-arama-maya-inp" class="inp bm-arama-inp" style="margin-bottom:6px;font-size:12px" placeholder="🔍 Maya ara — yazınca öneriler çıkar (Enter: ilk eşleşeni seç)" value="${sekmeArama.maya}" oninput="bmArama('maya',this.value)" onchange="sekmeArama.maya=this.value;render()" onkeydown="if(event.key==='Escape'){var _p=document.getElementById('bm-arama-maya');if(_p)_p.innerHTML='';this.blur();return;}if(event.key==='Enter'){const q=this.value.trim();if(!q)return;const _nq=_bmTrNorm(q);const _m=MAYALAR.find(x=>x&&_bmTrNorm(x.ad).includes(_nq))||_bmAliasIlk(MAYALAR,_nq);if(_m){S.mayaId=_m.id;this.value='';sekmeArama.maya='';flash('Maya seçildi: '+_m.ad,'ok');var _p2=document.getElementById('bm-arama-maya');if(_p2)_p2.innerHTML='';render();}else flash('Eşleşen maya yok','err');event.preventDefault();}">
         <div id="bm-arama-maya" class="bm-arama-panel"></div>
         ${_mayaKatHtml}
         <div style="margin-top:10px">
@@ -17653,7 +17664,7 @@ function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
   const mArama=sekmeArama.malt.toLowerCase();
   const mKat=sekmKat.malt;
   const filtreliMaltlar=MALTLAR.filter(m=>
-    m&&(!mArama||((m.ad||'').toLowerCase().includes(mArama)||(m.mo||'').toLowerCase().includes(mArama)))&&
+    m&&(!mArama||(_bmKatEsles(m,mArama)||(m.mo||'').toLowerCase().includes(mArama)))&&
     (!mKat||m.g===mKat)
   );
   const filtreliMg={};filtreliMaltlar.forEach(m=>{(filtreliMg[m.g]=filtreliMg[m.g]||[]).push(m);});
@@ -17731,7 +17742,7 @@ function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
       <button class="bm-acc-header" type="button" aria-expanded="${_mEkleAria}" onclick="bmAccToggle('malt-ekle')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmAccToggle('malt-ekle')}"><span class="bm-acc-title">➕ Yeni Malt Ekle</span><span class="bm-acc-chevron">▾</span></button>
       <div class="bm-acc-body">
         <span class="etiket">Malt Ekle</span>
-        <input aria-label="Malt ara" type="text" id="bm-arama-malt-inp" class="inp bm-arama-inp" style="margin-bottom:6px;font-size:12px" placeholder="🔍 Malt ara — yazınca öneriler çıkar (Enter: ilk eşleşeni ekle)" value="${sekmeArama.malt}" oninput="bmArama('malt',this.value)" onchange="sekmeArama.malt=this.value;render()" onkeydown="if(event.key==='Escape'){var _p=document.getElementById('bm-arama-malt');if(_p)_p.innerHTML='';this.blur();return;}if(event.key==='Enter'){const q=this.value.trim();if(!q)return;const _nq=_bmTrNorm(q);const _m=MALTLAR.find(x=>x&&_bmTrNorm(x.ad).includes(_nq));if(_m){yM.id=_m.id;maltEkle();this.value='';sekmeArama.malt='';var _p2=document.getElementById('bm-arama-malt');if(_p2)_p2.innerHTML='';}else flash('Eşleşen malt yok','err');event.preventDefault();}">
+        <input aria-label="Malt ara" type="text" id="bm-arama-malt-inp" class="inp bm-arama-inp" style="margin-bottom:6px;font-size:12px" placeholder="🔍 Malt ara — yazınca öneriler çıkar (Enter: ilk eşleşeni ekle)" value="${sekmeArama.malt}" oninput="bmArama('malt',this.value)" onchange="sekmeArama.malt=this.value;render()" onkeydown="if(event.key==='Escape'){var _p=document.getElementById('bm-arama-malt');if(_p)_p.innerHTML='';this.blur();return;}if(event.key==='Enter'){const q=this.value.trim();if(!q)return;const _nq=_bmTrNorm(q);const _m=MALTLAR.find(x=>x&&_bmTrNorm(x.ad).includes(_nq))||_bmAliasIlk(MALTLAR,_nq);if(_m){yM.id=_m.id;maltEkle();this.value='';sekmeArama.malt='';var _p2=document.getElementById('bm-arama-malt');if(_p2)_p2.innerHTML='';}else flash('Eşleşen malt yok','err');event.preventDefault();}">
         <div id="bm-arama-malt" class="bm-arama-panel"></div>
         ${_maltKatHtml}
         <div style="display:flex;gap:8px;margin-bottom:6px;align-items:center">
@@ -17992,7 +18003,7 @@ function rEditorHop(og, ibu, seciHop){
   const _hKat=sekmKat.hop;
   const hopKatlar=[...new Set(HOPLAR.filter(h=>h).map(h=>h.g))].sort();
   const hopKatBar=hopKatlar.map(k=>{const n=HOPLAR.filter(h=>h&&h.g===k).length;const ak=_hKat===k;return`<button onclick="setSekmKat('hop','${k}')" style="flex-shrink:0;padding:4px 10px;border-radius:14px;border:1.5px solid ${ak?"var(--altin)":"var(--bor)"};background:${ak?"var(--sa)":"var(--card)"};color:${ak?"var(--bakir)":"var(--soluk)"};font-size:11px;font-weight:600;cursor:pointer">${k} (${n})</button>`;}).join("");
-  const _hFg=HOPLAR.filter(h=>h&&(!_hAr||h.ad.toLowerCase().includes(_hAr))&&(!_hKat||h.g===_hKat));
+  const _hFg=HOPLAR.filter(h=>h&&(!_hAr||_bmKatEsles(h,_hAr))&&(!_hKat||h.g===_hKat));
   const _hFg2={};_hFg.forEach(h=>{(_hFg2[h.g]=_hFg2[h.g]||[]).push(h);});
   const hOptsFiltreli=Object.entries(_hFg2).map(([g,hs])=>`<optgroup label="── ${g} ──">${hs.map(h=>`<option value="${h.id}">${h.ad} (${h.aa}% AA)</option>`).join("")}</optgroup>`).join("");
   var _hopKatHtml='';
@@ -18024,7 +18035,7 @@ function rEditorHop(og, ibu, seciHop){
       <button class="bm-acc-header" type="button" aria-expanded="${_hEkleAria}" onclick="bmAccToggle('hop-ekle')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmAccToggle('hop-ekle')}"><span class="bm-acc-title">➕ Yeni Hop Ekle</span><span class="bm-acc-chevron">▾</span></button>
       <div class="bm-acc-body">
         <span class="etiket">Hop Ekle</span>
-        <input aria-label="Hop ara" type="text" id="bm-arama-hop-inp" class="inp bm-arama-inp" style="margin-bottom:6px;font-size:12px" placeholder="🔍 Hop ara — yazınca öneriler çıkar (Enter: ilk eşleşeni ekle)" value="${sekmeArama.hop}" oninput="bmArama('hop',this.value)" onchange="sekmeArama.hop=this.value;render()" onkeydown="if(event.key==='Escape'){var _p=document.getElementById('bm-arama-hop');if(_p)_p.innerHTML='';this.blur();return;}if(event.key==='Enter'){const q=this.value.toLowerCase().trim();if(!q)return;const _k=sekmKat.hop;const _h=HOPLAR.find(x=>x&&x.ad.toLowerCase().includes(q)&&(!_k||x.g===_k));if(_h){yH.id=_h.id;hopEkle();this.value='';sekmeArama.hop='';var _p2=document.getElementById('bm-arama-hop');if(_p2)_p2.innerHTML='';}else flash('Eşleşen hop yok','err');event.preventDefault();}">
+        <input aria-label="Hop ara" type="text" id="bm-arama-hop-inp" class="inp bm-arama-inp" style="margin-bottom:6px;font-size:12px" placeholder="🔍 Hop ara — yazınca öneriler çıkar (Enter: ilk eşleşeni ekle)" value="${sekmeArama.hop}" oninput="bmArama('hop',this.value)" onchange="sekmeArama.hop=this.value;render()" onkeydown="if(event.key==='Escape'){var _p=document.getElementById('bm-arama-hop');if(_p)_p.innerHTML='';this.blur();return;}if(event.key==='Enter'){const q=this.value.toLowerCase().trim();if(!q)return;const _k=sekmKat.hop;const _h=HOPLAR.find(x=>x&&x.ad.toLowerCase().includes(q)&&(!_k||x.g===_k))||_bmAliasIlk(HOPLAR,_bmTrNorm(q),function(x){return !_k||x.g===_k;});if(_h){yH.id=_h.id;hopEkle();this.value='';sekmeArama.hop='';var _p2=document.getElementById('bm-arama-hop');if(_p2)_p2.innerHTML='';}else flash('Eşleşen hop yok','err');event.preventDefault();}">
         <div id="bm-arama-hop" class="bm-arama-panel"></div>
         ${_hopKatHtml}
         <div style="display:flex;gap:8px;margin-bottom:6px;align-items:center">
@@ -25957,6 +25968,10 @@ window.brewTimerTik=function(){
 // Panel akis-ici (akordeon CSS max-height:max-content, AQ2-1), render()'dan bagimsiz (focus kaybi yok).
 var _bmAramaTimer=null;
 function _bmTrNorm(s){return (s||'').toString().toLocaleLowerCase('tr-TR').replace(/ı/g,'i').replace(/İ/g,'i').replace(/ş/g,'s').replace(/ğ/g,'g').replace(/ü/g,'u').replace(/ö/g,'o').replace(/ç/g,'c').replace(/â/g,'a').replace(/î/g,'i').replace(/û/g,'u').trim();}
+// SPRINT BV: alias skoru (TR-normalize). Dönüş {sc,al} | null — sc 3 tam · 4 önek · 5 içerir (ad eşleşmesi 0-2 sonrası sıralanır).
+function _bmAliasSkor(x,nq){ if(!x||!nq||!Array.isArray(x.alias))return null; var best=null; for(var j=0;j<x.alias.length;j++){var a=x.alias[j];var na=_bmTrNorm(a);var s=na===nq?3:(na.indexOf(nq)===0?4:(na.indexOf(nq)>=0?5:-1));if(s>=0&&(!best||s<best.sc||(s===best.sc&&a.length<best.al.length)))best={sc:s,al:a};} return best; }
+// Enter kısayolu yedeği: ad eşleşmesi yoksa EN İYİ alias eşleşmesi (filtre opsiyonel).
+function _bmAliasIlk(liste,nq,filt){ var enI=null,enS=null; (liste||[]).forEach(function(x){ if(!x||(filt&&!filt(x)))return; var s=_bmAliasSkor(x,nq); if(s&&(!enS||s.sc<enS.sc||(s.sc===enS.sc&&s.al.length<enS.al.length))){enI=x;enS=s;} }); return enI; }
 var _bmAramaCfg={
   malt:{panel:'bm-arama-malt',data:function(){return MALTLAR;},ad:function(m){return m.ad;},
     sat:function(m){var k=katKodu(m.g);return '<span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:9px;font-weight:700;background:'+k.bg+';color:'+k.tx+';letter-spacing:.3px;flex-shrink:0">'+k.ad+'</span><span style="flex:1;min-width:0;font-size:12px;font-weight:600;color:var(--kahve);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(m.ad)+'</span><span style="font-size:10px;color:var(--soluk);flex-shrink:0">'+m.r+'°L · GU '+m.gu+'</span>';},
@@ -25974,11 +25989,11 @@ function _bmAramaCiz(key,q){
   var panel=document.getElementById(cfg.panel); if(!panel)return;
   var nq=_bmTrNorm(q); if(!nq){panel.innerHTML='';return;}
   var data=cfg.data()||[],arr=[];
-  for(var i=0;i<data.length;i++){var it=data[i];if(!it)continue;var nm=cfg.ad(it);if(!nm)continue;var na=_bmTrNorm(nm);var sc=-1;if(na===nq)sc=0;else if(na.indexOf(nq)===0)sc=1;else if(na.indexOf(nq)>=0)sc=2;if(sc<0)continue;arr.push({it:it,sc:sc,len:na.length,nm:nm});}
+  for(var i=0;i<data.length;i++){var it=data[i];if(!it)continue;var nm=cfg.ad(it);if(!nm)continue;var na=_bmTrNorm(nm);var sc=-1,al=null;if(na===nq)sc=0;else if(na.indexOf(nq)===0)sc=1;else if(na.indexOf(nq)>=0)sc=2;if(sc<0){var _as=_bmAliasSkor(it,nq);if(_as){sc=_as.sc;al=_as.al;}}if(sc<0)continue;arr.push({it:it,sc:sc,len:na.length,nm:nm,al:al});}
   arr.sort(function(a,b){return a.sc-b.sc||a.len-b.len||(a.nm<b.nm?-1:1);});
   if(!arr.length){panel.innerHTML='<div style="padding:8px 10px;font-size:11px;color:var(--dim);border:1px solid var(--bor);border-radius:8px;background:var(--card);margin-bottom:8px">Eşleşen yok</div>';return;}
   var more=arr.length-10;
-  var rows=arr.slice(0,10).map(function(o){return '<div onmousedown="event.preventDefault();bmAramaSec(&quot;'+key+'&quot;,&quot;'+esc(o.it.id)+'&quot;)" style="display:flex;align-items:center;gap:8px;padding:7px 10px;cursor:pointer;border-bottom:1px solid var(--bor)" onmouseover="this.style.background=\'var(--bg2)\'" onmouseout="this.style.background=\'\'">'+cfg.sat(o.it)+'</div>';}).join('');
+  var rows=arr.slice(0,10).map(function(o){return '<div onmousedown="event.preventDefault();bmAramaSec(&quot;'+key+'&quot;,&quot;'+esc(o.it.id)+'&quot;)" style="display:flex;align-items:center;gap:8px;'+(o.al?'flex-wrap:wrap;':'')+'padding:7px 10px;cursor:pointer;border-bottom:1px solid var(--bor)" onmouseover="this.style.background=\'var(--bg2)\'" onmouseout="this.style.background=\'\'">'+cfg.sat(o.it)+(o.al?'<span class="bm-arama-es" style="flex-basis:100%;font-size:10px;line-height:1.2;color:var(--dim);margin-top:-4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">≈ '+esc(o.al)+'</span>':'')+'</div>';}).join('');
   panel.innerHTML='<div style="border:1px solid var(--bor);border-radius:8px;background:var(--card);box-shadow:var(--golge);margin-bottom:8px;max-height:320px;overflow-y:auto">'+rows+(more>0?'<div style="padding:6px 10px;font-size:10px;color:var(--dim);text-align:center">+'+more+' daha — aramayı daralt</div>':'')+'</div>';
 }
 function bmAramaSec(key,id){ var cfg=_bmAramaCfg[key]; if(!cfg||!id)return; var p=document.getElementById(cfg.panel); if(p)p.innerHTML=''; cfg.sec(id); }

@@ -7068,6 +7068,110 @@ const CASELER = [
         !d3.satirlar.find(s => s.faz === 'Kondisyon'), d3.satirlar.map(s => s.faz).join(','));
       return __REG.al();
     })
+  },
+
+  // ── SPRINT BV — katalog alias alanı (korpus↔katalog köprüsü) ──
+  {
+    kod: 'BV1-SEMA', ad: 'alias alanı şeması: MALTLAR/HOPLAR/MAYALAR kayıtlarında alias = küçük harf, kırpılmış dizge dizisi; bir tür içinde her alias TEK kayda gider; hiçbir alias başka kaydın ad\'ı değil; sayılar kilitli (kaynak _bv_alias_kaynak.js → working/_bv_kapi.js PASS çıktısı)',
+    calistir: (page) => page.evaluate(() => {
+      const BEK = { MALTLAR: [86, 163], HOPLAR: [26, 59], MAYALAR: [64, 171] };
+      for (const ad of Object.keys(BEK)) {
+        const L = window.eval(ad).filter(Boolean);
+        const aliasli = L.filter(x => x.alias !== undefined);
+        const topAl = aliasli.reduce((t, x) => t + (Array.isArray(x.alias) ? x.alias.length : 0), 0);
+        __REG.ok(ad + ': alias taşıyan kayıt ' + BEK[ad][0] + ', alias dizgesi ' + BEK[ad][1], aliasli.length === BEK[ad][0] && topAl === BEK[ad][1], aliasli.length + ' kayıt / ' + topAl + ' dizge');
+        const bicimBozuk = aliasli.filter(x => !Array.isArray(x.alias) || !x.alias.length || x.alias.some(a => typeof a !== 'string' || !a || a !== a.toLowerCase() || a !== a.trim() || /\s{2}/.test(a)));
+        __REG.ok('  ' + ad + ': biçim (dizi, küçük harf, kırpılmış, tek boşluk)', bicimBozuk.length === 0, bicimBozuk.map(x => x.id).join(','));
+        const hedef = new Map(), cakisma = [];
+        aliasli.forEach(x => x.alias.forEach(a => { if (hedef.has(a) && hedef.get(a) !== x.id) cakisma.push(a + '→' + hedef.get(a) + '/' + x.id); hedef.set(a, x.id); }));
+        __REG.ok('  ' + ad + ': her alias TEK kayda gider', cakisma.length === 0, cakisma.join(' '));
+        const adlar = new Map(L.map(x => [String(x.ad).toLowerCase(), x.id]));
+        const adCak = [...hedef.entries()].filter(([a, id]) => adlar.has(a) && adlar.get(a) !== id);
+        __REG.ok('  ' + ad + ': alias başka kaydın ad\'ıyla çakışmıyor', adCak.length === 0, adCak.map(x => x[0]).join(','));
+      }
+      // KORPUS KİLİDİ: 376K korpusun EN SIK ham adları (satır sayısıyla) beklenen kayda bağlanıyor.
+      // Veri kayarsa (alias silinir/yanlış kayda taşınır) burada kırmızı.
+      const bagla = (L, ham) => { const n = ham.toLowerCase(); const x = L.filter(Boolean).find(k => String(k.ad).toLowerCase() === n || (Array.isArray(k.alias) && k.alias.includes(n))); return x ? x.id : null; };
+      const KORPUS = {
+        MALTLAR: [['2-row', 'briess_pale', 72494], ['carapils malt', 'carapils', 59050], ['pilsner', 'pilsner', 57193], ['2-row brewers malt', 'briess_pale', 53520], ['maris otter pale', 'maris', 51636], ['caramel malt 40l', 'c40', 38682], ['white wheat', 'wheat', 35680], ['2-row caramel malt 60l', 'c60', 35552], ['vienna', 'vienna', 34340], ['chocolate', 'choc', 31387], ['caramel malt 20l', 'c20', 29174], ['pale ale', 'pale_ale', 25892]],
+        HOPLAR: [['columbus', 'columbus', 54104], ['east kent golding', 'ekg', 51403], ['fuggle', 'fuggles', 46184], ['hallertau', 'hrtau', 45022], ['saaz', 'saaz', 44432], ['golding', 'ekg', 18261], ['styrian golding', 'styrian', 18089], ['hallertauer mittelfrüh', 'hrtau', 10504], ['czech saaz', 'saaz', 7698], ['spalt', 'spalt', 3884], ['goldings, east kent', 'ekg', 3390], ['zeus', 'columbus', 2979]],
+        MAYALAR: [['safale us-05', 'us05', 45272], ['safale us-05 (fermentis)', 'us05', 44999], ['american ale (wyeast)', 'wy1056', 19284], ['american ale ii (wyeast)', 'wy1272', 17668], ['california ale yeast (white labs)', 'wlp001', 17637], ['safale s-04', 's04', 16217], ['safale s-04 (fermentis)', 's04', 15228], ['nottingham ale yeast (white labs)', 'nottm', 9551], ['dry english ale yeast (white labs)', 'wlp007', 5573], ['irish ale yeast (white labs)', 'wlp004', 5101], ['english ale yeast (white labs)', 'wlp002', 5022]]
+      };
+      for (const ad of Object.keys(KORPUS)) {
+        const L = window.eval(ad);
+        const yanlis = KORPUS[ad].filter(([ham, id]) => bagla(L, ham) !== id).map(([ham, id]) => ham + '→' + bagla(L, ham) + '(beklenen ' + id + ')');
+        const satir = KORPUS[ad].reduce((t, x) => t + x[2], 0);
+        __REG.ok(ad + ': korpusun en sık ' + KORPUS[ad].length + ' ham adı (' + satir + ' satır) beklenen kayda bağlanıyor', yanlis.length === 0, yanlis.join(' | '));
+      }
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BV2-IKAME-SIZINTI', ad: 'alias = KİMLİK, ikame DEĞİL: V2/V3 build-time tablolarında ikame olarak eşlenen adlar (Liberty/Mt Hood/Hersbrucker/Strisselspalt/Vanguard→Hallertau, kabuklu Carafa→Special, en-yakın-°L crystal, golden naked oats→yulaf, pirinç→pirinç KABUĞU) katalog alias\'ına SIZMIYOR — aksi halde arama "Liberty yok, ne kullanayım?" sorusuna yanlış "zaten var" derdi',
+    calistir: (page) => page.evaluate(() => {
+      const tum = [].concat(MALTLAR, HOPLAR, MAYALAR).filter(Boolean);
+      const hepsi = new Map(); tum.forEach(x => (x.alias || []).forEach(a => hepsi.set(a, x.id)));
+      const YASAK = ['liberty', 'mount hood', 'mt hood', 'hersbrucker', 'hallertauer hersbrucker', 'strisselspalt', 'vanguard', 'new zealand hallertau',
+        'carafa i', 'carafa ii', 'carafa iii', 'caravienne', 'caraamber', 'carastan', 'crystal 15l', 'caramel/crystal 30l', 'golden naked oats',
+        'caramunich', 'crystal malt', 'munich malt 10l', 'rahr 2-row pale', 'pale malt, 2 row, uk', 'chocolate rye', 'invert sugar', 'rice', 'tnt'];
+      const sizan = YASAK.filter(a => hepsi.has(a)).map(a => a + '→' + hepsi.get(a));
+      __REG.ok('ikame/belirsiz ' + YASAK.length + ' ad hiçbir kaydın alias\'ı değil', sizan.length === 0, sizan.join(' '));
+      __REG.ok('Hallertau Mittelfrueh arama "liberty" ile BULUNMUYOR', !_bmKatEsles(HOPLAR.find(h => h && h.id === 'hrtau'), 'liberty'));
+      __REG.ok('"liberty" hop filtresi boş (katalog boşluğu dürüstçe görünür)', HOPLAR.filter(h => _bmKatEsles(h, 'liberty')).length === 0);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BV3-ARAMA', ad: 'alias tüketicileri: (a) _bmKatEsles filtreleri (editör malt/hop/maya listeleri + stok ekleme) ad VEYA alias içerir; (b) canlı type-ahead _bmAramaCiz ad eşleşmelerini ÖNCE, alias eşleşmelerini SONRA sıralar ve satırda "≈ eş ad" gösterir; (c) Enter kısayolu ad yoksa en iyi alias\'ı seçer; (d) reçete listesi araması "hallertauer" → Hallertau içeren reçete',
+    calistir: (page) => page.evaluate(() => {
+      const ids = (L, q) => L.filter(x => _bmKatEsles(x, q)).map(x => x.id);
+      __REG.ok('(a) hop "hallertauer" → hrtau', ids(HOPLAR, 'hallertauer').includes('hrtau'), ids(HOPLAR, 'hallertauer').join(','));
+      __REG.ok('(a) malt "2-row" → briess_pale', ids(MALTLAR, '2-row').includes('briess_pale'), ids(MALTLAR, '2-row').join(','));
+      __REG.ok('(a) malt "sauermalz" → acid', ids(MALTLAR, 'sauermalz').join(',') === 'acid', ids(MALTLAR, 'sauermalz').join(','));
+      __REG.ok('(a) maya "nottingham" → nottm', ids(MAYALAR, 'nottingham').join(',') === 'nottm', ids(MAYALAR, 'nottingham').join(','));
+      __REG.ok('(a) ad araması bozulmadı: "citra" → citra, cc, lupulin_c', ids(HOPLAR, 'citra').join(',') === 'citra,cc,lupulin_c', ids(HOPLAR, 'citra').join(','));
+      __REG.ok('(a) boş terim = hepsi, null kayıt = eşleşmez', HOPLAR.filter(x => _bmKatEsles(x, '')).length === HOPLAR.filter(Boolean).length && _bmKatEsles(null, 'x') === false);
+      // (b) type-ahead — panel akış-içi div; testte yoksa kur
+      let p = document.getElementById('bm-arama-hop'); let kurduk = false;
+      if (!p) { p = document.createElement('div'); p.id = 'bm-arama-hop'; document.body.appendChild(p); kurduk = true; }
+      _bmAramaCiz('hop', 'Hallertauer');
+      const satirlar = [...p.querySelectorAll('[onmousedown]')];
+      const ilkId = satirlar.length ? (/bmAramaSec\("hop","([^"]+)"\)/.exec(satirlar[0].getAttribute('onmousedown')) || [])[1] : null;
+      __REG.ok('(b) type-ahead "Hallertauer" → ilk satır hrtau (tam alias, önek/içerir alias\'lardan önce)', ilkId === 'hrtau', ilkId + ' / ' + satirlar.length + ' satır');
+      __REG.ok('(b) satırda "≈ hallertauer" ipucu', !!satirlar[0] && /≈ hallertauer</.test(satirlar[0].innerHTML), satirlar[0] ? satirlar[0].textContent.slice(-40) : '-');
+      // katalog adı "Hallertau Mittelfrueh" (ue); "mittelfrüh" TR-normalize ile "mittelfruh" olur ve ad'da GEÇMEZ
+      // → BV öncesi 0 sonuç; şimdi alias "hallertau mittelfrüh" ile bulunuyor
+      _bmAramaCiz('hop', 'Mittelfrüh');
+      const s2 = [...p.querySelectorAll('[onmousedown]')];
+      __REG.ok('(b) "Mittelfrüh" (ad\'da "Mittelfrueh" yazılı) → hrtau alias ile bulunuyor, ipucu var', s2.length > 0 && /"hrtau"/.test(s2[0].getAttribute('onmousedown')) && !!s2[0].querySelector('.bm-arama-es'), s2.map(x => (/"([^"]+)"\)$/.exec(x.getAttribute('onmousedown')) || [])[1]).join(','));
+      _bmAramaCiz('hop', 'mittelfrueh');
+      const s2b = [...p.querySelectorAll('[onmousedown]')];
+      // iki AD eşleşmesi: "Mittelfrueh Clone (TR)" (önek, sc1) + "Hallertau Mittelfrueh" (içerir, sc2) — mevcut sıralama aynen
+      __REG.ok('(b) "mittelfrueh" → iki satır da AD eşleşmesi (mittelf önek, hrtau içerir), hiçbirinde alias ipucu YOK',
+        s2b.length === 2 && /"mittelf"/.test(s2b[0].getAttribute('onmousedown')) && /"hrtau"/.test(s2b[1].getAttribute('onmousedown')) && s2b.every(x => !x.querySelector('.bm-arama-es')),
+        s2b.map(x => (/"([^"]+)"\)$/.exec(x.getAttribute('onmousedown')) || [])[1]).join(','));
+      _bmAramaCiz('hop', 'citra');
+      const s3 = [...p.querySelectorAll('[onmousedown]')];
+      __REG.ok('(b) ad eşleşmesi olan aramada alias ipucu hiç yok ("citra")', s3.length === 3 && s3.every(x => !x.querySelector('.bm-arama-es')), s3.length + ' satır');
+      _bmAramaCiz('hop', 'liberty');
+      __REG.ok('(b) "liberty" → "Eşleşen yok" (ikame önerilmez)', /Eşleşen yok/.test(p.textContent), p.textContent.slice(0, 40));
+      if (kurduk) p.remove();
+      // (c) Enter yedeği
+      const e1 = _bmAliasIlk(HOPLAR, _bmTrNorm('hallertauer'));
+      __REG.ok('(c) Enter yedeği: "hallertauer" → hrtau (tam alias, "hallertauer magnum"dan önce)', e1 && e1.id === 'hrtau', e1 && e1.id);
+      const e2 = _bmAliasIlk(HOPLAR, _bmTrNorm('hallertauer'), x => x.g === 'Amerikan');
+      __REG.ok('(c) Enter yedeği kategori filtresine uyuyor (Amerikan kategorisinde hallertauer yok)', e2 === null, e2 && e2.id);
+      // (d) reçete listesi araması
+      __REG.yeniKayit('REGTEST BV Hallertau', { hoplar: [{ id: 'hrtau', g: 20, dk: 60, tur: 'boil' }], maltlar: [{ id: 'pilsner', kg: 4 }] });
+      aramaMetni = 'hallertauer';
+      const liste = rListe();
+      aramaMetni = 'liberty';
+      const liste2 = rListe();
+      aramaMetni = '';
+      __REG.ok('(d) reçete araması "hallertauer" → Hallertau içeren reçete listede', /REGTEST BV Hallertau/.test(liste));
+      __REG.ok('(d) reçete araması "liberty" → o reçete listede YOK', !/REGTEST BV Hallertau/.test(liste2));
+      return __REG.al();
+    })
   }
 ];
 
