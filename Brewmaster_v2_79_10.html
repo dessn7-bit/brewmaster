@@ -7383,7 +7383,7 @@ function _stokListeGuncelle(){
         return'<div class="satir" style="'+(dusuk?'border-color:#C49080;background:var(--ka)':'')+'">'+
           '<div style="flex:1">'+
             '<div style="font-size:13px;font-weight:600;color:var(--kahve)">'+esc(s.ad)+'</div>'+
-            '<div style="font-size:10px;color:'+(dusuk?'var(--kk)':'var(--soluk)')+'">'+(dusuk?'⚠️ Az kaldı — ':'')+(_stokMikYok(s)?'<b class="bm-stok-mikq" style="color:#8A6A20">miktar ?</b>':s.miktar+' '+s.birim)+'</div>'+
+            '<div style="font-size:10px;color:'+(dusuk?'var(--kk)':'var(--soluk)')+'">'+(dusuk?'⚠️ Az kaldı — ':'')+_stokMikDugme(idx,s,_stokMikYok(s))+'</div>'+
           '</div>'+
           '<div style="display:flex;align-items:center;gap:4px">'+
             '<button class="btn" style="background:var(--ka);color:var(--kk);font-size:16px;padding:3px 9px;line-height:1;border:1px solid #D0A0A0" onclick="stokGuncelle('+idx+',-1)">−</button>'+
@@ -13437,7 +13437,7 @@ function rStok(){
     '<div style="text-align:center;padding:30px;color:var(--dim);font-size:13px">Henüz stok kaydı yok.<br>Aşağıdan malzeme ekle.</div>':
     Object.entries(stokGruplar).map(function(sE,gi){
     var g=sE[0],items=sE[1];
-    var _sI={'Malt':'🌾','Hop':'🌿','Maya':'🔬','Katkı':'🧪','Su Minerali':'💧','Diğer':'📦'};
+    var _sI={'Malt':'🌾','Hop':'🌿','Maya':'🔬','Katkı':'🧪','Su Minerali':'💧','Şeker':'🍬','Aroma':'🌺','Meyve':'🍒','Baharat':'🌶️','Meşe':'🪵','Proses':'⚗️','Diğer':'📦'};
     var ih=items.map(function(s){
       var idx=STOK.indexOf(s);
       var _mq=_stokMikYok(s); // SPRINT CA
@@ -13471,7 +13471,7 @@ function rStok(){
       }
       return '<div class="satir" style="'+(dusuk?'border-color:var(--crit);background:var(--crit-bg);':'')+'margin-bottom:var(--sp-1)">'
         +'<div style="flex:1;min-width:0"><div style="font-family:var(--font-govde);font-size:var(--fs-sm);font-weight:var(--fw-semibold);color:var(--ink)">'+esc(s.ad)+'</div>'
-        +'<div style="font-family:var(--font-govde);font-size:var(--fs-xs);color:'+(dusuk?'var(--crit)':'var(--metin-soluk)')+'">'+(dusuk?'⚠️ ':'')+(_mq?'<b class="bm-stok-mikq" style="color:#8A6A20">miktar ?</b>':s.miktar+' '+s.birim)+(s.uyari>0?' · Uyarı: '+s.uyari+s.birim:'')+'</div>'
+        +'<div style="font-family:var(--font-govde);font-size:var(--fs-xs);color:'+(dusuk?'var(--crit)':'var(--metin-soluk)')+'">'+(dusuk?'⚠️ ':'')+_stokMikDugme(idx,s,_mq)+(s.uyari>0?' · Uyarı: '+s.uyari+s.birim:'')+'</div>'
         +rezSatir
         +'</div>'
         +'<div style="display:flex;align-items:center;gap:var(--sp-1)">'
@@ -13530,7 +13530,8 @@ function rStok(){
           <option value="Hop">🌿 Hop</option><option value="Malt">🌾 Malt</option>
           <option value="Maya">🧬 Maya</option><option value="Şeker">🍬 Şeker</option>
           <option value="Su Minerali">💧 Su Minerali</option><option value="Aroma">🌺 Aroma</option>
-          <option value="Meşe">🪵 Meşe</option><option value="Diğer">📦 Diğer</option>
+          <option value="Meyve">🍒 Meyve</option><option value="Baharat">🌶️ Baharat</option>
+          <option value="Meşe">🪵 Meşe</option><option value="Proses">⚗️ Proses (berraklaştırıcı · maya besini · enzim)</option><option value="Diğer">📦 Diğer</option>
         </select>
         <input aria-label="Uyarı eşiği" type="number" id="stokUyari" class="inp" style="width:90px" placeholder="Uyarı" min="0" step="1">
       </div>
@@ -26485,7 +26486,7 @@ function stokSecimGuncelle(val){
   if(parts.length>=4){
     document.getElementById('stokAd').value=parts[1];
     document.getElementById('stokBirim').value=parts[2];
-    document.getElementById('stokGrup').value=parts[3];
+    document.getElementById('stokGrup').value=window._stokGrupBul(parts[0], parts[3]); // SPRINT STK2: katalog grubu → Kiler grubu (tek tablo)
     // refId ve refTip geçici olarak window'da tut
     window._stokRefId = parts[0];
     window._stokRefTip = parts[3]; // Hop/Malt/Maya/Katkı/Su Minerali
@@ -26529,6 +26530,74 @@ function stokEkle(){
   window._stokRefId=null; window._stokRefTip=null;
   if(ekran==='stok'){document.getElementById('ekran').innerHTML=rStok();}else render();
 }
+// ── SPRINT STK2: Kiler'de miktarı DOĞRUDAN yazma. Kaydet = ATAMA (yeni miktar budur). Boş bırakıp kapatmak değiştirmez.
+// Yazım mevcut yoldan: STOK[idx].miktar → stokKaydet (LS + IDB + senkron). +/− düğmeleri ve STK1 seçimi aynen.
+var _STOK_MIK_TAVAN = { kg:100, g:100000, L:100, mL:100000, adet:1000, paket:1000, tablet:1000, 'parça':1000, dal:1000, yaprak:1000, pk:1000 };
+function _stokMikDugme(idx, s, mq){
+  var e_ = (typeof esc === 'function') ? esc : function(v){ return String(v); };
+  return '<button type="button" class="bm-stok-mik-btn" data-idx="'+idx+'" onclick="_stokMikAc('+idx+')" aria-label="'+e_(s.ad)+' miktarını yaz" title="Miktarı yaz" style="min-height:44px;min-width:44px;background:none;border:1px dashed var(--bor,#ccc);border-radius:8px;padding:2px 8px;margin:2px 0;font:inherit;color:inherit;cursor:pointer;text-align:left">'
+    + (mq ? '<b class="bm-stok-mikq" style="color:#8A6A20">miktar ?</b>' : e_(String(s.miktar).replace('.', ',')) + ' ' + e_(s.birim || '')) + ' <span aria-hidden="true">✏️</span></button>';
+}
+window._stokMikAc = function(idx){
+  var s = STOK[idx]; if(!s) return;
+  var b = document.querySelector('.bm-stok-mik-btn[data-idx="'+idx+'"]'); if(!b) return;
+  var e_ = (typeof esc === 'function') ? esc : function(v){ return String(v); };
+  var w = document.createElement('span'); w.className = 'bm-stok-mik-edit'; w.setAttribute('data-idx', idx);
+  w.innerHTML = '<span style="display:inline-flex;align-items:center;gap:4px;flex-wrap:wrap">'
+    + '<input id="stokMikInp_'+idx+'" class="inp" type="text" inputmode="decimal" autocomplete="off" aria-label="'+e_(s.ad)+' yeni miktar" value="'+(_stokMikYok(s) ? '' : String(s.miktar).replace('.', ','))+'" style="width:84px;min-height:44px;font-size:15px;padding:4px 8px" onkeydown="if(event.key===\'Enter\'){event.preventDefault();_stokMikKaydet('+idx+')}else if(event.key===\'Escape\'){_stokMikKapat()}">'
+    + '<b style="font-size:13px">'+e_(s.birim || '')+'</b>'
+    + '<button type="button" class="bm-stok-mik-kaydet" onclick="_stokMikKaydet('+idx+')" aria-label="Miktarı kaydet" style="min-height:44px;min-width:44px;border-radius:8px;border:none;background:var(--bakir,#9a6b3f);color:#fff;font-size:15px;cursor:pointer">✓</button>'
+    + '<button type="button" class="bm-stok-mik-iptal" onclick="_stokMikKapat()" aria-label="Vazgeç" style="min-height:44px;min-width:44px;border-radius:8px;border:1px solid var(--bor,#ccc);background:transparent;font-size:15px;cursor:pointer">✕</button>'
+    + '</span><div class="bm-stok-mik-uyari" role="alert" style="font-size:11px;color:#b3261e"></div>';
+  b.replaceWith(w);
+  var inp = document.getElementById('stokMikInp_'+idx); if(inp){ try{ inp.focus(); inp.select(); }catch(_f){} }
+};
+window._stokMikKapat = function(){ if(ekran === 'stok'){ document.getElementById('ekran').innerHTML = rStok(); } else render(); };
+// Türkçe virgül kabul; boş = değişiklik yok; negatif / sayı değil / tavan üstü → satırda uyarı, yazma yok
+window._stokMikCoz = function(str, birim){
+  var t = String(str == null ? '' : str).trim().replace(/\s+/g, '');
+  if(t === '') return { bos:true };
+  if(/^\d{1,3}(\.\d{3})+(,\d+)?$/.test(t)) t = t.replace(/\./g, ''); // 1.500,5 → 1500,5
+  t = t.replace(',', '.');
+  if(!/^-?\d+(\.\d+)?$/.test(t)) return { hata:'Sayı gir (ör. 1,5)' };
+  var v = parseFloat(t);
+  if(v < 0) return { hata:'Miktar negatif olamaz' };
+  var tavan = _STOK_MIK_TAVAN[birim] || 100000;
+  if(v > tavan) return { hata:'Bu miktar gerçekçi değil (en çok ' + String(tavan).replace('.', ',') + ' ' + birim + ')' };
+  return { v:Math.round(v * 1000) / 1000 };
+};
+window._stokMikKaydet = function(idx){
+  var s = STOK[idx]; if(!s) return;
+  var inp = document.getElementById('stokMikInp_'+idx), r = window._stokMikCoz(inp ? inp.value : '', s.birim || 'g');
+  var uy = document.querySelector('.bm-stok-mik-edit[data-idx="'+idx+'"] .bm-stok-mik-uyari');
+  if(r.bos){ window._stokMikKapat(); return; }
+  if(r.hata){ if(uy) uy.textContent = '⚠️ ' + r.hata; return; }
+  s.miktar = r.v; // ATAMA
+  stokKaydet(STOK);
+  if(typeof flash === 'function') flash('📦 ' + s.ad + ': ' + String(r.v).replace('.', ',') + ' ' + (s.birim || ''), 'ok');
+  window._stokMikKapat();
+};
+// ── SPRINT STK2: KATALOG GRUBU → KİLER GRUBU (TEK TABLO). Kiler'in eski grup listesi katalog katkı gruplarını
+// tanımıyordu (form "Fermantasyon/Berraklaştırıcı/Adjunct" değerini seçemeyip "Diğer"e düşürüyordu). Kiler'e 3 grup eklendi:
+// Meyve, Baharat, Proses. id istisnaları kategori karışıklığını giderir (Proses'teki DME/LME fermente özüttür → Malt; CaCl₂ /
+// gypsum / kireç su tuzudur → Su Minerali; kültürler maya gibi saklanır → Maya; sirke lezzettir → Aroma).
+window._STOK_GRUP_ESLE = {
+  katkiGrup: { 'Adjunct':'Malt', 'Şeker':'Şeker', 'Aroma':'Aroma', 'Meşe':'Meşe', 'Meyve':'Meyve', 'Baharat':'Baharat', 'Berraklaştırıcı':'Proses', 'Fermantasyon':'Proses', 'Proses':'Proses' },
+  katkiId: { dme:'Malt', lme_ekstra:'Malt', kalsiyum_klorur_k:'Su Minerali', kirec_caco3:'Su Minerali', calcium_sulfate:'Su Minerali', malt_sirke:'Aroma',
+    champagne_y:'Maya', wine_y:'Maya', lacto_bact:'Maya', brett_b:'Maya', pedio_b:'Maya' },
+  maltGrup: { 'Şeker':'Şeker' } // MALTLAR'daki şekerler (dekstroz, laktoz, beyaz şeker…) Kiler'de Şeker; diğer MALTLAR → Malt
+};
+window._STOK_GRUPLAR = ['Hop', 'Malt', 'Maya', 'Şeker', 'Su Minerali', 'Aroma', 'Meyve', 'Baharat', 'Meşe', 'Proses', 'Diğer'];
+// katalog seçimi (stokSecimGuncelle değeri: "id|ad|birim|tür") → Kiler grubu
+window._stokGrupBul = function(id, tur){
+  var E = window._STOK_GRUP_ESLE;
+  if(tur === 'Hop' || tur === 'Maya' || tur === 'Su Minerali') return tur;
+  if(tur === 'Malt'){ var m = (typeof MALTLAR !== 'undefined') ? MALTLAR.find(function(x){ return x && x.id === id; }) : null; return (m && E.maltGrup[m.g]) || 'Malt'; }
+  if(E.katkiId[id]) return E.katkiId[id];
+  if(E.katkiGrup[tur]) return E.katkiGrup[tur];
+  var k = (typeof KATKILAR !== 'undefined') ? KATKILAR.find(function(x){ return x && x.id === id; }) : null;
+  return (k && E.katkiGrup[k.g]) || 'Diğer';
+};
 // ── SPRINT STK1: aynı kalem tespiti + "mevcut X — üstüne ekle / miktarı X yap" seçimi ──
 function _stokAdNorm(v){ return String(v == null ? '' : v).toLocaleLowerCase('tr').replace(/\s+/g, ' ').trim(); }
 // Aynı ürün = aynı katalog kaydı (refId) VE aynı ad (marka dahil: "Çavdar Maltı (Weyermann)" ≠ "Çavdar Maltı (Hitit)").
@@ -31020,6 +31089,108 @@ window.BM_AI = (function(){
     ANAHTAR_LS: ANAHTAR_LS, DURUM_LS: DURUM_LS };
 })();
 
+// ── SPRINT STK2: AI ANAHTARINI BAŞKA CİHAZA AKTARMA (tek kullanımlık kod) ──
+// Firebase RTDB herkese okunabilir (bilinen açık) → anahtar buluta DÜZ METİN olarak ASLA yazılmaz. Akış:
+//  · Kaynak cihaz 8 karakterlik kod üretir (alfabe: A-Z + 2-9, karışan 0/O/1/I YOK → 32 sembol, 40 bit), kodu YALNIZ ekranda gösterir.
+//  · Anahtar bu kodla tarayıcıda şifrelenir: PBKDF2-SHA256 (600.000 tekrar, 16 bayt rastgele salt) → AES-GCM-256 (12 bayt rastgele iv).
+//  · Yalnız şifreli paket ayrı düğüme yazılır: <oda URL'si>/brewmaster_<oda>_aktar.json (ana belgenin KARDEŞİ — ana PUT onu ne siler ne taşır).
+//  · Paket 5 dk geçerli. Hedef cihaz kodu girer → paket çekilir, çözülür, anahtar ai_anahtar_v1'e (yalnız o cihaz) yazılır, paket HEMEN silinir.
+//  · 5 dk geçince ya da 3 yanlış denemede paket silinir. Kod hiçbir yere yazılmaz/gönderilmez/günlüğe düşmez.
+window.BM_AKTAR = (function(){
+  var ALFABE = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', SURE = 5 * 60 * 1000, TEKRAR = 600000, AZAMI_DENEME = 3;
+  var b64 = function(u8){ var s = ''; for(var i = 0; i < u8.length; i++) s += String.fromCharCode(u8[i]); return btoa(s); };
+  var u8 = function(b){ var s = atob(b), a = new Uint8Array(s.length); for(var i = 0; i < s.length; i++) a[i] = s.charCodeAt(i); return a; };
+  function kodUret(){ var r = new Uint8Array(8); crypto.getRandomValues(r); var k = ''; for(var i = 0; i < 8; i++) k += ALFABE[r[i] & 31]; return k; } // 32 = 2^5 → sapmasız
+  function kodNorm(k){ return String(k || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }
+  function kodGecerli(k){ k = kodNorm(k); return k.length === 8 && k.split('').every(function(c){ return ALFABE.indexOf(c) >= 0; }); }
+  function url(){ var u = (typeof syncUrl === 'function') ? syncUrl() : null; return u ? u.replace(/\.json$/, '_aktar.json') : null; }
+  function destek(){ return typeof crypto !== 'undefined' && crypto.subtle && typeof crypto.subtle.importKey === 'function'; }
+  async function anahtarTuret(kod, salt, tekrar){
+    var ham = await crypto.subtle.importKey('raw', new TextEncoder().encode(kodNorm(kod)), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey({ name:'PBKDF2', hash:'SHA-256', salt:salt, iterations:tekrar }, ham, { name:'AES-GCM', length:256 }, false, ['encrypt', 'decrypt']);
+  }
+  async function sifrele(metin, kod, tekrar){
+    tekrar = tekrar || TEKRAR; var salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12));
+    var k = await anahtarTuret(kod, salt, tekrar);
+    var ct = new Uint8Array(await crypto.subtle.encrypt({ name:'AES-GCM', iv:iv }, k, new TextEncoder().encode(metin)));
+    var simdi = Date.now();
+    return { v:1, alg:'PBKDF2-SHA256/AES-GCM-256', tekrar:tekrar, salt:b64(salt), iv:b64(iv), ct:b64(ct), olustu:simdi, son:simdi + SURE, deneme:0 };
+  }
+  async function coz(paket, kod){
+    var k = await anahtarTuret(kod, u8(paket.salt), paket.tekrar);
+    var duz = await crypto.subtle.decrypt({ name:'AES-GCM', iv:u8(paket.iv) }, k, u8(paket.ct)); // yanlış kod → GCM etiketi tutmaz → istisna
+    return new TextDecoder().decode(duz);
+  }
+  async function sil(){ var u = url(); if(!u) return false; try{ var r = await fetch(u, { method:'DELETE' }); return !!(r && r.ok); }catch(e){ return false; } }
+  var _zaman = null;
+  async function gonder(){
+    if(!destek()) return { ok:false, mesaj:'Bu tarayıcıda şifreleme (Web Crypto) yok — aktarım yapılamaz.' };
+    var anahtar = window.BM_AI.anahtarAl(); if(!anahtar) return { ok:false, mesaj:'Bu cihazda kayıtlı anahtar yok.' };
+    var u = url(); if(!u) return { ok:false, mesaj:'Senkron odası ayarlı değil — iki cihazda da aynı oda gerekir (Ayarlar ▸ Senkron).' };
+    if(typeof navigator !== 'undefined' && navigator.onLine === false) return { ok:false, mesaj:'Çevrimdışısın — aktarım internet ister.' };
+    var kod = kodUret(), paket = await sifrele(anahtar, kod);
+    try{ var r = await fetch(u, { method:'PUT', headers:{ 'Content-Type':'application/json' }, body:JSON.stringify(paket) }); if(!r || !r.ok) return { ok:false, mesaj:'Paket yazılamadı (HTTP ' + (r ? r.status : '?') + ').' }; }
+    catch(e){ return { ok:false, mesaj:'Paket yazılamadı (ağ hatası).' }; }
+    if(_zaman) clearTimeout(_zaman); _zaman = setTimeout(function(){ sil(); }, SURE + 1000); // kaynak cihaz açık kalırsa süre sonunda siler
+    return { ok:true, kod:kod, son:paket.son };
+  }
+  async function al(kod){
+    if(!destek()) return { ok:false, mesaj:'Bu tarayıcıda şifreleme (Web Crypto) yok — aktarım yapılamaz.' };
+    if(!kodGecerli(kod)) return { ok:false, mesaj:'Kod 8 karakter olmalı (harf ve rakam; 0, O, 1, I kullanılmaz).' };
+    var u = url(); if(!u) return { ok:false, mesaj:'Senkron odası ayarlı değil — iki cihazda da aynı oda gerekir (Ayarlar ▸ Senkron).' };
+    var paket = null;
+    try{ var r = await fetch(u + '?t=' + Date.now()); paket = r && r.ok ? await r.json() : null; }catch(e){ return { ok:false, mesaj:'Paket okunamadı (ağ hatası).' }; }
+    if(!paket || !paket.ct) return { ok:false, mesaj:'Bekleyen aktarım yok — kaynak cihazda yeniden "Başka cihaza aktar" de.' };
+    if(!(paket.son > Date.now())){ await sil(); return { ok:false, mesaj:'Kodun süresi doldu (5 dk) — paket silindi. Kaynak cihazda yeniden kod üret.' }; }
+    var anahtar = null;
+    try{ anahtar = await coz(paket, kod); }catch(e){ anahtar = null; }
+    if(anahtar == null){
+      var d = (+paket.deneme || 0) + 1;
+      if(d >= AZAMI_DENEME){ await sil(); return { ok:false, mesaj:'Kod yanlış — 3 yanlış deneme, paket silindi. Kaynak cihazda yeniden kod üret.', silindi:true }; }
+      try{ await fetch(u.replace(/\.json$/, '/deneme.json'), { method:'PUT', headers:{ 'Content-Type':'application/json' }, body:String(d) }); }catch(e){}
+      return { ok:false, mesaj:'Kod yanlış — ' + (AZAMI_DENEME - d) + ' deneme hakkın kaldı.' };
+    }
+    await sil(); // paket HEMEN silinir (kayıttan önce — anahtar bellekte)
+    var k = window.BM_AI.anahtarKaydet(anahtar); anahtar = null;
+    if(!k.ok) return { ok:false, mesaj:'Çözülen anahtar biçimi tanınmadı: ' + k.mesaj };
+    return { ok:true };
+  }
+  return { gonder:gonder, al:al, sil:sil, sifrele:sifrele, coz:coz, kodUret:kodUret, kodGecerli:kodGecerli, url:url, ALFABE:ALFABE, SURE:SURE, TEKRAR:TEKRAR, AZAMI_DENEME:AZAMI_DENEME };
+})();
+window.bmAiAktarGonder = async function(){
+  var kutu = function(h){ var el = document.getElementById('bm-ai-aktar-panel'); if(el) el.innerHTML = h; };
+  kutu('<div style="font-size:12px;color:var(--metin-soluk);margin-top:6px">⏳ Anahtar bu cihazda şifreleniyor…</div>');
+  var r = await window.BM_AKTAR.gonder();
+  if(!r.ok){ kutu('<div class="bm-ai-aktar-hata" style="font-size:12px;margin-top:6px;color:#8c1d18">⚠️ ' + esc(r.mesaj) + '</div>'); return r; }
+  var gs = function(){ var kal = Math.max(0, Math.round((r.son - Date.now()) / 1000)); return Math.floor(kal / 60) + ':' + String(kal % 60).padStart(2, '0'); };
+  kutu('<div class="bm-ai-aktar-kod-kutu" style="margin-top:8px;padding:10px;border:1px solid var(--bor);border-radius:10px;background:var(--bg2);text-align:center">'
+    + '<div style="font-size:12px">Diğer cihazda Ayarlar ▸ AI özellikleri ▸ <b>📥 Kodla al</b> ve bu kodu gir:</div>'
+    + '<div class="bm-ai-aktar-kod" style="font-family:ui-monospace,monospace;font-size:28px;font-weight:700;letter-spacing:6px;margin:8px 0;word-break:break-all">' + r.kod.slice(0, 4) + ' ' + r.kod.slice(4) + '</div>'
+    + '<div style="font-size:11px;color:var(--metin-soluk)">Tek kullanımlık · <span class="bm-ai-aktar-sure">' + gs() + '</span> geçerli · kod hiçbir yere kaydedilmez — buluta yalnız şifreli paket gider.</div>'
+    + '<button type="button" class="bm-ayar-btn" style="margin-top:8px;min-height:44px" onclick="window.bmAiAktarIptal()">İptal (paketi sil)</button></div>');
+  var t = setInterval(function(){ var el = document.querySelector('.bm-ai-aktar-sure'); if(!el || Date.now() > r.son){ clearInterval(t); if(el) el.textContent = 'süre doldu'; return; } el.textContent = gs(); }, 1000);
+  r.kod = null; return { ok:true };
+};
+window.bmAiAktarIptal = async function(){ await window.BM_AKTAR.sil(); var el = document.getElementById('bm-ai-aktar-panel'); if(el) el.innerHTML = '<div style="font-size:12px;margin-top:6px">Aktarım iptal edildi — paket silindi.</div>'; };
+window.bmAiAktarAlAc = function(){
+  var el = document.getElementById('bm-ai-aktar-panel'); if(!el) return;
+  el.innerHTML = '<div class="bm-ai-al-kutu" style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">'
+    + '<input id="bm-ai-al-kod" class="inp" type="text" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="9" placeholder="ABCD 2345" aria-label="8 karakterlik aktarım kodu" style="flex:1 1 140px;min-width:0;min-height:44px;font-family:ui-monospace,monospace;font-size:18px;letter-spacing:3px;text-transform:uppercase">'
+    + '<button type="button" class="bm-ayar-btn" style="min-height:44px" onclick="window.bmAiAktarAl()">Al</button></div><div id="bm-ai-al-sonuc" aria-live="polite"></div>';
+};
+window.bmAiAktarAl = async function(){
+  var inp = document.getElementById('bm-ai-al-kod'), kod = inp ? inp.value : '';
+  var yaz = function(h){ var el = document.getElementById('bm-ai-al-sonuc'); if(el) el.innerHTML = h; };
+  yaz('<div style="font-size:12px;margin-top:6px;color:var(--metin-soluk)">⏳ Paket çözülüyor…</div>');
+  var r = await window.BM_AKTAR.al(kod); kod = null; if(inp) inp.value = '';
+  if(!r.ok){ yaz('<div class="bm-ai-al-hata" style="font-size:12px;margin-top:6px;color:#8c1d18">⚠️ ' + esc(r.mesaj) + '</div>'); return r; }
+  if(typeof bmToast === 'function') bmToast('Anahtar bu cihaza aktarıldı — bağlantı testi çalışıyor', 'success');
+  try{ render(); }catch(_e){}
+  var el = document.getElementById('bm-ai-aktar-panel'); if(el) el.innerHTML = '<div class="bm-ai-al-ok" style="font-size:12px;margin-top:6px;color:#1e6b2a">✓ Anahtar bu cihaza aktarıldı; buluttaki paket silindi. Bağlantı testi:</div>';
+  var t = (typeof window.bmAiBaglantiTesti === 'function') ? await window.bmAiBaglantiTesti() : null;
+  return { ok:true, test:t };
+};
+
 // ── Ayarlar ▸ 🤖 AI özellikleri kartı ──
 window._bmAiKartHTML = function(){
   var A = window.BM_AI, k = A.anahtarAl(), d = A.durumAl();
@@ -31044,6 +31215,11 @@ window._bmAiKartHTML = function(){
     (k ? '<div class="bm-ayar-satir"><div class="bm-ayar-satir-text">Bağlantı testi <small>Küçük bir tabloyla soru sorar; cevap, kaynak, token ve maliyeti gösterir (Haiku 4.5, ≈ 0,001 $)</small></div>'+
          '<button class="bm-ayar-btn" id="bm-ai-test-btn" onclick="window.bmAiBaglantiTesti()">Test et</button></div>' : '')+
     '<div id="bm-ai-test-sonuc" aria-live="polite"></div>'+
+    // SPRINT STK2: anahtarı başka cihaza tek kullanımlık kodla aktarma (anahtar buluta düz metin gitmez)
+    '<div class="bm-ayar-satir" style="gap:6px;flex-wrap:wrap"><div class="bm-ayar-satir-text">Başka cihaz <small>Kod yalnız ekranda; buluta yalnız şifreli paket gider, 5 dk geçerli, kullanılınca silinir</small></div>'+
+      (k ? '<button class="bm-ayar-btn bm-ai-aktar-btn" style="min-height:44px" onclick="window.bmAiAktarGonder()">📱 Başka cihaza aktar</button>' : '')+
+      '<button class="bm-ayar-btn bm-ai-al-btn" style="min-height:44px" onclick="window.bmAiAktarAlAc()">📥 Kodla al</button></div>'+
+    '<div id="bm-ai-aktar-panel" aria-live="polite"></div>'+
   '</div>';
 };
 window.bmAiAnahtarKaydet = function(){
