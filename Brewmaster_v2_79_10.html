@@ -13536,7 +13536,7 @@ function rStok(){
       </div>
       <button class="btn" style="background:var(--altin);color:#fff;width:100%;padding:10px" onclick="stokEkle()">+ Stoka Ekle</button>
     </div>`;
-  const stokAramaKutu=
+  const stokAramaKutu=(window._stokCiftUyariHTML ? window._stokCiftUyariHTML() : '')+ // SPRINT STK1
     '<div style="padding:8px 12px;background:var(--bg2);border-bottom:1px solid var(--bor)">'+
       '<input aria-label="Stokta ara" id="stokAramaInp" type="text" class="inp" style="font-size:13px;margin-bottom:6px" placeholder="🔍 Stokta ara..." value="'+esc(sekmeArama.stok)+'" oninput="_stokAra(this.value)">'+
       (stokGruplari.length>0?'<div style="display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px">'+stokKatBar+'</div>':'')+
@@ -26509,7 +26509,8 @@ function stokEkle(){
   if(_uyStr!==''&&_uyRaw===0){flash("ℹ️ Eşik 0 — bu kalem için düşük-stok bildirimi KAPALI","ok");}
   if(!ad){flash("Stok adı gir","err");return;}
   const marka=(document.getElementById("stokMarka")?.value||"").trim();
-  const adTam = marka ? ad+" ("+marka+")" : ad;
+  // SPRINT STK1: katalog adı markayı zaten içeriyorsa ("İsli Malt (Hitit)") ikinci kez eklenmez — "(Hitit) (Hitit)" çift soneki
+  const adTam = (marka && _stokAdNorm(ad).indexOf('(' + _stokAdNorm(marka) + ')') < 0) ? ad+" ("+marka+")" : ad;
   var rec = {id:Date.now().toString(),ad:adTam,miktar,birim,g,uyari};
   rec.marka=marka;
   // Katalogdan seçildiyse refId ekle
@@ -26517,6 +26518,10 @@ function stokEkle(){
     rec.refId = window._stokRefId;
     rec.refTip = window._stokRefTip;
   }
+  // SPRINT STK1: aynı kalem stokta varsa YENİ KAYIT AÇILMAZ — kullanıcıya uygulama içi seçim (native confirm YOK):
+  // "üstüne ekle" ya da "miktarı X yap". Eskiden her ekleme ayrı kayıt açıyordu → iki 2 kg İsli = Kiler'de 4 kg (kanıt: 26.06 yedeği).
+  var _ayni = _stokAyniKalemIdx(rec);
+  if(_ayni > -1){ _stokCiftSor(STOK[_ayni], rec); return; }
   STOK.push(rec);
   stokKaydet(STOK);
   if(miktar===null) flash("ℹ️ Miktar girilmedi — Kiler'de 'miktar ?' görünür; Ne Demleyebilirim bunu 'var, miktarı doğrulanmadı' sayar","ok"); // SPRINT CA
@@ -26524,6 +26529,75 @@ function stokEkle(){
   window._stokRefId=null; window._stokRefTip=null;
   if(ekran==='stok'){document.getElementById('ekran').innerHTML=rStok();}else render();
 }
+// ── SPRINT STK1: aynı kalem tespiti + "mevcut X — üstüne ekle / miktarı X yap" seçimi ──
+function _stokAdNorm(v){ return String(v == null ? '' : v).toLocaleLowerCase('tr').replace(/\s+/g, ' ').trim(); }
+// Aynı ürün = aynı katalog kaydı (refId) VE aynı ad (marka dahil: "Çavdar Maltı (Weyermann)" ≠ "Çavdar Maltı (Hitit)").
+// Katalog bağı yoksa: aynı ad. Farklı markalı aynı refId AYRI ürün sayılır.
+function _stokAyniKalemIdx(rec, haricId){
+  if(!rec) return -1;
+  return STOK.findIndex(function(x){
+    if(!x || (haricId != null && String(x.id) === String(haricId))) return false;
+    if(rec.refId || x.refId) return !!rec.refId && x.refId === rec.refId && _stokAdNorm(x.ad) === _stokAdNorm(rec.ad);
+    return _stokAdNorm(x.ad) === _stokAdNorm(rec.ad);
+  });
+}
+function _stokMikMetin(m, b){ return (m == null) ? 'miktar ?' : (String(Math.round(m * 1000) / 1000).replace('.', ',') + ' ' + (b || '')); }
+function _stokCiftSor(mev, rec){
+  window.__stokCiftBekleyen = { mevId:mev.id, rec:rec };
+  var es = document.getElementById('stokCiftModal'); if(es) es.remove();
+  var ekle = (rec.miktar != null && mev.miktar != null) ? _stokBirimCevir(rec.miktar, rec.birim, mev.birim) : null;
+  var e_ = (typeof esc === 'function') ? esc : function(v){ return String(v); };
+  var btn = 'min-height:44px;width:100%;margin-top:8px;border-radius:10px;padding:10px;font-size:14px;cursor:pointer;font-family:inherit';
+  var h = '<div id="stokCiftModal" role="dialog" aria-modal="true" aria-label="Stokta zaten var" style="position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center" onclick="if(event.target===this)_stokCiftUygula(\'vazgec\')">'
+    + '<div style="background:var(--card,#fff);width:100%;max-width:520px;border-radius:16px 16px 0 0;padding:16px;box-sizing:border-box">'
+    + '<div style="font-weight:700;color:var(--bakir);font-size:15px">📦 Stokta zaten var</div>'
+    + '<div style="font-size:13px;margin-top:6px;line-height:1.5"><b>' + e_(mev.ad) + '</b> — mevcut <b>' + _stokMikMetin(mev.miktar, mev.birim) + '</b>. Yeni girdiğin: <b>' + _stokMikMetin(rec.miktar, rec.birim) + '</b>.</div>'
+    + (ekle != null ? '<button type="button" class="stok-cift-ekle" style="' + btn + ';background:var(--bg2);border:1px solid var(--bor)" onclick="_stokCiftUygula(\'ekle\')">➕ Üstüne ekle → ' + _stokMikMetin(mev.miktar + ekle, mev.birim) + '</button>' : '')
+    + '<button type="button" class="stok-cift-ata" style="' + btn + ';background:var(--bakir);color:#fff;border:none" onclick="_stokCiftUygula(\'ata\')">✏️ Miktarı ' + _stokMikMetin(rec.miktar, rec.birim) + ' yap</button>'
+    + '<button type="button" class="stok-cift-vazgec" style="' + btn + ';background:transparent;border:1px solid var(--bor)" onclick="_stokCiftUygula(\'vazgec\')">Vazgeç</button>'
+    + '<div style="font-size:10.5px;color:var(--dim);margin-top:8px">Ayrı bir kayıt açılmaz — aynı malzemenin iki kaydı Kiler\'de toplamı yanlış gösteriyordu.</div>'
+    + '</div></div>';
+  document.body.insertAdjacentHTML('beforeend', h);
+}
+window._stokCiftUygula = function(mod){
+  var b = window.__stokCiftBekleyen; window.__stokCiftBekleyen = null;
+  var m = document.getElementById('stokCiftModal'); if(m) m.remove();
+  if(!b || mod === 'vazgec') return;
+  var i = STOK.findIndex(function(x){ return x && String(x.id) === String(b.mevId); }); if(i < 0){ flash('Kalem artık stokta yok', 'err'); return; }
+  var x = STOK[i], r = b.rec;
+  if(mod === 'ekle'){ var e = _stokBirimCevir(r.miktar, r.birim, x.birim); if(e == null || x.miktar == null){ flash('Birim uyumsuz — miktarı yeniden gir', 'err'); return; } x.miktar = Math.round((x.miktar + e) * 1000) / 1000; }
+  else if(mod === 'ata'){ x.miktar = r.miktar; x.birim = r.birim; }
+  if(r.uyari) x.uyari = r.uyari;
+  stokKaydet(STOK);
+  flash('📦 ' + x.ad + ': ' + _stokMikMetin(x.miktar, x.birim) + (mod === 'ekle' ? ' (üstüne eklendi)' : ' (miktar güncellendi)'), 'ok');
+  window._stokRefId = null; window._stokRefTip = null;
+  if(ekran === 'stok'){ document.getElementById('ekran').innerHTML = rStok(); } else render();
+};
+// Kiler uyarısı: (1) aynı malzemenin birden çok kaydı (OTOMATİK BİRLEŞTİRME YOK — yalnız uyarı) (2) senkronda bu cihazdan gelen,
+// buluttakiyle aynı malzemenin ayrı kaydı (çift olmasın diye birleşime girmedi; geri getir / unut)
+window._stokCiftGruplari = function(){
+  var g = {}; STOK.forEach(function(x){ if(!x || !x.refId) return; var k = x.refId + '|' + _stokAdNorm(x.ad); (g[k] = g[k] || []).push(x); });
+  return Object.keys(g).map(function(k){ return g[k]; }).filter(function(L){ return L.length > 1; });
+};
+function _stokCakismaOku(){ try{ var a = JSON.parse(localStorage.getItem('bm_stok_cakisma_v1') || '[]'); return Array.isArray(a) ? a : []; }catch(e){ return []; } }
+function _stokCakismaYaz(a){ try{ localStorage.setItem('bm_stok_cakisma_v1', JSON.stringify(a.slice(-50))); }catch(e){} }
+window._stokCakismaOku = _stokCakismaOku;
+window._stokCakismaIslem = function(id, mod){
+  var a = _stokCakismaOku(), i = a.findIndex(function(c){ return c && c.rec && String(c.rec.id) === String(id); }); if(i < 0) return;
+  var c = a.splice(i, 1)[0]; _stokCakismaYaz(a);
+  if(mod === 'geri'){ STOK.push(c.rec); stokKaydet(STOK); flash('📦 ' + c.rec.ad + ' ayrı kayıt olarak geri getirildi', 'ok'); }
+  if(ekran === 'stok'){ document.getElementById('ekran').innerHTML = rStok(); } else render();
+};
+window._stokCiftUyariHTML = function(){
+  var e_ = (typeof esc === 'function') ? esc : function(v){ return String(v); };
+  var G = window._stokCiftGruplari(), C = _stokCakismaOku(), h = '';
+  if(G.length) h += '<div class="stok-cift-uyari" style="margin:8px 12px 0;padding:8px 10px;border:1px solid #e0b25a;background:#fff7e6;border-radius:10px;font-size:12px;line-height:1.5">⚠️ Aynı malzemeden birden çok kayıt (Kiler toplamı şişer): '
+    + G.map(function(L){ return '<b>' + e_(L[0].ad) + '</b> — ' + L.length + ' kayıt (' + L.map(function(x){ return _stokMikMetin(x.miktar, x.birim); }).join(' + ') + ')'; }).join(' · ')
+    + '. Otomatik birleştirilmez: fazlasını sil ya da miktarı düzelt.</div>';
+  if(C.length) h += '<div class="stok-cakisma-uyari" style="margin:8px 12px 0;padding:8px 10px;border:1px solid #e0b25a;background:#fff7e6;border-radius:10px;font-size:12px;line-height:1.5">⚠️ Senkronda bu cihazda buluttakiyle aynı malzemenin ayrı bir kaydı vardı; çift olmasın diye Kiler\'e eklenmedi:'
+    + C.map(function(c){ return '<div style="margin-top:6px"><b>' + e_(c.rec.ad) + '</b> — ' + _stokMikMetin(c.rec.miktar, c.rec.birim) + ' <button type="button" class="nd-mini" onclick="_stokCakismaIslem(\'' + String(c.rec.id).replace(/'/g, '') + '\',\'geri\')">Ayrı kayıt olarak geri getir</button> <button type="button" class="nd-mini" onclick="_stokCakismaIslem(\'' + String(c.rec.id).replace(/'/g, '') + '\',\'unut\')">Unut</button></div>'; }).join('') + '</div>';
+  return h;
+};
 function stokGuncelle(idx, isaret){
   if(idx<0||idx>=STOK.length||!STOK[idx])return;
   // Adımı DOM'dan oku (onchange'i beklemeden anlık değer)
@@ -31571,9 +31645,17 @@ async function syncAl(){
     yerelSTOK = yerelSTOK.filter(_stokCanli);
     const _bulutBayat = gelenSTOK.length < _gelenSTOKh; // bulutta silinmiş kalem var (eski istemci geri yazmış) → temizlemek için PUT
     const gelenStokIds = new Set(gelenSTOK.map(_stokKey).filter(Boolean));
+    // SPRINT STK1: bulutta AYNI malzemenin (aynı refId + aynı ad) başka kimlikli kaydı varken yerelden gelen kayıt birleşime
+    // GİRMEZ (çift kayıt engeli — repro: eski cihazdaki 02.06 Kızıl Çavdar kopyası). Veri kaybı yok: kayıt bm_stok_cakisma_v1'e
+    // saklanır, Kiler'de "geri getir / unut" ile kullanıcı karar verir. Mevcut çiftler otomatik BİRLEŞTİRİLMEZ.
+    const _gelenKalem = new Set(gelenSTOK.map(function(s){ return (s && s.refId) ? s.refId + '|' + _stokAdNorm(s.ad) : null; }).filter(Boolean));
+    const _cakisan = [];
     const yerelStokEklenecek = yerelSTOK.filter(function(s){
-      var k = _stokKey(s); return k && !gelenStokIds.has(k);
+      var k = _stokKey(s); if(!(k && !gelenStokIds.has(k))) return false;
+      if(s.refId && _gelenKalem.has(s.refId + '|' + _stokAdNorm(s.ad))){ _cakisan.push(s); return false; }
+      return true;
     });
+    if(_cakisan.length){ try{ var _ca = _stokCakismaOku(); _cakisan.forEach(function(s){ if(!_ca.some(function(c){ return c && c.rec && String(c.rec.id) === String(s.id); })) _ca.push({ rec:s, ts:Date.now() }); }); _stokCakismaYaz(_ca); }catch(_cz){ if(window.bmHataKaydet)bmHataKaydet('sync',_cz,'syncAl/stokCakisma'); } }
     let yeniSTOK;
     if(yerelStokEklenecek.length > 0){
       yeniSTOK = gelenSTOK.concat(yerelStokEklenecek);

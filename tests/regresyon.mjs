@@ -8863,6 +8863,70 @@ const CASELER = [
       STOK.length = 0;
       return __REG.al();
     })
+  },
+  {
+    kod: 'STK1-FORM', ad: 'STOK EKLEME — aynı kalem: yeni kayıt AÇILMAZ, uygulama içi seçim ("mevcut X — üstüne ekle / miktarı X yap / vazgeç"); "miktarı yap" = atama, "üstüne ekle" = toplama (birim çevrimli); farklı markalı aynı refId AYRI ürün; "(Hitit) (Hitit)" çift soneki yok; native confirm kullanılmaz (Kaan\'ın 26.06 yedeğindeki iki 2 kg İsli kaydının yeniden üretimi)',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('STK1 Form', {});
+      let conf = 0; const _c = window.confirm; window.confirm = () => { conf++; return true; };
+      STOK.length = 0;
+      STOK.push({ ad: 'İsli Malt (Hitit)', birim: 'kg', g: 'Malt', id: '1780387828620', miktar: 2, refId: 'isli_malt', refTip: 'Malt', uyari: 0 });
+      STOK.push({ ad: 'Çavdar Maltı (Weyermann)', birim: 'kg', g: 'Malt', id: '1780580873325', marka: 'Weyermann', miktar: 2.5, refId: 'rye', refTip: 'Malt', uyari: 0 });
+      ekran = 'stok'; render();
+      const form = (val, mik, marka) => { stokSecimGuncelle(val); document.getElementById('stokMiktar').value = mik; document.getElementById('stokMarka').value = marka || ''; stokEkle(); };
+      const isli = () => STOK.filter(s => s.refId === 'isli_malt');
+      form('isli_malt|İsli Malt (Hitit)|kg|Malt', '2', 'Hitit');
+      const m1 = document.getElementById('stokCiftModal');
+      __REG.ok('aynı kalem yeniden eklenince yeni kayıt AÇILMAZ, uygulama içi seçim açılır ("mevcut 2 kg")', isli().length === 1 && !!m1 && /mevcut\s*2 kg/.test(m1.textContent) && !!m1.querySelector('.stok-cift-ekle') && !!m1.querySelector('.stok-cift-ata'), isli().length + ' kayıt');
+      __REG.ok('"Üstüne ekle → 4 kg" ve "Miktarı 2 kg yap" seçenekleri metinde', /Üstüne ekle → 4 kg/.test(m1.textContent) && /Miktarı 2 kg yap/.test(m1.textContent));
+      _stokCiftUygula('ata');
+      __REG.ok('"miktarı yap" = ATAMA (2 kg kalır, toplama yok)', isli().length === 1 && isli()[0].miktar === 2 && !document.getElementById('stokCiftModal'));
+      form('isli_malt|İsli Malt (Hitit)|kg|Malt', '500', 'Hitit'); document.getElementById('stokBirim').value = 'g';
+      _stokCiftUygula('vazgec'); form('isli_malt|İsli Malt (Hitit)|kg|Malt', '500', 'Hitit');
+      __REG.ok('vazgeç → hiçbir şey değişmez', isli().length === 1 && isli()[0].miktar === 2);
+      window.__stokCiftBekleyen.rec.birim = 'g'; window.__stokCiftBekleyen.rec.miktar = 500; _stokCiftUygula('ekle');
+      __REG.ok('"üstüne ekle" = TOPLAMA, birim çevrimli (2 kg + 500 g = 2,5 kg)', isli().length === 1 && Math.abs(isli()[0].miktar - 2.5) < 1e-9 && isli()[0].birim === 'kg', isli()[0].miktar + isli()[0].birim);
+      const n0 = STOK.length; form('rye|Çavdar Maltı|kg|Malt', '190', 'Hitit');
+      __REG.ok('farklı markalı aynı refId (Çavdar Hitit ≠ Çavdar Weyermann) → AYRI kayıt, soru yok', STOK.length === n0 + 1 && !document.getElementById('stokCiftModal') && STOK[STOK.length - 1].ad === 'Çavdar Maltı (Hitit)');
+      const n1 = STOK.length; form('karamela_arpa|Karamela Arpa Maltı (Hitit)|kg|Malt', '585', 'Hitit');
+      __REG.ok('katalog adı markayı içeriyorsa ikinci kez eklenmez ("(Hitit) (Hitit)" yok)', STOK.length === n1 + 1 && STOK[STOK.length - 1].ad === 'Karamela Arpa Maltı (Hitit)', STOK[STOK.length - 1].ad);
+      form('isli_malt|İsli Malt (Hitit)|kg|Malt', '', 'Hitit'); const m2 = document.getElementById('stokCiftModal');
+      __REG.ok('yeni miktar boş ("miktar ?") → yalnız "miktarı ? yap" (toplama seçeneği yok)', !!m2 && !m2.querySelector('.stok-cift-ekle') && !!m2.querySelector('.stok-cift-ata')); _stokCiftUygula('vazgec');
+      window.confirm = _c;
+      __REG.ok('native confirm hiç çağrılmadı', conf === 0);
+      STOK.length = 0; ekran = 'liste';
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'STK1-SYNC', ad: 'SENKRON ÇİFT ENGELİ (sahte bulut): eski cihazdaki aynı refId+ad kopyası (repro: 02.06 Kızıl Çavdar) birleşime GİRMEZ, bm_stok_cakisma_v1\'e saklanır, Kiler\'de "geri getir / unut"; benzersiz yerel kalem birleşimde KALIR (veri koruma aynen); buluttaki mevcut çiftler otomatik BİRLEŞTİRİLMEZ, Kiler\'de uyarı',
+    calistir: (page) => page.evaluate(async () => {
+      __REG.yeniKayit('STK1 Sync', {});
+      try { localStorage.removeItem('bm_stok_cakisma_v1'); } catch (e) {}
+      const kz = (id) => ({ ad: 'Kızıl Çavdar Maltı (Hitit)', birim: 'kg', g: 'Malt', id, miktar: 1, refId: 'kizil_rye', refTip: 'Malt', uyari: 0 });
+      const yeniYerel = { ad: 'Bu cihazda yeni kalem', birim: 'g', g: 'Diğer', id: '1791000000001', miktar: 5, uyari: 0 };
+      const bulutCift = [{ ad: 'İsli Malt (Hitit)', birim: 'kg', g: 'Malt', id: 'b1', miktar: 2, refId: 'isli_malt', refTip: 'Malt' }, { ad: 'İsli Malt (Hitit)', birim: 'kg', g: 'Malt', id: 'b2', miktar: 2, refId: 'isli_malt', refTip: 'Malt' }];
+      const bulut = [kz('1781990801937')].concat(bulutCift);
+      STOK.length = 0; [kz('1781990801937'), kz('1780387859890'), yeniYerel].forEach(s => STOK.push(s));
+      const cfg0 = syncCfg, ts0 = syncSonGuncelle; syncCfg = { url: 'https://ornek.firebaseio.com', oda: 'regtest' }; syncSonGuncelle = 1;
+      let put = 0; const _f = window.fetch;
+      window.fetch = async (u, o) => { if (o && o.method === 'PUT') { put++; return { ok: true, json: async () => ({}) }; } return { ok: true, json: async () => ({ KR: KR.slice(), STOK: JSON.parse(JSON.stringify(bulut)), STOKSil: [], KRSil: [], ts: Date.now() + 1000, cihaz: 'B' }) }; };
+      try { await syncAl(); } finally { window.fetch = _f; syncCfg = cfg0; syncSonGuncelle = ts0; }
+      const kizil = STOK.filter(s => s.refId === 'kizil_rye').map(s => s.id), cak = window._stokCakismaOku();
+      __REG.ok('eski kopya (aynı refId+ad, farklı id) birleşime GİRMEDİ — tek Kızıl Çavdar', kizil.length === 1 && kizil[0] === '1781990801937', kizil.join(','));
+      __REG.ok('kopya kaybolmadı: bm_stok_cakisma_v1\'de saklı', cak.length === 1 && cak[0].rec.id === '1780387859890');
+      __REG.ok('benzersiz yerel kalem birleşimde KALDI (union veri koruması aynen)', STOK.some(s => s.id === yeniYerel.id));
+      __REG.ok('buluttaki mevcut çift otomatik BİRLEŞTİRİLMEDİ (iki İsli kaydı duruyor)', STOK.filter(s => s.refId === 'isli_malt').length === 2);
+      ekran = 'stok'; render(); const ek = document.getElementById('ekran');
+      const u1 = ek.querySelector('.stok-cift-uyari'), u2 = ek.querySelector('.stok-cakisma-uyari');
+      __REG.ok('Kiler uyarısı: aynı malzemeden 2 kayıt (2 kg + 2 kg) — otomatik birleştirilmez', !!u1 && /İsli Malt \(Hitit\)/.test(u1.textContent) && /2 kayıt/.test(u1.textContent) && /Otomatik birleştirilmez/.test(u1.textContent));
+      __REG.ok('Kiler uyarısı: senkronda eklenmeyen kopya + "geri getir / unut"', !!u2 && /Kızıl Çavdar/.test(u2.textContent) && u2.querySelectorAll('button').length === 2);
+      window._stokCakismaIslem('1780387859890', 'geri');
+      __REG.ok('"Ayrı kayıt olarak geri getir" → kayıt Kiler\'e döner, saklama boşalır', STOK.some(s => s.id === '1780387859890') && window._stokCakismaOku().length === 0);
+      try { localStorage.removeItem('bm_stok_cakisma_v1'); } catch (e) {}
+      STOK.length = 0; ekran = 'liste';
+      return __REG.al();
+    })
   }
 ];
 
