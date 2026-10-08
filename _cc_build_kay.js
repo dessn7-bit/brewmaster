@@ -123,9 +123,31 @@ const KARAR = [
   ['Mixed Berry Sour', /red rum ruos/i, 'red', 'sayfa içi birim çelişkisi: hibiskus «5 oz. (21 g)» (5 oz ≈ 142 g)'],
   ['German Leichtbier', /carmelo/i, 'red', 'sayfa içi birim çelişkisi: şerbetçiotu «1.5 oz. (21g)» (1.5 oz ≈ 43 g)'],
   ['Trappist Single / Abbey Ale', /spencer/i, 'red', 'OG 1.058 / %6,5 — single bandının üstünde'],
-  ['Kentucky Common', /spelunker/i, 'red', 'sayfada mısır gevreği «907 kg» — baskı hatası, miktar güvenilmez']
+  ['Kentucky Common', /spelunker/i, 'red', 'sayfada mısır gevreği «907 kg» — baskı hatası, miktar güvenilmez'],
+  // CC3 4. tur (ikinci araştırma)
+  ['Spiced Wheat Beer', /peppered honey/i, 'red', 'baharat acı biber — chili/bal birası, baharatlı buğday değil'],
+  ['Spiced Wheat Beer', /lemongrass|outer banks/i, 'red', 'limon otu = ot; aynı tarif Herb Wheat Beer K2 örneği'],
+  ['Non-Alcoholic Beer', /low alcohol pilsner/i, 'red', 'başlık «düşük alkollü», alkolsüz değil (CC2 3. tur kararıyla aynı)'],
+  ['Trappist Single / Abbey Ale', /father|enkel/i, 'red', 'OG 1.040 + SRM 16 + tarçın/muskat — single bandı ve tanımı dışında'],
+  ['Matcha / Green Tea Beer', /green tease/i, 'red', '%7,8 / 60 IBU IPA — stil gücü bandının üstünde'],
+  ['Pumpkin Stout', /dark o.? ?the moon/i, 'red', 'tarif sayfası «stout» demiyor (CC2 3. tur kararıyla aynı)'],
+  ['Spiced Witbier', /witty dutchman|gordon strong/i, 'red', 'düz witbier — Belgian Witbier komşu stili, «spiced» değil'],
+  ['Contemporary Gose', /mangose|gold hammer/i, 'red', 'meyveli gose / sayfa «classic» diyor — komşu stil (CC2 kararıyla aynı)'],
+  ['American Pilsner', /mustache|pre-prohibition/i, 'red', 'Pre-Prohibition Lager (Classic American Pilsner) — CC2 kararıyla aynı'],
+  ['Double Milk Stout', /weldwerks|coffee coconut/i, 'red', 'sayfa «imperial milk stout» diyor + birim çelişkisi «9 oz. (283 g)»'],
+  ['Tropical Saison', /tropic king/i, 'red', 'tropikal bağ yalnız ad + hop; %8 imperial saison'],
+  ['Kriek / Fruit Lambic', /crabapple|apple/i, 'red', 'meyve kiraz değil (elma)'],
+  ['International Pale Lager', /mexican lager/i, 'red', 'sayfada «2 lbs. (907 kg)» baskı hatası'],
+  ['Table Saison', /petit saison/i, 'red', '%4,5 — table saison bandının (%2,5–3,5) üstünde'],
+  ['Fresh Hop IPA', /hoptime/i, 'red', 'sayfa içi birim çelişkisi «16 oz (141.75 g)»'],
+  ['Light Craft Lager', /lighter than helium/i, 'red', 'ABV %4,5 — light craft lager bandının (%2,5–3,8) üstünde'],
+  ['International Pale Lager', /euro pale lager/i, 'red', 'OG 1.058 / %5,9 — International Pale Lager bandının (1.042–1.050) üstünde']
 ];
 const KARARLOG = [];
+// CC3: araştırmacı raporunda yanlış stile yazılmış kayıt — [yazılan stil, kalıp, doğru stil, gerekçe]
+const STIL_DUZELT = [
+  ['Framboise / Fruit Lambic', /basic kriek/i, 'Kriek / Fruit Lambic', 'tarif başlığı Kriek (kiraz) — Framboise değil']
+];
 // ÖDÜL KATEGORİSİ STİLE NET KARŞILIK GELMİYOR → K2 iddiası düşer, tarif (stile uyuyorsa) K3 olarak kalır. Gerekçeli, elle:
 const K3_INDIR = {
   'Dry-Hopped Saison': 'ödül kategorisi American-Belgo-Style Ale (saison kategorisi değil)',
@@ -139,6 +161,8 @@ const K3_INDIR = {
 ham.forEach(x => {
   if (!x || !x.style) return;
   if (x.tier === 'none') { NONE.push(x.style + ' — ' + kisa(x.notes, 140)); return; }
+  const sd = STIL_DUZELT.find(d => d[0] === x.style && d[1].test(String(x.beer || '') + ' ' + x.recipe_url));
+  if (sd) { TASINAN.push(x.style + ' | ' + x.beer + ' → ' + sd[2] + ' (elle: ' + sd[3] + ')'); x = Object.assign({}, x, { style: sd[2] }); }
   if (!BJCP[x.style]) return red(x, 'stil BJCP-239 adı değil');
   if (x.tier !== 'K2' && x.tier !== 'K3') return red(x, 'kademe geçersiz');
   if (!x.recipe_url || !/^https:\/\//.test(x.recipe_url)) return red(x, 'tarif URL yok');
@@ -199,6 +223,7 @@ ham.forEach(x => {
   const ek = (f.other || []).filter(z => z && z[0]).map(z => [kisa(z[0], 40), kisa(z[1], 40)]); if (ek.length) o.ek = ek.slice(0, 8);
   // bant bekçileri
   if (o.og && (o.og < 1.005 || o.og > 1.16)) return red(x, 'OG bant dışı'); // alkolsüz bira OG'si meşru olarak düşük
+  if (!o.L) return red(x, 'batch hacmi sayfada yok — gramlar ölçeklenemez (CC3: zorunlu)');
   if (o.L && (o.L < 3 || o.L > 250)) return red(x, 'batch bant dışı');
   if (o.L) { const kgL = g.reduce((a, z) => a + z[1], 0) / 1000 / o.L; if (kgL < 0.05 || kgL > 0.8) return red(x, 'grist yoğunluğu tutarsız (' + kgL.toFixed(2) + ' kg/L) — sayfada birim yazım hatası olabilir'); }
   // aynı tarif farklı URL'de (ör. BYO hem /articles/ hem /recipes/ altında) → bir kez

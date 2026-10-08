@@ -5434,8 +5434,9 @@ const CASELER = [
       // CC: Dubbel artık K2 örnekli → hiç örneği olmayan, dağılımlı + iskeletli bir stil dinamik seçilir
       const Kk = window._KAYNAKLI_ORNEK, D0 = Object.keys(window._TOPLULUK_DAGILIM);
       // CC2: dağılımlı + iskeletli stillerin hepsi artık örnekli olabilir → yoksa K1'siz bir stilin K2/K3'ü test süresince geçici kaldırılır (sonra geri konur)
-      let hedefS = D0.find(k => !M[k] && !N[k] && !Kk[k] && STIL_ISKELET[k]), _yedekK = null;
-      if (!hedefS) { hedefS = D0.find(k => !M[k] && !N[k] && Kk[k] && STIL_ISKELET[k]); if (hedefS) { _yedekK = Kk[hedefS]; delete Kk[hedefS]; } }
+      const TO = window._TOPLULUK_ORNEK || {};
+      let hedefS = D0.find(k => !M[k] && !N[k] && !Kk[k] && !TO[k] && STIL_ISKELET[k]), _yedekK = null, _yedekT = null;
+      if (!hedefS) { hedefS = D0.find(k => !M[k] && !N[k] && (Kk[k] || TO[k]) && STIL_ISKELET[k]); if (hedefS) { _yedekK = Kk[hedefS] || null; _yedekT = TO[hedefS] || null; delete Kk[hedefS]; delete TO[hedefS]; } }
       __REG.ok('önkoşul: üç örnek tablosunda da olmayan + dağılımda olan iskeletli stil var', !!hedefS, hedefS);
       __REG.yeniKayit('REGTEST BG3', {});
       // AN6 deseni: Dubbel + OG bandın altına → topluluk bloğu kesin basılır
@@ -5446,13 +5447,13 @@ const CASELER = [
       const el = document.querySelector('.bm-topluluk');
       __REG.ok('topluluk bloğu basıldı (gözlem var)', !!el);
       const t = el ? el.textContent : '';
-      const u = {}; Object.keys(M).concat(Object.keys(N), Object.keys(Kk)).forEach(a => u[a] = 1);
+      const u = {}; Object.keys(M).concat(Object.keys(N), Object.keys(Kk), Object.keys(TO)).forEach(a => u[a] = 1);
       const say = Object.keys(u).length;
       __REG.ok('kapsam satırı: "ödüllü örnek verimizde yok" + gerçek havuz sayısı', t.indexOf('kaynaklı örnek verimizde yok') >= 0 && t.indexOf(say + ' stili kapsıyor') >= 0, 'havuz=' + say);
       __REG.ok('uydurma örnek YOK: madalya/NHC bölümü basılmadı', t.indexOf('madalya almış') < 0 && t.indexOf('NHC') < 0 && t.indexOf('🏅') < 0);
       __REG.ok('satır yargı taşımaz (yalın kapsam dili)', t.indexOf('veri kapsamı durumu') >= 0 && t.indexOf('yargı değil') >= 0);
       __REG.ok('kapsam satırı tıklanabilir öğe eklemez (AN6 kuralı korunur)', el.querySelectorAll('[onclick],button,[role=button]').length === 0);
-      if (_yedekK) Kk[hedefS] = _yedekK;
+      if (_yedekK) Kk[hedefS] = _yedekK; if (_yedekT) TO[hedefS] = _yedekT;
       // örnekli stilde kapsam satırı YAZILMAZ
       __REG.yeniKayit('BG3 poz', {});
       ekran = 'editor'; sekme = 'genel';
@@ -8081,6 +8082,61 @@ const CASELER = [
       _bmProfilSifirla(); window.__brAra = ''; _brKapat();
       return __REG.al();
     })
+  },
+  // ═════════════ SPRINT CC3 — K4 📗 TOPLULUK REÇETESİ ═════════════
+  {
+    kod: 'CC5-K4', ad: 'K4 "📗 Topluluk reçetesi": yalnız K1-K3 toplamı 3’ün altındaki stilde, stil başına ≤3 ve toplamı 3’e tamamlar; HER kayıt _cc_k4_kural.js ile TEK stile mekanik eşleşir (etiket ya da ad), belirsiz/olumsuz/komşu-etiket tuzakları reddedilir; satır + önizleme "Ödül yok — topluluk reçetesi, kalitesi bilinmiyor" + kaynak + "yıl kaynakta yok"; sıralama K1>K2>K3>K4; örnekten reçete K4 notuyla; arama satırında 📗 sayısı',
+    calistir: async (page) => {
+      const src = fs.readFileSync(path.join(KOK, '_cc_k4_kural.js'), 'utf8');
+      return page.evaluate((src) => {
+        const mod = { exports: {} }; (new Function('module', 'exports', src))(mod, mod.exports); const KK = mod.exports;
+        const T = window._TOPLULUK_ORNEK, N = window._NHC_MADALYA, M = window._TOPLULUK_MADALYA, K = window._KAYNAKLI_ORNEK;
+        const tum = Object.keys(T || {}).map(k => T[k].map(o => [k, o])).reduce((a, b) => a.concat(b), []);
+        __REG.ok('K4 tablosu yüklü ve dolu', !!T && tum.length > 20, tum.length);
+        __REG.ok('her K4: k=K4 + kaynak Brewer’s Friend|Brewtoad + bağlantı yok + yıl null + OG var + grist dolu', tum.every(([, o]) => o.k === 'K4' && /^(Brewer's Friend|Brewtoad)$/.test(o.kay.pub) && o.kay.u === null && o.yil === null && o.og > 1 && o.g.length > 0));
+        const yanlis = tum.filter(([k, o]) => { const L = KK.eslesHepsi(o.bira, o.et); return !(L.length === 1 && L[0].stil === k && L[0].es === o.es); });
+        __REG.ok('HER K4 kaydı kural modülüyle TEK stile ve kendi stiline eşleşiyor (mekanik, belirsiz yok)', yanlis.length === 0, yanlis.slice(0, 5).map(([k, o]) => k + ':' + o.bira).join(' | '));
+        const k1say = k => { const nv = (N[k] && N[k][1]) || [], mv = (M[k] && M[k][1]) || []; return nv.length + mv.filter(o => !nv.some(n => n.yil === o.yil && o.og && n.og && Math.abs(n.og - o.og) <= 0.0015)).length; };
+        const ust = k => k1say(k) + ((K[k] || []).length);
+        const kotu = Object.keys(T).filter(k => !(T[k].length <= 3 && ust(k) < 3 && ust(k) + T[k].length <= 3));
+        __REG.ok('K4 yalnız K1-K3 < 3 stilde, stil başına ≤3, toplamı ≤3', kotu.length === 0, kotu.join(','));
+        __REG.ok('Gruit K4’ünde şerbetçiotu yok (stil tanımı)', (T['Gruit Ale'] || []).every(o => !o.h || !o.h.length));
+        // kural tuzakları (pozitif + negatif)
+        const V = [
+          ['pumpkin stout', 'sweet stout', 'Pumpkin Stout'], ['ky', 'kentucky common', 'Kentucky Common'], ['moby white ipa', 'specialty ipa: white ipa', 'White IPA'],
+          ['negra modelo clone', 'dark american lager', 'Mexican Dark Lager'], ['citrazilla - yuzu ipa', 'american ipa', 'Yuzu IPA / Japanese Hop Beer'], ['cucumber gose', 'gose', 'Cucumber Gose'],
+          ['paulaner naturtrüb', 'weissbier', null], ['saison des framboise', 'saison', null], ['erich kings mexican light ale', 'blonde ale', null], ['tamarind chamoy sour', 'wild specialty beer', null],
+          ['huell then, why yuzu bitter?', 'american pale ale', null], ["bailey & john's sorta sour ipa", 'american ipa', null], ['sherlocks american pils', 'classic american pilsner', null],
+          ['fat belgian amber', 'belgian pale ale', null], ['dry-hopped kettle sour #5', 'berliner weisse', null], ['Not a Pumpkin Stout', '', null], ['pumpkin peanut butter stout', '', null],
+          ['wheat ipa', 'specialty ipa: white ipa', null]
+        ];
+        const fark = V.filter(([a, e, b]) => { const r = KK.esles(a, e); return (r ? r.stil : null) !== b; });
+        __REG.ok('kural tuzakları: ' + V.length + ' vakanın hepsi beklenen sonuçta (olumsuz ad, komşu etiket, iki stile uyan = koyma)', fark.length === 0, fark.map(x => x[0]).join(' | '));
+        // liste DOM'u: sıralama + etiket metni
+        const st = Object.keys(T).find(k => ust(k) > 0) || Object.keys(T)[0];
+        const box = document.createElement('div'); box.innerHTML = window._bmOrnekListeHTML(st);
+        const roz = Array.from(box.querySelectorAll('.bm-kademe')).map(r => (r.textContent.match(/K[1-4]/) || [''])[0]);
+        __REG.ok('sıralama K1 > K2 > K3 > K4 (' + st + ': ' + roz.join(',') + ')', roz.length >= 2 && roz.join(',') === roz.slice().sort().join(',') && roz[roz.length - 1] === 'K4');
+        const tx = box.textContent;
+        __REG.ok('K4 satırı: 📗 rozet + zorunlu etiket + kaynak + "yıl kaynakta yok"', /📗 K4 · Topluluk reçetesi/.test(tx) && tx.indexOf('Ödül yok — topluluk reçetesi, kalitesi bilinmiyor') >= 0 && /Brewer’s Friend|Brewer's Friend|Brewtoad/.test(tx) && tx.indexOf('yıl kaynakta yok') >= 0);
+        __REG.ok('K4 satırında ödül iddiası yok', !/🏆|madalya almış|altın almış/.test(Array.from(box.querySelectorAll('.bm-ornek-satir')).filter(r => /K4/.test(r.textContent)).map(r => r.textContent).join(' ')));
+        const YASAK = ['daha iyi', 'daha kötü', 'yapmalısın', 'yapmalı', 'hatalı', 'yanlış', 'olmalı', 'gerekir', 'tavsiye', 'öneriyoruz', 'düzelt', 'kötü', 'başarılı', 'kazanmak için', 'kazandıran', 'ideal', 'doğrusu', 'eksik'];
+        const hepsi = Object.keys(T).map(k => { const b = document.createElement('div'); b.innerHTML = window._bmOrnekListeHTML(k); return b.textContent; }).join(' ').toLocaleLowerCase('tr-TR');
+        __REG.ok('AN5-DIL: tüm K4’lü stil listelerinde yasak kelime 0', YASAK.every(k => hepsi.indexOf(k) < 0), YASAK.filter(k => hepsi.indexOf(k) >= 0).join(','));
+        // önizleme + örnekten reçete
+        __REG.yeniKayit('REGTEST CC5', {});
+        const st4 = Object.keys(T)[0], n0 = KR.length;
+        _bmOrnekOnizle('k4', st4, 0);
+        const m = document.getElementById('bmOrnekOnizle'), mt = m ? m.textContent : '';
+        __REG.ok('önizleme: zorunlu etiket + kaynak + yıl satırı + bağlantı YOK', !!m && mt.indexOf('Ödül yok — topluluk reçetesi, kalitesi bilinmiyor') >= 0 && mt.indexOf('Topluluk reçetesinin yılı kaynakta yok') >= 0 && !m.querySelector('.bm-onizle-kaynak a'));
+        const yid = bmOrnekOnizleOlustur();
+        __REG.ok('örnekten reçete: yeni kayıt + stil + not "📗 KAYNAK (K4)" + ad "topluluk reçetesinden"', KR.length === n0 + 1 && !!yid && S.stil === st4 && String(S.notlar || '').indexOf('📗 KAYNAK (K4)') >= 0 && S.biraAd.indexOf('topluluk reçetesinden') >= 0);
+        // arama satırı sayısı
+        const os = window._bmOrnekSayim(st4);
+        __REG.ok('_bmOrnekSayim K4 sayar', os.K4 === T[st4].length && os.toplam >= os.K4);
+        return __REG.al();
+      }, src);
+    }
   }
 ];
 
