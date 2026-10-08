@@ -1052,7 +1052,7 @@ button.bm-demle-giris{display:flex;align-items:center;gap:15px;padding:16px 17px
 .nd-muadil{display:block;width:100%;min-height:44px;text-align:left;background:var(--card);border:1px dashed var(--altin);border-radius:8px;padding:6px 9px;margin:4px 0;font-size:11.5px;color:var(--metin);cursor:pointer;font-family:var(--font-govde)}
 .nd-malz-isk{font-size:11px;color:var(--soluk);margin-top:6px;line-height:1.6}
 .nd-malz-tum summary{cursor:pointer;font-size:11.5px;font-weight:700;color:var(--bakir);padding:12px 0;min-height:44px;box-sizing:border-box}
-.nd-kalem{font-size:10.5px;white-space:nowrap;margin-left:6px}.nd-k-stokta,.nd-k-bilinmiyor{color:#3f7d3e}.nd-k-yok,.nd-k-yetersiz{color:#b0413e}.nd-k-muadil{color:var(--bakir)}.nd-k-eslenemedi,.nd-k-dogrulanmadi{color:var(--dim)}
+.nd-kalem{font-size:10.5px;white-space:normal;margin-left:6px}.nd-yakin{color:var(--dim)}.nd-k-stokta,.nd-k-bilinmiyor{color:#3f7d3e}.nd-k-yok,.nd-k-yetersiz{color:#b0413e}.nd-k-muadil{color:var(--bakir)}.nd-k-eslenemedi,.nd-k-dogrulanmadi{color:var(--dim)}
 .nd-onizle-ozet{margin-top:8px;padding:6px 9px;border-radius:8px;border:1px solid var(--bor);background:var(--bg2);font-size:12px;color:var(--metin);line-height:1.45}
 .nd-onizle-ozet.nd-ok{border-color:#7fb77e;background:#eef7ee}
 .nd-onizle-yontem{font-size:10px;color:var(--dim);margin-top:2px}
@@ -4183,75 +4183,75 @@ window.beerXmlExport=beerXmlExport;
 
 // ═══ VERİ TABANLARI ═══════════════════════════════════════
 const MALTLAR=[
-  {id:"pale_ale",ad:"Pale Ale Malt",gu:304,r:3,g:"Base",mo:"Weyermann, Crisp, Simpsons, Hitit (yerli)",alias:["pale ale","pale malt","british pale","english pale","pale ale malz","crisp pale ale malt"]},
-  {id:"pilsner",ad:"Pilsner Malt",gu:310,r:2,g:"Base",mo:"Weyermann, BestMalz, Hitit (yerli)",bufKap:34,alias:["pilsen malt","pilsner malz","german pilsner","pilsen","pilsner"]},
-  {id:"maris",ad:"Maris Otter",gu:316,r:3,g:"Base",mo:"Crisp, Simpsons, Fawcett, Muntons",bufKap:51,alias:["maris otter pale","maris otter malt","marris otter","warminster floor-malted maris otter"]},
-  {id:"bel_pils",ad:"Belgian Pilsner",gu:305,r:2,g:"Base",mo:"Castle, Dingemans"},
-  {id:"wheat",ad:"Buğday Maltı",gu:315,r:2,g:"Base",mo:"Weyermann, BestMalz, Muntons, Hitit (yerli)",alias:["white wheat","wheat malt, white","white wheat malt","pale wheat malt","wheat malt","malted wheat","red wheat","wheat, red","german wheat","weizenmalz hell"]},
-  {id:"dark_wheat",ad:"Koyu Buğday Maltı",gu:311,r:7,g:"Base",mo:"Weyermann",alias:["dark wheat"]},
-  {id:"munich",ad:"Munich Malt",gu:300,r:6,g:"Base",mo:"Weyermann, BestMalz, Hitit (yerli 6L)",alias:["german munich","munich"]},
-  {id:"dark_munich",ad:"Munich Dark (Aroma)",gu:300,r:9,g:"Base",mo:"Weyermann",alias:["munich type ii","dark munich"]},
-  {id:"vienna",ad:"Vienna Malt",gu:304,r:3,g:"Base",mo:"Weyermann, BestMalz, Muntons, Hitit (yerli)",alias:["wiener malz","german vienna","vienna"]},
+  {id:"pale_ale",ad:"Pale Ale Malt",gu:304,r:3,g:"Base",mo:"Weyermann, Crisp, Simpsons, Hitit (yerli)",alias:["pale ale","pale malt","british pale","english pale","pale ale malz","crisp pale ale malt","british pale ale malt","british pale malt","crisp british pale ale malt (3 °l)","crisp british pale malt","english gold pale malt","english pale ale malt","english pale ale malt (3 °l)","english pale ale malt (~3 °l)","u.k. pale ale malt","uk pale ale malt"]},
+  {id:"pilsner",ad:"Pilsner Malt",gu:310,r:2,g:"Base",mo:"Weyermann, BestMalz, Hitit (yerli)",bufKap:34,alias:["pilsen malt","pilsner malz","german pilsner","pilsen","pilsner","( 7.37 kg) pilsner malt","2° l german pilsner malt","avangard - pilsner","avangard pils malt","avangard pilsner malt","durst pils malt","durst pilsner malt","german pils","german pils malt","german pilsner malt","german pilsner malt (1.8 °l)","german pilsner malt (2 °l)","german pilsner malt, 1.6°l","german two-row pilsner malt","pils malt","pilsener malt","pilsner (best malz)","pilsner (durst)","pilsner (weyermann)","pilsner malt (20%)","pilsner malt (all-grain variant)","pilsner malt (german)","pilsner malt (great western)","pilsner malt (weyermann)","weyermann floor-malted pilsner 2l","weyermann pils malt","weyermann pilsner","weyermann pilsner malt","weyermann&#39;s pilsner malt"]},
+  {id:"maris",ad:"Maris Otter",gu:316,r:3,g:"Base",mo:"Crisp, Simpsons, Fawcett, Muntons",bufKap:51,alias:["maris otter pale","maris otter malt","marris otter","warminster floor-malted maris otter","baird’s maris otter","crisp maris otter","crisp maris otter malt","crisp maris otter pale malt","fawcett\u0019s maris otter pale malt","fawcett maris otter pale malt","hugh baird maris otter pale malt","maris otter (crisp)","maris otter (uk)","maris otter pale ale malt","maris otter pale ale malt (2.4 °l)","maris otter pale malt","munton &amp; fison maris otter malt","munton s maris otter pale malt","munton s maris otter palt malt","munton&#39;s maris otter pale malt","muntons - maris otter","muntons maris otter malt","muntons maris otter pale ale malt","pale malt, maris otter","pale malt, maris otter (crisp)","simpsons maris otter","simpsons maris otter pale malt","thomas fawcett maris otter pale ma","thomas fawcetts maris otter malt","u.k. maris otter","u.k. maris otter pale ale malt","uk maris otter"]},
+  {id:"bel_pils",ad:"Belgian Pilsner",gu:305,r:2,g:"Base",mo:"Castle, Dingemans",alias:["1.1° l belgian pilsner malt","belgian pils","belgian pils malt","belgian pilsner malt","belgian pilsner malt (1.4–1.8 °l)","belgian two-row pilsner malt","dingemans belgian pilsner malt","dingemans pils malt","dingemans pilsner malt"]},
+  {id:"wheat",ad:"Buğday Maltı",gu:315,r:2,g:"Base",mo:"Weyermann, BestMalz, Muntons, Hitit (yerli)",alias:["white wheat","wheat malt, white","white wheat malt","pale wheat malt","wheat malt","malted wheat","red wheat","wheat, red","german wheat","weizenmalz hell","american wheat malt","american white wheat malt","belgian wheat malt","briess white wheat malt","durst malz wheat malt","durst wheat malt","german wheat malt","german white wheat malt","great western white wheat malt","joe white white wheat malt","north american white wheat malt","rahr white wheat malt","weyermann pale wheat malt","weyermann wheat malt","wheat","wheat (durst)","wheat malt (all-grain variant)","wheat malt (belgian)","wheat malt (briess)","white wheat malt (2 °l)","white wheat malt (great western)"]},
+  {id:"dark_wheat",ad:"Koyu Buğday Maltı",gu:311,r:7,g:"Base",mo:"Weyermann",alias:["dark wheat","6.5° l german dark wheat malt","dark wheat malt (7 °l)","german dark wheat malt","weyermann dark wheat malt","weyermann dark wheat malt, 6-8 °l"]},
+  {id:"munich",ad:"Munich Malt",gu:300,r:6,g:"Base",mo:"Weyermann, BestMalz, Hitit (yerli 6L)",alias:["german munich","munich","6° l munich malt","7 srm munich malt","barke munich malt","belgian munich (ding.) malt","belgian munich malt","bonlander munich","briess bonlander munich malt","dingemans 5.5° l munich malt","dingemans munich malt","durst munich malt","durst munich malt (8 °l)","dwc* munich malt","german munich (best)","german munich malt","german munich malt (6 °l)","ireks munich malt","light german munich malt","mecca grade metolius munich malt","mecca metolius munich malt","munich (dingemans)","munich malt (1 lb of it home-smoked with alder wood)","munich malt (6 °l)","munich malt (9 °l)","munich malt (9.0 srm)","munich malt (proximity)","organic munich malt","tf munich malt","wayermann munich malt","weyermann 5-7° l munich malt","weyermann barke munich","weyermann barke munich malt","weyermann munich malt","weyermenn barke munich malt"]},
+  {id:"dark_munich",ad:"Munich Dark (Aroma)",gu:300,r:9,g:"Base",mo:"Weyermann",alias:["munich type ii","dark munich","10° l munich malt","10° l munich malt (19%)","10°l munich malt","8-10° l munich malt","bestmälz munich dark malt","continental dark munich malt (11 °l)","dark munich (munich ii) malt","dark munich malt","dark munich malt (10 °l)","dark munich malt (8–10 °l)","dark munich malt (9 °l)","german dark munich malt","german munich malt (10 °l)","great western munich malt (10 °l)","great western munich malt 10 °l","joe white dark munich malt","light munich (10 l)","munich - light 10l","munich 10l malt","munich dark (48%)","munich ii","munich ii (weyermann)","munich ii malt","munich malt (10 °l)","munich malt (8-10 °l)","munich malt 10°l","munich malt, 10°l","munich type ii (dark)","weyerman munich ii","weyermann 10°l munich malt","weyermann munich dark","weyermann munich ii","weyermann munich ii 9l","weyermann munich ii malt"]},
+  {id:"vienna",ad:"Vienna Malt",gu:304,r:3,g:"Base",mo:"Weyermann, BestMalz, Muntons, Hitit (yerli)",alias:["wiener malz","german vienna","vienna","avangard vienna malt","baronesse vienna malt (9.5%)","continental vienna malt","durst 3° l vienna malt","durst vienna malt","german vienna malt","ireks vienna malt","mecca vanora vienna malt","mfb vienna malt","motor city vienna malt","u.s. vienna malt","us vienna malt","vienna (weyermann)","vienna malt (3-4 °l)","vienna malt (4 °l)","vienna malt (weyerman)","vienna malt (weyermann)","wayermann vienna","weyemann vienna malt","weyermann 3.5° l vienna malt","weyermann barke vienna","weyermann barke vienna malt","weyermann vienna","weyermann vienna malt"]},
   {id:"rye",ad:"Çavdar Maltı",gu:311,r:3,g:"Base",mo:"Weyermann, Simpsons, Muntons, Hitit (yerli)",alias:["rye malt","malted rye","rye"]},
-  {id:"smoked",ad:"İsli Malt — Kayın (Beech)",gu:296,r:3,g:"Base",mo:"Weyermann, Viking Malt (Polonya VK), Hitit (yerli)",alias:["smoked malt","german rauch smoked"]},
-  {id:"smoked_oak",ad:"İsli Buğday — Meşe (Oak Wheat)",gu:311,r:2,g:"Base",mo:"Weyermann"},
-  {id:"oat",ad:"Yulaf (Flaked Oats)",gu:269,r:2,g:"Adjunct",mo:"Herhangi",bufKap:48.2,alias:["flaked oats","oat flakes","rolled oats","quaker quick oats","haferflocken"]},
-  {id:"oat_malt",ad:"Yulaf Maltı",gu:270,r:2,g:"Adjunct",mo:"Simpsons, Crisp",alias:["oat malt"]},
+  {id:"smoked",ad:"İsli Malt — Kayın (Beech)",gu:296,r:3,g:"Base",mo:"Weyermann, Viking Malt (Polonya VK), Hitit (yerli)",alias:["smoked malt","german rauch smoked","bamberg smoked malt","beechwood home smoked malt","beechwood smoked malt","beechwood-smoked malt","rauch malt","weyermann rauch malt","weyermann rauchmalz"]},
+  {id:"smoked_oak",ad:"İsli Buğday — Meşe (Oak Wheat)",gu:311,r:2,g:"Base",mo:"Weyermann",alias:["oak-smoked wheat malt","weyermann oak smoked wheat malt","weyermann oak-smoked wheat malt"]},
+  {id:"oat",ad:"Yulaf (Flaked Oats)",gu:269,r:2,g:"Adjunct",mo:"Herhangi",bufKap:48.2,alias:["flaked oats","oat flakes","rolled oats","quaker quick oats","haferflocken","briess flaked oats","flaked oats (us)","flaked oats, toasted at 300f for 3","great western flaked oats (2 °l)","lb. flaked oats","oats, flaked"]},
+  {id:"oat_malt",ad:"Yulaf Maltı",gu:270,r:2,g:"Adjunct",mo:"Simpsons, Crisp",alias:["oat malt","crisp naked malted oats","crisp naked oat malt","crisp oat malt","malted oats","oat malt (with husk)","simpsons malted oats"]},
   {id:"fawcett_oat",ad:"Fawcett Oat Malt",gu:231,r:3,g:"Adjunct",mo:"Thomas Fawcett"},
   {id:"fawcett_mild",ad:"Fawcett Mild Ale Malt",gu:308,r:4,g:"Base",mo:"Thomas Fawcett"},
-  {id:"rwh",ad:"Ham Buğday (Unmalted)",gu:296,r:2,g:"Adjunct",mo:"Herhangi",alias:["raw wheat"]},
-  {id:"torr_wh",ad:"Torrified Wheat",gu:308,r:3,g:"Adjunct",mo:"Crisp, Simpsons"},
-  {id:"fbar",ad:"Arpa (Flaked Barley)",gu:269,r:2,g:"Adjunct",mo:"Herhangi",bufKap:51.8,alias:["flaked barley","barley, flaked"]},
-  {id:"corn",ad:"Mısır (Flaked Corn)",gu:323,r:1,g:"Adjunct",mo:"Herhangi",bufKap:9.6,alias:["flaked corn","corn, flaked"]},
+  {id:"rwh",ad:"Ham Buğday (Unmalted)",gu:296,r:2,g:"Adjunct",mo:"Herhangi",alias:["raw wheat","briess raw wheat","briess unmalted wheat","rahr unmalted wheat","raw white wheat","unmalted wheat","unmalted wheat berries"]},
+  {id:"torr_wh",ad:"Torrified Wheat",gu:308,r:3,g:"Adjunct",mo:"Crisp, Simpsons",alias:["briess torrified wheat"]},
+  {id:"fbar",ad:"Arpa (Flaked Barley)",gu:269,r:2,g:"Adjunct",mo:"Herhangi",bufKap:51.8,alias:["flaked barley","barley, flaked","briess flaked barley, 1.5 °l","flaked barley (mash)","flaked barley 1.7 srm"]},
+  {id:"corn",ad:"Mısır (Flaked Corn)",gu:323,r:1,g:"Adjunct",mo:"Herhangi",bufKap:9.6,alias:["flaked corn","corn, flaked","briess flaked corn","flaked corn (1 °l)","flaked corn (maize)","flaked corn 1.3 srm","flaked corn grits","flaked maize","flaked maize (corn)","flaked maize (thomas fawcett)","yellow flaked corn"]},
   {id:"rice",ad:"Pirinç Kabuğu",gu:0,r:0,g:"Adjunct",mo:"—"},
-  {id:"rice_flaked",ad:"Pirinç (Flaked Rice)",gu:315,r:1,g:"Adjunct",mo:"Herhangi",alias:["flaked rice","rice, flaked"]},
-  {id:"dex",ad:"Dekstroz (Monohydrate)",gu:350,r:0,g:"Şeker",mo:"Herhangi",alias:["corn sugar (dextrose)","dextrose (corn sugar)","corn sugar","dextrose"]},
-  {id:"sek",ad:"Beyaz Şeker",gu:384,r:0,g:"Şeker",mo:"Herhangi",alias:["cane sugar","sugar, table (sucrose)","sucrose (table sugar)","table sugar","white sugar"]},
-  {id:"lak",ad:"Laktoz (fermente olmaz)",gu:367,r:0,g:"Şeker",mo:"Herhangi",alias:["lactose (milk sugar)","milk sugar (lactose)","lactose"]},
+  {id:"rice_flaked",ad:"Pirinç (Flaked Rice)",gu:315,r:1,g:"Adjunct",mo:"Herhangi",alias:["flaked rice","rice, flaked","briess flaked rice"]},
+  {id:"dex",ad:"Dekstroz (Monohydrate)",gu:350,r:0,g:"Şeker",mo:"Herhangi",alias:["corn sugar (dextrose)","dextrose (corn sugar)","corn sugar","dextrose","corn sugar (15 min boil)","corn sugar (15 min left in boil)","corn sugar (15 min)","corn sugar (post-boil)","corn sugar @ 5 min","corn sugar in boil","corn sugar primary","corn sugar to carbonate","corn sugar to prime","corn sugar, boil","dextrose (10 min)","dextrose (30 min)","dextrose (briess)","dextrose (in boil)","dextrose (whirlpool)","dextrose corn sugar (10 min)","dextrose in boil","dextrose sugar","dextrose to bottle condition","dextrose to carbonate","dextrose to prime","dextrose, primary"]},
+  {id:"sek",ad:"Beyaz Şeker",gu:384,r:0,g:"Şeker",mo:"Herhangi",alias:["cane sugar","sugar, table (sucrose)","sucrose (table sugar)","table sugar","white sugar","() table sugar for bottle priming","cane sugar (20 min left in boil)","cane sugar (20 min)","cane sugar (90 min)","cane sugar (boil)","cane sugar (in boil)","cane sugar (sucrose), 0 min","cane sugar @ 30 min","cane sugar, in boil","cane sugar, in boil @15 min","per 5 gallons (18.9 l) cane sugar","sucrose","sucrose (cane sugar)","sucrose (secondary)","sucrose (with first wort hops)","table sugar (15 min)","table sugar (boil)","table sugar @ 15 min","table sugar for priming","table sugar to prime","table sugar, in boil","table sugar, plus . more after fer","white table sugar (boil)"]},
+  {id:"lak",ad:"Laktoz (fermente olmaz)",gu:367,r:0,g:"Şeker",mo:"Herhangi",alias:["lactose (milk sugar)","milk sugar (lactose)","lactose","lactose (0 min)","lactose (at bottling)","lactose (boil)"]},
   {id:"bal",ad:"Bal",gu:290,r:2,g:"Şeker",mo:"Herhangi (Akasya, Çiçek, Kestane)",alias:["honey","clover honey","orange blossom honey","honey, clover"]},
   {id:"candy_clr",ad:"Candi Şurup Clear (Simplicity)",gu:267,r:1,g:"Şeker",mo:"Candi Syrup Inc., Simplicity"},
   {id:"candy_amb",ad:"Candi Şurup Amber (D-90)",gu:267,r:90,g:"Şeker",mo:"Candi Syrup Inc., Simplicity"},
   {id:"candy_drk",ad:"Candi Şurup Dark (D-180)",gu:267,r:180,g:"Şeker",mo:"Candi Syrup Inc., Simplicity",alias:["candi syrup d-180"]},
-  {id:"c20",ad:"Crystal 20 (Briess/Simpsons)",gu:293,r:20,g:"Özel",mo:"Briess, Simpsons",alias:["caramel malt 20l","crystal 20l"]},
-  {id:"c40",ad:"Crystal 40 (Briess/Simpsons)",gu:293,r:40,g:"Özel",mo:"Briess, Simpsons",alias:["caramel malt 40l","crystal 40l"]},
-  {id:"c60",ad:"Crystal 60 (Briess/Simpsons)",gu:296,r:60,g:"Özel",mo:"Briess, Simpsons",alias:["caramel malt 60l","caramel/crystal 60l","crystal 60l","2-row caramel malt 60l","british crystal 50-60l"]},
-  {id:"c80",ad:"Crystal 80 (Briess/Simpsons)",gu:289,r:80,g:"Özel",mo:"Briess, Simpsons",alias:["caramel malt 80l","crystal 80l","british crystal 70-80l","dark crystal 80l"]},
-  {id:"c120",ad:"Crystal 120 (Briess/Simpsons)",gu:285,r:120,g:"Özel",mo:"Briess, Simpsons",alias:["caramel malt 120l","crystal 120l"]},
-  {id:"specb",ad:"Special B",gu:285,r:115,g:"Koyu",mo:"Dingemans, Castle"},
-  {id:"bisk",ad:"Bisküvi Malt",gu:295,r:25,g:"Özel",mo:"Dingemans (orijinal), Crisp, Pauls/Boortmalt",alias:["biscuit md"]},
-  {id:"amber",ad:"Amber Malt",gu:277,r:30,g:"Özel",mo:"Crisp, Thomas Fawcett, Muntons",bufKap:35.5,alias:["crisp amber"]},
-  {id:"brown",ad:"Brown Malt",gu:273,r:65,g:"Koyu",mo:"Crisp, Simpsons, Muntons",alias:["crisp brown"]},
-  {id:"carapils",ad:"Carapils / Dextrin",gu:285,r:2,g:"Özel",mo:"Briess, Weyermann",alias:["carapils malt","cara-pils/dextrine","dextrine malt (cara-pils)","carapils"]},
-  {id:"mel",ad:"Melanoidin Malt",gu:288,r:27,g:"Özel",mo:"Weyermann",bufKap:68.9,alias:["melanoidin"]},
+  {id:"c20",ad:"Crystal 20 (Briess/Simpsons)",gu:293,r:20,g:"Özel",mo:"Briess, Simpsons",alias:["caramel malt 20l","crystal 20l","20° l crystal","20° l crystal malt","20°l caramel malt","20°l crystal malt","briess 20°l crystal malt","briess caramel 20°l malt","crystal malt (20 °l)","crystal malt 20 °l","crystal malt, 20°l","us crystal malt (20 °l)"]},
+  {id:"c40",ad:"Crystal 40 (Briess/Simpsons)",gu:293,r:40,g:"Özel",mo:"Briess, Simpsons",alias:["caramel malt 40l","crystal 40l","0.875 crystal 40 malt","40 l crystal malt","40l crystal malt","40° l crystal malt","40° l u.s. crystal malt","40°l caramel malt","40°l crystal malt","40˚ l crystal malt","briess 40° l crystal malt","briess caramel 40 malt","briess caramel malt (40 °l)","briess crystal malt (40 °l)","caramel malt (40 °l)","caramel malt - 40l (briess)","caramel malt 40l (4%)","crystal 40","crystal 40 (us)","crystal 40 °l","crystal 40l malt","crystal 40°l","crystal malt (40 °l)","crystal malt, 40°l","uk light crystal malt (38 °l)"]},
+  {id:"c60",ad:"Crystal 60 (Briess/Simpsons)",gu:296,r:60,g:"Özel",mo:"Briess, Simpsons",alias:["caramel malt 60l","caramel/crystal 60l","crystal 60l","2-row caramel malt 60l","british crystal 50-60l","60 l crystal malt","60l crystal malt","60° l caramel malt","60° l crystal malt","60°l crystal malt","briess 60° l crystal malt","briess crystal malt (60 °l)","caramel 60","caramel 60 malt","caramel malt (60 °l)","crystal 60","crystal 60 °l","crystal malt (60 °l)","crystal malt (60l)","crystal malt 60 °l","crystal malt 60l","crystal malt, 60 °l","crystal malt, 60°l","uk 60° l crystal malt","us crystal malt, 60 °l"]},
+  {id:"c80",ad:"Crystal 80 (Briess/Simpsons)",gu:289,r:80,g:"Özel",mo:"Briess, Simpsons",alias:["caramel malt 80l","crystal 80l","british crystal 70-80l","dark crystal 80l","70–80°l caramel malt","80 l crystal malt","80 °l crystal malt","80l crystal malt","80° l caramel malt","80° l crystal malt","80° l crystal malt malt","80°l caramel malt","80°l crystal malt","80˚ l crystal malt","american crystal malt (80 °l)","caramel 80°l malt, steeped","caramel malt (80 °l)","crystal 80","crystal 80°l","crystal malt (80 °l)","crystal malt 60–80 °l","crystal malt 80 °l","dark crystal malt (60–80 °l)","u.s. 80 °l crystal malt","us caramel malt (80 °l)"]},
+  {id:"c120",ad:"Crystal 120 (Briess/Simpsons)",gu:285,r:120,g:"Özel",mo:"Briess, Simpsons",alias:["caramel malt 120l","crystal 120l","() briess 120° l caramel malt","(12 oz) briess 120° l caramel malt","120 l crystal malt","120l crystal malt","120° l caramel malt","120° l crystal malt","120° l crystal malt (u.s.)","120°l crystal malt","120°l crystal malt (in sparge)","120˚ l crystal malt","american crystal malt (120 °l)","caramel 120 malt (us)","caramel malt (120 °l)","caramel malt, 120°l","crystal 120","crystal 120 malt","crystal 120 °l","crystal malt (120 °l)","crystal malt 120 °l","crystal malt, 120°l","english crystal 120 °l"]},
+  {id:"specb",ad:"Special B",gu:285,r:115,g:"Koyu",mo:"Dingemans, Castle",alias:["belgian special b malt","dingeman s special b malt","dingemans special b","dingemans special b malt","dingemans special b malt (120 °l)","dmc special b malt","special b (bel)","special b malt"]},
+  {id:"bisk",ad:"Bisküvi Malt",gu:295,r:25,g:"Özel",mo:"Dingemans (orijinal), Crisp, Pauls/Boortmalt",alias:["biscuit md","biscuit","biscuit (dingemans)","biscuit malt","biscuit malt (25 °l)","dinegmans biscuit malt","dingemans 24° l biscuit malt","dingemans biscuit malt","dingemans biscuit malt (mout roost 50)","dingman biscuit malt","dmc biscuit malt"]},
+  {id:"amber",ad:"Amber Malt",gu:277,r:30,g:"Özel",mo:"Crisp, Thomas Fawcett, Muntons",bufKap:35.5,alias:["crisp amber","amber malt (30 °l)","crisp 27° l amber malt","crisp amber malt","simpsons amber malt"]},
+  {id:"brown",ad:"Brown Malt",gu:273,r:65,g:"Koyu",mo:"Crisp, Simpsons, Muntons",alias:["crisp brown","70° l u.k. brown malt","brown malt (crisp)","crisp 64° l brown malt","crisp brown malt","fawcett brown malt","hugh baird 60° l brown malt","uk brown malt"]},
+  {id:"carapils",ad:"Carapils / Dextrin",gu:285,r:2,g:"Özel",mo:"Briess, Weyermann",alias:["carapils malt","cara-pils/dextrine","dextrine malt (cara-pils)","carapils","belgian dextrin malt","briess carapils","briess carapils 2 °l","briess carapils malt","briess carapils malt, 2 °l","briess dextrin malt","cara-pils malt","carapils (briess)","dextrin malt","dextrin malt (proximity)","dextrine malt","dmc dextrin malt","proximity dextrin malt"]},
+  {id:"mel",ad:"Melanoidin Malt",gu:288,r:27,g:"Özel",mo:"Weyermann",bufKap:68.9,alias:["melanoidin","melanoidin (weyermann)","melanoidin malt (27 °l)","weyermann melanoidin","weyermann melanoidin malt"]},
   {id:"thracian_ruby",ad:"Thracian Ruby Melanoidin Malt",gu:309,r:27,g:"Özel",mo:"Thracian Malt (Yunanistan)"},
   {id:"muntons_caramalt",ad:"Muntons Caramalt 30",gu:290,r:12,g:"Özel",mo:"Muntons",phc:"crystal"},
-  {id:"hml",ad:"Honey Malt (Gambrinus)",gu:308,r:20,g:"Özel",mo:"Gambrinus",bufKap:95.4,alias:["honey malt"]},
-  {id:"acid",ad:"Acidulated Malt",gu:300,r:2,g:"Özel",mo:"Weyermann, Hitit (yerli)",alias:["acid malt","sauermalz"]},
-  {id:"victory",ad:"Victory / Special Roast (Briess)",gu:289,r:28,g:"Özel",mo:"Briess",phc:"amber_biscuit",bufKap:36.8,alias:["victory malt","american victory"]},
-  {id:"aromatic",ad:"Aromatic Malt (Dingemans)",gu:304,r:20,g:"Base",mo:"Dingemans",bufKap:64.7,alias:["aromatic","aromatic barley malt","aromatic (munich) malt"]},
-  {id:"choc",ad:"Chocolate Malt",gu:270,r:400,g:"Koyu",mo:"Crisp, Simpsons, Briess",phc:"chocolate",alias:["chocolate","american chocolate"]},
-  {id:"pale_choc",ad:"Pale Chocolate Malt",gu:273,r:225,g:"Koyu",mo:"Simpsons, Crisp",phc:"chocolate",alias:["pale chocolate"]},
-  {id:"crf1",ad:"Carafa I (Debittered)",gu:250,r:337,g:"Koyu",mo:"Weyermann",phc:"chocolate",alias:["carafa special i"]},
-  {id:"crf2",ad:"Carafa II (Debittered)",gu:250,r:430,g:"Koyu",mo:"Weyermann",phc:"chocolate",alias:["carafa special ii","de-husked caraf ii"]},
-  {id:"crf3",ad:"Carafa Special III (Debittered)",gu:250,r:525,g:"Koyu",mo:"Weyermann",phc:"chocolate",alias:["carafa special iii","de-husked caraf iii"]},
-  {id:"roast",ad:"Roasted Barley",gu:235,r:500,g:"Koyu",mo:"Crisp, Simpsons, Hitit Kara Malt No:3 (yerli)",phc:"roasted_barley",bufKap:67.5},
-  {id:"black",ad:"Black Malt (Patent Malt)",gu:275,r:605,g:"Koyu",mo:"Crisp, Simpsons",alias:["black malt"]},
-  {id:"midnight",ad:"Midnight Wheat",gu:270,r:550,g:"Koyu",mo:"Briess",phc:"chocolate",alias:["midnight wheat malt"]},
+  {id:"hml",ad:"Honey Malt (Gambrinus)",gu:308,r:20,g:"Özel",mo:"Gambrinus",bufKap:95.4,alias:["honey malt","canadian honey malt","gambrinus honey malt"]},
+  {id:"acid",ad:"Acidulated Malt",gu:300,r:2,g:"Özel",mo:"Weyermann, Hitit (yerli)",alias:["acid malt","sauermalz","acid malt 3.0 srm","acidulated","acidulated (weyermann)","acidulated malt (2 °l)","acidulated malt (to achieve desire","german acidulated malt (sauermalz)","weyermann acid malt","weyermann acidulated malt"]},
+  {id:"victory",ad:"Victory / Special Roast (Briess)",gu:289,r:28,g:"Özel",mo:"Briess",phc:"amber_biscuit",bufKap:36.8,alias:["victory malt","american victory","briess victory malt","victory","victory malt (30 °l)"]},
+  {id:"aromatic",ad:"Aromatic Malt (Dingemans)",gu:304,r:20,g:"Base",mo:"Dingemans",bufKap:64.7,alias:["aromatic","aromatic barley malt","aromatic (munich) malt","aromatic malt","aromatic malt (17–21 °l)","aromatic malt (20 °l)","aromatic malt (23 °l)","aromatic malt (amber 50)","aromatic munich","belgian aromatic malt","belgian aromatic malt (19 °l)","dingeman aromatic malt","dingemans 19° l aromatic malt","dingemans aromatic","dingemans aromatic malt","dmc aromatic malt"]},
+  {id:"choc",ad:"Chocolate Malt",gu:270,r:400,g:"Koyu",mo:"Crisp, Simpsons, Briess",phc:"chocolate",alias:["chocolate","american chocolate","350° l chocolate malt","350°l chocolate malt","400° l chocolate malt","american chocolate malt (350 °l)","briess chocolate malt","briess chocolate malt (350 °l)","briess dark chocolate malt","briess dark chocolate malt 420 °l","british chocolate malt","british chocolate malt (350 °l)","british chocolate malt (450 °l)","chocolate malt (330 °l)","chocolate malt (340 °l)","chocolate malt (350 °l)","chocolate malt (450 srm)","chocolate malt (450 °l)","chocolate malt (briess)","chocolate malt (u.k.)","chocolate malt - 350 srm","chocolate malt - 350l (cold steep)","chocolate malt 350–400 °l","chocolate syrup","crisp chocolate malt","dark chocolate malt","dingemans chocolate malt","english chocolate malt","fawcett chocolate malt","organic chocolate malt (350 °l)","thomas fawcetts chocolate malt (425 °l)","u.s. chocolate malt","uk chocolate malt","us chocolate malt","us chocolate malt (350 °l)"]},
+  {id:"pale_choc",ad:"Pale Chocolate Malt",gu:273,r:225,g:"Koyu",mo:"Simpsons, Crisp",phc:"chocolate",alias:["pale chocolate","210° l pale chocolate malt","fawcett pale chocolate malt","light chocolate malt","light chocolate malt (u.k.)","pale chocolate (225 °l)","pale chocolate malt (1%)","pale chocolate malt (200 °l)","weyermann pale chocolate malt"]},
+  {id:"crf1",ad:"Carafa I (Debittered)",gu:250,r:337,g:"Koyu",mo:"Weyermann",phc:"chocolate",alias:["carafa special i","carafa special i malt"]},
+  {id:"crf2",ad:"Carafa II (Debittered)",gu:250,r:430,g:"Koyu",mo:"Weyermann",phc:"chocolate",alias:["carafa special ii","de-husked caraf ii","carafa ii special malt","carafa special ii malt","carafa special ii malt (430 °l)","weyermann carafa special ii","weyermann carafa special ii (430 °l)","weyermann carafa special ii malt","weyermann carafa special ii malt (430 °l)","weyermann carafa special ii malt (added at mash-out)","weyermann carafa special ii, dehusked (450 °l)","wyermann carafa special ii malt"]},
+  {id:"crf3",ad:"Carafa Special III (Debittered)",gu:250,r:525,g:"Koyu",mo:"Weyermann",phc:"chocolate",alias:["carafa special iii","de-husked caraf iii","carafa iii special","carafa iii special malt","carafa iii special malt (525 °l)","carafa special iii malt","weyermann carafa iii special malt","weyermann carafa special iii","weyermann carafa special iii (600 °l)","weyermann carafa special iii malt","weyermann carafa special type 3","weyermann carafa special type iii","weyermann carafa spezial iii"]},
+  {id:"roast",ad:"Roasted Barley",gu:235,r:500,g:"Koyu",mo:"Crisp, Simpsons, Hitit Kara Malt No:3 (yerli)",phc:"roasted_barley",bufKap:67.5,alias:["400° l roasted barley","american roast barley","baird roasted barley 575 °l","briess roasted barley","british roasted barley","crisp roast barley","crisp roasted barley","english roast barley","munton s roasted barley","roast barley","roast barley (450 °l)","roast barley (u.k.)","roasted barley (500 °l)","roasted barley (crisp) (695 srm)","roasted barley - 300 srm","simpsons roast barley","simpsons roasted barley","simpsons roasted barley malt (550 °l)","thomas fawcetts roasted barley (550 °l)","uk roasted barley"]},
+  {id:"black",ad:"Black Malt (Patent Malt)",gu:275,r:605,g:"Koyu",mo:"Crisp, Simpsons",alias:["black malt","500° l black malt","baird black malt 530 °l","black malt (500 srm)","black malt (500 °l)","black malt 500 °l","black patent","black patent malt (500 °l)","black patent malt (525 °l)","black patent malt (u.k.)","briess black malt (500 °l)","british black patent malt","hugh bairds 600° l black malt","simpsons black malt","u.s. black malt","uk black malt"]},
+  {id:"midnight",ad:"Midnight Wheat",gu:270,r:550,g:"Koyu",mo:"Briess",phc:"chocolate",alias:["midnight wheat malt","breiss midnight wheat","briess midnight wheat","briess midnight wheat (10 min rema","briess midnight wheat malt","briess midnight wheat malt (steep)"]},
   // ── Weyermann Base ─────────────────────────────────────────
-  {id:"barke",ad:"Barke Pilsner (Weyermann)",gu:310,r:2,g:"Base",mo:"Weyermann"},
-  {id:"bohem_pils",ad:"Bohemian Pilsner (Weyermann)",gu:308,r:2,g:"Base",mo:"Weyermann (Bohemia CZ)"},
-  {id:"bohemian",ad:"Floor-Malted Bohemian Pilsner (Weyermann)",gu:304,r:2,g:"Base",mo:"Weyermann (floor-malted CZ)",alias:["floor-malted bohemian pilsner"]},
-  {id:"munich_light",ad:"Munich Type 1 Light (Weyermann)",gu:300,r:6,g:"Base",mo:"Weyermann",alias:["munich light","munich type i","münchner malz typ i"]},
+  {id:"barke",ad:"Barke Pilsner (Weyermann)",gu:310,r:2,g:"Base",mo:"Weyermann",alias:["barke pilsner malt","weyermann barke pils malt","weyermann barke pilsner","weyermann barke pilsner malt"]},
+  {id:"bohem_pils",ad:"Bohemian Pilsner (Weyermann)",gu:308,r:2,g:"Base",mo:"Weyermann (Bohemia CZ)",alias:["bohemian pilsner","bohemian pilsner malt","bohemian pilsner malt (2 °l)","german bohemian pilsner malt","weyermann bohemian pilsner malt","weyermann floor malted bohemian pilsner malt"]},
+  {id:"bohemian",ad:"Floor-Malted Bohemian Pilsner (Weyermann)",gu:304,r:2,g:"Base",mo:"Weyermann (floor-malted CZ)",alias:["floor-malted bohemian pilsner","floor-malted bohemian pilsner malt","weyermann floor-malted bohemian da"]},
+  {id:"munich_light",ad:"Munich Type 1 Light (Weyermann)",gu:300,r:6,g:"Base",mo:"Weyermann",alias:["munich light","munich type i","münchner malz typ i","german light munich malt","german munich i malt (6 °l)","light munich 6 °l","light munich malt","light munich malt (6 °l)","munich i","munich i (weyermann)","munich i malt","munich light (48%)","munich light (deu)","weyermann munich i","weyermann munich i (6 °l)","weyermann munich i 6l","weyermann munich i malt","weyermann munich light","weyermann munich type i","weyermann munich type i malt"]},
   {id:"spelt",ad:"Kavuzlu Buğday (Spelt/Dinkel)",gu:306,r:2,g:"Base",mo:"Weyermann",alias:["spelt"]},
   {id:"einkorn",ad:"Siyez Buğday (Einkorn)",gu:285,r:3,g:"Base",mo:"Bestmalz, özel üretim"},
   {id:"emmer",ad:"Emmer Buğday",gu:285,r:3,g:"Base",mo:"Bestmalz, özel üretim"},
-  {id:"smoked_peat",ad:"İsli Malt Torf (Peat Smoked)",gu:312,r:2,g:"Base",mo:"Simpsons, Thomas Fawcett",alias:["peated malt"]},
+  {id:"smoked_peat",ad:"İsli Malt Torf (Peat Smoked)",gu:312,r:2,g:"Base",mo:"Simpsons, Thomas Fawcett",alias:["peated malt","lightly-peated malt"]},
   {id:"abbey_malt",ad:"Abbey Malt",gu:288,r:18,g:"Base",mo:"Weyermann, Dingemans, Castle"},
   // ── Crisp / Simpsons / Thomas Fawcett ──────────────────────
   {id:"maris_extra",ad:"Maris Otter Extra Pale (Crisp)",gu:316,r:2,g:"Base",mo:"Crisp"},
-  {id:"golden_promise",ad:"Golden Promise (Simpsons)",gu:312,r:2,g:"Base",mo:"Simpsons",alias:["golden promise"]},
-  {id:"pearl",ad:"Pearl Malt (Fawcett)",gu:310,r:3,g:"Base",mo:"Thomas Fawcett",alias:["pearl"]},
-  {id:"halcyon",ad:"Halcyon Malt (Fawcett)",gu:316,r:3,g:"Base",mo:"Thomas Fawcett",alias:["halcyon"]},
+  {id:"golden_promise",ad:"Golden Promise (Simpsons)",gu:312,r:2,g:"Base",mo:"Simpsons",alias:["golden promise","golden promise malt","golden promise pale ale malt","golden promise pale malt","simpsons golden promise","simpsons golden promise malt","simpsons golden promise pale malt","u.k. golden promise","uk golden promise","uk golden promise malt"]},
+  {id:"pearl",ad:"Pearl Malt (Fawcett)",gu:310,r:3,g:"Base",mo:"Thomas Fawcett",alias:["pearl","fawcett pearl malt","fawcett pearl pale ale malt"]},
+  {id:"halcyon",ad:"Halcyon Malt (Fawcett)",gu:316,r:3,g:"Base",mo:"Thomas Fawcett",alias:["halcyon","pale malt, halcyon (thomas fawcett"]},
   {id:"tipple",ad:"Tipple Malt (Simpsons)",gu:312,r:3,g:"Base",mo:"Simpsons"},
   {id:"lager_malt",ad:"Lager Malt (Crisp)",gu:314,r:2,g:"Base",mo:"Crisp"},
   {id:"extra_pale",ad:"Extra Pale Malt (Crisp)",gu:314,r:2,g:"Base",mo:"Crisp"},
@@ -4263,31 +4263,31 @@ const MALTLAR=[
   {id:"viking_vienna",ad:"Viking Vienna Malt",gu:304,r:4,g:"Base",mo:"Viking Malt"},
   {id:"viking_munich",ad:"Viking Munich Malt",gu:300,r:9,g:"Base",mo:"Viking Malt"},
   {id:"best_pale",ad:"Best Pale Ale (BestMalz)",gu:310,r:3,g:"Base",mo:"BestMalz"},
-  {id:"best_munich",ad:"Best Munich (BestMalz)",gu:310,r:6,g:"Base",mo:"BestMalz",alias:["best malz munich"]},
-  {id:"best_vienna",ad:"BEST Vienna (BestMalz)",gu:310,r:4,g:"Base",mo:"BestMalz"},
-  {id:"best_munich_dark",ad:"BEST Munich Dark (BestMalz)",gu:308,r:11,g:"Base",mo:"BestMalz"},
+  {id:"best_munich",ad:"Best Munich (BestMalz)",gu:310,r:6,g:"Base",mo:"BestMalz",alias:["best malz munich","bestmalz munich malt"]},
+  {id:"best_vienna",ad:"BEST Vienna (BestMalz)",gu:310,r:4,g:"Base",mo:"BestMalz",alias:["best vienna malt","bestmalz vienna malt"]},
+  {id:"best_munich_dark",ad:"BEST Munich Dark (BestMalz)",gu:308,r:11,g:"Base",mo:"BestMalz",alias:["bestmalz munich dark malt"]},
   {id:"best_melano",ad:"BEST Melanoidin (BestMalz)",gu:288,r:27,g:"Base",mo:"BestMalz"},
   {id:"best_melano_light",ad:"BEST Melanoidin Light (BestMalz)",gu:288,r:20,g:"Base",mo:"BestMalz"},
   {id:"best_heidel_wheat",ad:"BEST Heidelberg Wheat Malt (BestMalz)",gu:315,r:2,g:"Base",mo:"BestMalz"},
-  {id:"best_pils",ad:"Best Pilsen (BestMalz)",gu:310,r:2,g:"Base",mo:"BestMalz",alias:["best malz pilsner"]},
+  {id:"best_pils",ad:"Best Pilsen (BestMalz)",gu:310,r:2,g:"Base",mo:"BestMalz",alias:["best malz pilsner","best heidelberg pilsner malt","best malz continental pilsner malt (2 °l)","best malz heidelberg pilsner malt","bestmalz pilsen malt","bestmalz pilsner","bestmalz pilsner malt"]},
   {id:"best_heidel",ad:"BestMalz Heidelberg Pale Ale",gu:310,r:2,g:"Base",mo:"BestMalz"},
   {id:"best_wheat",ad:"BestMalz Pale Wheat",gu:315,r:2,g:"Base",mo:"BestMalz"},
   {id:"best_aromatic",ad:"BestMalz Aromatic Malt",gu:288,r:21,g:"Özel",mo:"BestMalz"},
   {id:"best_caramel_a",ad:"BestMalz Caramel Amber",gu:288,r:27,g:"Özel",mo:"BestMalz"},
   {id:"best_special_x",ad:"BEST Special X (BestMalz)",gu:288,r:132,g:"Özel",mo:"BestMalz"},
-  {id:"best_caramel_p",ad:"BEST Caramel Pils (BestMalz)",gu:288,r:2,g:"Özel",mo:"BestMalz"},
+  {id:"best_caramel_p",ad:"BEST Caramel Pils (BestMalz)",gu:288,r:2,g:"Özel",mo:"BestMalz",alias:["bestmalz caramel pils malt (2 °l)"]},
   {id:"best_caramel_h",ad:"BEST Caramel Hell (BestMalz)",gu:288,r:12,g:"Özel",mo:"BestMalz"},
   {id:"best_redx",ad:"BestMalz Red X (Red Color Malt)",gu:304,r:13,g:"Özel",mo:"BestMalz",alias:["red x"]},
   {id:"best_acid",ad:"BestMalz Acidulated Malt",gu:292,r:2,g:"Özel",mo:"BestMalz"},
   // ── Briess ─────────────────────────────────────────────────
-  {id:"briess_pale",ad:"Briess 2-Row Brewers Malt",gu:310,r:2,g:"Base",mo:"Briess",alias:["2-row brewers malt","2-row","american 2-row","pale malt, 2 row, us"]},
-  {id:"briess_6row",ad:"Briess 6-Row Brewers Malt",gu:290,r:2,g:"Base",mo:"Briess",alias:["6-row brewers malt","6-row","pale malt, 6 row, us"]},
+  {id:"briess_pale",ad:"Briess 2-Row Brewers Malt",gu:310,r:2,g:"Base",mo:"Briess",alias:["2-row brewers malt","2-row","american 2-row","pale malt, 2 row, us","2 row pale malt","2-row malt","2-row malt (briess)","2-row pale ale malt","2-row pale ale malt (us)","2-row pale malt","2-row pale malt (2 °l)","2-row pale malt (all-grain, replaces liquid extract)","2-row pale malt (american)","2-row pale malt (or pilsner malt)","2-row pale malt (us)","2-row pilsner malt","american 2-row malt","american 2-row pale malt","american two-row malt","american two-row pale malt","brewer s malt, 2-row, premium (gre","brewers malt 2-row (briess)","briess american 2-row","briess pale two-row malt","briess two-row malt","briess two-row pale","briess two-row pale malt","british 2-row lager malt","british 2-row pale ale malt","canadian 2-row pale malt","domestic 2-row pale malt","montana two-row pale malt","north american 2-row malt","north american 2-row malt (2 °l)","north american 2-row pale malt","north american 2-row pilsner malt","organic 2-row pale malt","pale 2-row (us)","pale 2-row malt","pale ale two-row malt, 3-4 °l","pale malt 2 row (uk 3.0 srm)","pale two-row","pale two-row malt","pale u.s. 2-row malt","roasted two-row malt","two row pale malt","two-row malt","two-row pale malt","two-row pale malt (all-grain option)","two-row pilsner malt","u.s. 2-row malt","u.s. pale 2-row malt","u.s. pale two-row malt","us 2-row","us 2-row malt","us 2-row pale malt","us pale 2-row malt","us pale two-row malt","us two-row pale malt"]},
+  {id:"briess_6row",ad:"Briess 6-Row Brewers Malt",gu:290,r:2,g:"Base",mo:"Briess",alias:["6-row brewers malt","6-row","pale malt, 6 row, us","6-row malt","6-row pale brewers malt (1.7-2 °l)","6-row pale malt","6-row pale malt (pilot)","[[us 6-row]] malt","american six-row pale malt","briess 6-row brewer's malt","briess six-row pale malt","domestic 6-row pale malt","pale 6-row malt","six-row malt","six-row pale malt","six-row pilsner malt","u.s. 6-row ale malt","u.s. six-row malt","us 6-row malt"]},
   {id:"synergy",ad:"Synergy Select Pilsen (Briess)",gu:312,r:2,g:"Base",mo:"Briess"},
-  {id:"briess_sroast",ad:"Briess Special Roast",gu:277,r:40,g:"Özel",mo:"Briess",phc:"amber_biscuit",bufKap:99.1,alias:["special roast"]},
+  {id:"briess_sroast",ad:"Briess Special Roast",gu:277,r:40,g:"Özel",mo:"Briess",phc:"amber_biscuit",bufKap:99.1,alias:["special roast","american special roast","briess special roast (50 °l)","briess special roast (50 °l) malt","briess special roast malt","briess special roast malt, 40 °l","special roast malt","special roast malt (u.s.)"]},
   // ── Castle / Dingemans ─────────────────────────────────────
-  {id:"chateau_bld",ad:"Chateau Pale Ale (Castle)",gu:312,r:4,g:"Base",mo:"Castle",alias:["château pale ale 2-row"]},
-  {id:"chateau_pils",ad:"Chateau Pilsen 2RS (Castle)",gu:316,r:2,g:"Base",mo:"Castle",alias:["château pilsen 2-row"]},
-  {id:"chateau_munich",ad:"Chateau Munich (Castle)",gu:312,r:10,g:"Base",mo:"Castle"},
+  {id:"chateau_bld",ad:"Chateau Pale Ale (Castle)",gu:312,r:4,g:"Base",mo:"Castle",alias:["château pale ale 2-row","castle malting château pale ale malt"]},
+  {id:"chateau_pils",ad:"Chateau Pilsen 2RS (Castle)",gu:316,r:2,g:"Base",mo:"Castle",alias:["château pilsen 2-row","castle pils malt","castle pilsen malt","castle pilsner malt"]},
+  {id:"chateau_munich",ad:"Chateau Munich (Castle)",gu:312,r:10,g:"Base",mo:"Castle",alias:["castle malting château wheat munich","chateau munich"]},
   {id:"chateau_vienna",ad:"Chateau Vienna (Castle)",gu:308,r:3,g:"Base",mo:"Castle"},
   {id:"chateau_munich_light",ad:"Chateau Munich Light (Castle)",gu:308,r:6,g:"Base",mo:"Castle"},
   {id:"chateau_abbey",ad:"Chateau Abbey (Castle)",gu:300,r:17,g:"Base",mo:"Castle"},
@@ -4307,30 +4307,30 @@ const MALTLAR=[
   {id:"muntons_mild",ad:"Muntons Mild Malt",gu:308,r:3,g:"Base",mo:"Muntons"},
   // ── Hitit Malt (Yerli) ─────────────────────────────────────,
   // ── Weyermann Crystal/Cara ─────────────────────────────────
-  {id:"cara_aroma",ad:"CaraAroma (Weyermann)",gu:285,r:151,g:"Özel",mo:"Weyermann",alias:["caraaroma"]},
+  {id:"cara_aroma",ad:"CaraAroma (Weyermann)",gu:285,r:151,g:"Özel",mo:"Weyermann",alias:["caraaroma","caraaroma malt","weyermann caraaroma (150 °l)","weyermann caraaroma malt","wyermann caraaroma malt"]},
   {id:"cara_belge",ad:"CaraBelge (Weyermann)",gu:285,r:13,g:"Özel",mo:"Weyermann",alias:["carabelge"]},
-  {id:"cara_rye",ad:"CaraRye (Weyermann)",gu:285,r:66,g:"Özel",mo:"Weyermann"},
-  {id:"cara_wheat",ad:"CaraWheat (Weyermann)",gu:262,r:46,g:"Özel",mo:"Weyermann",alias:["carawheat"]},
-  {id:"cara_red",ad:"CaraRed (Weyermann)",gu:285,r:20,g:"Özel",mo:"Weyermann",alias:["carared"]},
-  {id:"cara_hell",ad:"CaraHell (Weyermann)",gu:285,r:10,g:"Özel",mo:"Weyermann",alias:["carahell"]},
-  {id:"cara_dark",ad:"CaraBohemian (Weyermann)",gu:281,r:72,g:"Özel",mo:"Weyermann",alias:["carabohemian"]},
+  {id:"cara_rye",ad:"CaraRye (Weyermann)",gu:285,r:66,g:"Özel",mo:"Weyermann",alias:["weyermann cararye (70 °l)"]},
+  {id:"cara_wheat",ad:"CaraWheat (Weyermann)",gu:262,r:46,g:"Özel",mo:"Weyermann",alias:["carawheat","carawheat malt (50 °l)"]},
+  {id:"cara_red",ad:"CaraRed (Weyermann)",gu:285,r:20,g:"Özel",mo:"Weyermann",alias:["carared","carared malt","weyermann carared malt","weyermann carared malt (20 °l)"]},
+  {id:"cara_hell",ad:"CaraHell (Weyermann)",gu:285,r:10,g:"Özel",mo:"Weyermann",alias:["carahell","carahell malt","carahell malt (10 °l)","weyermann carahell","weyermann carahell malt"]},
+  {id:"cara_dark",ad:"CaraBohemian (Weyermann)",gu:281,r:72,g:"Özel",mo:"Weyermann",alias:["carabohemian","weyermann carabohemian malt"]},
   {id:"cara_pils_w",ad:"CaraPils (Weyermann)",gu:288,r:2,g:"Özel",mo:"Weyermann"},
-  {id:"cara_foam",ad:"CaraFoam (Weyermann)",gu:288,r:2,g:"Özel",mo:"Weyermann",alias:["carafoam"]},
-  {id:"cara_munich1",ad:"CaraMunich I (Weyermann)",gu:281,r:35,g:"Özel",mo:"Weyermann",alias:["caramunich i"]},
-  {id:"cara_munich2",ad:"CaraMunich II (Weyermann)",gu:281,r:46,g:"Özel",mo:"Weyermann",alias:["caramunich ii"]},
-  {id:"cara_munich3",ad:"CaraMunich III (Weyermann / BestMalz)",gu:281,r:57,g:"Özel",mo:"Weyermann, BestMalz",alias:["caramunich iii"]},
+  {id:"cara_foam",ad:"CaraFoam (Weyermann)",gu:288,r:2,g:"Özel",mo:"Weyermann",alias:["carafoam","carafoam malt","weyermann carafoam","weyermann carafoam malt"]},
+  {id:"cara_munich1",ad:"CaraMunich I (Weyermann)",gu:281,r:35,g:"Özel",mo:"Weyermann",alias:["caramunich i","caramunich i malt","caramunich type i","weyermann caramunich 1","weyermann caramunich i","weyermann caramunich i 38l","weyermann caramunich i malt","weyermann caramunich type i malt"]},
+  {id:"cara_munich2",ad:"CaraMunich II (Weyermann)",gu:281,r:46,g:"Özel",mo:"Weyermann",alias:["caramunich ii","cara-munich ii malt","caramel munich ii malt","caramel-munich ii malt","caramunich ii (45 °l)","caramunich ii malt","caramunich ii malt (45 °l)","caramunich malt ii","weyermann caramel munich ii","weyermann caramunich ii","weyermann caramunich ii malt","weyermann caramunich ii malt (45 °l)"]},
+  {id:"cara_munich3",ad:"CaraMunich III (Weyermann / BestMalz)",gu:281,r:57,g:"Özel",mo:"Weyermann, BestMalz",alias:["caramunich iii","caramunich iii (55 °l)","caramunich iii malt","caramunich iii malt (57 °l)","wayermann caramunich iii","weyermann caramunich 3 malt","weyermann caramunich iii","weyermann caramunich iii (56 °l)","weyermann caramunich iii malt","weyermann caramunich type 3"]},
   // ── Dingemans / Castle ─────────────────────────────────────
   {id:"cara45",ad:"Cara 45 MD (Dingemans)",gu:285,r:45,g:"Özel",mo:"Dingemans",phc:"crystal",alias:["cara 45l"]},
   {id:"cara120",ad:"Cara 120 MD (Dingemans) — 120 EBC",gu:285,r:45,g:"Özel",mo:"Dingemans",phc:"crystal"},
   {id:"dingemans_pale",ad:"Dingemans Pale Ale Malt",gu:308,r:4,g:"Base",mo:"Dingemans"},
   {id:"dingemans_cara8",ad:"Dingemans Cara 8 (Belçika CaraHell)",gu:288,r:8,g:"Özel",mo:"Dingemans",phc:"crystal"},
   {id:"dingemans_cara20",ad:"Dingemans Cara 20 (Belçika Crystal)",gu:288,r:8,g:"Özel",mo:"Dingemans",phc:"crystal"},
-  {id:"chateau_specb",ad:"Chateau Special Belgium (Castle)",gu:285,r:110,g:"Koyu",mo:"Castle"},
+  {id:"chateau_specb",ad:"Chateau Special Belgium (Castle)",gu:285,r:110,g:"Koyu",mo:"Castle",alias:["chateau special b"]},
   {id:"chateau_cara_blond",ad:"Chateau Cara Blond (Castle)",gu:285,r:8,g:"Özel",mo:"Castle"},
   {id:"chateau_cara_ruby",ad:"Chateau Cara Ruby (Castle)",gu:277,r:19,g:"Özel",mo:"Castle"},
   {id:"chateau_cara_gold",ad:"Chateau Cara Gold (Castle)",gu:288,r:45,g:"Özel",mo:"Castle",alias:["cara gold"]},
   {id:"chateau_melano",ad:"Chateau Melano (Castle turbo Munich)",gu:293,r:30,g:"Özel",mo:"Castle"},
-  {id:"chateau_black",ad:"Chateau Black (Castle)",gu:250,r:480,g:"Koyu",mo:"Castle",phc:"black"},
+  {id:"chateau_black",ad:"Chateau Black (Castle)",gu:250,r:480,g:"Koyu",mo:"Castle",phc:"black",alias:["(de) château black nature","castle black malt"]},
   {id:"chateau_biscuit",ad:"Chateau Biscuit (Castle)",gu:293,r:19,g:"Özel",mo:"Castle",alias:["château biscuit"]},
   {id:"chateau_cara_belge",ad:"Chateau Cara Belgium (Castle)",gu:292,r:13,g:"Özel",mo:"Castle"},
   {id:"chateau_melano_light",ad:"Chateau Melano Light (Castle)",gu:300,r:16,g:"Özel",mo:"Castle"},
@@ -4339,40 +4339,40 @@ const MALTLAR=[
   {id:"crystal_light",ad:"Pale Crystal 25 (Fawcett)",gu:277,r:25,g:"Özel",mo:"Thomas Fawcett"},
   {id:"crystal_med",ad:"Crystal II 65 (Fawcett)",gu:277,r:65,g:"Özel",mo:"Thomas Fawcett"},
   {id:"crystal_dark",ad:"Dark Crystal II 120 (Fawcett)",gu:277,r:120,g:"Koyu",mo:"Thomas Fawcett"},
-  {id:"crystal_extra",ad:"Crystal Extra Dark 160 (Simpsons/Fawcett)",gu:270,r:160,g:"Koyu",mo:"Simpsons, Thomas Fawcett",alias:["extra dark crystal 160l"]},
+  {id:"crystal_extra",ad:"Crystal Extra Dark 160 (Simpsons/Fawcett)",gu:270,r:160,g:"Koyu",mo:"Simpsons, Thomas Fawcett",alias:["extra dark crystal 160l","160°l extra dark crystal malt","uk extra dark crystal (160 °l)"]},
   // ── Simpsons Crystal ───────────────────────────────────────
   {id:"simp_heritage",ad:"Heritage Crystal Medium (Simpsons)",gu:277,r:65,g:"Özel",mo:"Simpsons",phc:"crystal"},
   // ── Briess Crystal ─────────────────────────────────────────
-  {id:"c10",ad:"Crystal 10L (Briess)",gu:293,r:10,g:"Özel",mo:"Briess",alias:["caramel malt 10l","crystal 10l"]},
-  {id:"c150",ad:"Crystal 150L (Briess)",gu:281,r:150,g:"Özel",mo:"Briess",alias:["caramel/crystal 150l"]},
+  {id:"c10",ad:"Crystal 10L (Briess)",gu:293,r:10,g:"Özel",mo:"Briess",alias:["caramel malt 10l","crystal 10l","10l crystal malt","10° l crystal malt","10° l crystal malt (u.s.)","10°l caramel malt","10°l crystal malt","briess caramel 10l","briess caramel 10°l","caramel malt (10 °l)"]},
+  {id:"c150",ad:"Crystal 150L (Briess)",gu:281,r:150,g:"Özel",mo:"Briess",alias:["caramel/crystal 150l","150l crystal malt","150° l crystal malt"]},
   // ── BiraBurada Crystal ─────────────────────────────────────,
   // ── ButikBira Crystal ──────────────────────────────────────,
   // ── Hitit Crystal ──────────────────────────────────────────,
   // ── Adjunct Ek ─────────────────────────────────────────────
-  {id:"flaked_wheat",ad:"Buğday (Flaked Wheat)",gu:296,r:2,g:"Adjunct",mo:"Herhangi",bufKap:28.2,alias:["flaked wheat","wheat, flaked"]},
+  {id:"flaked_wheat",ad:"Buğday (Flaked Wheat)",gu:296,r:2,g:"Adjunct",mo:"Herhangi",bufKap:28.2,alias:["flaked wheat","wheat, flaked","briess red flaked wheat","flaked soft red wheat","flaked unmalted wheat","flaked winter wheat","white unmalted wheat flakes"]},
   {id:"flaked_rye",ad:"Çavdar (Flaked Rye)",gu:296,r:3,g:"Adjunct",mo:"Herhangi",bufKap:29.8,alias:["flaked rye","rye, flaked"]},
   {id:"raw_oat",ad:"Ham Yulaf (Raw Oats)",gu:255,r:2,g:"Adjunct",mo:"Herhangi"},
-  {id:"corn_grits",ad:"Mısır İrmiği (Corn Grits)",gu:308,r:1,g:"Adjunct",mo:"Herhangi"},
+  {id:"corn_grits",ad:"Mısır İrmiği (Corn Grits)",gu:308,r:1,g:"Adjunct",mo:"Herhangi",alias:["corn grits","corn grits (cereal mash)"]},
   {id:"potato_fl",ad:"Patates (Flaked Potato)",gu:292,r:1,g:"Adjunct",mo:"Herhangi"},
   {id:"buckwheat",ad:"Karabuğday (Buckwheat)",gu:260,r:3,g:"Adjunct",mo:"Herhangi",alias:["buckwheat"]},
   {id:"sorghum",ad:"Dari (Sorghum - Glutensiz)",gu:280,r:2,g:"Adjunct",mo:"Herhangi"},
   // ── Koyu Ek ────────────────────────────────────────────────
   {id:"dehusked_black",ad:"Dehusked Black Malt",gu:250,r:550,g:"Koyu",mo:"Weyermann (Carafa III), Simpsons",phc:"chocolate",alias:["blackprinz"]},
-  {id:"roast_wheat",ad:"Chocolate Wheat (Weyermann)",gu:250,r:395,g:"Koyu",mo:"Weyermann",alias:["chocolate wheat"]},
-  {id:"pale_choc2",ad:"Chocolate Malt (Simpsons)",gu:269,r:445,g:"Koyu",mo:"Simpsons",phc:"chocolate"},
+  {id:"roast_wheat",ad:"Chocolate Wheat (Weyermann)",gu:250,r:395,g:"Koyu",mo:"Weyermann",alias:["chocolate wheat","chocolate wheat malt","chocolate wheat malt (420 °l)","weyermann chocolate wheat malt"]},
+  {id:"pale_choc2",ad:"Chocolate Malt (Simpsons)",gu:269,r:445,g:"Koyu",mo:"Simpsons",phc:"chocolate",alias:["412° l simpsons chocolate malt","simpsons chocolate malt","simpsons chocolate malt (440 °l)"]},
   {id:"chateau_choc",ad:"Chateau Chocolat (Castle)",gu:270,r:340,g:"Koyu",mo:"Castle",phc:"chocolate"},
   {id:"sinamar",ad:"Sinamar Sıvı Renk Maltı (Weyermann)",gu:0,r:3148,g:"Koyu",mo:"Weyermann",alias:["sinamar"]},
   // ── Seker Ek ───────────────────────────────────────────────
   {id:"muscovado",ad:"Muscovado Şeker (Ham Esmer)",gu:360,r:65,g:"Şeker",mo:"Herhangi"},
-  {id:"dark_brown",ad:"Koyu Esmer Şeker",gu:370,r:40,g:"Şeker",mo:"Herhangi",alias:["brown sugar, dark"]},
-  {id:"light_brown",ad:"Açık Esmer Şeker",gu:375,r:20,g:"Şeker",mo:"Herhangi",alias:["brown sugar"]},
-  {id:"molasses",ad:"Pekmez / Melas",gu:290,r:80,g:"Şeker",mo:"Herhangi",alias:["molasses"]},
+  {id:"dark_brown",ad:"Koyu Esmer Şeker",gu:370,r:40,g:"Şeker",mo:"Herhangi",alias:["brown sugar, dark","dark brown sugar","dark brown sugar (caramelized)"]},
+  {id:"light_brown",ad:"Açık Esmer Şeker",gu:375,r:20,g:"Şeker",mo:"Herhangi",alias:["brown sugar","light brown sugar (at kegging)","light brown sugar (in primary)","light brown sugar @ 15 min"]},
+  {id:"molasses",ad:"Pekmez / Melas",gu:290,r:80,g:"Şeker",mo:"Herhangi",alias:["molasses","1.0 tbsp (15 g) blackstrap molasses 15 min.","light (normal) molasses 15 min."]},
   {id:"treacle",ad:"Treacle (Ingiliz Pekmez)",gu:300,r:100,g:"Şeker",mo:"Herhangi",alias:["treacle"]},
   {id:"maple",ad:"Akçaağaç Şurubu (Maple Syrup)",gu:260,r:5,g:"Şeker",mo:"Herhangi",alias:["maple syrup"]},
-  {id:"turbinado",ad:"Turbinado (Ham Karamel Şeker)",gu:378,r:5,g:"Şeker",mo:"Herhangi",alias:["turbinado"]},
+  {id:"turbinado",ad:"Turbinado (Ham Karamel Şeker)",gu:378,r:5,g:"Şeker",mo:"Herhangi",alias:["turbinado","turbinado sugar","turbinado sugar (boil)"]},
   {id:"invert2",ad:"Invert Sugar No.2 (Amber)",gu:324,r:32,g:"Şeker",mo:"Herhangi"},
   {id:"invert3",ad:"Invert Sugar No.3 (Koyu)",gu:324,r:60,g:"Şeker",mo:"Herhangi"},
-  {id:"rice_hulls",ad:"Çeltik Kavuzu (Rice Hulls)",gu:0,r:0,g:"Adjunct",mo:"—",alias:["rice hulls"]},
+  {id:"rice_hulls",ad:"Çeltik Kavuzu (Rice Hulls)",gu:0,r:0,g:"Adjunct",mo:"—",alias:["rice hulls","rice hulls (in mash)","rice hulls (mash)","rice hulls, in mash"]},
   {id:"best_choc",ad:"Best Chocolate (BestMalz)",gu:289,r:340,g:"Koyu",mo:"BestMalz",phc:"chocolate"},
   {id:"bohem_choc",ad:"Bohemian Chocolate Malt (900 EBC)",gu:277,r:340,g:"Koyu",mo:"Bohemia CZ üretim (BiraBurada, üretici detayı belirtilmemiş)",phc:"chocolate"},
   {id:"bitter_roast",ad:"Bitter Kavrulmuş Arpa Maltı (Hitit)",gu:232,r:590,g:"Koyu",mo:"Hitit Malt (Türkiye)",phc:"roasted_barley"},
@@ -4543,9 +4543,9 @@ const MAYALAR=[
   {id:"la_windsor",ad:"Lallemand Windsor",atu:[68,75],sc:[15,22],ideal:20,e:"Malt-meyve. İngiliz bitter/ESB. Orta attenüasyon.",tip:"ale",ek:"dolap",alias:["windsor ale yeast (danstar)","danstar windsor ale","windsor yeast"]},
   {id:"la_bry97",ad:"Lallemand BRY-97 American West Coast",atu:[77,83],sc:[15,22],ideal:20,e:"Çok temiz. West Coast IPA, Pale Ale.",tip:"ale",ek:"dolap",alias:["american west coast yeast bry-97 (danstar)","bry-97 american west coast","bry-97 american west coast (danstar)","bry-97"]},
   {id:"la_cbc1",ad:"Lallemand CBC-1 (Şişe Kondisyon)",atu:[75,85],sc:[15,28],ideal:22,e:"Şişe/fıçı kondisyonu için. Yüksek alkol toleranslı.",tip:"ale",ek:"oda"},
-  {id:"la_diamond",ad:"Lallemand Diamond Lager",atu:[77,83],sc:[10,15],ideal:12,e:"Çok temiz lager. Crisp bitiş.",tip:"lager",ek:"dolap"},
-  {id:"la_belle",ad:"Lallemand Belle Saison",atu:[85,90],sc:[15,35],ideal:28,e:"Geniş sıcaklık aralığı. Tropikal-biber-çiçeksi.",tip:"saison",ek:"isitici",alias:["belle saison (danstar)","belle saison yeast (danstar)"]},
-  {id:"la_philly",ad:"Lallemand WildBrew Philly Sour",atu:[78,82],sc:[20,35],ideal:28,e:"Lachancea. Doğal laktik asit. Sour ale.",tip:"sour",ek:"isitici"},
+  {id:"la_diamond",ad:"Lallemand Diamond Lager",atu:[77,83],sc:[10,15],ideal:12,e:"Çok temiz lager. Crisp bitiş.",tip:"lager",ek:"dolap",alias:["lallemand diamond"]},
+  {id:"la_belle",ad:"Lallemand Belle Saison",atu:[85,90],sc:[15,35],ideal:28,e:"Geniş sıcaklık aralığı. Tropikal-biber-çiçeksi.",tip:"saison",ek:"isitici",alias:["belle saison (danstar)","belle saison yeast (danstar)","lallemand lalbrew belle saison"]},
+  {id:"la_philly",ad:"Lallemand WildBrew Philly Sour",atu:[78,82],sc:[20,35],ideal:28,e:"Lachancea. Doğal laktik asit. Sour ale.",tip:"sour",ek:"isitici",alias:["wildbrew philly sour"]},
   {id:"la_sour_pitch",ad:"Lallemand WildBrew Sour Pitch",atu:[4,8],sc:[35,45],ideal:40,e:"Laktik asit üretir. Hızlı kettle souring. 24-48 saat. Yüksek sıcaklık. Bakteri karışımı (Lb + Ped) — sonrasında ayrı ale mayası gerekir.",tip:"sour",ek:"isitici"},
   {id:"la_helveticus",ad:"Lallemand WildBrew Helveticus",atu:[4,6],sc:[35,48],ideal:42,e:"Sadece laktik asit. Kettle souring için. Maya değil — bakteri. Sonrasında ayrı ale mayası pitch'lenmeli.",tip:"sour",ek:"isitici"},
   {id:"la_abbaye",ad:"Lallemand Abbaye",atu:[80,84],sc:[17,25],ideal:22,e:"Belçika manastır tarzı. Meyve-baharat-fenolik.",tip:"belcika",ek:"isitici"},
@@ -7605,7 +7605,7 @@ const KATKILAR=[
   {id:"askorbik",ad:"Askorbik Asit (C Vitamini)",g:"Proses",gu:0,fermente:false,ibu_dk60:0,srm:0,etki:"Antioksidan, hop aroma ve tazelik koruma",acik:"Şişelemede oksidasyonu engeller. Hop aromasını korur. 0.25-0.5g/10L (25-50 mg/L hedef).",kullanim:"Şişeleme öncesi",birim:"g",zaman:"Şişeleme öncesi",tags:["Antioxidant", "Vit C", "Proses", "Stabilite"],varsayDozgL:0.05,maxDozgL:0.1,maxUyari:"Ters etki, oksidan",onerilenZaman:["Şişelemede"],fiyat:"ucuz",alerjen:[]},
   {id:"gliserol",ad:"Gliserin / Gliserol (USP Grade)",g:"Proses",gu:0,fermente:false,ibu_dk60:0,srm:0,etki:"Ağız dolgunluğu, gövde artışı, hafif tatlılık",acik:"Session ve low-ABV biralarda gövde eksikliğini kapatır. 10-30mL/10L (1-3 mL/L).",kullanim:"Şişeleme öncesi",birim:"mL",density:1.262,/* kayn: USP monograph, Glycerin USP (20°C) */zaman:"Şişeleme öncesi",tags:["Gövde", "Ağız Hissi", "Mouthfeel", "Smooth"],varsayDozgL:5,maxDozgL:15,maxUyari:"Tatlı + yağımsı",onerilenZaman:["Fermantasyon sonu"],fiyat:"orta",alerjen:[]},
   {id:"pektinaz",ad:"Pektinaz Enzim",g:"Proses",gu:0,fermente:false,ibu_dk60:0,srm:0,etki:"Meyve bulanıklığını giderir, berraklaştırır",acik:"Meyve katkılı biralar için. 1-3g toz veya 0.5-2 mL sıvı enzim/10L. Pektini parçalar, birayı berraklaştırır.",kullanim:"Fermantasyon başında",birim:"g",zaman:"Fermantasyon başı",tags:["Enzim", "Pektin", "Meyve", "Berraklaştırıcı"],varsayDozgL:0.5,maxDozgL:1,maxUyari:"Aşırı, gerekli değil",onerilenZaman:["Secondary", "Fermantasyon başı"],fiyat:"orta",alerjen:[]},
-  {id:"dme",ad:"DME (Kuru Malt Ekstrakt)",g:"Proses",gu:310,fermente:true,ibu_dk60:0,srm:0,etki:"OG artırır, hafif malt karakteri",acik:"Parti büyütme veya hızlı OG artışı için. 200-500g/10L (extract brewing için). Pale DME rengi bozmaz.",kullanim:"Kaynatmada ekle",birim:"g",zaman:"Kaynatma",tags:["Malt", "Extract", "Light", "Priming"],varsayDozgL:50,maxDozgL:200,maxUyari:"Bulanık + aşırı OG",onerilenZaman:["Kaynatmada", "Şişelemede"],fiyat:"orta",alerjen:["gluten-var"]},
+  {id:"dme",ad:"DME (Kuru Malt Ekstrakt)",g:"Proses",gu:310,fermente:true,ibu_dk60:0,srm:0,etki:"OG artırır, hafif malt karakteri",acik:"Parti büyütme veya hızlı OG artışı için. 200-500g/10L (extract brewing için). Pale DME rengi bozmaz.",kullanim:"Kaynatmada ekle",birim:"g",zaman:"Kaynatma",tags:["Malt", "Extract", "Light", "Priming"],varsayDozgL:50,maxDozgL:200,maxUyari:"Bulanık + aşırı OG",onerilenZaman:["Kaynatmada", "Şişelemede"],fiyat:"orta",alerjen:["gluten-var"],alias:["7 ebc plain extra-light dry malt extract","briess golden light dme @ 60 min","briess pilsner dme, in boil","briess pilsner dried malt extract","coopers light dried malt extract","extra light dme","extra light dried malt extract","extra light dry malt extract","extra-light dry malt extract","golden light dry malt extract","light dry malt extract","munton & fison extra light dried malt extract","muntons extra light dried malt extract","pilsen light dme","pilsner dry malt extract"]},
   {id:"armut",ad:"Armut (Püre/Taze)",g:"Meyve",gu:0,fermente:false,ibu_dk60:0,srm:0,etki:"Hafif tatlı meyve, şarapımsı",acik:"Saison ve farmhouse için hafif meyve karakteri. 300-800g/10L (aroması hafif).",kullanim:"Fermantasyon sonu",birim:"g",zaman:"Fermantasyon sonu",tags:["Meyve", "Pear", "Cider", "Perry"],varsayDozgL:100,maxDozgL:300,maxUyari:"Sorbitol-tatlı",onerilenZaman:["Secondary"],fiyat:"orta",alerjen:[]},
   {id:"erik",ad:"Erik / Kuru Erik",g:"Meyve",gu:0,fermente:false,ibu_dk60:0,srm:3,etki:"Derin koyu meyve, tatlı-ekşi",acik:"Porter, dark ale ve barleywine için derin kuru meyve karakteri. 200-500g/10L (kuru erik yoğun; taze erik için 500-1000g/10L).",kullanim:"Fermantasyon sonu",birim:"g",zaman:"Fermantasyon sonu",tags:["Meyve", "Plum", "Stone", "Dubbel"],varsayDozgL:80,maxDozgL:200,maxUyari:"Benzaldehit bademsi",onerilenZaman:["Secondary"],fiyat:"orta",alerjen:[]},
   {id:"nar",ad:"Nar Suyu / Nar Tanesi",g:"Meyve",gu:0,fermente:false,ibu_dk60:0.01,srm:4,etki:"Ekşi-tatlı, koyu kırmızı, tanin",acik:"Sour ve wheat biralarında Orta Doğu karakteri. 200-400g taneler/10L veya 300-600mL nar suyu/10L.",kullanim:"Fermantasyon sonu",birim:"g",zaman:"Fermantasyon sonu",tags:["Meyve", "Pomegranate", "Turkish", "Sour"],varsayDozgL:50,maxDozgL:150,maxUyari:"Tanen + asit baskın",onerilenZaman:["Secondary"],fiyat:"orta",alerjen:[]},
@@ -7668,7 +7668,7 @@ const KATKILAR=[
   {id:"potasyum_met",ad:"Potasyum Metabisülfit (Campden)",g:"Proses",gu:0,fermente:false,ibu_dk60:0,srm:0,etki:"Sterilizasyon, klorin giderim, oksidasyonu engelleme",acik:"Ekipman sterilizasyonu ve su arıtımı için. 1 tablet (500mg)/20L su (0.025 g/L) klor/kloramini nötralize eder.",kullanim:"Ekipman dezenfeksiyonu",birim:"g",zaman:"Ekipman",tags:["Stabilite", "SO2", "Campden", "Antioxidant"],varsayMiktar:1,maxMiktar:2,maxUyari:"Aşırı SO2 kokusu",onerilenZaman:["Şişelemede", "Fermantasyon sonu"],fiyat:"ucuz",alerjen:["sulfit"]},
   {id:"askorbik_ek",ad:"Askorbik Asit Tableti (500mg)",g:"Proses",gu:0,fermente:false,ibu_dk60:0,srm:0,etki:"Antioksidan, oksidasyonu engeller",acik:"Şişeleme sırasında oksidasyonu azaltır. 1 tablet (500mg)/10-20L. ⚠️ DUBLE: 'askorbik' (toz) ile aynı madde — sadece form farklı. Birini seç, iki ekleme!",kullanim:"Şişeleme öncesi",birim:"adet",gPerUnit:0.5,/* kayn: Manufacturer spec: 500mg ascorbic acid per tablet */zaman:"Şişeleme öncesi",tags:["Antioxidant", "Vit C", "Tablet", "Stabilite"],varsayMiktar:1,maxMiktar:3,maxUyari:"Aşırı, ters etki",onerilenZaman:["Şişelemede"],fiyat:"ucuz",alerjen:[]},
   {id:"malt_sirke",ad:"Malt Sirkesi",g:"Proses",gu:0,fermente:false,ibu_dk60:0.01,srm:0,etki:"Doğal asitlik, hafif malt nüansı",acik:"Kettle sour alternatifi veya pH düşürücü. 10-50 mL/10L (pH hedefine göre; malt aroması da katar).",kullanim:"Kaynatma öncesi",birim:"mL",density:1.01,/* kayn: BinMaster industrial ref: 5% acetic acid vinegar */zaman:"Kaynatma",tags:["Asit", "Vinegar", "pH", "Tart"],varsayDozgL:1,maxDozgL:3,maxUyari:"Sirke baskın",onerilenZaman:["Şişelemede", "Fermantasyon sonu"],fiyat:"ucuz",alerjen:[]},
-  {id:"lme_ekstra",ad:"LME (Sıvı Malt Ekstrakt — Pale)",g:"Proses",gu:300,fermente:true,ibu_dk60:0,srm:0,etki:"OG artırır, malt karakteri",acik:"Hızlı parti büyütme veya OG artışı. 300-800 mL/10L (extract brewing).",kullanim:"Kaynatmada",birim:"mL",density:1.42,/* kayn: Briess CBW 80-83° Brix + sucrose density tablosu */zaman:"Kaynatma",tags:["Malt", "Extract", "Liquid", "Priming"],varsayDozgL:100,maxDozgL:300,maxUyari:"Aşırı OG",onerilenZaman:["Kaynatmada", "Şişelemede"],fiyat:"orta",alerjen:["gluten-var"]},
+  {id:"lme_ekstra",ad:"LME (Sıvı Malt Ekstrakt — Pale)",g:"Proses",gu:300,fermente:true,ibu_dk60:0,srm:0,etki:"OG artırır, malt karakteri",acik:"Hızlı parti büyütme veya OG artışı. 300-800 mL/10L (extract brewing).",kullanim:"Kaynatmada",birim:"mL",density:1.42,/* kayn: Briess CBW 80-83° Brix + sucrose density tablosu */zaman:"Kaynatma",tags:["Malt", "Extract", "Liquid", "Priming"],varsayDozgL:100,maxDozgL:300,maxUyari:"Aşırı OG",onerilenZaman:["Kaynatmada", "Şişelemede"],fiyat:"orta",alerjen:["gluten-var"],alias:["brewmasters light liquid malt extract","briess pilsen light liquid malt extract","coopers light liquid malt extract","light liquid malt extract","liquid malt extract - light","liquid malt extract - pilsen","pilsen light liquid malt extract","ultra light liquid malt extract"]},
   {id:"isinglass",ad:"İzinglas (Balık Jelatin Berraklaştırıcı)",g:"Berraklaştırıcı",gu:0,fermente:false,ibu_dk60:0,srm:0,etki:"Hızlı berraklaşma, yüzen tanecikleri çöktürür",acik:"Vegan değil. Çok etkili berraklaşma sağlar. 5-10 mL/10L (hazır finings sıvısı).",kullanim:"Fermantasyon sonu",birim:"mL",density:1.02,/* kayn: Practical Treatise on Brewing (1834): SG <1.025 + Murphy&Son */zaman:"Fermantasyon sonu",tags:["Berraklaştırıcı", "Fish", "Ale", "UK"],varsayDozgL:0.1,maxDozgL:0.5,maxUyari:"Aşırı, balık tadı",onerilenZaman:["Secondary", "Cold crash"],fiyat:"orta",alerjen:["balık"]},
   // ── EK MEYVELER ──────────────────────────────────────────────
   {id:"bergamot_meyve",ad:"Bergamot (Taze Meyve / Kabuk)",g:"Meyve",gu:0,fermente:false,ibu_dk60:0.06,srm:0,etki:"Çiçeksi-citrus, Earl Grey aromatik, hafif tatlı",acik:"İtalyan bergamot meyvesi — IPA, saison ve witbier\'de premium citrus karakteri. 50-150g taze meyve veya 10-25g kabuk/10L. (NOT: #96 bergamot, #147 pütürlü, #149 kuru şerit farklı formlar.)",kullanim:"Whirlpool veya fermantasyon sonu",birim:"g",zaman:"Whirlpool",tags:["Citrus", "Bergamot", "Fresh", "Calabria"],varsayDozgL:1,maxDozgL:3,maxUyari:"Aşırı Earl Grey",onerilenZaman:["Fermantasyon sonu"],fiyat:"pahali",alerjen:[]},
@@ -27540,9 +27540,16 @@ window._TD_BOYUT = {
       if(nhc && o.ekN) h += '<div style="font-size:10px;color:var(--dim);margin-top:8px">+' + o.ekN + ' ek kalem (baharat/katkı) kaynakta var — burada listelenmedi.</div>';
       if(kay) h += '<div style="margin-top:10px;font-size:9.5px;color:var(--dim);line-height:1.45;border-top:1px solid var(--bor);padding-top:6px">Bu bir <b>örnek</b>, kural değil' + (o.k === 'K2' ? ': ödül resmi sonuç listesinden teyitli ve ticari biraya ait; reçete o biranın yayınlanmış klonu — klonun yarışmaya girmiş reçete olduğu iddia edilmez.' : o.k === 'K4' ? (': ' + K4_ETIKET + '. Topluluk korpusundaki pek çok reçeteden, adı ya da beyan ettiği stil etiketi bu stille açıkça eşleşen biri — tipik ya da iyi olduğu iddia edilmez.') : ': yayınlanmış otorite reçetesi; ödüllü diye sunulmaz.') + '</div>';
       else h += '<div style="margin-top:10px;font-size:9.5px;color:var(--dim);line-height:1.45;border-top:1px solid var(--bor);padding-top:6px">Bu bir <b>örnek</b>, kural değil: AHA yarışmalarında <b>elenen</b> reçeteler bu veride yok. Kazananları kaybedenlerden ayıran şeyin ne olduğu bu havuzdan çıkarılamaz — bu yalnızca "şöyle yapmışlar" kaydıdır.</div>';
-      h += '<div style="display:flex;gap:8px;margin-top:12px;position:sticky;bottom:-16px;background:#fff;padding:8px 0">';
+      // SPRINT ND2: iki oluşturma yolu, her biri tek satırla açıklanır. "Malzemeleriyle" yalnız tüm malt/hop/maya eşlenmiş ve
+      // malt + hop miktarı kaynakta biliniyorsa görünür (uydurma gramaj yok; AHA hop gramajı olmadığı için orada hiç görünmez).
+      var _ndMlz = (window._bmOrnekMalzemeliMi && window._bmOrnekMalzemeliMi(kaynak, stilAd, idx)) ? true : false;
+      h += '<div class="nd-olustur-acik" style="font-size:10px;color:var(--dim);line-height:1.45;margin-top:10px">'
+        + (_ndMlz ? '✨ <b>Bu örneğin malzemeleriyle</b>: bu örneğin malt / hop / mayası, miktarlar senin hacim ve verimine ölçeklenerek kurulur.<br>' : '')
+        + '📋 <b>Stil iskeletinden</b>: stilin tipik iskeleti senin hacmine kurulur; örneğin metni not alanına yazılır.</div>';
+      if(_ndMlz) h += '<button type="button" class="nd-mlz-btn" onclick="bmOrnekOnizleMalzemeli(\'' + kaynak + '\',\'' + jsq(stilAd) + '\',' + idx + ')" style="width:100%;margin-top:8px;min-height:44px;background:var(--bakir);color:#fff;border:none;border-radius:10px;padding:11px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font-govde)">✨ Bu örneğin malzemeleriyle oluştur</button>';
+      h += '<div style="display:flex;gap:8px;margin-top:8px;position:sticky;bottom:-16px;background:#fff;padding:8px 0">';
       h += '<button type="button" onclick="bmOrnekOnizleKapat()" style="flex:1;background:var(--bg2);color:var(--kahve);border:1px solid var(--bor);border-radius:10px;padding:11px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-govde)">Kapat</button>';
-      h += '<button type="button" onclick="bmOrnekOnizleOlustur()" title="Stil iskeleti + örneğin hedefleri; orijinal içerik not alanına yazılır" style="flex:2;background:var(--bakir);color:#fff;border:none;border-radius:10px;padding:11px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font-govde)">✨ Yeni reçete oluştur</button>';
+      h += '<button type="button" onclick="bmOrnekOnizleOlustur()" title="Stil iskeleti + örneğin hedefleri; orijinal içerik not alanına yazılır" style="flex:2;background:' + (_ndMlz ? 'var(--bg2);color:var(--kahve);border:1px solid var(--bakir)' : 'var(--bakir);color:#fff;border:none') + ';border-radius:10px;padding:11px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font-govde)">📋 Stil iskeletinden oluştur</button>';
       h += '</div>';
       h += '</div></div>';
       document.body.insertAdjacentHTML('beforeend', h);
@@ -28652,9 +28659,15 @@ window._brTamHTML = function(){
     var p = mayaAyir(y);
     if(p.lab){ var k = bvNorm(p.ad + ' (' + p.lab + ')'); if(Object.prototype.hasOwnProperty.call(d.ad, k)) return d.ad[k]; }
     if(Object.prototype.hasOwnProperty.call(d.ad, bvNorm(p.ad))) return d.ad[bvNorm(p.ad)];
-    var bul = {}, n = 0;
-    y.split(/[^a-z0-9\/\-]+/).forEach(function(t){ t = t.replace(/^-+|-+$/g, ''); if(Object.prototype.hasOwnProperty.call(d.kod, t) && !bul[d.kod[t]]){ bul[d.kod[t]] = 1; n++; } });
-    return n === 1 ? Object.keys(bul)[0] : null; // iki farklı kod = belirsiz → eşleme YOK
+    var bul = {}, sira = [];
+    // ND2: "wlp 001" / "wy 1056" / "oyl 004" boşluklu kod yazımı → tek token (aynı kod; yeni eşleme değil)
+    y.replace(/\b(wlp|wy|oyl)\s+(\d)/g, '$1$2').split(/[^a-z0-9\/\-]+/).forEach(function(t){ t = t.replace(/^-+|-+$/g, ''); if(Object.prototype.hasOwnProperty.call(d.kod, t) && !bul[d.kod[t]]){ bul[d.kod[t]] = 1; sira.push(d.kod[t]); } });
+    if(sira.length === 1) return sira[0];
+    // ND2: birden çok kod ("WLP001, Wyeast 1056 or US-05") — HEPSİ birbirinin ✅-muadiliyse (Sprint 7 maya köprüsü kuralı:
+    // MUADIL fark alanı ✅ ile başlar, iki yönden biri yeter) satır İLK geçen koda bağlanır; değilse belirsiz → eşleme YOK
+    var esd = function(a, b){ var f = function(x, z){ return (typeof MUADIL !== 'undefined' && Array.isArray(MUADIL[x])) && MUADIL[x].some(function(m){ return m && m.id === z && typeof m.fark === 'string' && String(m.fark).trim().indexOf('✅') === 0; }); }; return f(a, b) || f(b, a); };
+    if(sira.length > 1 && sira.every(function(a, i){ return sira.every(function(b, j){ return i === j || esd(a, b); }); })) return sira[0];
+    return null; // iki farklı (✅-eşdeğer olmayan) kod = belirsiz → eşleme YOK
   };
   // ── 2) Metin eşleme kuralı (TEK YER): katkı çözümü + arama metin kolu ──
   function trN(s){ return (typeof _bmTrNorm === 'function' ? _bmTrNorm(s) : String(s || '').toLowerCase()).replace(/[^a-z0-9]+/g, ' ').trim(); }
@@ -28675,7 +28688,7 @@ window._brTamHTML = function(){
     var L = tip === 'malt' ? MALTLAR : tip === 'hop' ? HOPLAR : tip === 'maya' ? MAYALAR : KATKILAR, sayac = {}, kayit = {};
     (L || []).forEach(function(x){
       if(!x || !x.id) return;
-      var t = {}, ekle = function(s){ var n = trN(s); if(n.length >= 3) t[n] = 1; };
+      var t = {}, ekle = function(s){ var n = cekirdek(s) || trN(s); if(n.length >= 3) t[n] = 1; }; // ND2: terim de ham adla AYNI çekirdekten geçer
       ekle(String(x.ad || '').replace(/\([^)]*\)/g, ' '));
       // parantez içi ("Agave Şurubu (Amber)", "Candi Sugar (Şeffaf)") çoğu kez betimleyicidir → etiketle AYNI süzgeç
       var suz = function(s){ var n = trN(s); if(n && !n.split(' ').some(function(w){ return adKelimeleri()[w]; })) ekle(s); };
@@ -28693,7 +28706,8 @@ window._brTamHTML = function(){
   // "lavender" (lavanta) eşleşir; "orange blossom honey" → "orange", "amber malt" → "amber" EŞLEŞMEZ (betimleyici sözcük).
   var ATIL = /^(\d+([.,]\d+)?|tsp|tbsp|oz|lb|lbs|g|kg|ml|l|min|mins|minute|minutes|cup|cups|dried|dry|fresh|freshly|ground|crushed|coarsely|whole|frozen|toasted|organic|raw|pure|in|boil|kettle|primary|secondary|whirlpool|mash|at|end|of|the|optional|for|to|prime|priming|carbonate|or|and|a|an|left|last|tablet|tablets|leaf|pellets?)$/;
   function cekirdek(ham){
-    var s = String(ham || '').replace(/\([^)]*\)/g, ' ').replace(/\[[^\]]*\]/g, ' ').split(/[@,;]/)[0];
+    // ND2: "dry/dried malt extract" = ÜRÜN FORMU (DME), hazırlama sözcüğü değil → atılmadan önce tek token'a indirgenir
+    var s = String(ham || '').replace(/\b(dry|dried)\s+malt\s+extract\b/gi, ' dme ').replace(/\([^)]*\)/g, ' ').replace(/\[[^\]]*\]/g, ' ').split(/[@,;]/)[0];
     return trN(s).split(' ').filter(function(w){ return w && !ATIL.test(w); }).join(' ');
   }
   function esit(c, t){ return c === t || c === t + 's' || c + 's' === t || c === t + 'es' || c + 'es' === t; }
@@ -28773,9 +28787,12 @@ window._brTamHTML = function(){
   };
   var _onb = { imza:null, m:{}, hz:null };
   function stokMik(id, ad){ var i = (typeof _stokMalBul === 'function') ? _stokMalBul(id, ad) : -1; return i > -1 ? STOK[i] : null; }
-  function muadilStokta(id){
+  // ND2 MUADİL DİSİPLİNİ: stok karşılığı YALNIZ fark alanı "✅" ile başlayan eşdeğer (Sprint 7 maya köprüsüyle aynı kural).
+  // ⚠️ / ❌ eşdeğer stokta olsa da durumu İYİLEŞTİRMEZ — önizlemede yalnız bilgi ("yakın alternatif: X (⚠️)").
+  window._bmMuadilTam = function(mu){ return !!mu && typeof mu.fark === 'string' && String(mu.fark).trim().indexOf('✅') === 0; };
+  function muadilStokta(id, tamMi){
     if(typeof MUADIL === 'undefined' || !Array.isArray(MUADIL[id])) return null;
-    for(var i = 0; i < MUADIL[id].length; i++){ var mu = MUADIL[id][i]; if(!mu || !mu.id) continue; var s = stokMik(mu.id, mu.ad || mu.id); if(s && (s.miktar || 0) > 0) return { id:mu.id, ad:mu.ad || mu.id }; }
+    for(var i = 0; i < MUADIL[id].length; i++){ var mu = MUADIL[id][i]; if(!mu || !mu.id || window._bmMuadilTam(mu) !== tamMi) continue; var s = stokMik(mu.id, mu.ad || mu.id); if(s && (s.miktar || 0) > 0) return { id:mu.id, ad:mu.ad || mu.id, isaret:String(mu.fark || '').trim().charAt(0) }; }
     return null;
   }
   window._bmOrnekStok = function(kaynak, stil, idx, imza){
@@ -28792,8 +28809,8 @@ window._brTamHTML = function(){
         if(!k.id) return { d:'eslenemedi' };
         var L = (k.tip === 'katki') ? kt : st, bul = function(arr){ return (arr || []).find(function(x){ return x && x.refId === k.id; }); };
         var e = bul(L.eksik), y = bul(L.yetersiz), q = bul(L.dogrulanmadi), bilinmez = !(k.mik > 0);
-        if(e || (y && bilinmez)){ var mu = (k.tip !== 'maya') ? muadilStokta(k.id) : null; return mu ? { d:'muadil', mu:mu } : { d:'yok' }; }
-        if(y){ var mu2 = muadilStokta(k.id); return mu2 ? { d:'muadil', mu:mu2, mevcut:y.mevcut, gerek:y.ihtiyac, birimS:y.birim } : { d:'yetersiz', mevcut:y.mevcut, gerek:y.ihtiyac, birimS:y.birim }; }
+        if(e || (y && bilinmez)){ var mu = (k.tip !== 'maya') ? muadilStokta(k.id, true) : null; return mu ? { d:'muadil', mu:mu } : { d:'yok', yakin:(k.tip !== 'maya') ? muadilStokta(k.id, false) : null }; }
+        if(y){ var mu2 = muadilStokta(k.id, true); return mu2 ? { d:'muadil', mu:mu2, mevcut:y.mevcut, gerek:y.ihtiyac, birimS:y.birim } : { d:'yetersiz', mevcut:y.mevcut, gerek:y.ihtiyac, birimS:y.birim, yakin:muadilStokta(k.id, false) }; }
         if(q) return { d:'dogrulanmadi' };
         var s = stokMik(k.id, k.ad || k.id);
         return { d:bilinmez ? 'bilinmiyor' : 'stokta', mevcut:s ? s.miktar : null, birimS:s ? (s.birim || '') : '' };
@@ -28976,7 +28993,7 @@ window._brTamHTML = function(){
       sec.forEach(function(s, i){
         var M = (typeof MUADIL !== 'undefined' && Array.isArray(MUADIL[s.id])) ? MUADIL[s.id] : [];
         M.forEach(function(mu){
-          if(!mu || !mu.id) return;
+          if(!mu || !mu.id || !window._bmMuadilTam(mu)) return; // ND2: yalnız ✅ eşdeğer (⚠️/❌ önerilmez)
           var alt = sec.slice(); alt[i] = { tip:s.tip, id:mu.id };
           var n = window._bmMalzemeAra(alt, suz).length;
           if(n) h += '<button type="button" class="nd-muadil" onclick="_ndMalzDegis(' + i + ',\'' + s.tip + '\',\'' + String(mu.id).replace(/'/g, "\\'") + '\')">🔁 ' + esc_(window._ndKatAd(s.tip, s.id)) + ' kullanan örnek yok; muadili <b>' + esc_(mu.ad || window._ndKatAd(s.tip, mu.id)) + '</b> kullanan ' + n + ' örnek var — onunla ara</button>';
@@ -29015,6 +29032,7 @@ window._brTamHTML = function(){
       : x.d === 'muadil' ? '🔁 muadili stokta: ' + esc_(x.mu && x.mu.ad || '')
       : x.d === 'yok' ? '✕ yok' + (gerek ? ' (gereken ' + gerek + ')' : '')
       : '❔ eşlenemedi';
+    if(x.yakin) m += ' · <span class="nd-yakin" title="MUADIL tablosunda ✅ değil — stok karşılığı sayılmaz">yakın alternatif stokta: ' + esc_(x.yakin.ad) + ' (' + esc_(x.yakin.isaret || '⚠️') + ')</span>';
     return '<span class="nd-kalem nd-k-' + x.d + '">' + m + '</span>';
   };
   window._ndOzetHTML = function(s){
@@ -29031,6 +29049,80 @@ window._brTamHTML = function(){
       var gerek = x.d === 'yetersiz' ? ' — ' + String(Math.round((x.gerek - (x.mevcut || 0)) * 1000) / 1000).replace('.', ',') + ' ' + (x.birimS || '') + ' daha' : (x.k.mik > 0 ? ' — ' + String(x.k.mik).replace('.', ',') + ' ' + x.k.birim : '');
       return '<div class="nd-eksik">' + esc_(x.k.ad || x.k.ham) + gerek + '</div>';
     }).join('') + '<div class="nd-onizle-yontem">Yalnız gösterim — stoğuna bir şey yazılmaz.</div></div>';
+  };
+})();
+
+// ═══ SPRINT ND2 — ÖRNEĞİN KENDİ MALZEMELERİYLE REÇETE ═══
+// Koşul (uydurma gramaj YOK): tüm grist / hop / maya kalemleri kataloğa eşlendi VE grist + hop miktarları kaynakta biliniyor
+// (gramlı kaynak: NHC / K2 / K3 / K4; AHA'da hop gramajı yok → görünmez). Miktarlar ND1 kuru dönüşümünden: Kaan'ın S.hacim /
+// S.verim'i (AV kuralı), grist OG biliniyorsa hOG ile o OG'ye ölçeklenir. Ek kalemler (katkı / baharat) miktarı kaynakta metin
+// olduğu için reçeteye EKLENMEZ, notta kalır. Whirlpool / kuru hop süresi kaynakta yoksa varsayılan yazılır ve NOTTA söylenir.
+(function(){
+  function hopDk(x){ var d = x == null ? null : x; return d; }
+  window._bmOrnekMalzemeliMi = function(kaynak, stil, idx){
+    try{
+      if(kaynak === 'aha') return false;
+      var r = window._bmOrnekKuru(kaynak, stil, idx), o = window._bmOrnekNesne(kaynak, stil, idx); if(!r || !o) return false;
+      if(!r.g.length || !r.h.length || !r.y || !r.y.id) return false;
+      if(!r.g.every(function(k){ return k.id && (k.tip === 'malt' || k.tip === 'katki') && k.mik > 0; })) return false;
+      if(!r.h.every(function(k){ return k.id && k.tip === 'hop' && k.mik > 0; })) return false;
+      if((o.h || []).some(function(x){ return x[2] === 'mash'; })) return false; // mayşe hop'u editörde karşılıksız
+      return true;
+    }catch(e){ return false; }
+  };
+  window._bmOrnekMalzemeliRecete = function(kaynak, stil, idx){
+    try{
+      if(!window._bmOrnekMalzemeliMi(kaynak, stil, idx)){ if(typeof flash === 'function') flash('Bu örnekte miktarı bilinmeyen ya da eşlenemeyen kalem var — malzemeleriyle kurulamaz', 'err'); return null; }
+      var o = window._bmOrnekNesne(kaynak, stil, idx), r = window._bmOrnekKuru(kaynak, stil, idx);
+      var hacim = r.hacim, verim = r.verim;
+      var kor = window._bmAcikIsiGuvenceyeAl ? window._bmAcikIsiGuvenceyeAl() : { yol:'bos' };
+      yeniTarif();
+      S.hacim = hacim; S.verim = verim; S.stil = stil;
+      var kad = kaynak === 'nhc' || kaynak === 'aha' ? 'K1' : (o.k || 'K3');
+      var baslik = o.bira || (kaynak === 'nhc' ? 'NHC ' + (o.yil || '') : 'örnek');
+      S.biraAd = window._bmYeniReceteAd(stil + ' — ' + baslik + ' (örnek malzemeleri)');
+      var varsay = [];
+      S.maltlar = r.g.filter(function(k){ return k.tip === 'malt'; }).map(function(k){ var m = MALTLAR.find(function(a){ return a && a.id === k.id; }); return { id:k.id, kg:k.mik, marka:'', _ad:m ? m.ad : k.id }; });
+      if(!Array.isArray(S.katkilar)) S.katkilar = [];
+      r.g.filter(function(k){ return k.tip === 'katki'; }).forEach(function(k){ var x = KATKILAR.find(function(a){ return a && a.id === k.id; }); S.katkilar.push({ id:k.id, ad:x ? x.ad : k.id, birim:'kg', miktar:k.mik, zaman:x ? x.kullanim : '' }); });
+      S.hoplar = r.h.map(function(k, i){
+        var d = hopDk((o.h[i] || [])[2]), aa = +((o.h[i] || [])[3]) || null, h = HOPLAR.find(function(a){ return a && a.id === k.id; });
+        var b = { id:k.id, g:k.mik, cAA:aa, form:'pellet', _ad:h ? h.ad : k.id };
+        if(typeof d === 'number') { b.tur = 'boil'; b.dk = d; }
+        else if(d === 'kuru'){ b.tur = 'dry_hop'; b.dk = 0; b.dryDays = 5; varsay.push(b._ad + ': kuru hop süresi kaynakta yok → 5 gün'); }
+        else if(d === 'wp'){ b.tur = 'whirlpool'; b.dk = 15; b.whT = 80; varsay.push(b._ad + ': whirlpool süresi/sıcaklığı kaynakta yok → 15 dk / 80°C'); }
+        else if(d === 'FWH'){ b.tur = 'fwh'; b.dk = 60; }
+        else { b.tur = 'boil'; b.dk = 60; varsay.push(b._ad + ': kaynatma süresi kaynakta yok → 60 dk'); }
+        return b;
+      });
+      S.mayaId = r.y.id;
+      if(+o.ms >= 60 && +o.ms <= 74) S.mashSc = Math.round(+o.ms);
+      var kayn = kad === 'K1' ? (kaynak === 'nhc' ? 'AHA NHC finali altın (' + (o.yil || '') + ') — veri: nhc-homebrew-data derlemesi' : 'AHA yarışma derlemesi')
+        : kad === 'K2' ? ('Ödül biraya ait; reçete yayınlanmış klon — ' + (o.bf || '') + ' ' + (o.bira || '') + ' · ' + (o.od ? o.od.yr + ' ' + o.od.y : '') + ' · ' + (o.kay ? o.kay.pub + (o.kay.u ? ': ' + o.kay.u : '') : ''))
+        : kad === 'K4' ? ('Ödül yok — topluluk reçetesi, kalitesi bilinmiyor · ' + (o.kay ? o.kay.pub : '') + ' «' + (o.bira || '') + '»')
+        : ('Yayınlanmış otorite reçetesi — ' + (o.kay ? o.kay.pub + (o.kay.u ? ': ' + o.kay.u : '') : ''));
+      var not = ['✨ ÖRNEĞİN MALZEMELERİYLE (' + kad + '): ' + kayn + '.',
+        'Malzemeler örnekten, miktarlar senin hacmine ölçeklendi: ' + String(hacim).replace('.', ',') + ' L / %' + verim + ' verim (' + (r.yontem === 'og' ? 'grist örneğin OG’sine ölçeklendi' : 'hacim oranıyla') + ').',
+        'Bu bir "şöyle yapmışlar" kaydı, kural değil.'];
+      var og = +o.og > 1 ? 'OG ' + Number(o.og).toFixed(3) : (+o.ogH > 1 ? 'OG ≈' + Number(o.ogH).toFixed(3) + ' (kaynakta yok; hesaplandı — ölçüm değil)' : '');
+      var olc = [og, +o.fg > 0.98 ? 'FG ' + Number(o.fg).toFixed(3) : '', +o.ib > 0 ? 'IBU ' + Math.round(o.ib) : '', +o.sr > 0 ? 'SRM ' + o.sr : ''].filter(Boolean);
+      if(olc.length) not.push('Örneğin ölçüleri: ' + olc.join(' · '));
+      if(varsay.length) not.push('Kaynakta olmayan süreler (değiştirebilirsin): ' + varsay.join(' · '));
+      var ekler = (r.ek || []).map(function(k){ var e = (o.ek || []).find(function(x){ return x[0] === k.ham; }); return k.ham + (e && e[1] ? ' — ' + e[1] : '') + (k.id ? ' [katalog: ' + k.ad + ']' : ''); });
+      if(ekler.length) not.push('Ek kalemler (miktarı kaynakta metin — reçeteye EKLENMEDİ): ' + ekler.join(' · '));
+      if(r.ekAdsiz) not.push('Kaynakta adı verilmeyen ' + r.ekAdsiz + ' ek kalem daha var.');
+      S.notlar = not.join('\n');
+      window.__stilSecKaynak = 'iskelet'; // örnekten reçete = NİYET (Sprint Z stil öğrenme sinyali yazılmaz)
+      var ok = (typeof tarifeKaydet === 'function') ? tarifeKaydet() : false;
+      if(typeof render === 'function') render();
+      if(typeof flash === 'function') flash('✨ "' + S.biraAd + '" · örneğin malzemeleriyle · ' + String(hacim).replace('.', ',') + ' L' + (kor.yol === 'kayitli' ? ' · önceki reçete kaydedildi' : kor.yol === 'adli' ? ' · "' + kor.ad + '" kaydedildi' : kor.yol === 'adsiz' ? ' · adsız çalışman "' + kor.ad + '" olarak kaydedildi' : '') + (ok ? '' : ' · ⚠️ kaydedilemedi'), ok ? 'ok' : 'hata');
+      return (typeof _editId !== 'undefined') ? _editId : null;
+    }catch(e){ if(window.bmHataKaydet) bmHataKaydet('calc', e, '_bmOrnekMalzemeliRecete'); try{ console.warn('_bmOrnekMalzemeliRecete', e); }catch(_){} return null; }
+  };
+  window.bmOrnekOnizleMalzemeli = function(kaynak, stil, idx){
+    if(typeof bmOrnekOnizleKapat === 'function') bmOrnekOnizleKapat();
+    if(window.__brAcik){ window.__brAcik = false; }
+    return window._bmOrnekMalzemeliRecete(kaynak, stil, idx);
   };
 })();
 
