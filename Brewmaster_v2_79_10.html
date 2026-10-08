@@ -31158,6 +31158,7 @@ window.BM_AKTAR = (function(){
   return { gonder:gonder, al:al, sil:sil, sifrele:sifrele, coz:coz, kodUret:kodUret, kodGecerli:kodGecerli, url:url, ALFABE:ALFABE, SURE:SURE, TEKRAR:TEKRAR, AZAMI_DENEME:AZAMI_DENEME };
 })();
 window.bmAiAktarGonder = async function(){
+  window.__bmAiAktarMesaj = '';
   var kutu = function(h){ var el = document.getElementById('bm-ai-aktar-panel'); if(el) el.innerHTML = h; };
   kutu('<div style="font-size:12px;color:var(--metin-soluk);margin-top:6px">⏳ Anahtar bu cihazda şifreleniyor…</div>');
   var r = await window.BM_AKTAR.gonder();
@@ -31173,6 +31174,7 @@ window.bmAiAktarGonder = async function(){
 };
 window.bmAiAktarIptal = async function(){ await window.BM_AKTAR.sil(); var el = document.getElementById('bm-ai-aktar-panel'); if(el) el.innerHTML = '<div style="font-size:12px;margin-top:6px">Aktarım iptal edildi — paket silindi.</div>'; };
 window.bmAiAktarAlAc = function(){
+  window.__bmAiAktarMesaj = '';
   var el = document.getElementById('bm-ai-aktar-panel'); if(!el) return;
   el.innerHTML = '<div class="bm-ai-al-kutu" style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">'
     + '<input id="bm-ai-al-kod" class="inp" type="text" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="9" placeholder="ABCD 2345" aria-label="8 karakterlik aktarım kodu" style="flex:1 1 140px;min-width:0;min-height:44px;font-family:ui-monospace,monospace;font-size:18px;letter-spacing:3px;text-transform:uppercase">'
@@ -31186,7 +31188,8 @@ window.bmAiAktarAl = async function(){
   if(!r.ok){ yaz('<div class="bm-ai-al-hata" style="font-size:12px;margin-top:6px;color:#8c1d18">⚠️ ' + esc(r.mesaj) + '</div>'); return r; }
   if(typeof bmToast === 'function') bmToast('Anahtar bu cihaza aktarıldı — bağlantı testi çalışıyor', 'success');
   try{ render(); }catch(_e){}
-  var el = document.getElementById('bm-ai-aktar-panel'); if(el) el.innerHTML = '<div class="bm-ai-al-ok" style="font-size:12px;margin-top:6px;color:#1e6b2a">✓ Anahtar bu cihaza aktarıldı; buluttaki paket silindi. Bağlantı testi:</div>';
+  window.__bmAiAktarMesaj = '<div class="bm-ai-al-ok" style="font-size:12px;margin-top:6px;color:#1e6b2a">✓ Anahtar bu cihaza aktarıldı; buluttaki paket silindi. Bağlantı testinin sonucu yukarıda.</div>';
+  var el = document.getElementById('bm-ai-aktar-panel'); if(el) el.innerHTML = window.__bmAiAktarMesaj;
   var t = (typeof window.bmAiBaglantiTesti === 'function') ? await window.bmAiBaglantiTesti() : null;
   return { ok:true, test:t };
 };
@@ -31216,10 +31219,10 @@ window._bmAiKartHTML = function(){
          '<button class="bm-ayar-btn" id="bm-ai-test-btn" onclick="window.bmAiBaglantiTesti()">Test et</button></div>' : '')+
     '<div id="bm-ai-test-sonuc" aria-live="polite"></div>'+
     // SPRINT STK2: anahtarı başka cihaza tek kullanımlık kodla aktarma (anahtar buluta düz metin gitmez)
-    '<div class="bm-ayar-satir" style="gap:6px;flex-wrap:wrap"><div class="bm-ayar-satir-text">Başka cihaz <small>Kod yalnız ekranda; buluta yalnız şifreli paket gider, 5 dk geçerli, kullanılınca silinir</small></div>'+
+    '<div class="bm-ayar-satir" style="gap:6px;flex-wrap:wrap"><div class="bm-ayar-satir-text" style="flex:1 1 100%">Başka cihaz <small>Kod yalnız ekranda; buluta yalnız şifreli paket gider, 5 dk geçerli, kullanılınca silinir</small></div>'+
       (k ? '<button class="bm-ayar-btn bm-ai-aktar-btn" style="min-height:44px" onclick="window.bmAiAktarGonder()">📱 Başka cihaza aktar</button>' : '')+
       '<button class="bm-ayar-btn bm-ai-al-btn" style="min-height:44px" onclick="window.bmAiAktarAlAc()">📥 Kodla al</button></div>'+
-    '<div id="bm-ai-aktar-panel" aria-live="polite"></div>'+
+    '<div id="bm-ai-aktar-panel" aria-live="polite">'+(window.__bmAiAktarMesaj || '')+'</div>'+ // yeniden çizimde (bağlantı testi durumu) mesaj kaybolmasın
   '</div>';
 };
 window.bmAiAnahtarKaydet = function(){
