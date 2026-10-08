@@ -7314,11 +7314,11 @@ function _stokListeGuncelle(){
       '<div class="etiket" style="margin-bottom:6px">'+g+'</div>'+
       items.map(function(s){
         const idx=STOK.indexOf(s);
-        const dusuk=s.miktar<(s.uyari||0);
+        const dusuk=!_stokMikYok(s)&&s.miktar<(s.uyari||0); // SPRINT CA
         return'<div class="satir" style="'+(dusuk?'border-color:#C49080;background:var(--ka)':'')+'">'+
           '<div style="flex:1">'+
             '<div style="font-size:13px;font-weight:600;color:var(--kahve)">'+esc(s.ad)+'</div>'+
-            '<div style="font-size:10px;color:'+(dusuk?'var(--kk)':'var(--soluk)')+'">'+(dusuk?'⚠️ Az kaldı — ':'')+s.miktar+' '+s.birim+'</div>'+
+            '<div style="font-size:10px;color:'+(dusuk?'var(--kk)':'var(--soluk)')+'">'+(dusuk?'⚠️ Az kaldı — ':'')+(_stokMikYok(s)?'<b class="bm-stok-mikq" style="color:#8A6A20">miktar ?</b>':s.miktar+' '+s.birim)+'</div>'+
           '</div>'+
           '<div style="display:flex;align-items:center;gap:4px">'+
             '<button class="btn" style="background:var(--ka);color:var(--kk);font-size:16px;padding:3px 9px;line-height:1;border:1px solid #D0A0A0" onclick="stokGuncelle('+idx+',-1)">−</button>'+
@@ -7408,6 +7408,26 @@ function stokKaydet(a){
   }
 }
 let STOK=stokYukle();
+// ═══ SPRINT CA: miktarsız stok kalemi — miktar null/undefined = "var ama miktarı doğrulanmadı" ═══
+// Firebase RTDB null alanı düşürür → undefined da AYNI anlam. ASLA 0'a çevrilmez: ne "yeterli" ne "yok";
+// Kiler'de "miktar ?", Ne Demleyebilirim/eksik hesabında ayrı kova (dogrulanmadi), düşüm/iade dokunmaz.
+function _stokMikYok(s){ return !!s && (s.miktar === null || s.miktar === undefined || s.miktar === ''); }
+function _stokMikYazi(s, ayrac){ return _stokMikYok(s) ? 'miktar ?' : (s.miktar + (ayrac == null ? ' ' : ayrac) + (s.birim || '')); }
+window._stokMikYok = _stokMikYok; window._stokMikYazi = _stokMikYazi;
+// ═══ SPRINT CA: stok silme izi (tombstone) — Sprint S KRSil deseninin stok ikizi ═══
+// Eskiden syncAl STOK'u BİRLEŞİM (union) ile kaynaştırıyordu → bir cihazda silinen kalem diğer cihazın yerel
+// kopyasından DİRİLİYORDU (Kaan'ın 8 hayalet kalemi). Silinen kalemin anahtarı {id, ts} LS'te (bm_stok_sil_v1)
+// tutulur, PUT payload'ına STOKSil olarak biner, syncAl birleşiminde iki taraftan da SÜZÜLÜR. Stok kalemi
+// guncelleme taşımaz; geri ekleme stokEkle ile YENİ id alır → tombstone ona dokunmaz. TTL 90 gün (KRSil ile aynı).
+// Eski istemci STOKSil'i yok sayar (fail-open) — her iki cihaz güncellenince kalıcı.
+const _STOKSIL_SK = 'bm_stok_sil_v1';
+const _STOKSIL_TTL = 90 * 86400000;
+function _stokAnahtar(s){ return s ? (s.id || ((s.ad||'')+'|'+(s.birim||''))) : null; }
+function _stokSilOku(){ try{ var a = JSON.parse(localStorage.getItem(_STOKSIL_SK) || '[]'); return Array.isArray(a) ? a : []; }catch(e){ return []; } }
+function _stokSilYaz(a){ try{ localStorage.setItem(_STOKSIL_SK, JSON.stringify(a || [])); return true; }catch(e){ if(window.bmHataKaydet)bmHataKaydet('persist',e,'_stokSilYaz'); return false; } }
+function _stokSilSupur(a){ var esik = Date.now() - _STOKSIL_TTL; return (a || []).filter(function(t){ return t && t.id != null && typeof t.ts === 'number' && t.ts > esik; }); }
+function _stokSilEkle(anahtar){ if(anahtar == null || anahtar === '') return; var a = _stokSilSupur(_stokSilOku()).filter(function(t){ return String(t.id) !== String(anahtar); }); a.push({ id: String(anahtar), ts: Date.now() }); _stokSilYaz(a); }
+window._stokSilOku = _stokSilOku; window._stokSilEkle = _stokSilEkle; window._stokSilSupur = _stokSilSupur; window._stokSilYaz = _stokSilYaz; window._stokAnahtar = _stokAnahtar;
 
 // ═══ Stok Hareketleri Log (v2.78.52) ═══
 const SK_STOK_HIST="bm_stok_history_v1";
@@ -7747,7 +7767,7 @@ function _stokBirimCevir(mik, rb, sb){
 
 function stokYetersizlikKontrol(tarif){
   // v2.78.96 H13 — _stokMalBul ve _stokBirimCevir ortak helper'lar kullanılır
-  var yetersiz=[], eksik=[];
+  var yetersiz=[], eksik=[], dogrulanmadi=[]; // SPRINT CA: dogrulanmadi = stokta VAR ama miktar ? (ne yeterli ne yok)
   function kontrol(id, ad, ihtiyac, birim){
     if(ihtiyac<=0) return;
     var idx = _stokMalBul(id, ad);
@@ -7760,6 +7780,7 @@ function stokYetersizlikKontrol(tarif){
       eksik.push({ad:ad+' (birim uyumsuz: '+birim+' ↔ '+stBir+')', ihtiyac, birim, refId:id});
       return;
     }
+    if(_stokMikYok(s)){ dogrulanmadi.push({ad:s.ad, ihtiyac:ihtCev, birim:stBir, refId:id}); return; } // SPRINT CA
     var mevcut = s.miktar||0;
     if(mevcut < ihtCev){
       yetersiz.push({ad:s.ad, ihtiyac:ihtCev, mevcut:mevcut, birim:stBir, refId:id, eksikMik: Math.round((ihtCev-mevcut)*1000)/1000});
@@ -7786,7 +7807,7 @@ function stokYetersizlikKontrol(tarif){
     var min=MINERALLER.find(x=>x&&x.id===sm.id); if(!min) return;
     kontrol(sm.id, min.ad, sm.miktar||0, 'g');
   });
-  return {yetersiz, eksik};
+  return {yetersiz, eksik, dogrulanmadi};
 }
 
 // Sprint 6 — Malt/hop stok yeterliligi (maya/katki/mineral MUAF). stokYetersizlikKontrol DOKUNULMAZ; ciktisi recetenin malt+hop id'lerine suzulur.
@@ -7798,15 +7819,17 @@ window.stokYetersizMaltHop = function(tarif){
   (tarif.hoplar ||[]).forEach(function(h){ if(h&&h.id) izin[h.id]=1; });
   return {
     yetersiz: (k.yetersiz||[]).filter(function(it){ return izin[it.refId]; }),
-    eksik:    (k.eksik   ||[]).filter(function(it){ return izin[it.refId]; })
+    eksik:    (k.eksik   ||[]).filter(function(it){ return izin[it.refId]; }),
+    dogrulanmadi: (k.dogrulanmadi||[]).filter(function(it){ return izin[it.refId]; }) // SPRINT CA
   };
 };
 // Sprint 6 — ortak metin (rozet title + plan bildirimi ayni format): "Pilsner Malt yok, Magnum (15g eksik)"
 window._stokYetersizMetin = function(st){
-  if(!st || (!st.yetersiz.length && !st.eksik.length)) return '';
+  if(!st || (!st.yetersiz.length && !st.eksik.length && !(st.dogrulanmadi||[]).length)) return '';
   var parts = [];
   (st.eksik||[]).forEach(function(it){ parts.push(String(it.ad) + ' yok'); });
   (st.yetersiz||[]).forEach(function(it){ parts.push(String(it.ad) + ' (' + it.eksikMik + (it.birim||'') + ' eksik)'); });
+  (st.dogrulanmadi||[]).forEach(function(it){ parts.push(String(it.ad) + ' (miktar ?)'); }); // SPRINT CA
   return parts.join(', ');
 };
 
@@ -7844,57 +7867,70 @@ window._mayaKod = function(katalogId){
   return null;
 };
 // Duzeltme A (D1) — plan bildirimi yapisal detay: baslik kisa kalir, eksik/stok GOVDEYE newline'li gecer; maya 🧬 ayri / malt-hop 📦 ayri; ad cozulemezse (id sizintisi) kalem duser; her grup max 3 + 'N daha'.
-window._planBildirimDetay = function(eks, st){ var lines=[]; if(eks&&eks.length) lines.push('⚠ Eksik alan: '+eks.join(', ')); function grupMetin(arr,onek){ var adlar=[]; (arr||[]).forEach(function(it){ if(!it) return; var ad=String(it.ad||''); if(!ad||ad===String(it.refId||'')) return; adlar.push(ad); }); if(!adlar.length) return null; var ilk=adlar.slice(0,3); var fazla=adlar.length-ilk.length; return onek+ilk.join(', ')+(fazla>0?' +'+fazla+' daha':''); } st=st||{}; var mhEksik=(st.eksik||[]).filter(function(it){ return it&&it._tip!=='maya'; }); var mh=(st.yetersiz||[]).concat(mhEksik); var mhLine=grupMetin(mh,'📦 Malt/Hop stok yok: '); if(mhLine) lines.push(mhLine); var myEksik=(st.eksik||[]).filter(function(it){ return it&&it._tip==='maya'; }); var myLine=grupMetin(myEksik,'🧬 Maya stok yok: '); if(myLine) lines.push(myLine); return lines.join(String.fromCharCode(10)); };
+window._planBildirimDetay = function(eks, st){ var lines=[]; if(eks&&eks.length) lines.push('⚠ Eksik alan: '+eks.join(', ')); function grupMetin(arr,onek){ var adlar=[]; (arr||[]).forEach(function(it){ if(!it) return; var ad=String(it.ad||''); if(!ad||ad===String(it.refId||'')) return; adlar.push(ad); }); if(!adlar.length) return null; var ilk=adlar.slice(0,3); var fazla=adlar.length-ilk.length; return onek+ilk.join(', ')+(fazla>0?' +'+fazla+' daha':''); } st=st||{}; var mhEksik=(st.eksik||[]).filter(function(it){ return it&&it._tip!=='maya'; }); var mh=(st.yetersiz||[]).concat(mhEksik); var mhLine=grupMetin(mh,'📦 Malt/Hop stok yok: '); if(mhLine) lines.push(mhLine); var myEksik=(st.eksik||[]).filter(function(it){ return it&&it._tip==='maya'; }); var myLine=grupMetin(myEksik,'🧬 Maya stok yok: '); if(myLine) lines.push(myLine); var qLine=grupMetin(st.dogrulanmadi,'❓ Miktar doğrulanmadı: '); if(qLine) lines.push(qLine); return lines.join(String.fromCharCode(10)); };
 // SPRINT J J12: maya stok-eşleşme hazırlığı (katalog+kod tarama) tek fonksiyona çıkarıldı —
 // keşif kartı döngüsü reçete başına yeniden kurmak yerine BİR KEZ kurup paylaşır. Sonuç aynı.
 window._stokMayaHazirlik = function(){
-  var stokMayaIds = {}, stokKodlar = {};
-  if(typeof MAYALAR==='undefined' || !Array.isArray(MAYALAR) || typeof STOK==='undefined' || !Array.isArray(STOK)) return { stokMayaIds: stokMayaIds, stokKodlar: stokKodlar };
+  // SPRINT CA: miktarı doğrulanmamış (miktar ?) stok mayaları AYRI kümelerde (…Q) — "var" sayılmaz, "yok" da sayılmaz
+  var stokMayaIds = {}, stokKodlar = {}, stokMayaIdsQ = {}, stokKodlarQ = {};
+  var bos = { stokMayaIds: stokMayaIds, stokKodlar: stokKodlar, stokMayaIdsQ: stokMayaIdsQ, stokKodlarQ: stokKodlarQ };
+  if(typeof MAYALAR==='undefined' || !Array.isArray(MAYALAR) || typeof STOK==='undefined' || !Array.isArray(STOK)) return bos;
   MAYALAR.forEach(function(y){
     if(!y || !y.id) return;
     var idx = _stokMalBul(y.id, y.ad);
     if(idx > -1 && STOK[idx] && STOK[idx].g === 'Maya' && (STOK[idx].miktar||0) > 0){
       stokMayaIds[y.id] = true;
       var kk = _mayaKod(y.id); if(kk) stokKodlar[kk] = true;
+    } else if(idx > -1 && STOK[idx] && STOK[idx].g === 'Maya' && _stokMikYok(STOK[idx])){
+      stokMayaIdsQ[y.id] = true;
+      var kq = _mayaKod(y.id); if(kq) stokKodlarQ[kq] = true;
     }
   });
   STOK.forEach(function(s){   // katalog-disi custom maya guvencesi: adindaki "(=KOD)" de gecerli
-    if(!s || s.g !== 'Maya' || !((s.miktar||0) > 0)) return;
+    if(!s || s.g !== 'Maya') return;
     var ex = String(s.ad||'').match(/\(=\s*([A-Z0-9][A-Z0-9\/-]*)\s*\)/i);
-    if(ex) stokKodlar[ex[1].toUpperCase()] = true;
+    if(!ex) return;
+    if((s.miktar||0) > 0) stokKodlar[ex[1].toUpperCase()] = true;
+    else if(_stokMikYok(s)) stokKodlarQ[ex[1].toUpperCase()] = true;
   });
-  return { stokMayaIds: stokMayaIds, stokKodlar: stokKodlar };
+  return bos;
 };
 window.stokYetersizMaya = function(tarif, hazirlik){
-  var out = { eksik: [] };
+  var out = { eksik: [], dogrulanmadi: [] };
   if(!tarif || typeof MAYALAR==='undefined' || !Array.isArray(MAYALAR)) return out;
   if(typeof STOK==='undefined' || !Array.isArray(STOK)) return out;
   var _hz = (hazirlik && hazirlik.stokMayaIds) ? hazirlik : _stokMayaHazirlik(); // SPRINT J J12
-  var stokMayaIds = _hz.stokMayaIds, stokKodlar = _hz.stokKodlar;
+  // Aynı 4 kademe (1 DOGRUDAN · 2 FORWARD ✅ · 3 ESDEGER-KOD · 4 REVERSE ✅) iki kez koşar:
+  // önce miktarı > 0 stokla ("var" → sessiz), bulunamazsa miktar ? stokla (→ dogrulanmadi), o da yoksa EKSIK.
+  function kademe(mid, maya, uygun, ids, kodlar){
+    var idx = _stokMalBul(mid, maya.ad);
+    if(idx > -1 && STOK[idx] && STOK[idx].g === 'Maya' && uygun(STOK[idx])) return true;
+    if(typeof MUADIL!=='undefined' && Array.isArray(MUADIL[mid])){
+      for(var i = 0; i < MUADIL[mid].length; i++){
+        var mu = MUADIL[mid][i];
+        if(!mu || !mu.id || typeof mu.fark!=='string' || String(mu.fark).trim().indexOf('✅')!==0) continue;
+        var m2 = MAYALAR.find(function(x){ return x && x.id===mu.id; });
+        var i2 = _stokMalBul(mu.id, m2 ? m2.ad : mu.id);
+        if(i2 > -1 && STOK[i2] && STOK[i2].g === 'Maya' && uygun(STOK[i2])) return true;
+      }
+    }
+    var kod = _mayaKod(mid); if(kod && kodlar[kod]) return true;
+    if(typeof MUADIL!=='undefined'){
+      var sids = Object.keys(ids);
+      for(var j = 0; j < sids.length; j++){
+        var L = MUADIL[sids[j]]; if(!Array.isArray(L)) continue;
+        for(var k = 0; k < L.length; k++){ var mu2 = L[k]; if(mu2 && mu2.id===mid && typeof mu2.fark==='string' && String(mu2.fark).trim().indexOf('✅')===0) return true; }
+      }
+    }
+    return false;
+  }
+  var varMi = function(st){ return (st.miktar||0) > 0; };
   [tarif.mayaId, tarif.maya2Id].filter(Boolean).forEach(function(mid){
     var maya = MAYALAR.find(function(x){ return x && x.id===mid; });
     if(!maya) return;   // katalog-disi maya -> belirlenemez, atla (stokYetersizlikKontrol emsali)
-    var bulundu = false;
-    var idx = _stokMalBul(mid, maya.ad);                                       // 1) DOGRUDAN ad eslesme
-    if(idx > -1 && STOK[idx] && STOK[idx].g === 'Maya' && (STOK[idx].miktar||0) > 0) bulundu = true;
-    if(!bulundu && typeof MUADIL!=='undefined' && Array.isArray(MUADIL[mid])){ // 2) FORWARD ✅-muadil
-      MUADIL[mid].forEach(function(mu){
-        if(bulundu || !mu || !mu.id || typeof mu.fark!=='string' || String(mu.fark).trim().indexOf('✅')!==0) return;
-        var m2 = MAYALAR.find(function(x){ return x && x.id===mu.id; });
-        var i2 = _stokMalBul(mu.id, m2 ? m2.ad : mu.id);
-        if(i2 > -1 && STOK[i2] && STOK[i2].g === 'Maya' && (STOK[i2].miktar||0) > 0) bulundu = true;
-      });
-    }
-    if(!bulundu){ var kod = _mayaKod(mid); if(kod && stokKodlar[kod]) bulundu = true; } // 3) ESDEGER-KOD
-    if(!bulundu && typeof MUADIL!=='undefined'){                               // 4) REVERSE ✅ (stok mayasi bu mayayi ✅-listeler mi)
-      Object.keys(stokMayaIds).forEach(function(sid){
-        if(bulundu || !Array.isArray(MUADIL[sid])) return;
-        MUADIL[sid].forEach(function(mu){
-          if(mu && mu.id===mid && typeof mu.fark==='string' && String(mu.fark).trim().indexOf('✅')===0) bulundu = true;
-        });
-      });
-    }
-    if(!bulundu) out.eksik.push({ ad: maya.ad, birim:'pk', refId: mid, _tip:'maya' });
+    if(kademe(mid, maya, varMi, _hz.stokMayaIds, _hz.stokKodlar)) return;
+    if(kademe(mid, maya, _stokMikYok, _hz.stokMayaIdsQ || {}, _hz.stokKodlarQ || {})){ out.dogrulanmadi.push({ ad: maya.ad, birim:'pk', refId: mid, _tip:'maya' }); return; }
+    out.eksik.push({ ad: maya.ad, birim:'pk', refId: mid, _tip:'maya' });
   });
   return out;
 };
@@ -7904,14 +7940,15 @@ window.stokYetersizTam = function(tarif, hazirlik){ // SPRINT J J12: hazırlık 
   var my = (typeof stokYetersizMaya==='function') ? stokYetersizMaya(tarif, hazirlik) : {eksik:[]};
   return {
     yetersiz: (mh.yetersiz||[]).slice(),
-    eksik: (mh.eksik||[]).concat(my.eksik||[])
+    eksik: (mh.eksik||[]).concat(my.eksik||[]),
+    dogrulanmadi: (mh.dogrulanmadi||[]).concat(my.dogrulanmadi||[]) // SPRINT CA
   };
 };
 
 // ═══ "Ne Demleyebilirim?" — stok-güdümlü reçete keşfi (SALT-OKUR: KR/STOK/MAYALAR değişmez) ═══
 // stokYetersizTam'ı yapımda-olmayan tüm reçetelere uygular → HAZIR/AZ-EKSİK/ÇOK-EKSİK kova.
 window.bmDemlenebilirAnaliz = function(){
-  var out = { hazir:[], azEksik:[], cokEksik:[], cokEksikSay:0, alisveris:[] };
+  var out = { hazir:[], dogrula:[], azEksik:[], cokEksik:[], cokEksikSay:0, alisveris:[] }; // SPRINT CA: dogrula = eksik yok ama miktar ? kalem var
   try {
     if(typeof KR==='undefined' || !KR) return out;
     var list = Array.isArray(KR) ? KR : Object.values(KR);
@@ -7925,7 +7962,10 @@ window.bmDemlenebilirAnaliz = function(){
       var toplam = yet.length + eks.length;
       var ad = String(r.biraAd||'(adsız)');
       var planTarih = (r.planBrewTarih && /^\d{4}-\d{2}-\d{2}$/.test(r.planBrewTarih)) ? r.planBrewTarih : null;
-      if(toplam===0){
+      var dog = st.dogrulanmadi||[]; // SPRINT CA: miktar ? kalemler eksikSay'a GİRMEZ, alışverişe GİRMEZ
+      if(toplam===0 && dog.length){
+        out.dogrula.push({ id:r.id, ad:ad, dogStr:dog.map(function(it){ return String(it.ad); }).join(', '), planTarih:planTarih });
+      } else if(toplam===0){
         out.hazir.push({ id:r.id, ad:ad, planTarih:planTarih });
       } else if(toplam<=2){
         var eksikStr = (typeof _stokYetersizMetin==='function') ? _stokYetersizMetin(st) : '';
@@ -7966,11 +8006,12 @@ window.bmDemleKartHTML = function(){
     var planBadge = function(pt){ if(!pt) return ''; var p=String(pt).split('-'); return ' <span class="bm-demle-badge">📅 '+esc(p[2]+'.'+p[1])+'</span>'; };
     var row = function(r,sub){ return '<button type="button" class="bm-demle-row" onclick="tarifAc(\''+escId(r.id)+'\')" aria-label="'+esc(r.ad)+' reçetesini aç">'+
       '<span class="bm-demle-rn"><span class="bm-demle-rt">'+esc(r.ad)+planBadge(r.planTarih)+'</span>'+(sub?'<span class="bm-demle-rs">'+sub+'</span>':'')+'</span></button>'; };
-    var nH=a.hazir.length, nA=a.azEksik.length, nC=a.cokEksik.length;
-    var ozet = (nH>0||nA>0) ? (nH+' reçete hazır · '+nA+' az-eksik'+(nC>0?' · '+nC+' çok-eksik':''))
+    var nH=a.hazir.length, nA=a.azEksik.length, nC=a.cokEksik.length, nD=(a.dogrula||[]).length;
+    var ozet = (nH>0||nA>0||nD>0) ? (nH+' reçete hazır · '+(nD>0?nD+' miktar ? · ':'')+nA+' az-eksik'+(nC>0?' · '+nC+' çok-eksik':''))
                             : ('Stok yeni reçete için yetersiz'+(a.cokEksikSay>0?' · '+a.cokEksikSay+' çok-eksik':''));
     var body='';
     if(nH>0){ body+='<div class="bm-demle-h">🍺 Hazır ('+nH+')</div>'; a.hazir.forEach(function(r){ body+=row(r,''); }); }
+    if(nD>0){ body+='<div class="bm-demle-h bm-demle-dogrula">❓ Stokta var, miktarı doğrulanmadı ('+nD+')</div>'; a.dogrula.forEach(function(r){ body+=row(r, 'miktar ?: '+esc(r.dogStr)); }); } // SPRINT CA
     if(nA>0){ body+='<div class="bm-demle-h">🛒 Az-eksik ('+nA+')</div>'; a.azEksik.forEach(function(r){ body+=row(r, r.eksikSay+' eksik: '+esc(r.eksikStr)); }); }
     if(nC>0){
       var cokRows = a.cokEksik.map(function(r){ return row(r, r.eksikSay+' eksik: '+esc(r.eksikStr)); }).join('');
@@ -8991,8 +9032,10 @@ function stoktenDus(tarif){
   }
   let dustuler=[];
   let bulunmayan=[];
+  let bilinmez=[]; // SPRINT CA: miktar ? → düşülmez (0'a inmez)
   function _denele(ad,miktar,birim,idx){
     if(idx<0){ bulunmayan.push(ad.split('(')[0].trim()); return false; }
+    if(_stokMikYok(STOK[idx])){ bilinmez.push(ad.split('(')[0].trim()); return false; }
     if(!dustur(idx,miktar,birim)){ bulunmayan.push(ad.split('(')[0].trim()+' (birim uyumsuz)'); return false; }
     return true;
   }
@@ -9034,16 +9077,18 @@ function stoktenDus(tarif){
     if(_denele(min.ad,sm.miktar||0,'g',idx))
       dustuler.push(min.ad.split('(')[0].trim()+' '+sm.miktar+'g');
   });
-  if(dustuler.length>0||bulunmayan.length>0){
+  if(dustuler.length>0||bulunmayan.length>0||bilinmez.length>0){
     if(dustuler.length>0) stokKaydet(STOK);
     // Stok history: yapımda düşüm
     stokHistEkle('dusum', tarif.ad||'(adsız tarif)', [
       ...dustuler.map(d=>({ad:d, bulundu:true})),
-      ...bulunmayan.map(b=>({ad:b, bulundu:false}))
+      ...bulunmayan.map(b=>({ad:b, bulundu:false})),
+      ...bilinmez.map(b=>({ad:b+' (miktar ? — düşülmedi)', bulundu:true}))
     ]);
     var msg='🔨 Yapıma alındı';
     if(dustuler.length>0) msg+=' — düşüldü: '+dustuler.join(', ');
     if(bulunmayan.length>0) msg+=' · ⚠️ stokta yok: '+bulunmayan.join(', ');
+    if(bilinmez.length>0) msg+=' · ❓ miktar ? (düşülmedi): '+bilinmez.join(', ');
     flash(msg+' ✓');
   } else {
     flash('🔨 Yapıma alındı ✓');
@@ -9065,6 +9110,7 @@ function stoktenGeriKoy(tarif){
   let gerilenler=[];
   let geriKonamayan=[];
   function _iadeDene(ad, miktar, birim, idx){
+    if(idx>=0 && _stokMikYok(STOK[idx])) return false; // SPRINT CA: miktar ? kaleme iade eklenmez (bilinmeyen + x = yine bilinmez)
     if(geriKoy(idx, miktar, birim)){ gerilenler.push(ad.split('(')[0].trim()+' '+miktar+birim); return true; }
     // Sadece idx<0 değil, birim uyumsuz da olabilir
     if(idx>=0) geriKonamayan.push(ad.split('(')[0].trim()+' (birim uyumsuz)');
@@ -9115,6 +9161,7 @@ function stoktenManuelDus(tarifId){
   if(kontrol.yetersiz.length>0){
     onayMsg += '⚠️ Yetersiz: '+kontrol.yetersiz.map(function(y){return y.ad+' (eksik '+y.eksikMik+' '+y.birim+')';}).join(', ')+'\n\n';
   }
+  if((kontrol.dogrulanmadi||[]).length>0){ onayMsg += '❓ Miktar doğrulanmadı (düşülmeyecek): '+kontrol.dogrulanmadi.map(function(q){return q.ad;}).join(', ')+'\n\n'; } // SPRINT CA
   onayMsg += 'Mevcut stoğu düşürmek istediğinden emin misin?\n(Tarif durumu değişmez — sadece stok düşer)';
   if(!confirm(onayMsg)) return;
   stoktenDus(t);
@@ -9172,6 +9219,7 @@ function tarifDurumDegistir(id,yeniDurum){
         });
         msg += '\n';
       }
+      if((kontrol.dogrulanmadi||[]).length>0){ msg += '❓ Miktar doğrulanmadı (düşülmeyecek): '+kontrol.dogrulanmadi.map(function(q){return q.ad;}).join(', ')+'\n\n'; } // SPRINT CA
       msg += 'Yine de YAPIMA AL ve mevcudu düşür?';
       if(!confirm(msg)) return;
     }
@@ -12791,7 +12839,7 @@ function stokKontrolHTML(){
       satirlar+=`<div style="flex:1;min-width:0">`;
       satirlar+=`<div style="font-size:12px;font-weight:600;color:var(--metin)">${esc(item.ad)}</div>`;
       satirlar+=`<div style="font-size:var(--fs-xs);color:var(--metin-soluk)">Reçete: ${esc(item.miktar)}`;
-      if(varMi) satirlar+=` &nbsp;·&nbsp; Stokta: <b>${stokItem.miktar}${stokItem.birim}</b>`;
+      if(varMi) satirlar+=` &nbsp;·&nbsp; Stokta: <b>${_stokMikYok(stokItem)?'miktar ?':stokItem.miktar+stokItem.birim}</b>`; // SPRINT CA
       satirlar+=`</div></div>`;
       if(_stokVar&&!varMi) satirlar+=`<span style="font-size:var(--fs-xs);padding:2px 8px;border-radius:10px;background:var(--ka);color:var(--kk);font-weight:600;flex-shrink:0;border:1px solid var(--kk)">Stokta Yok</span>`;
       satirlar+=`</div>`;
@@ -13344,7 +13392,8 @@ function rStok(){
     var _sI={'Malt':'🌾','Hop':'🌿','Maya':'🔬','Katkı':'🧪','Su Minerali':'💧','Diğer':'📦'};
     var ih=items.map(function(s){
       var idx=STOK.indexOf(s);
-      var dusuk=s.uyari>0&&s.miktar<=s.uyari;
+      var _mq=_stokMikYok(s); // SPRINT CA
+      var dusuk=!_mq&&s.uyari>0&&s.miktar<=s.uyari;
       // Rezerv hesabı
       var rezler = _rezervBul(s);
       var rezTop = 0;
@@ -13362,7 +13411,9 @@ function rStok(){
       rezTop = Math.round(rezTop*1000)/1000;
       var eksikRez = rezTop - (s.miktar||0);
       var rezSatir = '';
-      if(rezler.length>0){
+      if(rezler.length>0&&_mq){ // SPRINT CA: miktar bilinmiyor → ne yeterli ne eksik
+        rezSatir = '<div style="font-size:9px;color:#8A6A20;margin-top:2px;line-height:1.3">❓ '+rezler.length+' tarif · toplam gerek: '+rezTop+rezBirim+' · miktar doğrulanmadı</div>';
+      } else if(rezler.length>0){
         var rezRenk = eksikRez > 0 ? '#C62828' : eksikRez > -(s.miktar*0.2) ? '#8A6A20' : '#2A7A2A';
         var rezIkon = eksikRez > 0 ? '⚠️' : '📅';
         rezSatir = '<div style="font-size:9px;color:'+rezRenk+';margin-top:2px;line-height:1.3">'
@@ -13372,7 +13423,7 @@ function rStok(){
       }
       return '<div class="satir" style="'+(dusuk?'border-color:var(--crit);background:var(--crit-bg);':'')+'margin-bottom:var(--sp-1)">'
         +'<div style="flex:1;min-width:0"><div style="font-family:var(--font-govde);font-size:var(--fs-sm);font-weight:var(--fw-semibold);color:var(--ink)">'+esc(s.ad)+'</div>'
-        +'<div style="font-family:var(--font-govde);font-size:var(--fs-xs);color:'+(dusuk?'var(--crit)':'var(--metin-soluk)')+'">'+(dusuk?'⚠️ ':'')+s.miktar+' '+s.birim+(s.uyari>0?' · Uyarı: '+s.uyari+s.birim:'')+'</div>'
+        +'<div style="font-family:var(--font-govde);font-size:var(--fs-xs);color:'+(dusuk?'var(--crit)':'var(--metin-soluk)')+'">'+(dusuk?'⚠️ ':'')+(_mq?'<b class="bm-stok-mikq" style="color:#8A6A20">miktar ?</b>':s.miktar+' '+s.birim)+(s.uyari>0?' · Uyarı: '+s.uyari+s.birim:'')+'</div>'
         +rezSatir
         +'</div>'
         +'<div style="display:flex;align-items:center;gap:var(--sp-1)">'
@@ -17141,7 +17192,7 @@ function rEditorKatki(){
 
   // ═══ EKLENEN KATKILAR PANELİ (en üst) ═══
   var _hac = S.hacim || 11;
-  var _stokCipMap={};try{if(typeof STOK!=='undefined'&&Array.isArray(STOK)&&STOK.length>0&&typeof _stokMalBul==='function'){KATKILAR.forEach(function(k){if(!k)return;var _six=_stokMalBul(k.id,k.ad);if(_six>-1&&STOK[_six])_stokCipMap[k.id]=(STOK[_six].miktar||0)+(STOK[_six].birim||'g');});}}catch(_e){} // FEAT-STOK-ROZET: stok çip haritası — eşleştirici _stokMalBul tek kaynak (refId>normalize ad), render başına tek hazırlık, kartlar O(1)
+  var _stokCipMap={};try{if(typeof STOK!=='undefined'&&Array.isArray(STOK)&&STOK.length>0&&typeof _stokMalBul==='function'){KATKILAR.forEach(function(k){if(!k)return;var _six=_stokMalBul(k.id,k.ad);if(_six>-1&&STOK[_six])_stokCipMap[k.id]=_stokMikYok(STOK[_six])?'miktar ?':(STOK[_six].miktar||0)+(STOK[_six].birim||'g');});}}catch(_e){} // FEAT-STOK-ROZET: stok çip haritası — eşleştirici _stokMalBul tek kaynak (refId>normalize ad), render başına tek hazırlık, kartlar O(1)
   // Kapsamlı overdose eşikleri — literatür bazlı (g/L veya adet cinsinden)
   // Kaynaklar yorum satırlarında belirtilmiş. "bulamadım" = kaynak yok, atla.
   function _katkiUyari(kt, kDB, hacimL){
@@ -17789,7 +17840,7 @@ function gristOlcekHTML(curOG,curHac){
 }
 
 function rEditorMalt(og, ogHesap, ogKaynak, srm, topMalt, rk, seciMalt, uy){
-  var _stokCipMap={};try{if(typeof STOK!=='undefined'&&Array.isArray(STOK)&&STOK.length>0&&typeof _stokMalBul==='function'){MALTLAR.forEach(function(m){if(!m)return;var _six=_stokMalBul(m.id,m.ad);if(_six>-1&&STOK[_six])_stokCipMap[m.id]=(STOK[_six].miktar||0)+(STOK[_six].birim||'g');});}}catch(_e){} // MALT-STOK-ROZET: stok çip haritası (Katkı/Hop emsali, _stokMalBul refId>ad, render başına tek)
+  var _stokCipMap={};try{if(typeof STOK!=='undefined'&&Array.isArray(STOK)&&STOK.length>0&&typeof _stokMalBul==='function'){MALTLAR.forEach(function(m){if(!m)return;var _six=_stokMalBul(m.id,m.ad);if(_six>-1&&STOK[_six])_stokCipMap[m.id]=_stokMikYok(STOK[_six])?'miktar ?':(STOK[_six].miktar||0)+(STOK[_six].birim||'g');});}}catch(_e){} // MALT-STOK-ROZET: stok çip haritası (Katkı/Hop emsali, _stokMalBul refId>ad, render başına tek)
   // Kombine base ve en büyük base bir kere hesapla (rol hesabı için)
   const _baseTopKg=S.maltlar.reduce((s,m2)=>{const ml2=MALTLAR.find(x=>x&&x.id===m2.id);return (ml2&&ml2.g==="Base"&&m2.id!=="rice_hulls"&&m2.id!=="rice")?s+m2.kg:s;},0);
   const _basePct=topMalt>0?(_baseTopKg/topMalt*100):0;
@@ -18133,7 +18184,7 @@ function hopOlcekHTML(curOG,curIBU,curHac){
 }
 
 function rEditorHop(og, ibu, seciHop){
-  var _stokCipMap={};try{if(typeof STOK!=='undefined'&&Array.isArray(STOK)&&STOK.length>0&&typeof _stokMalBul==='function'){HOPLAR.forEach(function(h){if(!h)return;var _six=_stokMalBul(h.id,h.ad);if(_six>-1&&STOK[_six])_stokCipMap[h.id]=(STOK[_six].miktar||0)+(STOK[_six].birim||'g');});}}catch(_e){} // HOP-STOK-ROZET: stok çip haritası (Katkı FEAT-STOK-ROZET emsali, _stokMalBul refId>ad, render başına tek)
+  var _stokCipMap={};try{if(typeof STOK!=='undefined'&&Array.isArray(STOK)&&STOK.length>0&&typeof _stokMalBul==='function'){HOPLAR.forEach(function(h){if(!h)return;var _six=_stokMalBul(h.id,h.ad);if(_six>-1&&STOK[_six])_stokCipMap[h.id]=_stokMikYok(STOK[_six])?'miktar ?':(STOK[_six].miktar||0)+(STOK[_six].birim||'g');});}}catch(_e){} // HOP-STOK-ROZET: stok çip haritası (Katkı FEAT-STOK-ROZET emsali, _stokMalBul refId>ad, render başına tek)
   const dkO=[90,75,60,45,30,20,15,10,5,1].map(d=>`<option value="${d}"${yH.dk===d?" selected":""}>${d} dk</option>`).join("");
   // Whirlpool iki input: sıcaklık (°C) + süre (dk). Default: 85°C / 15dk.
   const yHwhT=yH.whT!=null?yH.whT:85;
@@ -23050,22 +23101,22 @@ window.brewdayOnKontrol=function(){
     (S.maltlar||[]).forEach(m=>{
       const st=_stokEsles(m.id, MALTLAR.find(x=>x&&x.id===m.id)?.ad||'');
       const stKg=st?(st.birim==='kg'?st.miktar:st.miktar/1000):0;
-      r.malt.push({ad:MALTLAR.find(x=>x&&x.id===m.id)?.ad||m.id,gerek:m.kg,stok:stKg,birim:'kg',ok:stKg>=m.kg});
+      r.malt.push({ad:MALTLAR.find(x=>x&&x.id===m.id)?.ad||m.id,gerek:m.kg,stok:stKg,birim:'kg',ok:stKg>=m.kg,q:_stokMikYok(st)}); // SPRINT CA q
     });
     (S.hoplar||[]).forEach(h=>{
       const st=_stokEsles(h.id, HOPLAR.find(x=>x&&x.id===h.id)?.ad||'');
       const stG=st?(st.birim==='kg'?st.miktar*1000:st.miktar):0;
-      r.hop.push({ad:HOPLAR.find(x=>x&&x.id===h.id)?.ad||h.id,gerek:h.g,stok:stG,birim:'g',ok:stG>=h.g});
+      r.hop.push({ad:HOPLAR.find(x=>x&&x.id===h.id)?.ad||h.id,gerek:h.g,stok:stG,birim:'g',ok:stG>=h.g,q:_stokMikYok(st)});
     });
     if(S.mayaId){
       const st=_stokEsles(S.mayaId, MAYALAR.find(x=>x&&x.id===S.mayaId)?.ad||'');
-      r.maya.push({ad:MAYALAR.find(x=>x&&x.id===S.mayaId)?.ad||S.mayaId,gerek:1,stok:st?st.miktar:0,birim:'paket',ok:st&&st.miktar>0});
+      r.maya.push({ad:MAYALAR.find(x=>x&&x.id===S.mayaId)?.ad||S.mayaId,gerek:1,stok:st?st.miktar:0,birim:'paket',ok:st&&st.miktar>0,q:_stokMikYok(st)});
     }
     (S.katkilar||[]).forEach(k=>{
       const kz=(k.zaman||'').toLowerCase();
       if(!kz.includes('kaynat')&&!kz.includes('whirlpool')&&k.dk==null)return;
       const st=_stokEsles(k.id, k.ad||'');
-      r.katki.push({ad:k.ad,gerek:k.miktar,stok:st?st.miktar:0,birim:k.birim||'g',ok:(st?st.miktar:0)>=k.miktar});
+      r.katki.push({ad:k.ad,gerek:k.miktar,stok:st?st.miktar:0,birim:k.birim||'g',ok:(st?st.miktar:0)>=k.miktar,q:_stokMikYok(st)});
     });
     return r;
   }catch(e){console.error('[Brewday] onKontrol',e);return null;}
@@ -23905,15 +23956,16 @@ window.brewdayBaslatEkran=function(){
   }
   // Ön kontrol
   if(rapor){
-    const eksik=[];
-    ['malt','hop','maya','katki'].forEach(t=>(rapor[t]||[]).forEach(r=>{if(!r.ok)eksik.push(esc(r.ad)+' ('+r.gerek+r.birim+' gerek, '+r.stok+r.birim+' stok)');}));
+    const eksik=[], _bdq=[]; // SPRINT CA: miktar ? kalemler ayrı (ne 'stokta' ne 'eksik')
+    ['malt','hop','maya','katki'].forEach(t=>(rapor[t]||[]).forEach(r=>{if(r.q){_bdq.push(esc(r.ad)+' ('+r.gerek+r.birim+' gerek)');return;}if(!r.ok)eksik.push(esc(r.ad)+' ('+r.gerek+r.birim+' gerek, '+r.stok+r.birim+' stok)');}));
+    if(_bdq.length>0) h+='<div class="bm-bd-mikq" style="background:#FFF6DC;border:1px solid #C9A040;border-radius:8px;padding:10px;margin-bottom:12px;font-size:11px;color:#6A5010;line-height:1.5"><b>❓ Stokta var, miktarı doğrulanmadı ('+_bdq.length+')</b><br>'+_bdq.join('<br>')+'</div>';
     if(eksik.length>0){
       h+='<div style="background:#FFE8E0;border:1px solid #D88060;border-radius:8px;padding:10px;margin-bottom:12px">';
       h+='<div style="font-size:12px;font-weight:700;color:#7A2020;margin-bottom:4px">⚠️ Stok Eksik ('+eksik.length+')</div>';
       h+='<div style="font-size:11px;color:#7A2020;line-height:1.5">'+eksik.join('<br>')+'</div>';
       h+='<div style="font-size:10px;color:#7A2020;margin-top:6px;font-style:italic">Eksik olsa da devam edebilirsin — elle takviye edersin.</div>';
       h+='</div>';
-    }else{
+    }else if(_bdq.length===0){
       h+='<div style="background:#E0F5E0;border:1px solid #60A060;border-radius:8px;padding:10px;margin-bottom:12px;font-size:12px;color:#205020"><b>✅ Tüm malzemeler stokta</b></div>';
     }
   }
@@ -24695,6 +24747,7 @@ window.brewdayBitir=function(){
         STOK.forEach(function(it){
           if(!it || !it.id) return;
           if(!(it.uyari > 0)) return;
+          if(_stokMikYok(it)) return; // SPRINT CA: miktar ? → düşük sayılmaz
           if(!((it.miktar || 0) <= it.uyari)) return; // eşik üstü -> alarm yok (reset)
           var key = 'stok:' + it.id; gecerli[key] = 1;
           var ad = String(it.ad || '?'), birim = String(it.birim || '');
@@ -26395,11 +26448,11 @@ function stokSecimGuncelle(val){
 function stokEkle(){
   const ad=(document.getElementById("stokAd")?.value||"").trim();
   // SPRINT BE3 (BD F8-9): negatif miktar/eşik sessizce kabul ediliyor, 'abc' 0'a dönüyordu — reddet + uyarı.
-  // Boş miktar = 0 (tükenmiş kalem kaydı MEŞRU); eşik 0/boş = bildirim kapalı (bilgi verilir, _stokDusukSync uyari>0 şartı).
+  // SPRINT CA: boş miktar = null → "miktar ?" (var ama doğrulanmadı); 0 yazılırsa tükenmiş kalem (MEŞRU). Eşik 0/boş = bildirim kapalı (bilgi verilir, _stokDusukSync uyari>0 şartı).
   const _mikStr=(document.getElementById("stokMiktar")?.value||"").trim();
   const _mikRaw=parseFloat(_mikStr);
   if(_mikStr!==''&&(!isFinite(_mikRaw)||_mikRaw<0)){flash("Geçerli stok miktarı gir (0 veya üstü)","err");return;}
-  const miktar=(_mikStr!==''&&isFinite(_mikRaw))?_mikRaw:0;
+  const miktar=(_mikStr!==''&&isFinite(_mikRaw))?_mikRaw:null;
   const birim=document.getElementById("stokBirim")?.value||"g";
   const g=document.getElementById("stokGrup")?.value||"Diğer";
   const _uyStr=(document.getElementById("stokUyari")?.value||"").trim();
@@ -26419,6 +26472,7 @@ function stokEkle(){
   }
   STOK.push(rec);
   stokKaydet(STOK);
+  if(miktar===null) flash("ℹ️ Miktar girilmedi — Kiler'de 'miktar ?' görünür; Ne Demleyebilirim bunu 'var, miktarı doğrulanmadı' sayar","ok"); // SPRINT CA
   // Temizle
   window._stokRefId=null; window._stokRefTip=null;
   if(ekran==='stok'){document.getElementById('ekran').innerHTML=rStok();}else render();
@@ -26429,10 +26483,11 @@ function stokGuncelle(idx, isaret){
   const el=document.getElementById('adim_'+idx);
   const adim=el?parseFloat(el.value)||1:(STOK[idx].adim||1);
   STOK[idx].adim=adim; // kaydet
+  if(_stokMikYok(STOK[idx])&&isaret<0){flash('Miktar bilinmiyor (miktar ?) — önce + ile sayımı gir','err');return;} // SPRINT CA
   STOK[idx].miktar=Math.max(0,(STOK[idx].miktar||0)+isaret*adim);
   stokKaydet(STOK);if(ekran==='stok'){document.getElementById('ekran').innerHTML=rStok();}else render();
 }
-function stokSil(idx){if(idx<0||idx>=STOK.length)return;STOK.splice(idx,1);stokKaydet(STOK);if(ekran==='stok'){document.getElementById('ekran').innerHTML=rStok();}else render();}
+function stokSil(idx){if(idx<0||idx>=STOK.length)return;try{_stokSilEkle(_stokAnahtar(STOK[idx]));}catch(_tsw){if(window.bmHataKaydet)bmHataKaydet('persist',_tsw,'stokSil/tombstone');} /* SPRINT CA */ STOK.splice(idx,1);stokKaydet(STOK);if(ekran==='stok'){document.getElementById('ekran').innerHTML=rStok();}else render();}
 function stokEkranAc(){
   ekran="stok";render();
 }
@@ -30038,7 +30093,7 @@ window.rStokBildirim = function(){
   // Dusuk stok
   if (pref.catStok !== false && typeof STOK !== 'undefined' && Array.isArray(STOK)) {
     STOK.forEach(function(s){
-      if (!s || !(s.uyari>0)) return;
+      if (!s || !(s.uyari>0) || _stokMikYok(s)) return; // SPRINT CA: miktar ? → düşük sayılmaz
       if ((s.miktar||0) <= s.uyari) {
         var row = {
           tipSinif: 'uyari',
@@ -30251,6 +30306,7 @@ async function syncGonder(){
       KR: JSON.parse(JSON.stringify(KR)),
       STOK: JSON.parse(JSON.stringify(STOK)),
       KRSil: _krSilSupur(_krSilOku()), // SPRINT S: silme tombstone yayılımı (iki PUT yazarı da taşımalı — alan kaybolmasın)
+      STOKSil: _stokSilSupur(_stokSilOku()), // SPRINT CA: stok silme izi (iki PUT yazarı da taşır)
       ts: Date.now(),
       cihaz: syncCfg.cihaz||"A"
     };
@@ -30288,6 +30344,7 @@ function _syncGonderKeepalive(){
       KR: JSON.parse(JSON.stringify(KR)),
       STOK: JSON.parse(JSON.stringify(STOK)),
       KRSil: _krSilSupur(_krSilOku()), // SPRINT S: silme tombstone yayılımı (iki PUT yazarı da taşımalı — alan kaybolmasın)
+      STOKSil: _stokSilSupur(_stokSilOku()), // SPRINT CA: stok silme izi (iki PUT yazarı da taşır)
       ts: Date.now(),
       cihaz: syncCfg.cihaz||"A"
     };
@@ -30327,9 +30384,9 @@ async function syncAl(){
     // Sessizce ezmek yerine MERGE et: yerelde olup Firebase'de olmayan
     // kayıtlar korunur. Kayıp durumunda kullanıcı kayıt hissedilmez.
     const gelenKR = _migrateAllRecipes(data.KR || []);
-    const gelenSTOK = _migrateLegacyKatkiIds(Array.isArray(data.STOK) ? data.STOK : []);
+    let gelenSTOK = _migrateLegacyKatkiIds(Array.isArray(data.STOK) ? data.STOK : []); // SPRINT CA: let (tombstone süzgeci)
     const yerelKR = Array.isArray(KR) ? KR : [];
-    const yerelSTOK = Array.isArray(STOK) ? STOK : [];
+    let yerelSTOK = Array.isArray(STOK) ? STOK : []; // SPRINT CA: let (tombstone süzgeci)
 
     // Faz 2: per-reçete guncelleme bazlı son-yazan-kazanır merge.
     // Migration: guncelleme alanı olmayan eski reçeteler 0 sayılır (en eski).
@@ -30381,7 +30438,20 @@ async function syncAl(){
 
     // STOK merge — aynı mantık
     // Fallback: id yoksa ad+birim birleşimiyle eşleştir (eski stok item'ları id'siz olabilir)
-    function _stokKey(s){ return s && (s.id || ((s.ad||'')+'|'+(s.birim||''))); }
+    function _stokKey(s){ return _stokAnahtar(s); }
+    // SPRINT CA: birleşik stok tombstone T = yerel bm_stok_sil_v1 ∪ gelen STOKSil (anahtar başına en yeni ts);
+    // T'deki anahtar birleşime HİÇBİR taraftan girmez → silinen kalem dirilemez. Eski payload'da STOKSil yok → boş katkı.
+    var _stsMap = {};
+    try{
+      _stokSilSupur(_stokSilOku()).forEach(function(t){ var k = String(t.id); _stsMap[k] = Math.max(_stsMap[k] || 0, t.ts); });
+      (Array.isArray(data.STOKSil) ? data.STOKSil : []).forEach(function(t){ if(t && t.id != null && typeof t.ts === 'number'){ var k = String(t.id); _stsMap[k] = Math.max(_stsMap[k] || 0, t.ts); } });
+      _stokSilYaz(_stokSilSupur(Object.keys(_stsMap).map(function(k){ return { id: k, ts: _stsMap[k] }; })));
+    }catch(_sts){ _stsMap = {}; if(window.bmHataKaydet)bmHataKaydet('sync',_sts,'syncAl/stokTombstone'); }
+    const _stokCanli = function(s){ var k = _stokKey(s); return !(k && _stsMap[String(k)]); };
+    const _gelenSTOKh = gelenSTOK.length;
+    gelenSTOK = gelenSTOK.filter(_stokCanli);
+    yerelSTOK = yerelSTOK.filter(_stokCanli);
+    const _bulutBayat = gelenSTOK.length < _gelenSTOKh; // bulutta silinmiş kalem var (eski istemci geri yazmış) → temizlemek için PUT
     const gelenStokIds = new Set(gelenSTOK.map(_stokKey).filter(Boolean));
     const yerelStokEklenecek = yerelSTOK.filter(function(s){
       var k = _stokKey(s); return k && !gelenStokIds.has(k);
@@ -30394,6 +30464,7 @@ async function syncAl(){
     } else {
       yeniSTOK = gelenSTOK;
     }
+    if(_bulutBayat) setTimeout(syncGonder, 200);
 
     KR = yeniKR;
     STOK = yeniSTOK;
@@ -31682,6 +31753,7 @@ syncBaslat();
         return;
       }
       var s = STOK[idx];
+      if (_stokMikYok(s)) { if (typeof bmToast === 'function') bmToast('📦 '+ad+': miktar ? — stoktan düşülmedi (önce miktarı gir)', 'info'); return; } // SPRINT CA
       var sb = s.birim || 'g';
       var dusulecek = (typeof _stokBirimCevir === 'function') ? _stokBirimCevir(parseFloat(miktar)||0, recipeBirim, sb) : null;
       if (dusulecek === null || dusulecek === undefined) {

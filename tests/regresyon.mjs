@@ -7571,6 +7571,166 @@ const CASELER = [
       __REG.ok('demlenmemiş: geri al elle OG/FG\'yi geri getirdi', S.ogManuel === 1.06 && S.fgManuel === '1.012');
       return __REG.al();
     })
+  },
+  // ── SPRINT CA — stok silme izi (tombstone) + miktarsız stok kalemi. Bulgu (BZ teşhisi): syncAl STOK'u birleşimle
+  //    kaynaştırıyordu → bir cihazda silinen kalem öbür cihazın yerel kopyasından diriliyordu (Kaan'ın 8 hayaleti).
+  //    fetch SAHTE: Firebase'e tek bayt gitmez; iki cihaz aynı sayfada yerel STOK + gelen payload ile canlandırılır.
+  {
+    kod: 'CA1-STOK-TOMBSTONE', ad: 'SİLİNEN STOK KALEMİ DİRİLMEZ: stokSil izi bm_stok_sil_v1\'e yazar ve PUT payload\'ında STOKSil olarak gider (STOK\'ta kalem yok); (a) öbür cihaz — yerelinde kalem duruyor, gelen STOKSil ile birleşimde DÜŞER ve izi kendi listesine alır (eski kod union ile geri ekliyordu); (b) eski istemci bulutu kalemle geri yazmışsa (STOKSil yok) yerel iz yine süzer ve bulutu temizlemek için PUT atar; (c) aynı adla yeniden ekleme YENİ id alır, süzülmez; (d) id\'siz eski kalem ad|birim anahtarıyla; (e) 90 gün TTL süpürür',
+    calistir: (page) => page.evaluate(async () => {
+      const PUTLAR = [];
+      let GELEN = null;
+      const eskiFetch = window.fetch;
+      window.fetch = (u, o) => {
+        if (o && o.method === 'PUT') { PUTLAR.push(JSON.parse(o.body)); return Promise.resolve(new Response('{}', { status: 200 })); }
+        return Promise.resolve(new Response(JSON.stringify(GELEN), { status: 200 }));
+      };
+      syncCfg = { url: 'https://test.invalid', oda: 'catest', cihaz: 'T' };
+      const bekle = async (kosul) => { for (let i = 0; i < 100 && !kosul(); i++) await new Promise(r => setTimeout(r, 30)); return kosul(); };
+      const A = { id: '1700000000001', ad: 'Pilsner Malt', miktar: 5, birim: 'kg', g: 'Malt', uyari: 0, refId: 'pilsner', refTip: 'Malt' };
+      const B = { id: '1700000000002', ad: 'Hitit', miktar: 7, birim: 'kg', g: 'Malt', uyari: 0 };
+      const C = { id: '1700000000003', ad: 'Magnum', miktar: 100, birim: 'g', g: 'Hop', uyari: 10, refId: 'magnum', refTip: 'Hop' };
+      const kopya = x => JSON.parse(JSON.stringify(x));
+      const ids = () => STOK.map(x => x.id).join(',');
+      localStorage.removeItem('bm_stok_sil_v1');
+      STOK = kopya([A, B, C]); stokKaydet(STOK);
+      // silme → iz + payload
+      stokSil(STOK.findIndex(x => x.id === B.id));
+      const iz = JSON.parse(localStorage.getItem('bm_stok_sil_v1') || '[]');
+      __REG.ok('stokSil izi yazdı (B.id, ts sayı)', iz.length === 1 && iz[0].id === B.id && typeof iz[0].ts === 'number', JSON.stringify(iz));
+      await syncGonder();
+      const p1 = PUTLAR[PUTLAR.length - 1];
+      __REG.ok('PUT payload: STOK\'ta B yok, STOKSil\'de B var', p1 && !p1.STOK.some(x => x.id === B.id) && Array.isArray(p1.STOKSil) && p1.STOKSil.some(t => t.id === B.id), p1 && JSON.stringify(p1.STOKSil));
+      __REG.ok('PUT payload KRSil\'i de hâlâ taşıyor (alan kaybolmadı)', p1 && Array.isArray(p1.KRSil));
+      // (a) öbür cihaz: yerelinde B var, izi YOK; gelen STOK=[A,C] + STOKSil=[B]
+      const izB = kopya(iz);
+      localStorage.removeItem('bm_stok_sil_v1');
+      STOK = kopya([A, B, C]); _origStokKaydet(STOK);
+      GELEN = { KR: kopya(KR), STOK: kopya([A, C]), STOKSil: izB, KRSil: [], ts: Date.now() + 1e6, cihaz: 'Telefon' };
+      await syncAl();
+      __REG.ok('(a) öbür cihaz: B birleşimde DÜŞTÜ (eski kod union ile geri eklerdi)', !STOK.some(x => x.id === B.id) && STOK.length === 2, ids());
+      __REG.ok('(a) öbür cihaz izi kendi listesine aldı (yayılım)', JSON.parse(localStorage.getItem('bm_stok_sil_v1') || '[]').some(t => t.id === B.id));
+      __REG.ok('(a) yerel depoya da B\'siz yazıldı', !JSON.parse(localStorage.getItem('bm_stok_v1')).some(x => x.id === B.id));
+      // (b) eski istemci bulutu B ile geri yazmış (STOKSil alanı YOK): yerel iz süzer + temizleme PUT'u
+      const putOnce = PUTLAR.length;
+      GELEN = { KR: kopya(KR), STOK: kopya([A, B, C]), KRSil: [], ts: Date.now() + 2e6, cihaz: 'EskiTelefon' };
+      await syncAl();
+      __REG.ok('(b) eski istemcinin geri yazdığı B yine süzüldü', !STOK.some(x => x.id === B.id), ids());
+      const temizledi = await bekle(() => PUTLAR.length > putOnce);
+      const p2 = PUTLAR[PUTLAR.length - 1];
+      __REG.ok('(b) bulutu temizlemek için PUT atıldı: STOK B\'siz, STOKSil B\'li', temizledi && !p2.STOK.some(x => x.id === B.id) && p2.STOKSil.some(t => t.id === B.id));
+      // (b2) bulut temizse gereksiz PUT YOK (salınım yok). Önce SAKİNLİK: önceki adımların debounce/pending PUT'ları biter
+      const sakin = async () => { let n = -1; while (n !== PUTLAR.length) { n = PUTLAR.length; await new Promise(r => setTimeout(r, 700)); } };
+      await sakin();
+      const putOnce2 = PUTLAR.length;
+      GELEN = { KR: kopya(KR), STOK: kopya([A, C]), STOKSil: izB, KRSil: [], ts: Date.now() + 3e6, cihaz: 'Telefon' };
+      await syncAl();
+      await new Promise(r => setTimeout(r, 0));
+      await sakin();
+      __REG.ok('(b2) bulut zaten temiz → syncAl ek PUT planlamadı', PUTLAR.length === putOnce2, PUTLAR.length - putOnce2);
+      __REG.ok('silmeden sonraki HİÇBİR PUT B kalemini taşımadı (diriliş yok)', PUTLAR.every(p => !p.STOK.some(x => x.id === B.id)), PUTLAR.length);
+      // (c) aynı adla yeniden ekleme: yeni id, süzülmez
+      ekran = 'stok'; render();
+      document.getElementById('stokAd').value = 'Hitit'; document.getElementById('stokMiktar').value = '3';
+      document.getElementById('stokBirim').value = 'kg'; document.getElementById('stokGrup').value = 'Malt';
+      stokEkle();
+      const yeniB = STOK[STOK.length - 1];
+      __REG.ok('(c) yeniden ekleme yeni id aldı', yeniB && yeniB.ad === 'Hitit' && yeniB.id !== B.id);
+      GELEN = { KR: kopya(KR), STOK: kopya(STOK), STOKSil: izB, KRSil: [], ts: Date.now() + 4e6, cihaz: 'Telefon' };
+      await syncAl();
+      __REG.ok('(c) yeniden eklenen kalem tombstone\'a takılmadı', STOK.some(x => x.id === yeniB.id), ids());
+      // (d) id'siz eski kalem: ad|birim anahtarı
+      const ESKI = { ad: 'Eski Kalem', miktar: 1, birim: 'adet', g: 'Diğer' };
+      STOK = kopya([A, C, ESKI]); _origStokKaydet(STOK);
+      stokSil(STOK.findIndex(x => x.ad === 'Eski Kalem'));
+      __REG.ok('(d) id\'siz kalem izi ad|birim anahtarıyla', JSON.parse(localStorage.getItem('bm_stok_sil_v1')).some(t => t.id === 'Eski Kalem|adet'));
+      GELEN = { KR: kopya(KR), STOK: kopya([A, C, ESKI]), KRSil: [], ts: Date.now() + 5e6, cihaz: 'EskiTelefon' };
+      await syncAl();
+      __REG.ok('(d) id\'siz kalem eski istemciden dirilmedi', !STOK.some(x => x.ad === 'Eski Kalem'), ids());
+      // (e) TTL
+      const eskiIz = [{ id: 'cok-eski', ts: Date.now() - 91 * 86400000 }, { id: 'taze', ts: Date.now() }];
+      __REG.ok('(e) 90 gün TTL: eski iz süpürülür, taze kalır', JSON.stringify(_stokSilSupur(eskiIz).map(t => t.id)) === '["taze"]');
+      window.fetch = eskiFetch; syncCfg = null;
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'CA2-MIKTAR-SORU', ad: 'MİKTARSIZ STOK KALEMİ: boş miktarla eklenen kalem miktar=null (0 DEĞİL; 0 yazılırsa tükenmiş), Kiler\'de "miktar ?" ve düşük-stok kırmızısı YOK; eksik hesabı ve Ne Demleyebilirim onu "var ama miktarı doğrulanmadı" sayar — ne hazır/yeterli ne eksik/yok, alışveriş listesine GİRMEZ; maya için de aynı (4 kademe); düşüm/iade/tek-çip düşümü dokunmaz; düşük-stok alarmı üretmez; − düğmesi reddeder, + sayımı başlatır; Firebase null alanı düşürse (undefined) anlam aynı; brewday ön kontrolü ayrı sarı kutu',
+    calistir: (page) => page.evaluate(async () => {
+      ekran = 'stok'; render();
+      const ekle = (ad, mik, birim, grup, uyari) => {
+        document.getElementById('stokAd').value = ad; document.getElementById('stokMiktar').value = mik;
+        document.getElementById('stokBirim').value = birim; document.getElementById('stokGrup').value = grup;
+        document.getElementById('stokUyari').value = uyari || '';
+        stokEkle(); return STOK[STOK.length - 1];
+      };
+      STOK = []; _origStokKaydet(STOK); render();
+      const q = ekle('Antioksidasyon tuzu', '', 'g', 'Diğer', '5');
+      __REG.ok('boş miktar → null (0 değil)', q.ad === 'Antioksidasyon tuzu' && q.miktar === null, String(q.miktar));
+      const z = ekle('Bitmiş Kalem', '0', 'g', 'Diğer', '');
+      __REG.ok('"0" yazılırsa 0 (tükenmiş kalem MEŞRU)', z.miktar === 0);
+      ekran = 'stok'; render();
+      const liste = document.getElementById('stokListeDiv').textContent;
+      __REG.ok('Kiler: "miktar ?" görünüyor, "null" YOK', /miktar \?/.test(liste) && !/null/.test(liste), liste.slice(0, 200));
+      const qSatir = [...document.querySelectorAll('#stokListeDiv .satir')].find(e => /Antioksidasyon/.test(e.textContent));
+      __REG.ok('Kiler: miktar ? kalem eşikli olsa da düşük-stok kırmızısı/⚠️ YOK', qSatir && !/⚠️/.test(qSatir.textContent) && !/crit/.test(qSatir.getAttribute('style') || ''), qSatir && qSatir.textContent);
+      _stokAra('antiok');
+      __REG.ok('arama yolu da "miktar ?" yazıyor', /miktar \?/.test(document.getElementById('stokListeDiv').textContent));
+      _stokAra('');
+      // − reddedilir, + sayımı başlatır
+      const qi = STOK.indexOf(q);
+      stokGuncelle(qi, -1);
+      __REG.ok('− düğmesi miktar ? kalemi 0\'a İNDİRMEDİ', STOK[qi].miktar === null);
+      // eksik hesabı: Pilsner bilinen, Magnum miktar ?, maya bilinen
+      STOK = [
+        { id: '1', ad: 'Pilsner Malt', miktar: 10, birim: 'kg', g: 'Malt', uyari: 0, refId: 'pilsner', refTip: 'Malt' },
+        { id: '2', ad: 'Magnum', miktar: null, birim: 'g', g: 'Hop', uyari: 10, refId: 'magnum', refTip: 'Hop' },
+        { id: '3', ad: 'Fermentis W-34/70', miktar: 2, birim: 'paket', g: 'Maya', uyari: 0, refId: 'w3470', refTip: 'Maya' }
+      ];
+      _origStokKaydet(STOK);
+      const tarif = { maltlar: [{ id: 'pilsner', kg: 4 }], hoplar: [{ id: 'magnum', g: 20, dk: 60, tur: 'boil' }], mayaId: 'w3470' };
+      const st = stokYetersizTam(tarif);
+      __REG.ok('eksik hesabı: Magnum ne yetersiz ne eksik, dogrulanmadi\'da', st.yetersiz.length === 0 && st.eksik.length === 0 && st.dogrulanmadi.length === 1 && st.dogrulanmadi[0].refId === 'magnum', JSON.stringify(st));
+      __REG.ok('metin: "Magnum (miktar ?)"', _stokYetersizMetin(st) === 'Magnum (miktar ?)', _stokYetersizMetin(st));
+      // Ne Demleyebilirim
+      const rid = __REG.yeniKayit('CA2 Pils', { maltlar: tarif.maltlar, hoplar: tarif.hoplar, mayaId: 'w3470', durum: 'aktif' });
+      const a = bmDemlenebilirAnaliz();
+      __REG.ok('Ne Demleyebilirim: reçete "miktar ?" kovasında; hazır/az-eksik/çok-eksik DEĞİL', a.dogrula.some(r => r.id === rid && /Magnum/.test(r.dogStr)) && !a.hazir.some(r => r.id === rid) && !a.azEksik.some(r => r.id === rid) && !a.cokEksik.some(r => r.id === rid));
+      __REG.ok('Ne Demleyebilirim: Magnum alışveriş listesine GİRMEDİ', !a.alisveris.some(x => /Magnum/.test(x.ad)));
+      const kart = document.createElement('div'); kart.innerHTML = bmDemleKartHTML();
+      __REG.ok('kart: "❓ Stokta var, miktarı doğrulanmadı" bölümü + özet "miktar ?"', /Stokta var, miktarı doğrulanmadı \(\d+\)/.test(kart.textContent) && /miktar \?/.test(kart.querySelector('.bm-demle-sum').textContent), kart.querySelector('.bm-demle-sum').textContent);
+      // maya miktar ?
+      STOK[2] = Object.assign({}, STOK[2], { miktar: null }); STOK[1] = Object.assign({}, STOK[1], { miktar: 50 });
+      const stm = stokYetersizTam(tarif);
+      __REG.ok('maya miktar ? → dogrulanmadi (_tip maya), eksik DEĞİL', stm.eksik.length === 0 && stm.dogrulanmadi.length === 1 && stm.dogrulanmadi[0]._tip === 'maya', JSON.stringify(stm));
+      // muadil kademesi: stokta ✅-muadil maya miktar ? ise de dogrulanmadi (kod kademesi)
+      STOK[2] = Object.assign({}, STOK[2], { miktar: 0 });
+      __REG.ok('maya 0 (tükenmiş) → EKSİK (eski davranış aynen)', stokYetersizTam(tarif).eksik.some(e => e._tip === 'maya'));
+      // Firebase null düşürür: miktar alanı yok → aynı anlam
+      STOK[2] = { id: '3', ad: 'Fermentis W-34/70', birim: 'paket', g: 'Maya', uyari: 0, refId: 'w3470', refTip: 'Maya' };
+      __REG.ok('miktar alanı YOK (RTDB null\'ı düşürür) → yine dogrulanmadi', stokYetersizTam(tarif).dogrulanmadi.some(e => e._tip === 'maya') && _stokMikYok(STOK[2]));
+      // düşüm / iade
+      STOK[1] = Object.assign({}, STOK[1], { miktar: null });
+      stoktenDus(tarif);
+      __REG.ok('düşüm: Pilsner 10 → 6, Magnum miktar ? KALDI (0\'a inmedi), maya alanı yok KALDI', STOK[0].miktar === 6 && STOK[1].miktar === null && STOK[2].miktar === undefined, JSON.stringify(STOK.map(x => x.miktar)));
+      stoktenGeriKoy(tarif);
+      __REG.ok('iade: Pilsner 6 → 10, Magnum hâlâ miktar ?', STOK[0].miktar === 10 && STOK[1].miktar === null);
+      bmStokDusurTek('magnum', 'Magnum', 5, 'g');
+      __REG.ok('tek-çip düşümü miktar ? kaleme dokunmadı', STOK[1].miktar === null);
+      // düşük-stok alarmı
+      _stokDusukSync();
+      const al = JSON.parse(localStorage.getItem('bm_alarms_v1') || '{}');
+      __REG.ok('düşük-stok alarmı miktar ? (eşik 10) için ÜRETİLMEDİ', !al['stok:2'], Object.keys(al).filter(k => k.indexOf('stok:') === 0).join(','));
+      // brewday ön kontrol
+      yeniTarif(); S.maltlar = tarif.maltlar; S.hoplar = tarif.hoplar; S.mayaId = 'w3470';
+      const r = brewdayOnKontrol();
+      __REG.ok('brewday ön kontrol: Magnum q=true (ayrı durum)', r.hop[0].q === true && r.malt[0].q === false, JSON.stringify(r.hop[0]));
+      // + sayımı başlatır
+      ekran = 'stok'; render();
+      stokGuncelle(1, 1);
+      __REG.ok('+ düğmesi sayımı başlattı (adım 1 → 1)', STOK[1].miktar === 1);
+      return __REG.al();
+    })
   }
 ];
 
