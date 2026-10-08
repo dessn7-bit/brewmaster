@@ -12364,6 +12364,13 @@ function _muadilDegistir(st, kat, src, tgt, mik, birim, idxTercih){
   }
   return {ok:false,adi:'',kayit:null};
 }
+// SPRINT BZ: gerçek demleme kanıtı (BL plan/gerçek ayrımı). İkame bir PLANLAMA işlemidir: kanıt varsa
+// ogManuel/fgManuel (ve brewSnapshot/brewSonuc/brewLog) ikame yüzünden ASLA silinmez / tahminle ezilmez.
+function _bmDemlemeKanitiVar(st){
+  if(!st) return false;
+  if(st.brewSnapshot || st.brewSonuc) return true;
+  return Array.isArray(st.brewLog) && st.brewLog.some(function(l){ var t = l ? String(l.tip || '') : ''; return t === 'pitching' || t === 'og_olcum' || t === 'fg_olcum' || t === 'siseleme' || t.indexOf('brewday_') === 0; });
+}
 let _muadilSonDegis=null;
 window.muadilSec=function(el){
   const src=el.dataset.src, tgt=el.dataset.tgt, kat=el.dataset.kat;
@@ -12380,7 +12387,8 @@ window.muadilSec=function(el){
     // Kullanıcı önceki seansta manuel girdiyse veya brewLog FG ölçümü otomatik set ettiyse,
     // malt/hop değişikliği onları istemsizce kilitler. Muadil uyguladıkça canlı hesap istiyoruz.
     const _ogM=S.ogManuel, _fgM=S.fgManuel;
-    if(_ogM||_fgM){
+    // SPRINT BZ: demlenmiş batch'te bu değerler GERÇEK ölçümdür → dokunulmaz (yalnız plan hesabı değişir)
+    if((_ogM||_fgM) && !_bmDemlemeKanitiVar(S)){
       S.ogManuel=null; S.fgManuel=null;
       _muadilSonDegis._ogManuelEski=_ogM;
       _muadilSonDegis._fgManuelEski=_fgM;
@@ -12497,12 +12505,13 @@ window._bmIkameOnizle = function(kat, idx, tgtId, mik){
   var once = calc(), kl = JSON.parse(JSON.stringify(S));
   var sonuc = _muadilDegistir(kl, kat, d.satir.id, tgtId, mik, '', idx);
   if (!sonuc.ok) return null;
-  var manuelTemizlenir = !!(kl.ogManuel || kl.fgManuel);
-  kl.ogManuel = null; kl.fgManuel = null;
+  var olcumKorunur = !!(kl.ogManuel || kl.fgManuel) && _bmDemlemeKanitiVar(kl); // SPRINT BZ: muadilSec ile AYNI kapı
+  var manuelTemizlenir = !!(kl.ogManuel || kl.fgManuel) && !olcumKorunur;
+  if (manuelTemizlenir) { kl.ogManuel = null; kl.fgManuel = null; }
   var eski = S, sonra;
   try { S = kl; sonra = calc(); } finally { S = eski; }
   var ayni = (kat === 'hop' ? S.hoplar : kat === 'malt' ? S.maltlar : []).filter(function(x){ return x && x.id === d.satir.id; }).length;
-  return { once: once, sonra: sonra, manuelTemizlenir: manuelTemizlenir, ayniMalzemeSatir: ayni };
+  return { once: once, sonra: sonra, manuelTemizlenir: manuelTemizlenir, olcumKorunur: olcumKorunur, ayniMalzemeSatir: ayni };
 };
 window._bmIkameBaglam = function(d){
   var st = S.stil && typeof BJCP !== 'undefined' ? BJCP[S.stil] : null, c = null;
@@ -12633,6 +12642,7 @@ window.bmIkameOnizleGoster = function(tgtId){
     '<table class="bm-ikame-tablo" style="margin-top:4px;border-collapse:collapse;font-variant-numeric:tabular-nums">' +
       satirF('OG', o.og, s.og, 3) + satirF('FG', o.fg, s.fg, 3) + satirF('ABV %', o.abv || 0, s.abv || 0, 1) + satirF('IBU', o.ibu, s.ibu, 0) + satirF('SRM', o.srm, s.srm, 0) + '</table>' +
     (p.manuelTemizlenir ? '<div style="color:#8a5a00;margin-top:4px">⚠️ Elle girilmiş OG/FG temizlenecek (hesap devreye girer; geri alınca döner).</div>' : '') +
+    (p.olcumKorunur ? '<div class="bm-ikame-olcum-korunur" style="color:var(--metin-soluk);margin-top:4px">🔒 Bu batch demlendi — ölçülen OG/FG korunur; değişiklik yalnız reçete planına yansır.</div>' : '') +
     (p.ayniMalzemeSatir > 1 ? '<div class="bm-ikame-cift" style="color:#8a5a00;margin-top:4px">⚠️ Bu malzeme reçetede ' + p.ayniMalzemeSatir + ' satırda var — yalnız BU satır değişir; diğerleri için o satırın 🔁 düğmesini kullan.</div>' : '') +
     '<div style="display:flex;gap:8px;margin-top:8px"><button type="button" class="bm-ayar-btn" onclick="this.closest(\'.bm-ikame-onizleme\').innerHTML=\'\'" style="flex:1">Vazgeç</button>' +
     '<button type="button" class="bm-ayar-btn bm-ikame-uygula" onclick="bmIkameUygula(\'' + _bmIkameE(a.id) + '\')" style="flex:2;background:var(--bakir);color:#fff">Uygula</button></div></div>';
@@ -12746,8 +12756,8 @@ function stokKontrolHTML(){
     if(S.ogManuel) _uyar.push(`OG manuel: <b>${S.ogManuel}</b>`);
     if(S.fgManuel) _uyar.push(`FG manuel: <b>${S.fgManuel}</b>`);
     html+=`<div style="padding:8px 14px;background:var(--crit-bg);border-bottom:1px solid var(--crit);display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-      <span style="font-size:11px;color:var(--kk);flex:1">⚠️ Manuel override aktif — ${_uyar.join(', ')}. Muadil/malt değişimi OG'yi güncellese de manuel değer kilitli kalır.</span>
-      <button onclick="S.ogManuel=null;S.fgManuel=null;flash('Manuel OG/FG temizlendi','ok');render()" style="background:var(--kk);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer">Temizle</button>
+      <span style="font-size:11px;color:var(--kk);flex:1">⚠️ Manuel override aktif — ${_uyar.join(', ')}. Muadil/malt değişimi OG'yi güncellese de manuel değer kilitli kalır.${_bmDemlemeKanitiVar(S)?' 🔒 Bu batch demlendi: bunlar GERÇEK ölçüm, muadil değişimi onlara dokunmaz.':''}</span>
+      ${_bmDemlemeKanitiVar(S)?'':`<button onclick="S.ogManuel=null;S.fgManuel=null;flash('Manuel OG/FG temizlendi','ok');render()" style="background:var(--kk);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer">Temizle</button>`}
     </div>`;
   }
 

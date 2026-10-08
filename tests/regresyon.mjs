@@ -7503,6 +7503,74 @@ const CASELER = [
       window.fetch = eskiFetch; A.anahtarSil(); ekran = 'ana'; render();
       return __REG.al();
     })
+  },
+  // ── SPRINT BZ — İKAME ÖLÇÜM SİLMEZ (BL plan/gerçek ayrımı). Bulgu: Kaan'ın telefonunda demlenmiş+şişelenmiş Muzo'da
+  //    Magnum → Warrior önizlemesi "FG 1.008 → 1.012, ABV 6.1 → 5.5 · elle girilmiş OG/FG temizlenecek" diyordu; Uygula
+  //    tek gerçek FG ölçümünü silecekti. Muzo'nun GERÇEK demleme kayıtları (Firebase 2026-10-08, yalnız ölçüm alanları)
+  //    fixture Muzo'suna graft edilir.
+  {
+    kod: 'BZ1-OLCUM-KILIDI', ad: 'DEMLENMİŞ BATCH: malt/hop/maya ikamesi önizle + uygula → ogManuel/fgManuel/brewSonuc/brewLog/brewSnapshot BİREBİR aynı; hop ikamesi FG/ABV\'yi DEĞİŞTİRMEZ; önizleme "temizlenecek" DEMEZ, "🔒 korunur" der; muadil paneli banner\'ında "Temizle" düğmesi YOK; kanıt tek başına brewLog pitching/ölçüm/şişeleme da yeter; demlenmemiş reçetede eski davranış (elle OG temizlenir) AYNEN',
+    calistir: (page) => page.evaluate(() => {
+      const MUZO = '1775830924009';
+      const r = KR.find(x => x && x.id === MUZO);
+      __REG.ok('fixture\'da Muzo var', !!r); if (!r) return __REG.al();
+      Object.assign(r, {
+        brewLog: [{ deger: '', id: '1787581793798', not: '', tarih: '2026-08-16', tip: 'pitching' }, { deger: '1054', id: '1787581800860', not: '', tarih: '2026-08-16', tip: 'og_olcum' }, { deger: '1.008', id: '1787994571603', not: '', tarih: '2026-08-29', tip: 'fg_olcum' }, { deger: '', id: '1788848662413', not: '', tarih: '2026-08-29', tip: 'cold_crash' }, { deger: '', id: '1788848672655', not: '', tarih: '2026-09-06', tip: 'siseleme' }],
+        brewSonuc: { fgG: 1.008, kaynak: { fg: 'olcum' }, ts: 1788848672657 },
+        brewSnapshot: { attenMax: 77, attenMin: 73, fgT: 1.013, hacim: 11, mayaAd: 'BB Alman Buğday No1', mayaId: 'bb_alman_bugday1', ogT: 1.054, stil: 'Weizen / Weissbier', ts: 1787581793799, verimVarsayim: 41 },
+        ogManuel: null, fgManuel: '1.008', durum: 'yapimda',
+        maltlar: [{ id: 'wheat', kg: 2, marka: '' }, { id: 'pilsner', kg: 1, marka: '' }, { id: 'acid', kg: 0.16, marka: '' }],
+        hoplar: [{ dk: 75, form: 'pellet', g: 4, id: 'magnum', tur: 'boil' }], mayaId: 'bb_alman_bugday1', hacim: 11, verim: 41
+      });
+      _origKy(KR); tarifAc(MUZO);
+      const gercek = () => JSON.stringify({ og: S.ogManuel, fg: S.fgManuel, son: S.brewSonuc, log: S.brewLog, snap: S.brewSnapshot });
+      const ilk = gercek();
+      __REG.ok('kanıt kapısı Muzo\'da açık', _bmDemlemeKanitiVar(S) === true);
+      const dene = (kat, idx, etiket, tercih) => {
+        bmIkameAc(kat, idx);
+        const ad = _bmIkame && _bmIkame.adaylar.length ? (_bmIkame.adaylar.find(a => a.id === tercih) || _bmIkame.adaylar[0]) : null;
+        __REG.ok(etiket + ': aday var', !!ad, ad && ad.id); if (!ad) { bmIkameKapat(); return; }
+        const once = JSON.stringify(S);
+        const p = bmIkameOnizleGoster(ad.id);
+        const metin = document.querySelector('#bmIkame .bm-ikame-onizleme-ic').textContent;
+        __REG.ok(etiket + ' önizleme: S değişmedi, "temizlenecek" YOK, "🔒 korunur" VAR', JSON.stringify(S) === once && !p.manuelTemizlenir && p.olcumKorunur && !/temizlenecek/.test(metin) && /ölçülen OG\/FG korunur/.test(metin), metin);
+        __REG.ok(etiket + ' önizleme: FG aynı (gerçek ölçüm 1.008)', Math.abs(p.once.fg - 1.008) < 1e-9 && Math.abs(p.sonra.fg - 1.008) < 1e-9, p.once.fg + ' → ' + p.sonra.fg);
+        if (kat === 'hop') __REG.ok('hop ikamesi ABV\'yi DEĞİŞTİRMEZ', Math.abs((p.once.abv || 0) - (p.sonra.abv || 0)) < 1e-9, p.once.abv + ' → ' + p.sonra.abv);
+        bmIkameUygula(ad.id);
+        __REG.ok(etiket + ' uygulandı (satır değişti)', _bmIkameSatir(kat, idx).id === ad.id);
+        __REG.ok(etiket + ' uygulama: ogManuel/fgManuel/brewSonuc/brewLog/brewSnapshot BİREBİR', gercek() === ilk);
+        const ozet = KR.find(x => x && x.id === MUZO).ozet || {};
+        __REG.ok(etiket + ' uygulama: kart özeti FG = ölçüm', ozet.fg === undefined || ozet.fg === '1.008', ozet.fg);
+        muadilGeriAl(); bmIkameKapat();
+        __REG.ok(etiket + ' geri al: S tam önceki hal', JSON.stringify(S) === once);
+      };
+      setSekme('hop'); render(); dene('hop', 0, 'HOP', 'warrior');
+      setSekme('malt'); render(); dene('malt', 0, 'MALT');
+      dene('maya1', 0, 'MAYA');
+      // stok bölümü eski çağrısı (idx'siz) da aynı kapıdan geçer
+      muadilSec({ dataset: { src: 'magnum', tgt: 'warrior', kat: 'hop', mik: '3', birim: 'g' } });
+      __REG.ok('idx\'siz muadilSec (stok bölümü) de ölçüme dokunmaz', gercek() === ilk);
+      muadilGeriAl();
+      const banner = stokKontrolHTML();
+      __REG.ok('muadil paneli banner\'ı: demlenmiş batch\'te "Temizle" düğmesi YOK, 🔒 açıklama VAR', !/>Temizle<\/button>/.test(banner) && /GERÇEK ölçüm/.test(banner));
+      // kanıt türleri: brewLog'da tek pitching / tek ölçüm / şişeleme yeter; sıcaklık-tadım tek başına yetmez
+      __REG.ok('kanıt: yalnız pitching', _bmDemlemeKanitiVar({ brewLog: [{ tip: 'pitching' }] }));
+      __REG.ok('kanıt: yalnız fg_olcum', _bmDemlemeKanitiVar({ brewLog: [{ tip: 'fg_olcum', deger: '1.010' }] }));
+      __REG.ok('kanıt: brewday_start', _bmDemlemeKanitiVar({ brewLog: [{ tip: 'brewday_start' }] }));
+      __REG.ok('kanıt: brewSonuc tek başına', _bmDemlemeKanitiVar({ brewSonuc: { fgG: 1.01 } }));
+      __REG.ok('kanıt YOK: boş / yalnız tadım-not', !_bmDemlemeKanitiVar({}) && !_bmDemlemeKanitiVar({ brewLog: [{ tip: 'tadim' }, { tip: 'diger' }] }) && !_bmDemlemeKanitiVar(null));
+      // demlenmemiş reçete: eski davranış AYNEN (elle OG/FG temizlenir, uyarılır, geri alınca döner)
+      yeniTarif(); S.stil = 'German Pils'; S.hacim = 20; S.maltlar = [{ id: 'pilsner', kg: 4.5 }, { id: 'c40', kg: 0.3 }]; S.hoplar = [{ id: 'hrtau', g: 30, dk: 60, tur: 'boil' }]; S.mayaId = 'w3470';
+      S.ogManuel = 1.060; S.fgManuel = '1.012'; setSekme('hop'); render();
+      bmIkameAc('hop', 0); const a = _bmIkame.adaylar[0];
+      const pn = bmIkameOnizleGoster(a.id);
+      __REG.ok('demlenmemiş: önizleme "temizlenecek" der, 🔒 demez', pn.manuelTemizlenir && !pn.olcumKorunur);
+      bmIkameUygula(a.id);
+      __REG.ok('demlenmemiş: elle OG/FG temizlendi (eski davranış)', S.ogManuel === null && S.fgManuel === null);
+      muadilGeriAl(); bmIkameKapat();
+      __REG.ok('demlenmemiş: geri al elle OG/FG\'yi geri getirdi', S.ogManuel === 1.06 && S.fgManuel === '1.012');
+      return __REG.al();
+    })
   }
 ];
 
