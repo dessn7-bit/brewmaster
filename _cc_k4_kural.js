@@ -98,7 +98,7 @@ const KURAL = [
   ['Table Saison', { ad: [/\btable saison\b|\bsaison de table\b/] }],
   ["Saison d'Hiver", { ad: [/\bsaison d'?hiver\b|\bwinter saison\b/] }],
   ['Tropical Saison', { ad: [/\btropical saison\b/] }],
-  ['Provision Ale', { ad: [/\bprovision\b/] }],
+  ['Provision Ale', { ad: [/\bprovision\b/], etiketHaric: /flanders|oud bru|lambic|red ale/ }],
   ['Modern Belgian Pale Ale', { ad: [/\bmodern belgian pale\b/] }],
   ['Barrel-Aged Belgian Quad', { ad: [/\b(barrel|bourbon|wine)[- ]aged\b|\bba\b/, /\bquad(rupel)?\b/] }],
   ['American Pilsner', { ad: [/\bamerican pils(ner|ener)?\b/], haric: /\b(classic|pre-?prohibition|cap)\b/, etiketHaric: /classic american pilsner|pre-prohibition/ }],

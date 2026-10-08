@@ -17,12 +17,14 @@ if (!ARS || !ODUL || !ONB || !K1KAP) abort('kullanım: node _cc_build_kay.js <ar
 fs.mkdirSync(ONB, { recursive: true });
 const KOK = __dirname;
 const html = fs.readFileSync(path.join(KOK, 'Brewmaster_v2_79_10.html'), 'utf8').replace(/\r\n/g, '\n');
+// CC4: örnek tabloları ornek_veri.js'e taşındı → HTML + veri dosyası birlikte okunur
+const _veriKaynak = html + '\n' + (fs.existsSync(path.join(__dirname, 'ornek_veri.js')) ? fs.readFileSync(path.join(__dirname, 'ornek_veri.js'), 'utf8').replace(/\r\n/g, '\n') : '');
 const ctx = vm.createContext({}); vm.runInContext(html.match(/const BJCP = \{[\s\S]*?\n\};/)[0].replace('const ', 'var '), ctx);
 const BJCP = ctx.BJCP; if (Object.keys(BJCP).length !== 239) abort('BJCP 239 değil');
 const K1 = new Set(JSON.parse(fs.readFileSync(K1KAP, 'utf8')));
 const K1SAY = {};
 (function(){
-  const sat = {}; html.split('\n').filter(l => /^window\.(_TOPLULUK_MADALYA|_NHC_MADALYA) = /.test(l)).forEach(l => { const c = vm.createContext({ window: {} }); vm.runInContext(l, c); Object.assign(sat, { [l.slice(7, l.indexOf(' ='))]: c.window[l.slice(7, l.indexOf(' ='))] }); });
+  const sat = {}; _veriKaynak.split('\n').filter(l => /^window\.(_TOPLULUK_MADALYA|_NHC_MADALYA) = /.test(l)).forEach(l => { const c = vm.createContext({ window: {} }); vm.runInContext(l, c); Object.assign(sat, { [l.slice(7, l.indexOf(' ='))]: c.window[l.slice(7, l.indexOf(' ='))] }); });
   const A = sat._TOPLULUK_MADALYA || {}, N = sat._NHC_MADALYA || {};
   Object.keys(BJCP).forEach(st => { const nv = (N[st] && N[st][1]) || [], mv = (A[st] && A[st][1]) || [];
     K1SAY[st] = nv.length + mv.filter(o => !nv.some(n => n.yil === o.yil && o.og && n.og && Math.abs(n.og - o.og) <= 0.0015)).length; });

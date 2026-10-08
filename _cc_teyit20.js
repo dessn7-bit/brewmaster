@@ -12,7 +12,9 @@ const fs = require('fs'), path = require('path'), vm = require('vm'), cp = requi
 const { DatabaseSync } = require('node:sqlite');
 const [DB, ODUL, TOHUM] = process.argv.slice(2);
 const html = fs.readFileSync(path.join(__dirname, 'Brewmaster_v2_79_10.html'), 'utf8').replace(/\r\n/g, '\n');
-const T = {}; html.split('\n').filter(l => /^window\.(_TOPLULUK_MADALYA|_NHC_MADALYA|_KAYNAKLI_ORNEK) = /.test(l)).forEach(l => { const c = vm.createContext({ window: {} }); vm.runInContext(l, c); Object.assign(T, c.window); });
+// CC4: örnek tabloları ornek_veri.js'e taşındı → HTML + veri dosyası birlikte okunur
+const _veriKaynak = html + '\n' + (fs.existsSync(path.join(__dirname, 'ornek_veri.js')) ? fs.readFileSync(path.join(__dirname, 'ornek_veri.js'), 'utf8').replace(/\r\n/g, '\n') : '');
+const T = {}; _veriKaynak.split('\n').filter(l => /^window\.(_TOPLULUK_MADALYA|_NHC_MADALYA|_KAYNAKLI_ORNEK) = /.test(l)).forEach(l => { const c = vm.createContext({ window: {} }); vm.runInContext(l, c); Object.assign(T, c.window); });
 const norm = t => String(t || '').normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 let rs = +(TOHUM || 20261008); const rnd = () => (rs = (rs * 1103515245 + 12345) % 2147483648) / 2147483648;
 function sec(L, n) { const a = L.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a.slice(0, n); }

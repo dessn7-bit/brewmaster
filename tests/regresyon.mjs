@@ -33,6 +33,7 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
+import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 
@@ -8093,7 +8094,7 @@ const CASELER = [
         const T = window._TOPLULUK_ORNEK, N = window._NHC_MADALYA, M = window._TOPLULUK_MADALYA, K = window._KAYNAKLI_ORNEK;
         const tum = Object.keys(T || {}).map(k => T[k].map(o => [k, o])).reduce((a, b) => a.concat(b), []);
         __REG.ok('K4 tablosu yüklü ve dolu', !!T && tum.length > 20, tum.length);
-        __REG.ok('her K4: k=K4 + kaynak Brewer’s Friend|Brewtoad + bağlantı yok + yıl null + OG var + grist dolu', tum.every(([, o]) => o.k === 'K4' && /^(Brewer's Friend|Brewtoad)$/.test(o.kay.pub) && o.kay.u === null && o.yil === null && o.og > 1 && o.g.length > 0));
+        __REG.ok('her K4: k=K4 + kaynak Brewer’s Friend|Brewtoad + bağlantı yok + yıl null + OG var (ham ya da CC4 hesaplanmış) + grist dolu', tum.every(([, o]) => o.k === 'K4' && /^(Brewer's Friend|Brewtoad)$/.test(o.kay.pub) && o.kay.u === null && o.yil === null && (o.og > 1 || o.ogH > 1) && o.g.length > 0));
         const yanlis = tum.filter(([k, o]) => { const L = KK.eslesHepsi(o.bira, o.et); return !(L.length === 1 && L[0].stil === k && L[0].es === o.es); });
         __REG.ok('HER K4 kaydı kural modülüyle TEK stile ve kendi stiline eşleşiyor (mekanik, belirsiz yok)', yanlis.length === 0, yanlis.slice(0, 5).map(([k, o]) => k + ':' + o.bira).join(' | '));
         const k1say = k => { const nv = (N[k] && N[k][1]) || [], mv = (M[k] && M[k][1]) || []; return nv.length + mv.filter(o => !nv.some(n => n.yil === o.yil && o.og && n.og && Math.abs(n.og - o.og) <= 0.0015)).length; };
@@ -8137,6 +8138,92 @@ const CASELER = [
         return __REG.al();
       }, src);
     }
+  },
+  // ═════════════ SPRINT CC4 — ÖRNEK TABLOLARI AYRI DOSYA + ÇEVRİMDIŞI · K4 HESAPLANMIŞ OG ═════════════
+  {
+    kod: 'CC6-AYRI-DOSYA', ad: 'Örnek tabloları ornek_veri.js’te: HTML’de veri satırı YOK; tek <script src="ornek_veri.js?v=…"> tabloyu okuyan koddan ÖNCE; ?v = dosyanın sha256-10 özeti; sw.js kritik listesinde BİREBİR aynı URL; uygulama tabloları dosyadan alır; dosya yüklenemezse uygulama hatasız açılır (örnekler sessizce boş); GERÇEK ÇEVRİMDIŞI: SW açık ayrı sunucu+tarayıcı → sunucu KAPATILIR → yeniden yükleme HTML + veri dosyasını SW önbelleğinden getirir',
+    calistir: async (page) => {
+      const out = []; const ok = (ad, k, d) => out.push({ ad, ok: !!k, detay: d === undefined ? '' : String(d) });
+      const html = fs.readFileSync(path.join(KOK, HTML_AD), 'utf8'), veri = fs.readFileSync(path.join(KOK, 'ornek_veri.js'), 'utf8'), sw = fs.readFileSync(path.join(KOK, 'sw.js'), 'utf8');
+      const v = crypto.createHash('sha256').update(veri).digest('hex').slice(0, 10);
+      const tag = [...html.matchAll(/<script src="ornek_veri\.js\?v=([0-9a-f]+)"><\/script>/g)];
+      ok('HTML’de tek <script src="ornek_veri.js?v=…">', tag.length === 1, tag.length);
+      ok('?v = veri dosyasının içerik özeti (veri değişip ?v güncellenmezse KIRMIZI)', !!tag[0] && tag[0][1] === v, (tag[0] && tag[0][1]) + ' ≠ ' + v);
+      ok('sw.js kurulum listesinde BİREBİR aynı URL (çevrimdışı önbellek)', sw.indexOf("'./ornek_veri.js?v=" + v + "'") >= 0);
+      ok('HTML’de örnek tablosu veri satırı YOK (taşındı)', !/^window\.(_TOPLULUK_MADALYA|_NHC_MADALYA|_KAYNAKLI_ORNEK|_TOPLULUK_ORNEK) = /m.test(html));
+      const iTag = html.indexOf('<script src="ornek_veri.js'), iKod = html.indexOf('function ornekListe(');
+      ok('veri dosyası tabloyu okuyan koddan ÖNCE yükleniyor', iTag > 0 && iKod > iTag);
+      ok('veri dosyasında 4 tablo + K4 yöntem sapması', ['_TOPLULUK_MADALYA', '_NHC_MADALYA', '_KAYNAKLI_ORNEK', '_TOPLULUK_ORNEK', '_K4_OGH_SAPMA'].every(x => new RegExp('^window\\.' + x + ' = ', 'm').test(veri)));
+      const r = await page.evaluate(() => { const b = document.createElement('div'); b.innerHTML = window._bmOrnekListeHTML('Coffee Stout');
+        return { k: Object.keys(window._KAYNAKLI_ORNEK || {}).length, t: Object.keys(window._TOPLULUK_ORNEK || {}).length, cs: b.querySelectorAll('.bm-ornek-satir').length }; });
+      ok('uygulama tabloları dosyadan aldı + Coffee Stout listesi 3 satır', r.k > 100 && r.t > 30 && r.cs === 3, JSON.stringify(r));
+      // ── SW açık ayrı sunucu + tarayıcı (dış ağ çözümlenmez) ──
+      const PORT2 = PORT + 1, socks = new Set();
+      const srv = http.createServer((req, res) => { try { const u = decodeURIComponent(req.url.split('?')[0]); const p = path.join(KOK, u === '/' ? HTML_AD : u);
+        if (!path.normalize(p).startsWith(path.normalize(KOK)) || !fs.existsSync(p) || fs.statSync(p).isDirectory()) { res.writeHead(404); res.end(); return; }
+        const buf = fs.readFileSync(p); res.writeHead(200, { 'Content-Type': MIME[path.extname(p).toLowerCase()] || 'application/octet-stream', 'Content-Length': buf.length }); res.end(buf); } catch (e) { res.writeHead(500); res.end(); } });
+      srv.on('connection', s => { socks.add(s); s.on('close', () => socks.delete(s)); });
+      await new Promise(c => srv.listen(PORT2, '127.0.0.1', c));
+      const b2 = await puppeteer.launch({ headless: true, args: ['--host-resolver-rules=MAP * ~NOTFOUND , EXCLUDE 127.0.0.1'] });
+      const U = 'http://127.0.0.1:' + PORT2 + '/' + HTML_AD;
+      const hazir = () => typeof render === 'function' && typeof tarifeKaydet === 'function' && Array.isArray(KR);
+      try {
+        // (a) veri dosyası yüklenemezse: uygulama hatasız açılır, örnekler sessizce boş
+        const ctx3 = await b2.createBrowserContext(); const p3 = await ctx3.newPage(); const hata3 = [];
+        p3.on('pageerror', e => hata3.push(String(e && e.message || e)));
+        await p3.setRequestInterception(true); p3.on('request', q => (q.url().indexOf('ornek_veri.js') >= 0 ? q.abort() : q.continue()).catch(() => {}));
+        await p3.goto(U, { waitUntil: 'domcontentloaded', timeout: 60000 }); await p3.waitForFunction(hazir, { timeout: 45000 });
+        const r3 = await p3.evaluate(() => ({ yok: typeof window._KAYNAKLI_ORNEK === 'undefined' && typeof window._TOPLULUK_ORNEK === 'undefined', bos: window._bmOrnekListeHTML('Coffee Stout') === '', say: window._bmOrnekSayim('Coffee Stout').toplam }));
+        ok('veri dosyası YÜKLENEMEZSE: uygulama açılır, sayfa hatası 0, örnek listesi sessizce boş', r3.yok && r3.bos && r3.say === 0 && hata3.length === 0, JSON.stringify(r3) + ' hata=' + hata3.slice(0, 2).join(' | '));
+        await ctx3.close();
+        // (b) çevrimiçi ilk yükleme → SW kurulur, HTML + veri dosyası önbelleğe girer
+        const p2 = await b2.newPage();
+        await p2.goto(U, { waitUntil: 'domcontentloaded', timeout: 60000 }); await p2.waitForFunction(hazir, { timeout: 45000 });
+        let swHazir = true;
+        await p2.waitForFunction(async (vv) => { try { if (!navigator.serviceWorker.controller) return false; for (const k of await caches.keys()) { if (k.indexOf('bm-cache-') !== 0) continue; const c = await caches.open(k); if (await c.match('./ornek_veri.js?v=' + vv) && await c.match('./Brewmaster_v2_79_10.html')) return true; } } catch (e) {} return false; }, { timeout: 60000, polling: 500 }, v).catch(() => { swHazir = false; });
+        ok('SW kurulumu: HTML + ornek_veri.js?v=… önbellekte, sayfa SW denetiminde', swHazir, swHazir ? '' : '60 sn içinde önbelleğe girmedi');
+        // (c) sunucu KAPATILIR → gerçek çevrimdışı yeniden yükleme
+        await new Promise(c => { srv.close(() => c()); for (const s of socks) s.destroy(); });
+        await p2.reload({ waitUntil: 'domcontentloaded', timeout: 60000 }); await p2.waitForFunction(hazir, { timeout: 45000 });
+        const r2 = await p2.evaluate(async () => { const b = document.createElement('div'); b.innerHTML = window._bmOrnekListeHTML('Coffee Stout');
+          let ag; try { ag = (await fetch('./yok-' + Math.random() + '.txt')).status; } catch (e) { ag = 'ag-hatasi'; }
+          return { k: Object.keys(window._KAYNAKLI_ORNEK || {}).length, t: Object.keys(window._TOPLULUK_ORNEK || {}).length, cs: b.querySelectorAll('.bm-ornek-satir').length, ag: ag }; });
+        ok('ÇEVRİMDIŞI (sunucu kapalı): sayfa + tablolar SW önbelleğinden, Coffee Stout listesi 3 satır', r2.k > 100 && r2.t > 30 && r2.cs === 3, JSON.stringify(r2));
+        ok('ağ gerçekten yok (önbellekte olmayan istek 504/hata döner)', r2.ag === 504 || r2.ag === 'ag-hatasi', r2.ag);
+      } finally { await b2.close().catch(() => {}); try { srv.close(); } catch (e) {} for (const s of socks) s.destroy(); }
+      return out;
+    }
+  },
+  {
+    kod: 'CC7-K4-OGH', ad: 'K4 HESAPLANMIŞ OG: ham OG’siz topluluk reçetesinde OG ayrı alanda (ogH, og DEĞİL) ve HER yerde etiketli — liste "OG ≈… (hesaplanmış, kaynakta yok)", önizleme çipi "≈ … · hesaplanmış" + yöntem açıklaması (sapma sayısıyla, "ölçüm değil"), reçete notu; ham OG’li kayıtta hesap etiketi YOK; stil içinde ham OG’liler önce; hedef OG hesaplanandan TAŞINMAZ',
+    calistir: (page) => page.evaluate(() => {
+      const T = window._TOPLULUK_ORNEK, SP = window._K4_OGH_SAPMA;
+      const tum = Object.keys(T).map(k => T[k].map((o, i) => [k, o, i])).reduce((a, b) => a.concat(b), []);
+      const h = tum.filter(([, o]) => o.ogH), r = tum.filter(([, o]) => o.og);
+      __REG.ok('her K4’te OG ya ham (og) ya hesaplanmış (ogH) — ikisi birden/hiçbiri yok', tum.every(([, o]) => (o.og > 1) !== (o.ogH > 1)), tum.filter(([, o]) => (o.og > 1) === (o.ogH > 1)).length);
+      __REG.ok('hesaplanmış OG’li kayıt var + yöntem sapması tabloda', h.length > 0 && !!SP && SP.n > 0, h.length + ' / n=' + (SP && SP.n));
+      __REG.ok('stil içinde ham OG’liler hesaplanmışlardan ÖNCE', Object.keys(T).every(k => { let g = false; return T[k].every(o => { if (o.ogH) g = true; return !(g && o.og); }); }));
+      const [stH, oH, iH] = h[0];
+      const b = document.createElement('div'); b.innerHTML = window._bmOrnekListeHTML(stH);
+      const satir = Array.from(b.querySelectorAll('.bm-ornek-satir')).find(x => x.textContent.indexOf(oH.bira) >= 0);
+      __REG.ok('liste satırı: "OG ≈… (hesaplanmış, kaynakta yok)"', !!satir && satir.textContent.indexOf('OG ≈' + Number(oH.ogH).toFixed(3).replace('.', ',') + ' (hesaplanmış, kaynakta yok)') >= 0, stH);
+      if (r.length) { const [stR, oR] = r[0]; const b2 = document.createElement('div'); b2.innerHTML = window._bmOrnekListeHTML(stR);
+        const s2 = Array.from(b2.querySelectorAll('.bm-ornek-satir')).find(x => x.textContent.indexOf(oR.bira) >= 0);
+        __REG.ok('ham OG’li K4 satırında hesap etiketi YOK', !!s2 && s2.textContent.indexOf('hesaplanmış') < 0 && s2.textContent.indexOf('OG ' + Number(oR.og).toFixed(3).replace('.', ',')) >= 0, stR); }
+      __REG.yeniKayit('REGTEST CC7', {});
+      _bmOrnekOnizle('k4', stH, iH);
+      const m = document.getElementById('bmOrnekOnizle'), mt = m ? m.textContent : '';
+      __REG.ok('önizleme: çip "≈ … · hesaplanmış" + yöntem açıklaması ("ölçüm değil" + sapma sayısı)', !!m && mt.indexOf('≈' + Number(oH.ogH).toFixed(3).replace('.', ',') + ' · hesaplanmış') >= 0 && !!m.querySelector('.bm-onizle-ogh') && mt.indexOf('ölçüm değil') >= 0 && mt.indexOf(SP.n.toLocaleString('tr-TR')) >= 0);
+      const _orj = window._bmStildenYeniRecete; let _yak = null;
+      window._bmStildenYeniRecete = function(a, o){ _yak = o; return _orj.apply(this, arguments); };
+      const n0 = KR.length, yid = bmOrnekOnizleOlustur();
+      window._bmStildenYeniRecete = _orj;
+      __REG.ok('örnekten reçete: not hesaplanmış OG’yi "ölçüm değil" diye taşır', KR.length === n0 + 1 && !!yid && String(S.notlar || '').indexOf('OG ≈' + Number(oH.ogH).toFixed(3)) >= 0 && String(S.notlar || '').indexOf('ölçüm değil') >= 0);
+      __REG.ok('hedef OG hesaplanmış değerden TAŞINMAZ (yalnız ham OG hedef olur)', !!_yak && !!_yak.hedef && _yak.hedef.og === undefined, _yak && JSON.stringify(_yak.hedef));
+      if (r.length) { const [stR, oR, iR] = r[0]; _bmOrnekOnizle('k4', stR, iR); const m2 = document.getElementById('bmOrnekOnizle');
+        __REG.ok('ham OG’li K4 önizlemesinde yöntem açıklaması YOK', !!m2 && !m2.querySelector('.bm-onizle-ogh')); bmOrnekOnizleKapat(); }
+      return __REG.al();
+    })
   }
 ];
 
