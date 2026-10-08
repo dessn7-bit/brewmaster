@@ -4,7 +4,8 @@
 //   K2 ödülü : alıntılanan sonuç satırı ilgili resmi metinde (normalize edilmiş) AYNEN geçmeli; madalya sözcüğü + bira + bira
 //              fabrikası aynı satırda olmalı; resmi URL kaynak.json'dan alınır (araştırmacınınki değil).
 //   Tarif    : yayımcı sayfası YENİDEN çekilir; OG değeri + grist adlarının ≥%60'ı + hop adlarının ≥%50'si sayfada geçmeli.
-//   Kademe   : K3 yalnız K1 (AHA/NHC) ve K2 OLMAYAN stilde (Kaan'ın tanımı). Stil başına ≤3. "none" kayıtları raporlanır.
+//   Kademe   : CC2 — stil başına EN AZ 3 hedefi: önce K1, sonra K2, sonra K3. K3 artık yalnız boş stillerle sınırlı DEĞİL:
+//              K1+K2 toplamı 3'ün altındaysa K3 eksiği 3'e tamamlar (dolgu). K2 stil başına ≤5. "none" kayıtları raporlanır.
 // Birim çevirisi deterministik aritmetik (lb/oz/kg/g, gal/L, °F→°C); parantezdeki metrik ile emperyal >3× tutarsızsa emperyal esas.
 // Telif: yalnız OLGULAR (ad/miktar/ölçüler/maya/mash) + atıf (yayımcı + URL). Talimat düzyazısı GÖMÜLMEZ.
 // Kullanım: node _cc_build_kay.js <arastirma-dizini> <cc_odul-dizini> <sayfa-onbellek-dizini> <k1-kapsam.json> [cikti.js]
@@ -19,6 +20,13 @@ const html = fs.readFileSync(path.join(KOK, 'Brewmaster_v2_79_10.html'), 'utf8')
 const ctx = vm.createContext({}); vm.runInContext(html.match(/const BJCP = \{[\s\S]*?\n\};/)[0].replace('const ', 'var '), ctx);
 const BJCP = ctx.BJCP; if (Object.keys(BJCP).length !== 239) abort('BJCP 239 değil');
 const K1 = new Set(JSON.parse(fs.readFileSync(K1KAP, 'utf8')));
+const K1SAY = {};
+(function(){
+  const sat = {}; html.split('\n').filter(l => /^window\.(_TOPLULUK_MADALYA|_NHC_MADALYA) = /.test(l)).forEach(l => { const c = vm.createContext({ window: {} }); vm.runInContext(l, c); Object.assign(sat, { [l.slice(7, l.indexOf(' ='))]: c.window[l.slice(7, l.indexOf(' ='))] }); });
+  const A = sat._TOPLULUK_MADALYA || {}, N = sat._NHC_MADALYA || {};
+  Object.keys(BJCP).forEach(st => { const nv = (N[st] && N[st][1]) || [], mv = (A[st] && A[st][1]) || [];
+    K1SAY[st] = nv.length + mv.filter(o => !nv.some(n => n.yil === o.yil && o.og && n.og && Math.abs(n.og - o.og) <= 0.0015)).length; });
+})();
 const KAYNAK = {}; JSON.parse(fs.readFileSync(path.join(ODUL, 'kaynak.json'), 'utf8')).forEach(k => { KAYNAK[k.file] = k; });
 const YR = { 'Great American Beer Festival': 'GABF', 'World Beer Cup': 'World Beer Cup', 'European Beer Star': 'European Beer Star' };
 const norm = t => String(t || '').normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[’'`´]/g, "'").replace(/[^a-z0-9']+/g, ' ').trim();
@@ -56,7 +64,7 @@ function gram(miktar) {
 function litre(b) {
   const t = String(b || '').replace(/,/g, '.'); let m;
   if ((m = /\(\s*([\d.]+)\s*L\s*\)/i.exec(t)) || (m = /([\d.]+)\s*(L|liters?|litres?)\b/i.exec(t))) return Math.round(parseFloat(m[1]) * 10) / 10;
-  if ((m = /([\d.]+)\s*(gal|gallons?)\b/i.exec(t))) return Math.round(parseFloat(m[1]) * 3.78541 * 10) / 10;
+  if ((m = /([\d.]+)\s*(?:US\s*)?(gal|gallons?)\b/i.exec(t))) return Math.round(parseFloat(m[1]) * 3.78541 * 10) / 10;
   return null;
 }
 function mashC(t) {
@@ -76,13 +84,48 @@ const aaSayi = a => { const m = /([\d.]+)\s*%/.exec(String(a || '')); return m ?
 const kisa = (s, n) => String(s || '').replace(/\s+/g, ' ').replace(/[<>"`]/g, ' ').trim().slice(0, n || 60);
 
 // ── kayıtları oku ──
-const dosyalar = fs.readdirSync(ARS).filter(f => /^sonuc_\d+\.json$/.test(f)).sort();
-let ham = []; dosyalar.forEach(f => { try { const a = JSON.parse(fs.readFileSync(path.join(ARS, f), 'utf8')); a.forEach(x => { x._dosya = f; ham.push(x); }); } catch (e) { abort(f + ' JSON değil: ' + e.message); } });
+const dosyalar = [];
+ARS.split(',').forEach(dz => fs.readdirSync(dz).filter(f => /^sonuc_\d+\.json$/.test(f)).sort().forEach(f => dosyalar.push(path.join(dz, f))));
+let ham = []; dosyalar.forEach(f => { try { const a = JSON.parse(fs.readFileSync(f, 'utf8')); a.forEach(x => { x._dosya = path.basename(path.dirname(f)) + '/' + path.basename(f); ham.push(x); }); } catch (e) { abort(f + ' JSON değil: ' + e.message); } });
 const RED = [], NONE = [], OK = [], INDIRILEN = [], TASINAN = [];
 const red = (x, neden) => RED.push((x.style || '?') + ' | ' + (x.tier || '?') + ' | ' + (x.beer || x.recipe_url || '') + ' → ' + neden);
-const gorulenUrl = new Set();
+const gorulenUrl = new Set(), gorulenTarif = new Set();
 // BİLİNÇLİ ELEMELER (manuel inceleme; gerekçe raporda): araştırmacının kendisi zayıf dediği stil eşleşmeleri
 const MANUEL_RED = { 'Alternative Grain Beer|https://byo.com/recipes/kent-falls-brewing-co-s-chocolate-spelt-porter-clone/': 'alternatif tahıl (spelt) gristin yalnız ~%8’i — stil eşleşmesi zayıf', 'Oud Bruin|https://byo.com/recipes/new-belgium-la-folie-clone/': 'ödül kategorisi genel Belgian-Style Sour Ale; Oud Bruin eşleşmesi yayımcı sayfasında yok (araştırmacı da zayıf dedi)' };
+// CC2 ELLE KARARLAR (araştırmacı raporları + katı stil eşleşmesi) — [stil, kalıp (bira adı + URL üzerinde), işlem, gerekçe]
+const KARAR = [
+  ['Fresh Hop IPA', /black ipa/i, 'red', 'tam tahıl gristi sayfada yok — araştırmacının varsayımı (olgu değil)'],
+  ['Pre-Prohibition Porter', /classic american porter/i, 'red', 'sayfa "pre-Prohibition" demiyor'],
+  ['English Barleywine', /brick kiln/i, 'red', 'US-05 + Special B — İngiliz barleywine eşleşmesi zayıf'],
+  ['Dry-Hopped Saison', /petit saison|petite saison/i, 'red', 'sayfada dry-hop açıkça doğrulanamadı'],
+  ['Dry-Hopped Saison', /form.?to.?table|fermentory/i, 'red', '%3,5 table saison — Table Saison örneği olarak kalır'],
+  ['Light Craft Lager', /leichtbier/i, 'red', 'Alman Leichtbier ≠ craft light lager (zaten German Leichtbier örneği)'],
+  ['Spiced Wheat Beer', /michigan summer/i, 'red', 'yalnız 1 çay kaşığı kişniş — baharatlı buğday eşleşmesi zayıf'],
+  ['Gruit Ale', /gruit.?style spiced/i, 'red', 'gruit tanımı gereği şerbetçiotsuz; bu tarifte şerbetçiotu var'],
+  ['Rose / Floral Beer', /elderflower|apple/i, 'red', 'mürver çiçeği + elma — gül/çiçek birası eşleşmesi kısmi'],
+  ['American Wild Ale', /consecration/i, 'red', 'frenk üzümü — Fruited / Dark Fruit Sour örneği olarak kalır'],
+  ['Belgian Amber Ale', /de koninck/i, 'red', 'Belgian Pale Ale örneği olarak kalır'],
+  ['Belgian Amber Ale', /belgian pale ale/i, 'red', 'başlığı Belgian PALE Ale'],
+  ['Pastry Stout', /flaked/i, 'red', 'sayfadaki yazar bilgisi tutarsız — olgu güvenilirliği şüpheli'],
+  ['Lavender Saison', /hippie farm/i, 'red', 'homebrew dükkânı tarifi (Great Fermentations) — protokol dükkân tariflerini dışlar'],
+  ['American Pilsner', /siebel|classic american pilsner/i, 'red', '%20 mısır = BJCP Pre-Prohibition Lager (Classic American Pilsner)'],
+  ['Kriek / Fruit Lambic', /lindeman/i, 'red', 'meyve kiraz değil, genel — Framboise örneği olarak kalır'],
+  ['Contemporary Gose', /blood orange|raspberry/i, 'red', 'meyveli gose — Gose de Fruit örneği olarak kalır'],
+  ['Scottish Ale / 80 Shilling', /taildragger|clan.?destine/i, 'red', 'OG 1.058 / %6,2 — 80 Shilling bandının çok üstünde'],
+  ['Honey Beer', /indeed|mexican honey/i, 'k3', 'GABF 2014 satırında bira adı farklı («Mexican Honey»)'],
+  ['Brown IPA', /10-clones-dark-side/i, 'red', 'sayfa içi birim çelişkisi: kuru şerbetçiotu «8 oz. (453 g)» (8 oz ≈ 227 g) — miktar belirsiz'],
+  // CC2 3. tur
+  ['New England Pale Ale', /dry mopped/i, 'red', 'OG 1.065 / %7 — IPA gücü; başlık «Hazy», New England pale değil'],
+  ['Sour IPA', /brummel/i, 'red', 'böğürtlen + vanilya + laktoz — meyveli/pastry varyant, düz Sour IPA değil'],
+  ['Hemp Beer / CBD Beer', /burnt/i, 'red', 'başlık/tanım kenevir birası demiyor (yalnız malzemede kenevir tohumu)'],
+  ['Light Craft Lager', /old style light/i, 'red', 'kitlesel light lager — craft light lager değil'],
+  ['Mixed Berry Sour', /slush/i, 'red', 'sayfada deniz tuzu «9 oz. (255 g)» / 19 L ≈ 13 g/L — olası baskı hatası, miktar güvenilmez'],
+  ['Mixed Berry Sour', /red rum ruos/i, 'red', 'sayfa içi birim çelişkisi: hibiskus «5 oz. (21 g)» (5 oz ≈ 142 g)'],
+  ['German Leichtbier', /carmelo/i, 'red', 'sayfa içi birim çelişkisi: şerbetçiotu «1.5 oz. (21g)» (1.5 oz ≈ 43 g)'],
+  ['Trappist Single / Abbey Ale', /spencer/i, 'red', 'OG 1.058 / %6,5 — single bandının üstünde'],
+  ['Kentucky Common', /spelunker/i, 'red', 'sayfada mısır gevreği «907 kg» — baskı hatası, miktar güvenilmez']
+];
+const KARARLOG = [];
 // ÖDÜL KATEGORİSİ STİLE NET KARŞILIK GELMİYOR → K2 iddiası düşer, tarif (stile uyuyorsa) K3 olarak kalır. Gerekçeli, elle:
 const K3_INDIR = {
   'Dry-Hopped Saison': 'ödül kategorisi American-Belgo-Style Ale (saison kategorisi değil)',
@@ -124,13 +167,16 @@ ham.forEach(x => {
     if (fab.length && !fab.some(w => parcalar.join(' ').indexOf(w) >= 0)) return red(x, 'bira fabrikası adı alıntıda yok');
     od = { yr: YR[k.competition] || k.competition, y: +k.year, kat: kisa(a.category, 70), m: mad, u: k.official_url };
     // ödül kategorisi BAŞKA bir uygulama stiline BİREBİR karşılık geliyorsa kayıt o stile taşınır (stil = ödülün söylediği)
-    const CAT2STIL = [[/italian.?style pilsener/i, 'Italian Pilsner'], [/german.?style pilsener/i, 'German Pils'], [/american[- ]style (india pale ale|ipa)/i, 'American IPA']];
+    const CAT2STIL = [[/italian.?style pilsener/i, 'Italian Pilsner'], [/german.?style pilsener/i, 'German Pils'], [/american.?style (india pale ale|ipa)/i, 'American IPA'], [/belgian.?style (witbier|white)/i, 'Belgian Witbier'], [/specialty honey/i, 'Honey Beer']];
     const hedef = (CAT2STIL.find(z => z[0].test(a.category || '')) || [])[1];
-    if (hedef && hedef !== x.style) { TASINAN.push(x.style + ' | ' + x.beer + ' → ' + hedef + ' (kategori: ' + a.category + ')'); x = Object.assign({}, x, { style: hedef }); }
+    if (hedef && hedef !== x.style) { TASINAN.push(x.style + ' | ' + x.beer + ' → ' + hedef + ' (kategori: ' + a.category + ')'); x = Object.assign({}, x, { style: hedef }); const mk2 = x.style + '|' + x.recipe_url; if (gorulenUrl.has(mk2)) return; gorulenUrl.add(mk2); }
   }
+  const kr = KARAR.find(k => k[0] === x.style && k[1].test(String(x.beer || '') + ' ' + x.recipe_url));
+  if (kr) { KARARLOG.push(x.style + ' | ' + (x.beer || x.recipe_url) + ' → ' + (kr[2] === 'red' ? 'ÇIKARILDI' : 'K3') + ' (' + kr[3] + ')'); if (kr[2] === 'red') return; x = Object.assign({}, x, { tier: 'K3', award: null }); od = null; }
   // tarif sayfası doğrulaması
   const h = sayfa(x.recipe_url); if (!h) return red(x, 'tarif sayfası çekilemedi');
   const sm = sayfaMetin(h);
+  if (!(+f.og > 1)) return red(x, 'OG yok (CC2: örnekte OG zorunlu)');
   if (f.og && sm.indexOf(norm(Number(f.og).toFixed(3))) < 0 && sm.indexOf(norm(String(f.og))) < 0) return red(x, 'OG ' + f.og + ' sayfada yok');
   const adKok = s => norm(String(s).replace(/\(.*?\)/g, ' ')).split(' ').filter(w => w.length > 2 && !/^(malt|pellets?|hops?|lb|oz|kg|whole|leaf)$/.test(w)).slice(0, 2).join(' ');
   const gr = (f.grains || []).filter(g => g && g[0]);
@@ -149,22 +195,26 @@ ham.forEach(x => {
   const L = litre(f.batch); if (L) o.L = L;
   if (+f.og > 1) o.og = +f.og; if (+f.fg > 0.98) o.fg = +f.fg; if (+f.ibu > 0) o.ib = Math.round(+f.ibu); if (+f.srm > 0) o.sr = +f.srm; if (+f.abv > 0) o.ab = +f.abv;
   const ms = mashC(f.mash); if (ms) o.ms = ms;
-  o.g = g; if (hh.length) o.h = hh; if (f.yeast) o.y = kisa(f.yeast, 90);
+  o.g = g; if (hh.length) o.h = hh; if (f.yeast) o.y = kisa(String(f.yeast).replace(/,\s*ideally\b/gi, ''), 90); // yönerge sözcüğü ('ideally') olgu değil → atılır
   const ek = (f.other || []).filter(z => z && z[0]).map(z => [kisa(z[0], 40), kisa(z[1], 40)]); if (ek.length) o.ek = ek.slice(0, 8);
   // bant bekçileri
   if (o.og && (o.og < 1.005 || o.og > 1.16)) return red(x, 'OG bant dışı'); // alkolsüz bira OG'si meşru olarak düşük
   if (o.L && (o.L < 3 || o.L > 250)) return red(x, 'batch bant dışı');
   if (o.L) { const kgL = g.reduce((a, z) => a + z[1], 0) / 1000 / o.L; if (kgL < 0.05 || kgL > 0.8) return red(x, 'grist yoğunluğu tutarsız (' + kgL.toFixed(2) + ' kg/L) — sayfada birim yazım hatası olabilir'); }
+  // aynı tarif farklı URL'de (ör. BYO hem /articles/ hem /recipes/ altında) → bir kez
+  const imza = x.style + '|' + o.og + '|' + o.fg + '|' + g.map(z => z[1]).join(',');
+  if (gorulenTarif.has(imza)) return red(x, 'aynı tarif başka URL’den zaten alındı'); gorulenTarif.add(imza);
   OK.push({ stil: x.style, o: o, not: x.style_match });
 });
 
 // ── kademe kuralı + stil başına ≤3 ──
 const T = {};
-const k2Stil = new Set(OK.filter(r => r.o.k === 'K2').map(r => r.stil));
-OK.forEach(r => {
-  if (r.o.k === 'K3' && (K1.has(r.stil) || k2Stil.has(r.stil))) { red({ style: r.stil, tier: 'K3', recipe_url: r.o.kay.u }, 'K3 yalnız K1/K2 olmayan stilde (kural)'); return; }
-  (T[r.stil] = T[r.stil] || []);
-  if (T[r.stil].length < 3) T[r.stil].push(r.o);
+// önce K2 (stil başına ≤5), sonra K3 yalnız K1+K2 < 3 ise eksiği 3'e tamamlayacak kadar (dolgu)
+OK.filter(r => r.o.k === 'K2').forEach(r => { T[r.stil] = T[r.stil] || []; if (T[r.stil].length < 5) T[r.stil].push(r.o); });
+OK.filter(r => r.o.k === 'K3').forEach(r => {
+  const var_ = (K1SAY[r.stil] || 0) + (T[r.stil] || []).length;
+  if (var_ >= 3) { red({ style: r.stil, tier: 'K3', recipe_url: r.o.kay.u }, 'K3 dolgu gereksiz (K1+K2+K3 zaten ≥3)'); return; }
+  (T[r.stil] = T[r.stil] || []).push(r.o);
 });
 Object.keys(T).forEach(k => T[k].sort((a, b) => (a.k < b.k ? -1 : a.k > b.k ? 1 : 0)));
 
@@ -178,8 +228,9 @@ if (Object.keys(T).some(k => !BJCP[k])) abort('BJCP dışı anahtar');
 const js = 'window._KAYNAKLI_ORNEK = ' + JSON.stringify(T) + ';';
 if (CIKTI) fs.writeFileSync(CIKTI, js);
 const k2 = Object.values(T).reduce((a, v) => a + v.filter(o => o.k === 'K2').length, 0), k3 = Object.values(T).reduce((a, v) => a + v.filter(o => o.k === 'K3').length, 0);
-console.log('[ham] ' + ham.length + ' kayıt · dosya ' + dosyalar.join(','));
+console.log('[ham] ' + ham.length + ' kayıt · ' + dosyalar.length + ' dosya');
 console.log('[KABUL] stil=' + Object.keys(T).length + ' K2=' + k2 + ' K3=' + k3 + ' (' + (js.length / 1024).toFixed(1) + ' KB)');
+console.log('[ELLE KARAR ' + KARARLOG.length + ']'); KARARLOG.forEach(r => console.log('  ⊘ ' + r));
 console.log('[STİL TAŞINAN ' + TASINAN.length + ']'); TASINAN.forEach(r => console.log('  → ' + r));
 console.log('[K2→K3 İNDİRİLEN ' + INDIRILEN.length + ']'); INDIRILEN.forEach(r => console.log('  ↓ ' + r));
 console.log('[RED ' + RED.length + ']'); RED.forEach(r => console.log('  ✗ ' + r));

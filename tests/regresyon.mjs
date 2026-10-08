@@ -5432,7 +5432,10 @@ const CASELER = [
     calistir: (page) => page.evaluate(() => {
       const M = window._TOPLULUK_MADALYA, N = window._NHC_MADALYA;
       // CC: Dubbel artık K2 örnekli → hiç örneği olmayan, dağılımlı + iskeletli bir stil dinamik seçilir
-      const Kk = window._KAYNAKLI_ORNEK, hedefS = Object.keys(window._TOPLULUK_DAGILIM).find(k => !M[k] && !N[k] && !Kk[k] && STIL_ISKELET[k]);
+      const Kk = window._KAYNAKLI_ORNEK, D0 = Object.keys(window._TOPLULUK_DAGILIM);
+      // CC2: dağılımlı + iskeletli stillerin hepsi artık örnekli olabilir → yoksa K1'siz bir stilin K2/K3'ü test süresince geçici kaldırılır (sonra geri konur)
+      let hedefS = D0.find(k => !M[k] && !N[k] && !Kk[k] && STIL_ISKELET[k]), _yedekK = null;
+      if (!hedefS) { hedefS = D0.find(k => !M[k] && !N[k] && Kk[k] && STIL_ISKELET[k]); if (hedefS) { _yedekK = Kk[hedefS]; delete Kk[hedefS]; } }
       __REG.ok('önkoşul: üç örnek tablosunda da olmayan + dağılımda olan iskeletli stil var', !!hedefS, hedefS);
       __REG.yeniKayit('REGTEST BG3', {});
       // AN6 deseni: Dubbel + OG bandın altına → topluluk bloğu kesin basılır
@@ -5449,6 +5452,7 @@ const CASELER = [
       __REG.ok('uydurma örnek YOK: madalya/NHC bölümü basılmadı', t.indexOf('madalya almış') < 0 && t.indexOf('NHC') < 0 && t.indexOf('🏅') < 0);
       __REG.ok('satır yargı taşımaz (yalın kapsam dili)', t.indexOf('veri kapsamı durumu') >= 0 && t.indexOf('yargı değil') >= 0);
       __REG.ok('kapsam satırı tıklanabilir öğe eklemez (AN6 kuralı korunur)', el.querySelectorAll('[onclick],button,[role=button]').length === 0);
+      if (_yedekK) Kk[hedefS] = _yedekK;
       // örnekli stilde kapsam satırı YAZILMAZ
       __REG.yeniKayit('BG3 poz', {});
       ekran = 'editor'; sekme = 'genel';
@@ -7981,10 +7985,17 @@ const CASELER = [
     calistir: (page) => page.evaluate(() => {
       const K = window._KAYNAKLI_ORNEK, N = window._NHC_MADALYA, M = window._TOPLULUK_MADALYA;
       const tumK = Object.keys(K).map(k => K[k].map(o => [k, o])).reduce((a, b) => a.concat(b), []);
-      __REG.ok('K2/K3 tablosu dolu, stil başına ≤3', tumK.length > 30 && Object.values(K).every(v => v.length >= 1 && v.length <= 3), tumK.length);
+      __REG.ok('K2/K3 tablosu dolu, stil başına ≤5 (K2 ≤5; K3 dolgu ≤3 toplam)', tumK.length > 30 && Object.values(K).every(v => v.length >= 1 && v.length <= 5), tumK.length);
       __REG.ok('her K2: bira + bira fabrikası + resmi sonuç URL (GABF/WBC/EBS kendi sitesi) + kategori + madalya', tumK.filter(([, o]) => o.k === 'K2').every(([, o]) => o.bira && o.bf && o.od && /greatamericanbeerfestival\.com|worldbeercup\.org|european-beer-star|private-brauereien/.test(o.od.u) && o.od.kat && /^(gold|silver|bronze)$/.test(o.od.m)));
       __REG.ok('her K2/K3: yayımcı + https tarif URL\'si (atıf)', tumK.every(([, o]) => o.kay && o.kay.pub && /^https:\/\//.test(o.kay.u)));
-      __REG.ok('K3 YALNIZ K1/K2 olmayan stilde (Kaan\'ın tanımı)', tumK.filter(([, o]) => o.k === 'K3').every(([k]) => !N[k] && !M[k] && !K[k].some(o => o.k === 'K2')));
+      // CC2: K3 artık DOLGU — yalnız K1+K2 < 3 olan stilde ve toplamı en fazla 3'e tamamlayacak kadar
+      const k1say = k => { const nv = (N[k] && N[k][1]) || [], mv = (M[k] && M[k][1]) || []; return nv.length + mv.filter(o => !nv.some(n => n.yil === o.yil && o.og && n.og && Math.abs(n.og - o.og) <= 0.0015)).length; };
+      const k3Kural = k => { const k2 = K[k].filter(o => o.k === 'K2').length, k3 = K[k].filter(o => o.k === 'K3').length; return k1say(k) + k2 < 3 && k1say(k) + k2 + k3 <= 3; };
+      const k3Stiller = Object.keys(K).filter(k => K[k].some(o => o.k === 'K3'));
+      __REG.ok('K3 yalnız K1+K2 < 3 stilde ve toplamı ≤3’e tamamlıyor (CC2 kuralı)', k3Stiller.every(k3Kural), k3Stiller.filter(k => !k3Kural(k)).join(','));
+      __REG.ok('CC2: her K2/K3 örneğinde OG var (OG’siz örnek alınmaz)', tumK.every(([, o]) => o.og > 1), tumK.filter(([, o]) => !(o.og > 1)).map(([k]) => k).join(','));
+      const imz = tumK.map(([k, o]) => k + '|' + o.og + '|' + o.fg + '|' + o.g.map(z => z[1]).join(','));
+      __REG.ok('CC2: aynı stilde aynı tarif iki kez yok (farklı URL’den gelen kopya elenir)', new Set(imz).size === imz.length, imz.length - new Set(imz).size);
       __REG.ok('yasaklı kaynak yok (brewersfriend/MTF/reddit…)', tumK.every(([, o]) => !/brewersfriend|milkthefunk|reddit|brewfather|beersmith/i.test(o.kay.u)));
       __REG.ok('gram/hacim bantları sağlam (birim yazım hatası sızmadı)', tumK.every(([, o]) => o.g.every(z => z[1] > 0 && z[1] < 20000) && (!o.L || (o.L >= 3 && o.L <= 250)) && (!o.og || (o.og > 1.004 && o.og < 1.16))));
       // birleşik liste DOM'u — en çok örneği olan stil
@@ -7994,7 +8005,7 @@ const CASELER = [
       const satir = box.querySelectorAll('.bm-ornek-satir'), tum = box.querySelector('details.bm-ornek-tum');
       __REG.ok('çok örnekli stil (' + cok + '): ≤50, ilk 3 açık + gerisi katlanır "Tüm örnekler (N)"', say(cok) > 3 && say(cok) <= 50 && satir.length === say(cok) && !!tum && /Tüm örnekler \(\d+\)/.test(tum.querySelector('summary').textContent) && tum.querySelectorAll('.bm-ornek-satir').length === say(cok) - 3, say(cok) + ' / ' + satir.length);
       __REG.ok('HER satırda kademe rozeti', Array.from(satir).every(r => !!r.querySelector('.bm-kademe')));
-      const k2Stil = Object.keys(K).find(k => K[k].some(o => o.k === 'K2')), k3Stil = Object.keys(K).find(k => K[k].every(o => o.k === 'K3'));
+      const k2Stil = Object.keys(K).find(k => K[k].some(o => o.k === 'K2')), k3Stil = Object.keys(K).find(k => K[k].every(o => o.k === 'K3') && !N[k] && !M[k]); // CC2: K3 artık K1'li stilde de dolgu olabilir → saf K3 stili seçilir
       const b2 = document.createElement('div'); b2.innerHTML = window._bmOrnekListeHTML(k2Stil);
       __REG.ok('K2 satırı: 🏆 rozet + "Ödül biraya ait; reçete yayınlanmış klon" + bira fabrikası + yıl', /🏆 K2 · Ödüllü ticari biranın klonu/.test(b2.textContent) && /Ödül biraya ait; reçete yayınlanmış klon/.test(b2.textContent), k2Stil);
       const b3 = document.createElement('div'); b3.innerHTML = window._bmOrnekListeHTML(k3Stil);
