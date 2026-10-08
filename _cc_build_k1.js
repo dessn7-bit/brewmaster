@@ -8,14 +8,17 @@
 //     şemsiye (Stout / Porter · Lager / Pilsner · Barleywine) > GÖMÜLMEZ.
 //  3. D-kapısı (yalnız _TOPLULUK_DAGILIM'daki 68 stil) KALDIRILDI: örnek bölümü artık her stilde çizilir.
 // Telif/kişisel veri ilkeleri AN/AX ile AYNI: yalnız olgular; talimat düzyazısı, reçete adı, kişi adı GÖMÜLMEZ.
-// Kullanım: node _cc_build_k1.js <nhc.db yolu> [çıktı-dizini]
+// Kullanım: node _cc_build_k1.js <nhc.db yolu> [çıktı-dizini] [--kuru]
+//   Varsayılan: AHA + NHC tabloları ornek_veri.js'e yazılır + içerik özeti HTML ve sw.js'te güncellenir (_cc_veri_yaz.js — CC5).
+//   --kuru: ornek_veri.js'e DOKUNMAZ (yalnız çıktı dizinine .txt + kapsam).
 'use strict';
 const fs = require('fs'), path = require('path'), vm = require('vm');
 const { DatabaseSync } = require('node:sqlite');
 const KOK = __dirname;
 function abort(m) { console.error('ABORT: ' + m); process.exit(1); }
-const DB_YOL = process.argv[2]; if (!DB_YOL || !fs.existsSync(DB_YOL)) abort('nhc.db yolu ver (github.com/thcipriani/nhc-homebrew-data)');
-const CIKTI = process.argv[3] || path.join(KOK, 'working');
+const KURU = process.argv.includes('--kuru'), _arg = process.argv.slice(2).filter(a => a !== '--kuru');
+const DB_YOL = _arg[0]; if (!DB_YOL || !fs.existsSync(DB_YOL)) abort('nhc.db yolu ver (github.com/thcipriani/nhc-homebrew-data)');
+const CIKTI = _arg[1] || path.join(KOK, 'working');
 const MAX = 50;
 
 // ── HTML'den otorite tabloları + çözücü ──
@@ -166,6 +169,7 @@ Object.values(AHA).forEach(v => { if (v[0][0] !== v[0][1] + v[0][2] + v[0][3]) a
 // ══════════ ÇIKTI + ÖZET ══════════
 const ahaJs = 'window._TOPLULUK_MADALYA = ' + JSON.stringify(AHA) + ';', nhcJs = 'window._NHC_MADALYA = ' + JSON.stringify(NHC) + ';';
 fs.writeFileSync(path.join(CIKTI, '_cc_aha.js.txt'), ahaJs); fs.writeFileSync(path.join(CIKTI, '_cc_nhc.js.txt'), nhcJs);
+if (!KURU) require('./_cc_veri_yaz.js').yaz([ahaJs, nhcJs]); else console.log('[--kuru] ornek_veri.js değiştirilmedi');
 const kap = new Set([...Object.keys(AHA), ...Object.keys(NHC)]);
 console.log('[sayaç]', JSON.stringify(say));
 console.log('[AHA] stil=' + Object.keys(AHA).length + ' gömülü=' + Object.values(AHA).reduce((a, v) => a + v[1].length, 0) + ' (' + (ahaJs.length / 1024).toFixed(1) + ' KB)');

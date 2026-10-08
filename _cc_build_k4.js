@@ -13,11 +13,15 @@
 //     gelir; hesaplanmış OG yalnız boşluğu doldurur. Yöntem ham OG'si bilinen adaylarda sınanır, sapma build çıktısında basılır.
 //   • Yıl: korpusta tarif başına yıl alanı YOK → yil:null (UI "yıl kaynakta yok" der; uydurulmaz).
 //   • Kişi adı (brewer) TABLOYA YAZILMAZ. Yasak dil listesi / küfür içeren ad atlanır.
-// Kullanım: node _cc_build_k4.js <çıktı.txt> [aday-önbellek.jsonl]
+// Kullanım: node _cc_build_k4.js [çıktı.txt] [--onbellek aday.jsonl] [--kuru]
+//   Varsayılan: K4 + yöntem sapması ornek_veri.js'e yazılır + içerik özeti HTML ve sw.js'te güncellenir (_cc_veri_yaz.js — CC5).
+//   --onbellek: korpus aday listesi (yoksa tam geçiş yapıp oraya yazar). --kuru: ornek_veri.js'e DOKUNMAZ.
 'use strict';
 const fs = require('fs'), path = require('path');
 const { esles, KURAL, norm } = require('./_cc_k4_kural.js');
-const [OUT, CACHE] = process.argv.slice(2);
+const _arg = process.argv.slice(2), KURU = _arg.includes('--kuru'), _oi = _arg.indexOf('--onbellek');
+const CACHE = _oi >= 0 ? _arg[_oi + 1] : null;
+const OUT = _arg.filter((x, i) => x !== '--kuru' && x !== '--onbellek' && !(_oi >= 0 && i === _oi + 1))[0] || null;
 const KORPUS = path.join(__dirname, 'working', '_step105_dataset_v8_clean.json');
 const html = fs.readFileSync(path.join(__dirname, 'Brewmaster_v2_79_10.html'), 'utf8').replace(/\r\n/g, '\n');
 // CC4: örnek tabloları ornek_veri.js'e taşındı → HTML + veri dosyası birlikte okunur
@@ -144,7 +148,8 @@ topla(L => {
   const metin = JSON.stringify(T).toLocaleLowerCase('tr-TR'); const ih = YASAK.filter(k => metin.includes(k)); if (ih.length) abort('yasak kelime: ' + ih);
   Object.keys(T).forEach(st => { if (T[st].length > 3) abort('stil başına >3: ' + st); if (mevcut(st) + T[st].length > Math.max(3, mevcut(st))) abort('3’ü aşan dolgu: ' + st); });
   const satir = 'window._TOPLULUK_ORNEK = ' + JSON.stringify(T) + ';\nwindow._K4_OGH_SAPMA = ' + JSON.stringify(SAPMA) + ';';
-  fs.writeFileSync(OUT, satir);
+  if (OUT) fs.writeFileSync(OUT, satir);
+  if (!KURU) require('./_cc_veri_yaz.js').yaz(satir.split('\n')); else console.log('[--kuru] ornek_veri.js değiştirilmedi');
   let n = 0; Object.values(T).forEach(v => n += v.length);
   console.log('[KABUL] stil=' + Object.keys(T).length + ' K4=' + n + ' (' + (Buffer.byteLength(satir) / 1024).toFixed(1) + ' KB)');
   console.log('stil | mevcut K1-K3 | gereken | kural-eşleşen | bekçiden geçen | eklenen');

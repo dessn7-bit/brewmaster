@@ -8,11 +8,14 @@
 //              K1+K2 toplamı 3'ün altındaysa K3 eksiği 3'e tamamlar (dolgu). K2 stil başına ≤5. "none" kayıtları raporlanır.
 // Birim çevirisi deterministik aritmetik (lb/oz/kg/g, gal/L, °F→°C); parantezdeki metrik ile emperyal >3× tutarsızsa emperyal esas.
 // Telif: yalnız OLGULAR (ad/miktar/ölçüler/maya/mash) + atıf (yayımcı + URL). Talimat düzyazısı GÖMÜLMEZ.
-// Kullanım: node _cc_build_kay.js <arastirma-dizini> <cc_odul-dizini> <sayfa-onbellek-dizini> <k1-kapsam.json> [cikti.js]
+// Kullanım: node _cc_build_kay.js <arastirma-dizin(ler)i> <cc_odul-dizini> <sayfa-onbellek-dizini> <k1-kapsam.json> [cikti.js] [--kuru]
+//   Varsayılan: tablo ornek_veri.js'e yazılır + içerik özeti HTML ve sw.js'te güncellenir (_cc_veri_yaz.js — CC5, elle adım yok).
+//   --kuru: ornek_veri.js'e DOKUNMAZ (yalnız [cikti.js] ve rapor; inceleme için).
 'use strict';
 const fs = require('fs'), path = require('path'), vm = require('vm'), cp = require('child_process'), crypto = require('crypto');
 function abort(m) { console.error('ABORT: ' + m); process.exit(1); }
-const [ARS, ODUL, ONB, K1KAP, CIKTI] = process.argv.slice(2);
+const KURU = process.argv.includes('--kuru');
+const [ARS, ODUL, ONB, K1KAP, CIKTI] = process.argv.slice(2).filter(a => a !== '--kuru');
 if (!ARS || !ODUL || !ONB || !K1KAP) abort('kullanım: node _cc_build_kay.js <arastirma> <cc_odul> <onbellek> <k1-kapsam.json> [cikti]');
 fs.mkdirSync(ONB, { recursive: true });
 const KOK = __dirname;
@@ -254,6 +257,7 @@ if (Object.keys(T).some(k => !BJCP[k])) abort('BJCP dışı anahtar');
 
 const js = 'window._KAYNAKLI_ORNEK = ' + JSON.stringify(T) + ';';
 if (CIKTI) fs.writeFileSync(CIKTI, js);
+if (!KURU) require('./_cc_veri_yaz.js').yaz([js]); else console.log('[--kuru] ornek_veri.js değiştirilmedi');
 const k2 = Object.values(T).reduce((a, v) => a + v.filter(o => o.k === 'K2').length, 0), k3 = Object.values(T).reduce((a, v) => a + v.filter(o => o.k === 'K3').length, 0);
 console.log('[ham] ' + ham.length + ' kayıt · ' + dosyalar.length + ' dosya');
 console.log('[KABUL] stil=' + Object.keys(T).length + ' K2=' + k2 + ' K3=' + k3 + ' (' + (js.length / 1024).toFixed(1) + ' KB)');
