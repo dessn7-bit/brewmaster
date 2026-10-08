@@ -8892,6 +8892,9 @@ const CASELER = [
       __REG.ok('katalog adı markayı içeriyorsa ikinci kez eklenmez ("(Hitit) (Hitit)" yok)', STOK.length === n1 + 1 && STOK[STOK.length - 1].ad === 'Karamela Arpa Maltı (Hitit)', STOK[STOK.length - 1].ad);
       form('isli_malt|İsli Malt (Hitit)|kg|Malt', '', 'Hitit'); const m2 = document.getElementById('stokCiftModal');
       __REG.ok('yeni miktar boş ("miktar ?") → yalnız "miktarı ? yap" (toplama seçeneği yok)', !!m2 && !m2.querySelector('.stok-cift-ekle') && !!m2.querySelector('.stok-cift-ata')); _stokCiftUygula('vazgec');
+      STOK.push({ ad: 'Bal Tozu', birim: 'kg', g: 'Şeker', id: '1775567827478', miktar: 1, uyari: 0 }); const n2 = STOK.length;
+      form('bal_tozu|Bal Tozu|g|Şeker', '', '');
+      __REG.ok('katalog bağsız ESKİ kayıt (Bal Tozu) + katalogdan aynı ad → aynı kalem sayılır, ikinci kayıt açılmaz', STOK.length === n2 && !!document.getElementById('stokCiftModal')); _stokCiftUygula('vazgec');
       window.confirm = _c;
       __REG.ok('native confirm hiç çağrılmadı', conf === 0);
       STOK.length = 0; ekran = 'liste';

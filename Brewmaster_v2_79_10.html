@@ -26532,13 +26532,13 @@ function stokEkle(){
 // ── SPRINT STK1: aynı kalem tespiti + "mevcut X — üstüne ekle / miktarı X yap" seçimi ──
 function _stokAdNorm(v){ return String(v == null ? '' : v).toLocaleLowerCase('tr').replace(/\s+/g, ' ').trim(); }
 // Aynı ürün = aynı katalog kaydı (refId) VE aynı ad (marka dahil: "Çavdar Maltı (Weyermann)" ≠ "Çavdar Maltı (Hitit)").
-// Katalog bağı yoksa: aynı ad. Farklı markalı aynı refId AYRI ürün sayılır.
+// Katalog bağı iki tarafta yoksa ya da yalnız birinde varsa: aynı ad. Farklı markalı aynı refId AYRI ürün sayılır.
 function _stokAyniKalemIdx(rec, haricId){
   if(!rec) return -1;
   return STOK.findIndex(function(x){
     if(!x || (haricId != null && String(x.id) === String(haricId))) return false;
-    if(rec.refId || x.refId) return !!rec.refId && x.refId === rec.refId && _stokAdNorm(x.ad) === _stokAdNorm(rec.ad);
-    return _stokAdNorm(x.ad) === _stokAdNorm(rec.ad);
+    if(rec.refId && x.refId) return x.refId === rec.refId && _stokAdNorm(x.ad) === _stokAdNorm(rec.ad);
+    return _stokAdNorm(x.ad) === _stokAdNorm(rec.ad); // biri katalog bağsız eski kayıt (ör. Bal Tozu) → aynı ad = aynı kalem
   });
 }
 function _stokMikMetin(m, b){ return (m == null) ? 'miktar ?' : (String(Math.round(m * 1000) / 1000).replace('.', ',') + ' ' + (b || '')); }
