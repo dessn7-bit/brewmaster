@@ -2540,7 +2540,7 @@ const CASELER = [
       ekran = 'editor'; sekme = 'genel';
       window.__akProfil = { renk: '', aci: '', govde: '', maya: '', malt: '' }; render();
       let dom = document.getElementById('ekran').innerHTML;
-      __REG.ok('giriş noktası görünür (dropdown alternatifi)', dom.indexOf('Stilin adını bilmiyorum') >= 0);
+      __REG.ok('giriş noktası görünür (dropdown alternatifi)', dom.indexOf('Stil ara ya da tarif et') >= 0);
       // SPRINT BR: panel yerine TAM EKRAN; 'Üç ekseni de seç' ZORUNLULUĞU KALKTI —
       // hiçbir eksen seçilmemişken tüm korpus listelenir (5 eksen de isteğe bağlı).
       _brAc();
@@ -6055,7 +6055,7 @@ const CASELER = [
       __REG.yeniKayit('BR1 Tam', {});
       ekran = 'editor'; sekme = 'genel'; _bmProfilSifirla(); render();
       const giris = document.querySelector('.bm-profil-sec');
-      __REG.ok('giriş düğmesi Hedef Stil satırının altında duruyor', !!giris && /Stilin adını bilmiyorum/.test(giris.textContent));
+      __REG.ok('giriş düğmesi Hedef Stil satırının altında duruyor', !!giris && /Stil ara ya da tarif et/.test(giris.textContent));
       __REG.ok('giriş düğmesi tam ekranı açıyor (_brAc)', /_brAc\(\)/.test(giris.getAttribute('onclick') || ''));
       __REG.ok('tam ekran BAŞLANGIÇTA kapalı', !document.getElementById('br-tam'));
       giris.click();
@@ -7729,6 +7729,118 @@ const CASELER = [
       ekran = 'stok'; render();
       stokGuncelle(1, 1);
       __REG.ok('+ düğmesi sayımı başlattı (adım 1 → 1)', STOK[1].miktar === 1);
+      return __REG.al();
+    })
+  },
+  // ── SPRINT CB — Tarif ekranı: stil arama (CB1) + lezzet notaları (CB2). Kaan: "Seçenekler çok genel soruyor;
+  //    istediğim stili yazıp bulabilmeliyim."
+  {
+    kod: 'CB1-ARAMA', ad: 'STİL ARAMA: tarif ekranının EN ÜSTÜNDE arama kutusu (notalardan ve eksenlerden önce); 239 BJCP stilinde ad + Türkçe karşılık; "weizen"/"buğday"/"hefe" → Weizen / Weissbier ilk, "stout" → ilk sıralar stout, "belcika"/"belçika" → ilk sıralar Belçika ailesi, "ipa" → American IPA ilk; yazarken kutu YENİDEN ÇİZİLMEZ (odak/klavye korunur); bulunamayınca dürüst mesaj; "Hedef yap" = dropdown ile AYNI yol (S.stil + kaynak dropdown); "Yeni reçete" AV1 yolu; Hedef Stil dropdown\'u eskisi gibi',
+    calistir: (page) => page.evaluate(() => {
+      yeniTarif(); render(); _brAc();
+      const tam = document.getElementById('br-tam'), ara = document.getElementById('br-ara');
+      __REG.ok('arama kutusu tam ekranda', !!ara);
+      const govde = tam.querySelector('.br-tam-govde');
+      __REG.ok('arama kutusu SABİT başlıkta (kaydırmaz), sonuç kabı gövdenin en üstünde, eksenlerden önce', !!tam.querySelector('.br-tam-bas #br-ara') && govde.firstElementChild && govde.firstElementChild.id === 'br-ara-sonuc' && !!(govde.firstElementChild.compareDocumentPosition(govde.querySelector('.br-eksen')) & Node.DOCUMENT_POSITION_FOLLOWING));
+      const ilk = q => _brAraListe(q).map(x => x.ad);
+      const L = {};
+      ['weizen', 'buğday', 'bugday', 'hefe', 'stout', 'belcika', 'belçika', 'ipa', 'BELÇİKA', 'Weizen'].forEach(q => L[q] = ilk(q));
+      __REG.ok('"weizen" → Weizen / Weissbier İLK', L.weizen[0] === 'Weizen / Weissbier', L.weizen.slice(0, 4).join(' | '));
+      __REG.ok('"Weizen" (büyük harf) aynı', L.Weizen[0] === 'Weizen / Weissbier');
+      __REG.ok('"buğday" → Weizen / Weissbier İLK; ilk 6 içinde American Wheat + Witbier', L['buğday'][0] === 'Weizen / Weissbier' && L['buğday'].slice(0, 6).includes('American Wheat Beer') && L['buğday'].slice(0, 6).some(a => /Witbier/.test(a)), L['buğday'].slice(0, 6).join(' | '));
+      __REG.ok('"bugday" (ğ\'siz) = "buğday"', JSON.stringify(L.bugday) === JSON.stringify(L['buğday']));
+      __REG.ok('"hefe" → Weizen / Weissbier İLK, American Hefeweizen ilk 3', L.hefe[0] === 'Weizen / Weissbier' && L.hefe.slice(0, 3).includes('American Hefeweizen'), L.hefe.slice(0, 4).join(' | '));
+      __REG.ok('"stout" → ilk 5\'in HEPSİ stout, Dry Irish Stout ilk 8', L.stout.slice(0, 5).every(a => /Stout/.test(a)) && L.stout.slice(0, 8).includes('Dry Irish Stout'), L.stout.slice(0, 8).join(' | '));
+      const BEL = /Belgian|Tripel|Dubbel|Quadrupel|Saison|Witbier|Lambic|Gueuze|Flanders|Oud Bruin|Bière|Trappist|Abbey|Kriek|Framboise|Grisette/;
+      __REG.ok('"belcika" → ilk 5\'in HEPSİ Belçika ailesi', L.belcika.slice(0, 5).every(a => BEL.test(a)), L.belcika.slice(0, 5).join(' | '));
+      __REG.ok('"belçika" ve "BELÇİKA" = "belcika"', JSON.stringify(L['belçika']) === JSON.stringify(L.belcika) && JSON.stringify(L['BELÇİKA']) === JSON.stringify(L.belcika));
+      __REG.ok('"ipa" → American IPA İLK, ilk 5\'in hepsi IPA', L.ipa[0] === 'American IPA' && L.ipa.slice(0, 5).every(a => /IPA/.test(a)), L.ipa.slice(0, 5).join(' | '));
+      __REG.ok('negatif: "weizen" ilk 5\'inde IPA yok, "stout" ilk 5\'inde porter yok', !L.weizen.slice(0, 5).some(a => /IPA/.test(a)) && !L.stout.slice(0, 5).some(a => /Porter/.test(a) && !/Stout/.test(a)));
+      __REG.ok('çok kelime VE: "koyu weizen" → Dunkelweizen ilk 3', ilk('koyu weizen').slice(0, 3).some(a => /Dunkel/.test(a)), ilk('koyu weizen').slice(0, 3).join(' | '));
+      // yazarken kutu yeniden çizilmez
+      ara.focus(); ara.value = 'weiz'; ara.dispatchEvent(new Event('input', { bubbles: true }));
+      __REG.ok('yazarken input AYNI eleman + odak kaybolmadı', document.getElementById('br-ara') === ara && document.activeElement === ara);
+      const satirlar = document.querySelectorAll('#br-ara-sonuc .br-ara-satir');
+      __REG.ok('sonuç satırları çizildi (≤8), ilk satır Weizen / Weissbier', satirlar.length > 0 && satirlar.length <= 8 && /Weizen \/ Weissbier/.test(satirlar[0].textContent), satirlar.length);
+      ara.value = 'xqzv'; ara.dispatchEvent(new Event('input', { bubbles: true }));
+      __REG.ok('bulunamayınca dürüst mesaj', /stil bulunamadı/.test(document.getElementById('br-ara-sonuc').textContent));
+      // yeniden çizimde (çip tıklaması) arama metni korunur
+      ara.value = 'weizen'; ara.dispatchEvent(new Event('input', { bubbles: true }));
+      _bmProfilSec('renk', 'acik');
+      __REG.ok('çip tıklamasından sonra arama metni ve sonuçlar duruyor', document.getElementById('br-ara').value === 'weizen' && document.querySelectorAll('#br-ara-sonuc .br-ara-satir').length > 0);
+      _bmProfilSifirla();
+      // Hedef yap = dropdown yolu
+      document.querySelector('#br-ara-sonuc .br-ara-sec').click();
+      __REG.ok('Hedef yap → S.stil = Weizen / Weissbier, kaynak dropdown, tam ekran kapandı', S.stil === 'Weizen / Weissbier' && window.__stilSecKaynak === 'dropdown' && !document.getElementById('br-tam'), S.stil + ' / ' + window.__stilSecKaynak);
+      // Hedef Stil dropdown'u eskisi gibi
+      const sel = document.querySelector('select[aria-label="Hedef stil"]');
+      sel.value = 'Dubbel'; sel.dispatchEvent(new Event('change', { bubbles: true }));
+      __REG.ok('Hedef Stil dropdown\'u eskisi gibi (S.stil = Dubbel, kaynak dropdown)', S.stil === 'Dubbel' && window.__stilSecKaynak === 'dropdown');
+      __REG.ok('giriş düğmesi aramayı söylüyor', /Stil ara ya da tarif et/.test((document.querySelector('.bm-profil-sec') || {}).textContent || ''));
+      // Yeni reçete (AV1 yolu)
+      _brAc(); _brAra('ipa');
+      const krOnce = KR.length;
+      _brAraYeni(0);
+      __REG.ok('Yeni reçete → American IPA hedefli yeni reçete', S.stil === 'American IPA' && KR.length >= krOnce, S.stil);
+      window.__brAra = '';
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'CB2-NOTA', ad: 'LEZZET NOTALARI: eksenlerin üstünde 10 nota (kahve · çikolata · muz&karanfil · narenciye&acı · tropikal · ekşi · isli · karamel&malt · baharatlı · temiz&ekmeksi), hepsi korpustan açık kuralla; her nota için POZİTİF/NEGATİF kontrol tablosu; "Muz & karanfil" → yalnız Weizen ailesi (+Roggenbier), IPA YOK, Witbier YOK; eksenlerle VE; çipteki sayı = kalan stil; boş sonuç notayı adıyla söyler; satırda nota payı; özet kartta 👅',
+    calistir: (page) => page.evaluate(() => {
+      yeniTarif(); render(); _brAc();
+      __REG.ok('varsayılan: nota paneli kapalı (gövdede yer kaplamaz), başlıkta 👅 Nota düğmesi', !document.querySelector('#br-tam .br-nota') && /👅 Nota/.test(document.querySelector('#br-tam .br-nota-ac').textContent));
+      _brNotaAc();
+      __REG.ok('düğme → panel açıldı, eksenlerin ÜSTÜNDE, çipler SARIYOR', !!document.querySelector('#br-tam .br-nota') && !!(document.querySelector('#br-tam .br-nota').compareDocumentPosition(document.querySelector('#br-tam .br-eksen')) & Node.DOCUMENT_POSITION_FOLLOWING) && getComputedStyle(document.querySelector('#br-tam .br-nota-serit')).flexWrap === 'wrap');
+      const cips = [...document.querySelectorAll('#br-tam .br-nota .br-cip')];
+      __REG.ok('10 nota çipi, hepsi > 0 stil', cips.length === 10 && cips.every(c => +c.querySelector('.br-cip-n').textContent > 0), cips.map(c => c.textContent).join(' | '));
+      __REG.ok('aday listede olmayan nota YOK (vanilya/laktoz/meyve)', !cips.some(c => /vanilya|laktoz|tatlı|meyve/i.test(c.textContent)));
+      __REG.ok('düşen niteleyiciler etikette yok (yumuşak/ferah/kuru)', !cips.some(c => /yumuşak|ferah|kuru/i.test(c.textContent)));
+      __REG.ok('temel eksen sayısı DEĞİŞMEDİ (4 .br-eksen)', document.querySelectorAll('#br-tam .br-eksen').length === 4);
+      const T = {
+        kahve: { v: ['Dry Irish Stout', 'Foreign Extra Stout', 'American Stout'], y: ['Robust Porter', 'Brown Porter', 'American IPA'] },
+        cikolata: { v: ['Robust Porter', 'Brown Porter', 'London Porter'], y: ['Dry Irish Stout', 'Foreign Extra Stout', 'American IPA'] },
+        muz: { v: ['Weizen / Weissbier', 'Dunkelweizen', 'Weizenbock'], y: ['American IPA', 'Witbier / Belgian White', 'Tripel', 'American Wheat Beer'] },
+        narenciye: { v: ['American IPA', 'American Pale Ale'], y: ['German Pils', 'Dry Irish Stout', 'Weizen / Weissbier'] },
+        tropik: { v: ['NEIPA / Hazy IPA'], y: ['German Pils', 'American IPA'] },
+        eksi: { v: ['Berliner Weisse', 'Lambic / Gueuze', 'Flanders Red Ale'], y: ['American IPA', 'German Pils', 'Saison / Farmhouse Ale'] },
+        isli: { v: ['Rauchbier / Bamberg Smoked'], y: ['American IPA', 'Dry Irish Stout'] },
+        karamel: { v: ['Munich Märzen / Oktoberfest', 'Bock', 'Doppelbock'], y: ['American IPA', 'Altbier / Düsseldorf Altbier', 'Flanders Red Ale'] },
+        baharat: { v: ['Tripel', 'Saison / Farmhouse Ale', 'Dubbel'], y: ['Weizen / Weissbier', 'American IPA'] },
+        temiz: { v: ['German Pils', 'Helles / Münchner Hell', 'Kölsch'], y: ['American IPA', 'Weizen / Weissbier', 'Dry Irish Stout'] }
+      };
+      const tablo = [];
+      Object.keys(T).forEach(k => {
+        _bmProfilSifirla(); _bmProfilSec('nota', k);
+        const L = _brSonuc().stiller;
+        const pz = T[k].v.every(a => L.includes(a)), ng = !T[k].y.some(a => L.includes(a));
+        tablo.push(k + ':' + (pz ? '+' : 'X') + (ng ? '-' : 'X'));
+        __REG.ok('nota ' + k + ': pozitifler VAR, negatifler YOK', pz && ng, L.join(' | '));
+      });
+      _bmProfilSifirla(); _bmProfilSec('nota', 'muz');
+      const muz = _brSonuc().stiller;
+      __REG.ok('Muz & karanfil ⊆ {Weizen, Dunkelweizen, Weizenbock, Roggenbier}, IPA YOK', muz.length > 0 && muz.every(a => ['Weizen / Weissbier', 'Dunkelweizen', 'Weizenbock', 'Roggenbier / Rye Beer'].includes(a)) && !muz.some(a => /IPA/.test(a)), muz.join(' | '));
+      const muzCip = document.querySelector('#br-tam .br-nota .br-cip-akt');
+      __REG.ok('seçince panel tek satıra katlandı; aktif çip sayısı = liste uzunluğu; başlık düğmesi notayı söylüyor', muzCip && /Muz & karanfil/.test(muzCip.textContent) && +muzCip.querySelector('.br-cip-n').textContent === muz.length && !document.querySelector('#br-tam .br-nota-serit') && /🍌 Muz & karanfil/.test(document.querySelector('#br-tam .br-nota-ac').textContent));
+      __REG.ok('satırda nota payı (🍌 Muz & karanfil %)', /🍌 Muz & karanfil %\d+/.test(document.querySelector('#br-tam .br-satir').textContent));
+      // eksenle VE
+      _bmProfilSec('renk', 'acik');
+      const muzAcik = _brSonuc().stiller;
+      const sadeRenk = _brSonuc({ renk: 'acik' }).stiller;
+      const kesisim = muz.filter(x => sadeRenk.includes(x));
+      __REG.ok('muz + açık renk = muz ∩ açık renk (eksenle VE, sıra korunur)', JSON.stringify(muzAcik.slice().sort()) === JSON.stringify(kesisim.slice().sort()) && muzAcik.includes('Weizen / Weissbier'), muzAcik.join(' | ') + ' // ' + kesisim.join(' | '));
+      // boş sonuç notayı adıyla söyler
+      _bmProfilSifirla(); _bmProfilSec('nota', 'tropik'); _bmProfilSec('renk', 'cokkoyu');
+      const bos = document.querySelector('#br-tam .br-bos');
+      __REG.ok('boş sonuç: gevşetme düğmelerinde "👅 Tropikal" adıyla', !!bos && /👅 Tropikal/.test(bos.textContent), bos && bos.textContent.slice(0, 160));
+      // tekrar tık temizler + özet kart
+      _bmProfilSifirla(); _bmProfilSec('nota', 'kahve'); _bmProfilSec('nota', 'kahve');
+      __REG.ok('aynı notaya tekrar tık → temizlendi', !window.__akProfil.nota);
+      _bmProfilSec('nota', 'isli'); _brKapat();
+      __REG.ok('editördeki özet kart notayı söylüyor (👅 İsli → N stil)', /👅 İsli/.test((document.querySelector('.bm-br-ozet') || {}).textContent || ''));
+      _bmProfilSifirla();
+      __REG.ok('kontrol tablosu ' + tablo.join(' '), tablo.every(t => /:\+-$/.test(t)));
       return __REG.al();
     })
   }

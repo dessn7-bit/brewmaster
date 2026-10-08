@@ -312,6 +312,18 @@ input[type="checkbox"]:disabled,input[type="radio"]:disabled{opacity:.5;cursor:n
 .br-cip-degis{font-size:11px;color:var(--soluk);background:transparent;border-style:dashed}
 .br-eksen-ad{font-size:11px;color:var(--soluk);font-weight:600;margin-bottom:4px}
 .br-cip-kap{display:flex;gap:6px;flex-wrap:wrap}
+.br-ara-sonuc{margin-top:4px}
+.br-ara-satir{display:flex;align-items:center;gap:8px;padding:7px 2px;border-bottom:1px solid var(--cizgi-arac)}
+.br-ara-ad{font-size:13px;font-weight:600;color:var(--kahve);line-height:1.25}
+.br-ara-alt{font-size:10px;color:var(--soluk);line-height:1.3}
+.br-ara-yok{font-size:11.5px;color:var(--soluk);padding:6px 2px;line-height:1.4}
+.br-nota{margin:8px 0 2px}
+.br-nota-ad{font-size:11px;font-weight:700;color:var(--soluk);margin-bottom:4px}
+.br-nota-serit{display:flex;flex-wrap:wrap;gap:6px}
+.br-ara-satiri{display:flex;gap:6px;margin-top:6px}
+.br-ara-satiri input{flex:1;min-width:0;box-sizing:border-box;min-height:44px;font-size:15px;padding:8px 11px;border:1px solid var(--bor);border-radius:10px;background:var(--card);color:var(--metin);font-family:var(--font-govde)}
+.br-nota-ac{flex:none;min-height:44px;padding:0 12px;border:1px solid var(--bor);border-radius:10px;background:var(--bg2);color:var(--kahve);font-weight:700;font-size:13px;cursor:pointer;font-family:var(--font-govde);white-space:nowrap;max-width:46%;overflow:hidden;text-overflow:ellipsis}
+.br-nota-ac[aria-expanded="true"],.br-nota-ac.br-nota-secili{border-color:var(--altin);background:var(--accent-soft)}
 .br-cip{display:inline-flex;align-items:center;gap:4px;min-height:34px;background:var(--card);color:var(--metin);border:1px solid var(--bor);border-radius:16px;padding:4px 11px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font-govde);white-space:nowrap}
 .br-cip-akt{background:var(--bakir);color:#fff;border-color:var(--bakir);font-weight:700}
 .br-cip-olu{opacity:.42}
@@ -27846,6 +27858,7 @@ window._brSonuc = function(p){
   if(p.tahil) liste = liste.filter(function(a){ return window._bmKarakterSinif(a, 'tahil') === p.tahil; });
   if(p.hop) liste = liste.filter(function(a){ return window._bmKarakterSinif(a, 'hop') === p.hop; });
   if(p.malt) liste = liste.filter(function(a){ return window._bmKarakterSinif(a, 'malt') === p.malt; });
+  if(p.nota){ var _N = (window._CB_NOTA || {})[p.nota]; liste = liste.filter(function(a){ return !!(_N && _N.stil && _N.stil[a] != null); }); } // SPRINT CB2
   liste.sort(function(a, b){ return (r.m[b] * (ISK[b] ? 1.35 : 1)) - (r.m[a] * (ISK[a] ? 1.35 : 1)); });
   var esl = 0; liste.forEach(function(a){ esl += r.m[a]; });
   return { toplam:r.toplam, kova:r.kova, havuz:havuz, stiller:liste, esleseN:esl, m:r.m };
@@ -27855,7 +27868,7 @@ window._brSonuc = function(p){
 // çıkmaz sokağı TIKLAMADAN ÖNCE görür (0 yazan çip = boş sonuç).
 window._brCipSayi = function(eksen, deger){
   var p = window.__akProfil || {}, q = {};
-  ['renk','aci','govde','abv','maya','tahil','malt','hop'].forEach(function(k){ q[k] = p[k] || ''; });
+  ['renk','aci','govde','abv','maya','tahil','malt','hop','nota'].forEach(function(k){ q[k] = p[k] || ''; });
   q[eksen] = deger;
   return window._brSonuc(q).stiller.length;
 };
@@ -27864,9 +27877,9 @@ window._brCipSayi = function(eksen, deger){
 // Sessiz boşluk YOK (BB dersi) — hangi ekseni gevşetmenin ne kazandırdığı yazılır.
 window._brDaraltan = function(){
   var p = window.__akProfil || {}, out = [];
-  ['renk','aci','govde','abv','maya','tahil','malt','hop'].forEach(function(e){
+  ['renk','aci','govde','abv','maya','tahil','malt','hop','nota'].forEach(function(e){
     if(!p[e]) return;
-    var q = {}; ['renk','aci','govde','abv','maya','tahil','malt','hop'].forEach(function(k){ q[k] = p[k] || ''; });
+    var q = {}; ['renk','aci','govde','abv','maya','tahil','malt','hop','nota'].forEach(function(k){ q[k] = p[k] || ''; });
     q[e] = '';
     out.push({ eksen:e, deger:p[e], kalan:window._brSonuc(q).stiller.length });
   });
@@ -27875,16 +27888,17 @@ window._brDaraltan = function(){
 };
 
 // Seçim GEÇİCİ: reçete nesnesine (S) YAZILMAZ — bu bir keşif aracı, reçete verisi değil.
-window.__akProfil = { renk:'', aci:'', govde:'', abv:'', maya:'', tahil:'', malt:'', hop:'' };
+window.__akProfil = { renk:'', aci:'', govde:'', abv:'', maya:'', tahil:'', malt:'', hop:'', nota:'' };
 window.__brAcik = false;
 
 window._bmProfilSec = function(eksen, deger){
   try{
-    if(!window.__akProfil) window.__akProfil = { renk:'', aci:'', govde:'', abv:'', maya:'', tahil:'', malt:'', hop:'' };
+    if(!window.__akProfil) window.__akProfil = { renk:'', aci:'', govde:'', abv:'', maya:'', tahil:'', malt:'', hop:'', nota:'' };
     window.__akProfil[eksen] = (window.__akProfil[eksen] === deger) ? '' : deger; // tekrar tık = temizle
     // Seçim yapıldıysa o ekseni katla (sonuç yukarı çıksın); temizlendiyse zaten açılır.
     if(!window.__brGenis) window.__brGenis = {};
     window.__brGenis[eksen] = false;
+    if(eksen === 'nota') window.__brNotaAcik = false; // SPRINT CB2: seçim/temizleme → panel katlanır (eksen deseni)
     // BQ1'in "kovada yoksa süzgeci sessizce düşür" davranışı KALDIRILDI: 5 eksen
     // de ekranda göründüğü için kullanıcının seçimini geri almak kafa karıştırır.
     // Seçim KORUNUR, çipte 0 yazar, boş sonuç hangi eksenin daralttığını söyler.
@@ -27920,10 +27934,11 @@ window._brGenislet = function(eksen){
 };
 
 window._bmProfilSifirla = function(){
-  window.__akProfil = { renk:'', aci:'', govde:'', abv:'', maya:'', tahil:'', malt:'', hop:'' };
+  window.__akProfil = { renk:'', aci:'', govde:'', abv:'', maya:'', tahil:'', malt:'', hop:'', nota:'' };
   window.__brGenis = {};
   window.__brHepsi = false;
   window.__brDetayAcik = false;
+  window.__brNotaAcik = false;
   if(window.__brAcik && document.getElementById('br-tam')) window._brCiz();
   else if(typeof render === 'function') render();
 };
@@ -28018,6 +28033,7 @@ window._bmProfilStilKart = function(){
       var o = null; x.sec.forEach(function(s){ if(s[0] === p[x.k]) o = s; });
       return x.ikon + ' ' + _e(o ? o[1] : p[x.k]);
     });
+    if(p.nota && window._CB_NOTA && window._CB_NOTA[p.nota]) sec.unshift('👅 ' + _e(window._CB_NOTA[p.nota].et)); // SPRINT CB2
     var ozet = '';
     if(sec.length){
       var s = window._brSonuc(p);
@@ -28027,9 +28043,164 @@ window._bmProfilStilKart = function(){
     }
     return '<button type="button" class="bm-profil-sec" onclick="_brAc()" '
       + 'style="width:100%;text-align:left;cursor:pointer;font-size:11px;font-weight:600;color:var(--kahve);padding:6px 8px;background:var(--bg2);border:1px solid var(--bor);border-radius:6px;font-family:var(--font-govde);margin:-4px 0 4px">'
-      + '🔎 Stilin adını bilmiyorum — <span style="font-weight:400;color:var(--soluk)">istediğim birayı tarif edeyim</span>'
+      + '🔎 Stil ara ya da tarif et — <span style="font-weight:400;color:var(--soluk)">adını yaz ya da istediğin birayı anlat</span>'
       + '</button>' + ozet;
   }catch(e){ try{ console.warn('_bmProfilStilKart', e); }catch(_){} return ''; }
+};
+
+// ═══ SPRINT CB2 — LEZZET NOTALARI (üretici: _cb_build_nota.js, repo kökü; 65 pozitif/negatif kontrol ABORT kapılı) ═══
+// Eksenlerin ÜSTÜNDE, kullanıcının düşündüğü dilde birleşik notalar. Her nota AÇIK bir kuralla korpustan:
+// "taşır" = o stilin reçetelerinin ≥%40'ı (BQ1'in "?" sınırı). Değer = gösterilen korpus payı.
+// ADAY 10 → verinin taşıdığı 10 nota; 3 niteleyici DÜŞTÜ (ölçülmüyor): "Tropikal & yumuşak" → Tropikal,
+// "Ekşi & ferah" → Ekşi, "Baharatlı & kuru" → Baharatlı (FG'nin çoğu yazılım tahmini; kuruluk tat iddiası taşımaz).
+// "Çikolata" kahveden AYRI tutuldu: porter'lar çikolata maltına (%59–62), stout'lar kavrulmuşa (%51–82) yaslanıyor;
+// Oatmeal/Milk Stout iki notada da (ikisini de taşıyor). "Muz & karanfil" = ALMAN BUĞDAY MAYASI payı
+// (Witbier %10 → girmez, Roggenbier %63 → girer: BJCP'de de weizen mayası). Veride olmayan notalar
+// (vanilya, meyve katkısı, laktoz/tatlı) EKLENMEDİ.
+window._CB_NOTA_SIRA = ["kahve","cikolata","muz","narenciye","tropik","eksi","isli","karamel","baharat","temiz"];
+window._CB_NOTA = {"kahve":{"et":"Kahve & kavrulmuş","ikon":"☕","uzun":"Kavrulmuş malt baskın (roast > çikolata malt) reçete payı ≥%40","stil":{"American Stout":56,"Dry Irish Stout":82,"Foreign Extra Stout":67,"Imperial / Russian Imperial Stout":60,"Milk Stout / Sweet Stout":49,"Oatmeal Stout":51}},"cikolata":{"et":"Çikolata","ikon":"🍫","uzun":"Çikolata maltı baskın (çikolata > roast) reçete payı ≥%40","stil":{"American Brown Ale":47,"Baltic Porter":44,"Brown Porter":59,"English Mild / Dark Mild":44,"London Porter":60,"Milk Stout / Sweet Stout":44,"Oatmeal Stout":44,"Robust Porter":62}},"muz":{"et":"Muz & karanfil","ikon":"🍌","uzun":"Alman buğday (weizen) mayası reçete payı ≥%40 — muz/karanfil bu mayanın imzası; Belçika/wit mayası sayılmaz","stil":{"Dunkelweizen":85,"Roggenbier / Rye Beer":63,"Weizen / Weissbier":81,"Weizenbock":84}},"narenciye":{"et":"Narenciye & acı","ikon":"🍊","uzun":"Baskın hop aroması narenciye (≥%40) ve reçetelerin çoğu (>%50) acı tarafta","stil":{"American Amber Ale / Red Ale":46,"American Amber IPA / Red IPA":45,"American Barleywine":49,"American IPA":46,"American Pale Ale":49,"Black IPA / Cascadian Dark Ale":48,"Imperial IPA / DIPA":41}},"tropik":{"et":"Tropikal","ikon":"🥭","uzun":"Baskın hop aroması tropikal (≥%40)","stil":{"NEIPA / Hazy IPA":70}},"eksi":{"et":"Ekşi","ikon":"🍋","uzun":"Ekşi/vahşi maya-bakteri reçete payı ≥%40","stil":{"Berliner Weisse":53,"Brett Beer / Farmhouse Brett":83,"Flanders Red Ale":75,"Lambic / Gueuze":85,"Mixed Fermentation Sour":67,"Oud Bruin":67}},"isli":{"et":"İsli","ikon":"🔥","uzun":"İsli malt reçete payı ≥%40","stil":{"Rauchbier / Bamberg Smoked":83,"Smoked Beer / Rauchbier":48}},"karamel":{"et":"Karamel & malt","ikon":"🍯","uzun":"Karamel+tost malt payı ≥%40, reçetelerin çoğu (>%50) malt/dengeli tarafta, ekşi değil","stil":{"Bière de Garde":48,"Bock":76,"Doppelbock":73,"Dunkelweizen":49,"Festbier / Wiesn":75,"Irish Red Ale":46,"Kellerbier / Zwickelbier":73,"Maibock / Helles Bock":70,"Munich Dunkel":72,"Munich Märzen / Oktoberfest":85,"Roggenbier / Rye Beer":49,"Vienna Lager":79,"Weizenbock":40}},"baharat":{"et":"Baharatlı","ikon":"🌶️","uzun":"Fenolik (Belçika/çiftlik/wit) maya payı ≥%40, Alman buğday mayası değil","stil":{"Belgian Blonde Ale":86,"Belgian Dark Strong Ale":94,"Belgian Quadrupel / Abt":98,"Belgian Strong Golden Ale":92,"Bière de Garde":68,"Dubbel":94,"Saison / Farmhouse Ale":88,"Tripel":96,"Witbier / Belgian White":91}},"temiz":{"et":"Temiz & ekmeksi","ikon":"🍞","uzun":"Temiz maya ≥%40 ve ekmeksi malt ≥%40; baskın hop narenciye/tropik değil","stil":{"American Lager / Light Lager":72,"California Common / Steam Beer":53,"Dortmunder Export":60,"German Pils":87,"Helles / Münchner Hell":73,"International Pale Lager":78,"Kölsch":87,"Pre-Prohibition Lager":87}}};
+// ═══ SPRINT CB1 — STİL ARAMA ═══════════════════════════════════════════════
+// Kaan: "Seçenekler çok genel soruyor; istediğim stili yazıp bulabilmeliyim." Arama OTORİTE listede
+// (BJCP, 239 stil — Hedef Stil dropdown'unun AYNISI). Seçim dropdown ile AYNI yol (S.stil + kaynak 'dropdown'),
+// "Yeni reçete" AV1 yolu. Puan: her sorgu kelimesi eşleşmeli (VE); stil adı kelimesi tam 100 · başı 80 ·
+// birincil Türkçe/yaygın ad 95 · eş anlam (ülke/tahıl/aile) 70/60 · ad içinde geçiyor 45; eşitlikte korpus
+// yaygınlığı (0–10, log) — "stout" yazınca en çok demlenen stout önce gelir. Eş anlamlar AD KALIBINA bağlı
+// (regex stil adında aranır) — stil başına elle liste YOK, yeni stil eklense de kendiliğinden kapsanır.
+window._brAraNorm = function(t){
+  return String(t == null ? '' : t).toLocaleLowerCase('tr')
+    .replace(/[ıİ]/g,'i').replace(/ş/g,'s').replace(/ç/g,'c').replace(/ğ/g,'g').replace(/ö/g,'o').replace(/ü/g,'u')
+    .replace(/[äâà]/g,'a').replace(/[éèê]/g,'e').replace(/ß/g,'ss').replace(/ñ/g,'n')
+    .replace(/[^a-z0-9]+/g,' ').trim();
+};
+// [ad kalıbı (normalize ad üzerinde), eş anlam kelimeleri]
+window._BR_ARA_ES = [
+  [/wheat|weizen|weiss|wit\b|witbier|blanche|lichtenhainer|grodziskie|gose/, ['bugday']],
+  [/belgian|tripel|dubbel|quadrupel|saison|witbier|lambic|gueuze|kriek|framboise|flanders|oud bruin|biere de|trappist|abbey|grisette/, ['belcika','belcik']],
+  [/german|pils|helles|marzen|oktoberfest|festbier|bock|kolsch|altbier|weizen|weiss|dunkel|schwarzbier|rauchbier|gose|berliner|kellerbier|dortmunder|munich|munchner|leicht|zoigl|roggenbier|dampfbier|lichtenhainer|rotbier/, ['alman']],
+  [/english|british|bitter|\besb\b|mild|london/, ['ingiliz']],
+  [/scottish|wee heavy/, ['iskoc']],
+  [/irish/, ['irlanda']],
+  [/american|west coast|california|kentucky|cream ale|pre prohibition/, ['amerikan']],
+  [/czech/, ['cek']],
+  [/sour|gose|berliner|lambic|gueuze|kriek|framboise|flanders|oud bruin|wild|brett|lichtenhainer|catharina/, ['eksi']],
+  [/smoked|rauch|grodziskie|lichtenhainer/, ['isli','fume']],
+  [/coffee/, ['kahve']], [/chocolate/, ['cikolata']], [/honey|braggot/, ['bal']],
+  [/fruit|kriek|framboise|berry|grape|cherry/, ['meyve','meyveli']], [/\boat/, ['yulaf']], [/rye|roggen/, ['cavdar']],
+  [/winter|christmas|holiday|hiver/, ['kis','yilbasi']], [/light|leicht|session|table/, ['hafif']],
+  [/hazy|neipa|new england|naturtrub|milkshake|juicy/, ['puslu','bulanik']], [/\bred\b|rotbier/, ['kirmizi']],
+  [/brown|bruin/, ['kahverengi']], [/black|schwarz/, ['siyah']], [/dark|dunkel|schwarz|black/, ['koyu']],
+  [/pale|blonde|golden|helles/, ['acik','sari']], [/trappist|abbey|dubbel|tripel|quadrupel/, ['manastir']],
+  [/farmhouse|saison|grisette|kveik|sahti|provision/, ['ciftlik']], [/spice|herb|gruit|christmas/, ['baharat','baharatli']],
+  [/pumpkin/, ['balkabagi','kabak']], [/rice/, ['pirinc']], [/mexican/, ['meksika']], [/australian/, ['avustralya']],
+  [/new zealand/, ['zelanda']], [/norwegian|kveik/, ['norvec']], [/japanese/, ['japon']], [/non alcoholic/, ['alkolsuz']],
+  [/double|imperial|dipa|doppel/, ['duble','cift']], [/pils/, ['pilsner','pilsener','pilsen']],
+  [/american pale ale/, ['apa']], [/russian imperial stout/, ['ris']], [/barrel|wood aged/, ['fici','meseli']]
+];
+// birincil yaygın adlar: sorgu bu kelimeyse bu stil öne çıkar (ör. "hefe" = Hefeweizen = Weizen / Weissbier)
+window._BR_ARA_BIRINCIL = {
+  'Weizen / Weissbier': ['bugday','hefe','hefeweizen','hefeweissbier','weissbier','weizen'],
+  'Belgian Witbier': ['wit'], 'Witbier / Belgian White': ['wit'],
+  'Munich Märzen / Oktoberfest': ['oktoberfest','marzen'], 'German Pils': ['pils','pilsner','pilsener'],
+  'Imperial / Russian Imperial Stout': ['ris']
+};
+window._brAraListe = function(q){
+  var B = (typeof BJCP !== 'undefined') ? BJCP : {};
+  var tok = window._brAraNorm(q).split(' ').filter(function(t){ return t.length >= 2; });
+  if(!tok.length) return [];
+  var pop = {}; try{ pop = window._brTopla({}).m || {}; }catch(_p){}
+  var mx = 1; Object.keys(pop).forEach(function(k){ if(pop[k] > mx) mx = pop[k]; });
+  var ES = window._BR_ARA_ES || [], BR = window._BR_ARA_BIRINCIL || {};
+  var out = [];
+  Object.keys(B).forEach(function(ad){
+    var an = window._brAraNorm(ad), kel = an.split(' ');
+    var es = []; ES.forEach(function(e){ if(e[0].test(an)) es = es.concat(e[1]); });
+    var bir = BR[ad] || [];
+    var top = 0, tamam = true;
+    tok.forEach(function(t){
+      var en = 0;
+      kel.forEach(function(w){ if(w === t) en = Math.max(en, 100); else if(w.indexOf(t) === 0) en = Math.max(en, 80); else if(t.length >= 3 && w.indexOf(t) > 0) en = Math.max(en, 45); });
+      bir.forEach(function(w){ if(w === t) en = Math.max(en, 95); else if(w.indexOf(t) === 0) en = Math.max(en, 85); });
+      es.forEach(function(w){ if(w === t) en = Math.max(en, 70); else if(w.indexOf(t) === 0) en = Math.max(en, 60); });
+      if(!en) tamam = false; top += en;
+    });
+    if(!tamam) return;
+    var n = pop[ad] || 0;
+    out.push({ ad:ad, skor: top + 10 * Math.log(1 + n) / Math.log(1 + mx), n:n });
+  });
+  out.sort(function(a, b){ return (b.skor - a.skor) || (a.ad.length - b.ad.length) || (a.ad < b.ad ? -1 : 1); });
+  return out;
+};
+window._BR_ARA_MAX = 8;
+window._brAraSonucHTML = function(){
+  var q = window.__brAra || '';
+  if(!window._brAraNorm(q)) return '';
+  var _e = (typeof esc === 'function') ? esc : function(x){ return String(x == null ? '' : x); };
+  var L = window._brAraListe(q);
+  window.__brAraSon = L.slice(0, window._BR_ARA_MAX).map(function(x){ return x.ad; });
+  if(!L.length) return '<div class="br-ara-yok">"' + _e(q) + '" için stil bulunamadı — aşağıdaki notalar ya da eksenlerle tarif ederek bulabilirsin.</div>';
+  var ISK = (typeof STIL_ISKELET !== 'undefined' && STIL_ISKELET) ? STIL_ISKELET : {};
+  var h = window.__brAraSon.map(function(ad, i){
+    var bj = BJCP[ad], x = L[i];
+    var alt = [bj && bj.abv ? '%' + bj.abv[0] + '–' + bj.abv[1] + ' ABV' : '', bj && bj.ibu ? bj.ibu[0] + '–' + bj.ibu[1] + ' IBU' : '',
+      x.n ? x.n.toLocaleString('tr-TR') + ' reçete korpusta' : 'korpusta örnek az/yok'].filter(Boolean).join(' · ');
+    return '<div class="br-ara-satir"><div style="flex:1;min-width:0"><div class="br-ara-ad">' + _e(ad) + (ISK[ad] ? ' <span class="br-isk">iskelet</span>' : '') + '</div>'
+      + '<div class="br-ara-alt">' + _e(alt) + '</div></div>'
+      + '<div class="br-satir-btn"><button type="button" class="br-btn-ana" onclick="_brAraYeni(' + i + ')" title="Bu stilden YENİ reçete oluştur (açık reçete korunur)">✨ Yeni reçete</button>'
+      + '<button type="button" class="br-btn-ikincil br-ara-sec" onclick="_brAraSec(' + i + ')" title="Açık reçetenin Hedef Stil\'ini bu yap (dropdown ile aynı)">🎯 Hedef yap</button></div></div>';
+  }).join('');
+  return h + (L.length > window._BR_ARA_MAX ? '<div class="br-ara-yok">' + (L.length - window._BR_ARA_MAX) + ' eşleşme daha — aramayı daralt (ör. "' + _e(q) + ' koyu").</div>' : '');
+};
+// Başlıkta (sabit, kaydırmaz): arama + nota düğmesi. ÖLÇÜM ZORUNLULUĞU: 360×640'ta seçimsizken sonuç başlığına
+// en fazla bir kısa kaydırma bütçesi var (BT1: <160 px; öncesi 110 px). Gövdeye açık nota şeridi + arama kutusu
+// koymak bu bütçeyi aşıyordu (ölçüldü: 234 px) — o yüzden arama alt yazının YERİNE başlığa, notalar tek dokunuşla açılan panele.
+window._brAraKutuHTML = function(){
+  var _e = (typeof esc === 'function') ? esc : function(x){ return String(x == null ? '' : x); };
+  var p = window.__akProfil || {}, N = window._CB_NOTA || {}, sec = p.nota && N[p.nota] ? N[p.nota] : null, acik = !!window.__brNotaAcik;
+  return '<div class="br-ara-satiri"><input id="br-ara" type="search" autocomplete="off" enterkeyhint="search" aria-label="Stil adıyla ara" '
+    + 'placeholder="🔍 Stil adı: weizen, stout, belçika…" value="' + _e(window.__brAra || '') + '" oninput="_brAra(this.value)">'
+    + '<button type="button" class="br-nota-ac' + (sec ? ' br-nota-secili' : '') + '" onclick="_brNotaAc()" aria-expanded="' + (acik ? 'true' : 'false') + '" '
+    + 'title="Lezzet notası seç (kahve, çikolata, muz & karanfil …)">' + (sec ? sec.ikon + ' ' + _e(sec.et) : '👅 Nota') + (acik ? ' ▴' : ' ▾') + '</button></div>';
+};
+window._brNotaAc = function(){
+  window.__brNotaAcik = !window.__brNotaAcik;
+  if(window.__brAcik && document.getElementById('br-tam')) window._brCiz();
+};
+// Yazarken yalnız sonuç kutusu yenilenir (tam yeniden çizim odağı/klavyeyi düşürürdü)
+window._brAra = function(v){
+  window.__brAra = String(v == null ? '' : v);
+  var k = document.getElementById('br-ara-sonuc'); if(k) k.innerHTML = window._brAraSonucHTML();
+};
+window._brAraSec = function(i){
+  var ad = (window.__brAraSon || [])[i]; if(!ad || typeof S === 'undefined' || !S) return;
+  window.__brAcik = false;
+  S.stil = ad; window.__stilSecKaynak = 'dropdown'; // Hedef Stil dropdown'u ile AYNI anlam: kullanıcının açık seçimi
+  if(typeof render === 'function') render();
+  if(typeof flash === 'function') flash('🎯 Hedef stil: ' + ad, 'ok');
+};
+window._brAraYeni = function(i){ var ad = (window.__brAraSon || [])[i]; return ad ? window._brYeniRecete(ad) : null; };
+
+// ═══ SPRINT CB2 — LEZZET NOTASI ŞERİDİ (eksenlerin üstünde, tek satır kayar) ═══
+// Tek seçim, tekrar tık temizler; çipteki sayı = o notayla kalan stil sayısı (BR çip sözleşmesinin aynısı).
+window._brNotaHTML = function(){
+  var N = window._CB_NOTA, SIRA = window._CB_NOTA_SIRA; if(!N || !SIRA) return '';
+  var _e = (typeof esc === 'function') ? esc : function(x){ return String(x == null ? '' : x); };
+  var p = window.__akProfil || {}, sec = p.nota || '';
+  var cips = SIRA.map(function(k){
+    var o = N[k]; if(!o) return '';
+    var akt = sec === k, kalan = window._brCipSayi('nota', k);
+    return '<button type="button" class="br-cip' + (akt ? ' br-cip-akt' : '') + (kalan ? '' : ' br-cip-olu') + '" data-nota="' + k + '" '
+      + 'onclick="_bmProfilSec(\'nota\',\'' + k + '\')" aria-pressed="' + (akt ? 'true' : 'false') + '" title="' + _e(o.uzun) + '">'
+      + o.ikon + ' ' + _e(o.et) + '<span class="br-cip-n">' + kalan + '</span></button>';
+  }).join('');
+  if(!window.__brNotaAcik){
+    if(!sec || !N[sec]) return '';
+    return '<div class="br-nota br-eksen-kapali"><span class="br-eksen-ad">👅 Lezzet notası</span>'
+      + '<button type="button" class="br-cip br-cip-akt" aria-pressed="true" title="Notayı kaldır" onclick="_bmProfilSec(\'nota\',\'' + sec + '\')">'
+      + N[sec].ikon + ' ' + _e(N[sec].et) + '<span class="br-cip-n">' + window._brCipSayi('nota', sec) + '</span></button>'
+      + '<button type="button" class="br-cip br-cip-degis" onclick="_brNotaAc()">değiştir</button></div>';
+  }
+  return '<div class="br-nota"><div class="br-nota-ad">👅 Lezzet notası <span style="font-weight:400">— korpustaki malt/maya/hop bileşiminden; dokun, liste süzülsün</span></div>'
+    + '<div class="br-nota-serit" role="group" aria-label="Lezzet notası">' + cips + '</div></div>';
 };
 
 // ── Sunum 2: TAM EKRAN. render() çıktısının parçası (tam render'da kaybolmaz),
@@ -28039,9 +28210,9 @@ window._brTamHTML = function(){
     if(!window.__brAcik) return '';
     var _e = (typeof esc === 'function') ? esc : function(s){ return String(s == null ? '' : s); };
     var say = function(n){ return (n || 0).toLocaleString('tr-TR'); };
-    var p = window.__akProfil || { renk:'', aci:'', govde:'', abv:'', maya:'', tahil:'', malt:'', hop:'' };
+    var p = window.__akProfil || { renk:'', aci:'', govde:'', abv:'', maya:'', tahil:'', malt:'', hop:'', nota:'' };
     var s = window._brSonuc(p);
-    var karAktif = !!(p.abv || p.maya || p.tahil || p.malt || p.hop);
+    var karAktif = !!(p.abv || p.maya || p.tahil || p.malt || p.hop || p.nota);
 
     // ── 5 eksen, HEPSİ İSTEĞE BAĞLI, HEPSİ AYNI EKRANDA ──────────────────
     // KATLAMA: bir eksen SEÇİLİNCE tek satıra iner (seçim + 'değiştir'), böylece
@@ -28089,7 +28260,8 @@ window._brTamHTML = function(){
     var _detay = _tumEksen.filter(function(x){ return x.grup === 'detay'; });
     var _detaySecili = _detay.filter(function(x){ return p[x.k]; }).length;
     var _detayAcik = !!window.__brDetayAcik || _detaySecili > 0;
-    var bloklar = _temel.map(_cizEksen).join('')
+    var bloklar = '<div id="br-ara-sonuc" class="br-ara-sonuc" aria-live="polite">' + window._brAraSonucHTML() + '</div>' + window._brNotaHTML() // SPRINT CB1 + CB2: eksenlerin ÜSTÜNDE
+      + _temel.map(_cizEksen).join('')
       + (_detay.length
           ? '<button type="button" class="br-grup" onclick="_brDetayAc()" aria-expanded="' + (_detayAcik ? 'true' : 'false') + '">'
             + (_detayAcik ? '▴ ' : '▾ ') + 'Detaylı tarif: '
@@ -28115,6 +28287,7 @@ window._brTamHTML = function(){
         var et = {}; x.sec.forEach(function(o){ et[o[0]] = o[1]; });
         eksAd[x.k] = { ikon:x.ikon, ad:x.ad, et:et };
       });
+      (function(){ var et = {}, N = window._CB_NOTA || {}; Object.keys(N).forEach(function(k){ et[k] = N[k].et; }); eksAd.nota = { ikon:'👅', ad:'Lezzet notası', et:et }; })(); // SPRINT CB2
       var etiket = function(e, v){ var E = eksAd[e] || { ikon:'', et:{} }; return E.ikon + ' ' + _e((E.et && E.et[v]) || v); };
       sonucHTML = '<div class="br-bos">'
         + '<div style="font-weight:700;margin-bottom:4px">⚠️ Bu birleşimde stil yok</div>'
@@ -28141,6 +28314,8 @@ window._brTamHTML = function(){
         var bj = (typeof BJCP !== 'undefined') ? BJCP[ad] : null;
         var bant = (bj && bj.abv) ? ('%' + bj.abv[0] + '–' + bj.abv[1] + ' ABV') : '';
         var pay = s.toplam ? Math.round(100 * n / s.toplam) : 0;
+        var _NN = p.nota && window._CB_NOTA ? window._CB_NOTA[p.nota] : null; // SPRINT CB2
+        if(_NN && _NN.stil[ad] != null) kar = _NN.ikon + ' ' + _e(_NN.et) + ' %' + _NN.stil[ad] + (kar ? ' · ' + kar : '');
         return '<div class="br-satir">'
           + '<div style="flex:1;min-width:0">'
           +   '<div class="br-satir-ad">' + _e(ad)
@@ -28170,7 +28345,8 @@ window._brTamHTML = function(){
       sonucHTML = '<div class="br-sonuc-bas">' + bas + '</div>' + satirlar + dahaBtn;
     }
 
-    var dipnot = '<div class="br-dipnot">Sayılar ' + say(336149) + ' ev-üretimi reçetenin dağılımıdır — '
+    var dipnot = '<div class="br-dipnot">Her eksen ve nota <b>isteğe bağlı</b> — seçmediğin süzmez. <b>Lezzet notaları</b> tat ölçümü değil, korpustaki malt/maya/hop bileşiminden açık kurallarla gelir: bir stil, reçetelerinin en az %40\'ı o bileşimi taşıyorsa notada görünür (ör. Muz & karanfil = Alman buğday mayası). Arama 239 BJCP stilinde ad ve Türkçe karşılıklarla yapılır. '
+      + 'Sayılar ' + say(336149) + ' ev-üretimi reçetenin dağılımıdır — '
       + '<b>kalite değerlendirmesi değil</b>, "kaç kişi böyle demlemiş" bilgisi. Çiplerdeki sayı: o seçimle '
       + 'kalan <b>stil</b> sayısı (0 = çıkmaz sokak, seçmeden önce görürsün). Gövde ekseni grist bileşiminden '
       + 'türetilir (dataset FG\'si güvenilmez). Tahıl sınıfı gristteki orandan gelir (buğday ≥%21 · çavdar ≥%22 · yulaf ≥%5; eşikler BJCP tanımlı stillere karşı kalibre edildi, mısır/pirinç sınıfı korpus desteklemediği için YOK). Maya/malt karakteri de aynı korpustan gelir: maya sınıfı '
@@ -28180,7 +28356,7 @@ window._brTamHTML = function(){
     return '<div id="br-tam" class="br-tam" role="dialog" aria-modal="true" aria-label="İstediğin birayı tarif et" tabindex="-1">'
       + '<div class="br-tam-bas">'
       +   '<div style="flex:1;min-width:0"><div class="br-tam-baslik">🍺 İstediğin birayı tarif et</div>'
-      +   '<div class="br-tam-alt-yazi">Her eksen isteğe bağlı — seçmediğin eksen süzmez.</div></div>'
+      +   window._brAraKutuHTML() + '</div>'
       +   '<button type="button" class="br-kapat" onclick="_brKapat()" aria-label="Kapat" title="Kapat (Esc)">✕</button>'
       + '</div>'
       + '<div class="br-tam-govde">' + bloklar + '<div class="br-ayrac"></div>' + sonucHTML + dipnot + '</div>'
