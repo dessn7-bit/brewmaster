@@ -7787,15 +7787,15 @@ const CASELER = [
     })
   },
   {
-    kod: 'CB2-NOTA', ad: 'LEZZET NOTALARI: eksenlerin üstünde 10 nota (kahve · çikolata · muz&karanfil · narenciye&acı · tropikal · ekşi · isli · karamel&malt · baharatlı · temiz&ekmeksi), hepsi korpustan açık kuralla; her nota için POZİTİF/NEGATİF kontrol tablosu; "Muz & karanfil" → yalnız Weizen ailesi (+Roggenbier), IPA YOK, Witbier YOK; eksenlerle VE; çipteki sayı = kalan stil; boş sonuç notayı adıyla söyler; satırda nota payı; özet kartta 👅',
+    kod: 'CB2-NOTA', ad: 'LEZZET NOTALARI: eksenlerin üstünde 11 nota (CB2-ek: +meyvemsi; kahve · çikolata · muz&karanfil · narenciye&acı · tropikal · ekşi · isli · karamel&malt · baharatlı · temiz&ekmeksi), hepsi korpustan açık kuralla; her nota için POZİTİF/NEGATİF kontrol tablosu; "Muz & karanfil" → yalnız Weizen ailesi (+Roggenbier), IPA YOK, Witbier YOK; eksenlerle VE; çipteki sayı = kalan stil; boş sonuç notayı adıyla söyler; satırda nota payı; özet kartta 👅',
     calistir: (page) => page.evaluate(() => {
       yeniTarif(); render(); _brAc();
       __REG.ok('varsayılan: nota paneli kapalı (gövdede yer kaplamaz), başlıkta 👅 Nota düğmesi', !document.querySelector('#br-tam .br-nota') && /👅 Nota/.test(document.querySelector('#br-tam .br-nota-ac').textContent));
       _brNotaAc();
       __REG.ok('düğme → panel açıldı, eksenlerin ÜSTÜNDE, çipler SARIYOR', !!document.querySelector('#br-tam .br-nota') && !!(document.querySelector('#br-tam .br-nota').compareDocumentPosition(document.querySelector('#br-tam .br-eksen')) & Node.DOCUMENT_POSITION_FOLLOWING) && getComputedStyle(document.querySelector('#br-tam .br-nota-serit')).flexWrap === 'wrap');
       const cips = [...document.querySelectorAll('#br-tam .br-nota .br-cip')];
-      __REG.ok('10 nota çipi, hepsi > 0 stil', cips.length === 10 && cips.every(c => +c.querySelector('.br-cip-n').textContent > 0), cips.map(c => c.textContent).join(' | '));
-      __REG.ok('aday listede olmayan nota YOK (vanilya/laktoz/meyve)', !cips.some(c => /vanilya|laktoz|tatlı|meyve/i.test(c.textContent)));
+      __REG.ok('11 nota çipi (CB2-ek: +Meyvemsi), hepsi > 0 stil', cips.length === 11 && cips.every(c => +c.querySelector('.br-cip-n').textContent > 0), cips.map(c => c.textContent).join(' | '));
+      __REG.ok('aday listede olmayan nota YOK (vanilya/laktoz/meyve)', !cips.some(c => /vanilya|laktoz|tatlı|meyve katk/i.test(c.textContent)));
       __REG.ok('düşen niteleyiciler etikette yok (yumuşak/ferah/kuru)', !cips.some(c => /yumuşak|ferah|kuru/i.test(c.textContent)));
       __REG.ok('temel eksen sayısı DEĞİŞMEDİ (4 .br-eksen)', document.querySelectorAll('#br-tam .br-eksen').length === 4);
       const T = {
@@ -7808,7 +7808,8 @@ const CASELER = [
         isli: { v: ['Rauchbier / Bamberg Smoked'], y: ['American IPA', 'Dry Irish Stout'] },
         karamel: { v: ['Munich Märzen / Oktoberfest', 'Bock', 'Doppelbock'], y: ['American IPA', 'Altbier / Düsseldorf Altbier', 'Flanders Red Ale'] },
         baharat: { v: ['Tripel', 'Saison / Farmhouse Ale', 'Dubbel'], y: ['Weizen / Weissbier', 'American IPA'] },
-        temiz: { v: ['German Pils', 'Helles / Münchner Hell', 'Kölsch'], y: ['American IPA', 'Weizen / Weissbier', 'Dry Irish Stout'] }
+        temiz: { v: ['German Pils', 'Helles / Münchner Hell', 'Kölsch'], y: ['American IPA', 'Weizen / Weissbier', 'Dry Irish Stout'] },
+        meyvemsi: { v: ['Best Bitter', 'Strong Bitter / ESB', 'English Mild / Dark Mild', 'English Brown Ale'], y: ['Weizen / Weissbier', 'American IPA', 'German Pils'] }
       };
       const tablo = [];
       Object.keys(T).forEach(k => {
@@ -7841,6 +7842,73 @@ const CASELER = [
       __REG.ok('editördeki özet kart notayı söylüyor (👅 İsli → N stil)', /👅 İsli/.test((document.querySelector('.bm-br-ozet') || {}).textContent || ''));
       _bmProfilSifirla();
       __REG.ok('kontrol tablosu ' + tablo.join(' '), tablo.every(t => /:\+-$/.test(t)));
+      return __REG.al();
+    })
+  },
+  // ── SPRINT CB2-ek (Kaan onayı): CB'nin iki açık sorusu ──
+  {
+    kod: 'CB3-MEYVEMSI', ad: 'MEYVEMSİ (İNGİLİZ MAYASI) NOTASI: CB2 kuralının AYNISI (esterli maya payı ≥%40, ek istisna YOK); Kaan\'ın kontrol tablosu — Bitter/ESB/Mild/English Brown GEÇER, Weizen/American IPA/Pils GEÇMEZ; notasız stil 15 → 5 (yeniden ölçüldü); nota paneli 360 ve 390 px\'te TAŞMIYOR (11 çip sarıyor, ≥44 px)',
+    calistir: async (page) => {
+      const veri = await page.evaluate(() => {
+        const N = window._CB_NOTA, M = N.meyvemsi;
+        const pos = ['Best Bitter', 'Strong Bitter / ESB', 'English Mild / Dark Mild', 'English Brown Ale', 'Session Ale / Ordinary Bitter', 'English IPA'];
+        const neg = ['Weizen / Weissbier', 'American IPA', 'German Pils', 'Tripel', 'Helles / Münchner Hell'];
+        __REG.ok('nota var: 🍑 Meyvemsi (İngiliz mayası), sırada temiz\'den önce', !!M && M.et === 'Meyvemsi (İngiliz mayası)' && window._CB_NOTA_SIRA.indexOf('meyvemsi') === window._CB_NOTA_SIRA.indexOf('temiz') - 1);
+        pos.forEach(a => __REG.ok('GEÇER: ' + a, M.stil[a] >= 40, M.stil[a]));
+        neg.forEach(a => __REG.ok('GEÇMEZ: ' + a, M.stil[a] == null));
+        __REG.ok('kural tek: tablodaki her değer ≥40 (ek istisna yok)', Object.keys(M.stil).every(a => M.stil[a] >= 40));
+        const tum = new Set(); Object.keys(N).forEach(k => Object.keys(N[k].stil).forEach(a => tum.add(a)));
+        const notasiz = Object.keys(window._PROFIL_KARAKTER).filter(a => !tum.has(a));
+        __REG.ok('notasız stil 5 (15 idi): Altbier · American Wheat · Schwarzbier · American Strong · Blonde/Cream', notasiz.length === 5 && ['Altbier / Düsseldorf Altbier', 'American Wheat Beer', 'Schwarzbier', 'American Strong Ale', 'Blonde Ale / Cream Ale'].every(a => notasiz.includes(a)), notasiz.join(' | '));
+        _bmProfilSifirla(); _bmProfilSec('nota', 'meyvemsi');
+        const L = _brSonuc().stiller;
+        __REG.ok('seçilince sonuç: ESB var, Weizen yok', L.includes('Strong Bitter / ESB') && !L.includes('Weizen / Weissbier'), L.length);
+        _bmProfilSifirla();
+        return __REG.al();
+      });
+      for (const [w, h] of [[360, 640], [390, 844]]) {
+        await page.setViewport({ width: w, height: h }); // BR6 deseni: isMobile/hasTouch sayfayı YENİDEN YÜKLER (yardımcılar kaybolur)
+        // BR6 dersi: .bm-sidebar çekmeceye 250 ms ANİMASYONLA gider; sabit bekleme YOK, ekran dışına çıkması beklenir
+        await page.waitForFunction(() => { const sb = document.querySelector('.bm-sidebar'); if (!sb || getComputedStyle(sb).position !== 'fixed') return true; return sb.getBoundingClientRect().right <= 0.5; }, { timeout: 4000 });
+        const r = await page.evaluate((w) => {
+          yeniTarif(); render(); _brAc(); _brNotaAc();
+          const cips = [...document.querySelectorAll('#br-tam .br-nota .br-cip')];
+          const tasan = cips.filter(c => { const b = c.getBoundingClientRect(); return b.right > innerWidth + 0.5 || b.left < -0.5; });
+          __REG.ok(w + ': 11 çip, HİÇBİRİ viewport dışına taşmıyor', cips.length === 11 && tasan.length === 0, tasan.map(c => c.textContent).join(','));
+          __REG.ok(w + ': sayfada yatay kaydırma yok', document.documentElement.scrollWidth <= innerWidth && document.querySelector('#br-tam .br-tam-govde').scrollWidth <= document.querySelector('#br-tam .br-tam-govde').clientWidth + 1);
+          __REG.ok(w + ': nota çipleri ≥44 px dokunma hedefi', cips.every(c => c.getBoundingClientRect().height >= 44), cips.filter(c => c.getBoundingClientRect().height < 44).length + ' küçük');
+          const el = cips.find(c => /Meyvemsi/.test(c.textContent)), b = el.getBoundingClientRect();
+          __REG.ok(w + ': Meyvemsi çipi görünür (elementFromPoint kaplama kanıtı)', (document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2) || {}).closest && !!document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2).closest('.br-cip'), JSON.stringify({ top: Math.round(b.top), bot: Math.round(b.bottom), ih: innerHeight, el: (document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2) || {}).className || String(document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2)) }));
+          _brKapat(); _bmProfilSifirla();
+          return __REG.al();
+        }, w);
+        veri.push(...r);
+      }
+      return veri;
+    }
+  },
+  {
+    kod: 'CB4-ARAMA-SIRA', ad: 'ARAMA SIRASI: eşleşme kalitesi (neredeyse) eşitse korpus yaygınlığı öne geçer — "weizen" → Weizen/Weissbier · Weizenbock · Dunkelweizen İLK 3, Leichtes Weizen SONRA; diğer CB aramaları KÖTÜLEŞMEDİ (stout · belçika · ipa · buğday · hefe ilk 5 aynen); tam ad popülerlik yakınken korunur (bock · pils · porter); "koyu weizen" Almanca "Dunkles"i de buluyor',
+    calistir: (page) => page.evaluate(() => {
+      const ilk = (q, k) => _brAraListe(q).slice(0, k || 5).map(x => x.ad);
+      const w = ilk('weizen', 6);
+      __REG.ok('"weizen" ilk 3: Weizen/Weissbier · Weizenbock · Dunkelweizen', w[0] === 'Weizen / Weissbier' && w[1] === 'Weizenbock' && w[2] === 'Dunkelweizen', w.join(' | '));
+      __REG.ok('"weizen": Leichtes Weizen Weizenbock ve Dunkelweizen\'den SONRA', w.indexOf('Leichtes Weizen') > 2, w.join(' | '));
+      // CB'deki tablo — ilk 5 BİREBİR (CB2-ek öncesi ölçülen sıra)
+      const T = {
+        'stout': ['Imperial / Russian Imperial Stout', 'American Stout', 'Oatmeal Stout', 'Milk Stout / Sweet Stout', 'Dry Irish Stout'],
+        'belçika': ['Saison / Farmhouse Ale', 'Belgian Dark Strong Ale', 'Belgian Blonde Ale', 'Witbier / Belgian White', 'Dubbel'],
+        'ipa': ['American IPA', 'Imperial IPA / DIPA', 'English IPA', 'Black IPA / Cascadian Dark Ale', 'American Amber IPA / Red IPA'],
+        'buğday': ['Weizen / Weissbier', 'American Wheat Beer', 'Witbier / Belgian White', 'Dunkelweizen', 'Berliner Weisse'],
+        'hefe': ['Weizen / Weissbier', 'Hoppy Hefeweizen', 'American Hefeweizen']
+      };
+      Object.keys(T).forEach(q => { const L = ilk(q); __REG.ok('"' + q + '" ilk 5 KÖTÜLEŞMEDİ (aynen)', JSON.stringify(L) === JSON.stringify(T[q]), L.join(' | ')); });
+      __REG.ok('"bock": Bock ilk 2 (tam ad), Maibock/Helles Bock tam kelime eşleşmesiyle önde', ilk('bock', 2).includes('Bock'), ilk('bock').join(' | '));
+      __REG.ok('"pils": German Pils ilk', ilk('pils')[0] === 'German Pils');
+      __REG.ok('"porter": Robust Porter ilk', ilk('porter')[0] === 'Robust Porter');
+      const kw = ilk('koyu weizen');
+      __REG.ok('"koyu weizen": Dunkelweizen + Dunkles Weizenbock (Almanca dunkl- kalıbı)', kw.includes('Dunkelweizen') && kw.includes('Dunkles Weizenbock'), kw.join(' | '));
+      __REG.ok('yaygınlık ağırlığı tek sabit (_BR_ARA_POP = 40)', window._BR_ARA_POP === 40);
       return __REG.al();
     })
   }

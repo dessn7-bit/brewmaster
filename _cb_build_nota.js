@@ -20,6 +20,8 @@
 //   🍯 Karamel & malt      karamel+tost malt payı ≥40 VE >%50 malt/dengeli tarafta VE ekşi payı <40
 //   🌶️ Baharatlı           fenolik ≥40 VE Alman buğday mayası <40 (Belçika/çiftlik/wit) — "& kuru" DÜŞTÜ
 //   🍞 Temiz & ekmeksi     temiz maya ≥40 VE ekmeksi malt ≥40 VE baskın hop narenciye/tropik DEĞİL
+//   🍑 Meyvemsi (İngiliz)  esterli (İngiliz ale) maya payı ≥40 — CB2 kuralının AYNISI, ek istisna YOK (Kaan: Mild GEÇMELİ;
+//                         'kavrulmuşu hariç tut' istisnası Mild'ı eliyordu → kaldırıldı). Stout/porter'lar da girer: veri bu.
 // EKLENMEYENLER (veride yok): vanilya, meyve katkısı, laktoz/tatlı.
 //
 // KAPI: her notanın pozitif/negatif kontrolleri aşağıda; biri tutmazsa ABORT (tablo yazılmaz).
@@ -83,7 +85,7 @@ function bitir() {
   S.forEach((v, ad) => {
     P[ad] = { n: v.n, kav: pay(v.malt, 'kavrulmus'), cik: pay(v.malt, 'cikolata'), isli: pay(v.malt, 'isli'),
       kar: pay(v.malt, 'karamel'), tost: pay(v.malt, 'tost'), ekm: pay(v.malt, 'ekmeksi'),
-      fen: pay(v.maya, 'fenolik'), eksi: pay(v.maya, 'eksi'), temiz: pay(v.maya, 'temiz'),
+      fen: pay(v.maya, 'fenolik'), eksi: pay(v.maya, 'eksi'), temiz: pay(v.maya, 'temiz'), est: pay(v.maya, 'esterli'),
       wz: v.n ? Math.round(100 * v.wz / v.n) : 0,
       aciYuk: pay(v.aci, 'hop') + pay(v.aci, 'cokaci'), aciDus: pay(v.aci, 'malt') + pay(v.aci, 'dengeli'),
       hop: KAR[ad][8] || '', hopPay: KAR[ad][9] || 0 };
@@ -103,6 +105,7 @@ function bitir() {
     ['isli', 'İsli', '🔥', 'İsli malt reçete payı ≥%40', p => p.isli >= E ? p.isli : null],
     ['karamel', 'Karamel & malt', '🍯', 'Karamel+tost malt payı ≥%40, reçetelerin çoğu (>%50) malt/dengeli tarafta, ekşi değil', p => (p.kar + p.tost >= E && p.aciDus > 50 && p.eksi < E) ? (p.kar + p.tost) : null],
     ['baharat', 'Baharatlı', '🌶️', 'Fenolik (Belçika/çiftlik/wit) maya payı ≥%40, Alman buğday mayası değil', p => (p.fen >= E && p.wz < E) ? p.fen : null],
+    ['meyvemsi', 'Meyvemsi (İngiliz mayası)', '🍑', 'İngiliz ale mayası (esterli — meyvemsi esterler) reçete payı ≥%40', p => p.est >= E ? p.est : null],
     ['temiz', 'Temiz & ekmeksi', '🍞', 'Temiz maya ≥%40 ve ekmeksi malt ≥%40; baskın hop narenciye/tropik değil', p => (p.temiz >= E && p.ekm >= E && p.hop !== 'narenciye' && p.hop !== 'tropik') ? Math.min(p.temiz, p.ekm) : null]
   ];
   const T = {};
@@ -123,6 +126,7 @@ function bitir() {
     isli: { var: ['Rauchbier / Bamberg Smoked'], yok: ['American IPA', 'Dry Irish Stout', 'German Pils'] },
     karamel: { var: ['Munich Märzen / Oktoberfest', 'Bock', 'Doppelbock'], yok: ['American IPA', 'Altbier / Düsseldorf Altbier', 'Flanders Red Ale', 'German Pils'] },
     baharat: { var: ['Tripel', 'Saison / Farmhouse Ale', 'Dubbel', 'Witbier / Belgian White'], yok: ['Weizen / Weissbier', 'American IPA', 'German Pils'] },
+    meyvemsi: { var: ['Best Bitter', 'Strong Bitter / ESB', 'English Mild / Dark Mild', 'English Brown Ale', 'Session Ale / Ordinary Bitter', 'English IPA'], yok: ['Weizen / Weissbier', 'American IPA', 'German Pils', 'Tripel', 'Helles / Münchner Hell'] },
     temiz: { var: ['German Pils', 'Helles / Münchner Hell', 'Kölsch'], yok: ['American IPA', 'American Pale Ale', 'Weizen / Weissbier', 'Dry Irish Stout'] }
   };
   let kontrol = 0;

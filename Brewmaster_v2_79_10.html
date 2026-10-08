@@ -28057,14 +28057,19 @@ window._bmProfilStilKart = function(){
 // Oatmeal/Milk Stout iki notada da (ikisini de taşıyor). "Muz & karanfil" = ALMAN BUĞDAY MAYASI payı
 // (Witbier %10 → girmez, Roggenbier %63 → girer: BJCP'de de weizen mayası). Veride olmayan notalar
 // (vanilya, meyve katkısı, laktoz/tatlı) EKLENMEDİ.
-window._CB_NOTA_SIRA = ["kahve","cikolata","muz","narenciye","tropik","eksi","isli","karamel","baharat","temiz"];
-window._CB_NOTA = {"kahve":{"et":"Kahve & kavrulmuş","ikon":"☕","uzun":"Kavrulmuş malt baskın (roast > çikolata malt) reçete payı ≥%40","stil":{"American Stout":56,"Dry Irish Stout":82,"Foreign Extra Stout":67,"Imperial / Russian Imperial Stout":60,"Milk Stout / Sweet Stout":49,"Oatmeal Stout":51}},"cikolata":{"et":"Çikolata","ikon":"🍫","uzun":"Çikolata maltı baskın (çikolata > roast) reçete payı ≥%40","stil":{"American Brown Ale":47,"Baltic Porter":44,"Brown Porter":59,"English Mild / Dark Mild":44,"London Porter":60,"Milk Stout / Sweet Stout":44,"Oatmeal Stout":44,"Robust Porter":62}},"muz":{"et":"Muz & karanfil","ikon":"🍌","uzun":"Alman buğday (weizen) mayası reçete payı ≥%40 — muz/karanfil bu mayanın imzası; Belçika/wit mayası sayılmaz","stil":{"Dunkelweizen":85,"Roggenbier / Rye Beer":63,"Weizen / Weissbier":81,"Weizenbock":84}},"narenciye":{"et":"Narenciye & acı","ikon":"🍊","uzun":"Baskın hop aroması narenciye (≥%40) ve reçetelerin çoğu (>%50) acı tarafta","stil":{"American Amber Ale / Red Ale":46,"American Amber IPA / Red IPA":45,"American Barleywine":49,"American IPA":46,"American Pale Ale":49,"Black IPA / Cascadian Dark Ale":48,"Imperial IPA / DIPA":41}},"tropik":{"et":"Tropikal","ikon":"🥭","uzun":"Baskın hop aroması tropikal (≥%40)","stil":{"NEIPA / Hazy IPA":70}},"eksi":{"et":"Ekşi","ikon":"🍋","uzun":"Ekşi/vahşi maya-bakteri reçete payı ≥%40","stil":{"Berliner Weisse":53,"Brett Beer / Farmhouse Brett":83,"Flanders Red Ale":75,"Lambic / Gueuze":85,"Mixed Fermentation Sour":67,"Oud Bruin":67}},"isli":{"et":"İsli","ikon":"🔥","uzun":"İsli malt reçete payı ≥%40","stil":{"Rauchbier / Bamberg Smoked":83,"Smoked Beer / Rauchbier":48}},"karamel":{"et":"Karamel & malt","ikon":"🍯","uzun":"Karamel+tost malt payı ≥%40, reçetelerin çoğu (>%50) malt/dengeli tarafta, ekşi değil","stil":{"Bière de Garde":48,"Bock":76,"Doppelbock":73,"Dunkelweizen":49,"Festbier / Wiesn":75,"Irish Red Ale":46,"Kellerbier / Zwickelbier":73,"Maibock / Helles Bock":70,"Munich Dunkel":72,"Munich Märzen / Oktoberfest":85,"Roggenbier / Rye Beer":49,"Vienna Lager":79,"Weizenbock":40}},"baharat":{"et":"Baharatlı","ikon":"🌶️","uzun":"Fenolik (Belçika/çiftlik/wit) maya payı ≥%40, Alman buğday mayası değil","stil":{"Belgian Blonde Ale":86,"Belgian Dark Strong Ale":94,"Belgian Quadrupel / Abt":98,"Belgian Strong Golden Ale":92,"Bière de Garde":68,"Dubbel":94,"Saison / Farmhouse Ale":88,"Tripel":96,"Witbier / Belgian White":91}},"temiz":{"et":"Temiz & ekmeksi","ikon":"🍞","uzun":"Temiz maya ≥%40 ve ekmeksi malt ≥%40; baskın hop narenciye/tropik değil","stil":{"American Lager / Light Lager":72,"California Common / Steam Beer":53,"Dortmunder Export":60,"German Pils":87,"Helles / Münchner Hell":73,"International Pale Lager":78,"Kölsch":87,"Pre-Prohibition Lager":87}}};
+// SPRINT CB2-ek (Kaan onayı): 11. nota 🍑 Meyvemsi (İngiliz mayası) = esterli maya payı ≥%40, AYNI kural, ek istisna YOK
+// (Mild GEÇMELİ dendi; "kavrulmuşu hariç tut" istisnası Mild'ı eliyordu). Stout/porter'lar da girer — veri bu.
+// Notasız stil 15 → 5 (Altbier · American Wheat · Schwarzbier · American Strong Ale · Blonde/Cream Ale).
+window._CB_NOTA_SIRA = ["kahve","cikolata","muz","narenciye","tropik","eksi","isli","karamel","baharat","meyvemsi","temiz"];
+window._CB_NOTA = {"kahve":{"et":"Kahve & kavrulmuş","ikon":"☕","uzun":"Kavrulmuş malt baskın (roast > çikolata malt) reçete payı ≥%40","stil":{"American Stout":56,"Dry Irish Stout":82,"Foreign Extra Stout":67,"Imperial / Russian Imperial Stout":60,"Milk Stout / Sweet Stout":49,"Oatmeal Stout":51}},"cikolata":{"et":"Çikolata","ikon":"🍫","uzun":"Çikolata maltı baskın (çikolata > roast) reçete payı ≥%40","stil":{"American Brown Ale":47,"Baltic Porter":44,"Brown Porter":59,"English Mild / Dark Mild":44,"London Porter":60,"Milk Stout / Sweet Stout":44,"Oatmeal Stout":44,"Robust Porter":62}},"muz":{"et":"Muz & karanfil","ikon":"🍌","uzun":"Alman buğday (weizen) mayası reçete payı ≥%40 — muz/karanfil bu mayanın imzası; Belçika/wit mayası sayılmaz","stil":{"Dunkelweizen":85,"Roggenbier / Rye Beer":63,"Weizen / Weissbier":81,"Weizenbock":84}},"narenciye":{"et":"Narenciye & acı","ikon":"🍊","uzun":"Baskın hop aroması narenciye (≥%40) ve reçetelerin çoğu (>%50) acı tarafta","stil":{"American Amber Ale / Red Ale":46,"American Amber IPA / Red IPA":45,"American Barleywine":49,"American IPA":46,"American Pale Ale":49,"Black IPA / Cascadian Dark Ale":48,"Imperial IPA / DIPA":41}},"tropik":{"et":"Tropikal","ikon":"🥭","uzun":"Baskın hop aroması tropikal (≥%40)","stil":{"NEIPA / Hazy IPA":70}},"eksi":{"et":"Ekşi","ikon":"🍋","uzun":"Ekşi/vahşi maya-bakteri reçete payı ≥%40","stil":{"Berliner Weisse":53,"Brett Beer / Farmhouse Brett":83,"Flanders Red Ale":75,"Lambic / Gueuze":85,"Mixed Fermentation Sour":67,"Oud Bruin":67}},"isli":{"et":"İsli","ikon":"🔥","uzun":"İsli malt reçete payı ≥%40","stil":{"Rauchbier / Bamberg Smoked":83,"Smoked Beer / Rauchbier":48}},"karamel":{"et":"Karamel & malt","ikon":"🍯","uzun":"Karamel+tost malt payı ≥%40, reçetelerin çoğu (>%50) malt/dengeli tarafta, ekşi değil","stil":{"Bière de Garde":48,"Bock":76,"Doppelbock":73,"Dunkelweizen":49,"Festbier / Wiesn":75,"Irish Red Ale":46,"Kellerbier / Zwickelbier":73,"Maibock / Helles Bock":70,"Munich Dunkel":72,"Munich Märzen / Oktoberfest":85,"Roggenbier / Rye Beer":49,"Vienna Lager":79,"Weizenbock":40}},"baharat":{"et":"Baharatlı","ikon":"🌶️","uzun":"Fenolik (Belçika/çiftlik/wit) maya payı ≥%40, Alman buğday mayası değil","stil":{"Belgian Blonde Ale":86,"Belgian Dark Strong Ale":94,"Belgian Quadrupel / Abt":98,"Belgian Strong Golden Ale":92,"Bière de Garde":68,"Dubbel":94,"Saison / Farmhouse Ale":88,"Tripel":96,"Witbier / Belgian White":91}},"meyvemsi":{"et":"Meyvemsi (İngiliz mayası)","ikon":"🍑","uzun":"İngiliz ale mayası (esterli — meyvemsi esterler) reçete payı ≥%40","stil":{"American Brown Ale":45,"American Stout":48,"Baltic Porter":43,"Best Bitter":87,"Brown Porter":70,"Dry Irish Stout":77,"English Barleywine":72,"English Brown Ale":87,"English IPA":69,"English Mild / Dark Mild":86,"Foreign Extra Stout":68,"Imperial / Russian Imperial Stout":47,"Irish Red Ale":71,"London Porter":61,"Milk Stout / Sweet Stout":68,"NEIPA / Hazy IPA":64,"Oatmeal Stout":76,"Old Ale":73,"Robust Porter":62,"Scottish Ale / 80 Shilling":82,"Scottish Ale / Wee Heavy":84,"Session Ale / Ordinary Bitter":85,"Strong Bitter / ESB":88,"Winter Warmer / Old Ale":47}},"temiz":{"et":"Temiz & ekmeksi","ikon":"🍞","uzun":"Temiz maya ≥%40 ve ekmeksi malt ≥%40; baskın hop narenciye/tropik değil","stil":{"American Lager / Light Lager":72,"California Common / Steam Beer":53,"Dortmunder Export":60,"German Pils":87,"Helles / Münchner Hell":73,"International Pale Lager":78,"Kölsch":87,"Pre-Prohibition Lager":87}}};
 // ═══ SPRINT CB1 — STİL ARAMA ═══════════════════════════════════════════════
 // Kaan: "Seçenekler çok genel soruyor; istediğim stili yazıp bulabilmeliyim." Arama OTORİTE listede
 // (BJCP, 239 stil — Hedef Stil dropdown'unun AYNISI). Seçim dropdown ile AYNI yol (S.stil + kaynak 'dropdown'),
 // "Yeni reçete" AV1 yolu. Puan: her sorgu kelimesi eşleşmeli (VE); stil adı kelimesi tam 100 · başı 80 ·
-// birincil Türkçe/yaygın ad 95 · eş anlam (ülke/tahıl/aile) 70/60 · ad içinde geçiyor 45; eşitlikte korpus
-// yaygınlığı (0–10, log) — "stout" yazınca en çok demlenen stout önce gelir. Eş anlamlar AD KALIBINA bağlı
+// birincil Türkçe/yaygın ad 100/95 · eş anlam (ülke/tahıl/aile) 70/60 · ad içinde geçiyor 90; + korpus yaygınlığı
+// (0–40, log). SPRINT CB2-ek (Kaan onayı): ad eşleşmeleri (tam 100 · baş 95 · iç 90) neredeyse EŞİT kalite sayılır →
+// yaygınlık öne geçer ("weizen": Weizen/Weissbier · Weizenbock · Dunkelweizen, sonra Leichtes Weizen); küçük
+// tam-eşleşme payı popülerlik yakınken tam adı korur ("bock" → Bock ilk). Eski: iç 45, yaygınlık 0–10. Eş anlamlar AD KALIBINA bağlı
 // (regex stil adında aranır) — stil başına elle liste YOK, yeni stil eklense de kendiliğinden kapsanır.
 window._brAraNorm = function(t){
   return String(t == null ? '' : t).toLocaleLowerCase('tr')
@@ -28088,7 +28093,7 @@ window._BR_ARA_ES = [
   [/fruit|kriek|framboise|berry|grape|cherry/, ['meyve','meyveli']], [/\boat/, ['yulaf']], [/rye|roggen/, ['cavdar']],
   [/winter|christmas|holiday|hiver/, ['kis','yilbasi']], [/light|leicht|session|table/, ['hafif']],
   [/hazy|neipa|new england|naturtrub|milkshake|juicy/, ['puslu','bulanik']], [/\bred\b|rotbier/, ['kirmizi']],
-  [/brown|bruin/, ['kahverengi']], [/black|schwarz/, ['siyah']], [/dark|dunkel|schwarz|black/, ['koyu']],
+  [/brown|bruin/, ['kahverengi']], [/black|schwarz/, ['siyah']], [/dark|dunkel|dunkl|schwarz|black/, ['koyu']],
   [/pale|blonde|golden|helles/, ['acik','sari']], [/trappist|abbey|dubbel|tripel|quadrupel/, ['manastir']],
   [/farmhouse|saison|grisette|kveik|sahti|provision/, ['ciftlik']], [/spice|herb|gruit|christmas/, ['baharat','baharatli']],
   [/pumpkin/, ['balkabagi','kabak']], [/rice/, ['pirinc']], [/mexican/, ['meksika']], [/australian/, ['avustralya']],
@@ -28118,19 +28123,20 @@ window._brAraListe = function(q){
     var top = 0, tamam = true;
     tok.forEach(function(t){
       var en = 0;
-      kel.forEach(function(w){ if(w === t) en = Math.max(en, 100); else if(w.indexOf(t) === 0) en = Math.max(en, 80); else if(t.length >= 3 && w.indexOf(t) > 0) en = Math.max(en, 45); });
-      bir.forEach(function(w){ if(w === t) en = Math.max(en, 95); else if(w.indexOf(t) === 0) en = Math.max(en, 85); });
+      kel.forEach(function(w){ if(w === t) en = Math.max(en, 100); else if(w.indexOf(t) === 0) en = Math.max(en, 95); else if(t.length >= 3 && w.indexOf(t) > 0) en = Math.max(en, 90); });
+      bir.forEach(function(w){ if(w === t) en = Math.max(en, 100); else if(w.indexOf(t) === 0) en = Math.max(en, 95); });
       es.forEach(function(w){ if(w === t) en = Math.max(en, 70); else if(w.indexOf(t) === 0) en = Math.max(en, 60); });
       if(!en) tamam = false; top += en;
     });
     if(!tamam) return;
     var n = pop[ad] || 0;
-    out.push({ ad:ad, skor: top + 10 * Math.log(1 + n) / Math.log(1 + mx), n:n });
+    out.push({ ad:ad, skor: top + window._BR_ARA_POP * Math.log(1 + n) / Math.log(1 + mx), n:n });
   });
   out.sort(function(a, b){ return (b.skor - a.skor) || (a.ad.length - b.ad.length) || (a.ad < b.ad ? -1 : 1); });
   return out;
 };
 window._BR_ARA_MAX = 8;
+window._BR_ARA_POP = 40; // yaygınlık ağırlığı (CB2-ek)
 window._brAraSonucHTML = function(){
   var q = window.__brAra || '';
   if(!window._brAraNorm(q)) return '';
