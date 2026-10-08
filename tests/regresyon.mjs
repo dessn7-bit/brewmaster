@@ -8335,7 +8335,7 @@ const CASELER = [
     }
   },
   {
-    kod: 'ND1-DURUM', ad: 'YAPILABİLİRLİK (sentetik stok): tamamı stokta → ✅ · 1 kalem yok → 🟡 · 3 kalem yok → 🔴 · "miktar ?" → 🟡 · miktar yetersiz → yetersiz · eksik maltın MUADIL\'i stokta → 🔁 muadil (🟡) · eşlenemeyen kalemli örnek tam stokla bile ✅ OLMAZ · kaynakta gramajı olmayan (AHA hop) → "miktar bilinmiyor" (🟡) · stok değişince yeniden hesap (önbellek anahtarı stok)',
+    kod: 'ND1-DURUM', ad: 'YAPILABİLİRLİK (sentetik stok): tamamı stokta → ✅ · 1 kalem yok → 🟡 · 3 kalem yok → 🔴 · "miktar ?" → ✅ + ≈ (ND4) · miktar yetersiz → yetersiz (🟡 az var) · eksik maltın ✅ MUADIL\'i stokta → ✅ + 🔁 muadille (ND4) · eşlenemeyen kalemli örnek tam stokla bile ✅ OLMAZ · kaynakta gramajı olmayan (AHA hop) stokta → ✅ + ≈ miktar doğrulanmadı (ND4) · stok değişince yeniden hesap (önbellek anahtarı stok)',
     calistir: (page) => page.evaluate(() => {
       const H = window._bmOrnekHepsi(), kuru = e => window._bmOrnekKuru(e.kaynak, e.stil, e.idx);
       const tamEsli = e => { const r = kuru(e); const L = r.g.concat(r.h, r.ek, r.y ? [r.y] : []); return r.yontem !== 'yok' && !r.ekAdsiz && !r.ek.length && L.length >= 4 && L.every(k => k.id && (k.tip === 'maya' || k.tip === 'katki' || k.mik > 0)); };
@@ -8356,9 +8356,9 @@ const CASELER = [
       stokKur([0, 1, 2]); const s3 = d();
       __REG.ok('3 kalem yok → 🔴', s3.durum === 'eksik' && s3.eksik >= 3, s3.durum + ' ' + s3.eksik);
       stokKur([], { soru: 0 }); const sq = d();
-      __REG.ok('"miktar ?" kalem → 🟡 (ne yeterli ne yok)', sq.durum === 'yakin' && sq.g[0].d === 'dogrulanmadi', sq.g[0].d);
+      __REG.ok('ND4: "miktar ?" kalem (stokta var, yeterliliği bilinemez) → ✅ + ≈ işareti (durum düşmez)', sq.durum === 'ok' && sq.g[0].d === 'dogrulanmadi' && sq.belirsiz >= 1 && sq.eksik === 0, sq.durum + ' ' + sq.g[0].d);
       stokKur([], { az: 0 }); const sy = d();
-      __REG.ok('miktar yetersiz → "yetersiz" + 🟡 (mevcut/gereken taşınır)', sy.g[0].d === 'yetersiz' && sy.durum === 'yakin' && sy.g[0].gerek > sy.g[0].mevcut, sy.g[0].d);
+      __REG.ok('miktar yetersiz → "yetersiz" + 🟡 "az var" (mevcut/gereken taşınır; ND4: yok sayısına girmez)', sy.g[0].d === 'yetersiz' && sy.durum === 'yakin' && sy.az >= 1 && sy.eksik === 0 && sy.g[0].gerek > sy.g[0].mevcut, sy.g[0].d);
       // muadil: MUADIL tablosunda karşılığı olan bir malt yerine muadili stokta
       const tamMu = id => (MUADIL[id] || []).find(m => window._bmMuadilTam(m)); // ND2: yalnız ✅ eşdeğer stok karşılığı
       const mi = r.g.findIndex(k => k.tip === 'malt' && tamMu(k.id) && L.every(z => z.id !== tamMu(k.id).id));
@@ -8366,7 +8366,7 @@ const CASELER = [
         stokKur([mi]); const mu = tamMu(r.g[mi].id), mx = MALTLAR.find(a => a.id === mu.id);
         STOK.push({ id: 'ndmu', ad: mx ? mx.ad : mu.ad, refId: mu.id, g: 'Malt', miktar: 50, birim: 'kg' });
         const sm = d();
-        __REG.ok('eksik maltın MUADIL\'i stokta → 🔁 muadil (🟡, yalnız MUADIL tablosu)', sm.g[mi].d === 'muadil' && sm.durum === 'yakin' && sm.g[mi].mu.id === mu.id, sm.g[mi].d + ' ' + (sm.g[mi].mu || {}).id);
+        __REG.ok('ND4: eksik maltın ✅ MUADIL\'i stokta → satır 🔁 muadil, örnek ✅ + "🔁 muadille" işareti', sm.g[mi].d === 'muadil' && sm.durum === 'ok' && sm.muadil >= 1 && sm.g[mi].mu.id === mu.id, sm.g[mi].d + ' ' + sm.durum + ' ' + (sm.g[mi].mu || {}).id);
       } else __REG.ok('muadil vakası: bu örnekte MUADIL karşılıklı malt yok (kapsam notu)', true);
       // eşlenemeyen kalemli örnek: tam stokla bile ✅ değil
       const es = H.find(e => { const z = kuru(e); return z.g.concat(z.h).some(k => !k.id) && z.g.concat(z.h).some(k => k.id); });
@@ -8377,7 +8377,7 @@ const CASELER = [
       const aha = H.find(e => e.kaynak === 'aha' && kuru(e).h.some(k => k.id)); const za = kuru(aha);
       STOK.length = 0; za.g.concat(za.h, za.y ? [za.y] : []).forEach((k, i) => { if (!k.id) return; const x = KAT[k.tip].find(a => a.id === k.id); STOK.push({ id: 'na' + i, ad: x.ad, refId: k.id, g: k.tip === 'malt' ? 'Malt' : k.tip === 'hop' ? 'Hop' : k.tip === 'maya' ? 'Maya' : 'Katkı', miktar: 1e6, birim: k.tip === 'malt' ? 'kg' : k.tip === 'maya' ? 'paket' : 'g' }); });
       const sa = window._bmOrnekStok(aha.kaynak, aha.stil, aha.idx), hk = sa.h.find(x => x.k.id);
-      __REG.ok('AHA hop gramajı kaynakta yok → "miktar bilinmiyor" (varlık kontrolü, ✅ değil)', hk.d === 'bilinmiyor' && sa.durum !== 'ok', hk.d + ' / ' + sa.durum);
+      __REG.ok('ND4: AHA hop gramajı kaynakta yok, stokta VAR → satır "bilinmiyor", örnek ✅ + ≈ (eşlenemeyen yoksa)', hk.d === 'bilinmiyor' && (sa.eslenemedi > 0 ? sa.durum === 'yakin' : (sa.durum === 'ok' && sa.belirsiz >= 1)), hk.d + ' / ' + sa.durum + ' ❔' + sa.eslenemedi);
       __REG.ok('miktar AV kuralıyla (S.hacim/S.verim) ölçekleniyor', r.hacim === ((+S.hacim > 0) ? +S.hacim : 11) && r.verim === ((+S.verim > 0) ? +S.verim : 61), r.hacim + ' L / %' + r.verim);
       return __REG.al();
     })
@@ -8657,7 +8657,7 @@ const CASELER = [
         const btn = document.querySelector('#br-tam .nd-oneri-ac'), kapali = !document.querySelector('#br-tam .nd-oneri');
         const rozet = btn ? btn.querySelector('.nd-oneri-n').textContent : '';
         btn.click();
-        const kart = document.querySelector('#br-tam .nd-oneri'), malz = Array.from(document.querySelectorAll('#br-tam .nd-oneri-malz')), bir = Array.from(document.querySelectorAll('#br-tam .nd-bir-satir'));
+        const kart = document.querySelector('#br-tam .nd-oneri'), malz = Array.from(document.querySelectorAll('#br-tam .nd-oneri-malz:not(.nd-sepet-adim)')), bir = Array.from(document.querySelectorAll('#br-tam .nd-bir-satir'));
         const out = { rozet, kapali, kart: !!kart, kartT: kart ? kart.textContent : '', malz: malz.length, bir: bir.length, ilkSatirX: malz.some(b => b.textContent.indexOf(window._ndKatAd(X.tip, X.id)) >= 0) };
         const b0 = bir.find(b => /_bmOrnekOnizle\('/.test(b.getAttribute('onclick')) && b.getAttribute('onclick').indexOf(',' + e0.idx + ')') > 0);
         (b0 || bir[0]).click(); out.onizle = !!document.getElementById('bmOrnekOnizle'); bmOrnekOnizleKapat();
@@ -8679,7 +8679,7 @@ const CASELER = [
         { ad: 'tahmin edilen örnek KÜMESİ gerçekle birebir', ok: JSON.stringify(r.tahmin) === JSON.stringify(r.yeni), detay: r.tahmin.slice(0, 3).join(',') + ' / ' + r.yeni.slice(0, 3).join(',') },
         { ad: 'iki farklı kalem eksik → tek kalem sayılmaz', ok: r.tk2 === null && r.durum2 !== 'ok', detay: String(r.tk2) },
         { ad: 'kart kapalıyken gövdede yok; başlık düğmesi rozeti = tek kalemle ✅ sayısı', ok: u.kapali && u.rozet === String(r.bir), detay: u.rozet + ' / ' + r.bir },
-        { ad: 'açık kart: ilk 5 (≤5) + "1 kalemle ✅ olacaklar" listesi + salt-hesap notu', ok: u.kart && u.malz >= 1 && u.malz <= 5 && u.bir === Math.min(10, r.bir) && /1 kalemle ✅ olacaklar/.test(u.kartT) && /Stoğuna bir şey yazılmaz/.test(u.kartT) && u.ilkSatirX, detay: u.malz + ' malzeme · ' + u.bir + ' satır' },
+        { ad: 'açık kart: ilk 5 (≤5) + "1 kalemle ✅ olacaklar" listesi + salt-hesap notu', ok: u.kart && u.malz >= 1 && u.malz <= 5 && u.bir === Math.min(10, r.bir) && /1 kalemle ✅ olacaklar/.test(u.kartT) && /Stoğuna ya da alışveriş listene bir şey yazılmaz/.test(u.kartT) && u.ilkSatirX, detay: u.malz + ' malzeme · ' + u.bir + ' satır' },
         { ad: 'listedeki satıra dokununca önizleme açılır', ok: u.onizle, detay: '' },
         { ad: 'malzemeye dokununca o malzemeyle malzeme araması (ND1) açılır', ok: u.malzArama, detay: '' },
         { ad: 'kart stil aramasına uyar (yalnız o stilin örnekleri)', ok: u.suz, detay: '' },
@@ -8735,6 +8735,131 @@ const CASELER = [
       const etiket = ['briess_pale', 'bel_pils', 'munich_light', 'choc', 'corn', 'dark_munich', 'mel', 'ekg', 'fuggles', 'styrian', 'willamette', 'cascade', 'mosaic'].every(k => (MUADIL[k] || []).some(m => /\[ND3/.test(m.fark)));
       __REG.ok('değişen her MUADIL anahtarında ND3 kaynak etiketi', etiket);
       __REG.ok('mısır→yulaf: yanlış satır metni (Halcyon) kaldırıldı', (MUADIL.corn || []).every(m => !/Halcyon/.test(m.fark)));
+      STOK.length = 0;
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'ND4-DURUM', ad: 'YENİ DURUM TANIMI (sentetik stok): ✅ muadille → ✅ + "🔁 muadille" · ⚠️ muadil ✅ YAPMAZ · miktarı bilinmeyen ama stokta → ✅ + "≈" · miktarı bilinen yetersiz → 🟡 "az var" · proses yardımcısı eşlenmese de ✅\'yi engellemez (önizlemede ayrı etiket) · lezzet katkısı eşlenmezse engeller · proses listesi tek yerde · ekranda sıralama ✅ işaretsiz > ✅ işaretli > 🟡 > 🔴 · muadille ✅ örnekte "malzemeleriyle" reçeteye muadili yazar',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('ND4 Durum', {});
+      const H = window._bmOrnekHepsi(), kuru = e => window._bmOrnekKuru(e.kaynak, e.stil, e.idx), st = e => window._bmOrnekStok(e.kaynak, e.stil, e.idx);
+      const KAT = { malt: MALTLAR, hop: HOPLAR, maya: MAYALAR, katki: KATKILAR };
+      const giris = (tip, id, mik) => { const x = KAT[tip].find(a => a.id === id); return { id: 'n4' + tip + id + Math.random(), ad: x.ad, refId: id, g: tip === 'malt' ? 'Malt' : tip === 'hop' ? 'Hop' : tip === 'maya' ? 'Maya' : 'Katkı', miktar: mik, birim: tip === 'malt' ? 'kg' : tip === 'maya' ? 'paket' : 'g' }; };
+      const stokla = (e, haric, ekle) => { const r = kuru(e), ek = {}; STOK.length = 0; r.g.concat(r.h, r.ek, r.y ? [r.y] : []).forEach(k => { if (!k.id || ek[k.id] || (haric || []).indexOf(k.id) >= 0) return; ek[k.id] = 1; STOK.push(giris(k.tip, k.id, k.tip === 'maya' ? 3 : k.mik > 0 ? k.mik * 50 : 1000)); }); (ekle || []).forEach(g => STOK.push(g)); };
+      const P = window._bmProsesYardimci;
+      __REG.ok('proses listesi: irish moss / whirlfloc / CaCl2 / laktik asit / "dextrose (priming)" / pirinç kavuzu / Berraklaştırıcı kategorisi / maya besini → EVET', P({ ham: 'irish moss' }) && P({ ham: '1 tablet whirlfloc' }) && P({ ham: 'calcium chloride (mash)' }) && P({ ham: '10% phosphoric acid' }) && P({ ham: 'lactic acid' }) && P({ ham: 'dextrose (priming)' }) && P({ tip: 'malt', id: 'rice_hulls' }) && P({ tip: 'katki', id: 'irish_moss' }) && P({ tip: 'katki', id: 'jelatin' }) && P({ tip: 'katki', id: 'maya_besini' }) && P({ tip: 'katki', id: 'calcium_sulfate' }));
+      __REG.ok('proses listesi: DME / sirke / tuz / kahve / meyve / lacto / glukoamilaz / pilsner → HAYIR', !P({ tip: 'katki', id: 'dme' }) && !P({ tip: 'katki', id: 'malt_sirke' }) && !P({ ham: 'sea salt' }) && !P({ ham: 'ground kona coffee' }) && !P({ tip: 'katki', id: 'visne' }) && !P({ tip: 'katki', id: 'lacto_bact' }) && !P({ tip: 'katki', id: 'glucoamylase' }) && !P({ tip: 'malt', id: 'pilsner' }) && Array.isArray(window._BM_PROSES.katki) && window._BM_PROSES.kategori.indexOf('Berraklaştırıcı') >= 0);
+      // a) ✅ muadil → ✅ + 🔁
+      const tamMu = id => (MUADIL[id] || []).find(m => String(m.fark || '').trim().indexOf('✅') === 0 && MALTLAR.some(a => a.id === m.id));
+      const tam = e => { const r = kuru(e); const L = r.g.concat(r.h, r.ek, r.y ? [r.y] : []); return e.kaynak !== 'aha' && !r.ekAdsiz && L.every(k => k.id && (k.tip === 'maya' || k.tip === 'katki' || k.mik > 0)) && !L.some(k => P(k)); };
+      const eA = H.find(e => tam(e) && !kuru(e).ek.length && kuru(e).g.some(k => k.tip === 'malt' && tamMu(k.id) && kuru(e).g.every(z => z.id !== tamMu(k.id).id)));
+      const kA = kuru(eA).g.find(k => k.tip === 'malt' && tamMu(k.id) && kuru(eA).g.every(z => z.id !== tamMu(k.id).id)), muA = tamMu(kA.id);
+      stokla(eA, [kA.id], [giris('malt', muA.id, 999)]); const sA = st(eA);
+      __REG.ok('✅ muadil stokta → durum ✅ + muadil işareti (' + kA.id + ' → ' + muA.id + ')', sA.durum === 'ok' && sA.muadil >= 1 && sA.eksik === 0, sA.durum + ' 🔁' + sA.muadil);
+      window.__brAcik = true; const rz = window._ndSatirRozetHTML(eA.kaynak, eA.stil, eA.idx); window.__brAcik = false;
+      __REG.ok('rozette "🔁 muadille" işareti + önizleme özetinde "X → stoktaki Y (✅ muadil)"', /🔁 muadille/.test(rz) && /stoktaki .+ \(✅ muadil\)/.test(window._ndOzetHTML(sA)), rz.replace(/<[^>]+>/g, ''));
+      // b) ⚠️ muadil ✅ yapmaz
+      const yarMu = id => (MUADIL[id] || []).find(m => String(m.fark || '').trim().indexOf('✅') !== 0 && MALTLAR.some(a => a.id === m.id));
+      const eB = H.find(e => tam(e) && !kuru(e).ek.length && kuru(e).g.some(k => k.tip === 'malt' && yarMu(k.id) && !tamMu(k.id) && kuru(e).g.filter(z => z.id === k.id).length === 1 && kuru(e).g.every(z => z.id !== yarMu(k.id).id)));
+      const kB = kuru(eB).g.find(k => k.tip === 'malt' && yarMu(k.id) && !tamMu(k.id) && kuru(eB).g.filter(z => z.id === k.id).length === 1 && kuru(eB).g.every(z => z.id !== yarMu(k.id).id));
+      stokla(eB, [kB.id], [giris('malt', yarMu(kB.id).id, 999)]); const sB = st(eB);
+      __REG.ok('⚠️ muadil stokta → ✅ OLMAZ (🟡, satır "yok" + yakın alternatif)', sB.durum === 'yakin' && sB.eksik === 1 && sB.g.find(x => x.k.id === kB.id).d === 'yok', sB.durum + ' ' + kB.id + '→' + yarMu(kB.id).id);
+      // c) miktarı bilinmeyen ama stokta → ✅ + ≈  (AHA: hop gramajı kaynakta yok)
+      const eC = H.find(e => { if (e.kaynak !== 'aha') return false; const r = kuru(e); const L = r.g.concat(r.h, r.ek, r.y ? [r.y] : []); return !r.ekAdsiz && L.length >= 3 && L.every(k => k.id || P(k)) && r.h.some(k => k.id && !(k.mik > 0)); });
+      if (!eC) { __REG.ok('miktarı kaynakta olmayan + tamamı eşli AHA örneği bulundu', false); return __REG.al(); }
+      stokla(eC); const sC = st(eC);
+      window.__brAcik = true; const rzC = window._ndSatirRozetHTML(eC.kaynak, eC.stil, eC.idx); window.__brAcik = false;
+      __REG.ok('miktarı kaynakta olmayan kalem stokta → ✅ + "≈ miktar doğrulanmadı" (' + eC.stil + ')', sC.durum === 'ok' && sC.belirsiz >= 1 && /≈ miktar doğrulanmadı/.test(rzC), sC.durum + ' ≈' + sC.belirsiz);
+      __REG.ok('önizleme satırı "≈ … yeterliliği bilinemiyor"', /≈ .*yeterliliği bilinemiyor/.test(window._ndKalemHTML(sC.h.find(x => x.d === 'bilinmiyor'))));
+      // d) miktarı bilinen yetersiz → 🟡 az var
+      const eD = H.find(e => tam(e) && !kuru(e).ek.length && kuru(e).g.filter(k => k.tip === 'malt').length >= 2);
+      const kD = kuru(eD).g.find(k => k.tip === 'malt'); stokla(eD, [kD.id], [giris('malt', kD.id, kD.mik / 10)]); const sD = st(eD);
+      window.__brAcik = true; const rzD = window._ndSatirRozetHTML(eD.kaynak, eD.stil, eD.idx); window.__brAcik = false;
+      __REG.ok('miktarı bilinen kalemde stok yetersiz → 🟡 "az var" (yok sayısına girmez)', sD.durum === 'yakin' && sD.az === 1 && sD.eksik === 0 && /az var/.test(rzD), sD.durum + ' az' + sD.az);
+      // e) proses yardımcısı eşlenmese de engellemez
+      const eE = H.find(e => { if (e.kaynak === 'aha') return false; const r = kuru(e); const L = r.g.concat(r.h, r.ek, r.y ? [r.y] : []); return !r.ekAdsiz && L.some(k => !k.id && P(k)) && L.every(k => P(k) || (k.id && (k.tip === 'maya' || k.mik > 0 || r.ek.indexOf(k) >= 0))); });
+      if (!eE) { __REG.ok('eşlenemeyen proses yardımcılı örnek bulundu (proses kuralı çalışıyor mu?)', false); return __REG.al(); }
+      stokla(eE); const sE = st(eE), prs = sE.g.concat(sE.h, sE.ek).find(x => x.proses && x.d === 'eslenemedi');
+      __REG.ok('eşlenemeyen PROSES yardımcısı (' + (prs ? prs.k.ham : '?') + ') ✅\'yi engellemez', sE.durum === 'ok' && !!prs && sE.eslenemedi === 0, sE.durum + ' ❔' + sE.eslenemedi);
+      __REG.ok('önizlemede "⚙️ proses yardımcısı — yapılabilirliği etkilemez"', /proses yardımcısı — yapılabilirliği etkilemez/.test(window._ndKalemHTML(prs)) && /proses yardımcısı/.test(window._ndOzetHTML(sE)));
+      // f) lezzet katkısı eşlenmezse engeller
+      const eF = H.find(e => { if (e.kaynak === 'aha') return false; const r = kuru(e); return !r.ekAdsiz && r.ek.some(k => !k.id && !P(k)) && r.g.concat(r.h).every(k => k.id && k.mik > 0) && r.y && r.y.id; });
+      if (!eF) { __REG.ok('eşlenemeyen lezzet kalemli örnek bulundu', false); return __REG.al(); }
+      stokla(eF); const sF = st(eF), lz = sF.ek.find(x => !x.proses && x.d === 'eslenemedi');
+      __REG.ok('eşlenemeyen LEZZET kalemi (' + (lz ? lz.k.ham : '?') + ') ✅\'yi ENGELLER', sF.durum !== 'ok' && sF.eslenemedi >= 1 && !!lz, sF.durum);
+      // g) sıralama (ekranda stil örnek listesi): stok A örneğine göre; bir stil seç, sıra anahtarları artmayan olmamalı
+      stokla(eA, [kA.id], [giris('malt', muA.id, 999)]);
+      window.__brAcik = true; const box = document.createElement('div'); box.innerHTML = window._bmOrnekListeHTML(eA.stil); window.__brAcik = false;
+      const rozetler = Array.from(box.querySelectorAll('.bm-ornek-satir .nd-rozet')).map(r => { const p = r.parentElement; const tt = p.textContent; return /✅/.test(r.textContent) ? (/🔁 muadille|≈ miktar/.test(tt) ? 1 : 0) : /🟡/.test(r.textContent) ? 2 : 3; });
+      __REG.ok('ekranda örnek listesi durum sırasıyla (✅ işaretsiz > ✅ işaretli > 🟡 > 🔴)', rozetler.length >= 1 && rozetler.every((v, i) => !i || rozetler[i - 1] <= v), rozetler.join(','));
+      // h) muadille ✅ örnekte "malzemeleriyle" → reçeteye muadil
+      const eH = H.find(e => window._bmOrnekMalzemeliMi(e.kaynak, e.stil, e.idx) && !kuru(e).ek.length && !kuru(e).ekAdsiz && kuru(e).g.some(k => k.tip === 'malt' && tamMu(k.id) && kuru(e).g.every(z => z.id !== tamMu(k.id).id)));
+      if (eH) { const kH = kuru(eH).g.find(k => k.tip === 'malt' && tamMu(k.id) && kuru(eH).g.every(z => z.id !== tamMu(k.id).id)), muH = tamMu(kH.id);
+        stokla(eH, [kH.id], [giris('malt', muH.id, 999)]); const n0 = KR.length, sH = st(eH);
+        window._bmOrnekMalzemeliRecete(eH.kaynak, eH.stil, eH.idx);
+        __REG.ok('muadille ✅ örnek → "malzemeleriyle" reçetede ' + kH.id + ' yerine ' + muH.id + ' + notta "yerine stoktaki … (✅ muadil)"', sH.durum === 'ok' && KR.length === n0 + 1 && S.maltlar.some(m => m.id === muH.id) && !S.maltlar.some(m => m.id === kH.id) && /yerine stoktaki .+\(✅ muadil\)/.test(S.notlar || ''), S.maltlar.map(m => m.id).join(','));
+      } else __REG.ok('muadille ✅ + malzemeleriyle kurulabilir örnek yok (kapsam notu)', true);
+      STOK.length = 0;
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'ND4-SEPET', ad: 'SEPET (birikimli açgözlü): her adımın "+N" ve "toplam" sayısı, o malzeme GERÇEKTEN stoğa eklenince ✅\'e geçen örnek sayısıyla birebir (adım adım, önceki adımlar stokta) · 1. adım tek-malzeme listesinin en iyisine eşit · ≤5 adım · kartta sepet satırları + dokununca malzeme araması · stil aramasına uyar · stoğa yazmaz',
+    calistir: async (page) => {
+      await page.evaluate(() => { __REG.yeniKayit('ND4 Sepet', {}); window.__ndMalz = []; window.__brAra = ''; window._bmProfilSifirla(); window.__ND4S = JSON.stringify(STOK); window._ndHazirlaTum(); });
+      await page.waitForFunction(() => window._ndTumHazir(), { timeout: 30000 });
+      const r = await page.evaluate(() => {
+        const R = window._ndOneriHesap(), H = window._bmOrnekHepsi(), KAT = { malt: MALTLAR, hop: HOPLAR, maya: MAYALAR, katki: KATKILAR };
+        const okSay = () => H.filter(e => { const s = window._bmOrnekStok(e.kaynak, e.stil, e.idx); return s && s.durum === 'ok'; }).length;
+        const ok0 = okSay(), adim = [];
+        R.sepet.forEach(x => { const once = okSay(); const k = KAT[x.tip].find(a => a.id === x.id); STOK.push({ id: 'n4s' + x.id, ad: k.ad, refId: x.id, g: x.tip === 'malt' ? 'Malt' : x.tip === 'hop' ? 'Hop' : x.tip === 'maya' ? 'Maya' : 'Katkı', miktar: x.tip === 'maya' ? 99 : 99999, birim: x.tip === 'malt' ? 'kg' : x.tip === 'maya' ? 'paket' : 'g' }); const sonra = okSay(); adim.push({ ad: x.ad, beklenen: x.arti, gercek: sonra - once, toplamB: x.toplam, toplamG: sonra - ok0 }); });
+        STOK.length = 0; JSON.parse(window.__ND4S).forEach(s => STOK.push(s));
+        // bağımsız açgözlü denetim: ihtiyaç kümeleri üzerinden her adımda TÜM adayların kazancı; seçilen = en yüksek
+        const N = H.map(e => window._bmOrnekIhtiyac(window._bmOrnekStok(e.kaynak, e.stil, e.idx))).filter(n => n && n.length).map(n => n.map(k => k.tip + ':' + k.id));
+        const sec = new Set(), maxSapma = [];
+        R.sepet.forEach(x => { const kaz = {}; N.forEach(n => { const eks = n.filter(k => !sec.has(k)); if (eks.length === 1) kaz[eks[0]] = (kaz[eks[0]] || 0) + 1; }); const mx = Math.max(0, ...Object.values(kaz)); const key = x.tip + ':' + x.id; maxSapma.push((kaz[key] || 0) + '/' + mx); sec.add(key); });
+        return { n: R.sepet.length, adim, ilk: R.ilk5[0] ? R.ilk5[0].n : 0, s1: R.sepet[0] ? R.sepet[0].arti : 0, maxSapma };
+      });
+      await page.evaluate(() => window._ndHazirlaTum()); await page.waitForFunction(() => window._ndTumHazir(), { timeout: 30000 });
+      const u = await page.evaluate(() => {
+        window.__ndOneriAcik = true; _brAc(); const R = window._ndOneriHesap();
+        const sat = Array.from(document.querySelectorAll('#br-tam .nd-sepet-adim')), out = { sat: sat.length, beklenen: R.sepet.length, metin: sat.map(b => b.textContent).join(' | ') };
+        if (sat.length) { sat[0].click(); out.malz = window.__ndMalz.length === 1 && window.__ndMalz[0].id === R.sepet[0].id && window.__ndMalzAcik === true; } else out.malz = true;
+        window.__ndMalz = []; const st0 = (R.sepet[0] || {}); const H = window._bmOrnekHepsi(); const stil = st0.ornek && st0.ornek[0] ? st0.ornek[0].stil : H[0].stil;
+        window.__brAra = stil; window._brCiz(); const R2 = window._ndOneriHesap(), suz = window._ndStilSuzgec();
+        out.suz = !!suz && R2.sepet.every(x => x.ornek.every(e => suz[e.stil])) && R2.n < R.n;
+        window.__brAra = ''; window.__ndOneriAcik = false; _brKapat(); return out;
+      });
+      return [
+        { ad: 'sepet 1–5 adım (' + r.n + ')', ok: r.n >= 1 && r.n <= 5, detay: r.adim.map(a => a.ad + ' +' + a.beklenen).join(' · ') },
+        { ad: 'her adımın "+N"i gerçek stok güncellemesiyle birebir', ok: r.adim.every(a => a.beklenen === a.gercek), detay: r.adim.map(a => a.beklenen + '/' + a.gercek).join(' ') },
+        { ad: 'birikimli "toplam" gerçekle birebir', ok: r.adim.every(a => a.toplamB === a.toplamG), detay: r.adim.map(a => a.toplamB + '/' + a.toplamG).join(' ') },
+        { ad: '1. adım = tek-malzeme listesinin en iyisi', ok: r.s1 === r.ilk, detay: r.s1 + ' / ' + r.ilk },
+        { ad: 'her adımda seçilen malzeme = o anki EN YÜKSEK kazanç (bağımsız açgözlü hesap)', ok: r.maxSapma.length === r.n && r.maxSapma.every(x => { const [a, b] = x.split('/'); return a === b; }), detay: r.maxSapma.join(' ') },
+        { ad: 'kartta sepet satırları ("toplam") + dokununca malzeme araması', ok: u.sat === u.beklenen && /toplam/.test(u.metin) && u.malz, detay: u.metin.slice(0, 120) },
+        { ad: 'sepet stil aramasına uyar', ok: u.suz, detay: '' }
+      ];
+    }
+  },
+  {
+    kod: 'ND4-MUADIL', ad: 'İKİ ŞÜPHELİ MUADİL (veri sayfasıyla): Maris Otter→Abbey Malt ve Roasted Barley→Carafa Special III artık ⚠️ — stokta olsalar örnek "yok" + yakın alternatif kalır, ✅ olmaz; satırlarda ND4 kaynak etiketi',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('ND4 Muadil', {});
+      const m1 = (MUADIL.maris || []).find(m => m.id === 'abbey_malt'), m2 = (MUADIL.roast || []).find(m => m.id === 'crf3');
+      __REG.ok('maris→abbey_malt ve roast→crf3 fark ⚠️ + [ND4 kaynak]', !!m1 && !!m2 && !window._bmMuadilTam(m1) && !window._bmMuadilTam(m2) && /\[ND4/.test(m1.fark) && /\[ND4/.test(m2.fark));
+      const H = window._bmOrnekHepsi(), kuru = e => window._bmOrnekKuru(e.kaynak, e.stil, e.idx), KAT = { malt: MALTLAR, hop: HOPLAR, maya: MAYALAR, katki: KATKILAR };
+      const dene = (id, aday) => {
+        const e = H.find(e => { if (e.kaynak === 'aha') return false; const r = kuru(e); return r.g.some(k => k.id === id && k.mik > 0) && r.g.concat(r.h, r.ek).every(k => !k.id || (MUADIL[id] || []).every(m => m.id !== k.id)); });
+        const r = kuru(e), ek = {}; STOK.length = 0;
+        r.g.concat(r.h, r.ek, r.y ? [r.y] : []).forEach(k => { if (!k.id || k.id === id || ek[k.id]) return; ek[k.id] = 1; const x = KAT[k.tip].find(a => a.id === k.id); STOK.push({ id: 'n4m' + k.id, ad: x.ad, refId: k.id, g: k.tip === 'malt' ? 'Malt' : k.tip === 'hop' ? 'Hop' : k.tip === 'maya' ? 'Maya' : 'Katkı', miktar: k.tip === 'maya' ? 3 : k.mik > 0 ? k.mik * 50 : 1000, birim: k.tip === 'malt' ? 'kg' : k.tip === 'maya' ? 'paket' : 'g' }); });
+        const x = MALTLAR.find(a => a.id === aday); STOK.push({ id: 'n4ma', ad: x.ad, refId: aday, g: 'Malt', miktar: 99, birim: 'kg' });
+        const s = window._bmOrnekStok(e.kaynak, e.stil, e.idx), sat = s.g.find(z => z.k.id === id);
+        return { d: sat.d, yakin: sat.yakin && sat.yakin.id, durum: s.durum };
+      };
+      const a = dene('maris', 'abbey_malt'), b = dene('roast', 'crf3');
+      __REG.ok('Maris Otter yok + Abbey Malt stokta → "yok" + yakın alternatif, ✅ değil', a.d === 'yok' && a.yakin === 'abbey_malt' && a.durum !== 'ok', JSON.stringify(a));
+      __REG.ok('Roasted Barley yok + Carafa Special III stokta → "yok" + yakın alternatif, ✅ değil', b.d === 'yok' && b.yakin === 'crf3' && b.durum !== 'ok', JSON.stringify(b));
       STOK.length = 0;
       return __REG.al();
     })
