@@ -1029,6 +1029,35 @@ body:has(.brewday-timeline) #bm-toast-container{top:20px;bottom:auto}
 .bm-demle-alis{margin-top:12px;background:#FBF6EC;border-radius:10px;padding:8px 12px 10px}
 .bm-demle-alis pre{font-family:inherit;font-size:12.5px;color:#2E2218;white-space:pre-wrap;word-break:break-word;margin:4px 0 0;line-height:1.55}
 .bm-demle-bos{font-size:12.5px;color:#998A73;padding:6px 2px}
+/* SPRINT ND1 — ana kart = stil seçme ekranı girişi + yapılabilirlik rozetleri + malzeme araması */
+button.bm-demle-giris{display:flex;align-items:center;gap:15px;padding:16px 17px;cursor:pointer;text-align:left;font-family:inherit;min-height:44px}
+.br-tam-ust{display:flex;gap:6px;flex-wrap:nowrap}
+.br-malz-ac,.nd-filtre{flex:1 1 0;min-width:0;min-height:44px;padding:0 10px;border:1px solid var(--bor);border-radius:10px;background:var(--bg2);color:var(--kahve);font-weight:700;font-size:12.5px;cursor:pointer;font-family:var(--font-govde);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.br-malz-ac[aria-expanded="true"],.br-malz-ac.nd-secili,.nd-filtre[aria-pressed="true"]{border-color:var(--altin);background:var(--accent-soft)}
+.nd-stil-ozet{display:inline-block;font-size:10.5px;color:var(--kahve);margin-top:2px;white-space:nowrap}
+.nd-rozet{display:inline-block;font-size:10px;font-weight:700;border-radius:8px;padding:1px 7px;margin:2px 4px 0 0;border:1px solid var(--bor);background:var(--bg2);color:var(--kahve)}
+.nd-rozet.nd-ok{border-color:#7fb77e;background:#eef7ee}.nd-rozet.nd-eksik{color:var(--soluk)}
+.nd-es{font-size:9.5px;color:var(--dim);white-space:nowrap}
+.nd-filtre-not{font-size:10.5px;color:var(--soluk);margin:4px 0;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.nd-mini{min-height:44px;background:transparent;border:1px solid var(--bor);border-radius:12px;padding:2px 9px;font-size:11px;color:var(--bakir);cursor:pointer;font-family:var(--font-govde);margin:2px 2px 0 0}
+.nd-malz{margin:4px 0 8px;padding:8px;border:1px solid var(--bor);border-radius:10px;background:var(--bg2)}
+.nd-malz-bas{font-size:11px;color:var(--soluk);margin-bottom:6px;line-height:1.4}
+.nd-malz input{width:100%;box-sizing:border-box;min-height:44px;font-size:15px;padding:8px 11px;border:1px solid var(--bor);border-radius:10px;background:var(--card);color:var(--metin);font-family:var(--font-govde)}
+.nd-malz-oner{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.nd-oner{min-height:44px;background:var(--card);border:1px solid var(--bor);border-radius:16px;padding:4px 11px;font-size:12px;cursor:pointer;font-family:var(--font-govde);color:var(--metin);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nd-malz-cip{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0}
+.nd-malz-say{font-size:11.5px;color:var(--kahve);margin:4px 0}
+.nd-malz-satir{display:flex;flex-direction:column;align-items:flex-start;gap:1px;width:100%;min-height:44px;text-align:left;background:var(--card);border:1px solid var(--bor);border-radius:8px;padding:6px 9px;margin:3px 0;cursor:pointer;font-family:var(--font-govde)}
+.nd-malz-stil{font-size:12.5px;font-weight:700;color:var(--kahve)}.nd-malz-alt{font-size:10.5px;color:var(--soluk);word-break:break-word}
+.nd-muadil{display:block;width:100%;min-height:44px;text-align:left;background:var(--card);border:1px dashed var(--altin);border-radius:8px;padding:6px 9px;margin:4px 0;font-size:11.5px;color:var(--metin);cursor:pointer;font-family:var(--font-govde)}
+.nd-malz-isk{font-size:11px;color:var(--soluk);margin-top:6px;line-height:1.6}
+.nd-malz-tum summary{cursor:pointer;font-size:11.5px;font-weight:700;color:var(--bakir);padding:12px 0;min-height:44px;box-sizing:border-box}
+.nd-kalem{font-size:10.5px;white-space:nowrap;margin-left:6px}.nd-k-stokta,.nd-k-bilinmiyor{color:#3f7d3e}.nd-k-yok,.nd-k-yetersiz{color:#b0413e}.nd-k-muadil{color:var(--bakir)}.nd-k-eslenemedi,.nd-k-dogrulanmadi{color:var(--dim)}
+.nd-onizle-ozet{margin-top:8px;padding:6px 9px;border-radius:8px;border:1px solid var(--bor);background:var(--bg2);font-size:12px;color:var(--metin);line-height:1.45}
+.nd-onizle-ozet.nd-ok{border-color:#7fb77e;background:#eef7ee}
+.nd-onizle-yontem{font-size:10px;color:var(--dim);margin-top:2px}
+.nd-eksikler{margin-top:10px;padding:6px 9px;border:1px solid var(--bor);border-radius:8px;background:#fff8f2}
+.nd-eksikler-bas{font-size:11px;font-weight:700;color:var(--kahve);margin-bottom:2px}.nd-eksik{font-size:12px;color:var(--metin);padding:1px 0}
 .bm-ana-kc svg{width:18px;height:18px;transform:rotate(-90deg)}
 .bm-ana-logo{margin-top:auto;display:flex;justify-content:center;padding:14px 0 20px}
 .bm-ana-logo img{width:80px;height:80px;display:block}
@@ -8016,40 +8045,14 @@ window.bmDemlenebilirAnaliz = function(){
   } catch(e){ try{console.warn('bmDemlenebilirAnaliz',e);}catch(_){} }
   return out;
 };
+// SPRINT ND1: kart artık stil seçme ekranını (_brAc) açar — eski içerik (Kaan'ın KENDİ reçetelerinin hazır / az-eksik /
+// çok-eksik listesi + alışveriş listesi) bu karttan kaldırıldı. bmDemlenebilirAnaliz + stokYetersizTam SİLİNMEDİ: plan bildirimi
+// (stokYetersizTam) ve editördeki 📦 rozeti aynı stok hesabını kullanmaya devam eder.
 window.bmDemleKartHTML = function(){
-  try {
-    if(typeof KR==='undefined' || !KR) return '';
-    var krLen = Array.isArray(KR) ? KR.length : Object.keys(KR).length;
-    if(!krLen) return '';                                                        // KR boş → kart hiç çıkmaz
-    var a = bmDemlenebilirAnaliz();
-    var esc = function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
-    var escId = function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;'); }; // SPRINT J J6: çift-tırnak/& attribute enjeksiyonu kapatıldı (import/sync kaynaklı kötü id yüzeyi)
-    var planBadge = function(pt){ if(!pt) return ''; var p=String(pt).split('-'); return ' <span class="bm-demle-badge">📅 '+esc(p[2]+'.'+p[1])+'</span>'; };
-    var row = function(r,sub){ return '<button type="button" class="bm-demle-row" onclick="tarifAc(\''+escId(r.id)+'\')" aria-label="'+esc(r.ad)+' reçetesini aç">'+
-      '<span class="bm-demle-rn"><span class="bm-demle-rt">'+esc(r.ad)+planBadge(r.planTarih)+'</span>'+(sub?'<span class="bm-demle-rs">'+sub+'</span>':'')+'</span></button>'; };
-    var nH=a.hazir.length, nA=a.azEksik.length, nC=a.cokEksik.length, nD=(a.dogrula||[]).length;
-    var ozet = (nH>0||nA>0||nD>0) ? (nH+' reçete hazır · '+(nD>0?nD+' miktar ? · ':'')+nA+' az-eksik'+(nC>0?' · '+nC+' çok-eksik':''))
-                            : ('Stok yeni reçete için yetersiz'+(a.cokEksikSay>0?' · '+a.cokEksikSay+' çok-eksik':''));
-    var body='';
-    if(nH>0){ body+='<div class="bm-demle-h">🍺 Hazır ('+nH+')</div>'; a.hazir.forEach(function(r){ body+=row(r,''); }); }
-    if(nD>0){ body+='<div class="bm-demle-h bm-demle-dogrula">❓ Stokta var, miktarı doğrulanmadı ('+nD+')</div>'; a.dogrula.forEach(function(r){ body+=row(r, 'miktar ?: '+esc(r.dogStr)); }); } // SPRINT CA
-    if(nA>0){ body+='<div class="bm-demle-h">🛒 Az-eksik ('+nA+')</div>'; a.azEksik.forEach(function(r){ body+=row(r, r.eksikSay+' eksik: '+esc(r.eksikStr)); }); }
-    if(nC>0){
-      var cokRows = a.cokEksik.map(function(r){ return row(r, r.eksikSay+' eksik: '+esc(r.eksikStr)); }).join('');
-      body+='<details class="bm-demle-cokgrup"><summary class="bm-demle-h" style="cursor:pointer">🛒 Daha fazla eksik ('+nC+') <span style="font-weight:400;color:var(--dim);font-size:11px">— 3+ malzeme, katlanabilir</span></summary><div class="bm-demle-cokbody">'+cokRows+'</div></details>';
-    }
-    if((nA>0||nC>0) && a.alisveris.length){
-      var satir = a.alisveris.map(function(x){ return x.mik>0 ? (x.ad+' — '+x.mik+(x.birim||'')) : x.ad; }).join('\n');
-      body+='<div class="bm-demle-alis"><div class="bm-demle-h" style="margin-top:0">🛒 Eksik listesi</div><pre>'+esc(satir)+'</pre></div>';
-    }
-    if(!body) body='<div class="bm-demle-bos">Şu an demlenebilir reçete yok.</div>';
-    var chevron = (typeof BM_SVG!=='undefined' && BM_SVG['chevron-down']) ? BM_SVG['chevron-down'] : '▾';
-    return '<details class="bm-demle">'+
-      '<summary><span class="bm-ana-ki" style="font-size:20px">🍺</span>'+
-      '<span class="bm-ana-kt"><span class="bm-ana-kn">NE DEMLEYEBİLİRİM?</span><span class="bm-demle-sum">'+esc(ozet)+'</span></span>'+
-      '<span class="bm-ana-kc">'+chevron+'</span></summary>'+
-      '<div class="bm-demle-body">'+body+'</div></details>';
-  } catch(e){ try{console.warn('bmDemleKartHTML',e);}catch(_){} return ''; }
+  return '<button type="button" class="bm-demle bm-demle-giris" onclick="_brAc()" aria-label="Ne demleyebilirim — stil ya da malzeme seç, stoğunla neyi yapabileceğini gör">'
+    + '<span class="bm-ana-ki" style="font-size:20px">🍺</span>'
+    + '<span class="bm-ana-kt"><span class="bm-ana-kn">NE DEMLEYEBİLİRİM?</span><span class="bm-demle-sum">Stil ya da malzeme seç, örneğe bak, stoğunla neyi yapabileceğini gör</span></span>'
+    + '<span class="bm-ana-kc">›</span></button>';
 };
 
 // ═══ 📖 DEMLEME GÜNLÜĞÜM — ölçüm tabanlı kişisel profil (saf türetilmiş) ═══════
@@ -22606,9 +22609,7 @@ function rEditor(){
     </select>
     <button type="button" onclick="bmStilIskeletDoldur()" title="Seçili stilin tipik malt/hop/maya iskeletini bu batch boyutuna ölçekleyip doldur" style="background:var(--bakir);color:#fff;border:none;border-radius:var(--r-sm);font-size:var(--fs-xs);padding:4px 10px;white-space:nowrap;cursor:pointer;font-family:var(--font-govde)">📋 İskeleti Doldur</button>
   </div>
-  <div class="bm-eh-arac">${(typeof _bmProfilStilKart==='function')?_bmProfilStilKart():''}</div>
   </div><!-- Adim 132-J-2: editor üst kahve header 6 stat duplicate KALDIRILDI (sticky özet 132-A+E zaten gosteriyor, KH J-2'de sticky'ye eklendi) -->
-  ${(typeof _brTamHTML==='function')?_brTamHTML():''}<!-- SPRINT BR: tam ekran secici .eh DISINDA (krom-kucuk kurali .bm-eh-arac'i display:none yapiyor) -->
   ${uy?`<div style="padding:8px 12px 0">${uy}</div>`:""}
   <!-- Adim 132-E: Sticky ozet paneli global (eh disinda, her tab'da gorunur). srmR(srm) renk. -->
   <div class="bm-sticky-summary" id="bm-summary">
@@ -22709,6 +22710,7 @@ function render(){
     document.getElementById("ekran").innerHTML=ekran==="ana"?rAnasayfa():ekran==="liste"?rListe():ekran==="stok"?rStok():ekran==="ayarlar"?rAyarlarEkran():ekran==="bildirim"?rBildirimEkran():rEditor();
     try{ renderSidebar(); }catch(e){ console.warn("renderSidebar fail:", e); }
     try{ renderHeader(); }catch(e){ console.warn("renderHeader fail:", e); }
+    try{ if(typeof window._brKatman==='function') window._brKatman(); }catch(e){ console.warn("_brKatman fail:", e); } // SPRINT ND1: stil seçme ekranı her ekranda (ana kart girişi)
     // Adim 132-A: render sonrasi --bm-header-h CSS var guncelle (sticky-summary top hizalama)
     try{ setTimeout(function(){ if(typeof window._bmUpdateHeaderH==='function') window._bmUpdateHeaderH(); }, 0); }catch(_){}
     // Adim 132-D: render sonrasi accordion state restore + ARIA bind
@@ -27180,6 +27182,7 @@ window._TD_BOYUT = {
     return out.slice(0, window._BM_ORNEK_MAX);
   }
   window._bmOrnekSayim = function(stilAd){ var L = ornekListe(stilAd), r = { K1:0, K2:0, K3:0, K4:0, toplam:L.length }; L.forEach(function(x){ r[x.k]++; }); return r; };
+  window._bmOrnekListe = ornekListe; // SPRINT ND1: kuru dönüşüm + stok analizi + malzeme araması birleşik listeyi okur
   function yolaCikBtn(kaynak, stilAd, oi){
     return '<div style="margin-top:4px"><button type="button" onclick="_bmOrnekOnizle(\'' + kaynak + '\',\'' + jsq(stilAd) + '\',' + oi + ')" '
       + 'title="Örneğin tam içeriğini önizlemede gösterir; yeni reçete oluşturma önizlemeden yapılır" '
@@ -27204,7 +27207,7 @@ window._TD_BOYUT = {
   }
   function nhcSatir(o, oi, stilAd, esc){
     var olc = olcumListe(o, true);
-    return '<div class="bm-ornek-satir" style="padding:5px 0;border-top:1px dotted var(--bor)">' + kademeRozet('K1')
+    return '<div class="bm-ornek-satir" style="padding:5px 0;border-top:1px dotted var(--bor)">' + kademeRozet('K1') + (window._ndSatirRozetHTML ? window._ndSatirRozetHTML('nhc', stilAd, oi) : '')
       + '<div style="font-size:10px;color:var(--soluk)">🥇 NHC ' + o.yil + ' · ' + String(o.L).replace('.', ',') + ' L'
       +   (o.ms ? ' · mash ' + String(o.ms).replace('.', ',') + '°C' : '')
       +   (olc.length ? ' · ' + esc(olc.join(' · ')) : '') + '</div>'
@@ -27219,7 +27222,7 @@ window._TD_BOYUT = {
     var kunye = [];
     if(o.yil) kunye.push(o.yil);
     if(o.e) kunye.push('kategoride ' + o.e.toLocaleString('tr-TR') + ' giriş arasından');
-    return '<div class="bm-ornek-satir" style="padding:5px 0;border-top:1px dotted var(--bor)">' + kademeRozet('K1')
+    return '<div class="bm-ornek-satir" style="padding:5px 0;border-top:1px dotted var(--bor)">' + kademeRozet('K1') + (window._ndSatirRozetHTML ? window._ndSatirRozetHTML('aha', stilAd, oi) : '')
       + '<div style="font-size:10px;color:var(--soluk)">' + (MADALYA_IKON[o.m] || '🏅')
       +   (kunye.length ? ' ' + esc(kunye.join(' · ')) : '')
       +   (olc.length ? ' · ' + esc(olc.join(' · ')) : '') + '</div>'
@@ -27238,7 +27241,7 @@ window._TD_BOYUT = {
     var etiket = o.k === 'K2' ? 'Ödül biraya ait; reçete yayınlanmış klon (' + esc(o.kay.pub) + ')'
       : o.k === 'K4' ? K4_ETIKET + ' (' + esc(o.kay.pub) + (o.et ? ' · beyan edilen stil: ' + esc(o.et) : '') + ')'
       : 'Yayınlanmış otorite reçetesi (' + esc(o.kay.pub) + ') — ödüllü diye sunulmaz';
-    return '<div class="bm-ornek-satir" style="padding:5px 0;border-top:1px dotted var(--bor)">' + kademeRozet(o.k)
+    return '<div class="bm-ornek-satir" style="padding:5px 0;border-top:1px dotted var(--bor)">' + kademeRozet(o.k) + (window._ndSatirRozetHTML ? window._ndSatirRozetHTML(o.k === 'K4' ? 'k4' : 'kay', stilAd, oi) : '')
       + '<div style="font-size:10px;color:var(--soluk)">' + kayBaslik(o, esc) + '</div>'
       + '<div style="font-size:9.5px;color:var(--dim)">' + etiket + (o.L ? ' · ' + String(o.L).replace('.', ',') + ' L' : '') + (o.ms ? ' · mash ' + String(o.ms).replace('.', ',') + '°C' : '') + (olc.length ? ' · ' + esc(olc.join(' · ')) : '') + '</div>'
       + gramSatirlari(o, esc)
@@ -27248,6 +27251,8 @@ window._TD_BOYUT = {
   function madalyaHTML(stilAd, esc){
     var L = ornekListe(stilAd);
     if(!L.length) return '';
+    // SPRINT ND1: stil seçme ekranında "Yalnız yapabileceklerim" açıksa örnekler de süzülür (editördeki Reçete Doktoru süzülmez)
+    if(window.__brAcik && window.__ndFiltre && window._bmOrnekStok){ L = L.filter(function(x){ var d = window._bmOrnekStok(x.kaynak, stilAd, x.idx); return d && window._ndUygun(d.durum); }); if(!L.length) return '<div class="br-ara-yok">Bu stilde süzgece uyan örnek yok.</div>'; }
     var M = window._TOPLULUK_MADALYA, N = window._NHC_MADALYA;
     var v = (M && M[stilAd] && M[stilAd][1] && M[stilAd][1].length) ? M[stilAd] : null;
     var nv = (N && N[stilAd] && N[stilAd][1] && N[stilAd][1].length) ? N[stilAd] : null;
@@ -27453,6 +27458,8 @@ window._TD_BOYUT = {
       var T = nhc ? window._NHC_MADALYA : k4 ? window._TOPLULUK_ORNEK : kay ? window._KAYNAKLI_ORNEK : window._TOPLULUK_MADALYA;
       var v = T && T[stilAd]; var o = kay ? (v && v[idx]) : (v && v[1] && v[1][idx]); if(!o) return null;
       _onizleSec = { kaynak: kaynak, stilAd: stilAd, idx: idx };
+      var _nd = window._bmOrnekStok ? window._bmOrnekStok(kaynak, stilAd, idx) : null; // SPRINT ND1: kuru dönüşüm + stok (yazma yok)
+      var _ndK = function(grup, i){ return (_nd && window._ndKalemHTML) ? window._ndKalemHTML(grup === 'y' ? _nd.y : (_nd[grup] || [])[i]) : ''; };
       var esk = document.getElementById('bmOrnekOnizle'); if(esk) esk.remove();
       var derece = kay ? kayBaslik(o, _oe) : nhc ? ('🥇 NHC finali altın · ' + o.yil)
                        : ((MADALYA_IKON[o.m] || '🏅') + ' AHA ' + (DERECE_AD[o.m] || 'madalya') + (o.yil ? ' · ' + o.yil : '') + (o.e ? ' · kategoride ' + o.e.toLocaleString('tr-TR') + ' giriş' : ''));
@@ -27485,24 +27492,24 @@ window._TD_BOYUT = {
       var gristHTML;
       if(nhc || kay){
         var gTop = 0; (o.g || []).forEach(function(x){ gTop += (+x[1] || 0); });
-        gristHTML = (o.g || []).map(function(x){
+        gristHTML = (o.g || []).map(function(x, gi){
           var p = (gTop > 0 && +x[1]) ? Math.round(x[1] / gTop * 100) : null;
-          return '<div style="' + satirStil + '"><span style="flex:1;min-width:0">' + _oe(x[0]) + '</span><span style="white-space:nowrap;color:var(--kahve);font-weight:600">' + nhcGramTR(x[1]) + (p >= 1 ? ' · %' + p : '') + '</span></div>';
+          return '<div style="' + satirStil + ';flex-wrap:wrap"><span style="flex:1;min-width:0">' + _oe(x[0]) + _ndK('g', gi) + '</span><span style="white-space:nowrap;color:var(--kahve);font-weight:600">' + nhcGramTR(x[1]) + (p >= 1 ? ' · %' + p : '') + '</span></div>';
         }).join('');
       } else {
-        gristHTML = (o.g || []).map(function(x){
-          return '<div style="' + satirStil + '"><span style="flex:1;min-width:0">' + _oe(x[0]) + '</span><span style="white-space:nowrap;color:var(--kahve);font-weight:600">%' + _oe(x[1]) + '</span></div>';
+        gristHTML = (o.g || []).map(function(x, gi){
+          return '<div style="' + satirStil + ';flex-wrap:wrap"><span style="flex:1;min-width:0">' + _oe(x[0]) + _ndK('g', gi) + '</span><span style="white-space:nowrap;color:var(--kahve);font-weight:600">%' + _oe(x[1]) + '</span></div>';
         }).join('');
         gristHTML += '<div style="font-size:10px;color:var(--dim);margin-top:3px">Gram/kg miktarı kaynakta yok — yüzdeler kaynaktan; derleme gristi ilk 5 kalemle sınırlı verir.</div>';
       }
       var hopHTML;
       if(nhc || kay){
-        hopHTML = (o.h || []).map(function(x){
-          return '<div style="' + satirStil + '"><span style="flex:1;min-width:0">' + _oe(x[0]) + _oe(nhcDkStr(x[2])) + (x[3] ? ' <span style="color:var(--soluk)">(%' + _onizleTR(x[3]) + ' AA)</span>' : '') + '</span><span style="white-space:nowrap;color:var(--kahve);font-weight:600">' + nhcGramTR(x[1]) + '</span></div>';
+        hopHTML = (o.h || []).map(function(x, hi){
+          return '<div style="' + satirStil + ';flex-wrap:wrap"><span style="flex:1;min-width:0">' + _oe(x[0]) + _oe(nhcDkStr(x[2])) + _ndK('h', hi) + (x[3] ? ' <span style="color:var(--soluk)">(%' + _onizleTR(x[3]) + ' AA)</span>' : '') + '</span><span style="white-space:nowrap;color:var(--kahve);font-weight:600">' + nhcGramTR(x[1]) + '</span></div>';
         }).join('');
       } else {
-        hopHTML = (o.h || []).map(function(x){
-          return '<div style="' + satirStil + '"><span style="flex:1;min-width:0">' + _oe(x[0]) + (x[1] != null ? ' @' + _oe(x[1]) + 'dk' : '') + (x[2] ? ' <span style="color:var(--soluk)">(' + _oe(x[2]) + ')</span>' : '') + '</span></div>';
+        hopHTML = (o.h || []).map(function(x, hi){
+          return '<div style="' + satirStil + ';flex-wrap:wrap"><span style="flex:1;min-width:0">' + _oe(x[0]) + (x[1] != null ? ' @' + _oe(x[1]) + 'dk' : '') + _ndK('h', hi) + (x[2] ? ' <span style="color:var(--soluk)">(' + _oe(x[2]) + ')</span>' : '') + '</span></div>';
         }).join('');
         hopHTML += '<div style="font-size:10px;color:var(--dim);margin-top:3px">Hop gramajı kaynakta yok — kaynak yalnız çeşidi ve zamanı verir.</div>';
       }
@@ -27515,6 +27522,7 @@ window._TD_BOYUT = {
       h += '<div style="font-size:10px;color:var(--soluk);margin-top:1px">' + kaynakStr + '</div></div>';
       h += '<button type="button" onclick="bmOrnekOnizleKapat()" aria-label="Önizlemeyi kapat" style="background:var(--bg2);border:1px solid var(--bor);border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;color:var(--kahve);flex:none">✕</button>';
       h += '</div>';
+      h += (window._ndOzetHTML ? window._ndOzetHTML(_nd) : '');
       h += yasHTML;
       var oghHTML = '';
       if(!o.og && o.ogH){
@@ -27525,8 +27533,9 @@ window._TD_BOYUT = {
       h += '<div style="margin-top:10px">' + olcHTML + mashIskHTML + oghHTML + '</div>';
       if(gristHTML) h += _onizleBolum('🌾 GRIST', gristHTML);
       if(hopHTML) h += _onizleBolum('🌿 HOP', hopHTML);
-      if(o.y) h += _onizleBolum('🧪 MAYA', '<div style="font-size:12px;color:var(--metin);line-height:1.5">' + _oe(o.y) + '</div>');
-      if(kay && o.ek && o.ek.length) h += _onizleBolum('➕ EK KALEMLER', o.ek.map(function(x){ return '<div style="font-size:12px;color:var(--metin);padding:2px 0">' + _oe(x[0]) + (x[1] ? ' — ' + _oe(x[1]) : '') + '</div>'; }).join(''));
+      if(o.y) h += _onizleBolum('🧪 MAYA', '<div style="font-size:12px;color:var(--metin);line-height:1.5">' + _oe(o.y) + _ndK('y') + '</div>');
+      if(kay && o.ek && o.ek.length) h += _onizleBolum('➕ EK KALEMLER', o.ek.map(function(x, ei){ return '<div style="font-size:12px;color:var(--metin);padding:2px 0">' + _oe(x[0]) + (x[1] ? ' — ' + _oe(x[1]) : '') + _ndK('ek', ei) + '</div>'; }).join(''));
+      h += (window._ndAlinacakHTML ? window._ndAlinacakHTML(_nd) : '');
       if(kay) h += '<div class="bm-onizle-kaynak" style="font-size:10.5px;color:var(--metin);margin-top:8px;line-height:1.5">Kaynak: ' + (o.kay.u ? '<a href="' + _oe(o.kay.u) + '" target="_blank" rel="noopener noreferrer">' + _oe(o.kay.pub) + '</a>' : (_oe(o.kay.pub) + ' topluluk reçetesi (topluluk korpusu derlemesinden; bağlantı yok)' + (o.et ? ' · beyan edilen stil: ' + _oe(o.et) : ''))) + (o.k === 'K2' ? ' · Resmi sonuç: <a href="' + _oe(o.od.u) + '" target="_blank" rel="noopener noreferrer">' + _oe(o.od.yr) + ' ' + o.od.y + '</a>' : '') + '</div>';
       if(nhc && o.ekN) h += '<div style="font-size:10px;color:var(--dim);margin-top:8px">+' + o.ekN + ' ek kalem (baharat/katkı) kaynakta var — burada listelenmedi.</div>';
       if(kay) h += '<div style="margin-top:10px;font-size:9.5px;color:var(--dim);line-height:1.45;border-top:1px solid var(--bor);padding-top:6px">Bu bir <b>örnek</b>, kural değil' + (o.k === 'K2' ? ': ödül resmi sonuç listesinden teyitli ve ticari biraya ait; reçete o biranın yayınlanmış klonu — klonun yarışmaya girmiş reçete olduğu iddia edilmez.' : o.k === 'K4' ? (': ' + K4_ETIKET + '. Topluluk korpusundaki pek çok reçeteden, adı ya da beyan ettiği stil etiketi bu stille açıkça eşleşen biri — tipik ya da iyi olduğu iddia edilmez.') : ': yayınlanmış otorite reçetesi; ödüllü diye sunulmaz.') + '</div>';
@@ -28169,6 +28178,16 @@ window._bmProfilSifirla = function(){
   else if(typeof render === 'function') render();
 };
 
+// SPRINT ND1: tam ekran artık editör şablonunun İÇİNDE DEĞİL — HER ekranın #ekran kabının sonuna eklenir (render() kabı
+// yeniden yazınca bu kanca yeniden ekler). Ana ekrandaki "Ne Demleyebilirim?" kartı açtığında editör çizilmediği için şablon
+// içinde kalsaydı ekran hiç görünmezdi. #ekran kapsamlı CSS (44 px dokunma hedefleri vb.) aynen uygulanır.
+window._brKatman = function(){
+  var el = document.getElementById('br-tam');
+  if(!window.__brAcik){ if(el) el.remove(); return; }
+  var h = window._brTamHTML(); if(!h) return;
+  var kap = document.getElementById('ekran') || document.body;
+  if(el) el.outerHTML = h; else kap.insertAdjacentHTML('beforeend', h);
+};
 window._brAc = function(){
   window.__brAcik = true;
   if(typeof render === 'function') render();
@@ -28206,23 +28225,6 @@ window._brCiz = function(){
 
 // ── Eylemler: AK/AV yolları AYNEN, yalnız stil ADIYLA çağrılabilir hâle geldi
 // (BR listesi artık tek bir kovadan gelmiyor; kova indeksi anlamsız).
-window._brStilKur = function(ad, doldur){
-  try{
-    if(!ad || typeof S === 'undefined' || !S) return;
-    window.__brAcik = false;
-    S.stil = ad;
-    if(doldur && typeof window.bmStilIskeletDoldur === 'function'){
-      // __stilSecKaynak='iskelet' bmStilIskeletDoldur içinde kurulur (Sprint Z:
-      // stilden-reçete = NİYET, düzeltme sinyali DEĞİL → stil öğrenme kolu zehirlenmez)
-      window.bmStilIskeletDoldur();
-      return;
-    }
-    window.__stilSecKaynak = 'iskelet'; // profil-güdümlü seçim de NİYET sayılır
-    if(typeof _receteYazSync === 'function') _receteYazSync();
-    if(typeof render === 'function') render();
-    if(typeof flash === 'function') flash('🎯 Hedef stil: ' + ad, 'ok');
-  }catch(e){ try{ console.warn('_brStilKur', e); }catch(_){} }
-};
 window._brYeniRecete = function(ad){
   try{
     if(!ad) return null;
@@ -28230,14 +28232,8 @@ window._brYeniRecete = function(ad){
     return window._bmStildenYeniRecete ? window._bmStildenYeniRecete(ad) : null;
   }catch(e){ if(window.bmHataKaydet)bmHataKaydet('calc', e, '_brYeniRecete'); return null; }
 };
-// AK/AV1 imzaları KORUNDU (kovaKey + indeks) — mevcut çağrılar aynen çalışır.
-window._bmProfilStilUygula = function(kovaKey, idx, doldur){
-  try{
-    var v = window._PROFIL_STIL && window._PROFIL_STIL[kovaKey];
-    if(!v || !v[1] || !v[1][idx]) return;
-    window._brStilKur(v[1][idx][0], doldur);
-  }catch(e){ try{ console.warn('_bmProfilStilUygula', e); }catch(_){} }
-};
+// AK/AV1 "yeni reçete" imzası (kovaKey + indeks) korundu. SPRINT ND1: açık reçeteyi dolduran _bmProfilStilUygula / _brStilKur /
+// _brDoldurIx / _brAraSec KALDIRILDI — stil seçme ekranında tek mod var (✨ Yeni reçete + örnek eylemleri).
 window._bmProfilYeniRecete = function(kovaKey, idx){
   try{
     var v = window._PROFIL_STIL && window._PROFIL_STIL[kovaKey];
@@ -28247,32 +28243,7 @@ window._bmProfilYeniRecete = function(kovaKey, idx){
 };
 // Listedeki satır indeksiyle (ad tırnak/kaçış sorunu üretmesin diye)
 window._brYeniIx = function(i){ var L = window.__brSon || []; return L[i] ? window._brYeniRecete(L[i]) : null; };
-window._brDoldurIx = function(i, doldur){ var L = window.__brSon || []; if(L[i]) window._brStilKur(L[i], doldur !== false); };
 
-// ── Sunum 1: "Hedef Stil" dropdown'unun altındaki GİRİŞ (dropdown AYNEN kalır)
-window._bmProfilStilKart = function(){
-  try{
-    if(!window._AK_EKSEN || !window._PROFIL_STIL) return '';
-    var _e = (typeof esc === 'function') ? esc : function(s){ return String(s == null ? '' : s); };
-    var p = window.__akProfil || {};
-    var sec = window._brEksenler().filter(function(x){ return p[x.k]; }).map(function(x){
-      var o = null; x.sec.forEach(function(s){ if(s[0] === p[x.k]) o = s; });
-      return x.ikon + ' ' + _e(o ? o[1] : p[x.k]);
-    });
-    if(p.nota && window._CB_NOTA && window._CB_NOTA[p.nota]) sec.unshift('👅 ' + _e(window._CB_NOTA[p.nota].et)); // SPRINT CB2
-    var ozet = '';
-    if(sec.length){
-      var s = window._brSonuc(p);
-      ozet = '<div class="bm-br-ozet" style="font-size:9.5px;color:var(--soluk);margin:2px 0 6px;line-height:1.4">'
-        + sec.join(' · ') + ' → <b>' + s.stiller.length + '</b> stil'
-        + ' <button type="button" onclick="_bmProfilSifirla()" style="background:none;border:none;color:var(--dim);font-size:9.5px;cursor:pointer;padding:0 4px;text-decoration:underline;font-family:var(--font-govde)">temizle</button></div>';
-    }
-    return '<button type="button" class="bm-profil-sec" onclick="_brAc()" '
-      + 'style="width:100%;text-align:left;cursor:pointer;font-size:11px;font-weight:600;color:var(--kahve);padding:6px 8px;background:var(--bg2);border:1px solid var(--bor);border-radius:6px;font-family:var(--font-govde);margin:-4px 0 4px">'
-      + '🔎 Stil ara ya da tarif et — <span style="font-weight:400;color:var(--soluk)">adını yaz ya da istediğin birayı anlat</span>'
-      + '</button>' + ozet;
-  }catch(e){ try{ console.warn('_bmProfilStilKart', e); }catch(_){} return ''; }
-};
 
 // ═══ SPRINT CB2 — LEZZET NOTALARI (üretici: _cb_build_nota.js, repo kökü; 65 pozitif/negatif kontrol ABORT kapılı) ═══
 // Eksenlerin ÜSTÜNDE, kullanıcının düşündüğü dilde birleşik notalar. Her nota AÇIK bir kuralla korpustan:
@@ -28368,6 +28339,13 @@ window._brAraSonucHTML = function(){
   if(!window._brAraNorm(q)) return '';
   var _e = (typeof esc === 'function') ? esc : function(x){ return String(x == null ? '' : x); };
   var L = window._brAraListe(q);
+  if(window.__ndFiltre){ // SPRINT ND1: "Yalnız yapabileceklerim" — stil, en az bir uygun örneği varsa kalır
+    var _f = window._ndFiltreUygula(L.map(function(x){ return x.ad; }));
+    if(!_f.hazir) return window._ndBekleHTML();
+    var _fm = {}; _f.liste.forEach(function(a){ _fm[a] = 1; }); L = L.filter(function(x){ return _fm[x.ad]; });
+    if(!L.length) return window._ndFiltreNotHTML() + '<div class="br-ara-yok">"' + _e(q) + '" araması içinde stoğunla ' + (window.__ndFiltre === 1 ? 'yapabileceğin' : 'yapabileceğin ya da neredeyse yapabileceğin') + ' örneği olan stil yok.</div>';
+  }
+  var _im = window._bmStokImza ? window._bmStokImza() : null;
   window.__brAraSon = L.slice(0, window._BR_ARA_MAX).map(function(x){ return x.ad; });
   if(!L.length) return '<div class="br-ara-yok">"' + _e(q) + '" için stil bulunamadı — aşağıdaki notalar ya da eksenlerle tarif ederek bulabilirsin.</div>';
   var ISK = (typeof STIL_ISKELET !== 'undefined' && STIL_ISKELET) ? STIL_ISKELET : {};
@@ -28380,12 +28358,12 @@ window._brAraSonucHTML = function(){
     var acik = !!(window.__brAraOrnekAcik && window.__brAraOrnekAcik[ad]);
     return '<div class="br-ara-blok"><div class="br-ara-satir"><div style="flex:1;min-width:0"><div class="br-ara-ad">' + _e(ad) + (ISK[ad] ? ' <span class="br-isk">iskelet</span>' : '') + '</div>'
       + (os.toplam ? '<button type="button" class="br-ara-ornek-btn" aria-expanded="' + (acik ? 'true' : 'false') + '" onclick="_brAraOrnek(' + i + ')">📚 ' + os.toplam + ' kaynaklı örnek · ' + osStr + (acik ? ' ▴' : ' ▾') + '</button>' : '<div class="br-ara-alt" style="color:var(--dim)">kaynaklı örnek yok</div>')
+      + (os.toplam && window._ndStilOzetHTML ? window._ndStilOzetHTML(ad, _im) : '')
       + '<div class="br-ara-alt">' + _e(alt) + '</div></div>'
-      + '<div class="br-satir-btn"><button type="button" class="br-btn-ana" onclick="_brAraYeni(' + i + ')" title="Bu stilden YENİ reçete oluştur (açık reçete korunur)">✨ Yeni reçete</button>'
-      + '<button type="button" class="br-btn-ikincil br-ara-sec" onclick="_brAraSec(' + i + ')" title="Açık reçetenin Hedef Stil\'ini bu yap (dropdown ile aynı)">🎯 Hedef yap</button></div></div>'
+      + '<div class="br-satir-btn"><button type="button" class="br-btn-ana" onclick="_brAraYeni(' + i + ')" title="Bu stilden YENİ reçete oluştur (açık reçete korunur)">✨ Yeni reçete</button></div></div>'
       + (acik && os.toplam ? '<div class="br-ara-ornek">' + window._bmOrnekListeHTML(ad) + '</div>' : '') + '</div>';
   }).join('');
-  return h + (L.length > window._BR_ARA_MAX ? '<div class="br-ara-yok">' + (L.length - window._BR_ARA_MAX) + ' eşleşme daha — aramayı daralt (ör. "' + _e(q) + ' koyu").</div>' : '');
+  return (window._ndFiltreNotHTML ? window._ndFiltreNotHTML() : '') + h + (L.length > window._BR_ARA_MAX ? '<div class="br-ara-yok">' + (L.length - window._BR_ARA_MAX) + ' eşleşme daha — aramayı daralt (ör. "' + _e(q) + ' koyu").</div>' : '');
 };
 // Başlıkta (sabit, kaydırmaz): arama + nota düğmesi. ÖLÇÜM ZORUNLULUĞU: 360×640'ta seçimsizken sonuç başlığına
 // en fazla bir kısa kaydırma bütçesi var (BT1: <160 px; öncesi 110 px). Gövdeye açık nota şeridi + arama kutusu
@@ -28416,13 +28394,6 @@ window._brProfilGorunur = function(){
   var p = document.getElementById('br-profil-sonuc'), n = document.getElementById('br-ara-not');
   if(p) p.style.display = aktif ? 'none' : '';
   if(n) n.style.display = aktif ? '' : 'none';
-};
-window._brAraSec = function(i){
-  var ad = (window.__brAraSon || [])[i]; if(!ad || typeof S === 'undefined' || !S) return;
-  window.__brAcik = false;
-  S.stil = ad; window.__stilSecKaynak = 'dropdown'; // Hedef Stil dropdown'u ile AYNI anlam: kullanıcının açık seçimi
-  if(typeof render === 'function') render();
-  if(typeof flash === 'function') flash('🎯 Hedef stil: ' + ad, 'ok');
 };
 // SPRINT CC: arama satırında kaynaklı örnekleri aç/kapat (yalnız sonuç kutusu yeniden çizilir; input odağı korunur)
 window._brAraOrnek = function(i){
@@ -28468,6 +28439,9 @@ window._brTamHTML = function(){
     var p = window.__akProfil || { renk:'', aci:'', govde:'', abv:'', maya:'', tahil:'', malt:'', hop:'', nota:'' };
     var s = window._brSonuc(p);
     var karAktif = !!(p.abv || p.maya || p.tahil || p.malt || p.hop || p.nota);
+    var _ndF = window._ndFiltreUygula ? window._ndFiltreUygula(s.stiller) : null; // SPRINT ND1: null = filtre kapalı
+    if(_ndF) s = Object.assign({}, s, { stiller:_ndF.liste });
+    var _ndIm = window._bmStokImza ? window._bmStokImza() : null;
 
     // ── 5 eksen, HEPSİ İSTEĞE BAĞLI, HEPSİ AYNI EKRANDA ──────────────────
     // KATLAMA: bir eksen SEÇİLİNCE tek satıra iner (seçim + 'değiştir'), böylece
@@ -28515,7 +28489,9 @@ window._brTamHTML = function(){
     var _detay = _tumEksen.filter(function(x){ return x.grup === 'detay'; });
     var _detaySecili = _detay.filter(function(x){ return p[x.k]; }).length;
     var _detayAcik = !!window.__brDetayAcik || _detaySecili > 0;
-    var bloklar = '<div id="br-ara-sonuc" class="br-ara-sonuc" aria-live="polite">' + window._brAraSonucHTML() + '</div>' + window._brNotaHTML() // SPRINT CB1 + CB2: eksenlerin ÜSTÜNDE
+    var bloklar = (window._ndVeriVar && !window._ndVeriVar() ? '<div class="br-ara-yok">Örnek verisi yüklenemedi (ornek_veri.js) — stil araması çalışır, kaynaklı örnekler görünmez.</div>' : '')
+      + (window._ndMalzBlokHTML ? window._ndMalzBlokHTML() : '') // SPRINT ND1: malzeme araması (stil araması / nota / eksenlerle VE)
+      + '<div id="br-ara-sonuc" class="br-ara-sonuc" aria-live="polite">' + window._brAraSonucHTML() + '</div>' + window._brNotaHTML() // SPRINT CB1 + CB2: eksenlerin ÜSTÜNDE
       + _temel.map(_cizEksen).join('')
       + (_detay.length
           ? '<button type="button" class="br-grup" onclick="_brDetayAc()" aria-expanded="' + (_detayAcik ? 'true' : 'false') + '">'
@@ -28534,7 +28510,11 @@ window._brTamHTML = function(){
     var goster = hepsiAcik ? s.stiller : s.stiller.slice(0, ILK);
     window.__brSon = s.stiller.slice(0);
     var sonucHTML;
-    if(!s.stiller.length){
+    if(_ndF && !_ndF.hazir){
+      sonucHTML = window._ndBekleHTML();
+    } else if(_ndF && !s.stiller.length){
+      sonucHTML = window._ndFiltreNotHTML() + '<div class="br-bos"><div style="font-weight:700;margin-bottom:4px">Bu seçimde stoğunla ' + (window.__ndFiltre === 1 ? 'yapabileceğin' : 'yapabileceğin ya da neredeyse yapabileceğin') + ' örneği olan stil yok.</div><div>Süzgeci kapatırsan tüm stiller görünür; bir örneği açınca neyin eksik olduğunu görürsün.</div></div>';
+    } else if(!s.stiller.length){
       var d = window._brDaraltan();
       var en = d.length ? d[0] : null;
       var eksAd = {};
@@ -28577,15 +28557,13 @@ window._brTamHTML = function(){
           +     (iskVar ? ' <span class="br-isk">iskelet</span>' : '')
           +   '</div>'
           +   '<div class="br-satir-alt">' + say(n) + ' reçete bu profilde (%' + pay + ')' + (bant ? ' · ' + bant : '') + (kar ? ' · ' + kar : '') + '</div>'
+          +   (window._ndStilOzetHTML ? window._ndStilOzetHTML(ad, _ndIm) : '')
           + '</div>'
-          // SPRINT AV1 ayrımı KORUNDU: BİRİNCİL "Yeni reçete", İKİNCİL "Doldur".
+          // SPRINT ND1: tek mod — yalnız "✨ Yeni reçete" (açık reçeteyi dolduran "📋 Doldur / 🎯 Hedef yap" kaldırıldı)
           + '<div class="br-satir-btn">'
           +   '<button type="button" class="br-btn-ana" onclick="_brYeniIx(' + i + ')" '
           +     'title="' + (iskVar ? 'Bu stilden YENİ reçete oluştur — iskelet batch boyutuna ölçeklenir (açık reçete korunur)' : 'Bu stilden YENİ reçete oluştur — hazır iskelet yok: BJCP hedefi + maya gelir, malt/hop boş kalır') + '">'
           +     '✨ Yeni reçete</button>'
-          +   '<button type="button" class="br-btn-ikincil" onclick="_brDoldurIx(' + i + ',true)" '
-          +     'title="' + (iskVar ? 'AÇIK reçeteyi bu stilin iskeletiyle doldur' : 'AÇIK reçetenin hedef stilini kur — BJCP hedefleri + maya önerisi (malt/hop uydurulmaz)') + '">'
-          +     (iskVar ? '📋 Doldur' : '🎯 Hedef yap') + '</button>'
           + '</div>'
           + '</div>';
       }).join('');
@@ -28597,7 +28575,7 @@ window._brTamHTML = function(){
         ? '<button type="button" class="br-daha" onclick="_brHepsiAc()">▾ ' + kalan + ' stil daha</button>'
         : (window.__brHepsi && s.stiller.length > ILK
             ? '<button type="button" class="br-daha" onclick="_brHepsiKapat()">▴ ilk ' + ILK + ' stille kısalt</button>' : '');
-      sonucHTML = '<div class="br-sonuc-bas">' + bas + '</div>' + satirlar + dahaBtn;
+      sonucHTML = '<div class="br-sonuc-bas">' + bas + '</div>' + (_ndF ? window._ndFiltreNotHTML() : '') + satirlar + dahaBtn;
     }
 
     var dipnot = '<div class="br-dipnot">Her eksen ve nota <b>isteğe bağlı</b> — seçmediğin süzmez. <b>Lezzet notaları</b> tat ölçümü değil, korpustaki malt/maya/hop bileşiminden açık kurallarla gelir: bir stil, reçetelerinin en az %40\'ı o bileşimi taşıyorsa notada görünür (ör. Muz & karanfil = Alman buğday mayası). Arama 239 BJCP stilinde ad ve Türkçe karşılıklarla yapılır. '
@@ -28610,7 +28588,10 @@ window._brTamHTML = function(){
 
     return '<div id="br-tam" class="br-tam" role="dialog" aria-modal="true" aria-label="İstediğin birayı tarif et" tabindex="-1">'
       + '<div class="br-tam-bas">'
-      +   '<div style="flex:1;min-width:0"><div class="br-tam-baslik">🍺 İstediğin birayı tarif et</div>'
+      +   '<div style="flex:1;min-width:0"><div class="br-tam-ust">'
+      +     '<button type="button" class="br-malz-ac' + ((window.__ndMalz || []).length ? ' nd-secili' : '') + '" onclick="_ndMalzAc()" aria-expanded="' + (window.__ndMalzAcik ? 'true' : 'false') + '" title="Kullanmak istediğin malzemeye göre örnek bul">🧺 Malzeme' + ((window.__ndMalz || []).length ? ' (' + window.__ndMalz.length + ')' : '') + (window.__ndMalzAcik ? ' ▴' : ' ▾') + '</button>'
+      +     '<button type="button" class="nd-filtre" onclick="_ndFiltreTik()" aria-pressed="' + (window.__ndFiltre ? 'true' : 'false') + '" title="Yalnız stoğunla yapabileceğin örnekleri göster">✅ Yapabileceklerim</button>'
+      +   '</div>'
       +   window._brAraKutuHTML() + '</div>'
       +   '<button type="button" class="br-kapat" onclick="_brKapat()" aria-label="Kapat" title="Kapat (Esc)">✕</button>'
       + '</div>'
@@ -28625,6 +28606,433 @@ window._brTamHTML = function(){
       + '</div>';
   }catch(e){ try{ console.warn('_brTamHTML', e); }catch(_){} return ''; }
 };
+
+// ═══ SPRINT ND1 — ÖRNEK → KURU REÇETE + STOK YAPILABİLİRLİK + MALZEME ARAMASI (çekirdek) ═══
+// Kaan: "seçtiğim örneğin önizlemesi olsun ve stoğa göre görebileyim hangisini yapabiliyorum" + "Aloha / lavanta
+// kullanmak istiyorum; seçtiğim malzemeye göre hangi reçeteler var bulabileyim".
+// ÖNEMLİ KEŞİF: "örnekten yeni reçete" (AW/AX/CC) örneğin malzemelerini katalog kalemine DÖNÜŞTÜRMEZ — reçete stil
+// iskeletinden kurulur, örnek metni nota yazılır (bilinçli tasarım). Bu yüzden stok analizi için ayrı bir KURU dönüşüm
+// gerekir; YENİ eşleme mantığı yazılmadı:
+//   • malt/hop/maya → SPRINT BV L2 çözücüsü (working/_bv_cozucu.js ile BİREBİR: normalize ad/alias tam eşitlik; mayada
+//     "(lab, …)" ayrıştırma + tek-anlamlı ürün KODU). Test: build-time çözücüyle aynı sonucu verdiği doğrulanır.
+//   • katkı (alias'ı yok) + arama metin kolu → _bmKalemEsles: kayıt ad'ı + alias + tags TERİMLERİ, yalnız TEK kayda ait
+//     terimler (birden çok kayıtta geçen terim = kategori adı, belirsiz → eşleşme sayılmaz), ham adda TAM KELİME olarak.
+//   • stok → mevcut stokYetersizTam (malt/hop/maya; maya kod köprüsü + ✅-muadil + "miktar ?" içinde) ve katkıda mevcut
+//     stokYetersizlikKontrol (stokYetersizTam katkıyı MUAF tutar). _stokMalBul / refId kuralları aynen.
+//   • miktar → AV kuralı: S.hacim / S.verim (yoksa 11 L / %61). Grist tamamen eşlendiyse ve OG (ham ya da CC4
+//     hesaplanmış) biliniyorsa yüzdeler _stilIskeletHesap'taki gibi hOG ile o OG'ye ölçeklenir; değilse yalnız hacim
+//     oranı. Kaynakta gramajı olmayan kalem (AHA hop'u, ek kalemler) "miktar bilinmiyor": VARLIK kontrol edilir.
+// KURU: KR / localStorage / IndexedDB / Firebase'e HİÇBİR ŞEY yazılmaz (test izlemeli).
+(function(){
+  var EPS = 1e-6; // miktarı bilinmeyen kalem: varlık testi için ihmal edilebilir ihtiyaç
+  // ── 1) BV L2 çözücü (birebir port) ──
+  function bvNorm(s){ return String(s == null ? '' : s).toLowerCase().replace(/[®™©]/g, '').replace(/[     ]/g, ' ').replace(/\s+/g, ' ').trim(); }
+  function mayaAyir(y){
+    var m = /^(.*?)\s*\(([^()]*)\)\s*$/.exec(y); if(!m) return { ad:y, lab:'' };
+    var par = m[2].split(',').map(function(s){ return s.trim(); });
+    return { ad:m[1].trim(), lab:(par.length >= 2 && !/%$/.test(par[0])) ? par[0] : '' };
+  }
+  function sozluk(liste){
+    var ad = {}, kod = {};
+    (liste || []).forEach(function(x){
+      if(!x) return; ad[bvNorm(x.ad)] = x.id;
+      (Array.isArray(x.alias) ? x.alias : []).forEach(function(a){
+        var n = bvNorm(a);
+        if((/^[a-z]{0,4}-?\d[\d\/]*$|^\d{2}\/\d{2}$/.test(n)) && /\d/.test(n)) kod[n] = x.id; else ad[n] = x.id;
+      });
+    });
+    return { ad:ad, kod:kod };
+  }
+  var _soz = null;
+  window._bmKatCoz = function(tip, ham){
+    if(!_soz) _soz = { malt:sozluk(typeof MALTLAR !== 'undefined' ? MALTLAR : []), hop:sozluk(typeof HOPLAR !== 'undefined' ? HOPLAR : []), maya:sozluk(typeof MAYALAR !== 'undefined' ? MAYALAR : []) };
+    var d = _soz[tip], y = bvNorm(ham); if(!d || !y) return null;
+    if(Object.prototype.hasOwnProperty.call(d.ad, y)) return d.ad[y];
+    if(tip !== 'maya') return null;
+    var p = mayaAyir(y);
+    if(p.lab){ var k = bvNorm(p.ad + ' (' + p.lab + ')'); if(Object.prototype.hasOwnProperty.call(d.ad, k)) return d.ad[k]; }
+    if(Object.prototype.hasOwnProperty.call(d.ad, bvNorm(p.ad))) return d.ad[bvNorm(p.ad)];
+    var bul = {}, n = 0;
+    y.split(/[^a-z0-9\/\-]+/).forEach(function(t){ t = t.replace(/^-+|-+$/g, ''); if(Object.prototype.hasOwnProperty.call(d.kod, t) && !bul[d.kod[t]]){ bul[d.kod[t]] = 1; n++; } });
+    return n === 1 ? Object.keys(bul)[0] : null; // iki farklı kod = belirsiz → eşleme YOK
+  };
+  // ── 2) Metin eşleme kuralı (TEK YER): katkı çözümü + arama metin kolu ──
+  function trN(s){ return (typeof _bmTrNorm === 'function' ? _bmTrNorm(s) : String(s || '').toLowerCase()).replace(/[^a-z0-9]+/g, ' ').trim(); }
+  var _terim = {}, _adKelime = null;
+  // KATKILAR tags'i kimlik adlarıyla kullanım ipuçlarını karıştırıyor ("Nane": Chocolate · "Greyfurt": Pale, IPA). Etiket ancak
+  // malt/hop/maya katalog adlarında ve BJCP stil adlarında GEÇMİYORSA kimlik terimi sayılır ("Lavender" kalır, "Pale" düşer).
+  function adKelimeleri(){
+    if(_adKelime) return _adKelime; var m = {};
+    [MALTLAR, HOPLAR, MAYALAR].forEach(function(L){ (L || []).forEach(function(x){ if(x) trN(x.ad).split(' ').forEach(function(w){ if(w) m[w] = 1; }); }); });
+    // stil adı sözcüğü yalnız ≥2 stil adında geçiyorsa betimleyici (IPA, Pale, Saison); tek stilde geçen malzeme adı
+    // ("Lavender" ← Lavender Saison, "Pumpkin" ← Pumpkin Stout) kimlik terimi olarak KALIR
+    var sw = {}; Object.keys(typeof BJCP !== 'undefined' ? BJCP : {}).forEach(function(s){ var g = {}; trN(s).split(' ').forEach(function(w){ if(w && !g[w]){ g[w] = 1; sw[w] = (sw[w] || 0) + 1; } }); });
+    Object.keys(sw).forEach(function(w){ if(sw[w] >= 2) m[w] = 1; });
+    return (_adKelime = m);
+  }
+  function terimler(tip){
+    if(_terim[tip]) return _terim[tip];
+    var L = tip === 'malt' ? MALTLAR : tip === 'hop' ? HOPLAR : tip === 'maya' ? MAYALAR : KATKILAR, sayac = {}, kayit = {};
+    (L || []).forEach(function(x){
+      if(!x || !x.id) return;
+      var t = {}, ekle = function(s){ var n = trN(s); if(n.length >= 3) t[n] = 1; };
+      ekle(String(x.ad || '').replace(/\([^)]*\)/g, ' '));
+      // parantez içi ("Agave Şurubu (Amber)", "Candi Sugar (Şeffaf)") çoğu kez betimleyicidir → etiketle AYNI süzgeç
+      var suz = function(s){ var n = trN(s); if(n && !n.split(' ').some(function(w){ return adKelimeleri()[w]; })) ekle(s); };
+      (String(x.ad || '').match(/\(([^)]*)\)/g) || []).forEach(function(p){ p.slice(1, -1).split(/[\/,;]/).forEach(suz); });
+      (Array.isArray(x.alias) ? x.alias : []).forEach(ekle);
+      (Array.isArray(x.tags) ? x.tags : []).forEach(function(tg){ var n = trN(tg); if(n && !n.split(' ').some(function(w){ return adKelimeleri()[w]; })) ekle(tg); });
+      kayit[x.id] = Object.keys(t);
+      kayit[x.id].forEach(function(k){ sayac[k] = (sayac[k] || 0) + 1; });
+    });
+    var out = {}; Object.keys(kayit).forEach(function(id){ out[id] = kayit[id].filter(function(k){ return sayac[k] === 1; }); });
+    return (_terim[tip] = out);
+  }
+  // EŞİTLİK kuralı (kelime-içinde DEĞİL): ham adın ÇEKİRDEĞİ bir terime birebir eşit olmalı. Çekirdek = parantez,
+  // "@ …" / virgül sonrası, sayı + birim, zamanlama ve hazırlama sözcükleri atılmış ad. Böylece "dried lavender" →
+  // "lavender" (lavanta) eşleşir; "orange blossom honey" → "orange", "amber malt" → "amber" EŞLEŞMEZ (betimleyici sözcük).
+  var ATIL = /^(\d+([.,]\d+)?|tsp|tbsp|oz|lb|lbs|g|kg|ml|l|min|mins|minute|minutes|cup|cups|dried|dry|fresh|freshly|ground|crushed|coarsely|whole|frozen|toasted|organic|raw|pure|in|boil|kettle|primary|secondary|whirlpool|mash|at|end|of|the|optional|for|to|prime|priming|carbonate|or|and|a|an|left|last|tablet|tablets|leaf|pellets?)$/;
+  function cekirdek(ham){
+    var s = String(ham || '').replace(/\([^)]*\)/g, ' ').replace(/\[[^\]]*\]/g, ' ').split(/[@,;]/)[0];
+    return trN(s).split(' ').filter(function(w){ return w && !ATIL.test(w); }).join(' ');
+  }
+  function esit(c, t){ return c === t || c === t + 's' || c + 's' === t || c === t + 'es' || c + 'es' === t; }
+  // katalog kaydı (tip + id) bu ham adı adlandırıyor mu? (yalnız TEK kayda ait terimler; çekirdek eşitliği)
+  window._bmKalemEsles = function(tip, id, hamAd){
+    var T = terimler(tip)[id] || [], c = cekirdek(hamAd); if(!c) return false;
+    for(var i = 0; i < T.length; i++) if(esit(c, T[i])) return true;
+    return false;
+  };
+  // ham ad → tek katalog kaydı (metin kuralı); 0 ya da 2+ kayıt = null (belirsiz)
+  window._bmMetinCoz = function(tip, hamAd){
+    var T = terimler(tip), c = cekirdek(hamAd), bul = null; if(!c) return null;
+    for(var id in T){ if(!Object.prototype.hasOwnProperty.call(T, id)) continue;
+      for(var i = 0; i < T[id].length; i++){ if(esit(c, T[id][i])){ if(bul && bul !== id) return null; bul = id; break; } } }
+    return bul;
+  };
+  window._bmKalemCekirdek = cekirdek; // test/teşhis
+  // ── 3) Örnek nesnesi ──
+  window._bmOrnekNesne = function(kaynak, stil, idx){
+    var T = kaynak === 'nhc' ? window._NHC_MADALYA : kaynak === 'aha' ? window._TOPLULUK_MADALYA : kaynak === 'k4' ? window._TOPLULUK_ORNEK : window._KAYNAKLI_ORNEK;
+    var v = T && T[stil]; if(!v) return null;
+    return (kaynak === 'nhc' || kaynak === 'aha') ? (v[1] && v[1][idx]) || null : v[idx] || null;
+  };
+  function katAd(tip, id){ var L = tip === 'malt' ? MALTLAR : tip === 'hop' ? HOPLAR : tip === 'maya' ? MAYALAR : KATKILAR; var x = (L || []).find(function(a){ return a && a.id === id; }); return x ? x.ad : id; }
+  // ── 4) KURU dönüşüm (yazma yok) ──
+  window._bmOrnekKuru = function(kaynak, stil, idx){
+    var o = window._bmOrnekNesne(kaynak, stil, idx); if(!o) return null;
+    var hacim = (typeof S !== 'undefined' && S && +S.hacim > 0) ? +S.hacim : 11, verim = (typeof S !== 'undefined' && S && +S.verim > 0) ? +S.verim : 61;
+    var aha = kaynak === 'aha', gramli = !aha && +o.L > 0, oran = gramli ? hacim / +o.L : null;
+    var r = { g:[], h:[], y:null, ek:[], ekAdsiz:0, hacim:hacim, verim:verim, yontem:'' };
+    var cozKalem = function(tip, ham){ // malt/hop: BV L2 → yoksa katkı metin kuralı (örn. grist'te şeker, hop listesinde baharat)
+      var id = window._bmKatCoz(tip, ham); if(id) return { tip:tip, id:id };
+      var kid = window._bmMetinCoz('katki', ham); return kid ? { tip:'katki', id:kid } : null;
+    };
+    (o.g || []).forEach(function(x){ var c = cozKalem('malt', x[0]); r.g.push({ ham:x[0], tip:c ? c.tip : 'malt', id:c ? c.id : null, ad:c ? katAd(c.tip, c.id) : null, kaynakMik:+x[1] || 0 }); });
+    // grist miktarı: tamamı MALTLAR'a eşlendiyse + OG biliniyorsa → hOG ile OG'ye ölçek (iskelet yolu); değilse hacim oranı
+    var og = +o.og > 1 ? +o.og : (+o.ogH > 1 ? +o.ogH : null);
+    var hepsiMalt = r.g.length > 0 && r.g.every(function(k){ return k.id && k.tip === 'malt'; });
+    if(hepsiMalt && og && typeof hOG === 'function'){
+      var top = r.g.reduce(function(a, k){ return a + k.kaynakMik; }, 0) || 1;
+      var deneme = r.g.map(function(k){ return { id:k.id, kg:k.kaynakMik / top }; });
+      var dOG = hOG(deneme, verim, [], hacim), olc = dOG > 1 ? (og - 1) / (dOG - 1) : 0;
+      r.g.forEach(function(k, i){ k.mik = olc > 0 ? Math.round(deneme[i].kg * olc * 1000) / 1000 : null; k.birim = 'kg'; });
+      r.yontem = 'og';
+    } else if(gramli){
+      r.g.forEach(function(k){ k.mik = k.kaynakMik > 0 ? Math.round(k.kaynakMik / 1000 * oran * 1000) / 1000 : null; k.birim = 'kg'; });
+      r.yontem = 'hacim';
+    } else { r.g.forEach(function(k){ k.mik = null; k.birim = 'kg'; }); r.yontem = 'yok'; }
+    (o.h || []).forEach(function(x){
+      var c = cozKalem('hop', x[0]), gr = (!aha && gramli && +x[1] > 0) ? Math.round(+x[1] * oran * 10) / 10 : null;
+      r.h.push({ ham:x[0], tip:c ? c.tip : 'hop', id:c ? c.id : null, ad:c ? katAd(c.tip, c.id) : null, mik:gr, birim:'g' });
+    });
+    if(o.y){ var yid = window._bmKatCoz('maya', o.y); r.y = { ham:o.y, tip:'maya', id:yid, ad:yid ? katAd('maya', yid) : null, mik:1, birim:'pk' }; }
+    (o.ek || []).forEach(function(x){
+      var id = window._bmMetinCoz('katki', x[0]), tip = 'katki';
+      if(!id){ var mid = window._bmKatCoz('malt', x[0]); if(mid){ id = mid; tip = 'malt'; } }
+      r.ek.push({ ham:x[0], tip:tip, id:id, ad:id ? katAd(tip, id) : null, mik:null, birim:'g' });
+    });
+    if(+o.ekN > 0) r.ekAdsiz = +o.ekN;
+    // stokYetersizTam'ın okuduğu reçete biçimi (geçici, bellekte)
+    var t = { maltlar:[], hoplar:[], mayaId:null, katkilar:[] };
+    r.g.concat(r.h, r.ek).forEach(function(k){
+      if(!k.id) return;
+      if(k.tip === 'malt') t.maltlar.push({ id:k.id, kg:k.mik > 0 ? k.mik : EPS });
+      else if(k.tip === 'hop') t.hoplar.push({ id:k.id, g:k.mik > 0 ? k.mik : EPS, dk:60, tur:'boil' });
+      else if(k.tip === 'katki') t.katkilar.push({ id:k.id, ad:k.ad, miktar:EPS, birim:'g' });
+    });
+    if(r.y && r.y.id) t.mayaId = r.y.id;
+    r.tarif = t;
+    return r;
+  };
+  // ── 5) Stok analizi + sınıflama ──
+  window._bmStokImza = function(){
+    var st = (typeof STOK !== 'undefined' && Array.isArray(STOK)) ? STOK : [];
+    var h = (typeof S !== 'undefined' && S) ? [+S.hacim || 0, +S.verim || 0] : [0, 0];
+    return JSON.stringify([h, st.map(function(s){ return s ? [s.refId || '', s.ad || '', s.miktar == null ? null : s.miktar, s.birim || '', s.g || ''] : null; })]);
+  };
+  var _onb = { imza:null, m:{}, hz:null };
+  function stokMik(id, ad){ var i = (typeof _stokMalBul === 'function') ? _stokMalBul(id, ad) : -1; return i > -1 ? STOK[i] : null; }
+  function muadilStokta(id){
+    if(typeof MUADIL === 'undefined' || !Array.isArray(MUADIL[id])) return null;
+    for(var i = 0; i < MUADIL[id].length; i++){ var mu = MUADIL[id][i]; if(!mu || !mu.id) continue; var s = stokMik(mu.id, mu.ad || mu.id); if(s && (s.miktar || 0) > 0) return { id:mu.id, ad:mu.ad || mu.id }; }
+    return null;
+  }
+  window._bmOrnekStok = function(kaynak, stil, idx, imza){
+    try{
+      var im = imza || window._bmStokImza();
+      if(_onb.imza !== im){ _onb = { imza:im, m:{}, hz:(typeof _stokMayaHazirlik === 'function') ? _stokMayaHazirlik() : null }; }
+      var key = kaynak + '|' + stil + '|' + idx; if(_onb.m[key]) return _onb.m[key];
+      var r = window._bmOrnekKuru(kaynak, stil, idx); if(!r) return null;
+      var st = (typeof stokYetersizTam === 'function') ? stokYetersizTam(r.tarif, _onb.hz) : { yetersiz:[], eksik:[], dogrulanmadi:[] };
+      // katkı varlık testi: birim stoktaki kalemden (stokta 'adet' ise 'g' ihtiyacı birim-uyumsuz diye YOK sayılmasın)
+      var ktIn = r.tarif.katkilar.map(function(k){ var s = stokMik(k.id, k.ad || k.id); return { id:k.id, ad:k.ad, miktar:k.miktar, birim:(s && s.birim) ? s.birim : 'g' }; });
+      var kt = (ktIn.length && typeof stokYetersizlikKontrol === 'function') ? stokYetersizlikKontrol({ katkilar:ktIn }) : { yetersiz:[], eksik:[], dogrulanmadi:[] };
+      var durumu = function(k){
+        if(!k.id) return { d:'eslenemedi' };
+        var L = (k.tip === 'katki') ? kt : st, bul = function(arr){ return (arr || []).find(function(x){ return x && x.refId === k.id; }); };
+        var e = bul(L.eksik), y = bul(L.yetersiz), q = bul(L.dogrulanmadi), bilinmez = !(k.mik > 0);
+        if(e || (y && bilinmez)){ var mu = (k.tip !== 'maya') ? muadilStokta(k.id) : null; return mu ? { d:'muadil', mu:mu } : { d:'yok' }; }
+        if(y){ var mu2 = muadilStokta(k.id); return mu2 ? { d:'muadil', mu:mu2, mevcut:y.mevcut, gerek:y.ihtiyac, birimS:y.birim } : { d:'yetersiz', mevcut:y.mevcut, gerek:y.ihtiyac, birimS:y.birim }; }
+        if(q) return { d:'dogrulanmadi' };
+        var s = stokMik(k.id, k.ad || k.id);
+        return { d:bilinmez ? 'bilinmiyor' : 'stokta', mevcut:s ? s.miktar : null, birimS:s ? (s.birim || '') : '' };
+      };
+      var kalem = function(k){ var x = durumu(k); x.k = k; return x; };
+      var out = { g:r.g.map(kalem), h:r.h.map(kalem), y:r.y ? kalem(r.y) : null, ek:r.ek.map(kalem), ekAdsiz:r.ekAdsiz, yontem:r.yontem, hacim:r.hacim, verim:r.verim };
+      var tum = out.g.concat(out.h, out.ek, out.y ? [out.y] : []);
+      var say = function(d){ return tum.filter(function(x){ return x.d === d; }).length; };
+      out.eksik = say('yok') + say('yetersiz'); out.muadil = say('muadil'); out.eslenemedi = say('eslenemedi') + (r.ekAdsiz || 0);
+      out.belirsiz = say('bilinmiyor') + say('dogrulanmadi');
+      out.durum = out.eksik >= 3 ? 'eksik' : (out.eksik > 0 || out.muadil > 0 || out.belirsiz > 0 || out.eslenemedi > 0) ? 'yakin' : 'ok';
+      out.eksikler = tum.filter(function(x){ return x.d === 'yok' || x.d === 'yetersiz'; });
+      return (_onb.m[key] = out);
+    }catch(e){ try{ console.warn('_bmOrnekStok', e); }catch(_){} return null; }
+  };
+  window._ND_DURUM = { ok:{ ikon:'✅', ad:'Yapabilirsin' }, yakin:{ ikon:'🟡', ad:'Neredeyse' }, eksik:{ ikon:'🔴', ad:'Eksik' } };
+  // ── 6) Malzeme indeksi (statik veri; stoktan bağımsız) + arama ──
+  var _idx = null;
+  window._bmOrnekHepsi = function(){
+    var out = [], B = (typeof BJCP !== 'undefined') ? BJCP : {};
+    Object.keys(B).forEach(function(st){ (window._bmOrnekListe ? window._bmOrnekListe(st) : []).forEach(function(x){ out.push({ kaynak:x.kaynak, stil:st, idx:x.idx, k:x.k }); }); });
+    return out;
+  };
+  window._bmMalzemeIndex = function(){
+    if(_idx) return _idx;
+    _idx = window._bmOrnekHepsi().map(function(e){
+      var r = window._bmOrnekKuru(e.kaynak, e.stil, e.idx) || { g:[], h:[], ek:[] };
+      var ids = {}, ham = [];
+      r.g.concat(r.h, r.ek, r.y ? [r.y] : []).forEach(function(k){ if(k.id) ids[k.tip + ':' + k.id] = 1; else ham.push({ tip:k.tip, ham:k.ham }); });
+      e.ids = ids; e.ham = ham; return e;
+    });
+    return _idx;
+  };
+  // seçim: [{tip, id}] — HEPSİ (VE). Eşleşme: önce kuru dönüşümün kimliği, kimliği olmayan ham kalemde metin kuralı.
+  window._bmMalzemeEslesir = function(e, sec){
+    if(e.ids[sec.tip + ':' + sec.id]) return true;
+    for(var i = 0; i < e.ham.length; i++){ if(window._bmKalemEsles(sec.tip, sec.id, e.ham[i].ham)) return true; }
+    return false;
+  };
+  window._bmMalzemeAra = function(secim, stilFiltre){
+    if(!secim || !secim.length) return [];
+    return window._bmMalzemeIndex().filter(function(e){ return (!stilFiltre || stilFiltre[e.stil]) && secim.every(function(s){ return window._bmMalzemeEslesir(e, s); }); });
+  };
+  // seçili malzeme hangi STIL_ISKELET'lerde geçiyor
+  window._bmMalzemeIskelet = function(sec){
+    var out = []; if(typeof STIL_ISKELET === 'undefined') return out;
+    Object.keys(STIL_ISKELET).forEach(function(st){ var k = STIL_ISKELET[st] || {};
+      var var_ = (sec.tip === 'malt' && (k.grist || []).some(function(g){ return g[0] === sec.id; })) || (sec.tip === 'hop' && (k.hop || []).some(function(h){ return h.id === sec.id; })) || (sec.tip === 'maya' && k.mayaId === sec.id);
+      if(var_) out.push(st); });
+    return out;
+  };
+})();
+
+// ═══ SPRINT ND1 — "NE DEMLEYEBİLİRİM?" EKRANI: yapılabilirlik rozetleri + filtre + malzeme araması (UI) ═══
+// Ana kart artık stil seçme ekranını (_brAc) açar; ekranın TEK girişi bu kart. Editördeki giriş ve ekrandaki
+// "📋 Doldur / 🎯 Hedef yap" eylemleri kaldırıldı — açık reçetenin stili editördeki Hedef Stil + İskeleti Doldur ile kalır.
+// Hesap TEMBEL: 991 örneğin tamamı ~0,8 sn sürüyor (ölçüldü) → yalnız görünen stiller + açılan örnek hesaplanır;
+// "Yalnız yapabileceklerim" filtresi tüm listeyi gerektirdiği için parçalı (setTimeout) arka plan hesabı + bekleme durumu.
+(function(){
+  var esc_ = function(s){ return (typeof esc === 'function') ? esc(s) : String(s == null ? '' : s); };
+  var D = function(){ return window._ND_DURUM || {}; };
+  window.__ndFiltre = window.__ndFiltre || 0; // 0 kapalı · 1 yalnız ✅ · 2 ✅ + 🟡
+  window._ndUygun = function(d){ return window.__ndFiltre === 1 ? d === 'ok' : window.__ndFiltre === 2 ? (d === 'ok' || d === 'yakin') : true; };
+  window._ndVeriVar = function(){ return !!(window._KAYNAKLI_ORNEK || window._NHC_MADALYA || window._TOPLULUK_MADALYA); };
+  // ── stil özeti (o stilin örnekleri) ──
+  window._ndStilSay = function(stil, imza){
+    var r = { ok:0, yakin:0, eksik:0, n:0 }, L = window._bmOrnekListe ? window._bmOrnekListe(stil) : [];
+    L.forEach(function(x){ var s = window._bmOrnekStok(x.kaynak, stil, x.idx, imza); if(s){ r[s.durum]++; r.n++; } });
+    return r;
+  };
+  window._ndStilOzetHTML = function(stil, imza){
+    var r = window._ndStilSay(stil, imza); if(!r.n) return '';
+    return '<span class="nd-stil-ozet" title="Bu stilin kaynaklı örnekleri, stoğuna göre">✅ ' + r.ok + ' · 🟡 ' + r.yakin + ' · 🔴 ' + r.eksik + '</span>';
+  };
+  window._ndSatirRozetHTML = function(kaynak, stil, idx){
+    if(!window.__brAcik) return ''; // rozet yalnız stil seçme ekranında (editördeki Reçete Doktoru örnek listesi değişmez)
+    var s = window._bmOrnekStok ? window._bmOrnekStok(kaynak, stil, idx) : null; if(!s) return '';
+    var d = D()[s.durum] || {};
+    return '<span class="nd-rozet nd-' + s.durum + '" title="Stoğuna göre: ' + esc_(d.ad || '') + (s.eksik ? ' · ' + s.eksik + ' kalem eksik' : '') + '">' + (d.ikon || '') + ' ' + esc_(d.ad || '')
+      + (s.eksik ? ' · ' + s.eksik + (s.durum === 'eksik' ? ' kalem' : ' eksik') : '') + '</span>' + (s.eslenemedi ? ' <span class="nd-es" title="Katalogla eşlenemeyen kalem — stokta sayılmaz">❔ ' + s.eslenemedi + ' kalem eşlenemedi</span>' : '');
+  };
+  // ── tüm örnekler: parçalı arka plan hesabı (filtre için) ──
+  window.__ndTumImza = null; var _ndCalisan = null;
+  window._ndTumHazir = function(){ return window.__ndTumImza === window._bmStokImza(); };
+  window._ndHazirlaTum = function(bitti){
+    var im = window._bmStokImza(); if(window.__ndTumImza === im){ if(bitti) bitti(); return; }
+    if(_ndCalisan === im) return; _ndCalisan = im;
+    var H = window._bmOrnekHepsi(), i = 0;
+    (function adim(){
+      if(_ndCalisan !== im) return;
+      var son = Math.min(H.length, i + 60);
+      for(; i < son; i++) window._bmOrnekStok(H[i].kaynak, H[i].stil, H[i].idx, im);
+      if(i < H.length) return setTimeout(adim, 0);
+      window.__ndTumImza = im; _ndCalisan = null;
+      if(bitti) bitti(); else if(window.__brAcik && window._brCiz) window._brCiz();
+    })();
+  };
+  // filtre açıksa stil listesini süzer; tümü hazır değilse hesap başlatır ve {hazir:false} döner
+  window._ndFiltreUygula = function(stiller){
+    if(!window.__ndFiltre) return null;
+    if(!window._ndTumHazir()){ window._ndHazirlaTum(); return { hazir:false, liste:[] }; }
+    var im = window._bmStokImza();
+    return { hazir:true, liste:stiller.filter(function(st){ var r = window._ndStilSay(st, im); return window.__ndFiltre === 1 ? r.ok > 0 : (r.ok + r.yakin) > 0; }) };
+  };
+  window._ndFiltreTik = function(){ window.__ndFiltre = window.__ndFiltre ? 0 : 1; if(window._brCiz) window._brCiz(); };
+  window._ndFiltreSari = function(){ window.__ndFiltre = window.__ndFiltre === 2 ? 1 : 2; if(window._brCiz) window._brCiz(); };
+  window._ndBekleHTML = function(){ return '<div class="br-ara-yok nd-bekle">⏳ Stok durumu hesaplanıyor — örnekler stoğunla karşılaştırılıyor…</div>'; };
+  window._ndFiltreNotHTML = function(){
+    if(!window.__ndFiltre) return '';
+    return '<div class="nd-filtre-not">Süzgeç: ' + (window.__ndFiltre === 1 ? '✅ yalnız yapabileceklerin' : '✅ + 🟡 neredeyse') + ' · '
+      + '<button type="button" class="nd-mini" onclick="_ndFiltreSari()">' + (window.__ndFiltre === 2 ? '🟡 hariç tut' : '🟡 neredeyse olanları da göster') + '</button></div>';
+  };
+  // ── malzeme araması ──
+  window.__ndMalz = window.__ndMalz || []; window.__ndMalzQ = window.__ndMalzQ || '';
+  var KAT = function(tip){ return tip === 'malt' ? MALTLAR : tip === 'hop' ? HOPLAR : tip === 'maya' ? MAYALAR : KATKILAR; };
+  var TIP_IK = { malt:'🌾', hop:'🌿', maya:'🧪', katki:'➕' };
+  window._ndKatAd = function(tip, id){ var x = (KAT(tip) || []).find(function(a){ return a && a.id === id; }); return x ? x.ad : id; };
+  window._ndMalzOner = function(q){
+    var n = (typeof _bmTrNorm === 'function') ? _bmTrNorm(q).trim() : String(q || '').toLowerCase().trim(); if(n.length < 2) return [];
+    var out = [];
+    ['hop', 'malt', 'maya', 'katki'].forEach(function(tip){
+      (KAT(tip) || []).forEach(function(x){
+        if(!x || !x.id) return;
+        var ad = (typeof _bmTrNorm === 'function') ? _bmTrNorm(x.ad) : String(x.ad).toLowerCase();
+        var ok = ad.indexOf(n) >= 0 || (Array.isArray(x.alias) && x.alias.some(function(a){ return String(a).indexOf(n) >= 0; }))
+          || (tip === 'katki' && Array.isArray(x.tags) && x.tags.some(function(t){ return ((typeof _bmTrNorm === 'function') ? _bmTrNorm(t) : String(t).toLowerCase()).indexOf(n) >= 0; }));
+        if(ok) out.push({ tip:tip, id:x.id, ad:x.ad, bas:ad.indexOf(n) === 0 ? 0 : 1 });
+      });
+    });
+    out.sort(function(a, b){ return a.bas - b.bas || a.ad.length - b.ad.length; });
+    return out.slice(0, 8);
+  };
+  window._ndMalzOnerHTML = function(){
+    var L = window._ndMalzOner(window.__ndMalzQ);
+    if(!L.length) return window.__ndMalzQ && window.__ndMalzQ.trim().length >= 2 ? '<div class="br-ara-yok">Katalogda "' + esc_(window.__ndMalzQ) + '" yok.</div>' : '';
+    return L.map(function(x){ return '<button type="button" class="nd-oner" onclick="_ndMalzEkle(\'' + x.tip + '\',\'' + String(x.id).replace(/'/g, "\\'") + '\')">' + TIP_IK[x.tip] + ' ' + esc_(x.ad) + '</button>'; }).join('');
+  };
+  window._ndMalzYaz = function(v){ window.__ndMalzQ = String(v == null ? '' : v); var k = document.getElementById('nd-malz-oner'); if(k) k.innerHTML = window._ndMalzOnerHTML(); };
+  window._ndMalzEkle = function(tip, id){
+    if(!window.__ndMalz.some(function(s){ return s.tip === tip && s.id === id; })) window.__ndMalz.push({ tip:tip, id:id });
+    window.__ndMalzQ = ''; if(window._brCiz) window._brCiz();
+  };
+  window._ndMalzCikar = function(i){ window.__ndMalz.splice(i, 1); if(window._brCiz) window._brCiz(); };
+  window._ndMalzDegis = function(i, tip, id){ window.__ndMalz[i] = { tip:tip, id:id }; if(window._brCiz) window._brCiz(); };
+  window._ndMalzAc = function(){ window.__ndMalzAcik = !window.__ndMalzAcik; if(window._brCiz) window._brCiz(); };
+  window._ndAraYaz = function(ad){ window.__brAra = ad; if(window._brCiz) window._brCiz(); };
+  // stil süzgeci: arama açıksa aramanın TÜM eşleşmeleri; eksen/nota seçiliyse profil stilleri; yoksa süzgeç yok
+  window._ndStilSuzgec = function(){
+    var q = window.__brAra || '';
+    if(window._brAraNorm && window._brAraNorm(q)){ var m = {}; window._brAraListe(q).forEach(function(x){ m[x.ad] = 1; }); return m; }
+    var p = window.__akProfil || {}, sec = Object.keys(p).some(function(k){ return p[k]; });
+    if(sec && window._brSonuc){ var m2 = {}; window._brSonuc(p).stiller.forEach(function(st){ m2[st] = 1; }); return m2; }
+    return null;
+  };
+  window._ndMalzBlokHTML = function(){
+    if(!window.__ndMalzAcik && !window.__ndMalz.length) return '';
+    var h = '<div class="nd-malz">';
+    if(window.__ndMalzAcik){
+      h += '<div class="nd-malz-bas">🧺 Kullanmak istediğin malzeme — katalogdan seç (hop · malt · maya · katkı); birden çok seçersen HEPSİNİ içeren örnekler</div>'
+        + '<input id="nd-malz-q" type="search" autocomplete="off" aria-label="Malzeme ara" placeholder="🧺 Aloha, Pilsner, lavanta…" value="' + esc_(window.__ndMalzQ) + '" oninput="_ndMalzYaz(this.value)">'
+        + '<div id="nd-malz-oner" class="nd-malz-oner">' + window._ndMalzOnerHTML() + '</div>';
+    }
+    if(window.__ndMalz.length){
+      h += '<div class="nd-malz-cip">' + window.__ndMalz.map(function(s, i){ return '<button type="button" class="br-cip br-cip-akt" onclick="_ndMalzCikar(' + i + ')" title="Çıkar">' + TIP_IK[s.tip] + ' ' + esc_(window._ndKatAd(s.tip, s.id)) + ' ✕</button>'; }).join('') + '</div>';
+      h += window._ndMalzSonucHTML();
+    }
+    return h + '</div>';
+  };
+  window._ndMalzSonucHTML = function(){
+    var sec = window.__ndMalz, suz = window._ndStilSuzgec();
+    var L = window._bmMalzemeAra(sec, suz), h = '';
+    if(window.__ndFiltre){
+      if(!window._ndTumHazir()){ window._ndHazirlaTum(); return window._ndBekleHTML(); }
+      L = L.filter(function(e){ var s = window._bmOrnekStok(e.kaynak, e.stil, e.idx); return s && window._ndUygun(s.durum); });
+    }
+    var adlar = sec.map(function(s){ return window._ndKatAd(s.tip, s.id); }).join(' + ');
+    if(!L.length){
+      h += '<div class="br-ara-yok nd-malz-yok">' + esc_(adlar) + ' içeren kaynaklı örnek ' + (suz ? 'bu stil seçiminde ' : '') + (window.__ndFiltre ? 'stoğunla yapılabilir durumda ' : '') + 'yok.</div>';
+      // muadil satırı: yalnız MUADIL tablosu (tahmin yok)
+      sec.forEach(function(s, i){
+        var M = (typeof MUADIL !== 'undefined' && Array.isArray(MUADIL[s.id])) ? MUADIL[s.id] : [];
+        M.forEach(function(mu){
+          if(!mu || !mu.id) return;
+          var alt = sec.slice(); alt[i] = { tip:s.tip, id:mu.id };
+          var n = window._bmMalzemeAra(alt, suz).length;
+          if(n) h += '<button type="button" class="nd-muadil" onclick="_ndMalzDegis(' + i + ',\'' + s.tip + '\',\'' + String(mu.id).replace(/'/g, "\\'") + '\')">🔁 ' + esc_(window._ndKatAd(s.tip, s.id)) + ' kullanan örnek yok; muadili <b>' + esc_(mu.ad || window._ndKatAd(s.tip, mu.id)) + '</b> kullanan ' + n + ' örnek var — onunla ara</button>';
+        });
+      });
+    } else {
+      var stilSay = {}; L.forEach(function(e){ stilSay[e.stil] = 1; });
+      h += '<div class="nd-malz-say">🧺 ' + esc_(adlar) + ' içeren <b>' + L.length + '</b> örnek · ' + Object.keys(stilSay).length + ' stil' + (suz ? ' (stil seçimiyle birlikte)' : '') + '</div>';
+      var satir = function(e){
+        var o = window._bmOrnekNesne(e.kaynak, e.stil, e.idx) || {};
+        var ik = { K1:'🥇', K2:'🏆', K3:'📘', K4:'📗' }[e.k] || '';
+        var baslik = o.bira || (e.kaynak === 'nhc' ? 'NHC ' + (o.yil || '') : 'AHA ' + (o.yil || ''));
+        return '<button type="button" class="nd-malz-satir" onclick="_bmOrnekOnizle(\'' + e.kaynak + '\',\'' + String(e.stil).replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\',' + e.idx + ')">'
+          + '<span class="nd-malz-stil">' + esc_(e.stil) + '</span><span class="nd-malz-alt">' + ik + ' ' + e.k + ' · ' + esc_(baslik) + '</span>'
+          + '<span class="nd-malz-rozet">' + window._ndSatirRozetHTML(e.kaynak, e.stil, e.idx) + '</span></button>';
+      };
+      h += L.slice(0, 15).map(satir).join('');
+      if(L.length > 15) h += '<details class="nd-malz-tum"><summary>Tüm sonuçlar (' + L.length + ')</summary>' + L.slice(15).map(satir).join('') + '</details>';
+    }
+    // stil iskeletleri
+    sec.forEach(function(s){
+      var I = window._bmMalzemeIskelet(s); if(!I.length) return;
+      h += '<div class="nd-malz-isk">📋 ' + esc_(window._ndKatAd(s.tip, s.id)) + ' şu stillerin iskeletinde: ' + I.map(function(st){ return '<button type="button" class="nd-mini" onclick="_ndAraYaz(\'' + String(st).replace(/'/g, "\\'") + '\')">' + esc_(st) + '</button>'; }).join(' ') + '</div>';
+    });
+    return h;
+  };
+  // ── önizleme parçaları ──
+  window._ndKalemHTML = function(x){
+    if(!x) return '';
+    var tr = function(n, b){ if(n == null || n === '') return '?'; var v = +n; return (Math.round(v * (b === 'kg' ? 1000 : 10)) / (b === 'kg' ? 1000 : 10)).toString().replace('.', ',') + (b ? ' ' + b : ''); };
+    var gerek = x.k && x.k.mik > 0 ? tr(x.k.mik, x.k.birim) : null;
+    var m = x.d === 'stokta' ? '✓ stokta' + (x.mevcut != null ? ' (' + tr(x.mevcut, x.birimS) + (gerek ? ' / gereken ' + gerek : '') + ')' : '')
+      : x.d === 'bilinmiyor' ? '✓ stokta · miktar bilinmiyor'
+      : x.d === 'dogrulanmadi' ? '❓ stokta, miktar ?'
+      : x.d === 'yetersiz' ? '✕ yetersiz (' + tr(x.mevcut, x.birimS) + ' / gereken ' + tr(x.gerek, x.birimS) + ')'
+      : x.d === 'muadil' ? '🔁 muadili stokta: ' + esc_(x.mu && x.mu.ad || '')
+      : x.d === 'yok' ? '✕ yok' + (gerek ? ' (gereken ' + gerek + ')' : '')
+      : '❔ eşlenemedi';
+    return '<span class="nd-kalem nd-k-' + x.d + '">' + m + '</span>';
+  };
+  window._ndOzetHTML = function(s){
+    if(!s) return '';
+    var d = D()[s.durum] || {};
+    return '<div class="nd-onizle-ozet nd-' + s.durum + '">' + (d.ikon || '') + ' <b>' + esc_(d.ad || '') + '</b> — '
+      + (s.eksik ? s.eksik + ' kalem eksik' : 'eksik kalem yok') + (s.muadil ? ' · ' + s.muadil + ' muadille' : '') + (s.belirsiz ? ' · ' + s.belirsiz + ' miktarı bilinmiyor/doğrulanmadı' : '')
+      + (s.eslenemedi ? ' · ❔ ' + s.eslenemedi + ' kalem eşlenemedi (stokta sayılmaz)' : '')
+      + '<div class="nd-onizle-yontem">Miktarlar senin ' + String(s.hacim).replace('.', ',') + ' L / %' + s.verim + ' verimine göre: ' + (s.yontem === 'og' ? 'grist örneğin OG’sine ölçeklendi' : s.yontem === 'hacim' ? 'hacim oranıyla ölçeklendi' : 'kaynakta gramaj yok — yalnız varlık kontrol edildi') + '.</div></div>';
+  };
+  window._ndAlinacakHTML = function(s){
+    if(!s || !s.eksikler.length) return '';
+    return '<div class="nd-eksikler"><div class="nd-eksikler-bas">🛒 Eksikler</div>' + s.eksikler.map(function(x){
+      var gerek = x.d === 'yetersiz' ? ' — ' + String(Math.round((x.gerek - (x.mevcut || 0)) * 1000) / 1000).replace('.', ',') + ' ' + (x.birimS || '') + ' daha' : (x.k.mik > 0 ? ' — ' + String(x.k.mik).replace('.', ',') + ' ' + x.k.birim : '');
+      return '<div class="nd-eksik">' + esc_(x.k.ad || x.k.ham) + gerek + '</div>';
+    }).join('') + '<div class="nd-onizle-yontem">Yalnız gösterim — stoğuna bir şey yazılmaz.</div></div>';
+  };
+})();
 
 // ═══ SPRINT AJ — MASH SÜRECİ NEDEN-SONUÇ BİLGİ TABANI ══════════════════════
 // Kaynak: Sprint AI keşfi — 6 mash konusu × (araştırma + adversaryal denetim),
