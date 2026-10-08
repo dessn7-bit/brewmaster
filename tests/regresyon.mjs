@@ -7103,7 +7103,7 @@ const CASELER = [
   {
     kod: 'BV1-SEMA', ad: 'alias alanı şeması: MALTLAR/HOPLAR/MAYALAR kayıtlarında alias = küçük harf, kırpılmış dizge dizisi; bir tür içinde her alias TEK kayda gider; hiçbir alias başka kaydın ad\'ı değil; sayılar kilitli (kaynak _bv_alias_kaynak.js → working/_bv_kapi.js PASS çıktısı)',
     calistir: (page) => page.evaluate(() => {
-      const BEK = { MALTLAR: [102, 937], HOPLAR: [26, 59], MAYALAR: [66, 174] }; // SPRINT ND2: BV + _nd2_alias.js (dergi yazımları; aynı kapı + renk + malthane)
+      const BEK = { MALTLAR: [102, 937], HOPLAR: [45, 180], MAYALAR: [66, 174] }; // SPRINT ND2: BV + _nd2_alias.js (dergi yazımları; aynı kapı + renk + malthane) · ND3: _nd3_hop_alias.js (hop yazımları, köken kapısı)
       for (const ad of Object.keys(BEK)) {
         const L = window.eval(ad).filter(Boolean);
         const aliasli = L.filter(x => x.alias !== undefined);
@@ -8581,6 +8581,160 @@ const CASELER = [
       else __REG.ok('bu kalemin ✅ muadili yok — ✅ yolu ND1-DURUM\'da (kapsam notu)', true);
       // kaynak: _bmMuadilTam ile ✅/⚠️ ayrımı
       __REG.ok('_bmMuadilTam: "✅ …" doğru, "⚠️ …" / "❌ …" / boş yanlış', window._bmMuadilTam({ fark: '✅ aynı' }) && !window._bmMuadilTam({ fark: '⚠️ yakın' }) && !window._bmMuadilTam({ fark: '❌ farklı' }) && !window._bmMuadilTam({}));
+      STOK.length = 0;
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'ND3-HOP', ad: 'HOP EŞLEME (BV alias = KİMLİK): ≥8 gerçek yazım biçim gürültüsü / köken öneki ayıklanınca doğru kayda · katalogda OLMAYAN çeşit (Hersbrucker, Mt. Hood, Cluster) başka hopa bağlanmaz · köken uyuşmazlığı (german saaz, us goldings, northern brewer (u.s.)) ve ayrı ürün (celeia, homegrown, nz cascade, cascade cryo) bağlanmaz · K1–K3 hop eşleme ≥%84',
+    calistir: (page) => page.evaluate(() => {
+      const C = h => window._bmKatCoz('hop', h);
+      const iyi = [['kent golding', 'ekg'], ['e.k. goldings', 'ekg'], ['e.k. golding pellets', 'ekg'], ['czech saaz pellets', 'saaz'], ['hallertau magnum', 'magnum'], ['northern brewer pellets', 'nbrewer'],
+        ['magnum pellets', 'magnum'], ['tettnanger pellets', 'tettn'], ['german tradition', 'tradition'], ['citra cryo', 'cc'], ['amarillo (dry)', 'amarillo'], ['wye challenger', 'challenger']];
+      const ham = new Set(); window._bmOrnekHepsi().forEach(e => (window._bmOrnekNesne(e.kaynak, e.stil, e.idx).h || []).forEach(x => ham.add(String(x[0]).toLowerCase().replace(/\s+/g, ' ').trim())));
+      const yanlis = iyi.filter(([h, b]) => C(h) !== b), veride = iyi.filter(([h]) => ham.has(h));
+      __REG.ok(iyi.length + ' gerçek hop yazımı doğru kayda', yanlis.length === 0, yanlis.map(([h]) => h + '→' + C(h)).join(' | '));
+      __REG.ok('yazımların hepsi örnek verisinde GERÇEKTEN geçiyor', veride.length === iyi.length, veride.length + '/' + iyi.length);
+      const yok = ['hersbrucker', 'mt. hood', 'cluster', 'liberty', 'hallertau hersbrucker', 'crystal'];
+      __REG.ok('katalogda olmayan çeşit başka hopa BAĞLANMAZ', yok.every(h => C(h) === null), yok.map(h => h + '→' + C(h)).join(' | '));
+      const kok = ['german saaz', 'us goldings', 'northern brewer (u.s.)', 'fuggle (u.s.)', 'styrian golding (celeia)', 'homegrown chinook', 'nz cascade', 'cascade cryo', 'willamette (aged)', 'citra (fresh)'];
+      __REG.ok('köken uyuşmazlığı / ayrı ürün / işlem → BAĞLANMAZ', kok.every(h => C(h) === null), kok.filter(h => C(h) !== null).map(h => h + '→' + C(h)).join(' | '));
+      let es = 0, top = 0; window._bmOrnekHepsi().filter(e => e.kaynak !== 'k4').forEach(e => { const r = window._bmOrnekKuru(e.kaynak, e.stil, e.idx); if (r) r.h.forEach(k => { top++; if (k.id) es++; }); });
+      __REG.ok('K1–K3 hop eşleme ≥ %84 (ND2 sonu %74,4)', top > 2400 && es / top >= 0.84, es + '/' + top + ' %' + (100 * es / top).toFixed(1));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'ND3-BLACKPATENT', ad: 'BLACK PATENT: BV REDDET korpus (K4) için AYNEN — katalog alias\'ı YOK; yalnız örnek verisinde (K1–K3) satırda renk yoksa ya da ≥400°L ise black kaydına; renk <400°L bağlanmaz; debittered ayrı ürün; gerçek K1–K3 satırları kuru dönüşümde black',
+    calistir: (page) => page.evaluate(() => {
+      const B = window._bmOrnekBlackPatent;
+      __REG.ok('katalogda "black patent malt" alias\'ı YOK (BV REDDET aynen)', window._bmKatCoz('malt', 'black patent malt') === null && !MALTLAR.some(m => (m.alias || []).indexOf('black patent malt') >= 0));
+      __REG.ok('K1–K3 (kay / nhc / aha): renk yok → black', B('black patent malt', 'kay') === 'black' && B('black patent malt', 'nhc') === 'black' && B('Black Patent Malt', 'aha') === 'black');
+      __REG.ok('K4 (topluluk korpusu) → BAĞLANMAZ', B('black patent malt', 'k4') === null);
+      __REG.ok('renk ≥400°L → black; <400°L → bağlanmaz; EBC çevrilir', B('black patent malt (525 °l)', 'kay') === 'black' && B('black patent malt (300 °l)', 'kay') === null && B('black patent malt (1000 ebc)', 'kay') === 'black' && B('black patent malt (600 ebc)', 'kay') === null);
+      __REG.ok('debittered / dehusked ayrı ürün → bu kurala girmez', B('debittered black patent malt', 'kay') === null);
+      const H = window._bmOrnekHepsi().filter(e => e.kaynak !== 'k4'); let n = 0, bagli = 0;
+      H.forEach(e => { const r = window._bmOrnekKuru(e.kaynak, e.stil, e.idx); r.g.forEach(k => { if (/^black patent malt$/i.test(String(k.ham).trim())) { n++; if (k.id === 'black') bagli++; } }); });
+      __REG.ok('gerçek K1–K3 "black patent malt" satırları kuru dönüşümde black', n >= 10 && bagli === n, bagli + '/' + n);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'ND3-ONERI', ad: '"NE ALIRSAM NE AÇILIR" (sentetik stok): tek kalemi eksik örnek → tahmin o kalem; o malzeme stoğa eklenince ✅\'e geçen örnek SAYISI ve KÜMESİ tahminle BİREBİR; iki farklı kalem eksikse sayılmaz; kart düğmesi rozeti + açık kart (ilk 5, "1 kalemle ✅" listesi); malzemeye dokununca malzeme araması; satıra dokununca önizleme; stil aramasına uyar; stok değişince "hesaplanıyor"',
+    calistir: async (page) => {
+      const kur = await page.evaluate(() => {
+        __REG.yeniKayit('ND3 Oneri', {}); window.__ndMalz = []; window.__ndMalzAcik = false; window.__brAra = ''; window._bmProfilSifirla();
+        const H = window._bmOrnekHepsi(), kuru = e => window._bmOrnekKuru(e.kaynak, e.stil, e.idx);
+        const tam = e => { const r = kuru(e); const L = r.g.concat(r.h, r.ek, r.y ? [r.y] : []); return e.kaynak !== 'aha' && r.yontem !== 'yok' && !r.ekAdsiz && !r.ek.length && L.length >= 4 && L.every(k => k.id && k.mik > 0); };
+        const e0 = H.find(e => tam(e) && kuru(e).h.length >= 2 && kuru(e).g.filter(k => k.tip === 'malt').length >= 2);
+        const r = kuru(e0), L = r.g.concat(r.h, r.y ? [r.y] : []), X = r.g.find(k => k.tip === 'malt'), Y = r.h.find(k => k.id !== X.id);
+        const KAT = { malt: MALTLAR, hop: HOPLAR, maya: MAYALAR, katki: KATKILAR };
+        const giris = (k, mik) => { const x = KAT[k.tip].find(a => a.id === k.id); return { id: 'n3' + k.tip + k.id, ad: x.ad, refId: k.id, g: k.tip === 'malt' ? 'Malt' : k.tip === 'hop' ? 'Hop' : k.tip === 'maya' ? 'Maya' : 'Katkı', miktar: mik, birim: k.tip === 'malt' ? 'kg' : k.tip === 'maya' ? 'paket' : 'g' }; };
+        const ekli = {}; STOK.length = 0; L.forEach(k => { if (k.id === X.id || ekli[k.id]) return; ekli[k.id] = 1; STOK.push(giris(k, k.tip === 'maya' ? 3 : k.mik * 50)); });
+        window.__ND3 = { e0, X: { tip: X.tip, id: X.id }, Y: { tip: Y.tip, id: Y.id }, giris };
+        return { e0: e0.stil + ' ' + e0.kaynak + ' ' + e0.idx, X: X.id, Y: Y.id };
+      });
+      await page.evaluate(() => window._ndHazirlaTum());
+      await page.waitForFunction(() => window._ndTumHazir(), { timeout: 30000 });
+      const r = await page.evaluate(() => {
+        const { e0, X, Y, giris } = window.__ND3, im = window._bmStokImza(), H = window._bmOrnekHepsi();
+        const st0 = window._bmOrnekStok(e0.kaynak, e0.stil, e0.idx), tk = window._bmOrnekTekKalem(st0);
+        const R = window._ndOneriHesap(), xs = R.tum.find(z => z.tip === X.tip && z.id === X.id);
+        const okK = () => { const m = {}; H.forEach(e => { const s = window._bmOrnekStok(e.kaynak, e.stil, e.idx); if (s && s.durum === 'ok') m[e.kaynak + '|' + e.stil + '|' + e.idx] = 1; }); return m; };
+        const once = okK(), tahmin = R.bir.filter(b => b.kalem.tip === X.tip && b.kalem.id === X.id).map(b => b.kaynak + '|' + b.stil + '|' + b.idx).sort();
+        const x = (X.tip === 'malt' ? MALTLAR : HOPLAR).find(a => a.id === X.id); STOK.push(giris({ tip: X.tip, id: X.id }, 999));
+        const sonra = okK(), yeni = Object.keys(sonra).filter(k => !once[k]).sort(); STOK.pop();
+        // iki farklı kalem eksik → sayılmaz
+        const iy = STOK.findIndex(s => s.refId === Y.id); const yedek = STOK.splice(iy, 1);
+        const st2 = window._bmOrnekStok(e0.kaynak, e0.stil, e0.idx), tk2 = window._bmOrnekTekKalem(st2);
+        STOK.splice(iy, 0, yedek[0]);
+        return { tk: tk && tk.id, xn: xs ? xs.n : 0, tahmin, yeni, tk2, durum2: st2.durum, ilk5: R.ilk5.length, bir: R.bir.length };
+      });
+      await page.waitForFunction(() => window._ndTumHazir(), { timeout: 30000 }).catch(() => {});
+      await page.evaluate(() => window._ndHazirlaTum()); await page.waitForFunction(() => window._ndTumHazir(), { timeout: 30000 });
+      const u = await page.evaluate(() => {
+        const { e0, X } = window.__ND3; window.__ndOneriAcik = false; _brAc();
+        const btn = document.querySelector('#br-tam .nd-oneri-ac'), kapali = !document.querySelector('#br-tam .nd-oneri');
+        const rozet = btn ? btn.querySelector('.nd-oneri-n').textContent : '';
+        btn.click();
+        const kart = document.querySelector('#br-tam .nd-oneri'), malz = Array.from(document.querySelectorAll('#br-tam .nd-oneri-malz')), bir = Array.from(document.querySelectorAll('#br-tam .nd-bir-satir'));
+        const out = { rozet, kapali, kart: !!kart, kartT: kart ? kart.textContent : '', malz: malz.length, bir: bir.length, ilkSatirX: malz.some(b => b.textContent.indexOf(window._ndKatAd(X.tip, X.id)) >= 0) };
+        const b0 = bir.find(b => /_bmOrnekOnizle\('/.test(b.getAttribute('onclick')) && b.getAttribute('onclick').indexOf(',' + e0.idx + ')') > 0);
+        (b0 || bir[0]).click(); out.onizle = !!document.getElementById('bmOrnekOnizle'); bmOrnekOnizleKapat();
+        const mb = malz.find(b => b.textContent.indexOf(window._ndKatAd(X.tip, X.id)) >= 0) || malz[0]; mb.click();
+        out.malzArama = window.__ndMalz.length === 1 && window.__ndMalzAcik === true && !!document.querySelector('#br-tam .nd-malz-say, #br-tam .nd-malz-yok');
+        // stil aramasına uyar: e0'ın stiliyle arama → hesap yalnız o stilin örnekleri
+        window.__ndMalz = []; window.__brAra = e0.stil; window._brCiz(); const R2 = window._ndOneriHesap(); const suz = window._ndStilSuzgec();
+        out.suz = !!suz && R2.bir.every(b => suz[b.stil]) && R2.n === window._bmOrnekHepsi().filter(e => suz[e.stil]).length && R2.n < 991;
+        window.__brAra = ''; window._brCiz();
+        // stok değişince hesaplanıyor
+        STOK.push({ id: 'n3tmp', ad: 'Cascade', refId: 'cascade', g: 'Hop', miktar: 1, birim: 'g' }); window._brCiz();
+        out.bekle = /hesaplanıyor/.test((document.querySelector('#br-tam .nd-oneri') || {}).textContent || '') && /…/.test(document.querySelector('#br-tam .nd-oneri-n').textContent);
+        STOK.pop(); window.__ndOneriAcik = false; _brKapat(); STOK.length = 0;
+        return out;
+      });
+      return [
+        { ad: 'tek kalemi eksik örnek → tahmin o kalem (' + kur.e0 + ', eksik ' + kur.X + ')', ok: r.tk === kur.X, detay: r.tk },
+        { ad: 'öneri: ' + kur.X + ' alınınca ✅ olacak sayı = gerçekte ✅\'e geçen örnek sayısı', ok: r.xn >= 1 && r.xn === r.yeni.length, detay: 'tahmin ' + r.xn + ' · gerçek ' + r.yeni.length },
+        { ad: 'tahmin edilen örnek KÜMESİ gerçekle birebir', ok: JSON.stringify(r.tahmin) === JSON.stringify(r.yeni), detay: r.tahmin.slice(0, 3).join(',') + ' / ' + r.yeni.slice(0, 3).join(',') },
+        { ad: 'iki farklı kalem eksik → tek kalem sayılmaz', ok: r.tk2 === null && r.durum2 !== 'ok', detay: String(r.tk2) },
+        { ad: 'kart kapalıyken gövdede yok; başlık düğmesi rozeti = tek kalemle ✅ sayısı', ok: u.kapali && u.rozet === String(r.bir), detay: u.rozet + ' / ' + r.bir },
+        { ad: 'açık kart: ilk 5 (≤5) + "1 kalemle ✅ olacaklar" listesi + salt-hesap notu', ok: u.kart && u.malz >= 1 && u.malz <= 5 && u.bir === Math.min(10, r.bir) && /1 kalemle ✅ olacaklar/.test(u.kartT) && /Stoğuna bir şey yazılmaz/.test(u.kartT) && u.ilkSatirX, detay: u.malz + ' malzeme · ' + u.bir + ' satır' },
+        { ad: 'listedeki satıra dokununca önizleme açılır', ok: u.onizle, detay: '' },
+        { ad: 'malzemeye dokununca o malzemeyle malzeme araması (ND1) açılır', ok: u.malzArama, detay: '' },
+        { ad: 'kart stil aramasına uyar (yalnız o stilin örnekleri)', ok: u.suz, detay: '' },
+        { ad: 'stok değişince kart "hesaplanıyor", rozet "…"', ok: u.bekle, detay: '' }
+      ];
+    }
+  },
+  {
+    kod: 'ND3-KURU', ad: 'ÖNERİ HESABI YAZMAZ: statik (ND3 bloğunda yazma çağrısı yok) + çalışma zamanı (tüm görünümde öneri hesabı + kart aç/kapat → KR, localStorage AYNEN; IndexedDB / ağ çağrılmaz)',
+    calistir: async (page) => {
+      const html = fs.readFileSync(path.join(KOK, HTML_AD), 'utf8');
+      const b0 = html.indexOf('// ═══ SPRINT ND3 — NE ALIRSAM NE AÇILIR'), b1 = html.indexOf('// ═══ SPRINT AJ — MASH SÜRECİ NEDEN-SONUÇ', b0);
+      const blok = b0 > 0 && b1 > b0 ? html.slice(b0, b1).split('\n').filter(l => !/^\s*\/\//.test(l)).map(l => l.replace(/\/\/ .*$/, '')).join('\n') : '';
+      const yasak = ['localStorage', 'setItem', 'indexedDB', 'tarifeKaydet', '_receteYazSync', 'KR.push', 'STOK.push', 'STOK.splice', 'fetch(', 'firebase', 'saveDraft'].filter(k => blok.indexOf(k) >= 0);
+      await page.evaluate(() => { window._ndHazirlaTum(); });
+      await page.waitForFunction(() => window._ndTumHazir(), { timeout: 30000 });
+      const r = await page.evaluate(() => {
+        const krJ = JSON.stringify(KR), lsJ = JSON.stringify(Object.keys(localStorage).sort().map(k => [k, localStorage.getItem(k)])), stJ = JSON.stringify(STOK);
+        let idb = 0, ag = 0; const _o = indexedDB.open.bind(indexedDB), _f = window.fetch;
+        indexedDB.open = function(){ idb++; return _o.apply(null, arguments); }; window.fetch = function(){ ag++; return _f.apply(window, arguments); };
+        const R = window._ndOneriHesap(); window.__ndOneriAcik = true; _brAc(); window.__ndOneriAcik = false; _brKapat();
+        indexedDB.open = _o; window.fetch = _f;
+        return { n: R.n, kr: JSON.stringify(KR) === krJ, ls: JSON.stringify(Object.keys(localStorage).sort().map(k => [k, localStorage.getItem(k)])) === lsJ, st: JSON.stringify(STOK) === stJ, idb, ag };
+      });
+      return [
+        { ad: 'statik: ND3 bloğu bulundu, yazma çağrısı YOK', ok: blok.length > 1000 && yasak.length === 0, detay: yasak.join(',') },
+        { ad: 'çalışma zamanı: ' + r.n + ' örnek, KR + STOK + localStorage AYNEN', ok: r.n > 900 && r.kr && r.ls && r.st, detay: '' },
+        { ad: 'IndexedDB / ağ çağrılmadı', ok: r.idb === 0 && r.ag === 0, detay: r.idb + ' / ' + r.ag }
+      ];
+    }
+  },
+  {
+    kod: 'ND3-MUADIL', ad: 'MUADIL DENETİMİ (veri sayfasıyla): yeni ✅ (Briess 2-Row→Thracian Pale · Belgian Pilsner→Pilsner/Viking · Munich Light→Munich · Chocolate→BEST Chocolate · Fuggle↔Willamette) stokta → 🔁 muadil; ⚠️\'e inen (mısır→yulaf, Munich Dark→Melanoidin, EKG→Fuggle, Cascade→Willamette, Mosaic→Citra) stokta → "yok" + yakın alternatif, durum İYİLEŞMEZ; her ND3 satırı kaynak etiketi taşır',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('ND3 Muadil', {});
+      const H = window._bmOrnekHepsi(), kuru = e => window._bmOrnekKuru(e.kaynak, e.stil, e.idx);
+      const KAT = { malt: MALTLAR, hop: HOPLAR, maya: MAYALAR, katki: KATKILAR };
+      const giris = (tip, id, mik) => { const x = KAT[tip].find(a => a.id === id); return { id: 'n3m' + tip + id, ad: x.ad, refId: id, g: tip === 'malt' ? 'Malt' : tip === 'hop' ? 'Hop' : tip === 'maya' ? 'Maya' : 'Katkı', miktar: mik, birim: tip === 'malt' ? 'kg' : tip === 'maya' ? 'paket' : 'g' }; };
+      // hedef kalemi (id) gramlı içeren, muadil adayını İÇERMEYEN bir örnek; stok: hedef HARİÇ her şey + aday
+      const dene = (tip, id, aday) => {
+        const e = H.find(e => { if (e.kaynak === 'aha') return false; const r = kuru(e); const L = r.g.concat(r.h); return L.some(k => k.id === id && k.mik > 0) && L.every(k => k.id !== aday); });
+        if (!e) return { yok: true };
+        const r = kuru(e), L = r.g.concat(r.h, r.ek, r.y ? [r.y] : []); STOK.length = 0; const ek = {};
+        L.forEach(k => { if (!k.id || k.id === id || ek[k.id]) return; ek[k.id] = 1; STOK.push(giris(k.tip, k.id, k.tip === 'maya' ? 3 : k.mik > 0 ? k.mik * 50 : 1000)); });
+        const s0 = window._bmOrnekStok(e.kaynak, e.stil, e.idx); STOK.push(giris(tip, aday, 999));
+        const s1 = window._bmOrnekStok(e.kaynak, e.stil, e.idx), sat = s1.g.concat(s1.h).find(x => x.k.id === id), sat0 = s0.g.concat(s0.h).find(x => x.k.id === id);
+        return { e: e.stil, d0: sat0.d, d: sat.d, mu: sat.mu && sat.mu.id, yakin: sat.yakin && sat.yakin.id, eksik0: s0.eksik, eksik1: s1.eksik, durum0: s0.durum, durum1: s1.durum };
+      };
+      const tam = [['malt', 'briess_pale', 'thracian_pale'], ['malt', 'bel_pils', 'pilsner'], ['malt', 'bel_pils', 'viking_pils'], ['malt', 'munich_light', 'munich'], ['malt', 'choc', 'best_choc'], ['hop', 'fuggles', 'willamette'], ['hop', 'willamette', 'fuggles']];
+      tam.forEach(([tip, id, a]) => { const r = dene(tip, id, a); __REG.ok('✅ ' + id + ' yok + ' + a + ' stokta → 🔁 muadil (eksik sayısı 1 azalır)', !r.yok && r.d0 === 'yok' && r.d === 'muadil' && r.mu === a && r.eksik1 === r.eksik0 - 1, JSON.stringify(r)); });
+      const yari = [['malt', 'corn', 'oat'], ['malt', 'dark_munich', 'mel'], ['hop', 'ekg', 'fuggles'], ['hop', 'cascade', 'willamette'], ['hop', 'mosaic', 'citra']];
+      yari.forEach(([tip, id, a]) => { const r = dene(tip, id, a); __REG.ok('⚠️ ' + id + ' yok + ' + a + ' stokta → "yok" + yakın alternatif, durum/eksik AYNI', !r.yok && r.d === 'yok' && r.yakin === a && r.eksik1 === r.eksik0 && r.durum1 === r.durum0, JSON.stringify(r)); });
+      const etiket = ['briess_pale', 'bel_pils', 'munich_light', 'choc', 'corn', 'dark_munich', 'mel', 'ekg', 'fuggles', 'styrian', 'willamette', 'cascade', 'mosaic'].every(k => (MUADIL[k] || []).some(m => /\[ND3/.test(m.fark)));
+      __REG.ok('değişen her MUADIL anahtarında ND3 kaynak etiketi', etiket);
+      __REG.ok('mısır→yulaf: yanlış satır metni (Halcyon) kaldırıldı', (MUADIL.corn || []).every(m => !/Halcyon/.test(m.fark)));
       STOK.length = 0;
       return __REG.al();
     })

@@ -1029,6 +1029,19 @@ body:has(.brewday-timeline) #bm-toast-container{top:20px;bottom:auto}
 .bm-demle-alis{margin-top:12px;background:#FBF6EC;border-radius:10px;padding:8px 12px 10px}
 .bm-demle-alis pre{font-family:inherit;font-size:12.5px;color:#2E2218;white-space:pre-wrap;word-break:break-word;margin:4px 0 0;line-height:1.55}
 .bm-demle-bos{font-size:12.5px;color:#998A73;padding:6px 2px}
+/* SPRINT ND3 — "ne alırsam ne açılır" kartı (salt hesap) */
+.nd-oneri{margin:4px 0 8px;border:1px solid var(--bor);border-radius:10px;background:var(--bg2)}
+.nd-oneri-ac{flex:0 0 auto;min-width:52px;min-height:44px;padding:0 8px;border:1px solid var(--bor);border-radius:10px;background:var(--bg2);color:var(--kahve);font-weight:700;font-size:13px;cursor:pointer;font-family:var(--font-govde);white-space:nowrap}
+.nd-oneri-ac[aria-expanded="true"]{border-color:var(--altin);background:var(--accent-soft)}
+.nd-oneri-n{display:inline-block;min-width:16px;margin-left:3px;font-size:10.5px;border-radius:8px;padding:0 4px;background:var(--card);border:1px solid var(--bor)}
+.nd-oneri-bas{min-height:44px;box-sizing:border-box;display:flex;align-items:center;gap:6px;padding:6px 10px;font-size:12px;color:var(--kahve);cursor:pointer;line-height:1.35;list-style:none}
+.nd-oneri-bas::-webkit-details-marker{display:none}
+.nd-oneri-ic{padding:0 8px 8px}
+.nd-oneri-alt{font-size:10.5px;color:var(--soluk);margin:8px 2px 4px;font-weight:700}
+.nd-oneri-malz,.nd-bir-satir{display:flex;width:100%;box-sizing:border-box;min-height:44px;align-items:center;gap:6px;text-align:left;background:var(--card);border:1px solid var(--bor);border-radius:10px;padding:6px 10px;margin:4px 0 0;font-size:12px;color:var(--metin);cursor:pointer;font-family:var(--font-govde);white-space:normal}
+.nd-oneri-malz b{margin-left:auto;white-space:nowrap;color:var(--bakir)}
+.nd-bir-satir{flex-direction:column;align-items:flex-start;gap:1px}.nd-bir-satir>span,.nd-bir-satir>small{display:block;width:100%;text-align:left}.nd-bir-satir small{font-size:10.5px;color:var(--soluk)}
+.nd-oneri-not{font-size:10px;color:var(--dim);line-height:1.45;margin:6px 2px 0}
 /* SPRINT ND1 — ana kart = stil seçme ekranı girişi + yapılabilirlik rozetleri + malzeme araması */
 button.bm-demle-giris{display:flex;align-items:center;gap:15px;padding:16px 17px;cursor:pointer;text-align:left;font-family:inherit;min-height:44px}
 .br-tam-ust{display:flex;gap:6px;flex-wrap:nowrap}
@@ -4391,61 +4404,61 @@ const MALTLAR=[
 ];
 
 const HOPLAR=[
-  {id:"cascade",ad:"Cascade",aa:5.5,g:"Amerikan",mo:"Sitrus, çiçek, greyfurt, hafif çam. Amerikan craft hop devriminin öncüsü (1972).",ornek:"American Pale Ale, American IPA, Blonde Ale",alias:["cascade us","cascade (u.s.)"]},
-  {id:"centn",ad:"Centennial",aa:10.0,g:"Amerikan",mo:"Greyfurt, çiçek, sitrus, hafif reçine. Cascade'den daha güçlü.",ornek:"American IPA, Pale Ale, NEIPA"},
-  {id:"citra",ad:"Citra",aa:12.0,g:"Amerikan",mo:"Tropikal meyve, kavun, limon, şeftali, mango, greyfurt.",ornek:"NEIPA, Hazy IPA, American IPA"},
-  {id:"columbus",ad:"Columbus (CTZ)",aa:15.0,g:"Amerikan",mo:"Reçine, keskin, siyah biber, dank, hafif sitrus. Yüksek AA — güçlü bitter ve dank dry-hop.",ornek:"American IPA, Imperial IPA, Pale Ale",alias:["zeus","ctz","tomahawk","columbus (tomahawk)","columbus/tomahawk/zeus, ctz","colombus","columbus"]},
-  {id:"simcoe",ad:"Simcoe",aa:13.0,g:"Amerikan",mo:"Çam, reçine, şeftali, tropikal, toprak. Karmaşık profil.",ornek:"American IPA, West Coast IPA, NEIPA"},
-  {id:"mosaic",ad:"Mosaic",aa:12.5,g:"Amerikan",mo:"Tropikal meyve, yaban mersini, çiçek, toprak. Çok boyutlu.",ornek:"NEIPA, Hazy IPA, American IPA"},
-  {id:"amarillo",ad:"Amarillo",aa:9.5,g:"Amerikan",mo:"Portakal, greyfurt, çiçek, şeftali, tropikal.",ornek:"American Pale Ale, IPA, Wheat Ale"},
-  {id:"chinook",ad:"Chinook",aa:13.0,g:"Amerikan",mo:"Çam, reçine, greyfurt, baharat. Klasik bittering hop.",ornek:"American IPA, Pale Ale, Smoked Porter",alias:["chinook us"]},
+  {id:"cascade",ad:"Cascade",aa:5.5,g:"Amerikan",mo:"Sitrus, çiçek, greyfurt, hafif çam. Amerikan craft hop devriminin öncüsü (1972).",ornek:"American Pale Ale, American IPA, Blonde Ale",alias:["cascade us","cascade (u.s.)","cascade (leaf)","cascade (pellet)","cascade (whole)","cascade pellets","whole cascade"]},
+  {id:"centn",ad:"Centennial",aa:10.0,g:"Amerikan",mo:"Greyfurt, çiçek, sitrus, hafif reçine. Cascade'den daha güçlü.",ornek:"American IPA, Pale Ale, NEIPA",alias:["centennial (dry)","centennial pellets","whole centennial"]},
+  {id:"citra",ad:"Citra",aa:12.0,g:"Amerikan",mo:"Tropikal meyve, kavun, limon, şeftali, mango, greyfurt.",ornek:"NEIPA, Hazy IPA, American IPA",alias:["citra (pellets)","citra pellets","citra t90","citra whole cone"]},
+  {id:"columbus",ad:"Columbus (CTZ)",aa:15.0,g:"Amerikan",mo:"Reçine, keskin, siyah biber, dank, hafif sitrus. Yüksek AA — güçlü bitter ve dank dry-hop.",ornek:"American IPA, Imperial IPA, Pale Ale",alias:["zeus","ctz","tomahawk","columbus (tomahawk)","columbus/tomahawk/zeus, ctz","colombus","columbus","columbus (dry)","columbus pellets","ctz pellets","tomahawk (whole)","whole columbus","whole zeus"]},
+  {id:"simcoe",ad:"Simcoe",aa:13.0,g:"Amerikan",mo:"Çam, reçine, şeftali, tropikal, toprak. Karmaşık profil.",ornek:"American IPA, West Coast IPA, NEIPA",alias:["simcoe (dry)","simcoe pellets","whole simcoe"]},
+  {id:"mosaic",ad:"Mosaic",aa:12.5,g:"Amerikan",mo:"Tropikal meyve, yaban mersini, çiçek, toprak. Çok boyutlu.",ornek:"NEIPA, Hazy IPA, American IPA",alias:["mosaic (whole cone)","mosaic pellets","mosaic t90"]},
+  {id:"amarillo",ad:"Amarillo",aa:9.5,g:"Amerikan",mo:"Portakal, greyfurt, çiçek, şeftali, tropikal.",ornek:"American Pale Ale, IPA, Wheat Ale",alias:["amarillo (dry)","amarillo pellets","whole amarillo"]},
+  {id:"chinook",ad:"Chinook",aa:13.0,g:"Amerikan",mo:"Çam, reçine, greyfurt, baharat. Klasik bittering hop.",ornek:"American IPA, Pale Ale, Smoked Porter",alias:["chinook us","chinook (pellets)","chinook pellets","whole chinook"]},
   {id:"eldorado",ad:"El Dorado",aa:15.0,g:"Amerikan",mo:"Şeker kamışı, kavun, armut, tropikal meyve.",ornek:"NEIPA, Hazy IPA, American IPA"},
-  {id:"galaxy",ad:"Galaxy",aa:14.0,g:"Avustralya",mo:"Şeftali, çarkıfelek meyvesi, sitrus, tropikal. Avustralya ikonu.",ornek:"NEIPA, Hazy IPA, American IPA",alias:["australian galaxy"]},
-  {id:"warrior",ad:"Warrior",aa:16.0,g:"Amerikan",mo:"Temiz bitter, hafif reçine, minimal aroma. Saf IBU kaynağı.",ornek:"American IPA, West Coast IPA, Pale Ale"},
+  {id:"galaxy",ad:"Galaxy",aa:14.0,g:"Avustralya",mo:"Şeftali, çarkıfelek meyvesi, sitrus, tropikal. Avustralya ikonu.",ornek:"NEIPA, Hazy IPA, American IPA",alias:["australian galaxy","galaxy t90"]},
+  {id:"warrior",ad:"Warrior",aa:16.0,g:"Amerikan",mo:"Temiz bitter, hafif reçine, minimal aroma. Saf IBU kaynağı.",ornek:"American IPA, West Coast IPA, Pale Ale",alias:["warrior pellets"]},
   {id:"ekuanot",ad:"Ekuanot",aa:13.0,g:"Amerikan",mo:"Tropikal, ananas, bektaşiüzümü, çiçek, hafif limon.",ornek:"NEIPA, Hazy IPA, American IPA",alias:["equinox"]},
   {id:"idaho7",ad:"Idaho 7",aa:13.0,g:"Amerikan",mo:"Tropikal meyve, siyah çay, reçine, kavun.",ornek:"NEIPA, Hazy IPA, American IPA, Pale Ale"},
   {id:"azacca",ad:"Azacca",aa:15.0,g:"Amerikan",mo:"Tropikal, ananas, mango, sitrus, portakal.",ornek:"NEIPA, American IPA, Pale Ale"},
   {id:"strata",ad:"Strata",aa:13.0,g:"Amerikan",mo:"Çilek, tropikal, pasyon meyvesi, çam, toprak.",ornek:"NEIPA, Hazy IPA, American IPA"},
-  {id:"calypso",ad:"Calypso",aa:12.0,g:"Amerikan",mo:"Elma, armut, limonlu tropikal, hafif çiçek.",ornek:"American Pale Ale, Wheat IPA, Hazy Pale"},
-  {id:"willamette",ad:"Willamette",aa:5.0,g:"Amerikan",mo:"Çiçek, meyve, toprak, bitki. Fuggles klonu.",ornek:"American Amber, Pale Ale, Porter"},
-  {id:"nbrewer",ad:"Northern Brewer",aa:9.0,g:"Alman",mo:"Baharat, çam, hafif çiçek. Çok amaçlı bittering (Alman partisi).",ornek:"California Common, Lager, ESB, Porter, Altbier",alias:["german northern brewer"]},
-  {id:"perle",ad:"Perle",aa:8.0,g:"Alman",mo:"Hafif baharatlı, çiçeksi, bitkisel, temiz bitter.",ornek:"German Lager, Altbier, Pale Ale, Porter",alias:["german perle"]},
-  {id:"nelson",ad:"Nelson Sauvin",aa:12.5,g:"NZ",mo:"Beyaz şarap (Sauvignon Blanc), bektaşiüzümü, kavun, tropikal.",ornek:"American IPA, Pale Ale, Saison, NEIPA"},
+  {id:"calypso",ad:"Calypso",aa:12.0,g:"Amerikan",mo:"Elma, armut, limonlu tropikal, hafif çiçek.",ornek:"American Pale Ale, Wheat IPA, Hazy Pale",alias:["calypso pellets"]},
+  {id:"willamette",ad:"Willamette",aa:5.0,g:"Amerikan",mo:"Çiçek, meyve, toprak, bitki. Fuggles klonu.",ornek:"American Amber, Pale Ale, Porter",alias:["whole willamette","willamette (pellets)","willamette pellets"]},
+  {id:"nbrewer",ad:"Northern Brewer",aa:9.0,g:"Alman",mo:"Baharat, çam, hafif çiçek. Çok amaçlı bittering (Alman partisi).",ornek:"California Common, Lager, ESB, Porter, Altbier",alias:["german northern brewer","northern brewer (leaf)","northern brewer pellets","whole northern brewer"]},
+  {id:"perle",ad:"Perle",aa:8.0,g:"Alman",mo:"Hafif baharatlı, çiçeksi, bitkisel, temiz bitter.",ornek:"German Lager, Altbier, Pale Ale, Porter",alias:["german perle","hallertau perle","hallertau perle pellets","perle pellets"]},
+  {id:"nelson",ad:"Nelson Sauvin",aa:12.5,g:"NZ",mo:"Beyaz şarap (Sauvignon Blanc), bektaşiüzümü, kavun, tropikal.",ornek:"American IPA, Pale Ale, Saison, NEIPA",alias:["nelson sauvin pellets"]},
   {id:"motueka",ad:"Motueka",aa:7.0,g:"NZ",mo:"Limon, limon otu, tropikal, hafif çam.",ornek:"Pale Ale, Saison, Pilsner, Wheat"},
   {id:"waiiti",ad:"Wai-iti",aa:3.0,g:"NZ",mo:"Şeftali, kayısı, çiçek, hafif sitrus. Düşük AA nazik hop.",ornek:"Pale Ale, Saison, Session Ale, Kölsch"},
   {id:"enigma",ad:"Enigma",aa:16.0,g:"Avustralya",mo:"Şarap, böğürtlen, şeftali, tropikal. Karmaşık Avustralya profil (HPA).",ornek:"American IPA, NEIPA, Pale Ale"},
   {id:"vic_secret",ad:"Victoria Secret",aa:16.5,g:"Avustralya",mo:"Ananas, tropikal, çam, reçine. Avustralya hop.",ornek:"American IPA, NEIPA, Pale Ale, DIPA",alias:["vic secret"]},
-  {id:"hrtau",ad:"Hallertau Mittelfrueh",aa:4.0,g:"Alman",mo:"Bitkisel, topraksı, çiçeksi, hafif baharatlı. En klasik noble hop.",ornek:"German Pils, Helles, Märzen, Oktoberfest",alias:["hallertau","hallertauer","hallertauer mittelfrüh","hallertau mittelfrüh","hallertau mittelfruh","hallertauer mittelfruh","hallertauer mittelfrüher","hallertauer mittelfrueh","mittelfrueh"]},
-  {id:"tettn",ad:"Tettnanger",aa:4.5,g:"Alman",mo:"Bitkisel, baharatlı, çiçeksi, çok boyutlu noble profil.",ornek:"German Lager, Pilsner, Wheat, Märzen",alias:["tettnang","german tettnanger"]},
+  {id:"hrtau",ad:"Hallertau Mittelfrueh",aa:4.0,g:"Alman",mo:"Bitkisel, topraksı, çiçeksi, hafif baharatlı. En klasik noble hop.",ornek:"German Pils, Helles, Märzen, Oktoberfest",alias:["hallertau","hallertauer","hallertauer mittelfrüh","hallertau mittelfrüh","hallertau mittelfruh","hallertauer mittelfruh","hallertauer mittelfrüher","hallertauer mittelfrueh","mittelfrueh","[hallertauer]","german hallertau","german hallertauer","hallertau (30 min.)","hallertau (60 min.)","hallertau mittlefruh","hallertau pellets","hallertauer (15 min.)","hallertauer (30 min.)","hallertauer (90 min.)","hallertauer pellets","whole hallertau"]},
+  {id:"tettn",ad:"Tettnanger",aa:4.5,g:"Alman",mo:"Bitkisel, baharatlı, çiçeksi, çok boyutlu noble profil.",ornek:"German Lager, Pilsner, Wheat, Märzen",alias:["tettnang","german tettnanger","german tettnang","tettnang 3.7 %","tettnang pellets","tettnanger pellets"]},
   {id:"spalt",ad:"Spalt (Spalter geleneksel)",aa:5.0,g:"Alman",mo:"Topraksı, baharatlı, bitkisel. Noble hop — Saaz ile çok yakın. (NOT: #68 spalt_sel Spalter Select — 1993 Hüll modern çeşit.)",ornek:"German Pils, Kölsch, Lager",alias:["spalter","spalt"]},
   {id:"hrblc",ad:"Hallertau Blanc",aa:10.5,g:"Alman",mo:"Beyaz şarap, limon, kavun, çiçek. Modern Alman aromatic hop.",ornek:"Saison, Kölsch, Pilsner, Witbier"},
   {id:"mandarina",ad:"Mandarina Bavaria",aa:8.0,g:"Alman",mo:"Portakal kabuğu, mandalina, tropikal. Güçlü narenciye aroması.",ornek:"Pale Ale, IPA, Witbier, Saison",alias:["bavaria mandarina"]},
-  {id:"magnum",ad:"Magnum",aa:14.0,g:"Alman",mo:"Çok temiz bitter, minimal aroma. Premium Alman bittering.",ornek:"German Lager, Pilsner, Helles, Altbier",alias:["hallertauer magnum","magnum us","german magnum","us magnum"]},
-  {id:"herkules",ad:"Herkules",aa:16.0,g:"Alman",mo:"Temiz bitter, hafif reçine. Yüksek AA Alman bittering hopu.",ornek:"German Lager, Pilsner, Bock"},
+  {id:"magnum",ad:"Magnum",aa:14.0,g:"Alman",mo:"Çok temiz bitter, minimal aroma. Premium Alman bittering.",ornek:"German Lager, Pilsner, Helles, Altbier",alias:["hallertauer magnum","magnum us","german magnum","us magnum","german magnum pellets","hallertau magnum","magnum hop pellets","magnum leaf","magnum pellets","u.s. magnum pellets","us magnum pellets"]},
+  {id:"herkules",ad:"Herkules",aa:16.0,g:"Alman",mo:"Temiz bitter, hafif reçine. Yüksek AA Alman bittering hopu.",ornek:"German Lager, Pilsner, Bock",alias:["herkules pellets"]},
   {id:"polaris",ad:"Polaris",aa:20.0,g:"Alman",mo:"Nane, menthol, çam. Çok yüksek AA — dikkatli kullan.",ornek:"Spiced Beer, Imperial Stout, Bittering"},
-  {id:"saaz",ad:"Saaz (Czech)",aa:3.5,g:"Çek",mo:"Bitkisel, topraksı, baharatlı. En saf noble hop — Bohemian klasiği.",ornek:"Czech Pils, German Lager, Kölsch, Witbier",alias:["czech saaz","saazer","saaz"]},
+  {id:"saaz",ad:"Saaz (Czech)",aa:3.5,g:"Çek",mo:"Bitkisel, topraksı, baharatlı. En saf noble hop — Bohemian klasiği.",ornek:"Czech Pils, German Lager, Kölsch, Witbier",alias:["czech saaz","saazer","saaz","czech saaz (whole)","czech saaz pellets","saaz (15 min.)","saaz (2 min.)","saaz (5 min.)","saaz (pellet)","saaz (whole)","saaz 2.6%","saaz pellets","saaz t45","whole saaz"]},
   {id:"kazbek",ad:"Kazbek",aa:7.0,g:"Çek",mo:"Baharatlı, tropikal, çiçeksi. Modern Çek hop.",ornek:"Czech Lager, Pale Ale, Saison"},
-  {id:"ekg",ad:"East Kent Goldings (EKG)",aa:5.5,g:"İngiliz",mo:"Bal, çiçek, lavanta, toprak, hafif baharat. İngiliz hop klasiği.",ornek:"ESB, English Bitter, Pale Ale, Stout",alias:["east kent golding","east kent goldings","goldings, east kent","kent goldings","golding","goldings","ekg"]},
-  {id:"fuggles",ad:"Fuggles",aa:4.5,g:"İngiliz",mo:"Toprak, ahşap, bitki, hafif çiçek. İngiliz ale temel hopu.",ornek:"English Bitter, Porter, Stout, Brown Ale",alias:["fuggle"]},
-  {id:"challenger",ad:"Challenger",aa:7.5,g:"İngiliz",mo:"Temiz bitter, hafif çiçek, yeşil bitki. Çok amaçlı İngiliz hop.",ornek:"ESB, English IPA, Bitter, Pale Ale"},
-  {id:"target",ad:"Target",aa:11.0,g:"İngiliz",mo:"Reçine, baharat, çiçek, yüksek AA. İngiliz bittering hopu.",ornek:"English IPA, Barleywine, Stout, Bitter"},
+  {id:"ekg",ad:"East Kent Goldings (EKG)",aa:5.5,g:"İngiliz",mo:"Bal, çiçek, lavanta, toprak, hafif baharat. İngiliz hop klasiği.",ornek:"ESB, English Bitter, Pale Ale, Stout",alias:["east kent golding","east kent goldings","goldings, east kent","kent goldings","golding","goldings","ekg","british golding","e. k. goldings","e.k. golding","e.k. golding pellets","e.k. goldings","east kent goldings (dry)","east kent goldings (whole)","ek goldings","english kent goldings","kent english golding","kent golding","kent golding (whole leaf)","u.k. golding","uk golding","uk goldings"]},
+  {id:"fuggles",ad:"Fuggles",aa:4.5,g:"İngiliz",mo:"Toprak, ahşap, bitki, hafif çiçek. İngiliz ale temel hopu.",ornek:"English Bitter, Porter, Stout, Brown Ale",alias:["fuggle","(14 g) fuggles","english fuggles","fuggle pellets","fuggles (whole)"]},
+  {id:"challenger",ad:"Challenger",aa:7.5,g:"İngiliz",mo:"Temiz bitter, hafif çiçek, yeşil bitki. Çok amaçlı İngiliz hop.",ornek:"ESB, English IPA, Bitter, Pale Ale",alias:["challenger pellets","uk challenger","wye challenger"]},
+  {id:"target",ad:"Target",aa:11.0,g:"İngiliz",mo:"Reçine, baharat, çiçek, yüksek AA. İngiliz bittering hopu.",ornek:"English IPA, Barleywine, Stout, Bitter",alias:["target (pellets)"]},
   {id:"progress",ad:"Progress",aa:6.5,g:"İngiliz",mo:"Hafif çiçek, bitki, tatlı meyve. Nazik İngiliz aromatic hop.",ornek:"Mild, Bitter, Pale Ale, Saison"},
-  {id:"styrian",ad:"Styrian Goldings",aa:5.5,g:"Slovenya",mo:"Çiçek, bitki, hafif toprak, bal. Fuggles klonu (Slovenya yerli adaptasyonu — EKG değil, karışıklık yaygın).",ornek:"ESB, Saison, Belgian Ale, Pale Ale",alias:["styrian golding","styrian"]},
-  {id:"lublin",ad:"Lublin (Lubelski)",aa:4.0,g:"Polonya",mo:"Bitkisel, topraksı, baharat. Saaz benzeri Polonya hopu.",ornek:"Czech/Polish Lager, Pilsner, Kölsch",alias:["polish lublin","lubelski","lublin"]},
+  {id:"styrian",ad:"Styrian Goldings",aa:5.5,g:"Slovenya",mo:"Çiçek, bitki, hafif toprak, bal. Fuggles klonu (Slovenya yerli adaptasyonu — EKG değil, karışıklık yaygın).",ornek:"ESB, Saison, Belgian Ale, Pale Ale",alias:["styrian golding","styrian","slovenian styrian golding","styrian golding pellets","styrian goldings (2 min.)","styrian goldings (90 min.)"]},
+  {id:"lublin",ad:"Lublin (Lubelski)",aa:4.0,g:"Polonya",mo:"Bitkisel, topraksı, baharat. Saaz benzeri Polonya hopu.",ornek:"Czech/Polish Lager, Pilsner, Kölsch",alias:["polish lublin","lubelski","lublin","polish lubelski"]},
   {id:"sabro",ad:"Sabro",aa:13.0,g:"Amerikan",mo:"Hindistan cevizi, tropikal meyve, kavun, greyfurt.",ornek:"NEIPA, Hazy IPA, American IPA"},
   {id:"callista",ad:"Callista",aa:4.0,g:"Alman",mo:"Mürver çiçeği (elderflower), armut, şeftali, çilek. Hafif noble profil.",ornek:"Pilsner, Kölsch, Wheat, Pale Ale"},
   {id:"tnt",ad:"TnT Karışım (BiraBurada)",aa:8.0,g:"Karışım",mo:"BiraBurada TnT harman: tropikal/sitrus blend. Çok amaçlı.",ornek:"Pale Ale, IPA, Saison"},
   {id:"aloha",ad:"Aloha Karışım (BiraBurada)",aa:8.0,g:"Karışım",mo:"BiraBurada Aloha harman: tropikal/çiçeksi blend.",ornek:"Pale Ale, Wheat, Session IPA"},
-  {id:"loral",ad:"Loral",aa:11.0,g:"Amerikan",mo:"Çiçek, baharat, limon, tropikal, çay. Karmaşık profil.",ornek:"American IPA, West Coast IPA, Lager"},
+  {id:"loral",ad:"Loral",aa:11.0,g:"Amerikan",mo:"Çiçek, baharat, limon, tropikal, çay. Karmaşık profil.",ornek:"American IPA, West Coast IPA, Lager",alias:["loral pellets"]},
   {id:"triumph",ad:"Triumph",aa:14.0,g:"Amerikan",mo:"Tropikal, çarkıfelek meyvesi, çiçek, limon, reçine.",ornek:"American IPA, NEIPA, Pale Ale"},
   {id:"huell_m",ad:"Huell Melon",aa:7.5,g:"Alman",mo:"Çilek, kavun, çiçek, hafif tropikal. Alman tropikal hop.",ornek:"Pale Ale, Saison, Wheat, Kölsch"},
   {id:"mittelf",ad:"Mittelfrueh Clone (TR)",aa:3.5,g:"Alman",mo:"Bitkisel, topraksı, çiçeksi. Hallertau klonu (Türkiye üretimi).",ornek:"Lager, Pilsner, Helles"},
   {id:"waimea",ad:"Waimea",aa:16.0,g:"NZ",mo:"Sitrus, tropikal, çam, kavun. Çok yüksek AA NZ hop.",ornek:"American IPA, DIPA, West Coast IPA"},
   {id:"riwaka",ad:"Riwaka",aa:5.5,g:"NZ",mo:"Bektaşiüzümü, tropikal, greyfurt, çiçek.",ornek:"Pale Ale, IPA, Saison, Session IPA"},
-  {id:"cc",ad:"Cryo Citra",aa:25.0,g:"Cryo",mo:"Cryo Citra: 2x konsantre tropik ve sitrus. Çok az gramaj.",ornek:"NEIPA, Hazy IPA, Dry-Hopped IPA"},
-  {id:"cm",ad:"Cryo Mosaic",aa:22.0,g:"Cryo",mo:"Cryo Mosaic: 2x konsantre tropikal, meyve, toprak.",ornek:"NEIPA, Hazy IPA, American IPA"},
+  {id:"cc",ad:"Cryo Citra",aa:25.0,g:"Cryo",mo:"Cryo Citra: 2x konsantre tropik ve sitrus. Çok az gramaj.",ornek:"NEIPA, Hazy IPA, Dry-Hopped IPA",alias:["citra cryo"]},
+  {id:"cm",ad:"Cryo Mosaic",aa:22.0,g:"Cryo",mo:"Cryo Mosaic: 2x konsantre tropikal, meyve, toprak.",ornek:"NEIPA, Hazy IPA, American IPA",alias:["mosaic (cryo)","mosaic cryo"]},
   {id:"lupulin_c",ad:"Lupulin Powder Citra",aa:30.0,g:"Cryo",mo:"Lupulin powder: tüm hop aromatiklerini konsantre toz form.",ornek:"NEIPA, Dry-Hopped Sour, Hazy IPA",alias:["citra lupuln2"]},
-  {id:"sterling",ad:"Sterling",aa:7.5,g:"Amerikan",mo:"Bitkisel, baharatlı, çiçeksi. Saaz türevi Amerikan noble hop.",ornek:"American Pilsner, Wheat, Lager, Kölsch"},
+  {id:"sterling",ad:"Sterling",aa:7.5,g:"Amerikan",mo:"Bitkisel, baharatlı, çiçeksi. Saaz türevi Amerikan noble hop.",ornek:"American Pilsner, Wheat, Lager, Kölsch",alias:["sterling 6.8%","sterling pellets","us sterling"]},
   {id:"hop_ekstrakt",ad:"CO₂ Hop Ekstrakt",aa:62.0,g:"Ekstrakt",mo:"CO₂ ekstrakt: yüksek konsantrasyon, nötr koku. Saf IBU kaynağı.",ornek:"IBU artırımı, tüm stiller"},
   // ── Türk yerli (Bilecik/Pazaryeri — OT-GÜL Koop) ─
   {id:"hitit_aroma",ad:"Hitit Aroma (Türk yerli)",aa:9.0,g:"Türk",mo:"Çiçeksi, baharatlı, bitkisel. Bilecik/Pazaryeri yerli Türk çeşidi.",ornek:"Lager, Pilsner, Altbier, Kölsch, Pale Ale"},
@@ -4454,7 +4467,7 @@ const HOPLAR=[
   {id:"tr_erciyes",ad:"Erciyes (Türk TARBES hibrit)",aa:12.0,g:"Türk",mo:"Yüksek alfa Türk hibriti (TARBES tescili). Bittering+aroma. Spec tahmini — resmi PDF yok.",ornek:"Lager, Pilsner, IPA, Amber Ale"},
   {id:"tr_pazaryeri",ad:"Pazaryeri (Türk TARBES hibrit)",aa:10.0,g:"Türk",mo:"Türk dual-purpose hibriti (TARBES tescili). Coğrafi işaretli bölge adıyla. Spec tahmini — resmi PDF yok.",ornek:"Lager, Pilsner, Kölsch, Altbier"},
   // ── Türkiye'de satılan eksikler ──────────────────
-  {id:"nugget",ad:"Nugget",aa:13.0,g:"Amerikan",mo:"Taze, bitkisel, baharatlı, hafif reçine. ABD Dual-purpose (1983 Oregon).",ornek:"American Pale Ale, IPA, Amber Ale, Stout"},
+  {id:"nugget",ad:"Nugget",aa:13.0,g:"Amerikan",mo:"Taze, bitkisel, baharatlı, hafif reçine. ABD Dual-purpose (1983 Oregon).",ornek:"American Pale Ale, IPA, Amber Ale, Stout",alias:["american nugget (whole)","nugget pellets"]},
   {id:"lemondrop",ad:"Lemondrop",aa:6.0,g:"Amerikan",mo:"Limon, misket limonu, hafif çay, tatlı sitrus. Cascade türevi (ADHA).",ornek:"Pale Ale, Blonde, Wheat, Saison",alias:["lemon drop"]},
   {id:"krush",ad:"Krush (HBC 586)",aa:12.0,g:"Amerikan",mo:"Mango, guava, şeftali, portakal, böğürtlen. 2024 yeni ticari hop.",ornek:"NEIPA, IPA, Hazy IPA, Fruit-forward Ale"},
   {id:"yellow_sub",ad:"Yellow Sub (Barth-Haas blend)",aa:7.9,g:"Karışım",mo:"Tatlı, meyveli, kayısı, portakal, hafif böğürtlen. Barth-Haas gizli harman.",ornek:"Pale Ale, IPA, Hazy Ale",alias:["yellow sub"]},
@@ -4463,13 +4476,13 @@ const HOPLAR=[
   {id:"pac_gem",ad:"Pacific Gem",aa:14.0,g:"NZ",mo:"Böğürtlen, meşe, bitkisel. NZ bittering hopu.",ornek:"IPA, Porter, Stout, Lager bittering"},
   // ── Önemli dünya hopları ─────────────────────────
   {id:"talus",ad:"Talus (HBC 692)",aa:9.0,g:"Amerikan",mo:"Çam, gül-mürver, greyfurt, üzüm. Sabro akrabası modern.",ornek:"NEIPA, Hazy IPA, American Pale Ale"},
-  {id:"cashmere",ad:"Cashmere",aa:8.5,g:"Amerikan",mo:"Kavun, limon, yumuşak tropikal. Ekstra pürüzsüz.",ornek:"Pale Ale, IPA, Blonde Ale"},
+  {id:"cashmere",ad:"Cashmere",aa:8.5,g:"Amerikan",mo:"Kavun, limon, yumuşak tropikal. Ekstra pürüzsüz.",ornek:"Pale Ale, IPA, Blonde Ale",alias:["cashmere (whole cone)"]},
   {id:"sultana",ad:"Sultana (eski Denali)",aa:14.0,g:"Amerikan",mo:"Ananas, sitrus, çam, kavun. Yüksek AA, çok yüksek yağ. Hopsteiner #06277 — 2016'da Denali, 2019'da Sultana adıyla çıktı (aynı çeşit).",ornek:"American IPA, NEIPA, Pale Ale",alias:["denali","sultana"]},
   {id:"nectaron",ad:"Nectaron",aa:13.0,g:"NZ",mo:"Pasyon meyvesi, şeftali, tropikal. NZ yeni yıldız hopu.",ornek:"Hazy IPA, NEIPA, Pale Ale"},
-  {id:"saphir",ad:"Saphir",aa:3.5,g:"Alman",mo:"Mandalina, çiçek, hafif sitrus. Modern Alman aromatic noble.",ornek:"German Lager, Pilsner, Witbier, Kölsch",alias:["saphir (german organic)"]},
-  {id:"tradition",ad:"Hallertau Tradition",aa:5.5,g:"Alman",mo:"Bitkisel, topraksı, çiçeksi. Mittelfrueh modern dirençli çeşit (Hüll 1993).",ornek:"German Lager, Pilsner, Helles, Märzen",alias:["hallertauer tradition","tradition"]},
+  {id:"saphir",ad:"Saphir",aa:3.5,g:"Alman",mo:"Mandalina, çiçek, hafif sitrus. Modern Alman aromatic noble.",ornek:"German Lager, Pilsner, Witbier, Kölsch",alias:["saphir (german organic)","german saphir"]},
+  {id:"tradition",ad:"Hallertau Tradition",aa:5.5,g:"Alman",mo:"Bitkisel, topraksı, çiçeksi. Mittelfrueh modern dirençli çeşit (Hüll 1993).",ornek:"German Lager, Pilsner, Helles, Märzen",alias:["hallertauer tradition","tradition","german hallertau tradition","german tradition","german tradition pellets"]},
   {id:"ella",ad:"Ella",aa:14.5,g:"Avustralya",mo:"Çiçek, anason, baharat, tropikal. Eski adı Stella (2013\'te Ella olarak yeniden adlandırıldı).",ornek:"Saison, Belgian Ale, Hefeweizen, Pale Ale",alias:["ella (stella)"]},
-  {id:"topaz",ad:"Topaz",aa:17.5,g:"Avustralya",mo:"Tropikal, reçine, baharat. Yüksek AA Avustralya bittering+aroma.",ornek:"IPA, Pale Ale, Red Ale"},
+  {id:"topaz",ad:"Topaz",aa:17.5,g:"Avustralya",mo:"Tropikal, reçine, baharat. Yüksek AA Avustralya bittering+aroma.",ornek:"IPA, Pale Ale, Red Ale",alias:["australian topaz"]},
   {id:"eclipse",ad:"Eclipse",aa:15.0,g:"Avustralya",mo:"Mandalina, çam, kırmızı meyve. Avustralya dual-purpose.",ornek:"IPA, NEIPA, Pale Ale, American Ale"}
 ];
 
@@ -10366,7 +10379,8 @@ const MUADIL={
     {id:"reddish",ad:"Reddish Malt",fark:"⚠️ Reddish biraz daha koyu — Red Ale için Vienna'dan daha iyi kırmızı renk.",detay:"Vienna ~5°L hafif Maillard. Reddish ~8°L biraz daha güçlü ve kırmızı/amber renk. Red Ale için Reddish daha otantik sonuç. 1:1 kullan. Vienna Lager için Vienna tercih edilir.",mo:"Weyermann"}
   ],
   "dark_munich":[
-    {id:"mel",ad:"Melanoidin Malt",fark:"✅ Çok benzer koyu ekmek/karamel karakteri. %50 gramaj kullan.",detay:"Munich Dark (Aroma) (GU 300, 9°L): Çok yoğun Maillard, karamel, amber şeker, hafif kuru me. → Melanoidin Malt (GU 288, 27°L): Yoğun Maillard ekmek, bal, karamel, hafif kuru meyve. Renk 18°L koyulaşır. 1:1 gramaj kullan."}
+    {id:"munich",ad:"Munich Malt",fark:"⚠️ Daha açık: Munich Type 2 20–25 EBC ↔ Münih (Hitit) 15–16 EBC — daha az koyu ekmek/kabuk. [ND3]",detay:"Weyermann Munich Type 2 (20–25 EBC, ≥78) ↔ Hitit Münih (15–16 EBC, 81,5). Renk farkı ~3°L."},
+    {id:"mel",ad:"Melanoidin Malt",fark:"⚠️ Eşdeğer değil: Munich Type 2 20–25 EBC, %100'e kadar taban ↔ Melanoidin 60–80 EBC, en çok %20 özel malt. Çok daha yoğun Maillard — az kullan. [ND3 — Weyermann Munich Type 2 + Melanoidin veri sayfası; önceki ✅ veriyle desteklenmedi]",detay:"Munich Dark (Aroma) (GU 300, 9°L): Çok yoğun Maillard, karamel, amber şeker, hafif kuru me. → Melanoidin Malt (GU 288, 27°L): Yoğun Maillard ekmek, bal, karamel, hafif kuru meyve. Renk 18°L koyulaşır. 1:1 gramaj kullan."}
   ],
   "rye":[
     {id:"flaked_rye",ad:"Çavdar Flakeleri (Flaked Rye)",fark:"✅ Aynı baharatlık profil. Beta-glukan fazla → çeltik kavuzu artır.",detay:"Çavdar Maltı (GU 311, 3°L): Baharatlı, peppery, bitkisel çavdar karakteri + tahıl t. → Cavdar (Flaked Rye) (GU 296, 3°L): Çavdar baharatlığı, beta-glukan. Renk neredeyse aynı. %105 gramaj kullan."},
@@ -10378,7 +10392,7 @@ const MUADIL={
     {id:"smoked_peat",ad:"İsli Malt Torf (Peat Smoked)",fark:"❌ Çok daha güçlü ve ilaçlımsı. Yalnızca Scotch Ale/Peaty stillerde. %30 gramaj kullan.",detay:"İsli Malt — Kayın (Beech) (GU 296, 3°L): Belirgin kayın ağacı dumanı, tütsü eti, Rauchbier kimli. → İsli Malt Torf (Peat Smok (GU 312, 2°L): Çok güçlü, ilaçlı, fenollü İskoç torf dumanı. Renk neredeyse aynı. %95 gramaj kullan."}
   ],
   "oat":[
-    {id:"oat_malt",ad:"Yulaf Maltı",fark:"✅ Aynı kremsi gövde. Daha iyi enzim içeriği.",detay:"Flaked Oats GU 269: enzim yok, 90 dk mash şart, kremsi. Yulaf Maltı GU 270: enzim içerir, daha stabil mash. Her ikisi NEIPA ve Oatmeal Stout için kremsi gövde. 1:1 gramaj kullan. Fark minimal — Yulaf Maltı biraz daha kolay."},
+    {id:"oat_malt",ad:"Yulaf Maltı",fark:"✅ Aynı gövde/ağız hissi işlevi: malt yulaf 1,5–3°L, ekstrakt %60–75 (Simpsons/Fawcett) ↔ flake yulaf 2,5 SRM, %70 (Briess); malt yulafın enzimi var. 1:1. [ND3 — RahrBSG (Simpsons) + MoreBeer (Fawcett) + Briess]",detay:"Flaked Oats GU 269: enzim yok, 90 dk mash şart, kremsi. Yulaf Maltı GU 270: enzim içerir, daha stabil mash. Her ikisi NEIPA ve Oatmeal Stout için kremsi gövde. 1:1 gramaj kullan. Fark minimal — Yulaf Maltı biraz daha kolay."},
     {id:"raw_oat",ad:"Ham Yulaf (Raw Oats)",fark:"⚠️ Proteaz rest gerekir. Gövde benzer ama mash uzun sürer.",detay:"Yulaf (Flaked Oats) (GU 269, 2°L): Nötr tahıl, hafif kremsi tatlılık — aroma katkısı minim. → Ham Yulaf (Raw Oats) (GU 255, 2°L): Ham yulaf — Flaked Oats ile aynı kremsi/yumuşak profil . Renk neredeyse aynı. %105 gramaj kullan."},
     {id:"flaked_oat",ad:"Yulaf Flakeleri (Flaked Oats)",fark:"✅ Neredeyse aynı. Enzim gerektirmez.",detay:"Yulaf (Flaked Oats): Nötr tahıl, hafif kremsi tatlılık — aroma katkısı minimal → Yulaf Flakeleri (Flaked Oats: Fermente OLMAZ. Kremsilik, NEIPA gövdesi, protein Kullanım: Mash veya MALTL Kullanım zamanı ve gramajı karşılaştır."}
   ],
@@ -10437,6 +10451,7 @@ const MUADIL={
     {id:"brown",ad:"Brown Malt",fark:"⚠️ Daha koyu renk. Daha fazla kahve/tost nüansı.",detay:"Amber Malt (GU 277, 30°L): Topraksı kavrulmuş tahıl, fındık, hafif kahve başlangıc. → Brown Malt (GU 273, 65°L): Kavrulmuş tahıl, tost, hafif kahve ve çikolata başlangı. Renk 35°L koyulaşır. 1:1 gramaj kullan."}
   ],
   "choc":[
+    {id:"best_choc",ad:"Best Chocolate (BestMalz)",fark:"✅ Aynı sınıf çikolata maltı: Briess 350 SRM, Crisp 353–436°L / %72 ↔ BEST Chocolate 300–380°L / %75; ikisi de koyu biralarda %5–10. 1:1. [ND3 — Briess + Crisp + BESTMALZ veri sayfası]",detay:"Briess Chocolate (350 SRM, %1–10) · Crisp Chocolate (930–1155 EBC = 353–436°L, ekstrakt %72, %5'e kadar) ↔ BEST Chocolate (800–1000 EBC = 300–380°L, ekstrakt %75, %10'a kadar)."},
     {id:"crf2",ad:"Carafa II (Debittered)",fark:"⚠️ Astrenjan acılık yok (debittered). Renk benzer.",detay:"Chocolate Malt (GU 270, 400°L): Belirgin çikolata, kahve, kakaolu fındık, hafif yanık. → Carafa II (Debittered) (GU 250, 430°L): Çok koyu siyah renk, minimal tat — temiz Schwarzbier iç. Renk 30°L koyulaşır. Gramajı 105%'ye artır."},
     {id:"koyu_kahve_arpa",ad:"Koyu Kahve Arpa Maltı",fark:"⚠️ Koyu Kahve Arpa çok daha sert yanık — Chocolate Malt'tan farklı.",detay:"Chocolate Malt ~350°L çikolata/kahve. Koyu Kahve Arpa EBC 600-750 (~340°L) çok sert yanık ve astrenjan. Gramajı %60'a düşür. Koyu Kahve daha sert profil; Chocolate Malt daha yumuşak.",mo:"Herhangi"}
   ],
@@ -10469,9 +10484,10 @@ const MUADIL={
     {id:"bitter_roast",ad:"Bitter Kavrulmuş Arpa",fark:"✅ Bitter Roasted daha az sert — Black Malt'tan biraz yumuşak.",detay:"Black Malt ~600°L çok sert. Bitter Roasted ~530°L biraz yumuşak. Gramajı %110'a çıkar. Her ikisi sert koyu renk. Irish Stout için az kullan.",mo:"Herhangi"}
   ],
   "mel":[
+    {id:"thracian_ruby",ad:"Thracian Ruby Melanoidin Malt",fark:"⚠️ Renk aynı (60–80 EBC) ama üretici \"melanoidin\" demiyor ve kullanım oranı vermiyor — yakın alternatif. [ND3 — Weyermann Melanoidin + Thracian Malt Ruby veri sayfası]",detay:"Weyermann Melanoidin (60–80 EBC, ≥75, en çok %20) ↔ Thracian Malt Ruby (verginabeer.com: 60–80 EBC, kuru 79–81, \"red, dark red to ruby beers\"; oran yok)."},
     {id:"dark_munich",ad:"Munich Dark (Aroma)",fark:"⚠️ Daha az yoğun Maillard. Melanoidin miktarının 2x'ini kullan.",detay:"Melanoidin Malt (GU 288, 27°L): Yoğun Maillard ekmek, bal, karamel, hafif kuru meyve. → Munich Dark (Aroma) (GU 300, 9°L): Çok yoğun Maillard, karamel, amber şeker, hafif kuru me. Renk 18°L açılır. 1:1 gramaj kullan."},
-    {id:"aromatic",ad:"Aromatic Malt",fark:"✅ Çok benzer. Hafif daha çiçeksi aroma.",detay:"Melanoidin Malt (GU 288, 27°L): Yoğun Maillard ekmek, bal, karamel, hafif kuru meyve. → Aromatic Malt (GU 304, 20°L): Çok yoğun malt/ekmek aroması, hafif çiçeksi, Maillard. Renk 7°L açılır. 1:1 gramaj kullan."},
-    {id:"melaroma",ad:"Melaroma Malt",fark:"✅ Melaroma ile özdeş — Hitit/Weyermann markalı.",detay:"Her ikisi GU ~275, ~25-30°L. Yoğun Maillard, ekmek, bal. 1:1 kullan. Amber, Red Ale için.",mo:"Weyermann"}
+    {id:"aromatic",ad:"Aromatic Malt",fark:"⚠️ Renk aralıkları örtüşmüyor: Melanoidin 60–80 EBC ↔ Dingemans Aromatic 40–60 EBC (oran ≤%20 ↔ ≤%30). Benzer maltlı karakter, daha açık. [ND3 — Weyermann + RahrBSG (Dingemans) veri sayfası]",detay:"Melanoidin Malt (GU 288, 27°L): Yoğun Maillard ekmek, bal, karamel, hafif kuru meyve. → Aromatic Malt (GU 304, 20°L): Çok yoğun malt/ekmek aroması, hafif çiçeksi, Maillard. Renk 7°L açılır. 1:1 gramaj kullan."},
+    {id:"melaroma",ad:"Melaroma Malt",fark:"⚠️ Özdeş DEĞİL: katalogdaki Hitit Melaroma r 114°L ↔ Melanoidin 60–80 EBC (~23–31°L, Weyermann). \"Melaroma\" için üretici veri sayfası bulunamadı. [ND3]",detay:"Her ikisi GU ~275, ~25-30°L. Yoğun Maillard, ekmek, bal. 1:1 kullan. Amber, Red Ale için.",mo:"Weyermann"}
   ],
   "acid":[
     {id:"laktik",ad:"Laktik Asit %88 (mL)",fark:"⚠️ Farklı mekanizma. pH düşürür ama malt tadı yok.",detay:"Acidulated Malt: %1 mash'a = pH ~0.1 düşüş. Laktik Asit %88: 1mL/10L ≈ 0.1 pH düşüş, tat bırakmaz. Mash pH kontrolü için laktik asit çok daha hassas ve temiz. pH metre ile kullan. 0.5-2mL/10L ile başla. Hedef: 5.2-5.4 pH."}
@@ -10482,7 +10498,7 @@ const MUADIL={
   ],
   "sek":[
     {id:"dex",ad:"Dekstroz (Monohydrate)",fark:"✅ Aynı fermentasyon. Hafif daha tatlı.",detay:"Beyaz Şeker (GU 384, 0°L): sakaroz, invertaz ile fruktoz+glikoza parçalanır. → Dekstroz (Monohidrat) (GU 350, 0°L): direkt glikoz, hızlı fermente. İkisi de %100 fermente, renk vermez. GU düşük — %110 gramaj kullan. Belçika stillerinde pratikte birbirinin yerine geçer."},
-    {id:"invert2",ad:"Invert Sugar No.2 (Amber)",fark:"✅ Fermentasyon benzer. Invert No.2 hafif karamel + amber renk; GU düşük — gramaj artır.",detay:"Beyaz Şeker (GU 384, 0°L): Nötr — tamamen kaybolur, kuru bitiş bırakır. → Invert Sugar No.2 (Amber) (GU 324, 32°L): Hafif karamel, toffee, amber renk — Belçika amber şekeri. Renk ~32°L koyulaşır. GU daha düşük — %119 gramaj kullan."}
+    {id:"invert2",ad:"Invert Sugar No.2 (Amber)",fark:"⚠️ Renk farklı: Ragus Invert No.2 60–70 EBC (amber) ↔ beyaz şeker renksiz; fermente olabilirlik üretici sayfasında yok. [ND3 — Ragus / Murphy & Son]",detay:"Beyaz Şeker (GU 384, 0°L): Nötr — tamamen kaybolur, kuru bitiş bırakır. → Invert Sugar No.2 (Amber) (GU 324, 32°L): Hafif karamel, toffee, amber renk — Belçika amber şekeri. Renk ~32°L koyulaşır. GU daha düşük — %119 gramaj kullan."}
   ],
   "candy_clr":[
     {id:"dex",ad:"Dekstroz (Monohydrate)",fark:"✅ İkisi de nötr/şeffaf fermente şeker. Dekstroz yüksek GU — gramaj düşür.",detay:"Candi Şurup Clear (Simplicity) (GU 267, 1°L): Şeffaf — tat katkısı yok denecek kadar az, saf fermente şeker. → Dekstroz (Monohidrat) (GU 350, 0°L): Nötr — fermantasyonla tamamen kaybolur. Renk neredeyse aynı. GU daha yüksek — %76 gramaj kullan."},
@@ -10509,12 +10525,12 @@ const MUADIL={
   "cascade":[
     {id:"centn",ad:"Centennial",fark:"⚠️ Daha yüksek AA, daha az çiçeksi, daha sitrus.",detay:"Cascade AA %5.5: çiçeksi/greyfurt, APA ikonik hopu. Centennial AA %10: aynı aileden ama çok daha yoğun. IBU için gramajı yarıya düşür: 20g Cascade ≈ 11g Centennial. Dry hop 1:1. Centennial daha reçineli ve yoğun sitrus."},
     {id:"amarillo",ad:"Amarillo",fark:"⚠️ Çok daha tropik/portakal. Cascade'den farklı profil.",detay:"Cascade (AA %5.5, Amerikan): Greyfurt, portakal, gül, çiçeksi. → Amarillo (AA %9.5, Amerikan): Portakal, mandalina, kavun — saf Amerikan portakal. IBU için gramajı 58%'ye düşür (AA: 5.5→9.5). Dry hop 1:1. Aynı Amerikan ailesi."},
-    {id:"willamette",ad:"Willamette",fark:"✅ Çiçeksi ve meyveli. Cascade'den biraz daha topraksı.",detay:"Cascade (AA %5.5, Amerikan): Greyfurt, portakal, gül, çiçeksi. → Willamette (AA %5.0, Amerikan): Topraksı, çiçeksi, hafif meyvesel. IBU için gramajı 110%'ye artır (AA: 5.5→5.0). Dry hop 1:1. Aynı Amerikan ailesi."}
+    {id:"willamette",ad:"Willamette",fark:"⚠️ Tedarikçi ikame listesinde yok (Hopsteiner Cascade: Centennial, Lemondrop). Daha topraksı, sitrus az. [ND3]",detay:"Cascade (AA %5.5, Amerikan): Greyfurt, portakal, gül, çiçeksi. → Willamette (AA %5.0, Amerikan): Topraksı, çiçeksi, hafif meyvesel. IBU için gramajı 110%'ye artır (AA: 5.5→5.0). Dry hop 1:1. Aynı Amerikan ailesi."}
   ],
   "centn":[{id:"cascade",ad:"Cascade",fark:"✅ Centennial süper-Cascade, en doğal muadil.",detay:"Centennial (AA %10): yoğun sitrus/greyfurt/çiçek. Cascade (AA %5.5): greyfurt/çiçek, hafif. Gramajı ~%70 artır."},{id:"columbus",ad:"Columbus (CTZ)",fark:"⚠️ Columbus reçine/odunsu, bittering tarafında.",detay:"Centennial (AA %10): sitrus-çiçek. Columbus (AA %15): reçine. Bittering iyi; aroması farklı. Gramajı düşür."},{id:"amarillo",ad:"Amarillo",fark:"✅ Amarillo portakal/çiçek, sitrus-yakın.",detay:"Centennial (AA %10): greyfurt/çiçek. Amarillo (AA %9): portakal/şeftali/çiçek. Aroma 1:1."}],
   "citra":[{id:"mosaic",ad:"Mosaic",fark:"✅ En yakın muadil, ikisi de NEIPA imzası.",detay:"Citra (AA %12): lime/passionfruit/mango. Mosaic (AA %12.5): yabanmersini/mango/çam. NEIPA neredeyse birebir; Mosaic biraz daha çam. 1:1."},{id:"simcoe",ad:"Simcoe",fark:"⚠️ Simcoe çam/reçine, Citra daha sitrus.",detay:"Citra (AA %12): tropik/lime. Simcoe (AA %13): çam/passionfruit/reçine. Tropik taban ortak, sitrusu tam vermez. Aroma 1:1."},{id:"eldorado",ad:"El Dorado",fark:"✅ El Dorado tropik/şeker, Citra'ya parlak alternatif.",detay:"Citra (AA %12): lime/mango. El Dorado (AA %16): armut/karpuz/şeker. Gramajı düşür (yüksek AA), daha tatlı-meyve."}],
   "simcoe":[{id:"citra",ad:"Citra",fark:"✅ Beermaverick #1 muadil, tropik/passionfruit ortak.",detay:"Simcoe (AA %13): çam/passionfruit/reçine. Citra (AA %12): lime/tropik. Çamı vermez. NEIPA 1:1."},{id:"chinook",ad:"Chinook",fark:"✅ Chinook çam/reçine, Simcoe'nun reçineli tarafı.",detay:"Simcoe (AA %13): çam/reçine. Chinook (AA %13): çam/greyfurt. Çok yakın çam-reçine. 1:1."},{id:"amarillo",ad:"Amarillo",fark:"⚠️ Amarillo portakal/şeftali, meyveli tarafına alternatif.",detay:"Simcoe (AA %13): çam/passionfruit. Amarillo (AA %9): portakal/şeftali. Gramajı artır. Aroma."}],
-  "mosaic":[{id:"citra",ad:"Citra",fark:"✅ En yakın, ikisi de modern tropik imza.",detay:"Mosaic (AA %12.5): yabanmersini/mango/çam. Citra (AA %12): lime/passionfruit. Citra daha sitrus, Mosaic daha üzümsü. 1:1."},{id:"simcoe",ad:"Simcoe",fark:"⚠️ Simcoe çam/reçine ağır, üzümsü nüansı paylaşır.",detay:"Mosaic (AA %12.5): mango/yabanmersini/çam. Simcoe (AA %13): çam/passionfruit. Çam-tropik ortak. 1:1."},{id:"azacca",ad:"Azacca",fark:"✅ Azacca mango/ananas, Mosaic'e tropik alternatif.",detay:"Mosaic (AA %12.5): mango. Azacca (AA %14): mango/ananas/narenciye. Gramajı hafif düşür. Tropik dry hop."}],
+  "mosaic":[{id:"citra",ad:"Citra",fark:"⚠️ YCH yalnız \"benzer çeşit\" der (duyusal; ikame listesi değil). α 10–15 ↔ 10–16. Tropik ortak, Mosaic'in çam/üzüm yanı yok. [ND3]",detay:"Mosaic (AA %12.5): yabanmersini/mango/çam. Citra (AA %12): lime/passionfruit. Citra daha sitrus, Mosaic daha üzümsü. 1:1."},{id:"simcoe",ad:"Simcoe",fark:"⚠️ Simcoe çam/reçine ağır, üzümsü nüansı paylaşır.",detay:"Mosaic (AA %12.5): mango/yabanmersini/çam. Simcoe (AA %13): çam/passionfruit. Çam-tropik ortak. 1:1."},{id:"azacca",ad:"Azacca",fark:"⚠️ Tedarikçi ikame/benzer listesinde yok. [ND3]",detay:"Mosaic (AA %12.5): mango. Azacca (AA %14): mango/ananas/narenciye. Gramajı hafif düşür. Tropik dry hop."}],
   "amarillo":[
     {id:"cascade",ad:"Cascade",fark:"⚠️ Daha az AA, daha çiçeksi. Portakal benzer.",detay:"Amarillo (AA %9.5, Amerikan): Portakal, mandalina, kavun — saf Amerikan portakal. → Cascade (AA %5.5, Amerikan): Greyfurt, portakal, gül, çiçeksi. IBU için gramajı 173%'ye artır (AA: 9.5→5.5). Dry hop 1:1. Aynı Amerikan ailesi."},
     {id:"centn",ad:"Centennial",fark:"⚠️ Daha sitrus, daha az portakal.",detay:"Amarillo (AA %9.5, Amerikan): Portakal, mandalina, kavun — saf Amerikan portakal. → Centennial (AA %10.0, Amerikan): Sitrus, greyfurt, çiçeksi — Cascade'in daha güçlü . IBU için 1:1 gramaj. Dry hop 1:1. Aynı Amerikan ailesi."}
@@ -10536,12 +10552,12 @@ const MUADIL={
     {id:"saaz",ad:"Saaz (Czech)",fark:"⚠️ Daha çiçeksi/baharatlı. AA %3.5 — gramajı %28 artır.",detay:"Czech noble. Pilsner karakteri ön plana çıkar, Tettnanger'in yumuşaklığı yerine daha keskin/bitkisel karakter verir. Almanya→Çek geçişi — Bohemian Pilsner, Czech Amber için iyi alternatif."}
   ],
   "spalt":[{id:"tettn",ad:"Tettnanger",fark:"✅ Tettnanger - beermaverick #1 Spalt muadili.",detay:"Spalt (AA %5): noble baharat/cicek. Tettnanger (AA %4.5): noble cicek/baharat. Cok yakin Alman noble; Bock/Alt/Pilsner. 1:1."},{id:"saaz",ad:"Saaz (Czech)",fark:"✅ Saaz noble - Spalt-tipi yumusak baharat.",detay:"Spalt (AA %5): noble baharat. Saaz (AA %3.5): cicek/baharat/topraksi Cek noble. Yumusak noble taban yakin; gramaji hafif artir. 1:1."},{id:"hrtau",ad:"Hallertau Mittelfrueh",fark:"✅ Hallertau Mittelfruh - noble kardes.",detay:"Spalt (AA %5): noble baharat/cicek. Hallertau Mittelfruh (AA %4): noble cicek/baharat. Ayni noble aile; cok yakin. Aroma."}],
-  "ekg":[{id:"fuggles",ad:"Fuggles",fark:"✅ Fuggle - klasik Ingiliz noble ikilisi.",detay:"East Kent Goldings (AA %5.5): cicek/bal/topraksi. Fuggles (AA %4.5): topraksi/odunsu. Ingiliz ale klasik cifti; Fuggle daha topraksi. 1:1."},{id:"styrian",ad:"Styrian Goldings",fark:"✅ Styrian Goldings (Fuggle-tipi) - yakin.",detay:"EKG (AA %5.5): cicek/bal. Styrian Goldings (AA %5.5): bitkisel/cicek/odunsu. Ingiliz/Belcika ale; yakin. 1:1."},{id:"progress",ad:"Progress",fark:"✅ Progress Ingiliz aroma - Golding-uyumlu.",detay:"EKG (AA %5.5): cicek/bal. Progress (AA %6.5): yumusak cicek/topraksi, Fuggle-replacement. Ingiliz ale; yakin. 1:1."}],
-  "fuggles":[{id:"ekg",ad:"East Kent Goldings (EKG)",fark:"✅ East Kent Goldings - klasik Ingiliz cifti.",detay:"Fuggles (AA %4.5): topraksi/odunsu/bitkisel. East Kent Goldings (AA %5.5): cicek/bal/topraksi. Ingiliz ale klasik cifti; EKG daha ciceksi. 1:1."},{id:"willamette",ad:"Willamette",fark:"✅ Willamette = Fuggle'in ABD soyu - birebir.",detay:"Fuggles (AA %4.5): topraksi/odunsu. Willamette (AA %5): odunsu/cicek/hafif baharat. Dogrudan akraba; cok yakin. 1:1."},{id:"styrian",ad:"Styrian Goldings",fark:"✅ Styrian Goldings = Fuggle cesidi.",detay:"Fuggles (AA %4.5): topraksi/odunsu. Styrian Goldings (AA %5.5): bitkisel/cicek/odunsu, Fuggle-soyu. Ayni genetik. 1:1."}],
-  "styrian":[{id:"fuggles",ad:"Fuggles",fark:"✅ Styrian Goldings aslinda Fuggle cesidi - en dogal muadil.",detay:"Styrian Goldings (Savinjski, AA %5.5): bitkisel/cicek/odunsu, Fuggle-soyu. Fuggles (AA %4.5): topraksi/odunsu. Ayni genetik; cok yakin. 1:1."},{id:"ekg",ad:"East Kent Goldings (EKG)",fark:"✅ East Kent Goldings - Ingiliz noble esi.",detay:"Styrian Goldings (AA %5.5): bitkisel/cicek. East Kent Goldings (AA %5.5): cicek/bal/topraksi. Ingiliz ale uyumlu; EKG daha ciceksi. 1:1."},{id:"willamette",ad:"Willamette",fark:"✅ Willamette Fuggle-soyu ABD - yakin.",detay:"Styrian Goldings (AA %5.5): odunsu/cicek. Willamette (AA %5): odunsu/cicek/baharat, Fuggle-soyu. Ayni aile; cok yakin. 1:1."}],
+  "ekg":[{id:"fuggles",ad:"Fuggles",fark:"⚠️ İngiliz aroma hopu ama tedarikçi ikame listesinde yok (Hopsteiner Golding: First Gold). EKG α 4,5–6,5 ↔ Fuggle α 3–6. [ND3]",detay:"East Kent Goldings (AA %5.5): cicek/bal/topraksi. Fuggles (AA %4.5): topraksi/odunsu. Ingiliz ale klasik cifti; Fuggle daha topraksi. 1:1."},{id:"styrian",ad:"Styrian Goldings",fark:"⚠️ Tedarikçi ikame listesinde yok. Savinjski Golding Fuggle soyudur (BarthHaas), EKG değil. [ND3]",detay:"EKG (AA %5.5): cicek/bal. Styrian Goldings (AA %5.5): bitkisel/cicek/odunsu. Ingiliz/Belcika ale; yakin. 1:1."},{id:"progress",ad:"Progress",fark:"⚠️ EKG için tedarikçi ikame listesinde yok (Castle yalnız jenerik \"Goldings\" için Progress der). [ND3]",detay:"EKG (AA %5.5): cicek/bal. Progress (AA %6.5): yumusak cicek/topraksi, Fuggle-replacement. Ingiliz ale; yakin. 1:1."}],
+  "fuggles":[{id:"ekg",ad:"East Kent Goldings (EKG)",fark:"⚠️ Tedarikçi ikame listesinde yok (Hopsteiner Fuggle: Styrian Golding (Celeia), Willamette, Delta). [ND3]",detay:"Fuggles (AA %4.5): topraksi/odunsu/bitkisel. East Kent Goldings (AA %5.5): cicek/bal/topraksi. Ingiliz ale klasik cifti; EKG daha ciceksi. 1:1."},{id:"willamette",ad:"Willamette",fark:"✅ Willamette = Fuggle'ın triploid fidesi; Hopsteiner Fuggle ikamesi olarak listeler (kaynatma + kuru). α 4,5–7 ↔ 3–6. [ND3 — Hopsteiner fug/wil veri sayfası]",detay:"Fuggles (AA %4.5): topraksi/odunsu. Willamette (AA %5): odunsu/cicek/hafif baharat. Dogrudan akraba; cok yakin. 1:1."},{id:"styrian",ad:"Styrian Goldings",fark:"✅ Savinjski (Styrian) Golding Fuggle soyu/ekotipi (BarthHaas \"Daughter of Fuggle\"; Castle \"Fuggles ecotype\", ikame: Fuggle). α 2,5–6 ↔ 3–6. [ND3]",detay:"Fuggles (AA %4.5): topraksi/odunsu. Styrian Goldings (AA %5.5): bitkisel/cicek/odunsu, Fuggle-soyu. Ayni genetik. 1:1."}],
+  "styrian":[{id:"fuggles",ad:"Fuggles",fark:"✅ Savinjski Golding Fuggle ekotipi; Castle Malting ikame listesi: Saaz, Fuggle, Tettnang. [ND3 — Castle + BarthHaas]",detay:"Styrian Goldings (Savinjski, AA %5.5): bitkisel/cicek/odunsu, Fuggle-soyu. Fuggles (AA %4.5): topraksi/odunsu. Ayni genetik; cok yakin. 1:1."},{id:"ekg",ad:"East Kent Goldings (EKG)",fark:"⚠️ Tedarikçi ikame listesinde yok; adındaki \"Golding\" yanıltıcı — Fuggle soyudur. [ND3]",detay:"Styrian Goldings (AA %5.5): bitkisel/cicek. East Kent Goldings (AA %5.5): cicek/bal/topraksi. Ingiliz ale uyumlu; EKG daha ciceksi. 1:1."},{id:"willamette",ad:"Willamette",fark:"⚠️ İkisi de Fuggle soyu ama tedarikçi ikame listesinde yok. [ND3]",detay:"Styrian Goldings (AA %5.5): odunsu/cicek. Willamette (AA %5): odunsu/cicek/baharat, Fuggle-soyu. Ayni aile; cok yakin. 1:1."}],
   "perle":[{id:"nbrewer",ad:"Northern Brewer",fark:"✅ Perle'nin ebeveyni Northern Brewer - en dogal muadil.",detay:"Perle (AA %8): cicek/baharat/nane/yesil meyve, Mittelfruh-tipi. Northern Brewer (AA %9): odunsu/cam/nane. Genetik ebeveyn; nane-baharat ortak. Dual 1:1."},{id:"tradition",ad:"Hallertau Tradition",fark:"✅ Hallertau Tradition noble cicek/baharat - yakin.",detay:"Perle (AA %8): cicek/baharat. Hallertau Tradition (AA %5.5): noble cicek/baharat. Alman noble yakin; gramaji hafif artir. Aroma."},{id:"hrtau",ad:"Hallertau Mittelfrueh",fark:"✅ Perle, Hallertau Mittelfruh muadili olarak gelistirildi.",detay:"Perle (AA %8): cicek/baharat/nane. Hallertau Mittelfruh (AA %4): noble cicek/baharat. Mittelfruh muadili olarak tasarlandi; gramaji artir. Aroma."}],
   "nbrewer":[{id:"perle",ad:"Perle",fark:"✅ Perle, Northern Brewer'dan turedi - en yakin.",detay:"Northern Brewer (AA %9): odunsu/cam/nane/baharat. Perle (AA %8): cicek/baharat/nane. Genetik cocugu; nane-baharat ortak. Dual 1:1."},{id:"chinook",ad:"Chinook",fark:"⚠️ Chinook cam/recine - NB'nin cam tarafi (ABD).",detay:"Northern Brewer (AA %9): cam/odunsu/nane. Chinook (AA %13): cam/greyfurt/recine. Cam ortak; gramaji dusur. Bittering+aroma."},{id:"magnum",ad:"Magnum",fark:"✅ Magnum temiz bittering - NB'nin acilik tarafi.",detay:"Northern Brewer (AA %9): odunsu dual. Magnum (AA %14): temiz acilik. Bittering icin; aroma vermez. Gramaji dusur. Bittering."}],
-  "willamette":[{id:"fuggles",ad:"Fuggles",fark:"✅ Willamette Fuggle'ın ABD soyu, en doğal muadil.",detay:"Willamette (AA %5): odunsu/çiçek/baharat. Fuggles (AA %4.5): topraksı/odunsu. Aynı aile. 1:1."},{id:"styrian",ad:"Styrian Goldings",fark:"✅ Styrian Goldings Fuggle tipi, yakın.",detay:"Willamette (AA %5): odunsu/çiçek. Styrian Goldings (AA %5): bitkisel/çiçek, Fuggle-soyu. 1:1."},{id:"ekg",ad:"East Kent Goldings (EKG)",fark:"⚠️ EKG çiçek/bal, İngiliz noble alternatifi.",detay:"Willamette (AA %5): odunsu. East Kent Goldings (AA %5): çiçek/bal/topraksı. Daha çiçeksi. 1:1."}],
+  "willamette":[{id:"fuggles",ad:"Fuggles",fark:"✅ Willamette Fuggle'ın triploid fidesi; Hopsteiner Willamette ikameleri: Fuggle, Tettnanger, Delta. [ND3 — Hopsteiner wil veri sayfası]",detay:"Willamette (AA %5): odunsu/çiçek/baharat. Fuggles (AA %4.5): topraksı/odunsu. Aynı aile. 1:1."},{id:"styrian",ad:"Styrian Goldings",fark:"⚠️ Tedarikçi ikame listesinde yok (Hopsteiner Bobek der — farklı Sloven çeşit). [ND3]",detay:"Willamette (AA %5): odunsu/çiçek. Styrian Goldings (AA %5): bitkisel/çiçek, Fuggle-soyu. 1:1."},{id:"ekg",ad:"East Kent Goldings (EKG)",fark:"⚠️ EKG çiçek/bal, İngiliz noble alternatifi.",detay:"Willamette (AA %5): odunsu. East Kent Goldings (AA %5): çiçek/bal/topraksı. Daha çiçeksi. 1:1."}],
   "sabro":[{id:"citra",ad:"Citra",fark:"⚠️ Sabro hindistancevizi özgün, Citra tropik tabanı verir.",detay:"Sabro (AA %14): hindistancevizi/mandalina/sedir. Citra (AA %12): lime/tropik. Düşük doz tut. Aroma."},{id:"mosaic",ad:"Mosaic",fark:"⚠️ Mosaic tropik/mango, meyveli taban için.",detay:"Sabro (AA %14): hindistancevizi. Mosaic (AA %12.5): mango/yabanmersini. Karışımda. Aroma."},{id:"strata",ad:"Strata",fark:"⚠️ Strata tropik/üzüm, modern meyveli alternatif.",detay:"Sabro (AA %14): hindistancevizi/mandalina. Strata (AA %12): çilek/üzüm. İmzayı vermez. Aroma."}],
   "mandarina":[
     {id:"huell_m",ad:"Huell Melon",fark:"✅ Alman tropik/kavun. Mandarina'ya çok yakın.",detay:"Mandarina Bavaria (AA %8.0, Alman): Portakal, mandalina, hafif çiçeksi — Alman tropik . → Huell Melon (AA %7.5, Alman): Kavun, elma, hafif çiçeksi — Alman aroma hopu. IBU için 1:1 gramaj. Dry hop 1:1. Aynı Alman ailesi."}
@@ -11021,7 +11037,7 @@ const MUADIL={
     {id:"oat",ad:"Yulaf (Flaked Oats)",fark:"⚠️ Rice hulls'un gerçek muadili yoktur. Alternatif: malt daha kaba öğütün.",detay:"Çeltik Kavuzu (Rice Hulls) (GU 0, 0°L): Filtre yardımcısı. OG/tat katkısı sıfır. Kullanım: %5-10. → Yulaf (Flaked Oats) (GU 269, 2°L): Nötr tahıl, hafif kremsi tatlılık — aroma katkısı minimal. Renk neredeyse aynı. Gramajı kontrol et."}
   ],
   "victory":[
-    {id:"bisk",ad:"Bisküvi Malt",fark:"✅ Çok yakın — her ikisi de kavrulmuş bisküvi/tost karakteri. Renk neredeyse aynı, OG benzer.",detay:"Victory / Special Roast (GU 289, 28°L): Tost, fındık, kavrulmuş ekmek kabuğu — Bisküvi Malt'tan. → Bisküvi Malt (GU 295, 25°L): Güçlü bisküvi, kavrulmuş ekmek kabuğu, ceviz, hafif tah. Renk 3°L açılır. 1:1 gramaj kullan."}
+    {id:"bisk",ad:"Bisküvi Malt",fark:"⚠️ Benzer tost/bisküvi karakteri ama renk aralıkları örtüşmüyor: Briess Victory 28°L (~73 EBC) ↔ Dingemans Biscuit 47–70 EBC; ekstrakt ikisi de %75. [ND3 — Briess Victory PISB + Dingemans Biscuit bilgi sayfası]",detay:"Victory / Special Roast (GU 289, 28°L): Tost, fındık, kavrulmuş ekmek kabuğu — Bisküvi Malt'tan. → Bisküvi Malt (GU 295, 25°L): Güçlü bisküvi, kavrulmuş ekmek kabuğu, ceviz, hafif tah. Renk 3°L açılır. 1:1 gramaj kullan."}
   ],
   "pale_choc2":[
     {id:"pale_ale",ad:"Pale Ale Malt",fark:"⚠️ Aromatic Malt (Dingemans) Bisküvi Malt ile aynı amber malt kategorisi. 1:1.",detay:"Extra Pale Chocolate (Sim (GU 269, 445°L): Orta-koyu çikolata, derin kahve — Pale Chocolate Malt a. → Pale Ale Malt (GU 304, 3°L): Ekmek kabuğu, bisküvi, hafif fındık ve tatlı tahıl. Renk 442°L açılır. Gramajı 85%'ye düşür."}
@@ -11197,7 +11213,7 @@ const MUADIL={
     {id:"oat",ad:"Yulaf (Flaked Oats)",fark:"⚠️ Zıt etki — Mısır İrmiği gövdeyi hafifletir, Yulaf kremsi gövde ekler.",detay:"Mısır İrmiği (Corn Grits) (GU 308, 1°L): nötr-hafif tatlı mısır, gövdeyi inceltir, OG artırır — pişirme (cereal mash) gerektirir. → Yulaf Flakeleri (GU 269, 2°L): kremsi/yağlı gövde, ipeksi ağız hissi. Renk neredeyse aynı. İşlev zıt: mısır inceltir, yulaf doldurur — profil tamamen değişir. %114 gramaj kullan."}
   ],
   "corn":[
-    {id:"oat",ad:"Yulaf (Flaked Oats)",fark:"✅ Halcyon (Fawcett) İngiliz premium pale malt. GU ~300, 3-4°L. 1:1.",detay:"Mısır (Flaked Corn) (GU 323, 1°L): Nötr, hafif mısır tatlılığı — birayı hafifletir. → Yulaf (Flaked Oats) (GU 269, 2°L): Nötr tahıl, hafif kremsi tatlılık — aroma katkısı minim. Renk neredeyse aynı. %120 gramaj kullan."}
+    {id:"oat",ad:"Yulaf (Flaked Oats)",fark:"⚠️ Ters etki: Mısır flake birayı kurutur/hafifletir (Briess: \"drier, more crisp\", ekstrakt %80) ↔ Yulaf flake gövde ve yapışkan ağız hissi verir (Briess: \"sticky mouthfeel\", %70). Yalnız adjunct oranı olarak. [ND3 — Briess Corn Flakes + Oat Flakes veri sayfası; önceki ✅ metni başka bir maltı (İngiliz pale malt) anlatıyordu]",detay:"Mısır (Flaked Corn) (GU 323, 1°L): Nötr, hafif mısır tatlılığı — birayı hafifletir. → Yulaf (Flaked Oats) (GU 269, 2°L): Nötr tahıl, hafif kremsi tatlılık — aroma katkısı minim. Renk neredeyse aynı. %120 gramaj kullan."}
   ],
   "challenger":[{id:"target",ad:"Target",fark:"✅ Target Ingiliz dual - Challenger'a yakin guc.",detay:"Challenger (AA %7.5): cicek/baharatli/sedir, orta-guclu Ingiliz dual. Target (AA %11): baharatli/topraksi Ingiliz. Benzer dual; Target daha guclu, gramaji dusur. Dual."},{id:"nbrewer",ad:"Northern Brewer",fark:"✅ Northern Brewer odunsu/baharat - robust muadil.",detay:"Challenger (AA %7.5): baharatli/sedir/cicek. Northern Brewer (AA %9): odunsu/cam/baharat. Robust baharat-odun yakin; bittering+aroma. 1:1."},{id:"ekg",ad:"East Kent Goldings (EKG)",fark:"⚠️ East Kent Goldings - Ingiliz cicek alternatifi.",detay:"Challenger (AA %7.5): baharatli/cicek. EKG (AA %5.5): cicek/bal/topraksi. EKG daha narin; gucunu vermez. Gramaji artir. Aroma."}],
   "tnt":[
@@ -11774,6 +11790,8 @@ const MUADIL={
     {id:"vienna",ad:"Vienna Malt",fark:"⚠️ Daha zengin Maillard. Extra Pale'den 1-2 SRM koyu.",detay:"Maris Extra Pale hafif ve temiz. Vienna hafif Maillard ekler, daha altın renk. NEIPA veya Hazy için Extra Pale daha iyi; Vienna Lager için Vienna."}
   ],
   "bel_pils":[
+    {id:"viking_pils",ad:"Viking Pilsner Malt",fark:"✅ Aynı sınıf pils maltı: Dingemans Pilsen 2,5–3,6 EBC / ≥80 ↔ Viking Pilsner 3,0–4,2 EBC / ≥80. 1:1. [ND3 — RahrBSG (Dingemans) + Viking veri sayfası]",detay:"Dingemans Pilsen MD (2,5–3,6 EBC, FG ≥80,0) ↔ Viking Malt Pilsner (3,0–4,2 EBC, ≥80,0, \"For all kind of beers\")."},
+    {id:"pilsner",ad:"Pilsner Malt",fark:"✅ Aynı sınıf pils maltı: Dingemans Pilsen 2,5–3,6 EBC / ≥80 ↔ Weyermann Pilsner 2,5–4,5 EBC / ≥80,5; ikisi de %100'e kadar. 1:1. [ND3 — RahrBSG (Dingemans) + Weyermann veri sayfası]",detay:"Dingemans Pilsen MD (RahrBSG dağıtıcı sayfası: 2,5–3,6 EBC, FG ≥80,0, protein ≤11,5, \"up to 100%\") ↔ Weyermann Pilsner Malt (2,5–4,5 EBC, ≥80,5, protein 9–12, \"up to 100%\")."},
     {id:"pale_ale",ad:"Pale Ale Malt",fark:"⚠️ Pale Ale bisküvi karakteri var. Belgian Pilsner'ın nötr profilini kaybedersin.",detay:"Belgian Pilsner (288, 2°L): Çok nötr, temiz, Belçika maya esterlerinin ön plana çıkması için. Pale Ale (310, 3°L): Ekmek/bisküvi nüansı. Belgian Strong/Tripel yapıyorsan Belgian Pilsner şart — Pale Ale kullanmak maya karakterini maskeler. 1:1 gramaj."},
     {id:"wheat",ad:"Buğday Maltı",fark:"⚠️ Witbier/Saison stillerinde belirli bir oranda buğday ile değiştirilir.",detay:"Belgian Pilsner baz. Wheat ekleyerek (%30-50) Witbier, Saison veya Belgian Wit profili yapılır. Tek başına değil, karışımda kullan."}
   ],
@@ -11835,6 +11853,9 @@ const MUADIL={
     {id:"vienna",ad:"Vienna Malt",fark:"✅ Çok benzer profil. Hafif Maillard ekler.",detay:"Her ikisi de premium Alman malt. Vienna biraz daha altın ve maltlı. 1:1 eşit kullan."}
   ],
   "briess_pale":[
+    {id:"viking_pils",ad:"Viking Pilsner Malt",fark:"⚠️ Renk ve ekstrakt aynı (Viking 3,0–4,2 EBC / ≥80) ama pilsner maltı — DMS öncülü veri sayfasında yok; uzun kaynatma gerekebilir. [ND3]",detay:"Viking Malt Pilsner veri sayfası (3,0–4,2 EBC, ekstrakt ≥80, protein ≤12) ↔ Briess 2-Row (2,1 SRM, 81,0)."},
+    {id:"pilsner",ad:"Pilsner Malt",fark:"⚠️ Renk ve ekstrakt aynı (Weyermann Pilsner 2,5–4,5 EBC / ≥80,5) ama pilsner maltı daha az kavrulur — DMS öncülü veri sayfasında yok; uzun kaynatma gerekebilir. [ND3]",detay:"Weyermann Pilsner Malt veri sayfası (2,5–4,5 EBC, ekstrakt ≥80,5) ↔ Briess 2-Row (2,1 SRM, 81,0). DMS ölçüsü iki sayfada da yok — eşdeğerlik iddia edilmedi."},
+    {id:"thracian_pale",ad:"Thracian Pale Ale Malt",fark:"✅ Aynı sınıf taban malt: Briess 2,1 SRM (~4 EBC) / ekstrakt 81,0 FGDB ↔ Thracian 4,5–6,5 EBC / 80–82 kuru; ikisi de %100'e kadar taban. 1:1. [ND3 — Briess PISB Brewers Malt + Thracian Malt Pale Ale veri sayfası]",detay:"Briess 2-Row (Briess veri sayfası: 2,1 SRM, FG kuru 81,0, protein 11,0, \"Up to 100% of the base malt\") ↔ Thracian Malt Pale Ale (verginabeer.com: 4,5–6,5 EBC, kuru ekstrakt 80–82, protein 9–10,5, \"base for many beers, especially for Ales\"). Renk farkı ~1°L, ekstrakt aynı, kullanım aynı."},
     {id:"vienna",ad:"Vienna Malt",fark:"⚠️ Vienna daha malty. Briess 2-Row'un nötr Amerikan karakterinden farklı.",detay:"Briess 2-Row (310, 2°L): Amerikan clean base. Vienna (312, 3°L): Alman/Avrupa altın renk ve Maillard. NEIPA için Briess; Vienna Lager için Vienna."},
     {id:"munich",ad:"Munich Malt",fark:"⚠️ Munich çok daha koyu ve yoğun.",detay:"Briess 2-Row nötr. Munich 6°L yoğun ekmek — karakter tamamen farklı. Stouts için karışımda."}
   ],
@@ -12057,6 +12078,7 @@ const MUADIL={
     {id:"vienna",ad:"Vienna Malt",fark:"⚠️ Vienna hafif Maillard, altın renk. Bohemian otantik Çek lager karakterinden farklı.",detay:"Floor-Malted Bohemian: smooth mouthfeel + earthy pilsner. Vienna: Avusturya altın malty. Historical Bohemian Pilsner için Floor-Malted şart."}
   ],
   "munich_light":[
+    {id:"munich",ad:"Munich Malt",fark:"✅ Aynı sınıf Münih maltı: Weyermann Munich Type 1 12–18 EBC / ≥78 ↔ Hitit Münih 15–16 EBC / 81,5; ikisi de %100'e kadar. 1:1. [ND3 — Weyermann + Hitit Malt veri sayfası]",detay:"Weyermann Munich Malt Type 1 (12–18 EBC, ekstrakt ≥78, \"up to 100%\") ↔ Hitit Malt Münih Arpa Maltı (hititmalt.com: 15–16 EBC, kuru ekstrakt %81,5, \"%100'e kadar\"). Katalogdaki munich kaydı (r 6°L) bu sınıf."},
     {id:"vienna",ad:"Vienna Malt",fark:"⚠️ Vienna daha açık (3°L vs 6°L). Hafif Maillard ama daha nötr.",detay:"Munich Type 1 Light (300, 6°L): Weyermann hafif Munich — subtle bread, Helles için ideal. Vienna (312, 3°L): daha açık altın. Helles için ikisi de uygun; Munich karakteri için Munich 1."},
     {id:"abbey_malt",ad:"Abbey Malt",fark:"⚠️ Abbey Malt daha koyu ve Belçika profil.",detay:"Munich 1 Alman light. Abbey Belçika yoğun. Belgian Blond için Abbey; German Helles için Munich Light."}
   ]
@@ -28497,6 +28519,7 @@ window._brTamHTML = function(){
     var _detaySecili = _detay.filter(function(x){ return p[x.k]; }).length;
     var _detayAcik = !!window.__brDetayAcik || _detaySecili > 0;
     var bloklar = (window._ndVeriVar && !window._ndVeriVar() ? '<div class="br-ara-yok">Örnek verisi yüklenemedi (ornek_veri.js) — stil araması çalışır, kaynaklı örnekler görünmez.</div>' : '')
+      + (window._ndOneriHTML ? window._ndOneriHTML() : '') // SPRINT ND3: "ne alırsam ne açılır" (o anki görünüme göre, salt hesap)
       + (window._ndMalzBlokHTML ? window._ndMalzBlokHTML() : '') // SPRINT ND1: malzeme araması (stil araması / nota / eksenlerle VE)
       + '<div id="br-ara-sonuc" class="br-ara-sonuc" aria-live="polite">' + window._brAraSonucHTML() + '</div>' + window._brNotaHTML() // SPRINT CB1 + CB2: eksenlerin ÜSTÜNDE
       + _temel.map(_cizEksen).join('')
@@ -28597,7 +28620,7 @@ window._brTamHTML = function(){
       + '<div class="br-tam-bas">'
       +   '<div style="flex:1;min-width:0"><div class="br-tam-ust">'
       +     '<button type="button" class="br-malz-ac' + ((window.__ndMalz || []).length ? ' nd-secili' : '') + '" onclick="_ndMalzAc()" aria-expanded="' + (window.__ndMalzAcik ? 'true' : 'false') + '" title="Kullanmak istediğin malzemeye göre örnek bul">🧺 Malzeme' + ((window.__ndMalz || []).length ? ' (' + window.__ndMalz.length + ')' : '') + (window.__ndMalzAcik ? ' ▴' : ' ▾') + '</button>'
-      +     '<button type="button" class="nd-filtre" onclick="_ndFiltreTik()" aria-pressed="' + (window.__ndFiltre ? 'true' : 'false') + '" title="Yalnız stoğunla yapabileceğin örnekleri göster">✅ Yapabileceklerim</button>'
+      +     '<button type="button" class="nd-filtre" onclick="_ndFiltreTik()" aria-pressed="' + (window.__ndFiltre ? 'true' : 'false') + '" title="Yalnız stoğunla yapabileceğin örnekleri göster">✅ Yapabilirim</button>' + (window._ndOneriDugmeHTML ? window._ndOneriDugmeHTML() : '') /* SPRINT ND3: ne alırsam ne açılır — 360 px bütçesi: kapalıyken gövdede yer kaplamaz */
       +   '</div>'
       +   window._brAraKutuHTML() + '</div>'
       +   '<button type="button" class="br-kapat" onclick="_brKapat()" aria-label="Kapat" title="Kapat (Esc)">✕</button>'
@@ -28668,6 +28691,18 @@ window._brTamHTML = function(){
     var esd = function(a, b){ var f = function(x, z){ return (typeof MUADIL !== 'undefined' && Array.isArray(MUADIL[x])) && MUADIL[x].some(function(m){ return m && m.id === z && typeof m.fark === 'string' && String(m.fark).trim().indexOf('✅') === 0; }); }; return f(a, b) || f(b, a); };
     if(sira.length > 1 && sira.every(function(a, i){ return sira.every(function(b, j){ return i === j || esd(a, b); }); })) return sira[0];
     return null; // iki farklı (✅-eşdeğer olmayan) kod = belirsiz → eşleme YOK
+  };
+  // SPRINT ND3 — BLACK PATENT (yalnız örnek verisi K1–K3): BV "black patent malt"ı korpusta rengi tutarsız (127°L) diye
+  // REDDETMİŞTİ; o karar korpus (K4) için AYNEN kalır, katalog alias'ı EKLENMEZ. Dergi / NHC / klon satırlarında "black patent"
+  // geleneksel ~500°L black malt'tır → satırda renk YOKSA ya da yazan renk ≥400°L ise katalogdaki black kaydına bağlanır;
+  // renk <400°L ise bağlanmaz. Debittered / dehusked / chocolate / wheat / barley ayrı ürünlerdir → bu kurala girmez.
+  window._bmOrnekBlackPatent = function(ham, kaynak){
+    if(kaynak === 'k4') return null;
+    var n = bvNorm(ham); if(!/\bblack patent\b/.test(n) || /debitter|dehusk|de-husk|chocolate|wheat|barley|carafa|roast/.test(n)) return null;
+    if(typeof MALTLAR === 'undefined' || !MALTLAR.some(function(m){ return m && m.id === 'black'; })) return null;
+    var m = /(\d{2,4}(?:[.,]\d+)?)\s*(°|˚|ebc\b|srm\b|l\b)/.exec(n); if(!m) return 'black';
+    var v = parseFloat(m[1].replace(',', '.')); if(/ebc/.test(m[2])) v = v / 1.97;
+    return v >= 400 ? 'black' : null;
   };
   // ── 2) Metin eşleme kuralı (TEK YER): katkı çözümü + arama metin kolu ──
   function trN(s){ return (typeof _bmTrNorm === 'function' ? _bmTrNorm(s) : String(s || '').toLowerCase()).replace(/[^a-z0-9]+/g, ' ').trim(); }
@@ -28740,6 +28775,7 @@ window._brTamHTML = function(){
     var r = { g:[], h:[], y:null, ek:[], ekAdsiz:0, hacim:hacim, verim:verim, yontem:'' };
     var cozKalem = function(tip, ham){ // malt/hop: BV L2 → yoksa katkı metin kuralı (örn. grist'te şeker, hop listesinde baharat)
       var id = window._bmKatCoz(tip, ham); if(id) return { tip:tip, id:id };
+      if(tip === 'malt'){ var bp = window._bmOrnekBlackPatent(ham, kaynak); if(bp) return { tip:'malt', id:bp }; } // ND3: yalnız K1–K3
       var kid = window._bmMetinCoz('katki', ham); return kid ? { tip:'katki', id:kid } : null;
     };
     (o.g || []).forEach(function(x){ var c = cozKalem('malt', x[0]); r.g.push({ ham:x[0], tip:c ? c.tip : 'malt', id:c ? c.id : null, ad:c ? katAd(c.tip, c.id) : null, kaynakMik:+x[1] || 0 }); });
@@ -29123,6 +29159,80 @@ window._brTamHTML = function(){
     if(typeof bmOrnekOnizleKapat === 'function') bmOrnekOnizleKapat();
     if(window.__brAcik){ window.__brAcik = false; }
     return window._bmOrnekMalzemeliRecete(kaynak, stil, idx);
+  };
+})();
+
+// ═══ SPRINT ND3 — NE ALIRSAM NE AÇILIR (salt hesap — stoğa / KR'ye / ağa YAZMA YOK) ═══
+// Her örnek için ND1 stok analizi (_bmOrnekStok, önbellekli) okunur. Bir örnek "tek kalemle ✅" sayılır ancak:
+//  · stoktaki her satır zaten "stokta" ve kalan TÜM satırlar AYNI tek katalog kalemine aitse (aynı hop iki satırda olabilir),
+//  · o kalemin durumu yok / yetersiz / 🔁 muadil ise (satın alınınca birebir "stokta" olur) ve miktarı biliniyorsa
+//    (maya = 1 paket). Miktarı kaynakta olmayan (AHA hop, metin miktarlı ek kalem), "miktar ?", eşlenemeyen kalem ya da adsız
+//    ek kalem varsa satın almak ✅ yapmaz → sayılmaz.
+// Miktar varsayımı: örnekteki gerekli miktar kadar (her örnek kendi miktarıyla; birleşik sepet hesabı YOK — açgözlü tek malzeme).
+// Hesap o anki görünüme uyar: stil araması / eksen / nota (_ndStilSuzgec) + seçili malzemeler (_bmMalzemeAra). Tüm örneklerin
+// stok analizi yoksa ND1'in parçalı arka plan hesabı başlatılır, kart "hesaplanıyor" der.
+(function(){
+  var esc_ = function(s){ return (typeof esc === 'function') ? esc(s) : String(s == null ? '' : s); };
+  var jsq_ = function(s){ return String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'"); };
+  var TIP_IK = { malt:'🌾', hop:'🌿', maya:'🧪', katki:'➕' };
+  window._bmOrnekTekKalem = function(st){
+    if(!st || st.durum === 'ok' || st.ekAdsiz) return null;
+    var tum = st.g.concat(st.h, st.ek, st.y ? [st.y] : []), anahtar = null, k0 = null;
+    for(var i = 0; i < tum.length; i++){
+      var x = tum[i]; if(x.d === 'stokta') continue;
+      if(['yok', 'yetersiz', 'muadil'].indexOf(x.d) < 0 || !x.k || !x.k.id || !(x.k.mik > 0)) return null;
+      var a = x.k.tip + ':' + x.k.id; if(anahtar && anahtar !== a) return null; anahtar = a; k0 = x.k;
+    }
+    return k0 ? { tip:k0.tip, id:k0.id, ad:k0.ad || k0.id } : null;
+  };
+  var _onb = { key:null, r:null };
+  window._ndOneriHesap = function(){
+    if(!window._ndTumHazir || !window._ndTumHazir()) return null;
+    var im = window._bmStokImza(), suz = window._ndStilSuzgec ? window._ndStilSuzgec() : null, sec = window.__ndMalz || [];
+    var key = im + '|' + (suz ? Object.keys(suz).sort().join('¦') : '*') + '|' + JSON.stringify(sec);
+    if(_onb.key === key) return _onb.r;
+    var L = sec.length ? window._bmMalzemeAra(sec, suz) : window._bmOrnekHepsi().filter(function(e){ return !suz || suz[e.stil]; });
+    var say = {}, bir = [], ok = 0;
+    L.forEach(function(e){
+      var st = window._bmOrnekStok(e.kaynak, e.stil, e.idx, im); if(!st) return;
+      if(st.durum === 'ok'){ ok++; return; }
+      var t = window._bmOrnekTekKalem(st); if(!t) return;
+      var a = t.tip + ':' + t.id; (say[a] = say[a] || { tip:t.tip, id:t.id, ad:t.ad, n:0 }).n++;
+      bir.push({ kaynak:e.kaynak, stil:e.stil, idx:e.idx, k:e.k, kalem:t });
+    });
+    var ilk = Object.keys(say).map(function(a){ return say[a]; }).sort(function(x, y){ return y.n - x.n || String(x.ad).localeCompare(String(y.ad), 'tr'); });
+    return (_onb = { key:key, r:{ ilk5:ilk.slice(0, 5), tum:ilk, bir:bir, n:L.length, ok:ok } }).r;
+  };
+  window._ndOneriAc = function(){ window.__ndOneriAcik = !window.__ndOneriAcik; if(window._brCiz) window._brCiz(); };
+  window._ndOneriDugmeHTML = function(){
+    if(window._ndVeriVar && !window._ndVeriVar()) return '';
+    var r = window._ndTumHazir() ? window._ndOneriHesap() : null; if(!r) window._ndHazirlaTum();
+    return '<button type="button" class="nd-oneri-ac" onclick="_ndOneriAc()" aria-expanded="' + (window.__ndOneriAcik ? 'true' : 'false') + '" aria-label="Ne alırsam ne açılır" title="Ne alırsam ne açılır — tek malzemeyle ✅ olacak örnekler">🛒<span class="nd-oneri-n">' + (r ? r.bir.length : '…') + '</span></button>';
+  };
+  window._ndOneriMalz = function(tip, id){ window.__ndMalz = [{ tip:tip, id:id }]; window.__ndMalzAcik = true; window.__ndMalzQ = ''; if(window._brCiz) window._brCiz(); };
+  window._ndOneriHTML = function(){
+    if(window._ndVeriVar && !window._ndVeriVar()) return '';
+    if(!window.__ndOneriAcik) return '';
+    if(!window._ndTumHazir()){ window._ndHazirlaTum(); return '<div class="nd-oneri nd-oneri-bekle"><div class="nd-oneri-bas">🛒 Ne alırsam ne açılır — hesaplanıyor (örnekler stoğunla karşılaştırılıyor)…</div></div>'; }
+    var r = window._ndOneriHesap(); if(!r) return '';
+    var gor = (window.__ndMalz && window.__ndMalz.length) || (window._ndStilSuzgec && window._ndStilSuzgec()) ? ' bu görünümde' : '';
+    var bas = r.ilk5.length
+      ? '🛒 <span><b>Ne alırsam ne açılır</b> — tek malzemeyle ✅ olacak ' + r.bir.length + ' örnek' + gor + '</span>'
+      : '🛒 <span>Tek bir malzeme alarak ✅ olacak örnek yok' + gor + ' (' + r.n + ' örnek, ✅ ' + r.ok + ')</span>';
+    var h = '<div class="nd-oneri"><div class="nd-oneri-bas">' + bas + '</div><div class="nd-oneri-ic">';
+    if(r.ilk5.length){
+      h += '<div class="nd-oneri-alt">Şu malzemeyi alırsan N örnek daha yapılabilir hale gelir</div>'
+        + r.ilk5.map(function(x){ return '<button type="button" class="nd-oneri-malz" onclick="_ndOneriMalz(\'' + x.tip + '\',\'' + jsq_(x.id) + '\')" title="Bu malzemeyle örnek ara">' + (TIP_IK[x.tip] || '') + ' ' + esc_(x.ad) + '<b>+' + x.n + ' ✅</b></button>'; }).join('');
+      h += '<div class="nd-oneri-alt">1 kalemle ✅ olacaklar (' + r.bir.length + ')</div>';
+      var satir = function(b){
+        var o = window._bmOrnekNesne(b.kaynak, b.stil, b.idx) || {}, ik = { K1:'🥇', K2:'🏆', K3:'📘', K4:'📗' }[b.k] || '';
+        var baslik = o.bira || (b.kaynak === 'nhc' ? 'NHC ' + (o.yil || '') : 'AHA ' + (o.yil || ''));
+        return '<button type="button" class="nd-bir-satir" onclick="_bmOrnekOnizle(\'' + b.kaynak + '\',\'' + jsq_(b.stil) + '\',' + b.idx + ')"><span>' + esc_(b.stil) + ' <small>' + ik + ' ' + b.k + ' · ' + esc_(baslik) + '</small></span><small>alınacak: ' + (TIP_IK[b.kalem.tip] || '') + ' ' + esc_(b.kalem.ad) + '</small></button>';
+      };
+      h += r.bir.slice(0, 10).map(satir).join('') + (r.bir.length > 10 ? '<details class="nd-malz-tum"><summary>Tümü (' + r.bir.length + ')</summary>' + r.bir.slice(10).map(satir).join('') + '</details>' : '');
+    }
+    h += '<div class="nd-oneri-not">Tek malzeme, örnekteki miktar kadar; birden çok malzemenin birlikte ne açacağı hesaplanmaz. Stoğuna bir şey yazılmaz.</div>';
+    return h + '</div></div>';
   };
 })();
 
