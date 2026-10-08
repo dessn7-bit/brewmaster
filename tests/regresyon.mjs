@@ -2915,12 +2915,15 @@ const CASELER = [
       __REG.ok('test için tablosuz+iskeletli stil bulundu', !!hedef, hedef);
       S.stil = hedef; bmStilIskeletDoldur(); render();
       const dom = document.getElementById('ekran').innerHTML;
-      __REG.ok('topluluk bölümü BASILMADI (sessiz)', dom.indexOf('bm-topluluk') < 0);
+      // SPRINT CC: dağılımsız stilde kaynaklı örnek VARSA yalnız örnek bloğu basılır (istatistik cümlesi yine YOK)
+      __REG.ok('dağılım bölümü BASILMADI (yalnız kaynaklı-örnek bloğu olabilir)', dom.indexOf('bm-topluluk') < 0 || (dom.indexOf('bm-ornek-blok') >= 0 && dom.indexOf('📊 Topluluk') < 0));
       __REG.ok('"reçete" istatistik cümlesi de yok', dom.indexOf('📊 Topluluk') < 0);
       const c = calc();
       const f = window.__bmBuildFeaturesV12(window.__recipeV2 || {});
       __REG.ok('motor da boş dönüyor', window._bmToplulukGozlem(hedef, f, { og: c.og, ibu: c.ibu, srm: parseFloat(c.srm), abv: c.abv }, BJCP[hedef]).length === 0);
-      __REG.ok('bölüm render\'ı da boş', window._bmToplulukBolum(hedef, BJCP[hedef], f, { og: c.og, ibu: c.ibu, srm: parseFloat(c.srm), abv: c.abv }, true) === '');
+      const _anr = window._bmToplulukBolum(hedef, BJCP[hedef], f, { og: c.og, ibu: c.ibu, srm: parseFloat(c.srm), abv: c.abv }, true);
+      __REG.ok('bölüm render\'ı: istatistik YOK (boş ya da yalnız örnek bloğu)', _anr === '' || (_anr.indexOf('bm-ornek-blok') >= 0 && _anr.indexOf('📊') < 0 && _anr.indexOf('reçetenin %') < 0), _anr.slice(0, 80));
+      __REG.ok('örnek bloğu yalnız örnek VARSA basılır', (_anr === '') === (window._bmOrnekSayim(hedef).toplam === 0), window._bmOrnekSayim(hedef).toplam);
       return __REG.al();
     })
   },
@@ -2928,9 +2931,9 @@ const CASELER = [
     kod: 'AN3-MADALYA', ad: 'SPRINT AN: madalyalı örnekler ÖRNEK olarak sunuluyor — "kural değil" + "elenen reçeteler bu veride yok" çerçevesi + örneklem sayısı ŞEFFAF (gizlenmiyor)',
     calistir: (page) => page.evaluate(() => {
       const M = window._TOPLULUK_MADALYA;
-      __REG.ok('madalya tablosu yüklü (45 stil)', !!M && Object.keys(M).length === 45, M && Object.keys(M).length);
+      __REG.ok('madalya tablosu yüklü (CC: 89 stil — 45 idi; ≤3 sınırı + genel etiket eşlemesi kalktı)', !!M && Object.keys(M).length === 89, M && Object.keys(M).length);
       __REG.ok('toplam = altın+gümüş+bronz (sayım tutarlı)', Object.values(M).every(v => v[0][0] === v[0][1] + v[0][2] + v[0][3]));
-      __REG.ok('stil başına en çok 3 örnek', Object.values(M).every(v => v[1].length >= 1 && v[1].length <= 3));
+      __REG.ok('stil başına en çok 50 örnek (CC üst sınırı)', Object.values(M).every(v => v[1].length >= 1 && v[1].length <= window._BM_ORNEK_MAX) && window._BM_ORNEK_MAX === 50);
       __REG.ok('gösterilen ≤ mevcut (şişirme yok)', Object.values(M).every(v => v[1].length <= v[0][0]));
       __REG.yeniKayit('AN3 Weizen', {});
       ekran = 'editor'; sekme = 'genel';
@@ -2965,7 +2968,7 @@ const CASELER = [
       const t0 = el0 ? el0.textContent : '';
       __REG.ok('(a) madalya bölümü YOK (uydurma yok)', t0.indexOf('madalya almış') < 0 && t0.indexOf('🏅') < 0 && t0.indexOf('NHC') < 0, hedefStil);
       // (b) Robust Porter: eski tabloda yok ama NHC altınları VAR (AX) → gerçek veriyle dolu
-      __REG.ok('(b) önkoşul: Robust Porter eski tabloda yok + NHC tablosunda var', !M['Robust Porter'] && !!NH['Robust Porter']);
+      __REG.ok('(b) önkoşul: Robust Porter NHC tablosunda var', !!NH['Robust Porter']);
       __REG.yeniKayit('AN4 Porter', {});
       ekran = 'editor'; sekme = 'genel';
       S.hacim = 11; S.verim = 61; S.stil = 'Robust Porter';
@@ -2976,7 +2979,7 @@ const CASELER = [
       const el = document.querySelector('.bm-topluluk');
       __REG.ok('(b) topluluk bölümü VAR (dağılım çalışıyor)', !!el);
       const t = el ? el.textContent : '';
-      __REG.ok('(b) NHC madalya bölümü VAR — kaynak etiketli (gerçek veri)', t.indexOf('NHC finalinde altın almış') >= 0 && t.indexOf('nhc-homebrew-data') >= 0);
+      __REG.ok('(b) NHC örnekleri VAR — kaynak etiketli (gerçek veri) + kademe rozeti', (t.indexOf('NHC finalinde altın almış') >= 0 || t.indexOf('madalya almış') >= 0) && t.indexOf('nhc-homebrew-data') >= 0 && t.indexOf('K1 · Ödüllü ev reçetesi') >= 0);
       __REG.ok('(b) dağılım gözlemi yine de var', t.indexOf('Topluluk') >= 0 && /%\d/.test(t));
       return __REG.al();
     })
@@ -3057,7 +3060,8 @@ const CASELER = [
       const el = document.querySelector('.bm-topluluk');
       __REG.ok('topluluk bölümü AYRI kutuda', !!el);
       __REG.ok('topluluk bölümünde ÇİP YOK (preskriptif değil)', !el || el.querySelectorAll('.bm-doctor-cozum-chip').length === 0);
-      __REG.ok('topluluk bölümünde tıklanabilir eleman YOK', !el || el.querySelectorAll('[onclick],button,[role=button]').length === 0);
+      // CC: Dubbel artık K2 örnekli → örnek listesinin "yola çık" düğmeleri (AW'den beri bilinçli) sayılmaz; DAĞILIM kısmında tıklanabilir öğe yok
+      __REG.ok('topluluk bölümünde (örnek listesi dışında) tıklanabilir eleman YOK', !el || Array.from(el.querySelectorAll('[onclick],button,[role=button]')).every(b => !!b.closest('.bm-ornek-liste')));
       __REG.ok('iki otorite ayrımı metinde açık', !!el && el.textContent.indexOf('yalnız bilgilendirir') >= 0);
       // BJCP ÇAKIŞMA KAPISI: OG bandın dışında → topluluk OG hakkında SUSMALI
       const c = calc();
@@ -4295,33 +4299,36 @@ const CASELER = [
     kod: 'AW1-ORNEK', ad: 'SPRINT AW: MADALYALI ÖRNEKTEN REÇETE — örnek satırından yeni reçete: AV yolu + iskelet, örneğin OG/IBU\'su ölçek hedefi olur, orijinal grist/hop/maya METNİ not alanına AYNEN yazılır; gramaj/oran UYDURULMAZ, ad ödül iması taşımaz',
     calistir: (page) => page.evaluate(() => {
       const M = window._TOPLULUK_MADALYA;
-      __REG.ok('45 madalya anahtarının HEPSİ BJCP otoritesinde (buton hiçbir stilde ölü değil)', Object.keys(M).length === 45 && Object.keys(M).every(k => !!BJCP[k]), Object.keys(M).filter(k => !BJCP[k]).join(','));
+      __REG.ok('89 madalya anahtarının HEPSİ BJCP otoritesinde (buton hiçbir stilde ölü değil)', Object.keys(M).length === 89 && Object.keys(M).every(k => !!BJCP[k]), Object.keys(M).filter(k => !BJCP[k]).join(','));
       __REG.yeniKayit('REGTEST AW1', {});
       S.hacim = 10; S.verim = 45; tarifeKaydet();
-      const stil = 'Altbier / Düsseldorf Altbier', o = M[stil][1][0];
-      __REG.ok('önkoşul: iskeletli stil + 4 ölçüsü dolu örnek', !!STIL_ISKELET[stil] && o.og === 1.071 && o.ib === 25 && o.sr === 19 && o.ab === 7.5 && o.yil === 2024);
+      // CC: eski M[stil][1][0] (2024, OG 1.071, %7,5) Specialty-kategorisi "Sticke Alt" altınıydı — Altbier bandı dışında; çözücü onu
+      // dürüstçe Altbier örneği saymadı. Test artık sabit indekse değil ÖZELLİĞE bağlı: 4 ölçüsü + giriş sayısı dolu, OG'si BJCP ortasından uzak ilk örnek.
+      const stil = 'Altbier / Düsseldorf Altbier', ogMid0 = (BJCP[stil].og[0] + BJCP[stil].og[1]) / 2;
+      const oi = M[stil][1].findIndex(x => x.og && x.ib && x.sr && x.ab && x.yil && x.h && x.h.length && Math.abs(x.og - ogMid0) > 0.004), o = M[stil][1][oi];
+      __REG.ok('önkoşul: iskeletli stil + 4 ölçüsü dolu örnek', !!STIL_ISKELET[stil] && oi >= 0, oi);
       const n0 = KR.length;
-      const yid = _bmMadalyaYeniRecete(stil, 0);
+      const yid = _bmMadalyaYeniRecete(stil, oi);
       __REG.ok('YENİ reçete oluştu (KR +1)', KR.length === n0 + 1 && !!yid, n0 + ' → ' + KR.length);
       __REG.ok('stil + iskelet AV yolundan (yeni kod yolu YOK)', S.stil === stil && (S.maltlar || []).length > 0 && (S.hoplar || []).length > 0 && !!S.mayaId, (S.maltlar || []).length + ' malt / ' + (S.hoplar || []).length + ' hop');
       __REG.ok('batch boyutu taşındı', S.hacim === 10 && S.verim === 45, S.hacim + 'L / %' + S.verim);
       const c = calc(), ogMidB = (BJCP[stil].og[0] + BJCP[stil].og[1]) / 2;
-      __REG.ok('HEDEF KURULDU: OG örneğe ölçeklendi (BJCP ortasına DEĞİL)', Math.abs(c.og - o.og) <= 0.004 && Math.abs(c.og - ogMidB) > 0.008, c.og.toFixed(3) + ' vs örnek ' + o.og + ' / mid ' + ogMidB.toFixed(3));
+      __REG.ok('HEDEF KURULDU: OG örneğe ölçeklendi (BJCP ortasına DEĞİL)', Math.abs(c.og - o.og) <= 0.004 && Math.abs(c.og - ogMidB) > 0.004, c.og.toFixed(3) + ' vs örnek ' + o.og + ' / mid ' + ogMidB.toFixed(3));
       __REG.ok('HEDEF KURULDU: IBU örneğe ölçeklendi', Math.abs(c.ibu - o.ib) <= 4, Math.round(c.ibu) + ' vs ' + o.ib);
       const n = String(S.notlar || '');
-      __REG.ok('NOT: kaynak şeffaf (AHA + derece + yıl + giriş sayısı)', n.indexOf('AHA yarışmasında altın almış') >= 0 && n.indexOf('(2024, kategoride 77 giriş)') >= 0, n.split('\n')[0]);
+      __REG.ok('NOT: kaynak şeffaf (AHA + derece + yıl + giriş sayısı)', n.indexOf('AHA yarışmasında altın almış') >= 0 && n.indexOf('(' + o.yil + (o.e ? ', kategoride ' + o.e + ' giriş' : '') + ')') >= 0, n.split('\n')[0]);
       __REG.ok('NOT: çerçeve — elenen yok + kural değil + miktarlar iskeletten', n.indexOf('Elenen reçeteler bu veride yok') >= 0 && n.indexOf('kural değil') >= 0 && n.indexOf('stil iskeletinden geliyor') >= 0);
-      __REG.ok('NOT: örneğin 4 ölçüsü de yazıldı', n.indexOf('OG 1.071') >= 0 && n.indexOf('IBU 25') >= 0 && n.indexOf('SRM 19') >= 0 && n.indexOf('ABV %7.5') >= 0);
-      __REG.ok('NOT: grist orijinal yüzdelerle AYNEN (artık baz malta itilmedi)', n.indexOf('%56 Munich II malt + %35 German Vienna malt + %7 CaraMunich II malt + %1 Carafa II') >= 0);
+      __REG.ok('NOT: örneğin 4 ölçüsü de yazıldı', n.indexOf('OG ' + Number(o.og).toFixed(3)) >= 0 && n.indexOf('IBU ' + Math.round(o.ib)) >= 0 && n.indexOf('SRM ' + o.sr) >= 0 && n.indexOf('ABV %' + o.ab) >= 0);
+      __REG.ok('NOT: grist orijinal yüzdelerle AYNEN (artık baz malta itilmedi)', n.indexOf(o.g.map(x => '%' + x[1] + ' ' + x[0]).join(' + ')) >= 0);
       const hopSatiri = n.split('\n').find(s => s.indexOf('Hop (') === 0) || 'x';
-      __REG.ok('NOT: hop ad+dakika AYNEN + gramaj-yok uyarısı; GRAM UYDURULMADI', hopSatiri === 'Hop (gramaj kaynakta YOK — kendi hesabını yap): German Magnum @60dk' && !/\d+(\.\d+)?\s*g(r|ram)?\b/i.test(hopSatiri), hopSatiri);
-      __REG.ok('NOT: maya orijinal serbest metniyle', n.indexOf('Maya (orijinal metin): WLP 833 German Bock lager yeast') >= 0);
-      __REG.ok('AD: stil + yıl + örneğinden; ödül iması YOK', S.biraAd.indexOf(stil + ' — 2024 örneğinden') === 0 && !/ödül|madalya|şampiyon|birinci|kazanan/i.test(S.biraAd), S.biraAd);
+      __REG.ok('NOT: hop ad+dakika AYNEN + gramaj-yok uyarısı; GRAM UYDURULMADI', hopSatiri === 'Hop (gramaj kaynakta YOK — kendi hesabını yap): ' + o.h.map(x => x[0] + (x[1] != null ? ' @' + x[1] + 'dk' : '') + (x[2] ? ' (' + x[2] + ')' : '')).join(', ') && !/\d+(\.\d+)?\s*g(r|ram)?\b/i.test(hopSatiri), hopSatiri);
+      __REG.ok('NOT: maya orijinal serbest metniyle', n.indexOf('Maya (orijinal metin): ' + o.y) >= 0);
+      __REG.ok('AD: stil + yıl + örneğinden; ödül iması YOK', S.biraAd.indexOf(stil + ' — ' + o.yil + ' örneğinden') === 0 && !/ödül|madalya|şampiyon|birinci|kazanan/i.test(S.biraAd), S.biraAd);
       __REG.ok('DİL: notta kalite iddiası yok', !/kazan[ıi]rs[ıi]n|en iyi|daha iyi|bunu demle|yapmal[ıi]/i.test(n));
       const kr = KR.find(x => x && x.id === yid);
       __REG.ok('KALICI: not + iskelet + stil KR kaydında', !!kr && String(kr.notlar || '').indexOf('AHA') >= 0 && (kr.maltlar || []).length > 0 && kr.stil === stil);
-      const yid2 = _bmMadalyaYeniRecete(stil, 0);
-      __REG.ok('ikinci basış: ad ÇAKIŞMADI (AV ad mantığı korunur)', !!yid2 && yid2 !== yid && S.biraAd.indexOf(stil + ' — 2024 örneğinden') === 0 && S.biraAd !== (stil + ' — 2024 örneğinden'), S.biraAd);
+      const yid2 = _bmMadalyaYeniRecete(stil, oi);
+      __REG.ok('ikinci basış: ad ÇAKIŞMADI (AV ad mantığı korunur)', !!yid2 && yid2 !== yid && S.biraAd.indexOf(stil + ' — ' + o.yil + ' örneğinden') === 0 && S.biraAd !== (stil + ' — ' + o.yil + ' örneğinden'), S.biraAd);
       return __REG.al();
     })
   },
@@ -4374,9 +4381,9 @@ const CASELER = [
       const el = document.querySelector('.bm-topluluk');
       __REG.ok('topluluk bölümü var', !!el);
       const btnler = el ? Array.from(el.querySelectorAll('button')) : [];
-      const ornekBtn = btnler.filter(b => /Bu örnekten yola çık/.test(b.innerText));
+      const ornekBtn = btnler.filter(b => /Bu örnekten yola çık/.test(b.textContent)); // CC: katlanan örnekler kapalı <details> içinde (innerText boş)
       const stilBtn = btnler.filter(b => /Stil iskeletinden yeni reçete/.test(b.innerText));
-      const nOrnek = window._NHC_MADALYA['Weizen / Weissbier'][1].length; // AX: Weizen örnekleri artık NHC altınlarından
+      const nOrnek = window._bmOrnekSayim('Weizen / Weissbier').toplam; // CC: birleşik kademeli liste (NHC + tekrar etmeyen AHA + K2/K3), katlananlar da DOM'da
       __REG.ok('AW1: örnek başına 1 buton', ornekBtn.length === nOrnek, ornekBtn.length + '/' + nOrnek);
       __REG.ok('AW2: blok başlığında TEK stil-düzeyi buton (örnek butonundan ayrı)', stilBtn.length === 1, String(stilBtn.length));
       const etiket = btnler.map(b => b.innerText + '|' + (b.getAttribute('title') || '')).join(' ');
@@ -4388,7 +4395,7 @@ const CASELER = [
       __REG.ok('AW2 tıklama: yeni reçete + stil kuruldu, NOT YAZILMADI (düz AV)', KR.length === n0 + 1 && S.stil === 'Weizen / Weissbier' && String(S.notlar || '') === '' && S.biraAd.indexOf('Weizen / Weissbier') === 0 && S.biraAd.indexOf('örneğinden') < 0, S.biraAd + ' | not:' + String(S.notlar || '').length);
       // yeni reçetenin genel sekmesi de butonları basıyor → örnek butonuna GERÇEK TIKLAMA
       const el2 = document.querySelector('.bm-topluluk');
-      const ob2 = el2 ? Array.from(el2.querySelectorAll('button')).filter(b => /Bu örnekten yola çık/.test(b.innerText)) : [];
+      const ob2 = el2 ? Array.from(el2.querySelectorAll('button')).filter(b => /Bu örnekten yola çık/.test(b.textContent)) : [];
       __REG.ok('tıklama sonrası örnek butonları yine var', ob2.length === nOrnek, String(ob2.length));
       const n1 = KR.length;
       ob2[0].click();
@@ -4412,15 +4419,16 @@ const CASELER = [
     kod: 'AX1-TABLO', ad: 'SPRINT AX: NHC tablosu YALNIZ OLGU — 29 stil/74 kayıt, tüm anahtarlar BJCP+dağılım içinde (uydurma eşleme yok), talimat düzyazısı GÖMÜLMEMİŞ, alan bantları sağlam, AN5 yasak-kelime taraması tabloyu da geçiyor, boyut makul',
     calistir: (page) => page.evaluate(() => {
       const N = window._NHC_MADALYA;
-      __REG.ok('tablo yüklü: 29 stil', !!N && Object.keys(N).length === 29, N && Object.keys(N).length);
+      __REG.ok('tablo yüklü: 59 stil (CC: 29 idi — ≤3 sınırı kalktı, kategori-düzeyi kayıtlar ad/özel-kategori kuralıyla çözüldü)', !!N && Object.keys(N).length === 59, N && Object.keys(N).length);
       const kayitlar = Object.values(N).map(v => v[1]).reduce((a, b) => a.concat(b), []);
-      __REG.ok('74 gömülü kayıt (stil başına 1-3)', kayitlar.length === 74 && Object.values(N).every(v => v[1].length >= 1 && v[1].length <= 3), kayitlar.length);
+      __REG.ok('174 gömülü kayıt (stil başına 1-50)', kayitlar.length === 174 && Object.values(N).every(v => v[1].length >= 1 && v[1].length <= 50), kayitlar.length);
       __REG.ok('gösterilen ≤ toplam (şişirme yok)', Object.values(N).every(v => v[1].length <= v[0]));
       __REG.ok('TÜM anahtarlar BJCP otoritesinde', Object.keys(N).every(k => !!BJCP[k]), Object.keys(N).filter(k => !BJCP[k]).join(','));
-      __REG.ok('TÜM anahtarlar dağılım kapsamında (görünürlük kapısıyla tutarlı — ölü veri yok)', Object.keys(N).every(k => !!window._TOPLULUK_DAGILIM[k]));
-      __REG.ok('kategori-düzeyi UYDURMA eşleme yok (Stout/IPA/Pilsner kategorileri tabloda değil)', !N['American IPA'] && !N['German Pils'] && !N['Imperial / Russian Imperial Stout'] && !N['Stout / Porter'] && !N['Sour Ale / Kettle Sour']);
+      // CC: D-kapısı KALDIRILDI — dağılımsız stilde de yalnız-örnek bloğu çizilir; ölü veri yok, her anahtar görünür
+      __REG.ok('dağılım dışı NHC stilleri de görünür (yalnız-örnek bloğu)', Object.keys(N).filter(k => !window._TOPLULUK_DAGILIM[k]).every(k => window._bmOrnekListeHTML(k).indexOf('Bu örnekten yola çık') >= 0));
+      __REG.ok('kategori-düzeyi kayıtlar YALNIZ beyanlı yolla (es) eşlendi; şemsiye yalnız aile anahtarına; IPA kategorisi hâlâ eşlenmiyor', kayitlar.filter(o => o.es === 'semsiye').length > 0 && Object.keys(N).every(k => N[k][1].every(o => o.es !== 'semsiye' || ['Stout / Porter', 'Lager / Pilsner', 'Barleywine'].indexOf(k) >= 0)) && !N['American IPA']);
       __REG.ok('her kayıt: OG+hacim+grist dolu, bantlar sağlam', kayitlar.every(o => o.og >= 1.02 && o.og <= 1.15 && o.L > 0 && o.L <= 250 && Array.isArray(o.g) && o.g.length > 0 && o.g.every(x => x[1] > 0 && x[1] < 60000)));
-      __REG.ok('HOP GRAMAJI: 74/74 kayıtta gramlı hop satırı (eski tabloda hiç yoktu)', kayitlar.every(o => Array.isArray(o.h) && o.h.length > 0 && o.h.every(x => x[1] > 0 && x[1] < 2000)));
+      __REG.ok('HOP GRAMAJI: hop satırı olan HER kayıtta gram > 0 (sessiz gramsız satır yok)', kayitlar.filter(o => Array.isArray(o.h) && o.h.length).length >= 160 && kayitlar.every(o => !o.h || o.h.every(x => x[1] > 0 && x[1] < 2000)), kayitlar.filter(o => o.h && o.h.length).length + '/' + kayitlar.length);
       __REG.ok('mash °C yalnız 60-74 şekerleme bandında', kayitlar.every(o => o.ms == null || (o.ms >= 60 && o.ms <= 74)));
       const dump = JSON.stringify(N);
       let uzun = 0; JSON.parse(dump, (k, v) => { if (typeof v === 'string' && v.length > 90) uzun++; return v; });
@@ -4428,7 +4436,7 @@ const CASELER = [
       const YASAK = ['daha iyi', 'yapmalı', 'hatalı', 'yanlış', 'olmalı', 'gerekir', 'tavsiye', 'öneriyoruz', 'düzelt', 'kötü', 'başarılı', 'kazanmak için', 'kazandıran', 'ideal', 'doğrusu', 'eksik'];
       const ld = dump.toLocaleLowerCase('tr-TR');
       __REG.ok('AN5-DIL: tablo metinlerinde yasak kelime 0', YASAK.every(k => ld.indexOf(k) < 0), YASAK.filter(k => ld.indexOf(k) >= 0).join(','));
-      __REG.ok('boyut makul (<30KB — AK 11.5KB / AN 68KB emsali arası)', dump.length < 30000, dump.length + ' bayt');
+      __REG.ok('boyut makul (<80KB — CC: ≤50/stil)', dump.length < 80000, dump.length + ' bayt');
       return __REG.al();
     })
   },
@@ -4445,7 +4453,10 @@ const CASELER = [
       const t = el ? el.textContent : '';
       __REG.ok('(a) NHC kaynak etiketi + atıf görünür', t.indexOf('NHC') >= 0 && t.indexOf('nhc-homebrew-data') >= 0);
       __REG.ok('(a) GERÇEK gramaj görünür (kg/g)', /\d+(,\d+)?\s?(kg|g)\s/.test(t), (t.match(/\d+(,\d+)?\s?(kg|g)\s\S+/) || [''])[0]);
-      __REG.ok('(a) eski örnekler GİZLİ (çift listeleme yok: "kategoride ... giriş" markörü 0)', t.indexOf('kategoride') < 0);
+      // CC: "tüm mevcut örnekler" — AHA örnekleri artık NHC'nin yanında; aynı NHC altını iki kez listelenmez (yıl + OG ±0,0015)
+      const _nW = window._NHC_MADALYA['Weizen / Weissbier'][1], _aW = window._TOPLULUK_MADALYA['Weizen / Weissbier'][1];
+      const _cift = _aW.filter(o => _nW.some(n => n.yil === o.yil && o.og && n.og && Math.abs(n.og - o.og) <= 0.0015)).length;
+      __REG.ok('(a) çift listeleme yok: toplam = NHC + AHA − aynı kayıt', window._bmOrnekSayim('Weizen / Weissbier').toplam === Math.min(50, _nW.length + _aW.length - _cift), _nW.length + '+' + _aW.length + '-' + _cift);
       __REG.ok('(a) eski toplam başlığı KORUNDU (11 reçete · 9 altın)', t.indexOf('madalya almış 11 reçete') >= 0 && /9 alt[ıi]n/.test(t));
       // (a2) mash görünürlüğü: ms'li kaydı olan bir NHC stili
       const N = window._NHC_MADALYA;
@@ -5420,19 +5431,21 @@ const CASELER = [
     kod: 'BG3-KAPSAM', ad: 'SPRINT BG3: ödüllü örneği OLMAYAN stilde (iki tabloda da yok) topluluk bloğu dürüst kapsam satırı basar ("ödüllü örnek verimizde yok" + gerçek havuz sayısı); uydurma örnek basılmaz; örnekli stilde satır YOK',
     calistir: (page) => page.evaluate(() => {
       const M = window._TOPLULUK_MADALYA, N = window._NHC_MADALYA;
-      __REG.ok('önkoşul: Dubbel iki madalya tablosunda da yok + dağılımda var', !M['Dubbel'] && !N['Dubbel'] && !!window._TOPLULUK_DAGILIM['Dubbel']);
+      // CC: Dubbel artık K2 örnekli → hiç örneği olmayan, dağılımlı + iskeletli bir stil dinamik seçilir
+      const Kk = window._KAYNAKLI_ORNEK, hedefS = Object.keys(window._TOPLULUK_DAGILIM).find(k => !M[k] && !N[k] && !Kk[k] && STIL_ISKELET[k]);
+      __REG.ok('önkoşul: üç örnek tablosunda da olmayan + dağılımda olan iskeletli stil var', !!hedefS, hedefS);
       __REG.yeniKayit('REGTEST BG3', {});
       // AN6 deseni: Dubbel + OG bandın altına → topluluk bloğu kesin basılır
       ekran = 'editor'; sekme = 'genel';
-      S.hacim = 11; S.verim = 61; S.stil = 'Dubbel'; bmStilIskeletDoldur();
+      S.hacim = 11; S.verim = 61; S.stil = hedefS; bmStilIskeletDoldur();
       S.maltlar = (S.maltlar || []).map(m => ({ ...m, kg: (m.kg || 0) * 0.45 }));
       render();
       const el = document.querySelector('.bm-topluluk');
       __REG.ok('topluluk bloğu basıldı (gözlem var)', !!el);
       const t = el ? el.textContent : '';
-      const u = {}; Object.keys(M).concat(Object.keys(N)).forEach(a => u[a] = 1);
+      const u = {}; Object.keys(M).concat(Object.keys(N), Object.keys(Kk)).forEach(a => u[a] = 1);
       const say = Object.keys(u).length;
-      __REG.ok('kapsam satırı: "ödüllü örnek verimizde yok" + gerçek havuz sayısı', t.indexOf('ödüllü örnek verimizde yok') >= 0 && t.indexOf(say + ' stili kapsıyor') >= 0, 'havuz=' + say);
+      __REG.ok('kapsam satırı: "ödüllü örnek verimizde yok" + gerçek havuz sayısı', t.indexOf('kaynaklı örnek verimizde yok') >= 0 && t.indexOf(say + ' stili kapsıyor') >= 0, 'havuz=' + say);
       __REG.ok('uydurma örnek YOK: madalya/NHC bölümü basılmadı', t.indexOf('madalya almış') < 0 && t.indexOf('NHC') < 0 && t.indexOf('🏅') < 0);
       __REG.ok('satır yargı taşımaz (yalın kapsam dili)', t.indexOf('veri kapsamı durumu') >= 0 && t.indexOf('yargı değil') >= 0);
       __REG.ok('kapsam satırı tıklanabilir öğe eklemez (AN6 kuralı korunur)', el.querySelectorAll('[onclick],button,[role=button]').length === 0);
@@ -5444,7 +5457,7 @@ const CASELER = [
       const t2 = el2 ? el2.textContent : '';
       // Weizen HEM AHA hem NHC tablosunda → başlık AHA biçiminde ('madalya almış N reçete'),
       // 'NHC finalinde altın almış' başlığı yalnız NHC-only stillerde basılır (AX2 tasarımı)
-      __REG.ok('örnekli stilde kapsam satırı YOK + örnekler duruyor', t2.indexOf('ödüllü örnek verimizde yok') < 0 && (t2.indexOf('madalya almış') >= 0 || t2.indexOf('NHC finalinde altın almış') >= 0), t2.slice(0, 80));
+      __REG.ok('örnekli stilde kapsam satırı YOK + örnekler duruyor', t2.indexOf('kaynaklı örnek verimizde yok') < 0 && (t2.indexOf('madalya almış') >= 0 || t2.indexOf('NHC finalinde altın almış') >= 0), t2.slice(0, 80));
       return __REG.al();
     })
   },
@@ -5460,9 +5473,11 @@ const CASELER = [
       const ac = (k, s, i) => { _bmOrnekOnizle(k, s, i); const m = document.getElementById('bmOrnekOnizle'); const el = m && m.querySelector('.bm-onizle-yas'); const t = el ? el.textContent : ''; bmOrnekOnizleKapat(); return t; };
       const simdi = new Date().getFullYear();
       const N = window._NHC_MADALYA, M = window._TOPLULUK_MADALYA;
-      __REG.ok('önkoşul: NHC Altbier#1 2012, Weizen#0 2013, Weizen#2 2008; AHA Altbier#0 2024, #1 2012',
-        N['Altbier / Düsseldorf Altbier'][1][1].yil === 2012 && N['Weizen / Weissbier'][1][0].yil === 2013 && N['Weizen / Weissbier'][1][2].yil === 2008
-        && M['Altbier / Düsseldorf Altbier'][1][0].yil === 2024 && M['Altbier / Düsseldorf Altbier'][1][1].yil === 2012);
+      // CC: AHA tablosunda 2024 Altbier kaydı (Specialty Sticke) artık Altbier değil → 2021+ kaydı olan bir AHA stili seçilir
+      const _aha21 = Object.keys(M).find(k => M[k][1].some(o => o.yil >= 2021) && M[k][1].some(o => o.yil === 2012));
+      const _i21 = _aha21 ? M[_aha21][1].findIndex(o => o.yil >= 2021) : -1, _i12 = _aha21 ? M[_aha21][1].findIndex(o => o.yil === 2012) : -1;
+      __REG.ok('önkoşul: NHC Altbier#1 2012, Weizen#0 2013, Weizen#2 2008; bir AHA stilinde 2021+ ve 2012 kaydı',
+        N['Altbier / Düsseldorf Altbier'][1][1].yil === 2012 && N['Weizen / Weissbier'][1][0].yil === 2013 && N['Weizen / Weissbier'][1][2].yil === 2008 && _i21 >= 0 && _i12 >= 0, _aha21);
       const t1 = ac('nhc', 'Altbier / Düsseldorf Altbier', 1);
       __REG.ok('(a) 2012 kaydı: satır var, yıl dinamik, nötr cümle (farklı olabilir + BJCP)', t1.indexOf('⏳ 2012 kaydı') >= 0 && t1.indexOf('farklı olabilir') >= 0 && t1.indexOf('BJCP') >= 0, t1);
       __REG.ok('(a) 2012: net-vurgu biçimi DEĞİL', t1.indexOf('belirgin') < 0 && t1.indexOf('yıl önce') < 0, t1);
@@ -5470,9 +5485,9 @@ const CASELER = [
       __REG.ok('(b) 2013 kaydı: kendi yılı (dinamik), 2012 yazmaz', t3.indexOf('⏳ 2013 kaydı') >= 0 && t3.indexOf('2012') < 0, t3);
       const t2 = ac('nhc', 'Weizen / Weissbier', 2);
       __REG.ok('(b) 2008 kaydı: net vurgu + yıl farkı dinamik', t2.indexOf('⏳ 2008 kaydı (' + (simdi - 2008) + ' yıl önce)') >= 0 && t2.indexOf('belirgin farklı olabilir') >= 0, t2);
-      const t4 = ac('aha', 'Altbier / Düsseldorf Altbier', 0);
+      const t4 = ac('aha', _aha21, _i21);
       __REG.ok('(c) AHA 2024 kaydı: satır YOK (güncel dönem)', t4 === '', t4);
-      const t5 = ac('aha', 'Altbier / Düsseldorf Altbier', 1);
+      const t5 = ac('aha', _aha21, _i12);
       __REG.ok('(c) AHA 2012 kaydı: aynı bağlam satırı', t5.indexOf('⏳ 2012 kaydı') >= 0 && t5.indexOf('farklı olabilir') >= 0, t5);
       const hepsi = [t1, t2, t3, t5].join(' ');
       __REG.ok('(d) AN5-DIL: veri yaşı satırlarında yasak kelime 0', tara(hepsi).length === 0, tara(hepsi).join(','));
@@ -7909,6 +7924,150 @@ const CASELER = [
       const kw = ilk('koyu weizen');
       __REG.ok('"koyu weizen": Dunkelweizen + Dunkles Weizenbock (Almanca dunkl- kalıbı)', kw.includes('Dunkelweizen') && kw.includes('Dunkles Weizenbock'), kw.join(' | '));
       __REG.ok('yaygınlık ağırlığı tek sabit (_BR_ARA_POP = 40)', window._BR_ARA_POP === 40);
+      return __REG.al();
+    })
+  },
+  // ── SPRINT CC — her stile kaynaklı reçete örneği (kademeli etiket) + aramada göster ──
+  {
+    kod: 'CC1-COZUCU', ad: 'ÖZEL KATEGORİ EŞLEMESİ (madde 2) — kural testli: stout tabanı + kahve → Coffee Stout (aynı desen çikolata/hindistan cevizi/balkabağı/bal/vanilya+laktoz/bourbon fıçı); DENETİMİN BULDUĞU TUZAKLAR kilitli: "chocolate malt" çikolata DEĞİL, "honey malt" bal DEĞİL, "beechwood smoked malt" ahşap fıçı DEĞİL, birleşik "Smoke-Flavored and Wood-Aged" kategorisinde malzeme karar verir, Specialty IPA katkı kategorisi DEĞİL, katkılı kayıt taban stilin örneği SAYILMAZ, alt stili belirsiz kategori tek alt stile DEĞİL şemsiyeye; 2008 "English Brown Ale" aile adı Mild\'ı yutmaz',
+    calistir: (page) => page.evaluate(() => {
+      const C = window._bmOrnekStilCoz, E = window._bmOzelKategoriEsle;
+      const st = g => { const r = C(g); return r ? r.stil : null; };
+      const T = [
+        // pozitif: madde 2'nin kendi örnekleri
+        [{ kategori: 'Spice/Herb/Vegetable Beer', ad: 'black friday stout', malzeme: 'ground coffee, chocolate malt' }, 'Coffee Stout'],
+        [{ kategori: 'Spice/Herb/Vegetable Beer', ad: 'oatmeal stout', malzeme: 'cacao nibs' }, 'Chocolate Stout'],
+        [{ kategori: 'Spiced Beer', ad: 'stout', malzeme: 'pumpkin puree, cinnamon' }, 'Pumpkin Stout'],
+        [{ kategori: 'Fruit Beer', ad: 'kokos nut stout', malzeme: 'toasted coconut' }, 'Coconut Stout'],
+        [{ kategori: 'Spice/Herb/Vegetable Beer', ad: 'vanilla cream stout', malzeme: 'vanilla bean, lactose' }, 'Pastry Stout'],
+        [{ kategori: 'Wood-Aged Beer', ifade: 'Russian Imperial Stout aged in bourbon barrel' }, 'Bourbon Barrel Aged Stout'],
+        [{ kategori: 'Specialty Beer', ad: 'lager', malzeme: 'clover honey' }, 'Honey Lager'],
+        [{ kategori: 'Fruit Beer', ifade: 'Catharina Sour with Guava and Passion Fruit' }, 'Catharina Sour'],
+        [{ kategori: 'Fruit Beer', ifade: 'Berliner Weisse with Raspberries' }, 'Fruited Sour / Gose'],
+        [{ kategori: 'Spice/Herb/Vegetable Beer', ad: 'hop canyon habanero ipa', malzeme: 'black peppercorns' }, 'Chili Beer'],
+        [{ kategori: 'Smoke-Flavored Beer', ad: 'kaltrauch rauchbier' }, 'Rauchbier / Bamberg Smoked'],
+        [{ kategori: 'Stout', ad: 'robs oatmeal stout' }, 'Oatmeal Stout'],
+        [{ kategori: 'Imperial Stout' }, 'Imperial / Russian Imperial Stout'],
+        [{ kategori: 'Pale British Ale', ad: 'lous best esb' }, 'Strong Bitter / ESB'],
+        [{ kategori: 'Pale European Beer', ifade: 'German Helles Exportbier' }, 'German Helles Exportbier'],
+        // negatif / tuzaklar
+        [{ kategori: 'Smoke-Flavored and Wood-Aged Beer', ad: 'love potion stout', malzeme: 'chocolate malt, roasted barley, oak cubes' }, 'Wood-Aged Beer / Barrel Aged'],
+        [{ kategori: 'Spice/Herb/Vegetable Beer', ad: 'brown ale', malzeme: 'honey malt, chocolate malt, nutmeg' }, 'Spiced Beer / Winter Warmer'], // bal maltı bal DEĞİL (Honey Beer olmaz); küçük hindistan cevizi = kış baharatı
+        [{ kategori: 'Smoke-Flavored and Wood-Aged Beer', ad: 'slightly smoked helles', malzeme: 'beechwood smoked malt, pilsner malt' }, 'Smoked Beer / Rauchbier'],
+        [{ kategori: 'Specialty IPA', ifade: 'White IPA' }, 'White IPA'],
+        [{ kategori: 'Spiced Beer', ifade: 'Vienna Lager with coffee' }, 'Herb & Spice Beer'],
+        [{ kategori: 'Stout' }, 'Stout / Porter'],
+        [{ kategori: 'Pilsner', ad: 'aok' }, 'Lager / Pilsner'],
+        [{ kategori: 'English Brown Ale', ad: 'country mild', etiketStil: 'English Mild / Dark Mild' }, 'English Mild / Dark Mild'],
+        [{ kategori: 'Fruit Beer' }, null],
+        [{ kategori: 'Specialty Beer', ad: 'emily' }, null]
+      ];
+      const bas = [];
+      T.forEach(([g, beklenen]) => { const r = st(g); if (r !== beklenen) bas.push(JSON.stringify(g).slice(0, 70) + ' → ' + r + ' (beklenen ' + beklenen + ')'); });
+      __REG.ok('kural tablosu: ' + T.length + ' vakanın HEPSİ beklenen stile (pozitif + tuzak)', bas.length === 0, bas.join(' || '));
+      __REG.ok('malt adı temizliği: "chocolate malt" tek başına Chocolate Stout YAPMAZ', E('stout', 'pale malt, chocolate malt, roasted barley', 'Specialty Beer', '') !== 'Chocolate Stout');
+      __REG.ok('malt adı temizliği: "honey malt" bal DEĞİL', !/Honey/.test(E('pale ale', 'honey malt, crystal', 'Specialty Beer', '') || ''));
+      const hedefler = Object.values(window._BM_ORNEK_AD).concat(Object.values(window._BM_ORNEK_SEMSIYE), window._BM_ORNEK_ADKURAL.map(r => r[2]));
+      __REG.ok('çözücünün TÜM hedefleri BJCP-239 anahtarı (yazım hatası = sessiz kayıp)', hedefler.every(h => !!BJCP[h]), hedefler.filter(h => !BJCP[h]).join(','));
+      const N = window._NHC_MADALYA, M = window._TOPLULUK_MADALYA;
+      const tumKayit = Object.keys(M).map(k => M[k][1].map(o => [k, o])).concat(Object.keys(N).map(k => N[k][1].map(o => [k, o]))).reduce((a, b) => a.concat(b), []);
+      __REG.ok('şemsiye yolu yalnız aile anahtarlarında', tumKayit.every(([k, o]) => o.es !== 'semsiye' || ['Stout / Porter', 'Lager / Pilsner', 'Barleywine'].indexOf(k) >= 0));
+      __REG.ok('eski yanlış örnek: 2024 Sticke (Specialty, %7,5) Altbier listesinde YOK', !M['Altbier / Düsseldorf Altbier'][1].some(o => o.og === 1.071 && o.ab === 7.5));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'CC2-KADEME', ad: 'KADEMELİ ÖRNEK LİSTESİ (madde 7): stil başına tüm örnekler (≤50), ilk 3 açık + "Tüm örnekler (N)" katlanır, HER satırda kademe rozeti (🥇K1 / 🏆K2 / 📘K3); K2 etiketi "Ödül biraya ait; reçete yayınlanmış klon" + resmi sonuç URL\'si; K3 "ödüllü diye sunulmaz" ve YALNIZ K1/K2 olmayan stilde; dağılımı olmayan stilde de yalnız-örnek bloğu; AN5-DIL yasak kelime 0',
+    calistir: (page) => page.evaluate(() => {
+      const K = window._KAYNAKLI_ORNEK, N = window._NHC_MADALYA, M = window._TOPLULUK_MADALYA;
+      const tumK = Object.keys(K).map(k => K[k].map(o => [k, o])).reduce((a, b) => a.concat(b), []);
+      __REG.ok('K2/K3 tablosu dolu, stil başına ≤3', tumK.length > 30 && Object.values(K).every(v => v.length >= 1 && v.length <= 3), tumK.length);
+      __REG.ok('her K2: bira + bira fabrikası + resmi sonuç URL (GABF/WBC/EBS kendi sitesi) + kategori + madalya', tumK.filter(([, o]) => o.k === 'K2').every(([, o]) => o.bira && o.bf && o.od && /greatamericanbeerfestival\.com|worldbeercup\.org|european-beer-star|private-brauereien/.test(o.od.u) && o.od.kat && /^(gold|silver|bronze)$/.test(o.od.m)));
+      __REG.ok('her K2/K3: yayımcı + https tarif URL\'si (atıf)', tumK.every(([, o]) => o.kay && o.kay.pub && /^https:\/\//.test(o.kay.u)));
+      __REG.ok('K3 YALNIZ K1/K2 olmayan stilde (Kaan\'ın tanımı)', tumK.filter(([, o]) => o.k === 'K3').every(([k]) => !N[k] && !M[k] && !K[k].some(o => o.k === 'K2')));
+      __REG.ok('yasaklı kaynak yok (brewersfriend/MTF/reddit…)', tumK.every(([, o]) => !/brewersfriend|milkthefunk|reddit|brewfather|beersmith/i.test(o.kay.u)));
+      __REG.ok('gram/hacim bantları sağlam (birim yazım hatası sızmadı)', tumK.every(([, o]) => o.g.every(z => z[1] > 0 && z[1] < 20000) && (!o.L || (o.L >= 3 && o.L <= 250)) && (!o.og || (o.og > 1.004 && o.og < 1.16))));
+      // birleşik liste DOM'u — en çok örneği olan stil
+      const say = k => window._bmOrnekSayim(k).toplam;
+      const cok = Object.keys(BJCP).reduce((a, k) => say(k) > say(a) ? k : a, 'Weizen / Weissbier');
+      const box = document.createElement('div'); box.innerHTML = window._bmOrnekListeHTML(cok);
+      const satir = box.querySelectorAll('.bm-ornek-satir'), tum = box.querySelector('details.bm-ornek-tum');
+      __REG.ok('çok örnekli stil (' + cok + '): ≤50, ilk 3 açık + gerisi katlanır "Tüm örnekler (N)"', say(cok) > 3 && say(cok) <= 50 && satir.length === say(cok) && !!tum && /Tüm örnekler \(\d+\)/.test(tum.querySelector('summary').textContent) && tum.querySelectorAll('.bm-ornek-satir').length === say(cok) - 3, say(cok) + ' / ' + satir.length);
+      __REG.ok('HER satırda kademe rozeti', Array.from(satir).every(r => !!r.querySelector('.bm-kademe')));
+      const k2Stil = Object.keys(K).find(k => K[k].some(o => o.k === 'K2')), k3Stil = Object.keys(K).find(k => K[k].every(o => o.k === 'K3'));
+      const b2 = document.createElement('div'); b2.innerHTML = window._bmOrnekListeHTML(k2Stil);
+      __REG.ok('K2 satırı: 🏆 rozet + "Ödül biraya ait; reçete yayınlanmış klon" + bira fabrikası + yıl', /🏆 K2 · Ödüllü ticari biranın klonu/.test(b2.textContent) && /Ödül biraya ait; reçete yayınlanmış klon/.test(b2.textContent), k2Stil);
+      const b3 = document.createElement('div'); b3.innerHTML = window._bmOrnekListeHTML(k3Stil);
+      __REG.ok('yalnız K2/K3 listesinde "yarışma derlemesinden" havuz notu YOK (K3 yarışmadan gelmez)', !/yarışma derlemesinden/.test(b3.textContent));
+      __REG.ok('K3 satırı: 📘 rozet + "ödüllü diye sunulmaz"; madalya/ödül iddiası YOK', /📘 K3 · Otorite reçetesi/.test(b3.textContent) && /ödüllü diye sunulmaz/.test(b3.textContent) && !/🏆|madalya almış|altın almış/.test(b3.textContent), k3Stil);
+      // dağılımı olmayan + yalnız K2/K3 olan stilde Reçete Doktoru bloğu
+      const D = window._TOPLULUK_DAGILIM;
+      const yalnizK = Object.keys(K).find(k => !D[k] && !N[k] && !M[k]);
+      __REG.ok('dağılımsız stilde yalnız-örnek bloğu (istatistik YOK)', !!yalnizK && /bm-ornek-blok/.test(window._bmToplulukBolum(yalnizK, BJCP[yalnizK], {}, {}, true)) && !/📊/.test(window._bmToplulukBolum(yalnizK, BJCP[yalnizK], {}, {}, true)), yalnizK);
+      __REG.ok('izin kapısı korunur: izin=false → hiçbir şey', window._bmToplulukBolum(yalnizK, BJCP[yalnizK], {}, {}, false) === '');
+      const YASAK = ['daha iyi', 'daha kötü', 'yapmalısın', 'yapmalı', 'hatalı', 'yanlış', 'olmalı', 'gerekir', 'tavsiye', 'öneriyoruz', 'düzelt', 'kötü', 'başarılı', 'kazanmak için', 'kazandıran', 'ideal', 'doğrusu', 'eksik'];
+      const metin = (box.textContent + b2.textContent + b3.textContent).toLocaleLowerCase('tr-TR');
+      __REG.ok('AN5-DIL: yeni liste metinlerinde yasak kelime 0', YASAK.every(k => metin.indexOf(k) < 0), YASAK.filter(k => metin.indexOf(k) >= 0).join(','));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'CC3-KAY-ONIZLE', ad: 'ÖRNEKTEN YENİ REÇETE K2/K3 İÇİN DE (madde 12): önizleme modalı (BG) gramlı içerik + kademe + yayımcı/resmi sonuç bağlantısı + BH yaş satırı; oluşturma AV yolu, not kademeyi TAŞIR (K2: "Ödül biraya ait", K3: "ödüllü diye sunulmaz"), ad "… klonundan" / "… reçetesinden" — ödül iması yok; BG/AW/AX yolları bozulmadı',
+    calistir: (page) => page.evaluate(() => {
+      const K = window._KAYNAKLI_ORNEK;
+      // iskeletli stil: iskeletsiz stilde AV yolu malt/hop'u bilerek BOŞ bırakır (uydurma yok) → OG hedefi ancak iskeletle ölçülebilir
+      const k2Stil = Object.keys(K).find(k => STIL_ISKELET[k] && K[k].some(o => o.k === 'K2' && o.og && o.ib)), i2 = K[k2Stil].findIndex(o => o.k === 'K2' && o.og && o.ib);
+      const k3Stil = Object.keys(K).find(k => K[k].some(o => o.k === 'K3' && o.og)), i3 = K[k3Stil].findIndex(o => o.k === 'K3' && o.og);
+      __REG.yeniKayit('CC3', {}); S.hacim = 11; S.verim = 61; tarifeKaydet();
+      const o2 = K[k2Stil][i2];
+      _bmOrnekOnizle('kay', k2Stil, i2);
+      const m = document.getElementById('bmOrnekOnizle'), t = m ? m.textContent : '';
+      __REG.ok('K2 önizleme açıldı: bira fabrikası + bira + yarışma/yıl + gram', !!m && t.indexOf(o2.bf) >= 0 && t.indexOf(String(o2.od.y)) >= 0 && /\d+(,\d+)?\s?(kg|g)\b/.test(t), k2Stil);
+      __REG.ok('K2 önizleme: tarif ve resmi sonuç BAĞLANTISI (yeni sekmede, noopener)', !!m && Array.from(m.querySelectorAll('a')).some(a => a.href === o2.kay.u && a.target === '_blank' && /noopener/.test(a.rel)) && Array.from(m.querySelectorAll('a')).some(a => a.href === o2.od.u));
+      __REG.ok('K2 çerçevesi: klonun yarışmaya girmiş reçete olduğu iddia EDİLMEZ', /klonun yarışmaya girmiş reçete olduğu iddia edilmez/.test(t));
+      const yas2 = (m.querySelector('.bm-onizle-yas') || {}).textContent || '';
+      __REG.ok('BH veri yaşı K2’de dürüst: ödül yılı ≠ reçete yılı, yayın yılı yoksa söylenir', yas2.indexOf('Ödül ' + o2.od.y + ' yılına ait; klon reçetenin yayın yılı kaynakta yok') >= 0, yas2);
+      const n0 = KR.length;
+      bmOrnekOnizleOlustur();
+      const n = String(S.notlar || '');
+      __REG.ok('K2 oluştur: yeni reçete, not "Ödül biraya ait; reçete yayınlanmış klon" + resmi URL + yayımcı URL', KR.length === n0 + 1 && n.indexOf('🏆 KAYNAK (K2)') === 0 && n.indexOf('Ödül biraya ait; reçete yayınlanmış klon') >= 0 && n.indexOf(o2.od.u) >= 0 && n.indexOf(o2.kay.u) >= 0, n.split('\n')[0].slice(0, 90));
+      __REG.ok('K2 oluştur: GERÇEK gramajlar notta, ad "… klonundan" (ödül iması YOK)', /Grist \(orijinal miktarlar\): \d/.test(n) && S.biraAd.indexOf(k2Stil + ' — ' + o2.bira + ' klonundan') === 0 && !/ödül|madalya|şampiyon/i.test(S.biraAd), S.biraAd);
+      __REG.ok('K2 oluştur: OG hedefi örneğe ölçeklendi', Math.abs(calc().og - o2.og) <= 0.006, calc().og.toFixed(3) + ' vs ' + o2.og);
+      const o3 = K[k3Stil][i3];
+      _bmOrnekOnizle('kay', k3Stil, i3);
+      const t3 = (document.getElementById('bmOrnekOnizle') || {}).textContent || '';
+      __REG.ok('K3 önizleme: "Yayınlanmış otorite reçetesi" + ödüllü diye sunulmaz, 🏆 YOK', /Yayınlanmış otorite reçetesi/.test(t3) && /ödüllü diye sunulmaz/.test(t3) && t3.indexOf('🏆') < 0, k3Stil);
+      bmOrnekOnizleOlustur();
+      const n3 = String(S.notlar || '');
+      __REG.ok('K3 oluştur: not kademeyi taşır ("📘 KAYNAK (K3)" + ödüllü diye sunulmaz), ad "… reçetesinden"', n3.indexOf('📘 KAYNAK (K3)') === 0 && n3.indexOf('Ödüllü diye sunulmaz') >= 0 && S.biraAd.indexOf(k3Stil + ' — ' + o3.kay.pub + ' reçetesinden') === 0, S.biraAd);
+      __REG.ok('önizleme kapandı', !document.getElementById('bmOrnekOnizle'));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'CC4-ARAMA-ORNEK', ad: 'ARAMADA ÖNCE GÖSTER + MADDE 11: arama satırında "📚 N kaynaklı örnek · 🥇/🏆/📘 sayıları" + tek dokunuşla satır içinde kademeli liste (input odağı korunur); örneği olmayan stil "kaynaklı örnek yok" der; ARAMA AÇIKKEN alttaki "bu profilde" listesi GİZLİ (aramayla ilgisiz IPA\'ları gösteriyordu) + neden notu; arama temizlenince liste geri gelir',
+    calistir: (page) => page.evaluate(() => {
+      yeniTarif(); render(); _brAc();
+      const ara = document.getElementById('br-ara');
+      ara.focus(); ara.value = 'dubbel'; ara.dispatchEvent(new Event('input', { bubbles: true }));
+      const btn = document.querySelector('#br-ara-sonuc .br-ara-ornek-btn');
+      __REG.ok('arama satırında örnek özeti (📚 N kaynaklı örnek)', !!btn && /📚 \d+ kaynaklı örnek/.test(btn.textContent), btn && btn.textContent);
+      btn.click();
+      const liste = document.querySelector('#br-ara-sonuc .br-ara-ornek .bm-ornek-liste');
+      __REG.ok('tek dokunuş → kademeli liste satır içinde açıldı (rozetli)', !!liste && !!liste.querySelector('.bm-kademe'));
+      __REG.ok('açma/kapama input\'u yeniden çizmedi (odak/klavye korunur)', document.getElementById('br-ara') === ara);
+      const prof = document.getElementById('br-profil-sonuc'), not = document.getElementById('br-ara-not');
+      __REG.ok('MADDE 11: arama açıkken profil listesi GİZLİ + neden notu görünür', prof && prof.style.display === 'none' && not && not.style.display !== 'none' && /Arama açık/.test(not.textContent));
+      ara.value = 'ranch water'; ara.dispatchEvent(new Event('input', { bubbles: true }));
+      const yok = document.querySelector('#br-ara-sonuc .br-ara-satir');
+      __REG.ok('örneği olmayan stil dürüstçe "kaynaklı örnek yok"', !!yok && /kaynaklı örnek yok/.test(yok.textContent));
+      ara.value = ''; ara.dispatchEvent(new Event('input', { bubbles: true }));
+      __REG.ok('arama temizlenince profil listesi GERİ geldi, not gizlendi', prof.style.display === '' && not.style.display === 'none' && !!prof.querySelector('.br-satir'));
+      // tam yeniden çizimde (çip) de kural korunur
+      ara.value = 'weizen'; ara.dispatchEvent(new Event('input', { bubbles: true }));
+      _bmProfilSec('renk', 'acik');
+      __REG.ok('çip tıklaması sonrası da arama açık → profil listesi gizli', document.getElementById('br-profil-sonuc').style.display === 'none');
+      _bmProfilSifirla(); window.__brAra = ''; _brKapat();
       return __REG.al();
     })
   }
