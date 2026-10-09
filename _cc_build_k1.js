@@ -30,7 +30,7 @@ const cb = html.indexOf('// ═══ SPRINT CC — ÖRNEK STİL ÇÖZÜCÜ (BA�
 if (cb < 0 || ce < cb) abort('çözücü işaretçileri yok');
 vm.runInContext(html.slice(cb, ce), ctx);
 const BJCP = ctx.BJCP, S2B = ctx.SLUG_TO_BJCP, W = ctx.window;
-if (Object.keys(BJCP).length !== 241) abort('BJCP 241 değil'); // AI1: Saison table/super satırları (239 + 2)
+if (Object.keys(BJCP).length !== 240) abort('BJCP 240 değil'); // AI1: Saison table/super (+2) · AI2: Table Saison kaldırıldı (−1)
 if (typeof W._bmOrnekStilCoz !== 'function') abort('çözücü yüklenmedi');
 
 // AN'in ek eşlemesi (BİREBİR) + GENEL (alt stili söylemeyen) AHA etiketleri

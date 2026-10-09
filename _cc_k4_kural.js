@@ -95,7 +95,7 @@ const KURAL = [
   ['Juicy Bitter', { ad: [/\bjuicy bitter\b/] }],
   ['Dry-Hopped Saison', { ad: [/\bdry[- ]?hop(ped)? saison\b/] }],
   ['Grisette', { ad: [/\bgrisette\b/] }],
-  ['Table Saison', { ad: [/\btable saison\b|\bsaison de table\b/] }],
+  ['Saison (table)', { ad: [/\btable saison\b|\bsaison de table\b/] }], // AI2 4: eski 'Table Saison' satırı kaldırıldı
   ["Saison d'Hiver", { ad: [/\bsaison d'?hiver\b|\bwinter saison\b/] }],
   ['Tropical Saison', { ad: [/\btropical saison\b/] }],
   ['Provision Ale', { ad: [/\bprovision\b/], etiketHaric: /flanders|oud bru|lambic|red ale/ }],

@@ -23,7 +23,8 @@ const html = fs.readFileSync(path.join(KOK, 'Brewmaster_v2_79_10.html'), 'utf8')
 // CC4: örnek tabloları ornek_veri.js'e taşındı → HTML + veri dosyası birlikte okunur
 const _veriKaynak = html + '\n' + (fs.existsSync(path.join(__dirname, 'ornek_veri.js')) ? fs.readFileSync(path.join(__dirname, 'ornek_veri.js'), 'utf8').replace(/\r\n/g, '\n') : '');
 const ctx = vm.createContext({}); vm.runInContext(html.match(/const BJCP = \{[\s\S]*?\n\};/)[0].replace('const ', 'var '), ctx);
-const BJCP = ctx.BJCP; if (Object.keys(BJCP).length !== 241) abort('BJCP 241 değil'); // AI1: Saison table/super
+const BJCP = ctx.BJCP; if (Object.keys(BJCP).length !== 240) abort('BJCP 240 değil'); // AI1 +2 · AI2 Table Saison −1
+const STIL_ALIAS = { 'Table Saison': 'Saison (table)' }; // AI2 4: kaldırılan stil adı (BJCP/BA kaynağı yok) → yeni ad
 const K1 = new Set(JSON.parse(fs.readFileSync(K1KAP, 'utf8')));
 const K1SAY = {};
 (function(){
@@ -143,7 +144,7 @@ const KARAR = [
   ['Tropical Saison', /tropic king/i, 'red', 'tropikal bağ yalnız ad + hop; %8 imperial saison'],
   ['Kriek / Fruit Lambic', /crabapple|apple/i, 'red', 'meyve kiraz değil (elma)'],
   ['International Pale Lager', /mexican lager/i, 'red', 'sayfada «2 lbs. (907 kg)» baskı hatası'],
-  ['Table Saison', /petit saison/i, 'red', '%4,5 — table saison bandının (%2,5–3,5) üstünde'],
+  ['Saison (table)', /petit saison/i, 'red', '%4,5 — eski Table Saison bandının (%2,5–3,5) üstünde (AI2: yeni Saison (table) bandı 3,5–5,0; K1 zaten 3 örnek → kademe kuralıyla da alınmaz)'],
   ['Fresh Hop IPA', /hoptime/i, 'red', 'sayfa içi birim çelişkisi «16 oz (141.75 g)»'],
   ['Light Craft Lager', /lighter than helium/i, 'red', 'ABV %4,5 — light craft lager bandının (%2,5–3,8) üstünde'],
   ['International Pale Lager', /euro pale lager/i, 'red', 'OG 1.058 / %5,9 — International Pale Lager bandının (1.042–1.050) üstünde']
@@ -166,6 +167,7 @@ const K3_INDIR = {
 ham.forEach(x => {
   if (!x || !x.style) return;
   if (x.tier === 'none') { NONE.push(x.style + ' — ' + kisa(x.notes, 140)); return; }
+  if (STIL_ALIAS[x.style]) x = Object.assign({}, x, { style: STIL_ALIAS[x.style] }); // AI2 4
   const sd = STIL_DUZELT.find(d => d[0] === x.style && d[1].test(String(x.beer || '') + ' ' + x.recipe_url));
   if (sd) { TASINAN.push(x.style + ' | ' + x.beer + ' → ' + sd[2] + ' (elle: ' + sd[3] + ')'); x = Object.assign({}, x, { style: sd[2] }); }
   if (!BJCP[x.style]) return red(x, 'stil BJCP-239 adı değil');

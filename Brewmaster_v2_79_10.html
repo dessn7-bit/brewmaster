@@ -3918,8 +3918,9 @@ window.bmTipografiPanelRender = function(){
 })();
 </script>
 
-<script src="ornek_veri.js?v=b6e54510cc"></script>
-<script src="iskelet_veri.js?v=ae63f8f49f"></script>
+<script src="ornek_veri.js?v=51d7928d8f"></script>
+<script src="iskelet_veri.js?v=2ab21bcd71"></script>
+<script src="korpus_kullanim.js?v=a0e91aede9"></script>
 <script>
 // ═══ APP_VERSION — Tek yerden versiyon kontrolü ═══
 // Yeni sürüm çıkarırken sadece BURAYI değiştir; render'da otomatik görünür
@@ -6025,7 +6026,6 @@ const BJCP = {
   "Juicy Bitter":               {og:[1.038,1.050],fg:[1.008,1.012],ibu:[25,45],srm:[6,14],abv:[3.5,5.0]},
     "Dry-Hopped Saison":          {og:[1.048,1.072],fg:[1.004,1.016],ibu:[25,45],srm:[4,10],abv:[5.0,8.0]},
   "Grisette":                   {og:[1.032,1.044],fg:[1.002,1.008],ibu:[15,30],srm:[2,6],abv:[3.0,4.5]},
-  "Table Saison":               {og:[1.025,1.038],fg:[1.004,1.010],ibu:[10,25],srm:[3,8],abv:[2.5,3.5]},
   "Saison d'Hiver":             {og:[1.065,1.090],fg:[1.008,1.018],ibu:[20,40],srm:[8,20],abv:[6.5,9.0]},
   "Tropical Saison":            {og:[1.052,1.072],fg:[1.006,1.014],ibu:[20,40],srm:[4,8],abv:[5.5,8.0]},
   "Provision Ale":              {og:[1.070,1.090],fg:[1.010,1.020],ibu:[20,40],srm:[8,18],abv:[7.5,10.0]},
@@ -6945,7 +6945,7 @@ const STIL_SIGNATURES = {
   "Elderflower Saison": { pilsnerPct:[60,90], bonusKatki:/mürver|elderflower|elderberry/i, bonusMaya:/be134|wy3711|wy3724|wy3725|wlp565|wlp566|wlp072|la_belle|la_farmhouse|mj_m29|bb_saison/i },
   "Lavender Saison": { pilsnerPct:[60,90], bonusKatki:/lavanta|lavender/i, bonusMaya:/be134|wy3711|wy3724|wy3725|wlp565|wlp566|wlp072|la_belle|la_farmhouse|mj_m29|bb_saison/i },
   "Dry-Hopped Saison": { pilsnerPct:[60,90], bonusHop:/cascade|centennial|columbus|chinook|amarillo|citra|simcoe|mosaic|galaxy|ekuanot|azacca|el_dorado|hallertau|saaz/i, bonusMaya:/be134|wy3711|wy3724|wy3725|wlp565|wlp566|wlp072|la_belle|la_farmhouse|mj_m29|bb_saison/i },
-  "Table Saison": { pilsnerPct:[60,90], wheatPct:[0,20], bonusMaya:/be134|wy3711|wy3724|wy3725|wlp565|wlp566|wlp072|la_belle|la_farmhouse|mj_m29|bb_saison/i, abvMax:4.5 },
+  "Saison (table)": { pilsnerPct:[60,90], wheatPct:[0,20], bonusMaya:/be134|wy3711|wy3724|wy3725|wlp565|wlp566|wlp072|la_belle|la_farmhouse|mj_m29|bb_saison/i, abvMax:4.5 },
   "Saison d'Hiver": { pilsnerPct:[50,80], munichPct:[5,25], bonusMaya:/be134|wy3711|wy3724|wy3725|wlp565|wlp566|wlp072|la_belle|la_farmhouse|mj_m29|bb_saison/i, ogMin:1.062 },
   "Tropical Saison": { pilsnerPct:[60,90], bonusHop:/citra|mosaic|galaxy|nelson/i, bonusMaya:/be134|wy3711|wy3724|wy3725|wlp565|wlp566|wlp072|la_belle|la_farmhouse|mj_m29|bb_saison/i },
   "Provision Ale": { pilsnerPct:[60,90], bonusMaya:/be134|wy3711|wy3724|wy3725|wlp565|wlp566|wlp072|la_belle|la_farmhouse|mj_m29|bb_saison/i, ogMin:1.070 },
@@ -18951,9 +18951,9 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
       sp("Saison / Farmhouse Ale",-2);
     }
 
-    // Table Saison: çok düşük ABV saison
+    // Saison (table) (AI2: eski "Table Saison" satırı kaldırıldı — BJCP/BA kaynağı yok): çok düşük ABV saison
     if(_abv<=3.5&&_ibu<=25){
-      sp("Table Saison",8);
+      sp("Saison (table)",8);
       sp("Saison / Farmhouse Ale",-2);
     }
 
@@ -27240,6 +27240,10 @@ window._bmOrnekStilCoz = function(g){
   if(aile && S[aile]) return { stil:S[aile], yol:'semsiye' };
   return null;
 };
+// SPRINT AI2 4: kaldırılan stil adları → yeni ad (ALIAS). BJCP nesnesinde SAYILMAYAN (enumerable:false) özellik: Object.keys(BJCP) 240 kalır,
+// dropdown listelemez; eski adı taşıyan reçete (varsa) BJCP[ad] ile yeni satırın bantlarını görür. Reçeteye YAZILMAZ.
+window._BM_STIL_ALIAS = { 'Table Saison': 'Saison (table)' };
+try{ Object.keys(window._BM_STIL_ALIAS).forEach(function(a){ if(typeof BJCP !== 'undefined' && !Object.prototype.hasOwnProperty.call(BJCP, a)) Object.defineProperty(BJCP, a, { enumerable:false, configurable:true, get:function(){ return BJCP[window._BM_STIL_ALIAS[a]]; } }); }); }catch(_al){}
 // SPRINT AI1 1: BJCP 2021 25B Saison üç güçte (table 3,5–5,0 · standard 5,0–7,0 · super 7,0–9,5 ABV). Örnek, ABV'sine göre uygun güce düşer;
 // ABV yoksa OG ve FG'den (ABV = (OG−FG)×131,25, uygulamanın formülü) hesaplanır; ikisi de yoksa standard kalır. Sınır 7,0 ve 5,0 → standard.
 window._BM_SAISON_GUC = { table: 'Saison (table)', standard: 'Saison / Farmhouse Ale', super: 'Saison (super)' };
@@ -31604,8 +31608,13 @@ window.BM_AI = (function(){
     ikame:  { model: 'ucuz',    maxTokens: 1200, onbellek: false }, // BX: en çok 7 aday × 1-2 cümle; kesilen JSON = kaynaksız cevap
     akil:   { model: 'dengeli', maxTokens: 1500, onbellek: false },
     asistan: { model: 'dengeli', maxTokens: 1500, onbellek: false, sistem: 'asistan' }, // AI1: katmanlı iddia cevabı (×3 örnekleme)
-    denetim: { model: 'dengeli', maxTokens: 800,  onbellek: false, sistem: 'denetim' }  // AI1: "yeni reçete olarak aç" öncesi denetim
+    denetim: { model: 'dengeli', maxTokens: 800,  onbellek: false, sistem: 'denetim' }, // AI1: "yeni reçete olarak aç" öncesi denetim
+    web:     { model: 'dengeli', maxTokens: 1500, onbellek: false, sistem: 'web', web: true } // AI2: 🌐 yalnız Kaan basınca; şema YOK (atıflar metin bloklarında)
   };
+  // SPRINT AI2 2: web search server tool (platform.claude.com/docs …/web-search-tool, okundu 2026-10-09): 'web_search_20250305' (temel, doğrudan çağrı;
+  // dinamik filtreli 20260209+ sürümleri kod yürütme ister → seçilmedi). 10 $ / 1.000 arama + sonuç sayfaları GİRDİ token'ı. Atıflar her zaman açık.
+  // allowed_domains alt alan adlarını kapsar (server-tools ▸ Domain filtering). max_uses ve alan listesi KODDA SABİT.
+  var WEB = { tip: 'web_search_20250305', maxUses: 3, aramaUsd: 0.01, sonucTokTahmin: 6000, domainler: ['byo.com', 'brulosophy.com', 'homebrewersassociation.org', 'bjcp.org', 'beerandbrewing.com', 'weyermann.de', 'briess.com', 'castlemalting.com', 'simpsonsmalt.co.uk', 'crispmalt.com', 'dingemansmalt.com', 'whitelabs.com', 'wyeastlab.com', 'fermentis.com', 'lallemandbrewing.com', 'hopsteiner.com', 'yakimachief.com', 'barthhaas.com'] };
   var SISTEM = [
     'Sen Brewmaster ev biracılığı uygulamasının veri asistanısın. ZORUNLU KURALLAR:',
     '1. Yalnız sana VERİ bölümünde verilen tablolardan/veriden cevapla. Sorunun cevabı veride yoksa cevap alanına tam olarak "Bu veride yok." yaz; tahmin etme, uydurma.',
@@ -31624,7 +31633,9 @@ window.BM_AI = (function(){
     '2. Kullanıcıya hak vermek için cevap verme. Sorunun ima ettiği cevabı doğru kabul etme; risk varsa açıkça söyle. ÖNCE riskleri, SONRA faydaları yaz.',
     '3. "veri" ve "hesap" katmanlarında değer yargısı ya da emir kipi YOK ("daha iyi", "ideal", "doğrusu", "yapmalısın", "olmalı", "gerekir" vb.). Kalite iddiası yalnız "yorum" katmanında, yorum olarak.',
     '4. oneri_taslak yalnız PAKET\'te geçen katalog id\'lerini kullanır (satırlardaki [tip:id] ve kat: parçaları); id uydurma. Emin değilsen boş bırak.',
-    '5. Türkçe ve kısa yaz; en fazla 10 iddia.'
+    '5. Her iddiaya "anahtar" yaz: kısa, kanonik, ASCII küçük harf "konu:yön" biçimi (ör. renk:artar, doz:lavanta:0.5gL, risk:kavrulmusluk, bilinmiyor:ebc). Aynı anlam her zaman aynı anahtar.',
+    '6. top: parçaları topluluk istatistiğidir (kaç reçete, hangi stil, doz dağılımı): kalite ölçüsü DEĞİLDİR; "topluluk böyle yapmış" diye aktar, "doğru doz" diye sunma.',
+    '7. Türkçe ve kısa yaz; en fazla 10 iddia.'
   ].join('\n');
   var SISTEM_CIKAR = [
     'Kullanıcının reçete sorusunu yapılandırılmış bir değişikliğe çevir. Yalnız alanları doldur; yorum yapma, değerlendirme yapma.',
@@ -31634,7 +31645,35 @@ window.BM_AI = (function(){
     '- miktar ve birim: yalnız kullanıcı açıkça söylediyse; söylemediyse 0 ve "". Miktar uydurma.'
   ].join('\n');
   var SISTEM_DENETIM = 'Sen bir denetçisin. Sana bir bilgi PAKET\'i (VERİ) ve bir asistanın iddiaları verilir. Görevin iddiaları kusur açısından taramak: dayanaksız veri iddiası, kullanıcıya hak verme izi (riskleri atlayan, soruyu onaylamak için kurulmuş ifade), çelişki, yanlış sayı. Asistanı savunma; yalnız bulgu yaz. Bulgu yoksa boş liste. Türkçe ve kısa yaz.';
-  var SISTEMLER = { asistan: SISTEM_ASISTAN, cikar: SISTEM_CIKAR, denetim: SISTEM_DENETIM };
+  var SISTEM_WEB = 'Sen Brewmaster reçete asistanının web araştırma koludur. Yalnız web arama sonuçlarından, atıflı ve kısa cevap ver; her olgu cümlesi bir kaynağa dayansın. Kullanıcıya hak verme ya da değerlendirme yapma; yalnız olgu. Sayıyı kaynaktaki birimiyle yaz. Bulamazsan tam olarak "Web\'de güvenilir kaynak bulamadım." yaz. Türkçe yaz.';
+  var SISTEMLER = { asistan: SISTEM_ASISTAN, cikar: SISTEM_CIKAR, denetim: SISTEM_DENETIM, web: SISTEM_WEB };
+  // SPRINT AI2 2: model web arama destekliyor mu? Models API capabilities.server_tools.web_search.supported (gerçek doğrulama AI3). Cihaz-yerel, bm_ öneksiz.
+  var WEB_LS = 'ai_web_destek_v1';
+  function webDestekDurum(){ try { return JSON.parse(localStorage.getItem(WEB_LS) || 'null') || { durum: 'bilinmiyor', neden: 'Models API ile henüz denetlenmedi' }; } catch(e){ return { durum: 'bilinmiyor', neden: 'okunamadı' }; } }
+  function webDestekYaz(d){ d.ts = Date.now(); try { localStorage.setItem(WEB_LS, JSON.stringify(d)); } catch(e){} return d; }
+  function webDestekDenetle(){
+    var k = anahtarAl(); if (!k) return Promise.resolve({ durum: 'bilinmiyor', neden: 'anahtar yok' });
+    var id = MODEL[KULLANIM.web.model].id;
+    return fetch('https://api.anthropic.com/v1/models/' + id, { headers: { 'x-api-key': k, 'anthropic-version': SURUM, 'anthropic-dangerous-direct-browser-access': 'true' } })
+      .then(function(r){ return r.json().catch(function(){ return null; }).then(function(j){
+        if (!r.ok) return webDestekYaz({ durum: 'bilinmiyor', neden: 'Models API yanıtı ' + r.status });
+        var w = j && j.capabilities && j.capabilities.server_tools && j.capabilities.server_tools.web_search;
+        return webDestekYaz(w && w.supported === true ? { durum: 'var', neden: id + ' web aramayı destekliyor (Models API)' } : w && w.supported === false ? { durum: 'yok', neden: id + ' web aramayı desteklemiyor (Models API)' } : { durum: 'bilinmiyor', neden: 'Models API yanıtında capabilities.server_tools.web_search yok' }); }); },
+        function(){ return { durum: 'bilinmiyor', neden: 'Models API\'ye ulaşılamadı' }; });
+  }
+  // web yanıtı: atıflı metin blokları = 🌐 iddia; arama hatası kodları; arama sayısı usage.server_tool_use'dan
+  function webCoz(json){
+    var bl = (json && json.content) || [], idd = [], hatalar = [], aramalar = 0, bayrak = [];
+    bl.forEach(function(b){ if (!b) return;
+      if (b.type === 'server_tool_use' && b.name === 'web_search') aramalar++;
+      else if (b.type === 'web_search_tool_result' && b.content && !Array.isArray(b.content) && b.content.type === 'web_search_tool_result_error') hatalar.push(b.content.error_code || '?');
+      else if (b.type === 'text' && Array.isArray(b.citations) && b.citations.length) idd.push({ metin: String(b.text || ''), kaynaklar: b.citations.filter(function(c){ return c && c.type === 'web_search_result_location'; }).map(function(c){ return { url: c.url, baslik: c.title || '', alinti: c.cited_text || '' }; }) });
+    });
+    var su = json && json.usage && json.usage.server_tool_use; if (su && su.web_search_requests != null) aramalar = +su.web_search_requests || 0;
+    if (json && json.stop_reason === 'pause_turn') bayrak.push({ tip: 'yarim', mesaj: 'Arama turu yarıda kaldı (pause_turn) — kısmi sonuç; devam isteği gönderilmedi.' });
+    if (json && json.stop_reason === 'max_tokens') bayrak.push({ tip: 'kesildi', mesaj: 'Yanıt uzunluk sınırında kesildi.' });
+    return { cevap: '', kaynak: null, bayraklar: bayrak, veri: { iddialar: idd, hatalar: hatalar, aramalar: aramalar } };
+  }
   // SPRINT AI1: maliyet sayacı — yalnız GERÇEK başarılı istekler (sor() 200 yolu). Anahtar 'ai_maliyet_v1' bm_ öneksiz → yedeğe girmez (cihaz-yerel).
   var MALIYET_LS = 'ai_maliyet_v1';
   function sayacAl(){ try { var s = JSON.parse(localStorage.getItem(MALIYET_LS) || 'null'); return (s && typeof s.usd === 'number') ? s : { usd: 0, n: 0, k: {} }; } catch(e){ return { usd: 0, n: 0, k: {} }; } }
@@ -31669,8 +31708,9 @@ window.BM_AI = (function(){
   function maliyet(modelKey, u){
     var m = MODEL[modelKey]; u = u || {};
     var gir = +u.input_tokens || 0, cik = +u.output_tokens || 0, cw = +u.cache_creation_input_tokens || 0, cr = +u.cache_read_input_tokens || 0;
-    var usd = (gir * m.gir + cw * m.gir * 1.25 + cr * m.gir * 0.1 + cik * m.cik) / 1e6;
-    return { usd: usd, gir: gir, cik: cik, cw: cw, cr: cr, model: m.ad };
+    var ara = (u.server_tool_use && +u.server_tool_use.web_search_requests) || 0; // AI2: web arama ücreti (10 $ / 1.000)
+    var usd = (gir * m.gir + cw * m.gir * 1.25 + cr * m.gir * 0.1 + cik * m.cik) / 1e6 + ara * WEB.aramaUsd;
+    return { usd: usd, gir: gir, cik: cik, cw: cw, cr: cr, model: m.ad, arama: ara };
   }
   // API hata sınıflama (platform.claude.com/docs/en/api/errors, okundu 2026-09-26):
   // HESAP durumları kod hatası DEĞİL: 402 billing_error · 400 + kredi/harcama-limiti mesajı · 429 retry-after'sız (katman harcama tavanı).
@@ -31718,6 +31758,8 @@ window.BM_AI = (function(){
       if (k.onbellek) blok.cache_control = { type: 'ephemeral' }; // önek asgarinin altındaysa API sessizce önbelleklemez (ücret yok)
       sistem.push(blok);
     }
+    if (k.web) return { modelKey: k.model, web: true, govde: { model: m.id, max_tokens: k.maxTokens, system: sistem, // AI2: web — şema yok, araç sabit
+      messages: [{ role: 'user', content: String(soru || '') }], tools: [{ type: WEB.tip, name: 'web_search', max_uses: WEB.maxUses, allowed_domains: WEB.domainler.slice() }] } };
     return { modelKey: k.model, govde: { model: m.id, max_tokens: k.maxTokens, system: sistem,
       messages: [{ role: 'user', content: String(soru || '') }], output_config: { format: sema || SEMA } } };
   }
@@ -31742,11 +31784,12 @@ window.BM_AI = (function(){
             var hs = hataSinifla(r.status, j, ra); hs.durum = r.status; hs.istekId = istekId || (j && j.request_id) || '';
             if (hs.tur === 'anahtar') durumYaz({ durum: 'gecersiz', ts: Date.now(), mesaj: '401' });
             else if (hs.tur === 'hesap') durumYaz({ durum: 'hesap', ts: Date.now(), mesaj: String(r.status) });
+            if (ist.web && r.status === 400 && /web.?search|server.?tool|tool type|not (enabled|supported)/i.test(hs.api || '')) webDestekYaz({ durum: 'yok', neden: 'API web aramayı reddetti (400): ' + String(hs.api || '').slice(0, 140) }); // AI2
             hataKaydet(hs.tur, r.status + ' ' + (hs.api || ''));
             return { ok: false, hata: hs };
           }
           durumYaz({ durum: 'ok', ts: Date.now(), mesaj: 'Son istek başarılı' });
-          var c = cevapCoz(j), _ml = maliyet(ist.modelKey, j && j.usage); sayacEkle(p.kullanim, _ml); // AI1: maliyet sayacı
+          var c = ist.web ? webCoz(j) : cevapCoz(j), _ml = maliyet(ist.modelKey, j && j.usage); sayacEkle(p.kullanim, _ml); // AI1: maliyet sayacı · AI2: web ayrıştırma
           return { ok: true, cevap: c.cevap, kaynak: c.kaynak, bayraklar: c.bayraklar, veri: c.veri,
             maliyet: maliyet(ist.modelKey, j && j.usage), model: MODEL[ist.modelKey].id, istekId: istekId };
         });
@@ -31763,7 +31806,8 @@ window.BM_AI = (function(){
   return { sor: sor, hazirMi: hazirMi, anahtarKaydet: anahtarKaydet, anahtarSil: anahtarSil, anahtarAl: anahtarAl,
     bicimOk: bicimOk, sonDort: sonDort, durumAl: durumAl, maliyet: maliyet, hataSinifla: hataSinifla, cevapCoz: cevapCoz,
     yasakTara: yasakTara, istekKur: istekKur, maskele: maskele, MODEL: MODEL, KULLANIM: KULLANIM, SISTEM: SISTEM,
-    ANAHTAR_LS: ANAHTAR_LS, DURUM_LS: DURUM_LS, SISTEMLER: SISTEMLER, sayacAl: sayacAl, sayacSifirla: sayacSifirla, MALIYET_LS: MALIYET_LS };
+    ANAHTAR_LS: ANAHTAR_LS, DURUM_LS: DURUM_LS, SISTEMLER: SISTEMLER, sayacAl: sayacAl, sayacSifirla: sayacSifirla, MALIYET_LS: MALIYET_LS,
+    WEB: WEB, WEB_LS: WEB_LS, webCoz: webCoz, webDestekDurum: webDestekDurum, webDestekDenetle: webDestekDenetle };
 })();
 
 // ═══ SPRINT AI1 MODÜL BAŞ ═══
@@ -31962,6 +32006,18 @@ window.BM_AI = (function(){
       (+k.varsayDozgL > 0 ? ' · varsayılan doz ' + trS(k.varsayDozgL, 2) + ' g/L' : '') + (+k.maxDozgL > 0 ? ' · azami doz ' + trS(k.maxDozgL, 2) + ' g/L' : '') + (k.maxUyari ? ' (' + k.maxUyari + ')' : '') +
       (k.srm ? ' · renk ' + trS(k.srm, 0) + ' SRM' : '') + (k.renkTahmini ? ' · RENK TAHMİNİ (doğrulanmadı)' : '');
   }
+  // SPRINT AI2 1: topluluk kullanım tablosu (korpus_kullanim.js, build-time). Tipiklik ≠ iyilik.
+  A1.topluluk = function(tip, id){ var K = window._KORPUS_KULLANIM; return (K && K.k && K.k[tip + ':' + id]) || null; };
+  function trG(v){ return String(v).replace('.', ','); }
+  A1.toplulukMetin = function(tip, id, uyarisiz){ var K = window._KORPUS_KULLANIM; if(!K || !K.m) return null; var k = kayit(tip, id), t = A1.topluluk(tip, id), ad = k ? k.ad : id;
+    var son = uyarisiz ? '' : ' · TOPLULUK BÖYLE YAPMIŞ — kalite ölçüsü değil (kalite etiketi yalnız ' + K.m.kaliteEtiketli + ' reçetede)';
+    if(!t) return ad + ': toplulukta kayıt yok (' + K.m.asgari + ' reçeteden azında geçiyor ya da korpus adı katalog kaydına eşlenemedi)' + son;
+    var x = ad + ': ' + t.n + ' reçetede (korpus ' + K.m.gecerli + ' reçete) · en sık stiller: ' + t.st.map(function(z){ return z[0] + ' ' + z[1]; }).join(', ');
+    if(t.d) x += ' · doz g/L p10 ' + trG(t.d[0]) + ' · medyan ' + trG(t.d[1]) + ' · p90 ' + trG(t.d[2]) + ' (' + t.dn + ' reçetede miktar var)';
+    else if(tip === 'katki') x += ' · miktar: korpusta katkı miktarı birimsiz (çay kaşığı / adet / ons karışık) → g/L dağılımı yok';
+    else if(tip !== 'maya') x += ' · miktar verisi yok';
+    if(t.z) x += ' · kullanım: ' + t.z.map(function(z){ return z[0] + ' ' + z[1]; }).join(', ');
+    return x + son; };
   A1.paket = function(o){
     var T = o.T, P = [], h = +T.tarif.hacim || 11, ekle = function(id, baslik, metin, oncelik){ if(metin) P.push({ id:id, baslik:baslik, metin:String(metin), oncelik:oncelik }); };
     var sat = A1.satirlar(o.deg ? o.deg.once : T.tarif), ilgili = {};
@@ -31982,6 +32038,7 @@ window.BM_AI = (function(){
       ALANLAR.forEach(function(a){ ekle('hes:' + a.toLowerCase(), 'Uygulama hesabı', a + ' = {' + a + '} (uygulama hesaplar; sayıyı yer tutucuyla yaz)', 1); });
     }
     Object.keys(ilgili).forEach(function(k){ var p = k.split(':'); ekle('kat:' + p[1], 'Katalog', katMetin(p[0], kayit(p[0], p[1])), 2); });
+    Object.keys(ilgili).forEach(function(k){ var p = k.split(':'); ekle('top:' + p[1], 'Topluluk (korpus; kalite ölçüsü değil)', A1.toplulukMetin(p[0], p[1]), 3); }); // AI2 1
     var B = (typeof BJCP !== 'undefined' && T.stil) ? BJCP[T.stil] : null;
     if(B) ekle('bjcp:' + T.stil, 'BJCP bandı', T.stil + ': OG ' + B.og.join('–') + ' · FG ' + B.fg.join('–') + ' · IBU ' + B.ibu.join('–') + ' · SRM ' + B.srm.join('–') + ' · ABV %' + B.abv.join('–'), 2);
     try{ var stk = (typeof STOK !== 'undefined' ? STOK : []).filter(function(s){ return s && (s.g === 'Malt' || s.g === 'Hop' || s.g === 'Maya' || s.refId); }).slice(0, 40);
@@ -31990,6 +32047,7 @@ window.BM_AI = (function(){
       if(iA && iA.isk) ekle('isk:' + T.stil, 'Stil iskeleti kaynak izi', (window._bmIskeletKaynakStr ? window._bmIskeletKaynakStr(iA) : iA.tur) + ' · grist ' + (iA.isk.grist || []).map(function(g){ return (kayit('malt', g[0]) || {}).ad + ' %' + trS(g[1], 1); }).join(', ') +
         ((iA.isk.iz && iA.isk.iz.grist) ? ' · frekans ' + iA.isk.iz.grist.map(function(z){ return z.id + ' ' + trS(z.fr, 2); }).join(', ') : ''), 5); }catch(_i){}
     sat.forEach(function(x){ if(!ilgili[x.tip + ':' + x.id]) ekle('kat:' + x.id, 'Katalog', katMetin(x.tip, kayit(x.tip, x.id)), 6); });
+    sat.forEach(function(x){ if(!ilgili[x.tip + ':' + x.id] && A1.topluluk(x.tip, x.id)) ekle('top:' + x.id, 'Topluluk (korpus; kalite ölçüsü değil)', A1.toplulukMetin(x.tip, x.id), 7); }); // AI2 1
     // tavan: öncelik sırasıyla al; 1-2 asla düşmez
     var sira = P.slice().sort(function(a, b){ return a.oncelik - b.oncelik; }), al = [], dus = [], top = 0, tavan = o.tavan || A1.TAVAN_TOK, gor = {};
     sira.forEach(function(p){ if(gor[p.id]) return; gor[p.id] = 1; var tk = tokTahmin(p.id + p.metin) + 4; if(p.oncelik <= 2 || top + tk <= tavan){ al.push(p); top += tk; } else dus.push(p.id); });
@@ -31999,7 +32057,7 @@ window.BM_AI = (function(){
 
   // ── ŞEMALAR ──
   A1.sema = function(){ return { type:'json_schema', schema:{ type:'object', properties:{
-    iddialar:{ type:'array', items:{ type:'object', properties:{ metin:{ type:'string' }, katman:{ type:'string', enum:['veri', 'hesap', 'yorum', 'bilmiyorum'] }, dayanak_id:{ type:'string' } }, required:['metin', 'katman'], additionalProperties:false } },
+    iddialar:{ type:'array', items:{ type:'object', properties:{ metin:{ type:'string' }, katman:{ type:'string', enum:['veri', 'hesap', 'yorum', 'bilmiyorum'] }, dayanak_id:{ type:'string' }, anahtar:{ type:'string' } }, required:['metin', 'katman', 'anahtar'], additionalProperties:false } }, // AI2 3: anahtar = kısa kanonik konu:yön (ör. renk:artar, doz:lavanta:0.5gL, risk:kavrulmusluk)
     oneri_taslak:{ type:'array', items:{ type:'object', properties:{ tip:{ type:'string', enum:['malt', 'hop', 'maya', 'katki'] }, id:{ type:'string' }, miktar:{ type:'number' }, birim:{ type:'string', enum:['kg', 'g', 'paket', 'mL', 'adet'] }, zaman:{ type:'string' }, kullanim:{ type:'string', enum:['mash', 'kaynatma', 'whirlpool', 'fwh', 'kuru', 'fermantasyon', 'sisele'] } }, required:['tip', 'id', 'miktar', 'birim', 'zaman', 'kullanim'], additionalProperties:false } },
     ton:{ type:'string', enum:['olumlu', 'olumsuz', 'notr'] } }, required:['iddialar', 'ton'], additionalProperties:false } }; };
   A1.cikarSema = function(keys){ return { type:'json_schema', schema:{ type:'object', properties:{
@@ -32018,9 +32076,27 @@ window.BM_AI = (function(){
   function sayilar(s){ var out = []; String(s || '').replace(/(\d+(?:[.,]\d+)?)/g, function(m){ out.push(parseFloat(m.replace(',', '.'))); return m; }); return out; }
   A1.sayilar = sayilar;
   function tutar(x, y){ if(x > 0.98 && x < 1.2 && y > 0.98 && y < 1.2) return Math.abs(x - y) <= 0.0015; return Math.abs(x - y) <= Math.max(0.05, 0.025 * Math.abs(y)); }
+  // SPRINT AI2 3: sayı + (varsa) AÇIK birim. Türkçe yüzde ön eki (%7,3) da birim sayılır.
+  var HARF = '(?![a-zçğıöşü])', BIRIM = new RegExp('(%\\s*)?(\\d+(?:[.,]\\d+)?)\\s*(g\\s*\\/\\s*l' + HARF + '|gram\\/litre|kg' + HARF + '|gr' + HARF + '|gram' + HARF + '|g' + HARF + '|°\\s*l' + HARF + '|ebc' + HARF + '|srm' + HARF + '|%|puan' + HARF + '|litre' + HARF + '|l' + HARF + '|dk' + HARF + '|gün' + HARF + '|°\\s*c' + HARF + ')?', 'gi');
+  function birimliSayilar(s){ var out = []; String(s || '').replace(BIRIM, function(m, yuz, n, b){ var u = String(b || '').toLowerCase().replace(/\s+/g, ''); if(!u && yuz) u = '%'; if(u === 'gram/litre') u = 'g/l'; out.push({ v:parseFloat(n.replace(',', '.')), u:u, dec:(n.split(/[.,]/)[1] || '').length, ham:m.trim() }); return m; }); return out; }
+  A1.birimliSayilar = birimliSayilar;
   A1.sayiTutar = function(metin, parcaMetin, hacim){
-    var izin = [hacim]; /* reçete hacmi pakette (rec:ozet) — g/L ↔ batch gramı çevirisinin kendisi */ sayilar(parcaMetin).forEach(function(n){ izin.push(n, n * hacim, n / hacim, n * 1000, n / 1000, n * 1.97, n / 1.97, n * 100, n / 100); if(n > 0.98 && n < 1.2) izin.push((n - 1) * 1000); if(n >= 1 && n < 200) izin.push(1 + n / 1000); });
-    var kotu = sayilar(metin).filter(function(x){ return !izin.some(function(y){ return tutar(x, y); }); });
+    var P = sayilar(parcaMetin), kotu = [];
+    birimliSayilar(metin).forEach(function(x){ var u = x.u, ad = [];
+      P.forEach(function(n){
+        if(!u || u === 'dk' || u === 'gün' || u === '°c') ad.push([n, 1]);
+        else if(u === 'g/l') ad.push([n]);
+        else if(u === 'g' || u === 'gr' || u === 'gram') ad.push([n], [n * hacim], [n * 1000]);
+        else if(u === 'kg') ad.push([n], [n / 1000], [n * hacim / 1000]);
+        else if(u === '°l' || u === 'srm') ad.push([n], [n / 1.97]);
+        else if(u === 'ebc') ad.push([n], [n * 1.97]);
+        else if(u === '%') ad.push([n], [n * 100], [n / 100]);
+        else if(u === 'puan'){ if(n > 0.98 && n < 1.2) ad.push([(n - 1) * 1000]); }
+        else if(u === 'l' || u === 'litre') ad.push([n]);
+      });
+      if(u === 'l' || u === 'litre') ad.push([hacim]); // reçete hacmi pakette (rec:ozet)
+      var ok = ad.some(function(a){ return a[1] ? Math.abs(x.v - a[0]) <= 0.5 * Math.pow(10, -x.dec) + 1e-9 : tutar(x.v, a[0]); }); // birimsiz → yazıldığı hassasiyette birebir
+      if(!ok) kotu.push(x.v); });
     return { ok:!kotu.length, kotu:kotu };
   };
   var YT = /\{([A-Z]+)(?:_(A|B|ONCE|SONRA))?\}/g;
@@ -32043,7 +32119,7 @@ window.BM_AI = (function(){
     return out; }
   var METRIK = [['OG', /\bOG\b\s*(?:[:=≈~]\s*)?(1[.,]\d{3})/i], ['FG', /\bFG\b\s*(?:[:=≈~]\s*)?(1[.,]\d{3})/i], ['IBU', /\bIBU\b\s*(?:[:=≈~]\s*)?(\d+(?:[.,]\d+)?)/i], ['SRM', /\bSRM\b\s*(?:[:=≈~]\s*)?(\d+(?:[.,]\d+)?)/i], ['ABV', /(?:ABV\s*(?:[:=≈~]\s*)?%?\s*|%\s*)(\d+(?:[.,]\d+)?)\s*(?:ABV)?/i]];
   A1.iddiaDenetle = function(idd, o){
-    var x = { metin:String(idd.metin || ''), katman:idd.katman, dayanak:idd.dayanak_id || null, durum:'ok', uyari:[] };
+    var x = { metin:String(idd.metin || ''), katman:idd.katman, dayanak:idd.dayanak_id || null, anahtar:A1.anahtarNorm(idd.anahtar), durum:'ok', uyari:[] };
     var h = +o.T.tarif.hacim || 11;
     if(x.katman === 'hesap'){
       var g = A1.yerTutucuDoldur(x.metin, o);
@@ -32081,7 +32157,10 @@ window.BM_AI = (function(){
 
   // ── TUTARLILIK: 3 örneklemde iddiaları katman + dayanak + anahtar sözcükle eşle ──
   function sozler(s){ var o = {}; norm(String(s || '').replace(/\{[^}]*\}/g, ' ')).split(' ').forEach(function(w){ if(w.length >= 4) o[w.slice(0, 5)] = 1; }); return o; }
+  // SPRINT AI2 3: kanonik anahtar (konu:yön) — iki iddiada da varsa TEK ölçü odur; kelime benzerliği yalnız yedek
+  A1.anahtarNorm = function(s){ var t = String(s || '').toLocaleLowerCase('tr').replace(/ı/g, 'i').replace(/ş/g, 's').replace(/ç/g, 'c').replace(/ğ/g, 'g').replace(/ö/g, 'o').replace(/ü/g, 'u').replace(/,/g, '.').replace(/\s*:\s*/g, ':').replace(/\s+/g, '_').replace(/[^a-z0-9:._-]+/g, '').replace(/^:+|:+$/g, ''); return t || null; };
   function benzer(a, b){ if(a.katman !== b.katman || (a.dayanak || '') !== (b.dayanak || '')) return false;
+    if(a.anahtar && b.anahtar) return a.anahtar === b.anahtar;
     if(a.katman === 'hesap'){ var ya = (a.metin.match(/\{[A-Z_]+\}/g) || []).sort().join(), yb = (b.metin.match(/\{[A-Z_]+\}/g) || []).sort().join(); if(ya && ya === yb) return true; }
     var sa = sozler(a.metin), sb = sozler(b.metin), k = Object.keys(sa), ort = k.filter(function(w){ return sb[w]; }).length, bir = k.length + Object.keys(sb).filter(function(w){ return !sa[w]; }).length;
     return bir ? ort / bir >= 0.25 : true; }
@@ -32147,6 +32226,50 @@ window.BM_AI = (function(){
     return { kumeler:goster, gizli:gizli, dusen:dusen, n:iyi.length, ton:en, tonlar:tonD, ana:ana, celiski:celiski, taslak:taslak, hatalar:hatalar, bayraklar:bay };
   };
 
+  // ── SPRINT AI2 2: 🌐 WEB KATMANI — yalnız Kaan basınca; ayrı çağrı (kullanım 'web', Anthropic web search server tool, max_uses / allowed_domains BM_AI.WEB'de SABİT).
+  // Web soruya kullanıcının fikri girmez: yalnız ilgili kalem adları + stil (tarafsız olgu araması). Atıfsız ya da izinli alan dışı iddia ATILIR.
+  // Web 📊 Veri'yi EZMEZ: açık birimli sayı (g/L, EBC, °L, SRM, %) paketteki katalog/topluluk/BJCP verisiyle tutmazsa uyarı, veri esas.
+  A1.webTahmin = function(){ var W = window.BM_AI.WEB, d = window.BM_AI.MODEL[window.BM_AI.KULLANIM.web.model]; var arama = W.maxUses * W.aramaUsd, tok = (900 + W.maxUses * W.sonucTokTahmin) * d.gir / 1e6 + 700 * d.cik / 1e6; return { arama:arama, token:tok, toplam:arama + tok }; };
+  A1.webSoruKur = function(st){ var o = st.o, ad = [];
+    if(o.deg) [o.deg.eskiId, o.deg.yeniId].forEach(function(id){ var k = id && kayit(o.deg.tip, id); if(k && ad.indexOf(k.ad) < 0) ad.push(k.ad); });
+    else A1.satirlar(o.T.tarif).slice(0, 4).forEach(function(x){ if(ad.indexOf(x.ad) < 0) ad.push(x.ad); });
+    return 'Şu malzemeler hakkında üretici veri sayfalarından ve biracılık kaynaklarından OLGU bul: ' + ad.join('; ') + (o.T.stil ? ' (bağlam: ' + o.T.stil + ' stili)' : '') + '. Renk (EBC / °L), ekstrakt, alfa asit, önerilen kullanım oranı ya da dozu gibi değerleri kaynağıyla birlikte yaz. Bulamazsan tam olarak "Web\'de güvenilir kaynak bulamadım." yaz.'; };
+  A1.webIsle = function(v, o){ v = v || {}; var izin = window.BM_AI.WEB.domainler, h = +o.T.tarif.hacim || 11;
+    var hostOk = function(u){ try{ var hn = new URL(u).hostname.toLowerCase().replace(/^www\./, ''); return izin.some(function(d){ return hn === d || hn.slice(-(d.length + 1)) === '.' + d; }); }catch(e){ return false; } };
+    var veriP = (o.paket.parcalar || []).filter(function(p){ return /^(kat|top|bjcp):/.test(p.id); }), out = [], atilan = 0;
+    (v.iddialar || []).forEach(function(w){ var k = (w.kaynaklar || []).filter(function(c){ return c && c.url && hostOk(c.url); });
+      if(!k.length || !String(w.metin || '').trim()){ atilan++; return; }
+      var x = { metin:String(w.metin).trim(), kaynaklar:k, uyari:[] };
+      var bs = birimliSayilar(x.metin).filter(function(z){ return /^(g\/l|ebc|°l|srm|%)$/.test(z.u); });
+      // yalnız cümlenin ADINI andığı kalemin kat:/top: parçaları (ve adı geçen stilin bjcp: parçası) — paketin tüm sayılarıyla tesadüfi eşleşme olmasın
+      var nx = norm(x.metin), ilg = veriP.filter(function(p){ var id = p.id.replace(/^[a-z]+:/, ''), ad = '';
+        if(/^bjcp:/.test(p.id)) ad = id; else ['malt', 'hop', 'maya', 'katki'].some(function(tp){ var k = kayit(tp, id); if(k){ ad = k.ad; return true; } return false; });
+        var w = norm(String(ad).replace(/\([^)]*\)/g, ' ')).split(' ').filter(function(t){ return t.length >= 4; }).slice(0, 2); return w.length && w.every(function(t){ return nx.indexOf(t) >= 0; }); });
+      if(bs.length && ilg.length){ var veriP0 = veriP; veriP = ilg; var kotu = bs.filter(function(z){ return !veriP.some(function(p){ return A1.sayiTutar(z.ham, p.metin, h).ok; }); });
+        if(kotu.length) x.uyari.push('Web değeri (' + kotu.map(function(z){ return z.ham; }).join(', ') + ') paketteki ' + ilg.map(function(p){ return p.id; }).join(', ') + ' verisiyle tutmuyor — 📊 veri esas'); veriP = veriP0; }
+      out.push(x); });
+    return { durum:'tamam', iddialar:out, atilan:atilan, aramalar:+v.aramalar || 0, hatalar:v.hatalar || [] }; };
+  A1.webSor = function(key){ var st = A1.durum[key]; if(!st || st.durum !== 'tamam') return Promise.resolve(null);
+    var wd = window.BM_AI.webDestekDurum(); if(wd.durum === 'yok'){ st.web = { durum:'hata', hata:{ mesaj:'Web arama bu modelde desteklenmiyor: ' + wd.neden } }; A1.ciz(key); return Promise.resolve(st.web); }
+    st.web = { durum:'bekliyor' }; A1.ciz(key);
+    return window.BM_AI.sor({ kullanim:'web', baglam:'', soru:A1.webSoruKur(st) }).then(function(r){
+      if(!r || !r.ok){ st.web = { durum:'hata', hata:(r && r.hata) || { mesaj:'yanıt yok' } }; A1.ciz(key); return st.web; }
+      if(r.maliyet) st.maliyet += r.maliyet.usd;
+      st.web = A1.webIsle(r.veri, st.o); st.web.maliyet = r.maliyet || null; st.web.bayraklar = r.bayraklar || []; A1.ciz(key); return st.web; }); };
+  A1.webHTML = function(key){ var st = A1.durum[key], w = st.web, h = '';
+    if(!w){ var wd = window.BM_AI.webDestekDurum(); if(wd.durum === 'yok') return ''; var t = A1.webTahmin();
+      return '<button type="button" class="bm-ayar-btn bm-ai1-web-btn" style="width:100%;min-height:44px;margin-top:8px" onclick="BM_AI1.webSor(\'' + E(key) + '\')">🌐 İnternette de ara <small style="font-weight:400">(yalnız sen basınca · en çok ' + window.BM_AI.WEB.maxUses + ' arama · tahmini ek ≈ $' + trS(t.toplam, 3) + ')</small></button>'; }
+    h += '<div class="bm-ai1-web" data-durum="' + w.durum + '" style="margin-top:8px;padding:6px 8px;border-radius:8px;border:1px solid var(--cizgi-arac)"><div style="font-weight:700">🌐 Web <small style="font-weight:400;color:var(--metin-soluk)">— atıflı; 📊 veriyi ezmez, çelişirse veri esas</small></div>';
+    if(w.durum === 'bekliyor') return h + '<div style="color:var(--metin-soluk)">⏳ İnternette aranıyor (en çok ' + window.BM_AI.WEB.maxUses + ' arama)…</div></div>';
+    if(w.durum === 'hata') return h + '<div class="bm-ai1-web-hata" style="color:#8c1d18">⚠️ ' + E(w.hata && w.hata.mesaj) + '</div></div>';
+    if(!w.iddialar.length) h += '<div class="bm-ai1-web-bos">Web\'de izinli kaynaklarda atıflı bilgi bulunamadı.</div>';
+    h += w.iddialar.map(function(x){ return '<div class="bm-ai1-web-iddia" style="padding:3px 0;border-top:1px dotted var(--cizgi-arac)">🌐 ' + E(x.metin) + x.kaynaklar.map(function(c){ var hn = ''; try{ hn = new URL(c.url).hostname.replace(/^www\./, ''); }catch(e){}
+        return '<div class="bm-ai1-web-kaynak" style="font-size:10.5px;margin-top:2px"><a href="' + E(c.url) + '" target="_blank" rel="noopener noreferrer">' + E(c.baslik || hn) + '</a> <span style="color:var(--metin-soluk)">' + E(hn) + '</span>' + (c.alinti ? ' <q class="bm-ai1-web-alinti">' + E(c.alinti) + '</q>' : '') + '</div>'; }).join('') +
+        x.uyari.map(function(u){ return '<div class="bm-ai1-uyari" style="color:#8a5a00;font-size:11px">⚠️ ' + E(u) + '</div>'; }).join('') + '</div>'; }).join('');
+    if(w.atilan) h += '<div class="bm-ai1-web-atilan" style="font-size:10.5px;color:var(--metin-soluk)">🗑️ ' + w.atilan + ' web cümlesi atıfsız ya da izinli alan dışı olduğu için gösterilmedi.</div>';
+    if(w.hatalar.length) h += '<div style="font-size:10.5px;color:#8a5a00">⚠️ arama hatası: ' + E(w.hatalar.join(', ')) + '</div>';
+    (w.bayraklar || []).forEach(function(b){ h += '<div style="font-size:10.5px;color:#8a5a00">⚠️ ' + E(b.mesaj) + '</div>'; });
+    return h + '<div class="bm-ai1-web-meta" style="font-size:10.5px;color:var(--metin-soluk)">' + w.aramalar + ' arama' + (w.maliyet ? ' · ≈ $' + trS(w.maliyet.usd, 4) : '') + '</div></div>'; };
   // ── DENETİM + TASLAK ÖNİZLEME + YENİ REÇETE ──
   A1.denetle = function(st){
     var idd = (st.sonuc ? st.sonuc.kumeler : []).map(function(c, i){ return (i + 1) + '. [' + c.goster.katman + (c.goster.dayanak ? ' · ' + c.goster.dayanak : '') + '] ' + (c.goster.goster || c.goster.metin); }).join('\n');
@@ -32257,6 +32380,8 @@ window.BM_AI = (function(){
         '<table style="margin-top:4px;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:11.5px">' + ALANLAR.map(function(a){ var x = o.hk.once, y = o.hk.sonra, v = function(c){ return a === 'OG' ? c.og : a === 'FG' ? c.fg : a === 'ABV' ? c.abv : a === 'IBU' ? c.ibu : c.srm; }, b = o.hk.bant[a];
           return '<tr><td style="padding:1px 6px 1px 0;color:var(--metin-soluk);white-space:nowrap">' + a + '</td><td style="padding:1px 4px;white-space:nowrap">' + degerB(a, v(x), b && b.aralik) + '</td><td>→</td><td style="padding:1px 4px;white-space:nowrap"><b>' + degerB(a, v(y), b && b.aralik) + '</b></td><td style="padding:1px 4px;color:var(--metin-soluk)">' + (b ? 'bant ' + deger(a, b.aralik[0]) + '–' + deger(a, b.aralik[1]) + (b.sonra ? ' ✓' : ' ✗') : '') + '</td></tr>'; }).join('') + '</table></div>';
     } else h += '<div class="bm-ai1-hukum" data-seviye="yok" style="padding:6px 8px;border-radius:8px;background:var(--bg2);color:var(--metin-soluk)">⚖️ Hüküm yok: soru yapılandırılmış bir değişikliğe çevrilemedi (' + E(st.cikarim.neden || '') + '). Uygulama hesabı yalnız mevcut reçete için.</div>';
+    if(o.deg){ var tk = [o.deg.eskiId, o.deg.yeniId].filter(function(v, i, a){ return v && a.indexOf(v) === i; }), K0 = window._KORPUS_KULLANIM;
+      if(tk.length && K0) h += '<div class="bm-ai1-topluluk" style="margin-top:6px;padding:6px 8px;border-radius:8px;border:1px dashed var(--cizgi-arac);font-size:11.5px"><div style="font-weight:700">👥 Topluluk (korpus)</div><div class="bm-ai1-top-uyari" style="color:#8a5a00;font-size:10.5px">topluluk böyle yapmış — kalite ölçüsü değil (kalite etiketi yalnız ' + K0.m.kaliteEtiketli + ' reçetede)</div>' + tk.map(function(id){ return '<div class="bm-ai1-top-satir" data-id="' + E(id) + '">' + E(A1.toplulukMetin(o.deg.tip, id, true)) + '</div>'; }).join('') + '</div>'; }
     if(s.celiski) h += '<div class="bm-ai1-celiski" style="margin-top:6px;padding:6px 8px;border-radius:8px;background:#fff4e0;color:#8a5a00;font-weight:600">⚠️ AI ile hesap çelişiyor — hesap esas (AI tonu: ' + E(s.ton) + '; hüküm: ' + E(o.hk.seviye === 'risk' ? 'risk' : 'muadil ' + (o.hk.derece || '')) + ')</div>';
     if(s.ana === 'emin_degil') h += '<div class="bm-ai1-emin-degil" style="margin-top:6px;padding:6px 8px;border-radius:8px;background:#f3f0f8;color:#5a3d8a">🤔 AI bu konuda emin değil — ' + s.n + ' örneklemin ana mesajı tutarsız (' + E(s.tonlar.join(' / ')) + ').</div>';
     else if(s.ana === 'kismen') h += '<div class="bm-ai1-kismen-ana" style="margin-top:6px;color:var(--metin-soluk)">ℹ️ Ana mesaj kısmen tutarlı (' + E(s.tonlar.join(' / ')) + ').</div>';
@@ -32266,6 +32391,7 @@ window.BM_AI = (function(){
         return '<div class="bm-ai1-iddia" data-katman="' + km[0] + '" data-durum="' + x.durum + '" data-tutarlilik="' + c.tutarlilik + '" style="padding:3px 0;border-top:1px dotted var(--cizgi-arac)">' +
           (km[0] === 'yorum' ? '<span class="bm-ai1-yorum-etiket" style="color:#5a3d8a;font-weight:600">💬 Bu benim yorumum, doğrulanmadı: </span>' : '') +
           (yanlis ? '<s>' + E(x.goster || x.metin) + '</s> <span class="bm-ai1-yanlis" style="color:#b3261e;font-weight:600">AI yanlış değer söyledi</span> <small>(' + E(x.neden) + ')</small>' : E(x.goster || x.metin)) +
+          (x.dayanak && /^top:/.test(x.dayanak) ? ' <span class="bm-ai1-top-etiket" style="font-size:10px;color:#8a5a00">👥 topluluk — kalite ölçüsü değil</span>' : '') +
           (x.dayanak ? ' <span class="bm-ai1-dayanak" style="font-size:10px;color:var(--metin-soluk);border:1px solid var(--cizgi-arac);border-radius:4px;padding:0 3px">' + E(x.dayanak) + '</span>' : '') +
           (c.tutarlilik === 'kismen' ? ' <span class="bm-ai1-kismen" style="font-size:10px;color:#8a5a00">kısmen tutarlı (' + c.destek + '/' + s.n + ')</span>' : '') +
           x.uyari.map(function(u){ return '<div class="bm-ai1-uyari" style="color:#8a5a00;font-size:11px">⚠️ ' + E(u) + '</div>'; }).join('') + '</div>'; }).join('') + '</div>';
@@ -32276,6 +32402,7 @@ window.BM_AI = (function(){
     s.bayraklar.forEach(function(b){ h += '<div style="font-size:11px;color:#8a5a00">⚠️ ' + E(b.mesaj) + '</div>'; });
     h += '<div class="bm-ai1-meta" style="margin-top:6px;font-size:10.5px;color:var(--metin-soluk)">' + (o.mod === 'ab' ? '🔀 Soru tarafsızlaştırıldı: AI\'ya "Seçenek A / Seçenek B" gitti (sıra rastgele, kimin fikri olduğu yazılmadı).' : '📝 Değişiklik çıkarılamadı → soru yalakalık-karşıtı talimatla ham gönderildi.') +
       ' · Bilgi paketi ~' + o.paket.tok + ' token' + (o.paket.dusen.length ? ' · sığmayan: ' + E(o.paket.dusen.join(', ')) : '') + ' · bu soru ≈ $' + trS(st.maliyet, 4) + '</div>';
+    h += A1.webHTML(key); // AI2 2
     if(!st.taslak) h += '<button type="button" class="bm-ayar-btn bm-ai1-taslak-btn" style="width:100%;min-height:44px;margin-top:8px" onclick="BM_AI1.taslakOnizle(\'' + E(key) + '\')">📝 Yeni reçete olarak aç — önce denetle ve önizle</button>';
     if(st.taslakHata) h += '<div style="color:#8c1d18;font-size:11px">⚠️ ' + E(st.taslakHata) + '</div>';
     if(st.taslak) h += A1.taslakHTML(key);
@@ -32433,7 +32560,9 @@ window._bmAiKartHTML = function(){
       return '<div class="bm-ayar-satir bm-ai1-beta-ayar" style="gap:6px;flex-wrap:wrap"><div class="bm-ayar-satir-text" style="flex:1 1 200px">Beta: AI reçeteci <small>(tuzak testi henüz yapılmadı) · reçete ekranında ve örnek önizlemesinde soru kutusu; sayılar ve hüküm uygulamadan</small></div>'+
         '<button type="button" class="bm-ayar-btn bm-ai1-beta-btn" data-acik="'+(on ? '1' : '0')+'" style="min-height:44px" onclick="window.bmAi1BetaDegistir()">'+(on ? '✓ Açık — kapat' : 'Kapalı — aç')+'</button></div>'+
         '<div class="bm-ayar-satir bm-ai-sayac" style="gap:6px;flex-wrap:wrap"><div class="bm-ayar-satir-text" style="flex:1 1 200px">AI maliyet sayacı <small>bu cihazda uygulamanın saydığı başarılı istekler: <b>$'+sy.usd.toFixed(4)+'</b> · '+sy.n+' istek (Anthropic faturası esas)</small></div>'+
-        (sy.n ? '<button type="button" class="bm-ayar-btn" style="min-height:44px" onclick="window.BM_AI.sayacSifirla();try{render();}catch(_e){}">Sıfırla</button>' : '')+'</div>'; })()+
+        (sy.n ? '<button type="button" class="bm-ayar-btn" style="min-height:44px" onclick="window.BM_AI.sayacSifirla();try{render();}catch(_e){}">Sıfırla</button>' : '')+'</div>'+
+        (function(){ var wd = A.webDestekDurum(); return '<div class="bm-ayar-satir bm-ai-web-destek" data-durum="'+esc(wd.durum)+'" style="gap:6px;flex-wrap:wrap"><div class="bm-ayar-satir-text" style="flex:1 1 200px">🌐 Web arama (AI reçeteci) <small>'+(wd.durum === 'var' ? '✓ destekleniyor' : wd.durum === 'yok' ? '✕ desteklenmiyor — düğme gizli' : 'denetlenmedi')+' · '+esc(wd.neden || '')+' · yalnız izinli '+A.WEB.domainler.length+' alan, soru başına en çok '+A.WEB.maxUses+' arama</small></div>'+
+          (k ? '<button type="button" class="bm-ayar-btn" style="min-height:44px" onclick="window.BM_AI.webDestekDenetle().then(function(){try{render();}catch(_e){}})">Denetle</button>' : '')+'</div>'; })(); })()+
   '</div>';
 };
 window.bmAi1BetaDegistir = function(){ var B = window.BM_AI1; if(!B) return; B.betaYaz(!B.betaAcik()); if(typeof bmToast === 'function') bmToast(B.betaAcik() ? 'AI reçeteci (beta) açıldı — tuzak testi yapılmadı' : 'AI reçeteci kapatıldı', 'info'); try{ render(); }catch(_e){} };
