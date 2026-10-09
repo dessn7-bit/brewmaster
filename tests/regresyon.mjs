@@ -10169,6 +10169,41 @@ const CASELER = [
     }
   },
   {
+    kod: 'AI4C-METRIK', ad: 'UYDURMA METRİĞİ KOŞUDAN ÖNCE SABİT (Kaan 2026-10-10): cümle bazlı üç sayım — (a) düşen + değer başka kaynakta var (kaynak hatası, eşiğe girmez, a/N > %15 → kalite sorunu) · (b) düşen + değer hiçbir kaynakta yok (gerçek uydurma) · (c) gösterilende elle bulunan yanlış · eşik (b + c_est)/N ≤ %5 · tohumu yazılı rastgele 40 gösterilen cümle · (c) gözlenen + %95 üst sınır',
+    calistir: async (page) => {
+      const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'tuzak_seti.json'), 'utf8'));
+      return page.evaluate((set) => {
+        const A4 = window.BM_AI4, A1 = window.BM_AI1, T3 = window.BM_TUZAK;
+        const it = set.istemler.find(x => x.id === 'C07'), tb = set.tabanlar[it.taban], T = { stil: tb.stil, tarif: Object.assign({ hacim: 11, verim: 61, mashSc: 66 }, JSON.parse(JSON.stringify(tb.tarif))) }, co = A4.cozumle(it.istem, T);
+        const deg = A1.degisiklikKur(T, co.v), hk = A1.hukum(co.stil, deg), kal = [{ tip: deg.tip, id: deg.yeniId }, { tip: deg.tip, id: deg.eskiId }].filter(k => k.id);
+        const st = { kanit: A4.kanitKur({ stil: co.stil, kalemler: kal, hk, deg, mod: 'ikame' }), web: { bulgular: [] }, kalemler: kal, coz: co };
+        const o = A4.ozetIsle({ ok: true, bayraklar: [], veri: { cumleler: [
+          { metin: 'WY3068 Weihenstephan attenüasyonu %73–77.', kaynaklar: ['kat:wlp300'] },           // değer doğru, kaynak yanlış → (a)
+          { metin: 'WLP300 Hefeweizen attenüasyonu %91–95.', kaynaklar: ['kat:wlp300'] },              // değer hiçbir kaynakta yok → (b)
+          { metin: 'Bu değer kat:yok kaynağında.', kaynaklar: ['kat:yok'] },                             // kaynaksız, sayı/ürün yok → (a)
+          { metin: 'Thrakia-77 Saison Mayası %88 attenüasyon verir.', kaynaklar: ['kat:yok'] },          // kaynaksız + değer yok → (b)
+          { metin: 'Bu harika olur.', kaynaklar: ['kat:wlp300'] },                                         // tat → sınıf yok
+          { metin: 'WLP300 Hefeweizen attenüasyonu %72–76.', kaynaklar: ['kat:wlp300'] }                // geçer
+        ] } }, st), s = o.tum.map(x => x.sinif);
+        __REG.ok('sınıf: kaynak hatası (a), uydurma (b), kaynaksız ama değer yok (a), kaynaksız + değer yok (b), tat (yok), geçen (yok)', JSON.stringify(s) === JSON.stringify(['a', 'b', 'a', 'b', null, null]), JSON.stringify(s));
+        const cum = (d, si) => ({ durum: d, tur: d === 'ok' ? null : 'sayi', sinif: si || null, kaynaklar: ['x'], metin: 'm' });
+        const R = [{ id: 'A01a', tur: 1, model: 'ucuz', t1: { ai: true, gecerli: true, tumCumle: [cum('ok'), cum('ok'), cum('dusuruldu', 'a'), cum('dusuruldu', 'b'), { durum: 'gizli', tur: 'yorum', metin: 'y' }] } },
+          { id: 'B01', tur: 1, model: 'ucuz', t1: { ai: false, gecerli: true, tumCumle: [] } }, { id: 'C04', tur: 1, model: 'ucuz', t1: { ai: true, gecerli: false, tumCumle: [cum('dusuruldu', 'b')] } }]
+          .concat(Array.from({ length: 60 }, (_, i) => ({ id: 'T' + i, tur: 1, model: 'ucuz', t1: { ai: true, gecerli: true, tumCumle: [cum('ok')] } })));
+        const u = T3.uydurma3(R), u2 = T3.uydurma3(R);
+        __REG.ok('sayım: N 64 (gizli yorum ve geçersiz adım hariç) · G 62 · a 1 · b 1', u.N === 64 && u.G === 62 && u.a === 1 && u.b === 1, JSON.stringify({ N: u.N, G: u.G, a: u.a, b: u.b }));
+        __REG.ok('örnek: tohum 20261010, 40 gösterilen cümle, deterministik; düşenlerin hepsi listede (etiket için)', u.tohum === 20261010 && u.ornekN === 40 && JSON.stringify(u.ornek.map(x => x.id)) === JSON.stringify(u2.ornek.map(x => x.id)) && u.ornek.every(x => x.durum === 'ok') && u.dusen.length === 2 && u.c === null && /elle etiket bekliyor/.test(u.durum));
+        const n0 = T3.nihaiUydurma(u, 0, 40), n1 = T3.nihaiUydurma(u, 2, 40);
+        __REG.ok('nihai: c 0/40 → c_est 0, oran 1/64 = %1,6 geçer, c üst %95 ≈ %7,2 · c 2/40 → c_est 3,1, oran (1 + 3,1)/64 = %6,4 kalır', Math.abs(n0.oran - 1 / 64) < 1e-9 && n0.gecti && Math.abs(n0.cUst - (1 - Math.pow(0.05, 1 / 40))) < 1e-9 && Math.abs(n1.cEst - 3.1) < 1e-9 && !n1.gecti, JSON.stringify({ n0: n0.oran, n1: n1.oran }));
+        const ua = T3.uydurma3([{ id: 'X', tur: 1, model: 'ucuz', t1: { ai: true, gecerli: true, tumCumle: [cum('dusuruldu', 'a'), cum('dusuruldu', 'a'), cum('ok'), cum('ok'), cum('ok'), cum('ok'), cum('ok'), cum('ok'), cum('ok'), cum('ok')] } }]);
+        __REG.ok('(a) eşiğe girmez: a 2/10 = %20 → kalite sorunu notu, b 0', ua.kaliteSorunu && ua.b === 0 && !T3.uydurma3(R).kaliteSorunu);
+        const sk = T3.sonucKur({ istemler: [], surum: 3 }, { sonuclar: R, harcama: { usd: 0, gir: 0, cik: 0, arama: 0, cw: 0, cr: 0, n: 0 }, plan: [], i: 0, tavan: 4.56 });
+        __REG.ok('sonuç biçimi: uydurma3 {N, a, b, ornek, dusen, durum} + karar metni "NİHAİ karar elle etiketten (c) sonra"', !!sk.uydurma3 && sk.uydurma3.N === 64 && /NİHAİ karar elle etiketten \(c\) sonra/.test(sk.karar));
+        return __REG.al();
+      }, set);
+    }
+  },
+  {
     kod: 'AI4B-DONDUR', ad: 'DONDURMA (AI4B madde 4): denetleyici metninin imzası (HTML\'deki iki işaret arası) = _BM_AI4B_DONMUS · dondurma commit\'i yazılı · koşucu sonucu denetleyici {imza, donmus, commit, esit} taşır · ön kontrol imza tutmazsa KALIR',
     calistir: async (page) => {
       const html = fs.readFileSync(path.join(KOK, HTML_AD), 'utf8').replace(/\r\n/g, '\n'), B = '// ═══ AI4B DENETLEYİCİ BAŞ ═══', S = '// ═══ AI4B DENETLEYİCİ SON ═══', a = html.indexOf(B), b = html.indexOf(S);
