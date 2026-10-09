@@ -31,6 +31,19 @@ Kaan kod bilmiyor. Tüm kod okuma, yazma, düzenleme, deploy işlerini Claude ya
 ## M Backlog
 M1-M10 UX iyileştirmeleri var ama detayı şu an belirsiz, Kaan hatırladıkça eklenecek.
 
+## Sprint Kuyruğu (2026-10-09, Kaan onaylı sıra — promptları Claude sırayla verir, Kaan karıştırmasın diye)
+1. **ND5** — lezzet katkısı eşleme + K1 adsız ek kalemler + ek miktarı (gorevler/ND5.md) — CC'de çalışıyor.
+2. **Birleşik sprint** (ND5 raporu gelince yazılacak; gorevler/ISK1.md bunun yerine geçecek, ISK1 tek başına GÖNDERİLMEZ; gerekirse ikiye bölünür):
+   - Örnek verisinden türetilmiş iskelet (227 stil, kaynak izi, LOO + stil motoru hakem, kendiliğinden yeniden hesap).
+   - "📦 Stoğumla oluştur": stokta → aynen, ✅ muadil → değiştir, ⚠️ → en yakını + ne değişeceği notu, yok → "alınacak"; maya en yakın suş; OG/IBU yeniden dengeleme, renk kayması uyarısı.
+   - Satır değiştirme önizlemesi: "bunun yerine bunu koyarsan" → OG/FG/ABV/SRM/IBU önce/sonra (AI'sız, kaynaklı fark notu).
+   - AI soru kutusu + "yeni reçete olarak aç" (yapılandırılmış taslak → katalog doğrulama → uygulama hesabı → Kaan basar; asla üstüne yazmaz; stil öğrenme sinyali yazılmaz).
+   - Yalakalık/uydurma önlemleri: iddia-bazlı çıktı (veri/genel/bilmiyorum), sayısal iddia katalogla otomatik kontrol, soru tarafsızlaştırma, hesap-AI çelişki uyarısı, açmadan önce ikinci denetim çağrısı, ~30 tuzak soruluk test seti (eşik geçmeden canlı yok). Gerçek anahtarla test Kaan'ın onayına bağlı (~1 $).
+   - AI reçetelerini işaretle → tadım sonuçlarıyla AI vs diğer karşılaştırması.
+3. **EVR1** — 30 saniyelik tadım soruları (acılık/gövde/aroma az-tam-fazla + "tekrar yapar mısın") + tek değişkenli "sonraki deneme" önerisi; popülasyon önseli → Kaan verisine kayan ağırlık.
+4. **Firebase RTDB güvenliği** — kurallar + oda rotasyonu (STK2 aktarım kodunu da gerçekten güvenli yapar).
+5. **Mash asistanı AI** — mash süresince yardımcı yapay zekâ (Kaan istedi 2026-10-09, "işler bittikten sonra, unutmayalım").
+
 ## Önemli Tanımlar
 - Kaan: Bankacı, ev üreticisi (homebrewer), betta breeder, yazar
 - Bulldog Brewer, 10-12L batch boyutu
