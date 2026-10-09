@@ -4,7 +4,8 @@
 // adresini KENDİSİ günceller. Elle adım yok. CC6 testi kapı olarak kalır (özet/adres uyuşmazlığı = kırmızı).
 //   require('./_cc_veri_yaz.js').yaz(['window._KAYNAKLI_ORNEK = {...};'])   → { v, eskiV, degisen }
 //   node _cc_veri_yaz.js            → veri değişmeden yalnız özet + adresleri eşitle (elle düzenleme sonrası onarım)
-//   node _cc_veri_yaz.js --kontrol  → yalnız denetle; uyuşmazlıkta çıkış kodu 1
+//   node _cc_veri_yaz.js --kontrol  → yalnız denetle; uyuşmazlıkta çıkış kodu 1 (ISK1: iskelet_veri.js kaynak özeti de)
+// ISK1: her yazımdan sonra _isk_build.js çalışır → iskelet_veri.js örnek verisiyle aynı anda yenilenir.
 'use strict';
 const fs = require('fs'), path = require('path'), crypto = require('crypto');
 const KOK = __dirname;
@@ -12,6 +13,11 @@ const VF = path.join(KOK, 'ornek_veri.js'), HF = path.join(KOK, 'Brewmaster_v2_7
 const TAG = /<script src="ornek_veri\.js\?v=([0-9a-f]+)"><\/script>/g, SWU = /'\.\/ornek_veri\.js\?v=([0-9a-f]+)'/g;
 const ozet = icerik => crypto.createHash('sha256').update(icerik).digest('hex').slice(0, 10);
 function hata(m) { throw new Error('[_cc_veri_yaz] ' + m); }
+// SPRINT ISK1 6: örnek verisi her yazıldığında türetilmiş iskelet de yeniden üretilir (iskelet_veri.js + ?v; _isk_build.js başsız uygulamada)
+function iskeletYenile(kontrol) {
+  const r = require('child_process').spawnSync(process.execPath, [path.join(KOK, '_isk_build.js')].concat(kontrol ? ['--kontrol'] : []), { stdio: 'inherit' });
+  if (r.status !== 0) { if (kontrol) return false; hata('iskelet builder başarısız (çıkış ' + r.status + ')'); } return true;
+}
 function oku() {
   const veri = fs.readFileSync(VF, 'utf8').replace(/\r\n/g, '\n'), html = fs.readFileSync(HF, 'utf8'), sw = fs.readFileSync(SF, 'utf8');
   const t = [...html.matchAll(TAG)], s = [...sw.matchAll(SWU)];
@@ -42,17 +48,18 @@ function yaz(satirlar) {
     else { L.splice(L.length - 1, 0, sat); degisen.push(m[1] + ' (yeni)'); }
     veri = L.join('\n');
   }
-  const r = esitle(veri); r.degisen = degisen;
+  const r = esitle(veri); r.degisen = degisen; iskeletYenile(false);
   console.log('[ornek_veri.js] ' + (degisen.length ? 'güncellenen: ' + degisen.join(', ') : 'tablolar aynı') + ' · ?v ' + r.eskiV + ' → ' + r.v + (r.degisti ? ' (HTML + sw.js güncellendi)' : ' (değişmedi)'));
   return r;
 }
-module.exports = { yaz, esitle, ozet, oku };
+module.exports = { yaz, esitle, ozet, oku, iskeletYenile };
 if (require.main === module) {
   if (process.argv.includes('--kontrol')) {
     const d = oku(), v = ozet(d.veri);
     const ok = d.htmlV === v && d.swV === v;
     console.log((ok ? 'TAMAM' : 'UYUŞMAZLIK') + ' · içerik ' + v + ' · HTML ' + d.htmlV + ' · sw.js ' + d.swV);
-    process.exit(ok ? 0 : 1);
+    const isk = iskeletYenile(true);
+    process.exit(ok && isk ? 0 : 1);
   }
-  const r = esitle(); console.log('?v ' + r.eskiV + ' → ' + r.v + (r.degisti ? ' (HTML + sw.js güncellendi)' : ' (zaten eşit)'));
+  const r = esitle(); iskeletYenile(false); console.log('?v ' + r.eskiV + ' → ' + r.v + (r.degisti ? ' (HTML + sw.js güncellendi)' : ' (zaten eşit)'));
 }

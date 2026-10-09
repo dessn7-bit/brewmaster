@@ -120,6 +120,10 @@ function helperKur() {
     chk: [],
     ok(ad, kosul, detay) { this.chk.push({ ad: ad, ok: !!kosul, detay: detay === undefined ? '' : String(detay) }); },
     al() { const c = this.chk; this.chk = []; return c; },
+    // SPRINT ISK1: C katmanı (iskelet yok) sınamak için bir stilin türetilmiş + elle iskeletini GEÇİCİ gizler; dönen fonksiyon geri koyar
+    iskeletGizle(st) { const T = (window._ISKELET_TURETILMIS && window._ISKELET_TURETILMIS.stiller) || {}, y = { d: T[st], e: STIL_ISKELET[st] }; delete T[st]; delete STIL_ISKELET[st]; return () => { if (y.d) T[st] = y.d; if (y.e) STIL_ISKELET[st] = y.e; }; },
+    // SPRINT ISK1: düz stil yolunda not yalnız "🧬 İskelet nereden geldi?" bölümüdür (örnek notu / kaynak metni sızmaz)
+    yalnizIskeletNotu(n) { const s = String(n || ''); return s === '' || (/^🧬 İskelet nereden geldi\?/.test(s) && !/AHA (yarışmasında|NHC)|NHC finalinde|Grist \(orijinal|örneğin orijinal/.test(s)); },
     // SPRINT ND1: AN5-DIL taraması için metin — stok durumu öğeleri (nd-*) hariç
     dilMetni(el) { if (!el) return ''; const c = el.cloneNode(true); c.querySelectorAll('.nd-onizle-ozet,.nd-kalem,.nd-eksikler,.nd-rozet,.nd-es,.nd-stil-ozet').forEach(n => n.remove()); return c.textContent; },
     // Sentetik reçete: app akışıyla kaydeder (yeniTarif→tarifeKaydet), ekstra
@@ -1322,8 +1326,9 @@ const CASELER = [
       bmStilIskeletDoldur();
       __REG.ok('malt dolduruldu (buğday + pilsner)', S.maltlar.length >= 2 && S.maltlar.some(m => m.id === 'wheat'));
       __REG.ok('hop dolduruldu', S.hoplar.length >= 1);
-      __REG.ok('maya dolduruldu (wy3068 Weizen)', S.mayaId === 'wy3068');
-      __REG.ok('mash sıcaklığı ayarlandı', S.mashSc === 67);
+      const _wA = window._bmIskeletAl('Weizen / Weissbier'); // ISK1: tek kaynak çözücü (türetilmiş iskelet seçildi)
+      __REG.ok('maya dolduruldu (iskeletin mayası, tip wheat — Weizen mayası)', S.mayaId === _wA.isk.mayaId && (MAYALAR.find(m => m.id === S.mayaId) || {}).tip === 'wheat', S.mayaId);
+      __REG.ok('mash sıcaklığı iskeletten ayarlandı (60–74 °C)', S.mashSc === _wA.isk.mashSc && S.mashSc >= 60 && S.mashSc <= 74, S.mashSc);
       const c = calc(); const bj = BJCP['Weizen / Weissbier'];
       __REG.ok('calc() OG BJCP Weizen aralığında', c.og >= bj.og[0] && c.og <= bj.og[1], 'OG=' + c.og.toFixed(3));
       __REG.ok('calc() IBU BJCP Weizen aralığında', c.ibu >= bj.ibu[0] && c.ibu <= bj.ibu[1], 'IBU=' + Math.round(c.ibu));
@@ -1358,7 +1363,8 @@ const CASELER = [
       __REG.ok('onay reddedildi → mevcut malt KORUNDU (maris tek, ezilmedi)', S.maltlar.length === 1 && S.maltlar[0].id === 'maris');
       window.confirm = () => true; // KABUL ET
       bmStilIskeletDoldur();
-      __REG.ok('onay kabul → iskelet mevcut malzemeyi değiştirdi (pale_ale bazlı)', S.maltlar.length >= 2 && S.maltlar.some(m => m.id === 'pale_ale') && !S.maltlar.some(m => m.id === 'maris'));
+      const _baz = window._bmIskeletAl('American IPA').isk.grist[0][0]; // ISK1: çözücünün iskeleti
+      __REG.ok('onay kabul → iskelet mevcut malzemeyi değiştirdi (iskeletin baz maltı)', S.maltlar.length >= 2 && S.maltlar.some(m => m.id === _baz) && !S.maltlar.some(m => m.id === 'maris'), _baz);
       window.confirm = _oldConfirm;
       return __REG.al();
     })
@@ -1369,7 +1375,7 @@ const CASELER = [
       // Sprint AL NOTU: eskiden sabit "Munich Dunkel" kullanılıyordu; V3 çıkarımı ona
       // iskelet ürettiği için örnek DİNAMİK seçilir — test gelecekteki iskelet
       // eklemelerine dayanıklı olsun (sabit isim = her sprintte bayatlayan test).
-      const iskeletsiz = Object.keys(BJCP).filter(a => !window.STIL_ISKELET[a]);
+      const iskeletsiz = Object.keys(BJCP).filter(a => !window._bmIskeletAl(a)); // ISK1: türetilmiş + ödünç dahil hiç iskeleti olmayan
       __REG.ok('iskeleti olmayan BJCP stili hâlâ var (C katmanı canlı)', iskeletsiz.length > 0, iskeletsiz.length + ' stil');
       const hedef = iskeletsiz[0];
       const beklenenMaya = window._stilMayaOner ? window._stilMayaOner(hedef) : '';
@@ -1507,9 +1513,10 @@ const CASELER = [
       let msg = ''; const _f = window.flash; window.flash = (m) => { msg = String(m); };
       bmStilIskeletDoldur();
       window.flash = _f;
-      __REG.ok('malt dolduruldu (munich bazlı — koyu lager)', S.maltlar.length >= 2 && S.maltlar[0].id === 'munich');
-      __REG.ok('maya wy2206 (lager, veri modu)', S.mayaId === 'wy2206');
-      __REG.ok('şeffaflık: flash "(10 gerçek reçeteden türetildi, lager maya)"', msg.includes('(10 gerçek reçeteden türetildi, lager maya)'), msg);
+      const _sA = window._bmIskeletAl('Schwarzbier'); // ISK1: türetilmiş seçildi, V2 iskeleti yedekte
+      __REG.ok('malt dolduruldu (çözücünün iskeleti)', S.maltlar.length >= 2 && S.maltlar[0].id === _sA.isk.grist[0][0], S.maltlar.map(m => m.id).join(','));
+      __REG.ok('maya lager (iskeletin mayası)', S.mayaId === _sA.isk.mayaId && (MAYALAR.find(m => m.id === S.mayaId) || {}).tip === 'lager', S.mayaId);
+      __REG.ok('şeffaflık: flash iskeletin kaynağını söyler', msg.includes('(' + window._bmIskeletKaynakStr(_sA) + ')'), msg);
       const c = calc(); const bj = BJCP['Schwarzbier'];
       const srm = (c.srm != null) ? +c.srm : hSRM(S.maltlar, [], 11);
       __REG.ok('calc() OG BJCP Schwarzbier aralığında', c.og >= bj.og[0] && c.og <= bj.og[1], 'OG=' + c.og.toFixed(3));
@@ -2599,7 +2606,7 @@ const CASELER = [
       // TÜM kovalarda aranır; hiç kalmadıysa bu bir BAŞARIDIR, test onu da doğrular.
       let key = null, idx = -1;
       for (const k of Object.keys(window._PROFIL_STIL)) {
-        const i = window._PROFIL_STIL[k][1].findIndex(x => !STIL_ISKELET[x[0]]);
+        const i = window._PROFIL_STIL[k][1].findIndex(x => !window._bmIskeletAl(x[0])); // ISK1: çözücü
         if (i >= 0) { key = k; idx = i; break; }
       }
       if (idx < 0) {
@@ -4237,13 +4244,15 @@ const CASELER = [
     kod: 'AV3-ISKELETSIZ', ad: 'İSKELETSİZ STİLDE SAHTE İSKELET ÜRETİLMEZ (V1a dersi): yeni reçete oluşur, BJCP hedefi + maya önerisi gelir, malt/hop BOŞ kalır',
     calistir: (page) => page.evaluate(() => {
       __REG.yeniKayit('REGTEST AV3', {});
-      let bul = null;
+      let bul = null, geri = null;
       Object.keys(window._PROFIL_STIL).some(k => {
-        const j = window._PROFIL_STIL[k][1].findIndex(x => !STIL_ISKELET[x[0]]);
+        const j = window._PROFIL_STIL[k][1].findIndex(x => !window._bmIskeletAl(x[0]));
         if (j >= 0) { bul = { k: k, j: j, ad: window._PROFIL_STIL[k][1][j][0] }; return true; }
         return false;
       });
-      __REG.ok('kovalarda iskeletsiz öneri VAR (kapsama %100 değil)', !!bul, bul ? bul.ad : 'YOK');
+      // ISK1: türetilmiş + ödünç iskeletle kovalarda iskeletsiz öneri kalmayabilir → ilk önerinin iskeleti GEÇİCİ gizlenir (C katmanı sınanır)
+      if (!bul) { const k = Object.keys(window._PROFIL_STIL)[0]; bul = { k: k, j: 0, ad: window._PROFIL_STIL[k][1][0][0] }; geri = __REG.iskeletGizle(bul.ad); }
+      __REG.ok('iskeletsiz öneri bulundu ya da C katmanı için iskeleti gizlendi', !!bul && !window._bmIskeletAl(bul.ad), bul ? bul.ad + (geri ? ' (gizlendi)' : '') : 'YOK');
       if (!bul) return __REG.al();
       const n0 = KR.length;
       const yid = _bmProfilYeniRecete(bul.k, bul.j);
@@ -4255,6 +4264,7 @@ const CASELER = [
       const kr = KR.find(x => x && x.id === yid);
       __REG.ok('KR kaydı da boş grist ile yazıldı (uydurma kalıcılaşmadı)', !!kr && (kr.maltlar || []).length === 0 && kr.stil === bul.ad);
       __REG.ok('ad önerildi', String(S.biraAd || '').indexOf(bul.ad) === 0, S.biraAd);
+      if (geri) geri();
       return __REG.al();
     })
   },
@@ -4360,8 +4370,8 @@ const CASELER = [
       __REG.ok('(a) IBU UYDURULMADI: örnekli doluş = düz iskelet doluşu (aynı IBU)', Math.abs(ibuOrnekli - ibuDuz) <= 2, ibuOrnekli.toFixed(1) + ' vs ' + ibuDuz.toFixed(1));
       // (b) iskeletsiz madalyalı stil
       __REG.yeniKayit('REGTEST AW2b', {});
-      const st2 = 'Berliner Weisse', o2 = M[st2][1][0];
-      __REG.ok('(b) önkoşul: iskeletsiz madalyalı stil + ib boş örnek', !STIL_ISKELET[st2] && !!BJCP[st2] && !o2.ib, JSON.stringify([o2.og, o2.ib, o2.sr, o2.ab]));
+      const st2 = 'Berliner Weisse', o2 = M[st2][1][0], geri2 = __REG.iskeletGizle(st2); // ISK1: örnekten türetilmiş iskeleti var → C yolu için GEÇİCİ gizlenir
+      __REG.ok('(b) önkoşul: iskeletsiz madalyalı stil + ib boş örnek', !window._bmIskeletAl(st2) && !!BJCP[st2] && !o2.ib, JSON.stringify([o2.og, o2.ib, o2.sr, o2.ab]));
       const nb = KR.length;
       const yid2 = _bmMadalyaYeniRecete(st2, 0);
       __REG.ok('(b) reçete YİNE oluştu (iskelet yokluğu akışı durdurmaz)', KR.length === nb + 1 && !!yid2, nb + ' → ' + KR.length);
@@ -4372,6 +4382,7 @@ const CASELER = [
       __REG.ok('(b) notta IBU yok (boş alan), SRM var (dolu alan)', n2.indexOf('IBU') < 0 && n2.indexOf('SRM ' + o2.sr) >= 0);
       const kr2 = KR.find(x => x && x.id === yid2);
       __REG.ok('(b) KR kaydı boş grist + notla yazıldı (uydurma kalıcılaşmadı)', !!kr2 && (kr2.maltlar || []).length === 0 && String(kr2.notlar || '').indexOf('AHA') >= 0);
+      geri2();
       yeniTarif();
       return __REG.al();
     })
@@ -4397,7 +4408,7 @@ const CASELER = [
       // GERÇEK TIKLAMA — AW2 başlık butonu = düz AV davranışı (not YOK)
       const n0 = KR.length;
       stilBtn[0].click();
-      __REG.ok('AW2 tıklama: yeni reçete + stil kuruldu, NOT YAZILMADI (düz AV)', KR.length === n0 + 1 && S.stil === 'Weizen / Weissbier' && String(S.notlar || '') === '' && S.biraAd.indexOf('Weizen / Weissbier') === 0 && S.biraAd.indexOf('örneğinden') < 0, S.biraAd + ' | not:' + String(S.notlar || '').length);
+      __REG.ok('AW2 tıklama: yeni reçete + stil kuruldu, NOT YAZILMADI (düz AV)', KR.length === n0 + 1 && S.stil === 'Weizen / Weissbier' && __REG.yalnizIskeletNotu(S.notlar) && S.biraAd.indexOf('Weizen / Weissbier') === 0 && S.biraAd.indexOf('örneğinden') < 0, S.biraAd + ' | not:' + String(S.notlar || '').length);
       // yeni reçetenin genel sekmesi de butonları basıyor → örnek butonuna GERÇEK TIKLAMA
       const el2 = document.querySelector('.bm-topluluk');
       const ob2 = el2 ? Array.from(el2.querySelectorAll('button')).filter(b => /Bu örnekten yola çık/.test(b.textContent)) : [];
@@ -4414,7 +4425,7 @@ const CASELER = [
       const idx = window._PROFIL_STIL[key][1].findIndex(x => !!STIL_ISKELET[x[0]]);
       const avAd = window._PROFIL_STIL[key][1][idx][0];
       _bmProfilYeniRecete(key, idx);
-      __REG.ok('AV REGRESYONU: opts\'suz yolda not YAZILMAZ + ad stil adıyla', String(S.notlar || '') === '' && S.biraAd.indexOf(avAd) === 0, S.biraAd + ' | not:' + String(S.notlar || '').length);
+      __REG.ok('AV REGRESYONU: opts\'suz yolda örnek notu YAZILMAZ (yalnız iskelet kaynağı bölümü) + ad stil adıyla', __REG.yalnizIskeletNotu(S.notlar) && S.biraAd.indexOf(avAd) === 0, S.biraAd + ' | not:' + String(S.notlar || '').length);
       return __REG.al();
     })
   },
@@ -4511,7 +4522,7 @@ const CASELER = [
       const kr = KR.find(x => x && x.id === yid);
       __REG.ok('KALICI: not + mashSc KR kaydında', !!kr && String(kr.notlar || '').indexOf('NHC') >= 0 && kr.mashSc === 66);
       // ── ESKİ YOL REGRESYONU: aynı stil, eski tablo örneği ──
-      const iskSc = STIL_ISKELET[stil] ? (STIL_ISKELET[stil].mashSc || 67) : 67;
+      const _xA = window._bmIskeletAl(stil), iskSc = _xA ? (_xA.isk.mashSc || 67) : 67; // ISK1: çözücü
       _bmMadalyaYeniRecete(stil, 0);
       const n2 = String(S.notlar || '');
       __REG.ok('ESKİ YOL: "gramaj kaynakta YOK — kendi hesabını yap" AYNEN duruyor', n2.indexOf('gramaj kaynakta YOK — kendi hesabını yap') >= 0);
@@ -5518,14 +5529,15 @@ const CASELER = [
       const ac = (k, s, i) => { _bmOrnekOnizle(k, s, i); const m = document.getElementById('bmOrnekOnizle'); const t = m ? m.textContent : ''; const el = m && m.querySelector('.bm-onizle-mash-isk'); const r = { t: t, isk: el ? el.textContent : '', d: __REG.dilMetni(m) }; bmOrnekOnizleKapat(); return r; };
       const a = ac('nhc', 'Altbier / Düsseldorf Altbier', 0);
       __REG.ok('(a) mash\'siz NHC: chip "Mash kaynakta yok" AYNEN', /Mash\s*kaynakta yok/.test(a.t), a.t.slice(0, 120));
-      __REG.ok('(a) iskelet satırı: 67°C + kaynak ayrımı NET (kaynakta yok / stil iskeleti / örneğe ait ölçüm değil)', a.isk.indexOf('kaynakta yok') >= 0 && a.isk.indexOf('67°C') >= 0 && a.isk.indexOf('stil iskeleti') >= 0 && a.isk.indexOf('bu örneğe ait bir ölçüm değil') >= 0, a.isk);
-      __REG.ok('(a) iskelet kaynağı etiketli (kürator varsayılanı / topluluk çıkarımı v2)', /kürator varsayılanı|topluluk çıkarımı v2/.test(a.isk), a.isk);
+      const _aA = window._bmIskeletAl('Altbier / Düsseldorf Altbier'); // ISK1: çözücü (türetilmiş ya da elle)
+      __REG.ok('(a) iskelet satırı: iskeletin mash değeri + kaynak ayrımı NET (kaynakta yok / stil iskeleti / örneğe ait ölçüm değil)', a.isk.indexOf('kaynakta yok') >= 0 && a.isk.indexOf(_aA.isk.mashSc + '°C') >= 0 && a.isk.indexOf('stil iskeleti') >= 0 && a.isk.indexOf('bu örneğe ait bir ölçüm değil') >= 0, a.isk);
+      __REG.ok('(a) iskelet kaynağı etiketli (kürator varsayılanı / topluluk çıkarımı v2 / örnekten türetildi / ödünç / zayıf)', /kürator varsayılanı|topluluk çıkarımı v2|örnekten türetildi|stilinden ödünç|zayıf iskelet/.test(a.isk), a.isk);
       __REG.ok('(a) "AJ" / "tipik" iddiası YOK (bilgi tabanında stil-bazlı sıcaklık yok)', a.isk.indexOf('AJ') < 0 && a.isk.toLocaleLowerCase('tr-TR').indexOf('tipik') < 0);
-      __REG.ok('(a) oluşturma yolu söyleneni yapar: iskelet hesabı mashSc 67 verir', window._stilIskeletHesap && (window._stilIskeletHesap('Altbier / Düsseldorf Altbier', 11, 61) || {}).mashSc === 67);
+      __REG.ok('(a) oluşturma yolu söyleneni yapar: iskelet hesabı satırdaki mash değerini verir', window._stilIskeletHesap && (window._stilIskeletHesap('Altbier / Düsseldorf Altbier', 11, 61) || {}).mashSc === _aA.isk.mashSc);
       const b = ac('nhc', 'Altbier / Düsseldorf Altbier', 1);
       __REG.ok('(b) mash\'li NHC: gerçek 66°C chip AYNEN, iskelet satırı YOK', /Mash\s*66°C/.test(b.t) && b.isk === '' && b.t.indexOf('stil iskeletinin değeri') < 0, b.t.slice(0, 120));
-      const ahaVar = Object.keys(M).find(s => ISK[s] && ISK[s].mashSc);
-      const ahaYok = Object.keys(M).find(s => !ISK[s]);
+      const ahaVar = Object.keys(M).find(s => { const A = window._bmIskeletAl(s); return A && A.isk.mashSc; }); // ISK1: çözücü
+      const ahaYok = Object.keys(M).find(s => !window._bmIskeletAl(s));
       const c = ac('aha', ahaVar, 0);
       __REG.ok('(c) AHA + iskeletli stil: chip "kaynakta yok" + iskelet satırı', /Mash\s*kaynakta yok/.test(c.t) && c.isk.indexOf('stil iskeleti') >= 0, ahaVar);
       if(ahaYok){ const d = ac('aha', ahaYok, 0); __REG.ok('(c) AHA + iskeletsiz stil: yalnız "kaynakta yok", iskelet satırı YOK (uydurma yok)', /Mash\s*kaynakta yok/.test(d.t) && d.isk === '', ahaYok); }
@@ -8537,9 +8549,9 @@ const CASELER = [
       __REG.yeniKayit('ND2 Dugme', {});
       const H = window._bmOrnekHepsi(), mi = e => window._bmOrnekMalzemeliMi(e.kaynak, e.stil, e.idx);
       const var_ = e => { _bmOrnekOnizle(e.kaynak, e.stil, e.idx); const m = document.getElementById('bmOrnekOnizle'); const r = { mlz: !!m.querySelector('.nd-mlz-btn'), isk: !!m.querySelector('button[onclick="bmOrnekOnizleOlustur()"]') }; bmOrnekOnizleKapat(); return r; };
-      const aha = H.find(e => e.kaynak === 'aha' && window._bmOrnekKuru(e.kaynak, e.stil, e.idx).h.some(k => k.id));
+      const aha = H.find(e => e.kaynak === 'aha' && window._bmOrnekKuru(e.kaynak, e.stil, e.idx).h.some(k => k.id) && !mi(e)); // ISK1: varsayımla da kurulamayan AHA örneği
       const a = var_(aha);
-      __REG.ok('AHA örneği: malzemeleriyle düğmesi YOK, iskelet düğmesi VAR', !a.mlz && a.isk && !mi(aha));
+      __REG.ok('AHA örneği (hop gramı varsayımla da kurulamıyor): malzemeleriyle düğmesi YOK, iskelet düğmesi VAR', !a.mlz && a.isk && !mi(aha));
       const es = H.find(e => e.kaynak !== 'aha' && !mi(e) && window._bmOrnekKuru(e.kaynak, e.stil, e.idx).g.some(k => !k.id));
       const b = var_(es);
       __REG.ok('eşlenemeyen grist kalemi olan örnek: düğme YOK', !b.mlz && b.isk, es.stil + ' ' + es.kaynak);
@@ -8717,7 +8729,7 @@ const CASELER = [
     }
   },
   {
-    kod: 'ND3-MUADIL', ad: 'MUADIL DENETİMİ (veri sayfasıyla): yeni ✅ (Briess 2-Row→Thracian Pale · Belgian Pilsner→Pilsner/Viking · Munich Light→Munich · Chocolate→BEST Chocolate · Fuggle↔Willamette) stokta → 🔁 muadil; ⚠️\'e inen (mısır→yulaf, Munich Dark→Melanoidin, EKG→Fuggle, Cascade→Willamette; Mosaic→Citra KAT1 kaynağıyla ✅ oldu) stokta → "yok" + yakın alternatif, durum İYİLEŞMEZ; her ND3 satırı kaynak etiketi taşır',
+    kod: 'ND3-MUADIL', ad: 'MUADIL DENETİMİ (veri sayfasıyla): yeni ✅ (Briess 2-Row→Thracian Pale · Belgian Pilsner→Pilsner/Viking · Munich Light→Munich · Chocolate→BEST Chocolate · Fuggle↔Willamette) stokta → 🔁 muadil; ⚠️\'e inen (mısır→yulaf, Munich Dark→Melanoidin, EKG→Fuggle, Cascade→Willamette, Mosaic→Citra — KAT1 ✅, ISK1 madde 7 ile ⚠️) stokta → "yok" + yakın alternatif, durum İYİLEŞMEZ; her ND3 satırı kaynak etiketi taşır',
     calistir: (page) => page.evaluate(() => {
       __REG.yeniKayit('ND3 Muadil', {});
       const H = window._bmOrnekHepsi(), kuru = e => window._bmOrnekKuru(e.kaynak, e.stil, e.idx);
@@ -8734,9 +8746,9 @@ const CASELER = [
         const n = s0.g.concat(s0.h).filter(x => x.k.id === id).length; // hedef kalem örnekte birden çok satırda olabilir (Milkshake IPA'da Mosaic 3 satır)
         return { e: e.stil, n, d0: sat0.d, d: sat.d, mu: sat.mu && sat.mu.id, yakin: sat.yakin && sat.yakin.id, eksik0: s0.eksik, eksik1: s1.eksik, durum0: s0.durum, durum1: s1.durum };
       };
-      const tam = [['malt', 'briess_pale', 'thracian_pale'], ['malt', 'bel_pils', 'pilsner'], ['malt', 'bel_pils', 'viking_pils'], ['malt', 'munich_light', 'munich'], ['malt', 'choc', 'best_choc'], ['hop', 'fuggles', 'willamette'], ['hop', 'willamette', 'fuggles'], ['hop', 'mosaic', 'citra']]; // mosaic→citra: ND3'te ⚠️, KAT1'de Charles Faram ikame listesiyle ✅ (kaynaklı)
+      const tam = [['malt', 'briess_pale', 'thracian_pale'], ['malt', 'bel_pils', 'pilsner'], ['malt', 'bel_pils', 'viking_pils'], ['malt', 'munich_light', 'munich'], ['malt', 'choc', 'best_choc'], ['hop', 'fuggles', 'willamette'], ['hop', 'willamette', 'fuggles']]; // mosaic→citra: ND3 ⚠️ → KAT1 ✅ (Charles Faram) → ISK1 madde 7: ikinci kaynak yok → yine ⚠️
       tam.forEach(([tip, id, a]) => { const r = dene(tip, id, a); __REG.ok('✅ ' + id + ' yok + ' + a + ' stokta → 🔁 muadil (eksik sayısı hedefin satır sayısı kadar azalır)', !r.yok && r.d0 === 'yok' && r.d === 'muadil' && r.mu === a && r.n >= 1 && r.eksik1 === r.eksik0 - r.n, JSON.stringify(r)); });
-      const yari = [['malt', 'corn', 'oat'], ['malt', 'dark_munich', 'mel'], ['hop', 'ekg', 'fuggles'], ['hop', 'cascade', 'willamette']];
+      const yari = [['malt', 'corn', 'oat'], ['malt', 'dark_munich', 'mel'], ['hop', 'ekg', 'fuggles'], ['hop', 'cascade', 'willamette'], ['hop', 'mosaic', 'citra']];
       yari.forEach(([tip, id, a]) => { const r = dene(tip, id, a); __REG.ok('⚠️ ' + id + ' yok + ' + a + ' stokta → "yok" + yakın alternatif, durum/eksik AYNI', !r.yok && r.d === 'yok' && r.yakin === a && r.eksik1 === r.eksik0 && r.durum1 === r.durum0, JSON.stringify(r)); });
       const etiket = ['briess_pale', 'bel_pils', 'munich_light', 'choc', 'corn', 'dark_munich', 'mel', 'ekg', 'fuggles', 'styrian', 'willamette', 'cascade', 'mosaic'].every(k => (MUADIL[k] || []).some(m => /\[ND3/.test(m.fark)));
       __REG.ok('değişen her MUADIL anahtarında ND3 kaynak etiketi', etiket);
@@ -9574,14 +9586,187 @@ const CASELER = [
       const cift = T.filter(([k, m]) => MUADIL[k].filter(x => x.id === m.id).length !== 1).map(([k, m]) => k + '→' + m.id);
       __REG.ok('her çift MUADIL\'de TEK giriş (mevcut güncellendi, kopya yok)', !cift.length, cift.join(','));
       const E = (k, id) => (MUADIL[k] || []).find(x => x.id === id);
-      __REG.ok('✅: willamette→tettn, mosaic→citra, challenger→nbrewer, fuggles→styrian', ['willamette:tettn', 'mosaic:citra', 'challenger:nbrewer', 'fuggles:styrian'].every(p => { const [k, id] = p.split(':'); return E(k, id) && window._bmMuadilTam(E(k, id)); }));
-      __REG.ok('⚠️ (çekinceli / ters yön): cascade→centn, galaxy→citra, motueka→saaz, cascade→willamette (ND3) ✅ DEĞİL', ['cascade:centn', 'galaxy:citra', 'motueka:saaz', 'cascade:willamette'].every(p => { const [k, id] = p.split(':'); return E(k, id) && !window._bmMuadilTam(E(k, id)); }));
+      __REG.ok('✅ (ISK1 madde 7 sonrası, ikinci kaynaklı): willamette→tettn, challenger→nbrewer, fuggles→styrian', ['willamette:tettn', 'challenger:nbrewer', 'fuggles:styrian'].every(p => { const [k, id] = p.split(':'); return E(k, id) && window._bmMuadilTam(E(k, id)); }));
+      __REG.ok('⚠️ (çekinceli / ters yön / ISK1 tek tüccar): cascade→centn, galaxy→citra, motueka→saaz, cascade→willamette (ND3), mosaic→citra ✅ DEĞİL', ['cascade:centn', 'galaxy:citra', 'motueka:saaz', 'cascade:willamette', 'mosaic:citra'].every(p => { const [k, id] = p.split(':'); return E(k, id) && !window._bmMuadilTam(E(k, id)); }));
       __REG.ok('yeni girişler dizinin SONUNDA (mevcut sıra = aynı derecede öncelik korunur; Cascade varsayılanı Centennial kalır, Huell Melon değil)', MUADIL.cascade.map(m => m.id).join(',') === 'centn,amarillo,willamette,mandarina,huell_m' && MUADIL.galaxy[0].id === 'citra', MUADIL.cascade.map(m => m.id).join(','));
       STOK.length = 0; const h = HOPLAR.find(a => a.id === 'tettn'); STOK.push({ id: 'k1h' + Math.random(), ad: h.ad, refId: 'tettn', g: 'Hop', miktar: 100, birim: 'g' });
       const A = window._bmIkameAday({ tip: 'hop', id: 'willamette', gerek: 20, birim: 'g' }), a = A.find(x => x.id === 'tettn');
       __REG.ok('aday ✅ (derece 2) ve kaynak nesnesini taşır', !!a && a.derece === 2 && !!a.kaynak && a.kaynak.url === E('willamette', 'tettn').kaynak.url, A.map(x => x.derece + ':' + x.id).join(','));
       const H = window._bmKaynakHTML(a.kaynak);
       __REG.ok('önizleme HTML: link (yeni sekme) + alıntı', /<a href="https:\/\/web\.archive\.org\/[^"]+" target="_blank" rel="noopener">🔗 Charles Faram \(web arşivi\)<\/a> <q>/.test(H) && window._bmKaynakHTML(null) === '', H.slice(0, 200));
+      STOK.length = 0;
+      return __REG.al();
+    })
+  },
+  // ═════════════ SPRINT ISK1 — TÜRETİLMİŞ İSKELET · İSKELETİ STOĞUMLA · AHA VARSAYIMLI HOP · HOP ✅ EŞİĞİ ═════════════
+  {
+    kod: 'ISK1-ROL', ad: 'ROL SINIFLAMASI (UYG2 tahıl + işlem tablosu üstüne): baz · kilnli · kristal açık <40 / orta 40–80 / koyu >80 °L · kavrulmuş · debittered · buğday / yulaf / çavdar (katalogda Adjunct olan pul tahıl dahil) · adjunct · şeker · isli · asitli',
+    calistir: (page) => page.evaluate(() => {
+      const R = id => window._bmIskRol('malt', id);
+      const bek = { pilsner: 'baz', pale_ale: 'baz', munich: 'kilnli', c20: 'kristal-acik', c60: 'kristal-orta', c120: 'kristal-koyu', roast: 'kavrulmus', crf3: 'debittered', wheat: 'tahil-bugday', flaked_wheat: 'tahil-bugday', oat: 'tahil-yulaf', rye: 'tahil-cavdar', corn: 'adjunct', dex: 'seker', smoked: 'isli', acid: 'asitli' };
+      const h = Object.keys(bek).filter(id => R(id) !== bek[id]).map(id => id + '=' + R(id) + ' (beklenen ' + bek[id] + ')');
+      __REG.ok('16 temsilci malt doğru role', !h.length, h.join(' | '));
+      const c40 = MALTLAR.find(m => m.id === 'c40');
+      __REG.ok('kristal sınırı katalog °L ile: Crystal 40 (r ' + c40.r + ') → orta (40–80 dahil)', R('c40') === (c40.r < 40 ? 'kristal-acik' : 'kristal-orta'));
+      __REG.ok('şeker katkısı (KATKILAR Şeker) → seker; lezzet katkısı rol almaz', window._bmIskRol('katki', 'bal_tozu') === 'seker' && window._bmIskRol('katki', 'kahve_cekirdek') === null);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'ISK1-ESIK', ad: 'FREKANS EŞİĞİ + AĞIRLIKLI MEDYAN: K1/K2/K3 = 1, K4 = 0,3 · iskelete yalnız ağırlıklı frekansı ≥ %50 rol girer (imza / renk tamamlama istisnası etiketli) · pay = ağırlıklı medyan, IQR tutulur, paylar 100 · etkin n ≥ 3 türetilmiş / 1–2 zayıf',
+    calistir: (page) => page.evaluate(() => {
+      const q = window._bmIskWq;
+      __REG.ok('ağırlıklı medyan: eşit ağırlık [1,2,3] → 2 · ağır uç [1×0,3 ; 5×1] → 5 · [1×1 ; 5×0,3] → 1', q([[1, 1], [2, 1], [3, 1]], 0.5) === 2 && q([[1, 0.3], [5, 1]], 0.5) === 5 && q([[1, 1], [5, 0.3]], 0.5) === 1);
+      __REG.ok('ağırlıklar ve eşikler', window._BM_ISK_AGIRLIK.K4 === 0.3 && window._BM_ISK_AGIRLIK.K1 === 1 && window._BM_ISK_ESIK.rol === 0.5 && window._BM_ISK_ESIK.katki === 0.4 && window._BM_ISK_ESIK.turetilmis === 3);
+      const T = window._ISKELET_TURETILMIS.stiller, L = Object.keys(T).filter(s => T[s].grist && T[s].grist.length);
+      const esik = [], top = [], dur = [], iqr = [];
+      L.forEach(s => { const d = T[s]; d.iz.grist.forEach(g => { if (g.fr < 0.5 - 1e-9 && !g.imza && !g.renk) esik.push(s + ':' + g.rol + ' ' + g.fr); if (!g.renk && !(g.iqr && g.iqr.length === 2)) iqr.push(s + ':' + g.rol); });
+        const t = d.grist.reduce((a, g) => a + g[1], 0); if (Math.abs(t - 100) > 0.01) top.push(s + '=' + t);
+        if (d.durum !== (d.nEtkin >= 3 - 1e-9 ? 'turetilmis' : 'zayif')) dur.push(s); });
+      __REG.ok('eşik altı rol yok (istisnalar etiketli)', !esik.length, esik.slice(0, 5).join(' | '));
+      __REG.ok('her iskelette grist payları toplamı 100', !top.length, top.slice(0, 5).join(' | '));
+      __REG.ok('IQR her eşik-üstü rolde', !iqr.length, iqr.slice(0, 5).join(' | '));
+      __REG.ok('durum etiketi etkin n ile tutarlı (≥3 türetilmiş, <3 zayıf)', !dur.length, dur.slice(0, 5).join(' | '));
+      const d = window._bmIskTuret('Weizenbock'), d4 = window._bmIskTuret('Weizenbock', { kademe: ['K1', 'K2', 'K3'] });
+      __REG.ok('etkin n = Σ ağırlık (K4 0,3) · kademe süzgeci çalışır', !!d && d.nEtkin <= d.kademe.K1 + d.kademe.K2 + d.kademe.K3 + 0.3 * d.kademe.K4 + 1e-6 && d.nEtkin >= d.n * 0.3 - 1e-6 && !!d4 && d4.kademe.K4 === 0, JSON.stringify(d && d.kademe) + ' nE ' + (d && d.nEtkin));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'ISK1-HOP', ad: 'HOP ZAMAN SINIFLARI (UYG1 kuralı): acı ≥30 dk ya da FWH · lezzet 10–29 · aroma 0–9 / whirlpool · kuru hop · zamanı yazılmayan satır sınıfa GİRMEZ · AHA satırı [ad, zaman, ""] tek biçime',
+    calistir: (page) => page.evaluate(() => {
+      const c = window._bmIskHopSinif, bek = [[60, 'aci'], ['FWH', 'aci'], [30, 'aci'], [29, 'lezzet'], [10, 'lezzet'], [9, 'aroma'], [0, 'aroma'], ['wp', 'aroma'], ['kuru', 'kuru'], [null, null], ['mash', null]];
+      const h = bek.filter(([d, s]) => c(d) !== s).map(([d, s]) => d + '→' + c(d));
+      __REG.ok('11 zaman değeri doğru sınıfa', !h.length, h.join(' | '));
+      const n = window._bmOrnekHopNorm('aha', { h: [['Saaz', 60, ''], ['Saaz', null, '']] });
+      __REG.ok('AHA hop satırı normalize: zaman 3. alana, gram null', n[0][2] === 60 && n[0][1] === null && n[1][2] === null);
+      const d = window._ISKELET_TURETILMIS.stiller['Coffee Stout'];
+      __REG.ok('Coffee Stout: acı Nugget (≥30 dk), aroma g/L gramlı örneklerin medyanı', d.hop.some(x => x.rol === 'aci') && d.iz.hop.some(x => x.sinif === 'aci' && x.ibuPay > 0), JSON.stringify(d.iz.hop.map(x => [x.sinif, x.id, x.gL])));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'ISK1-IMZA', ad: 'İMZA MALZEMESİ (stil adı ↔ katalog, tek tablo): Coffee Stout iskeletinde KAHVE var · Witbier kişniş + portakal kabuğu · Gose tuz + kişniş · imzası olmayan stilde imza yok · kütlesi bilinmeyen imza "senin kararın" (uydurma yok)',
+    calistir: (page) => page.evaluate(() => {
+      const T = window._ISKELET_TURETILMIS.stiller, K = s => (T[s] && T[s].katki) || [];
+      __REG.ok('Coffee Stout iskeletinde kahve VAR (imza)', K('Coffee Stout').some(k => (k.id === 'kahve_cekirdek' || k.id === 'espresso') && k.imza === 'kahve'), JSON.stringify(K('Coffee Stout')));
+      __REG.ok('Witbier: kişniş + portakal kabuğu imza', ['kişniş', 'portakal kabuğu'].every(a => K('Witbier / Belgian White').some(k => k.imza === a)));
+      __REG.ok('Gose: tuz + kişniş imza', ['tuz', 'kişniş'].every(a => K('Gose').some(k => k.imza === a)), JSON.stringify(K('Gose')));
+      __REG.ok('imza tablosu: German Pils / American IPA eşleşmez', window._bmIskImza('German Pils').length === 0 && window._bmIskImza('American IPA').length === 0);
+      const yok = Object.keys(T).map(s => K(s).filter(k => k.imza && k.gL == null)).reduce((a, b) => a.concat(b), []);
+      const not = window._bmIskeletIzNot('Witbier / Belgian White', { isk: T['Witbier / Belgian White'], tur: 'turetilmis' });
+      __REG.ok('kütlesi kaynakta olmayan imza miktarsız + notta "miktar kaynakta yok, senin kararın"', yok.length > 0 && yok.every(k => k.gL === null) && (K('Witbier / Belgian White').some(k => k.gL == null) ? /senin kararın/.test(not) : true), yok.length + ' kalem');
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'ISK1-ETIKET', ad: 'ÇÖZÜCÜ + ETİKETLER: türetilmiş "N ödüllü/kaynaklı örnekten türetildi" · "zayıf iskelet (n=2)" · "X stilinden ödünç" · iskelet yoksa C katmanı + düğme "Boş reçete (yalnız stil hedefleri)" · bildirim + reçete notu "İskelet nereden geldi?" (satır başına n ve frekans) · stil öğrenme sinyali yazılmaz',
+    calistir: (page) => page.evaluate(() => {
+      const T = window._ISKELET_TURETILMIS.stiller, A = window._bmIskeletAl, K = window._bmIskeletKaynakStr;
+      const zs = Object.keys(T).find(s => T[s].durum === 'zayif' && !STIL_ISKELET[s]), os = Object.keys(T).find(s => T[s].durum === 'odunc'), cs = Object.keys(BJCP).find(s => !A(s));
+      __REG.ok('zayıf: "zayıf iskelet (n=…)"', !!zs && A(zs).tur === 'zayif' && /^zayıf iskelet \(n=\d\)$/.test(K(A(zs))), zs + ' → ' + (zs && K(A(zs))));
+      __REG.ok('ödünç: "X stilinden ödünç" + hedef BJCP (ödünç verenin hedefi taşınmaz)', !!os && A(os).tur === 'odunc' && K(A(os)) === T[os].kaynakStil + ' stilinden ödünç' && A(os).isk.hedef === null, os + ' ← ' + (os && T[os].kaynakStil));
+      __REG.ok('C katmanı stili var + düğme dürüst adıyla', !!cs && /Boş reçete \(yalnız stil hedefleri\)/.test(window._bmIskeletDugmeHTML(cs)) && !/stoğumla/.test(window._bmIskeletDugmeHTML(cs)), cs);
+      __REG.ok('iskeletli stilde iki düğme (yeni reçete + 📦 İskeleti stoğumla oluştur), düğmede kalite iması yok', /✨ Stil iskeletinden yeni reçete/.test(window._bmIskeletDugmeHTML('Coffee Stout')) && /📦 İskeleti stoğumla oluştur/.test(window._bmIskeletDugmeHTML('Coffee Stout')) && !/ödül/.test(window._bmIskeletDugmeHTML('Coffee Stout')));
+      __REG.yeniKayit('ISK1 Etiket', {}); S.hacim = 11; S.verim = 61; S.stil = 'Coffee Stout';
+      let msg = ''; const _f = window.flash; window.flash = m => { msg = String(m); }; window.__stilSecKaynak = null; bmStilIskeletDoldur(); window.flash = _f;
+      const d = T['Coffee Stout'];
+      __REG.ok('bildirim: "N ödüllü/kaynaklı örnekten türetildi"', A('Coffee Stout').tur === 'turetilmis' && msg.indexOf(d.n + ' ödüllü/kaynaklı örnekten türetildi') >= 0, msg);
+      __REG.ok('reçete notu "🧬 İskelet nereden geldi?" + satır başına "n/N örnekte" + örnek referansları', /🧬 İskelet nereden geldi\?/.test(S.notlar) && /\d+\/\d+ örnekte/.test(S.notlar) && /Örnekler: /.test(S.notlar), String(S.notlar).slice(0, 160));
+      __REG.ok('imza katkısı reçeteye g/L × hacimle (kahve)', (S.katkilar || []).some(k => k.id === 'kahve_cekirdek' || k.id === 'espresso'), JSON.stringify(S.katkilar));
+      __REG.ok('Sprint Z: iskelet = NİYET (__stilSecKaynak "iskelet")', window.__stilSecKaynak === 'iskelet');
+      bmStilIskeletDoldur(); const say = (String(S.notlar).match(/🧬 İskelet nereden geldi\?/g) || []).length;
+      __REG.ok('ikinci doldurmada not bölümü yenilenir (çoğalmaz)', say === 1, say);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'ISK1-SECIM', ad: 'ELLE ↔ TÜRETİLMİŞ SEÇİMİ (madde 2): elle iskeleti olan her stilde birini-dışarıda-bırak kıyası kayıtlı (n, SRM hatası, rol Jaccard, neden) · türetilmiş yalnız ölçüde ≥ ve tutarlılık kapısından geçtiyse seçilir · elle tablo SİLİNMEDİ (63)',
+    calistir: (page) => page.evaluate(() => {
+      const T = window._ISKELET_TURETILMIS.stiller, E = Object.keys(STIL_ISKELET);
+      __REG.ok('elle tablo yedekte: 63 stil', E.length === 63);
+      const kiy = E.filter(s => T[s] && T[s].grist && T[s].grist.length), eks = kiy.filter(s => !T[s].kiyas || !T[s].kiyas.neden || !(T[s].kiyas.n >= 0));
+      __REG.ok('türetilmişi olan her elle stilde kıyas kaydı', kiy.length > 0 && !eks.length, kiy.length + ' stil · eksik ' + eks.join(','));
+      const kotu = kiy.filter(s => T[s].secim === 'turetilmis' && (T[s].kapi.length || T[s].kiyas.n < 3));
+      __REG.ok('seçilen türetilmişlerin hepsi kapıdan geçti ve n ≥ 3', !kotu.length, kotu.join(','));
+      const uyum = kiy.filter(s => (window._bmIskeletAl(s).tur === 'elle') !== (T[s].secim !== 'turetilmis'));
+      __REG.ok('çözücü seçimi uygular', !uyum.length, uyum.join(','));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'ISK1-HASH', ad: 'KENDİLİĞİNDEN GÜNCELLENME (madde 6): iskelet_veri.js içindeki örnek verisi özeti = ornek_veri.js sha256-10 (bayat iskelet KIRMIZI) · HTML <script src> ve sw.js listesinde içerik özetli aynı URL · canlı türetme saklananla BİREBİR (kod / katalog kayması KIRMIZI) · tarif metni yok (public repo)',
+    calistir: async (page) => {
+      const out = []; const ok = (ad, k, d) => out.push({ ad, ok: !!k, detay: d === undefined ? '' : String(d) });
+      const html = fs.readFileSync(path.join(KOK, HTML_AD), 'utf8'), sw = fs.readFileSync(path.join(KOK, 'sw.js'), 'utf8'), iv = fs.readFileSync(path.join(KOK, 'iskelet_veri.js'), 'utf8');
+      const ov = crypto.createHash('sha256').update(fs.readFileSync(path.join(KOK, 'ornek_veri.js'), 'utf8').replace(/\r\n/g, '\n')).digest('hex').slice(0, 10), q = crypto.createHash('sha256').update(iv).digest('hex').slice(0, 10);
+      const m = /"ornekV":"([0-9a-f]+)"/.exec(iv);
+      ok('iskelet_veri.js örnek özeti = ornek_veri.js özeti', !!m && m[1] === ov, (m && m[1]) + ' vs ' + ov);
+      ok('HTML\'de tek <script src="iskelet_veri.js?v=içerik özeti">, ornek_veri\'den sonra, kodu okuyan scriptten önce', (html.match(/<script src="iskelet_veri\.js\?v=/g) || []).length === 1 && html.indexOf('iskelet_veri.js?v=' + q + '"') > html.indexOf('ornek_veri.js?v=') && html.indexOf('iskelet_veri.js?v=') < html.indexOf('window._bmIskTuret = '), q);
+      ok('sw.js kurulum listesinde aynı URL', sw.indexOf("'./iskelet_veri.js?v=" + q + "'") >= 0);
+      ok('tarif metni gömülmedi (yalnız sayı + id + kaynak:idx)', !/"ham"|"bira"|"g":\[\["/.test(iv) && iv.length < 1500000, iv.length + ' bayt');
+      const r = await page.evaluate(() => { const T = window._ISKELET_TURETILMIS.stiller, f = []; let n = 0;
+        Object.keys(T).forEach(s => { const d = T[s]; if (d.durum !== 'turetilmis' && d.durum !== 'zayif') return; n++; const c = window._bmIskTuret(s);
+          const A = x => JSON.stringify([x.grist, x.hop, x.mayaId, x.katki, x.hedef, x.mashSc, x.durum, x.ref]); if (!c || A(c) !== A(d)) f.push(s); });
+        return { n, f }; });
+      ok('canlı türetme saklanan iskeletle birebir (' + r.n + ' stil)', r.n > 150 && !r.f.length, r.f.slice(0, 5).join(' | '));
+      return out;
+    }
+  },
+  {
+    kod: 'ISK1-STOK', ad: '📦 İSKELETİ STOĞUMLA OLUŞTUR = örnek önizlemesindeki "Stoğumla oluştur" ile AYNI kod yolu (_bmStokUyarla / _bmStokumlaOlustur, kaynak "isk" sanal örnek): ikame dereceleri, hop aroma satırında özellik benzeri varsayılan değil, dengeleme, Uyarlamalar + İskelet nereden geldi notu · stil sinyali yazılmaz',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('ISK1 Stok', {}); S.hacim = 11; S.verim = 61;
+      const giris = (L, g, id, mik, birim) => { const x = L.find(a => a.id === id); return { id: 'i1' + id, ad: x.ad, refId: id, g: g, miktar: mik, birim: birim }; };
+      const y0 = STOK.slice(); STOK.length = 0;
+      STOK.push(giris(MALTLAR, 'Malt', 'maris', 10, 'kg')); STOK.push(giris(MALTLAR, 'Malt', 'oat', 2, 'kg')); STOK.push(giris(MALTLAR, 'Malt', 'best_choc', 1, 'kg')); STOK.push(giris(MALTLAR, 'Malt', 'crf3', 1, 'kg'));
+      STOK.push(giris(HOPLAR, 'Hop', 'magnum', 100, 'g')); STOK.push(giris(HOPLAR, 'Hop', 'simcoe', 100, 'g'));
+      const o = window._bmOrnekNesne('isk', 'Coffee Stout', 0), p = window._bmStokUyarla('isk', 'Coffee Stout', 0);
+      __REG.ok('sanal örnek: iskeletin kalemleri katalog id\'siyle, hacim = S.hacim', !!o && o.L === 11 && o._id.g.length === o.g.length && o._isk.tur === 'turetilmis');
+      __REG.ok('uyarlama planı aynı motordan (satırlar + dereceler)', !!p && p.satirlar.length >= o.g.length + o.h.length && p.satirlar.some(z => z.secilen && z.secilen.derece === 1), p && p.satirlar.map(z => z.orijAd + ':' + (z.secilen ? z.secilen.derece : '-')).join(' | '));
+      const ar = p.satirlar.find(z => z.grup === 'h' && z.rol === 'aroma');
+      __REG.ok('KAT1 kuralı aynen: aroma satırında özellik benzeri varsayılan değil', !ar || !ar.secilen || ar.secilen.derece <= 3, ar ? ar.orijAd + '→' + (ar.secilen ? ar.secilen.ad + ':' + ar.secilen.derece : 'alınacak') : 'aroma yok');
+      __REG.ok('OG iskelet hedefine dengelendi', Math.abs(p.sonuc.og - p.hedef.og) <= 0.002 && p.hedef.ogK === 'iskelet', p.sonuc.og + ' / ' + p.hedef.og);
+      const n0 = KR.length; window.__stilSecKaynak = null; const id = window._bmIskeletStokumla('Coffee Stout');
+      __REG.ok('yeni reçete (açık reçeteye yazmaz) + not: STOĞUMA UYARLANDI (İSKELET) + Uyarlamalar + İskelet nereden geldi', KR.length === n0 + 1 && !!id && /STOĞUMA UYARLANDI \(İSKELET\)/.test(S.notlar) && /Uyarlamalar:/.test(S.notlar) && /🧬 İskelet nereden geldi\?/.test(S.notlar), S.biraAd);
+      __REG.ok('Sprint Z: stil öğrenme sinyali yazılmaz', window.__stilSecKaynak === 'iskelet');
+      STOK.length = 0; y0.forEach(x => STOK.push(x));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'ISK1-AHA', ad: 'AHA VARSAYIMLI HOP GRAMI (madde 5): acı eklemeler örneğin IBU\'sunu tutar (diğer satırların IBU\'su düşülür, eşit bölünür) · lezzet / aroma / kuru = iskeletin sınıf g/L medyanı · her satır "varsayım" etiketli (önizleme + not) · stok analizinde ≈ kalır (durum değişmez)',
+    calistir: (page) => page.evaluate(() => {
+      const H = window._bmOrnekHepsi(), e = H.find(x => x.kaynak === 'aha' && window._bmOrnekMalzemeliMi(x.kaynak, x.stil, x.idx) && window._bmOrnekKuru(x.kaynak, x.stil, x.idx).h.length >= 2);
+      __REG.ok('varsayımla kurulabilen AHA örneği var', !!e, e ? e.stil + ' #' + e.idx : 'yok');
+      if (!e) return __REG.al();
+      const r = window._bmOrnekKuru(e.kaynak, e.stil, e.idx), o = window._bmOrnekNesne(e.kaynak, e.stil, e.idx);
+      __REG.ok('her hop satırında gram + varsayım etiketi', r.h.every(k => k.mik > 0 && /IBU|sınıfı iskelet medyanı/.test(k.varsayim || '')), r.h.map(k => k.ad + ' ' + k.mik + ' ' + k.varsayim).join(' | '));
+      const p = window._bmStokUyarla(e.kaynak, e.stil, e.idx, { birebir: true });
+      __REG.ok('IBU tutması: örneğin kendi malzemeleriyle IBU = örnek IBU ± 2', Math.abs(p.sonuc.ibu - o.ib) <= 2, p.sonuc.ibu.toFixed(1) + ' vs ' + o.ib);
+      _bmOrnekOnizle(e.kaynak, e.stil, e.idx); const m = document.getElementById('bmOrnekOnizle'), t = m ? m.textContent : ''; bmOrnekOnizleKapat();
+      __REG.ok('önizlemede "varsayım — kaynakta gramaj yok"', /varsayım — kaynakta gramaj yok/.test(t));
+      const st = window._bmOrnekStok(e.kaynak, e.stil, e.idx);
+      __REG.ok('stok analizinde varsayımlı hop "biliniyor" sayılmaz (≈ / yok)', st.h.every(x => x.d !== 'stokta' && x.d !== 'yetersiz'), st.h.map(x => x.d).join(','));
+      __REG.yeniKayit('ISK1 AHA', {}); const n0 = KR.length; window._bmStokumlaOlustur(e.kaynak, e.stil, e.idx);
+      __REG.ok('reçete notunda "Varsayımlı hop gramı — kaynakta gramaj yok"', KR.length === n0 + 1 && /Varsayımlı hop gramı — kaynakta gramaj yok/.test(S.notlar));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'ISK1-HOPESIK', ad: 'HOP ✅ EŞİĞİ (madde 7): ✅ için yetiştirici veri sayfası ya da 2 bağımsız kaynak · KAT1 tek tüccar ✅\'lerinden ikinci kaynağı bulunan 7 çift ✅ + kaynak2 (url + alıntı), bulunamayan 4 çift ⚠️ · her KAT1 ✅ ya Hopsteiner kaynaklı ya kaynak2\'li',
+    calistir: (page) => page.evaluate(() => {
+      const E = (k, id) => (MUADIL[k] || []).find(x => x.id === id);
+      const kal = ['cascade:amarillo', 'amarillo:cascade', 'fuggles:styrian', 'styrian:willamette', 'challenger:nbrewer', 'challenger:perle', 'willamette:tettn'], ind = ['fuggles:progress', 'mosaic:citra', 'idaho7:calypso', 'pac_gem:columbus'];
+      const k1 = kal.filter(p => { const [a, b] = p.split(':'), x = E(a, b); return !(x && window._bmMuadilTam(x) && x.kaynak2 && /^https:\/\//.test(x.kaynak2.url) && x.kaynak2.alinti.length > 10); });
+      __REG.ok('7 çift ✅ + ikinci kaynak', !k1.length, k1.join(','));
+      const k2 = ind.filter(p => { const [a, b] = p.split(':'), x = E(a, b); return !(x && !window._bmMuadilTam(x) && /\[ISK1 hop eşiği\]/.test(x.fark)); });
+      __REG.ok('4 çift ⚠️ (tek tüccar listesi)', !k2.length, k2.join(','));
+      const kural = []; Object.keys(MUADIL).forEach(k => (MUADIL[k] || []).forEach(m => { if (/\[KAT1 hop kaynak\]/.test(m.fark) && window._bmMuadilTam(m) && !/hopsteiner/.test(m.kaynak.url) && !/Hopsteiner/.test(m.fark) && !m.kaynak2) kural.push(k + '→' + m.id); }));
+      __REG.ok('kural: her KAT1 ✅ ya yetiştirici veri sayfası ya ikinci kaynak', !kural.length, kural.join(','));
+      STOK.length = 0; const h = HOPLAR.find(a => a.id === 'perle'); STOK.push({ id: 'i1p', ad: h.ad, refId: 'perle', g: 'Hop', miktar: 100, birim: 'g' });
+      const a = window._bmIkameAday({ tip: 'hop', id: 'challenger', gerek: 20, birim: 'g' }).find(x => x.id === 'perle');
+      __REG.ok('adayda ikinci kaynak + önizleme linki "Hopunion (web arşivi)"', !!a && !!a.kaynak2 && /Hopunion \(web arşivi\)/.test(window._bmKaynakHTML(a.kaynak2)));
       STOK.length = 0;
       return __REG.al();
     })
