@@ -8717,7 +8717,7 @@ const CASELER = [
     }
   },
   {
-    kod: 'ND3-MUADIL', ad: 'MUADIL DENETİMİ (veri sayfasıyla): yeni ✅ (Briess 2-Row→Thracian Pale · Belgian Pilsner→Pilsner/Viking · Munich Light→Munich · Chocolate→BEST Chocolate · Fuggle↔Willamette) stokta → 🔁 muadil; ⚠️\'e inen (mısır→yulaf, Munich Dark→Melanoidin, EKG→Fuggle, Cascade→Willamette, Mosaic→Citra) stokta → "yok" + yakın alternatif, durum İYİLEŞMEZ; her ND3 satırı kaynak etiketi taşır',
+    kod: 'ND3-MUADIL', ad: 'MUADIL DENETİMİ (veri sayfasıyla): yeni ✅ (Briess 2-Row→Thracian Pale · Belgian Pilsner→Pilsner/Viking · Munich Light→Munich · Chocolate→BEST Chocolate · Fuggle↔Willamette) stokta → 🔁 muadil; ⚠️\'e inen (mısır→yulaf, Munich Dark→Melanoidin, EKG→Fuggle, Cascade→Willamette; Mosaic→Citra KAT1 kaynağıyla ✅ oldu) stokta → "yok" + yakın alternatif, durum İYİLEŞMEZ; her ND3 satırı kaynak etiketi taşır',
     calistir: (page) => page.evaluate(() => {
       __REG.yeniKayit('ND3 Muadil', {});
       const H = window._bmOrnekHepsi(), kuru = e => window._bmOrnekKuru(e.kaynak, e.stil, e.idx);
@@ -8731,11 +8731,12 @@ const CASELER = [
         L.forEach(k => { if (!k.id || k.id === id || ek[k.id]) return; ek[k.id] = 1; STOK.push(giris(k.tip, k.id, k.tip === 'maya' ? 3 : k.mik > 0 ? k.mik * 50 : 1000)); });
         const s0 = window._bmOrnekStok(e.kaynak, e.stil, e.idx); STOK.push(giris(tip, aday, 999));
         const s1 = window._bmOrnekStok(e.kaynak, e.stil, e.idx), sat = s1.g.concat(s1.h).find(x => x.k.id === id), sat0 = s0.g.concat(s0.h).find(x => x.k.id === id);
-        return { e: e.stil, d0: sat0.d, d: sat.d, mu: sat.mu && sat.mu.id, yakin: sat.yakin && sat.yakin.id, eksik0: s0.eksik, eksik1: s1.eksik, durum0: s0.durum, durum1: s1.durum };
+        const n = s0.g.concat(s0.h).filter(x => x.k.id === id).length; // hedef kalem örnekte birden çok satırda olabilir (Milkshake IPA'da Mosaic 3 satır)
+        return { e: e.stil, n, d0: sat0.d, d: sat.d, mu: sat.mu && sat.mu.id, yakin: sat.yakin && sat.yakin.id, eksik0: s0.eksik, eksik1: s1.eksik, durum0: s0.durum, durum1: s1.durum };
       };
-      const tam = [['malt', 'briess_pale', 'thracian_pale'], ['malt', 'bel_pils', 'pilsner'], ['malt', 'bel_pils', 'viking_pils'], ['malt', 'munich_light', 'munich'], ['malt', 'choc', 'best_choc'], ['hop', 'fuggles', 'willamette'], ['hop', 'willamette', 'fuggles']];
-      tam.forEach(([tip, id, a]) => { const r = dene(tip, id, a); __REG.ok('✅ ' + id + ' yok + ' + a + ' stokta → 🔁 muadil (eksik sayısı 1 azalır)', !r.yok && r.d0 === 'yok' && r.d === 'muadil' && r.mu === a && r.eksik1 === r.eksik0 - 1, JSON.stringify(r)); });
-      const yari = [['malt', 'corn', 'oat'], ['malt', 'dark_munich', 'mel'], ['hop', 'ekg', 'fuggles'], ['hop', 'cascade', 'willamette'], ['hop', 'mosaic', 'citra']];
+      const tam = [['malt', 'briess_pale', 'thracian_pale'], ['malt', 'bel_pils', 'pilsner'], ['malt', 'bel_pils', 'viking_pils'], ['malt', 'munich_light', 'munich'], ['malt', 'choc', 'best_choc'], ['hop', 'fuggles', 'willamette'], ['hop', 'willamette', 'fuggles'], ['hop', 'mosaic', 'citra']]; // mosaic→citra: ND3'te ⚠️, KAT1'de Charles Faram ikame listesiyle ✅ (kaynaklı)
+      tam.forEach(([tip, id, a]) => { const r = dene(tip, id, a); __REG.ok('✅ ' + id + ' yok + ' + a + ' stokta → 🔁 muadil (eksik sayısı hedefin satır sayısı kadar azalır)', !r.yok && r.d0 === 'yok' && r.d === 'muadil' && r.mu === a && r.n >= 1 && r.eksik1 === r.eksik0 - r.n, JSON.stringify(r)); });
+      const yari = [['malt', 'corn', 'oat'], ['malt', 'dark_munich', 'mel'], ['hop', 'ekg', 'fuggles'], ['hop', 'cascade', 'willamette']];
       yari.forEach(([tip, id, a]) => { const r = dene(tip, id, a); __REG.ok('⚠️ ' + id + ' yok + ' + a + ' stokta → "yok" + yakın alternatif, durum/eksik AYNI', !r.yok && r.d === 'yok' && r.yakin === a && r.eksik1 === r.eksik0 && r.durum1 === r.durum0, JSON.stringify(r)); });
       const etiket = ['briess_pale', 'bel_pils', 'munich_light', 'choc', 'corn', 'dark_munich', 'mel', 'ekg', 'fuggles', 'styrian', 'willamette', 'cascade', 'mosaic'].every(k => (MUADIL[k] || []).some(m => /\[ND3/.test(m.fark)));
       __REG.ok('değişen her MUADIL anahtarında ND3 kaynak etiketi', etiket);
@@ -9220,7 +9221,7 @@ const CASELER = [
         if (p.hedef.ib && !p.uyari.some(u => /IBU dengelenemedi/.test(u))) { ib = Math.max(ib, Math.abs(p.sonuc.ibu - p.hedef.ib)); ibN++; }
         // UYG2: bileşik muadil satırı reçetede İKİ malt (ana = satır kütlesi, koyu = MCU açığı) — sıra korunur
         const g = p.satirlar.filter(z => z.grup === 'g'), bek = [], m = p.tarif.maltlar;
-        g.filter(z => z.tip === 'malt').forEach(z => { if (z.secilen && z.secilen.bilesik) z.secilen.bilesik.forEach(q => bek.push([z, q.kg * p.dengele.s])); else bek.push([z, z.gerek * p.dengele.s]); });
+        g.filter(z => z.tip === 'malt').forEach(z => { if (z.secilen && z.secilen.bilesik) z.secilen.bilesik.forEach(q => bek.push([z, q.kg * p.dengele.s])); else bek.push([z, z.gerek * p.dengele.s * (z.renkMod === 'renk' ? z.renkEsKat : 1)]); }); // KAT1 2: renk-eşdeğer satırda kütle × eski°L/yeni°L
         bek.forEach(([z, b], i) => { if (!m[i] || Math.abs(m[i].kg - b) > 0.0006) oranHata.push(e.stil + ':' + z.orijAd); });
         p.satirlar.filter(z => z.grup === 'h' && z.hop && z.rol === 'aroma').forEach(z => { if (Math.abs(z.hop.g - z.gerek) > 1e-9) aromaHata.push(e.stil + ':' + z.orijAd); });
         const B = BJCP[e.stil], kay = p.srmOnce > 0 && Math.abs(p.sonuc.srm - p.srmOnce) / p.srmOnce > 0.15, band = B && (p.sonuc.srm < B.srm[0] || p.sonuc.srm > B.srm[1]);
@@ -9471,6 +9472,136 @@ const CASELER = [
       window._stokAlfaAc(idx); document.getElementById('stokAlfaInp_' + idx).value = ''; window._stokAlfaKaydet(idx);
       __REG.ok('boş kaydet → katalog alfasına döner (aa silinir)', STOK[idx].aa === undefined);
       STOK.length = 0;
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'KAT1-HOPVARS', ad: 'HOP VARSAYILANI: aroma/lezzet satırında (<30 dk, whirlpool, dry hop) özellik benzerliği VARSAYILAN OLMAZ (aynen > ✅ > ⚠️ > alınacak) — Willamette 0 dk + stokta yalnız Simcoe → alınacak; Simcoe listede "doğrulanmamış — aroma farklı olabilir" uyarısıyla seçilebilir · acı satırında davranış aynı · önizlemede aroma satırı "stoktan tamamlanabilir" demez',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('KAT1 Hop', {});
+      const V = window._bmIkameVarsayilan, gir = id => { const x = HOPLAR.find(a => a.id === id); return { id: 'k1h' + id, ad: x.ad, refId: id, g: 'Hop', miktar: 100, birim: 'g' }; };
+      STOK.length = 0; STOK.push(gir('simcoe'));
+      const Ar = window._bmIkameAday({ tip: 'hop', id: 'willamette', gerek: 8, birim: 'g', rol: 'aroma' }), Ac = window._bmIkameAday({ tip: 'hop', id: 'willamette', gerek: 8, birim: 'g', rol: 'aci' });
+      __REG.ok('aroma satırı: Simcoe aday (derece 4) ama varsayılan YOK (alınacak); acı satırında varsayılan Simcoe', Ar.some(a => a.id === 'simcoe' && a.derece === 4) && V(Ar, { tip: 'hop', rol: 'aroma' }) === null && V(Ac, { tip: 'hop', rol: 'aci' }) && V(Ac, { tip: 'hop', rol: 'aci' }).id === 'simcoe');
+      const H = window._bmOrnekHepsi(), e = H.find(x => x.stil === 'Coffee Stout' && /Breakfast/.test(window._bmOrnekNesne(x.kaynak, x.stil, x.idx).bira || ''));
+      const kuru = window._bmOrnekKuru(e.kaynak, e.stil, e.idx), KAT = { malt: MALTLAR, hop: HOPLAR, maya: MAYALAR };
+      STOK.length = 0; kuru.g.concat(kuru.y ? [kuru.y] : []).forEach(k => { if (!k.id || STOK.some(s => s.refId === k.id)) return; const x = KAT[k.tip].find(a => a.id === k.id); STOK.push({ id: 'k1x' + k.id, ad: x.ad, refId: k.id, g: k.tip === 'malt' ? 'Malt' : 'Maya', miktar: k.tip === 'maya' ? 3 : 99, birim: k.tip === 'malt' ? 'kg' : 'paket' }); });
+      STOK.push(gir('simcoe')); STOK.push(gir('nugget'));
+      const p = window._bmStokUyarla(e.kaynak, e.stil, e.idx), zw = p.satirlar.filter(z => z.grup === 'h' && z.orijId === 'willamette' && z.rol === 'aroma');
+      __REG.ok('Breakfast Stout Willamette aroma satırı → alınacak (Simcoe varsayılan değil)', zw.length >= 1 && zw.every(z => z.alinacak && z.aday.some(a => a.id === 'simcoe')));
+      window.__uygOnizle = { kaynak: e.kaynak, stil: e.stil, idx: e.idx }; window.__uygAcikDet = true; window.__uygAcik = zw[0].key;
+      const htm = window._bmUyarlaHTML(e.kaynak, e.stil, e.idx);
+      __REG.ok('satır değiştirme listesinde Simcoe "doğrulanmamış — aroma farklı olabilir" uyarısıyla', /Simcoe[\s\S]*doğrulanmamış — aroma farklı olabilir/.test(htm));
+      const st = window._bmOrnekStok(e.kaynak, e.stil, e.idx), wr = st.h.find(x => x.k.id === 'willamette' && x.d === 'yok' && !x.tamamla);
+      __REG.ok('önizleme: aroma Willamette satırı "stoktan tamamlanabilir" DEMEZ (✕ yok)', !!wr && /✕ yok/.test(window._ndKalemHTML(wr)));
+      window._bmUyarlaSifirla(); STOK.length = 0;
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'KAT1-RENKES', ad: 'RENK-EŞDEĞER MİKTAR: kristal / kavrulmuş / debittered rolde ⚠️ ya da özellik benzeri farklı renkli malt → yeni kg = eski kg × eski °L / yeni °L (varsayılan) · "aynı miktar" seçilebilir · baz / kilnli rolde UYGULANMAZ · Weizenbock Pale Chocolate (225 °L) → Best Chocolate (340 °L) ≈ %66 · notta seçim yazılı',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('KAT1 Renk', {}); S.hacim = 11; S.verim = 61;
+      const gir = (id, mik) => { const x = MALTLAR.find(a => a.id === id); return { id: 'k1r' + id, ad: x.ad, refId: id, g: 'Malt', miktar: mik, birim: 'kg' }; };
+      const H = window._bmOrnekHepsi(), e = H.find(x => x.stil === 'Weizenbock' && x.kaynak === 'nhc' && x.idx === 0), kuru = window._bmOrnekKuru(e.kaynak, e.stil, e.idx);
+      // Munich Dark (kilnli) stokta yok, Munich (⚠️ MUADIL, kilnli) var → baz/kilnli rolde renk eşdeğer UYGULANMAMALI
+      STOK.length = 0; kuru.g.forEach(k => { if (k.id && k.tip === 'malt' && k.id !== 'pale_choc' && k.id !== 'dark_munich' && !STOK.some(s => s.refId === k.id)) STOK.push(gir(k.id, 99)); }); STOK.push(gir('best_choc', 5)); if (!STOK.some(s => s.refId === 'munich')) STOK.push(gir('munich', 9));
+      const yid = kuru.y && kuru.y.id; if (yid) STOK.push({ id: 'k1ry', ad: MAYALAR.find(a => a.id === yid).ad, refId: yid, g: 'Maya', miktar: 3, birim: 'paket' });
+      const p = window._bmStokUyarla(e.kaynak, e.stil, e.idx), z = p.satirlar.find(q => q.orijId === 'pale_choc');
+      const r = id => MALTLAR.find(a => a.id === id).r, k = r('pale_choc') / r('best_choc');
+      const bc = p.tarif.maltlar.find(m => m.id === 'best_choc'), sc = p.dengele.s;
+      __REG.ok('renk eşdeğer varsayılan: katsayı ' + k.toFixed(3) + ' (≈0,66), reçetede ' + Math.round(bc.kg * 1000) + ' g = ' + Math.round(z.gerek * 1000) + ' g × ' + k.toFixed(3) + ' × ölçek', z.renkMod === 'renk' && Math.abs(z.renkEsKat - k) < 1e-9 && Math.abs(k - 0.66) < 0.01 && Math.abs(bc.kg - Math.round(z.gerek * k * sc * 1000) / 1000) < 0.0011);
+      __REG.ok('kg × °L eşit (MCU): eski ' + (z.gerek * r('pale_choc')).toFixed(2) + ' = yeni ' + (z.gerek * k * r('best_choc')).toFixed(2), Math.abs(z.gerek * r('pale_choc') - z.gerek * k * r('best_choc')) < 1e-9);
+      const pA = window._bmStokUyarla(e.kaynak, e.stil, e.idx, { miktar: { [z.key]: 'ayni' } }), zA = pA.satirlar.find(q => q.orijId === 'pale_choc');
+      __REG.ok('"aynı miktar" seçilince miktar kaynak oranında, SRM daha yüksek (renk ' + p.sonuc.srm.toFixed(1) + ' → aynı miktarla ' + pA.sonuc.srm.toFixed(1) + ')', zA.renkMod === 'ayni' && Math.abs(pA.tarif.maltlar.find(m => m.id === 'best_choc').kg - Math.round(z.gerek * pA.dengele.s * 1000) / 1000) < 0.0011 && pA.sonuc.srm > p.sonuc.srm);
+      // baz rolde uygulanmaz: Pale Ale → Pilsner (✅) / özellik benzeri baz → miktar aynı
+      const baz = p.satirlar.filter(q => q.grup === 'g' && q.secilen && q.secilen.derece >= 3 && window._bmMaltSinif(q.orijId) && /^(baz|kilnli)$/.test(window._bmMaltSinif(q.orijId).islem));
+      __REG.ok('baz / kilnli rolde renk eşdeğer YOK (' + baz.map(q => q.orijAd).join(', ') + ')', baz.length >= 1 && baz.every(q => !q.renkEsKat));
+      window._bmUyarlaSifirla(); window._bmStokumlaOlustur(e.kaynak, e.stil, e.idx);
+      __REG.ok('notta "miktar: renk eşdeğer (×0,66, kg × °L eşit)"', /Pale Chocolate Malt yerine Best Chocolate.*miktar: renk eşdeğer \(×0,66, kg × °L eşit\)/.test(S.notlar || ''));
+      window.__uygOnizle = { kaynak: e.kaynak, stil: e.stil, idx: e.idx }; window.__uygAcikDet = true; window.__uygAcik = z.key;
+      const htm = window._bmUyarlaHTML(e.kaynak, e.stil, e.idx);
+      __REG.ok('satır değiştirme listesinde iki seçenek: "Aynı miktar (… g)" + "Renk eşdeğer miktar (… g)"', /Aynı miktar \(\d+ g\)/.test(htm) && /Renk eşdeğer miktar \(\d+ g\)/.test(htm));
+      window._bmUyarlaSifirla(); STOK.length = 0;
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'KAT1-SEPET', ad: 'SEPET FARKI KÖK NEDENİ (UYG2): kod değil STOK — buğday 2 → 5 kg olunca American Wheat IPA örneklerinin ihtiyacından buğday düştü, Bisküvi\'nin ✅ muadili Amber Malt tek kalemle ✅ açan aday oldu; aynı stokla motor değişmeden sonuç aynı',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('KAT1 Sepet', {});
+      const H = window._bmOrnekHepsi(), e = H.find(x => x.kaynak === 'kay' && x.stil === 'American Wheat IPA / Hoppy Wheat' && x.idx === 0);
+      if (!e) { __REG.ok('American Wheat IPA K3 örneği', false); return __REG.al(); }
+      const kuru = window._bmOrnekKuru(e.kaynak, e.stil, e.idx), wheat = kuru.g.find(k => k.id === 'wheat');
+      const gir = (id, mik, b) => ({ id: 'k1s' + id, ad: MALTLAR.find(a => a.id === id).ad, refId: id, g: 'Malt', miktar: mik, birim: b || 'kg' });
+      STOK.length = 0; STOK.push(gir('wheat', wheat.mik / 2));
+      const n1 = window._bmOrnekIhtiyac(window._bmOrnekStok(e.kaynak, e.stil, e.idx)) || [];
+      STOK.length = 0; STOK.push(gir('wheat', wheat.mik * 2));
+      const n2 = window._bmOrnekIhtiyac(window._bmOrnekStok(e.kaynak, e.stil, e.idx)) || [];
+      __REG.ok('buğday yetersizken ihtiyaçta buğday VAR; yeterliyken YOK (ihtiyaç kümesi stokla küçülür)', n1.some(k => k.id === 'wheat') && !n2.some(k => k.id === 'wheat'), n1.map(k => k.id) + ' → ' + n2.map(k => k.id));
+      const bisk = n2.find(k => k.id === 'bisk');
+      __REG.ok('Bisküvi ihtiyacının ✅ muadil alternatiflerinde Amber Malt (sepet adayı olmasının nedeni)', !!bisk && (bisk.alt || []).some(a => a.id === 'amber'));
+      STOK.length = 0;
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'KAT1-RENKMETIN', ad: 'MUADIL RENK METİNLERİ (üretici veri sayfası; °L = (EBC × 0,508 + 0,76) / 1,3546): yanlış eşitlemeler ve EBC→°L hataları kalktı · katalog değerleri veri sayfasıyla uyumlu (CaraMunich I 35, CaraHell 10, CaraRed 20, Special B 115, Aromatic 20, Munich 6, Dark Munich 9, Koyu Kristal 27, Karamela 109, Koyu Kahve 254) · yanlış renge dayanan iki ✅ (Koyu Kristal = CaraMunich II, Crystal 60 ≈ CaraRed) ⚠️\'e indi',
+    calistir: (page) => page.evaluate(() => {
+      const J = JSON.stringify(MUADIL), M = id => MALTLAR.find(a => a.id === id).r;
+      const L = ebc => (ebc * 0.508 + 0.76) / 1.3546;
+      const yok = ['CaraMunich I (GU 296, 60°L)', 'CaraMunich I (GU 289, 80°L)', 'CaraHell (GU 293, 20°L)', '= CaraMunich II (~60°L)', 'CaraRed ~45°L', 'CaraRed (~45°L)', 'Special B (~155°L', 'Aromatic GU ~278, ~35°L', 'Dark Munich 25°L', 'Reddish ~8°L', 'EBC 265-310 (~145°L', 'EBC 600-750 (~340°L'].filter(k => J.indexOf(k) >= 0);
+      __REG.ok('eski yanlış ifadelerin hiçbiri kalmadı', !yok.length, yok.join(' | '));
+      const kat = [['cara_munich1', 90], ['cara_hell', 25], ['cara_red', 50], ['specb', 300], ['aromatic', 50], ['munich', 15], ['dark_munich', 22.5], ['koyu_kristal', 70], ['karamela_arpa', 287.5], ['koyu_kahve_arpa', 675], ['reddish', 30]];
+      const sap = kat.filter(([id, ebc]) => Math.abs(M(id) - L(ebc)) / L(ebc) > 0.12).map(([id, ebc]) => id + ' ' + M(id) + ' vs ' + L(ebc).toFixed(1));
+      __REG.ok('katalog r değerleri veri sayfası EBC orta noktasının formülle °L karşılığına ±%12 içinde', !sap.length, sap.join(' | '));
+      const kk = (MUADIL.koyu_kristal || []).find(m => m.id === 'cara_munich2'), cr = (MUADIL.cara_red || []).find(m => m.id === 'c60');
+      __REG.ok('Koyu Kristal → CaraMunich II ve CaraRed → Crystal 60 artık ⚠️ (✅ değil) + düzeltme etiketi', kk && cr && !window._bmMuadilTam(kk) && !window._bmMuadilTam(cr) && /KAT1 renk düzeltmesi/.test(kk.fark) && /KAT1 renk düzeltmesi/.test(cr.fark));
+      __REG.ok('düzeltilmiş metinler kaynak değerlerini taşıyor (CaraRed 40–60 EBC, Special B 300 EBC, Dark Munich 20–25 EBC, Karamela ≈100–117°L)', /CaraRed ~19°L \(Weyermann 40–60 EBC\)/.test(J) && /Special B \(115°L; Dingemans 300 EBC\)/.test(J) && /Dark Munich ~9°L \(Weyermann Munich Type 2: 20–25 EBC\)/.test(J) && /EBC 265-310 \(≈100–117°L\)/.test(J));
+      __REG.ok('Kızıl Çavdar (UYG2) düzeltmesi aynen', (J.match(/EBC 490-500/g) || []).length >= 5 && M('kizil_rye') === 187);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'KAT1-HOPKAYNAK', ad: 'KAYNAKLI HOP MUADIL (madde 1b): 24 çift yalnız üretici/tüccar sayfasıyla (Hopsteiner veri sayfası "Possible Substitutions" · Charles Faram "Substitutes", web arşivi) — her girişte url + alıntı · ✅ yalnız kaynak koşulsuz listeliyorsa (Willamette→Tettnanger, Mosaic→Citra, Challenger→Northern Brewer), çekinceli/tek yönlü olanlar ⚠️ (Cascade→Centennial, Galaxy→Citra, Motueka→Saaz) · tahmini ✅ YOK · adayda kaynak taşınır, önizlemede link + alıntı',
+    calistir: (page) => page.evaluate(() => {
+      const T = [];
+      Object.keys(MUADIL).forEach(k => (MUADIL[k] || []).forEach(m => { if (/\[KAT1 hop kaynak\]/.test(m.fark)) T.push([k, m]); }));
+      __REG.ok('24 kaynaklı hop girişi', T.length === 24, String(T.length));
+      const URL = /^https:\/\/(pim\.hopsteiner\.de\/api\/v1\/en\/varieties\/[a-z0-9]+\.pdf|web\.archive\.org\/web\/\d{14}\/https:\/\/www\.charlesfaram\.co\.uk\/product\/[a-z0-9%A-F-]+\/)$/; // mosaic slug'ı gerçekten "mosaic%C2%99" (™)
+      const kotu = T.filter(([k, m]) => !m.kaynak || !URL.test(m.kaynak.url) || !m.kaynak.alinti || m.kaynak.alinti.length < 8 || !/^(✅|⚠️)/.test(m.fark.trim())).map(([k, m]) => k + '→' + m.id);
+      __REG.ok('her girişte üretici/tüccar url + alıntı + ✅/⚠️ işareti', !kotu.length, kotu.join(','));
+      const cift = T.filter(([k, m]) => MUADIL[k].filter(x => x.id === m.id).length !== 1).map(([k, m]) => k + '→' + m.id);
+      __REG.ok('her çift MUADIL\'de TEK giriş (mevcut güncellendi, kopya yok)', !cift.length, cift.join(','));
+      const E = (k, id) => (MUADIL[k] || []).find(x => x.id === id);
+      __REG.ok('✅: willamette→tettn, mosaic→citra, challenger→nbrewer, fuggles→styrian', ['willamette:tettn', 'mosaic:citra', 'challenger:nbrewer', 'fuggles:styrian'].every(p => { const [k, id] = p.split(':'); return E(k, id) && window._bmMuadilTam(E(k, id)); }));
+      __REG.ok('⚠️ (çekinceli / ters yön): cascade→centn, galaxy→citra, motueka→saaz, cascade→willamette (ND3) ✅ DEĞİL', ['cascade:centn', 'galaxy:citra', 'motueka:saaz', 'cascade:willamette'].every(p => { const [k, id] = p.split(':'); return E(k, id) && !window._bmMuadilTam(E(k, id)); }));
+      __REG.ok('yeni girişler dizinin SONUNDA (mevcut sıra = aynı derecede öncelik korunur; Cascade varsayılanı Centennial kalır, Huell Melon değil)', MUADIL.cascade.map(m => m.id).join(',') === 'centn,amarillo,willamette,mandarina,huell_m' && MUADIL.galaxy[0].id === 'citra', MUADIL.cascade.map(m => m.id).join(','));
+      STOK.length = 0; const h = HOPLAR.find(a => a.id === 'tettn'); STOK.push({ id: 'k1h' + Math.random(), ad: h.ad, refId: 'tettn', g: 'Hop', miktar: 100, birim: 'g' });
+      const A = window._bmIkameAday({ tip: 'hop', id: 'willamette', gerek: 20, birim: 'g' }), a = A.find(x => x.id === 'tettn');
+      __REG.ok('aday ✅ (derece 2) ve kaynak nesnesini taşır', !!a && a.derece === 2 && !!a.kaynak && a.kaynak.url === E('willamette', 'tettn').kaynak.url, A.map(x => x.derece + ':' + x.id).join(','));
+      const H = window._bmKaynakHTML(a.kaynak);
+      __REG.ok('önizleme HTML: link (yeni sekme) + alıntı', /<a href="https:\/\/web\.archive\.org\/[^"]+" target="_blank" rel="noopener">🔗 Charles Faram \(web arşivi\)<\/a> <q>/.test(H) && window._bmKaynakHTML(null) === '', H.slice(0, 200));
+      STOK.length = 0;
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'KAT1-DOZ', ad: 'KATKI DOZ DENETİMİ: kaynakla düzeltilenler (lavanta 0,5/1,5 · viskide meşe 2/5 · tamarind özü 4/8 · grains of paradise 0,1/0,2 · fungal amilaz 0,03/0,08 mL/L) metin ile alan tutarlı · kaynak g/L vermeyen meşe spirali ve form belirsiz izinglas "doz doğrulanmadı" (tek yardımcı) · katkı uyarısında görünür',
+    calistir: (page) => page.evaluate(() => {
+      const K = id => KATKILAR.find(a => a.id === id);
+      const bek = { lavanta: [0.5, 1.5], viski_mese: [2, 5], tamarind: [4, 8], maniguete: [0.1, 0.2], maise_guc: [0.03, 0.08] };
+      const h = Object.keys(bek).filter(id => K(id).varsayDozgL !== bek[id][0] || K(id).maxDozgL !== bek[id][1] || !/\[KAT1 doz\]/.test(K(id).acik));
+      __REG.ok('5 kayıt kaynaklı değerlerle + "[KAT1 doz]" etiketi', !h.length, h.join(','));
+      __REG.ok('lavanta metni kaynak aralığını taşıyor (0,05–1,5 g/L; BYO 1 g/19 L)', /0,05–1,5 g\/L/.test(K('lavanta').acik) && /BYO Hippie Farm/.test(K('lavanta').acik));
+      __REG.ok('doz doğrulanmadı bayrağı: meşe spirali + izinglas (alanlar DEĞİŞMEDİ: 0,1 / 0,5)', K('mese_spiral').dozDogrulanmadi === true && K('isinglass').dozDogrulanmadi === true && K('mese_spiral').varsayDozgL === 0.1 && K('isinglass').maxDozgL === 0.5 && KATKILAR.filter(k => k.dozDogrulanmadi).length === 2);
+      __REG.ok('tek yardımcı: _bmTahmini("doz") bayraklı katkıyı bulur, bayraksızı bulmaz', window._bmTahmini('doz', [], [{ id: 'isinglass' }]).length === 1 && window._bmTahmini('doz', [], [{ id: 'lavanta' }]).length === 0);
+      __REG.yeniKayit('KAT1 Doz', {}); S.hacim = 10; S.katkilar = [{ id: 'mese_spiral', ad: K('mese_spiral').ad, birim: 'g', miktar: 1, zaman: 'Secondary' }];
+      render(); window.eval("sekme='katki'"); render();
+      __REG.ok('katkı sekmesinde uyarı: "doz doğrulanmadı"', /Meşe Spirali — doz doğrulanmadı/.test(document.body.innerText));
+      S.katkilar[0].miktar = 10; render();
+      __REG.ok('max aşımında da (1 g/L > 0,5) aşım uyarısına "· doz doğrulanmadı" eklenir', /Meşe Spirali 1\.00g\/L > 0\.5g\/L — [^\n]*· doz doğrulanmadı/.test(document.body.innerText));
+      window.eval("sekme='genel'");
       return __REG.al();
     })
   }
