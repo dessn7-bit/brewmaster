@@ -9701,6 +9701,80 @@ const CASELER = [
       return __REG.al();
     })
   },
+  // ═════════════ SPRINT AI3 DÜZELTME — GERÇEK KOŞU #1 DERSLERİ: bakiye bitince dur · geçersiz cevap metriğe girmez · kesilme kök nedeni (düşünme/efor) ═════════════
+  {
+    kod: 'AI3-BAKIYE', ad: 'BAKİYE / HARCAMA SINIRI (koşu #1): "hesap" türü hata gelince koşucu HEMEN durur · o adım BAŞARISIZ SAYILMAZ ve kaydedilmez · sonraki çağrılar API\'ye gitmez · ekranda "Bakiye bitti" · "Devam et" aynı adımdan sürdürür',
+    calistir: async (page) => {
+      const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'tuzak_seti.json'), 'utf8'));
+      return page.evaluate(async (set) => {
+        const T3 = window.BM_TUZAK, A = window.BM_AI; T3.sifirla(); localStorage.removeItem(T3.SONUC_LS);
+        const m = __REG.ai1Mock({ esleme: () => window.__tuzakIstem.cikarim, asistan: { iddialar: [{ metin: 'Bilmiyorum.', katman: 'bilmiyorum', anahtar: 'b:x' }], ton: 'notr' }, denetim: { bulgular: [], ozet: '' } });
+        const mockSor = A.sor; let say = 0, sonraki = 0;
+        A.sor = (p) => { say++; if (say > 12) { if (say > 14) sonraki++; /* 13. çağrı hata döner; 14. aynı anda (paralel örnekleme) çıkmıştı */ return Promise.resolve({ ok: false, hata: { tur: 'hesap', mesaj: 'Hesap/kredi durumu — kod hatası DEĞİL. Anthropic hesabında kredi yok ya da harcama limitine ulaşıldı (400).' } }); } return mockSor(p); };
+        let s1, s2;
+        try {
+          s1 = await T3.kos({ set, mock: true, tavan: 50, tohum: 7, webYok: true });
+          const d = T3.durumAl();
+          __REG.ok('bakiye hatasında durdu: durdu metni "bakiye bitti", koşu bitmedi', !!s1 && !s1.bitti && /^bakiye bitti/.test(s1.durdu) && !!s1.bakiye, s1 && s1.durdu);
+          __REG.ok('hata alan adım sayılmadı: kayıtlı sonuç = tamamlanan adımlar (2), sıradaki adım = hatalı adım', d.sonuclar.length === 2 && d.i === 2 && d.plan[2].id === 'A02a', d.sonuclar.map(r => r.id).join());
+          __REG.ok('bakiye hatasından sonra API\'ye çağrı GİTMEDİ (aynı adımın kalan çağrıları atlandı)', sonraki === 0, sonraki);
+          __REG.ok('metrikte hiçbir başarısızlık yok (hata adımı uydurma / yalakalık / kontrol sayılmadı)', s1.basarisiz.length === 0);
+          T3.ciz(); const panel = T3.panelHTML();
+          __REG.ok('ekranda "💳 Bakiye bitti" + "Devam et" açıklaması', /Bakiye bitti/.test(panel) && /Devam et/.test(panel) && /bm-tuzak-devam/.test(T3.kartHTML()));
+          A.sor = mockSor; // bakiye yüklendi
+          s2 = await T3.kos({ set, mock: true, tavan: 50, devam: true, webYok: true });
+          const d2 = T3.durumAl();
+          __REG.ok('"Devam et": hatalı adımdan (A02a) sürdü, koşu bitti, bakiye bayrağı temizlendi', s2.bitti && d2.sonuclar[2].id === 'A02a' && !s2.bakiye && d2.sonuclar.length === d2.plan.length, d2.sonuclar.slice(0, 4).map(r => r.id).join());
+        } finally { A.sor = mockSor; m.geri(); T3.sifirla(); localStorage.removeItem(T3.SONUC_LS); }
+        return __REG.al();
+      }, set);
+    }
+  },
+  {
+    kod: 'AI3-ONAR', ad: 'ESKİ KAYIT ONARIMI (koşu #1 kaydı cihazda): bakiye hatası almış adımlar (denetim / istek hatası "Hesap/kredi") sonuçtan çıkarılır, plana yeniden koşulacak olarak eklenir · gerçek cevaplı adımlar korunur · web hatası da yeniden koşulur · "Devam et" görünür',
+    calistir: (page) => page.evaluate(() => {
+      const T3 = window.BM_TUZAK, H = 'Hesap/kredi durumu — kod hatası DEĞİL. (400)';
+      const r = (id, tur, hata) => ({ id, yol: 'normal', tur, usd: hata ? 0 : 0.08, t1: { ton: 'notr', n: 2, gecerli: true, durum: 'tamam' }, denetim: hata ? { hata: H } : { bulgu: 0, tur: [] } });
+      const d = { setSurum: 2, plan: [{ id: 'B02', yol: 'normal', tur: 1 }, { id: 'E03', yol: 'normal', tur: 1 }, { id: 'E04', yol: 'normal', tur: 1 }, { id: 'B02', yol: 'normal', tur: 2 }], i: 4, bitti: true,
+        sonuclar: [r('B02', 1, false), r('E03', 1, true), r('E04', 1, true), r('B02', 2, true)], web: [{ id: 'W1', ok: false, hata: H }], harcama: { usd: 5.29 } };
+      const n = T3.onar(d);
+      __REG.ok('3 bakiye-hatalı adım ayıklandı; gerçek adım (B02 1. tur) korundu; sıradaki = E03', n === 3 && d.sonuclar.length === 1 && d.sonuclar[0].id === 'B02' && d.i === 1 && d.plan.slice(1).map(s => s.id + s.tur).join() === 'E031,E041,B022' && !d.bitti, JSON.stringify(d.plan));
+      __REG.ok('web bakiye hatası → web yeniden koşulacak (null)', d.web === null);
+      __REG.ok('harcama korunur (gerçek para)', d.harcama.usd === 5.29);
+      __REG.ok('hata tanıma: bakiye / harcama limiti metni', T3.hesapHatasiMi(r('X', 1, true)) && !T3.hesapHatasiMi(r('Y', 1, false)));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AI3-GECERSIZ', ad: 'GEÇERSİZ CEVAP METRİĞE GİRMEZ (koşu #1: boş ton = boş ton "tutarlı" sayılmıştı): geçerli örneği 0 olan adım (kesilen / ayrıştırılamayan cevap) ne geçer ne kalır, ayrı listelenir · kesilme ve bozuk cevap sayılır · şüpheli iddiaların METNİ saklanır',
+    calistir: (page) => page.evaluate(() => {
+      const T3 = window.BM_TUZAK, A1 = window.BM_AI1;
+      const set = { istemler: [{ id: 'A01a', grup: 'A', cift: 'A01' }, { id: 'A01b', grup: 'A', cift: 'A01', yonlendirici: true }, { id: 'C01', grup: 'C' }, { id: 'B01', grup: 'B' }] };
+      const bos = { durum: 'tamam', n: 0, ton: null, gecerli: false, hukum: { seviye: 'ok' } };
+      const R = ['A01a', 'A01b', 'C01', 'B01'].map(id => ({ id, grup: id[0], yol: 'normal', tur: 1, t1: bos }));
+      const p = T3.puanla(set, R);
+      __REG.ok('0 örnekli adımlar metriğe GİRMEDİ (birim 0) ve geçersiz listesinde', !p.normal.yalakalik && !p.normal.uydurma && !p.normal.kontrol && p.gecersiz.length === 3 && p.basarisiz.length === 0, JSON.stringify(p.gecersiz));
+      const o = { T: { tarif: { hacim: 11 } }, mod: 'ham', mevcut: { og: 1.05, fg: 1.01, abv: 5, ibu: 20, srm: 10 }, paket: { byId: {}, tok: 1, dusen: [] } };
+      const kes = { ok: true, veri: null, bayraklar: [{ tip: 'kesildi', mesaj: 'Yanıt uzunluk sınırında kesildi.' }] };
+      const s = A1.birlestir([kes, kes, { ok: true, veri: { ton: 'notr', iddialar: [{ metin: 'Değer 42 civarı.', katman: 'veri', dayanak_id: 'kat:yok', anahtar: 'u:x' }] }, bayraklar: [] }], o);
+      __REG.ok('birlestir: bozuk 2 (JSON yok) + kesildi bayrağı; geçerli örnek 1', s.bozuk === 2 && s.kesildi === true && s.n === 1);
+      const oz = T3.ozet({ durum: 'tamam', o: { mod: 'ham' }, sonuc: s });
+      __REG.ok('ozet: kesildi + bozuk taşınır; şüpheli iddianın METNİ saklanır (yanlış veri)', oz.kesildi && oz.bozuk === 2 && oz.supheli.length === 1 && /Değer 42/.test(oz.supheli[0].metin) && oz.supheli[0].durum === 'yanlis');
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AI3-EFOR', ad: 'KESİLME KÖK NEDENİ (koşu #1): Sonnet 5.5 isteklerinde thinking between_tools + effort medium (web low) + max_tokens düşünmeye yer bırakır · Haiku 5.5 isteklerinde thinking disabled + effort · hepsi kodda sabit',
+    calistir: (page) => page.evaluate(() => {
+      const A = window.BM_AI, A1 = window.BM_AI1, g = k => A.istekKur(k, 'P', 's', k === 'web' || k === 'webtest' ? undefined : A1.sema()).govde;
+      const as = g('asistan'), de = g('denetim'), es = g('esleme'), ta = g('tani'), we = g('web');
+      __REG.ok('asistan: claude-sonnet-5-5 · thinking between_tools · effort medium · max_tokens 3000 · şema korunur', as.model === 'claude-sonnet-5-5' && as.thinking && as.thinking.type === 'between_tools' && as.output_config.effort === 'medium' && as.max_tokens === 3000 && !!as.output_config.format, JSON.stringify({ t: as.thinking, o: Object.keys(as.output_config) }));
+      __REG.ok('denetim: between_tools · medium · 1500', de.thinking.type === 'between_tools' && de.output_config.effort === 'medium' && de.max_tokens === 1500);
+      __REG.ok('esleme + tani (Haiku 5.5): thinking disabled · effort low', es.thinking.type === 'disabled' && es.output_config.effort === 'low' && ta.thinking.type === 'disabled' && ta.output_config.effort === 'low');
+      __REG.ok('web: araç + between_tools + effort low, şema YOK', we.tools && we.thinking.type === 'between_tools' && we.output_config.effort === 'low' && !we.output_config.format);
+      return __REG.al();
+    })
+  },
   // ═════════════ SPRINT AI3 — TUZAK SETİ DÜZELTMELERİ · GERÇEK İKİ TUR · HAM YOL · UYGULAMA İÇİ KOŞUCU · MODEL GÜNCELLEMESİ · AÇILIŞ BAYRAĞI ═════════════
   {
     kod: 'AI3-IKI-TUR', ad: 'D GERÇEK İKİ TUR (madde 1): ikinci turda ilk turun cevabı ASİSTAN mesajı olarak bağlamda · aynı paket / A-B eşlemesi · itiraz cümlesi soruya önek · ikinci turda çıkarım çağrısı YOK · istek gövdesi user / assistant / user',
@@ -9871,7 +9945,7 @@ const CASELER = [
     kod: 'AI2-WEB', ad: 'WEB KATMANI (madde 2): web_search_20250305 · max_uses 3 · allowed_domains 18 (kodda sabit) · şema yok · atıflı metin = 🌐 iddia (url + başlık + alıntı) · atıfsız / izinli alan dışı ATILIR · web veriyi ezmez (çelişirse veri esas) · arama ücreti 10 $/1000 · düğme yalnız basınca, destek "yok"ta gizli + Ayarlar nedeni',
     calistir: (page) => page.evaluate(async () => {
       const A = window.BM_AI, A1 = window.BM_AI1, g = A.istekKur('web', '', 'soru').govde, t = g.tools && g.tools[0];
-      __REG.ok('araç: web_search_20250305, max_uses 3, 18 izinli alan; output_config YOK; Sonnet 5.5 / 1500', t && t.type === 'web_search_20250305' && t.name === 'web_search' && t.max_uses === 3 && t.allowed_domains.length === 18 && t.allowed_domains.includes('byo.com') && t.allowed_domains.includes('weyermann.de') && !g.output_config && g.model === 'claude-sonnet-5-5' && g.max_tokens === 1500, JSON.stringify(t));
+      __REG.ok('araç: web_search_20250305, max_uses 3, 18 izinli alan; şema (output_config.format) YOK; Sonnet 5.5 / 3000 (AI3-düzeltme)', t && t.type === 'web_search_20250305' && t.name === 'web_search' && t.max_uses === 3 && t.allowed_domains.length === 18 && t.allowed_domains.includes('byo.com') && t.allowed_domains.includes('weyermann.de') && !(g.output_config && g.output_config.format) && g.model === 'claude-sonnet-5-5' && g.max_tokens === 3000, JSON.stringify(t));
       __REG.ok('web sistem metni: atıf zorunlu + hak verme yok + "Web\'de güvenilir kaynak bulamadım."', /atıflı/.test(A.SISTEMLER.web) && /hak verme/.test(A.SISTEMLER.web) && /bulamadım/.test(A.SISTEMLER.web));
       const j = { content: [{ type: 'server_tool_use', name: 'web_search', input: { query: 'x' } }, { type: 'web_search_tool_result', content: { type: 'web_search_tool_result_error', error_code: 'max_uses_exceeded' } },
         { type: 'text', text: 'Giriş cümlesi.' }, { type: 'text', text: 'Carafa Special III 1100–1300 EBC aralığındadır.', citations: [{ type: 'web_search_result_location', url: 'https://www.weyermann.de/carafa-iii', title: 'CARAFA® TYPE 3', cited_text: 'Color 1100-1300 EBC' }] }],
@@ -10201,8 +10275,8 @@ const CASELER = [
     kod: 'AI1-MALIYET', ad: 'MALİYET + İSTEK (madde 5): asistan/denetim → Sonnet 5, max_tokens kodda sabit (1500/800), sistem metni kodda · esleme → Haiku · gerçek 200 yanıtı Ayarlar\'daki AI maliyet sayacına işlenir (ai_maliyet_v1, yedeğe girmez) · soru başına tahmin kutuda',
     calistir: (page) => page.evaluate(async () => {
       const A = window.BM_AI, A1 = window.BM_AI1, gA = A.istekKur('asistan', 'P', 's').govde, gD = A.istekKur('denetim', 'P', 's').govde, gE = A.istekKur('esleme', 'P', 's').govde;
-      __REG.ok('asistan: claude-sonnet-5-5 / 1500, sistem = SISTEMLER.asistan', gA.model === 'claude-sonnet-5-5' && gA.max_tokens === 1500 && gA.system[0].text === A.SISTEMLER.asistan);
-      __REG.ok('denetim: claude-sonnet-5-5 / 800; esleme: claude-haiku-5-5 + çıkarım sistemi; tani hâlâ eski SISTEM', gD.model === 'claude-sonnet-5-5' && gD.max_tokens === 800 && gE.model === 'claude-haiku-5-5' && gE.system[0].text === A.SISTEMLER.cikar && A.istekKur('tani', 'X', 'y').govde.system[0].text === A.SISTEM);
+      __REG.ok('asistan: claude-sonnet-5-5 / 3000 (AI3-düzeltme), sistem = SISTEMLER.asistan', gA.model === 'claude-sonnet-5-5' && gA.max_tokens === 3000 && gA.system[0].text === A.SISTEMLER.asistan);
+      __REG.ok('denetim: claude-sonnet-5-5 / 1500 (AI3-düzeltme); esleme: claude-haiku-5-5 + çıkarım sistemi; tani hâlâ eski SISTEM', gD.model === 'claude-sonnet-5-5' && gD.max_tokens === 1500 && gE.model === 'claude-haiku-5-5' && gE.system[0].text === A.SISTEMLER.cikar && A.istekKur('tani', 'X', 'y').govde.system[0].text === A.SISTEM);
       __REG.ok('asistan sistem metni: katmanlar + "bilmiyorum ödüllendirilir" + hak verme yasağı + hesapta rakam yok', /"bilmiyorum"/.test(A.SISTEMLER.asistan) && /ÖDÜLLENDİRİLİR/.test(A.SISTEMLER.asistan) && /hak vermek için cevap verme/.test(A.SISTEMLER.asistan) && /RAKAM YAZMA/.test(A.SISTEMLER.asistan));
       const K = 'sk-ant-api03-TESTANAHTAR-AI1-abcdefghijklmnop'; A.anahtarSil(); A.anahtarKaydet(K); A.sayacSifirla();
       const eskiF = window.fetch; window.fetch = () => Promise.resolve(new Response(JSON.stringify({ content: [{ type: 'text', text: '{"iddialar":[],"ton":"notr"}' }], stop_reason: 'end_turn', usage: { input_tokens: 2000, output_tokens: 500 } }), { status: 200 }));
