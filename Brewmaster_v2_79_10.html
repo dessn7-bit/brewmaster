@@ -1042,6 +1042,7 @@ body:has(.brewday-timeline) #bm-toast-container{top:20px;bottom:auto}
 .nd-oneri-alt{font-size:10.5px;color:var(--soluk);margin:8px 2px 4px;font-weight:700}
 .nd-oneri-malz,.nd-bir-satir{display:flex;width:100%;box-sizing:border-box;min-height:44px;align-items:center;gap:6px;text-align:left;background:var(--card);border:1px solid var(--bor);border-radius:10px;padding:6px 10px;margin:4px 0 0;font-size:12px;color:var(--metin);cursor:pointer;font-family:var(--font-govde);white-space:normal}
 .nd-oneri-malz b{margin-left:auto;white-space:nowrap;color:var(--bakir)}
+.uyg-bolum{margin-top:10px;border:1px solid var(--bor);border-radius:10px;padding:0 8px 8px;background:var(--bg2)}.uyg-ozet{min-height:44px;display:flex;align-items:center;font-size:13px;font-weight:700;color:var(--kahve);cursor:pointer}.uyg-sonuc{font-size:11px;color:var(--metin);line-height:1.5;margin:4px 0 6px;overflow-wrap:anywhere}.uyg-uyari{color:#a15c00;margin-top:3px}.uyg-satir{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;width:100%;box-sizing:border-box;min-height:44px;text-align:left;background:var(--card,#fff);border:1px solid var(--bor);border-radius:10px;padding:6px 10px;margin:4px 0 0;font-size:12px;color:var(--metin);cursor:pointer;font-family:var(--font-govde)}.uyg-orj{flex:1 1 140px;min-width:0;overflow-wrap:anywhere}.uyg-et{font-size:11px;border-radius:8px;padding:2px 6px;background:var(--bg2);overflow-wrap:anywhere;max-width:100%}.uyg-d1,.uyg-d2{color:#2e7d32}.uyg-d3{color:#a15c00}.uyg-d4{color:#6b4fa0}.uyg-al{color:#b3261e}.uyg-ozel{color:var(--dim)}.uyg-panel{margin:2px 0 6px 10px}.uyg-aday{display:block;width:100%;box-sizing:border-box;min-height:44px;text-align:left;background:#fff;border:1px dashed var(--bor);border-radius:10px;padding:6px 10px;margin:4px 0 0;font-size:12px;color:var(--metin);cursor:pointer;font-family:var(--font-govde);overflow-wrap:anywhere}.uyg-aday small{display:block;color:var(--soluk)}.uyg-fark{font-style:italic}.uyg-secili{border:2px solid var(--bakir)}.uyg-delta{display:flex;flex-wrap:wrap;gap:2px 8px;font-size:10.5px;margin-top:3px;color:var(--soluk)}.uyg-d-var{color:var(--bakir);font-weight:700}.uyg-yok,.uyg-not{font-size:10px;color:var(--dim);margin-top:6px;line-height:1.4}.bm-renk-tahmini{font-size:11px;font-weight:600;color:#a15c00;background:#fff4e0;border-radius:6px;padding:1px 6px;font-family:var(--font-govde);vertical-align:middle}
 .nd-bir-satir{flex-direction:column;align-items:flex-start;gap:1px}.nd-bir-satir>span,.nd-bir-satir>small{display:block;width:100%;text-align:left}.nd-bir-satir small{font-size:10.5px;color:var(--soluk)}
 .nd-oneri-not{font-size:10px;color:var(--dim);line-height:1.45;margin:6px 2px 0}
 /* SPRINT ND1 — ana kart = stil seçme ekranı girişi + yapılabilirlik rozetleri + malzeme araması */
@@ -4402,7 +4403,11 @@ const MALTLAR=[
   {id:"koyu_kahve_arpa",ad:"Koyu Kahve Arpa Maltı (Hitit)",gu:230,r:254,g:"Koyu",mo:"Hitit Malt (Türkiye)"},
   {id:"black_wheat",ad:"Siyah Buğday Maltı (Hitit)",gu:238,r:640,g:"Koyu",mo:"Hitit Malt (Türkiye)"}
 ,
-  {id:"melaroma",ad:"Melaroma Arpa Maltı (Hitit)",gu:275,r:114,g:"Özel",mo:"Hitit Malt (Türkiye)"}
+  {id:"melaroma",ad:"Melaroma Arpa Maltı (Hitit)",gu:275,r:114,g:"Özel",mo:"Hitit Malt (Türkiye)"},
+  // ═══ SPRINT UYG1 — ND5 kalıntıları / Kaan'ın stoğu (kaynaklar _uyg1_katalog.js başlığında) ═══
+  {id:"crf2_kabuklu",ad:"Carafa Type 2 (Weyermann, kabuklu)",gu:250,r:434,g:"Koyu",mo:"Weyermann",phc:"chocolate",/* kayn: weyermann.de 1100–1200 EBC / 415–453 °L (orta 434); ekstrakt üretici sayfasında YOK → kabuksuz eşi crf2 ile aynı gu (≤%5 kullanım) */alias:["weyermann carafa ii"]},
+  {id:"dingemans_black",ad:"Debittered Black Malt (Dingemans)",gu:250,r:545,g:"Koyu",mo:"Dingemans",/* kayn: BYO 525–600 °L, CraftaBrew 488–562 °L → örtüşme ortası 545; ekstrakt açılabilen sayfada YOK → kabuksuz siyah maltların katalog değeri 250 */alias:["debittered black malt (530 °l)"]},
+  {id:"chit",ad:"Chit Malt (BestMalz)",gu:192,r:1.4,g:"Özel",mo:"BestMalz",/* kayn: bestmalz.de EBC 2.0–3.0 (1.2–1.6 °L), ekstrakt ≥%50 kuru → 0,50×384; köpük stabilitesi, ~%15 */alias:["chit malt"]}
 ];
 
 const HOPLAR=[
@@ -4631,6 +4636,11 @@ const MAYALAR=[
   {id:"wy1388",ad:"WY1388 Belgian Strong Ale",atu:[73,77],sc:[18,25],ideal:22,e:"Duvel soyu. Belgian Golden Strong Ale.",tip:"belcika",ek:"isitici",alias:["belgian strong ale (wyeast)","belgian strong ale 1388 (wyeast)","1388"]},
   {id:"wy2001",ad:"WY2001 Pilsner Urquell",atu:[72,76],sc:[10,13],ideal:11,e:"Pilsner Urquell soyu. Klasik Bohemian Pilsner.",tip:"lager",ek:"dolap",alias:["urquell lager (wyeast)","2001"]},
   {id:"wy2112",ad:"WY2112 California Lager",atu:[67,71],sc:[14,17],ideal:16,e:"Anchor Steam soyu. California Common.",tip:"lager",ek:"dolap",alias:["california lager (wyeast)","california lager 2112 (wyeast)","2112"]},
+  // ═══ SPRINT UYG1 — ND5 kalıntıları / Kaan'ın stoğu (kaynaklar _uyg1_katalog.js başlığında) ═══
+  {id:"rva132",ad:"RVA 132 Manchester Ale",atu:[70,75],sc:[18,22],ideal:20,e:"İngiliz ale (Boddington soyu; RVA tat tanımı kaynakta yok)",tip:"ale",ek:"dolap",/* kayn: scottjanish.com RVA tablosu — 70-75%, 65-72F, flokülasyon yüksek */alias:["rva132 manchester ale"]},
+  // ═══ SPRINT UYG1 — ND5 kalıntıları / Kaan'ın stoğu (kaynaklar _uyg1_katalog.js başlığında) ═══
+  {id:"wlp380",ad:"WLP380 Hefeweizen IV",atu:[73,80],sc:[19,21],ideal:20,e:"Muskat, karanfil, baharat baskın; muz/sakız geride",tip:"wheat",ek:"dolap",tol:10,/* kayn: whitelabs.com WLP380 — 73-80%, 19-21 °C, flokülasyon düşük, alkol orta (5-10%) */alias:["wlp380","wlp380 hefeweizen iv ale yeast (2 vials)"]},
+  {id:"wy3333",ad:"WY3333 German Wheat",atu:[70,76],sc:[17,24],ideal:20,e:"Muz esteri + karanfil fenolü dengeli; yüksek çökelme (Kristallweizen)",tip:"wheat",ek:"dolap",tol:10,/* kayn: wyeastlab.com 3333-PC — 70-76%, 63-75°F (17-24°C), flokülasyon yüksek, %10 */alias:["wyeast 3333","wyeast 3333 german wheat ale yeast (big slurry)"]}
 ];
 // ═══ SPRINT BV: katalog arama — ad + alias (KİMLİK eşanlamlıları) ═══
 // alias = "bu ham ad BU kaydı adlandırır" (ör. "hallertauer" → Hallertau Mittelfrueh). İKAME DEĞİL:
@@ -7536,7 +7546,7 @@ const KATKILAR=[
   {id:"maise_guc",ad:"Fungal Alfa Amilaz (Maişe Güçlendirici / A. oryzae)",g:"Fermantasyon",gu:0,fermente:false,ibu_dk60:0,srm:0,attenBoost:5,etki:"Nişasta ve dekstrinleri maltoz/maltotrioz'a parçalar. Attenüasyonu %84-89'a çıkarır, FG'yi düşürür.",acik:"Aspergillus oryzae kaynaklı fungal alfa amilaz (FAA). Halk dilinde 'Maişe Güçlendirici' olarak bilinir. Alfa-1,4 bağlarını endo-fashion parçalar, limit dekstrinlere dokunmaz. Kaynak: Brewing Forward, Briggs et al. 'Brewing Science and Practice'. Doz: 0.5-2 mL/L sıvı veya 0.5-2 g/hL toz. Zaman: Mash'e (65-68°C optimum) veya fermentasyon başında. Glucoamylase'ten daha yumuşak — bira lezzetini bozmaz. Brut IPA, düşük-kalori biralarda.",kullanim:"Mash (65-68°C) veya fermentasyon başı",birim:"mL",density:1.26,/* kayn: Novozymes Fungamyl BrewQ manufacturer datasheet */zaman:"Mash / Fermantasyon başı",tags:["Enzim", "Alfa Amilaz", "Brut", "Attenüasyon"],varsayDozgL:1,maxDozgL:3,maxUyari:"Aşırı attenüasyon, gövde kalmaz",onerilenZaman:["Mash", "Fermantasyon başı"],fiyat:"orta",alerjen:[]},
   {id:"berrak_sivi",ad:"Bira Berraklaştırıcı (Whirlfloc/Irish Moss)",g:"Berraklaştırıcı",gu:0,fermente:false,ibu_dk60:0,srm:0,etki:"OG/SRM'ye etkisi yok. Berraklık sağlar.",acik:"Kaynatma son 10 dk\'da 1 tablet/20L (veya yarım tablet/10L). BYO: 1 tablet per 5 gallons.",kullanim:"Kaynatma son 10 dk",birim:"tablet",gPerUnit:2.5,/* kayn: Kerry WHIRLFLOC-T manufacturer spec, RahrBSG US+CA, NNL */tags:["Berraklaştırıcı", "Whirlfloc", "Kaynatma"],varsayDozgL:0.1,maxDozgL:0.3,maxUyari:"Tanen aşımı, bulanıklık artabilir",onerilenZaman:["Kaynatma sonu"],fiyat:"ucuz",alerjen:[]},
   {id:"jelatin",ad:"Berraklaştırıcı Toz Jelatin",g:"Berraklaştırıcı",gu:0,fermente:false,ibu_dk60:0,srm:0,etki:"OG/SRM'ye etkisi yok. Cold crash'te berraklık.",acik:"Soğuk kullanım (5°C). 2-4g/10L (BYO: 1-2 tsp per 5 gallons).",kullanim:"Cold crash sırasında (5°C)",birim:"g",tags:["Berraklaştırıcı", "Cold", "Soğuk"],varsayDozgL:0.7,maxDozgL:1.5,maxUyari:"Glutenous, hayvansal kaynak",onerilenZaman:["Cold crash", "Fermantasyon sonu"],fiyat:"ucuz",alerjen:["hayvansal"]},
-  {id:"kakao",ad:"Kakao Nibları (Cacao Nibs)",g:"Aroma",gu:0,fermente:false,ibu_dk60:0.08,srm:150,etki:"SRM'yi hafifçe koyulaştırır. Çikolata aroması katar.",acik:"Çikolata aroması. Cold crash sonrası soğuk ekle. 30-60g/10L.",kullanim:"Fermentasyon sonunda (soğuk)",birim:"g",tags:["Çikolata", "Stout", "Porter", "Dark"],varsayDozgL:4,maxDozgL:8,maxUyari:"Yağ bulanıklığı + acılık",onerilenZaman:["Fermantasyon sonu"],fiyat:"orta",alerjen:[],alias:["cocoa nibs","unsweetened cacao nibs","unsweetened cocoa nibs"]},
+  {id:"kakao",ad:"Kakao Nibları (Cacao Nibs)",g:"Aroma",gu:0,fermente:false,ibu_dk60:0.08,srm:150,etki:"SRM'yi hafifçe koyulaştırır. Çikolata aroması katar.",acik:"Çikolata aroması. Cold crash sonrası soğuk ekle. 30-60g/10L.",kullanim:"Fermentasyon sonunda (soğuk)",birim:"g",tags:["Çikolata", "Stout", "Porter", "Dark"],varsayDozgL:4,maxDozgL:8,maxUyari:"Yağ bulanıklığı + acılık",onerilenZaman:["Fermantasyon sonu"],fiyat:"orta",alerjen:[],alias:["cocoa nibs","unsweetened cacao nibs","unsweetened cocoa nibs","unsweetened chocolate baking nibs"]},
   {id:"vanilya",ad:"Vanilya Çubuğu",g:"Aroma",gu:0,fermente:false,ibu_dk60:0,srm:0,etki:"OG/SRM'ye etkisi yok. Vanilya aroması katar.",acik:"Boyuna yar, ovalayarak sıyır. 1-2 çubuk/10L. Soğukta 2 hafta.",kullanim:"Primary fermentation sonu veya secondary",birim:"adet",gPerUnit:3.5,/* kayn: Vanilla Etc + Slofoodgroup (110-150/lb) + Gneiss */tags:["Vanilya", "Aroma", "Stout", "Porter"],varsayMiktar:1,maxMiktar:4,maxUyari:"Aşırı parfüm, kimyasal tat",onerilenZaman:["Fermantasyon sonu"],fiyat:"pahali",alerjen:[],alias:["madagascar vanilla beans","vanilla bean"]},
   {id:"limon_otu",ad:"Limon Otu (Lemongrass)",g:"Aroma",gu:0,fermente:false,ibu_dk60:0.01,srm:0,etki:"OG/SRM'ye etkisi yok. Citrus-limon aroması.",acik:"5-15g/10L. Flameout veya kuru.",kullanim:"Flameout veya dry hop",birim:"g",tags:["Citrus", "Saison", "Wit", "Light"],varsayDozgL:2,maxDozgL:5,maxUyari:"Sabun-zencefil baskın",onerilenZaman:["Fermantasyon sonu", "Kaynatma sonu"],fiyat:"orta",alerjen:[],alias:["lemon grass","lemongrass stalks"]},
   {id:"kuru_lime",ad:"Kurutulmuş Lime (Kabuk)",g:"Aroma",gu:0,fermente:false,ibu_dk60:0.02,srm:0,etki:"OG'ye etkisi yok. Lime-citrus nüansı.",acik:"5-10g/10L. Taze beyaz kısmını alma.",kullanim:"Flameout veya dry hop",birim:"g",tags:["Citrus", "Sour", "Lime", "Mexican"],varsayDozgL:1,maxDozgL:3,maxUyari:"Keskin ekşi, pH düşük",onerilenZaman:["Kaynatma sonu", "Fermantasyon sonu"],fiyat:"orta",alerjen:[],alias:["lime peel"]},
@@ -7762,8 +7772,10 @@ const KATKILAR=[
   {id:"ardic_meyve",ad:"Ardıç Meyvesi (Juniper Berries)",g:"Baharat",gu:0,fermente:false,ibu_dk60:0,srm:0,etki:"OG/SRM etkisiz. Reçineli-biberimsi, cin benzeri aroma.",acik:"Juniperus communis meyvesi (kuru). Ardıç DALI ile aynı ürün DEĞİL: dal daha odunsu/iğne yapraklı, meyve daha biberimsi (Brewing Nordic, BYO Gordon Strong Sahti). Örnek reçetelerde 0,7–4,2 g/L (sahti mash 4,2; gruit 0,7–1,5). Kaynak: brewingnordic.com/new-nordic-beer/brewing-with-juniper-spruce-fir-pine/",kullanim:"Mash veya kaynatma sonu",birim:"g",tags:["Baharat","Sahti","Gin","Nordic"],varsayDozgL:0.75,maxDozgL:4.2,maxUyari:"Keskin reçine/cin baskın",onerilenZaman:["Mash","Kaynatma sonu"],fiyat:"orta",alerjen:[]},
   {id:"meyan_koku",ad:"Meyan Kökü (Licorice Root)",g:"Baharat",gu:0,fermente:false,ibu_dk60:0,srm:0,etki:"OG/SRM etkisiz. Yumuşak meyan tatlılığı, renk vermez.",acik:"Glycyrrhiza glabra kökü (kuru, kıyılmış). Brewer's licorice (yoğunlaştırılmış meyan özü çubuğu) AYRI ürün — çok daha yoğun (CB&B Special Ingredient: Brewer's Licorice). Örnek reçetelerde 0,7–1,5 g/L. Kaynak: beerandbrewing.com/special-ingredient-brewers-licorice",kullanim:"Kaynatma (son 15 dk)",birim:"g",tags:["Baharat","Licorice Root","Stout","Dubbel"],varsayDozgL:0.75,maxDozgL:1.5,maxUyari:"Meyan baskın, tatlımsı",onerilenZaman:["Kaynatmada"],fiyat:"ucuz",alerjen:[]},
   {id:"sweet_gale",ad:"Bataklık Mersini (Sweet Gale / Bog Myrtle)",g:"Baharat",gu:0,fermente:false,ibu_dk60:0,srm:0,etki:"OG/SRM etkisiz. Reçineli, tatlımsı, muskat ipuçlu aroma; gruit'in klasik otu.",acik:"Myrica gale yaprağı (kuru). Ortaçağ gruit'inin temel otu (Wikipedia: Myrica gale). Türkçe yerleşik adını bulamadım — ad İngilizce bog myrtle'ın çevirisi. Örnek reçetelerde 0,5 g/L. Hamilelikte kullanılmaması önerilir. Kaynak: en.wikipedia.org/wiki/Myrica_gale",kullanim:"Kaynatma sonu",birim:"g",tags:["Baharat","Gruit","Herbal","Myrica"],varsayDozgL:0.5,maxDozgL:1,maxUyari:"Reçine/acılık baskın",onerilenZaman:["Kaynatma sonu"],fiyat:"orta",alerjen:[]},
-  {id:"karaman_kimyon",ad:"Karaman Kimyonu (Caraway)",g:"Baharat",gu:0,fermente:false,ibu_dk60:0,srm:0,etki:"OG/SRM etkisiz. Sıcak, anason-fındıksı baharat.",acik:"Carum carvi tohumu. Kimyon (cumin) ile AYNI ürün değil. Bira ve kvass baharatı (ICAR-IISR caraway). Örnek reçetelerde 0,5 g/L. Kaynak: spices.res.in/products/spices/caraway.html",kullanim:"Kaynatma sonu",birim:"g",tags:["Baharat","Caraway","Kvass","Rye"],varsayDozgL:0.5,maxDozgL:1,maxUyari:"Ekmeksi-kimyonumsu baskın",onerilenZaman:["Kaynatma sonu"],fiyat:"ucuz",alerjen:[],alias:["caraway seeds"]},
-  {id:"mese_kup",ad:"Meşe Küpü (Oak Cubes)",g:"Meşe",gu:0,fermente:false,ibu_dk60:0,srm:0,etki:"Yavaş, kontrollü meşe/vanilya/tanen.",acik:"Kızartılmış meşe küpleri. Cips ile aynı ürün DEĞİL: yüzeyi az, aroma haftalar-aylar içinde gelir, çıkarması kolay (BYO Oak Alternatives). Örnek reçetelerde 1,5 g/L (ikincil). Kaynak: byo.com/articles/oak-alternatives-oaking-methods/",kullanim:"İkincil / olgunlaştırma",birim:"g",tags:["Meşe","Cubes","Ahşap","Barrel"],varsayDozgL:1.5,maxDozgL:3,maxUyari:"Aşırı tanen/odunsu",onerilenZaman:["Fermantasyon sonu"],fiyat:"orta",alerjen:[],alias:["american oak cubes","medium toast american oak cubes","medium toast french oak cubes","medium-toast oak cubes"]}
+  {id:"karaman_kimyon",ad:"Karaman Kimyonu (Caraway)",g:"Baharat",gu:0,fermente:false,ibu_dk60:0,srm:0,etki:"OG/SRM etkisiz. Sıcak, anason-fındıksı baharat.",acik:"Carum carvi L. tohumu (ICAR-IISR: çavdar ekmeği, Aquavit/Kümmel çeşnisi). Kimyon (cumin) AYRI bitki. Örnek reçetelerde 0,5 g/L (gruit, kvass). Kaynak: spices.res.in/products/spices/caraway.html",kullanim:"Kaynatma sonu",birim:"g",tags:["Baharat","Caraway","Kvass","Rye"],varsayDozgL:0.5,maxDozgL:1,maxUyari:"Ekmeksi-kimyonumsu baskın",onerilenZaman:["Kaynatma sonu"],fiyat:"ucuz",alerjen:[],alias:["caraway seeds"]},
+  {id:"mese_kup",ad:"Meşe Küpü (Oak Cubes)",g:"Meşe",gu:0,fermente:false,ibu_dk60:0,srm:0,etki:"Yavaş, kontrollü meşe/vanilya/tanen.",acik:"Kızartılmış meşe küpleri. Cips ile aynı ürün DEĞİL: yüzeyi az, aroma haftalar-aylar içinde gelir, çıkarması kolay (BYO Oak Alternatives). Örnek reçetelerde 1,5 g/L (ikincil). Kaynak: byo.com/articles/oak-alternatives-oaking-methods/",kullanim:"İkincil / olgunlaştırma",birim:"g",tags:["Meşe","Cubes","Ahşap","Barrel"],varsayDozgL:1.5,maxDozgL:3,maxUyari:"Aşırı tanen/odunsu",onerilenZaman:["Fermantasyon sonu"],fiyat:"orta",alerjen:[],alias:["american oak cubes","medium toast american oak cubes","medium toast french oak cubes","medium-toast oak cubes"]},
+  // ═══ SPRINT UYG1 — ND5 kalıntıları / Kaan'ın stoğu (kaynaklar _uyg1_katalog.js başlığında) ═══
+  {id:"koyu_candi_kaya",ad:"Koyu Candi Şekeri (Kaya) — Hazkat",g:"Şeker",gu:384,fermente:true,ibu_dk60:0,srm:183,renkTahmini:true,etki:"OG artar, tamamen fermente olur. Koyu renk + karamel.",acik:"Hazkat Profesyonel \"Brewing Dark Candi Sugar\" — koyu KAYA (katı) candi şekeri, şurup DEĞİL (D-180 kayıtları ayrı ürün). Renk TAHMİNİ: 360 EBC ≈ 183 SRM — üreticisi bilinmiyor; Castle \"Candy sugar dark (pieces)\" 250–450 EBC (castlemalting.com/Publications/SugarProducts/SucreCandiBrunFT_en.pdf) ve Südzucker \"candy sugar brown crushed\" 150–600 EBC (brouwland.com) orta noktalarının ortalaması; gerçek aralık 150–600 EBC. Potansiyel: Castle sükroz ≥%99,5 (kuru madde) → katalogdaki sükroz değeri 384 GU (Nöbet Şekeri ile aynı esas). Doz için kaynak bulunamadı — alan boş.",kullanim:"Kaynatmada",birim:"g",tags:["Şeker","Candi","Kaya","Hazkat"],onerilenZaman:["Kaynatmada"],alerjen:[]}
 ];
 let aramaMetni="";
 let _editId=null; // Düzenlenen tarihin ID'si, null ise yeni tarif
@@ -10364,6 +10376,9 @@ const TANIM={"uzum_pekmez":"GU: 300 (Fermente olur). Renk katkısı: 25°L. Üz�
 
 
 const MUADIL={
+  "crf2_kabuklu":[
+    {id:"crf2",ad:"Carafa II (Debittered)",fark:"⚠️ Aynı renk (Weyermann: ikisi de 1100–1200 EBC) ama Special kabuksuz — kabuklu Type 2 daha buruk/kavrulmuş. [UYG1 kaynak: weyermann.de]",detay:"Carafa Type 2 (kabuklu, 415–453 °L) ↔ Carafa Special Type 2 (\"made from dehusked barley\", 415–453 °L). Renk aynı; kabuk çıkarıldığı için Special'da acı/burukluk azalır."}
+  ],
   "pale_ale":[
     {id:"pilsner",ad:"Pilsner Malt",fark:"✅ OG aynı. Renk 1-2 SRM açık. Daha nötr, temiz tat.",detay:"Pale Ale GU 304, 3°L: ekmek/bisküvi/fındık aroması. Pilsner GU 310, 2°L: çok nötr, temiz. Pilsner kullanmak ekmeksi malt karakterini ortadan kaldırır. 90 dk kaynat — DMS riski. İngiliz stillerde bisküvi özlenir; American IPA için fark az. 1:1 gramaj kullan."},
     {id:"bel_pils",ad:"Belgian Pilsner",fark:"✅ OG aynı. Çok nötr ve temiz tat. Belçika stilleri için ideal.",detay:"Pale Ale GU 304, 3°L: ekmeksi. Belgian Pilsner GU 305, 2°L: nötr/temiz. Saison, Tripel ve Golden Strong'da maya esterlerinin öne çıkması için malt arka planda kalmalı — Belgian Pilsner ideal. 1:1 gramaj kullan."}
@@ -10476,6 +10491,7 @@ const MUADIL={
     {id:"pale_choc",ad:"Pale Chocolate Malt",fark:"⚠️ Hafif astrenjan ekler. Renk benzer.",detay:"Carafa I (Debittered) (GU 250, 337°L): Temiz siyah renk — çikolata benzer ama çok az astrenjan. → Pale Chocolate Malt (GU 273, 225°L): Hafif çikolata, daha yumuşak kahve, daha az yanık nüans. Renk 112°L açılır. Gramajı 94%'ye düşür."}
   ],
   "crf2":[
+    {id:"crf2_kabuklu",ad:"Carafa Type 2 (Weyermann, kabuklu)",fark:"⚠️ Aynı renk (Weyermann: ikisi de 1100–1200 EBC) ama kabuklu — daha buruk/kavrulmuş. [UYG1 kaynak: weyermann.de]",detay:"Carafa Special Type 2 kabuksuz arpadan; Type 2 kabuklu. Renk aynı (415–453 °L)."},
     {id:"crf1",ad:"Carafa I (Debittered)",fark:"⚠️ Carafa I — Carafa II'den daha açık. Renk azalır.",detay:"Carafa II (Debittered) (GU 250, 430°L): Çok koyu siyah renk, minimal tat — temiz Schwarzbier iç. → Carafa I (Debittered) (GU 250, 337°L): Temiz siyah renk — çikolata benzer ama çok az astrenjan. Renk 93°L açılır. 1:1 gramaj kullan."},
     {id:"crf3",ad:"Carafa Special III",fark:"⚠️ Carafa III — Carafa II'den 95°L daha koyu. Renk çok artar.",detay:"Carafa II GU 250, 430°L. Carafa III GU 250, 525°L: ~95°L daha koyu. Renk eşlemek için %82 gramaj kullan. Her ikisi debittered. Imperial Stout için Carafa III; Schwarzbier için Carafa II."}
   ],
@@ -17184,7 +17200,7 @@ ${batchOlcekKartHtml()}
     +'<div style="display:flex;align-items:center;gap:14px">'
     +'<div style="width:64px;height:64px;border-radius:10px;flex-shrink:0;border:2px solid rgba(0,0,0,.15);background:'+_hexV+'"></div>'
     +'<div>'
-    +'<div style="font-size:32px;font-weight:600;color:var(--bakir);font-family:var(--font-display);line-height:1">'+((_srmV||0)>40?'40+':(_srmV||0).toFixed(1))+' <span style="font-size:14px;color:var(--metin-soluk)">SRM</span></div>'
+    +'<div style="font-size:32px;font-weight:600;color:var(--bakir);font-family:var(--font-display);line-height:1">'+((_srmV||0)>40?'40+':(_srmV||0).toFixed(1))+' <span style="font-size:14px;color:var(--metin-soluk)">SRM</span>'+(window._bmRenkTahminiHTML?window._bmRenkTahminiHTML(S.katkilar):'')+'</div>'
     +'<div style="font-size:12px;color:var(--metin-soluk);margin-top:2px">'+_ebcV+' EBC</div>'
     +'<div style="font-size:13px;color:var(--metin);font-weight:600;margin-top:4px">'+_adTr+(_adEn&&_adEn!==_adTr?' <span style="color:var(--metin-soluk);font-weight:400">/ '+_adEn+'</span>':'')+'</div>'
     +'</div>'
@@ -27719,8 +27735,11 @@ window._TD_BOYUT = {
       var _ndMlz = (window._bmOrnekMalzemeliMi && window._bmOrnekMalzemeliMi(kaynak, stilAd, idx)) ? true : false;
       h += '<div class="nd-olustur-acik" style="font-size:10px;color:var(--dim);line-height:1.45;margin-top:10px">'
         + (_ndMlz ? '✨ <b>Bu örneğin malzemeleriyle</b>: bu örneğin malt / hop / mayası, miktarlar senin hacim ve verimine ölçeklenerek kurulur.<br>' : '')
+        + (_ndMlz ? '📦 <b>Stoğumla</b>: her satır stoğundaki en yakın karşılıkla (aynen › ✅ › ⚠️ › özellik benzerliği), OG/IBU örneğe dengelenerek kurulur; karşılığı olmayan "alınacak" kalır.<br>' : '')
         + '📋 <b>Stil iskeletinden</b>: stilin tipik iskeleti senin hacmine kurulur; örneğin metni not alanına yazılır.</div>';
+      if(_ndMlz && window._bmUyarlaHTML) h += window._bmUyarlaHTML(kaynak, stilAd, idx); // SPRINT UYG1
       if(_ndMlz) h += '<button type="button" class="nd-mlz-btn" onclick="bmOrnekOnizleMalzemeli(\'' + kaynak + '\',\'' + jsq(stilAd) + '\',' + idx + ')" style="width:100%;margin-top:8px;min-height:44px;background:var(--bakir);color:#fff;border:none;border-radius:10px;padding:11px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font-govde)">✨ Bu örneğin malzemeleriyle oluştur</button>';
+      if(_ndMlz) h += '<button type="button" class="uyg-btn" onclick="bmOrnekOnizleStokumla(\'' + kaynak + '\',\'' + jsq(stilAd) + '\',' + idx + ')" style="width:100%;margin-top:8px;min-height:44px;background:var(--kahve);color:#fff;border:none;border-radius:10px;padding:11px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font-govde)">📦 Stoğumla oluştur</button>'; // SPRINT UYG1
       h += '<div style="display:flex;gap:8px;margin-top:8px;position:sticky;bottom:-16px;background:#fff;padding:8px 0">';
       h += '<button type="button" onclick="bmOrnekOnizleKapat()" style="flex:1;background:var(--bg2);color:var(--kahve);border:1px solid var(--bor);border-radius:10px;padding:11px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font-govde)">Kapat</button>';
       h += '<button type="button" onclick="bmOrnekOnizleOlustur()" title="Stil iskeleti + örneğin hedefleri; orijinal içerik not alanına yazılır" style="flex:2;background:' + (_ndMlz ? 'var(--bg2);color:var(--kahve);border:1px solid var(--bakir)' : 'var(--bakir);color:#fff;border:none') + ';border-radius:10px;padding:11px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font-govde)">📋 Stil iskeletinden oluştur</button>';
@@ -27732,7 +27751,7 @@ window._TD_BOYUT = {
       return true;
     }catch(e){ if(window.bmHataKaydet)bmHataKaydet('calc',e,'_bmOrnekOnizle'); return null; }
   };
-  window.bmOrnekOnizleKapat = function(){ var m = document.getElementById('bmOrnekOnizle'); if(m) m.remove(); document.removeEventListener('keydown', _bmOnizleEsc); _onizleSec = null; };
+  window.bmOrnekOnizleKapat = function(){ var m = document.getElementById('bmOrnekOnizle'); if(m) m.remove(); document.removeEventListener('keydown', _bmOnizleEsc); _onizleSec = null; if(window._bmUyarlaSifirla) window._bmUyarlaSifirla(); /* UYG1: satır seçimleri önizleme kapanınca sıfırlanır */ };
   function _bmOnizleEsc(e){ if(e && e.key === 'Escape'){ try{ e.stopPropagation(); }catch(_){} bmOrnekOnizleKapat(); } }
   window.bmOrnekOnizleOlustur = function(){
     try{
@@ -28894,20 +28913,33 @@ window._brTamHTML = function(){
   var ATIL = /^(\d+([.,]\d+)?|tsp|tbsp|oz|lb|lbs|g|kg|ml|l|min|mins|minute|minutes|cup|cups|dried|dry|fresh|freshly|ground|crushed|coarsely|whole|frozen|toasted|organic|raw|pure|in|boil|kettle|primary|secondary|whirlpool|mash|at|end|of|the|optional|for|to|prime|priming|carbonate|or|and|a|an|left|last|tablet|tablets|leaf|pellets?)$/;
   function cekirdek(ham){
     // ND2: "dry/dried malt extract" = ÜRÜN FORMU (DME), hazırlama sözcüğü değil → atılmadan önce tek token'a indirgenir
-    var s = String(ham || '').replace(/\b(dry|dried)\s+malt\s+extract\b/gi, ' dme ').replace(/\([^)]*\)/g, ' ').replace(/\[[^\]]*\]/g, ' ').split(/[@,;]/)[0];
+    var s = String(ham || '').replace(/\b(dry|dried)\s+malt\s+extract\b/gi, ' dme ').replace(/\([^)]*\)/g, ' ').replace(/\[[^\]]*\]/g, ' ').replace(/[(\[][^)\]]*$/, ' ').split(/[@,;]/)[0]; // UYG1: kapanmayan parantez (kırpılmış kaynak adı) sonrası atılır
     return trN(s).split(' ').filter(function(w){ return w && !ATIL.test(w); }).join(' ');
   }
   function esit(c, t){ return c === t || c === t + 's' || c + 's' === t || c === t + 'es' || c + 'es' === t; }
+  // SPRINT UYG1 — biçim çatışması. Ham yazımın biçimi: "fresh" (ardından öğütme/rendeleme sözcüğü gelmiyorsa — "fresh ground",
+  // "freshly ground" öğütme niteliğidir) → taze; "dried"/"dry" → kuru. Kaydın biçimi adından: yalnız "kuru/kurutulmuş" → kuru,
+  // yalnız "taze" → taze, ikisi birden ya da hiçbiri → biçimsiz (her ikisini kabul eder).
+  function hamBicim(ham){ var s = trN(String(ham || '').replace(/\([^)]*\)/g, ' ').replace(/[(\[][^)\]]*$/, ' ').split(/[@,;]/)[0]);
+    var tz = /\bfresh\b(?! (ground|grated|cracked|crushed|milled))/.test(s), kr = /\b(dried|dry)\b/.test(s) && !/\bdry (malt )?extract\b|\bdme\b/.test(s);
+    return tz && !kr ? 'taze' : kr && !tz ? 'kuru' : null; }
+  var _kbOn = {};
+  function kayitBicim(tip, id){ var k = tip + ':' + id; if(k in _kbOn) return _kbOn[k];
+    var L = tip === 'malt' ? MALTLAR : tip === 'hop' ? HOPLAR : tip === 'maya' ? MAYALAR : KATKILAR, x = (L || []).find(function(a){ return a && a.id === id; });
+    var a = x ? trN(x.ad) : '', kr = /\b(kuru|kurutulmus)\b/.test(a), tz = /\btaze\b/.test(a);
+    return (_kbOn[k] = kr && !tz ? 'kuru' : tz && !kr ? 'taze' : null); }
+  function bicimCatisir(tip, id, ham){ var h = hamBicim(ham); if(!h) return false; var k = kayitBicim(tip, id); return !!k && k !== h; }
+  window._bmBicimCatisir = bicimCatisir; // test/teşhis
   // katalog kaydı (tip + id) bu ham adı adlandırıyor mu? (yalnız TEK kayda ait terimler; çekirdek eşitliği)
   window._bmKalemEsles = function(tip, id, hamAd){
-    var T = terimler(tip)[id] || [], c = cekirdek(hamAd); if(!c) return false;
+    var T = terimler(tip)[id] || [], c = cekirdek(hamAd); if(!c || bicimCatisir(tip, id, hamAd)) return false;
     for(var i = 0; i < T.length; i++) if(esit(c, T[i])) return true;
     return false;
   };
   // ham ad → tek katalog kaydı (metin kuralı); 0 ya da 2+ kayıt = null (belirsiz)
   window._bmMetinCoz = function(tip, hamAd){
     var T = terimler(tip), c = cekirdek(hamAd), bul = null; if(!c) return null;
-    for(var id in T){ if(!Object.prototype.hasOwnProperty.call(T, id)) continue;
+    for(var id in T){ if(!Object.prototype.hasOwnProperty.call(T, id) || bicimCatisir(tip, id, hamAd)) continue;
       for(var i = 0; i < T[id].length; i++){ if(esit(c, T[id][i])){ if(bul && bul !== id) return null; bul = id; break; } } }
     return bul;
   };
@@ -28926,9 +28958,20 @@ window._brTamHTML = function(){
     var s = String(metin == null ? '' : metin).toLowerCase(); if(!s.trim() || /\bfl\.?\s*oz\b/.test(s)) return null;
     var num = function(v){ v = String(v).trim(); var m = /^(\d+)\s+(\d+)\/(\d+)$/.exec(v); if(m) return +m[1] + m[2] / m[3]; m = /^(\d+)\/(\d+)$/.exec(v); if(m) return m[1] / m[2]; return parseFloat(v); };
     var p = /\(\s*(\d+(?:\.\d+)?)\s*(g|grams?|kg|ml|l|liters?)\s*\)/.exec(s);
-    if(p){ if(!/^(g|grams?|kg)$/.test(p[2])) return null; var gp = parseFloat(p[1]) * (p[2] === 'kg' ? 1000 : 1); return gp > 0 ? Math.round(gp * 10) / 10 : null; }
-    var m = /^\s*(\d+\s+\d+\/\d+|\d+\/\d+|\d+(?:\.\d+)?)\s*(kg|g|grams?|oz|ounces?|lbs?|pounds?)\.?(?![a-z])/.exec(s); if(!m) return null;
-    var v = num(m[1]), b = m[2], g = b === 'kg' ? v * 1000 : /^(g|grams?)$/.test(b) ? v : /^(oz|ounces?)$/.test(b) ? v * 28.3495 : v * 453.592;
+    var m = /^\s*(\d+\s+\d+\/\d+|\d+\/\d+|\d+(?:\.\d+)?)\s*(kg|g|grams?|oz|ounces?|lbs?|pounds?)\.?(?![a-z])/.exec(s);
+    var emp = function(){ var v = num(m[1]), b = m[2]; return b === 'kg' ? v * 1000 : /^(g|grams?)$/.test(b) ? v : /^(oz|ounces?)$/.test(b) ? v * 28.3495 : v * 453.592; };
+    if(p){ if(!/^(g|grams?|kg)$/.test(p[2])) return null; var gp = parseFloat(p[1]) * (p[2] === 'kg' ? 1000 : 1);
+      // UYG1: "1/2 oz. (56 g)" — iki birim %10'dan fazla çelişiyorsa hangisinin doğru olduğu bilinemez → miktar bilinmiyor.
+      // Basılı değerler yuvarlanmıştır ("0.06 oz (2 g)"): her değer yazıldığı hassasiyetin aralığı (son hanenin ±yarısı; kesir tam)
+      // olarak alınır, aralıklar %10 genişletilir; HİÇ örtüşmüyorsa çelişki.
+      if(m && gp > 0){
+        var hz = function(t){ t = String(t).trim(); var d = /\.(\d+)$/.exec(t); return /\//.test(t) ? 0 : d ? Math.pow(10, -d[1].length) / 2 : 0.5; };
+        var ge = emp(), ke = ge / num(m[1]), kp = p[2] === 'kg' ? 1000 : 1, ue = hz(m[1]) * ke, up = hz(p[1]) * kp;
+        if(ge > 0 && ((ge + ue) * 1.1 < (gp - up) / 1.1 || (gp + up) * 1.1 < (ge - ue) / 1.1)) return null;
+      }
+      return gp > 0 ? Math.round(gp * 10) / 10 : null; }
+    if(!m) return null;
+    var g = emp();
     return g > 0 ? Math.round(g * 10) / 10 : null;
   };
   // ── 4) KURU dönüşüm (yazma yok) ──
@@ -29398,6 +29441,249 @@ window._brTamHTML = function(){
     if(window.__brAcik){ window.__brAcik = false; }
     return window._bmOrnekMalzemeliRecete(kaynak, stil, idx);
   };
+})();
+
+// ═══ SPRINT UYG1 — ORTAK İKAME MOTORU + "📦 STOĞUMLA OLUŞTUR" + SATIR DEĞİŞTİRME ÖNİZLEMESİ ═══
+// TEK YER: satır değiştirme, "Stoğumla oluştur" ve (ileride) iskelet aynı motoru (_bmIkameAday) kullanır.
+// Motor YALNIZ reçete KURMA ve önizleme içindir: ✅/🟡/🔴 durum hesabı (_bmOrnekStok, ND1/ND4) DEĞİŞMEZ.
+// Derece: 1 aynen (stokta aynı kayıt) · 2 ✅ MUADIL (fark "✅" ile başlar) · 3 ⚠️ MUADIL (fark "⚠️") · 4 özellik benzerliği
+// (YALNIZ malt/hop/maya; katalog alanlarından, sayısal farklarla; "doğrulanmış muadil değil") · aday yoksa satır "alınacak".
+// Lezzet katkısında özellik benzerliği YOK (lavanta ↔ gül anlamsız): yalnız aynen / MUADIL.
+// Özellik benzerliği ağırlıkları (skor küçük = yakın; derece 4 içinde sıralama):
+//   malt: aynı kullanım grubu (MALTLAR.g) ŞART · renk |Δ°L| / max(°L, 10) (ağırlık 1; >1 ise aday değil) + potansiyel |ΔGU| / GU (ağırlık 2)
+//   hop : katalogda acı/aroma rol alanı YOK → rol reçete satırından (kaynatma/FWH ≥30 dk = acı, diğerleri aroma).
+//         acı: alfa oranı |ln(aa₂/aa₁)| (gram zaten IBU'ya göre dengelenir); aroma: AYNI köken grubu (HOPLAR.g) ŞART + aynı alfa ölçütü;
+//         alfa oranı 0,25–4 dışı ve "Ekstrakt" grubu aday değil
+//   maya: aynı tip (MAYALAR.tip) ŞART · attenüasyon aralığı boşluğu / 5 + sıcaklık aralığı boşluğu / 5 + karakter (e) farklıysa 0,5
+(function(){
+  var KAT = function(tip){ return tip === 'malt' ? MALTLAR : tip === 'hop' ? HOPLAR : tip === 'maya' ? MAYALAR : KATKILAR; };
+  var kayit = function(tip, id){ return id ? ((KAT(tip) || []).find(function(a){ return a && a.id === id; }) || null) : null; };
+  var esc_ = function(s){ return (typeof esc === 'function') ? esc(s) : String(s == null ? '' : s); };
+  var jsq_ = function(s){ return String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'"); };
+  var tr = function(v, d){ return (Math.round(v * Math.pow(10, d || 0)) / Math.pow(10, d || 0)).toString().replace('.', ','); };
+  window._BM_IKAME_DERECE = { 1:{ ik:'✓', ad:'aynen' }, 2:{ ik:'✅', ad:'✅ muadil' }, 3:{ ik:'⚠️', ad:'⚠️ muadil' }, 4:{ ik:'≈', ad:'özellik benzerliği — doğrulanmış muadil değil' } };
+  function stokBul(tip, id){ var x = kayit(tip, id); var i = (typeof _stokMalBul === 'function') ? _stokMalBul(id, x ? x.ad : id) : -1; return i > -1 ? STOK[i] : null; }
+  // stok karşılığı: miktar > 0 ya da "miktar ?" (≈ doğrulanmadı). Gereken karşılanmıyorsa "az var" (yine önerilir).
+  function stokBilgi(s, gerek, birim){
+    if(!s) return null; var bel = (typeof _stokMikYok === 'function') && _stokMikYok(s);
+    if(!bel && !((+s.miktar || 0) > 0)) return null;
+    var az = false;
+    if(!bel && gerek > 0 && birim){ var c = (typeof _stokBirimCevir === 'function') ? _stokBirimCevir(gerek, birim, s.birim || birim) : null; if(c != null && (+s.miktar || 0) < c) az = true; }
+    return { ad:s.ad, miktar:bel ? null : +s.miktar, birim:s.birim || '', az:az, belirsiz:bel };
+  }
+  function benzerMalt(t, c){
+    if(!t || !c || t.g !== c.g || !(c.gu > 0)) return null;
+    var dr = Math.abs(c.r - t.r) / Math.max(t.r, 10), de = Math.abs(c.gu - t.gu) / Math.max(t.gu, 1); if(dr > 1) return null;
+    return { skor:dr + 2 * de, fark:'renk ' + tr(t.r, 1) + ' °L → ' + tr(c.r, 1) + ' °L, potansiyel GU ' + t.gu + ' → ' + c.gu + ' (aynı grup: ' + t.g + ')' };
+  }
+  function benzerHop(t, c, rol){
+    if(!t || !c || !(t.aa > 0) || !(c.aa > 0) || c.g === 'Ekstrakt' || t.g === 'Ekstrakt') return null;
+    var r = c.aa / t.aa; if(r < 0.25 || r > 4) return null;
+    if(rol !== 'aci' && c.g !== t.g) return null;
+    return { skor:Math.abs(Math.log(r)), fark:'alfa %' + tr(t.aa, 1) + ' → %' + tr(c.aa, 1) + (rol === 'aci' ? ' · acılık satırı (gram hedef IBU\'ya göre ayarlanır)' : ' · aroma satırı, köken aynı (' + t.g + ') — aroma karakteri karşılaştırması için kaynak yok') };
+  }
+  function bosluk(a, b){ return Math.max(0, Math.max(a[0], b[0]) - Math.min(a[1], b[1])); }
+  function benzerMaya(t, c){
+    if(!t || !c || t.tip !== c.tip || !Array.isArray(t.atu) || !Array.isArray(c.atu)) return null;
+    var ga = bosluk(t.atu, c.atu), gs = bosluk(t.sc || [0, 0], c.sc || [0, 0]), ke = String(t.e || '').trim() === String(c.e || '').trim() ? 0 : 1;
+    return { skor:ga / 5 + gs / 5 + 0.5 * ke, fark:'attenüasyon %' + t.atu[0] + '–' + t.atu[1] + ' → %' + c.atu[0] + '–' + c.atu[1] + ' · sıcaklık ' + (t.sc || []).join('–') + ' → ' + (c.sc || []).join('–') + ' °C · karakter «' + (t.e || '?') + '» → «' + (c.e || '?') + '»' };
+  }
+  // Girdi: { tip, id, gerek, birim, rol } · Çıktı: aday dizisi (derece sırasıyla); boş = "yok"
+  window._bmIkameAday = function(sat, maxDerece){
+    var out = [], gor = {}, mx = maxDerece || 4;
+    var ekle = function(derece, id, fark, detay, skor){
+      if(derece > mx || gor[id]) return; var b = stokBilgi(stokBul(sat.tip, id), sat.gerek, sat.birim); if(!b) return;
+      gor[id] = 1; var k = kayit(sat.tip, id);
+      out.push({ derece:derece, tip:sat.tip, id:id, ad:k ? k.ad : id, stok:b, az:b.az, belirsiz:b.belirsiz, fark:fark || '', detay:detay || '', skor:skor || 0 });
+    };
+    if(!sat || !sat.id) return out;
+    ekle(1, sat.id);
+    var M = (typeof MUADIL !== 'undefined' && Array.isArray(MUADIL[sat.id])) ? MUADIL[sat.id] : [];
+    M.forEach(function(mu){ if(mu && mu.id && kayit(sat.tip, mu.id) && window._bmMuadilTam(mu)) ekle(2, mu.id, mu.fark, mu.detay); });
+    M.forEach(function(mu){ if(mu && mu.id && kayit(sat.tip, mu.id) && String(mu.fark || '').trim().indexOf('⚠️') === 0) ekle(3, mu.id, mu.fark, mu.detay); });
+    if(mx >= 4 && (sat.tip === 'malt' || sat.tip === 'hop' || sat.tip === 'maya')){
+      var t = kayit(sat.tip, sat.id), L = [];
+      (typeof STOK !== 'undefined' ? STOK : []).forEach(function(s){
+        if(!s || !s.refId || gor[s.refId]) return; var c = kayit(sat.tip, s.refId); if(!c || c.id === sat.id) return;
+        var b = sat.tip === 'malt' ? benzerMalt(t, c) : sat.tip === 'hop' ? benzerHop(t, c, sat.rol) : benzerMaya(t, c);
+        if(b && !L.some(function(z){ return z.id === c.id; })) L.push({ id:c.id, b:b });
+      });
+      L.sort(function(a, b){ return a.b.skor - b.b.skor; }).slice(0, 3).forEach(function(x){ ekle(4, x.id, x.b.fark, '', x.b.skor); });
+    }
+    return out;
+  };
+  // reçete hesabı (uygulamanın KENDİ calc()'ı) — S alanları geçici atanır, finally'de AYNI referanslarla geri konur (render/kayıt yok)
+  var ALAN = ['maltlar', 'hoplar', 'katkilar', 'mayaId', 'maya2Id', 'hacim', 'verim', 'ogManuel', 'fgManuel', 'mashSc', 'kopitchOran'];
+  window._bmTarifHesap = function(t){
+    var es = {}; ALAN.forEach(function(a){ es[a] = { var_:Object.prototype.hasOwnProperty.call(S, a), v:S[a] }; });
+    try{
+      S.maltlar = t.maltlar || []; S.hoplar = t.hoplar || []; S.katkilar = t.katkilar || []; S.mayaId = t.mayaId || null; S.maya2Id = null;
+      S.hacim = t.hacim; S.verim = t.verim; S.ogManuel = ''; S['fgManuel'] = ''; /* AK1 kaynak taraması: FG alanı yalnız boşaltılır, okunmaz */ S.mashSc = t.mashSc || 67; S.kopitchOran = null;
+      var c = calc(); return { og:c.og, fg:c.fg, abv:c.abv, srm:c.srm, ibu:c.ibu };
+    } finally { ALAN.forEach(function(a){ if(es[a].var_) S[a] = es[a].v; else delete S[a]; }); }
+  };
+  function hopSatir(id, g, x, cAA){
+    var d = x == null ? null : x[2], h = HOPLAR.find(function(a){ return a && a.id === id; }), b = { id:id, g:g, cAA:cAA, form:'pellet', _ad:h ? h.ad : id }, v = null;
+    if(typeof d === 'number'){ b.tur = 'boil'; b.dk = d; }
+    else if(d === 'kuru'){ b.tur = 'dry_hop'; b.dk = 0; b.dryDays = 5; v = 'kuru hop süresi kaynakta yok → 5 gün'; }
+    else if(d === 'wp'){ b.tur = 'whirlpool'; b.dk = 15; b.whT = 80; v = 'whirlpool süresi/sıcaklığı kaynakta yok → 15 dk / 80°C'; }
+    else if(d === 'FWH'){ b.tur = 'fwh'; b.dk = 60; }
+    else { b.tur = 'boil'; b.dk = 60; v = 'kaynatma süresi kaynakta yok → 60 dk'; }
+    return { b:b, varsay:v };
+  }
+  var aciMi = function(b){ return (b.tur === 'boil' && b.dk >= 30) || b.tur === 'fwh'; };
+  function bjcpOrta(stil, a){ var B = (typeof BJCP !== 'undefined') ? BJCP[stil] : null; return (B && Array.isArray(B[a])) ? (B[a][0] + B[a][1]) / 2 : null; }
+  // opt: { sec:{ anahtar: id | '__aynen' }, maxDerece:1–4, birebir:true (örneğin KENDİ kalemleri, stoğa bakmadan) }
+  window._bmStokUyarla = function(kaynak, stil, idx, opt){
+    try{
+      opt = opt || {}; var sec = opt.sec || {}, mx = opt.maxDerece || 4;
+      if(!window._bmOrnekMalzemeliMi || !window._bmOrnekMalzemeliMi(kaynak, stil, idx)) return null;
+      var o = window._bmOrnekNesne(kaynak, stil, idx), r = window._bmOrnekKuru(kaynak, stil, idx); if(!o || !r) return null;
+      var P = window._bmProsesYardimci, satirlar = [], varsay = [];
+      var sec1 = function(grup, i, k, rol){
+        var key = grup + ':' + i, proses = !!P(k), base = { key:key, grup:grup, i:i, tip:k.tip, ham:k.ham, orijId:k.id, orijAd:k.ad || k.ham, gerek:k.mik, birim:k.birim, rol:rol || null, proses:proses, mikMetin:k.mikMetin || '' };
+        if(!k.id){ base.ozel = true; base.id = null; base.ad = k.ham; base.aday = []; return base; }
+        if(opt.birebir || proses){ base.aday = []; base.secilen = null; base.id = k.id; base.ad = k.ad; base.alinacak = false; return base; }
+        var A = window._bmIkameAday({ tip:k.tip, id:k.id, gerek:k.mik > 0 ? k.mik : (k.tip === 'maya' ? 1 : 0), birim:k.tip === 'maya' ? 'pk' : k.birim, rol:rol }, mx);
+        var s = sec[key], c = s === '__aynen' ? (A[0] && A[0].derece === 1 ? A[0] : null) : s ? (A.find(function(a){ return a.id === s; }) || A[0] || null) : (A[0] || null);
+        base.aday = A; base.secilen = c; base.aynenIstendi = s === '__aynen';
+        base.id = c ? c.id : k.id; base.ad = c ? c.ad : k.ad; base.alinacak = !c; return base;
+      };
+      var hb = (o.h || []).map(function(x, i){ return hopSatir(r.h[i] ? r.h[i].id : null, 0, x, null).b; });
+      r.g.forEach(function(k, i){ satirlar.push(sec1('g', i, k)); });
+      r.h.forEach(function(k, i){ satirlar.push(sec1('h', i, k, aciMi(hb[i]) ? 'aci' : 'aroma')); });
+      if(r.y) satirlar.push(sec1('y', 0, r.y));
+      r.ek.forEach(function(k, i){ if(k.id || (k.mik > 0 && !P(k))) satirlar.push(sec1('ek', i, k)); });
+      var hacim = r.hacim, verim = r.verim, t = { maltlar:[], hoplar:[], katkilar:[], mayaId:null, hacim:hacim, verim:verim, mashSc:(+o.ms >= 60 && +o.ms <= 74) ? Math.round(+o.ms) : null };
+      // grist (oranı korunarak ölçeklenecek) + sabit ek kalemler
+      var grist = [], sabitM = [], sabitK = [];
+      satirlar.forEach(function(s){
+        if(s.grup === 'g'){ if(s.tip === 'malt') grist.push({ s:s, m:{ id:s.id, kg:s.gerek, marka:'', _ad:s.ad } }); else grist.push({ s:s, k:{ id:s.id, ad:s.ad, birim:'kg', miktar:s.gerek, zaman:(kayit('katki', s.id) || {}).kullanim || '' } }); }
+        else if(s.grup === 'ek' && s.gerek > 0){
+          if(s.ozel) sabitK.push({ id:'ozel_uyg_' + s.i, ad:s.ham, birim:'g', miktar:s.gerek, zaman:'' });
+          else if(s.tip === 'malt') sabitM.push({ id:s.id, kg:s.gerek, marka:'', _ad:s.ad });
+          else { var xk = kayit('katki', s.id); sabitK.push({ id:s.id, ad:xk ? xk.ad : s.ad, birim:'g', miktar:s.gerek, zaman:xk ? xk.kullanim : '' }); }
+        }
+      });
+      var gM = function(f){ return grist.filter(function(x){ return x.m; }).map(function(x){ return { id:x.m.id, kg:x.m.kg * f, marka:'', _ad:x.m._ad }; }); };
+      var gK = function(f){ return grist.filter(function(x){ return x.k; }).map(function(x){ return { id:x.k.id, ad:x.k.ad, birim:'kg', miktar:x.k.miktar * f, zaman:x.k.zaman }; }); };
+      var hOgK = { og:+o.og > 1 ? +o.og : +o.ogH > 1 ? +o.ogH : bjcpOrta(stil, 'og'), ib:+o.ib > 0 ? +o.ib : bjcpOrta(stil, 'ibu') };
+      var hedef = { og:hOgK.og, ib:hOgK.ib, ogK:+o.og > 1 ? 'örnek' : +o.ogH > 1 ? 'örnek (hesaplanmış OG)' : 'BJCP orta noktası', ibK:+o.ib > 0 ? 'örnek' : 'BJCP orta noktası' };
+      var uyari = [], s = 1;
+      if(hedef.og > 1 && !opt.birebir){
+        var o0 = hOG(sabitM, verim, sabitK, hacim), o1 = hOG(sabitM.concat(gM(1)), verim, sabitK.concat(gK(1)), hacim);
+        if(o1 - o0 > 1e-6 && hedef.og > o0) s = (hedef.og - o0) / (o1 - o0); else uyari.push('OG dengelenemedi (grist katkısı yok ya da sabit kalemler hedefi aşıyor)');
+      }
+      t.maltlar = gM(s).map(function(m){ m.kg = Math.round(m.kg * 1000) / 1000; return m; }).concat(sabitM);
+      t.katkilar = gK(s).map(function(k){ k.miktar = Math.round(k.miktar * 1000) / 1000; return k; }).concat(sabitK);
+      // hoplar: alfa — stoktan gelen hop için katalog (stok kaleminde alfa alanı yok); stokta olmayan ("alınacak") orijinal hop için kaynaktaki alfa
+      satirlar.forEach(function(sa){ if(sa.grup !== 'h') return; var x = (o.h || [])[sa.i];
+        var hs = hopSatir(sa.id, sa.gerek, x, (sa.alinacak && sa.id === sa.orijId && +((x || [])[3]) > 0) ? +x[3] : (opt.birebir && +((x || [])[3]) > 0 ? +x[3] : null));
+        if(hs.varsay) varsay.push((hs.b._ad || sa.id) + ': ' + hs.varsay); sa.hop = hs.b; t.hoplar.push(hs.b); });
+      var ogD = hOG(t.maltlar, verim, t.katkilar, hacim), f = 1;
+      if(hedef.ib > 0 && !opt.birebir){
+        var aci = t.hoplar.filter(aciMi), diger = t.hoplar.filter(function(b){ return !aciMi(b); });
+        var i0 = hIBU(diger, ogD, hacim, t.katkilar), i1 = hIBU(t.hoplar, ogD, hacim, t.katkilar);
+        if(aci.length && i1 - i0 > 0.01 && hedef.ib > i0){ f = (hedef.ib - i0) / (i1 - i0); aci.forEach(function(b){ b.g = Math.round(b.g * f * 10) / 10; }); }
+        else uyari.push(aci.length ? 'IBU dengelenemedi (aroma hopları hedefi zaten aşıyor)' : 'IBU dengelenemedi (acılık hop\'u yok — kaynatma/FWH ≥30 dk)');
+      }
+      var y = satirlar.find(function(z){ return z.grup === 'y'; }); t.mayaId = y ? y.id : null;
+      var son = window._bmTarifHesap(t), plan = { kaynak:kaynak, stil:stil, idx:idx, satirlar:satirlar, tarif:t, hedef:hedef, sonuc:son, dengele:{ s:s, f:f }, varsay:varsay, uyari:uyari };
+      if(!opt.birebir){
+        var bb = window._bmStokUyarla(kaynak, stil, idx, { birebir:true }); plan.srmOnce = bb ? bb.sonuc.srm : null;
+        var B = (typeof BJCP !== 'undefined') ? BJCP[stil] : null;
+        if(plan.srmOnce > 0 && Math.abs(son.srm - plan.srmOnce) / plan.srmOnce > 0.15) uyari.push('Renk kaydı: SRM ' + tr(plan.srmOnce, 1) + ' → ' + tr(son.srm, 1) + ' (%' + Math.round(Math.abs(son.srm - plan.srmOnce) / plan.srmOnce * 100) + ')');
+        if(B && Array.isArray(B.srm) && (son.srm < B.srm[0] || son.srm > B.srm[1])) uyari.push('SRM ' + tr(son.srm, 1) + ' BJCP bandının dışında (' + B.srm[0] + '–' + B.srm[1] + ')');
+        plan.kalib = (t.mayaId && typeof bmMayaKalib === 'function') ? bmMayaKalib(t.mayaId) : null;
+      }
+      plan.alinacak = satirlar.filter(function(z){ return z.alinacak; });
+      plan.ozel = satirlar.filter(function(z){ return z.ozel; });
+      return plan;
+    }catch(e){ try{ console.warn('_bmStokUyarla', e); }catch(_){} return null; }
+  };
+  // ── satır değiştirme: aday için önce/sonra (o anki seçimlere göre) ──
+  window._bmIkameDelta = function(kaynak, stil, idx, key, id){
+    var sec = Object.assign({}, window.__uygSec || {}), once = window._bmStokUyarla(kaynak, stil, idx, { sec:sec }); sec[key] = id;
+    var sonra = window._bmStokUyarla(kaynak, stil, idx, { sec:sec }); return (once && sonra) ? { once:once.sonuc, sonra:sonra.sonuc } : null;
+  };
+  var degerHTML = function(v, d){ return '<span>OG ' + v.og.toFixed(3).replace('.', ',') + ' · FG ' + v.fg.toFixed(3).replace('.', ',') + ' · ABV %' + tr(v.abv, 1) + ' · SRM ' + tr(v.srm, 1) + ' · IBU ' + Math.round(v.ibu) + '</span>'; };
+  window._bmDeltaHTML = function(d){
+    if(!d) return ''; var a = d.once, b = d.sonra, p = function(ad, x, y, dd){ var f = y - x, z = Math.abs(f) < Math.pow(10, -dd) / 2; return '<span class="uyg-d' + (z ? '' : ' uyg-d-var') + '">' + ad + ' ' + (dd === 3 ? x.toFixed(3).replace('.', ',') : tr(x, dd)) + (z ? '' : ' → ' + (dd === 3 ? y.toFixed(3).replace('.', ',') : tr(y, dd))) + '</span>'; };
+    return '<div class="uyg-delta">' + p('OG', a.og, b.og, 3) + p('FG', a.fg, b.fg, 3) + p('ABV %', a.abv, b.abv, 1) + p('SRM', a.srm, b.srm, 1) + p('IBU', a.ibu, b.ibu, 0) + '</div>';
+  };
+  window.__uygSec = window.__uygSec || {}; window.__uygAcik = null;
+  var GRUP = { g:'🌾', h:'🌿', y:'🧪', ek:'➕' };
+  window._bmUyarlaHTML = function(kaynak, stil, idx){
+    var su = window.__uygOnizle; if(!su || su.kaynak !== kaynak || su.stil !== stil || su.idx !== idx){ window._bmUyarlaSifirla(); window.__uygOnizle = { kaynak:kaynak, stil:stil, idx:idx }; }
+    var p = window._bmStokUyarla(kaynak, stil, idx, { sec:window.__uygSec }); if(!p) return '';
+    var sat = p.satirlar.filter(function(z){ return !z.proses; });
+    var h = '<details id="uyg-bolum" class="uyg-bolum"' + (window.__uygAcikDet ? ' open' : '') + ' ontoggle="window.__uygAcikDet=this.open"><summary class="uyg-ozet">📦 Stoğuna uyarla — ' + sat.length + ' satır · ' + p.alinacak.length + ' alınacak</summary>';
+    h += '<div class="uyg-sonuc">Uyarlanmış: ' + degerHTML(p.sonuc) + (p.srmOnce ? ' <small>(örneğin kendi malzemeleriyle SRM ' + tr(p.srmOnce, 1) + ')</small>' : '') + '<br><small>Hedef OG ' + (p.hedef.og ? p.hedef.og.toFixed(3).replace('.', ',') : '?') + ' (' + p.hedef.ogK + ') · IBU ' + (p.hedef.ib ? Math.round(p.hedef.ib) : '?') + ' (' + p.hedef.ibK + ')' + (p.kalib ? ' · FG senin maya kalibrasyonunla (%' + p.kalib + ')' : '') + '</small>'
+      + (p.uyari.length ? '<div class="uyg-uyari">⚠️ ' + p.uyari.map(esc_).join(' · ') + '</div>' : '') + '</div>';
+    sat.forEach(function(z){
+      var c = z.secilen, D = window._BM_IKAME_DERECE;
+      var sag = z.ozel ? '<span class="uyg-et uyg-ozel">özel katkı (katalogda yok)</span>' : c ? '<span class="uyg-et uyg-d' + c.derece + '">' + D[c.derece].ik + ' ' + esc_(c.ad) + (c.az ? ' · az var' : '') + (c.belirsiz ? ' · miktar ?' : '') + '</span>' : '<span class="uyg-et uyg-al">🛒 alınacak</span>';
+      h += '<button type="button" class="uyg-satir" onclick="_bmUyarlaSatirAc(\'' + z.key + '\')"><span class="uyg-orj">' + GRUP[z.grup] + ' ' + esc_(z.orijAd || z.ham) + '</span>' + sag + '</button>';
+      if(window.__uygAcik === z.key && !z.ozel){
+        h += '<div class="uyg-panel">';
+        z.aday.forEach(function(a){
+          var d = window._bmIkameDelta(kaynak, stil, idx, z.key, a.id), secili = c && c.id === a.id;
+          h += '<button type="button" class="uyg-aday' + (secili ? ' uyg-secili' : '') + '" onclick="_bmUyarlaSec(\'' + z.key + '\',\'' + jsq_(a.id) + '\')"><b>' + D[a.derece].ik + ' ' + esc_(a.ad) + '</b> <small>' + esc_(D[a.derece].ad) + ' · stokta ' + (a.belirsiz ? 'miktar ?' : tr(a.stok.miktar, 3) + ' ' + esc_(a.stok.birim)) + (a.az ? ' · az var' : '') + '</small>'
+            + (a.fark ? '<small class="uyg-fark">' + esc_(a.fark) + '</small>' : '') + window._bmDeltaHTML(d) + '</button>';
+        });
+        if(!z.aday.length) h += '<div class="uyg-yok">Stoğunda bu satıra karşılık yok — reçetede orijinal kalır, "alınacak" işaretli.</div>';
+        h += '<button type="button" class="uyg-aday' + (z.aynenIstendi || (!c) ? ' uyg-secili' : '') + '" onclick="_bmUyarlaSec(\'' + z.key + '\',\'__aynen\')"><b>Aynen kalsın</b> <small>örnekteki ' + esc_(z.orijAd) + (z.aday[0] && z.aday[0].derece === 1 ? ' (stokta)' : ' — stokta yoksa alınacak') + '</small></button>';
+        h += '</div>';
+      }
+    });
+    h += '<div class="uyg-not">Fark notları yalnız MUADIL tablosundan ya da katalog alanlarından (sayısal); kaynağı olmayan lezzet yorumu yazılmaz. Seçimler yalnız bu önizlemede tutulur.</div></details>';
+    return h;
+  };
+  window._bmUyarlaCiz = function(){ var m = document.getElementById('uyg-bolum'), s = window.__uygOnizle; if(!m || !s) return; m.outerHTML = window._bmUyarlaHTML(s.kaynak, s.stil, s.idx); };
+  window._bmUyarlaSatirAc = function(key){ window.__uygAcik = window.__uygAcik === key ? null : key; window.__uygAcikDet = true; window._bmUyarlaCiz(); };
+  window._bmUyarlaSec = function(key, id){ window.__uygSec[key] = id; window.__uygAcikDet = true; window._bmUyarlaCiz(); };
+  window._bmUyarlaSifirla = function(){ window.__uygSec = {}; window.__uygAcik = null; window.__uygAcikDet = false; window.__uygOnizle = null; };
+  // ── "📦 Stoğumla oluştur" — her zaman YENİ reçete ──
+  window._bmStokumlaOlustur = function(kaynak, stil, idx){
+    try{
+      var p = window._bmStokUyarla(kaynak, stil, idx, { sec:window.__uygSec || {} });
+      if(!p){ if(typeof flash === 'function') flash('Bu örnek stoğuna uyarlanamıyor (miktarı bilinmeyen ya da eşlenemeyen malt/hop/maya var)', 'err'); return null; }
+      var o = window._bmOrnekNesne(kaynak, stil, idx), D = window._BM_IKAME_DERECE;
+      var kor = window._bmAcikIsiGuvenceyeAl ? window._bmAcikIsiGuvenceyeAl() : { yol:'bos' };
+      yeniTarif();
+      var baslik = o.bira || (kaynak === 'nhc' ? 'NHC ' + (o.yil || '') : 'örnek');
+      S.hacim = p.tarif.hacim; S.verim = p.tarif.verim; S.stil = stil;
+      S.biraAd = window._bmYeniReceteAd(stil + ' — ' + baslik + ' — stoğuma uyarlandı');
+      S.maltlar = p.tarif.maltlar.map(function(m){ return { id:m.id, kg:m.kg, marka:'', _ad:m._ad }; });
+      S.katkilar = p.tarif.katkilar.map(function(k){ return { id:k.id, ad:k.ad, birim:k.birim, miktar:k.miktar, zaman:k.zaman }; });
+      S.hoplar = p.tarif.hoplar.map(function(b){ return Object.assign({}, b); });
+      S.mayaId = p.tarif.mayaId; if(p.tarif.mashSc) S.mashSc = p.tarif.mashSc;
+      var kad = (kaynak === 'nhc' || kaynak === 'aha') ? 'K1' : (o.k || 'K3');
+      var not = ['📦 STOĞUMA UYARLANDI (' + kad + '): ' + stil + ' — ' + baslik + '. Malzemeler stoğundan; miktarlar ' + tr(p.tarif.hacim, 1) + ' L / %' + p.tarif.verim + ' verime göre, grist oranı korunup hedef OG ' + (p.hedef.og ? p.hedef.og.toFixed(3) : '?') + ' (' + p.hedef.ogK + '), acı hoplar hedef IBU ' + (p.hedef.ib ? Math.round(p.hedef.ib) : '?') + ' (' + p.hedef.ibK + ') tutacak şekilde dengelendi; aroma/dry hop g/L korundu.'];
+      var uy = p.satirlar.filter(function(z){ return z.secilen && z.secilen.derece > 1; }).map(function(z){ var c = z.secilen; return z.orijAd + ' yerine ' + c.ad + ' (' + D[c.derece].ad + ')' + (c.fark ? ' — ' + c.fark : '') + (c.az ? ' · stokta az var' : '') + (c.belirsiz ? ' · stok miktarı ?' : ''); });
+      not.push('Uyarlamalar: ' + (uy.length ? '\n• ' + uy.join('\n• ') : 'yok — tüm kalemler stokta aynen.'));
+      if(p.alinacak.length) not.push('Alınacaklar (reçetede orijinal haliyle duruyor, stoğunda karşılığı yok): ' + p.alinacak.map(function(z){ return z.orijAd; }).join(' · '));
+      if(p.ozel.length) not.push('Katalogda olmayan ek kalemler özel katkı olarak eklendi: ' + p.ozel.map(function(z){ return z.ham + ' ' + tr(z.gerek, 1) + ' g'; }).join(' · '));
+      var ss = p.satirlar.filter(function(z){ return z.proses; }); if(ss.length) not.push('Proses yardımcıları uyarlanmadı: ' + ss.map(function(z){ return z.orijAd; }).join(' · '));
+      not.push('Renk: SRM ' + (p.srmOnce ? tr(p.srmOnce, 1) : '?') + ' (örneğin kendi malzemeleriyle) → ' + tr(p.sonuc.srm, 1) + ' (uyarlanmış). Renk kendiliğinden düzeltilmedi.' + (p.uyari.length ? ' ⚠️ ' + p.uyari.join(' · ') : ''));
+      if(p.kalib) not.push('Beklenen FG senin bu mayayla ölçtüğün attenüasyonla (%' + p.kalib + ') hesaplandı.');
+      if(p.varsay.length) not.push('Kaynakta olmayan süreler (değiştirebilirsin): ' + p.varsay.join(' · '));
+      S.notlar = not.join('\n');
+      window.__stilSecKaynak = 'iskelet'; // örnekten reçete = NİYET (Sprint Z stil öğrenme sinyali yazılmaz)
+      var ok = (typeof tarifeKaydet === 'function') ? tarifeKaydet() : false;
+      if(typeof render === 'function') render();
+      if(typeof flash === 'function') flash('📦 "' + S.biraAd + '" · stoğuna uyarlandı' + (p.alinacak.length ? ' · ' + p.alinacak.length + ' kalem alınacak' : '') + (kor.yol === 'kayitli' ? ' · önceki reçete kaydedildi' : kor.yol === 'adli' ? ' · "' + kor.ad + '" kaydedildi' : kor.yol === 'adsiz' ? ' · adsız çalışman "' + kor.ad + '" olarak kaydedildi' : '') + (ok ? '' : ' · ⚠️ kaydedilemedi'), ok ? 'ok' : 'hata');
+      return (typeof _editId !== 'undefined') ? _editId : null;
+    }catch(e){ if(window.bmHataKaydet) bmHataKaydet('calc', e, '_bmStokumlaOlustur'); try{ console.warn('_bmStokumlaOlustur', e); }catch(_){} return null; }
+  };
+  window.bmOrnekOnizleStokumla = function(kaynak, stil, idx){
+    var sec = window.__uygSec; if(typeof bmOrnekOnizleKapat === 'function') bmOrnekOnizleKapat(); window.__uygSec = sec || {};
+    if(window.__brAcik) window.__brAcik = false;
+    var r = window._bmStokumlaOlustur(kaynak, stil, idx); window._bmUyarlaSifirla(); return r;
+  };
+  // ── "tahmini renk" işareti (TEK YER): reçetede rengi tahmini bir katkı varsa SRM'nin yanında ──
+  window._bmRenkTahmini = function(katkilar){ return (katkilar || []).some(function(k){ var x = k && KATKILAR.find(function(a){ return a && a.id === k.id; }); return !!(x && x.renkTahmini); }); };
+  window._bmRenkTahminiHTML = function(katkilar){ return window._bmRenkTahmini(katkilar) ? ' <span class="bm-renk-tahmini" title="Reçetedeki bir katkının rengi üretici verisi olmadan TAHMİN edildi (ör. Koyu Candi Şekeri (Kaya) — Hazkat: gerçek aralık 150–600 EBC)">tahmini renk</span>' : ''; };
 })();
 
 // ═══ SPRINT ND3 — NE ALIRSAM NE AÇILIR (salt hesap — stoğa / KR'ye / ağa YAZMA YOK) ═══
