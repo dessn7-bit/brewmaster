@@ -135,6 +135,18 @@ function ekSatirCoz(l) {
   if (!ad || ad.length > 80 || mik.length > 30 || /\.\s+[A-Z]/.test(ad) || /\b(until|about \d+ days)\b/i.test(ad) || /^(treat|use|add|forced|see)\b/i.test(ad) || !/[a-z]{3}/i.test(ad) || /^[\d.]+%/.test(ad)) return null;
   return [ad, mik];
 }
+// SPRINT ISK2 4: AX ayrıştırıcısının (BİREBİR alınır) kaçırdığı zaman yazımları — AYNI ham satırdan, yeni kazıma yok:
+// "(60 min.)" / ", 0 min" / "(60)" / "(dry)" / "(steep)" / "(hop back)" / "(1st wort)" / "(mash hop)". Hiçbiri yoksa zaman null kalır (varsayım YOK).
+function zamanEk(l, hp) {
+  if (!hp || hp[2] != null) return hp; const s = String(l).toLowerCase(); let d = null;
+  if (/1st wort|first wort|\bfwh\b/.test(s)) d = 'FWH';
+  else if (/\bdry\b/.test(s)) d = 'kuru';
+  else if (/hop ?back|\bsteep|whirl|flame ?out|knock ?out|hop ?stand/.test(s)) d = 'wp';
+  else if (/\bmash\b/.test(s)) d = 'mash';
+  else { const m = /(\d+(?:\.\d+)?)\s*min/.exec(s); if (m) d = Math.round(parseFloat(m[1])); else { const p = /\(\s*(\d{1,3})\s*\)\s*$/.exec(s); if (p) d = +p[1]; } }
+  if (d == null) { inc('nhc_hop_zamansiz'); return hp; }
+  inc('nhc_hop_zaman_ek_' + (typeof d === 'number' ? 'dk' : d)); hp = hp.slice(); hp[2] = d; return hp;
+}
 const db = new DatabaseSync(DB_YOL, { readOnly: true });
 const rows = db.prepare('select * from recipes order by year desc, id').all();
 const nhcByStil = new Map();
@@ -153,7 +165,7 @@ rows.forEach(r => {
   const ekle = l => { const e = ekSatirCoz(l); if (e && e.su) { inc('nhc_su_satiri'); return; } if (e) { ek.push(e); inc('nhc_ek_adli'); } else { ekN++; inc('nhc_ek_adsiz'); } };
   AXE.satirlar(r.ingredients).forEach(l => {
     if (AXE.mayaMu(l)) { if (!y) y = AXE.mayaCoz(l); return; }
-    if (AXE.hopMu(l)) { const hp = AXE.hopCoz(l); if (hp) h.push(hp); else dusur = true; return; }
+    if (AXE.hopMu(l)) { const hp = zamanEk(l, AXE.hopCoz(l)); if (hp) h.push(hp); else dusur = true; return; }
     if (AXE.katkiMu(l)) { ekle(l); return; }
     if (AXE.fermMu(l)) { const gr = AXE.gristCoz(l); if (gr) g.push(gr); else dusur = true; return; }
     ekle(l);
