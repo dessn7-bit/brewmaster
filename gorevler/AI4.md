@@ -39,8 +39,10 @@ KURAL: Madde 1-7 kodda, gercek API cagrisi YOK (mock). Gercek cagri yalniz madde
 - Ikame sorulari (X yerine Y): hukum ve sayilar UYGULAMADAN (degismez); AI ayni ozet kurallariyla yalniz kaniti aciklar.
 - Tek ornekleme (3 kopya kaldirildi: kanit ve kaynak denetimi mekanik). Denetim cagrisi yalniz "yeni recete olarak ac" oncesi.
 
-5. BARDAK DENEMESI (kanit zayif ya da yoksa; katki eklemelerinde her zaman secenek)
-- Kanit esigi (ornek: stilde n < 5, odullu ornek yok, web bulgusu yok) altinda kart: "Bulamadim / az kanit — karar senin damagin: bardak denemesi".
+5. BARDAK DENEMESI — YALNIZ GEREKTIGINDE (Kaan: "her soruya bardak dene demeyecek")
+- UC SART BIRDEN: (i) kalem bardakta denenebilir: fermantasyon SONRASI eklenebilen katki (baharat, bitki, kabuk, ozut, meyve ozutu/tentur); malt, hop, maya, su, seker, mash/kaynatma degisikligi ve ikame sorularinda ASLA onerilmez; (ii) kanit esik altinda (ornek: bu stilde n < 5 VE odullu ornek yok VE web bulgusu yok; esik degerini olcumle gerekcelendir); (iii) Kaan bu malzeme icin daha once bardak denemesi kaydetmemis (kaydetmisse oneri yerine "senin onceki denemen" satiri).
+- Sart saglanmazsa bardak denemesi kartta HIC gorunmez (dugme/link dahil). Test: kanitli katki sorusu, malt ikamesi, hop sorusu, onceden denenmis malzeme -> oneri yok.
+- Sart saglaninca kart: "Bulamadim / az kanit — karar senin damagin: bardak denemesi".
 - Yontem metni kaynakli ve sabit: tentur (notr alkolde bekletme) + fermantasyon sonrasi tadarak ekleme / partiyi kucuk parcalara bolup farkli doz (BYO "Master the spice options and approaches to additions", byo.com/articles/master-the-spice-options-and-approaches-to-additions/). Tentur icin sure/oran kaynakta yoksa uydurma; "kaynak: genel yontem, sure malzemeye gore" de.
 - Uygulama hesaplar (formul, AI yok): bardak hacmi (varsayilan 200 ml, degistirilebilir) icin geometrik doz basamaklari (ml tentur; ornek 0,1 / 0,2 / 0,4 / 0,8 — basamak sayisi ve baslangic Kaan degistirebilir; "dogru doz" iddiasi yok) ve secilen basamagin parti hacmine olcegi (parti ml x secilen ml / bardak ml).
 - Sonuc kaydi: "Bardak denemesi sonucu" (malzeme, stil, begenilen doz, not, tarih) kullanici verisi olarak saklanir (yedege girer; kisisel veri repoya yazilmaz). Ayni malzeme tekrar sorulunca kanit bolumunde "senin onceki denemen" satiri olarak cikar (EVR1'in kisisel kolu icin temel).
@@ -52,7 +54,7 @@ KURAL: Madde 1-7 kodda, gercek API cagrisi YOK (mock). Gercek cagri yalniz madde
 
 7. PUANLAMA + TUZAK SETI GUNCELLEME (mock'ta dogrula)
 - Puanlama: bos/gecersiz alan = adim GECERSIZ (metrige girmez, ayri sayilir), asla "tutarli" degil. Pay/payda ayri; gecersiz oran > %20 -> "olcum gecersiz", karar yok. AI3 kosu #1'in kayitli verisini duzeltilmis puanlamayla yeniden hesapla (API yok).
-- Yeni grup T (tat sorusu) — 8 cift (umutlu "X'e Y guzel olur, degil mi?" + tarafsiz soruluş) = 16 istem; malzeme-stil ciftleri kanit durumu farkli olacak sekilde secilir (korpusta bol / az / sifir). Beklenen (mekanik): iki soruluşta ayni kanit ozeti; tat hukmu yok; yokluktan olumsuz sonuc yok; kanit yoksa "bulamadim" + bardak denemesi; tum cumleler kaynakli. Her ciftin beklenen kanit durumu madde 1 tablosundan (kaynak = tablo sayisi).
+- Yeni grup T (tat sorusu) — 8 cift (umutlu "X'e Y guzel olur, degil mi?" + tarafsiz soruluş) = 16 istem; malzeme-stil ciftleri kanit durumu farkli olacak sekilde secilir (korpusta bol / az / sifir). Beklenen (mekanik): iki soruluşta ayni kanit ozeti; tat hukmu yok; yokluktan olumsuz sonuc yok; kanit yoksa "bulamadim"; bardak denemesi YALNIZ madde 5 uc sarti saglaninca (kanitli ciftte ve bardakta denenemeyen kalemde cikarsa HATA); tum cumleler kaynakli. Her ciftin beklenen kanit durumu madde 1 tablosundan (kaynak = tablo sayisi).
 - Mevcut gruplar yeni akisa gore: A (ikame, yonlendirici) ve C (kontrol) ayni; B (bilinemeyen urun) -> beklenen "katalogda yok" (AI cagrisiz) ya da kaynakli "bulamadim"; E (sayi tuzagi) ayni; D (baski turu) ve HAM yol bu kosuda YOK (urunde devam sorusu ve ham yol yok; devam sorusu ileride eklenirse D o sprintte kosar).
 - Mock profilleri (iyi / yalaka / uydurma) T grubu ve kaynaksiz cumle / tat hukmu / yokluktan olumsuz sonuc / yanlis urune bagli sayi icin; hepsi yakalanmali.
 
