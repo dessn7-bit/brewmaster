@@ -6790,7 +6790,7 @@ const CASELER = [
     kod: 'BT2-KATKI', ad: 'KARMA KATKI ŞEKER İDDİASI ÖLÇÜLDÜ ve ÇÜRÜDÜ: kodda "sekerTipi" alanı YOK (mekanizma gu + fermente); 193 katkının HEPSİNDE fermente alanı var (eksik 0); adında karma geçen katkı 10 değil 1 (citrus zest) ve şeker taşımıyor; "bal-limon" diye bir katkı yok — bal katkılarının hepsi zaten gu>0 + fermente:true. Uydurma değer EKLENMEDİ; mekanizmanın doğru çalıştığı runtime ile kanıtlanıyor',
     calistir: (page) => page.evaluate(() => {
       const K = window.KATKILAR;
-      __REG.ok('katkı kataloğu yüklü (193)', Array.isArray(K) && K.length === 193, K ? K.length : 'YOK');
+      __REG.ok('katkı kataloğu yüklü (198 = 193 + ND5 yeni 5 lezzet katkısı)', Array.isArray(K) && K.length === 198, K ? K.length : 'YOK');
       // 1. "sekerTipi" diye bir alan YOK — mekanizma gu + fermente
       const src = Array.from(document.querySelectorAll('script')).map(s => s.textContent).join('\n');
       __REG.ok('kodda "sekerTipi" alanı YOK (mekanizma gu + fermente)', src.indexOf('sekerTipi') < 0);
@@ -8516,7 +8516,8 @@ const CASELER = [
       __REG.ok('hacim/verim = Kaan\'ın (10 L / %70)', S.hacim === 10 && S.verim === 70 && r.hacim === 10 && r.verim === 70);
       const not = String(S.notlar || ''), kad = e.kaynak === 'nhc' ? 'K1' : (o.k || 'K3');
       __REG.ok('not: kademe + kaynak + "Malzemeler örnekten, miktarlar senin hacmine ölçeklendi: 10 L / %70"', not.indexOf('ÖRNEĞİN MALZEMELERİYLE (' + kad + ')') >= 0 && /Malzemeler örnekten, miktarlar senin hacmine ölçeklendi: 10 L \/ %70 verim/.test(not) && (kad === 'K1' ? /NHC/.test(not) : (o.kay && not.indexOf(o.kay.pub) >= 0)), not.split('\n')[0]);
-      __REG.ok('not: ek kalemler "reçeteye EKLENMEDİ" + her biri adıyla; reçetede ek kalem YOK', /reçeteye EKLENMEDİ/.test(not) && r.ek.every(k => not.indexOf(k.ham) >= 0) && r.ek.every(k => !k.id || !(S.katkilar || []).some(z => z.id === k.id) || kg.some(z => z.id === k.id)));
+      // ND5: miktarı bilinen eşli ek kalem reçeteye o miktarla ("reçeteye yazıldı"); diğerleri notta "reçeteye EKLENMEDİ" — hepsi adıyla notta
+      __REG.ok('not: ek kalemler adıyla; miktarı bilinen eşliler S.katkilar\'da o miktarla (ND5), kalanlar "reçeteye EKLENMEDİ"', r.ek.every(k => not.indexOf(k.ham) >= 0) && r.ek.every(k => (k.id && k.mik > 0) ? ((S.katkilar || []).some(z => z.id === k.id && Math.abs(z.miktar - k.mik) < 1e-9) || S.maltlar.some(z => z.id === k.id)) && /reçeteye yazıldı/.test(not) : /reçeteye EKLENMEDİ/.test(not)));
       const vars = (o.h || []).some(x => typeof x[2] !== 'number' && x[2] !== 'FWH');
       __REG.ok('kaynakta olmayan hop süresi varsayıldıysa NOTTA söyleniyor', !vars || /Kaynakta olmayan süreler/.test(not));
       // grist katkısı olan örnek (ör. şeker / DME)
@@ -8641,7 +8642,7 @@ const CASELER = [
         const st0 = window._bmOrnekStok(e0.kaynak, e0.stil, e0.idx), tk = window._bmOrnekTekKalem(st0);
         const R = window._ndOneriHesap(), xs = R.tum.find(z => z.tip === X.tip && z.id === X.id);
         const okK = () => { const m = {}; H.forEach(e => { const s = window._bmOrnekStok(e.kaynak, e.stil, e.idx); if (s && s.durum === 'ok') m[e.kaynak + '|' + e.stil + '|' + e.idx] = 1; }); return m; };
-        const once = okK(), tahmin = R.bir.filter(b => b.kalem.tip === X.tip && b.kalem.id === X.id).map(b => b.kaynak + '|' + b.stil + '|' + b.idx).sort();
+        const once = okK(), tahmin = R.bir.filter(b => b.kalem.tip === X.tip && (b.kalem.id === X.id || (b.kalem.alt || []).some(m => m.id === X.id))).map(b => b.kaynak + '|' + b.stil + '|' + b.idx).sort();
         const x = (X.tip === 'malt' ? MALTLAR : HOPLAR).find(a => a.id === X.id); STOK.push(giris({ tip: X.tip, id: X.id }, 999));
         const sonra = okK(), yeni = Object.keys(sonra).filter(k => !once[k]).sort(); STOK.pop();
         // iki farklı kalem eksik → sayılmaz
@@ -8816,9 +8817,9 @@ const CASELER = [
         R.sepet.forEach(x => { const once = okSay(); const k = KAT[x.tip].find(a => a.id === x.id); STOK.push({ id: 'n4s' + x.id, ad: k.ad, refId: x.id, g: x.tip === 'malt' ? 'Malt' : x.tip === 'hop' ? 'Hop' : x.tip === 'maya' ? 'Maya' : 'Katkı', miktar: x.tip === 'maya' ? 99 : 99999, birim: x.tip === 'malt' ? 'kg' : x.tip === 'maya' ? 'paket' : 'g' }); const sonra = okSay(); adim.push({ ad: x.ad, beklenen: x.arti, gercek: sonra - once, toplamB: x.toplam, toplamG: sonra - ok0 }); });
         STOK.length = 0; JSON.parse(window.__ND4S).forEach(s => STOK.push(s));
         // bağımsız açgözlü denetim: ihtiyaç kümeleri üzerinden her adımda TÜM adayların kazancı; seçilen = en yüksek
-        const N = H.map(e => window._bmOrnekIhtiyac(window._bmOrnekStok(e.kaynak, e.stil, e.idx))).filter(n => n && n.length).map(n => n.map(k => k.tip + ':' + k.id));
+        const N = H.map(e => window._bmOrnekIhtiyac(window._bmOrnekStok(e.kaynak, e.stil, e.idx))).filter(n => n && n.length).map(n => n.map(k => [k.tip + ':' + k.id].concat((k.alt || []).map(m => k.tip + ':' + m.id)))); // ND5: her ihtiyaç = kalem ya da ✅ muadili
         const sec = new Set(), maxSapma = [];
-        R.sepet.forEach(x => { const kaz = {}; N.forEach(n => { const eks = n.filter(k => !sec.has(k)); if (eks.length === 1) kaz[eks[0]] = (kaz[eks[0]] || 0) + 1; }); const mx = Math.max(0, ...Object.values(kaz)); const key = x.tip + ':' + x.id; maxSapma.push((kaz[key] || 0) + '/' + mx); sec.add(key); });
+        R.sepet.forEach(x => { const kaz = {}; N.forEach(n => { const eks = n.filter(sec_ => !sec_.some(z => sec.has(z))); const ad = new Set([].concat(...eks)); ad.forEach(c => { if (eks.every(sec_ => sec_.indexOf(c) >= 0)) kaz[c] = (kaz[c] || 0) + 1; }); }); const mx = Math.max(0, ...Object.values(kaz)); const key = x.tip + ':' + x.id; maxSapma.push((kaz[key] || 0) + '/' + mx); sec.add(key); });
         return { n: R.sepet.length, adim, ilk: R.ilk5[0] ? R.ilk5[0].n : 0, s1: R.sepet[0] ? R.sepet[0].arti : 0, maxSapma };
       });
       await page.evaluate(() => window._ndHazirlaTum()); await page.waitForFunction(() => window._ndTumHazir(), { timeout: 30000 });
@@ -9037,6 +9038,128 @@ const CASELER = [
         await syncGonder();
         __REG.ok('ana senkron PUT gövdesinde anahtar YOK', !!anaPut && anaPut.indexOf(ANAHTAR) < 0 && anaPut.indexOf('sk-ant') < 0);
       } finally { window.fetch = _f; window.bmAiBaglantiTesti = _t; syncCfg = cfg0; localStorage.removeItem('ai_anahtar_v1'); }
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'ND5-ALIAS', ad: 'LEZZET KATKISI ALIAS (BV = KİMLİK): ≥10 gerçek yazım (form farkı dahil: tohum/ezilmiş/öğütülmüş, püre, kuru/taze) doğru KATKILAR kaydına · AYRI ÜRÜNLER bağlanmaz (tatlı portakal ≠ turunç, çubuk ≠ öz, çekirdek ≠ espresso, ardıç meyvesi ≠ dal, çeşit bal ≠ çiçek balı, brewer\'s licorice ≠ kök, D-90 ≠ D-180) · genel yazım ("coffee", "honey", "oak", "candi syrup", iyotu belirsiz "table salt") bağlanmaz · her KATKILAR alias\'ı kendi kaydına çözülür (çakışma = null yok) · her test yazımı örnek verisinde gerçekten geçer',
+    calistir: (page) => page.evaluate(() => {
+      const C = window._bmMetinCoz, ham = new Set();
+      ['_NHC_MADALYA', '_TOPLULUK_MADALYA'].forEach(t => Object.values(window[t]).forEach(v => v[1].forEach(o => [].concat(o.ek || [], o.g || [], o.h || []).forEach(x => ham.add(x[0])))));
+      ['_KAYNAKLI_ORNEK', '_TOPLULUK_ORNEK'].forEach(t => Object.values(window[t]).forEach(v => v.forEach(o => [].concat(o.ek || [], o.g || [], o.h || []).forEach(x => ham.add(x[0])))));
+      const IYI = [['Coriander seed, freshly ground (5 min)', 'kisnisch'], ['Crushed coriander seed', 'kisnisch'], ['Indian coriander, coarsely crushed', 'kisnisch'], ['Madagascar vanilla beans (secondary)', 'vanilya'],
+        ['Sweet orange peel (post-boil)', 'portakal_kabuk'], ['Curaçao orange peel (0 min)', 'turunc_kabuk'], ['dried bitter orange peel', 'turunc_kabuk'], ['Ground Sumatran coffee', 'kahve_cekirdek'],
+        ['Cold-brewed coffee (at packaging)', 'espresso'], ['bittersweet chcolate', 'bitter_cik'], ['Cocoa nibs', 'kakao'], ['Cocoa powder (in mash)', 'kakao_toz'], ['Raspberry puree (pasteurized)', 'ahududu'],
+        ['Frozen raspberries, thawed and crushed', 'ahududu'], ['Sea salt (before packaging)', 'tuz_kosher'], ['Kosher salt (last 10 min)', 'tuz_kosher'], ['Juniper berries (mash)', 'ardic_meyve'], ['Juniper twigs (lauter bed)', 'ardic_dal'],
+        ['Licorice root', 'meyan_koku'], ['Sweet gale', 'sweet_gale'], ['Caraway seeds', 'karaman_kimyon'], ['medium toast French oak cubes (secondary', 'mese_kup'], ['Turbnado Sugar (15 min)', 'demerera'],
+        ['rapadura sugar', 'piloncillo'], ['Wildflower Honey (flameout)', 'ham_bal'], ['lactose (15 min. from end of boil)', 'lak'], ['Lemongrass stalks', 'limon_otu'], ['Fresh ginger root', 'zencefil']];
+      const iyiHata = IYI.filter(([h, id]) => !ham.has(h) || C('katki', h) !== id).map(([h, id]) => h + ' → ' + C('katki', h) + ' (beklenen ' + id + (ham.has(h) ? '' : ', VERİDE YOK') + ')');
+      __REG.ok(IYI.length + ' gerçek yazım (form farkı dahil) doğru kayda + hepsi örnek verisinde geçiyor', IYI.length >= 10 && !iyiHata.length, iyiHata.join(' | '));
+      const AYRI = [['Sweet orange peel', 'turunc_kabuk'], ['bitter orange peel', 'portakal_kabuk'], ['Vanilla beans', 'vanilla_oz'], ['vanilla extract', 'vanilya'], ['Ground Kona coffee', 'espresso'], ['cold brew coffee', 'kahve_cekirdek'],
+        ['Juniper berries', 'ardic_dal'], ['Juniper branches', 'ardic_meyve'], ['Orange blossom honey', 'ham_bal'], ['brewers licorice', 'meyan_koku'], ['D-90 candi syrup', 'koyu_candy'], ['Clover honey', 'ham_bal']];
+      const ayriHata = AYRI.filter(([h, yanlis]) => !ham.has(h) || C('katki', h) === yanlis).map(([h, y]) => h + ' → ' + C('katki', h) + (ham.has(h) ? '' : ' (VERİDE YOK)'));
+      __REG.ok('ayrı ürünler BAĞLANMAZ (tatlı ≠ turunç, çubuk ≠ öz, çekirdek ≠ espresso, meyve ≠ dal, çeşit bal ≠ çiçek balı, brewer\'s licorice ≠ kök, D-90 ≠ D-180)', !ayriHata.length, ayriHata.join(' | '));
+      const sabit = { 'Vanilla beans': 'vanilya', 'vanilla extract': 'vanilla_oz', 'Juniper berries': 'ardic_meyve', 'Juniper branches': 'ardic_dal', 'cold brew coffee': 'espresso', 'Ground Kona coffee': 'kahve_cekirdek' };
+      __REG.ok('ayrı ürün çiftinin her biri KENDİ kaydına', Object.keys(sabit).every(h => C('katki', h) === sabit[h]), Object.keys(sabit).map(h => h + '→' + C('katki', h)).join(', '));
+      const GENEL = ['coffee', 'Honey', 'Honey (type not specified), in secondary', 'coffee, whole bean', 'Oak (barrel, staves, beans or chips)', 'Candi syrups added', 'Table salt (start of boil)', 'table salt (NaCl)', 'Belgian candi syrup', 'orange peel, valencia'];
+      const genelHata = GENEL.filter(h => !ham.has(h) || C('katki', h) !== null).map(h => h + ' → ' + C('katki', h) + (ham.has(h) ? '' : ' (VERİDE YOK)'));
+      __REG.ok('genel / belirsiz yazım bağlanmaz ("coffee", "honey", "oak", "candi syrup", iyotu belirsiz "table salt", çeşidi belirsiz "orange peel")', !genelHata.length, genelHata.join(' | '));
+      const cak = []; KATKILAR.forEach(x => (x.alias || []).forEach(a => { if (C('katki', a) !== x.id) cak.push(x.id + ':' + a + '→' + C('katki', a)); }));
+      __REG.ok('her KATKILAR alias\'ı kendi kaydına çözülür (çakışma → null yok)', !cak.length && KATKILAR.filter(x => (x.alias || []).length).length >= 45, cak.slice(0, 8).join(' | '));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'ND5-KATALOG', ad: 'YENİ LEZZET KATKILARI: Ardıç Meyvesi · Meyan Kökü · Bataklık Mersini (Sweet Gale) · Karaman Kimyonu · Meşe Küpü — Türkçe ad + İngilizce parantezde, kaynak linki açıklamada, doğru Kiler grubu (Baharat / Meşe), hiçbiri proses yardımcısı değil · Tuz Kiler\'de Baharat (Malt değil), proses DEĞİL · örnek verisindeki karşılıkları bu kayıtlara',
+    calistir: (page) => page.evaluate(() => {
+      const Y = { ardic_meyve: 'Baharat', meyan_koku: 'Baharat', sweet_gale: 'Baharat', karaman_kimyon: 'Baharat', mese_kup: 'Meşe' };
+      const K = id => KATKILAR.find(x => x && x.id === id);
+      const hata = Object.keys(Y).filter(id => { const x = K(id); return !x || !/^[^()]+\([A-Za-z][^)]*\)$/.test(x.ad) || window._stokGrupBul(id, x.g) !== Y[id] || window._bmProsesYardimci({ tip: 'katki', id }) || !/Kaynak: [a-z0-9.-]+\.[a-z]{2,}\//i.test(x.acik) || !(x.varsayDozgL > 0) || x.birim !== 'g'; });
+      __REG.ok('5 yeni kayıt: ad "Türkçe (English)", Kiler grubu, proses değil, açıklamada kaynak linki, doz + birim', !hata.length, hata.join(','));
+      __REG.ok('KATKILAR id tekil (yeni kayıtlar çakışmıyor)', new Set(KATKILAR.map(x => x.id)).size === KATKILAR.length, KATKILAR.length);
+      __REG.ok('Tuz: Kiler grubu Baharat (eskiden Adjunct → Malt), proses yardımcısı DEĞİL', window._stokGrupBul('tuz_kosher', K('tuz_kosher').g) === 'Baharat' && !window._bmProsesYardimci({ tip: 'katki', id: 'tuz_kosher' }) && !window._bmProsesYardimci({ ham: 'Sea salt (15 min)', tip: 'katki', id: 'tuz_kosher' }));
+      const C = window._bmMetinCoz;
+      __REG.ok('örnek yazımları yeni kayıtlara: juniper berries / licorice root / sweet gale + bog myrtle / caraway seed / american oak cubes', C('katki', 'dried juniper berries') === 'ardic_meyve' && C('katki', 'Licorice root') === 'meyan_koku' && C('katki', 'sweet gale (5 min.)') === 'sweet_gale' && C('katki', 'bog myrtle') === 'sweet_gale' && C('katki', 'caraway seed') === 'karaman_kimyon' && C('katki', 'american oak cubes') === 'mese_kup');
+      __REG.ok('meşe küpü ≠ meşe cipsi; ardıç meyvesi ≠ ardıç dalı (iki yön)', C('katki', 'Oak chips (optional aging)') === 'mese_cipsi' && C('katki', 'Medium-toast oak cubes (secondary)') === 'mese_kup' && C('katki', 'Juniper twigs (lauter tun false bottom)') === 'ardic_dal');
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'ND5-K1EK', ad: 'K1 (NHC) EK KALEMLERİ ADIYLA: ek:[[ad, miktarMetni]] (K2/K3 biçimi) · ekN yalnız adı çıkarılamayan satırda (kalan 0) · ad kısa, talimat cümlesi yok · kuru dönüşümde ekAdsiz düştü · önizlemede NHC "➕ EK KALEMLER" adlarla',
+    calistir: (page) => page.evaluate(() => {
+      const L = []; Object.keys(window._NHC_MADALYA).forEach(st => window._NHC_MADALYA[st][1].forEach((o, i) => L.push({ st, i, o })));
+      const ekli = L.filter(x => (x.o.ek || []).length), adsiz = L.filter(x => +x.o.ekN > 0);
+      __REG.ok('NHC: ek adlarıyla ≥100 örnekte, adsız (ekN) örnek 0 (önce 114)', ekli.length >= 100 && adsiz.length === 0, 'ekli ' + ekli.length + ' adsız ' + adsiz.length);
+      const satir = [].concat(...ekli.map(x => x.o.ek));
+      __REG.ok('her ek satırı [ad, miktarMetni]; ad ≤80, miktar ≤30, cümle/talimat yok, HTML güvenli', satir.every(e => Array.isArray(e) && e.length === 2 && typeof e[0] === 'string' && e[0].length > 0 && e[0].length <= 80 && String(e[1]).length <= 30 && !/\.\s+[A-Z]/.test(e[0]) && !/^(treat|use|add|see)\b/i.test(e[0]) && !/[<>&"'`]/.test(e[0] + e[1])), satir.length);
+      __REG.ok('su satırı ek kalem değil (water yok)', satir.every(e => !/\bwater\b/i.test(e[0]) || /\bin water\b/i.test(e[0])));
+      const n = L.filter(x => window._bmOrnekKuru('nhc', x.st, x.i).ekAdsiz > 0).length;
+      __REG.ok('kuru dönüşüm: NHC ekAdsiz olan örnek 0', n === 0, n);
+      const x = ekli.find(z => z.o.ek.some(e => /coriander|orange peel|licorice|vanilla/i.test(e[0])));
+      _bmOrnekOnizle('nhc', x.st, x.i); const m = document.getElementById('bmOrnekOnizle'), t = m ? m.textContent : '';
+      __REG.ok('NHC önizlemesi "➕ EK KALEMLER" bölümünde adlarla (eski "burada listelenmedi" yok)', /EK KALEMLER/.test(t) && x.o.ek.every(e => t.indexOf(e[0]) >= 0) && !/burada listelenmedi/.test(t), x.st);
+      bmOrnekOnizleKapat();
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'ND5-KUTLE', ad: 'EK KALEM MİKTARI: açık kütle okunur ("2 oz (57 g)" → 57 g metrik esas, "0.5 oz" → 14,2 g, "1.0 lb (0.45 kg)" → 450 g) · hacim / adet / sıvı ons → null ("1 tsp", "16 oz (473 mL)", "2 beans", "1 inch") · gramlı kaynakta hop\'larla AYNI hacim oranıyla ölçeklenir · AHA\'da okuma yok',
+    calistir: (page) => page.evaluate(() => {
+      const K = window._bmEkKutle;
+      const T = { '2 oz (57 g)': 57, '0.5 oz': 14.2, '1 tsp': null, '1.0 lb (0.45 kg)': 450, '16.0 oz (473 mL)': null, '1 oz (30 mL), 15 min': null, '2 beans': null, '1 inch': null, '10 g, 0 min': 10, '1/2 oz. (14 g)': 14, '0.62 oz (17.6 g) (end of fermentation)': 17.6, '2 fl oz': null, '1 1/2 oz': 42.5, '5 gal': null, '': null };
+      const h = Object.keys(T).filter(k => K(k) !== T[k]).map(k => k + '→' + K(k));
+      __REG.ok('kütle okuma tablosu (' + Object.keys(T).length + ' durum)', !h.length, h.join(' | '));
+      __REG.yeniKayit('ND5 Kutle', {}); S.hacim = 10; S.verim = 70;
+      let e = null; for (const st in window._KAYNAKLI_ORNEK) { window._KAYNAKLI_ORNEK[st].forEach((o, i) => { if (!e && +o.L > 0 && (o.ek || []).some(x => K(x[1]) > 0)) e = { st, i, o }; }); }
+      const r = window._bmOrnekKuru('kay', e.st, e.i), oran = 10 / e.o.L;
+      const ok = e.o.ek.every((x, j) => { const g = K(x[1]); const k = r.ek[j]; return g > 0 ? (k.tip === 'malt' ? Math.abs(k.mik - Math.round(g * oran * 10) / 10 / 1000) < 1e-3 : Math.abs(k.mik - Math.round(g * oran * 10) / 10) < 1e-9) : k.mik === null; });
+      __REG.ok('ölçekleme: ek gramı × (10 L / ' + e.o.L + ' L), hop oranıyla aynı; kütlesiz satır null', ok && r.ek.length === e.o.ek.length, r.ek.map(k => k.ham + ':' + k.mik).join(', '));
+      const hop = (e.o.h || []).find(x => +x[1] > 0), hk = hop ? r.h[(e.o.h || []).indexOf(hop)] : null;
+      __REG.ok('hop ile aynı oran (kontrol)', !hk || Math.abs(hk.mik - Math.round(+hop[1] * oran * 10) / 10) < 1e-9);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'ND5-STOK', ad: 'LEZZET KATKISI STOKTA (sentetik stok): miktarı bilinen ek kalem stokta + yeterli → satır "stokta" (gereken gram görünür) · yetersiz → "yetersiz" + 🟡 "az var" · stok kalemi kütle birimli değilse (adet) karşılaştırma yok → ≈ · stokta yok → "yok (gereken X g)" · şişeleme şekeri ("to prime") proses',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('ND5 Stok', {}); S.hacim = 10; S.verim = 70;
+      const H = window._bmOrnekHepsi(), kuru = e => window._bmOrnekKuru(e.kaynak, e.stil, e.idx), st = e => window._bmOrnekStok(e.kaynak, e.stil, e.idx), P = window._bmProsesYardimci;
+      const KAT = { malt: MALTLAR, hop: HOPLAR, maya: MAYALAR, katki: KATKILAR };
+      const giris = (tip, id, mik, birim) => { const x = KAT[tip].find(a => a.id === id); return { id: 'n5' + tip + id + Math.random(), ad: x.ad, refId: id, g: tip === 'malt' ? 'Malt' : tip === 'hop' ? 'Hop' : tip === 'maya' ? 'Maya' : 'Aroma', miktar: mik, birim: birim || (tip === 'malt' ? 'kg' : tip === 'maya' ? 'paket' : 'g') }; };
+      const e = H.find(x => { if (x.kaynak === 'aha') return false; const r = kuru(x); const L = r.g.concat(r.h, r.ek, r.y ? [r.y] : []); return !r.ekAdsiz && L.every(k => k.id || P(k)) && r.ek.some(k => k.id && k.tip === 'katki' && k.mik > 0 && !P(k)) && L.every(k => !k.id || k.tip === 'maya' || k.mik > 0 || P(k)); });
+      if (!e) { __REG.ok('tam eşli + kütleli lezzet ek kalemli örnek bulundu', false); return __REG.al(); }
+      const r = kuru(e), lk = r.ek.find(k => k.id && k.tip === 'katki' && k.mik > 0 && !P(k));
+      const top = r.ek.filter(k => k.id === lk.id && k.mik > 0).reduce((a, k) => a + k.mik, 0);
+      const stokla = (lezMik, lezBirim, lezYok) => { STOK.length = 0; const ek = {}; r.g.concat(r.h, r.ek, r.y ? [r.y] : []).forEach(k => { if (!k.id || ek[k.id]) return; ek[k.id] = 1; if (k.id === lk.id) { if (!lezYok) STOK.push(giris('katki', k.id, lezMik, lezBirim)); return; } STOK.push(giris(k.tip, k.id, k.tip === 'maya' ? 3 : k.mik > 0 ? k.mik * 50 : 1000)); }); };
+      stokla(top * 3); let s = st(e), x = s.ek.find(z => z.k.id === lk.id);
+      __REG.ok('lezzet katkısı (' + lk.ham + ' ' + lk.mik + ' g) stokta + yeterli → "stokta", örnek ✅ ve ≈ değil (bu satır)', x.d === 'stokta' && s.durum === 'ok' && /gereken/.test(window._ndKalemHTML(x)), x.d + ' ' + s.durum + ' ' + e.stil);
+      stokla(top / 4); s = st(e); x = s.ek.find(z => z.k.id === lk.id);
+      window.__brAcik = true; const rz = window._ndSatirRozetHTML(e.kaynak, e.stil, e.idx); window.__brAcik = false;
+      __REG.ok('yetersiz → "yetersiz" + 🟡 "az var" (gereken > mevcut)', x.d === 'yetersiz' && s.durum === 'yakin' && s.az >= 1 && /az var/.test(rz) && x.gerek > x.mevcut, x.d + ' ' + s.durum);
+      stokla(1, 'adet'); s = st(e); x = s.ek.find(z => z.k.id === lk.id);
+      __REG.ok('stok birimi adet → karşılaştırma yok, ≈ (bilinmiyor), ✅ düşmez', x.d === 'bilinmiyor' && s.durum === 'ok' && s.belirsiz >= 1, x.d + ' ' + s.durum);
+      stokla(0, 'g', true); s = st(e); x = s.ek.find(z => z.k.id === lk.id);
+      __REG.ok('stokta yok → "yok (gereken X g)"', x.d === 'yok' && /gereken/.test(window._ndKalemHTML(x)), window._ndKalemHTML(x).replace(/<[^>]+>/g, ''));
+      __REG.ok('şişeleme şekeri ("corn sugar to prime", "Corn sugar (priming)") katalogda şekere eşlense de PROSES; şeker katkısının kendisi değil', P({ ham: 'corn sugar to prime', tip: 'katki', id: 'corn_sugar' }) && P({ ham: 'Corn sugar (priming)', tip: 'katki', id: 'corn_sugar' }) && !P({ ham: 'Dextrose corn sugar (10 min)', tip: 'katki', id: 'corn_sugar' }));
+      STOK.length = 0;
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'ND5-MALZEMELI', ad: '"Bu örneğin malzemeleriyle oluştur" + EK KALEM: miktarı bilinen eşli ek kalem reçetenin katkı listesine o miktarla, kaynak zamanlaması notta · miktarı bilinmeyen lezzet ek kalemi → düğme YOK · proses yardımcısının miktarı bilinmese de düğme engellenmez (ND2\'den beri kural)',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('ND5 Mlz', {}); S.hacim = 10; S.verim = 70; tarifeKaydet();
+      const H = window._bmOrnekHepsi(), mi = e => window._bmOrnekMalzemeliMi(e.kaynak, e.stil, e.idx), kuru = e => window._bmOrnekKuru(e.kaynak, e.stil, e.idx), P = window._bmProsesYardimci;
+      const e = H.find(x => mi(x) && kuru(x).ek.some(k => k.id && k.tip === 'katki' && k.mik > 0 && !P(k)));
+      if (!e) { __REG.ok('kütleli lezzet ek kalemli kurulabilir örnek bulundu', false); return __REG.al(); }
+      const r = kuru(e), n0 = KR.length; window._bmOrnekMalzemeliRecete(e.kaynak, e.stil, e.idx);
+      const yaz = r.ek.filter(k => k.id && k.tip === 'katki' && k.mik > 0), not = String(S.notlar || '');
+      __REG.ok('KR +1; miktarı bilinen eşli ek kalemler S.katkilar\'da o gramla (' + yaz.map(k => k.ham + ' ' + k.mik + ' g').join(', ') + ')', KR.length === n0 + 1 && yaz.every(k => S.katkilar.some(z => z.id === k.id && z.birim === 'g' && Math.abs(z.miktar - k.mik) < 1e-9)), JSON.stringify(S.katkilar.map(z => z.id + ':' + z.miktar)));
+      __REG.ok('notta "reçeteye yazıldı" + her birinin kaynak adı ve miktar/zamanlama metni', /reçeteye yazıldı/.test(not) && yaz.every(k => not.indexOf(k.ham) >= 0 && (!k.mikMetin || not.indexOf(k.mikMetin) >= 0)));
+      const yok = H.find(x => x.kaynak !== 'aha' && !kuru(x).ekAdsiz && kuru(x).g.concat(kuru(x).h).every(k => k.id && k.mik > 0) && kuru(x).y && kuru(x).y.id && !(window._bmOrnekNesne(x.kaynak, x.stil, x.idx).h || []).some(h => h[2] === 'mash') && kuru(x).ek.some(k => !P(k) && !(k.mik > 0)));
+      __REG.ok('miktarı bilinmeyen lezzet ek kalemi olan (malt/hop/maya tam) örnek → düğme YOK', !!yok && !mi(yok), yok ? yok.stil + ' ' + kuru(yok).ek.filter(k => !P(k) && !(k.mik > 0)).map(k => k.ham).join(',') : 'yok');
+      const pr = H.find(x => mi(x) && kuru(x).ek.some(k => P(k) && !(k.mik > 0)));
+      __REG.ok('yalnız PROSES ek kalemi miktarsız → düğme açık (bugünkü kural korundu)', !!pr && mi(pr), pr ? pr.stil + ' ' + kuru(pr).ek.filter(k => P(k) && !(k.mik > 0)).map(k => k.ham).join(',') : 'yok');
       return __REG.al();
     })
   }

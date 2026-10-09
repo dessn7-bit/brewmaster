@@ -744,7 +744,7 @@
 // HTML degisti (Sprint BW: AI altyapisi BYOK - anahtar yonetimi + istek katmani + cikti filtresi) -> CACHE_VERSION bump v131-436 -> v131-437.
 // HTML degisti (Sprint BX: ikame paneli - MUADIL gorunur + AI siralama/aciklama + muadilSec tek yol) -> CACHE_VERSION bump v131-437 -> v131-438.
 // HTML degisti (Sprint BY: bekleyen guncelleme - editordeyken gelen surum guvenli ilk anda uygulanir) -> CACHE_VERSION bump v131-438 -> v131-439.
-const CACHE_VERSION='bm-cache-v131-455';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
+const CACHE_VERSION='bm-cache-v131-456';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
 const ASSET_CACHE   = 'bm-assets-v1';        // font + ikon + manifest — KALICI, bump'ta silinmez
 const MODEL_CACHE   = 'bm-models-v1';        // workers.dev + jsdelivr — SHA'li/immutable URL, KALICI
 
@@ -760,7 +760,7 @@ const MODEL_CACHE   = 'bm-models-v1';        // workers.dev + jsdelivr — SHA'l
 // (HankenGrotesk-latin*.woff2 diskte var ama HTML'de referansi YOK = olu; precache'e alinmadi.)
 const CRITICAL_HTML = [
   './Brewmaster_v2_79_10.html',
-  './ornek_veri.js?v=009d846eda',   // SPRINT CC4: örnek tabloları — HTML'deki <script src> ile BİREBİR aynı URL (test kilitli)
+  './ornek_veri.js?v=672187b8af',   // SPRINT CC4: örnek tabloları — HTML'deki <script src> ile BİREBİR aynı URL (test kilitli)
 ];
 // Degismeyen varliklar -> ASSET_CACHE (kalici). Nisan/Haziran'dan beri degismediler.
 const CRITICAL_ASSETS = [

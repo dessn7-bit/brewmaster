@@ -116,6 +116,25 @@ vm.runInContext(axSl('const moj = ', '\n// ── 1. STİL EŞLEME') + '\n' + ax
 const AXE = vm.runInContext('({moj, temiz, satirlar, mayaMu, hopMu, katkiMu, fermMu, hopCoz, gristCoz, mayaCoz, specsCoz, mashCoz})', axCtx);
 // AX'in alt-kategori eşleme tablosu (özgül etiketler) BİREBİR
 const axEsl = vm.runInContext('(' + axSl('const STIL_ESLEME = {', '\n// hedeflerin hepsi').replace('const STIL_ESLEME = ', '').replace(/;\s*$/, '') + ')', vm.createContext({}));
+// SPRINT ND5: katkı / tanınmayan satır SAYILMAZ, [ad, miktarMetni] olarak tutulur (K2/K3 biçimi). Yalnız OLGU: malzeme adı +
+// kaynaktaki miktar metni. Talimat/yorum cümlesi GÖMÜLMEZ → adı çıkarılamayan satır ekN'de kalır. Su satırları (şebeke / RO /
+// "filtered St. Paul water"…) malzeme kalemi değil, su profili notu → ne ek ne ekN (sayaç: su_satiri).
+const EK_ENT = s => String(s || '').replace(/&#39;/g, "'").replace(/&#34;|&quot;/g, '"').replace(/&amp;/g, '&');
+const EK_MIK = /^((?:\d+(?:\.\d+)?(?:\s+\d+\/\d+)?|\d+\/\d+)\s*(?:fl\.?\s*oz\.?|oz\.?|ounces?|lbs?\.?|pounds?|kg|g|grams?|ml|l|liters?|litres?|tsp\.?|tsb\.?|tbsp\.?|tbs\.?|t\.|cups?|c\.|qt|quarts?|gal\.?|gallons?|inch(?:es)?|tablets?|tabs?|capsules?|packets?|cans?|drops|cc|pinch(?:es)?)?(?:\s*\(\s*\d+(?:\.\d+)?\s*(?:kg|g|ml|l|liters?)\s*\))?)\s+(?=\S)/i;
+const EK_SON_MIK = /\s*\(\s*(\d+(?:\.\d+)?\s*(?:kg|g|ml|l|liters?))\s*\)\s*$/i;
+function ekSatirCoz(l) {
+  const t = EK_ENT(l).replace(/\s+/g, ' ').trim();
+  if (/\bwater\b/i.test(t) && !/\bin water\b/i.test(t)) return { su: true };
+  if (/\bmicron\b|^forced co/i.test(t)) return { su: true }; // filtrasyon / zorla gazlama: malzeme değil, işlem notu
+  let mik = '', ad = t; const m = EK_MIK.exec(t);
+  if (m && !/^\d+(\.\d+)?%/.test(t)) { mik = m[1].trim(); ad = t.slice(m[0].length); }
+  const s = EK_SON_MIK.exec(ad); if (s) { mik = (mik ? mik + ' ' : '') + '(' + s[1] + ')'; ad = ad.slice(0, s.index); }
+  ad = htmlGuvenli(ad).replace(/\s+to (clarify|calrify)\b.*$/i, '').replace(/[,;.\s]+$/, '').replace(/\s+/g, ' ').trim();
+  mik = htmlGuvenli(mik).replace(/\s+/g, ' ').trim();
+  // cümle / talimat / yalnız oran ("4.1% a.a.") → ad çıkarılamaz
+  if (!ad || ad.length > 80 || mik.length > 30 || /\.\s+[A-Z]/.test(ad) || /\b(until|about \d+ days)\b/i.test(ad) || /^(treat|use|add|forced|see)\b/i.test(ad) || !/[a-z]{3}/i.test(ad) || /^[\d.]+%/.test(ad)) return null;
+  return [ad, mik];
+}
 const db = new DatabaseSync(DB_YOL, { readOnly: true });
 const rows = db.prepare('select * from recipes order by year desc, id').all();
 const nhcByStil = new Map();
@@ -130,13 +149,14 @@ rows.forEach(r => {
   const vmL = /\(([\d.]+)\s*L\)/i.exec(String(r.vol || ''));
   const L = vmL ? Math.round(parseFloat(vmL[1]) * 10) / 10 : null;
   if (!sp.og || !L) { inc('nhc_olcu_yok'); return; }
-  const g = [], h = []; let y = null, ekN = 0, dusur = false;
+  const g = [], h = [], ek = []; let y = null, ekN = 0, dusur = false;
+  const ekle = l => { const e = ekSatirCoz(l); if (e && e.su) { inc('nhc_su_satiri'); return; } if (e) { ek.push(e); inc('nhc_ek_adli'); } else { ekN++; inc('nhc_ek_adsiz'); } };
   AXE.satirlar(r.ingredients).forEach(l => {
     if (AXE.mayaMu(l)) { if (!y) y = AXE.mayaCoz(l); return; }
     if (AXE.hopMu(l)) { const hp = AXE.hopCoz(l); if (hp) h.push(hp); else dusur = true; return; }
-    if (AXE.katkiMu(l)) { ekN++; return; }
+    if (AXE.katkiMu(l)) { ekle(l); return; }
     if (AXE.fermMu(l)) { const gr = AXE.gristCoz(l); if (gr) g.push(gr); else dusur = true; return; }
-    ekN++;
+    ekle(l);
   });
   if (dusur || !g.length) { inc('nhc_kirpik'); return; }
   const kgL = g.reduce((a, x) => a + x[1], 0) / 1000 / L;
@@ -144,7 +164,7 @@ rows.forEach(r => {
   const ms = AXE.mashCoz(r.instructions);
   const k = { yil: +r.year, L: L, og: sp.og };
   if (sp.fg) k.fg = sp.fg; if (sp.ab) k.ab = sp.ab; if (sp.ib) k.ib = sp.ib; if (sp.sr) k.sr = sp.sr;
-  if (ms) k.ms = ms; k.g = g; if (h.length) k.h = h; if (y) k.y = y; if (ekN) k.ekN = ekN;
+  if (ms) k.ms = ms; k.g = g; if (h.length) k.h = h; if (y) k.y = y; if (ek.length) k.ek = ek; if (ekN) k.ekN = ekN;
   if (es.yol !== 'etiket') k.es = es.yol;
   inc('nhc_yol_' + es.yol);
   (nhcByStil.get(es.stil) || nhcByStil.set(es.stil, []).get(es.stil)).push(k);
