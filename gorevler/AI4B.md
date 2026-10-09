@@ -42,3 +42,5 @@ KURAL: Madde 1-4 bedava (API yok). Madde 5 Kaan'in dugmesiyle. Asistan beta anah
 - AKIS: madde 1-4 + canli -> Kaan'a TEK cumle (bakiye kontrolu + dugme + Sonucu kopyala). Yapistirma gelince puanla, etiketle, karari uygula, raporla.
 
 RAPOR: 7 duzeltme (once/sonra davranis), dogrulama seti (etiket dagilimi, yanlis alarm, kacan uydurma), mutasyon yakalama tablosu, dondurma hash'i, taze kosu metrikleri + elle etiket ozeti, maliyet, karar, SUPHE (zorunlu).
+
+EK (Claude, 2026-10-10 gece — TAZE KOSUDAN ONCE yazildi, git tarihi kanit): (c) kacan uydurma icin 40'lik ornekten oranla genelleme YAPILMAZ (Kaan kurali: kucuk ornekten oran cikarimi yok). Gosterilen cumlelerin TAMAMI kanitli elle etiketlenir; c gercek sayidir, c_est kullanilmaz. Esik: (b + c) / N <= %5. Gosterilen cumle sayisi 400'u asarsa once sayiyi raporla, tamami yine etiketlenir (ucretsiz is, API yok). Tohum 20261010 ile secilen 40 cumle ayrica "ilk bakilan ornek" olarak raporda isaretli kalir.
