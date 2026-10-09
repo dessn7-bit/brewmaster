@@ -103,6 +103,14 @@ const AHA = {};
   AHA[ad] = [[L.length, sayim[1], sayim[2], sayim[3]], sec.map(x => {
     const o = { m: +x.m.medal, og: x.m.og || null, ib: x.m.ibu || null, sr: x.m.srm || null, ab: x.m.abv || null, g: gristOzet(x.m), h: hopOzet(x.m), y: mayaSadelestir(x.m.yeast), yil: x.mb.yil, e: x.mb.entries };
     if (x.yol !== 'etiket') o.es = x.yol; // stil eşleme yolu (etiket dışı: ifade/ozel/kategori/ad/semsiye) — şeffaflık
+    // SPRINT VERI1 2: ham AN verisindeki GERÇEK miktarlar (yeni kazıma yok; yalnız olgu: ad + miktar + zaman). Eski g / h (yüzde, ilk 5 malt /
+    // ilk 4 hop, gramsız) liste görünümü ve topluluk dağılımı için AYNEN kalır; gg / hg / L varsa uygulama örneği "gramlı" sayar.
+    // su satırı ("RO water (with gypsum…)") malzeme değil — NHC ek satırındaki su kuralıyla aynı (ekSatirCoz: \bwater\b → su notu)
+    const gg = (x.m.malts || []).filter(z => z && +z.amount_kg > 0 && !(/\bwater\b/i.test(z.name || '') && !/\bin water\b/i.test(z.name || ''))).map(z => [maltAdSadelestir(z.name), Math.round(+z.amount_kg * 1000)]).filter(z => z[0]);
+    const hg = (x.m.hops || []).filter(z => z && (z.alpha != null || z.time_min != null || z.use)).map(z => {
+      const u = String(z.use || ''), d = u === 'dry_hop' ? 'kuru' : u === 'whirlpool' ? 'wp' : u === 'first_wort' ? 'FWH' : u === 'mash' ? 'mash' : (z.time_min == null ? null : Math.round(z.time_min));
+      return [hopAdSadelestir(z.name), +z.amount_g > 0 ? Math.round(+z.amount_g * 10) / 10 : null, d, +z.alpha > 0 ? +z.alpha : null]; }).filter(z => z[0] && z[0].length <= 24);
+    if (+x.m.batch_l > 0 && gg.length && hg.length) { o.L = Math.round(+x.m.batch_l * 10) / 10; o.gg = gg; o.hg = hg; if (x.m.fg) o.fg = x.m.fg; inc('aha_gramli'); } else inc('aha_gramsiz');
     return o;
   })];
 });

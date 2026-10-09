@@ -46,8 +46,13 @@ function sayfada() {
     const med = (L, f) => { const v = L.map(f).filter(x => x != null && isFinite(x)).sort((p, q) => p - q); return v.length ? v[Math.floor((v.length - 1) / 2)] : null; };
     const ol = L => { const h = med(L, z => z.hata), j = med(L, z => z.jac); return { srm:h == null ? null : Math.round(h * 10) / 10, jac:j == null ? null : Math.round(j * 1000) / 1000, skor:(j == null ? 0 : j) - (h == null ? 0 : h / bw) }; };
     const A = ol(md), E = ol(me), n = md.length;
-    const kp = d.kapi.length === 0, iy = A.skor >= E.skor - 1e-9;
-    kiyas[s] = { n:n, d:{ srm:A.srm, jac:A.jac }, e:{ srm:E.srm, jac:E.jac }, secim:(n >= 3 && iy && kp) ? 'turetilmis' : 'elle', neden:n < 3 ? 'ölçülebilen örnek < 3' : !iy ? 'elle ölçüde daha iyi' : !kp ? 'türetilmiş ölçüde iyi ama tutarlılık kapısından geçmedi (' + d.kapi.join(', ') + ')' : 'türetilmiş ölçüde daha iyi ya da eşit' };
+    const kp = d.kapi.length === 0, iy = A.skor >= E.skor - 1e-9, ek = kapi(s, STIL_ISKELET[s]), ekp = ek.length === 0;
+    // VERI1: kapı önce — yalnız biri tutarlılık kapısından geçiyorsa (doğru BJCP bandıyla) o seçilir; ikisi de geçiyor / geçmiyorsa ölçü kuralı
+    let secim, neden;
+    if (n >= 3 && kp && !ekp) { secim = 'turetilmis'; neden = 'elle iskelet tutarlılık kapısından geçmiyor (' + ek.join(', ') + '), türetilmiş geçiyor'; }
+    else if (!kp && ekp) { secim = 'elle'; neden = 'türetilmiş tutarlılık kapısından geçmedi (' + d.kapi.join(', ') + ')'; }
+    else { secim = (n >= 3 && iy) ? 'turetilmis' : 'elle'; neden = n < 3 ? 'ölçülebilen örnek < 3' : !iy ? 'elle ölçüde daha iyi' : 'türetilmiş ölçüde daha iyi ya da eşit'; if (!kp && !ekp) neden += ' · ikisi de kapı dışı (türetilmiş ' + d.kapi.join(', ') + ' / elle ' + ek.join(', ') + ')'; }
+    kiyas[s] = { n:n, d:{ srm:A.srm, jac:A.jac }, e:{ srm:E.srm, jac:E.jac }, ekapi:ek, secim:secim, neden:neden };
   });
   const orta = {}; st.forEach(s => { const B = BJCP[s]; orta[s] = { og:B.og, ibu:B.ibu, srm:B.srm }; });
   return { T, kiyas, orta, slug:window.SLUG_TO_BJCP || {}, elle:Object.keys(STIL_ISKELET) };

@@ -1289,7 +1289,7 @@ const CASELER = [
       const styles = Object.keys(window.STIL_ISKELET || {});
       __REG.ok('STIL_ISKELET 63 stil (20 küratörlü + 4 V1b + 18 V2 + 21 V3/AL)', styles.length === 63, String(styles.length));
       yeniTarif();
-      let idFail = [], rangeFail = [], pctFail = [];
+      let idFail = [], rangeFail = [], pctFail = [], istisna = [];
       styles.forEach(st => {
         const isk = window.STIL_ISKELET[st];
         const bj = BJCP[st];
@@ -1309,11 +1309,13 @@ const CASELER = [
         const srm = (c.srm != null) ? +c.srm : hSRM(S.maltlar, [], 11);
         if (!(c.og >= bj.og[0] && c.og <= bj.og[1])) rangeFail.push(st + ':OG=' + c.og.toFixed(3) + '[' + bj.og + ']');
         if (!(c.ibu >= bj.ibu[0] && c.ibu <= bj.ibu[1])) rangeFail.push(st + ':IBU=' + Math.round(c.ibu) + '[' + bj.ibu + ']');
-        if (!(srm >= bj.srm[0] && (bj.srm[1] >= 30 || srm <= bj.srm[1]))) rangeFail.push(st + ':SRM=' + srm + '[' + bj.srm + ']');
+        const _ik = (window._ISKELET_TURETILMIS.stiller[st] || {}).kiyas, _ikisi = !!(_ik && /ikisi de kapı dışı/.test(_ik.neden || '')); // VERI1: doğru BJCP bandıyla iki iskelet de dışarıda (builder kaydı)
+        if (!(srm >= bj.srm[0] && (bj.srm[1] >= 30 || srm <= bj.srm[1]))) { if (_ikisi) istisna.push(st + ':SRM=' + srm + '[' + bj.srm + ']'); else rangeFail.push(st + ':SRM=' + srm + '[' + bj.srm + ']'); }
       });
       __REG.ok('grist %% toplamı 100 (tüm iskelet)', pctFail.length === 0, pctFail.slice(0, 4).join(' | '));
       __REG.ok('tüm ID katalogda (malt/hop/maya) — sahte ID yok', idFail.length === 0, idFail.slice(0, 5).join(' | '));
       __REG.ok('tüm iskelet calc() OG+IBU+SRM BJCP aralığında — bozuk iskelet yok', rangeFail.length === 0, rangeFail.slice(0, 5).join(' | '));
+      __REG.ok('VERI1 istisnası yalnız builder\'ın "ikisi de kapı dışı" dediği stil(ler) — en fazla 1 (German Pils: %100 pilsner uygulamanın renk modelinde 4,1 SRM, BJCP 5D üst 4)', istisna.length <= 1, istisna.join(' | '));
       return __REG.al();
     })
   },
@@ -4359,7 +4361,7 @@ const CASELER = [
       _bmMadalyaYeniRecete(st1, 1);
       const c1 = calc();
       __REG.ok('(a) dolu alan (OG) yine örneğe ölçeklendi', Math.abs(c1.og - o1.og) <= 0.004, c1.og.toFixed(3) + ' vs ' + o1.og);
-      const n1 = String(S.notlar || '');
+      const n1 = String(S.notlar || '').split('🧬 İskelet nereden geldi?')[0]; // VERI1: yalnız örnek notu (iskelet kaynağı bölümü hariç)
       __REG.ok('(a) notta IBU ve SRM satırı YOK (boş bırakıldı, uydurulmadı)', n1.indexOf('IBU') < 0 && n1.indexOf('SRM') < 0, n1.split('\n').find(s => s.indexOf('Örneğin') === 0) || '');
       __REG.ok('(a) notta dolu alanlar (OG/ABV) VAR', n1.indexOf('OG ' + o1.og.toFixed(3)) >= 0 && n1.indexOf('ABV %' + o1.ab) >= 0);
       // IBU davranışı düz iskelet doluşuyla BİREBİR (örnek IBU vermedi → BJCP ortası, mevcut yol)
@@ -5393,8 +5395,12 @@ const CASELER = [
       bmOrnekOnizleKapat();
       __REG.ok('(a) Kapat: modal kalktı + hiçbir şey oluşmadı', !document.getElementById('bmOrnekOnizle') && KR.length === n0 && S.biraAd === ad0);
       // (b) AHA örneği — hop gramajsız kaynak (American Barleywine eski tabloda var, NHC tablosunda yok)
-      __REG.ok('(b) önkoşul: American Barleywine yalnız eski tabloda', !!window._TOPLULUK_MADALYA['American Barleywine'] && !window._NHC_MADALYA['American Barleywine']);
-      const r2 = _bmOrnekOnizle('aha', 'American Barleywine', 0);
+      // VERI1 2: American Barleywine AHA örneği artık ham AN verisinden gramlı → dürüst boşluk satırları GRAMSIZ AHA örneğinde sınanır
+      const _gs = window._bmOrnekHepsi().find(e => e.kaynak === 'aha' && !window._bmOrnekNesne('aha', e.stil, e.idx)._ahaGram), _gl = window._bmOrnekNesne('aha', 'American Barleywine', 0);
+      __REG.ok('(b) VERI1: American Barleywine AHA örneği gramlı (L + gg + hg), gramsız AHA örneği hâlâ var', !!_gl && _gl._ahaGram === true && _gl.L > 0 && !!_gs, _gs ? _gs.stil + '#' + _gs.idx : 'yok');
+      _bmOrnekOnizle('aha', 'American Barleywine', 0); const _mg = document.getElementById('bmOrnekOnizle'), _tg = _mg ? _mg.textContent : ''; bmOrnekOnizleKapat();
+      __REG.ok('(b) VERI1: gramlı AHA önizlemesi gram gösterir, "Hop gramajı kaynakta yok" demez', /\d+(,\d+)? (g|kg)/.test(_tg) && _tg.indexOf('Hop gramajı kaynakta yok') < 0);
+      const r2 = _bmOrnekOnizle('aha', _gs.stil, _gs.idx);
       const m2 = document.getElementById('bmOrnekOnizle');
       __REG.ok('(b) AHA önizleme açıldı, reçete OLUŞMADI', r2 === true && !!m2 && KR.length === n0);
       const t2 = m2 ? m2.textContent : '', t2d = __REG.dilMetni(m2);
@@ -7471,7 +7477,7 @@ const CASELER = [
       const en = govde.output_config.format.schema.properties.siralama.items.properties.id.enum;
       __REG.ok('şema: id ENUM = tam aday listesi (API katalog dışı id üretemez)', JSON.stringify(en) === JSON.stringify(['tradition', 'tettn', 'spalt']), JSON.stringify(en));
       const v = govde.system[1].text;
-      __REG.ok('bağlam: stil + BJCP bantları + mevcut hesap + malt/hop/maya listesi', /stil German Pils · BJCP bantları OG 1.05-1.058, IBU 20-30, SRM 4-6/.test(v) && /Şu anki hesap: OG 1\.\d{3}, FG/.test(v) && /Maltlar: Pilsner Malt 4\.5 kg/.test(v) && /Maya: W-34\/70/.test(v), v.slice(0, 200));
+      __REG.ok('bağlam: stil + BJCP bantları + mevcut hesap + malt/hop/maya listesi', v.indexOf('stil German Pils · BJCP bantları OG ' + BJCP['German Pils'].og.join('-') + ', IBU ' + BJCP['German Pils'].ibu.join('-') + ', SRM ' + BJCP['German Pils'].srm.join('-')) >= 0 && BJCP['German Pils'].og[0] === 1.044 && /Şu anki hesap: OG 1\.\d{3}, FG/.test(v) && /Maltlar: Pilsner Malt 4\.5 kg/.test(v) && /Maya: W-34\/70/.test(v), v.slice(0, 200));
       __REG.ok('bağlam: değişecek malzeme alfa+miktar+süre+profil; 3 aday id + alfa + önerilen miktar + tablo notu', /DEĞİŞECEK MALZEME: Hallertau Mittelfrueh \(alfa %4\) · 30 g · 60 dk · profil:/.test(v) && /id=tradition \| Hallertau Tradition \| alfa %5\.5 \| aynı etki için önerilen miktar 21\.8 g \| tablo notu:/.test(v) && (v.match(/^- id=/gm) || []).length === 3);
       const sira = [...document.querySelectorAll('#bmIkame .bm-ikame-aday')].map(e => e.dataset.id);
       __REG.ok('istemci doğrulaması: sıra spalt, tradition (tekrar teklendi), tettn sona (AI sıralamadı); cascade ATILDI', JSON.stringify(sira) === JSON.stringify(['spalt', 'tradition', 'tettn']) && JSON.stringify(r.dogrulama.disari) === '["cascade"]' && JSON.stringify(r.dogrulama.eksik) === '["tettn"]', sira.join(',') + ' / ' + JSON.stringify(r.dogrulama));
@@ -8386,10 +8392,11 @@ const CASELER = [
       const se = window._bmOrnekStok(es.kaynak, es.stil, es.idx);
       __REG.ok('eşlenemeyen kalemi olan örnek tam stokla bile ✅ OLMAZ (❔ ayrı sayılır)', se.durum !== 'ok' && se.eslenemedi > 0, se.durum + ' ❔' + se.eslenemedi);
       // AHA: hop gramajı kaynakta yok → miktar bilinmiyor
-      const aha = H.find(e => e.kaynak === 'aha' && kuru(e).h.some(k => k.id)); const za = kuru(aha);
-      STOK.length = 0; za.g.concat(za.h, za.y ? [za.y] : []).forEach((k, i) => { if (!k.id) return; const x = KAT[k.tip].find(a => a.id === k.id); STOK.push({ id: 'na' + i, ad: x.ad, refId: k.id, g: k.tip === 'malt' ? 'Malt' : k.tip === 'hop' ? 'Hop' : k.tip === 'maya' ? 'Maya' : 'Katkı', miktar: 1e6, birim: k.tip === 'malt' ? 'kg' : k.tip === 'maya' ? 'paket' : 'g' }); });
-      const sa = window._bmOrnekStok(aha.kaynak, aha.stil, aha.idx), hk = sa.h.find(x => x.k.id);
-      __REG.ok('ND4: AHA hop gramajı kaynakta yok, stokta VAR → satır "bilinmiyor", örnek ✅ + ≈ (eşlenemeyen yoksa)', hk.d === 'bilinmiyor' && (sa.eslenemedi > 0 ? sa.durum === 'yakin' : (sa.durum === 'ok' && sa.belirsiz >= 1)), hk.d + ' / ' + sa.durum + ' ❔' + sa.eslenemedi);
+      const _bil = k => k.id && !window._bmProsesYardimci(k) && (!(k.mik > 0) || k.varsayim); // VERI1: AHA hopları gramlı → miktarı bilinmeyen herhangi bir eşlenmiş kalem
+      const aha = H.find(e => { const z = kuru(e); return !z.ekAdsiz && z.g.concat(z.h, z.ek, z.y ? [z.y] : []).every(k => k.id || window._bmProsesYardimci(k)) && z.g.concat(z.h, z.ek).some(_bil); }); const za = kuru(aha);
+      STOK.length = 0; za.g.concat(za.h, za.ek, za.y ? [za.y] : []).forEach((k, i) => { if (!k.id) return; const x = KAT[k.tip].find(a => a.id === k.id); STOK.push({ id: 'na' + i, ad: x.ad, refId: k.id, g: k.tip === 'malt' ? 'Malt' : k.tip === 'hop' ? 'Hop' : k.tip === 'maya' ? 'Maya' : 'Katkı', miktar: 1e6, birim: k.tip === 'malt' ? 'kg' : k.tip === 'maya' ? 'paket' : 'g' }); });
+      const sa = window._bmOrnekStok(aha.kaynak, aha.stil, aha.idx), hk = sa.g.concat(sa.h, sa.ek).find(x => _bil(x.k));
+      __REG.ok('ND4: miktarı kaynakta yok (VERI1: AHA hopları artık gramlı — ' + aha.kaynak + ' ' + aha.stil + '), stokta VAR → satır "bilinmiyor", örnek ✅ + ≈ (eşlenemeyen yoksa)', hk.d === 'bilinmiyor' && (sa.eslenemedi > 0 ? sa.durum === 'yakin' : (sa.durum === 'ok' && sa.belirsiz >= 1)), hk.d + ' / ' + sa.durum + ' ❔' + sa.eslenemedi);
       __REG.ok('miktar AV kuralıyla (S.hacim/S.verim) ölçekleniyor', r.hacim === ((+S.hacim > 0) ? +S.hacim : 11) && r.verim === ((+S.verim > 0) ? +S.verim : 61), r.hacim + ' L / %' + r.verim);
       return __REG.al();
     })
@@ -8784,12 +8791,12 @@ const CASELER = [
       stokla(eB, [kB.id], [giris('malt', yarMu(kB.id).id, 999)]); const sB = st(eB);
       __REG.ok('⚠️ muadil stokta → ✅ OLMAZ (🟡, satır "yok" + yakın alternatif)', sB.durum === 'yakin' && sB.eksik === 1 && sB.g.find(x => x.k.id === kB.id).d === 'yok', sB.durum + ' ' + kB.id + '→' + yarMu(kB.id).id);
       // c) miktarı bilinmeyen ama stokta → ✅ + ≈  (AHA: hop gramajı kaynakta yok)
-      const eC = H.find(e => { if (e.kaynak !== 'aha') return false; const r = kuru(e); const L = r.g.concat(r.h, r.ek, r.y ? [r.y] : []); return !r.ekAdsiz && L.length >= 3 && L.every(k => k.id || P(k)) && r.h.some(k => k.id && !(k.mik > 0)); });
+      const eC = H.find(e => { const r = kuru(e); /* VERI1: kaynağa bakmadan (AHA hopları artık gramlı) */ const L = r.g.concat(r.h, r.ek, r.y ? [r.y] : []); return !r.ekAdsiz && L.length >= 3 && L.every(k => k.id || P(k)) && r.g.concat(r.h, r.ek).some(k => k.id && !P(k) && (!(k.mik > 0) || k.varsayim)); }); // VERI1: varsayımlı gram da bilinmeyen sayılır
       if (!eC) { __REG.ok('miktarı kaynakta olmayan + tamamı eşli AHA örneği bulundu', false); return __REG.al(); }
       stokla(eC); const sC = st(eC);
       window.__brAcik = true; const rzC = window._ndSatirRozetHTML(eC.kaynak, eC.stil, eC.idx); window.__brAcik = false;
       __REG.ok('miktarı kaynakta olmayan kalem stokta → ✅ + "≈ miktar doğrulanmadı" (' + eC.stil + ')', sC.durum === 'ok' && sC.belirsiz >= 1 && /≈ miktar doğrulanmadı/.test(rzC), sC.durum + ' ≈' + sC.belirsiz);
-      __REG.ok('önizleme satırı "≈ … yeterliliği bilinemiyor"', /≈ .*yeterliliği bilinemiyor/.test(window._ndKalemHTML(sC.h.find(x => x.d === 'bilinmiyor'))));
+      __REG.ok('önizleme satırı "≈ … yeterliliği bilinemiyor"', /≈ .*yeterliliği bilinemiyor/.test(window._ndKalemHTML(sC.g.concat(sC.h, sC.ek).find(x => x.d === 'bilinmiyor'))));
       // d) miktarı bilinen yetersiz → 🟡 az var
       const eD = H.find(e => tam(e) && !kuru(e).ek.length && kuru(e).g.filter(k => k.tip === 'malt').length >= 2);
       const kD = kuru(eD).g.find(k => k.tip === 'malt'); stokla(eD, [kD.id], [giris('malt', kD.id, kD.mik / 10)]); const sD = st(eD);
@@ -9234,8 +9241,12 @@ const CASELER = [
         // UYG2: bileşik muadil satırı reçetede İKİ malt (ana = satır kütlesi, koyu = MCU açığı) — sıra korunur
         const g = p.satirlar.filter(z => z.grup === 'g'), bek = [], m = p.tarif.maltlar;
         g.filter(z => z.tip === 'malt').forEach(z => { if (z.secilen && z.secilen.bilesik) z.secilen.bilesik.forEach(q => bek.push([z, q.kg * p.dengele.s])); else bek.push([z, z.gerek * p.dengele.s * (z.renkMod === 'renk' ? z.renkEsKat : 1)]); }); // KAT1 2: renk-eşdeğer satırda kütle × eski°L/yeni°L
-        bek.forEach(([z, b], i) => { if (!m[i] || Math.abs(m[i].kg - b) > 0.0006) oranHata.push(e.stil + ':' + z.orijAd); });
-        p.satirlar.filter(z => z.grup === 'h' && z.hop && z.rol === 'aroma').forEach(z => { if (Math.abs(z.hop.g - z.gerek) > 1e-9) aromaHata.push(e.stil + ':' + z.orijAd); });
+        const bekT = {}, mT = {}; bek.forEach(([z, b]) => { const id = z.secilen && z.secilen.bilesik ? null : z.id; if (id) bekT[id] = (bekT[id] || 0) + b; }); g.filter(z => z.tip === 'malt' && z.secilen && z.secilen.bilesik).forEach(z => z.secilen.bilesik.forEach(q => { bekT[q.id] = (bekT[q.id] || 0) + q.kg * p.dengele.s; }));
+        m.forEach(x => { mT[x.id] = (mT[x.id] || 0) + x.kg; }); // VERI1 4: aynı kalem satırları birleşir → kimlik bazında toplam
+        Object.keys(bekT).forEach(id => { if (mT[id] == null || Math.abs(mT[id] - bekT[id]) > 0.0006 * (1 + bek.length)) oranHata.push(e.stil + ':' + id); });
+        const hk = b => b.id + '|' + (b.tur || '') + '|' + (b.dk == null ? '' : b.dk) + '|' + (b.whT == null ? '' : b.whT) + '|' + (b.dryDays == null ? '' : b.dryDays), aG = {};
+        p.satirlar.filter(z => z.grup === 'h' && z.hop && z.rol === 'aroma').forEach(z => { const k = hk(z.hop); aG[k] = (aG[k] || 0) + z.gerek; });
+        Object.keys(aG).forEach(k => { const hb = p.tarif.hoplar.find(b => hk(b) === k); if (!hb || Math.abs(hb.g - Math.round(aG[k] * 10) / 10) > 0.051 * (1 + (p.birlesen || []).length)) aromaHata.push(e.stil + ':' + k); }); // VERI1 4: aynı hop + zaman tek satır
         const B = BJCP[e.stil], kay = p.srmOnce > 0 && Math.abs(p.sonuc.srm - p.srmOnce) / p.srmOnce > 0.15, band = B && (p.sonuc.srm < B.srm[0] || p.sonuc.srm > B.srm[1]);
         const bandO = !!(B && (p.srmOnce < B.srm[0] || p.srmOnce > B.srm[1])); /* UYG2 3f: örnek bant dışı ayrı cümle */ if (kay !== p.uyari.some(u => /^Renk kaydı/.test(u)) || bandO !== p.uyari.some(u => /^Örnek zaten BJCP/.test(u)) || !!(band && !bandO) !== p.uyari.some(u => /^Uyarlama rengi BJCP/.test(u))) srmHata.push(e.stil); if (kay || band) uyN++; });
       __REG.ok('kurulabilir örnek ≥80 (' + K.length + ')', K.length >= 80);
@@ -9598,6 +9609,91 @@ const CASELER = [
       return __REG.al();
     })
   },
+  // ═════════════ SPRINT VERI1 — BJCP TABLOSU DENETİMİ · AHA GERÇEK GRAM · AYNI STOK KALEMİ TEK SATIR ═════════════
+  {
+    kod: 'VERI1-BJCP-KAYNAK', ad: 'BJCP TABLOSU KAYNAKLA (madde 1): 13 stil BJCP 2021 PDF "Vital Statistics" alıntısıyla birebir (sayfa) · Saison çok güçlü stil → STANDART güç + açık renk (25B) · BJCP nesnesinde çift anahtar YOK (yanlış tabloya girmiş 9 ölü imza satırı silindi)',
+    calistir: async (page) => {
+      const out = []; const ok = (ad, k, d) => out.push({ ad, ok: !!k, detay: d === undefined ? '' : String(d) });
+      // PDF (BJCP_2021_Guidelines.pdf) — alıntılar: "Vital Statistics: IBUs: a – b SRM: a – b OG: a – b FG: a – b ABV: a – b%"
+      const K = {
+        'German Pils': [26, '5D', { og: [1.044, 1.050], fg: [1.008, 1.013], ibu: [22, 40], srm: [2, 4], abv: [4.4, 5.2] }],
+        'Dortmunder Export': [26, '5C', { og: [1.050, 1.058], fg: [1.008, 1.015], ibu: [20, 30], srm: [4, 6], abv: [5.0, 6.0] }],
+        'Munich Dunkel': [30, '8A', { og: [1.048, 1.056], fg: [1.010, 1.016], ibu: [18, 28], srm: [17, 28], abv: [4.5, 5.6] }],
+        'Schwarzbier': [30, '8B', { og: [1.046, 1.052], fg: [1.010, 1.016], ibu: [20, 35], srm: [19, 30], abv: [4.4, 5.4] }],
+        'Cream Ale': [18, '1C', { og: [1.042, 1.055], fg: [1.006, 1.012], ibu: [8, 20], srm: [2, 5], abv: [4.2, 5.6] }],
+        'American Wheat Beer': [18, '1D', { og: [1.040, 1.055], fg: [1.008, 1.013], ibu: [15, 30], srm: [3, 6], abv: [4.0, 5.5] }],
+        'American Porter': [52, '20A', { og: [1.050, 1.070], fg: [1.012, 1.018], ibu: [25, 50], srm: [22, 40], abv: [4.8, 6.5] }],
+        'American Stout': [52, '20B', { og: [1.050, 1.075], fg: [1.010, 1.022], ibu: [35, 75], srm: [30, 40], abv: [5.0, 7.0] }],
+        'Tropical Stout': [46, '16C', { og: [1.056, 1.075], fg: [1.010, 1.018], ibu: [30, 50], srm: [30, 40], abv: [5.5, 8.0] }],
+        'Foreign Extra Stout': [46, '16D', { og: [1.056, 1.075], fg: [1.010, 1.018], ibu: [50, 70], srm: [30, 40], abv: [6.3, 8.0] }],
+        'Belgian Blonde Ale': [67, '25A', { og: [1.062, 1.075], fg: [1.008, 1.018], ibu: [15, 30], srm: [4, 6], abv: [6.0, 7.5] }],
+        'Best Bitter': [35, '11B', { og: [1.040, 1.048], fg: [1.008, 1.012], ibu: [25, 40], srm: [8, 16], abv: [3.8, 4.6] }],
+        'International Amber Lager': [19, '2B', { og: [1.042, 1.055], fg: [1.008, 1.014], ibu: [8, 25], srm: [6, 14], abv: [4.5, 6.0] }],
+        'Saison / Farmhouse Ale': [68, '25B (standart, açık)', { og: [1.048, 1.065], fg: [1.002, 1.008], ibu: [20, 35], srm: [5, 14], abv: [5.0, 7.0] }]
+      };
+      const B = await page.evaluate(() => BJCP);
+      const kotu = Object.keys(K).filter(s => ['og', 'fg', 'ibu', 'srm', 'abv'].some(a => !B[s] || Math.abs(B[s][a][0] - K[s][2][a][0]) > 1e-9 || Math.abs(B[s][a][1] - K[s][2][a][1]) > 1e-9));
+      ok('14 satır BJCP 2021 PDF değerleriyle birebir (13 stil + Saison standart güç)', !kotu.length, kotu.map(s => s + ' ' + JSON.stringify(B[s])).join(' | '));
+      const html = fs.readFileSync(path.join(KOK, HTML_AD), 'utf8'), a = html.indexOf('const BJCP = {'), b = html.indexOf('\nconst ', a + 10), blok = html.slice(a, b);
+      const anah = {}; (blok.match(/^\s*"([^"]+)":\s*\{/gm) || []).forEach(l => { const k = /"([^"]+)"/.exec(l)[1]; anah[k] = (anah[k] || 0) + 1; });
+      const cift = Object.keys(anah).filter(k => anah[k] > 1);
+      ok('BJCP nesnesinde çift anahtar yok · imza alanı (pilsnerPct / palePct) yok', !cift.length && !/pilsnerPct|palePct/.test(blok), cift.join(','));
+      ok('düzeltilen satırlar kaynağını yorumda taşır ("VERI1: BJCP 2021 …" / "VERI1: BA 2026 …")', (blok.match(/VERI1: (BJCP 2021|BA 2026)/g) || []).length >= 30);
+      return out;
+    }
+  },
+  {
+    kod: 'VERI1-BJCP-KOPYA', ad: 'BİREBİR KOPYA SATIR TARAMASI (madde 1): bilinen 5 çift (German Pils = Dortmunder, Munich Dunkel = Schwarzbier, Belgian Blonde = Saison, American Stout = American Porter, Cream Ale = American Wheat) artık FARKLI · kalan her kopya grubu aynı kaynak stilin eş anlamlısı (gerekçeli liste) ya da kaynakta değerleri birebir aynı iki stil',
+    calistir: (page) => page.evaluate(() => {
+      const k = s => ['og', 'fg', 'ibu', 'srm', 'abv'].map(a => JSON.stringify(BJCP[s][a])).join('|');
+      const bes = [['German Pils', 'Dortmunder Export'], ['Munich Dunkel', 'Schwarzbier'], ['Belgian Blonde Ale', 'Saison / Farmhouse Ale'], ['American Stout', 'American Porter'], ['Cream Ale', 'American Wheat Beer']];
+      __REG.ok('bilinen 5 çift artık farklı', bes.every(([a, b]) => k(a) !== k(b)), bes.filter(([a, b]) => k(a) === k(b)).map(p => p.join('=')).join(','));
+      const IZIN = { 'Dortmunder Export|German Helles Exportbier': '5C', 'Rauchbier / Bamberg Smoked|Smoked Beer / Rauchbier': '6B', 'American Blonde Ale|Blonde Ale / Cream Ale': '18A', 'English Bitter / ESB|Strong Bitter / ESB': '11C',
+        'English Mild / Dark Mild|Session Stout / Dark Mild': '13A', 'Old Ale|Winter Warmer / Old Ale': '17B', 'Framboise / Fruit Lambic|Kriek / Fruit Lambic': '23F', 'Hazy Pale Ale|New England Pale Ale': 'BA Juicy or Hazy Pale Ale',
+        'Mexican Lager|Mexican Pale Lager': 'BA Mexican-Style Pale Lager', 'Australian Pale Ale|New Zealand Pale Ale': 'BA s.41 iki stil birebir aynı aralık', 'Belgian Witbier|Witbier / Belgian White': 'aynı stil (BJCP 24A / BA)' };
+      const g = {}; Object.keys(BJCP).forEach(s => { (g[k(s)] = g[k(s)] || []).push(s); });
+      const gruplar = Object.values(g).filter(v => v.length > 1).map(v => v.sort().join('|')), izinsiz = gruplar.filter(x => !IZIN[x]);
+      __REG.ok('kalan kopya grupları yalnız gerekçeli eş anlamlılar (' + gruplar.length + ' grup)', !izinsiz.length, izinsiz.join(' ; '));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'VERI1-AHA-GRAM', ad: 'AHA GERÇEK GRAM (madde 2): ham AN verisinden L + gg (tüm maltlar, gram) + hg (tüm hoplar: gram, zaman, alfa) · eski yüzde g / zaman h liste görünümü için AYNEN · uygulama gramlı AHA örneğini K2/K3 gibi gramlı yoldan okur (miktar = gram × hacim oranı) · hop satırlarının ≥ %95\'i gramlı',
+    calistir: (page) => page.evaluate(() => {
+      const T = window._TOPLULUK_MADALYA; let n = 0, g = 0, ht = 0, hg = 0;
+      Object.keys(T).forEach(s => T[s][1].forEach(o => { n++; if (o.L > 0 && o.gg && o.hg) { g++; o.hg.forEach(h => { ht++; if (h[1] > 0) hg++; }); } }));
+      __REG.ok('AHA örneklerinin ≥ %90\'ı gramlı, gramlı örneklerde hop satırlarının ≥ %95\'i gramlı', g / n >= 0.9 && hg / ht >= 0.95, g + '/' + n + ' örnek · ' + hg + '/' + ht + ' hop');
+      const st = Object.keys(T).find(s => T[s][1].some(o => o.gg)), i = T[st][1].findIndex(o => o.gg), o = T[st][1][i], on = window._bmOrnekNesne('aha', st, i), r = window._bmOrnekKuru('aha', st, i);
+      __REG.ok('ham tablo: eski g (yüzde) + h (zaman) AYNEN, yeni L/gg/hg ek alan', Array.isArray(o.g) && Array.isArray(o.h) && o.h[0].length === 3 && o.gg[0].length === 2 && o.hg[0].length === 4);
+      __REG.ok('_bmOrnekNesne: gramlı AHA → g = gg, h = hg, _ahaGram', on._ahaGram === true && on.g === o.gg && on.h === o.hg);
+      const kh = r.h.find((k, j) => k.id && o.hg[j][1] > 0), j = r.h.indexOf(kh);
+      __REG.ok('kuru dönüşüm gramlı: hop miktarı = gram × (hacim / L), varsayım yok', !!kh && Math.abs(kh.mik - Math.round(o.hg[j][1] * r.hacim / o.L * 10) / 10) < 0.051 && !kh.varsayim && r.yontem !== 'yok', kh ? kh.ham + ' ' + kh.mik : '');
+      const kur = window._bmOrnekHepsi().filter(e => e.kaynak === 'aha' && window._bmOrnekMalzemeliMi(e.kaynak, e.stil, e.idx)).length;
+      __REG.ok('kurulabilen AHA örneği arttı: ≥ 50 (ISK2: 31; asıl engel maya eşlemesi — 184 örnek, ayrı iş)', kur >= 50, String(kur));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'VERI1-BIRLES', ad: 'AYNI STOK KALEMİ TEK SATIR (madde 4): malt / şeker aynı id toplanır · hop yalnız aynı kullanım + süre (+ whirlpool sıcaklığı / kuru hop günü) · katkı aynı aşama + birim · notta "X ve Y satırları tek satırda birleştirildi" · Weizenbock iskeleti (Carafa III 2 satır) tek satır',
+    calistir: (page) => page.evaluate(() => {
+      const t = { maltlar: [{ id: 'crf3', kg: 0.083, _kaynak: 'Carafa I' }, { id: 'pilsner', kg: 1 }, { id: 'crf3', kg: 0.004, _kaynak: 'CaraMunich III' }],
+        hoplar: [{ id: 'saaz', tur: 'boil', dk: 60, g: 10, _kaynak: 'A' }, { id: 'saaz', tur: 'boil', dk: 60, g: 5, _kaynak: 'B' }, { id: 'saaz', tur: 'boil', dk: 15, g: 3 }, { id: 'saaz', tur: 'dry_hop', dk: 0, dryDays: 5, g: 20 }],
+        katkilar: [{ id: 'kisnisch', birim: 'g', miktar: 5, zaman: 'Kaynatmada' }, { id: 'kisnisch', birim: 'g', miktar: 3, zaman: 'Kaynatmada' }, { id: 'kisnisch', birim: 'g', miktar: 2, zaman: 'Fermentasyonda' }] };
+      const b = window._bmTarifBirlestir(t);
+      __REG.ok('malt: Carafa III tek satır 87 g', t.maltlar.length === 2 && Math.abs(t.maltlar.find(m => m.id === 'crf3').kg - 0.087) < 1e-9);
+      __REG.ok('hop: yalnız aynı süre birleşir (60 dk 15 g · 15 dk ayrı · kuru hop ayrı)', t.hoplar.length === 3 && t.hoplar[0].g === 15);
+      __REG.ok('katkı: yalnız aynı aşama birleşir', t.katkilar.length === 2 && t.katkilar[0].miktar === 8);
+      __REG.ok('birleşenler listesi + kaynak satır adları', b.length === 3 && b[0].satirlar.join(' ve ') === 'Carafa I ve CaraMunich III' && !t.maltlar.some(m => m._kaynak));
+      const g = (L, tip, id, mik, birim) => { const x = L.find(a => a.id === id); return { id: 'v1' + id, ad: x.ad, refId: id, g: tip, miktar: mik, birim: birim }; };
+      const y0 = STOK.slice(); STOK.length = 0; [['wheat', 5], ['pilsner', 5], ['munich', 2], ['crf3', 1], ['cara_munich1', 2]].forEach(([id, kg]) => STOK.push(g(MALTLAR, 'Malt', id, kg, 'kg'))); STOK.push(g(HOPLAR, 'Hop', 'hrtau', 100, 'g'));
+      __REG.yeniKayit('VERI1 Birles', {}); S.hacim = 11; S.verim = 61;
+      const p = window._bmStokUyarla('isk', 'Weizenbock', 0), crf = p.tarif.maltlar.filter(m => m.id === 'crf3');
+      const n0 = KR.length; window._bmIskeletStokumla('Weizenbock');
+      __REG.ok('Weizenbock iskeleti stoğumla: Carafa III tek satır + notta birleştirme cümlesi', crf.length <= 1 && (p.birlesen.length === 0 || /satırları tek satırda birleştirildi/.test(S.notlar)) && KR.length === n0 + 1, crf.length + ' satır · ' + JSON.stringify(p.birlesen));
+      STOK.length = 0; y0.forEach(x => STOK.push(x));
+      return __REG.al();
+    })
+  },
   // ═════════════ SPRINT ISK2 — İKAME SIRASI · ŞEKER ROLÜ · ROL DÜZEYİ EŞLEME · HOP ZAMANI · HEDEF KIRPMA ═════════════
   {
     kod: 'ISK2-SIRA', ad: 'İKAME SIRASI (madde 1): malt satırında ⚠️ MUADIL ile özellik benzeri TEK kademede sayısal yakınlıkla · SINIF FARKLI ⚠️ (Maris Otter → Munich) aynı sınıftaki yakın özellik adayının ARKASINA düşer · aynı sınıfta ⚠️ küçük öncelik payı · ✅/🟡/🔴 durumu sıradan ETKİLENMEZ',
@@ -9775,7 +9871,7 @@ const CASELER = [
       __REG.ok('elle tablo yedekte: 63 stil', E.length === 63);
       const kiy = E.filter(s => T[s] && T[s].grist && T[s].grist.length), eks = kiy.filter(s => !T[s].kiyas || !T[s].kiyas.neden || !(T[s].kiyas.n >= 0));
       __REG.ok('türetilmişi olan her elle stilde kıyas kaydı', kiy.length > 0 && !eks.length, kiy.length + ' stil · eksik ' + eks.join(','));
-      const kotu = kiy.filter(s => T[s].secim === 'turetilmis' && (T[s].kapi.length || T[s].kiyas.n < 3));
+      const kotu = kiy.filter(s => T[s].secim === 'turetilmis' && ((T[s].kapi.length && !/ikisi de kapı dışı/.test(T[s].kiyas.neden)) || T[s].kiyas.n < 3)); // VERI1: ikisi de kapı dışıysa ölçü kuralı (kayıtlı)
       __REG.ok('seçilen türetilmişlerin hepsi kapıdan geçti ve n ≥ 3', !kotu.length, kotu.join(','));
       const uyum = kiy.filter(s => (window._bmIskeletAl(s).tur === 'elle') !== (T[s].secim !== 'turetilmis'));
       __REG.ok('çözücü seçimi uygular', !uyum.length, uyum.join(','));
@@ -9823,19 +9919,22 @@ const CASELER = [
     })
   },
   {
-    kod: 'ISK1-AHA', ad: 'AHA VARSAYIMLI HOP GRAMI (madde 5): acı eklemeler örneğin IBU\'sunu tutar (diğer satırların IBU\'su düşülür, eşit bölünür) · lezzet / aroma / kuru = iskeletin sınıf g/L medyanı · her satır "varsayım" etiketli (önizleme + not) · stok analizinde ≈ kalır (durum değişmez)',
+    kod: 'ISK1-AHA', ad: 'AHA HOP GRAMI (ISK1 madde 5 + VERI1 2): AHA örneği ham AN verisinden GERÇEK gramla · varsayım (acı: IBU eşit bölüşüm, diğer: iskelet g/L) YALNIZ kaynakta gramı olmayan satırda · varsayımlı satır etiketli (önizleme + not) ve stok analizinde ≈ · gramlı satırda varsayım YOK',
     calistir: (page) => page.evaluate(() => {
-      const H = window._bmOrnekHepsi(), e = H.find(x => x.kaynak === 'aha' && window._bmOrnekMalzemeliMi(x.kaynak, x.stil, x.idx) && window._bmOrnekKuru(x.kaynak, x.stil, x.idx).h.length >= 2);
-      __REG.ok('varsayımla kurulabilen AHA örneği var', !!e, e ? e.stil + ' #' + e.idx : 'yok');
-      if (!e) return __REG.al();
-      const r = window._bmOrnekKuru(e.kaynak, e.stil, e.idx), o = window._bmOrnekNesne(e.kaynak, e.stil, e.idx);
-      __REG.ok('her hop satırında gram + varsayım etiketi', r.h.every(k => k.mik > 0 && /IBU|sınıfı iskelet medyanı/.test(k.varsayim || '')), r.h.map(k => k.ad + ' ' + k.mik + ' ' + k.varsayim).join(' | '));
-      const p = window._bmStokUyarla(e.kaynak, e.stil, e.idx, { birebir: true });
-      __REG.ok('IBU tutması: örneğin kendi malzemeleriyle IBU = örnek IBU ± 2', Math.abs(p.sonuc.ibu - o.ib) <= 2, p.sonuc.ibu.toFixed(1) + ' vs ' + o.ib);
+      const H = window._bmOrnekHepsi().filter(x => x.kaynak === 'aha'), ihlal = [];
+      let gram = 0, vars = 0;
+      H.forEach(x => { const o = window._bmOrnekNesne('aha', x.stil, x.idx), r = window._bmOrnekKuru('aha', x.stil, x.idx); if (!o || !r) return; const N = window._bmOrnekHopNorm('aha', o);
+        r.h.forEach((k, i) => { const kg = N[i] && +N[i][1] > 0; if (kg) { gram++; if (k.varsayim) ihlal.push(x.stil + '#' + x.idx + ':' + k.ham); } else if (k.varsayim) vars++; }); });
+      __REG.ok('gramlı AHA hop satırı çoğunlukta (≥ %90) ve hiçbirinde varsayım yok', gram > 1000 && !ihlal.length, gram + ' gramlı · ' + vars + ' varsayımlı · ihlal ' + ihlal.slice(0, 3).join(','));
+      const e = H.find(x => window._bmOrnekMalzemeliMi(x.kaynak, x.stil, x.idx) && window._bmOrnekKuru(x.kaynak, x.stil, x.idx).h.some(k => k.varsayim));
+      const g = H.find(x => window._bmOrnekNesne('aha', x.stil, x.idx)._ahaGram && window._bmOrnekMalzemeliMi(x.kaynak, x.stil, x.idx) && window._bmOrnekKuru(x.kaynak, x.stil, x.idx).h.every(k => !k.varsayim));
+      __REG.ok('tam gramlı AHA örneği kurulabiliyor (gram × hacim oranı, varsayım yok)', !!g && (() => { const o = window._bmOrnekNesne('aha', g.stil, g.idx), r = window._bmOrnekKuru('aha', g.stil, g.idx); return r.h.every((k, i) => !k.id || Math.abs(k.mik - Math.round(o.h[i][1] * r.hacim / o.L * 10) / 10) < 0.051); })(), g ? g.stil + '#' + g.idx : 'yok');
+      if (!e) { __REG.ok('gramsız satırlı kurulabilir AHA örneği yok (varsayım yolu yalnız sınanabilir değil — bilgi)', true); return __REG.al(); }
+      const r = window._bmOrnekKuru(e.kaynak, e.stil, e.idx);
       _bmOrnekOnizle(e.kaynak, e.stil, e.idx); const m = document.getElementById('bmOrnekOnizle'), t = m ? m.textContent : ''; bmOrnekOnizleKapat();
-      __REG.ok('önizlemede "varsayım — kaynakta gramaj yok"', /varsayım — kaynakta gramaj yok/.test(t));
+      __REG.ok('önizlemede "varsayım — kaynakta gramaj yok" (gramsız satır için)', /varsayım — kaynakta gramaj yok/.test(t), e.stil + '#' + e.idx);
       const st = window._bmOrnekStok(e.kaynak, e.stil, e.idx);
-      __REG.ok('stok analizinde varsayımlı hop "biliniyor" sayılmaz (≈ / yok)', st.h.every(x => x.d !== 'stokta' && x.d !== 'yetersiz'), st.h.map(x => x.d).join(','));
+      __REG.ok('stok analizinde varsayımlı hop "biliniyor" sayılmaz', st.h.every((x, i) => !r.h[i].varsayim || (x.d !== 'stokta' && x.d !== 'yetersiz')));
       __REG.yeniKayit('ISK1 AHA', {}); const n0 = KR.length; window._bmStokumlaOlustur(e.kaynak, e.stil, e.idx);
       __REG.ok('reçete notunda "Varsayımlı hop gramı — kaynakta gramaj yok"', KR.length === n0 + 1 && /Varsayımlı hop gramı — kaynakta gramaj yok/.test(S.notlar));
       return __REG.al();

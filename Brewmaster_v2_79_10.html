@@ -3918,8 +3918,8 @@ window.bmTipografiPanelRender = function(){
 })();
 </script>
 
-<script src="ornek_veri.js?v=bb937fecd4"></script>
-<script src="iskelet_veri.js?v=0a0b2364b8"></script>
+<script src="ornek_veri.js?v=3e9f72f4f0"></script>
+<script src="iskelet_veri.js?v=f9b9d01a3a"></script>
 <script>
 // ═══ APP_VERSION — Tek yerden versiyon kontrolü ═══
 // Yeni sürüm çıkarırken sadece BURAYI değiştir; render'da otomatik görünür
@@ -5826,7 +5826,7 @@ function hKarb(og,fg,ml){
 }
 // BJCP Stil Referans Tablosu: {og:[min,max], fg:[min,max], ibu:[min,max], srm:[min,max], abv:[min,max]}
 const BJCP = {
-  "German Pils":                    {og:[1.050,1.058],fg:[1.008,1.015],ibu:[20,30],srm:[4,6],abv:[5.0,6.0]},
+  "German Pils":                    {og:[1.044,1.050],fg:[1.008,1.013],ibu:[22,40],srm:[2,4],abv:[4.4,5.2]}, // VERI1: BJCP 2021 5D German Pils (PDF s.26)
   "Czech Premium Pale Lager":       {og:[1.044,1.060],fg:[1.013,1.017],ibu:[30,45],srm:[3.5,6],abv:[4.2,5.8]},
   "Czech Pale Lager":               {og:[1.028,1.044],fg:[1.008,1.014],ibu:[20,35],srm:[3,6],abv:[3.0,4.1]},
   "Czech Amber Lager":              {og:[1.044,1.060],fg:[1.013,1.017],ibu:[20,35],srm:[10,16],abv:[4.4,5.8]},
@@ -5835,7 +5835,7 @@ const BJCP = {
   "Festbier / Wiesn":               {og:[1.054,1.057],fg:[1.010,1.012],ibu:[18,25],srm:[4,6],abv:[5.8,6.3]},
   "Munich Märzen / Oktoberfest":    {og:[1.054,1.060],fg:[1.010,1.014],ibu:[18,24],srm:[8,17],abv:[5.6,6.3]},
   "Munich Dunkel":                  {og:[1.048,1.056],fg:[1.010,1.016],ibu:[18,28],srm:[17,28],abv:[4.5,5.6]},
-  "Schwarzbier":                    {og:[1.048,1.056],fg:[1.010,1.016],ibu:[18,28],srm:[17,28],abv:[4.5,5.6]},
+  "Schwarzbier":                    {og:[1.046,1.052],fg:[1.010,1.016],ibu:[20,35],srm:[19,30],abv:[4.4,5.4]}, // VERI1: BJCP 2021 8B Schwarzbier (PDF s.30)
   "Kellerbier / Zwickelbier":       {og:[1.048,1.056],fg:[1.012,1.016],ibu:[20,35],srm:[3,15],abv:[4.7,5.4]},
   "Dortmunder Export": {og:[1.05,1.058],fg:[1.008,1.015],ibu:[20,30],srm:[4,6],abv:[5.0,6.0]},
   "Bock":                           {og:[1.064,1.072],fg:[1.013,1.019],ibu:[20,27],srm:[14,22],abv:[6.3,7.2]},
@@ -5844,7 +5844,7 @@ const BJCP = {
   "Eisbock":                        {og:[1.078,1.120],fg:[1.020,1.035],ibu:[25,35],srm:[17,30],abv:[9.0,14.0]},
   "Vienna Lager":                   {og:[1.048,1.055],fg:[1.010,1.014],ibu:[18,30],srm:[9,15],abv:[4.7,5.5]},
   "California Common / Steam Beer": {og:[1.048,1.054],fg:[1.011,1.014],ibu:[30,45],srm:[9,14],abv:[4.5,5.5]},
-  "Dark American Lager":            {og:[1.044,1.056],fg:[1.008,1.012],ibu:[8,20],srm:[14,30],abv:[4.2,6.0]},
+  "Dark American Lager":            {og:[1.040,1.050],fg:[1.008,1.012],ibu:[14,24],srm:[14,40],abv:[4.1,5.6]}, // VERI1: BA 2026 American-Style Dark Lager (PDF s.52)
   "Rauchbier / Bamberg Smoked":     {og:[1.050,1.057],fg:[1.012,1.016],ibu:[20,30],srm:[12,22],abv:[4.8,6.0]},
   "Baltic Porter":                  {og:[1.060,1.090],fg:[1.016,1.024],ibu:[20,40],srm:[17,30],abv:[6.5,9.5]},
   "Weizen / Weissbier":             {og:[1.044,1.053],fg:[1.008,1.014],ibu:[8,15],srm:[2,6],abv:[4.3,5.6]},
@@ -5863,22 +5863,22 @@ const BJCP = {
   "Belgian Pale Ale":               {og:[1.048,1.054],fg:[1.010,1.014],ibu:[20,30],srm:[8,14],abv:[4.8,5.5]},
   "Dubbel":                         {og:[1.062,1.075],fg:[1.008,1.018],ibu:[15,25],srm:[10,17],abv:[6.0,7.6]},
   "Tripel":                         {og:[1.075,1.085],fg:[1.008,1.014],ibu:[20,40],srm:[4.5,7],abv:[7.5,9.5]},
-  "Belgian Quadrupel / Abt": {og:[1.080,1.115],fg:[1.015,1.024],ibu:[20,35],srm:[12,22],abv:[8.5,12.5]},
+  "Belgian Quadrupel / Abt": {og:[1.092,1.120],fg:[1.014,1.020],ibu:[25,50],srm:[16,36],abv:[10,14.2]}, // VERI1: BA 2026 Belgian-Style Quadrupel (PDF s.34)
   "Belgian Strong Golden Ale":      {og:[1.070,1.095],fg:[1.005,1.016],ibu:[22,35],srm:[3,6],abv:[7.5,10.5]},
   "Belgian Dark Strong Ale":        {og:[1.075,1.110],fg:[1.010,1.024],ibu:[20,35],srm:[12,22],abv:[8.0,12.0]},
-  "Saison / Farmhouse Ale":         {og:[1.062,1.075],fg:[1.008,1.018],ibu:[15,30],srm:[4,6],abv:[6.0,7.5]},
+  "Saison / Farmhouse Ale":         {og:[1.048,1.065],fg:[1.002,1.008],ibu:[20,35],srm:[5,14],abv:[5,7]}, // VERI1: BJCP 2021 25B Saison (PDF s.68) — çok güçlü stil: STANDART güç + açık renk seçildi
   "Norwegian Farmhouse / Kveik":    {og:[1.048,1.065],fg:[1.008,1.015],ibu:[20,40],srm:[4,10],abv:[5.0,8.0]},
   "Kölsch":                         {og:[1.044,1.050],fg:[1.007,1.011],ibu:[18,30],srm:[3.5,5],abv:[4.4,5.2]},
   "Altbier / Düsseldorf Altbier":   {og:[1.044,1.052],fg:[1.008,1.014],ibu:[25,50],srm:[9,17],abv:[4.3,5.5]},
   "Irish Red Ale":                  {og:[1.036,1.046],fg:[1.010,1.014],ibu:[18,28],srm:[9,14],abv:[3.8,5.0]},
   "Scottish Ale / 60 Shilling":     {og:[1.030,1.035],fg:[1.010,1.013],ibu:[10,20],srm:[17,25],abv:[2.5,3.3]},
-  "Scottish Ale / 80 Shilling":     {og:[1.035,1.04],fg:[1.01,1.015],ibu:[10,20],srm:[12,20],abv:[3.3,3.9]},
+  "Scottish Ale / 80 Shilling":     {og:[1.040,1.060],fg:[1.010,1.016],ibu:[15,30],srm:[12,20],abv:[3.9,6]}, // VERI1: BJCP 2021 14C Scottish Export (PDF s.42)
   "Scottish Ale / Wee Heavy":       {og:[1.070,1.130],fg:[1.018,1.04],ibu:[17,35],srm:[14,25],abv:[6.5,10.0]},
   "Cream Ale":                      {og:[1.042,1.055],fg:[1.006,1.012],ibu:[8,20],srm:[2,5],abv:[4.2,5.6]},
   "Blonde Ale / Cream Ale":         {og:[1.038,1.054],fg:[1.008,1.013],ibu:[15,28],srm:[3,6],abv:[3.8,5.5]},
   "American Pale Ale":              {og:[1.045,1.060],fg:[1.010,1.015],ibu:[30,50],srm:[5,10],abv:[4.5,6.2]},
   "American IPA":                   {og:[1.056,1.070],fg:[1.008,1.014],ibu:[40,70],srm:[6,14],abv:[5.5,7.5]},
-  "West Coast IPA": {og:[1.055,1.070],fg:[1.005,1.012],ibu:[45,75],srm:[3,8],abv:[5.8,7.5]},
+  "West Coast IPA": {og:[1.055,1.070],fg:[1.005,1.012],ibu:[50,75],srm:[2,6],abv:[6.3,7.5]}, // VERI1: BA 2026 West Coast-Style India Pale Ale (PDF s.20)
   "NEIPA / Hazy IPA":               {og:[1.06,1.085],fg:[1.01,1.015],ibu:[25,60],srm:[3,7],abv:[6,9]},
   "Imperial IPA / DIPA":            {og:[1.065,1.085],fg:[1.008,1.018],ibu:[60,100],srm:[6,14],abv:[7.5,10.0]},
   "American Amber Ale / Red Ale":   {og:[1.045,1.060],fg:[1.010,1.015],ibu:[25,40],srm:[10,17],abv:[4.5,6.2]},
@@ -5894,14 +5894,14 @@ const BJCP = {
   "Winter Warmer / Old Ale":        {og:[1.055,1.088],fg:[1.015,1.022],ibu:[30,60],srm:[10,22],abv:[5.5,9.0]},
   "Spiced Beer / Winter Warmer":    {og:[1.056,1.076],fg:[1.012,1.018],ibu:[20,40],srm:[5,34],abv:[5.0,8.0]},
   "Dry Irish Stout":                {og:[1.036,1.044],fg:[1.007,1.011],ibu:[25,45],srm:[25,40],abv:[3.8,5.0]},
-  "American Stout":                 {og:[1.050,1.070],fg:[1.012,1.018],ibu:[25,50],srm:[22,40],abv:[4.8,6.5]},
-  "Foreign Extra Stout":            {og:[1.056,1.075],fg:[1.010,1.018],ibu:[30,50],srm:[30,40],abv:[5.5,8.0]},
+  "American Stout":                 {og:[1.050,1.075],fg:[1.010,1.022],ibu:[35,75],srm:[30,40],abv:[5,7]}, // VERI1: BJCP 2021 20B American Stout (PDF s.52)
+  "Foreign Extra Stout":            {og:[1.056,1.075],fg:[1.010,1.018],ibu:[50,70],srm:[30,40],abv:[6.3,8]}, // VERI1: BJCP 2021 16D Foreign Extra Stout (PDF s.46)
   "Oatmeal Stout":                  {og:[1.045,1.065],fg:[1.010,1.018],ibu:[25,40],srm:[22,40],abv:[4.2,5.9]},
   "Milk Stout / Sweet Stout":       {og:[1.044,1.060],fg:[1.012,1.024],ibu:[20,40],srm:[30,40],abv:[4.0,6.0]},
   "Imperial / Russian Imperial Stout":{og:[1.075,1.115],fg:[1.018,1.030],ibu:[50,90],srm:[30,40],abv:[8.0,12.0]},
   "London Porter":                  {og:[1.040,1.052],fg:[1.008,1.014],ibu:[18,35],srm:[20,30],abv:[4.0,5.4]},
-  "Robust Porter":                  {og:[1.05,1.07],fg:[1.012,1.018],ibu:[25,50],srm:[22,40],abv:[4.8,6.5]},
-  "Pastry Stout":                   {og:[1.070,1.120],fg:[1.020,1.040],ibu:[20,50],srm:[30,40],abv:[7.0,14.0]},
+  "Robust Porter":                  {og:[1.045,1.060],fg:[1.008,1.016],ibu:[25,40],srm:[22,40],abv:[5.1,6.6]}, // VERI1: BA 2026 Robust Porter (PDF s.14)
+  "Pastry Stout":                   {og:[1.080,1.120],fg:[1.020,1.060],ibu:[20,65],srm:[13,40],abv:[7,13]}, // VERI1: BA 2026 Dessert Stout or Pastry Beer (PDF s.62)
   "Wood-Aged Beer / Barrel Aged":   {og:[1.060,1.100],fg:[1.014,1.024],ibu:[20,60],srm:[5,40],abv:[6.0,12.0]},
   "Honey Ale / Braggot":            {og:[1.040,1.120],fg:[1.004,1.020],ibu:[8,40],srm:[3,18],abv:[3.5,12.0]},
   "Lambic / Gueuze":            {og:[1.040,1.054],fg:[1.001,1.010],ibu:[0,10],srm:[3,6],abv:[5,6.5]},
@@ -5909,14 +5909,14 @@ const BJCP = {
   "Framboise / Fruit Lambic":   {og:[1.040,1.060],fg:[1,1.01],ibu:[0,10],srm:[3,7],abv:[5.0,7.0]},
   "American Wild Ale":          {og:[1.044,1.072],fg:[1.004,1.014],ibu:[10,35],srm:[3,20],abv:[4.0,7.0]},
   "Brett Beer / Farmhouse Brett":{og:[1.044,1.072],fg:[1.004,1.014],ibu:[15,35],srm:[3,15],abv:[4.0,8.0]},
-  "Session IPA":                {og:[1.040,1.052],fg:[1.008,1.014],ibu:[30,65],srm:[3,7],abv:[3.3,5.0]},
-  "Brut IPA":                   {og:[1.05,1.065],fg:[1.000,1.004],ibu:[20,40],srm:[2,6],abv:[6,7.5]},
-  "Hazy Pale Ale":              {og:[1.044,1.054],fg:[1.010,1.016],ibu:[20,35],srm:[3,6],abv:[4.5,6]},
+  "Session IPA":                {og:[1.008,1.052],fg:[1.005,1.014],ibu:[20,55],srm:[3,12],abv:[0.5,5]}, // VERI1: BA 2026 Session India Pale Ale (PDF s.17)
+  "Brut IPA":                   {og:[1.046,1.057],fg:[0.990,1.004],ibu:[20,30],srm:[2,4],abv:[6,7.5]}, // VERI1: BJCP 2021 Specialty IPA:Brut IPA Brut IPA (PDF s.58)
+  "Hazy Pale Ale":              {og:[1.044,1.050],fg:[1.008,1.014],ibu:[5,30],srm:[3,7],abv:[4.4,5.4]}, // VERI1: BA 2026 Juicy or Hazy Pale Ale (PDF s.18)
   "Milkshake IPA":              {og:[1.060,1.080],fg:[1.018,1.028],ibu:[40,70],srm:[3,8],abv:[6,8]},
-  "New Zealand Pilsner":        {og:[1.044,1.056],fg:[1.008,1.014],ibu:[25,45],srm:[3,7],abv:[4.8,6]},
+  "New Zealand Pilsner":        {og:[1.044,1.056],fg:[1.009,1.014],ibu:[25,45],srm:[2,6],abv:[4.5,5.8]}, // VERI1: BJCP 2021 X5 New Zealand Pilsner (PDF s.102)
   "Bière de Garde":             {og:[1.060,1.080],fg:[1.008,1.016],ibu:[18,28],srm:[6,19],abv:[6.0,8.5]},
   "Trappist Single / Abbey Ale":{og:[1.044,1.054],fg:[1.004,1.010],ibu:[25,45],srm:[3,5],abv:[4.8,6.0]},
-  "Table Beer / Bière de Table":{og:[1.020,1.034],fg:[1.006,1.010],ibu:[5,20],srm:[2,8],abv:[0.5,3.5]},
+  "Table Beer / Bière de Table":{og:[1.008,1.023],fg:[1.002,1.008],ibu:[5,15],srm:[5,50],abv:[0.5,2]}, // VERI1: BA 2026 Belgian-Style Table Beer (PDF s.31)
   "Belgian Specialty Ale":      {og:[1.044,1.096],fg:[1.006,1.024],ibu:[15,60],srm:[3,40],abv:[4.5,12.0]},
   "Old Ale":                    {og:[1.055,1.088],fg:[1.015,1.022],ibu:[30,60],srm:[10,22],abv:[5.5,9]},
   "British Strong Ale":         {og:[1.055,1.080],fg:[1.015,1.022],ibu:[30,60],srm:[8,22],abv:[5.5,8]},
@@ -5945,16 +5945,16 @@ const BJCP = {
   "Steinbier / Caramel Ale":    {og:[1.048,1.056],fg:[1.012,1.016],ibu:[10,25],srm:[12,22],abv:[4.5,5.5]},
     "International Pale Lager":    {og:[1.042,1.05],fg:[1.008,1.012],ibu:[18,25],srm:[2,6],abv:[4.5,6]},
   "International Amber Lager":   {og:[1.042,1.055],fg:[1.008,1.014],ibu:[8,25],srm:[6,14],abv:[4.5,6.0]}, // BJCP 2B — ISK2: bjcp.org/style/2021/2/2B (eski satır 2A International Pale Lager kopyasıydı)
-  "Mexican Lager":               {og:[1.040,1.050],fg:[1.006,1.010],ibu:[10,25],srm:[2,4],abv:[4.0,5.5]},
-  "Italian Pilsner":             {og:[1.048,1.058],fg:[1.006,1.010],ibu:[25,45],srm:[2,4],abv:[4.7,5.8]},
+  "Mexican Lager":               {og:[1.045,1.050],fg:[1.008,1.012],ibu:[15,22],srm:[3,5],abv:[4.5,5]}, // VERI1: BA 2026 Mexican-Style Pale Lager (PDF s.53)
+  "Italian Pilsner":             {og:[1.044,1.052],fg:[1.006,1.013],ibu:[25,50],srm:[3,4],abv:[4.6,5.3]}, // VERI1: BA 2026 Italian-Style Pilsener (PDF s.44)
   "German Helles Exportbier":    {og:[1.05,1.058],fg:[1.008,1.015],ibu:[20,30],srm:[4,6],abv:[5,6]},
   "American Blonde Ale":         {og:[1.038,1.054],fg:[1.008,1.013],ibu:[15,28],srm:[3,6],abv:[3.8,5.5]},
   "American Strong Ale":         {og:[1.062,1.090],fg:[1.014,1.024],ibu:[50,100],srm:[7,18],abv:[6.3,10.0]},
   "Cold IPA":                    {og:[1.055,1.068],fg:[1.006,1.012],ibu:[50,70],srm:[2,5],abv:[5.5,7.5]},
-  "Lager IPA":                   {og:[1.055,1.07],fg:[1.008,1.014],ibu:[30,60],srm:[3,8],abv:[5.5,7]},
+  "Lager IPA":                   {og:[1.050,1.065],fg:[1.006,1.016],ibu:[30,70],srm:[2.5,6],abv:[5.6,7.9]}, // VERI1: BA 2026 American-Style India Pale Lager (PDF s.51)
   "English IPA":                 {og:[1.050,1.070],fg:[1.010,1.015],ibu:[40,60],srm:[6,14],abv:[5.0,7.5]},
-  "White IPA":                   {og:[1.056,1.065],fg:[1.010,1.016],ibu:[40,70],srm:[3,7],abv:[5.5,7.0]},
-  "Brown IPA":                   {og:[1.056,1.070],fg:[1.008,1.016],ibu:[40,70],srm:[11,19],abv:[5.5,7.5]},
+  "White IPA":                   {og:[1.056,1.065],fg:[1.010,1.016],ibu:[40,70],srm:[5,6],abv:[5.5,7]}, // VERI1: BJCP 2021 Specialty IPA:White IPA White IPA (PDF s.57)
+  "Brown IPA":                   {og:[1.056,1.070],fg:[1.008,1.016],ibu:[40,70],srm:[18,35],abv:[5.5,7.5]}, // VERI1: BJCP 2021 Specialty IPA:Brown IPA Brown IPA (PDF s.56)
   "Mixed Fermentation Sour":     {og:[1.044,1.075],fg:[1.004,1.014],ibu:[5,25],srm:[3,18],abv:[4.0,7.0]},
   "Smoothie Sour":               {og:[1.044,1.075],fg:[1.010,1.030],ibu:[0,10],srm:[3,20],abv:[4.0,7.0]},
   "Christmas / Holiday Beer":    {og:[1.056,1.120],fg:[1.012,1.030],ibu:[20,60],srm:[8,40],abv:[5.5,12.0]},
@@ -5966,36 +5966,27 @@ const BJCP = {
   "London Brown Ale":            {og:[1.033,1.038],fg:[1.012,1.015],ibu:[15,20],srm:[22,35],abv:[2.8,3.6]},
   "Pre-Prohibition Porter":      {og:[1.046,1.060],fg:[1.010,1.016],ibu:[20,30],srm:[20,30],abv:[4.5,6.0]},
   "Australian Sparkling Ale":    {og:[1.038,1.05],fg:[1.004,1.006],ibu:[20,35],srm:[4,7],abv:[4.5,6.0]},
-  "Kristallweizen":              {og:[1.044,1.052],fg:[1.008,1.014],ibu:[8,15],srm:[2,6],abv:[4.3,5.6]},
-  "Leichtes Weizen":             {og:[1.028,1.044],fg:[1.006,1.010],ibu:[5,15],srm:[2,8],abv:[2.5,3.5]},
+  "Kristallweizen":              {og:[1.047,1.056],fg:[1.008,1.016],ibu:[10,15],srm:[3,9],abv:[4.9,5.6]}, // VERI1: BA 2026 South German-Style Kristal Weizen (PDF s.29)
+  "Leichtes Weizen":             {og:[1.028,1.044],fg:[1.004,1.008],ibu:[10,15],srm:[3.5,15],abv:[2.5,3.5]}, // VERI1: BA 2026 German-Style Leichtes Weizen (PDF s.29)
   "Hoppy Hefeweizen":            {og:[1.044,1.056],fg:[1.008,1.014],ibu:[15,30],srm:[2,6],abv:[4.5,6.0]},
-  "American Hefeweizen":         {og:[1.040,1.055],fg:[1.008,1.014],ibu:[10,25],srm:[3,7],abv:[3.8,5.5]},
+  "American Hefeweizen":         {og:[1.036,1.056],fg:[1.004,1.016],ibu:[10,35],srm:[2,10],abv:[3.5,5.6]}, // VERI1: BA 2026 American-Style Wheat Beer (PDF s.48)
   "Helles Weizenbock / Weizenbock Hell":{og:[1.064,1.09],fg:[1.015,1.022],ibu:[15,30],srm:[6,9],abv:[6.5,9.0]},
   "Dunkles Weizenbock":          {og:[1.064,1.090],fg:[1.015,1.022],ibu:[15,30],srm:[10,25],abv:[6.5,9.0]},
-  "Belgian Witbier":             {og:[1.044,1.052],fg:[1.008,1.012],ibu:[8,20],srm:[2,4],abv:[4.5,5.5]},
+  "Belgian Witbier":             {og:[1.038,1.050],fg:[1.008,1.014],ibu:[10,17],srm:[2,4],abv:[4,5.5]}, // VERI1: BA 2026 Belgian-Style Witbier (PDF s.34)
   "Spiced Witbier":              {og:[1.044,1.054],fg:[1.008,1.014],ibu:[8,20],srm:[2,5],abv:[4.5,5.8]},
   "Spiced Wheat Beer":           {og:[1.040,1.060],fg:[1.008,1.016],ibu:[8,25],srm:[3,8],abv:[4.0,6.0]},
   "Herb Wheat Beer":             {og:[1.040,1.056],fg:[1.008,1.014],ibu:[5,20],srm:[2,7],abv:[3.8,5.5]},
   "Australian Wheat Beer":       {og:[1.042,1.054],fg:[1.006,1.012],ibu:[10,25],srm:[3,7],abv:[4.0,5.5]},
   "Blanche Sour / Sour Witbier": {og:[1.040,1.050],fg:[1.004,1.01],ibu:[5,15],srm:[2,4],abv:[3.5,5.0]},
     "Catharina Sour":             {og:[1.039,1.048],fg:[1.002,1.008],ibu:[2,8],srm:[2,7],abv:[4.0,5.5]},
-  "New England Pale Ale":       {og:[1.040,1.054],fg:[1.008,1.016],ibu:[20,40],srm:[3,6],abv:[3.5,5.0]},
+  "New England Pale Ale":       {og:[1.044,1.050],fg:[1.008,1.014],ibu:[5,30],srm:[3,7],abv:[4.4,5.4]}, // VERI1: BA 2026 Juicy or Hazy Pale Ale (PDF s.18)
   "Hazy Bitter":                {og:[1.035,1.048],fg:[1.006,1.012],ibu:[20,40],srm:[4,10],abv:[3.5,4.5]},
   "Farmhouse IPA":              {og:[1.056,1.075],fg:[1.004,1.012],ibu:[25,50],srm:[4,10],abv:[5.5,8.0]},
-  "New Zealand Pale Ale":       {og:[1.044,1.056],fg:[1.008,1.014],ibu:[20,40],srm:[3,7],abv:[4.0,5.5]},
-  "Australian Pale Ale":        {og:[1.044,1.054],fg:[1.008,1.014],ibu:[20,35],srm:[3,7],abv:[4.2,5.5]},
+  "New Zealand Pale Ale":       {og:[1.040,1.052],fg:[1.006,1.010],ibu:[15,40],srm:[3,9],abv:[4,6]}, // VERI1: BA 2026 New Zealand-Style Pale Ale (PDF s.41)
+  "Australian Pale Ale":        {og:[1.040,1.052],fg:[1.006,1.010],ibu:[15,40],srm:[3,9],abv:[4,6]}, // VERI1: BA 2026 Australian-Style Pale Ale (PDF s.41)
   "Thiolized IPA / Biotech IPA":{og:[1.060,1.075],fg:[1.010,1.016],ibu:[30,70],srm:[3,6],abv:[6.0,8.0]},
   "Fresh Hop IPA":              {og:[1.056,1.072],fg:[1.008,1.016],ibu:[40,80],srm:[4,10],abv:[5.5,8.0]},
   "Hazy Lager":                 {og:[1.048,1.058],fg:[1.008,1.014],ibu:[20,35],srm:[2,5],abv:[4.5,6.0]},
-  "Rice Lager": { pilsnerPct:[50,80], ricePct:[15,50], bonusMaya:/w3470|s23|s189|wy2124|wy2001|wy2206|wy2278|wy2308|wy2035|wlp800|wlp802|wlp830|wlp840|mj_m54|bb_lager/i, bonusHop:/hallertau|tettnang|saaz|hersbrucker|spalt|mittelfrüh|mittelfrueh|magnum/i }, // BA 2026
-  "Brown Porter": { palePct:[60,80], chocPct:[3,8], crsPct:[5,15], bonusMaya:/wlp002|wy1968|wy1187|s04|bry97|mj_m07|mj_m42|bb_ingiliz/i }, // BA 2026
-  "American Imperial Porter": { palePct:[50,75], chocPct:[5,12], crsPct:[5,15], ogMin:1.080, bonusMaya:/wlp001|wy1056|us05|bry97|mj_m44/i }, // BA 2026
-  "Franconian Rotbier": { pilsnerPct:[40,60], munichPct:[30,50], crsPct:[5,15], bonusMaya:/w3470|s23|s189|wy2124|wy2206|wy2308|wlp830|wlp833|wlp838/i, bonusHop:/hallertau|tettnang|spalt|mittelfrüh|mittelfrueh/i }, // BA 2026
-  "German Leichtbier": { pilsnerPct:[70,90], munichPct:[0,20], ogMax:1.034, bonusMaya:/w3470|s23|s189|wy2124|wy2001|wy2007|wy2308|wlp800|wlp830|wlp833/i, bonusHop:/hallertau|tettnang|saaz|spalt|mittelfrüh|mittelfrueh/i }, // BA 2026 + BJCP 5A
-  "Mexican Light Lager": { pilsnerPct:[50,75], ricePct:[0,30], ogMax:1.044, bonusMaya:/w3470|s23|s189|wy2124|wy2007|wy2035|wlp800|wlp840/i }, // BA 2026
-  "Mexican Amber Lager": { pilsnerPct:[50,70], munichPct:[15,35], crsPct:[5,15], bonusMaya:/w3470|s23|s189|wy2124|wy2206|wy2308|wlp830|wlp833|wlp838/i }, // BA 2026
-  "Leipzig Gose": { pilsnerPct:[40,60], wheatPct:[30,50], bonusKatki:/kisni|coriander|koriander|tuz|salt|sea_salt/i, bonusMaya:/wlp670|wy3031|bb_berliner|mj_m42/i }, // BA 2026
-  "Contemporary Gose": { pilsnerPct:[40,60], wheatPct:[25,50], bonusKatki:/tuz|salt|sea_salt/i, bonusMaya:/wlp670|wy3031|bb_berliner|mj_m42/i }, // BA 2026
   "Non-Alcoholic Beer":         {og:[1.010,1.040],fg:[1.005,1.015],ibu:[5,40],srm:[2,40],abv:[0.0,0.5]},
   "Tropical Stout":             {og:[1.056,1.075],fg:[1.01,1.018],ibu:[30,50],srm:[30,40],abv:[5.5,8.0]},
   "Honey Lager":                {og:[1.040,1.054],fg:[1.004,1.012],ibu:[8,20],srm:[2,5],abv:[4.0,5.5]},
@@ -6038,14 +6029,14 @@ const BJCP = {
   "Provision Ale":              {og:[1.070,1.090],fg:[1.010,1.020],ibu:[20,40],srm:[8,18],abv:[7.5,10.0]},
   "Modern Belgian Pale Ale":    {og:[1.044,1.060],fg:[1.008,1.014],ibu:[25,45],srm:[5,12],abv:[4.5,6.0]},
   "Barrel-Aged Belgian Quad":   {og:[1.084,1.120],fg:[1.014,1.030],ibu:[20,40],srm:[14,25],abv:[9.0,14.0]},
-    "American Amber IPA / Red IPA":  {og:[1.056,1.070],fg:[1.010,1.016],ibu:[40,70],srm:[11,17],abv:[5.5,7.5]},
+    "American Amber IPA / Red IPA":  {og:[1.056,1.070],fg:[1.008,1.016],ibu:[40,70],srm:[11,17],abv:[5.5,7.5]}, // VERI1: BJCP 2021 Specialty IPA:Red IPA Red IPA (PDF s.56)
   "American Lager / Light Lager": {og:[1.04,1.05],fg:[1.004,1.01],ibu:[8,18],srm:[2,3.5],abv:[4.2,5.3]},
-  "American Pilsner":               {og:[1.044,1.060],fg:[1.008,1.014],ibu:[25,40],srm:[3,6],abv:[4.5,6.0]}, // BA 2026
+  "American Pilsner":               {og:[1.045,1.060],fg:[1.012,1.018],ibu:[25,40],srm:[3,6],abv:[4.9,6]}, // BA 2026 · VERI1: BA 2026 American-Style Pilsener (PDF s.51)
   "Rice Lager":                     {og:[1.040,1.052],fg:[1.004,1.008],ibu:[15,30],srm:[2,6],abv:[4.0,6.0]}, // BA 2026
   "Brown Porter":                   {og:[1.040,1.050],fg:[1.006,1.014],ibu:[20,30],srm:[20,35],abv:[4.4,6.0]}, // BA 2026
   "American Imperial Porter":       {og:[1.080,1.100],fg:[1.020,1.030],ibu:[35,50],srm:[30,50],abv:[7.0,12.0]}, // BA 2026
   "Franconian Rotbier":             {og:[1.046,1.056],fg:[1.012,1.018],ibu:[22,28],srm:[13,23],abv:[4.8,5.4]}, // BA 2026
-  "German Leichtbier": {og:[1.026,1.034],fg:[1.006,1.010],ibu:[15,28],srm:[2,4],abv:[2.5,3.7]}, // BA 2026 + BJCP 5A
+  "German Leichtbier": {og:[1.026,1.034],fg:[1.006,1.010],ibu:[15,28],srm:[1.5,4],abv:[2.4,3.6]}, // BA 2026 + BJCP 5A · VERI1: BJCP 2021 5A German Leichtbier (PDF s.25)
   "Mexican Light Lager":            {og:[1.026,1.044],fg:[1.003,1.010],ibu:[8,17],srm:[2,3],abv:[3.2,4.2]}, // BA 2026
   "Mexican Pale Lager":             {og:[1.045,1.050],fg:[1.008,1.012],ibu:[15,22],srm:[3,5],abv:[4.5,5.0]}, // BA 2026
   "Mexican Amber Lager":            {og:[1.045,1.052],fg:[1.010,1.012],ibu:[12,25],srm:[7,15],abv:[4.0,5.5]}, // BA 2026
@@ -6053,10 +6044,10 @@ const BJCP = {
   "Leipzig Gose":                   {og:[1.036,1.056],fg:[1.008,1.012],ibu:[5,15],srm:[2,7],abv:[4.4,5.4]}, // BA 2026 (geleneksel, IBU daralttım)
   "Contemporary Gose":              {og:[1.036,1.056],fg:[1.008,1.012],ibu:[5,30],srm:[3,9],abv:[4.4,5.4]}, // BA 2026
   "American Porter":               {og:[1.050,1.070],fg:[1.012,1.018],ibu:[25,50],srm:[22,40],abv:[4.8,6.5]},
-  "American Wheat Beer":           {og:[1.042,1.055],fg:[1.006,1.012],ibu:[8,20],srm:[2,5],abv:[4.2,5.6]},
+  "American Wheat Beer":           {og:[1.040,1.055],fg:[1.008,1.013],ibu:[15,30],srm:[3,6],abv:[4,5.5]}, // VERI1: BJCP 2021 1D American Wheat Beer (PDF s.18)
   "American Wheat IPA / Hoppy Wheat":{og:[1.050,1.070],fg:[1.008,1.016],ibu:[35,70],srm:[3,8],abv:[5.0,7.5]},
   "Barleywine":                    {og:[1.080,1.120],fg:[1.016,1.030],ibu:[40,80],srm:[8,22],abv:[8.0,15.0]},
-  "Belgian IPA":                   {og:[1.058,1.080],fg:[1.008,1.016],ibu:[50,100],srm:[5,15],abv:[6.2,9.5]},
+  "Belgian IPA":                   {og:[1.058,1.080],fg:[1.008,1.016],ibu:[50,100],srm:[5,8],abv:[6.2,9.5]}, // VERI1: BJCP 2021 Specialty IPA:Belgian IPA Belgian IPA (PDF s.55)
   "Belgian Strong Ale":            {og:[1.064,1.096],fg:[1.008,1.024],ibu:[20,50],srm:[7,22],abv:[6.5,9.0]},
   "Black IPA / Cascadian Dark Ale":{og:[1.050,1.085],fg:[1.010,1.018],ibu:[50,90],srm:[25,40],abv:[5.5,9.0]},
   "Coffee Stout":                  {og:[1.050,1.075],fg:[1.012,1.022],ibu:[25,45],srm:[30,40],abv:[4.5,7.5]},
@@ -27586,7 +27577,7 @@ window._TD_BOYUT = {
   // opts.hedef.mash ile S.mashSc'ye taşınır (AJ mash kartı + mash pH zinciri
   // mashSc'yi zaten okur — bağlantı otomatik). AN çerçevesi AYNEN: NHC de
   // winners-only, kalite iddiası kurulamaz.
-  function nhcGramTR(g){ return g >= 1000 ? (String(+(g/1000).toFixed(2)).replace('.', ',') + ' kg') : (String(g).replace('.', ',') + ' g'); }
+  function nhcGramTR(g){ if(g == null || !(+g > 0)) return '—'; return g >= 1000 ? (String(+(g/1000).toFixed(2)).replace('.', ',') + ' kg') : (String(g).replace('.', ',') + ' g'); }
   function nhcGramStr(g){ return g >= 1000 ? ((+(g/1000).toFixed(2)) + ' kg') : (g + ' g'); }
   function nhcDkStr(dk){ if(dk == null) return ''; if(dk === 'FWH') return ' @FWH'; if(dk === 'kuru') return ' (kuru hop)'; if(dk === 'wp') return ' (whirlpool)'; if(dk === 'mash') return ' (mayşe hop)'; return ' @' + dk + 'dk'; }
   function nhcNotu(stilAd, o){
@@ -27700,6 +27691,7 @@ window._TD_BOYUT = {
       var k4 = (kaynak === 'k4'), nhc = (kaynak === 'nhc'), kay = (kaynak === 'kay' || k4); // SPRINT CC: kay = K2/K3 kaynaklı örnek (gramlı, NHC gösterimi); CC3: k4 aynı gösterim
       var T = nhc ? window._NHC_MADALYA : k4 ? window._TOPLULUK_ORNEK : kay ? window._KAYNAKLI_ORNEK : window._TOPLULUK_MADALYA;
       var v = T && T[stilAd]; var o = kay ? (v && v[idx]) : (v && v[1] && v[1][idx]); if(!o) return null;
+      var ahaG = (kaynak === 'aha') && +o.L > 0 && Array.isArray(o.gg) && Array.isArray(o.hg); if(ahaG) o = Object.assign({}, o, { g:o.gg, h:o.hg }); // VERI1: gerçek miktarlar
       _onizleSec = { kaynak: kaynak, stilAd: stilAd, idx: idx };
       var _nd = window._bmOrnekStok ? window._bmOrnekStok(kaynak, stilAd, idx) : null; // SPRINT ND1: kuru dönüşüm + stok (yazma yok)
       var _ndK = function(grup, i){ return (_nd && window._ndKalemHTML) ? window._ndKalemHTML(grup === 'y' ? _nd.y : (_nd[grup] || [])[i]) : ''; };
@@ -27733,7 +27725,7 @@ window._TD_BOYUT = {
       var olcHTML = olc.map(function(x){ return '<span style="display:inline-block;background:var(--bg2);border:1px solid var(--bor);border-radius:8px;padding:3px 8px;font-size:11px;color:var(--kahve);margin:0 4px 4px 0"><b>' + x[0] + '</b> ' + x[1] + '</span>'; }).join('');
       var satirStil = 'display:flex;gap:6px;padding:3px 0;border-top:1px dotted var(--bor);font-size:12px;color:var(--metin)';
       var gristHTML;
-      if(nhc || kay){
+      if(nhc || kay || ahaG){
         var gTop = 0; (o.g || []).forEach(function(x){ gTop += (+x[1] || 0); });
         gristHTML = (o.g || []).map(function(x, gi){
           var p = (gTop > 0 && +x[1]) ? Math.round(x[1] / gTop * 100) : null;
@@ -27746,7 +27738,7 @@ window._TD_BOYUT = {
         gristHTML += '<div style="font-size:10px;color:var(--dim);margin-top:3px">Gram/kg miktarı kaynakta yok — yüzdeler kaynaktan; derleme gristi ilk 5 kalemle sınırlı verir.</div>';
       }
       var hopHTML;
-      if(nhc || kay){
+      if(nhc || kay || ahaG){
         hopHTML = (o.h || []).map(function(x, hi){
           return '<div style="' + satirStil + ';flex-wrap:wrap"><span style="flex:1;min-width:0">' + _oe(x[0]) + _oe(nhcDkStr(x[2])) + _ndK('h', hi) + (x[3] ? ' <span style="color:var(--soluk)">(%' + _onizleTR(x[3]) + ' AA)</span>' : '') + '</span><span style="white-space:nowrap;color:var(--kahve);font-weight:600">' + nhcGramTR(x[1]) + '</span></div>';
         }).join('');
@@ -27754,10 +27746,12 @@ window._TD_BOYUT = {
         hopHTML = (o.h || []).map(function(x, hi){
           return '<div style="' + satirStil + ';flex-wrap:wrap"><span style="flex:1;min-width:0">' + _oe(x[0]) + (x[1] != null ? ' @' + _oe(x[1]) + 'dk' : '') + _ndK('h', hi) + (x[2] ? ' <span style="color:var(--soluk)">(' + _oe(x[2]) + ')</span>' : '') + '</span></div>';
         }).join('');
-        var _ahaK = window._bmOrnekKuru ? window._bmOrnekKuru(kaynak, stilAd, idx) : null, _ahaV = _ahaK ? _ahaK.h.filter(function(k){ return k.varsayim; }) : [];
-        if(_ahaV.length) hopHTML += '<div class="aha-varsayim" style="font-size:10px;color:var(--metin);margin-top:3px">≈ ' + _ahaV.map(function(k){ return _oe(k.ad || k.ham) + ' ' + _onizleTR(k.mik) + ' g'; }).join(' · ') + ' — <b>varsayım — kaynakta gramaj yok</b> (acı: örneğin IBU\'su eşit bölündü; aroma / kuru: stil iskeletinin g/L medyanı)</div>';
+        var _ahaK = null, _ahaV = [];
+        if(false) hopHTML += '<div class="aha-varsayim" style="font-size:10px;color:var(--metin);margin-top:3px">≈ ' + _ahaV.map(function(k){ return _oe(k.ad || k.ham) + ' ' + _onizleTR(k.mik) + ' g'; }).join(' · ') + ' — <b>varsayım — kaynakta gramaj yok</b> (acı: örneğin IBU\'su eşit bölündü; aroma / kuru: stil iskeletinin g/L medyanı)</div>';
         hopHTML += '<div style="font-size:10px;color:var(--dim);margin-top:3px">Hop gramajı kaynakta yok — kaynak yalnız çeşidi ve zamanı verir.</div>';
       }
+      if(kaynak === 'aha'){ var _ahaK2 = window._bmOrnekKuru ? window._bmOrnekKuru(kaynak, stilAd, idx) : null, _ahaV2 = _ahaK2 ? _ahaK2.h.filter(function(k){ return k.varsayim; }) : [];
+        if(_ahaV2.length) hopHTML += '<div class="aha-varsayim" style="font-size:10px;color:var(--metin);margin-top:3px">≈ ' + _ahaV2.map(function(k){ return _oe(k.ad || k.ham) + ' ' + _onizleTR(k.mik) + ' g'; }).join(' · ') + ' — <b>varsayım — kaynakta gramaj yok</b> (acı: örneğin IBU\'su eşit bölündü; aroma / kuru: stil iskeletinin g/L medyanı)</div>'; }
       var h = '';
       h += '<div id="bmOrnekOnizle" role="dialog" aria-modal="true" aria-label="Ödüllü örnek önizleme" tabindex="-1" style="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center" onclick="if(event.target===this)bmOrnekOnizleKapat()">';
       h += '<div style="background:#fff;width:100%;max-width:520px;max-height:88vh;overflow-y:auto;border-radius:16px 16px 0 0;padding:16px;box-shadow:0 -4px 24px rgba(0,0,0,.3)">';
@@ -29004,7 +28998,10 @@ window._brTamHTML = function(){
     if(kaynak === 'isk') return window._bmIskeletOrnek ? window._bmIskeletOrnek(stil) : null; // SPRINT ISK1: stil iskeleti = sanal örnek
     var T = kaynak === 'nhc' ? window._NHC_MADALYA : kaynak === 'aha' ? window._TOPLULUK_MADALYA : kaynak === 'k4' ? window._TOPLULUK_ORNEK : window._KAYNAKLI_ORNEK;
     var v = T && T[stil]; if(!v) return null;
-    return (kaynak === 'nhc' || kaynak === 'aha') ? (v[1] && v[1][idx]) || null : v[idx] || null;
+    var o_ = (kaynak === 'nhc' || kaynak === 'aha') ? (v[1] && v[1][idx]) || null : v[idx] || null;
+    // SPRINT VERI1 2: ham AN verisinden gerçek miktar taşıyan AHA örneği (L + gg + hg) → g / h gram listeleriyle, _ahaGram işaretli
+    if(kaynak === 'aha' && o_ && +o_.L > 0 && Array.isArray(o_.gg) && Array.isArray(o_.hg)) o_ = Object.assign({}, o_, { g:o_.gg, h:o_.hg, _ahaGram:true });
+    return o_;
   };
   function katAd(tip, id){ var L = tip === 'malt' ? MALTLAR : tip === 'hop' ? HOPLAR : tip === 'maya' ? MAYALAR : KATKILAR; var x = (L || []).find(function(a){ return a && a.id === id; }); return x ? x.ad : id; }
   // SPRINT ND5: ek kalem miktar metninden AÇIK kütle (gram). Parantezli çift yazımda metrik esas ("2 oz (57 g)" → 57); yalnız
@@ -29034,7 +29031,7 @@ window._brTamHTML = function(){
   window._bmOrnekKuru = function(kaynak, stil, idx){
     var o = window._bmOrnekNesne(kaynak, stil, idx); if(!o) return null;
     var hacim = (typeof S !== 'undefined' && S && +S.hacim > 0) ? +S.hacim : 11, verim = (typeof S !== 'undefined' && S && +S.verim > 0) ? +S.verim : 61;
-    var aha = kaynak === 'aha', gramli = !aha && +o.L > 0, oran = gramli ? hacim / +o.L : null;
+    var aha = kaynak === 'aha' && !o._ahaGram, gramli = !aha && +o.L > 0, oran = gramli ? hacim / +o.L : null; // VERI1: gramlı AHA = gramlı yol
     var r = { g:[], h:[], y:null, ek:[], ekAdsiz:0, hacim:hacim, verim:verim, yontem:'' };
     var cozKalem = function(tip, ham){ // malt/hop: BV L2 → yoksa katkı metin kuralı (örn. grist'te şeker, hop listesinde baharat)
       var id = window._bmKatCoz(tip, ham); if(id) return { tip:tip, id:id };
@@ -29060,7 +29057,7 @@ window._brTamHTML = function(){
       var c = _pid ? { tip:'hop', id:_pid.h[hi] } : cozKalem('hop', x[0]), gr = (!aha && gramli && +x[1] > 0) ? Math.round(+x[1] * oran * 10) / 10 : null;
       r.h.push({ ham:x[0], tip:c ? c.tip : 'hop', id:c ? c.id : null, ad:c ? katAd(c.tip, c.id) : null, mik:gr, birim:'g' });
     });
-    if(window._bmAhaHopVarsay && aha) window._bmAhaHopVarsay(stil, o, r); // SPRINT ISK1 5: AHA varsayımlı hop gramı (etiketli)
+    if(window._bmAhaHopVarsay && kaynak === 'aha') window._bmAhaHopVarsay(stil, o, r); // VERI1: yalnız gramı OLMAYAN satırlar (gramlı AHA'da da tek tük) // SPRINT ISK1 5: AHA varsayımlı hop gramı (etiketli)
     if(o.y){ var yid = _pid ? _pid.y : window._bmKatCoz('maya', o.y); r.y = { ham:o.y, tip:'maya', id:yid, ad:yid ? katAd('maya', yid) : null, mik:1, birim:'pk' }; }
     (o.ek || []).forEach(function(x, ei){
       var id = _pid ? _pid.ek[ei].id : window._bmMetinCoz('katki', x[0]), tip = 'katki';
@@ -29764,6 +29761,20 @@ window._brTamHTML = function(){
   var aciMi = function(b){ return (b.tur === 'boil' && b.dk >= 30) || b.tur === 'fwh'; };
   function bjcpOrta(stil, a){ var B = (typeof BJCP !== 'undefined') ? BJCP[stil] : null; return (B && Array.isArray(B[a])) ? (B[a][0] + B[a][1]) / 2 : null; }
   // opt: { sec:{ anahtar: id | '__aynen' }, maxDerece:1–4, birebir:true (örneğin KENDİ kalemleri, stoğa bakmadan) }
+  // SPRINT VERI1 4: aynı stok kalemi birden çok satıra karşılık geliyorsa TEK satır — malt / şeker (maltlar) aynı id, katkı aynı id + aynı aşama
+  // (zaman) + aynı birim, hop aynı id + aynı kullanım (tur) + aynı süre (dk) + aynı whirlpool sıcaklığı / kuru hop günü. Dönüş: birleştirilenler listesi.
+  window._bmTarifBirlestir = function(t){
+    var out = [], tr2 = function(v){ return String(Math.round(v * 10) / 10).replace('.', ','); };
+    var topla = function(L, anahtar, mikAl, mikYaz, birimStr){ var gor = {}, yeni = [];
+      (L || []).forEach(function(x){ var k = anahtar(x); if(gor[k] == null){ gor[k] = yeni.length; yeni.push(x); x._parca = [x._kaynak || x._ad || x.ad || x.id]; x._mik = [mikAl(x)]; return; }
+        var a = yeni[gor[k]]; mikYaz(a, mikAl(a) + mikAl(x)); a._parca.push(x._kaynak || x._ad || x.ad || x.id); a._mik.push(mikAl(x)); });
+      yeni.forEach(function(a){ if(a._parca.length > 1) out.push({ ad:a._ad || a.ad || a.id, satirlar:a._parca.slice(), miktarlar:a._mik.map(birimStr), toplam:birimStr(mikAl(a)) }); delete a._parca; delete a._mik; delete a._kaynak; });
+      return yeni; };
+    t.maltlar = topla(t.maltlar, function(m){ return m.id; }, function(m){ return m.kg; }, function(m, v){ m.kg = Math.round(v * 1000) / 1000; }, function(v){ return Math.round(v * 1000) + ' g'; });
+    t.katkilar = topla(t.katkilar, function(k){ return k.id + '|' + (k.zaman || '') + '|' + (k.birim || ''); }, function(k){ return +k.miktar || 0; }, function(k, v){ k.miktar = k.birim === 'g' ? Math.round(v * 10) / 10 : Math.round(v * 1000) / 1000; }, function(v){ return tr2(v); });
+    t.hoplar = topla(t.hoplar, function(b){ return b.id + '|' + (b.tur || '') + '|' + (b.dk == null ? '' : b.dk) + '|' + (b.whT == null ? '' : b.whT) + '|' + (b.dryDays == null ? '' : b.dryDays); }, function(b){ return +b.g || 0; }, function(b, v){ b.g = Math.round(v * 10) / 10; }, function(v){ return tr2(v) + ' g'; });
+    return out;
+  };
   window._bmStokUyarla = function(kaynak, stil, idx, opt){
     try{
       opt = opt || {}; var sec = opt.sec || {}, mx = opt.maxDerece || 5;
@@ -29797,12 +29808,12 @@ window._brTamHTML = function(){
         else if(s.grup === 'g'){ if((s.tipYeni || s.tip) === 'malt') grist.push({ s:s, m:{ id:s.id, kg:s.gerek * (s.renkMod === 'renk' ? s.renkEsKat : 1), marka:'', _ad:s.ad } }); else grist.push({ s:s, k:{ id:s.id, ad:s.ad, birim:'kg', miktar:s.gerek, zaman:(kayit('katki', s.id) || {}).kullanim || '' } }); }
         else if(s.grup === 'ek' && s.gerek > 0){
           if(s.ozel) sabitK.push({ id:'ozel_uyg_' + s.i, ad:s.ham, birim:'g', miktar:s.gerek, zaman:'' });
-          else if(s.tip === 'malt') sabitM.push({ id:s.id, kg:s.gerek, marka:'', _ad:s.ad });
+          else if(s.tip === 'malt') sabitM.push({ id:s.id, kg:s.gerek, marka:'', _ad:s.ad, _kaynak:s.orijAd });
           else { var xk = kayit('katki', s.id); sabitK.push({ id:s.id, ad:xk ? xk.ad : s.ad, birim:'g', miktar:s.gerek, zaman:xk ? xk.kullanim : '' }); }
         }
       });
-      var gM = function(f){ return grist.filter(function(x){ return x.m; }).map(function(x){ return { id:x.m.id, kg:x.m.kg * f, marka:'', _ad:x.m._ad }; }); };
-      var gK = function(f){ return grist.filter(function(x){ return x.k; }).map(function(x){ return { id:x.k.id, ad:x.k.ad, birim:x.k.birim || 'kg', miktar:x.k.miktar * f, zaman:x.k.zaman }; }); }; // ISK2: şeker karışımı parçası gram
+      var gM = function(f){ return grist.filter(function(x){ return x.m; }).map(function(x){ return { id:x.m.id, kg:x.m.kg * f, marka:'', _ad:x.m._ad, _kaynak:x.s.orijAd }; }); };
+      var gK = function(f){ return grist.filter(function(x){ return x.k; }).map(function(x){ return { id:x.k.id, ad:x.k.ad, birim:x.k.birim || 'kg', miktar:x.k.miktar * f, zaman:x.k.zaman, _kaynak:x.s.orijAd }; }); }; // ISK2: şeker karışımı parçası gram
       var hOgK = { og:+o.og > 1 ? +o.og : +o.ogH > 1 ? +o.ogH : bjcpOrta(stil, 'og'), ib:+o.ib > 0 ? +o.ib : bjcpOrta(stil, 'ibu') };
       var hedef = { og:hOgK.og, ib:hOgK.ib, ogK:+o.og > 1 ? (kaynak === 'isk' ? 'iskelet' : 'örnek') : +o.ogH > 1 ? 'örnek (hesaplanmış OG)' : 'BJCP orta noktası', ibK:+o.ib > 0 ? (kaynak === 'isk' ? 'iskelet' : 'örnek') : 'BJCP orta noktası' };
       var uyari = [], s = 1;
@@ -29817,7 +29828,7 @@ window._brTamHTML = function(){
         var paket = (!opt.birebir && sa.secilen && sa.secilen.stok && sa.secilen.stok.aa) ? sa.secilen.stok.aa : null, kaynakAA = +((x || [])[3]) > 0 ? +x[3] : null;
         var hs = hopSatir(sa.id, sa.gerek, x, paket != null ? paket : ((sa.alinacak && sa.id === sa.orijId) || opt.birebir) ? kaynakAA : null);
         sa.alfaKaynak = paket != null ? 'paket' : (((sa.alinacak && sa.id === sa.orijId) || opt.birebir) && kaynakAA) ? 'kaynak' : 'katalog';
-        if(hs.varsay) varsay.push((hs.b._ad || sa.id) + ': ' + hs.varsay); sa.hop = hs.b; t.hoplar.push(hs.b); });
+        if(hs.varsay) varsay.push((hs.b._ad || sa.id) + ': ' + hs.varsay); sa.hop = hs.b; hs.b._kaynak = sa.orijAd; t.hoplar.push(hs.b); });
       var ogD = hOG(t.maltlar, verim, t.katkilar, hacim), f = 1;
       if(hedef.ib > 0 && !opt.birebir){
         var aci = t.hoplar.filter(aciMi), diger = t.hoplar.filter(function(b){ return !aciMi(b); });
@@ -29826,7 +29837,8 @@ window._brTamHTML = function(){
         else uyari.push(aci.length ? 'IBU dengelenemedi (aroma hopları hedefi zaten aşıyor)' : 'IBU dengelenemedi (acılık hop\'u yok — kaynatma/FWH ≥30 dk)');
       }
       var y = satirlar.find(function(z){ return z.grup === 'y'; }); t.mayaId = y ? y.id : null;
-      var son = window._bmTarifHesap(t), plan = { kaynak:kaynak, stil:stil, idx:idx, satirlar:satirlar, tarif:t, hedef:hedef, sonuc:son, dengele:{ s:s, f:f }, varsay:varsay, uyari:uyari };
+      var birlesen = window._bmTarifBirlestir(t); // VERI1 4: aynı stok kalemi tek satır (miktarlar toplanır; stok toplam kontrolü satır bazında aynen)
+      var son = window._bmTarifHesap(t), plan = { kaynak:kaynak, stil:stil, idx:idx, satirlar:satirlar, tarif:t, hedef:hedef, sonuc:son, dengele:{ s:s, f:f }, varsay:varsay, uyari:uyari, birlesen:birlesen };
       if(!opt.birebir){
         var bb = window._bmStokUyarla(kaynak, stil, idx, { birebir:true }); plan.srmOnce = bb ? bb.sonuc.srm : null;
         var B = (typeof BJCP !== 'undefined') ? BJCP[stil] : null;
@@ -29926,6 +29938,7 @@ window._brTamHTML = function(){
       not.push('Renk: SRM ' + (p.srmOnce ? tr(p.srmOnce, 1) : '?') + ' (örneğin kendi malzemeleriyle) → ' + tr(p.sonuc.srm, 1) + ' (uyarlanmış). Renk kendiliğinden düzeltilmedi.' + (p.uyari.length ? ' ⚠️ ' + p.uyari.join(' · ') : ''));
       if(p.kalib) not.push('Beklenen FG senin bu mayayla ölçtüğün attenüasyonla (%' + p.kalib + ') hesaplandı.');
       if(p.varsay.length) not.push('Kaynakta olmayan süreler (değiştirebilirsin): ' + p.varsay.join(' · '));
+      if(p.birlesen && p.birlesen.length) not.push('Aynı stok kalemi tek satırda: ' + p.birlesen.map(function(b){ return b.satirlar.join(' ve ') + ' satırları tek satırda birleştirildi (' + b.ad + ' ' + b.miktarlar.join(' + ') + ' = ' + b.toplam + ')'; }).join(' · ')); // VERI1 4
       var _vh = p.satirlar.filter(function(z){ return z.grup === 'h' && z.varsayim && z.hop; }); if(_vh.length) not.push('Varsayımlı hop gramı — kaynakta gramaj yok: ' + _vh.map(function(z){ return (z.hop._ad || z.id) + ' ' + tr(z.hop.g, 1) + ' g (' + z.varsayim + ')'; }).join(' · '));
       if(kaynak === 'isk' && o._isk && window._bmIskeletIzNot) not.push(window._bmIskeletIzNot(stil, o._isk)); // ISK1
       S.notlar = not.join('\n');
@@ -33667,7 +33680,7 @@ syncBaslat();
   // örnek hop satırı tek biçim: [ad, gram|null, zaman, alfa|null] (AHA kaynağı [ad, zaman, ""] verir)
   // ISK2 4: AHA satırının 3. alanı kaynaktaki KULLANIM etiketidir (AN şeması use: dry_hop → "kuru", whirlpool → "whirlpool", first_wort → "ilk şıra");
   //  ISK1 bunu yok sayıyordu. Etiket zamandan önce gelir (whirlpool 20 dk = whirlpool, kaynatma değil).
-  window._bmOrnekHopNorm = function(kaynak, o){ return ((o && o.h) || []).map(function(x){ if(kaynak !== 'aha') return x;
+  window._bmOrnekHopNorm = function(kaynak, o){ return ((o && o.h) || []).map(function(x){ if(kaynak !== 'aha' || (o && o._ahaGram)) return x; // VERI1: gramlı AHA zaten [ad, gram, zaman, alfa]
     var u = String(x[2] || ''), d = u === 'kuru' ? 'kuru' : u === 'whirlpool' ? 'wp' : u === 'ilk şıra' ? 'FWH' : ((x[1] === '' || x[1] == null) ? null : x[1]);
     return [x[0], null, d, null]; }); };
   // İMZA MALZEMESİ — stil adının tanımladığı malzeme (tek tablo, testli). Frekans eşiğinin altında kalsa da iskelete girer.
@@ -33730,7 +33743,7 @@ syncBaslat();
     // HOP
     var hOz = { aci:{ ids:{}, ex:{}, dk:[], gL:[], ibu:[] }, lezzet:{ ids:{}, ex:{}, dk:[], gL:[], ibu:[] }, aroma:{ ids:{}, ex:{}, dk:[], gL:[], ibu:[] }, kuru:{ ids:{}, ex:{}, dk:[], gL:[], ibu:[] } }, hBil = 0;
     ex.forEach(function(e, ei){
-      var H = window._bmOrnekHopNorm(e.kaynak, e.o), gramli = e.kaynak !== 'aha' && +e.o.L > 0, og = +e.o.og > 1 ? +e.o.og : +e.o.ogH > 1 ? +e.o.ogH : (B.og[0] + B.og[1]) / 2;
+      var H = window._bmOrnekHopNorm(e.kaynak, e.o), gramli = (e.kaynak !== 'aha' || e.o._ahaGram) && +e.o.L > 0, og = +e.o.og > 1 ? +e.o.og : +e.o.ogH > 1 ? +e.o.ogH : (B.og[0] + B.og[1]) / 2;
       var S_ = {}, ibuTop = 0, gTam = {};
       H.forEach(function(x, i){
         var c = window._bmIskHopSinif(x[2]); if(!c){ hBil++; return; }
@@ -33900,6 +33913,8 @@ syncBaslat();
       var og = +o.og > 1 ? +o.og : null, ib = +o.ib > 0 ? +o.ib : null, h = r.hacim; if(!og || r.yontem !== 'og') return;
       var H = window._bmOrnekHopNorm('aha', o), aci = [], dig = [];
       H.forEach(function(x, i){ var k = r.h[i], c = window._bmIskHopSinif(x[2]); if(!k || !k.id || k.tip !== 'hop' || !c) return;
+        // VERI1: kaynakta gramı OLAN satır varsayıma girmez; IBU'su acı payından düşülür (gerçek veri önce)
+        if(k.mik > 0 && !k.varsayim){ if(c !== 'kuru') dig.push(hopNesne(k.id, [x[0], k.mik, x[2], x[3]])); return; }
         if(c === 'aci'){ aci.push(i); return; }
         var z = iz.find(function(q){ return q.sinif === c; }); if(!z || z.gL == null) return;
         k.mik = r1(z.gL * h, 1); k.varsayim = (c === 'kuru' ? 'kuru hop' : c === 'lezzet' ? 'lezzet' : 'aroma') + ' sınıfı iskelet medyanı ' + tr_(z.gL, 2) + ' g/L'; dig.push(hopNesne(k.id, [x[0], k.mik, x[2], null]));
@@ -33915,7 +33930,7 @@ syncBaslat();
   window._bmIskOlc = function(stil, isk, kaynak, idx){
     var o = window._bmOrnekNesne(kaynak, stil, idx), r = window._bmOrnekKuru(kaynak, stil, idx); if(!o || !r || !(+o.og > 1) || !isk) return null;
     var L = +o.L > 0 ? +o.L : 19, v = 72;
-    if(kaynak !== 'aha' && +o.L > 0 && r.g.length && r.g.every(function(k){ return k.tip === 'malt' && k.id && k.kaynakMik > 0; })){
+    if((kaynak !== 'aha' || o._ahaGram) && +o.L > 0 && r.g.length && r.g.every(function(k){ return k.tip === 'malt' && k.id && k.kaynakMik > 0; })){
       var o61 = hOG(r.g.map(function(k){ return { id:k.id, kg:k.kaynakMik / 1000 }; }), 61, [], L); if(o61 > 1) v = Math.max(50, Math.min(95, 61 * (+o.og - 1) / (o61 - 1)));
     }
     var q = window._stilIskeletHesap(stil, L, v, { og:+o.og, ibu:+o.ib > 0 ? +o.ib : null }, isk); if(!q) return null;
