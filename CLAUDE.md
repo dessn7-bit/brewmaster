@@ -32,8 +32,9 @@ Kaan kod bilmiyor. Tüm kod okuma, yazma, düzenleme, deploy işlerini Claude ya
 M1-M10 UX iyileştirmeleri var ama detayı şu an belirsiz, Kaan hatırladıkça eklenecek.
 
 ## Sprint Kuyruğu (2026-10-09, Kaan onaylı sıra — promptları Claude sırayla verir, Kaan karıştırmasın diye)
-1. **ND5** — lezzet katkısı eşleme + K1 adsız ek kalemler + ek miktarı (gorevler/ND5.md) — CC'de çalışıyor.
-2. **Birleşik sprint** (ND5 raporu gelince yazılacak; gorevler/ISK1.md bunun yerine geçecek, ISK1 tek başına GÖNDERİLMEZ; gerekirse ikiye bölünür):
+1. **ND5** — TAMAM (c015c0a, SW v131-456).
+1b. **UYG1** — "📦 Stoğumla oluştur" + ortak ikame motoru + satır değiştirme önizlemesi + ND5 kalıntıları (gorevler/UYG1.md).
+2. **Kalan birleşik iş** — UYG1'den sonra İKİ sprint: ISK1 (türetilmiş iskelet + katalog doz denetimi; eski ISK1.md silindi, UYG1 motoru üstüne yeniden yazılacak) → AI1 (asistan + tuzak testi). Başlangıç kapsamı:
    - Örnek verisinden türetilmiş iskelet (227 stil, kaynak izi, LOO + stil motoru hakem, kendiliğinden yeniden hesap).
    - "📦 Stoğumla oluştur": stokta → aynen, ✅ muadil → değiştir, ⚠️ → en yakını + ne değişeceği notu, yok → "alınacak"; maya en yakın suş; OG/IBU yeniden dengeleme, renk kayması uyarısı.
    - Satır değiştirme önizlemesi: "bunun yerine bunu koyarsan" → OG/FG/ABV/SRM/IBU önce/sonra (AI'sız, kaynaklı fark notu).
