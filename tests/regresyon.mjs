@@ -120,6 +120,12 @@ function helperKur() {
     chk: [],
     ok(ad, kosul, detay) { this.chk.push({ ad: ad, ok: !!kosul, detay: detay === undefined ? '' : String(detay) }); },
     al() { const c = this.chk; this.chk = []; return c; },
+    // SPRINT AI1: BM_AI.sor yerine senaryo cevabı (gerçek anahtar / ağ YOK); dönen geri() asıl fonksiyonları geri koyar
+    ai1Mock(sen) { const A = window.BM_AI, eski = { sor: A.sor, hazirMi: A.hazirMi }, log = [], say = {}; A.hazirMi = () => ({ hazir: true });
+      A.sor = (p) => { log.push(p); const i = say[p.kullanim] = (say[p.kullanim] || 0) + 1, s = sen[p.kullanim], v = typeof s === 'function' ? s(i, p) : s;
+        if (v === undefined) return Promise.resolve({ ok: false, hata: { tur: 'mock', mesaj: 'mock yanıtı yok' } });
+        return Promise.resolve({ ok: true, veri: JSON.parse(JSON.stringify(v)), bayraklar: [], maliyet: A.maliyet(p.kullanim === 'esleme' ? 'ucuz' : 'dengeli', { input_tokens: 1000, output_tokens: 300 }) }); };
+      return { log, geri: () => { A.sor = eski.sor; A.hazirMi = eski.hazirMi; } }; },
     // SPRINT ISK1: C katmanı (iskelet yok) sınamak için bir stilin türetilmiş + elle iskeletini GEÇİCİ gizler; dönen fonksiyon geri koyar
     iskeletGizle(st) { const T = (window._ISKELET_TURETILMIS && window._ISKELET_TURETILMIS.stiller) || {}, y = { d: T[st], e: STIL_ISKELET[st] }; delete T[st]; delete STIL_ISKELET[st]; return () => { if (y.d) T[st] = y.d; if (y.e) STIL_ISKELET[st] = y.e; }; },
     // SPRINT ISK1: düz stil yolunda not yalnız "🧬 İskelet nereden geldi?" bölümüdür (örnek notu / kaynak metni sızmaz)
@@ -1315,7 +1321,7 @@ const CASELER = [
       __REG.ok('grist %% toplamı 100 (tüm iskelet)', pctFail.length === 0, pctFail.slice(0, 4).join(' | '));
       __REG.ok('tüm ID katalogda (malt/hop/maya) — sahte ID yok', idFail.length === 0, idFail.slice(0, 5).join(' | '));
       __REG.ok('tüm iskelet calc() OG+IBU+SRM BJCP aralığında — bozuk iskelet yok', rangeFail.length === 0, rangeFail.slice(0, 5).join(' | '));
-      __REG.ok('VERI1 istisnası yalnız builder\'ın "ikisi de kapı dışı" dediği stil(ler) — en fazla 1 (German Pils: %100 pilsner uygulamanın renk modelinde 4,1 SRM, BJCP 5D üst 4)', istisna.length <= 1, istisna.join(' | '));
+      __REG.ok('VERI1 istisnası yalnız builder\'ın "ikisi de kapı dışı" dediği stil(ler) — en fazla 2 (German Pils: %100 pilsner uygulamanın renk modelinde 4,1 SRM, BJCP 5D üst 4 · AI1 Saison standard: 25B alt sınır 5 SRM, örneklerin kendi SRM\'si 4, uygulama 4,4–4,7)', istisna.length <= 2 && istisna.every(x => /^(German Pils|Saison \/ Farmhouse Ale):SRM/.test(x)), istisna.join(' | '));
       return __REG.al();
     })
   },
@@ -2945,7 +2951,7 @@ const CASELER = [
     kod: 'AN3-MADALYA', ad: 'SPRINT AN: madalyalı örnekler ÖRNEK olarak sunuluyor — "kural değil" + "elenen reçeteler bu veride yok" çerçevesi + örneklem sayısı ŞEFFAF (gizlenmiyor)',
     calistir: (page) => page.evaluate(() => {
       const M = window._TOPLULUK_MADALYA;
-      __REG.ok('madalya tablosu yüklü (CC: 89 stil — 45 idi; ≤3 sınırı + genel etiket eşlemesi kalktı)', !!M && Object.keys(M).length === 89, M && Object.keys(M).length);
+      __REG.ok('madalya tablosu yüklü (CC: 89 stil — 45 idi; ≤3 sınırı + genel etiket eşlemesi kalktı; AI1: Saison table/super +2 → 91)', !!M && Object.keys(M).length === 91, M && Object.keys(M).length);
       __REG.ok('toplam = altın+gümüş+bronz (sayım tutarlı)', Object.values(M).every(v => v[0][0] === v[0][1] + v[0][2] + v[0][3]));
       __REG.ok('stil başına en çok 50 örnek (CC üst sınırı)', Object.values(M).every(v => v[1].length >= 1 && v[1].length <= window._BM_ORNEK_MAX) && window._BM_ORNEK_MAX === 50);
       __REG.ok('gösterilen ≤ mevcut (şişirme yok)', Object.values(M).every(v => v[1].length <= v[0][0]));
@@ -4316,7 +4322,7 @@ const CASELER = [
     kod: 'AW1-ORNEK', ad: 'SPRINT AW: MADALYALI ÖRNEKTEN REÇETE — örnek satırından yeni reçete: AV yolu + iskelet, örneğin OG/IBU\'su ölçek hedefi olur, orijinal grist/hop/maya METNİ not alanına AYNEN yazılır; gramaj/oran UYDURULMAZ, ad ödül iması taşımaz',
     calistir: (page) => page.evaluate(() => {
       const M = window._TOPLULUK_MADALYA;
-      __REG.ok('89 madalya anahtarının HEPSİ BJCP otoritesinde (buton hiçbir stilde ölü değil)', Object.keys(M).length === 89 && Object.keys(M).every(k => !!BJCP[k]), Object.keys(M).filter(k => !BJCP[k]).join(','));
+      __REG.ok('91 madalya anahtarının HEPSİ BJCP otoritesinde (buton hiçbir stilde ölü değil; AI1 Saison table/super dahil)', Object.keys(M).length === 91 && Object.keys(M).every(k => !!BJCP[k]), Object.keys(M).filter(k => !BJCP[k]).join(','));
       __REG.yeniKayit('REGTEST AW1', {});
       S.hacim = 10; S.verim = 45; tarifeKaydet();
       // CC: eski M[stil][1][0] (2024, OG 1.071, %7,5) Specialty-kategorisi "Sticke Alt" altınıydı — Altbier bandı dışında; çözücü onu
@@ -9629,7 +9635,7 @@ const CASELER = [
         'Belgian Blonde Ale': [67, '25A', { og: [1.062, 1.075], fg: [1.008, 1.018], ibu: [15, 30], srm: [4, 6], abv: [6.0, 7.5] }],
         'Best Bitter': [35, '11B', { og: [1.040, 1.048], fg: [1.008, 1.012], ibu: [25, 40], srm: [8, 16], abv: [3.8, 4.6] }],
         'International Amber Lager': [19, '2B', { og: [1.042, 1.055], fg: [1.008, 1.014], ibu: [8, 25], srm: [6, 14], abv: [4.5, 6.0] }],
-        'Saison / Farmhouse Ale': [68, '25B (standart, açık)', { og: [1.048, 1.065], fg: [1.002, 1.008], ibu: [20, 35], srm: [5, 14], abv: [5.0, 7.0] }]
+        'Saison / Farmhouse Ale': [68, '25B (standart; AI1: renk açık 5–14 + koyu 15–22)', { og: [1.048, 1.065], fg: [1.002, 1.008], ibu: [20, 35], srm: [5, 22], abv: [5.0, 7.0] }]
       };
       const B = await page.evaluate(() => BJCP);
       const kotu = Object.keys(K).filter(s => ['og', 'fg', 'ibu', 'srm', 'abv'].some(a => !B[s] || Math.abs(B[s][a][0] - K[s][2][a][0]) > 1e-9 || Math.abs(B[s][a][1] - K[s][2][a][1]) > 1e-9));
@@ -9691,6 +9697,259 @@ const CASELER = [
       const n0 = KR.length; window._bmIskeletStokumla('Weizenbock');
       __REG.ok('Weizenbock iskeleti stoğumla: Carafa III tek satır + notta birleştirme cümlesi', crf.length <= 1 && (p.birlesen.length === 0 || /satırları tek satırda birleştirildi/.test(S.notlar)) && KR.length === n0 + 1, crf.length + ' satır · ' + JSON.stringify(p.birlesen));
       STOK.length = 0; y0.forEach(x => STOK.push(x));
+      return __REG.al();
+    })
+  },
+  // ═════════════ SPRINT AI1 — SAISON 3 GÜÇ · AI REÇETECİ (beta, mock; gerçek anahtar YOK) ═════════════
+  {
+    kod: 'AI1-SAISON', ad: 'SAISON 3 GÜÇ (madde 1): BJCP 2021 25B table 3,5–5,0 / standard 5,0–7,0 / super 7,0–9,5 ABV · IBU 20–35 · SRM 5–22 (açık+koyu) · kaynak yorumu satırda · örnekler ABV\'sine göre güce düşer (sınır 5,0 ve 7,0 standard; ABV yoksa OG/FG\'den)',
+    calistir: (page) => page.evaluate(() => {
+      const B = BJCP, t = B['Saison (table)'], s = B['Saison / Farmhouse Ale'], u = B['Saison (super)'];
+      __REG.ok('üç satır var, ABV PDF bantları', !!t && !!s && !!u && t.abv.join() === '3.5,5' && s.abv.join() === '5,7' && u.abv.join() === '7,9.5', JSON.stringify([t && t.abv, s && s.abv, u && u.abv]));
+      __REG.ok('IBU 20–35 ve SRM 5–22 üçünde de (PDF; renk açık+koyu birleşimi)', [t, s, u].every(x => x.ibu.join() === '20,35' && x.srm.join() === '5,22'));
+      __REG.ok('standard OG/FG PDF (1,048–1,065 / 1,002–1,008)', s.og.join() === '1.048,1.065' && s.fg.join() === '1.002,1.008');
+      __REG.ok('table/super OG = FG + ABV/131,25 türetimi (1,029–1,046 / 1,055–1,080)', t.og.join() === '1.029,1.046' && u.og.join() === '1.055,1.08');
+      const html = document.documentElement.outerHTML;
+      __REG.ok('kaynak yorumu satırın yanında (25B, PDF s.51, TÜRETİLMİŞ notu)', /"Saison \(table\)":[^\n]*BJCP 2021 25B Saison TABLE güç \(PDF s\.51\)[^\n]*TÜRETİLMİŞ/.test(html) && /"Saison \(super\)":[^\n]*SUPER güç \(PDF s\.51\)/.test(html));
+      const g = window._bmSaisonGuc, S0 = 'Saison / Farmhouse Ale';
+      __REG.ok('güç seçici sınırları: 4,99 table · 5,0 standard · 7,0 standard · 7,01 super · ABV yok → OG/FG · ikisi yok → standard · başka stil dokunulmaz',
+        g(S0, 4.99) === 'Saison (table)' && g(S0, 5) === S0 && g(S0, 7) === S0 && g(S0, 7.01) === 'Saison (super)' && g(S0, null, 1.061, 1.006) === 'Saison (super)' && g(S0, null, null, null) === S0 && g('Dubbel', 9) === 'Dubbel');
+      const M = window._TOPLULUK_MADALYA, N = window._NHC_MADALYA, ab = o => +o.ab > 0 ? +o.ab : (o.og && o.fg ? (o.og - o.fg) * 131.25 : null);
+      const kotu = [];
+      [['Saison (table)', t], [S0, s], ['Saison (super)', u]].forEach(([st, b]) => [M[st], N[st]].forEach(T => ((T && T[1]) || []).forEach(o => { const a = ab(o); if (a != null && (a < b.abv[0] - 1e-9 || a > b.abv[1] + 1e-9)) kotu.push(st + ' ' + a); })));
+      __REG.ok('örnek tablolarında her Saison örneği kendi gücünün ABV bandında', !kotu.length && !!(M['Saison (table)'] && M['Saison (super)']), kotu.join(' | '));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AI1-PAKET', ad: 'BİLGİ PAKETİ (madde 2): her parçanın ID\'si (rec / secenek / hes / kat / muadil / bjcp / stok / isk) · satırlarda katalog [tip:id] · TAVAN aşılınca en az ilgili parçalar düşer ve raporlanır, öncelik 1-2 asla düşmez · prompt önbelleği KAPALI',
+    calistir: (page) => page.evaluate(() => {
+      const A1 = window.BM_AI1, T = { tur: 'recete', stil: 'Schwarzbier', ad: 'x', key: 'recete', tarif: { maltlar: [{ id: 'pilsner', kg: 1.6 }, { id: 'munich', kg: 1 }, { id: 'crf3', kg: 0.13 }], hoplar: [{ id: 'magnum', g: 10, tur: 'boil', dk: 60 }], katkilar: [], mayaId: 'w3470', hacim: 11, verim: 61, mashSc: 67 } };
+      const deg = A1.degisiklikKur(T, { islem: 'degistir', kalem: 'malt:2', yeni_kalem: 'siyah buğday maltı', miktar: 0, birim: '' });
+      __REG.ok('değişiklik kuruldu: crf3 → black_wheat (GU eşitliği varsayımı yazılı)', deg.ok && deg.eskiId === 'crf3' && deg.yeniId === 'black_wheat' && /GU eşitliği/.test(deg.varsayim.join()), JSON.stringify(deg.neden || deg.varsayim));
+      const hk = A1.hukum('Schwarzbier', deg), o = { T, deg, hk, ab: { A: 'once', B: 'sonra' }, mod: 'ab' }, P = A1.paket(o), ids = Object.keys(P.byId);
+      const bek = ['rec:ozet', 'rec:ortak', 'secenek:A', 'secenek:B', 'hes:og_A', 'hes:srm_B', 'kat:crf3', 'kat:black_wheat', 'bjcp:Schwarzbier', 'muadil:crf3:black_wheat', 'kat:pilsner'];
+      __REG.ok('beklenen parça ID\'leri pakette', bek.every(i => ids.includes(i)), bek.filter(i => !ids.includes(i)).join(','));
+      __REG.ok('metinde her parça [ID] başlığıyla; satırlar [tip:id] taşır', /\[kat:crf3\] Katalog/.test(P.metin) && /\[malt:pilsner\]/.test(P.metin) && /\[malt:black_wheat\]/.test(P.metin));
+      __REG.ok('hes parçalarında SAYI YOK, yalnız yer tutucu', Object.values(P.byId).filter(p => /^hes:/.test(p.id)).every(p => /\{[A-Z]+_[AB]\}/.test(p.metin) && !/\d/.test(p.metin.replace(/\{[^}]*\}/g, ''))));
+      const K = A1.paket(Object.assign({}, o, { tavan: 300 }));
+      __REG.ok('küçük tavanda düşük öncelikli parçalar DÜŞER ve listelenir (kat:pilsner gibi)', K.dusen.includes('kat:pilsner') && !K.byId['kat:pilsner'] && K.dusen.length > 0, K.dusen.join(','));
+      __REG.ok('öncelik 1-2 (reçete, seçenek, hesap, ilgili katalog, BJCP, muadil) tavanda bile kalır', ['rec:ortak', 'secenek:A', 'secenek:B', 'hes:srm_A', 'kat:crf3', 'kat:black_wheat', 'bjcp:Schwarzbier'].every(i => K.byId[i]));
+      __REG.ok('varsayılan tavan tanımlı ve paket tahmini token taşır', A1.TAVAN_TOK > 0 && P.tok > 0 && P.tok <= A1.TAVAN_TOK + 2000);
+      const g = window.BM_AI.istekKur('asistan', P.metin, 'x').govde;
+      __REG.ok('asistan isteğinde prompt önbelleği YOK (BW2 kararı)', !JSON.stringify(g).includes('cache_control'));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AI1-SEMA', ad: 'ÇIKTI ŞEMASI + YER TUTUCU (madde 3): katman enum veri/hesap/yorum/bilmiyorum · ton enum · oneri_taslak · hesap metni yer tutucuyla dolar, tanınmayan yer tutucu ya da rakamlı hesap iddiası DÜŞER',
+    calistir: (page) => page.evaluate(() => {
+      const A1 = window.BM_AI1, sm = A1.sema().schema;
+      __REG.ok('şema: iddialar[metin, katman enum, dayanak_id?] + ton enum + oneri_taslak', JSON.stringify(sm.properties.iddialar.items.properties.katman.enum) === '["veri","hesap","yorum","bilmiyorum"]' && JSON.stringify(sm.properties.ton.enum) === '["olumlu","olumsuz","notr"]' && sm.required.join() === 'iddialar,ton' && !!sm.properties.oneri_taslak && sm.properties.iddialar.items.required.join() === 'metin,katman');
+      const T = { tarif: { hacim: 11 } }, hk = { once: { og: 1.05, fg: 1.01, abv: 5.2, ibu: 25, srm: 20 }, sonra: { og: 1.051, fg: 1.01, abv: 5.3, ibu: 25, srm: 31.4 } };
+      const o = { T, hk, ab: { A: 'sonra', B: 'once' }, mod: 'ab', paket: { byId: {} } };
+      const a = A1.iddiaDenetle({ metin: 'Renk {SRM_A} olur, mevcut {SRM_B}.', katman: 'hesap', dayanak_id: 'hes:srm_A' }, o);
+      __REG.ok('yer tutucu uygulama sayısıyla dolar (A=değişiklik 31,4 · B=mevcut 20,0)', a.durum === 'ok' && /31,4 \(değişiklik\)/.test(a.goster) && /20,0 \(mevcut\)/.test(a.goster), a.goster);
+      const b = A1.iddiaDenetle({ metin: 'Köpük {KOPUK_A} olur.', katman: 'hesap' }, o), c = A1.iddiaDenetle({ metin: 'Renk {SRM_C}.', katman: 'hesap' }, o), d = A1.iddiaDenetle({ metin: 'Renk 31 SRM olur ({SRM_A}).', katman: 'hesap' }, o), e = A1.iddiaDenetle({ metin: 'Renk koyulaşır.', katman: 'hesap' }, o);
+      __REG.ok('tanınmayan yer tutucu ({KOPUK_A}, {SRM_C}) → iddia DÜŞER', b.durum === 'dusuruldu' && c.durum === 'dusuruldu' && /tanınmayan/.test(b.neden), b.neden + ' | ' + c.neden);
+      __REG.ok('hesap katmanında rakam → DÜŞER; yer tutucusuz hesap → DÜŞER', d.durum === 'dusuruldu' && /sayı yazılmış/.test(d.neden) && e.durum === 'dusuruldu');
+      const h = A1.iddiaDenetle({ metin: 'OG {OG} ve SRM {SRM}.', katman: 'hesap' }, { T, mod: 'ham', mevcut: hk.once, paket: { byId: {} } });
+      __REG.ok('ham modda {OG}/{SRM} mevcut reçeteyle dolar; A/B eki ham modda tanınmaz', h.durum === 'ok' && /1,050/.test(h.goster) && A1.iddiaDenetle({ metin: '{OG_A}', katman: 'hesap' }, { T, mod: 'ham', mevcut: hk.once, paket: { byId: {} } }).durum === 'dusuruldu');
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AI1-VERI-SAYI', ad: 'VERİ İDDİASI DENETİMİ (madde 3): dayanak_id ZORUNLU ve pakette olmalı · metindeki sayı o parçanın verisiyle (birim çevirisiyle: g/L↔g, °L↔EBC, puan) tutmalı · tutmazsa ÜSTÜ ÇİZİLİ + "AI yanlış değer söyledi"',
+    calistir: (page) => page.evaluate(() => {
+      const A1 = window.BM_AI1, p = { id: 'kat:lavanta', metin: 'Lavanta · varsayılan doz 0,50 g/L · azami doz 1,50 g/L' }, o = { T: { tarif: { hacim: 11 } }, mod: 'ab', paket: { byId: { 'kat:lavanta': p, 'bjcp:Dubbel': { id: 'bjcp:Dubbel', metin: 'Dubbel: OG 1.062–1.075 · SRM 10–17' } } } };
+      const ok1 = A1.iddiaDenetle({ metin: 'Katalog varsayılan dozu 0,5 g/L, azami 1,5 g/L.', katman: 'veri', dayanak_id: 'kat:lavanta' }, o);
+      const ok2 = A1.iddiaDenetle({ metin: '11 L için azami 16,5 g.', katman: 'veri', dayanak_id: 'kat:lavanta' }, o);
+      const ok3 = A1.iddiaDenetle({ metin: 'Dubbel OG alt sınırı 62 puan.', katman: 'veri', dayanak_id: 'bjcp:Dubbel' }, o);
+      __REG.ok('doğru sayı (aynen / hacimle çarpılmış / gravite puanı) → geçer', ok1.durum === 'ok' && ok2.durum === 'ok' && ok3.durum === 'ok', [ok1.neden, ok2.neden, ok3.neden].join(' | '));
+      const y1 = A1.iddiaDenetle({ metin: 'Azami doz 4 g/L.', katman: 'veri', dayanak_id: 'kat:lavanta' }, o), y2 = A1.iddiaDenetle({ metin: 'Azami doz 1,5 g/L.', katman: 'veri' }, o), y3 = A1.iddiaDenetle({ metin: 'Azami 1,5 g/L.', katman: 'veri', dayanak_id: 'kat:yok' }, o);
+      __REG.ok('yanlış sayı → yanlis (4 pakette yok)', y1.durum === 'yanlis' && /4/.test(y1.neden), y1.neden);
+      __REG.ok('dayanaksız ya da pakette olmayan dayanak → yanlis', y2.durum === 'yanlis' && /dayanak yok/.test(y2.neden) && y3.durum === 'yanlis' && /pakette yok/.test(y3.neden));
+      const st = { durum: 'tamam', soru: 'x', maliyet: 0, o: { mod: 'ham', paket: { tok: 1, dusen: [] }, hk: null }, cikarim: { neden: 'test' }, sonuc: { kumeler: [{ goster: y1, tutarlilik: 'tutarli', destek: 3 }], gizli: 0, dusen: [], n: 3, ana: 'tutarli', tonlar: [], celiski: false, hatalar: [], bayraklar: [] } };
+      A1.durum.__t = st; const html = A1.kartHTML('__t'); delete A1.durum.__t;
+      __REG.ok('kartta ÜSTÜ ÇİZİLİ + "AI yanlış değer söyledi"', /<s>Azami doz 4 g\/L\.<\/s>/.test(html) && /AI yanlış değer söyledi/.test(html));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AI1-AN5', ad: 'AN5-DIL (madde 3): yasak liste "veri" ve "hesap" katmanında AYNEN geçerli (işaret) · "yorum" katmanında değer ifadesi SERBEST (etiketli) · yorum "💬 Bu benim yorumum, doğrulanmadı" etiketiyle',
+    calistir: (page) => page.evaluate(() => {
+      const A1 = window.BM_AI1, o = { T: { tarif: { hacim: 11 } }, mod: 'ab', ab: { A: 'once', B: 'sonra' }, hk: { once: { og: 1.05, fg: 1.01, abv: 5, ibu: 20, srm: 10 }, sonra: { og: 1.05, fg: 1.01, abv: 5, ibu: 20, srm: 10 } }, paket: { byId: { 'bjcp:X': { id: 'bjcp:X', metin: 'X: SRM 10–17' } } } };
+      const v = A1.iddiaDenetle({ metin: 'SRM bandı 10–17; bu seçenek daha iyi.', katman: 'veri', dayanak_id: 'bjcp:X' }, o), h = A1.iddiaDenetle({ metin: 'Renk {SRM_B} ile ideal.', katman: 'hesap' }, o), y = A1.iddiaDenetle({ metin: 'Bence bu daha iyi ve ideal olur.', katman: 'yorum' }, o);
+      __REG.ok('veri katmanında "daha iyi" İŞARETLENDİ', v.uyari.some(u => /daha iyi/.test(u)), v.uyari.join());
+      __REG.ok('hesap katmanında "ideal" İŞARETLENDİ', h.uyari.some(u => /ideal/.test(u)), h.uyari.join());
+      __REG.ok('yorum katmanında değer ifadesi SERBEST (AN5 işareti yok)', !y.uyari.some(u => /Kalite iddiası/.test(u)) && y.durum === 'ok', y.uyari.join());
+      const st = { durum: 'tamam', soru: 'x', maliyet: 0, o: { mod: 'ham', paket: { tok: 1, dusen: [] }, hk: null }, cikarim: { neden: 'test' }, sonuc: { kumeler: [{ goster: y, tutarlilik: 'tutarli', destek: 3 }], gizli: 0, dusen: [], n: 3, ana: 'tutarli', tonlar: [], celiski: false, hatalar: [], bayraklar: [] } };
+      A1.durum.__t = st; const html = A1.kartHTML('__t'); delete A1.durum.__t;
+      __REG.ok('yorum kartta "💬 Bu benim yorumum, doğrulanmadı" etiketiyle', /💬 Bu benim yorumum, doğrulanmadı/.test(html) && /data-katman="yorum"/.test(html));
+      __REG.ok('uygulamanın AN5 listesi tek kaynak (BM_AI.yasakTara)', window.BM_AI.yasakTara('daha iyi').length === 1);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AI1-TARAFSIZ', ad: 'TARAFSIZLAŞTIRMA (madde 4): ucuz model (esleme) yapılandırılmış değişikliği çıkarır · ana çağrıya HAM soru GİTMEZ, "Seçenek A / B" gider, sıra RASTGELE · pakette ve soruda kimin fikri olduğu YOK · "önce riskler sonra faydalar" · çıkarım başarısızsa ham soru yalakalık-karşıtı talimatla',
+    calistir: (page) => page.evaluate(async () => {
+      const A1 = window.BM_AI1; __REG.yeniKayit('REGTEST AI1 tarafsiz', {});
+      S.stil = 'Schwarzbier'; S.hacim = 11; S.verim = 61; S.maltlar = [{ id: 'pilsner', kg: 1.6 }, { id: 'munich', kg: 1 }, { id: 'crf3', kg: 0.13 }]; S.hoplar = [{ id: 'magnum', g: 10, tur: 'boil', dk: 60 }]; S.mayaId = 'w3470';
+      const SORU = 'Kaan olarak bence Carafa yerine siyah buğday koymak harika olur, değil mi?';
+      const cev = { iddialar: [{ metin: 'Renk {SRM_A} / {SRM_B}.', katman: 'hesap', dayanak_id: 'hes:srm_A' }], ton: 'notr' };
+      const kos = async (rnd) => { const m = __REG.ai1Mock({ esleme: { islem: 'degistir', kalem: 'malt:2', yeni_kalem: 'siyah buğday maltı', miktar: 0, birim: '' }, asistan: cev }); A1.rastgele = () => rnd;
+        try { await A1.sor({ tur: 'recete' }, SORU); return { log: m.log, st: A1.durum.recete }; } finally { m.geri(); A1.rastgele = Math.random; } };
+      const r1 = await kos(0.2), r2 = await kos(0.8);
+      const as1 = r1.log.filter(p => p.kullanim === 'asistan'), as2 = r2.log.filter(p => p.kullanim === 'asistan');
+      __REG.ok('akış: 1 esleme (ucuz) + ' + A1.ORNEKLEME + ' asistan', r1.log[0].kullanim === 'esleme' && as1.length === A1.ORNEKLEME && r1.st.o.mod === 'ab');
+      __REG.ok('esleme çağrısı ham soruyu görür (çıkarım için), asistan GÖRMEZ', r1.log[0].soru.includes('harika') && as1.every(p => !p.soru.includes('harika') && !p.baglam.includes('harika') && !p.soru.includes('siyah buğday koymak')));
+      const kimlik = /Kaan|kullanıcının (fikri|önerisi|seçimi)|önerdiği|mevcut reçete|değişiklik önerisi|önce\/sonra/i;
+      __REG.ok('asistan paketinde/sorusunda kimin fikri olduğu YOK', as1.concat(as2).every(p => !kimlik.test(p.baglam) && !kimlik.test(p.soru)), (as1[0].baglam.match(kimlik) || as1[0].soru.match(kimlik) || [''])[0]);
+      const sec = (log) => { const b = log[0].baglam; return /\[secenek:A\][^\n]*\n([^\n]*)/.exec(b)[1]; };
+      __REG.ok('sıra RASTGELE: rastgele 0,2 → A = mevcut (Carafa), 0,8 → A = değişiklik (siyah buğday)', /Carafa/.test(sec(as1)) && /Siyah Buğday/.test(sec(as2)) && r1.st.o.ab.A === 'once' && r2.st.o.ab.A === 'sonra');
+      __REG.ok('soru "önce riskler, sonra faydalar" + "ikisi de eşit derecede olası"', /ÖNCE riskleri/.test(as1[0].soru) && /eşit derecede olası/.test(as1[0].soru));
+      const m3 = __REG.ai1Mock({ esleme: { islem: 'yok', kalem: '', yeni_kalem: '', miktar: 0, birim: '' }, asistan: cev });
+      try { await A1.sor({ tur: 'recete' }, 'Bu reçete güzel mi?'); } finally { m3.geri(); }
+      const h = m3.log.filter(p => p.kullanim === 'asistan')[0];
+      __REG.ok('çıkarım başarısız → ham soru + yalakalık-karşıtı talimat ("hak vermek için cevap verme")', A1.durum.recete.o.mod === 'ham' && /Bu reçete güzel mi\?/.test(h.soru) && /hak vermek için cevap verme/.test(h.soru) && /ÖNCE riskleri/.test(h.soru));
+      const ad = [['siyah buğday maltı', 'black_wheat'], ['lavanta', 'lavanta'], ['Saaz', 'saaz'], ['Carafa Special III', 'crf3'], ['Pilsner Malt', 'pilsner']];
+      __REG.ok('katalog çözücü örnek adları doğru kayda bağlar (uydurma yok)', ad.every(([n, id]) => (A1.kalemBul(n) || {}).id === id) && A1.kalemBul('uzaylı maltı xyz') === null, ad.map(([n]) => n + '→' + (A1.kalemBul(n) || {}).id).join(', '));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AI1-HUKUM', ad: 'HÜKÜM UYGULAMADAN (madde 4): AI "olur / olumlu" dese de hüküm BANT DIŞI kalır (aynı hüküm, AI cevabından bağımsız) · ton olumlu + değişikliğin riski → "AI ile hesap çelişiyor — hesap esas" · önceden de bant dışı olan eksen çelişki sayılmaz',
+    calistir: (page) => page.evaluate(async () => {
+      const A1 = window.BM_AI1; __REG.yeniKayit('REGTEST AI1 hukum', {});
+      S.stil = 'Schwarzbier'; S.hacim = 11; S.verim = 61; S.maltlar = [{ id: 'pilsner', kg: 1.6 }, { id: 'munich', kg: 1 }, { id: 'crf3', kg: 0.13 }]; S.hoplar = [{ id: 'magnum', g: 10, tur: 'boil', dk: 60 }]; S.mayaId = 'w3470';
+      const es = { islem: 'miktar', kalem: 'malt:2', yeni_kalem: '', miktar: 700, birim: 'g' };
+      A1.rastgele = () => 0.2; /* A = mevcut, B = değişiklik → mock tonu A→B yönünde */
+      const kos = async (ton, yorum) => { const m = __REG.ai1Mock({ esleme: es, asistan: { iddialar: [{ metin: yorum, katman: 'yorum' }], ton: ton } }); try { await A1.sor({ tur: 'recete' }, 'Carafa 700 g olsa olur mu?'); return A1.durum.recete; } finally { m.geri(); } };
+      const a = await kos('olumlu', 'Olur, gayet güzel olur.'), aHk = JSON.stringify(a.o.hk), aCel = a.sonuc.celiski;
+      const b = await kos('olumsuz', 'Olmaz.');
+      __REG.ok('SRM banttan çıkar → hüküm RİSK', a.o.hk.seviye === 'risk' && a.o.hk.satirlar.some(s => /bandı dışına çıkar: SRM/.test(s)), a.o.hk.satirlar.join(' | '));
+      __REG.ok('hüküm AI cevabından BAĞIMSIZ (olumlu ve olumsuz AI → aynı hüküm)', aHk === JSON.stringify(b.o.hk));
+      __REG.ok('ton olumlu + risk → çelişki uyarısı; ton olumsuz → yok', aCel === true && b.sonuc.celiski === false);
+      A1.durum.recete = a; const html = A1.kartHTML('recete');
+      __REG.ok('kartta hüküm başta + "AI ile hesap çelişiyor — hesap esas"', html.indexOf('bm-ai1-hukum') >= 0 && html.indexOf('bm-ai1-hukum') < html.indexOf('bm-ai1-bolum') && /AI ile hesap çelişiyor — hesap esas/.test(html));
+      const T = A1.baglamTarif({ tur: 'recete' }), d2 = A1.degisiklikKur(T, { islem: 'degistir', kalem: 'malt:2', yeni_kalem: 'siyah buğday maltı', miktar: 0, birim: '' }), h2 = A1.hukum('Schwarzbier', d2);
+      __REG.ok('kaynaklı ✅ muadil + yalnız önceden bant dışı eksen → değişiklik riski YOK (çelişki tetiklenmez)', h2.derece === '✅' && h2.degRisk === false, JSON.stringify({ d: h2.derece, s: h2.seviye }));
+      const T3 = { stil: 'Dubbel', tarif: { maltlar: [{ id: 'pilsner', kg: 3 }], hoplar: [], katkilar: [], mayaId: null, hacim: 10, verim: 61, mashSc: 67 } }, d3 = A1.degisiklikKur(T3, { islem: 'ekle', kalem: '', yeni_kalem: 'lavanta', miktar: 40, birim: 'g' }), h3 = A1.hukum('Dubbel', d3);
+      A1.rastgele = () => 0.8; const c2 = await kos('olumsuz', 'Olmaz.');
+      __REG.ok('sıra ters (A = değişiklik): AI "A→B olumsuz" = değişiklik yönünde olumlu → çelişki yine yakalanır', c2.sonuc.celiski === true && c2.sonuc.ton === 'olumlu' && JSON.stringify(c2.o.hk) === aHk);
+      A1.rastgele = Math.random;
+      __REG.ok('katkı dozu katalog azamisini aşınca RİSK (4 g/L > 1,5)', h3.seviye === 'risk' && h3.satirlar.some(s => /azami dozunu aşar/.test(s)));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AI1-TUTARLI', ad: 'ÇOKLU ÖRNEKLEME (madde 5): 3/3 tutarlı gösterilir · 2/3 "kısmen tutarlı" işaretli · 1/3 gösterilmez (sayılır) · ana mesaj üçünde farklıysa "AI bu konuda emin değil" · yanlış sayılı üye kümeyi yanlış işaretler',
+    calistir: (page) => page.evaluate(() => {
+      const A1 = window.BM_AI1, o = { T: { tarif: { hacim: 11 } }, mod: 'ham', mevcut: { og: 1.05, fg: 1.01, abv: 5, ibu: 20, srm: 10 }, paket: { byId: { 'kat:x': { id: 'kat:x', metin: 'X · azami doz 1,50 g/L' } }, tok: 1, dusen: [] } };
+      const r = (ton, L) => ({ ok: true, veri: { ton, iddialar: L }, bayraklar: [] });
+      const ortak = { metin: 'Lavanta parfümsü notayla baskın olabilir.', katman: 'yorum' }, iki = { metin: 'Köpük tutuculuğu buğday proteiniyle artabilir.', katman: 'yorum' }, tek = { metin: 'Tamamen alakasız bir cümle burada.', katman: 'yorum' };
+      const v1 = { metin: 'Azami doz 1,5 g/L.', katman: 'veri', dayanak_id: 'kat:x' }, v2 = { metin: 'Azami doz 9 g/L.', katman: 'veri', dayanak_id: 'kat:x' };
+      const s = A1.birlestir([r('notr', [ortak, iki, tek, v1]), r('notr', [ortak, iki, v2]), r('notr', [Object.assign({}, ortak, { metin: 'Lavanta parfümsü baskın nota bırakabilir.' }), v1])], o);
+      const bul = re => s.kumeler.find(c => re.test(c.goster.metin) || c.uyeler.some(u => re.test(u.metin)));
+      __REG.ok('3/3 → tutarlı (benzer ifade eşleşir)', bul(/parfümsü/) && bul(/parfümsü/).tutarlilik === 'tutarli', s.kumeler.map(c => c.destek + ':' + c.goster.metin.slice(0, 20)).join(' | '));
+      __REG.ok('2/3 → kısmen', bul(/Köpük/) && bul(/Köpük/).tutarlilik === 'kismen');
+      __REG.ok('1/3 → gösterilmez, sayılır', !bul(/alakasız/) && s.gizli === 1);
+      __REG.ok('veri kümesinde bir üye yanlışsa küme YANLIŞ işaretli gösterilir', bul(/Azami doz/) && bul(/Azami doz/).goster.durum === 'yanlis');
+      const e = A1.birlestir([r('olumlu', [ortak]), r('olumsuz', [ortak]), r('notr', [ortak])], o), k = A1.birlestir([r('olumlu', [ortak]), r('olumlu', [ortak]), r('notr', [ortak])], o);
+      __REG.ok('ana mesaj üçünde farklı → emin değil; 2/3 → kısmen; 3/3 → tutarlı', e.ana === 'emin_degil' && k.ana === 'kismen' && s.ana === 'tutarli');
+      A1.durum.__t = { durum: 'tamam', soru: 'x', maliyet: 0, o: Object.assign({ hk: null }, o), cikarim: { neden: 't' }, sonuc: e }; const html = A1.kartHTML('__t'); delete A1.durum.__t;
+      __REG.ok('kartta "AI bu konuda emin değil"', /AI bu konuda emin değil/.test(html));
+      __REG.ok('başarısız çağrı sayılır; tek başarılı örneklem → emin değil', A1.birlestir([r('notr', [ortak]), { ok: false, hata: { mesaj: 'x' } }, null], o).ana === 'emin_degil');
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AI1-TASLAK', ad: 'YENİ REÇETE TASLAĞI (madde 6): her id katalogda doğrulanır — yoksa "eşlenemedi" (uydurulmaz, reçeteye girmez) · uygulama kendi hesabıyla OG/FG/IBU/SRM/ABV + stil uygunluğu · stok durumu UYG motoruyla',
+    calistir: (page) => page.evaluate(() => {
+      const A1 = window.BM_AI1, T = { stil: 'Dubbel', tarif: { hacim: 11, verim: 61, mashSc: 67 } };
+      const d = A1.taslakDogrula([{ tip: 'malt', id: 'pilsner', miktar: 3200, birim: 'g', zaman: '', kullanim: 'mash' }, { tip: 'malt', id: 'uydurma_malt_9', miktar: 1, birim: 'kg', zaman: '', kullanim: 'mash' }, { tip: 'hop', id: 'styrian', miktar: 20, birim: 'g', zaman: '60', kullanim: 'kaynatma' }, { tip: 'maya', id: 'wy3787', miktar: 1, birim: 'paket', zaman: '', kullanim: 'fermantasyon' }, { tip: 'katki', id: 'lavanta', miktar: 0, birim: 'g', zaman: '', kullanim: 'kaynatma' }], T);
+      const uy = d.satirlar.find(r => r.id === 'uydurma_malt_9');
+      __REG.ok('geçersiz id → "eşlenemedi", reçeteye GİRMEDİ', uy && uy.durum === 'eslenemedi' && !d.tarif.maltlar.some(m => m.id === 'uydurma_malt_9') && d.eslenemedi === 2, JSON.stringify(d.satirlar.map(r => r.id + ':' + r.durum)));
+      __REG.ok('geçerli satırlar birim çevrilerek kuruldu (3200 g → 3,2 kg; hop 60 dk kaynatma)', d.tarif.maltlar[0].kg === 3.2 && d.tarif.hoplar[0].tur === 'boil' && d.tarif.hoplar[0].dk === 60 && d.tarif.mayaId === 'wy3787');
+      __REG.ok('uygulama hesabı + Dubbel uygunluğu (5 eksen)', !!d.hesap && d.uyum.length === 5 && d.uyum.every(u => typeof u.ic === 'boolean'));
+      __REG.ok('her geçerli satırda stok durumu (UYG motoru)', d.satirlar.filter(r => r.durum === 'ok').every(r => typeof r.stok === 'string' && r.stok.length));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AI1-YENI', ad: '"YENİ REÇETE OLARAK AÇ" (madde 5-6): denetim çağrısı önce (yalnız iddialar + paket) · KAAN basar · her zaman YENİ reçete (açık reçete korunur, ÜSTÜNE YAZMAZ) · S.kaynak="ai" · notta "AI önerisiyle oluşturuldu" + tarih · stil öğrenme sinyali YAZILMAZ',
+    calistir: (page) => page.evaluate(async () => {
+      const A1 = window.BM_AI1, id0 = __REG.yeniKayit('REGTEST AI1 yeni', {});
+      S.stil = 'Schwarzbier'; S.hacim = 11; S.verim = 61; S.maltlar = [{ id: 'pilsner', kg: 1.6 }, { id: 'munich', kg: 1 }, { id: 'crf3', kg: 0.13 }]; S.hoplar = [{ id: 'magnum', g: 10, tur: 'boil', dk: 60 }]; S.mayaId = 'w3470'; tarifeKaydet();
+      const once = JSON.stringify(KR.find(k => k.id === id0).maltlar), n0 = KR.length, z0 = window._bmStilOgrenOku().length;
+      const m = __REG.ai1Mock({ esleme: { islem: 'degistir', kalem: 'malt:2', yeni_kalem: 'siyah buğday maltı', miktar: 0, birim: '' }, asistan: { iddialar: [{ metin: 'Renk {SRM_A} / {SRM_B}.', katman: 'hesap' }], ton: 'notr', oneri_taslak: [] }, denetim: { bulgular: [{ iddia_no: 1, tur: 'dayanaksiz', aciklama: 'test bulgusu' }], ozet: 'ok' } });
+      let yeniId;
+      try {
+        await A1.sor({ tur: 'recete' }, 'Carafa yerine siyah buğday?');
+        __REG.ok('denetimden ÖNCE "yeni reçete" düğmesi yok (yalnız "önce denetle" düğmesi)', !/bm-ai1-yeni-btn/.test(A1.kartHTML('recete')) && /bm-ai1-taslak-btn/.test(A1.kartHTML('recete')));
+        __REG.ok('cevap gelince KR değişmedi (çıktı otomatik uygulanmaz)', KR.length === n0 && JSON.stringify(KR.find(k => k.id === id0).maltlar) === once);
+        await A1.taslakOnizle('recete');
+        const den = m.log.find(p => p.kullanim === 'denetim');
+        __REG.ok('denetim çağrısı: yalnız iddialar + paket (ham soru yok)', !!den && /İDDİALAR:/.test(den.soru) && !/Carafa yerine siyah buğday\?/.test(den.soru) && /\[rec:ortak\]/.test(den.baglam));
+        __REG.ok('önizlemede bulgu + "AI önerisi/uygulama" etiketi + yeni düğmesi', /test bulgusu/.test(A1.kartHTML('recete')) && /bm-ai1-ai-etiket/.test(A1.kartHTML('recete')) && /bm-ai1-yeni-btn/.test(A1.kartHTML('recete')));
+        yeniId = A1.yeniAc('recete');
+      } finally { m.geri(); }
+      const yeni = KR.find(k => k.id === yeniId), eski = KR.find(k => k.id === id0);
+      __REG.ok('YENİ reçete açıldı (KR +1), açık reçete aynen duruyor', !!yeni && yeniId !== id0 && KR.length === n0 + 1 && JSON.stringify(eski.maltlar) === once);
+      __REG.ok('yeni reçete: kaynak "ai" + siyah buğday + notta "AI önerisiyle oluşturuldu" + tarih', yeni.kaynak === 'ai' && yeni.maltlar.some(x => x.id === 'black_wheat') && /AI önerisiyle oluşturuldu · \d{1,2}\.\d{1,2}\.\d{4}/.test(yeni.notlar) && S.kaynak === 'ai');
+      __REG.ok('stil öğrenme sinyali YAZILMADI + kapı kodda', window._bmStilOgrenOku().length === z0 && /S\.kaynak==='ai'/.test(String(window._bmStilSinyalYaz)));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AI1-BETA', ad: 'KAPALI AÇILIŞ (madde 7): tuzak testi (AI3) geçmeden kutu VARSAYILAN GÖRÜNMEZ · Ayarlar ▸ AI özellikleri\'nde "Beta: AI reçeteci (tuzak testi henüz yapılmadı)" anahtarı · açılınca kalıcı "beta — test edilmedi" şeridi · düğmeler ≥44 px',
+    calistir: (page) => page.evaluate(() => {
+      const A1 = window.BM_AI1; A1.betaYaz(false);
+      __REG.yeniKayit('REGTEST AI1 beta', {}); S.maltlar = [{ id: 'pilsner', kg: 2 }]; window.eval("ekran='editor';sekme='genel'"); render();
+      __REG.ok('beta KAPALI (varsayılan) → editörde kutu YOK', !document.querySelector('.bm-ai1-kutu') && !A1.betaAcik());
+      const kart = window._bmAiKartHTML();
+      __REG.ok('Ayarlar kartında beta anahtarı metni', /Beta: AI reçeteci <small>\(tuzak testi henüz yapılmadı\)/.test(kart) && /bm-ai1-beta-btn/.test(kart));
+      window.bmAi1BetaDegistir(); window.eval("ekran='editor';sekme='genel'"); render();
+      const k = document.querySelector('.bm-ai1-kutu');
+      __REG.ok('beta AÇIK → kutu + "beta — test edilmedi" şeridi', !!k && /beta — test edilmedi/.test(k.textContent) && A1.betaAcik());
+      const btn = k && k.querySelector('.bm-ai1-sor-btn'), ta = k && k.querySelector('textarea');
+      __REG.ok('Sor düğmesi ve soru kutusu ≥44 px', btn && btn.getBoundingClientRect().height >= 44 && ta && ta.getBoundingClientRect().height >= 44, btn && btn.getBoundingClientRect().height);
+      __REG.ok('anahtar cihaz-yerel (bm_ öneksiz → yedeğe girmez)', !/^bm_/.test(A1.BETA_LS));
+      A1.betaYaz(false); render();
+      __REG.ok('kapatınca kutu kaybolur', !document.querySelector('.bm-ai1-kutu'));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AI1-MALIYET', ad: 'MALİYET + İSTEK (madde 5): asistan/denetim → Sonnet 5, max_tokens kodda sabit (1500/800), sistem metni kodda · esleme → Haiku · gerçek 200 yanıtı Ayarlar\'daki AI maliyet sayacına işlenir (ai_maliyet_v1, yedeğe girmez) · soru başına tahmin kutuda',
+    calistir: (page) => page.evaluate(async () => {
+      const A = window.BM_AI, A1 = window.BM_AI1, gA = A.istekKur('asistan', 'P', 's').govde, gD = A.istekKur('denetim', 'P', 's').govde, gE = A.istekKur('esleme', 'P', 's').govde;
+      __REG.ok('asistan: claude-sonnet-5 / 1500, sistem = SISTEMLER.asistan', gA.model === 'claude-sonnet-5' && gA.max_tokens === 1500 && gA.system[0].text === A.SISTEMLER.asistan);
+      __REG.ok('denetim: claude-sonnet-5 / 800; esleme: claude-haiku-4-5 + çıkarım sistemi; tani hâlâ eski SISTEM', gD.model === 'claude-sonnet-5' && gD.max_tokens === 800 && gE.model === 'claude-haiku-4-5' && gE.system[0].text === A.SISTEMLER.cikar && A.istekKur('tani', 'X', 'y').govde.system[0].text === A.SISTEM);
+      __REG.ok('asistan sistem metni: katmanlar + "bilmiyorum ödüllendirilir" + hak verme yasağı + hesapta rakam yok', /"bilmiyorum"/.test(A.SISTEMLER.asistan) && /ÖDÜLLENDİRİLİR/.test(A.SISTEMLER.asistan) && /hak vermek için cevap verme/.test(A.SISTEMLER.asistan) && /RAKAM YAZMA/.test(A.SISTEMLER.asistan));
+      const K = 'sk-ant-api03-TESTANAHTAR-AI1-abcdefghijklmnop'; A.anahtarSil(); A.anahtarKaydet(K); A.sayacSifirla();
+      const eskiF = window.fetch; window.fetch = () => Promise.resolve(new Response(JSON.stringify({ content: [{ type: 'text', text: '{"iddialar":[],"ton":"notr"}' }], stop_reason: 'end_turn', usage: { input_tokens: 2000, output_tokens: 500 } }), { status: 200 }));
+      let r; try { r = await A.sor({ kullanim: 'asistan', baglam: 'P', soru: 's', sema: A1.sema() }); } finally { window.fetch = eskiF; }
+      const sy = A.sayacAl();
+      __REG.ok('200 → sayaç n=1, usd = maliyet (2000×2 + 500×10)/1e6', r.ok && sy.n === 1 && Math.abs(sy.usd - (2000 * 2 + 500 * 10) / 1e6) < 1e-12 && sy.k.asistan.n === 1, JSON.stringify(sy));
+      __REG.ok('katmanlı şemada "kaynak_yok" bayrağı çıkmaz', !r.bayraklar.some(b => b.tip === 'kaynak_yok'));
+      __REG.ok('Ayarlar kartında sayaç satırı', /AI maliyet sayacı/.test(window._bmAiKartHTML()) && /\$0\.0090/.test(window._bmAiKartHTML()));
+      __REG.ok('sayaç anahtarı bm_ öneksiz (yedeğe girmez)', A.MALIYET_LS === 'ai_maliyet_v1');
+      const t = A1.maliyetTahmin(2000);
+      __REG.ok('soru başına tahmin: çıkarım + 3 örnekleme (Sonnet) > 0, denetim ayrı', t.soru > 0 && t.denetim > 0 && Math.abs(t.toplam - t.soru - t.denetim) < 1e-12, JSON.stringify(t));
+      A.sayacSifirla(); A.anahtarSil();
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AI1-YORUM', ad: 'YORUM DENETİMİ (madde 3): yorumdaki doz katalog maxDozgL\'yi aşarsa uyarı (g/L ve batch gramı) · yorum uygulamanın hesabıyla çelişen OG/SRM söylerse "hesap esas" uyarısı · sınır içindeki yorum uyarısız',
+    calistir: (page) => page.evaluate(() => {
+      const A1 = window.BM_AI1, o = { T: { tarif: { hacim: 11 } }, mod: 'ab', ab: { A: 'once', B: 'sonra' }, hk: { once: { og: 1.065, fg: 1.012, abv: 7, ibu: 20, srm: 18 }, sonra: { og: 1.065, fg: 1.012, abv: 7, ibu: 20, srm: 18 } }, paket: { byId: {} } };
+      const a = A1.iddiaDenetle({ metin: 'Lavanta için 30 g koyardım.', katman: 'yorum', dayanak_id: 'kat:lavanta' }, o), b = A1.iddiaDenetle({ metin: 'Lavanta 2 g/L iyi gider.', katman: 'yorum' }, o), c = A1.iddiaDenetle({ metin: 'Lavanta 3 g yeter.', katman: 'yorum', dayanak_id: 'kat:lavanta' }, o);
+      __REG.ok('30 g / 11 L = 2,73 g/L > 1,5 → uyarı; 2 g/L (ad metinde) → uyarı', a.uyari.some(u => /azamisini aşıyor/.test(u)) && b.uyari.some(u => /azamisini aşıyor/.test(u)), a.uyari.join() + ' | ' + b.uyari.join());
+      __REG.ok('3 g (0,27 g/L) → uyarı yok', !c.uyari.length, c.uyari.join());
+      const d = A1.iddiaDenetle({ metin: 'Bu değişiklikle SRM 35 olur.', katman: 'yorum' }, o), e = A1.iddiaDenetle({ metin: 'SRM 18 civarı kalır.', katman: 'yorum' }, o);
+      __REG.ok('yorum hesaptan farklı SRM → "hesap esas"; aynı değer → uyarı yok', d.uyari.some(u => /hesap esas/.test(u)) && !e.uyari.length, d.uyari.join());
       return __REG.al();
     })
   },

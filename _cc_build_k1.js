@@ -30,7 +30,7 @@ const cb = html.indexOf('// ═══ SPRINT CC — ÖRNEK STİL ÇÖZÜCÜ (BA�
 if (cb < 0 || ce < cb) abort('çözücü işaretçileri yok');
 vm.runInContext(html.slice(cb, ce), ctx);
 const BJCP = ctx.BJCP, S2B = ctx.SLUG_TO_BJCP, W = ctx.window;
-if (Object.keys(BJCP).length !== 239) abort('BJCP 239 değil');
+if (Object.keys(BJCP).length !== 241) abort('BJCP 241 değil'); // AI1: Saison table/super satırları (239 + 2)
 if (typeof W._bmOrnekStilCoz !== 'function') abort('çözücü yüklenmedi');
 
 // AN'in ek eşlemesi (BİREBİR) + GENEL (alt stili söylemeyen) AHA etiketleri
@@ -83,6 +83,8 @@ mraw.forEach(m => {
   const malzeme = [].concat((m.malts || []).map(x => x.name), (m.hops || []).map(x => x.name), (m.misc || []).map(x => (x && (x.name || x)) || ''), [m.yeast || '']).join(' | ');
   const es = W._bmOrnekStilCoz({ kategori: mb.kat, ifade: ifade, ad: ad, malzeme: malzeme, etiketStil: etiketCoz(m.slug), etiketGenel: GENEL.has(m.slug), ozel: OZEL_ETIKET.has(m.slug) });
   if (!es || !BJCP[es.stil]) { inc('aha_eslesmedi'); return; }
+  // AI1 1: Saison ABV'sine göre güce (table/standard/super)
+  { const g0 = es.stil; es.stil = W._bmSaisonGuc(es.stil, m.abv, m.og, m.fg); if (es.stil !== g0) inc('saison_guc_' + es.stil); }
   inc('aha_yol_' + es.yol);
   if (!ahaByStil.has(es.stil)) ahaByStil.set(es.stil, []);
   ahaByStil.get(es.stil).push({ m, mb, yol: es.yol });
@@ -166,6 +168,7 @@ rows.forEach(r => {
   const es = W._bmOrnekStilCoz({ kategori: stilHam, ad: AXE.moj(r.name || ''), malzeme: ingTxt, etiketStil: etiket, etiketGenel: !etiket });
   if (!es || !BJCP[es.stil]) { inc('nhc_eslesmedi'); return; }
   const sp = AXE.specsCoz(r.specs);
+  { const g0 = es.stil; es.stil = W._bmSaisonGuc(es.stil, sp.ab, sp.og, sp.fg); if (es.stil !== g0) inc('saison_guc_' + es.stil); } // AI1 1
   const vmL = /\(([\d.]+)\s*L\)/i.exec(String(r.vol || ''));
   const L = vmL ? Math.round(parseFloat(vmL[1]) * 10) / 10 : null;
   if (!sp.og || !L) { inc('nhc_olcu_yok'); return; }
@@ -214,5 +217,5 @@ const kap = new Set([...Object.keys(AHA), ...Object.keys(NHC)]);
 console.log('[sayaç]', JSON.stringify(say));
 console.log('[AHA] stil=' + Object.keys(AHA).length + ' gömülü=' + Object.values(AHA).reduce((a, v) => a + v[1].length, 0) + ' (' + (ahaJs.length / 1024).toFixed(1) + ' KB)');
 console.log('[NHC] stil=' + Object.keys(NHC).length + ' gömülü=' + Object.values(NHC).reduce((a, v) => a + v[1].length, 0) + ' (' + (nhcJs.length / 1024).toFixed(1) + ' KB)');
-console.log('[K1 kapsam] ' + kap.size + '/239 stil');
+console.log('[K1 kapsam] ' + kap.size + '/' + Object.keys(BJCP).length + ' stil');
 fs.writeFileSync(path.join(CIKTI, '_cc_k1_kapsam.json'), JSON.stringify([...kap].sort()));

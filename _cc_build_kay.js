@@ -23,7 +23,7 @@ const html = fs.readFileSync(path.join(KOK, 'Brewmaster_v2_79_10.html'), 'utf8')
 // CC4: örnek tabloları ornek_veri.js'e taşındı → HTML + veri dosyası birlikte okunur
 const _veriKaynak = html + '\n' + (fs.existsSync(path.join(__dirname, 'ornek_veri.js')) ? fs.readFileSync(path.join(__dirname, 'ornek_veri.js'), 'utf8').replace(/\r\n/g, '\n') : '');
 const ctx = vm.createContext({}); vm.runInContext(html.match(/const BJCP = \{[\s\S]*?\n\};/)[0].replace('const ', 'var '), ctx);
-const BJCP = ctx.BJCP; if (Object.keys(BJCP).length !== 239) abort('BJCP 239 değil');
+const BJCP = ctx.BJCP; if (Object.keys(BJCP).length !== 241) abort('BJCP 241 değil'); // AI1: Saison table/super
 const K1 = new Set(JSON.parse(fs.readFileSync(K1KAP, 'utf8')));
 const K1SAY = {};
 (function(){
