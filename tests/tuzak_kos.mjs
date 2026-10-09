@@ -44,7 +44,7 @@ function mockKur(profil) {
     if (k === 'denetim') return ok({ bulgular: [], ozet: 'mock denetim' });
     if (k !== 'ozet') return Promise.resolve({ ok: false, hata: { tur: 'mock', mesaj: 'mock yok: ' + k } });
     if (it.istem && String(p.soru || '').indexOf(it.istem) >= 0) window.__tuzakSoruGitti = (window.__tuzakSoruGitti || 0) + 1; // soru cümlesi ÖZETE GİTMEMELİ
-    const P = parcalar(p.baglam), enumIds = p.sema.schema.properties.cumleler.items.properties.kaynak.enum;
+    const P = parcalar(p.baglam), enumIds = p.sema.schema.properties.cumleler.items.properties.kaynaklar.items.enum;
     const sec = P.filter(x => enumIds.includes(x.id) && /^(hes:hukum|kor:stil|bjcp:|kor:genel|kat:)/.test(x.id)).slice(0, 2);
     let c = sec.map(x => ({ metin: x.metin.slice(0, 160), kaynak: x.id }));
     if (!c.length) c = [{ metin: 'Kanıt özetlendi.', kaynak: enumIds[0] }];

@@ -1,0 +1,688 @@
+{
+ "surum": 1,
+ "uretildi": "2026-10-10",
+ "kaynak": "AI4 gerçek koşu #2 (2026-10-09, uygulama içi; Haiku 5.5 + Sonnet 5.5) — yapıştırılan sonuçtaki DÜŞEN cümleler (geçen cümlelerin metni o koşuda kaydedilmiyordu)",
+ "not": "Elle etiket: dogru / yanlis (uydurma) / kaynak_eksik / dogrulanamadi. Kanıt = tarayıcıda aynı kodla yeniden kurulan kanıt paketinde sayının bulunduğu parça. Kişisel veri yok (istemler kamuya açık tuzak seti; cümleler AI çıktısı).",
+ "gercek": [
+  {
+   "no": "H01",
+   "id": "C07",
+   "model": "haiku",
+   "tur": 1,
+   "kaynaklar": [
+    "kat:wlp300"
+   ],
+   "metin": "WLP300 Hefeweizen için katalogda attenüasyon %72–76 ve sıcaklık 19–22 °C belirtilmiştir; WY3068 Weihenstephan için attenüasyon %73–77 ve sıcaklık 17–22 °C belirtilmiştir.",
+   "etiket": "kaynak_eksik",
+   "duzeltilmisKaynaklar": [
+    "kat:wlp300",
+    "kat:wy3068"
+   ],
+   "kanit": "WLP300 72–76 / 19–22 → kat:wlp300; WY3068 73–77 / 17–22 → kat:wy3068 (katalog: wy3068 atu [73,77], sc [17,22]) — değer doğru, kaynak eksik",
+   "beklenen": "dus",
+   "paket": null
+  },
+  {
+   "no": "H02",
+   "id": "C07",
+   "model": "haiku",
+   "tur": 1,
+   "kaynaklar": [
+    "kalite:wlp300"
+   ],
+   "metin": "Weizen / Weissbier stilinde madalyalı alt kümede WLP300 Hefeweizen 4, WY3068 Weihenstephan 2 reçetede yer almaktadır.",
+   "etiket": "kaynak_eksik",
+   "duzeltilmisKaynaklar": [
+    "kalite:wlp300",
+    "kalite:wy3068"
+   ],
+   "kanit": "WLP300 4 → kalite:wlp300; WY3068 2 → kalite:wy3068 — değer doğru, kaynak eksik",
+   "beklenen": "dus",
+   "paket": null
+  },
+  {
+   "no": "H03",
+   "id": "C11",
+   "model": "haiku",
+   "tur": 1,
+   "kaynaklar": [
+    "kor:genel:c40"
+   ],
+   "metin": "Crystal 40, 363890 reçetelik korpusta 44546 reçetede yer alıyor; topluluk dozu medyanı 16,00 g/L'dir.",
+   "etiket": "kaynak_eksik",
+   "duzeltilmisKaynaklar": [
+    "kor:genel:c40",
+    "kor:doz:c40"
+   ],
+   "kanit": "44546 → kor:genel:c40; medyan 16,00 → kor:doz:c40 — değer doğru, kaynak eksik",
+   "beklenen": "dus",
+   "paket": null
+  },
+  {
+   "no": "H04",
+   "id": "C11",
+   "model": "haiku",
+   "tur": 1,
+   "kaynaklar": [
+    "kor:genel:cara_munich1"
+   ],
+   "metin": "CaraMunich I, 363890 reçetelik korpusta 6488 reçetede yer alıyor; topluluk dozu medyanı 13,20 g/L'dir.",
+   "etiket": "kaynak_eksik",
+   "duzeltilmisKaynaklar": [
+    "kor:genel:cara_munich1",
+    "kor:doz:cara_munich1"
+   ],
+   "kanit": "6488 → kor:genel:cara_munich1; medyan 13,20 → kor:doz:cara_munich1 — değer doğru, kaynak eksik",
+   "beklenen": "dus",
+   "paket": null
+  },
+  {
+   "no": "H05",
+   "id": "C11",
+   "model": "haiku",
+   "tur": 2,
+   "kaynaklar": [
+    "kor:doz:c40"
+   ],
+   "metin": "Crystal 40 için topluluk dozu (g/L): p10 7,49 · medyan 16,00 · p90 30,00.",
+   "etiket": "dogru",
+   "duzeltilmisKaynaklar": null,
+   "kanit": "p10 7,49 · medyan 16,00 · p90 30,00 → kor:doz:c40; \"40\" ürün adının parçası (Crystal 40)",
+   "beklenen": "gec",
+   "paket": null
+  },
+  {
+   "no": "H06",
+   "id": "A03a",
+   "model": "haiku",
+   "tur": 2,
+   "kaynaklar": [
+    "odul:wy3068:1"
+   ],
+   "metin": "WY3068 Weihenstephan için Weizen / Weissbier stilinde AHA NHC finali altın madalya örneği 2013 ve 2009 yıllarında kayıtlı.",
+   "etiket": "kaynak_eksik",
+   "duzeltilmisKaynaklar": [
+    "odul:wy3068:1",
+    "odul:wy3068:2"
+   ],
+   "kanit": "2013 → odul:wy3068:1; 2009 → odul:wy3068:2 — değer doğru, kaynak eksik; \"3068\" ürün adı",
+   "beklenen": "dus",
+   "paket": null
+  },
+  {
+   "no": "S01",
+   "id": "C01",
+   "model": "sonnet",
+   "tur": 1,
+   "kaynaklar": [
+    "kor:aile:black_wheat"
+   ],
+   "metin": "Siyah Buğday Maltı (Hitit) dark lager ailesindeki 3 stilde toplam 0 reçetede (4125 reçete; %0,0); Carafa Special III (Debittered) aynı ailede 114 reçetede (%2,8).",
+   "etiket": "kaynak_eksik",
+   "duzeltilmisKaynaklar": [
+    "kor:aile:black_wheat",
+    "kor:aile:crf3"
+   ],
+   "kanit": "Siyah Buğday 0 / 4125 / %0,0 → kor:aile:black_wheat; Carafa 114 / %2,8 → kor:aile:crf3",
+   "beklenen": "dus",
+   "paket": null
+  },
+  {
+   "no": "S02",
+   "id": "C01",
+   "model": "sonnet",
+   "tur": 1,
+   "kaynaklar": [
+    "kat:black_wheat"
+   ],
+   "metin": "Katalog: Siyah Buğday Maltı (Hitit) renk 640,0 °L, potansiyel GU 238; Carafa Special III (Debittered) renk 525,0 °L, potansiyel GU 250.",
+   "etiket": "kaynak_eksik",
+   "duzeltilmisKaynaklar": [
+    "kat:black_wheat",
+    "kat:crf3"
+   ],
+   "kanit": "640,0 °L / GU 238 → kat:black_wheat; 525,0 °L / GU 250 → kat:crf3",
+   "beklenen": "dus",
+   "paket": null
+  },
+  {
+   "no": "S03",
+   "id": "C02",
+   "model": "sonnet",
+   "tur": 1,
+   "kaynaklar": [
+    "kat:fuggles"
+   ],
+   "metin": "Katalog: Fuggles alfa %4,5, köken İngiliz; Styrian Goldings alfa %5,5, köken Slovenya.",
+   "etiket": "kaynak_eksik",
+   "duzeltilmisKaynaklar": [
+    "kat:fuggles",
+    "kat:styrian"
+   ],
+   "kanit": "Fuggles %4,5 → kat:fuggles; Styrian %5,5 → kat:styrian (katalog aa 5.5)",
+   "beklenen": "dus",
+   "paket": null
+  },
+  {
+   "no": "S04",
+   "id": "C03",
+   "model": "sonnet",
+   "tur": 1,
+   "kaynaklar": [
+    "kat:pilsner"
+   ],
+   "metin": "Katalogda Pilsner Malt renk 2,0 °L, potansiyel GU 310; Belgian Pilsner renk 2,0 °L, potansiyel GU 305.",
+   "etiket": "kaynak_eksik",
+   "duzeltilmisKaynaklar": [
+    "kat:pilsner",
+    "kat:bel_pils"
+   ],
+   "kanit": "Pilsner 2,0 / 310 → kat:pilsner; Belgian Pilsner 2,0 / 305 → kat:bel_pils (katalog gu 305)",
+   "beklenen": "dus",
+   "paket": null
+  },
+  {
+   "no": "S05",
+   "id": "C04",
+   "model": "sonnet",
+   "tur": 1,
+   "kaynaklar": [
+    "kor:doz:briess_pale"
+   ],
+   "metin": "Briess 2-Row Brewers Malt için topluluk dozu (g/L): p10 50,00, medyan 191,70, p90 287,60.",
+   "etiket": "dogru",
+   "duzeltilmisKaynaklar": null,
+   "kanit": "p10 50,00 · medyan 191,70 · p90 287,60 → kor:doz:briess_pale; \"2\" ürün adının parçası (2-Row)",
+   "beklenen": "gec",
+   "paket": null
+  },
+  {
+   "no": "S06",
+   "id": "C04",
+   "model": "sonnet",
+   "tur": 1,
+   "kaynaklar": [
+    "kat:thracian_pale"
+   ],
+   "metin": "Katalog: Thracian Pale Ale Malt, Base grubu, 3,0 °L, potansiyel GU 308 (Thracian Malt, Yunanistan); Briess 2-Row Brewers Malt, Base grubu, 2,0 °L, potansiyel GU 310.",
+   "etiket": "kaynak_eksik",
+   "duzeltilmisKaynaklar": [
+    "kat:thracian_pale",
+    "kat:briess_pale"
+   ],
+   "kanit": "Thracian 3,0 / 308 → kat:thracian_pale; Briess 2,0 / 310 → kat:briess_pale",
+   "beklenen": "dus",
+   "paket": null
+  },
+  {
+   "no": "S07",
+   "id": "C11",
+   "model": "sonnet",
+   "tur": 1,
+   "kaynaklar": [
+    "kor:stil:c40"
+   ],
+   "metin": "Crystal 40 (Briess/Simpsons) Dubbel reçetelerinin 215'inde geçiyor (3705 reçete; %5,8); CaraMunich I (Weyermann) ise 246'sında (%6,6).",
+   "etiket": "kaynak_eksik",
+   "duzeltilmisKaynaklar": [
+    "kor:stil:c40",
+    "kor:stil:cara_munich1"
+   ],
+   "kanit": "Crystal 40 215 / 3705 / %5,8 → kor:stil:c40; CaraMunich I 246 / %6,6 → kor:stil:cara_munich1",
+   "beklenen": "dus",
+   "paket": null
+  },
+  {
+   "no": "S08",
+   "id": "C11",
+   "model": "sonnet",
+   "tur": 1,
+   "kaynaklar": [
+    "kor:doz:c40"
+   ],
+   "metin": "Topluluk dozu Crystal 40 (Briess/Simpsons) için p10 7,49 · medyan 16,00 · p90 30,00 g/L.",
+   "etiket": "dogru",
+   "duzeltilmisKaynaklar": null,
+   "kanit": "p10 7,49 · medyan 16,00 · p90 30,00 → kor:doz:c40; \"40\" ürün adı",
+   "beklenen": "gec",
+   "paket": null
+  },
+  {
+   "no": "S09",
+   "id": "C11",
+   "model": "sonnet",
+   "tur": 1,
+   "kaynaklar": [
+    "kat:c40"
+   ],
+   "metin": "Crystal 40 (Briess/Simpsons): renk 40,0 °L, potansiyel GU 293; CaraMunich I (Weyermann): renk 35,0 °L, potansiyel GU 281.",
+   "etiket": "kaynak_eksik",
+   "duzeltilmisKaynaklar": [
+    "kat:c40",
+    "kat:cara_munich1"
+   ],
+   "kanit": "Crystal 40 40,0 / 293 → kat:c40; CaraMunich I 35,0 / 281 → kat:cara_munich1",
+   "beklenen": "dus",
+   "paket": null
+  },
+  {
+   "no": "W12",
+   "id": "T04a",
+   "model": "sonnet",
+   "tur": 1,
+   "kaynaklar": [
+    "kor:doz"
+   ],
+   "metin": "Korpusta bu katkının miktarı birimsiz; 4748 reçetede miktar var ama birim yok, bu yüzden g/L'ye çevrilemedi.",
+   "etiket": "dogru",
+   "duzeltilmisKaynaklar": null,
+   "kanit": "4748 → kor:doz (portakal_kabuk; \"4748 reçetede miktar var ama birim yok → g/L'ye çevrilemedi\") — olumsuz değer yargısı yok",
+   "beklenen": "gec",
+   "paket": {
+    "mod": "tat",
+    "stil": "Saison / Farmhouse Ale",
+    "kalem": "katki:portakal_kabuk"
+   }
+  }
+ ],
+ "dogrulanamadi": [
+  {
+   "no": "W01",
+   "id": "T02a",
+   "model": "haiku",
+   "tur": 1,
+   "kaynaklar": [
+    "w1"
+   ],
+   "metin": "Web kaynaklarında, Belçika Witbier'in kendine özgü yanının koriander, lavanta veya portakal kabuğu gibi eklenen baharatlardan geldiği, German Weizen standartlarının ise ekstra baharat eklenmesini dışladığı belirtilmektedir.",
+   "etiket": "dogrulanamadi",
+   "neden": "koşu #2 sonucu web alıntı metnini (cited_text) saklamıyordu — kaynakla karşılaştırılamaz; AI4B 7 ile artık saklanıyor"
+  },
+  {
+   "no": "W02",
+   "id": "T03a",
+   "model": "haiku",
+   "tur": 1,
+   "kaynaklar": [
+    "w3"
+   ],
+   "metin": "Web kaynaklarında Witbier'de en yaygın baharatın kişniş olduğu ve genellikle Turunç/Curaçao portakal kabuğuyla birlikte kullanıldığı belirtiliyor.",
+   "etiket": "dogrulanamadi",
+   "neden": "koşu #2 sonucu web alıntı metnini (cited_text) saklamıyordu — kaynakla karşılaştırılamaz; AI4B 7 ile artık saklanıyor"
+  },
+  {
+   "no": "W03",
+   "id": "T03b",
+   "model": "haiku",
+   "tur": 1,
+   "kaynaklar": [
+    "w3"
+   ],
+   "metin": "BJCP Witbier tanımında geleneksel olarak kişniş tohumu ve kurutulmuş Curaçao portakal kabuğu kullanıldığı belirtiliyor.",
+   "etiket": "dogrulanamadi",
+   "neden": "koşu #2 sonucu web alıntı metnini (cited_text) saklamıyordu — kaynakla karşılaştırılamaz; AI4B 7 ile artık saklanıyor"
+  },
+  {
+   "no": "W04",
+   "id": "T04b",
+   "model": "haiku",
+   "tur": 1,
+   "kaynaklar": [
+    "w2"
+   ],
+   "metin": "Web kaynağına göre saison'larda kişniş, tatlı veya acı portakal kabuğu gibi baharatlar bulunabilir.",
+   "etiket": "dogrulanamadi",
+   "neden": "koşu #2 sonucu web alıntı metnini (cited_text) saklamıyordu — kaynakla karşılaştırılamaz; AI4B 7 ile artık saklanıyor"
+  },
+  {
+   "no": "W05",
+   "id": "T06a",
+   "model": "haiku",
+   "tur": 1,
+   "kaynaklar": [
+    "w1"
+   ],
+   "metin": "Dubbel stilinin 1926'da Westmalle tarafından icat edildiği ve genellikle en az %6,5 alkol hacmine sahip olduğu belirtiliyor.",
+   "etiket": "dogrulanamadi",
+   "neden": "koşu #2 sonucu web alıntı metnini (cited_text) saklamıyordu — kaynakla karşılaştırılamaz; AI4B 7 ile artık saklanıyor (T06a %6,5)"
+  },
+  {
+   "no": "W06",
+   "id": "T08a",
+   "model": "haiku",
+   "tur": 1,
+   "kaynaklar": [
+    "w2"
+   ],
+   "metin": "Saaz, Fermentis'e göre geleneksel Alman buğday biralarında Hallertau, Spalt, Tettnang ve Perle gibi Alman çeşitleriyle birlikte, bazen Saaz da kullanılarak hafif hoplu bir profil için tercih edilebilir.",
+   "etiket": "dogrulanamadi",
+   "neden": "koşu #2 sonucu web alıntı metnini (cited_text) saklamıyordu — kaynakla karşılaştırılamaz; AI4B 7 ile artık saklanıyor"
+  },
+  {
+   "no": "W07",
+   "id": "T03b",
+   "model": "haiku",
+   "tur": 2,
+   "kaynaklar": [
+    "w2"
+   ],
+   "metin": "BJCP tanımında Witbier için kişniş ve Curaçao veya tatlı portakal kabuğu baharatları karakteristik olarak belirtilmektedir.",
+   "etiket": "dogrulanamadi",
+   "neden": "koşu #2 sonucu web alıntı metnini (cited_text) saklamıyordu — kaynakla karşılaştırılamaz; AI4B 7 ile artık saklanıyor"
+  },
+  {
+   "no": "W08",
+   "id": "T04b",
+   "model": "haiku",
+   "tur": 2,
+   "kaynaklar": [
+    "w1"
+   ],
+   "metin": "Web kaynaklarında Saison tarifinde kişniş ve turunç/tatlı portakal kabuğu gibi baharatların yer aldığı belirtiliyor.",
+   "etiket": "dogrulanamadi",
+   "neden": "koşu #2 sonucu web alıntı metnini (cited_text) saklamıyordu — kaynakla karşılaştırılamaz; AI4B 7 ile artık saklanıyor"
+  },
+  {
+   "no": "W09",
+   "id": "T08b",
+   "model": "haiku",
+   "tur": 2,
+   "kaynaklar": [
+    "w3"
+   ],
+   "metin": "Web alıntısına göre geleneksel Alman buğday biralarında genellikle Hallertau, Spalt, Tettnang ve Perle gibi Alman çeşitleri kullanılır; Saaz ara sıra kullanılır.",
+   "etiket": "dogrulanamadi",
+   "neden": "koşu #2 sonucu web alıntı metnini (cited_text) saklamıyordu — kaynakla karşılaştırılamaz; AI4B 7 ile artık saklanıyor"
+  },
+  {
+   "no": "W10",
+   "id": "T03a",
+   "model": "sonnet",
+   "tur": 1,
+   "kaynaklar": [
+    "w3"
+   ],
+   "metin": "BJCP Witbier tanımında taze öğütülmüş kişniş ve Curaçao ya da bazen tatlı portakal kabuğu baharatları, aromayı tamamlayan ve karakteristik unsurlar olarak anılıyor.",
+   "etiket": "dogrulanamadi",
+   "neden": "koşu #2 sonucu web alıntı metnini (cited_text) saklamıyordu — kaynakla karşılaştırılamaz; AI4B 7 ile artık saklanıyor"
+  },
+  {
+   "no": "W11",
+   "id": "T03b",
+   "model": "sonnet",
+   "tur": 1,
+   "kaynaklar": [
+    "w3"
+   ],
+   "metin": "BJCP stil tanımında geleneksel olarak kişniş tohumu ve kuru Curaçao portakal kabuğu kullanılıyor.",
+   "etiket": "dogrulanamadi",
+   "neden": "koşu #2 sonucu web alıntı metnini (cited_text) saklamıyordu — kaynakla karşılaştırılamaz; AI4B 7 ile artık saklanıyor"
+  },
+  {
+   "no": "W13",
+   "id": "T04a",
+   "model": "sonnet",
+   "tur": 1,
+   "kaynaklar": [
+    "w1"
+   ],
+   "metin": "BYO'ya göre saison'larda kişniş, tatlı veya acı portakal kabuğu, cennet tanesi, kakule ve zencefil gibi baharatlar bulunabiliyor.",
+   "etiket": "dogrulanamadi",
+   "neden": "koşu #2 sonucu web alıntı metnini (cited_text) saklamıyordu — kaynakla karşılaştırılamaz; AI4B 7 ile artık saklanıyor"
+  },
+  {
+   "no": "W14",
+   "id": "T04b",
+   "model": "sonnet",
+   "tur": 1,
+   "kaynaklar": [
+    "w2"
+   ],
+   "metin": "Beer & Brewing sözlüğü, karabiber, zencefil, tatlı portakal kabuğu, curaçao portakal kabuğu ve yıldız anasonla baharatlanmış çok kuru bir ale'den söz ediyor.",
+   "etiket": "dogrulanamadi",
+   "neden": "koşu #2 sonucu web alıntı metnini (cited_text) saklamıyordu — kaynakla karşılaştırılamaz; AI4B 7 ile artık saklanıyor"
+  },
+  {
+   "no": "W15",
+   "id": "T06a",
+   "model": "sonnet",
+   "tur": 1,
+   "kaynaklar": [
+    "w2"
+   ],
+   "metin": "Web alıntısı: Dubbel renginin büyük kısmını kavrulmuş maltlardan değil, karamelize bir şeker şurubundan (candi sugar) alır.",
+   "etiket": "dogrulanamadi",
+   "neden": "koşu #2 sonucu web alıntı metnini (cited_text) saklamıyordu — kaynakla karşılaştırılamaz; AI4B 7 ile artık saklanıyor"
+  },
+  {
+   "no": "W16",
+   "id": "T08a",
+   "model": "sonnet",
+   "tur": 1,
+   "kaynaklar": [
+    "w1"
+   ],
+   "metin": "Fermentis'e göre geleneksel Alman buğday biraları genelde Hallertau, Spalt, Tettnang, Perle gibi Alman çeşitlerini, bazen de Saaz'ı kullanır.",
+   "etiket": "dogrulanamadi",
+   "neden": "koşu #2 sonucu web alıntı metnini (cited_text) saklamıyordu — kaynakla karşılaştırılamaz; AI4B 7 ile artık saklanıyor"
+  },
+  {
+   "no": "W17",
+   "id": "T08b",
+   "model": "sonnet",
+   "tur": 1,
+   "kaynaklar": [
+    "w3"
+   ],
+   "metin": "BYO'nun Alman buğday birası (hefeweizen) tarifinde 3 AAU Czech Saaz 60 dakikada ekleniyor.",
+   "etiket": "dogrulanamadi",
+   "neden": "koşu #2 sonucu web alıntı metnini (cited_text) saklamıyordu — kaynakla karşılaştırılamaz; AI4B 7 ile artık saklanıyor"
+  }
+ ],
+ "sentetik": [
+  {
+   "no": "Y01",
+   "id": "A01a",
+   "kaynaklar": [
+    "kor:stil"
+   ],
+   "metin": "Carafa Special III (Debittered) — German Pils reçetelerinin 2'inde (5374 reçete; %0,04).",
+   "etiket": "dogru",
+   "kanit": "kanıt paketindeki parça metninin ilk cümlesi (sentetik taban — gerçek geçen cümle kaydı olmadığı için)"
+  },
+  {
+   "no": "Y02",
+   "id": "A05a",
+   "kaynaklar": [
+    "kor:stil"
+   ],
+   "metin": "Lavanta (Kuru Çiçek) — Dubbel reçetelerinin 3'inde (3705 reçete; %0,08).",
+   "etiket": "dogru",
+   "kanit": "kanıt paketindeki parça metninin ilk cümlesi (sentetik taban — gerçek geçen cümle kaydı olmadığı için)"
+  },
+  {
+   "no": "Y03",
+   "id": "A08a",
+   "kaynaklar": [
+    "kor:stil"
+   ],
+   "metin": "Kişniş (Coriander Tohumu) — Saison / Farmhouse Ale reçetelerinin 1183'inde (14668 reçete; %8,1).",
+   "etiket": "dogru",
+   "kanit": "kanıt paketindeki parça metninin ilk cümlesi (sentetik taban — gerçek geçen cümle kaydı olmadığı için)"
+  },
+  {
+   "no": "Y04",
+   "id": "A12a",
+   "kaynaklar": [
+    "kor:stil"
+   ],
+   "metin": "Karanfil — German Pils reçetelerinin 5'inde (5374 reçete; %0,09).",
+   "etiket": "dogru",
+   "kanit": "kanıt paketindeki parça metninin ilk cümlesi (sentetik taban — gerçek geçen cümle kaydı olmadığı için)"
+  },
+  {
+   "no": "Y05",
+   "id": "A10a",
+   "kaynaklar": [
+    "kor:stil:cascade"
+   ],
+   "metin": "Cascade — American Pale Ale reçetelerinin 17331'inde (42685 reçete; %40,6).",
+   "etiket": "dogru",
+   "kanit": "kanıt paketindeki parça metninin ilk cümlesi (sentetik taban — gerçek geçen cümle kaydı olmadığı için)"
+  },
+  {
+   "no": "Y06",
+   "id": "C02",
+   "kaynaklar": [
+    "kor:stil:fuggles"
+   ],
+   "metin": "Fuggles — Dubbel reçetelerinin 165'inde (3705 reçete; %4,5).",
+   "etiket": "dogru",
+   "kanit": "kanıt paketindeki parça metninin ilk cümlesi (sentetik taban — gerçek geçen cümle kaydı olmadığı için)"
+  },
+  {
+   "no": "Y07",
+   "id": "C05",
+   "kaynaklar": [
+    "kor:stil:wlp001"
+   ],
+   "metin": "WLP001 California Ale — American Pale Ale reçetelerinin 4779'inde (42685 reçete; %11,2).",
+   "etiket": "dogru",
+   "kanit": "kanıt paketindeki parça metninin ilk cümlesi (sentetik taban — gerçek geçen cümle kaydı olmadığı için)"
+  },
+  {
+   "no": "Y08",
+   "id": "C09",
+   "kaynaklar": [
+    "kor:stil:tradition"
+   ],
+   "metin": "Hallertau Tradition — German Pils reçetelerinin 79'inde (5374 reçete; %1,5).",
+   "etiket": "dogru",
+   "kanit": "kanıt paketindeki parça metninin ilk cümlesi (sentetik taban — gerçek geçen cümle kaydı olmadığı için)"
+  },
+  {
+   "no": "Y09",
+   "id": "C10",
+   "kaynaklar": [
+    "kor:stil:lublin"
+   ],
+   "metin": "Lublin (Lubelski) — Saison / Farmhouse Ale reçetelerinin 6'inde (14668 reçete; %0,04).",
+   "etiket": "dogru",
+   "kanit": "kanıt paketindeki parça metninin ilk cümlesi (sentetik taban — gerçek geçen cümle kaydı olmadığı için)"
+  },
+  {
+   "no": "Y10",
+   "id": "E03",
+   "kaynaklar": [
+    "bjcp:Dubbel"
+   ],
+   "metin": "Dubbel: OG 1,062–1,075 · FG 1,008–1,018 · IBU 15–25 · SRM 10–17 · ABV %6,0–7,6.",
+   "etiket": "dogru",
+   "kanit": "kanıt paketindeki parça metninin ilk cümlesi (sentetik taban — gerçek geçen cümle kaydı olmadığı için)"
+  },
+  {
+   "no": "Y11",
+   "id": "E05",
+   "kaynaklar": [
+    "bjcp:German Pils"
+   ],
+   "metin": "German Pils: OG 1,044–1,050 · FG 1,008–1,013 · IBU 22–40 · SRM 2–4 · ABV %4,4–5,2.",
+   "etiket": "dogru",
+   "kanit": "kanıt paketindeki parça metninin ilk cümlesi (sentetik taban — gerçek geçen cümle kaydı olmadığı için)"
+  },
+  {
+   "no": "Y12",
+   "id": "E07",
+   "kaynaklar": [
+    "bjcp:American Pale Ale"
+   ],
+   "metin": "American Pale Ale: OG 1,045–1,060 · FG 1,010–1,015 · IBU 30–50 · SRM 5–10 · ABV %4,5–6,2.",
+   "etiket": "dogru",
+   "kanit": "kanıt paketindeki parça metninin ilk cümlesi (sentetik taban — gerçek geçen cümle kaydı olmadığı için)"
+  },
+  {
+   "no": "Y13",
+   "id": "T01a",
+   "kaynaklar": [
+    "kor:stil"
+   ],
+   "metin": "Lavanta (Kuru Çiçek) — Dubbel reçetelerinin 3'inde (3705 reçete; %0,08).",
+   "etiket": "dogru",
+   "kanit": "kanıt paketindeki parça metninin ilk cümlesi (sentetik taban — gerçek geçen cümle kaydı olmadığı için)"
+  },
+  {
+   "no": "Y14",
+   "id": "T05a",
+   "kaynaklar": [
+    "kor:stil"
+   ],
+   "metin": "Nane (Taze / Kuru) — Dubbel reçetelerinin 0'inde (3705 reçete; %0,0).",
+   "etiket": "dogru",
+   "kanit": "kanıt paketindeki parça metninin ilk cümlesi (sentetik taban — gerçek geçen cümle kaydı olmadığı için)"
+  },
+  {
+   "no": "Y15",
+   "id": "T07a",
+   "kaynaklar": [
+    "kor:stil"
+   ],
+   "metin": "Mango (Püre) — German Pils reçetelerinin 0'inde (5374 reçete; %0,0).",
+   "etiket": "dogru",
+   "kanit": "kanıt paketindeki parça metninin ilk cümlesi (sentetik taban — gerçek geçen cümle kaydı olmadığı için)"
+  },
+  {
+   "no": "Y16",
+   "id": "T08a",
+   "kaynaklar": [
+    "kor:stil"
+   ],
+   "metin": "Saaz (Czech) — Weizen / Weissbier reçetelerinin 838'inde (6660 reçete; %12,6).",
+   "etiket": "dogru",
+   "kanit": "kanıt paketindeki parça metninin ilk cümlesi (sentetik taban — gerçek geçen cümle kaydı olmadığı için)"
+  }
+ ],
+ "webSentetik": [
+  {
+   "no": "WS1",
+   "stil": "Dubbel",
+   "kalem": "katki:lavanta",
+   "alinti": "Lavender can be used sparingly in a Belgian dubbel to add a floral note.",
+   "ozgu": true
+  },
+  {
+   "no": "WS2",
+   "stil": "Dubbel",
+   "kalem": "katki:lavanta",
+   "alinti": "Lavender is a popular addition to saison and witbier recipes.",
+   "ozgu": false
+  },
+  {
+   "no": "WS3",
+   "stil": "Weizen / Weissbier",
+   "kalem": "hop:saaz",
+   "alinti": "Traditional German wheat beers use Hallertau, Spalt or occasionally Saaz.",
+   "ozgu": true
+  },
+  {
+   "no": "WS4",
+   "stil": "Weizen / Weissbier",
+   "kalem": "hop:saaz",
+   "alinti": "Saaz is the classic hop of Czech pilsner.",
+   "ozgu": false
+  },
+  {
+   "no": "WS5",
+   "stil": "Dubbel",
+   "kalem": "katki:nane",
+   "alinti": "Mint has been used in some summer ales and stouts.",
+   "ozgu": false
+  },
+  {
+   "no": "WS6",
+   "stil": "Witbier / Belgian White",
+   "kalem": "katki:kisnisch",
+   "alinti": "Witbier is traditionally spiced with coriander and Curaçao orange peel.",
+   "ozgu": true
+  }
+ ]
+}
