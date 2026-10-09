@@ -40,6 +40,9 @@ M1-M10 UX iyileştirmeleri var ama detayı şu an belirsiz, Kaan hatırladıkça
    - AI soru kutusu + "yeni reçete olarak aç" (yapılandırılmış taslak → katalog doğrulama → uygulama hesabı → Kaan basar; asla üstüne yazmaz; stil öğrenme sinyali yazılmaz).
    - Yalakalık/uydurma önlemleri: iddia-bazlı çıktı (veri/genel/bilmiyorum), sayısal iddia katalogla otomatik kontrol, soru tarafsızlaştırma, hesap-AI çelişki uyarısı, açmadan önce ikinci denetim çağrısı, ~30 tuzak soruluk test seti (eşik geçmeden canlı yok). Gerçek anahtarla test Kaan'ın onayına bağlı (~1 $).
    - AI reçetelerini işaretle → tadım sonuçlarıyla AI vs diğer karşılaştırması.
+   - Cevap katmanları (Kaan kararı 2026-10-09): 📊 Veri (katalog/örnek, doğrulanmış) · 🧮 Hesap (uygulama) · 💬 Yorum ("bu benim yorumum, doğrulanmadı" — AI kendi bilgisiyle cevap VERİR, ör. "lavanta Dubbel'e ne kadar"). Yorumdaki miktar katalog maxDozgL'yi aşarsa uyarı; veriyle çelişirse veri kazanır + uyarı. Sayılar yine uygulamadan, verdict kuraldan. Tuzak seti 60 soru (≤%5 için), maliyet ≤12 $ — Kaan onayı BEKLİYOR.
+   - Katalog dozaj tutarlılık denetimi: ör. lavanta kaydında 3 farklı doz (acik "1-3g/10L" = 0.1-0.3 g/L; aynı metindeki "BYO 0.25-0.5 oz/5 gal" = 0.37-0.75 g/L; varsayDozgL 1 / maxDozgL 2) — tüm KATKILAR için acik metni ↔ varsay/max alanları karşılaştır, kaynakla düzelt.
+   - Ek miktarı oz↔g çelişki kontrolü: ör. örnek verisinde "dried lavender 1/2 oz. (56 g)" (1/2 oz = 14 g) — iki birim %10'dan fazla çelişirse miktar BİLİNMİYOR sayılır (ND5 parantez-metrik kuralına ek).
 3. **EVR1** — 30 saniyelik tadım soruları (acılık/gövde/aroma az-tam-fazla + "tekrar yapar mısın") + tek değişkenli "sonraki deneme" önerisi; popülasyon önseli → Kaan verisine kayan ağırlık.
 4. **Firebase RTDB güvenliği** — kurallar + oda rotasyonu (STK2 aktarım kodunu da gerçekten güvenli yapar).
 5. **Mash asistanı AI** — mash süresince yardımcı yapay zekâ (Kaan istedi 2026-10-09, "işler bittikten sonra, unutmayalım").
