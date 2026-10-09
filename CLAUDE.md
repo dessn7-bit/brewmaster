@@ -1,13 +1,13 @@
 # Brewmaster Proje Notları
 
 ## Proje
-Brewmaster, Türkçe bir ev üretimi (homebrewing) web uygulaması. Tek dosya: Brewmaster_v2_79_10.html (~2MB, ~17500 satır). PWA/APK olarak deploy ediliyor.
+Brewmaster, Türkçe bir ev üretimi (homebrewing) web uygulaması. Tek dosya: Brewmaster_v2_79_10.html (~3,7 MB, ~36.850 satır — ölçüldü 2026-10-09). PWA/APK olarak deploy ediliyor.
 
 ## ÇOK ÖNEMLİ - Kullanıcı Kuralı
 Kaan kod bilmiyor. Tüm kod okuma, yazma, düzenleme, deploy işlerini Claude yapar. Kaan'a asla "şunu kopyala/yapıştır" veya "şu satırı düzenle" denmez. Kaan sadece ne istediğini söyler (bug adı, özellik), gerisini Claude halleder.
 
 ## Workflow Kuralları
-1. ASLA dosyayı tam `view` etme (token yakar, 17500 satır büyük)
+1. ASLA dosyayı tam `view` etme (token yakar, ~36.850 satır)
 2. grep/findstr ile hedefli oku
 3. str_replace ile düzenle
 4. Değişiklikten sonra syntax kontrol yap (node -c gibi)
@@ -19,14 +19,6 @@ Kaan kod bilmiyor. Tüm kod okuma, yazma, düzenleme, deploy işlerini Claude ya
 - Kaan'a "kralım" deme
 - Direkt, dürüst, fikirli ol
 - Bilimsel ol, tutarsız olma
-
-## H Bug Listesi (kritik)
-- H1: 81 adet defansif olmayan .find çağrısı (null check eksik)
-- H2: rice_hulls grist hesaplamasında hata
-- H3: hSRM'de post-fermentation dkFactor sorunu
-- H4: m.mo null handling eksik
-- H5: hOG'da mL case problemi
-- H6: maltEkle'de duplicate satır oluşuyor
 
 ## M Backlog
 M1-M10 UX iyileştirmeleri var ama detayı şu an belirsiz, Kaan hatırladıkça eklenecek.
@@ -43,7 +35,8 @@ M1-M10 UX iyileştirmeleri var ama detayı şu an belirsiz, Kaan hatırladıkça
 1i. **AI2** — TAMAM (c609084, SW v131-464). korpus_kullanim.js 76 KB (346 kalem; katkı miktarları birimsiz → g/L yok); web_search_20250305, 18 izinli alan, max_uses 3; kanonik anahtar; Table Saison kaldırıldı (240 satır); tests/tuzak_seti.json 60 istem + tests/tuzak_kos.mjs.
 1j. **AI3** (gorevler/AI3.md, 7 madde) — Claude set incelemesi: D gerçek iki tur değildi, tarafsızlaştırma baskıyı siliyor (ham yol eklenecek), C03/C04/C12/A12/B02 belirsiz → değişecek, B puanlama kuralı. Kaan harcama tavanını KURDU (2026-10-09); anahtarı Console'da göremiyor (yalnız uygulamada) → gerçek koşu UYGULAMA İÇİNDEN ('🧪 Tuzak testini çalıştır', anahtar uygulamadan çıkmaz, sonuç anahtarsız kopyalanıp CC'ye yapıştırılır), Models API + fiyat doğrulama, web gerçek doğrulama (+WLP565 değeri), açılış kararı. — DURUM (SW v131-466): gerçek koşu #1 (2026-10-09) 5,29 $ — 55 gerçek adımın 46'sı max_tokens kesilmesi (Sonnet 5.5 effort high + thinking; düzeltildi: between_tools + effort medium, max_tokens 3000 — CANLI DOĞRULANMADI), kalan 83 adım bakiye/limit hatası (koşucu artık durur, adımı saymaz, Devam yalnız hatalıları koşar). Gerçek adımlarda uydurma 2/9 (B08, B09) > eşik → Kaan kuralı: yeni harcama YOK, asistan KAPALI. Kaan bakiye yükleyene kadar gerçek API çağrısı yok.
 1j2. **AI4** (gorevler/AI4.md, 9 madde, YENİDEN YAZILDI 2026-10-09) — KANIT-ÖNCE ASİSTAN (Kaan kararı: tat öznel, AI yorumu istenmiyor; "uygulama 376 bin reçetede arasın, sonuca göre internette araştırsın"). Korpus tablosu malzeme×stil tam sayım + kütle birimli g/L; kanıt paketi AI'sız; web sorgularını uygulama üretir; AI yalnız kaynaklı özet (Kaan'ın soru cümlesini görmez, tat hükmü yasak, yokluk olumsuz yorumlanmaz); yorum katmanı varsayılan KAPALI; kanıt yoksa "bulamadım" + BARDAK DENEMESİ (tentür, doz basamakları, partiye ölçek, sonuç kaydı → EVR1 kişisel kol). Uydurma önlemi (B08/B09), puanlama düzeltmesi, tuzak seti +T grubu (16 tat istemi), D ve ham yol bu koşuda yok. Gerçek koşu: ön kontrol → önce Haiku 5.5 tüm set 2 tur → kalan gruplar Sonnet 5.5. Bütçe kalan 6,71 $.
-1j3. **AI5** (gorevler/AI5.md, 8 madde; AI4 SONRASI) — "Bu reçeteyi nasıl geliştirebilirim?" (Kaan istedi 2026-10-09). Hedef çipleri (varsayılan stile/ödüllülere yaklaştır; daha kuru/gövdeli/acı/koyu…); kıyas motoru AI'sız (BJCP + iskelet + ödüllüler + korpus, p10–p90 + n); öneriyi KURAL MOTORU üretir (en fazla 3 tek değişkenli aday + önizleme + stok + kanıt; hedef→değişken tablosu kaynaklı); kişisel geçmiş (profil, maya kalibrasyonu, off-flavor, bardak denemesi); AI yalnız kaynaklı anlatır, aday ekleyemez. Bardak denemesi yalnız AI4 madde 5 üç şartıyla (Kaan: "her soruya bardak dene demeyecek"). Tuzak G grubu 8 istem, Haiku, ≤1 $.
+1j2b. **BUL1** (gorevler/BUL1.md, 7 madde; AI4 SONRASI, AI5'TEN ÖNCE — Kaan "kesinlikle istiyorum" 2026-10-09) — "Tarif et, uygulama bulsun": serbest tarif → sözlük (TR+EN, kaynaklı eşikler) + gerekirse Haiku enum seçimi → ekranda düzenlenebilir filtre çipleri → ödüllü örneklerde AI'sız arama → en fazla 5 sonuç + "Stoğumla oluştur". Belirsiz kelime iki seçenek, çelişkide sorar, enum dışı düşer, anahtarsız da çalışır. Test seti 24 tarif, gerçek koşu ≤0,50 $.
+1j3. **AI5** (gorevler/AI5.md, 8 madde; BUL1 SONRASI) — "Bu reçeteyi nasıl geliştirebilirim?" (Kaan istedi 2026-10-09). Hedef çipleri (varsayılan stile/ödüllülere yaklaştır; daha kuru/gövdeli/acı/koyu…); kıyas motoru AI'sız (BJCP + iskelet + ödüllüler + korpus, p10–p90 + n); öneriyi KURAL MOTORU üretir (en fazla 3 tek değişkenli aday + önizleme + stok + kanıt; hedef→değişken tablosu kaynaklı); kişisel geçmiş (profil, maya kalibrasyonu, off-flavor, bardak denemesi); AI yalnız kaynaklı anlatır, aday ekleyemez. Bardak denemesi yalnız AI4 madde 5 üç şartıyla (Kaan: "her soruya bardak dene demeyecek"). Tuzak G grubu 8 istem, Haiku, ≤1 $.
 1k. **Opus seçeneği** (Kaan sordu 2026-10-09) — AI3 sonucundan sonra: Ayarlar'da model seçimi (Sonnet 5.5 varsayılan / Opus 5.5 'daha dikkatli'); fiyat platform.claude.com pricing: Opus 5.5 $4/$20, Sonnet 5.5 $2/$10 (okundu 2026-10-09) → soru başı ≈2x. Karar tuzak testiyle: Sonnet geçerse Opus isteğe bağlı; kalırsa Opus ile kalan gruplar tekrar.
 1f. **ISK2** (gorevler/ISK2.md, 6 madde) — ⚠️/özellik tek kademe + sınıf farkı (Coffee Stout'ta Maris Otter→Munich 3,69 kg hatası); şeker rolü ikamesi (Dubbel Candi D-90 → Hazkat koyu kaya ~77 g + dekstroz ~79 g); rol düzeyi eşleme (belirsiz malt adları, yalnız iskelet); zamansız hop satırları; hedef kırpma incelemesi. Sonra AI1.
    (KAT1 kapsamı:) — hop aroma satırında özellik benzerliği varsayılan değil + kaynaklı hop MUADIL genişletme; renk-eşdeğer miktar (kristal/kavrulmuş); MUADIL renk metni çelişkileri (9); katkı doz denetimi; sepet farkı (Amber Malt +3). Sonra ISK1 → AI1.
@@ -63,7 +56,7 @@ M1-M10 UX iyileştirmeleri var ama detayı şu an belirsiz, Kaan hatırladıkça
    - Kaan geri bildirimi (2026-10-09, Ommegang Dubbel önizlemesi): "Munich var, yok diyor" + "CaraAroma muadili var". Ölçüm: örnek "Munich malt (10 °L)" → dark_munich (r 9); Kaan'ın Hitit Münih'i 15-16 EBC ≈ 6 °L (hititmalt.com/munih-arpa-malti1) → ⚠️ doğru ama "✕ yok" yazısı yanıltıcı → ekran dili: "stokta daha açık bir Munich var (6 °L, örnek 10 °L)". CaraAroma r 151 °L; Kaan'ın en koyu kristalleri Hitit Koyu Kristal 60-80 EBC ≈ 27 °L (hititmalt.com/koyu-kristal-arpa-malti), CaraMunich I 35 °L → muadil YOK (5x açık). Fikir: bileşik ikame (kristal + az Carafa ile renk) — ⚠️ etiketli, ileride.
    - Katalog dozaj tutarlılık denetimi: ör. lavanta kaydında 3 farklı doz (acik "1-3g/10L" = 0.1-0.3 g/L; aynı metindeki "BYO 0.25-0.5 oz/5 gal" = 0.37-0.75 g/L; varsayDozgL 1 / maxDozgL 2) — tüm KATKILAR için acik metni ↔ varsay/max alanları karşılaştır, kaynakla düzelt.
    - Ek miktarı oz↔g çelişki kontrolü: ör. örnek verisinde "dried lavender 1/2 oz. (56 g)" (1/2 oz = 14 g) — iki birim %10'dan fazla çelişirse miktar BİLİNMİYOR sayılır (ND5 parantez-metrik kuralına ek).
-3. **EVR1** — 30 saniyelik tadım soruları (acılık/gövde/aroma az-tam-fazla + "tekrar yapar mısın") + tek değişkenli "sonraki deneme" önerisi; popülasyon önseli → Kaan verisine kayan ağırlık.
+3. **EVR1** — (ileride, Kaan "şu an değil" 2026-10-09: DENEY DEFTERİ — AI5 tek değişkenli önerisi → bağlı yeni reçete → üçgen kör tadım + binom anlamlılık → kişisel kanıt; EVR1 ile birleşebilir) 30 saniyelik tadım soruları (acılık/gövde/aroma az-tam-fazla + "tekrar yapar mısın") + tek değişkenli "sonraki deneme" önerisi; popülasyon önseli → Kaan verisine kayan ağırlık.
 4. **Firebase RTDB güvenliği** — kurallar + oda rotasyonu (STK2 aktarım kodunu da gerçekten güvenli yapar).
 5. **Mash asistanı AI** — mash süresince yardımcı yapay zekâ (Kaan istedi 2026-10-09, "işler bittikten sonra, unutmayalım").
 
