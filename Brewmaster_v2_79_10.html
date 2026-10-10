@@ -32066,6 +32066,50 @@ window._BUL_ETIKET = {"German Pils":{"kod":"5D","ad":"German Pils","t":["standar
       ara('guc').forEach(function(c){ if(b.abv[1] < c.a[0] - 0.5 || b.abv[0] > c.a[1] + 0.5) out.push({ a:s, b:c, neden:s.d + ' BJCP alkolü %' + b.abv.join('–') }); }); });
     return out;
   };
+  // ── BELİRGİN KARAKTERLER (Claude değerlendirmesi + Kaan, 2026-10-11): tarifte İSTENMEDİKÇE sıralamada sona ──
+  // Etiket kaynağı sırası: (1) stilin BJCP 2021 etiketi (sour / smoke / fruit / roasty / wild-fermented) · (2) örneğin MALZEMESİ (katkı grubu Meyve,
+  // kahve) · (3) maya ailesi sour (katalog tipi) · (4) YALNIZ BJCP'de karşılığı olmayan stilde stil ADI (uygulama varsayımı).
+  // "İstenmiş" sayılması: aynı karakteri anlatan çip var (ör. ekşi ↔ lezzet:sour). Kavrulmuş için stout / porter ailesi ve siyah renk de istek sayılır (varsayım).
+  var has = function(cs, f){ return (cs || []).some(f); };
+  var KARAKTER = [
+    { k:'eksi', et:'ekşi', t:['sour'], maya:['sour'], ad:/\bsour\b|gose|berliner|lambic|gueuze|kriek|framboise|flanders|oud bruin|catharina|lichtenhainer/,
+      istek:function(cs){ return has(cs, function(c){ return c.k === 'lezzet' && c.d === 'sour'; }); } },
+    { k:'isli', et:'isli', t:['smoke'], ad:/smoke|rauch|lichtenhainer|grodzisk|gratzer/,
+      istek:function(cs){ return has(cs, function(c){ return c.k === 'lezzet' && c.d === 'smoke'; }); } },
+    // BJCP metninde yazım farkı: Tag Reference "wild-fermented", 28. kategori stilleri "wild-fermentation" — aynı etiket sayılır
+    { k:'vahsi', et:'Brett / vahşi maya', t:['wild-fermented', 'wild-fermentation'], maya:['sour'], ad:/brett|wild|lambic|gueuze|mixed ferm/,
+      istek:function(cs){ return has(cs, function(c){ return (c.k === 'maya' && c.d === 'brett') || (c.k === 'lezzet' && c.d === 'sour'); }); } },
+    { k:'meyveli', et:'meyveli', t:['fruit'], grup:'Meyve', ad:/fruit|kriek|framboise|berry|cherry|mango|smoothie|peach|tropical/,
+      istek:function(cs){ return has(cs, function(c){ if(c.k === 'malzGrup' && c.d === 'Meyve') return true; if(c.k !== 'malz') return false; var p = c.d.split(':'), kk = p[0] === 'katki' ? kayit('katki', p[1]) : null; return !!(kk && kk.g === 'Meyve'); }); } },
+    { k:'kavrulmus', et:'kavrulmuş / kahve', t:['roasty'], katki:['kahve_cekirdek'], ad:/coffee|espresso|roast|black ipa|cascadian/,
+      istek:function(cs){ return has(cs, function(c){ return (c.k === 'lezzet' && c.d === 'roasty') || (c.k === 'malz' && c.d === 'katki:kahve_cekirdek') || (c.k === 'aile' && (c.d === 'stout-family' || c.d === 'porter-family')) || (c.k === 'renk' && c.d === 'siyah'); }); } }
+  ];
+  B.KARAKTER = KARAKTER;
+  // örneğin karakterleri: [{ k, nerden:[…] }] — her neden kaynağıyla
+  B.karakter = function(x){
+    var out = [], T = x.et.t || [];
+    KARAKTER.forEach(function(K){ var n = [];
+      (K.t || []).forEach(function(t){ if(T.indexOf(t) >= 0) n.push(x.et.adKurali ? 'ad kuralı etiketi ' + t + ' (varsayım)' : 'BJCP etiketi ' + t); });
+      if(K.maya && x.mayaAile.some(function(a){ return K.maya.indexOf(a) >= 0; })) n.push('maya ailesi sour (katalog)');
+      var ids = Object.keys((x.e && x.e.ids) || {});
+      if(K.grup) ids.forEach(function(k){ var q = k.split(':'); if(q[0] !== 'katki') return; var kk = kayit('katki', q[1]); if(kk && kk.g === K.grup) n.push('malzeme ' + kk.ad); });
+      if(K.katki) ids.forEach(function(k){ if(K.katki.indexOf(k.replace(/^katki:/, '')) >= 0 && /^katki:/.test(k)) n.push('malzeme ' + (kayit('katki', k.slice(6)) || {}).ad); });
+      if(x.et.adKurali && K.ad.test(N(x.stil))) n.push('stil adı (uygulama varsayımı)');
+      if(n.length) out.push({ k:K.k, et:K.et, nerden:n }); });
+    return out;
+  };
+  B.istenmeyen = function(x, cipler){ return (x.kar || []).filter(function(r){ var K = KARAKTER.find(function(z){ return z.k === r.k; }); return !K.istek(cipler); }); };
+  // ── KURULUK YÖNTEMİ: 'mutlak' (görünür att. sabit eşik) · 'bjcpFG' (örneğin FG'si KENDİ stilinin BJCP FG bandının neresinde) · 'medyanAA' (stilin örnek medyanına göre)
+  B.KURU = 'mutlak';
+  var KURU_GORELI = { bjcpFG:{ kuru:[-INF, 0.33], orta:[0.33, 0.67], tatli:[0.67, INF], tol:0.15 }, medyanAA:{ kuru:[2, INF], orta:[-2, 2], tatli:[-INF, -2], tol:1.5 } };
+  var _med = null;
+  B.stilMedyanAA = function(st){ if(!_med){ _med = {}; var g = {}; B.indeks().forEach(function(x){ if(x.aa != null) (g[x.stil] = g[x.stil] || []).push(x.aa); });
+      Object.keys(g).forEach(function(s){ var a = g[s].sort(function(p, q){ return p - q; }); if(a.length >= 3) _med[s] = a.length % 2 ? a[(a.length - 1) / 2] : (a[a.length / 2 - 1] + a[a.length / 2]) / 2; }); }
+    return _med[st] != null ? _med[st] : null; };
+  B.kuruDeger = function(x, yontem){ yontem = yontem || B.KURU;
+    if(yontem === 'mutlak') return x.aa;
+    if(yontem === 'bjcpFG'){ var b = (typeof BJCP !== 'undefined') ? BJCP[x.stil] : null; if(!b || x.fg == null || !(b.fg[1] > b.fg[0])) return null; return Math.round((x.fg - b.fg[0]) / (b.fg[1] - b.fg[0]) * 100) / 100; }
+    var m = B.stilMedyanAA(x.stil); return (m == null || x.aa == null) ? null : Math.round((x.aa - m) * 10) / 10; };
   // ── 3) ARAMA (AI'SIZ) ──
   var _idx = null;
   B.indeks = function(){
@@ -32082,13 +32126,18 @@ window._BUL_ETIKET = {"German Pils":{"kod":"5D","ad":"German Pils","t":["standar
         srm:(o.sr != null && isFinite(+o.sr)) ? +o.sr : null, abv:ab, abvH:abH, og:og, ogH:!!o.ogH, fg:fg, ibu:ib, aa:aa, bugu:(ib != null && og && og > 1) ? Math.round(ib / ((og - 1) * 1000) * 100) / 100 : null,
         mayaAile:maya.map(B.mayaAile).filter(Boolean), et:B.stilEtiket(e.stil) };
     });
+    _idx.forEach(function(x){ x.kar = B.karakter(x); });
     return _idx;
   };
-  B.indeksSifirla = function(){ _idx = null; };
+  B.indeksSifirla = function(){ _idx = null; _med = null; };
   var TOL = { renk:3, guc:0.7, abvSayi:0.5, kuru:4, aci:0.12 };
   var ALAN = { renk:'srm', guc:'abv', abvSayi:'abv', kuru:'aa', aci:'bugu' };
   // tek çip × tek örnek → { durum:'uyuyor'|'yakin'|'uymuyor'|'bilinmiyor', puan, not }
   B.cipUyum = function(c, x){
+    if(c.k === 'kuru' && B.KURU !== 'mutlak'){ var R = KURU_GORELI[B.KURU], g = R[c.d], v0 = B.kuruDeger(x);
+      if(v0 == null) return { durum:'bilinmiyor', puan:0.75, not:B.KURU === 'bjcpFG' ? 'örnekte FG ya da stilin BJCP FG bandı yok' : 'stilde ≥ 3 örnek medyanı yok' };
+      if(v0 >= g[0] && v0 <= g[1]) return { durum:'uyuyor', puan:0 }; var ds = (v0 < g[0] ? g[0] - v0 : v0 - g[1]) / R.tol;
+      return ds <= 1 ? { durum:'yakin', puan:0.3 + 0.4 * ds } : { durum:'uymuyor', puan:Math.min(3, 1 + ds / 2) }; }
     if(ALAN[c.k]){ var v = x[ALAN[c.k]]; if(v == null) return { durum:'bilinmiyor', puan:0.75, not:'örnekte ' + ALAN[c.k].toUpperCase() + ' yok' };
       var hes = (c.k === 'guc' || c.k === 'abvSayi') && x.abvH, a = c.a, u = a[1] >= INF ? Infinity : a[1];
       if(v >= a[0] && v <= u) return { durum:'uyuyor', puan:0, hes:hes };
@@ -32121,16 +32170,18 @@ window._BUL_ETIKET = {"German Pils":{"kod":"5D","ad":"German Pils","t":["standar
       var bj = (typeof BJCP !== 'undefined') ? BJCP[x.stil] : null, sy = 0;
       yum.forEach(function(c){ var band = c.k === 'renk' ? (bj && bj.srm) : (c.k === 'guc' || c.k === 'abvSayi') ? (bj && bj.abv) : null; if(!(c.k === 'renk' || c.k === 'guc' || c.k === 'abvSayi')) return;
         if(!band){ sy += 5; return; } var cc = c.a[1] >= INF ? c.a[0] + TOL[c.k] : (c.a[0] + c.a[1]) / 2; sy += Math.abs((band[0] + band[1]) / 2 - cc) / TOL[c.k]; });
-      return { x:x, u:u, puan:Math.round(puan * 100) / 100, sertOk:sertOk && !sertBil, sertBil:sertBil, sertKac:sertKac, uymuyor:uymuyor, stilIc:SU[x.stil] ? 0 : 1, stilYakin:Math.round(sy * 10) / 10 };
+      var ist = B.istenmeyen(x, cipler);
+      return { x:x, u:u, puan:Math.round(puan * 100) / 100, sertOk:sertOk && !sertBil, sertBil:sertBil, sertKac:sertKac, uymuyor:uymuyor, stilIc:SU[x.stil] ? 0 : 1, stilYakin:Math.round(sy * 10) / 10, ist:ist, istN:ist.length };
     });
     var stok = function(r){ if(r._st !== undefined) return r._st; var s = window._bmOrnekStok ? window._bmOrnekStok(r.x.kaynak, r.x.stil, r.x.idx) : null; r._st = s ? s.durum : null; return r._st; };
     // sıra: uyum kovası (0,5 puan) → [stok ✅/🟡/🔴, anahtar açıksa] → kademe K1/K2 önce → puan → kararlı (stil, idx)
     // stok hesabı pahalı (örnek başına ~1 ms) → yalnız ilk 40 aday için
     var kova = function(r){ return Math.floor(r.puan * 2) / 2; };
-    var temel = function(a, b){ return (kova(a) - kova(b)) || (KSIRA[a.x.k] - KSIRA[b.x.k]) || (a.stilIc - b.stilIc) || (a.stilYakin - b.stilYakin) || (a.puan - b.puan) || (a.x.stil < b.x.stil ? -1 : a.x.stil > b.x.stil ? 1 : a.x.idx - b.x.idx); };
+    // İLK anahtar: istenmeyen belirgin karakter sayısı (ekşi / isli / Brett / meyveli / kavrulmuş — tarifte istenmedikçe sona)
+    var temel = function(a, b){ return (a.istN - b.istN) || (kova(a) - kova(b)) || (KSIRA[a.x.k] - KSIRA[b.x.k]) || (a.stilIc - b.stilIc) || (a.stilYakin - b.stilYakin) || (a.puan - b.puan) || (a.x.stil < b.x.stil ? -1 : a.x.stil > b.x.stil ? 1 : a.x.idx - b.x.idx); };
     var sd = function(r){ var v = DSIRA[stok(r)]; return v != null ? v : 3; };
     var sirala = function(L){ L.sort(temel); if(!opt.stok) return L;
-      var bas = L.slice(0, 40).sort(function(a, b){ return (kova(a) - kova(b)) || (sd(a) - sd(b)) || temel(a, b); }); return bas.concat(L.slice(40)); };
+      var bas = L.slice(0, 40).sort(function(a, b){ return (a.istN - b.istN) || (kova(a) - kova(b)) || (sd(a) - sd(b)) || temel(a, b); }); return bas.concat(L.slice(40)); };
     var uyan = sirala(deg.filter(function(r){ return r.sertOk && r.uymuyor === 0; }));
     var sonuc = { uyan:uyan.length, ilk:uyan.slice(0, 5), bulunamadi:!uyan.length, yakin:[], gevset:[], stiller:stilL, toplam:I.length };
     if(!uyan.length){
@@ -32231,6 +32282,7 @@ window._BUL_ETIKET = {"German Pils":{"kod":"5D","ad":"German Pils","t":["standar
       + '<div style="font-size:11px;color:var(--soluk)">' + (K[x.k] || x.k) + (kay ? ' · ' + E(kay) : '') + (x.o && x.o.yil ? ' · ' + x.o.yil : '') + (st && D[st] ? ' · ' + D[st].ikon + ' ' + E(D[st].ad) : '') + '</div>'
       + '<div style="font-size:11px;margin-top:2px">OG ' + sayi(x.og, 3) + (x.ogH ? '<sup>h</sup>' : '') + ' · FG ' + sayi(x.fg, 3) + ' · ABV ' + sayi(x.abv, 1) + (x.abvH ? '<sup>h</sup>' : '') + ' · SRM ' + sayi(x.srm, 0) + ' · IBU ' + sayi(x.ibu, 0) + '</div>'
       + '<div style="font-size:11px;margin-top:3px">' + isa + '</div>'
+      + (r.ist && r.ist.length ? '<div class="bul-ist" style="font-size:10.5px;margin-top:2px;color:#8a5a00" title="' + E(r.ist.map(function(z){ return z.et + ': ' + z.nerden.join(', '); }).join(' · ')) + '">⚠ tarifte istemediğin belirgin karakter: ' + E(r.ist.map(function(z){ return z.et; }).join(', ')) + ' — sona alındı</div>' : '')
       + '<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap"><button type="button" class="bul-onizle" onclick="BM_BUL.onizle(\'' + grup + '\',' + i + ')" style="min-height:44px;padding:0 12px;border-radius:8px;border:1px solid var(--bakir);background:transparent;color:var(--bakir);font-weight:700">Önizle</button>'
       + '<button type="button" class="bul-stok" onclick="BM_BUL.stokumla(\'' + grup + '\',' + i + ')" style="min-height:44px;padding:0 12px;border-radius:8px;border:1px solid var(--bakir);background:var(--bakir);color:#fff;font-weight:700">📦 Stoğumla oluştur</button></div></div>';
   };
@@ -32294,14 +32346,15 @@ window._BUL_ETIKET = {"German Pils":{"kod":"5D","ad":"German Pils","t":["standar
     var satir = function(s){ var a = s.a ? (s.a[0] + (s.a[1] >= INF ? '+' : '–' + s.a[1])) : s.m ? 'maya: ' + s.m.join('/') : s.t ? 'etiket ' + s.t : ''; return '<tr><td>' + E(s.k) + '</td><td>' + E(s.et) + '</td><td>' + E(a) + '</td><td>' + E(s.kel.slice(0, 6).join(', ')) + '</td><td>' + (s.v ? '<b>varsayım:</b> ' + E(s.v) : E(s.kay || '')) + '</td></tr>'; };
     return '<details class="bm-ayar-satir bul-sozluk" style="display:block"><summary class="bm-ayar-satir-text" style="cursor:pointer">🔎 Tarif et sözlüğü <small>(' + S.length + ' giriş · eşikler ve kaynakları · "varsayım" = kaynağı bulunamayan uygulama kabulü)</small></summary>'
       + '<div style="overflow-x:auto"><table style="font-size:10.5px;border-collapse:collapse;width:100%"><tr><th>eksen</th><th>değer</th><th>aralık</th><th>kelimeler</th><th>kaynak</th></tr>' + S.map(satir).join('') + '</table></div>'
-      + '<div style="font-size:10.5px;margin-top:4px">Belirsiz kelimeler (iki seçenek, ilki varsayılan): ' + BELIRSIZ.map(function(b){ return E(b.et) + ' → ' + b.sec.map(function(s){ return E(s.et); }).join(' / '); }).join(' · ') + '. Stil etiketleri: BJCP 2021 "Tags:" satırları (' + Object.keys(window._BUL_ETIKET || {}).length + ' stil); diğer stillerde köken yalnız stil adından (varsayım).</div></details>';
+      + '<div style="font-size:10.5px;margin-top:4px">Belirsiz kelimeler (iki seçenek, ilki varsayılan): ' + BELIRSIZ.map(function(b){ return E(b.et) + ' → ' + b.sec.map(function(s){ return E(s.et); }).join(' / '); }).join(' · ') + '. Stil etiketleri: BJCP 2021 "Tags:" satırları (' + Object.keys(window._BUL_ETIKET || {}).length + ' stil); diğer stillerde köken yalnız stil adından (varsayım).</div>'
+      + '<div style="font-size:10.5px;margin-top:4px"><b>Belirgin karakterler</b> (tarifte istenmedikçe sıralamada sona): ' + KARAKTER.map(function(K){ return E(K.et) + ' ← BJCP etiketi ' + E(K.t.join('/')) + (K.grup ? ' · katkı grubu ' + E(K.grup) : '') + (K.katki ? ' · katkı ' + E(K.katki.join('/')) : '') + (K.maya ? ' · maya ailesi ' + E(K.maya.join('/')) : '') + ' · BJCP dışı stilde stil adı (varsayım)'; }).join(' — ') + '. Kuruluk yöntemi: ' + E(B.KURU) + ' (2026-10-11 ölçümü: mutlak 5/8 = BJCP-FG 5/8 > medyan 4/8).</div></details>';
   };
   // ── 6) BUL SETİ KOŞUCUSU (Ayarlar ▸ AI ▸ 🧪; yalnız AI gerektiren + uydurma + çelişkili istemler, Haiku, tavan 0,50 $) ──
-  var SON_LS = 'ai_bul_sonuc_v1', ARS_LS = 'ai_bul_arsiv_v1';
-  B.SON_LS = SON_LS; B.ARS_LS = ARS_LS; B.TAVAN = 0.50; B.SET_URL = 'tests/bul_seti.json'; B.ON_ADIM = 2;
+  var SON_LS = 'ai_bul_sonuc_v1', ARS_LS = 'ai_bul_arsiv_v1', YAR_LS = 'ai_bul_yarim_v1';
+  B.SON_LS = SON_LS; B.ARS_LS = ARS_LS; B.YAR_LS = YAR_LS; B.TAVAN = 0.50; B.SET_URL = 'tests/bul_seti.json'; B.ON_ADIM = 2;
   function lsOku(k){ try{ return JSON.parse(localStorage.getItem(k) || 'null'); }catch(e){ return null; } }
   function lsYaz(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } }
-  B.sonucAl = function(){ return lsOku(SON_LS); }; B.arsivAl = function(){ var a = lsOku(ARS_LS); return Array.isArray(a) ? a : []; };
+  B.sonucAl = function(){ return lsOku(SON_LS); }; B.arsivAl = function(){ var a = lsOku(ARS_LS); return Array.isArray(a) ? a : []; }; B.yarimAl = function(){ var a = lsOku(YAR_LS); return Array.isArray(a) ? a : []; };
   // tek istemi değerlendir (sözlük + gerekiyorsa AI) → metrik girdisi
   B.degerlendir = function(it, cipler, aiCip){
     var hep = cipler.concat(aiCip || []), kodlar = hep.map(function(c){ return c.k + ':' + c.d; });
@@ -32322,7 +32375,14 @@ window._BUL_ETIKET = {"German Pils":{"kod":"5D","ad":"German Pils","t":["standar
     var A = window.BM_AI; if(!opt.mock && !(A && A.anahtarAl && A.anahtarAl())){ B.mesaj = 'Bu cihazda kayıtlı AI anahtarı yok.'; B.panelCiz(); return Promise.resolve(null); }
     B.calisiyor = true; B.durdur = false; B.mesaj = '';
     var d = { tur:'BREWMASTER-BUL', surum:1, kosuId:Date.now(), tarih:new Date().toISOString().slice(0, 16), mock:!!opt.mock, bitti:false, durdu:null, tavan:opt.tavan || B.TAVAN, harcama:{ usd:0, n:0 }, sonuclar:[], on:null, model:{ ucuz:{ id:A && A.MODEL ? A.MODEL.ucuz.id : null } } };
-    var bitir = function(){ d.metrik = B.metrik(d.sonuclar); B.calisiyor = false; lsYaz(SON_LS, d); var a = B.arsivAl(); a = [{ id:String(d.kosuId), tarih:d.tarih, bitti:d.bitti, mock:d.mock, usd:d.harcama.usd, karar:d.bitti ? 'bitti' : 'yarım — ' + (d.durdu || ''), sonuc:d }].concat(a).slice(0, 5); lsYaz(ARS_LS, a); B.panelCiz(); return d; };
+    // KORUMA (AI4D deseni, Kaan 2026-10-11): asıl sonuç + arşiv YALNIZ biten koşuyla; durdurulan / hatalı / bitmeyen koşu ayrı "yarım" listesine.
+    // Yeni koşu, durdurma ya da hata arşivi silmez, üstüne yazmaz (yalnız 6. bitmiş sonuç en eskiyi düşürür).
+    var bitir = function(){ d.metrik = B.metrik(d.sonuclar); B.calisiyor = false;
+      var e = { id:String(d.kosuId), tarih:d.tarih, bitti:d.bitti, mock:d.mock, usd:d.harcama.usd, karar:d.bitti ? 'bitti' + (d.metrik ? ' · çip ' + d.metrik.cip + ' · uydurma ' + d.metrik.uydurma : '') : 'yarım — ' + (d.durdu || ''), sonuc:d }, ok;
+      if(d.bitti){ ok = lsYaz(ARS_LS, [e].concat(B.arsivAl().filter(function(x){ return x.id !== e.id; })).slice(0, 5)); lsYaz(SON_LS, d); }
+      else ok = lsYaz(YAR_LS, [e].concat(B.yarimAl().filter(function(x){ return x.id !== e.id; })).slice(0, 5));
+      if(!ok) B.mesaj = 'Sonuç yazılamadı (tarayıcı depolaması dolu) — HEMEN "BUL sonucunu kopyala" ile al.';
+      B.son = d; B.panelCiz(); return d; };
     return (opt.set ? Promise.resolve(opt.set) : fetch(B.SET_URL + '?t=' + Date.now(), { cache:'no-store' }).then(function(r){ if(!r.ok) throw new Error('BUL seti okunamadı (' + r.status + ')'); return r.json(); })).then(function(set){
       d.setSurum = set.surum;
       var tum = set.tarifler || [], ai = tum.filter(function(t){ return t.grup !== 'sozluk'; });
@@ -32351,17 +32411,21 @@ window._BUL_ETIKET = {"German Pils":{"kod":"5D","ad":"German Pils","t":["standar
   };
   B.kopyaMetni = function(s){ return ('BREWMASTER-BUL v1\n' + JSON.stringify(s || B.sonucAl() || {})).replace(/sk-ant-[A-Za-z0-9_\-]+/g, 'sk-ant-***'); };
   B.kopyala = function(s){ var t = B.kopyaMetni(s); try{ if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(function(){ if(typeof bmToast === 'function') bmToast('BUL sonucu panoya kopyalandı (anahtarsız)', 'success'); }, function(){ var el = document.getElementById('bul-kopya'); if(el){ el.style.display = 'block'; el.value = t; } }); } }catch(e){} return t; };
-  B.kopyalaKayit = function(i){ var e = B.arsivAl()[i]; return e ? B.kopyala(e.sonuc) : null; };
-  B.baslat = function(){ var t = B.aiTahmin() || 0.003; var m = 'BUL seti: 12 istem, yalnız Haiku. Yaklaşık ' + (t * 12).toFixed(3).replace('.', ',') + ' $ (tavan 0,50 $). Önceki BUL sonuçları arşivde kalır. Başlatılsın mı?';
+  B.kopyalaKayit = function(i, tur){ var e = (tur === 'y' ? B.yarimAl() : B.arsivAl())[i]; return e ? B.kopyala(e.sonuc) : null; };
+  B.baslat = function(){ var t = B.aiTahmin() || 0.003, a = B.arsivAl().filter(function(x){ return !x.mock; }).length;
+    var m = (a ? 'Önceki ' + a + ' BUL sonucu arşivde kalır (Önceki sonuçlar listesinden kopyalanabilir). ' : '') + 'BUL seti: 12 istem, yalnız Haiku. Yaklaşık ' + (t * 12).toFixed(3).replace('.', ',') + ' $ (tavan 0,50 $). Başlatılsın mı?';
     var ok = false; try{ ok = (window.BM_TUZAK && window.BM_TUZAK.onayla) ? window.BM_TUZAK.onayla(m) : confirm(m); }catch(e){} if(!ok) return Promise.resolve(null); return B.kos(); };
   B.panelHTML = function(){
-    var s = B.sonucAl(), a = B.arsivAl(), m = s && s.metrik, ms = s && s.metrikSozluk, y = function(v){ return v == null ? '—' : '%' + (v * 100).toFixed(0); };
+    var s = B.son || B.sonucAl(), a = B.arsivAl(), m = s && s.metrik, ms = s && s.metrikSozluk, y = function(v){ return v == null ? '—' : '%' + (v * 100).toFixed(0); };
     return (B.mesaj ? '<div style="color:#8c1d18;font-size:12px">⚠️ ' + E(B.mesaj) + '</div>' : '')
       + (B.calisiyor ? '<div style="font-size:11px">çalışıyor… ekran açık kalsın</div>' : '')
       + (s ? '<div class="bul-son" style="font-size:11px;margin-top:4px">Son BUL koşusu: ' + E(s.tarih) + (s.mock ? ' · MOCK' : '') + ' · $' + (s.harcama ? (+s.harcama.usd).toFixed(4) : '?') + ' · ' + (s.bitti ? 'bitti' : 'yarım: ' + E(s.durdu || '')) + (s.on ? ' · ön kontrol ' + (s.on.gecti ? 'geçti' : 'KALDI') : '')
         + (m ? '<br>AI istemleri: çip isabeti ' + y(m.cipIsabet) + ' (' + m.cip + ') · uydurma ' + m.uydurma + ' · çelişkide soru ' + y(m.celiskiSoru) + ' (' + m.celiski + ') · beklenen örnek ilk-5 ' + y(m.ornekIlk5) + ' (' + m.ornek + ')' : '')
         + (ms ? '<br>Sözlük istemleri (AI yok): çip isabeti ' + y(ms.cipIsabet) + ' (' + ms.cip + ') · beklenen örnek ilk-5 ' + y(ms.ornekIlk5) + ' (' + ms.ornek + ')' : '') + '</div>' : '')
-      + (a.length ? '<div style="font-size:11px;margin-top:4px">Önceki BUL sonuçları: ' + a.map(function(e, i){ return '<button type="button" class="bul-arsiv-kopyala" onclick="BM_BUL.kopyalaKayit(' + i + ')" style="min-height:36px;margin:2px 4px 0 0;font-size:11px">📋 ' + E(e.tarih) + (e.mock ? ' mock' : '') + ' · ' + E(e.karar) + '</button>'; }).join('') + '</div>' : '');
+      + (function(){ var y = B.yarimAl(), btn = function(e, i, tur){ return '<button type="button" class="bul-arsiv-kopyala" onclick="BM_BUL.kopyalaKayit(' + i + ',\'' + tur + '\')" style="min-height:44px;margin:2px 4px 0 0;font-size:11px">📋 ' + E(e.tarih) + (e.mock ? ' mock' : '') + ' · ' + (e.bitti ? '✓ ' : '⏸ ') + E(e.karar) + ' · $' + (+e.usd || 0).toFixed(4) + '</button>'; };
+        return (a.length || y.length) ? '<details class="bul-onceki" style="margin-top:4px"><summary style="cursor:pointer;font-size:11.5px;font-weight:700">📚 Önceki BUL sonuçları (' + a.length + ' bitmiş · ' + y.length + ' yarım)</summary>'
+          + a.map(function(e, i){ return btn(e, i, 'a'); }).join('') + y.map(function(e, i){ return btn(e, i, 'y'); }).join('')
+          + '<div style="font-size:10.5px;color:var(--soluk)">Son 5 bitmiş + son 5 yarım koşu bu cihazda (yedeğe / senkrona girmez). Yeni koşu ya da durdurma bunları silmez.</div></details>' : ''; })();
   };
   B.panelCiz = function(){ var el = document.getElementById('bul-panel'); if(el) el.innerHTML = B.panelHTML(); };
   B.kartAyarHTML = function(){

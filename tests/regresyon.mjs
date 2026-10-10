@@ -10330,6 +10330,72 @@ const CASELER = [
     }
   },
   {
+    kod: 'BUL1-KARAKTER', ad: 'BELİRGİN KARAKTER SIRASI (Kaan 2026-10-11): ekşi / isli / Brett-vahşi / meyveli / kavrulmuş-kahve tarifte istenmedikçe SONA · etiket kaynağı BJCP etiketi > malzeme > maya ailesi > (yalnız BJCP dışı stilde) stil adı = varsayım · kabul: "hafif, açık renkli, az acı yaz birası" ilk 5\'te ekşi/isli/Brett YOK; "ekşi bir buğday birası" ekşiler önde · KASITLI BOZMA: kural kalkarsa kırmızı',
+    calistir: (page) => page.evaluate(() => {
+      const B = window.BM_BUL, I = B.indeks(), ilk = m => B.ara(B.coz(m).cipler, {}).ilk, kar = r => r.x.kar.map(z => z.k);
+      __REG.ok('5 karakter tek tabloda; her örneğin karakter nedeni yazılı; ad kuralı YALNIZ BJCP\'de karşılığı olmayan stilde', B.KARAKTER.length === 5 && I.every(x => x.kar.every(z => z.nerden.length)) && I.filter(x => !x.et.adKurali).every(x => x.kar.every(z => z.nerden.every(n => !/stil adı/.test(n)))));
+      __REG.ok('BJCP yazım farkı: 28A Brett Beer ("wild-fermentation") Brett / vahşi sayılır', I.filter(x => x.stil === 'Brett Beer / Farmhouse Brett').every(x => kar({ x }).indexOf('vahsi') >= 0));
+      const yaz = ilk('hafif, açık renkli, az acı yaz birası');
+      __REG.ok('KABUL: yaz birası ilk 5\'te ekşi / isli / Brett YOK', yaz.length === 5 && yaz.every(r => !kar(r).some(k => k === 'eksi' || k === 'isli' || k === 'vahsi')), yaz.map(r => r.x.stil).join(' / '));
+      const eb = ilk('ekşi bir buğday birası');
+      __REG.ok('KABUL: "ekşi bir buğday birası" → ilk 5\'in hepsi ekşi, istenmeyen sayılmadı', eb.length === 5 && eb.every(r => kar(r).indexOf('eksi') >= 0 && r.istN === 0), eb.map(r => r.x.stil).join(' / '));
+      const ks = ilk('kahveli bir stout');
+      __REG.ok('kavrulmuş / kahve stout ya da kahve isteyende istenmeyen sayılmaz', ks.every(r => r.istN === 0));
+      const ist = B.ara(B.coz('açık renkli bir bira').cipler, {}), son = ist.ilk.concat([]);
+      __REG.ok('kart: istenmeyen karakterde "⚠ … sona alındı" + nedeni (title)', /tarifte istemediğin belirgin karakter: ekşi — sona alındı/.test(B.kartHTML({ x: I.find(x => kar({ x }).indexOf('eksi') >= 0), u: {}, ist: [{ et: 'ekşi', nerden: ['BJCP etiketi sour'] }] }, 0, 'ilk')));
+      const es = B.istenmeyen; B.istenmeyen = () => []; let bozuk;
+      try { bozuk = ilk('hafif, açık renkli, az acı yaz birası'); } finally { B.istenmeyen = es; }
+      __REG.ok('KASITLI BOZMA: kural kalkınca yaz birası ilk 5\'e ekşi/Brett GİRER → kabul denetimi kırmızıya döner', bozuk.some(r => kar(r).some(k => k === 'eksi' || k === 'vahsi')), bozuk.map(r => r.x.stil).join(' / '));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BUL1-KURU', ad: 'KURULUK YÖNTEMİ (Kaan 2026-10-11): mutlak (görünür att. sabit) · bjcpFG (FG\'nin kendi stil bandındaki yeri) · medyanAA (stil örnek medyanına göre) karşılaştırıldı; 8 kuruluk isteminde mutlak 5/8 = bjcpFG 5/8 > medyanAA 4/8 (S04: 2 / 1 / 0 sonuç) → varsayılan MUTLAK · "kahveli bir stout" (tatlı çipsiz) de 2 sonuç: kısıt kahve, kuruluk değil',
+    calistir: (page) => page.evaluate(() => {
+      const B = window.BM_BUL, I = B.indeks(), n = m => B.ara(B.coz(m).cipler, {}).uyan;
+      __REG.ok('varsayılan yöntem mutlak', B.KURU === 'mutlak');
+      __REG.ok('"kahveli tatlı bir stout" 2 · "tatlı" çipsiz "kahveli bir stout" 2 (kısıt: yalnız 2 stout örneği kahve içeriyor)', n('kahveli tatlı bir stout') === 2 && n('kahveli bir stout') === 2 && I.filter(x => /stout/i.test(x.stil) && window._bmMalzemeEslesir(x.e, { tip: 'katki', id: 'kahve_cekirdek' })).length === 2);
+      const tat = B.cipDetay({ id: 't', k: 'kuru', d: 'tatli', et: 'tatlı' }), r = {};
+      try {
+        B.KURU = 'bjcpFG'; r.bj = n('kahveli tatlı bir stout'); const ms = I.find(x => x.stil === 'Milk Stout / Sweet Stout' && x.fg != null), b = BJCP['Milk Stout / Sweet Stout'];
+        r.rel = B.kuruDeger(ms); r.relOk = Math.abs(r.rel - (ms.fg - b.fg[0]) / (b.fg[1] - b.fg[0])) < 0.01; r.bil = B.cipUyum(tat, { stil: ms.stil, fg: null }).durum;
+        B.KURU = 'medyanAA'; r.md = n('kahveli tatlı bir stout');
+      } finally { B.KURU = 'mutlak'; }
+      __REG.ok('bjcpFG: değer = FG\'nin stil bandındaki yeri (0 alt, 1 üst); FG yoksa "bilinmiyor" · ölçülen S04: bjcpFG 1, medyanAA 0', r.relOk && r.bil === 'bilinmiyor' && r.bj === 1 && r.md === 0, JSON.stringify(r));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BUL1-ARSIV', ad: 'BUL KOŞU KORUMASI (AI4D deseni, Kaan 2026-10-11): biten sonuç asıl yere + arşive (son 5); durdurulan / hatalı koşu ayrı "yarım" listesine, asıl sonucu ve arşivi SİLMEZ · Önceki sonuçlardan kopyalama · yeni koşu onay ister ("arşivde kalır") · KASITLI BOZMA: eski davranış (her koşu asıl yere yazar) kırmızı',
+    calistir: async (page) => {
+      const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'bul_seti.json'), 'utf8'));
+      return page.evaluate(async (set) => {
+        const B = window.BM_BUL, A = window.BM_AI, K = [B.SON_LS, B.ARS_LS, B.YAR_LS], es = K.map(k => localStorage.getItem(k)), oku = k => JSON.parse(localStorage.getItem(k) || 'null');
+        const bos = { bul: { secimler: [], cozemedim: ['x'] } };
+        const kos = async (sen, opt) => { const m = __REG.ai1Mock(sen); try { return await B.kos(Object.assign({ mock: true, set }, opt || {})); } finally { m.geri(); } };
+        try {
+          K.forEach(k => localStorage.removeItem(k));
+          const d1 = await kos(bos), id1 = String(d1.kosuId);
+          __REG.ok('biten koşu → asıl sonuç + arşiv 1', d1.bitti && String(oku(B.SON_LS).kosuId) === id1 && B.arsivAl().length === 1 && B.arsivAl()[0].id === id1 && !B.yarimAl().length);
+          const d2 = await kos({ bul: () => { B.durdur = true; return { secimler: [], cozemedim: ['x'] }; } });
+          __REG.ok('durdurulan koşu → yarım listesi; asıl sonuç ve arşiv AYNEN', !d2.bitti && /durdurdu/.test(d2.durdu) && B.yarimAl().length === 1 && String(oku(B.SON_LS).kosuId) === id1 && B.arsivAl().length === 1 && B.arsivAl()[0].id === id1);
+          const m3 = __REG.ai1Mock({}); const sor = A.sor; A.sor = () => Promise.reject(new Error('ağ koptu'));
+          let d3; try { d3 = await B.kos({ mock: true, set }); } finally { A.sor = sor; m3.geri(); }
+          __REG.ok('hatalı koşu → yarım listesi (2), asıl sonuç ve arşiv AYNEN', /^hata: ağ koptu/.test(d3.durdu) && B.yarimAl().length === 2 && String(oku(B.SON_LS).kosuId) === id1 && B.arsivAl().length === 1);
+          const ta = B.kopyalaKayit(0, 'a') || '', ty = B.kopyalaKayit(0, 'y') || '';
+          __REG.ok('Önceki sonuçlar: bitmişten ve yarımdan ayrı ayrı kopyalanır; ana "BUL sonucunu kopyala" biteni verir', ta.indexOf('"kosuId":' + id1) > 0 && ty.indexOf('"kosuId":' + d3.kosuId) > 0 && B.kopyaMetni().indexOf('"kosuId":' + id1) > 0 && /📚 Önceki BUL sonuçları \(1 bitmiş · 2 yarım\)/.test(B.panelHTML()));
+          localStorage.setItem(B.ARS_LS, JSON.stringify([{ id: '1', tarih: 't', bitti: true, mock: false, usd: 0.03, karar: 'bitti', sonuc: { kosuId: 1 } }].concat(B.arsivAl())));
+          const T3 = window.BM_TUZAK, oe = T3.onayla; let soru = null; T3.onayla = m => { soru = m; return false; };
+          let r; try { r = await B.baslat(); } finally { T3.onayla = oe; }
+          __REG.ok('bitmiş gerçek sonuç varken yeni koşu ONAY ister ("arşivde kalır", ≈ maliyet, tavan 0,50 $); hayır → koşu yok', r === null && /arşivde kalır/.test(soru) && /tavan 0,50 \$/.test(soru) && /Yaklaşık 0,0\d+ \$/.test(soru), soru);
+          localStorage.setItem(B.SON_LS, JSON.stringify(d2));
+          __REG.ok('KASITLI BOZMA: yarım koşu asıl yere yazılmış olsaydı (eski davranış) koruma denetimi KIRMIZI', String(oku(B.SON_LS).kosuId) !== id1);
+        } finally { B.durdur = false; B.son = null; K.forEach((k, i) => es[i] == null ? localStorage.removeItem(k) : localStorage.setItem(k, es[i])); }
+        return __REG.al();
+      }, set);
+    }
+  },
+  {
     kod: 'AI4D-ARSIV', ad: 'TUZAK SONUÇ ARŞİVİ (koşu #3 sonucu kayboldu, 2026-10-10): bitmiş sonuç ayrı arşivde (son 5) · yeni koşu, durdurma ve hata arşive ve asıl sonuca dokunmaz, yarım koşu ayrı listede · Önceki sonuçlar listesinden kopyalama · bitmiş sonuç varken yeni koşu onay ister (0,70 $) · Durdur ön kontrolde de çalışır · bütçe defteri (koşu #3 ihtiyatlı 1,40 $ + durdurulan koşunun kayıtlı harcaması) · kasıtlı bozmayla kırmızı',
     calistir: async (page) => {
       const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'tuzak_seti.json'), 'utf8'));
