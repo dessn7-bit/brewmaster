@@ -10257,7 +10257,7 @@ const CASELER = [
       try {
         __REG.ok('beta açık + anahtar → AI düğmesi + tahmini maliyet', B.aiHazir() && /bul-ai-btn/.test(B.govdeHTML()) && /AI ile çöz \(≈ \$0\.\d{4}\)/.test(B.govdeHTML()));
         const r = await B.aiCalistir(), p = m.log[m.log.length - 1], enumL = p.sema.schema.properties.secimler.items.properties.kod.enum;
-        __REG.ok('çağrı: kullanım bul, Haiku (ucuz), şema enum = kod listesi (stil 240 + katalog + sözlük), kod listesi bağlamda', p.kullanim === 'bul' && p.modelKey === 'ucuz' && enumL.length === B.kodlar().length && enumL.indexOf('stil:Dubbel') >= 0 && enumL.length > 700 && /KOD LİSTESİ/.test(p.baglam), enumL.length);
+        __REG.ok('çağrı: kullanım bul, Haiku (ucuz), şema enum = İSTEK BAŞINA kod listesi (sözlük + 240 stil + yalnız kalan kelimeye benzeyen ürün; tam 884 listenin yarısından az), kod listesi bağlamda', p.kullanim === 'bul' && p.modelKey === 'ucuz' && enumL.length === B.kodlar(B.coz(B.d.metin).cozulemeyen).length && enumL.length < B.kodlar().length / 2 && enumL.filter(k => /^stil:/.test(k)).length === Object.keys(BJCP).length && enumL.indexOf('stil:Dubbel') >= 0 && /KOD LİSTESİ/.test(p.baglam), enumL.length + ' / ' + B.kodlar().length);
         __REG.ok('enum dışı kod DÜŞTÜ (pembe kristal), geçerli kod çip oldu (🤖 etiketli), "çözemedim" gösterildi', r.ok && r.cipler.length === 1 && r.cipler[0].k === 'stil' && r.dusen.length === 1 && B.d.cipler.some(c => c.k === 'stil' && c.kaynakMetin === 'AI') && /çözemedi: westmalle/.test(B.d.aiDurum) && /listede olmayan 1 seçim düştü/.test(B.d.aiDurum));
         const yuk = JSON.stringify(p);
         __REG.ok('AI\'ya stok / reçete / not GİTMEDİ; tarif metni gitti', !/REGTEST-GIZLI/.test(yuk) && /Westmalle/.test(p.soru), (yuk.match(/REGTEST-GIZLI[A-Z-]*/g) || []).join());
@@ -10287,7 +10287,7 @@ const CASELER = [
         __REG.ok('çelişkili 3/3 → soru (arama yok)', C.every(r => r.celiski && !r.ilk.length));
         // mock koşu: AI istemleri için beklenen kodlar; uydurmada çözemedim
         const yan = { A01: ['renk:acik'], A02: ['stil:Dubbel'], A03: ['stil:Foreign Extra Stout'], A04: ['stil:Christmas / Holiday Beer'], A05: ['stil:Witbier / Belgian White'], A06: ['stil:Imperial IPA / DIPA'] };
-        const kos = async (uyd) => { const m = __REG.ai1Mock({ bul: (i, p) => { const t = set.tarifler.find(x => p.soru.indexOf('"' + x.metin + '"') >= 0) || {}; const k = yan[t.id] || (uyd && t.id === 'U01' ? ['malz:malt:c120'] : []);
+        const kos = async (uyd) => { const m = __REG.ai1Mock({ bul: (i, p) => { const t = set.tarifler.find(x => p.soru.indexOf('"' + x.metin + '"') >= 0) || {}; const k = yan[t.id] || (uyd && t.id === 'U01' ? ['malz:malt:koyu_kristal'] : []);
           return { secimler: k.filter(x => bilinen[x]).map(x => ({ kod: x, olumsuz: false, ifade: 'mock' })), cozemedim: k.length ? [] : ['mock-çözemedim'] }; } });
           try { return await B.kos({ mock: true, set }); } finally { m.geri(); } };
         const es = [localStorage.getItem(B.SON_LS), localStorage.getItem(B.ARS_LS)];
@@ -10297,7 +10297,7 @@ const CASELER = [
           __REG.ok('mock metrikler: AI istemleri beklenen çip + örnek, çelişkide soru 3/3, uydurma 0; sözlük metrikleri koşuya yazıldı', d.metrik.uydurma === 0 && d.metrik.celiski === '3/3' && d.metrik.cipIsabet >= 0.9 && d.metrikSozluk.cip === '38/38', JSON.stringify(d.metrik));
           __REG.ok('sonuç ai_bul_* anahtarlarında (bm_ öneksiz → yedeğe girmez), arşivde, kopya anahtarsız', !!B.sonucAl() && B.arsivAl().length >= 1 && !/^bm_/.test(B.SON_LS) && /^BREWMASTER-BUL v1/.test(B.kopyaMetni()) && !/sk-ant-[A-Za-z0-9]{8}/.test(B.kopyaMetni()));
           const d2 = await kos(true);
-          __REG.ok('KASITLI BOZMA: AI U01\'de gerçek ama İSTENMEYEN malzeme (Crystal 120) seçerse uydurma sayacı 1 → metrik kırmızı', d2.metrik.uydurma === 1, JSON.stringify(d2.metrik));
+          __REG.ok('KASITLI BOZMA: AI U01\'de istek listesindeki BENZER ama istenmeyen malzemeyi (Koyu Kristal, "Pembe Kristal 120" yerine) seçerse uydurma sayacı 1 → metrik kırmızı (tam listeden Crystal 120 artık enum dışı, düşer)', d2.metrik.uydurma === 1, JSON.stringify(d2.metrik));
           __REG.ok('Ayarlar ▸ AI: BUL seti düğmesi + son koşu metrikleri + önceki sonuçlar kopyala', /BUL setini çalıştır/.test(B.kartAyarHTML()) && /çip isabeti/.test(B.panelHTML()) && /bul-arsiv-kopyala/.test(B.panelHTML()));
         } finally { [B.SON_LS, B.ARS_LS].forEach((k, i) => es[i] == null ? localStorage.removeItem(k) : localStorage.setItem(k, es[i])); }
         return __REG.al();
@@ -10393,6 +10393,49 @@ const CASELER = [
         } finally { B.durdur = false; B.son = null; K.forEach((k, i) => es[i] == null ? localStorage.removeItem(k) : localStorage.setItem(k, es[i])); }
         return __REG.al();
       }, set);
+    }
+  },
+  {
+    kod: 'BUL1-TUR3', ad: 'BUL KOŞUSU TUR 3 (Kaan 2026-10-11 — "Tamam\'a bastım, bir şey olmadı"): istek başına küçük enum (sözlük + 240 stil + kalan kelimeye benzeyen ≤ 40 ürün; tam 884 değil) · tahmin GERÇEK istek boyutundan · "bul" zaman aşımı 120 sn · Tamam\'dan hemen sonra "çalışıyor…" · bitiş / ön kontrol / hata toast\'u + panelde kalıcı mesaj · ön kontrol nedeni adım adım (aiOk, hata, giriş token, tahmin, kod sayısı) · ana kopyala düğmesi bitmiş yoksa son yarım koşuyu kopyalar ve söyler · KASITLI BOZMA',
+    calistir: async (page) => {
+      const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'bul_seti.json'), 'utf8')), html = fs.readFileSync(path.join(KOK, HTML_AD), 'utf8');
+      const zaman = /bul:\s+\{[^}]*zamanAsimi: 120000/.test(html) && /setTimeout\(function\(\)\{ ac\.abort\(\); \}, \(KULLANIM\[p\.kullanim\] && KULLANIM\[p\.kullanim\]\.zamanAsimi\) \|\| ZAMAN_ASIMI\)/.test(html);
+      return page.evaluate(async (set, zaman) => {
+        const B = window.BM_BUL, A = window.BM_AI, K = [B.SON_LS, B.ARS_LS, B.YAR_LS], es = K.map(k => localStorage.getItem(k));
+        __REG.ok('"bul" çağrısının zaman aşımı 120 sn (yeni şemanın ilk derlemesi), diğer kullanımlar 60 sn', zaman);
+        const tam = B.kodlar(), i2 = B.istekKur('Westmalle\'nin koyusu gibi bir şey', []), iw = B.istekKur('Weihenstephan mayalı bir şey', []);
+        __REG.ok('istek başına enum: sözlük + 240 stil her zaman, ürün yalnız kalan kelimeye benzeyen ("westmalle" → "west coast" ürünü YOK; "weihenstephan" → WY3068 VAR)', i2.kod.length < 330 && i2.kod.filter(x => /^stil:/.test(x.kod)).length === Object.keys(BJCP).length && B.SOZLUK.every(s => i2.kod.some(x => x.kod === s.k + ':' + s.d)) && !i2.kod.some(x => /^malz:/.test(x.kod) && /west/i.test(x.et)) && iw.kod.some(x => x.kod === 'malz:maya:wy3068'), i2.kod.length + ' kod');
+        const uz = A.SISTEMLER.bul.length + i2.baglam.length + i2.soru.length + JSON.stringify(i2.sema).length;
+        __REG.ok('tahmin GERÇEK istekten: giriş = ⌈(sistem + bağlam + soru + şema) / 2,5⌉ + 300', i2.tahmin.gir === Math.ceil(uz / 2.5) + 300 && i2.tahmin.usd > 0, JSON.stringify(i2.tahmin));
+        const tamUz = A.SISTEMLER.bul.length + B.aiBaglam(tam).length + JSON.stringify(B.aiSema(tam.map(x => x.kod))).length;
+        __REG.ok('KASITLI BOZMA: tam liste (884 kod) geri gelirse istek ≥ 2,5 kat büyür → bu denetim kırmızıya döner', tam.length > 800 && tamUz > 2.5 * uz, tam.length + ' kod · ' + tamUz + ' / ' + uz + ' karakter');
+        const toast = [], tEs = window.bmToast; window.bmToast = (m, t) => toast.push(t + ': ' + m);
+        const sorEs = A.sor, hEs = A.hazirMi; A.hazirMi = () => ({ hazir: true });
+        try {
+          K.forEach(k => localStorage.removeItem(k));
+          // 1) anında "çalışıyor…" + bitiş toast'u
+          A.sor = (p) => Promise.resolve({ ok: true, veri: { secimler: [], cozemedim: ['x'] }, bayraklar: [], maliyet: A.maliyet('ucuz', { input_tokens: 9000, output_tokens: 120 }) });
+          const pr = B.kos({ mock: true, set }), anlik = B.calisiyor && /⏳ BUL seti çalışıyor/.test(B.panelHTML());
+          const d1 = await pr;
+          __REG.ok('Tamam\'dan HEMEN sonra (ilk adımı beklemeden) panelde "⏳ BUL seti çalışıyor…"', anlik);
+          __REG.ok('bitiş: başarı toast\'u + panelde kalıcı yeşil mesaj (çip, uydurma, $)', d1.bitti && toast.some(t => /^success: BUL seti bitti — çip \d+\/\d+, uydurma 0/.test(t)) && /bul-son-mesaj/.test(B.panelHTML()) && /BUL seti bitti/.test(B.panelHTML()), toast.join(' | '));
+          __REG.ok('adım kaydı: gerçek giriş/çıkış token, o isteğin tahmini, kod sayısı', d1.sonuclar.filter(x => x.ai).every(x => x.gir === 9000 && x.cik === 120 && x.tahmin && x.tahmin.gir > 0 && x.kodN > 200 && x.kodN < 340));
+          // 2) ön kontrol: AI çağrısı başarısız → neden adım adım, hata toast'u
+          toast.length = 0; A.sor = () => Promise.resolve({ ok: false, hata: { tur: 'yetki', mesaj: 'Anahtar geçersiz (401)' } });
+          const d2 = await B.kos({ mock: true, set });
+          __REG.ok('ön kontrol (AI hatası): durdu metni ve toast NEDENİ söyler (adım + hata türü + mesaj), adım kaydında aiOk / hata', !d2.bitti && /^ön kontrol geçmedi: A01: AI çağrısı başarısız — yetki: Anahtar geçersiz \(401\)/.test(d2.durdu) && toast.some(t => /^error: BUL ön kontrol geçmedi: A01/.test(t)) && d2.on.adim[0].aiOk === false && /401/.test(d2.on.adim[0].hata), d2.durdu);
+          // 3) ön kontrol: maliyet o isteğin tahmininin 1,5 katını aşarsa (token ile birlikte)
+          A.sor = (p) => Promise.resolve({ ok: true, veri: { secimler: [], cozemedim: [] }, bayraklar: [], maliyet: A.maliyet('ucuz', { input_tokens: 60000, output_tokens: 100 }) });
+          const d3 = await B.kos({ mock: true, set });
+          __REG.ok('ön kontrol (maliyet): "maliyet $x > 1,5 × tahmin $y (giriş N token, tahmin M)"', /ön kontrol geçmedi: A01: maliyet \$0\.\d+ > 1,5 × tahmin \$0\.\d+ \(giriş 60000 token, tahmin \d+\)/.test(d3.durdu), d3.durdu);
+          // 4) kopyala yedeği: bitmiş sonuç yoksa son yarım koşu + açıklama
+          localStorage.removeItem(B.SON_LS); toast.length = 0; const t = B.kopyala();
+          __REG.ok('ana "BUL sonucunu kopyala": bitmiş yoksa SON YARIM koşuyu kopyalar ve söyler', !!t && t.indexOf('"kosuId":' + d3.kosuId) > 0 && /Bitmiş BUL sonucu yok — son YARIM koşu kopyalandı/.test(B.mesaj) && toast.some(x => /son YARIM koşu kopyalandı/.test(x)));
+          localStorage.setItem(B.SON_LS, JSON.stringify(d1)); const t2 = B.kopyala();
+          __REG.ok('bitmiş sonuç varsa onu kopyalar (yarım değil)', t2.indexOf('"kosuId":' + d1.kosuId) > 0);
+        } finally { A.sor = sorEs; A.hazirMi = hEs; window.bmToast = tEs; B.mesaj = ''; B.sonMesaj = ''; B.son = null; K.forEach((k, i) => es[i] == null ? localStorage.removeItem(k) : localStorage.setItem(k, es[i])); }
+        return __REG.al();
+      }, set, zaman);
     }
   },
   {
