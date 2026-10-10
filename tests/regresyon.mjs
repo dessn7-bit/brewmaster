@@ -10169,7 +10169,7 @@ const CASELER = [
     }
   },
   {
-    kod: 'AI4C-METRIK', ad: 'UYDURMA METRİĞİ KOŞUDAN ÖNCE SABİT (Kaan 2026-10-10): cümle bazlı üç sayım — (a) düşen + değer başka kaynakta var (kaynak hatası, eşiğe girmez, a/N > %15 → kalite sorunu) · (b) düşen + değer hiçbir kaynakta yok (gerçek uydurma) · (c) gösterilende elle bulunan yanlış · eşik (b + c_est)/N ≤ %5 · tohumu yazılı rastgele 40 gösterilen cümle · (c) gözlenen + %95 üst sınır',
+    kod: 'AI4C-METRIK', ad: 'UYDURMA METRİĞİ KOŞUDAN ÖNCE SABİT (Kaan 2026-10-10): cümle bazlı üç sayım — (a) düşen + değer başka kaynakta var (kaynak hatası, eşiğe girmez, a/N > %15 → kalite sorunu) · (b) düşen + değer hiçbir kaynakta yok (gerçek uydurma) · (c) gösterilende elle bulunan yanlış · eşik (b + c)/N ≤ %5 · AI4B EK: gösterilen cümlelerin TAMAMI kanıtlı elle etiketlenir, örnekleme/c_est YOK · doğrulanamayan doğru sayılmaz (BELİRSİZ)',
     calistir: async (page) => {
       const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'tuzak_seti.json'), 'utf8'));
       return page.evaluate((set) => {
@@ -10192,13 +10192,18 @@ const CASELER = [
           .concat(Array.from({ length: 60 }, (_, i) => ({ id: 'T' + i, tur: 1, model: 'ucuz', t1: { ai: true, gecerli: true, tumCumle: [cum('ok')] } })));
         const u = T3.uydurma3(R), u2 = T3.uydurma3(R);
         __REG.ok('sayım: N 64 (gizli yorum ve geçersiz adım hariç) · G 62 · a 1 · b 1', u.N === 64 && u.G === 62 && u.a === 1 && u.b === 1, JSON.stringify({ N: u.N, G: u.G, a: u.a, b: u.b }));
-        __REG.ok('örnek: tohum 20261010, 40 gösterilen cümle, deterministik; düşenlerin hepsi listede (etiket için)', u.tohum === 20261010 && u.ornekN === 40 && JSON.stringify(u.ornek.map(x => x.id)) === JSON.stringify(u2.ornek.map(x => x.id)) && u.ornek.every(x => x.durum === 'ok') && u.dusen.length === 2 && u.c === null && /elle etiket bekliyor/.test(u.durum));
-        const n0 = T3.nihaiUydurma(u, 0, 40), n1 = T3.nihaiUydurma(u, 2, 40);
-        __REG.ok('nihai: c 0/40 → c_est 0, oran 1/64 = %1,6 geçer, c üst %95 ≈ %7,2 · c 2/40 → c_est 3,1, oran (1 + 3,1)/64 = %6,4 kalır', Math.abs(n0.oran - 1 / 64) < 1e-9 && n0.gecti && Math.abs(n0.cUst - (1 - Math.pow(0.05, 1 / 40))) < 1e-9 && Math.abs(n1.cEst - 3.1) < 1e-9 && !n1.gecti, JSON.stringify({ n0: n0.oran, n1: n1.oran }));
+        __REG.ok('gösterilen: 62 cümlenin TAMAMI listede (hepsi ok, deterministik); tohum 20261010 ile 40 cümle yalnız "ilk bakılan" işaretli; G ≤ 400 → büyük-G notu yok; düşenler 2', u.gosterilen.length === 62 && u.gosterilen.every(x => x.durum === 'ok') && JSON.stringify(u.gosterilen) === JSON.stringify(u2.gosterilen) && !('ornek' in u) && u.dusen.length === 2 && u.gosterilen.filter(x => x.ilkBakilan).length === 40 && u.ilkBakilan.tohum === 20261010 && u.buyukG === null && u.c === null && /elle etiket bekliyor/.test(u.durum));
+        const ub = T3.uydurma3([{ id: 'B', tur: 1, model: 'ucuz', t1: { ai: true, gecerli: true, tumCumle: Array.from({ length: 401 }, () => cum('ok')) } }]);
+        __REG.ok('G 401 > 400 → sayı önce raporlanır (buyukG notu), gösterilen yine 401', /401/.test(ub.buyukG) && ub.gosterilen.length === 401 && ub.gosterilen.filter(x => x.ilkBakilan).length === 40);
+        const et = (yan, dog, kanitsizI) => u.gosterilen.map((x, j) => ({ id: x.id, tur: x.tur, i: x.i, etiket: j < yan ? 'yanlis' : j < yan + dog ? 'dogrulanamadi' : 'dogru', kanit: j === kanitsizI ? '' : 'paket: değer' }));
+        const n0 = T3.nihaiUydurma(u, et(0, 0)), n2 = T3.nihaiUydurma(u, et(2, 0)), n3 = T3.nihaiUydurma(u, et(3, 0)), nd = T3.nihaiUydurma(u, et(2, 1));
+        __REG.ok('nihai (sayım, c_est yok): c 0 → 1/64 = %1,6 GEÇTİ · c 2 → 3/64 = %4,7 GEÇTİ · c 3 → 4/64 = %6,25 KALDI · c 2 + d 1 → 3/64 ama kötümser 4/64 → BELİRSİZ', n0.tamam && Math.abs(n0.oran - 1 / 64) < 1e-9 && n0.gecti && n2.gecti && n2.c === 2 && !n3.gecti && n3.karar === 'KALDI' && nd.belirsiz && !nd.gecti && nd.d === 1 && /BELİRSİZ/.test(nd.karar) && !('cEst' in n2), JSON.stringify({ n0: n0.oran, n2: n2.oran, n3: n3.oran, nd: [nd.oran, nd.kotumserOran] }));
+        const e1 = et(0, 0).slice(1), nEks = T3.nihaiUydurma(u, e1), nKs = T3.nihaiUydurma(u, et(0, 0, 5)), nFaz = T3.nihaiUydurma(u, et(0, 0).concat([{ id: 'ZZ', tur: 1, i: 0, etiket: 'dogru', kanit: 'k' }])), nGec = T3.nihaiUydurma(u, et(0, 0).map((e, j) => j === 0 ? Object.assign({}, e, { etiket: 'belki' }) : e));
+        __REG.ok('KASITLI BOZMA: 1 etiket eksik / 1 kanıtsız / gösterilende olmayan fazla etiket / geçersiz etiket → nihai sonuç YOK', [nEks, nKs, nFaz, nGec].every(n => n.tamam === false && n.c === null && /eksik/.test(n.karar)) && /etiketsiz/.test(nEks.hata[0]) && /kanıtsız/.test(nKs.hata[0]) && /gösterilende yok/.test(nFaz.hata[0]) && /geçersiz/.test(nGec.hata[0]), JSON.stringify([nEks.hata, nKs.hata, nFaz.hata, nGec.hata]));
         const ua = T3.uydurma3([{ id: 'X', tur: 1, model: 'ucuz', t1: { ai: true, gecerli: true, tumCumle: [cum('dusuruldu', 'a'), cum('dusuruldu', 'a'), cum('ok'), cum('ok'), cum('ok'), cum('ok'), cum('ok'), cum('ok'), cum('ok'), cum('ok')] } }]);
         __REG.ok('(a) eşiğe girmez: a 2/10 = %20 → kalite sorunu notu, b 0', ua.kaliteSorunu && ua.b === 0 && !T3.uydurma3(R).kaliteSorunu);
         const sk = T3.sonucKur({ istemler: [], surum: 3 }, { sonuclar: R, harcama: { usd: 0, gir: 0, cik: 0, arama: 0, cw: 0, cr: 0, n: 0 }, plan: [], i: 0, tavan: 4.56 });
-        __REG.ok('sonuç biçimi: uydurma3 {N, a, b, ornek, dusen, durum} + karar metni "NİHAİ karar elle etiketten (c) sonra"', !!sk.uydurma3 && sk.uydurma3.N === 64 && /NİHAİ karar elle etiketten \(c\) sonra/.test(sk.karar));
+        __REG.ok('sonuç biçimi: uydurma3 {N, a, b, ornek, dusen, durum} + karar metni "NİHAİ karar elle etiketten (c) sonra"', !!sk.uydurma3 && sk.uydurma3.N === 64 && /NİHAİ karar elle etiketten \(c\) sonra: \(b \+ c\)\/N/.test(sk.karar) && !/c_est/.test(sk.karar) && sk.uydurma3.gosterilen.length === 62);
         return __REG.al();
       }, set);
     }
