@@ -9848,7 +9848,7 @@ const CASELER = [
         const T3 = window.BM_TUZAK, p = T3.planKur(set, 7, 'ucuz'), ids = p.filter(s => s.tur === 1).map(s => s.id), ids2 = p.filter(s => s.tur === 2).map(s => s.id), pd = T3.planKur(set, 7, 'dengeli', ['T', 'C']);
         __REG.ok('Haiku planı (AI4B taze koşu): 70 istem × 1 tur, hepsi ucuz, ham yol yok, D yok · T3.TUR = 2 olsa 2. tur karışık sırada eklenir', p.length === 70 && !ids2.length && p.every(s => s.model === 'ucuz' && s.yol === 'normal') && !ids.some(x => /^D/.test(x)) && (() => { T3.TUR = 2; const p2 = T3.planKur(set, 7, 'ucuz'), b = p2.filter(s => s.tur === 2).map(s => s.id); T3.TUR = 1; return p2.length === 140 && b.slice().sort().join() === ids.slice().sort().join() && b.join() !== ids.join(); })());
         __REG.ok('Sonnet tekrarı: yalnız seçilen gruplar (T + C = 28), tek tur', pd.length === 28 && pd.every(s => s.model === 'dengeli' && s.tur === 1 && /^[TC]/.test(s.id)));
-        __REG.ok('bütçe: toplam 12 $, önceki koşular 7,44 $ (5,29 + 2,15) → bu koşu 4,56 $ · ön kontrol 0,30 $ · Sonnet kapalı', T3.TAVAN_TOPLAM === 12 && T3.TAVAN === 4.56 && T3.ON_TAVAN === 0.3 && T3.SONNET === false);
+        __REG.ok('bütçe: toplam 12 $, önceki koşular 7,44 $ (5,29 + 2,15) + kaybolan koşu #3 ihtiyatlı 1,40 $ → kalan 3,16 $ (defter boşken) · ön kontrol 0,30 $ · Sonnet kapalı', T3.TAVAN_TOPLAM === 12 && T3.KAYIP3 === 1.4 && T3.tavanHesap() === 3.16 && T3.ON_TAVAN === 0.3 && T3.SONNET === false);
         __REG.ok('kayıt anahtarları bm_ öneksiz', !/^bm_/.test(T3.DURUM_LS) && !/^bm_/.test(T3.SONUC_LS));
         T3.sifirla(); localStorage.removeItem(T3.SONUC_LS);
         const m = __REG.ai1Mock({ ozet: { cumleler: [{ metin: 'Kanıt özeti.', kaynak: 'kor:stil' }] }, kanitweb: { iddialar: [], hatalar: [], aramalar: 3, sorgular: [] } });
@@ -10169,6 +10169,75 @@ const CASELER = [
     }
   },
   {
+    kod: 'AI4D-ARSIV', ad: 'TUZAK SONUÇ ARŞİVİ (koşu #3 sonucu kayboldu, 2026-10-10): bitmiş sonuç ayrı arşivde (son 5) · yeni koşu, durdurma ve hata arşive ve asıl sonuca dokunmaz, yarım koşu ayrı listede · Önceki sonuçlar listesinden kopyalama · bitmiş sonuç varken yeni koşu onay ister (0,70 $) · Durdur ön kontrolde de çalışır · bütçe defteri (koşu #3 ihtiyatlı 1,40 $ + durdurulan koşunun kayıtlı harcaması) · kasıtlı bozmayla kırmızı',
+    calistir: async (page) => {
+      const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'tuzak_seti.json'), 'utf8'));
+      return page.evaluate(async (set) => {
+        const T3 = window.BM_TUZAK, A = window.BM_AI, K = [T3.DURUM_LS, T3.SONUC_LS, T3.ARSIV_LS, T3.YARIM_LS, T3.DEFTER_LS], es = K.map(k => localStorage.getItem(k));
+        const temiz = () => K.forEach(k => localStorage.removeItem(k)), oku = k => JSON.parse(localStorage.getItem(k) || 'null');
+        const m = __REG.ai1Mock({ ozet: { cumleler: [{ metin: 'Kanıt özeti.', kaynak: 'kor:stil' }] }, kanitweb: { iddialar: [], hatalar: [], aramalar: 3, sorgular: [] } });
+        const mockSor = A.sor, onayEs = T3.onayla, kosEs = T3.kos, planEs = T3.planKur, sakEs = T3.sonucSakla;
+        try {
+          temiz(); T3.mesaj = '';
+          __REG.ok('anahtarlar bm_ öneksiz → yedek / senkron allowlist\'ine GİRMEZ', [T3.ARSIV_LS, T3.YARIM_LS, T3.DEFTER_LS].every(k => !/^(bm_|kabir_|_orig|acc_|KR$)/.test(k)));
+          // 1) bitmiş koşu → asıl + arşiv
+          const s1 = await T3.kos({ set, mock: true, tohum: 7, webYok: true, onKontrolYok: true });
+          const id1 = String(s1.kosuId), a1 = T3.arsivAl();
+          __REG.ok('bitmiş koşu: asıl sonuç + arşivde 1 kayıt (kosuId, bitti, kısa karar), yarım listesi boş', s1.bitti && a1.length === 1 && a1[0].id === id1 && a1[0].bitti && /ön karar/.test(a1[0].karar) && oku(T3.SONUC_LS).kosuId === s1.kosuId && !T3.yarimAl().length);
+          // 2) yeni koşu başlat + hemen durdur (koşu #3'ün başına gelen)
+          const korunmus = () => { const a = T3.arsivAl(), s = oku(T3.SONUC_LS), t = T3.kopyalaKayit('a', a.length - 1) || ''; return a.some(e => e.id === id1 && e.bitti) && !!s && String(s.kosuId) === id1 && s.bitti && t.indexOf('"kosuId":' + id1) > 0 && T3.kopyaMetni().indexOf('"kosuId":' + id1) > 0; };
+          const durdurKos = async (o) => { let n = 0; A.sor = p => { n++; T3.durdur = true; return mockSor(p); }; try { return { s: await T3.kos(Object.assign({ set, mock: true, tohum: 9, webYok: true }, o)), n }; } finally { A.sor = mockSor; } };
+          const k2 = await durdurKos({ onKontrolYok: true });
+          __REG.ok('yeni koşu + Durdur: bitmiş sonuç arşivde ve asıl yerde AYNEN; Sonucu kopyala (ana + listeden) bitmiş koşuyu verir', korunmus() && !k2.s.bitti && /kullanıcı durdurdu/.test(k2.s.durdu));
+          __REG.ok('durdurulan koşu ayrı "yarım" listesinde (bitti değil, kendi kosuId\'si)', T3.yarimAl().length === 1 && !T3.yarimAl()[0].bitti && T3.yarimAl()[0].id === String(k2.s.kosuId) && T3.yarimAl()[0].id !== id1);
+          // 3) hata yolu
+          T3.planKur = () => { throw new Error('test hatası'); };
+          let s3; try { s3 = await T3.kos({ set, mock: true, tohum: 11, webYok: true, onKontrolYok: true }); } finally { T3.planKur = planEs; }
+          __REG.ok('hata ile biten koşu: arşiv + asıl sonuç korunur, hata yarım listesine', korunmus() && !!s3 && /^hata: /.test(s3.durdu) && T3.yarimAl().length === 2 && /hata/.test(T3.yarimAl()[0].karar));
+          // 4) Durdur ön kontrol sırasında da çalışır
+          let tamN = 0; A.sor = p => { tamN++; return mockSor(p); }; try { await T3.kos({ set, mock: true, tohum: 13, webYok: true }); } finally { A.sor = mockSor; }
+          const k4 = await durdurKos({});
+          __REG.ok('Durdur ön kontrolde: ilk çağrıdan sonra durur ("ön kontrol yarıda"), tam ön kontrolden az çağrı, plan kurulmaz', /ön kontrol yarıda/.test(k4.s.durdu) && k4.n < tamN && k4.n >= 1 && !k4.s.planAdim, k4.n + ' < ' + tamN);
+          // 5) son 5 kuralı: 6. bitmiş en eskiyi düşürür; yarımlar arşivi düşürmez
+          const aOnce = T3.arsivAl().map(e => e.id);
+          for (let i = 0; i < 6; i++) T3.sonucSakla({ kosuId: 900 + i, tarih: 't' + i, bitti: false, durdu: 'kullanıcı durdurdu', harcama: { usd: 0 } });
+          __REG.ok('6 yarım koşu: yarım listesi 5 ile sınırlı, arşiv HİÇ değişmedi', T3.yarimAl().length === 5 && JSON.stringify(T3.arsivAl().map(e => e.id)) === JSON.stringify(aOnce));
+          for (let i = 0; i < 6; i++) T3.sonucSakla({ kosuId: 800 + i, tarih: 'b' + i, bitti: true, gecti: false, harcama: { usd: 0.7 } });
+          const aSon = T3.arsivAl();
+          __REG.ok('bitmiş arşiv son 5: en yeni başta (805), 6. kayıtta en eski düşer', aSon.length === 5 && aSon[0].id === '805' && aSon[4].id === '801' && aSon[0].karar === 'ön karar: KALDI');
+          // 6) onay penceresi
+          let soruldu = null, kosuldu = 0; T3.onayla = msg => { soruldu = msg; return false; }; T3.kos = () => { kosuldu++; return Promise.resolve('kos'); };
+          const dOnce = localStorage.getItem(T3.DURUM_LS), b1 = await T3.baslat();
+          __REG.ok('bitmiş sonuç varken 🧪: onay sorulur ("arşivde kalır", "0,70 $", kalan tavan); Hayır → koşu YOK, durum değişmedi', b1 === null && kosuldu === 0 && /arşivde kalır/.test(soruldu) && /0,70 \$/.test(soruldu) && /kalan tavan/.test(soruldu) && localStorage.getItem(T3.DURUM_LS) === dOnce, soruldu);
+          T3.onayla = () => true; const b2 = await T3.baslat();
+          __REG.ok('Evet → koşu başlar', b2 === 'kos' && kosuldu === 1);
+          temiz(); soruldu = null; T3.onayla = msg => { soruldu = msg; return false; }; const b3 = await T3.baslat();
+          __REG.ok('arşiv / sonuç / yarım durum yokken onay SORULMAZ', b3 === 'kos' && soruldu === null && kosuldu === 2);
+          T3.onayla = onayEs; T3.kos = kosEs;
+          // 7) bütçe defteri + cihazdaki eski kaydın göçü (koşu #3 sonrası durdurulan koşu)
+          temiz(); const bas = Date.parse('2026-10-10T12:00:00+03:00');
+          localStorage.setItem(T3.DURUM_LS, JSON.stringify({ surum: 2, basla: bas, mock: false, harcama: { usd: 0.1234 }, bitti: false, durdu: 'kullanıcı durdurdu', i: 0 }));
+          localStorage.setItem(T3.SONUC_LS, JSON.stringify({ kosuId: bas, tarih: '2026-10-10T12:00', bitti: false, durdu: 'kullanıcı durdurdu', mock: false, harcama: { usd: 0.1234 } }));
+          T3.goc();
+          __REG.ok('göç: durdurulan koşu asıl yerden yarım listesine taşındı; harcaması (0,1234 $) deftere → kalan tavan 12 − 7,4378 − 1,40 − 0,1234 = 3,03 $ (aşağı yuvarlı)', !localStorage.getItem(T3.SONUC_LS) && T3.yarimAl().length === 1 && T3.yarimAl()[0].id === String(bas) && T3.defterToplam() === 0.1234 && T3.tavanHesap() === 3.03 && T3.tavanHesap(bas) === 3.16, T3.tavanHesap());
+          temiz(); localStorage.setItem(T3.DURUM_LS, JSON.stringify({ surum: 2, basla: Date.parse('2026-10-09T20:00:00+03:00'), mock: false, harcama: { usd: 2.15 }, bitti: true }));
+          T3.goc(); __REG.ok('koşu #2 (2026-10-09, zaten 7,44 $ içinde) deftere İKİ KEZ girmez', T3.defterToplam() === 0 && T3.tavanHesap() === 3.16);
+          // 8) ekran
+          temiz(); T3.sonucSakla({ kosuId: 1, tarih: '2026-10-10T13:00', bitti: true, gecti: false, model: { ucuz: { id: 'claude-haiku-5-5' } }, harcama: { usd: 0.69 } }); T3.sonucSakla({ kosuId: 2, tarih: '2026-10-10T14:00', bitti: false, durdu: 'kullanıcı durdurdu', harcama: { usd: 0.01 } });
+          const kart = T3.kartHTML();
+          __REG.ok('Ayarlar ▸ AI ▸ 🧪: "📚 Önceki sonuçlar (1 bitmiş · 1 yarım)" + satır başına tarih · model · bitti/yarım · karar + 📋 Sonucu kopyala; 🧪 düğmesi baslat() (onaylı)', /Önceki sonuçlar \(1 bitmiş · 1 yarım\)/.test(kart) && /claude-haiku-5-5 · ✓ bitti/.test(kart) && /⏸ yarım/.test(kart) && /ön karar: KALDI/.test(kart) && (kart.match(/bm-tuzak-onceki-kopyala/g) || []).length === 2 && /kopyalaKayit\('a',0\)/.test(kart) && /BM_TUZAK\.baslat\(\)/.test(kart) && !/BM_TUZAK\.kos\(\)/.test(kart) && /kalan tavan \$3\.16/.test(kart));
+          // 9) KASITLI BOZMA: eski davranış (durdurulan koşu asıl sonucun üstüne yazar + yeni koşu arşivi siler) → koruma denetimi KIRMIZI
+          temiz(); const s9 = await T3.kos({ set, mock: true, tohum: 7, webYok: true, onKontrolYok: true }); const id9 = String(s9.kosuId);
+          const korundu9 = () => { const s = oku(T3.SONUC_LS); return !!s && String(s.kosuId) === id9 && T3.arsivAl().some(e => e.id === id9); };
+          T3.sonucSakla = s => { localStorage.setItem(T3.SONUC_LS, JSON.stringify(s)); localStorage.removeItem(T3.ARSIV_LS); };
+          try { await durdurKos({ onKontrolYok: true }); } finally { T3.sonucSakla = sakEs; }
+          __REG.ok('KASITLI BOZMA: eski yazma davranışı geri gelirse koruma denetimi KIRMIZI (asıl sonuç ve arşiv kaybolur)', !korundu9() && T3.kopyalaKayit('a', 0) === null);
+        } finally { A.sor = mockSor; m.geri(); T3.onayla = onayEs; T3.kos = kosEs; T3.planKur = planEs; T3.sonucSakla = sakEs; T3.durdur = false; T3.mesaj = ''; K.forEach((k, i) => es[i] == null ? localStorage.removeItem(k) : localStorage.setItem(k, es[i])); }
+        return __REG.al();
+      }, set);
+    }
+  },
+  {
     kod: 'AI4C-METRIK', ad: 'UYDURMA METRİĞİ KOŞUDAN ÖNCE SABİT (Kaan 2026-10-10): cümle bazlı üç sayım — (a) düşen + değer başka kaynakta var (kaynak hatası, eşiğe girmez, a/N > %15 → kalite sorunu) · (b) düşen + değer hiçbir kaynakta yok (gerçek uydurma) · (c) gösterilende elle bulunan yanlış · eşik (b + c)/N ≤ %5 · AI4B EK: gösterilen cümlelerin TAMAMI kanıtlı elle etiketlenir, örnekleme/c_est YOK · doğrulanamayan doğru sayılmaz (BELİRSİZ)',
     calistir: async (page) => {
       const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'tuzak_seti.json'), 'utf8'));
@@ -10224,7 +10293,7 @@ const CASELER = [
         const es = A4.DENETLEYICI_DONMUS; A4.DENETLEYICI_DONMUS = 'degisti';
         try { const ev = T3.onKontrolDegerlendir({ istemler: [] }, [], T3.webSahte(), 0, true); __REG.ok('imza tutmazsa ön kontrol maddesi KALIR', ev.maddeler.some(m => /dondurulmuş/.test(m.ad) && !m.ok)); }
         finally { A4.DENETLEYICI_DONMUS = es; }
-        __REG.ok('koşu ayarı: yalnız Haiku (T3.SONNET false), 1 tur, tavan 4,56 $', T3.SONNET === false && T3.TUR === 1 && T3.TAVAN === 4.56);
+        __REG.ok('koşu ayarı: yalnız Haiku (T3.SONNET false), 1 tur, kalan tavan 3,16 $ (defter boşken)', T3.SONNET === false && T3.TUR === 1 && T3.tavanHesap() === 3.16);
         return __REG.al(); });
       return dis.concat(ic);
     }
