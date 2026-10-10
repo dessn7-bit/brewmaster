@@ -9905,10 +9905,12 @@ const CASELER = [
     kod: 'AI3-ACILIS', ad: 'AÇILIŞ BAYRAĞI (madde 5): tuzak testi geçmeden _BM_AI1_ACILIS = false → kutu varsayılan KAPALI, şerit "beta — test edilmedi" · bayrak true olunca varsayılan AÇIK + şerit "AI — yorumlar etiketli, hesap uygulamadan" · kullanıcının "kapalı" seçimi her zaman geçerli',
     calistir: (page) => page.evaluate(() => {
       const A1 = window.BM_AI1; localStorage.removeItem(A1.BETA_LS);
-      __REG.ok('şu an: bayrak false, kayıt yokken kapalı, şerit beta', window._BM_AI1_ACILIS === false && A1.ACILIS === false && A1.betaAcik() === false && /beta — test edilmedi/.test(A1.seritMetni()));
+      __REG.ok('şu an (koşu #3 geçti, Kaan onayı): bayrak true, kayıt yokken AÇIK, şerit "erken test — sınırlı ölçüm", varsayılan özet Haiku', window._BM_AI1_ACILIS === true && A1.ACILIS === true && A1.betaAcik() === true && /erken test — sınırlı ölçüm/.test(A1.seritMetni()) && /erken test — sınırlı ölçüm/.test(window.BM_AI4.seritMetni()) && window.BM_AI4.ozetModel() === 'ucuz');
+      A1.ACILIS = false; const kap0 = A1.betaAcik(), ser0 = A1.seritMetni();
+      __REG.ok('KASITLI BOZMA: bayrak false olsaydı kayıt yokken KAPALI + "beta — test edilmedi" (açılış bayrağa bağlı)', kap0 === false && /beta — test edilmedi/.test(ser0));
       A1.ACILIS = true;
       const ac = A1.betaAcik(), ser = A1.seritMetni(); A1.betaYaz(false); const kapat = A1.betaAcik(); A1.betaYaz(true); const ac2 = A1.betaAcik();
-      A1.ACILIS = false; localStorage.removeItem(A1.BETA_LS);
+      A1.ACILIS = true; localStorage.removeItem(A1.BETA_LS);
       __REG.ok('bayrak true: kayıt yokken AÇIK, şerit "AI — yorumlar etiketli, hesap uygulamadan", kullanıcı kapatınca kapalı', ac && /AI — yorumlar etiketli, hesap uygulamadan/.test(ser) && kapat === false && ac2 === true);
       return __REG.al();
     })
@@ -10514,7 +10516,7 @@ const CASELER = [
       const k = window._bmAiKartHTML(), A4 = window.BM_AI4;
       __REG.ok('Ayarlar: web anahtarı (açık) + yorum anahtarı (kapalı)', /bm-ai4-web-oto" data-acik="1"/.test(k) && /bm-ai4-yorum" data-acik="0"/.test(k) && /AI kendi yorumunu da eklesin/.test(k));
       const B = window.BM_AI1, eb = localStorage.getItem(B.BETA_LS); B.betaYaz(true);
-      try { const h = A4.kutuHTML({ tur: 'recete' }); __REG.ok('kutu: "🔎 Kanıta sor", kanıt bedava + özet tahmini; beta şeridi', /🔎 Kanıta sor/.test(h) && /kanıt bedava · özet ≈ \$/.test(h) && /beta — test edilmedi/.test(h)); }
+      try { const h = A4.kutuHTML({ tur: 'recete' }); __REG.ok('kutu: "🔎 Kanıta sor", kanıt bedava + özet tahmini; açılış şeridi (erken test — sınırlı ölçüm · koşu #3)', /🔎 Kanıta sor/.test(h) && /kanıt bedava · özet ≈ \$/.test(h) && /erken test — sınırlı ölçüm/.test(h) && /tuzak testi geçti \(koşu #3\)/.test(h)); }
       finally { if (eb == null) localStorage.removeItem(B.BETA_LS); else localStorage.setItem(B.BETA_LS, eb); }
       const T3 = window.BM_TUZAK, es = localStorage.getItem(T3.SONUC_LS);
       localStorage.setItem(T3.SONUC_LS, JSON.stringify({ tarih: '2026-10-09T23:00', mock: true, bitti: true, gecti: true, model: { ucuz: { id: 'claude-haiku-5-5' } }, metrik: { ucuz: { toplam: { yalakalik: { oran: 0, hata: 0, birim: 40 }, uydurma: { oran: 0, hata: 0, birim: 140 }, kontrol: { oran: 1, gecen: 24, birim: 24 }, tat: { oran: 0, hata: 0, birim: 32 } } } } }));
@@ -10725,16 +10727,16 @@ const CASELER = [
     })
   },
   {
-    kod: 'AI1-BETA', ad: 'KAPALI AÇILIŞ (madde 7): tuzak testi (AI3) geçmeden kutu VARSAYILAN GÖRÜNMEZ · Ayarlar ▸ AI özellikleri\'nde "Beta: AI reçeteci (tuzak testi henüz yapılmadı)" anahtarı · açılınca kalıcı "beta — test edilmedi" şeridi · düğmeler ≥44 px',
+    kod: 'AI1-BETA', ad: 'AÇILIŞ (AI4 madde 8, koşu #3 geçti): varsayılan açık, kapatma anahtarı çalışır; önceki kural — tuzak testi geçmeden kutu VARSAYILAN GÖRÜNMEZ · Ayarlar ▸ AI özellikleri\'nde "Beta: AI reçeteci (tuzak testi henüz yapılmadı)" anahtarı · açılınca kalıcı "beta — test edilmedi" şeridi · düğmeler ≥44 px',
     calistir: (page) => page.evaluate(() => {
       const A1 = window.BM_AI1; A1.betaYaz(false);
       __REG.yeniKayit('REGTEST AI1 beta', {}); S.maltlar = [{ id: 'pilsner', kg: 2 }]; window.eval("ekran='editor';sekme='genel'"); render();
-      __REG.ok('beta KAPALI (varsayılan) → editörde kutu YOK', !document.querySelector('.bm-ai1-kutu') && !A1.betaAcik());
+      __REG.ok('beta KAPATILINCA → editörde kutu YOK', !document.querySelector('.bm-ai1-kutu') && !A1.betaAcik());
       const kart = window._bmAiKartHTML();
-      __REG.ok('Ayarlar kartında beta anahtarı metni (AI4: 🔎 Kanıta sor)', /Beta: 🔎 Kanıta sor <small>\(tuzak testi henüz geçilmedi\)/.test(kart) && /bm-ai1-beta-btn/.test(kart));
+      __REG.ok('Ayarlar kartında beta anahtarı (erken test notu + kapatma düğmesi) ve açılış testi sonucu (koşu #3, tarih, model, uydurma 13/426, yalakalık 1/20, kontrol 12/12, tat 0/16)', /Beta: 🔎 Kanıta sor <small>\(erken test — sınırlı ölçüm/.test(kart) && /bm-ai1-beta-btn/.test(kart) && /Açılış testi \(tuzak\) <small>koşu #3 · 2026-10-10 · claude-haiku-5-5 · uydurma 13\/426 \(%3,1\) ≤ %5 · yalakalık 1\/20 \(%5,0\) ≤ %5 · kontrol 12\/12 ≥ %80 · tat hükmü 0\/16/.test(kart), (kart.match(/Açılış testi[^<]*<small>[^<]*/) || [''])[0]);
       window.bmAi1BetaDegistir(); window.eval("ekran='editor';sekme='genel'"); render();
       const k = document.querySelector('.bm-ai1-kutu');
-      __REG.ok('beta AÇIK → kutu + "beta — test edilmedi" şeridi', !!k && /beta — test edilmedi/.test(k.textContent) && A1.betaAcik());
+      __REG.ok('beta AÇIK → kutu + "erken test — sınırlı ölçüm · tuzak testi geçti (koşu #3)" şeridi', !!k && /erken test — sınırlı ölçüm/.test(k.textContent) && /tuzak testi geçti \(koşu #3\)/.test(k.textContent) && A1.betaAcik());
       const btn = k && k.querySelector('.bm-ai1-sor-btn'), ta = k && k.querySelector('textarea');
       __REG.ok('Sor düğmesi ve soru kutusu ≥44 px', btn && btn.getBoundingClientRect().height >= 44 && ta && ta.getBoundingClientRect().height >= 44, btn && btn.getBoundingClientRect().height);
       __REG.ok('anahtar cihaz-yerel (bm_ öneksiz → yedeğe girmez)', !/^bm_/.test(A1.BETA_LS));

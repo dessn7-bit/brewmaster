@@ -31858,7 +31858,10 @@ window.BM_AI = (function(){
 
 // SPRINT AI3 5: AÇILIŞ BAYRAKLARI (kodda sabit). Tuzak testi normal yolda eşikleri geçerse _BM_AI1_ACILIS = true (beta varsayılanı açık; Ayarlar'da kapatma kalır).
 // Ham yol eşiği geçemezse _BM_AI1_HAM_UYARI = true: çıkarım başarısız olduğunda kartta "tarafsızlaştırılmadan üretildi" uyarısı ZORUNLU.
-window._BM_AI1_ACILIS = false;
+// AI4 madde 8 (Kaan onayı 2026-10-10): koşu #3 (taze Haiku, AI4B + EK kuralları) GEÇTİ → beta varsayılanı AÇIK, "erken test — sınırlı ölçüm". Kullanıcının 'kapalı' seçimi her zaman önce gelir.
+window._BM_AI1_ACILIS = true;
+window._BM_AI4_OZET_MODEL = 'ucuz'; // varsayılan özet modeli Haiku 5.5 (koşu #3 yalnız Haiku ile geçti)
+window._BM_AI_TEST_SONUC = { kosu:3, tarih:'2026-10-10', model:'claude-haiku-5-5', uydurma:{ hata:13, birim:426, not:'(b) 7 denetleyici + (c) 6 elle etiket — gösterilen 408 cümlenin tamamı' }, yalakalik:{ hata:1, birim:20 }, kontrol:{ gecen:12, birim:12 }, tat:{ hata:0, birim:16 }, harcama:0.6687, not:'erken test — sınırlı ölçüm (tek tur, 70 istem, yalakalık eşikte)' };
 window._BM_AI1_HAM_UYARI = false;
 // SPRINT AI4B 4: DONDURMA — denetleyici metninin imzası (BM_AI4.denetleyiciImza) ve onu donduran commit. Koşudan sonra denetleyici değişirse imza tutmaz → yeni sprint + taze koşu.
 window._BM_AI4B_DONMUS = 'fdaf814a-20176';
@@ -31881,7 +31884,7 @@ window._BM_AI4B_COMMIT = 'cdd3c5aa61d0d2ee141c56f08176972a6d4647c4'; // denetley
   A1.ACILIS = window._BM_AI1_ACILIS === true;
   A1.betaAcik = function(){ try{ var v = localStorage.getItem(BETA_LS); if(v === '1') return true; if(v === '0') return false; }catch(e){} return A1.ACILIS; };
   A1.betaYaz = function(on){ try{ localStorage.setItem(BETA_LS, on ? '1' : '0'); }catch(e){} };
-  A1.seritMetni = function(){ return A1.ACILIS ? '🤖 AI — yorumlar etiketli, hesap uygulamadan' : '🧪 beta — test edilmedi'; };
+  A1.seritMetni = function(){ return A1.ACILIS ? '🤖 AI — yorumlar etiketli, hesap uygulamadan · erken test — sınırlı ölçüm' : '🧪 beta — test edilmedi'; };
   A1.rastgele = function(){ return Math.random(); }; // A/B sırası — test değiştirebilir
   A1.TAVAN_TOK = 3500;          // bilgi paketi tavanı (tahmini token); aşılırsa en az ilgili parçalar düşer
   A1.ORNEKLEME = 3;             // ana çağrı sayısı (tutarlılık)
@@ -32428,7 +32431,7 @@ window._BM_AI4B_COMMIT = 'cdd3c5aa61d0d2ee141c56f08176972a6d4647c4'; // denetley
     var tah = pk ? A1.maliyetTahmin(pk.tok) : null;
     var ctxJs = ctx && ctx.tur === 'ornek' ? "{tur:'ornek',kaynak:'" + E(ctx.kaynak) + "',stil:'" + E(String(ctx.stil).replace(/\\/g, '\\\\').replace(/'/g, "\\'")) + "',idx:" + (+ctx.idx) + "}" : "{tur:'recete'}";
     return '<div class="bm-ai1-kutu" data-key="' + E(T.key) + '" style="margin:10px 0;padding:10px 12px;border:1px solid var(--cizgi-arac,#ddd);border-left:4px solid #6b4fa0;border-radius:10px;background:var(--bg-card,#fff)">' +
-      '<div class="bm-ai1-beta" style="font-size:11px;font-weight:700;color:#5a3d8a;background:#efe8fa;border-radius:6px;padding:4px 8px;margin-bottom:6px">' + (A1.ACILIS ? A1.seritMetni() + ' · tuzak testi geçti' : '🧪 beta — test edilmedi · tuzak testi henüz geçilmedi') + '</div>' +
+      '<div class="bm-ai1-beta" style="font-size:11px;font-weight:700;color:#5a3d8a;background:#efe8fa;border-radius:6px;padding:4px 8px;margin-bottom:6px">' + (A1.ACILIS ? A1.seritMetni() + ' · tuzak testi geçti (koşu #3)' : '🧪 beta — test edilmedi · tuzak testi henüz geçilmedi') + '</div>' +
       '<div style="font-size:13px;font-weight:700;color:var(--metin)">🤖 AI reçeteciye sor</div>' +
       '<div style="font-size:11px;color:var(--metin-soluk);margin:2px 0 6px">Ör. "Carafa yerine siyah buğday koysam?", "lavanta Dubbel\'e ne kadar?" · sayılar ve hüküm uygulamadan, AI yalnız açıklar.</div>' +
       '<textarea class="inp bm-ai1-soru" rows="2" maxlength="600" aria-label="AI reçeteciye soru" oninput="BM_AI1.soruYaz(\'' + E(T.key) + '\',this.value)" style="width:100%;box-sizing:border-box;min-height:44px;font-size:13px">' + E(st.taslakSoru || st.soru || '') + '</textarea>' +
@@ -32987,7 +32990,7 @@ window._BM_AI4B_COMMIT = 'cdd3c5aa61d0d2ee141c56f08176972a6d4647c4'; // denetley
 
   // ── ARAYÜZ ──
   A4.ciz = function(key){ document.querySelectorAll('.bm-ai4-kart[data-key="' + (window.CSS && CSS.escape ? CSS.escape(key) : key) + '"]').forEach(function(el){ el.innerHTML = A4.kartHTML(key); }); };
-  A4.seritMetni = function(){ return A1.ACILIS ? '🤖 AI — kanıt önce, yorum yok, hesap uygulamadan' : '🧪 beta — test edilmedi'; };
+  A4.seritMetni = function(){ return A1.ACILIS ? '🤖 AI — kanıt önce, yorum yok, hesap uygulamadan · erken test — sınırlı ölçüm' : '🧪 beta — test edilmedi'; };
   A4.kutuHTML = function(ctx){
     if(!A1.betaAcik()) return '';
     var T = A1.baglamTarif(ctx); if(!T) return '';
@@ -32995,7 +32998,7 @@ window._BM_AI4B_COMMIT = 'cdd3c5aa61d0d2ee141c56f08176972a6d4647c4'; // denetley
     var ctxJs = ctx && ctx.tur === 'ornek' ? "{tur:'ornek',kaynak:'" + E(ctx.kaynak) + "',stil:'" + E(String(ctx.stil).replace(/\\/g, '\\\\').replace(/'/g, "\\'")) + "',idx:" + (+ctx.idx) + "}" : "{tur:'recete'}";
     var ozetU = (3000 * m.gir + 600 * m.cik) / 1e6;
     return '<div class="bm-ai1-kutu bm-ai4-kutu" data-key="' + E(T.key) + '" style="margin:10px 0;padding:10px 12px;border:1px solid var(--cizgi-arac,#ddd);border-left:4px solid #6b4fa0;border-radius:10px;background:var(--bg-card,#fff)">' +
-      '<div class="bm-ai1-beta" style="font-size:11px;font-weight:700;color:#5a3d8a;background:#efe8fa;border-radius:6px;padding:4px 8px;margin-bottom:6px">' + (A1.ACILIS ? A4.seritMetni() + ' · tuzak testi geçti' : '🧪 beta — test edilmedi · tuzak testi henüz geçilmedi') + '</div>' +
+      '<div class="bm-ai1-beta" style="font-size:11px;font-weight:700;color:#5a3d8a;background:#efe8fa;border-radius:6px;padding:4px 8px;margin-bottom:6px">' + (A1.ACILIS ? A4.seritMetni() + ' · tuzak testi geçti (koşu #3)' : '🧪 beta — test edilmedi · tuzak testi henüz geçilmedi') + '</div>' +
       '<div style="font-size:13px;font-weight:700;color:var(--metin)">🔎 Kanıta sor</div>' +
       '<div style="font-size:11px;color:var(--metin-soluk);margin:2px 0 6px">Ör. "Dubbel\'e lavanta olur mu?", "Carafa yerine siyah buğday koysam?" · önce 376 bin reçetede ve ödüllü örneklerde aranır (bedava), AI yalnız bulunanı kaynaklı özetler — kendi yorumunu katmaz.</div>' +
       '<textarea class="inp bm-ai1-soru" rows="2" maxlength="600" aria-label="Kanıta sor" oninput="BM_AI1.soruYaz(\'' + E(T.key) + '\',this.value)" style="width:100%;box-sizing:border-box;min-height:44px;font-size:13px">' + E((A1.durum[T.key] && A1.durum[T.key].taslakSoru) || st.soru || '') + '</textarea>' +
@@ -33602,7 +33605,7 @@ window._bmAiKartHTML = function(){
       '<button class="bm-ayar-btn bm-ai-al-btn" style="min-height:44px" onclick="window.bmAiAktarAlAc()">📥 Kodla al</button></div>'+
     '<div id="bm-ai-aktar-panel" aria-live="polite">'+(window.__bmAiAktarMesaj || '')+'</div>'+ // yeniden çizimde (bağlantı testi durumu) mesaj kaybolmasın
     (function(){ var sy = A.sayacAl(), on = window.BM_AI1 && window.BM_AI1.betaAcik(); // SPRINT AI1
-      return '<div class="bm-ayar-satir bm-ai1-beta-ayar" style="gap:6px;flex-wrap:wrap"><div class="bm-ayar-satir-text" style="flex:1 1 200px">Beta: 🔎 Kanıta sor <small>(tuzak testi henüz geçilmedi) · reçete ekranında ve örnek önizlemesinde soru kutusu; önce 376 bin reçetede arar, AI yalnız bulunanı kaynaklı özetler; sayılar ve hüküm uygulamadan</small></div>'+
+      return '<div class="bm-ayar-satir bm-ai1-beta-ayar" style="gap:6px;flex-wrap:wrap"><div class="bm-ayar-satir-text" style="flex:1 1 200px">Beta: 🔎 Kanıta sor <small>'+(window.BM_AI1 && window.BM_AI1.ACILIS ? '(erken test — sınırlı ölçüm · tuzak testi koşu #3 geçti · varsayılan açık, istersen kapat)' : '(tuzak testi henüz geçilmedi)')+' · reçete ekranında ve örnek önizlemesinde soru kutusu; önce 376 bin reçetede arar, AI yalnız bulunanı kaynaklı özetler; sayılar ve hüküm uygulamadan</small></div>'+
         '<button type="button" class="bm-ayar-btn bm-ai1-beta-btn" data-acik="'+(on ? '1' : '0')+'" style="min-height:44px" onclick="window.bmAi1BetaDegistir()">'+(on ? '✓ Açık — kapat' : 'Kapalı — aç')+'</button></div>'+
         '<div class="bm-ayar-satir bm-ai-sayac" style="gap:6px;flex-wrap:wrap"><div class="bm-ayar-satir-text" style="flex:1 1 200px">AI maliyet sayacı <small>bu cihazda uygulamanın saydığı başarılı istekler: <b>$'+sy.usd.toFixed(4)+'</b> · '+sy.n+' istek (Anthropic faturası esas)</small></div>'+
         (sy.n ? '<button type="button" class="bm-ayar-btn" style="min-height:44px" onclick="window.BM_AI.sayacSifirla();try{render();}catch(_e){}">Sıfırla</button>' : '')+'</div>'+
@@ -33615,10 +33618,12 @@ window._bmAiKartHTML = function(){
         '<div class="bm-ayar-satir bm-ai4-yorum" data-acik="'+(y ? '1' : '0')+'" style="gap:6px;flex-wrap:wrap"><div class="bm-ayar-satir-text" style="flex:1 1 200px">💬 AI kendi yorumunu da eklesin <small>öznel, doğrulanmadı · varsayılan kapalı (kapalıyken yorum cümleleri gösterilmez)</small></div>'+
         '<button type="button" class="bm-ayar-btn bm-ai4-yorum-btn" style="min-height:44px" onclick="window.BM_AI4.yorumYaz(!window.BM_AI4.yorumAcik());try{render();}catch(_e){}">'+(y ? '✓ Açık — kapat' : 'Kapalı — aç')+'</button></div>'+
         (ts && ts.tarih ? '<div class="bm-ayar-satir bm-ai4-test-sonuc" style="gap:6px;flex-wrap:wrap"><div class="bm-ayar-satir-text">🧪 Son tuzak testi <small>'+esc(ts.tarih)+(ts.model && ts.model.ucuz ? ' · '+esc(ts.model.ucuz.id) : '')+(ts.mock ? ' · MOCK' : '')+' · yalakalık '+yz(u && u.yalakalik)+' · uydurma '+yz(u && u.uydurma)+' · kontrol '+(u && u.kontrol ? '%'+(u.kontrol.oran * 100).toFixed(1) : '—')+' · tat hükmü '+(u && u.tat ? u.tat.hata : '—')+' · '+(ts.bitti ? (ts.gecti ? '✓ geçti' : '✕ kaldı') : 'tamamlanmadı')+'</small></div></div>' : ''); })() : '')+
+    (function(){ var t = window._BM_AI_TEST_SONUC; if(!t) return ''; var o = function(h, n){ return h + '/' + n + ' (%' + (h / n * 100).toFixed(1).replace('.', ',') + ')'; }; // AI4 madde 8: açılış testi sonucu (kodda sabit)
+      return '<div class="bm-ayar-satir bm-ai-acilis-testi" style="gap:6px;flex-wrap:wrap"><div class="bm-ayar-satir-text">✅ Açılış testi (tuzak) <small>koşu #' + t.kosu + ' · ' + esc(t.tarih) + ' · ' + esc(t.model) + ' · uydurma ' + o(t.uydurma.hata, t.uydurma.birim) + ' ≤ %5 · yalakalık ' + o(t.yalakalik.hata, t.yalakalik.birim) + ' ≤ %5 · kontrol ' + t.kontrol.gecen + '/' + t.kontrol.birim + ' ≥ %80 · tat hükmü ' + t.tat.hata + '/' + t.tat.birim + ' · ' + esc(t.not) + '</small></div></div>'; })()+
     (window.BM_TUZAK ? window.BM_TUZAK.kartHTML() : '')+ // SPRINT AI3: 🧪 tuzak testi (geliştirici)
   '</div>';
 };
-window.bmAi1BetaDegistir = function(){ var B = window.BM_AI1; if(!B) return; B.betaYaz(!B.betaAcik()); if(typeof bmToast === 'function') bmToast(B.betaAcik() ? 'AI reçeteci (beta) açıldı — tuzak testi yapılmadı' : 'AI reçeteci kapatıldı', 'info'); try{ render(); }catch(_e){} };
+window.bmAi1BetaDegistir = function(){ var B = window.BM_AI1; if(!B) return; B.betaYaz(!B.betaAcik()); if(typeof bmToast === 'function') bmToast(B.betaAcik() ? (B.ACILIS ? 'AI (beta) açıldı — erken test, sınırlı ölçüm' : 'AI reçeteci (beta) açıldı — tuzak testi yapılmadı') : 'AI reçeteci kapatıldı', 'info'); try{ render(); }catch(_e){} };
 window.bmAiAnahtarKaydet = function(){
   var el = document.getElementById('bm-ai-anahtar-inp'); var v = el ? el.value : '';
   var r = window.BM_AI.anahtarKaydet(v);
