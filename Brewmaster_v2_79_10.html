@@ -21130,7 +21130,7 @@ return `
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:2px">
             <div style="width:40px;height:40px;border-radius:50%;background:${renk_hex};border:2.5px solid var(--bor2);flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;color:#FEFBF2;font-family:var(--font-display);font-weight:700;text-shadow:0 1px 2px rgba(0,0,0,.4)"><span style="font-size:14px;line-height:1">${ebcGoster(srm)}</span></div>
             <div style="flex:1;min-width:0">${(()=>{
-              if(window._bmBosOtoMu&&window._bmBosOtoMu()) return '<span class="bm-stil-adi" style="font-size:15px;font-weight:700;color:var(--soluk);font-family:var(--font-display)">Reçete boş</span><div style="font-size:11px;color:var(--soluk);margin-top:2px">Önce malt ekle — stil tahmini malzemeyle başlar.</div>'; // AQ2-2: boş reçetede motor-tahmin (Kvass) başlığı basılmaz
+              if(window._bmBosOtoMu&&window._bmBosOtoMu()) return '<span class="bm-stil-adi" style="font-size:15px;font-weight:700;color:var(--soluk);font-family:var(--font-display)">Reçete boş</span><div style="font-size:11px;color:var(--soluk);margin-top:2px">Önce malt ekle — stil tahmini malzemeyle başlar.</div>' + (window.BM_BUL ? '<button type="button" class="bul-bos-giris" onclick="BM_BUL.ac()" style="margin-top:6px;min-height:40px;padding:0 12px;border-radius:8px;border:1px solid var(--bakir);background:transparent;color:var(--bakir);font-weight:700;font-size:12px">🔎 Tarif et, ödüllü örneklerden bulayım</button>' : ''); // AQ2-2: boş reçetede motor-tahmin (Kvass) başlığı basılmaz
               // Bug 1: V12 slug top-1 → kart başlığı (DRY window.bmSlugToBjcp)
               // Bug 5: "Belirsiz" SADECE slug-model-ready + slug confidence < 20. Cluster fallback'te tetiklenmez.
               // Bug 6: Manuel mode (S.stil && BJCP[S.stil]) → kart başlığı kullanıcı seçimi, V12 ne olursa olsun.
@@ -28756,6 +28756,7 @@ window._brTamHTML = function(){
     var _detaySecili = _detay.filter(function(x){ return p[x.k]; }).length;
     var _detayAcik = !!window.__brDetayAcik || _detaySecili > 0;
     var bloklar = (window._ndVeriVar && !window._ndVeriVar() ? '<div class="br-ara-yok">Örnek verisi yüklenemedi (ornek_veri.js) — stil araması çalışır, kaynaklı örnekler görünmez.</div>' : '')
+      + (window.BM_BUL ? window.BM_BUL.kutuHTML() : '') // SPRINT BUL1: 🔎 Tarif et — serbest tarif → çipler → ödüllü örneklerde arama
       + (window._ndOneriHTML ? window._ndOneriHTML() : '') // SPRINT ND3: "ne alırsam ne açılır" (o anki görünüme göre, salt hesap)
       + (window._ndMalzBlokHTML ? window._ndMalzBlokHTML() : '') // SPRINT ND1: malzeme araması (stil araması / nota / eksenlerle VE)
       + '<div id="br-ara-sonuc" class="br-ara-sonuc" aria-live="polite">' + window._brAraSonucHTML() + '</div>' + window._brNotaHTML() // SPRINT CB1 + CB2: eksenlerin ÜSTÜNDE
@@ -28856,7 +28857,7 @@ window._brTamHTML = function(){
     return '<div id="br-tam" class="br-tam" role="dialog" aria-modal="true" aria-label="İstediğin birayı tarif et" tabindex="-1">'
       + '<div class="br-tam-bas">'
       +   '<div style="flex:1;min-width:0"><div class="br-tam-ust">'
-      +     '<button type="button" class="br-malz-ac' + ((window.__ndMalz || []).length ? ' nd-secili' : '') + '" onclick="_ndMalzAc()" aria-expanded="' + (window.__ndMalzAcik ? 'true' : 'false') + '" title="Kullanmak istediğin malzemeye göre örnek bul">🧺 Malzeme' + ((window.__ndMalz || []).length ? ' (' + window.__ndMalz.length + ')' : '') + (window.__ndMalzAcik ? ' ▴' : ' ▾') + '</button>'
+      +     (window.BM_BUL ? window.BM_BUL.dugmeHTML() : '') + '<button type="button" class="br-malz-ac' + ((window.__ndMalz || []).length ? ' nd-secili' : '') + '" onclick="_ndMalzAc()" aria-expanded="' + (window.__ndMalzAcik ? 'true' : 'false') + '" title="Kullanmak istediğin malzemeye göre örnek bul">🧺 Malzeme' + ((window.__ndMalz || []).length ? ' (' + window.__ndMalz.length + ')' : '') + (window.__ndMalzAcik ? ' ▴' : ' ▾') + '</button>'
       +     '<button type="button" class="nd-filtre" onclick="_ndFiltreTik()" aria-pressed="' + (window.__ndFiltre ? 'true' : 'false') + '" title="Yalnız stoğunla yapabileceğin örnekleri göster">✅ Yapabilirim</button>' + (window._ndOneriDugmeHTML ? window._ndOneriDugmeHTML() : '') /* SPRINT ND3: ne alırsam ne açılır — 360 px bütçesi: kapalıyken gövdede yer kaplamaz */
       +   '</div>'
       +   window._brAraKutuHTML() + '</div>'
@@ -31623,7 +31624,8 @@ window.BM_AI = (function(){
     //   (3) sabit önek (sistem metni) 512 token asgarisinin altında (tahmin ~400) → API önbelleklemez. Kanıt paketi zaten her soruda değişir.
     ozet:     { model: 'ucuz',    maxTokens: 2000, onbellek: false, sistem: 'ozet' },              // kaynaklı özet (tek örnekleme) · AI4B: 1500 → 2000 (koşu #2'de C04 iki kez kesildi)
     kanitweb: { model: 'dengeli', maxTokens: 2000, onbellek: false, sistem: 'kanitweb', web: true }, // sorguları uygulama kurar; ucuz model destekliyorsa ucuz (BM_AI4.webModel)
-    secim:    { model: 'ucuz',    maxTokens: 100,  onbellek: false, sistem: 'secim' }              // belirsiz soru → YALNIZ aday listesinden enum seçimi
+    secim:    { model: 'ucuz',    maxTokens: 100,  onbellek: false, sistem: 'secim' },
+    bul:      { model: 'ucuz',    maxTokens: 600,  onbellek: false, sistem: 'bul' }                // SPRINT BUL1: tarif → YALNIZ kod listesinden çip seçimi (enum); arama uygulamada              // belirsiz soru → YALNIZ aday listesinden enum seçimi
   };
   // SPRINT AI2 2: web search server tool (platform.claude.com/docs …/web-search-tool, okundu 2026-10-09): 'web_search_20250305' (temel, doğrudan çağrı;
   // dinamik filtreli 20260209+ sürümleri kod yürütme ister → seçilmedi). 10 $ / 1.000 arama + sonuç sayfaları GİRDİ token'ı. Atıflar her zaman açık.
@@ -31673,7 +31675,14 @@ window.BM_AI = (function(){
   ].join('\n');
   var SISTEM_KANITWEB = 'Sen Brewmaster uygulamasının web arama koludur. Sana verilen arama sorgularını AYNEN ve verilen sırayla kullan; başka sorgu üretme. Yalnız arama sonuçlarından, atıflı ve kısa olgu cümleleri yaz; değerlendirme, tat hükmü ya da tavsiye yazma. Bulamazsan tam olarak "Web\'de güvenilir kaynak bulamadım." yaz.';
   var SISTEM_SECIM = 'Kullanıcının sorusunda kastedilen malzemeyi YALNIZ verilen aday listesinden seç. Emin değilsen "yok" seç. Başka bir şey yazma.';
-  var SISTEMLER = { asistan: SISTEM_ASISTAN, cikar: SISTEM_CIKAR, denetim: SISTEM_DENETIM, web: SISTEM_WEB, ozet: SISTEM_OZET, kanitweb: SISTEM_KANITWEB, secim: SISTEM_SECIM };
+  // SPRINT BUL1: tarif → çip kodları. Yalnız tarif metni + sabit kod listesi gider (stok / reçete GİTMEZ).
+  var SISTEM_BUL = ['Kullanıcı istediği birayı serbest metinle tarif etti. Görevin: tarifteki ifadeleri YALNIZ VERİ bölümündeki KOD LİSTESİ\'nden seçerek arama kodlarına çevirmek.',
+    '1. Yalnız listedeki kodları kullan. Adı listede BİREBİR geçmeyen ürün, marka ya da stil adını SEÇME, benzer ürün seçme; o ifadeyi cozemedim dizisine yaz.',
+    '2. Ticari bira, bira fabrikası, yer ya da mevsim adı geçerse yalnız kesin bildiğin stil / renk / güç / köken kodunu seç; emin değilsen cozemedim dizisine yaz.',
+    '3. olumsuz=true yalnız istenmeyen malzeme içindir (ör. "kahvesiz", "laktoz olmasın"); diğer bütün kodlarda false.',
+    '4. ifade alanına kodu tarifteki hangi kelimelerden çıkardığını yaz. Sözlüğün zaten anladıklarını tekrar seçme.',
+    '5. Tat, kalite, öneri ya da reçete yazma.'].join('\n');
+  var SISTEMLER = { bul: SISTEM_BUL, asistan: SISTEM_ASISTAN, cikar: SISTEM_CIKAR, denetim: SISTEM_DENETIM, web: SISTEM_WEB, ozet: SISTEM_OZET, kanitweb: SISTEM_KANITWEB, secim: SISTEM_SECIM };
   // SPRINT AI2 2: model web arama destekliyor mu? Models API capabilities.server_tools.web_search.supported (gerçek doğrulama AI3). Cihaz-yerel, bm_ öneksiz.
   var WEB_LS = 'ai_web_destek_v1';
   function webDestekDurum(){ try { return JSON.parse(localStorage.getItem(WEB_LS) || 'null') || { durum: 'bilinmiyor', neden: 'Models API ile henüz denetlenmedi' }; } catch(e){ return { durum: 'bilinmiyor', neden: 'okunamadı' }; } }
@@ -31866,6 +31875,506 @@ window._BM_AI1_HAM_UYARI = false;
 // SPRINT AI4B 4: DONDURMA — denetleyici metninin imzası (BM_AI4.denetleyiciImza) ve onu donduran commit. Koşudan sonra denetleyici değişirse imza tutmaz → yeni sprint + taze koşu.
 window._BM_AI4B_DONMUS = 'fdaf814a-20176';
 window._BM_AI4B_COMMIT = 'cdd3c5aa61d0d2ee141c56f08176972a6d4647c4'; // denetleyiciyi donduran commit (AI4C yeniden dondurma; ilk dondurma 10aa4ac)
+// SPRINT BUL1: BJCP 2021 stil etiketleri — _bul_build_etiket.js çıktısı (BJCP_2021_raw.txt "Tags:" satırları; elle düzenlenmez)
+window._BUL_ETIKET = {"German Pils":{"kod":"5D","ad":"German Pils","t":["standard-strength","pale-color","bottom-fermented","lagered","central-europe","traditional-style","pilsner-family","bitter","hoppy"]},"Czech Premium Pale Lager":{"kod":"3B","ad":"Czech Premium Pale Lager","t":["standard-strength","pale-color","bottom-fermented","lagered","central-europe","traditional-style","pilsner-family","balanced","hoppy"]},"Czech Pale Lager":{"kod":"3A","ad":"Czech Pale Lager","t":["session-strength","pale-color","bottom-fermented","lagered","central-europe","traditional-style","pale-lager-family","bitter","hoppy"]},"Czech Amber Lager":{"kod":"3C","ad":"Czech Amber Lager","t":["standard-strength","amber-color","bottom-fermented","lagered","central-europe","traditional-style","amber-lager-family","balanced"]},"Czech Dark Lager":{"kod":"3D","ad":"Czech Dark Lager","t":["standard-strength","dark-color","bottom-fermented","lagered","central-europe","traditional-style","dark-lager-family","balanced"]},"Helles / Münchner Hell":{"kod":"4A","ad":"Munich Helles","t":["standard-strength","pale-color","bottom-fermented","lagered","central-europe","traditional-style","pale-lager-family","malty"]},"Festbier / Wiesn":{"kod":"4B","ad":"Festbier","t":["standard-strength","pale-color","bottom-fermented","lagered","central-europe","traditional-style","pale-lager-family","malty"]},"Munich Märzen / Oktoberfest":{"kod":"6A","ad":"Märzen","t":["standard-strength","amber-color","bottom-fermented","lagered","central-europe","traditional-style","amber-lager-family","malty"]},"Munich Dunkel":{"kod":"8A","ad":"Munich Dunkel","t":["standard-strength","dark-color","bottom-fermented","lagered","central-europe","traditional-style","malty","dark-lager-family"]},"Schwarzbier":{"kod":"8B","ad":"Schwarzbier","t":["standard-strength","dark-color","bottom-fermented","lagered","central-europe","traditional-style","balanced","dark-lager-family"]},"Kellerbier / Zwickelbier":{"kod":"27","ad":"Kellerbier","t":["standard-strength","bottom-fermented","central-europe","traditional-style","balanced"]},"Dortmunder Export":{"kod":"5C","ad":"German Helles Exportbier","t":["standard-strength","pale-color","bottom-fermented","lagered","central-europe","traditional-style","pale-lager-family","balanced"]},"Bock":{"kod":"6C","ad":"Dunkles Bock","t":["high-strength","amber-color","bottom-fermented","lagered","central-europe","traditional-style","bock-family","malty"]},"Maibock / Helles Bock":{"kod":"4C","ad":"Helles Bock","t":["high-strength","pale-color","bottom-fermented","lagered","central-europe","traditional-style","bock-family","malty"]},"Doppelbock":{"kod":"9A","ad":"Doppelbock","t":["high-strength","amber-color","pale-color","bottom-fermented","lagered","central-europe","traditional-style","bock-family","malty"]},"Eisbock":{"kod":"9B","ad":"Eisbock","t":["very-high-strength","amber-color","bottom-fermented","lagered","central-europe","traditional-style","bock-family","malty"]},"Vienna Lager":{"kod":"7A","ad":"Vienna Lager","t":["standard-strength","amber-color","bottom-fermented","lagered","central-europe","traditional-style","amber-lager-family","balanced"]},"California Common / Steam Beer":{"kod":"19B","ad":"California Common","t":["standard-strength","amber-color","bottom-fermented","north-america","traditional-style","amber-lager-family","bitter","hoppy"]},"Rauchbier / Bamberg Smoked":{"kod":"6B","ad":"Rauchbier","t":["standard-strength","amber-color","bottom-fermented","lagered","central-europe","traditional-style","amber-lager-family","malty","smoke"]},"Baltic Porter":{"kod":"9C","ad":"Baltic Porter","t":["high-strength","dark-color","any-fermentation","lagered","eastern-europe","traditional-style","porter-family","malty"]},"Weizen / Weissbier":{"kod":"10A","ad":"Weissbier","t":["standard-strength","pale-color","top-fermented","central-europe","traditional-style","wheat-beer-family","malty"]},"Dunkelweizen":{"kod":"10B","ad":"Dunkles Weissbier","t":["standard-strength","amber-color","top-fermented","central-europe","traditional-style","wheat-beer-family","malty"]},"Weizenbock":{"kod":"10C","ad":"Weizenbock","t":["high-strength","amber-color","pale-color","top-fermented","central-europe","traditional-style","wheat-beer-family","malty"]},"Witbier / Belgian White":{"kod":"24A","ad":"Witbier","t":["standard-strength","pale-color","top-fermented","western-europe","traditional-style","wheat-beer-family","spice"]},"Grodziskie / Grätzer":{"kod":"27","ad":"Piwo Grodziskie","t":["session-strength","pale-color","top-fermented","central-europe","historical-style","wheat-beer-family","bitter","smoke"]},"Gose":{"kod":"23G","ad":"Gose","t":["standard-strength","pale-color","top-fermented","central-europe","historical-style","wheat-beer-family","sour","spice"]},"Berliner Weisse":{"kod":"23A","ad":"Berliner Weisse","t":["session-strength","pale-color","top-fermented","central-europe","traditional-style","wheat-beer-family","sour"]},"Flanders Red Ale":{"kod":"23B","ad":"Flanders Red Ale","t":["standard-strength","amber-color","top-fermented","western-europe","traditional-style","balanced","sour","wood"]},"Oud Bruin":{"kod":"23C","ad":"Oud Bruin","t":["standard-strength","dark-color","top-fermented","western-europe","traditional-style","malty","sour"]},"Sour Ale / Kettle Sour":{"kod":"28D","ad":"Straight Sour Beer","t":["pale-color","top-fermented","sour"]},"Belgian Blonde Ale":{"kod":"25A","ad":"Belgian Blond Ale","t":["high-strength","pale-color","top-fermented","western-europe","traditional-style","balanced"]},"Belgian Pale Ale":{"kod":"24B","ad":"Belgian Pale Ale","t":["standard-strength","amber-color","top-fermented","western-europe","traditional-style","pale-ale-family","balanced"]},"Dubbel":{"kod":"26B","ad":"Belgian Dubbel","t":["high-strength","amber-color","top-fermented","western-europe","traditional-style","malty"]},"Tripel":{"kod":"26C","ad":"Belgian Tripel","t":["high-strength","pale-color","top-fermented","western-europe","traditional-style","bitter"]},"Belgian Quadrupel / Abt":{"kod":"26D","ad":"Belgian Dark Strong Ale","t":["very-high-strength","amber-color","top-fermented","western-europe","traditional-style","malty"]},"Belgian Strong Golden Ale":{"kod":"25C","ad":"Belgian Golden Strong Ale","t":["very-high-strength","pale-color","top-fermented","western-europe","traditional-style","bitter"]},"Belgian Dark Strong Ale":{"kod":"26D","ad":"Belgian Dark Strong Ale","t":["very-high-strength","amber-color","top-fermented","western-europe","traditional-style","malty"]},"Saison / Farmhouse Ale":{"kod":"25B","ad":"Saison","t":["standard-strength","pale-color","top-fermented","western-europe","traditional-style","bitter"]},"Saison (table)":{"kod":"25B","ad":"Saison","t":["standard-strength","pale-color","top-fermented","western-europe","traditional-style","bitter"]},"Saison (super)":{"kod":"25B","ad":"Saison","t":["standard-strength","pale-color","top-fermented","western-europe","traditional-style","bitter"]},"Kölsch":{"kod":"5B","ad":"Kölsch","t":["standard-strength","pale-color","top-fermented","lagered","central-europe","traditional-style","pale-ale-family","balanced"]},"Altbier / Düsseldorf Altbier":{"kod":"7B","ad":"Altbier","t":["standard-strength","amber-color","top-fermented","lagered","central-europe","traditional-style","amber-ale-family","bitter"]},"Irish Red Ale":{"kod":"15A","ad":"Irish Red Ale","t":["standard-strength","amber-color","top-fermented","british-isles","traditional-style","amber-ale-family","balanced"]},"Scottish Ale / 60 Shilling":{"kod":"14A","ad":"Scottish Light","t":["session-strength","amber-color","top-fermented","british-isles","traditional-style","amber-ale-family","malty"]},"Scottish Ale / 80 Shilling":{"kod":"14C","ad":"Scottish Export","t":["standard-strength","amber-color","top-fermented","british-isles","traditional-style","amber-ale-family","malty"]},"Scottish Ale / Wee Heavy":{"kod":"17C","ad":"Wee Heavy","t":["high-strength","amber-color","top-fermented","british-isles","traditional-style","strong-ale-family","malty"]},"Cream Ale":{"kod":"1C","ad":"Cream Ale","t":["standard-strength","pale-color","any-fermentation","north-america","traditional-style","pale-ale-family","balanced"]},"Blonde Ale / Cream Ale":{"kod":"18A","ad":"Blonde Ale","t":["standard-strength","pale-color","any-fermentation","north-america","craft-style","pale-ale-family","balanced"]},"American Pale Ale":{"kod":"18B","ad":"American Pale Ale","t":["standard-strength","pale-color","top-fermented","north-america","craft-style","pale-ale-family","bitter","hoppy"]},"American IPA":{"kod":"21A","ad":"American IPA","t":["high-strength","pale-color","top-fermented","north-america","craft-style","ipa-family","bitter","hoppy"]},"NEIPA / Hazy IPA":{"kod":"21C","ad":"Hazy IPA","t":["high-strength","pale-color","top-fermented","north-america","craft-style","ipa-family","bitter","hoppy"]},"Imperial IPA / DIPA":{"kod":"22A","ad":"Double IPA","t":["very-high-strength","pale-color","top-fermented","north-america","craft-style","ipa-family","bitter","hoppy"]},"American Amber Ale / Red Ale":{"kod":"19A","ad":"American Amber Ale","t":["standard-strength","amber-color","top-fermented","north-america","craft-style","amber-ale-family","balanced","hoppy"]},"American Brown Ale":{"kod":"19C","ad":"American Brown Ale","t":["standard-strength","dark-color","top-fermented","north-america","craft-style","brown-ale-family","balanced","hoppy"]},"American Barleywine":{"kod":"22C","ad":"American Barleywine","t":["very-high-strength","amber-color","top-fermented","north-america","craft-style","strong-ale-family","bitter","hoppy"]},"Session Ale / Ordinary Bitter":{"kod":"11A","ad":"Ordinary Bitter","t":["session-strength","amber-color","top-fermented","british-isles","traditional-style","amber-ale-family","bitter"]},"Strong Bitter / ESB":{"kod":"11C","ad":"Strong Bitter","t":["standard-strength","amber-color","top-fermented","british-isles","traditional-style","amber-ale-family","bitter"]},"Best Bitter":{"kod":"11B","ad":"Best Bitter","t":["standard-strength","amber-color","top-fermented","british-isles","traditional-style","amber-ale-family","bitter"]},"English Bitter / ESB":{"kod":"11C","ad":"Strong Bitter","t":["standard-strength","amber-color","top-fermented","british-isles","traditional-style","amber-ale-family","bitter"]},"English Brown Ale":{"kod":"13B","ad":"British Brown Ale","t":["standard-strength","amber-color","top-fermented","british-isles","traditional-style","brown-ale-family","malty"]},"English Mild / Dark Mild":{"kod":"13A","ad":"Dark Mild","t":["session-strength","dark-color","top-fermented","british-isles","traditional-style","brown-ale-family","malty"]},"English Barleywine":{"kod":"17D","ad":"English Barley Wine","t":["very-high-strength","amber-color","top-fermented","british-isles","traditional-style","strong-ale-family","malty"]},"Winter Warmer / Old Ale":{"kod":"17B","ad":"Old Ale","t":["high-strength","amber-color","top-fermented","british-isles","traditional-style","strong-ale-family","malty","aged"]},"Dry Irish Stout":{"kod":"15B","ad":"Irish Stout","t":["standard-strength","dark-color","top-fermented","british-isles","traditional-style","stout-family","bitter","roasty"]},"American Stout":{"kod":"20B","ad":"American Stout","t":["high-strength","dark-color","top-fermented","north-america","craft-style","stout-family","bitter","roasty","hoppy"]},"Foreign Extra Stout":{"kod":"16D","ad":"Foreign Extra Stout","t":["high-strength","dark-color","top-fermented","british-isles","traditional-style","stout-family","balanced","roasty"]},"Oatmeal Stout":{"kod":"16B","ad":"Oatmeal Stout","t":["standard-strength","dark-color","top-fermented","british-isles","traditional-style","stout-family","balanced","roasty"]},"Milk Stout / Sweet Stout":{"kod":"16A","ad":"Sweet Stout","t":["standard-strength","dark-color","top-fermented","british-isles","traditional-style","stout-family","malty","roasty","sweet"]},"Imperial / Russian Imperial Stout":{"kod":"20C","ad":"Imperial Stout","t":["very-high-strength","dark-color","top-fermented","british-isles","north-america","traditional-style","craft-style","stout-family","malty","bitter","roasty"]},"Robust Porter":{"kod":"20A","ad":"American Porter","t":["standard-strength","dark-color","top-fermented","north-america","craft-style","porter-family","bitter","roasty","hoppy"]},"Wood-Aged Beer / Barrel Aged":{"kod":"33A","ad":"Wood-Aged Beer","t":["specialty-beer","wood"]},"Lambic / Gueuze":{"kod":"23D","ad":"Lambic","t":["standard-strength","pale-color","wild-fermented","western-europe","traditional-style","wheat-beer-family","sour"]},"Kriek / Fruit Lambic":{"kod":"23F","ad":"Fruit Lambic","t":["standard-strength","pale-color","wild-fermented","western-europe","traditional-style","wheat-beer-family","sour","fruit"]},"Framboise / Fruit Lambic":{"kod":"23F","ad":"Fruit Lambic","t":["standard-strength","pale-color","wild-fermented","western-europe","traditional-style","wheat-beer-family","sour","fruit"]},"Brett Beer / Farmhouse Brett":{"kod":"28A","ad":"Brett Beer","t":["wild-fermentation","north-america","craft-style","specialty-beer"]},"Brut IPA":{"kod":"21B","ad":"Brut IPA","t":["high-strength","pale-color","top-fermented","north-america","craft-style","ipa-family","specialty-family","bitter","hoppy"]},"Bière de Garde":{"kod":"24C","ad":"Bière de Garde","t":["high-strength","pale-color","amber-color","any-fermentation","lagered","western-europe","traditional-style","amber-ale-family","malty"]},"Trappist Single / Abbey Ale":{"kod":"26A","ad":"Belgian Single","t":["standard-strength","pale-color","top-fermented","western-europe","craft-style","bitter","hoppy"]},"Old Ale":{"kod":"17B","ad":"Old Ale","t":["high-strength","amber-color","top-fermented","british-isles","traditional-style","strong-ale-family","malty","aged"]},"British Strong Ale":{"kod":"17A","ad":"British Strong Ale","t":["high-strength","amber-color","top-fermented","british-isles","traditional-style","strong-ale-family","malty"]},"Wheatwine":{"kod":"22D","ad":"Wheatwine","t":["very-high-strength","amber-color","top-fermented","north-america","craft-style","strong-ale-family","wheat-beer-family","balanced","hoppy"]},"Roggenbier / Rye Beer":{"kod":"27","ad":"Roggenbier","t":["standard-strength","amber-color","top-fermented","central-europe","historical-style","wheat-beer-family"]},"Lichtenhainer":{"kod":"27","ad":"Lichtenhainer","t":["standard-strength","pale-color","top-fermented","central-europe","historical-style","wheat-beer-family","sour","smoke"]},"Sahti / Nordic Farmhouse":{"kod":"27","ad":"Sahti","t":["high-strength","amber-color","top-fermented","central-europe","historical-style","spice"]},"Kentucky Common":{"kod":"27","ad":"Kentucky Common","t":["standard-strength","amber-color","top-fermented","north-america","historical-style","balanced"]},"Pre-Prohibition Lager":{"kod":"27","ad":"Pre-Prohibition Lager","t":["standard-strength","pale-color","bottom-fermented","lagered","north-america","historical-style","pilsner-family","bitter","hoppy"]},"Session Stout / Dark Mild":{"kod":"13A","ad":"Dark Mild","t":["session-strength","dark-color","top-fermented","british-isles","traditional-style","brown-ale-family","malty"]},"International Pale Lager":{"kod":"2A","ad":"International Pale Lager","t":["standard-strength","pale-color","bottom-fermented","lagered","traditional-style","pale-lager-family","balanced"]},"International Amber Lager":{"kod":"2B","ad":"International Amber Lager","t":["standard-strength","amber-color","bottom-fermented","lagered","traditional-style","amber-lager-family","malty"]},"German Helles Exportbier":{"kod":"5C","ad":"German Helles Exportbier","t":["standard-strength","pale-color","bottom-fermented","lagered","central-europe","traditional-style","pale-lager-family","balanced"]},"American Strong Ale":{"kod":"22B","ad":"American Strong Ale","t":["high-strength","amber-color","top-fermented","north-america","craft-style","strong-ale-family","bitter","hoppy"]},"English IPA":{"kod":"12C","ad":"English IPA","t":["high-strength","pale-color","top-fermented","british-isles","traditional-style","ipa-family","bitter","hoppy"]},"White IPA":{"kod":"21B","ad":"White IPA","t":["high-strength","pale-color","top-fermented","north-america","craft-style","ipa-family","specialty-family","bitter","hoppy","spice"]},"Brown IPA":{"kod":"21B","ad":"Brown IPA","t":["high-strength","dark-color","top-fermented","north-america","craft-style","ipa-family","specialty-family","bitter","hoppy"]},"Mixed Fermentation Sour":{"kod":"28B","ad":"Mixed-Fermentation Sour Beer","t":["wild-fermentation","north-america","craft-style","specialty-beer","sour"]},"Christmas / Holiday Beer":{"kod":"30C","ad":"Winter Seasonal Beer","t":["specialty-beer","spice"]},"Fruit Beer":{"kod":"29A","ad":"Fruit Beer","t":["specialty-beer","fruit"]},"Herb & Spice Beer":{"kod":"30A","ad":"Spice, Herb, or Vegetable Beer","t":["specialty-beer","spice"]},"Alternative Grain Beer":{"kod":"31A","ad":"Alternative Grain Beer","t":["specialty-beer"]},"London Brown Ale":{"kod":"27","ad":"London Brown Ale","t":["session-strength","dark-color","top-fermented","british-isles","historical-style","brown-ale-family","malty","sweet"]},"Pre-Prohibition Porter":{"kod":"27","ad":"Pre-Prohibition Porter","t":["standard-strength","dark-color","any-fermentation","north-america","historical-style","porter-family","malty"]},"Australian Sparkling Ale":{"kod":"12B","ad":"Australian Sparkling Ale","t":["standard-strength","pale-color","top-fermented","pacific","traditional-style","pale-ale-family","bitter"]},"Belgian Witbier":{"kod":"24A","ad":"Witbier","t":["standard-strength","pale-color","top-fermented","western-europe","traditional-style","wheat-beer-family","spice"]},"Tropical Stout":{"kod":"16C","ad":"Tropical Stout","t":["high-strength","dark-color","top-fermented","british-isles","traditional-style","stout-family","malty","roasty","sweet"]},"Grape Ale / Wine Beer":{"kod":"29D","ad":"Grape Ale","t":["specialty-beer","fruit"]},"American Amber IPA / Red IPA":{"kod":"21B","ad":"Red IPA","t":["high-strength","amber-color","top-fermented","north-america","craft-style","ipa-family","specialty-family","bitter","hoppy"]},"American Lager / Light Lager":{"kod":"1B","ad":"American Lager","t":["standard-strength","pale-color","bottom-fermented","lagered","north-america","traditional-style","pale-lager-family","balanced"]},"Brown Porter":{"kod":"13C","ad":"English Porter","t":["standard-strength","dark-color","top-fermented","british-isles","traditional-style","porter-family","malty","roasty"]},"German Leichtbier":{"kod":"5A","ad":"German Leichtbier","t":["session-strength","pale-color","bottom-fermented","lagered","central-europe","traditional-style","pale-lager-family","bitter","hoppy"]},"American Porter":{"kod":"20A","ad":"American Porter","t":["standard-strength","dark-color","top-fermented","north-america","craft-style","porter-family","bitter","roasty","hoppy"]},"American Wheat Beer":{"kod":"1D","ad":"American Wheat Beer","t":["standard-strength","pale-color","any-fermentation","north-america","craft-style","wheat-beer-family","balanced"]},"Belgian IPA":{"kod":"21B","ad":"Belgian IPA","t":["high-strength","pale-color","top-fermented","north-america","craft-style","ipa-family","specialty-family","bitter","hoppy"]},"Black IPA / Cascadian Dark Ale":{"kod":"21B","ad":"Black IPA","t":["high-strength","dark-color","top-fermented","north-america","craft-style","ipa-family","specialty-family","bitter","hoppy"]},"Fruited Sour / Gose":{"kod":"23G","ad":"Gose","t":["standard-strength","pale-color","top-fermented","central-europe","historical-style","wheat-beer-family","sour","spice"]},"Rye IPA":{"kod":"21B","ad":"Rye IPA","t":["high-strength","amber-color","top-fermented","north-america","craft-style","ipa-family","specialty-family","bitter","hoppy"]},"Smoked Beer / Rauchbier":{"kod":"6B","ad":"Rauchbier","t":["standard-strength","amber-color","bottom-fermented","lagered","central-europe","traditional-style","amber-lager-family","malty","smoke"]}};
+// ═══ SPRINT BUL1 MODÜL BAŞ ═══
+// "TARİF ET, UYGULAMA BULSUN" (Kaan 2026-10-09). Serbest tarif → SÖZLÜK (tek tablo, TR+EN) → ekranda düzenlenebilir ÇİPLER →
+// ödüllü/kaynaklı örneklerde AI'SIZ arama → en fazla 5 sonuç + Önizle + 📦 Stoğumla oluştur (mevcut UYG akışı).
+// AI (Haiku 5.5) YALNIZ sözlüğün çözemediği kelimeler için, kullanıcı dokununca, ENUM kodlardan seçer; arama/sıralama/sonuç UYGULAMADAN.
+// AI'ya giden: tarif metni + sabit kod listesi (katalog adları dahil). Stok / reçete verisi GİTMEZ (testli).
+// Eşik kaynakları: BJCP 2021 Style Guidelines (repodaki BJCP_2021_Guidelines.pdf / BJCP_2021_raw.txt) — Color Reference (s. xii),
+// Style Tag Reference (s. xiii–xiv). Kaynağı olmayan eşik "uygulama varsayımı" etiketli ve Ayarlar ▸ AI özellikleri'nde görünür.
+// Stil etiketleri _bul_build_etiket.js ile BJCP metnindeki "Tags:" satırlarından üretildi (aşağıdaki _BUL_ETIKET); eşlenemeyen stilin
+// köken etiketi yalnız stil ADINDAN (ad kuralı, varsayım etiketli) — aile/lezzet etiketi uydurulmaz.
+(function(){
+  var B = window.BM_BUL = {};
+  var E = function(s){ return (typeof esc === 'function') ? esc(String(s == null ? '' : s)) : String(s == null ? '' : s).replace(/[<>&"]/g, function(c){ return { '<':'&lt;', '>':'&gt;', '&':'&amp;', '"':'&quot;' }[c]; }); };
+  var N = function(s){ return String(s == null ? '' : s).toLocaleLowerCase('tr-TR').replace(/ı/g, 'i').replace(/İ/g, 'i').replace(/ş/g, 's').replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ö/g, 'o').replace(/ç/g, 'c').replace(/â/g, 'a').replace(/î/g, 'i').replace(/û/g, 'u').replace(/ä/g, 'a').replace(/ß/g, 'ss').replace(/é|è|ê/g, 'e').replace(/ñ/g, 'n').replace(/[’'`´]/g, ' ').replace(/[^a-z0-9%.,\- ]+/g, ' ').replace(/\s+/g, ' ').trim(); };
+  var INF = 999;
+  var KAY = {
+    renk: 'BJCP 2021 Color Reference (s. xii): Straw 2-3 · Yellow 3-4 · Gold 5-6 · Amber 6-9 · Deep amber/light copper 10-14 · Copper 14-17 · Deep copper/light brown 17-18 · Brown 19-22 · Dark Brown 22-30 · Very Dark Brown 30-35 · Black 30+ · Black, opaque 40+',
+    renkEt: 'BJCP 2021 Style Tag Reference (s. xiii): pale-color = straw to gold · amber-color = amber to copper-brown · dark-color = dark brown to black',
+    guc: 'BJCP 2021 Style Tag Reference (s. xiii): session-strength <4% · standard-strength 4-6% · high-strength 6-9% · very-high-strength >9% ABV',
+    etiket: 'BJCP 2021 Style Tag Reference (s. xiii–xiv) + her stilin "Tags:" satırı'
+  };
+  // ── 1) SÖZLÜK (tek tablo; testli). k = eksen, d = değer kodu, kel = TR+EN ifadeler (normalize; uzun ifade önce eşlenir) ──
+  // Ek değerler: a = [alt, üst] aralık (üst INF = sınırsız) · m = maya aileleri · t = BJCP etiketi · v = uygulama varsayımı notu
+  var S = [
+    // RENK (SRM) — BJCP renk adları
+    { k:'renk', d:'acik', et:'açık renk', a:[2, 6], kel:['acik renkli', 'acik renk', 'acik', 'soluk', 'saman', 'saman rengi', 'sari', 'pale colored', 'pale color', 'light colored', 'light color', 'straw'], kay:KAY.renk + ' · ' + KAY.renkEt + ' (pale-color = Straw 2 … Gold 6)' },
+    { k:'renk', d:'altin', et:'altın', a:[5, 6], kel:['altin renkli', 'altin sarisi', 'altin', 'golden'], kay:KAY.renk + ' (Gold 5-6)' },
+    { k:'renk', d:'amber', et:'amber / bakır', a:[6, 18], kel:['amber renkli', 'amber', 'kehribar', 'bakir renkli', 'bakir', 'copper', 'kizil', 'kizilimsi', 'kirmizi', 'red'], kay:KAY.renk + ' · ' + KAY.renkEt + ' (amber-color = Amber 6 … Deep copper/light brown 18)', v:'"kızıl / kırmızı / red" BJCP renk tablosunda yok — amber-color aralığına eşlendi' },
+    { k:'renk', d:'kahve', et:'kahverengi', a:[17, 30], kel:['kahverengi', 'kahve rengi', 'kahve renkli', 'brown colored', 'brown'], kay:KAY.renk + ' (Deep copper/light brown 17 … Dark Brown 30)' },
+    { k:'renk', d:'koyu', et:'koyu', a:[17, INF], kel:['koyu renkli', 'koyu renk', 'koyu', 'dark colored', 'dark'], kay:KAY.renk + ' (Deep copper/light brown 17 … Black, opaque 40+)', v:'BJCP dark-color etiketi Dark Brown (22) ile başlar; Türkçe "koyu" kahverengiyi de kapsadığı için 17\'den başlatıldı' },
+    { k:'renk', d:'siyah', et:'siyah', a:[30, INF], kel:['simsiyah', 'zifiri', 'siyah', 'black'], kay:KAY.renk + ' (Black 30+)' },
+    // GÜÇ (ABV) — BJCP strength etiketleri
+    { k:'guc', d:'hafif', et:'hafif (<%4)', a:[0, 4], kel:['dusuk alkollu', 'az alkollu', 'sessionable', 'session', 'hafif', 'low alcohol', 'light'], kay:KAY.guc + ' (session-strength)', v:'"hafif" gövde anlamında da kullanılır; burada alkol (session) olarak alındı' },
+    { k:'guc', d:'standart', et:'orta güç (%4–6)', a:[4, 6], kel:['orta guclu', 'orta guc', 'normal guclu', 'standart guc', 'standard strength', 'medium strength'], kay:KAY.guc + ' (standard-strength)' },
+    { k:'guc', d:'guclu', et:'güçlü (%6–9)', a:[6, 9], kel:['yuksek alkollu', 'guclu', 'kuvvetli', 'sert', 'strong', 'high alcohol'], kay:KAY.guc + ' (high-strength)' },
+    { k:'guc', d:'cok_guclu', et:'çok güçlü (>%9)', a:[9, INF], kel:['cok guclu', 'cok kuvvetli', 'cok yuksek alkollu', 'emperyal', 'imperial', 'very strong', 'double', 'duble'], kay:KAY.guc + ' (very-high-strength)' },
+    // KURULUK (görünür attenüasyon % = (OG−FG)/(OG−1)) — UYGULAMA VARSAYIMI
+    { k:'kuru', d:'kuru', et:'kuru', a:[80, INF], kel:['cok kuru', 'kupkuru', 'kuru', 'sek', 'dry', 'brut', 'bone dry'], v:'kaynak bulunamadı: görünür attenüasyon ≥ %80 = kuru (uygulama varsayımı)' },
+    { k:'kuru', d:'orta', et:'yarı kuru', a:[72, 80], kel:['yari kuru', 'yari tatli', 'medium dry', 'off dry'], v:'kaynak bulunamadı: görünür attenüasyon %72–80 (uygulama varsayımı)' },
+    { k:'kuru', d:'tatli', et:'tatlı', a:[0, 72], kel:['tatlimsi', 'tatli', 'sweet', 'malt tatliligi'], v:'kaynak bulunamadı: görünür attenüasyon < %72 = tatlı (uygulama varsayımı)' },
+    // ACILIK (BU:GU = IBU / ((OG−1)×1000)) — UYGULAMA VARSAYIMI
+    { k:'aci', d:'az', et:'az acı', a:[0, 0.45], kel:['acisiz', 'az aci', 'dusuk acilik', 'hafif aci', 'aci olmayan', 'not bitter', 'low bitterness'], v:'kaynak bulunamadı: BU:GU < 0,45 = az acı (uygulama varsayımı)' },
+    { k:'aci', d:'dengeli', et:'dengeli acılık', a:[0.45, 0.7], kel:['dengeli', 'balanced'], v:'kaynak bulunamadı: BU:GU 0,45–0,70 (uygulama varsayımı)' },
+    { k:'aci', d:'aci', et:'acı', a:[0.7, INF], kel:['acilikli', 'acili', 'aci', 'bitter'], v:'kaynak bulunamadı: BU:GU ≥ 0,70 = acı (uygulama varsayımı)' },
+    { k:'aci', d:'cok_aci', et:'çok acı', a:[0.95, INF], kel:['cok aci', 'cok acili', 'very bitter', 'extra bitter'], v:'kaynak bulunamadı: BU:GU ≥ 0,95 = çok acı (uygulama varsayımı)' },
+    // MAYA KARAKTERİ (katalog maya tipi + tanımı) — sert filtre; UYGULAMA VARSAYIMI (tat ölçümü değil, maya KÖKENİ)
+    { k:'maya', d:'fenolik', et:'fenolik-baharatlı maya', m:['belcika', 'bugday', 'saison', 'wit'], kel:['fenolik', 'baharatli maya', 'belcika mayasi', 'belcika mayali', 'phenolic', 'belgian yeast'], v:'maya ailesi katalog maya tipinden (belcika / wheat / saison / wit) — tat ölçümü değil' },
+    { k:'maya', d:'muz_karanfil', et:'muz-karanfil (Alman buğday mayası)', m:['bugday'], kel:['muz karanfil', 'muzlu', 'muz', 'banana', 'hefe mayasi', 'weizen mayasi', 'bugday mayasi'], v:'katalog maya tipi wheat' },
+    { k:'maya', d:'temiz', et:'temiz maya', m:['temiz', 'lager'], kel:['temiz mayali', 'temiz maya', 'temiz', 'notr', 'clean', 'neutral'], v:'katalog: lager + tanımı "temiz / nötr" ile başlayan ale mayaları' },
+    { k:'maya', d:'ester', et:'meyvemsi ester', m:['ester', 'belcika'], kel:['meyvemsi', 'esterli', 'ester', 'fruity', 'ingiliz mayasi'], v:'katalog: tanımı meyve / ester / İngiliz olan ale + Belçika mayaları' },
+    { k:'maya', d:'kveik', et:'kveik', m:['kveik'], kel:['kveik'], v:'katalog maya tipi kveik' },
+    { k:'maya', d:'brett', et:'Brett / vahşi', m:['sour'], kel:['brettanomyces', 'brett', 'vahsi', 'wild', 'funky'], v:'katalog maya tipi sour' },
+    // FERMANTASYON (BJCP etiketleri) — sert
+    { k:'ferm', d:'bottom-fermented', et:'lager (alt fermantasyon)', t:'bottom-fermented', kel:['lageri', 'lager', 'alt fermantasyon', 'bottom fermented'], kay:KAY.etiket },
+    { k:'ferm', d:'top-fermented', et:'ale (üst fermantasyon)', t:'top-fermented', kel:['ust fermantasyon', 'top fermented', 'ale'], kay:KAY.etiket },
+    // KÖKEN (BJCP Region of Origin) — sert
+    { k:'koken', d:'western-europe', et:'Belçika / Fransa / Hollanda', t:'western-europe', kel:['belcikali', 'belcika', 'belgian', 'fransiz', 'french', 'hollanda', 'dutch'], kay:KAY.etiket + ' (western-europe = Belgium, France, Netherlands)' },
+    { k:'koken', d:'central-europe', et:'Almanya / Avusturya / Çekya / İskandinavya', t:'central-europe', kel:['almanya', 'alman', 'german', 'avusturya', 'austrian', 'cek', 'czech', 'bohem', 'bohemian', 'iskandinav', 'nordic'], kay:KAY.etiket + ' (central-europe = Germany, Austria, Czech Republic, Scandinavia)' },
+    { k:'koken', d:'british-isles', et:'Britanya / İrlanda', t:'british-isles', kel:['ingiliz', 'ingiltere', 'english', 'british', 'iskoc', 'scottish', 'irlanda', 'irish'], kay:KAY.etiket + ' (british-isles = England, Wales, Scotland, Ireland)' },
+    { k:'koken', d:'north-america', et:'Kuzey Amerika', t:'north-america', kel:['amerikan', 'american', 'abd', 'kanada', 'meksika', 'mexican'], kay:KAY.etiket + ' (north-america = United States, Canada, Mexico)' },
+    { k:'koken', d:'eastern-europe', et:'Doğu Avrupa', t:'eastern-europe', kel:['polonya', 'polish', 'baltik', 'baltic', 'rus', 'russian'], kay:KAY.etiket + ' (eastern-europe = Poland, Baltic States, Russia)' },
+    { k:'koken', d:'pacific', et:'Avustralya / Yeni Zelanda', t:'pacific', kel:['avustralya', 'australian', 'yeni zelanda', 'new zealand'], kay:KAY.etiket + ' (pacific = Australia, New Zealand)' },
+    // AİLE (BJCP Style Family) — sert
+    { k:'aile', d:'ipa-family', et:'IPA ailesi', t:'ipa-family', kel:['ipa'], kay:KAY.etiket },
+    { k:'aile', d:'pale-ale-family', et:'pale ale ailesi', t:'pale-ale-family', kel:['pale ale'], kay:KAY.etiket },
+    { k:'aile', d:'stout-family', et:'stout ailesi', t:'stout-family', kel:['stoutu', 'stout'], kay:KAY.etiket },
+    { k:'aile', d:'porter-family', et:'porter ailesi', t:'porter-family', kel:['porter'], kay:KAY.etiket },
+    { k:'aile', d:'bock-family', et:'bock ailesi', t:'bock-family', kel:['bock'], kay:KAY.etiket },
+    { k:'aile', d:'wheat-beer-family', et:'buğday birası ailesi', t:'wheat-beer-family', kel:['bugday birasi', 'bugday', 'wheat beer', 'wheat', 'weisse', 'weiss', 'wit'], kay:KAY.etiket },
+    { k:'aile', d:'pilsner-family', et:'pilsner ailesi', t:'pilsner-family', kel:['pilsner', 'pilsener', 'pils'], kay:KAY.etiket },
+    { k:'aile', d:'brown-ale-family', et:'brown ale ailesi', t:'brown-ale-family', kel:['brown ale'], kay:KAY.etiket },
+    { k:'aile', d:'amber-ale-family', et:'amber ale ailesi', t:'amber-ale-family', kel:['amber ale', 'red ale'], kay:KAY.etiket },
+    { k:'aile', d:'strong-ale-family', et:'strong ale ailesi', t:'strong-ale-family', kel:['strong ale', 'barleywine', 'barley wine'], kay:KAY.etiket },
+    // LEZZET (BJCP Dominant Flavor, stil düzeyi) — yumuşak (uyuyor / uymuyor)
+    { k:'lezzet', d:'roasty', et:'kavrulmuş', t:'roasty', kel:['kavrulmus', 'kavrulmus malt', 'roasty', 'roasted'], kay:KAY.etiket },
+    { k:'lezzet', d:'smoke', et:'isli', t:'smoke', kel:['isli', 'dumanli', 'fume', 'smoked', 'smoky'], kay:KAY.etiket },
+    { k:'lezzet', d:'sour', et:'ekşi', t:'sour', kel:['eksimsi', 'eksi', 'mayhos', 'sour', 'tart'], kay:KAY.etiket },
+    { k:'lezzet', d:'wood', et:'meşe / fıçı', t:'wood', kel:['mese', 'ficida', 'fici', 'barrel', 'oak', 'wood'], kay:KAY.etiket },
+    { k:'lezzet', d:'malty', et:'malt ağırlıklı', t:'malty', kel:['malt agirlikli', 'maltli', 'malty'], kay:KAY.etiket },
+    { k:'lezzet', d:'hoppy', et:'hop aromalı', t:'hoppy', kel:['hop aromali', 'serbetciotu aromali', 'hoplu', 'hoppy'], kay:KAY.etiket }
+  ];
+  // BELİRSİZ kelimeler: iki seçenekli çip; ilk seçenek varsayılan (Kaan değiştirir)
+  var BELIRSIZ = [
+    { kel:['baharatli', 'spicy', 'spiced'], et:'baharatlı', sec:[{ k:'maya', d:'fenolik', et:'maya baharatı' }, { k:'malzGrup', d:'Baharat', et:'baharat katkısı' }] },
+    { kel:['karanfilli', 'karanfil', 'clove'], et:'karanfil', sec:[{ k:'maya', d:'fenolik', et:'maya karanfil fenolü' }, { k:'malz', d:'katki:karanfil', et:'karanfil katkısı' }] },
+    { kel:['meyveli', 'meyve'], et:'meyveli', sec:[{ k:'malzGrup', d:'Meyve', et:'meyve katkısı' }, { k:'maya', d:'ester', et:'maya esteri' }] }
+  ];
+  // Katkı sözlüğü (genel kelime → katalog id; TR+EN). Yalnız BİREBİR kayıt; benzer ürün UYDURULMAZ.
+  var KATKI_KEL = [
+    ['kahveli', 'kahve_cekirdek'], ['kahve', 'kahve_cekirdek'], ['coffee', 'kahve_cekirdek'], ['espresso', 'kahve_cekirdek'],
+    ['lavantali', 'lavanta'], ['lavanta', 'lavanta'], ['lavender', 'lavanta'], ['kisnisli', 'kisnisch'], ['kisnis', 'kisnisch'], ['coriander', 'kisnisch'],
+    ['portakal kabugu', 'portakal_kabuk'], ['portakal', 'portakal_kabuk'], ['orange peel', 'portakal_kabuk'], ['acı portakal', 'turunc_kabuk'], ['aci portakal', 'turunc_kabuk'], ['bitter orange', 'turunc_kabuk'], ['turunc', 'turunc_kabuk'],
+    ['vanilyali', 'vanilya'], ['vanilya', 'vanilya'], ['vanilla', 'vanilya'], ['zencefilli', 'zencefil'], ['zencefil', 'zencefil'], ['ginger', 'zencefil'],
+    ['tarcinli', 'tarcin'], ['tarcin', 'tarcin'], ['cinnamon', 'tarcin'], ['naneli', 'nane'], ['nane', 'nane'], ['mint', 'nane'],
+    ['ballı', 'bal'], ['balli', 'bal'], ['honey', 'bal'], ['laktozlu', 'laktoz'], ['laktoz', 'laktoz'], ['lactose', 'laktoz'],
+    ['mangolu', 'mango'], ['mango', 'mango'], ['kakaolu', 'kakao'], ['kakao', 'kakao'], ['cacao', 'kakao'], ['cocoa', 'kakao']
+  ];
+  B.SOZLUK = S; B.BELIRSIZ = BELIRSIZ; B.KATKI_KEL = KATKI_KEL; B.INF = INF;
+  var DUR = ['bir', 'biraz', 'bira', 'birasi', 'biralar', 'birayi', 'beer', 'istiyorum', 'isterim', 'istiyom', 'olsun', 'olan', 'gibi', 'ama', 've', 'ile', 'icin', 'daha', 'en', 'bu', 'su', 'o', 'de', 'da', 'mi', 'mu', 'bana', 'ben', 'yap', 'yapalim', 'demle', 'demlemek', 'tarzi', 'tarzinda', 'stili', 'stilinde', 'usulu', 'tadi', 'tadinda', 'cok', 'az', 'renkli', 'renk', 'a', 'an', 'the', 'i', 'want', 'like', 'with', 'something', 'some', 'and', 'or', 'of', 'kullanan', 'iceren', 'icinde', 'olmayan', 'olmadan', 'yok', 'siz', 'sız', 'without', 'no', 'free', 'bir sey', 'sey', 'seyler', 'mayali', 'mayasi', 'mayasiyla', 'maya', 'malt', 'hop', 'alkollu', 'alkol', 'abv', 'hem', 'nin', 'nun', 'in', 'un', 'ye', 'ya', 'icilecek', 'icmek', 'icecek', 'benzeri', 'benzer', 'gibisi', 'turu', 'tur', 'kullanan', 'kullanilan', 'olarak', 'ozellikle', 'mumkunse'];
+  // ── KATALOG + STİL ETİKETLERİ ──
+  var KAT = function(tip){ return tip === 'malt' ? (typeof MALTLAR !== 'undefined' ? MALTLAR : []) : tip === 'hop' ? (typeof HOPLAR !== 'undefined' ? HOPLAR : []) : tip === 'maya' ? (typeof MAYALAR !== 'undefined' ? MAYALAR : []) : (typeof KATKILAR !== 'undefined' ? KATKILAR : []); };
+  var kayit = function(tip, id){ return (KAT(tip) || []).find(function(x){ return x && x.id === id; }) || null; };
+  B.kayit = kayit;
+  // maya ailesi: katalog tipi + tanım (ale: tanımı temiz/nötr ile başlıyorsa "temiz", aksi hâlde meyve/ester/İngiliz geçiyorsa "ester")
+  B.mayaAile = function(id){ var m = kayit('maya', id); if(!m) return null; var t = m.tip;
+    if(t === 'wheat') return 'bugday'; if(t === 'wit') return 'wit'; if(t === 'belcika' || t === 'saison' || t === 'kveik' || t === 'lager' || t === 'sour') return t;
+    var e = N(m.e || ''); if(/^(cok )?temiz|^notr|^amerikan tarzi|^west coast|^chico|^us pale/.test(e)) return 'temiz';
+    if(/meyve|ester|ingiliz|english|esb|bitter|london|irish|topraks/.test(e)) return 'ester'; return 'ale'; };
+  // stil etiketleri: BJCP tablosu (_BUL_ETIKET) + eşlenemeyen stilde yalnız köken için ad kuralı (varsayım)
+  var AD_KOKEN = [[/belgian|belcika|saison|witbier|wit\b|trappist|abbey|flanders|lambic|gueuze|biere|quad|tripel|dubbel|grisette/, 'western-europe'], [/german|weizen|weiss|bock|kolsch|alt\b|altbier|helles|marzen|gose|berliner|rauch|zoigl|keller|dunkel|pils|lichtenhainer|roggen|dampf|franconian|leipzig/, 'central-europe'],
+    [/english|british|london|scottish|irish|bitter|esb|porter|mild/, 'british-isles'], [/american|west coast|neipa|hazy|kentucky|cascadian|california|mexican|cream ale|pre prohibition/, 'north-america'], [/new zealand|australian/, 'pacific'], [/norwegian|kveik|nordic|sahti/, 'central-europe'], [/baltic|grodzisk/, 'eastern-europe']];
+  // ad kuralı (yalnız BJCP 2021'de karşılığı OLMAYAN stil): stil adındaki aile sözcüğü → BJCP aile etiketi (ör. "Coffee Stout" → stout-family)
+  var AD_AILE = [[/stout/, 'stout-family'], [/porter/, 'porter-family'], [/\bipa\b|neipa|india pale/, 'ipa-family'], [/pale ale/, 'pale-ale-family'], [/bock/, 'bock-family'],
+    [/weizen|weiss|wheat|witbier|\bwit\b|blanche|hefe/, 'wheat-beer-family'], [/pilsner|\bpils\b/, 'pilsner-family'], [/brown ale/, 'brown-ale-family'], [/amber ale|red ale/, 'amber-ale-family'], [/barleywine|barley wine|strong ale|old ale|wee heavy/, 'strong-ale-family']];
+  var _et = {};
+  B.stilEtiket = function(st){ if(_et[st]) return _et[st]; var T = window._BUL_ETIKET || {}, x = T[st];
+    if(x) return (_et[st] = { t:x.t, kaynak:'BJCP 2021 ' + x.kod + ' ' + x.ad });
+    var n = N(st), r = []; AD_KOKEN.some(function(p){ if(p[0].test(n)){ r.push(p[1]); return true; } return false; });
+    AD_AILE.forEach(function(p){ if(p[0].test(n)) r.push(p[1]); });
+    return (_et[st] = { t:r, kaynak:r.length ? 'ad kuralı (uygulama varsayımı: BJCP 2021\'de bu adla stil yok)' : null, adKurali:true }); };
+  // ── 2) ÇÖZÜMLEME: metin → çipler ──
+  var cid = 0;
+  function cip(k, d, et, ek){ var x = { id:'c' + (++cid), k:k, d:d, et:et }; Object.keys(ek || {}).forEach(function(a){ x[a] = ek[a]; }); return x; }
+  B.cipDetay = function(c){ // eksen + değer → aralık / maya aileleri / etiket / kaynak
+    if(c.k === 'malz' || c.k === 'malzYok' || c.k === 'malzGrup' || c.k === 'stil' || c.k === 'abvSayi') return c;
+    var s = S.find(function(x){ return x.k === c.k && x.d === c.d; }); if(!s) return c;
+    return Object.assign({}, c, { a:s.a, m:s.m, t:s.t, kay:s.kay || null, v:s.v || null }); };
+  function ifadeler(){ // [ifade, üretici] — uzun ifade önce
+    var L = [];
+    S.forEach(function(s){ s.kel.forEach(function(w){ L.push({ w:w, f:function(){ return cip(s.k, s.d, s.et); } }); }); });
+    BELIRSIZ.forEach(function(b){ b.kel.forEach(function(w){ L.push({ w:w, f:function(){ var s0 = b.sec[0]; return cip(s0.k, s0.d, b.et + ': ' + s0.et, { belirsiz:b.sec, kelime:w, secili:0 }); } }); }); });
+    KATKI_KEL.forEach(function(p){ if(!kayit('katki', p[1])) return; L.push({ w:N(p[0]), f:function(){ return cip('malz', 'katki:' + p[1], kayit('katki', p[1]).ad); } }); });
+    // sözlük kelimesi olan katalog adı / stil parçası ATLANIR (ör. "imperial" güçtür, stil değil; "pilsner" ailedir, malt değil)
+    var SK = {}; L.forEach(function(x){ SK[x.w] = 1; });
+    // katalog adı / alias: ≥ 4 harf, BİREBİR (benzer ürün yok); genel kelimeler hariç
+    ['malt', 'hop', 'maya', 'katki'].forEach(function(tip){ (KAT(tip) || []).forEach(function(x){ if(!x || !x.id) return;
+      [x.ad].concat(x.alias || []).forEach(function(a){ var w = N(String(a).replace(/\([^)]*\)/g, ' ')); if(w.length < 4 || SK[w] || /\d\s*(g|kg|oz|lb)\b/.test(w)) return;
+        if(/^(malt|maya|hop|seker|tuz|pale|light|dark|crystal|kristal|munich|wheat|bugday|kara|siyah|black|chocolate|cikolata|roast|ale|lager|yeast)$/.test(w)) return;
+        L.push({ w:w, f:function(){ return cip('malz', tip + ':' + x.id, x.ad); } }); }); }); });
+    // ürün KODU (adın ilk sözcüğü rakam içeriyorsa: WY3068, WLP300, US-05 …) — yalnız TEK ürüne aitse
+    var KOD = {}; ['malt', 'hop', 'maya', 'katki'].forEach(function(tip){ (KAT(tip) || []).forEach(function(x){ if(!x || !x.id) return; var w = N(String(x.ad).split(/\s+/)[0]);
+      if(w.length >= 4 && /\d/.test(w) && /[a-z]/.test(w)) (KOD[w] = KOD[w] || []).push({ tip:tip, x:x }); }); });
+    Object.keys(KOD).forEach(function(w){ if(KOD[w].length !== 1 || SK[w]) return; var p = KOD[w][0]; L.push({ w:w, f:function(){ return cip('malz', p.tip + ':' + p.x.id, p.x.ad); } }); });
+    // stil adları (BJCP anahtarlarının " / " parçaları; ≥ 4 harf; sözlük kelimesi ve genel kelimeler hariç)
+    Object.keys(typeof BJCP !== 'undefined' ? BJCP : {}).forEach(function(st){ st.split(' / ').forEach(function(p){ var w = N(p); if(w.length >= 4 && !SK[w] && !/^(lager|stout|porter|ale|ipa|pils|pilsner|bock|wheat|sour|imperial|double|session)$/.test(w)) L.push({ w:w, f:function(){ return cip('stil', st, st); } }); }); });
+    L.sort(function(a, b){ return b.w.length - a.w.length; });
+    return L;
+  }
+  var _ifade = null; B.ifadeSifirla = function(){ _ifade = null; };
+  var OLUMSUZ_ON = /(olmadan|olmayan|icermeyen|yok|siz|suz|sız|süz|free)$/;
+  B.coz = function(metin){
+    var ham = String(metin || ''), n = ' ' + N(ham) + ' ', tuk = n.split(' ').map(function(){ return 0; }), cipler = [], kul = n;
+    if(!_ifade) _ifade = ifadeler();
+    // sayısal ABV: "%5", "5% abv", "%5,5 alkol"
+    var abvRe = /(?:%\s?(\d{1,2}(?:[.,]\d)?))|(?:(\d{1,2}(?:[.,]\d)?)\s?%)/g, m;
+    while((m = abvRe.exec(n))){ var v = parseFloat(String(m[1] || m[2]).replace(',', '.')); if(isFinite(v) && v > 0 && v < 20){ cipler.push(cip('abvSayi', String(v), '%' + String(v).replace('.', ',') + ' alkol', { a:[v - 0.5, v + 0.5], kay:'tarifteki sayı (±0,5)' })); kul = kul.replace(m[0], ' ' + Array(m[0].length).join('_') + ' '); } }
+    kul = kul.replace(/[.,;:!?%]/g, ' ').replace(/ +/g, ' '); // noktalama (sayılar alındıktan sonra)
+    if(kul.charAt(0) !== ' ') kul = ' ' + kul; if(kul.slice(-1) !== ' ') kul += ' ';
+    _ifade.forEach(function(x){
+      // Türkçe / İngilizce ek: yalnız beyaz listedeki ekler (en çok iki) — "açıkçası" "açık" sayılmaz
+      var re = new RegExp('(^| )' + x.w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '((?:li|lu|si|su|lari|leri|lar|ler|i|u|a|e|da|de|ta|te|dan|den|ya|ye|yi|yu|nin|nun|in|un|imsi|umsu|msi|siz|suz|s|y|n){0,2})(?= |$)', 'g'), r;
+      while((r = re.exec(kul))){
+        var son = r[0], sonek = r[2] || '', bas = r.index + r[1].length;
+        var c = x.f(); c.kelime = c.kelime || (x.w + sonek); c.kaynakMetin = 'sözlük';
+        var sonra = kul.slice(bas + son.length - r[1].length).trim().split(' ').slice(0, 2).join(' ');
+        if(c.k === 'malz' && (/^(siz|suz|sız|süz)/.test(sonek) || /^(olmadan|olmayan|icermeyen|yok|free)\b/.test(sonra) || /\b(without|no)\s*$/.test(kul.slice(0, bas)))) c = cip('malzYok', c.d, c.et, { kelime:c.kelime, kaynakMetin:'sözlük' });
+        if(!cipler.some(function(y){ return y.k === c.k && y.d === c.d; })) cipler.push(c);
+        kul = kul.slice(0, bas) + Array(son.length - r[1].length + 1).join('_') + kul.slice(bas + son.length - r[1].length);
+        re.lastIndex = 0;
+      }
+    });
+    // aynı eksende genel + özel değer ("acı" + "çok acı") → özel kalır
+    if(cipler.some(function(c){ return c.k === 'aci' && c.d === 'cok_aci'; })) cipler = cipler.filter(function(c){ return !(c.k === 'aci' && c.d === 'aci'); });
+    // stil çipi varken aynı stili de adlandıran aile çipi ve "lager/ale" çipi tekrar sayılmaz
+    var kalan = kul.split(' ').filter(function(w){ return w && !/^_+$/.test(w) && w.replace(/_/g, '').length >= 3 && DUR.indexOf(w) < 0 && !/^\d+([.,]\d+)?$/.test(w); });
+    return { metin:ham, cipler:cipler.map(B.cipDetay), cozulemeyen:kalan };
+  };
+  // ── ÇELİŞKİ: aynı eksende kesişmeyen aralık / farklı maya aileleri / adlandırılmış stilin BJCP bandı ile çip aralığı ──
+  B.celiski = function(cipler){
+    var out = [], ara = function(k){ return cipler.filter(function(c){ return (c.k === k || (k === 'guc' && c.k === 'abvSayi')) && c.a; }); };
+    ['renk', 'guc', 'kuru', 'aci'].forEach(function(k){ var L = ara(k);
+      for(var i = 0; i < L.length; i++) for(var j = i + 1; j < L.length; j++){ var a = L[i].a, b = L[j].a; if(a[1] < b[0] || b[1] < a[0]) out.push({ a:L[i], b:L[j], neden:'aynı anda olamaz' }); } });
+    var my = cipler.filter(function(c){ return c.k === 'maya'; });
+    for(var i = 0; i < my.length; i++) for(var j = i + 1; j < my.length; j++){ var x = my[i].m || [], y = my[j].m || []; if(!x.some(function(z){ return y.indexOf(z) >= 0; }) && (my[i].d === 'temiz' || my[j].d === 'temiz')) out.push({ a:my[i], b:my[j], neden:'aynı maya hem temiz hem karakterli olamaz' }); }
+    var st = cipler.filter(function(c){ return c.k === 'stil'; });
+    st.forEach(function(s){ var b = (typeof BJCP !== 'undefined') ? BJCP[s.d] : null; if(!b) return;
+      ara('renk').forEach(function(c){ if(b.srm[1] < c.a[0] - 2 || b.srm[0] > c.a[1] + 2) out.push({ a:s, b:c, neden:s.d + ' BJCP rengi SRM ' + b.srm.join('–') }); });
+      ara('guc').forEach(function(c){ if(b.abv[1] < c.a[0] - 0.5 || b.abv[0] > c.a[1] + 0.5) out.push({ a:s, b:c, neden:s.d + ' BJCP alkolü %' + b.abv.join('–') }); }); });
+    return out;
+  };
+  // ── 3) ARAMA (AI'SIZ) ──
+  var _idx = null;
+  B.indeks = function(){
+    if(_idx) return _idx;
+    var MI = window._bmMalzemeIndex ? window._bmMalzemeIndex() : [], L = {};
+    _idx = MI.map(function(e){
+      var liste = L[e.stil] || (L[e.stil] = window._bmOrnekListe ? window._bmOrnekListe(e.stil) : []);
+      var x = liste.find(function(y){ return y.kaynak === e.kaynak && y.idx === e.idx; }), o = x ? x.o : {};
+      var maya = Object.keys(e.ids || {}).filter(function(k){ return /^maya:/.test(k); }).map(function(k){ return k.slice(5); });
+      var og = +o.og || null, fg = +o.fg || null, ab = (o.ab != null && isFinite(+o.ab)) ? +o.ab : null, abH = false;
+      if(ab == null && og && fg){ ab = Math.round((og - fg) * 131.25 * 10) / 10; abH = true; }
+      var aa = og && fg && og > 1 ? Math.round((og - fg) / (og - 1) * 1000) / 10 : null, ib = (o.ib != null && isFinite(+o.ib)) ? +o.ib : null;
+      return { kaynak:e.kaynak, stil:e.stil, idx:e.idx, k:e.k, e:e, o:o, ad:o.bira || (o.bf ? o.bf : null) || (e.stil + ' örneği'), kay:o.kay || null,
+        srm:(o.sr != null && isFinite(+o.sr)) ? +o.sr : null, abv:ab, abvH:abH, og:og, ogH:!!o.ogH, fg:fg, ibu:ib, aa:aa, bugu:(ib != null && og && og > 1) ? Math.round(ib / ((og - 1) * 1000) * 100) / 100 : null,
+        mayaAile:maya.map(B.mayaAile).filter(Boolean), et:B.stilEtiket(e.stil) };
+    });
+    return _idx;
+  };
+  B.indeksSifirla = function(){ _idx = null; };
+  var TOL = { renk:3, guc:0.7, abvSayi:0.5, kuru:4, aci:0.12 };
+  var ALAN = { renk:'srm', guc:'abv', abvSayi:'abv', kuru:'aa', aci:'bugu' };
+  // tek çip × tek örnek → { durum:'uyuyor'|'yakin'|'uymuyor'|'bilinmiyor', puan, not }
+  B.cipUyum = function(c, x){
+    if(ALAN[c.k]){ var v = x[ALAN[c.k]]; if(v == null) return { durum:'bilinmiyor', puan:0.75, not:'örnekte ' + ALAN[c.k].toUpperCase() + ' yok' };
+      var hes = (c.k === 'guc' || c.k === 'abvSayi') && x.abvH, a = c.a, u = a[1] >= INF ? Infinity : a[1];
+      if(v >= a[0] && v <= u) return { durum:'uyuyor', puan:0, hes:hes };
+      var dist = v < a[0] ? a[0] - v : v - u, t = TOL[c.k], d = dist / t;
+      return d <= 1 ? { durum:'yakin', puan:0.3 + 0.4 * d, hes:hes, fark:dist } : { durum:'uymuyor', puan:Math.min(3, 1 + d / 2), hes:hes, fark:dist }; }
+    if(c.k === 'lezzet') return (x.et.t || []).indexOf(c.t) >= 0 ? { durum:'uyuyor', puan:0 } : (x.et.adKurali ? { durum:'bilinmiyor', puan:0.75, not:'stilin BJCP etiketi yok' } : { durum:'uymuyor', puan:1.5 });
+    return null; // sert çipler ayrı
+  };
+  B.sertUyum = function(c, x){
+    if(c.k === 'maya'){ if(!x.mayaAile.length) return { durum:'bilinmiyor', not:'örneğin mayası katalogla eşlenemedi' }; return x.mayaAile.some(function(a){ return (c.m || []).indexOf(a) >= 0; }) ? { durum:'uyuyor' } : { durum:'uymuyor' }; }
+    if(c.k === 'malz' || c.k === 'malzYok'){ var p = c.d.split(':'), var_ = window._bmMalzemeEslesir ? window._bmMalzemeEslesir(x.e, { tip:p[0], id:p[1] }) : false; return (c.k === 'malz' ? var_ : !var_) ? { durum:'uyuyor' } : { durum:'uymuyor' }; }
+    if(c.k === 'malzGrup'){ var ok = Object.keys(x.e.ids || {}).some(function(k){ var q = k.split(':'); if(q[0] !== 'katki') return false; var kk = kayit('katki', q[1]); return kk && kk.g === c.d; }); return ok ? { durum:'uyuyor' } : { durum:'uymuyor' }; }
+    if(c.k === 'stil') return x.stil === c.d ? { durum:'uyuyor' } : { durum:'uymuyor' };
+    if(c.k === 'koken' || c.k === 'aile' || c.k === 'ferm'){ var t = x.et.t || []; if(!t.length) return { durum:'bilinmiyor', not:'stilin BJCP etiketi yok' }; return t.indexOf(c.t) >= 0 ? { durum:'uyuyor' } : { durum:'uymuyor' }; }
+    return null;
+  };
+  var SERT = { maya:1, malz:1, malzYok:1, malzGrup:1, stil:1, koken:1, aile:1, ferm:1 };
+  B.SERT = SERT;
+  var KSIRA = { K1:0, K2:1, K3:2, K4:3 }, DSIRA = { ok:0, yakin:1, eksik:2 };
+  B.ara = function(cipler, opt){
+    opt = opt || {}; var I = B.indeks(), sert = cipler.filter(function(c){ return SERT[c.k]; }), yum = cipler.filter(function(c){ return !SERT[c.k]; });
+    var stilL = B.stilUyum(cipler), SU = {}; stilL.forEach(function(st){ SU[st] = 1; }); // örneğin stili de BJCP bandıyla çiplere düşüyorsa önde
+    var deg = I.map(function(x){
+      var u = {}, puan = 0, sertOk = true, sertBil = false;
+      sert.forEach(function(c){ var r = B.sertUyum(c, x) || { durum:'bilinmiyor' }; u[c.id] = r; if(r.durum === 'uymuyor') sertOk = false; if(r.durum === 'bilinmiyor') sertBil = true; });
+      yum.forEach(function(c){ var r = B.cipUyum(c, x) || { durum:'bilinmiyor', puan:0.75 }; u[c.id] = r; puan += r.puan; });
+      var uymuyor = yum.filter(function(c){ return u[c.id].durum === 'uymuyor'; }).length;
+      var sertKac = sert.filter(function(c){ return u[c.id].durum === 'uymuyor'; }).length + 0.5 * sert.filter(function(c){ return u[c.id].durum === 'bilinmiyor'; }).length;
+      // stil merkezi: örneğin stilinin BJCP bandı (SRM / ABV) merkezinin çip aralığı merkezine uzaklığı (tolerans biriminde) — eşitlikte ayırıcı
+      var bj = (typeof BJCP !== 'undefined') ? BJCP[x.stil] : null, sy = 0;
+      yum.forEach(function(c){ var band = c.k === 'renk' ? (bj && bj.srm) : (c.k === 'guc' || c.k === 'abvSayi') ? (bj && bj.abv) : null; if(!(c.k === 'renk' || c.k === 'guc' || c.k === 'abvSayi')) return;
+        if(!band){ sy += 5; return; } var cc = c.a[1] >= INF ? c.a[0] + TOL[c.k] : (c.a[0] + c.a[1]) / 2; sy += Math.abs((band[0] + band[1]) / 2 - cc) / TOL[c.k]; });
+      return { x:x, u:u, puan:Math.round(puan * 100) / 100, sertOk:sertOk && !sertBil, sertBil:sertBil, sertKac:sertKac, uymuyor:uymuyor, stilIc:SU[x.stil] ? 0 : 1, stilYakin:Math.round(sy * 10) / 10 };
+    });
+    var stok = function(r){ if(r._st !== undefined) return r._st; var s = window._bmOrnekStok ? window._bmOrnekStok(r.x.kaynak, r.x.stil, r.x.idx) : null; r._st = s ? s.durum : null; return r._st; };
+    // sıra: uyum kovası (0,5 puan) → [stok ✅/🟡/🔴, anahtar açıksa] → kademe K1/K2 önce → puan → kararlı (stil, idx)
+    // stok hesabı pahalı (örnek başına ~1 ms) → yalnız ilk 40 aday için
+    var kova = function(r){ return Math.floor(r.puan * 2) / 2; };
+    var temel = function(a, b){ return (kova(a) - kova(b)) || (KSIRA[a.x.k] - KSIRA[b.x.k]) || (a.stilIc - b.stilIc) || (a.stilYakin - b.stilYakin) || (a.puan - b.puan) || (a.x.stil < b.x.stil ? -1 : a.x.stil > b.x.stil ? 1 : a.x.idx - b.x.idx); };
+    var sd = function(r){ var v = DSIRA[stok(r)]; return v != null ? v : 3; };
+    var sirala = function(L){ L.sort(temel); if(!opt.stok) return L;
+      var bas = L.slice(0, 40).sort(function(a, b){ return (kova(a) - kova(b)) || (sd(a) - sd(b)) || temel(a, b); }); return bas.concat(L.slice(40)); };
+    var uyan = sirala(deg.filter(function(r){ return r.sertOk && r.uymuyor === 0; }));
+    var sonuc = { uyan:uyan.length, ilk:uyan.slice(0, 5), bulunamadi:!uyan.length, yakin:[], gevset:[], stiller:stilL, toplam:I.length };
+    if(!uyan.length){
+      // en yakın 3: önce en az SERT uyumsuzluk (bilinmiyor yarım sayılır), sonra yumuşak puan, sonra olağan sıra
+      sonuc.yakin = deg.slice().sort(function(a, b){ return (a.sertKac - b.sertKac) || (a.uymuyor - b.uymuyor) || temel(a, b); }).slice(0, 3);
+      cipler.forEach(function(c){ var q = cipler.filter(function(y){ return y.id !== c.id; }); if(!q.length) return;
+        var n = 0; I.forEach(function(x){ var ok = q.every(function(y){ var r = SERT[y.k] ? B.sertUyum(y, x) : B.cipUyum(y, x); return r && r.durum === 'uyuyor' || (r && r.durum === 'yakin'); }); if(ok) n++; });
+        if(n) sonuc.gevset.push({ cip:c, n:n }); });
+      sonuc.gevset.sort(function(a, b){ return b.n - a.n; }); sonuc.gevset = sonuc.gevset.slice(0, 3);
+    }
+    if(opt.stok) sonuc.ilk.concat(sonuc.yakin).forEach(stok);
+    return sonuc;
+  };
+  // çiplere uyan BJCP stilleri (bant kesişimi + etiketler) — "bu tarif şu stillere düşer"
+  B.stilUyum = function(cipler){
+    var Bj = typeof BJCP !== 'undefined' ? BJCP : {}, out = [];
+    Object.keys(Bj).forEach(function(st){ var b = Bj[st], et = B.stilEtiket(st), ok = true;
+      cipler.forEach(function(c){ if(!ok) return;
+        if(c.k === 'renk' && c.a) ok = !(b.srm[1] < c.a[0] || b.srm[0] > (c.a[1] >= INF ? 999 : c.a[1]));
+        else if((c.k === 'guc' || c.k === 'abvSayi') && c.a) ok = !(b.abv[1] < c.a[0] || b.abv[0] > (c.a[1] >= INF ? 99 : c.a[1]));
+        else if(c.k === 'stil') ok = st === c.d;
+        else if(c.k === 'koken' || c.k === 'aile' || c.k === 'ferm' || c.k === 'lezzet') ok = (et.t || []).indexOf(c.t) >= 0; });
+      if(ok) out.push(st); });
+    return out;
+  };
+  // ── 4) AI YOLU (yalnız çözülemeyen kelime varsa, kullanıcı dokununca; Haiku, enum) ──
+  B.kodlar = function(){
+    var L = [];
+    S.forEach(function(s){ L.push({ kod:s.k + ':' + s.d, et:s.et }); });
+    BELIRSIZ.forEach(function(b){ b.sec.forEach(function(s){ if(s.k === 'malzGrup') L.push({ kod:'malzGrup:' + s.d, et:s.et }); }); });
+    Object.keys(typeof BJCP !== 'undefined' ? BJCP : {}).forEach(function(st){ L.push({ kod:'stil:' + st, et:'stil ' + st }); });
+    ['malt', 'hop', 'maya', 'katki'].forEach(function(tip){ (KAT(tip) || []).forEach(function(x){ if(x && x.id) L.push({ kod:'malz:' + tip + ':' + x.id, et:x.ad }); }); });
+    var g = {}; return L.filter(function(x){ if(g[x.kod]) return false; g[x.kod] = 1; return true; });
+  };
+  B.aiSema = function(kodlar){ return { type:'json_schema', schema:{ type:'object', properties:{
+    secimler:{ type:'array', items:{ type:'object', properties:{ kod:{ type:'string', enum:kodlar }, olumsuz:{ type:'boolean' }, ifade:{ type:'string' } }, required:['kod', 'olumsuz', 'ifade'], additionalProperties:false } },
+    cozemedim:{ type:'array', items:{ type:'string' } } }, required:['secimler', 'cozemedim'], additionalProperties:false } }; };
+  B.aiBaglam = function(kod){ return 'KOD LİSTESİ (yalnız bunlardan seç; "kod = anlamı"):\n' + kod.map(function(x){ return x.kod + ' = ' + x.et; }).join('\n'); };
+  B.aiTahmin = function(){ var M = window.BM_AI && window.BM_AI.MODEL && window.BM_AI.MODEL.ucuz; if(!M) return null; var tok = Math.round(B.aiBaglam(B.kodlar()).length / 3.2) * 2 + 400; return Math.round((tok * M.gir + 250 * M.cik) / 1e6 * 10000) / 10000; };
+  B.aiHazir = function(){ var A = window.BM_AI; return !!(A && A.hazirMi && A.hazirMi().hazir && window.BM_AI1 && window.BM_AI1.betaAcik()); };
+  // AI'ya giden: tarif metni + sözlüğün zaten anladığı çip ETİKETLERİ + kod listesi. Stok / reçete GİTMEZ.
+  B.aiCoz = function(metin, cipler, opt){
+    opt = opt || {}; var A = window.BM_AI; if(!A) return Promise.resolve({ ok:false, hata:{ mesaj:'AI modülü yok' } });
+    var kod = B.kodlar(), K = {}; kod.forEach(function(x){ K[x.kod] = x; });
+    var soru = 'Tarif: "' + String(metin).slice(0, 400) + '"\nSözlüğün zaten anladıkları: ' + ((cipler || []).map(function(c){ return c.et; }).join(' · ') || '—') + '\nYalnız kalan ifadeleri koda çevir.';
+    return A.sor({ kullanim:'bul', modelKey:'ucuz', baglam:B.aiBaglam(kod), soru:soru, sema:B.aiSema(kod.map(function(x){ return x.kod; })) }).then(function(r){
+      if(!r || !r.ok) return { ok:false, hata:r && r.hata, maliyet:r && r.maliyet };
+      var v = r.veri || {}, yeni = [], dus = [];
+      (v.secimler || []).forEach(function(s){ var k = K[s.kod]; if(!k){ dus.push(s.kod); return; } // enum dışı DÜŞER (şema zaten kilitli; ikinci kapı)
+        var p = s.kod.split(':'), eks = p[0], d = p.slice(1).join(':');
+        if(eks === 'malz' && s.olumsuz) eks = 'malzYok';
+        var c = B.cipDetay(cip(eks, d, k.et, { kaynakMetin:'AI', kelime:String(s.ifade || '').slice(0, 60) }));
+        if(eks === 'stil'){ c.et = d; }
+        yeni.push(c); });
+      return { ok:true, cipler:yeni, cozemedim:(v.cozemedim || []).map(function(x){ return String(x).slice(0, 60); }), dusen:dus, maliyet:r.maliyet, model:r.model };
+    });
+  };
+  // ── 5) ARAYÜZ ──
+  B.d = { metin:'', cipler:[], cozulemeyen:[], ai:null, stok:false, sonuc:null, aiDurum:'' };
+  // Pencere başlığında düğme (🧺 Malzeme ile aynı kalıp); kutu yalnız açıkken gövdenin üstünde — kapalıyken ekran eskisiyle AYNI (360/390 yerleşim kilitleri)
+  B.acik = false;
+  B.dugmeHTML = function(){ return '<button type="button" class="br-malz-ac bul-ac' + (B.d.metin ? ' nd-secili' : '') + '" onclick="BM_BUL.acKapa()" aria-expanded="' + (B.acik ? 'true' : 'false') + '" title="İstediğin birayı yaz; uygulama ödüllü örneklerde bulsun">🔎 Tarif et' + (B.acik ? ' ▴' : ' ▾') + '</button>'; };
+  B.odak = function(){ setTimeout(function(){ var el = document.getElementById('bul-inp'); if(el) try{ el.focus(); }catch(_){} }, 0); };
+  B.acKapa = function(){ B.acik = !B.acik; if(window._brCiz) window._brCiz(); if(B.acik) B.odak(); };
+  B.kutuHTML = function(){
+    var d = B.d; if(!B.acik) return '';
+    return '<div id="bul-kutu" class="bul-kutu" style="margin:0 0 10px;padding:10px 12px;border:1px solid var(--bor);border-left:4px solid var(--bakir);border-radius:10px;background:var(--bg-card,#fff)">'
+      + '<div style="font-size:13px;font-weight:700;color:var(--metin)">🔎 Tarif et — uygulama ödüllü örneklerde bulsun</div>'
+      + '<div style="font-size:11px;color:var(--soluk);margin:2px 0 6px">Ör. "kuru, baharatlı, koyu bir Belçika birası". Sözlük anlar (bedava); sonuç gerçek örneklerden, uydurma reçete yok.</div>'
+      + '<div style="display:flex;gap:6px"><input id="bul-inp" type="search" autocomplete="off" enterkeyhint="search" aria-label="İstediğin birayı tarif et" value="' + E(d.metin) + '" placeholder="İstediğin birayı yaz…" '
+      + 'onkeydown="if(event.key===\'Enter\'){event.preventDefault();BM_BUL.tarifEt(this.value);}" style="flex:1;min-width:0;min-height:44px;font-size:14px;padding:6px 10px;border:1px solid var(--bor);border-radius:8px;box-sizing:border-box">'
+      + '<button type="button" class="bul-btn" onclick="BM_BUL.tarifEt(document.getElementById(\'bul-inp\').value)" style="min-height:44px;padding:0 14px;border-radius:8px;border:1px solid var(--bakir);background:var(--bakir);color:#fff;font-weight:700">Bul</button></div>'
+      + '<div id="bul-govde" aria-live="polite">' + B.govdeHTML() + '</div></div>';
+  };
+  var EKSEN_AD = { renk:'🎨', guc:'🍺', abvSayi:'🍺', kuru:'🌵', aci:'🌿', maya:'🧪', ferm:'🧪', koken:'🌍', aile:'👪', lezzet:'👅', malz:'➕', malzYok:'🚫', malzGrup:'➕', stil:'📘' };
+  function aralikMetin(c){ var a = c.a, f = function(v){ return v >= INF ? '+' : String(v).replace('.', ','); }; if(!a) return '';
+    return c.k === 'renk' ? 'SRM ' + a[0] + (a[1] >= INF ? '+' : '–' + a[1]) : c.k === 'kuru' ? 'görünür att. ' + (a[1] >= INF ? '≥%' + a[0] : a[0] ? '%' + a[0] + '–' + a[1] : '<%' + a[1]) : c.k === 'aci' ? 'BU:GU ' + (a[1] >= INF ? '≥' + f(a[0]) : a[0] ? f(a[0]) + '–' + f(a[1]) : '<' + f(a[1])) : ''; }
+  function cipMetin(c){ var ar = aralikMetin(c); return (c.k === 'malzYok' ? 'olmasın: ' : '') + c.et + (ar ? ' (' + ar + ')' : ''); }
+  B.cipHTML = function(c, i){
+    // açılır menü varsa etiket TEKRAR yazılmaz (menü değeri gösterir); aralık küçük yazıyla yanında
+    var sel = '', ss = 'font-size:11.5px;min-height:32px;max-width:170px;border:0;background:transparent;font-weight:700;color:var(--metin)';
+    if(c.belirsiz) sel = '<select aria-label="' + E(c.et.split(':')[0]) + ' — anlamı seç" onchange="BM_BUL.belirsizSec(' + i + ',+this.value)" style="' + ss + '">' + c.belirsiz.map(function(s, j){ return '<option value="' + j + '"' + (j === c.secili ? ' selected' : '') + '>' + E(s.et) + '</option>'; }).join('') + '</select>';
+    else if(S.some(function(x){ return x.k === c.k && x.d === c.d; })){ var al = S.filter(function(x){ return x.k === c.k; });
+      if(al.length > 1) sel = '<select aria-label="Değeri değiştir" onchange="BM_BUL.cipDegistir(' + i + ',this.value)" style="' + ss + '">' + al.map(function(x){ return '<option value="' + E(x.d) + '"' + (x.d === c.d ? ' selected' : '') + '>' + E(x.et) + '</option>'; }).join('') + '</select>'; }
+    var etk = c.belirsiz ? E(c.et.split(':')[0]) + ':' : sel ? '' : E(cipMetin(c)), ar = sel && !c.belirsiz ? aralikMetin(c) : '';
+    return '<span class="bul-cip" data-k="' + E(c.k) + '" title="' + E((c.kay ? 'Kaynak: ' + c.kay : '') + (c.v ? ' · Uygulama varsayımı: ' + c.v : '') + (c.kaynakMetin === 'AI' ? ' · AI seçti' : '')) + '" style="display:inline-flex;align-items:center;flex-wrap:wrap;max-width:100%;box-sizing:border-box;gap:2px;margin:2px 4px 2px 0;padding:0 2px 0 8px;border:1px solid var(--bor);border-radius:14px;font-size:11.5px;background:' + (c.kaynakMetin === 'AI' ? '#efe8fa' : 'var(--bg2,#f6f1e7)') + '">'
+      + (EKSEN_AD[c.k] || '') + ' ' + etk + sel + (ar ? '<small style="color:var(--soluk)">' + E(ar) + '</small>' : '') + (c.v ? ' <small style="color:var(--soluk)" title="uygulama varsayımı">ⓥ</small>' : '') + (c.kaynakMetin === 'AI' ? ' <small>🤖</small>' : '')
+      + '<button type="button" aria-label="Çipi kaldır" onclick="BM_BUL.cipSil(' + i + ')" style="min-width:32px;min-height:32px;border:0;background:transparent;font-size:13px;cursor:pointer">✕</button></span>';
+  };
+  function uyumIsaret(r){ return r.durum === 'uyuyor' ? '✓' : r.durum === 'yakin' ? '≈' : r.durum === 'uymuyor' ? '✕' : '?'; }
+  function sayi(v, dec){ return v == null ? '—' : (+v).toFixed(dec).replace('.', ','); }
+  B.kartHTML = function(r, i, grup){
+    var x = r.x, D = window._ND_DURUM || {}, K = { K1:'🥇 K1', K2:'🏆 K2', K3:'📘 K3', K4:'📗 K4' }, st = r._st !== undefined ? r._st : (window._bmOrnekStok ? (window._bmOrnekStok(x.kaynak, x.stil, x.idx) || {}).durum : null);
+    var kay = x.kay && x.kay.pub ? x.kay.pub : x.kaynak === 'nhc' ? 'AHA NHC' : x.kaynak === 'aha' ? 'AHA madalya derlemesi' : '';
+    var isa = B.d.cipler.map(function(c){ var u = r.u[c.id] || { durum:'bilinmiyor' }; return '<span title="' + E(u.not || '') + (u.hes ? ' (hesaplanmış değer)' : '') + '" style="margin-right:6px;white-space:nowrap">' + uyumIsaret(u) + ' ' + E(c.et) + (u.hes ? '<sup>h</sup>' : '') + '</span>'; }).join(' '); // boşluk = satır kırılma noktası (dar ekranda taşmasın)
+    return '<div class="bul-sonuc" data-stil="' + E(x.stil) + '" style="margin:6px 0;padding:8px 10px;border:1px solid var(--bor);border-radius:8px">'
+      + '<div style="font-size:12.5px;font-weight:700">' + E(x.ad) + ' <span style="font-weight:400;color:var(--soluk)">· ' + E(x.stil) + '</span></div>'
+      + '<div style="font-size:11px;color:var(--soluk)">' + (K[x.k] || x.k) + (kay ? ' · ' + E(kay) : '') + (x.o && x.o.yil ? ' · ' + x.o.yil : '') + (st && D[st] ? ' · ' + D[st].ikon + ' ' + E(D[st].ad) : '') + '</div>'
+      + '<div style="font-size:11px;margin-top:2px">OG ' + sayi(x.og, 3) + (x.ogH ? '<sup>h</sup>' : '') + ' · FG ' + sayi(x.fg, 3) + ' · ABV ' + sayi(x.abv, 1) + (x.abvH ? '<sup>h</sup>' : '') + ' · SRM ' + sayi(x.srm, 0) + ' · IBU ' + sayi(x.ibu, 0) + '</div>'
+      + '<div style="font-size:11px;margin-top:3px">' + isa + '</div>'
+      + '<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap"><button type="button" class="bul-onizle" onclick="BM_BUL.onizle(\'' + grup + '\',' + i + ')" style="min-height:44px;padding:0 12px;border-radius:8px;border:1px solid var(--bakir);background:transparent;color:var(--bakir);font-weight:700">Önizle</button>'
+      + '<button type="button" class="bul-stok" onclick="BM_BUL.stokumla(\'' + grup + '\',' + i + ')" style="min-height:44px;padding:0 12px;border-radius:8px;border:1px solid var(--bakir);background:var(--bakir);color:#fff;font-weight:700">📦 Stoğumla oluştur</button></div></div>';
+  };
+  B.govdeHTML = function(){
+    var d = B.d; if(!d.metin) return '';
+    var h = '';
+    h += '<div class="bul-anladim" style="font-size:12px;margin-top:8px"><b>Şöyle anladım:</b> ' + (d.cipler.length ? d.cipler.map(B.cipHTML).join('') : '<i>hiçbir şey — sözlükte eşleşen kelime yok</i>') + '</div>';
+    if(d.cozulemeyen.length){
+      h += '<div class="bul-cozulemeyen" style="font-size:11.5px;margin-top:4px;color:var(--soluk)">Anlayamadığım: ' + d.cozulemeyen.map(function(w){ return '"' + E(w) + '"'; }).join(', ');
+      if(B.aiHazir() && d.aiDurum !== 'tamam') { var t = B.aiTahmin(); h += ' · <button type="button" class="bul-ai-btn" onclick="BM_BUL.aiCalistir()" style="min-height:36px;padding:0 10px;border-radius:8px;border:1px solid #6b4fa0;background:#efe8fa;color:#5a3d8a;font-weight:700">🤖 AI ile çöz' + (t != null ? ' (≈ $' + t.toFixed(4) + ')' : '') + '</button>'; }
+      else if(!B.aiHazir()) h += ' <small>(AI kapalı ya da anahtar yok — sözlükle devam ediliyor)</small>';
+      h += '</div>'; }
+    if(d.aiDurum) h += '<div class="bul-ai-durum" style="font-size:11px;margin-top:2px;color:#5a3d8a">' + E(d.aiDurum) + '</div>';
+    var cel = B.celiski(d.cipler);
+    if(cel.length){
+      return h + '<div class="bul-celiski" style="margin-top:8px;padding:8px 10px;border-radius:8px;background:#fff4e0;color:#8a5a00;font-size:12px"><b>Çelişki var — tahmin etmiyorum, hangisi?</b>'
+        + cel.map(function(c){ var ia = d.cipler.indexOf(c.a), ib = d.cipler.indexOf(c.b);
+          return '<div style="margin-top:4px">"' + E(cipMetin(c.a)) + '" ile "' + E(cipMetin(c.b)) + '" — ' + E(c.neden) + '<br>'
+            + '<button type="button" class="bul-celiski-sec" onclick="BM_BUL.cipSil(' + ib + ')" style="min-height:40px;margin:4px 6px 0 0;padding:0 10px;border-radius:8px;border:1px solid #8a5a00;background:#fff">' + E(c.a.et) + ' kalsın</button>'
+            + '<button type="button" class="bul-celiski-sec" onclick="BM_BUL.cipSil(' + ia + ')" style="min-height:40px;margin:4px 0 0;padding:0 10px;border-radius:8px;border:1px solid #8a5a00;background:#fff">' + E(c.b.et) + ' kalsın</button></div>'; }).join('') + '</div>'; }
+    if(!d.cipler.length) return h;
+    if(d.hazirlaniyor) return h + '<div class="bul-hazir" style="font-size:12px;margin-top:6px">⏳ Örnekler hazırlanıyor (yalnız ilk aramada, ~1 sn)…</div>';
+    var s = d.sonuc || (d.sonuc = B.ara(d.cipler, { stok:d.stok }));
+    h += '<label style="display:flex;align-items:center;gap:6px;font-size:11.5px;margin-top:6px;min-height:36px"><input type="checkbox" class="bul-stok-tik" ' + (d.stok ? 'checked' : '') + ' onchange="BM_BUL.stokTik(this.checked)"> Stoğumla yapabileceklerimi öne al</label>';
+    if(s.stiller.length) h += '<div class="bul-stiller" style="font-size:11px;margin-top:2px;color:var(--soluk)">Bu tarif şu BJCP stillerine düşer: ' + s.stiller.slice(0, 8).map(E).join(' · ') + (s.stiller.length > 8 ? ' · +' + (s.stiller.length - 8) : '') + '</div>';
+    if(!s.bulunamadi){
+      h += '<div class="bul-bas" style="font-size:12px;font-weight:700;margin-top:6px">' + s.uyan + ' örnek uyuyor (' + s.toplam + ' örnek tarandı) — ilk ' + s.ilk.length + '</div>' + s.ilk.map(function(r, i){ return B.kartHTML(r, i, 'ilk'); }).join('');
+    } else {
+      h += '<div class="bul-yok" style="margin-top:6px;padding:8px 10px;border-radius:8px;background:var(--bg2,#f6f1e7);font-size:12px"><b>Bu tarife tam uyan örnek bulamadım</b> (' + s.toplam + ' örnek tarandı). Uydurma reçete önermiyorum; en yakın ' + s.yakin.length + ' örnek ve ayrıldıkları çipler:</div>'
+        + s.yakin.map(function(r, i){ return B.kartHTML(r, i, 'yakin'); }).join('')
+        + (s.gevset.length ? '<div class="bul-gevset" style="font-size:11.5px;margin-top:4px">Gevşetilebilecek çip: ' + s.gevset.map(function(g){ var j = d.cipler.indexOf(g.cip); return '<button type="button" onclick="BM_BUL.cipSil(' + j + ')" style="min-height:36px;margin:2px 4px 0 0;padding:0 8px;border-radius:12px;border:1px solid var(--bor);background:#fff;font-size:11px">✕ ' + E(g.cip.et) + ' → ' + g.n + ' örnek</button>'; }).join('') + '</div>' : '');
+    }
+    return h;
+  };
+  B.ciz = function(){ var el = document.getElementById('bul-govde'); if(el) el.innerHTML = B.govdeHTML(); };
+  B.hazir = function(){ return !!_idx; };
+  B.tarifEt = function(metin){ var r = B.coz(metin); B.d.metin = r.metin; B.d.cipler = r.cipler; B.d.cozulemeyen = r.cozulemeyen; B.d.sonuc = null; B.d.aiDurum = '';
+    if(!_idx && r.cipler.length){ B.d.hazirlaniyor = true; B.ciz(); setTimeout(function(){ try{ B.indeks(); }catch(e){} B.d.hazirlaniyor = false; B.ciz(); }, 30); return r; } // ilk arama: ~1 sn indeks, arayüz donmasın
+    B.ciz(); return r; };
+  B.cipSil = function(i){ B.d.cipler.splice(i, 1); B.d.sonuc = null; B.ciz(); };
+  B.cipDegistir = function(i, d){ var c = B.d.cipler[i]; if(!c) return; var s = S.find(function(x){ return x.k === c.k && x.d === d; }); if(!s) return; B.d.cipler[i] = B.cipDetay(cip(s.k, s.d, s.et, { kelime:c.kelime, kaynakMetin:c.kaynakMetin })); B.d.sonuc = null; B.ciz(); };
+  B.belirsizSec = function(i, j){ var c = B.d.cipler[i]; if(!c || !c.belirsiz || !c.belirsiz[j]) return; var s = c.belirsiz[j], base = c.et.split(':')[0];
+    var y = B.cipDetay(cip(s.k, s.d, base + ': ' + s.et, { belirsiz:c.belirsiz, secili:j, kelime:c.kelime, kaynakMetin:c.kaynakMetin }));
+    if(s.k === 'malz'){ var p = s.d.split(':'), kk = kayit(p[0], p[1]); if(!kk){ y.et += ' (katalogda yok)'; } }
+    B.d.cipler[i] = y; B.d.sonuc = null; B.ciz(); };
+  B.stokTik = function(v){ B.d.stok = !!v; B.d.sonuc = null; B.ciz(); };
+  B.aiCalistir = function(){ var d = B.d; d.aiDurum = '🤖 AI kalan kelimeleri çözüyor…'; B.ciz();
+    return B.aiCoz(d.metin, d.cipler).then(function(r){
+      if(!r.ok){ d.aiDurum = '🤖 AI çağrısı olmadı: ' + ((r.hata && r.hata.mesaj) || 'bilinmeyen hata') + ' — sözlük çipleriyle devam.'; B.ciz(); return r; }
+      r.cipler.forEach(function(c){ if(!d.cipler.some(function(y){ return y.k === c.k && y.d === c.d; })) d.cipler.push(c); });
+      var us = r.maliyet && r.maliyet.usd != null ? ' · gerçek maliyet $' + (+r.maliyet.usd).toFixed(4) : '';
+      d.aiDurum = '🤖 AI ' + r.cipler.length + ' çip seçti' + (r.cozemedim.length ? ' · çözemedi: ' + r.cozemedim.join(', ') : '') + (r.dusen.length ? ' · listede olmayan ' + r.dusen.length + ' seçim düştü' : '') + us;
+      d.aiSon = r; d.sonuc = null; d.cozulemeyen = []; B.ciz(); return r; }); };
+  B.secili = function(grup, i){ var s = B.d.sonuc; if(!s) return null; var L = grup === 'yakin' ? s.yakin : s.ilk; return L[i] ? L[i].x : null; };
+  B.onizle = function(grup, i){ var x = B.secili(grup, i); if(x && window._bmOrnekOnizle) return window._bmOrnekOnizle(x.kaynak, x.stil, x.idx); };
+  B.stokumla = function(grup, i){ var x = B.secili(grup, i); if(x && window._bmStokumlaOlustur) return window._bmStokumlaOlustur(x.kaynak, x.stil, x.idx); };
+  // boş reçete ekranından giriş
+  B.ac = function(){ B.acik = true; if(window._brAc) window._brAc(); B.odak(); };
+  // Ayarlar ▸ AI özellikleri: sözlük tablosu + eşik kaynakları + varsayımlar
+  B.ayarHTML = function(){
+    var satir = function(s){ var a = s.a ? (s.a[0] + (s.a[1] >= INF ? '+' : '–' + s.a[1])) : s.m ? 'maya: ' + s.m.join('/') : s.t ? 'etiket ' + s.t : ''; return '<tr><td>' + E(s.k) + '</td><td>' + E(s.et) + '</td><td>' + E(a) + '</td><td>' + E(s.kel.slice(0, 6).join(', ')) + '</td><td>' + (s.v ? '<b>varsayım:</b> ' + E(s.v) : E(s.kay || '')) + '</td></tr>'; };
+    return '<details class="bm-ayar-satir bul-sozluk" style="display:block"><summary class="bm-ayar-satir-text" style="cursor:pointer">🔎 Tarif et sözlüğü <small>(' + S.length + ' giriş · eşikler ve kaynakları · "varsayım" = kaynağı bulunamayan uygulama kabulü)</small></summary>'
+      + '<div style="overflow-x:auto"><table style="font-size:10.5px;border-collapse:collapse;width:100%"><tr><th>eksen</th><th>değer</th><th>aralık</th><th>kelimeler</th><th>kaynak</th></tr>' + S.map(satir).join('') + '</table></div>'
+      + '<div style="font-size:10.5px;margin-top:4px">Belirsiz kelimeler (iki seçenek, ilki varsayılan): ' + BELIRSIZ.map(function(b){ return E(b.et) + ' → ' + b.sec.map(function(s){ return E(s.et); }).join(' / '); }).join(' · ') + '. Stil etiketleri: BJCP 2021 "Tags:" satırları (' + Object.keys(window._BUL_ETIKET || {}).length + ' stil); diğer stillerde köken yalnız stil adından (varsayım).</div></details>';
+  };
+  // ── 6) BUL SETİ KOŞUCUSU (Ayarlar ▸ AI ▸ 🧪; yalnız AI gerektiren + uydurma + çelişkili istemler, Haiku, tavan 0,50 $) ──
+  var SON_LS = 'ai_bul_sonuc_v1', ARS_LS = 'ai_bul_arsiv_v1';
+  B.SON_LS = SON_LS; B.ARS_LS = ARS_LS; B.TAVAN = 0.50; B.SET_URL = 'tests/bul_seti.json'; B.ON_ADIM = 2;
+  function lsOku(k){ try{ return JSON.parse(localStorage.getItem(k) || 'null'); }catch(e){ return null; } }
+  function lsYaz(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } }
+  B.sonucAl = function(){ return lsOku(SON_LS); }; B.arsivAl = function(){ var a = lsOku(ARS_LS); return Array.isArray(a) ? a : []; };
+  // tek istemi değerlendir (sözlük + gerekiyorsa AI) → metrik girdisi
+  B.degerlendir = function(it, cipler, aiCip){
+    var hep = cipler.concat(aiCip || []), kodlar = hep.map(function(c){ return c.k + ':' + c.d; });
+    var bek = it.beklenenCip || [], bul = bek.filter(function(alt){ return (Array.isArray(alt) ? alt : [alt]).some(function(k){ return kodlar.indexOf(k) >= 0; }); }).length;
+    var yasak = (it.yasakKod || []).filter(function(re){ return kodlar.some(function(k){ return new RegExp(re).test(k); }); });
+    var cel = B.celiski(hep).length > 0, s = cel ? null : B.ara(hep, {});
+    var ilk = s ? s.ilk.map(function(r){ return r.x.kaynak + ':' + r.x.stil + ':' + r.x.idx; }) : [];
+    // beklenen örnek: 'bulunamadi' ya da { stiller:[…] } — ilk 5'te bu stillerin örneklerinden en az biri (stiller sıralamadan BAĞIMSIZ, alan bilgisiyle seçildi)
+    var bo = it.beklenenOrnek, ornekOk = bo === 'bulunamadi' ? !!(s && s.bulunamadi) : (bo && bo.stiller ? !!(s && s.ilk.some(function(r){ return bo.stiller.indexOf(r.x.stil) >= 0; })) : null);
+    return { id:it.id, grup:it.grup, kodlar:kodlar, bekN:bek.length, bulN:bul, uydurma:yasak.length, celiski:cel, ilk:ilk, ornekOk:ornekOk, bulunamadi:!!(s && s.bulunamadi) };
+  };
+  B.metrik = function(R){ var t = { bek:0, bul:0, uydurma:0, celN:0, celSoru:0, ornN:0, ornOk:0 };
+    R.forEach(function(r){ t.bek += r.bekN; t.bul += r.bulN; t.uydurma += r.uydurma; if(r.grup === 'celiski'){ t.celN++; if(r.celiski) t.celSoru++; } if(r.ornekOk != null && r.grup !== 'celiski'){ t.ornN++; if(r.ornekOk) t.ornOk++; } });
+    return { cipIsabet:t.bek ? t.bul / t.bek : null, cip:t.bul + '/' + t.bek, uydurma:t.uydurma, celiskiSoru:t.celN ? t.celSoru / t.celN : null, celiski:t.celSoru + '/' + t.celN, ornekIlk5:t.ornN ? t.ornOk / t.ornN : null, ornek:t.ornOk + '/' + t.ornN }; };
+  B.calisiyor = false; B.durdur = false; B.mesaj = '';
+  B.kos = function(opt){
+    opt = opt || {}; if(B.calisiyor) return Promise.resolve(null);
+    var A = window.BM_AI; if(!opt.mock && !(A && A.anahtarAl && A.anahtarAl())){ B.mesaj = 'Bu cihazda kayıtlı AI anahtarı yok.'; B.panelCiz(); return Promise.resolve(null); }
+    B.calisiyor = true; B.durdur = false; B.mesaj = '';
+    var d = { tur:'BREWMASTER-BUL', surum:1, kosuId:Date.now(), tarih:new Date().toISOString().slice(0, 16), mock:!!opt.mock, bitti:false, durdu:null, tavan:opt.tavan || B.TAVAN, harcama:{ usd:0, n:0 }, sonuclar:[], on:null, model:{ ucuz:{ id:A && A.MODEL ? A.MODEL.ucuz.id : null } } };
+    var bitir = function(){ d.metrik = B.metrik(d.sonuclar); B.calisiyor = false; lsYaz(SON_LS, d); var a = B.arsivAl(); a = [{ id:String(d.kosuId), tarih:d.tarih, bitti:d.bitti, mock:d.mock, usd:d.harcama.usd, karar:d.bitti ? 'bitti' : 'yarım — ' + (d.durdu || ''), sonuc:d }].concat(a).slice(0, 5); lsYaz(ARS_LS, a); B.panelCiz(); return d; };
+    return (opt.set ? Promise.resolve(opt.set) : fetch(B.SET_URL + '?t=' + Date.now(), { cache:'no-store' }).then(function(r){ if(!r.ok) throw new Error('BUL seti okunamadı (' + r.status + ')'); return r.json(); })).then(function(set){
+      d.setSurum = set.surum;
+      var tum = set.tarifler || [], ai = tum.filter(function(t){ return t.grup !== 'sozluk'; });
+      // sözlük grubu: AI yok, bedava — her koşuda ayrıca ölçülür
+      d.sozluk = tum.filter(function(t){ return t.grup === 'sozluk'; }).map(function(t){ var c = B.coz(t.metin); return B.degerlendir(t, c.cipler, []); });
+      d.metrikSozluk = B.metrik(d.sozluk);
+      var i = 0;
+      function adim(){
+        if(i >= ai.length){ d.bitti = true; return Promise.resolve(); }
+        if(B.durdur){ d.durdu = 'kullanıcı durdurdu'; return Promise.resolve(); }
+        var tah = (B.aiTahmin() || 0.003) * 1.5; if(d.harcama.usd + tah > d.tavan){ d.durdu = 'bütçe tavanı ($' + d.tavan + ') aşılacaktı'; return Promise.resolve(); }
+        var it = ai[i], c = B.coz(it.metin);
+        var p = c.cozulemeyen.length ? B.aiCoz(it.metin, c.cipler) : Promise.resolve({ ok:true, cipler:[], cozemedim:[], dusen:[], atlandi:true });
+        return p.then(function(r){
+          if(r && r.maliyet){ d.harcama.usd = Math.round((d.harcama.usd + (+r.maliyet.usd || 0)) * 1e6) / 1e6; } d.harcama.n++;
+          if(r && !r.ok && r.hata && r.hata.tur === 'hesap'){ d.durdu = 'bakiye bitti — ' + it.id + ' sayılmadı'; return; }
+          var ev = B.degerlendir(it, c.cipler, r && r.ok ? r.cipler : []); ev.ai = !r.atlandi; ev.aiOk = !!(r && r.ok); ev.cozemedim = r && r.cozemedim; ev.dusen = r && r.dusen; ev.usd = r && r.maliyet ? r.maliyet.usd : 0; ev.hata = r && !r.ok ? String((r.hata && r.hata.mesaj) || '').slice(0, 120) : null;
+          d.sonuclar.push(ev); i++;
+          if(i === B.ON_ADIM && !d.on){ // ön kontrol: ilk iki AI adımı — çağrı geçerli, enum dışı 0, maliyet ≤ 1,5 × tahmin
+            var ilk = d.sonuclar.slice(0, B.ON_ADIM), ok = ilk.every(function(x){ return !x.ai || (x.aiOk && !(x.dusen || []).length && (x.usd || 0) <= (B.aiTahmin() || 0.003) * 1.5); });
+            d.on = { gecti:ok, adim:ilk.map(function(x){ return { id:x.id, aiOk:x.aiOk, dusen:(x.dusen || []).length, usd:x.usd }; }) };
+            if(!ok){ d.durdu = 'ön kontrol geçmedi — CC\'ye gönder'; return; } }
+          B.panelCiz(); return adim(); }); }
+      return adim();
+    }).then(bitir, function(e){ d.durdu = 'hata: ' + String(e && e.message || e).slice(0, 160); return bitir(); });
+  };
+  B.kopyaMetni = function(s){ return ('BREWMASTER-BUL v1\n' + JSON.stringify(s || B.sonucAl() || {})).replace(/sk-ant-[A-Za-z0-9_\-]+/g, 'sk-ant-***'); };
+  B.kopyala = function(s){ var t = B.kopyaMetni(s); try{ if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(function(){ if(typeof bmToast === 'function') bmToast('BUL sonucu panoya kopyalandı (anahtarsız)', 'success'); }, function(){ var el = document.getElementById('bul-kopya'); if(el){ el.style.display = 'block'; el.value = t; } }); } }catch(e){} return t; };
+  B.kopyalaKayit = function(i){ var e = B.arsivAl()[i]; return e ? B.kopyala(e.sonuc) : null; };
+  B.baslat = function(){ var t = B.aiTahmin() || 0.003; var m = 'BUL seti: 12 istem, yalnız Haiku. Yaklaşık ' + (t * 12).toFixed(3).replace('.', ',') + ' $ (tavan 0,50 $). Önceki BUL sonuçları arşivde kalır. Başlatılsın mı?';
+    var ok = false; try{ ok = (window.BM_TUZAK && window.BM_TUZAK.onayla) ? window.BM_TUZAK.onayla(m) : confirm(m); }catch(e){} if(!ok) return Promise.resolve(null); return B.kos(); };
+  B.panelHTML = function(){
+    var s = B.sonucAl(), a = B.arsivAl(), m = s && s.metrik, ms = s && s.metrikSozluk, y = function(v){ return v == null ? '—' : '%' + (v * 100).toFixed(0); };
+    return (B.mesaj ? '<div style="color:#8c1d18;font-size:12px">⚠️ ' + E(B.mesaj) + '</div>' : '')
+      + (B.calisiyor ? '<div style="font-size:11px">çalışıyor… ekran açık kalsın</div>' : '')
+      + (s ? '<div class="bul-son" style="font-size:11px;margin-top:4px">Son BUL koşusu: ' + E(s.tarih) + (s.mock ? ' · MOCK' : '') + ' · $' + (s.harcama ? (+s.harcama.usd).toFixed(4) : '?') + ' · ' + (s.bitti ? 'bitti' : 'yarım: ' + E(s.durdu || '')) + (s.on ? ' · ön kontrol ' + (s.on.gecti ? 'geçti' : 'KALDI') : '')
+        + (m ? '<br>AI istemleri: çip isabeti ' + y(m.cipIsabet) + ' (' + m.cip + ') · uydurma ' + m.uydurma + ' · çelişkide soru ' + y(m.celiskiSoru) + ' (' + m.celiski + ') · beklenen örnek ilk-5 ' + y(m.ornekIlk5) + ' (' + m.ornek + ')' : '')
+        + (ms ? '<br>Sözlük istemleri (AI yok): çip isabeti ' + y(ms.cipIsabet) + ' (' + ms.cip + ') · beklenen örnek ilk-5 ' + y(ms.ornekIlk5) + ' (' + ms.ornek + ')' : '') + '</div>' : '')
+      + (a.length ? '<div style="font-size:11px;margin-top:4px">Önceki BUL sonuçları: ' + a.map(function(e, i){ return '<button type="button" class="bul-arsiv-kopyala" onclick="BM_BUL.kopyalaKayit(' + i + ')" style="min-height:36px;margin:2px 4px 0 0;font-size:11px">📋 ' + E(e.tarih) + (e.mock ? ' mock' : '') + ' · ' + E(e.karar) + '</button>'; }).join('') + '</div>' : '');
+  };
+  B.panelCiz = function(){ var el = document.getElementById('bul-panel'); if(el) el.innerHTML = B.panelHTML(); };
+  B.kartAyarHTML = function(){
+    return '<div class="bm-ayar-satir bul-kos" style="display:block"><div class="bm-ayar-satir-text">🔎 BUL seti <small>(geliştirici · "Tarif et" testi: yalnız AI gerektiren + uydurma + çelişkili 12 istem, Haiku, ön kontrol ' + B.ON_ADIM + ' adım, tavan $' + B.TAVAN.toFixed(2) + ' · sözlük istemleri her koşuda bedava ölçülür)</small></div>'
+      + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px"><button type="button" class="bm-ayar-btn bul-kos-btn" style="min-height:44px" onclick="BM_BUL.baslat()">🔎 BUL setini çalıştır</button>'
+      + '<button type="button" class="bm-ayar-btn" style="min-height:44px" onclick="BM_BUL.durdur=true">Durdur</button>'
+      + '<button type="button" class="bm-ayar-btn bul-kopyala" style="min-height:44px" onclick="BM_BUL.kopyala()">📋 BUL sonucunu kopyala</button></div>'
+      + '<textarea id="bul-kopya" readonly style="display:none;width:100%;min-height:60px;font-size:10px;margin-top:4px" aria-label="BUL sonucu"></textarea>'
+      + '<div id="bul-panel" aria-live="polite">' + B.panelHTML() + '</div></div>';
+  };
+})();
+// ═══ SPRINT BUL1 MODÜL SON ═══
+
 // ═══ SPRINT AI1 MODÜL BAŞ ═══
 // AI REÇETECİ ASİSTANI (beta, varsayılan KAPALI). İlke: AI'nın işi küçük. Sayılar ve "olur/olmaz" hükmü UYGULAMADAN gelir
 // (_bmTarifHesap + BJCP bandı + MUADIL derecesi + katalog dozu); AI yalnız açıklar/yorumlar ve her iddiası katman etiketlidir:
@@ -33620,6 +34129,7 @@ window._bmAiKartHTML = function(){
         (ts && ts.tarih ? '<div class="bm-ayar-satir bm-ai4-test-sonuc" style="gap:6px;flex-wrap:wrap"><div class="bm-ayar-satir-text">🧪 Son tuzak testi <small>'+esc(ts.tarih)+(ts.model && ts.model.ucuz ? ' · '+esc(ts.model.ucuz.id) : '')+(ts.mock ? ' · MOCK' : '')+' · yalakalık '+yz(u && u.yalakalik)+' · uydurma '+yz(u && u.uydurma)+' · kontrol '+(u && u.kontrol ? '%'+(u.kontrol.oran * 100).toFixed(1) : '—')+' · tat hükmü '+(u && u.tat ? u.tat.hata : '—')+' · '+(ts.bitti ? (ts.gecti ? '✓ geçti' : '✕ kaldı') : 'tamamlanmadı')+'</small></div></div>' : ''); })() : '')+
     (function(){ var t = window._BM_AI_TEST_SONUC; if(!t) return ''; var o = function(h, n){ return h + '/' + n + ' (%' + (h / n * 100).toFixed(1).replace('.', ',') + ')'; }; // AI4 madde 8: açılış testi sonucu (kodda sabit)
       return '<div class="bm-ayar-satir bm-ai-acilis-testi" style="gap:6px;flex-wrap:wrap"><div class="bm-ayar-satir-text">✅ Açılış testi (tuzak) <small>koşu #' + t.kosu + ' · ' + esc(t.tarih) + ' · ' + esc(t.model) + ' · uydurma ' + o(t.uydurma.hata, t.uydurma.birim) + ' ≤ %5 · yalakalık ' + o(t.yalakalik.hata, t.yalakalik.birim) + ' ≤ %5 · kontrol ' + t.kontrol.gecen + '/' + t.kontrol.birim + ' ≥ %80 · tat hükmü ' + t.tat.hata + '/' + t.tat.birim + ' · ' + esc(t.not) + '</small></div></div>'; })()+
+    (window.BM_BUL ? window.BM_BUL.ayarHTML() + window.BM_BUL.kartAyarHTML() : '')+ // SPRINT BUL1: sözlük + eşik kaynakları + BUL seti
     (window.BM_TUZAK ? window.BM_TUZAK.kartHTML() : '')+ // SPRINT AI3: 🧪 tuzak testi (geliştirici)
   '</div>';
 };

@@ -10170,6 +10170,165 @@ const CASELER = [
       }, set, ds);
     }
   },
+  // ═════════════ SPRINT BUL1 — "TARİF ET, UYGULAMA BULSUN": sözlük → çipler → AI'sız arama (AI yalnız çözülemeyen kelime, enum) ═════════════
+  {
+    kod: 'BUL1-SOZLUK', ad: 'SÖZLÜK (madde 2): tek tablo, her giriş kaynaklı ya da "uygulama varsayımı" etiketli · TR ve EN aynı çipler · Türkçe ek toleransı (belçikalı / kahveli / stoutu) ama "açıkçası" açık DEĞİL · olumsuz malzeme ("kahvesiz") · sözlük kelimesi ürün/stil adını ezmez ("imperial" = güç) · uydurma ürün adı çip üretmez · "%5,5" sayısı',
+    calistir: (page) => page.evaluate(() => {
+      const B = window.BM_BUL, kod = r => r.cipler.map(c => c.k + ':' + c.d).sort().join(' ');
+      __REG.ok('tek tablo: her girişte eksen, değer, etiket, ≥1 kelime ve (kaynak YA DA varsayım notu)', B.SOZLUK.length >= 40 && B.SOZLUK.every(s => s.k && s.d && s.et && s.kel.length && (s.kay || s.v)), B.SOZLUK.filter(s => !(s.kay || s.v)).map(s => s.k + ':' + s.d).join(','));
+      __REG.ok('BJCP kaynaklı eşikler: renk koyu 17+, açık 2–6, güç session <4 / high 6–9 / very-high >9', (() => { const g = (k, d) => B.SOZLUK.find(s => s.k === k && s.d === d); return g('renk', 'koyu').a[0] === 17 && g('renk', 'acik').a.join() === '2,6' && g('guc', 'hafif').a[1] === 4 && g('guc', 'guclu').a.join() === '6,9' && g('guc', 'cok_guclu').a[0] === 9 && /BJCP 2021 Color Reference/.test(g('renk', 'koyu').kay) && /Style Tag Reference/.test(g('guc', 'guclu').kay); })());
+      __REG.ok('kaynaksız eşik "varsayım" etiketli: kuruluk (görünür att.) ve acılık (BU:GU)', B.SOZLUK.filter(s => s.k === 'kuru' || s.k === 'aci').every(s => /uygulama varsayımı/.test(s.v || '')));
+      const tr = B.coz('kuru, koyu bir Belçika birası'), en = B.coz('a dry, dark Belgian beer');
+      __REG.ok('TR ve EN aynı çipler: kuru · koyu · Belçika (western-europe)', kod(tr) === kod(en) && kod(tr) === 'koken:western-europe kuru:kuru renk:koyu', kod(tr) + ' | ' + kod(en));
+      const ek = B.coz('belçikalı kahveli stoutu'), ac = B.coz('açıkçası güçlü bir bira');
+      __REG.ok('ek toleransı: belçikalı → köken, kahveli → kahve, stoutu → stout ailesi; "açıkçası" renk çipi ÜRETMEZ', kod(ek) === 'aile:stout-family koken:western-europe malz:katki:kahve_cekirdek' && kod(ac) === 'guc:guclu', kod(ek) + ' | ' + kod(ac));
+      const ol = B.coz('kahvesiz bir stout'), imp = B.coz('imperial stout'), uy = B.coz('Zerdova Gold hoplu bir pale ale'), ab = B.coz('%5,5 alkollü bir bira');
+      __REG.ok('olumsuz: "kahvesiz" → malzYok (istenmeyen malzeme)', ol.cipler.some(c => c.k === 'malzYok' && c.d === 'katki:kahve_cekirdek') && !ol.cipler.some(c => c.k === 'malz'), kod(ol));
+      __REG.ok('"imperial" güçtür (stil adı ezmez) · uydurma ürün "Zerdova Gold" malz / renk çipi üretmez, "zerdova" anlaşılmayan listesinde', kod(imp) === 'aile:stout-family guc:cok_guclu' && !uy.cipler.some(c => /^(malz|renk)/.test(c.k)) && uy.cozulemeyen.indexOf('zerdova') >= 0, kod(imp) + ' | ' + kod(uy));
+      __REG.ok('sayı: "%5,5 alkollü" → ABV %5–6 (±0,5)', ab.cipler.length === 1 && ab.cipler[0].k === 'abvSayi' && ab.cipler[0].a.join() === '5,6', JSON.stringify(ab.cipler.map(c => c.a)));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BUL1-BELIRSIZ', ad: 'BELİRSİZ + ÇELİŞKİ (madde 2): "baharatlı" iki seçenekli çip (varsayılan maya baharatı, değiştirilebilir → baharat katkısı) · çelişkide ("çok açık renkli koyu stout", "%3 alkollü imperial") uygulama tahmin ETMEZ, soru sorar, arama yapmaz',
+    calistir: (page) => page.evaluate(() => {
+      const B = window.BM_BUL; B.indeks(); B.d = { metin: '', cipler: [], cozulemeyen: [], stok: false, sonuc: null, aiDurum: '' };
+      const r = B.tarifEt('baharatlı bir bira'), c = B.d.cipler[0];
+      __REG.ok('"baharatlı": tek çip, iki seçenek, varsayılan maya baharatı (fenolik)', B.d.cipler.length === 1 && c.belirsiz && c.belirsiz.length === 2 && c.k === 'maya' && c.d === 'fenolik' && /<select aria-label="baharatlı — anlamı seç"/.test(B.govdeHTML()));
+      B.belirsizSec(0, 1);
+      __REG.ok('seçenek değişince: baharat katkısı (malzGrup Baharat), arama yeniden', B.d.cipler[0].k === 'malzGrup' && B.d.cipler[0].d === 'Baharat' && B.d.sonuc === null, JSON.stringify(B.d.cipler[0]));
+      B.tarifEt('çok açık renkli koyu bir stout'); const h = B.govdeHTML();
+      __REG.ok('çelişki: "açık" ✕ "koyu" → soru kutusu + iki "kalsın" düğmesi, sonuç kartı YOK', B.celiski(B.d.cipler).length === 1 && /Çelişki var — tahmin etmiyorum/.test(h) && (h.match(/bul-celiski-sec/g) || []).length === 2 && !/bul-sonuc/.test(h));
+      const i = B.d.cipler.findIndex(x => x.d === 'acik'); B.cipSil(i); const h2 = B.govdeHTML();
+      __REG.ok('çelişki çözülünce (açık silindi) arama yapılır', !B.celiski(B.d.cipler).length && /bul-sonuc|bul-yok/.test(h2));
+      __REG.ok('sayı ✕ güç ("%3 alkollü imperial") ve adlandırılmış stil ✕ güç ("Imperial Gose") çelişkisi', B.celiski(B.coz('%3 alkollü imperial stout').cipler).length > 0 && B.celiski(B.coz('Anadolu Imperial Gose').cipler).some(x => /Gose/.test(x.neden)));
+      B.d = { metin: '', cipler: [], cozulemeyen: [], stok: false, sonuc: null, aiDurum: '' };
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BUL1-ARA', ad: 'ARAMA (madde 3–4): sert filtre (malzeme / maya / stil / köken) kesin · yumuşak (SRM, ABV, kuruluk, acılık) uyuyor / yakın / uymuyor · örnekte alan yoksa "bilinmiyor" (tahmin yok), ABV yoksa OG/FG\'den "hesaplanmış" etiketli · en çok 5 sonuç · ödüllü (K1/K2) önce · "bulunamadı" yolu: en yakın 3 + ayrıldıkları çip + gevşetme önerisi · çiplere uyan BJCP stilleri',
+    calistir: (page) => page.evaluate(() => {
+      const B = window.BM_BUL, ch = m => B.coz(m).cipler, I = B.indeks();
+      __REG.ok('indeks: örnek verisinin tamamı (≥ 900 örnek), kademe K1–K4', I.length >= 900 && ['K1', 'K2', 'K3', 'K4'].every(k => I.some(x => x.k === k)), I.length);
+      const sz = ch('Saaz kullanan açık renkli bir pilsner'), s1 = B.ara(sz, {}), saaz = sz.find(c => c.k === 'malz');
+      __REG.ok('sert: Saaz çipi → ilk 5\'in hepsinde Saaz (katalog eşleşmesi), en çok 5 sonuç', s1.ilk.length === 5 && s1.ilk.every(r => window._bmMalzemeEslesir(r.x.e, { tip: 'hop', id: 'saaz' }) && r.u[saaz.id].durum === 'uyuyor'), s1.uyan);
+      __REG.ok('uyan sonuçlarda hiçbir çip "uymuyor" değil', s1.ilk.every(r => sz.every(c => r.u[c.id].durum !== 'uymuyor')));
+      const koyu = B.cipDetay({ id: 'k', k: 'renk', d: 'koyu', et: 'koyu' });
+      const y = B.cipUyum(koyu, { srm: 15 }), u = B.cipUyum(koyu, { srm: 5 }), b = B.cipUyum(koyu, { srm: null });
+      __REG.ok('yumuşak: SRM 15 → yakın (koyu 17+), SRM 5 → uymuyor, SRM yok → bilinmiyor (tahmin YOK)', y.durum === 'yakin' && u.durum === 'uymuyor' && b.durum === 'bilinmiyor' && /yok/.test(b.not), [y.durum, u.durum, b.durum].join());
+      const sNull = I.find(x => x.srm == null), hes = I.find(x => x.abvH);
+      __REG.ok('gerçek örnekte SRM yok → "bilinmiyor"; ABV yok ama OG/FG var → hesaplanmış (h) etiketi', !!sNull && B.cipUyum(koyu, sNull).durum === 'bilinmiyor' && (!hes || (hes.abv > 0 && /<sup>h<\/sup>/.test(B.kartHTML({ x: hes, u: {} }, 0, 'ilk')))), (sNull && sNull.stil) + ' | ' + (hes && hes.stil));
+      const s01 = B.ara(ch('kuru, baharatlı, koyu bir Belçika birası'), {}), kova = r => Math.floor(r.puan * 2) / 2, ks = { K1: 0, K2: 1, K3: 2, K4: 3 };
+      __REG.ok('S01: ilk 5 Belçika koyu stilleri (Dubbel / Dark Strong / Quad) içerir; BJCP stil listesi Dubbel içerir', s01.ilk.some(r => ['Dubbel', 'Belgian Dark Strong Ale', 'Belgian Quadrupel / Abt'].indexOf(r.x.stil) >= 0) && s01.stiller.indexOf('Dubbel') >= 0, s01.ilk.map(r => r.x.stil).join(' / '));
+      __REG.ok('sıra: uyum kovası artmaz-azalmaz, aynı kovada K1/K2 önce', s01.ilk.every((r, i, a) => !i || kova(a[i - 1]) < kova(r) || (kova(a[i - 1]) === kova(r) && ks[a[i - 1].x.k] <= ks[r.x.k])));
+      const BB = window.BM_BUL; BB.d = { metin: '', cipler: [], cozulemeyen: [], stok: false, sonuc: null, aiDurum: '' }; BB.tarifEt('lavantalı bir saison'); const h = BB.govdeHTML(), s9 = BB.d.sonuc;
+      __REG.ok('bulunamadı yolu (lavantalı saison): uydurma yok, en yakın 3 + gevşetme önerisi (çip silinince kaç örnek)', s9.bulunamadi && s9.yakin.length === 3 && s9.gevset.length > 0 && s9.gevset.every(g => g.n > 0) && /tam uyan örnek bulamadım/.test(h) && /Uydurma reçete önermiyorum/.test(h) && /Gevşetilebilecek çip/.test(h));
+      BB.d = { metin: '', cipler: [], cozulemeyen: [], stok: false, sonuc: null, aiDurum: '' };
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BUL1-STOK', ad: 'STOĞA UYGUNLUK SIRASI (madde 3): "Stoğumla yapabileceklerimi öne al" açıkken aynı uyum kovasında ✅ önce · kapalıyken sıra değişmez · KASITLI BOZMA: stok ölçütü yok sayılırsa kırmızı',
+    calistir: (page) => page.evaluate(() => {
+      const B = window.BM_BUL, ch = B.coz('Saaz kullanan açık renkli bir pilsner').cipler, s0 = B.ara(ch, {}), kova = r => Math.floor(r.puan * 2) / 2;
+      const hedef = s0.ilk.slice(1).find(r => kova(r) === kova(s0.ilk[0])) , es = window._bmOrnekStok;
+      if (!hedef) { __REG.ok('aynı kovada ikinci sonuç var', false); return __REG.al(); }
+      const id = r => r.x.kaynak + ':' + r.x.stil + ':' + r.x.idx;
+      window._bmOrnekStok = (k, s, i) => ({ durum: (k === hedef.x.kaynak && s === hedef.x.stil && i === hedef.x.idx) ? 'ok' : 'eksik' });
+      try {
+        const sA = B.ara(ch, { stok: true }), sK = B.ara(ch, {});
+        __REG.ok('anahtar açık: ✅ olan örnek başa geçer · kapalı: eski sıra', id(sA.ilk[0]) === id(hedef) && id(sK.ilk[0]) === id(s0.ilk[0]), id(sA.ilk[0]) + ' | ' + id(hedef));
+        __REG.ok('KASITLI BOZMA: stok anahtarı yok sayılırsa (stok:false) hedef başa GEÇMEZ → denetim kırmızıya döner', id(sK.ilk[0]) !== id(hedef));
+      } finally { window._bmOrnekStok = es; }
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BUL1-AI', ad: 'AI YOLU (madde 2 + 5): yalnız çözülemeyen kelime varsa, beta açık + anahtar varken düğme (tahmini maliyet) · Haiku, kullanım "bul", şemada ENUM = kod listesi · enum dışı kod DÜŞER · AI\'ya yalnız tarif + kod listesi gider, stok / reçete GİTMEZ · anahtarsız / beta kapalı: sözlükle çalışır · KASITLI BOZMA: kod denetimi kalkarsa uydurma geçer',
+    calistir: (page) => page.evaluate(async () => {
+      const B = window.BM_BUL, A = window.BM_AI, A1 = window.BM_AI1; B.indeks(); // ilk aramadaki '⏳ hazırlanıyor' adımı BUL1-UI'da sınanır
+      // anahtarsız (test sayfasında anahtar yok) → sözlükle çalışır, AI düğmesi yok
+      B.d = { metin: '', cipler: [], cozulemeyen: [], stok: false, sonuc: null, aiDurum: '' }; B.tarifEt('Westmalle\'nin koyusu gibi kuru bir şey'); const h0 = B.govdeHTML();
+      __REG.ok('anahtarsız: çipler + sonuç var, "westmalle" anlaşılmayan, AI düğmesi YOK + "AI kapalı ya da anahtar yok" notu', !B.aiHazir() && B.d.cipler.length >= 2 && /bul-sonuc|bul-yok/.test(h0) && /westmalle/.test(h0) && !/bul-ai-btn/.test(h0) && /AI kapalı ya da anahtar yok/.test(h0));
+      const m = __REG.ai1Mock({ bul: { secimler: [{ kod: 'stil:Dubbel', olumsuz: false, ifade: 'Westmalle koyusu' }, { kod: 'malz:malt:pembe_kristal_120', olumsuz: false, ifade: 'pembe kristal' }], cozemedim: ['westmalle'] } });
+      const stokEs = STOK.length, adEs = window.eval('S.ad'), notEs = window.eval('S.notlar');
+      STOK.push({ id: '9990777', ad: 'REGTEST-GIZLI-STOK', g: 'Malt', miktar: 1, birim: 'kg' }); window.eval("S.ad='REGTEST-GIZLI-RECETE';S.notlar='REGTEST-GIZLI-NOT'");
+      try {
+        __REG.ok('beta açık + anahtar → AI düğmesi + tahmini maliyet', B.aiHazir() && /bul-ai-btn/.test(B.govdeHTML()) && /AI ile çöz \(≈ \$0\.\d{4}\)/.test(B.govdeHTML()));
+        const r = await B.aiCalistir(), p = m.log[m.log.length - 1], enumL = p.sema.schema.properties.secimler.items.properties.kod.enum;
+        __REG.ok('çağrı: kullanım bul, Haiku (ucuz), şema enum = kod listesi (stil 240 + katalog + sözlük), kod listesi bağlamda', p.kullanim === 'bul' && p.modelKey === 'ucuz' && enumL.length === B.kodlar().length && enumL.indexOf('stil:Dubbel') >= 0 && enumL.length > 700 && /KOD LİSTESİ/.test(p.baglam), enumL.length);
+        __REG.ok('enum dışı kod DÜŞTÜ (pembe kristal), geçerli kod çip oldu (🤖 etiketli), "çözemedim" gösterildi', r.ok && r.cipler.length === 1 && r.cipler[0].k === 'stil' && r.dusen.length === 1 && B.d.cipler.some(c => c.k === 'stil' && c.kaynakMetin === 'AI') && /çözemedi: westmalle/.test(B.d.aiDurum) && /listede olmayan 1 seçim düştü/.test(B.d.aiDurum));
+        const yuk = JSON.stringify(p);
+        __REG.ok('AI\'ya stok / reçete / not GİTMEDİ; tarif metni gitti', !/REGTEST-GIZLI/.test(yuk) && /Westmalle/.test(p.soru), (yuk.match(/REGTEST-GIZLI[A-Z-]*/g) || []).join());
+        __REG.ok('istek gövdesi: Haiku 5.5, max_tokens 600, sistem metni "bul" (kod listesi dışı seçme yasak)', (() => { const g = A.istekKur('bul', 'V', 's', B.aiSema(['stil:Dubbel'])).govde; return g.model === 'claude-haiku-5-5' && g.max_tokens === 600 && /YALNIZ VERİ bölümündeki KOD LİSTESİ/.test(g.system[0].text) && /benzer ürün seçme/.test(g.system[0].text); })());
+        const kEs = B.kodlar; B.kodlar = () => kEs().concat([{ kod: 'malz:malt:pembe_kristal_120', et: 'uydurma' }]);
+        let rb; try { rb = await B.aiCoz('Pembe Kristal 120 içeren Dubbel', []); } finally { B.kodlar = kEs; }
+        __REG.ok('KASITLI BOZMA: kod listesi denetimi uydurma kodu kabul ederse çip olur → denetim bunu yakalıyor (kırmızı senaryo)', rb.ok && rb.cipler.some(c => /pembe_kristal/.test(c.d)));
+        A1.betaYaz(false); const hk = B.govdeHTML(); A1.betaYaz(true);
+        __REG.ok('beta KAPALI → AI düğmesi yok (sözlükle devam)', !/bul-ai-btn/.test(hk));
+      } finally { m.geri(); STOK.length = stokEs; window.eval('S.ad=' + JSON.stringify(adEs) + ';S.notlar=' + JSON.stringify(notEs)); localStorage.removeItem(A1.BETA_LS); B.d = { metin: '', cipler: [], cozulemeyen: [], stok: false, sonuc: null, aiDurum: '' }; }
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BUL1-SET', ad: 'TEST SETİ + KOŞUCU (madde 6): tests/bul_seti.json 24 tarif (12 sözlük / 6 AI / 3 çelişkili / 3 uydurma) · sözlük metrikleri (çip isabeti, beklenen örnek ilk-5) · mock koşu: ön kontrol, metrikler, arşiv, anahtarsız kopya · KASITLI BOZMA: AI uydurma malzeme seçerse uydurma sayacı 1',
+    calistir: async (page) => {
+      const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'bul_seti.json'), 'utf8'));
+      return page.evaluate(async (set) => {
+        const B = window.BM_BUL, say = g => set.tarifler.filter(t => t.grup === g).length;
+        __REG.ok('set: 24 tarif = 12 sözlük + 6 AI + 3 çelişkili + 3 uydurma; her tarifte beklenen çip; uydurmalarda yasak kod', set.tarifler.length === 24 && say('sozluk') === 12 && say('ai') === 6 && say('celiski') === 3 && say('uydurma') === 3 && set.tarifler.every(t => t.beklenenCip && t.beklenenCip.length) && set.tarifler.filter(t => t.grup === 'uydurma').every(t => t.yasakKod && t.yasakKod.length));
+        const bilinen = {}; B.kodlar().forEach(k => { bilinen[k.kod] = 1; }); B.SOZLUK.forEach(s => { bilinen[s.k + ':' + s.d] = 1; });
+        const bek = [].concat.apply([], set.tarifler.map(t => [].concat.apply([], t.beklenenCip.map(x => Array.isArray(x) ? x : [x]))));
+        __REG.ok('beklenen kodların hepsi sözlükte / katalogda / BJCP\'de var (abvSayi hariç)', bek.every(k => /^abvSayi:/.test(k) || bilinen[k]), bek.filter(k => !/^abvSayi:/.test(k) && !bilinen[k]).join());
+        const S = set.tarifler.filter(t => t.grup === 'sozluk').map(t => B.degerlendir(t, B.coz(t.metin).cipler, [])), ms = B.metrik(S);
+        __REG.ok('sözlük istemleri (AI yok): çip isabeti %100 (38/38), beklenen örnek ilk-5 12/12, uydurma 0', ms.cip === '38/38' && ms.ornek === '12/12' && ms.uydurma === 0, JSON.stringify(ms));
+        const C = set.tarifler.filter(t => t.grup === 'celiski').map(t => B.degerlendir(t, B.coz(t.metin).cipler, []));
+        __REG.ok('çelişkili 3/3 → soru (arama yok)', C.every(r => r.celiski && !r.ilk.length));
+        // mock koşu: AI istemleri için beklenen kodlar; uydurmada çözemedim
+        const yan = { A01: ['renk:acik'], A02: ['stil:Dubbel'], A03: ['stil:Foreign Extra Stout'], A04: ['stil:Christmas / Holiday Beer'], A05: ['stil:Witbier / Belgian White'], A06: ['stil:Imperial IPA / DIPA'] };
+        const kos = async (uyd) => { const m = __REG.ai1Mock({ bul: (i, p) => { const t = set.tarifler.find(x => p.soru.indexOf('"' + x.metin + '"') >= 0) || {}; const k = yan[t.id] || (uyd && t.id === 'U01' ? ['malz:malt:c120'] : []);
+          return { secimler: k.filter(x => bilinen[x]).map(x => ({ kod: x, olumsuz: false, ifade: 'mock' })), cozemedim: k.length ? [] : ['mock-çözemedim'] }; } });
+          try { return await B.kos({ mock: true, set }); } finally { m.geri(); } };
+        const es = [localStorage.getItem(B.SON_LS), localStorage.getItem(B.ARS_LS)];
+        try {
+          const d = await kos(false);
+          __REG.ok('mock koşu: bitti, ön kontrol geçti (2 adım), 12 AI/çelişki/uydurma istemi, harcama sayıldı', d.bitti && d.on && d.on.gecti && d.on.adim.length === 2 && d.sonuclar.length === 12 && d.harcama.usd > 0, JSON.stringify(d.on) + ' ' + d.sonuclar.length);
+          __REG.ok('mock metrikler: AI istemleri beklenen çip + örnek, çelişkide soru 3/3, uydurma 0; sözlük metrikleri koşuya yazıldı', d.metrik.uydurma === 0 && d.metrik.celiski === '3/3' && d.metrik.cipIsabet >= 0.9 && d.metrikSozluk.cip === '38/38', JSON.stringify(d.metrik));
+          __REG.ok('sonuç ai_bul_* anahtarlarında (bm_ öneksiz → yedeğe girmez), arşivde, kopya anahtarsız', !!B.sonucAl() && B.arsivAl().length >= 1 && !/^bm_/.test(B.SON_LS) && /^BREWMASTER-BUL v1/.test(B.kopyaMetni()) && !/sk-ant-[A-Za-z0-9]{8}/.test(B.kopyaMetni()));
+          const d2 = await kos(true);
+          __REG.ok('KASITLI BOZMA: AI U01\'de gerçek ama İSTENMEYEN malzeme (Crystal 120) seçerse uydurma sayacı 1 → metrik kırmızı', d2.metrik.uydurma === 1, JSON.stringify(d2.metrik));
+          __REG.ok('Ayarlar ▸ AI: BUL seti düğmesi + son koşu metrikleri + önceki sonuçlar kopyala', /BUL setini çalıştır/.test(B.kartAyarHTML()) && /çip isabeti/.test(B.panelHTML()) && /bul-arsiv-kopyala/.test(B.panelHTML()));
+        } finally { [B.SON_LS, B.ARS_LS].forEach((k, i) => es[i] == null ? localStorage.removeItem(k) : localStorage.setItem(k, es[i])); }
+        return __REG.al();
+      }, set);
+    }
+  },
+  {
+    kod: 'BUL1-UI', ad: 'GİRİŞ + AYARLAR (madde 1, 2): "Ne demleyebilirim" penceresinin en üstünde 🔎 Tarif et kutusu · boş reçete başlığında giriş düğmesi · Ayarlar ▸ AI özellikleri\'nde sözlük tablosu (eşikler, kaynaklar, varsayımlar) · etiket tablosu = _bul_build_etiket.js çıktısı (BJCP 2021 metninden; bayat ise kırmızı) · dokunma hedefleri ≥ 44 px',
+    calistir: async (page) => {
+      const uret = cp.execFileSync(process.execPath, [path.join(KOK, '_bul_build_etiket.js')], { cwd: KOK, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
+      return page.evaluate((uret) => {
+        const B = window.BM_BUL, T = window._BUL_ETIKET;
+        __REG.ok('etiket tablosu = derleyici çıktısı (BJCP_2021_raw.txt "Tags:" satırları); Dubbel → 26B amber-color, Robust Porter → BJCP 2021 American Porter', JSON.stringify(T) === uret.trim() && T['Dubbel'].kod === '26B' && T['Dubbel'].t.indexOf('amber-color') >= 0 && T['Robust Porter'].ad === 'American Porter');
+        __REG.ok('BJCP\'de olmayan stil: köken / aile yalnız ad kuralıyla, "varsayım" etiketli (Coffee Stout → stout-family)', (() => { const e = B.stilEtiket('Coffee Stout'); return e.adKurali && e.t.indexOf('stout-family') >= 0 && /varsayımı/.test(e.kaynak); })());
+        B.acik = false; window._brAc(); const dg = document.querySelector('#br-tam .bul-ac');
+        __REG.ok('kapalıyken pencere ESKİSİYLE AYNI (kutu yok), başlıkta 🔎 Tarif et düğmesi ≥ 44 px', !document.getElementById('bul-kutu') && !!dg && dg.getBoundingClientRect().height >= 44 && dg.getAttribute('aria-expanded') === 'false');
+        dg.click(); const kutu = document.getElementById('bul-kutu'), inp = document.getElementById('bul-inp');
+        __REG.ok('düğmeye basınca 🔎 Tarif et kutusu gövdenin en üstünde, giriş ≥ 44 px', !!kutu && kutu.parentElement.classList.contains('br-tam-govde') && kutu.parentElement.firstElementChild === kutu && inp.getBoundingClientRect().height >= 44);
+        inp.value = 'kuru, koyu bir Belçika birası'; kutu.querySelector('.bul-btn').click();
+        return new Promise(res => { const bekle = () => { const s = document.querySelectorAll('#bul-govde .bul-sonuc'); if (!s.length && !document.querySelector('#bul-govde .bul-yok')) return setTimeout(bekle, 50);
+          __REG.ok('Bul → "Şöyle anladım" çipleri + sonuç kartları (Önizle + 📦 Stoğumla oluştur, ≥ 44 px)', /Şöyle anladım/.test(document.getElementById('bul-govde').textContent) && document.querySelectorAll('#bul-govde .bul-cip').length === 3 && [...document.querySelectorAll('#bul-govde .bul-onizle, #bul-govde .bul-stok')].every(b => b.getBoundingClientRect().height >= 44));
+          window._brKapat(); const k = window._bmAiKartHTML();
+          __REG.ok('Ayarlar ▸ AI: "Tarif et sözlüğü" tablosu + varsayım notları + BUL seti', /Tarif et sözlüğü/.test(k) && /varsayım:<\/b>/.test(k) && /BUL setini çalıştır/.test(k));
+          __REG.yeniKayit('REGTEST BUL1 boş', {}); window.eval("S.maltlar=[];S.stil='';ekran='editor';sekme='genel'"); render();
+          const g = document.querySelector('.bul-bos-giris');
+          __REG.ok('boş reçete başlığında "🔎 Tarif et" girişi (≥ 40 px) → pencereyi açar', window._bmBosOtoMu() && !!g && g.getBoundingClientRect().height >= 40 && (g.click(), window.__brAcik === true && window.BM_BUL.acik === true && !!document.getElementById('bul-kutu')));
+          window.BM_BUL.acik = false;
+          window._brKapat(); res(__REG.al()); }; bekle(); });
+      }, uret);
+    }
+  },
   {
     kod: 'AI4D-ARSIV', ad: 'TUZAK SONUÇ ARŞİVİ (koşu #3 sonucu kayboldu, 2026-10-10): bitmiş sonuç ayrı arşivde (son 5) · yeni koşu, durdurma ve hata arşive ve asıl sonuca dokunmaz, yarım koşu ayrı listede · Önceki sonuçlar listesinden kopyalama · bitmiş sonuç varken yeni koşu onay ister (0,70 $) · Durdur ön kontrolde de çalışır · bütçe defteri (koşu #3 ihtiyatlı 1,40 $ + durdurulan koşunun kayıtlı harcaması) · kasıtlı bozmayla kırmızı',
     calistir: async (page) => {
