@@ -13,7 +13,7 @@ KAAN'IN ISTEGI (2026-10-09, "kesinlikle istiyorum"): "Kuru, baharatli, koyu bir 
 2. TARIF -> FILTRE CIPLERI (once deterministik, sonra AI)
 - Sozluk tablosu (tek tablo, testli, TR+EN es anlamlilar): renk (acik/altin/amber/kahverengi/koyu/siyah -> SRM araligi), guc (hafif/sessionable/guclu/imperial -> ABV araligi), kuruluk (kuru/orta/tatli -> gorunur attenuasyon ya da FG araligi), aci (az/dengeli/aci -> BU:GU ya da IBU araligi), maya karakteri (fenolik-baharatli / meyvemsi ester / temiz / kveik / Brett ...), koken/aile (Belcika, Alman, Ingiliz, Amerikan...), malzeme iceren/icermeyen (katalog id), stil adi gecerse stil.
 - Esik degerleri kaynakli: SRM renk adlari ve stil aileleri icin BJCP 2021 (repodaki PDF) ya da kaynakli tablo; kaynagi bulunamayan esik "uygulama varsayimi" etiketli ve Ayarlar'da gorunur. Raporda tablo + kaynaklar.
-- PARA HARCAMA YOK (Kaan karari 2026-10-10): bu sprintte hicbir gercek API cagrisi yapilmaz. Ozellik varsayilan olarak YALNIZ SOZLUKLE calisir; cozulemeyen kelime kullaniciya gosterilir ("bunu anlayamadim: ...") ve cip elle secilir. AI yolu yalniz AI beta anahtari aciksa devreye girer (su an KAPALI) ve yalniz mock ile sinanir: sozlugun cozemedigi kelimeler varsa ucuz model (claude-haiku-5-5) json_schema ENUM'larla (stil adlari = BJCP 240, maya aileleri, katalog id'leri, sabit aralik kodlari) cip SECER; enum disi deger duser. Model "cozemedim" diyebilir.
+- Sozlugun cozemedigi kelimeler varsa ucuz model (claude-haiku-5-5) json_schema ENUM'larla (stil adlari = BJCP 240, maya aileleri, katalog id'leri, sabit aralik kodlari) cip SECER; enum disi deger duser. Model "cozemedim" diyebilir.
 - Belirsiz kelime kurali: "baharatli" hem maya fenolu hem baharat katkisi olabilir -> iki secenekli cip ("maya baharati" / "baharat katkisi"), varsayilan maya baharati; Kaan degistirir. Celiski ("cok acik renkli koyu stout") -> uygulama tahmin ETMEZ, celiskiyi gosterip sorar.
 - Cipler aramadan ONCE ekranda: "Soyle anladim: SRM 17–35 · kuru · Belcika maya (fenolik) · ABV 6–8". Her cip silinebilir/duzenlenebilir; arama ciplerden yapilir, metinden degil.
 
@@ -30,14 +30,14 @@ KAAN'IN ISTEGI (2026-10-09, "kesinlikle istiyorum"): "Kuru, baharatli, koyu bir 
 - AI ozet yazmaz (gerek yok); kart tamamen uygulama verisi.
 
 5. MALIYET + GIZLILIK
-- Sozluk yolu bedava ve VARSAYILAN. AI yolu yalniz beta acikken (su an kapali): tek Haiku cagrisi; tahmini maliyet kartta/Ayarlar sayacinda.
+- Sozluk yolu bedava. AI yolu: tek Haiku cagrisi; tahmini ve gercek maliyet kartta/Ayarlar sayacinda.
 - AI'ya giden yalniz tarif metni + enum listeleri; stok/recete verisi GITMEZ.
 
 6. TEST SETI (mock + gercek)
 - tests/bul_seti.json: 24 tarif (repoda, kisisel veri yok): 12 sozlukle cozulen, 6 AI gerektiren (deyimsel / dolayli: "yazin terasta icilecek hafif bir sey", "Westmalle'nin koyusu gibi"), 3 celiskili, 3 uydurma malzeme/stil iceren ("Pembe Kristal 120 iceren", "Anadolu Imperial Gose" — enum disi -> dusmeli, uydurmamali).
 - Her tarifin beklenen cipleri ve beklenen ilk-5 icinde olmasi gereken en az bir ornek (ya da "bulunamadi") — beklenen cip sozluk tablosundan ve ornek verisinden (kaynak = tablo/ornek id).
 - Metrikler: cip isabeti (beklenen ciplerin bulunma orani), enum disi uydurma 0, celiskide soru sorma orani, beklenen ornegin ilk-5'te olma orani.
-- Gercek kosu YOK (Kaan: para harcanmayacak). Test seti sozluk yoluyla ve AI yolu mock ile kosar. Sozlugun 24 tarifin kacini AI'siz cozdugu raporda ana metrik; cozulemeyenler sozluge eklenecek aday listesi olarak raporlanir.
+- Gercek kosu: yalniz AI gerektiren + uydurma + celiskili istemler, Haiku, Ayarlar ▸ AI ozellikleri ▸ tuzak kosucusuna "BUL seti" secenegi; butce <= 0,50 $; on kontrolle (AI4 deseni).
 
 7. DOGRULAMA
 - npm test yesil + yeni case'ler: sozluk esleme (TR+EN), belirsiz "baharatli" iki secenek, celiskide soru, enum disi cipin dusmesi, AI'ya stok/recete gitmemesi, sert/yumusak filtre, "bilinmiyor" alan, bulunamadi yolu + gevsetme onerisi, stoga uygunluk siralamasi, anahtarsiz calisma. En az 2 case kasitli bozmayla kirmizi.
