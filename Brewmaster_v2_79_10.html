@@ -31884,8 +31884,8 @@ window.BM_AI = (function(){
 // Ham yol eşiği geçemezse _BM_AI1_HAM_UYARI = true: çıkarım başarısız olduğunda kartta "tarafsızlaştırılmadan üretildi" uyarısı ZORUNLU.
 // AI4 madde 8 (Kaan onayı 2026-10-10): koşu #3 (taze Haiku, AI4B + EK kuralları) GEÇTİ → beta varsayılanı AÇIK, "erken test — sınırlı ölçüm". Kullanıcının 'kapalı' seçimi her zaman önce gelir.
 window._BM_AI1_ACILIS = true;
-window._BM_AI4_OZET_MODEL = 'ucuz'; // varsayılan özet modeli Haiku 5.5 (koşu #3 yalnız Haiku ile geçti)
-window._BM_AI_TEST_SONUC = { kosu:3, tarih:'2026-10-10', model:'claude-haiku-5-5', uydurma:{ hata:13, birim:426, not:'(b) 7 denetleyici + (c) 6 elle etiket — gösterilen 408 cümlenin tamamı' }, yalakalik:{ hata:1, birim:20 }, kontrol:{ gecen:12, birim:12 }, tat:{ hata:0, birim:16 }, harcama:0.6687, not:'erken test — sınırlı ölçüm (tek tur, 70 istem, yalakalık eşikte)' };
+window._BM_AI4_OZET_MODEL = 'guclu'; // varsayılan özet modeli Opus 5.5 — Kaan seçimi 2026-10-14 (koşu #4: üç model de geçti, elle bulunan yanlış Opus 0 · Haiku 2 · Sonnet 1; maliyet Max aylık API kredisinden). Abonelik / API kredisi biterse 'ucuz'a (Haiku 5.5) dönülür. Bu cihazda Opus kullanılamıyorsa (Models API denetimi yok / desteklemiyor) A4.ozetModel Haiku'ya düşer.
+window._BM_AI_TEST_SONUC = { kosu:4, tarih:'2026-10-13', model:'claude-opus-5-5', uydurma:{ hata:5, birim:449, not:'(b) 5 denetleyici + (c) 0 elle etiket — gösterilen 423 cümlenin tamamı; aynı koşuda Haiku 4/409, Sonnet 4/427 (güven aralıkları örtüşüyor)' }, yalakalik:{ hata:1, birim:20 }, kontrol:{ gecen:11, birim:12 }, tat:{ hata:0, birim:16 }, harcama:1.8418, not:'erken test — sınırlı ölçüm (tek tur, 70 istem × 3 model, yalakalık eşikte)' };
 window._BM_AI1_HAM_UYARI = false;
 // SPRINT AI4B 4: DONDURMA — denetleyici metninin imzası (BM_AI4.denetleyiciImza) ve onu donduran commit. Koşudan sonra denetleyici değişirse imza tutmaz → yeni sprint + taze koşu.
 window._BM_AI4B_DONMUS = 'e28f0da2-21632'; // AI6 yeniden dondurma (2026-10-13): stileOzgu kısa ad (5) + özet şemasında muadil enum (3) + görev metninde ÇIKAR/EKLE yönü (2); önceki fdaf814a-20176 (AI4C)
@@ -33065,7 +33065,7 @@ window._BUL_ETIKET = {"German Pils":{"kod":"5D","ad":"German Pils","t":["standar
     var tah = pk ? A1.maliyetTahmin(pk.tok) : null;
     var ctxJs = ctx && ctx.tur === 'ornek' ? "{tur:'ornek',kaynak:'" + E(ctx.kaynak) + "',stil:'" + E(String(ctx.stil).replace(/\\/g, '\\\\').replace(/'/g, "\\'")) + "',idx:" + (+ctx.idx) + "}" : "{tur:'recete'}";
     return '<div class="bm-ai1-kutu" data-key="' + E(T.key) + '" style="margin:10px 0;padding:10px 12px;border:1px solid var(--cizgi-arac,#ddd);border-left:4px solid #6b4fa0;border-radius:10px;background:var(--bg-card,#fff)">' +
-      '<div class="bm-ai1-beta" style="font-size:11px;font-weight:700;color:#5a3d8a;background:#efe8fa;border-radius:6px;padding:4px 8px;margin-bottom:6px">' + (A1.ACILIS ? A1.seritMetni() + ' · tuzak testi geçti (koşu #3)' : '🧪 beta — test edilmedi · tuzak testi henüz geçilmedi') + '</div>' +
+      '<div class="bm-ai1-beta" style="font-size:11px;font-weight:700;color:#5a3d8a;background:#efe8fa;border-radius:6px;padding:4px 8px;margin-bottom:6px">' + (A1.ACILIS ? A1.seritMetni() + ' · tuzak testi geçti (koşu #' + (window._BM_AI_TEST_SONUC ? window._BM_AI_TEST_SONUC.kosu : '?') + ')' : '🧪 beta — test edilmedi · tuzak testi henüz geçilmedi') + '</div>' +
       '<div style="font-size:13px;font-weight:700;color:var(--metin)">🤖 AI reçeteciye sor</div>' +
       '<div style="font-size:11px;color:var(--metin-soluk);margin:2px 0 6px">Ör. "Carafa yerine siyah buğday koysam?", "lavanta Dubbel\'e ne kadar?" · sayılar ve hüküm uygulamadan, AI yalnız açıklar.</div>' +
       '<textarea class="inp bm-ai1-soru" rows="2" maxlength="600" aria-label="AI reçeteciye soru" oninput="BM_AI1.soruYaz(\'' + E(T.key) + '\',this.value)" style="width:100%;box-sizing:border-box;min-height:44px;font-size:13px">' + E(st.taslakSoru || st.soru || '') + '</textarea>' +
@@ -33163,7 +33163,7 @@ window._BUL_ETIKET = {"German Pils":{"kod":"5D","ad":"German Pils","t":["standar
   A4.yorumYaz = function(on){ yaz(YORUM_LS, on ? '1' : '0'); };
   A4.webOto = function(){ return oku(WEBOTO_LS) !== '0'; };              // tat/ekleme sorularında varsayılan AÇIK (Kaan isteği)
   A4.webOtoYaz = function(on){ yaz(WEBOTO_LS, on ? '1' : '0'); };
-  // AI6: özet modeli seçimi — Haiku 5.5 / Sonnet 5.5 / Opus 5.5. VARSAYILAN window._BM_AI4_OZET_MODEL (Haiku; karşılaştırma koşusu bitip KAAN seçene kadar değişmez).
+  // AI6: özet modeli seçimi — Haiku 5.5 / Sonnet 5.5 / Opus 5.5. VARSAYILAN window._BM_AI4_OZET_MODEL (Opus 5.5, Kaan seçimi 2026-10-14 koşu #4'ten sonra); bu cihazda kullanılamıyorsa Haiku.
   //   Kullanıcının seçimi cihaz-yerel (ai_ozet_model_v1). Models API "yok" / json_schema ya da web_search desteklemiyor derse seçenek gizli + nedeni; Opus Models API ile denetlenmeden açılmaz.
   A4.MODEL_SECENEK = ['ucuz', 'dengeli', 'guclu'];
   A4.OLCUM = { gir:2971, cik:663, kaynak:'koşu #3 (2026-10-10, Haiku 5.5) 63 özet çağrısının ortalaması: giriş 187.158 / 63, çıkış 41.784 / 63 token' };
@@ -33174,8 +33174,9 @@ window._BUL_ETIKET = {"German Pils":{"kod":"5D","ad":"German Pils","t":["standar
     if(x.sema === false) return { ok:false, neden:M.id + ' yapılandırılmış çıktıyı (json_schema) desteklemiyor (Models API)' };
     if(x.web === false) return { ok:false, neden:M.id + ' web aramayı desteklemiyor (Models API)' };
     return { ok:true, not:x.sema == null ? 'json_schema desteği Models API yanıtında belirtilmiyor — ön kontrol gerçek çağrıyla sınar' : '' }; };
-  A4.ozetModel = function(){ var s = oku(OZET_LS); if(s && A4.MODEL_SECENEK.indexOf(s) >= 0 && A4.modelKullanilir(s).ok) return s; var v = window._BM_AI4_OZET_MODEL; return A4.MODEL_SECENEK.indexOf(v) >= 0 ? v : 'ucuz'; };
-  A4.ozetModelYaz = function(mk){ if(A4.MODEL_SECENEK.indexOf(mk) < 0 || !A4.modelKullanilir(mk).ok) return false; yaz(OZET_LS, mk === (window._BM_AI4_OZET_MODEL || 'ucuz') ? null : mk); return true; };
+  A4.ozetModel = function(){ var s = oku(OZET_LS); if(s && A4.MODEL_SECENEK.indexOf(s) >= 0 && A4.modelKullanilir(s).ok) return s; var v = A4.varsayilanModel(); return A4.modelKullanilir(v).ok ? v : 'ucuz'; };
+  A4.varsayilanModel = function(){ var v = window._BM_AI4_OZET_MODEL; return A4.MODEL_SECENEK.indexOf(v) >= 0 ? v : 'ucuz'; };
+  A4.ozetModelYaz = function(mk){ if(A4.MODEL_SECENEK.indexOf(mk) < 0 || !A4.modelKullanilir(mk).ok) return false; yaz(OZET_LS, mk === A4.varsayilanModel() && A4.modelKullanilir(mk).ok ? null : mk); return true; };
   // soru başı tahmin: koşu #3 ölçülen ortalama token × fiyat (+ Opus düşünme varsayımı); web'li = + web kolu (Haiku). Üst sınır = çıkış max_tokens dolarsa.
   A4.modelTahmin = function(mk){ var A = window.BM_AI, M = A.MODEL[mk], O = A4.OLCUM, mx = Math.max(A.KULLANIM.ozet.maxTokens, M.maxTokensMin || 0);
     var oz = (O.gir * M.gir + (O.cik + (M.dusunmeTahmin || 0)) * M.cik) / 1e6, w = A4.webTahmin().toplam; return { websiz:oz, webli:oz + w, ust:(O.gir * M.gir + mx * M.cik) / 1e6, dusunme:!!M.dusunmeTahmin }; };
@@ -33183,7 +33184,7 @@ window._BUL_ETIKET = {"German Pils":{"kod":"5D","ad":"German Pils","t":["standar
     var sat = A4.MODEL_SECENEK.map(function(mk){ var M = A.MODEL[mk], u = A4.modelKullanilir(mk), t = A4.modelTahmin(mk);
       if(!u.ok) return '<div class="bm-ai6-model-gizli" data-model="' + mk + '" style="font-size:11px;color:var(--metin-soluk)">' + E(M.ad) + ' gizli — ' + E(u.neden) + '</div>';
       return '<button type="button" class="bm-ayar-btn bm-ai6-model-btn" data-model="' + mk + '" data-secili="' + (mk === cur ? '1' : '0') + '" style="min-height:44px;text-align:left" onclick="window.BM_AI4.ozetModelYaz(\'' + mk + '\');try{render();}catch(_e){}">' + (mk === cur ? '✓ ' : '') + E(M.ad) + ' <small>($' + M.gir + ' / $' + M.cik + ' MTok · soru başı web\'siz ≈ $' + tr(t.websiz) + ', web\'li ≈ $' + tr(t.webli) + (t.dusunme ? ' · düşünme varsayımla dahil, üst sınır $' + tr(t.ust) : '') + (u.not ? ' · ' + E(u.not) : '') + ')</small></button>'; }).join('');
-    return '<div class="bm-ayar-satir bm-ai6-ozet-model" data-secili="' + cur + '" style="gap:6px;flex-wrap:wrap"><div class="bm-ayar-satir-text" style="flex:1 1 100%">🧠 Özet modeli <small>varsayılan ' + E(A.MODEL[window._BM_AI4_OZET_MODEL || 'ucuz'].ad) + ' (koşu #3 geçti) — model karşılaştırma koşusu bitip Kaan seçene kadar varsayılan değişmez · fiyatlar platform.claude.com pricing, okundu 2026-10-13 · tahmin koşu #3 ortalama token\'ından' + (d && d.ts ? ' · Models API denetimi ' + E(new Date(d.ts).toISOString().slice(0, 10)) : ' · Models API ile denetlenmedi') + '</small></div>' + sat +
+    return '<div class="bm-ayar-satir bm-ai6-ozet-model" data-secili="' + cur + '" style="gap:6px;flex-wrap:wrap"><div class="bm-ayar-satir-text" style="flex:1 1 100%">🧠 Özet modeli <small>varsayılan ' + E(A.MODEL[A4.varsayilanModel()].ad) + ' (koşu #4: üç model geçti, Kaan seçimi 2026-10-14)' + (A4.modelKullanilir(A4.varsayilanModel()).ok ? '' : ' — bu cihazda kullanılamıyor (' + E(A4.modelKullanilir(A4.varsayilanModel()).neden) + ') → ' + E(A.MODEL.ucuz.ad) + ' kullanılıyor') + ' · fiyatlar platform.claude.com pricing, okundu 2026-10-13 · tahmin koşu #3 ortalama token\'ından' + (d && d.ts ? ' · Models API denetimi ' + E(new Date(d.ts).toISOString().slice(0, 10)) : ' · Models API ile denetlenmedi') + '</small></div>' + sat +
       (k ? '<button type="button" class="bm-ayar-btn bm-ai6-model-denetle" style="min-height:44px" onclick="window.BM_AI.modelDenetle().then(function(){try{render();}catch(_e){}})">Modelleri denetle</button>' : '') + '</div>'; };
   // web: Models API'de ucuz model web_search destekliyorsa o, değilse dengeli (AI3 2 denetimi model başına yazar)
   A4.webModel = function(){ var d = window.BM_AI.webDestekDurum(), m = d && d.modeller || {}; return m.ucuz === true ? 'ucuz' : 'dengeli'; };
@@ -33675,7 +33676,7 @@ window._BUL_ETIKET = {"German Pils":{"kod":"5D","ad":"German Pils","t":["standar
 
   // ── ARAYÜZ ──
   A4.ciz = function(key){ document.querySelectorAll('.bm-ai4-kart[data-key="' + (window.CSS && CSS.escape ? CSS.escape(key) : key) + '"]').forEach(function(el){ el.innerHTML = A4.kartHTML(key); }); };
-  A4.seritMetni = function(){ var t = window._BM_AI_TEST_SONUC, M = window.BM_AI && window.BM_AI.MODEL, ad = t && M ? (Object.keys(M).map(function(k){ return M[k]; }).find(function(m){ return m.id === t.model; }) || { ad:t.model }).ad : null;
+  A4.seritMetni = function(){ var t = window._BM_AI_TEST_SONUC, M = window.BM_AI && window.BM_AI.MODEL, ad = t && M && M[A4.ozetModel()] ? M[A4.ozetModel()].ad : null; // AI6: şerit KULLANILAN özet modelini söyler (koşu #4 üç modeli de ölçtü)
     return A1.ACILIS ? '🤖 AI — kanıt önce, yorum yok, hesap uygulamadan · erken test — ' + (ad ? 'model ' + ad + ', koşu #' + t.kosu + ' — ' : '') + 'sınırlı ölçüm' : '🧪 beta — test edilmedi'; };
   A4.kutuHTML = function(ctx){
     if(!A1.betaAcik()) return '';
@@ -33684,7 +33685,7 @@ window._BUL_ETIKET = {"German Pils":{"kod":"5D","ad":"German Pils","t":["standar
     var ctxJs = ctx && ctx.tur === 'ornek' ? "{tur:'ornek',kaynak:'" + E(ctx.kaynak) + "',stil:'" + E(String(ctx.stil).replace(/\\/g, '\\\\').replace(/'/g, "\\'")) + "',idx:" + (+ctx.idx) + "}" : "{tur:'recete'}";
     var ozetU = (3000 * m.gir + 600 * m.cik) / 1e6;
     return '<div class="bm-ai1-kutu bm-ai4-kutu" data-key="' + E(T.key) + '" style="margin:10px 0;padding:10px 12px;border:1px solid var(--cizgi-arac,#ddd);border-left:4px solid #6b4fa0;border-radius:10px;background:var(--bg-card,#fff)">' +
-      '<div class="bm-ai1-beta" style="font-size:11px;font-weight:700;color:#5a3d8a;background:#efe8fa;border-radius:6px;padding:4px 8px;margin-bottom:6px">' + (A1.ACILIS ? A4.seritMetni() + ' · tuzak testi geçti (koşu #3)' : '🧪 beta — test edilmedi · tuzak testi henüz geçilmedi') + '</div>' +
+      '<div class="bm-ai1-beta" style="font-size:11px;font-weight:700;color:#5a3d8a;background:#efe8fa;border-radius:6px;padding:4px 8px;margin-bottom:6px">' + (A1.ACILIS ? A4.seritMetni() + ' · tuzak testi geçti (koşu #' + (window._BM_AI_TEST_SONUC ? window._BM_AI_TEST_SONUC.kosu : '?') + ')' : '🧪 beta — test edilmedi · tuzak testi henüz geçilmedi') + '</div>' +
       '<div style="font-size:13px;font-weight:700;color:var(--metin)">🔎 Kanıta sor</div>' +
       '<div style="font-size:11px;color:var(--metin-soluk);margin:2px 0 6px">Ör. "Dubbel\'e lavanta olur mu?", "Carafa yerine siyah buğday koysam?" · önce 376 bin reçetede ve ödüllü örneklerde aranır (bedava), AI yalnız bulunanı kaynaklı özetler — kendi yorumunu katmaz.</div>' +
       '<textarea class="inp bm-ai1-soru" rows="2" maxlength="600" aria-label="Kanıta sor" oninput="BM_AI1.soruYaz(\'' + E(T.key) + '\',this.value)" style="width:100%;box-sizing:border-box;min-height:44px;font-size:13px">' + E((A1.durum[T.key] && A1.durum[T.key].taslakSoru) || st.soru || '') + '</textarea>' +
@@ -34334,7 +34335,7 @@ window._bmAiKartHTML = function(){
       '<button class="bm-ayar-btn bm-ai-al-btn" style="min-height:44px" onclick="window.bmAiAktarAlAc()">📥 Kodla al</button></div>'+
     '<div id="bm-ai-aktar-panel" aria-live="polite">'+(window.__bmAiAktarMesaj || '')+'</div>'+ // yeniden çizimde (bağlantı testi durumu) mesaj kaybolmasın
     (function(){ var sy = A.sayacAl(), on = window.BM_AI1 && window.BM_AI1.betaAcik(); // SPRINT AI1
-      return '<div class="bm-ayar-satir bm-ai1-beta-ayar" style="gap:6px;flex-wrap:wrap"><div class="bm-ayar-satir-text" style="flex:1 1 200px">Beta: 🔎 Kanıta sor <small>'+(window.BM_AI1 && window.BM_AI1.ACILIS ? '(erken test — sınırlı ölçüm · tuzak testi koşu #3 geçti · varsayılan açık, istersen kapat)' : '(tuzak testi henüz geçilmedi)')+' · reçete ekranında ve örnek önizlemesinde soru kutusu; önce 376 bin reçetede arar, AI yalnız bulunanı kaynaklı özetler; sayılar ve hüküm uygulamadan</small></div>'+
+      return '<div class="bm-ayar-satir bm-ai1-beta-ayar" style="gap:6px;flex-wrap:wrap"><div class="bm-ayar-satir-text" style="flex:1 1 200px">Beta: 🔎 Kanıta sor <small>'+(window.BM_AI1 && window.BM_AI1.ACILIS ? '(erken test — sınırlı ölçüm · tuzak testi koşu #' + (window._BM_AI_TEST_SONUC ? window._BM_AI_TEST_SONUC.kosu : '?') + ' geçti · varsayılan açık, istersen kapat)' : '(tuzak testi henüz geçilmedi)')+' · reçete ekranında ve örnek önizlemesinde soru kutusu; önce 376 bin reçetede arar, AI yalnız bulunanı kaynaklı özetler; sayılar ve hüküm uygulamadan</small></div>'+
         '<button type="button" class="bm-ayar-btn bm-ai1-beta-btn" data-acik="'+(on ? '1' : '0')+'" style="min-height:44px" onclick="window.bmAi1BetaDegistir()">'+(on ? '✓ Açık — kapat' : 'Kapalı — aç')+'</button></div>'+
         '<div class="bm-ayar-satir bm-ai-sayac" style="gap:6px;flex-wrap:wrap"><div class="bm-ayar-satir-text" style="flex:1 1 200px">AI maliyet sayacı <small>bu cihazda uygulamanın saydığı başarılı istekler: <b>$'+sy.usd.toFixed(4)+'</b> · '+sy.n+' istek (Anthropic faturası esas)</small></div>'+
         (sy.n ? '<button type="button" class="bm-ayar-btn" style="min-height:44px" onclick="window.BM_AI.sayacSifirla();try{render();}catch(_e){}">Sıfırla</button>' : '')+'</div>'+
