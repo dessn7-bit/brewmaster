@@ -32235,9 +32235,11 @@ window._BUL_ETIKET = {"German Pils":{"kod":"5D","ad":"German Pils","t":["standar
     secimler:{ type:'array', items:{ type:'object', properties:{ kod:{ type:'string', enum:kodlar }, olumsuz:{ type:'boolean' }, ifade:{ type:'string' } }, required:['kod', 'olumsuz', 'ifade'], additionalProperties:false } },
     cozemedim:{ type:'array', items:{ type:'string' } } }, required:['secimler', 'cozemedim'], additionalProperties:false } }; };
   B.aiBaglam = function(kod){ return 'KOD LİSTESİ (yalnız bunlardan seç; "kod = anlamı"):\n' + kod.map(function(x){ return x.kod + ' = ' + x.et; }).join('\n'); };
-  // Tahmin GERÇEK istekten: sistem + bağlam + soru + şema (enum dahil) uzunluğu / 2,5 karakter (Türkçe + kod listesi için ihtiyatlı) + 300
+  // Tahmin GERÇEK istekten: sistem + bağlam + soru + şema (enum dahil) uzunluğu / 1,7 karakter + 300
   // (structured-outputs'un eklediği sistem metni) giriş; çıkış 250. Eski tahmin (tam liste uzunluğu / 3,2 × 2) gerçek isteğe bağlı değildi.
-  B.KAR_TOKEN = 2.5;
+  // 1,7 = gerçek koşudan ölçüldü (2026-10-13, Haiku 5.5, 9 çağrı: 2,5 ile gerçek giriş = tahmin × 1,416, yani ≈ 1,705 karakter/token).
+  // 2,5 ile çıkış max_tokens'a (600) yaklaşırsa maliyet 1,54 × tahmin olur → ön kontrol 1,5 eşiğinde YANLIŞ kalırdı.
+  B.KAR_TOKEN = 1.7;
   B.istekTahmin = function(baglam, soru, sema){ var A = window.BM_AI, M = A && A.MODEL && A.MODEL.ucuz; if(!M) return null;
     var sis = (A.SISTEMLER && A.SISTEMLER.bul) ? A.SISTEMLER.bul.length : 900, uz = sis + String(baglam || '').length + String(soru || '').length + JSON.stringify(sema || {}).length;
     var gir = Math.ceil(uz / B.KAR_TOKEN) + 300; return { gir:gir, cik:250, usd:Math.round((gir * M.gir + 250 * M.cik) / 1e6 * 1e5) / 1e5 }; };

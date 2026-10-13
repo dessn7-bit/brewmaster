@@ -10399,14 +10399,22 @@ const CASELER = [
     kod: 'BUL1-TUR3', ad: 'BUL KOŞUSU TUR 3 (Kaan 2026-10-11 — "Tamam\'a bastım, bir şey olmadı"): istek başına küçük enum (sözlük + 240 stil + kalan kelimeye benzeyen ≤ 40 ürün; tam 884 değil) · tahmin GERÇEK istek boyutundan · "bul" zaman aşımı 120 sn · Tamam\'dan hemen sonra "çalışıyor…" · bitiş / ön kontrol / hata toast\'u + panelde kalıcı mesaj · ön kontrol nedeni adım adım (aiOk, hata, giriş token, tahmin, kod sayısı) · ana kopyala düğmesi bitmiş yoksa son yarım koşuyu kopyalar ve söyler · KASITLI BOZMA',
     calistir: async (page) => {
       const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'bul_seti.json'), 'utf8')), html = fs.readFileSync(path.join(KOK, HTML_AD), 'utf8');
+      const gercekKosu = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'fixtures', 'bul_kosu_2026-10-13.json'), 'utf8'));
       const zaman = /bul:\s+\{[^}]*zamanAsimi: 120000/.test(html) && /setTimeout\(function\(\)\{ ac\.abort\(\); \}, \(KULLANIM\[p\.kullanim\] && KULLANIM\[p\.kullanim\]\.zamanAsimi\) \|\| ZAMAN_ASIMI\)/.test(html);
-      return page.evaluate(async (set, zaman) => {
+      return page.evaluate(async (set, zaman, gercekKosu) => {
         const B = window.BM_BUL, A = window.BM_AI, K = [B.SON_LS, B.ARS_LS, B.YAR_LS], es = K.map(k => localStorage.getItem(k));
         __REG.ok('"bul" çağrısının zaman aşımı 120 sn (yeni şemanın ilk derlemesi), diğer kullanımlar 60 sn', zaman);
         const tam = B.kodlar(), i2 = B.istekKur('Westmalle\'nin koyusu gibi bir şey', []), iw = B.istekKur('Weihenstephan mayalı bir şey', []);
         __REG.ok('istek başına enum: sözlük + 240 stil her zaman, ürün yalnız kalan kelimeye benzeyen ("westmalle" → "west coast" ürünü YOK; "weihenstephan" → WY3068 VAR)', i2.kod.length < 330 && i2.kod.filter(x => /^stil:/.test(x.kod)).length === Object.keys(BJCP).length && B.SOZLUK.every(s => i2.kod.some(x => x.kod === s.k + ':' + s.d)) && !i2.kod.some(x => /^malz:/.test(x.kod) && /west/i.test(x.et)) && iw.kod.some(x => x.kod === 'malz:maya:wy3068'), i2.kod.length + ' kod');
         const uz = A.SISTEMLER.bul.length + i2.baglam.length + i2.soru.length + JSON.stringify(i2.sema).length;
-        __REG.ok('tahmin GERÇEK istekten: giriş = ⌈(sistem + bağlam + soru + şema) / 2,5⌉ + 300', i2.tahmin.gir === Math.ceil(uz / 2.5) + 300 && i2.tahmin.usd > 0, JSON.stringify(i2.tahmin));
+        __REG.ok('tahmin GERÇEK istekten: giriş = ⌈(sistem + bağlam + soru + şema) / 1,7⌉ + 300 (1,7 = 2026-10-13 gerçek koşusundan ölçülen karakter/token)', B.KAR_TOKEN === 1.7 && i2.tahmin.gir === Math.ceil(uz / 1.7) + 300 && i2.tahmin.usd > 0, JSON.stringify(i2.tahmin));
+        // Gerçek koşu (2026-10-13, 9 Haiku çağrısı): istek uzunluğu eski tahminden geri çözülür, gerçek giriş token'ı kayıttan.
+        // En kötü çıkış = max_tokens (600). Ön kontrol kuralı: maliyet ≤ 1,5 × tahmin.
+        const M = A.MODEL.ucuz, fx = gercekKosu, enKotu = (a, kar) => { const uzA = (a.tahminGir - 300) * fx.karToken, tg = Math.ceil(uzA / kar) + 300, tUsd = (tg * M.gir + 250 * M.cik) / 1e6, gUsd = (a.gir * M.gir + fx.maxTokens * M.cik) / 1e6; return { tg, oran: gUsd / tUsd, kayit: Math.abs((a.gir * M.gir + a.cik * M.cik) / 1e6 - a.usd) < 2e-7 }; };
+        const yeni = fx.adim.map(a => enKotu(a, B.KAR_TOKEN)), eski = fx.adim.map(a => enKotu(a, 2.5));
+        __REG.ok('gerçek koşu kaydı fiyatla tutarlı (giriş × ' + M.gir + ' + çıkış × ' + M.cik + ' $/M = kayıttaki usd, 9/9)', fx.adim.length === 9 && yeni.every(r => r.kayit));
+        __REG.ok('gerçek koşu, 9/9 çağrı: yeni tahmin gerçek giriş token\'ından büyük-eşit ve çıkış 600 token olsa bile maliyet ≤ 1,5 × tahmin', yeni.every((r, i) => r.tg >= fx.adim[i].gir && r.oran <= 1.5), 'en kötü oran ' + Math.max(...yeni.map(r => r.oran)).toFixed(3));
+        __REG.ok('KASITLI BOZMA: eski 2,5 karakter/token ile aynı 9 çağrıda çıkış 600 olunca oran > 1,5 → ön kontrol yanlış kalırdı (bu denetim kırmızıya döner)', eski.every(r => r.oran > 1.5), 'eski en düşük oran ' + Math.min(...eski.map(r => r.oran)).toFixed(3));
         const tamUz = A.SISTEMLER.bul.length + B.aiBaglam(tam).length + JSON.stringify(B.aiSema(tam.map(x => x.kod))).length;
         __REG.ok('KASITLI BOZMA: tam liste (884 kod) geri gelirse istek ≥ 2,5 kat büyür → bu denetim kırmızıya döner', tam.length > 800 && tamUz > 2.5 * uz, tam.length + ' kod · ' + tamUz + ' / ' + uz + ' karakter');
         const toast = [], tEs = window.bmToast; window.bmToast = (m, t) => toast.push(t + ': ' + m);
@@ -10435,7 +10443,7 @@ const CASELER = [
           __REG.ok('bitmiş sonuç varsa onu kopyalar (yarım değil)', t2.indexOf('"kosuId":' + d1.kosuId) > 0);
         } finally { A.sor = sorEs; A.hazirMi = hEs; window.bmToast = tEs; B.mesaj = ''; B.sonMesaj = ''; B.son = null; K.forEach((k, i) => es[i] == null ? localStorage.removeItem(k) : localStorage.setItem(k, es[i])); }
         return __REG.al();
-      }, set, zaman);
+      }, set, zaman, gercekKosu);
     }
   },
   {
