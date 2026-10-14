@@ -10728,6 +10728,102 @@ const CASELER = [
       }, set);
     }
   },
+  // ═════════════ SPRINT BUL2C — marka ∩ açık stil, kısa yer adı, koşu puanlaması, gerçek koşu kaçakları, BUL modeli Opus ═════════════
+  {
+    kod: 'BUL2C-MARKA', ad: 'MARKA ∩ AÇIK STİL BOŞ (BUL2C madde 1): kullanıcının açık yazdığı stil / aile çipi kazanır; kesişim boşsa marka çipi filtre değil bilgi notu ("BJCP 2021 … saymıyor (BJCP\'de: …) — arama yalnız …") · kesişim varsa daraltma aynen · KASITLI BOZMA: eski davranış (belirsiz marka çipi + stil) 0 sonuç',
+    calistir: (page) => page.evaluate(async () => {
+      const B = window.BM_BUL; B.indeks();
+      const p = B.coz('Paulaner gibi bir weizen'), sp = B.ara(p.cipler, {});
+      __REG.ok('"Paulaner gibi bir weizen" → yalnız stil:Weizen / Weissbier (marka çipi YOK), Weissbier örnekleri, not: Paulaner BJCP\'de Helles / Festbier / Pils / Märzen / Doppelbock / Kellerbier', p.cipler.length === 1 && p.cipler[0].d === 'Weizen / Weissbier' && sp.uyan > 5 && sp.ilk.every(r => r.x.stil === 'Weizen / Weissbier') && p.bjcp.bilgi && /BJCP 2021 "Paulaner" birasını Weizen \/ Weissbier örnekleri arasında saymıyor \(BJCP'de: Munich Helles, Festbier, German Pils, Märzen, Doppelbock, Kellerbier\) — arama yalnız Weizen \/ Weissbier ile/.test(p.bjcp.not) && !p.ticari && !p.cozulemeyen.length, p.bjcp && p.bjcp.not);
+      const w = B.coz('Westmalle gibi bir tripel').cipler.find(c => c.k === 'bjcpOrnek'), b = B.coz('Paulaner gibi bir bock').cipler.find(c => c.k === 'bjcpOrnek');
+      __REG.ok('kesişim varsa daraltma aynen: Westmalle + tripel → 26C · Paulaner + bock → 9A Doppelbock', !!w && w.d === '26C' && !!b && b.d === '9A' && b.stiller.indexOf('Doppelbock') >= 0);
+      B.d = { metin: '', cipler: [], cozulemeyen: [], stok: false, sonuc: null, aiDurum: '' }; B.tarifEt('Paulaner gibi bir weizen'); await new Promise(r => setTimeout(r, 60));
+      __REG.ok('kartta 📕 bilgi notu + sonuç', /bul-bjcp-not/.test(B.govdeHTML()) && /bul-bas/.test(B.govdeHTML()));
+      const grup = B.bjcpIndeks().filter(e => e.tok.indexOf('paulaner') >= 0 && !e.sepet), st = []; grup.forEach(e => e.anahtar.forEach(k => { if (st.indexOf(k) < 0) st.push(k); }));
+      const eski = [p.cipler[0], { id: 'boz', k: 'bjcpOrnek', d: 'hepsi', et: 'x', stiller: st, kaynakMetin: 'BJCP' }];
+      __REG.ok('KASITLI BOZMA: eski davranış (Paulaner stilleri filtre + Weizen) 0 sonuç → kırmızı', B.ara(eski, {}).uyan === 0);
+      B.d = { metin: '', cipler: [], cozulemeyen: [], stok: false, sonuc: null, aiDurum: '' };
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BUL2C-KISA', ad: 'KISA / YER ADI KATALOG KELİMESİ (BUL2C madde 2): ≤ 4 harfli katalog adlarından yer adı / özel ad ile çakışanlar (ege, zeus, ella, tnt) yalnız malzeme bağlamında çip (yanında hop / malt / maya / şeker / katkı ya da -li/-lu/-siz/-suz) · "Ege\'de / Ege\'nin" çip değil, anlaşılmayana düşer · KASITLI BOZMA',
+    calistir: (page) => page.evaluate(async () => {
+      const B = window.BM_BUL; B.indeks(); const kod = c => c.cipler.map(x => x.k + ':' + x.d).sort().join(' ');
+      const e1 = B.coz('Ege\'de yazın içilecek bir bira'), e2 = B.coz('Ege hopuyla bir pale ale'), e3 = B.coz('ballı bir bira'), e4 = B.coz('Ege\'nin birası');
+      __REG.ok('"Ege\'de yazın içilecek" → hop çipi YOK, "ege" anlaşılmayan, yaz araması sonuç verir', !e1.cipler.some(c => /tr_ege/.test(c.d)) && e1.cozulemeyen.indexOf('ege') >= 0 && B.ara(e1.cipler, {}).uyan > 0);
+      __REG.ok('"Ege hopuyla bir pale ale" → hop:tr_ege (malzeme bağlamı) · "ballı bir bira" → malt:bal (bugünkü gibi) · "Ege\'nin birası" çip yok', kod(e2) === 'aile:pale-ale-family malz:hop:tr_ege' && !e2.cozulemeyen.length && kod(e3) === 'malz:malt:bal' && !e4.cipler.length, kod(e2) + ' | ' + kod(e3));
+      __REG.ok('liste kodda: ege / zeus / ella / tnt; "Zeus hopu" → Columbus', B.KISA_BAGLAMLI.join() === 'ege,zeus,ella,tnt' && B.coz('Zeus hopu ile bir IPA').cipler.some(c => c.d === 'hop:columbus') && !B.coz('Zeus gibi güçlü bir bira').cipler.some(c => c.d === 'hop:columbus'));
+      const es = B.KISA_BAGLAMLI.slice(); B.KISA_BAGLAMLI.length = 0; B.ifadeSifirla(); let bz;
+      try { bz = B.coz('Ege\'de yazın içilecek bir bira'); } finally { es.forEach(w => B.KISA_BAGLAMLI.push(w)); B.ifadeSifirla(); }
+      __REG.ok('KASITLI BOZMA: kural kalkınca "Ege\'de" yine sert hop çipi → 0 sonuç → kırmızı', bz.cipler.some(c => c.d === 'hop:tr_ege') && B.ara(bz.cipler, {}).uyan === 0);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BUL2C-ISTEK', ad: 'AI\'YA GİDEN İSTEMLER DEĞİŞMEDİ (BUL2C madde 6 ZORUNLU): gerçek koşuyu yapan koddaki anlık görüntü (tests/fixtures/bul_istek_2026-10-14.json) ile her tarifin AI\'ya gidip gitmediği, soru metni, kod listesi uzunluğu + bağlam / şema kontrol kodu BİREBİR · koşudaki AI listesiyle aynı 15 istem · KASITLI BOZMA',
+    calistir: async (page) => {
+      const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'bul_seti.json'), 'utf8'));
+      const snap = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'fixtures', 'bul_istek_2026-10-14.json'), 'utf8'));
+      const kosu = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'fixtures', 'bul_kosu_2026-10-14.json'), 'utf8'));
+      return page.evaluate(async (set, snap, kosuAi) => {
+        const B = window.BM_BUL; B.indeks();
+        const fark = () => { const f = []; set.tarifler.forEach(t => { const c = B.coz(t.metin), a = snap.istemler.find(x => x.id === t.id), ai = c.cozulemeyen.length > 0;
+          if (!a || ai !== a.ai) { f.push(t.id + ':ai'); return; } if (!ai) return; const i = B.istekKur(t.metin, c.cipler, 'ucuz');
+          if (i.soru !== a.soru) f.push(t.id + ':soru'); if (i.kod.length !== a.kodN || B.kontrolKodu(i.baglam) !== a.baglamKod || B.kontrolKodu(JSON.stringify(i.sema)) !== a.semaKod) f.push(t.id + ':kod'); }); return f; };
+        const f0 = fark(), aiL = snap.istemler.filter(x => x.ai).map(x => x.id);
+        __REG.ok('40 tarifin hepsinde AI\'ya gidiş + soru + kod listesi + şema BİREBİR aynı; AI listesi = koşudaki 15 istem', !f0.length && aiL.join() === kosuAi.join() && aiL.length === 15, f0.join(' | '));
+        B.BAGLAM.push({ d: 'boz', et: 'boz', kel: ['mangal'], cip: [['guc', 'guclu']], v: 'test' }); B.ifadeSifirla(); let f1;
+        try { f1 = fark(); } finally { B.BAGLAM.pop(); B.ifadeSifirla(); }
+        __REG.ok('KASITLI BOZMA: sözlüğe tek kelime ("mangal") eklenince B305\'in istemi değişir → denetim kırmızı', f1.length >= 1 && f1.some(x => /^B305/.test(x)), f1.join(' | '));
+        return __REG.al();
+      }, set, snap, [...new Set(kosu.sonuclar.filter(r => r.ai).map(r => r.id))]);
+    }
+  },
+  {
+    kod: 'BUL2C-KOSU', ad: 'GERÇEK BUL KOŞUSU (2026-10-14, kosuId 1791966701651) PUANLAMASI + KAÇAKLAR (BUL2C madde 3-4): (i) uydurma / (ii) kaynaksız bağlam yorumu ayrı (kural koşudan önce, fd81b11), %95 üst sınır · kayıtlı AI kodlarıyla AI\'sız yeniden: B309 (AI stil:Coffee Stout kahveli Pastry Stout\'u eliyordu), B307 (AI kuru:tatli zencefilli tek kış örneğini), B310 Opus (aynı BJCP 26 iki stil = VEYA) düzeldi; Haiku B310 Trappist Single çelişkisi GERÇEK, kalır · KASITLI BOZMA',
+    calistir: async (page) => {
+      const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'bul_seti.json'), 'utf8'));
+      const kosu = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'fixtures', 'bul_kosu_2026-10-14.json'), 'utf8'));
+      return page.evaluate(async (set, kosu) => {
+        const B = window.BM_BUL; B.indeks(); const it = id => set.tarifler.find(x => x.id === id);
+        __REG.ok('kayıt: bitti, 56 adım, 0,8095 $, iki modelde ön kontrol geçti, anahtar yok', kosu.bitti && kosu.sonuclar.length === 56 && kosu.harcama.usd === 0.809503 && kosu.onModel.ucuz.gecti && kosu.onModel.guclu.gecti && !/sk-ant-[A-Za-z0-9]{8}/.test(JSON.stringify(kosu)));
+        const ham = m => B.metrik(kosu.sonuclar.filter(r => r.model === m).map(r => { const a = B.uydurmaAyir(r, it(r.id)); return Object.assign({}, r, { uydurmaI: a.i, kaynaksiz: a.ii }); }));
+        const H = ham('ucuz'), O = ham('guclu');
+        __REG.ok('tablo (ham kayıt): Haiku çip 37/37 · ilk-5 18/22 · uydurma ham 2 = (i) 1 (B308 limon_konsantre) + (ii) 1 (B305 mangal → isli / Rauchbier) · tahmin 3 · 0,00125 $/çağrı | Opus 37/37 · 19/22 · 0 = 0 + 0 · tahmin 2 · 0,0527 $/çağrı', H.cip === '37/37' && H.ornek === '18/22' && H.uydurma === 2 && H.uydurmaI === 1 && H.kaynaksizYorum === 1 && H.tahmin === 3 && H.cagriBasi === 0.001251 && O.cip === '37/37' && O.ornek === '19/22' && O.uydurma === 0 && O.uydurmaI === 0 && O.kaynaksizYorum === 0 && O.tahmin === 2 && O.cagriBasi === 0.052716, JSON.stringify({ H, O }));
+        __REG.ok('%95 tek yönlü üst sınır (n 15): 0/15 → %18,1 · 1/15 → %27,9 — aralıklar örtüşüyor (fark ayırt edilemez)', B.cpUst(0, 15) === 0.181 && B.cpUst(1, 15) === 0.279 && H.uydurmaIUst === 0.279 && O.uydurmaIUst === 0.181);
+        const yeniden = (m) => kosu.sonuclar.filter(r => r.model === m).map(r => { const t = it(r.id), c = B.coz(t.metin), kal = c.cipler.map(x => x.k + ':' + x.d), ai = [];
+          r.kodlar.forEach(k => { const j = kal.indexOf(k); if (j >= 0) kal.splice(j, 1); else ai.push(k); });
+          const ac = r.ai ? ai.map(k => { const p = k.split(':'), x = B.cipDetay({ id: 'ai' + k, k: p[0], d: p.slice(1).join(':'), et: p.slice(1).join(':'), kaynakMetin: 'AI' }); if (c.ticari && x.k === 'stil') { x.tahmin = true; x.onay = false; } return x; }) : [];
+          return B.degerlendir(t, c.cipler, ac, { cozulemeyen: c.cozulemeyen }); });
+        const RH = yeniden('ucuz'), RO = yeniden('guclu'), g = (R, id) => R.find(r => r.id === id);
+        __REG.ok('AI\'sız yeniden (kayıtlı AI kodları aynen): ilk-5 Haiku 18 → 20/22, Opus 19 → 22/22; B307 / B309 / B310 Opus düzeldi; Haiku B310 çelişki KALDI (Trappist Single + koyu + güçlü)', B.metrik(RH).ornek === '20/22' && B.metrik(RO).ornek === '22/22' && ['B307', 'B309', 'B310'].every(id => g(RO, id).ornekOk) && g(RH, 'B310').celiski && g(RO, 'B310').kodlar.some(k => /^stilSet:veya:/.test(k)), B.metrik(RH).ornek + ' / ' + B.metrik(RO).ornek);
+        const te = B.tercihMi; B.tercihMi = () => false; let RB; try { RB = yeniden('guclu'); } finally { B.tercihMi = te; }
+        __REG.ok('KASITLI BOZMA: AI çipi yine sert filtre olunca B307 ve B309 tekrar kaçar → kırmızı', !g(RB, 'B307').ornekOk && !g(RB, 'B309').ornekOk);
+        return __REG.al();
+      }, set, kosu);
+    }
+  },
+  {
+    kod: 'BUL2C-MODEL', ad: 'BUL AI MODELİ OPUS 5.5 (BUL2C madde 5, Kaan kararı 2026-10-14): "AI ile çöz" varsayılanı Opus; Opus bu cihazda kullanılamıyorsa (Models API denetimi yok / desteklemiyor) Haiku + nedeni Ayarlar\'da · düğmede ÖLÇÜLEN maliyet (≈ 0,0527 $) · kartta kullanılan model · KASITLI BOZMA',
+    calistir: (page) => page.evaluate(async () => {
+      const B = window.BM_BUL, A = window.BM_AI, es = localStorage.getItem(A.MODEL_LS);
+      try {
+        localStorage.removeItem(A.MODEL_LS);
+        const m0 = B.aiModel();
+        __REG.ok('varsayılan Opus; Models API denetimi yokken Haiku\'ya düşer + neden; Ayarlar satırında neden', B.VARSAYILAN_MODEL === 'guclu' && m0.mk === 'ucuz' && /denetlenmedi/.test(m0.neden) && /"AI ile çöz" modeli: <b>Haiku 5\.5<\/b>.*bu cihazda kullanılamıyor/.test(B.kartAyarHTML()));
+        localStorage.setItem(A.MODEL_LS, JSON.stringify({ ts: Date.now(), destek: { guclu: { id: 'claude-opus-5-5', var: true, web: true, sema: true } } }));
+        const m1 = B.aiModel();
+        __REG.ok('Opus denetlenmiş → Opus; düğme tahmini ölçülen 0,0527 $ (eski istek-boyutu tahmini ≈ 0,09 $)', m1.mk === 'guclu' && B.aiTahmin('x') === 0.0527 && /"AI ile çöz" modeli: <b>Opus 5\.5<\/b> ≈ \$0\.0527/.test(B.kartAyarHTML()));
+        const m = __REG.ai1Mock({ bul: { secimler: [], cozemedim: ['x'] } }); let r;
+        try { B.d = { metin: '', cipler: [], cozulemeyen: [], stok: false, sonuc: null, aiDurum: '' }; B.tarifEt('koyu, kadifemsi bir bira'); r = await B.aiCalistir(); } finally { m.geri(); }
+        __REG.ok('"AI ile çöz" çağrısı Opus ile (modelKey guclu) ve kartta "AI (Opus 5.5)"', m.log[m.log.length - 1].modelKey === 'guclu' && /🤖 AI \(Opus 5\.5\)/.test(B.d.aiDurum), B.d.aiDurum);
+        const v = B.VARSAYILAN_MODEL; B.VARSAYILAN_MODEL = 'ucuz'; const mb = B.aiModel(); B.VARSAYILAN_MODEL = v;
+        __REG.ok('KASITLI BOZMA: varsayılan Haiku\'ya çekilirse (kredi bitince yapılacak geri dönüş) model ucuz → bu denetim ayırt eder', mb.mk === 'ucuz' && m1.mk !== mb.mk);
+      } finally { es == null ? localStorage.removeItem(A.MODEL_LS) : localStorage.setItem(A.MODEL_LS, es); B.d = { metin: '', cipler: [], cozulemeyen: [], stok: false, sonuc: null, aiDurum: '' }; }
+      return __REG.al();
+    })
+  },
   {
     kod: 'AI6-PAKET', ad: 'KOŞU #3 ZAYIFLIK DÜZELTMELERİ (AI6 madde 1): (1) kırpılmış liste "LİSTE KIRPILDI" + sorulan stilin kendi sayısı / "pakette YOK — 0 olduğu söylenemez" (A03a, T08b) · (2) yön etiketi ÇIKAR / EKLE / DEĞİŞTİR (A09a, A01a) · (3) MUADİL DERECESİ tek anlamlı kod + özet şemasında enum + AI kodu ↔ uygulama kodu (A06a, C12) · (4) her ödüllü örnek AYRI ve adı benzersiz + özet kuralı (T03a) · KASITLI BOZMA: eski liste / eski yön metni geri gelirse kırmızı',
     calistir: async (page) => {
@@ -10824,9 +10920,9 @@ const CASELER = [
           __REG.ok('hesapta Opus yoksa ("var" false) gizli + "bu hesapta yok"', !A4.modelKullanilir('guclu').ok && /bu hesapta yok/.test(A4.modelKullanilir('guclu').neden));
           liste.push({ id: 'claude-opus-5-5', capabilities: cap(true, true) }); await A.modelDenetle(); A4.ozetModelYaz('ucuz');
           const t = { h: A4.modelTahmin('ucuz'), s: A4.modelTahmin('dengeli'), o: A4.modelTahmin('guclu') }, w = A4.webTahmin().toplam;
-          __REG.ok('soru başı tahmin koşu #3 ortalama token\'ından (2971 giriş / 663 çıkış): Haiku ≈ 0,00063 $, Sonnet ≈ 0,0126 $, Opus düşünme varsayımıyla ≈ 0,065 $; web\'li = + web kolu; Opus üst sınır max_tokens 8000', Math.abs(t.h.websiz - 0.0006286) < 1e-6 && Math.abs(t.s.websiz - 0.012572) < 1e-6 && Math.abs(t.o.websiz - 0.065144) < 1e-6 && Math.abs(t.o.webli - t.o.websiz - w) < 1e-9 && Math.abs(t.o.ust - (2971 * 4 + 8000 * 20) / 1e6) < 1e-9 && t.o.dusunme && !t.h.dusunme, JSON.stringify(t));
+          __REG.ok('soru başı tahmin (BUL2C madde 5): koşu #4 ÖLÇÜLEN web\'siz maliyet — Haiku 0,0007 $ (n 43), Sonnet 0,0144 $, Opus 0,0307 $ (n 60; eski düşünme varsayımlı 0,065 $ ölçülenin ≈ 2 katıydı); web\'li = + web kolu; Opus üst sınır max_tokens 8000', t.h.websiz === 0.0007 && t.s.websiz === 0.0144 && t.o.websiz === 0.0307 && t.o.olculen && t.o.n === 60 && Math.abs(t.o.webli - t.o.websiz - w) < 1e-9 && Math.abs(t.o.ust - (2971 * 4 + 8000 * 20) / 1e6) < 1e-9 && !t.o.dusunme, JSON.stringify(t));
           const h = A4.modelAyarHTML();
-          __REG.ok('Ayarlar ▸ AI özellikleri ▸ 🧠 Özet modeli: üç seçenek (fiyat + web\'siz / web\'li tahmin), seçili ✓ Haiku, "Modelleri denetle", varsayılan notu, düğmeler ≥ 44 px', (h.match(/bm-ai6-model-btn/g) || []).length === 3 && /data-model="ucuz" data-secili="1"/.test(h) && /✓ Haiku 5\.5/.test(h) && /Opus 5\.5 <small>\(\$4 \/ \$20 MTok · soru başı web'siz ≈ \$0,065, web'li ≈ \$/.test(h) && /Modelleri denetle/.test(h) && /varsayılan Opus 5\.5 \(koşu #4: üç model geçti, Kaan seçimi 2026-10-14\) · fiyatlar/.test(h) && !/min-height:(?!44)/.test(h), h.slice(0, 300));
+          __REG.ok('Ayarlar ▸ AI özellikleri ▸ 🧠 Özet modeli: üç seçenek (fiyat + web\'siz / web\'li tahmin), seçili ✓ Haiku, "Modelleri denetle", varsayılan notu, düğmeler ≥ 44 px', (h.match(/bm-ai6-model-btn/g) || []).length === 3 && /data-model="ucuz" data-secili="1"/.test(h) && /✓ Haiku 5\.5/.test(h) && /Opus 5\.5 <small>\(\$4 \/ \$20 MTok · soru başı web'siz ≈ \$0,031, web'li ≈ \$[\d,]+ · ölçülen: koşu #4, n 60/.test(h) && /Modelleri denetle/.test(h) && /varsayılan Opus 5\.5 \(koşu #4: üç model geçti, Kaan seçimi 2026-10-14\) · fiyatlar/.test(h) && !/min-height:(?!44)/.test(h), h.slice(0, 300));
           localStorage.removeItem(A.MODEL_LS); const h2 = A4.modelAyarHTML();
           __REG.ok('denetim yokken Opus satırı "gizli — Models API ile denetlenmedi"', /bm-ai6-model-gizli" data-model="guclu"[^>]*>Opus 5\.5 gizli — Models API ile denetlenmedi/.test(h2) && (h2.match(/bm-ai6-model-btn/g) || []).length === 2);
           // KASITLI BOZMA: Opus'a thinking "disabled" gönderilirse (400 hatası verir) denetim kırmızı
