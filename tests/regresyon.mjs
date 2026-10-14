@@ -10702,6 +10702,33 @@ const CASELER = [
     }
   },
   {
+    kod: 'BUL-OZET', ad: 'KISA ÖZET KOPYASI (2026-10-14: uzun JSON sonuç yapıştırmada iki kez kesildi / harfleri karıştı): model tablosu + yalnız AI ve sorunlu adımlar, kısa satırlar, sonda kontrol kodu (FNV-1a + uzunluk) · panoya + her zaman görünür kutuya · Ayarlar\'da düğme + arşiv satırı başına "kısa özet" · anahtarsız · KASITLI BOZMA: tek harf değişirse kontrol kodu tutmaz',
+    calistir: async (page) => {
+      const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'bul_seti.json'), 'utf8'));
+      return page.evaluate(async (set) => {
+        const B = window.BM_BUL, A = window.BM_AI, K = [B.SON_LS, B.ARS_LS, B.YAR_LS], es = K.map(k => localStorage.getItem(k)), sorEs = A.sor, hEs = A.hazirMi;
+        A.hazirMi = () => ({ hazir: true });
+        A.sor = (pp) => { const t = set.tarifler.find(x => pp.soru.indexOf('"' + x.metin + '"') >= 0) || {}; const k = t.id === 'B301' ? [{ kod: 'stil:International Pale Lager', olumsuz: false, ifade: 'Efes' }] : [];
+          return Promise.resolve({ ok: true, veri: { secimler: k, cozemedim: k.length ? [] : ['x'] }, bayraklar: [], maliyet: A.maliyet(pp.modelKey, { input_tokens: 12000, output_tokens: pp.modelKey === 'guclu' ? 3000 : 80 }) }); };
+        try {
+          K.forEach(k => localStorage.removeItem(k));
+          const d = await B.kos({ mock: true, set, modeller: ['ucuz', 'guclu'] }), t = B.ozetMetni(d), sat = t.split('\n'), uzun = JSON.stringify(d).length;
+          const kl = /^KONTROL ([0-9a-f]{8}) (\d+)$/.exec(sat[sat.length - 1]), govde = sat.slice(1, -1).join('\n');
+          __REG.ok('özet: başlık + koşu satırı + 2 MODEL satırı (Haiku 5.5 / Opus 5.5) + ön kontrol + model başına 15 AI adımı; tam JSON\'dan en az 8 kat kısa', sat[0] === 'BREWMASTER-BUL-OZET v1' && /^kosu \d+ \| .* \| bitti \| \$/.test(sat[1]) && sat.filter(x => /^MODEL /.test(x)).length === 2 && /^MODEL Haiku 5\.5 \| cip /.test(sat[2]) && sat.filter(x => /^ON /.test(x)).length === 2 && sat.filter(x => /^(U0|B)\d+ ai /.test(x)).length === 30 && t.length * 8 < uzun, t.length + ' / ' + uzun);
+          __REG.ok('kontrol kodu gövdeyi doğrular (FNV-1a 32 bit + uzunluk); satırlar kısa (≤ 400 karakter)', !!kl && kl[1] === B.kontrolKodu(govde) && +kl[2] === govde.length && sat.every(x => x.length <= 400));
+          __REG.ok('özet anahtarsız; ticari tahmin + AI kodları satırda (B301 tah=1, stil:International Pale Lager)', !/sk-ant-[A-Za-z0-9]{8}/.test(t) && sat.some(x => /^B301 ai .* tah=1 .*stil:International Pale Lager/.test(x)));
+          const g = B.ozetKopyala(), el = document.getElementById('bul-kopya');
+          __REG.ok('"📋 Kısa özeti kopyala": biten sonucu verir; metin her zaman görünür kutuya da yazılır (pano çalışmasa da elle seçilir)', g === t || (!!g && g.indexOf('kosu ' + d.kosuId) > 0));
+          const kart = B.kartAyarHTML();
+          __REG.ok('Ayarlar ▸ AI ▸ BUL: "Kısa özeti kopyala" düğmesi + arşiv satırı başına "kısa özet"', /bul-ozet-kopyala/.test(kart) && /BM_BUL\.ozetKopyalaKayit\(0,'a'\)/.test(kart));
+          const boz = govde.replace('MODEL Haiku', 'MODEL Haikx');
+          __REG.ok('KASITLI BOZMA: gövdede tek harf değişince kontrol kodu tutmaz (bozuk yapıştırma fark edilir)', B.kontrolKodu(boz) !== kl[1]);
+        } finally { A.sor = sorEs; A.hazirMi = hEs; B.son = null; B.sonMesaj = ''; B.mesaj = ''; K.forEach((k, i) => es[i] == null ? localStorage.removeItem(k) : localStorage.setItem(k, es[i])); }
+        return __REG.al();
+      }, set);
+    }
+  },
+  {
     kod: 'AI6-PAKET', ad: 'KOŞU #3 ZAYIFLIK DÜZELTMELERİ (AI6 madde 1): (1) kırpılmış liste "LİSTE KIRPILDI" + sorulan stilin kendi sayısı / "pakette YOK — 0 olduğu söylenemez" (A03a, T08b) · (2) yön etiketi ÇIKAR / EKLE / DEĞİŞTİR (A09a, A01a) · (3) MUADİL DERECESİ tek anlamlı kod + özet şemasında enum + AI kodu ↔ uygulama kodu (A06a, C12) · (4) her ödüllü örnek AYRI ve adı benzersiz + özet kuralı (T03a) · KASITLI BOZMA: eski liste / eski yön metni geri gelirse kırmızı',
     calistir: async (page) => {
       const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'tuzak_seti.json'), 'utf8'));

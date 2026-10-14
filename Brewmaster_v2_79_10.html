@@ -32750,6 +32750,31 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     if(not){ B.mesaj = not; B.panelCiz(); try{ if(typeof bmToast === 'function') bmToast(not, 'info'); }catch(_){} }
     var t = B.kopyaMetni(s); try{ if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(function(){ if(typeof bmToast === 'function') bmToast('BUL sonucu panoya kopyalandı (anahtarsız)', 'success'); }, function(){ var el = document.getElementById('bul-kopya'); if(el){ el.style.display = 'block'; el.value = t; } }); } }catch(e){} return t; };
   B.kopyalaKayit = function(i, tur){ var e = (tur === 'y' ? B.yarimAl() : B.arsivAl())[i]; return e ? B.kopyala(e.sonuc) : null; };
+  // ── KISA ÖZET (2026-10-14): uzun JSON yapıştırmada iki kez kesildi / harfleri karıştı → model tablosu + yalnız AI adımları, kısa satırlar,
+  // sonda kontrol kodu (FNV-1a 32 bit, gövde üzerinden) — bozulursa CC kodu yeniden hesaplayıp fark eder. Anahtar / stok / reçete yok.
+  B.kontrolKodu = function(t){ var h = 0x811c9dc5; for(var i = 0; i < t.length; i++){ h ^= t.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return ('0000000' + h.toString(16)).slice(-8); };
+  B.ozetMetni = function(s){ s = s || B.sonucAl(); if(!s) return null;
+    var L = [], f = function(v, n){ return v == null ? '-' : (+v).toFixed(n); }, ad = function(m){ return (s.model && s.model[m] && s.model[m].ad) || m; };
+    L.push('kosu ' + s.kosuId + ' | ' + s.tarih + ' | ' + (s.bitti ? 'bitti' : 'YARIM: ' + String(s.durdu || '').slice(0, 120)) + ' | $' + f(s.harcama && s.harcama.usd, 4) + ' | adim ' + (s.sonuclar || []).length + (s.mock ? ' | MOCK' : ''));
+    (s.karsilastirma || []).forEach(function(k){ var mm = s.metrikModel && Object.keys(s.metrikModel).find(function(x){ return ad(x) === k.model; }), m = mm ? s.metrikModel[mm] : {};
+      L.push('MODEL ' + k.model + ' | cip ' + k.cip + ' | ilk5 ' + k.ornek + ' | onayli ' + k.ornekOnay + ' | uydurma ' + k.uydurma + ' | celiski ' + k.celiski + ' | tahmin ' + k.tahmin + ' | kural ' + (m.aiKural || '-') + ' | ai ' + k.aiCagri + ' | $/cagri ' + f(k.cagriBasi, 5) + ' | $ ' + f(k.usd, 4) + ' | tekrar ' + (k.tekrar || 0)); });
+    Object.keys(s.onModel || {}).forEach(function(m){ var o = s.onModel[m]; L.push('ON ' + ad(m) + ' ' + (o.gecti ? 'gecti' : 'KALDI: ' + o.neden.join(' / ').slice(0, 160))); });
+    if(s.atlanan && Object.keys(s.atlanan).length) L.push('ATLANAN ' + JSON.stringify(s.atlanan));
+    (s.modeller || ['ucuz']).forEach(function(m){ var R = (s.sonuclar || []).filter(function(r){ return (r.model || 'ucuz') === m; });
+      var kot = R.filter(function(r){ return r.ornekOk === false || r.uydurma || r.aiKuralOk === false || r.kismiOk === false; }).map(function(r){ return r.id; });
+      L.push('== ' + ad(m) + ' | sorunlu: ' + (kot.join(',') || 'yok'));
+      R.filter(function(r){ return r.ai || kot.indexOf(r.id) >= 0; }).forEach(function(r){
+        L.push(r.id + ' ' + (r.ai ? (r.aiOk ? 'ai' : 'AIHATA') : 'aisiz') + ' ok=' + (r.ornekOk === null ? '-' : r.ornekOk ? 1 : 0) + (r.ornekOkOnay !== r.ornekOk ? '/onay=' + (r.ornekOkOnay ? 1 : 0) : '') + ' cip=' + r.bulN + '/' + r.bekN + ' uyd=' + r.uydurma + (r.celiski ? ' CEL' : '') + (r.anlayamadim ? ' ANL' : '') + (r.tahminN ? ' tah=' + r.tahminN : '') + (r.aiKuralOk === false ? ' KURAL0' : '') + (r.kismiOk === false ? ' KISMI0' : '')
+          + ' | ' + (r.kodlar || []).join(',') + (r.cozemedim && r.cozemedim.length ? ' | coz:' + r.cozemedim.join(';').slice(0, 60) : '') + (r.dusen && r.dusen.length ? ' | dus:' + r.dusen.join(',') : '') + (r.tekrar ? ' | tek' + r.tekrar : '')
+          + (r.ai ? ' | $' + f(r.usd, 5) + ' ' + (r.gir || '-') + '/' + (r.cik || '-') : '') + (r.hata ? ' | H:' + String(r.hata).slice(0, 80) : '') + (r.ornekOk === false ? ' | ilk:' + (r.ilk || []).slice(0, 3).map(function(x){ return x.split(':')[1]; }).join(';') : '')); }); });
+    var g = L.join('\n').replace(/sk-ant-[A-Za-z0-9_\-]+/g, 'sk-ant-***');
+    return 'BREWMASTER-BUL-OZET v1\n' + g + '\nKONTROL ' + B.kontrolKodu(g) + ' ' + g.length; };
+  // özet: panoya + HER ZAMAN görünür kutuya (pano çalışmasa da elle seçilebilsin)
+  B.ozetKopyala = function(s){ if(!s){ var k = B.kopyalaKaynak(); s = k.s; } var t = B.ozetMetni(s); if(!t){ try{ if(typeof bmToast === 'function') bmToast('Kopyalanacak BUL sonucu yok.', 'info'); }catch(_){} return null; }
+    var el = document.getElementById('bul-kopya'); if(el){ el.style.display = 'block'; el.value = t; }
+    try{ if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function(){ if(typeof bmToast === 'function') bmToast('BUL kısa özeti panoya kopyalandı (' + t.length + ' karakter)', 'success'); }, function(){}); }catch(e){}
+    return t; };
+  B.ozetKopyalaKayit = function(i, tur){ var e = (tur === 'y' ? B.yarimAl() : B.arsivAl())[i]; return e ? B.ozetKopyala(e.sonuc) : null; };
   // BUL2 madde 6: plan tahmini — setteki AI gerektiren her istem × model; gerçek istek boyutundan (istekTahmin), düşünen modelde (Opus) düşünme VARSAYIMI dahil
   B.planTahmin = function(set, mods){ var ai = ((set && set.tarifler) || []).filter(function(t){ return t.grup !== 'sozluk'; }), out = { n:0, usd:0, ust:0, model:{} };
     (mods || B.KOS_MODELLER).forEach(function(mk){ var x = { n:0, usd:0, ust:0 }; ai.forEach(function(t){ var c = B.coz(t.metin); if(!c.cozulemeyen.length) return; var tt = B.istekKur(t.metin, c.cipler, mk).tahmin; if(!tt) return; x.n++; x.usd += tt.usd; x.ust += tt.ust; });
@@ -32774,7 +32799,7 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
       + (s ? '<div class="bul-son" style="font-size:11px;margin-top:4px">Son BUL koşusu: ' + E(s.tarih) + (s.mock ? ' · MOCK' : '') + ' · $' + (s.harcama ? (+s.harcama.usd).toFixed(4) : '?') + ' · ' + (s.bitti ? 'bitti' : 'yarım: ' + E(s.durdu || '')) + (s.on ? ' · ön kontrol ' + (s.on.gecti ? 'geçti' : 'KALDI') : '')
         + (m ? '<br>AI istemleri' + (s.karsilastirma && s.karsilastirma.length ? ' (' + E(s.karsilastirma[0].model) + ')' : '') + ': çip isabeti ' + y(m.cipIsabet) + ' (' + m.cip + ') · uydurma ' + m.uydurma + ' · çelişkide soru ' + y(m.celiskiSoru) + ' (' + m.celiski + ') · beklenen örnek ilk-5 ' + y(m.ornekIlk5) + ' (' + m.ornek + ')' : '')
         + (ms ? '<br>Sözlük istemleri (AI yok): çip isabeti ' + y(ms.cipIsabet) + ' (' + ms.cip + ') · beklenen örnek ilk-5 ' + y(ms.ornekIlk5) + ' (' + ms.ornek + ')' : '') + tab + '</div>' : '')
-      + (function(){ var y = B.yarimAl(), btn = function(e, i, tur){ return '<button type="button" class="bul-arsiv-kopyala" onclick="BM_BUL.kopyalaKayit(' + i + ',\'' + tur + '\')" style="min-height:44px;margin:2px 4px 0 0;font-size:11px">📋 ' + E(e.tarih) + (e.mock ? ' mock' : '') + ' · ' + (e.bitti ? '✓ ' : '⏸ ') + E(e.karar) + ' · $' + (+e.usd || 0).toFixed(4) + '</button>'; };
+      + (function(){ var y = B.yarimAl(), btn = function(e, i, tur){ return '<button type="button" class="bul-arsiv-kopyala" onclick="BM_BUL.kopyalaKayit(' + i + ',\'' + tur + '\')" style="min-height:44px;margin:2px 4px 0 0;font-size:11px">📋 ' + E(e.tarih) + (e.mock ? ' mock' : '') + ' · ' + (e.bitti ? '✓ ' : '⏸ ') + E(e.karar) + ' · $' + (+e.usd || 0).toFixed(4) + '</button><button type="button" class="bul-arsiv-ozet" onclick="BM_BUL.ozetKopyalaKayit(' + i + ',\'' + tur + '\')" style="min-height:44px;margin:2px 8px 0 0;font-size:11px">📋 kısa özet</button>'; };
         return (a.length || y.length) ? '<details class="bul-onceki" style="margin-top:4px"><summary style="cursor:pointer;font-size:11.5px;font-weight:700">📚 Önceki BUL sonuçları (' + a.length + ' bitmiş · ' + y.length + ' yarım)</summary>'
           + a.map(function(e, i){ return btn(e, i, 'a'); }).join('') + y.map(function(e, i){ return btn(e, i, 'y'); }).join('')
           + '<div style="font-size:10.5px;color:var(--soluk)">Son 5 bitmiş + son 5 yarım koşu bu cihazda (yedeğe / senkrona girmez). Yeni koşu ya da durdurma bunları silmez.</div></details>' : ''; })();
@@ -32784,7 +32809,8 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     return '<div class="bm-ayar-satir bul-kos" style="display:block"><div class="bm-ayar-satir-text">🔎 BUL seti <small>(geliştirici · "Tarif et" testi: AI gerektiren + çelişkili + uydurma + B2 istemleri, modeller sırayla ' + B.KOS_MODELLER.map(function(m){ return window.BM_AI.MODEL[m].ad; }).join(' → ') + ', ön kontrol model başına ' + B.ON_ADIM + ' adım, tavan $' + B.TAVAN.toFixed(2) + ' (kredi dönemi kalanını aşmaz) · sözlük istemleri her koşuda bedava ölçülür)</small></div>'
       + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px"><button type="button" class="bm-ayar-btn bul-kos-btn" style="min-height:44px" onclick="BM_BUL.baslat()">🔎 BUL setini çalıştır</button>'
       + '<button type="button" class="bm-ayar-btn" style="min-height:44px" onclick="BM_BUL.durdur=true">Durdur</button>'
-      + '<button type="button" class="bm-ayar-btn bul-kopyala" style="min-height:44px" onclick="BM_BUL.kopyala()">📋 BUL sonucunu kopyala</button></div>'
+      + '<button type="button" class="bm-ayar-btn bul-kopyala" style="min-height:44px" onclick="BM_BUL.kopyala()">📋 BUL sonucunu kopyala</button>'
+      + '<button type="button" class="bm-ayar-btn bul-ozet-kopyala" style="min-height:44px" onclick="BM_BUL.ozetKopyala()">📋 Kısa özeti kopyala</button></div>'
       + '<textarea id="bul-kopya" readonly style="display:none;width:100%;min-height:60px;font-size:10px;margin-top:4px" aria-label="BUL sonucu"></textarea>'
       + '<div id="bul-panel" aria-live="polite">' + B.panelHTML() + '</div></div>';
   };
