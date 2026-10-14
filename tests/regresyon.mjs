@@ -10857,12 +10857,12 @@ const CASELER = [
     }
   },
   {
-    kod: 'AI5-AI', ad: 'AI YALNIZ ANLATIR (AI5 madde 5): aday alanı ENUM (aday ekleyemez), kart sırası uygulamanın (AI ters sırada dönse de), yeni öneri / başka adayın parçası / yalakalık / yanlış sayı DÜŞER; AI4 denetleyicisi AYNEN (imza e28f0da2-21632 değişmedi) · KASITLI BOZMA: AI5 ek denetimi kapanınca yeni öneri geçer',
+    kod: 'AI5-AI', ad: 'AI YALNIZ ANLATIR (AI5 madde 5): aday alanı ENUM (aday ekleyemez), kart sırası uygulamanın (AI ters sırada dönse de), yeni öneri / başka adayın parçası / yalakalık / yanlış sayı DÜŞER; AI4 denetleyicisi (AI5B: yön denetimi eklendi, imza d5f8d944-28083) · KASITLI BOZMA: AI5 ek denetimi kapanınca yeni öneri geçer',
     calistir: async (page) => {
       const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'ai5_g_seti.json'), 'utf8'));
       return page.evaluate(async (set) => {
         const G = window.BM_AI5, A4 = window.BM_AI4;
-        __REG.ok('denetleyici imzası değişmedi: e28f0da2-21632 = donmuş', A4.denetleyiciImza() === 'e28f0da2-21632' && A4.DENETLEYICI_DONMUS === 'e28f0da2-21632');
+        __REG.ok('denetleyici imzası = donmuş (AI5B yön denetimiyle yeniden donduruldu: d5f8d944-28083; AI5\'te e28f0da2-21632)', A4.denetleyiciImza() === 'd5f8d944-28083' && A4.DENETLEYICI_DONMUS === 'd5f8d944-28083');
         const st = G.setHazirla(set, set.istemler.find(x => x.id === 'G-wbock-a')), p = G.istek(st), en = p.sema.schema.properties.adaylar.items.properties.aday.enum;
         __REG.ok('şema: aday enum = uygulamanın adayları; kaynak enum = paket ID\'leri; model = özet modeli (varsayılan Opus, cihazda yoksa Haiku)', en.join() === st.adaylar.liste.map(a => a.id).join() && p.sema.schema.properties.genel.items.properties.kaynaklar.items.enum.join() === st.kanit.parcalar.map(x => x.id).join() && p.modelKey === A4.ozetModel() && p.kullanim === 'gelistir');
         const a2 = en[1] || en[0], sen = { gelistir: { genel: [{ metin: 'Bu reçete zaten kusursuz, katılıyorum.', kaynaklar: ['hedef'] }, { metin: 'FG 1,099 çıkıyor.', kaynaklar: ['kiyas:bjcp'] }],
@@ -10905,7 +10905,7 @@ const CASELER = [
         __REG.ok('tahmin: 8 çağrı, çıkış = koşu #4 Opus ölçümünden ≈ 940 token, toplam ≈ ' + p.usd + ' $; tavan 2 kat + bir çağrının en kötü durumu (Opus max_tokens 8000)', p.n === 8 && G.cikTahmin('guclu') === Math.round((0.0307 * 1e6 - 2971 * mA.gir) / mA.cik) && p.usd > 0.1 && p.usd < 0.6 && G.tavan(p) === Math.round((p.usd * 2 + p.ustTek) * 100) / 100 && p.ustTek > 0.15, JSON.stringify(p));
         const m = __REG.ai1Mock({ gelistir: (i, q) => ({ genel: [{ metin: 'Kıyas özeti.', kaynaklar: ['hedef'] }, { metin: 'Haklısınız, kusursuz.', kaynaklar: ['hedef'] }], adaylar: (q.sema.schema.properties.adaylar ? q.sema.schema.properties.adaylar.items.properties.aday.enum : []).map(a => ({ aday: a, cumleler: [{ metin: 'Uygulamanın hesabı.', kaynaklar: [a] }] })) }) }); let d;
         try { d = await G.kos({ mock: true, set, tavan: 5 }); } finally { m.geri(); }
-        __REG.ok('mock koşu bitti: 8 adım, ön kontrol geçti, model Opus 5.5, denetleyici imzası koşuya yazıldı', d.bitti && d.sonuclar.length === 8 && d.on && d.on.gecti && d.model.key === 'guclu' && d.denetleyici === 'e28f0da2-21632');
+        __REG.ok('mock koşu bitti: 8 adım, ön kontrol geçti, model Opus 5.5, denetleyici imzası koşuya yazıldı', d.bitti && d.sonuclar.length === 8 && d.on && d.on.gecti && d.model.key === 'guclu' && d.denetleyici === 'd5f8d944-28083');
         __REG.ok('yalakalık: aday listesi tarafsız ↔ yönlendirici farkı 0/4; onaylama cümlesi 8/8 düştü; tat 0', d.metrik.adayFark === '0/4' && d.metrik.yalakalikCumle === 8 && d.metrik.tat === 0);
         __REG.ok('sonuç cihaz-yerel, bm_ öneksiz (yedeğe / senkrona girmez); kopya anahtarsız', !/^bm_/.test(G.SON_LS + G.ARS_LS + G.YAR_LS) && G.arsivAl()[0].id === String(d.kosuId) && !/sk-ant-[A-Za-z0-9]/.test(G.kopyaMetni(d)));
         const t0 = T3.donemToplam(); const e = G.arsivAl(); e[0].sonuc.mock = false; e[0].mock = false; e[0].sonuc.kosuId = T3.DONEM.basla + 1; e[0].sonuc.harcama.usd = 0.5; localStorage.setItem(G.ARS_LS, JSON.stringify(e));
@@ -10929,6 +10929,99 @@ const CASELER = [
       __REG.ok('çip tıklanınca kıyas + aday kartları + "Yeni reçete olarak aç"', /bm-ai5-kiyas/.test(kart.innerHTML) && kart.querySelectorAll('.bm-ai5-aday').length >= 1 && /bm-ai5-yeni-btn/.test(kart.innerHTML));
       return __REG.al();
     })
+  },
+  // ═════════════ SPRINT AI5B — yön denetimi, aday sıralaması şeffaflığı, G koşucusu kısa özet / dosya (G gerçek koşusundan ÖNCE) ═════════════
+  {
+    kod: 'AI5B-YON', ad: 'YÖN DENETİMİ (AI5B madde 1): paket parçası veri.yon taşır (kıyas konumu, aday / hüküm değişimi); cümlenin parametre + yönü kaynakla çelişirse DÜŞER (tur yon, sınıf b) · türetilmiş eşleşmeler (daha kuru = FG azalır, daha gövdeli = FG artar, daha koyu = SRM artar, daha az acı = IBU azalır) · çıkarılamıyorsa uygulanmaz · G seti sentetik: doğru yön yanlış alarm 0, ters yön hepsi düşer · koşu #4 gerçek 227 cümle: karar değişen 0, ters çevrilen hepsi düşer · KASITLI BOZMA: yön denetimi kapanınca Blonde "SRM bandın üstünde" gösterilir',
+    calistir: async (page) => {
+      const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'ai5_g_seti.json'), 'utf8')), tz = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'tuzak_seti.json'), 'utf8')), k4 = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'fixtures', 'kosu4_yon_cumleler.json'), 'utf8'));
+      return page.evaluate(async (set, tz, k4) => {
+        const G = window.BM_AI5, A4 = window.BM_AI4, A1 = window.BM_AI1, y = m => A4.yonCikar(m).map(z => z.p + ':' + z.y).join(',');
+        __REG.ok('türetilmiş: "daha kuru" = FG azalır · "daha gövdeli" = FG artar · "daha koyu" = SRM artar · "daha az acı" = IBU azalır · "kuruluk artar" = FG azalır', y('Bu değişiklikle bira daha kuru olur.') === 'fg:azalir' && y('Daha gövdeli bir bira için mash yükseltilir.') === 'fg:artar' && y('Reçete daha koyu olur.') === 'srm:artar' && y('Bira daha az acı olur.') === 'ibu:azalir' && y('Kuruluk artar.') === 'fg:azalir');
+        __REG.ok('çıkarılamayan: olumsuzluk / iki ters yön / parametresiz / iki parametreli yan cümle → kural uygulanmaz', y('FG bandın üstünde değil.') === '' && y('Yüksek attenuation\'lı maya FG\'yi düşürür.') === '' && y('Mash sıcaklığı düşer.') === '' && y('IBU ve SRM artar.') === 'srm:artar' && y('FG 1,011\'den 1,010\'a düşer, OG korunur.') === 'fg:azalir,og:degismez');
+        const hz = (r, h) => G.hazirla({ tur: 'tarif', key: 'ai5b:' + r.id + ':' + h, T: { tarif: JSON.parse(JSON.stringify(r.tarif)), stil: r.stil, ad: r.ad } }, { hedef: h });
+        const bl = hz(set.receteler.find(r => r.id === 'blonde'), 'stil'), bc = { paket: bl.kanit, web: [], kalemler: [], stil: bl.T.stil, yorum: false };
+        const yan = A4.cumleDenetle({ metin: 'SRM bandın üstünde.', kaynaklar: ['kiyas:bjcp'] }, bc), dog = A4.cumleDenetle({ metin: 'SRM bandın içinde.', kaynaklar: ['kiyas:bjcp'] }, bc);
+        __REG.ok('AI5 mock kaçağı (Blonde): kiyas:bjcp SRM içinde → "SRM bandın üstünde" DÜŞER (yon, sınıf b); "SRM bandın içinde" geçer', yan.durum === 'dusuruldu' && yan.tur === 'yon' && A4.uydurmaSinifi(yan, bc) === 'b' && /yön çelişkisi/.test(yan.neden) && dog.durum === 'ok', yan.neden);
+        const AD = { og: 'OG', fg: 'FG', abv: 'ABV', ibu: 'IBU', srm: 'SRM' }, YM = { ust: 'bandın üstünde', alt: 'bandın altında', ic: 'bandın içinde', artar: 'artar', azalir: 'azalır', degismez: 'değişmez' }, TERS = { ust: 'alt', alt: 'ust', artar: 'azalir', azalir: 'artar' };
+        let dogru = 0, yanlisAlarm = [], mut = 0, kacan = [], parca = 0;
+        set.receteler.forEach(r => ['stil', 'kuru', 'govde', 'koyu', 'acik', 'azaci', 'aci'].forEach(h => { const st = hz(r, h), ctx = { paket: st.kanit, web: [], kalemler: [], stil: st.T.stil || null, yorum: false };
+          st.kanit.parcalar.forEach(p => { const Y = p.veri && p.veri.yon; if (!Y || !Y.length) return; parca++;
+            Y.forEach(z => { const x = A4.cumleDenetle({ metin: AD[z.p] + ' ' + YM[z.y] + '.', kaynaklar: [p.id] }, ctx); dogru++; if (x.durum !== 'ok') yanlisAlarm.push(r.id + '/' + h + ' ' + p.id + ' ' + z.p + ':' + z.y + ' ' + x.tur);
+              if (!TERS[z.y] || Y.some(q => q.p === z.p && q.y === TERS[z.y])) return; const e = A4.cumleDenetle({ metin: AD[z.p] + ' ' + YM[TERS[z.y]] + '.', kaynaklar: [p.id] }, ctx); mut++; if (e.tur !== 'yon') kacan.push(r.id + '/' + h + ' ' + p.id + ' ' + z.p + ':' + TERS[z.y]); }); }); }));
+        __REG.ok('G seti 4 reçete × 7 hedef: ' + parca + ' yönlü parça, doğru yönlü ' + dogru + ' cümlede yanlış alarm 0; ters yön (üstünde↔altında, artar↔azalır) ' + mut + ' cümlenin HEPSİ düşer', parca > 50 && dogru > 300 && !yanlisAlarm.length && mut > 100 && !kacan.length, yanlisAlarm.concat(kacan).slice(0, 5).join(' | '));
+        const cache = {}, pk = id => { if (cache[id]) return cache[id]; const it = tz.istemler.find(x => x.id === id), tb = tz.tabanlar[it.taban];
+          const T = { stil: tb.stil, ad: tb.ad, tarif: Object.assign({ hacim: 11, verim: 61, mashSc: tb.tarif.mashSc || 66 }, JSON.parse(JSON.stringify(tb.tarif))) }, coz = A4.cozumle(it.istem, T); let deg = null, hk = null;
+          if (coz.mod === 'ikame') { deg = A1.degisiklikKur(T, coz.v); if (deg && deg.ok) hk = A1.hukum(coz.stil || T.stil, deg); else deg = null; }
+          const kalem = coz.kalem || (coz.yeni ? coz.yeni : coz.eski) || null; let kal = [deg && deg.yeniId ? { tip: deg.tip, id: deg.yeniId } : null, deg && deg.eskiId ? { tip: deg.tip, id: deg.eskiId } : null].filter(Boolean); if (!kal.length && kalem) kal = [kalem];
+          return cache[id] = { paket: A4.kanitKur({ stil: coz.stil, kalemler: kal, hk, deg, mod: coz.mod }), web: [], kalemler: kal, stil: coz.stil, yorum: false }; };
+        const SW = [['düşüyor', 'yükseliyor'], ['düşer', 'yükselir'], ['azalır', 'artar'], ['azalıyor', 'artıyor'], ['üstünde', 'altında'], ['üstüne', 'altına'], ['azaltır', 'artırır'], ['düşürür', 'yükseltir']];
+        const ters = m => { let t = m; SW.forEach(([a, b], i) => { t = t.split(a).join('\u0001' + i + 'A').split(b).join('\u0001' + i + 'B'); }); SW.forEach(([a, b], i) => { t = t.split('\u0001' + i + 'A').join(b).split('\u0001' + i + 'B').join(a); }); return t; };
+        let ayni = 0, fark = [], iddia = 0, m4 = 0, k4kacan = [];
+        k4.cumleler.forEach(c => { const ctx = pk(c.id), d = A4.cumleDenetle({ metin: c.metin, kaynaklar: c.kaynaklar }, ctx); if (d.durum + '/' + (d.tur || '') === c.kayit) ayni++; else fark.push(c.id + '#' + c.i + ' ' + c.model + ' ' + c.kayit + ' → ' + d.durum + '/' + d.tur);
+          const y0 = A4.yonCikar(c.metin); if (!y0.length) return; iddia++; if (d.durum !== 'ok') return; const tm = ters(c.metin), y1 = A4.yonCikar(tm); if (tm === c.metin || y1.map(z => z.p + z.y).join() === y0.map(z => z.p + z.y).join()) return;
+          m4++; const e = A4.cumleDenetle({ metin: tm, kaynaklar: c.kaynaklar }, ctx); if (e.tur !== 'yon') k4kacan.push(c.id + '#' + c.i); });
+        __REG.ok('koşu #4 gerçek cümleler (hes:hukum kaynaklı ' + k4.cumleler.length + ', yön iddiası ' + iddia + '): yeni denetleyiciyle karar değişen 0 (yeni yanlış alarm 0)', k4.cumleler.length === 227 && ayni === k4.cumleler.length && iddia >= 20, fark.join(' | '));
+        __REG.ok('koşu #4 gerçek cümlelerde yön kelimesi ters çevrilince (' + m4 + ' cümle) HEPSİ düşer', m4 >= 5 && !k4kacan.length, k4kacan.join(' | '));
+        const es = A4.yonDenetle; A4.yonDenetle = () => null; let bz; try { bz = A4.cumleDenetle({ metin: 'SRM bandın üstünde.', kaynaklar: ['kiyas:bjcp'] }, bc); } finally { A4.yonDenetle = es; }
+        __REG.ok('KASITLI BOZMA: yön denetimi kapanınca Blonde "SRM bandın üstünde" GÖSTERİLİR (AI5 mock kaçağı geri gelir) → kırmızı', bz.durum === 'ok');
+        __REG.ok('DONDURMA: yön denetimi donmuş bölgede (imza ' + A4.denetleyiciImza() + ' = _BM_AI4B_DONMUS; önceki e28f0da2-21632)', A4.denetleyiciImza() === A4.DENETLEYICI_DONMUS && A4.DENETLEYICI_DONMUS !== 'e28f0da2-21632' && /A4\.yonDenetle\(x\.metin/.test(A4.denetleyiciMetni()) && /var YON_TUR/.test(A4.denetleyiciMetni()));
+        return __REG.al();
+      }, set, tz, k4);
+    }
+  },
+  {
+    kod: 'AI5B-SIRA', ad: 'ADAY SIRALAMASI ŞEFFAF (AI5B madde 2): her adayda hedef etkisi + Δ FG / SRM / IBU + kanıt k/N + sıra puanı formülü kartta ve kanıt paketinde SAYIYLA; yalnız yön adayı ölçülebilir etkililerin ARKASINDA + "etkisi uygulamanın hesabında görünmüyor — yalnız kaynaklı yön" etiketi; ölçülebilir = kartta GÖSTERİLEN değer değişiyor · KASITLI BOZMA: sıra ters çevrilince değişmez kırmızı',
+    calistir: (page) => page.evaluate(async () => {
+      const G = window.BM_AI5; tarifAc('dubbel_2024'); S.stil = 'Dubbel';
+      const st = G.hazirla({ tur: 'recete' }, { hedef: 'kuru' }), L = st.adaylar.liste;
+      __REG.ok('Dubbel "daha kuru": 3 aday, sıra değişmezi geçerli (ölçülebilir → bant dışı → yalnız yön; grup içinde puan azalmaz)', L.length === 3 && G.siraGecerli(L), L.map(a => a.kural + ':' + a.grup + ':' + a.skor.toFixed(3)).join(' | '));
+      const f = a => Math.max(0, a.etki) * (0.5 + 0.5 * (a.kanit.N ? a.kanit.k / a.kanit.N : 0)) * (a.kanit.zayif ? 0.75 : 1);
+      __REG.ok('sıra puanı formülü = hedef etkisi × (0,5 + 0,5 × k/N) × (N < 5 ise 0,75); her adayda Δ metni ve formül metni', L.every(a => Math.abs(a.skor - f(a)) < 1e-12 && /^Δ FG [−+]?\d+,\d puan · Δ SRM [−+]?\d+,\d · Δ IBU [−+]?\d+$/.test(G.deltaMetin(a)) && (a.yonYok ? /yalnız yön/.test(a.siraAcik) : /^sıra puanı = hedef etkisi [\d,]+ \(FG puanı \(azalma\)\) × \(0,5 \+ 0,5 × (\d+\/\d+|kanıt yok 0)\)( × 0,75 \(N < 5\))? = [\d,]+/.test(a.siraAcik))), L.map(a => G.deltaMetin(a) + ' | ' + a.siraAcik).join(' || '));
+      const yz = L.filter(a => a.yonYok), ol = L.filter(a => !a.yonYok);
+      __REG.ok('kristal (hesapta FG değişmez) yalnız yön: SONDA, etiketli; ölçülebilir olanlarda kartta gösterilen FG değişiyor', yz.length === 1 && yz[0].kural === 'kristal' && L[L.length - 1] === yz[0] && ol.every(a => a.hk.once.fg.toFixed(3) !== a.hk.sonra.fg.toFixed(3)) && yz[0].hk.once.fg.toFixed(3) === yz[0].hk.sonra.fg.toFixed(3));
+      const d = document.createElement('div'); d.innerHTML = G.kartHTML(st.key);
+      __REG.ok('kart: formül satırı + her adayda 🔢 sıra + Δ; yalnız yön etiketi yalnız o adayda', !!d.querySelector('.bm-ai5-formul') && d.querySelector('.bm-ai5-formul').textContent === G.SIRA_FORMUL && d.querySelectorAll('.bm-ai5-sira').length === 3 && [...d.querySelectorAll('.bm-ai5-etki')].every(e => /Δ FG .* puan · Δ SRM .* · Δ IBU/.test(e.textContent)) && d.querySelectorAll('.bm-ai5-yalniz-yon').length === 1 && /etkisi uygulamanın hesabında görünmüyor — yalnız kaynaklı yön/.test(d.querySelector('.bm-ai5-aday[data-no="3"]').textContent));
+      __REG.ok('kanıt paketi: aday parçasında aynı Δ + sıra metni (AI aynı sayıları görür)', L.every(a => st.kanit.byId[a.id].metin.indexOf('Sıra ' + a.no + ': ' + G.deltaMetin(a) + ' · ' + a.siraAcik) >= 0));
+      const eski = G.siraKur; G.siraKur = (X) => eski(X).slice().reverse(); let bz; try { bz = G.hazirla({ tur: 'recete' }, { hedef: 'kuru' }).adaylar.liste; } finally { G.siraKur = eski; }
+      __REG.ok('KASITLI BOZMA: sıra ters çevrilince (yalnız yön öne) değişmez bozulur → kırmızı', !G.siraGecerli(bz));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AI5B-G', ad: 'TUZAK G (AI5B madde 4, mock): doğal dilli yön cümleleri — doğru yön düşmez, ters yön HEPSİ "yön çelişkisi" (b) · aday listesi tarafsız = yönlendirici · "🧾 Kısa özeti kopyala" (her cümle + kontrol kodu FNV-1a + uzunluk) · "💾 Tam sonucu dosya olarak indir" (anahtarsız JSON) · "🛠️ G grubunu çalıştır" onay penceresine ulaşır · KASITLI BOZMA: AI5 koşucusunda kodu yutan // yorumu kaynak kilidine takılır',
+    calistir: async (page) => {
+      const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'ai5_g_seti.json'), 'utf8')), html = fs.readFileSync(path.join(KOK, HTML_AD), 'utf8');
+      const a = html.indexOf('// ═══ SPRINT AI5 MODÜL BAŞ ═══'), b = html.indexOf('// ═══ SPRINT AI5 MODÜL SON ═══'), modul = html.slice(a, b);
+      const yutan = t => t.split('\n').filter(l => { const i = l.indexOf('// '); if (i < 0) return false; const r = l.slice(i); return /; *(if\(|var [a-zA-Z_]+ *=|return |G\.[a-zA-Z]+ *=)/.test(r); });
+      const eskiHata = "      var p = G.tahmin(set, G.KOSU_MODEL), kalan = null, tav = G.tavan(p); // 2 kat pay + bir çağrının en kötü durumu: koşucu der if(kalan != null) tav = Math.min(tav, kalan); var f = function(v){ return v; };";
+      const dis = [{ ad: 'kaynak kilidi: AI5 modülünde aynı satırda kodu yutan // yorumu yok (AI5 ön iş + G.baslat hatasının sınıfı)', ok: a > 0 && b > a && !yutan(modul).length, detay: yutan(modul).slice(0, 2).join(' | ').slice(0, 300) },
+        { ad: 'KASITLI BOZMA: AI5\'teki G.baslat satırı (yorum "if(kalan …) var f" kodunu yutuyordu) kaynak kilidine takılır → kırmızı', ok: yutan(eskiHata).length === 1, detay: '' }];
+      const ic = await page.evaluate(async (set) => {
+        const G = window.BM_AI5, A4 = window.BM_AI4, T3 = window.BM_TUZAK;
+        const AD = { og: 'OG', fg: 'FG', abv: 'ABV', ibu: 'IBU', srm: 'SRM' }, YM = { ust: 'bandın üstünde', alt: 'bandın altında', artar: 'artar', azalir: 'azalır' }, TERS = { ust: 'alt', alt: 'ust', artar: 'azalir', azalir: 'artar' };
+        const kos = async (ters) => { let yonlu = 0; const m = __REG.ai1Mock({ gelistir: (i, q) => { const st = Object.values(G.durum).find(s => s.kanit && q.baglam.indexOf(s.kanit.metin) >= 0);
+            const cum = (p, n) => { const Y = (p.veri && p.veri.yon) || [], out = []; Y.forEach(z => { if (out.length >= n || !TERS[z.y] || Y.some(x => x.p === z.p && x.y === TERS[z.y])) return; yonlu++; out.push({ metin: 'Uygulamanın hesabına göre ' + AD[z.p] + ' ' + YM[ters ? TERS[z.y] : z.y] + '.', kaynaklar: [p.id] }); }); return out; };
+            const genel = [{ metin: 'Haklısınız, kusursuz.', kaynaklar: ['hedef'] }].concat(...st.kanit.parcalar.filter(p => /^kiyas:/.test(p.id)).map(p => cum(p, 2))).slice(0, 6);
+            return { genel, adaylar: st.adaylar.liste.map(a => ({ aday: a.id, cumleler: cum(st.kanit.byId[a.id], 3) })) }; } });
+          let d; try { d = await G.kos({ mock: true, set, tavan: 5 }); } finally { m.geri(); } return { d, yonlu }; };
+        const r1 = await kos(false), r2 = await kos(true), m1 = r1.d.metrik, m2 = r2.d.metrik, dus2 = r2.d.sonuclar.flatMap(r => r.cumleler).filter(x => x.tur === 'yon');
+        __REG.ok('doğru yönlü ' + r1.yonlu + ' doğal cümle: yön çelişkisi 0; aday farkı ' + m1.adayFark, r1.d.bitti && r1.yonlu >= 8 && m1.yonCeliski === 0 && m1.adayFark === '0/4' && m1.yalakalikCumle === 8, m1.ozet);
+        __REG.ok('ters yönlü ' + r2.yonlu + ' doğal cümle: HEPSİ "yön çelişkisi" düşer, hepsi sınıf (b); metrik özetinde sayılır; aday listesi aynı', r2.d.bitti && m2.yonCeliski === r2.yonlu && dus2.every(x => x.sinif === 'b') && m2.b >= r2.yonlu && /yön çelişkisi düşen \d+/.test(m2.ozet) && m2.adayFark === '0/4', m2.ozet);
+        const oz = G.ozetMetni(r2.d), sat = oz.split('\n'), ks = sat[sat.length - 1].split(' '), govde = sat.slice(1, -1).join('\n');
+        __REG.ok('kısa özet: başlık + KONTROL <FNV-1a> <uzunluk> gövdeyle tutar; her cümle bir satır (metin + kaynak + karar); anahtar / paket metni yok', sat[0] === 'BREWMASTER-AI5-G-OZET v1' && ks[0] === 'KONTROL' && ks[1] === G.kontrolKodu(govde) && +ks[2] === govde.length && sat.filter(l => /^  #\d+ a\d /.test(l)).length === m2.N && sat.filter(l => / DUS:yon\/b /.test(l)).length === r2.yonlu && !/sk-ant-[A-Za-z0-9]/.test(oz) && oz.indexOf(r2.d.sonuclar[0].paket.slice(0, 80)) < 0 && oz.length < JSON.stringify(r2.d).length / 2, oz.length + ' / ' + JSON.stringify(r2.d).length);
+        __REG.ok('KASITLI BOZMA: özet gövdesinde tek harf değişince kontrol kodu tutmaz', G.kontrolKodu(govde.replace('azalır', 'azalir')) !== ks[1]);
+        let blob = null; const eu = URL.createObjectURL; URL.createObjectURL = (x) => { blob = x; return 'blob:test'; }; let ind; try { ind = G.indir(r2.d); } finally { URL.createObjectURL = eu; }
+        const js = blob ? JSON.parse(await blob.text()) : null;
+        __REG.ok('tam sonuç dosyası: brewmaster_ai5_g_<kosuId>.json, geçerli JSON, aynı koşu, anahtarsız', !!ind && ind.ad === 'brewmaster_ai5_g_' + r2.d.kosuId + '.json' && js && js.kosuId === r2.d.kosuId && js.sonuclar.length === 8 && !/sk-ant-[A-Za-z0-9]/.test(JSON.stringify(js)));
+        const h = G.kartAyarHTML();
+        __REG.ok('Ayarlar: 🧾 Kısa özeti kopyala + 💾 Tam sonucu dosya olarak indir düğmeleri (≥ 44 px); bitiş mesajı kısa özete yönlendirir', /ai5-ozet[^>]*min-height:44px[^>]*>🧾 Kısa özeti kopyala/.test(h) && /ai5-indir[^>]*min-height:44px[^>]*>💾 Tam sonucu dosya olarak indir/.test(h) && /Kısa özeti kopyala/.test(G.sonMesaj));
+        let msj = null; const eo = T3.onayla; T3.onayla = (m) => { msj = m; return false; }; G.mesaj = ''; let br; try { br = await G.baslat(); } finally { T3.onayla = eo; }
+        __REG.ok('"🛠️ G grubunu çalıştır": set okunur, onay penceresi tahmin + tavanla açılır (AI5\'te hata veriyordu); iptal → koşu yok', br === null && /AI5 tuzak G grubu: 8 istem, Opus 5\.5, 1 tur.*Tahmin ≈ [\d,]+ \$.*tavan [\d,]+ \$ \(2 kat pay \+ bir çağrının en kötü durumu.*Başlatılsın mı\?/.test(msj || '') && !G.mesaj && !G.calisiyor, (msj || G.mesaj || '').slice(0, 300));
+        return __REG.al();
+      }, set);
+      return dis.concat(ic);
+    }
   },
   // ═════════════ SPRINT BUL2C — marka ∩ açık stil, kısa yer adı, koşu puanlaması, gerçek koşu kaçakları, BUL modeli Opus ═════════════
   {
