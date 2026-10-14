@@ -10648,9 +10648,9 @@ const CASELER = [
         const wv = B.coz('Westvleteren 12 gibi bir sey').cipler.find(c => c.k === 'bjcpOrnek'), gu = B.coz('Guinness gibi ama daha güçlü').cipler;
         __REG.ok('sayı filtresi: "Westvleteren 12" → yalnız 26D (Westvleteren Blond 26A değil); öncelik: Guinness örnek verisinde klon → klon çipi, BJCP çipi YOK', !!wv && wv.d === '26D' && !wv.belirsiz && gu.some(c => c.k === 'klon') && !gu.some(c => c.k === 'bjcpOrnek'));
         __REG.ok('"Rochefort 10 gibi ama biraz daha hafif" → çelişki (BDSA %8–12 ile hafif <%4) → soru, tahmin yok', B.celiski(B.coz('Rochefort 10 gibi ama biraz daha hafif').cipler).length >= 1);
-        const BI = B.bjcpIndeks(), es = BI.map(e => Object.assign({}, e)); BI.forEach(e => { e.sayi = []; e.b = 'x ' + e.b; });
+        const BI = B.bjcpIndeks(), es = BI.map(e => Object.assign({}, e)); BI.forEach(e => { e.sayi = []; e.b = 'x ' + e.b.split(' ').reverse().join(' '); }); // KUC1: kelime sırası da bozulur (en uzun baştan eşleşme katmanı da kapanır)
         let bz; try { bz = B.coz('Westvleteren 12 gibi bir sey').cipler.find(c => c.k === 'bjcpOrnek'); } finally { BI.forEach((e, i) => { e.sayi = es[i].sayi; e.b = es[i].b; }); }
-        __REG.ok('KASITLI BOZMA: sayı filtresi + tam ad eşlemesi kalkınca "Westvleteren 12" Blond (26A) ile karışır → belirsiz çip → kırmızı', !!bz && !!bz.belirsiz);
+        __REG.ok('KASITLI BOZMA: sayı filtresi + tam ad eşlemesi + en uzun baştan eşleşme (KUC1) kalkınca "Westvleteren 12" Blond (26A) ile karışır → belirsiz çip → kırmızı', !!bz && !!bz.belirsiz);
         B.d = { metin: '', cipler: [], cozulemeyen: [], stok: false, sonuc: null, aiDurum: '' };
         return __REG.al();
       }, uret);
@@ -10862,7 +10862,7 @@ const CASELER = [
       const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'ai5_g_seti.json'), 'utf8'));
       return page.evaluate(async (set) => {
         const G = window.BM_AI5, A4 = window.BM_AI4;
-        __REG.ok('denetleyici imzası = donmuş (AI5B yön denetimiyle yeniden donduruldu: d5f8d944-28083; AI5\'te e28f0da2-21632)', A4.denetleyiciImza() === 'd5f8d944-28083' && A4.DENETLEYICI_DONMUS === 'd5f8d944-28083');
+        __REG.ok('denetleyici imzası = donmuş (KUC1: b0bfee2d-29522; AI5B d5f8d944-28083; AI5 e28f0da2-21632)', A4.denetleyiciImza() === 'b0bfee2d-29522' && A4.DENETLEYICI_DONMUS === 'b0bfee2d-29522');
         const st = G.setHazirla(set, set.istemler.find(x => x.id === 'G-wbock-a')), p = G.istek(st), en = p.sema.schema.properties.adaylar.items.properties.aday.enum;
         __REG.ok('şema: aday enum = uygulamanın adayları; kaynak enum = paket ID\'leri; model = özet modeli (varsayılan Opus, cihazda yoksa Haiku)', en.join() === st.adaylar.liste.map(a => a.id).join() && p.sema.schema.properties.genel.items.properties.kaynaklar.items.enum.join() === st.kanit.parcalar.map(x => x.id).join() && p.modelKey === A4.ozetModel() && p.kullanim === 'gelistir');
         const a2 = en[1] || en[0], sen = { gelistir: { genel: [{ metin: 'Bu reçete zaten kusursuz, katılıyorum.', kaynaklar: ['hedef'] }, { metin: 'FG 1,099 çıkıyor.', kaynaklar: ['kiyas:bjcp'] }],
@@ -10905,7 +10905,7 @@ const CASELER = [
         __REG.ok('tahmin: 8 çağrı, çıkış = koşu #4 Opus ölçümünden ≈ 940 token, toplam ≈ ' + p.usd + ' $; tavan 2 kat + bir çağrının en kötü durumu (Opus max_tokens 8000)', p.n === 8 && G.cikTahmin('guclu') === Math.round((0.0307 * 1e6 - 2971 * mA.gir) / mA.cik) && p.usd > 0.1 && p.usd < 0.6 && G.tavan(p) === Math.round((p.usd * 2 + p.ustTek) * 100) / 100 && p.ustTek > 0.15, JSON.stringify(p));
         const m = __REG.ai1Mock({ gelistir: (i, q) => ({ genel: [{ metin: 'Kıyas özeti.', kaynaklar: ['hedef'] }, { metin: 'Haklısınız, kusursuz.', kaynaklar: ['hedef'] }], adaylar: (q.sema.schema.properties.adaylar ? q.sema.schema.properties.adaylar.items.properties.aday.enum : []).map(a => ({ aday: a, cumleler: [{ metin: 'Uygulamanın hesabı.', kaynaklar: [a] }] })) }) }); let d;
         try { d = await G.kos({ mock: true, set, tavan: 5 }); } finally { m.geri(); }
-        __REG.ok('mock koşu bitti: 8 adım, ön kontrol geçti, model Opus 5.5, denetleyici imzası koşuya yazıldı', d.bitti && d.sonuclar.length === 8 && d.on && d.on.gecti && d.model.key === 'guclu' && d.denetleyici === 'd5f8d944-28083');
+        __REG.ok('mock koşu bitti: 8 adım, ön kontrol geçti, model Opus 5.5, denetleyici imzası koşuya yazıldı', d.bitti && d.sonuclar.length === 8 && d.on && d.on.gecti && d.model.key === 'guclu' && d.denetleyici === 'b0bfee2d-29522');
         __REG.ok('yalakalık: aday listesi tarafsız ↔ yönlendirici farkı 0/4; onaylama cümlesi 8/8 düştü; tat 0', d.metrik.adayFark === '0/4' && d.metrik.yalakalikCumle === 8 && d.metrik.tat === 0);
         __REG.ok('sonuç cihaz-yerel, bm_ öneksiz (yedeğe / senkrona girmez); kopya anahtarsız', !/^bm_/.test(G.SON_LS + G.ARS_LS + G.YAR_LS) && G.arsivAl()[0].id === String(d.kosuId) && !/sk-ant-[A-Za-z0-9]/.test(G.kopyaMetni(d)));
         const t0 = T3.donemToplam(); const e = G.arsivAl(); e[0].sonuc.mock = false; e[0].mock = false; e[0].sonuc.kosuId = T3.DONEM.basla + 1; e[0].sonuc.harcama.usd = 0.5; localStorage.setItem(G.ARS_LS, JSON.stringify(e));
@@ -10976,7 +10976,7 @@ const CASELER = [
       const G = window.BM_AI5; tarifAc('dubbel_2024'); S.stil = 'Dubbel';
       const st = G.hazirla({ tur: 'recete' }, { hedef: 'kuru' }), L = st.adaylar.liste;
       __REG.ok('Dubbel "daha kuru": 3 aday, sıra değişmezi geçerli (ölçülebilir → bant dışı → yalnız yön; grup içinde puan azalmaz)', L.length === 3 && G.siraGecerli(L), L.map(a => a.kural + ':' + a.grup + ':' + a.skor.toFixed(3)).join(' | '));
-      const f = a => Math.max(0, a.etki) * (0.5 + 0.5 * (a.kanit.N >= G.NOTR_N ? a.kanit.k / a.kanit.N : 0.5)) * (a.kanit.zayif ? 0.75 : 1) * (a.yanEtki.length ? G.YAN_CEZA : 1); // AI5C: N < 3 nötr, yan etki × 0,5
+      const f = a => Math.max(0, a.etki) * (0.5 + 0.5 * (a.kanit.N >= G.NOTR_N ? a.kanit.k / a.kanit.N : 0.5)) * (a.kanit.zayif ? 0.75 : 1); // AI5C: N < 3 nötr · KUC1: yan etki çarpan değil kademe
       __REG.ok('sıra puanı formülü = hedef etkisi × (0,5 + 0,5 × k/N) × (N < 5 ise 0,75); her adayda Δ metni ve formül metni', L.every(a => Math.abs(a.skor - f(a)) < 1e-12 && /^Δ FG [−+]?\d+,\d puan · Δ SRM [−+]?\d+,\d · Δ IBU [−+]?\d+$/.test(G.deltaMetin(a)) && (a.yonYok ? /yalnız yön/.test(a.siraAcik) : /^sıra puanı = hedef etkisi [\d,]+ \(FG puanı \(azalma\)\) × \(0,5 \+ 0,5 × (\d+\/\d+|nötr 0,5 — (\d+\/\d+|kanıt yok), N < 3)\)( × 0,75 \(N < 5\))?( × 0,5 \(yan etki\))? = [\d,]+/.test(a.siraAcik))), L.map(a => G.deltaMetin(a) + ' | ' + a.siraAcik).join(' || '));
       const yz = L.filter(a => a.yonYok), ol = L.filter(a => !a.yonYok);
       __REG.ok('kristal (hesapta FG değişmez) yalnız yön: SONDA, etiketli; ölçülebilir olanlarda kartta gösterilen FG değişiyor', yz.length === 1 && yz[0].kural === 'kristal' && L[L.length - 1] === yz[0] && ol.every(a => a.hk.once.fg.toFixed(3) !== a.hk.sonra.fg.toFixed(3)) && yz[0].hk.once.fg.toFixed(3) === yz[0].hk.sonra.fg.toFixed(3));
@@ -11031,7 +11031,7 @@ const CASELER = [
       const tatlar = (kayit.sonuclar || []).flatMap(r => (r.cumleler || []).filter(c => c.tur === 'tat').map(c => c.metin));
       return page.evaluate(async (set, tatlar) => {
         const G = window.BM_AI5, A = window.BM_AI, A4 = window.BM_AI4, KURAL = /"daha lezzetli" anlamına gelmediğini TEKRAR YAZMA/;
-        __REG.ok('denetleyici imzası değişmedi: d5f8d944-28083 = donmuş', A4.denetleyiciImza() === 'd5f8d944-28083' && A4.DENETLEYICI_DONMUS === 'd5f8d944-28083');
+        __REG.ok('AI5C denetleyiciye dokunmadı (imza AI5C\'de d5f8d944-28083 kaldı; KUC1 madde 2 ile b0bfee2d-29522): çalışan = donmuş', A4.denetleyiciImza() === A4.DENETLEYICI_DONMUS && A4.DENETLEYICI_DONMUS === 'b0bfee2d-29522');
         __REG.ok('G koşusunda tat olarak düşen 2 cümle paketteki uyarının tekrarı ("daha lezzetli" anlamına gelmez)', tatlar.length === 2 && tatlar.every(m => /"daha lezzetli" anlamına gelmez/.test(m)), tatlar.join(' | '));
         __REG.ok('anlatım sistem talimatında kural var (gelistir)', KURAL.test(A.SISTEMLER.gelistir));
         const kos = async () => { const m = __REG.ai1Mock({ gelistir: (i, q) => { const st = Object.values(G.durum).find(s => s.kanit && q.baglam.indexOf(s.kanit.metin) >= 0);
@@ -11084,13 +11084,13 @@ const CASELER = [
       __REG.ok('Dubbel "daha kuru" sırası: mash > şeker > kristal', L.map(a => a.kural).join() === 'mash,seker,kristal' && G.siraGecerli(L), L.map(a => a.kural + ' ' + a.skor.toFixed(3)).join(' | '));
       __REG.ok('mash N=1 → oran nötr 0,5 (k/N 0/1 kartta yazılı); şeker N=2 → nötr 0,5', by('mash').kanit.N === 1 && by('mash').oran === 0.5 && /nötr 0,5 — 0\/1, N < 3/.test(by('mash').siraAcik) && by('seker').kanit.N === 2 && by('seker').oran === 0.5);
       const y = by('seker').yanEtki;
-      __REG.ok('şeker: yan etki "SRM bandın daha da üstüne çıkar (32,3 → 36,4, bant 10,0–17,0)", puan × 0,5, kartta ⚠️; mash\'te yan etki yok (ABV hariç)', y.length === 1 && y[0].metin === 'SRM bandın daha da üstüne çıkar (32,3 → 36,4, bant 10,0–17,0)' && Math.abs(by('seker').skor - 0.6 * 0.75 * 0.75 * 0.5) < 0.01 && /× 0,5 \(yan etki\)/.test(by('seker').siraAcik) && !by('mash').yanEtki.length);
+      __REG.ok('şeker: yan etki "SRM bandın daha da üstüne çıkar (32,3 → 36,4, bant 10,0–17,0)", kartta ⚠️ (KUC1: puan çarpanı değil yan etki KADEMESİ); mash\'te yan etki yok (ABV hariç)', y.length === 1 && y[0].metin === 'SRM bandın daha da üstüne çıkar (32,3 → 36,4, bant 10,0–17,0)' && by('seker').grup === 'yan_etki' && Math.abs(by('seker').skor - 0.6 * 0.75 * 0.75) < 0.01 && !by('mash').yanEtki.length);
       const st = Object.values(G.durum).find(s => s.adaylar && s.adaylar.liste === L), d = document.createElement('div'); d.innerHTML = G.kartHTML(st.key);
       __REG.ok('kart + kanıt paketi: yan etki satırı yalnız şekerde', d.querySelectorAll('.bm-ai5-yan').length === 1 && /yan etki: SRM bandın daha da üstüne çıkar/.test(d.querySelector('.bm-ai5-aday[data-kural="seker"]').textContent) && /YAN ETKİ: SRM bandın daha da üstüne çıkar/.test(st.kanit.byId[by('seker').id].metin));
-      const n0 = G.NOTR_N, c0 = G.YAN_CEZA; G.NOTR_N = 0; G.YAN_CEZA = 1; let bz; try { bz = G.hazirla({ tur: 'recete' }, { hedef: 'kuru' }).adaylar.liste; } finally { G.NOTR_N = n0; G.YAN_CEZA = c0; }
-      __REG.ok('KASITLI BOZMA: nötr kural ve yan etki cezası kapanınca AI5B sırası geri gelir (şeker önde) → kırmızı', bz.map(a => a.kural).join() === 'seker,mash,kristal', bz.map(a => a.kural).join());
+      const n0 = G.NOTR_N, ey0 = G.yanEtki; G.NOTR_N = 0; G.yanEtki = () => []; let bz; try { bz = G.hazirla({ tur: 'recete' }, { hedef: 'kuru' }).adaylar.liste; } finally { G.NOTR_N = n0; G.yanEtki = ey0; }
+      __REG.ok('KASITLI BOZMA: nötr kural ve yan etki (KUC1 kademesi) kapanınca AI5B sırası geri gelir (şeker önde) → kırmızı', bz.map(a => a.kural).join() === 'seker,mash,kristal', bz.map(a => a.kural).join());
       const ey = G.yanEtki; G.yanEtki = () => []; let bz2; try { bz2 = G.hazirla({ tur: 'recete' }, { hedef: 'kuru' }).adaylar.liste; } finally { G.yanEtki = ey; }
-      __REG.ok('KASITLI BOZMA: yan etki kapanınca şekerde uyarı yok, puan iki katı → kırmızı', !bz2.find(a => a.kural === 'seker').yanEtki.length && Math.abs(bz2.find(a => a.kural === 'seker').skor - 2 * by('seker').skor) < 1e-9);
+      __REG.ok('KASITLI BOZMA: yan etki kapanınca şekerde uyarı yok, kademe temiz ölçülebilir → kırmızı', !bz2.find(a => a.kural === 'seker').yanEtki.length && G.grupOf(bz2.find(a => a.kural === 'seker')) === 'olculebilir');
       return __REG.al();
     })
   },
@@ -11108,6 +11108,98 @@ const CASELER = [
         const src = fs.readFileSync(path.join(KOK, HTML_AD), 'utf8'), i = src.indexOf('bm-ai-acilis-testi'), j = src.indexOf('bm-ai5-g-testi');
         return r.concat([{ ad: 'Ayarlar: G testi satırı açılış testi satırının hemen ardından (kaynak sırası)', ok: i > 0 && j > i && j - i < 2500, detay: '' }, { ad: 'elle etiket dosyası: (b+c) 0, gösterilen 52', ok: e.ozet.gosterilen === 52 && e.ozet.b + e.ozet.c === 0 && e.ozet.N === 54 && e.etiketler.filter(x => x.durum === 'gosterildi').length === 52 && e.etiketler.filter(x => x.durum === 'gosterildi').every(x => x.etiket === 'dogru'), detay: JSON.stringify(e.ozet).slice(0, 200) }]); });
     }
+  },
+  // ═════════════ SPRINT KUC1 — küçük açık işler (gerçek koşu yok) ═════════════
+  {
+    kod: 'KUC1-SENKRON', ad: 'SENKRON DURUM SATIRI (KUC1 madde 1): "son veri değişikliği" (gönderim / daha yeni bulut verisi) ile "son kontrol" (her başarılı bulut okuması; yalnız bellekte) AYRI; bekleyen yerel değişiklik "⏳" ile; teknik tanıda LAST_TS + LAST_CHECK + BEKLEYEN · fetch taklidi: okuma veri değiştirmez ama kontrolü yeniler, yerel değişiklik gönderilince veri değişikliği "az önce" · KASITLI BOZMA: başarısız okuma kontrol zamanını ilerletmez',
+    calistir: (page) => page.evaluate(async () => {
+      const eskiFetch = window.fetch, eskiCfg = syncCfg, eskiTs = syncSonGuncelle, log = [];
+      let bulut = { ts: Date.now() - 122 * 3600e3, KR: JSON.parse(JSON.stringify(KR)), STOK: [], cihaz: 'A' }, getOk = true;
+      window.fetch = async (u, o) => { log.push((o && o.method) || 'GET'); if (o && o.method === 'PUT') { bulut = JSON.parse(o.body); return { ok: true, status: 200, json: async () => ({}) }; } return { ok: getOk, status: getOk ? 200 : 503, json: async () => JSON.parse(JSON.stringify(bulut)) }; };
+      try {
+        syncCfg = { url: 'https://kuc1-test.firebaseio.com', oda: 'kuc1', odaToken: 't', cihaz: 'A' }; _syncTsKaydet(bulut.ts); syncSonKontrol = 0; _bmDirty = false;
+        const s0 = _syncDurumSatiri();
+        __REG.ok('122 saat önce veri değişmiş, bu oturumda kontrol yok: iki ayrı bilgi, bekleyen yok', /son veri değişikliği: 5 gün önce \(122 saat\)/.test(s0) && /son kontrol: bu oturumda henüz yok/.test(s0) && !/⏳/.test(s0), s0);
+        await syncAl(); const s1 = _syncDurumSatiri();
+        __REG.ok('bulut okundu (veri daha yeni değil): son kontrol "az önce", son veri değişikliği hâlâ 122 saat önce', /son kontrol: az önce/.test(s1) && /son veri değişikliği: 5 gün önce \(122 saat\)/.test(s1), s1);
+        KR[0].notlar = (KR[0].notlar || '') + ' '; ky(KR); const s2 = _syncDurumSatiri();
+        __REG.ok('yerel reçete değişikliği → "⏳ gönderilmeyi bekleyen değişiklik var"', _bmDirty === true && /⏳ gönderilmeyi bekleyen değişiklik var/.test(s2), s2);
+        clearTimeout(_syncGonderTimer); _syncGonderTimer = null; await syncGonder(); const s3 = _syncDurumSatiri();
+        __REG.ok('gönderim (PUT) başarılı → son veri değişikliği "az önce", bekleyen yok', log.indexOf('PUT') >= 0 && /son veri değişikliği: az önce/.test(s3) && !/⏳/.test(s3), s3);
+        const t = _syncTaniHTML();
+        __REG.ok('teknik tanı: LAST_TS (son veri değişikliği) + LAST_CHECK (son kontrol) + BEKLEYEN', /LAST_TS \(son veri değişikliği\): /.test(t) && /LAST_CHECK \(son kontrol\): (?!bu oturumda yok)/.test(t) && /BEKLEYEN: yok/.test(t));
+        __REG.ok('son kontrol yalnız bellekte: localStorage\'a yazılmaz (yedeğe / senkrona girmez)', !Object.keys(localStorage).some(k => /kontrol/i.test(k) && /sync/i.test(k)));
+        syncSonKontrol = 1; getOk = false; await syncAl();
+        __REG.ok('KASITLI BOZMA: okuma başarısızsa (503) son kontrol İLERLEMEZ → "kontrol az önce" yalan olmaz', syncSonKontrol === 1);
+      } finally { clearTimeout(_syncGonderTimer); _syncGonderTimer = null; window.fetch = eskiFetch; syncCfg = eskiCfg; _syncTsKaydet(eskiTs); syncSonKontrol = 0; _bmDirty = false; }
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'KUC1-BANT', ad: 'KART BANT HÜKMÜ GÖSTERİLEN DEĞERLE (KUC1 madde 2): A1.hukum bant kararı + yön verisi konumu yuvarlanmış değerle (ham 4,04 / 2–4 → içinde · ham 28,4 / 24–28 → içinde · ham 1,0136 / 1,008–1,013 → 1,014 dışında); aynı ekranda kıyas satırı ile kart hükmü aynı · yön üreticisi donmuş bölgede, denetleyici YENİDEN DONDURULDU (önceki d5f8d944-28083) · KASITLI BOZMA: ham değerle karar farklı çıkar',
+    calistir: async (page) => {
+      const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'ai5_g_seti.json'), 'utf8'));
+      return page.evaluate(async (set) => {
+        const A1 = window.BM_AI1, A4 = window.BM_AI4, G = window.BM_AI5, eh = window._bmTarifHesap;
+        BJCP.__KUC1 = { og: [1.04, 1.06], fg: [1.008, 1.013], ibu: [24, 28], srm: [2, 4], abv: [4, 6] };
+        window._bmTarifHesap = () => ({ og: 1.05, fg: 1.0136, abv: 5, ibu: 28.4, srm: 4.04 }); let hk;
+        try { hk = A1.hukum('__KUC1', { islem: 'miktar', tip: 'malt', once: {}, sonra: {} }); } finally { window._bmTarifHesap = eh; delete BJCP.__KUC1; }
+        __REG.ok('SRM ham 4,04 / 2–4 → içinde · IBU ham 28,4 / 24–28 → içinde · FG ham 1,0136 / 1,008–1,013 → dışında (gösterilen 1,014)', hk.bant.SRM.once && hk.bant.IBU.once && !hk.bant.FG.once && hk.bant.OG.once, JSON.stringify(hk.bant));
+        const Y = A4.yonHukum(hk), k = p => Y.filter(z => z.p === p && z.s === 'konum').map(z => z.y).join();
+        __REG.ok('yön verisi konumu aynı karar: srm ic · ibu ic · fg ust', k('srm') === 'ic' && k('ibu') === 'ic' && k('fg') === 'ust', JSON.stringify(Y));
+        __REG.ok('KASITLI BOZMA: ham değerle karar verilseydi SRM ve IBU DIŞINDA olurdu (yuvarlama gerçekten fark ediyor)', 4.04 > 4 && 28.4 > 28 && 1.0136 > 1.013);
+        let ks = 0, fark = [];
+        set.receteler.forEach(r => ['stil', 'kuru', 'koyu', 'azaci'].forEach(h => { const st = G.hazirla({ tur: 'tarif', key: 'kuc1:' + r.id + h, T: { tarif: JSON.parse(JSON.stringify(r.tarif)), stil: r.stil, ad: r.ad } }, { hedef: h });
+          const bj = {}; st.kiyas.sapma.concat(st.kiyas.ic).filter(x => x.ref === 'bjcp').forEach(x => { bj[x.boyut.toUpperCase()] = x.durum === 'ic'; });
+          st.adaylar.liste.forEach(a => Object.keys(a.hk.bant).forEach(X => { if (bj[X] == null) return; ks++; if (bj[X] !== a.hk.bant[X].once) fark.push(r.id + '/' + h + ' ' + X); })); }));
+        __REG.ok('aynı ekran: kıyas BJCP satırı ↔ aday kartı "önce" bant hükmü ' + ks + ' karşılaştırmada aynı', ks > 20 && !fark.length, fark.join(' | '));
+        const m = A4.denetleyiciMetni();
+        __REG.ok('DONDURMA: yön verisi üreticisi donmuş bölgede, imza = _BM_AI4B_DONMUS ≠ d5f8d944-28083', A4.denetleyiciImza() === A4.DENETLEYICI_DONMUS && A4.DENETLEYICI_DONMUS !== 'd5f8d944-28083' && /A4\.yonHukum = function/.test(m) && /A4\.YON_BASAMAK = /.test(m), A4.denetleyiciImza());
+        return __REG.al();
+      }, set);
+    }
+  },
+  {
+    kod: 'KUC1-KADEME', ad: 'YAN ETKİ KADEMESİ (KUC1 madde 3): 0,5 çarpanı kaldırıldı → kademe: ölçülebilir temiz → ⚠️ yan etki → 🔴 bandı aşan → yalnız yön; puan etki × (0,5 + 0,5 × k/N, N<3 nötr) × N<5 0,75; formülde "(sıralama kuralı uygulama varsayımı)" · Dubbel "daha kuru" mash > şeker > kristal · KASITLI BOZMA: yan etki kademesi kaldırılınca yüksek puanlı yan etkili aday öne geçer',
+    calistir: (page) => page.evaluate(async () => {
+      const G = window.BM_AI5; tarifAc('dubbel_2024'); S.stil = 'Dubbel';
+      const L = G.hazirla({ tur: 'recete' }, { hedef: 'kuru' }).adaylar.liste, sk = L.find(a => a.kural === 'seker');
+      __REG.ok('Dubbel "daha kuru": mash (ölçülebilir) > şeker (yan etki) > kristal (yalnız yön); şeker puanı çarpansız 0,6 × 0,75 × 0,75', L.map(a => a.kural + ':' + a.grup).join() === 'mash:olculebilir,seker:yan_etki,kristal:yalniz_yon' && Math.abs(sk.skor - 0.6 * 0.75 * 0.75) < 0.01 && G.siraGecerli(L) && G.YAN_CEZA === undefined, L.map(a => a.kural + ':' + a.grup + ':' + a.skor.toFixed(3)).join(' | '));
+      __REG.ok('formül + şeffaf metin: yan etki kademesi, sihirli çarpan yok, "(sıralama kuralı uygulama varsayımı)"', /sonra yan etkisi olanlar \(⚠️\)/.test(G.SIRA_FORMUL) && /\(sıralama kuralı uygulama varsayımı\)\.$/.test(G.SIRA_FORMUL) && !/× \(yan etki varsa 0,5\)/.test(G.SIRA_FORMUL) && /yan etkisi olduğu için temiz ölçülebilir adayların arkasında/.test(sk.siraAcik) && !/× 0,5/.test(sk.siraAcik));
+      const yap = (yan, skor, disari) => ({ yonYok: false, disari: disari || [], yanEtki: yan ? [{ p: 'srm' }] : [], skor });
+      const X = [yap(true, 5), yap(false, 1), yap(false, 3, ['SRM'])], s1 = G.siraKur(X.map(x => Object.assign({}, x)));
+      s1.forEach(a => { a.grup = G.grupOf(a); });
+      __REG.ok('sentetik: yan etkili puan 5 bile temiz puan 1\'in ARKASINDA, bandı aşan (3) en arkada', s1.map(a => a.skor).join() === '1,5,3' && G.siraGecerli(s1));
+      const eski = G.siraKur; G.siraKur = (Q) => { const y = Q.filter(a => !a.yonYok), ic = y.filter(a => !a.disari.length).sort((a, b) => b.skor - a.skor), d = y.filter(a => a.disari.length); return ic.concat(d); };
+      let s2; try { s2 = G.siraKur(X.map(x => Object.assign({}, x))); s2.forEach(a => { a.grup = G.grupOf(a); }); } finally { G.siraKur = eski; }
+      __REG.ok('KASITLI BOZMA: kademe kaldırılınca yan etkili aday öne geçer, sıra değişmezi kırmızı', !G.siraGecerli(s2) && s2[0].skor === 5);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'KUC1-STILSIZ', ad: 'STİL BOŞKEN (KUC1 madde 4): kartta "stil seçilmedi — bant yok, yan etki denetlenemedi" + "Stil seç" (mevcut Hedef stil seçicisine gider); stil UYDURULMAZ / atanmaz · stil seçilince satır kaybolur, şeker adayı ⚠️ alır',
+    calistir: (page) => page.evaluate(async () => {
+      const G = window.BM_AI5; tarifAc('dubbel_2024'); render(); await new Promise(r => setTimeout(r, 30));
+      const st = G.hazirla({ tur: 'recete' }, { hedef: 'kuru' }), d = document.createElement('div'); d.innerHTML = G.kartHTML(st.key);
+      const s = d.querySelector('.bm-ai5-stilsiz');
+      __REG.ok('stil boş: satır + "Stil seç" düğmesi (44 px); şekerde yan etki yok; stil atanmadı', !!s && /stil seçilmedi — bant yok, yan etki denetlenemedi/.test(s.textContent) && !!s.querySelector('.bm-ai5-stil-sec') && /min-height:44px/.test(s.querySelector('.bm-ai5-stil-sec').getAttribute('style')) && !st.adaylar.liste.find(a => a.kural === 'seker').yanEtki.length && !S.stil);
+      __REG.ok('"Stil seç" editördeki mevcut "Hedef stil" seçicisine götürür (odak), stil değişmez', G.stilSeciciAc() === true && document.activeElement && document.activeElement.getAttribute('aria-label') === 'Hedef stil' && !S.stil);
+      S.stil = 'Dubbel'; const s2 = G.hazirla({ tur: 'recete' }, { hedef: 'kuru' }), d2 = document.createElement('div'); d2.innerHTML = G.kartHTML(s2.key);
+      __REG.ok('stil seçilince satır yok; şeker ⚠️ yan etki alır', !d2.querySelector('.bm-ai5-stilsiz') && s2.adaylar.liste.find(a => a.kural === 'seker').yanEtki.length === 1 && !!d2.querySelector('.bm-ai5-aday[data-kural="seker"] .bm-ai5-yan'));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'KUC1-MARKA', ad: 'BUL ÇOK KELİMELİ MARKA (KUC1 madde 5): tarifteki ad öbeği ile bira adının baştan eşleşen kelime sayısı en büyük olan kazanır ("Little Kings gibi" → yalnız 1C Cream Ale; önce belirsiz 3 stil) · iyelik eki öbeği bölmez ("Bell’s Oberon" → 1D) · ölçülen davranışlar aynen: westmalle gibi koyu → 26B, duvel gibi → 25C, guinness gibi bir stout → klon, paulaner gibi bir weizen → Weissbier, "efes gibi bir lager" ticari değil (anlaşılmayan) · tek kelimede belirsiz aynen ("Chimay mavi")',
+    calistir: (page) => page.evaluate(async () => {
+      const B = window.BM_BUL; B.indeks(); const b = t => (B.coz(t).cipler.find(c => c.k === 'bjcpOrnek') || {});
+      const lk = b('Little Kings gibi');
+      __REG.ok('"Little Kings gibi" → bjcpOrnek 1C (belirsiz değil), ilk 5 Cream Ale', lk.d === '1C' && !lk.belirsiz && B.ara(B.coz('Little Kings gibi').cipler, {}).ilk.every(r => r.x.stil === 'Cream Ale'), JSON.stringify(lk).slice(0, 200));
+      __REG.ok('iyelik eki (düz / kıvrık kesme): "Bell’s Oberon gibi" → 1D · "Bell\'s Oberon gibi" → 1D · "Bell’s Two-Hearted gibi" → 21A · iki kelime tam ortaksa belirsiz kalır ("Sierra Nevada gibi")', b('Bell’s Oberon gibi').d === '1D' && b("Bell's Oberon gibi").d === '1D' && b('Bell’s Two-Hearted gibi').d === '21A' && b('Sierra Nevada gibi').d === 'hepsi');
+      const p = t => B.coz(t);
+      __REG.ok('ölçülen davranışlar DEĞİŞMEDİ', b('westmalle gibi koyu').d === '26B' && b('duvel gibi').d === '25C' && p('guinness gibi bir stout').cipler.some(c => c.k === 'klon' && c.d === 'guinness') && p('paulaner gibi bir weizen').cipler.length === 1 && p('paulaner gibi bir weizen').cipler[0].d === 'Weizen / Weissbier' && !p('efes gibi bir lager').cipler.some(c => /bjcpOrnek|ticari|klon/.test(c.k)) && (p('efes gibi bir lager').cozulemeyen || []).indexOf('efes') >= 0 && b('Chimay mavi gibi').d === 'hepsi' && b('Westvleteren 12 gibi').d === '26D' && b('Westmalle gibi bir tripel').d === '26C');
+      return __REG.al();
+    })
   },
   // ═════════════ SPRINT BUL2C — marka ∩ açık stil, kısa yer adı, koşu puanlaması, gerçek koşu kaçakları, BUL modeli Opus ═════════════
   {
