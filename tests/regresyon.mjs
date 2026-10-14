@@ -11354,7 +11354,7 @@ const CASELER = [
         const c1 = await M.soruIsle('altmış dört derece');
         __REG.ok('yalnız ölçüm → kaydedildi, AI yok', c1.tur === 'olcum' && n === 0 && S.mashOlcumler.slice(-1)[0].deger === 64);
         const k0 = S.mashOlcumler.length, c2 = await M.soruIsle('pH 5,0 ölçtüm ama motor 5,5 diyor, motor doğru değil mi');
-        __REG.ok('soru + ölçüm: yalnız "pH 5,0" kaydedildi ("motor 5,5" ölçüm değil), sonra AI', c2.tur === 'ai' && n === 1 && S.mashOlcumler.length === k0 + 1 && S.mashOlcumler.slice(-1)[0].deger === 5 && S.mashPh === 5);
+        __REG.ok('soru + sayı (MASH2B): HİÇBİRİ kaydedilmez, soru:deger parçası (5,00 ve 5,50), sonra AI', c2.tur === 'ai' && n === 1 && S.mashOlcumler.length === k0 && /pH 5,00 — birimi \/ türü söylendi; pH 5,50 — birimi söylenmedi/.test(c2.paket.byId['soru:deger'].metin));
         const c3 = await M.soruIsle('mash\'e tarçın atsam');
         __REG.ok('malzeme sorusu → AI4 yönlendirmesi (katki:tarcin), AI çağrısı yok; kartta yazar', c3.tur === 'yonlendirme' && c3.urunler.indexOf('katki:tarcin') >= 0 && n === 1 && (M.cevap = c3, /Kanıta sor/.test(M.soruHTML())));
         const c4 = await M.soruIsle('mash kaç kalori');
@@ -11442,6 +11442,32 @@ const CASELER = [
         return __REG.al();
       }, set);
     }
+  },
+  {
+    kod: 'MASH2B-SORU', ad: 'SORUDAKİ SAYI KAYDEDİLMEZ (MASH2B madde 1-2): yalnız SAF ÖLÇÜM (sayı + tür / birim + izinli dolgu M.DOLGU) otomatik kaydedilir; soru / geçmiş / varsayım cümlesindeki sayı soru:deger parçası olur ("kullanıcının sorusunda geçti, ölçüm olarak KAYDEDİLMEDİ"), kartta "kaydedilsin mi? [Kaydet]" (tek dokunuş, geri al mevcut); soru eki yoksa AI de yok · ses aynı kural · denetleyici imzası aynı · KASITLI BOZMA: kural kalkınca M06 sayısı ölçüm olarak yazılır',
+    calistir: (page) => page.evaluate(async () => {
+      const M = window.BM_MASH, A4 = window.BM_AI4; tarifAc('dubbel_2024'); let n = 0; const m = __REG.ai1Mock({ mash: () => { n++; return { kapsam: 'cevaplandi', cumleler: [] }; } });
+      const K = [['altmış dört derece', 'olcum', 1, null], ['mash altmış altı buçuk', 'olcum', 1, null], ['ölçtüm 5,4', 'olcum', 1, null], ['yetmiş beş derecede mash yaptım daha iyi olur değil mi', 'ai', 0, /75,0 °C — birimi \/ türü söylendi/],
+        ['pH 5,0 ölçtüm ama motor 5,5 diyor, motor doğru değil mi', 'ai', 0, /pH 5,00 — birimi \/ türü söylendi; pH 5,50 — birimi söylenmedi, türü değer aralığından/], ["64'te yapsam daha lezzetli olur mu", 'ai', 0, /64,0 °C — birimi söylenmedi/]], kot = [];
+      try { for (const [c, tur, kay, sd] of K) { const n0 = (S.mashOlcumler || []).length, r = await M.soruIsle(c), p = r.paket && r.paket.byId['soru:deger'];
+          if (r.tur !== tur || (S.mashOlcumler || []).length - n0 !== kay || (sd ? !(p && sd.test(p.metin) && /ölçüm olarak KAYDEDİLMEDİ/.test(p.baslik)) : !!p)) kot.push(c + ' → ' + r.tur + ' kayıt ' + ((S.mashOlcumler || []).length - n0) + ' ' + (p ? p.metin.slice(0, 80) : '-')); }
+        __REG.ok('6 cümle: 3 saf ölçüm kaydedildi · 3 soru: kayıt YOK + soru:deger (75 · 5,0 ve 5,5 · 64)', !kot.length, kot.join(' | '));
+        const n1 = n, c7 = await M.soruIsle('75 derecede mash yaptım');
+        __REG.ok('soru eki yok ama saf ölçüm değil ("yaptım") → kayıt YOK, AI YOK, "kaydedilsin mi?"', c7.tur === 'olcumOner' && n === n1 && c7.degerler.length === 1 && (M.cevap = c7, /75,0 °C bu partinin ölçümü olarak kaydedilsin mi\? <button[^>]*mash-deger-kaydet/.test(M.soruHTML())));
+        const k0 = S.mashOlcumler.length; M.soruDegerKaydet(0);
+        __REG.ok('[Kaydet] tek dokunuş → ölçüm kaydedildi, kartta ✓; ↶ geri al ile silinir', S.mashOlcumler.length === k0 + 1 && S.mashOlcumler.slice(-1)[0].deger === 75 && /✓ 75,0 °C bu partinin ölçümü olarak kaydedildi/.test(M.soruHTML()) && (M.sonuSil(), S.mashOlcumler.length === k0));
+        const c8 = await M.soruIsle('pH 5,0 ölçtüm ama motor 5,5 diyor, motor doğru değil mi'); M.cevap = c8; const h8 = M.soruHTML();
+        __REG.ok('yalnız birimi söylenen değere [Kaydet] (5,0); motorun 5,5\'ine düğme yok', (h8.match(/mash-deger-kaydet/g) || []).length === 1 && /pH 5,00 bu partinin/.test(h8) && !/pH 5,50 bu partinin/.test(h8));
+        const k1 = S.mashOlcumler.length; M.sesIsle('yetmiş beş derecede mash yaptım daha iyi olur değil mi');
+        __REG.ok('ses: aynı kural — kayıt yok, soru kutusuna', S.mashOlcumler.length === k1 && M.soruTaslak === 'yetmiş beş derecede mash yaptım daha iyi olur değil mi');
+        M.sesIsle('altmış beş derece'); __REG.ok('ses: saf ölçüm kaydedilir', S.mashOlcumler.length === k1 + 1 && S.mashOlcumler.slice(-1)[0].deger === 65);
+        __REG.ok('izinli dolgu listesi sabit (testli)', String(M.DOLGU) === String(/^(mash|olctum|olcum|olcumu|olcuyorum|olctugum|okudum|kaldi|oldu|cikti|geldi|gosteriyor|su|an|simdi|adim|adimda|ana|hacmi|sicakligi|termometre)$/));
+        __REG.ok('denetleyici imzası değişmedi (b0bfee2d-29522)', A4.denetleyiciImza() === 'b0bfee2d-29522');
+        const ed = M.DOLGU; M.DOLGU = /./; const k2 = S.mashOlcumler.length; let bz; try { bz = await M.soruIsle('yetmiş beş derecede mash yaptım daha iyi olur değil mi'); } finally { M.DOLGU = ed; }
+        __REG.ok('KASITLI BOZMA: kural kalkınca (her sözcük dolgu) M06 cümlesindeki 75 °C ölçüm olarak yazılır → kırmızı', S.mashOlcumler.length === k2 + 1 && S.mashOlcumler.slice(-1)[0].deger === 75);
+      } finally { m.geri(); }
+      return __REG.al();
+    })
   },
   // ═════════════ SPRINT BUL2C — marka ∩ açık stil, kısa yer adı, koşu puanlaması, gerçek koşu kaçakları, BUL modeli Opus ═════════════
   {

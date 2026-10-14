@@ -34971,7 +34971,7 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   var SAYI = { sifir:0, bir:1, iki:2, uc:3, dort:4, bes:5, alti:6, yedi:7, sekiz:8, dokuz:9, on:10, yirmi:20, otuz:30, kirk:40, elli:50, altmis:60, yetmis:70, seksen:80, doksan:90, yuz:100, bin:1000 };
   var katla = function(s){ return String(s || '').replace(/İ/g, 'i').replace(/I/g, 'ı').toLowerCase().replace(/ı/g, 'i').replace(/ş/g, 's').replace(/ç/g, 'c').replace(/ğ/g, 'g').replace(/ö/g, 'o').replace(/ü/g, 'u'); };
   var TUR_KEL = [['sicaklik', /^(derece|derecede|santigrat|celsius|sicaklik|sicakligi|sicaklikta|c|°c|°)$/], ['ph', /^(ph|peha|pehas|pe-ha)$/], ['hacim', /^(litre|litresi|litrede|lt|l|hacim|hacmi)$/], ['gravite', /^(og|gravite|gravity|yogunluk|okuma|sg|preboil|onkaynatma)$/]];
-  M.ayristir = function(metin){ var s = katla(metin).replace(/(\d)\s*°\s*c\b/g, '$1 °c').replace(/(\d)\s*°/g, '$1 °').replace(/\bp\s*h\b/g, 'ph').replace(/\bpe\s+ha\b/g, 'ph').replace(/on kaynatma|ön kaynatma|pre-?boil/g, 'onkaynatma').replace(/(\d)\s*(l|lt)\b/g, '$1 $2').replace(/(\d)(derece)/g, '$1 $2');
+  M.ayristir = function(metin){ var s = katla(metin).replace(/([a-z0-9])['’][a-z]+/g, '$1').replace(/(\d)\s*°\s*c\b/g, '$1 °c').replace(/(\d)\s*°/g, '$1 °').replace(/\bp\s*h\b/g, 'ph').replace(/\bpe\s+ha\b/g, 'ph').replace(/on kaynatma|ön kaynatma|pre-?boil/g, 'onkaynatma').replace(/(\d)\s*(l|lt)\b/g, '$1 $2').replace(/(\d)(derece)/g, '$1 $2');
     s = s.replace(/([a-z])-(?=[a-z])/g, '$1 '); // "altmış-altı" → iki sözcük
     var T0 = s.split(/[\s;:!?]+|,(?!\d)|\.(?!\d)/).filter(Boolean), T = [], belirsiz = {}, sayilar = [], i = 0;
     // MASH2 (0): sözcük sayı köküyle başlıyorsa: kök + hâl eki (de/da/te/ta/e/a/ye/ya/den/dan/ten/tan) → kök · kök + "bucuk" → kök, bucuk ·
@@ -35012,7 +35012,13 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
       if(tur === 'sicaklik' && !(v >= 20 && v <= 100)) tur = null; if(tur === 'ph' && !(v >= 3 && v <= 9)) tur = null; if(tur === 'hacim' && !(v > 0 && v <= 100)) tur = null;
       if(tur) out.push({ tur:tur, deger:Math.round(v * 10000) / 10000, ham:T.slice(n.a, n.b + 1).join(' '), kel:!!atanan[ni] }); });
     if(!out.length && Object.keys(belirsiz).length) out.belirsiz = true; // "altmışaltı derece", "yarım litre": sayı söylendi ama okunamadı → anlayamadım (soruya dönüşmez)
+    // MASH2B: SAF ÖLÇÜM — cümlenin her sözcüğü bir sayı öbeğine, tür / birim sözcüğüne ya da izinli dolguya (M.DOLGU) ait; yalnız bu otomatik kaydedilir.
+    //   Başka içerik (soru eki, "yaptım", "yapsam", "ama", "diyor", koşul / geçmiş / varsayım) varsa sayı KAYDEDİLMEZ — mash ölçümleri mash FG modeli verisidir (Kaan kararı)
+    var kapsa = {}; sayilar.forEach(function(nn){ for(var j = nn.a; j <= nn.b; j++) kapsa[j] = 1; }); kel.forEach(function(k){ kapsa[k.j] = 1; });
+    out.saf = out.length > 0 && T.every(function(w, j){ return kapsa[j] || M.DOLGU.test(w); });
     return out; };
+  // izinli dolgu sözcükleri (katlanmış; MASH2B testiyle sabit): "mash altmış dört", "ölçtüm 5,4", "şu an 66 derece", "termometre 65 gösteriyor"
+  M.DOLGU = /^(mash|olctum|olcum|olcumu|olcuyorum|olctugum|okudum|kaldi|oldu|cikti|geldi|gosteriyor|su|an|simdi|adim|adimda|ana|hacmi|sicakligi|termometre)$/;
   M.dinliyor = false; M.sonMetin = '';
   M.dinle = function(){ var SR = M.SR(); if(!SR || M.dinliyor) return false; var notGoster = lsAl(LS.not, '') !== '1'; if(notGoster) lsYaz(LS.not, '1');
     try{ var r = new SR(); r.lang = 'tr-TR'; r.interimResults = false; r.maxAlternatives = 1; r.continuous = false; M.dinliyor = true; M.sesNotIlk = notGoster; M.ciz();
@@ -35022,7 +35028,7 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   M.sesIsle = function(metin){ M.sonMetin = String(metin || ''); M.sesHata = null; var L = M.ayristir(metin);
     if(L.belirsiz){ M.son = { tur:'anlasilmadi', metin:M.sonMetin }; M.oku('Anlayamadım.'); M.ciz(); return L; }
     // MASH2: soru (soru eki / soru sözcüğü) ya da ölçüm yoksa → soru kutusuna yazılır; AI isteği "Sor" düğmesiyle (ücret)
-    if(!L.length || (M.SORU_RE && M.SORU_RE.test(katlaS(metin)))){ M.soruTaslak = M.sonMetin; L.filter(function(x){ return x.kel; }).forEach(function(x){ if(x.tur === 'sicaklik'){ M.taslak.sic = x.deger; M.kaydet('sicaklik'); } else if(x.tur === 'ph'){ M.taslak.ph = x.deger; M.kaydet('ph'); } }); M.ciz(); return L; }
+    if(!L.saf){ M.soruTaslak = M.sonMetin; M.ciz(); return L; } // MASH2B: saf ölçüm değilse soru kutusuna; sorudaki sayı KAYDEDİLMEZ (kartta "kaydedilsin mi?")
     var pb = L.find(function(x){ return x.tur === 'gravite'; }), hv = L.find(function(x){ return x.tur === 'hacim'; });
     L.forEach(function(x){ if(x.tur === 'sicaklik'){ M.taslak.sic = x.deger; M.kaydet('sicaklik'); } else if(x.tur === 'ph'){ M.taslak.ph = x.deger; M.kaydet('ph'); } });
     if(pb){ M.taslak.og = pb.deger; if(hv) M.taslak.V = hv.deger; M.kaydet('preboil'); } else if(hv){ M.taslak.V = hv.deger; M.ciz(); }
@@ -35142,12 +35148,17 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     Object.keys(kaynakIds).forEach(function(k){ var x = M.KAYNAK[k]; if(x) pEkle(P, 'kaynak:' + k, 'Kaynak', x.ad + (x.alinti ? ' — ' + x.alinti : '') + (x.url ? ' (' + x.url + ')' : '')); });
     var B = window._MASH_BILGI || {}, bk = []; tip.forEach(function(t){ (TIP_BILGI[t] || []).forEach(function(k){ if(B[k] && bk.indexOf(k) < 0) bk.push(k); }); });
     bk.slice(0, 6).forEach(function(k){ var x = B[k]; pEkle(P, 'bilgi:' + k, 'Mash bilgi tabanı (uygulama)', x.kol + ' — ETKİ: ' + x.etki + ' — KANIT DURUMU: ' + x.kanitDurumu + (x.kanitNot ? ' (' + x.kanitNot + ')' : '') + ' — BÜYÜKLÜK: ' + x.buyukluk + ' — KAYNAK: ' + x.kaynak); });
+    var sdL = opt.soruDeger || []; if(sdL.length) pEkle(P, 'soru:deger', 'Kullanıcının sorusunda geçen değerler (ölçüm olarak KAYDEDİLMEDİ)', sdL.map(function(x){ return M.degerMetin(x) + ' — ' + (x.kel ? 'birimi / türü söylendi' : 'birimi söylenmedi, türü değer aralığından'); }).join('; ') + '. Bu sayılar kullanıcının sorusunda geçti; aktif partinin ölçümü değildir.');
     var hm = M.hatirlatma(ai, null); if(hm.length) pEkle(P, 'hatirlatma', 'Bu adımın hatırlatmaları (uygulama)', hm.map(function(x){ return x.metin; }).join(' · '));
     pEkle(P, 'tip', 'Soru tipi (uygulama)', tip.length ? tip.join(', ') : 'eşleşmedi');
     var metinP = P.map(function(p){ return '[' + p.id + '] ' + p.baslik + ':\n' + p.metin; }).join('\n\n');
     // kanıt var mı: soruya ait bilgi / hesap / kaynak parçası
     var kanitli = P.some(function(p){ return /^(hesap:|bilgi:|kaynak:)/.test(p.id); });
     return { parcalar:P, byId:P.reduce(function(o, p){ o[p.id] = p; return o; }, {}), metin:metinP, tip:tip, kanitli:kanitli, secenekTur:Object.keys(hesapTur), f:{} }; };
+  M.degerMetin = function(x){ return x.tur === 'sicaklik' ? tr(x.deger, 1) + ' °C' : x.tur === 'ph' ? 'pH ' + tr(x.deger, 2) : x.tur === 'gravite' ? tr(x.deger, 3) + ' (gravite)' : tr(x.deger, 1) + ' L'; };
+  // MASH2B: sorudaki değeri tek dokunuşla ölçüm olarak kaydet (geri al mevcut: ↶ Son ölçümü sil)
+  M.soruDegerKaydet = function(i){ var c = M.cevap, x = c && c.degerler && c.degerler[i]; if(!x || x.kaydedildi) return null; var r = x.tur === 'sicaklik' ? M.olcumEkle({ tur:'sicaklik', deger:x.deger }) : x.tur === 'ph' ? M.olcumEkle({ tur:'ph', deger:x.deger, sic:M.taslak.phSic }) : x.tur === 'gravite' ? M.olcumEkle({ tur:'preboil', deger:x.deger }) : { ok:false, neden:'hacim tek başına kaydedilmez' };
+    if(r.ok) x.kaydedildi = true; else x.hata = r.neden; M.ciz(); return r; };
   M.sema = function(ids){ return { type:'json_schema', schema:{ type:'object', properties:{ kapsam:{ type:'string', enum:['cevaplandi', 'pakette_yok'] }, cumleler:{ type:'array', items:{ type:'object', properties:{ metin:{ type:'string' }, tur:{ type:'string', enum:['veri', 'hesap', 'yorum'] }, kaynaklar:{ type:'array', items:{ type:'string', enum:ids }, minItems:1 } }, required:['metin', 'tur', 'kaynaklar'], additionalProperties:false } } }, required:['kapsam', 'cumleler'], additionalProperties:false } }; };
   M.GOREV = 'GÖREV: Kullanıcının mash sorusunu YALNIZ yukarıdaki parçalarla cevapla; en çok 6 cümle. Her cümleye tür (veri / hesap / yorum) ve 1–3 parça ID yaz.';
   M.istek = function(paket, metin, mk, web){ var w = web || [], ids = paket.parcalar.map(function(p){ return p.id; }).concat(w.map(function(x){ return x.id; }));
@@ -35177,15 +35188,16 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   // soruIsle: { tur:'olcum'|'anlasilmadi'|'yonlendirme'|'bulamadim'|'ai', ... } — opt.kayitYok: ölçümü kaydetme (M koşucusu); opt.mock / opt.model
   M.soruIsle = function(metin, opt){ opt = opt || {}; var L = M.ayristir(metin), n = katlaS(metin), soru = M.SORU_RE.test(n) || !L.length;
     if(L.belirsiz) return Promise.resolve({ tur:'anlasilmadi', metin:metin });
-    if(soru) L = L.filter(function(x){ return x.kel; }); // soru içinde yalnız birimiyle / tür sözcüğüyle söylenen sayı ölçümdür ("motor 5,5 diyor" ölçüm değil)
+    // MASH2B: YALNIZ saf ölçüm otomatik kaydedilir; sorudaki / anlatıdaki sayı soru:deger parçası olur + kartta "kaydedilsin mi?" (tek dokunuş)
+    var sd = L.saf ? [] : L.slice(); if(!L.saf) L = [];
     if(L.length && !opt.kayitYok){ L.forEach(function(x){ if(x.tur === 'sicaklik'){ M.taslak.sic = x.deger; M.kaydet('sicaklik'); } else if(x.tur === 'ph'){ M.taslak.ph = x.deger; M.kaydet('ph'); } }); var pb = L.find(function(x){ return x.tur === 'gravite'; }); if(pb){ var hv = L.find(function(x){ return x.tur === 'hacim'; }); M.taslak.og = pb.deger; if(hv) M.taslak.V = hv.deger; M.kaydet('preboil'); } }
-    if(!soru) return Promise.resolve({ tur:'olcum', olcum:L });
-    var y = M.yonlendir(metin); if(y) return Promise.resolve({ tur:'yonlendirme', metin:metin, urunler:y.urunler });
-    var paket = M.paketKur(metin), web = opt.web || [];
-    if(!paket.kanitli && !web.length) return Promise.resolve({ tur:'bulamadim', metin:metin, paket:paket });
-    var A = window.BM_AI; if(!A || !(opt.mock || (A.hazirMi && A.hazirMi().hazir))) return Promise.resolve({ tur:'aiyok', metin:metin, paket:paket });
+    if(!soru) return Promise.resolve(sd.length ? { tur:'olcumOner', metin:metin, degerler:sd } : { tur:'olcum', olcum:L }); // soru değil ama saf ölçüm de değil → kayıt yok, AI yok, "kaydedilsin mi?"
+    var y = M.yonlendir(metin); if(y) return Promise.resolve({ tur:'yonlendirme', metin:metin, urunler:y.urunler, degerler:sd });
+    var paket = M.paketKur(metin, { soruDeger:sd }), web = opt.web || [];
+    if(!paket.kanitli && !web.length) return Promise.resolve({ tur:'bulamadim', metin:metin, paket:paket, degerler:sd });
+    var A = window.BM_AI; if(!A || !(opt.mock || (A.hazirMi && A.hazirMi().hazir))) return Promise.resolve({ tur:'aiyok', metin:metin, paket:paket, degerler:sd });
     var q = M.istek(paket, metin, opt.model, web);
-    return A.sor(q).then(function(r){ var m = r && r.maliyet; return { tur:'ai', metin:metin, paket:paket, istek:{ boy:q.baglam.length + q.soru.length, model:q.modelKey }, ok:!!(r && r.ok), usd:m ? +m.usd || 0 : 0, gir:m ? m.gir : 0, cik:m ? m.cik : 0, model:r && r.model || q.modelKey, hata:r && !r.ok ? r.hata : null, sonuc:M.cevapIsle(r, paket, web) }; }); };
+    return A.sor(q).then(function(r){ var m = r && r.maliyet; return { tur:'ai', metin:metin, paket:paket, istek:{ boy:q.baglam.length + q.soru.length, model:q.modelKey }, ok:!!(r && r.ok), usd:m ? +m.usd || 0 : 0, gir:m ? m.gir : 0, cik:m ? m.cik : 0, model:r && r.model || q.modelKey, hata:r && !r.ok ? r.hata : null, sonuc:M.cevapIsle(r, paket, web), degerler:sd }; }); };
   M.sor = function(metin, opt){ metin = String(metin || M.soruTaslak || '').trim(); if(!metin) return Promise.resolve(null); if(M.calisiyor) return Promise.resolve(null); var gen = (M._gen = (M._gen || 0) + 1);
     M.calisiyor = true; M.cevap = { tur:'bekliyor', metin:metin }; M.ciz();
     return M.soruIsle(metin, opt).then(function(c){ if(gen !== M._gen) return null; M.calisiyor = false; M.cevap = c; if(c && c.tur === 'ai') M.cevapOku(c); else if(c && c.tur === 'anlasilmadi') M.oku('Anlayamadım.'); M.ciz(); return c; }, function(e){ if(gen !== M._gen) return null; M.calisiyor = false; M.cevap = { tur:'hata', metin:metin, neden:String(e && e.message || e) }; M.ciz(); return null; }); };
@@ -35208,6 +35220,8 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     if(!c) return h + '</div>';
     if(c.tur === 'bekliyor') return h + '<div class="mash-cevap" data-tur="bekliyor" style="margin-top:6px">⏳ ' + (c.web ? 'internette aranıyor…' : 'cevap hazırlanıyor…') + ' <button type="button" class="bm-ayar-btn" style="min-height:44px;font-size:12px" onclick="BM_MASH.iptal()">İptal</button></div></div>';
     var k = '<div class="mash-cevap" data-tur="' + E(c.tur) + '" style="margin-top:6px;padding:8px 10px;border-radius:8px;background:#fff8ec;border:1px solid #e3cfa8">';
+    (c.degerler || []).forEach(function(x, i){ if(!x.kel || x.tur === 'hacim') return; k += '<div class="mash-soru-deger" style="margin-bottom:4px">' + (x.kaydedildi ? '✓ ' + E(M.degerMetin(x)) + ' bu partinin ölçümü olarak kaydedildi (geri almak için ↶ Son ölçümü sil)' : E(M.degerMetin(x)) + ' bu partinin ölçümü olarak kaydedilsin mi? <button type="button" class="bm-ayar-btn mash-deger-kaydet" style="min-height:44px;font-size:12px" onclick="BM_MASH.soruDegerKaydet(' + i + ')">Kaydet</button>' + (x.hata ? ' ⚠️ ' + E(x.hata) : '')) + '</div>'; });
+    if(c.tur === 'olcumOner') k += 'Cümlede ölçümden başka içerik var — sayı otomatik kaydedilmedi.';
     if(c.tur === 'iptal') k += 'İptal edildi (gönderilmiş istek ücretlendirilebilir; sonucu gösterilmez).';
     else if(c.tur === 'olcum') k += '📏 Ölçüm olarak kaydedildi — sapma kartı yukarıda (AI yok).';
     else if(c.tur === 'anlasilmadi') k += '❔ Anlayamadım: "' + E(c.metin) + '" — sayıyı okuyamadım, yazıyla gir.';
