@@ -1,6 +1,6 @@
 SPRINT BUL2C (BUL2B 35299b7 uzerine, SW v131-484) — kucuk duzeltmeler; BUL GERCEK KOSUSUNUN SONUCU GELDIKTEN SONRA uygulanir. AI'ya giden istemleri DEGISTIRMEZ (kosu sonucu gecerli kalir).
 
-Bu dosyada 4 numarali madde var. Ise baslamadan 4'unu de okudugunu raporun ilk satirinda teyit et.
+Bu dosyada 5 numarali madde var. Ise baslamadan 5'ini de okudugunu raporun ilk satirinda teyit et.
 EFOR: medium
 MODEL: Model-bagimsiz. Modelini ilk satirda belirt.
 
@@ -23,7 +23,13 @@ NEDEN: Claude BUL2B'yi canli kodda AI'siz denedi (2026-10-14, 34 tarif). Duzelen
 - Model tablosu: model · cip isabeti · ilk-5 · (i) uydurma · (ii) kaynaksiz yorum · AI tahmini sayisi · cagri basi gercek maliyet · %95 ust sinirlar. n kucuk (15 istem/model): fark guven araliginda ortusuyorsa acikca yaz. Karar Kaan'da; CC oneri yazar, karar vermez.
 - Ham sayilar (kosucunun kendi uydurma sayisi) de ayni tabloda kalir; bu kural yalniz ayrimi ekler, sonucu sonradan degistirmez.
 
-4. DOGRULAMA + AKIS
+4. GERCEK KOSUDA UYGULAMA KAYNAKLI KACAKLAR (kosu 1791966701651, 2026-10-14; kayit tests/fixtures/bul_kosu_2026-10-14.json — Kaan'in yapistirdigi metin, JSON gecerli, bitti, 56 cagri, 0,8095 $, anahtar 0)
+- B309 "kahveli ama aci olmayan, kadife gibi yumusak bir stout": IKI MODEL de ayni dogru cipleri secti (aci:az + kahve + stout + Coffee Stout) -> bulunamadi. Hangi cip eliyor (aci:az sert mi, Coffee Stout orneginde kahve malzemesi kayitli mi)? Model hatasi degil.
+- B310 "Belcika manastir birasi gibi koyu ve guclu": Opus stil:Dubbel + stil:Belgian Dark Strong Ale secti -> "iki farkli stil" celiski kurali soru sordu. Tarifte "manastir birasi" ust kavram; iki stil ayni BJCP grubundaysa (26) ya da tarif tek stil adi icermiyorsa VEYA (secenek) olmali, celiski degil. Haiku'nun Trappist Single + koyu + guclu celiskisi ise GERCEK celiski (BJCP 26A pale, standart guc) — o soru dogru.
+- B307 Opus "Noel icin zencefilli kurabiye tadinda": zencefil + kis + baharat + kuru:tatli -> bulunamadi (veride 1 ornek). Tatli yumusak cip olmasina ragmen neden 0? Kok neden.
+- Her biri icin: neden + duzeltme + kayitli AI kodlariyla AI'siz yeniden degerlendirme (ilk-5 once/sonra, model basina). Duzeltme AI istemlerini degistirmez.
+
+5. DOGRULAMA + AKIS
 - npm test yesil + madde 1-2 case'leri, en az 2 kasitli bozma kirmizi.
 - ZORUNLU: AI'ya giden istem listesi ve her istemin AI'ya giden metni/kod listesi bu degisiklikten once ve sonra AYNI (test). Degisirse dur ve raporla — kosu sonucunun gecerliligi buna bagli.
 - Tum set AI'siz, gercek kosunun AI kodlari aynen: beklenen ilk-5 orani dusmemeli.
