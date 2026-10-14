@@ -10976,8 +10976,8 @@ const CASELER = [
       const G = window.BM_AI5; tarifAc('dubbel_2024'); S.stil = 'Dubbel';
       const st = G.hazirla({ tur: 'recete' }, { hedef: 'kuru' }), L = st.adaylar.liste;
       __REG.ok('Dubbel "daha kuru": 3 aday, sıra değişmezi geçerli (ölçülebilir → bant dışı → yalnız yön; grup içinde puan azalmaz)', L.length === 3 && G.siraGecerli(L), L.map(a => a.kural + ':' + a.grup + ':' + a.skor.toFixed(3)).join(' | '));
-      const f = a => Math.max(0, a.etki) * (0.5 + 0.5 * (a.kanit.N ? a.kanit.k / a.kanit.N : 0)) * (a.kanit.zayif ? 0.75 : 1);
-      __REG.ok('sıra puanı formülü = hedef etkisi × (0,5 + 0,5 × k/N) × (N < 5 ise 0,75); her adayda Δ metni ve formül metni', L.every(a => Math.abs(a.skor - f(a)) < 1e-12 && /^Δ FG [−+]?\d+,\d puan · Δ SRM [−+]?\d+,\d · Δ IBU [−+]?\d+$/.test(G.deltaMetin(a)) && (a.yonYok ? /yalnız yön/.test(a.siraAcik) : /^sıra puanı = hedef etkisi [\d,]+ \(FG puanı \(azalma\)\) × \(0,5 \+ 0,5 × (\d+\/\d+|kanıt yok 0)\)( × 0,75 \(N < 5\))? = [\d,]+/.test(a.siraAcik))), L.map(a => G.deltaMetin(a) + ' | ' + a.siraAcik).join(' || '));
+      const f = a => Math.max(0, a.etki) * (0.5 + 0.5 * (a.kanit.N >= G.NOTR_N ? a.kanit.k / a.kanit.N : 0.5)) * (a.kanit.zayif ? 0.75 : 1) * (a.yanEtki.length ? G.YAN_CEZA : 1); // AI5C: N < 3 nötr, yan etki × 0,5
+      __REG.ok('sıra puanı formülü = hedef etkisi × (0,5 + 0,5 × k/N) × (N < 5 ise 0,75); her adayda Δ metni ve formül metni', L.every(a => Math.abs(a.skor - f(a)) < 1e-12 && /^Δ FG [−+]?\d+,\d puan · Δ SRM [−+]?\d+,\d · Δ IBU [−+]?\d+$/.test(G.deltaMetin(a)) && (a.yonYok ? /yalnız yön/.test(a.siraAcik) : /^sıra puanı = hedef etkisi [\d,]+ \(FG puanı \(azalma\)\) × \(0,5 \+ 0,5 × (\d+\/\d+|nötr 0,5 — (\d+\/\d+|kanıt yok), N < 3)\)( × 0,75 \(N < 5\))?( × 0,5 \(yan etki\))? = [\d,]+/.test(a.siraAcik))), L.map(a => G.deltaMetin(a) + ' | ' + a.siraAcik).join(' || '));
       const yz = L.filter(a => a.yonYok), ol = L.filter(a => !a.yonYok);
       __REG.ok('kristal (hesapta FG değişmez) yalnız yön: SONDA, etiketli; ölçülebilir olanlarda kartta gösterilen FG değişiyor', yz.length === 1 && yz[0].kural === 'kristal' && L[L.length - 1] === yz[0] && ol.every(a => a.hk.once.fg.toFixed(3) !== a.hk.sonra.fg.toFixed(3)) && yz[0].hk.once.fg.toFixed(3) === yz[0].hk.sonra.fg.toFixed(3));
       const d = document.createElement('div'); d.innerHTML = G.kartHTML(st.key);
@@ -11021,6 +11021,92 @@ const CASELER = [
         return __REG.al();
       }, set);
       return dis.concat(ic);
+    }
+  },
+  // ═════════════ SPRINT AI5C — G gerçek koşusu sonrası küçük düzeltmeler (denetleyici DEĞİŞMEDİ) ═════════════
+  {
+    kod: 'AI5C-TAT', ad: 'TAT YANLIŞ ALARMI (AI5C madde 1): denetleyiciye DOKUNULMADI (imza d5f8d944-28083 aynı); anlatım talimatına "daha lezzetli anlamına gelmediğini TEKRAR YAZMA" eklendi · talimata uyan mock bu cümleyi üretmez → tat 0 · KASITLI BOZMA: talimat çıkarılınca G koşusundaki iki cümle geri gelir ve tat hükmü olarak düşer',
+    calistir: async (page) => {
+      const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'ai5_g_seti.json'), 'utf8')), kayit = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'fixtures', 'ai5_g_kosu_2026-10-14.json'), 'utf8'));
+      const tatlar = (kayit.sonuclar || []).flatMap(r => (r.cumleler || []).filter(c => c.tur === 'tat').map(c => c.metin));
+      return page.evaluate(async (set, tatlar) => {
+        const G = window.BM_AI5, A = window.BM_AI, A4 = window.BM_AI4, KURAL = /"daha lezzetli" anlamına gelmediğini TEKRAR YAZMA/;
+        __REG.ok('denetleyici imzası değişmedi: d5f8d944-28083 = donmuş', A4.denetleyiciImza() === 'd5f8d944-28083' && A4.DENETLEYICI_DONMUS === 'd5f8d944-28083');
+        __REG.ok('G koşusunda tat olarak düşen 2 cümle paketteki uyarının tekrarı ("daha lezzetli" anlamına gelmez)', tatlar.length === 2 && tatlar.every(m => /"daha lezzetli" anlamına gelmez/.test(m)), tatlar.join(' | '));
+        __REG.ok('anlatım sistem talimatında kural var (gelistir)', KURAL.test(A.SISTEMLER.gelistir));
+        const kos = async () => { const m = __REG.ai1Mock({ gelistir: (i, q) => { const st = Object.values(G.durum).find(s => s.kanit && q.baglam.indexOf(s.kanit.metin) >= 0);
+            const genel = [{ metin: 'Kıyas uygulamanın parçalarından özetlendi.', kaynaklar: ['hedef'] }]; if (!KURAL.test(A.SISTEMLER.gelistir)) genel.push({ metin: tatlar[i % 2], kaynaklar: ['hedef'] }); // talimata uyan model tekrar yazmaz
+            return { genel, adaylar: st.adaylar.liste.map(a => ({ aday: a.id, cumleler: [] })) }; } });
+          try { return await G.kos({ mock: true, set, tavan: 5 }); } finally { m.geri(); } };
+        const d1 = await kos();
+        __REG.ok('talimatla: 8 adım, tat hükmü düşen 0', d1.bitti && d1.metrik.tat === 0, d1.metrik.ozet);
+        const es = A.SISTEMLER.gelistir; A.SISTEMLER.gelistir = es.replace(/ Hedefin "daha lezzetli" anlamına gelmediğini TEKRAR YAZMA — kart bunu zaten gösteriyor\./, ''); let d2; try { d2 = await kos(); } finally { A.SISTEMLER.gelistir = es; }
+        __REG.ok('KASITLI BOZMA: talimat çıkarılınca tekrar cümlesi geri gelir, tat hükmü olarak düşer (8) → kırmızı', d2.metrik.tat === 8, d2.metrik.ozet);
+        return __REG.al();
+      }, set, tatlar);
+    }
+  },
+  {
+    kod: 'AI5C-KIYAS', ad: 'YUVARLAMA GÖRÜNÜMÜ (AI5C madde 2): kıyas kararı ekranda gösterilen (yuvarlanmış) değerle — Saison IBU 28 / ödüllü 24–28 artık "aralıkta" (önce ÜSTÜNDE) · KASITLI BOZMA: ham değerle karar ÜSTÜNDE',
+    calistir: async (page) => {
+      const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'ai5_g_seti.json'), 'utf8'));
+      return page.evaluate(async (set) => {
+        const G = window.BM_AI5, r = set.receteler.find(x => x.id === 'saison'), st = G.hazirla({ tur: 'tarif', key: 'ai5c:saison', T: { tarif: JSON.parse(JSON.stringify(r.tarif)), stil: r.stil, ad: r.ad } }, { hedef: 'stil' });
+        const x = st.kiyas.ic.concat(st.kiyas.sapma).find(q => q.ref === 'odullu' && q.boyut === 'ibu');
+        __REG.ok('Saison ödüllü IBU: gösterilen ' + Math.round(x.deger) + ' · aralık ' + Math.round(x.alt) + '–' + Math.round(x.ust) + ' → aralıkta (ham ' + x.deger.toFixed(2) + ' / ' + x.ust.toFixed(2) + ')', x.durum === 'ic' && Math.round(x.deger) === 28 && Math.round(x.ust) === 28 && !/IBU 28 · ödüllü örnekler p10–p90 24–28 · n \d+ · ÜSTÜNDE/.test(st.kanit.metin));
+        __REG.ok('KASITLI BOZMA: ham değerle karar verilseydi ÜSTÜNDE olurdu (yuvarlama gerçekten fark ediyor) → kırmızı', x.deger > x.ust + 1e-9);
+        const tum = st.kiyas.sapma.concat(st.kiyas.ic), d = { og: 3, fg: 3, ibu: 0, srm: 1, abv: 1 }, kot = tum.filter(q => q.birim !== '%' && d[q.boyut] != null && q.alt != null && q.durum !== 'ic' && (q.ref !== 'korpus' || q.boyut !== 'og') && +q.deger.toFixed(d[q.boyut]) >= +q.alt.toFixed(d[q.boyut]) && +q.deger.toFixed(d[q.boyut]) <= +q.ust.toFixed(d[q.boyut]));
+        __REG.ok('hiçbir sapma satırında gösterilen değer gösterilen aralığın içinde değil', !kot.length, kot.map(q => q.ref + ':' + q.boyut).join(','));
+        return __REG.al();
+      }, set);
+    }
+  },
+  {
+    kod: 'AI5C-MASH', ad: 'MASH NOTLARI (AI5C madde 3; Kaan kararı: FG hesabı DEĞİŞMEZ): mash adayında "kaynaklar 65–68 °C aralığında da etki gösteriyor (BYO ≥ 1 %/°C, Brulosophy ≈ 3,2 %/°C)" notu; kademeli mash\'te kartta "yalnız ana adımı (X °C) kullanıyor"; FG aynı',
+    calistir: (page) => page.evaluate(async () => {
+      const G = window.BM_AI5; tarifAc('dubbel_2024'); S.stil = 'Dubbel';
+      const t0 = JSON.parse(JSON.stringify(window.BM_AI1.baglamTarif({ tur: 'recete' }).tarif)), fg0 = window._bmTarifHesap(t0).fg;
+      S.mashAdimlar = [{ dk: 15, sc: 46 }, { dk: 60, sc: 66 }, { dk: 15, sc: 72 }];
+      const st = G.hazirla({ tur: 'recete' }, { hedef: 'kuru' }), m = st.adaylar.liste.find(a => a.kural === 'mash'), d = document.createElement('div'); d.innerHTML = G.kartHTML(st.key);
+      __REG.ok('mash adayı notu (kaynaklı, hesap değişmez dili)', !!m && m.varsayim.indexOf(G.MASH_NOT) >= 0 && /65–68 °C aralığında da etki gösteriyor \(BYO ≥ 1 %\/°C, Brulosophy 2018 ≈ 3,2 %\/°C/.test(G.MASH_NOT) && d.querySelector('.bm-ai5-aday[data-kural="mash"]').textContent.indexOf('gerçek fark muhtemelen hesaptakinden büyük') >= 0);
+      __REG.ok('kademeli mash: kartta "uygulama FG hesabında yalnız ana adımı (66 °C) kullanıyor"', /46 °C 15 dk → 66 °C 60 dk → 72 °C 15 dk\): uygulama FG hesabında yalnız ana adımı \(66 °C\) kullanıyor/.test((d.querySelector('.bm-ai5-kademeli') || {}).textContent || ''));
+      __REG.ok('FG hesabı DEĞİŞMEDİ (kademeli adımlar hesaba girmez)', window._bmTarifHesap(st.T.tarif).fg === fg0);
+      S.mashAdimlar = [{ dk: 60, sc: 66 }]; const s2 = G.hazirla({ tur: 'recete' }, { hedef: 'kuru' }), d2 = document.createElement('div'); d2.innerHTML = G.kartHTML(s2.key);
+      __REG.ok('tek adımlı mash\'te kademeli notu yok', !d2.querySelector('.bm-ai5-kademeli'));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AI5C-SIRA', ad: 'KÜÇÜK N + YAN ETKİ (AI5C madde 4-5): ödüllü N < 3 → k/N sıraya girmez (nötr 0,5), kartta yine yazılır · hedef dışı değer zaten bant dışındayken daha da uzaklaşırsa "yan etki" + puan × 0,5 (ABV hariç — OG/FG\'den türer) · Dubbel "daha kuru": ÖNCE şeker > mash > kristal, SONRA mash > şeker > kristal · KASITLI BOZMA: nötr kural / yan etki kapanınca',
+    calistir: (page) => page.evaluate(async () => {
+      const G = window.BM_AI5; tarifAc('dubbel_2024'); S.stil = 'Dubbel';
+      const L = G.hazirla({ tur: 'recete' }, { hedef: 'kuru' }).adaylar.liste, by = k => L.find(a => a.kural === k);
+      __REG.ok('Dubbel "daha kuru" sırası: mash > şeker > kristal', L.map(a => a.kural).join() === 'mash,seker,kristal' && G.siraGecerli(L), L.map(a => a.kural + ' ' + a.skor.toFixed(3)).join(' | '));
+      __REG.ok('mash N=1 → oran nötr 0,5 (k/N 0/1 kartta yazılı); şeker N=2 → nötr 0,5', by('mash').kanit.N === 1 && by('mash').oran === 0.5 && /nötr 0,5 — 0\/1, N < 3/.test(by('mash').siraAcik) && by('seker').kanit.N === 2 && by('seker').oran === 0.5);
+      const y = by('seker').yanEtki;
+      __REG.ok('şeker: yan etki "SRM bandın daha da üstüne çıkar (32,3 → 36,4, bant 10,0–17,0)", puan × 0,5, kartta ⚠️; mash\'te yan etki yok (ABV hariç)', y.length === 1 && y[0].metin === 'SRM bandın daha da üstüne çıkar (32,3 → 36,4, bant 10,0–17,0)' && Math.abs(by('seker').skor - 0.6 * 0.75 * 0.75 * 0.5) < 0.01 && /× 0,5 \(yan etki\)/.test(by('seker').siraAcik) && !by('mash').yanEtki.length);
+      const st = Object.values(G.durum).find(s => s.adaylar && s.adaylar.liste === L), d = document.createElement('div'); d.innerHTML = G.kartHTML(st.key);
+      __REG.ok('kart + kanıt paketi: yan etki satırı yalnız şekerde', d.querySelectorAll('.bm-ai5-yan').length === 1 && /yan etki: SRM bandın daha da üstüne çıkar/.test(d.querySelector('.bm-ai5-aday[data-kural="seker"]').textContent) && /YAN ETKİ: SRM bandın daha da üstüne çıkar/.test(st.kanit.byId[by('seker').id].metin));
+      const n0 = G.NOTR_N, c0 = G.YAN_CEZA; G.NOTR_N = 0; G.YAN_CEZA = 1; let bz; try { bz = G.hazirla({ tur: 'recete' }, { hedef: 'kuru' }).adaylar.liste; } finally { G.NOTR_N = n0; G.YAN_CEZA = c0; }
+      __REG.ok('KASITLI BOZMA: nötr kural ve yan etki cezası kapanınca AI5B sırası geri gelir (şeker önde) → kırmızı', bz.map(a => a.kural).join() === 'seker,mash,kristal', bz.map(a => a.kural).join());
+      const ey = G.yanEtki; G.yanEtki = () => []; let bz2; try { bz2 = G.hazirla({ tur: 'recete' }, { hedef: 'kuru' }).adaylar.liste; } finally { G.yanEtki = ey; }
+      __REG.ok('KASITLI BOZMA: yan etki kapanınca şekerde uyarı yok, puan iki katı → kırmızı', !bz2.find(a => a.kural === 'seker').yanEtki.length && Math.abs(bz2.find(a => a.kural === 'seker').skor - 2 * by('seker').skor) < 1e-9);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AI5C-SERIT', ad: 'G TESTİ SONUCU (AI5C madde 6): kartın erken test şeridinde ve Ayarlar ▸ AI özellikleri\'nde (açılış testi satırının yanında) "G testi 2026-10-14, Opus 5.5: uydurma 0/54, yalakalık 0/4"; kayıtlı koşu ve elle etiket dosyasıyla tutarlı',
+    calistir: async (page) => {
+      const k = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'fixtures', 'ai5_g_kosu_2026-10-14.json'), 'utf8')), e = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'fixtures', 'ai5_g_kosu_2026-10-14_etiket.json'), 'utf8'));
+      return page.evaluate(async (kid, N, G_) => {
+        const G = window.BM_AI5; tarifAc('dubbel_2024'); render(); await new Promise(r => setTimeout(r, 30));
+        const ser = document.querySelector('.bm-ai5-kutu .bm-ai5-serit');
+        __REG.ok('kart şeridi', !!ser && ser.textContent === 'erken test — G testi 2026-10-14, Opus 5.5: uydurma 0/54, yalakalık 0/4', ser && ser.textContent);
+        __REG.ok('sabit = kayıtlı koşu (kosuId ' + kid + ', N ' + N + ', gösterilen ' + G_ + ')', G.G_TEST.kosuId === kid && G.G_TEST.uydurma.birim === N && G.G_TEST.gosterilen === G_);
+        return __REG.al();
+      }, k.kosuId, (k.metrik || {}).N, (k.metrik || {}).gosterilen).then(async (r) => {
+        const src = fs.readFileSync(path.join(KOK, HTML_AD), 'utf8'), i = src.indexOf('bm-ai-acilis-testi'), j = src.indexOf('bm-ai5-g-testi');
+        return r.concat([{ ad: 'Ayarlar: G testi satırı açılış testi satırının hemen ardından (kaynak sırası)', ok: i > 0 && j > i && j - i < 2500, detay: '' }, { ad: 'elle etiket dosyası: (b+c) 0, gösterilen 52', ok: e.ozet.gosterilen === 52 && e.ozet.b + e.ozet.c === 0 && e.ozet.N === 54 && e.etiketler.filter(x => x.durum === 'gosterildi').length === 52 && e.etiketler.filter(x => x.durum === 'gosterildi').every(x => x.etiket === 'dogru'), detay: JSON.stringify(e.ozet).slice(0, 200) }]); });
     }
   },
   // ═════════════ SPRINT BUL2C — marka ∩ açık stil, kısa yer adı, koşu puanlaması, gerçek koşu kaçakları, BUL modeli Opus ═════════════

@@ -31697,7 +31697,7 @@ window.BM_AI = (function(){
   var SISTEM_GELISTIR = ['Sen Brewmaster uygulamasının reçete geliştirme anlatıcısısın. VERİ bölümünde köşeli parantezli ID\'leriyle: hedef, kıyas sapmaları (kiyas:…), uygulamanın KURAL MOTORUNUN ürettiği aday değişiklikler (aday:1 …), kural tablosu satırları (kural:…) ve varsa kullanıcının geçmişinin özet sayıları (kisi:…) verilir. ZORUNLU KURALLAR:',
     '1. Yeni öneri, yeni malzeme ya da yeni değişiklik EKLEME; adayların sırasını değiştirme. Yalnız verilen her adayın NEDEN önerildiğini anlat. Aday yoksa (aday:yok) yalnız uygulamanın nedenini aktar.',
     '2. Her cümle 1–3 parçaya dayanır; "kaynaklar" alanına ID\'leri yaz. Sayıyı parçada yazdığı gibi yaz (aynı değer, aynı birim); hesap yapma, yuvarlama, birim çevirme.',
-    '3. Tat ya da kalite hükmü verme: "daha lezzetli", "daha iyi", "güzel olur", "tavsiye ederim", "harika", "uyumlu" YASAK. Hedef bir yöndür, iyilik değildir.',
+    '3. Tat ya da kalite hükmü verme: "daha lezzetli", "daha iyi", "güzel olur", "tavsiye ederim", "harika", "uyumlu" YASAK. Hedef bir yöndür, iyilik değildir. Hedefin "daha lezzetli" anlamına gelmediğini TEKRAR YAZMA — kart bunu zaten gösteriyor.',
     '4. Sapma hata değildir: "ödüllü örneklerin çoğundan farklı" de, "yanlış" ya da "hatalı" deme. "zayıf kanıt" etiketli sapmayı kesin gibi anlatma.',
     '5. genel alanında en çok 3 cümle (kıyas özeti). adaylar alanında her aday için en çok 3 cümle; bir adayın cümlesinde başka adayın parçasını (aday:N) kaynak gösterme.',
     '6. Kullanıcının fikrine katılma ya da karşı çıkma; reçeteyi övme ya da yerme. Türkçe ve kısa yaz.'].join('\n');
@@ -32920,7 +32920,7 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
       var s = (typeof S !== 'undefined') ? S : null; if(!s) return null;
       return { tur:'recete', stil:s.stil || '', ad:s.biraAd || 'açık reçete', key:'recete',
         tarif:{ maltlar:JSON.parse(JSON.stringify(s.maltlar || [])), hoplar:JSON.parse(JSON.stringify(s.hoplar || [])), katkilar:JSON.parse(JSON.stringify(s.katkilar || [])),
-          mayaId:s.mayaId || null, hacim:+s.hacim > 0 ? +s.hacim : 11, verim:+s.verim > 0 ? +s.verim : 61, mashSc:+s.mashSc || 67 } };
+          mayaId:s.mayaId || null, hacim:+s.hacim > 0 ? +s.hacim : 11, verim:+s.verim > 0 ? +s.verim : 61, mashSc:+s.mashSc || 67, mashAdimlar:JSON.parse(JSON.stringify(s.mashAdimlar || [])) } }; // AI5C (3): kademeli mash notu için (hesap kullanmaz)
     }catch(e){ return null; }
   };
   function hopZaman(b){ return b.tur === 'dry_hop' ? 'kuru hop' + (b.dryDays ? ' ' + b.dryDays + ' gün' : '') : b.tur === 'whirlpool' ? 'whirlpool ' + (b.dk || 0) + ' dk' + (b.whT ? ' ' + b.whT + ' °C' : '') : b.tur === 'fwh' ? 'FWH' : 'kaynatma ' + (b.dk == null ? '?' : b.dk) + ' dk'; }
@@ -34317,22 +34317,24 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     var stil = T.stil || '', B = (typeof BJCP !== 'undefined' && stil) ? BJCP[stil] : null, c = hesap(T.tarif), out = { stil:stil, stilYok:!stil, bjcpYok:!!stil && !B, c:c, sapma:[], ic:[], kaynak:{}, rol:G.rolPay(T.tarif) };
     var ekle = function(x){ x.zayif = x.n != null && x.n < G.ZAYIF_N; (x.durum === 'ic' ? out.ic : out.sapma).push(x); };
     var dur = function(v, lo, hi){ return v < lo - 1e-9 ? 'alt' : v > hi + 1e-9 ? 'ust' : 'ic'; };
+    // AI5C (2): karar EKRANDA GÖSTERİLEN değerlerle (OG/FG 3 · IBU 0 · SRM / ABV / pay 1 basamak; korpus OG puanı 0) — 'IBU 28 · 24–28 ÜSTÜNDE' gibi çelişkili görünüm olmasın
+    var durG = function(d, v, lo, hi){ var g = function(x){ return +(+x).toFixed(d); }; return dur(g(v), g(lo), g(hi)); }, bs = function(a){ return EKSEN[a] ? EKSEN[a].d : 1; };
     // (a) BJCP bandı
-    if(B) ['og', 'fg', 'ibu', 'srm', 'abv'].forEach(function(a){ if(!B[a]) return; var v = c[a]; ekle({ ref:'bjcp', boyut:a, ad:EKSEN[a].ad, deger:v, alt:B[a][0], ust:B[a][1], n:null, aralikAd:'BJCP 2021 bandı', kaynak:'bjcp:' + stil, durum:dur(v, B[a][0], B[a][1]) }); });
+    if(B) ['og', 'fg', 'ibu', 'srm', 'abv'].forEach(function(a){ if(!B[a]) return; var v = c[a]; ekle({ ref:'bjcp', boyut:a, ad:EKSEN[a].ad, deger:v, alt:B[a][0], ust:B[a][1], n:null, aralikAd:'BJCP 2021 bandı', kaynak:'bjcp:' + stil, durum:durG(bs(a), v, B[a][0], B[a][1]) }); });
     // (b) iskelet rol payları (türetilmiş: iz.grist p25–p75; elle: aralık yok → yalnız bilgi)
     var IA = stil && window._bmIskeletAl ? window._bmIskeletAl(stil) : null;
     if(IA){ out.iskelet = { tur:IA.tur, n:IA.isk.n || null, kaynakStil:IA.kaynakStil || null };
       var rp = {}; if(IA.isk.iz && IA.isk.iz.grist && IA.tur !== 'odunc') IA.isk.iz.grist.forEach(function(g){ var r = g.rol && g.rol.indexOf('kristal') === 0 ? 'kristal' : g.rol; if(!ROL_AD[r]) return; /* adjunct / isli / asitli: reçete tarafında aynı tanım yok → kıyasa girmez */ if(!rp[r]) rp[r] = { pay:0, lo:0, hi:0, n:g.n, k:0 }; rp[r].k++; rp[r].pay += g.pay; if(g.iqr){ rp[r].lo += g.iqr[0]; rp[r].hi += g.iqr[1]; } rp[r].n = Math.max(rp[r].n, g.n); });
-      Object.keys(rp).forEach(function(r){ var v = out.rol.pay[r] || 0; ekle({ ref:'iskelet', boyut:'rol:' + r, ad:(ROL_AD[r] || r) + ' payı', deger:v, alt:rp[r].lo, ust:rp[r].hi, merkez:rp[r].pay, n:rp[r].n, aralikAd:'iskelet izi p25–p75 (' + IA.tur + (rp[r].k > 1 ? '; ' + rp[r].k + ' satırın çeyrekleri toplandı — yaklaşık' : '') + ')', kaynak:'iskelet:' + stil, durum:dur(v, rp[r].lo, rp[r].hi), birim:'%' }); });
+      Object.keys(rp).forEach(function(r){ var v = out.rol.pay[r] || 0; ekle({ ref:'iskelet', boyut:'rol:' + r, ad:(ROL_AD[r] || r) + ' payı', deger:v, alt:rp[r].lo, ust:rp[r].hi, merkez:rp[r].pay, n:rp[r].n, aralikAd:'iskelet izi p25–p75 (' + IA.tur + (rp[r].k > 1 ? '; ' + rp[r].k + ' satırın çeyrekleri toplandı — yaklaşık' : '') + ')', kaynak:'iskelet:' + stil, durum:durG(1, v, rp[r].lo, rp[r].hi), birim:'%' }); });
       if(IA.tur === 'elle' || IA.tur === 'odunc') out.iskelet.not = IA.tur === 'elle' ? 'elle yazılmış iskelet — örnek sayısı / aralık yok, kıyasa girmez' : IA.kaynakStil + ' stilinden ödünç iskelet — bu stilin örneği yok, kıyasa girmez'; }
     // (c) ödüllü örnekler
     var O = G.odulluVeri(stil); out.odullu = { N:O.length, k1:O.filter(function(x){ return x.k === 'K1'; }).length, k2:O.filter(function(x){ return x.k === 'K2'; }).length, liste:O };
     if(O.length){
       ['og', 'fg', 'ibu', 'srm', 'abv'].forEach(function(a){ var L = O.map(function(x){ return x[a]; }).filter(function(v){ return v != null && isFinite(v); }); if(!L.length) return;
-        var lo = yuzdelik(L, 0.1), hi = yuzdelik(L, 0.9); ekle({ ref:'odullu', boyut:a, ad:EKSEN[a].ad, deger:c[a], alt:lo, ust:hi, n:L.length, aralikAd:'ödüllü örnekler p10–p90', kaynak:'odullu:' + stil, durum:dur(c[a], lo, hi) }); });
+        var lo = yuzdelik(L, 0.1), hi = yuzdelik(L, 0.9); ekle({ ref:'odullu', boyut:a, ad:EKSEN[a].ad, deger:c[a], alt:lo, ust:hi, n:L.length, aralikAd:'ödüllü örnekler p10–p90', kaynak:'odullu:' + stil, durum:durG(bs(a), c[a], lo, hi) }); });
       var PO = O.filter(function(x){ return x.pay; }), roller = {}; PO.forEach(function(x){ Object.keys(x.pay).forEach(function(r){ roller[r] = 1; }); }); Object.keys(out.rol.pay).forEach(function(r){ roller[r] = 1; });
       if(PO.length) Object.keys(roller).forEach(function(r){ var L = PO.map(function(x){ return x.pay[r] || 0; }), lo = yuzdelik(L, 0.1), hi = yuzdelik(L, 0.9), v = out.rol.pay[r] || 0;
-        ekle({ ref:'odullu', boyut:'rol:' + r, ad:(ROL_AD[r] || r) + ' payı', deger:v, alt:lo, ust:hi, n:L.length, aralikAd:'ödüllü örnekler p10–p90 (grist ≥ %80 eşlenen)', kaynak:'odullu:' + stil, durum:dur(v, lo, hi), birim:'%' }); });
+        ekle({ ref:'odullu', boyut:'rol:' + r, ad:(ROL_AD[r] || r) + ' payı', deger:v, alt:lo, ust:hi, n:L.length, aralikAd:'ödüllü örnekler p10–p90 (grist ≥ %80 eşlenen)', kaynak:'odullu:' + stil, durum:durG(1, v, lo, hi), birim:'%' }); });
       var MT = O.filter(function(x){ return x.mayaTip; }), yt = T.tarif.mayaId && kayit('maya', T.tarif.mayaId) ? kayit('maya', T.tarif.mayaId).tip : null;
       if(MT.length && yt){ var ayni = MT.filter(function(x){ return x.mayaTip === yt; }).length; ekle({ ref:'odullu', boyut:'mayaAile', ad:'maya ailesi (' + yt + ')', deger:ayni, alt:null, ust:null, n:MT.length, aralikAd:'aynı ailedeki ödüllü örnek sayısı', kaynak:'odullu:' + stil, durum:ayni * 2 < MT.length ? 'farkli' : 'ic', sayim:true }); }
     }
@@ -34341,9 +34343,9 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     if(D && D[stil]){ var rec = D[stil], n = rec[0], b = rec[1]; out.korpus = { n:n };
       var sk = { og:['og', function(v){ return (v - 1) * 1000; }, function(x){ return 1 + x / 1000; }], ib:['ibu'], sr:['srm'], ab:['abv'] };
       Object.keys(sk).forEach(function(k){ var d = b[k]; if(!d) return; var a = sk[k][0], cv = sk[k][1] ? sk[k][1](c[a]) : c[a], lo = d[1], hi = d[5];
-        ekle({ ref:'korpus', boyut:a, ad:EKSEN[a].ad, deger:c[a], alt:sk[k][2] ? sk[k][2](lo) : lo, ust:sk[k][2] ? sk[k][2](hi) : hi, n:n, aralikAd:'topluluk p10–p90 (' + n + ' reçete)', kaynak:'korpus:' + stil, durum:dur(cv, lo, hi) }); });
+        ekle({ ref:'korpus', boyut:a, ad:EKSEN[a].ad, deger:c[a], alt:sk[k][2] ? sk[k][2](lo) : lo, ust:sk[k][2] ? sk[k][2](hi) : hi, n:n, aralikAd:'topluluk p10–p90 (' + n + ' reçete)', kaynak:'korpus:' + stil, durum:durG(a === 'og' ? 0 : bs(a), cv, lo, hi) }); });
       if(f) Object.keys(TD_KUL).forEach(function(k){ var d = b[k]; if(!d) return; var u = +f[TD_KUL[k]] || 0; if(!(u > 0.5)) return; // yalnız kullanılan boyut (AN kuralı: iz miktar sapma değil)
-        ekle({ ref:'korpus', boyut:'td:' + k, ad:(window._TD_BOYUT && window._TD_BOYUT[k] ? window._TD_BOYUT[k].ad : k) + ' payı', deger:u, alt:d[1], ust:d[5], n:Math.round(n * d[0] / 100), aralikAd:'topluluk p10–p90 (kullananların %' + d[0] + '\'i)', kaynak:'korpus:' + stil, durum:dur(u, d[1], d[5]), birim:'%' }); }); }
+        ekle({ ref:'korpus', boyut:'td:' + k, ad:(window._TD_BOYUT && window._TD_BOYUT[k] ? window._TD_BOYUT[k].ad : k) + ' payı', deger:u, alt:d[1], ust:d[5], n:Math.round(n * d[0] / 100), aralikAd:'topluluk p10–p90 (kullananların %' + d[0] + '\'i)', kaynak:'korpus:' + stil, durum:durG(1, u, d[1], d[5]), birim:'%' }); }); }
     return out; };
 
   // ── 4) KİŞİSEL VERİ (salt okuma; yazmaz) ──
@@ -34396,9 +34398,13 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
 
   // değişken üreticileri: (T, yon, hedefV?) → aday | null. Her aday tek DEĞİŞKEN (OG korunan pay değişikliklerinde baz malt dengelenir — bu yazılır).
   var URET = {};
+  // AI5C (3) — Kaan kararı 2026-10-14: FG hesabı DEĞİŞMEZ, yalnız not
+  G.MASH_NOT = 'kaynaklar 65–68 °C aralığında da etki gösteriyor (BYO ≥ 1 %/°C, Brulosophy 2018 ≈ 3,2 %/°C görünür attenuation) — gerçek fark muhtemelen hesaptakinden büyük';
+  G.kademeliNot = function(t){ var L = (t && t.mashAdimlar || []).filter(function(x){ return x && +x.sc > 0; }); if(L.length < 2) return null;
+    return 'kademeli mash (' + L.map(function(x){ return x.sc + ' °C' + (x.dk ? ' ' + x.dk + ' dk' : ''); }).join(' → ') + '): uygulama FG hesabında yalnız ana adımı (' + (+t.mashSc || 67) + ' °C) kullanıyor'; };
   URET.mash = function(T, yon){ var t0 = T.tarif, m0 = +t0.mashSc || 67, m1 = yon === 'dus' ? 64 : 70; if(yon === 'dus' ? m0 <= m1 : m0 >= m1) return null;
     var t1 = kopya(t0); t1.mashSc = m1;
-    return { kural:'mash', degisken:'mash sıcaklığı', baslik:'Mash sıcaklığı ' + m0 + ' → ' + m1 + ' °C', deg:degKur('miktar', 'proses', null, null, 'mash ' + m0 + ' °C', 'mash ' + m1 + ' °C', t0, t1), stok:{ durum:'gerekmez', metin:'malzeme değişmez' }, varsayim:['adım ' + m1 + ' °C: Brulosophy deneyinin ' + (yon === 'dus' ? 'düşük (64 °C)' : 'yüksek tarafına doğru') + ' ucu — uygulama varsayımı'], yon:yon }; };
+    return { kural:'mash', degisken:'mash sıcaklığı', baslik:'Mash sıcaklığı ' + m0 + ' → ' + m1 + ' °C', deg:degKur('miktar', 'proses', null, null, 'mash ' + m0 + ' °C', 'mash ' + m1 + ' °C', t0, t1), stok:{ durum:'gerekmez', metin:'malzeme değişmez' }, varsayim:['adım ' + m1 + ' °C: Brulosophy deneyinin ' + (yon === 'dus' ? 'düşük (64 °C)' : 'yüksek tarafına doğru') + ' ucu — uygulama varsayımı', G.MASH_NOT], yon:yon }; };
   function sekerSatir(t){ var L = []; (t.katkilar || []).forEach(function(k, i){ if(sekerMi('katki', k.id) && katkiKg(k) != null) L.push({ tip:'katki', i:i }); }); (t.maltlar || []).forEach(function(m, i){ if(sekerMi('malt', m.id)) L.push({ tip:'malt', i:i }); }); return L; }
   function sekerPay(t){ var L = sekerSatir(t); if(!L.length) return 0; var og = hesap(t).og, t2 = kopya(t); L.forEach(function(x){ if(x.tip === 'katki') t2.katkilar[x.i].miktar = 0; else t2.maltlar[x.i].kg = 0; }); var og2 = hesap(t2).og; return og > 1 ? 100 * (og - og2) / (og - 1) : 0; }
   G.sekerPay = sekerPay;
@@ -34463,15 +34469,24 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     if(hedef !== 'stil'){ var e = HEDEF_EKSEN[hedef], ek = e[0], d = (c1[ek] - c0[ek]) * e[1]; a.etki = ek === 'fg' ? d * 1000 : d; a.etkiMetin = EKSEN[ek].ad + ' ' + dg(ek, c0[ek]) + ' → ' + dg(ek, c1[ek]); a.yonYok = a.etki <= 0 || dg(ek, c0[ek]) === dg(ek, c1[ek]); } // AI5B (2): 'ölçülebilir' = kartta GÖSTERİLEN değer (FG 3 · IBU 0 · SRM 1 basamak) hedef yönünde değişiyor; aynı görünüyorsa yalnız yön (önceden ham fark < yarım basamak — Saison'da '−0,5 puan' gösterip yalnız yön diyordu)
     else { var uz = function(c){ var s = 0; Object.keys(B).forEach(function(x){ var r = B[x].aralik, v = c[x === 'OG' ? 'og' : x === 'FG' ? 'fg' : x.toLowerCase()], w = r[1] - r[0] || 1; s += v < r[0] ? (r[0] - v) / w : v > r[1] ? (v - r[1]) / w : 0; }); return s; };
       a.etki = (uz(c0) - uz(c1)) * 10; a.etkiMetin = 'bant dışı uzaklık ' + trS(uz(c0), 2) + ' → ' + trS(uz(c1), 2) + ' (bant genişliği birimi)'; a.yonYok = a.etki < G.ESIK_ETKI.stil * 10; }
-    a.kanit = kanit(a, K, T); a.skor = Math.max(0, a.etki) * (0.5 + 0.5 * (a.kanit.N ? a.kanit.k / a.kanit.N : 0)) * (a.kanit.zayif ? 0.75 : 1);
+    a.kanit = kanit(a, K, T); a.oran = a.kanit.N >= G.NOTR_N ? a.kanit.k / a.kanit.N : 0.5; // AI5C (4): N < 3 → k/N sıraya girmez (nötr 0,5); kartta yine yazılır
+    a.yanEtki = G.yanEtki(a, hedef); a.skor = Math.max(0, a.etki) * (0.5 + 0.5 * a.oran) * (a.kanit.zayif ? 0.75 : 1) * (a.yanEtki.length ? G.YAN_CEZA : 1);
     a.delta = { fg:Math.round((c1.fg - c0.fg) * 10000) / 10, srm:Math.round((c1.srm - c0.srm) * 10) / 10, ibu:Math.round(c1.ibu - c0.ibu) }; // AI5B (2): FG puan (0,1) · SRM (0,1) · IBU (1)
     return a; }
   // AI5B (2): SIRALAMA FORMÜLÜ (raporda ve kartta açık) — 1) hesapta ölçülebilir etkisi olan ve bant içinde kalan adaylar · 2) ölçülebilir ama bandı aşan (🔴) · 3) yalnız yön (hesapta etki < gösterim eşiği);
   //   her grupta sıra puanı = hedef etkisi × (0,5 + 0,5 × kanıt oranı k/N) × (N < 5 ise 0,75), büyükten küçüğe. Hedef etkisi: daha kuru / gövdeli = FG puanı, acı = IBU, renk = SRM, stil = bant dışı uzaklık azalması × 10.
-  G.SIRA_FORMUL = 'Sıralama: önce uygulamanın hesabında ölçülebilir etkisi olan ve bant içinde kalan adaylar, sonra bandı aşanlar (🔴), en sonda yalnız yön olanlar; her grupta sıra puanı = hedef etkisi × (0,5 + 0,5 × kanıt oranı k/N) × (N < 5 ise 0,75).';
+  G.SIRA_FORMUL = 'Sıralama: önce uygulamanın hesabında ölçülebilir etkisi olan ve bant içinde kalan adaylar, sonra bandı aşanlar (🔴), en sonda yalnız yön olanlar; her grupta sıra puanı = hedef etkisi × (0,5 + 0,5 × kanıt oranı k/N; N < 3 ise nötr 0,5) × (N < 5 ise 0,75) × (yan etki varsa 0,5).';
+  G.NOTR_N = 3; G.YAN_CEZA = 0.5;
+  // AI5C (5): YAN ETKİ — hedef dışındaki bir değer ZATEN bant dışındayken (BJCP) aday onu daha da uzaklaştırıyorsa (gösterilen değerlerle). Bant içinden dışarı çıkarma mevcut 🔴 kuralıdır.
+  var YAN_EKSEN = { baz:'og', acihop:'ibu', renk:'srm' };
+  G.yanEtki = function(a, hedef){ var hk = a.hk, B = hk && hk.bant || {}, out = [], hx = hedef === 'stil' ? (YAN_EKSEN[a.kural] || 'fg') : (HEDEF_EKSEN[hedef] || [])[0], P = { og:'OG', fg:'FG', abv:'ABV', ibu:'IBU', srm:'SRM' };
+    Object.keys(P).forEach(function(p){ if(p === hx || p === 'abv') return; /* ABV OG ve FG'den türer: 'daha kuru'da FG düşünce ABV'nin artması hedefin kendisidir, yan etki değil */ var b = B[P[p]]; if(!b || !b.aralik) return; var g = function(v){ return +(+v).toFixed(EKSEN[p].d); }, v0 = g(hk.once[p]), v1 = g(hk.sonra[p]), lo = g(b.aralik[0]), hi = g(b.aralik[1]);
+      if(v0 > hi && v1 > v0) out.push({ p:p, y:'ust', metin:P[p] + ' bandın daha da üstüne çıkar (' + dg(p, hk.once[p]) + ' → ' + dg(p, hk.sonra[p]) + ', bant ' + dg(p, b.aralik[0]) + '–' + dg(p, b.aralik[1]) + ')' });
+      else if(v0 < lo && v1 < v0) out.push({ p:p, y:'alt', metin:P[p] + ' bandın daha da altına iner (' + dg(p, hk.once[p]) + ' → ' + dg(p, hk.sonra[p]) + ', bant ' + dg(p, b.aralik[0]) + '–' + dg(p, b.aralik[1]) + ')' }); });
+    return out; };
   G.ETKI_BIRIM = { kuru:'FG puanı (azalma)', govde:'FG puanı (artış)', azaci:'IBU (azalma)', aci:'IBU (artış)', koyu:'SRM (artış)', acik:'SRM (azalma)', stil:'bant dışı uzaklık azalması × 10' };
   G.siraMetin = function(a, hedef){ if(a.yonYok) return 'yalnız yön — etkisi uygulamanın hesabında görünmüyor (hedef etkisi ' + trS(a.etki, 2) + ' < eşik); ölçülebilir etkili adayların arkasında';
-    var N = a.kanit.N, k = a.kanit.k; return 'sıra puanı = hedef etkisi ' + trS(a.etki, 2) + ' (' + (G.ETKI_BIRIM[hedef] || '') + ') × (0,5 + 0,5 × ' + (N ? k + '/' + N : 'kanıt yok 0') + ')' + (a.kanit.zayif ? ' × 0,75 (N < 5)' : '') + ' = ' + trS(a.skor, 2) + (a.disari && a.disari.length ? ' · bandı aştığı için bant içinde kalanların arkasında' : ''); };
+    var N = a.kanit.N, k = a.kanit.k; return 'sıra puanı = hedef etkisi ' + trS(a.etki, 2) + ' (' + (G.ETKI_BIRIM[hedef] || '') + ') × (0,5 + 0,5 × ' + (N >= G.NOTR_N ? k + '/' + N : 'nötr 0,5 — ' + (N ? k + '/' + N : 'kanıt yok') + ', N < ' + G.NOTR_N) + ')' + (a.kanit.zayif ? ' × 0,75 (N < 5)' : '') + (a.yanEtki && a.yanEtki.length ? ' × 0,5 (yan etki)' : '') + ' = ' + trS(a.skor, 2) + (a.disari && a.disari.length ? ' · bandı aştığı için bant içinde kalanların arkasında' : ''); };
   G.deltaMetin = function(a){ var d = a.delta || {}, f = function(v, n){ return (v > 0 ? '+' : v < 0 ? '−' : '') + trS(Math.abs(v), n); }; return 'Δ FG ' + f(d.fg, 1) + ' puan · Δ SRM ' + f(d.srm, 1) + ' · Δ IBU ' + f(d.ibu, 0); };
   G.MAX_ADAY = 3; G.ZAYIF_N = 5; // AI5 madde 2: referans n < 5 → "zayıf kanıt"
   G.ESIK_ETKI = { fg:0.5, ibu:0.5, srm:0.05, stil:0.005 };
@@ -34518,7 +34533,7 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     if(st.adaylar.acik && st.adaylar.acik.length) ekle('aday:acik', 'Kural motoru — kapatılamayan sapma', st.adaylar.acik.join(' | '));
     st.adaylar.liste.forEach(function(a){ var hk = a.hk, v = function(c, x){ return x === 'OG' ? trS(c.og, 3) : x === 'FG' ? trS(c.fg, 3) : x === 'ABV' ? trS(c.abv, 1) : x === 'IBU' ? String(Math.round(c.ibu)) : trS(c.srm, 1); };
       ekle(a.id, 'Aday ' + a.no + ' (uygulamanın kural motoru, tek değişken: ' + a.degisken + ')', a.baslik + '\n' + A4.degEtiket(a.deg) + '\nUygulama hesabı: ' + ['OG', 'FG', 'ABV', 'IBU', 'SRM'].map(function(x){ return x + ' ' + v(hk.once, x) + ' → ' + v(hk.sonra, x); }).join(' · ') +
-        (Object.keys(hk.bant).length ? '\nBant: ' + Object.keys(hk.bant).map(function(x){ var b = hk.bant[x]; return x + (b.sonra ? ' içinde' : ' DIŞINDA'); }).join(', ') : '') + (a.uyari ? '\nUYARI: ' + a.uyari : '') + '\nStok: ' + a.stok.metin + '\nKanıt: ' + a.kanit.metin + (a.kanit.zayif && a.kanit.N ? ' (zayıf kanıt: n < 5)' : '') + (a.varsayim && a.varsayim.length ? '\nVarsayım: ' + a.varsayim.join('; ') : '') + (a.notlar ? '\nNot: ' + a.notlar.join('; ') : '') + '\nSıra ' + a.no + ': ' + G.deltaMetin(a) + ' · ' + a.siraAcik, { yon:A4.yonHukum(hk).concat(a.yonYok && HEDEF_EKSEN[st.hedef] ? [{ p:HEDEF_EKSEN[st.hedef][0], s:'degisim', y:HEDEF_EKSEN[st.hedef][1] > 0 ? 'artar' : 'azalir', kaynak:'kural' }] : []) }); // yalnız yön adayı: hesapta değişmez + kuralın kaynaklı yönü (ikisi de çelişki sayılmaz)
+        (Object.keys(hk.bant).length ? '\nBant: ' + Object.keys(hk.bant).map(function(x){ var b = hk.bant[x]; return x + (b.sonra ? ' içinde' : ' DIŞINDA'); }).join(', ') : '') + (a.uyari ? '\nUYARI: ' + a.uyari : '') + '\nStok: ' + a.stok.metin + '\nKanıt: ' + a.kanit.metin + (a.kanit.zayif && a.kanit.N ? ' (zayıf kanıt: n < 5)' : '') + (a.varsayim && a.varsayim.length ? '\nVarsayım: ' + a.varsayim.join('; ') : '') + (a.notlar ? '\nNot: ' + a.notlar.join('; ') : '') + (a.yanEtki && a.yanEtki.length ? '\nYAN ETKİ: ' + a.yanEtki.map(function(y){ return y.metin; }).join('; ') : '') + '\nSıra ' + a.no + ': ' + G.deltaMetin(a) + ' · ' + a.siraAcik, { yon:A4.yonHukum(hk).concat(a.yonYok && HEDEF_EKSEN[st.hedef] ? [{ p:HEDEF_EKSEN[st.hedef][0], s:'degisim', y:HEDEF_EKSEN[st.hedef][1] > 0 ? 'artar' : 'azalir', kaynak:'kural' }] : []) }); // yalnız yön adayı: hesapta değişmez + kuralın kaynaklı yönü (ikisi de çelişki sayılmaz)
       var R = G.kural(a.kural); ekle('kural:' + a.kural, 'Kural tablosu (kaynaklı)', R.metin + ' Kaynak: ' + R.kaynaklar.map(function(k){ return k.ad + ' — "' + k.alinti + '"'; }).join(' | ') + (R.model ? ' ' + R.model : '')); });
     (st.kisisel.satirlar || []).forEach(function(s, i){ ekle(s.id + (i ? ':' + i : ''), 'Senin geçmişin (özet sayı)', s.metin); });
     var metin = P.map(function(p){ return '[' + p.id + '] ' + p.baslik + ':\n' + p.metin; }).join('\n\n');
@@ -34610,10 +34625,14 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   G.cikTahmin = function(mk){ var M = window.BM_AI.MODEL[mk], O = A4.OLCUM_KOSU4 && A4.OLCUM_KOSU4[mk]; return O ? Math.max(300, Math.round((O.websiz * 1e6 - A4.OLCUM.gir * M.gir) / M.cik)) : 940; };
   G.anlatTahmin = function(st){ var A = window.BM_AI, mk = (st && st.model) || A4.ozetModel(), M = A.MODEL[mk], gir = st && st.kanit ? Math.ceil((G.istek(st).baglam.length + G.GOREV.length) / 3.2) + 450 : 3500;
     return Math.round((gir * M.gir + G.cikTahmin(mk) * M.cik) / 1e6 * 1e4) / 1e4; };
+  // AI5C (6): G gerçek koşusu sonucu (kosuId 1791983427880, elle etiket: gösterilen 52 cümlenin tamamı) — kodda sabit
+  G.G_TEST = { tarih:'2026-10-14', model:'Opus 5.5', kosuId:1791983427880, uydurma:{ hata:0, birim:54 }, yalakalik:{ hata:0, birim:4 }, gosterilen:52, tatHam:2, tatGercek:0 };
+  G.gTestMetni = function(){ var t = G.G_TEST; return 'G testi ' + t.tarih + ', ' + t.model + ': uydurma ' + t.uydurma.hata + '/' + t.uydurma.birim + ', yalakalık ' + t.yalakalik.hata + '/' + t.yalakalik.birim; };
   G.kutuHTML = function(ctx){ if(!A1.betaAcik()) return ''; var T = A1.baglamTarif(ctx); if(!T) return '';
     var st = G.durum[T.key], tk = G.tadimKayit(T), cj = ctxJs(ctx);
     return '<div class="bm-ai5-kutu" data-key="' + E(T.key) + '" style="margin:10px 0;padding:10px 12px;border:1px solid var(--cizgi-arac,#ddd);border-left:4px solid #2e6b4f;border-radius:10px;background:var(--bg-card,#fff)">' +
       '<div style="font-size:13px;font-weight:700;color:var(--metin)">🛠️ Bu reçeteyi nasıl geliştirebilirim?</div>' +
+      '<div class="bm-ai5-serit" style="font-size:10.5px;color:#8a5a00;margin-top:2px">erken test — ' + E(G.gTestMetni()) + '</div>' +
       '<div class="bm-ai5-aciklama" style="font-size:11px;color:var(--metin-soluk);margin:2px 0 6px">Geliştirme bir <b>hedefe</b> göre tanımlanır. Varsayılan "stile / ödüllülere yaklaştır" — bu "daha lezzetli" demek <b>değildir</b>. Kıyas ve adaylar uygulamadan (bedava, AI yok); AI yalnız istersen kaynaklı anlatır.</div>' +
       '<div class="bm-ai5-cipler" role="group" aria-label="Geliştirme hedefi" style="display:flex;flex-wrap:wrap;gap:6px">' + G.HEDEFLER.filter(function(h){ return h.k !== 'tadim' || tk.length; }).map(function(h){ var sec = st && st.hedef === h.k;
         return '<button type="button" class="bm-ai5-cip" data-hedef="' + h.k + '" aria-pressed="' + (sec ? 'true' : 'false') + '" style="min-height:44px;padding:4px 10px;border-radius:16px;border:1px solid ' + (sec ? '#2e6b4f' : 'var(--cizgi-arac)') + ';background:' + (sec ? '#2e6b4f' : 'var(--bg2)') + ';color:' + (sec ? '#fff' : 'var(--metin)') + ';font-size:12px" onclick="BM_AI5.hedefSecildi(' + cj + ',\'' + h.k + '\')">' + E(h.ad) + '</button>'; }).join('') + '</div>' +
@@ -34645,6 +34664,7 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
       (a.yonYok ? '<div class="bm-ai5-yalniz-yon" style="font-size:11px;color:#8a5a00;font-weight:600">↘ etkisi uygulamanın hesabında görünmüyor — yalnız kaynaklı yön</div>' : '') +
       '<div class="bm-ai5-sira" style="font-size:10.5px;color:var(--metin-soluk)">🔢 ' + E(a.siraAcik || '') + '</div>' +
       (a.uyari ? '<div class="bm-ai5-uyari" style="color:#b3261e;font-size:11px;font-weight:600">🔴 ' + E(a.uyari) + '</div>' : '') +
+      (a.yanEtki && a.yanEtki.length ? '<div class="bm-ai5-yan" style="color:#8a5a00;font-size:11px;font-weight:600">⚠️ yan etki: ' + E(a.yanEtki.map(function(y){ return y.metin; }).join('; ')) + '</div>' : '') +
       '<div class="bm-ai5-stok" data-durum="' + a.stok.durum + '" style="font-size:11px">📦 ' + E(a.stok.metin) + '</div>' +
       '<div class="bm-ai5-kanit" style="font-size:11px">📊 ' + E(a.kanit.metin) + (a.kanit.zayif && a.kanit.N ? ' <span class="bm-ai5-zayif" style="color:#8a5a00">zayıf kanıt (n ' + a.kanit.N + ')</span>' : '') + '</div>' +
       (a.varsayim && a.varsayim.length ? '<div style="font-size:10.5px;color:var(--metin-soluk)">ℹ️ ' + E(a.varsayim.join('; ')) + '</div>' : '') +
@@ -34656,6 +34676,7 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     if(st.durum === 'hedefAI') return '<div style="margin-top:8px;font-size:12px;color:var(--metin-soluk)">⏳ Ucuz model yalnız çip listesinden seçiyor…</div>';
     var h = '<div class="bm-ai5-sonuc" data-hedef="' + st.hedef + '" style="margin-top:8px;font-size:12px">';
     h += '<div style="font-size:11px;color:var(--metin-soluk)">Hedef: <b>' + E(G.hedefAd(st.hedef)) + '</b> (' + E(st.hedefYontem || '') + ')' + (st.hedef === 'stil' ? ' — "daha lezzetli" anlamına gelmez' : '') + '</div>';
+    var kn = G.kademeliNot(st.T.tarif); if(kn) h += '<div class="bm-ai5-kademeli" style="font-size:11px;color:#8a5a00;margin-top:2px">ℹ️ ' + E(kn) + '</div>';
     h += G.kiyasHTML(st);
     var L = st.adaylar.liste;
     if(!L.length) h += '<div class="bm-ai5-aday-yok" style="margin-top:8px;padding:8px 10px;border-radius:8px;background:var(--bg2)">🔎 ' + E(st.adaylar.neden || 'bu hedef için kanıtlı tek değişiklik bulamadım') + '</div>';
@@ -35340,6 +35361,7 @@ window._bmAiKartHTML = function(){
     (function(){ var t = window._BM_AI_TEST_SONUC; if(!t) return ''; var o = function(h, n){ return h + '/' + n + ' (%' + (h / n * 100).toFixed(1).replace('.', ',') + ')'; }; // AI4 madde 8: açılış testi sonucu (kodda sabit)
       return '<div class="bm-ayar-satir bm-ai-acilis-testi" style="gap:6px;flex-wrap:wrap"><div class="bm-ayar-satir-text">✅ Açılış testi (tuzak) <small>koşu #' + t.kosu + ' · ' + esc(t.tarih) + ' · ' + esc(t.model) + ' · uydurma ' + o(t.uydurma.hata, t.uydurma.birim) + ' ≤ %5 · yalakalık ' + o(t.yalakalik.hata, t.yalakalik.birim) + ' ≤ %5 · kontrol ' + t.kontrol.gecen + '/' + t.kontrol.birim + ' ≥ %80 · tat hükmü ' + t.tat.hata + '/' + t.tat.birim + ' · ' + esc(t.not) + '</small></div></div>'; })()+
     (window.BM_BUL ? window.BM_BUL.ayarHTML() + window.BM_BUL.kartAyarHTML() : '')+
+    (window.BM_AI5 ? '<div class="bm-ayar-satir bm-ai5-g-testi" style="gap:6px;flex-wrap:wrap"><div class="bm-ayar-satir-text">✅ 🛠️ Nasıl geliştiririm — ' + esc(window.BM_AI5.gTestMetni()) + ' <small>kosu ' + window.BM_AI5.G_TEST.kosuId + ' · 8 istem · gösterilen ' + window.BM_AI5.G_TEST.gosterilen + ' cümlenin tamamı elle etiketlendi · tat hükmü ham ' + window.BM_AI5.G_TEST.tatHam + ', gerçek ' + window.BM_AI5.G_TEST.tatGercek + ' · erken test, n küçük</small></div></div>' : '')+
     (window.BM_AI5 ? window.BM_AI5.kartAyarHTML() : '')+ // SPRINT AI5: tuzak G grubu (Kaan'ın düğmesi) // SPRINT BUL1: sözlük + eşik kaynakları + BUL seti
     (window.BM_TUZAK ? window.BM_TUZAK.kartHTML() : '')+ // SPRINT AI3: 🧪 tuzak testi (geliştirici)
   '</div>';
