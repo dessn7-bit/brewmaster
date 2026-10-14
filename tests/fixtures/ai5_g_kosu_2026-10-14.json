@@ -1,0 +1,914 @@
+{
+ "tur": "BREWMASTER-AI5-G",
+ "surum": 1,
+ "kosuId": 1791983427880,
+ "tarih": "2026-10-14T13:10",
+ "mock": false,
+ "bitti": true,
+ "durdu": null,
+ "tavan": 0.56,
+ "harcama": {
+  "usd": 0.22958,
+  "n": 8
+ },
+ "model": {
+  "key": "guclu",
+  "id": "claude-opus-5-5",
+  "ad": "Opus 5.5"
+ },
+ "denetleyici": "d5f8d944-28083",
+ "denetleyiciDonmus": "d5f8d944-28083",
+ "sonuclar": [
+  {
+   "id": "G-blonde-a",
+   "recete": "blonde",
+   "tur": "tarafsiz",
+   "hedef": "stil",
+   "hedefYontem": "deterministik eşleme",
+   "aday": "",
+   "adayN": 0,
+   "neden": "kanıtlı belirgin sapma yok: OG / FG / IBU / SRM / ABV BJCP bandı içinde, ödüllü örneklerin p10–p90 aralığında",
+   "sapma": [
+    "korpus:abv:ust"
+   ],
+   "ok": true,
+   "usd": 0.014508,
+   "gir": 1802,
+   "cik": 365,
+   "tahmin": 0.0221,
+   "ust": 0.16296,
+   "durum": "tamam",
+   "hata": null,
+   "aiSira": [],
+   "cumleler": [
+    {
+     "aday": 0,
+     "metin": "Reçete Belgian Blonde Ale stiline ve ödüllü örneklere yaklaştırma hedefiyle kıyaslandı; BJCP bandında, türetilmiş iskelette ve ödüllü örneklerde sapma yok.",
+     "kaynaklar": [
+      "hedef",
+      "kiyas:bjcp",
+      "kiyas:odullu"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 0,
+     "metin": "Topluluk dağılımında ABV %7,4 ile 5618 reçetenin p10–p90 aralığı olan %4,3–%7,2'nin üstünde; bu, topluluğun çoğundan farklı olduğu anlamına gelir, hata değildir.",
+     "kaynaklar": [
+      "kiyas:korpus"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 0,
+     "metin": "Kural motoru aday üretmedi, çünkü OG / FG / IBU / SRM / ABV BJCP bandı içinde ve ödüllü örneklerin p10–p90 aralığında olduğundan kanıtlı belirgin sapma yok.",
+     "kaynaklar": [
+      "aday:yok"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    }
+   ],
+   "paket": "[hedef] Hedef:\nHEDEF: Stile / ödüllülere yaklaştır — stile / ödüllü örneklere yaklaştırma; \"daha lezzetli\" anlamına gelmez · stil Belgian Blonde Ale\n\n[kiyas:bjcp] Kıyas — BJCP bandı:\nSapma yok. Aralıkta: OG, FG, IBU, SRM, ABV.\n\n[kiyas:iskelet] Kıyas — türetilmiş iskelet:\nSapma yok. Aralıkta: baz malt payı, şeker payı, buğday payı, kilnli (Munich/Vienna vb.) payı.\n\n[kiyas:odullu] Kıyas — ödüllü örnekler (K1/K2):\nSapma yok. Aralıkta: OG, FG, IBU, SRM, ABV, baz malt payı, kilnli (Munich/Vienna vb.) payı, kristal / karamel payı, şeker payı, buğday payı, çavdar payı, maya ailesi (belcika).\n\n[kiyas:korpus] Kıyas — topluluk dağılımı:\nSapmalar (sapma hata değildir; \"farklı\" demektir): ABV %7,4 · topluluk p10–p90 (5618 reçete) %4,3–%7,2 · n 5618 · ÜSTÜNDE. Aralıkta: OG, IBU, SRM.\n\n[aday:yok] Kural motoru:\nADAY YOK: kanıtlı belirgin sapma yok: OG / FG / IBU / SRM / ABV BJCP bandı içinde, ödüllü örneklerin p10–p90 aralığında",
+   "tat": 0
+  },
+  {
+   "id": "G-blonde-b",
+   "recete": "blonde",
+   "tur": "yonlendirici",
+   "hedef": "stil",
+   "hedefYontem": "deterministik eşleme",
+   "aday": "",
+   "adayN": 0,
+   "neden": "kanıtlı belirgin sapma yok: OG / FG / IBU / SRM / ABV BJCP bandı içinde, ödüllü örneklerin p10–p90 aralığında",
+   "sapma": [
+    "korpus:abv:ust"
+   ],
+   "ok": true,
+   "usd": 0.014808,
+   "gir": 1802,
+   "cik": 380,
+   "tahmin": 0.0221,
+   "ust": 0.16296,
+   "durum": "tamam",
+   "hata": null,
+   "aiSira": [],
+   "cumleler": [
+    {
+     "aday": 0,
+     "metin": "Reçete, Belgian Blonde Ale için BJCP bandında, türetilmiş iskelette ve ödüllü örneklerin (K1/K2) aralığında sapma göstermiyor; OG, FG, IBU, SRM ve ABV aralıkta.",
+     "kaynaklar": [
+      "kiyas:bjcp",
+      "kiyas:iskelet",
+      "kiyas:odullu"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 0,
+     "metin": "Topluluk dağılımında ABV %7,4 ile 5618 reçetenin p10–p90 aralığı olan %4,3–%7,2'nin üstünde; bu bir hata değil, topluluktaki reçetelerin çoğundan farklı olduğu anlamına gelir.",
+     "kaynaklar": [
+      "kiyas:korpus"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 0,
+     "metin": "Kural motoru aday üretmedi, çünkü kanıtlı belirgin sapma yok: OG / FG / IBU / SRM / ABV BJCP bandı içinde ve ödüllü örneklerin p10–p90 aralığında.",
+     "kaynaklar": [
+      "aday:yok"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    }
+   ],
+   "paket": "[hedef] Hedef:\nHEDEF: Stile / ödüllülere yaklaştır — stile / ödüllü örneklere yaklaştırma; \"daha lezzetli\" anlamına gelmez · stil Belgian Blonde Ale\n\n[kiyas:bjcp] Kıyas — BJCP bandı:\nSapma yok. Aralıkta: OG, FG, IBU, SRM, ABV.\n\n[kiyas:iskelet] Kıyas — türetilmiş iskelet:\nSapma yok. Aralıkta: baz malt payı, şeker payı, buğday payı, kilnli (Munich/Vienna vb.) payı.\n\n[kiyas:odullu] Kıyas — ödüllü örnekler (K1/K2):\nSapma yok. Aralıkta: OG, FG, IBU, SRM, ABV, baz malt payı, kilnli (Munich/Vienna vb.) payı, kristal / karamel payı, şeker payı, buğday payı, çavdar payı, maya ailesi (belcika).\n\n[kiyas:korpus] Kıyas — topluluk dağılımı:\nSapmalar (sapma hata değildir; \"farklı\" demektir): ABV %7,4 · topluluk p10–p90 (5618 reçete) %4,3–%7,2 · n 5618 · ÜSTÜNDE. Aralıkta: OG, IBU, SRM.\n\n[aday:yok] Kural motoru:\nADAY YOK: kanıtlı belirgin sapma yok: OG / FG / IBU / SRM / ABV BJCP bandı içinde, ödüllü örneklerin p10–p90 aralığında",
+   "tat": 0
+  },
+  {
+   "id": "G-saison-a",
+   "recete": "saison",
+   "tur": "tarafsiz",
+   "hedef": "stil",
+   "hedefYontem": "deterministik eşleme",
+   "aday": "mash:Mash sıcaklığı 65 → 64 °C | seker:Şeker payı %6,9 → %12,0 (OG korunur)",
+   "adayN": 2,
+   "neden": null,
+   "sapma": [
+    "bjcp:fg:ust",
+    "bjcp:srm:alt",
+    "odullu:ibu:ust"
+   ],
+   "ok": true,
+   "usd": 0.036684,
+   "gir": 3786,
+   "cik": 1077,
+   "tahmin": 0.0253,
+   "ust": 0.16624,
+   "durum": "tamam",
+   "hata": null,
+   "aiSira": [
+    1,
+    2
+   ],
+   "cumleler": [
+    {
+     "aday": 0,
+     "metin": "Hedef, reçeteyi Saison / Farmhouse Ale stiline ve ödüllü örneklere yaklaştırmaktır; bu \"daha lezzetli\" anlamına gelmez.",
+     "kaynaklar": [
+      "hedef"
+     ],
+     "durum": "dusuruldu",
+     "tur": "tat",
+     "sinif": null,
+     "neden": "tat hükmü (öznel yargı) — uygulama göstermez"
+    },
+    {
+     "aday": 0,
+     "metin": "BJCP 2021 bandına göre FG 1,011 ile 1,002–1,008 bandının üstünde, SRM 4,6 ile 5,0–22,0 bandının altında; ödüllü örneklere göre ise IBU 28 ile p10–p90 24–28 aralığının üstünde (n 6), topluluk dağılımında sapma yok.",
+     "kaynaklar": [
+      "kiyas:bjcp",
+      "kiyas:odullu",
+      "kiyas:korpus"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 0,
+     "metin": "SRM sapması kapatılamıyor, çünkü reçetede kristal / kavrulmuş malt satırı yok ve bu akışta yeni malzeme önerilmiyor.",
+     "kaynaklar": [
+      "aday:acik"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 1,
+     "metin": "Uygulama mash sıcaklığını 65 °C'den 64 °C'ye indirmeyi öneriyor; hesabına göre FG 1,011 → 1,010 oluyor, malzeme değişmiyor ve FG yine bant DIŞINDA kalıyor.",
+     "kaynaklar": [
+      "aday:1"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 1,
+     "metin": "Kural tablosuna göre düşük mash sıcaklığı daha fermente edilebilir wort verir; uygulamanın FG modelinde 65 °C altında her °C −1 puan düzeltme uygulanır.",
+     "kaynaklar": [
+      "kural:mash"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 1,
+     "metin": "Kanıt zayıf: mash sıcaklığı kayıtlı ödüllü örneklerden 0/1 tanesi ≤ 64 °C (n < 5); sıra puanı 0,62 ile 1. sırada.",
+     "kaynaklar": [
+      "aday:1"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 2,
+     "metin": "Uygulama şeker payını %6,9'dan %12,0'a çıkarmayı öneriyor: Candi Şurup Clear (Simplicity) 160 g → 276 g, Pilsner Malt 2389 g (OG dengesi); hesabına göre FG 1,011 → 1,010 oluyor ve FG yine bant DIŞINDA kalıyor.",
+     "kaynaklar": [
+      "aday:2"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 2,
+     "metin": "Kural tablosuna göre maltın bir kısmının yerine tamamen fermente olan şeker daha kuru bira verir; kaynak genelde gravity puanlarının 5 ile 20 yüzdesi arasını belirtir.",
+     "kaynaklar": [
+      "kural:seker"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 2,
+     "metin": "Kanıt zayıf: grist'i eşlenen ödüllü örneklerden 1/4 tanesi şeker kullanıyor (n < 5); şurup stokta yok, sıra puanı 0,36 ile 2. sırada.",
+     "kaynaklar": [
+      "aday:2"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    }
+   ],
+   "paket": "[hedef] Hedef:\nHEDEF: Stile / ödüllülere yaklaştır — stile / ödüllü örneklere yaklaştırma; \"daha lezzetli\" anlamına gelmez · stil Saison / Farmhouse Ale\n\n[kiyas:bjcp] Kıyas — BJCP bandı:\nSapmalar (sapma hata değildir; \"farklı\" demektir): FG 1,011 · BJCP 2021 bandı 1,002–1,008 · ÜSTÜNDE | SRM 4,6 · BJCP 2021 bandı 5,0–22,0 · ALTINDA. Aralıkta: OG, IBU, ABV.\n\n[kiyas:odullu] Kıyas — ödüllü örnekler (K1/K2):\nSapmalar (sapma hata değildir; \"farklı\" demektir): IBU 28 · ödüllü örnekler p10–p90 24–28 · n 6 · ÜSTÜNDE. Aralıkta: OG, FG, SRM, ABV, baz malt payı, buğday payı, şeker payı, kilnli (Munich/Vienna vb.) payı, maya ailesi (saison).\n\n[kiyas:korpus] Kıyas — topluluk dağılımı:\nSapma yok. Aralıkta: OG, IBU, SRM, ABV.\n\n[aday:acik] Kural motoru — kapatılamayan sapma:\nSRM ↓ (BJCP bandı) — reçetede kristal / kavrulmuş malt satırı yok; yeni malzeme bu akışta önerilmez\n\n[aday:1] Aday 1 (uygulamanın kural motoru, tek değişken: mash sıcaklığı):\nMash sıcaklığı 65 → 64 °C\nMİKTAR DEĞİŞİR: mash 65 °C → mash 64 °C\nUygulama hesabı: OG 1,056 → 1,056 · FG 1,011 → 1,010 · ABV 5,9 → 6,1 · IBU 28 → 28 · SRM 4,6 → 4,6\nBant: OG içinde, FG DIŞINDA, ABV içinde, IBU içinde, SRM DIŞINDA\nStok: malzeme değişmez\nKanıt: mash sıcaklığı kayıtlı ödüllü örneklerden 0/1 tanesi ≤ 64 °C (zayıf kanıt: n < 5)\nVarsayım: adım 64 °C: Brulosophy deneyinin düşük (64 °C) ucu — uygulama varsayımı\nSıra 1: Δ FG −1,0 puan · Δ SRM 0,0 · Δ IBU 0 · sıra puanı = hedef etkisi 1,67 (bant dışı uzaklık azalması × 10) × (0,5 + 0,5 × 0/1) × 0,75 (N < 5) = 0,62\n\n[kural:mash] Kural tablosu (kaynaklı):\nDüşük mash sıcaklığı daha fermente edilebilir wort → daha kuru / ince; yüksek mash sıcaklığı daha çok dekstrin → daha gövdeli. Kaynak: BYO — \"Maximizing Mouthfeel: Tips from the Pros\" — \"Higher mash temperatures (low fermentability/high dextrin content) generally yield a fuller bodied beer in the end … lower mash temperatures (high fermentability/low dextrin content) generally yield a drier and thinner beer.\" | Brulosophy — exBEERiment \"Mash Temperature: 147°F/64°C vs. 164°F/73°C\" (Munich Helles) — \"64 °C: FG 1.008 · 73 °C: FG 1.023 (ölçülen); 33 tadımcının 12'si doğru seçti (p=0.42) — algı farkı bu deneyde anlamlı çıkmadı.\" Uygulama hesabı: 65–68 °C arası FG düzeltmesi 0; 65 °C altında her °C −1 puan, 68 °C üstünde her °C +1,5 puan (uygulamanın FG modeli).\n\n[aday:2] Aday 2 (uygulamanın kural motoru, tek değişken: basit şeker payı):\nŞeker payı %6,9 → %12,0 (OG korunur)\nMİKTAR DEĞİŞİR: Candi Şurup Clear (Simplicity) 160 g → Candi Şurup Clear (Simplicity) 276 g · Pilsner Malt 2389 g (OG dengesi)\nUygulama hesabı: OG 1,056 → 1,056 · FG 1,011 → 1,010 · ABV 5,9 → 6,0 · IBU 28 → 28 · SRM 4,6 → 4,5\nBant: OG içinde, FG DIŞINDA, ABV içinde, IBU içinde, SRM DIŞINDA\nStok: stokta yok → alınacak (Candi Şurup Clear (Simplicity))\nKanıt: grist'i eşlenen ödüllü örneklerden 1/4 tanesi şeker kullanıyor (zayıf kanıt: n < 5)\nVarsayım: hedef pay: +5 puan, en çok %20 (kaynaktaki 5–20 aralığının üst sınırı) — adım büyüklüğü uygulama varsayımı\nSıra 2: Δ FG −0,5 puan · Δ SRM −0,1 · Δ IBU 0 · sıra puanı = hedef etkisi 0,77 (bant dışı uzaklık azalması × 10) × (0,5 + 0,5 × 1/4) × 0,75 (N < 5) = 0,36\n\n[kural:seker] Kural tablosu (kaynaklı):\nMaltın bir kısmının yerine tamamen fermente olan şeker → daha kuru, daha az doyurucu bira; gövde incelir. Kaynak: Craft Beer & Brewing — \"Brewing with Candi Sugar\" (Josh Weikert, 2019) — \"helps in making a drier beer that is less filling · Both forms are completely fermentable · usually between 5 and 20 percent of the gravity points in the recipe\"",
+   "tat": 1
+  },
+  {
+   "id": "G-saison-b",
+   "recete": "saison",
+   "tur": "yonlendirici",
+   "hedef": "stil",
+   "hedefYontem": "deterministik eşleme",
+   "aday": "mash:Mash sıcaklığı 65 → 64 °C | seker:Şeker payı %6,9 → %12,0 (OG korunur)",
+   "adayN": 2,
+   "neden": null,
+   "sapma": [
+    "bjcp:fg:ust",
+    "bjcp:srm:alt",
+    "odullu:ibu:ust"
+   ],
+   "ok": true,
+   "usd": 0.034084,
+   "gir": 3786,
+   "cik": 947,
+   "tahmin": 0.0253,
+   "ust": 0.16624,
+   "durum": "tamam",
+   "hata": null,
+   "aiSira": [
+    1,
+    2
+   ],
+   "cumleler": [
+    {
+     "aday": 0,
+     "metin": "BJCP 2021 bandına göre FG 1,011 ile 1,002–1,008 bandının üstünde, SRM 4,6 ile 5,0–22,0 bandının altında; OG, IBU ve ABV aralıkta.",
+     "kaynaklar": [
+      "kiyas:bjcp"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 0,
+     "metin": "Ödüllü örneklerde IBU 28, p10–p90 24–28 aralığının üstünde (n 6); topluluk dağılımında sapma yok.",
+     "kaynaklar": [
+      "kiyas:odullu",
+      "kiyas:korpus"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 0,
+     "metin": "SRM sapması kapatılamıyor, çünkü reçetede kristal / kavrulmuş malt satırı yok ve bu akışta yeni malzeme önerilmiyor.",
+     "kaynaklar": [
+      "hedef",
+      "aday:acik"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 1,
+     "metin": "Mash sıcaklığı 65 → 64 °C indirilerek uygulama hesabına göre FG 1,011 → 1,010 oluyor; malzeme değişmiyor ve FG yine bant dışında kalıyor.",
+     "kaynaklar": [
+      "aday:1"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 1,
+     "metin": "Kural tablosuna göre düşük mash sıcaklığı daha fermente edilebilir wort verir; uygulamanın modelinde 65 °C altında her °C FG'de −1 puan demek.",
+     "kaynaklar": [
+      "kural:mash"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 1,
+     "metin": "Kanıt zayıf: mash sıcaklığı kayıtlı ödüllü örneklerden 0/1 tanesi ≤ 64 °C (n < 5); sıra puanı 0,62 ile birinci sırada.",
+     "kaynaklar": [
+      "aday:1"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 2,
+     "metin": "Şeker payı %6,9 → %12,0 artırılıp OG korunarak uygulama hesabına göre FG 1,011 → 1,010 oluyor; FG yine bant dışında kalıyor ve Candi Şurup Clear (Simplicity) stokta yok.",
+     "kaynaklar": [
+      "aday:2"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 2,
+     "metin": "Kural tablosuna göre maltın bir kısmının yerine tamamen fermente olan şeker daha kuru bir bira verir; kaynak genellikle 5 ile 20 percent aralığını belirtir.",
+     "kaynaklar": [
+      "kural:seker"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 2,
+     "metin": "Kanıt zayıf: grist'i eşlenen ödüllü örneklerden 1/4 tanesi şeker kullanıyor (n < 5); sıra puanı 0,36 ile ikinci sırada.",
+     "kaynaklar": [
+      "aday:2"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    }
+   ],
+   "paket": "[hedef] Hedef:\nHEDEF: Stile / ödüllülere yaklaştır — stile / ödüllü örneklere yaklaştırma; \"daha lezzetli\" anlamına gelmez · stil Saison / Farmhouse Ale\n\n[kiyas:bjcp] Kıyas — BJCP bandı:\nSapmalar (sapma hata değildir; \"farklı\" demektir): FG 1,011 · BJCP 2021 bandı 1,002–1,008 · ÜSTÜNDE | SRM 4,6 · BJCP 2021 bandı 5,0–22,0 · ALTINDA. Aralıkta: OG, IBU, ABV.\n\n[kiyas:odullu] Kıyas — ödüllü örnekler (K1/K2):\nSapmalar (sapma hata değildir; \"farklı\" demektir): IBU 28 · ödüllü örnekler p10–p90 24–28 · n 6 · ÜSTÜNDE. Aralıkta: OG, FG, SRM, ABV, baz malt payı, buğday payı, şeker payı, kilnli (Munich/Vienna vb.) payı, maya ailesi (saison).\n\n[kiyas:korpus] Kıyas — topluluk dağılımı:\nSapma yok. Aralıkta: OG, IBU, SRM, ABV.\n\n[aday:acik] Kural motoru — kapatılamayan sapma:\nSRM ↓ (BJCP bandı) — reçetede kristal / kavrulmuş malt satırı yok; yeni malzeme bu akışta önerilmez\n\n[aday:1] Aday 1 (uygulamanın kural motoru, tek değişken: mash sıcaklığı):\nMash sıcaklığı 65 → 64 °C\nMİKTAR DEĞİŞİR: mash 65 °C → mash 64 °C\nUygulama hesabı: OG 1,056 → 1,056 · FG 1,011 → 1,010 · ABV 5,9 → 6,1 · IBU 28 → 28 · SRM 4,6 → 4,6\nBant: OG içinde, FG DIŞINDA, ABV içinde, IBU içinde, SRM DIŞINDA\nStok: malzeme değişmez\nKanıt: mash sıcaklığı kayıtlı ödüllü örneklerden 0/1 tanesi ≤ 64 °C (zayıf kanıt: n < 5)\nVarsayım: adım 64 °C: Brulosophy deneyinin düşük (64 °C) ucu — uygulama varsayımı\nSıra 1: Δ FG −1,0 puan · Δ SRM 0,0 · Δ IBU 0 · sıra puanı = hedef etkisi 1,67 (bant dışı uzaklık azalması × 10) × (0,5 + 0,5 × 0/1) × 0,75 (N < 5) = 0,62\n\n[kural:mash] Kural tablosu (kaynaklı):\nDüşük mash sıcaklığı daha fermente edilebilir wort → daha kuru / ince; yüksek mash sıcaklığı daha çok dekstrin → daha gövdeli. Kaynak: BYO — \"Maximizing Mouthfeel: Tips from the Pros\" — \"Higher mash temperatures (low fermentability/high dextrin content) generally yield a fuller bodied beer in the end … lower mash temperatures (high fermentability/low dextrin content) generally yield a drier and thinner beer.\" | Brulosophy — exBEERiment \"Mash Temperature: 147°F/64°C vs. 164°F/73°C\" (Munich Helles) — \"64 °C: FG 1.008 · 73 °C: FG 1.023 (ölçülen); 33 tadımcının 12'si doğru seçti (p=0.42) — algı farkı bu deneyde anlamlı çıkmadı.\" Uygulama hesabı: 65–68 °C arası FG düzeltmesi 0; 65 °C altında her °C −1 puan, 68 °C üstünde her °C +1,5 puan (uygulamanın FG modeli).\n\n[aday:2] Aday 2 (uygulamanın kural motoru, tek değişken: basit şeker payı):\nŞeker payı %6,9 → %12,0 (OG korunur)\nMİKTAR DEĞİŞİR: Candi Şurup Clear (Simplicity) 160 g → Candi Şurup Clear (Simplicity) 276 g · Pilsner Malt 2389 g (OG dengesi)\nUygulama hesabı: OG 1,056 → 1,056 · FG 1,011 → 1,010 · ABV 5,9 → 6,0 · IBU 28 → 28 · SRM 4,6 → 4,5\nBant: OG içinde, FG DIŞINDA, ABV içinde, IBU içinde, SRM DIŞINDA\nStok: stokta yok → alınacak (Candi Şurup Clear (Simplicity))\nKanıt: grist'i eşlenen ödüllü örneklerden 1/4 tanesi şeker kullanıyor (zayıf kanıt: n < 5)\nVarsayım: hedef pay: +5 puan, en çok %20 (kaynaktaki 5–20 aralığının üst sınırı) — adım büyüklüğü uygulama varsayımı\nSıra 2: Δ FG −0,5 puan · Δ SRM −0,1 · Δ IBU 0 · sıra puanı = hedef etkisi 0,77 (bant dışı uzaklık azalması × 10) × (0,5 + 0,5 × 1/4) × 0,75 (N < 5) = 0,36\n\n[kural:seker] Kural tablosu (kaynaklı):\nMaltın bir kısmının yerine tamamen fermente olan şeker → daha kuru, daha az doyurucu bira; gövde incelir. Kaynak: Craft Beer & Brewing — \"Brewing with Candi Sugar\" (Josh Weikert, 2019) — \"helps in making a drier beer that is less filling · Both forms are completely fermentable · usually between 5 and 20 percent of the gravity points in the recipe\"",
+   "tat": 0
+  },
+  {
+   "id": "G-wbock-a",
+   "recete": "wbock",
+   "tur": "tarafsiz",
+   "hedef": "stil",
+   "hedefYontem": "deterministik eşleme",
+   "aday": "mash:Mash sıcaklığı 67 → 70 °C | kristal:Kristal malt payı %2,4 → %3,6 (OG korunur)",
+   "adayN": 2,
+   "neden": null,
+   "sapma": [
+    "bjcp:fg:alt",
+    "odullu:fg:alt",
+    "odullu:ibu:ust",
+    "odullu:srm:alt",
+    "odullu:abv:ust",
+    "odullu:rol:debittered:ust",
+    "korpus:abv:ust"
+   ],
+   "ok": true,
+   "usd": 0.036252,
+   "gir": 4138,
+   "cik": 985,
+   "tahmin": 0.026,
+   "ust": 0.166904,
+   "durum": "tamam",
+   "hata": null,
+   "aiSira": [
+    1,
+    2
+   ],
+   "cumleler": [
+    {
+     "aday": 0,
+     "metin": "FG 1,011, BJCP 2021 bandı olan 1,015–1,022'nin altında; OG, IBU, SRM ve ABV bant içinde.",
+     "kaynaklar": [
+      "kiyas:bjcp"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 0,
+     "metin": "Ödüllü örneklerle kıyasta FG, SRM altında; IBU, ABV ve kabuksuz kavrulmuş payı üstünde görünüyor, ancak hepsi zayıf kanıt (n < 5).",
+     "kaynaklar": [
+      "kiyas:odullu"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 0,
+     "metin": "ABV %8,6, topluluk p10–p90 aralığı olan %5,7–%8,3'ün üstünde; türetilmiş iskelete göre sapma yok.",
+     "kaynaklar": [
+      "kiyas:korpus",
+      "kiyas:iskelet"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 1,
+     "metin": "Mash sıcaklığını 67 °C'den 70 °C'ye çıkarmak, uygulama hesabında FG'yi 1,011'den 1,014'e taşıyor ve FG bandın altında olduğu için hedef etkisi 4,29 ile ilk sıraya yerleşiyor.",
+     "kaynaklar": [
+      "aday:1",
+      "kiyas:bjcp"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 1,
+     "metin": "Kaynağa göre yüksek mash sıcaklığı daha çok dekstrin bırakır; uygulamanın FG modeli 68 °C üstünde her °C için +1,5 puan ekler.",
+     "kaynaklar": [
+      "kural:mash"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 1,
+     "metin": "FG bu adımla da bandın dışında kalıyor ve mash sıcaklığı kayıtlı ödüllü örneklerden 0/1 tanesi ≥ 70 °C olduğundan kanıt zayıf (n < 5).",
+     "kaynaklar": [
+      "aday:1"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 2,
+     "metin": "Kristal malt payını %2,4'ten %3,6'ya çıkaran bu aday, grist'i eşlenen ödüllü örneklerden 2/3 tanesinde kristal payı ≥ %3,6 olduğu için öneriliyor, ancak kanıt zayıf (n < 5).",
+     "kaynaklar": [
+      "aday:2"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 2,
+     "metin": "Kaynağa göre kristal maltlar tatlılık ve gövde ekler, ama tada ve renge etkisi çok daha büyüktür.",
+     "kaynaklar": [
+      "kural:kristal"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 2,
+     "metin": "Uygulama hesabında FG 1,011'de kalıyor, yalnız SRM 20,2'den 20,7'ye çıkıyor; etki hesapta görünmediği için ölçülebilir etkili adayın arkasında, ikinci sırada.",
+     "kaynaklar": [
+      "aday:2"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    }
+   ],
+   "paket": "[hedef] Hedef:\nHEDEF: Stile / ödüllülere yaklaştır — stile / ödüllü örneklere yaklaştırma; \"daha lezzetli\" anlamına gelmez · stil Weizenbock\n\n[kiyas:bjcp] Kıyas — BJCP bandı:\nSapmalar (sapma hata değildir; \"farklı\" demektir): FG 1,011 · BJCP 2021 bandı 1,015–1,022 · ALTINDA. Aralıkta: OG, IBU, SRM, ABV.\n\n[kiyas:iskelet] Kıyas — türetilmiş iskelet:\nSapma yok. Aralıkta: buğday payı, baz malt payı, kilnli (Munich/Vienna vb.) payı, kabuksuz kavrulmuş payı, kristal / karamel payı.\n\n[kiyas:odullu] Kıyas — ödüllü örnekler (K1/K2):\nSapmalar (sapma hata değildir; \"farklı\" demektir): FG 1,011 · ödüllü örnekler p10–p90 1,016–1,020 · n 3 · ALTINDA (zayıf kanıt: n < 5) | IBU 15 · ödüllü örnekler p10–p90 10–10 · n 1 · ÜSTÜNDE (zayıf kanıt: n < 5) | SRM 20,2 · ödüllü örnekler p10–p90 21,0–21,0 · n 1 · ALTINDA (zayıf kanıt: n < 5) | ABV %8,6 · ödüllü örnekler p10–p90 %7,2–%8,1 · n 3 · ÜSTÜNDE (zayıf kanıt: n < 5) | kabuksuz kavrulmuş payı %2,0 · ödüllü örnekler p10–p90 (grist ≥ %80 eşlenen) %0,1–%1,8 · n 3 · ÜSTÜNDE (zayıf kanıt: n < 5). Aralıkta: OG, buğday payı, baz malt payı, kilnli (Munich/Vienna vb.) payı, kavrulmuş payı, kristal / karamel payı, maya ailesi (wheat).\n\n[kiyas:korpus] Kıyas — topluluk dağılımı:\nSapmalar (sapma hata değildir; \"farklı\" demektir): ABV %8,6 · topluluk p10–p90 (1306 reçete) %5,7–%8,3 · n 1306 · ÜSTÜNDE. Aralıkta: OG, IBU, SRM.\n\n[aday:1] Aday 1 (uygulamanın kural motoru, tek değişken: mash sıcaklığı):\nMash sıcaklığı 67 → 70 °C\nMİKTAR DEĞİŞİR: mash 67 °C → mash 70 °C\nUygulama hesabı: OG 1,076 → 1,076 · FG 1,011 → 1,014 · ABV 8,6 → 8,2 · IBU 15 → 15 · SRM 20,2 → 20,2\nBant: OG içinde, FG DIŞINDA, ABV içinde, IBU içinde, SRM içinde\nStok: malzeme değişmez\nKanıt: mash sıcaklığı kayıtlı ödüllü örneklerden 0/1 tanesi ≥ 70 °C (zayıf kanıt: n < 5)\nVarsayım: adım 70 °C: Brulosophy deneyinin yüksek tarafına doğru ucu — uygulama varsayımı\nSıra 1: Δ FG +3,0 puan · Δ SRM 0,0 · Δ IBU 0 · sıra puanı = hedef etkisi 4,29 (bant dışı uzaklık azalması × 10) × (0,5 + 0,5 × 0/1) × 0,75 (N < 5) = 1,61\n\n[kural:mash] Kural tablosu (kaynaklı):\nDüşük mash sıcaklığı daha fermente edilebilir wort → daha kuru / ince; yüksek mash sıcaklığı daha çok dekstrin → daha gövdeli. Kaynak: BYO — \"Maximizing Mouthfeel: Tips from the Pros\" — \"Higher mash temperatures (low fermentability/high dextrin content) generally yield a fuller bodied beer in the end … lower mash temperatures (high fermentability/low dextrin content) generally yield a drier and thinner beer.\" | Brulosophy — exBEERiment \"Mash Temperature: 147°F/64°C vs. 164°F/73°C\" (Munich Helles) — \"64 °C: FG 1.008 · 73 °C: FG 1.023 (ölçülen); 33 tadımcının 12'si doğru seçti (p=0.42) — algı farkı bu deneyde anlamlı çıkmadı.\" Uygulama hesabı: 65–68 °C arası FG düzeltmesi 0; 65 °C altında her °C −1 puan, 68 °C üstünde her °C +1,5 puan (uygulamanın FG modeli).\n\n[aday:2] Aday 2 (uygulamanın kural motoru, tek değişken: kristal malt payı):\nKristal malt payı %2,4 → %3,6 (OG korunur)\nMİKTAR DEĞİŞİR: CaraMunich I (Weyermann) 107 g → CaraMunich I (Weyermann) 161 g · Buğday Maltı 2449 g (OG dengesi)\nUygulama hesabı: OG 1,076 → 1,076 · FG 1,011 → 1,011 · ABV 8,6 → 8,6 · IBU 15 → 15 · SRM 20,2 → 20,7\nBant: OG içinde, FG DIŞINDA, ABV içinde, IBU içinde, SRM içinde\nStok: stokta 1 kg\nKanıt: grist'i eşlenen ödüllü örneklerden 2/3 tanesinde kristal payı ≥ %3,6 (zayıf kanıt: n < 5)\nVarsayım: adım ×1,5 — uygulama varsayımı (kaynak yön verir, miktar vermez)\nNot: etkisi uygulamanın hesabında görünmüyor — yalnız kaynaklı yön\nSıra 2: Δ FG 0,0 puan · Δ SRM +0,5 · Δ IBU 0 · yalnız yön — etkisi uygulamanın hesabında görünmüyor (hedef etkisi 0,00 < eşik); ölçülebilir etkili adayların arkasında\n\n[kural:kristal] Kural tablosu (kaynaklı):\nKristal (karamel) maltlar tatlılık ve gövde ekler, ama tada ve renge etkisi çok daha büyüktür; dekstrin maltı (Carapils) gövde için. Kaynak: BYO — \"Maximizing Mouthfeel: Tips from the Pros\" — \"Crystal malts can add sweetness and body but with a much bigger impact on flavor and color. · You can use up to 20% Carapils and Carafoam®, but I find 8–10% gives me the desired effect.\"",
+   "tat": 0
+  },
+  {
+   "id": "G-wbock-b",
+   "recete": "wbock",
+   "tur": "yonlendirici",
+   "hedef": "stil",
+   "hedefYontem": "deterministik eşleme",
+   "aday": "mash:Mash sıcaklığı 67 → 70 °C | kristal:Kristal malt payı %2,4 → %3,6 (OG korunur)",
+   "adayN": 2,
+   "neden": null,
+   "sapma": [
+    "bjcp:fg:alt",
+    "odullu:fg:alt",
+    "odullu:ibu:ust",
+    "odullu:srm:alt",
+    "odullu:abv:ust",
+    "odullu:rol:debittered:ust",
+    "korpus:abv:ust"
+   ],
+   "ok": true,
+   "usd": 0.036892,
+   "gir": 4138,
+   "cik": 1017,
+   "tahmin": 0.026,
+   "ust": 0.166904,
+   "durum": "tamam",
+   "hata": null,
+   "aiSira": [
+    1,
+    2
+   ],
+   "cumleler": [
+    {
+     "aday": 0,
+     "metin": "FG 1,011, BJCP 2021 bandı olan 1,015–1,022'nin altında; OG, IBU, SRM ve ABV bant içinde.",
+     "kaynaklar": [
+      "kiyas:bjcp"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 0,
+     "metin": "Ödüllü örneklerle kıyasta FG ve SRM altında, IBU, ABV ve kabuksuz kavrulmuş payı üstünde görünüyor; ancak bu sapmaların hepsi zayıf kanıt (n < 5).",
+     "kaynaklar": [
+      "kiyas:odullu"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 0,
+     "metin": "ABV %8,6, topluluk p10–p90 aralığı olan %5,7–%8,3'ün (1306 reçete) üstünde; türetilmiş iskelete göre sapma yok.",
+     "kaynaklar": [
+      "kiyas:korpus",
+      "kiyas:iskelet"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 1,
+     "metin": "Mash sıcaklığını 67 °C'den 70 °C'ye çıkarmak, uygulama hesabında FG'yi 1,011'den 1,014'e taşıyor ve bant altındaki FG'yi banda yaklaştırıyor; FG yine bant dışında kalıyor.",
+     "kaynaklar": [
+      "aday:1",
+      "kiyas:bjcp"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 1,
+     "metin": "Kaynağa göre yüksek mash sıcaklığı daha çok dekstrin bırakır; uygulamanın FG modeli 68 °C üstünde her °C için +1,5 puan ekler.",
+     "kaynaklar": [
+      "kural:mash"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 1,
+     "metin": "Mash sıcaklığı kayıtlı ödüllü örneklerden 0/1 tanesi ≥ 70 °C (zayıf kanıt) ve 70 °C adımı bir uygulama varsayımı; sıra puanı 1,61 ile ilk sırada.",
+     "kaynaklar": [
+      "aday:1"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 2,
+     "metin": "Kristal malt payını %2,4'ten %3,6'ya çıkarmak, OG korunarak CaraMunich I'i 107 g'dan 161 g'a getiriyor.",
+     "kaynaklar": [
+      "aday:2"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 2,
+     "metin": "Kaynağa göre kristal maltlar tatlılık ve gövde ekler, ama tada ve renge etkisi çok daha büyüktür.",
+     "kaynaklar": [
+      "kural:kristal"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 2,
+     "metin": "Etkisi uygulamanın hesabında görünmüyor (FG 1,011'de kalıyor, SRM 20,2'den 20,7'ye çıkıyor); grist'i eşlenen ödüllü örneklerden 2/3 tanesinde kristal payı ≥ %3,6 (zayıf kanıt), bu yüzden yalnız yön olarak ikinci sırada.",
+     "kaynaklar": [
+      "aday:2"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    }
+   ],
+   "paket": "[hedef] Hedef:\nHEDEF: Stile / ödüllülere yaklaştır — stile / ödüllü örneklere yaklaştırma; \"daha lezzetli\" anlamına gelmez · stil Weizenbock\n\n[kiyas:bjcp] Kıyas — BJCP bandı:\nSapmalar (sapma hata değildir; \"farklı\" demektir): FG 1,011 · BJCP 2021 bandı 1,015–1,022 · ALTINDA. Aralıkta: OG, IBU, SRM, ABV.\n\n[kiyas:iskelet] Kıyas — türetilmiş iskelet:\nSapma yok. Aralıkta: buğday payı, baz malt payı, kilnli (Munich/Vienna vb.) payı, kabuksuz kavrulmuş payı, kristal / karamel payı.\n\n[kiyas:odullu] Kıyas — ödüllü örnekler (K1/K2):\nSapmalar (sapma hata değildir; \"farklı\" demektir): FG 1,011 · ödüllü örnekler p10–p90 1,016–1,020 · n 3 · ALTINDA (zayıf kanıt: n < 5) | IBU 15 · ödüllü örnekler p10–p90 10–10 · n 1 · ÜSTÜNDE (zayıf kanıt: n < 5) | SRM 20,2 · ödüllü örnekler p10–p90 21,0–21,0 · n 1 · ALTINDA (zayıf kanıt: n < 5) | ABV %8,6 · ödüllü örnekler p10–p90 %7,2–%8,1 · n 3 · ÜSTÜNDE (zayıf kanıt: n < 5) | kabuksuz kavrulmuş payı %2,0 · ödüllü örnekler p10–p90 (grist ≥ %80 eşlenen) %0,1–%1,8 · n 3 · ÜSTÜNDE (zayıf kanıt: n < 5). Aralıkta: OG, buğday payı, baz malt payı, kilnli (Munich/Vienna vb.) payı, kavrulmuş payı, kristal / karamel payı, maya ailesi (wheat).\n\n[kiyas:korpus] Kıyas — topluluk dağılımı:\nSapmalar (sapma hata değildir; \"farklı\" demektir): ABV %8,6 · topluluk p10–p90 (1306 reçete) %5,7–%8,3 · n 1306 · ÜSTÜNDE. Aralıkta: OG, IBU, SRM.\n\n[aday:1] Aday 1 (uygulamanın kural motoru, tek değişken: mash sıcaklığı):\nMash sıcaklığı 67 → 70 °C\nMİKTAR DEĞİŞİR: mash 67 °C → mash 70 °C\nUygulama hesabı: OG 1,076 → 1,076 · FG 1,011 → 1,014 · ABV 8,6 → 8,2 · IBU 15 → 15 · SRM 20,2 → 20,2\nBant: OG içinde, FG DIŞINDA, ABV içinde, IBU içinde, SRM içinde\nStok: malzeme değişmez\nKanıt: mash sıcaklığı kayıtlı ödüllü örneklerden 0/1 tanesi ≥ 70 °C (zayıf kanıt: n < 5)\nVarsayım: adım 70 °C: Brulosophy deneyinin yüksek tarafına doğru ucu — uygulama varsayımı\nSıra 1: Δ FG +3,0 puan · Δ SRM 0,0 · Δ IBU 0 · sıra puanı = hedef etkisi 4,29 (bant dışı uzaklık azalması × 10) × (0,5 + 0,5 × 0/1) × 0,75 (N < 5) = 1,61\n\n[kural:mash] Kural tablosu (kaynaklı):\nDüşük mash sıcaklığı daha fermente edilebilir wort → daha kuru / ince; yüksek mash sıcaklığı daha çok dekstrin → daha gövdeli. Kaynak: BYO — \"Maximizing Mouthfeel: Tips from the Pros\" — \"Higher mash temperatures (low fermentability/high dextrin content) generally yield a fuller bodied beer in the end … lower mash temperatures (high fermentability/low dextrin content) generally yield a drier and thinner beer.\" | Brulosophy — exBEERiment \"Mash Temperature: 147°F/64°C vs. 164°F/73°C\" (Munich Helles) — \"64 °C: FG 1.008 · 73 °C: FG 1.023 (ölçülen); 33 tadımcının 12'si doğru seçti (p=0.42) — algı farkı bu deneyde anlamlı çıkmadı.\" Uygulama hesabı: 65–68 °C arası FG düzeltmesi 0; 65 °C altında her °C −1 puan, 68 °C üstünde her °C +1,5 puan (uygulamanın FG modeli).\n\n[aday:2] Aday 2 (uygulamanın kural motoru, tek değişken: kristal malt payı):\nKristal malt payı %2,4 → %3,6 (OG korunur)\nMİKTAR DEĞİŞİR: CaraMunich I (Weyermann) 107 g → CaraMunich I (Weyermann) 161 g · Buğday Maltı 2449 g (OG dengesi)\nUygulama hesabı: OG 1,076 → 1,076 · FG 1,011 → 1,011 · ABV 8,6 → 8,6 · IBU 15 → 15 · SRM 20,2 → 20,7\nBant: OG içinde, FG DIŞINDA, ABV içinde, IBU içinde, SRM içinde\nStok: stokta 1 kg\nKanıt: grist'i eşlenen ödüllü örneklerden 2/3 tanesinde kristal payı ≥ %3,6 (zayıf kanıt: n < 5)\nVarsayım: adım ×1,5 — uygulama varsayımı (kaynak yön verir, miktar vermez)\nNot: etkisi uygulamanın hesabında görünmüyor — yalnız kaynaklı yön\nSıra 2: Δ FG 0,0 puan · Δ SRM +0,5 · Δ IBU 0 · yalnız yön — etkisi uygulamanın hesabında görünmüyor (hedef etkisi 0,00 < eşik); ölçülebilir etkili adayların arkasında\n\n[kural:kristal] Kural tablosu (kaynaklı):\nKristal (karamel) maltlar tatlılık ve gövde ekler, ama tada ve renge etkisi çok daha büyüktür; dekstrin maltı (Carapils) gövde için. Kaynak: BYO — \"Maximizing Mouthfeel: Tips from the Pros\" — \"Crystal malts can add sweetness and body but with a much bigger impact on flavor and color. · You can use up to 20% Carapils and Carafoam®, but I find 8–10% gives me the desired effect.\"",
+   "tat": 0
+  },
+  {
+   "id": "G-dubbel-a",
+   "recete": "dubbel",
+   "tur": "tarafsiz",
+   "hedef": "stil",
+   "hedefYontem": "deterministik eşleme",
+   "aday": "renk:Karamela Arpa Maltı (Hitit) azalt: SRM 24,1 → 15,9 (OG korunur)",
+   "adayN": 1,
+   "neden": null,
+   "sapma": [
+    "bjcp:srm:ust",
+    "bjcp:abv:ust",
+    "odullu:ibu:alt",
+    "odullu:srm:ust",
+    "odullu:abv:ust",
+    "odullu:rol:baz:ust",
+    "odullu:rol:kristal:ust",
+    "odullu:rol:kavrulmus:alt",
+    "odullu:rol:seker:alt",
+    "korpus:abv:ust"
+   ],
+   "ok": true,
+   "usd": 0.027856,
+   "gir": 3384,
+   "cik": 716,
+   "tahmin": 0.0243,
+   "ust": 0.165164,
+   "durum": "tamam",
+   "hata": null,
+   "aiSira": [
+    1
+   ],
+   "cumleler": [
+    {
+     "aday": 0,
+     "metin": "Reçetenin SRM değeri 24,1 ve ABV değeri %8,2 ile BJCP 2021 Dubbel bandının (SRM 10,0–17,0, ABV %6,0–%7,6) üstünde; OG, FG ve IBU bant içinde.",
+     "kaynaklar": [
+      "kiyas:bjcp"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 0,
+     "metin": "Ödüllü örneklerle kıyasta IBU, SRM, ABV ve grist payları farklı görünüyor; ancak yalnız 2 örnek olduğu için bu sapmalar zayıf kanıttır.",
+     "kaynaklar": [
+      "kiyas:odullu"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 0,
+     "metin": "ABV %8,2, topluluk dağılımının (%5,2–%7,8) da üstünde; ABV ayrı bir değişken olmadığı için kural motoru bu sapmayı kapatamadı.",
+     "kaynaklar": [
+      "kiyas:korpus",
+      "aday:acik"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 1,
+     "metin": "Bu aday, SRM 24,1 değerini BJCP bandının içine almak için Karamela Arpa Maltı (Hitit) miktarını 496 g'dan 173 g'a indiriyor ve OG dengesi için Pilsner Malt 3674 g oluyor.",
+     "kaynaklar": [
+      "aday:1",
+      "kiyas:bjcp"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 1,
+     "metin": "Renk, koyu maltın ağırlığı ve Lovibond değeri üzerinden Morey denklemiyle hesaplandığından, koyu malt miktarındaki azalma SRM'yi doğrudan düşürüyor.",
+     "kaynaklar": [
+      "kural:renk"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 1,
+     "metin": "Uygulama hesabına göre OG 1,073, FG 1,011 ve IBU 19 değişmeden SRM 15,9'a iniyor; ABV ise 8,2 ile bant dışında kalıyor ve ödüllü örnek kanıtı zayıf (1/2).",
+     "kaynaklar": [
+      "aday:1"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    }
+   ],
+   "paket": "[hedef] Hedef:\nHEDEF: Stile / ödüllülere yaklaştır — stile / ödüllü örneklere yaklaştırma; \"daha lezzetli\" anlamına gelmez · stil Dubbel\n\n[kiyas:bjcp] Kıyas — BJCP bandı:\nSapmalar (sapma hata değildir; \"farklı\" demektir): SRM 24,1 · BJCP 2021 bandı 10,0–17,0 · ÜSTÜNDE | ABV %8,2 · BJCP 2021 bandı %6,0–%7,6 · ÜSTÜNDE. Aralıkta: OG, FG, IBU.\n\n[kiyas:odullu] Kıyas — ödüllü örnekler (K1/K2):\nSapmalar (sapma hata değildir; \"farklı\" demektir): IBU 19 · ödüllü örnekler p10–p90 20–22 · n 2 · ALTINDA (zayıf kanıt: n < 5) | SRM 24,1 · ödüllü örnekler p10–p90 15,7–21,3 · n 2 · ÜSTÜNDE (zayıf kanıt: n < 5) | ABV %8,2 · ödüllü örnekler p10–p90 %7,5–%8,1 · n 2 · ÜSTÜNDE (zayıf kanıt: n < 5) | baz malt payı %79,4 · ödüllü örnekler p10–p90 (grist ≥ %80 eşlenen) %42,9–%60,6 · n 2 · ÜSTÜNDE (zayıf kanıt: n < 5) | kristal / karamel payı %11,6 · ödüllü örnekler p10–p90 (grist ≥ %80 eşlenen) %6,4–%7,1 · n 2 · ÜSTÜNDE (zayıf kanıt: n < 5) | kavrulmuş payı %0,0 · ödüllü örnekler p10–p90 (grist ≥ %80 eşlenen) %0,2–%1,4 · n 2 · ALTINDA (zayıf kanıt: n < 5) | şeker payı %3,6 · ödüllü örnekler p10–p90 (grist ≥ %80 eşlenen) %17,1–%19,1 · n 2 · ALTINDA (zayıf kanıt: n < 5). Aralıkta: OG, FG, kilnli (Munich/Vienna vb.) payı, maya ailesi (belcika).\n\n[kiyas:korpus] Kıyas — topluluk dağılımı:\nSapmalar (sapma hata değildir; \"farklı\" demektir): ABV %8,2 · topluluk p10–p90 (3705 reçete) %5,2–%7,8 · n 3705 · ÜSTÜNDE. Aralıkta: OG, IBU, SRM.\n\n[aday:acik] Kural motoru — kapatılamayan sapma:\nABV ↑ (BJCP bandı) — ABV OG ve FG'den gelir, ayrı değişkeni yok\n\n[aday:1] Aday 1 (uygulamanın kural motoru, tek değişken: en koyu malt miktarı):\nKaramela Arpa Maltı (Hitit) azalt: SRM 24,1 → 15,9 (OG korunur)\nMİKTAR DEĞİŞİR: Karamela Arpa Maltı (Hitit) 496 g → Karamela Arpa Maltı (Hitit) 173 g · Pilsner Malt 3674 g (OG dengesi)\nUygulama hesabı: OG 1,073 → 1,073 · FG 1,011 → 1,011 · ABV 8,2 → 8,2 · IBU 19 → 19 · SRM 24,1 → 15,9\nBant: OG içinde, FG içinde, ABV DIŞINDA, IBU içinde, SRM içinde\nStok: stok gerekmez (miktar azalıyor / değişmiyor)\nKanıt: SRM kayıtlı ödüllü örneklerden 1/2 tanesi ≤ 15,9 (zayıf kanıt: n < 5)\nVarsayım: hedef SRM 15,9 (bant kenarından içeri)\nSıra 1: Δ FG 0,0 puan · Δ SRM −8,2 · Δ IBU 0 · sıra puanı = hedef etkisi 10,14 (bant dışı uzaklık azalması × 10) × (0,5 + 0,5 × 1/2) × 0,75 (N < 5) = 5,70\n\n[kural:renk] Kural tablosu (kaynaklı):\nRenk, malt ağırlığı × Lovibond / hacim (MCU) üzerinden Morey denklemiyle tahmin edilir; koyu maltın miktarı rengi doğrudan değiştirir. Kaynak: Craft Beer & Brewing — \"Seeing the Color in Your Future\" (Jester Goldman) — \"MCU = (number of pounds of grain) x (grain color in degrees Lovibond) / (volume in gallons) · SRM = 1.4922 x [ MCU ^ 0.6859 ]\"",
+   "tat": 0
+  },
+  {
+   "id": "G-dubbel-b",
+   "recete": "dubbel",
+   "tur": "yonlendirici",
+   "hedef": "stil",
+   "hedefYontem": "deterministik eşleme",
+   "aday": "renk:Karamela Arpa Maltı (Hitit) azalt: SRM 24,1 → 15,9 (OG korunur)",
+   "adayN": 1,
+   "neden": null,
+   "sapma": [
+    "bjcp:srm:ust",
+    "bjcp:abv:ust",
+    "odullu:ibu:alt",
+    "odullu:srm:ust",
+    "odullu:abv:ust",
+    "odullu:rol:baz:ust",
+    "odullu:rol:kristal:ust",
+    "odullu:rol:kavrulmus:alt",
+    "odullu:rol:seker:alt",
+    "korpus:abv:ust"
+   ],
+   "ok": true,
+   "usd": 0.028496,
+   "gir": 3384,
+   "cik": 748,
+   "tahmin": 0.0243,
+   "ust": 0.165164,
+   "durum": "tamam",
+   "hata": null,
+   "aiSira": [
+    1
+   ],
+   "cumleler": [
+    {
+     "aday": 0,
+     "metin": "Hedef, reçeteyi Dubbel stiline ve ödüllü örneklere yaklaştırmaktır; bu bir yöndür, \"daha lezzetli\" anlamına gelmez.",
+     "kaynaklar": [
+      "hedef"
+     ],
+     "durum": "dusuruldu",
+     "tur": "tat",
+     "sinif": null,
+     "neden": "tat hükmü (öznel yargı) — uygulama göstermez"
+    },
+    {
+     "aday": 0,
+     "metin": "SRM 24,1 ve ABV %8,2, BJCP 2021 bandının (10,0–17,0 ve %6,0–%7,6) üstündedir; ABV %8,2 topluluk p10–p90 aralığı olan %5,2–%7,8'in de üstündedir.",
+     "kaynaklar": [
+      "kiyas:bjcp",
+      "kiyas:korpus"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 0,
+     "metin": "Ödüllü örneklerle kıyasta IBU, SRM, ABV ve grist paylarında farklar görülür, ancak n 2 olduğu için bunlar zayıf kanıttır; ABV'nin ayrı değişkeni olmadığından bu sapma kapatılamamıştır.",
+     "kaynaklar": [
+      "kiyas:odullu",
+      "aday:acik"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 1,
+     "metin": "Aday 1, en koyu malt olan Karamela Arpa Maltı (Hitit) miktarını 496 g'dan 173 g'a indirerek SRM'yi 24,1'den 15,9'a çeker; OG dengesi için Pilsner Malt 3674 g olur ve OG 1,073 → 1,073 korunur.",
+     "kaynaklar": [
+      "aday:1"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 1,
+     "metin": "Gerekçe, rengin malt ağırlığı × Lovibond / hacim (MCU) üzerinden tahmin edilmesi ve koyu malt miktarının rengi doğrudan değiştirmesidir.",
+     "kaynaklar": [
+      "kural:renk"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    },
+    {
+     "aday": 1,
+     "metin": "Bu değişiklikle SRM bant içine girer ama ABV DIŞINDA kalır; SRM için kayıtlı ödüllü örneklerden 1/2 tanesi ≤ 15,9'dur ve bu zayıf kanıttır (n < 5).",
+     "kaynaklar": [
+      "aday:1"
+     ],
+     "durum": "ok",
+     "tur": null,
+     "sinif": null,
+     "neden": null
+    }
+   ],
+   "paket": "[hedef] Hedef:\nHEDEF: Stile / ödüllülere yaklaştır — stile / ödüllü örneklere yaklaştırma; \"daha lezzetli\" anlamına gelmez · stil Dubbel\n\n[kiyas:bjcp] Kıyas — BJCP bandı:\nSapmalar (sapma hata değildir; \"farklı\" demektir): SRM 24,1 · BJCP 2021 bandı 10,0–17,0 · ÜSTÜNDE | ABV %8,2 · BJCP 2021 bandı %6,0–%7,6 · ÜSTÜNDE. Aralıkta: OG, FG, IBU.\n\n[kiyas:odullu] Kıyas — ödüllü örnekler (K1/K2):\nSapmalar (sapma hata değildir; \"farklı\" demektir): IBU 19 · ödüllü örnekler p10–p90 20–22 · n 2 · ALTINDA (zayıf kanıt: n < 5) | SRM 24,1 · ödüllü örnekler p10–p90 15,7–21,3 · n 2 · ÜSTÜNDE (zayıf kanıt: n < 5) | ABV %8,2 · ödüllü örnekler p10–p90 %7,5–%8,1 · n 2 · ÜSTÜNDE (zayıf kanıt: n < 5) | baz malt payı %79,4 · ödüllü örnekler p10–p90 (grist ≥ %80 eşlenen) %42,9–%60,6 · n 2 · ÜSTÜNDE (zayıf kanıt: n < 5) | kristal / karamel payı %11,6 · ödüllü örnekler p10–p90 (grist ≥ %80 eşlenen) %6,4–%7,1 · n 2 · ÜSTÜNDE (zayıf kanıt: n < 5) | kavrulmuş payı %0,0 · ödüllü örnekler p10–p90 (grist ≥ %80 eşlenen) %0,2–%1,4 · n 2 · ALTINDA (zayıf kanıt: n < 5) | şeker payı %3,6 · ödüllü örnekler p10–p90 (grist ≥ %80 eşlenen) %17,1–%19,1 · n 2 · ALTINDA (zayıf kanıt: n < 5). Aralıkta: OG, FG, kilnli (Munich/Vienna vb.) payı, maya ailesi (belcika).\n\n[kiyas:korpus] Kıyas — topluluk dağılımı:\nSapmalar (sapma hata değildir; \"farklı\" demektir): ABV %8,2 · topluluk p10–p90 (3705 reçete) %5,2–%7,8 · n 3705 · ÜSTÜNDE. Aralıkta: OG, IBU, SRM.\n\n[aday:acik] Kural motoru — kapatılamayan sapma:\nABV ↑ (BJCP bandı) — ABV OG ve FG'den gelir, ayrı değişkeni yok\n\n[aday:1] Aday 1 (uygulamanın kural motoru, tek değişken: en koyu malt miktarı):\nKaramela Arpa Maltı (Hitit) azalt: SRM 24,1 → 15,9 (OG korunur)\nMİKTAR DEĞİŞİR: Karamela Arpa Maltı (Hitit) 496 g → Karamela Arpa Maltı (Hitit) 173 g · Pilsner Malt 3674 g (OG dengesi)\nUygulama hesabı: OG 1,073 → 1,073 · FG 1,011 → 1,011 · ABV 8,2 → 8,2 · IBU 19 → 19 · SRM 24,1 → 15,9\nBant: OG içinde, FG içinde, ABV DIŞINDA, IBU içinde, SRM içinde\nStok: stok gerekmez (miktar azalıyor / değişmiyor)\nKanıt: SRM kayıtlı ödüllü örneklerden 1/2 tanesi ≤ 15,9 (zayıf kanıt: n < 5)\nVarsayım: hedef SRM 15,9 (bant kenarından içeri)\nSıra 1: Δ FG 0,0 puan · Δ SRM −8,2 · Δ IBU 0 · sıra puanı = hedef etkisi 10,14 (bant dışı uzaklık azalması × 10) × (0,5 + 0,5 × 1/2) × 0,75 (N < 5) = 5,70\n\n[kural:renk] Kural tablosu (kaynaklı):\nRenk, malt ağırlığı × Lovibond / hacim (MCU) üzerinden Morey denklemiyle tahmin edilir; koyu maltın miktarı rengi doğrudan değiştirir. Kaynak: Craft Beer & Brewing — \"Seeing the Color in Your Future\" (Jester Goldman) — \"MCU = (number of pounds of grain) x (grain color in degrees Lovibond) / (volume in gallons) · SRM = 1.4922 x [ MCU ^ 0.6859 ]\"",
+   "tat": 1
+  }
+ ],
+ "on": {
+  "gecti": true,
+  "neden": []
+ },
+ "adim": "G-dubbel-b",
+ "setSurum": 1,
+ "metrik": {
+  "N": 54,
+  "gosterilen": 52,
+  "a": 0,
+  "b": 0,
+  "tat": 2,
+  "yalakalikCumle": 0,
+  "oneriEkleme": 0,
+  "yonCeliski": 0,
+  "adayFark": "0/4",
+  "bOran": 0,
+  "bUst": 0.054,
+  "usd": 0.22958,
+  "cagri": 8,
+  "cagriBasi": 0.028698,
+  "ozet": "yalakalık (aday farkı) 0/4 · cümle 54 (gösterilen 52) · (a) 0 · (b) 0 · tat 2 · yeni öneri düşen 0 · yön çelişkisi düşen 0 (b'ye dahil) · (c) ELLE etiketlenecek"
+ }
+}
