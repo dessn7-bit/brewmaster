@@ -11201,6 +11201,131 @@ const CASELER = [
       return __REG.al();
     })
   },
+  // ═════════════ SPRINT MASH1 — mash asistanı AI'sız çekirdek ═════════════
+  {
+    kod: 'MASH1-SICAKLIK', ad: 'MASH SICAKLIĞI SAPMASI (MASH1 madde 1): Palmer infüzyon denklemi Wm = G(0,4 + R)(T2 − T1)/(Tw − T2), Wv = Wm/0,985 — Palmer örneği BİREBİR (4,54 kg · R 2,06 · 50 → 65 °C · Tw 96 → 5,40 kg / 5,48 L) · 64→66 ısıtıcısız sıcak su · 70→66 soğuk 15 °C "yaklaşık" + yön · ısıtıcılı düşük → yalnız ısıtıcı, süre YOK · ±1 °C hedefte (uygulama varsayımı) · önizleme: yeni R, ön kaynatma hacmi, OG / ABV / IBU (uygulamanın hesabı) · KASITLI BOZMA: 0,4 yerine 0,2',
+    calistir: (page) => page.evaluate(async () => {
+      const M = window.BM_MASH; tarifAc('dubbel_2024');
+      const p = M.palmerWm(4.54, 2.06, 50, 65, 96);
+      __REG.ok('Palmer örneği: Wm ' + p.toFixed(3) + ' kg (Palmer 5.4), Wv ' + (p / 0.985).toFixed(3) + ' L (Palmer 5.48)', Math.abs(p - 5.40) < 0.01 && Math.abs(p / 0.985 - 5.48) < 0.01);
+      const R = M.R(), f = (T1, T2, Tw) => R.G * (0.4 + R.R) * (T2 - T1) / (Tw - T2);
+      const a = M.sicaklikSapma({ olculen: 64, hedef: 66, kap: 'isiticisiz', G: R.G, R: R.R, Tw: 96, TwSoguk: 15 });
+      __REG.ok('64 → 66 ısıtıcısız: sıcak su ' + a.secenek[0].Wv.toFixed(2) + ' L = Palmer (kaynak satırı)', a.durum === 'dusuk' && a.secenek[0].tur === 'sicakSu' && Math.abs(a.secenek[0].Wm - f(64, 66, 96)) < 1e-9 && Math.abs(a.secenek[0].Wv - f(64, 66, 96) / 0.985) < 1e-9 && a.secenek[0].kaynak === 'palmerInfuzyon' && R.R > 1 && R.G > 1);
+      const b = M.sicaklikSapma({ olculen: 70, hedef: 66, kap: 'isiticisiz', G: R.G, R: R.R, Tw: 96, TwSoguk: 15 });
+      __REG.ok('70 → 66 soğuk su 15 °C: aynı denklem (pozitif), "soğutmada yaklaşık" etiketi + karıştır / kapak aç (miktarsız yön)', b.durum === 'yuksek' && Math.abs(b.secenek[0].Wm - f(70, 66, 15)) < 1e-9 && /soğutmada yaklaşık/.test(b.secenek[0].yaklasik) && b.secenek[1].tur === 'yon' && !/\d/.test(b.secenek[1].metin));
+      const c = M.sicaklikSapma({ olculen: 63, hedef: 66, kap: 'isitici', G: R.G, R: R.R });
+      __REG.ok('Bulldog (ısıtıcılı) düşük → yalnız ısıtıcı, karıştır kaynağı, süre YAZILMAZ (ısıtma hızı yok)', c.secenek.length === 1 && c.secenek[0].tur === 'isitici' && c.secenek[0].dakika === null && /süre yazılmıyor/.test(c.secenek[0].dakikaNot) && c.secenek[0].kaynak === 'palmerKaristir');
+      const d = M.sicaklikSapma({ olculen: 66.8, hedef: 66, kap: 'isitici', G: R.G, R: R.R }), e = M.sicaklikSapma({ olculen: 67.2, hedef: 66, kap: 'isitici', G: R.G, R: R.R });
+      __REG.ok('±1 °C eşiği: 66,8 hedefte · 67,2 yüksek (eşik uygulama varsayımı, kartta yazar)', d.durum === 'hedefte' && e.durum === 'yuksek' && M.ESIK_C === 1);
+      const o = M.suOnizleme(a.secenek[0].Wv, R.G, R.R);
+      __REG.ok('önizleme: yeni R büyür, ön kaynatma hacmi + su, OG düşer (uygulamanın _bmTarifHesap\'ı, hacim + su)', o.Ryeni > R.R && Math.abs(o.preboilV - (M.preboilBeklenen().V + a.secenek[0].Wv)) < 1e-9 && o.og1 < o.og0 && o.ibu1 < o.ibu0);
+      M.taslak.sic = 64; M.kapYaz('isiticisiz'); M.kaydet('sicaklik'); const h = M.kartHTML(); M.kapYaz(null);
+      __REG.ok('kart: fark, eşik notu, Palmer formülü sayılarıyla, kaynak bağlantısı + okuma tarihi', /fark −?-?2,0 °C|fark -2,0 °C/.test(h) && /uygulama varsayımı/.test(h) && /Wm = G \(0,4 \+ R\)\(T2 − T1\)\/\(Tw − T2\)/.test(h) && /howtobrew\.com\/section-3\/chapter-16/.test(h) && /okundu 2026-10-14/.test(h), h.slice(0, 200));
+      const t0 = M.TANE_ISI; M.TANE_ISI = 0.2; let bz; try { bz = M.palmerWm(4.54, 2.06, 50, 65, 96); } finally { M.TANE_ISI = t0; }
+      __REG.ok('KASITLI BOZMA: tane ısı oranı 0,2 olunca Palmer örneği tutmaz → kırmızı', Math.abs(bz - 5.40) > 0.1, bz);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'MASH1-PREBOIL', ad: 'ÖN KAYNATMA SAPMASI (MASH1 madde 2): GP×V korunur (Palmer bl.3) · beklenen hacim / OG Süreç sekmesinin formülüyle (yalnız tane) · düşük: kaynamayı uzat (buharlaşma ayarı YOKSA dakika yazılmaz, varsa ΔV / kayıp) + reçetedeki / stoktaki şeker (stokta yoksa "alınacak", yeni malzeme yok) · yüksek: su V × (GP/GP_hedef − 1) · her seçenekte OG / ABV / IBU önizlemesi · ölçülen mash verimi (hOG tersi) partiye · KASITLI BOZMA: buharlaşma ayarlı sayılınca süre uydurulur',
+    calistir: (page) => page.evaluate(async () => {
+      const M = window.BM_MASH; tarifAc('dubbel_2024'); localStorage.removeItem('bm_boiloff_v1');
+      const B = M.preboilBeklenen(), h = +S.hacim, kb = h * bmBoilOff() * (+S.kaynatmaSure || 60) / 60;
+      __REG.ok('beklenen ön kaynatma hacmi = Süreç formülü (hacim + 0,9 + kaynatma kaybı)', Math.abs(B.V - (h + 0.9 + kb)) < 1e-9 && B.og > 1.02);
+      const d = M.preboilSapma({ og: B.og - 0.006, V: B.V }), k = d.secenek.find(x => x.tur === 'kaynat'), sk = d.secenek.find(x => x.tur === 'seker');
+      __REG.ok('düşük: hedef hacim = GP×V / GP_hedef, ΔV; buharlaşma ayarlanmamış → DAKİKA YOK + neden', d.durum === 'dusuk' && Math.abs(k.hedefV - d.gp * d.V / d.gpH) < 1e-9 && k.dakika === null && /girilmemiş — süre yazılmıyor/.test(k.dakikaNot) && k.onizleme.og > 1);
+      __REG.ok('düşük: reçetedeki şeker (Koyu Candi) kg = ΔGP × V / katalog puanı; stokta yok → "alınacak"; önizleme', !!sk && Math.abs(sk.kg - (d.gpH - d.gp) * d.V / sk.gu) < 1e-9 && /alınacak/.test(sk.stok) && sk.onizleme.og > d.devam.og && sk.kaynak === 'palmerSeker');
+      STOK.push({ ad: 'Koyu Candi (D-180)', refId: 'koyu_candy', refTip: 'Katki', grup: 'Şeker', miktar: 500, birim: 'g' });
+      const d2 = M.preboilSapma({ og: B.og - 0.006, V: B.V }), sk2 = d2.secenek.find(x => x.tur === 'seker'); STOK.pop();
+      __REG.ok('stokta varsa stok miktarı yazılır', !!sk2 && /stokta 500/.test(sk2.stok), sk2 && sk2.stok);
+      localStorage.setItem('bm_boiloff_v1', '8'); const d3 = M.preboilSapma({ og: B.og - 0.006, V: M.preboilBeklenen().V }), k3 = d3.secenek.find(x => x.tur === 'kaynat'); localStorage.removeItem('bm_boiloff_v1');
+      __REG.ok('buharlaşma ayarlıysa (%8/saat): ek dakika = ΔV / (hacim × %8 / 60)', k3.dakika === Math.round(k3.dV / (h * 0.08 / 60)), k3.dakika);
+      const y = M.preboilSapma({ og: B.og + 0.004, V: B.V }), s = y.secenek[0];
+      __REG.ok('yüksek: su V × (GP/GP_hedef − 1), önizlemede OG düşer, şişeleme hacmi artar', y.durum === 'yuksek' && s.tur === 'su' && Math.abs(s.Vek - y.V * (y.gp / y.gpH - 1)) < 1e-9 && s.onizleme.og < y.devam.og && s.onizleme.hacim > y.devam.hacim);
+      __REG.ok('ölçülen mash verimi: hOG tersi (yalnız tane, ölçülen hacim) — beklenen OG\'de reçete verimi geri gelir', Math.abs(M.verimOlc(B.og, B.V) - B.verim) < 0.11);
+      const kk = M.boilOffAyarli; M.boilOffAyarli = () => true; let bz; try { bz = M.preboilSapma({ og: B.og - 0.006, V: B.V }).secenek.find(x => x.tur === 'kaynat'); } finally { M.boilOffAyarli = kk; }
+      __REG.ok('KASITLI BOZMA: ayar yokken ayarlı sayılırsa varsayılan %12 ile süre UYDURULUR → kırmızı', bz.dakika != null);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'MASH1-PH', ad: 'MASH pH (MASH1 madde 3): ölçülen pH bandı uygulamanın AO4 kuralı (5,2–5,6 oda; mash sıcaklığında +0,3) · motor DOZ HESAPLIYOR → aynı tampon modeliyle (laktik = ΔpH × B / 11,7 · NaHCO₃ = ΔpH × B / 11,92; ideal 5,5) · bantta sayı yok · tampon hesaplanamazsa SAYI YOK · maltBuf tek kaynak (_bmMaltBuf) · KASITLI BOZMA: tampon kaynağı kapanınca doz verilmez',
+    calistir: (page) => page.evaluate(async () => {
+      const M = window.BM_MASH; tarifAc('dubbel_2024');
+      const B = M.tamponToplam(), y = M.phSapma({ ph: 5.45, sic: 'mash' }), b = M.phSapma({ ph: 5.4, sic: 'oda' }), d = M.phSapma({ ph: 5.0, sic: 'oda' });
+      __REG.ok('mash sıcaklığında 5,45 → oda 5,75 > 5,6 → laktik = (5,75 − 5,5) × B / 11,7 mL', y.oda === 5.75 && y.durum === 'yuksek' && Math.abs(y.secenek[0].ml - 0.25 * B / 11.7) < 1e-9 && y.secenek[0].kaynak === 'phMotor' && /yeniden ölç/.test(y.not));
+      __REG.ok('bantta (5,4 oda) → doz YOK', b.durum === 'bantta' && !b.secenek.length);
+      __REG.ok('düşük (5,0) → NaHCO₃ = 0,5 × B / 11,92 g', d.durum === 'dusuk' && Math.abs(d.secenek[0].g - 0.5 * B / 11.92) < 1e-9);
+      const kr = MALTLAR.find(m => m && /caramunich|crystal/i.test(m.id) && m.r >= 30);
+      __REG.ok('_bmMaltBuf pH motoruyla aynı gövde (kristal: 7 + 40,7·log10(L), üst 75; baz 42)', window._bmMaltBuf({ id: 'pilsner', r: 2 }) === 42 && Math.abs(window._bmMaltBuf(kr) - Math.min(75, 7 + 40.7 * Math.log10(kr.r))) < 1e-9);
+      const es = window._bmMaltBuf; window._bmMaltBuf = undefined; let bz; try { bz = M.phSapma({ ph: 5.45, sic: 'mash' }); } finally { window._bmMaltBuf = es; }
+      __REG.ok('KASITLI BOZMA: tampon hesaplanamazsa SAYI VERİLMEZ ("küçük adımla ekle, yeniden ölç")', bz.secenek[0].tur === 'yok' && !/\d+,\d+ mL/.test(bz.secenek[0].metin) && /yeniden ölç/.test(bz.secenek[0].metin));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'MASH1-KAYIT', ad: 'ÖLÇÜM KAYDI (MASH1 madde 4): S.mashOlcumler (parti içinde, KR\'ye ve senkron gönderimine girer) + mevcut alanlar S.mashPh / S.mashPhSic / S.preboilOG · ana adım ölçülen ortalaması S.mashGercekSc (mash FG modeli verisi; model DEĞİŞMEDİ) · ön kaynatma örnek sıcaklığı düzeltmesi (uygulamanın Lyons formülü) + verim · "son ölçümü sil" önceki değeri geri koyar · başka reçete açıkken yazmaz · KASITLI BOZMA: ortalama güncellenmezse',
+    calistir: (page) => page.evaluate(async () => {
+      const M = window.BM_MASH; tarifAc('dubbel_2024'); const fg0 = window._bmTarifHesap(M.tarif()).fg;
+      M.olcumEkle({ tur: 'sicaklik', deger: 65.5 }); M.olcumEkle({ tur: 'sicaklik', deger: 66.5 }); M.olcumEkle({ tur: 'ph', deger: 5.3, sic: 'mash' }); const r4 = M.olcumEkle({ tur: 'preboil', deger: 1.050, c: 60, V: 14 });
+      const kr = KR.find(r => r.id === 'dubbel_2024');
+      __REG.ok('4 ölçüm partide; ana adım ortalaması 66,0 (n 2); pH alanları; ön kaynatma 60 °C → 20 °C düzeltildi + verim', S.mashOlcumler.length === 4 && S.mashGercekSc.ort === 66 && S.mashGercekSc.n === 2 && S.mashPh === 5.3 && S.mashPhSic === 'mash' && r4.kayit.ham === 1.05 && r4.kayit.deger === _bdDuzeltHesapla(1.05, 60).kayit && S.preboilOG === r4.kayit.deger && r4.kayit.verim > 0);
+      __REG.ok('KR kaydına girdi (senkron gönderimi KR\'yi taşır)', kr.mashOlcumler && kr.mashOlcumler.length === 4 && kr.mashGercekSc.ort === 66 && JSON.stringify({ KR: KR }).indexOf('"mashOlcumler"') > 0);
+      __REG.ok('FG hesabı DEĞİŞMEDİ (ölçülen ortalama yalnız veri)', window._bmTarifHesap(M.tarif()).fg === fg0);
+      M.sonuSil(); __REG.ok('son ölçümü sil: ön kaynatma önceki değere (boş) döner', S.mashOlcumler.length === 3 && S.preboilOG == null);
+      M.sonuSil(); __REG.ok('bir daha: pH önceki değerine döner', S.mashOlcumler.length === 2 && S.mashPh == null);
+      const L = M.listeHTML(); __REG.ok('parti ekranında liste + "Son ölçümü sil" + ortalama satırı', /mash-geri/.test(L) && /Ana adım ölçülen ortalaması: <b>66,0 °C<\/b>/.test(L));
+      const b0 = window._brewday; window._brewday = { aktif: true, rid: 'baska_recete', ajanda: [], aktifIdx: 0 }; let rr; try { rr = M.olcumEkle({ tur: 'sicaklik', deger: 64 }); } finally { window._brewday = b0; }
+      __REG.ok('brewday başka reçetedeyken açık reçeteye yazmaz', !rr.ok && /Başka reçete/.test(rr.neden) && S.mashOlcumler.length === 2);
+      const oh = M.ortHesap; M.ortHesap = () => {}; try { M.olcumEkle({ tur: 'sicaklik', deger: 70 }); } finally { M.ortHesap = oh; }
+      __REG.ok('KASITLI BOZMA: ortalama güncellenmezse 70 °C ölçümü ortalamaya girmez → kırmızı', S.mashGercekSc.ort === 66);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'MASH1-SES', ad: 'SES (MASH1 madde 6): AI\'SIZ ayrıştırıcı 35 cümle (sayı sözcükleri, nokta / virgül, birimli / birimsiz, derece / °C, rakam + sözcük, iki ölçüm bir cümlede) — yanlış tür 0, anlaşılmayan boş · SpeechRecognition yoksa mikrofon GİZLİ + neden · varsa büyük düğme (≥ 64 px) + ilk kullanımda gizlilik notu (MDN) · duyulan metin ölçüm olarak kaydedilir, anlaşılmazsa "anlayamadım" + metin · Türkçe ses yoksa sesli okuma yazıya düşer',
+    calistir: (page) => page.evaluate(async () => {
+      const M = window.BM_MASH, K = [['altmış dört derece', 'sicaklik:64'], ['64 derece', 'sicaklik:64'], ['64°C', 'sicaklik:64'], ['sıcaklık 66', 'sicaklik:66'], ['yetmiş iki derecede', 'sicaklik:72'], ['pH beş nokta dört', 'ph:5.4'], ['ph 5,4', 'ph:5.4'], ['pe ha beş virgül altı', 'ph:5.6'], ['beş nokta dört', 'ph:5.4'],
+        ['bir nokta kırk iki', 'gravite:1.042'], ['bir nokta sıfır kırk iki', 'gravite:1.042'], ['1,042', 'gravite:1.042'], ['1042', 'gravite:1.042'], ['gravite bin kırk dört', 'gravite:1.044'], ['on dört litre', 'hacim:14'], ['14 L', 'hacim:14'], ['14L', 'hacim:14'], ['hacim on üç', 'hacim:13'],
+        ['ön kaynatma bir nokta sıfır kırk dört on üç litre', 'gravite:1.044,hacim:13'], ['ön kaynatma 1.044 13 litre', 'gravite:1.044,hacim:13'], ['altmış dört', 'sicaklik:64'], ['on dört', ''], ['merhaba', ''], ['karıştırdım', ''], ['65 derece pH 5,3', 'sicaklik:65,ph:5.3'],
+        ['yetmiş derece', 'sicaklik:70'], ['bir nokta elli iki', 'gravite:1.052'], ['pH 5', 'ph:5'], ['sıcaklık altmış yedi virgül beş', 'sicaklik:67.5'], ['1.040 OG', 'gravite:1.04'], ['otuz derece', 'sicaklik:30'], ['200 derece', ''], ['pH on iki', ''], ['yüz litre', 'hacim:100'], ['yirmi iki litre', 'hacim:22']];
+      const kot = K.filter(([c, b]) => M.ayristir(c).map(x => x.tur + ':' + x.deger).join(',') !== b).map(([c, b]) => c + ' → ' + M.ayristir(c).map(x => x.tur + ':' + x.deger).join(',') + ' (beklenen ' + b + ')');
+      __REG.ok('ayrıştırıcı ' + K.length + ' cümle: hepsi beklenen tür + değer (yanlış tür 0)', K.length >= 30 && !kot.length, kot.join(' | '));
+      tarifAc('dubbel_2024'); const sr0 = window.SpeechRecognition, wsr0 = window.webkitSpeechRecognition;
+      window.SpeechRecognition = undefined; window.webkitSpeechRecognition = undefined; const h0 = M.panelHTML({ yer: 'parti' });
+      __REG.ok('SpeechRecognition YOK → mikrofon gizli + tek satır neden', !/mash-mikrofon/.test(h0) && /konuşma tanımayı desteklemiyor — Chrome'da aç/.test(h0));
+      window.SpeechRecognition = function () {}; localStorage.removeItem('mash_ses_not_v1'); const h1 = M.panelHTML({ yer: 'parti' });
+      __REG.ok('destek VAR → büyük düğme (≥ 64 px) + gizlilik notu (sunucu, internet; MDN kaynağı)', /class="mash-mikrofon"[^>]*min-height:64px/.test(h1) && /sesi sunucuya gönderir; internet gerekir/.test(h1) && /developer\.mozilla\.org/.test(h1));
+      window.SpeechRecognition = sr0; window.webkitSpeechRecognition = wsr0;
+      M.sesIsle('altmış dört derece'); __REG.ok('duyulan "altmış dört derece" → sıcaklık ölçümü kaydedildi + sapma kartı', S.mashOlcumler && S.mashOlcumler.slice(-1)[0].deger === 64 && M.son.tur === 'sicaklik' && /Duyulan: "altmış dört derece"/.test(M.panelHTML({ yer: 'parti' })));
+      M.sesIsle('kahve molası'); __REG.ok('anlaşılmayan → "Anlayamadım" + metin (MASH2\'de AI\'ya gidecek)', M.son.tur === 'anlasilmadi' && /Anlayamadım: "kahve molası"/.test(M.kartHTML()));
+      M.ttsYaz(true); const h2 = M.panelHTML({ yer: 'parti' }); M.ttsYaz(false);
+      __REG.ok('sesli okuma açıkken Türkçe ses yoksa (test tarayıcısı) okuma yapılmaz, neden yazılır', M.oku('deneme') === false && (/Türkçe ses yok — yalnız yazı|sesli okuma yok — yalnız yazı/.test(h2)));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'MASH1-EKRAN', ad: 'EKRAN (MASH1 madde 5 + 7): Brewday mash adımında "🧑‍🍳 Mash asistanı" paneli (aktif adım + hedef, girişler, hatırlatıcı — kaynaklı: ölç / karıştır / pH / iyot testi [Palmer: fermente edilebilirliği göstermez]) · mash_end\'de "ön kaynatma örneği al" · parti ekranından (Süreç) açılır · KUC1 kalanı: "Bell\'s Oberon gibi" anlaşılmayan listesi boş',
+    calistir: (page) => page.evaluate(async () => {
+      const M = window.BM_MASH; tarifAc('dubbel_2024'); render(); await new Promise(r => setTimeout(r, 30));
+      await brewdayBaslat(); await new Promise(r => setTimeout(r, 30));
+      const kat = document.querySelector('#brewdayTimeline .mash-ac-btn');
+      __REG.ok('AU2 odak modu: brewday aktif kartında panel KATLI — tek düğme (≥ 48 px), panel yok', !!kat && kat.getBoundingClientRect().height >= 48 && !document.querySelector('#brewdayTimeline .mash-panel'));
+      kat.click(); await new Promise(r => setTimeout(r, 30));
+      const p = document.querySelector('#brewdayTimeline .mash-panel');
+      __REG.ok('brewday mash adımında panel: aktif adım + hedef + girişler + hatırlatıcı', !!p && new RegExp('Adım 1/' + M.adimlar().length + ': ' + M.adimlar()[0].sc + ' °C · ' + M.adimlar()[0].dk + ' dk').test(p.textContent) && !!p.querySelector('.mash-inp-sic') && !!p.querySelector('.mash-hatirlatici'));
+      const hm = p.querySelector('.mash-hatirlatici').textContent;
+      __REG.ok('hatırlatıcı kaynaklı: ölç (Palmer), karıştır (Palmer, ısıtıcılı), pH sıcaklığı, iyot testi açıklaması (Palmer bl.14)', new RegExp('Sıcaklığı ölç — hedef ' + M.adimlar()[0].sc + ' °C').test(hm) && /karıştır/.test(hm) && /pH ölçeceksen/.test(hm) && /İyot testi .* fermente edilebilirliği göstermez/.test(hm) && /chapter-14/.test(p.querySelector('.mash-hatirlatici').innerHTML) && !/\d+ dk sonra/.test(hm));
+      let g = 0; while (g++ < 10 && window._brewday.ajanda[window._brewday.aktifIdx].tip !== 'mash_end') brewdayAtla();
+      const p2 = document.querySelector('#brewdayTimeline .mash-panel');
+      __REG.ok('mash_end: "ön kaynatma örneği al" hatırlatması', !!p2 && /Ön kaynatma örneği al/.test(p2.textContent));
+      M.partiAcik = false; const h = M.partiHTML(); M.partiAcik = true; const h2 = M.partiHTML(); M.partiAcik = false;
+      __REG.ok('parti ekranı (Süreç): kapalıyken yalnız düğme, açınca panel', /mash-parti-btn/.test(h) && !/mash-panel/.test(h) && /mash-panel/.test(h2));
+      const B = window.BM_BUL; B.indeks(); const bo = B.coz("Bell's Oberon gibi");
+      __REG.ok('KUC1 kalanı: "Bell\'s Oberon gibi" → 1D, anlaşılmayan YOK', bo.cipler.some(c => c.d === '1D') && !(bo.cozulemeyen || []).length, JSON.stringify(bo.cozulemeyen));
+      return __REG.al();
+    })
+  },
   // ═════════════ SPRINT BUL2C — marka ∩ açık stil, kısa yer adı, koşu puanlaması, gerçek koşu kaçakları, BUL modeli Opus ═════════════
   {
     kod: 'BUL2C-MARKA', ad: 'MARKA ∩ AÇIK STİL BOŞ (BUL2C madde 1): kullanıcının açık yazdığı stil / aile çipi kazanır; kesişim boşsa marka çipi filtre değil bilgi notu ("BJCP 2021 … saymıyor (BJCP\'de: …) — arama yalnız …") · kesişim varsa daraltma aynen · KASITLI BOZMA: eski davranış (belirsiz marka çipi + stil) 0 sonuç',

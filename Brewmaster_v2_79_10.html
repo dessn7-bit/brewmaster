@@ -5141,6 +5141,17 @@ const BM_SIVI_GML=1.3; // sıvı katkı yoğunluğu g/mL (candi şurup bazı) �
 // Emsal: bmMayaKalib LS getter/setter. Varsayılan %12/saat (Palmer); anahtar YOKKEN 0.12 döner →
 // mevcut tüm reçeteler byte-özdeş kalır (geriye uyum). Kapalı all-in-one (Bulldog) tipik ~%5-8.
 // TEK KAYNAK: hesap motorundaki 3 buharlaşma noktası (pre-boil hedef, su kırılımı, kv-hedef) bunu okur.
+// SPRINT MASH1: malt tampon kapasitesi (mEq/(kg·pH)) — mash pH motorundan (_suMashPHHTML) taşındı, gövde BİREBİR aynı; mash asistanı da kullanır
+window._bmMaltBuf = function(malt){
+        if(!malt||!malt.id) return 42;
+        var id=(malt.id||'').toLowerCase();
+        var Lv=malt.r||2;
+        if(id.includes('acid')||id.includes('sauer')) return 0; if(malt.bufKap!=null) return malt.bufKap;
+        if(malt.phc==='chocolate'||malt.phc==='roasted_barley'||malt.phc==='black') return 68;
+        if(/black_patent|patent_black|black_malt|\bblack\b|roasted_barley|roast_barley|chocolate|choc_|roast_wheat|black_wheat|dingemans_roast|simp_roasted/i.test(id)) return 68;
+        if(malt.phc==='crystal'||/crystal|caramel|cara_|caramunich|carapils|carared|caraaroma|cara_aroma|cararye|cara_rye|cara_wheat|cara_red|carafoam|c_?\d+|^c\d+$/i.test(id)) return Math.min(75, 7 + 40.7*Math.log10(Math.max(1,Lv)));
+        return 42;
+};
 function bmBoilOff(){ // kesir (0.12); akıl bandı %2-25 dışı → varsayılan
   try{ var v=parseInt(localStorage.getItem('bm_boiloff_v1'),10); return (isFinite(v)&&v>=2&&v<=25)?v/100:0.12; }catch(e){ return 0.12; }
 }
@@ -16130,16 +16141,7 @@ function rEditorSu(){
       }
       
       // Grist ağırlıklı ortalama pH
-      function maltBuf(malt){
-        if(!malt||!malt.id) return 42;
-        var id=(malt.id||'').toLowerCase();
-        var Lv=malt.r||2;
-        if(id.includes('acid')||id.includes('sauer')) return 0; if(malt.bufKap!=null) return malt.bufKap;
-        if(malt.phc==='chocolate'||malt.phc==='roasted_barley'||malt.phc==='black') return 68;
-        if(/black_patent|patent_black|black_malt|\bblack\b|roasted_barley|roast_barley|chocolate|choc_|roast_wheat|black_wheat|dingemans_roast|simp_roasted/i.test(id)) return 68;
-        if(malt.phc==='crystal'||/crystal|caramel|cara_|caramunich|carapils|carared|caraaroma|cara_aroma|cararye|cara_rye|cara_wheat|cara_red|carafoam|c_?\d+|^c\d+$/i.test(id)) return Math.min(75, 7 + 40.7*Math.log10(Math.max(1,Lv)));
-        return 42;
-      }
+      var maltBuf = window._bmMaltBuf; // MASH1: tek kaynak (mash asistanı ölçülen pH dozunda aynı tampon değerini kullanır)
       let topKg = 0, topPHB = 0, B_total = 0, acidMaltKg = 0;
       (S.maltlar||[]).forEach(m => {
         if (!m || !m.id) return;
@@ -16360,6 +16362,7 @@ function rEditorSurec(){
   <div class="kart" style="margin-bottom:10px;background:${(_ogKyn==="manuel"||_fgKyn==="manuel")?"var(--ya)":"var(--card)"};border-color:${(_ogKyn==="manuel"||_fgKyn==="manuel")?"var(--yk)":"var(--bor)"}">
     <div style="font-size:13px;font-weight:700;color:var(--kahve);margin-bottom:4px">📏 Brewday Ölçümleri</div>
     <div style="font-size:10px;color:var(--dim);margin-bottom:8px">Gerçek ölçüm girince ABV ve fermentasyon tahminleri ona göre hesaplanır. Boş bırakırsan reçeteden tahmin edilir.</div>
+    ${window.BM_MASH?window.BM_MASH.partiHTML():""}
     ${(()=>{
       // I-P1: Pre-boil OG ölçümü — kaynatma öncesi verim kontrolü
       // Hedef pre-boil OG: Final OG × (final_hacim / pre_boil_hacim)
@@ -23538,6 +23541,8 @@ window.brewdayRender=function(){
     if(akt&&!ok&&(ev.tip==='mash_end'||ev.tip==='pitch'))h+=_bdOlcumBlokHTML(ev.tip==='mash_end'?'pb':'og');
     // AU2-3: aktif sparge kartında gerçek-ölçüm girişi
     if(akt&&!ok&&ev.tip==='sparge')h+=_bdSpargeBlokHTML();
+    // SPRINT MASH1: aktif mash adımında (mash_step / sparge / mash_end) mash asistanı paneli
+    if(akt&&!ok&&ev.faz==='mash'&&window.BM_MASH)h+=BM_MASH.panelHTML({yer:'brewday',ev:ev});
     if(akt&&!ok){
       // AU2-4: birincil buton TAM GENISLIK x48px, metin adima ozel fiziksel iddia.
       // AT3 onayi bekleniyorsa (isinma) sirali birincil eylem "Sayaci baslat"tir -> bu buton
@@ -32210,7 +32215,7 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
       var enUz = Math.max.apply(null, es.map(uz)); if(enUz >= 2) es = es.filter(function(e){ return uz(e) === enUz; }); }
     var sy = (new RegExp(' ' + obek[obek.length - 1] + ' (\\d+) ').exec(nn) || [])[1] || (new RegExp(' ' + obek[0] + ' (\\d+) ').exec(nn) || [])[1];
     if(sy){ var es2 = es.filter(function(e){ return e.sayi.indexOf(sy) >= 0; }); if(es2.length) es = es2; }
-    var kel = obek.filter(function(w){ return es.some(function(e){ return e.tok.indexOf(w) >= 0; }); });
+    var kel = obek.concat(kalan || []).filter(function(w, i, a){ return a.indexOf(w) === i && es.some(function(e){ return e.tok.indexOf(w) >= 0; }); }); // MASH1 (KUC1 kalanı): "Bell's Oberon" — oberon öbek dışında kalsa da çözülen biranın kelimesi
     var adlar = []; es.forEach(function(e){ if(adlar.indexOf(e.b) < 0) adlar.push(e.b); });
     var gercek = es.filter(function(e){ return !e.sepet && e.anahtar.length; });
     if(!gercek.length){ var sp = es[0]; return { cip:null, kelime:kel, adlar:adlar, not:'BJCP 2021 "' + adlar.join('", "') + '" birasını kendi stiline koymuyor (' + sp.kod + ' ' + sp.ad + ', satır ' + sp.satir + ')' }; }
@@ -34809,6 +34814,266 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
       '<textarea id="ai5-kopya" readonly style="display:none;width:100%;min-height:60px;font-size:10px;margin-top:4px" aria-label="G sonucu"></textarea><div id="ai5-panel" aria-live="polite">' + G.panelHTML() + '</div></div>'; };
 })();
 // ═══ SPRINT AI5 MODÜL SON ═══
+// ═══ SPRINT MASH1 MODÜL BAŞ ═══
+// MASH ASİSTANI — AI'SIZ ÇEKİRDEK (Kaan 2026-10-14). Sayıları ve hükmü UYGULAMA üretir, kaynaklı kural satırıyla; kaynak yoksa "bulamadım" ya da sayı yazılmaz.
+// (1) mash sıcaklığı sapması — Palmer infüzyon denklemi · (2) ön kaynatma gravitesi / hacmi — GP×V korunur · (3) mash pH — uygulamanın mevcut tampon motoru
+// (4) ölçüm kaydı (S.mashOlcumler + mevcut alanlar S.preboilOG / S.mashPh) · (5) adım hatırlatıcısı · (6) ses: SpeechRecognition (tr-TR, dokun-konuş) + speechSynthesis + AI'sız ayrıştırıcı.
+(function(){
+  'use strict';
+  var M = window.BM_MASH = {};
+  var E = function(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]; }); };
+  var tr = function(v, d){ return v == null || !isFinite(v) ? '—' : (+v).toFixed(d).replace('.', ','); };
+  M.OKUMA = '2026-10-14';
+  // ── KAYNAK SATIRLARI (okunan sayfa + tarih) ──
+  M.KAYNAK = {
+    palmerInfuzyon:{ ad:'Palmer, How to Brew — Chapter 16 "Infusion Calculations (updated 2025)"', url:'https://howtobrew.com/section-3/chapter-16', alinti:'Mash Infusion Equation Wm = G(.4 + R)(T2 - T1)/(Tw - T2) · Wv = Wm/ρ · ρ = density of hot water (0.985 kg/L) · "These equations also work for liters, kilograms and degrees Celsius." · örnek: 4.54 kg, R 2.06, 50 → 65 °C, Tw 96 °C → Wm 5.4 kg, Wv 5.48 L' },
+    palmerKaristir:{ ad:'Palmer, How to Brew — Chapter 16 "Multiple Rest Mashing"', url:'https://howtobrew.com/section-3/chapter-16', alinti:'"carefully adding heat from the stove and constant stirring to avoid scorching and heat the mash uniformly"' },
+    palmerOlc:{ ad:'Palmer, How to Brew — Chapter 16 (Multiple Rest Infusion Example)', url:'https://howtobrew.com/section-3/chapter-16', alinti:'"In reality, you should measure the temperature and use that value as T1 in the equation."' },
+    palmerGP:{ ad:'Palmer, How to Brew — Chapter 3 "Malt Extract"', url:'https://howtobrew.com/section-1/chapter-3', alinti:'"points = an extract\'s yield x mass = specific gravity x total volume" · "1 PPG = 8.3454 PKL"' },
+    palmerSeker:{ ad:'Palmer, How to Brew — Chapter 18 "Extraction"', url:'https://howtobrew.com/section-3/chapter-18', alinti:'sucrose "46 points/pound/gallon (PPG)" (= 384 PKL) · "42 PPG for dry" malt extract (= 350 PKL)' },
+    palmerIyot:{ ad:'Palmer, How to Brew — Chapter 14 "Mash Works"', url:'https://howtobrew.com/section-3/chapter-14', alinti:'"the iodine test only tells you that you have degraded the starches, it does not tell you to what extent, nor the resulting fermentability"' },
+    phBant:{ ad:'Uygulamanın ölçülen pH bağlamı (AO4): 5.2–5.6 ODA referansı; mash sıcaklığında okuma ~0.3 düşük (deLange 0.2–0.35 · Brungard ~0.3 · BYO 0.2–0.4)', url:null, alinti:'' },
+    phMotor:{ ad:'Uygulamanın mash pH motoru (Riffe / deLange tampon modeli: gereken mEq = ΔpH × B_toplam; laktik %88 ≈ 11,7 mEq/mL · NaHCO₃ 11,92 mEq/g; ideal 5,5)', url:null, alinti:'' },
+    mdnSes:{ ad:'MDN — SpeechRecognition', url:'https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition', alinti:'"On some browsers, like Chrome, using Speech Recognition on a web page involves a server-based recognition engine. Your audio is sent to a web service for recognition processing, so it won\'t work offline."' }
+  };
+  M.ESIK_C = 1; // ±1 °C "hedefte" — UYGULAMA VARSAYIMI (kartta yazar)
+  M.RHO_SICAK = 0.985; // Palmer: sıcak su yoğunluğu kg/L
+  M.TANE_ISI = 0.4; // Palmer: tane, suyun ısı kapasitesinin %40'ı
+  // ── CİHAZ TERCİHLERİ (bm_ öneksiz: yedeğe / senkrona girmez) ──
+  var LS = { kap:'mash_kap_v1', tts:'mash_tts_v1', not:'mash_ses_not_v1' };
+  var lsAl = function(k, d){ try{ var v = localStorage.getItem(k); return v == null ? d : v; }catch(e){ return d; } }, lsYaz = function(k, v){ try{ if(v == null) localStorage.removeItem(k); else localStorage.setItem(k, String(v)); }catch(e){} };
+  M.kap = function(){ return lsAl(LS.kap, 'isitici') === 'isiticisiz' ? 'isiticisiz' : 'isitici'; }; // varsayılan: ısıtıcılı all-in-one (Kaan: Bulldog)
+  M.kapYaz = function(v){ lsYaz(LS.kap, v === 'isiticisiz' ? 'isiticisiz' : null); M.ciz(); };
+  M.ttsAcik = function(){ return lsAl(LS.tts, '0') === '1'; };
+  M.ttsYaz = function(v){ lsYaz(LS.tts, v ? '1' : null); M.ciz(); };
+
+  // ── REÇETE BİLGİLERİ (uygulamanın mevcut tanımları) ──
+  M.adimlar = function(){ var s = (typeof S !== 'undefined' && S) || {}; return s.mashAdimlar && s.mashAdimlar.length ? s.mashAdimlar.map(function(a){ return { sc:+a.sc, dk:+a.dk }; }) : [{ sc:+(s.mashSc || 66), dk:+(s.mashDk || 60) }]; };
+  // ana adım: S.mashSc ile aynı sıcaklıktaki adım (uygulamanın FG hesabının kullandığı), yoksa en uzun
+  M.anaAdim = function(){ var L = M.adimlar(), ms = +((typeof S !== 'undefined' && S && S.mashSc) || 0), i = L.findIndex(function(a){ return a.sc === ms; }); if(i >= 0) return i; var en = 0; L.forEach(function(a, j){ if(a.dk > L[en].dk) en = j; }); return en; };
+  M.tane = function(){ var kg = 0; ((typeof S !== 'undefined' && S && S.maltlar) || []).forEach(function(m){ var x = (typeof MALTLAR !== 'undefined' ? MALTLAR : []).find(function(a){ return a && a.id === m.id; }); if(x && x.g !== 'Şeker') kg += +m.kg || 0; }); return kg; };
+  M.mashSuL = function(){ try{ return typeof _bdMashPayi === 'function' ? _bdMashPayi() : null; }catch(e){ return null; } };
+  // aktif adım: brewday'de ajandanın mash_step sırası; değilse seçilen adım
+  M.secAdim = null;
+  M.aktifAdim = function(){ var b = window._brewday; if(b && b.aktif && Array.isArray(b.ajanda)){ var n = -1; for(var i = 0; i <= b.aktifIdx && i < b.ajanda.length; i++) if(b.ajanda[i] && b.ajanda[i].tip === 'mash_step') n++; var ev = b.ajanda[b.aktifIdx]; if(ev && ev.tip === 'mash_step') return n; }
+    var L = M.adimlar(); return M.secAdim != null && M.secAdim < L.length ? M.secAdim : M.anaAdim(); };
+
+  // ── 1) MASH SICAKLIĞI SAPMASI ──
+  // Palmer: Wm = G(0,4 + R)(T2 − T1)/(Tw − T2); Wv = Wm/ρ. Soğutmada (Tw < T2) aynı denklem — kaynak ısıtma için yazmış → "yaklaşık" etiketi.
+  M.palmerWm = function(G, R, T1, T2, Tw){ if(!(G > 0) || !(R > 0) || !isFinite(T1) || !isFinite(T2) || !isFinite(Tw) || Tw === T2) return null; var w = G * (M.TANE_ISI + R) * (T2 - T1) / (Tw - T2); return w > 0 ? w : null; };
+  M.sicaklikSapma = function(o){ // o: { olculen, hedef, kap, G, R, Tw, TwSoguk }
+    var d = o.olculen - o.hedef, r = { olculen:o.olculen, hedef:o.hedef, fark:Math.round(d * 10) / 10, esik:M.ESIK_C, secenek:[] };
+    if(Math.abs(d) <= M.ESIK_C + 1e-9){ r.durum = 'hedefte'; return r; }
+    if(d < 0){ r.durum = 'dusuk';
+      if(o.kap === 'isitici'){ r.secenek.push({ tur:'isitici', metin:'Isıtıcıyla ' + tr(o.hedef, 0) + ' °C\'ye getir, karıştırarak', dakika:null, dakikaNot:'ısıtma hızı ayarı yok — süre yazılmıyor', kaynak:'palmerKaristir' }); }
+      else { var Tw = isFinite(o.Tw) ? o.Tw : 96, wm = M.palmerWm(o.G, o.R, o.olculen, o.hedef, Tw);
+        r.secenek.push(wm ? { tur:'sicakSu', Tw:Tw, Wm:wm, Wv:wm / M.RHO_SICAK, metin:tr(wm / M.RHO_SICAK, 2) + ' L su (' + tr(Tw, 0) + ' °C) ekle', kaynak:'palmerInfuzyon' } : { tur:'yok', metin:'tane miktarı / su oranı bilinmiyor — hesap yapılmadı' }); }
+    } else { r.durum = 'yuksek'; var Tc = isFinite(o.TwSoguk) ? o.TwSoguk : 15, wc = M.palmerWm(o.G, o.R, o.olculen, o.hedef, Tc);
+      r.secenek.push(wc ? { tur:'sogukSu', Tw:Tc, Wm:wc, Wv:wc / 1.0, metin:'≈ ' + tr(wc, 2) + ' L soğuk su (' + tr(Tc, 0) + ' °C) ekle', yaklasik:'denklem kaynakta ısıtma için yazılmış — soğutmada yaklaşık (soğuk su ≈ 1 kg/L)', kaynak:'palmerInfuzyon' } : { tur:'yok', metin:'tane miktarı / su oranı bilinmiyor — hesap yapılmadı' });
+      r.secenek.push({ tur:'yon', metin:'Karıştır, kapağı aç (yalnız yön — miktar yok)', kaynak:null }); }
+    return r; };
+  // su ilavesinin önizlemesi: yeni R, ön kaynatma hacmi, OG (uygulamanın hesabı _bmTarifHesap, hacim + eklenen su; kaynatma uzatılmazsa)
+  M.suOnizleme = function(Wv, G, R){ if(!(Wv > 0)) return null; var t = M.tarif(); if(!t) return null; var c0 = window._bmTarifHesap(t), t1 = JSON.parse(JSON.stringify(t)); t1.hacim = (+t.hacim || 11) + Wv; var c1 = window._bmTarifHesap(t1), pb = M.preboilBeklenen();
+    return { Ryeni:G > 0 ? (R * G + Wv * M.RHO_SICAK) / G : null, preboilV:pb ? pb.V + Wv : null, og0:c0.og, og1:c1.og, abv0:c0.abv, abv1:c1.abv, ibu0:c0.ibu, ibu1:c1.ibu, not:'kaynatma uzatılmazsa eklenen su şişeleme hacmine geçer' }; };
+  M.tarif = function(){ if(typeof S === 'undefined' || !S) return null; return { maltlar:JSON.parse(JSON.stringify(S.maltlar || [])), hoplar:JSON.parse(JSON.stringify(S.hoplar || [])), katkilar:JSON.parse(JSON.stringify(S.katkilar || [])), mayaId:S.mayaId || null, hacim:+S.hacim > 0 ? +S.hacim : 11, verim:+S.verim > 0 ? +S.verim : 61, mashSc:+S.mashSc || 67 }; };
+  M.R = function(){ var p = M.mashSuL(), G = M.tane(); return p && G > 0 && p.mashSu > 0 ? { R:p.mashSu * M.RHO_SICAK / G, suL:p.mashSu, kaynak:p.kaynak, G:G } : { R:null, suL:null, kaynak:null, G:G }; };
+
+  // ── 2) ÖN KAYNATMA ──
+  // beklenen hacim / OG: Süreç sekmesiyle AYNI formül (hacim + 0,9 L trub + kaynatma kaybı; GP×V) — şeker / katkı KAYNATMADA eklenir varsayımı (yalnız tane)
+  M.boilOffAyarli = function(){ try{ return localStorage.getItem('bm_boiloff_v1') != null; }catch(e){ return false; } };
+  M.preboilBeklenen = function(){ if(typeof S === 'undefined' || !S) return null; var h = +S.hacim || 11, k = +S.kaynatmaSure || 60, kb = h * (typeof bmBoilOff === 'function' ? bmBoilOff() : 0.12) * k / 60, V = h + 0.9 + kb;
+    var tane = (S.maltlar || []).filter(function(m){ var x = MALTLAR.find(function(a){ return a && a.id === m.id; }); return x && x.g !== 'Şeker'; });
+    var og = typeof hOG === 'function' ? hOG(tane, +S.verim || 61, [], V) : null; return { V:V, og:og, kb:kb, kayipLdk:h * (typeof bmBoilOff === 'function' ? bmBoilOff() : 0.12) / 60, verim:+S.verim || 61 }; };
+  // ölçülen ön kaynatma OG'sinden mash verimi: uygulamanın OG formülünün (hOG) tersi, yalnız tane, ölçülen hacimde
+  M.verimOlc = function(og, V){ if(typeof S === 'undefined' || !(og > 1) || !(V > 0) || typeof hOG !== 'function') return null; var tane = (S.maltlar || []).filter(function(m){ var x = MALTLAR.find(function(a){ return a && a.id === m.id; }); return x && x.g !== 'Şeker'; });
+    var Mx = (hOG(tane, 100, [], V) - 1) / 100; return Mx > 0 ? Math.round((og - 1) / Mx * 10) / 10 : null; };
+  // stokta (ya da reçetede) şeker / DME adayları — yeni malzeme ÖNERİLMEZ
+  M.sekerAday = function(){ var out = [], gor = {}, ekle = function(tip, id, kaynak){ var k = tip + ':' + id; if(gor[k]) return; var x = tip === 'malt' ? MALTLAR.find(function(a){ return a && a.id === id; }) : KATKILAR.find(function(a){ return a && a.id === id; }); if(!x || !(+x.gu > 0) || id === 'lak') return;
+      if(tip === 'malt' && x.g !== 'Şeker') return; if(tip === 'katki' && x.fermente !== true) return; var st = window._bmStokKalemBul ? window._bmStokKalemBul(tip, id) : null; gor[k] = 1; out.push({ tip:tip, id:id, ad:x.ad, gu:+x.gu, stok:st, kaynak:kaynak }); };
+    (S.maltlar || []).forEach(function(m){ ekle('malt', m.id, 'recete'); }); (S.katkilar || []).forEach(function(k){ ekle('katki', k.id, 'recete'); });
+    (typeof STOK !== 'undefined' ? STOK : []).forEach(function(s){ if(s && s.refId){ ekle(s.refTip === 'Malt' || s.refTip === 'malt' ? 'malt' : 'katki', s.refId, 'stok'); } });
+    return out.filter(function(a){ return a.kaynak === 'recete' || a.stok; }); };
+  M.preboilSapma = function(o){ // o: { og, V (ölçülen ya da null) }
+    var B = M.preboilBeklenen(); if(!B || !(o.og > 1)) return null; var V = o.V > 0 ? o.V : B.V, gp = (o.og - 1) * 1000, gpH = (B.og - 1) * 1000, r = { og:o.og, V:V, Vvarsayim:!(o.V > 0), B:B, gp:gp, gpH:gpH, fark:Math.round(gp - gpH), secenek:[], verim:M.verimOlc(o.og, V) };
+    var t = M.tarif(); if(!t) return r; var hS = (+t.hacim || 11), pv = function(tt){ var c = window._bmTarifHesap(tt); return { og:c.og, abv:c.abv, ibu:c.ibu, hacim:tt.hacim }; };
+    var tBase = JSON.parse(JSON.stringify(t)); if(r.verim) tBase.verim = r.verim; tBase.hacim = Math.max(1, V - B.kb - 0.9); r.devam = pv(tBase); // olduğu gibi devam: ölçülen verim, ölçülen hacimden aynı kayıpla
+    if(Math.abs(gp - gpH) < 1){ r.durum = 'hedefte'; return r; }
+    if(gp < gpH){ r.durum = 'dusuk';
+      var Vt = gp * V / gpH, dV = V - Vt, t1 = JSON.parse(JSON.stringify(tBase)); t1.hacim = Math.max(1, Vt - B.kb - 0.9);
+      r.secenek.push({ tur:'kaynat', hedefV:Vt, dV:dV, dakika:M.boilOffAyarli() ? Math.round(dV / B.kayipLdk) : null, dakikaNot:M.boilOffAyarli() ? null : 'kaynama kaybı (buharlaşma %/saat) Ayarlar\'da girilmemiş — süre yazılmıyor', metin:'Kaynamayı uzatarak ' + tr(dV, 1) + ' L buharlaştır (hedef ön kaynatma hacmi ' + tr(Vt, 1) + ' L)', onizleme:pv(t1), kaynak:'palmerGP' });
+      M.sekerAday().forEach(function(a){ var kg = (gpH - gp) * V / a.gu, t2 = JSON.parse(JSON.stringify(tBase)); (a.tip === 'malt' ? (t2.maltlar = t2.maltlar || []) : (t2.katkilar = t2.katkilar || [])).push(a.tip === 'malt' ? { id:a.id, kg:kg } : { id:a.id, miktar:Math.round(kg * 1000), birim:'g', zaman:'kaynatma' });
+        var b = a.stok && window._bmStokBilgi ? window._bmStokBilgi(a.stok, a.tip === 'malt' ? kg : kg * 1000, a.tip === 'malt' ? 'kg' : 'g') : null;
+        r.secenek.push({ tur:'seker', id:a.id, ad:a.ad, gu:a.gu, kg:kg, stok:b ? (b.belirsiz ? 'stokta var, miktarı girilmemiş' : b.az ? 'stokta ' + tr(b.miktar, 2) + ' ' + b.birim + ' — yetmeyebilir' : 'stokta ' + tr(b.miktar, 2) + ' ' + b.birim) : 'stokta yok → alınacak', metin:tr(kg * 1000, 0) + ' g ' + a.ad + ' ekle (katalog ' + a.gu + ' puan·L/kg)', onizleme:pv(t2), kaynak:'palmerSeker' }); });
+    } else { r.durum = 'yuksek'; var Ve = V * (gp / gpH - 1), t3 = JSON.parse(JSON.stringify(tBase)); t3.hacim = tBase.hacim + Ve;
+      r.secenek.push({ tur:'su', Vek:Ve, metin:tr(Ve, 1) + ' L su ekle', onizleme:pv(t3), kaynak:'palmerGP' }); }
+    return r; };
+
+  // ── 3) MASH pH ──
+  M.tamponToplam = function(){ var B = 0; if(typeof window._bmMaltBuf !== 'function') return null; (S.maltlar || []).forEach(function(m){ var mo = MALTLAR.find(function(x){ return x && x.id === m.id; }); if(!mo || mo.g === 'Şeker') return; var id = (mo.id || '').toLowerCase(); if(id.indexOf('acid') >= 0 || id.indexOf('sauer') >= 0) return; B += window._bmMaltBuf(mo) * (+m.kg || 0); }); return B > 0 ? B : null; };
+  M.phSapma = function(o){ // o: { ph, sic:'oda'|'mash' }
+    if(!(o.ph >= 3 && o.ph <= 9)) return null; var oda = o.sic === 'mash' ? Math.round((o.ph + 0.3) * 100) / 100 : o.ph, r = { ph:o.ph, sic:o.sic, oda:oda, bant:[5.2, 5.6], ideal:5.5, secenek:[] };
+    if(oda >= 5.2 && oda <= 5.6){ r.durum = 'bantta'; return r; }
+    var B = M.tamponToplam(); r.durum = oda > 5.6 ? 'yuksek' : 'dusuk';
+    if(!B){ r.secenek.push({ tur:'yok', metin:'pH bandın ' + (oda > 5.6 ? 'üstünde' : 'altında') + '; tampon hesabı yapılamadı (malt yok) — küçük adımla ekle, sonra yeniden ölç' }); return r; }
+    if(oda > 5.6){ var dph = oda - r.ideal; r.secenek.push({ tur:'laktik', ml:dph * B / 11.7, metin:tr(dph * B / 11.7, 1) + ' mL laktik asit %88', kaynak:'phMotor' }); }
+    else { var dp2 = r.ideal - oda; r.secenek.push({ tur:'nahco3', g:dp2 * B / 11.92, metin:tr(dp2 * B / 11.92, 2) + ' g NaHCO₃ (sodyum bikarbonat)', kaynak:'phMotor' }); }
+    r.not = 'motor tahmini (±0,1–0,2 pH) — ekledikten sonra yeniden ölç'; r.B = B; return r; };
+
+  // ── 4) ÖLÇÜM KAYDI ──
+  // S.mashOlcumler [{ t, tur:'sicaklik'|'ph'|'preboil', adim, deger, ... }] (parti içinde, KR ile senkrona girer) + mevcut alanlar (S.preboilOG / S.mashPh)
+  M.ridKapi = function(){ var b = window._brewday, a = (typeof _editId !== 'undefined' && _editId) ? String(_editId) : null; return !(b && b.aktif && b.rid && a !== String(b.rid)); };
+  // sessiz kalıcılık: uygulamanın _receteYazSync'i (açık reçete → KR + senkron kuyruğu, "Kaydedildi" bildirimi YOK — brewday sırasında her ölçümde bildirim yığılıyordu)
+  M.kaydetS = function(){ try{ if(S.biraAd && String(S.biraAd).trim() && typeof window._receteYazSync === 'function') window._receteYazSync(); else if(S.biraAd && String(S.biraAd).trim() && typeof tarifeKaydet === 'function') tarifeKaydet(); else if(typeof ky === 'function') ky(KR); }catch(e){ if(window.bmHataKaydet) bmHataKaydet('persist', e, 'BM_MASH.kaydet'); } };
+  M.ortHesap = function(){ var ana = M.anaAdim(), L = (S.mashOlcumler || []).filter(function(x){ return x && x.tur === 'sicaklik' && x.adim === ana; });
+    S.mashGercekSc = L.length ? { ort:Math.round(L.reduce(function(s, x){ return s + x.deger; }, 0) / L.length * 10) / 10, n:L.length, adim:ana, hedef:(M.adimlar()[ana] || {}).sc, not:'ana adımın ölçülen ortalaması — mash FG modeli için veri (model değişmedi)' } : null; };
+  M.olcumEkle = function(x){ if(typeof S === 'undefined' || !S) return { ok:false, neden:'açık reçete yok' }; if(!M.ridKapi()) return { ok:false, neden:'Başka reçete açık — ölçüm için demlenen reçeteye dön' };
+    var e = { t:Date.now(), tur:x.tur, adim:x.adim != null ? x.adim : (x.tur === 'sicaklik' || x.tur === 'ph' ? M.aktifAdim() : null), deger:+x.deger };
+    if(x.tur === 'sicaklik'){ if(!(e.deger >= 20 && e.deger <= 100)) return { ok:false, neden:'sıcaklık 20–100 °C dışında' }; }
+    else if(x.tur === 'ph'){ if(!(e.deger >= 3 && e.deger <= 9)) return { ok:false, neden:'pH 3–9 dışında' }; e.sic = x.sic === 'mash' ? 'mash' : 'oda'; e.onceki = { ph:S.mashPh != null ? S.mashPh : null, sic:S.mashPhSic || null }; S.mashPh = e.deger; S.mashPhSic = e.sic; }
+    else if(x.tur === 'preboil'){ var d = typeof _bdDuzeltHesapla === 'function' ? _bdDuzeltHesapla(e.deger, x.c != null && x.c !== '' ? +x.c : null) : { kayit:e.deger, duzeltildi:false, uyari:'' }; if(!(d.kayit > 0.99 && d.kayit < 1.2)) return { ok:false, neden:'SG 0,990–1,200 dışında' };
+      e.ham = e.deger; e.deger = d.kayit; e.c = d.duzeltildi ? +x.c : null; e.V = x.V > 0 ? +x.V : null; e.verim = M.verimOlc(e.deger, e.V || (M.preboilBeklenen() || {}).V); e.onceki = S.preboilOG != null ? S.preboilOG : null;
+      S.preboilOG = e.deger; try{ if(window._preboilSnapDondur) _preboilSnapDondur(S, typeof _editId !== 'undefined' ? _editId : null); }catch(_e){} }
+    else return { ok:false, neden:'bilinmeyen ölçüm türü' };
+    if(!Array.isArray(S.mashOlcumler)) S.mashOlcumler = []; S.mashOlcumler.push(e); M.ortHesap(); M.kaydetS(); return { ok:true, kayit:e }; };
+  M.sonuSil = function(){ if(typeof S === 'undefined' || !S || !Array.isArray(S.mashOlcumler) || !S.mashOlcumler.length) return null; if(!M.ridKapi()) return null; var e = S.mashOlcumler.pop();
+    if(e.tur === 'ph'){ S.mashPh = e.onceki ? e.onceki.ph : null; S.mashPhSic = e.onceki ? e.onceki.sic : null; }
+    if(e.tur === 'preboil'){ S.preboilOG = e.onceki != null ? e.onceki : null; try{ if(window._preboilSnapDondur) _preboilSnapDondur(S, typeof _editId !== 'undefined' ? _editId : null); }catch(_e){} }
+    M.ortHesap(); M.kaydetS(); M.son = null; M.ciz(); return e; };
+
+  // ── 5) HATIRLATICI (deterministik; yalnız kaynaklı / uygulamanın kendi içeriği) ──
+  M.hatirlatma = function(adimNo, faz){ var L = M.adimlar(), a = L[adimNo], ana = M.anaAdim(), out = [];
+    if(faz === 'mash_end'){ out.push({ metin:'Ön kaynatma örneği al: OG + örnek sıcaklığı + hacim (verim kontrolü)', kaynak:null, uyg:true }); return out; }
+    if(!a) return out;
+    out.push({ metin:'Sıcaklığı ölç — hedef ' + a.sc + ' °C (±' + M.ESIK_C + ' °C uygulama varsayımı)', kaynak:'palmerOlc' });
+    if(M.kap() === 'isitici') out.push({ metin:'Isıtırken karıştır (dibin yanmasını önler, ısıyı eşitler)', kaynak:'palmerKaristir' });
+    if(adimNo === ana) out.push({ metin:'pH ölçeceksen bu adımda; ölçüm sıcaklığını işaretle (mash sıcaklığında ~0,3 düşük okur)', kaynak:'phBant' });
+    if(adimNo === ana) out.push({ metin:'İyot testi yaparsan: yalnız nişastanın parçalandığını gösterir — ne ölçüde ve fermente edilebilirliği göstermez', kaynak:'palmerIyot' });
+    return out; };
+
+  // ── 6) SES ──
+  M.SR = function(){ return window.SpeechRecognition || window.webkitSpeechRecognition || null; };
+  M.sesDestek = function(){ return { tanima:!!M.SR(), sentez:!!(window.speechSynthesis && window.SpeechSynthesisUtterance) }; };
+  M.trSes = function(){ try{ var v = window.speechSynthesis ? window.speechSynthesis.getVoices() : []; return v.find(function(x){ return /^tr(-|_|$)/i.test(x.lang || ''); }) || null; }catch(e){ return null; } };
+  M.oku = function(metin){ if(!M.ttsAcik() || !M.sesDestek().sentez) return false; var v = M.trSes(); if(!v) return false; try{ var u = new SpeechSynthesisUtterance(String(metin)); u.lang = 'tr-TR'; u.voice = v; window.speechSynthesis.cancel(); window.speechSynthesis.speak(u); return true; }catch(e){ return false; } };
+  // AYRIŞTIRICI (AI'SIZ): Türkçe sayı sözcükleri + rakam + birim → [{ tur, deger, ham }]
+  var SAYI = { sifir:0, bir:1, iki:2, uc:3, dort:4, bes:5, alti:6, yedi:7, sekiz:8, dokuz:9, on:10, yirmi:20, otuz:30, kirk:40, elli:50, altmis:60, yetmis:70, seksen:80, doksan:90, yuz:100, bin:1000 };
+  var katla = function(s){ return String(s || '').replace(/İ/g, 'i').replace(/I/g, 'ı').toLowerCase().replace(/ı/g, 'i').replace(/ş/g, 's').replace(/ç/g, 'c').replace(/ğ/g, 'g').replace(/ö/g, 'o').replace(/ü/g, 'u'); };
+  var TUR_KEL = [['sicaklik', /^(derece|derecede|santigrat|celsius|sicaklik|sicakligi|sicaklikta|c|°c|°)$/], ['ph', /^(ph|peha|pehas|pe-ha)$/], ['hacim', /^(litre|litresi|litrede|lt|l|hacim|hacmi)$/], ['gravite', /^(og|gravite|gravity|yogunluk|okuma|sg|preboil|onkaynatma)$/]];
+  M.ayristir = function(metin){ var s = katla(metin).replace(/(\d)\s*°\s*c\b/g, '$1 °c').replace(/(\d)\s*°/g, '$1 °').replace(/\bp\s*h\b/g, 'ph').replace(/\bpe\s+ha\b/g, 'ph').replace(/on kaynatma|ön kaynatma|pre-?boil/g, 'onkaynatma').replace(/(\d)\s*(l|lt)\b/g, '$1 $2').replace(/(\d)(derece)/g, '$1 $2');
+    var T = s.split(/[\s;:!?]+|,(?!\d)|\.(?!\d)/).filter(Boolean), sayilar = [], i = 0;
+    var kelSay = function(j){ var w = T[j]; return w != null && SAYI.hasOwnProperty(w); };
+    var tamSay = function(ws){ var top = 0, cur = 0; ws.forEach(function(w){ var v = SAYI[w]; if(v === 1000){ top += (cur || 1) * 1000; cur = 0; } else if(v === 100){ cur = (cur || 1) * 100; } else cur += v; }); return top + cur; };
+    var kesirStr = function(ws){ var out = '', grup = []; var bosalt = function(){ if(grup.length){ out += String(tamSay(grup)); grup = []; } }; ws.forEach(function(w){ if(w === 'sifir'){ bosalt(); out += '0'; } else { if(grup.length){ var son = SAYI[grup[grup.length - 1]], v = SAYI[w]; if(!(son >= 10 && son % 10 === 0 && son < 100 && v < 10)) bosalt(); } grup.push(w); } }); bosalt(); return out; };
+    while(i < T.length){ var w = T[i], bas = i, deger = null, kesirUz = null;
+      if(/^\d+([.,]\d+)?$/.test(w)){ deger = parseFloat(w.replace(',', '.')); kesirUz = /[.,]/.test(w) ? w.split(/[.,]/)[1].length : 0; i++;
+        if((T[i] === 'nokta' || T[i] === 'virgul') && /^\d+$/.test(T[i + 1] || '')){ deger = parseFloat(w + '.' + T[i + 1]); kesirUz = T[i + 1].length; i += 2; } }
+      else if(kelSay(i)){ var ws = []; while(kelSay(i)) ws.push(T[i++]); deger = tamSay(ws); kesirUz = 0;
+        // kesir: baştaki "sıfır"lar + TEK sayı grubu (onlar [+ birler] ya da birler) — sonraki sayı ayrı ölçümdür ("… kırk dört on üç litre")
+        if((T[i] === 'nokta' || T[i] === 'virgul') && (kelSay(i + 1) || /^\d+$/.test(T[i + 1] || ''))){ i++; if(/^\d+$/.test(T[i])){ var dg = T[i++]; deger = parseFloat(deger + '.' + dg); kesirUz = dg.length; } else { var ks = ''; while(T[i] === 'sifir'){ ks += '0'; i++; }
+            if(kelSay(i) && T[i] !== 'yuz' && T[i] !== 'bin'){ var v1 = SAYI[T[i++]]; if(v1 >= 10 && kelSay(i) && SAYI[T[i]] < 10 && SAYI[T[i]] > 0) v1 += SAYI[T[i++]]; ks += String(v1); }
+            if(ks){ deger = parseFloat(deger + '.' + ks); kesirUz = ks.length; } } } }
+      else { i++; continue; }
+      sayilar.push({ v:deger, kesir:kesirUz, a:bas, b:i - 1 }); }
+    var kel = []; T.forEach(function(w, j){ TUR_KEL.forEach(function(k){ if(k[1].test(w)) kel.push({ tur:k[0], j:j }); }); });
+    var out = [], kul = {};
+    // birim / tür kelimesi ↔ sayı eşlemesi EN YAKIN önce: (mesafe, sonra-önce) sıralı açgözlü atama ("ön kaynatma 1.044 13 litre" → litre 13'ün)
+    var cift = []; sayilar.forEach(function(n, ni){ kel.forEach(function(k){ var d = k.j > n.b ? k.j - n.b : n.a - k.j; if(d >= 1 && d <= 2) cift.push({ ni:ni, k:k, d:d, sonra:k.j > n.b ? 0 : 1 }); }); });
+    cift.sort(function(x, y){ return x.d - y.d || x.sonra - y.sonra; }); var atanan = {};
+    cift.forEach(function(c){ if(atanan[c.ni] || kul[c.k.j]) return; atanan[c.ni] = c.k.tur; kul[c.k.j] = 1; });
+    sayilar.forEach(function(n, ni){ var tur = atanan[ni] || null;
+      var v = n.v;
+      // gravite biçimleri: 1042 → 1,042 · "bir nokta kırk iki" (kesir ≤ 2 hane) → 1,042
+      var grv = function(x, ks){ if(x >= 990 && x <= 1200) return x / 1000; if(x >= 1 && x < 2 && ks > 0 && ks <= 2 && x > 1.2) return 1 + (x - 1) / 10; if(x >= 0.99 && x <= 1.2) return x; return null; };
+      if(!tur){ var g = grv(v, n.kesir); if(g != null && (n.kesir > 0 || v >= 990)) tur = 'gravite'; else if(v >= 30 && v <= 100) tur = 'sicaklik'; else if(v >= 3 && v <= 9 && n.kesir > 0) tur = 'ph'; }
+      if(tur === 'gravite'){ v = grv(v, n.kesir); if(v == null) tur = null; }
+      if(tur === 'sicaklik' && !(v >= 20 && v <= 100)) tur = null; if(tur === 'ph' && !(v >= 3 && v <= 9)) tur = null; if(tur === 'hacim' && !(v > 0 && v <= 100)) tur = null;
+      if(tur) out.push({ tur:tur, deger:Math.round(v * 10000) / 10000, ham:T.slice(n.a, n.b + 1).join(' ') }); });
+    return out; };
+  M.dinliyor = false; M.sonMetin = '';
+  M.dinle = function(){ var SR = M.SR(); if(!SR || M.dinliyor) return false; var notGoster = lsAl(LS.not, '') !== '1'; if(notGoster) lsYaz(LS.not, '1');
+    try{ var r = new SR(); r.lang = 'tr-TR'; r.interimResults = false; r.maxAlternatives = 1; r.continuous = false; M.dinliyor = true; M.sesNotIlk = notGoster; M.ciz();
+      r.onresult = function(ev){ var t = ev.results && ev.results[0] && ev.results[0][0] ? ev.results[0][0].transcript : ''; M.sesIsle(t); };
+      r.onerror = function(ev){ M.sonMetin = ''; M.sesHata = 'konuşma tanınamadı (' + (ev && ev.error || 'hata') + ')'; };
+      r.onend = function(){ M.dinliyor = false; M.ciz(); }; r.start(); return true; }catch(e){ M.dinliyor = false; M.sesHata = String(e && e.message || e); M.ciz(); return false; } };
+  M.sesIsle = function(metin){ M.sonMetin = String(metin || ''); M.sesHata = null; var L = M.ayristir(metin);
+    if(!L.length){ M.son = { tur:'anlasilmadi', metin:M.sonMetin }; M.oku('Anlayamadım.'); M.ciz(); return L; }
+    var pb = L.find(function(x){ return x.tur === 'gravite'; }), hv = L.find(function(x){ return x.tur === 'hacim'; });
+    L.forEach(function(x){ if(x.tur === 'sicaklik'){ M.taslak.sic = x.deger; M.kaydet('sicaklik'); } else if(x.tur === 'ph'){ M.taslak.ph = x.deger; M.kaydet('ph'); } });
+    if(pb){ M.taslak.og = pb.deger; if(hv) M.taslak.V = hv.deger; M.kaydet('preboil'); } else if(hv){ M.taslak.V = hv.deger; M.ciz(); }
+    return L; };
+
+  // ── EKRAN ──
+  M.taslak = { sic:null, ph:null, phSic:'oda', og:null, c:null, V:null, Tw:96, TwSoguk:15 };
+  M.son = null;
+  M.gir = function(alan, v){ var s = String(v == null ? '' : v).trim().replace(',', '.'); M.taslak[alan] = alan === 'phSic' ? v : (s === '' ? null : parseFloat(s)); if(alan === 'Tw' || alan === 'TwSoguk') M.hesapla(); };
+  M.hesapla = function(){ if(!M.son || !M.son.tur) return; if(M.son.tur === 'sicaklik') M.son.sonuc = M.sicaklikHesap(M.son.deger); M.ciz(); };
+  M.sicaklikHesap = function(olc){ var L = M.adimlar(), a = L[M.aktifAdim()] || L[0], Rr = M.R(), r = M.sicaklikSapma({ olculen:olc, hedef:a.sc, kap:M.kap(), G:Rr.G, R:Rr.R, Tw:M.taslak.Tw, TwSoguk:M.taslak.TwSoguk });
+    r.R = Rr; r.secenek.forEach(function(sc){ if(sc.Wv > 0) sc.onizleme = M.suOnizleme(sc.Wv, Rr.G, Rr.R); }); return r; };
+  M.kaydet = function(tur){ var t = M.taslak, r;
+    if(tur === 'sicaklik'){ r = M.olcumEkle({ tur:'sicaklik', deger:t.sic }); if(r.ok){ M.son = { tur:'sicaklik', deger:t.sic, sonuc:M.sicaklikHesap(t.sic) }; M.oku(M.sesMetni(M.son)); } }
+    else if(tur === 'ph'){ r = M.olcumEkle({ tur:'ph', deger:t.ph, sic:t.phSic }); if(r.ok){ M.son = { tur:'ph', sonuc:M.phSapma({ ph:t.ph, sic:t.phSic }) }; M.oku(M.sesMetni(M.son)); } }
+    else if(tur === 'preboil'){ r = M.olcumEkle({ tur:'preboil', deger:t.og, c:t.c, V:t.V }); if(r.ok){ M.son = { tur:'preboil', sonuc:M.preboilSapma({ og:r.kayit.deger, V:r.kayit.V }), kayit:r.kayit }; M.oku(M.sesMetni(M.son)); } }
+    if(r && !r.ok) M.son = { tur:'hata', metin:r.neden }; M.ciz(); return r; };
+  M.sesMetni = function(son){ var s = son && son.sonuc; if(!s) return ''; if(son.tur === 'sicaklik') return s.durum === 'hedefte' ? 'Hedefte.' : (s.durum === 'dusuk' ? 'Hedefin ' + tr(-s.fark, 1) + ' derece altında. ' : 'Hedefin ' + tr(s.fark, 1) + ' derece üstünde. ') + (s.secenek[0] ? s.secenek[0].metin : '');
+    if(son.tur === 'ph') return s.durum === 'bantta' ? 'pH bantta.' : 'pH bandın ' + (s.durum === 'yuksek' ? 'üstünde. ' : 'altında. ') + (s.secenek[0] ? s.secenek[0].metin : '');
+    if(son.tur === 'preboil') return s.durum === 'hedefte' ? 'Ön kaynatma hedefte.' : 'Ön kaynatma ' + Math.abs(s.fark) + ' puan ' + (s.durum === 'dusuk' ? 'düşük.' : 'yüksek.'); return ''; };
+  var kay = function(k){ var x = M.KAYNAK[k]; return x ? '<span class="mash-kaynak" style="font-size:12px;color:#6b5a45">📚 ' + (x.url ? '<a href="' + E(x.url) + '" target="_blank" rel="noopener">' + E(x.ad) + '</a>' : E(x.ad)) + ' (okundu ' + M.OKUMA + ')</span>' : ''; };
+  var onz = function(p){ if(!p) return ''; var q = [];
+    if(p.og0 != null) q.push('OG ' + tr(p.og0, 3) + ' → ' + tr(p.og1, 3), 'ABV %' + tr(p.abv0, 1) + ' → %' + tr(p.abv1, 1), 'IBU ' + Math.round(p.ibu0) + ' → ' + Math.round(p.ibu1));
+    else { if(p.og != null) q.push('OG ' + tr(p.og, 3)); if(p.abv != null) q.push('ABV %' + tr(p.abv, 1)); if(p.ibu != null) q.push('IBU ' + Math.round(p.ibu)); if(p.hacim != null) q.push('şişeleme ≈ ' + tr(p.hacim, 1) + ' L'); }
+    if(p.Ryeni != null) q.push('yeni R ' + tr(p.Ryeni, 2)); if(p.preboilV != null) q.push('ön kaynatma ≈ ' + tr(p.preboilV, 1) + ' L');
+    return '<div class="mash-onizleme" style="font-size:12px;color:#4a3b2a">Bunu yaparsan (uygulamanın hesabı): ' + q.join(' · ') + (p.not ? ' — ' + E(p.not) : '') + '</div>'; };
+  M.kartHTML = function(){ var s = M.son; if(!s) return ''; var h = '<div class="mash-sapma" data-tur="' + E(s.tur) + '" style="margin-top:8px;padding:8px 10px;border-radius:8px;background:#fff8ec;border:1px solid #e3cfa8;color:#3b2f22;font-size:12px">';
+    if(s.tur === 'hata') return h + '⚠️ ' + E(s.metin) + '</div>';
+    if(s.tur === 'anlasilmadi') return h + '❔ Anlayamadım: "' + E(s.metin) + '" — ölçümü yazıyla gir</div>';
+    var r = s.sonuc;
+    if(s.tur === 'sicaklik'){ h += '<b>🌡️ ' + tr(r.olculen, 1) + ' °C · hedef ' + tr(r.hedef, 0) + ' °C · fark ' + (r.fark > 0 ? '+' : '') + tr(r.fark, 1) + ' °C</b> <span>(±' + r.esik + ' °C "hedefte" eşiği: uygulama varsayımı)</span>';
+      if(r.durum === 'hedefte') h += '<div class="mash-hedefte">✓ Hedefte</div>';
+      r.secenek.forEach(function(sc){ h += '<div class="mash-secenek" data-tur="' + sc.tur + '" style="margin-top:4px">• ' + E(sc.metin) + (sc.dakikaNot ? ' <span>(' + E(sc.dakikaNot) + ')</span>' : '') + (sc.yaklasik ? ' <span>⚠️ ' + E(sc.yaklasik) + '</span>' : '') + (sc.Wm ? ' <span>Wm = G (0,4 + R)(T2 − T1)/(Tw − T2) = ' + tr(r.R.G, 2) + ' × (0,4 + ' + tr(r.R.R, 2) + ') × (' + tr(r.hedef, 1) + ' − ' + tr(r.olculen, 1) + ') / (' + tr(sc.Tw, 0) + ' − ' + tr(r.hedef, 1) + ') = ' + tr(sc.Wm, 2) + ' kg · R = mash suyu ' + tr(r.R.suL, 1) + ' L (' + E(r.R.kaynak) + ') × 0,985 / tane ' + tr(r.R.G, 2) + ' kg</span>' : '') + onz(sc.onizleme) + (sc.kaynak ? '<div>' + kay(sc.kaynak) + '</div>' : '') + '</div>'; });
+      if(r.durum !== 'hedefte') h += '<div style="margin-top:4px;display:flex;gap:6px;flex-wrap:wrap;font-size:12px">' + (M.kap() === 'isitici' || r.durum !== 'dusuk' ? '' : '<label>sıcak su °C <input class="inp" type="number" style="width:64px;min-height:44px" value="' + E(M.taslak.Tw) + '" onchange="BM_MASH.gir(\'Tw\',this.value)"></label>') + (r.durum === 'yuksek' ? '<label>soğuk su °C <input class="inp" type="number" style="width:64px;min-height:44px" value="' + E(M.taslak.TwSoguk) + '" onchange="BM_MASH.gir(\'TwSoguk\',this.value)"></label> ' : '') + '<span>kap: ' + (M.kap() === 'isitici' ? 'ısıtıcılı (all-in-one)' : 'ısıtıcısız') + ' <button type="button" class="bm-ayar-btn" style="min-height:44px;font-size:12px" onclick="BM_MASH.kapYaz(\'' + (M.kap() === 'isitici' ? 'isiticisiz' : 'isitici') + '\')">değiştir</button></span></div>'; }
+    else if(s.tur === 'ph'){ h += '<b>🧪 pH ' + tr(r.ph, 2) + ' (' + (r.sic === 'mash' ? 'mash sıcaklığında → oda ≈ ' + tr(r.oda, 2) : 'oda') + ') · bant ' + tr(r.bant[0], 1) + '–' + tr(r.bant[1], 1) + ' (oda)</b><div>' + kay('phBant') + '</div>';
+      if(r.durum === 'bantta') h += '<div class="mash-hedefte">✓ Bantta</div>';
+      r.secenek.forEach(function(sc){ h += '<div class="mash-secenek" data-tur="' + sc.tur + '">• ' + E(sc.metin) + (sc.kaynak ? ' <span>(hedef ' + tr(r.ideal, 1) + ', tampon ' + tr(r.B, 0) + ' mEq/pH)</span><div>' + kay(sc.kaynak) + '</div>' : '') + '</div>'; }); if(r.not) h += '<div style="font-size:12px">ℹ️ ' + E(r.not) + '</div>'; }
+    else if(s.tur === 'preboil'){ if(!r){ return h + 'Ön kaynatma hesabı yapılamadı.</div>'; }
+      h += '<b>🔬 Ön kaynatma ' + tr(r.og, 3) + (s.kayit && s.kayit.c != null ? ' (ham ' + tr(s.kayit.ham, 3) + ' @ ' + s.kayit.c + ' °C → 20 °C)' : '') + ' · ' + tr(r.V, 1) + ' L' + (r.Vvarsayim ? ' (hacim girilmedi — beklenen hacim varsayıldı)' : '') + '</b><div>beklenen ' + tr(r.B.og, 3) + ' · ' + tr(r.B.V, 1) + ' L (yalnız tane; şeker / katkı kaynatmada — uygulama varsayımı) · fark ' + (r.fark > 0 ? '+' : '') + r.fark + ' puan · ölçülen mash verimi %' + tr(r.verim, 1) + ' (reçete %' + r.B.verim + ')</div>';
+      if(r.durum === 'hedefte') h += '<div class="mash-hedefte">✓ Hedefte</div>';
+      if(r.devam) h += '<div style="font-size:12px">Olduğu gibi devam ederse: OG ' + tr(r.devam.og, 3) + ' · ABV %' + tr(r.devam.abv, 1) + ' · IBU ' + Math.round(r.devam.ibu) + '</div>';
+      r.secenek.forEach(function(sc){ h += '<div class="mash-secenek" data-tur="' + sc.tur + '" style="margin-top:4px">• ' + E(sc.metin) + (sc.tur === 'kaynat' ? (sc.dakika != null ? ' — ≈ ' + sc.dakika + ' dk ek kaynatma' : ' <span>(' + E(sc.dakikaNot) + ')</span>') : '') + (sc.stok ? ' <span>📦 ' + E(sc.stok) + '</span>' : '') + onz(sc.onizleme) + (sc.kaynak ? '<div>' + kay(sc.kaynak) + '</div>' : '') + '</div>'; });
+      if(r.durum === 'dusuk' && !r.secenek.some(function(x){ return x.tur === 'seker'; })) h += '<div style="font-size:12px">Reçetede ya da stokta şeker / DME yok — bu akışta yeni malzeme önerilmez.</div>'; }
+    return h + '</div>'; };
+  M.listeHTML = function(){ var L = (typeof S !== 'undefined' && S && S.mashOlcumler) || []; if(!L.length) return '<div style="font-size:12px;color:#6b5a45">Henüz ölçüm yok.</div>';
+    var ad = { sicaklik:'🌡️', ph:'🧪', preboil:'🔬' };
+    return '<div class="mash-liste" style="font-size:12px">' + L.slice(-6).reverse().map(function(x){ return '<div>' + ad[x.tur] + ' ' + new Date(x.t).toTimeString().slice(0, 5) + (x.adim != null ? ' · adım ' + (x.adim + 1) : '') + ' · ' + (x.tur === 'sicaklik' ? tr(x.deger, 1) + ' °C' : x.tur === 'ph' ? 'pH ' + tr(x.deger, 2) + ' (' + x.sic + ')' : tr(x.deger, 3) + (x.V ? ' · ' + tr(x.V, 1) + ' L' : '') + (x.verim != null ? ' · verim %' + tr(x.verim, 1) : '')) + '</div>'; }).join('') +
+      (S.mashGercekSc ? '<div style="margin-top:2px">Ana adım ölçülen ortalaması: <b>' + tr(S.mashGercekSc.ort, 1) + ' °C</b> (n ' + S.mashGercekSc.n + ', hedef ' + S.mashGercekSc.hedef + ' °C) — mash FG modeli için veri, hesap değişmedi</div>' : '') +
+      '<button type="button" class="bm-ayar-btn mash-geri" style="min-height:44px;margin-top:4px;font-size:12px" onclick="BM_MASH.sonuSil()">↶ Son ölçümü sil</button></div>'; };
+  M.panelHTML = function(o){ o = o || {}; var L = M.adimlar(), ai = M.aktifAdim(), a = L[ai] || L[0], ana = M.anaAdim(), d = M.sesDestek(), t = M.taslak, faz = o.ev ? o.ev.tip : null;
+    if(o.yer === 'brewday'){ var anahtar = (window._brewday && window._brewday.rid) + ':' + (window._brewday && window._brewday.aktifIdx); if(M._sonOkunan !== anahtar){ M._sonOkunan = anahtar; var hm = M.hatirlatma(ai, faz); if(hm.length) M.oku(hm.map(function(x){ return x.metin; }).join('. ')); } }
+    // AU2 odak modu: brewday aktif kartı tek ekrana sığmalı → panel KATLI (tek düğme); açınca tam panel
+    if(o.yer === 'brewday' && !M.bdAcik) return '<button type="button" class="mash-ac-btn" aria-expanded="false" style="display:block;width:100%;min-height:48px;margin-top:10px;border-radius:10px;border:1.5px solid rgba(245,215,153,.5);background:transparent;color:#F5D799;font-size:14px;font-weight:700" onclick="BM_MASH.bdAcik=true;BM_MASH.ciz()">🧑‍🍳 Mash asistanı ▸' + (M.son && M.son.tur === 'sicaklik' && M.son.sonuc ? ' · son ' + tr(M.son.sonuc.olculen, 1) + ' °C' : '') + '</button>';
+    var inp = function(alan, ph, w, al){ return '<input class="inp mash-inp-' + alan + '" type="number" inputmode="decimal" aria-label="' + E(al) + '" placeholder="' + E(ph) + '" style="width:' + w + 'px;min-height:44px;font-size:15px;text-align:center" value="' + (t[alan] != null ? E(t[alan]) : '') + '" onchange="BM_MASH.gir(\'' + alan + '\',this.value)">'; };
+    var btn = function(tur, et){ return '<button type="button" class="bm-ayar-btn mash-kaydet-' + tur + '" style="min-height:44px;font-size:12px" onclick="BM_MASH.kaydet(\'' + tur + '\')">' + et + '</button>'; };
+    var h = '<div class="mash-panel" data-yer="' + E(o.yer || '') + '" style="margin-top:10px;padding:10px 12px;border-radius:10px;background:#fdf6e6;color:#3b2f22;border:1px solid #e3cfa8;text-align:left">' +
+      '<div style="font-weight:700;font-size:14px;display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="flex:1">🧑‍🍳 Mash asistanı <span style="font-weight:400;font-size:12px">(AI yok — hesap uygulamanın, kaynaklı)</span></span>' + (o.yer === 'brewday' ? '<button type="button" class="bm-ayar-btn mash-kapat-btn" aria-expanded="true" style="min-height:44px;font-size:12px" onclick="BM_MASH.bdAcik=false;BM_MASH.ciz()">▲ Kapat</button>' : '') + '</div>' +
+      '<div class="mash-aktif" style="font-size:12px">Adım ' + (ai + 1) + '/' + L.length + ': <b>' + a.sc + ' °C · ' + a.dk + ' dk</b>' + (ai === ana ? ' (ana adım — FG hesabındaki)' : '') + (o.yer !== 'brewday' && L.length > 1 ? ' <select aria-label="Adım" style="min-height:44px" onchange="BM_MASH.secAdim=+this.value;BM_MASH.ciz()">' + L.map(function(x, j){ return '<option value="' + j + '"' + (j === ai ? ' selected' : '') + '>' + (j + 1) + ': ' + x.sc + ' °C</option>'; }).join('') + '</select>' : '') + '</div>';
+    // ses
+    h += '<div class="mash-ses" style="margin-top:6px">' + (d.tanima ? '<button type="button" class="mash-mikrofon" aria-label="Dokun ve ölçümü söyle" style="width:100%;min-height:64px;font-size:18px;font-weight:700;border-radius:12px;border:none;background:' + (M.dinliyor ? '#b3261e' : '#2e6b4f') + ';color:#fff" onclick="BM_MASH.dinle()">' + (M.dinliyor ? '🎙️ Dinliyorum…' : '🎤 Dokun — konuş') + '</button>' + (M.sesNotIlk || lsAl(LS.not, '') !== '1' ? '<div class="mash-gizlilik" style="font-size:12px">🔒 Chrome konuşma tanımada sesi sunucuya gönderir; internet gerekir. ' + kay('mdnSes') + '</div>' : '') : '<div class="mash-ses-yok" style="font-size:12px;color:#8a5a00">🎤 Bu tarayıcı / APK konuşma tanımayı desteklemiyor — Chrome\'da aç. Ölçümleri yazıyla gir.</div>') +
+      (M.sonMetin ? '<div class="mash-duyulan" style="font-size:12px">Duyulan: "' + E(M.sonMetin) + '"</div>' : '') + (M.sesHata ? '<div style="font-size:12px;color:#8c1d18">⚠️ ' + E(M.sesHata) + '</div>' : '') +
+      '<div style="font-size:12px;margin-top:2px">🔊 Sesli okuma: ' + (d.sentez ? (M.trSes() || !window.speechSynthesis ? '' : '<span class="mash-tts-yok">Türkçe ses yok — yalnız yazı. </span>') + '<button type="button" class="bm-ayar-btn mash-tts" style="min-height:44px;font-size:12px" onclick="BM_MASH.ttsYaz(' + (M.ttsAcik() ? 'false' : 'true') + ')">' + (M.ttsAcik() ? '✓ Açık — kapat' : 'Kapalı — aç') + '</button>' : '<span class="mash-tts-yok">bu tarayıcıda sesli okuma yok — yalnız yazı</span>') + '</div></div>';
+    // girişler
+    h += '<div class="mash-girisler" style="display:flex;flex-direction:column;gap:6px;margin-top:8px;font-size:12px">' +
+      '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">🌡️ ' + inp('sic', '°C', 72, 'Mash sıcaklığı (°C)') + ' °C ' + btn('sicaklik', 'Kaydet') + '</div>' +
+      '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">🧪 pH ' + inp('ph', '5,4', 66, 'Mash pH') + '<select aria-label="pH ölçüm sıcaklığı" style="min-height:44px" onchange="BM_MASH.gir(\'phSic\',this.value)"><option value="oda"' + (t.phSic === 'oda' ? ' selected' : '') + '>oda</option><option value="mash"' + (t.phSic === 'mash' ? ' selected' : '') + '>mash sıcaklığında</option></select>' + btn('ph', 'Kaydet') + '</div>' +
+      '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">🔬 ön kaynatma ' + inp('og', '1,040', 76, 'Ön kaynatma OG') + inp('c', '°C', 56, 'Örnek sıcaklığı (°C)') + inp('V', 'L', 56, 'Ön kaynatma hacmi (L)') + ' L ' + btn('preboil', 'Kaydet') + '</div></div>';
+    h += M.kartHTML();
+    var hm2 = M.hatirlatma(ai, faz); if(hm2.length) h += '<div class="mash-hatirlatici" style="margin-top:8px;font-size:12px"><b>📝 Bu adımda</b>' + hm2.map(function(x){ return '<div>☐ ' + E(x.metin) + (x.kaynak ? ' ' + kay(x.kaynak) : x.uyg ? ' <span>(uygulamanın brewday adımı)</span>' : '') + '</div>'; }).join('') + '</div>';
+    h += '<div style="margin-top:8px"><b style="font-size:12px">📋 Son ölçümler</b>' + M.listeHTML() + '</div></div>';
+    return h; };
+  M.partiAcik = false; M.bdAcik = false;
+  M.partiHTML = function(){ return '<div class="mash-parti" style="margin-top:8px"><button type="button" class="bm-ayar-btn mash-parti-btn" style="min-height:44px;width:100%" onclick="BM_MASH.partiAcik=!BM_MASH.partiAcik;try{render();}catch(e){}">' + (M.partiAcik ? '▲ Mash asistanını kapat' : '🧑‍🍳 Mash asistanı (ölçüm + sapma hesabı)') + '</button>' + (M.partiAcik ? M.panelHTML({ yer:'parti' }) : '') + '</div>'; };
+  M.ciz = function(){ try{ if(window._brewday && window._brewday.aktif && typeof brewdayRender === 'function'){ brewdayRender(); } if(typeof render === 'function' && M.partiAcik) render(); }catch(e){} };
+})();
+// ═══ SPRINT MASH1 MODÜL SON ═══
+
 // ═══ SPRINT AI3 TUZAK MODÜL BAŞ ═══
 // UYGULAMA İÇİ TUZAK TESTİ (geliştirici; Ayarlar ▸ AI özellikleri ▸ 🧪). Anahtar uygulamadan ÇIKMAZ: istekler cihazdaki ai_anahtar_v1 ile BM_AI.sor üzerinden.
 // SPRINT AI4B: TAZE DOĞRULAMA KOŞUSU — yalnız claude-haiku-5-5, tek tur, Sonnet YOK; her adımda TÜM cümleler + kaynak ID'leri + web alıntıları (url + cited_text) sonuca yazılır;
