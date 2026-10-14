@@ -10255,9 +10255,9 @@ const CASELER = [
       const stokEs = STOK.length, adEs = window.eval('S.ad'), notEs = window.eval('S.notlar');
       STOK.push({ id: '9990777', ad: 'REGTEST-GIZLI-STOK', g: 'Malt', miktar: 1, birim: 'kg' }); window.eval("S.ad='REGTEST-GIZLI-RECETE';S.notlar='REGTEST-GIZLI-NOT'");
       try {
-        __REG.ok('beta açık + anahtar → AI düğmesi + tahmini maliyet', B.aiHazir() && /bul-ai-btn/.test(B.govdeHTML()) && /AI ile çöz \(≈ \$0\.\d{4}\)/.test(B.govdeHTML()));
+        __REG.ok('beta açık + anahtar → AI düğmesi + tahmini maliyet', B.aiHazir() && /bul-ai-btn/.test(B.govdeHTML()) && /AI ile (çöz|stil tahmini) \(≈ \$0\.\d{4}\)/.test(B.govdeHTML()));
         const r = await B.aiCalistir(), p = m.log[m.log.length - 1], enumL = p.sema.schema.properties.secimler.items.properties.kod.enum;
-        __REG.ok('çağrı: kullanım bul, Haiku (ucuz), şema enum = İSTEK BAŞINA kod listesi (sözlük + 240 stil + yalnız kalan kelimeye benzeyen ürün; tam 884 listenin yarısından az), kod listesi bağlamda', p.kullanim === 'bul' && p.modelKey === 'ucuz' && enumL.length === B.kodlar(B.coz(B.d.metin).cozulemeyen).length && enumL.length < B.kodlar().length / 2 && enumL.filter(k => /^stil:/.test(k)).length === Object.keys(BJCP).length && enumL.indexOf('stil:Dubbel') >= 0 && /KOD LİSTESİ/.test(p.baglam), enumL.length + ' / ' + B.kodlar().length);
+        __REG.ok('çağrı: kullanım bul, Haiku (ucuz), şema enum = İSTEK BAŞINA kod listesi (sözlük + 240 stil + yalnız kalan kelimeye benzeyen ürün; tam 884 listenin yarısından az), kod listesi bağlamda', p.kullanim === 'bul' && p.modelKey === 'ucuz' && enumL.length === B.istekKur(B.d.metin, B.d.cipler).kod.length && enumL.length < B.kodlar().length / 2 && enumL.filter(k => /^stil:/.test(k)).length === Object.keys(BJCP).length && enumL.indexOf('stil:Dubbel') >= 0 && /KOD LİSTESİ/.test(p.baglam), enumL.length + ' / ' + B.kodlar().length);
         __REG.ok('enum dışı kod DÜŞTÜ (pembe kristal), geçerli kod çip oldu (🤖 etiketli), "çözemedim" gösterildi', r.ok && r.cipler.length === 1 && r.cipler[0].k === 'stil' && r.dusen.length === 1 && B.d.cipler.some(c => c.k === 'stil' && c.kaynakMetin === 'AI') && /çözemedi: westmalle/.test(B.d.aiDurum) && /listede olmayan 1 seçim düştü/.test(B.d.aiDurum));
         const yuk = JSON.stringify(p);
         __REG.ok('AI\'ya stok / reçete / not GİTMEDİ; tarif metni gitti', !/REGTEST-GIZLI/.test(yuk) && /Westmalle/.test(p.soru), (yuk.match(/REGTEST-GIZLI[A-Z-]*/g) || []).join());
@@ -10277,23 +10277,23 @@ const CASELER = [
       const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'bul_seti.json'), 'utf8'));
       return page.evaluate(async (set) => {
         const B = window.BM_BUL, say = g => set.tarifler.filter(t => t.grup === g).length;
-        __REG.ok('set: 24 tarif = 12 sözlük + 6 AI + 3 çelişkili + 3 uydurma; her tarifte beklenen çip; uydurmalarda yasak kod', set.tarifler.length === 24 && say('sozluk') === 12 && say('ai') === 6 && say('celiski') === 3 && say('uydurma') === 3 && set.tarifler.every(t => t.beklenenCip && t.beklenenCip.length) && set.tarifler.filter(t => t.grup === 'uydurma').every(t => t.yasakKod && t.yasakKod.length));
-        const bilinen = {}; B.kodlar().forEach(k => { bilinen[k.kod] = 1; }); B.SOZLUK.forEach(s => { bilinen[s.k + ':' + s.d] = 1; });
-        const bek = [].concat.apply([], set.tarifler.map(t => [].concat.apply([], t.beklenenCip.map(x => Array.isArray(x) ? x : [x]))));
+        __REG.ok('set: 30 tarif = 12 sözlük + 6 AI + 3 çelişkili + 3 uydurma + 6 B2 (BUL2; eski 24 aynen); her tarifte beklenen çip; uydurmalarda yasak kod', set.tarifler.length === 30 && say('sozluk') === 12 && say('ai') === 6 && say('celiski') === 3 && say('uydurma') === 3 && say('B2') === 6 && set.tarifler.every(t => t.beklenenCip && (t.beklenenCip.length || t.beklenenOrnek === 'anlayamadim')) && set.tarifler.filter(t => t.grup === 'uydurma').every(t => t.yasakKod && t.yasakKod.length));
+        const bilinen = {}; B.kodlar().forEach(k => { bilinen[k.kod] = 1; }); B.SOZLUK.forEach(s => { bilinen[s.k + ':' + s.d] = 1; }); B.BAGLAM.filter(b => b.stilSet).forEach(b => { bilinen['stilSet:' + b.d] = 1; }); // BUL2: bağlam stil kümesi kodu
+        const bek =[].concat.apply([], set.tarifler.map(t => [].concat.apply([], t.beklenenCip.map(x => Array.isArray(x) ? x : [x]))));
         __REG.ok('beklenen kodların hepsi sözlükte / katalogda / BJCP\'de var (abvSayi hariç)', bek.every(k => /^abvSayi:/.test(k) || bilinen[k]), bek.filter(k => !/^abvSayi:/.test(k) && !bilinen[k]).join());
         const S = set.tarifler.filter(t => t.grup === 'sozluk').map(t => B.degerlendir(t, B.coz(t.metin).cipler, [])), ms = B.metrik(S);
         __REG.ok('sözlük istemleri (AI yok): çip isabeti %100 (38/38), beklenen örnek ilk-5 12/12, uydurma 0', ms.cip === '38/38' && ms.ornek === '12/12' && ms.uydurma === 0, JSON.stringify(ms));
         const C = set.tarifler.filter(t => t.grup === 'celiski').map(t => B.degerlendir(t, B.coz(t.metin).cipler, []));
         __REG.ok('çelişkili 3/3 → soru (arama yok)', C.every(r => r.celiski && !r.ilk.length));
         // mock koşu: AI istemleri için beklenen kodlar; uydurmada çözemedim
-        const yan = { A01: ['renk:acik'], A02: ['stil:Dubbel'], A03: ['stil:Foreign Extra Stout'], A04: ['stil:Christmas / Holiday Beer'], A05: ['stil:Witbier / Belgian White'], A06: ['stil:Imperial IPA / DIPA'] };
+        const yan = { A01: ['renk:acik'], A02: ['stil:Dubbel'], A03: ['stil:Foreign Extra Stout'], A04: ['stil:Christmas / Holiday Beer'], A05: ['stil:Witbier / Belgian White'], A06: ['stil:Imperial IPA / DIPA'], B202: ['stil:Belgian Quadrupel / Abt'] };
         const kos = async (uyd) => { const m = __REG.ai1Mock({ bul: (i, p) => { const t = set.tarifler.find(x => p.soru.indexOf('"' + x.metin + '"') >= 0) || {}; const k = yan[t.id] || (uyd && t.id === 'U01' ? ['malz:malt:koyu_kristal'] : []);
           return { secimler: k.filter(x => bilinen[x]).map(x => ({ kod: x, olumsuz: false, ifade: 'mock' })), cozemedim: k.length ? [] : ['mock-çözemedim'] }; } });
           try { return await B.kos({ mock: true, set }); } finally { m.geri(); } };
         const es = [localStorage.getItem(B.SON_LS), localStorage.getItem(B.ARS_LS)];
         try {
           const d = await kos(false);
-          __REG.ok('mock koşu: bitti, ön kontrol geçti (2 adım), 12 AI/çelişki/uydurma istemi, harcama sayıldı', d.bitti && d.on && d.on.gecti && d.on.adim.length === 2 && d.sonuclar.length === 12 && d.harcama.usd > 0, JSON.stringify(d.on) + ' ' + d.sonuclar.length);
+          __REG.ok('mock koşu: bitti, ön kontrol geçti (2 adım), 18 AI/çelişki/uydurma/B2 istemi, harcama sayıldı', d.bitti && d.on && d.on.gecti && d.on.adim.length === 2 && d.sonuclar.length === 18 && d.harcama.usd > 0, JSON.stringify(d.on) + ' ' + d.sonuclar.length);
           __REG.ok('mock metrikler: AI istemleri beklenen çip + örnek, çelişkide soru 3/3, uydurma 0; sözlük metrikleri koşuya yazıldı', d.metrik.uydurma === 0 && d.metrik.celiski === '3/3' && d.metrik.cipIsabet >= 0.9 && d.metrikSozluk.cip === '38/38', JSON.stringify(d.metrik));
           __REG.ok('sonuç ai_bul_* anahtarlarında (bm_ öneksiz → yedeğe girmez), arşivde, kopya anahtarsız', !!B.sonucAl() && B.arsivAl().length >= 1 && !/^bm_/.test(B.SON_LS) && /^BREWMASTER-BUL v1/.test(B.kopyaMetni()) && !/sk-ant-[A-Za-z0-9]{8}/.test(B.kopyaMetni()));
           const d2 = await kos(true);
@@ -10387,7 +10387,7 @@ const CASELER = [
           localStorage.setItem(B.ARS_LS, JSON.stringify([{ id: '1', tarih: 't', bitti: true, mock: false, usd: 0.03, karar: 'bitti', sonuc: { kosuId: 1 } }].concat(B.arsivAl())));
           const T3 = window.BM_TUZAK, oe = T3.onayla; let soru = null; T3.onayla = m => { soru = m; return false; };
           let r; try { r = await B.baslat(); } finally { T3.onayla = oe; }
-          __REG.ok('bitmiş gerçek sonuç varken yeni koşu ONAY ister ("arşivde kalır", ≈ maliyet, tavan 0,50 $); hayır → koşu yok', r === null && /arşivde kalır/.test(soru) && /tavan 0,50 \$/.test(soru) && /Yaklaşık 0,0\d+ \$/.test(soru), soru);
+          __REG.ok('bitmiş gerçek sonuç varken yeni koşu ONAY ister ("arşivde kalır", model başına ≈ maliyet Haiku → Opus, tavan); hayır → koşu yok', r === null && /arşivde kalır/.test(soru) && /Tavan \d+,\d+ \$/.test(soru) && /Yaklaşık \d+,\d+ \$/.test(soru) && /Haiku 5\.5 ≈ [\d,]+ \$ → Opus 5\.5 ≈ [\d,]+ \$/.test(soru), soru);
           localStorage.setItem(B.SON_LS, JSON.stringify(d2));
           __REG.ok('KASITLI BOZMA: yarım koşu asıl yere yazılmış olsaydı (eski davranış) koruma denetimi KIRMIZI', String(oku(B.SON_LS).kosuId) !== id1);
         } finally { B.durdur = false; B.son = null; K.forEach((k, i) => es[i] == null ? localStorage.removeItem(k) : localStorage.setItem(k, es[i])); }
@@ -10404,7 +10404,7 @@ const CASELER = [
       return page.evaluate(async (set, zaman, gercekKosu) => {
         const B = window.BM_BUL, A = window.BM_AI, K = [B.SON_LS, B.ARS_LS, B.YAR_LS], es = K.map(k => localStorage.getItem(k));
         __REG.ok('"bul" çağrısının zaman aşımı 120 sn (yeni şemanın ilk derlemesi), diğer kullanımlar 60 sn', zaman);
-        const tam = B.kodlar(), i2 = B.istekKur('Westmalle\'nin koyusu gibi bir şey', []), iw = B.istekKur('Weihenstephan mayalı bir şey', []);
+        const tam = B.kodlar(), i2 = B.istekKur('koyu bir Westmalle', []), iw = B.istekKur('Weihenstephan mayalı bir şey', []);
         __REG.ok('istek başına enum: sözlük + 240 stil her zaman, ürün yalnız kalan kelimeye benzeyen ("westmalle" → "west coast" ürünü YOK; "weihenstephan" → WY3068 VAR)', i2.kod.length < 330 && i2.kod.filter(x => /^stil:/.test(x.kod)).length === Object.keys(BJCP).length && B.SOZLUK.every(s => i2.kod.some(x => x.kod === s.k + ':' + s.d)) && !i2.kod.some(x => /^malz:/.test(x.kod) && /west/i.test(x.et)) && iw.kod.some(x => x.kod === 'malz:maya:wy3068'), i2.kod.length + ' kod');
         const uz = A.SISTEMLER.bul.length + i2.baglam.length + i2.soru.length + JSON.stringify(i2.sema).length;
         __REG.ok('tahmin GERÇEK istekten: giriş = ⌈(sistem + bağlam + soru + şema) / 1,7⌉ + 300 (1,7 = 2026-10-13 gerçek koşusundan ölçülen karakter/token)', B.KAR_TOKEN === 1.7 && i2.tahmin.gir === Math.ceil(uz / 1.7) + 300 && i2.tahmin.usd > 0, JSON.stringify(i2.tahmin));
@@ -10426,16 +10426,16 @@ const CASELER = [
           const pr = B.kos({ mock: true, set }), anlik = B.calisiyor && /⏳ BUL seti çalışıyor/.test(B.panelHTML());
           const d1 = await pr;
           __REG.ok('Tamam\'dan HEMEN sonra (ilk adımı beklemeden) panelde "⏳ BUL seti çalışıyor…"', anlik);
-          __REG.ok('bitiş: başarı toast\'u + panelde kalıcı yeşil mesaj (çip, uydurma, $)', d1.bitti && toast.some(t => /^success: BUL seti bitti — çip \d+\/\d+, uydurma 0/.test(t)) && /bul-son-mesaj/.test(B.panelHTML()) && /BUL seti bitti/.test(B.panelHTML()), toast.join(' | '));
+          __REG.ok('bitiş: başarı toast\'u + panelde kalıcı yeşil mesaj (çip, uydurma, $)', d1.bitti && toast.some(t => /^success: BUL seti bitti — Haiku 5\.5 çip \d+\/\d+, uydurma 0/.test(t)) && /bul-son-mesaj/.test(B.panelHTML()) && /BUL seti bitti/.test(B.panelHTML()), toast.join(' | '));
           __REG.ok('adım kaydı: gerçek giriş/çıkış token, o isteğin tahmini, kod sayısı', d1.sonuclar.filter(x => x.ai).every(x => x.gir === 9000 && x.cik === 120 && x.tahmin && x.tahmin.gir > 0 && x.kodN > 200 && x.kodN < 340));
           // 2) ön kontrol: AI çağrısı başarısız → neden adım adım, hata toast'u
           toast.length = 0; A.sor = () => Promise.resolve({ ok: false, hata: { tur: 'yetki', mesaj: 'Anahtar geçersiz (401)' } });
           const d2 = await B.kos({ mock: true, set });
-          __REG.ok('ön kontrol (AI hatası): durdu metni ve toast NEDENİ söyler (adım + hata türü + mesaj), adım kaydında aiOk / hata', !d2.bitti && /^ön kontrol geçmedi: A01: AI çağrısı başarısız — yetki: Anahtar geçersiz \(401\)/.test(d2.durdu) && toast.some(t => /^error: BUL ön kontrol geçmedi: A01/.test(t)) && d2.on.adim[0].aiOk === false && /401/.test(d2.on.adim[0].hata), d2.durdu);
+          __REG.ok('ön kontrol (AI hatası): durdu metni ve toast NEDENİ söyler (adım + hata türü + mesaj), adım kaydında aiOk / hata', !d2.bitti && /^ön kontrol geçmedi \(Haiku 5\.5\): A02: AI çağrısı başarısız — yetki: Anahtar geçersiz \(401\)/.test(d2.durdu) && toast.some(t => /^error: BUL ön kontrol geçmedi \(Haiku 5\.5\): A02/.test(t)) && d2.on.adim[1].aiOk === false && /401/.test(d2.on.adim[1].hata), d2.durdu);
           // 3) ön kontrol: maliyet o isteğin tahmininin 1,5 katını aşarsa (token ile birlikte)
           A.sor = (p) => Promise.resolve({ ok: true, veri: { secimler: [], cozemedim: [] }, bayraklar: [], maliyet: A.maliyet('ucuz', { input_tokens: 60000, output_tokens: 100 }) });
           const d3 = await B.kos({ mock: true, set });
-          __REG.ok('ön kontrol (maliyet): "maliyet $x > 1,5 × tahmin $y (giriş N token, tahmin M)"', /ön kontrol geçmedi: A01: maliyet \$0\.\d+ > 1,5 × tahmin \$0\.\d+ \(giriş 60000 token, tahmin \d+\)/.test(d3.durdu), d3.durdu);
+          __REG.ok('ön kontrol (maliyet): "maliyet $x > 1,5 × tahmin $y (giriş N token, tahmin M)"', /ön kontrol geçmedi \(Haiku 5\.5\): A02: maliyet \$0\.\d+ > 1,5 × tahmin \$0\.\d+ \(giriş 60000 token, tahmin \d+\)/.test(d3.durdu), d3.durdu);
           // 4) kopyala yedeği: bitmiş sonuç yoksa son yarım koşu + açıklama
           localStorage.removeItem(B.SON_LS); toast.length = 0; const t = B.kopyala();
           __REG.ok('ana "BUL sonucunu kopyala": bitmiş yoksa SON YARIM koşuyu kopyalar ve söyler', !!t && t.indexOf('"kosuId":' + d3.kosuId) > 0 && /Bitmiş BUL sonucu yok — son YARIM koşu kopyalandı/.test(B.mesaj) && toast.some(x => /son YARIM koşu kopyalandı/.test(x)));
@@ -10444,6 +10444,164 @@ const CASELER = [
         } finally { A.sor = sorEs; A.hazirMi = hEs; window.bmToast = tEs; B.mesaj = ''; B.sonMesaj = ''; B.son = null; K.forEach((k, i) => es[i] == null ? localStorage.removeItem(k) : localStorage.setItem(k, es[i])); }
         return __REG.al();
       }, set, zaman, gercekKosu);
+    }
+  },
+  // ═════════════ SPRINT BUL2 — "Tarif et" kalite düzeltmeleri (gerçek koşu 2026-10-13 bulguları) + Haiku/Opus karşılaştırma koşucusu ═════════════
+  {
+    kod: 'BUL2-ANLAYAMADIM', ad: 'ÇİPSİZ TARİFTE SONUÇ YOK (BUL2 madde 1): hiç çip yoksa arama YAPILMAZ, örnek gösterilmez, "Bunu anlayamadım" kartı + çip seçici (renk / güç / kuruluk / acı / maya / köken / stil) · kısmi anlamada "bunları dikkate alamadım … arama yalnız anlaşılan çiplerle" · seçiciden çip eklenince arama · KASITLI BOZMA: eski davranış (0 çiple arama) gerçek koşudaki 5 Altbier\'i geri getirir → kırmızı',
+    calistir: (page) => page.evaluate(async () => {
+      const B = window.BM_BUL; B.indeks(); const bos = () => ({ metin: '', cipler: [], cozulemeyen: [], stok: false, sonuc: null, aiDurum: '' });
+      const s0 = B.ara([], {});
+      __REG.ok('0 çip → arama yok: anlayamadim, ilk 0, bulunamadı değil', s0.anlayamadim === true && s0.ilk.length === 0 && s0.uyan === 0 && !s0.bulunamadi);
+      B.d = bos(); B.tarifEt('annemin sevdiği türden bir şey'); const h = B.govdeHTML();
+      __REG.ok('anlaşılmaz tarif: kart "Bunu anlayamadım: \'<metin>\'" + "Arama yapmadım" + 7 seçici (renk/güç/kuruluk/acı/maya/köken/stil), sonuç kartı YOK', /bul-anlayamadim/.test(h) && /Bunu anlayamadım:<\/b> "annemin sevdiği türden bir şey"/.test(h) && /Arama yapmadım/.test(h) && ['renk', 'guc', 'kuru', 'aci', 'maya', 'koken', 'stil'].every(k => h.indexOf('bul-sec-' + k) >= 0) && !/bul-sonuc|bul-yok|bul-bas/.test(h));
+      B.cipEkle('renk', 'koyu'); await new Promise(r => setTimeout(r, 0)); const h2 = B.govdeHTML();
+      __REG.ok('seçiciden çip eklenince arama yapılır, "anlayamadım" kartı kalkar, anlaşılmayan kelimeler "dikkate alamadım … yalnız anlaşılan çiplerle" olarak kalır', B.d.cipler.length === 1 && /bul-bas/.test(h2) && !/bul-anlayamadim/.test(h2) && /Bunları dikkate alamadım: .*annemin.* — arama yalnız anlaşılan çiplerle yapıldı/.test(h2));
+      B.d = bos(); B.tarifEt('koyu, kadifemsi bir bira'); const h3 = B.govdeHTML();
+      __REG.ok('kısmi anlama: "koyu" çip + arama, "kadifemsi" ayrıca listelenir ve kartta aramanın yalnız anlaşılanla yapıldığı yazar', B.d.cipler.length === 1 && B.d.cipler[0].d === 'koyu' && /bul-bas/.test(h3) && /Bunları dikkate alamadım: "kadifemsi" — arama yalnız anlaşılan çiplerle yapıldı/.test(h3) && /bul-cip-ekle/.test(h3));
+      // KASITLI BOZMA: koruma kalkarsa (0 çip "her şeye uyar") gerçek koşudaki A06 dökümü geri gelir
+      const akEs = B.aktif; B.aktif = cs => cs.length ? akEs(cs) : [{ id: 'boz', k: 'yok_eksen', d: 'x', et: 'x' }];
+      let sb; try { sb = B.ara([], {}); } finally { B.aktif = akEs; }
+      __REG.ok('KASITLI BOZMA: koruma kalkınca 0 çiple 5 örnek dökülür ve ilki Altbier (gerçek koşu 2026-10-13 A06 dökümü) → "0 sonuç" denetimi kırmızıya döner', sb.ilk.length === 5 && /Altbier/.test(sb.ilk[0].x.stil), sb.ilk.map(r => r.x.stil).join(' / '));
+      B.d = bos();
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BUL2-TICARI', ad: 'TİCARİ BİRA ADI (BUL2 madde 2): önce DETERMİNİSTİK — örnek verisinde ad eşleşmesi (BYO klonları) → klon ilk sırada "adı geçen biranın klonu", diğer sonuçlar aynı stilden (eş BJCP kodu dahil) · ad öbeğinin tamamı eşleşmeli ("Zerdova Gold" → "Gold …" birası DEĞİL) · veride yoksa AI yalnız STİL (enum 240 stil), "AI tahmini — doğrulanmadı", onaysız aramaya girmez · "Kaynakla doğrula": link + alıntı ya da "doğrulayamadım" · KASITLI BOZMA',
+    calistir: (page) => page.evaluate(async () => {
+      const B = window.BM_BUL, A = window.BM_AI; B.indeks(); const bos = () => ({ metin: '', cipler: [], cozulemeyen: [], stok: false, sonuc: null, aiDurum: '' });
+      const p = B.coz('Pliny the Elder benzeri bir bira'), kp = p.cipler.find(c => c.k === 'klon'), sp = B.ara(p.cipler, {});
+      __REG.ok('"Pliny the Elder benzeri": klon çipi (2 BYO örneği), anlaşılmayan kelime 0 (AI çağrısı gerekmez), ilk 2 sonuç klon, hepsi Imperial IPA / DIPA', !!kp && kp.ornek.length === 2 && !p.cozulemeyen.length && sp.ilk[0].klon === 1 && sp.ilk[1].klon === 1 && sp.ilk.every(r => r.x.stil === 'Imperial IPA / DIPA'), sp.ilk.map(r => r.x.stil + (r.klon ? '[K]' : '')).join(' / '));
+      B.d = bos(); B.tarifEt('Pliny the Elder benzeri bir bira'); await new Promise(r => setTimeout(r, 60)); const hk = B.govdeHTML();
+      __REG.ok('kart: "🏷 adı geçen biranın klonu" etiketi + klon çipi kaynağı (örnek verisi, BYO); klon OLMAYAN aynı-stil örnekte uyum satırı "klonla aynı stil (klon değil)"', /bul-klon/.test(hk) && /adı geçen biranın klonu/.test(hk) && /örnek verisi: 2 örnek \(Brew Your Own\)/.test(hk) && (hk.match(/✓ adı geçen bira</g) || []).length === 2 && /klonla aynı stil \(klon değil\)/.test(hk));
+      const g = B.coz('Guinness gibi ama daha güçlü'), sg = B.ara(g.cipler, {}), ho = B.coz('Hoegaarden tadında bir şey').cipler.find(c => c.k === 'klon');
+      __REG.ok('"Guinness gibi ama daha güçlü" → Guinness FES klonu ilk + güçlü; "Hoegaarden" → klon stili Belgian Witbier + eş BJCP 24A "Witbier / Belgian White"', sg.ilk[0].klon === 1 && /Guinness/.test(sg.ilk[0].x.ad) && sg.ilk.every(r => r.x.stil === 'Foreign Extra Stout') && !!ho && ho.stiller.indexOf('Belgian Witbier') >= 0 && ho.stiller.indexOf('Witbier / Belgian White') >= 0 && ho.stiller.length === 2);
+      const z = B.coz('Zerdova Gold hoplu bir pale ale'), gold = B.klonIndeks().filter(k => k.tok[0] === 'gold');
+      __REG.ok('"Zerdova Gold": klon YOK (öbek [zerdova, gold] hiçbir adda birlikte değil), zerdova + gold anlaşılmayan kalır', !z.cipler.some(c => c.k === 'klon') && z.cozulemeyen.indexOf('zerdova') >= 0 && z.cozulemeyen.indexOf('gold') >= 0);
+      __REG.ok('KASITLI BOZMA: yalnız tek kelime eşlemesi (öbek kuralı yok) olsaydı veride "gold" ile başlayan ' + gold.length + ' bira U03\'e klon diye eşlenirdi → kırmızı', gold.length >= 1 && B.klonIndeks().some(k => z.cozulemeyen.indexOf(k.tok[0]) >= 0), gold.map(k => k.ad).join(' / '));
+      // veride klonu olmayan ad → ticari kip
+      const w = B.coz('Westvleteren 12 gibi bir şey'), iw = B.istekKur(w.metin, w.cipler);
+      __REG.ok('"Westvleteren 12 gibi": klon yok → ticari kip (ad ham yazımla "Westvleteren 12"), AI enum YALNIZ 240 stil kodu, soru "yalnız stil" kuralını taşır', !!w.ticari && w.ticari.ad === 'Westvleteren 12' && iw.kod.length === Object.keys(BJCP).length && iw.kod.every(x => /^stil:/.test(x.kod)) && /ticari bira adı geçiyor: "Westvleteren 12"/.test(iw.soru) && /Stil dışında özellik seçme/.test(iw.soru));
+      const m = __REG.ai1Mock({ bul: { secimler: [{ kod: 'stil:Belgian Quadrupel / Abt', olumsuz: false, ifade: 'Westvleteren 12' }, { kod: 'guc:cok_guclu', olumsuz: false, ifade: 'Westvleteren 12' }], cozemedim: [] },
+        kanitweb: (i) => i === 1 ? { iddialar: [{ metin: 'x', kaynaklar: [{ url: 'https://byo.com/article/westvleteren', baslik: 'Westvleteren 12', alinti: 'Westvleteren 12 is a Belgian quadrupel brewed by monks' }] }], hatalar: [], aramalar: 1 } : { iddialar: [], hatalar: [], aramalar: 1 } });
+      try {
+        B.d = bos(); B.tarifEt('Westvleteren 12 gibi bir şey'); const h0 = B.govdeHTML();
+        __REG.ok('AI öncesi: "anlayamadım" kartı + "örnek verisinde yok (klonu bulunamadı)" + "🤖 AI ile stil tahmini" düğmesi', /bul-anlayamadim/.test(h0) && /"Westvleteren 12" örnek verisinde yok/.test(h0) && /AI ile stil tahmini/.test(h0));
+        const r = await B.aiCalistir(), c = B.d.cipler.find(x => x.tahmin), h1 = B.govdeHTML();
+        __REG.ok('AI stil dışı kod (guc:cok_guclu) enum dışı → DÜŞTÜ; stil tahmini "AI tahmini — doğrulanmadı", onay=false', r.ok && r.dusen.length === 1 && r.cipler.length === 1 && !!c && c.onay === false && c.k === 'stil' && /AI tahmini — doğrulanmadı/.test(h1) && /bul-tahmin-onay/.test(h1));
+        __REG.ok('onaysız tahmin aramaya GİRMEZ: arama yok ("onay bekliyor"), çelişkiye de girmez', B.ara(B.d.cipler, {}).anlayamadim === true && /AI tahmini onay bekliyor/.test(h1) && B.celiski(B.d.cipler).length === 0);
+        B.tahminOnay(B.d.cipler.indexOf(c)); await new Promise(r => setTimeout(r, 0)); const so = B.ara(B.d.cipler, {});
+        __REG.ok('✓ Onayla → arama Quadrupel örnekleriyle', so.uyan > 0 && so.ilk.every(x => x.x.stil === 'Belgian Quadrupel / Abt') && /onayladın — doğrulanmadı/.test(B.govdeHTML()));
+        const wv = await B.webDogrula(B.d.cipler.indexOf(c)), hw = B.govdeHTML(), pw = m.log.find(x => x.kullanim === 'kanitweb');
+        __REG.ok('🌐 Kaynakla doğrula: sorgu "\\"Westvleteren 12\\" beer style" (uygulama kurar), alıntı + link çipin yanında, "alıntıda önerilen stilin adı geçiyor"', !!pw && /"Westvleteren 12" beer style/.test(pw.soru) && wv.durum === 'bulundu' && wv.stilGeciyor === true && /href="https:\/\/byo\.com\/article\/westvleteren"/.test(hw) && /Belgian quadrupel brewed by monks/.test(hw) && /Alıntıda önerilen stilin adı geçiyor/.test(hw));
+        c.web = null; const wy = await B.webDogrula(B.d.cipler.indexOf(c));
+        __REG.ok('alıntı yoksa "Doğrulayamadım"', wy.durum === 'yok' && /Doğrulayamadım<\/b>/.test(B.govdeHTML()));
+      } finally { m.geri(); B.d = bos(); }
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BUL2-BAGLAM', ad: 'MEVSİM / ÖZEL GÜN BAĞLAMI (BUL2 madde 3): yaz / terasta / sıcakta → hafif + açık + ferah (kuru) · Christmas / Noel / kış → BJCP 30C Winter Seasonal stil kümesi + baharat · hepsi "uygulama varsayımı" etiketli ve Ayarlar ▸ Tarif et sözlüğü\'nde · "baharatlı" kış bağlamında baharat katkısına döner · A04 kök nedeni: belirsiz "baharatlı" varsayılanı (maya fenolik, sert) + AI Baharat + Christmas birlikte 3 Christmas örneğinin 3\'ünü de eliyordu · KASITLI BOZMA',
+    calistir: (page) => page.evaluate(async () => {
+      const B = window.BM_BUL; B.indeks(); const kod = r => r.cipler.map(c => c.k + ':' + c.d).sort().join(' ');
+      const y = B.coz('yazın terasta içilecek hafif bir şey'), sy = B.ara(y.cipler, {}), A01 = ['American Lager / Light Lager', 'Czech Pale Lager', 'Berliner Weisse', 'Lager / Pilsner', 'Mexican Light Lager'];
+      __REG.ok('yaz: guc:hafif + renk:acik + kuru:kuru, bağlam etiketli (bv), anlaşılmayan 0; ilk 5\'te A01 beklenen stili', kod(y) === 'guc:hafif kuru:kuru renk:acik' && y.cipler.filter(c => c.baglam === 'yaz').length >= 2 && y.cipler.every(c => c.baglam !== 'yaz' || /uygulama varsayımı/.test(c.bv)) && !y.cozulemeyen.length && sy.ilk.some(r => A01.indexOf(r.x.stil) >= 0), sy.ilk.map(r => r.x.stil).join(' / '));
+      const n = B.coz('Noel\'de içilecek baharatlı bir şey'), ss = n.cipler.find(c => c.k === 'stilSet'), bh = n.cipler.find(c => c.belirsiz), sn = B.ara(n.cipler, {});
+      __REG.ok('Noel: stil kümesi (BJCP 30C Christmas / Holiday Beer + Winter Warmer adlı stiller, kaynak 30C alıntısı) + "baharatlı" belirsiz çipi BAHARAT KATKISINA döndü (çift çip yok); ilk 5\'te Christmas', !!ss && ss.stiller.indexOf('Christmas / Holiday Beer') >= 0 && /30C Winter Seasonal Beer/.test(ss.bkay) && !!bh && bh.k === 'malzGrup' && bh.d === 'Baharat' && bh.secili === 1 && n.cipler.filter(c => c.k === 'malzGrup').length === 1 && sn.ilk.some(r => r.x.stil === 'Christmas / Holiday Beer'), sn.ilk.map(r => r.x.stil).join(' / '));
+      __REG.ok('"kısa bir bira" kış bağlamı DEĞİL (çıplak "kis" kelimesi listede yok); "bana yaz" yaz bağlamı değil', !B.coz('kısa bir bira').cipler.length && !B.coz('bana bir tarif yaz').cipler.some(c => c.baglam));
+      // A04 kök nedeni: gerçek kayıttaki çipler (sözlük maya:fenolik + AI malzGrup:Baharat + AI stil:Christmas) birleştirilmeden
+      const mk = (k, d) => B.cipDetay({ id: 'q' + k + d, k, d, et: d });
+      const eski = [mk('maya', 'fenolik'), mk('malzGrup', 'Baharat'), mk('stil', 'Christmas / Holiday Beer')], se = B.ara(eski, {});
+      const ch = B.indeks().filter(x => x.stil === 'Christmas / Holiday Beer'), neden = ch.map(x => (B.sertUyum(eski[0], x).durum === 'uyuyor' ? '' : 'maya ' + x.mayaAile.join('/')) + (B.sertUyum(eski[1], x).durum === 'uyuyor' ? '' : ' baharat yok'));
+      __REG.ok('A04 KÖK NEDEN (kanıt): eski üç sert çiple Christmas örneği 0 — 3 örneğin 2\'si ester mayalı (fenolik değil), Belçika mayalı tek örnekte baharat katkısı yok (vişne)', se.bulunamadi && ch.length === 3 && neden.filter(Boolean).length === 3, neden.join(' | '));
+      const BA = B.BAGLAM.slice(); B.BAGLAM.length = 0; B.ifadeSifirla(); let bz;
+      try { bz = B.coz('yazın terasta içilecek hafif bir şey'); } finally { BA.forEach(b => B.BAGLAM.push(b)); B.ifadeSifirla(); }
+      __REG.ok('KASITLI BOZMA: bağlam tablosu kalkınca "yazın terasta" yine anlaşılmaz ve ilk 5 koyu session ale (gerçek koşu A01) → kırmızı', kod(bz) === 'guc:hafif' && bz.cozulemeyen.length === 2 && !B.ara(bz.cipler, {}).ilk.some(r => A01.indexOf(r.x.stil) >= 0), B.ara(bz.cipler, {}).ilk.map(r => r.x.stil).join(' / '));
+      const ay = B.ayarHTML();
+      __REG.ok('Ayarlar ▸ Tarif et sözlüğü: "Kullanım bağlamı" satırı — yaz ve kış girişleri, varsayım notu, 30C kaynağı + ticari ad kuralı', /bul-baglam-ayar/.test(ay) && /yaz \/ sıcak hava/.test(ay) && /kış \/ Noel/.test(ay) && /varsayım:<\/b>/.test(ay) && /30C Winter Seasonal Beer/.test(ay) && /Ticari bira adı/.test(ay));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'BUL2-TEKIL', ad: 'ÇİFT KOD + AI ÇIKTI TEMİZLİĞİ (BUL2 madde 4): AI\'nın döndürdüğü kodlar tekilleştirilir (gerçek kayıtta 9 çağrının 5\'inde sözlüğün bulduğu kod tekrar geldi: guc:hafif ×2 …) · AI\'nın seçtiği kod belirsiz çipin seçeneğiyse belirsiz o seçeneğe döner · aynı eksende çelişen kodlar (guc:hafif + guc:guclu) ve iki farklı stil soru sorar · KASITLI BOZMA: tekilleştirme kalkarsa çift çip',
+    calistir: async (page) => {
+      const fx = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'fixtures', 'bul_kosu_2026-10-13.json'), 'utf8'));
+      const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'bul_seti.json'), 'utf8'));
+      return page.evaluate(async (fx, set) => {
+        const B = window.BM_BUL; B.indeks(); const mk = (kod) => { const p = kod.split(':'); return B.cipDetay({ id: 'ai' + kod, k: p[0], d: p.slice(1).join(':'), et: p.slice(1).join(':'), kaynakMetin: 'AI' }); };
+        const k1 = fx.kayit.find(k => k.id === 'A01'), t1 = set.tarifler.find(t => t.id === 'A01');
+        __REG.ok('gerçek kayıt: A01\'de sözlük guc:hafif + AI guc:hafif (kayıt "guc:hafif,guc:hafif"); 9 AI çağrısının 5\'inde yineleme', k1.kodlar.join(',') === 'guc:hafif,guc:hafif' && fx.kayit.filter(k => k.aiKod.some(a => k.sozlukKod.indexOf(a) >= 0)).length === 5);
+        const ev = B.degerlendir(t1, [mk('guc:hafif')], k1.aiKod.map(mk));
+        __REG.ok('değerlendirme: guc:hafif TEK çip', ev.kodlar.filter(k => k === 'guc:hafif').length === 1, ev.kodlar.join(','));
+        const m = __REG.ai1Mock({ bul: { secimler: [{ kod: 'guc:hafif', olumsuz: false, ifade: 'a' }, { kod: 'guc:hafif', olumsuz: false, ifade: 'b' }, { kod: 'malzGrup:Baharat', olumsuz: false, ifade: 'baharatlı' }], cozemedim: [] } });
+        try {
+          const c0 = B.coz('hafif baharatlı zımbırtı bir şey'), r = await B.aiCoz(c0.metin, c0.cipler), hep = B.birlestir(c0.cipler.concat(r.cipler));
+          __REG.ok('aiCoz: AI içi yineleme + sözlükte olan kod "tekrar" (2) → yeni çip yalnız Baharat; birleşince "baharatlı" belirsiz çipi Baharat seçeneğine döner (tek çip)', r.tekrar.length === 2 && r.cipler.length === 1 && hep.length === 2 && hep.some(c => c.belirsiz && c.k === 'malzGrup' && c.secili === 1), JSON.stringify(r.tekrar) + ' ' + hep.map(c => c.k + ':' + c.d).join(','));
+        } finally { m.geri(); }
+        const cg = B.celiski([mk('guc:hafif'), mk('guc:guclu')]), cs = B.celiski([mk('stil:Dubbel'), mk('stil:Gose')]);
+        __REG.ok('çelişki: guc:hafif + guc:guclu "aynı anda olamaz"; iki farklı stil "aynı bira iki ayrı stil olamaz" → soru', cg.length === 1 && cs.some(c => /iki ayrı stil/.test(c.neden)));
+        const bEs = B.birlestir; B.birlestir = cs => cs; let eb; try { eb = B.degerlendir(t1, [mk('guc:hafif')], k1.aiKod.map(mk)); } finally { B.birlestir = bEs; }
+        __REG.ok('KASITLI BOZMA: tekilleştirme kalkınca gerçek kayıttaki çift çip geri gelir → kırmızı', eb.kodlar.filter(k => k === 'guc:hafif').length === 2);
+        return __REG.al();
+      }, fx, set);
+    }
+  },
+  {
+    kod: 'BUL2-KACAK', ad: 'KAÇAN BEKLENEN ÖRNEKLER (BUL2 madde 5): gerçek kayıt (2026-10-13) AI çipleri AYNEN, AI\'sız yeniden değerlendirme — beklenen ilk-5 önce 4/8 → sonra 7/8 (AI tahmini onaylanırsa 8/8) · A01 (bağlam çipi eksikti) · A03 (Guinness çözülmüyordu → klon) · A04 (belirsiz + sert çipler) · A06 (çipsiz arama → klon) düzeldi · A02 artık AI tahmini (onay bekler) · KASITLI BOZMA',
+    calistir: async (page) => {
+      const fx = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'fixtures', 'bul_kosu_2026-10-13.json'), 'utf8'));
+      const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'bul_seti.json'), 'utf8'));
+      return page.evaluate(async (fx, set) => {
+        const B = window.BM_BUL; B.indeks();
+        const yeniden = () => fx.kayit.map(k => { const t = set.tarifler.find(x => x.id === k.id), c = B.coz(t.metin);
+          const ai = k.aiKod.map(kod => { const p = kod.split(':'), x = B.cipDetay({ id: 'ai' + kod, k: p[0], d: p.slice(1).join(':'), et: p.slice(1).join(':'), kaynakMetin: 'AI' }); if (c.ticari && x.k === 'stil') { x.tahmin = true; x.onay = false; x.ticariAd = c.ticari.ad; } return x; });
+          return Object.assign(B.degerlendir(t, c.cipler, ai, { cozulemeyen: c.cozulemeyen }), { once: k.ornekOk }); });
+        const R = yeniden(), say = (f) => R.filter(r => r.once != null && f(r)).length, n = say(() => true);
+        __REG.ok('önce (kayıt): beklenen ilk-5 4/8', n === 8 && say(r => r.once) === 4);
+        __REG.ok('sonra (AI\'sız, kayıtlı AI çipleriyle): 7/8; AI tahmini onaylanırsa 8/8', say(r => r.ornekOk) === 7 && say(r => r.ornekOkOnay) === 8, R.map(r => r.id + ':' + r.once + '→' + r.ornekOk).join(' '));
+        __REG.ok('kaçan 4 (A01, A03, A04, A06) düzeldi; A02 tahmin onayı bekliyor (onaysız aramada yalnız "koyu"), çelişkili 3 + U02 hâlâ soru', ['A01', 'A03', 'A04', 'A06'].every(id => R.find(r => r.id === id).ornekOk) && R.find(r => r.id === 'A02').ornekOk === false && R.find(r => r.id === 'A02').ornekOkOnay === true && R.filter(r => r.celiski).length === 4);
+        const KE = B.klonIndeks; B.klonIndeks = () => []; const BA = B.BAGLAM.slice(); B.BAGLAM.length = 0; B.ifadeSifirla(); let RB;
+        try { RB = yeniden(); } finally { B.klonIndeks = KE; BA.forEach(b => B.BAGLAM.push(b)); B.ifadeSifirla(); }
+        __REG.ok('KASITLI BOZMA: klon eşlemesi + bağlam kalkınca A01 / A03 / A06 yine kaçar → kırmızı', ['A01', 'A03', 'A06'].every(id => !RB.find(r => r.id === id).ornekOk), RB.map(r => r.id + ':' + r.ornekOk).join(' '));
+        return __REG.al();
+      }, fx, set);
+    }
+  },
+  {
+    kod: 'BUL2-SET', ad: 'B2 GRUBU + HAIKU / OPUS KOŞUCUSU (BUL2 madde 6): eski 24 tarif DEĞİŞMEDİ, B2 6 tarif (2 ticari ad: klonlu / klonsuz, 2 bağlam, 1 anlaşılmaz, 1 kısmi) · AI\'sız B2 değerlendirmesi · iki model SIRAYLA (Haiku 5.5 → Opus 5.5), model başına ön kontrol + metrik + tablo (model · çip isabeti · ilk-5 · uydurma · AI tahmini · çağrı başı $) · Opus tahmininde düşünme varsayımı + üst sınır (max_tokens 8000) · KASITLI BOZMA',
+    calistir: async (page) => {
+      const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'bul_seti.json'), 'utf8'));
+      const eski = cp.execFileSync('git', ['show', '8e4b68d:tests/bul_seti.json'], { cwd: KOK, encoding: 'utf8' });
+      return page.evaluate(async (set, eski) => {
+        const B = window.BM_BUL, A = window.BM_AI; B.indeks(); const E = JSON.parse(eski), b2 = set.tarifler.filter(t => t.grup === 'B2');
+        const eskiAyni = E.tarifler.length === 24 && E.tarifler.every(t => JSON.stringify(set.tarifler.find(x => x.id === t.id)) === JSON.stringify(t));
+        __REG.ok('eski 24 tarif birebir AYNI (BUL2 öncesi commit 8e4b68d ile); B2: 6 tarif — ticari klonlu (B201) / klonsuz (B202), bağlam (B203 kış, B204 yaz), anlaşılmaz (B205), kısmi (B206)', eskiAyni && b2.length === 6 && b2.map(t => t.id).join(',') === 'B201,B202,B203,B204,B205,B206');
+        const ev = b2.map(t => { const c = B.coz(t.metin); return Object.assign(B.degerlendir(t, c.cipler, [], { cozulemeyen: c.cozulemeyen }), { ai: c.cozulemeyen.length > 0 }); }), g = id => ev.find(r => r.id === id);
+        __REG.ok('AI\'sız: B201 ilk sıradaki örnek Aventinus klonu · B203 / B204 beklenen stiller ilk 5\'te · B205 "anlayamadım" · B206 kısmi ("kadifemsi" anlaşılmayan, "koyu" ile arama) · AI gerektiren yalnız B202 / B205 / B206', g('B201').ornekOk && g('B201').klon && g('B203').ornekOk && g('B204').ornekOk && g('B205').ornekOk && g('B205').anlayamadim && g('B206').kismiOk === true && ev.filter(r => r.ai).map(r => r.id).join(',') === 'B202,B205,B206', ev.map(r => r.id + ':' + r.ornekOk + (r.ai ? '(AI)' : '')).join(' '));
+        const tH = B.istekKur('Westvleteren 12 gibi bir şey', [], 'ucuz').tahmin, tO = B.istekKur('Westvleteren 12 gibi bir şey', [], 'guclu').tahmin, p = B.planTahmin(set, ['ucuz', 'guclu']);
+        __REG.ok('Opus tahmini: aynı giriş, çıkış 250 + düşünme varsayımı 2000, üst sınır max_tokens 8000; plan: model başına 7 AI istemi, Opus ≥ 30 × Haiku', tO.gir === tH.gir && tO.cik === 2250 && tO.dusunme && Math.abs(tO.ust - (tO.gir * 4 + 8000 * 20) / 1e6) < 1e-5 && p.model.ucuz.n === 7 && p.model.guclu.n === 7 && p.model.guclu.usd > 30 * p.model.ucuz.usd, JSON.stringify(p));
+        const K = [B.SON_LS, B.ARS_LS, B.YAR_LS], es = K.map(k => localStorage.getItem(k));
+        const sorEs = A.sor, hEs = A.hazirMi; A.hazirMi = () => ({ hazir: true }); const cagri = [];
+        const yan = { A02: 'stil:Dubbel', B202: 'stil:Belgian Quadrupel / Abt' };
+        const kur = (opusCik) => (pp) => { cagri.push(pp.modelKey); const t = set.tarifler.find(x => pp.soru.indexOf('"' + x.metin + '"') >= 0) || {}; const k = yan[t.id];
+          return Promise.resolve({ ok: true, veri: { secimler: k ? [{ kod: k, olumsuz: false, ifade: 'mock' }] : [], cozemedim: k ? [] : ['x'] }, bayraklar: [], maliyet: A.maliyet(pp.modelKey, { input_tokens: 12000, output_tokens: pp.modelKey === 'guclu' ? opusCik : 80 }) }); };
+        try {
+          K.forEach(k => localStorage.removeItem(k));
+          A.sor = kur(3000); const d = await B.kos({ mock: true, set, modeller: ['ucuz', 'guclu'] });
+          __REG.ok('iki model sırayla: önce 18 adım Haiku sonra 18 adım Opus, model başına 7 gerçek AI çağrısı, model başına ön kontrol geçti', d.bitti && d.sonuclar.length === 36 && d.sonuclar.slice(0, 18).every(r => r.model === 'ucuz') && d.sonuclar.slice(18).every(r => r.model === 'guclu') && cagri.filter(m => m === 'ucuz').length === 7 && cagri.filter(m => m === 'guclu').length === 7 && d.onModel.ucuz.gecti && d.onModel.guclu.gecti, JSON.stringify(d.onModel));
+          const kh = d.karsilastirma[0], ko = d.karsilastirma[1];
+          __REG.ok('model başına tablo: Haiku 5.5 / Opus 5.5 · çip isabeti · ilk-5 · uydurma · AI tahmini çip (A02 + B202 = 2) · çağrı başı $ (Opus > Haiku)', d.karsilastirma.length === 2 && kh.model === 'Haiku 5.5' && ko.model === 'Opus 5.5' && kh.tahmin === 2 && ko.tahmin === 2 && kh.uydurma === 0 && kh.aiCagri === 7 && ko.cagriBasi > 20 * kh.cagriBasi && /bul-model-tablo/.test(B.panelHTML()) && /Opus 5\.5/.test(B.panelHTML()), JSON.stringify(d.karsilastirma));
+          __REG.ok('arşiv: tek koşu kaydı, kararda iki modelin özeti', B.arsivAl().length === 1 && /Haiku 5\.5: çip .* \| Opus 5\.5: çip /.test(B.arsivAl()[0].karar), B.arsivAl()[0].karar);
+          A.sor = kur(9000); const d2 = await B.kos({ mock: true, set, modeller: ['ucuz', 'guclu'] });
+          __REG.ok('Opus ön kontrolü üst sınırla: çıkış max_tokens\'ı (8000) aşan maliyet → "ön kontrol geçmedi (Opus 5.5)", Haiku sonuçları yarım kayıtta', !d2.bitti && /^ön kontrol geçmedi \(Opus 5\.5\): A02: maliyet \$0\.\d+ > üst sınır/.test(d2.durdu) && d2.onModel.ucuz.gecti && B.yarimAl().length === 1, d2.durdu);
+          A.sor = kur(3000); const ozEs = B.ON_ADIM; let d3;
+          const bozuk = B.degerlendir; B.degerlendir = (it, c, ai, ek) => bozuk(it, c, (ai || []).map(x => Object.assign({}, x, { tahmin: false })), ek);
+          try { d3 = await B.kos({ mock: true, set, modeller: ['ucuz'] }); } finally { B.degerlendir = bozuk; B.ON_ADIM = ozEs; }
+          __REG.ok('KASITLI BOZMA: ticari ad tahmini "doğrulanmadı" bayrağını kaybederse tahmin sayısı 0 olur → tablo denetimi kırmızı', d3.karsilastirma[0].tahmin === 0);
+        } finally { A.sor = sorEs; A.hazirMi = hEs; B.son = null; B.sonMesaj = ''; B.mesaj = ''; K.forEach((k, i) => es[i] == null ? localStorage.removeItem(k) : localStorage.setItem(k, es[i])); }
+        return __REG.al();
+      }, set, eski);
     }
   },
   {
