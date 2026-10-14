@@ -1,6 +1,6 @@
 SPRINT BUL2C (BUL2B 35299b7 uzerine, SW v131-484) — kucuk duzeltmeler; BUL GERCEK KOSUSUNUN SONUCU GELDIKTEN SONRA uygulanir. AI'ya giden istemleri DEGISTIRMEZ (kosu sonucu gecerli kalir).
 
-Bu dosyada 5 numarali madde var. Ise baslamadan 5'ini de okudugunu raporun ilk satirinda teyit et.
+Bu dosyada 6 numarali madde var. Ise baslamadan 6'sini da okudugunu raporun ilk satirinda teyit et.
 EFOR: medium
 MODEL: Model-bagimsiz. Modelini ilk satirda belirt.
 
@@ -29,7 +29,12 @@ NEDEN: Claude BUL2B'yi canli kodda AI'siz denedi (2026-10-14, 34 tarif). Duzelen
 - B307 Opus "Noel icin zencefilli kurabiye tadinda": zencefil + kis + baharat + kuru:tatli -> bulunamadi (veride 1 ornek). Tatli yumusak cip olmasina ragmen neden 0? Kok neden.
 - Her biri icin: neden + duzeltme + kayitli AI kodlariyla AI'siz yeniden degerlendirme (ilk-5 once/sonra, model basina). Duzeltme AI istemlerini degistirmez.
 
-5. DOGRULAMA + AKIS
+5. BUL AI MODELI = OPUS 5.5 (KAAN KARARI 2026-10-14, tablo bu kosudan: Opus uydurma 0 / kaynaksiz yorum 0 / ilk-5 19/22 / 0,0527 $ cagri; Haiku 1 / 1 / 18/22 / 0,00125 $; n 15 — fark istatistik olarak ayirt edilemez, Kaan'a soylendi)
+- "AI ile coz" (kullanim 'bul') varsayilan modeli Opus 5.5. AI6 ozet modeliyle AYNI dusme kurali: bu cihazda Opus kullanilamiyorsa (Models API denetimi yok / desteklemiyor) Haiku 5.5'e duser ve nedeni Ayarlar'da yazar; ABONELIK YA DA API KREDISI BITERSE Haiku'ya donulur. Kartta kullanilan model yazar.
+- Dugme ustundeki tahmini maliyet olculenle guncellenir (cagri basi ≈0,053 $, bu kosu n 15).
+- Uygulamadaki Opus ozet tahmini (Ayarlar, 0,065 $) olculenin ≈2 kati — kosu #4 olcumuyle (0,0307 $ web'siz) guncelle.
+
+6. DOGRULAMA + AKIS
 - npm test yesil + madde 1-2 case'leri, en az 2 kasitli bozma kirmizi.
 - ZORUNLU: AI'ya giden istem listesi ve her istemin AI'ya giden metni/kod listesi bu degisiklikten once ve sonra AYNI (test). Degisirse dur ve raporla — kosu sonucunun gecerliligi buna bagli.
 - Tum set AI'siz, gercek kosunun AI kodlari aynen: beklenen ilk-5 orani dusmemeli.
