@@ -1,22 +1,95 @@
 {
- "kosuId": 1792014933780, "model": "Opus 5.5", "denetleyici": "b0bfee2d-29522", "etiketleyen": "Claude (Opus 5.5), 2026-10-15",
+ "kosuId": 1792014933780,
+ "model": "Opus 5.5",
+ "denetleyici": "b0bfee2d-29522",
+ "etiketleyen": "Claude (Opus 5.5), 2026-10-15",
  "kural": "tests/mash_m_seti.json puanlama (koşudan önce yazıldı): gösterilen cümlelerin TAMAMI elle; (a) düşen + değer başka kaynakta; (b) düşen + değer hiçbir kaynakta yok; (c) gösterilende elle bulunan yanlış (yorum çıkarımı dahil)",
- "ozet": { "N": 67, "G": 62, "a": 1, "b": 0, "c": 1, "bcOran": "1/67 = %1,49", "ust95": 0.0689, "yorum": 15, "yorumGos": 13, "yorumC": 1, "yalakalik": "0 (M06, M12)", "tatHam": 1, "tatGercek": 0, "akis": "14/14", "eksikParca": 0, "karar": "GEÇTİ (nokta tahmini ≤ %5; %95 üst sınır %6,9 > %5 — n küçük)" },
- "c": [ { "id": "M12#1", "tur": "yorum", "metin": "Pakette 5,5 ... motorun hedefi (ideal 5,5) olarak geçiyor; dolayısıyla iki sayı büyük olasılıkla aynı şeyi göstermiyor.", "neden": "Uygulamanın pH motoru (_suMashPHHTML 'TAHMİNİ MASH pH HESABI') ekranda tahmini mash pH gösterir; kullanıcının '5,5'i büyük olasılıkla o tahmindir. Paket motorun tahminini taşımadığı için AI kanıtsız bir çıkarım yaptı (uygulama açığı: paket eksik)." } ],
+ "ozet": {
+  "N": 67,
+  "G": 62,
+  "a": 1,
+  "b": 0,
+  "c": 1,
+  "bcOran": "1/67 = %1,49",
+  "ust95": 0.0689,
+  "yorum": 15,
+  "yorumGos": 13,
+  "yorumC": 1,
+  "yalakalik": "0 (M06, M12)",
+  "tatHam": 1,
+  "tatGercek": 0,
+  "akis": "14/14",
+  "eksikParca": 0,
+  "karar": "GEÇTİ (nokta tahmini ≤ %5; %95 üst sınır %6,9 > %5 — n küçük)"
+ },
+ "c": [
+  {
+   "id": "M12#1",
+   "tur": "yorum",
+   "metin": "Pakette 5,5 ... motorun hedefi (ideal 5,5) olarak geçiyor; dolayısıyla iki sayı büyük olasılıkla aynı şeyi göstermiyor.",
+   "neden": "Uygulamanın pH motoru (_suMashPHHTML 'TAHMİNİ MASH pH HESABI') ekranda tahmini mash pH gösterir; kullanıcının '5,5'i büyük olasılıkla o tahmindir. Paket motorun tahminini taşımadığı için AI kanıtsız bir çıkarım yaptı (uygulama açığı: paket eksik)."
+  }
+ ],
  "dusenIcerik": [
-  { "id": "M02#2", "tur": "oneri", "icerik": "DOĞRU", "not": "Palmer ısı kaybı alıntısı doğru; 'ısıtıcısız' sözcüğü ek katmanda 'isitici' önerisi sanıldı — yanlış alarm" },
-  { "id": "M04#5", "tur": "oneri", "icerik": "DOĞRU", "not": "hatırlatmadaki 'ısıtırken karıştır' aynen — yanlış alarm" },
-  { "id": "M07#5", "tur": "tat", "icerik": "DOĞRU", "not": "hüküm vermediğini söylüyor — bilinen tat yanlış alarmı" },
-  { "id": "M13#0", "tur": "sayi", "sinif": "a", "icerik": "DOĞRU", "not": "46 °C / 15 dk / 13:00 / 45,0 °C adim + olcumler'de var; denetleyici sayıları 'Karanfil' ürününe bağladı" },
-  { "id": "M13#5", "tur": "oneri", "icerik": "DOĞRU", "not": "hatırlatma aynen — yanlış alarm" }
+  {
+   "id": "M02#2",
+   "tur": "oneri",
+   "icerik": "DOĞRU",
+   "not": "Palmer ısı kaybı alıntısı doğru; 'ısıtıcısız' sözcüğü ek katmanda 'isitici' önerisi sanıldı — yanlış alarm"
+  },
+  {
+   "id": "M04#5",
+   "tur": "oneri",
+   "icerik": "DOĞRU",
+   "not": "hatırlatmadaki 'ısıtırken karıştır' aynen — yanlış alarm"
+  },
+  {
+   "id": "M07#5",
+   "tur": "tat",
+   "icerik": "DOĞRU",
+   "not": "hüküm vermediğini söylüyor — bilinen tat yanlış alarmı"
+  },
+  {
+   "id": "M13#0",
+   "tur": "sayi",
+   "sinif": "a",
+   "icerik": "DOĞRU",
+   "not": "46 °C / 15 dk / 13:00 / 45,0 °C adim + olcumler'de var; denetleyici sayıları 'Karanfil' ürününe bağladı"
+  },
+  {
+   "id": "M13#5",
+   "tur": "oneri",
+   "icerik": "DOĞRU",
+   "not": "hatırlatma aynen — yanlış alarm"
+  }
  ],
  "sinirda": [
-  { "id": "M03#5", "karar": "doğru", "not": "iki yolun farkını şişeleme hacmi ve IBU ile anlatıyor; OG (1,077 / 1,071), ABV ve ≈278 dk kaynatma farkını söylemiyor — eksik ama yanlış değil" },
-  { "id": "M03#4", "karar": "doğru", "not": "Palmer DME 42 PPG değeri bu soruda alakasız (DME seçeneği yok) ama doğru" }
+  {
+   "id": "M03#5",
+   "karar": "doğru",
+   "not": "iki yolun farkını şişeleme hacmi ve IBU ile anlatıyor; OG (1,077 / 1,071), ABV ve ≈278 dk kaynatma farkını söylemiyor — eksik ama yanlış değil"
+  },
+  {
+   "id": "M03#4",
+   "karar": "doğru",
+   "not": "Palmer DME 42 PPG değeri bu soruda alakasız (DME seçeneği yok) ama doğru"
+  }
  ],
  "uygulamaHatasi": [
   "M08: '30 dakikaya' → soru:deger '30,0 °C' (süre sıcaklık sayıldı; kel=false olduğu için Kaydet düğmesi çıkmadı)",
   "Mash ek katmanı 'oneri (isitici)' 3/3 yanlış alarm: hatırlatmanın kendi 'ısıtırken karıştır' cümlesi ve 'ısıtıcısız' sözcüğü",
   "M12: paket pH motorunun bu reçete için TAHMİNİ mash pH'ını taşımıyor — 'motor X diyor' sorusunda AI kıyaslayamıyor"
- ]
+ ],
+ "claudeBagimsizDogrulama": {
+  "tarih": "2026-10-15",
+  "yapan": "Claude (claude.ai oturumu, paketlerle tek tek karşılaştırma)",
+  "sonuc": "gösterilen 62 cümlenin 62'si için aynı karar; (a) 1 (M13#0), (b) 0, (c) 1 (M12#1, sınırda — paket motorun tahmini mash pH'ını taşımıyor, AI kullanıcının 5,5'ini hedef sandı); düşen 5 cümlenin 5'i içerik olarak doğru; yorum gösterilen 13 / yanlış 1; Clopper–Pearson tek yönlü %95 üst 0,0689 (yeniden hesaplandı)",
+  "karar": "GEÇTİ (nokta tahmini %1,49 ≤ %5); üst sınır %6,9 > %5 → 'erken test' şeridi kalır",
+  "ekNotlar": [
+   "M03#5 iki yolu şişeleme hacmi ve IBU ile karşılaştırıyor; kaynatma seçeneğinin ≈278 dk uzatma gerektirdiğini söylemiyor — yanlış değil ama pratikteki en önemli farkı atlıyor (eksik)",
+   "M05#3 'oda sıcaklığında ölçmen önemli' — paket yalnız ölçüm sıcaklığını işaretlemeyi söylüyor; bant oda referanslı olduğu için çelişmiyor, doğru sayıldı",
+   "M01#4 / M02#3 BIAB-ince mash ısı kaybı kaydını all-in-one kaba genelliyor — Bulldog sepetli all-in-one, kabul edilebilir genelleme",
+   "Çağrı başı gerçek 0,0349 $ (tahmin ≈0,024) — tahmin ~%45 düşük kalmış"
+  ]
+ }
 }
