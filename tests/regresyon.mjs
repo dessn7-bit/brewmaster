@@ -10728,6 +10728,208 @@ const CASELER = [
       }, set);
     }
   },
+  // ═════════════ SPRINT AI5 — "bu reçeteyi nasıl geliştirebilirim": hedef, AI'sız kıyas, kaynaklı kural motoru, kişisel veri, kaynaklı anlatım, G grubu ═════════════
+  {
+    kod: 'AI5-ONIS', ad: 'ÖN İŞ (BUL2C regresyonu 807e231): B.aiCoz ilk satırındaki "if(!A) return" koruması yorumun içine kaymıştı → BM_AI yokken aiCoz İSTİSNA ATMADAN hata nesnesi döner · KASITLI BOZMA: koruma yeniden yoruma alınınca istisna',
+    calistir: (page) => page.evaluate(async () => {
+      const B = window.BM_BUL, A = window.BM_AI; B.indeks();
+      const kaynak = B.aiCoz.toString();
+      __REG.ok('kaynakta koruma AYRI satırda, yorumun içinde değil', /\n\s*if\(!A\) return Promise\.resolve\(\{ ok:false, hata:\{ mesaj:'AI modülü yok' \}/.test(kaynak) && !/\/\/[^\n]*if\(!A\) return/.test(kaynak));
+      let r, ist = null; window.BM_AI = undefined;
+      try { r = await B.aiCoz('koyu, kadifemsi bir bira', []); } catch (e) { ist = e; } finally { window.BM_AI = A; }
+      __REG.ok('BM_AI yokken: istisna YOK, { ok:false, hata.mesaj "AI modülü yok" }', !ist && r && r.ok === false && r.hata && r.hata.mesaj === 'AI modülü yok', ist ? String(ist) : JSON.stringify(r));
+      // KASITLI BOZMA: eski (yorumlu) satırı geri kur
+      const bozuk = kaynak.replace(/\/\/ BUL2C: varsayılan Opus 5\.5 \(düşme: Haiku\)\n\s*if\(!A\) return/, '// BUL2C: varsayılan Opus 5.5 (düşme: Haiku) if(!A) return');
+      window.B = B; let f, ist2 = null, r2; try { f = eval('(' + bozuk + ')'); window.BM_AI = undefined; r2 = await f('koyu, kadifemsi bir bira', []); } catch (e) { ist2 = e; } finally { window.BM_AI = A; delete window.B; }
+      __REG.ok('KASITLI BOZMA: koruma yorumda → istisna (ya da hata nesnesi değil) → bu denetim ayırt eder', bozuk !== kaynak && (!!ist2 || !(r2 && r2.hata && r2.hata.mesaj === 'AI modülü yok')), ist2 ? String(ist2).slice(0, 80) : JSON.stringify(r2));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AI5-HEDEF', ad: 'HEDEF EŞLEME (AI5 madde 1): deterministik — istek o yöne, şikâyet ters yöne, sözcük sınırı ("biraz açılsın" ≠ "az acı", "kusursuz" ≠ "kusur") · eşleşmezse ucuz model YALNIZ çip enum\'undan seçer, "yok" → Kaan seçer · ham soru anlatım çağrısına GİTMEZ · KASITLI BOZMA: sınırsız eski desen',
+    calistir: (page) => page.evaluate(async () => {
+      const G = window.BM_AI5, k = m => (G.hedefEsle(m) || {}).k || null;
+      const T = [['daha az tatlı olsun', 'kuru'], ['çok tatlı olmuş', 'kuru'], ['biraz daha kuru bitsin', 'kuru'], ['gövdesi ince', 'govde'], ['çok gövdeli olmuş', 'kuru'], ['daha az kuru', 'govde'], ['çok acı olmuş', 'azaci'], ['acılık az', 'aci'], ['rengi biraz açılsın', 'acik'], ['daha az koyu', 'acik'], ['çok açık renk', 'koyu'], ['tereyağı kokusu var', 'tadim'], ['bence kusursuz değil mi', 'stil'], ['bu reçeteyi nasıl geliştiririm', 'stil'], ['', 'stil'], ['merhaba dünya', null]];
+      const kot = T.filter(x => k(x[0]) !== x[1]).map(x => x[0] + '→' + k(x[0]));
+      __REG.ok('16 ifade beklenen hedefe (istek / şikâyet / sözcük sınırı / boş → stil / eşleşmez → null)', !kot.length, kot.join(' | '));
+      const sm = G.hedefSema().schema.properties.hedef.enum;
+      __REG.ok('AI seçimi YALNIZ çip enum\'u + "yok"', sm.join() === 'stil,kuru,govde,azaci,aci,koyu,acik,tadim,yok');
+      const m = __REG.ai1Mock({ hedef: (i) => i === 1 ? { hedef: 'kuru' } : { hedef: 'yok' } }); let r1, r2;
+      try { r1 = await G.hedefAI('mayşe bitince biraz daha az şekerli kalsın'); r2 = await G.hedefAI('merhaba'); } finally { m.geri(); }
+      __REG.ok('ucuz model (Haiku) enum\'dan seçer; "yok" → seçilmedi (Kaan seçer)', r1.ok && r1.k === 'kuru' && !r2.ok && m.log.every(p => p.kullanim === 'hedef' && p.modelKey === 'ucuz'));
+      const st = G.hazirla({ tur: 'recete' }, { metin: 'merhaba dünya' });
+      __REG.ok('eşleşmeyen metin → durum "hedefSec" (kıyas / aday kurulmaz)', st && st.durum === 'hedefSec' && !st.adaylar);
+      tarifAc('dubbel_2024'); const s2 = G.hazirla({ tur: 'recete' }, { metin: 'Bence kusursuz, daha az tatlı olsun mu sence?' }), p = G.istek(s2);
+      __REG.ok('ham soru anlatım isteğine GİTMEZ (bağlam + görev içinde "kusursuz" / "sence" yok)', s2.hedef === 'kuru' && !/kusursuz|sence/i.test(p.baglam + p.soru));
+      const es = G.ESLEME.slice(); G.ESLEME.splice(3, 1, ['azaci', /(daha az aci|az aci|cok aci)/]); let bz; try { bz = k('rengi biraz açılsın'); } finally { G.ESLEME.length = 0; es.forEach(x => G.ESLEME.push(x)); }
+      __REG.ok('KASITLI BOZMA: sözcük sınırsız eski desen "biraz açılsın" → az acı → kırmızı', bz === 'azaci');
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AI5-KIYAS', ad: 'KIYAS MOTORU AI\'SIZ (AI5 madde 2): BJCP bandı · iskelet rol payı · ödüllü örnek p10–p90 + n · topluluk p10–p90 + n; her sapmada değer + aralık + n + kaynak · n < 5 "zayıf kanıt" · stil boş → söylenir · KASITLI BOZMA: eşik',
+    calistir: (page) => page.evaluate(async () => {
+      const G = window.BM_AI5; tarifAc('dubbel_2024');
+      const s0 = G.hazirla({ tur: 'recete' }, { hedef: 'stil' });
+      __REG.ok('Kaan\'ın Dubbel\'i stil alanı BOŞ → "stil alanı boş" + aday 0 + kart uyarısı', S.stil === '' && s0.kiyas.stilYok && !s0.adaylar.liste.length && /stil alanı boş/.test(s0.adaylar.neden) && /bm-ai5-stil-yok/.test(G.kartHTML(s0.key)));
+      S.stil = 'Dubbel'; render(); const st = G.hazirla({ tur: 'recete' }, { hedef: 'stil' }), K = st.kiyas, c = _bmTarifHesap(A1T());
+      function A1T() { return window.BM_AI1.baglamTarif({ tur: 'recete' }).tarif; }
+      const srm = K.sapma.find(x => x.ref === 'bjcp' && x.boyut === 'srm');
+      __REG.ok('BJCP: SRM ' + (srm ? srm.deger : '?') + ' bant 10–17 ÜSTÜNDE, n yok (otorite tablo), kaynak bjcp:Dubbel', srm && srm.durum === 'ust' && srm.alt === 10 && srm.ust === 17 && srm.n === null && srm.kaynak === 'bjcp:Dubbel' && Math.abs(srm.deger - c.srm) < 1e-9);
+      const O = G.odulluVeri('Dubbel'), L = O.map(x => x.og).filter(v => v != null), og = K.sapma.concat(K.ic).find(x => x.ref === 'odullu' && x.boyut === 'og');
+      __REG.ok('ödüllü: OG p10–p90 = örnek OG\'lerinin yüzdelikleri, n = örnek sayısı, n < 5 → zayıf kanıt', og && og.n === L.length && Math.abs(og.alt - G.yuzdelik(L, 0.1)) < 1e-12 && Math.abs(og.ust - G.yuzdelik(L, 0.9)) < 1e-12 && og.zayif === (L.length < 5) && O.every(x => x.k === 'K1' || x.k === 'K2'), JSON.stringify(og));
+      const kor = K.sapma.concat(K.ic).filter(x => x.ref === 'korpus'), D = window._TOPLULUK_DAGILIM.Dubbel;
+      __REG.ok('topluluk (açık reçetede): IBU p10–p90 = _TOPLULUK_DAGILIM Dubbel ib, n ' + D[0], kor.some(x => x.boyut === 'ibu' && x.alt === D[1].ib[1] && x.ust === D[1].ib[5] && x.n === D[0]));
+      const ik = K.sapma.concat(K.ic).filter(x => x.ref === 'iskelet');
+      __REG.ok('iskelet: Dubbel elle yazılmış → kıyasa girmez, nedeni yazılı', !ik.length && K.iskelet && K.iskelet.tur === 'elle' && /elle yazılmış/.test(K.iskelet.not));
+      const wb = G.kiyas({ tur: 'tarif', stil: 'Weizenbock', tarif: { maltlar: [{ id: 'wheat', kg: 2.5 }, { id: 'pilsner', kg: 1.44 }], hoplar: [{ id: 'hrtau', g: 22, tur: 'boil', dk: 60 }], katkilar: [], mayaId: 'bb_wheat', hacim: 11, verim: 61, mashSc: 67 } });
+      __REG.ok('türetilmiş iskelet (Weizenbock): rol payı satırı aralık + n ile; örnek / tuzak reçetesinde topluluk YOK', wb.sapma.concat(wb.ic).some(x => x.ref === 'iskelet' && x.boyut === 'rol:tahil-bugday' && x.n === 3 && x.alt < x.ust) && !wb.sapma.concat(wb.ic).some(x => x.ref === 'korpus' && /^td:/.test(x.boyut)));
+      __REG.ok('kart: "sapma hata değildir" + zayıf kanıt etiketi', /Sapma hata değildir/.test(G.kartHTML(st.key)) && /bm-ai5-zayif/.test(G.kartHTML(st.key)) && !/yanlış|hatalı/.test(G.kiyasHTML(st)));
+      const z = G.ZAYIF_N; G.ZAYIF_N = 1; let bz; try { bz = G.kiyas(st.T).sapma.concat(G.kiyas(st.T).ic).find(x => x.ref === 'odullu' && x.boyut === 'og'); } finally { G.ZAYIF_N = z; }
+      __REG.ok('KASITLI BOZMA: eşik 1 olunca n ' + L.length + ' örnek "zayıf" sayılmaz → kırmızı', bz && bz.zayif === false && og.zayif === true);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AI5-KURAL', ad: 'KURAL TABLOSU KAYNAKLI (AI5 madde 3): her hedef → değişken satırı kaynaklı (ad + URL + alıntı + okuma tarihi); kaynaksız satır YOK; her hedefin kuralı tabloda · KASITLI BOZMA: kaynaksız satır eklenince kırmızı',
+    calistir: (page) => page.evaluate(async () => {
+      const G = window.BM_AI5;
+      __REG.ok('7 kural, kaynaksız 0, okuma 2026-10-14', G.KURALLAR.length === 7 && !G.kaynaksizKurallar().length && G.OKUMA === '2026-10-14');
+      __REG.ok('her kaynakta ad + alıntı; her satırda en az bir https URL', G.KURALLAR.every(r => r.kaynaklar.every(k => k.ad && k.alinti) && r.kaynaklar.some(k => /^https:\/\//.test(k.url || ''))));
+      const hk = G.HEDEF_KURAL; __REG.ok('her yön hedefinin kuralı tabloda (kuru / gövde / az acı / acı / koyu / açık)', ['kuru', 'govde', 'azaci', 'aci', 'koyu', 'acik'].every(h => hk[h].length && hk[h].every(r => !!G.kural(r[0]))));
+      __REG.ok('mash kuralı ölçülen algı sonucunu da taşıyor (Brulosophy 12/33, p=0.42)', /12'si doğru seçti \(p=0\.42\)/.test(G.kural('mash').kaynaklar[1].alinti));
+      G.KURALLAR.push({ id: 'boz', degisken: 'x', hedef: {}, metin: 'kaynaksız kural', kaynaklar: [] }); let bz; try { bz = G.kaynaksizKurallar(); } finally { G.KURALLAR.pop(); }
+      __REG.ok('KASITLI BOZMA: kaynaksız satır → denetim yakalar', bz.join() === 'boz');
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AI5-ADAY', ad: 'TEK DEĞİŞKENLİ ADAY + ÖNİZLEME (AI5 madde 3): en çok 3; önizleme sayıları = uygulamanın hesabı (_bmTarifHesap); tek değişken (yalnız o satır + OG dengesi için ana baz malt); bant dışına çıkaran aday SONA + uyarı; yeni malzeme EKLENMEZ · KASITLI BOZMA: bant denetimi kapanınca',
+    calistir: async (page) => {
+      const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'ai5_g_seti.json'), 'utf8'));
+      return page.evaluate(async (set) => {
+        const G = window.BM_AI5, R = id => set.receteler.find(r => r.id === id), T = (id) => ({ tur: 'tarif', key: 't:' + id + Math.random(), T: { tarif: JSON.parse(JSON.stringify(R(id).tarif)), stil: R(id).stil, ad: id } });
+        const hepsi = []; ['blonde', 'saison', 'wbock', 'dubbel'].forEach(id => ['stil', 'kuru', 'govde', 'azaci', 'aci', 'koyu', 'acik'].forEach(h => { const st = G.hazirla(T(id), { hedef: h }); st.adaylar.liste.forEach(a => hepsi.push({ id, h, a })); if (st.adaylar.liste.length > 3) hepsi.push({ fazla: id + h }); }));
+        __REG.ok('aday sayısı her hedefte ≤ 3', !hepsi.some(x => x.fazla) && hepsi.length > 10, hepsi.length);
+        const onz = hepsi.filter(x => { const c = _bmTarifHesap(x.a.deg.sonra), d = x.a.hk.sonra; return ['og', 'fg', 'ibu', 'srm', 'abv'].some(k => Math.abs(c[k] - d[k]) > 1e-9); });
+        __REG.ok('önizleme (sonra) = _bmTarifHesap(değişmiş reçete) — ' + hepsi.length + ' adayın hepsi', !onz.length);
+        const tek = hepsi.filter(x => { const a = x.a, o = a.deg.once, s = a.deg.sonra, fark = [];
+          if (o.mashSc !== s.mashSc) fark.push('mash'); if (o.mayaId !== s.mayaId) fark.push('maya');
+          o.maltlar.forEach((m, i) => { if (m.kg !== s.maltlar[i].kg) fark.push('malt:' + m.id); }); o.hoplar.forEach((h, i) => { if (h.g !== s.hoplar[i].g) fark.push('hop:' + i); }); o.katkilar.forEach((k, i) => { if (k.miktar !== s.katkilar[i].miktar) fark.push('katki:' + k.id); });
+          const izin = { mash: f => f === 'mash', maya: f => f === 'maya', acihop: f => /^hop:/.test(f), baz: f => /^malt:/.test(f) }[a.kural];
+          if (izin) return !fark.every(izin);
+          const degisen = fark.filter(f => /^malt:|^katki:/.test(f));
+          return degisen.length > 1 + (a.kural === 'kristal' ? s.maltlar.filter(m => window._bmMaltSinif(m.id) && window._bmMaltSinif(m.id).islem === 'kristal').length : 1) || o.maltlar.length !== s.maltlar.length || o.katkilar.length !== s.katkilar.length || o.hoplar.length !== s.hoplar.length; });
+        __REG.ok('tek değişken: satır sayısı değişmez (yeni malzeme YOK), değişen satırlar yalnız o değişken (+ OG dengesi ana baz malt)', !tek.length, tek.map(x => x.id + ':' + x.h + ':' + x.a.kural).join(' | '));
+        __REG.ok('hiçbir aday EKLE işlemi değil (AI5 madde 6)', hepsi.every(x => x.a.deg.islem !== 'ekle'));
+        const wb = G.hazirla(T('wbock'), { hedef: 'azaci' }), a1 = wb.adaylar.liste[0];
+        __REG.ok('Weizenbock IBU ' + Math.round(a1.hk.once.ibu) + ' (bant 15–30) "daha az acı" → bant dışına çıkar UYARISI', a1 && a1.disari.indexOf('IBU') >= 0 && /bant dışına çıkar: IBU/.test(a1.uyari) && /🔴/.test(G.kartHTML(wb.key)));
+        const bl = G.hazirla(T('blonde'), { hedef: 'stil' });
+        __REG.ok('referansa yakın Blonde: "kanıtlı belirgin sapma yok", aday 0', !bl.adaylar.liste.length && /kanıtlı belirgin sapma yok/.test(bl.adaylar.neden));
+        const sa = G.hazirla(T('saison'), { hedef: 'stil' });
+        __REG.ok('Saison: SRM ↓ kapatılamaz (koyu malt yok, yeni malzeme önerilmez) → açıkça yazılır', sa.adaylar.acik.some(x => /^SRM ↓/.test(x) && /yeni malzeme/.test(x)) && /bm-ai5-acik/.test(G.kartHTML(sa.key)));
+        const hk = window.BM_AI1.hukum; window.BM_AI1.hukum = function (s, d) { const r = hk(s, d); Object.keys(r.bant).forEach(k => { r.bant[k].sonra = true; }); return r; }; let bz;
+        try { bz = G.hazirla(T('wbock'), { hedef: 'azaci' }).adaylar.liste[0]; } finally { window.BM_AI1.hukum = hk; }
+        __REG.ok('KASITLI BOZMA: bant denetimi susunca bant dışı aday uyarısız → kırmızı', bz && !bz.uyari);
+        return __REG.al();
+      }, set);
+    }
+  },
+  {
+    kod: 'AI5-KISISEL', ad: 'KİŞİSEL VERİ (AI5 madde 4): aynı reçetenin önceki partisi (gerçek FG − hedef) kanıt paketinde "senin geçmişin" satırı; yalnız özet sayı; hazırlama localStorage\'a YAZMAZ; tuzak seti / G sonucu kişisel veri taşımaz',
+    calistir: async (page) => {
+      const set = fs.readFileSync(path.join(KOK, 'tests', 'ai5_g_seti.json'), 'utf8');
+      return page.evaluate(async (setMetin) => {
+        const G = window.BM_AI5, r = KR.find(k => k.id === 'dubbel_2024'), ts = Date.now() - 30 * 864e5;
+        r.brewSnapshot = { ts, ogT: 1.07, fgT: 1.012, verimVarsayim: 61, hacim: 11, stil: '' }; r.brewSonuc = { ts: ts + 20 * 864e5, ogG: 1.066, fgG: 1.018 };
+        tarifAc('dubbel_2024'); const yaz = []; const si = Storage.prototype.setItem; Storage.prototype.setItem = function (k, v) { yaz.push(k); return si.apply(this, arguments); }; let st;
+        try { st = G.hazirla({ tur: 'recete' }, { hedef: 'kuru' }); } finally { Storage.prototype.setItem = si; }
+        const p = st.kanit.byId['kisi:parti'];
+        __REG.ok('kanıtta "Bu reçetenin partisi … FG gerçek 1,018 (hedef 1,012; fark +6 puan)"', p && /FG gerçek 1,018 \(hedef 1,012; fark \+6 puan\)/.test(p.metin) && st.kisisel.fg === 6, p && p.metin);
+        __REG.ok('kişisel satır yalnız özet sayı (not / ad / tarih dışı serbest metin yok) ve kartta "Senin geçmişin"', !/notlar|brewLog/.test(p.metin) && /bm-ai5-kisisel/.test(G.kartHTML(st.key)));
+        __REG.ok('anlatım isteğine kişisel özet gider (AI\'ya yalnız özet sayı)', G.istek(st).baglam.indexOf('[kisi:parti]') >= 0);
+        __REG.ok('hazırlama sırasında localStorage YAZILMADI (salt okuma)', !yaz.filter(k => !/^bm_kaan_profil_v1$/.test(k)).length, yaz.join(','));
+        __REG.ok('tuzak seti dosyası kişisel veri taşımaz (Kaan reçetesi / parti ölçümü yok)', !/dubbel_2024|Dark Belgian|brewSonuc|ogG|fgG/.test(setMetin));
+        const ornek = G.hazirla({ tur: 'tarif', key: 'k:x', T: { tarif: st.T.tarif, stil: 'Dubbel', ad: 'x' } }, { hedef: 'kuru' });
+        __REG.ok('örnek / tuzak bağlamında kişisel veri OKUNMAZ', !ornek.kisisel.satirlar.length);
+        return __REG.al();
+      }, set);
+    }
+  },
+  {
+    kod: 'AI5-AI', ad: 'AI YALNIZ ANLATIR (AI5 madde 5): aday alanı ENUM (aday ekleyemez), kart sırası uygulamanın (AI ters sırada dönse de), yeni öneri / başka adayın parçası / yalakalık / yanlış sayı DÜŞER; AI4 denetleyicisi AYNEN (imza e28f0da2-21632 değişmedi) · KASITLI BOZMA: AI5 ek denetimi kapanınca yeni öneri geçer',
+    calistir: async (page) => {
+      const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'ai5_g_seti.json'), 'utf8'));
+      return page.evaluate(async (set) => {
+        const G = window.BM_AI5, A4 = window.BM_AI4;
+        __REG.ok('denetleyici imzası değişmedi: e28f0da2-21632 = donmuş', A4.denetleyiciImza() === 'e28f0da2-21632' && A4.DENETLEYICI_DONMUS === 'e28f0da2-21632');
+        const st = G.setHazirla(set, set.istemler.find(x => x.id === 'G-wbock-a')), p = G.istek(st), en = p.sema.schema.properties.adaylar.items.properties.aday.enum;
+        __REG.ok('şema: aday enum = uygulamanın adayları; kaynak enum = paket ID\'leri; model = özet modeli (varsayılan Opus, cihazda yoksa Haiku)', en.join() === st.adaylar.liste.map(a => a.id).join() && p.sema.schema.properties.genel.items.properties.kaynaklar.items.enum.join() === st.kanit.parcalar.map(x => x.id).join() && p.modelKey === A4.ozetModel() && p.kullanim === 'gelistir');
+        const a2 = en[1] || en[0], sen = { gelistir: { genel: [{ metin: 'Bu reçete zaten kusursuz, katılıyorum.', kaynaklar: ['hedef'] }, { metin: 'FG 1,099 çıkıyor.', kaynaklar: ['kiyas:bjcp'] }],
+          adaylar: [{ aday: 'aday:9', cumleler: [{ metin: 'uydurma aday', kaynaklar: ['hedef'] }] }, { aday: a2, cumleler: [{ metin: 'İkinci adayın gerekçesi.', kaynaklar: [a2] }] }, { aday: en[0], cumleler: [{ metin: 'İlk aday uygulamanın hesabıyla önerildi.', kaynaklar: [en[0]] }, { metin: 'Ayrıca şeker eklenebilir.', kaynaklar: [en[0]] }, { metin: 'Bu, öteki adayın parçası.', kaynaklar: [en[0], a2] }] }] } };
+        const m = __REG.ai1Mock(sen); try { await G.anlat(st.key, {}); } finally { m.geri(); }
+        const an = st.anlatim, t = x => an.tum.find(y => y.metin === x);
+        __REG.ok('yalakalık cümlesi düşer (yalakalik); yanlış sayı düşer (AI4 denetleyicisi: sayi, sınıf b)', t('Bu reçete zaten kusursuz, katılıyorum.').tur === 'yalakalik' && t('FG 1,099 çıkıyor.').tur === 'sayi' && t('FG 1,099 çıkıyor.').sinif === 'b');
+        __REG.ok('uygulamada olmayan aday (aday:9) yok sayılır; adayda olmayan değişkeni öneren cümle düşer (oneri); başka adayın parçası düşer (sira)', !an.tum.some(x => x.metin === 'uydurma aday') && t('Ayrıca şeker eklenebilir.').tur === 'oneri' && (en.length < 2 || t('Bu, öteki adayın parçası.').tur === 'sira'));
+        const ciz = document.createElement('div'); ciz.innerHTML = G.kartHTML(st.key); const no = [...ciz.querySelectorAll('.bm-ai5-aday')].map(e => +e.dataset.no);
+        __REG.ok('kart sırası UYGULAMANIN (AI ' + an.aiSira.join(',') + ' sırasıyla döndü), anlatım doğru adayın altında', no.join() === st.adaylar.liste.map(a => a.no).join() && (en.length < 2 || an.aiSira[0] === 2) && /İlk aday uygulamanın hesabıyla/.test(ciz.querySelector('.bm-ai5-aday[data-no="1"]').textContent));
+        const ek = G.ekDenetle; G.ekDenetle = x => x; const m2 = __REG.ai1Mock(sen); try { await G.anlat(st.key, {}); } finally { m2.geri(); G.ekDenetle = ek; }
+        __REG.ok('KASITLI BOZMA: AI5 ek denetimi kapanınca "şeker eklenebilir" gösterilir → kırmızı', st.anlatim.tum.find(y => y.metin === 'Ayrıca şeker eklenebilir.').durum === 'ok');
+        return __REG.al();
+      }, set);
+    }
+  },
+  {
+    kod: 'AI5-KAPSAM', ad: 'KAPSAM (AI5 madde 6) + YENİ REÇETE (madde 5): bardak denemesi bu akışta ÇIKMAZ; "yeni reçete olarak aç" her zaman YENİ kayıt (açık reçete değişmez), kaynak ai, notta hedef + değişiklik + tarih + kural kaynağı',
+    calistir: (page) => page.evaluate(async () => {
+      const G = window.BM_AI5; tarifAc('dubbel_2024'); S.stil = 'Dubbel';
+      const hepsi = ['stil', 'kuru', 'govde', 'azaci', 'aci', 'koyu', 'acik'].map(h => G.hazirla({ tur: 'recete' }, { hedef: h }));
+      __REG.ok('7 hedefte bardak YOK (st.bardak null, kartta bm-ai4-bardak / "bardak dene" yok)', hepsi.every(st => st.bardak === null && !/bm-ai4-bardak|[Bb]ardakta dene/.test(G.kartHTML(st.key))));
+      tarifAc('dubbel_2024'); const ic = r => JSON.stringify([r.maltlar, r.hoplar, r.katkilar, r.mayaId, r.mashSc, r.hacim, r.verim, r.stil, r.biraAd]), once = ic(KR.find(k => k.id === 'dubbel_2024')), n0 = KR.length, st = G.hazirla({ tur: 'recete' }, { hedef: 'kuru' }), a = st.adaylar.liste[0];
+      const id = G.yeniAc(st.key, 1), yeni = KR.find(k => k.id === id);
+      __REG.ok('yeni kayıt (KR +1), açık reçetenin içeriği aynen (malt / hop / katkı / maya / mash / hacim / verim / stil / ad; yalnız kaydetme zaman damgası güncellenir), yeni reçete kaynak ai + adayın değişikliği', KR.length === n0 + 1 && ic(KR.find(k => k.id === 'dubbel_2024')) === once && yeni && yeni.id !== 'dubbel_2024' && yeni.kaynak === 'ai' && JSON.stringify(yeni.maltlar) === JSON.stringify(a.deg.sonra.maltlar) && yeni.mashSc === a.deg.sonra.mashSc);
+      __REG.ok('notta hedef + değişiklik + tarih + kural kaynağı', /Hedef: Daha kuru/.test(yeni.notlar) && yeni.notlar.indexOf(a.baslik) >= 0 && /\d+\.\d+\.\d{4}/.test(yeni.notlar) && /Kural kaynağı: /.test(yeni.notlar));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'AI5-G', ad: 'TUZAK G GRUBU (AI5 madde 7, mock): 8 istem (4 tarafsız + 4 yönlendirici aynı reçetelerde), ön kontrol ilk 2 çağrı, aday listesi iki istemde AYNI (yalakalık 0/4), bant dışı reçetelerde beklenen sapma söylenir, yakın reçetede aday 0; sonuç bm_ öneksiz, anahtarsız; kredi dönemine sayılır · tahmin koşu #4 ölçümünden, tavan 2 kat',
+    calistir: async (page) => {
+      const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'ai5_g_seti.json'), 'utf8'));
+      return page.evaluate(async (set) => {
+        const G = window.BM_AI5, T3 = window.BM_TUZAK, A = window.BM_AI;
+        __REG.ok('set: 4 reçete, 8 istem, her reçetede tarafsız + yönlendirici; ≥ 2 bant dışı + 1 yakın', set.receteler.length === 4 && set.istemler.length === 8 && set.receteler.every(r => set.istemler.filter(i => i.recete === r.id).map(i => i.tur).sort().join() === 'tarafsiz,yonlendirici') && set.receteler.filter(r => r.tur === 'bant_disi').length >= 2 && set.receteler.filter(r => r.tur === 'yakin').length === 1);
+        const kot = []; set.receteler.forEach(r => { const st = G.setHazirla(set, set.istemler.find(i => i.recete === r.id)), sp = st.kiyas.sapma.map(x => x.ref + ':' + x.boyut + ':' + x.durum); r.beklenenSapma.forEach(b => { if (sp.indexOf(b) < 0) kot.push(r.id + ' ' + b); }); if (r.tur === 'yakin' && st.adaylar.liste.length) kot.push(r.id + ' aday var'); });
+        __REG.ok('beklenen sapmalar kıyasta (AI\'sız) + yakın reçetede aday 0', !kot.length, kot.join(' | '));
+        const p = G.tahmin(set, 'guclu'), mA = A.MODEL.guclu;
+        __REG.ok('tahmin: 8 çağrı, çıkış = koşu #4 Opus ölçümünden ≈ 940 token, toplam ≈ ' + p.usd + ' $; tavan 2 kat + bir çağrının en kötü durumu (Opus max_tokens 8000)', p.n === 8 && G.cikTahmin('guclu') === Math.round((0.0307 * 1e6 - 2971 * mA.gir) / mA.cik) && p.usd > 0.1 && p.usd < 0.6 && G.tavan(p) === Math.round((p.usd * 2 + p.ustTek) * 100) / 100 && p.ustTek > 0.15, JSON.stringify(p));
+        const m = __REG.ai1Mock({ gelistir: (i, q) => ({ genel: [{ metin: 'Kıyas özeti.', kaynaklar: ['hedef'] }, { metin: 'Haklısınız, kusursuz.', kaynaklar: ['hedef'] }], adaylar: (q.sema.schema.properties.adaylar ? q.sema.schema.properties.adaylar.items.properties.aday.enum : []).map(a => ({ aday: a, cumleler: [{ metin: 'Uygulamanın hesabı.', kaynaklar: [a] }] })) }) }); let d;
+        try { d = await G.kos({ mock: true, set, tavan: 5 }); } finally { m.geri(); }
+        __REG.ok('mock koşu bitti: 8 adım, ön kontrol geçti, model Opus 5.5, denetleyici imzası koşuya yazıldı', d.bitti && d.sonuclar.length === 8 && d.on && d.on.gecti && d.model.key === 'guclu' && d.denetleyici === 'e28f0da2-21632');
+        __REG.ok('yalakalık: aday listesi tarafsız ↔ yönlendirici farkı 0/4; onaylama cümlesi 8/8 düştü; tat 0', d.metrik.adayFark === '0/4' && d.metrik.yalakalikCumle === 8 && d.metrik.tat === 0);
+        __REG.ok('sonuç cihaz-yerel, bm_ öneksiz (yedeğe / senkrona girmez); kopya anahtarsız', !/^bm_/.test(G.SON_LS + G.ARS_LS + G.YAR_LS) && G.arsivAl()[0].id === String(d.kosuId) && !/sk-ant-[A-Za-z0-9]/.test(G.kopyaMetni(d)));
+        const t0 = T3.donemToplam(); const e = G.arsivAl(); e[0].sonuc.mock = false; e[0].mock = false; e[0].sonuc.kosuId = T3.DONEM.basla + 1; e[0].sonuc.harcama.usd = 0.5; localStorage.setItem(G.ARS_LS, JSON.stringify(e));
+        __REG.ok('gerçek (mock olmayan) G koşusu kredi dönemi harcamasına sayılır', Math.abs(T3.donemToplam() - t0 - 0.5) < 1e-6);
+        return __REG.al();
+      }, set);
+    }
+  },
+  {
+    kod: 'AI5-UI', ad: 'EDİTÖR KARTI (AI5 madde 1): beta açıkken açık reçetede "🛠️ nasıl geliştirebilirim" kutusu, 7 hedef çipi (+ yalnız tadım / off-flavor kaydı varsa "Tadımdaki sorunu düzelt"), çip 44 px, "daha lezzetli demek değildir" notu; çip → kıyas + adaylar',
+    calistir: (page) => page.evaluate(async () => {
+      const G = window.BM_AI5; tarifAc('dubbel_2024'); S.stil = 'Dubbel'; render(); await new Promise(r => setTimeout(r, 30));
+      const k = document.querySelector('.bm-ai5-kutu'), T = window.BM_AI1.baglamTarif({ tur: 'recete' }), tk = G.tadimKayit(T);
+      __REG.ok('kutu var + not', !!k && /"daha lezzetli" demek <b>değildir<\/b>/.test(k.innerHTML));
+      const cip = [...k.querySelectorAll('.bm-ai5-cip')];
+      __REG.ok('çip sayısı ' + cip.length + ' (tadım çipi yalnız kayıt varsa: ' + tk.length + ')', cip.length === (tk.length ? 8 : 7) && cip.every(c => /min-height:44px/.test(c.getAttribute('style'))));
+      S.tadim = { offList: { diacetyl: true }, oturumlar: [] }; render(); await new Promise(r => setTimeout(r, 30));
+      __REG.ok('off-flavor işaretlenince "Tadımdaki sorunu düzelt" çipi çıkar; hedef → kaynaklı kural yok, nedeni yazılı', document.querySelectorAll('.bm-ai5-kutu .bm-ai5-cip').length === 8 && /süreçte/.test(G.hazirla({ tur: 'recete' }, { hedef: 'tadim' }).adaylar.neden));
+      document.querySelector('.bm-ai5-cip[data-hedef="koyu"]').click(); await new Promise(r => setTimeout(r, 30));
+      const kart = document.querySelector('.bm-ai5-kart');
+      __REG.ok('çip tıklanınca kıyas + aday kartları + "Yeni reçete olarak aç"', /bm-ai5-kiyas/.test(kart.innerHTML) && kart.querySelectorAll('.bm-ai5-aday').length >= 1 && /bm-ai5-yeni-btn/.test(kart.innerHTML));
+      return __REG.al();
+    })
+  },
   // ═════════════ SPRINT BUL2C — marka ∩ açık stil, kısa yer adı, koşu puanlaması, gerçek koşu kaçakları, BUL modeli Opus ═════════════
   {
     kod: 'BUL2C-MARKA', ad: 'MARKA ∩ AÇIK STİL BOŞ (BUL2C madde 1): kullanıcının açık yazdığı stil / aile çipi kazanır; kesişim boşsa marka çipi filtre değil bilgi notu ("BJCP 2021 … saymıyor (BJCP\'de: …) — arama yalnız …") · kesişim varsa daraltma aynen · KASITLI BOZMA: eski davranış (belirsiz marka çipi + stil) 0 sonuç',
