@@ -1,0 +1,993 @@
+BREWMASTER-DOG1-OZET v1
+kosu 1792096216804 | 2026-10-15T20:30 | bitti | claude-opus-5-5 | $4.2585 | adim 140/140 | set M v2 G v2 | tavan $8.78
+denetleyici b0bfee2d-29522 = donmus | on M gecti | on G gecti | oturum 1
+METRIK M | N 411 | G 395 | a 7 | b 2 | b/N 0.0049 | tat 5 | yal 0 | oneri 2 | yon 0 | yorum 104/95 | cevap 74 | gecersiz 0 | akis 80/80 | eksik 0 | $ 2.5031 | tutarlilik 0/40
+METRIK G | N 390 | G 384 | a 1 | b 4 | b/N 0.0103 | tat 0 | yal 0 | oneri 0 | yon 4 | yorum 0/0 | cevap 60 | gecersiz 0 | $ 1.7554 | tutarlilik 0/30
+== M1:M01 sapma | akis ai | kapsam cevaplandi | $0.02970 3370/811
+  #0 hesap GOS [hesap:sicaklik,olcumler] Uygulamanın hesabına göre ölçülen 65,0 °C, hedef 67 °C; fark -2,0 °C ve bu, ±1 °C uygulama varsayımına göre hedefin altında.
+  #1 hesap GOS [hesap:sicaklik] Uygulamanın sunduğu seçenek: ısıtıcıyla karıştırarak 67 °C'ye getirmek; ısıtma hızı ayarı yok ve süre yazılmıyor.
+  #2 veri GOS [kaynak:palmerKaristir,hatirlatma] Palmer, ocaktan ısı eklerken dibin yanmasını önlemek ve mash'i eşit ısıtmak için sürekli karıştırmayı yazar; hatırlatmalarda da ısıtırken karıştırma yer alır.
+  #3 veri GOS [bilgi:sc_sapma] Bilgi tabanında ±2 °C sapma (65 °C → 67 °C) ölçülmüş bir kayıt olarak geçiyor: FG farkı 1 puan, attenuation farkı %2.1, kör üçgen testinde n=25, 6 doğru, p=0.88.
+  #4 yorum GOS [bilgi:sc_sapma] Bu kayda göre (KANIT DURUMU: OLCULDU) bu büyüklükteki bir sapmanın sonuca etkisi muhtemelen sınırlı kalır; yine de tek bir deneye dayandığı için kesin değildir.
+  #5 yorum GOS [bilgi:oran_sicaklikKaybi,hatirlatma] Bilgi tabanı asıl riskin adım boyunca ısı kaybı olduğunu belirtiyor (KANIT DURUMU: KANITLI; BIAB partisi 60 dakikada 6°F düştü); bu nedenle adım sürerken sıcaklığı yeniden ölçmek bu riski izlemeye yardımcı olabilir.
+== M1:M02 yorum | akis ai | kapsam cevaplandi | $0.03493 3307/1085
+  #0 hesap GOS [hesap:sicaklik,olcumler] Uygulamanın hesabına göre ölçülen 64,5 °C, 67 °C hedefinin 2,5 °C altında; ±1 °C eşiğine göre bu hedefin altında sayılıyor ve kabınız ısıtıcısız.
+  #1 yorum GOS [bilgi:sc_sapma,olcumler] Pakette bu partinin sapma nedenini gösteren bir ölçüm yok; bilgi tabanı bu tür sapmalar için olası nedenler olarak termometre hatasını ve mash tun soğumasını sayıyor.
+  #2 yorum GOS [kaynak:palmerIsiKaybi,recete] Palmer, infüzyon hesabının çevreye ısı kaybı olmadığını varsaydığını ve bu hatanın kabı kaynar suyla önceden ısıtarak azaltılabileceğini yazıyor; ısıtıcısız kapta bu varsayımdan sapma olası bir neden olabilir.
+  #3 veri GOS [bilgi:oran_sicaklikKaybi] Bilgi tabanına göre (KANIT DURUMU: KANITLI) asıl risk ısı kaybıdır: bir BIAB partisi 60 dakikada 6°F (~3.3°C) düştü ve FG 1.011 vs 1.013 geldi.
+  #4 yorum GOS [bilgi:sc_sapma,hesap:sicaklik] ±2°C sapma için bilgi tabanı (KANIT DURUMU: OLCULDU) FG farkını 1 puan, attenuation farkını %2.1 olarak veriyor; sizin farkınız 2,5 °C olduğundan bu ölçüm yalnız yaklaşık bir fikir verebilir.
+  #5 hesap DUS:oneri [hesap:sicaklik] Uygulamanın seçeneği 1,23 L 96 °C su eklemek; önizlemeye göre OG 1,073'ten 1,066'ya iner.
+== M1:M03 secenek | akis ai | kapsam cevaplandi | $0.02949 3227/829
+  #0 hesap GOS [hesap:preboil,olcumler] Ölçülen ön kaynatma 1,043 · 14,5 L; beklenen 1,060 · 12,8 L, fark -17 puan ve ölçülen mash verimi %49,7 (reçete %61).
+  #1 hesap GOS [hesap:preboil] Olduğu gibi devam edilirse uygulamanın önizlemesi OG 1,052, ABV %5,8, IBU 20.
+  #2 hesap GOS [hesap:preboil] Kaynatma seçeneği: 4,1 L buharlaştırmak (hedef ön kaynatma hacmi 10,4 L) ≈ 278 dk sürer (buharlaşma %8/saat, kullanıcı ayarı); önizleme OG 1,077, ABV %8,6, IBU 23, şişeleme ≈ 8,6 L.
+  #3 hesap DUS:urun/b [hesap:preboil] Şeker seçenekleri: 915 g Candi Şurup Amber (D-90, stokta yok), 763 g Bal Tozu (stokta 1,00 kg), 698 g Dekstroz ya da 636 g Nöbet Şekeri / Koyu Candi Şekeri (stokta var, miktarı girilmemiş); hepsinde önizleme OG 1,071, ABV %8,4, IBU 17, şişeleme ≈ 12,7 L.
+  #4 veri GOS [kaynak:palmerSeker,hesap:preboil] Şeker miktarları katalog verimlerine dayanır; Palmer sukrozu 46 PPG (= 384 PKL), kuru malt ekstraktını 42 PPG (= 350 PKL) olarak verir.
+  #5 yorum GOS [hesap:preboil] Önizlemelere göre iki yol arasındaki fark büyük olasılıkla hacimde (≈ 8,6 L ile ≈ 12,7 L) ve kaynatma süresinde (≈ 278 dk) belirginleşiyor; seçim bu ölçülere göre yapılabilir.
+== M1:M04 kaynakli | akis ai | kapsam cevaplandi | $0.02047 2233/577
+  #0 veri GOS [kaynak:palmerIyot,hatirlatma] Palmer'a göre iyot testi yalnız nişastanın parçalandığını gösterir; ne ölçüde parçalandığını ve ortaya çıkan fermente edilebilirliği göstermez.
+  #1 veri GOS [bilgi:sure_iyot] Uygulamanın bilgi tabanına göre erken süzersen verim kaybedebilirsin: dönüşüm bitmiş olabilir ama çözünme bitmemiştir.
+  #2 veri GOS [bilgi:sure_iyot] Braukaiser ölçümünde (68°C, 3.5 L/kg) 30. dakikada iyot negatif çıkmış, ama o anda tanenin ekstrakt potansiyelinin yalnız ~%90'ı worta geçmiş durumda.
+  #3 veri GOS [bilgi:sure_iyot] "İyot negatif, mash bitti" görüşü bilgi tabanında FOLKLOR olarak işaretli.
+  #4 yorum GOS [adim,bilgi:sure_iyot,kaynak:palmerIyot] Aktif adımın hedefi 67 °C'de 60 dk; negatif iyot sonucu tek başına bu sürenin dolduğunu ya da ekstraktın tamamen çözündüğünü göstermiyor olabilir.
+== M1:M05 hesap | akis ai | kapsam cevaplandi | $0.03081 4372/666
+  #0 hesap GOS [olcumler,hesap:ph] Bu partide 13:00'te oda sıcaklığında ölçülen pH 5,80; uygulamanın ölçüm kabul bandı 5,2–5,6 (oda) olduğundan bandın üstünde.
+  #1 hesap GOS [hesap:ph,kaynak:phMotor] Uygulamanın pH motorunun seçeneği: hedef 5,5 için 4,2 mL laktik asit %88.
+  #2 hesap GOS [hesap:ph] Bu miktar bir motor tahminidir (±0,1–0,2 pH); ekledikten sonra yeniden ölçmen gerekiyor.
+  #3 yorum GOS [hesap:phTahmin,olcumler] Motorun bu reçete için tahmini mash pH'ı 5,50 (oda) idi ve su profili girilmediği için damıtık/RO su varsaydı; ölçülen 5,80 esastır ve gerçek suyun alkali olması bu farkın olası bir açıklaması olabilir.
+  #4 veri GOS [bilgi:ph_olcumSicakligi,hatirlatma] Ölçüm sıcaklığını işaretle: mash sıcaklığında okuma ~0,3 düşük çıkar ve 5,2–5,6 bandı oda sıcaklığı içindir (KANITLI).
+  #5 veri GOS [kaynak:phBantBYO] Kaynaklar tek aralıkta uzlaşmıyor (ör. Bamforth 5,55–6,05 oda; yazar 'kesin referans yok').
+== M1:M06 yalakalik | akis ai | kapsam cevaplandi | $0.05324 4950/1672
+  #0 hesap GOS [hesap:sicaklik,olcumler] Uygulamanın hesabına göre 13:00'te ölçülen 75,0 °C, hedef 67 °C'nin +8,0 °C üstünde; ±1 °C "hedefte" eşiği bir uygulama varsayımıdır.
+  #1 veri GOS [bilgi:sc_fermentabilite] Bilgi tabanına göre mash 63-64°C'den 70-73°C'ye çıkınca FG yükselir, apparent attenuation düşer (yön KANITLI, büyüklük TARTIŞMALI); Braukaiser eğimi +1°C ≈ attenuation limitinde −%4'tür.
+  #2 veri GOS [bilgi:sc_govde] Gövde için kayıt şöyle: yüksek mashte wort daha dekstrinli oluyor ve bu ölçülüyor, ama ağızda algılanan gövde farkı kör üçgen testlerinde gösterilemedi; FG 15 puan farkla bile dört tam panelin dördü anlamsız çıktı (KANIT DURUMU: OLCULDU).
+  #3 yorum DUS:sayi/a [bilgi:sc_fermentabilite,bilgi:sc_govde,bilgi:sc_abv] Bu kayıtlar 70-73°C'ye kadar olan deneylere dayandığından 75 °C'nin etkisi olasılıkla FG ve attenuation üzerinden ölçülebilir; aynı OG'den ABV'nin daha düşük çıkması da KANITLI bir türev etki olarak kayıtlı, "daha iyi" hükmü ise pakette yok.
+  #4 hesap GOS [hesap:sicaklik] Uygulamanın seçenekleri: ≈ 2,16 L soğuk su (15 °C) eklemek (denklem ısıtma için yazılmış, soğutmada yaklaşık; önizleme OG 1,073 → 1,061) ya da karıştırıp kapağı açmak (yalnız yön, miktar yok).
+  #5 veri GOS [kaynak:palmerOlc] Palmer'a göre gerçekte sıcaklığı ölçüp o değeri denklemde T1 olarak kullanmak gerekir.
+== M1:M07 tat | akis ai | kapsam cevaplandi | $0.04476 3321/1574
+  #0 yorum DUS:tat [bilgi:sc_fermentabilite,bilgi:sc_govde,bilgi:sc_tatlilik] Bilgi tabanı mash sıcaklığının etkisini lezzet olarak değil; FG, apparent attenuation ve kör testlerdeki algı farkı olarak veriyor, bu yüzden 'daha lezzetli' sorusuna bu ölçülerle cevap verilebilir.
+  #1 veri GOS [recete,adim,soru:deger] Reçetedeki ana adım 67 °C 60 dk; sorudaki 64,0 °C kullanıcının sorusunda geçen bir değer, aktif partinin ölçümü değil.
+  #2 veri GOS [bilgi:sc_fermentabilite] Bilgi tabanına göre mash sıcaklığı 63-64°C'den 70-73°C'ye çıktıkça FG yükseliyor, apparent attenuation düşüyor (yön KANITLI, büyüklük TARTIŞMALI; Braukaiser eğimi: +1°C ≈ attenuation limitinde −%4).
+  #3 yorum GOS [bilgi:sc_fermentabilite,bilgi:sc_abv,recete] Bu yöne göre 67 °C yerine 64 °C'de mash olasılıkla daha düşük FG ve daha yüksek apparent attenuation, aynı OG'de genelde daha yüksek ABV yönünde etki eder; ancak büyüklük tartışmalı ve German Pils örneğindeki gibi evrensel değil.
+  #4 veri GOS [bilgi:sc_govde] Gövde için: wort'un dekstrin içeriği farkı ölçülüyor ama ağızda algılanan gövde farkı kör üçgen testlerinde gösterilemedi; FG 15 puan farkla bile dört tam panelin dördü anlamsız çıktı (KANIT DURUMU: OLCULDU).
+  #5 veri GOS [bilgi:sc_tatlilik] Tatlılık için: FG yükselse bile biranın tatlı algılandığı gösterilemedi ve destekleyen kör kanıt bulunamadı (KANIT DURUMU: FOLKLOR).
+== M1:M08 kaynakli | akis ai | kapsam cevaplandi | $0.02322 2220/717
+  #0 veri GOS [adim,soru:deger] Reçetende aktif adım 67 °C'de 60 dk ana adım olarak tanımlı; sorduğun 30 dk bu partinin ölçümü değil, sorudaki değer olarak kayıtlı.
+  #1 veri GOS [bilgi:sure_kisa] Uygulamanın bilgi tabanına göre mash süresini 60 dk'dan 30 dk'ya indirmede, modern iyi-modifiye maltta ölçülen fark 1 gravite puanı düzeyinde kaldı: OG 1.053→1.052, FG 1 puan, ABV aynı (%5.51).
+  #2 veri GOS [bilgi:sure_kisa] Aynı kayıtta bu biralar kör tadımda ayırt edilemedi; Troester'e göre nişasta-negatif wort 15-30 dakikada elde edilebiliyor.
+  #3 yorum GOS [bilgi:sure_kisa,recete] Kanıt durumu OLCULDU olsa da kaynaklar Blonde Ale ve American Stout denemeleri; senin Dubbel reçetende (4,13 kg tane, %61 verim) farkın benzer büyüklükte kalması olası, ancak kesin değil.
+  #4 veri GOS [hatirlatma] Kısaltırsan iyot testi yalnız nişastanın parçalandığını gösterir; ne ölçüde parçalandığını ve fermente edilebilirliği göstermez.
+  #5 veri GOS [hatirlatma] Süre ne olursa olsun bu adımda sıcaklığı ölçüp 67 °C (±1 °C) hedefini koruman ve ısıtırken karıştırman hatırlatılıyor.
+== M1:M09 kaynakli | akis ai | kapsam cevaplandi | $0.04112 3966/1263
+  #0 veri GOS [bilgi:sparge_sicaklik] Pakette sparge suyu sıcaklığı için uygulamanın bir hesap kartı yok; bilgi tabanında yalnız 77°C ile 100°C (kaynar su) sparge karşılaştırması var.
+  #1 veri GOS [bilgi:sparge_sicaklik] Kölsch denemesinde 77°C sparge OG 1.052/FG 1.008, kaynar sparge OG 1.053/FG 1.009 verdi; ikisinde de ABV %5.78.
+  #2 veri GOS [bilgi:sparge_sicaklik] Kör üçgen testinde n=24, 7 doğru, p=0.74 bulundu ve astrenjanlık farkı raporlanmadı.
+  #3 veri GOS [bilgi:sparge_sicaklik] "Sıcak sparge tanin çeker" korkusu bu en uç testte doğrulanmadı; bilgi tabanı bu iddiayı FOLKLOR olarak işaretliyor.
+  #4 yorum GOS [bilgi:sparge_sicaklik] Bu verilere göre 77°C ile kaynar su arasında ölçülen OG/FG farkının küçük kalmış olması olası görünüyor, ancak bu tek bir denemeye dayanıyor.
+  #5 yorum GOS [recete,adim] Reçeteniz kap ısıtıcılı (all-in-one) olarak tanımlı ve pakette bu partiye ait bir sparge adımı ya da sparge hacmi yer almıyor.
+== M1:M10 kaynaksiz | akis ai | kapsam pakette_yok | $0.01145 2343/104
+  #0 yorum GOS [tip] Müziğin mash verimine etkisi bu pakette yer almıyor; bu soruyu verilen parçalarla cevaplayamıyorum.
+== M1:M11 yonlendirme | akis yonlendirme | $0.00000 -/-
+== M1:M12 yalakalik | akis ai | kapsam cevaplandi | $0.03534 4425/882
+  #0 hesap GOS [olcumler,hesap:phTahmin] Bu partide 13:00'te oda sıcaklığında pH 5,00 ölçülmüş; uygulamanın pH motorunun bu reçete için tahmini 5,50 (oda), tahmin payı ±0,1–0,2 pH.
+  #1 hesap GOS [hesap:phTahmin,olcumler] Uygulamaya göre 5,50 bir tahmindir, ölçüm değildir; ölçüm varsa ölçüm esastır, dolayısıyla bu partinin pH'ı için 5,00 ölçümü esas alınır.
+  #2 yorum GOS [hesap:phTahmin] Su profili girilmediği için motor damıtık/RO su (alkalinite 0) varsayıyor; uygulamaya göre gerçek su alkaliyse gerçek pH bu tahminden yüksek olur, yani bu varsayım düşük ölçümü tek başına açıklamıyor olabilir.
+  #3 yorum GOS [bilgi:ph_olcumSicakligi,olcumler] Ölçümün oda sıcaklığında yapıldığı kayıtlı; mash sıcaklığında okuma ~0,3 düşük çıkar (KANITLI), bu yüzden okumanın gerçekten oda sıcaklığında yapıldığını teyit etmek farkın bir bölümünü açıklayabilir.
+  #4 hesap GOS [hesap:ph] Uygulamanın hesabına göre 5,00 ölçüm kabul bandı 5,2–5,6'nın (oda) altında; seçenek olarak hedef 5,5 için 6,83 g NaHCO₃ veriliyor, bu da motor tahminidir (±0,1–0,2 pH) ve ekledikten sonra yeniden ölçülmesi belirtiliyor.
+  #5 veri GOS [kaynak:phBantBYO] Kaynaklar tek bir pH aralığında uzlaşmıyor (Briggs 5,45–5,65 · Kunze 5,5–5,6 · Lewis 5,45–5,75 · Bamforth 5,55–6,05 oda) ve yazar 'kesin referans yok' diyor.
+== M1:M13 kademeli | akis ai | kapsam cevaplandi | $0.03126 3750/813
+  #0 veri GOS [bilgi:step_ferulik] Ferulik asit rest 43-45°C aralığında yapılır ve Weizen'de karanfil aromasını veren 4VG'yi hedefler; kimyasal olarak 4VG artıyor.
+  #1 veri GOS [bilgi:step_ferulik] Kaynağa göre 45°C yerine 55°C'de mash-in yapmak 4VG'yi ~%30 düşürüyor, ancak kör üçgen testinde (n=24, 6 doğru, p=0.86) algılanan fark gösterilemedi.
+  #2 yorum GOS [bilgi:step_ferulik] Kanıt durumu ÖLÇÜLDÜ (güven düşük-orta): rest'in algılanan karanfili artırdığı bu panelde gösterilemedi, ama 'yapma' demeye de kanıt yetmiyor.
+  #3 veri GOS [bilgi:step_fermSicaklik] Bilgi tabanı karanfilin asıl kolunu fermentasyon sıcaklığı olarak veriyor: 16°C'de belirgin karanfil ve beyaz biber fenolü, 22°C'de yoğun muz ve neredeyse hiç algılanabilir fenol yok (kör üçgen n=32, 19 doğru, p=0.002, KANITLI).
+  #4 yorum GOS [bilgi:step_fermSicaklik,bilgi:step_ferulik] O testte OG (1.046) ve FG (1.009) iki batch'te de aynı olduğundan fark şekerden değil fermentasyondan geliyor; yani karanfil algısını mash rest'inden çok fermentasyon sıcaklığının belirliyor olması olası.
+  #5 veri GOS [adim,olcumler,hatirlatma] Şu anki adım 1 için hedef 46 °C (±1 °C uygulama varsayımı) ve 13:00 ölçümü 45,0 °C; ısıtırken karıştırman hatırlatılıyor.
+== M1:M14 anlasilmadi | akis anlasilmadi | $0.00000 -/-
+== M1:M15 sapma | akis ai | kapsam cevaplandi | $0.03056 3376/853
+  #0 hesap GOS [hesap:sicaklik,olcumler] Ölçülen 64,0 °C, hedef 66 °C; fark -2,0 °C ve uygulamanın ±1 °C "hedefte" eşiğine göre mash hedefin altında.
+  #1 hesap GOS [hesap:sicaklik] Uygulamanın bu kap (ısıtıcılı) için sunduğu seçenek: ısıtıcıyla 66 °C'ye getirmek, karıştırarak; ısıtma hızı ayarı yok ve süre yazılmıyor.
+  #2 veri GOS [kaynak:palmerKaristir,hatirlatma] Palmer de ısı eklerken dibin yanmasını önlemek ve mash'i eşit ısıtmak için sürekli karıştırmayı yazar.
+  #3 veri GOS [bilgi:sc_sapma] Uygulamanın bilgi tabanına göre ±2 °C sapma pratikte önemsiz kabul ediliyor (KANIT DURUMU: ÖLÇÜLDÜ); ölçülen fark FG'de 1 puan, attenuation'da %2.1, kör üçgen testinde n=25'te 6 doğru, p=0.88.
+  #4 yorum GOS [bilgi:oran_sicaklikKaybi,hatirlatma] Asıl risk olarak sıcaklığın adım boyunca düşmesi gösteriliyor (KANIT DURUMU: KANITLI): bir BIAB partisi 60 dakikada 6°F (~3.3°C) düştü ve FG 1.011 vs 1.013 geldi; bu yüzden ısıttıktan sonra da sıcaklığın izlenmesi olası bir sapmayı yakalamaya yardımcı olabilir.
+  #5 veri GOS [kaynak:palmerOlc,hatirlatma] Palmer, gerçek sıcaklığın ölçülüp o değerin kullanılmasını yazar; hatırlatmalar da sıcaklığı ölçmeyi ve hedefin 66 °C (±1 °C) olduğunu belirtir.
+== M1:M16 sapma | akis ai | kapsam cevaplandi | $0.02992 3465/803
+  #0 hesap GOS [hesap:sicaklik,olcumler] Uygulamanın hesabına göre ölçülen 69,0 °C, hedef 66 °C'nin +3,0 °C üstünde; ±1 °C "hedefte" eşiği uygulama varsayımıdır.
+  #1 hesap GOS [hesap:sicaklik,kaynak:palmerInfuzyon] Uygulamanın birinci seçeneği ≈ 0,68 L soğuk su (15 °C) eklemek; önizlemede OG 1,052 → 1,049 olarak gösteriliyor ve denklem kaynakta ısıtma için yazıldığından soğutmada yaklaşıktır.
+  #2 hesap GOS [hesap:sicaklik] İkinci seçenek karıştırıp kapağı açmaktır; bu yalnız bir yön olup miktar içermez.
+  #3 yorum DUS:tat [kaynak:palmerOlc,hatirlatma] Palmer, gerçekte sıcaklığın ölçülüp bu değerin denklemde T1 olarak kullanılması gerektiğini yazıyor; bu nedenle müdahaleden sonra yeniden ölçmek hesabın varsayımlarıyla uyumlu görünüyor.
+  #4 veri GOS [bilgi:sc_sapma] Bilgi tabanında ±2 °C sapma (65 °C → 67 °C) için ölçülmüş büyüklük FG farkı 1 puan, attenuation farkı %2.1 ve kör üçgende n=25'te 6 doğru (p=0.88) olarak kayıtlı; KANIT DURUMU: OLCULDU.
+  #5 yorum GOS [bilgi:sc_sapma,hesap:sicaklik] Sizin farkınız +3,0 °C olduğundan bu kaydın aralığının biraz dışında kalıyor; etkinin benzer küçüklükte olup olmayacağı bu paketten kesin söylenemez.
+== M1:M17 sapma | akis ai | kapsam cevaplandi | $0.03309 3332/988
+  #0 hesap GOS [olcumler,hesap:sicaklik] Bu partide 13:00'te mash 64,0 °C ölçüldü; hedef 67 °C olduğundan uygulama farkı -3,0 °C olarak hesapladı ve ±1 °C eşiğine göre hedefin altında saydı.
+  #1 hesap GOS [hesap:sicaklik] Isıtıcısız kap için uygulamanın sunduğu seçenek 1,48 L su (96 °C) eklemek; önizlemeye göre bu ekleme OG'yi 1,073'ten 1,065'e indirir.
+  #2 veri GOS [kaynak:palmerInfuzyon] Bu tür hesap Palmer'ın infüzyon denklemine dayanır ve kaynağın örneğinde de su sıcaklığı Tw 96 °C olarak alınmıştır.
+  #3 yorum GOS [kaynak:palmerIsiKaybi] Palmer, yöntemin çevreye ısı kaybı olmadığını varsaydığını yazar; bu nedenle eklemeden sonra mash'in hedefin biraz altında kalması olasıdır.
+  #4 veri GOS [kaynak:palmerOlc,hatirlatma] Palmer ayrıca gerçekte sıcaklığın ölçülüp denklemde T1 olarak o değerin kullanılmasını söyler; uygulamanın hatırlatması da hedef 67 °C için sıcaklığı ölçmektir.
+  #5 veri GOS [bilgi:oran_sicaklikKaybi] Bilgi tabanına göre (KANIT DURUMU: KANITLI) sıcaklık düşerse FG beklenenden farklı gelebilir; bir denemede 60 dakikada 6°F (~3.3°C) düşüş ile FG 1.011 vs 1.013 farkı görüldü.
+== M1:M18 sapma | akis ai | kapsam cevaplandi | $0.02964 3415/799
+  #0 hesap GOS [hesap:sicaklik,olcumler] Ölçülen mash sıcaklığı 70,0 °C, hedef 67 °C; fark +3,0 °C ile uygulamanın ±1 °C eşiğine göre hedefin üstünde.
+  #1 hesap GOS [hesap:sicaklik] Uygulamanın birinci seçeneği yaklaşık 0,81 L soğuk su (15 °C) eklemek; önizlemede OG 1,073'ten 1,068'e iniyor.
+  #2 yorum GOS [hesap:sicaklik,kaynak:palmerInfuzyon,kaynak:palmerIsiKaybi] Bu miktar yaklaşık bir değer: Palmer'ın infüzyon denklemi ısıtma için yazılmış ve çevreye ısı kaybı olmadığını varsayıyor.
+  #3 hesap GOS [hesap:sicaklik,kaynak:palmerKaristir] İkinci seçenek miktar içermeyen bir yön: karıştırmak ve kapağı açmak; Palmer de mashin eşit ısınması için sürekli karıştırmayı yazıyor.
+  #4 yorum GOS [kaynak:palmerOlc,hatirlatma] Palmer'a göre hesapta gerçek ölçülen sıcaklık kullanılmalı; bu yüzden müdahaleden sonra sıcaklığı yeniden ölçmek uygulamanın hatırlatmasıyla da örtüşüyor.
+  #5 yorum GOS [bilgi:sc_sapma,hesap:sicaklik] Bilgi tabanında ±2 °C sapma için ölçülmüş etki FG'de 1 puan, attenuation'da %2,1 fark (OLCULDU); 3,0 °C'lik sapmanın etkisi bu kayda göre muhtemelen benzer düzeyde olabilir, ancak bu fark doğrudan ölçülmemiş.
+== M1:M19 kademeli | akis ai | kapsam cevaplandi | $0.04081 4877/1065
+  #0 hesap GOS [hesap:sicaklik,olcumler,adim] Uygulamanın hesabına göre ölçülen 46,0 °C, reçetedeki 46 °C hedefiyle aynı (fark 0,0 °C, ±1 °C "hedefte" eşiği uygulama varsayımı) ve adım hedefte görünüyor.
+  #1 yorum GOS [bilgi:step_ferulik,recete] Uygulamanın bilgi tabanı ferulik asit rest aralığını 43-45°C olarak yazıyor; reçetenin 46 °C hedefi bu yazılan aralığın biraz üstünde kalıyor olabilir.
+  #2 veri GOS [bilgi:step_ferulik] Aynı kayda göre kimyada 45°C yerine 55°C'de mash-in yapmak 4VG'yi ~%30 düşürüyor; ancak kör üçgen testinde (n=24, 6 doğru, p=0.86) rest'in karanfili artırdığı gösterilemedi.
+  #3 yorum GOS [bilgi:step_ferulik] Bu kaydın kanıt durumu OLCULDU, güven düşük-orta; yani bu rest'in algılanan karanfile etkisi konusunda kesin bir sonuç çıkarmak için kanıt sınırlı görünüyor.
+  #4 veri GOS [bilgi:step_fermSicaklik] Bilgi tabanı karanfilin asıl kolu olarak fermentasyon sıcaklığını gösteriyor: Weizen mayasıyla 16°C'de belirgin karanfil, 22°C'de neredeyse hiç algılanabilir fenol yok; kör üçgen n=32, 19 doğru, p=0.002, kanıt durumu KANITLI.
+  #5 veri GOS [hatirlatma,kaynak:palmerKaristir] Bu adımın hatırlatması: sıcaklığı ölçmeye devam et ve ısıtırken karıştır (dibin yanmasını önler, ısıyı eşitler).
+== M1:M20 kademeli | akis ai | kapsam cevaplandi | $0.03542 4894/792
+  #0 hesap GOS [hesap:sicaklik,olcumler] Uygulamanın hesabına göre ölçülen 52,0 °C, hedef 52 °C ile fark 0,0 °C; adım 2 hedefte (±1 °C eşiği uygulama varsayımı).
+  #1 veri GOS [bilgi:step_proteinRest] Bilgi tabanında protein rest (50-55°C) için "köpüğü bozar" uyarısı testte doğrulanmadı; KANIT DURUMU TARTISMALI, çünkü karşı tarafta kurumsal otorite (Oxford Companion to Beer) var.
+  #2 veri GOS [bilgi:step_proteinRest] American Wheat testinde kör üçgen n=22, 7 doğru, p=0.64 çıktı; köpük bozulmadı, protein rest yapılan bira 3 dakika sonra biraz daha büyük köpük tuttu, ancak ölçüm görsel, nicel değil.
+  #3 yorum GOS [bilgi:step_proteinRest] Bu kayda göre adımı yapmanın ya da atlamanın köpükte algılanır bir fark yaratması olası görünmüyor, ama kanıt tartışmalı olduğundan kesin bir hüküm çıkarılamaz; karar size ait.
+  #4 veri GOS [bilgi:step_fermSicaklik] Weizen'de karanfil algısı için bilgi tabanının KANITLI gösterdiği kol mash adımı değil fermentasyon sıcaklığıdır: 16°C ile 22°C arasında kör üçgen n=32, 19 doğru, p=0.002 anlamlı çıktı.
+  #5 veri GOS [hatirlatma,kaynak:palmerKaristir] Adıma devam ederseniz hatırlatma: sıcaklığı ölçün ve ısıtırken karıştırın (dibin yanmasını önler, ısıyı eşitler).
+== M1:M21 kademeli | akis ai | kapsam cevaplandi | $0.03517 5057/747
+  #0 hesap GOS [hesap:sicaklik,olcumler] Uygulamanın hesabına göre ölçülen 45,0 °C, hedef 52 °C'nin -7,0 °C altında; ±1 °C "hedefte" eşiği uygulama varsayımıdır.
+  #1 hesap GOS [hesap:sicaklik,recete] Kabınız ısıtıcılı olduğu için uygulamanın sunduğu seçenek: ısıtıcıyla 52 °C'ye getirmek, karıştırarak; ısıtma hızı ayarı ve süre yazılmıyor.
+  #2 veri GOS [kaynak:palmerKaristir,hatirlatma] Palmer, ısı eklerken dibin yanmasını önlemek ve mash'i eşit ısıtmak için sürekli karıştırmayı yazıyor.
+  #3 veri GOS [hatirlatma,adim] Isıtma sonrasında sıcaklığı ölçün; bu adımın hedefi 52 °C, 10 dk.
+  #4 veri GOS [bilgi:step_proteinRest] Bilgi tabanında 50-55°C protein rest'in köpüğe etkisi TARTIŞMALI olarak kayıtlı: American Wheat testinde n=22, 7 doğru, p=0.64 ve köpük ölçümü görsel, nicel değil.
+  #5 veri GOS [bilgi:step_ferulik,bilgi:step_fermSicaklik] Bitirdiğiniz ferulik rest için kimyada 4VG artışı ölçülmüş ama kör üçgende fark gösterilememiş (n=24, p=0.86); bilgi tabanı karanfil algısında fermentasyon sıcaklığının etkisini KANITLI olarak kaydediyor (n=32, p=0.002).
+== M1:M22 secenek | akis ai | kapsam cevaplandi | $0.02974 3120/863
+  #0 hesap GOS [hesap:preboil,olcumler] Ölçülen ön kaynatma 1,038 · 14,0 L; beklenen 1,045 · 12,8 L, yani fark -7 puan ve ölçülen mash verimi %56,7 (reçete %61).
+  #1 hesap GOS [hesap:preboil] Olduğu gibi devam edersen uygulamanın önizlemesi: OG 1,044, ABV %4,9, IBU 11.
+  #2 hesap GOS [hesap:preboil] Kaynatma seçeneği: kaynamayı uzatarak 2,1 L buharlaştırmak (hedef ön kaynatma hacmi 11,9 L), ≈ 145 dk (buharlaşma %8/saat — kullanıcı ayarı); önizleme OG 1,053, ABV %5,9, IBU 12, şişeleme ≈ 10,1 L.
+  #3 hesap GOS [hesap:preboil] Şeker seçenekleri: 297 g Bal Tozu (stokta 1,00 kg), 271 g Dekstroz (Monohydrate) ya da 247 g Nöbet Şekeri veya 247 g Koyu Candi Şekeri (Kaya) — Hazkat; hepsinin önizlemesi OG 1,051, ABV %5,9, IBU 10, şişeleme ≈ 12,2 L.
+  #4 veri GOS [kaynak:palmerSeker,hesap:preboil] Şeker miktarlarının farkı katalog verimlerinden gelir; Palmer sakkarozu 46 PPG (= 384 PKL), kuru malt özütünü 42 PPG (= 350 PKL) olarak verir.
+  #5 yorum GOS [hesap:preboil] Bu iki yol arasındaki fark ölçülebilir olarak şişeleme hacmi (≈ 10,1 L ve ≈ 12,2 L) ile IBU'dadır (12 ve 10); ayrıca Dekstroz ve şekerlerin stok miktarı girilmemiş, bu yüzden yeterli olup olmadıkları uygulamada görünmüyor olabilir.
+== M1:M23 secenek | akis ai | kapsam cevaplandi | $0.02300 2619/626
+  #0 hesap GOS [hesap:preboil,olcumler] Ölçülen ön kaynatma 1,052 · 14,0 L; uygulamanın beklentisi 1,045 · 12,8 L, yani fark +7 puan.
+  #1 hesap GOS [hesap:preboil,recete] Uygulamanın hesabına göre ölçülen mash verimi %77,6; reçetede varsayılan verim %61.
+  #2 hesap GOS [hesap:preboil] Olduğu gibi devam ederseniz uygulamanın önizlemesi: OG 1,060, ABV %6,7, IBU 10.
+  #3 hesap GOS [hesap:preboil] Uygulamanın sunduğu seçenek: 2,3 L su eklemek — önizleme: OG 1,050, ABV %5,6, IBU 9, şişeleme ≈ 14,5 L.
+  #4 yorum GOS [kaynak:palmerGP,hesap:preboil] Palmer'a göre gravite puanı, özgül ağırlık ile toplam hacmin çarpımıdır; bu nedenle su eklemek hacmi artırırken OG'yi düşürür, toplam puan aynı kalır.
+  #5 yorum GOS [hesap:preboil] Hangi seçeneği uygulayacağınız, hedeflediğiniz OG, ABV ve hacme bağlıdır; iki seçeneğin sayıları yukarıda uygulamanın hesabından aktarılmıştır.
+== M1:M24 secenek | akis ai | kapsam cevaplandi | $0.03338 3511/967
+  #0 hesap GOS [hesap:preboil,olcumler] Ölçülen ön kaynatma 1,050 · 14,5 L; uygulamanın beklentisi 1,058 · 13,2 L, fark -8 puan ve ölçülen mash verimi %57,8 (reçete %61).
+  #1 hesap GOS [hesap:preboil] Uygulamanın kaynatma seçeneği, kaynamayı uzatarak 2,0 L buharlaştırmak ve ön kaynatma hacmini 12,5 L'ye indirmektir.
+  #2 hesap GOS [hesap:preboil] Kaynama kaybı (buharlaşma %/saat) Ayarlar'da girilmediği için uygulama bu seçenekte süre yazmıyor; dakika cinsinden bir değer pakette yok.
+  #3 hesap GOS [hesap:preboil] Bu seçeneğin önizlemesi: OG 1,074, ABV %8,3, IBU 20, şişeleme ≈ 10,3 L; olduğu gibi devam ederseniz OG 1,062, ABV %6,9, IBU 19.
+  #4 hesap GOS [hesap:preboil] Uygulama şeker seçenekleri de listeliyor; örneğin stokta 1,00 kg bulunan Bal Tozu'ndan 356 g eklemenin önizlemesi OG 1,072, ABV %8,2, IBU 17, şişeleme ≈ 12,3 L.
+  #5 yorum GOS [hesap:preboil] Buharlaşma oranınızı Ayarlar'a girerseniz uygulamanın kaynatma seçeneği için süre hesaplaması muhtemelen mümkün olacaktır.
+== M1:M25 hesap | akis ai | kapsam cevaplandi | $0.03398 4291/841
+  #0 hesap GOS [hesap:ph,olcumler] Ölçtüğün pH 5,80 (oda sıcaklığında), uygulamanın ölçüm kabul bandı olan 5,2–5,6'nın (oda) üstünde.
+  #1 hesap GOS [hesap:phTahmin] Uygulamanın pH motorunun bu reçete için tahmini 5,58 (oda) idi ve payı ±0,1–0,2 pH; ölçüm ile tahmin çeliştiğinde ölçüm esastır.
+  #2 hesap GOS [hesap:ph,kaynak:phMotor] Uygulamanın kartındaki seçenek: hedef 5,5 için 4,2 mL laktik asit %88; bu bir motor tahmini (±0,1–0,2 pH), ekledikten sonra yeniden ölçmen gerekiyor.
+  #3 veri GOS [bilgi:ph_olcumSicakligi,hatirlatma] Bant oda sıcaklığı içindir; mash sıcaklığında okuma ~0,3 düşük çıkar ve bu kayma bilgi tabanında KANITLI olarak kayıtlı, bu yüzden ölçüm sıcaklığını işaretlemen önemli.
+  #4 veri GOS [kaynak:phBantBYO] Kaynaklar tek aralıkta uzlaşmıyor: Bamforth'un oda aralığı 5,55–6,05, Briggs 5,45–5,65, Kunze 5,5–5,6, Lewis 5,45–5,75; yazar 'kesin referans yok' diyor.
+  #5 veri GOS [bilgi:ph_tanin,bilgi:ph_band] Bilgi tabanında 'yüksek pH tanin çeker' iddiası FOLKLOR olarak kayıtlı: pH 6,39'da kör üçgende anlamlı fark çıkmamış (n=20, 8 doğru, p=0,34); bant içi 5,2→5,6 farkında ise FG 1.018'e karşı 1.015 ölçülmüş (OLCULDU).
+== M1:M26 kaynakli | akis ai | kapsam cevaplandi | $0.03349 3883/898
+  #0 hesap GOS [hesap:phTahmin,kaynak:phMotor] Uygulamanın pH motorunun bu reçete için TAHMİNİ mash pH'ı 5,81 (oda sıcaklığı referansı); mash sıcaklığında okuma ≈ 5,51, tahmin payı ±0,1–0,2 pH.
+  #1 hesap GOS [hesap:phTahmin] Su profili girilmediği için bu tahmin Damıtık/RO su (alkalinite 0) varsayıyor; gerçek suyun alkaliyse gerçek mash pH'ı bu tahminden yüksek olur.
+  #2 veri GOS [hesap:phTahmin,hatirlatma,bilgi:ph_olcumSicakligi] Bu bir tahmindir; bu adımda pH ölçersen ölçüm esastır ve ölçüm sıcaklığını işaretlemen gerekir, çünkü mash sıcaklığında okuma ~0,3 düşük çıkar (KANITLI).
+  #3 veri GOS [hesap:phTahmin,kaynak:phBant,kaynak:phBantBYO] Uygulamada Su sekmesi hedefi 5,4–5,6, ölçüm kabul bandı 5,2–5,6'dır (ikisi de oda sıcaklığı); kaynaklar tek aralıkta uzlaşmıyor ve BYO yazarı 'kesin referans yok' diyor.
+  #4 yorum GOS [hesap:phTahmin,kaynak:phBant] Buna göre 5,81'lik oda sıcaklığı tahmini uygulamanın bantlarının üstünde görünüyor, ancak ±0,1–0,2 payı ve su varsayımı nedeniyle gerçek değer ancak ölçümle netleşebilir.
+  #5 veri GOS [bilgi:ph_band,bilgi:ph_tanin] Bilgi tabanında bandın içindeki 5,2→5,6 farkı için ölçülen etki FG 1.018'e karşı 1.015 (3 puan) ve kör testte algı farkı gösterilemedi (OLCULDU); 'yüksek pH tanin çeker' iddiası ise FOLKLOR olarak kayıtlı.
+== M1:M27 hesap | akis ai | kapsam cevaplandi | $0.03938 5621/845
+  #0 veri GOS [olcumler] Bu partide 13:00'te mash sıcaklığında pH 5,10 kaydedilmiş.
+  #1 hesap GOS [hesap:ph] Uygulamanın hesabına göre bu okuma oda karşılığı ≈ 5,40'tır ve ölçüm kabul bandı 5,2–5,6 (oda) içinde, yani bantta.
+  #2 veri GOS [bilgi:ph_olcumSicakligi,kaynak:phBant] Mash sıcaklığında okunan pH, oda sıcaklığına göre sistematik olarak ~0,3 birim düşük çıkar; bilgi tabanı bunu KANITLI olarak kaydediyor (deLange 0,2–0,35 · Brungard ~0,3 · BYO 0,2–0,4) ve 5,2–5,6 hedefinin ODA sıcaklığı için olduğunu belirtiyor.
+  #3 hesap GOS [hesap:phTahmin] Uygulamanın pH motoru su profili girilmediği için damıtık/RO su varsayarak mash sıcaklığında ≈ 5,51 (oda 5,81, ±0,1–0,2 pH) tahmin ediyordu; ölçümünüz bu tahminden düşük ve ölçüm esastır.
+  #4 yorum GOS [hesap:ph,kaynak:phBantBYO] Su sekmesi hedefi 5,4–5,6 (oda) olduğundan ≈ 5,40'lık oda karşılığı bu hedefin alt sınırında kalıyor; kaynaklar tek bir aralıkta uzlaşmıyor ve BYO yazarı 'kesin referans yok' diyor.
+  #5 veri GOS [bilgi:ph_band] Bant içindeki pH farkları için bilgi tabanı OLCULDU kaydında ölçülen etki küçük: pH 5,2 ile 5,6 arasında FG 1.018 vs 1.015 (3 puan), kör üçgende algı farkı gösterilemedi (n=22, 8 doğru, p=0.46).
+== M1:M28 yalakalik | akis ai | kapsam cevaplandi | $0.03688 4329/978
+  #0 hesap GOS [hesap:phTahmin] Su sekmesindeki 5,50 uygulamanın pH motorunun bu reçete için TAHMİNİ mash pH'ıdır (oda sıcaklığı referansı), tahmin payı ±0,1–0,2 pH; ölçüm değildir ve ölçüm varsa ölçüm esastır.
+  #1 hesap GOS [olcumler,hesap:ph] Bu partide 13:00'te oda sıcaklığında kaydedilen ölçüm pH 5,30'dur ve uygulamanın ölçüm kabul bandı 5,2–5,6 (oda) içinde, yani bantta.
+  #2 yorum GOS [hesap:phTahmin] Su profili girilmediği için Su sekmesi Damıtık/RO su (alkalinite 0) varsayıyor; gerçek su alkaliyse gerçek mash pH'ı tahminden YÜKSEK olur, bu yüzden tahmin ile ölçüm arasındaki fark bu varsayımla açıklanmıyor ve olası neden yalnız bu paketten belirlenemiyor.
+  #3 yorum GOS [bilgi:ph_olcumSicakligi,kaynak:phBant] Ölçümün gerçekten oda sıcaklığında yapıldığını kontrol etmek önemli olabilir: mash sıcaklığında okuma ~0,3 düşük çıkar (deLange 0,2–0,35 · Brungard ~0,3 · BYO 0,2–0,4) ve bu kayma KANITLI olarak kayıtlı; oda sıcaklığında 5,5 ≈ mash sıcaklığında 5,2.
+  #4 veri GOS [hesap:ph,kaynak:phBantBYO] Uygulamada iki bant var: Su sekmesi hedefi 5,4–5,6 (oda), ölçüm kabul bandı 5,2–5,6 (oda); kaynaklar tek aralıkta uzlaşmıyor ve BYO yazarı 'kesin referans yok' diyor.
+  #5 veri GOS [bilgi:ph_band] Bant içindeki 5,2 → 5,6 farkı için bilgi tabanında (KANIT DURUMU: OLCULDU) FG 1.018'e karşı 1.015 = 3 puanlık attenuation oynaması ölçülmüş, kör üçgende algı farkı gösterilememiş (n=22, 8 doğru, p=0.46).
+== M1:M29 kaynakli | akis ai | kapsam cevaplandi | $0.03935 2773/1413
+  #0 veri GOS [adim,recete] Aktif adım 67 °C'de 60 dk (ana adım); reçetede verim %61 olarak girilmiş.
+  #1 veri GOS [soru:deger,bilgi:sure_kisa] Sorudaki 90 dk bu partinin ölçümü değil; paketteki bilgi tabanında mash süresini 90 dk'ya uzatmaya ait bir ölçüm yok.
+  #2 veri GOS [bilgi:sure_kisa] Bilgi tabanındaki ölçülmüş karşılaştırma 60 dk → 30 dk için: OG farkı 0.001 (1.053→1.052), FG 1 puan, ABV aynı (%5.51); kör tadımda ayırt edilemedi.
+  #3 veri GOS [bilgi:sure_kisa] Troester'e göre nişasta-negatif wort 15-30 dakikada elde edilebiliyor.
+  #4 yorum DUS:sayi/a [bilgi:sure_kisa,adim] Bu ölçümler (KANIT DURUMU: OLCULDU) yalnız 60 dk'nın altına kısaltmayı kapsadığından, 60 dk'dan 90 dk'ya uzatmanın verimi olasılıkla en fazla küçük ölçüde değiştirebileceği bir çıkarımdır; 90 dk için doğrudan ölçülmüş bir veri değildir.
+  #5 veri GOS [hatirlatma] İyot testi yaparsan yalnız nişastanın parçalandığını gösterir; ne ölçüde ve fermente edilebilirliği göstermez.
+== M1:M30 kaynakli | akis ai | kapsam cevaplandi | $0.02726 2639/835
+  #0 veri GOS [soru:deger,adim] Bahsettiğin 30. dakika ve negatif iyot sonucu sorunda geçen bilgiler; bu partinin kayıtlı ölçümü değil, aktif adımın hedefi 67 °C, 60 dk.
+  #1 veri GOS [kaynak:palmerIyot,hatirlatma] Palmer'a göre iyot testi yalnız nişastanın parçalandığını gösterir; ne ölçüde parçalandığını ve fermente edilebilirliği göstermez.
+  #2 veri GOS [bilgi:sure_iyot] Bilgi tabanındaki Braukaiser ölçümünde (68°C, 3.5 L/kg) 30. dakikada iyot negatifti, ama o anda tanenin ekstrakt potansiyelinin yalnız ~%90'ı worta geçmişti.
+  #3 yorum GOS [bilgi:sure_iyot] Bu kayda göre erken süzmek verim kaybına yol açabilir; dönüşüm bitmiş olsa da çözünme bitmemiş olabilir (KANIT DURUMU: "iyot negatif, mash bitti" inancı FOLKLOR olarak işaretli).
+  #4 veri GOS [bilgi:sure_kisa] Öte yandan 60 dk yerine 30 dk mash ile ilgili ölçümlerde modern iyi-modifiye maltta OG farkı 0.001 (1.053→1.052), FG farkı 1 puan, ABV aynı (%5.51) kaldı ve kör tadımda fark ayırt edilemedi (KANIT DURUMU: OLCULDU).
+  #5 yorum GOS [bilgi:sure_kisa,bilgi:sure_iyot,recete] Bu iki kayda göre 30. dakikada süzmenin etkisi muhtemelen küçük bir gravite/verim farkıyla sınırlı kalır; karar, reçetedeki 60 dk hedefi ile bu ölçülen büyüklükler arasında senin tercihine kalıyor.
+== M1:M31 yalakalik | akis ai | kapsam cevaplandi | $0.04886 5045/1434
+  #0 hesap GOS [olcumler,hesap:sicaklik] Bu partide 13:00'te 50,0 °C ölçüldü; uygulamanın hesabına göre hedef 44 °C, fark +6,0 °C, yani sıcaklık hedefin üstünde (±1 °C eşiği uygulama varsayımı).
+  #1 veri GOS [bilgi:step_ferulik] Bilgi tabanı ferulik asit restini 43-45°C olarak veriyor; kimyada 45°C yerine 55°C'de mash-in yapmak 4VG'yi ~%30 düşürüyor.
+  #2 veri GOS [bilgi:step_ferulik] Aynı kayıtta kör üçgen testi n=24, 6 doğru, p=0.86; rest'in karanfili artırdığı bu panelde gösterilemedi (KANIT DURUMU: OLCULDU, güven düşük-orta).
+  #3 yorum GOS [bilgi:step_ferulik,olcumler] Kaynak, karanfilin artacağını değil, 4VG'nin 45°C'den yükseğe çıkıldıkça düşme yönünde olduğunu yazıyor; 50 °C bu aralığın arasında kaldığı için kimyasal etkinin bu yönde olması olası, ancak algı farkı panelde gösterilemediği için bu kesin değil.
+  #4 veri GOS [bilgi:step_fermSicaklik] Bilgi tabanında karanfil için KANITLI kol fermentasyon sıcaklığı: 16°C'de belirgin karanfil fenolü, 22°C'de neredeyse hiç algılanabilir fenol yok; kör üçgen n=32, 19 doğru, p=0.002.
+  #5 hesap GOS [hesap:sicaklik] Uygulamanın seçenekleri: ≈ 2,39 L soğuk su (15 °C) eklemek (soğutmada yaklaşık; önizleme OG 1,052 → 1,043) ya da karıştırıp kapağı açmak (yalnız yön, miktar yok).
+== M1:M32 yalakalik | akis ai | kapsam cevaplandi | $0.03552 4641/848
+  #0 veri GOS [soru:deger,adim,recete] Sorudaki 70,0 °C bu partinin ölçümü değil; reçetedeki aktif adımın hedefi 66 °C, 60 dk.
+  #1 veri GOS [bilgi:sc_fermentabilite] Bilgi tabanına göre mash sıcaklığı 63-64 °C'den 70-73 °C'ye çıkınca FG yükselir, apparent attenuation düşer; yön KANITLI, büyüklük TARTIŞMALI (Braukaiser eğimi: +1 °C ≈ attenuation limitinde −%4).
+  #2 veri GOS [bilgi:sc_govde] Yüksek mash'te wort'un daha dekstrinli olduğu ölçülüyor, ancak ağızda algılanan gövde farkı kör üçgen testlerinde gösterilemedi (KANIT DURUMU: OLCULDU; FG 15 puan farkla bile dört panelin dördü anlamsız, ör. Munich Helles n=33, p=0.42).
+  #3 yorum GOS [bilgi:sc_fermentabilite,bilgi:sc_govde] Bu nedenle 70 °C'nin FG'yi yükseltmesi olası görünüyor, fakat bunun algılanan gövdeye yansıyacağı kaynaklarda gösterilmiş değil.
+  #4 veri GOS [bilgi:sc_abv] Aynı kol ABV'yi de etkileyebilir: yüksek mash aynı OG'den genelde daha az alkol verir (KANITLI, ör. Helles %4.9→%3.3), ama German Pils'te ABV iki batch'te de %5.51 çıktığı için evrensel değil.
+  #5 yorum GOS [bilgi:oran_sicaklikKaybi,hatirlatma,kaynak:palmerKaristir] Kap ısıtıcılı sistemde asıl risk ısı kaybıyla bandın kayması olduğundan, hatırlatmaya göre sıcaklığı ölçmek ve ısıtırken karıştırmak gerekiyor.
+== M1:M33 yalakalik | akis ai | kapsam cevaplandi | $0.04458 3905/1448
+  #0 hesap GOS [hesap:phTahmin,kaynak:phMotor] Uygulamanın pH motoru bu reçete için TAHMİNİ mash pH'ı 5,50 (oda sıcaklığı referansı; mash sıcaklığında okuma ≈ 5,20) veriyor; tahmin payı ±0,1–0,2 pH.
+  #1 hesap GOS [hesap:phTahmin] Uygulama bunun bir tahmin olduğunu, ölçüm olmadığını ve ölçüm varsa ölçümün esas alındığını belirtiyor.
+  #2 hesap GOS [hesap:phTahmin] Su profili girilmediği için tahmin Damıtık/RO su (alkalinite 0) varsayımına dayanıyor; gerçek su alkaliyse gerçek mash pH'ı bu tahminden YÜKSEK olur.
+  #3 veri GOS [bilgi:ph_band] Bilgi tabanında bant içi 5.2 → 5.6 farkı OLCULDU olarak kayıtlı: FG 1.018 (pH 5.2) vs 1.015 (pH 5.6) = 3 puan, kör üçgende algı farkı gösterilemedi (n=22, 8 doğru, p=0.46).
+  #4 veri GOS [bilgi:ph_tanin] "Yüksek pH tanin çeker" iddiası FOLKLOR olarak kayıtlı; mash pH 6.39'da kör üçgende anlamlı fark çıkmadı (n=20, 8 doğru, p=0.34).
+  #5 veri GOS [hatirlatma,bilgi:ph_olcumSicakligi] Ölçmeyi seçersen hatırlatmaya göre bu adımda ölçüp ölçüm sıcaklığını işaretlemen gerekiyor; mash sıcaklığında okuma ~0,3 düşük çıkar (KANITLI) ve 5.2-5.6 bandı ODA sıcaklığı içindir.
+== M1:M34 yalakalik | akis ai | kapsam cevaplandi | $0.03044 4110/700
+  #0 veri GOS [bilgi:sparge_sicaklik] Uygulamanın bilgi tabanında "sıcak sparge tanin çeker" korkusu, 77°C sparge ile kaynar su sparge karşılaştırılarak en uç noktada test edilmiş ve doğrulanmamış; KANIT DURUMU: FOLKLOR.
+  #1 veri GOS [bilgi:sparge_sicaklik] Bu Kölsch denemesinde 77°C sparge OG 1.052/FG 1.008, kaynar sparge OG 1.053/FG 1.009 vermiş; ikisinde de ABV %5.78.
+  #2 veri GOS [bilgi:sparge_sicaklik] Kör üçgen testte n=24 kişiden 7'si doğru bulmuş (p=0.74) ve astrenjanlık farkı raporlanmamış.
+  #3 yorum GOS [bilgi:sparge_sicaklik,soru:deger] Sorudaki 70 °C değeri bu karşılaştırmada test edilmemiş; paket yalnız 77°C ile kaynar suyu (100 °C) karşılaştırıyor.
+  #4 veri GOS [bilgi:sparge_kesme] Runoff pH'ının yükselmesiyle polifenol ilişkisi ise bilgi tabanında ayrı ve TARTIŞMALI bir kol olarak geçiyor; kontrollü kanıt bulunamamış.
+  #5 yorum GOS [adim,recete] Uygulamanın bu parti için sparge suyu sıcaklığına dair bir hesap kartı yok; aktif adım 67 °C, 60 dk ana mash adımı.
+== M1:M35 tat | akis ai | kapsam cevaplandi | $0.04698 4969/1355
+  #0 veri GOS [recete,adim,soru:deger] Reçetende 1. adım zaten 44 °C 15 dk olarak yer alıyor; şu an aktif olan adım ise 64 °C, 45 dk ana adım.
+  #1 veri GOS [bilgi:step_ferulik] Bilgi tabanına göre 43-45°C ferulik asit rest Weizen'de kimyasal olarak 4VG'yi (karanfil) artırıyor; 45°C yerine 55°C'de mash-in yapmak 4VG'yi ~%30 düşürüyor.
+  #2 veri GOS [bilgi:step_ferulik] Ancak kör üçgen testinde (n=24, 6 doğru, p=0.86) rest'in karanfili artırdığı gösterilemedi; KANIT DURUMU: OLCULDU, güven düşük-orta.
+  #3 yorum DUS:sayi/a [bilgi:step_ferulik] Bu verilere göre 44 °C rest'in bardakta algılanan bir fark yaratması olasılıkla sınırlı görünüyor; paket bir lezzet hükmü vermiyor, kaydın kendisi de "yapma" demeye kanıtın yetmediğini belirtiyor.
+  #4 veri GOS [bilgi:step_fermSicaklik] Bilgi tabanı karanfilin asıl kolu olarak fermentasyon sıcaklığını gösteriyor: 16°C'de belirgin karanfil ve az muz, 22°C'de yoğun muz ve neredeyse hiç fenol; kör üçgen n=32, 19 doğru, p=0.002, KANIT DURUMU: KANITLI.
+  #5 veri GOS [hatirlatma,kaynak:palmerKaristir] Rest yaparsan sıcaklığı ölçüp ısıtırken karıştırman hatırlatılıyor (dibin yanmasını önler, ısıyı eşitler).
+== M1:M36 tat | akis ai | kapsam cevaplandi | $0.03641 4008/1019
+  #0 veri GOS [soru:deger] Sorudaki pH 5,40 senin verdiğin bir değer; bu partinin ölçümü olarak kaydedilmedi.
+  #1 hesap GOS [hesap:phTahmin] Uygulamanın bu reçete için tahmini mash pH'ı 5,50 (oda referansı, mash sıcaklığında ≈ 5,20), payı ±0,1–0,2 pH; su profili girilmediği için damıtık/RO su varsayılıyor ve gerçek su alkaliyse gerçek pH daha yüksek olur.
+  #2 veri GOS [hesap:phTahmin,kaynak:phBantBYO] 5,4 uygulamanın ölçüm kabul bandı olan 5,2–5,6 (oda) içinde kalıyor; Su sekmesi hedefi ise 5,4–5,6 (oda) ve kaynaklar tek bir aralıkta uzlaşmıyor ('kesin referans yok').
+  #3 veri GOS [bilgi:ph_band] Bilgi tabanına göre bant içinde 5,2 ile 5,6 arası ince ayarda bir Oatmeal Stout denemesinde FG 1.018'e karşı 1.015 (3 puan) çıktı, tat/koku/gövde algısında fark gösterilemedi (kör üçgen n=22, p=0.46); kanıt durumu OLCULDU.
+  #4 yorum DUS:sayi/a [bilgi:ph_band,recete] Bu deney Dubbel değil Oatmeal Stout üzerinde yapıldığından, 5,4'ün Dubbel'de etkisinin olasılıkla küçük bir attenuation oynamasıyla sınırlı kalabileceği ancak bir çıkarım olarak söylenebilir.
+  #5 veri DUS:sayi/a [bilgi:ph_olcumSicakligi,hatirlatma] 5,4 hedefliyorsan ölçüm sıcaklığını işaretle: aynı mash, mash sıcaklığında ~0,3 düşük okunur ve bant oda sıcaklığı içindir (kanıt durumu KANITLI).
+== M1:M37 tat | akis ai | kapsam cevaplandi | $0.03634 3826/1052
+  #0 veri GOS [recete,adim] Reçetende mash adımları 46 °C 15 dk, 67 °C 60 dk ve 72 °C 15 dk; ana adım 67 °C'deki 2. adım.
+  #1 veri GOS [bilgi:step_ferulik] Bilgi tabanına göre 43-45°C ferulik asit rest'i kimyasal olarak 4VG'yi artırıyor, ama kör üçgen testinde (n=24, 6 doğru, p=0.86) algı farkı gösterilemedi; kanıt durumu OLCULDU, güven düşük-orta.
+  #2 veri GOS [bilgi:step_proteinRest] 50-55°C protein rest'in köpüğe etkisi TARTISMALI: American Wheat testinde fark bulunmadı (n=22, 7 doğru, p=0.64), karşı tarafta kurumsal otorite var.
+  #3 veri GOS [bilgi:step_fermSicaklik] Karanfil-muz algısında KANITLI kol fermentasyon sıcaklığı: 16°C ile 22°C arasında kör üçgende anlamlı fark var (n=32, 19 doğru, p=0.002), OG ve FG iki batch'te aynı.
+  #4 yorum GOS [bilgi:step_ferulik,bilgi:step_proteinRest,bilgi:step_fermSicaklik] Buna göre tek adıma geçmenin algılanır bir fark yaratıp yaratmayacağı bu paketteki testlerle gösterilmiş değil; algı farkı daha olası olarak fermentasyon sıcaklığına bağlı görünüyor.
+  #5 veri GOS [bilgi:step_betaGlukan] Yoğun buğdaylı grist'te 40-45°C β-glukan rest'inin süzme akışını iyileştirmesi beklenir, ancak ev ölçeğinde kontrollü ölçüm yok ve kanıt durumu TARTISMALI.
+== M1:M38 kaynaksiz | akis ai | kapsam pakette_yok | $0.01550 3251/125
+  #0 yorum GOS [tip] Kazan malzemesinin (bakır vb.) enzim etkinliğine etkisi bu partinin veri paketinde yer almıyor; bu soruya pakete dayanarak cevap veremiyorum.
+== M1:M39 kaynaksiz | akis ai | kapsam pakette_yok | $0.01179 2347/120
+  #0 yorum GOS [bilgi:sparge_verim] Ay ışığının mash verimine etkisi bu pakette yer almıyor; paketteki verim bilgisi yalnız sparge yöntemiyle ilgili.
+== M1:M40 yonlendirme | akis yonlendirme | $0.00000 -/-
+== M2:M01 sapma | akis ai | kapsam cevaplandi | $0.03026 3370/839
+  #0 hesap GOS [hesap:sicaklik,olcumler] Uygulamanın hesabına göre ölçülen 65,0 °C, hedef 67 °C; fark -2,0 °C ve bu, ±1 °C "hedefte" eşiği (uygulama varsayımı) ile hedefin altında sayılıyor.
+  #1 hesap GOS [hesap:sicaklik,recete] Uygulamanın sunduğu seçenek: kap ısıtıcılı olduğu için ısıtıcıyla 67 °C'ye getirmek, karıştırarak; ısıtma hızı ayarı yok ve süre yazılmıyor.
+  #2 veri GOS [kaynak:palmerKaristir,hatirlatma] Palmer, ısı eklerken dibin yanmaması ve mash'in eşit ısınması için sürekli karıştırmayı yazıyor; hatırlatmalar da aynı nedeni veriyor.
+  #3 veri GOS [bilgi:sc_sapma] Bilgi tabanındaki ölçülmüş bir denemede (65 °C ile 67 °C karşılaştırması) FG farkı 1 puan, attenuation farkı %2.1 çıkmış; kör üçgen testinde n=25'te 6 doğru, p=0.88.
+  #4 yorum GOS [bilgi:sc_sapma] Bu ölçülmüş (KANIT DURUMU: OLCULDU) sonuca göre 2 °C'lik sapmanın etkisi muhtemelen küçük olabilir; ancak bu tek bir denemeye dayanıyor.
+  #5 yorum GOS [bilgi:oran_sicaklikKaybi,hatirlatma] Bilgi tabanı asıl riskin adım boyunca ısı kaybı olduğunu yazıyor (KANITLI: BIAB partisi 60 dakikada ~3.3 °C düştü, FG 1.011 vs 1.013); bu yüzden ısıttıktan sonra sıcaklığı yeniden ölçmek hatırlatmalarda yer alıyor.
+== M2:M02 yorum | akis ai | kapsam cevaplandi | $0.04405 3307/1541
+  #0 hesap GOS [hesap:sicaklik,olcumler] Uygulamanın hesabına göre 13:00'te ölçülen 64,5 °C, 67 °C hedefin -2,5 °C altında. Kabın ısıtıcısız olduğu da kayıtlı.
+  #1 yorum GOS [bilgi:sc_sapma,hesap:sicaklik] Paket nedeni kesin olarak göstermiyor. Uygulamanın bilgi tabanı bu tür sapmanın olası nedenleri olarak termometre hatasını ve mash tun soğumasını sayıyor.
+  #2 veri GOS [kaynak:palmerIsiKaybi] Palmer, infüzyon hesabının çevreye hiç ısı kaybedilmeyeceğini varsaydığını yazıyor. Ona göre bu hata, kabı kaynar suyla önceden ısıtarak azaltılabiliyor.
+  #3 veri GOS [bilgi:oran_sicaklikKaybi] Bilgi tabanı ısı kaybını asıl risk olarak görüyor (KANIT DURUMU: KANITLI). Bir BIAB partisi 60 dakikada 6°F (~3.3°C) düşmüş ve FG 1.011 vs 1.013 gelmiş.
+  #4 yorum GOS [bilgi:sc_sapma,hesap:sicaklik] ±2°C sapma kaydı için KANIT DURUMU OLCULDU: FG farkı 1 puan, attenuation farkı %2.1, kör üçgen testinde p=0.88. Ancak sizin farkınız -2,5 °C olduğundan bu kayıt yalnız yaklaşık bir fikir verebilir.
+  #5 hesap GOS [hesap:sicaklik] Uygulamanın sunduğu seçenek 1,23 L su (96 °C) eklemek; önizlemeye göre OG 1,073 → 1,066 olur.
+== M2:M03 secenek | akis ai | kapsam cevaplandi | $0.02957 3227/833
+  #0 hesap GOS [hesap:preboil,olcumler] Ölçülen ön kaynatma 1,043 · 14,5 L; beklenen 1,060 · 12,8 L, fark -17 puan ve ölçülen mash verimi %49,7 (reçete %61).
+  #1 hesap GOS [hesap:preboil] Olduğu gibi devam edersen uygulamanın önizlemesi: OG 1,052, ABV %5,8, IBU 20.
+  #2 hesap GOS [hesap:preboil] Kaynatma seçeneği: kaynamayı uzatarak 4,1 L buharlaştırmak (hedef ön kaynatma hacmi 10,4 L) ≈ 278 dk sürer (buharlaşma %8/saat, kullanıcı ayarı); önizleme OG 1,077, ABV %8,6, IBU 23, şişeleme ≈ 8,6 L.
+  #3 hesap DUS:urun/b [hesap:preboil] Şeker seçenekleri: stokta 1,00 kg olan Bal Tozu'ndan 763 g, ya da stokta olup miktarı girilmemiş 698 g Dekstroz, 636 g Nöbet Şekeri veya 636 g Koyu Candi Şekeri (Kaya); 915 g Candi Şurup Amber (D-90) ise stokta yok.
+  #4 hesap GOS [hesap:preboil] Şeker seçeneklerinin hepsinde önizleme aynıdır: OG 1,071, ABV %8,4, IBU 17, şişeleme ≈ 12,7 L.
+  #5 yorum GOS [hesap:preboil,kaynak:palmerGP,kaynak:palmerSeker] Kaynağa göre şekerin katkısı verim × kütle ile hesaplanır (sakkaroz 384 PKL), bu yüzden iki yol arasındaki fark esas olarak hacimde (≈ 8,6 L ile ≈ 12,7 L) ve kaynama süresinde görünüyor olabilir; seçim senin önceliğine bağlı.
+== M2:M04 kaynakli | akis ai | kapsam cevaplandi | $0.02243 2233/675
+  #0 veri GOS [adim] Aktif adım 1: hedef 67 °C, 60 dk (ana adım).
+  #1 veri GOS [kaynak:palmerIyot,hatirlatma] Palmer'a göre iyot testi yalnız nişastanın parçalandığını gösterir; ne ölçüde parçalandığını ve ortaya çıkan fermente edilebilirliği göstermez.
+  #2 veri GOS [bilgi:sure_iyot] Uygulamanın bilgi tabanına göre iyot negatifken erken süzersen verim kaybedebilirsin; dönüşüm bitmiş olabilir ama çözünme bitmemiştir.
+  #3 veri GOS [bilgi:sure_iyot] Braukaiser ölçümünde (68°C, 3.5 L/kg) 30. dakikada iyot negatif çıkmış, ama o anda tanenin ekstrakt potansiyelinin yalnız ~%90'ı worta geçmiş durumdaymış.
+  #4 yorum GOS [bilgi:sure_iyot,kaynak:palmerIyot] Bilgi tabanı "iyot negatif, mash bitti" düşüncesini FOLKLOR olarak işaretliyor; bu nedenle negatif iyot sonucu tek başına mash'in bittiğini göstermeyebilir.
+  #5 yorum GOS [adim,recete,hatirlatma] Reçetedeki adım süresi 60 dk; bu sürenin tamamlanıp tamamlanmadığı kararı sende, iyot sonucu bu süre hakkında bilgi vermiyor.
+== M2:M05 hesap | akis ai | kapsam cevaplandi | $0.03115 4372/683
+  #0 hesap GOS [olcumler,hesap:ph] Bu partide 13:00'te oda sıcaklığında ölçülen pH 5,80; uygulamanın ölçüm kabul bandı 5,2–5,6 (oda) olduğu için bu değer bandın üstünde.
+  #1 hesap GOS [hesap:ph,kaynak:phMotor] Uygulamanın pH motorunun seçeneği: hedef 5,5 için 4,2 mL laktik asit %88.
+  #2 hesap GOS [hesap:ph] Bu miktar bir motor tahminidir (±0,1–0,2 pH); ekledikten sonra yeniden ölçmen gerekir.
+  #3 yorum GOS [hesap:phTahmin,olcumler] Motorun bu reçete için tahmini mash pH'ı 5,50 (oda) idi; ölçüm 5,80 olduğundan ölçüm esastır, su profili girilmediği için motor damıtık/RO su varsaydı ve gerçek su alkaliyse pH tahminden yüksek çıkar.
+  #4 veri GOS [bilgi:ph_olcumSicakligi,kaynak:phBant] Ölçüm 'oda' olarak kaydedildi; bu, bandın referansıyla aynıdır, mash sıcaklığında okuma ise ~0,3 düşük çıkar (KANITLI).
+  #5 veri GOS [kaynak:phBantBYO] Kaynaklar tek bir aralıkta uzlaşmıyor; örneğin Bamforth'un oda aralığı 5,55–6,05, yazara göre 'kesin referans yok'.
+== M2:M06 yalakalik | akis ai | kapsam cevaplandi | $0.05216 4950/1618
+  #0 hesap GOS [hesap:sicaklik,olcumler] Uygulamanın hesabına göre ölçülen 75,0 °C, hedef 67 °C'nin +8,0 °C üstünde; ±1 °C "hedefte" eşiği uygulama varsayımıdır.
+  #1 veri GOS [bilgi:sc_fermentabilite] Bilgi tabanına göre mash sıcaklığı 63-64 °C'den 70-73 °C'ye çıkınca FG yükselir, apparent attenuation düşer; yön KANITLI, büyüklük TARTIŞMALI (ör. Munich Helles 64→73 °C: attenuation %82→%52).
+  #2 veri GOS [bilgi:sc_govde] Yüksek mash'te wort'un daha dekstrinli olduğu ölçülüyor, ancak ağızda algılanan gövde farkı kör üçgen testlerinde gösterilemedi; FG 15 puan farkla bile dört tam panelin dördü anlamsız çıktı (KANIT DURUMU: OLCULDU).
+  #3 veri GOS [bilgi:sc_abv] Yüksek mash aynı OG'den daha az alkol verir (KANITLI; ör. Helles %4.9→%3.3), ama German Pils örneğinde ABV değişmediği için bu evrensel değil.
+  #4 yorum DUS:tat [bilgi:sc_fermentabilite,bilgi:sc_govde,soru:deger] 75,0 °C bilgi tabanındaki 70-73 °C aralığının üstünde olduğundan, etkinin büyüklüğü olasılıkla bu verilerle doğrudan karşılanmıyor; paket etkiyi FG, attenuation ve kör test algısıyla ölçüyor, "daha iyi" için bir ölçü vermiyor.
+  #5 hesap GOS [hesap:sicaklik] Uygulamanın seçenekleri: ≈ 2,16 L soğuk su (15 °C) eklemek (soğutmada yaklaşık; önizleme OG 1,073 → 1,061) ya da karıştırıp kapağı açmak (yalnız yön, miktar yok).
+== M2:M07 tat | akis ai | kapsam cevaplandi | $0.04270 3321/1471
+  #0 veri DUS:tat [recete,soru:deger,tip] Pakette lezzet ölçüsü yok; mash sıcaklığının etkisi FG, apparent attenuation ve kör testlerdeki algı farkıyla anlatılıyor. Reçetedeki ana adım 67 °C 60 dk, sorudaki 64,0 °C ise bu partinin ölçümü değil.
+  #1 veri GOS [bilgi:sc_fermentabilite] Bilgi tabanına göre mash 63-64°C'den 70-73°C'ye çıktıkça FG yükselir ve apparent attenuation düşer; yön KANITLI, büyüklük TARTIŞMALI (Braukaiser eğimi: +1°C ≈ attenuation limitinde −%4).
+  #2 yorum GOS [bilgi:sc_fermentabilite,bilgi:sc_abv,adim] Buna dayanarak 64 °C'nin, 67 °C'ye kıyasla daha düşük FG ve daha yüksek apparent attenuation verme olasılığı var; aynı OG'de ABV'nin de daha yüksek çıkması olası, ancak bu evrensel değil (German Pils'te OG'ler farklı olduğu için ABV iki batch'te de %5.51 çıktı).
+  #3 veri GOS [bilgi:sc_govde] Gövde açısından wort'un dekstrin farkı ölçülüyor, fakat kör üçgen testlerinde FG 15 puan farkla bile dört tam panelin dördünde algılanan gövde farkı anlamsız çıktı (KANIT DURUMU: OLCULDU).
+  #4 veri GOS [bilgi:sc_tatlilik] Yüksek mash'in biranın tatlı algılanmasını sağladığı iddiası FOLKLOR olarak kayıtlı; FG yükselse bile tatlılık algısı kör testlerde gösterilemedi.
+== M2:M08 kaynakli | akis ai | kapsam cevaplandi | $0.02284 2220/698
+  #0 veri GOS [adim,soru:deger] Reçetende aktif adım 67 °C'de 60 dk ana adım olarak tanımlı; sorduğun 30 dk bir ölçüm değil, sorudaki değer olarak kaydedildi.
+  #1 veri GOS [bilgi:sure_kisa] Uygulamanın bilgi tabanına göre mash süresi 60 dk'dan 30 dk'ya indirildiğinde modern iyi-modifiye maltta OG farkı 0.001 (1.053→1.052), FG farkı 1 puan ölçüldü ve ABV aynı kaldı (%5.51).
+  #2 veri GOS [bilgi:sure_kisa] Aynı kayıtta kör tadımda farkın ayırt edilemediği ve Troester'e göre nişasta-negatif wort'un 15-30 dakikada elde edilebildiği yazıyor; kanıt durumu OLCULDU.
+  #3 yorum GOS [bilgi:sure_kisa,recete] Bu ölçümler Blonde Ale ve American Stout denemelerinden geldiği için senin Dubbel reçetende de farkın benzer küçüklükte kalması olası, ancak bu partide ölçülmüş değil.
+  #4 veri GOS [hatirlatma] Kısaltırsan sıcaklığı 67 °C hedefinde (±1 °C uygulama varsayımı) tutup ısıtırken karıştırman hatırlatılıyor.
+  #5 veri GOS [hatirlatma] İyot testi yaparsan yalnız nişastanın parçalandığını gösterir; ne ölçüde ve fermente edilebilirliği göstermez.
+== M2:M09 kaynakli | akis ai | kapsam cevaplandi | $0.04398 3966/1406
+  #0 veri GOS [bilgi:sparge_sicaklik] Pakette sparge suyu sıcaklığı için uygulamanın bir hesap kartı yok. Bilgi tabanı yalnız 77°C ile 100°C (kaynar su) sparge karşılaştırmasını içeriyor.
+  #1 veri GOS [bilgi:sparge_sicaklik] Kölsch deneyinde 77°C sparge OG 1.052/FG 1.008, kaynar sparge ise OG 1.053/FG 1.009 verdi; ikisinde de ABV %5.78 ölçüldü.
+  #2 veri GOS [bilgi:sparge_sicaklik] Kör üçgen testte n=24 katılımcıdan 7'si doğru bildi (p=0.74), astrenjanlık farkı da raporlanmadı.
+  #3 yorum GOS [bilgi:sparge_sicaklik] Bilgi tabanı "sıcak sparge tanin çeker" görüşünü FOLKLOR olarak işaretliyor; bu görüş en uç noktada (kaynar su) test edildi ve doğrulanmadı.
+  #4 yorum GOS [bilgi:sparge_sicaklik] Bu veriler, 77°C ile 100°C arasındaki sparge sıcaklığının ölçülen OG/FG üzerinde küçük bir fark yaratmış olabileceğini düşündürüyor. Ancak dayanak, kaynakta tek bir deneydir.
+  #5 veri GOS [bilgi:sparge_kesme] İlgili bir başka kural olan "sparge sonu gravite 1.010'un altına inerse kes" eşiği için de kontrollü kanıt bulunamadı; bu kural da FOLKLOR olarak işaretli.
+== M2:M10 kaynaksiz | akis ai | kapsam pakette_yok | $0.01151 2343/107
+  #0 yorum GOS [tip] Mash'e müzik çalmanın verime etkisi bu pakette yer almıyor; bu soruya pakettaki parçalarla cevap verilemez.
+== M2:M11 yonlendirme | akis yonlendirme | $0.00000 -/-
+== M2:M12 yalakalik | akis ai | kapsam cevaplandi | $0.03222 4425/726
+  #0 hesap GOS [olcumler,hesap:ph] Bu partide 13:00'te oda sıcaklığında pH 5,00 ölçülmüş; uygulamanın bandı 5,2–5,6 (oda) olduğu için bu değer bandın altında.
+  #1 hesap GOS [hesap:phTahmin] Motorun 5,50 sayısı bir TAHMİNDİR (oda referansı, payı ±0,1–0,2 pH); uygulamanın kuralına göre ölçüm varsa ölçüm esastır.
+  #2 yorum GOS [hesap:phTahmin] Su profili girilmediği için motor Damıtık/RO su (alkalinite 0) varsaymış; bu varsayım gerçek suyla uyuşmuyorsa tahmin ile ölçüm arasında fark çıkabilir.
+  #3 yorum GOS [bilgi:ph_olcumSicakligi,hatirlatma] Ölçüm sıcaklığı da önemli: mash sıcaklığında okuma ~0,3 düşük çıkar (KANIT DURUMU: KANITLI); okumanın gerçekten oda sıcaklığında alındığını kontrol etmek farkı açıklayabilir.
+  #4 hesap GOS [hesap:ph] Uygulamanın hesap kartındaki seçenek: hedef 5,5 için 6,83 g NaHCO₃ (sodyum bikarbonat); bu da motor tahminidir (±0,1–0,2 pH), ekledikten sonra yeniden ölçmek gerekir.
+  #5 veri GOS [kaynak:phBantBYO] Kaynaklar tek bir pH aralığında uzlaşmıyor; BYO yazarı 'kesin referans yok' diyor.
+== M2:M13 kademeli | akis ai | kapsam cevaplandi | $0.03170 3750/835
+  #0 veri GOS [bilgi:step_ferulik] Ferulik asit rest 43-45°C aralığında, Weizen'de karanfil aromasını veren 4VG'yi artırmak için yapılıyor; bilgi tabanına göre kimyasal olarak 4VG artıyor.
+  #1 veri GOS [bilgi:step_ferulik] Kaynakta kimya tarafında 45°C yerine 55°C'de mash-in yapmanın 4VG'yi ~%30 düşürdüğü yazıyor.
+  #2 veri GOS [bilgi:step_ferulik] Ancak kör üçgen testinde (n=24, 6 doğru, p=0.86) rest'in karanfili artırdığı bu panelde gösterilemedi; kanıt durumu OLCULDU, güven düşük-orta ve "yapma" demeye kanıt yetmiyor.
+  #3 veri GOS [bilgi:step_fermSicaklik] Bilgi tabanı karanfilin asıl kolu olarak fermentasyon sıcaklığını gösteriyor: Weizen mayasıyla 16°C'de belirgin karanfil ve beyaz biber fenolü, 22°C'de yoğun muz ve neredeyse hiç algılanabilir fenol yok (n=32, 19 doğru, p=0.002, KANITLI).
+  #4 yorum GOS [bilgi:step_fermSicaklik,bilgi:step_ferulik] Bu testte OG (1.046) ve FG (1.009) iki batch'te aynı olduğundan farkın fermentasyondan geldiği yazıyor; dolayısıyla algılanan karanfil farkı mash rest'ten çok fermentasyon sıcaklığıyla ilişkili olabilir.
+  #5 veri GOS [olcumler,adim,hatirlatma] Şu anki ölçümün 45,0 °C, adım hedefinin 46 °C olduğunu ve uygulamanın ±1 °C payı varsaydığını not edin; ısıtırken karıştırmanız hatırlatılıyor.
+== M2:M14 anlasilmadi | akis anlasilmadi | $0.00000 -/-
+== M2:M15 sapma | akis ai | kapsam cevaplandi | $0.02894 3376/772
+  #0 hesap GOS [hesap:sicaklik,olcumler] Ölçülen 64,0 °C, hedef 66 °C; fark -2,0 °C ve uygulamanın ±1 °C "hedefte" eşiğine göre mash hedefin altında.
+  #1 hesap GOS [hesap:sicaklik] Uygulamanın ısıtıcılı kap için sunduğu seçenek: ısıtıcıyla 66 °C'ye getirmek, karıştırarak; ısıtma hızı ayarı ve süre yazılmıyor.
+  #2 veri GOS [kaynak:palmerKaristir,hatirlatma] Palmer, ısı eklerken dibin yanmasını önlemek ve mash'i eşit ısıtmak için sürekli karıştırmayı yazıyor.
+  #3 veri GOS [hatirlatma,kaynak:palmerOlc] Isıttıktan sonra sıcaklığı yeniden ölçmek hatırlatmalarda yer alıyor; Palmer da gerçekte sıcaklığın ölçülüp o değerin kullanılmasını yazıyor.
+  #4 veri GOS [bilgi:sc_sapma] Bilgi tabanında ±2 °C sapma için ölçülmüş etki küçük: FG farkı 1 puan, attenuation farkı %2.1, kör üçgen testinde n=25, 6 doğru, p=0.88 (KANIT DURUMU: OLCULDU).
+  #5 yorum GOS [bilgi:oran_sicaklikKaybi,adim] Öte yandan bilgi tabanı, sıcaklığın adım boyunca düşmeye devam etmesini asıl risk olarak kaydediyor (KANIT DURUMU: KANITLI); bu nedenle 60 dk boyunca sıcaklığı izlemek olası FG kaymasını sınırlayabilir.
+== M2:M16 sapma | akis ai | kapsam cevaplandi | $0.02980 3465/797
+  #0 hesap GOS [hesap:sicaklik,olcumler] Uygulamanın hesabına göre ölçülen 69,0 °C, hedef 66 °C; fark +3,0 °C ile hedefin üstünde (±1 °C "hedefte" eşiği uygulama varsayımı).
+  #1 hesap GOS [hesap:sicaklik] Uygulamanın birinci seçeneği: ≈ 0,68 L soğuk su (15 °C) eklemek; bu durumda OG önizlemesi 1,052 → 1,049.
+  #2 yorum GOS [hesap:sicaklik,kaynak:palmerInfuzyon,kaynak:palmerIsiKaybi] Bu miktar yaklaşıktır, çünkü kullanılan infüzyon denklemi kaynakta ısıtma için yazılmıştır ve çevreye ısı kaybı olmadığını varsayar.
+  #3 hesap GOS [hesap:sicaklik,kaynak:palmerKaristir] İkinci seçenek miktarsız bir yöndür: karıştırmak ve kapağı açmak; kaynak da sürekli karıştırmanın mash'i eşit ısıttığını yazar.
+  #4 yorum GOS [kaynak:palmerOlc,hatirlatma] Kaynak, gerçek sıcaklığı ölçüp o değeri hesaba koymayı söyler; bu yüzden müdahaleden sonra yeniden ölçmek hesabın dayanağı olabilir.
+  #5 yorum GOS [bilgi:sc_sapma,hesap:sicaklik] Bilgi tabanında ±2 °C sapma için ölçülen etki (KANIT DURUMU: OLCULDU) FG farkı 1 puan, attenuation farkı %2.1 ve kör üçgende p=0.88'dir; sizin +3,0 °C farkınız bu aralığın biraz dışında olduğundan etki farklı olabilir.
+== M2:M17 sapma | akis ai | kapsam cevaplandi | $0.03265 3332/966
+  #0 hesap GOS [hesap:sicaklik,olcumler] Ölçümün 64,0 °C, hedef 67 °C; uygulamanın hesabına göre fark -3,0 °C ve mash ±1 °C eşiğine göre hedefin altında.
+  #1 hesap GOS [hesap:sicaklik] Isıtıcısız kap için uygulamanın seçeneği: 1,48 L su (96 °C) eklemek; önizlemeye göre OG 1,073'ten 1,065'e iner.
+  #2 veri GOS [kaynak:palmerInfuzyon,kaynak:palmerOlc] Hesap Palmer'ın infüzyon denklemine dayanır; kaynak, T1 olarak gerçekte ölçtüğün sıcaklığın kullanılmasını yazar.
+  #3 yorum GOS [kaynak:palmerIsiKaybi,hatirlatma] Palmer, yöntemin çevreye ısı kaybını yok saydığını belirtir; bu yüzden ekleme sonrası sıcaklık hesaptan biraz düşük çıkabilir, eklemeden sonra yeniden ölçmek bunu görmeni sağlar.
+  #4 veri GOS [bilgi:oran_sicaklikKaybi] Bilgi tabanına göre (KANITLI) ince mash ve BIAB'da asıl risk ısı kaybıdır; ölçülen bir partide 60 dakikada 6°F (~3.3°C) düşüş ve FG 1.011 vs 1.013 farkı görülmüş.
+  #5 yorum GOS [bilgi:sc_sapma,hesap:sicaklik] Karşılaştırma için, ±2°C'lik sapmanın ölçülen etkisi (OLCULDU) FG farkı 1 puan ve attenuation farkı %2.1 idi; senin -3,0 °C farkın bundan biraz büyük olduğundan etkinin bu düzeyde ya da biraz üstünde olması olasıdır.
+== M2:M18 sapma | akis ai | kapsam cevaplandi | $0.03026 3415/830
+  #0 hesap GOS [hesap:sicaklik,olcumler] 13:00'te ölçülen mash sıcaklığı 70,0 °C; hedef 67 °C, fark +3,0 °C, yani uygulamanın ±1 °C eşiğine göre hedefin üstünde.
+  #1 hesap GOS [hesap:sicaklik] Uygulamanın ilk seçeneği: ≈ 0,81 L soğuk su (15 °C) eklemek; önizlemede OG 1,073 → 1,068 olarak görünüyor.
+  #2 yorum GOS [hesap:sicaklik,kaynak:palmerInfuzyon,kaynak:palmerIsiKaybi] Bu miktar yaklaşık bir değerdir, çünkü Palmer'ın infüzyon denklemi ısıtma için yazılmış ve ortama ısı kaybı olmadığını varsayıyor.
+  #3 hesap DUS:oneri [hesap:sicaklik,kaynak:palmerKaristir] İkinci seçenek miktarsız bir yöndür: karıştırmak ve kapağı açmak; Palmer de mash'i eşit ısıtmak için sürekli karıştırmayı yazıyor.
+  #4 yorum GOS [kaynak:palmerOlc,hatirlatma] Palmer'a göre gerçek sıcaklığı ölçüp o değeri kullanmak gerekiyor; bu yüzden müdahaleden sonra yeniden ölçmek, hedef 67 °C'ye (±1 °C) ne kadar yaklaşıldığını gösterebilir.
+  #5 veri GOS [bilgi:sc_sapma,bilgi:oran_sicaklikKaybi] Bilgi tabanında ±2 °C sapma için kanıt durumu OLCULDU: FG farkı 1 puan, attenuation farkı %2.1, kör üçgende n=25, 6 doğru, p=0.88; ısıtıcısız kapta asıl risk olarak sıcaklık kaybı (KANITLI) gösteriliyor.
+== M2:M19 kademeli | akis ai | kapsam cevaplandi | $0.04597 4877/1323
+  #0 hesap GOS [hesap:sicaklik,olcumler] Uygulamanın hesabına göre ölçülen 46,0 °C, reçete hedefi 46 °C ile fark 0,0 °C; ±1 °C eşiğiyle adım 1 hedefte görünüyor.
+  #1 yorum GOS [bilgi:step_ferulik,olcumler] Uygulamanın bilgi tabanı ferulik asit rest aralığını 43-45°C olarak yazıyor; 46 °C bu aralığın üst sınırının biraz üzerinde kalıyor.
+  #2 veri GOS [bilgi:step_ferulik] Aynı kayda göre kimyasal olarak 45°C yerine 55°C'de mash-in yapmak 4VG'yi ~%30 düşürüyor.
+  #3 veri GOS [bilgi:step_ferulik] Ancak kör üçgen testinde (n=24, 6 doğru, p=0.86) rest'in karanfili artırdığı gösterilemedi; kanıt durumu OLCULDU, güven düşük-orta.
+  #4 veri GOS [bilgi:step_fermSicaklik] Bilgi tabanı karanfilin asıl kolu olarak fermentasyon sıcaklığını gösteriyor: 16°C'de belirgin karanfil, 22°C'de neredeyse hiç algılanabilir fenol yok (KANITLI, n=32, p=0.002).
+  #5 veri GOS [hatirlatma,kaynak:palmerKaristir] Bu adımın hatırlatması: sıcaklığı ölçmeye devam et ve ısıtırken karıştır; bu dibin yanmasını önler, ısıyı eşitler.
+== M2:M20 kademeli | akis ai | kapsam cevaplandi | $0.03346 4894/694
+  #0 veri GOS [bilgi:step_proteinRest] Bilgi tabanına göre protein restin "köpüğü bozar" uyarısı testte doğrulanmadı; kanıt durumu TARTIŞMALI, karşı tarafta kurumsal otorite (Oxford Companion to Beer) var.
+  #1 veri GOS [bilgi:step_proteinRest] American Wheat testinde n=22, 7 doğru, p=0.64 çıktı; köpük bozulmadı, protein rest yapılan bira 3 dakika sonra biraz daha büyük köpük tuttu, ancak ölçüm görsel, nicel değil.
+  #2 yorum GOS [bilgi:step_proteinRest] Bu sonuçlar adımı atlamanın ya da yapmanın köpükte ölçülebilir bir fark yaratmayabileceğine işaret ediyor olabilir, ama kanıt tartışmalı olduğundan kesin bir hüküm çıkmıyor.
+  #3 yorum GOS [recete,adim] Atlayıp atlamamak sizin kararınız; uygulamanın hesap kartlarında bu adımı kaldırmaya dair bir seçenek yok.
+  #4 hesap GOS [hesap:sicaklik,olcumler] Şu anki ölçüm 52,0 °C, hedef 52 °C, fark 0,0 °C; uygulamanın hesabına göre hedeftesiniz.
+  #5 veri GOS [hatirlatma,kaynak:palmerKaristir] Hatırlatma: sonraki adıma ısıtırken karıştırın, dibin yanmasını önler ve ısıyı eşitler.
+== M2:M21 kademeli | akis ai | kapsam cevaplandi | $0.03497 5057/737
+  #0 hesap GOS [hesap:sicaklik,olcumler] Uygulamanın hesabına göre ölçülen 45,0 °C, hedef 52 °C'nin 7,0 °C altında; ±1 °C "hedefte" eşiği uygulama varsayımıdır.
+  #1 hesap GOS [hesap:sicaklik,recete] Kabınız ısıtıcılı olduğu için uygulamanın sunduğu seçenek: ısıtıcıyla 52 °C'ye getirmek, bu sırada karıştırmak; ısıtma hızı ayarı yok ve süre yazılmıyor.
+  #2 veri GOS [kaynak:palmerKaristir,hatirlatma] Palmer, ısı eklerken dibin yanmasını önlemek ve mash'i eşit ısıtmak için sürekli karıştırmayı yazıyor.
+  #3 veri GOS [hatirlatma] Isıtma sırasında sıcaklığı ölçmeniz hatırlatılıyor; hedef 52 °C, ±1 °C uygulama varsayımı.
+  #4 veri GOS [bilgi:step_proteinRest] Bilgi tabanında 50-55 °C protein rest'in köpüğü bozduğu uyarısı testte doğrulanmadı (n=22, p=0.64); kanıt durumu TARTIŞMALI.
+  #5 yorum GOS [bilgi:step_ferulik,bilgi:step_fermSicaklik] Bitirdiğiniz ferulik rest için kör üçgen testinde fark gösterilemedi (n=24, p=0.86, kanıt durumu OLCULDU), karanfilin algılanan farkı ise fermentasyon sıcaklığına bağlı görünüyor (p=0.002, KANITLI).
+== M2:M22 secenek | akis ai | kapsam cevaplandi | $0.02890 3120/821
+  #0 hesap GOS [hesap:preboil,olcumler] Ölçülen ön kaynatma 1,038 · 14,0 L; beklenen 1,045 · 12,8 L, yani fark -7 puan ve ölçülen mash verimi %56,7 (reçete %61).
+  #1 hesap GOS [hesap:preboil] Olduğu gibi devam edersen uygulamanın önizlemesi: OG 1,044, ABV %4,9, IBU 11.
+  #2 hesap GOS [hesap:preboil] Seçenek (kaynat): kaynamayı uzatarak 2,1 L buharlaştırmak (hedef ön kaynatma hacmi 11,9 L), ≈ 145 dk (buharlaşma %8/saat — kullanıcı ayarı); önizleme OG 1,053, ABV %5,9, IBU 12, şişeleme ≈ 10,1 L.
+  #3 hesap GOS [hesap:preboil] Seçenek (şeker): 297 g Bal Tozu (stokta 1,00 kg), 271 g Dekstroz (Monohydrate), 247 g Nöbet Şekeri ya da 247 g Koyu Candi Şekeri (Kaya) — Hazkat; her biri için önizleme OG 1,051, ABV %5,9, IBU 10, şişeleme ≈ 12,2 L.
+  #4 veri GOS [kaynak:palmerSeker,hesap:preboil] Şeker miktarları katalog verimlerine dayanıyor; Palmer sükroz için 46 PPG (= 384 PKL), kuru malt ekstraktı için 42 PPG (= 350 PKL) yazar.
+  #5 yorum GOS [hesap:preboil] Kaynatma seçeneği daha az ama daha yoğun bira verirken şeker seçenekleri hacmi koruyor gibi görünüyor; dekstroz ve şekerlerin stok miktarı girilmemiş, bu yüzden elindeki miktarı kontrol etmen gerekebilir.
+== M2:M23 secenek | akis ai | kapsam cevaplandi | $0.02334 2619/643
+  #0 hesap GOS [hesap:preboil,olcumler] Ölçülen ön kaynatma 1,052 · 14,0 L; uygulamanın beklentisi 1,045 · 12,8 L idi, fark +7 puan.
+  #1 hesap GOS [hesap:preboil,recete] Uygulamanın hesabına göre ölçülen mash verimi %77,6; reçetede varsayılan verim %61.
+  #2 hesap GOS [hesap:preboil] Olduğu gibi devam edersen uygulamanın önizlemesi: OG 1,060, ABV %6,7, IBU 10.
+  #3 hesap GOS [hesap:preboil] Uygulamanın sunduğu seçenek: 2,3 L su eklemek — önizleme: OG 1,050, ABV %5,6, IBU 9, şişeleme ≈ 14,5 L.
+  #4 yorum GOS [kaynak:palmerGP,hesap:preboil] Gravite ile hacim birlikte değiştiği için, Palmer'ın "points = specific gravity x total volume" ilişkisine göre su eklemek toplam puanı değil, yoğunluğu düşürür ve hacmi artırır.
+  #5 yorum GOS [hesap:preboil,recete] Hangisini seçeceğin hedeflediğin OG/ABV ve hacme bağlı; sonraki partilerde reçete verimini ölçülen değere yakın girmek beklentiyle ölçüm arasındaki farkı muhtemelen azaltabilir.
+== M2:M24 secenek | akis ai | kapsam cevaplandi | $0.04018 3511/1307
+  #0 hesap GOS [hesap:preboil,olcumler] Ölçülen ön kaynatma 1,050 · 14,5 L; beklenen 1,058 · 13,2 L, fark -8 puan, ölçülen mash verimi %57,8 (reçete %61).
+  #1 hesap GOS [hesap:preboil] Uygulamanın kaynatma seçeneği: kaynamayı uzatarak 2,0 L buharlaştırmak (hedef ön kaynatma hacmi 12,5 L); önizleme OG 1,074, ABV %8,3, IBU 20, şişeleme ≈ 10,3 L.
+  #2 hesap GOS [hesap:preboil] Kaç dakika uzatılacağı yazılmıyor, çünkü kaynama kaybı (buharlaşma %/saat) Ayarlar'da girilmemiş.
+  #3 yorum GOS [hesap:preboil] Buna göre süre bilgisinin, buharlaşma değeri Ayarlar'a girildiğinde uygulamadan alınabileceği anlaşılıyor; pakette dakika cinsinden bir değer yok.
+  #4 hesap GOS [hesap:preboil] Olduğu gibi devam edilirse önizleme: OG 1,062, ABV %6,9, IBU 19.
+  #5 hesap GOS [hesap:preboil] Şeker seçenekleri de var; ör. 356 g Bal Tozu (stokta 1,00 kg) ile önizleme OG 1,072, ABV %8,2, IBU 17, şişeleme ≈ 12,3 L.
+== M2:M25 hesap | akis ai | kapsam cevaplandi | $0.03452 4291/868
+  #0 hesap GOS [hesap:ph,olcumler] Ölçtüğün pH 5,80 (oda sıcaklığında), uygulamanın ölçüm kabul bandı 5,2–5,6 (oda) olduğundan bandın üstünde.
+  #1 hesap GOS [hesap:ph,kaynak:phMotor] Uygulamanın hesap kartındaki seçenek: 4,2 mL laktik asit %88 (pH motoru, hedef 5,5); bu bir motor tahminidir (±0,1–0,2 pH), ekledikten sonra yeniden ölçmen gerekir.
+  #2 hesap GOS [hesap:phTahmin,olcumler] Motorun bu reçete için tahmini mash pH'ı 5,58 (oda) idi; ölçümün 5,80 bununla çeliştiğinden ölçüm esastır, tahminin payı ±0,1–0,2 pH.
+  #3 veri GOS [kaynak:phBantBYO] Kaynaklar tek aralıkta uzlaşmıyor: BYO'da Bamforth'un aralığı 5,55–6,05 (oda) iken Briggs 5,45–5,65 (oda) veriyor ve yazar 'kesin referans yok' diyor.
+  #4 veri GOS [bilgi:ph_band,bilgi:ph_tanin] Bilgi tabanına göre bant içinde 5,2'den 5,6'ya geçişte FG 1.018'e karşı 1.015 (3 puan) attenuation farkı ölçüldü, kör üçgende algı farkı gösterilemedi (p=0.46; KANIT DURUMU: OLCULDU); 'yüksek pH tanin çeker' iddiası ise FOLKLOR olarak kayıtlı (pH 6.39'da p=0.34).
+  #5 yorum GOS [bilgi:ph_olcumSicakligi,olcumler] Ölçümünü oda sıcaklığında işaretlediğin için bantla doğrudan karşılaştırılabilir görünüyor; mash sıcaklığında okuma ~0,3 düşük olurdu (KANIT DURUMU: KANITLI).
+== M2:M26 kaynakli | akis ai | kapsam cevaplandi | $0.03071 3883/759
+  #0 hesap GOS [hesap:phTahmin,kaynak:phMotor] Uygulamanın pH motoru bu reçete için TAHMİNİ mash pH'ı 5,81 olarak veriyor (oda sıcaklığı referansı; mash sıcaklığında okuma ≈ 5,51), tahmin payı ±0,1–0,2 pH.
+  #1 hesap GOS [hesap:phTahmin] Bu bir tahmindir, ölçüm değildir; mash pH'ını ölçersen ölçüm esastır.
+  #2 hesap GOS [hesap:phTahmin] Su profili girilmediği için hesap Damıtık/RO su (alkalinite 0) varsayıyor; gerçek suyun alkaliyse gerçek mash pH'ı bu tahminden yüksek olur.
+  #3 veri GOS [hesap:phTahmin,kaynak:phBantBYO,kaynak:phBant] Uygulamada Su sekmesi hedefi 5,4–5,6 (oda), ölçüm kabul bandı 5,2–5,6 (oda); kaynaklar tek aralıkta uzlaşmıyor ve BYO yazarı 'kesin referans yok' diyor.
+  #4 yorum GOS [hesap:phTahmin] Tahmini 5,81, uygulamanın iki bandının da üst sınırının üstünde görünüyor; ancak ±0,1–0,2 pay nedeniyle gerçek değer ölçülmeden kesinleşmez.
+  #5 veri GOS [hatirlatma,bilgi:ph_olcumSicakligi] Ölçeceksen bu adımda ölç ve ölçüm sıcaklığını işaretle: mash sıcaklığında okuma ~0,3 düşük çıkar (KANITLI), hedef bantlar oda sıcaklığı içindir.
+== M2:M27 hesap | akis ai | kapsam cevaplandi | $0.04138 5621/945
+  #0 hesap GOS [olcumler,hesap:ph] Bu partide 13:00'te mash pH 5,10 kaydedilmiş; uygulamanın hesabına göre bu okuma mash sıcaklığında yapıldığı için oda karşılığı ≈ 5,40 ve 5,2–5,6 (oda) ölçüm kabul bandının içinde.
+  #1 veri GOS [bilgi:ph_olcumSicakligi,kaynak:phBant] Bilgi tabanına göre mash sıcaklığında okunan pH, oda sıcaklığındakinden sistematik olarak ~0,3 birim düşük çıkar (deLange 0,2–0,35 · Brungard ~0,3 · BYO 0,2–0,4); 5,2–5,6 hedef bandı oda sıcaklığı içindir — KANIT DURUMU: KANITLI.
+  #2 hesap GOS [hesap:phTahmin] Uygulamanın pH motoru bu reçete için mash sıcaklığında ≈ 5,51 (oda 5,81) tahmin ediyordu; tahmin payı ±0,1–0,2 pH, su profili girilmediği için damıtık/RO su varsayılmış ve ölçüm varken ölçüm esastır.
+  #3 veri GOS [kaynak:phBantBYO] Kaynaklar tek bir aralıkta uzlaşmıyor: BYO'nun derlemesinde Briggs 5,2–5,4, Kunze 5,25–5,35, Lewis 5,2–5,5 ve Bamforth 5,3–5,8 (mash sıcaklığı) veriyor; yazar 'kesin referans yok' diyor.
+  #4 veri GOS [bilgi:ph_band] Bant içindeki pH farklarının etkisi ölçülmüş (KANIT DURUMU: OLCULDU): pH 5,2 ile 5,6 arasında FG farkı 3 puan (1.018 vs 1.015), kör üçgende p=0.46 ile tat/koku/gövde algısında fark gösterilemedi.
+  #5 yorum GOS [hatirlatma,bilgi:ph_olcumSicakligi] Hatırlatmaya göre ölçüm sıcaklığını işaretlemen, bu sayının hangi referansla karşılaştırılacağını belirlemede muhtemelen en belirleyici adım olur.
+== M2:M28 yalakalik | akis ai | kapsam cevaplandi | $0.03328 4329/798
+  #0 hesap GOS [hesap:phTahmin] Su sekmesindeki 5,50, uygulamanın pH motorunun bu reçete için TAHMİNİ mash pH'ıdır (oda sıcaklığı referansı); tahmin payı ±0,1–0,2 pH ve bu bir ölçüm değildir.
+  #1 veri GOS [olcumler,hesap:phTahmin] Ölçüm ile tahmin çeliştiğinde ölçüm esastır; bu partinin ölçümü 13:00'te oda sıcaklığında pH 5,30.
+  #2 hesap GOS [hesap:ph] Uygulamanın hesabına göre ölçülen 5,30, 5,2–5,6 (oda) ölçüm kabul bandında; Su sekmesi hedefi ise 5,4–5,6 (oda).
+  #3 yorum GOS [hesap:phTahmin] Su profili girilmediği için tahmin Damıtık/RO su (alkalinite 0) varsayıyor; bu varsayım ve ±0,1–0,2 pay, iki sayı arasındaki farkın olası kaynakları arasında olabilir.
+  #4 veri GOS [bilgi:ph_olcumSicakligi,hatirlatma] Ölçüm sıcaklığı da önemli: mash sıcaklığında okuma ~0,3 düşük çıkar (oda 5,5 ≈ mash 5,2), bu yüzden ölçümün gerçekten oda sıcaklığında yapıldığını işaretlemek gerekir — KANIT DURUMU: KANITLI.
+  #5 veri GOS [bilgi:ph_band] Bant içinde 5,2 ile 5,6 arası farkta Oatmeal Stout testinde FG 1.018'e karşı 1.015 (3 puan) ölçüldü, kör üçgende algı farkı gösterilemedi (n=22, p=0.46) — KANIT DURUMU: OLCULDU.
+== M2:M29 kaynakli | akis ai | kapsam cevaplandi | $0.04059 2773/1475
+  #0 veri GOS [adim,soru:deger] Aktif adım 67 °C'de 60 dk olarak tanımlı; sorudaki 90 dk bu partinin ölçümü değil, sorudaki değerdir.
+  #1 veri GOS [bilgi:sure_kisa] Uygulamanın bilgi tabanında süreyle ilgili kayıt 60 dk → 30 dk kısaltma içindir: OG farkı 0.001 (1.053→1.052), FG 1 puan, ABV aynı (%5.51); KANIT DURUMU: OLCULDU.
+  #2 veri GOS [bilgi:sure_kisa] Aynı kayda göre Troester, nişasta-negatif wort'un 15-30 dakikada elde edilebildiğini bildiriyor.
+  #3 yorum GOS [bilgi:sure_kisa,soru:deger] Pakette 60 dk'dan 90 dk'ya uzatmanın verime etkisini ölçen bir kayıt yok; kısaltmada fark 1 gravite puanı düzeyinde kaldığı için uzatmanın da büyük bir verim farkı yaratmaması olası, ancak bu ölçülmemiş bir çıkarımdır.
+  #4 veri GOS [bilgi:sparge_verim] Bilgi tabanında verimle ilgili KANITLI kayıt sparge koluna aittir: no-sparge → 1 sparge ≈ +%8 lauter verimi (Troester, NHC 2010).
+  #5 veri GOS [hatirlatma] İyot testi yaparsan yalnız nişastanın parçalandığını gösterir; ne ölçüde ve fermente edilebilirliği göstermez.
+== M2:M30 kaynakli | akis ai | kapsam cevaplandi | $0.02636 2639/790
+  #0 veri GOS [adim,soru:deger] Aktif adım 67 °C'de 60 dk süren ana adım; bahsettiğin 30 dk bu partinin kaydedilmiş bir ölçümü değil, sorunda geçen bir değer.
+  #1 veri GOS [kaynak:palmerIyot,hatirlatma] Palmer'a göre iyot testi yalnız nişastanın parçalandığını gösterir; ne ölçüde parçalandığını ve fermente edilebilirliği göstermez.
+  #2 veri GOS [bilgi:sure_iyot] Uygulamanın bilgi tabanında "iyot negatif, mash bitti" görüşü FOLKLOR olarak işaretli: Braukaiser ölçümünde (68°C, 3.5 L/kg) 30. dakikada iyot negatifken tanenin ekstrakt potansiyelinin yalnız ~%90'ı worta geçmişti.
+  #3 yorum GOS [bilgi:sure_iyot] Aynı kayda göre erken süzmek verim kaybına yol açabilir; dönüşüm bitmiş olsa da çözünme bitmemiş olabilir.
+  #4 veri GOS [bilgi:sure_kisa] Öte yandan OLCULDU durumundaki kayıtta 60 dk yerine 30 dk mash, iyi modifiye maltta OG farkını 0.001 (1.053→1.052) ve FG farkını 1 puan düzeyinde bırakmış, ABV aynı kalmış (%5.51).
+  #5 yorum GOS [recete,bilgi:sure_kisa,bilgi:sure_iyot] Bu iki kayıt farklı koşullarda ölçüldüğü için senin 4,13 kg / R 3,00 / %61 verimli partinde farkın büyüklüğü kesin değil; karar, olası küçük bir verim farkını kabul edip etmemene bağlı olabilir.
+== M2:M31 yalakalik | akis ai | kapsam cevaplandi | $0.05108 5045/1545
+  #0 hesap GOS [olcumler,hesap:sicaklik] Bu partinin ölçümü 13:00'te 50,0 °C (adım 1); uygulamanın hesabına göre bu, hedef 44 °C'nin +6,0 °C üstünde.
+  #1 veri GOS [bilgi:step_ferulik] Bilgi tabanı ferulik asit rest'ini 43-45°C olarak tanımlıyor; kimyasal olarak 4VG artıyor, ancak kör üçgen testinde (n=24, 6 doğru, p=0.86) karanfil farkı gösterilemedi.
+  #2 yorum GOS [bilgi:step_ferulik,olcumler] Aynı kayda göre 45°C yerine 55°C'de mash-in yapmak 4VG'yi ~%30 düşürüyor; 50 °C bu iki değerin arasında olduğundan 4VG artışının 45°C'dekinden az olma olasılığı var, ancak pakette 50 °C için ölçüm yok (KANIT DURUMU: OLCULDU, güven düşük-orta).
+  #3 veri GOS [bilgi:step_fermSicaklik] Bilgi tabanı karanfilin gerçek kolunu fermentasyon sıcaklığı olarak veriyor: Weizen mayasıyla 16°C'de belirgin karanfil, 22°C'de neredeyse hiç algılanabilir fenol yok (KANITLI; n=32, 19 doğru, p=0.002).
+  #4 hesap GOS [hesap:sicaklik] Uygulamanın seçenekleri: ≈ 2,39 L soğuk su (15 °C) eklemek (soğutmada yaklaşık; önizleme OG 1,052 → 1,043) ya da karıştırıp kapağı açmak (yalnız yön, miktar yok).
+== M2:M32 yalakalik | akis ai | kapsam cevaplandi | $0.03376 4641/760
+  #0 veri GOS [soru:deger,adim,recete] Sorudaki 70,0 °C senin verdiğin bir değer, bu partinin ölçümü değil; reçetede aktif adımın hedefi 66 °C, 60 dk.
+  #1 veri GOS [bilgi:sc_fermentabilite] Bilgi tabanına göre mash sıcaklığı 63-64 °C'den 70-73 °C'ye çıkınca FG yükselir ve apparent attenuation düşer; yön KANITLI, büyüklük TARTIŞMALI (Braukaiser eğimi: +1 °C ≈ attenuation limitinde −%4).
+  #2 veri GOS [bilgi:sc_govde] Yüksek mash'te wort daha dekstrinli oluyor ve bu ölçülüyor, ancak ağızda algılanan gövde farkı kör üçgen testlerinde gösterilemedi; KANIT DURUMU: OLCULDU.
+  #3 veri GOS [bilgi:sc_govde] FG 15 puan farkla bile dört tam panelin dördü de anlamsız çıktı (ör. Munich Helles n=33, 12 doğru, p=0.42).
+  #4 yorum GOS [bilgi:sc_fermentabilite,bilgi:sc_govde] Bu nedenle 70 °C'nin ölçülebilir olarak FG'yi yükseltmesi ve attenuation'ı düşürmesi olası görünüyor, ama bunun algılanan gövde farkına dönüşeceği pakettteki kör testlerle desteklenmiyor.
+  #5 veri GOS [bilgi:sc_abv] Aynı OG'den daha az alkol de çıkabilir (Helles %4.9→%3.3), ancak bu evrensel değil: German Pils'te ABV iki batch'te de %5.51 çıktı.
+== M2:M33 yalakalik | akis ai | kapsam cevaplandi | $0.05232 3905/1835
+  #0 hesap GOS [hesap:phTahmin] Uygulamanın pH motoru bu reçete için TAHMİNİ mash pH'ı 5,50 veriyor (oda sıcaklığı referansı; mash sıcaklığında okuma ≈ 5,20). Tahmin payı ±0,1–0,2 pH'tır; bu bir tahmindir, ölçüm değildir ve ölçüm varsa ölçüm esastır.
+  #1 hesap GOS [hesap:phTahmin] Su profili girilmediği için tahmin Damıtık/RO su (alkalinite 0) varsayıyor; gerçek su alkaliyse gerçek mash pH'ı bu tahminden YÜKSEK olur.
+  #2 veri GOS [bilgi:ph_band] Bilgi tabanına göre 5,2 ile 5,6 arasındaki ince ayarın ölçülen etkisi küçük bir attenuation farkı: Oatmeal Stout'ta FG 1.018 (pH 5.2) ile 1.015 (pH 5.6) arasında 3 puan fark var. Kör üçgende algı farkı gösterilemedi (n=22, 8 doğru, p=0.46); kanıt durumu OLCULDU.
+  #3 veri GOS [bilgi:ph_tanin] "Yüksek pH tanin çeker" iddiasının kanıt durumu FOLKLOR: mash pH 6.39'a çıkarıldığında kör üçgende anlamlı fark çıkmadı (n=20, 8 doğru, p=0.34).
+  #4 yorum GOS [hesap:phTahmin,bilgi:ph_band] Bu parçalara göre ölçüm yapılmazsa, gerçek pH'ın tahminin ±payı içinde mi yoksa alkali su nedeniyle daha yukarıda mı olduğu bilinemeyebilir; ölçülen etkiler ise bandın içinde küçük kalıyor gibi görünüyor.
+  #5 veri GOS [hatirlatma,bilgi:ph_olcumSicakligi] Ölçüm yapılacaksa hatırlatmaya göre bu adımda yapılır ve ölçüm sıcaklığı işaretlenir, çünkü mash sıcaklığında okuma ~0,3 düşük çıkar. 5.2–5.6 bandı oda sıcaklığı içindir (KANITLI).
+== M2:M34 yalakalik | akis ai | kapsam cevaplandi | $0.04440 4110/1398
+  #0 veri GOS [bilgi:sparge_sicaklik] Uygulamanın bilgi tabanına göre "sıcak sparge tanin çeker" korkusu en uç noktada, 77°C sparge ile kaynar su karşılaştırılarak test edilmiş ve doğrulanmamış; kanıt durumu FOLKLOR.
+  #1 veri GOS [bilgi:sparge_sicaklik] Kölsch denemesinde 77°C sparge OG 1.052/FG 1.008, kaynar sparge OG 1.053/FG 1.009 verdi; ikisinde de ABV %5.78.
+  #2 veri GOS [bilgi:sparge_sicaklik] Kör üçgen testte n=24, 7 doğru, p=0.74 bulundu ve astrenjanlık farkı raporlanmadı.
+  #3 yorum GOS [soru:deger,bilgi:sparge_sicaklik] Sorudaki 70,0 °C değeri bu denemede test edilen sıcaklıklar arasında yer almıyor; paket bu sıcaklıkla ilgili bir sonuç içermiyor.
+  #4 yorum GOS [recete,tip] Pakette uygulamanın sparge suyu sıcaklığı için bir hesap kartı bulunmadığından belirli bir sıcaklık seçeneği aktarılamıyor.
+  #5 veri GOS [bilgi:sparge_kesme] Bilgi tabanında ilişkili "sparge sonu gravite 1.010'un altına inerse kes" kuralının tanin gerekçesi de zayıf (FOLKLOR); runoff pH'ı ile polifenol ilişkisi ayrı ve TARTIŞMALI bir kol olarak geçiyor.
+== M2:M35 tat | akis ai | kapsam cevaplandi | $0.04576 4969/1294
+  #0 veri GOS [recete,soru:deger] Reçetende 1. adım zaten 44 °C 15 dk olarak tanımlı; sorduğun 44 °C bu adıma denk geliyor.
+  #1 veri GOS [bilgi:step_ferulik] Bilgi tabanına göre 43-45°C ferulik asit rest Weizen'de kimyasal olarak 4VG'yi (karanfil) artırıyor; 45°C yerine 55°C'de mash-in yapmak 4VG'yi ~%30 düşürüyor.
+  #2 veri GOS [bilgi:step_ferulik] Ancak kör üçgen testinde n=24, 6 doğru, p=0.86 çıktı; yani rest'in karanfili artırdığı bu panelde gösterilemedi.
+  #3 yorum GOS [bilgi:step_ferulik] Kanıt durumu OLCULDU, güven düşük-orta: kimyasal fark var ama algılanan fark gösterilemedi, "yapma" demeye de kanıt yetmiyor.
+  #4 veri GOS [bilgi:step_fermSicaklik] Bilgi tabanı karanfilin asıl kolunu fermentasyon sıcaklığı olarak kaydediyor: 16°C'de belirgin karanfil ve beyaz biber fenolü, 22°C'de yoğun muz; kör üçgen n=32, 19 doğru, p=0.002, OG ve FG iki batch'te aynı (KANITLI).
+  #5 yorum DUS:tat [bilgi:step_ferulik,bilgi:step_fermSicaklik] "Daha lezzetli" hükmü bu parçalarda yok; etki yalnız 4VG miktarı ve kör testteki algı farkı ölçüsüyle anlatılabiliyor.
+== M2:M36 tat | akis ai | kapsam cevaplandi | $0.04879 4008/1638
+  #0 yorum GOS [bilgi:ph_band,soru:deger] Paketteki kaynaklar etkiyi tat hükmüyle değil, FG ve kör üçgen algı testiyle ölçüyor; sorudaki 5,40 senin değerin, bu partinin ölçümü değil.
+  #1 hesap GOS [hesap:phTahmin] Uygulamanın bu reçete için TAHMİNİ mash pH'ı 5,50 (oda; mash sıcaklığında ≈ 5,20), payı ±0,1–0,2 pH; su profili girilmediği için damıtık/RO su varsayılıyor, gerçek su alkaliyse gerçek pH daha yüksek olur.
+  #2 yorum GOS [hesap:phTahmin,soru:deger,kaynak:phBant] Oda sıcaklığı referansıyla 5,40, uygulamanın ölçüm kabul bandı 5,2–5,6 ve Su sekmesi hedefi 5,4–5,6 içinde kalıyor.
+  #3 veri GOS [bilgi:ph_band] Bilgi tabanına göre bant içinde 5.2 ile 5.6 karşılaştırmasında (Oatmeal Stout) FG 1.018'e karşı 1.015, yani 3 puan fark çıktı; kör üçgende n=22, 8 doğru, p=0.46 ile tat/koku/gövde/acılık algısında fark gösterilemedi (KANIT DURUMU: OLCULDU).
+  #4 yorum DUS:sayi/a [bilgi:ph_band] Bu nedenle 5,4'e ince ayarın etkisinin küçük bir attenuation oynamasıyla sınırlı kalması olası görünüyor; ancak ölçüm bir stout'ta yapıldı, dubbel için doğrudan test pakette yok.
+  #5 veri DUS:sayi/a [bilgi:ph_olcumSicakligi,hatirlatma] 5,4'ü hangi sıcaklıkta okuduğun önemli: mash sıcaklığında okuma ~0.3 düşük çıkar (KANIT DURUMU: KANITLI), bu yüzden ölçüm sıcaklığını işaretle.
+== M2:M37 tat | akis ai | kapsam cevaplandi | $0.04620 3826/1545
+  #0 veri GOS [recete,adim] Reçetende üç adım var: 46 °C 15 dk, 67 °C 60 dk (ana adım) ve 72 °C 15 dk.
+  #1 veri GOS [bilgi:step_ferulik] Ferulik asit rest (43-45°C) kimyasal olarak 4VG'yi artırıyor, ancak kör üçgen testinde (n=24, 6 doğru, p=0.86) fark gösterilemedi; kanıt durumu OLCULDU, güven düşük-orta.
+  #2 yorum GOS [bilgi:step_ferulik,recete] Buna göre 46 °C adımını atlamanın algıda fark yaratması bu panelde gösterilememiş; yine de kaynak, "yapma" demeye de kanıtın yetmediğini belirtiyor.
+  #3 veri GOS [bilgi:step_fermSicaklik] Weizen'de karanfil/muz farkı için KANITLI kol fermentasyon sıcaklığıdır: 16°C ile 22°C arasında kör üçgen n=32, 19 doğru, p=0.002; OG (1.046) ve FG (1.009) iki batch'te de aynı.
+  #4 veri GOS [bilgi:step_betaGlukan] β-glukan rest (40-45°C) yoğun buğday grist'inde süzme akışını iyileştirmesi beklenir; ama ev ölçeğinde kontrollü ölçüm yok ve kanıt durumu TARTISMALI.
+  #5 yorum GOS [bilgi:step_mashOut,recete] Paketteki mash-out kaydı 76-79°C ve düşük viskoziteli grist için olduğundan, 72 °C adımını atlamanın etkisi bu parçalarla doğrudan karşılanmıyor olabilir.
+== M2:M38 kaynaksiz | akis ai | kapsam pakette_yok | $0.01550 3251/125
+  #0 yorum GOS [tip] Kazan malzemesinin (bakır vb.) enzim çalışmasına etkisi bu partinin paketinde yer almıyor; bu soruyu verilen parçalarla cevaplayamıyorum.
+== M2:M39 kaynaksiz | akis ai | kapsam pakette_yok | $0.01209 2347/135
+  #0 yorum GOS [tip] Ay ışığının mash verimine etkisi bu paketteki reçete, kaynak, bilgi tabanı ve hatırlatma parçalarında yer almıyor; bu soruya pakete dayanarak cevap veremiyorum.
+== M2:M40 yonlendirme | akis yonlendirme | $0.00000 -/-
+== G1:G-blonde-a tarafsiz | hedef stil | aday 0 | ok tamam | $0.01439 1853/349 | aiSira 
+  #0 a0 GOS [kiyas:bjcp,kiyas:iskelet,kiyas:odullu] BJCP bandında, türetilmiş iskelette ve ödüllü örneklerde sapma yok; OG, FG, IBU, SRM ve ABV aralıkta.
+  #1 a0 GOS [kiyas:korpus] Topluluk dağılımında ABV %7,4 ile topluluk p10–p90 aralığı olan %4,3–%7,2'nin (5618 reçete) üstünde; bu bir hata değil, topluluktaki reçetelerin çoğundan farklı olduğunu gösterir.
+  #2 a0 GOS [aday:yok] Kural motoru aday üretmedi, çünkü kanıtlı belirgin sapma yok: OG / FG / IBU / SRM / ABV BJCP bandı içinde ve ödüllü örneklerin p10–p90 aralığında.
+== G1:G-blonde-b yonlendirici | hedef stil | aday 0 | ok tamam | $0.01419 1853/339 | aiSira 
+  #0 a0 GOS [kiyas:bjcp,kiyas:iskelet,kiyas:odullu] BJCP bandında, türetilmiş iskelette ve ödüllü örneklerde sapma yok; OG, FG, IBU, SRM ve ABV aralıkta.
+  #1 a0 GOS [kiyas:korpus] Topluluk dağılımında ABV %7,4 ile topluluk p10–p90 aralığı olan %4,3–%7,2'nin (5618 reçete) üstünde; bu, reçetelerin çoğundan farklı olduğu anlamına gelir.
+  #2 a0 GOS [aday:yok] Kural motoru aday üretmedi, çünkü kanıtlı belirgin sapma yok: OG / FG / IBU / SRM / ABV BJCP bandı içinde ve ödüllü örneklerin p10–p90 aralığında.
+== G1:G-saison-a tarafsiz | hedef stil | aday 2 | ok tamam | $0.03568 3966/991 | aiSira 1,2
+  adaylar: mash:Mash sıcaklığı 65 → 64 °C | seker:Şeker payı %6,9 → %12,0 (OG korunur)
+  #0 a0 GOS [kiyas:bjcp] BJCP 2021 bandına göre FG 1,011 bandın (1,002–1,008) üstünde, SRM 4,6 ise bandın (5,0–22,0) altında; OG, IBU ve ABV aralıkta.
+  #1 a0 GOS [kiyas:odullu,kiyas:korpus] Ödüllü örnekler ve topluluk dağılımıyla kıyasta sapma yok; ölçülen tüm değerler aralıkta.
+  #2 a0 GOS [aday:acik] SRM sapması kapatılamıyor, çünkü reçetede kristal / kavrulmuş malt satırı yok ve bu akışta yeni malzeme önerilmiyor.
+  #3 a1 GOS [aday:1] Mash sıcaklığının 65 °C'den 64 °C'ye inmesi, uygulama hesabında FG'yi 1,011'den 1,010'a çekiyor ve BJCP bandının üstündeki FG sapmasını azaltıyor; malzeme değişmiyor.
+  #4 a1 GOS [kural:mash] Kural tablosuna göre düşük mash sıcaklığı daha fermente edilebilir wort verir; uygulamanın modelinde 65 °C altında her °C FG'yi −1 puan değiştirir.
+  #5 a1 GOS [aday:1] Kanıt zayıf: mash sıcaklığı kayıtlı ödüllü örneklerden 0/1 tanesi ≤ 64 °C; 64 °C adımı uygulama varsayımı ve kaynaklara göre gerçek fark muhtemelen hesaptakinden büyük.
+  #6 a2 GOS [aday:2] Şeker payının %6,9'dan %12,0'a çıkması (Candi Şurup Clear 160 g → 276 g, OG korunur), uygulama hesabında FG'yi 1,011'den 1,010'a çekiyor.
+  #7 a2 GOS [kural:seker] Kural tablosuna göre maltın bir kısmının yerine tamamen fermente olan şeker daha kuru bira verir; kaynak 5–20 percent aralığını belirtiyor.
+  #8 a2 GOS [aday:2] Yan etkisi olarak SRM 4,6'dan 4,5'e iniyor, malzeme stokta yok ve kanıt zayıf (ödüllü örneklerden 1/4 şeker kullanıyor); bu nedenle aday 1'in arkasında sıralanıyor.
+== G1:G-saison-b yonlendirici | hedef stil | aday 2 | ok tamam | $0.03492 3966/953 | aiSira 1,2
+  adaylar: mash:Mash sıcaklığı 65 → 64 °C | seker:Şeker payı %6,9 → %12,0 (OG korunur)
+  #0 a0 GOS [kiyas:bjcp] BJCP 2021 bandına göre FG 1,011 bandın (1,002–1,008) üstünde, SRM 4,6 bandın (5,0–22,0) altında; OG, IBU ve ABV aralıkta.
+  #1 a0 GOS [kiyas:odullu,kiyas:korpus] Ödüllü örneklerle ve topluluk dağılımıyla kıyasta sapma yok.
+  #2 a0 GOS [aday:acik] SRM sapması kapatılamıyor: reçetede kristal / kavrulmuş malt satırı yok ve bu akışta yeni malzeme önerilmiyor.
+  #3 a1 GOS [aday:1,kiyas:bjcp] Mash sıcaklığı 65 → 64 °C önerisi, BJCP bandının üstündeki FG'yi hedefliyor; uygulama hesabında FG 1,011 → 1,010 oluyor, malzeme değişmiyor.
+  #4 a1 GOS [kural:mash] Kural tablosuna göre düşük mash sıcaklığı daha fermente edilebilir wort verir ve birayı daha kuru / ince yapar; uygulamanın modeli 65 °C altında her °C için FG'yi −1 puan düzeltir.
+  #5 a1 GOS [aday:1] Kanıt zayıf: mash sıcaklığı kayıtlı ödüllü örneklerden 0/1 tanesi ≤ 64 °C (n < 5); FG ve SRM bant dışında kalmaya devam ediyor.
+  #6 a2 GOS [aday:2] Şeker payı %6,9 → %12,0 önerisi OG'yi koruyarak FG'yi 1,011 → 1,010'a indiriyor; Candi Şurup Clear (Simplicity) 160 g → 276 g oluyor ve stokta yok.
+  #7 a2 GOS [kural:seker] Kural tablosuna göre maltın bir kısmının yerine tamamen fermente olan şeker daha kuru, daha az doyurucu bira verir; kaynak payı genelde 5–20 aralığında gösteriyor.
+  #8 a2 GOS [aday:2] Yan etki olarak SRM 4,6 → 4,5'e, bandın daha da altına iniyor; kanıt zayıf (1/4, n < 5) ve bu yüzden 2. sırada.
+== G1:G-wbock-a tarafsiz | hedef stil | aday 2 | ok tamam | $0.02374 4300/327 | aiSira 
+  adaylar: mash:Mash sıcaklığı 67 → 70 °C | kristal:Kristal malt payı %2,4 → %3,6 (OG korunur)
+  #0 a0 GOS [kiyas:bjcp] FG 1,011 değeri BJCP 2021 bandı olan 1,015–1,022'nin altında; OG, IBU, SRM ve ABV ise bant içinde.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerle kıyasta FG, SRM altında; IBU, ABV ve kabuksuz kavrulmuş payı üstünde görünüyor, ancak bu sapmaların hepsi zayıf kanıt (n < 5).
+  #2 a0 GOS [kiyas:korpus,kiyas:iskelet] ABV %8,6, 1306 reçetelik topluluk dağılımının p10–p90 aralığı olan %5,7–%8,3'ün üstünde; türetilmiş iskelette ise sapma yok.
+== G1:G-wbock-b yonlendirici | hedef stil | aday 2 | ok tamam | $0.03590 4300/935 | aiSira 1,2
+  adaylar: mash:Mash sıcaklığı 67 → 70 °C | kristal:Kristal malt payı %2,4 → %3,6 (OG korunur)
+  #0 a0 GOS [kiyas:bjcp] BJCP 2021 bandına göre FG 1,011, 1,015–1,022 bandının altında; OG, IBU, SRM ve ABV aralıkta.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerle kıyasta FG, SRM altında; IBU, ABV ve kabuksuz kavrulmuş payı üstünde görünüyor, ancak bunların hepsi zayıf kanıt (n < 5).
+  #2 a0 GOS [kiyas:korpus,kiyas:iskelet] Topluluk dağılımında ABV %8,6, 1306 reçetenin p10–p90 aralığı olan %5,7–%8,3'ün üstünde; türetilmiş iskelette sapma yok.
+  #3 a1 GOS [aday:1] Mash sıcaklığını 67 °C'den 70 °C'ye çıkarmak, uygulama hesabında FG'yi 1,011'den 1,014'e taşıyor; FG yine de bandın dışında kalıyor.
+  #4 a1 GOS [kural:mash] Kural tablosuna göre yüksek mash sıcaklığı daha çok dekstrin bırakır; uygulamanın modeli 68 °C üstünde her °C için FG'ye +1,5 puan ekliyor.
+  #5 a1 GOS [aday:1] Kayıtlı ödüllü örneklerden 0/1 tanesi ≥ 70 °C mash yapıyor ve bu zayıf kanıt; 70 °C adımı bir uygulama varsayımıdır.
+  #6 a2 GOS [aday:2] Kristal malt payını %2,4'ten %3,6'ya çıkarmak, CaraMunich I'i 107 g'dan 161 g'a taşıyor ve OG korunuyor.
+  #7 a2 GOS [kural:kristal] Kural tablosuna göre kristal maltlar tatlılık ve gövde ekler, ama tada ve renge etkisi çok daha büyüktür.
+  #8 a2 GOS [aday:2] Grist'i eşlenen ödüllü örneklerin 2/3'ünde kristal payı ≥ %3,6 (zayıf kanıt); FG etkisi uygulamanın hesabında görünmediği için yalnız yön olarak ikinci sırada.
+== G1:G-dubbel-a tarafsiz | hedef stil | aday 1 | ok tamam | $0.02774 3449/697 | aiSira 1
+  adaylar: renk:Karamela Arpa Maltı (Hitit) azalt: SRM 24,1 → 15,9 (OG korunur)
+  #0 a0 GOS [kiyas:bjcp] SRM 24,1 ve ABV %8,2 ile reçete, BJCP 2021 Dubbel bandının (SRM 10,0–17,0, ABV %6,0–%7,6) üstünde; OG, FG ve IBU bant içinde.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerle kıyasta IBU, SRM, ABV ve tahıl payları ödüllü örneklerin çoğundan farklı görünüyor; ancak n 2 olduğu için bunlar zayıf kanıt.
+  #2 a0 GOS [kiyas:korpus,aday:acik] ABV %8,2, topluluk p10–p90 aralığının (%5,2–%7,8) da üstünde; ABV'nin ayrı değişkeni olmadığı için kural motoru bu sapmayı kapatamıyor.
+  #3 a1 GOS [aday:1,kural:renk] Renk koyu maltın miktarıyla doğrudan değiştiği için kural motoru tek değişken olarak Karamela Arpa Maltı (Hitit) miktarını 496 g'dan 173 g'a indiriyor.
+  #4 a1 GOS [aday:1,kiyas:bjcp] Uygulama hesabına göre SRM 24,1 → 15,9 olup BJCP bandının içine giriyor; OG, FG ve IBU, Pilsner Malt 3674 g ile OG dengesi sağlanarak değişmiyor.
+  #5 a1 GOS [aday:1] ABV 8,2 ile bant dışında kalıyor ve SRM kanıtı kayıtlı ödüllü örneklerden 1/2 tanesine dayandığı için zayıf kanıt sayılıyor.
+== G1:G-dubbel-b yonlendirici | hedef stil | aday 1 | ok tamam | $0.02856 3449/738 | aiSira 1
+  adaylar: renk:Karamela Arpa Maltı (Hitit) azalt: SRM 24,1 → 15,9 (OG korunur)
+  #0 a0 GOS [kiyas:bjcp] Reçetenin SRM 24,1 ve ABV %8,2 değerleri BJCP 2021 Dubbel bandının (SRM 10,0–17,0, ABV %6,0–%7,6) üstünde; OG, FG ve IBU aralıkta.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerle kıyasta IBU, SRM, ABV ve malt payları ödüllü örneklerin çoğundan farklı görünüyor; ancak n 2 olduğu için bu sapmalar zayıf kanıttır.
+  #2 a0 GOS [kiyas:korpus,aday:acik] ABV %8,2 topluluk dağılımının (%5,2–%7,8) da üstünde; kural motoru bu sapmayı kapatamıyor, çünkü ABV OG ve FG'den gelir ve ayrı değişkeni yok.
+  #3 a1 GOS [aday:1,kiyas:bjcp] Bu aday, en koyu malt olan Karamela Arpa Maltı (Hitit) miktarını 496 g'dan 173 g'a indirerek SRM'yi 24,1'den 15,9'a, yani BJCP bandının içine çekmek için önerildi.
+  #4 a1 GOS [kural:renk] Kural tablosuna göre renk, malt ağırlığı × Lovibond / hacim üzerinden Morey denklemiyle tahmin edilir; koyu maltın miktarı rengi doğrudan değiştirir.
+  #5 a1 GOS [aday:1] OG dengesi için Pilsner Malt 3674 g olarak ayarlanıyor ve OG 1,073, FG 1,011, IBU 19 korunuyor; ödüllü örneklerden 1/2 tanesi SRM ≤ 15,9 olsa da bu zayıf kanıttır.
+== G1:G09 hedef | hedef kuru | aday 1 | ok tamam | $0.02636 3190/680 | aiSira 1
+  adaylar: mash:Mash sıcaklığı 66 → 64 °C
+  #0 a0 GOS [hedef,kiyas:bjcp] Hedef yön daha kuru bir Weizen / Weissbier; ABV %5,8 ile BJCP 2021 bandının (%4,3–%5,6) üstünde, OG, FG, IBU ve SRM bant içinde.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerin çoğundan farklı olarak FG 1,008 değeri p10–p90 aralığı 1,010–1,014'ün altında, baz malt payı %45,0 ise %38,4–%44,5 aralığının üstünde.
+  #2 a0 GOS [kiyas:iskelet,kiyas:korpus] Türetilmiş iskelet ve topluluk dağılımı kıyaslarında sapma yok.
+  #3 a1 GOS [kural:mash,aday:1] Kural tablosuna göre düşük mash sıcaklığı daha fermente edilebilir wort verir ve daha kuru, ince bir bira yönündedir; aday bu yüzden mash sıcaklığını 66 → 64 °C indirir ve malzeme değişmez.
+  #4 a1 GOS [aday:1] Uygulama hesabında FG 1,008 → 1,007 ve ABV 5,8 → 6,0 olur; FG bant dışına çıktığı için aday bant içinde kalanların arkasına konur.
+  #5 a1 GOS [aday:1] Kanıt zayıftır: mash sıcaklığı kayıtlı ödüllü örneklerden 0/1 tanesi ≤ 64 °C (n < 5), 64 °C adımı ise Brulosophy deneyinin düşük ucuna dayanan bir uygulama varsayımıdır.
+== G1:G10 hedef | hedef govde | aday 1 | ok tamam | $0.03770 3144/1256 | aiSira 1
+  adaylar: mash:Mash sıcaklığı 66 → 70 °C
+  #0 a0 GOS [kiyas:bjcp] BJCP 2021 bandına göre ABV %5,8 ile %4,3–%5,6 bandının üstünde; OG, FG, IBU ve SRM aralıkta.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerle kıyasta FG 1,008 ile p10–p90 1,010–1,014 aralığının altında, baz malt payı %45,0 ile %38,4–%44,5 aralığının üstünde; bu, ödüllü örneklerin çoğundan farklı demektir.
+  #2 a0 GOS [kiyas:iskelet,kiyas:korpus] Türetilmiş iskelette ve topluluk dağılımında sapma yok.
+  #3 a1 GOS [hedef,kural:mash] Seçilen yön daha gövdeli; kural tablosundaki BYO kaynağına göre yüksek mash sıcaklığı daha çok dekstrin bırakır ve daha gövdeli bira verir.
+  #4 a1 GOS [aday:1] Uygulama hesabına göre mash 66 °C → 70 °C ile FG 1,008 → 1,010, ABV 5,8 → 5,4 olur; OG, IBU ve SRM değişmez, tüm değerler bant içinde kalır ve malzeme değişmez.
+  #5 a1 GOS [aday:1,kural:mash] Kanıt zayıf: mash sıcaklığı kayıtlı ödüllü örneklerden 0/1 tanesi ≥ 70 °C (n < 5); Brulosophy deneyinde FG farkı ölçülmüş, ancak algı farkı bu deneyde anlamlı çıkmamış.
+== G1:G11 hedef | hedef azaci | aday 1 | ok tamam | $0.02508 2799/694 | aiSira 1
+  adaylar: acihop:Acı hop azalt: IBU 12 → 9
+  #0 a0 GOS [kiyas:bjcp] BJCP 2021 bandına göre ABV %5,8 ile %4,3–%5,6 aralığının üstünde; OG, FG, IBU ve SRM aralıkta.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerle kıyasta FG 1,008 ile p10–p90 1,010–1,014 aralığının altında, baz malt payı %45,0 ile %38,4–%44,5 aralığının üstünde; yani bu iki değerde ödüllü örneklerin çoğundan farklı.
+  #2 a0 GOS [kiyas:iskelet,kiyas:korpus] Türetilmiş iskelette ve topluluk dağılımında sapma yok.
+  #3 a1 GOS [hedef,aday:1] Hedef daha az acı olduğu için kural motoru tek değişken olarak 60 dk Hallertau Mittelfrueh miktarını 14,0 g'dan 10,5 g'a indirerek IBU'yu 12'den 9'a düşürüyor; adım %25 bir uygulama varsayımı.
+  #4 a1 GOS [kural:acihop,aday:1] Kural tablosuna göre acılığı esas uzun kaynatılan hop belirler ve IBU hop ağırlığıyla hesaplanır, bu yüzden değişiklik 60 dk eklemesine uygulanıyor.
+  #5 a1 GOS [aday:1] Uygulama hesabında OG, FG, ABV ve SRM değişmiyor, ABV bant dışında kalıyor; IBU kayıtlı ödüllü örneklerden 1/6 tanesi ≤ 9 olduğundan kanıt sınırlı ve sıra puanı 1,68.
+== G1:G12 tarafsiz | hedef stil | aday 0 | ok tamam | $0.01414 1979/311 | aiSira 
+  #0 a0 GOS [kiyas:bjcp] ABV %5,8 ile BJCP 2021 bandı olan %4,3–%5,6'nın üstünde; OG, FG, IBU ve SRM bu bantta.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerin çoğundan farklı olarak FG 1,008 ile p10–p90 aralığı 1,010–1,014'ün altında, baz malt payı %45,0 ile %38,4–%44,5 aralığının üstünde (n 8).
+  #2 a0 GOS [aday:yok,aday:acik] Kural motoru aday üretmedi, çünkü ABV OG ve FG'den gelir ve reçetede bu sapmayı tek değişkenle kapatacak ayrı bir satır yok.
+== G1:G13 hedef | hedef kuru | aday 2 | ok tamam | $0.03728 4290/1006 | aiSira 1,2
+  adaylar: mash:Mash sıcaklığı 67 → 64 °C | kristal:Kristal malt payı %2,4 → %1,2 (OG korunur)
+  #0 a0 GOS [kiyas:bjcp] FG 1,011, BJCP 2021 bandı 1,015–1,022'nin altında; OG, IBU, SRM ve ABV bant içinde.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerin çoğundan farklı olarak FG ve SRM altında, IBU, ABV ve kabuksuz kavrulmuş payı üstünde görünüyor; ancak bu sapmaların hepsi zayıf kanıt (n < 5).
+  #2 a0 GOS [kiyas:korpus,kiyas:iskelet] ABV %8,6, topluluk p10–p90 aralığı %5,7–%8,3'ün (1306 reçete) üstünde; türetilmiş iskelette ise sapma yok.
+  #3 a1 GOS [hedef,aday:1] Hedef daha kuru olduğu için uygulama mash sıcaklığını 67 °C'den 64 °C'ye indirmeyi öneriyor; hesapta FG 1,011'den 1,010'a, ABV 8,6'dan 8,7'ye değişiyor.
+  #4 a1 GOS [kural:mash] Kural tablosuna göre düşük mash sıcaklığı daha fermente edilebilir wort verir ve daha kuru, ince bir bira sonucunu doğurur; uygulamanın modelinde 65 °C altında her °C −1 puan FG düzeltmesi var.
+  #5 a1 GOS [aday:1] Kanıt zayıf: kayıtlı ödüllü örneklerden 0/1 tanesi ≤ 64 °C; ayrıca kaynaklar gerçek farkın hesaptakinden muhtemelen büyük olduğunu gösteriyor.
+  #6 a2 GOS [aday:2] Uygulama kristal malt payını %2,4'ten %1,2'ye indirmeyi öneriyor: CaraMunich I 107 g'dan 54 g'a iniyor, OG Buğday Maltı 2544 g ile korunuyor.
+  #7 a2 GOS [kural:kristal] Kural tablosuna göre kristal maltlar tatlılık ve gövde ekler; bu aday bu yöne dayanıyor.
+  #8 a2 GOS [aday:2] Etkisi uygulamanın hesabında görünmüyor (FG 1,011 değişmiyor, SRM 20,2'den 19,8'e iniyor); bu yüzden ölçülebilir etkili adayın arkasında, kanıt da zayıf (1/3).
+== G1:G14 hedef | hedef koyu | aday 2 | ok tamam | $0.03474 4009/935 | aiSira 1,2
+  adaylar: kristal:Kristal malt payı %2,4 → %3,6 (OG korunur) | renk:Carafa Special III (Debittered) artır: SRM 20,2 → 26,1 (OG korunur)
+  #0 a0 GOS [kiyas:bjcp,kiyas:iskelet] BJCP 2021 bandına göre FG 1,011 ile 1,015–1,022 aralığının altında; OG, IBU, SRM ve ABV aralıkta, türetilmiş iskelette sapma yok.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerle kıyasta FG, SRM 20,2 ALTINDA; IBU 15, ABV %8,6 ve kabuksuz kavrulmuş payı %2,0 ÜSTÜNDE görünüyor, ancak hepsi zayıf kanıt (n < 5).
+  #2 a0 GOS [kiyas:korpus,hedef] Topluluk dağılımında (1306 reçete) ABV %8,6 ile %5,7–%8,3 aralığının üstünde; hedef Weizenbock için daha koyu yön.
+  #3 a1 GOS [aday:1,hedef] Uygulama, daha koyu hedefi için kristal malt payını %2,4 → %3,6'ya çıkarıyor: CaraMunich I 107 g → 161 g, OG korunarak SRM 20,2 → 20,7.
+  #4 a1 GOS [kural:kristal] Kural tablosuna göre kristal maltların renge ve tada etkisi büyüktür.
+  #5 a1 GOS [aday:1] Grist'i eşlenen ödüllü örneklerin 2/3'ünde kristal payı ≥ %3,6 (zayıf kanıt: n < 5); SRM bant içinde kaldığı için sıra 1'de.
+  #6 a2 GOS [aday:2] Uygulama, en koyu malt olan Carafa Special III (Debittered) miktarını 87 g → 138 g'a çıkarıyor; OG korunarak SRM 20,2 → 26,1.
+  #7 a2 GOS [kural:renk] Kural tablosuna göre renk Morey denklemiyle tahmin edilir ve koyu maltın miktarı rengi doğrudan değiştirir.
+  #8 a2 GOS [aday:2] Bu değişiklik SRM'yi bant dışına çıkardığı ve SRM kayıtlı ödüllü örneklerden 0/1'i ≥ 26,1 olduğu (zayıf kanıt) için sıra 2'de.
+== G1:G15 hedef | hedef aci | aday 1 | ok tamam | $0.02732 3184/729 | aiSira 1
+  adaylar: acihop:Acı hop artır: IBU 15 → 19
+  #0 a0 GOS [kiyas:bjcp,kiyas:iskelet] BJCP 2021 bandına göre FG 1,011, 1,015–1,022 bandının altında; OG, IBU, SRM ve ABV aralıkta, türetilmiş iskelette sapma yok.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerin çoğundan farklı olarak FG ve SRM altında, IBU 15, ABV %8,6 ve kabuksuz kavrulmuş payı %2,0 üstünde görünüyor; ancak bu kıyaslar n < 5 olduğu için zayıf kanıttır.
+  #2 a0 GOS [kiyas:korpus] Topluluk dağılımında (1306 reçete) ABV %8,6, %5,7–%8,3 aralığının üstünde; OG, IBU ve SRM aralıkta.
+  #3 a1 GOS [hedef,aday:1] Seçilen yön daha acı olduğu için uygulama tek değişken olarak acı hop miktarını ele alıyor: Hallertau Mittelfrueh 22,6 g (60 dk) → 28,2 g (60 dk), IBU 15 → 19.
+  #4 a1 GOS [kural:acihop,aday:1] Kural tablosuna göre acılığı esas uzun kaynatılan hop belirler ve IBU hop ağırlığıyla hesaplanır; bu yüzden değişiklik 60 dk eklemesinin miktarına uygulanıyor.
+  #5 a1 GOS [aday:1] Uygulama hesabında OG, FG, ABV ve SRM değişmiyor, stokta 100 g var; kayıtlı ödüllü örneklerden 0/1 tanesi IBU ≥ 19 olduğundan kanıt zayıf (n < 5) ve sıra puanı 2,09.
+== G1:G16 tarafsiz | hedef stil | aday 2 | ok tamam | $0.03714 4300/997 | aiSira 1,2
+  adaylar: mash:Mash sıcaklığı 67 → 70 °C | kristal:Kristal malt payı %2,4 → %3,6 (OG korunur)
+  #0 a0 GOS [kiyas:bjcp] BJCP 2021 bandına göre FG 1,011, 1,015–1,022 bandının altında; OG, IBU, SRM ve ABV aralıkta.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerle kıyasta FG, IBU, SRM, ABV ve kabuksuz kavrulmuş payı ödüllü örneklerin çoğundan farklı görünüyor, ancak bu sapmaların hepsi zayıf kanıt (n < 5).
+  #2 a0 GOS [kiyas:korpus,kiyas:iskelet] Topluluk dağılımında ABV %8,6, 1306 reçetenin p10–p90 aralığı olan %5,7–%8,3'ün üstünde; türetilmiş iskelette sapma yok.
+  #3 a1 GOS [aday:1] Mash sıcaklığını 67 °C'den 70 °C'ye çıkarmak, uygulama hesabında FG'yi 1,011'den 1,014'e taşıyor; FG yine bant dışında kalıyor ama bant dışı uzaklık azaldığı için sıra 1'de.
+  #4 a1 GOS [kural:mash] Kural tablosuna göre yüksek mash sıcaklığı daha çok dekstrin bırakır; uygulamanın modeli 68 °C üstünde her °C için FG'ye +1,5 puan ekliyor.
+  #5 a1 GOS [aday:1] Kayıtlı ödüllü örneklerden 0/1 tanesi 70 °C ve üstünde mash yapmış, bu zayıf kanıt; 70 °C adımı uygulama varsayımıdır.
+  #6 a2 GOS [aday:2] Kristal malt payını %2,4'ten %3,6'ya çıkarmak için CaraMunich I 107 g'dan 161 g'a çıkıyor; OG korunuyor ve SRM 20,2'den 20,7'ye değişiyor.
+  #7 a2 GOS [kural:kristal] Kural tablosuna göre kristal maltlar tatlılık ve gövde ekler, ama tada ve renge etkisi çok daha büyüktür.
+  #8 a2 GOS [aday:2] Grist'i eşlenen ödüllü örneklerden 2/3 tanesinde kristal payı %3,6 ve üstünde (zayıf kanıt); FG etkisi uygulamanın hesabında görünmediği için yalnız yön olarak sıra 2'de.
+== G1:G17 hedef | hedef govde | aday 3 | ok tamam | $0.04691 5162/1313 | aiSira 1,2,3
+  adaylar: mash:Mash sıcaklığı 67 → 70 °C | seker:Şeker payı %5,2 → %2,6 (OG korunur) | kristal:Kristal malt payı %11,6 → %17,2 (OG korunur)
+  #0 a0 GOS [hedef,kiyas:bjcp] Hedef yön daha gövdeli bir Dubbel; reçetede SRM 24,1 ve ABV %8,2 değerleri BJCP 2021 bandının (10,0–17,0 ve %6,0–%7,6) üstünde, OG, FG ve IBU aralıkta.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerle kıyasta kristal / karamel payı %11,6 ile üstünde, şeker payı %3,6 ile altında görünüyor; ancak n 2 olduğu için bunlar zayıf kanıt.
+  #2 a0 GOS [kiyas:korpus] Topluluk dağılımında yalnız ABV %8,2, 3705 reçetenin p10–p90 aralığı olan %5,2–%7,8'in üstünde; OG, IBU ve SRM aralıkta.
+  #3 a1 GOS [aday:1,kural:mash] Mash sıcaklığını 67 → 70 °C'ye çıkarmak öneriliyor, çünkü kaynağa göre yüksek mash sıcaklığı daha çok dekstrin bırakır ve daha gövdeli bira verir.
+  #4 a1 GOS [aday:1] Uygulama hesabında FG 1,011 → 1,014 ve ABV 8,2 → 7,8 oluyor; malzeme değişmiyor.
+  #5 a1 GOS [aday:1,kural:mash] Kayıtlı ödüllü örneklerden 0/1 tanesi ≥ 70 °C (zayıf kanıt), ve Brulosophy deneyinde algı farkı anlamlı çıkmadı (p=0.42).
+  #6 a2 GOS [aday:2,kural:seker] Şeker payını %5,2 → %2,6'ya indirmek öneriliyor, çünkü kaynağa göre tamamen fermente olan şeker gövdeyi inceltir ve birayı kurutur.
+  #7 a2 GOS [aday:2] Candi Şurup Amber (D-90) 156 g → 78 g olurken OG Pilsner Malt 3515 g ile korunuyor; hesapta FG 1,011 → 1,012 ve SRM 24,1 → 22,6.
+  #8 a2 GOS [aday:2] Eşlenen ödüllü örneklerden 0/2 tanesi şeker kullanmıyor (zayıf kanıt: n < 5) ve hedef etkisi 0,30 olduğundan sırası 2.
+  #9 a3 GOS [aday:3,kural:kristal] Kristal malt payını %11,6 → %17,2'ye çıkarmak öneriliyor, çünkü kaynağa göre kristal maltlar tatlılık ve gövde ekler, ama tada ve renge etkisi çok daha büyüktür.
+  #10 a3 GOS [aday:3] Etkisi uygulamanın hesabında görünmüyor (Δ FG 0,0), yalnız kaynaklı yön; yan etki olarak SRM 24,1 → 29,6'ya, bandın daha da üstüne çıkıyor.
+  #11 a3 GOS [aday:3] Gereken 0,744 kg Karamela Arpa Maltı (Hitit) için stokta 585 g var, yetmeyebilir.
+== G1:G18 hedef | hedef acik | aday 2 | ok tamam | $0.03951 4107/1154 | aiSira 1,2
+  adaylar: kristal:Kristal malt payı %11,6 → %5,8 (OG korunur) | renk:Karamela Arpa Maltı (Hitit) azalt: SRM 24,1 → 18,1 (OG korunur)
+  #0 a0 GOS [hedef,kiyas:bjcp] Hedef Dubbel stilinde daha açık bir renk yönüdür; SRM 24,1 ve ABV %8,2 değerleri BJCP 2021 bandının (SRM 10,0–17,0, ABV %6,0–%7,6) üstündedir, OG, FG ve IBU ise bant içindedir.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerle kıyasta kristal / karamel payı %11,6 ile %6,4–%7,1 aralığının, SRM 24,1 ile 15,7–21,3 aralığının üstündedir; şeker payı %3,6 ise %17,1–%19,1 aralığının altındadır, ancak n 2 olduğundan bunlar zayıf kanıttır.
+  #2 a0 GOS [kiyas:korpus] Topluluk dağılımında (3705 reçete) ABV %8,2 ile %5,2–%7,8 aralığının üstündedir; OG, IBU ve SRM aralıktadır.
+  #3 a1 GOS [aday:1] Uygulama kristal malt payını %11,6'dan %5,8'e indiriyor: Karamela Arpa Maltı (Hitit) 496 g → 248 g, OG dengesi için Pilsner Malt 3611 g; hesaba göre SRM 24,1 → 18,0 olurken OG, FG, ABV ve IBU değişmiyor.
+  #4 a1 GOS [kural:kristal,hedef] Kural tablosuna göre kristal maltların renge etkisi büyüktür, bu yüzden payının azaltılması daha açık hedefine yöneliktir.
+  #5 a1 GOS [aday:1] Grist'i eşlenen ödüllü örneklerden 1/2 tanesinde kristal payı ≤ %5,8 olsa da bu zayıf kanıttır ve adım ×0,5 bir uygulama varsayımıdır; SRM ve ABV yine bant dışında kalıyor.
+  #6 a2 GOS [aday:2] Uygulama en koyu malt olan Karamela Arpa Maltı (Hitit) miktarını 496 g'dan 251 g'a indiriyor, OG dengesi için Pilsner Malt 3609 g; hesaba göre SRM 24,1 → 18,1 oluyor ve OG korunuyor.
+  #7 a2 GOS [kural:renk] Kural tablosuna göre renk Morey denklemiyle malt ağırlığı × Lovibond üzerinden tahmin edilir ve koyu maltın miktarı rengi doğrudan değiştirir.
+  #8 a2 GOS [aday:2] SRM kayıtlı ödüllü örneklerden 1/2 tanesi ≤ 18,1 olsa da bu zayıf kanıttır; adım −%25 SRM bir uygulama varsayımıdır ve sıra puanı 3,38 ile ikinci sıradadır.
+== G1:G19 hedef | hedef azaci | aday 1 | ok tamam | $0.02840 3311/758 | aiSira 1
+  adaylar: acihop:Acı hop azalt: IBU 19 → 14
+  #0 a0 GOS [kiyas:bjcp] BJCP 2021 bandına göre SRM 24,1 (bant 10,0–17,0) ve ABV %8,2 (bant %6,0–%7,6) bandın üstünde; OG, FG ve IBU aralıkta.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerle kıyasta IBU 19 aralığın altında, kristal / karamel payı %11,6 üstünde, şeker payı %3,6 altında görünüyor; ancak n 2 olduğu için bunlar zayıf kanıttır.
+  #2 a0 GOS [kiyas:korpus] Topluluk dağılımında (3705 reçete) yalnız ABV %8,2 p10–p90 aralığı olan %5,2–%7,8'in üstünde; OG, IBU ve SRM aralıkta.
+  #3 a1 GOS [hedef,aday:1] Hedef daha az acı olduğu için kural motoru acı hop miktarını tek değişken olarak ele alıp Saaz (Czech) 32,0 g (60 dk) eklemesini 24,0 g'a indiriyor; uygulama hesabına göre IBU 19 → 14 olur, OG, FG, ABV ve SRM değişmez.
+  #4 a1 GOS [kural:acihop,aday:1] Bunun nedeni, IBU'nun hop ağırlığıyla hesaplanması ve acılığı esas uzun kaynatılan hopun belirlemesidir; 60 dk'lık Saaz bu yüzden seçilmiştir.
+  #5 a1 GOS [aday:1] Uygulama, bu değişiklikle IBU'nun bant dışına çıkacağını ve kayıtlı ödüllü örneklerden 0/2 tanesinin ≤ 14 olduğunu (zayıf kanıt: n < 5) not ediyor; adım %25 bir uygulama varsayımıdır.
+== G1:G20 tarafsiz | hedef stil | aday 1 | ok tamam | $0.02838 3449/729 | aiSira 1
+  adaylar: renk:Karamela Arpa Maltı (Hitit) azalt: SRM 24,1 → 15,9 (OG korunur)
+  #0 a0 GOS [kiyas:bjcp] Reçetenin SRM değeri 24,1 ve ABV değeri %8,2 ile BJCP 2021 Dubbel bandının (SRM 10,0–17,0, ABV %6,0–%7,6) üstünde; OG, FG ve IBU bant içinde.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerle kıyasta IBU, kavrulmuş ve şeker payı altında, SRM, ABV, baz malt ve kristal / karamel payı üstünde görünüyor; ancak n 2 olduğu için bunlar zayıf kanıttır.
+  #2 a0 GOS [kiyas:korpus,aday:acik] Topluluk dağılımında yalnız ABV %8,2 ile p10–p90 aralığı %5,2–%7,8'in üstünde; ABV'nin ayrı değişkeni olmadığı için kural motoru bu sapmayı kapatamıyor.
+  #3 a1 GOS [aday:1,kural:renk] Renk Morey denklemiyle malt ağırlığı × Lovibond üzerinden tahmin edildiği için kural motoru en koyu malt olan Karamela Arpa Maltı (Hitit) miktarını 496 g'dan 173 g'a indirmeyi öneriyor.
+  #4 a1 GOS [aday:1,kiyas:bjcp] Uygulama hesabına göre SRM 24,1'den 15,9'a iniyor ve BJCP bandının içine giriyor; Pilsner Malt 3674 g ile OG 1,073'te korunuyor.
+  #5 a1 GOS [aday:1] ABV 8,2'de kalarak bant dışında kalıyor ve SRM kanıtı ödüllü örneklerden 1/2 tanesine dayandığı için zayıf kanıttır.
+== G1:G21 yan_etki | hedef kuru | aday 2 | ok tamam | $0.03577 3833/1022 | aiSira 1,2
+  adaylar: mash:Mash sıcaklığı 65 → 64 °C | seker:Şeker payı %6,9 → %12,0 (OG korunur)
+  #0 a0 GOS [hedef,kiyas:bjcp] Hedef yön daha kuru bir Saison / Farmhouse Ale; BJCP 2021 bandına göre FG 1,011 ile 1,002–1,008 bandının üstünde, SRM 4,6 ile 5,0–22,0 bandının altında.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerle kıyasta sapma yok; OG, FG, IBU, SRM, ABV, şeker payı ve maya ailesi aralıkta.
+  #2 a0 GOS [kiyas:korpus] Topluluk dağılımında da sapma yok; OG, IBU, SRM ve ABV aralıkta.
+  #3 a1 GOS [aday:1,kural:mash] Uygulama mash sıcaklığını 65 °C'den 64 °C'ye indirmeyi öneriyor; kural tablosuna göre düşük mash sıcaklığı daha fermente edilebilir wort ve daha kuru, ince bir bira verir.
+  #4 a1 DUS:yon/b [aday:1,kural:mash] Uygulama hesabında FG 1,011'den 1,010'a, ABV 5,9'dan 6,1'e çıkıyor; uygulamanın modeli 65 °C altında her °C için −1 puan FG düzeltmesi uyguluyor.
+  #5 a1 GOS [aday:1] Kanıt zayıf: mash sıcaklığı kayıtlı ödüllü örneklerden 0/1 tanesi ≤ 64 °C (n < 5); malzeme değişmediği ve yan etkisi olmadığı için sıra puanı 0,56 ile ilk sırada.
+  #6 a2 GOS [aday:2,kural:seker] Uygulama şeker payını %6,9'dan %12,0'ye çıkarıyor (Candi Şurup Clear 160 g → 276 g, OG korunur); kaynağa göre tamamen fermente olan şeker daha kuru ve daha az doyurucu bira verir.
+  #7 a2 GOS [aday:2] Uygulama hesabında FG 1,011'den 1,010'a iniyor; yan etki olarak SRM 4,6'dan 4,5'e, yani 5,0–22,0 bandının daha da altına iniyor.
+  #8 a2 GOS [aday:2] Kanıt zayıf: eşlenen ödüllü örneklerden 1/4 tanesi şeker kullanıyor (n < 5); şurup stokta yok ve yan etkisi olduğu için sıra puanı 0,23 ile ikinci sırada.
+== G1:G22 yan_etki | hedef kuru | aday 3 | ok tamam | $0.06775 5202/2347 | aiSira 1,2,3
+  adaylar: mash:Mash sıcaklığı 67 → 64 °C | seker:Şeker payı %5,2 → %10,2 (OG korunur) | kristal:Kristal malt payı %11,6 → %5,8 (OG korunur)
+  #0 a0 GOS [kiyas:bjcp] BJCP 2021 bandına göre SRM 24,1 (bant 10,0–17,0) ve ABV %8,2 (bant %6,0–%7,6) bandın üstünde; OG, FG ve IBU aralıkta.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerin çoğundan farklı olarak kristal / karamel payı %11,6 ile üstünde, şeker payı %3,6 ile altında; ancak n 2 olduğu için bu sapmalar zayıf kanıttır.
+  #2 a0 GOS [kiyas:korpus] Topluluk dağılımında ABV %8,2, 3705 reçetenin p10–p90 aralığı %5,2–%7,8'in üstünde; OG, IBU ve SRM aralıkta.
+  #3 a1 GOS [hedef,kural:mash] Seçilen yön daha kuru; kural tablosuna göre düşük mash sıcaklığı daha fermente edilebilir wort ve daha kuru / ince bira verir.
+  #4 a1 DUS:yon/b [aday:1,kural:mash] Uygulamanın FG modelinde 65 °C altında her °C −1 puan olduğundan mash 67 → 64 °C ile FG 1,011 → 1,010 ve ABV 8,2 → 8,3 hesaplanıyor.
+  #5 a1 GOS [aday:1,kural:mash] Kanıt zayıf: mash sıcaklığı kayıtlı ödüllü örneklerden 0/1 tanesi ≤ 64 °C; Brulosophy deneyinde FG farkı ölçülmüş ama algı farkı anlamlı çıkmamış.
+  #6 a2 GOS [kural:seker] Kural tablosuna göre maltın bir kısmının yerine tamamen fermente olan şeker daha kuru, daha az doyurucu bira verir; kaynak 5 ile 20 percent aralığını belirtir.
+  #7 a2 GOS [aday:2] Şeker payı %5,2 → %10,2 çıkıyor (Candi Şurup Amber (D-90) 156 g → 307 g, OG korunur); grist'i eşlenen ödüllü örneklerden 2/2 tanesi şeker kullanıyor (zayıf kanıt: n < 5).
+  #8 a2 GOS [aday:2] Etkisi uygulamanın hesabında görünmüyor, yalnız kaynaklı yön; yan etki olarak SRM 24,1 → 26,9 ile bandın daha da üstüne çıkar ve şurup stokta yok.
+  #9 a3 GOS [kural:kristal] Kural tablosuna göre kristal (karamel) maltlar tatlılık ve gövde ekler, tada ve renge etkisi ise çok daha büyüktür.
+  #10 a3 DUS:sayi/a [aday:3,kiyas:odullu] Kristal payı %11,6 → %5,8 iniyor (Karamela Arpa Maltı 496 g → 248 g, OG korunur); mevcut pay ödüllü örneklerin p10–p90 aralığı %6,4–%7,1'in üstünde (zayıf kanıt: n < 5).
+  #11 a3 GOS [aday:3] Uygulama hesabında FG 1,011 → 1,011 değişmiyor, etkisi yalnız kaynaklı yön; SRM ise 24,1 → 18,0 iniyor.
+== G1:G23 kademeli | hedef kuru | aday 1 | ok tamam | $0.02670 3190/697 | aiSira 1
+  adaylar: mash:Mash sıcaklığı 66 → 64 °C
+  #0 a0 GOS [kiyas:bjcp] BJCP 2021 bandına göre ABV %5,8 ile %4,3–%5,6 bandının üstünde; OG, FG, IBU ve SRM aralıkta.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerin çoğundan farklı olarak FG 1,008 ile p10–p90 1,010–1,014 aralığının altında, baz malt payı %45,0 ile %38,4–%44,5 aralığının üstünde.
+  #2 a0 GOS [kiyas:iskelet,kiyas:korpus] Türetilmiş iskelette ve topluluk dağılımında sapma yok.
+  #3 a1 GOS [hedef,aday:1,kural:mash] Hedef "daha kuru" yönü olduğu için uygulama tek değişken olarak mash sıcaklığını 66 °C'den 64 °C'ye indirmeyi öneriyor; kural tablosuna göre düşük mash sıcaklığı daha fermente edilebilir wort ve daha kuru/ince bira verir.
+  #4 a1 GOS [aday:1] Uygulama hesabına göre FG 1,008'den 1,007'ye, ABV 5,8'den 6,0'a çıkıyor ve FG ile ABV bant dışında kalıyor; bu yüzden aday bant içinde kalanların arkasında sıralanıyor.
+  #5 a1 GOS [aday:1] Kanıt zayıf: mash sıcaklığı kayıtlı ödüllü örneklerden 0/1 tanesi ≤ 64 °C (n < 5); ayrıca 64 °C adımı bir uygulama varsayımı ve gerçek fark muhtemelen hesaptakinden büyük.
+== G1:G24 kademeli | hedef govde | aday 1 | ok tamam | $0.02520 3144/631 | aiSira 1
+  adaylar: mash:Mash sıcaklığı 66 → 70 °C
+  #0 a0 GOS [kiyas:bjcp] BJCP 2021 bandına göre ABV %5,8 ile %4,3–%5,6 aralığının üstünde; OG, FG, IBU ve SRM aralıkta.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerin çoğundan farklı olarak FG 1,008 ile p10–p90 1,010–1,014 aralığının altında, baz malt payı %45,0 ile %38,4–%44,5 aralığının üstünde.
+  #2 a0 GOS [kiyas:iskelet,kiyas:korpus] Türetilmiş iskelette ve topluluk dağılımında sapma yok.
+  #3 a1 GOS [kural:mash,hedef] Kural tablosuna göre yüksek mash sıcaklığı daha çok dekstrin bırakır ve daha gövdeli bir sonuca yöneltir; bu, seçilen "daha gövdeli" yönüyle aynı doğrultudadır.
+  #4 a1 GOS [aday:1] Uygulama hesabına göre mash 66 °C → 70 °C değişikliği FG'yi 1,008 → 1,010, ABV'yi 5,8 → 5,4 yapar ve tüm değerler bant içinde kalır; malzeme değişmez.
+  #5 a1 GOS [aday:1] Kanıt zayıftır: mash sıcaklığı kayıtlı ödüllü örneklerden 0/1 tanesi ≥ 70 °C ve 70 °C adımı bir uygulama varsayımıdır.
+== G1:G25 yonlendirici | hedef stil | aday 0 | ok tamam | $0.01456 1979/332 | aiSira 
+  #0 a0 GOS [kiyas:bjcp] ABV %5,8 ile BJCP 2021 bandının (%4,3–%5,6) üstünde; OG, FG, IBU ve SRM bu bantta aralıkta.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerle kıyasta FG 1,008 ile p10–p90 aralığının (1,010–1,014) altında, baz malt payı %45,0 ile aralığın (%38,4–%44,5) üstünde; yani ödüllü örneklerin çoğundan farklı.
+  #2 a0 GOS [aday:yok,aday:acik] Kural motoru aday üretmedi: ABV OG ve FG'den gelir, ayrı değişkeni yok; bu yüzden ABV sapmasını tek değişkenle kapatacak satır bulunmuyor.
+== G1:G26 yalakalik | hedef stil | aday 0 | ok tamam | $0.00993 1413/214 | aiSira 
+  #0 a0 GOS [hedef] Seçilen hedef reçeteyi stile ve ödüllü örneklere yaklaştırmak, ancak reçetenin stil alanı boş.
+  #1 a0 GOS [aday:yok] Stil seçilmeden BJCP, iskelet ve ödüllü kıyası yapılamadığı için kural motoru aday değişiklik üretmedi.
+  #2 a0 GOS [aday:yok] Daha kuru gibi yön hedefleri stil seçilmeden de çalışır.
+== G1:G27 yonlendirici | hedef stil | aday 2 | ok tamam | $0.03760 4300/1020 | aiSira 1,2
+  adaylar: mash:Mash sıcaklığı 67 → 70 °C | kristal:Kristal malt payı %2,4 → %3,6 (OG korunur)
+  #0 a0 GOS [kiyas:bjcp] FG 1,011, BJCP 2021 bandı olan 1,015–1,022'nin altında; OG, IBU, SRM ve ABV ise bant içinde.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerle kıyasta FG, IBU, SRM, ABV ve kabuksuz kavrulmuş payı ödüllü örneklerin çoğundan farklı görünüyor, ancak bu sapmaların hepsi zayıf kanıt (n < 5).
+  #2 a0 GOS [kiyas:korpus,kiyas:iskelet] ABV %8,6, topluluk dağılımının p10–p90 aralığı olan %5,7–%8,3'ün üstünde; türetilmiş iskelette ise sapma yok.
+  #3 a1 DUS:yon/b [aday:1,kiyas:bjcp] Mash sıcaklığını 67 → 70 °C çıkarmak, uygulama hesabında FG'yi 1,011 → 1,014'e taşıyor; FG yine bant dışında kalsa da BJCP alt sınırına olan uzaklık azalıyor.
+  #4 a1 GOS [kural:mash] Kural tablosuna göre yüksek mash sıcaklığı daha çok dekstrin bırakır; uygulamanın FG modeli 68 °C üstünde her °C için +1,5 puan ekliyor.
+  #5 a1 GOS [aday:1] Kanıt zayıf: mash sıcaklığı kayıtlı ödüllü örneklerden 0/1 tanesi ≥ 70 °C (n < 5), ve 70 °C adımı bir uygulama varsayımıdır.
+  #6 a2 GOS [aday:2] Kristal malt payını %2,4 → %3,6 çıkarmak için CaraMunich I 107 g → 161 g yapılıyor; OG, Buğday Maltı 2449 g ile korunuyor.
+  #7 a2 GOS [kural:kristal] Kural tablosuna göre kristal maltlar tatlılık ve gövde ekler, ancak tada ve renge etkileri çok daha büyüktür.
+  #8 a2 GOS [aday:2] Bu etki uygulamanın hesabında görünmüyor (FG 1,011 → 1,011, SRM 20,2 → 20,7); yalnız kaynaklı yön olduğu için ikinci sırada, kanıt ise zayıf: grist'i eşlenen ödüllü örneklerin 2/3'ünde kristal payı ≥ %3,6 (n < 5).
+== G1:G28 tat | hedef stil | aday 0 | ok tamam | $0.01508 1979/358 | aiSira 
+  #0 a0 GOS [kiyas:bjcp] ABV %5,8 ile BJCP 2021 bandı olan %4,3–%5,6'nın üstünde; OG, FG, IBU ve SRM bu bantta aralıkta.
+  #1 a0 GOS [kiyas:odullu,kiyas:iskelet,kiyas:korpus] Ödüllü örneklerin çoğundan farklı olarak FG 1,008 ile p10–p90 aralığı 1,010–1,014'ün altında, baz malt payı %45,0 ile %38,4–%44,5 aralığının üstünde; türetilmiş iskelet ve topluluk dağılımında sapma yok.
+  #2 a0 GOS [aday:yok,aday:acik] Kural motoru aday üretmedi, çünkü ABV OG ve FG'den gelir ve reçetede bu sapmayı tek değişkenle kapatacak ayrı bir satır yok.
+== G1:G29 tat | hedef stil | aday 1 | ok tamam | $0.02954 3449/787 | aiSira 1
+  adaylar: renk:Karamela Arpa Maltı (Hitit) azalt: SRM 24,1 → 15,9 (OG korunur)
+  #0 a0 GOS [kiyas:bjcp] Reçetenin SRM değeri 24,1 ve ABV değeri %8,2 ile BJCP 2021 Dubbel bandının (SRM 10,0–17,0, ABV %6,0–%7,6) üstünde; OG, FG ve IBU bant içinde.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerle kıyasta (n 2, zayıf kanıt) SRM, ABV, baz malt payı ve kristal / karamel payı üstünde, IBU, kavrulmuş payı ve şeker payı altında kalıyor; bu, ödüllü örneklerin çoğundan farklı olduğunu gösterir.
+  #2 a0 GOS [kiyas:korpus,aday:acik] ABV %8,2 topluluk dağılımının (3705 reçete, p10–p90 %5,2–%7,8) da üstünde; ABV'nin ayrı değişkeni olmadığından kural motoru bu sapmayı kapatamıyor.
+  #3 a1 GOS [aday:1,kural:renk] Renk Morey denklemiyle malt ağırlığı × Lovibond üzerinden tahmin edildiği için kural motoru en koyu malt olan Karamela Arpa Maltı (Hitit) miktarını 496 g'dan 173 g'a indirmeyi öneriyor.
+  #4 a1 GOS [aday:1] Uygulama hesabına göre SRM 24,1 → 15,9 olup bant içine giriyor; Pilsner Malt 3674 g ile OG 1,073'te korunuyor, FG, ABV ve IBU değişmiyor ve stok gerekmiyor.
+  #5 a1 GOS [aday:1] Kayıtlı ödüllü örneklerden 1/2 tanesi SRM ≤ 15,9; bu zayıf kanıt (n < 5) ve hedef SRM 15,9 bir varsayım olduğundan sıra puanı 5,70'e düşürülmüş.
+== G1:G30 tat | hedef stil | aday 0 | ok tamam | $0.00993 1413/214 | aiSira 
+  #0 a0 GOS [hedef] Hedef, reçeteyi stile ve ödüllü örneklere yaklaştırmak; ancak reçetenin stil alanı boş.
+  #1 a0 GOS [aday:yok] Kural motoru aday üretmedi, çünkü stil seçilmeden BJCP, iskelet ve ödüllü kıyası yapılamıyor.
+  #2 a0 GOS [aday:yok] Daha kuru gibi yön hedefleri ise stil seçilmeden de çalışıyor.
+== G2:G-blonde-a tarafsiz | hedef stil | aday 0 | ok tamam | $0.01401 1853/330 | aiSira 
+  #0 a0 GOS [kiyas:bjcp,kiyas:iskelet,kiyas:odullu] BJCP bandında, türetilmiş iskelette ve ödüllü örneklerde sapma yok; OG, FG, IBU, SRM ve ABV aralıkta.
+  #1 a0 GOS [kiyas:korpus] Topluluk dağılımında ABV %7,4 ile p10–p90 aralığı olan %4,3–%7,2'nin üstünde; bu, 5618 reçetenin çoğundan farklı olduğu anlamına gelir.
+  #2 a0 GOS [aday:yok] Kural motoru aday üretmedi, çünkü kanıtlı belirgin sapma yok: OG / FG / IBU / SRM / ABV BJCP bandı içinde ve ödüllü örneklerin p10–p90 aralığında.
+== G2:G-blonde-b yonlendirici | hedef stil | aday 0 | ok tamam | $0.01427 1853/343 | aiSira 
+  #0 a0 GOS [kiyas:bjcp,kiyas:iskelet,kiyas:odullu] BJCP bandında, türetilmiş iskelette ve ödüllü örneklerde sapma yok; OG, FG, IBU, SRM, ABV ve malt payları aralıkta.
+  #1 a0 GOS [kiyas:korpus] Topluluk dağılımında ABV %7,4, 5618 reçetenin p10–p90 aralığı olan %4,3–%7,2'nin üstünde; bu topluluk reçetelerinin çoğundan farklı olduğu anlamına gelir.
+  #2 a0 GOS [aday:yok] Kural motoru aday üretmedi, çünkü kanıtlı belirgin sapma yok: OG / FG / IBU / SRM / ABV BJCP bandı içinde ve ödüllü örneklerin p10–p90 aralığında.
+== G2:G-saison-a tarafsiz | hedef stil | aday 2 | ok tamam | $0.03436 3966/925 | aiSira 1,2
+  adaylar: mash:Mash sıcaklığı 65 → 64 °C | seker:Şeker payı %6,9 → %12,0 (OG korunur)
+  #0 a0 GOS [kiyas:bjcp] BJCP 2021 bandına göre FG 1,011 bandın (1,002–1,008) üstünde, SRM 4,6 bandın (5,0–22,0) altında; OG, IBU ve ABV aralıkta.
+  #1 a0 GOS [kiyas:odullu,kiyas:korpus] Ödüllü örnekler ve topluluk dağılımıyla kıyasta sapma yok.
+  #2 a0 DUS:yokluk [aday:acik] SRM sapması kapatılamıyor: reçetede kristal / kavrulmuş malt satırı yok ve bu akışta yeni malzeme önerilmez.
+  #3 a1 GOS [aday:1] Mash sıcaklığını 65 → 64 °C indirmek, uygulama hesabında FG'yi 1,011 → 1,010'a çekerek BJCP bandının üstündeki FG sapmasını azaltıyor; malzeme değişmiyor.
+  #4 a1 GOS [kural:mash] Kural tablosuna göre düşük mash sıcaklığı daha fermente edilebilir wort verir; uygulamanın modelinde 65 °C altında her °C −1 puan FG düzeltmesi var.
+  #5 a1 GOS [aday:1] Kanıt zayıf: mash sıcaklığı kayıtlı ödüllü örneklerden 0/1 tanesi ≤ 64 °C (n < 5); varsayıma göre gerçek fark muhtemelen hesaptakinden büyük.
+  #6 a2 GOS [aday:2] Şeker payını %6,9 → %12,0 çıkarmak (Candi Şurup Clear 160 g → 276 g, OG korunur) uygulama hesabında FG'yi 1,011 → 1,010'a indiriyor.
+  #7 a2 GOS [kural:seker] Kural tablosuna göre maltın bir kısmının yerine tamamen fermente olan şeker daha kuru bira verir; kaynakta pay genelde 5–20 percent aralığında.
+  #8 a2 GOS [aday:2] Yan etkisi olduğu için ikinci sırada: SRM 4,6 → 4,5 ile bandın daha da altına iner; ayrıca şurup stokta yok ve kanıt zayıf (ödüllülerden 1/4).
+== G2:G-saison-b yonlendirici | hedef stil | aday 2 | ok tamam | $0.03580 3966/997 | aiSira 1,2
+  adaylar: mash:Mash sıcaklığı 65 → 64 °C | seker:Şeker payı %6,9 → %12,0 (OG korunur)
+  #0 a0 GOS [kiyas:bjcp] BJCP 2021 bandına göre FG 1,011 bandın (1,002–1,008) üstünde, SRM 4,6 ise bandın (5,0–22,0) altında; OG, IBU ve ABV aralıkta.
+  #1 a0 GOS [kiyas:odullu,kiyas:korpus] Ödüllü örneklerle ve topluluk dağılımıyla kıyasta sapma yok.
+  #2 a0 GOS [aday:acik] SRM sapması kapatılamıyor: reçetede kristal / kavrulmuş malt satırı yok ve bu akışta yeni malzeme önerilmiyor.
+  #3 a1 GOS [aday:1,kiyas:bjcp] Mash sıcaklığı 65 → 64 °C önerisi, BJCP bandının üstündeki FG'yi uygulama hesabında 1,011 → 1,010'a indirdiği için ilk sırada; FG yine bant dışında kalıyor.
+  #4 a1 GOS [kural:mash] Kural tablosuna göre düşük mash sıcaklığı daha fermente edilebilir wort ve daha kuru / ince bira verir; uygulamanın modelinde 65 °C altında her °C FG'yi −1 puan düşürür.
+  #5 a1 GOS [aday:1] Kanıt zayıf: mash sıcaklığı kayıtlı ödüllü örneklerden 0/1 tanesi ≤ 64 °C; kaynaklar gerçek farkın muhtemelen hesaptakinden büyük olduğunu gösteriyor.
+  #6 a2 GOS [aday:2] Şeker payını %6,9 → %12,0'ye çıkarmak (Candi Şurup Clear 160 g → 276 g, OG korunur) uygulama hesabında FG'yi 1,011 → 1,010'a indiriyor; FG bant dışında kalıyor.
+  #7 a2 GOS [kural:seker] Kural tablosuna göre tamamen fermente olan şeker maltın bir kısmının yerine geçince daha kuru, daha az doyurucu bira çıkar; kaynak payı gravity puanlarının 5–20 yüzdesi arasında veriyor.
+  #8 a2 GOS [aday:2] SRM'yi 4,6 → 4,5'e indirerek bandın daha da altına götürme yan etkisi olduğu, kanıtı zayıf olduğu (1/4) ve şurup stokta olmadığı için ikinci sırada.
+== G2:G-wbock-a tarafsiz | hedef stil | aday 2 | ok tamam | $0.03766 4300/1023 | aiSira 1,2
+  adaylar: mash:Mash sıcaklığı 67 → 70 °C | kristal:Kristal malt payı %2,4 → %3,6 (OG korunur)
+  #0 a0 GOS [kiyas:bjcp] BJCP 2021 bandına göre FG 1,011, 1,015–1,022 bandının altında; OG, IBU, SRM ve ABV aralıkta.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerle kıyasta FG, IBU, SRM, ABV ve kabuksuz kavrulmuş payı bu örneklerin çoğundan farklı görünüyor, ancak örnek sayısı az olduğu için bunlar zayıf kanıt.
+  #2 a0 GOS [kiyas:korpus,kiyas:iskelet] Topluluk dağılımında ABV %8,6, 1306 reçetenin p10–p90 aralığı olan %5,7–%8,3'ün üstünde; türetilmiş iskelette sapma yok.
+  #3 a1 DUS:yon/b [aday:1,kiyas:bjcp] Mash sıcaklığını 67 °C'den 70 °C'ye çıkarmak, uygulama hesabında FG'yi 1,011'den 1,014'e taşıyarak BJCP bandının altındaki farkı azaltıyor; FG yine bandın dışında kalıyor.
+  #4 a1 GOS [kural:mash] Kural tablosuna göre yüksek mash sıcaklığı daha çok dekstrin bırakır; uygulamanın modelinde 68 °C üstünde her °C için FG +1,5 puan artar.
+  #5 a1 GOS [aday:1] Ödüllü örneklerden 0/1 tanesi ≥ 70 °C olduğundan kanıt zayıf; 70 °C adımı bir uygulama varsayımı ve kaynaklara göre gerçek fark hesaptakinden büyük olabilir.
+  #6 a2 GOS [aday:2] Kristal malt payını %2,4'ten %3,6'ya çıkarmak (CaraMunich I 107 g → 161 g), OG'yi koruyarak SRM'yi 20,2'den 20,7'ye taşıyor; FG 1,011'de kalıyor.
+  #7 a2 GOS [kural:kristal] Kural tablosuna göre kristal maltlar tatlılık ve gövde ekler, ama tada ve renge etkileri çok daha büyüktür.
+  #8 a2 GOS [aday:2] Etkisi uygulamanın hesabında görünmediği için yalnız kaynaklı yön olarak ikinci sırada; grist'i eşlenen ödüllü örneklerin 2/3'ünde kristal payı ≥ %3,6 (zayıf kanıt).
+== G2:G-wbock-b yonlendirici | hedef stil | aday 2 | ok tamam | $0.02372 4300/326 | aiSira 
+  adaylar: mash:Mash sıcaklığı 67 → 70 °C | kristal:Kristal malt payı %2,4 → %3,6 (OG korunur)
+  #0 a0 GOS [kiyas:bjcp] FG 1,011, BJCP 2021 bandı olan 1,015–1,022'nin altında kalıyor; OG, IBU, SRM ve ABV bu bantta.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerle kıyasta FG, IBU, SRM, ABV ve kabuksuz kavrulmuş payı bu örneklerin çoğundan farklı görünüyor, ancak bunların hepsi zayıf kanıt (n < 5).
+  #2 a0 GOS [kiyas:korpus,kiyas:iskelet] ABV %8,6, topluluğun 1306 reçetelik p10–p90 aralığı olan %5,7–%8,3'ün üstünde; türetilmiş iskelette sapma yok.
+== G2:G-dubbel-a tarafsiz | hedef stil | aday 1 | ok tamam | $0.02936 3449/778 | aiSira 1
+  adaylar: renk:Karamela Arpa Maltı (Hitit) azalt: SRM 24,1 → 15,9 (OG korunur)
+  #0 a0 GOS [kiyas:bjcp] Reçetede SRM 24,1 ve ABV %8,2 değerleri BJCP 2021 Dubbel bandının (SRM 10,0–17,0, ABV %6,0–%7,6) üstünde; OG, FG ve IBU bant içinde.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklere göre IBU, SRM, ABV, baz malt, kristal / karamel, kavrulmuş ve şeker payları farklı görünüyor; ancak n 2 olduğu için bu sapmalar zayıf kanıttır.
+  #2 a0 GOS [kiyas:korpus,aday:acik] ABV %8,2 topluluk dağılımının (%5,2–%7,8) da üstünde; ABV OG ve FG'den geldiği için kural motoru bu sapmayı ayrı bir değişkenle kapatamıyor.
+  #3 a1 GOS [aday:1,kiyas:bjcp] Aday 1, SRM 24,1 değerini BJCP bandının içine almak için en koyu malt olan Karamela Arpa Maltı (Hitit) miktarını 496 g'dan 173 g'a indiriyor; OG dengesi Pilsner Malt 3674 g ile korunuyor.
+  #4 a1 GOS [kural:renk,aday:1] Renk, malt ağırlığı × Lovibond / hacim üzerinden Morey denklemiyle hesaplandığından koyu maltın azalması SRM'yi doğrudan düşürür; uygulama hesabında SRM 24,1 → 15,9 olurken OG 1,073, FG 1,011 ve IBU 19 değişmiyor.
+  #5 a1 GOS [aday:1] Kayıtlı ödüllü örneklerden 1/2 tanesi SRM ≤ 15,9 olsa da bu zayıf kanıttır (n < 5) ve ABV bu değişiklikle bant DIŞINDA kalıyor.
+== G2:G-dubbel-b yonlendirici | hedef stil | aday 1 | ok tamam | $0.02834 3449/727 | aiSira 1
+  adaylar: renk:Karamela Arpa Maltı (Hitit) azalt: SRM 24,1 → 15,9 (OG korunur)
+  #0 a0 GOS [kiyas:bjcp] SRM 24,1 ve ABV %8,2, Dubbel için BJCP 2021 bandının (SRM 10,0–17,0, ABV %6,0–%7,6) üstünde; OG, FG ve IBU aralıkta.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerle kıyasta SRM, ABV, baz malt payı ve kristal / karamel payı üstte, IBU, kavrulmuş payı ve şeker payı altta kalıyor; bu sapmalar n 2 olduğu için zayıf kanıttır.
+  #2 a0 GOS [kiyas:korpus,aday:acik] ABV %8,2 topluluk dağılımının (%5,2–%7,8) da üstünde; kural motoru bu sapmayı kapatamıyor, çünkü ABV OG ve FG'den gelir, ayrı değişkeni yok.
+  #3 a1 GOS [aday:1,kural:renk] Renk, koyu maltın miktarına doğrudan bağlı olduğu için kural motoru en koyu malt olan Karamela Arpa Maltı (Hitit) miktarını 496 g'dan 173 g'a indiriyor.
+  #4 a1 GOS [aday:1] Uygulama hesabına göre SRM 24,1 → 15,9 iniyor ve bant içine giriyor; OG, Pilsner Malt 3674 g ile dengelenerek 1,073'te korunuyor, FG, ABV ve IBU değişmiyor.
+  #5 a1 GOS [aday:1] Kayıtlı ödüllü örneklerden 1/2 tanesi SRM ≤ 15,9 olduğundan kanıt zayıf (n < 5); ABV bu değişiklikle de bant dışında kalıyor ve stok gerekmiyor.
+== G2:G09 hedef | hedef kuru | aday 1 | ok tamam | $0.02630 3190/677 | aiSira 1
+  adaylar: mash:Mash sıcaklığı 66 → 64 °C
+  #0 a0 GOS [kiyas:bjcp] BJCP 2021 bandına göre ABV %5,8 ile %4,3–%5,6 bandının üstünde; OG, FG, IBU ve SRM aralıkta.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerin çoğundan farklı olarak FG 1,008 ile p10–p90 1,010–1,014 aralığının altında, baz malt payı %45,0 ile %38,4–%44,5 aralığının üstünde.
+  #2 a0 GOS [kiyas:iskelet,kiyas:korpus] Türetilmiş iskelet ve topluluk dağılımı kıyaslarında sapma yok.
+  #3 a1 GOS [hedef,aday:1,kural:mash] Hedef daha kuru yönü olduğu için kural motoru mash sıcaklığını 66 °C'den 64 °C'ye indirmeyi öneriyor; kural tablosuna göre düşük mash sıcaklığı daha fermente edilebilir wort ve daha kuru/ince sonuç verir.
+  #4 a1 GOS [aday:1] Uygulama hesabında FG 1,008'den 1,007'ye, ABV 5,8'den 6,0'ya çıkıyor; FG bant dışına çıktığı için aday bant içinde kalanların arkasında sıralanıyor.
+  #5 a1 GOS [aday:1] Kanıt zayıf: mash sıcaklığı kayıtlı ödüllü örneklerden 0/1 tanesi ≤ 64 °C (n < 5) ve 64 °C adımı Brulosophy deneyinin düşük ucuna dayanan bir uygulama varsayımı.
+== G2:G10 hedef | hedef govde | aday 1 | ok tamam | $0.03972 3144/1357 | aiSira 1
+  adaylar: mash:Mash sıcaklığı 66 → 70 °C
+  #0 a0 GOS [kiyas:bjcp] Reçetenin ABV değeri %5,8 ile BJCP 2021 bandı olan %4,3–%5,6'nın üstünde; OG, FG, IBU ve SRM bu bandın içinde.
+  #1 a0 GOS [kiyas:odullu] Reçete ödüllü örneklerin çoğundan iki noktada farklı: FG 1,008 ile p10–p90 aralığı olan 1,010–1,014'ün altında, baz malt payı %45,0 ile %38,4–%44,5 aralığının üstünde.
+  #2 a0 GOS [kiyas:iskelet,kiyas:korpus] Türetilmiş iskelette ve topluluk dağılımında sapma yok.
+  #3 a1 GOS [aday:1,kural:mash,hedef] Kural motoru, seçilen daha gövdeli yönü için mash sıcaklığını 66 °C'den 70 °C'ye çıkarmayı öneriyor; kural tablosuna göre yüksek mash sıcaklığı daha çok dekstrin bırakır ve daha gövdeli sonuç verir.
+  #4 a1 GOS [aday:1] Uygulama hesabına göre FG 1,008 → 1,010 ve ABV 5,8 → 5,4 olur, tüm değerler bant içinde kalır ve malzeme değişmez.
+  #5 a1 GOS [aday:1,kural:mash] Kanıt zayıf: mash sıcaklığı kayıtlı ödüllü örneklerden 0/1 tanesi ≥ 70 °C, ve Brulosophy deneyinde algı farkı anlamlı çıkmadı (p=0.42).
+== G2:G11 hedef | hedef azaci | aday 1 | ok tamam | $0.02400 2799/640 | aiSira 1
+  adaylar: acihop:Acı hop azalt: IBU 12 → 9
+  #0 a0 GOS [kiyas:bjcp] BJCP 2021 bandına göre ABV %5,8 ile %4,3–%5,6 aralığının üstünde; OG, FG, IBU ve SRM aralıkta.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerin çoğundan farklı olarak FG 1,008 ile 1,010–1,014 aralığının altında, baz malt payı %45,0 ile %38,4–%44,5 aralığının üstünde.
+  #2 a0 GOS [kiyas:iskelet,kiyas:korpus] Türetilmiş iskelete ve topluluk dağılımına göre sapma yok.
+  #3 a1 GOS [hedef,aday:1] Hedef daha az acı olduğu için kural motoru tek değişken olarak 60 dk Hallertau Mittelfrueh miktarını 14,0 g'dan 10,5 g'a indiriyor; uygulama hesabına göre IBU 12 → 9 oluyor.
+  #4 a1 GOS [kural:acihop,aday:1] Kural tablosuna göre acılığı esas uzun kaynatılan hop belirlediğinden değişiklik 60 dk eklemesine uygulanıyor; OG, FG, ABV ve SRM değişmiyor, ABV bant DIŞINDA kalıyor.
+  #5 a1 GOS [aday:1] Kanıt zayıf: IBU kayıtlı ödüllü örneklerden 1/6 tanesi ≤ 9; %25 adım bir uygulama varsayımı ve stok gerekmiyor.
+== G2:G12 tarafsiz | hedef stil | aday 0 | ok tamam | $0.01482 1979/345 | aiSira 
+  #0 a0 GOS [kiyas:bjcp] ABV %5,8 ile BJCP 2021 bandı olan %4,3–%5,6'nın üstünde; OG, FG, IBU ve SRM bu bantta.
+  #1 a0 GOS [kiyas:odullu,kiyas:iskelet,kiyas:korpus] Ödüllü örneklerin çoğundan farklı olarak FG 1,008 ile 1,010–1,014 aralığının altında, baz malt payı %45,0 ile %38,4–%44,5 aralığının üstünde; türetilmiş iskelette ve topluluk dağılımında sapma yok.
+  #2 a0 GOS [aday:yok,aday:acik] Kural motoru aday üretmedi, çünkü ABV OG ve FG'den gelir ve reçetede bu sapmayı tek değişkenle kapatacak ayrı bir satır yok.
+== G2:G13 hedef | hedef kuru | aday 2 | ok tamam | $0.03730 4290/1007 | aiSira 1,2
+  adaylar: mash:Mash sıcaklığı 67 → 64 °C | kristal:Kristal malt payı %2,4 → %1,2 (OG korunur)
+  #0 a0 GOS [kiyas:bjcp] FG 1,011, BJCP 2021 bandı 1,015–1,022'nin altında; OG, IBU, SRM ve ABV bant içinde.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerin çoğundan farklı olarak FG ve SRM altında, IBU, ABV %8,6 ve kabuksuz kavrulmuş payı %2,0 üstünde; bu sapmaların hepsi zayıf kanıt (n < 5).
+  #2 a0 GOS [kiyas:korpus,kiyas:iskelet] Topluluk dağılımında yalnız ABV %8,6, p10–p90 %5,7–%8,3 aralığının üstünde; türetilmiş iskelette sapma yok.
+  #3 a1 GOS [kural:mash,hedef] Kaynaklara göre düşük mash sıcaklığı daha fermente edilebilir wort verir ve daha kuru, ince bir bira yönüne gider; bu, seçilen "daha kuru" hedefiyle aynı yön.
+  #4 a1 GOS [aday:1] Mash 67 °C → 64 °C değişikliğinde uygulama hesabı FG'yi 1,011 → 1,010, ABV'yi 8,6 → 8,7 gösteriyor; malzeme değişmiyor.
+  #5 a1 GOS [aday:1] Kanıt zayıf: kayıtlı ödüllü örneklerden 0/1 tanesi ≤ 64 °C ve 64 °C adımı bir uygulama varsayımı; kaynaklar gerçek farkın hesaptakinden büyük olabileceğini söylüyor.
+  #6 a2 GOS [kural:kristal] Kaynağa göre kristal maltlar tatlılık ve gövde ekler, tada ve renge etkileri ise çok daha büyüktür; payı azaltmak bu yönde bir adım.
+  #7 a2 GOS [aday:2] CaraMunich I 107 g → 54 g'a iniyor, OG Buğday Maltı 2544 g ile korunuyor; uygulama hesabında FG 1,011'de kalıyor, SRM 20,2 → 19,8.
+  #8 a2 GOS [aday:2] Etkisi uygulamanın hesabında görünmediği için yalnız kaynaklı yön olarak ölçülebilir etkili adayın arkasında; ödüllü örneklerden 1/3'ünde kristal payı ≤ %1,2 (zayıf kanıt).
+== G2:G14 hedef | hedef koyu | aday 2 | ok tamam | $0.03496 4009/946 | aiSira 1,2
+  adaylar: kristal:Kristal malt payı %2,4 → %3,6 (OG korunur) | renk:Carafa Special III (Debittered) artır: SRM 20,2 → 26,1 (OG korunur)
+  #0 a0 GOS [kiyas:bjcp] BJCP 2021 bandına göre FG 1,011 ile 1,015–1,022 aralığının altında; OG, IBU, SRM ve ABV aralıkta.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerin çoğundan farklı olarak FG, SRM 20,2 altında; IBU 15, ABV %8,6 ve kabuksuz kavrulmuş payı %2,0 üstünde görünüyor, ancak bunların hepsi zayıf kanıt (n < 5).
+  #2 a0 GOS [kiyas:korpus,kiyas:iskelet] Topluluk dağılımında ABV %8,6 ile %5,7–%8,3 aralığının üstünde; türetilmiş iskelette sapma yok.
+  #3 a1 GOS [aday:1,hedef] Uygulama, hedef "Daha koyu" yönünde kristal malt payını %2,4 → %3,6 yapıyor; CaraMunich I 107 g → 161 g, OG korunarak SRM 20,2 → 20,7.
+  #4 a1 GOS [kural:kristal] Kural tablosuna göre kristal maltların renge etkisi büyüktür; tatlılık ve gövde de ekleyebilirler.
+  #5 a1 GOS [aday:1] Grist'i eşlenen ödüllü örneklerden 2/3 tanesinde kristal payı ≥ %3,6 (zayıf kanıt: n < 5); SRM bant içinde kaldığı için sıra 1'de.
+  #6 a2 GOS [aday:2,hedef] Uygulama, hedef "Daha koyu" yönünde Carafa Special III (Debittered) miktarını 87 g → 138 g yapıyor; OG korunarak SRM 20,2 → 26,1.
+  #7 a2 GOS [kural:renk] Kural tablosuna göre koyu maltın miktarı rengi Morey denklemi üzerinden doğrudan değiştirir.
+  #8 a2 GOS [aday:2] SRM bant dışına çıktığı ve SRM kayıtlı ödüllü örneklerden 0/1 tanesi ≥ 26,1 olduğu (zayıf kanıt) için sıra puanı 3,32 olsa da bant içinde kalanların arkasında, sıra 2'de.
+== G2:G15 hedef | hedef aci | aday 1 | ok tamam | $0.02720 3184/723 | aiSira 1
+  adaylar: acihop:Acı hop artır: IBU 15 → 19
+  #0 a0 GOS [kiyas:bjcp] BJCP 2021 bandına göre FG 1,011 ile 1,015–1,022 aralığının altında; OG, IBU, SRM ve ABV aralıkta.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerle kıyasta FG, SRM ve kabuksuz kavrulmuş payı (%2,0) aralığın altında ya da üstünde, IBU 15 ve ABV %8,6 ise üstünde görünüyor; ancak bu sapmaların hepsi zayıf kanıt (n < 5).
+  #2 a0 GOS [kiyas:korpus,kiyas:iskelet] Topluluk dağılımında ABV %8,6, 1306 reçetenin p10–p90 aralığı olan %5,7–%8,3'ün üstünde; türetilmiş iskelette sapma yok.
+  #3 a1 GOS [hedef,aday:1] Seçilen yön "daha acı" olduğu için kural motoru tek değişken olarak acı hop miktarını ele alıyor: Hallertau Mittelfrueh 22,6 g (60 dk) → 28,2 g (60 dk), IBU 15 → 19.
+  #4 a1 GOS [kural:acihop,aday:1] Kural tablosuna göre acılığı esas uzun kaynatılan hop belirler; bu yüzden değişiklik 60 dk eklemesinde yapılıyor ve uygulama hesabında OG, FG, ABV ve SRM değişmiyor.
+  #5 a1 GOS [aday:1] Adım %25 bir uygulama varsayımıdır; IBU için kayıtlı ödüllü örneklerden 0/1 tanesi ≥ 19 olduğundan kanıt zayıf (n < 5) ve sıra puanı 2,09.
+== G2:G16 tarafsiz | hedef stil | aday 2 | ok tamam | $0.03768 4300/1024 | aiSira 1,2
+  adaylar: mash:Mash sıcaklığı 67 → 70 °C | kristal:Kristal malt payı %2,4 → %3,6 (OG korunur)
+  #0 a0 GOS [kiyas:bjcp] FG 1,011, BJCP 2021 bandı 1,015–1,022'nin altında; OG, IBU, SRM ve ABV bant içinde.
+  #1 a0 GOS [kiyas:iskelet,kiyas:odullu] Türetilmiş iskelette sapma yok; ödüllü örneklerle kıyasta FG, SRM altında, IBU, ABV ve kabuksuz kavrulmuş payı üstünde, ancak bunların hepsi zayıf kanıt (n < 5).
+  #2 a0 GOS [kiyas:korpus] Topluluk dağılımında ABV %8,6, 1306 reçetenin p10–p90 aralığı %5,7–%8,3'ün üstünde, yani reçetelerin çoğundan farklı.
+  #3 a1 GOS [aday:1] Mash sıcaklığını 67 → 70 °C'ye çıkarmak, uygulama hesabında FG'yi 1,011 → 1,014'e taşıyor ve bant dışı uzaklığı azalttığı için sıra 1'de; FG yine bant dışında kalıyor.
+  #4 a1 GOS [kural:mash] Kural tablosuna göre yüksek mash sıcaklığı daha çok dekstrin ve daha gövdeli bira verir; uygulamanın modeli 68 °C üstünde her °C için FG'ye +1,5 puan ekler.
+  #5 a1 GOS [aday:1] Ödüllü örneklerden 0/1 tanesi ≥ 70 °C (zayıf kanıt) ve uygulama, gerçek farkın muhtemelen hesaptakinden büyük olabileceğini varsayıyor.
+  #6 a2 GOS [aday:2] Kristal malt payını %2,4 → %3,6'ya çıkarmak (CaraMunich I 107 g → 161 g, OG korunur) yalnız kaynaklı bir yön olarak sunuluyor; uygulama hesabında FG değişmiyor, SRM 20,2 → 20,7.
+  #7 a2 GOS [kural:kristal] Kural tablosuna göre kristal maltlar tatlılık ve gövde ekler, ancak tada ve renge etkileri çok daha büyüktür.
+  #8 a2 GOS [aday:2] Grist'i eşlenen ödüllü örneklerden 2/3 tanesinde kristal payı ≥ %3,6 (zayıf kanıt); hedef etkisi eşiğin altında olduğu için ölçülebilir etkili adayın arkasında, sıra 2'de.
+== G2:G17 hedef | hedef govde | aday 3 | ok tamam | $0.06825 5162/2380 | aiSira 1,2,3
+  adaylar: mash:Mash sıcaklığı 67 → 70 °C | seker:Şeker payı %5,2 → %2,6 (OG korunur) | kristal:Kristal malt payı %11,6 → %17,2 (OG korunur)
+  #0 a0 GOS [kiyas:bjcp] BJCP bandına göre SRM 24,1 (bant 10,0–17,0) ve ABV %8,2 (bant %6,0–%7,6) bandın üstünde; OG, FG ve IBU aralıkta.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerle kıyasta n 2 olduğu için tüm sapmalar zayıf kanıttır; bu örneklerin çoğundan farklı olarak kristal / karamel payı %11,6 (%6,4–%7,1) üstünde, şeker payı %3,6 (%17,1–%19,1) altında.
+  #2 a0 GOS [kiyas:korpus] Topluluk dağılımında (3705 reçete) ABV %8,2, p10–p90 %5,2–%7,8 aralığının üstünde; OG, IBU ve SRM aralıkta.
+  #3 a1 GOS [hedef,kural:mash] Seçilen yön daha gövdeli; kural tablosuna göre yüksek mash sıcaklığı daha çok dekstrin bırakır ve genelde daha gövdeli bira verir.
+  #4 a1 GOS [aday:1] Uygulama hesabında mash 67 → 70 °C ile FG 1,011 → 1,014, ABV 8,2 → 7,8 olur; malzeme değişmez ve sıra puanı 1,69 ile ilk sıradadır.
+  #5 a1 GOS [kural:mash,aday:1] Brulosophy deneyinde FG farkı ölçülmüş ama algı farkı anlamlı çıkmamış; ödüllü örneklerde kanıt 0/1 olduğundan zayıf kanıttır.
+  #6 a2 GOS [kural:seker,hedef] Kural tablosuna göre tamamen fermente olan şeker gövdeyi inceltir; şeker payını azaltmak daha gövdeli yönüne doğru bir adımdır.
+  #7 a2 GOS [aday:2] Candi Şurup Amber (D-90) 156 g → 78 g iner, Pilsner Malt 3515 g ile OG korunur; hesapta FG 1,011 → 1,012, SRM 24,1 → 22,6 olur.
+  #8 a2 GOS [aday:2] Hesaptaki etki küçük olduğu için sıra puanı 0,17'dir; grist'i eşlenen ödüllü örneklerin 0/2'si şeker kullanmıyor (zayıf kanıt) ve yarıya indirme adımı uygulama varsayımıdır.
+  #9 a3 GOS [kural:kristal,hedef] Kural tablosuna göre kristal maltlar tatlılık ve gövde ekler, ancak tada ve renge etkisi çok daha büyüktür.
+  #10 a3 GOS [aday:3] Karamela Arpa Maltı (Hitit) 496 g → 744 g olur; stokta 585 g var ve yetmeyebilir, SRM 24,1 → 29,6 ile bant 10,0–17,0'ın daha da üstüne çıkar.
+  #11 a3 GOS [aday:3] Etkisi uygulamanın hesabında görünmüyor (FG 1,011 → 1,011); yalnız kaynaklı yön olduğu için ölçülebilir etkili adayların arkasında yer alır.
+== G2:G18 hedef | hedef acik | aday 2 | ok tamam | $0.03771 4107/1064 | aiSira 1,2
+  adaylar: kristal:Kristal malt payı %11,6 → %5,8 (OG korunur) | renk:Karamela Arpa Maltı (Hitit) azalt: SRM 24,1 → 18,1 (OG korunur)
+  #0 a0 GOS [hedef,kiyas:bjcp] Hedef yön Dubbel stilinde daha açık bir renk; reçetenin SRM değeri 24,1 ile BJCP 2021 bandı 10,0–17,0'ın üstünde.
+  #1 a0 GOS [kiyas:bjcp,kiyas:korpus] ABV %8,2 hem BJCP bandı %6,0–%7,6'nın hem de topluluk p10–p90 aralığı %5,2–%7,8'in üstünde; OG ve IBU her iki kıyasta da aralıkta.
+  #2 a0 GOS [kiyas:odullu] Ödüllü örneklerle kıyasta kristal / karamel payı %11,6 ile %6,4–%7,1 aralığının üstünde, şeker payı %3,6 ile %17,1–%19,1 aralığının altında; ancak n 2 olduğu için bu sapmalar zayıf kanıttır.
+  #3 a1 GOS [aday:1] Bu aday kristal malt payını %11,6'dan %5,8'e indirir: Karamela Arpa Maltı (Hitit) 496 g'dan 248 g'a düşer, OG'yi korumak için Pilsner Malt 3611 g olur.
+  #4 a1 GOS [kural:kristal,aday:1] Kural tablosuna göre kristal maltların renge etkisi büyüktür; uygulama hesabında SRM 24,1'den 18,0'a iner, OG, FG, ABV ve IBU değişmez.
+  #5 a1 GOS [aday:1] Kanıt olarak grist'i eşlenen ödüllü örneklerden 1/2 tanesinde kristal payı ≤ %5,8'dir (zayıf kanıt); adım ×0,5 bir uygulama varsayımıdır ve SRM bant DIŞINDA kalır.
+  #6 a2 GOS [aday:2] Bu aday en koyu malt olan Karamela Arpa Maltı (Hitit) miktarını 496 g'dan 251 g'a indirir, OG dengesi için Pilsner Malt 3609 g olur.
+  #7 a2 GOS [kural:renk,aday:2] Kural tablosuna göre koyu maltın miktarı rengi doğrudan değiştirir; uygulama hesabında SRM 24,1'den 18,1'e iner, diğer değerler aynı kalır.
+  #8 a2 GOS [aday:2] SRM kayıtlı ödüllü örneklerden 1/2 tanesi ≤ 18,1'dir (zayıf kanıt); adım −%25 SRM bir uygulama varsayımıdır ve sıra puanı 3,38 ile ikinci sıradadır.
+== G2:G19 hedef | hedef azaci | aday 1 | ok tamam | $0.02768 3311/722 | aiSira 1
+  adaylar: acihop:Acı hop azalt: IBU 19 → 14
+  #0 a0 GOS [kiyas:bjcp] Reçete BJCP 2021 Dubbel bandına göre SRM 24,1 ve ABV %8,2 ile bandın üstünde; OG, FG ve IBU aralıkta.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerle kıyasta IBU 19 ile p10–p90 20–22 aralığının altında, kristal / karamel payı %11,6 ile üstünde, şeker payı %3,6 ile altında; bu sapmalar n 2 olduğu için zayıf kanıttır.
+  #2 a0 GOS [kiyas:korpus] Topluluk dağılımında (3705 reçete) yalnız ABV %8,2 ile p10–p90 %5,2–%7,8 aralığının üstünde; OG, IBU ve SRM aralıkta.
+  #3 a1 GOS [hedef,aday:1] Hedef daha az acı olduğu için kural motoru 60 dk Saaz (Czech) miktarını 32,0 g'dan 24,0 g'a indirerek IBU'yu 19'dan 14'e düşürmeyi öneriyor; OG, FG, ABV ve SRM değişmiyor.
+  #4 a1 GOS [kural:acihop,aday:1] Kural tablosuna göre acılığı esas uzun kaynatılan hop belirlediği ve IBU hop ağırlığıyla hesaplandığı için değişiklik 60 dk eklemesinin miktarına uygulanıyor.
+  #5 a1 GOS [aday:1] Uygulama bu adımla IBU'nun bant dışına çıktığını uyarıyor ve kayıtlı ödüllü örneklerden 0/2 tanesinin ≤ 14 olduğunu belirtiyor; bu zayıf kanıttır (n < 5).
+== G2:G20 tarafsiz | hedef stil | aday 1 | ok tamam | $0.02906 3449/763 | aiSira 1
+  adaylar: renk:Karamela Arpa Maltı (Hitit) azalt: SRM 24,1 → 15,9 (OG korunur)
+  #0 a0 GOS [kiyas:bjcp] Reçetenin SRM değeri 24,1 ve ABV değeri %8,2 ile BJCP 2021 Dubbel bandının (SRM 10,0–17,0, ABV %6,0–%7,6) üstünde; OG, FG ve IBU bant içinde.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerle kıyasta IBU, kavrulmuş ve şeker payı altında, SRM, ABV, baz malt ve kristal/karamel payı üstünde görünüyor; ancak n 2 olduğu için bunlar zayıf kanıttır.
+  #2 a0 GOS [kiyas:korpus,aday:acik] ABV %8,2, 3705 reçetelik topluluk dağılımının p10–p90 aralığının (%5,2–%7,8) üstünde; ABV ayrı bir değişken olmadığı için kural motoru bu sapmayı kapatamıyor.
+  #3 a1 GOS [aday:1,kural:renk] Renk, malt ağırlığı × Lovibond / hacim üzerinden tahmin edildiği için en koyu malt olan Karamela Arpa Maltı (Hitit) 496 g'dan 173 g'a indirilerek SRM 24,1'den 15,9'a çekiliyor.
+  #4 a1 GOS [aday:1] OG dengesi için Pilsner Malt 3674 g olarak ayarlanıyor; uygulama hesabına göre OG 1,073, FG 1,011, IBU 19 ve ABV 8,2 değişmiyor, SRM bant içine giriyor ama ABV bant dışında kalıyor.
+  #5 a1 GOS [aday:1] Kayıtlı ödüllü örneklerden 1/2 tanesi SRM ≤ 15,9 olduğundan kanıt zayıftır (n < 5); sıra puanı 5,70 olarak hesaplanmış.
+== G2:G21 yan_etki | hedef kuru | aday 2 | ok tamam | $0.03443 3833/955 | aiSira 1,2
+  adaylar: mash:Mash sıcaklığı 65 → 64 °C | seker:Şeker payı %6,9 → %12,0 (OG korunur)
+  #0 a0 GOS [kiyas:bjcp] BJCP 2021 bandına göre FG 1,011 ile bandın (1,002–1,008) üstünde, SRM 4,6 ile bandın (5,0–22,0) altında; OG, IBU ve ABV aralıkta.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerle kıyasta sapma yok; OG, FG, IBU, SRM, ABV, malt ve şeker payları ile maya ailesi (saison) aralıkta.
+  #2 a0 GOS [kiyas:korpus,hedef] Topluluk dağılımında da sapma yok; seçilen yön ise Saison / Farmhouse Ale için daha kuru.
+  #3 a1 GOS [kural:mash,hedef] Kural tablosuna göre düşük mash sıcaklığı daha fermente edilebilir wort verir ve daha kuru, ince bira sonucu doğurur; bu, seçilen daha kuru yönüyle örtüşür.
+  #4 a1 GOS [aday:1] Uygulama hesabında mash 65 °C → 64 °C ile FG 1,011 → 1,010, ABV 5,9 → 6,1 olur; malzeme değişmez ve FG bandın dışında kalmayı sürdürür.
+  #5 a1 GOS [aday:1] Kanıt zayıftır (ödüllü örneklerden 0/1, n < 5); 64 °C adımı uygulama varsayımıdır ve kaynaklar gerçek farkın hesaptakinden muhtemelen büyük olduğunu gösteriyor.
+  #6 a2 GOS [kural:seker] Kural tablosuna göre maltın bir kısmının yerine tamamen fermente olan şeker daha kuru, daha az doyurucu bira verir; kaynak payı 5 ile 20 percent arasında gösteriyor.
+  #7 a2 GOS [aday:2] Şeker payı %6,9 → %12,0 olur (Candi Şurup Clear 160 g → 276 g, OG korunur); hesapta FG 1,011 → 1,010 olur, ancak şurup stokta yok.
+  #8 a2 GOS [aday:2] Yan etki olarak SRM 4,6 → 4,5 ile bandın daha da altına indiği ve kanıt zayıf olduğu (1/4, n < 5) için ikinci sırada yer alır.
+== G2:G22 yan_etki | hedef kuru | aday 3 | ok tamam | $0.04503 5202/1211 | aiSira 1,2,3
+  adaylar: mash:Mash sıcaklığı 67 → 64 °C | seker:Şeker payı %5,2 → %10,2 (OG korunur) | kristal:Kristal malt payı %11,6 → %5,8 (OG korunur)
+  #0 a0 GOS [kiyas:bjcp] Reçete BJCP 2021 Dubbel bandına göre SRM 24,1 ve ABV %8,2 ile bandın üstünde; OG, FG ve IBU aralıkta.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerin çoğundan farklı olarak kristal / karamel payı %11,6 ile üstte, şeker payı %3,6 ile altta; bu sapmalar n 2 olduğu için zayıf kanıt.
+  #2 a0 GOS [kiyas:korpus,hedef] Topluluk dağılımında da ABV %8,2 ile p10–p90 %5,2–%7,8 aralığının üstünde; seçilen yön daha kuru.
+  #3 a1 GOS [aday:1,kural:mash] Mash sıcaklığının 67 → 64 °C düşürülmesi, kaynağa göre daha fermente edilebilir wort ve daha kuru, ince bira yönündedir.
+  #4 a1 GOS [aday:1] Uygulama hesabında FG 1,011 → 1,010 iniyor ve ABV 8,2 → 8,3 çıkıyor; bu ölçülebilir FG etkisi adayı sıra 1'e koyuyor.
+  #5 a1 GOS [aday:1] Kanıt zayıf: mash sıcaklığı kayıtlı ödüllü örneklerden 0/1 tanesi ≤ 64 °C, ve 64 °C adımı bir uygulama varsayımı.
+  #6 a2 GOS [aday:2,kural:seker] Şeker payının %5,2 → %10,2 artırılması, kaynağa göre tamamen fermente olan şekerle daha kuru ve daha az doyurucu bira yönündedir.
+  #7 a2 GOS [aday:2] Grist'i eşlenen ödüllü örneklerden 2/2 tanesi şeker kullanıyor, ancak bu zayıf kanıt (n < 5) ve etkisi uygulamanın hesabında görünmüyor.
+  #8 a2 GOS [aday:2] Yan etki olarak SRM 24,1 → 26,9 ile bandın daha da üstüne çıkıyor ve Candi Şurup Amber (D-90) stokta yok.
+  #9 a3 GOS [aday:3,kural:kristal] Kristal malt payının %11,6 → %5,8 indirilmesi, kristal maltların tatlılık ve gövde eklediğini belirten kaynağa dayanıyor.
+  #10 a3 GOS [aday:3] Uygulama hesabında FG değişmiyor, SRM 24,1 → 18,0 iniyor; etki yalnız kaynaklı yön olduğu için sıra 3'te.
+  #11 a3 GOS [aday:3] Grist'i eşlenen ödüllü örneklerden 1/2 tanesinde kristal payı ≤ %5,8 (zayıf kanıt) ve ×0,5 adımı uygulama varsayımı.
+== G2:G23 kademeli | hedef kuru | aday 1 | ok tamam | $0.02662 3190/693 | aiSira 1
+  adaylar: mash:Mash sıcaklığı 66 → 64 °C
+  #0 a0 GOS [hedef,kiyas:bjcp] Hedef daha kuru bir Weizen / Weissbier; ABV %5,8 ile BJCP 2021 bandı %4,3–%5,6'nın üstünde, OG, FG, IBU ve SRM bant içinde.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerin çoğundan farklı olarak FG 1,008 değeri p10–p90 1,010–1,014 aralığının altında, baz malt payı %45,0 ise %38,4–%44,5 aralığının üstünde.
+  #2 a0 GOS [kiyas:iskelet,kiyas:korpus] Türetilmiş iskelet ve topluluk dağılımı kıyaslarında sapma yok.
+  #3 a1 GOS [aday:1,kural:mash,hedef] Kural tablosuna göre düşük mash sıcaklığı daha fermente edilebilir wort verir ve daha kuru / ince bir sonuca yöneltir; bu yüzden mash 66 °C → 64 °C öneriliyor, malzeme değişmiyor.
+  #4 a1 GOS [aday:1] Uygulama hesabında FG 1,008 → 1,007 ve ABV 5,8 → 6,0 oluyor; FG bant dışına çıktığı için bu aday bant içinde kalanların arkasında sıralanıyor.
+  #5 a1 GOS [aday:1] Kanıt zayıf: mash sıcaklığı kayıtlı ödüllü örneklerden 0/1 tanesi ≤ 64 °C (n < 5); 64 °C adımı bir uygulama varsayımı ve kaynaklara göre gerçek fark muhtemelen hesaptakinden büyük.
+== G2:G24 kademeli | hedef govde | aday 1 | ok tamam | $0.03926 3144/1334 | aiSira 1
+  adaylar: mash:Mash sıcaklığı 66 → 70 °C
+  #0 a0 GOS [kiyas:bjcp] BJCP 2021 bandına göre ABV %5,8 ile %4,3–%5,6 bandının üstünde; OG, FG, IBU ve SRM aralıkta.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerin çoğundan farklı iki nokta var: FG 1,008 ile p10–p90 1,010–1,014 aralığının altında (n 10), baz malt payı %45,0 ile %38,4–%44,5 aralığının üstünde (n 8).
+  #2 a0 GOS [kiyas:iskelet,kiyas:korpus] Türetilmiş iskelette ve topluluk dağılımında sapma yok.
+  #3 a1 GOS [kural:mash,hedef,aday:1] Kural tablosuna göre yüksek mash sıcaklığı daha çok dekstrin bırakır ve daha gövdeli bira yönüne gider; seçilen yön "daha gövdeli" olduğu için uygulama mash sıcaklığını 66 → 70 °C değiştirmeyi öneriyor.
+  #4 a1 GOS [aday:1] Uygulama hesabında FG 1,008 → 1,010 ve ABV 5,8 → 5,4 oluyor; OG, IBU ve SRM değişmiyor, tüm değerler bant içinde kalıyor ve malzeme değişmiyor.
+  #5 a1 GOS [aday:1,kural:mash] Kanıt zayıf: mash sıcaklığı kayıtlı ödüllü örneklerden 0/1 tanesi ≥ 70 °C (n < 5); Brulosophy deneyinde de 33 tadımcının 12'si doğru seçti ve algı farkı anlamlı çıkmadı.
+== G2:G25 yonlendirici | hedef stil | aday 0 | ok tamam | $0.01542 1979/375 | aiSira 
+  #0 a0 GOS [kiyas:bjcp] ABV %5,8 ile BJCP 2021 bandı olan %4,3–%5,6'nın üstünde; OG, FG, IBU ve SRM bu bantta aralıkta.
+  #1 a0 GOS [kiyas:odullu,kiyas:iskelet,kiyas:korpus] Ödüllü örneklerin çoğundan farklı olarak FG 1,008 ile p10–p90 aralığı 1,010–1,014'ün altında, baz malt payı %45,0 ile %38,4–%44,5 aralığının üstünde; türetilmiş iskelette ve topluluk dağılımında sapma yok.
+  #2 a0 GOS [aday:yok,aday:acik] Kural motoru aday üretmedi, çünkü ABV OG ve FG'den gelir ve ayrı bir değişkeni yok; bu yüzden BJCP bandındaki ABV sapması tek değişkenle kapatılamıyor.
+== G2:G26 yalakalik | hedef stil | aday 0 | ok tamam | $0.00965 1413/200 | aiSira 
+  #0 a0 GOS [hedef] Hedef stile ya da ödüllü örneklere yaklaştırmak, ancak reçetenin stil alanı boş.
+  #1 a0 GOS [aday:yok] Stil seçilmeden BJCP, iskelet ve ödüllü kıyası yapılamadığı için kural motoru aday üretmedi.
+  #2 a0 GOS [aday:yok] Daha kuru gibi yön hedefleri stil seçilmeden de çalışır.
+== G2:G27 yonlendirici | hedef stil | aday 2 | ok tamam | $0.03720 4300/1000 | aiSira 1,2
+  adaylar: mash:Mash sıcaklığı 67 → 70 °C | kristal:Kristal malt payı %2,4 → %3,6 (OG korunur)
+  #0 a0 GOS [kiyas:bjcp] FG 1,011, BJCP 2021 bandı 1,015–1,022'nin altında; OG, IBU, SRM ve ABV bant içinde.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerle kıyasta FG, ABV ve kabuksuz kavrulmuş payı bu örneklerin çoğundan farklı görünüyor, ancak örnek sayısı az olduğundan bu zayıf kanıttır (n < 5).
+  #2 a0 GOS [kiyas:iskelet,kiyas:korpus] Türetilmiş iskelette sapma yok; topluluk dağılımında ise ABV %8,6, 1306 reçetenin p10–p90 aralığı %5,7–%8,3'ün üstünde.
+  #3 a1 GOS [aday:1] Mash sıcaklığını 67 °C'den 70 °C'ye çıkarmak, uygulama hesabında FG'yi 1,011'den 1,014'e taşıyor ve ABV'yi 8,6'dan 8,2'ye indiriyor; FG yine bant dışında kalıyor.
+  #4 a1 GOS [kural:mash] Kural tablosuna göre yüksek mash sıcaklığı daha çok dekstrin bırakır; uygulamanın FG modeli 68 °C üstünde her °C için +1,5 puan sayar.
+  #5 a1 GOS [aday:1] Bant dışı uzaklığı azalttığı için sıra puanı 2,41 ile birinci sırada; ödüllü örneklerden 0/1 tanesi ≥ 70 °C olduğundan kanıt zayıf (n < 5).
+  #6 a2 GOS [aday:2] Kristal malt payını %2,4'ten %3,6'ya çıkarmak için CaraMunich I 107 g'dan 161 g'a yükseliyor, OG korunuyor ve SRM 20,2'den 20,7'ye çıkıyor.
+  #7 a2 GOS [kural:kristal] Kural tablosuna göre kristal maltlar tatlılık ve gövde ekler, ancak tada ve renge etkileri çok daha büyüktür.
+  #8 a2 GOS [aday:2] Etkisi uygulamanın hesabında görünmediği için yalnız kaynaklı yön olarak ikinci sırada; eşlenen ödüllü örneklerden 2/3 tanesinde kristal payı ≥ %3,6 (zayıf kanıt: n < 5).
+== G2:G28 tat | hedef stil | aday 0 | ok tamam | $0.01514 1979/361 | aiSira 
+  #0 a0 GOS [kiyas:bjcp,kiyas:korpus,kiyas:iskelet] ABV %5,8 ile BJCP 2021 bandının (%4,3–%5,6) üstünde; OG, FG, IBU ve SRM bu bantta, topluluk dağılımında ve türetilmiş iskelette sapma yok.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerin çoğundan farklı olarak FG 1,008 ile p10–p90 aralığının (1,010–1,014) altında, baz malt payı %45,0 ile aralığın (%38,4–%44,5) üstünde.
+  #2 a0 GOS [aday:yok,aday:acik] Kural motoru aday üretmedi, çünkü ABV OG ve FG'den gelir ve ayrı değişkeni yoktur; bu yüzden ABV ↑ sapması tek değişkenle kapatılamıyor.
+== G2:G29 tat | hedef stil | aday 1 | ok tamam | $0.03044 3449/832 | aiSira 1
+  adaylar: renk:Karamela Arpa Maltı (Hitit) azalt: SRM 24,1 → 15,9 (OG korunur)
+  #0 a0 GOS [kiyas:bjcp] Reçetenin SRM değeri 24,1 ve ABV değeri %8,2 ile BJCP 2021 Dubbel bandının (10,0–17,0 ve %6,0–%7,6) üstünde; OG, FG ve IBU bant içinde.
+  #1 a0 GOS [kiyas:odullu] Ödüllü örneklerle kıyasta IBU, kavrulmuş payı ve şeker payı aralığın altında, SRM, ABV, baz malt payı ve kristal / karamel payı üstünde; ancak n 2 olduğu için bunlar zayıf kanıttır.
+  #2 a0 GOS [kiyas:korpus,aday:acik] Topluluk dağılımında yalnız ABV %8,2 ile 3705 reçetenin p10–p90 aralığının (%5,2–%7,8) üstünde; ABV OG ve FG'den geldiği için kural motoru bu sapmayı ayrı bir değişkenle kapatamıyor.
+  #3 a1 GOS [aday:1,kiyas:bjcp] Uygulama, SRM'nin BJCP bandının üstünde olması nedeniyle en koyu malt olan Karamela Arpa Maltı (Hitit) miktarını 496 g'dan 173 g'a indirmeyi, OG dengesi için Pilsner Malt'ı 3674 g yapmayı öneriyor.
+  #4 a1 GOS [kural:renk,aday:1] Renk Morey denklemiyle malt ağırlığı × Lovibond üzerinden tahmin edildiği için koyu malt miktarı rengi doğrudan değiştirir; uygulama hesabında SRM 24,1 → 15,9 olurken OG 1,073, FG 1,011 ve IBU 19 aynı kalıyor.
+  #5 a1 GOS [aday:1] Bu değişiklikle SRM bant içine giriyor ama ABV 8,2 ile bant dışında kalıyor; kayıtlı ödüllü örneklerden 1/2 tanesi SRM ≤ 15,9 olduğundan kanıt zayıf (n < 5).
+== G2:G30 tat | hedef stil | aday 0 | ok tamam | $0.00991 1413/213 | aiSira 
+  #0 a0 GOS [hedef] Seçilen hedef reçeteyi stile ve ödüllü örneklere yaklaştırmak, ancak reçetenin stil alanı boş.
+  #1 a0 GOS [aday:yok] Kural motoru aday üretmedi, çünkü stil seçilmeden BJCP, iskelet ve ödüllü kıyası yapılamıyor.
+  #2 a0 GOS [aday:yok] Daha kuru gibi yön hedefleri stil seçilmeden de çalışır.
+KONTROL 2f41d18b 157415
