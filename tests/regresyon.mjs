@@ -11469,6 +11469,107 @@ const CASELER = [
       return __REG.al();
     })
   },
+  // ═════════════ SPRINT MASH2C — M gerçek koşusu sonrası küçük düzeltmeler (yeni gerçek koşu YOK; M sonucu 1/67 aynen) ═════════════
+  {
+    kod: 'MASH2C-SURE', ad: 'SÜRE AYRI TÜR (MASH2C madde 1): dakika / dk / saat / "bir buçuk saat" / "yarım saat" → tür süre (dakika cinsinden), sıcaklık SAYILMAZ · süre ölçüm olarak KAYDEDİLMEZ, soru:deger\'de "30 dk (süre)" · "altmış dört derece" ve MASH1 / MASH2 / MASH2B cümleleri aynen (kendi case\'lerinde) · KASITLI BOZMA: süre sözcüğü düşerse 30 yine 30,0 °C olur',
+    calistir: (page) => page.evaluate(async () => {
+      const M = window.BM_MASH, y = c => { const r = M.ayristir(c); return r.belirsiz ? 'BELIRSIZ' : r.map(x => x.tur + ':' + x.deger).join(','); };
+      const K = [["mash'i 30 dakikaya indirsem", 'sure:30'], ['45 dk', 'sure:45'], ['45dk', 'sure:45'], ['bir saat', 'sure:60'], ['bir buçuk saat', 'sure:90'], ['yarım saat', 'sure:30'], ['altmış dört derece', 'sicaklik:64'], ['65 derece 20 dakika kaldı', 'sicaklik:65,sure:20'], ['mash 30 dakika sürdü', 'sure:30'], ['yarım litre', 'BELIRSIZ']];
+      const kot = K.filter(([c, b]) => y(c) !== b).map(([c, b]) => c + ' → ' + y(c) + ' (beklenen ' + b + ')');
+      __REG.ok(K.length + ' cümle: süre ayrı tür (dakika cinsinden), sıcaklık değil; yarım litre hâlâ anlayamadım', !kot.length, kot.join(' | '));
+      tarifAc('dubbel_2024'); let n = 0; const m = __REG.ai1Mock({ mash: () => { n++; return { kapsam: 'cevaplandi', cumleler: [] }; } });
+      try {
+        const k0 = (S.mashOlcumler || []).length, c1 = await M.soruIsle("mash'i 30 dakikaya indirsem olur mu"), p = c1.paket && c1.paket.byId['soru:deger'];
+        __REG.ok('M08: soru:deger "30 dk (süre)" (30,0 °C DEĞİL), kayıt yok, AI', c1.tur === 'ai' && !!p && /30 dk \(süre\)/.test(p.metin) && !/30,0 °C/.test(p.metin) && (S.mashOlcumler || []).length === k0, p && p.metin);
+        const c2 = await M.soruIsle('45 dk'); M.cevap = c2; const h2 = M.soruHTML();
+        __REG.ok('yalnız süre ("45 dk") → kayıt YOK, AI YOK, [Kaydet] düğmesi YOK, "süre ölçüm olarak kaydedilmez"', c2.tur === 'olcumOner' && (S.mashOlcumler || []).length === k0 && n === 1 && !/mash-deger-kaydet/.test(h2) && /45 dk \(süre\) — süre ölçüm olarak kaydedilmez/.test(h2));
+        __REG.ok('soruDegerKaydet süreyi reddeder', M.soruDegerKaydet(0).ok === false && (S.mashOlcumler || []).length === k0);
+        const c3 = await M.soruIsle('65 derece 20 dakika kaldı');
+        __REG.ok('ölçüm + süre: 65 °C kaydedilir, 20 dk kaydedilmez (soru:deger listesinde)', c3.tur === 'olcum' && S.mashOlcumler.length === k0 + 1 && S.mashOlcumler.slice(-1)[0].deger === 65 && c3.degerler.length === 1 && c3.degerler[0].tur === 'sure');
+        M.sesIsle('bir buçuk saat'); __REG.ok('ses: yalnız süre → kayıt yok, soru kutusuna', S.mashOlcumler.length === k0 + 1 && M.soruTaslak === 'bir buçuk saat');
+      } finally { m.geri(); }
+      const eski = M.ayristir; M.ayristir = (t) => eski(String(t).replace(/dakika[a-zçğıöşü]*/g, '')); let bz; try { bz = M.ayristir("mash'i 30 dakikaya indirsem"); } finally { M.ayristir = eski; }
+      __REG.ok('KASITLI BOZMA: süre sözcüğü düşerse 30 sıcaklık sayılır → kırmızı', bz.length === 1 && bz[0].tur === 'sicaklik' && bz[0].deger === 30);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'MASH2C-EK', ad: 'EK KATMAN YANLIŞ ALARMLARI (MASH2C madde 2, donmuş bölge DIŞINDA): eylem paketteki hatırlatma / hesap SEÇENEK metninde varsa izinli; sözcük sınırı (ısıtıcı ≠ ısıtıcısız); olumsuz / tırnak içi tat ifadesi hüküm değil · M koşu kaydının 67 cümlesi AI çağrısı olmadan yeniden geçer: yeni yanlış alarm 0, önceki 4 yanlış alarm (M02#2, M04#5, M13#5, M07#5) gösterilir, gösterilen 62\'nin hiçbiri düşmez · KASITLI: ısıtıcılı kapta "sıcak su ekle" DÜŞER, "64\'te daha lezzetli olur" DÜŞER · denetleyici imzası aynı',
+    calistir: async (page) => {
+      const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'mash_m_seti.json'), 'utf8')), kayit = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'fixtures', 'mash_m_kosu_2026-10-14.json'), 'utf8'));
+      return page.evaluate(async ({ set, kayit }) => {
+        const M = window.BM_MASH, A4 = window.BM_AI4, tablo = [], alarm = [], duzelen = [], kalan = []; let N = 0, eskiG = 0, yeniG = 0;
+        // AI'nın GÖRDÜĞÜ paket: kayıttaki paket metni parçalarına geri yazılır (M03 ön kaynatma seçenekleri Kaan'ın cihazındaki stok + buharlaşma ayarına bağlı — test fixture'ında farklı)
+        const kayitPaket = (t) => { const o = {}; String(t || '').split(/\n\n(?=\[[^\]]+\] )/).forEach(ch => { const mm = ch.match(/^\[([^\]]+)\] ([^\n]*?):\n([\s\S]*)$/); if (mm) o[mm[1]] = mm[3]; }); return o; };
+        const pk0 = M.paketKur;
+        for (const r of kayit.sonuclar) { if (r.akis !== 'ai') continue; const it = set.istemler.find(x => x.id === r.id), kp = kayitPaket(r.paket);
+          M.paketKur = (mt, o) => { const p = pk0(mt, o); p.parcalar.forEach(x => { if (kp[x.id] != null) x.metin = kp[x.id]; }); p.metin = p.parcalar.map(x => '[' + x.id + '] ' + x.baslik + ':\n' + x.metin).join('\n\n'); return p; };
+          const m = __REG.ai1Mock({ mash: { kapsam: r.kapsam, cumleler: r.cumleler.map(x => ({ metin: x.metin, tur: x.etiket, kaynaklar: x.kaynaklar })) } }); let c; try { c = await M.setIsle(set, it, { mock: true, model: 'guclu' }); } finally { m.geri(); M.paketKur = pk0; }
+          r.cumleler.forEach((x, i) => { const z = c.sonuc.tum[i], id = r.id + '#' + i; N++; if (x.durum === 'ok') eskiG++; if (z.durum === 'ok') yeniG++;
+            if (x.durum === 'ok' && z.durum !== 'ok') alarm.push(id + ':' + z.tur); if (x.durum !== 'ok' && z.durum === 'ok') duzelen.push(id); if (x.durum !== 'ok' && z.durum !== 'ok') kalan.push(id + ':' + z.tur);
+            if (x.durum !== z.durum) tablo.push(id + ' ' + (x.durum === 'ok' ? 'GOS' : 'DUS:' + x.tur) + ' → ' + (z.durum === 'ok' ? 'GOS' : 'DUS:' + z.tur)); }); }
+        __REG.ok('67 cümle yeniden geçti (kayıttaki cümleler mock ile; AI çağrısı yok) — eski gösterilen ' + eskiG + ' → yeni ' + yeniG, N === 67 && eskiG === 62 && yeniG === 66, 'TABLO N ' + N + ' · gösterilen ' + eskiG + ' → ' + yeniG + ' · değişen: ' + tablo.join(' | ') + ' · düşmeye devam: ' + kalan.join(','));
+        __REG.ok('yeni yanlış alarm 0 — gösterilen 62 cümlenin hiçbiri düşmez', !alarm.length, alarm.join(','));
+        __REG.ok('önceki 4 yanlış alarm artık gösterilir (M02#2, M04#5, M07#5, M13#5)', duzelen.slice().sort().join() === 'M02#2,M04#5,M07#5,M13#5', duzelen.join(','));
+        __REG.ok('M13#0 (donmuş AI4 denetleyicisi: sayı / ürün, sınıf a) hâlâ düşer', kalan.join() === 'M13#0:sayi', kalan.join());
+        __REG.ok('denetleyici imzası değişmedi (b0bfee2d-29522)', A4.denetleyiciImza() === 'b0bfee2d-29522' && A4.DENETLEYICI_DONMUS === 'b0bfee2d-29522');
+        // birim: eylem bulucu + izin
+        const pkIsiticisiz = { secenekTur: ['sicakSu'], parcalar: [{ id: 'hatirlatma', metin: 'Sıcaklığı ölç — hedef 67 °C' }], byId: { 'kaynak:palmerIsiKaybi': {} } };
+        const ek = (metin, pk, et) => M.ekDenetle({ durum: 'ok', metin: metin, kaynaklar: ['recete'] }, et || 'veri', pk);
+        __REG.ok('"ısıtıcısız" sözcüğü ısıtıcı önerisi değil; kabı önceden ısıtma (Palmer ısı kaybı kaynağı pakette) izinli', ek('Kabınız ısıtıcısız olduğundan ısı kaybı olası bir neden olabilir; kabı kaynar suyla önceden ısıtarak bu azaltılabilir.', pkIsiticisiz).durum === 'ok');
+        __REG.ok('ısıtıcısız kapta "ısıtıcıyla getir" hâlâ DÜŞER (gerçek ihlal)', ek('Isıtıcıyla 67 °C\'ye getir.', pkIsiticisiz).tur === 'oneri');
+        tarifAc('dubbel_2024'); M.kapYaz('isitici'); M.olcumEkle({ tur: 'sicaklik', deger: 64 });
+        const C = [{ metin: 'Sıcak su ekle.', tur: 'veri', kaynaklar: ['hatirlatma'] }, { metin: 'Isıtırken karıştır.', tur: 'veri', kaynaklar: ['hatirlatma'] }, { metin: '64\'te daha lezzetli olur.', tur: 'yorum', kaynaklar: ['hesap:sicaklik'] },
+          { metin: 'Daha lezzetli olur ama kör testte gösterilemedi.', tur: 'yorum', kaynaklar: ['bilgi:sc_sapma'] }, { metin: 'Paket "daha lezzetli" sorusuna bir hüküm sunmuyor.', tur: 'veri', kaynaklar: ['bilgi:sc_sapma'] }, { metin: 'Bunun daha iyi bir bira anlamına gelmez.', tur: 'yorum', kaynaklar: ['bilgi:sc_sapma'] }];
+        const kos = async () => { const mm = __REG.ai1Mock({ mash: { kapsam: 'cevaplandi', cumleler: C } }); try { return await M.soruIsle('mash 2 derece düşük kaldı ne yapayım', { kayitYok: true }); } finally { mm.geri(); } };
+        const c = await kos(), t = x => c.sonuc.tum.find(z => z.metin === x);
+        __REG.ok('KASITLI: ısıtıcılı kapta "Sıcak su ekle." DÜŞER (oneri); hatırlatmadaki "Isıtırken karıştır." gösterilir', t(C[0].metin).tur === 'oneri' && t(C[1].metin).durum === 'ok', C.map(x => (t(x.metin) || {}).durum + ':' + (t(x.metin) || {}).tur).join(','));
+        __REG.ok('KASITLI: "64\'te daha lezzetli olur" ve "… olur ama gösterilemedi" DÜŞER (tat); olumsuz / tırnaklı ifade ("hüküm sunmuyor", "anlamına gelmez") gösterilir, metin AYNEN', t(C[2].metin).tur === 'tat' && t(C[3].metin).tur === 'tat' && t(C[4].metin).durum === 'ok' && t(C[5].metin).durum === 'ok' && t(C[4].metin).metin === C[4].metin);
+        const ei = M.eylemIzinli; M.eylemIzinli = () => true; let b1; try { b1 = await kos(); } finally { M.eylemIzinli = ei; }
+        __REG.ok('KASITLI BOZMA: izin kuralı her şeye izin verirse "Sıcak su ekle." gösterilir → kırmızı', b1.sonuc.tum.find(z => z.metin === C[0].metin).durum === 'ok');
+        const em = M.tatMaske; M.tatMaske = (x) => ({ metin: String(x).replace(/lezzetli/g, '…'), degisti: true }); let b2; try { b2 = await kos(); } finally { M.tatMaske = em; }
+        __REG.ok('KASITLI BOZMA: maske olumsuzluğa bakmazsa "64\'te daha lezzetli olur" gösterilir → kırmızı', b2.sonuc.tum.find(z => z.metin === C[2].metin).durum === 'ok');
+        return __REG.al();
+      }, { set, kayit });
+    }
+  },
+  {
+    kod: 'MASH2C-PH', ad: 'pH PAKETİ: MOTORUN TAHMİNİ (MASH2C madde 3, M12#1 kök nedeni): pH sorusunda "hesap:phTahmin" = Su sekmesindeki TAHMİNİ MASH pH ile aynı sayı (aynı fonksiyon window._bmMashPhTahmin; oda referansı + ±0,1–0,2 notu) · su profili boşsa / malt yoksa "tahmin yok" · KASITLI BOZMA: çekirdek değişirse Su sekmesi ile parça ayrışır',
+    calistir: (page) => page.evaluate(async () => {
+      const M = window.BM_MASH, suPh = () => { const h = rEditorSu(), m = h.match(/🧪 Tahmini Mash pH<\/div>\s*<div[^>]*>([\d.]+)<\/div>/); return m ? +m[1] : null; };
+      tarifAc('dubbel_2024'); const su = suPh(), pk = M.paketKur('pH 5,8 çıktı ne kadar laktik'), p = pk.byId['hesap:phTahmin'];
+      __REG.ok('Dubbel (su kaynağı distile + mineraller): Su sekmesi ' + su + ' = parça ' + (p && p.veri && p.veri.ph) + ' (oda referansı, ±0,1–0,2, "tahmindir")', su != null && !!p && p.veri.ph === su && /oda sıcaklığı referansı/.test(p.metin) && /±0,1–0,2 pH/.test(p.metin) && /TAHMİNDİR, ölçüm değildir/.test(p.metin) && p.metin.indexOf(String(su.toFixed(2)).replace('.', ',')) >= 0, p && p.metin);
+      __REG.ok('pH dışı soruda parça yok', !M.paketKur('neden hedefi tutturamadım').byId['hesap:phTahmin']);
+      const eskiK = S.suKaynak, eskiMin = S.suMineralleri; S.suKaynak = ''; S.suMineralleri = []; let p2; try { p2 = M.paketKur('pH 5,8 çıktı ne kadar laktik').byId['hesap:phTahmin']; } finally { S.suKaynak = eskiK; S.suMineralleri = eskiMin; }
+      __REG.ok('su profili boş → "tahmin yok" (sayı yok)', !!p2 && p2.veri.ph == null && /^tahmin yok — su profili girilmemiş/.test(p2.metin) && !/\d,\d\d/.test(p2.metin), p2 && p2.metin);
+      const eskiM = S.maltlar; S.maltlar = []; let p3; try { p3 = M.phTahmin(); } finally { S.maltlar = eskiM; }
+      __REG.ok('malt yok → "tahmin yok"', p3.ph == null && /^tahmin yok — tamponlu malt yok/.test(p3.metin));
+      const set = { receteler: [{ id: 'x', stil: 'Dubbel', tarif: { maltlar: [{ id: 'pilsner', kg: 3.4 }], hoplar: [], katkilar: [], hacim: 11, verim: 61, mashSc: 67 } }] }; M._T = M.ortam(set, { recete: 'x' }); let p4; try { p4 = M.phTahmin(); } finally { M._T = null; }
+      __REG.ok('M seti reçeteleri (su profili yok) → "tahmin yok"; çalışma reçetesi okunur (açık reçete değil)', p4.ph == null && p4.neden === 'su');
+      const ek = window._bmMashPhTahmin; window._bmMashPhTahmin = (T, ppm) => { const r = ek(T, ppm); if (r) r.ph += 0.2; return r; }; let bz, bzSu; try { bzSu = suPh(); bz = M.phTahmin().ph; } finally { window._bmMashPhTahmin = ek; }
+      __REG.ok('KASITLI BOZMA: çekirdek kayarsa Su sekmesi de aynı kayar (tek kaynak) ama eski değerden ayrışır → kırmızı', bz !== su && bz === bzSu);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'MASH2C-SERIT', ad: 'KART ŞERİDİ + AYARLAR + MALİYET (MASH2C madde 4): mash cevap kartında "erken test — M testi 2026-10-14, Opus 5.5: yanlış 1/67, yalakalık 0/2, tat 0" · Ayarlar ▸ AI özellikleri\'nde G satırının ALTINDA aynı satır · Opus\'ta soru düğmesi ölçülen çağrı başı ≈ $0,035 (M koşusu, n 12) · KASITLI BOZMA: M_TEST yoksa şerit kaybolur',
+    calistir: (page) => page.evaluate(async () => {
+      const M = window.BM_MASH, A4 = window.BM_AI4; tarifAc('dubbel_2024'); M.olcumEkle({ tur: 'sicaklik', deger: 64 });
+      const mm = __REG.ai1Mock({ mash: { kapsam: 'cevaplandi', cumleler: [{ metin: 'Ölçülen 64,0 °C, hedefin altında.', tur: 'veri', kaynaklar: ['hesap:sicaklik'] }] } }); let c; try { c = await M.soruIsle('mash 2 derece düşük kaldı ne yapayım', { kayitYok: true }); } finally { mm.geri(); }
+      M.cevap = c; const h = M.soruHTML();
+      __REG.ok('cevap kartında şerit: "erken test — M testi 2026-10-14, Opus 5.5: yanlış 1/67, yalakalık 0/2, tat 0"', /class="mash-serit"[^>]*>erken test — M testi 2026-10-14, Opus 5\.5: yanlış 1\/67, yalakalık 0\/2, tat 0</.test(h));
+      __REG.ok('M_TEST kayıtla tutarlı (kosuId 1792014933780, 0,419 $ / 12 = 0,0349)', M.M_TEST.kosuId === 1792014933780 && Math.abs(M.M_TEST.usd / M.M_TEST.cagri - M.M_TEST.cagriBasi) < 0.0001);
+      const eo = A4.ozetModel; A4.ozetModel = () => 'guclu'; M.cevap = null; M.soruTaslak = 'mash 2 derece düşük kaldı ne yapayım'; let hb; try { hb = M.soruHTML(); } finally { A4.ozetModel = eo; M.soruTaslak = ''; }
+      __REG.ok('Opus: Sor düğmesi ölçülen ≈ $0.035 + "ölçülen: M koşusu … (n 12)" (tahmin 0,024 idi)', /mash-sor-btn[^>]*>Sor[^<]*≈ \$0\.035</.test(hb) && /ölçülen: M koşusu 2026-10-14, çağrı başı ≈ \$0\.035 \(n 12\)/.test(hb), (hb.match(/mash-sor-btn[^>]*>[^<]*/) || [''])[0]);
+      const eu = A4.ozetModel; A4.ozetModel = () => 'ucuz'; M.soruTaslak = 'mash 2 derece düşük kaldı ne yapayım'; let hu; try { hu = M.soruHTML(); } finally { A4.ozetModel = eu; M.soruTaslak = ''; }
+      __REG.ok('Haiku: ölçüm yok → tahmin VARSAYIM satırı aynen', /tahmin VARSAYIM/.test(hu) && !/ölçülen: M koşusu/.test(hu));
+      const et = M.M_TEST, emt = M.mTestMetni; M.M_TEST = { modelKey: 'yok' }; M.mTestMetni = () => { throw new Error('M_TEST yok'); }; let bz = ''; try { M.cevap = c; bz = M.soruHTML(); } catch (e) { bz = 'HATA'; } finally { M.M_TEST = et; M.mTestMetni = emt; }
+      __REG.ok('KASITLI BOZMA: M_TEST bozulunca şerit üretilemez → kırmızı', !/class="mash-serit"/.test(bz));
+      __REG.ok('Ayarlar satırının metni (mTestMetni) kartla aynı', M.mTestMetni() === 'M testi 2026-10-14, Opus 5.5: yanlış 1/67, yalakalık 0/2, tat 0');
+      return __REG.al();
+    }).then(r => { const src = fs.readFileSync(path.join(KOK, HTML_AD), 'utf8'), j = src.indexOf('bm-ai5-g-testi'), k = src.indexOf('bm-mash-m-testi');
+      return r.concat([{ ad: 'Ayarlar ▸ AI özellikleri: M testi satırı G testi satırının hemen ALTINDA (kaynak sırası) + "✅ 🧑‍🍳 Mash asistanı — " + mTestMetni', ok: j > 0 && k > j && k - j < 1500 && /bm-mash-m-testi[^\n]*✅ 🧑‍🍳 Mash asistanı — ' \+ esc\(window\.BM_MASH\.mTestMetni\(\)\)/.test(src), detay: j + ' / ' + k }]); })
+  },
   // ═════════════ SPRINT BUL2C — marka ∩ açık stil, kısa yer adı, koşu puanlaması, gerçek koşu kaçakları, BUL modeli Opus ═════════════
   {
     kod: 'BUL2C-MARKA', ad: 'MARKA ∩ AÇIK STİL BOŞ (BUL2C madde 1): kullanıcının açık yazdığı stil / aile çipi kazanır; kesişim boşsa marka çipi filtre değil bilgi notu ("BJCP 2021 … saymıyor (BJCP\'de: …) — arama yalnız …") · kesişim varsa daraltma aynen · KASITLI BOZMA: eski davranış (belirsiz marka çipi + stil) 0 sonuç',
@@ -12836,6 +12937,7 @@ async function main() {
         sonuclar.push({ kod: c.kod, ad: c.ad, durum: hepsi ? 'PASS' : 'FAIL', checks });
         console.log(`${hepsi ? '✅' : '❌'} ${c.kod} — ${c.ad} (${checks.length} iddia, ${((Date.now() - t0) / 1000).toFixed(1)}s)`);
         if (!hepsi) for (const x of checks.filter(x => !x.ok)) console.log(`     ✗ ${x.ad}${x.detay ? ' [' + x.detay + ']' : ''}`);
+        if (argv.includes('--ayrinti')) for (const x of checks.filter(x => x.ok && x.detay)) console.log(`     · ${x.ad} [${x.detay}]`); // MASH2C: geçen iddianın ayrıntısı (rapor tabloları)
       } catch (e) {
         sonuclar.push({ kod: c.kod, ad: c.ad, durum: 'FAIL', hata: String(e && e.message || e).slice(0, 300) });
         console.log(`❌ ${c.kod} — HATA: ${String(e && e.message || e).slice(0, 200)}`);

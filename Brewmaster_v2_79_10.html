@@ -5152,6 +5152,135 @@ window._bmMaltBuf = function(malt){
         if(malt.phc==='crystal'||/crystal|caramel|cara_|caramunich|carapils|carared|caraaroma|cara_aroma|cararye|cara_rye|cara_wheat|cara_red|carafoam|c_?\d+|^c\d+$/i.test(id)) return Math.min(75, 7 + 40.7*Math.log10(Math.max(1,Lv)));
         return 42;
 };
+// SPRINT MASH2C: TAHMİNİ MASH pH çekirdeği — Su sekmesinin _suMashPHHTML hesabından taşındı (gövde BİREBİR, S → T). T: reçete; ppm: su iyonları (verilmezse suProfiliHesapla).
+// Dönüş { ph, gristPH, RA, B_total, topKg, acidMaltKg, acidPct, laktikMl } ya da null (malt yok / tampon 0). Su sekmesi ve mash asistanı AYNI fonksiyonu çağırır.
+window._bmMashPhTahmin = function(T, ppm){
+      if (!T) return null; if (!ppm) ppm = suProfiliHesapla(T.suMineralleri, T.hacim||11, T.suKaynak);
+      if (!T.maltlar || T.maltlar.length === 0) return null;
+      
+      // Malt DI-pH — Troester/Braukaiser ölçüm tablosuna göre (tip bazlı parçalı model)
+      // Primary source: Kai Troester "How pH affects brewing" + Weyermann/Simpsons datasheets
+      function maltPH(malt) {
+        if (!malt || !malt.id) return 5.75;
+        const id = (malt.id || '').toLowerCase();
+        const L = malt.r || 2;
+
+        // phc override — açık pH-sınıfı beyanı id-pattern tahminini ezer (yanlış-dal düzeltme, geriye uyumlu).
+        // Dönüş ifadeleri aşağıdaki ilgili dal gövdeleriyle BİREBİR aynı; bir dal formülü değişirse burası da güncellenmeli.
+        if (malt.phc === 'chocolate') {
+          if (L < 200) return 4.50;
+          if (L < 400) return 4.35;
+          return 4.25;
+        }
+        if (malt.phc === 'roasted_barley') return 4.30;
+        if (malt.phc === 'black') return 4.15;
+        if (malt.phc === 'crystal') {
+          if (L < 40) return Math.max(4.70, 5.10 - 0.008 * L);
+          return Math.max(4.30, 4.78 - 0.003 * (L - 40));
+        }
+        if (malt.phc === 'amber_biscuit') {
+          return Math.max(4.80, 5.50 - 0.015 * L);
+        }
+
+        // Acid/sauer malt (Weyermann Sauermalz DI-pH 3.4)
+        if (id.includes('acid') || id.includes('sauer')) return 3.44;
+        
+        // Black patent / Black malt (Troester: ~4.15)
+        if (/black_patent|patent_black|black_malt|\bblack\b/i.test(id)) return 4.15;
+        
+        // Roasted Barley (Troester: 4.30)
+        if (/roasted_barley|roast_barley/i.test(id)) return 4.30;
+        
+        // Chocolate / Roast (Troester: Pale Chocolate 4.50, Chocolate 4.35, Dark Chocolate 4.25)
+        if (/chocolate|choc_|roast_wheat|black_wheat|dingemans_roast|simp_roasted/i.test(id)) {
+          if (L < 200) return 4.50;
+          if (L < 400) return 4.35;
+          return 4.25;
+        }
+        
+        // Crystal / Caramel — asidik, L ile orantılı (Troester: C20=4.80, C40=4.75, C80=4.60, C120=4.55)
+        if (/crystal|caramel|cara_|caramunich|carapils|carared|caraaroma|cara_aroma|cararye|cara_rye|cara_wheat|cara_red|carafoam|c_?\d+|^c\d+$/i.test(id)) {
+          if (L < 40) return Math.max(4.70, 5.10 - 0.008 * L);     // C10-C40
+          return Math.max(4.30, 4.78 - 0.003 * (L - 40));          // C40+
+        }
+        
+        // Amber / Biscuit / Aromatic / Special B (Troester: ~5.20-5.50)
+        if (/amber|biscuit|aromatic|special_b|melanoid|chateau_biscuit|honey_malt|abbey_malt/i.test(id)) {
+          return Math.max(4.80, 5.50 - 0.015 * L);
+        }
+        
+        // Wheat (Weizen/Witbier base) — nötr (Troester: 5.85)
+        if (/wheat|buckwheat|rwh|torr_wh|flaked_wheat|weizen|dark_wheat/i.test(id)) {
+          return Math.max(4.80, 5.85 - 0.010 * L);
+        }
+        
+        // Rye — hafif asidik
+        if (/^rye|flaked_rye|cavdar|çavdar|kizil_rye/i.test(id)) {
+          return Math.max(4.80, 5.80 - 0.008 * L);
+        }
+        
+        // Oats — nötr
+        if (/\boat|flaked_oat|rolled_oat|golden_naked|yulaf/i.test(id)) {
+          return 5.80;
+        }
+        
+        // Corn/Rice/Adjuncts — nötr (yaklaşık 5.80)
+        if (/\bcorn|\brice|flaked_corn|flaked_rice|rice_hulls/i.test(id)) {
+          return 5.80;
+        }
+        
+        // Base malts: Pilsner, Pale Ale, Munich, Vienna (ağırlıklı)
+        // Troester: Pilsner 5.76, Pale 5.72, Vienna 5.70, Munich10L 5.55, Munich20L 5.50
+        if (L <= 3) return 5.80 - 0.012 * L;                     // Pilsner (5.80 → 5.76)
+        if (L <= 10) return 5.76 - 0.025 * (L - 3);              // Pale/Vienna (5.76 → 5.60)
+        return Math.max(5.00, 5.58 - 0.010 * (L - 10));          // Munich dark → 5.58-5.00
+      }
+      
+      // Grist ağırlıklı ortalama pH
+      var maltBuf = window._bmMaltBuf; // MASH1: tek kaynak (mash asistanı ölçülen pH dozunda aynı tampon değerini kullanır)
+      let topKg = 0, topPHB = 0, B_total = 0, acidMaltKg = 0;
+      (T.maltlar||[]).forEach(m => {
+        if (!m || !m.id) return;
+        const mo = MALTLAR.find(x => x && x.id === m.id);
+        if (!mo) return;
+        // Şekerler (candy, sugar, honey) grist pH'ına dahil değil — fermente olur, mash'i etkilemez
+        if (mo.g==='Şeker') return;
+        var _bid=(mo.id||'').toLowerCase();
+        if(_bid.includes('acid')||_bid.includes('sauer')){ acidMaltKg += (m.kg||0); return; }
+        var _Bi = maltBuf(mo);
+        topKg += (m.kg||0);
+        B_total += _Bi * (m.kg||0);
+        topPHB += maltPH(mo) * _Bi * (m.kg||0);
+      });
+      if (topKg === 0 || B_total === 0) return null;
+      const gristPH = topPHB / B_total;
+      
+      // Asit malt %
+      const acidKg = (T.maltlar||[]).reduce((s,m)=>{
+        if (!m || !m.id) return s;
+        const mo = MALTLAR.find(x=>x && x.id===m.id);
+        if (mo && mo.id && (mo.id.includes('acid') || mo.id.includes('sauer'))) return s + (m.kg||0);
+        return s;
+      }, 0);
+      const acidPct = (acidKg / topKg) * 100;
+      
+      // Laktik asit (mL, 11L için)
+      const laktikM = (T.suMineralleri||[]).find(m => m && m.id === 'laktik');
+      const laktikMl = laktikM ? (laktikM.miktar||0) : 0;
+      
+      // RA (Residual Alkalinity) hesabı
+      // Alk(ppm CaCO3) = HCO3 × 0.82
+      const Alk_CaCO3 = ppm.HCO3 * 0.82;
+      const RA = Alk_CaCO3 - ppm.Ca / 1.4 - ppm.Mg / 1.7;
+      
+      // buffer-weighted model (Riffe/deLange Eq.4): pHG = Σ(pHi*B*kg)/Σ(B*kg), shift = A_net / B_total
+      // Malt DI-pH: Troester/Braukaiser; buffer kapasitesi maltBuf kategori B (mEq/(kg·pH))
+      const base_mEq = (RA * (T.hacim||11)) / 50;
+      const acid_mEq = (acidMaltKg * 330);  // laktik RA/HCO3 yolunda hesaplaniyor; cift sayim onlendi
+      const A_net = base_mEq - acid_mEq;
+      const pH_tahmin = gristPH + (B_total > 0 ? (A_net / B_total) : 0);
+      return { ph:pH_tahmin, gristPH:gristPH, RA:RA, B_total:B_total, topKg:topKg, acidMaltKg:acidMaltKg, acidPct:acidPct, laktikMl:laktikMl };
+};
 function bmBoilOff(){ // kesir (0.12); akıl bandı %2-25 dışı → varsayılan
   try{ var v=parseInt(localStorage.getItem('bm_boiloff_v1'),10); return (isFinite(v)&&v>=2&&v<=25)?v/100:0.12; }catch(e){ return 0.12; }
 }
@@ -16060,129 +16189,9 @@ function rEditorSu(){
       // RA = Alk(CaCO3) - Ca/1.4 - Mg/1.7 (buffer modeli A_net girdisi, base_mEq = RA*hacim/50)
       // Mash pH = pHG (buffer-ağırlıklı grist DI-pH) + (A_net / B_total)
       
-      if (!S.maltlar || S.maltlar.length === 0) return '';
-      
-      // Malt DI-pH — Troester/Braukaiser ölçüm tablosuna göre (tip bazlı parçalı model)
-      // Primary source: Kai Troester "How pH affects brewing" + Weyermann/Simpsons datasheets
-      function maltPH(malt) {
-        if (!malt || !malt.id) return 5.75;
-        const id = (malt.id || '').toLowerCase();
-        const L = malt.r || 2;
-
-        // phc override — açık pH-sınıfı beyanı id-pattern tahminini ezer (yanlış-dal düzeltme, geriye uyumlu).
-        // Dönüş ifadeleri aşağıdaki ilgili dal gövdeleriyle BİREBİR aynı; bir dal formülü değişirse burası da güncellenmeli.
-        if (malt.phc === 'chocolate') {
-          if (L < 200) return 4.50;
-          if (L < 400) return 4.35;
-          return 4.25;
-        }
-        if (malt.phc === 'roasted_barley') return 4.30;
-        if (malt.phc === 'black') return 4.15;
-        if (malt.phc === 'crystal') {
-          if (L < 40) return Math.max(4.70, 5.10 - 0.008 * L);
-          return Math.max(4.30, 4.78 - 0.003 * (L - 40));
-        }
-        if (malt.phc === 'amber_biscuit') {
-          return Math.max(4.80, 5.50 - 0.015 * L);
-        }
-
-        // Acid/sauer malt (Weyermann Sauermalz DI-pH 3.4)
-        if (id.includes('acid') || id.includes('sauer')) return 3.44;
-        
-        // Black patent / Black malt (Troester: ~4.15)
-        if (/black_patent|patent_black|black_malt|\bblack\b/i.test(id)) return 4.15;
-        
-        // Roasted Barley (Troester: 4.30)
-        if (/roasted_barley|roast_barley/i.test(id)) return 4.30;
-        
-        // Chocolate / Roast (Troester: Pale Chocolate 4.50, Chocolate 4.35, Dark Chocolate 4.25)
-        if (/chocolate|choc_|roast_wheat|black_wheat|dingemans_roast|simp_roasted/i.test(id)) {
-          if (L < 200) return 4.50;
-          if (L < 400) return 4.35;
-          return 4.25;
-        }
-        
-        // Crystal / Caramel — asidik, L ile orantılı (Troester: C20=4.80, C40=4.75, C80=4.60, C120=4.55)
-        if (/crystal|caramel|cara_|caramunich|carapils|carared|caraaroma|cara_aroma|cararye|cara_rye|cara_wheat|cara_red|carafoam|c_?\d+|^c\d+$/i.test(id)) {
-          if (L < 40) return Math.max(4.70, 5.10 - 0.008 * L);     // C10-C40
-          return Math.max(4.30, 4.78 - 0.003 * (L - 40));          // C40+
-        }
-        
-        // Amber / Biscuit / Aromatic / Special B (Troester: ~5.20-5.50)
-        if (/amber|biscuit|aromatic|special_b|melanoid|chateau_biscuit|honey_malt|abbey_malt/i.test(id)) {
-          return Math.max(4.80, 5.50 - 0.015 * L);
-        }
-        
-        // Wheat (Weizen/Witbier base) — nötr (Troester: 5.85)
-        if (/wheat|buckwheat|rwh|torr_wh|flaked_wheat|weizen|dark_wheat/i.test(id)) {
-          return Math.max(4.80, 5.85 - 0.010 * L);
-        }
-        
-        // Rye — hafif asidik
-        if (/^rye|flaked_rye|cavdar|çavdar|kizil_rye/i.test(id)) {
-          return Math.max(4.80, 5.80 - 0.008 * L);
-        }
-        
-        // Oats — nötr
-        if (/\boat|flaked_oat|rolled_oat|golden_naked|yulaf/i.test(id)) {
-          return 5.80;
-        }
-        
-        // Corn/Rice/Adjuncts — nötr (yaklaşık 5.80)
-        if (/\bcorn|\brice|flaked_corn|flaked_rice|rice_hulls/i.test(id)) {
-          return 5.80;
-        }
-        
-        // Base malts: Pilsner, Pale Ale, Munich, Vienna (ağırlıklı)
-        // Troester: Pilsner 5.76, Pale 5.72, Vienna 5.70, Munich10L 5.55, Munich20L 5.50
-        if (L <= 3) return 5.80 - 0.012 * L;                     // Pilsner (5.80 → 5.76)
-        if (L <= 10) return 5.76 - 0.025 * (L - 3);              // Pale/Vienna (5.76 → 5.60)
-        return Math.max(5.00, 5.58 - 0.010 * (L - 10));          // Munich dark → 5.58-5.00
-      }
-      
-      // Grist ağırlıklı ortalama pH
-      var maltBuf = window._bmMaltBuf; // MASH1: tek kaynak (mash asistanı ölçülen pH dozunda aynı tampon değerini kullanır)
-      let topKg = 0, topPHB = 0, B_total = 0, acidMaltKg = 0;
-      (S.maltlar||[]).forEach(m => {
-        if (!m || !m.id) return;
-        const mo = MALTLAR.find(x => x && x.id === m.id);
-        if (!mo) return;
-        // Şekerler (candy, sugar, honey) grist pH'ına dahil değil — fermente olur, mash'i etkilemez
-        if (mo.g==='Şeker') return;
-        var _bid=(mo.id||'').toLowerCase();
-        if(_bid.includes('acid')||_bid.includes('sauer')){ acidMaltKg += (m.kg||0); return; }
-        var _Bi = maltBuf(mo);
-        topKg += (m.kg||0);
-        B_total += _Bi * (m.kg||0);
-        topPHB += maltPH(mo) * _Bi * (m.kg||0);
-      });
-      if (topKg === 0 || B_total === 0) return '';
-      const gristPH = topPHB / B_total;
-      
-      // Asit malt %
-      const acidKg = (S.maltlar||[]).reduce((s,m)=>{
-        if (!m || !m.id) return s;
-        const mo = MALTLAR.find(x=>x && x.id===m.id);
-        if (mo && mo.id && (mo.id.includes('acid') || mo.id.includes('sauer'))) return s + (m.kg||0);
-        return s;
-      }, 0);
-      const acidPct = (acidKg / topKg) * 100;
-      
-      // Laktik asit (mL, 11L için)
-      const laktikM = (S.suMineralleri||[]).find(m => m && m.id === 'laktik');
-      const laktikMl = laktikM ? (laktikM.miktar||0) : 0;
-      
-      // RA (Residual Alkalinity) hesabı
-      // Alk(ppm CaCO3) = HCO3 × 0.82
-      const Alk_CaCO3 = ppm.HCO3 * 0.82;
-      const RA = Alk_CaCO3 - ppm.Ca / 1.4 - ppm.Mg / 1.7;
-      
-      // buffer-weighted model (Riffe/deLange Eq.4): pHG = Σ(pHi*B*kg)/Σ(B*kg), shift = A_net / B_total
-      // Malt DI-pH: Troester/Braukaiser; buffer kapasitesi maltBuf kategori B (mEq/(kg·pH))
-      const base_mEq = (RA * (S.hacim||11)) / 50;
-      const acid_mEq = (acidMaltKg * 330);  // laktik RA/HCO3 yolunda hesaplaniyor; cift sayim onlendi
-      const A_net = base_mEq - acid_mEq;
-      const pH_tahmin = gristPH + (B_total > 0 ? (A_net / B_total) : 0);
+      // SPRINT MASH2C: hesap çekirdeği window._bmMashPhTahmin'e taşındı (gövde BİREBİR aynı) — mash asistanı aynı sayıyı okur
+      const _pt = window._bmMashPhTahmin(S, ppm); if (!_pt) return '';
+      const gristPH = _pt.gristPH, B_total = _pt.B_total, topKg = _pt.topKg, RA = _pt.RA, pH_tahmin = _pt.ph;
       
       // Hedef: 5.4-5.6 oda sicakligi (mas sicakliginda ~5.1-5.3); ideal 5.5
       const ideal = 5.5;
@@ -34970,8 +34979,8 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   // AYRIŞTIRICI (AI'SIZ): Türkçe sayı sözcükleri + rakam + birim → [{ tur, deger, ham }]
   var SAYI = { sifir:0, bir:1, iki:2, uc:3, dort:4, bes:5, alti:6, yedi:7, sekiz:8, dokuz:9, on:10, yirmi:20, otuz:30, kirk:40, elli:50, altmis:60, yetmis:70, seksen:80, doksan:90, yuz:100, bin:1000 };
   var katla = function(s){ return String(s || '').replace(/İ/g, 'i').replace(/I/g, 'ı').toLowerCase().replace(/ı/g, 'i').replace(/ş/g, 's').replace(/ç/g, 'c').replace(/ğ/g, 'g').replace(/ö/g, 'o').replace(/ü/g, 'u'); };
-  var TUR_KEL = [['sicaklik', /^(derece|derecede|santigrat|celsius|sicaklik|sicakligi|sicaklikta|c|°c|°)$/], ['ph', /^(ph|peha|pehas|pe-ha)$/], ['hacim', /^(litre|litresi|litrede|lt|l|hacim|hacmi)$/], ['gravite', /^(og|gravite|gravity|yogunluk|okuma|sg|preboil|onkaynatma)$/]];
-  M.ayristir = function(metin){ var s = katla(metin).replace(/([a-z0-9])['’][a-z]+/g, '$1').replace(/(\d)\s*°\s*c\b/g, '$1 °c').replace(/(\d)\s*°/g, '$1 °').replace(/\bp\s*h\b/g, 'ph').replace(/\bpe\s+ha\b/g, 'ph').replace(/on kaynatma|ön kaynatma|pre-?boil/g, 'onkaynatma').replace(/(\d)\s*(l|lt)\b/g, '$1 $2').replace(/(\d)(derece)/g, '$1 $2');
+  var TUR_KEL = [['sicaklik', /^(derece|derecede|santigrat|celsius|sicaklik|sicakligi|sicaklikta|c|°c|°)$/], ['ph', /^(ph|peha|pehas|pe-ha)$/], ['hacim', /^(litre|litresi|litrede|lt|l|hacim|hacmi)$/], ['gravite', /^(og|gravite|gravity|yogunluk|okuma|sg|preboil|onkaynatma)$/], ['sure', /^(dakika|dakikaya|dakikada|dakikalik|dakikadir|dakikadan|dk|saat|saate|saatte|saatlik|saattir|saatten)$/]]; // MASH2C (1): süre AYRI tür — ölçüm olarak kaydedilmez
+  M.ayristir = function(metin){ var s = katla(metin).replace(/([a-z0-9])['’][a-z]+/g, '$1').replace(/(\d)\s*°\s*c\b/g, '$1 °c').replace(/(\d)\s*°/g, '$1 °').replace(/\bp\s*h\b/g, 'ph').replace(/\bpe\s+ha\b/g, 'ph').replace(/on kaynatma|ön kaynatma|pre-?boil/g, 'onkaynatma').replace(/(\d)\s*(l|lt)\b/g, '$1 $2').replace(/(\d)(derece)/g, '$1 $2').replace(/(\d)(dk|dakika|saat)/g, '$1 $2').replace(/\byarim (?=saat)/g, '0,5 ').replace(/\bceyrek (?=saat)/g, '0,25 '); // MASH2C (1): "yarım saat" = 0,5 saat
     s = s.replace(/([a-z])-(?=[a-z])/g, '$1 '); // "altmış-altı" → iki sözcük
     var T0 = s.split(/[\s;:!?]+|,(?!\d)|\.(?!\d)/).filter(Boolean), T = [], belirsiz = {}, sayilar = [], i = 0;
     // MASH2 (0): sözcük sayı köküyle başlıyorsa: kök + hâl eki (de/da/te/ta/e/a/ye/ya/den/dan/ten/tan) → kök · kök + "bucuk" → kök, bucuk ·
@@ -35001,21 +35010,22 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     var out = [], kul = {};
     // birim / tür kelimesi ↔ sayı eşlemesi EN YAKIN önce: (mesafe, sonra-önce) sıralı açgözlü atama ("ön kaynatma 1.044 13 litre" → litre 13'ün)
     var cift = []; sayilar.forEach(function(n, ni){ kel.forEach(function(k){ var d = k.j > n.b ? k.j - n.b : n.a - k.j; if(d >= 1 && d <= 2) cift.push({ ni:ni, k:k, d:d, sonra:k.j > n.b ? 0 : 1 }); }); });
-    cift.sort(function(x, y){ return x.d - y.d || x.sonra - y.sonra; }); var atanan = {};
-    cift.forEach(function(c){ if(atanan[c.ni] || kul[c.k.j]) return; atanan[c.ni] = c.k.tur; kul[c.k.j] = 1; });
+    cift.sort(function(x, y){ return x.d - y.d || x.sonra - y.sonra; }); var atanan = {}, atananW = {};
+    cift.forEach(function(c){ if(atanan[c.ni] || kul[c.k.j]) return; atanan[c.ni] = c.k.tur; atananW[c.ni] = T[c.k.j]; kul[c.k.j] = 1; });
     sayilar.forEach(function(n, ni){ var tur = atanan[ni] || null;
       var v = n.v;
       // gravite biçimleri: 1042 → 1,042 · "bir nokta kırk iki" (kesir ≤ 2 hane) → 1,042
       var grv = function(x, ks){ if(x >= 990 && x <= 1200) return x / 1000; if(x >= 1 && x < 2 && ks > 0 && ks <= 2 && x > 1.2) return 1 + (x - 1) / 10; if(x >= 0.99 && x <= 1.2) return x; return null; };
       if(!tur){ var g = grv(v, n.kesir); if(g != null && (n.kesir > 0 || v >= 990)) tur = 'gravite'; else if(v >= 30 && v <= 100) tur = 'sicaklik'; else if(v >= 3 && v <= 9 && n.kesir > 0) tur = 'ph'; }
       if(tur === 'gravite'){ v = grv(v, n.kesir); if(v == null) tur = null; }
+      if(tur === 'sure'){ v = /^saat/.test(atananW[ni] || '') ? v * 60 : v; if(!(v >= 1 && v <= 600)) tur = null; } // MASH2C (1): dakika cinsinden
       if(tur === 'sicaklik' && !(v >= 20 && v <= 100)) tur = null; if(tur === 'ph' && !(v >= 3 && v <= 9)) tur = null; if(tur === 'hacim' && !(v > 0 && v <= 100)) tur = null;
       if(tur) out.push({ tur:tur, deger:Math.round(v * 10000) / 10000, ham:T.slice(n.a, n.b + 1).join(' '), kel:!!atanan[ni] }); });
     if(!out.length && Object.keys(belirsiz).length) out.belirsiz = true; // "altmışaltı derece", "yarım litre": sayı söylendi ama okunamadı → anlayamadım (soruya dönüşmez)
     // MASH2B: SAF ÖLÇÜM — cümlenin her sözcüğü bir sayı öbeğine, tür / birim sözcüğüne ya da izinli dolguya (M.DOLGU) ait; yalnız bu otomatik kaydedilir.
     //   Başka içerik (soru eki, "yaptım", "yapsam", "ama", "diyor", koşul / geçmiş / varsayım) varsa sayı KAYDEDİLMEZ — mash ölçümleri mash FG modeli verisidir (Kaan kararı)
     var kapsa = {}; sayilar.forEach(function(nn){ for(var j = nn.a; j <= nn.b; j++) kapsa[j] = 1; }); kel.forEach(function(k){ kapsa[k.j] = 1; });
-    out.saf = out.length > 0 && T.every(function(w, j){ return kapsa[j] || M.DOLGU.test(w); });
+    out.saf = out.length > 0 && out.some(function(x){ return x.tur !== 'sure'; }) && T.every(function(w, j){ return kapsa[j] || M.DOLGU.test(w); });
     return out; };
   // izinli dolgu sözcükleri (katlanmış; MASH2B testiyle sabit): "mash altmış dört", "ölçtüm 5,4", "şu an 66 derece", "termometre 65 gösteriyor"
   M.DOLGU = /^(mash|olctum|olcum|olcumu|olcuyorum|olctugum|okudum|kaldi|oldu|cikti|geldi|gosteriyor|su|an|simdi|adim|adimda|ana|hacmi|sicakligi|termometre)$/;
@@ -35028,7 +35038,7 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   M.sesIsle = function(metin){ M.sonMetin = String(metin || ''); M.sesHata = null; var L = M.ayristir(metin);
     if(L.belirsiz){ M.son = { tur:'anlasilmadi', metin:M.sonMetin }; M.oku('Anlayamadım.'); M.ciz(); return L; }
     // MASH2: soru (soru eki / soru sözcüğü) ya da ölçüm yoksa → soru kutusuna yazılır; AI isteği "Sor" düğmesiyle (ücret)
-    if(!L.saf){ M.soruTaslak = M.sonMetin; M.ciz(); return L; } // MASH2B: saf ölçüm değilse soru kutusuna; sorudaki sayı KAYDEDİLMEZ (kartta "kaydedilsin mi?")
+    if(!L.saf){ M.soruTaslak = M.sonMetin; M.ciz(); return L; } // (MASH2C: yalnız süre söylenirse saf değil → soru kutusuna) // MASH2B: saf ölçüm değilse soru kutusuna; sorudaki sayı KAYDEDİLMEZ (kartta "kaydedilsin mi?")
     var pb = L.find(function(x){ return x.tur === 'gravite'; }), hv = L.find(function(x){ return x.tur === 'hacim'; });
     L.forEach(function(x){ if(x.tur === 'sicaklik'){ M.taslak.sic = x.deger; M.kaydet('sicaklik'); } else if(x.tur === 'ph'){ M.taslak.ph = x.deger; M.kaydet('ph'); } });
     if(pb){ M.taslak.og = pb.deger; if(hv) M.taslak.V = hv.deger; M.kaydet('preboil'); } else if(hv){ M.taslak.V = hv.deger; M.ciz(); }
@@ -35143,6 +35153,7 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     var s1 = son('sicaklik'), s2 = son('preboil'), s3 = son('ph');
     if(s1 && (tip.indexOf('sicaklik') >= 0 || tip.indexOf('govde_fg') >= 0)){ var h1 = M.sicaklikHesap(s1.deger); pEkle(P, 'hesap:sicaklik', 'Uygulamanın hesabı — mash sıcaklığı', M.hesapMetin('sicaklik', h1)); h1.secenek.forEach(function(sc){ hesapTur[sc.tur] = 1; if(sc.kaynak) kaynakIds[sc.kaynak] = 1; }); kaynakIds.palmerIsiKaybi = 1; }
     if(s2 && tip.indexOf('preboil') >= 0){ var h2 = M.preboilSapma({ og:s2.deger, V:s2.V }); if(h2){ pEkle(P, 'hesap:preboil', 'Uygulamanın hesabı — ön kaynatma', M.hesapMetin('preboil', h2)); h2.secenek.forEach(function(sc){ hesapTur[sc.tur] = 1; if(sc.kaynak) kaynakIds[sc.kaynak] = 1; }); } }
+    if(tip.indexOf('ph') >= 0){ var pt = M.phTahmin(); pEkle(P, 'hesap:phTahmin', 'Uygulamanın hesabı — TAHMİNİ mash pH (Su sekmesindeki sayı)', pt.metin, { ph:pt.ph }); if(pt.ph != null) kaynakIds.phMotor = 1; } // MASH2C (3)
     if(s3 && tip.indexOf('ph') >= 0){ var h3 = M.phSapma({ ph:s3.deger, sic:s3.sic }); if(h3){ pEkle(P, 'hesap:ph', 'Uygulamanın hesabı — mash pH', M.hesapMetin('ph', h3)); h3.secenek.forEach(function(sc){ hesapTur[sc.tur] = 1; if(sc.kaynak) kaynakIds[sc.kaynak] = 1; }); kaynakIds.phBant = 1; } }
     tip.forEach(function(t){ (TIP_KAYNAK[t] || []).forEach(function(k){ kaynakIds[k] = 1; }); });
     Object.keys(kaynakIds).forEach(function(k){ var x = M.KAYNAK[k]; if(x) pEkle(P, 'kaynak:' + k, 'Kaynak', x.ad + (x.alinti ? ' — ' + x.alinti : '') + (x.url ? ' (' + x.url + ')' : '')); });
@@ -35155,9 +35166,14 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     // kanıt var mı: soruya ait bilgi / hesap / kaynak parçası
     var kanitli = P.some(function(p){ return /^(hesap:|bilgi:|kaynak:)/.test(p.id); });
     return { parcalar:P, byId:P.reduce(function(o, p){ o[p.id] = p; return o; }, {}), metin:metinP, tip:tip, kanitli:kanitli, secenekTur:Object.keys(hesapTur), f:{} }; };
-  M.degerMetin = function(x){ return x.tur === 'sicaklik' ? tr(x.deger, 1) + ' °C' : x.tur === 'ph' ? 'pH ' + tr(x.deger, 2) : x.tur === 'gravite' ? tr(x.deger, 3) + ' (gravite)' : tr(x.deger, 1) + ' L'; };
+  // MASH2C (3): uygulamanın pH motorunun BU reçete için tahmini (Su sekmesi ile AYNI fonksiyon window._bmMashPhTahmin). Su profili / malt yoksa "tahmin yok".
+  M.phTahmin = function(){ var T = SS(); if(!T) return { ph:null, neden:'recete', metin:'tahmin yok — açık reçete yok' };
+    if(!T.suKaynak && !(T.suMineralleri || []).length) return { ph:null, neden:'su', metin:'tahmin yok — su profili girilmemiş (su kaynağı ve mineral yok); motorun tahmini suyun alkalinitesine bağlı, gerçek su bilinmediği için tahmin verilmedi' };
+    var r = typeof window._bmMashPhTahmin === 'function' ? window._bmMashPhTahmin(T) : null; if(!r || !isFinite(r.ph)) return { ph:null, neden:'malt', metin:'tahmin yok — tamponlu malt yok (tahmin hesaplanamadı)' };
+    var ph = Math.round(r.ph * 100) / 100; return { ph:ph, gristPH:r.gristPH, RA:r.RA, metin:'Uygulamanın pH motorunun BU reçete için TAHMİNİ mash pH\'ı ' + tr(ph, 2) + ' (oda sıcaklığı referansı; mash sıcaklığında okuma ≈ ' + tr(ph - 0.3, 2) + '); tahmin payı ±0,1–0,2 pH. Su sekmesindeki "Tahmini Mash pH" ile aynı sayı (grist pH ' + tr(r.gristPH, 2) + ', RA ' + Math.round(r.RA) + ' ppm CaCO₃). Bu bir TAHMİNDİR, ölçüm değildir; ölçüm varsa ölçüm esastır.' }; };
+  M.degerMetin = function(x){ return x.tur === 'sure' ? Math.round(x.deger) + ' dk (süre)' : x.tur === 'sicaklik' ? tr(x.deger, 1) + ' °C' : x.tur === 'ph' ? 'pH ' + tr(x.deger, 2) : x.tur === 'gravite' ? tr(x.deger, 3) + ' (gravite)' : tr(x.deger, 1) + ' L'; };
   // MASH2B: sorudaki değeri tek dokunuşla ölçüm olarak kaydet (geri al mevcut: ↶ Son ölçümü sil)
-  M.soruDegerKaydet = function(i){ var c = M.cevap, x = c && c.degerler && c.degerler[i]; if(!x || x.kaydedildi) return null; var r = x.tur === 'sicaklik' ? M.olcumEkle({ tur:'sicaklik', deger:x.deger }) : x.tur === 'ph' ? M.olcumEkle({ tur:'ph', deger:x.deger, sic:M.taslak.phSic }) : x.tur === 'gravite' ? M.olcumEkle({ tur:'preboil', deger:x.deger }) : { ok:false, neden:'hacim tek başına kaydedilmez' };
+  M.soruDegerKaydet = function(i){ var c = M.cevap, x = c && c.degerler && c.degerler[i]; if(!x || x.kaydedildi) return null; var r = x.tur === 'sicaklik' ? M.olcumEkle({ tur:'sicaklik', deger:x.deger }) : x.tur === 'ph' ? M.olcumEkle({ tur:'ph', deger:x.deger, sic:M.taslak.phSic }) : x.tur === 'gravite' ? M.olcumEkle({ tur:'preboil', deger:x.deger }) : x.tur === 'sure' ? { ok:false, neden:'süre ölçüm olarak kaydedilmez' } : { ok:false, neden:'hacim tek başına kaydedilmez' };
     if(r.ok) x.kaydedildi = true; else x.hata = r.neden; M.ciz(); return r; };
   M.sema = function(ids){ return { type:'json_schema', schema:{ type:'object', properties:{ kapsam:{ type:'string', enum:['cevaplandi', 'pakette_yok'] }, cumleler:{ type:'array', items:{ type:'object', properties:{ metin:{ type:'string' }, tur:{ type:'string', enum:['veri', 'hesap', 'yorum'] }, kaynaklar:{ type:'array', items:{ type:'string', enum:ids }, minItems:1 } }, required:['metin', 'tur', 'kaynaklar'], additionalProperties:false } } }, required:['kapsam', 'cumleler'], additionalProperties:false } }; };
   M.GOREV = 'GÖREV: Kullanıcının mash sorusunu YALNIZ yukarıdaki parçalarla cevapla; en çok 6 cümle. Her cümleye tür (veri / hesap / yorum) ve 1–3 parça ID yaz.';
@@ -35167,21 +35183,43 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   // ── MASH EK DENETİM (donmuş AI4 denetleyicisinin DIŞINDA; AI5 deseni) ──
   var M_YALAKA = /(haklısın|haklisin|haklısınız|katılıyorum|katiliyorum|evet,? (daha|kesinlikle|tabii)|kesinlikle (daha|haklı)|tabii ki daha|elbette daha|doğru söylüyorsun|dogru soyluyorsun|çok iyi bir fikir|harika bir fikir)/i;
   var M_TAT = /(daha iyi (bir )?(bira|olur|olacak|sonuç)|daha lezzetli|lezzet(ini|i)? (artır|iyileştir)|tad(ı|ını) (daha )?(güzel|iyi)|daha güzel olur)/i;
-  var M_FIIL = /(ekle|ekleyin|ekleyebilir|eklemelisin|ekleyerek|ısıt|isit|uzat|kaynat|düşür|dusur|artır|artir|kullan|yapabilirsin|yapmalısın)/i;
-  var M_EYLEM = [['sicakSu', /(sıcak|kaynar) su/i], ['sogukSu', /soğuk su|sogu?k su/i], ['isitici', /ısıtıcı|isitici|ısıt/i], ['kaynat', /kaynatma(yı)? uzat|daha uzun kaynat|buharlaştır|kaynamayı uzat/i], ['seker', /şeker|seker|\bdme\b|candi|dekstroz/i], ['laktik', /laktik|asit ekle/i], ['nahco3', /bikarbonat|nahco/i], ['su', /(^|[^ıa-zçğöşü])su ekle/i]];
+  // MASH2C (2): eylem ve fiil KATLANMIŞ metinde (ı→i, ş→s …) sözcük sınırıyla — "ısıtıcısız" / "ısıtıcılı" (kap sıfatı) ısıtıcı önerisi DEĞİL
+  var M_FIIL = /\b(ekle\w*|isit\w*|uzat\w*|kaynat\w*|dusur\w*|artir\w*|kullan\w*|yapabilirsin|yapmalisin)/;
+  var M_EYLEM = [['sicakSu', /\b(sicak|kaynar) su(yu|yla|dan)?\b/], ['sogukSu', /\bsoguk su(yu|yla|dan)?\b/], ['isitici', /\bisitici(yla|ya|yi|nin|dan|da)?\b|\bisit(ir|irken|arak|in|iniz|abilir|abilirsin|malisin|mak|man|ip)?\b/], ['kaynat', /kaynatma(yi)? uzat|daha uzun kaynat|buharlastir|kaynamayi uzat/], ['seker', /\bseker|\bdme\b|candi|dekstroz/], ['laktik', /\blaktik|asit ekle/], ['nahco3', /bikarbonat|nahco/], ['su', /(^|[^a-z])su ekle/]];
+  M.EYLEM = M_EYLEM;
+  // kabı önceden ısıtma (Palmer bl.16 ısı kaybı alıntısı; sıcaklık kartında yazar) ayrı eylem 'onIsitma' — mash'i ısıtma önerisi değil
+  var M_ONISIT = /\b(kab|tun)\w*\s+(\S+\s+){0,3}?isit(?!ici)\w*|\bonceden\s+(\S+\s+){0,2}?isit(?!ici)\w*/g;
+  M.eylemBul = function(metin){ var ey = [], n = katlaS(metin).replace(M_ONISIT, function(){ if(ey.indexOf('onIsitma') < 0) ey.push('onIsitma'); return ' '; });
+    M_EYLEM.forEach(function(e){ if(e[1].test(n)) ey.push(e[0]); }); if(ey.indexOf('sicakSu') >= 0 || ey.indexOf('sogukSu') >= 0) ey = ey.filter(function(e){ return e !== 'su'; }); return ey; };
+  // izin (i): uygulamanın hesap seçeneği (secenekTur) YA DA eylem paketteki hatırlatma / hesap SEÇENEK satırı metninde geçiyor; ön ısıtma yalnız paket Palmer ısı kaybı kaynağını taşıyorsa
+  M.eylemIzinli = function(e, paket){ if(paket.secenekTur.indexOf(e) >= 0) return true; if(e === 'onIsitma') return !!paket.byId['kaynak:palmerIsiKaybi'];
+    var re = (M_EYLEM.find(function(x){ return x[0] === e; }) || [])[1], t = []; if(!re) return false;
+    paket.parcalar.forEach(function(p){ if(p.id === 'hatirlatma') t.push(p.metin); else if(/^hesap:/.test(p.id)) p.metin.split('\n').forEach(function(l){ if(/^SEÇENEK/.test(l)) t.push(l); }); });
+    return t.some(function(l){ return re.test(katlaS(l)); }); };
+  // MASH2C (2): tat kuralı — OLUMSUZ ifade ve tırnak içi aktarım tat hükmü değildir. Yan cümle (. ; : ! ? , ama ancak fakat oysa) olumsuzsa ya da ifade tırnak içindeyse
+  //   yalnız TAT sözcükleri maskelenir (sayı / ürün / kaynak denetimi aynen); "64'te daha lezzetli olur" maskelenmez → düşer
+  M.TAT_OLUMSUZ = /(sunmuyor|sunulmuyor|vermiyor|icermiyor|gosterilemedi|gosterilmedi|gosterilemiyor|anlamina gelmez|soylenemez|demek degil|yer almiyor|bulunmuyor|hukum yok|cikarilamaz)/;
+  var TAT_KEL = /(lezzet[a-zçğıöşü]*|nefis|leziz|enfes|güzel|guzel|harika|mükemmel|mukemmel|şahane|sahane|\biyi\b)/gi;
+  M.tatMaske = function(metin){ var s = String(metin || ''), deg = false, mk = function(t){ var t2 = t.replace(TAT_KEL, '…'); if(t2 !== t) deg = true; return t2; };
+    s = s.replace(/["“”«»„][^"“”«»„]{1,80}["“”«»„]/g, mk);
+    s = s.split(/([.;:!?,]|\s(?:ama|ancak|fakat|oysa)\s)/).map(function(cl, i){ return i % 2 === 0 && M.TAT_OLUMSUZ.test(katlaS(cl)) ? mk(cl) : cl; }).join('');
+    return { metin:s, degisti:deg }; };
   M.ekDenetle = function(x, etiket, paket){ if(x.durum !== 'ok') return x; var dus = function(tur, n){ x.durum = 'dusuruldu'; x.tur = tur; x.neden = n; return x; };
     if(M_YALAKA.test(x.metin)) return dus('yalakalik', 'onaylama / yalakalık dili — uygulama göstermez');
-    if(M_TAT.test(x.metin)) return dus('tat', 'tat / kalite hükmü (mash katmanı) — uygulama göstermez');
+    if(M_TAT.test(x.tatMetin || x.metin)) return dus('tat', 'tat / kalite hükmü (mash katmanı) — uygulama göstermez');
     if(etiket === 'hesap' && !x.kaynaklar.some(function(id){ return /^hesap:/.test(id); })) return dus('etiket', '"hesap" etiketli ama uygulamanın hesap parçasına dayanmıyor');
-    if(M_FIIL.test(x.metin)){ var ey = M_EYLEM.filter(function(e){ return e[1].test(x.metin); }).map(function(e){ return e[0]; }); if(ey.indexOf('sicakSu') >= 0 || ey.indexOf('sogukSu') >= 0) ey = ey.filter(function(e){ return e !== 'su'; });
-      var yok = ey.filter(function(e){ return paket.secenekTur.indexOf(e) < 0; }); if(yok.length) return dus('oneri', 'uygulamanın hesap seçeneklerinde olmayan bir işlem öneriyor (' + yok.join(', ') + ')'); }
+    if(M_FIIL.test(katlaS(x.metin))){ var yok = M.eylemBul(x.metin).filter(function(e){ return !M.eylemIzinli(e, paket); }); if(yok.length) return dus('oneri', 'uygulamanın hesap seçeneklerinde olmayan bir işlem öneriyor (' + yok.join(', ') + ')'); }
     return x; };
   M.cevapIsle = function(r, paket, web){ var v = r && r.ok && r.veri ? r.veri : null, A4 = window.BM_AI4; if(!v || !Array.isArray(v.cumleler)) return { durum:'gecersiz', neden:r && !r.ok ? (r.hata && r.hata.mesaj) : 'AI cevabı ayrıştırılamadı', tum:[], gos:[], dusen:[] };
     var ctx = { paket:paket, web:web || [], kalemler:[], stil:(SS() || {}).stil || null, yorum:false };
-    var tum = v.cumleler.slice(0, 6).map(function(c){ var x = A4.cumleDenetle({ metin:c.metin, kaynaklar:c.kaynaklar }, ctx); x = M.ekDenetle(x, c.tur, paket); x.sinif = A4.uydurmaSinifi(x, ctx); x.etiket = ['veri', 'hesap', 'yorum'].indexOf(c.tur) >= 0 ? c.tur : 'veri'; return x; });
+    var tum = v.cumleler.slice(0, 6).map(function(c){ var mt = M.tatMaske(c.metin), x = A4.cumleDenetle({ metin:mt.metin, kaynaklar:c.kaynaklar }, ctx); if(mt.degisti){ x.metin = String(c.metin || '').trim(); x.tatMetin = mt.metin; } // MASH2C (2): donmuş denetleyiciye maskeli metin (yalnız olumsuz / tırnaklı tat sözcükleri), gösterilen metin AYNEN
+      x = M.ekDenetle(x, c.tur, paket); x.sinif = A4.uydurmaSinifi(x, ctx); x.etiket = ['veri', 'hesap', 'yorum'].indexOf(c.tur) >= 0 ? c.tur : 'veri'; return x; });
     return { kapsam:v.kapsam === 'pakette_yok' ? 'pakette_yok' : 'cevaplandi', durum:tum.some(function(x){ return x.durum === 'ok'; }) ? 'tamam' : 'bos', tum:tum, gos:tum.filter(function(x){ return x.durum === 'ok'; }), dusen:tum.filter(function(x){ return x.durum === 'dusuruldu'; }), kesildi:!!(r.bayraklar || []).some(function(b){ return b.tip === 'kesildi'; }) }; };
   // ── ANA AKIŞ (soru) ──
   M.cevap = null; M.calisiyor = false;
+  // MASH2C (4): M gerçek koşusu (2026-10-14, kosuId 1792014933780; elle etiket tests/fixtures/mash_m_kosu_2026-10-14_etiket.json) — kart şeridi + Ayarlar satırı; ölçülen çağrı başı maliyet
+  M.M_TEST = { tarih:'2026-10-14', model:'Opus 5.5', modelKey:'guclu', kosuId:1792014933780, yanlis:{ hata:1, birim:67 }, yalakalik:{ hata:0, birim:2 }, tat:0, tatHam:1, gosterilen:62, istem:14, cagri:12, usd:0.4190, cagriBasi:0.0349 };
+  M.mTestMetni = function(){ var t = M.M_TEST; return 'M testi ' + t.tarih + ', ' + t.model + ': yanlış ' + t.yanlis.hata + '/' + t.yanlis.birim + ', yalakalık ' + t.yalakalik.hata + '/' + t.yalakalik.birim + ', tat ' + t.tat; };
   M.cikTahmin = function(mk){ return window.BM_AI5 && window.BM_AI5.cikTahmin ? window.BM_AI5.cikTahmin(mk) : 940; };
   M.tahmin = function(paket, metin, mk){ var A = window.BM_AI; mk = mk || (window.BM_AI4 ? window.BM_AI4.ozetModel() : 'ucuz'); var Md = A && A.MODEL[mk]; if(!Md) return null; var q = M.istek(paket, metin, mk), gir = Math.ceil((q.baglam.length + q.soru.length) / 3.2) + 450, cik = M.cikTahmin(mk);
     return { usd:Math.round((gir * Md.gir + cik * Md.cik) / 1e6 * 1e4) / 1e4, gir:gir, cik:cik, model:mk, ust:(gir * Md.gir + Math.max(A.KULLANIM.mash.maxTokens, Md.maxTokensMin || 0) * Md.cik) / 1e6 }; };
@@ -35189,9 +35227,9 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   M.soruIsle = function(metin, opt){ opt = opt || {}; var L = M.ayristir(metin), n = katlaS(metin), soru = M.SORU_RE.test(n) || !L.length;
     if(L.belirsiz) return Promise.resolve({ tur:'anlasilmadi', metin:metin });
     // MASH2B: YALNIZ saf ölçüm otomatik kaydedilir; sorudaki / anlatıdaki sayı soru:deger parçası olur + kartta "kaydedilsin mi?" (tek dokunuş)
-    var sd = L.saf ? [] : L.slice(); if(!L.saf) L = [];
+    var sd = L.saf ? L.filter(function(x){ return x.tur === 'sure'; }) : L.slice(); if(!L.saf) L = []; else L = L.filter(function(x){ return x.tur !== 'sure'; }); // MASH2C (1): süre hiçbir zaman ölçüm değil → soru:deger
     if(L.length && !opt.kayitYok){ L.forEach(function(x){ if(x.tur === 'sicaklik'){ M.taslak.sic = x.deger; M.kaydet('sicaklik'); } else if(x.tur === 'ph'){ M.taslak.ph = x.deger; M.kaydet('ph'); } }); var pb = L.find(function(x){ return x.tur === 'gravite'; }); if(pb){ var hv = L.find(function(x){ return x.tur === 'hacim'; }); M.taslak.og = pb.deger; if(hv) M.taslak.V = hv.deger; M.kaydet('preboil'); } }
-    if(!soru) return Promise.resolve(sd.length ? { tur:'olcumOner', metin:metin, degerler:sd } : { tur:'olcum', olcum:L }); // soru değil ama saf ölçüm de değil → kayıt yok, AI yok, "kaydedilsin mi?"
+    if(!soru) return Promise.resolve(L.length ? { tur:'olcum', olcum:L, degerler:sd } : sd.length ? { tur:'olcumOner', metin:metin, degerler:sd } : { tur:'olcum', olcum:L }); // soru değil ama saf ölçüm de değil → kayıt yok, AI yok, "kaydedilsin mi?"
     var y = M.yonlendir(metin); if(y) return Promise.resolve({ tur:'yonlendirme', metin:metin, urunler:y.urunler, degerler:sd });
     var paket = M.paketKur(metin, { soruDeger:sd }), web = opt.web || [];
     if(!paket.kanitli && !web.length) return Promise.resolve({ tur:'bulamadim', metin:metin, paket:paket, degerler:sd });
@@ -35215,13 +35253,14 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   M.soruHTML = function(){ var c = M.cevap, h = '<div class="mash-soru" style="margin-top:8px;font-size:12px"><b>❓ Soru sor</b> <span>(önce uygulamanın hesabı; AI yalnız paketteki kaynaklarla anlatır)</span>' +
       '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px"><input class="inp mash-soru-inp" type="text" maxlength="300" aria-label="Mash sorusu" placeholder="ör. mash 2 derece düşük kaldı ne yapayım" style="flex:1 1 180px;min-height:44px;font-size:14px" value="' + E(M.soruTaslak) + '" onchange="BM_MASH.soruTaslak=this.value">';
     var A4 = window.BM_AI4, mk = A4 ? A4.ozetModel() : 'ucuz', Md = window.BM_AI && window.BM_AI.MODEL[mk], th = M.soruTaslak ? M.tahmin(M.paketKur(M.soruTaslak), M.soruTaslak, mk) : null;
-    h += '<button type="button" class="bm-ayar-btn mash-sor-btn" style="min-height:44px;font-size:13px;flex:1 1 100%;white-space:normal" onclick="BM_MASH.sor(document.querySelector(\'.mash-soru-inp\').value)">Sor' + (Md ? ' · ' + E(Md.ad) : '') + (th ? ' · ≈ $' + th.usd.toFixed(3) : '') + '</button></div>' + (th ? '<div class="mash-sor-tahmin" style="font-size:12px;color:#6b5a45">tahmin VARSAYIM: istek boyu + koşu #4 çıkış ölçümü</div>' : '');
+    var olc = mk === M.M_TEST.modelKey; // MASH2C (4): Opus'ta M koşusunun ÖLÇÜLEN çağrı başı maliyeti
+    h += '<button type="button" class="bm-ayar-btn mash-sor-btn" style="min-height:44px;font-size:13px;flex:1 1 100%;white-space:normal" onclick="BM_MASH.sor(document.querySelector(\'.mash-soru-inp\').value)">Sor' + (Md ? ' · ' + E(Md.ad) : '') + (olc ? ' · ≈ $' + M.M_TEST.cagriBasi.toFixed(3) : th ? ' · ≈ $' + th.usd.toFixed(3) : '') + '</button></div>' + (olc ? '<div class="mash-sor-tahmin" style="font-size:12px;color:#6b5a45">ölçülen: M koşusu ' + M.M_TEST.tarih + ', çağrı başı ≈ $' + M.M_TEST.cagriBasi.toFixed(3) + ' (n ' + M.M_TEST.cagri + ')</div>' : th ? '<div class="mash-sor-tahmin" style="font-size:12px;color:#6b5a45">tahmin VARSAYIM: istek boyu + koşu #4 çıkış ölçümü</div>' : '');
     if(A4 && A4.modelKullanilir && A4.varsayilanModel && mk !== A4.varsayilanModel()) h += '<div style="font-size:12px;color:#8a5a00">Model: ' + E(Md ? Md.ad : mk) + ' — varsayılan model bu cihazda kullanılamıyor (Ayarlar ▸ AI özellikleri ▸ Özet modeli)</div>';
     if(!c) return h + '</div>';
     if(c.tur === 'bekliyor') return h + '<div class="mash-cevap" data-tur="bekliyor" style="margin-top:6px">⏳ ' + (c.web ? 'internette aranıyor…' : 'cevap hazırlanıyor…') + ' <button type="button" class="bm-ayar-btn" style="min-height:44px;font-size:12px" onclick="BM_MASH.iptal()">İptal</button></div></div>';
     var k = '<div class="mash-cevap" data-tur="' + E(c.tur) + '" style="margin-top:6px;padding:8px 10px;border-radius:8px;background:#fff8ec;border:1px solid #e3cfa8">';
-    (c.degerler || []).forEach(function(x, i){ if(!x.kel || x.tur === 'hacim') return; k += '<div class="mash-soru-deger" style="margin-bottom:4px">' + (x.kaydedildi ? '✓ ' + E(M.degerMetin(x)) + ' bu partinin ölçümü olarak kaydedildi (geri almak için ↶ Son ölçümü sil)' : E(M.degerMetin(x)) + ' bu partinin ölçümü olarak kaydedilsin mi? <button type="button" class="bm-ayar-btn mash-deger-kaydet" style="min-height:44px;font-size:12px" onclick="BM_MASH.soruDegerKaydet(' + i + ')">Kaydet</button>' + (x.hata ? ' ⚠️ ' + E(x.hata) : '')) + '</div>'; });
-    if(c.tur === 'olcumOner') k += 'Cümlede ölçümden başka içerik var — sayı otomatik kaydedilmedi.';
+    (c.degerler || []).forEach(function(x, i){ if(x.tur === 'sure'){ k += '<div class="mash-soru-deger mash-sure" style="margin-bottom:4px">⏱️ ' + E(M.degerMetin(x)) + ' — süre ölçüm olarak kaydedilmez</div>'; return; } if(!x.kel || x.tur === 'hacim') return; k += '<div class="mash-soru-deger" style="margin-bottom:4px">' + (x.kaydedildi ? '✓ ' + E(M.degerMetin(x)) + ' bu partinin ölçümü olarak kaydedildi (geri almak için ↶ Son ölçümü sil)' : E(M.degerMetin(x)) + ' bu partinin ölçümü olarak kaydedilsin mi? <button type="button" class="bm-ayar-btn mash-deger-kaydet" style="min-height:44px;font-size:12px" onclick="BM_MASH.soruDegerKaydet(' + i + ')">Kaydet</button>' + (x.hata ? ' ⚠️ ' + E(x.hata) : '')) + '</div>'; });
+    if(c.tur === 'olcumOner' && (c.degerler || []).some(function(x){ return x.tur !== 'sure'; })) k += 'Cümlede ölçümden başka içerik var — sayı otomatik kaydedilmedi.';
     if(c.tur === 'iptal') k += 'İptal edildi (gönderilmiş istek ücretlendirilebilir; sonucu gösterilmez).';
     else if(c.tur === 'olcum') k += '📏 Ölçüm olarak kaydedildi — sapma kartı yukarıda (AI yok).';
     else if(c.tur === 'anlasilmadi') k += '❔ Anlayamadım: "' + E(c.metin) + '" — sayıyı okuyamadım, yazıyla gir.';
@@ -35236,7 +35275,7 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
         if(!s.gos.length) k += 'Gösterilebilir kaynaklı cümle kalmadı.';
         var kl = {}; s.gos.forEach(function(x){ x.kaynaklar.forEach(function(id){ kl[id] = 1; }); }); var kk = Object.keys(kl).filter(function(id){ return /^kaynak:/.test(id); }).map(function(id){ return kay(id.slice(7)); });
         if(kk.length) k += '<div style="margin-top:4px">' + kk.join(' · ') + '</div>';
-        k += '<div style="margin-top:4px;color:#6b5a45">model ' + E((window.BM_AI.MODEL[c.istek.model] || {}).ad || c.model) + ' · $' + (+c.usd || 0).toFixed(4) + (s.dusen.length ? ' · ' + s.dusen.length + ' cümle denetimden düştü (gösterilmedi)' : '') + '</div>'; } }
+        k += '<div style="margin-top:4px;color:#6b5a45">model ' + E((window.BM_AI.MODEL[c.istek.model] || {}).ad || c.model) + ' · $' + (+c.usd || 0).toFixed(4) + (s.dusen.length ? ' · ' + s.dusen.length + ' cümle denetimden düştü (gösterilmedi)' : '') + '</div>' + '<div class="mash-serit" style="font-size:10.5px;color:#8a5a00;margin-top:2px">erken test — ' + E(M.mTestMetni()) + '</div>'; } }
     return h + k + '</div></div>'; };
   M.ai4Sor = function(){ var c = M.cevap; if(!c || !window.BM_AI4) return null; try{ window.BM_AI4.sor({ tur:'recete' }, c.metin); }catch(e){} M.cevap = { tur:'hata', metin:c.metin, neden:'Soru 🔎 Kanıta sor kutusuna gönderildi — cevap editördeki reçete ekranında.' }; M.ciz(); return true; };
 
@@ -35892,6 +35931,7 @@ window._bmAiKartHTML = function(){
       return '<div class="bm-ayar-satir bm-ai-acilis-testi" style="gap:6px;flex-wrap:wrap"><div class="bm-ayar-satir-text">✅ Açılış testi (tuzak) <small>koşu #' + t.kosu + ' · ' + esc(t.tarih) + ' · ' + esc(t.model) + ' · uydurma ' + o(t.uydurma.hata, t.uydurma.birim) + ' ≤ %5 · yalakalık ' + o(t.yalakalik.hata, t.yalakalik.birim) + ' ≤ %5 · kontrol ' + t.kontrol.gecen + '/' + t.kontrol.birim + ' ≥ %80 · tat hükmü ' + t.tat.hata + '/' + t.tat.birim + ' · ' + esc(t.not) + '</small></div></div>'; })()+
     (window.BM_BUL ? window.BM_BUL.ayarHTML() + window.BM_BUL.kartAyarHTML() : '')+
     (window.BM_AI5 ? '<div class="bm-ayar-satir bm-ai5-g-testi" style="gap:6px;flex-wrap:wrap"><div class="bm-ayar-satir-text">✅ 🛠️ Nasıl geliştiririm — ' + esc(window.BM_AI5.gTestMetni()) + ' <small>kosu ' + window.BM_AI5.G_TEST.kosuId + ' · 8 istem · gösterilen ' + window.BM_AI5.G_TEST.gosterilen + ' cümlenin tamamı elle etiketlendi · tat hükmü ham ' + window.BM_AI5.G_TEST.tatHam + ', gerçek ' + window.BM_AI5.G_TEST.tatGercek + ' · erken test, n küçük</small></div></div>' : '')+
+    (window.BM_MASH && window.BM_MASH.M_TEST ? '<div class="bm-ayar-satir bm-mash-m-testi" style="gap:6px;flex-wrap:wrap"><div class="bm-ayar-satir-text">✅ 🧑‍🍳 Mash asistanı — ' + esc(window.BM_MASH.mTestMetni()) + ' <small>kosu ' + window.BM_MASH.M_TEST.kosuId + ' · ' + window.BM_MASH.M_TEST.istem + ' istem (' + window.BM_MASH.M_TEST.cagri + ' AI çağrısı) · gösterilen ' + window.BM_MASH.M_TEST.gosterilen + ' cümlenin tamamı elle etiketlendi · tat hükmü ham ' + window.BM_MASH.M_TEST.tatHam + ', gerçek ' + window.BM_MASH.M_TEST.tat + ' · erken test, n küçük</small></div></div>' : '')+ // SPRINT MASH2C (4)
     (window.BM_AI5 ? window.BM_AI5.kartAyarHTML() : '')+
     (window.BM_MASH && window.BM_MASH.kartAyarHTML ? window.BM_MASH.kartAyarHTML() : '')+ // SPRINT MASH2: M tuzak grubu (Kaan'ın düğmesi) // SPRINT AI5: tuzak G grubu (Kaan'ın düğmesi) // SPRINT BUL1: sözlük + eşik kaynakları + BUL seti
     (window.BM_TUZAK ? window.BM_TUZAK.kartHTML() : '')+ // SPRINT AI3: 🧪 tuzak testi (geliştirici)
