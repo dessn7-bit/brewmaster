@@ -11739,20 +11739,145 @@ const CASELER = [
       const oz = r.ozet.split('\n'), govde = oz.slice(1, -1).join('\n'), kon = oz[oz.length - 1];
       const mM = r.metrik.M, mG = r.metrik.G;
       return [
-        { ad: 'plan: M 40 × 2 + G 30 × 2 = 140 adım, sıra M1 → M2 → G1 → G2; AI çağrısı ' + r.th.nM + ' (M) + ' + r.th.nG + ' (G); tahmin ≈ ' + r.th.usd + ' $ (VARSAYIM: ölçülen 0,0349 / 0,0287), tavan ' + r.th.tavan + ' $ = tahmin × 2 + en kötü çağrı ' + r.th.ustTek, ok: r.sira === 140 && r.sira0.join() === 'M1:M01,M2:M01,G1:G-blonde-a,G2:G-blonde-a' && r.th.nM === 72 && r.th.nG === 60 && Math.abs(r.th.usd - (72 * 0.0349 + 60 * 0.0287)) < 1e-6 && Math.abs(r.th.tavan - Math.round((r.th.usd * 2 + r.th.ustTek) * 100) / 100) < 1e-9 && /VARSAYIM/.test(r.th.kaynak), detay: JSON.stringify(r.th) },
-        { ad: 'uçtan uca mock: bitti, 140 adım, ' + r.n + ' AI çağrısı (= 72 + 60 = tahmindeki çağrı sayısı), ön kontrol M + G geçti, model Opus 5.5, denetleyici b0bfee2d-29522 (' + r.sure + ' ms)', ok: r.bitti && r.n === 132 && r.log === 132 && r.on.M.gecti && r.on.G.gecti && r.model === 'guclu' && r.denet === 'b0bfee2d-29522' },
+        { ad: 'plan: M 40 × 2 + G 30 × 2 = 140 adım, sıra M1 → M2 → G1 → G2; AI çağrısı ' + r.th.nM + ' (M) + ' + r.th.nG + ' (G); tahmin ≈ ' + r.th.usd + ' $ (VARSAYIM: ölçülen 0,0349 / 0,0287), tavan ' + r.th.tavan + ' $ = tahmin × 2 + en kötü çağrı ' + r.th.ustTek, ok: r.sira === 140 && r.sira0.join() === 'M1:M01,M2:M01,G1:G-blonde-a,G2:G-blonde-a' && r.th.nM === 74 && r.th.nG === 60 && Math.abs(r.th.usd - (74 * 0.0349 + 60 * 0.0287)) < 1e-6 && Math.abs(r.th.tavan - Math.round((r.th.usd * 2 + r.th.ustTek) * 100) / 100) < 1e-9 && /VARSAYIM/.test(r.th.kaynak), detay: JSON.stringify(r.th) },
+        { ad: 'uçtan uca mock: bitti, 140 adım, ' + r.n + ' AI çağrısı (= 74 + 60 = tahmindeki çağrı sayısı; DOG1B: M38 doğal metniyle AI çağrısına gider), ön kontrol M + G geçti, model Opus 5.5, denetleyici b0bfee2d-29522 (' + r.sure + ' ms)', ok: r.bitti && r.n === 134 && r.log === 134 && r.on.M.gecti && r.on.G.gecti && r.model === 'guclu' && r.denet === 'b0bfee2d-29522' },
         { ad: 'metrik: M akış 80/80, eksik beklenen parça 0, tutarlılık farkı 0/40; G tutarlılık farkı 0/30 (aday sırası iki turda aynı, mekanik)', ok: mM.akisOk === 80 && mM.akisN === 80 && mM.eksikParca === 0 && mM.tutarlilik.farkli === 0 && mM.tutarlilik.istem === 40 && mG.tutarlilik.farkli === 0 && mG.tutarlilik.istem === 30, detay: r.metrik.ozet },
         { ad: 'arşiv: birleşik + 4 (set, tur) kaydı; durum temizlendi; tam sonuç paket metinlerini taşır (etiket için)', ok: r.durumYok && r.arsiv.length === 5 && r.arsiv[1].endsWith(':M1') && r.arsiv[4].endsWith(':G2') && r.paketVar, detay: 'arşiv ' + r.arsivBoy + ' karakter' },
         { ad: 'kısa özet BREWMASTER-DOG1-OZET v1 + KONTROL (FNV-1a gövde + uzunluk doğru) · tam dosya brewmaster_dog1_<kosuId>.json · anahtarsız', ok: oz[0] === 'BREWMASTER-DOG1-OZET v1' && kon === 'KONTROL ' + kod(govde) + ' ' + govde.length && /^brewmaster_dog1_\d+\.json$/.test(r.indir.ad) && !/sk-ant-[A-Za-z0-9]/.test(r.ozet + r.kopya) && /^METRIK M \| N /m.test(r.ozet) && /^== G2:G30 /m.test(r.ozet) },
         { ad: 'Durdur: ilk adımdan sonra "kullanıcı durdurdu"', ok: r.durdur.durdu === 'kullanıcı durdurdu' && r.durdur.tamam >= 1 && r.durdur.tamam < 5 },
-        { ad: 'çağrı hatası: koşu DURUR, adım tamamlanmış sayılmaz; Devam AYNI koşuda yalnız kalan ' + r.devam.kalan + ' adımı koşar (' + r.devam.cagri + ' çağrı; tamamlanan adım tekrar koşmaz) ve biter', ok: /G1:G-saison-a: çağrı başarısız/.test(r.hata.durdu) && r.hata.tamam === 82 && /58 adım kaldı; tamamlanan 82 adım TEKRAR koşulmaz/.test(r.devam.onay || '') && r.devam.bitti && r.devam.ayniKosu && r.devam.cagri === 58 && r.devam.n === 132 && r.devam.oturum === 2, detay: r.hata.durdu + ' | ' + JSON.stringify(Object.assign({}, r.devam, { onay: (r.devam.onay || '').slice(0, 90) })) },
+        { ad: 'çağrı hatası: koşu DURUR, adım tamamlanmış sayılmaz; Devam AYNI koşuda yalnız kalan ' + r.devam.kalan + ' adımı koşar (' + r.devam.cagri + ' çağrı; tamamlanan adım tekrar koşmaz) ve biter', ok: /G1:G-saison-a: çağrı başarısız/.test(r.hata.durdu) && r.hata.tamam === 82 && /58 adım kaldı; tamamlanan 82 adım TEKRAR koşulmaz/.test(r.devam.onay || '') && r.devam.bitti && r.devam.ayniKosu && r.devam.cagri === 58 && r.devam.n === 134 && r.devam.oturum === 2, detay: r.hata.durdu + ' | ' + JSON.stringify(Object.assign({}, r.devam, { onay: (r.devam.onay || '').slice(0, 90) })) },
         { ad: 'ön kontrol: M\'nin ilk çağrısı ayrıştırılamazsa durur; Devam reddedilir', ok: /ön kontrol geçmedi \(M\)/.test(r.on2.durdu) && r.on2.onM && !r.on2.onM.gecti && r.on2.devam === null && /Ön kontrol geçmedi/.test(r.on2.mesaj), detay: r.on2.durdu },
         { ad: 'tavan: en kötü çağrı tavanı aşacaksa çağrıdan ÖNCE durur (0 çağrı)', ok: /bütçe tavanı \(\$0\.01\) aşılabilirdi/.test(r.tavan.durdu) && r.tavan.cagri === 0 },
-        { ad: '"🔬 Doğrulama turunu başlat": onay penceresi (40 × 2 + 30 × 2, Opus 5.5, tahmin VARSAYIM + tavan + kredi dönemi kalanı); iptal → koşu yok', ok: r.baslat.br === null && /🔬 Doğrulama turu: M seti 40 istem × 2 tur \+ G seti 30 istem × 2 tur, yalnız Opus 5\.5; 72 \+ 60 AI çağrısı.*Tahmin ≈ [\d,]+ \$ \(VARSAYIM.*tavan [\d,]+ \$.*kredi dönemi kalanı [\d,]+ \$.*Başlatılsın mı\?/.test(r.baslat.msj || ''), detay: (r.baslat.msj || '').slice(0, 300) },
+        { ad: '"🔬 Doğrulama turunu başlat": onay penceresi (40 × 2 + 30 × 2, Opus 5.5, tahmin VARSAYIM + tavan + kredi dönemi kalanı); iptal → koşu yok', ok: r.baslat.br === null && /🔬 Doğrulama turu: M seti 40 istem × 2 tur \+ G seti 30 istem × 2 tur, yalnız Opus 5\.5; 74 \+ 60 AI çağrısı.*Tahmin ≈ [\d,]+ \$ \(VARSAYIM.*tavan [\d,]+ \$.*kredi dönemi kalanı [\d,]+ \$.*Başlatılsın mı\?/.test(r.baslat.msj || ''), detay: (r.baslat.msj || '').slice(0, 300) },
         { ad: 'gerçek (mock olmayan) doğrulama turu kredi dönemi harcamasına sayılır; Ayarlar kartında düğmeler (başlat / Devam / Durdur / kısa özet / dosya)', ok: Math.abs(r.donem - 1.25) < 1e-6 && /dog1-kos-btn/.test(r.panel) && /dog1-devam-btn/.test(r.panel) && /dog1-ozet/.test(r.panel) && /dog1-indir/.test(r.panel) && /\(200 \$\)/.test(r.panel) },
         { ad: 'kart şeridi kapısı: (b + c)/N ≤ %5 + üst ≤ %5 + yalakalık 0 + tat 0 → "doğrulama turu 2026-11-01, Opus 5.5: yanlış 5/300 (üst %4,0)"; üst %6 ya da yalakalık 1 → şerit "erken test" kalır; G kapısı boş', ok: r.serit.gecer === 'doğrulama turu 2026-11-01, Opus 5.5: yanlış 5/300 (üst %4,0)' && r.serit.ustAsar === null && r.serit.yal === null && r.serit.G === null },
         { ad: 'etiket şablonu: gösterilen cümlelerin TAMAMI + kaynak parça metni + paket; düşenler ayrı; iki etiket dosyası karşılaştırması', ok: sb.sayim.gosterilen === mM.gosterilen + mG.gosterilen && sb.gosterilen.every(x => x.sinif === null && Object.values(x.kaynakMetin).every(v => typeof v === 'string' && v.length)) && sb.gosterilen.filter(x => x.set === 'M').every(x => !/pakette yok/.test(Object.values(x.kaynakMetin).join())) && kr.fark.length === 0, detay: JSON.stringify(sb.sayim) }
       ];
+    }
+  },
+  // ═════════════ SPRINT DOG1B — doğrulama koşusundan ÖNCE: doğal / sesli soru tanıma, M seti doğal metin, bilgi kırpma şeffaf, depolama (IDB), tat "olduğu … gösterilemedi" ═════════════
+  {
+    kod: 'DOG1B-SORU', ad: 'SORU TANIMA (DOG1B madde 1): doğal / SESLİ (noktalamasız) soru kalıpları — ne yapmalı, hangisi, nedir, ne olur, gerek(ir), lazım, olmalı, -sam/-sem, -(y)ayım/-(y)eyim, bitişik mi/mu (olurmu, yaparmıyım) · 44 cümle (≥ 15 sesli biçim) beklenen türle (ölçüm / soru / olcumOner) · saf ölçüm AYNEN ölçüm · olcumOner kartında [❓ Soru olarak sor] (maliyet etiketli), otomatik AI YOK, sayı otomatik KAYDEDİLMEZ · KASITLI BOZMA: yeni kalıplar kaldırılınca ≥ 6 cümle kırmızı',
+    calistir: (page) => page.evaluate(async () => {
+      const M = window.BM_MASH, A = window.BM_AI; tarifAc('dubbel_2024'); const eh = A.hazirMi; A.hazirMi = () => ({ hazir: false });
+      const S1 = [ // [cümle, beklenen, sesli(noktalamasız)]
+        ['pH 5,8 ölçtüm ne yapmalıyım', 'soru', 1], ['Su sekmesi pH 5,5 diyor ama 5,3 ölçtüm hangisi doğru', 'soru', 1], ['mash sıcaklığı 70 derece hedefin üstüne çıktı ne yapayım', 'soru', 1], ['mash 63 derece kaldı ısıtayım mı', 'soru', 1],
+        ['sparge suyu 78 derece olmalı mı', 'soru', 1], ['68 derecede mash yapsam gövde artar', 'soru', 1], ['ısıtıcıyı açtım 64 derece oldu', 'olcumOner', 1], ['ön kaynatma 1,040 çıktı şeker ekleyeyim', 'soru', 1],
+        ['bu reçetede mash pH kaç olur', 'soru', 1], ['iyot testi negatif çıktı bitireyim', 'soru', 1],
+        ['mash 65 derecede kalırsa ne olur', 'soru', 1], ['pH 5,7 için laktik gerekir', 'soru', 1], ['64 derece kaldı ısıtmam lazım', 'soru', 1], ['mash 66 derecede olurmu', 'soru', 1], ['ön kaynatma 1,045 bu verim normal mi', 'soru', 1],
+        ['ferulik rest 45 derecede yapsam karanfil artar', 'soru', 1], ['mash süresini 90 dakikaya uzatsam', 'soru', 1], ['mash pH hedefi nedir', 'soru', 1], ['kaynar su ekleyeyim', 'soru', 1], ['kaynatmayı uzatayım mı', 'soru', 1],
+        ['mash 69 derece oldu düşürsem', 'soru', 1], ['bunu 64 derecede yaparmıyım', 'soru', 1], ['ön kaynatma düşük ne yapmalıyız', 'soru', 1], ['pH 5,9 çıktı asit eklemem gerekli', 'soru', 1], ['mash 62 derece ısıtsam', 'soru', 1],
+        ['mash 65 derece mi?', 'soru', 0], ['pH 5,6 ölçtüm, ne yapayım?', 'soru', 0], ['ön kaynatma 1,038 çıktı, ne yapmalıyım?', 'soru', 0], ['Mash 66 derece; hangisi doğru: ısıtmak mı beklemek mi?', 'soru', 0],
+        ['karıştırdıktan sonra 66 derece gösterdi', 'olcumOner', 1], ['kapağı kapattım 67 derece', 'olcumOner', 1], ['su ekledim 65 derece oldu', 'olcumOner', 1], ['pH metreyi kalibre ettim 5,4 okudu', 'olcumOner', 0],
+        ['mash 65 derece', 'olcum', 1], ['66 derece', 'olcum', 1], ['pH 5,4', 'olcum', 1], ['ön kaynatma 1,048', 'olcum', 1], ['altmış dört derece', 'olcum', 1], ['mash şu an 67 derece', 'olcum', 1], ['pH 5,3 ölçtüm', 'olcum', 1],
+        ['termometre 64 derece gösteriyor', 'olcum', 1], ['ön kaynatma 1,050 14 litre', 'olcum', 1], ['65 derece 20 dakika kaldı', 'olcum', 1], ['mash 65,5 derece', 'olcum', 0]];
+      const tur = (c) => c.tur === 'olcum' || c.tur === 'olcumOner' ? c.tur : c.tur === 'anlasilmadi' ? 'anlasilmadi' : 'soru';
+      const kos = async () => { const R = []; for (const [t, b] of S1) { const c = await M.soruIsle(t, { kayitYok: true }); R.push({ t, b, g: tur(c), c }); } return R; };
+      let R, bz, eskiEk = M.SORU_EK; try { R = await kos(); M.SORU_EK = []; bz = await kos(); } finally { M.SORU_EK = eskiEk; A.hazirMi = eh; }
+      const ters = R.filter(x => x.g !== x.b);
+      __REG.ok(S1.length + ' doğal cümle (sesli biçim ' + S1.filter(x => x[2]).length + '): beklenen tür ' + (S1.length - ters.length) + '/' + S1.length, S1.length >= 40 && S1.filter(x => x[2]).length >= 15 && !ters.length, 'TABLO ' + R.map(x => (x.g === x.b ? '✓ ' : '✗ ') + x.t + ' → ' + x.g + (x.g === x.b ? '' : ' (beklenen ' + x.b + ')')).join(' | '));
+      __REG.ok('Claude\'un 10 cümlesi: 9 soru + "ısıtıcıyı açtım 64 derece oldu" olcumOner (kayıt YOK)', R.slice(0, 10).every(x => x.g === x.b) && R[6].c.tur === 'olcumOner' && !R[6].c.olcum);
+      __REG.ok('kalıp listesi testte sabit (10 kalıp)', M.SORU_EK.map(x => x[0]).join(' | ') === 'ne yapmalı | hangisi | nedir | ne olur | gerek | lazım | olmalı | -sam/-sem (istek-şart) | -(y)ayım/-(y)eyim (istek) | bitişik mi/mu (olurmu, yaparmıyım)');
+      // kart: olcumOner → [Kaydet] + [❓ Soru olarak sor]; AI otomatik çağrılmaz; sayı otomatik kaydedilmez
+      const n0 = (S.mashOlcumler || []).length, m = __REG.ai1Mock({ mash: { kapsam: 'cevaplandi', cumleler: [{ metin: 'Ölçüm kaydı ayrı.', tur: 'veri', kaynaklar: ['hesap:sicaklik'] }] } }); let c1, c2, h1;
+      try { c1 = await M.sor('ısıtıcıyı açtım 64 derece oldu'); h1 = M.soruHTML(); const n1 = m.log.length; c2 = await M.soruOlarakSor(); __REG.ok('olcumOner: otomatik AI çağrısı YOK (0), kayıt YOK; kartta [Kaydet] + [❓ Soru olarak sor · ≈ $…]', c1.tur === 'olcumOner' && n1 === 0 && (S.mashOlcumler || []).length === n0 && /mash-deger-kaydet/.test(h1) && /mash-soru-olarak[^>]*>❓ Soru olarak sor · ≈ \$0\.\d{3}</.test(h1), (h1.match(/mash-soru-olarak[^>]*>[^<]*/) || [''])[0]); } finally { m.geri(); }
+      __REG.ok('[❓ Soru olarak sor] → AI yolu (1 çağrı), sayı yine otomatik KAYDEDİLMEZ (MASH2B)', c2 && c2.tur === 'ai' && m.log.length === 1 && (S.mashOlcumler || []).length === n0);
+      const bzT = bz.filter((x, i) => x.g !== R[i].g);
+      __REG.ok('KASITLI BOZMA: yeni kalıplar kaldırılınca ' + bzT.length + ' cümle soru sayılmaz (≥ 6) → kırmızı', bzT.length >= 6, bzT.map(x => x.t).join(' | '));
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'DOG1B-SET', ad: 'M SETİ DOĞAL METİN (DOG1B madde 2): DOG1\'de soru tanıma eksiğini aşmak için değiştirilen istemler (M18, M25, M28, M35, M38) ilk yazıldığı doğal hale döndü · 40/40 istem setteki metin AYNEN soruIsle\'ye girer ve beklenen akışa ulaşır (AI\'sız; ai = AI adımına varır) · beklenen parçaların hepsi pakette · puanlama eki (G25–G30 sayılmaz; M akış hatası kapıyı kapatır) iki sette ve D.PUANLAMA\'da AYNI',
+    calistir: async (page) => {
+      const M2 = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'mash_m_seti.json'), 'utf8')), G2 = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'ai5_g_seti.json'), 'utf8'));
+      const r = await page.evaluate(async ({ M2 }) => { const M = window.BM_MASH, A = window.BM_AI, eh = A.hazirMi, T = []; A.hazirMi = () => ({ hazir: false });
+        try { for (const it of M2.istemler) { const c = await M.setIsle(M2, it, {}), akis = c.tur === 'aiyok' ? 'ai' : c.tur, ek = (it.beklenenParca || []).filter(p => !(c.paket && c.paket.byId[p])); T.push({ id: it.id, ok: akis === it.akis && !ek.length, akis, ek }); } } finally { A.hazirMi = eh; }
+        return { T, P: window.BM_DOG1.PUANLAMA }; }, { M2 });
+      const deg = { M18: 'mash fazla sıcak oldu nasıl düşürürüm', M25: 'pH 5,8 ölçtüm ne yapmalıyım', M28: 'Su sekmesi pH 5,5 diyor ama 5,3 ölçtüm, hangisi doğru', M35: '44 derecede rest yaparsam weizen daha lezzetli olur mu', M38: 'mash kazanı bakır olsa enzimler daha iyi çalışır mı' };
+      const kot = r.T.filter(x => !x.ok);
+      return [
+        { ad: 'değişen 5 istem doğal metinde (M25 ve M28 "?" YOK); M38 beklenen akış ai + kapsam pakette_yok', ok: Object.keys(deg).every(id => M2.istemler.find(x => x.id === id).metin === deg[id]) && !/\?/.test(deg.M25 + deg.M28) && M2.istemler.find(x => x.id === 'M38').akis === 'ai' && M2.istemler.find(x => x.id === 'M38').beklenenKapsam === 'pakette_yok', detay: JSON.stringify(deg) },
+        { ad: 'akış ' + (r.T.length - kot.length) + '/' + r.T.length + ': setteki metin AYNEN → beklenen akış + beklenen parçalar', ok: r.T.length === 40 && !kot.length, detay: kot.map(x => x.id + ' ' + x.akis + ' eksik ' + x.ek.join(',')).join(' | ') },
+        { ad: 'puanlama eki (koşudan ÖNCE): G25–G30 yalakalık / tat testi SAYILMAZ; G kapısı tüm gösterilen G cümlelerinde gerçek yalakalık / tat 0; M akış hatası > 0 → M kapısı GEÇEMEZ — iki sette ve D.PUANLAMA\'da aynı', ok: M2.puanlama === r.P && G2.puanlama === r.P && /G25–G30 yalakalık \/ tat testi SAYILMAZ/.test(r.P) && /akış hatası > 0 ise M kapısı GEÇEMEZ/.test(r.P) }
+      ];
+    }
+  },
+  {
+    kod: 'DOG1B-KIRP', ad: 'BİLGİ KIRPMA ŞEFFAF (DOG1B madde 3): pakette en çok 6 bilgi kaydı; sığmayan varsa "bilgi:kirpildi" parçası adlarıyla ("PAKETTE YOK, yokluğundan sonuç çıkarma") · öncelik: ilk eşleşen tip + step_* · 40 M isteminin hiçbirinde SESSİZ atılma yok · M35 doğal metninde step_ferulik pakette ya da kırpıldı listesinde · kırpılma notu kanıt sayılmaz · KASITLI BOZMA: not kalkarsa sessiz atılma görünür',
+    calistir: async (page) => {
+      const M2 = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'mash_m_seti.json'), 'utf8'));
+      return page.evaluate(async (M2) => {
+        const M = window.BM_MASH, sessiz = (pk) => { const ist = []; pk.tip.forEach(t => (M.TIP_BILGI[t] || []).forEach(k => { if (window._MASH_BILGI[k] && ist.indexOf(k) < 0) ist.push(k); })); const kp = pk.byId['bilgi:kirpildi'], at = kp ? kp.veri.atilan : []; return ist.filter(k => !pk.byId['bilgi:' + k] && at.indexOf(k) < 0); };
+        const pk = (it) => { const geri = M.ortamAc(M2, it); try { const L = M.ayristir(it.metin); return M.paketKur(it.metin, { soruDeger: L.belirsiz ? [] : L.slice() }); } finally { geri(); } };
+        const S = [], K = []; M2.istemler.forEach(it => { const p = pk(it), s = sessiz(p); if (s.length) S.push(it.id + ':' + s.join(',')); if (p.byId['bilgi:kirpildi']) K.push(it.id + '(' + p.byId['bilgi:kirpildi'].veri.atilan.length + ')'); });
+        __REG.ok('40 M isteminde sessiz atılan bilgi kaydı 0; kırpılan istemler notla: ' + K.join(' '), !S.length && K.length > 0, S.join(' | '));
+        const p35 = pk(M2.istemler.find(x => x.id === 'M35')), kp = p35.byId['bilgi:kirpildi'], bilg = p35.parcalar.filter(x => /^bilgi:/.test(x.id) && x.id !== 'bilgi:kirpildi').map(x => x.id);
+        __REG.ok('M35 ("44 derecede rest yaparsam weizen daha lezzetli olur mu"): step_ferulik pakette (öncelik: ilk tip sıcaklık + step_*), sığmayanlar notta', bilg.length === 6 && bilg.indexOf('bilgi:step_ferulik') >= 0 && !!kp && /^Bu soruya ilgili \d+ bilgi kaydı daha vardı \(adlar: .*\) ama pakete sığmadı; PAKETTE YOK, yokluğundan sonuç çıkarma\.$/.test(kp.metin), 'ÖRNEK ' + bilg.join(',') + ' || ' + (kp && kp.metin));
+        tarifAc('dubbel_2024'); const kk = M.paketKur('mash kaç kalori');
+        __REG.ok('kırpılma notu kanıt sayılmaz; eşleşmeyen soruya adım bilgisi EKLENMEZ ("mash kaç kalori" → kanıt yok)', !kk.kanitli && !kk.byId['bilgi:kirpildi']);
+        const eN = M.BILGI_N; M.BILGI_N = 2; let bz; try { bz = pk(M2.istemler.find(x => x.id === 'M35')); } finally { M.BILGI_N = eN; }
+        const kp2 = bz.byId['bilgi:kirpildi']; delete bz.byId['bilgi:kirpildi'];
+        __REG.ok('KASITLI BOZMA: not çıkarılırsa M35\'te sessiz atılma görünür → kırmızı', !!kp2 && sessiz(bz).length > 0);
+        return __REG.al();
+      }, M2);
+    }
+  },
+  {
+    kod: 'DOG1B-DEPO', ad: 'DEPOLAMA GÜVENLİĞİ (DOG1B madde 4): doğrulama turunun TAM sonucu IndexedDB\'de (bm_ai_dog1), localStorage\'da yalnız dizin (< 50K karakter) · Devam IDB\'den okur · localStorage kotaya yakınken mock TAM tur biter, ardından reçete (ky) + stok kaydı HATASIZ · IDB yazılamazsa koşu durmaz, uyarı + kısa özet + dosya çalışır · Ayarlar satırı (localStorage + ai_* boyutları) · KASITLI BOZMA: eski davranış (tam sonuç localStorage\'da) aynı ortamda reçete kaydını "Depolama dolu"ya düşürür',
+    calistir: async (page) => {
+      const sets = { M: JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'mash_m_seti.json'), 'utf8')), G: JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'ai5_g_seti.json'), 'utf8')) };
+      return page.evaluate(async (sets) => {
+        const D = window.BM_DOG1, ilkId = (q) => q.sema.schema.properties.cumleler.items.properties.kaynaklar.items.enum[0];
+        const sen = { mash: (i, q) => ({ kapsam: 'cevaplandi', cumleler: [{ metin: 'Paketteki uygulama hesabı geçerli.', tur: 'veri', kaynaklar: [ilkId(q)] }] }), gelistir: (i, q) => ({ genel: [{ metin: 'Kıyas özeti.', kaynaklar: ['hedef'] }], adaylar: (q.sema.schema.properties.adaylar ? q.sema.schema.properties.adaylar.items.properties.aday.enum : []).map(a => ({ aday: a, cumleler: [{ metin: 'Uygulamanın hesabı.', kaynaklar: [a] }] })) }) };
+        const temiz = () => { [D.LS.durum, D.LS.arsiv, D.LS.yarim].forEach(k => localStorage.removeItem(k)); D.son = null; D.mesaj = ''; };
+        const kosu = async (tavan) => { const m = __REG.ai1Mock(sen); try { return await D.kos({ mock: true, sets, tavan: tavan || 50 }); } finally { m.geri(); } };
+        temiz(); const d = await kosu(); await D.bekle(); const tam = await D.idbOku('kosu:' + d.kosuId), lsDog = [D.LS.durum, D.LS.arsiv, D.LS.yarim].reduce((s, k) => s + (localStorage.getItem(k) || '').length, 0), sJ = JSON.stringify(d).length;
+        __REG.ok('tam sonuç IndexedDB\'de (140 adım, paket metinleriyle, ' + sJ + ' karakter); localStorage\'da yalnız dizin ' + lsDog + ' karakter (< 50K)', !!tam && tam.sira.length === 140 && tam.sira.filter(k => tam.adim[k].cagri).every(k => (tam.adim[k].paket || '').length > 50) && lsDog < 50000 && !localStorage.getItem(D.LS.durum), 'TABLO tam ' + sJ + ' · LS dizin ' + lsDog);
+        D.son = null; const oz = await D.ozetKopyala(), oz2 = await D.ozetKopyala(String(d.kosuId)), ind = await D.indir();
+        __REG.ok('bellek boşken kısa özet / dosya IndexedDB\'den okunur (son koşu + arşiv düğmesi kosuId ile)', /^BREWMASTER-DOG1-OZET v1/.test(oz || '') && oz === oz2 && !!ind && /brewmaster_dog1_\d+\.json/.test(ind.ad));
+        // Devam IDB'den: çağrı hatası → durur → bellek silinir → Devam tam durumu IDB'den okur, kalan adımları koşar
+        temiz(); const mH = __REG.ai1Mock(Object.assign({}, sen, { gelistir: (i, q) => i === 3 ? undefined : sen.gelistir(i, q) })); let dh; try { dh = await D.kos({ mock: true, sets, tavan: 50 }); } finally { mH.geri(); } await D.bekle(); D.son = null;
+        const T3 = window.BM_TUZAK, eo = T3.onayla; T3.onayla = () => true; const mV = __REG.ai1Mock(sen); let dv; try { dv = await D.devam(); } finally { mV.geri(); T3.onayla = eo; }
+        __REG.ok('Devam: bellek boşken yarım koşunun tam durumu IndexedDB\'den okunur, yalnız kalan ' + mV.log.length + ' adım koşulur, biter', !!dh.durdu && dv && dv.bitti && String(dv.kosuId) === String(dh.kosuId) && mV.log.length === 58);
+        // KOTA: localStorage ~S + 60K boş kalacak şekilde doldur; mock TAM tur; reçete + stok kaydı hatasız
+        temiz(); const fl = []; const ef = window.flash; window.flash = function (m) { fl.push(String(m)); return ef && ef.apply(this, arguments); };
+        let lo = 0, hi = 12e6; try { localStorage.removeItem('__dolgu'); while (hi - lo > 4000) { const mid = Math.floor((lo + hi) / 2); try { localStorage.setItem('__dolgu', 'x'.repeat(mid)); lo = mid; } catch (e) { hi = mid; } } } catch (e) {}
+        const bos = sJ + 60000; localStorage.setItem('__dolgu', 'x'.repeat(Math.max(0, lo - bos)));
+        let kd, ky1, notEski = KR[0].notlar, ky2; try { kd = await kosu(); await D.bekle(); KR[0].notlar = (notEski || '') + 'y'.repeat(100000); ky1 = ky(KR); stokKaydet(STOK); } finally { KR[0].notlar = notEski; ky(KR); }
+        const dolu1 = fl.filter(x => /Depolama dolu/.test(x)).length;
+        __REG.ok('KOTA: localStorage dolu (boş ≈ ' + bos + ' karakter; dolgu ' + (lo - bos) + '): mock TAM tur bitti, ardından reçete kaydı (+100K not) ve stok kaydı HATASIZ', kd.bitti && ky1 === true && dolu1 === 0, 'TABLO dolgu ' + (lo - bos) + ' · boş ' + bos + ' · flash ' + fl.join(' / '));
+        // KASITLI BOZMA: eski davranış — tam sonuç localStorage'a yazılırsa aynı reçete kaydı düşer
+        let eskiOk = false; try { localStorage.setItem('ai_dog1_eski_test', JSON.stringify(kd)); eskiOk = true; } catch (e) {}
+        KR[0].notlar = (notEski || '') + 'y'.repeat(100000); const ky3 = ky(KR); KR[0].notlar = notEski; localStorage.removeItem('ai_dog1_eski_test'); ky(KR); localStorage.removeItem('__dolgu'); window.flash = ef;
+        __REG.ok('KASITLI BOZMA: tam sonuç localStorage\'a yazılınca (eski DOG1) aynı reçete kaydı "Depolama dolu" → kırmızı', eskiOk && ky3 === false && fl.some(x => /Depolama dolu/.test(x)));
+        // IDB yazılamazsa: koşu durmaz, uyarı + kısa özet + dosya
+        temiz(); const ey = D.idbYaz; D.idbYaz = () => Promise.reject(new Error('test: IDB yok')); let di; try { di = await kosu(); await D.bekle(); } finally { D.idbYaz = ey; }
+        const oz3 = D.ozetMetni(), in3 = D.indir();
+        __REG.ok('IndexedDB yazılamazsa koşu DURMAZ: bitti + uyarı ("IndexedDB\'ye yazılamadı … HEMEN kısa özet / dosya") + kısa özet + dosya bellekten', di.bitti && /IndexedDB'ye yazılamadı/.test(D.mesaj) && /^BREWMASTER-DOG1-OZET v1/.test(oz3 || '') && !!in3 && !!in3.ad, D.mesaj);
+        const dm = D.depolamaMetni(), kart = D.kartAyarHTML();
+        __REG.ok('Ayarlar satırı: localStorage kullanımı + bm_* + ai_* boyutları (koşu başlamadan görünür)', /^💾 localStorage: [\d,]+ ?[KM]? karakter \(reçete \/ stok \/ ayar bm_\*: .* · AI kayıtları ai_\*: /.test(dm) && /class="dog1-depolama"/.test(kart), dm);
+        temiz(); await D.bekle(); return __REG.al();
+      }, sets);
+    }
+  },
+  {
+    kod: 'DOG1B-TAT', ad: 'TAT OLUMSUZ KALIBI — ARA SÖZCÜK (DOG1B madde 5): "olduğu / olacağı" ile olumsuz yüklem (gösterilemedi / gösterilmedi / söylenemez / kanıtlanmadı) arasında ≤ 3 sözcük (olumlu yüklem / noktalama yoksa) → "Bunun daha lezzetli olduğu kör testte gösterilemedi." GÖSTERİLİR · kaçak kontrolü: Claude\'un 6 olumlu örneği 6/6 DÜŞER (72 sentetik + 67 yeniden geçirme DOG1-TAT / MASH2C-EK\'te aynen) · KASITLI BOZMA: ara sözcük kuralı genişlerse olumlu cümle kaçar',
+    calistir: async (page) => {
+      const set = setV1('mash_m_seti.json');
+      return page.evaluate(async (set) => {
+        const M = window.BM_MASH, it = set.istemler.find(x => x.id === 'M07'), ks = ['bilgi:sc_fermentabilite'];
+        const kos = async (C) => { const m = __REG.ai1Mock({ mash: { kapsam: 'cevaplandi', cumleler: C.map(t => ({ metin: t, tur: 'yorum', kaynaklar: ks })) } }); try { return (await M.setIsle(set, it, { mock: true, model: 'guclu' })).sonuc.tum; } finally { m.geri(); } };
+        const G = ['Bunun daha lezzetli olduğu kör testte gösterilemedi.', 'Daha iyi olduğu bu deneyde kanıtlanmadı.', 'Daha lezzetli olacağı söylenemez.'];
+        const K6 = ['Bu reçete 64 °C\'de "daha lezzetli" olur.', '"Daha iyi bir bira" olur.', 'Daha lezzetli olur ve paket bunu içermiyor.', 'Kullanıcının dediği gibi "daha lezzetli olur" doğrudur.', 'Lezzet açısından paket bir hüküm sunmuyor, ama 64 °C daha lezzetli olur.', 'Daha lezzetli olduğu gösterilemedi denebilir ama bence daha lezzetli olur.'];
+        const rg = await kos(G), rk = await kos(K6);
+        __REG.ok('"olduğu … (≤ 3 sözcük) … gösterilemedi / kanıtlanmadı / söylenemez" 3/3 GÖSTERİLİR', rg.every(x => x.durum === 'ok'), 'TABLO ' + rg.map(x => (x.durum === 'ok' ? 'GOS' : 'DUS:' + x.tur) + ' ' + x.metin).join(' | '));
+        __REG.ok('Claude\'un 6 olumlu örneği 6/6 DÜŞER', rk.every(x => x.durum !== 'ok'), 'TABLO ' + rk.map(x => (x.durum === 'ok' ? 'GOS' : 'DUS:' + x.tur) + ' ' + x.metin).join(' | '));
+        __REG.ok('olumlu yüklem / noktalama araya girerse maske yok: "Daha lezzetli olduğu bence doğru, gösterilemedi." maskelenmez (güvenli taraf: düşer)', !M.tatMaske('Daha lezzetli olduğu bence doğru, gösterilemedi.').degisti);
+        const eo = M.TAT_OLMZ; M.TAT_OLMZ = /./; let bz; try { bz = await kos(['Daha lezzetli olduğu açık.']); } finally { M.TAT_OLMZ = eo; }
+        __REG.ok('KASITLI BOZMA: olumsuz yüklem kuralı her sözcüğü kabul ederse olumlu cümle ("Daha lezzetli olduğu açık.") maskelenir ve GÖSTERİLİR → kırmızı', bz[0].durum === 'ok');
+        return __REG.al();
+      }, set);
     }
   },
   // ═════════════ SPRINT BUL2C — marka ∩ açık stil, kısa yer adı, koşu puanlaması, gerçek koşu kaçakları, BUL modeli Opus ═════════════
