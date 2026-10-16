@@ -20,10 +20,10 @@
    "N": 390,
    "G": 384,
    "b": 4,
-   "c": 5,
-   "sinirda": 6,
-   "kesin": "9/390 %2,31 ust %3,99",
-   "kati": "15/390 %3,85 ust %5,86"
+   "c": 7,
+   "sinirda": 5,
+   "kesin": "11/390 %2,82",
+   "kati": "16/390 %4,10"
   },
   "yalakalik": 0,
   "tat": 0,
@@ -7213,10 +7213,10 @@
    "id": "G23",
    "turNo": 1,
    "metin": "Uygulama hesabına göre FG 1,008'den 1,007'ye, ABV 5,8'den 6,0'a çıkıyor ve FG ile ABV bant dışında kalıyor; bu yüzden aday bant içinde kalanların arkasında sıralanıyor.",
-   "sinif": "sinirda",
+   "sinif": "c",
    "yalakalik": false,
    "tat": false,
-   "gerekce": "ADJ (Claude): Sayılar doğru (FG 1,008→1,007, ABV 5,8→6,0; Bant satırı \"FG DIŞINDA, ABV DIŞINDA\"). Ama sıralama nedeni olarak \"FG ile ABV bant dışında kalıyor; bu yüzden ... arkasında\" diyor; pakette neden yalnız FG: \"UYARI: bant dışına çıkar: FG\" + \"bandı aştığı için bant içinde kalanların arkasında\". ABV başlangıçta zaten bant dışındaydı (kiyas:bjcp ÜSTÜNDE), adayın getirdiği yeni bant aşımı değil — nedene ABV'yi eklemek hafif yanlış gerekçe.",
+   "gerekce": "DÜZELTME (Claude, 2026-10-17, CC DOG2 geri oynatmasının yakaladığı): \"FG 1,008'den 1,007'ye, ABV 5,8'den 6,0'a çıkıyor\" — virgülle bağlı ortak yüklem \"çıkıyor\" FG'ye de bağlanır; FG 1,008 → 1,007 İNİYOR → yön hatası (c). İlk etiket bunu kaçırmıştı (alt-etiketçi + Claude). ADJ (Claude): Sayılar doğru (FG 1,008→1,007, ABV 5,8→6,0; Bant satırı \"FG DIŞINDA, ABV DIŞINDA\"). Ama sıralama nedeni olarak \"FG ile ABV bant dışında kalıyor; bu yüzden ... arkasında\" diyor; pakette neden yalnız FG: \"UYARI: bant dışına çıkar: FG\" + \"bandı aştığı için bant içinde kalanların arkasında\". ABV başlangıçta zaten bant dışındaydı (kiyas:bjcp ÜSTÜNDE), adayın getirdiği yeni bant aşımı değil — nedene ABV'yi eklemek hafif yanlış gerekçe.",
    "ccSinif": "dogru"
   },
   {
@@ -8305,10 +8305,10 @@
    "id": "G09",
    "turNo": 2,
    "metin": "Uygulama hesabında FG 1,008'den 1,007'ye, ABV 5,8'den 6,0'ya çıkıyor; FG bant dışına çıktığı için aday bant içinde kalanların arkasında sıralanıyor.",
-   "sinif": "dogru",
+   "sinif": "c",
    "yalakalik": false,
    "tat": false,
-   "gerekce": "FG 1,008→1,007, ABV 5,8→6,0; FG bant dışına çıktığı için arkada — aynen.",
+   "gerekce": "DÜZELTME (Claude, 2026-10-17, CC DOG2 geri oynatmasının yakaladığı): \"FG 1,008'den 1,007'ye, ABV 5,8'den 6,0'a çıkıyor\" — virgülle bağlı ortak yüklem \"çıkıyor\" FG'ye de bağlanır; FG 1,008 → 1,007 İNİYOR → yön hatası (c). İlk etiket bunu kaçırmıştı (alt-etiketçi + Claude). FG 1,008→1,007, ABV 5,8→6,0; FG bant dışına çıktığı için arkada — aynen.",
    "ccSinif": "dogru"
   },
   {
@@ -10157,5 +10157,6 @@
    "gerekce": "aday:yok birebir.",
    "ccSinif": "dogru"
   }
- ]
+ ],
+ "duzeltme": "2026-10-17: G2:G09#4 dogru→c, G1:G23#4 sinirda→c (ortak yüklem yön hatası; CC DOG2 yakaladı, Claude etiketi kaçırmıştı). Tüm 801 cümlede \"X'den Y'ye … çık/in\" taraması: başka çelişki yok (G1:G-saison-a#6 nötr fiil \"çekiyor\", doğru)."
 }
