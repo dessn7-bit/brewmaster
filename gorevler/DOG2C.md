@@ -39,3 +39,11 @@ Kok nedenler:
 - Kaan'dan bir sey istenmez. Bitince Claude canlida dogrular; sonra Kaan'a "Yalniz G" icin tek cumle.
 
 RAPOR: madde 1-2 tablo (sabit set, gosterilmeli set, uretilmis set, 384 yeniden gecirme — yeni dusenler tek tek), kasitli bozmalar, imza, SUPHE (zorunlu).
+
+KARAR (Claude, 2026-10-18, CC'nin "25 > 15, durdum" raporu uzerine) — SECENEK 1 + 3 BIRLIKTE:
+- Ilke AYNEN kalir (sira + neden ayni onermede = DUSER). 25 cumlenin hepsi icerikce dogru ama hepsi kartin zaten gosterdigi sira nedenini tekrarliyor; gizlenmesi bilgi kaybettirmez. Pakette degeri oldugu icin AI4C'de (a) sayilir, kapiya girmez. Esik 15 -> bu kosu icin DUSER sayisi RAPOR satiri olur (dur kurali kalkar).
+- Neden 25 abartili: DOG1 G cumleleri "siranin nedenini yazma" talimati YOKKEN uretildi (talimat DOG2B'de geldi). Yeni kosuda bu tur cumle az olmali; olcmek icin kisa ozette ve sonuc dosyasinda "sira" dusen sayisi + metinleri ayri satir (zaten varsa aynen).
+- Secenek 3 (talimat): SISTEM_GELISTIR kural 7 + GOREV'e ornekli yasak: "'sıra 1'de', 'ikinci sırada', 'arkasında', 'önde', 'sıra puanı X ile' gibi ifadeleri bir NEDENLE birlikte yazma (… için / … olduğundan / bu yüzden / çünkü). Adayı yalnız 'aday 1 / aday 2' diye an; sırayı ve nedenini kart gösteriyor." Talimat testle sabit (metin kilidi).
+- CC sapmalari KABUL: sayidan hemen sonraki "puan" (FG puani) sira sozcugu degil; ciplak gelecek zaman "-acak" neden degil, yalniz iyelikli -acagi/-acagindan; NEDEN sozlugune "sebebi / nedeni".
+- DOG2B'nin ';' beklentisi (G1:G15#5, G2:G-saison-a#8, G2:G15#5, G2:G17#8 gosterilir) madde 1 ilkesiyle celisiyordu — ilke kazanir, bu 4'u DUSER; test beklentisi buna gore. "IBU için" (amac) da neden sayiliyor: bilinen guvenli taraf yanlis alarmi, SUPHE satirinda kalsin.
+- Sonra: npm test TAM, kasitli bozmalar kirmizi, imza 2c9ebd9f-32461 AYNI, commit + push + canli curl + SW bump (v131-502). Claude canlida held-out setle dogrular.
