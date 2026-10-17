@@ -11886,8 +11886,8 @@ const CASELER = [
     calistir: async (page) => {
       const cc = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'fixtures', 'dog1_kosu_2026-10-15_etiket_cc.json'), 'utf8')), cl = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'fixtures', 'dog1_kosu_2026-10-15_etiket_claude.json'), 'utf8')), set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'ai5_g_seti.json'), 'utf8'));
       const gos = cc.gosterilen.filter(x => x.set === 'G'), lab = {}; cl.gosterilen.forEach(x => { lab[x.key + '#' + x.i] = x.sinif; });
-      const html = fs.readFileSync(path.join(KOK, HTML_AD), 'utf8'), kural7 = html.indexOf("'7. Adayın sırasının ve sıra puanının nedenini YALNIZ o adayın \"SIRA NEDENİ (uygulama)\" satırından aktar; stok durumu, malzeme değişimi, varsayım ya da satırda olmayan başka bir neden EKLEME.") > html.indexOf('var SISTEM_GELISTIR = [');
-      return page.evaluate(async (gos, lab, set, kural7) => { __REG.ok('sistem talimatı SISTEM_GELISTIR kural 7: sıra nedeni yalnız "SIRA NEDENİ (uygulama)" satırından; stok / malzeme / varsayım EKLEME', kural7);
+      const html = fs.readFileSync(path.join(KOK, HTML_AD), 'utf8'), kural7 = html.indexOf("'7. Adayların sırasını ve nedenini KART gösteriyor; sıranın nedenini yazma. Sıra yalnız \"aday 1 / aday 2\" diye anılabilir. Stok durumu, malzeme değişimi ya da varsayımı sıra / puan nedeni olarak YAZMA.") > html.indexOf('var SISTEM_GELISTIR = [');
+      return page.evaluate(async (gos, lab, set, kural7) => { __REG.ok('sistem talimatı SISTEM_GELISTIR kural 7 (DOG2B): sırayı ve nedenini KART gösterir, sıranın nedeni yazılmaz, sıra yalnız "aday 1 / aday 2"; stok / malzeme / varsayım sıra nedeni YAZILMAZ', kural7);
         const G = window.BM_AI5, A = window.BM_AI, cache = {}, stOf = id => cache[id] || (cache[id] = G.setHazirla(set, set.istemler.find(x => x.id === id), 'dog2'));
         const den = x => G.ekDenetle({ durum: 'ok', metin: x.metin, kaynaklar: x.kaynaklar }, +String(x.etiket).replace(/^a/, '') || 0, stOf(x.id));
         // paket satırı
@@ -11895,18 +11895,19 @@ const CASELER = [
         __REG.ok('paket: her adayda tek "SIRA NEDENİ (uygulama)" satırı = G.siraNeden; grup adayın gerçek grubu; puan açılımı = skor; stok / malzeme / varsayım sıralamayı ETKİLEMEZ notu', L.length === 2 && L.every(a => sat(a) === a.siraNeden && st21.kanit.byId[a.id].metin.split('SIRA NEDENİ').length === 2 && sat(a).indexOf('grup ' + a.grup + ' (') >= 0 && sat(a).indexOf('= ' + a.skor.toFixed(2).replace('.', ',') + ';') >= 0 && /stok, malzeme değişimi ve varsayım satırı sıralamayı ETKİLEMEZ\.$/.test(sat(a))) && /Yan etki: SRM bandın daha da altına iner/.test(sat(L[1])) && /nötr 0,5 \(kanıt 0\/1, N < 3: kanıt oranı sırayı ETKİLEMEZ\)/.test(sat(L[0])), L.map(sat).join(' || '));
         const st11 = stOf('G11'); __REG.ok('N ≥ 5 adayda pakette "zayıf kanıt DEĞİL" (G11 IBU 1/6)', /\(N 6 ≥ 5: zayıf kanıt DEĞİL\)/.test(st11.adaylar.liste[0].siraNeden) && !/zayıf kanıt: n < 5/.test(st11.kanit.byId['aday:1'].metin), st11.adaylar.liste[0].siraNeden);
         const sis = A.SISTEM && A.SISTEM.gelistir; const q = G.istek(st21);
-        __REG.ok('talimat: GÖREV "nedenini yalnız SIRA NEDENİ satırından aktar; stok / malzeme / varsayım EKLEME; zayıf kanıt yalnız parça yazıyorsa"', /SIRA NEDENİ \(uygulama\)" satırından aktar; stok durumu, malzeme değişimi, varsayım ya da başka bir neden EKLEME/.test(q.soru) && /N ≥ 5 olan kanıta "zayıf" deme/.test(q.soru));
-        // 11 cümle + 373 yeniden geçirme
-        const on1 = [], sinir = {}, yeni = []; let c = 0;
-        gos.forEach(x => { const k = x.key + '#' + x.i, s = lab[k], y = den(x); if (s === 'c') { c++; if (y.durum === 'ok' || y.tur !== 'sira') on1.push(k); } else if (s === 'sinirda') sinir[k] = y.durum === 'ok' ? 'GOS' : 'DUS'; else if (y.durum !== 'ok') yeni.push(k + ' ' + y.neden); });
-        __REG.ok('Claude\'un G c\'leri (' + c + ') HEPSİ "sira" ile DÜŞER (G1:G-saison-a#8, G2:G-saison-b#8, G1:G21#8 stok · G1:G21#5 malzeme · G1:G29#5 varsayım)', c === 5 && !on1.length, on1.join(' | '));
-        __REG.ok('sınırda 6 cümlenin kararı sabit: G1:G23#4 DÜŞER (ABV neden sayıldı); G1:G-saison-b#8, G1:G14#8, G2:G14#8, G2:G11#5, G1:G-dubbel-a#1 GÖSTERİLİR', sinir['G1:G23#4'] === 'DUS' && ['G1:G-saison-b#8', 'G1:G14#8', 'G2:G14#8', 'G2:G11#5', 'G1:G-dubbel-a#1'].every(k => sinir[k] === 'GOS') && Object.keys(sinir).length === 6, JSON.stringify(sinir));
-        __REG.ok('kalan ' + (gos.length - 11) + ' gösterilen (doğru) G cümlesinde yeni düşen 0 (yanlış alarm 0)', gos.length === 384 && !yeni.length, yeni.slice(0, 3).join(' | '));
+        __REG.ok('talimat: GÖREV (DOG2B) "sırayı ve nedenini KART gösteriyor; sıranın nedenini yazma; sıra yalnız aday 1 / aday 2"; zayıf kanıt yalnız parça yazıyorsa', /Adayların sırasını ve nedenini KART gösteriyor; sıranın nedenini yazma\. Sıra yalnız "aday 1 \/ aday 2" diye anılabilir; stok durumu, malzeme değişimi ya da varsayımı sıra \/ puan nedeni olarak YAZMA/.test(q.soru) && /N ≥ 5 olan kanıta "zayıf" deme/.test(q.soru));
+        // 12 cümle (c 7 + sınırda 5; etiket düzeltmesi 2026-10-17: G2:G09#4, G1:G23#4 → c) + 372 doğru cümle yeniden geçirme
+        const A4 = window.BM_AI4, yonD = x => A4.yonDenetle(x.metin, x.kaynaklar || [], stOf(x.id).kanit);
+        const on1 = [], sinir = {}, yeni = [], cYol = {}; let c = 0;
+        gos.forEach(x => { const k = x.key + '#' + x.i, s = lab[k], y = den(x); if (s === 'c') { c++; cYol[k] = y.durum !== 'ok' && y.tur === 'sira' ? 'sira' : yonD(x) ? 'yon' : 'GOS'; if (cYol[k] === 'GOS') on1.push(k); } else if (s === 'sinirda') sinir[k] = y.durum === 'ok' ? 'GOS' : 'DUS'; else if (y.durum !== 'ok') yeni.push(k + ' ' + y.neden); });
+        __REG.ok('Claude\'un G c\'leri (' + c + ') HEPSİ DÜŞER: 6 "sira" (G1:G-saison-a#8, G2:G-saison-b#8, G1:G21#8 stok · G1:G21#5 malzeme · G1:G29#5 varsayım · G1:G23#4 ABV) + G2:G09#4 donmuş yön denetimi (ortak yüklem)', c === 7 && !on1.length && cYol['G2:G09#4'] === 'yon' && Object.keys(cYol).filter(k => cYol[k] === 'sira').length === 6, JSON.stringify(cYol));
+        __REG.ok('sınırda 5 cümlenin kararı sabit: G1:G-saison-b#8, G1:G14#8, G2:G14#8, G2:G11#5, G1:G-dubbel-a#1 GÖSTERİLİR (yasak neden yok)', ['G1:G-saison-b#8', 'G1:G14#8', 'G2:G14#8', 'G2:G11#5', 'G1:G-dubbel-a#1'].every(k => sinir[k] === 'GOS') && Object.keys(sinir).length === 5, JSON.stringify(sinir));
+        __REG.ok('kalan ' + (gos.length - 12) + ' gösterilen (doğru) G cümlesinde yeni düşen 0 (yanlış alarm 0)', gos.length === 384 && !yeni.length, yeni.join(' | '));
         const yanAday = L[1], k1 = G.ekDenetle({ durum: 'ok', metin: 'Bu aday stokta olduğu için 1. sırada.', kaynaklar: ['aday:1'] }, 1, st21), k2 = G.ekDenetle({ durum: 'ok', metin: 'Yan etkisi olduğu için temiz ölçülebilir adayın arkasında.', kaynaklar: ['aday:2'] }, 2, st21);
         const k3 = G.ekDenetle({ durum: 'ok', metin: 'Yan etkisi olduğu için arkasında.', kaynaklar: ['aday:1'] }, 1, st21);
         __REG.ok('KASITLI: "stokta olduğu için 1. sırada" DÜŞER (sira) · yan_etki adayında "yan etkisi olduğu için arkasında" GÖSTERİLİR · aynı cümle olculebilir adayda DÜŞER (yanlış grup)', yanAday.grup === 'yan_etki' && k1.durum === 'dusuruldu' && k1.tur === 'sira' && k2.durum === 'ok' && k3.durum === 'dusuruldu' && /grubu olculebilir/.test(k3.neden), [k1.neden, k2.durum, k3.neden].join(' | '));
         const es = G.siraNedenDenetle; G.siraNedenDenetle = () => null; let acik = 0; try { gos.forEach(x => { if (lab[x.key + '#' + x.i] === 'c' && den(x).durum === 'ok') acik++; }); } finally { G.siraNedenDenetle = es; }
-        __REG.ok('KASITLI BOZMA: sıra nedeni denetimi kapanınca 5 c\'nin 5\'i GÖSTERİLİR → kırmızı', acik === 5);
+        __REG.ok('KASITLI BOZMA: sıra nedeni denetimi kapanınca "sira" ile düşen 6 c\'nin 6\'sı GÖSTERİLİR (G2:G09#4 ek katmanda zaten görünür) → kırmızı', acik === 7);
         return __REG.al();
       }, gos, lab, set, kural7);
     }
@@ -11918,7 +11919,7 @@ const CASELER = [
       return page.evaluate(async (set) => {
         const MM = window.BM_MASH, pk = id => { const it = set.istemler.find(x => x.id === id), geri = MM.ortamAc(set, it); try { return MM.paketKur(it.metin); } finally { geri(); } };
         const p12 = pk('M12'), p28 = pk('M28'), y = p => p.byId['hesap:phYon'] ? p.byId['hesap:phYon'].metin : '';
-        const dusuk = t => /Ölçüm tahminden DÜŞÜK\. Damıtık\/RO varsayımı bu farkı AÇIKLAMAZ \(gerçek su alkaliyse tahmin YÜKSELİR/.test(t) && /tahmin payı \(±0,1–0,2\), ölçüm sıcaklığı referansı ya da suyun kalsiyum \/ magnezyumu/.test(t) && /RA = Alk\(CaCO₃\) − Ca\/1,4 − Mg\/1,7/.test(t) && /bu partinin suyu bilinmiyor/.test(t);
+        const dusuk = t => /Ölçüm tahminden DÜŞÜK\. Damıtık\/RO varsayımı bu farkı AÇIKLAMAZ \(gerçek su alkaliyse tahmin YÜKSELİR/.test(t) && /tahmin payı(?:nı)? \(±0,1–0,2\)(?:, | AŞIYOR; )ölçüm sıcaklığı referansı ya da suyun kalsiyum \/ magnezyumu/.test(t) && /RA = Alk\(CaCO₃\) − Ca\/1,4 − Mg\/1,7/.test(t) && /bu partinin suyu bilinmiyor/.test(t);
         __REG.ok('M12 (ölçüm 5,00 < tahmin 5,50) ve M28 (5,30 < 5,50) paketlerinde hesap:phYon: DÜŞÜK + RO AÇIKLAMAZ + Ca/Mg (motor RA formülü)', dusuk(y(p12)) && dusuk(y(p28)) && /farkı -0,50/.test(y(p12)) && /farkı -0,20/.test(y(p28)), y(p12) + ' || ' + y(p28));
         const yk = MM.phYon({ ph: 5.5, suBos: true }, { oda: 5.8 }), es = MM.phYon({ ph: 5.5, suBos: true }, { oda: 5.5 }), sp = MM.phYon({ ph: 5.58, suBos: false }, { oda: 5.8 });
         __REG.ok('ölçüm > tahmin (su boş): "YÖN OLARAK TUTARLI"; eşit: "AYNI"; su profili girilmiş: varsayım iddiası yok', yk.yon === 'yuksek' && /Ölçüm tahminden YÜKSEK\. Damıtık\/RO varsayımı YÖN OLARAK TUTARLI/.test(yk.metin) && es.yon === 'esit' && sp.yon === 'yuksek' && !/Damıtık/.test(sp.metin) && /Tahmin girilen su profiliyle hesaplandı/.test(sp.metin), [yk.metin, es.metin, sp.metin].join(' || '));
@@ -12001,19 +12002,19 @@ const CASELER = [
     }
   },
   {
-    kod: 'DOG2-SERIT', ad: 'ŞERİTLER + KAPI (DOG2 madde 6): M kapısı (katı okuma 7/411, üst %3,18, yalakalık 0, tat 0) GEÇER → mash cevap kartı + Ayarlar "doğrulama turu 2026-10-15, Opus 5.5: yanlış 7/411 (üst %3,2; katı okuma), yalakalık 0, tat 0", "erken test" kalkar · sayılar Claude etiket dosyasıyla AYNI, üst sınır Clopper–Pearson\'dan · G: "erken test" KALIR + "doğrulama turu 2026-10-15: katı okuma 15/390 (üst %5,9) — sıra nedeni düzeltmesi sonrası yeniden ölçülecek" · KASITLI BOZMA: sınırda sayılmazsa (yumuşak okuma) M sayısı 2/411 olur → şerit metni farklı',
+    kod: 'DOG2-SERIT', ad: 'ŞERİTLER + KAPI (DOG2 madde 6): M kapısı (katı okuma 7/411, üst %3,18, yalakalık 0, tat 0) GEÇER → mash cevap kartı + Ayarlar "doğrulama turu 2026-10-15, Opus 5.5: yanlış 7/411 (üst %3,2; katı okuma), yalakalık 0, tat 0", "erken test" kalkar · sayılar Claude etiket dosyasıyla AYNI, üst sınır Clopper–Pearson\'dan · G: "erken test" KALIR + "doğrulama turu 2026-10-15: katı okuma 16/390 (üst %6,2) — sıra nedeni düzeltmesi sonrası yeniden ölçülecek" · KASITLI BOZMA: sınırda sayılmazsa (yumuşak okuma) M sayısı 2/411 olur → şerit metni farklı',
     calistir: async (page) => {
       const cl = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'fixtures', 'dog1_kosu_2026-10-15_etiket_claude.json'), 'utf8')).sayim;
       return page.evaluate(async (cl) => {
         const D = window.BM_DOG1, cp = (x, n) => { const cdf = p => { let t = 0, c = 1; for (let i = 0; i <= x; i++) { t += c * Math.pow(p, i) * Math.pow(1 - p, n - i); c = c * (n - i) / (i + 1); } return t; }; let lo = x / n, hi = 1; for (let j = 0; j < 80; j++) { const m = (lo + hi) / 2; if (cdf(m) > 0.05) lo = m; else hi = m; } return (lo + hi) / 2; }, k = D.KAPI.M, o = D.G_ONCEKI, kat = t => +String(t).split('/')[0];
         __REG.ok('M kapısı sayıları = Claude etiket dosyası (N ' + cl.M.N + ' · b ' + cl.M.b + ' · c ' + cl.M.c + ' · sınırda ' + cl.M.sinirda + ' · katı ' + cl.M.kati + '); üst = Clopper–Pearson(7, 411)', k.N === cl.M.N && k.b === cl.M.b && k.c === cl.M.c && k.sinirda === cl.M.sinirda && D.kapiYanlis(k) === kat(cl.M.kati) && Math.abs(k.ust - cp(D.kapiYanlis(k), k.N)) < 5e-5 && /ust %3,18/.test(cl.M.kati) && D.kapiGecer(k), k.ust + ' / ' + cp(7, 411));
-        __REG.ok('G önceki sayılar = etiket dosyası (b ' + cl.G.b + ' · c ' + cl.G.c + ' · sınırda ' + cl.G.sinirda + ' · katı ' + cl.G.kati + ' · kesin ' + cl.G.kesin + ')', o.N === cl.G.N && o.b === cl.G.b && o.c === cl.G.c && o.sinirda === cl.G.sinirda && o.b + o.c + o.sinirda === kat(cl.G.kati) && o.b + o.c === kat(cl.G.kesin) && Math.abs(o.katiUst - cp(15, 390)) < 5e-5 && Math.abs(o.kesinUst - cp(9, 390)) < 5e-5 && D.KAPI.G === null);
+        __REG.ok('G önceki sayılar = etiket dosyası (b ' + cl.G.b + ' · c ' + cl.G.c + ' · sınırda ' + cl.G.sinirda + ' · katı ' + cl.G.kati + ' · kesin ' + cl.G.kesin + ')', o.N === cl.G.N && o.b === cl.G.b && o.c === cl.G.c && o.sinirda === cl.G.sinirda && o.b + o.c + o.sinirda === kat(cl.G.kati) && o.b + o.c === kat(cl.G.kesin) && Math.abs(o.katiUst - cp(kat(cl.G.kati), 390)) < 5e-5 && Math.abs(o.kesinUst - cp(kat(cl.G.kesin), 390)) < 5e-5 && D.KAPI.G === null);
         const sM = D.seritMetni('M'), sG = D.gOncekiMetni();
-        __REG.ok('M şeridi: "doğrulama turu 2026-10-15, Opus 5.5: yanlış 7/411 (üst %3,2; katı okuma), yalakalık 0, tat 0"; G seritMetni yok (kapı geçmedi); G ek satırı', sM === 'doğrulama turu 2026-10-15, Opus 5.5: yanlış 7/411 (üst %3,2; katı okuma), yalakalık 0, tat 0' && D.seritMetni('G') === null && sG === 'doğrulama turu 2026-10-15: katı okuma 15/390 (üst %5,9) — sıra nedeni düzeltmesi sonrası yeniden ölçülecek', sM + ' || ' + sG);
+        __REG.ok('M şeridi: "doğrulama turu 2026-10-15, Opus 5.5: yanlış 7/411 (üst %3,2; katı okuma), yalakalık 0, tat 0"; G seritMetni yok (kapı geçmedi); G ek satırı', sM === 'doğrulama turu 2026-10-15, Opus 5.5: yanlış 7/411 (üst %3,2; katı okuma), yalakalık 0, tat 0' && D.seritMetni('G') === null && sG === 'doğrulama turu 2026-10-15: katı okuma 16/390 (üst %6,2) — sıra nedeni düzeltmesi sonrası yeniden ölçülecek', sM + ' || ' + sG);
         const ay = document.createElement('div'); ay.innerHTML = window._bmAiKartHTML ? window._bmAiKartHTML() : ''; const mS = ay.querySelector('.bm-mash-m-testi'), gS = ay.querySelector('.bm-ai5-g-testi');
-        __REG.ok('Ayarlar: mash satırı doğrulama turu metni + "erken test" YOK; G satırı önceki G testi + katı okuma 15/390 satırı', !!mS && mS.textContent.indexOf(sM) >= 0 && !/erken test/.test(mS.textContent) && !!gS && gS.textContent.indexOf(sG) >= 0 && /G testi 2026-10-14/.test(gS.textContent), (mS ? mS.textContent.slice(0, 200) : '-') + ' || ' + (gS ? gS.textContent.slice(0, 200) : '-'));
+        __REG.ok('Ayarlar: mash satırı doğrulama turu metni + "erken test" YOK; G satırı önceki G testi + katı okuma 16/390 satırı', !!mS && mS.textContent.indexOf(sM) >= 0 && !/erken test/.test(mS.textContent) && !!gS && gS.textContent.indexOf(sG) >= 0 && /G testi 2026-10-14/.test(gS.textContent), (mS ? mS.textContent.slice(0, 200) : '-') + ' || ' + (gS ? gS.textContent.slice(0, 200) : '-'));
         tarifAc('dubbel_2024'); render(); await new Promise(r => setTimeout(r, 30)); const ser = document.querySelector('.bm-ai5-kutu .bm-ai5-serit');
-        __REG.ok('G kartı şeridi: "erken test — G testi …" KALIR + "katı okuma 15/390 (üst %5,9)"', !!ser && /^erken test — G testi 2026-10-14/.test(ser.textContent) && ser.textContent.indexOf(sG) >= 0, ser && ser.textContent);
+        __REG.ok('G kartı şeridi: "erken test — G testi …" KALIR + "katı okuma 16/390 (üst %6,2)"', !!ser && /^erken test — G testi 2026-10-14/.test(ser.textContent) && ser.textContent.indexOf(sG) >= 0, ser && ser.textContent);
         const sn = k.sinirda; k.sinirda = 0; const yum = D.seritMetni('M'); k.sinirda = sn;
         __REG.ok('KASITLI BOZMA: sınırda yanlış sayılmazsa (yumuşak okuma) şerit "yanlış 2/411" der — katı okuma metninden FARKLI → kırmızı', yum !== sM && /yanlış 2\/411/.test(yum));
         return __REG.al();
@@ -12043,6 +12044,55 @@ const CASELER = [
         { ad: '"🔬 Yalnız G (G1 → G2)" düğmesi + onay metni (YALNIZ G, 30 × 2, M koşulmaz, ölçülen 0,0293 VARSAYIM, tavan, kredi dönemi kalanı)', ok: r.btn && /🔬 Doğrulama turu — YALNIZ G \(sıra nedeni düzeltmesi sonrası\): G seti 30 istem × 2 tur \(G1 → G2\), yalnız Opus 5\.5; 60 AI çağrısı; M koşulmaz.*VARSAYIM: ölçülen çağrı başı G 0,0293, n 60\).*tavan [\d,]+ \$.*kredi dönemi kalanı [\d,]+ \$.*Başlatılsın mı\?/.test(r.msj || ''), detay: (r.msj || '').slice(0, 300) },
         { ad: 'puanlama EK (DOG2) koşudan ÖNCE: sıra nedeni (c), katı okuma (b + c + sınırda)/N, yalnız G — iki sette ve D.PUANLAMA\'da AYNI; DOG1 / DOG1B metni aynen önde', ok: r.P === sets.M.puanlama && r.P === sets.G.puanlama && /EK \(DOG2, 2026-10-16, YALNIZ G yeniden koşusundan ÖNCE yazıldı, sonradan DEĞİŞMEZ\)/.test(r.P) && /\(b \+ c \+ sınırda\)\/N ≤ %5/.test(r.P) && /SIRA NEDENİ \(uygulama\)/.test(r.P) && /G25–G30 yalakalık \/ tat testi SAYILMAZ/.test(r.P) && r.P.indexOf('EK (DOG1B') < r.P.indexOf('EK (DOG2') }
       ];
+    }
+  },
+  // ═════════════ SPRINT DOG2B — G koşusundan önce: sıra nedeni denetimi CÜMLE düzeyi geniş sözlük, pH yön satırı pay eşiği ═════════════
+  {
+    kod: 'DOG2B-SIRA', ad: 'SIRA NEDENİ GENİŞ (DOG2B madde 1, donmuş bölge DIŞI): aynı CÜMLEDE sıra sözcüğü (sıra / önde / öne çık / arka / geride / ilk aday / ikinci sıra / en üst / başta / öncelik / önce gelir / listede baş / puan…) + neden sözcüğü (için / nedeniyle / yüzünden / dolayı / sayesinde / çünkü / zira / -dığı / -dığından / bu yüzden…) + stok / alınacak / satın / malzeme değiş-stok / varsayım → DÜŞER · Claude\'un 7 doğal yeniden yazımı + üretilmiş ≥ 30 → HEPSİ DÜŞER · meşru 3 (+ kontrol) GÖSTERİLİR · DOG1 G gösterilen 384 yeniden geçer: doğru 372\'de yeni düşen 0 · KASITLI BOZMA: "çünkü" sözlükten çıkınca kırmızı',
+    calistir: async (page) => {
+      const cl = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'fixtures', 'dog1_kosu_2026-10-15_etiket_claude.json'), 'utf8')), cc = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'fixtures', 'dog1_kosu_2026-10-15_etiket_cc.json'), 'utf8')), set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'ai5_g_seti.json'), 'utf8'));
+      const gos = cc.gosterilen.filter(x => x.set === 'G'), lab = {}; cl.gosterilen.forEach(x => { lab[x.key + '#' + x.i] = x.sinif; });
+      return page.evaluate(async (gos, lab, set) => {
+        const G = window.BM_AI5, cache = {}, stOf = id => cache[id] || (cache[id] = G.setHazirla(set, set.istemler.find(x => x.id === id), 'dog2b'));
+        const st = stOf('G21'), d = (m, no) => G.ekDenetle({ durum: 'ok', metin: m, kaynaklar: ['aday:' + (no || 1)] }, no || 1, st);
+        const YEDI = ['Stok yeterli olduğundan bu aday öne çıkıyor.', 'Malzeme stokta olduğu için önerilen ilk aday budur.', 'Bu aday ilk sırada, çünkü stokta var.', 'Stokta olduğu için en üstte yer alıyor.', 'Puanı stok durumu yüzünden düşük.', 'Stokta olmadığı için bu aday daha az öncelikli.', 'Bu aday listede başta, çünkü malzeme değişmiyor.'];
+        const k7 = YEDI.map(m => { const r = d(m); return r.durum === 'dusuruldu' && r.tur === 'sira' ? null : m; }).filter(Boolean);
+        __REG.ok('Claude\'un 7 doğal yeniden yazımı (DOG2\'de 7\'si geçiyordu) HEPSİ "sira" ile DÜŞER', !k7.length, k7.join(' | '));
+        const SIRA = ['bu aday öne çıkıyor', 'aday ilk sırada', 'en üstte yer alıyor', 'daha az öncelikli', 'listede başta', 'ikinci sırada kalıyor', 'geride kalıyor', 'arkada duruyor', 'diğerlerinden önce gelir', 'puanı yüksek', 'önerilen ilk aday bu', 'son sırada', 'öncelik bu adayda', 'listede sonda'];
+        const NEDEN = ['stokta olduğu için', 'stokta bulunmadığından', 'malzeme değişmediği için', 'alınacak malzeme gerektirdiği için', 'hedef bir varsayım olduğundan', 'satın alma gerekmediği için', 'stok durumu nedeniyle', 'stok yeterliliği sayesinde', 'malzeme stokta hazır olduğundan', 'varsayıma dayandığı için', 'stok yüzünden', 'stoktan dolayı'];
+        const ure = []; SIRA.forEach((s, i) => { NEDEN.forEach((n, j) => { if ((i + j) % 3 === 0) ure.push(n.charAt(0).toUpperCase() + n.slice(1) + ' ' + s + '.'); }); });
+        SIRA.slice(0, 6).forEach(s => { ure.push(s.charAt(0).toUpperCase() + s.slice(1) + ', çünkü stokta var.'); ure.push(s.charAt(0).toUpperCase() + s.slice(1) + ', zira malzeme değişmiyor.'); ure.push('Malzeme stokta; bu yüzden ' + s + '.'); });
+        const kU = ure.map(m => { const r = d(m); return r.durum === 'dusuruldu' && r.tur === 'sira' ? null : m; }).filter(Boolean);
+        __REG.ok('üretilmiş ' + ure.length + ' yeniden yazım (sıra × neden × yasak neden; çünkü / zira / bu yüzden biçimleri) HEPSİ DÜŞER', ure.length >= 30 && !kU.length, kU.slice(0, 5).join(' | '));
+        const L = st.adaylar.liste, mes = [['Yan etkisi olduğu için temiz adayların arkasında.', 2], ['Aday 1 mash sıcaklığını 65\'ten 64\'e indiriyor.', 1], ['Stokta 585 g var, yetmeyebilir.', 1], ['Mash sırasında sıcaklığı ölçmek için stokta termometre olması gerekir.', 1], ['Şurup stokta yok; alınacak.', 2]];
+        const kM = mes.map(([m, no]) => { const r = d(m, no); return r.durum === 'ok' ? null : m + ' → ' + r.neden; }).filter(Boolean);
+        __REG.ok('meşru cümleler GÖSTERİLİR (yan_etki adayında "arkasında", sırasız stok cümlesi, "sırasında" = esnasında)', L[1].grup === 'yan_etki' && !kM.length, kM.join(' | '));
+        // DOG1 G gösterilen 384 yeniden geçirme (c / sınırda ayrı rapor)
+        const den = x => G.ekDenetle({ durum: 'ok', metin: x.metin, kaynaklar: x.kaynaklar }, +String(x.etiket).replace(/^a/, '') || 0, stOf(x.id));
+        const yanlis = [], tablo = { c: [], sinirda: [] };
+        gos.forEach(x => { const k = x.key + '#' + x.i, s = lab[k], y = den(x), yeniKural = !!G.siraNedenCumle(x.metin); if (s === 'c' || s === 'sinirda') tablo[s].push(k + ':' + (y.durum === 'ok' ? 'GOS' : 'DUS/' + y.tur) + (yeniKural ? '+cumle' : '')); else if (y.durum !== 'ok' || yeniKural) yanlis.push(k + ' ' + (y.neden || 'cümle kuralı') + ' ‖ ' + x.metin); });
+        __REG.ok('DOG1 G 384 yeniden geçirme: doğru ' + (gos.length - tablo.c.length - tablo.sinirda.length) + ' cümlede yanlış alarm ' + yanlis.length + ' (c: ' + tablo.c.join(', ') + ' · sınırda: ' + tablo.sinirda.join(', ') + ')', gos.length === 384 && tablo.c.length === 7 && tablo.sinirda.length === 5 && !yanlis.length, yanlis.join(' || '));
+        const es = G.SN2.neden; G.SN2.neden = new RegExp(es.source.replace('|cunku', '')); let bz; try { bz = d('Bu aday ilk sırada, çünkü stokta var.'); } finally { G.SN2.neden = es; }
+        __REG.ok('KASITLI BOZMA: "çünkü" sözlükten çıkınca "Bu aday ilk sırada, çünkü stokta var." GÖSTERİLİR → kırmızı', bz.durum === 'ok' && es.source.indexOf('|cunku') > 0);
+        return __REG.al();
+      }, gos, lab, set);
+    }
+  },
+  {
+    kod: 'DOG2B-PH', ad: 'pH YÖN SATIRI PAY EŞİĞİ (DOG2B madde 2): |ölçüm − tahmin| ≤ 0,2 → "tahmin payı (±0,1–0,2) … olabilir" kalır · > 0,2 → "fark tahmin payını (±0,1–0,2) AŞIYOR; … olası; ölçüm esastır" (tahmin payı neden SAYILMAZ) · M12 (−0,50) aşıyor · M28 (−0,20) pay içinde · M25 (+0,22) aşıyor · KASITLI BOZMA: eşik 1 olunca M12 yine "pay olabilir" der',
+    calistir: async (page) => {
+      const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'mash_m_seti.json'), 'utf8'));
+      return page.evaluate(async (set) => {
+        const MM = window.BM_MASH, pk = id => { const it = set.istemler.find(x => x.id === id), geri = MM.ortamAc(set, it); try { return MM.paketKur(it.metin); } finally { geri(); } }, y = p => p.byId['hesap:phYon'] ? p.byId['hesap:phYon'].metin : '';
+        const asar = t => /fark tahmin payını \(±0,1–0,2\) AŞIYOR; .*olası.*; ölçüm esastır/.test(t) && !/tahmin payı \(±0,1–0,2\)(,| ya da)/.test(t), icinde = t => /fark tahmin payı \(±0,1–0,2\)(,| ya da)/.test(t) && !/AŞIYOR/.test(t);
+        const t12 = y(pk('M12')), t28 = y(pk('M28')), t25 = y(pk('M25'));
+        __REG.ok('M12 (farkı −0,50): pay AŞIYOR, tahmin payı neden sayılmaz', /farkı -0,50/.test(t12) && asar(t12), t12);
+        __REG.ok('M28 (farkı −0,20): pay İÇİNDE ("tahmin payı … olabilir" kalır)', /farkı -0,20/.test(t28) && icinde(t28), t28);
+        __REG.ok('M25 (farkı +0,22): pay AŞIYOR (yüksek yön)', /farkı \+0,22/.test(t25) && /YÜKSEK/.test(t25) && asar(t25), t25);
+        const e = MM.PH_PAY; MM.PH_PAY = 1; let bz; try { bz = y(pk('M12')); } finally { MM.PH_PAY = e; }
+        __REG.ok('KASITLI BOZMA: eşik 1 olunca M12 yine "tahmin payı … olabilir" der → kırmızı', icinde(bz));
+        return __REG.al();
+      }, set);
     }
   },
   // ═════════════ SPRINT BUL2C — marka ∩ açık stil, kısa yer adı, koşu puanlaması, gerçek koşu kaçakları, BUL modeli Opus ═════════════
