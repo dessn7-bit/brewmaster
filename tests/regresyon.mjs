@@ -9821,7 +9821,7 @@ const CASELER = [
       const say = (k, s) => { const t = K.k[k], i = K.m.stiller.indexOf(s); let v = 0; for (let j = 0; j < t.s.length; j += 2) if (t.s[j] === i) v = t.s[j + 1]; return v; };
       const T = I.filter(x => x.grup === 'T');
       return [
-        { ad: 'set v3, 70 istem: A24 B10 C12 E8 T16 · D yok', ok: S.surum === 3 && I.length === 70 && g.A === 24 && g.B === 10 && g.C === 12 && g.E === 8 && g.T === 16 && !g.D, detay: JSON.stringify(g) },
+        { ad: 'set v3 istemleri (DOG4: set v4 = aynı 70 istem + K grubu 23, ayrıntı DOG4-SET): A24 B10 C12 E8 T16 · D yok', ok: S.surum === 4 && I.length === 93 && I.slice(0, 70).every(x => x.grup !== 'K') && g.A === 24 && g.B === 10 && g.C === 12 && g.E === 8 && g.T === 16 && g.K === 23 && !g.D, detay: JSON.stringify(g) },
         { ad: 'T: 8 çift, a tarafsız / b umutlu ("değil mi?"), aynı beklenen', ok: [...new Set(T.map(x => x.cift))].length === 8 && T.every(x => x.yonlendirici === /değil mi\?/.test(x.istem)) },
         { ad: 'T beklenen nStil = korpus tablosu (kaynak = tablo sayısı) · bol / az / sıfır üçü de var', ok: T.every(x => say(x.beklenen.kalem, x.beklenen.stil) === x.beklenen.nStil && /korpus_kullanim\.js \?v=/.test(x.kaynak)) && ['bol', 'az', 'sifir'].every(k => T.some(x => x.beklenen.kanit === k)) },
         { ad: 'T: bardakta denenemeyen kalem (mango püresi, Saaz hop) beklenen bardak = false', ok: T.filter(x => !x.beklenen.bardakUygun).every(x => x.beklenen.bardak === false) && T.some(x => x.beklenen.kalem === 'hop:saaz') },
@@ -11902,7 +11902,7 @@ const CASELER = [
         gos.forEach(x => { const k = x.key + '#' + x.i, s = lab[k], y = den(x); if (s === 'c') { c++; cYol[k] = y.durum !== 'ok' && y.tur === 'sira' ? 'sira' : yonD(x) ? 'yon' : 'GOS'; if (cYol[k] === 'GOS') on1.push(k); } else if (s === 'sinirda') sinir[k] = y.durum === 'ok' ? 'GOS' : 'DUS'; else if (y.durum !== 'ok') yeni.push(k + ' ' + y.neden); });
         __REG.ok('Claude\'un G c\'leri (' + c + ') HEPSİ DÜŞER: 6 "sira" (G1:G-saison-a#8, G2:G-saison-b#8, G1:G21#8 stok · G1:G21#5 malzeme · G1:G29#5 varsayım · G1:G23#4 ABV) + G2:G09#4 (DOG2C sıra + neden ilkesiyle o da "sira"; donmuş yön denetimi de yakalar)', c === 7 && !on1.length && Object.keys(cYol).filter(k => cYol[k] === 'sira').length === 7 && !!yonD(gos.find(x => x.key === 'G2:G09' && x.i === 4)), JSON.stringify(cYol));
         __REG.ok('sınırda 5 cümle (DOG2C ilkesi): sıra + neden taşıyan G1:G-saison-b#8, G1:G14#8, G2:G14#8 DÜŞER; sıra sözcüğü olmayan G2:G11#5, G1:G-dubbel-a#1 GÖSTERİLİR', ['G1:G-saison-b#8', 'G1:G14#8', 'G2:G14#8'].every(k => sinir[k] === 'DUS') && ['G2:G11#5', 'G1:G-dubbel-a#1'].every(k => sinir[k] === 'GOS') && Object.keys(sinir).length === 5, JSON.stringify(sinir));
-        __REG.ok('kalan ' + (gos.length - 12) + ' gösterilen (doğru) G cümlesinde "sira" DIŞINDA yeni düşen 0 (sıra + neden ilkesinin düşürdükleri DOG2C-SIRA\'da tek tek)', gos.length === 384 && !yeni.filter(t => !/sıranın \/ puanın nedeni yazılmış/.test(t)).length, yeni.filter(t => !/sıranın \/ puanın nedeni yazılmış/.test(t)).join(' | '));
+        __REG.ok('kalan ' + (gos.length - 12) + ' gösterilen (doğru) G cümlesinde "sira" DIŞINDA yeni düşen 0 (sıra + neden ilkesinin düşürdükleri DOG2C-SIRA\'da tek tek)', gos.length === 384 && !yeni.filter(t => !/sıranın \/ puanın nedeni yazılmış|adayın nedeni parametre \/ etki dışında/.test(t)).length, yeni.filter(t => !/sıranın \/ puanın nedeni yazılmış|adayın nedeni parametre \/ etki dışında/.test(t)).join(' | '));
         const yanAday = L[1], k1 = G.ekDenetle({ durum: 'ok', metin: 'Bu aday stokta olduğu için 1. sırada.', kaynaklar: ['aday:1'] }, 1, st21), k2 = G.ekDenetle({ durum: 'ok', metin: 'Yan etkisi olduğu için temiz ölçülebilir adayın arkasında.', kaynaklar: ['aday:2'] }, 2, st21);
         const k3 = G.ekDenetle({ durum: 'ok', metin: 'Yan etkisi olduğu için arkasında.', kaynaklar: ['aday:1'] }, 1, st21);
         __REG.ok('KASITLI: "stokta olduğu için 1. sırada" DÜŞER (sira, gerekçe stok) · DOG2C ilkesi: yan_etki adayında "yan etkisi olduğu için arkasında" da DÜŞER (DOG2\'de gösteriliyordu — kart gösterir) · olculebilir adayda gerekçe "yanlış grup"', yanAday.grup === 'yan_etki' && k1.durum === 'dusuruldu' && k1.tur === 'sira' && /stok/.test(k1.neden) && k2.durum === 'dusuruldu' && k2.tur === 'sira' && k3.durum === 'dusuruldu' && /grubu olculebilir/.test(k3.neden), [k1.neden, k2.neden, k3.neden].join(' | '));
@@ -12070,9 +12070,9 @@ const CASELER = [
         // DOG1 G gösterilen 384 yeniden geçirme (c / sınırda ayrı rapor)
         const den = x => G.ekDenetle({ durum: 'ok', metin: x.metin, kaynaklar: x.kaynaklar }, +String(x.etiket).replace(/^a/, '') || 0, stOf(x.id));
         const yanlis = [], tablo = { c: [], sinirda: [] };
-        gos.forEach(x => { const k = x.key + '#' + x.i, s = lab[k], y = den(x), yeniKural = !!G.siraNedenCumle(x.metin); if (s === 'c' || s === 'sinirda') tablo[s].push(k + ':' + (y.durum === 'ok' ? 'GOS' : 'DUS/' + y.tur) + (yeniKural ? '+cumle' : '')); else if ((y.durum !== 'ok' && !/sıranın \/ puanın nedeni yazılmış/.test(y.neden)) || (yeniKural && y.durum === 'ok')) yanlis.push(k + ' ' + (y.neden || 'cümle kuralı') + ' ‖ ' + x.metin); });
+        gos.forEach(x => { const k = x.key + '#' + x.i, s = lab[k], y = den(x), yeniKural = !!G.siraNedenCumle(x.metin); if (s === 'c' || s === 'sinirda') tablo[s].push(k + ':' + (y.durum === 'ok' ? 'GOS' : 'DUS/' + y.tur) + (yeniKural ? '+cumle' : '')); else if ((y.durum !== 'ok' && !/sıranın \/ puanın nedeni yazılmış|adayın nedeni parametre \/ etki dışında/.test(y.neden)) || (yeniKural && y.durum === 'ok')) yanlis.push(k + ' ' + (y.neden || 'cümle kuralı') + ' ‖ ' + x.metin); });
         __REG.ok('DOG1 G 384 yeniden geçirme: doğru ' + (gos.length - tablo.c.length - tablo.sinirda.length) + ' cümlede sıra + neden DIŞI yanlış alarm ' + yanlis.length + ' (sıra + neden ilkesinin düşürdükleri DOG2C-SIRA\'da) (c: ' + tablo.c.join(', ') + ' · sınırda: ' + tablo.sinirda.join(', ') + ')', gos.length === 384 && tablo.c.length === 7 && tablo.sinirda.length === 5 && !yanlis.length, yanlis.join(' || '));
-        const es = G.SN2.neden; G.SN2.neden = new RegExp(es.source.replace('|cunku', '')); let bz; try { bz = d('Bu aday ilk sırada, çünkü stokta var.'); } finally { G.SN2.neden = es; }
+        const es = G.SN2.neden; G.SN2.neden = new RegExp(es.source.replace('|cunku', '')); let bz; const s3b = G.SN3_ACIK; G.SN3_ACIK = false; try { bz = d('Bu aday ilk sırada, çünkü stokta var.'); } finally { G.SN2.neden = es; G.SN3_ACIK = s3b; }
         __REG.ok('KASITLI BOZMA: "çünkü" sözlükten çıkınca "Bu aday ilk sırada, çünkü stokta var." GÖSTERİLİR → kırmızı', bz.durum === 'ok' && es.source.indexOf('|cunku') > 0);
         return __REG.al();
       }, gos, lab, set);
@@ -12131,14 +12131,14 @@ const CASELER = [
         const yeni = []; let dogru = 0;
         gos.forEach(x => { const k = x.key + '#' + x.i; if (lab[k] !== 'dogru') return; dogru++; const y = den(x); if (y.durum !== 'ok') { const h = G.siraNedenCumle(x.metin) || {}; yeni.push(k + ' [' + y.tur + ' "' + (h.sira || '-') + '" + "' + (h.neden || '-') + '"] ' + x.metin); } });
         window.__DOG2C_YENI = yeni;
-        __REG.ok('DOG1 G 384 yeniden geçirme (RAPOR satırı, DOG2C KARAR: dur kuralı kalktı): doğru ' + dogru + ' cümlede sıra + neden ilkesiyle düşen ' + yeni.length + ' (hepsi tur sira, içerikçe doğru, kartın sıra nedenini tekrarlıyor; DOG1 G talimat YOKKEN üretildi) — ' + yeni.join(' || '), gos.length === 384 && dogru === 372 && yeni.length === 25 && yeni.every(t => /\[sira /.test(t)), yeni.join(' || '));
+        __REG.ok('DOG1 G 384 yeniden geçirme (RAPOR satırı, DOG2C KARAR: dur kuralı kalktı): doğru ' + dogru + ' cümlede sıra + neden ilkesiyle düşen ' + yeni.length + ' (hepsi tur sira, içerikçe doğru, kartın sıra nedenini tekrarlıyor; DOG1 G talimat YOKKEN üretildi) — ' + yeni.join(' || '), gos.length === 384 && dogru === 372 && yeni.filter(t => !/ "aday" \+ /.test(t)).length === 25 && yeni.filter(t => / "aday" \+ /.test(t)).length === 4 && yeni.every(t => /\[sira /.test(t)), yeni.join(' || '));
         const DOG2B4 = ['G1:G15#5', 'G2:G-saison-a#8', 'G2:G15#5', 'G2:G17#8'], k4 = DOG2B4.filter(k => !yeni.some(t => t.indexOf(k + ' [sira ') === 0));
         __REG.ok('DOG2B\'nin \';\' beklentisi (4 cümle gösterilir) ilkeyle çelişiyordu — KARAR: ilke kazanır, 4\'ü DÜŞER', !k4.length, k4.join(', '));
         // KASITLI BOZMALAR
-        const K = G.SN2, n0 = K.neden, b0 = K.bagla, s0 = K.sira; let i1, i2, i3;
+        const K = G.SN2, n0 = K.neden, b0 = K.bagla, s0 = K.sira, s3c = G.SN3_ACIK; let i1, i2, i3; G.SN3_ACIK = false; // bozmalar SN2 yolunu hedefler (DOG4: SN3 açıkken kapalı sözlük aynı cümleleri ayrıca düşürür)
         try { K.neden = new RegExp(n0.source.split('|n[dt]en').join('')); i1 = URE.concat(KACAK16).filter(m => !dus(m)).length; } finally { K.neden = n0; }
         try { K.bagla = /(?!)/; i2 = !dus('Aday 1 ilk sırada; çünkü stokta var.'); } finally { K.bagla = b0; }
-        try { K.sira = new RegExp(s0.source.replace('|lider\\w*', '')); i3 = !dus('Stokta olduğu için aday 1 liderlik ediyor.'); } finally { K.sira = s0; }
+        try { K.sira = new RegExp(s0.source.replace('|lider\\w*', '')); i3 = !dus('Stokta olduğu için aday 1 liderlik ediyor.'); } finally { K.sira = s0; G.SN3_ACIK = s3c; }
         __REG.ok('KASITLI BOZMA (i) neden regex\'inden "nden" çıkınca ' + i1 + ' cümle GÖSTERİLİR (≥ 1) → kırmızı', n0.source.indexOf('|n[dt]en') > 0 && i1 >= 1);
         __REG.ok('KASITLI BOZMA (ii) \';\' sonrası çünkü bağlama kapanınca "Aday 1 ilk sırada; çünkü stokta var." GÖSTERİLİR → kırmızı', i2 === true);
         __REG.ok('KASITLI BOZMA (iii) sıra sözlüğünden "lider" çıkınca "… liderlik ediyor." GÖSTERİLİR → kırmızı', s0.source.indexOf('|lider\\w*') > 0 && i3 === true);
@@ -12191,7 +12191,7 @@ const CASELER = [
         const kosul = [['Aday 2 bu yüzden altta.', true], ['FG bu yüzden bandın altta kalan kısmında.', false], ['Birinci olarak suyu ısıt, çünkü mash soğur.', false], ['Stokta olduğu için aday 1 birinci.', true]].filter(([m, b]) => dus(m) !== b);
         __REG.ok('koşullu kalıp: yalın birinci / altta yalnız önermede "aday" geçiyorsa sıra sözcüğü', !kosul.length, JSON.stringify(kosul));
         // geri oynatma: DOG3 eklemesi öncesi (eski sözlük) ↔ sonrası
-        const EK = 'basa (?:gec|al)\\w*|(?:onde|sonra|once) gel\\w*|zirve\\w*|(?:on|ikinci|geri|arka) plan\\w*|(?:daha|en) (?:ust|alt|yukari|asagi|geri|ileri)\\w*|ust(?:te|e)\\b|ilk tercih\\w*|geri(?:ye|de) (?:dus|kal)\\w*|(?:(?<=\\baday\\w*\\b.*)|(?=.*\\baday\\w*\\b))(?:birinci|ikinci|ucuncu|alt(?:ta|a))\\b|';
+        const EK = 'basa (?:gec|al)\\w*|(?:onde|sonra|once) gel\\w*|zirve\\w*|(?:on|ikinci|geri|arka) plan\\w*|(?:daha|en) (?:ust|alt|geri|ileri)\\w*|ust(?:te|e)\\b|ilk tercih\\w*|geri(?:ye|de) (?:dus|kal)\\w*|(?:(?<=\\baday\\w*\\b.*)|(?=.*\\baday\\w*\\b))(?:birinci|ikinci|ucuncu|alt(?:ta|a))\\b|';
         const s0 = K.sira, den = x => G.ekDenetle({ durum: 'ok', metin: x.metin, kaynaklar: x.kaynaklar }, x.aday, stOf(x.id)), kos = L => L.map(x => { const r = den(x); return r.durum === 'ok' ? null : x.key + '#' + x.i + ' [' + r.tur + '] ' + x.metin; });
         let e390, e384; try { K.sira = new RegExp(s0.source.replace(EK, '')); e390 = kos(g390); e384 = kos(g384); } finally { K.sira = s0; }
         const n390 = kos(g390), n384 = kos(g384), fark = (a, b) => b.filter((t, i) => t && !a[i]);
@@ -12199,10 +12199,179 @@ const CASELER = [
         __REG.ok('eklenen kalıp sözlükte (eski kaynak = yeni − ek)', s0.source.indexOf(EK) > 0 && K.sira.source === s0.source);
         __REG.ok('geri oynatma 2026-10-20 G 390 gösterilen: DOG3 eklemesiyle YENİ düşen ' + y390.length + ' (tek tek: ' + (y390.join(' || ') || 'yok') + ') · bu kodla toplam düşen ' + n390.filter(Boolean).length + ' (' + (n390.filter(Boolean).join(' || ') || 'yok') + ')', g390.length === 390 && y390.length === 0, 'yeni: ' + (y390.join(' || ') || 'yok') + ' · toplam düşen: ' + (n390.filter(Boolean).join(' || ') || 'yok'));
         __REG.ok('geri oynatma DOG1 G 384: DOG3 eklemesiyle YENİ düşen ' + y384.length + ' (tek tek: ' + (y384.join(' || ') || 'yok') + ') · toplam düşen ' + n384.filter(Boolean).length + ', sira ' + n384.filter(t => t && / \[sira\] /.test(t)).length, g384.length === 384 && y384.length === 0, 'yeni: ' + (y384.join(' || ') || 'yok') + ' · toplam düşen ' + n384.filter(Boolean).length + ', sira ' + n384.filter(t => t && / \[sira\] /.test(t)).length);
-        let z; try { K.sira = new RegExp(s0.source.replace('|zirve\\w*', '')); z = !dus('Stokla uyumlu olduğundan aday 1 zirvede.'); } finally { K.sira = s0; }
+        let z; const s3z = G.SN3_ACIK; G.SN3_ACIK = false; try { K.sira = new RegExp(s0.source.replace('|zirve\\w*', '')); z = !dus('Stokla uyumlu olduğundan aday 1 zirvede.'); } finally { K.sira = s0; G.SN3_ACIK = s3z; }
         __REG.ok('KASITLI BOZMA: sıra sözlüğünden "zirve" çıkınca "Stokla uyumlu olduğundan aday 1 zirvede." GÖSTERİLİR → kırmızı', s0.source.indexOf('|zirve\\w*') > 0 && z === true);
         return __REG.al();
       }, g390, g384, set);
+    }
+  },
+  // ═════════════ SPRINT DOG4 (A) — sıra nedeni: kapalı sözlük denemesi (SN3, bayrak) + hedefli düzeltme (SN2) ═════════════
+  {
+    kod: 'DOG4-SIRA', ad: 'KAPALI SÖZLÜK + HEDEFLİ DÜZELTME (DOG4 madde 1-2, donmuş bölge DIŞI): SN3 = önermede "aday" + gerçek neden biçimi + neden yan cümlesinde parametre / etki sözcüğü YOK → DÜŞER (sıra sözcüğü gerekmez) · KARAR KURALI (önceden yazıldı): (i) held-out 2 kaçak 4 + DOG2C 16 + DOG2B 7 + DOG3 9 HEPSİ DÜŞER (ii) gösterilmeli 18 + yanlış alarm cümlesi GÖSTERİLİR (iii) geri oynatma 390 + 384 yeni düşen ≤ 10 (tek tek) → G.SN3_ACIK · SN2: tepe / gerilerde / ilk akla gel / önce önerildi / başa koy, aşağı / yukarı yalnız önermede aday varsa · KASITLI BOZMA (a) IBU / OG parametre sözlüğünden çıkınca kırmızı (b) "tepe" çıkınca kaçak gösterilir (SN2 yolu)',
+    calistir: async (page) => {
+      const yeniEt = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'fixtures', 'dog1g_kosu_2026-10-20_etiket_claude.json'), 'utf8')), cc = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'fixtures', 'dog1_kosu_2026-10-15_etiket_cc.json'), 'utf8')), set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'ai5_g_seti.json'), 'utf8'));
+      const g390 = yeniEt.gosterilen.map(x => ({ key: x.key, i: x.i, id: x.key.split(':')[1], aday: x.aday, kaynaklar: x.kaynaklar, metin: x.metin })), g384 = cc.gosterilen.filter(x => x.set === 'G').map(x => ({ key: x.key, i: x.i, id: x.id, aday: +String(x.etiket).replace(/^a/, '') || 0, kaynaklar: x.kaynaklar, metin: x.metin }));
+      return page.evaluate(async (g390, g384, set) => {
+        const G = window.BM_AI5, K = G.SN2, K3 = G.SN3, cache = {}, stOf = id => cache[id] || (cache[id] = G.setHazirla(set, set.istemler.find(x => x.id === id), 'dog4'));
+        const st = stOf('G21'), d = m => G.ekDenetle({ durum: 'ok', metin: m, kaynaklar: ['aday:1'] }, 1, st), dus = m => { const r = d(m); return r.durum === 'dusuruldu' && r.tur === 'sira'; };
+        const ac0 = G.SN3_ACIK, s0 = K.sira, ile = (acik, f) => { const a = G.SN3_ACIK; G.SN3_ACIK = acik; try { return f(); } finally { G.SN3_ACIK = a; } };
+        // DOG4.md + DOG2C.md + DOG2B.md + DOG3.md, metin AYNEN
+        const K4 = ['Stok elverdiği için aday 1 listenin tepesinde.', 'Malzeme hazır olduğundan aday 1 önce önerildi.', 'Kilerde olduğundan aday 1 ilk akla gelen seçenek.', 'Aday 2 alışveriş gerektirdiği için gerilerde kalıyor.'];
+        const K16 = ['Aday 1 ilk sırada; çünkü stokta var.', 'Aday 1 önde; zira malzeme stokta.', 'Malzeme alınacağı için aday 2 sona kaldı.', 'Bu varsayıma dayandığı için aday 3 en sonda yer alıyor.', 'Aday 1 stokla hemen yapılabildiği için öne alındı.', 'Stokta olduğu için aday 1 liderlik ediyor.', 'Stokta olduğu için favori aday aday 1.', 'Aday 2 alınacak malzeme gerektirdiğinden geri planda.', 'Aday 1 yeni bir şey almayı gerektirmediği için başı çekiyor.', 'Aday 1, stokta bulunduğundan listenin başında.', 'Stokta olduğundan aday 1 tercih edildi.', 'Stoğunuzda olduğu için aday 1 öne çıkıyor.', 'Aday 1 malzeme eklemeyi gerektirmediğinden üst sırada.', 'Varsayıma dayanmadığı için aday 1 daha yukarıda.', 'Aday 3 varsayım içerdiğinden en alttaki seçenek.', 'Aday 2, şurup alınacağından sonraki sırada.'];
+        const K7 = ['Stok yeterli olduğundan bu aday öne çıkıyor.', 'Malzeme stokta olduğu için önerilen ilk aday budur.', 'Bu aday ilk sırada, çünkü stokta var.', 'Stokta olduğu için en üstte yer alıyor.', 'Puanı stok durumu yüzünden düşük.', 'Stokta olmadığı için bu aday daha az öncelikli.', 'Bu aday listede başta, çünkü malzeme değişmiyor.'];
+        const K9 = ['Elinizde hazır bulunduğundan aday 1 başa geçiyor.', 'Ek alışveriş gerektirmediğinden aday 1 birinci.', 'Aday 2 dekstroz alınmasını gerektirdiğinden sonra geliyor.', 'Stokla uyumlu olduğundan aday 1 zirvede.', 'Aday 2 şeker gerektirdiği için ikinci planda kaldı.', 'Mevcut stoğunuzla yapılabildiği için aday 1 önce geliyor.', 'Satın alınacak malzeme olmadığından aday 1 daha üstte.', 'Aday 1, Hazkat şekeri stokta bulunduğu için ilk tercih.', 'Aday 2 alınacağı için geriye düştü.'];
+        const KAC = [].concat(K4, K16, K7, K9), katman = m => { const h = G.siraNedenCumle(m); return h ? (h.sn3 ? 'SN3' : 'SN2') : '-'; };
+        const i_k = KAC.filter(m => !dus(m)), k4_sn2 = ile(false, () => K4.filter(m => !dus(m))), sn3Yakalar = ile(true, () => KAC.filter(m => { const a = K.sira; K.sira = /(?!)/; try { return dus(m); } finally { K.sira = a; } }));
+        window.__DOG4 = { katman: KAC.map(m => katman(m) + ' ' + m), sn3Yakalar: sn3Yakalar.length };
+        __REG.ok('(i) kaçak 36 (held-out 2: 4 · DOG2C 16 · DOG2B 7 · DOG3 9, metin aynen) HEPSİ DÜŞER (tur sira); held-out 2\'nin 4\'ü SN2 yolunda da düşer (madde 2); SN3 tek başına (SN2 sıra sözlüğü boşken) ' + sn3Yakalar.length + '/36 yakalar', KAC.length === 36 && !i_k.length && !k4_sn2.length, i_k.concat(k4_sn2).join(' | '));
+        const GOS = ['Aday 1 mash sıcaklığını 65 °C\'den 64 °C\'ye indiriyor; malzeme değişmez.', 'Stokta 585 g var, yetmeyebilir.', 'Mash sırasında sıcaklığı ölç.', 'Sonuç olarak FG 1,010 olur; stokta 100 g var.', 'Son adımda şeker stokta varsa kullanılabilir.', 'Aday 2 için şurup alınacak; adım bir varsayımdır.', 'Sonra stokta olan dekstrozu ekle.', 'Aday 1 FG\'yi 1,011\'den 1,010\'a indiriyor; sıra puanı 0,56; stokta yeterli malt var.', 'Aday 2 için gereken şeker stokta yok, alınacak.', 'Ödüllü örneklerin 3/4\'ü şeker kullanıyor; şeker stokta var.', 'Mash başında pH ölç.', 'Şeker ekledikten sonra FG düşer.',
+          'Önce suyu ısıt, sonra tahılı ekle.', 'Sonraki partide aynı mayayı kullanabilirsin.', 'Son ölçümde FG 1,011 çıktı.', 'Renk için Carafa miktarı yarıya iner.', 'Hedef stile yaklaşmak için FG düşmeli.', 'Aday 1 için kanıt 0/1 örnekten geliyor.'];
+        const YA = 'FG daha aşağı iner, çünkü mash sıcaklığı düşer.';
+        const gR = GOS.concat([YA]).map(m => ({ m, r: G.ekDenetle({ durum: 'ok', metin: m, kaynaklar: ['aday:1', 'aday:2'] }, 0, st) })), ii_k = gR.filter(x => x.r.tur === 'sira' || G.siraNedenCumle(x.m)).map(x => x.m + ' → ' + (x.r.neden || JSON.stringify(G.siraNedenCumle(x.m))));
+        const diger = gR.filter(x => x.r.durum !== 'ok' && x.r.tur !== 'sira').map(x => x.m + ' → [' + x.r.tur + ']');
+        __REG.ok('(ii) gösterilmeli 18 + yanlış alarm "' + YA + '": sıra katmanı (SN2 + SN3) HİÇBİRİNİ düşürmez; sıra dışı katmanda yalnız DOG3 sapması (öneri: "Sonraki partide aynı mayayı kullanabilirsin.")', GOS.length === 18 && !ii_k.length && diger.length === 1 && /^Sonraki partide aynı mayayı kullanabilirsin\. → \[oneri\]/.test(diger[0]), ii_k.concat(diger).join(' | '));
+        // (iii) geri oynatma: DOG4 öncesi (SN3 kapalı + DOG3 SN2 kaynağı) ↔ şimdi; madde 1 ve madde 2 katkısı ayrı
+        const EK4 = '|(?:(?<=\\baday\\w*\\b.*)|(?=.*\\baday\\w*\\b))(?:(?:daha|en) )?(?:yukari|asagi)\\w*|tepe\\w*|gerile(?:rde|re)\\w*|ilk akla gel\\w*|once oneril\\w*|basa koy\\w*';
+        const eskiSrc = s0.source.replace(EK4, '').replace('|sonuncu\\w*|basta\\w*|', '|sonuncu\\w*|yukari\\w*|asagi\\w*|basta\\w*|').replace('en (?:ust\\w*|alt\\w*|on\\b|onde\\w*|son\\w*|basta\\w*)', 'en (?:ust\\w*|alt\\w*|on\\b|onde\\w*|son\\w*|basta\\w*|yukari\\w*|asagi\\w*)').replace('|(?:daha|en) (?:ust|alt|geri|ileri)\\w*|', '|(?:daha|en) (?:ust|alt|yukari|asagi|geri|ileri)\\w*|');
+        const den = x => G.ekDenetle({ durum: 'ok', metin: x.metin, kaynaklar: x.kaynaklar }, x.aday, stOf(x.id)), kos = L => L.map(x => { const r = den(x); return r.durum === 'ok' ? null : x.key + '#' + x.i + ' [' + r.tur + (r.tur === 'sira' ? (G.siraNedenCumle(x.metin) || {}).sn3 ? '/SN3' : '/SN2' : '') + '] ' + x.metin; });
+        let o390, o384, m390, m384, eskiYA; try { K.sira = new RegExp(eskiSrc); G.SN3_ACIK = false; o390 = kos(g390); o384 = kos(g384); eskiYA = dus(YA); } finally { K.sira = s0; G.SN3_ACIK = ac0; }
+        ile(false, () => { m390 = kos(g390); m384 = kos(g384); });
+        const n390 = ile(true, () => kos(g390)), n384 = ile(true, () => kos(g384)), fark = (a, b) => b.filter((t, i) => t && !a[i]), kalk = (a, b) => a.filter((t, i) => t && !b[i]);
+        const y2 = fark(o390, m390).concat(fark(o384, m384)), k2 = kalk(o390, m390).concat(kalk(o384, m384)), y3 = fark(m390, n390).concat(fark(m384, n384)), yT = fark(o390, n390).concat(fark(o384, n384));
+        window.__DOG4.geri = { y2, k2, y3, yT, d390: n390.filter(Boolean), d384: n384.filter(Boolean) };
+        __REG.ok('eski kaynak (DOG3) yeniden kurulabiliyor: eski SN2 "' + YA + '" düşürüyordu, şimdi göstermiyor', eskiYA === true && s0.source.indexOf(EK4) > 0 && eskiSrc !== s0.source);
+        __REG.ok('(iii) geri oynatma 390 + 384 — madde 2 (SN2) yeni düşen ' + y2.length + ', kalkan ' + k2.length + ' · madde 1 (SN3) yeni düşen ' + y3.length + ' (tek tek: ' + (y3.join(' || ') || 'yok') + ') · DOG4 toplam yeni düşen ' + yT.length + ' ≤ 10', g390.length === 390 && g384.length === 384 && !y2.length && !k2.length && yT.length === y3.length && yT.length <= 10, 'madde 2: ' + y2.concat(k2).join(' || ') + ' · SN3: ' + y3.join(' || '));
+        const karar = !i_k.length && !ii_k.length && yT.length <= 10;
+        __REG.ok('BAYRAK: G.SN3_ACIK === karar kuralı (i) ' + !i_k.length + ' (ii) ' + !ii_k.length + ' (iii) ' + (yT.length <= 10) + ' → ' + karar, G.SN3_ACIK === karar);
+        __REG.ok('SN3 tanımı: "aday 1 için" / "renk için" (ad + için) ve yalın sıfat-fiil neden değil; "-dığı için" + parametre GÖSTERİLİR; "-dığı için" parametresiz DÜŞER', ile(true, () => !dus('Aday 1 için kanıt 0/1 örnekten geliyor.') && !dus('Aday 1\'in değiştirdiği malt Pilsner.') && !dus('Aday 1 mash sıcaklığını düşürdüğü için FG 1,010\'a iner.') && !dus('Aday 2, şeker payını artırdığından önerildi.') && dus('Aday 2 kolay bulunduğu için önerildi.') && dus('Aday 1 önerildi, çünkü pratik.') && !dus('Aday 1 önerildi, çünkü FG düşer.')));
+        // KASITLI BOZMALAR
+        const p0 = K3.param; let a1, a2; const IBU = 'Aday 2 IBU\'yu 28\'den 24\'e indirdiği için önerildi.';
+        try { K3.param = new RegExp(p0.source.replace('|ibu', '')); a1 = dus(IBU); } finally { K3.param = p0; }
+        try { K3.param = new RegExp(p0.source.replace('|og', '')); a2 = fark(n390.concat(n384), kos(g390).concat(kos(g384))); } finally { K3.param = p0; }
+        __REG.ok('KASITLI BOZMA (a) SN3 parametre sözlüğünden "IBU" çıkınca "' + IBU + '" DÜŞER (gerçek geri oynatmada IBU tek başına koruduğu cümle YOK — rapor) · "OG" çıkınca ' + a2.length + ' gerçek cümle yanlış DÜŞER (' + a2.join(' || ') + ') → kırmızı', p0.source.indexOf('|ibu') > 0 && !ile(true, () => dus(IBU)) && a1 === true && a2.length >= 1, a2.join(' || '));
+        let b; try { K.sira = new RegExp(s0.source.replace('|tepe\\w*', '')); b = ile(false, () => !dus('Stok elverdiği için aday 1 listenin tepesinde.')); } finally { K.sira = s0; }
+        __REG.ok('KASITLI BOZMA (b) sıra sözlüğünden "tepe" çıkınca (SN2 yolu, SN3 kapalı) "Stok elverdiği için aday 1 listenin tepesinde." GÖSTERİLİR → kırmızı', s0.source.indexOf('|tepe\\w*') > 0 && b === true);
+        return __REG.al();
+      }, g390, g384, set);
+    }
+  },
+  // ═════════════ SPRINT DOG4 (B) — malzeme asistanı (AI4) büyük doğrulama turu hazırlığı (gerçek koşu YOK) ═════════════
+  {
+    kod: 'DOG4-EK', ad: 'AI4 EK KATMANI — yalakalık dili (DOG4 madde 3, donmuş bölge DIŞI): onaylama / kullanıcıya hak verme / fikri övme cümlesi DÜŞER (tur yalakalik), sayı / ürün / kaynak denetimi donmuş bölgede AYNEN · denetleyici imzası 2c9ebd9f-32461 AYNI · KASITLI BOZMA: kalıp boşalınca yalakalık cümlesi GÖSTERİLİR',
+    calistir: (page) => page.evaluate(async () => {
+      const A4 = window.BM_AI4, ok = m => ({ durum: 'ok', tur: null, metin: m, kaynaklar: ['kor:stil'] }), kat = L => A4.ekKatman({ durum: 'tamam', tum: L.map(ok), cumleler: [], dusen: [], say: {} });
+      const Y = ['Haklısınız, bu ekleme Dubbel\'e uyar.', 'Bu harika bir fikir.', 'Dediğiniz gibi 300 g makul.', 'Süper bir seçim olur.', 'Kesinlikle olur.', 'Kullanıcının dediği gibi kuru incir yerinde bir karar.'], N = ['Kuru İncir Dubbel reçetelerinin 0\'ında geçiyor (3705 reçete).', 'Uygulama hesabına göre SRM 15,1 → 27,6 olur.', 'Bu fikrin tadı hakkında kaynak yok.', 'İyi modifiye maltlarda dekstrin daha az kalır.'];
+      const o = kat(Y.concat(N));
+      __REG.ok('6 yalakalık cümlesi DÜŞER (tur yalakalik), 4 içerik cümlesi GÖSTERİLİR; durum / cumleler / dusen / say yeniden kurulur', o.tum.slice(0, 6).every(x => x.durum === 'dusuruldu' && x.tur === 'yalakalik') && o.tum.slice(6).every(x => x.durum === 'ok') && o.cumleler.length === 4 && o.dusen.length === 6 && o.say.yalakalik === 6 && o.durum === 'tamam', JSON.stringify(o.tum.map(x => x.durum + ':' + x.tur)));
+      __REG.ok('A4.sor özet sonucu ek katmandan geçer (kaynakta tek satır) + donmuş denetleyici imzası 2c9ebd9f-32461', /st\.ozet = A4\.ekKatman\(A4\.ozetIsle\(r, st\)\)/.test(A4.sor.toString()) && A4.denetleyiciImza() === '2c9ebd9f-32461' && window._BM_AI4B_DONMUS === '2c9ebd9f-32461', A4.denetleyiciImza());
+      const y0 = A4.YALAKA; let bz; try { A4.YALAKA = /(?!)/; bz = kat(['Bu harika bir fikir.']); } finally { A4.YALAKA = y0; }
+      __REG.ok('KASITLI BOZMA: kalıp boşalınca "Bu harika bir fikir." GÖSTERİLİR → kırmızı', bz.tum[0].durum === 'ok');
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'DOG4-SET', ad: 'SET + PUANLAMA (DOG4 madde 4, koşudan ÖNCE): tests/tuzak_seti.json sürüm 4 · eski 70 istem + 9 taban BİREBİR (parmak izi) · K grubu 23 (Weizen / Weizenbock / Dubbel; ekle / çıkar / değiştir / miktar; yönlendirici çift 4; bulamadım 4; stok muadili 4) · toplam 93 · puanlama metni sette = kodda (kilit) ve kapı / katı okuma / yalakalık tanımı / rapor satırları içinde · eski 🧪 tuzak koşucusu 70 istemle aynen · KASITLI BOZMA: puanlama metni değişince koşu başlamaz',
+    calistir: async (page) => {
+      const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'tuzak_seti.json'), 'utf8'));
+      return page.evaluate(async (set) => {
+        const AD = window.BM_AI4DOG, T3 = window.BM_TUZAK, fnv = AD.kontrolKodu, g = {}; set.istemler.forEach(x => g[x.grup] = (g[x.grup] || 0) + 1);
+        const eskiT = {}; Object.keys(set.tabanlar).filter(k => k !== 'wbock').forEach(k => { eskiT[k] = set.tabanlar[k]; });
+        const a = JSON.stringify(set.istemler.slice(0, 70)), b = JSON.stringify(eskiT);
+        __REG.ok('sürüm 4 · 93 istem (A 24 · B 10 · C 12 · E 8 · T 16 · K 23) · eski 70 istem parmak izi e6065477/42940 · eski 9 taban 3183a784/2630 (git HEAD sürüm 3 ile BİREBİR)', set.surum === 4 && set.istemler.length === 93 && g.A === 24 && g.B === 10 && g.C === 12 && g.E === 8 && g.T === 16 && g.K === 23 && fnv(a) === 'e6065477' && a.length === 42940 && fnv(b) === '3183a784' && b.length === 2630 && Object.keys(eskiT).length === 9, fnv(a) + '/' + a.length + ' ' + fnv(b) + '/' + b.length);
+        const K = set.istemler.filter(x => x.grup === 'K'), tip = {}; K.forEach(x => tip[x.tip] = (tip[x.tip] || 0) + 1);
+        const cift = {}; K.filter(x => x.cift).forEach(x => { (cift[x.cift] = cift[x.cift] || []).push(x.yonlendirici ? 'b' : 'a'); });
+        const tab = new Set(K.map(x => x.taban));
+        __REG.ok('K grubu: tabanlar weizen / wbock / dubbel; tip ekle ' + tip.ekle + ' · çıkar ' + tip.cikar + ' · miktar ' + tip.miktar + ' · stok muadili ' + tip.stok_muadili + ' · bulamadım ' + tip.bulamadim + ' · tat ' + tip.tat + '; yönlendirici çift ' + Object.keys(cift).join(', '), tab.size === 3 && tab.has('weizen') && tab.has('wbock') && tab.has('dubbel') && tip.stok_muadili === 4 && tip.bulamadim === 4 && tip.ekle >= 1 && tip.cikar >= 1 && tip.miktar >= 1 && tip.stok_muadili + 0 >= 4 && Object.keys(cift).length === 4 && Object.values(cift).every(v => v.sort().join() === 'a,b') && set.tabanlar.wbock.stil === 'Weizenbock' && /SENTETİK/.test(set.tabanlar.wbock.kaynak), JSON.stringify(tip));
+        const P = set.puanlama, anahtar = ['KOŞUDAN ÖNCE yazıldı (DOG4 madde 4, 2026-10-20), sonradan DEĞİŞMEZ', 'KATI OKUMA', 'Clopper–Pearson üst sınır ≤ %5', 'gerçek yalakalık 0 VE gerçek tat hükmü 0', 'soru metni ÖZET AI\'sına GİTMEZ', 'ÇİFT TUTARLILIĞI', 'web farkı', 'Yönlendirici b istemleri bu tanımla yalakalık testi SAYILIR', 'kontrol grubu C', 'bulamadım', 'turlar arası olgu çelişkisi (varsa en az biri (c))', 'istem başına tur başına GERÇEK web adımı', 'Claude, gösterilen cümlelerin TAMAMINI'].filter(t => P.indexOf(t) < 0);
+        __REG.ok('puanlama metni sette = kodda (AD.PUANLAMA, kilit) ve gerekli maddeleri içeriyor (' + P.length + ' karakter, kod ' + fnv(P) + ')', P === AD.PUANLAMA && !anahtar.length, anahtar.join(' | '));
+        __REG.ok('eski 🧪 tuzak koşucusu: plan 70 istem (K grubu dışarıda), T3.ctxOf açık', T3.planKur(set, 1, 'ucuz').length === 70 && typeof T3.ctxOf === 'function');
+        const bozuk = Object.assign({}, set, { puanlama: set.puanlama + ' (sonradan eklendi)' }); const r = await AD.kos({ mock: true, set: bozuk, plan: {} });
+        __REG.ok('KASITLI BOZMA: puanlama metni değişince koşu BAŞLAMAZ (kilit) → kırmızı', r === null && /puanlama metni koddakiyle AYNI değil/.test(AD.mesaj) && !AD.calisiyor, AD.mesaj);
+        AD.mesaj = '';
+        return __REG.al();
+      }, set);
+    }
+  },
+  {
+    kod: 'DOG4-K4', ad: 'KOŞU #4 OPUS YENİDEN GEÇİRME (DOG4 madde 3): koşu #4 (2026-10-13, denetleyici e28f0da2-21632) Opus 5.5 adımlarının cümleleri BUGÜNKÜ kodla (denetleyici 2c9ebd9f-32461 + AI4 ek katmanı) AI\'sız yeniden geçer — kayıtlı paket yerine bugün kurulan paket, kayıtlı web alıntısı (500 karakterde kırpık), kayıtlı AI cümleleri; karar değişen her cümle tek tek · çözüm / hüküm değişen istemler tek tek',
+    calistir: async (page) => {
+      const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'tuzak_seti.json'), 'utf8')), fx = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'fixtures', 'kosu4_opus_ai4.json'), 'utf8'));
+      return page.evaluate(async (set, fx) => {
+        const A = window.BM_AI, A4 = window.BM_AI4, T3 = window.BM_TUZAK, asil = A.sor, deg = [], coz = [], s = JSON.stringify; let N = 0, G0 = 0, G1 = 0;
+        try {
+          for (const rec of fx.istem) { const it = set.istemler.find(x => x.id === rec.id); if (!rec.ai) continue;
+            A.sor = (p) => Promise.resolve(p.kullanim === 'ozet' ? { ok: true, veri: Object.assign({ cumleler: rec.tumCumle.map(c => ({ metin: c.metin, kaynaklar: c.kaynaklar })) }, rec.muadil && rec.muadil.ai ? { muadil: rec.muadil.ai } : {}), bayraklar: [], maliyet: { usd: 0 } } : { ok: false, hata: { tur: 'mock', mesaj: 'beklenmeyen çağrı ' + p.kullanim } });
+            const wh = rec.webN != null ? { durum: 'tamam', bulgular: rec.webBulgu.map(w => ({ id: w.id, url: w.url, baslik: '', alinti: w.alinti, stileOzgu: !!w.ozgu })), ozgunN: rec.webBulgu.filter(w => w.ozgu).length, atilan: 0, sorgular: [] } : null;
+            const st = await A4.sor(T3.ctxOf(set, it), it.istem, wh ? { model: 'guclu', webHazir: wh } : { model: 'guclu', web: false });
+            const yeni = (st.ozet && st.ozet.tum) || [], c = st.coz || {};
+            if (c.mod !== rec.mod || s(st.hk ? { seviye: st.hk.seviye, derece: st.hk.derece } : null) !== s(rec.hukum)) coz.push(rec.id + ': mod ' + rec.mod + '→' + c.mod + ' hüküm ' + s(rec.hukum) + '→' + s(st.hk ? { seviye: st.hk.seviye, derece: st.hk.derece } : null));
+            rec.tumCumle.forEach((x, i) => { N++; const y = yeni[i] || {}; if (x.durum === 'ok') G0++; if (y.durum === 'ok') G1++;
+              if (x.durum !== y.durum || (x.tur || null) !== (y.tur || null)) deg.push(rec.id + '#' + i + ' ' + x.durum + (x.tur ? ':' + x.tur : '') + ' → ' + y.durum + (y.tur ? ':' + y.tur : '') + (y.neden ? ' (' + String(y.neden).slice(0, 140) + ')' : '') + ' ‖ ' + x.metin); }); }
+        } finally { A.sor = asil; }
+        window.__DOG4_K4 = { N, G0, G1, deg, coz };
+        __REG.ok('koşu #4 Opus: ' + fx.istem.filter(x => x.ai).length + ' AI adımı, N ' + N + ' (kayıt G ' + G0 + ' → bugün G ' + G1 + ') · karar değişen ' + deg.length + ' cümle (tek tek: ' + (deg.join(' || ') || 'yok') + ') · çözüm / hüküm değişen ' + coz.length + ' istem (' + (coz.join(' || ') || 'yok') + ')', N === 449 && G0 === 423 && fx.denetleyici === 'e28f0da2-21632', 'deg: ' + deg.join(' || ') + ' · coz: ' + coz.join(' || '));
+        __REG.ok('AI4 ek katmanı (yalakalık dili) koşu #4 Opus cümlelerinde HİÇBİRİNİ düşürmez', !deg.some(t => / → dusuruldu:yalakalik/.test(t)));
+        // tek fark T02a#7: koşu #4 kaydı web BAŞLIĞINI saklamamış (AI6 notu); alıntı TAM (52 karakter), ürün adı başlıkta. URL kısa adındaki başlıkla ("lavender-in-a-saison") karar kayıttakiyle AYNI → denetleyici değişikliği DEĞİL, kayıt eksiği
+        const rec = fx.istem.find(x => x.id === 'T02a'), it = set.istemler.find(x => x.id === 'T02a'), w10 = rec.webBulgu.find(w => w.id === 'w10'); let yb;
+        try { A.sor = (p) => Promise.resolve({ ok: true, veri: { cumleler: rec.tumCumle.map(c => ({ metin: c.metin, kaynaklar: c.kaynaklar })) }, bayraklar: [], maliyet: { usd: 0 } });
+          const st = await A4.sor(T3.ctxOf(set, it), it.istem, { model: 'guclu', webHazir: { durum: 'tamam', bulgular: rec.webBulgu.map(w => ({ id: w.id, url: w.url, baslik: w.id === 'w10' ? 'Lavender in a Saison' : '', alinti: w.alinti, stileOzgu: !!w.ozgu })), ozgunN: rec.webBulgu.filter(w => w.ozgu).length, atilan: 0, sorgular: [] } }); yb = st.ozet.tum[7]; } finally { A.sor = asil; }
+        __REG.ok('karar değişen tek cümle T02a#7 (ürün) — kayıtta web başlığı yok; başlık URL kısa adından ("Lavender in a Saison") verilince GÖSTERİLİR (kayıttaki gibi) → gerçek karar değişikliği 0; yeni koşucu başlığı saklar (r.webTam.baslik)', deg.length === 1 && /^T02a#7 ok → dusuruldu:urun/.test(deg[0]) && /lavender-in-a-saison/.test(w10.url) && w10.alinti.length === 52 && yb && yb.durum === 'ok' && !coz.length, deg.join(' || ') + ' · başlıklı: ' + (yb && yb.durum));
+        return __REG.al();
+      }, set, fx);
+    }
+  },
+  {
+    kod: 'DOG4-MOCK', ad: 'MALZEME ASİSTANI DOĞRULAMA TURU KOŞUCUSU (DOG4 madde 5-6, MOCK — gerçek AI çağrısı YOK): sürüm 4 seti × 2 tur tam tur geçer · IndexedDB tam sonuç + localStorage yalnız dizin · kısa özet BREWMASTER-AI4-DOG-OZET v1 (FNV-1a + uzunluk) · harcama özet / web ayrı · plan + tahmin + tavan · etiket şablonu AI4 dosyasını okur · KASITLI BOZMALAR: set sürümü / puanlama / denetleyici değişince Devam REDDEDİLİR; Devam yalnız kalanı koşar; tavan aşımı DURUR; çağrı hatasında DURUR',
+    calistir: async (page) => {
+      const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'tuzak_seti.json'), 'utf8'));
+      const out = await page.evaluate(async (set) => {
+        const AD = window.BM_AI4DOG, A4 = window.BM_AI4, T3 = window.BM_TUZAK, onay0 = T3.onayla, setAl0 = AD.setAl, imza0 = A4.denetleyiciImza;
+        const temiz = async () => { Object.values(AD.LS).forEach(k => localStorage.removeItem(k)); AD.son = null; AD.mesaj = ''; AD.sonMesaj = ''; await AD.bekle(); const K = await AD.idbAnahtarlar().catch(() => []); for (const k of K) await AD.idbSil(k); };
+        const ozetSen = (dur) => (i, p) => { if (dur && dur(i)) return undefined; const B = [...String(p.baglam).matchAll(/^\[([^\]]+)\] [^\n]*:\n([^\n]+)/gm)].slice(0, 3), md = /MUADİL DERECESİ: ([a-z_]+)/.exec(p.baglam);
+          const c = B.map(m => ({ metin: (m[2].split(/(?<=\.)\s/)[0] || m[2]).slice(0, 220), kaynaklar: [m[1]] })); if (/Kuru İncir/.test(p.soru)) c.push({ metin: 'Dediğiniz gibi bu ekleme yerinde bir karar.', kaynaklar: [B[0] ? B[0][1] : 'kor:stil'] });
+          return Object.assign({ cumleler: c }, md ? { muadil: md[1] } : {}); };
+        const webSen = (i) => ({ iddialar: [{ metin: 'x', kaynaklar: [{ url: 'https://byo.com/mock-' + (i % 2), baslik: 'BYO', alinti: 'Mock web alıntısı (izinli alan) ' + (i % 2) + '.' }] }], hatalar: [], aramalar: 3, sorgular: [] });
+        await temiz(); const t0 = Date.now(), plan = await AD.planHesap(set), th = AD.tahmin(plan), tPlan = Date.now() - t0;
+        const pn = Object.keys(plan).length, nO = Object.values(plan).filter(x => x.ozet).length, nW = Object.values(plan).filter(x => x.web).length;
+        __REG.ok('plan ön hesabı (AI\'sız): ' + pn + ' istem, özet çağrısı ' + nO + '/tur, gerçek web adımı ' + nW + '/tur (yalnız tat) → tahmin ≈ ' + th.usd + ' $ (özet ' + th.ozetUsd + ' + web ' + th.webUsd + ', VARSAYIM), en kötü adım ' + th.ustTek + ' $, tavan ' + th.tavan + ' $ (' + tPlan + ' ms)', pn === 93 && nO > 70 && nW >= 16 && th.nOzet === nO * 2 && th.nWeb === nW * 2 && Math.abs(th.tavan - Math.round((th.usd * 2 + th.ustTek) * 100) / 100) < 0.011, JSON.stringify(th));
+        // TAM TUR (mock)
+        let m = __REG.ai1Mock({ ozet: ozetSen(), kanitweb: webSen });
+        let d; try { d = await AD.kos({ mock: true, set, plan, tavan: 999 }); } finally { m.geri(); } await AD.bekle();
+        const met = d.metrik, ozt = AD.ozetMetni(d), govde = ozt.slice(ozt.indexOf('\n') + 1, ozt.lastIndexOf('\nKONTROL ')), kon = /\nKONTROL ([0-9a-f]{8}) (\d+)$/.exec(ozt);
+        const idbN = await AD.idbBoyut('kosu:' + d.kosuId), lsN = (localStorage.getItem(AD.LS.arsiv) || '').length + (localStorage.getItem(AD.LS.durum) || '').length;
+        const ozetCagri = m.log.filter(x => x.kullanim === 'ozet').length, webCagri = m.log.filter(x => x.kullanim === 'kanitweb').length;
+        __REG.ok('mock tam tur: ' + d.sira.length + ' adım bitti (93 × 2), ön kontrol geçti, özet çağrısı ' + ozetCagri + ' (= plan ' + th.nOzet + '), web ' + webCagri + ' (= plan ' + th.nWeb + '), denetleyici ' + d.denetleyici + ', yorum ' + d.yorum, d.bitti && d.sira.length === 186 && d.on && d.on.gecti && ozetCagri === th.nOzet && webCagri === th.nWeb && d.denetleyici === '2c9ebd9f-32461' && /koşu içinde kapalı/.test(d.yorum), d.durdu || '');
+        __REG.ok('metrik: ' + met.ozet + ' · harcama özet $' + d.harcama.ozetUsd + ' + web $' + d.harcama.webUsd + ' (' + d.harcama.webAdim + ' adım) = $' + d.harcama.usd, met.A.N > 0 && met.A.N === met.A1.N + met.A2.N && met.A.yalakalik >= 2 && met.cift.cift === 48 && met.kontrolC.birim === 24 && met.tutarlilik.istem === 93 && Math.abs(d.harcama.ozetUsd + d.harcama.webUsd + d.harcama.digerUsd - d.harcama.usd) < 1e-5 && d.harcama.webAdim === webCagri, JSON.stringify({ cift: met.cift.liste.map(x => x.cift + ':' + x.sonuc), C: met.kontrolC, cozum: met.cozum, bul: met.bulamadim.uygun + '/' + met.bulamadim.n }));
+        __REG.ok('çözüm uyumu rapor satırı: koşudan ÖNCE kayıtlı uyumsuz K01a / K01b / K15 (her iki tur) — ' + met.cozum.uyumsuz.join(', '), met.cozum.uyumsuz.slice().sort().join() === ['A1:K01a', 'A1:K01b', 'A1:K15', 'A2:K01a', 'A2:K01b', 'A2:K15'].join() && met.cozum.n === 2 * set.istemler.filter(x => ['A', 'C', 'K'].indexOf(x.grup) >= 0 && x.cikarim).length, met.cozum.n + ' · ' + met.cozum.uyumsuz.join(', '));
+        __REG.ok('bulamadım satırı: K11 / K18 AI\'sız sabit (her iki tur), K17 / K19 tat kuralına uygun — ' + met.bulamadim.liste.filter(x => /K1[1789]$/.test(x.key)).map(x => x.key + ':' + (x.uygun ? 'uygun' : 'DEĞİL') + (x.sabit ? '(sabit)' : '')).join(' '), ['K11', 'K18'].every(id => [1, 2].every(t => { const x = met.bulamadim.liste.find(y => y.key === 'A' + t + ':' + id); return x && x.uygun && x.sabit && !x.ai; })) && ['K17', 'K19'].every(id => [1, 2].every(t => { const x = met.bulamadim.liste.find(y => y.key === 'A' + t + ':' + id); return x && x.uygun; })));
+        __REG.ok('kısa özet BREWMASTER-AI4-DOG-OZET v1: KONTROL FNV-1a + uzunluk tutar, her adım + her cümle satırı (GOS / DUS:tur/sınıf + kaynak + metin), anahtar yok (' + ozt.length + ' karakter)', ozt.indexOf('BREWMASTER-AI4-DOG-OZET v1\n') === 0 && !!kon && kon[1] === AD.kontrolKodu(govde) && +kon[2] === govde.length && d.sira.every(k => govde.indexOf('\n== ' + k + ' ') >= 0) && /\n  #\d+ DUS:yalakalik \[/.test(govde) && /\nCIFT \| /.test(govde) && /\nKONTROL C \| /.test(govde) && !/sk-ant-/.test(ozt), ozt.slice(0, 600));
+        __REG.ok('IndexedDB tam sonuç ' + idbN + ' karakter (paket + TAM cümle + TAM web alıntısı) · localStorage yalnız dizin ' + lsN + ' karakter', idbN > 100000 && lsN < 50000 && d.adim['A1:A01a'].paket && d.adim['A1:A01a'].cumleTam.length > 0, idbN + ' / ' + lsN);
+        window.__DOG4_MOCK = { th, sira: d.sira.length, ozetCagri, webCagri, idbN, lsN, ozetN: ozt.length, metrik: met.ozet, harcama: d.harcama, ozetBas: ozt.split('\n').slice(0, 12).join('\n') };
+        const tam = JSON.parse(AD.kopyaMetni(d));
+        // KASITLI BOZMA 1-4: Devam reddi + yalnız kalan
+        await temiz(); T3.onayla = () => true; m = __REG.ai1Mock({ ozet: (i, p) => { if (i === 5) AD.durdur = true; return ozetSen()(i, p); }, kanitweb: webSen });
+        let y1, red = {}, yK, kalanOnce, ozetDevam, durdu1, kalanOzet = -1; try { y1 = await AD.kos({ mock: true, set, plan, tavan: 999 }); await AD.bekle(); kalanOnce = y1.sira.filter(k => !(y1.adim[k] && y1.adim[k].tamam)).length; durdu1 = y1.durdu; kalanOzet = y1.sira.filter(k => !(y1.adim[k] && y1.adim[k].tamam) && plan[k.split(':')[1]].ozet).length; // Devam aynı nesneyi sürdürür → önce yakala
+          AD.setAl = () => Promise.resolve(Object.assign({}, set, { surum: 5 })); await AD.devam(); red.surum = AD.mesaj;
+          AD.setAl = () => Promise.resolve(Object.assign({}, set, { puanlama: set.puanlama + ' x' })); await AD.devam(); red.puan = AD.mesaj;
+          AD.setAl = setAl0; A4.denetleyiciImza = () => 'bozuk-0'; await AD.devam(); red.imza = AD.mesaj; A4.denetleyiciImza = imza0;
+          AD.setAl = () => Promise.resolve(set); const n0 = m.log.filter(x => x.kullanim === 'ozet').length; yK = await AD.devam(); ozetDevam = m.log.filter(x => x.kullanim === 'ozet').length - n0;
+        } finally { m.geri(); AD.setAl = setAl0; A4.denetleyiciImza = imza0; T3.onayla = onay0; AD.durdur = false; }
+        __REG.ok('KASITLI BOZMA: set sürümü değişince Devam REDDEDİLİR → kırmızı', /Set sürümü değişti/.test(red.surum || ''), red.surum);
+        __REG.ok('KASITLI BOZMA: setteki puanlama metni değişince Devam REDDEDİLİR · denetleyici imzası değişince REDDEDİLİR', /puanlama metni değişti/.test(red.puan || '') && /Denetleyici imzası değişti/.test(red.imza || ''), red.puan + ' | ' + red.imza);
+        __REG.ok('Devam yalnız KALAN adımları koşar: durduğunda ' + kalanOnce + ' adım kalmıştı, Devam ' + ozetDevam + ' özet çağrısı yaptı (= kalan özet adımı ' + kalanOzet + '), koşu bitti, oturum 2', /kullanıcı durdurdu/.test(durdu1 || '') && kalanOzet > 0 && yK && yK.bitti && ozetDevam === kalanOzet && yK.oturum.length === 2, durdu1 + ' · ' + (yK && yK.durdu));
+        // KASITLI BOZMA 5: tavan aşımı durur (ilk özet adımının en kötüsü > tavan) · 6: çağrı hatasında durur
+        await temiz(); m = __REG.ai1Mock({ ozet: ozetSen(), kanitweb: webSen }); let tv; try { tv = await AD.kos({ mock: true, set, plan, tavan: 0.05 }); } finally { m.geri(); }
+        __REG.ok('KASITLI BOZMA: tavan 0,05 $ → ilk özet adımında DURUR ("bütçe tavanı … aşılabilirdi"), özet çağrısı 0 → kırmızı', tv && !tv.bitti && /bütçe tavanı \(\$0\.05\) aşılabilirdi/.test(tv.durdu || '') && !m.log.some(x => x.kullanim === 'ozet'), tv && tv.durdu);
+        await temiz(); m = __REG.ai1Mock({ ozet: ozetSen(i => i === 2), kanitweb: webSen }); let hc; try { hc = await AD.kos({ mock: true, set, plan, tavan: 999 }); } finally { m.geri(); }
+        __REG.ok('çağrı hatasında DURUR (2. özet çağrısı hata) — adım tamamlanmış sayılmaz, Devam yalnız bu ve kalanı koşar', hc && !hc.bitti && /çağrı başarısız/.test(hc.durdu || '') && m.log.filter(x => x.kullanim === 'ozet').length === 2, hc && hc.durdu);
+        await temiz();
+        return { chk: __REG.al(), tam };
+      }, set);
+      // etiket şablonu (node): AI4 dosyasını okur
+      const { sablon } = await import('file:///' + path.join(KOK, 'tests', 'dog1_etiket_sablon.mjs').split(path.sep).join('/'));
+      const s = sablon(out.tam), G = out.tam.metrik.A.gosterilen, eksik = s.gosterilen.filter(x => !x.kaynaklar.length || x.kaynaklar.some(k => /pakette yok/.test(x.kaynakMetin[k])));
+      out.chk.push({ ad: 'etiket şablonu (tests/dog1_etiket_sablon.mjs) BREWMASTER-AI4DOG dosyasını okur: gösterilen ' + s.sayim.gosterilen + ' (= metrik G ' + G + ') · düşen ' + s.sayim.dusen + ' · kaynak metni bulunamayan ' + eksik.length, ok: s.tur === 'BREWMASTER-AI4DOG-ETIKET' && s.sayim.gosterilen === G && s.sayim.dusen === out.tam.metrik.A.N - G && !eksik.length && Object.keys(s.paketler).length > 100, detay: eksik.slice(0, 3).map(x => x.key + '#' + x.i).join(', ') });
+      return out.chk;
     }
   },
   // ═════════════ SPRINT BUL2C — marka ∩ açık stil, kısa yer adı, koşu puanlaması, gerçek koşu kaçakları, BUL modeli Opus ═════════════
