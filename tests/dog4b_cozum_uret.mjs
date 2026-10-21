@@ -90,10 +90,11 @@ const BELIRSIZ = [
 // CC EK DENEMELERİ — çözücü yazılırken bulunan tehlikeli sınıflar (fark / hedef miktar, "katına çıkar", var olan satıra ekleme). Çözücüyle birlikte yazıldı → DAİRESEL OLABİLİR, raporda ayrı satır.
 const EK = [
   ['wbock', "Special B'yi 2 katına çıkarsam", null, 'reçetede Special B yok (wbock) — kalem yok'],
-  ['dubbel', "Special B'yi 2 katına çıkarsam", { belirsiz: true }, '"katına çıkar" = kaldırma değil; hedef miktar yok'],
-  ['dubbel', "Special B'yi yarıya indirsem", { belirsiz: true }, 'hedef miktar yok'],
-  ['weizen', "pilsner'ı 1 kg azaltsam", { belirsiz: true }, '"1 kg azalt" = 1 kg eksilt (fark), hedef değil'],
-  ['weizen', "Hallertau'yu 5 g artırsam", { belirsiz: true }, 'fark'],
+  // DOG4C madde 2 (2026-10-21): çarpan ve fark artık deterministik hesaplanıyor → E02–E05 beklentisi belirsiz → MİKTAR (eski beklenti notta)
+  ['dubbel', "Special B'yi 2 katına çıkarsam", { islem: 'miktar', kalem: 'malt:3', miktar: 120, birim: 'g' }, '"katına çıkar" = kaldırma değil; DOG4C: × 2 → 60 → 120 g (DOG4B: belirsiz)'],
+  ['dubbel', "Special B'yi yarıya indirsem", { islem: 'miktar', kalem: 'malt:3', miktar: 30, birim: 'g' }, 'DOG4C: × 0,5 → 60 → 30 g (DOG4B: belirsiz)'],
+  ['weizen', "pilsner'ı 1 kg azaltsam", { islem: 'miktar', kalem: 'malt:1', miktar: 150, birim: 'g' }, '"1 kg azalt" = 1 kg eksilt (fark): DOG4C 1150 − 1000 = 150 g (DOG4B: belirsiz)'],
+  ['weizen', "Hallertau'yu 5 g artırsam", { islem: 'miktar', kalem: 'hop:0', miktar: 17, birim: 'g' }, 'fark: DOG4C 12 + 5 = 17 g (DOG4B: belirsiz)'],
   ['weizen', "Hallertau'ya 5 g daha eklesem", { belirsiz: true }, 'var olan satıra ekleme: toplam mı üstüne mi'],
   ['weizen', "buğday maltını 1,5 kiloya düşürsem", { islem: 'miktar', kalem: 'malt:0', miktar: 1.5, birim: 'kg' }, 'yönelme ekli hedef'],
   ['weizen', "buğday maltını 2 kg'a çıkarsam", { islem: 'miktar', kalem: 'malt:0', miktar: 2, birim: 'kg' }, "kesmeli yönelme 'a"],
