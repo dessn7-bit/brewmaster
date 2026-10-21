@@ -1,6 +1,6 @@
 SPRINT AI5D (DOG4D SONRASI) — "Bu reçeteyi nasıl geliştirebilirim?" kutusunun tanımadığı istekte para harcayıp boş/alakasız sonuç vermesi. GERÇEK AI KOSUSU YOK.
 
-Bu dosyada 6 numarali madde var. Ise baslamadan 6'sini de okudugunu raporun ilk satirinda teyit et.
+Bu dosyada 7 numarali madde var. Ise baslamadan 7'sini de okudugunu raporun ilk satirinda teyit et.
 EFOR: high
 MODEL: Model-bagimsiz. Modelini ilk satirda belirt.
 
@@ -42,5 +42,17 @@ Kaan: "hiç bişey anlamadım … ne oluyor burda".
 6. DOGRULAMA + AKIS
 - npm test TAM yesil. Donmus denetleyici imzasi 2c9ebd9f-32461 AYNI. G kapisi seridi (7/393) DEGISMEZ — bu sprint G setinin ciktisini degistirmemeli; degistirirse dur.
 - Canli curl, SW bump, APP_VERSION 'v2.79.10' SABIT, worker'a dokunma. Duzenlemeden once TAM yedek. Anahtar taramasi 0. Gercek AI cagrisi YOK. Kaan'dan bir sey istenmez.
+
+7. SADE GORUNUM (Kaan 2026-10-22: "Burası çok karışık, ne dediğini bile anlamadım")
+- Kartin ust kismi YALNIZ uc sey gosterir, sade Turkce, jargon YOK (p10–p90, n, iskelet izi, grist, kiyas:bjcp etiketi, "ödüllü örnekler (grist ≥ %80 eşlenen)" GORUNMEZ):
+  (a) "Anladığım: daha muzlu bir bira istiyorsun." (ya da "Bunu anlayamadım: '<metin>'")
+  (b) En cok 3 oneri, her biri TEK cumle: ne yapilacak + ne degisir + kaynak adi. Ornek bicim: "Mayalanmayı 20 °C yerine 22 °C'de yap — muz aroması artar (Wyeast, Brulosophy deneyi; tek deney)."
+  (c) Oneri yoksa tek cumle neden: "Bu istek için kaynaklı bir öneri bulamadım."
+- Geri kalan her sey (kiyas tablosu, kisisel gecmis, kaynakli anlatim, web alintilari, model/maliyet, dogrulama turu seridi "yanlış 7/393 …") TEK katli bolumde: "▸ Ayrıntılar ve kaynaklar". Varsayilan KAPALI.
+- Kiyas tablosu Ayrintilar'da kalirken bile satirlar duz cumle: "Şeker oranın benzer ödüllü biralardan yüksek (%12,5; onlarda %0)." — sayi + karsilastirma, istatistik terimi yok; ornek sayisi < 5 ise "az örnek, zayıf kanıt" sozcukleriyle.
+- AI anlatimi (kaynakli) sade Turkce talimatiyla: kisa cumle, yabanci terim yok ya da parantezde aciklamali (OG → "başlangıç yoğunluğu (OG)"). Denetleyici AYNEN.
+- Telefon olcusunde (360 px) ust kisim tek ekrana sigar; Playwright ekran goruntusu raporda (once/sonra, Kaan'in MUZO benzeri sentetik recetesiyle).
+- Ayni sadelestirme AI4 malzeme asistani kartinda da ayni ilkeyle mi gerekiyor: OLC ve raporla (kodlama bu sprintte yalniz AI5 karti).
+- AYRICA OLC: Kaan'in kartinda "baz malt payı %27,7" (bugday birasinda bugday malti baz sayiliyor mu?) ve "şeker payı %12,5" (MUZO'da hangi kalem seker sayildi?) — tanimlar dogru mu, ekran yaniltiyor mu; raporla, karar Claude.
 
 RAPOR: madde 1-4 once/sonra (Kaan'in cumlesiyle kart metni), kaynak kontrolu (CC'nin buldugu ek kaynaklar ayri liste, koda girmedi), parmak izi, kasitli bozmalar, imza, SUPHE (zorunlu).
