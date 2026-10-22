@@ -1,0 +1,1110 @@
+{
+ "tur": "BREWMASTER-DOG4D-COZUM-SETI",
+ "surum": 1,
+ "uretildi": "2026-10-22",
+ "kaynak": "tests/dog4d_cozum_uret.mjs — beklenen çözüm çekim tablosundan (dairesel değil; çözücü sözlüğü okunmadı); tabanlar tests/tuzak_seti.json (+ ekKatki sentetik mL satırı)",
+ "sayim": {
+  "heldout": 14,
+  "koru": 8,
+  "uretilmis_madde3": 66,
+  "ek_madde12": 9
+ },
+ "istemler": [
+  {
+   "id": "Y1a",
+   "grup": "heldout",
+   "taban": "dubbel",
+   "soru": "candi'yi 0,3 kg yapsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "katki:0",
+    "deg": 300
+   }
+  },
+  {
+   "id": "Y1b",
+   "grup": "heldout",
+   "taban": "dubbel",
+   "soru": "candi şekerini 0,2 kiloya çıkarsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "katki:0",
+    "deg": 200
+   }
+  },
+  {
+   "id": "Y1c",
+   "grup": "heldout",
+   "taban": "dubbel",
+   "soru": "Hazkat'ı 150 grama çıkarsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "katki:0",
+    "deg": 150
+   }
+  },
+  {
+   "id": "Y1d",
+   "grup": "heldout",
+   "taban": "dubbel",
+   "soru": "candiyi 50 g artırsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "katki:0",
+    "deg": 150
+   }
+  },
+  {
+   "id": "Y1e",
+   "grup": "heldout",
+   "taban": "dubbel",
+   "soru": "vanilya özünü 0,1 litre yapsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "katki:1",
+    "deg": 100
+   },
+   "ekKatki": {
+    "id": "vanilla_oz",
+    "ad": "Vanilya Özü (Saf Sıvı)",
+    "birim": "mL",
+    "miktar": 30,
+    "zaman": "Şişeleme"
+   }
+  },
+  {
+   "id": "Y2a",
+   "grup": "heldout",
+   "taban": "dubbel",
+   "soru": "mayayı WLP530 ile değiştirsem",
+   "beklenen": {
+    "yok": true
+   }
+  },
+  {
+   "id": "Y2b",
+   "grup": "heldout",
+   "taban": "dubbel",
+   "soru": "mayayı WLP500 ile değiştirsem",
+   "beklenen": {
+    "islem": "degistir",
+    "kalem": "maya",
+    "yeni": "wlp500"
+   }
+  },
+  {
+   "id": "Y2c",
+   "grup": "heldout",
+   "taban": "dubbel",
+   "soru": "mayayı BE-256 ile değiştirsem",
+   "beklenen": {
+    "islem": "degistir",
+    "kalem": "maya",
+    "yeni": "be256"
+   }
+  },
+  {
+   "id": "Y3a",
+   "grup": "heldout",
+   "taban": "weizen",
+   "soru": "mayayı WB-06 yapsam",
+   "beklenen": {
+    "islem": "degistir",
+    "kalem": "maya",
+    "yeni": "wb06"
+   }
+  },
+  {
+   "id": "Y3b",
+   "grup": "heldout",
+   "taban": "weizen",
+   "soru": "WY3068'i WB-06 yapsam",
+   "beklenen": {
+    "islem": "degistir",
+    "kalem": "maya",
+    "yeni": "wb06"
+   }
+  },
+  {
+   "id": "Y4",
+   "grup": "heldout",
+   "taban": "dubbel",
+   "soru": "special b'nin yarısını kullansam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:3",
+    "miktar": 30,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "G1",
+   "grup": "heldout",
+   "taban": "dubbel",
+   "soru": "Special B'yi tamamen atsam",
+   "beklenen": {
+    "islem": "cikar",
+    "kalem": "malt:3"
+   }
+  },
+  {
+   "id": "G2",
+   "grup": "heldout",
+   "taban": "dubbel",
+   "soru": "special b'siz yapsam",
+   "beklenen": {
+    "islem": "cikar",
+    "kalem": "malt:3"
+   }
+  },
+  {
+   "id": "G3",
+   "grup": "heldout",
+   "taban": "dubbel",
+   "soru": "candi olmadan yapsam",
+   "beklenen": {
+    "islem": "cikar",
+    "kalem": "katki:0"
+   }
+  },
+  {
+   "id": "R01",
+   "grup": "koru",
+   "taban": "dubbel",
+   "soru": "dubbele kişniş uyar mı",
+   "beklenen": {
+    "tat": true,
+    "stil": "Dubbel"
+   }
+  },
+  {
+   "id": "R02",
+   "grup": "koru",
+   "taban": "dubbel",
+   "soru": "Special B'yi biraz fazla koysam",
+   "beklenen": {
+    "belirsiz": true
+   }
+  },
+  {
+   "id": "R03",
+   "grup": "koru",
+   "taban": "dubbel",
+   "soru": "CaraMunich'i atıp Special B'yi artırsam",
+   "beklenen": {
+    "belirsiz": true
+   }
+  },
+  {
+   "id": "R04",
+   "grup": "koru",
+   "taban": "dubbel",
+   "soru": "Special B'yi çıkarıp yerine Carafa koysam",
+   "beklenen": {
+    "belirsiz": true,
+    "neden": "Carafa çok aday"
+   }
+  },
+  {
+   "id": "R05",
+   "grup": "koru",
+   "taban": "dubbel",
+   "soru": "Saaz yerine Styrian kullansam",
+   "beklenen": {
+    "belirsiz": true,
+    "neden": "Dubbel'de Saaz yok"
+   }
+  },
+  {
+   "id": "R06",
+   "grup": "koru",
+   "taban": "dubbel",
+   "soru": "kuru hop eklesem",
+   "beklenen": {
+    "belirsiz": true
+   }
+  },
+  {
+   "id": "R07",
+   "grup": "koru",
+   "taban": "weizen",
+   "soru": "Hallertau'yu 10 dakika kaynatsam",
+   "beklenen": {
+    "belirsiz": true
+   }
+  },
+  {
+   "id": "R08",
+   "grup": "koru",
+   "taban": "wbock",
+   "soru": "munich maltını 2 kilo azaltsam",
+   "beklenen": {
+    "belirsiz": true,
+    "neden": "1600 g − 2000 g ≤ 0"
+   }
+  },
+  {
+   "id": "D001",
+   "grup": "uretilmis",
+   "bicim": "iyelik-carpan",
+   "taban": "weizen",
+   "soru": "buğday maltının yarısını kullansam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:0",
+    "miktar": 875,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "D002",
+   "grup": "uretilmis",
+   "bicim": "iyelik-carpan",
+   "taban": "weizen",
+   "soru": "Buğday Maltı'nın iki katını koysam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:0",
+    "miktar": 3500,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "D003",
+   "grup": "uretilmis",
+   "bicim": "iyelik-belirsiz",
+   "taban": "weizen",
+   "soru": "buğday maltının bir kısmını kullansam",
+   "beklenen": {
+    "belirsiz": true
+   }
+  },
+  {
+   "id": "D004",
+   "grup": "uretilmis",
+   "bicim": "iyelik-carpan",
+   "taban": "weizen",
+   "soru": "Pilsner maltının üçte birini kullansam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:1",
+    "miktar": 383.3,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "D005",
+   "grup": "uretilmis",
+   "bicim": "iyelik-carpan",
+   "taban": "weizen",
+   "soru": "pilsner'ın dörtte birini koysam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:1",
+    "miktar": 287.5,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "D006",
+   "grup": "uretilmis",
+   "bicim": "iyelik-belirsiz",
+   "taban": "weizen",
+   "soru": "Pilsner maltının birazını koysam",
+   "beklenen": {
+    "belirsiz": true
+   }
+  },
+  {
+   "id": "D007",
+   "grup": "uretilmis",
+   "bicim": "iyelik-carpan",
+   "taban": "weizen",
+   "soru": "Hallertau'nun yarısını koysam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "hop:0",
+    "miktar": 6,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "D008",
+   "grup": "uretilmis",
+   "bicim": "iyelik-carpan",
+   "taban": "weizen",
+   "soru": "HALLERTAU'NUN üç katını kullansam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "hop:0",
+    "miktar": 36,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "D009",
+   "grup": "uretilmis",
+   "bicim": "iyelik-belirsiz",
+   "taban": "weizen",
+   "soru": "Hallertau'nun çoğunu kullansam",
+   "beklenen": {
+    "belirsiz": true
+   }
+  },
+  {
+   "id": "D010",
+   "grup": "uretilmis",
+   "bicim": "iyelik-carpan",
+   "taban": "dubbel",
+   "soru": "Special B'nin çeyreğini kullansam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:3",
+    "miktar": 15,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "D011",
+   "grup": "uretilmis",
+   "bicim": "iyelik-carpan",
+   "taban": "dubbel",
+   "soru": "SPECIAL B'NİN yarısını atsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:3",
+    "miktar": 30,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "D012",
+   "grup": "uretilmis",
+   "bicim": "iyelik-belirsiz",
+   "taban": "dubbel",
+   "soru": "Special B'nin bir miktarını atsam",
+   "beklenen": {
+    "belirsiz": true
+   }
+  },
+  {
+   "id": "D013",
+   "grup": "uretilmis",
+   "bicim": "iyelik-carpan",
+   "taban": "dubbel",
+   "soru": "Munich'in iki katını kullansam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:1",
+    "miktar": 800,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "D014",
+   "grup": "uretilmis",
+   "bicim": "iyelik-carpan",
+   "taban": "dubbel",
+   "soru": "münih maltının yarısını kullansam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:1",
+    "miktar": 200,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "D015",
+   "grup": "uretilmis",
+   "bicim": "iyelik-belirsiz",
+   "taban": "dubbel",
+   "soru": "Munich'in bir kısmını kullansam",
+   "beklenen": {
+    "belirsiz": true
+   }
+  },
+  {
+   "id": "D016",
+   "grup": "uretilmis",
+   "bicim": "iyelik-carpan",
+   "taban": "dubbel",
+   "soru": "candi'nin iki katını koysam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "katki:0",
+    "miktar": 200,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "D017",
+   "grup": "uretilmis",
+   "bicim": "iyelik-carpan",
+   "taban": "dubbel",
+   "soru": "candi şekerinin üçte birini kullansam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "katki:0",
+    "miktar": 33.3,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "D018",
+   "grup": "uretilmis",
+   "bicim": "iyelik-belirsiz",
+   "taban": "dubbel",
+   "soru": "candi'nin birazını koysam",
+   "beklenen": {
+    "belirsiz": true
+   }
+  },
+  {
+   "id": "D019",
+   "grup": "uretilmis",
+   "bicim": "iyelik-carpan",
+   "taban": "dubbel",
+   "soru": "Styrian'ın dörtte birini koysam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "hop:0",
+    "miktar": 5,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "D020",
+   "grup": "uretilmis",
+   "bicim": "iyelik-carpan",
+   "taban": "dubbel",
+   "soru": "Styrian Goldings'in yarısını koysam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "hop:0",
+    "miktar": 10,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "D021",
+   "grup": "uretilmis",
+   "bicim": "iyelik-belirsiz",
+   "taban": "dubbel",
+   "soru": "Styrian'ın çoğunu kullansam",
+   "beklenen": {
+    "belirsiz": true
+   }
+  },
+  {
+   "id": "D022",
+   "grup": "uretilmis",
+   "bicim": "iyelik-carpan",
+   "taban": "wbock",
+   "soru": "Carafa'nın üç katını kullansam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:3",
+    "miktar": 90,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "D023",
+   "grup": "uretilmis",
+   "bicim": "iyelik-belirsiz",
+   "taban": "wbock",
+   "soru": "Carafa'nın bir miktarını atsam",
+   "beklenen": {
+    "belirsiz": true
+   }
+  },
+  {
+   "id": "D024",
+   "grup": "uretilmis",
+   "bicim": "iyelik-carpan",
+   "taban": "wbock",
+   "soru": "caramunich 2'nin çeyreğini kullansam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:2",
+    "miktar": 37.5,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "D025",
+   "grup": "uretilmis",
+   "bicim": "iyelik-belirsiz",
+   "taban": "wbock",
+   "soru": "caramunich 2'nin bir kısmını kullansam",
+   "beklenen": {
+    "belirsiz": true
+   }
+  },
+  {
+   "id": "D026",
+   "grup": "uretilmis",
+   "bicim": "iyelik-carpan",
+   "taban": "wbock",
+   "soru": "buğday maltının yarısını atsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:0",
+    "miktar": 1300,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "D027",
+   "grup": "uretilmis",
+   "bicim": "iyelik-belirsiz",
+   "taban": "wbock",
+   "soru": "buğday maltının birazını koysam",
+   "beklenen": {
+    "belirsiz": true
+   }
+  },
+  {
+   "id": "D028",
+   "grup": "uretilmis",
+   "bicim": "siz",
+   "taban": "weizen",
+   "soru": "Hallertau'suz yapsam",
+   "beklenen": {
+    "islem": "cikar",
+    "kalem": "hop:0"
+   }
+  },
+  {
+   "id": "D029",
+   "grup": "uretilmis",
+   "bicim": "siz",
+   "taban": "weizen",
+   "soru": "Pilsner'siz yapsam",
+   "beklenen": {
+    "islem": "cikar",
+    "kalem": "malt:1"
+   }
+  },
+  {
+   "id": "D030",
+   "grup": "uretilmis",
+   "bicim": "siz",
+   "taban": "dubbel",
+   "soru": "Munich'siz yapsam",
+   "beklenen": {
+    "islem": "cikar",
+    "kalem": "malt:1"
+   }
+  },
+  {
+   "id": "D031",
+   "grup": "uretilmis",
+   "bicim": "siz",
+   "taban": "dubbel",
+   "soru": "Styrian'sız yapsam",
+   "beklenen": {
+    "islem": "cikar",
+    "kalem": "hop:0"
+   }
+  },
+  {
+   "id": "D032",
+   "grup": "uretilmis",
+   "bicim": "siz",
+   "taban": "dubbel",
+   "soru": "candi'siz yapsam",
+   "beklenen": {
+    "islem": "cikar",
+    "kalem": "katki:0"
+   }
+  },
+  {
+   "id": "D033",
+   "grup": "uretilmis",
+   "bicim": "siz",
+   "taban": "dubbel",
+   "soru": "Special B'siz bir Dubbel yapsam",
+   "beklenen": {
+    "islem": "cikar",
+    "kalem": "malt:3"
+   }
+  },
+  {
+   "id": "D034",
+   "grup": "uretilmis",
+   "bicim": "siz",
+   "taban": "wbock",
+   "soru": "Carafa'sız yapsam",
+   "beklenen": {
+    "islem": "cikar",
+    "kalem": "malt:3"
+   }
+  },
+  {
+   "id": "D035",
+   "grup": "uretilmis",
+   "bicim": "siz",
+   "taban": "wbock",
+   "soru": "caramunich 2'siz yapsam",
+   "beklenen": {
+    "islem": "cikar",
+    "kalem": "malt:2"
+   }
+  },
+  {
+   "id": "D036",
+   "grup": "uretilmis",
+   "bicim": "olmadan",
+   "taban": "dubbel",
+   "soru": "Special B olmadan yapsam",
+   "beklenen": {
+    "islem": "cikar",
+    "kalem": "malt:3"
+   }
+  },
+  {
+   "id": "D037",
+   "grup": "uretilmis",
+   "bicim": "olmadan",
+   "taban": "dubbel",
+   "soru": "candi koymadan yapsam",
+   "beklenen": {
+    "islem": "cikar",
+    "kalem": "katki:0"
+   }
+  },
+  {
+   "id": "D038",
+   "grup": "uretilmis",
+   "bicim": "olmadan",
+   "taban": "dubbel",
+   "soru": "Styrian Goldings kullanmadan yapsam",
+   "beklenen": {
+    "islem": "cikar",
+    "kalem": "hop:0"
+   }
+  },
+  {
+   "id": "D039",
+   "grup": "uretilmis",
+   "bicim": "olmadan",
+   "taban": "weizen",
+   "soru": "Hallertau olmadan yapsam",
+   "beklenen": {
+    "islem": "cikar",
+    "kalem": "hop:0"
+   }
+  },
+  {
+   "id": "D040",
+   "grup": "uretilmis",
+   "bicim": "olmadan",
+   "taban": "weizen",
+   "soru": "pilsner maltı olmadan yapsam",
+   "beklenen": {
+    "islem": "cikar",
+    "kalem": "malt:1"
+   }
+  },
+  {
+   "id": "D041",
+   "grup": "uretilmis",
+   "bicim": "olmadan",
+   "taban": "wbock",
+   "soru": "Carafa koymadan yapsam",
+   "beklenen": {
+    "islem": "cikar",
+    "kalem": "malt:3"
+   }
+  },
+  {
+   "id": "D042",
+   "grup": "uretilmis",
+   "bicim": "tamamen-at",
+   "taban": "dubbel",
+   "soru": "Styrian'ı tamamen atsam",
+   "beklenen": {
+    "islem": "cikar",
+    "kalem": "hop:0"
+   }
+  },
+  {
+   "id": "D043",
+   "grup": "uretilmis",
+   "bicim": "tamamen-at",
+   "taban": "dubbel",
+   "soru": "candi'yi tamamen atsam",
+   "beklenen": {
+    "islem": "cikar",
+    "kalem": "katki:0"
+   }
+  },
+  {
+   "id": "D044",
+   "grup": "uretilmis",
+   "bicim": "tamamen-at",
+   "taban": "weizen",
+   "soru": "Hallertau'yu tamamen atsam",
+   "beklenen": {
+    "islem": "cikar",
+    "kalem": "hop:0"
+   }
+  },
+  {
+   "id": "D045",
+   "grup": "uretilmis",
+   "bicim": "tamamen-at",
+   "taban": "wbock",
+   "soru": "Carafa'yı tamamen atsam",
+   "beklenen": {
+    "islem": "cikar",
+    "kalem": "malt:3"
+   }
+  },
+  {
+   "id": "D046",
+   "grup": "uretilmis",
+   "bicim": "atsam-yalniz",
+   "taban": "dubbel",
+   "soru": "Styrian'ı atsam",
+   "beklenen": {
+    "belirsiz": true
+   }
+  },
+  {
+   "id": "D047",
+   "grup": "uretilmis",
+   "bicim": "atsam-yalniz",
+   "taban": "weizen",
+   "soru": "Hallertau'yu atsam",
+   "beklenen": {
+    "belirsiz": true
+   }
+  },
+  {
+   "id": "D048",
+   "grup": "uretilmis",
+   "bicim": "siz-satir-yok",
+   "taban": "weizen",
+   "soru": "kişniş olmadan yapsam",
+   "beklenen": {
+    "belirsiz": true
+   }
+  },
+  {
+   "id": "D049",
+   "grup": "uretilmis",
+   "bicim": "siz-satir-yok",
+   "taban": "dubbel",
+   "soru": "Saaz'sız yapsam",
+   "beklenen": {
+    "belirsiz": true
+   }
+  },
+  {
+   "id": "D050",
+   "grup": "uretilmis",
+   "bicim": "yap",
+   "taban": "weizen",
+   "soru": "mayayı US-05 yapsam",
+   "beklenen": {
+    "islem": "degistir",
+    "kalem": "maya",
+    "yeni": "us05"
+   }
+  },
+  {
+   "id": "D051",
+   "grup": "uretilmis",
+   "bicim": "yap",
+   "taban": "weizen",
+   "soru": "Hallertau'yu Saaz yapsam",
+   "beklenen": {
+    "islem": "degistir",
+    "kalem": "hop:0",
+    "yeni": "saaz"
+   }
+  },
+  {
+   "id": "D052",
+   "grup": "uretilmis",
+   "bicim": "yap",
+   "taban": "weizen",
+   "soru": "hopu Saaz yapsam",
+   "beklenen": {
+    "islem": "degistir",
+    "kalem": "hop:0",
+    "yeni": "saaz"
+   }
+  },
+  {
+   "id": "D053",
+   "grup": "uretilmis",
+   "bicim": "yap",
+   "taban": "dubbel",
+   "soru": "Styrian'ı Fuggles yapsam",
+   "beklenen": {
+    "islem": "degistir",
+    "kalem": "hop:0",
+    "yeni": "fuggles"
+   }
+  },
+  {
+   "id": "D054",
+   "grup": "uretilmis",
+   "bicim": "yap",
+   "taban": "dubbel",
+   "soru": "Munich'i Vienna maltı yapsam",
+   "beklenen": {
+    "islem": "degistir",
+    "kalem": "malt:1",
+    "yeni": "vienna"
+   }
+  },
+  {
+   "id": "D055",
+   "grup": "uretilmis",
+   "bicim": "yap",
+   "taban": "dubbel",
+   "soru": "mayayı BE-256 yapsam",
+   "beklenen": {
+    "islem": "degistir",
+    "kalem": "maya",
+    "yeni": "be256"
+   }
+  },
+  {
+   "id": "D056",
+   "grup": "uretilmis",
+   "bicim": "yap",
+   "taban": "dubbel",
+   "soru": "WY3787'yi WLP500 yapsam",
+   "beklenen": {
+    "islem": "degistir",
+    "kalem": "maya",
+    "yeni": "wlp500"
+   }
+  },
+  {
+   "id": "D057",
+   "grup": "uretilmis",
+   "bicim": "yap",
+   "taban": "wbock",
+   "soru": "WY3068'i WB-06 yapsam",
+   "beklenen": {
+    "islem": "degistir",
+    "kalem": "maya",
+    "yeni": "wb06"
+   }
+  },
+  {
+   "id": "D058",
+   "grup": "uretilmis",
+   "bicim": "yap",
+   "taban": "dubbel",
+   "soru": "mayayı WLP530 yapsam",
+   "beklenen": {
+    "yok": true
+   }
+  },
+  {
+   "id": "D059",
+   "grup": "uretilmis",
+   "bicim": "yap",
+   "taban": "dubbel",
+   "soru": "mayayı Thrakia-77 yapsam",
+   "beklenen": {
+    "yok": true
+   }
+  },
+  {
+   "id": "D060",
+   "grup": "uretilmis",
+   "bicim": "yap",
+   "taban": "weizen",
+   "soru": "Hallertau'yu Hitit Altın yapsam",
+   "beklenen": {
+    "yok": true
+   }
+  },
+  {
+   "id": "D061",
+   "grup": "uretilmis",
+   "bicim": "yap",
+   "taban": "dubbel",
+   "soru": "Special B'yi daha az yapsam",
+   "beklenen": {
+    "belirsiz": true
+   }
+  },
+  {
+   "id": "D062",
+   "grup": "uretilmis",
+   "bicim": "yap",
+   "taban": "weizen",
+   "soru": "buğday maltını 2 kilo yapsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:0",
+    "miktar": 2,
+    "birim": "kg"
+   }
+  },
+  {
+   "id": "D063",
+   "grup": "uretilmis",
+   "bicim": "tur-sozcugu",
+   "taban": "weizen",
+   "soru": "mayayı WB-06 ile denesem",
+   "beklenen": {
+    "belirsiz": true
+   }
+  },
+  {
+   "id": "D064",
+   "grup": "uretilmis",
+   "bicim": "tur-sozcugu",
+   "taban": "dubbel",
+   "soru": "hopu Saaz'la denesem",
+   "beklenen": {
+    "belirsiz": true
+   }
+  },
+  {
+   "id": "D065",
+   "grup": "uretilmis",
+   "bicim": "tur-sozcugu",
+   "taban": "weizen",
+   "soru": "WB-06 kullansam olur mu",
+   "beklenen": {
+    "tat": true
+   }
+  },
+  {
+   "id": "D066",
+   "grup": "uretilmis",
+   "bicim": "tur-sozcugu",
+   "taban": "dubbel",
+   "soru": "Special B'nin yarısı kadar Carafa eklesem",
+   "beklenen": {
+    "belirsiz": true
+   }
+  },
+  {
+   "id": "D067",
+   "grup": "uretilmis",
+   "bicim": "madde1-2-ek",
+   "taban": "dubbel",
+   "soru": "Styrian'ı 0,03 kg yapsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "hop:0",
+    "deg": 30
+   }
+  },
+  {
+   "id": "D068",
+   "grup": "uretilmis",
+   "bicim": "madde1-2-ek",
+   "taban": "dubbel",
+   "soru": "candiyi 0,15 kg yapsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "katki:0",
+    "deg": 150
+   }
+  },
+  {
+   "id": "D069",
+   "grup": "uretilmis",
+   "bicim": "madde1-2-ek",
+   "taban": "dubbel",
+   "soru": "vanilya özünü 20 ml artırsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "katki:1",
+    "miktar": 50,
+    "birim": "mL"
+   },
+   "ekKatki": {
+    "id": "vanilla_oz",
+    "ad": "Vanilya Özü (Saf Sıvı)",
+    "birim": "mL",
+    "miktar": 30,
+    "zaman": "Şişeleme"
+   }
+  },
+  {
+   "id": "D070",
+   "grup": "uretilmis",
+   "bicim": "madde1-2-ek",
+   "taban": "dubbel",
+   "soru": "vanilya özünü 50 g yapsam",
+   "beklenen": {
+    "belirsiz": true,
+    "neden": "g → mL çevrilemez"
+   },
+   "ekKatki": {
+    "id": "vanilla_oz",
+    "ad": "Vanilya Özü (Saf Sıvı)",
+    "birim": "mL",
+    "miktar": 30,
+    "zaman": "Şişeleme"
+   }
+  },
+  {
+   "id": "D071",
+   "grup": "uretilmis",
+   "bicim": "madde1-2-ek",
+   "taban": "dubbel",
+   "soru": "candi'yi 1 litre yapsam",
+   "beklenen": {
+    "belirsiz": true,
+    "neden": "L → g çevrilemez"
+   }
+  },
+  {
+   "id": "D072",
+   "grup": "uretilmis",
+   "bicim": "madde1-2-ek",
+   "taban": "dubbel",
+   "soru": "WY3787 yerine WLP530 kullansam",
+   "beklenen": {
+    "yok": true
+   }
+  },
+  {
+   "id": "D073",
+   "grup": "uretilmis",
+   "bicim": "madde1-2-ek",
+   "taban": "weizen",
+   "soru": "Hallertau yerine Hitit Altın kullansam",
+   "beklenen": {
+    "yok": true
+   }
+  },
+  {
+   "id": "D074",
+   "grup": "uretilmis",
+   "bicim": "madde1-2-ek",
+   "taban": "dubbel",
+   "soru": "mayayı WY3787 ile değiştirsem",
+   "beklenen": {
+    "belirsiz": true,
+    "neden": "aynı kalem"
+   }
+  },
+  {
+   "id": "D075",
+   "grup": "uretilmis",
+   "bicim": "madde1-2-ek",
+   "taban": "dubbel",
+   "soru": "Special B yerine Special B kullansam",
+   "beklenen": {
+    "belirsiz": true,
+    "neden": "aynı kalem"
+   }
+  }
+ ]
+}
