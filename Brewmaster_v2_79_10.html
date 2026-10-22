@@ -34874,8 +34874,27 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   // ── 1) HEDEF ──
   G.HEDEFLER = [
     { k:'stil',  ad:'Stile / ödüllülere yaklaştır' }, { k:'kuru', ad:'Daha kuru' }, { k:'govde', ad:'Daha gövdeli' }, { k:'azaci', ad:'Daha az acı' },
-    { k:'aci', ad:'Daha acı' }, { k:'koyu', ad:'Daha koyu' }, { k:'acik', ad:'Daha açık' }, { k:'tadim', ad:'Tadımdaki sorunu düzelt' } ];
+    { k:'aci', ad:'Daha acı' }, { k:'koyu', ad:'Daha koyu' }, { k:'acik', ad:'Daha açık' }, { k:'muz', ad:'Daha muzlu (ester)' }, { k:'karanfil', ad:'Daha karanfilli (fenol)' }, { k:'tadim', ad:'Tadımdaki sorunu düzelt' } ];
   G.hedefAd = function(k){ var h = G.HEDEFLER.find(function(x){ return x.k === k; }); return h ? h.ad : k; };
+  // AI5D (1-2): EKRANDA GÖSTERİLEN çipler — 'tadim' yalnız tadım / off-flavor kaydı varsa; muz / karanfil yalnız buğday birası mayasında (kaynaklar buğday birası mayası için: Lallemand / White Labs / Wyeast / BSI)
+  //   AI'nın seçebileceği enum da YALNIZ bu liste (Kaan'ın denemesi 2026-10-22: tadım kaydı yokken ucuz model 'tadim' seçti — çip gizliydi ama enum'daydı)
+  G.AROMA_MAYA_TIP = /^(wheat|wit)$/;
+  G.aromaMaya = function(T){ var y = T && T.tarif && T.tarif.mayaId ? kayit('maya', T.tarif.mayaId) : null; return y && G.AROMA_MAYA_TIP.test(String(y.tip || '')) ? y : null; };
+  G.gorunurHedefler = function(T){ var tk = T ? G.tadimKayit(T) : [], ar = T ? G.aromaMaya(T) : null;
+    return G.HEDEFLER.filter(function(h){ return h.k === 'tadim' ? tk.length > 0 : (h.k === 'muz' || h.k === 'karanfil') ? !!ar : true; }); };
+  // AI5D (1): tat / aroma isteği (sözlük, katlanmış metin, sözcük sınırı) — eşleşmezse "tanıyamadım", AI'ya GİTMEZ (para yok)
+  G.AROMA_RE = /\b(muz\w*|banan\w*|karanfil\w*|vanilya\w*|meyve\w*|sut\w*|krem\w*|tad\w*|tat\b|tatli tat\w*|aroma\w*|koku\w*|kokus\w*|ester\w*|fenol\w*|baharat\w*|cicek\w*|narenciye\w*|turuncgil\w*|portakal\w*|limon\w*|seftali\w*|kayisi\w*|tropik\w*|cilek\w*|ahududu\w*|erik\w*|elma\w*|armut\w*|ananas\w*|mango\w*|kahve\w*|cikolata\w*|tost\w*|ekmek\w*|bisk[uü]vi\w*|bal\b|balli|isli|duman\w*|sakiz\w*)\b/;
+  G.AROMA_MUZ = /\b(muz\w*|banan\w*|izoamil\w*|ester\w*)\b/;
+  G.AROMA_KARANFIL = /\b(karanfil\w*|clove\w*|fenol\w*|4 ?vg)\b/;
+  //   azaltma / şikâyet ("karanfil daha az olsun", "çok muzlu olmuş") bu kurallarla karşılanmaz: kaynakların yönü ARTIRMA üzerine → hedef yok (tanıyamadım)
+  G.AROMA_NEG = /\b(daha az|az olsun|azal\w*|dusur\w*|olmasin|cok muzlu|cok karanfilli|asiri|bastir\w*|gitsin|istemiyorum|fazla (?:olmus|geldi|var))\b/;
+  G.aromaEsle = function(n){ var mz = G.AROMA_MUZ.test(n), kf = G.AROMA_KARANFIL.test(n); if(!mz && !kf) return null; if(G.AROMA_NEG.test(n) || (mz && kf)) return { k:null };
+    var k = mz ? 'muz' : 'karanfil', kal = [], re = new RegExp(G.AROMA_RE.source, 'g'), m; while((m = re.exec(n))){ if(!(k === 'muz' ? G.AROMA_MUZ : G.AROMA_KARANFIL).test(m[0]) && !/^(tad\w*|tat)$/.test(m[0])) kal.push(m[0]); }
+    return { k:k, yontem:'deterministik eşleme (aroma)', kalan:kal }; };
+  G.aromaIstek = function(metin){ var m = G.AROMA_RE.exec(' ' + norm(metin) + ' '); return m ? (G.asilSozler(metin, [m[0]])[0] || m[0]) : null; };
+  // katlanmış tat sözcüklerini kullanıcının ASIL yazımına çevirir; ardından gelen "tadı / tat / kokusu" da öbeğe katılır ("süt tadı")
+  G.asilSozler = function(metin, L){ var W = String(metin || '').split(/\s+/), N = W.map(function(w){ return norm(w.replace(/[.,!?;:]+$/, '')); }), out = [];
+    L.forEach(function(k){ var i = N.indexOf(k); if(i < 0) return; var s = W[i].replace(/[.,!?;:]+$/, ''); if(N[i + 1] && /^(tad\w*|tat\w*|koku\w*|aroma\w*)$/.test(N[i + 1])) s += ' ' + W[i + 1].replace(/[.,!?;:]+$/, ''); if(out.indexOf(s) < 0) out.push(s); }); return out; };
   // deterministik eşleme — SIRA önemli: olumsuz biçimler ("daha az acı", "daha az kuru", "daha az tatlı") yalın biçimden ÖNCE
   // Kural: İSTEK ("daha kuru olsun") o yöne; ŞİKÂYET ("çok tatlı olmuş", "gövdesi ince") TERS yöne. Sözcük sınırı zorunlu ("biraz açılsın" ≠ "az acı"; "kusursuz" ≠ "kusur").
   G.ESLEME = [
@@ -34889,13 +34908,15 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     ['stil', /\b(stil\w*|bjcp|odul\w*|madalya\w*|standart\w*|gelistir\w*|iyilestir\w*|duzelt\w*|kusursuz|mukemmel|nasil|ne yap\w*|eksik\w*|oneri\w*)\b/]
   ];
   G.hedefEsle = function(metin){ var n = ' ' + norm(metin) + ' '; if(!norm(metin)) return { k:'stil', yontem:'boş → varsayılan' };
+    var ar = G.aromaEsle(n); if(ar) return ar.k ? ar : null; // AI5D (2): muz / karanfil isteği ÖNCE (azaltma / ikisi birden → hedef yok)
     for(var i = 0; i < G.ESLEME.length; i++) if(G.ESLEME[i][1].test(n)) return { k:G.ESLEME[i][0], yontem:'deterministik eşleme' };
     return null; };
-  G.hedefSema = function(){ return { type:'json_schema', schema:{ type:'object', properties:{ hedef:{ type:'string', enum:G.HEDEFLER.map(function(h){ return h.k; }).concat(['yok']) } }, required:['hedef'], additionalProperties:false } }; };
-  // deterministik eşleme olmazsa: ucuz model YALNIZ çip listesinden seçer (serbest metin cevabı yok); "yok" → Kaan seçer
-  G.hedefAI = function(metin){ var A = window.BM_AI; if(!A || !A.hazirMi || !A.hazirMi().hazir) return Promise.resolve({ ok:false, neden:'AI hazır değil' });
-    return A.sor({ kullanim:'hedef', modelKey:'ucuz', baglam:'HEDEF ÇİPLERİ:\n' + G.HEDEFLER.map(function(h){ return h.k + ' — ' + h.ad; }).join('\n'), soru:'Kullanıcının isteği: "' + String(metin || '').slice(0, 200) + '"\nBu istek hangi hedef çipine karşılık geliyor? Yalnız listeden seç; emin değilsen "yok".', sema:G.hedefSema() })
-      .then(function(r){ var h = r && r.ok && r.veri && r.veri.hedef; return { ok:!!(h && h !== 'yok' && G.HEDEFLER.some(function(x){ return x.k === h; })), k:h, maliyet:r && r.maliyet, model:r && r.model }; }); };
+  // AI5D (1): enum YALNIZ ekranda gösterilen çiplerden (T yoksa: tadım ve aroma çipleri gösterilmez sayılır)
+  G.hedefSema = function(T){ return { type:'json_schema', schema:{ type:'object', properties:{ hedef:{ type:'string', enum:G.gorunurHedefler(T).map(function(h){ return h.k; }).concat(['yok']) } }, required:['hedef'], additionalProperties:false } }; };
+  // deterministik eşleme olmazsa: ucuz model YALNIZ ekrandaki çip listesinden seçer (serbest metin cevabı yok); "yok" → tanıyamadım
+  G.hedefAI = function(metin, T){ var A = window.BM_AI; if(!A || !A.hazirMi || !A.hazirMi().hazir) return Promise.resolve({ ok:false, neden:'AI hazır değil' }); var H = G.gorunurHedefler(T);
+    return A.sor({ kullanim:'hedef', modelKey:'ucuz', baglam:'HEDEF ÇİPLERİ:\n' + H.map(function(h){ return h.k + ' — ' + h.ad; }).join('\n'), soru:'Kullanıcının isteği: "' + String(metin || '').slice(0, 200) + '"\nBu istek hangi hedef çipine karşılık geliyor? Yalnız listeden seç; emin değilsen "yok".', sema:G.hedefSema(T) })
+      .then(function(r){ var h = r && r.ok && r.veri && r.veri.hedef; return { ok:!!(h && h !== 'yok' && H.some(function(x){ return x.k === h; })), k:h, maliyet:r && r.maliyet, model:r && r.model }; }); };
 
   // ── 2) KURAL TABLOSU (TEK TABLO, KAYNAKLI) — kaynağı bulunamayan kural GİRMEZ (test kilitli). Okuma: 2026-10-14 (Claude, sayfa metinleri okundu).
   G.OKUMA = '2026-10-14';
@@ -34916,8 +34937,57 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     { id:'renk', degisken:'en koyu malt miktarı (OG korunur)', hedef:{ koyu:'art', acik:'azalt', stil:'srm' }, metin:'Renk, malt ağırlığı × Lovibond / hacim (MCU) üzerinden Morey denklemiyle tahmin edilir; koyu maltın miktarı rengi doğrudan değiştirir.',
       kaynaklar:[ { ad:'Craft Beer & Brewing — "Seeing the Color in Your Future" (Jester Goldman)', url:'https://www.beerandbrewing.com/seeing-the-color-in-your-future', alinti:'MCU = (number of pounds of grain) x (grain color in degrees Lovibond) / (volume in gallons) · SRM = 1.4922 x [ MCU ^ 0.6859 ]' } ] },
     { id:'baz', degisken:'baz malt miktarı (oranlar korunur)', hedef:{ stil:'og' }, metin:'OG, maltların ağırlığı × ekstrakt potansiyeli × verim / hacim; FG, OG\'nin mayanın attenuation oranıyla fermente olmayan kısmı.',
-      kaynaklar:[ { ad:'Homebrew Academy — OG & FG Calculator', url:'https://homebrewacademy.com/og-fg-calculator/', alinti:'adjust our total points to reflect brew house efficiency · applying the average attenuation rating of our yeast strain to our Original Gravity\'s (OG) points per gallon number' } ] }
+      kaynaklar:[ { ad:'Homebrew Academy — OG & FG Calculator', url:'https://homebrewacademy.com/og-fg-calculator/', alinti:'adjust our total points to reflect brew house efficiency · applying the average attenuation rating of our yeast strain to our Original Gravity\'s (OG) points per gallon number' } ] },
+    // ── AI5D (2): MUZ (ester) / KARANFİL (fenol) — buğday birası mayası. Okuma 2026-10-23 (Claude Code: PDF / sayfa metni açıldı, alıntılar birebir; Claude'un 2026-10-22 özetiyle karşılaştırıldı).
+    //   aroma:true → HEDEF_KURAL / stil yolunda KULLANILMAZ; yontem: aday (reçete değişkeni, hesaplanır) · yon (reçetede alanı yok — yalnız yön cümlesi) · bilgi (öneri değil)
+    //   Büyüklük (kaç °C → ne kadar muz) kaynaklarda SAYI olarak YOK → adım büyüklükleri UYGULAMA VARSAYIMI.
+    { id:'pitch', aroma:true, yontem:'yon', degisken:'atılan maya miktarı (reçetede alanı yok)', hedef:{ muz:'azalt' }, okuma:'2026-10-23', metin:'Az maya atmak (düşük pitch) esteri ve muz aromasını (izoamil asetat) artırır; fazla maya muzu bastırır. Lallemand\'a göre en güçlü etken budur.',
+      kaynaklar:[ { ad:'Lallemand — Best Practices: Wheat Beer Solutions', kurum:'Lallemand', tur:'uretici', url:'https://admin.lallemandbrewing.com/wp-content/uploads/2023/10/Wheat-Beer-Solutions-BP-ENG-digital-LalBrew.pdf', alinti:'Higher total ester levels are strongly associated with lower pitching rates. · Lower pitching rates led to much higher levels of isoamyl acetate for LalBrew Munich Classic™ and LalBrew Abbaye™' },
+        { ad:'White Labs — WLP300 Hefeweizen Ale Yeast', kurum:'White Labs', tur:'uretici', url:'https://www.whitelabs.com/yeast-bank/wlp300-hefeweizen-ale-yeast', alinti:'The pitching rate and temperature will dramatically affect the flavor and aroma of this strain. Traditional brewing techniques suggest underpitching to produce more classic characteristics of the style.' },
+        { ad:'Wyeast — 3068 Weihenstephan Weizen', kurum:'Wyeast', tur:'uretici', url:'https://wyeastlab.com/product/weihenstephan-weizen/', alinti:'The balance can be manipulated towards ester production through increasing the fermentation temperature, increasing the wort density, and decreasing the pitch rate. Over pitching can result in a near complete loss of banana character.' },
+        { ad:'Brewing Science Institute — D. Bryant, "Wheat Beer Yeast and Fermentation"', kurum:'Brewing Science Institute', tur:'egitim', url:'https://brewingscience.com/wp-content/uploads/2019/06/Wheat_Beer_Yeast__Fermentation.pdf', alinti:'Under pitching may increase esters · Many breweries pitch 5-10 million cells/ml · (Narziss 1983) Pitching Rate 12-18 million cells/ml' } ] },
+    { id:'fermsc', aroma:true, yontem:'yon', degisken:'mayalanma sıcaklığı (reçetede alanı yok)', hedef:{ muz:'art' }, okuma:'2026-10-23', metin:'Mayanın sıcaklık aralığının üst tarafında mayalandırmak esteri (muz) artırır — etkisi maya miktarından küçüktür; karanfil (4-VG) de değişebilir.',
+      kaynaklar:[ { ad:'Lallemand — Best Practices: Wheat Beer Solutions', kurum:'Lallemand', tur:'uretici', url:'https://admin.lallemandbrewing.com/wp-content/uploads/2023/10/Wheat-Beer-Solutions-BP-ENG-digital-LalBrew.pdf', alinti:'Higher fermentation temperatures will also tend to increase total esters, but to a lesser degree than lowering the pitching rate.' },
+        { ad:'Wyeast — 3068 Weihenstephan Weizen', kurum:'Wyeast', tur:'uretici', url:'https://wyeastlab.com/product/weihenstephan-weizen/', alinti:'The balance can be manipulated towards ester production through increasing the fermentation temperature' },
+        { ad:'Brewing Science Institute — D. Bryant, "Wheat Beer Yeast and Fermentation"', kurum:'Brewing Science Institute', tur:'egitim', url:'https://brewingscience.com/wp-content/uploads/2019/06/Wheat_Beer_Yeast__Fermentation.pdf', alinti:'Ester Production is supported through … Increasing fermentation temperatures' },
+        { ad:'White Labs — WLP300 Hefeweizen Ale Yeast', kurum:'White Labs', tur:'uretici', yonYok:true, url:'https://www.whitelabs.com/yeast-bank/wlp300-hefeweizen-ale-yeast', alinti:'The pitching rate and temperature will dramatically affect the flavor and aroma of this strain. · FERMENTATION TEMPERATURE: 68° - 72° F / 20° - 22° C' },
+        { ad:'Brulosophy — exBEERiment "Fermentation Temperature: WLP300 Hefeweizen Ale Yeast" (2017)', kurum:'Brulosophy', tur:'tekdeney', url:'https://brulosophy.com/2017/08/21/fermentation-temperature-pt-9-wlp300-hefeweizen-ale-yeast', alinti:'16 °C ile 22 °C kör üçgen: 32 tadımcının 19\'u doğru seçti (p = 0,002); 22 °C yoğun muz (uygulamanın bilgi tabanı kaydı step_fermSicaklik)' } ] },
+    { id:'og_ester', aroma:true, yontem:'aday', degisken:'başlangıç yoğunluğu (OG)', hedef:{ muz:'art' }, okuma:'2026-10-23', metin:'Daha yoğun şıra (OG ≈ 1,053 / 13 °P üstü) maya büyümesini ve esteri artırır — yalnız stilin OG aralığı içinde önerilir.',
+      kaynaklar:[ { ad:'Lallemand — Best Practices: Wheat Beer Solutions', kurum:'Lallemand', tur:'uretici', url:'https://admin.lallemandbrewing.com/wp-content/uploads/2023/10/Wheat-Beer-Solutions-BP-ENG-digital-LalBrew.pdf', alinti:'high gravity wort and higher levels of zinc will increase yeast growth resulting in more fusel alcohols and therefore more esters · QUICK REFERENCE — Esters, To increase: Higher gravity wort' },
+        { ad:'Brewing Science Institute — D. Bryant, "Wheat Beer Yeast and Fermentation"', kurum:'Brewing Science Institute', tur:'egitim', url:'https://brewingscience.com/wp-content/uploads/2019/06/Wheat_Beer_Yeast__Fermentation.pdf', alinti:'Ester Production is supported through … Increasing the wort concentration above 13%' },
+        { ad:'Wyeast — 3068 Weihenstephan Weizen', kurum:'Wyeast', tur:'uretici', url:'https://wyeastlab.com/product/weihenstephan-weizen/', alinti:'manipulated towards ester production through … increasing the wort density' } ] },
+    { id:'ferulik', aroma:true, yontem:'yon', korAyirtEdemedi:true, degisken:'44–46 °C ferulik asit dinlenmesi (mash adımı)', hedef:{ muz:'kisalt', karanfil:'ekle' }, okuma:'2026-10-23', metin:'44–46 °C dinlenmesi karanfilin öncüsü ferulik asidi artırır; uzadıkça 4-VG (karanfil) artar. Kontrollü kör tadımda fark AYIRT EDİLEMEDİ — en fazla "olası".',
+      kaynaklar:[ { ad:'Lallemand — Best Practices: Wheat Beer Solutions', kurum:'Lallemand', tur:'uretici', url:'https://admin.lallemandbrewing.com/wp-content/uploads/2023/10/Wheat-Beer-Solutions-BP-ENG-digital-LalBrew.pdf', alinti:'A mashing rest at 45°C can increase ferulic acid levels in the wort, and potentially increase 4-VG in the beer (Coghe et al, 2004).' },
+        { ad:'Brewing Science Institute — D. Bryant, "Wheat Beer Yeast and Fermentation"', kurum:'Brewing Science Institute', tur:'egitim', url:'https://brewingscience.com/wp-content/uploads/2019/06/Wheat_Beer_Yeast__Fermentation.pdf', alinti:'(H. P. Drexler, Schneider) Longer the rest at 44°C, the higher the 4-V-G (clove phenol)' },
+        { ad:'Brulosophy — exBEERiment "Impact A Ferulic Acid Rest Has On A Weissbier" (2019)', kurum:'Brulosophy', tur:'tekdeney', url:'https://brulosophy.com/2019/06/17/the-ferulic-acid-rest-effect-exbeeriment-results/', alinti:'kör üçgen: 24 tadımcının 6\'sı doğru seçti (p = 0,86) — dinlenmeli / dinlenmesiz fark ayırt edilemedi (uygulamanın bilgi tabanı kaydı step_ferulik)' } ] },
+    { id:'acikferm', aroma:true, yontem:'bilgi', degisken:'fermentör biçimi (reçete değişkeni değil)', hedef:{ muz:'bilgi' }, okuma:'2026-10-23', metin:'Açık / sığ, basınçsız fermentör esteri artırır; silindirik (derin) tank daha az ester verir. Reçete değişkeni değil — bilgi.',
+      kaynaklar:[ { ad:'Lallemand — Best Practices: Wheat Beer Solutions', kurum:'Lallemand', tur:'uretici', url:'https://admin.lallemandbrewing.com/wp-content/uploads/2023/10/Wheat-Beer-Solutions-BP-ENG-digital-LalBrew.pdf', alinti:'QUICK REFERENCE — Esters, To increase: Avoid pressurized fermentation (open fermenter)' },
+        { ad:'Brewing Science Institute — D. Bryant, "Wheat Beer Yeast and Fermentation"', kurum:'Brewing Science Institute', tur:'egitim', url:'https://brewingscience.com/wp-content/uploads/2019/06/Wheat_Beer_Yeast__Fermentation.pdf', alinti:'(Narziss 1983) Cylindrical tanks produce only 2/3 the esters of shallow open fermenters · Open fermenters increase esters' } ] },
+    { id:'havalandirma', aroma:true, yontem:'bilgi', celiski:true, degisken:'şıra havalandırması', hedef:{ muz:'bilgi' }, okuma:'2026-10-23', metin:'Havalandırmanın estere etkisinde kaynaklar ÇELİŞİYOR: Lallemand metni yetersiz havalandırmanın esteri AZALTTIĞINI, aynı belgenin tablosu ve BSI ise az havalandırmanın esteri ARTIRDIĞINI söylüyor. Öneri yapılmaz.',
+      kaynaklar:[ { ad:'Lallemand — Best Practices: Wheat Beer Solutions (metin)', kurum:'Lallemand', tur:'uretici', url:'https://admin.lallemandbrewing.com/wp-content/uploads/2023/10/Wheat-Beer-Solutions-BP-ENG-digital-LalBrew.pdf', alinti:'Insufficient wort aeration or fermentation under pressure will tend to reduce yeast growth and lower total esters.' },
+        { ad:'Lallemand — Best Practices: Wheat Beer Solutions (hızlı başvuru tablosu)', kurum:'Lallemand', tur:'uretici', url:'https://admin.lallemandbrewing.com/wp-content/uploads/2023/10/Wheat-Beer-Solutions-BP-ENG-digital-LalBrew.pdf', alinti:'QUICK REFERENCE — Esters, To decrease: Increase aeration rate' },
+        { ad:'Brewing Science Institute — D. Bryant, "Wheat Beer Yeast and Fermentation"', kurum:'Brewing Science Institute', tur:'egitim', url:'https://brewingscience.com/wp-content/uploads/2019/06/Wheat_Beer_Yeast__Fermentation.pdf', alinti:'Ester Production is supported through … Decreasing wort aeration · Under aeration may increase esters (some aerate only 50% of knockout)' } ] },
+    { id:'karanfil_sicaklik', aroma:true, yontem:'bilgi', celiski:true, degisken:'mayalanma sıcaklığı → karanfil', hedef:{ karanfil:'bilgi' }, okuma:'2026-10-23', metin:'Sıcaklığın karanfile etkisinde kaynaklar ÇELİŞİYOR: Lallemand 25 °C\'de 20 °C\'ye göre 1,5–2 kat 4-VG ölçmüş; Kieninger (BSI) en yüksek 4-VG\'yi 20 °C\'de, Brulosophy deneyi 16 °C\'de belirgin karanfil bulmuş. Öneri yapılmaz.',
+      kaynaklar:[ { ad:'Lallemand — Best Practices: Wheat Beer Solutions', kurum:'Lallemand', tur:'uretici', url:'https://admin.lallemandbrewing.com/wp-content/uploads/2023/10/Wheat-Beer-Solutions-BP-ENG-digital-LalBrew.pdf', alinti:'In most cases, 4-VG levels increase by roughly 1.5 to 2-fold when either fermenting at 25°C compared to 20°C, or by pitching 0.5g/hL compared to 1.0g/hL.' },
+        { ad:'Brewing Science Institute — D. Bryant, "Wheat Beer Yeast and Fermentation"', kurum:'Brewing Science Institute', tur:'egitim', url:'https://brewingscience.com/wp-content/uploads/2019/06/Wheat_Beer_Yeast__Fermentation.pdf', alinti:'(H. Kieninger et al 1984) Small test fermentations at 15, 20 and 25 C indicated that both 4VG and 4VP reached a maximum at 20 C.' },
+        { ad:'Brulosophy — exBEERiment "Fermentation Temperature: WLP300 Hefeweizen Ale Yeast" (2017)', kurum:'Brulosophy', tur:'tekdeney', url:'https://brulosophy.com/2017/08/21/fermentation-temperature-pt-9-wlp300-hefeweizen-ale-yeast', alinti:'16 °C: bastırılmış ester, belirgin karanfil; 22 °C: yoğun muz, neredeyse hiç algılanabilir fenol yok (uygulamanın bilgi tabanı kaydı step_fermSicaklik)' } ] },
+    { id:'karanfil_pitch', aroma:true, yontem:'bilgi', celiski:true, degisken:'atılan maya miktarı → karanfil', hedef:{ karanfil:'bilgi' }, okuma:'2026-10-23', metin:'Maya miktarının karanfile etkisinde kaynaklar ters yönü işaret ediyor: Lallemand az mayada 4-VG\'nin ARTTIĞINI ölçmüş; Wyeast ise esteri azaltmanın (fazla maya) karanfili DAHA ÇOK hissettirdiğini yazıyor. Öneri yapılmaz.',
+      kaynaklar:[ { ad:'Lallemand — Best Practices: Wheat Beer Solutions', kurum:'Lallemand', tur:'uretici', url:'https://admin.lallemandbrewing.com/wp-content/uploads/2023/10/Wheat-Beer-Solutions-BP-ENG-digital-LalBrew.pdf', alinti:'4-VG levels are strongly correlated with lower pitching rates and higher fermentation temperatures.' },
+        { ad:'Wyeast — 3068 Weihenstephan Weizen', kurum:'Wyeast', tur:'uretici', url:'https://wyeastlab.com/product/weihenstephan-weizen/', alinti:'Decreasing the ester level will allow a higher clove character to be perceived.' } ] }
   ];
+  // AI5D (GÜNCELLEME): kaynak türü — kanıt gücü UYGULAMA tarafından hesaplanır. Sayılan tür: üretici · ders kitabı · eğitim kurumu · kontrollü deney (bağımsız = farklı kurum);
+  //   tek deney (Brulosophy) ve dergi / site makalesi güç SAYISINA girmez (destekleyici). Eski 7 kuralın kaynak türleri (okuma 2026-10-14 kaynakları, yeniden sınıflandırma 2026-10-23):
+  var ESKI_TUR = [[/^BYO/, 'dergi', 'BYO'], [/^Brulosophy/, 'tekdeney', 'Brulosophy'], [/^Craft Beer & Brewing/, 'dergi', 'Craft Beer & Brewing'], [/^Homebrew Academy/, 'site', 'Homebrew Academy'], [/^Üretici veri sayfası/, 'uretici', 'üretici veri sayfası']];
+  G.KURALLAR.forEach(function(r){ (r.kaynaklar || []).forEach(function(k){ if(k.tur) return; var e = ESKI_TUR.find(function(x){ return x[0].test(k.ad || ''); }); if(e){ k.tur = e[1]; k.kurum = e[2]; } }); });
+  G.KURALLAR.forEach(function(r){ if(r.id === 'mash') r.korAyirtEdemedi = true; }); // Brulosophy 64 vs 73 °C: 33 tadımcının 12'si (p = 0,42) — algı farkı anlamlı değil
+  G.GUC_TUR = { uretici:1, ders:1, egitim:1, deney:1 };
+  G.KAYNAK_KISA = { 'Lallemand':'Lallemand', 'White Labs':'White Labs', 'Wyeast':'Wyeast', 'Brewing Science Institute':'BSI', 'Brulosophy':'Brulosophy deneyi', 'BYO':'BYO', 'Craft Beer & Brewing':'Craft Beer & Brewing', 'Homebrew Academy':'Homebrew Academy', 'üretici veri sayfası':'üretici veri sayfası' };
+  // kanıt gücü: çelişki → 'celiski' (öneri değil) · ≥ 2 bağımsız sayılan kaynak (yönü yazan) ve kör tadım "ayırt edilemedi" değilse → 'guclu' · aksi 'olasi'
+  G.kuralGuc = function(R){ if(!R) return null; if(R.celiski) return { k:'celiski', ad:'kaynaklar çelişiyor', n:0 };
+    var Q = {}; (R.kaynaklar || []).forEach(function(k){ if(k && G.GUC_TUR[k.tur] && !k.yonYok && k.kurum) Q[k.kurum] = 1; }); var n = Object.keys(Q).length;
+    return n >= 2 && !R.korAyirtEdemedi ? { k:'guclu', ad:'güçlü', n:n } : { k:'olasi', ad:'olası', n:n, not:R.korAyirtEdemedi ? 'kör tadımda fark ayırt edilemedi' : (n < 2 ? (n ? 'tek bağımsız kaynak' : 'üretici / ders kitabı / kontrollü deney kaynağı yok') : '') }; };
+  //   kısa liste (öneri cümlesi): yalnız güce SAYILAN kaynaklar; sayılan yoksa hepsi (tam liste "Ayrıntılar"da)
+  G.kaynakKisa = function(R, hepsi){ var o = [], K = (R && R.kaynaklar || []), S = K.filter(function(k){ return G.GUC_TUR[k.tur] && !k.yonYok; }); (hepsi || !S.length ? K : S).forEach(function(k){ var a = G.KAYNAK_KISA[k.kurum] || k.kurum || k.ad; if(o.indexOf(a) < 0) o.push(a); }); return o.join(', '); };
   G.kural = function(id){ return G.KURALLAR.find(function(r){ return r.id === id; }) || null; };
   // tabloda kaynaksız satır var mı (test + açılış kapısı): her satırda ≥ 1 kaynak, her kaynakta ad + alıntı; URL'li kaynak en az bir tane
   G.kaynaksizKurallar = function(){ return G.KURALLAR.filter(function(r){ var k = r.kaynaklar || []; return !k.length || k.some(function(x){ return !x || !x.ad || !String(x.alinti || '').trim(); }) || !k.some(function(x){ return /^https:\/\//.test(x.url || ''); }); }).map(function(r){ return r.id; }); };
@@ -35086,7 +35156,7 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   G.URET = URET;
 
   // hedef → (kural, yön) sırası; stil hedefi eksen eksen sapmadan kurulur
-  var HEDEF_EKSEN = { kuru:['fg', -1], govde:['fg', 1], azaci:['ibu', -1], aci:['ibu', 1], koyu:['srm', 1], acik:['srm', -1] };
+  var HEDEF_EKSEN = { kuru:['fg', -1], govde:['fg', 1], azaci:['ibu', -1], aci:['ibu', 1], koyu:['srm', 1], acik:['srm', -1], muz:['og', 1] }; // AI5D: muz hedefinin hesaplanabilir tek adayı OG (og_ester)
   var HEDEF_KURAL = { kuru:[['mash', 'dus'], ['seker', 'art'], ['maya', 'art'], ['kristal', 'azalt']], govde:[['mash', 'art'], ['seker', 'azalt'], ['maya', 'azalt'], ['kristal', 'art']],
     azaci:[['acihop', 'azalt']], aci:[['acihop', 'art']], koyu:[['renk', 'art'], ['kristal', 'art']], acik:[['renk', 'azalt'], ['kristal', 'azalt']] };
   G.HEDEF_KURAL = HEDEF_KURAL;
@@ -35124,7 +35194,7 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
       if(v0 > hi && v1 > v0) out.push({ p:p, y:'ust', metin:P[p] + ' bandın daha da üstüne çıkar (' + dg(p, hk.once[p]) + ' → ' + dg(p, hk.sonra[p]) + ', bant ' + dg(p, b.aralik[0]) + '–' + dg(p, b.aralik[1]) + ')' });
       else if(v0 < lo && v1 < v0) out.push({ p:p, y:'alt', metin:P[p] + ' bandın daha da altına iner (' + dg(p, hk.once[p]) + ' → ' + dg(p, hk.sonra[p]) + ', bant ' + dg(p, b.aralik[0]) + '–' + dg(p, b.aralik[1]) + ')' }); });
     return out; };
-  G.ETKI_BIRIM = { kuru:'FG puanı (azalma)', govde:'FG puanı (artış)', azaci:'IBU (azalma)', aci:'IBU (artış)', koyu:'SRM (artış)', acik:'SRM (azalma)', stil:'bant dışı uzaklık azalması × 10' };
+  G.ETKI_BIRIM = { kuru:'FG puanı (azalma)', govde:'FG puanı (artış)', azaci:'IBU (azalma)', aci:'IBU (artış)', koyu:'SRM (artış)', acik:'SRM (azalma)', stil:'bant dışı uzaklık azalması × 10', muz:'OG (artış)' };
   G.siraMetin = function(a, hedef){ if(a.yonYok) return 'yalnız yön — etkisi uygulamanın hesabında görünmüyor (hedef etkisi ' + trS(a.etki, 2) + ' < eşik); ölçülebilir etkili adayların arkasında';
     var N = a.kanit.N, k = a.kanit.k; return 'sıra puanı = hedef etkisi ' + trS(a.etki, 2) + ' (' + (G.ETKI_BIRIM[hedef] || '') + ') × (0,5 + 0,5 × ' + (N >= G.NOTR_N ? k + '/' + N : 'nötr 0,5 — ' + (N ? k + '/' + N : 'kanıt yok') + ', N < ' + G.NOTR_N) + ')' + (a.kanit.zayif ? ' × 0,75 (N < 5)' : '') + ' = ' + trS(a.skor, 2) + (a.disari && a.disari.length ? ' · bandı aştığı için bant içinde kalanların arkasında' : a.yanEtki && a.yanEtki.length ? ' · yan etkisi olduğu için temiz ölçülebilir adayların arkasında' : ''); };
   // DOG2 (1): SIRA / PUAN NEDENİ — uygulamanın ürettiği TEK satır (AI sıranın nedenini yalnız buradan aktarır). Grup gerekçesi adayın gerçek grubundan; puan açılımı G.SIRA_FORMUL'ün sayısal hâli.
@@ -35147,6 +35217,7 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   // sıra değişmezi (test + rapor): grup sırası olculebilir < yan_etki < bant_disi < yalniz_yon, grup içinde skor azalmaz
   G.siraGecerli = function(L){ var g = G.GRUP_SIRA; for(var i = 1; i < L.length; i++){ var p = L[i - 1], q = L[i]; if(g[p.grup] > g[q.grup]) return false; if(g[p.grup] === g[q.grup] && q.skor > p.skor + 1e-12) return false; } return true; };
   G.adaylar = function(T, hedef, K){ K = K || G.kiyas(T); var L = [], neden = null, acik = [];
+    if(hedef === 'muz' || hedef === 'karanfil') return G.aromaAdaylar(T, hedef, K);
     if(hedef === 'tadim'){ var tk = G.tadimKayit(T); return { liste:[], neden:tk.length ? 'işaretli off-flavor (' + tk.join(', ') + ') için reçete değişkenine bağlanan KAYNAKLI kural tabloda yok — nedenleri süreçte (fermantasyon sıcaklığı, maya sağlığı, kaynatma…). Off-flavor kartındaki önlemlere bak.' : 'bu reçetede tadım / off-flavor kaydı yok', tadim:tk }; }
     if(hedef === 'stil'){
       if(!T.stil) return { liste:[], neden:'reçetenin stil alanı boş — stil seçilmeden BJCP / iskelet / ödüllü kıyası yapılamıyor (yön hedefleri — daha kuru vb. — stilsiz de çalışır)' };
@@ -35175,6 +35246,68 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     if(!sira.length && !neden) neden = 'bu hedef için kanıtlı tek değişiklik bulamadım — ' + (L.length ? 'adayların hepsi hedef ekseninde sayısal fark üretmedi' : 'reçetede bu hedefin değişkeni yok (' + (HEDEF_KURAL[hedef] || []).map(function(r){ return G.kural(r[0]).degisken; }).join(' / ') + ') ve yeni malzeme bu akışta önerilmez');
     return { liste:sira, elenen:elenen, neden:neden, acik:acik, birlesen:birlesen }; };
 
+  // ── 5b) AI5D: MUZ / KARANFİL ÖNERİLERİ (kaynaklı kural tablosu; AI YOK) ──
+  //   Reçetede atılan maya miktarı ve mayalanma sıcaklığı ALANI YOK (S yalnız mayaId tutar; uygulama sıcaklık için mayanın katalog idealini vekil kullanır) →
+  //   bu ikisi reçeteyi değiştiren aday değil, YÖN cümlesi. Hesaplanabilir tek aday OG (og_ester, URET.baz, stil bandı denetimi aynen).
+  G.OG_ESTER = 1.054; // ≈ 13 °P (BSI "wort concentration above 13%"; 13 °P ≈ 1,053) — hedef değer uygulama varsayımı (bir puan üstü)
+  G.ferulikAdim = function(t){ return (t && t.mashAdimlar || []).filter(function(x){ return x && +x.sc >= 40 && +x.sc <= 50; })[0] || null; };
+  G.pitchHesap = function(T){ try{ var y = kayit('maya', T.tarif.mayaId), og = hesap(T.tarif).og; if(!y || !(og > 1.001) || typeof bmPitchHedef !== 'function' || typeof bmOgPlato !== 'function') return null;
+    var p = bmPitchHedef(y.tip || 'ale', og), pl = bmOgPlato(og), h = +T.tarif.hacim || 11, cell = p.rate * pl * h, kuru = typeof mayaFormu === 'function' && mayaFormu(y) === 'dry', pk = typeof BM_KURU_PAKET_B !== 'undefined' ? BM_KURU_PAKET_B : 220;
+    return { rate:p.rate, mlBasi:p.rate * pl, milyar:cell, paket:cell / (kuru ? pk : 100), kuru:kuru }; }catch(e){ return null; } };
+  function oneriSon(R, g){ return ' (' + G.kaynakKisa(R) + '; ' + g.ad + (g.not && g.k !== 'guclu' ? ' — ' + g.not : '') + ').'; }
+  G.aromaAdaylar = function(T, hedef, K){ var out = { liste:[], neden:null, acik:[], birlesen:[], aroma:{ hedef:hedef, oneriler:[], bilgi:[] } }, Ar = out.aroma, y = kayit('maya', T.tarif.mayaId), c = hesap(T.tarif);
+    var oner = function(id, metin, ek){ var R = G.kural(id), g = G.kuralGuc(R); Ar.oneriler.push(Object.assign({ kural:id, guc:g, metin:metin + oneriSon(R, g) }, ek || {})); };
+    var bilgi = function(id, ek){ var R = G.kural(id), g = G.kuralGuc(R); Ar.bilgi.push({ kural:id, guc:g, ek:ek || '', metin:(g.k === 'celiski' ? '⚖️ ' : 'ℹ️ ') + R.metin + (ek ? ' ' + ek : '') + ' (' + G.kaynakKisa(R) + ')' }); };
+    var fa = G.ferulikAdim(T.tarif);
+    if(hedef === 'muz'){
+      var ph = G.pitchHesap(T);
+      oner('pitch', 'Mayayı fazla atma' + (ph ? ' — uygulamanın hesabındaki ≈ ' + Math.round(ph.milyar) + ' milyar hücreyi (≈ ' + trS(ph.paket, 1) + ' ' + (ph.kuru ? 'paket kuru maya' : 'sıvı paket') + ') aşma' : '') + '; fazla maya muzu bastırır, az maya artırır', { tur:'yon' });
+      if(y && y.sc && y.sc.length === 2) oner('fermsc', 'Mayalanmayı mayanın aralığının üst tarafında, ' + (y.sc[1] - 1) + '–' + y.sc[1] + ' °C\'de yap — muz artar, karanfil de değişebilir', { tur:'yon' });
+      else bilgi('fermsc', 'Mayanın sıcaklık aralığı katalogda yok — paketine bak.');
+      if(c.og < G.OG_ESTER - 0.0005){ var a = URET.baz(T, 'art', G.OG_ESTER);
+        if(a){ a.kural = 'og_ester'; a.degisken = 'başlangıç yoğunluğu (OG)'; a.baslik = 'OG ' + trS(c.og, 3) + ' → ' + trS(hesap(a.deg.sonra).og, 3) + ' (tüm malt orantılı)'; a.varsayim = ['hedef OG ' + trS(G.OG_ESTER, 3) + ' ≈ 13 °P (kaynaktaki eşiğin bir puan üstü) — uygulama varsayımı; oranlar korunur'];
+          degerlendir(a, K, T, 'muz'); a.grup = G.grupOf(a); a.no = 1; a.id = 'aday:1'; a.siraAcik = G.siraMetin(a, 'muz'); a.siraNeden = G.siraNeden(a, 'muz'); if(a.disari.length) a.uyari = 'bant dışına çıkar: ' + a.disari.join(', '); out.liste.push(a);
+          oner('og_ester', 'Başlangıç yoğunluğunu (OG) ' + trS(c.og, 3) + ' → ' + trS(hesap(a.deg.sonra).og, 3) + ' yap (tüm maltı orantılı artır) — muz artar' + (a.disari.length ? ' 🔴 ama ' + a.disari.join(', ') + ' stil aralığının dışına çıkar' : ''), { tur:'aday', aday:1, bantDisi:!!a.disari.length }); } }
+      else bilgi('og_ester', 'Senin OG\'in zaten ' + trS(c.og, 3) + ' (≥ ≈ 1,053).');
+      if(fa) oner('ferulik', 'Mash\'teki ' + fa.sc + ' °C adımını kısalt ya da kaldır — karanfil azalabilir, muz daha belirgin olabilir', { tur:'yon' });
+      bilgi('acikferm'); bilgi('havalandirma');
+    } else {
+      oner('ferulik', fa ? 'Mash\'teki ' + fa.sc + ' °C adımını uzat — karanfil artabilir' : 'Mash\'e 44–45 °C\'de bir dinlenme adımı ekle — karanfil artabilir', { tur:'yon' });
+      bilgi('karanfil_sicaklik'); bilgi('karanfil_pitch');
+    }
+    if(!Ar.oneriler.length) out.neden = 'Bu istek için kaynaklı bir öneri bulamadım.';
+    return out; };
+  // AI5D (7b): öneri cümlesi — ne yapılacak + ne değişir + kaynak adı + kanıt gücü; GÜÇLÜDEN ZAYIFA (eşitlikte uygulamanın sırası)
+  var EKSEN_TR = { og:'başlangıç yoğunluğu (OG)', fg:'bitiş yoğunluğu (FG)', ibu:'acılık (IBU)', srm:'renk (SRM)', abv:'alkol' };
+  G.oneriCumle = function(a, hedef){ var R = G.kural(a.kural), g = G.kuralGuc(R), hk = a.hk, ek = hedef === 'stil' ? ({ baz:'og', acihop:'ibu', renk:'srm' }[a.kural] || 'fg') : (HEDEF_EKSEN[hedef] || ['fg'])[0];
+    var ne = a.kural === 'mash' ? 'Mash sıcaklığını ' + a.deg.once.mashSc + ' °C yerine ' + a.deg.sonra.mashSc + ' °C yap' : a.kural === 'seker' ? 'Şeker payını %' + trS(a.pay0, 1) + ' → %' + trS(G.sekerPay(a.deg.sonra), 1) + ' yap (OG\'yi baz malt korur)' :
+      a.kural === 'maya' ? 'Mayayı ' + adOf('maya', a.deg.eskiId) + ' yerine ' + adOf('maya', a.deg.yeniId) + ' yap' : a.kural === 'kristal' ? 'Kristal malt payını %' + trS(a.pay0, 1) + ' → %' + trS(a.pay1, 1) + ' yap' :
+      a.kural === 'acihop' ? 'Acı hopu ' + (hk.sonra.ibu > hk.once.ibu ? 'artır' : 'azalt') : a.kural === 'renk' ? a.baslik.split(':')[0] : 'Tüm maltı orantılı ' + (hk.sonra.og > hk.once.og ? 'artır' : 'azalt');
+    var degis = hk ? EKSEN_TR[ek] + ' ' + dg(ek, hk.once[ek]) + ' → ' + dg(ek, hk.sonra[ek]) : '';
+    return { kural:a.kural, guc:g, tur:'aday', aday:a.no, bantDisi:!!(a.disari && a.disari.length), metin:ne + (degis ? ' — ' + degis : '') + (a.yonYok ? ' (hesapta fark görünmüyor — yalnız yön)' : '') + (a.disari && a.disari.length ? ' 🔴 ' + a.disari.join(', ') + ' stil aralığının dışına çıkar' : '') + oneriSon(R, g) }; };
+  G.GUC_SIRA = { guclu:0, olasi:1 };
+  G.oneriler = function(st){ if(!st || !st.adaylar) return []; var L = st.adaylar.aroma ? st.adaylar.aroma.oneriler.slice() : st.adaylar.liste.map(function(a){ return G.oneriCumle(a, st.hedef); });
+    var r = function(o){ return Object.prototype.hasOwnProperty.call(G.GUC_SIRA, o.guc.k) ? G.GUC_SIRA[o.guc.k] : 9; }; // (0 || 9 tuzağı: 'güçlü' = 0)
+    L.forEach(function(o, i){ o._i = i; }); L.sort(function(a, b){ return (r(a) - r(b)) || (a._i - b._i); }); return L.slice(0, G.MAX_ADAY); };
+  // AI5D (7a): "Anladığım" — sade cümle; aroma eşleşmesinde hesaba katılmayan tat sözcükleri ayrıca söylenir
+  G.HEDEF_CUMLE = { stil:'reçeteni stile ve ödüllü örneklere yaklaştırmak istiyorsun', kuru:'daha kuru bir bira istiyorsun', govde:'daha gövdeli bir bira istiyorsun', azaci:'daha az acı bir bira istiyorsun', aci:'daha acı bir bira istiyorsun', koyu:'daha koyu bir bira istiyorsun', acik:'daha açık renkli bir bira istiyorsun', muz:'daha muzlu bir bira istiyorsun', karanfil:'daha karanfilli bir bira istiyorsun', tadim:'tadımda işaretlediğin sorunu düzeltmek istiyorsun' };
+  G.anladigimMetni = function(st){ if(!st) return ''; if(st.durum === 'taniyamadim' || st.durum === 'hedefSec') return 'Bunu anlayamadım: \'' + st.metin + '\'';
+    return 'Anladığım: ' + (G.HEDEF_CUMLE[st.hedef] || G.hedefAd(st.hedef)) + '.' + (st.kalanAroma && st.kalanAroma.length ? ' (\'' + st.kalanAroma.join(', ') + '\' kısmı bu araçta hesaplanmıyor — tat ve aroma ölçülemiyor.)' : ''); };
+  // AI5D (1): tanıyamadım metni — tat / aroma isteğiyse ek cümle
+  G.taniyamadimMetni = function(st){ var m = 'Bu isteği mevcut hedeflere çeviremedim: \'' + st.metin + '\'.';
+    if(st.mayaUygunDegil) return m + ' Muz (ester) ve karanfil (fenol) kuralları buğday birası mayası kaynaklarından; reçetendeki maya (' + st.mayaUygunDegil + ') buğday birası mayası değil.';
+    return m + (st.aroma ? ' Aroma ve tat (muz, karanfil gibi) bu araçta hesaplanmıyor; ' + st.aroma + ' ile ilgili kaynaklı bilgi için malzeme / maya sorusu sorabilirsin.' : ' Yukarıdaki çiplerden birini seç.'); };
+  // AI5D (GÜNCELLEME d): "Senin reçetende:" — yalnız reçetenin / kataloğun kendi değerleri (katalogda olmayan uydurulmaz)
+  G.seninRecete = function(st){ var T = st.T, t = T.tarif, c = hesap(t), y = kayit('maya', t.mayaId), s = [];
+    if(st.hedef === 'muz' || st.hedef === 'karanfil'){ var fa = G.ferulikAdim(t);
+      s.push('Mayan ' + (y ? y.ad : 'seçilmemiş') + (y ? (y.sc && y.sc.length === 2 ? ' — katalogdaki sıcaklık aralığı ' + y.sc[0] + '–' + y.sc[1] + ' °C (kaynağı katalogda yazmıyor, paketine de bak)' : ' — üretici aralığını katalogda bulamadım, paketine bak') : '') + '.');
+      s.push('Mayalanma sıcaklığı ve atılan maya miktarı reçetede kayıtlı değil; OG\'in ' + trS(c.og, 3) + (fa ? ', mash\'te ' + fa.sc + ' °C adımın var' + (fa.dk ? ' (' + fa.dk + ' dk)' : '') : '') + '.'); }
+    else if(st.hedef === 'kuru' || st.hedef === 'govde') s.push('Bitiş yoğunluğu (FG) tahminin ' + trS(c.fg, 3) + ', mash ' + (+t.mashSc || 67) + ' °C' + (G.sekerPay(t) > 0.5 ? ', şeker payın %' + trS(G.sekerPay(t), 1) : '') + '.');
+    else if(st.hedef === 'aci' || st.hedef === 'azaci') s.push('Acılık (IBU) tahminin ' + Math.round(c.ibu) + '.');
+    else if(st.hedef === 'koyu' || st.hedef === 'acik') s.push('Renk tahminin ' + trS(c.srm, 1) + ' SRM.');
+    else s.push((T.stil ? 'Stilin ' + T.stil : 'Stil seçilmemiş') + '; başlangıç yoğunluğu (OG) ' + trS(c.og, 3) + ', bitiş (FG) ' + trS(c.fg, 3) + ', acılık (IBU) ' + Math.round(c.ibu) + ', renk ' + trS(c.srm, 1) + ' SRM.');
+    return 'Senin reçetende: ' + s.join(' '); };
+
   // ── 6) KANIT PAKETİ + AI ANLATIMI (AI4 denetleyicisi AYNEN) ──
   G.kanitKur = function(st){ var P = [], ekle = function(id, baslik, metin, veri){ if(metin) P.push({ id:id, baslik:baslik, metin:String(metin), veri:veri || null }); }, K = st.kiyas;
     var kyon = function(L){ return L.filter(function(x){ return /^(og|fg|ibu|srm|abv)$/.test(x.boyut) && /^(alt|ust|ic)$/.test(x.durum); }).map(function(x){ return { p:x.boyut, s:'konum', y:x.durum }; }); }; // AI5B (1)
@@ -35188,6 +35321,12 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
       ekle(a.id, 'Aday ' + a.no + ' (uygulamanın kural motoru, tek değişken: ' + a.degisken + ')', a.baslik + '\n' + A4.degEtiket(a.deg) + '\nUygulama hesabı: ' + ['OG', 'FG', 'ABV', 'IBU', 'SRM'].map(function(x){ return x + ' ' + v(hk.once, x) + ' → ' + v(hk.sonra, x); }).join(' · ') +
         (Object.keys(hk.bant).length ? '\nBant: ' + Object.keys(hk.bant).map(function(x){ var b = hk.bant[x]; return x + (b.sonra ? ' içinde' : ' DIŞINDA'); }).join(', ') : '') + (a.uyari ? '\nUYARI: ' + a.uyari : '') + '\nStok: ' + a.stok.metin + '\nKanıt: ' + a.kanit.metin + (a.kanit.zayif && a.kanit.N ? ' (zayıf kanıt: n < 5)' : '') + (a.varsayim && a.varsayim.length ? '\nVarsayım: ' + a.varsayim.join('; ') : '') + (a.notlar ? '\nNot: ' + a.notlar.join('; ') : '') + (a.yanEtki && a.yanEtki.length ? '\nYAN ETKİ: ' + a.yanEtki.map(function(y){ return y.metin; }).join('; ') : '') + '\nSıra ' + a.no + ': ' + G.deltaMetin(a) + '\n' + a.siraNeden, { yon:A4.yonHukum(hk).concat(a.yonYok && HEDEF_EKSEN[st.hedef] ? [{ p:HEDEF_EKSEN[st.hedef][0], s:'degisim', y:HEDEF_EKSEN[st.hedef][1] > 0 ? 'artar' : 'azalir', kaynak:'kural' }] : []) }); // yalnız yön adayı: hesapta değişmez + kuralın kaynaklı yönü (ikisi de çelişki sayılmaz)
       var R = G.kural(a.kural); ekle('kural:' + a.kural, 'Kural tablosu (kaynaklı)', R.metin + ' Kaynak: ' + R.kaynaklar.map(function(k){ return k.ad + ' — "' + k.alinti + '"'; }).join(' | ') + (R.model ? ' ' + R.model : '')); });
+    // AI5D (2): muz / karanfil — uygulamanın öneri cümleleri + kaynaklı kural satırları (reçetede alanı olmayan değişkenler yalnız YÖN; çelişen kaynak öneri değil)
+    if(st.adaylar.aroma){ var Ar = st.adaylar.aroma, gor = {};
+      Ar.oneriler.forEach(function(o, i){ ekle('oneri:' + (i + 1), 'Öneri ' + (i + 1) + ' (uygulamanın kural tablosu, kanıt gücü ' + o.guc.ad + ')', o.metin + (o.tur === 'yon' ? ' [YALNIZ YÖN — reçetede bu değişkenin alanı yok, hesap yapılmadı; büyüklük kaynaklarda sayı olarak yok]' : '')); });
+      Ar.oneriler.concat(Ar.bilgi).forEach(function(o){ if(gor[o.kural] || o.kural === 'og_ester') return; gor[o.kural] = 1; var R = G.kural(o.kural);
+        ekle('kural:' + o.kural, 'Kural tablosu (kaynaklı, okuma ' + R.okuma + ')' + (R.celiski ? ' — KAYNAKLAR ÇELİŞİYOR, öneri değil' : R.yontem === 'bilgi' ? ' — bilgi, öneri değil' : ''), R.metin + ' Kaynak: ' + R.kaynaklar.map(function(k){ return k.ad + ' — "' + k.alinti + '"'; }).join(' | ')); });
+      ekle('recete:degerler', 'Reçetenin değerleri', G.seninRecete(st)); }
     (st.kisisel.satirlar || []).forEach(function(s, i){ ekle(s.id + (i ? ':' + i : ''), 'Senin geçmişin (özet sayı)', s.metin); });
     var metin = P.map(function(p){ return '[' + p.id + '] ' + p.baslik + ':\n' + p.metin; }).join('\n\n');
     return { parcalar:P, byId:P.reduce(function(m, p){ m[p.id] = p; return m; }, {}), metin:metin, tok:A1.tokTahmin(metin), f:{} }; };
@@ -35196,9 +35335,11 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     var pr = { genel:{ type:'array', items:cu } }, rq = ['genel'];
     if(adayIds.length){ pr.adaylar = { type:'array', items:{ type:'object', properties:{ aday:{ type:'string', enum:adayIds }, cumleler:{ type:'array', items:cu } }, required:['aday', 'cumleler'], additionalProperties:false } }; rq.push('adaylar'); }
     return { type:'json_schema', schema:{ type:'object', properties:pr, required:rq, additionalProperties:false } }; };
-  G.GOREV = 'GÖREV: Önce en çok 3 cümleyle kıyası özetle (genel). Sonra uygulamanın adaylarını (aday:1 …) her biri için en çok 3 cümleyle, NEDEN önerildiğini kaynaklı anlat. Yeni öneri ekleme, sırayı değiştirme, tat ya da kalite hükmü verme. Adayların sırasını ve nedenini KART gösteriyor; sıranın nedenini yazma: "sıra 1\'de", "ikinci sırada", "arkasında", "önde", "sıra puanı X ile" gibi ifadeleri bir NEDENLE birlikte yazma (… için / … olduğundan / bu yüzden / çünkü). Adayı yalnız "aday 1 / aday 2" diye an; stok durumu, malzeme değişimi ya da varsayımı sıra / puan nedeni olarak YAZMA. "zayıf kanıt" ifadesini yalnız parça onu yazıyorsa kullan (N ≥ 5 olan kanıta "zayıf" deme).';
+  G.GOREV = 'GÖREV: Önce en çok 3 cümleyle kıyası özetle (genel). Sonra uygulamanın adaylarını (aday:1 …) her biri için en çok 3 cümleyle, NEDEN önerildiğini kaynaklı anlat. Yeni öneri ekleme, sırayı değiştirme, tat ya da kalite hükmü verme. Adayların sırasını ve nedenini KART gösteriyor; sıranın nedenini yazma: "sıra 1\'de", "ikinci sırada", "arkasında", "önde", "sıra puanı X ile" gibi ifadeleri bir NEDENLE birlikte yazma (… için / … olduğundan / bu yüzden / çünkü). Adayı yalnız "aday 1 / aday 2" diye an; stok durumu, malzeme değişimi ya da varsayımı sıra / puan nedeni olarak YAZMA. "zayıf kanıt" ifadesini yalnız parça onu yazıyorsa kullan (N ≥ 5 olan kanıta "zayıf" deme). SADE TÜRKÇE (AI5D): kısa cümle kur; yabancı terim kullanma ya da ilk geçtiği yerde parantezle açıkla — OG → "başlangıç yoğunluğu (OG)", FG → "bitiş yoğunluğu (FG)", IBU → "acılık (IBU)", SRM → "renk (SRM)", ester → "meyvemsi koku (ester)", fenol → "baharatlı koku (fenol)"; p10–p90, n, iskelet, grist gibi istatistik / teknik sözcük yazma. Parçada "öneri:N" varsa onu yalnız aktar, yenisini ekleme; "YALNIZ YÖN" yazan öneride miktar uydurma.';
   // AI5 katmanı (donmuş denetleyicinin DIŞINDA): yeni öneri / başka adaya ait parça / onaylama dili
   var ONERI_FIIL = /(eklenebilir|eklemek|ekleyin|ekleyebilir|kullanılabilir|kullanilabilir|kullanabilirsin|kullanın|artırılabilir|artirilabilir|artırın|artırmak|azaltılabilir|azaltilabilir|azaltın|azaltmak|düşürülebilir|dusurulebilir|düşürün|düşürmek|yükseltilebilir|yükseltin|değiştirilebilir|degistirilebilir|değiştirin|önerilir|onerilir|denenebilir|deneyebilir|deneyin|yapılabilir|yapilabilir|yapabilirsin|geçilebilir|gecilebilir)/i;
+  // AI5D: muz / karanfil kartında izinli değişken sözcükleri (YALNIZ aroma hedefinde kullanılır — genel G yolunun kararları değişmez)
+  var AROMA_KEL = { pitch:/(maya miktar|az maya|fazla maya|pitch|hücre|hucre|underpitch|maya)/i, fermsc:/(mayalanma sıcaklı|mayalanma sicakli|fermantasyon sıcaklı|fermantasyon sicakli|fermentasyon sıcaklı|sıcaklı|sicakli|°c)/i, og_ester:/(og\b|başlangıç yoğunlu|baslangic yogunlu|yoğunluk|yogunluk|malt)/i, ferulik:/(ferulik|dinlenme|°c|adım|adim|rest|mash)/i };
   var DEGISKEN_KEL = { mash:/(mash|mayşe|mayse|sıcaklı|sicakli)/i, seker:/(şeker|seker|candi|candy|dekstroz|sukroz)/i, maya:/(maya|suş|sus\b|attenua)/i, kristal:/(kristal|crystal|karamel|caramel|carapils|dekstrin)/i, acihop:/(hop|acılık|acilik|ibu)/i, renk:/(koyu malt|renk|srm|carafa|kavrulmuş|kavrulmus|chocolate|çikolata)/i, baz:/(baz malt|malt miktar|og\b|tüm malt)/i };
   var YALAKA = /(haklısınız|haklisiniz|katılıyorum|katiliyorum|kusursuz|mükemmel bir reçete|mukemmel bir recete|geliştirecek bir şey yok|gelistirecek bir sey yok|zaten çok iyi|zaten cok iyi)/i;
   // DOG2 (1): SIRA / PUAN NEDENİ DENETİMİ (donmuş denetleyicinin DIŞINDA). Sıraya / puana neden bağlayan yan cümlede (sıra|önde|arkasında|sıra puanı … + için|nedeniyle|yüzünden|olduğundan|-dığından|bu yüzden|bu nedenle)
@@ -35272,12 +35413,14 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     var adays = st.adaylar.liste, kendi = adayNo ? adays[adayNo - 1] : null;
     if(kendi && x.kaynaklar.some(function(id){ var m = /^aday:(\d+)$/.exec(id); return m && +m[1] !== adayNo; })) return dus('sira', 'başka bir adayın parçasını bu adaya bağlıyor (sıra uygulamanındır)');
     var sn = G.siraNedenDenetle(x.metin, kendi || G.tekAday(x.kaynaklar, adays)); if(sn) return dus('sira', sn);
+    if(ONERI_FIIL.test(x.metin) && st.adaylar.aroma){ var izA = st.adaylar.aroma.oneriler.map(function(o){ return o.kural; }); // AI5D: aroma kartı — öneri yalnız uygulamanın öneri listesindeki değişkenlerle
+      if(!izA.some(function(k){ return AROMA_KEL[k] && AROMA_KEL[k].test(x.metin); })) return dus('oneri', 'uygulamanın öneri listesinde olmayan bir değişiklik öneriyor — AI öneri ekleyemez'); return x; }
     if(ONERI_FIIL.test(x.metin)){ var izin = kendi ? [kendi.kural] : adays.map(function(a){ return a.kural; }), yasak = Object.keys(DEGISKEN_KEL).filter(function(k){ return izin.indexOf(k) < 0 && DEGISKEN_KEL[k].test(x.metin); });
       // genel kıyas cümlesi "bandın altında" gibi gözlem yazabilir; öneri fiili + adayı olmayan değişken = yeni öneri
       if(yasak.length && !izin.some(function(k){ return DEGISKEN_KEL[k].test(x.metin); })) return dus('oneri', 'kural motorunun adaylarında olmayan bir değişiklik öneriyor (' + yasak.join(', ') + ') — AI aday ekleyemez'); }
     return x; };
   G.anlatimIsle = function(r, st){ var v = r && r.ok && r.veri ? r.veri : null; if(!v || !Array.isArray(v.genel)) return { durum:'gecersiz', neden:r && !r.ok ? (r.hata && r.hata.mesaj) : 'AI cevabı ayrıştırılamadı', tum:[], genel:[], aday:{}, dusen:[] };
-    var ctx = { paket:st.kanit, web:st.web && st.web.bulgular || [], kalemler:[], stil:st.T.stil || null, yorum:false };
+    var ctx = { paket:st.kanit, web:st.web && (st.web.ilgili || st.web.bulgular) || [], kalemler:[], stil:st.T.stil || null, yorum:false };
     var isle = function(c, no){ var x = A4.cumleDenetle(c, ctx); x = G.ekDenetle(x, no, st); x.sinif = A4.uydurmaSinifi(x, ctx); x.aday = no || 0; return x; };
     var tum = [], genel = (v.genel || []).slice(0, 6).map(function(c){ var x = isle(c, 0); tum.push(x); return x; }), aday = {}, aiSira = [];
     (v.adaylar || []).forEach(function(b){ var m = /^aday:(\d+)$/.exec(b && b.aday || ''); if(!m || !st.adaylar.liste[+m[1] - 1]){ return; } var no = +m[1]; aiSira.push(no);
@@ -35289,12 +35432,15 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   G.hazirla = function(ctx, opt){ opt = opt || {}; var T = A1.baglamTarif(ctx); if(!T) return null;
     var key = T.key, st = G.durum[key] = { key:key, ctx:ctx, T:T, durum:'hazir', maliyet:0, cagri:[], web:null, anlatim:null };
     var h = opt.hedef ? { k:opt.hedef, yontem:'çip' } : G.hedefEsle(opt.metin || '');
-    if(!h){ st.durum = 'hedefSec'; st.metin = String(opt.metin || ''); return st; }
-    st.hedef = h.k; st.hedefYontem = h.yontem; st.metin = String(opt.metin || '');
+    // AI5D (1): eşleşme yoksa — tat / aroma isteği → "tanıyamadım" (AI'ya GİTMEZ, para yok); değilse 'hedefSec' (AI ekrandaki çiplerden seçebilir, "yok" → tanıyamadım)
+    if(!h){ st.metin = String(opt.metin || ''); var ai = G.aromaIstek(st.metin); if(ai){ st.durum = 'taniyamadim'; st.aroma = ai; } else st.durum = 'hedefSec'; return st; }
+    //   muz / karanfil yalnız buğday birası mayasında (çip de yalnız orada görünür) — çip dışından gelen istek de aynı kural
+    if((h.k === 'muz' || h.k === 'karanfil') && !G.aromaMaya(T)){ var ym = kayit('maya', T.tarif.mayaId); st.metin = String(opt.metin || G.hedefAd(h.k)); st.durum = 'taniyamadim'; st.aroma = h.k === 'muz' ? 'muz' : 'karanfil'; st.mayaUygunDegil = ym ? ym.ad : 'maya seçilmemiş'; return st; }
+    st.hedef = h.k; st.hedefYontem = h.yontem; st.metin = String(opt.metin || ''); st.kalanAroma = G.asilSozler(st.metin, h.kalan || []);
     st.kiyas = G.kiyas(T); st.adaylar = G.adaylar(T, st.hedef, st.kiyas); st.kisisel = G.kisisel(T); st.kanit = G.kanitKur(st);
     st.bardak = null; // AI5 madde 6: bardak denemesi bu akışta ÇIKMAZ
     return st; };
-  G.istek = function(st){ var web = st.web && st.web.bulgular || [], ids = st.kanit.parcalar.map(function(p){ return p.id; }).concat(web.map(function(w){ return w.id; }));
+  G.istek = function(st){ var web = st.web && (st.web.ilgili || st.web.bulgular) || [], ids = st.kanit.parcalar.map(function(p){ return p.id; }).concat(web.map(function(w){ return w.id; }));
     var baglam = st.kanit.metin + (web.length ? '\n\nWEB ALINTILARI (izinli kaynaklar; yalnız alıntı metni kanıttır):\n' + web.map(function(w){ return '[' + w.id + '] ' + w.url + '\n"' + w.alinti + '"'; }).join('\n') : '');
     return { kullanim:'gelistir', modelKey:st.model || A4.ozetModel(), baglam:baglam, soru:G.GOREV, sema:G.sema(ids, st.adaylar.liste.map(function(a){ return a.id; })) }; };
   G.anlat = function(key, opt){ opt = opt || {}; var st = G.durum[key]; if(!st || !st.kanit) return Promise.resolve(null);
@@ -35305,13 +35451,34 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
       .catch(function(e){ st.durum = 'hazir'; st.anlatim = { durum:'gecersiz', neden:String(e && e.message || e), tum:[], genel:[], aday:{}, dusen:[] }; G.ciz(key); return st; }); };
   // web (isteğe bağlı düğme): sorguları UYGULAMA kurar
   var DEG_EN = { mash:'mash temperature', seker:'candi sugar', maya:'yeast attenuation', kristal:'crystal malt', acihop:'bittering hops', renk:'dark malt color', baz:'original gravity' };
+  // AI5D (3): sorgu KULLANICININ HEDEFİNDEN kurulur (İngilizce karşılık sözlüğü, AI yok) + stil; "<stil> brewing tips" genel sorgusu KALDIRILDI (Kaan'ın denemesinde 22 ilgisiz alıntı getirdi)
+  G.HEDEF_EN = { stil:['style guidelines recipe'], kuru:['dry finish attenuation'], govde:['fuller body mouthfeel'], azaci:['reduce bitterness IBU'], aci:['increase bitterness IBU'], koyu:['darker color SRM'], acik:['lighter color SRM'],
+    muz:['banana ester fermentation temperature', 'banana ester yeast pitching rate'], karanfil:['clove 4-vinyl guaiacol ferulic acid rest'], tadim:['off-flavor cause'] };
+  //   ilgi denetimi: alıntıda (başlık dahil) hedef anahtar sözcüğü + stil sözcüğü BİRLİKTE geçmeli (stil yoksa yalnız hedef)
+  G.HEDEF_KEL = { stil:/\b(style|bjcp|guideline\w*)\b/i, kuru:/\b(dry|drier|attenuat\w*|fermentab\w*)\b/i, govde:/\b(body|mouthfeel|dextrin\w*|full\w*)\b/i, azaci:/\b(bitter\w*|ibu\w*)\b/i, aci:/\b(bitter\w*|ibu\w*)\b/i, koyu:/\b(colou?r|srm|dark\w*)\b/i, acik:/\b(colou?r|srm|pale|light\w*)\b/i,
+    muz:/\b(banana\w*|ester\w*|isoamyl\w*)\b/i, karanfil:/\b(clove\w*|phenol\w*|4-?vinyl\w*|4-?vg|guaiacol|ferulic)\b/i, tadim:/\b(off-?flavou?r\w*)\b/i };
+  G.STIL_KEL = function(stil){ var s = String(stil || ''), L = []; s.replace(/\([^)]*\)/g, ' ').split(/[\s\/,]+/).forEach(function(w){ w = w.toLowerCase().replace(/[^a-zäöüß-]/g, ''); if(w.length >= 4 && !/^(beer|style|ale)$/.test(w) && L.indexOf(w) < 0) L.push(w); });
+    if(/weiz|weiss|wheat|hefe|weizenbock|witbier/i.test(s)) ['weizen', 'weiss', 'wheat', 'hefe'].forEach(function(w){ if(L.indexOf(w) < 0) L.push(w); }); return L; };
+  G.webIlgili = function(w, st){ var t = String(w.alinti || '') + ' ' + String(w.baslik || ''), kel = G.HEDEF_KEL[st.hedef], sk = G.STIL_KEL(st.T.stil);
+    return !!(kel && kel.test(t)) && (!sk.length || sk.some(function(x){ return t.toLowerCase().indexOf(x) >= 0; })); };
   G.webSorgular = function(st){ var en = st.T.stil ? st.T.stil.split(' / ')[0].replace(/\([^)]*\)/g, '').trim() : null, q = [];
-    if(en) q.push(en + ' brewing tips'); st.adaylar.liste.forEach(function(a){ q.push((en ? en + ' ' : '') + DEG_EN[a.kural] + (en ? '' : ' homebrew')); });
+    (G.HEDEF_EN[st.hedef] || []).forEach(function(h){ q.push((en ? en + ' ' : '') + h + (en ? '' : ' homebrew')); });
+    st.adaylar.liste.forEach(function(a){ if(DEG_EN[a.kural]) q.push((en ? en + ' ' : '') + DEG_EN[a.kural] + (en ? '' : ' homebrew')); });
     return q.filter(function(x, i, A){ return A.indexOf(x) === i; }).slice(0, window.BM_AI.WEB.maxUses); };
+  // AI5D (3): Türkçe kısa web özeti — YALNIZ isteğe ilgili alıntılardan; mevcut özet modeli + AI4 denetleyicisi AYNEN (A4.cumleDenetle; imza değişmez). İlgili alıntı yoksa çağrı YOK.
+  G.WEB_OZET_GOREV = 'GÖREV: Aşağıdaki web alıntılarını SADE TÜRKÇE en çok 3 kısa cümleyle özetle. Yalnız alıntılarda yazan bilgiyi kullan; her cümlede kaynak kimliği (w…) ver. Yorum, tavsiye, tat hükmü ekleme; sayıyı alıntıdaki gibi aktar.';
+  G.webOzet = function(st){ var A = window.BM_AI, W = (st.web && st.web.ilgili) || []; if(!W.length || !A || !A.hazirMi().hazir){ st.web.ozet = { durum:'yok' }; return Promise.resolve(st.web.ozet); }
+    var ids = W.map(function(w){ return w.id; }), P = { parcalar:[], byId:{}, metin:'', tok:0, f:{} }, baglam = 'WEB ALINTILARI (izinli kaynaklar; yalnız alıntı metni kanıttır):\n' + W.map(function(w){ return '[' + w.id + '] ' + w.url + (w.baslik ? ' — ' + w.baslik : '') + '\n"' + w.alinti + '"'; }).join('\n'), mk = st.model || A4.ozetModel();
+    return A.sor({ kullanim:'ozet', modelKey:mk, baglam:baglam, soru:G.WEB_OZET_GOREV, sema:A4.ozetSema(ids, false, false) }).then(function(r){ var m = r && r.maliyet; if(m) st.maliyet += +m.usd || 0; st.cagri.push({ tur:'webozet', ok:!!(r && r.ok), usd:m ? +m.usd || 0 : 0, model:r && r.model || null });
+      var v = r && r.ok && r.veri, ctx = { paket:P, web:W, kalemler:[], stil:st.T.stil || null, yorum:false }, L = (v && Array.isArray(v.cumleler) ? v.cumleler : []).slice(0, 3).map(function(c){ return A4.cumleDenetle(c, ctx); });
+      st.web.ozet = { durum:L.some(function(x){ return x.durum === 'ok'; }) ? 'tamam' : 'yok', cumleler:L, model:mk }; return st.web.ozet; }); };
   G.webAra = function(key){ var st = G.durum[key]; if(!st || !st.kanit) return Promise.resolve(null); var q = G.webSorgular(st); st.web = { durum:'bekliyor', sorgular:q }; G.ciz(key);
     var soru = 'Şu web aramalarını AYNEN bu sırayla yap (her biri en fazla bir kez):\n' + q.map(function(x, i){ return (i + 1) + ') ' + x; }).join('\n') + '\nSonuçlardan yalnız olgu cümlelerini kısa ve atıflı yaz; değerlendirme yapma. Bulamazsan tam olarak "Web\'de güvenilir kaynak bulamadım." yaz.';
     return window.BM_AI.sor({ kullanim:'kanitweb', modelKey:A4.webModel(), baglam:'', soru:soru }).then(function(r){ var m = r && r.maliyet; if(m) st.maliyet += +m.usd || 0; st.cagri.push({ tur:'web', ok:!!(r && r.ok), usd:m ? +m.usd || 0 : 0 });
-      st.web = r && r.ok ? A4.webIsle(r.veri, q, null, st.T.stil || null) : { durum:'hata', hata:(r && r.hata) || { mesaj:'yanıt yok' }, sorgular:q, bulgular:[] }; G.ciz(key); return st.web; }); };
+      st.web = r && r.ok ? A4.webIsle(r.veri, q, null, st.T.stil || null) : { durum:'hata', hata:(r && r.hata) || { mesaj:'yanıt yok' }, sorgular:q, bulgular:[] };
+      st.web.ilgili = (st.web.bulgular || []).filter(function(w){ return G.webIlgili(w, st); }); // anlatım isteği de yalnız ilgili alıntıları görür
+      if(st.web.durum !== 'tamam'){ G.ciz(key); return st.web; } st.web.ozet = { durum:'bekliyor' }; G.ciz(key);
+      return G.webOzet(st).then(function(){ G.ciz(key); return st.web; }); }); };
   // seçilen aday → YENİ reçete (AI1 akışı: üstüne yazmaz, kaynak 'ai', stil sinyali yazılmaz, notta hedef + değişiklik + tarih)
   G.yeniAc = function(key, no){ var st = G.durum[key], a = st && st.adaylar && st.adaylar.liste[no - 1]; if(!a) return null;
     var T = st.T, t = a.deg.sonra, kor = window._bmAcikIsiGuvenceyeAl ? window._bmAcikIsiGuvenceyeAl() : { yol:'bos' };
@@ -35332,7 +35499,7 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   G.metinDugme = function(ctx, btn){ var kutu = btn && btn.closest ? btn.closest('.bm-ai5-kutu') : null, inp = kutu ? kutu.querySelector('.bm-ai5-metin') : null, m = inp ? inp.value.trim() : '';
     var st = G.hazirla(ctx, { metin:m }); if(!st) return null;
     if(st.durum === 'hedefSec' && window.BM_AI && window.BM_AI.hazirMi().hazir){ st.durum = 'hedefAI'; G.ciz(st.key);
-      return G.hedefAI(m).then(function(r){ if(r.maliyet) st.maliyet += +r.maliyet.usd || 0; if(r.ok){ var s2 = G.hazirla(ctx, { hedef:r.k, metin:m }); s2.hedefYontem = 'ucuz model çip listesinden seçti'; s2.maliyet = st.maliyet; G.ciz(s2.key); return s2; } st.durum = 'hedefSec'; G.ciz(st.key); return st; }); }
+      return G.hedefAI(m, st.T).then(function(r){ if(r.maliyet) st.maliyet += +r.maliyet.usd || 0; if(r.ok){ var s2 = G.hazirla(ctx, { hedef:r.k, metin:m }); s2.hedefYontem = 'ucuz model çip listesinden seçti'; s2.maliyet = st.maliyet; G.ciz(s2.key); return s2; } st.durum = 'taniyamadim'; G.ciz(st.key); return st; }); } // AI5D (1): AI "yok" → tanıyamadım (kıyas / web / anlatım yok)
     G.ciz(st.key); return st; };
 
   // ── ARAYÜZ ──
@@ -35349,12 +35516,11 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   G.G_TEST = { tarih:'2026-10-14', model:'Opus 5.5', kosuId:1791983427880, uydurma:{ hata:0, birim:54 }, yalakalik:{ hata:0, birim:4 }, gosterilen:52, tatHam:2, tatGercek:0 };
   G.gTestMetni = function(){ var t = G.G_TEST; return 'G testi ' + t.tarih + ', ' + t.model + ': uydurma ' + t.uydurma.hata + '/' + t.uydurma.birim + ', yalakalık ' + t.yalakalik.hata + '/' + t.yalakalik.birim; };
   G.kutuHTML = function(ctx){ if(!A1.betaAcik()) return ''; var T = A1.baglamTarif(ctx); if(!T) return '';
-    var st = G.durum[T.key], tk = G.tadimKayit(T), cj = ctxJs(ctx);
+    var st = G.durum[T.key], cj = ctxJs(ctx);
     return '<div class="bm-ai5-kutu" data-key="' + E(T.key) + '" style="margin:10px 0;padding:10px 12px;border:1px solid var(--cizgi-arac,#ddd);border-left:4px solid #2e6b4f;border-radius:10px;background:var(--bg-card,#fff)">' +
       '<div style="font-size:13px;font-weight:700;color:var(--metin)">🛠️ Bu reçeteyi nasıl geliştirebilirim?</div>' +
-      '<div class="bm-ai5-serit" style="font-size:10.5px;color:#8a5a00;margin-top:2px">' + (window.BM_DOG1 && window.BM_DOG1.seritMetni('G') ? E(window.BM_DOG1.seritMetni('G')) : 'erken test — ' + E(G.gTestMetni()) + (window.BM_DOG1 && window.BM_DOG1.gOncekiMetni() ? ' · ' + E(window.BM_DOG1.gOncekiMetni()) : '')) + '</div>' +
-      '<div class="bm-ai5-aciklama" style="font-size:11px;color:var(--metin-soluk);margin:2px 0 6px">Geliştirme bir <b>hedefe</b> göre tanımlanır. Varsayılan "stile / ödüllülere yaklaştır" — bu "daha lezzetli" demek <b>değildir</b>. Kıyas ve adaylar uygulamadan (bedava, AI yok); AI yalnız istersen kaynaklı anlatır.</div>' +
-      '<div class="bm-ai5-cipler" role="group" aria-label="Geliştirme hedefi" style="display:flex;flex-wrap:wrap;gap:6px">' + G.HEDEFLER.filter(function(h){ return h.k !== 'tadim' || tk.length; }).map(function(h){ var sec = st && st.hedef === h.k;
+      '<div class="bm-ai5-aciklama" style="font-size:11px;color:var(--metin-soluk);margin:2px 0 6px">Bir hedef seç ya da isteğini yaz. Öneriler uygulamadan gelir (ücretsiz); "daha lezzetli" demek <b>değildir</b>.</div>' +
+      '<div class="bm-ai5-cipler" role="group" aria-label="Geliştirme hedefi" style="display:flex;flex-wrap:wrap;gap:6px">' + G.gorunurHedefler(T).map(function(h){ var sec = st && st.hedef === h.k;
         return '<button type="button" class="bm-ai5-cip" data-hedef="' + h.k + '" aria-pressed="' + (sec ? 'true' : 'false') + '" style="min-height:44px;padding:4px 10px;border-radius:16px;border:1px solid ' + (sec ? '#2e6b4f' : 'var(--cizgi-arac)') + ';background:' + (sec ? '#2e6b4f' : 'var(--bg2)') + ';color:' + (sec ? '#fff' : 'var(--metin)') + ';font-size:12px" onclick="BM_AI5.hedefSecildi(' + cj + ',\'' + h.k + '\')">' + E(h.ad) + '</button>'; }).join('') + '</div>' +
       '<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap"><input class="inp bm-ai5-metin" type="text" maxlength="200" placeholder="ya da yaz: ör. daha az tatlı olsun" aria-label="Geliştirme hedefini yaz" style="flex:1 1 180px;min-height:44px;font-size:13px" value="' + E(st && st.metin || '') + '">' +
       '<button type="button" class="bm-ayar-btn bm-ai5-metin-btn" style="min-height:44px;flex:0 0 auto" onclick="BM_AI5.metinDugme(' + cj + ',this)">Hedefe çevir</button></div>' +
@@ -35362,16 +35528,22 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   function aralikStr(x){ return x.sayim ? x.deger + '/' + x.n + ' aynı ailede' : (x.birim === '%' ? '%' + trS(x.alt, 1) + '–%' + trS(x.ust, 1) : dg(x.boyut, x.alt) + '–' + dg(x.boyut, x.ust)); }
   function degStr(x){ return x.sayim ? '' : x.birim === '%' ? '%' + trS(x.deger, 1) : dg(x.boyut, x.deger); }
   var REF_AD = { bjcp:'BJCP', iskelet:'iskelet', odullu:'ödüllü', korpus:'topluluk' };
+  // AI5D (7): kıyas satırları DÜZ CÜMLE — sayı + karşılaştırma, istatistik terimi yok (p10–p90, n, iskelet, grist görünmez); örnek < 5 ise "az örnek, zayıf kanıt"
+  var REF_CUMLE = { bjcp:'stilin BJCP aralığından', iskelet:'bu stilin tipik reçetelerinden', odullu:'benzer ödüllü biralardan', korpus:'topluluk reçetelerinden' };
+  var BOYUT_AD = { og:'başlangıç yoğunluğun (OG)', fg:'bitiş yoğunluğun (FG)', ibu:'acılığın (IBU)', srm:'rengin (SRM)', abv:'alkolün' };
+  G.kiyasCumle = function(x){ var ad = BOYUT_AD[x.boyut] || (/^pay/.test(x.boyut) || x.birim === '%' ? String(x.ad || x.boyut).replace(/payı/, 'payın').replace(/baz malt/, 'arpa baz maltı') : String(x.ad || x.boyut)), yon = x.durum === 'alt' ? 'düşük' : x.durum === 'ust' ? 'yüksek' : x.durum === 'farkli' ? 'farklı' : 'benzer';
+    var tek = x.birim === '%' ? trS(x.alt, 1) === trS(x.ust, 1) : dg(x.boyut, x.alt) === dg(x.boyut, x.ust);
+    var aralik = x.sayim ? '' : (x.birim === '%' ? '%' + trS(x.alt, 1) + (tek ? '' : '–%' + trS(x.ust, 1)) : dg(x.boyut, x.alt) + (tek ? '' : '–' + dg(x.boyut, x.ust)));
+    var m = ad.charAt(0).toUpperCase() + ad.slice(1) + ' ' + REF_CUMLE[x.ref] + ' ' + yon + (x.sayim ? ' (' + x.deger + '/' + x.n + ' örnek aynı ailede)' : ' (' + degStr(x) + '; ' + (x.ref === 'bjcp' ? 'aralık' : 'onlarda') + ' ' + aralik + ')') + '.';
+    return m; };
   G.kiyasHTML = function(st){ var K = st.kiyas, h = '<div class="bm-ai5-kiyas" style="margin-top:8px;padding:8px 10px;border-radius:8px;border:1px solid var(--cizgi-arac);background:var(--bg2);font-size:11.5px">';
-    h += '<div style="font-weight:700">📏 Kıyas (uygulama, AI yok)</div>';
-    if(K.stilYok) return h + '<div class="bm-ai5-stil-yok" style="color:#8a5a00;font-weight:600">⚠️ Bu reçetenin stil alanı boş — BJCP / iskelet / ödüllü örnek kıyası yapılamıyor. Stil seçersen kıyas açılır; yön hedefleri (daha kuru, daha az acı…) stilsiz de çalışır ama bant denetimi yapılamaz.</div></div>';
-    if(K.bjcpYok) h += '<div style="color:#8a5a00">⚠️ "' + E(K.stil) + '" BJCP tablosunda yok — bant kıyası yok.</div>';
-    h += '<div style="color:var(--metin-soluk);font-size:10.5px">Sapma hata değildir: "ödüllü örneklerin çoğundan farklı" demektir. n &lt; 5 → zayıf kanıt.</div>';
+    h += '<div style="font-weight:700">📏 Benzer biralarla karşılaştırma (uygulama, AI yok)</div>';
+    if(K.stilYok) return h + '<div class="bm-ai5-stil-yok" style="color:#8a5a00;font-weight:600">⚠️ Bu reçetenin stili seçilmemiş — stil aralığı ve ödüllü biralarla karşılaştırma yapılamıyor. Stil seçersen karşılaştırma açılır; yön hedefleri (daha kuru, daha az acı…) stilsiz de çalışır.</div></div>';
+    if(K.bjcpYok) h += '<div style="color:#8a5a00">⚠️ "' + E(K.stil) + '" BJCP tablosunda yok — stil aralığı karşılaştırması yok.</div>';
+    h += '<div style="color:var(--metin-soluk);font-size:10.5px">Sapma hata değildir: "benzer biraların çoğundan farklı" demektir.</div>';
     if(!K.sapma.length) h += '<div class="bm-ai5-sapma-yok">Aralık dışında değer yok (' + K.ic.length + ' ölçü aralıkta).</div>';
-    else h += '<div style="overflow-x:auto"><table class="bm-ai5-sapma" style="border-collapse:collapse;font-variant-numeric:tabular-nums;margin-top:4px"><tr><th style="text-align:left;padding:1px 6px 1px 0">ölçü</th><th style="text-align:left;padding:1px 6px">reçete</th><th style="text-align:left;padding:1px 6px">aralık</th><th style="text-align:left;padding:1px 6px">n</th><th style="text-align:left;padding:1px 6px">referans</th></tr>' +
-      K.sapma.map(function(x){ return '<tr data-ref="' + x.ref + '" data-boyut="' + E(x.boyut) + '"><td style="padding:1px 6px 1px 0">' + E(x.ad) + (x.durum === 'alt' ? ' ↓' : x.durum === 'ust' ? ' ↑' : '') + '</td><td style="padding:1px 6px"><b>' + E(degStr(x)) + '</b></td><td style="padding:1px 6px">' + E(aralikStr(x)) + '</td><td style="padding:1px 6px">' + (x.n == null ? '—' : x.n) + (x.zayif ? ' <span class="bm-ai5-zayif" style="color:#8a5a00;font-size:10px">zayıf kanıt</span>' : '') + '</td><td style="padding:1px 6px;color:var(--metin-soluk)">' + E(REF_AD[x.ref] + ' · ' + x.aralikAd) + '</td></tr>'; }).join('') + '</table></div>';
-    if(K.iskelet && K.iskelet.not) h += '<div style="font-size:10.5px;color:var(--metin-soluk)">🧬 ' + E(K.iskelet.not) + '</div>';
-    h += '<div style="font-size:10.5px;color:var(--metin-soluk)">Ödüllü örnek: ' + (K.odullu ? K.odullu.N + ' (🥇 K1 ' + K.odullu.k1 + ' · 🏆 K2 ' + K.odullu.k2 + ')' : '0') + (K.korpus ? ' · topluluk ' + K.korpus.n + ' reçete' : st.T.tur === 'recete' ? '' : ' · topluluk dağılımı yalnız açık reçetede') + '</div>';
+    else h += '<div class="bm-ai5-sapma">' + K.sapma.map(function(x){ return '<div class="bm-ai5-sapma-satir" data-ref="' + x.ref + '" data-boyut="' + E(x.boyut) + '" style="padding:1px 0">' + E(G.kiyasCumle(x)) + (x.zayif ? ' <span class="bm-ai5-zayif" style="color:#8a5a00;font-size:10.5px">az örnek, zayıf kanıt</span>' : '') + '</div>'; }).join('') + '</div>';
+    h += '<div style="font-size:10.5px;color:var(--metin-soluk)">Ödüllü bira örneği: ' + (K.odullu ? K.odullu.N : 0) + (K.korpus ? ' · topluluk ' + K.korpus.n + ' reçete' : '') + '</div>';
     return h + '</div>'; };
   function hkTablo(a){ var hk = a.hk, v = function(c, x){ return x === 'OG' ? trS(c.og, 3) : x === 'FG' ? trS(c.fg, 3) : x === 'ABV' ? '%' + trS(c.abv, 1) : x === 'IBU' ? String(Math.round(c.ibu)) : trS(c.srm, 1); };
     return '<table class="bm-ai5-onizleme" style="border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:11.5px;margin-top:2px">' + ['OG', 'FG', 'ABV', 'IBU', 'SRM'].map(function(x){ var b = hk.bant[x];
@@ -35391,16 +35563,38 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
       '<div class="bm-ai5-kaynak" style="font-size:10.5px;color:var(--metin-soluk)">📚 ' + R.kaynaklar.map(function(k){ return k.url ? '<a href="' + E(k.url) + '" target="_blank" rel="noopener">' + E(k.ad) + '</a>' : E(k.ad); }).join(' · ') + ' (okundu ' + G.OKUMA + ')</div>' +
       (an.length ? '<div class="bm-ai5-anlatim" style="margin-top:4px;font-size:12px">' + an.map(cumleHTML).join('') + '</div>' : '') +
       '<button type="button" class="bm-ayar-btn bm-ai5-yeni-btn" style="width:100%;min-height:44px;margin-top:6px" onclick="BM_AI5.yeniAc(\'' + E(st.key) + '\',' + a.no + ')">✨ Yeni reçete olarak aç (mevcut reçeteye yazılmaz)</button></div>'; };
-  G.kartHTML = function(key){ var st = G.durum[key]; if(!st) return '<div style="font-size:11px;color:var(--metin-soluk);margin-top:6px">Bir hedef seç.</div>';
-    if(st.durum === 'hedefSec') return '<div class="bm-ai5-hedef-sec" style="margin-top:8px;font-size:12px;color:#8a5a00">❔ "' + E(st.metin) + '" bir hedefe çevrilemedi — yukarıdaki çiplerden birini seç.</div>';
-    if(st.durum === 'hedefAI') return '<div style="margin-top:8px;font-size:12px;color:var(--metin-soluk)">⏳ Ucuz model yalnız çip listesinden seçiyor…</div>';
-    var h = '<div class="bm-ai5-sonuc" data-hedef="' + st.hedef + '" style="margin-top:8px;font-size:12px">';
+  // AI5D (4): özet modeli varsayılandan (Opus 5.5) farklıysa NEDEN — Kaan kararı değişmez; düşme görünür olur
+  G.modelDusme = function(){ var A = window.BM_AI, v = A4.varsayilanModel(), k = A4.ozetModel(); if(!A || !A.MODEL || k === v) return null; var vk = A4.modelKullanilir(v), sec = null; try{ sec = localStorage.getItem(A4.OZET_LS); }catch(e){}
+    return A.MODEL[v].ad + ' yerine ' + A.MODEL[k].ad + ': ' + (sec && sec === k && vk.ok ? 'Ayarlar ▸ AI ▸ Özet modeli\'nde bu cihaz için seçtiğin model' : (vk.neden || 'varsayılan model bu cihazda kullanılamıyor') + ' (Ayarlar ▸ AI ▸ Model denetimi)'); };
+  // AI5D (7): kartın ÜST kısmı — Anladığım · en çok 3 öneri (güçlüden zayıfa, kanıt gücü sözcüğüyle) ya da tek cümle neden · Senin reçetende. Geri kalan her şey TEK katlı "Ayrıntılar ve kaynaklar" (varsayılan KAPALI).
+  G.seritHTML = function(){ return '<div class="bm-ai5-serit" style="font-size:10.5px;color:#8a5a00;margin-top:6px">' + (window.BM_DOG1 && window.BM_DOG1.seritMetni('G') ? E(window.BM_DOG1.seritMetni('G')) : 'erken test — ' + E(G.gTestMetni()) + (window.BM_DOG1 && window.BM_DOG1.gOncekiMetni() ? ' · ' + E(window.BM_DOG1.gOncekiMetni()) : '')) + '</div>'; };
+  G.ayrintiHTML = function(ic, acik){ return '<details class="bm-ai5-ayrinti" style="margin-top:8px"' + (acik ? ' open' : '') + '><summary style="cursor:pointer;min-height:44px;display:flex;align-items:center;font-size:12px;font-weight:600;color:var(--metin)">▸ Ayrıntılar ve kaynaklar</summary><div style="font-size:12px">' + ic + G.seritHTML() + '</div></details>'; };
+  G.ustHTML = function(st){ var h = '<div class="bm-ai5-ust" style="margin-top:8px;font-size:13px;line-height:1.45">';
+    if(st.durum === 'taniyamadim' || st.durum === 'hedefSec') return h + '<div class="bm-ai5-anladigim" style="font-weight:600">❔ ' + E(G.anladigimMetni(st)) + '</div><div class="bm-ai5-taniyamadim" style="margin-top:4px">' + E(G.taniyamadimMetni(st)) + '</div></div>';
+    h += '<div class="bm-ai5-anladigim" style="font-weight:600">' + E(G.anladigimMetni(st)) + '</div>';
+    var O = G.oneriler(st);
+    if(O.length) h += '<ol class="bm-ai5-oneriler" style="margin:6px 0 0;padding-left:20px">' + O.map(function(o){ return '<li class="bm-ai5-oneri" data-kural="' + E(o.kural) + '" data-guc="' + E(o.guc.k) + '" data-tur="' + E(o.tur) + '" style="margin:3px 0">' + E(o.metin) + '</li>'; }).join('') + '</ol>';
+    else h += '<div class="bm-ai5-oneri-yok" style="margin-top:6px">' + E(st.adaylar && st.adaylar.aroma ? 'Bu istek için kaynaklı bir öneri bulamadım.' : 'Bu istek için kaynaklı bir öneri bulamadım' + (st.adaylar && st.adaylar.neden ? ' — ' + String(st.adaylar.neden).split(' — ')[0] : '') + '.') + '</div>';
+    return h + '<div class="bm-ai5-senin" style="margin-top:6px;font-size:12px;color:var(--metin-soluk)">' + E(G.seninRecete(st)) + '</div></div>'; };
+  G.kartHTML = function(key){ var st = G.durum[key]; if(!st) return '<div style="font-size:11px;color:var(--metin-soluk);margin-top:6px">Bir hedef seç.</div>' + G.ayrintiHTML('');
+    if(st.durum === 'hedefAI') return '<div style="margin-top:8px;font-size:12px;color:var(--metin-soluk)">⏳ Ucuz model yalnız ekrandaki çiplerden seçiyor…</div>';
+    // AI5D (1): tanıyamadım — kıyas GÖSTERİLMEZ (cevap sanılmasın), web ve anlatım düğmeleri YOK
+    if(st.durum === 'taniyamadim' || st.durum === 'hedefSec') return '<div class="bm-ai5-hedef-sec" data-durum="' + st.durum + '">' + G.ustHTML(st) + '</div>' + G.ayrintiHTML(st.maliyet ? '<div style="font-size:10.5px;color:var(--metin-soluk)">bu kartın AI maliyeti ≈ $' + trS(st.maliyet, 4) + '</div>' : '');
+    var h = '<div class="bm-ai5-sonuc" data-hedef="' + st.hedef + '" style="margin-top:8px;font-size:12px">' + G.ustHTML(st);
+    var u = h.length; // ayrıntı bölümü bu noktadan başlar
     h += '<div style="font-size:11px;color:var(--metin-soluk)">Hedef: <b>' + E(G.hedefAd(st.hedef)) + '</b> (' + E(st.hedefYontem || '') + ')' + (st.hedef === 'stil' ? ' — "daha lezzetli" anlamına gelmez' : '') + '</div>';
     if(!st.T.stil) h += '<div class="bm-ai5-stilsiz" style="font-size:11px;color:#8a5a00;margin-top:2px;display:flex;flex-wrap:wrap;align-items:center;gap:6px"><span>⚠️ stil seçilmedi — bant yok, yan etki denetlenemedi</span>' + (st.T.tur === 'recete' ? '<button type="button" class="bm-ayar-btn bm-ai5-stil-sec" style="min-height:44px;font-size:11px" onclick="BM_AI5.stilSeciciAc()">Stil seç</button>' : '') + '</div>'; // KUC1 (4): stil tahmini uydurulmaz, otomatik atanmaz
     var kn = G.kademeliNot(st.T.tarif); if(kn) h += '<div class="bm-ai5-kademeli" style="font-size:11px;color:#8a5a00;margin-top:2px">ℹ️ ' + E(kn) + '</div>';
     h += G.kiyasHTML(st);
+    // AI5D (2): muz / karanfil — kural tablosu satırları (öneri + bilgi + çelişki) ve kaynakları; adım büyüklükleri uygulama varsayımı
+    if(st.adaylar.aroma){ var AR = st.adaylar.aroma, gk = {};
+      h += '<div class="bm-ai5-aroma" style="margin-top:8px;padding:8px 10px;border-radius:8px;border:1px solid var(--cizgi-arac);font-size:11.5px"><div style="font-weight:700">📚 Kaynaklı kurallar (' + E(G.hedefAd(st.hedef)) + ')</div>' +
+        AR.oneriler.concat(AR.bilgi).map(function(o){ if(gk[o.kural]) return ''; gk[o.kural] = 1; var R = G.kural(o.kural), g = o.guc;
+          return '<div class="bm-ai5-aroma-kural" data-kural="' + E(o.kural) + '" data-guc="' + E(g.k) + '" style="margin-top:4px"><b>' + E(R.degisken) + '</b> — ' + E(g.ad) + (g.not ? ' (' + E(g.not) + ')' : '') + '. ' + E(R.metin) + (o.ek ? ' ' + E(o.ek) : '') +
+            '<div style="font-size:10.5px;color:var(--metin-soluk)">📚 ' + R.kaynaklar.map(function(k){ return (k.url ? '<a href="' + E(k.url) + '" target="_blank" rel="noopener">' + E(k.ad) + '</a>' : E(k.ad)) + ': "' + E(k.alinti) + '"'; }).join(' · ') + ' (okundu ' + E(R.okuma) + ')</div></div>'; }).join('') +
+        '<div style="font-size:10.5px;color:var(--metin-soluk);margin-top:4px">Kanıt gücü uygulamanın hesabı: en az 2 bağımsız üretici / ders kitabı / eğitim kurumu / kontrollü deney kaynağı = güçlü; tek kaynak = olası; kör tadımda fark ayırt edilemediyse en fazla olası; tek deney (Brulosophy) ve dergi yazısı sayıya girmez. Ne kadar °C / maya → ne kadar muz: kaynaklarda sayı yok; aralık önerileri uygulama varsayımı.</div></div>'; }
     var L = st.adaylar.liste;
-    if(!L.length) h += '<div class="bm-ai5-aday-yok" style="margin-top:8px;padding:8px 10px;border-radius:8px;background:var(--bg2)">🔎 ' + E(st.adaylar.neden || 'bu hedef için kanıtlı tek değişiklik bulamadım') + '</div>';
+    if(!L.length && !st.adaylar.aroma) h += '<div class="bm-ai5-aday-yok" style="margin-top:8px;padding:8px 10px;border-radius:8px;background:var(--bg2)">🔎 ' + E(st.adaylar.neden || 'bu hedef için kanıtlı tek değişiklik bulamadım') + '</div>';
     if(st.adaylar.acik && st.adaylar.acik.length) h += '<div class="bm-ai5-acik" style="margin-top:6px;font-size:11px;color:#8a5a00">⚠️ Bu akışta kapatılamayan sapma: ' + E(st.adaylar.acik.join(' · ')) + '</div>';
     if(L.length) h += '<div style="margin-top:8px;font-weight:700">🧪 Tek değişkenli adaylar (kural motoru, en çok ' + G.MAX_ADAY + ')</div><div class="bm-ai5-formul" style="font-size:10.5px;color:var(--metin-soluk)">' + E(G.SIRA_FORMUL) + '</div>' + L.map(function(a){ return G.adayHTML(st, a); }).join('');
     if(st.kisisel && st.kisisel.satirlar.length) h += '<div class="bm-ai5-kisisel" style="margin-top:8px;padding:6px 8px;border-radius:8px;border:1px dashed var(--cizgi-arac);font-size:11.5px"><div style="font-weight:700">👤 Senin geçmişin</div>' + st.kisisel.satirlar.map(function(s){ return '<div>' + E(s.metin) + '</div>'; }).join('') + '</div>';
@@ -35410,12 +35604,17 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     if(an && (an.durum === 'gecersiz' || an.durum === 'cagrilmadi')) h += '<div style="font-size:11px;color:#8c1d18">⚠️ ' + E(an.neden || 'anlatım yok') + '</div>';
     if(st.durum === 'anlatiyor') h += '<div style="margin-top:6px;color:var(--metin-soluk)">⏳ AI adayları kaynaklı anlatıyor (yeni öneri ekleyemez)…</div>';
     if(st.web && st.web.durum === 'bekliyor') h += '<div style="color:var(--metin-soluk)">⏳ Web araması…</div>';
-    else if(st.web && st.web.durum === 'tamam') h += '<div class="bm-ai5-web" style="font-size:11px;margin-top:4px">🌐 ' + st.web.bulgular.length + ' alıntı (' + E(st.web.sorgular.join(' · ')) + ')' + st.web.bulgular.slice(0, 4).map(function(w){ return '<div>[' + E(w.id) + '] "' + E(String(w.alinti).slice(0, 160)) + '" — <a href="' + E(w.url) + '" target="_blank" rel="noopener">kaynak</a></div>'; }).join('') + '</div>';
+    // AI5D (3): üstte Türkçe kısa web özeti (yalnız isteğe ilgili alıntılardan, denetlenmiş cümleler); ham alıntılar KATLI; ilgili sayısı yazılır
+    else if(st.web && st.web.durum === 'tamam'){ var IL = st.web.ilgili || [], oz = st.web.ozet || {}, ozOk = (oz.cumleler || []).filter(function(x){ return x.durum === 'ok'; });
+      h += '<div class="bm-ai5-web" style="font-size:11.5px;margin-top:6px"><div style="font-weight:700">🌐 İnternetten (' + st.web.bulgular.length + ' alıntının ' + IL.length + '\'i isteğinle ilgili)</div>' +
+        (oz.durum === 'bekliyor' ? '<div style="color:var(--metin-soluk)">⏳ Türkçe özet hazırlanıyor…</div>' : ozOk.length ? '<div class="bm-ai5-web-ozet">' + ozOk.map(cumleHTML).join('') + '</div>' : '<div class="bm-ai5-web-ozet-yok" style="color:var(--metin-soluk)">web özeti yok — yalnız kaynak listesi</div>') +
+        (st.web.bulgular.length ? '<details class="bm-ai5-web-alinti" style="margin-top:4px"><summary style="cursor:pointer;min-height:44px;display:flex;align-items:center">' + st.web.bulgular.length + ' alıntı — kaynakları göster</summary><div style="font-size:11px">Arama: ' + E(st.web.sorgular.join(' · ')) + st.web.bulgular.map(function(w){ return '<div' + (IL.indexOf(w) >= 0 ? '' : ' style="color:var(--metin-soluk)"') + '>[' + E(w.id) + '] "' + E(String(w.alinti).slice(0, 220)) + '" — <a href="' + E(w.url) + '" target="_blank" rel="noopener">kaynak</a>' + (IL.indexOf(w) >= 0 ? '' : ' (isteğinle ilgisiz)') + '</div>'; }).join('') + '</div></details>' : '') + '</div>'; }
     if(window.BM_AI && L.length || (window.BM_AI && st.kanit)){ var t = G.anlatTahmin(st), mAd = window.BM_AI.MODEL[A4.ozetModel()].ad;
       h += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><button type="button" class="bm-ayar-btn bm-ai5-anlat-btn" style="min-height:44px;flex:1 1 150px" onclick="BM_AI5.anlat(\'' + E(key) + '\')">🤖 Neden? Kaynaklı anlat (' + E(mAd) + ' ≈ $' + trS(t, 4) + ')</button>' +
-        '<button type="button" class="bm-ayar-btn bm-ai5-web-btn" style="min-height:44px;flex:1 1 150px" onclick="BM_AI5.webAra(\'' + E(key) + '\')">🌐 İnternette de ara (≈ $' + trS(A4.webTahmin().toplam, 3) + ')</button></div>'; }
+        '<button type="button" class="bm-ayar-btn bm-ai5-web-btn" style="min-height:44px;flex:1 1 150px" onclick="BM_AI5.webAra(\'' + E(key) + '\')">🌐 İnternette de ara (≈ $' + trS(A4.webTahmin().toplam + A4.modelTahmin(A4.ozetModel()).websiz, 3) + ' — Türkçe özet dahil)</button></div>';
+      var md = G.modelDusme(); if(md) h += '<div class="bm-ai5-model-dusme" style="font-size:10.5px;color:#8a5a00;margin-top:2px">ℹ️ ' + E(md) + '</div>'; }
     if(st.maliyet) h += '<div style="font-size:10.5px;color:var(--metin-soluk);margin-top:4px">bu kartın AI maliyeti ≈ $' + trS(st.maliyet, 4) + '</div>';
-    return h + '</div>'; };
+    return h.slice(0, u) + G.ayrintiHTML(h.slice(u)) + '</div>'; };
 
   // ── 7) TUZAK G GRUBU KOŞUCUSU (Kaan'ın düğmesiyle; OPUS 5.5 — kullanılacak özet modeli; 1 tur; ön kontrol = ilk 2 AI çağrısı) ──
   var SON_LS = 'ai_ai5_sonuc_v1', ARS_LS = 'ai_ai5_arsiv_v1', YAR_LS = 'ai_ai5_yarim_v1'; // cihaz-yerel (bm_ öneksiz): yedeğe / senkrona girmez
