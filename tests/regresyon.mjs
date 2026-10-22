@@ -12402,7 +12402,8 @@ const CASELER = [
         const ile = (k, f) => { const a = C[k]; C[k] = false; try { return f(); } finally { C[k] = a; } };
         const a1 = ile('receteOnce', () => A4.cozumle(c1.soru, T('weizen'))), a8 = ile('receteOnce', () => A4.cozumle(c8.soru, T('dubbel')));
         __REG.ok('KASITLI BOZMA (a) reçete satırı önce KAPALI → 1 "' + c1.soru + '" ' + a1.mod + ' ' + JSON.stringify(a1.v) + ' · 8 "' + c8.soru + '" ' + a8.mod + ' ' + JSON.stringify(a8.v) + ' (ikisi de YANLIŞ: EKLE Flaked Wheat / EKLE D-180) → kırmızı', sinif(c1, a1) === 'YANLIS' && sinif(c8, a8) === 'YANLIS' && a1.v && a1.v.yeni_kalem === 'flaked_wheat' && a8.v && a8.v.yeni_kalem === 'koyu_candy');
-        const TB = "WY3068 yerine buğday kullansam", b0 = A4.cozumle(TB, T('weizen')), b1 = ile('turTutarli', () => A4.cozumle(TB, T('weizen'))), b5 = ile('turTutarli', () => A4.cozumle(c5.soru, T('weizen')));
+        const TB = "WY3068 yerine buğday kullansam", b0 = A4.cozumle(TB, T('weizen')), b1 = ile('turTutarli', () => ile('degKurKoruma', () => A4.cozumle(TB, T('weizen')))), b5 = ile('turTutarli', () => ile('degKurKoruma', () => A4.cozumle(c5.soru, T('weizen'))));
+        // DOG4H: genel koruma (ikame + degisiklikKur ok:false → belirsiz) 'tür farklı' çözümü de yakalar — tür tutarlılığı bozmasında o katman da kapatılır (ikinci koruma)
         __REG.ok('KASITLI BOZMA (b) tür tutarlılığı KAPALI → "' + TB + '" ' + b1.mod + ' ' + JSON.stringify(b1.v) + ' (maya satırına MALT — YANLIŞ; açıkken ' + b0.mod + ') → kırmızı · 5 "' + c5.soru + '" kapalıyken de ' + b5.mod + ' (ikinci koruma: "BB Alman Buğday" katalogda üç mayaya uyuyor — RAPOR)', b0.mod === 'belirsiz' && b1.mod === 'ikame' && b1.v.kalem === 'maya' && window.BM_AI1.kayit('malt', b1.v.yeni_kalem) && b5.mod === 'belirsiz');
         const x3 = ile('miktarCikar', () => ile('tuketim', () => A4.cozumle(c3.soru, T('weizen')))); // DOG4F: tüketim koruması da kapatılır — yoksa okunmayan '20 grama' belirsize çevrilir (ikinci savunma hattı)
         __REG.ok('KASITLI BOZMA (c) "grama çıkar = miktar" KAPALI → 3 "' + c3.soru + '" ' + x3.mod + ' ' + JSON.stringify(x3.v) + ' (ÇIKAR — YANLIŞ) → kırmızı', sinif(c3, x3) === 'YANLIS' && x3.v && x3.v.islem === 'cikar');
@@ -12764,6 +12765,47 @@ const CASELER = [
         __REG.ok('KASITLI BOZMA hacim başına kapalı → S2 ' + (b2.v ? b2.v.islem + ' ' + b2.v.miktar + ' g' : b2.mod) + ' (eski sessiz 2 g) → kırmızı', b2.mod === 'ikame' && b2.v.miktar === 2);
         return __REG.al();
       }, set, g4, f4, e4, d4, c4, cs);
+    }
+  },
+  // ═════════════ SPRINT DOG4H — maya miktarı + ikame/degisiklikKur genel koruması ═════════════
+  {
+    kod: 'DOG4H-COZUM', ad: 'MAYA MİKTARI (DOG4H madde 1–2): maya satırına yönelik HER miktar (g, paket, kat, kesir, fark; değiştir\'de Y\'ye yazılan miktar) → belirsiz/işlem, sade neden "Maya miktarı bu asistanda değiştirilmiyor …" · miktarsız "X yerine Y" DEĞİŞTİR aynen · GENEL KORUMA: çözüm ikame + A1.degisiklikKur ok:false → belirsiz (kırık akış yok) · ölçüm: setlerde ve mutasyonda ikame + ok:false = 0 · parmak izleri BİREBİR · KASITLI BOZMA',
+    calistir: async (page) => {
+      const rd = n => JSON.parse(fs.readFileSync(path.join(KOK, 'tests', n), 'utf8'));
+      const set = rd('tuzak_seti.json'), h4 = rd('dog4h_cozum_seti.json'), g4 = rd('dog4g_cozum_seti.json'), f4 = rd('dog4f_cozum_seti.json'), e4 = rd('dog4e_cozum_seti.json'), d4 = rd('dog4d_cozum_seti.json'), c4 = rd('dog4c_cozum_seti.json'), cs = rd('dog4b_cozum_seti.json');
+      return page.evaluate(async (set, h4, g4, f4, e4, d4, c4, cs) => {
+        const A1 = window.BM_AI1, A4 = window.BM_AI4, C = A4.COZ;
+        const T = (tb, ek) => { const t = set.tabanlar[tb], o = { stil: t.stil, tarif: Object.assign({ hacim: 11, verim: 61, mashSc: 66 }, JSON.parse(JSON.stringify(t.tarif))) }; if (ek) o.tarif.katkilar.push(JSON.parse(JSON.stringify(ek))); return o; };
+        const sinif = (b, x) => { if (b.belirsiz) return x.mod === 'belirsiz' && x.belirsizTur === 'islem' && (x.neden || '').indexOf(b.neden) >= 0 && x.tuketim && x.tuketim.kart === A4.MAYA_MIKTAR_NEDEN ? 'dogru' : 'YANLIS';
+          const v = x.v || {}; return x.mod === 'ikame' && v.islem === b.islem && v.yeni_kalem === b.yeni && !(+v.miktar > 0) ? 'dogru' : 'YANLIS'; };
+        const kos = () => h4.istemler.map(it => { const t = T(it.taban), c = A4.cozumle(it.soru, t), d = c.v ? A1.degisiklikKur(t, c.v) : null; return { id: it.id, it, c, d, k: sinif(it.beklenen, c), an: A4.anladigim({ coz: c, deg: d, kalem: c.kalem }) }; });
+        const yaz = R => R.map(x => x.id + ' ' + x.k + ': ' + x.it.soru + ' → ' + x.c.mod + ' ' + JSON.stringify(x.c.v || x.c.neden || null)).join(' || '), ac = x => x.c.v ? x.c.v.islem + ' ' + x.c.v.yeni_kalem : x.c.mod + ' "' + x.c.neden + '"';
+        const R = kos(), M = R.filter(x => x.it.grup === 'held7'), E = R.filter(x => x.it.grup === 'ek');
+        __REG.ok('Claude held-out 7 metin AYNEN: ' + M.map(x => x.id + ' ' + ac(x)).join(' · ') + ' (M1–M6 belirsiz "maya miktarı" · M7 DEĞİŞTİR aynen)', M.length === 7 && M.every(x => x.k === 'dogru'), yaz(M.filter(x => x.k !== 'dogru')));
+        const m7 = M.find(x => x.id === 'M7');
+        __REG.ok('kart metni sade: "' + A4.MAYA_MIKTAR_NEDEN + '" · M7 Anladığım: "' + m7.an + '" (miktarsız tür değişikliği hesaplanır)', /yalnız maya türü değiştirilebilir/.test(A4.MAYA_MIKTAR_NEDEN) && m7.d && m7.d.ok && /DEĞİŞTİR/.test(m7.an || ''));
+        __REG.ok('aynı sınıf CC ek: ' + E.map(x => x.id + ' ' + ac(x)).join(' · '), E.length === 6 && E.every(x => x.k === 'dogru'), yaz(E.filter(x => x.k !== 'dogru')));
+        // ÖLÇÜM (madde 1): tuzak 93 + DOG4B–DOG4H setleri + ikame köklerine dönüşümlü 1 ek — çözüm ikame iken degisiklikKur ok:false ya da maya satırında miktar kalan sonuç 0 olmalı
+        const kok = [].concat(set.istemler.map(i => ({ id: i.id, taban: i.taban, soru: i.istem })), cs.istemler, c4.istemler, d4.istemler, e4.istemler, f4.istemler, g4.istemler.filter(x => !x.hacimYok), h4.istemler);
+        const EK = g4.mutasyon.ekler; let j = 0; const olc = { n: 0, bozuk: [], maya: [] };
+        const bak = (q, it) => { const t = T(it.taban, it.ekKatki), c = A4.cozumle(q, t); olc.n++; if (c.mod !== 'ikame' || !c.v) return c; const d = A1.degisiklikKur(T(it.taban, it.ekKatki), c.v);
+          if (!d || !d.ok) olc.bozuk.push(q + ' → ' + (d && d.neden)); else if (d.tip === 'maya' && +c.v.miktar > 0) olc.maya.push(q); return c; };
+        kok.forEach(it => { const c0 = bak(it.soru, it); if (c0.mod !== 'ikame') return; const e = EK[(j++) % EK.length]; bak(j % 2 ? e + ' ' + it.soru : it.soru.replace(/[?.!]+$/, '') + ' ' + e, it); });
+        __REG.ok('ölçüm: ' + olc.n + ' soru (kök + ikame köklerine 1 ek) · ikame + degisiklikKur ok:false ' + olc.bozuk.length + ' · maya satırında miktar kalan ' + olc.maya.length, olc.n >= 900 && olc.bozuk.length === 0 && olc.maya.length === 0, olc.bozuk.concat(olc.maya).slice(0, 10).join(' || '));
+        // parmak izleri — DOG4G (abf671c) ile BİREBİR
+        const fnv = t => { let h = 0x811c9dc5; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return h.toString(16).padStart(8, '0'); };
+        const f = c => [c.mod, c.islem || null, c.eski || null, c.yeni || null, c.v || null, c.miktar || null, c.stil], P = (L, q) => { const p = JSON.stringify(L.map(it => f(A4.cozumle(it[q || 'soru'], T(it.taban, it.ekKatki))))); return fnv(p) + '/' + p.length; };
+        const fp = { t: P(set.istemler, 'istem'), b: P(cs.istemler.filter(x => ['E01', 'E02', 'E03', 'E04', 'E05', 'E06'].indexOf(x.id) < 0)), c: P(c4.istemler), d: P(d4.istemler), e: P(e4.istemler), f: P(f4.istemler), g: P(g4.istemler) };
+        __REG.ok('parmak izi BİREBİR: tuzak v5 93 ' + fp.t + ' (cb74f605/11217) · DOG4B 141 ' + fp.b + ' (3d8a0ef9/23172) · DOG4C 106 ' + fp.c + ' (63030f24/12289) · DOG4D 97 ' + fp.d + ' (b3af54f6/11588) · DOG4E 90 ' + fp.e + ' (0db4a347/12484) · DOG4F 23 ' + fp.f + ' (bf8ae693/3424) · DOG4G 13 ' + fp.g + ' (97a6e9cb/1483; DOG4G abf671c ile aynı)',
+          fp.t === 'cb74f605/11217' && fp.b === '3d8a0ef9/23172' && fp.c === '63030f24/12289' && fp.d === 'b3af54f6/11588' && fp.e === '0db4a347/12484' && fp.f === 'bf8ae693/3424' && fp.g === '97a6e9cb/1483');
+        // KASITLI BOZMALAR
+        const ile = (ks, fn) => { const a = ks.map(k => C[k]); ks.forEach(k => { C[k] = false; }); try { return fn(); } finally { ks.forEach((k, i) => { C[k] = a[i]; }); } };
+        const q1 = M.find(x => x.id === 'M1').it, q2 = M.find(x => x.id === 'M2').it;
+        const b1 = ile(['mayaMiktar'], () => A4.cozumle(q1.soru, T(q1.taban))), b2 = ile(['degKurKoruma'], () => { const t = T(q2.taban), c = A4.cozumle(q2.soru, t); return { c, d: c.v ? A1.degisiklikKur(t, c.v) : null }; });
+        __REG.ok('KASITLI BOZMA madde 1 (maya miktarı) kapalı → M1 ' + b1.mod + (b1.v ? ' ' + b1.v.islem + ' ' + b1.v.miktar + ' ' + b1.v.birim : '') + ' (eski sessiz DEĞİŞTİR) → kırmızı', b1.mod === 'ikame' && b1.v.islem === 'degistir' && b1.v.miktar === 22);
+        __REG.ok('KASITLI BOZMA sarmalayıcı koruması kapalı → M2 ' + b2.c.mod + ' · degisiklikKur ' + (b2.d ? (b2.d.ok ? 'ok' : 'ok:false "' + b2.d.neden + '"') : '—') + ' (eski kırık akış) → kırmızı', b2.c.mod === 'ikame' && b2.d && !b2.d.ok);
+        return __REG.al();
+      }, set, h4, g4, f4, e4, d4, c4, cs);
     }
   },
   // ═════════════ SPRINT BUL2C — marka ∩ açık stil, kısa yer adı, koşu puanlaması, gerçek koşu kaçakları, BUL modeli Opus ═════════════

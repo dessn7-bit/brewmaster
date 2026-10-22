@@ -33728,7 +33728,7 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   // ── DOG4B madde 1: REÇETE SATIRI ÖNCE · TÜR TUTARLILIĞI · EMİN DEĞİLSE SOR ──
   // Canlı denemede (Claude, 2026-10-21) 18 doğal sorunun 10'u yanlış / çözülemedi; en tehlikelisi kendinden emin YANLIŞ çözüm ("buğday maltını 2,5 kg" → EKLE Flaked Wheat).
   // Bayraklar yalnız testin kasıtlı bozmaları için (varsayılan hepsi açık).
-  A4.COZ = { receteOnce:true, turTutarli:true, miktarCikar:true, belirsizVarsayilan:true, carpan:true, stilAcik:true, kaldirip:true, birimCevir:true, yBilinmeyen:true, ayniKalem:true, iyelikTur:true, kesirYon:true, kesirArtir:true, tuketim:true, miktarParca:true, tumModlar:true, hacimBasina:true }; // DOG4G: tumModlar (koruma tat / bilgi / yok sonucunda da, madde 1) · hacimBasina (g/L, madde 2) — yalnız kasıtlı bozma · DOG4F: tuketim (tüketim koruması, madde 1) · miktarParca (hedefli okuma düzeltmeleri, madde 2) — yalnız kasıtlı bozma · DOG4E: kesirYon (yön kuralı) · kesirArtir (artırma yönü) — yalnız kasıtlı bozma · DOG4C: kaldirip'e kadar son dört bayrak (madde 1 / 2 / 4 / 3) · DOG4D: birimCevir (1) · yBilinmeyen + ayniKalem (2) · iyelikTur (3)
+  A4.COZ = { receteOnce:true, turTutarli:true, miktarCikar:true, belirsizVarsayilan:true, carpan:true, stilAcik:true, kaldirip:true, birimCevir:true, yBilinmeyen:true, ayniKalem:true, iyelikTur:true, kesirYon:true, kesirArtir:true, tuketim:true, miktarParca:true, tumModlar:true, hacimBasina:true, mayaMiktar:true, degKurKoruma:true }; // DOG4H: mayaMiktar (maya satırına miktar → belirsiz, madde 1) · degKurKoruma (ikame + A1.degisiklikKur ok:false → belirsiz, madde 1) — yalnız kasıtlı bozma · // DOG4G: tumModlar (koruma tat / bilgi / yok sonucunda da, madde 1) · hacimBasina (g/L, madde 2) — yalnız kasıtlı bozma · DOG4F: tuketim (tüketim koruması, madde 1) · miktarParca (hedefli okuma düzeltmeleri, madde 2) — yalnız kasıtlı bozma · DOG4E: kesirYon (yön kuralı) · kesirArtir (artırma yönü) — yalnız kasıtlı bozma · DOG4C: kaldirip'e kadar son dört bayrak (madde 1 / 2 / 4 / 3) · DOG4D: birimCevir (1) · yBilinmeyen + ayniKalem (2) · iyelikTur (3)
   var DOLGU = /^(malt|malti|maltini|maltinin|maltina|maltindan|maltiyla|maltlari|maya|mayasi|mayasini|mayasinin|mayayi|mayasiyla|arpa|hop|hopu|hopunu|hopunun|seker|sekeri|sekerini|sekerinin|sekerinden|sekeriyle)$/;
   var ROMA = { '1':'i', '2':'ii', '3':'iii', '4':'iv' }, MARKA_ES = { bb:['bb', 'birabura', 'biraburada'], birabura:['birabura', 'bb'], biraburada:['biraburada', 'birabura', 'bb'] };
   var TR_EN_K = { munih:'munich', cikolata:'chocolate', pilsen:'pilsner', viyana:'vienna' };
@@ -33930,12 +33930,31 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     return { parca:g.parca, zaman:g.zaman, tum:kalan.map(function(p){ return p.ham.replace(/[,.?!:;]+$/, ''); }) }; };
   // ilk ardışık öbek ("20 gram daha"); DOG4G: tek bağlaç sözcüğü ("değil / yerine / veya") iki parçayı tek öbekte birleştirir ("60 değil 40")
   A4.KOPRU_RE = /^(degil|yerine|veya)$/;
+  // DOG4H (1): maya miktarı bu asistanda hesaplanmıyor (A1._degKur maya satırında yalnız mayaId'yi değiştirir; miktarı yok sayar) — tek neden metni
+  A4.MAYA_MIKTAR_NEDEN = 'Maya miktarı bu asistanda değiştirilmiyor — yalnız maya türü değiştirilebilir ("X yerine Y kullansam").';
+  A4.mayaHedefMi = function(r){ var a = r.adaylar && r.adaylar.length ? r.adaylar : null;
+    return !!((r.eski && r.eski.tip === 'maya') || (r.v && r.v.kalem === 'maya') || (r.yeni && r.yeni.tip === 'maya' && !r.eski) || (a && a.every(function(x){ return x && x.tip === 'maya'; }))); };
+  A4.degKurSade = function(n){ n = String(n || ''); var m = /^tür farklı \((\w+) → (\w+)\)/.exec(n), TR = { malt:'malt', hop:'hop', maya:'maya', katki:'katkı' };
+    if(m) return 'iki kalem farklı türde (' + (TR[m[1]] || m[1]) + ' ↔ ' + (TR[m[2]] || m[2]) + ') — bu asistan yalnız aynı türden kalemi değiştirir';
+    if(/^miktar değişikliği çözülemedi/.test(n)) return 'yeni miktar hesaplanamadı';
+    if(/^yeni kalem katalogda bulunamadı/.test(n)) return n.replace(/^yeni kalem/, 'yeni ürün');
+    return n || 'değişiklik hesaplanamadı'; };
+  A4.belirsizYap = function(r, neden, kart){ var e = r.eski || r.yeni || (r.adaylar && r.adaylar[0]) || null;
+    r.onceki = r.v ? { mod:r.mod, islem:r.v.islem, miktar:r.v.miktar, birim:r.v.birim } : { mod:r.mod }; r.mod = 'belirsiz'; r.belirsizTur = 'islem'; r.neden = neden;
+    if(e) r.adaylar = [{ tip:e.tip, id:e.id, ad:e.ad || adOf(e.tip, e.id) }]; if(kart){ r.tuketim = r.tuketim || {}; r.tuketim.kart = kart; }
+    delete r.v; delete r.islem; delete r.carpan; delete r.fark; delete r.kesir; return r; };
   A4.parcaOzet = function(kalan, R){ var g = [kalan[0].i], zm = kalan[0].sinif === 'zaman';
     for(var j = 1; j < kalan.length; j++){ var son = g[g.length - 1], x = kalan[j];
       if(x.i === son + 1) g.push(x.i); else if(x.i === son + 2 && A4.KOPRU_RE.test(norm(String(R[son + 1] || '').replace(/['’].*$/, '')))) g.push(son + 1, x.i); else break;
       if(x.sinif === 'zaman') zm = true; }
     return { parca:g.map(function(i){ return String(R[i] || '').replace(/[,.?!:;]+$/, ''); }).join(' '), zaman:zm }; };
-  A4.cozumle = function(soru, T){ var r = A4._cozumle(soru, T);
+  // DOG4H: dış sarmalayıcı — koruma katmanları (A4._cozumleK) erken dönse de maya neden metni tek yerde uygulanır
+  A4.cozumle = function(soru, T){ var r = A4._cozumleK(soru, T);
+    //   maya satırına yönelik miktarlı, zaten belirsiz/işlem soru ("WY3068 yerine 3 paket WB-06", "mayayı iki katına çıkarsam") → tek sade neden
+    if(r && r.mod === 'belirsiz' && r.belirsizTur === 'islem' && A4.COZ.mayaMiktar !== false && A4.mayaHedefMi(r) && A4.miktarParcalar(soru).length && !/^maya miktarı/.test(r.neden || '')){
+      r.neden = 'maya miktarı hesaplanmıyor' + (r.tuketim && r.tuketim.parca ? ' (\'' + r.tuketim.parca + '\')' : ''); r.tuketim = r.tuketim || {}; r.tuketim.kart = A4.MAYA_MIKTAR_NEDEN; }
+    return r; };
+  A4._cozumleK = function(soru, T){ var r = A4._cozumle(soru, T);
     // DOG4F (1): TÜKETİM KORUMASI — ikame çözümü sorudaki her miktar parçasını hesaba katmış olmalı; katmadıysa sonuç BELİRSİZ (işlem) + hangi parçanın anlaşılmadığı
     //   (önceden "20 gram daha koysam" → 20 g, "%25'ini" → satır tamamen çıkar gibi okunmayan parça sessizce atılıyordu)
     if(r && r.mod === 'ikame' && A4.COZ.tuketim !== false){ var tg = A4.tuketimDenetle(soru, r, T);
@@ -33973,6 +33992,14 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
         r.mod = 'belirsiz'; r.belirsizTur = 'islem'; r.neden = 'şu kısmı hesaba katamadım: \'' + pc2 + '\''; if(k2) r.adaylar = [{ tip:k2.tip, id:k2.id, ad:ad2 }]; delete r.bilinmeyen; return r; } }
     if(r && r.mod === 'ikame' && r.v && +r.v.miktar > 0 && r.v.birim && A4.COZ.birimCevir){ var d = A1._degKur(T, r.v);
       if(d && !d.ok && /^birim/.test(d.neden || '')){ var e = r.eski || r.yeni; r.mod = 'belirsiz'; r.belirsizTur = 'islem'; r.neden = d.neden + ' — miktarı satırın biriminde yaz'; if(e) r.adaylar = [{ tip:e.tip, id:e.id, ad:adOf(e.tip, e.id) }]; r.vBirim = r.v; delete r.v; delete r.islem; } }
+    // DOG4H (1): MAYA MİKTARI — maya satırına yazılmış miktar ("WY3068 yerine 22 gram WB-06", "11 g WB-06 eklesem") A1._degKur'da SESSİZCE yok sayılıyordu (sonuç "1 paket → 1 paket")
+    //   (yalnız değiştir / ekle — degKur bunları "başarıyla" kurup miktarı atar; maya satırında 'miktar' işlemini degKur zaten reddeder → aşağıdaki genel koruma)
+    if(r && r.mod === 'ikame' && r.v && r.v.islem !== 'miktar' && +r.v.miktar > 0 && A4.COZ.mayaMiktar !== false && A4.mayaHedefMi(r)) return A4.belirsizYap(r, 'maya miktarı hesaplanmıyor', A4.MAYA_MIKTAR_NEDEN);
+    // DOG4H (1): GENEL KORUMA — çözüm 'ikame' ama değişiklik kurulamıyor (A1.degisiklikKur ok:false) → kartta ne yapılacağı belli olmayan kırık akış yerine belirsiz + sade neden
+    //   (Claude held-out 7: "mayayı 11 g kuru maya yapsam" → ikame miktar, degisiklikKur 'miktar değişikliği çözülemedi', Anladığım satırı yok)
+    if(r && r.mod === 'ikame' && r.v && T && T.tarif && A4.COZ.degKurKoruma !== false){ var dk = A1.degisiklikKur(T, r.v);
+      if(dk && !dk.ok){ var my = A4.mayaHedefMi(r) && (+r.v.miktar > 0 || r.v.islem === 'miktar'); r.degKur = dk.neden;
+        return A4.belirsizYap(r, my ? 'maya miktarı hesaplanmıyor' : 'bu değişiklik hesaplanamadı: ' + A4.degKurSade(dk.neden), my ? A4.MAYA_MIKTAR_NEDEN : 'Bu değişikliği hesaplayamadım: ' + A4.degKurSade(dk.neden) + '. Daha açık yazar mısın?'); } }
     return r; };
   A4._cozumle = function(soru, T){
     // DOG4C (3): "X'i kaldırıp / çıkarıp Y koysam / eklesem / kullansam / katsam" = DEĞİŞTİR X → Y — "X yerine Y" biçimine çevrilip AYNI yoldan çözülür (tür tutarlılığı aynen)
