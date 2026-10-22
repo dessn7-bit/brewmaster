@@ -1,0 +1,1220 @@
+{
+ "tur": "BREWMASTER-DOG4E-COZUM-SETI",
+ "surum": 1,
+ "uretildi": "2026-10-22",
+ "kaynak": "tests/dog4e_cozum_uret.mjs — beklenen miktar elle yazılmış kesir × fiil sınıfı tablosundan (dairesel değil; çözücü sözlüğü okunmadı); tabanlar tests/tuzak_seti.json",
+ "sayim": {
+  "heldout": 12,
+  "uretilmis": 70,
+  "ek": 8
+ },
+ "istemler": [
+  {
+   "id": "H01",
+   "grup": "heldout",
+   "taban": "dubbel",
+   "soru": "Special B'nin dörtte birini çıkarsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:3",
+    "miktar": 45,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "H02",
+   "grup": "heldout",
+   "taban": "dubbel",
+   "soru": "Special B'nin üçte birini atsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:3",
+    "miktar": 40,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "H03",
+   "grup": "heldout",
+   "taban": "dubbel",
+   "soru": "Special B'nin dörtte birini azaltsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:3",
+    "miktar": 45,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "H04",
+   "grup": "heldout",
+   "taban": "wbock",
+   "soru": "munich maltının dörtte birini çıkarsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:1",
+    "miktar": 1200,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "H05",
+   "grup": "heldout",
+   "taban": "wbock",
+   "soru": "munich maltının dörtte birini eksiltsem",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:1",
+    "miktar": 1200,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "H06",
+   "grup": "heldout",
+   "taban": "weizen",
+   "soru": "Hallertau'nun üçte birini kessem",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "hop:0",
+    "miktar": 8,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "H07",
+   "grup": "heldout",
+   "taban": "dubbel",
+   "soru": "Special B'nin dörtte birini daha eklesem",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:3",
+    "miktar": 75,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "B01",
+   "grup": "heldout",
+   "taban": "dubbel",
+   "soru": "Special B'den vazgeçsem",
+   "beklenen": {
+    "islem": "cikar",
+    "kalem": "malt:3",
+    "belirsizKabul": true
+   }
+  },
+  {
+   "id": "B02",
+   "grup": "heldout",
+   "taban": "dubbel",
+   "soru": "Special B'yi hiç kullanmasam",
+   "beklenen": {
+    "islem": "cikar",
+    "kalem": "malt:3",
+    "belirsizKabul": true
+   }
+  },
+  {
+   "id": "B03",
+   "grup": "heldout",
+   "taban": "dubbel",
+   "soru": "Special B'yi dörtte bir azaltsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:3",
+    "miktar": 45,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "B04",
+   "grup": "heldout",
+   "taban": "dubbel",
+   "soru": "Special B'nin dörtte biri kadar koysam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:3",
+    "miktar": 15,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "B05",
+   "grup": "heldout",
+   "taban": "dubbel",
+   "soru": "candi'nin yarısı kadar daha koysam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "katki:0",
+    "miktar": 150,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E001",
+   "grup": "uretilmis",
+   "bicim": "iyelik-azalt",
+   "k": 0.333,
+   "taban": "weizen",
+   "soru": "buğday maltının üçte birini çıkarsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:0",
+    "miktar": 1166.7,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E002",
+   "grup": "uretilmis",
+   "bicim": "iyelik-azalt",
+   "k": 0.333,
+   "taban": "weizen",
+   "soru": "pilsner maltının üçte birini atsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:1",
+    "miktar": 766.7,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E003",
+   "grup": "uretilmis",
+   "bicim": "iyelik-azalt",
+   "k": 0.333,
+   "taban": "weizen",
+   "soru": "Hallertau'nun üçte birini azaltsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "hop:0",
+    "miktar": 8,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E004",
+   "grup": "uretilmis",
+   "bicim": "iyelik-azalt",
+   "k": 0.333,
+   "taban": "dubbel",
+   "soru": "Special B'nin üçte birini eksiltsem",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:3",
+    "miktar": 40,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E005",
+   "grup": "uretilmis",
+   "bicim": "iyelik-birak",
+   "k": 0.333,
+   "taban": "dubbel",
+   "soru": "Munich'in üçte birini kullansam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:1",
+    "miktar": 133.3,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E006",
+   "grup": "uretilmis",
+   "bicim": "iyelik-birak",
+   "k": 0.333,
+   "taban": "dubbel",
+   "soru": "candi şekerinin üçte birini koysam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "katki:0",
+    "miktar": 33.3,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E007",
+   "grup": "uretilmis",
+   "bicim": "iyelik-artir",
+   "k": 0.333,
+   "taban": "dubbel",
+   "soru": "Styrian'ın üçte birini daha eklesem",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "hop:0",
+    "miktar": 26.7,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E008",
+   "grup": "uretilmis",
+   "bicim": "iyelik-artir",
+   "k": 0.333,
+   "taban": "wbock",
+   "soru": "CARAFA'NIN üçte birini daha koysam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:3",
+    "miktar": 40,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E009",
+   "grup": "uretilmis",
+   "bicim": "iyelik-yon-yok",
+   "k": 0.333,
+   "taban": "wbock",
+   "soru": "munich maltının üçte birini eklesem",
+   "beklenen": {
+    "belirsiz": true
+   }
+  },
+  {
+   "id": "E010",
+   "grup": "uretilmis",
+   "bicim": "kadar-birak",
+   "k": 0.333,
+   "taban": "wbock",
+   "soru": "buğday maltının üçte biri kadar koysam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:0",
+    "miktar": 866.7,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E011",
+   "grup": "uretilmis",
+   "bicim": "kadar-daha",
+   "k": 0.333,
+   "taban": "weizen",
+   "soru": "Buğday Maltı'nın üçte biri kadar daha koysam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:0",
+    "miktar": 2333.3,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E012",
+   "grup": "uretilmis",
+   "bicim": "eksiz-azalt",
+   "k": 0.333,
+   "taban": "weizen",
+   "soru": "pilsner maltını üçte bir azaltsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:1",
+    "miktar": 766.7,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E013",
+   "grup": "uretilmis",
+   "bicim": "eksiz-artir",
+   "k": 0.333,
+   "taban": "weizen",
+   "soru": "Hallertau'yu üçte bir artırsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "hop:0",
+    "miktar": 16,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E014",
+   "grup": "uretilmis",
+   "bicim": "yonelme-hedef",
+   "k": 0.333,
+   "taban": "dubbel",
+   "soru": "special b'yi üçte birine indirsem",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:3",
+    "miktar": 20,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E015",
+   "grup": "uretilmis",
+   "bicim": "iyelik-azalt",
+   "k": 0.25,
+   "taban": "dubbel",
+   "soru": "Munich'in dörtte birini indirsem",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:1",
+    "miktar": 300,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E016",
+   "grup": "uretilmis",
+   "bicim": "iyelik-azalt",
+   "k": 0.25,
+   "taban": "dubbel",
+   "soru": "candi şekerinin dörtte birini kaldırsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "katki:0",
+    "miktar": 75,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E017",
+   "grup": "uretilmis",
+   "bicim": "iyelik-azalt",
+   "k": 0.25,
+   "taban": "dubbel",
+   "soru": "Styrian'ın dörtte birini çıkarsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "hop:0",
+    "miktar": 15,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E018",
+   "grup": "uretilmis",
+   "bicim": "iyelik-azalt",
+   "k": 0.25,
+   "taban": "wbock",
+   "soru": "CARAFA'NIN dörtte birini atsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:3",
+    "miktar": 22.5,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E019",
+   "grup": "uretilmis",
+   "bicim": "iyelik-birak",
+   "k": 0.25,
+   "taban": "wbock",
+   "soru": "munich maltının dörtte birini bıraksam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:1",
+    "miktar": 400,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E020",
+   "grup": "uretilmis",
+   "bicim": "iyelik-birak",
+   "k": 0.25,
+   "taban": "wbock",
+   "soru": "buğday maltının dörtte birini kullanırsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:0",
+    "miktar": 650,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E021",
+   "grup": "uretilmis",
+   "bicim": "iyelik-artir",
+   "k": 0.25,
+   "taban": "weizen",
+   "soru": "BUĞDAY MALTININ dörtte birini artırsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:0",
+    "miktar": 2187.5,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E022",
+   "grup": "uretilmis",
+   "bicim": "iyelik-artir",
+   "k": 0.25,
+   "taban": "weizen",
+   "soru": "pilsner maltının dörtte birini arttırsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:1",
+    "miktar": 1437.5,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E023",
+   "grup": "uretilmis",
+   "bicim": "iyelik-yon-yok",
+   "k": 0.25,
+   "taban": "weizen",
+   "soru": "Hallertau'nun dörtte birini kullanmasam",
+   "beklenen": {
+    "belirsiz": true
+   }
+  },
+  {
+   "id": "E024",
+   "grup": "uretilmis",
+   "bicim": "kadar-birak",
+   "k": 0.25,
+   "taban": "dubbel",
+   "soru": "special b'nin dörtte biri kadar koysam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:3",
+    "miktar": 15,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E025",
+   "grup": "uretilmis",
+   "bicim": "kadar-daha",
+   "k": 0.25,
+   "taban": "dubbel",
+   "soru": "Munich'in dörtte biri kadar daha koysam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:1",
+    "miktar": 500,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E026",
+   "grup": "uretilmis",
+   "bicim": "eksiz-azalt",
+   "k": 0.25,
+   "taban": "dubbel",
+   "soru": "candi şekerini dörtte bir düşürsem",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "katki:0",
+    "miktar": 75,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E027",
+   "grup": "uretilmis",
+   "bicim": "eksiz-artir",
+   "k": 0.25,
+   "taban": "dubbel",
+   "soru": "Styrian'ı dörtte bir arttırsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "hop:0",
+    "miktar": 25,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E028",
+   "grup": "uretilmis",
+   "bicim": "yonelme-hedef",
+   "k": 0.25,
+   "taban": "wbock",
+   "soru": "Carafa'yı dörtte birine düşürsem",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:3",
+    "miktar": 7.5,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E029",
+   "grup": "uretilmis",
+   "bicim": "iyelik-azalt",
+   "k": 0.2,
+   "taban": "wbock",
+   "soru": "munich maltının beşte birini kessem",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:1",
+    "miktar": 1280,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E030",
+   "grup": "uretilmis",
+   "bicim": "iyelik-azalt",
+   "k": 0.2,
+   "taban": "wbock",
+   "soru": "buğday maltının beşte birini düşürsem",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:0",
+    "miktar": 2080,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E031",
+   "grup": "uretilmis",
+   "bicim": "iyelik-azalt",
+   "k": 0.2,
+   "taban": "weizen",
+   "soru": "buğday maltının beşte birini indirsem",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:0",
+    "miktar": 1400,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E032",
+   "grup": "uretilmis",
+   "bicim": "iyelik-azalt",
+   "k": 0.2,
+   "taban": "weizen",
+   "soru": "pilsner maltının beşte birini kaldırsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:1",
+    "miktar": 920,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E033",
+   "grup": "uretilmis",
+   "bicim": "iyelik-birak",
+   "k": 0.2,
+   "taban": "weizen",
+   "soru": "Hallertau'nun beşte birini kullansam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "hop:0",
+    "miktar": 2.4,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E034",
+   "grup": "uretilmis",
+   "bicim": "iyelik-birak",
+   "k": 0.2,
+   "taban": "dubbel",
+   "soru": "Special B'nin beşte birini koysam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:3",
+    "miktar": 12,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E035",
+   "grup": "uretilmis",
+   "bicim": "iyelik-artir",
+   "k": 0.2,
+   "taban": "dubbel",
+   "soru": "Munich'in beşte birini ekstra koysam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:1",
+    "miktar": 480,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E036",
+   "grup": "uretilmis",
+   "bicim": "iyelik-artir",
+   "k": 0.2,
+   "taban": "dubbel",
+   "soru": "candi şekerinin beşte birini fazladan koysam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "katki:0",
+    "miktar": 120,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E037",
+   "grup": "uretilmis",
+   "bicim": "iyelik-yon-yok",
+   "k": 0.2,
+   "taban": "dubbel",
+   "soru": "Styrian'ın beşte birini değiştirsem",
+   "beklenen": {
+    "belirsiz": true
+   }
+  },
+  {
+   "id": "E038",
+   "grup": "uretilmis",
+   "bicim": "kadar-birak",
+   "k": 0.2,
+   "taban": "wbock",
+   "soru": "CARAFA'NIN beşte biri kadar koysam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:3",
+    "miktar": 6,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E039",
+   "grup": "uretilmis",
+   "bicim": "kadar-daha",
+   "k": 0.2,
+   "taban": "wbock",
+   "soru": "munich maltının beşte biri kadar daha koysam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:1",
+    "miktar": 1920,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E040",
+   "grup": "uretilmis",
+   "bicim": "eksiz-azalt",
+   "k": 0.2,
+   "taban": "wbock",
+   "soru": "buğday maltını beşte bir eksiltsem",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:0",
+    "miktar": 2080,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E041",
+   "grup": "uretilmis",
+   "bicim": "eksiz-artir",
+   "k": 0.2,
+   "taban": "weizen",
+   "soru": "buğday maltını beşte bir yükseltsem",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:0",
+    "miktar": 2100,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E042",
+   "grup": "uretilmis",
+   "bicim": "yonelme-hedef",
+   "k": 0.2,
+   "taban": "weizen",
+   "soru": "pilsner maltını beşte birine azaltsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:1",
+    "miktar": 230,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E043",
+   "grup": "uretilmis",
+   "bicim": "iyelik-azalt",
+   "k": 0.667,
+   "taban": "weizen",
+   "soru": "Hallertau'nun üçte ikisini azaltsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "hop:0",
+    "miktar": 4,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E044",
+   "grup": "uretilmis",
+   "bicim": "iyelik-azalt",
+   "k": 0.667,
+   "taban": "dubbel",
+   "soru": "SPECIAL B'NİN üçte ikisini eksiltsem",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:3",
+    "miktar": 20,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E045",
+   "grup": "uretilmis",
+   "bicim": "iyelik-azalt",
+   "k": 0.667,
+   "taban": "dubbel",
+   "soru": "Munich'in üçte ikisini kessem",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:1",
+    "miktar": 133.3,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E046",
+   "grup": "uretilmis",
+   "bicim": "iyelik-azalt",
+   "k": 0.667,
+   "taban": "dubbel",
+   "soru": "candi şekerinin üçte ikisini düşürsem",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "katki:0",
+    "miktar": 33.3,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E047",
+   "grup": "uretilmis",
+   "bicim": "iyelik-birak",
+   "k": 0.667,
+   "taban": "dubbel",
+   "soru": "Styrian'ın üçte ikisini bıraksam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "hop:0",
+    "miktar": 13.3,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E048",
+   "grup": "uretilmis",
+   "bicim": "iyelik-birak",
+   "k": 0.667,
+   "taban": "wbock",
+   "soru": "CARAFA'NIN üçte ikisini kullanırsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:3",
+    "miktar": 20,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E049",
+   "grup": "uretilmis",
+   "bicim": "iyelik-artir",
+   "k": 0.667,
+   "taban": "wbock",
+   "soru": "munich maltının üçte ikisini daha eklesem",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:1",
+    "miktar": 2666.7,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E050",
+   "grup": "uretilmis",
+   "bicim": "iyelik-artir",
+   "k": 0.667,
+   "taban": "wbock",
+   "soru": "buğday maltının üçte ikisini daha koysam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:0",
+    "miktar": 4333.3,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E051",
+   "grup": "uretilmis",
+   "bicim": "iyelik-yon-yok",
+   "k": 0.667,
+   "taban": "weizen",
+   "soru": "BUĞDAY MALTININ üçte ikisini denesem",
+   "beklenen": {
+    "belirsiz": true
+   }
+  },
+  {
+   "id": "E052",
+   "grup": "uretilmis",
+   "bicim": "kadar-birak",
+   "k": 0.667,
+   "taban": "weizen",
+   "soru": "pilsner maltının üçte ikisi kadar koysam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:1",
+    "miktar": 766.7,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E053",
+   "grup": "uretilmis",
+   "bicim": "kadar-daha",
+   "k": 0.667,
+   "taban": "weizen",
+   "soru": "Hallertau'nun üçte ikisi kadar daha koysam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "hop:0",
+    "miktar": 20,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E054",
+   "grup": "uretilmis",
+   "bicim": "eksiz-azalt",
+   "k": 0.667,
+   "taban": "dubbel",
+   "soru": "special b'yi üçte iki azaltsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:3",
+    "miktar": 20,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E055",
+   "grup": "uretilmis",
+   "bicim": "eksiz-artir",
+   "k": 0.667,
+   "taban": "dubbel",
+   "soru": "Munich'i üçte iki artırsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:1",
+    "miktar": 666.7,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E056",
+   "grup": "uretilmis",
+   "bicim": "yonelme-hedef",
+   "k": 0.667,
+   "taban": "dubbel",
+   "soru": "candi şekerini üçte ikisine indirsem",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "katki:0",
+    "miktar": 66.7,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E057",
+   "grup": "uretilmis",
+   "bicim": "iyelik-azalt",
+   "k": 0.75,
+   "taban": "dubbel",
+   "soru": "Styrian'ın dörtte üçünü çıkarsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "hop:0",
+    "miktar": 5,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E058",
+   "grup": "uretilmis",
+   "bicim": "iyelik-azalt",
+   "k": 0.75,
+   "taban": "wbock",
+   "soru": "CARAFA'NIN dörtte üçünü atsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:3",
+    "miktar": 7.5,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E059",
+   "grup": "uretilmis",
+   "bicim": "iyelik-azalt",
+   "k": 0.75,
+   "taban": "wbock",
+   "soru": "munich maltının dörtte üçünü azaltsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:1",
+    "miktar": 400,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E060",
+   "grup": "uretilmis",
+   "bicim": "iyelik-azalt",
+   "k": 0.75,
+   "taban": "wbock",
+   "soru": "buğday maltının dörtte üçünü eksiltsem",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:0",
+    "miktar": 650,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E061",
+   "grup": "uretilmis",
+   "bicim": "iyelik-birak",
+   "k": 0.75,
+   "taban": "weizen",
+   "soru": "buğday maltının dörtte üçünü kullansam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:0",
+    "miktar": 1312.5,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E062",
+   "grup": "uretilmis",
+   "bicim": "iyelik-birak",
+   "k": 0.75,
+   "taban": "weizen",
+   "soru": "pilsner maltının dörtte üçünü koysam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:1",
+    "miktar": 862.5,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E063",
+   "grup": "uretilmis",
+   "bicim": "iyelik-artir",
+   "k": 0.75,
+   "taban": "weizen",
+   "soru": "Hallertau'nun dörtte üçünü artırsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "hop:0",
+    "miktar": 21,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E064",
+   "grup": "uretilmis",
+   "bicim": "iyelik-artir",
+   "k": 0.75,
+   "taban": "dubbel",
+   "soru": "Special B'nin dörtte üçünü arttırsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:3",
+    "miktar": 105,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E065",
+   "grup": "uretilmis",
+   "bicim": "iyelik-yon-yok",
+   "k": 0.75,
+   "taban": "dubbel",
+   "soru": "Munich'in dörtte üçünü ayarlasam",
+   "beklenen": {
+    "belirsiz": true
+   }
+  },
+  {
+   "id": "E066",
+   "grup": "uretilmis",
+   "bicim": "kadar-birak",
+   "k": 0.75,
+   "taban": "dubbel",
+   "soru": "candi şekerinin dörtte üçü kadar koysam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "katki:0",
+    "miktar": 75,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E067",
+   "grup": "uretilmis",
+   "bicim": "kadar-daha",
+   "k": 0.75,
+   "taban": "dubbel",
+   "soru": "Styrian'ın dörtte üçü kadar daha koysam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "hop:0",
+    "miktar": 35,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E068",
+   "grup": "uretilmis",
+   "bicim": "eksiz-azalt",
+   "k": 0.75,
+   "taban": "wbock",
+   "soru": "Carafa'yı dörtte üç düşürsem",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:3",
+    "miktar": 7.5,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E069",
+   "grup": "uretilmis",
+   "bicim": "eksiz-artir",
+   "k": 0.75,
+   "taban": "wbock",
+   "soru": "munich maltını dörtte üç arttırsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:1",
+    "miktar": 2800,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E070",
+   "grup": "uretilmis",
+   "bicim": "yonelme-hedef",
+   "k": 0.75,
+   "taban": "wbock",
+   "soru": "buğday maltını dörtte üçüne düşürsem",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:0",
+    "miktar": 1950,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E071",
+   "grup": "uretilmis",
+   "bicim": "ek",
+   "k": 0.25,
+   "taban": "dubbel",
+   "soru": "candi'nin %25'ini çıkarsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "katki:0",
+    "miktar": 75,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E072",
+   "grup": "uretilmis",
+   "bicim": "ek",
+   "k": 0.3,
+   "taban": "dubbel",
+   "soru": "Special B'nin yüzde 30'unu atsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:3",
+    "miktar": 42,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E073",
+   "grup": "uretilmis",
+   "bicim": "ek",
+   "k": 0.2,
+   "taban": "dubbel",
+   "soru": "Special B'yi %20 azaltsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:3",
+    "miktar": 48,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E074",
+   "grup": "uretilmis",
+   "bicim": "ek",
+   "k": 0.2,
+   "taban": "dubbel",
+   "soru": "Special B'yi %20 artırsam",
+   "beklenen": {
+    "islem": "miktar",
+    "kalem": "malt:3",
+    "miktar": 72,
+    "birim": "g"
+   }
+  },
+  {
+   "id": "E075",
+   "grup": "uretilmis",
+   "bicim": "ek",
+   "k": 0.25,
+   "taban": "dubbel",
+   "soru": "Special B'nin dörtte birini Carafa ile değiştirsem",
+   "beklenen": {
+    "belirsiz": true
+   }
+  },
+  {
+   "id": "E076",
+   "grup": "uretilmis",
+   "bicim": "ek",
+   "k": 0.25,
+   "taban": "dubbel",
+   "soru": "Special B'nin dörtte birini çıkarıp artırsam",
+   "beklenen": {
+    "belirsiz": true
+   }
+  },
+  {
+   "id": "E077",
+   "grup": "uretilmis",
+   "bicim": "ek",
+   "k": 2,
+   "taban": "dubbel",
+   "soru": "Special B'nin iki katı kadar daha koysam",
+   "beklenen": {
+    "belirsiz": true
+   }
+  },
+  {
+   "id": "E078",
+   "grup": "uretilmis",
+   "bicim": "ek",
+   "k": 0.25,
+   "taban": "dubbel",
+   "soru": "Special B'nin dörtte birini kullanmasam",
+   "beklenen": {
+    "belirsiz": true
+   }
+  }
+ ]
+}
