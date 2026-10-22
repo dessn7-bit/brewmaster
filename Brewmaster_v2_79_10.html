@@ -33728,7 +33728,7 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   // ── DOG4B madde 1: REÇETE SATIRI ÖNCE · TÜR TUTARLILIĞI · EMİN DEĞİLSE SOR ──
   // Canlı denemede (Claude, 2026-10-21) 18 doğal sorunun 10'u yanlış / çözülemedi; en tehlikelisi kendinden emin YANLIŞ çözüm ("buğday maltını 2,5 kg" → EKLE Flaked Wheat).
   // Bayraklar yalnız testin kasıtlı bozmaları için (varsayılan hepsi açık).
-  A4.COZ = { receteOnce:true, turTutarli:true, miktarCikar:true, belirsizVarsayilan:true, carpan:true, stilAcik:true, kaldirip:true, birimCevir:true, yBilinmeyen:true, ayniKalem:true, iyelikTur:true, kesirYon:true, kesirArtir:true }; // DOG4E: kesirYon (yön kuralı) · kesirArtir (artırma yönü) — yalnız kasıtlı bozma · DOG4C: kaldirip'e kadar son dört bayrak (madde 1 / 2 / 4 / 3) · DOG4D: birimCevir (1) · yBilinmeyen + ayniKalem (2) · iyelikTur (3)
+  A4.COZ = { receteOnce:true, turTutarli:true, miktarCikar:true, belirsizVarsayilan:true, carpan:true, stilAcik:true, kaldirip:true, birimCevir:true, yBilinmeyen:true, ayniKalem:true, iyelikTur:true, kesirYon:true, kesirArtir:true, tuketim:true, miktarParca:true }; // DOG4F: tuketim (tüketim koruması, madde 1) · miktarParca (hedefli okuma düzeltmeleri, madde 2) — yalnız kasıtlı bozma · DOG4E: kesirYon (yön kuralı) · kesirArtir (artırma yönü) — yalnız kasıtlı bozma · DOG4C: kaldirip'e kadar son dört bayrak (madde 1 / 2 / 4 / 3) · DOG4D: birimCevir (1) · yBilinmeyen + ayniKalem (2) · iyelikTur (3)
   var DOLGU = /^(malt|malti|maltini|maltinin|maltina|maltindan|maltiyla|maltlari|maya|mayasi|mayasini|mayasinin|mayayi|mayasiyla|arpa|hop|hopu|hopunu|hopunun|seker|sekeri|sekerini|sekerinin|sekerinden|sekeriyle)$/;
   var ROMA = { '1':'i', '2':'ii', '3':'iii', '4':'iv' }, MARKA_ES = { bb:['bb', 'birabura', 'biraburada'], birabura:['birabura', 'bb'], biraburada:['biraburada', 'birabura', 'bb'] };
   var TR_EN_K = { munih:'munich', cikolata:'chocolate', pilsen:'pilsner', viyana:'vienna' };
@@ -33765,70 +33765,176 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   // miktar ifadesi: kg / kilo / kilogram / g / gr / gram (+ -a / -ya / -lık ekleri: "20 grama", "1 kiloya", "300 gramlık") / ml
   //   dat = yönelme ekli ("20 grama", "1 kiloya", "2 kg'a") → HEDEF miktar; eksiz + "azalt / artır / indir …" → FARK olabilir ("1 kg azaltsam" = 1 kg eksilt)
   // DOG4D (1): litre / lt / l / mililitre de okunur (birim 'L' / 'mL') — çevirim A1.birimCevir'de (katkı satırının birimine)
-  A4.MIKTAR_RE = /(\d+(?:[.,]\d+)?)\s*(kilogram|kilo|kg|gram|gr|g|mililitre|ml|litre|lt|l)(['’]?(?:a|ya|ye|e|l[ıiuü]k|dan|den))?(?![a-zçğıöşü])/i;
+  // DOG4F (1): HAM SÖZCÜK HARİTASI — her okuyucu kullandığı parçanın ham sözcük aralığını ('ri', kelimeler() ile aynı bölme: String(s).split(/\s+/)) bildirir;
+  //   tüketim koruması (A4.tuketimDenetle) aralıklara bakar. katHarita: her ham sözcük ayrı katlanır → t (katlanmış metin, tüm metni katlamakla aynı) + h[j] = j. katlanmış sözcüğün ham indeksi
+  A4.katHarita = function(s, f){ var ws = [], h = []; String(s || '').split(/\s+/).forEach(function(w, i){ norm(f ? f(w) : w.replace(/['’]/g, '')).split(' ').filter(Boolean).forEach(function(x){ ws.push(x); h.push(i); }); }); return { t:ws.join(' '), w:ws, h:h }; };
+  //   (^| )…( |$) biçimli eşleşmenin ham aralığı (ilk grup baştaki boşluk, son grup sondaki boşluk)
+  A4.katAralik = function(K, m){ var a = m.index + (m[1] || '').length, b = m.index + m[0].length - (m[m.length - 1] || '').length, wi = function(c){ return (K.t.slice(0, c).match(/ /g) || []).length; }; return [K.h[wi(a)], K.h[wi(Math.max(a, b - 1))]]; };
+  A4.hamAt = function(s, c){ return String(s || '').slice(0, c).split(/\s+/).length - 1; };
+  function riYaz(o, a, b){ if(o) Object.defineProperty(o, 'ri', { value:[a, b], enumerable:false, configurable:true, writable:true }); return o; } // parmak izine (JSON) girmez
+  // DOG4F (2): iyelikli belirtme eki de okunur ("400 gramını", "1 kilosunu", "200 g'ını") → acc (kısmı: çıkar / at = eski − N, kullan / bırak = N)
+  A4.MIKTAR_RE = /(\d+(?:[.,]\d+)?)\s*(kilogram|kilo|kg|gram|gr|g|mililitre|ml|litre|lt|l)(['’]?(?:s?[ıiuü]n[ıiuü]|a|ya|ye|e|l[ıiuü]k|dan|den))?(?![a-zçğıöşü])/i;
   A4.birimAd = function(b){ b = String(b || '').toLowerCase(); return /^(kg|kilo|kilogram)$/.test(b) ? 'kg' : /^(ml|mililitre)$/.test(b) ? 'mL' : /^(litre|lt|l)$/.test(b) ? 'L' : 'g'; };
-  A4.miktarOku = function(s){ var mk = A4.MIKTAR_RE.exec(String(s || '')); return mk ? { v:parseFloat(mk[1].replace(',', '.')), birim:A4.birimAd(mk[2]), dat:/^['’]?(a|ya|ye|e)$/i.test(mk[3] || '') } : A4.miktarSozcuk(s); };
+  A4.MIKTAR_RE_ESKI = /(\d+(?:[.,]\d+)?)\s*(kilogram|kilo|kg|gram|gr|g|mililitre|ml|litre|lt|l)(['’]?(?:a|ya|ye|e|l[ıiuü]k|dan|den))?(?![a-zçğıöşü])/i; // DOG4E sürümü — yalnız kasıtlı bozma (A4.COZ.miktarParca false)
+  A4.miktarOku = function(s){ s = String(s || ''); var mk = (A4.COZ.miktarParca === false ? A4.MIKTAR_RE_ESKI : A4.MIKTAR_RE).exec(s); if(!mk) return A4.miktarSozcuk(s);
+    var o = { v:parseFloat(mk[1].replace(',', '.')), birim:A4.birimAd(mk[2]), dat:/^['’]?(a|ya|ye|e)$/i.test(mk[3] || '') }; if(/n[ıiuü]$/i.test(mk[3] || '')) o.acc = true;
+    return riYaz(o, A4.hamAt(s, mk.index), A4.hamAt(s, mk.index + mk[0].length - 1)); };
+  // DOG4F (2): sorudaki BÜTÜN rakamlı miktarlar (sıralı, ham aralıklı) — "100 g'dan 80 g'a düşürsem" kaynak → hedef
+  A4.miktarTum = function(s){ s = String(s || ''); var re = new RegExp(A4.MIKTAR_RE.source, 'gi'), out = [], mk;
+    while((mk = re.exec(s))) out.push(riYaz({ v:parseFloat(mk[1].replace(',', '.')), birim:A4.birimAd(mk[2]), ek:(mk[3] || '').replace(/['’]/g, '').toLowerCase() }, A4.hamAt(s, mk.index), A4.hamAt(s, mk.index + mk[0].length - 1)));
+    return out; };
   // DOG4C (2): rakamsız miktar — "yarım kilo", "bir buçuk kilo", "çeyrek kilo", "iki yüz gram" (+ -a / -ya hedef eki). Sayı sözcükleri MASH ayrıştırıcısından (BM_MASH.sozcukSayi, tek kaynak).
-  A4.MIKTAR_BIRIM_SOZ = /^(kilogram|kilo|kg|gram|gr|mililitre|litre)(ya|ye|a|e|l[iu]k|dan|den)?$/;
-  A4.miktarSozcuk = function(s){ var M = window.BM_MASH; if(!M || !M.sozcukSayi) return null; var w = norm(String(s || '').replace(/['’]/g, '')).split(' ');
-    for(var u = 1; u < w.length; u++){ var b = A4.MIKTAR_BIRIM_SOZ.exec(w[u]); if(!b) continue;
+  //   DOG4F (2): iyelikli belirtme eki ("yarım kilosunu", "iki yüz gramını") → acc
+  A4.MIKTAR_BIRIM_SOZ = /^(kilogram|kilo|kg|gram|gr|mililitre|litre)(ya|ye|a|e|l[iu]k|dan|den|s?[iu]n[iu])?$/;
+  A4.miktarSozcuk = function(s){ var M = window.BM_MASH; if(!M || !M.sozcukSayi) return null; var K = A4.katHarita(s), w = K.w;
+    for(var u = 1; u < w.length; u++){ var b = A4.MIKTAR_BIRIM_SOZ.exec(w[u]); if(!b) continue; var acc = /n[iu]$/.test(b[2] || ''); if(acc && A4.COZ.miktarParca === false) continue;
       for(var j = Math.max(0, u - 4); j < u; j++){ if(j > 0 && (M.SAYI.hasOwnProperty(w[j - 1]) || M.KESIR.hasOwnProperty(w[j - 1]))) continue; var n = M.sozcukSayi(w, j);
-        if(n && n.son === u - 1 && n.v > 0) return { v:n.v, birim:A4.birimAd(b[1]), dat:/^(a|ya|ye|e)$/.test(b[2] || ''), sozcuk:true }; } }
+        if(n && n.son === u - 1 && n.v > 0){ var o = { v:n.v, birim:A4.birimAd(b[1]), dat:/^(a|ya|ye|e)$/.test(b[2] || ''), sozcuk:true }; if(acc) o.acc = true; return riYaz(o, K.h[j], K.h[u]); } } }
     return null; };
   // DOG4C (2): ÇARPAN — "iki katına / ikiye katla / iki katı / 2 kat(ı/ına) / duble" ×2 · "üç katına" ×3 · "yarıya / yarısına / yarı yarıya" ×0,5 (katlanmış metinde)
-  A4.carpanOku = function(s){ var t = norm(String(s || '').replace(/['’]/g, '')), M = window.BM_MASH, SY = M && M.SAYI || {};
-    if(/(^| )(yariya|yarisina|yari yariya)( |$)/.test(t)) return 0.5;
+  //   DOG4F (1): A4.carpanBul aynı okuma + ham aralık ({ v, ri } ya da { belirsiz, ri }); A4.carpanOku yalnız sayıyı döndürür (eski arayüz)
+  A4.carpanBul = function(s){ var K = A4.katHarita(s), t = K.t, M = window.BM_MASH, SY = M && M.SAYI || {}, m, R = String(s || '').split(/\s+/), ok = function(v, m){ return { v:v, ri:A4.katAralik(K, m) }; };
+    // DOG4F (2): ONDALIK çarpan ("0,5 kat", "1,5 katına", "2,5 katını") — önceden "0,5" katlanınca "0 5" olup 5 okunuyordu ("0,5 kat artırsam" 60 → 300 g)
+    if(A4.COZ.miktarParca !== false) for(var i = 0; i + 1 < R.length; i++){ if(!/^\d+[.,]\d+$/.test(R[i])) continue; var kw = norm(R[i + 1].replace(/['’]/g, ''));
+      if(!/^(kat|kati|katina|katini|katla\w*)$/.test(kw)) continue; var v = parseFloat(R[i].replace(',', '.')), vy = String(v).replace('.', ',');
+      if(!(v > 0 && v <= 10 && v !== 1)) return { belirsiz:'"' + R[i] + ' ' + R[i + 1] + '" çarpanı okunamadı', ri:[i, i + 1] };
+      if(kw === 'kat'){ var vy2 = String(Math.round((1 + v) * 100) / 100).replace('.', ','); return { belirsiz:'"' + vy + ' kat" miktarı ' + vy + ' katına mı getiriyor, yoksa ' + vy2 + ' katına mı (' + vy + ' kat artış) belli değil — "' + vy2 + ' katına çıkarsam" ya da "X g yapsam" diye yaz', ri:[i, i + 1] }; }
+      return { v:v, ri:[i, i + 1], ondalik:true }; }
+    if((m = /(^| )(yariya|yarisina|yari yariya)( |$)/.exec(t))) return ok(0.5, m);
     // DOG4D (3): iyelikli çarpan — "X'in yarısını / iki katını (aşağıda) / üçte birini / dörtte birini / çeyreğini kullansam · koysam · atsam"
-    if(A4.COZ.iyelikTur !== false){ if(/(^| )yarisini( |$)/.test(t)) return 0.5; if(/(^| )ucte (birini|birine)( |$)/.test(t)) return 1 / 3; if(/(^| )(dortte (birini|birine)|ceyregini|ceyregine)( |$)/.test(t)) return 0.25; }
-    if(/(^| )(duble\w*)( |$)/.test(t)) return 2;
-    var m = /(^| )(\d+|[a-z]+?)(ye|ya|e|a)? (kat|kati|katina|katini|katla\w*)( |$)/.exec(t);
-    if(m){ var n = /^\d+$/.test(m[2]) ? +m[2] : SY[m[2]]; if(n >= 2 && n <= 10) return n; }
+    if(A4.COZ.iyelikTur !== false){ if((m = /(^| )yarisini( |$)/.exec(t))) return ok(0.5, m); if((m = /(^| )ucte (birini|birine)( |$)/.exec(t))) return ok(1 / 3, m); if((m = /(^| )(dortte (birini|birine)|ceyregini|ceyregine)( |$)/.exec(t))) return ok(0.25, m); }
+    if((m = /(^| )(duble\w*)( |$)/.exec(t))) return ok(2, m);
+    m = /(^| )(\d+|[a-z]+?)(ye|ya|e|a)? (kat|kati|katina|katini|katla\w*)( |$)/.exec(t);
+    if(m){ var n = /^\d+$/.test(m[2]) ? +m[2] : SY[m[2]]; if(n >= 2 && n <= 10) return ok(n, m); }
     return null; };
+  A4.carpanOku = function(s){ var c = A4.carpanBul(s); return c && c.v ? c.v : null; };
   // DOG4E (1): FİİL YÖNÜ — tek kaynak (A4.farkYon da bunları kullanır; katlanmış metinde)
   //   az: azalt / düşür / indir / eksilt (fark fiilleri) · at: atsam / çıkarsam / kessem / kaldırsam (yalnız kesirde; eksiz miktarla "50 g çıkarsam" FARK sayılmaz — DOG4B kuralı aynen)
   //   ar: artır / arttır / yükselt / çoğalt · daha: "daha / ekstra / fazladan" + ekle / koy / kat / kullan · birak: kullansam / koysam / bıraksam / kalsa (olumsuz "kullanmasam" HİÇBİRİ değil)
   A4.FIIL = { az:/(azalt|dusur|indir|eksilt)/, ar:/(artir|arttir|yukselt|cogalt)/,
-    at:/(^| )(ats[ae]|atars|atils|atip|cikars|cikarirs|cikarils|cikarip|kess|kesers|kesils|kesip|kaldirs|kaldirirs|kaldirils|kaldirip|azaltip)/,
-    daha:/(^| )(daha|ekstra|fazladan)( \w+)? (ekle|koy|kat|kullan|ilave)\w*/, birak:/(^| )(kullans|kullanirs|kullanils|koys|koyars|biraks|birakirs|kalsa|kalirs)/ };
+    at:/(^| )(ats[ae]|atars|atils|atip|cikars|cikarirs|cikarils|cikarip|kess|kesers|kesils|kesip|kaldirs|kaldirirs|kaldirils|kaldirip|azaltip|vazgecs|vazgecers)/, // DOG4F (2): kesir + "vazgeçsem" = azaltma yönü
+    daha:/(^| )(daha|ekstra|fazladan)( \w+)? (ekle|koy|kat|kullan|ilave)\w*/, birak:/(^| )(kullans|kullanirs|kullanils|koys|koyars|biraks|birakirs|kalsa|kalsin|kalirs)/ }; // DOG4F (2): "kalsın"
   // DOG4E (1): KESİR — "X'in dörtte birini / üçte ikisini / yarısını / çeyreğini" (iyelik; hal: acc / nom / dat) ve eksiz "dörtte bir azaltsam".
   //   k = pay / payda (pay < payda); ad = görünür Türkçe adı ("dörtte biri"). Sayı sözcükleri BM_MASH.SAYI'dan (dördü → 'dord' yumuşaması).
   var KESIR_LOK = { 2:'ikide', 3:'üçte', 4:'dörtte', 5:'beşte', 6:'altıda', 7:'yedide', 8:'sekizde', 9:'dokuzda', 10:'onda' }, KESIR_IYE = { 1:'biri', 2:'ikisi', 3:'üçü', 4:'dördü', 5:'beşi', 6:'altısı', 7:'yedisi', 8:'sekizi', 9:'dokuzu' };
   A4.kesirEk = function(ad, hal){ var v = (String(ad).match(/[aeıioöuü](?=[^aeıioöuü]*$)/) || ['e'])[0], ince = 'eiöü'.indexOf(v) >= 0, yuv = 'oöuü'.indexOf(v) >= 0;
     return ad + (hal === 'dat' ? (ince ? 'ne' : 'na') : 'n' + (ince ? (yuv ? 'ü' : 'i') : (yuv ? 'u' : 'ı'))); };
-  A4.kesirOku = function(s){ var t = norm(String(s || '').replace(/['’]/g, '').replace(/%\s*(?=\d)/g, ' yüzde ')), SY = (window.BM_MASH && window.BM_MASH.SAYI) || {}, m, hal = function(e){ return !e ? 'eksiz' : /n[ae]$/.test(e) ? 'dat' : /n[iu]$/.test(e) ? 'acc' : 'nom'; };
+  //   DOG4F (1): her sonuç ham aralığı taşır (ri: kesrin sözcükleri + hemen ardındaki "kadar"). DOG4F (2) yeni biçimler (A4.COZ.miktarParca): yazıyla yüzde ("yüzde yirmi beşini"),
+  //   rakamlı kesir ("1/4", "1/4'ünü"), ayrılma hâli ("dörtte birinden vazgeçsem", "yarısından") → 'abl' (belirtme gibi), eksiz yönelme ("dörtte bire düşürsem") → 'dat'
+  A4.kesirOku = function(s){ var Y = A4.COZ.miktarParca !== false, K = A4.katHarita(s, function(w){ return w.replace(/['’]/g, '').replace(/%(?=\d)/g, ' yüzde ').replace(/^%$/, ' yüzde '); }), t = K.t, SY = (window.BM_MASH && window.BM_MASH.SAYI) || {}, m;
+    var hal = function(e){ return !e ? 'eksiz' : /n[ae]$/.test(e) || (Y && /^y?[ae]$/.test(e)) ? 'dat' : /n[iu]$/.test(e) ? 'acc' : (Y && /d[ae]n$/.test(e)) ? 'abl' : 'nom'; };
+    var son = function(o, m){ var a = A4.katAralik(K, m), b = a[1], R = String(s || '').split(/\s+/); if(o.kadar && R[b + 1] && norm(R[b + 1]) === 'kadar') b++; o.ri = [a[0], b]; return o; };
+    var kd = function(m){ return / kadar( |$)/.test(t.slice(m.index)); };
     // yüzde: "%25'ini / yüzde 30'unu / %20'sine / %20 azaltsam" (önceden "candi'nin %25'ini çıkarsam" satırı TAMAMEN çıkarıyordu)
-    if((m = /(^| )yuzde (\d+)(?: (\d+)(?= |[a-z]))?([a-z]*)( |$)/.exec(t))){ var yv = parseFloat(m[2] + (m[3] ? '.' + m[3] : ''));
-      if(yv > 0 && yv < 100) return { k:yv / 100, hal:hal(m[4]), ad:'%' + String(yv).replace('.', ',') + (m[4] ? "'" + m[4].replace(/n[iuae]$/, '') : ''), kadar:/ kadar( |$)/.test(t.slice(m.index)) }; }
-    if((m = /(^| )yari(sini|sina|si)( |$)/.exec(t))) return { k:0.5, hal:hal(m[2]), ad:'yarısı', kadar:/ kadar( |$)/.test(t.slice(m.index)) };
-    if((m = /(^| )ceyreg(ini|ine|i)( |$)/.exec(t))) return { k:0.25, hal:hal(m[2]), ad:'çeyreği', kadar:/ kadar( |$)/.test(t.slice(m.index)) };
-    m = /(^| )(\d+|iki|uc|dort|bes|alti|yedi|sekiz|dokuz|on)(de|da|te|ta) (bir|iki|uc|dord|dort|bes|alti|yedi|sekiz|dokuz)(s?[iu](?:n[iuae])?)?( |$)/.exec(t);
+    if((m = /(^| )yuzde (\d+)(?: (\d+)(?= |[a-z]))?([a-z]*)( |$)/.exec(t))){
+      // DOG4F: ondalık kısım yalnız AYNI ham sözcükteyse ("%12,5"); "%10 400 gramını" / "%10 1/4" ayrı sayılardır (mutasyon testi: 10,4 / 10,1 okunuyordu)
+      var wi0 = (t.slice(0, m.index + m[1].length).match(/ /g) || []).length; if(m[3] && Y && K.h[wi0 + 1] !== K.h[wi0 + 2]){ m = /(^| )yuzde (\d+)()()( |$)/.exec(t.slice(0, m.index) + t.slice(m.index).replace(/^(\s?yuzde \d+) .*$/, '$1')); }
+      var yv = m ? parseFloat(m[2] + (m[3] ? '.' + m[3] : '')) : 0;
+      if(yv > 0 && yv < 100) return son({ k:yv / 100, hal:hal(m[4]), ad:'%' + String(yv).replace('.', ',') + (m[4] ? "'" + m[4].replace(/n[iuae]$/, '') : ''), kadar:kd(m) }, m); }
+    // DOG4F (2): yazıyla yüzde — "yüzde yirmi beşini" (sayı sözcükleri BM_MASH.SAYI; son sözcüğün eki hâli verir). Önceden okunmuyordu → satır TAMAMEN çıkarılıyordu.
+    var yi = Y && window.BM_MASH ? K.w.indexOf('yuzde') : -1;
+    if(yi >= 0){ var sw = [], yek = '', j = yi + 1;
+      while(j < K.w.length && sw.length < 4){ var x = K.w[j]; if(SY.hasOwnProperty(x)){ sw.push(x); j++; continue; } var kok = null;
+        Object.keys(SY).forEach(function(k){ if(x.indexOf(k) === 0 && /^(sini|sine|sinden|sindan|ini|ine|inden|unu|una|undan|si|su|i|u|ni|nu)$/.test(x.slice(k.length)) && (!kok || k.length > kok.length)) kok = k; });
+        if(kok){ sw.push(kok); yek = x.slice(kok.length); j++; } break; }
+      var nv = sw.length ? window.BM_MASH.sozcukSayi(sw, 0) : null;
+      if(nv && nv.son === sw.length - 1 && nv.v > 0 && nv.v < 100){ var R1 = String(s || '').split(/\s+/), b1 = K.h[j - 1], kad1 = !!R1[b1 + 1] && norm(R1[b1 + 1]) === 'kadar';
+        return { k:nv.v / 100, hal:hal(yek), ad:'%' + nv.v + (yek ? "'" + yek.replace(/n[iuae]$|nden$|ndan$/, '') : ''), kadar:kad1, ri:[K.h[yi], kad1 ? b1 + 1 : b1] }; } }
+    // DOG4F (2): rakamlı kesir — "1/4", "1/4'ünü", "3/4'ünü kullansam" (önceden okunmuyordu)
+    if(Y){ var R0 = String(s || '').split(/\s+/); for(var i0 = 0; i0 < R0.length; i0++){ var fm = /^(\d+)\/(\d+)(?:['’]?([a-zçğıöşü]*))?[,.?!]*$/i.exec(R0[i0]); if(!fm) continue; var pa = +fm[1], pd = +fm[2];
+      if(!(pa >= 1 && pa < pd && pd <= 100)) continue; var ek0 = norm(fm[3] || '').replace(/^s/, ''), kad = !!R0[i0 + 1] && norm(R0[i0 + 1]) === 'kadar';
+      return { k:pa / pd, hal:hal(ek0), ad:pa + '/' + pd, kadar:kad, ri:[i0, kad ? i0 + 1 : i0] }; } }
+    if((m = (Y ? /(^| )yari(sini|sina|si|sindan|sinden)( |$)/ : /(^| )yari(sini|sina|si)( |$)/).exec(t))) return son({ k:0.5, hal:hal(m[2]), ad:'yarısı', kadar:kd(m) }, m);
+    if((m = (Y ? /(^| )ceyreg(ini|ine|i|inden)( |$)/ : /(^| )ceyreg(ini|ine|i)( |$)/).exec(t))) return son({ k:0.25, hal:hal(m[2]), ad:'çeyreği', kadar:kd(m) }, m);
+    m = (Y ? /(^| )(\d+|iki|uc|dort|bes|alti|yedi|sekiz|dokuz|on)(de|da|te|ta) (bir|iki|uc|dord|dort|bes|alti|yedi|sekiz|dokuz)(s?[iu](?:n(?:den|dan|[iuae]))?|y?[ae])?( |$)/ : /(^| )(\d+|iki|uc|dort|bes|alti|yedi|sekiz|dokuz|on)(de|da|te|ta) (bir|iki|uc|dord|dort|bes|alti|yedi|sekiz|dokuz)(s?[iu](?:n[iuae])?)?( |$)/).exec(t);
     if(!m) return null; var N = /^\d+$/.test(m[2]) ? +m[2] : SY[m[2]], P = SY[m[4] === 'dord' ? 'dort' : m[4]];
     if(!(N >= 2 && N <= 10 && P >= 1 && P < N)) return null; var h = hal(m[5]);
-    return { k:P / N, hal:h, ad:(KESIR_LOK[N] || N + "'de") + ' ' + (h === 'eksiz' ? (P === 1 ? 'bir' : ({ 2:'iki', 3:'üç', 4:'dört', 5:'beş', 6:'altı', 7:'yedi', 8:'sekiz', 9:'dokuz' })[P]) : KESIR_IYE[P]), kadar:/ kadar( |$)/.test(t.slice(m.index)) }; };
+    return son({ k:P / N, hal:h, ad:(KESIR_LOK[N] || N + "'de") + ' ' + (h === 'eksiz' ? (P === 1 ? 'bir' : ({ 2:'iki', 3:'üç', 4:'dört', 5:'beş', 6:'altı', 7:'yedi', 8:'sekiz', 9:'dokuz' })[P]) : KESIR_IYE[P]), kadar:kd(m) }, m); };
   // DOG4E (1): KESİR + FİİL YÖNÜ → yeni = eski × k (bırak / kullan, ya da yönelme hâli "dörtte birine indirsem" = hedef) · × (1 − k) (azalt / at) · × (1 + k) (artır / daha ekle)
   //   yön belirsiz (hiçbir sınıf ya da iki sınıf birden) → { belirsiz } (asla tahmin). "N katı kadar daha" → belirsiz (toplam N+1 kat mı N kat mı belli değil).
   //   Dönen { carpan, kesir:{ k, yon, ad, metin } } — metin "Anladığım" satırında görünür; parmak izine girmez.
   A4.kesirCoz = function(s){ var C = A4.COZ, t = norm(String(s || '').replace(/['’]/g, ''));
     if(C.kesirYon !== false && /(^| )\S+ (kat|kati|katini) kadar daha( |$)|(^| )\S+ kati daha( |$)/.test(t)) return { belirsiz:'"katı kadar daha" toplamı mı (N kat) yoksa üstüne mi (N + 1 kat) anlatıyor belli değil — "X g yapsam" ya da "iki katına çıkarsam" diye yaz' };
     var q = A4.kesirOku(s); if(!q) return null;
+    // DOG4F (1): sonuç kesrin ham aralığını (+ artırma yönünde "daha / ekstra / fazladan") taşır — tüketim koruması için
+    var R = String(s || '').split(/\s+/), tk = function(o){ if(!o || !o.carpan) return o; var L = []; for(var i = q.ri[0]; i <= q.ri[1]; i++) L.push(i);
+      if(o.kesir && o.kesir.yon === 'artir') R.forEach(function(w, i){ if(/^(daha|ekstra|fazladan)$/.test(norm(w))) L.push(i); });
+      if(o.kesir && o.kesir.yon === 'birak') R.forEach(function(w, i){ if(/^(kalsin|kalsa|kalirsa)$/.test(norm(w.replace(/['’].*$/, '')))) L.push(i); }); o.ri = L; return o; };
     if(q.hal !== 'eksiz' && C.iyelikTur === false) return null;
-    if(C.kesirYon === false) return q.hal === 'eksiz' ? null : { carpan:q.k, kesir:{ k:q.k, yon:'birak', ad:q.ad, metin:q.ad + ' bırakıldı' } };
-    if(q.hal === 'dat') return { carpan:q.k, kesir:{ k:q.k, yon:'hedef', ad:q.ad, metin:A4.kesirEk(q.ad, 'dat') + ' getirildi' } };
+    if(C.kesirYon === false) return q.hal === 'eksiz' ? null : tk({ carpan:q.k, kesir:{ k:q.k, yon:'birak', ad:q.ad, metin:q.ad + ' bırakıldı' } });
+    if(q.hal === 'dat') return tk({ carpan:q.k, kesir:{ k:q.k, yon:'hedef', ad:q.ad, metin:A4.kesirEk(q.ad, 'dat') + ' getirildi' } });
     var F = A4.FIIL, daha = F.daha.test(t), ar = F.ar.test(t) || daha, az = F.az.test(t) || F.at.test(t), bir = !daha && F.birak.test(t);
     if(C.kesirArtir === false && ar && !az){ ar = false; bir = true; }
     if(q.hal === 'eksiz' && !(az || ar)) return null; // eksiz kesir yalnız fark fiiliyle ("dörtte bir azaltsam"); "dörtte bir oranında" vb. kesir sayılmaz
     var n = (az ? 1 : 0) + (ar ? 1 : 0) + (bir ? 1 : 0);
     if(n !== 1) return { belirsiz:'kesrin yönü anlaşılmadı ("' + q.ad + '") — çıkarılacak kısım mı, kalacak kısım mı, eklenecek kısım mı? "X\'in ' + A4.kesirEk(q.ad, 'acc') + ' çıkarsam" (kalan %' + (Math.round((1 - q.k) * 100)) + '), "' + A4.kesirEk(q.ad, 'acc') + ' kullansam" ya da "' + q.ad + ' kadar daha koysam" diye yaz' };
     var ad = q.ad;
-    if(az) return { carpan:1 - q.k, kesir:{ k:q.k, yon:'azalt', ad:ad, metin:ad + (q.hal === 'eksiz' ? ' azaltıldı' : ' çıkarıldı') } };
-    if(ar) return { carpan:1 + q.k, kesir:{ k:q.k, yon:'artir', ad:ad, metin:ad + (q.hal === 'eksiz' ? ' artırıldı' : ' eklendi') } };
-    return { carpan:q.k, kesir:{ k:q.k, yon:'birak', ad:ad, metin:ad + ' bırakıldı' } }; };
+    if(az) return tk({ carpan:1 - q.k, kesir:{ k:q.k, yon:'azalt', ad:ad, metin:ad + (q.hal === 'eksiz' ? ' azaltıldı' : ' çıkarıldı') } });
+    if(ar) return tk({ carpan:1 + q.k, kesir:{ k:q.k, yon:'artir', ad:ad, metin:ad + (q.hal === 'eksiz' ? ' artırıldı' : ' eklendi') } });
+    return tk({ carpan:q.k, kesir:{ k:q.k, yon:'birak', ad:ad, metin:ad + ' bırakıldı' } }); };
   // ekle FİİLİ ("eklesem / eklersem / eklemek / ekleyip / katsam / ilave"); "60 dakikalık eklemeyi" ADDIR, fiil değil
   var EKLE_FIIL = /(^|\s)(ekles\w*|ekler\w*|eklemek\w*|ekleyi[pn]\w*|ekleyeyim|ekleyelim|kats[ae]\w*|katmak\w*|katarsam\w*|ilave\w*)/i;
   // ana çözümleyici: { mod: ikame | tat | bilgi | yok | belirsiz, … } — AI YOK
   // DOG4D (1): sarmalayıcı — çözülen miktar satırın / yeni kalemin birimine ÇEVRİLEMİYORSA (ör. "0,1 litre" gram birimli katkıya, "0,05 L" malta) çözüm BELİRSİZ;
   //   önceden katkıda birim yok sayılıp sayı aynen yazılıyordu ("candi'yi 0,3 kg yapsam" → 0,3 g). Çevirim A1._degKur'da (A1.birimCevir, tek yer).
+  // DOG4F (1): MİKTAR TAŞIYAN PARÇALAR — KAPALI liste, geniş tutulur (koruma olduğu için fazlası güvenli): rakam (ondalık "0,5", "1/4", "%10"), yazıyla sayı (BM_MASH.SAYI kökü + ek;
+  //   "bir" / "on" yalnız birim / kat / kesir / "tane" yanında — "bir" belirsiz tanımlık, "onu" zamir), birim (g gr kg ml l litre gram kilo paket tane adet), yüzde, kat / katı / katına / duble,
+  //   kesir sözcükleri (dörtte, yarı-, çeyrek, buçuk), "biraz / ekstra / fazladan / tamam- / hepsi / komple / hiç / bütün", zaman (dakika, dk, saat, sn, saniye, kuru / dry hop, kaynama sonu,
+  //   whirlpool, flameout), "kalsın / kalsa"; "daha / az / fazla / eksik" yalnız bir sayı / birim yanında ya da ekleme fiilinden hemen önce ("daha koyu" karşılaştırmadır). → [{ i, ham, sinif }]
+  A4.miktarParcalar = function(s){ var R = String(s || '').split(/\s+/), n = R.map(function(w){ return norm(w.replace(/['’].*$/, '')); }), SY = (window.BM_MASH && window.BM_MASH.SAYI) || {};
+    var SEK = /^(|i|u|e|a|si|su|ini|unu|sini|sunu|ine|una|sine|suna|ye|ya|de|da|te|ta|den|dan|ten|tan|inden|undan|sinden|sundan|inci|nci|uncu|er|ar|ser|sar|li|lu|lik|luk|ni|nu|nin|nun|un|in)$/;
+    var sayiKok = function(w){ var k = null; Object.keys(SY).concat(['dord']).forEach(function(x){ if(w.indexOf(x) === 0 && SEK.test(w.slice(x.length)) && (!k || x.length > k.length)) k = x; }); return k; };
+    var cls = R.map(function(w, i){ var b = n[i];
+      if(/\d/.test(w)) return 'sayi'; if(/%/.test(w)) return 'yuzde'; if(!b) return null; if(/^yuzde/.test(b)) return 'yuzde';
+      if(/^(g|gr|kg|ml|l|lt|cl)$/.test(b) || /^(gram|kilo|litre|mililitre|paket|tane|adet)/.test(b)) return 'birim';
+      if(/^(kat|kati|katina|katini|katli|katla\w*|duble\w*)$/.test(b)) return 'kat';
+      if(/^(ikide|ucte|dortte|beste|altida|yedide|sekizde|dokuzda|onda|yari\w*|ceyre\w*|bucuk\w*)$/.test(b)) return 'kesir';
+      if(/^(biraz\w*|ekstra|fazladan|tamam\w*|hepsi\w*|komple|hic|butun\w*|busbutun|kism\w*|kisim\w*|miktar\w*|cogu\w*|azicik|epey\w*|bayagi|azi|azini|oran\w*)$/.test(b)) return 'nicel'; // DOG4F: belirsiz nicelik ("bir kısmını", "birazını", "çoğunu", "azıcık") ve "oranını" (gram mı yüzde payı mı) da parça
+      if(/^(dakika\w*|dk\w*|saat\w*|sn|saniye\w*|whirlpool|flameout|kaynama\w*|kaynatma\w*)$/.test(b)) return 'zaman';
+      if(/^(kalsin|kalsa|kalirsa)$/.test(b)) return 'kal';
+      if(/^(daha|az|fazla|eksik)$/.test(b)) return 'baglam?';
+      var k = sayiKok(b); if(k && !/^(ona|onu|onun|ondan|onlar\w*|onunla|bira\w*)$/.test(b)) return k === 'bir' || k === 'on' ? 'sayi?' : 'sayiSoz';
+      return null; });
+    for(var i = 0; i + 1 < R.length; i++) if(((n[i] === 'kuru' || n[i] === 'dry') && /^hop/.test(n[i + 1])) || (/^kayna(ma|tma)/.test(n[i]) && /^son/.test(n[i + 1])) || (/^ates/.test(n[i]) && /^(kapa|sondur)/.test(n[i + 1]))){ cls[i] = 'zaman'; cls[i + 1] = 'zaman'; }
+    var guclu = function(c){ return /^(sayi|sayiSoz|birim|kat|kesir|yuzde)$/.test(c || ''); };
+    cls = cls.map(function(c, i){ return c !== 'sayi?' ? c : (/^(birim|kat|kesir|sayiSoz)$/.test(cls[i + 1] || '') || /^(kism|kisim|miktar)/.test(n[i + 1] || '') || cls[i - 1] === 'kesir') ? 'sayiSoz' : null; });
+    var ekleV = /^(koy(s|ar|ma|al|ab|un|du|ac)|ekle|kats|katar|katma|kullan|ilave|ats|atar|atma|birak)/;
+    cls = cls.map(function(c, i){ return c !== 'baglam?' ? c : (guclu(cls[i - 1]) || guclu(cls[i + 1]) || ekleV.test(n[i + 1] || '')) ? 'nicel' : c; });
+    cls = cls.map(function(c, i){ return c !== 'baglam?' ? c : (cls[i - 1] === 'nicel' || cls[i + 1] === 'nicel') ? 'nicel' : null; });
+    return cls.map(function(c, i){ return c ? { i:i, ham:R[i], sinif:c } : null; }).filter(Boolean); };
+  // DOG4F (1): TÜKETİM DENETİMİ — ikame çözümünün tüketmediği miktar parçası → { parca, zaman, tum } (yoksa null). "X'i kaldırıp Y koysam" / "X'i Y yapsam" yeniden yazımında
+  //   parçalar yeniden yazılan cümledeki tüketilen sözcüklerle (katlanmış metin, çoklu küme) karşılaştırılır. Hop satırını seçen eklenme dakikası ("60 dakikalık Hallertau") ad gibidir:
+  //   seçilen satırın dakikasıyla aynıysa tüketilmiş sayılır; "15 dakikada atsam" (zaman değişikliği) sayılmaz.
+  A4.tuketimDenetle = function(soru, r, T){ var P = A4.miktarParcalar(soru); if(!P.length) return null; var tk = r._tuk || {}, R = String(soru || '').split(/\s+/), kalan;
+    if(r.kaldirip || r.yapYerine){ var R2 = String(r.kaldirip || r.yapYerine).split(/\s+/), torba = {};
+      Object.keys(tk).forEach(function(i){ var x = norm(String(R2[i] || '').replace(/['’]/g, '')); if(x) torba[x] = (torba[x] || 0) + 1; });
+      kalan = P.filter(function(p){ var x = norm(p.ham.replace(/['’]/g, '')); if(torba[x] > 0){ torba[x]--; return false; } return true; }); }
+    else kalan = P.filter(function(p){ return !tk[p.i]; });
+    var hk = r.v && /^hop:\d+$/.test(r.v.kalem || '') ? T && T.tarif && (T.tarif.hoplar || [])[+r.v.kalem.split(':')[1]] : null;
+    if(hk && hk.dk != null){ var sil = {}; P.forEach(function(p){ var sonraki = norm(String(R[p.i + 1] || '').replace(/['’]/g, ''));
+      if(/^\d+$/.test(p.ham) && +p.ham === +hk.dk && /^(dakikalik|dklik)$/.test(sonraki)){ sil[p.i] = 1; sil[p.i + 1] = 1; }
+      var tek = /^(\d+)(dk|dakika)lik$/.exec(norm(p.ham.replace(/['’]/g, ''))); if(tek && +tek[1] === +hk.dk) sil[p.i] = 1; });
+      kalan = kalan.filter(function(p){ return !sil[p.i]; }); }
+    if(!kalan.length) return null;
+    var g = [kalan[0]]; for(var j = 1; j < kalan.length && kalan[j].i === g[g.length - 1].i + 1; j++) g.push(kalan[j]); // ilk ardışık öbek ("20 gram daha")
+    return { parca:g.map(function(p){ return p.ham.replace(/[,.?!:;]+$/, ''); }).join(' '), zaman:g.some(function(p){ return p.sinif === 'zaman'; }), tum:kalan.map(function(p){ return p.ham.replace(/[,.?!:;]+$/, ''); }) }; };
   A4.cozumle = function(soru, T){ var r = A4._cozumle(soru, T);
+    // DOG4F (1): TÜKETİM KORUMASI — ikame çözümü sorudaki her miktar parçasını hesaba katmış olmalı; katmadıysa sonuç BELİRSİZ (işlem) + hangi parçanın anlaşılmadığı
+    //   (önceden "20 gram daha koysam" → 20 g, "%25'ini" → satır tamamen çıkar gibi okunmayan parça sessizce atılıyordu)
+    if(r && r.mod === 'ikame' && A4.COZ.tuketim !== false){ var tg = A4.tuketimDenetle(soru, r, T);
+      if(tg){ var te = r.eski || r.yeni, tad = te ? adOf(te.tip, te.id) : '';
+        r.tuketim = { parca:tg.parca, zaman:tg.zaman, kalanlar:tg.tum, kart:'Sorunun şu kısmını hesaba katamadım: \'' + tg.parca + '\'. ' + (tg.zaman ? 'Hop eklenme zamanını değiştirmek bu asistanda hesaplanmıyor; yalnız miktarı sorabilirsin' + (tad ? ' (ör. "' + tad + ' X g yapsam").' : '.') : 'Daha açık yazar mısın?' + (tad ? ' (ör. "' + tad + ' X g yapsam")' : '')) };
+        r.mod = 'belirsiz'; r.belirsizTur = 'islem'; r.neden = 'şu kısmı hesaba katamadım: \'' + tg.parca + '\'' + (tg.zaman ? ' — hop eklenme zamanı hesaplanmıyor' : '');
+        if(te) r.adaylar = [{ tip:te.tip, id:te.id, ad:tad }]; r.tuketim.onceki = r.v ? { islem:r.v.islem, miktar:r.v.miktar, birim:r.v.birim } : null; delete r.v; delete r.islem; delete r.carpan; delete r.fark; delete r.kesir; return r; } }
+    // DOG4F (1): aynı koruma SORU ('tat') ve BİLİNMEYEN ÜRÜN ('yok') sonucunda — dilek / şart kipli soruda okunmayan miktar parçası varken "değişiklik yok" denmez
+    //   (mutasyon: "%10 buğday maltının yarısını kullansam" → tat); bilinmeyen ürün adının içine miktar / zaman sözcüğü girmişse ("BB Alman Weisbier 15 dakikada") ad değildir.
+    //   Bilinmeyen adın içindeki rakam ürün kodu olabilir (WLP530) → yalnız rakamsız parça sınıfları sayılır.
+    if(r && A4.COZ.tuketim !== false && A4.COZ.miktarParca !== false && (r.mod === 'tat' || r.mod === 'yok')){ var P2 = A4.miktarParcalar(soru), tk2 = r._tuk || {}, kal2 = [];
+      if(r.mod === 'tat' && r.kalem && T && T.tarif && A1.satirlar(T.tarif).some(function(x){ return x.tip === r.kalem.tip && x.id === r.kalem.id; }) && A4.KOSUL_RE.test(norm(String(soru || '').replace(/['’]/g, '')))) kal2 =P2.filter(function(p){ return !tk2[p.i]; });
+      if(r.mod === 'yok' && r.bilinmeyen && r.bilinmeyen.ad){ var bn = ' ' + norm(r.bilinmeyen.ad) + ' '; kal2 = P2.filter(function(p){ return p.sinif !== 'sayi' && bn.indexOf(' ' + norm(p.ham.replace(/['’].*$/, '')) + ' ') >= 0; }); }
+      if(kal2.length){ var pc2 = kal2.map(function(p){ return p.ham.replace(/[,.?!:;]+$/, ''); }).join(' '), k2 = r.kalem || (r.eski) || null, ad2 = k2 ? adOf(k2.tip, k2.id) : '';
+        r.tuketim = { parca:pc2, zaman:kal2.some(function(p){ return p.sinif === 'zaman'; }), kalanlar:kal2.map(function(p){ return p.ham; }), kart:'Sorunun şu kısmını hesaba katamadım: \'' + pc2 + '\'. Daha açık yazar mısın?' + (ad2 ? ' (ör. "' + ad2 + ' X g yapsam")' : ''), onceki:{ mod:r.mod } };
+        r.mod = 'belirsiz'; r.belirsizTur = 'islem'; r.neden = 'şu kısmı hesaba katamadım: \'' + pc2 + '\''; delete r.bilinmeyen; return r; } }
     if(r && r.mod === 'ikame' && r.v && +r.v.miktar > 0 && r.v.birim && A4.COZ.birimCevir){ var d = A1._degKur(T, r.v);
       if(d && !d.ok && /^birim/.test(d.neden || '')){ var e = r.eski || r.yeni; r.mod = 'belirsiz'; r.belirsizTur = 'islem'; r.neden = d.neden + ' — miktarı satırın biriminde yaz'; if(e) r.adaylar = [{ tip:e.tip, id:e.id, ad:adOf(e.tip, e.id) }]; r.vBirim = r.v; delete r.v; delete r.islem; } }
     return r; };
@@ -33859,10 +33965,28 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     var stSoru = !!st && (!C.stilAcik || stAcik || !T.stil);
     var stil = stSoru ? st.stil : (T.stil || ''), ekleF = EKLE_FIIL.test(sl);
     // DOG4B: reçete satırı ÖNCE (trR); "ekle / kat" fiiliyle katalog yeni kalemi (trK, eski yol)
-    var trK = A4.kalemTara(soru, st), trR = C.receteOnce ? A4.kalemTara(soru, st, T) : null, tr = trR && !ekleF ? trR : trK, L = tr.kalemler;
+    // DOG4F (2): iyelikli kesir + "ekle" ("carafa'nın üçte biri kadar daha eklesem") reçetedeki satırı anar → reçete taraması (önceden katalog taraması: "carafa" tek başına bulunamıyordu)
+    var trK = A4.kalemTara(soru, st), trR = C.receteOnce ? A4.kalemTara(soru, st, T) : null;
+    var kesQ = C.miktarParca !== false ? A4.kesirOku(s) : null, kesE = ekleF && !!trR && !!kesQ && kesQ.hal !== 'eksiz' && trR.kalemler.some(function(k){ return k.kaynak === 'recete'; });
+    var tr = trR && (!ekleF || kesE) ? trR : trK, L = tr.kalemler;
+    // DOG4F (2): kesir / yüzde öbeğinin İÇİNDEKİ sözcük kalem değildir ("yüzde yirmi beşini" → "beşini" katalogdaki "Maya Besini" sanılıyordu)
+    if(kesQ && kesQ.ri){ tr.kalemler = L = L.filter(function(k){ if(k.kaynak === 'recete' || k.poz == null) return true; for(var q8 = k.poz; q8 < k.poz + (k.uz || 1); q8++){ var wq = tr.W[q8]; if(!wq || wq.i < kesQ.ri[0] || wq.i > kesQ.ri[1]) return true; } return false; }); }
     var miktar = A4.miktarOku(s);
     var dkm = /(\d+)\s*(dk|dakika)/i.exec(s), dk = dkm ? +dkm[1] : null, oz = A4.ozellik(soru);
+    // DOG4F (2): "100 g'dan 80 g'a düşürsem" — kaynak (ayrılma ekli) + hedef (yönelme ekli): miktar = hedef; kaynak reçetedeki miktarla karşılaştırılır (uyuşmazsa belirsiz)
+    var mikKay = null; if(C.miktarParca !== false){ var mt = A4.miktarTum(s); if(mt.length === 2 && /^d[ae]n$/.test(mt[0].ek) && /^(a|ya|ye|e)$/.test(mt[1].ek)){ mikKay = mt[0]; miktar = riYaz({ v:mt[1].v, birim:mt[1].birim, dat:true }, mt[1].ri[0], mt[1].ri[1]); } }
     var r = { soru:s, stil:stil, stilKaynak:stSoru ? 'soru' : 'recete', stilAcik:stAcik, kalemler:L.map(function(k){ return { tip:k.tip, id:k.id, ad:k.ad, kaynak:k.kaynak }; }), miktar:miktar, dk:dk, ozellik:oz, yontem:'deterministik' };
+    // DOG4F (1): TÜKETİLEN ham sözcükler (r._tuk, JSON'a girmez) — kalem adları (adın içindeki rakam: WY3068, D-180, No1 ad olarak tüketilir) + sorudan alınan stil adı;
+    //   her ikame yolu kendi okuduğu parçayı ekler (miktar / çarpan / kesir / "tamamen"). A4.cozumle sarmalayıcısı tüketilmemiş miktar parçası kalırsa çözümü BELİRSİZ yapar.
+    var tuk = {}, tukR = function(ri){ if(ri) for(var i = ri[0]; i <= ri[1]; i++) tuk[i] = 1; }, tukL = function(a){ (a || []).forEach(function(i){ tuk[i] = 1; }); };
+    var tukW = function(a, b){ for(var i = a; i < b; i++) if(tr.W[i]) tuk[tr.W[i].i] = 1; }, tukRe = function(re){ s.split(/\s+/).forEach(function(w, i){ if(re.test(norm(w.replace(/['’].*$/, '')))) tuk[i] = 1; }); };
+    Object.defineProperty(r, '_tuk', { value:tuk, enumerable:false, configurable:true });
+    //   adın içindeki miktar biçimli sözcük yalnız ürünün KENDİ adında / takma adında geçiyorsa tüketilir ("%10 Special B" ad öbeği olsa da %10 Special B'nin adı değildir)
+    var Pq = {}; A4.miktarParcalar(s).forEach(function(p){ Pq[p.i] = 1; });
+    L.forEach(function(k){ if(k.poz == null) return; var ks = null; for(var i = k.poz; i < k.poz + (k.uz || 1); i++){ var w = tr.W[i]; if(!w) continue;
+      if(Pq[w.i]){ if(!ks){ ks = {}; adTok(k.tip, k.id, k.ad).forEach(function(A){ A.forEach(function(t){ ks[t] = 1; }); }); } if(!norm(w.asil).split(' ').every(function(p){ return ks[p] || ks[ROMA[p]]; })) continue; }
+      tuk[w.i] = 1; } }); if(stSoru) for(var q9 = st.bas; q9 < st.bas + st.uz; q9++) if(W0[q9]) tuk[W0[q9].i] = 1;
+    var TAM_TUK = /^(tamamen|hic|komple|busbutun|tamamini|tamami|hepsini|hepsi|butun|butunuyle)$/;
     // belirsizTur 'islem': kalem belli, ne yapılacağı (miktar / yön) belli değil → aday seçtirilmez, soru yeniden yazdırılır (AI aday seçimi de yok)
     var bel = function(neden, ad, tur){ r.mod = 'belirsiz'; r.neden = neden; if(ad && ad.length) r.adaylar = ad; if(tur) r.belirsizTur = tur; return r; };
     // ekle fiili + ad reçetedeki bir satıra uyuyor ama katalog BAŞKA bir ürün buldu → yeni kalem mi, o satırın miktarı mı? sor
@@ -33877,7 +34001,7 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
       var c = satir.filter(function(x){ return x.tip === k.tip && x.id === k.id; });
       if(c.length > 1 && dk != null && k.tip === 'hop') c = c.filter(function(x){ var i = +x.key.split(':')[1], b = T.tarif.hoplar[i]; return b && +b.dk === dk; }); return c.length === 1 ? c[0] : c.length > 1 ? c[0] : null; };
     var yerine = /(^|\s)yerine(\s|$)/i.test(sl), ileDeg = /(^|\s)ile\s+de[gğ]i[sş]tir/i.test(sl);
-    var tamamen = /(^|\s)(tamamen|hiç|hic|komple|büsbütün)(\s|$)/i.test(sl), cikF = /çıkar(sam|mak|ırsam|ılsa|tsam)?\b|cikar(sam|mak)?\b|kaldır(sam|mak|ılsa|ırsam)?\b/i.test(sl);
+    var tamamen = /(^|\s)(tamamen|hiç|hic|komple|büsbütün)(\s|$)/i.test(sl) || (C.miktarParca !== false && /(^|\s)(tamamını|tamamini|tamamı|tamami|hepsini|hepsi)(\s|$|[,.?!])/i.test(sl)), cikF = /çıkar(sam|mak|ırsam|ılsa|tsam)?\b|cikar(sam|mak)?\b|kaldır(sam|mak|ılsa|ırsam)?\b/i.test(sl);
     var cik = cikF && (!C.miktarCikar || !miktar || tamamen); // DOG4B: "X grama / X kiloya çıkarsam" = MİKTAR; çıkar = kaldır yalnız miktar yokken ya da "tamamen / hiç" varken
     // DOG4D (3): "X'siz / X olmadan / X koymadan yapsam" ve "X'i tamamen / hiç atsam" = ÇIKAR. "atsam" TEK BAŞINA çıkar DEĞİL (biracılıkta "hop atmak" = eklemek → belirsiz kalır)
     var sizF = C.iyelikTur && !miktar && (/[^\s'’]['’]s[ıiuü]z(\s|$|[,.?!])/i.test(sl) || /(^|\s)(olmadan|koymadan|kullanmadan|katmadan|eklemeden|atmadan)(\s|$|[,.?!])/i.test(sl));
@@ -33919,19 +34043,38 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
       if(C.turTutarli && sa && yeni && sa.tip === 'katki' && yeni.tip === 'katki' && yeni.ham){ var yk = A4.ayniTurBul(yeni.ham, 'katki'); if(yk && yk.belirsiz) return bel('"' + yeni.ham + '" katkıda da şeker maltlarında da var', yk.belirsiz.map(function(x){ return { tip:x.tip, id:x.id, ad:adOf(x.tip, x.id) }; })); }
       // DOG4D (2): GENEL KURAL — değiştir'de eski === yeni → çözüm geçersiz (kendisiyle değiştirme hiçbir şey değiştirmez; çözücü bir adı kaybetmiş demektir)
       if(C.ayniKalem && sa && yeni && sa.tip === yeni.tip && sa.id === yeni.id) return bel('aynı kalemle değiştirme — ' + sa.ad + ' kendisiyle değiştirilemez; yeni kalemin adını yaz ("' + sa.ad + ' yerine Y kullansam")', [{ tip:sa.tip, id:sa.id, ad:sa.ad }], 'islem');
-      if(sa && yeni){ r.mod = 'ikame'; r.islem = 'degistir'; r.v = { islem:'degistir', kalem:sa.key, yeni_kalem:yeni.id, miktar:miktar ? miktar.v : 0, birim:miktar ? miktar.birim : '' }; r.eski = { tip:sa.tip, id:sa.id }; r.yeni = { tip:yeni.tip, id:yeni.id }; return r; }
+      if(sa && yeni){ if(miktar) tukR(miktar.ri); if(typeof yb === 'number' && ys > yb) tukW(yb, ys); tukRe(/^(tamamen|komple)$/); r.mod = 'ikame'; r.islem = 'degistir'; r.v = { islem:'degistir', kalem:sa.key, yeni_kalem:yeni.id, miktar:miktar ? miktar.v : 0, birim:miktar ? miktar.birim : '' }; r.eski = { tip:sa.tip, id:sa.id }; r.yeni = { tip:yeni.tip, id:yeni.id }; return r; }
       return bel(!yeni ? 'yeni kalem bulunamadı' : 'değişecek satır reçetede bulunamadı'); }
     var icinde = L.filter(function(k){ return !!recSat(k); }), disinda = L.filter(function(k){ return !recSat(k); });
     if((sizF || atTam) && !icinde.length && disinda.length) return bel('reçetede ' + disinda[0].ad + ' satırı yok — çıkarılacak bir şey yok', [{ tip:disinda[0].tip, id:disinda[0].id, ad:disinda[0].ad }], 'islem');
     // DOG4B: hedef miktar = yönelme ekli miktar ya da "yap / olsa / koy / getir / ayarla"; eksiz miktar + "azalt / artır / indir / düşür / yükselt / çıkar / ekle" = FARK olabilir → sor
     var mutlak = !!miktar && (miktar.dat || /(yaps|yapm|olsa|koys|koyar|getir|ayarla)/i.test(sl)), goreli = !!miktar && !mutlak && /(azalt|artır|arttır|indir|düşür|yükselt|çıkar|ekle|kats)/i.test(sl);
+    // DOG4F (2): miktar FARKI işaretleri (tek reçete satırı) — (a) miktarın HEMEN ardındaki "daha / fazla / ekstra / fazladan" (+) ya da "az / eksik" (−): "20 gram daha koysam" = eski + 20,
+    //   "4 g az koysam" = eski − 4 (önceden "daha / az" atılıp 20 / 4 g HEDEF sanılıyordu) · (b) "X'e N g eklesem" (yönelme ekli reçete kalemi + ekle) = eski + N
+    //   (c) iyelikli kısım "N gramını / yarım kilosunu": çıkar / at / azalt / vazgeç = eski − N, kullan / bırak / koy = N; ikisi birden ya da hiçbiri → belirsiz
+    var mikMod = 0, mikModI = -1, mikHedef = false, mikYonBel = null;
+    if(miktar && C.miktarParca !== false && icinde.length === 1 && !disinda.length){ var Rm = s.split(/\s+/), tN = norm(sl), F4 = A4.FIIL, mvy = '("' + String(miktar.v).replace('.', ',') + ' ' + miktar.birim + '")';
+      var nx = miktar.ri ? norm(String(Rm[miktar.ri[1] + 1] || '').replace(/['’].*$/, '')) : '';
+      // yön FİİLDEN: "20 g daha koysam / eklesem" +, "20 g daha çıkarsam / azaltsam" −; "fazla / ekstra" yalnız koy / ekle / kullan ile +, "az / eksik" yalnız koy / ekle / kullan ile −;
+      //   fiil yok, iki yön ya da "atsam" (hop atmak = eklemek de olabilir) → belirsiz (mutasyon testi buldu: "20 gram daha … çıkarsam" + sayılıyordu, fiilsiz bilgi sorusu bile +20 oluyordu)
+      var vPl = /(^| )(koy(s|ar|ma)|ekle|kats|kullan|ilave|artir|arttir|yukselt|cogalt)/.test(tN) && !/(^| )(koy|kullan|kat|ekle)(madan|meden|masam|mesem|mazsam|mezsem|mas[ae]k)( |$)/.test(tN), vMi = /(^| )(azalt|dusur|indir|eksilt|cikar|kes(s|er|il|ip)|kaldir)/.test(tN), vAt = /(^| )at(s|ar|il|ip|ma)/.test(tN);
+      var yonYaz = function(sg){ if(sg){ mikMod = sg; mikModI = miktar.ri[1] + 1; } else mikYonBel = 'miktar ' + mvy + ' yanındaki "' + nx + '" artış mı azalış mı, fiilden anlaşılmadı — yeni miktarı "X g yapsam" diye yaz'; };
+      if(nx === 'daha') yonYaz(vAt || vPl === vMi ? 0 : vPl ? 1 : -1); else if(/^(fazla|ekstra|fazladan)$/.test(nx)) yonYaz(vPl && !vMi && !vAt ? 1 : 0); else if(/^(az|eksik)$/.test(nx)) yonYaz(vPl && !vMi && !vAt ? -1 : 0);
+      else if(miktar.acc){ var aAz = F4.az.test(tN) || F4.at.test(tN), aAr = F4.ar.test(tN) || F4.daha.test(tN), aBir = F4.birak.test(tN);
+        if(aAz && !aAr && !aBir) mikMod = -1; else if(aBir && !aAz && !aAr) mikHedef = true; else mikYonBel = 'miktar ' + mvy + ' çıkarılacak kısım mı, kalacak miktar mı anlaşılmadı — "X\'in N gramını çıkarsam" ya da "X g yapsam" diye yaz'; }
+      else if(ekleF && !miktar.dat && !vMi && !vAt){ var kw2 = tr.W[icinde[0].poz + (icinde[0].uz || 1) - 1]; if(kw2 && /[^\s'’]['’]y?[aeAE][,.?!]*$/.test(Rm[kw2.i] || '')) mikMod = 1; }
+      if(mikMod){ var fy0 = A4.farkYon(sl); if(fy0 && fy0 !== mikMod) mikYonBel = 'miktar yönü çelişiyor ' + mvy + ' artış mı azalış mı? — "X g yapsam" diye yaz'; mutlak = false; goreli = false; }
+      if(mikHedef){ mutlak = true; goreli = false; } }
+    if(mikYonBel) return bel(mikYonBel, icinde.map(function(k){ return { tip:k.tip, id:k.id, ad:k.ad }; }), 'islem');
     // "2 katına / yarıya / iki katına çıkarsam": çıkar fiilinden önce yönelme ekli sözcük = "o düzeye çıkar", kaldırma DEĞİL
     var cikDat = cik && !tamamen && /(^|\s)\S*(a|e|ya|ye|na|ne)\s+(çıkar|cikar)/i.test(sl);
     // DOG4C (2): ÇARPAN ("iki katına / ikiye katla / duble / yarıya") ve FARK ("500 g azaltsam", "yarım kilo azaltsam") → yeni miktar = eski × n / eski ∓ X (deterministik, kartta "Anladığım" eski → yeni)
-    var carp = C.carpan && !miktar && (A4.KOSUL_RE.test(norm(s)) || /katla|duble/.test(norm(s))) ? A4.carpanOku(s) : null, farkY = miktar && !mutlak && C.carpan ? A4.farkYon(sl) : 0;
+    var cb = C.carpan && !miktar && (A4.KOSUL_RE.test(norm(s)) || /katla|duble/.test(norm(s))) ? A4.carpanBul(s) : null, carp = cb && cb.v ? cb.v : null, farkY = miktar && !mutlak && C.carpan ? A4.farkYon(sl) : 0;
+    if(mikMod) farkY = mikMod;
     // DOG4E (1): kesir + fiil yönü (A4.kesirCoz) çarpanı EZER — "dörtte birini çıkarsam" kalan 3/4 (önceden 1/4: atılacak kısım bırakılacak sanılıyordu)
     var kc = C.carpan && !miktar ? A4.kesirCoz(s) : null; if(kc && kc.carpan) carp = kc.carpan;
     if(C.miktarCikar && icinde.length && !disinda.length && kc && kc.belirsiz) return bel(kc.belirsiz, icinde.map(function(k){ return { tip:k.tip, id:k.id, ad:k.ad }; }), 'islem');
+    if(C.miktarCikar && icinde.length && !disinda.length && cb && cb.belirsiz && !(kc && kc.carpan)) return bel(cb.belirsiz, icinde.map(function(k){ return { tip:k.tip, id:k.id, ad:k.ad }; }), 'islem'); // DOG4F (2): "0,5 kat artırsam"
     if(C.miktarCikar && icinde.length && !disinda.length && (carp || farkY)){
       var hed = icinde.map(function(k){ return { tip:k.tip, id:k.id, ad:k.ad }; });
       if(icinde.length > 1) return bel('birden çok satır anıldı — hangisinin miktarı değişecek belli değil', hed);
@@ -33940,16 +34083,23 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
       var fx = 0; if(farkY){ fx = A4.birimCevir(miktar.v, miktar.birim, es.birim); if(fx == null) return bel('miktar birimi (' + miktar.birim + ') satırın birimiyle (' + es.birim + ') aynı değil', hed, 'islem'); }
       var yv = carp ? es.v * carp : es.v + farkY * fx; yv = Math.round(yv * 10) / 10;
       if(!(yv > 0)) return bel('yeni miktar sıfır ya da eksi çıkıyor (' + String(es.v).replace('.', ',') + ' ' + es.birim + ' − ' + String(fx).replace('.', ',') + ' ' + es.birim + ') — satırı çıkarmak istiyorsan "X\'i çıkarsam" diye yaz', hed, 'islem');
-      r.mod = 'ikame'; r.islem = 'miktar'; r.v = { islem:'miktar', kalem:s5.key, yeni_kalem:'', miktar:yv, birim:es.birim }; r.eski = { tip:s5.tip, id:s5.id }; r.carpan = carp || null; r.fark = farkY ? farkY * fx : null; if(kc && kc.kesir) r.kesir = kc.kesir; return r; }
+      r.mod = 'ikame'; r.islem = 'miktar'; r.v = { islem:'miktar', kalem:s5.key, yeni_kalem:'', miktar:yv, birim:es.birim }; r.eski = { tip:s5.tip, id:s5.id }; r.carpan = carp || null; r.fark = farkY ? farkY * fx : null; if(kc && kc.kesir) r.kesir = kc.kesir;
+      if(kc && kc.carpan) tukL(kc.ri); else if(cb && cb.v) tukR(cb.ri); if(farkY) tukR(miktar.ri); if(mikModI >= 0) tuk[mikModI] = 1; return r; }
     if(C.miktarCikar && icinde.length && !disinda.length){
       if(cikDat) return bel('"çıkar" fiili bir düzeye çıkarmayı anlatıyor ama miktar anlaşılmadı — hedef miktarı "X grama çıkarsam" ya da "X g yapsam" diye yaz', icinde.map(function(k){ return { tip:k.tip, id:k.id, ad:k.ad }; }), 'islem');
       if(goreli) return bel('miktar FARK mı HEDEF mi anlaşılmadı ("' + String(miktar.v).replace('.', ',') + ' ' + miktar.birim + '" o kadar değişim de olabilir) — hedefi "X grama indirsem" ya da "X g yapsam" diye yaz', icinde.map(function(k){ return { tip:k.tip, id:k.id, ad:k.ad }; }), 'islem');
       if(!miktar && !cik && /(yaps|indir|azalt|artır|arttır|yükselt|düşür)/i.test(sl)) return bel('reçetedeki satırın miktarı değişecek ama yeni miktar anlaşılmadı', icinde.map(function(k){ return { tip:k.tip, id:k.id, ad:k.ad }; }), 'islem');
       if(miktar && ekleF) return bel('reçetede zaten olan satıra ekleme — yeni toplam mı, üstüne mi? "X g yapsam" diye yaz', icinde.map(function(k){ return { tip:k.tip, id:k.id, ad:k.ad }; }), 'islem'); }
-    if(cik && icinde.length){ var s2 = recSat(icinde[0]); r.mod = 'ikame'; r.islem = 'cikar'; r.v = { islem:'cikar', kalem:s2.key, yeni_kalem:'', miktar:0, birim:'' }; r.eski = { tip:s2.tip, id:s2.id }; return r; }
-    if(miktar && (mutlak || !C.miktarCikar) && icinde.length && !disinda.length && /(yaps|yapm|olsa|artır|arttır|azalt|indir|düşür|yükselt|çıkar|koys|koyar|getir|ayarla)/i.test(sl)){ var s3 = recSat(icinde[0]); r.mod = 'ikame'; r.islem = 'miktar'; r.v = { islem:'miktar', kalem:s3.key, yeni_kalem:'', miktar:miktar.v, birim:miktar.birim }; r.eski = { tip:s3.tip, id:s3.id }; return r; }
+    if(cik && icinde.length){ var s2 = recSat(icinde[0]); tukRe(TAM_TUK); r.mod = 'ikame'; r.islem = 'cikar'; r.v = { islem:'cikar', kalem:s2.key, yeni_kalem:'', miktar:0, birim:'' }; r.eski = { tip:s2.tip, id:s2.id }; return r; }
+    if(miktar && (mutlak || !C.miktarCikar) && icinde.length && !disinda.length && (mikHedef || /(yaps|yapm|olsa|artır|arttır|azalt|indir|düşür|yükselt|çıkar|koys|koyar|getir|ayarla)/i.test(sl))){ var s3 = recSat(icinde[0]);
+      if(mikKay){ var es3 = A4.satirMiktar(T.tarif, s3), kv3 = es3 ? A4.birimCevir(mikKay.v, mikKay.birim, es3.birim) : null; // DOG4F (2): kaynak miktar reçetedekiyle uyuşmalı
+        if(kv3 == null || Math.abs(kv3 - es3.v) > Math.max(0.05, es3.v * 0.005)) return bel('başlangıç miktarı ("' + String(mikKay.v).replace('.', ',') + ' ' + mikKay.birim + '") reçetedeki ' + adOf(s3.tip, s3.id) + ' miktarıyla (' + (es3 ? String(es3.v).replace('.', ',') + ' ' + es3.birim : 'okunamadı') + ') uyuşmuyor — yalnız yeni miktarı yaz ("X g yapsam")', [{ tip:s3.tip, id:s3.id, ad:adOf(s3.tip, s3.id) }], 'islem');
+        tukR(mikKay.ri); }
+      tukR(miktar.ri); r.mod = 'ikame'; r.islem = 'miktar'; r.v = { islem:'miktar', kalem:s3.key, yeni_kalem:'', miktar:miktar.v, birim:miktar.birim }; r.eski = { tip:s3.tip, id:s3.id }; return r; }
     var hedef = (miktar && disinda.length) ? disinda[0] : L[0] || null; // ekleme: reçetede olmayan kalem · tat / bilgi: ilk anılan kalem
-    if(hedef && (miktar && disinda.length) && !oz.doz){ r.mod = 'ikame'; r.islem = 'ekle'; r.v = { islem:'ekle', kalem:'', yeni_kalem:hedef.id, miktar:miktar.v, birim:miktar.birim }; r.yeni = { tip:hedef.tip, id:hedef.id }; return r; }
+    // DOG4F: yeni kalem EKLE yalnız ekleme anlamında — iyelikli kısım ("400 gramını") ya da çıkar / azalt fiiliyle ekleme olmaz (mutasyon: "munich maltının %10 400 gramını çıkarsam" → EKLE 400 g)
+    if(hedef && (miktar && disinda.length) && !oz.doz && C.miktarParca !== false && (miktar.acc || (!miktar.dat && /(cikar|azalt|dusur|indir|eksilt|kaldir|vazgec)/.test(norm(sl))))) return bel('reçetede olmayan ' + hedef.ad + ' için çıkarma / kısım ifadesi — ne yapılacağı anlaşılmadı', [{ tip:hedef.tip, id:hedef.id, ad:hedef.ad }], 'islem');
+    if(hedef && (miktar && disinda.length) && !oz.doz){ tukR(miktar.ri); r.mod = 'ikame'; r.islem = 'ekle'; r.v = { islem:'ekle', kalem:'', yeni_kalem:hedef.id, miktar:miktar.v, birim:miktar.birim }; r.yeni = { tip:hedef.tip, id:hedef.id }; return r; }
     // DOG4C (1): VARSAYILAN 'tat' DEĞİL — reçetedeki kaleme yönelik tanınmayan değişiklik isteği (belirtme ekli kalem + dilek / şart kipli fiil, değişiklik fiili, hop zamanı,
     //   "değiştirsem" + Y yok) → BELİRSİZ (işlem). 'tat' yalnız: kalem reçetede YOK (ekleme / kullanma / uyma sorusu) ya da reçetede VAR ama değişiklik fiili yok (yalnız değerlendirme).
     if(C.belirsizVarsayilan && hedef && recSat(hedef)){ var dgN = A4.degisiklikIstegi(s, tr.W, hedef, dk); if(dgN) return bel(dgN, [{ tip:hedef.tip, id:hedef.id, ad:hedef.ad }], 'islem'); }
@@ -34604,6 +34754,8 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
       return h + '</div>'; }
     if(st.durum === 'secim' || c.mod === 'belirsiz'){
       var islemB = c.belirsizTur === 'islem' && !st.vazgecti;
+      // DOG4F (4): tüketim korumasında teknik neden yerine sade cümle ("Sorunun şu kısmını hesaba katamadım: '20 gram daha'. Daha açık yazar mısın? …")
+      if(islemB && c.tuketim){ h += '<div class="bm-ai4-secim bm-ai4-tuketim" data-tur="islem" style="margin-top:6px;padding:8px 10px;border-radius:8px;border:1px solid var(--cizgi-arac)"><b>' + E(c.tuketim.kart) + '</b></div>'; return h + '</div>'; }
       h += '<div class="bm-ai4-secim" data-tur="' + (st.vazgecti ? 'vazgecti' : islemB ? 'islem' : 'kalem') + '" style="margin-top:6px;padding:8px 10px;border-radius:8px;border:1px solid var(--cizgi-arac)"><b>' + (st.vazgecti ? 'Anladığımı değiştirmek istedin — malzemeyi seç ya da soruyu yeniden yaz' : islemB ? 'Ne yapmak istediğini tam anlayamadım' : 'Hangi malzemeyi kastettin?') + '</b> <small>(' + E(st.vazgecti ? 'AI özeti gösterilmedi' : c.neden || '') + ')</small>' +
         ((st.adaylar || []).length ? '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">' + st.adaylar.map(function(a){ return '<button type="button" class="bm-ayar-btn bm-ai4-aday" style="min-height:44px" onclick="BM_AI4.secimYap(\'' + E(st.key) + '\',\'' + E(a.tip) + '\',\'' + E(a.id) + '\')">' + E(a.ad) + '</button>'; }).join('') + '</div>' : '<div style="font-size:11px">' + (islemB ? 'Soruyu yeni miktarla yeniden yaz (ör. "… 300 g yapsam", "… 300 grama indirsem").' : 'Katalogda aday yok — soruyu malzeme adıyla yeniden yaz.') + '</div>') + '</div>';
       return h + '</div>'; }

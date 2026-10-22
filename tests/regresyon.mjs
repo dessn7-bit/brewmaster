@@ -12404,7 +12404,7 @@ const CASELER = [
         __REG.ok('KASITLI BOZMA (a) reçete satırı önce KAPALI → 1 "' + c1.soru + '" ' + a1.mod + ' ' + JSON.stringify(a1.v) + ' · 8 "' + c8.soru + '" ' + a8.mod + ' ' + JSON.stringify(a8.v) + ' (ikisi de YANLIŞ: EKLE Flaked Wheat / EKLE D-180) → kırmızı', sinif(c1, a1) === 'YANLIS' && sinif(c8, a8) === 'YANLIS' && a1.v && a1.v.yeni_kalem === 'flaked_wheat' && a8.v && a8.v.yeni_kalem === 'koyu_candy');
         const TB = "WY3068 yerine buğday kullansam", b0 = A4.cozumle(TB, T('weizen')), b1 = ile('turTutarli', () => A4.cozumle(TB, T('weizen'))), b5 = ile('turTutarli', () => A4.cozumle(c5.soru, T('weizen')));
         __REG.ok('KASITLI BOZMA (b) tür tutarlılığı KAPALI → "' + TB + '" ' + b1.mod + ' ' + JSON.stringify(b1.v) + ' (maya satırına MALT — YANLIŞ; açıkken ' + b0.mod + ') → kırmızı · 5 "' + c5.soru + '" kapalıyken de ' + b5.mod + ' (ikinci koruma: "BB Alman Buğday" katalogda üç mayaya uyuyor — RAPOR)', b0.mod === 'belirsiz' && b1.mod === 'ikame' && b1.v.kalem === 'maya' && window.BM_AI1.kayit('malt', b1.v.yeni_kalem) && b5.mod === 'belirsiz');
-        const x3 = ile('miktarCikar', () => A4.cozumle(c3.soru, T('weizen')));
+        const x3 = ile('miktarCikar', () => ile('tuketim', () => A4.cozumle(c3.soru, T('weizen')))); // DOG4F: tüketim koruması da kapatılır — yoksa okunmayan '20 grama' belirsize çevrilir (ikinci savunma hattı)
         __REG.ok('KASITLI BOZMA (c) "grama çıkar = miktar" KAPALI → 3 "' + c3.soru + '" ' + x3.mod + ' ' + JSON.stringify(x3.v) + ' (ÇIKAR — YANLIŞ) → kırmızı', sinif(c3, x3) === 'YANLIS' && x3.v && x3.v.islem === 'cikar');
         return __REG.al();
       }, set, cs);
@@ -12518,18 +12518,18 @@ const CASELER = [
         // 93 + 147 parmak izi (HEAD 3cd36c4 DOG4B çözücüsüyle aynı serileştirme: mod, işlem, eski, yeni, v, miktar, stil)
         const fnv = t => { let h = 0x811c9dc5; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return h.toString(16).padStart(8, '0'); };
         const f = c => [c.mod, c.islem || null, c.eski || null, c.yeni || null, c.v || null, c.miktar || null, c.stil];
-        const p93 = JSON.stringify(set.istemler.map(it => f(A4.cozumle(it.istem, T(it.taban))))), MAD2 = ['E02', 'E03', 'E04', 'E05'];
+        const p93 = JSON.stringify(set.istemler.map(it => f(A4.cozumle(it.istem, T(it.taban))))), MAD2 = ['E02', 'E03', 'E04', 'E05', 'E06']; // DOG4F: E06 madde 2 gereği belirsiz → MİKTAR 17 g (eski 143 parmak izi e67bdfc1/23304; kalan 142 eski kodla BİREBİR 07bae582/23218)
         const R147 = cs.istemler.map(it => ({ it, c: A4.cozumle(it.soru, T(it.taban)) })), p147 = JSON.stringify(R147.filter(x => MAD2.indexOf(x.it.id) < 0).map(x => f(x.c)));
         __REG.ok('tuzak seti v5 93 istemin çözümü (mod, işlem, eski, yeni, miktar, stil) HEAD (DOG4B) ile BİREBİR: ' + fnv(p93) + '/' + p93.length + ' (beklenen cb74f605/11217)', set.istemler.length === 93 && fnv(p93) === 'cb74f605' && p93.length === 11217);
         const e25 = R147.filter(x => MAD2.indexOf(x.it.id) >= 0).map(x => x.it.id + ' ' + JSON.stringify(x.c.v));
-        __REG.ok('DOG4B 18 + 115 + 14 = 147: E02–E05 dışındaki 143 BİREBIR (' + fnv(p147) + '/' + p147.length + ', beklenen e67bdfc1/23304) · E02–E05 madde 2 gereği belirsiz → MİKTAR (beklenti dosyada güncellendi, not eski beklentiyi taşır): ' + e25.join(' | '), R147.length === 147 && fnv(p147) === 'e67bdfc1' && p147.length === 23304 && R147.filter(x => MAD2.indexOf(x.it.id) >= 0).every(x => sinif(x.it.beklenen, x.c) === 'dogru'));
+        __REG.ok('DOG4B 18 + 115 + 14 = 147: E02–E06 dışındaki 142 BİREBIR (' + fnv(p147) + '/' + p147.length + ', beklenen 07bae582/23218 — DOG4F öncesi 143: e67bdfc1/23304) · E02–E05 madde 2 gereği belirsiz → MİKTAR (beklenti dosyada güncellendi, not eski beklentiyi taşır): ' + e25.join(' | '), R147.length === 147 && fnv(p147) === '07bae582' && p147.length === 23218 && R147.filter(x => MAD2.indexOf(x.it.id) >= 0).every(x => sinif(x.it.beklenen, x.c) === 'dogru'));
         // madde 5 KANIT: değişiklik katmanında "zaman" işlemi YOK (A1.cikarSema enum + A1._degKur) → hop zamanı belirsiz, ASLA tat
         const en = A1.cikarSema(['hop:0']).schema.properties.islem.enum, dz = A1._degKur(T('weizen'), { islem: 'zaman', kalem: 'hop:0', yeni_kalem: 'hrtau', miktar: 30, birim: '' }); // yeni kalem verilir ki işlem dalına ulaşsın (değiştir / ekle dalları yok → "bilinmeyen işlem")
         __REG.ok('madde 5 kod kanıtı: A1.cikarSema işlem enum = ' + en.join('/') + ' ("zaman" yok) · A1._degKur({ islem:"zaman" }) → "' + dz.neden + '" · hop zamanı soruları (H04 / H05 + üretilmiş 3) belirsiz / işlem, hiçbiri tat', en.indexOf('zaman') < 0 && dz.ok === false && dz.neden === 'bilinmeyen işlem' && ['H04', 'H05'].every(id => /ZAMANINI/.test(H.find(x => x.id === id).c.neden || '')) && U.filter(x => /dakikada|whirlpool|ateş kapanınca/.test(x.soru)).every(x => x.c.mod === 'belirsiz'));
         // KASITLI BOZMALAR
         const tum = H.concat(R, U).map(x => c4.istemler.find(y => y.id === x.id)), ile = (k, fn) => { const a = C[k]; C[k] = false; try { return fn(); } finally { C[k] = a; } };
         const kirmizi = k => ile(k, () => kos(tum).filter(x => x.k === 'YANLIS' || x.k === 'belirsiz'));
-        const b1 = kirmizi('belirsizVarsayilan'), b2 = kirmizi('carpan'), b4 = kirmizi('stilAcik');
+        const b1 = ile('tuketim', () => kirmizi('belirsizVarsayilan')), b2 = kirmizi('carpan'), b4 = kirmizi('stilAcik'); // DOG4F: madde 1 bozmasında tüketim koruması da kapalı — yoksa okunmayan parçalı sorular tat yerine belirsize düşer (ikinci savunma hattı)
         __REG.ok('KASITLI BOZMA madde 1 (varsayılan tat\'a geri) → ' + b1.length + ' kırmızı (≥ 3): ' + b1.map(x => x.id + ' ' + x.c.mod).join(', '), b1.length >= 3 && ['H04', 'H05', 'H06', 'H11'].every(id => b1.some(x => x.id === id && (x.c.mod === 'tat' || x.c.mod === 'bilgi'))));
         __REG.ok('KASITLI BOZMA madde 2 (çarpan / fark kapalı) → ' + b2.length + ' kırmızı (≥ 1): ' + b2.slice(0, 12).map(x => x.id + ' ' + x.c.mod).join(', '), b2.length >= 1 && ['H01', 'H12', 'H13', 'H14'].every(id => b2.some(x => x.id === id)));
         __REG.ok('KASITLI BOZMA madde 4 (stil sorudan) → ' + b4.length + ' kırmızı (≥ 1): ' + b4.map(x => x.id + ' ' + x.c.mod + ' ' + x.c.stil).join(', '), b4.length >= 1 && ['H08', 'H09', 'H10'].every(id => b4.some(x => x.id === id)));
@@ -12586,15 +12586,16 @@ const CASELER = [
         // parmak izleri: tuzak v5 93 · DOG4B 147 (E02–E05 hariç, DOG4C'deki gibi) · DOG4C 106 — HEAD (DOG4C 7dfd2a5) ile BİREBİR
         const fnv = t => { let h = 0x811c9dc5; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return h.toString(16).padStart(8, '0'); };
         const f = c => [c.mod, c.islem || null, c.eski || null, c.yeni || null, c.v || null, c.miktar || null, c.stil];
-        const p93 = JSON.stringify(set.istemler.map(it => f(A4.cozumle(it.istem, T(it.taban))))), MAD2 = ['E02', 'E03', 'E04', 'E05'];
+        const p93 = JSON.stringify(set.istemler.map(it => f(A4.cozumle(it.istem, T(it.taban))))), MAD2 = ['E02', 'E03', 'E04', 'E05', 'E06']; // DOG4F: E06 madde 2 gereği belirsiz → MİKTAR 17 g (eski 143 parmak izi e67bdfc1/23304; kalan 142 eski kodla BİREBİR 07bae582/23218)
         const p147 = JSON.stringify(cs.istemler.filter(it => MAD2.indexOf(it.id) < 0).map(it => f(A4.cozumle(it.soru, T(it.taban)))));
         const p106 = JSON.stringify(c4.istemler.map(it => f(A4.cozumle(it.soru, T(it.taban)))));
-        __REG.ok('parmak izi BİREBİR: tuzak v5 93 ' + fnv(p93) + '/' + p93.length + ' (cb74f605/11217) · DOG4B 143 ' + fnv(p147) + '/' + p147.length + ' (e67bdfc1/23304) · DOG4C 106 ' + fnv(p106) + '/' + p106.length + ' (63030f24/12289)',
-          fnv(p93) === 'cb74f605' && p93.length === 11217 && fnv(p147) === 'e67bdfc1' && p147.length === 23304 && fnv(p106) === '63030f24' && p106.length === 12289);
+        __REG.ok('parmak izi BİREBİR: tuzak v5 93 ' + fnv(p93) + '/' + p93.length + ' (cb74f605/11217) · DOG4B 142 ' + fnv(p147) + '/' + p147.length + ' (07bae582/23218; E06 DOG4F madde 2, önceki 143 e67bdfc1/23304) · DOG4C 106 ' + fnv(p106) + '/' + p106.length + ' (63030f24/12289)',
+          fnv(p93) === 'cb74f605' && p93.length === 11217 && fnv(p147) === '07bae582' && p147.length === 23218 && fnv(p106) === '63030f24' && p106.length === 12289);
         // KASITLI BOZMALAR
         const tum = H.concat(R, U).map(x => x.it), ile = (ks, fn) => { const a = ks.map(k => C[k]); ks.forEach(k => { C[k] = false; }); try { return fn(); } finally { ks.forEach((k, i) => { C[k] = a[i]; }); } };
         const kirmizi = ks => ile(ks, () => kos(tum).filter(x => x.k === 'YANLIS' || x.k === 'belirsiz'));
-        const b1 = kirmizi(['birimCevir']), b2 = kirmizi(['ayniKalem']), b2b = kirmizi(['ayniKalem', 'yBilinmeyen']), b3 = kirmizi(['iyelikTur']);
+        const b1 = kirmizi(['birimCevir']), b2 = kirmizi(['ayniKalem']), b2b = kirmizi(['ayniKalem', 'yBilinmeyen', 'tuketim']), // DOG4F: tüketim koruması da kapalı — yoksa bozuk yolun okumadığı rakamlı 'WLP530' Y2a'yı belirsize çevirir (ikinci savunma hattı)
+          b3 = kirmizi(['iyelikTur', 'tuketim']); // DOG4F: tüketim koruması da kapalı (aynı gerekçe)
         __REG.ok('KASITLI BOZMA madde 1 (birim çevirimi kapalı → eski davranış 0,3 g) → ' + b1.length + ' kırmızı (≥ 2): ' + b1.map(x => x.id).join(', '), b1.length >= 2 && ['Y1a', 'Y1b'].every(id => b1.some(x => x.id === id)));
         __REG.ok('KASITLI BOZMA madde 2 (eski === yeni koruması kapalı) → ' + b2.length + ' kırmızı (≥ 1): ' + b2.map(x => x.id + ' ' + x.c.mod).join(', ') + ' · + Y konumu kapalı → ' + b2b.length + ': ' + b2b.map(x => x.id + ' ' + x.c.mod).join(', '), b2.length >= 1 && b2b.some(x => x.id === 'Y2a' && x.c.mod === 'ikame'));
         __REG.ok('KASITLI BOZMA madde 3 (iyelik / tür sözcüğü / -siz / "Y yapsam" kapalı) → ' + b3.length + ' kırmızı (≥ 2): ' + b3.map(x => x.id + ' ' + x.c.mod).join(', '), b3.length >= 2 && ['Y3a', 'Y4'].every(id => b3.some(x => x.id === id && x.c.mod === 'tat')));
@@ -12643,12 +12644,12 @@ const CASELER = [
         // parmak izleri — HEAD (DOG4D 581e3c8) ile BİREBİR; kesir metni (r.kesir) parmak izine GİRMEZ
         const fnv = t => { let h = 0x811c9dc5; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return h.toString(16).padStart(8, '0'); };
         const f = c => [c.mod, c.islem || null, c.eski || null, c.yeni || null, c.v || null, c.miktar || null, c.stil];
-        const p93 = JSON.stringify(set.istemler.map(it => f(A4.cozumle(it.istem, T(it.taban))))), MAD2 = ['E02', 'E03', 'E04', 'E05'];
+        const p93 = JSON.stringify(set.istemler.map(it => f(A4.cozumle(it.istem, T(it.taban))))), MAD2 = ['E02', 'E03', 'E04', 'E05', 'E06']; // DOG4F: E06 madde 2 gereği belirsiz → MİKTAR 17 g (eski 143 parmak izi e67bdfc1/23304; kalan 142 eski kodla BİREBİR 07bae582/23218)
         const p147 = JSON.stringify(cs.istemler.filter(it => MAD2.indexOf(it.id) < 0).map(it => f(A4.cozumle(it.soru, T(it.taban)))));
         const p106 = JSON.stringify(c4.istemler.map(it => f(A4.cozumle(it.soru, T(it.taban)))));
         const p97 = JSON.stringify(d4.istemler.map(it => f(A4.cozumle(it.soru, T(it.taban, it.ekKatki)))));
-        __REG.ok('parmak izi BİREBİR: tuzak v5 93 ' + fnv(p93) + '/' + p93.length + ' (cb74f605/11217) · DOG4B 143 ' + fnv(p147) + '/' + p147.length + ' (e67bdfc1/23304) · DOG4C 106 ' + fnv(p106) + '/' + p106.length + ' (63030f24/12289) · DOG4D 97 ' + fnv(p97) + '/' + p97.length + ' (b3af54f6/11588)',
-          fnv(p93) === 'cb74f605' && p93.length === 11217 && fnv(p147) === 'e67bdfc1' && p147.length === 23304 && fnv(p106) === '63030f24' && p106.length === 12289 && fnv(p97) + '/' + p97.length === 'b3af54f6/11588');
+        __REG.ok('parmak izi BİREBİR: tuzak v5 93 ' + fnv(p93) + '/' + p93.length + ' (cb74f605/11217) · DOG4B 142 ' + fnv(p147) + '/' + p147.length + ' (07bae582/23218; E06 DOG4F madde 2, önceki 143 e67bdfc1/23304) · DOG4C 106 ' + fnv(p106) + '/' + p106.length + ' (63030f24/12289) · DOG4D 97 ' + fnv(p97) + '/' + p97.length + ' (b3af54f6/11588)',
+          fnv(p93) === 'cb74f605' && p93.length === 11217 && fnv(p147) === '07bae582' && p147.length === 23218 && fnv(p106) === '63030f24' && p106.length === 12289 && fnv(p97) + '/' + p97.length === 'b3af54f6/11588');
         // KASITLI BOZMALAR
         const tum = H.concat(U, UE).map(x => x.it), ile = (ks, fn) => { const a = ks.map(k => C[k]); ks.forEach(k => { C[k] = false; }); try { return fn(); } finally { ks.forEach((k, i) => { C[k] = a[i]; }); } };
         const kirmizi = ks => ile(ks, () => kos(tum).filter(x => x.k === 'YANLIS' || x.k === 'belirsiz'));
@@ -12657,6 +12658,64 @@ const CASELER = [
         __REG.ok('KASITLI BOZMA artırma yönü kapalı (artır = bırak × k) → ' + b2.length + ' kırmızı (≥ 1): ' + b2.map(x => x.id).join(', '), b2.length >= 1 && b2.some(x => x.id === 'H07'));
         return __REG.al();
       }, set, e4, d4, c4, cs);
+    }
+  },
+  // ═════════════ SPRINT DOG4F — okunmayan miktar parçası sessizce atılıyordu (tüketim koruması) ═════════════
+  {
+    kod: 'DOG4F-COZUM', ad: 'TÜKETİM KORUMASI (DOG4F madde 1–4): ikame çözümü sorudaki HER miktar parçasını (rakam, yazıyla sayı, birim, yüzde, kat, kesir, daha / az / fazla, tamamen, zaman, kalsın) hesaba katmış olmalı, yoksa belirsiz + "şu kısmı hesaba katamadım" · hedefli düzeltmeler (N gramını çıkar = eski − N, N g daha / az / fazla, X\'e N g ekle, ondalık kat, yazıyla yüzde, kesir + vazgeç, 1/4, dörtte bire, kalsın, tamamını, 100 g\'dan 80 g\'a) · Claude held-out 5 (9 yanlış + 7 gereksiz belirsiz, metin AYNEN) · MUTASYON (ek parça → belirsiz ya da farklı sonuç; sessiz yok sayma 0) · parmak izleri · KASITLI BOZMA',
+    calistir: async (page) => {
+      const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'tuzak_seti.json'), 'utf8')), f4 = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'dog4f_cozum_seti.json'), 'utf8'));
+      const e4 = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'dog4e_cozum_seti.json'), 'utf8')), d4 = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'dog4d_cozum_seti.json'), 'utf8'));
+      const c4 = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'dog4c_cozum_seti.json'), 'utf8')), cs = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'dog4b_cozum_seti.json'), 'utf8'));
+      return page.evaluate(async (set, f4, e4, d4, c4, cs) => {
+        const A = window.BM_AI, A4 = window.BM_AI4, T3 = window.BM_TUZAK, C = A4.COZ;
+        const T = (tb, ek) => { const t = set.tabanlar[tb], o = { stil: t.stil, tarif: Object.assign({ hacim: 11, verim: 61, mashSc: 66 }, JSON.parse(JSON.stringify(t.tarif))) }; if (ek) o.tarif.katkilar.push(JSON.parse(JSON.stringify(ek))); return o; };
+        const sinif = (b, x) => { if (x.mod === 'belirsiz') return b.belirsiz ? 'dogru-belirsiz' : 'belirsiz'; if (b.belirsiz) return 'YANLIS'; const v = x.v || {};
+          return x.mod === 'ikame' && v.islem === b.islem && (b.kalem == null || v.kalem === b.kalem) && (b.miktar == null || (v.miktar === b.miktar && v.birim === b.birim)) ? 'dogru' : 'YANLIS'; };
+        const kos = L => L.map(it => { const c = A4.cozumle(it.soru, T(it.taban, it.ekKatki)); return { id: it.id, it, k: sinif(it.beklenen, c), c, soru: it.soru }; });
+        const ok = R => R.every(x => x.k === 'dogru' || x.k === 'dogru-belirsiz'), yaz = R => R.map(x => x.id + ' ' + x.k + ': ' + x.soru + ' → ' + x.c.mod + ' ' + JSON.stringify(x.c.v || x.c.neden || null)).join(' || ');
+        const ac = x => x.c.v ? x.c.v.islem + ' ' + (x.c.v.miktar || '') : x.c.mod;
+        const Y = kos(f4.istemler.filter(x => x.grup === 'yanlis')), G = kos(f4.istemler.filter(x => x.grup === 'gereksiz')), K = kos(f4.istemler.filter(x => x.grup === 'kesir5'));
+        __REG.ok('Claude held-out 5 — 9 yanlış metin AYNEN: ' + Y.map(x => x.id + ' ' + ac(x)).join(' · ') + ' (beklenen 75 · 1200 · 1100 · 45 · 80 · 8 · 16 · belirsiz · belirsiz)', Y.length === 9 && ok(Y), yaz(Y.filter(x => x.k !== 'dogru' && x.k !== 'dogru-belirsiz')));
+        __REG.ok('7 gereksiz belirsiz: ' + G.map(x => x.id + ' ' + ac(x)).join(' · ') + ' (çıkar · 80 · 15 · 15 · 40 · 80 · 75)', G.length === 7 && ok(G), yaz(G.filter(x => x.k !== 'dogru')));
+        __REG.ok('held-out 5\'in doğru kesir soruları aynen: ' + K.map(x => x.id + ' ' + ac(x)).join(' · '), K.length === 7 && ok(K), yaz(K.filter(x => x.k !== 'dogru')));
+        // madde 1 + 4: neden metni ve kart cümlesi
+        const y9 = Y.find(x => x.id === 'Y9').c, m1 = A4.cozumle("Special B'yi 80 g yapsam 20 gram daha", T('dubbel'));
+        __REG.ok('neden: Y9 "' + y9.neden + '" · "Special B\'yi 80 g yapsam 20 gram daha" → ' + m1.mod + ' "' + m1.neden + '"', /^şu kısmı hesaba katamadım: '15 dakikada'/.test(y9.neden || '') && y9.tuketim && y9.tuketim.zaman && m1.mod === 'belirsiz' && m1.belirsizTur === 'islem' && m1.tuketim.parca === '20 gram daha' && !m1.v);
+        const asil = A.sor, hz = A.hazirMi; let kart = '', st = null;
+        try { A.hazirMi = () => ({ hazir: true }); A.sor = p => Promise.resolve({ ok: true, veri: p.kullanim === 'ozet' ? { cumleler: [] } : { secim: 'yok' }, maliyet: { usd: 0 } });
+          st = await A4.sor(T3.ctxOf(set, { taban: 'dubbel' }), "Special B'yi 80 g yapsam 20 gram daha", { model: 'guclu', web: false }); kart = A4.kartHTML('tuzak');
+        } finally { A.sor = asil; A.hazirMi = hz; delete A4.durum.tuzak; }
+        const dv = document.createElement('div'); dv.innerHTML = kart; const ktx = (dv.querySelector('.bm-ai4-tuketim') || {}).textContent || '';
+        __REG.ok('madde 4 kart (sade cümle, teknik neden yok): "' + ktx + '"', ktx === 'Sorunun şu kısmını hesaba katamadım: \'20 gram daha\'. Daha açık yazar mısın? (ör. "Special B X g yapsam")' && !/Ne yapmak istediğini/.test(kart) && st && st.coz.mod === 'belirsiz' && (st.cagri || []).length === 0);
+        // MUTASYON (ana kanıt): kök çözümü ikame olan her soru (tuzak 93 + DOG4B 147 + DOG4C 106 + DOG4D 97 + DOG4E 90 + DOG4F 23) × 8 ek parça; konum soru sırasına göre dönüşümlü (baş / son / kalemden sonra)
+        //   — tam koşu (8 ek × 3 konum, 13 120 mutasyon) CC raporunda; burada her köke dönüşümlü 3 ek, her ek bir konumda (npm test süresi)
+        const EK = f4.mutasyon.ekler, kok = [].concat(set.istemler.map(i => ({ k: 'tuzak', id: i.id, taban: i.taban, soru: i.istem })), cs.istemler, c4.istemler, d4.istemler, e4.istemler, f4.istemler);
+        const imza = c => JSON.stringify([c.mod, c.islem || null, c.v || null]);
+        const mutKos = () => { const s = { n: 0, belirsiz: 0, farkli: 0, okunduAyni: 0, sessiz: [] }; let j = 0;
+          kok.forEach(it => { const t0 = T(it.taban, it.ekKatki), c0 = A4.cozumle(it.soru, t0); if (c0.mod !== 'ikame') return; const R = String(it.soru).split(/\s+/); let kal = -1;
+            try { const tr = A4.kalemTara(it.soru, A4.stilBul(it.soru), t0), k = tr.kalemler[0]; if (k && tr.W[k.poz + (k.uz || 1) - 1]) kal = tr.W[k.poz + (k.uz || 1) - 1].i; } catch (e) {}
+            EK.filter((e, ei) => (ei + j) % 8 < 3).forEach(e => { const pz = (j++) % 3, q = pz === 0 ? e + ' ' + it.soru : pz === 1 || kal < 0 ? it.soru.replace(/[?.!]+$/, '') + ' ' + e : R.slice(0, kal + 1).concat([e], R.slice(kal + 1)).join(' ');
+              const c1 = A4.cozumle(q, T(it.taban, it.ekKatki)); s.n++;
+              if (c1.mod === 'belirsiz') s.belirsiz++; else if (c1.mod === 'ikame' && imza(c1) === imza(c0)) { if (e === 'tamamen' && c1.v && /^(cikar|degistir)$/.test(c1.v.islem)) s.okunduAyni++; else s.sessiz.push(q + ' → ' + c1.v.islem + ' ' + c1.v.miktar); } else s.farkli++; }); });
+          return s; };
+        const mu = mutKos();
+        __REG.ok('MUTASYON ' + mu.n + ' (ek: ' + EK.join(' / ') + '): belirsiz ' + mu.belirsiz + ' · farklı sonuç ' + mu.farkli + ' · "tamamen" + çıkar / değiştir (okundu, anlam aynı) ' + mu.okunduAyni + ' · SESSİZ YOK SAYMA ' + mu.sessiz.length, mu.n >= 1000 && mu.sessiz.length === 0, mu.sessiz.slice(0, 10).join(' || '));
+        // parmak izleri — DOG4E (a1b6e88) ile BİREBİR; DOG4B'de yalnız E06 madde 2 gereği değişti (belirsiz → 17 g)
+        const fnv = t => { let h = 0x811c9dc5; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return h.toString(16).padStart(8, '0'); };
+        const f = c => [c.mod, c.islem || null, c.eski || null, c.yeni || null, c.v || null, c.miktar || null, c.stil], P = (L, q) => { const p = JSON.stringify(L.map(it => f(A4.cozumle(it[q || 'soru'], T(it.taban, it.ekKatki))))); return fnv(p) + '/' + p.length; };
+        const E6 = cs.istemler.find(x => x.id === 'E06'), e6 = A4.cozumle(E6.soru, T(E6.taban)), fp = { t: P(set.istemler, 'istem'), b: P(cs.istemler.filter(x => ['E02', 'E03', 'E04', 'E05', 'E06'].indexOf(x.id) < 0)), c: P(c4.istemler), d: P(d4.istemler), e: P(e4.istemler) };
+        __REG.ok('parmak izi BİREBİR: tuzak v5 93 ' + fp.t + ' (cb74f605/11217) · DOG4B 142 ' + fp.b + ' (07bae582/23218) · DOG4C 106 ' + fp.c + ' (63030f24/12289) · DOG4D 97 ' + fp.d + ' (b3af54f6/11588) · DOG4E 90 ' + fp.e + ' (0db4a347/12484) · DOG4B E06 "' + E6.soru + '" belirsiz → ' + (e6.v ? e6.v.miktar + ' g' : e6.mod) + ' (madde 2: "X\'e N g daha eklesem" = eski + N)',
+          fp.t === 'cb74f605/11217' && fp.b === '07bae582/23218' && fp.c === '63030f24/12289' && fp.d === 'b3af54f6/11588' && fp.e === '0db4a347/12484' && e6.mod === 'ikame' && e6.v.miktar === 17 && E6.beklenen.miktar === 17);
+        // KASITLI BOZMALAR
+        const ile = (ks, fn) => { const a = ks.map(k => C[k]); ks.forEach(k => { C[k] = false; }); try { return fn(); } finally { ks.forEach((k, i) => { C[k] = a[i]; }); } };
+        const b1 = ile(['tuketim'], mutKos), b2 = ile(['tuketim', 'miktarParca'], () => kos(f4.istemler.filter(x => x.grup === 'yanlis'))), b3 = ile(['miktarParca'], () => kos(f4.istemler.filter(x => /^Y[1-4]$/.test(x.id))));
+        __REG.ok('KASITLI BOZMA tüketim koruması kapalı → mutasyonda ' + b1.sessiz.length + ' sessiz yok sayma (≥ 20): ' + b1.sessiz.slice(0, 3).join(' | '), b1.sessiz.length >= 20);
+        const kY = b2.filter(x => x.k === 'YANLIS' || x.k === 'belirsiz');
+        __REG.ok('KASITLI BOZMA koruma + hedefli okuma kapalı (eski davranış) → ' + kY.length + ' kırmızı: ' + kY.map(x => x.id + ' ' + ac(x)).join(', ') + ' (Y1–Y4 dahil)', ['Y1', 'Y2', 'Y3', 'Y4'].every(id => kY.some(x => x.id === id && x.c.mod === 'ikame' && x.c.v.islem === 'cikar')));
+        __REG.ok('yalnız hedefli okuma kapalı (koruma AÇIK) → Y1–Y4 yanlış DEĞİL, belirsiz: ' + b3.map(x => x.id + ' ' + x.c.mod + (x.c.tuketim ? " '" + x.c.tuketim.parca + "'" : '')).join(' · ') + ' (koruma tek başına sessiz yanlışı durduruyor)', b3.length === 4 && b3.every(x => x.c.mod === 'belirsiz'));
+        return __REG.al();
+      }, set, f4, e4, d4, c4, cs);
     }
   },
   // ═════════════ SPRINT BUL2C — marka ∩ açık stil, kısa yer adı, koşu puanlaması, gerçek koşu kaçakları, BUL modeli Opus ═════════════
@@ -14009,7 +14068,7 @@ async function main() {
   try {
     if (browserVar) {
       server = await sunucuKur();
-      browser = await puppeteer.launch({ headless: true });
+      browser = await puppeteer.launch({ headless: true, protocolTimeout: 900000 });
       console.log(`Sunucu: ${TABAN} (sw.js→404) · ${await browser.version()}\n`);
     }
     for (const c of tumCaseler) {

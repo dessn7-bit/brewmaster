@@ -1,0 +1,35 @@
+{
+ "tur": "DOG4F çözüm seti — okunmayan miktar parçası (Claude held-out 5)",
+ "surum": 1,
+ "kaynak": "gorevler/DOG4F.md (metin AYNEN). Y = yanlış çözüm (9), G = gereksiz belirsiz (7), K = held-out 5'in doğru çözülen kesir soruları (görevde sonucu verilen 7; fiil görevde yazılmadığı için CC yeniden kurdu). 'carafa'nın üçte biri kadar daha eklesem' görevde tabansız: beklenen 40 g = 30 g × 4/3 → yalnız wbock tabanında Carafa (crf1 30 g) var.",
+ "mutasyon": {
+  "ekler": ["20 gram daha", "yarısını", "15 dakikada", "%10", "0,5 kat", "biraz", "tamamen", "iki tane"],
+  "konumlar": ["bas", "son", "kalem"],
+  "kural": "kök çözüm ikame (miktar / çıkar / değiştir / ekle) iken mutasyon sonucu YA belirsiz YA DA kökten farklı bir ikame olmalı; kökün AYNISI = SESSİZ YOK SAYMA = kırmızı"
+ },
+ "istemler": [
+  { "id": "Y1", "grup": "yanlis", "taban": "dubbel", "soru": "candi'nin yüzde yirmi beşini çıkarsam", "beklenen": { "islem": "miktar", "kalem": "katki:0", "miktar": 75, "birim": "g" }, "once": "ÇIKAR (satır tamamen)" },
+  { "id": "Y2", "grup": "yanlis", "taban": "wbock", "soru": "munich maltının 400 gramını çıkarsam", "beklenen": { "islem": "miktar", "kalem": "malt:1", "miktar": 1200, "birim": "g" }, "once": "ÇIKAR (satır tamamen)" },
+  { "id": "Y3", "grup": "yanlis", "taban": "wbock", "soru": "munich maltının yarım kilosunu çıkarsam", "beklenen": { "islem": "miktar", "kalem": "malt:1", "miktar": 1100, "birim": "g" }, "once": "ÇIKAR (satır tamamen)" },
+  { "id": "Y4", "grup": "yanlis", "taban": "dubbel", "soru": "Special B'nin dörtte birinden vazgeçsem", "beklenen": { "islem": "miktar", "kalem": "malt:3", "miktar": 45, "birim": "g" }, "once": "ÇIKAR (satır tamamen)" },
+  { "id": "Y5", "grup": "yanlis", "taban": "dubbel", "soru": "Special B'yi 20 gram daha koysam", "beklenen": { "islem": "miktar", "kalem": "malt:3", "miktar": 80, "birim": "g" }, "once": "60 → 20 g" },
+  { "id": "Y6", "grup": "yanlis", "taban": "weizen", "soru": "Hallertau'dan 4 g az koysam", "beklenen": { "islem": "miktar", "kalem": "hop:0", "miktar": 8, "birim": "g" }, "once": "12 → 4 g" },
+  { "id": "Y7", "grup": "yanlis", "taban": "weizen", "soru": "Hallertau'yu 4 g fazla koysam", "beklenen": { "islem": "miktar", "kalem": "hop:0", "miktar": 16, "birim": "g" }, "once": "12 → 4 g" },
+  { "id": "Y8", "grup": "yanlis", "taban": "dubbel", "soru": "Special B'yi 0,5 kat artırsam", "beklenen": { "belirsiz": true }, "once": "60 → 300 g (0,5 → 5)" },
+  { "id": "Y9", "grup": "yanlis", "taban": "dubbel", "soru": "Styrian'ın dörtte birini 15 dakikada atsam", "beklenen": { "belirsiz": true }, "once": "20 → 15 g, zaman atıldı" },
+  { "id": "G1", "grup": "gereksiz", "taban": "dubbel", "soru": "Special B'nin tamamını atsam", "beklenen": { "islem": "cikar", "kalem": "malt:3" }, "once": "belirsiz" },
+  { "id": "G2", "grup": "gereksiz", "taban": "dubbel", "soru": "candi'yi 100 g'dan 80 g'a düşürsem", "beklenen": { "islem": "miktar", "kalem": "katki:0", "miktar": 80, "birim": "g" }, "once": "belirsiz" },
+  { "id": "G3", "grup": "gereksiz", "taban": "dubbel", "soru": "Special B'yi dörtte bire düşürsem", "beklenen": { "islem": "miktar", "kalem": "malt:3", "miktar": 15, "birim": "g" }, "once": "belirsiz" },
+  { "id": "G4", "grup": "gereksiz", "taban": "dubbel", "soru": "Special B'nin dörtte biri kalsın", "beklenen": { "islem": "miktar", "kalem": "malt:3", "miktar": 15, "birim": "g" }, "once": "belirsiz" },
+  { "id": "G5", "grup": "gereksiz", "taban": "wbock", "soru": "carafa'nın üçte biri kadar daha eklesem", "beklenen": { "islem": "miktar", "kalem": "malt:3", "miktar": 40, "birim": "g" }, "once": "belirsiz" },
+  { "id": "G6", "grup": "gereksiz", "taban": "dubbel", "soru": "Special B'ye 20 gram eklesem", "beklenen": { "islem": "miktar", "kalem": "malt:3", "miktar": 80, "birim": "g" }, "once": "belirsiz" },
+  { "id": "G7", "grup": "gereksiz", "taban": "dubbel", "soru": "candiyi 1/4 azaltsam", "beklenen": { "islem": "miktar", "kalem": "katki:0", "miktar": 75, "birim": "g" }, "once": "belirsiz" },
+  { "id": "K1", "grup": "kesir5", "taban": "dubbel", "soru": "Special B'nin üçte ikisini atsam", "beklenen": { "islem": "miktar", "kalem": "malt:3", "miktar": 20, "birim": "g" } },
+  { "id": "K2", "grup": "kesir5", "taban": "dubbel", "soru": "Special B'nin dörtte üçünü kullansam", "beklenen": { "islem": "miktar", "kalem": "malt:3", "miktar": 45, "birim": "g" } },
+  { "id": "K3", "grup": "kesir5", "taban": "dubbel", "soru": "Special B'nin beşte birini çıkarsam", "beklenen": { "islem": "miktar", "kalem": "malt:3", "miktar": 48, "birim": "g" } },
+  { "id": "K4", "grup": "kesir5", "taban": "dubbel", "soru": "pilsner maltının onda birini çıkarsam", "beklenen": { "islem": "miktar", "kalem": "malt:0", "miktar": 2565, "birim": "g" } },
+  { "id": "K5", "grup": "kesir5", "taban": "dubbel", "soru": "Special B'nin %20'sini çıkarsam", "beklenen": { "islem": "miktar", "kalem": "malt:3", "miktar": 48, "birim": "g" } },
+  { "id": "K6", "grup": "kesir5", "taban": "weizen", "soru": "Hallertau'yu üçte birine indirsem", "beklenen": { "islem": "miktar", "kalem": "hop:0", "miktar": 4, "birim": "g" } },
+  { "id": "K7", "grup": "kesir5", "taban": "weizen", "soru": "Hallertau'yu üç katına çıkarsam", "beklenen": { "islem": "miktar", "kalem": "hop:0", "miktar": 36, "birim": "g" } }
+ ]
+}

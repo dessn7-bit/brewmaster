@@ -95,7 +95,8 @@ const EK = [
   ['dubbel', "Special B'yi yarıya indirsem", { islem: 'miktar', kalem: 'malt:3', miktar: 30, birim: 'g' }, 'DOG4C: × 0,5 → 60 → 30 g (DOG4B: belirsiz)'],
   ['weizen', "pilsner'ı 1 kg azaltsam", { islem: 'miktar', kalem: 'malt:1', miktar: 150, birim: 'g' }, '"1 kg azalt" = 1 kg eksilt (fark): DOG4C 1150 − 1000 = 150 g (DOG4B: belirsiz)'],
   ['weizen', "Hallertau'yu 5 g artırsam", { islem: 'miktar', kalem: 'hop:0', miktar: 17, birim: 'g' }, 'fark: DOG4C 12 + 5 = 17 g (DOG4B: belirsiz)'],
-  ['weizen', "Hallertau'ya 5 g daha eklesem", { belirsiz: true }, 'var olan satıra ekleme: toplam mı üstüne mi'],
+  // DOG4F madde 2 (2026-10-22): "X'e N g eklesem" / "N g daha" = eski + N → E06 beklentisi belirsiz → MİKTAR (eski beklenti notta)
+  ['weizen', "Hallertau'ya 5 g daha eklesem", { islem: 'miktar', kalem: 'hop:0', miktar: 17, birim: 'g' }, 'var olan satıra ekleme: "5 g daha" + yönelme ekli satır = üstüne → DOG4F 12 + 5 = 17 g (DOG4B: belirsiz — toplam mı üstüne mi)'],
   ['weizen', "buğday maltını 1,5 kiloya düşürsem", { islem: 'miktar', kalem: 'malt:0', miktar: 1.5, birim: 'kg' }, 'yönelme ekli hedef'],
   ['weizen', "buğday maltını 2 kg'a çıkarsam", { islem: 'miktar', kalem: 'malt:0', miktar: 2, birim: 'kg' }, "kesmeli yönelme 'a"],
   ['dubbel', "Dubbel'deki Special B'yi 100 g yapsam", { islem: 'miktar', kalem: 'malt:3', miktar: 100, birim: 'g' }, ''],
