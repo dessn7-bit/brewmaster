@@ -1,0 +1,24 @@
+{
+  "tur": "dog4g_cozum_seti",
+  "surum": 1,
+  "kaynak": "Claude held-out 6 (2026-10-22) — S1, S2, %10 ve dekstroz soruları metin AYNEN (gorevler/DOG4G.md); H / D grupları CC ek (hacim başına biçimleri, değerlendirme istisnası) — dairesel olabilir",
+  "mutasyon": {
+    "ekler": ["20 gram daha", "yarısını", "15 dakikada", "%10", "0,5 kat", "biraz", "tamamen", "iki tane", "/litre", "60 değil 40"],
+    "kural": "tat / bilgi / yok (ve ikame) sonucu veren her soruya ek parça → eski sonuç AYNEN = sessiz yok sayma = kırmızı (0 olmalı)"
+  },
+  "istemler": [
+    { "id": "S1", "grup": "held6", "taban": "dubbel", "soru": "Special B 60 değil 40 olsun", "beklenen": { "belirsiz": true, "parca": "60 değil 40" }, "once": "tat — SORU (değişiklik yok); 60 ve 40 sessizce atıldı" },
+    { "id": "S2", "grup": "held6", "taban": "dubbel", "soru": "kişniş 2 gram/litre eklesem", "beklenen": { "islem": "ekle", "miktar": 22, "birim": "g" }, "once": "EKLE Kişniş 2,0 g ('/litre' atıldı)" },
+    { "id": "S3", "grup": "held6", "taban": "dubbel", "soru": "%10 buğday maltının yarısını kullansam", "beklenen": { "belirsiz": true, "parca": "%10" }, "once": "tat — SORU (değişiklik yok)" },
+    { "id": "S4", "grup": "held6", "taban": "dubbel", "soru": "candi yerine 150 gram dekstroz koysam", "beklenen": { "belirsiz": true, "neden": "dekstroz" }, "once": "belirsiz, neden '\"150\" bir katki değil (malt: Dekstroz…)' — sayı ürün adı gibi yazılıyordu" },
+    { "id": "H1", "grup": "hacim", "taban": "dubbel", "soru": "litreye 2 gram kişniş eklesem", "beklenen": { "islem": "ekle", "miktar": 22, "birim": "g" } },
+    { "id": "H2", "grup": "hacim", "taban": "dubbel", "soru": "kişniş 2 g/L eklesem", "beklenen": { "islem": "ekle", "miktar": 22, "birim": "g" } },
+    { "id": "H3", "grup": "hacim", "taban": "dubbel", "soru": "kişniş litre başına 2 g eklesem", "beklenen": { "islem": "ekle", "miktar": 22, "birim": "g" } },
+    { "id": "H4", "grup": "hacim", "taban": "dubbel", "soru": "kişniş 2 g litre başına eklesem", "beklenen": { "islem": "ekle", "miktar": 22, "birim": "g" } },
+    { "id": "H5", "grup": "hacim", "taban": "dubbel", "soru": "10 litreye 20 gram kişniş eklesem", "beklenen": { "islem": "ekle", "miktar": 22, "birim": "g" }, "not": "oran 20 g / 10 L = 2 g/L × parti 11 L (hesap Anladığım satırında açık)" },
+    { "id": "H6", "grup": "hacim", "taban": "dubbel", "hacimYok": true, "soru": "kişniş 2 gram/litre eklesem", "beklenen": { "belirsiz": true }, "not": "reçetede parti hacmi yok → belirsiz" },
+    { "id": "D1", "grup": "degerlendirme", "taban": "dubbel", "soru": "60 g Special B Dubbel'e uyar mı", "beklenen": { "mod": "tat" }, "not": "reçetedeki mevcut miktar (60 g) + değerlendirme sorusu → tat kalır" },
+    { "id": "D2", "grup": "degerlendirme", "taban": "dubbel", "soru": "40 g Special B Dubbel'e uyar mı", "beklenen": { "belirsiz": true, "parca": "40 g" }, "not": "mevcut miktardan farklı sayı → belirsiz" },
+    { "id": "D3", "grup": "degerlendirme", "taban": "dubbel", "soru": "Special B'nin rengi 150 mi", "beklenen": { "belirsiz": true, "parca": "150" }, "not": "bilgi sonucu da korunur" }
+  ]
+}
