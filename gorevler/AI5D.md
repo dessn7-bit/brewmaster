@@ -1,5 +1,10 @@
 SPRINT AI5D (DOG4D SONRASI) — "Bu reçeteyi nasıl geliştirebilirim?" kutusunun tanımadığı istekte para harcayıp boş/alakasız sonuç vermesi. GERÇEK AI KOSUSU YOK.
 
+GUNCELLEME (Claude, 2026-10-23 — once bunu oku): Soru cozucu turlari KAPANDI (DOG4H d090494, SW v131-511; Claude canli dogrulamasi: maya miktari 13 yeni yaziminin 13'u guvenli belirsiz, miktarsiz maya degisimi DEGISTIR, 13 eski dogru soru aynen). Bu dosya CEVAP ILKESI'nden (CLAUDE.md, Kaan karari 2026-10-22) birkac saat ONCE yazildi; asagidaki iki ek baglayicidir:
+- Madde 7 (b) oneri satiri CEV1 madde 1 bicimine uyar: oneriler GUCLUDEN ZAYIFA siralanir ve her birinde kanit gucu sozcugu vardir. Guc UYGULAMA tarafindan kural tablosundaki bagimsiz kaynak sayisi + turunden HESAPLANIR: >= 2 bagimsiz uretici/ders kitabi/egitim kurumu/kontrollu deney kaynagi = "güçlü"; tek kaynak = "olası"; kontrollu kor tadim farki AYIRT EDEMEDIYSE (ferulik dinlenme, Brulosophy 6/24 p 0,86) en fazla "olası" + o not; kaynaklar celisiyorsa "kaynaklar çelişiyor" ve ONERI DEGIL bilgi satiri (havalandirma). Tek deney (Brulosophy) tek basina kaynak sayisini "güçlü"ye tasimaz. Madde 2 icin beklenen: maya miktari (L, W, B) güçlü · ferm sicakligi (L, W, V) güçlü · OG (L, B) güçlü ama yalniz stil bandi icinde · ferulik dinlenme olası · havalandirma celiski. CC kaynaklari kendisi okuyup farkli sayarsa raporlar, kendi okumasini koda yazar, farki SUPHE'de gosterir.
+- Madde 7'ye (d) satiri eklenir: "Senin reçetende:" — recetenin kendi degerleriyle 1–2 cumle (ornek: "Mayan BB Alman Buğday No1 — üretici aralığını katalogda bulamadım, paketine bak; mayalanma sıcaklığın 18 °C."). Katalogda olmayan bilgi uydurulmaz.
+- SW bump v131-512. Imza 2c9ebd9f-32461 AYNI. Malzeme asistani (AI4) cozum parmak izleri (tuzak v5 93 cb74f605/11217, DOG4B 141 3d8a0ef9/23172) bu sprintte DEGISMEMELI.
+
 Bu dosyada 7 numarali madde var. Ise baslamadan 7'sini de okudugunu raporun ilk satirinda teyit et.
 EFOR: high
 MODEL: Model-bagimsiz. Modelini ilk satirda belirt.
