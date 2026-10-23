@@ -10798,10 +10798,10 @@ const CASELER = [
     calistir: (page) => page.evaluate(async () => {
       const G = window.BM_AI5;
       // AI5D: tabloya 8 aroma kuralı (muz / karanfil, okuma 2026-10-23) eklendi; AI5'in 7 kuralı + okuma tarihi AYNEN
-      __REG.ok('7 kural (+ AI5D 8 aroma kuralı), kaynaksız 0, okuma 2026-10-14', G.KURALLAR.filter(r => !r.aroma).length === 7 && G.KURALLAR.filter(r => r.aroma).length === 8 && !G.kaynaksizKurallar().length && G.OKUMA === '2026-10-14');
+      __REG.ok('7 kural (+ AI5D 8 + AI5E 4 ters yön aroma kuralı), kaynaksız 0, okuma 2026-10-14', G.KURALLAR.filter(r => !r.aroma).length === 7 && G.KURALLAR.filter(r => r.aroma).length === 12 && !G.kaynaksizKurallar().length && G.OKUMA === '2026-10-14');
       __REG.ok('her kaynakta ad + alıntı; her satırda en az bir https URL', G.KURALLAR.every(r => r.kaynaklar.every(k => k.ad && k.alinti) && r.kaynaklar.some(k => /^https:\/\//.test(k.url || ''))));
       const hk = G.HEDEF_KURAL; __REG.ok('her yön hedefinin kuralı tabloda (kuru / gövde / az acı / acı / koyu / açık)', ['kuru', 'govde', 'azaci', 'aci', 'koyu', 'acik'].every(h => hk[h].length && hk[h].every(r => !!G.kural(r[0]))));
-      __REG.ok('mash kuralı ölçülen algı sonucunu da taşıyor (Brulosophy 12/33, p=0.42)', /12'si doğru seçti \(p=0\.42\)/.test(G.kural('mash').kaynaklar[1].alinti));
+      __REG.ok('mash kuralı ölçülen algı sonucunu da taşıyor (Brulosophy 12/33, p=0.42)', /12'si doğru seçti \(p=0\.42\)/.test((G.kural('mash').kaynaklar.find(k => /^Brulosophy/.test(k.ad)) || {}).alinti)); // AI5E: kaynak sırası değişti (Palmer + Muller önde)
       G.KURALLAR.push({ id: 'boz', degisken: 'x', hedef: {}, metin: 'kaynaksız kural', kaynaklar: [] }); let bz; try { bz = G.kaynaksizKurallar(); } finally { G.KURALLAR.pop(); }
       __REG.ok('KASITLI BOZMA: kaynaksız satır → denetim yakalar', bz.join() === 'boz');
       return __REG.al();
@@ -12786,13 +12786,13 @@ const CASELER = [
       let S1, S2, S3, S4, S5;
       try { S1 = await kos('Daha muzlu süt tadı istiyorum'); S2 = await kos('karanfil daha az olsun'); S3 = await kos('daha meyvemsi'); const l0 = log.length; S4 = await kos('merhaba dünya'); S5 = { l0, l1: log.length }; } finally { A.hazirMi = sah; A.sor = sor; }
       __REG.ok('Kaan\'ın cümlesi "Daha muzlu süt tadı istiyorum" → hedef ' + S1.hedef + ' · "' + G.anladigimMetni(S1) + '"', S1.hedef === 'muz' && /süt tadı/.test(G.anladigimMetni(S1)) && G.oneriler(S1).some(o => o.kural === 'fermsc'));
-      __REG.ok('tat / aroma eşleşmezse tanıyamadım, AI çağrısı YOK: "karanfil daha az olsun" ' + S2.durum + ' · "daha meyvemsi" ' + S3.durum + ' · AI çağrısı ' + S5.l0 + ' (aroma) → ' + S5.l1 + ' ("merhaba dünya" AI "yok" → ' + S4.durum + ')', S2.durum === 'taniyamadim' && S3.durum === 'taniyamadim' && S5.l0 === 0 && S5.l1 === 1 && S4.durum === 'taniyamadim' && /Aroma ve tat \(muz, karanfil gibi\) bu araçta hesaplanmıyor/.test(G.taniyamadimMetni(S3)));
+      __REG.ok('tat / aroma eşleşmezse tanıyamadım, AI çağrısı YOK (AI5E: "karanfil daha az olsun" artık ters yön hedefi → ' + S2.hedef + '): "karanfil daha az olsun" ' + S2.durum + ' · "daha meyvemsi" ' + S3.durum + ' · AI çağrısı ' + S5.l0 + ' (aroma) → ' + S5.l1 + ' ("merhaba dünya" AI "yok" → ' + S4.durum + ')', S2.hedef === 'azkaranfil' && S2.durum === 'hazir' && S3.durum === 'taniyamadim' && S5.l0 === 0 && S5.l1 === 1 && S4.durum === 'taniyamadim' && /Aroma ve tat \(muz, karanfil gibi\) bu araçta hesaplanmıyor/.test(G.taniyamadimMetni(S3)));
       const hk = G.kartHTML(S3.key);
       __REG.ok('tanıyamadım kartı: kıyas YOK, web / anlatım düğmesi YOK', !/bm-ai5-kiyas|bm-ai5-anlat-btn|bm-ai5-web-btn/.test(hk) && /Bu isteği mevcut hedeflere çeviremedim/.test(hk));
       const Tus = A1.baglamTarif(ctx(Object.assign({}, R, { tarif: Object.assign({}, R.tarif, { mayaId: 'us05' }) }))), su = G.hazirla({ tur: 'tarif', key: 'ai5d:us', T: { tarif: Tus.tarif, stil: R.stil, ad: 'x' } }, { metin: 'daha muzlu olsun' });
       __REG.ok('buğday mayası değilse (US-05) muz isteği tanıyamadım + nedeni', su.durum === 'taniyamadim' && /buğday birası mayası değil/.test(G.taniyamadimMetni(su)));
       // (2) kanıt gücü (uygulama hesabı)
-      const gc = id => G.kuralGuc(G.kural(id)).k, bek = { pitch: 'guclu', fermsc: 'guclu', og_ester: 'guclu', ferulik: 'olasi', havalandirma: 'celiski', karanfil_sicaklik: 'celiski', mash: 'olasi' };
+      const gc = id => G.kuralGuc(G.kural(id)).k, bek = { pitch: 'guclu', fermsc: 'guclu', og_ester: 'guclu', ferulik: 'olasi', havalandirma: 'celiski', karanfil_sicaklik: 'celiski', mash: 'guclu' }; // AI5E (3): mash ölçülebilir iddia (FG) + Palmer + Muller 2000 → güçlü (önce kör tadım notu yüzünden olası)
       __REG.ok('kanıt gücü: ' + Object.keys(bek).map(k => k + ' ' + gc(k)).join(' · ') + ' (beklenen: maya miktarı / ferm. sıcaklığı / OG güçlü · ferulik olası · havalandırma çelişki)', Object.keys(bek).every(k => gc(k) === bek[k]));
       __REG.ok('kaynaksız kural 0 (' + G.KURALLAR.length + ' kural, aroma kuralları okuma 2026-10-23)', !G.kaynaksizKurallar().length && G.KURALLAR.filter(r => r.aroma).every(r => r.okuma === '2026-10-23'));
       const O1 = G.oneriler(S1);
@@ -12830,6 +12830,61 @@ const CASELER = [
       __REG.ok('KASITLI BOZMA eski web sorgusu → "' + b2[0] + '" → kırmızı', /brewing tips/.test(b2[0]) && !q.some(x => /brewing tips/.test(x)));
       G.KURALLAR.push({ id: 'pitch_boz', aroma: true, yontem: 'yon', degisken: 'x', hedef: { muz: 'azalt' }, metin: 'kaynaksız', kaynaklar: [] }); let b3; try { b3 = G.kaynaksizKurallar(); } finally { G.KURALLAR.pop(); }
       __REG.ok('KASITLI BOZMA kaynaksız aroma kuralı → kilit ' + JSON.stringify(b3) + ' → kırmızı', b3.indexOf('pitch_boz') >= 0);
+      return __REG.al();
+    })
+  },
+  // ═════════════ SPRINT AI5E — katalog ters muz/karanfil notu + attenuation metni · ters yön · eski 7 kuralın kanıt gücü · varsayım etiketleri ═════════════
+  {
+    kod: 'AI5E', ad: 'GELİŞTİRME KARTI DOĞRULUK (AI5E madde 1–5): katalogda "18 °C = daha çok muz; 24 °C = daha çok karanfil" ters notu 0 (Wyeast 3068 metniyle değişti) + attenuation metni ↔ kayıt alanı çelişkisi 0 (otomatik tarama) · ters yön ("daha az muz", "karanfil daha az") yalnız İLİŞKİ cümleli kaynaklarla cevaplanır, AI çağrısı 0 · kör tadım notu gücü yalnız algı iddiasında düşürür (mash = güçlü + ayrı tadım notu + MASH_NOT) · Tinseth / Morey / OG = "hesapla" · üst satırda varsayım sayıları etiketli · G seti / G kapısı aynen · KASITLI BOZMA',
+    calistir: (page) => page.evaluate(async () => {
+      const G = window.BM_AI5, A1 = window.BM_AI1, A = window.BM_AI;
+      const R = { ad: 'Sentetik Weizen (MUZO benzeri; kişisel veri yok)', stil: 'Weizen / Weissbier', tarif: { maltlar: [{ id: 'wheat', kg: 2 }, { id: 'pilsner', kg: 1.2 }], hoplar: [{ id: 'magnum', g: 8, dk: 60, tur: 'boil', form: 'pellet' }], katkilar: [], mayaId: 'bb_alman_bugday1', hacim: 11, verim: 60, mashSc: 67, mashAdimlar: [{ sc: 46, dk: 15 }, { sc: 67, dk: 45 }, { sc: 72, dk: 15 }, { sc: 76, dk: 10 }] } };
+      let n = 0; const ctx = (r) => ({ tur: 'tarif', key: 'ai5e:' + (n++), T: JSON.parse(JSON.stringify(r || R)) });
+      // (1) KATALOG TARAMASI — ters yön notu + attenuation metni ↔ alan (TANIM strict; MUADIL "benzer (~%N)" iki mayada ±2)
+      const tara = () => { const ters = [], att = [], acik = { ha18: 'üretici %98–102 (enzimli); uygulamanın FG doğrulayıcısı atu ≤ 95 → alan değişmedi (açık iş)' };
+        const TERS = /\d+\s*°C\s*(?:=|→)?\s*(?:daha çok|daha fazla)\s*(?:muz|karanfil)|\((?:muz|karanfil) için\)|daha çok karanfil/;
+        const by = {}; MAYALAR.forEach(m => { by[m.id] = m; });
+        Object.keys(TANIM).forEach(id => { if (!by[id]) return; const t = TANIM[id]; if (TERS.test(t)) ters.push('TANIM ' + id);
+          const a = /Attenuation:\s*([^.]*)/.exec(t); if (!a || acik[id]) return; const m = /%\s*(\d+)(?:\s*[–-]\s*(\d+))?/.exec(a[1]); if (!m) return; const lo = +m[1], hi = +(m[2] || m[1]);
+          if (hi < by[id].atu[0] || lo > by[id].atu[1]) att.push(id + ' metin ' + a[1] + ' ↔ alan ' + by[id].atu.join('–')); });
+        Object.keys(MUADIL).forEach(k => { if (!by[k]) return; (MUADIL[k] || []).forEach(e => { if (!by[e.id]) return; const t = (e.fark || '') + ' ' + (e.detay || ''); if (TERS.test(t)) ters.push('MUADIL ' + k + '→' + e.id);
+          (t.match(/Attenuation benzer \(~%(\d+)\)/g) || []).forEach(x => { const v = +/(\d+)/.exec(x)[1], ic = y => v >= y.atu[0] - 2 && v <= y.atu[1] + 2; if (!ic(by[k]) || !ic(by[e.id])) att.push('MUADIL ' + k + '→' + e.id + ' ' + x); }); }); });
+        return { ters, att, acik }; };
+      const K0 = tara(), wy = Object.keys(TANIM).filter(id => /muz azalınca karanfil öne çıkar \(Wyeast 3068/.test(TANIM[id])).length + Object.keys(MUADIL).reduce((s, k) => s + (MUADIL[k] || []).filter(e => /muz azalınca karanfil öne çıkar \(Wyeast 3068/.test(e.detay || '')).length, 0);
+      __REG.ok('katalog: ters muz / karanfil notu ' + K0.ters.length + ' · attenuation metin ↔ alan çelişkisi ' + K0.att.length + ' · Wyeast kaynaklı not ' + wy + ' yerde (bb_alman_bugday1, bb_wheat, wb06, MUADIL wb06→wy3068) · açık: ha18', !K0.ters.length && !K0.att.length && wy === 4 && /%98–102 \(Fermentis/.test(TANIM.ha18), K0.ters.concat(K0.att).join(' | '));
+      __REG.ok('üretici değeri metinde: wb06 %86–90 (Fermentis) · la_munich %76–83 (Lallemand) · wy3522 %72–76 (Wyeast) · bb_wheat sayısı kaldırıldı (BiraBurada veri sayfası yok)', /Attenuation: %86–90 \(Fermentis\)/.test(TANIM.wb06) && /Attenuation: %76–83 \(Lallemand\)/.test(TANIM.la_munich) && /Attenuation: %72–76 \(Wyeast\)/.test(TANIM.wy3522) && !/Attenuation/.test(TANIM.bb_wheat));
+      // (2) TERS YÖN — canlı cümleler AYNEN; AI çağrısı 0
+      const sah = A.hazirMi, sor = A.sor, log = []; A.hazirMi = () => ({ hazir: true }); A.sor = p => { log.push(p.kullanim); return Promise.resolve({ ok: false, hata: { mesaj: 'test' } }); };
+      const kos = m => { const c = ctx(); const st = G.hazirla(c, { metin: m }); return st; };
+      let Z; try { Z = ['daha az muz istiyorum', 'muz aroması az olsun', 'karanfil daha az olsun', 'muz azalsın karanfil artsın', 'Daha muzlu süt tadı istiyorum', 'daha karanfilli olsun'].map(m => ({ m, st: kos(m) })); } finally { A.hazirMi = sah; A.sor = sor; }
+      const oz = x => x.m + ' → ' + x.st.hedef + ' [' + G.oneriler(x.st).map(o => o.kural + ':' + o.guc.ad).join(', ') + ']', H = Z.map(x => x.st.hedef);
+      __REG.ok('canlı cümleler: ' + Z.map(oz).join(' · ') + ' · AI çağrısı ' + log.length, H.join() === 'azmuz,azmuz,azkaranfil,azmuz_karanfil,muz,karanfil' && Z.every(x => x.st.durum === 'hazir' && G.oneriler(x.st).length >= 1) && log.length === 0);
+      const O = i => G.oneriler(Z[i].st), kurallar = i => O(i).map(o => o.kural);
+      __REG.ok('"daha az muz": fazla maya (güçlü) + serin mayalanma (güçlü), OG\'nin tersi önerilmez (ilişki cümlesi yok)', kurallar(0).join() === 'pitch_ters,fermsc_ters' && O(0).every(o => o.guc.k === 'guclu') && !kurallar(0).some(k => /^(pitch|fermsc|og_ester)$/.test(k)));
+      __REG.ok('"karanfil daha az": 46 °C adımını kısalt (olası) + muz-karanfil maskesi (olası, tek kaynak Wyeast)', kurallar(2).join() === 'ferulik_ters,karanfil_maske' && O(2).every(o => o.guc.k === 'olasi'));
+      __REG.ok('"muz azalsın karanfil artsın": iki hedef birlikte, çelişen öneri yok (sıcak / az maya / OG yok): ' + kurallar(3).join(','), kurallar(3).join() === 'pitch_ters,fermsc_ters,ferulik' && !kurallar(3).some(k => /^(pitch|fermsc|og_ester|ferulik_ters)$/.test(k)) && /kaynaklar çelişiyor/.test(O(3)[0].metin));
+      const gu = id => G.kuralGuc(G.kural(id)).k;
+      __REG.ok('ters kural gücü (yalnız ilişki cümlesi sayılır): pitch_ters ' + gu('pitch_ters') + ' · fermsc_ters ' + gu('fermsc_ters') + ' · ferulik_ters ' + gu('ferulik_ters') + ' · karanfil_maske ' + gu('karanfil_maske') + ' · her ters kuralda alıntı + iliski', gu('pitch_ters') === 'guclu' && gu('fermsc_ters') === 'guclu' && gu('ferulik_ters') === 'olasi' && gu('karanfil_maske') === 'olasi' && G.KURALLAR.filter(r => r.ters).every(r => r.kaynaklar.every(k => k.iliski === true && String(k.alinti).trim())) && !G.kaynaksizKurallar().length);
+      // (3) ESKİ 7 KURAL — mash güçlü + ayrı tadım notu + MASH_NOT; hesap modelleri 'hesapla'
+      const tb = { mash: 'guclu', seker: 'guclu', maya: 'guclu', kristal: 'guclu', acihop: 'hesap', renk: 'hesap', baz: 'hesap' };
+      __REG.ok('7 kuralın gücü: ' + Object.keys(tb).map(k => k + ' ' + G.kuralGuc(G.kural(k)).ad + ' (' + G.kuralGuc(G.kural(k)).n + ')').join(' · '), Object.keys(tb).every(k => gu(k) === tb[k]));
+      const SK = G.hazirla(ctx(), { metin: 'daha kuru olsun' }), om = G.oneriler(SK).find(o => o.kural === 'mash') || {};
+      __REG.ok('"daha kuru olsun" mash satırı: "' + (om.metin || '—') + '"', om.guc && om.guc.k === 'guclu' && /Palmer, How to Brew/.test(om.metin) && /Muller 2000/.test(om.metin) && /güçlü\)\./.test(om.metin) && /Tadımda fark: tek deneyde ayırt edilemedi \(Brulosophy\)\./.test(om.metin) && om.metin.indexOf(G.MASH_KISA) >= 0 && !/olası/.test(om.metin));
+      // (4) varsayım sayıları etiketli
+      const Om = G.oneriler(Z[4].st), op = Om.find(o => o.kural === 'pitch') || {}, of = Om.find(o => o.kural === 'fermsc') || {};
+      __REG.ok('üst satır etiketli: "' + op.metin + '" · "' + of.metin + '"', op.metin.indexOf(G.VARS_HUCRE) >= 0 && /aralığının üst ucunda \(22 °C\)/.test(of.metin) && of.metin.indexOf(G.VARS_DERECE) >= 0 && !/21–22 °C/.test(of.metin));
+      // DEĞİŞMEMESİ GEREKEN — G kapısı şeridi 7/393 (G seti 30 istem parmak izi AI5D case'inde, tuzak / DOG4B DOG4H-COZUM case'inde)
+      __REG.ok('G kapısı şeridi aynen: "' + window.BM_DOG1.seritMetni('G') + '"', /yanlış 7\/393 \(üst %3,3; katı okuma\)/.test(window.BM_DOG1.seritMetni('G')));
+      // KASITLI BOZMALAR
+      const es = TANIM.bb_wheat; TANIM.bb_wheat = es.replace('Not: ', 'Not: 18°C daha çok muz; 24°C daha çok karanfil. '); let b1; try { b1 = tara(); } finally { TANIM.bb_wheat = es; }
+      __REG.ok('KASITLI BOZMA ters notu geri koy → katalog taraması ' + b1.ters.join(',') + ' → kırmızı', b1.ters.indexOf('TANIM bb_wheat') >= 0);
+      const ea = TANIM.wb06; TANIM.wb06 = ea.replace('Attenuation: %86–90 (Fermentis)', 'Attenuation: %73'); let b1b; try { b1b = tara(); } finally { TANIM.wb06 = ea; }
+      __REG.ok('KASITLI BOZMA eski "%73" metni geri → attenuation çelişkisi ' + b1b.att.join(',') + ' → kırmızı', b1b.att.some(x => /^wb06/.test(x)));
+      const Rm = G.kural('mash'), ei = Rm.iddia; delete Rm.iddia; let b2; try { b2 = G.oneriler(G.hazirla(ctx(), { metin: 'daha kuru olsun' })).find(o => o.kural === 'mash'); } finally { Rm.iddia = ei; }
+      __REG.ok('KASITLI BOZMA kör tadım notu ölçüm iddiasında gücü düşürür → mash ' + b2.guc.ad + ' → kırmızı', b2.guc.k === 'olasi' && /olası/.test(b2.metin));
+      const Rp = G.kural('pitch_ters'), k0 = Rp.kaynaklar[0]; k0.iliski = false; let b3; try { b3 = G.kaynaksizKurallar(); } finally { k0.iliski = true; }
+      const al = Rp.kaynaklar[1].alinti; Rp.kaynaklar[1].alinti = ''; let b4; try { b4 = G.kaynaksizKurallar(); } finally { Rp.kaynaklar[1].alinti = al; }
+      __REG.ok('KASITLI BOZMA ters kural ilişki cümlesiz / alıntısız → kaynak kilidi ' + JSON.stringify(b3) + ' / ' + JSON.stringify(b4) + ' → kırmızı', b3.indexOf('pitch_ters') >= 0 && b4.indexOf('pitch_ters') >= 0 && !G.kaynaksizKurallar().length);
       return __REG.al();
     })
   },
