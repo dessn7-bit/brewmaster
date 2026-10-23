@@ -1,8 +1,18 @@
 SPRINT CEV1 (AI5D SONRASI) — CEVAP ILKESI: her soruya sade, dogrudan, cok kaynakli cevap. Kaan karari 2026-10-22: "Evet kesinlikle her soruya bu şekilde cevap vermeli" (ornek: "daha muzlu weizen" sorusuna Claude'un verdigi cevap — etkenler guclüden zayifa, her biri uretici + ders kitabi kaynakli, celiski acikca, recetene uygulanisi, kaynak listesi).
 
-Bu dosyada 7 numarali madde var. Ise baslamadan 7'sini de okudugunu raporun ilk satirinda teyit et.
+Bu dosyada 8 numarali madde var (0–7). Ise baslamadan 8'ini de okudugunu raporun ilk satirinda teyit et.
 EFOR: high
 MODEL: Model-bagimsiz. Modelini ilk satirda belirt.
+
+GUNCELLEME (Claude, 2026-10-23 — once bunu oku): AI5E (9235a5c, SW v131-513) Claude canlida dogruladi: md5 canli = yerel (02569d12…), imza 2c9ebd9f-32461, anahtar 0; ters katalog notu 0, ters yon istekleri cevaplaniyor (AI cagrisi 0), "daha kuru" mash satiri güçlü + ayri tadim notu + MASH_NOT. KABUL: baz malt "hesapla" sapmasi, "serin mayalanma" iliski okumasi, Muller 2000 / Oxford Companion / Warminster kaynaklari. Bu dosyaya MADDE 0 (on is) eklendi; toplam 8 madde (0–7). SW bump v131-514.
+
+0. ON IS — MAYA SICAKLIK ALANLARI + KUCUK ACIKLAR (CEV1 madde 4 bu alanlari "Senin reçetende"de kullanacak; once dogru olmali)
+- CANLI HATA: weizen + WY3068 recetesinde "daha az muz" karti "Mayalanmayı mayanın aralığının alt ucunda (17 °C) yap" diyor. Katalog sc:[17,22], ama Wyeast 3068 urun metni "64-75 TEMPERATURE RANGE" (°F ≈ 18–24 °C) — oneri ureticinin ALT SINIRININ ALTINDA. Muz yonundeki "ust uc 22 °C" de ureticinin 24'unden dar.
+- AI5E'deki attenuation taramasi gibi: TUM maya kayitlarinin sc alanini uretici sayfasiyla karsilastir (CC kaynaklari KENDISI acar; °F → °C yuvarlama kuralini yaz). Celisen alan ureticiye gore duzeltilir; uretici sayfasi bulunamayan maya (BiraBurada vb.) "aralık doğrulanmadı" isareti alir → kart o maya icin SAYI vermez ("mayanın üretici aralığını bulamadım — paketine bak", CEV1 madde 4 metni).
+- HA-18: atu alani uretici degerine (Fermentis 98–102, glukoamilaz iceriyor) getir; dogrulayicinin %95 tavani YALNIZ enzim iceren (diastaticus / glukoamilaz) mayalar icin gerekceli acilir; FG hesabinin sonucu olc ve raporla (absurd degerse alan yerine kartta "bu maya enzim içerir — FG tahmini güvenilmez" notu).
+- Kucuk: "hem muz hem karanfil daha çok" → tanıyamadım yerine iki hedef birlikte (muz: maya/sicaklik güçlü — karanfile etkisi celiskili notuyla; karanfil: ferulik uzat olası). AI cagrisi 0.
+- Rapor: degisen her maya satiri once/sonra + kaynak; kartin WY3068 ve BB Alman Bugday No1 "daha az muz" / "daha muzlu" cumleleri once/sonra. G seti 30 / tuzak v5 / DOG4B parmak izleri BIREBIR (degisen yalniz sicaklik sayisi iceren metin satiri ise liste + gerekce).
+
 
 KAPSAM: uc asistan — malzeme asistani (AI4), "Bu receteyi nasil gelistirebilirim?" (AI5), mash asistani (MASH). Denetleyici (imza 2c9ebd9f-32461) ve dogrulama puanlamasi DEGISMEZ; degisirse yeniden dondurma + Claude onayi.
 
