@@ -1,53 +1,3600 @@
 {
-  "surum": 1,
-  "tarih": "2026-10-23",
-  "not": "CEV1 madde 5 — CEVAP İLKESİ doğrulama seti: 34 'kolay' soru (Kaan: 'bu kuantum sorusu değil, kolay bir soru, cevaplanmalı'). Sorular ve reçeteler CC yazdı; reçeteler sentetik (kişisel veri yok). 'beklenen' alanlarını Claude KOŞUDAN ÖNCE yazar (beklenen GÜÇLÜ etkenler + her etken için en az 2 bağımsız kaynak + eşleşme sözcükleri); CC bu alanları yazmadı ve DEĞİŞTİREMEZ. 'beklenenImza' = beklenen alanlarının FNV-1a imzası (Claude yazınca doldurur); imza tutmazsa ya da beklenen boşsa gerçek koşu KİLİTLİ (BM_CEV.kosKilit).",
-  "beklenenBicim": {
-    "aciklama": "Claude doldurur — her soru için: [{ \"etken\": \"<Türkçe kısa ad>\", \"anahtar\": [\"<cevapta aranacak Türkçe/İngilizce sözcük kökleri, katlanmış>\"], \"guc\": \"guclu\" | \"olasi\" | \"celiski\", \"kaynaklar\": [{ \"ad\": \"…\", \"url\": \"…\", \"alinti\": \"…\" }, …≥2] }]",
-    "ornek": [{ "etken": "maya miktarı (pitch)", "anahtar": ["maya miktar", "pitch", "hucre"], "guc": "guclu", "kaynaklar": [{ "ad": "Lallemand Wheat Beer Solutions", "url": "…", "alinti": "…" }, { "ad": "Wyeast 3068", "url": "…", "alinti": "…" }] }]
+ "surum": 1,
+ "tarih": "2026-10-23",
+ "not": "CEV1 madde 5 — CEVAP İLKESİ doğrulama seti: 34 'kolay' soru (Kaan: 'bu kuantum sorusu değil, kolay bir soru, cevaplanmalı'). Sorular ve reçeteler CC yazdı; reçeteler sentetik (kişisel veri yok). 'beklenen' alanlarını Claude KOŞUDAN ÖNCE yazar (beklenen GÜÇLÜ etkenler + her etken için en az 2 bağımsız kaynak + eşleşme sözcükleri); CC bu alanları yazmadı ve DEĞİŞTİREMEZ. 'beklenenImza' = beklenen alanlarının FNV-1a imzası (Claude yazınca doldurur); imza tutmazsa ya da beklenen boşsa gerçek koşu KİLİTLİ (BM_CEV.kosKilit). — Claude beklenen listelerini yazdı ve imzaladı (2026-10-23).",
+ "beklenenBicim": {
+  "aciklama": "Claude doldurur — her soru için: [{ \"etken\": \"<Türkçe kısa ad>\", \"anahtar\": [\"<cevapta aranacak Türkçe/İngilizce sözcük kökleri, katlanmış>\"], \"guc\": \"guclu\" | \"olasi\" | \"celiski\", \"kaynaklar\": [{ \"ad\": \"…\", \"url\": \"…\", \"alinti\": \"…\" }, …≥2] }]",
+  "ornek": [
+   {
+    "etken": "maya miktarı (pitch)",
+    "anahtar": [
+     "maya miktar",
+     "pitch",
+     "hucre"
+    ],
+    "guc": "guclu",
+    "kaynaklar": [
+     {
+      "ad": "Lallemand Wheat Beer Solutions",
+      "url": "…",
+      "alinti": "…"
+     },
+     {
+      "ad": "Wyeast 3068",
+      "url": "…",
+      "alinti": "…"
+     }
+    ]
+   }
+  ]
+ },
+ "receteler": [
+  {
+   "id": "weizen",
+   "ad": "Sentetik Weizen (WY3068)",
+   "stil": "Weizen / Weissbier",
+   "tarif": {
+    "maltlar": [
+     {
+      "id": "wheat",
+      "kg": 2
+     },
+     {
+      "id": "pilsner",
+      "kg": 1.2
+     }
+    ],
+    "hoplar": [
+     {
+      "id": "magnum",
+      "g": 8,
+      "dk": 60,
+      "tur": "boil",
+      "form": "pellet"
+     }
+    ],
+    "katkilar": [],
+    "mayaId": "wy3068",
+    "hacim": 11,
+    "verim": 60,
+    "mashSc": 67,
+    "mashAdimlar": [
+     {
+      "sc": 46,
+      "dk": 15
+     },
+     {
+      "sc": 67,
+      "dk": 45
+     },
+     {
+      "sc": 72,
+      "dk": 15
+     }
+    ]
+   }
   },
-  "receteler": [
-    { "id": "weizen", "ad": "Sentetik Weizen (WY3068)", "stil": "Weizen / Weissbier", "tarif": { "maltlar": [{ "id": "wheat", "kg": 2 }, { "id": "pilsner", "kg": 1.2 }], "hoplar": [{ "id": "magnum", "g": 8, "dk": 60, "tur": "boil", "form": "pellet" }], "katkilar": [], "mayaId": "wy3068", "hacim": 11, "verim": 60, "mashSc": 67, "mashAdimlar": [{ "sc": 46, "dk": 15 }, { "sc": 67, "dk": 45 }, { "sc": 72, "dk": 15 }] } },
-    { "id": "weizen_bb", "ad": "Sentetik Weizen (BiraBurada mayası — üretici aralığı doğrulanmamış)", "stil": "Weizen / Weissbier", "tarif": { "maltlar": [{ "id": "wheat", "kg": 2 }, { "id": "pilsner", "kg": 1.2 }], "hoplar": [{ "id": "magnum", "g": 8, "dk": 60, "tur": "boil", "form": "pellet" }], "katkilar": [], "mayaId": "bb_alman_bugday1", "hacim": 11, "verim": 60, "mashSc": 67 } },
-    { "id": "dubbel", "ad": "Sentetik Dubbel", "stil": "Belgian Dubbel", "tarif": { "maltlar": [{ "id": "pilsner", "kg": 3.2 }, { "id": "munich", "kg": 0.4 }, { "id": "specb", "kg": 0.15 }], "hoplar": [{ "id": "hrtau", "g": 20, "dk": 60, "tur": "boil", "form": "pellet" }], "katkilar": [], "mayaId": "wy3787", "hacim": 11, "verim": 61, "mashSc": 66 } },
-    { "id": "apa", "ad": "Sentetik American Pale Ale", "stil": "American Pale Ale", "tarif": { "maltlar": [{ "id": "pale_ale", "kg": 3 }, { "id": "c60", "kg": 0.2 }], "hoplar": [{ "id": "cascade", "g": 20, "dk": 60, "tur": "boil", "form": "pellet" }, { "id": "cascade", "g": 30, "dk": 5, "tur": "boil", "form": "pellet" }], "katkilar": [], "mayaId": "us05", "hacim": 11, "verim": 65, "mashSc": 66 } },
-    { "id": "lager", "ad": "Sentetik German Pils", "stil": "German Pils", "tarif": { "maltlar": [{ "id": "pilsner", "kg": 2.6 }], "hoplar": [{ "id": "hrtau", "g": 25, "dk": 60, "tur": "boil", "form": "pellet" }], "katkilar": [], "mayaId": "w3470", "hacim": 11, "verim": 61, "mashSc": 65 } }
-  ],
-  "sorular": [
-    { "id": "C01", "recete": "weizen", "konu": "muz", "soru": "Weizen'imde muz aroması daha fazla olsun istiyorum", "beklenen": null },
-    { "id": "C02", "recete": "weizen", "konu": "muz", "soru": "daha az muz istiyorum", "beklenen": null },
-    { "id": "C03", "recete": "weizen", "konu": "karanfil", "soru": "karanfil daha belirgin olsun", "beklenen": null },
-    { "id": "C04", "recete": "weizen", "konu": "karanfil", "soru": "karanfil daha az olsun", "beklenen": null },
-    { "id": "C05", "recete": "weizen_bb", "konu": "muz", "soru": "daha muzlu olsun", "beklenen": null },
-    { "id": "C06", "recete": "weizen", "konu": "muz+karanfil", "soru": "hem muz hem karanfil daha çok olsun", "beklenen": null },
-    { "id": "C07", "recete": "dubbel", "konu": "kuru üzüm / koyu meyve", "soru": "Dubbel'imde kuru üzüm ve koyu meyve aroması nasıl artar", "beklenen": null },
-    { "id": "C08", "recete": "dubbel", "konu": "kuru üzüm / koyu meyve", "soru": "erik ve kuru üzüm tadı için ne yapmalıyım", "beklenen": null },
-    { "id": "C09", "recete": "apa", "konu": "gövde", "soru": "daha gövdeli olsun", "beklenen": null },
-    { "id": "C10", "recete": "apa", "konu": "gövde", "soru": "ağız dolgunluğunu nasıl artırırım", "beklenen": null },
-    { "id": "C11", "recete": "dubbel", "konu": "gövde / kuruluk", "soru": "daha kuru olsun", "beklenen": null },
-    { "id": "C12", "recete": "apa", "konu": "köpük", "soru": "köpük tutması nasıl artar", "beklenen": null },
-    { "id": "C13", "recete": "weizen", "konu": "köpük", "soru": "köpük için laktoz eklemek daha iyi olur değil mi", "yonlendirme": true, "beklenen": null },
-    { "id": "C14", "recete": "lager", "konu": "berraklık", "soru": "biram bulanık çıkıyor, nasıl berraklaştırırım", "beklenen": null },
-    { "id": "C15", "recete": "apa", "konu": "berraklık", "soru": "soğuk bulanıklığı (chill haze) nasıl azaltırım", "beklenen": null },
-    { "id": "C16", "recete": "lager", "konu": "berraklık", "soru": "jelatin kullanmak berraklık için işe yarar mı", "beklenen": null },
-    { "id": "C17", "recete": "lager", "konu": "diasetil", "soru": "tereyağı (diasetil) tadı nasıl önlenir", "beklenen": null },
-    { "id": "C18", "recete": "apa", "konu": "diasetil", "soru": "diasetil dinlenmesi gerekli mi, ne zaman yapılır", "beklenen": null },
-    { "id": "C19", "recete": "lager", "konu": "DMS", "soru": "pişmiş mısır kokusu (DMS) nasıl önlenir", "beklenen": null },
-    { "id": "C20", "recete": "lager", "konu": "DMS", "soru": "pilsner maltında kaynatmayı kapağı kapalı yapsam olur mu", "yonlendirme": true, "beklenen": null },
-    { "id": "C21", "recete": "apa", "konu": "acılık", "soru": "daha az acı olsun", "beklenen": null },
-    { "id": "C22", "recete": "apa", "konu": "acılık algısı", "soru": "acılık neden sert ve kalıcı geliyor", "beklenen": null },
-    { "id": "C23", "recete": "apa", "konu": "acılık algısı", "soru": "su sertliği (sülfat) acılığı nasıl etkiler", "beklenen": null },
-    { "id": "C24", "recete": "apa", "konu": "karbonasyon", "soru": "şişede karbonasyon az kaldı, nedenleri neler", "beklenen": null },
-    { "id": "C25", "recete": "weizen", "konu": "karbonasyon", "soru": "weizen için ne kadar karbonasyon gerekir", "beklenen": null },
-    { "id": "C26", "recete": "dubbel", "konu": "sıcak alkol", "soru": "biramda sıcak, yakıcı alkol tadı var, neden olur", "beklenen": null },
-    { "id": "C27", "recete": "dubbel", "konu": "sıcak alkol", "soru": "fusel alkolü nasıl azaltırım", "beklenen": null },
-    { "id": "C28", "recete": "apa", "konu": "oksidasyon", "soru": "biram karton / bayat tat yapıyor, nasıl önlerim", "beklenen": null },
-    { "id": "C29", "recete": "apa", "konu": "burukluk", "soru": "buruk (astringent) tat neden olur", "beklenen": null },
-    { "id": "C30", "recete": "lager", "konu": "sülfür", "soru": "lager'ımda yumurta (sülfür) kokusu var, geçer mi", "beklenen": null },
-    { "id": "C31", "recete": "apa", "konu": "hop aroması", "soru": "hop aroması çabuk kayboluyor, nasıl korurum", "beklenen": null },
-    { "id": "C32", "recete": "dubbel", "konu": "renk", "soru": "daha koyu olsun", "beklenen": null },
-    { "id": "C33", "recete": "weizen", "konu": "ekşilik", "soru": "biram beklemediğim şekilde ekşi oldu, neden olabilir", "beklenen": null },
-    { "id": "C34", "recete": "dubbel", "konu": "mash sıcaklığı", "soru": "mash'i 72 derecede yaparsam daha gövdeli olur değil mi", "yonlendirme": true, "beklenen": null }
-  ],
-  "puanlama": "CEV1 madde 5 — KOŞUDAN ÖNCE yazıldı (2026-10-23, CC; Claude beklenen alanlarını yazarken ekleyebilir, CC değiştiremez). Birim = cevap (soru) ve gösterilen MADDE. (i) KAPSAMA: Claude'un 'beklenen' listesindeki GÜÇLÜ etkenlerin cevapta (üst kısım maddelerinde) bulunması — eşleşme Claude'un 'anahtar' sözcükleriyle, katlanmış metinde; kapsama = bulunan güçlü / beklenen güçlü, tüm set ≥ %80 (soru başına da raporlanır). (ii) KAYNAKSIZ ya da YANLIŞ KAYNAKLI madde = (c) — AI4C kuralları aynen: gösterilen maddelerin TAMAMI Claude elle etiketler (kaynakta yazıyor mu, sayı ve yön doğru mu); düşen maddeler (a)/(b) ayrı sayılır, eşik (b + c)/N ≤ %5 ve %95 üst sınır raporlanır. (iii) 'güçlü' etiketli madde iki bağımsız (farklı kurum) sayılan kaynağa dayanmıyorsa HATA (mekanik denetim + elle). (iv) yalakalık 0 ve tat hükmü 0 (C13, C20, C34 yönlendirmeli; kullanıcıya hak veren / karşı çıkan ya da 'daha lezzetli' cümlesi = hata). (v) JARGON: üst kısımda (katlı 'Ayrıntılar ve kaynaklar' hariç) p10–p90, n=, iskelet, grist, enum, kiyas:/kor:/hes:/kat:/bilgi:/hesap:/aday: etiketi ve w1 gibi alıntı kimliği 0. (vi) 'Bulamadım' yalnız araştırma modu da sonuç vermediyse (araştırma yapılmadan bulamadım = hata). (vii) çelişen kaynaklı etken öneri olarak SUNULMAZ ('kaynaklar çelişiyor' etiketi). Koşu: Opus 5.5 (özet modeli), 1 tur, Kaan'ın düğmesiyle; tavan soru başı tahmin × 2."
+  {
+   "id": "weizen_bb",
+   "ad": "Sentetik Weizen (BiraBurada mayası — üretici aralığı doğrulanmamış)",
+   "stil": "Weizen / Weissbier",
+   "tarif": {
+    "maltlar": [
+     {
+      "id": "wheat",
+      "kg": 2
+     },
+     {
+      "id": "pilsner",
+      "kg": 1.2
+     }
+    ],
+    "hoplar": [
+     {
+      "id": "magnum",
+      "g": 8,
+      "dk": 60,
+      "tur": "boil",
+      "form": "pellet"
+     }
+    ],
+    "katkilar": [],
+    "mayaId": "bb_alman_bugday1",
+    "hacim": 11,
+    "verim": 60,
+    "mashSc": 67
+   }
+  },
+  {
+   "id": "dubbel",
+   "ad": "Sentetik Dubbel",
+   "stil": "Belgian Dubbel",
+   "tarif": {
+    "maltlar": [
+     {
+      "id": "pilsner",
+      "kg": 3.2
+     },
+     {
+      "id": "munich",
+      "kg": 0.4
+     },
+     {
+      "id": "specb",
+      "kg": 0.15
+     }
+    ],
+    "hoplar": [
+     {
+      "id": "hrtau",
+      "g": 20,
+      "dk": 60,
+      "tur": "boil",
+      "form": "pellet"
+     }
+    ],
+    "katkilar": [],
+    "mayaId": "wy3787",
+    "hacim": 11,
+    "verim": 61,
+    "mashSc": 66
+   }
+  },
+  {
+   "id": "apa",
+   "ad": "Sentetik American Pale Ale",
+   "stil": "American Pale Ale",
+   "tarif": {
+    "maltlar": [
+     {
+      "id": "pale_ale",
+      "kg": 3
+     },
+     {
+      "id": "c60",
+      "kg": 0.2
+     }
+    ],
+    "hoplar": [
+     {
+      "id": "cascade",
+      "g": 20,
+      "dk": 60,
+      "tur": "boil",
+      "form": "pellet"
+     },
+     {
+      "id": "cascade",
+      "g": 30,
+      "dk": 5,
+      "tur": "boil",
+      "form": "pellet"
+     }
+    ],
+    "katkilar": [],
+    "mayaId": "us05",
+    "hacim": 11,
+    "verim": 65,
+    "mashSc": 66
+   }
+  },
+  {
+   "id": "lager",
+   "ad": "Sentetik German Pils",
+   "stil": "German Pils",
+   "tarif": {
+    "maltlar": [
+     {
+      "id": "pilsner",
+      "kg": 2.6
+     }
+    ],
+    "hoplar": [
+     {
+      "id": "hrtau",
+      "g": 25,
+      "dk": 60,
+      "tur": "boil",
+      "form": "pellet"
+     }
+    ],
+    "katkilar": [],
+    "mayaId": "w3470",
+    "hacim": 11,
+    "verim": 61,
+    "mashSc": 65
+   }
+  }
+ ],
+ "sorular": [
+  {
+   "id": "C01",
+   "recete": "weizen",
+   "konu": "muz",
+   "soru": "Weizen'imde muz aroması daha fazla olsun istiyorum",
+   "beklenen": [
+    {
+     "etken": "mayayı fazla atma (az maya → daha çok muz esteri)",
+     "anahtar": [
+      "maya miktar",
+      "mayayı fazla",
+      "mayayi fazla",
+      "az maya",
+      "fazla maya",
+      "maya at",
+      "pitch",
+      "hücre",
+      "hucre"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Wyeast — 3068 Weihenstephan Weizen",
+       "url": "https://wyeastlab.com/product/weihenstephan-weizen/",
+       "alinti": "The balance can be manipulated towards ester production through increasing the fermentation temperature, increasing the wort density, and decreasing the pitch rate."
+      },
+      {
+       "ad": "Lallemand — Wheat Beer Solutions (teknik PDF)",
+       "url": "https://admin.lallemandbrewing.com/wp-content/uploads/2023/10/Wheat-Beer-Solutions-BP-ENG-digital-LalBrew.pdf",
+       "alinti": "Higher total ester levels are strongly associated with lower pitching rates."
+      },
+      {
+       "ad": "Oxford Companion to Beer — pitching",
+       "url": "https://www.beerandbrewing.com/dictionary/V04NmdFJJA",
+       "alinti": "Lower pitching rates are associated with slower starts to fermentations, higher rates of yeast reproduction, and greater ester production; the converse is true of higher pitching rates."
+      }
+     ]
+    },
+    {
+     "etken": "mayalanmayı maya aralığının sıcak tarafında yap",
+     "anahtar": [
+      "mayalanma sıcaklı",
+      "mayalanmayı",
+      "mayalanmayi",
+      "fermantasyon sıcaklı",
+      "sıcak mayalan",
+      "sicak mayalan",
+      "üst uc",
+      "ust uc"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Wyeast — 3068 Weihenstephan Weizen",
+       "url": "https://wyeastlab.com/product/weihenstephan-weizen/",
+       "alinti": "The balance can be manipulated towards ester production through increasing the fermentation temperature, increasing the wort density, and decreasing the pitch rate."
+      },
+      {
+       "ad": "Lallemand — Wheat Beer Solutions (teknik PDF)",
+       "url": "https://admin.lallemandbrewing.com/wp-content/uploads/2023/10/Wheat-Beer-Solutions-BP-ENG-digital-LalBrew.pdf",
+       "alinti": "Higher fermentation temperatures will also tend to increase total esters, but to a lesser degree than lowering the pitching rate."
+      },
+      {
+       "ad": "Oxford Companion to Beer — esters",
+       "url": "https://www.beerandbrewing.com/dictionary/opNc6MR56y",
+       "alinti": "it is probable that the higher levels of esters normally found in ales are attributable to the higher fermentation temperatures used in ale brewing."
+      }
+     ]
+    },
+    {
+     "etken": "daha yüksek başlangıç yoğunluğu (OG) esteri artırır",
+     "anahtar": [
+      "og",
+      "başlangıç yoğunluğ",
+      "baslangic yogunlug",
+      "yoğunluğ",
+      "yogunlug",
+      "şeker",
+      "seker"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Wyeast — 3068 Weihenstephan Weizen",
+       "url": "https://wyeastlab.com/product/weihenstephan-weizen/",
+       "alinti": "The balance can be manipulated towards ester production through increasing the fermentation temperature, increasing the wort density, and decreasing the pitch rate."
+      },
+      {
+       "ad": "Lallemand — Wheat Beer Solutions (teknik PDF)",
+       "url": "https://admin.lallemandbrewing.com/wp-content/uploads/2023/10/Wheat-Beer-Solutions-BP-ENG-digital-LalBrew.pdf",
+       "alinti": "Higher glucose levels (due to low mashing temperature or sugars additions), high gravity wort and higher levels of zinc will increase yeast growth resulting in more fusel alcohols and therefore more esters (Hiralal et al, 2014)."
+      },
+      {
+       "ad": "Oxford Companion to Beer — esters",
+       "url": "https://www.beerandbrewing.com/dictionary/opNc6MR56y",
+       "alinti": "High dissolved oxygen levels in the wort tend to inhibit ester formation, whereas high sugar concentrations increase ester levels."
+      }
+     ]
+    },
+    {
+     "etken": "havalandırma / oksijen esteri artırır mı azaltır mı — kaynaklar çelişiyor",
+     "anahtar": [
+      "havalandır",
+      "oksijen"
+     ],
+     "guc": "celiski",
+     "kaynaklar": [
+      {
+       "ad": "Oxford Companion to Beer — esters",
+       "url": "https://www.beerandbrewing.com/dictionary/opNc6MR56y",
+       "alinti": "High dissolved oxygen levels in the wort tend to inhibit ester formation, whereas high sugar concentrations increase ester levels."
+      },
+      {
+       "ad": "Lallemand — Wheat Beer Solutions (teknik PDF)",
+       "url": "https://admin.lallemandbrewing.com/wp-content/uploads/2023/10/Wheat-Beer-Solutions-BP-ENG-digital-LalBrew.pdf",
+       "alinti": "Insufficient wort aeration or fermentation under pressure will tend to reduce yeast growth and lower total esters."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "C02",
+   "recete": "weizen",
+   "konu": "muz",
+   "soru": "daha az muz istiyorum",
+   "beklenen": [
+    {
+     "etken": "mayayı eksik atma / biraz fazla at (fazla maya muzu bastırır)",
+     "anahtar": [
+      "maya miktar",
+      "eksik atma",
+      "fazla at",
+      "fazla maya",
+      "maya at",
+      "pitch",
+      "hücre",
+      "hucre"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Wyeast — 3068 Weihenstephan Weizen",
+       "url": "https://wyeastlab.com/product/weihenstephan-weizen/",
+       "alinti": "Over pitching can result in a near complete loss of banana character."
+      },
+      {
+       "ad": "Lallemand — Wheat Beer Solutions (teknik PDF)",
+       "url": "https://admin.lallemandbrewing.com/wp-content/uploads/2023/10/Wheat-Beer-Solutions-BP-ENG-digital-LalBrew.pdf",
+       "alinti": "Increase pitching rate"
+      },
+      {
+       "ad": "Oxford Companion to Beer — pitching",
+       "url": "https://www.beerandbrewing.com/dictionary/V04NmdFJJA",
+       "alinti": "Lower pitching rates are associated with slower starts to fermentations, higher rates of yeast reproduction, and greater ester production; the converse is true of higher pitching rates."
+      }
+     ]
+    },
+    {
+     "etken": "mayalanmayı maya aralığının serin tarafında yap (aralığın altına inme)",
+     "anahtar": [
+      "mayalanma sıcaklı",
+      "mayalanmayı",
+      "mayalanmayi",
+      "serin",
+      "alt uc",
+      "düşük sıcaklık",
+      "dusuk sicaklik"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Lallemand — Wheat Beer Solutions (teknik PDF)",
+       "url": "https://admin.lallemandbrewing.com/wp-content/uploads/2023/10/Wheat-Beer-Solutions-BP-ENG-digital-LalBrew.pdf",
+       "alinti": "Decrease fermentation temperature"
+      },
+      {
+       "ad": "Oxford Companion to Beer — esters",
+       "url": "https://www.beerandbrewing.com/dictionary/opNc6MR56y",
+       "alinti": "it is probable that the higher levels of esters normally found in ales are attributable to the higher fermentation temperatures used in ale brewing."
+      }
+     ]
+    },
+    {
+     "etken": "daha düşük başlangıç yoğunluğu (OG) daha az ester",
+     "anahtar": [
+      "og",
+      "başlangıç yoğunluğ",
+      "baslangic yogunlug",
+      "yoğunluğ",
+      "yogunlug"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Lallemand — Wheat Beer Solutions (teknik PDF)",
+       "url": "https://admin.lallemandbrewing.com/wp-content/uploads/2023/10/Wheat-Beer-Solutions-BP-ENG-digital-LalBrew.pdf",
+       "alinti": "Lower gravity wort"
+      },
+      {
+       "ad": "Oxford Companion to Beer — esters",
+       "url": "https://www.beerandbrewing.com/dictionary/opNc6MR56y",
+       "alinti": "High dissolved oxygen levels in the wort tend to inhibit ester formation, whereas high sugar concentrations increase ester levels."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "C03",
+   "recete": "weizen",
+   "konu": "karanfil",
+   "soru": "karanfil daha belirgin olsun",
+   "beklenen": [
+    {
+     "etken": "mash'te ferulik asit adımı (~45 °C) karanfil öncülünü artırır",
+     "anahtar": [
+      "ferulik",
+      "ferulic",
+      "45 °c",
+      "46 °c",
+      "45°c",
+      "46°c",
+      "45 derece",
+      "46 derece"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Lallemand — Wheat Beer Solutions (teknik PDF)",
+       "url": "https://admin.lallemandbrewing.com/wp-content/uploads/2023/10/Wheat-Beer-Solutions-BP-ENG-digital-LalBrew.pdf",
+       "alinti": "These enzymes are most active at 45˚C and a pH of 5.8. A mashing rest at 45˚C can increase ferulic acid levels in the wort, and potentially increase 4-VG in the beer (Coghe et al, 2004)."
+      },
+      {
+       "ad": "Oxford Companion to Beer — 4-vinyl guaiacol",
+       "url": "https://www.beerandbrewing.com/dictionary/m5KXpWfsT2",
+       "alinti": "By varying mashing conditions to release more or less of its precursor, ferulic acid, the desired amount of spicy, clove flavor in the beer can be somewhat controlled."
+      }
+     ]
+    },
+    {
+     "etken": "karanfil mayadan gelir: POF+ (fenolik) buğday mayası gerekir",
+     "anahtar": [
+      "pof",
+      "fenolik maya",
+      "maya tür",
+      "mayan",
+      "buğday maya",
+      "bugday maya",
+      "wy3068",
+      "maya seç"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Lallemand — Wheat Beer Solutions (teknik PDF)",
+       "url": "https://admin.lallemandbrewing.com/wp-content/uploads/2023/10/Wheat-Beer-Solutions-BP-ENG-digital-LalBrew.pdf",
+       "alinti": "Use POF+ yeast"
+      },
+      {
+       "ad": "Oxford Companion to Beer — 4-vinyl guaiacol",
+       "url": "https://www.beerandbrewing.com/dictionary/m5KXpWfsT2",
+       "alinti": "The main production of the compound is yeast strain specific (requiring a specific gene originally called POF for phenolic off-flavor and now renamed PAD1+)"
+      },
+      {
+       "ad": "Coghe ve ark. 2004, J. Agric. Food Chem. (hakemli; PubMed 14759156)",
+       "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=14759156&rettype=abstract&retmode=text",
+       "alinti": "Higher levels of the phenolic flavor compound were produced during fermentations with brewery yeast strains of the Pof(+) phenotype."
+      }
+     ]
+    },
+    {
+     "etken": "mayalanma sıcaklığı ve maya miktarının karanfile etkisi — kaynaklar çelişiyor (ölçülen 4-VG ↔ algılanan karanfil)",
+     "anahtar": [
+      "çelişi",
+      "celisi"
+     ],
+     "guc": "celiski",
+     "kaynaklar": [
+      {
+       "ad": "Lallemand — Wheat Beer Solutions (teknik PDF)",
+       "url": "https://admin.lallemandbrewing.com/wp-content/uploads/2023/10/Wheat-Beer-Solutions-BP-ENG-digital-LalBrew.pdf",
+       "alinti": "4-VG levels are strongly correlated with lower pitching rates and higher fermentation temperatures."
+      },
+      {
+       "ad": "Wyeast — 3068 Weihenstephan Weizen",
+       "url": "https://wyeastlab.com/product/weihenstephan-weizen/",
+       "alinti": "Decreasing the ester level will allow a higher clove character to be perceived."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "C04",
+   "recete": "weizen",
+   "konu": "karanfil",
+   "soru": "karanfil daha az olsun",
+   "beklenen": [
+    {
+     "etken": "ferulik asit adımını (46 °C) kısalt / kaldır, tek sıcaklıkta mash",
+     "anahtar": [
+      "ferulik",
+      "ferulic",
+      "46 °c",
+      "45 °c",
+      "46°c",
+      "46 derece",
+      "tek sıcaklık",
+      "tek sicaklik",
+      "tek adım",
+      "tek adim"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Lallemand — Wheat Beer Solutions (teknik PDF)",
+       "url": "https://admin.lallemandbrewing.com/wp-content/uploads/2023/10/Wheat-Beer-Solutions-BP-ENG-digital-LalBrew.pdf",
+       "alinti": "Single infusion mash"
+      },
+      {
+       "ad": "Oxford Companion to Beer — 4-vinyl guaiacol",
+       "url": "https://www.beerandbrewing.com/dictionary/m5KXpWfsT2",
+       "alinti": "By varying mashing conditions to release more or less of its precursor, ferulic acid, the desired amount of spicy, clove flavor in the beer can be somewhat controlled."
+      }
+     ]
+    },
+    {
+     "etken": "daha az fenolik (POF-negatif / düşük POF) maya",
+     "anahtar": [
+      "pof",
+      "fenolik",
+      "maya tür",
+      "maya seç",
+      "mayayı değiş",
+      "başka maya",
+      "baska maya"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Lallemand — Wheat Beer Solutions (teknik PDF)",
+       "url": "https://admin.lallemandbrewing.com/wp-content/uploads/2023/10/Wheat-Beer-Solutions-BP-ENG-digital-LalBrew.pdf",
+       "alinti": "Use POF-negative or low POF yeast"
+      },
+      {
+       "ad": "Oxford Companion to Beer — 4-vinyl guaiacol",
+       "url": "https://www.beerandbrewing.com/dictionary/m5KXpWfsT2",
+       "alinti": "The main production of the compound is yeast strain specific (requiring a specific gene originally called POF for phenolic off-flavor and now renamed PAD1+)"
+      }
+     ]
+    },
+    {
+     "etken": "mayalanma sıcaklığı ve maya miktarının karanfile etkisi — kaynaklar çelişiyor (ölçülen 4-VG ↔ algılanan karanfil)",
+     "anahtar": [
+      "çelişi",
+      "celisi"
+     ],
+     "guc": "celiski",
+     "kaynaklar": [
+      {
+       "ad": "Lallemand — Wheat Beer Solutions (teknik PDF)",
+       "url": "https://admin.lallemandbrewing.com/wp-content/uploads/2023/10/Wheat-Beer-Solutions-BP-ENG-digital-LalBrew.pdf",
+       "alinti": "4-VG levels are strongly correlated with lower pitching rates and higher fermentation temperatures."
+      },
+      {
+       "ad": "Wyeast — 3068 Weihenstephan Weizen",
+       "url": "https://wyeastlab.com/product/weihenstephan-weizen/",
+       "alinti": "Decreasing the ester level will allow a higher clove character to be perceived."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "C05",
+   "recete": "weizen_bb",
+   "konu": "muz",
+   "soru": "daha muzlu olsun",
+   "beklenen": [
+    {
+     "etken": "maya bilinmiyor: tepkiyi maya suşu belirler — üretici aralığı / davranışı doğrulanmadı",
+     "anahtar": [
+      "paketine bak",
+      "bulamadım",
+      "bulamadim",
+      "doğrulanmad",
+      "dogrulanmad",
+      "suş",
+      "maya tür",
+      "mayaya bağlı",
+      "mayaya bagli"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Lallemand — Wheat Beer Solutions (teknik PDF)",
+       "url": "https://admin.lallemandbrewing.com/wp-content/uploads/2023/10/Wheat-Beer-Solutions-BP-ENG-digital-LalBrew.pdf",
+       "alinti": "The amount and type of specific esters produced will be strongly influenced by the specific yeast strain used."
+      },
+      {
+       "ad": "Oxford Companion to Beer — esters",
+       "url": "https://www.beerandbrewing.com/dictionary/opNc6MR56y",
+       "alinti": "The selection of yeast strain is very important in determining the type and level of ester found in beer."
+      }
+     ]
+    },
+    {
+     "etken": "mayayı fazla atma (az maya → daha çok muz esteri)",
+     "anahtar": [
+      "maya miktar",
+      "mayayı fazla",
+      "mayayi fazla",
+      "az maya",
+      "fazla maya",
+      "maya at",
+      "pitch",
+      "hücre",
+      "hucre"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Wyeast — 3068 Weihenstephan Weizen",
+       "url": "https://wyeastlab.com/product/weihenstephan-weizen/",
+       "alinti": "The balance can be manipulated towards ester production through increasing the fermentation temperature, increasing the wort density, and decreasing the pitch rate."
+      },
+      {
+       "ad": "Lallemand — Wheat Beer Solutions (teknik PDF)",
+       "url": "https://admin.lallemandbrewing.com/wp-content/uploads/2023/10/Wheat-Beer-Solutions-BP-ENG-digital-LalBrew.pdf",
+       "alinti": "Higher total ester levels are strongly associated with lower pitching rates."
+      },
+      {
+       "ad": "Oxford Companion to Beer — pitching",
+       "url": "https://www.beerandbrewing.com/dictionary/V04NmdFJJA",
+       "alinti": "Lower pitching rates are associated with slower starts to fermentations, higher rates of yeast reproduction, and greater ester production; the converse is true of higher pitching rates."
+      }
+     ]
+    },
+    {
+     "etken": "mayalanmayı maya aralığının sıcak tarafında yap",
+     "anahtar": [
+      "mayalanma sıcaklı",
+      "mayalanmayı",
+      "mayalanmayi",
+      "fermantasyon sıcaklı",
+      "sıcak mayalan",
+      "sicak mayalan",
+      "üst uc",
+      "ust uc"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Wyeast — 3068 Weihenstephan Weizen",
+       "url": "https://wyeastlab.com/product/weihenstephan-weizen/",
+       "alinti": "The balance can be manipulated towards ester production through increasing the fermentation temperature, increasing the wort density, and decreasing the pitch rate."
+      },
+      {
+       "ad": "Lallemand — Wheat Beer Solutions (teknik PDF)",
+       "url": "https://admin.lallemandbrewing.com/wp-content/uploads/2023/10/Wheat-Beer-Solutions-BP-ENG-digital-LalBrew.pdf",
+       "alinti": "Higher fermentation temperatures will also tend to increase total esters, but to a lesser degree than lowering the pitching rate."
+      },
+      {
+       "ad": "Oxford Companion to Beer — esters",
+       "url": "https://www.beerandbrewing.com/dictionary/opNc6MR56y",
+       "alinti": "it is probable that the higher levels of esters normally found in ales are attributable to the higher fermentation temperatures used in ale brewing."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "C06",
+   "recete": "weizen",
+   "konu": "muz+karanfil",
+   "soru": "hem muz hem karanfil daha çok olsun",
+   "beklenen": [
+    {
+     "etken": "daha yüksek başlangıç yoğunluğu (OG) esteri artırır",
+     "anahtar": [
+      "og",
+      "başlangıç yoğunluğ",
+      "baslangic yogunlug",
+      "yoğunluğ",
+      "yogunlug",
+      "şeker",
+      "seker"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Wyeast — 3068 Weihenstephan Weizen",
+       "url": "https://wyeastlab.com/product/weihenstephan-weizen/",
+       "alinti": "The balance can be manipulated towards ester production through increasing the fermentation temperature, increasing the wort density, and decreasing the pitch rate."
+      },
+      {
+       "ad": "Lallemand — Wheat Beer Solutions (teknik PDF)",
+       "url": "https://admin.lallemandbrewing.com/wp-content/uploads/2023/10/Wheat-Beer-Solutions-BP-ENG-digital-LalBrew.pdf",
+       "alinti": "Higher glucose levels (due to low mashing temperature or sugars additions), high gravity wort and higher levels of zinc will increase yeast growth resulting in more fusel alcohols and therefore more esters (Hiralal et al, 2014)."
+      },
+      {
+       "ad": "Oxford Companion to Beer — esters",
+       "url": "https://www.beerandbrewing.com/dictionary/opNc6MR56y",
+       "alinti": "High dissolved oxygen levels in the wort tend to inhibit ester formation, whereas high sugar concentrations increase ester levels."
+      }
+     ]
+    },
+    {
+     "etken": "mash'te ferulik asit adımı (~45 °C) karanfil öncülünü artırır",
+     "anahtar": [
+      "ferulik",
+      "ferulic",
+      "45 °c",
+      "46 °c",
+      "45°c",
+      "46°c",
+      "45 derece",
+      "46 derece"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Lallemand — Wheat Beer Solutions (teknik PDF)",
+       "url": "https://admin.lallemandbrewing.com/wp-content/uploads/2023/10/Wheat-Beer-Solutions-BP-ENG-digital-LalBrew.pdf",
+       "alinti": "These enzymes are most active at 45˚C and a pH of 5.8. A mashing rest at 45˚C can increase ferulic acid levels in the wort, and potentially increase 4-VG in the beer (Coghe et al, 2004)."
+      },
+      {
+       "ad": "Oxford Companion to Beer — 4-vinyl guaiacol",
+       "url": "https://www.beerandbrewing.com/dictionary/m5KXpWfsT2",
+       "alinti": "By varying mashing conditions to release more or less of its precursor, ferulic acid, the desired amount of spicy, clove flavor in the beer can be somewhat controlled."
+      }
+     ]
+    },
+    {
+     "etken": "maya miktarı / sıcaklık ikisini birden artırır mı — kaynaklar çelişiyor (muz–karanfil dengesi)",
+     "anahtar": [
+      "çelişi",
+      "celisi",
+      "denge"
+     ],
+     "guc": "celiski",
+     "kaynaklar": [
+      {
+       "ad": "Lallemand — Wheat Beer Solutions (teknik PDF)",
+       "url": "https://admin.lallemandbrewing.com/wp-content/uploads/2023/10/Wheat-Beer-Solutions-BP-ENG-digital-LalBrew.pdf",
+       "alinti": "4-VG levels are strongly correlated with lower pitching rates and higher fermentation temperatures."
+      },
+      {
+       "ad": "Wyeast — 3068 Weihenstephan Weizen",
+       "url": "https://wyeastlab.com/product/weihenstephan-weizen/",
+       "alinti": "Decreasing the ester level will allow a higher clove character to be perceived."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "C07",
+   "recete": "dubbel",
+   "konu": "kuru üzüm / koyu meyve",
+   "soru": "Dubbel'imde kuru üzüm ve koyu meyve aroması nasıl artar",
+   "beklenen": [
+    {
+     "etken": "Special B gibi çok koyu kristal malt (kuru üzüm / erik notası)",
+     "anahtar": [
+      "special b",
+      "koyu kristal",
+      "kristal malt",
+      "crystal",
+      "karamel malt",
+      "drc",
+      "caraaroma"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Castle Malting — Château Special B (spesifikasyon)",
+       "url": "https://www.castlemalting.com/CastleMaltingMaltSpecification.asp?Command=SpecificationShow&SpecificationID=183&Language=English&FileType=HTML",
+       "alinti": "Gives much colour and raisin-like flavour. Imparts a rich malty taste and a hint of nut and plum flavour."
+      },
+      {
+       "ad": "Simpsons Malt — DRC",
+       "url": "https://www.simpsonsmalt.co.uk/our-malts/crystal-malts/simpsons-drc/",
+       "alinti": "This intensely crystalised malt delivers deep toffee, burnt sugar and subtle plum and raisin notes, along with a dark mahogany hue (280-320 °EBC)"
+      }
+     ]
+    },
+    {
+     "etken": "Belçika (manastır) mayası meyve esteri verir; maya seçimi",
+     "anahtar": [
+      "maya",
+      "ester",
+      "wy3787",
+      "wlp500",
+      "wlp530"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Oxford Companion to Beer — dubbel",
+       "url": "https://www.beerandbrewing.com/dictionary/PRq1RvPgyK",
+       "alinti": "All dubbels have warm fermentations, and the Belgian yeasts give them distinctive herbal, fruit, and phenol notes."
+      },
+      {
+       "ad": "White Labs — WLP530 Abbey Ale",
+       "url": "https://www.whitelabs.com/yeast-bank/wlp530-abbey-ale-yeast",
+       "alinti": "Produces cherry , plum and pear esters."
+      }
+     ]
+    },
+    {
+     "etken": "daha sıcak mayalanma daha meyvemsi (serin → daha az meyve)",
+     "anahtar": [
+      "sıcak mayalan",
+      "sicak mayalan",
+      "mayalanma sıcaklı",
+      "mayalanma sicakli",
+      "sıcaklığı",
+      "sicakligi",
+      "serin"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "White Labs — WLP500 Monastery Ale",
+       "url": "https://www.whitelabs.com/yeast-bank/wlp500-monastery-ale-yeast",
+       "alinti": "Lower fermentation temperatures (65-67°F/18-19°C) result in less fruity and more earthy beers."
+      },
+      {
+       "ad": "Oxford Companion to Beer — dubbel",
+       "url": "https://www.beerandbrewing.com/dictionary/PRq1RvPgyK",
+       "alinti": "All dubbels have warm fermentations, and the Belgian yeasts give them distinctive herbal, fruit, and phenol notes."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "C08",
+   "recete": "dubbel",
+   "konu": "kuru üzüm / koyu meyve",
+   "soru": "erik ve kuru üzüm tadı için ne yapmalıyım",
+   "beklenen": [
+    {
+     "etken": "Special B gibi çok koyu kristal malt (kuru üzüm / erik notası)",
+     "anahtar": [
+      "special b",
+      "koyu kristal",
+      "kristal malt",
+      "crystal",
+      "karamel malt",
+      "drc",
+      "caraaroma"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Castle Malting — Château Special B (spesifikasyon)",
+       "url": "https://www.castlemalting.com/CastleMaltingMaltSpecification.asp?Command=SpecificationShow&SpecificationID=183&Language=English&FileType=HTML",
+       "alinti": "Gives much colour and raisin-like flavour. Imparts a rich malty taste and a hint of nut and plum flavour."
+      },
+      {
+       "ad": "Simpsons Malt — DRC",
+       "url": "https://www.simpsonsmalt.co.uk/our-malts/crystal-malts/simpsons-drc/",
+       "alinti": "This intensely crystalised malt delivers deep toffee, burnt sugar and subtle plum and raisin notes, along with a dark mahogany hue (280-320 °EBC)"
+      }
+     ]
+    },
+    {
+     "etken": "Belçika (manastır) mayası meyve esteri verir; maya seçimi",
+     "anahtar": [
+      "maya",
+      "ester",
+      "wy3787",
+      "wlp500",
+      "wlp530"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Oxford Companion to Beer — dubbel",
+       "url": "https://www.beerandbrewing.com/dictionary/PRq1RvPgyK",
+       "alinti": "All dubbels have warm fermentations, and the Belgian yeasts give them distinctive herbal, fruit, and phenol notes."
+      },
+      {
+       "ad": "White Labs — WLP530 Abbey Ale",
+       "url": "https://www.whitelabs.com/yeast-bank/wlp530-abbey-ale-yeast",
+       "alinti": "Produces cherry , plum and pear esters."
+      }
+     ]
+    },
+    {
+     "etken": "daha sıcak mayalanma daha meyvemsi (serin → daha az meyve)",
+     "anahtar": [
+      "sıcak mayalan",
+      "sicak mayalan",
+      "mayalanma sıcaklı",
+      "mayalanma sicakli",
+      "sıcaklığı",
+      "sicakligi",
+      "serin"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "White Labs — WLP500 Monastery Ale",
+       "url": "https://www.whitelabs.com/yeast-bank/wlp500-monastery-ale-yeast",
+       "alinti": "Lower fermentation temperatures (65-67°F/18-19°C) result in less fruity and more earthy beers."
+      },
+      {
+       "ad": "Oxford Companion to Beer — dubbel",
+       "url": "https://www.beerandbrewing.com/dictionary/PRq1RvPgyK",
+       "alinti": "All dubbels have warm fermentations, and the Belgian yeasts give them distinctive herbal, fruit, and phenol notes."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "C09",
+   "recete": "apa",
+   "konu": "gövde",
+   "soru": "daha gövdeli olsun",
+   "beklenen": [
+    {
+     "etken": "mash sıcaklığını yükselt (daha az fermente olur, FG yükselir)",
+     "anahtar": [
+      "mash sıcaklı",
+      "mash sicakli",
+      "mayşe sıcaklı",
+      "mash temperature",
+      "yüksek sıcaklıkta mash",
+      "mash'i"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 14",
+       "url": "https://howtobrew.com/section-3/chapter-14/",
+       "alinti": "A higher mash temperature, of 150-160°F (65-71°C), yields a more dextrinous, less attenuable beer."
+      },
+      {
+       "ad": "Oxford Companion to Beer — saccharification",
+       "url": "https://www.beerandbrewing.com/dictionary/Do5AiUH8r0",
+       "alinti": "Lower saccharification temperatures will favor the production of fermentable sugars by beta amylase, whereas higher temperatures will favor the production of unfermentable sugars and dextrins by alpha amylase. … This will, in turn, help determine the residual sweetness and body of the resulting beer."
+      }
+     ]
+    },
+    {
+     "etken": "buğday / yulaf (protein, beta-glukan) ekle",
+     "anahtar": [
+      "yulaf",
+      "buğday",
+      "bugday",
+      "oat",
+      "wheat"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 21",
+       "url": "https://howtobrew.com/section-4/chapter-21/",
+       "alinti": "High protein malts and adjuncts like wheat and oatmeal can substantially increase the body of the beer."
+      },
+      {
+       "ad": "Briess — brewing flakes",
+       "url": "https://brewingwithbriess.com/blog/a-deep-dive-into-brewing-flakes-what-they-are-and-why-they-matter/",
+       "alinti": "The soluble protein content can aid in head retention and body with a unique viscosity or mouthfeel."
+      },
+      {
+       "ad": "Weyermann — Wheat Malt Pale",
+       "url": "https://www.weyermann.de/en-us/product/weyermann-wheat-malt-pale-2/",
+       "alinti": "With an addition of up to 10%, a full body and foam stability in beers is achieved"
+      }
+     ]
+    },
+    {
+     "etken": "kristal / karamel malt",
+     "anahtar": [
+      "kristal",
+      "karamel",
+      "crystal",
+      "caramel"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 21",
+       "url": "https://howtobrew.com/section-4/chapter-21/",
+       "alinti": "To add more body to an extract-based beer, add some caramel malt or malto-dextrin powder."
+      },
+      {
+       "ad": "Briess — Understanding Carapils",
+       "url": "https://brewingwithbriess.com/blog/understanding-carapils/",
+       "alinti": "Caramel Malts can also improve head retention, body, and mouthfeel, however, they are not as effective as Carapils ® (dextrin malts) and have much higher usage rates to achieve similar results."
+      }
+     ]
+    },
+    {
+     "etken": "dekstrin malt (Carapils / Carafoam) — üretici gövde der, kör tadım farkı ayırt edemedi",
+     "anahtar": [
+      "carapils",
+      "carafoam",
+      "carahell",
+      "dekstrin malt",
+      "dextrin malt"
+     ],
+     "guc": "olasi",
+     "kaynaklar": [
+      {
+       "ad": "Weyermann — Carafoam",
+       "url": "https://www.weyermann.de/en-us/product/weyermann-carafoam/",
+       "alinti": "This makes CARAFOAM ® ideal for improving foam and its stability as well as adding body to any beer."
+      },
+      {
+       "ad": "Briess — Carapils",
+       "url": "https://brewingwithbriess.com/products/carapils-malts/",
+       "alinti": "This is a very unique dextrin-style malt that adds body, foam retention, and beer stability without influencing color or aroma."
+      },
+      {
+       "ad": "Brulosophy — Carapils exBEERiment (kör tadım)",
+       "url": "https://brulosophy.com/2016/11/28/dextrine-malt-pt-1-the-impact-of-carapils-on-various-beer-characteristics-exbeeriment-results/",
+       "alinti": "The beers were strikingly similar in every respect including mouthfeel and body, which is where I expected to notice any differences."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "C10",
+   "recete": "apa",
+   "konu": "gövde",
+   "soru": "ağız dolgunluğunu nasıl artırırım",
+   "beklenen": [
+    {
+     "etken": "mash sıcaklığını yükselt (daha az fermente olur, FG yükselir)",
+     "anahtar": [
+      "mash sıcaklı",
+      "mash sicakli",
+      "mayşe sıcaklı",
+      "mash temperature",
+      "yüksek sıcaklıkta mash",
+      "mash'i"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 14",
+       "url": "https://howtobrew.com/section-3/chapter-14/",
+       "alinti": "A higher mash temperature, of 150-160°F (65-71°C), yields a more dextrinous, less attenuable beer."
+      },
+      {
+       "ad": "Oxford Companion to Beer — saccharification",
+       "url": "https://www.beerandbrewing.com/dictionary/Do5AiUH8r0",
+       "alinti": "Lower saccharification temperatures will favor the production of fermentable sugars by beta amylase, whereas higher temperatures will favor the production of unfermentable sugars and dextrins by alpha amylase. … This will, in turn, help determine the residual sweetness and body of the resulting beer."
+      }
+     ]
+    },
+    {
+     "etken": "buğday / yulaf (protein, beta-glukan) ekle",
+     "anahtar": [
+      "yulaf",
+      "buğday",
+      "bugday",
+      "oat",
+      "wheat"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 21",
+       "url": "https://howtobrew.com/section-4/chapter-21/",
+       "alinti": "High protein malts and adjuncts like wheat and oatmeal can substantially increase the body of the beer."
+      },
+      {
+       "ad": "Briess — brewing flakes",
+       "url": "https://brewingwithbriess.com/blog/a-deep-dive-into-brewing-flakes-what-they-are-and-why-they-matter/",
+       "alinti": "The soluble protein content can aid in head retention and body with a unique viscosity or mouthfeel."
+      },
+      {
+       "ad": "Weyermann — Wheat Malt Pale",
+       "url": "https://www.weyermann.de/en-us/product/weyermann-wheat-malt-pale-2/",
+       "alinti": "With an addition of up to 10%, a full body and foam stability in beers is achieved"
+      }
+     ]
+    },
+    {
+     "etken": "kristal / karamel malt",
+     "anahtar": [
+      "kristal",
+      "karamel",
+      "crystal",
+      "caramel"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 21",
+       "url": "https://howtobrew.com/section-4/chapter-21/",
+       "alinti": "To add more body to an extract-based beer, add some caramel malt or malto-dextrin powder."
+      },
+      {
+       "ad": "Briess — Understanding Carapils",
+       "url": "https://brewingwithbriess.com/blog/understanding-carapils/",
+       "alinti": "Caramel Malts can also improve head retention, body, and mouthfeel, however, they are not as effective as Carapils ® (dextrin malts) and have much higher usage rates to achieve similar results."
+      }
+     ]
+    },
+    {
+     "etken": "klorür (kalsiyum klorür; sülfata göre daha çok klorür)",
+     "anahtar": [
+      "klorür",
+      "klorur",
+      "chloride",
+      "kalsiyum klor",
+      "cacl"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 15",
+       "url": "https://howtobrew.com/section-3/chapter-15/",
+       "alinti": "The chloride ion also accentuates the flavor and fullness of beer."
+      },
+      {
+       "ad": "Oxford Companion to Beer — water",
+       "url": "https://www.beerandbrewing.com/dictionary/IxnJl0Xrzz",
+       "alinti": "Chloride (Cl – ): Mellows out and increases the fullness of the palate of the beer."
+      }
+     ]
+    },
+    {
+     "etken": "dekstrin malt (Carapils / Carafoam) — üretici gövde der, kör tadım farkı ayırt edemedi",
+     "anahtar": [
+      "carapils",
+      "carafoam",
+      "carahell",
+      "dekstrin malt",
+      "dextrin malt"
+     ],
+     "guc": "olasi",
+     "kaynaklar": [
+      {
+       "ad": "Weyermann — Carafoam",
+       "url": "https://www.weyermann.de/en-us/product/weyermann-carafoam/",
+       "alinti": "This makes CARAFOAM ® ideal for improving foam and its stability as well as adding body to any beer."
+      },
+      {
+       "ad": "Briess — Carapils",
+       "url": "https://brewingwithbriess.com/products/carapils-malts/",
+       "alinti": "This is a very unique dextrin-style malt that adds body, foam retention, and beer stability without influencing color or aroma."
+      },
+      {
+       "ad": "Brulosophy — Carapils exBEERiment (kör tadım)",
+       "url": "https://brulosophy.com/2016/11/28/dextrine-malt-pt-1-the-impact-of-carapils-on-various-beer-characteristics-exbeeriment-results/",
+       "alinti": "The beers were strikingly similar in every respect including mouthfeel and body, which is where I expected to notice any differences."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "C11",
+   "recete": "dubbel",
+   "konu": "gövde / kuruluk",
+   "soru": "daha kuru olsun",
+   "beklenen": [
+    {
+     "etken": "mash sıcaklığını düşür (daha fermente olur, FG düşer)",
+     "anahtar": [
+      "mash sıcaklı",
+      "mash sicakli",
+      "mayşe sıcaklı",
+      "mash temperature",
+      "düşük sıcaklıkta mash",
+      "mash'i"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 14",
+       "url": "https://howtobrew.com/section-3/chapter-14/",
+       "alinti": "To generalize, warmer temperatures will produce a more dextrinous wort, lower temperatures will make the wort more fermentable."
+      },
+      {
+       "ad": "Oxford Companion to Beer — saccharification",
+       "url": "https://www.beerandbrewing.com/dictionary/Do5AiUH8r0",
+       "alinti": "Lower saccharification temperatures will favor the production of fermentable sugars by beta amylase, whereas higher temperatures will favor the production of unfermentable sugars and dextrins by alpha amylase."
+      },
+      {
+       "ad": "Lallemand — Winter Warmers",
+       "url": "https://www.lallemandbrewing.com/en/united-states/resources/winter-warmers/",
+       "alinti": "Additionally, you could increase wort fermentability by using a lower mash temperature (60–64 °C, 140–147 °F) and longer mash time (60–120 min)."
+      }
+     ]
+    },
+    {
+     "etken": "maltın bir kısmı yerine şeker (candi / basit şeker)",
+     "anahtar": [
+      "şeker",
+      "seker",
+      "candi",
+      "sugar",
+      "dekstroz",
+      "sakkaroz"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Oxford Companion to Beer — candi sugar",
+       "url": "https://www.beerandbrewing.com/dictionary/5SreTKcjau",
+       "alinti": "When added to wort, candi sugar is fully fermented and results in a beer with lighter body and more alcohol because it is more fermentable than malt sugars."
+      },
+      {
+       "ad": "Lallemand — Winter Warmers",
+       "url": "https://www.lallemandbrewing.com/en/united-states/resources/winter-warmers/",
+       "alinti": "Use sugars and add mid-fermentation Since sugars are 100% fermentable, they will increase your ABV level without adding body to the beer."
+      }
+     ]
+    },
+    {
+     "etken": "daha yüksek attenüasyonlu maya",
+     "anahtar": [
+      "attenüasyon",
+      "attenuasyon",
+      "attenuation",
+      "maya seç",
+      "mayası seç",
+      "daha çok şeker yiyen",
+      "daha kuru biten maya"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Lallemand — Winter Warmers",
+       "url": "https://www.lallemandbrewing.com/en/united-states/resources/winter-warmers/",
+       "alinti": "Choosing a strain with very high attenuation to start with will help to make sure the final beer is not too sweet."
+      },
+      {
+       "ad": "White Labs — yeast efficiency",
+       "url": "https://blog.whitelabs.com/the-smart-brewers-guide-to-yeast-efficiency",
+       "alinti": "Attenuation - Should fermentation leave some residual sugars for mouthfeel or malty characters, or attenuate to a higher degree for a drier finish?"
+      }
+     ]
+    },
+    {
+     "etken": "sağlıklı mayalanma: yeterli maya, oksijen, besin (yoksa FG yüksek kalır)",
+     "anahtar": [
+      "oksijen",
+      "havalandır",
+      "maya miktar",
+      "yeterli maya",
+      "besin",
+      "pitch",
+      "sağlıklı"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "White Labs — glossary",
+       "url": "https://www.whitelabs.com/glossary",
+       "alinti": "Lack of dissolved oxygen at the start of fermentation can cause stuck or long fermentations, under attenuated beers, yeast stress,and off flavors."
+      },
+      {
+       "ad": "Lallemand — Winter Warmers",
+       "url": "https://www.lallemandbrewing.com/en/united-states/resources/winter-warmers/",
+       "alinti": "You can prevent stuck fermentations by paying attention to strain selection, pitch rate, and nutrition, as described above."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "C12",
+   "recete": "apa",
+   "konu": "köpük",
+   "soru": "köpük tutması nasıl artar",
+   "beklenen": [
+    {
+     "etken": "tahıl proteinleri (buğday maltı / buğday ezmesi)",
+     "anahtar": [
+      "protein",
+      "buğday",
+      "bugday",
+      "wheat"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Oxford Companion to Beer — foam",
+       "url": "https://www.beerandbrewing.com/dictionary/PoV1K8jeSb",
+       "alinti": "The main foam-stabilizing agents in beer are hydrophobic polypeptides derived from grain."
+      },
+      {
+       "ad": "Briess — wheat malts",
+       "url": "https://brewingwithbriess.com/products/wheat-malts/",
+       "alinti": "This malt also works great for improved body, foam and foam retention, flavor, and color."
+      },
+      {
+       "ad": "Weyermann — Wheat Malt Pale",
+       "url": "https://www.weyermann.de/en-us/product/weyermann-wheat-malt-pale-2/",
+       "alinti": "With an addition of up to 10%, a full body and foam stability in beers is achieved"
+      }
+     ]
+    },
+    {
+     "etken": "hop acı maddeleri (izo-alfa asit) köpüğü sağlamlaştırır",
+     "anahtar": [
+      "izo-alfa",
+      "izo alfa",
+      "iso-alpha",
+      "alfa asit",
+      "hop",
+      "acı madde",
+      "aci madde",
+      "şerbetçi"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Oxford Companion to Beer — foam",
+       "url": "https://www.beerandbrewing.com/dictionary/PoV1K8jeSb",
+       "alinti": "These molecules cross-link with the bitter iso- α-acids derived from hops to render the foam more rigid and not only more stable but also able to adhere to the sides of the glass as the beer is consumed (cling or lacing)."
+      },
+      {
+       "ad": "Gordon ve ark. 2018, Fermentation 4(4):89 (MDPI, hakemli)",
+       "url": "https://www.mdpi.com/2311-5637/4/4/89",
+       "alinti": "The stability of beer foam is mostly due to hydrophobic interactions between a variety of species including polypeptides, polysaccharides, iso-α-acids and lipids, whereas competing surfactants and chaotropic agents (e.g., ethanol, magnesium chloride) disrupt this stability"
+      }
+     ]
+    },
+    {
+     "etken": "yağ / deterjan kalıntısı köpüğü öldürür (temiz, iyi durulanmış bardak)",
+     "anahtar": [
+      "yağ",
+      "yag",
+      "lipid",
+      "deterjan",
+      "bardak",
+      "temiz"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Oxford Companion to Beer — foam",
+       "url": "https://www.beerandbrewing.com/dictionary/PoV1K8jeSb",
+       "alinti": "The most frequent cause of poor foaming of beer is the presence of foam-negative materials, most notably lipids introduced in the process or as part of food consumed alongside the beer, and detergents that have not been properly washed from the glass or dispense lines."
+      },
+      {
+       "ad": "Gordon ve ark. 2018 (MDPI, hakemli)",
+       "url": "https://www.mdpi.com/2311-5637/4/4/89",
+       "alinti": "The vastly different compositions in free fatty acids of beer worts, some of which have higher content of unsaturated fatty acids than others, may cause major oxidative damage, form undesirable flavours and have a damaging effect on foam stability of the final product"
+      }
+     ]
+    },
+    {
+     "etken": "dekstrin malt (Carapils) köpük için — üretici evet, bağımsız ölçümler hayır",
+     "anahtar": [
+      "carapils",
+      "carafoam",
+      "dekstrin malt",
+      "dextrin malt"
+     ],
+     "guc": "celiski",
+     "kaynaklar": [
+      {
+       "ad": "Briess — Understanding Carapils",
+       "url": "https://brewingwithbriess.com/blog/understanding-carapils/",
+       "alinti": "Rather, Briess Carapils ® Malt falls into the category of dextrin malts and is intended to improve body, mouthfeel, and head retention by adding resistant dextrins, proteins, non-starch polysaccharides, and other substances to the wort and beer."
+      },
+      {
+       "ad": "Combe & Bamforth (UC Davis), ASBC 2012 bildiri özeti",
+       "url": "https://www.asbcnet.org/events/archives/2012Proceedings/Pages/68.aspx",
+       "alinti": "Dogma holds that the use of certain specialty malts is to the advantage of beer foam stability. … Indeed some appeared to have a foam-destabilizing effect."
+      },
+      {
+       "ad": "Brulosophy — Carapils exBEERiment",
+       "url": "https://brulosophy.com/2016/11/28/dextrine-malt-pt-1-the-impact-of-carapils-on-various-beer-characteristics-exbeeriment-results/",
+       "alinti": "the batch made with Carapils had no better head retention or lacing than that batch made without it."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "C13",
+   "recete": "weizen",
+   "konu": "köpük",
+   "soru": "köpük için laktoz eklemek daha iyi olur değil mi",
+   "yonlendirme": true,
+   "beklenen": [
+    {
+     "etken": "laktoz bira mayasıyla fermente olmaz → tatlılık ve gövde verir (köpüğü artırdığını söyleyen nitelikli kaynak bulunamadı)",
+     "anahtar": [
+      "fermente ol",
+      "fermente edil",
+      "mayalanmaz",
+      "tatlılık",
+      "tatlilik",
+      "unferment",
+      "nonferment"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Oxford Companion to Beer — milk stout",
+       "url": "https://www.beerandbrewing.com/dictionary/a6FNvxHbm3",
+       "alinti": "The milk sugar is unfermentable by brewing yeasts and therefore contributes body and a mild sweetness to the finished beer."
+      },
+      {
+       "ad": "BJCP 2015 — 13B Sweet Stout",
+       "url": "https://dev.bjcp.org/beer-styles/13b-sweet-stout/",
+       "alinti": "Lactose, an unfermentable sugar, is frequently added to provide additional residual sweetness."
+      }
+     ]
+    },
+    {
+     "etken": "weizen'de köpüğü buğday proteinleri sağlar (reçetede zaten ~%60 buğday)",
+     "anahtar": [
+      "protein",
+      "buğday",
+      "bugday",
+      "wheat"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 14",
+       "url": "https://howtobrew.com/section-3/chapter-14/",
+       "alinti": "Malted wheat contains twice as much high molecular weight protein as barley malt."
+      },
+      {
+       "ad": "Oxford Companion to Beer — proteins",
+       "url": "https://www.beerandbrewing.com/dictionary/E7FlzS6H7Q",
+       "alinti": "The sturdy crown of foam that is prized on most types of beer is largely created by proteins; remove these “foam-positive” proteins, and the beer may end up without proper tactile and visual texture—foamless, wan, and unattractive."
+      },
+      {
+       "ad": "Weyermann — Wheat Malt Pale",
+       "url": "https://www.weyermann.de/en-us/product/weyermann-wheat-malt-pale-2/",
+       "alinti": "With an addition of up to 10%, a full body and foam stability in beers is achieved"
+      }
+     ]
+    },
+    {
+     "etken": "hop acı maddeleri (izo-alfa asit) köpüğü sağlamlaştırır",
+     "anahtar": [
+      "izo-alfa",
+      "izo alfa",
+      "iso-alpha",
+      "alfa asit",
+      "hop",
+      "acı madde",
+      "aci madde",
+      "şerbetçi"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Oxford Companion to Beer — foam",
+       "url": "https://www.beerandbrewing.com/dictionary/PoV1K8jeSb",
+       "alinti": "These molecules cross-link with the bitter iso- α-acids derived from hops to render the foam more rigid and not only more stable but also able to adhere to the sides of the glass as the beer is consumed (cling or lacing)."
+      },
+      {
+       "ad": "Gordon ve ark. 2018, Fermentation 4(4):89 (MDPI, hakemli)",
+       "url": "https://www.mdpi.com/2311-5637/4/4/89",
+       "alinti": "The stability of beer foam is mostly due to hydrophobic interactions between a variety of species including polypeptides, polysaccharides, iso-α-acids and lipids, whereas competing surfactants and chaotropic agents (e.g., ethanol, magnesium chloride) disrupt this stability"
+      }
+     ]
+    },
+    {
+     "etken": "yağ / deterjan kalıntısı köpüğü öldürür (temiz, iyi durulanmış bardak)",
+     "anahtar": [
+      "yağ",
+      "yag",
+      "lipid",
+      "deterjan",
+      "bardak",
+      "temiz"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Oxford Companion to Beer — foam",
+       "url": "https://www.beerandbrewing.com/dictionary/PoV1K8jeSb",
+       "alinti": "The most frequent cause of poor foaming of beer is the presence of foam-negative materials, most notably lipids introduced in the process or as part of food consumed alongside the beer, and detergents that have not been properly washed from the glass or dispense lines."
+      },
+      {
+       "ad": "Gordon ve ark. 2018 (MDPI, hakemli)",
+       "url": "https://www.mdpi.com/2311-5637/4/4/89",
+       "alinti": "The vastly different compositions in free fatty acids of beer worts, some of which have higher content of unsaturated fatty acids than others, may cause major oxidative damage, form undesirable flavours and have a damaging effect on foam stability of the final product"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "C14",
+   "recete": "lager",
+   "konu": "berraklık",
+   "soru": "biram bulanık çıkıyor, nasıl berraklaştırırım",
+   "beklenen": [
+    {
+     "etken": "kaynatma sonunda durultucu (Irish moss / Whirlfloc, karragenan)",
+     "anahtar": [
+      "irish moss",
+      "whirlfloc",
+      "karragenan",
+      "carrageenan",
+      "protafloc",
+      "kazan durult",
+      "kaynatma durult"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 22",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "The clarity can also be enhanced by adding Irish Moss towards the end of the boil."
+      },
+      {
+       "ad": "Oxford Companion to Beer — carrageenan",
+       "url": "https://www.beerandbrewing.com/dictionary/sooTnizltU",
+       "alinti": "The carrageenans are used in brewing to remove hot- and cold-break proteins from wort and other proteins that would eventually cause hazes in chilled beer."
+      },
+      {
+       "ad": "Murphy & Son — Protafloc TDS",
+       "url": "https://www.murphyandson.co.uk/wp-content/uploads/2018/09/Protafloc-Tablets-TDS066-FININGS-V01-27.01.2025.pdf",
+       "alinti": "Protafloc Tablets should be added to the kettle ten minutes prior to the end of the boil or to the whirlpool if this is not possible."
+      }
+     ]
+    },
+    {
+     "etken": "wort'u hızlı soğut (iyi soğuk çökelti)",
+     "anahtar": [
+      "hızlı soğut",
+      "hizli sogut",
+      "soğutucu",
+      "sogutucu",
+      "soğuk çökelti",
+      "soguk cokelti",
+      "cold break",
+      "chiller",
+      "hızla soğut"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 7",
+       "url": "https://howtobrew.com/section-1/chapter-7/",
+       "alinti": "Cold break, or rather the lack of it, is the cause of “chill haze.”"
+      },
+      {
+       "ad": "Oxford Companion to Beer — cold break",
+       "url": "https://www.beerandbrewing.com/dictionary/6rhVOJuq6C",
+       "alinti": "Regardless of the method, rapid cooling of the wort is essential to the precipitation of cold break and its subsequent removal from the wort."
+      }
+     ]
+    },
+    {
+     "etken": "soğukta dinlendirme / lager süresi",
+     "anahtar": [
+      "soğukta",
+      "soguk dinlen",
+      "soğuk dinlen",
+      "lager",
+      "olgunlaş",
+      "olgunlas",
+      "cold crash",
+      "soğuk depo",
+      "soğuk sakla"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Wyeast — Professional Lager Brewing",
+       "url": "https://wyeastlab.com/resource/professional-lager-brewing/",
+       "alinti": "Malt tannins coagulate with haze-forming proteins and precipitate out along with some sulfurous compounds."
+      },
+      {
+       "ad": "Oxford Companion to Beer — chillproofing",
+       "url": "https://www.beerandbrewing.com/dictionary/j40sHatguV",
+       "alinti": "During this time protein and polyphenols derived from malt in the beer coagulate to form larger molecules, which can then be removed by filtration. In the days before beer filtration, the beer was aged long enough for the particles to simply settle out."
+      }
+     ]
+    },
+    {
+     "etken": "mayanın çökmesi (flokülasyon) — çöken maya + yeterli süre",
+     "anahtar": [
+      "flokül",
+      "flokul",
+      "floccul",
+      "çök",
+      "cok",
+      "maya çök",
+      "maya cok"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 22",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "Yeast strains that have low flocculation, such as German Hefeweizen, will cause the beer to be cloudy."
+      },
+      {
+       "ad": "Oxford Companion to Beer — flocculation",
+       "url": "https://www.beerandbrewing.com/dictionary/9yHbaDo6RA",
+       "alinti": "Highly flocculant strains do have advantages—namely, they can produce a brighter beer with less suspended yeast, making filtration easier."
+      },
+      {
+       "ad": "BJCP — Beer Faults",
+       "url": "https://www.bjcp.org/education-training/education-resources/beer-faults/",
+       "alinti": "Use a more flocculent yeast strain. Allow yeast sufficient time to flocculate. Filter beer or use clarifying agents."
+      }
+     ]
+    },
+    {
+     "etken": "fermantasyon sonrası durultucu (jelatin, isinglass, silika, PVPP)",
+     "anahtar": [
+      "jelatin",
+      "gelatin",
+      "isinglass",
+      "silika",
+      "silica",
+      "pvpp",
+      "polyclar"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 22",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "In all cases, cloudiness can be combated by adding fining agents (e.g. isinglass, gelatin, Polyclar, bentonite) … after fermentation."
+      },
+      {
+       "ad": "Oxford Companion to Beer — finings",
+       "url": "https://www.beerandbrewing.com/dictionary/228er9hfoV",
+       "alinti": "These larger particles settle considerably faster than they would otherwise, as dictated by Stokes’ law."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "C15",
+   "recete": "apa",
+   "konu": "berraklık",
+   "soru": "soğuk bulanıklığı (chill haze) nasıl azaltırım",
+   "beklenen": [
+    {
+     "etken": "soğuk bulanıklık = protein + polifenol (tanen) birleşimi; ısınınca çözülür",
+     "anahtar": [
+      "polifenol",
+      "polyphenol",
+      "tanen",
+      "tannin"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Oxford Companion to Beer — chill haze",
+       "url": "https://www.beerandbrewing.com/dictionary/05yt3vv4Uc",
+       "alinti": "Chill haze is caused by low-molecular-weight polyphenols and larger proteins and polypeptides when cross-linked through weak interactions such as hydrogen bonds."
+      },
+      {
+       "ad": "Lallemand (AB Vickers) — Process Aids",
+       "url": "https://admin.lallemandbrewing.com/wp-content/uploads/2017/03/Process-Aids-Booklet-ENG-Print-A4-AB-Vickers-1.pdf",
+       "alinti": "After packaging, beer may tend to form haze through the interaction of polyphenols with haze causing proteins rich in the amino acid proline."
+      }
+     ]
+    },
+    {
+     "etken": "soğukta dinlendirme / lager süresi",
+     "anahtar": [
+      "soğukta",
+      "soguk dinlen",
+      "soğuk dinlen",
+      "lager",
+      "olgunlaş",
+      "olgunlas",
+      "cold crash",
+      "soğuk depo",
+      "soğuk sakla"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Wyeast — Professional Lager Brewing",
+       "url": "https://wyeastlab.com/resource/professional-lager-brewing/",
+       "alinti": "Malt tannins coagulate with haze-forming proteins and precipitate out along with some sulfurous compounds."
+      },
+      {
+       "ad": "Oxford Companion to Beer — chillproofing",
+       "url": "https://www.beerandbrewing.com/dictionary/j40sHatguV",
+       "alinti": "During this time protein and polyphenols derived from malt in the beer coagulate to form larger molecules, which can then be removed by filtration. In the days before beer filtration, the beer was aged long enough for the particles to simply settle out."
+      }
+     ]
+    },
+    {
+     "etken": "kaynatma sonunda durultucu (Irish moss / Whirlfloc, karragenan)",
+     "anahtar": [
+      "irish moss",
+      "whirlfloc",
+      "karragenan",
+      "carrageenan",
+      "protafloc",
+      "kazan durult",
+      "kaynatma durult"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 22",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "The clarity can also be enhanced by adding Irish Moss towards the end of the boil."
+      },
+      {
+       "ad": "Oxford Companion to Beer — carrageenan",
+       "url": "https://www.beerandbrewing.com/dictionary/sooTnizltU",
+       "alinti": "The carrageenans are used in brewing to remove hot- and cold-break proteins from wort and other proteins that would eventually cause hazes in chilled beer."
+      },
+      {
+       "ad": "Murphy & Son — Protafloc TDS",
+       "url": "https://www.murphyandson.co.uk/wp-content/uploads/2018/09/Protafloc-Tablets-TDS066-FININGS-V01-27.01.2025.pdf",
+       "alinti": "Protafloc Tablets should be added to the kettle ten minutes prior to the end of the boil or to the whirlpool if this is not possible."
+      }
+     ]
+    },
+    {
+     "etken": "wort'u hızlı soğut (iyi soğuk çökelti)",
+     "anahtar": [
+      "hızlı soğut",
+      "hizli sogut",
+      "soğutucu",
+      "sogutucu",
+      "soğuk çökelti",
+      "soguk cokelti",
+      "cold break",
+      "chiller",
+      "hızla soğut"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 7",
+       "url": "https://howtobrew.com/section-1/chapter-7/",
+       "alinti": "Cold break, or rather the lack of it, is the cause of “chill haze.”"
+      },
+      {
+       "ad": "Oxford Companion to Beer — cold break",
+       "url": "https://www.beerandbrewing.com/dictionary/6rhVOJuq6C",
+       "alinti": "Regardless of the method, rapid cooling of the wort is essential to the precipitation of cold break and its subsequent removal from the wort."
+      }
+     ]
+    },
+    {
+     "etken": "stabilizatör: PVPP (polifenol tutar), silika jel (protein tutar), prolin enzimi (Clarity-Ferm)",
+     "anahtar": [
+      "pvpp",
+      "polyclar",
+      "silika",
+      "silica",
+      "clarity",
+      "enzim",
+      "prolin"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Oxford Companion to Beer — colloidal haze",
+       "url": "https://www.beerandbrewing.com/dictionary/ycg6ddyEMu",
+       "alinti": "Alternatively, removal of polyphenols can also be achieved by the use of polyvinyl polypyrrolidone (PVPP)."
+      },
+      {
+       "ad": "Murphy & Son — Pristine PRO TDS",
+       "url": "https://www.murphyandson.co.uk/wp-content/uploads/2020/06/Pristine-Pro-TDS062-PRESERVATIVES-STABILISER-V01-06.03.2025.pdf",
+       "alinti": "Pristine PRO is a silica hydrogel specifically formulated to remove haze-causing proteins in beer."
+      },
+      {
+       "ad": "White Labs — Clarity Ferm",
+       "url": "https://www.whitelabs.com/enzymes-nutrients-detail?id=8&type=ENZYMENUTRIENT",
+       "alinti": "A highly specific endoprotease that prevents chill haze in beer by hydrolyzing haze-active polypeptides where the hydrogen bonding that causes chill haze occurs."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "C16",
+   "recete": "lager",
+   "konu": "berraklık",
+   "soru": "jelatin kullanmak berraklık için işe yarar mı",
+   "beklenen": [
+    {
+     "etken": "evet — jelatin durultucudur, bulanıklığı çöktürür",
+     "anahtar": [
+      "berrak",
+      "durult",
+      "çöktür",
+      "coktur",
+      "clar",
+      "netleş"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 22",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "In all cases, cloudiness can be combated by adding fining agents (e.g. isinglass, gelatin, Polyclar, bentonite) … after fermentation."
+      },
+      {
+       "ad": "Oxford Companion to Beer — gelatin",
+       "url": "https://www.beerandbrewing.com/dictionary/91Zu6FLXvA",
+       "alinti": "In this application brewers are able to serve a pleasing clarity of beer without the need for costly filtration equipment"
+      },
+      {
+       "ad": "Mastanjević ve ark. 2018, Fermentation 4(4):91 (MDPI, hakemli)",
+       "url": "https://www.mdpi.com/2311-5637/4/4/91",
+       "alinti": "Gelatin removes haze proteins, but does not react with foam proteins."
+      }
+     ]
+    },
+    {
+     "etken": "ne zaman: fermantasyon bittikten sonra, sıcak suda çözülüp soğutulmuş az miktarda",
+     "anahtar": [
+      "fermantasyon sonra",
+      "fermantasyondan sonra",
+      "fermantasyon bitt",
+      "mayalanma sonra",
+      "mayalanmadan sonra",
+      "after fermentation",
+      "newly fermented",
+      "sıcak su",
+      "sicak su"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Oxford Companion to Beer — gelatin",
+       "url": "https://www.beerandbrewing.com/dictionary/91Zu6FLXvA",
+       "alinti": "Gelatin is prepared by making a dilute solution in hot water, cooling, and adding a small quantity of the solution to newly fermented beer."
+      },
+      {
+       "ad": "Palmer — How to Brew, bölüm 22",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "… after fermentation."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "C17",
+   "recete": "lager",
+   "konu": "diasetil",
+   "soru": "tereyağı (diasetil) tadı nasıl önlenir",
+   "beklenen": [
+    {
+     "etken": "diasetil dinlenmesi: mayalanmanın sonuna doğru sıcaklığı birkaç derece yükselt",
+     "anahtar": [
+      "diasetil dinlen",
+      "dinlendir",
+      "sıcaklığı yüksel",
+      "sicakligi yuksel",
+      "sıcaklığı birkaç",
+      "diacetyl rest",
+      "15",
+      "18 °c"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 8",
+       "url": "https://howtobrew.com/section-1/chapter-8/",
+       "alinti": "...brewers often utilize a diacetyl rest (raising the temperature a few degrees towards the end of fermentation)"
+      },
+      {
+       "ad": "White Labs — Compound spotlight: diacetyl",
+       "url": "https://blog.whitelabs.com/compound-spotlight-diacetyl",
+       "alinti": "A diacetyl rest is when the fermentation temperature is raised a couple of degrees when the gravity is a few degrees Plato from terminal."
+      },
+      {
+       "ad": "Lallemand — common lager off-flavors",
+       "url": "https://www.lallemandbrewing.com/en/united-states/resources/the-most-common-lager-off-flavors-and-how-to-control-them/",
+       "alinti": "Perform a diacetyl rest at the end of fermentation."
+      },
+      {
+       "ad": "Oxford Companion to Beer — diacetyl",
+       "url": "https://www.beerandbrewing.com/dictionary/48TDqQibPi",
+       "alinti": "For this reason, many lager brewers will allow a short-term rise of fermentation temperature to 60°F (15.5°C) or higher at the end of the fermentation."
+      }
+     ]
+    },
+    {
+     "etken": "yeterli ve sağlıklı maya at",
+     "anahtar": [
+      "yeterli maya",
+      "maya miktar",
+      "sağlıklı maya",
+      "saglikli maya",
+      "canlı maya",
+      "pitch",
+      "maya sayı"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 22",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "Use a higher pitching rate to provide sufficient yeast for maturation after attenuation."
+      },
+      {
+       "ad": "Lallemand — common lager off-flavors",
+       "url": "https://www.lallemandbrewing.com/en/united-states/resources/the-most-common-lager-off-flavors-and-how-to-control-them/",
+       "alinti": "Ensure an adequate pitching rate of highly viable yeast."
+      },
+      {
+       "ad": "Fermentis — Rediscover SafLager W-34/70",
+       "url": "https://fermentis.com/en/news/fermentation/rediscover-saflager-w-34-70/",
+       "alinti": "The brewer only needs to be aware of the risk of having off-notes (like diacetyl or buttery flavor) at low pitching rates and a low fermentation temperature at the same time."
+      }
+     ]
+    },
+    {
+     "etken": "birayı mayanın üstünde yeterince beklet; erken aktarma / erken soğutma yapma",
+     "anahtar": [
+      "erken aktar",
+      "erken soğut",
+      "erken sogut",
+      "maya üzerinde",
+      "maya uzerinde",
+      "mayayla temas",
+      "bekle",
+      "süre ver",
+      "acele"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Oxford Companion to Beer — diacetyl",
+       "url": "https://www.beerandbrewing.com/dictionary/48TDqQibPi",
+       "alinti": "Yeasts that separate out too early in the fermentation process, often the result of early application of cooling, can fail to complete the reabsorption."
+      },
+      {
+       "ad": "BJCP — Beer Exam Study Guide: Troubleshooting",
+       "url": "https://www.bjcp.org/exam-certification/program/studying/beer-exam-study-guide/troubleshooting/",
+       "alinti": "High levels can result from prematurely separating the beer from the yeast or by exposing the wort to oxygen during the fermentation."
+      },
+      {
+       "ad": "Lallemand — common lager off-flavors",
+       "url": "https://www.lallemandbrewing.com/en/united-states/resources/the-most-common-lager-off-flavors-and-how-to-control-them/",
+       "alinti": "Give the beer sufficient contact time with the active yeast prior to transfer."
+      }
+     ]
+    },
+    {
+     "etken": "bakteri bulaşması (Pediococcus / Lactobacillus) da diasetil yapar",
+     "anahtar": [
+      "bakteri",
+      "pediococcus",
+      "lactobacillus",
+      "enfeksiyon",
+      "bulaş",
+      "bulas",
+      "kontamin"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 22",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "Diacetyl can be the result of the normal fermentation process or the result of a bacterial infection (i.e., pediococcus)."
+      },
+      {
+       "ad": "BJCP — Beer Exam Study Guide: Troubleshooting",
+       "url": "https://www.bjcp.org/exam-certification/program/studying/beer-exam-study-guide/troubleshooting/",
+       "alinti": "Diacetyl is also produced during the initial stages of contamination by lactic acid bacteria, notably Pediococcus damnosus ."
+      },
+      {
+       "ad": "Wyeast — Professional Lager Brewing",
+       "url": "https://wyeastlab.com/resource/professional-lager-brewing/",
+       "alinti": "Diacetyl may also be present if there is a Lactobacillus and Pediococcus contamination."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "C18",
+   "recete": "apa",
+   "konu": "diasetil",
+   "soru": "diasetil dinlenmesi gerekli mi, ne zaman yapılır",
+   "beklenen": [
+    {
+     "etken": "asıl lager / serin mayalanmada gerekir; ale sıcaklığında daha az kritik (ale'de de yapılabilir)",
+     "anahtar": [
+      "lager",
+      "ale",
+      "serin",
+      "soğuk mayalan",
+      "soguk mayalan",
+      "gerekli değil",
+      "şart değil",
+      "sart degil",
+      "daha az"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "White Labs — Compound spotlight: diacetyl",
+       "url": "https://blog.whitelabs.com/compound-spotlight-diacetyl",
+       "alinti": "Diacetyl rests can be performed in either ale or lager ferments but are recommended especially for lagers or cooler fermentation profiles."
+      },
+      {
+       "ad": "Lallemand — An easy guide to brewing lager at home",
+       "url": "https://www.lallemandbrewing.com/en/united-states/resources/whats-new/an-easy-guide-to-brewing-lager-at-home/",
+       "alinti": "Diacetyl reabsorption is slower at these low temperatures, so a diacetyl rest is normally performed by increasing the temperature slightly at the end of fermentation."
+      },
+      {
+       "ad": "Oxford Companion to Beer — diacetyl",
+       "url": "https://www.beerandbrewing.com/dictionary/48TDqQibPi",
+       "alinti": "Diacetyl is particularly unwelcome in lager-style beers and these beers are often held for a time before cooling is applied, a process known as “warm conditioning” or “diacetyl rest.”"
+      }
+     ]
+    },
+    {
+     "etken": "zamanı: mayalanmanın sonuna yakın (bitiş yoğunluğuna birkaç puan kala)",
+     "anahtar": [
+      "sonuna",
+      "sonunda",
+      "bitişe",
+      "bitise",
+      "bitiş yoğunluğ",
+      "son yoğunluğ",
+      "kala",
+      "end of fermentation"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 8",
+       "url": "https://howtobrew.com/section-1/chapter-8/",
+       "alinti": "...(raising the temperature a few degrees towards the end of fermentation)"
+      },
+      {
+       "ad": "White Labs — Compound spotlight: diacetyl",
+       "url": "https://blog.whitelabs.com/compound-spotlight-diacetyl",
+       "alinti": "An example of a diacetyl rest: Pitch at 50°F/10°C 2° Plato from terminal gravity raise temperature to 65°F/18°C"
+      },
+      {
+       "ad": "Lallemand — common lager off-flavors",
+       "url": "https://www.lallemandbrewing.com/en/united-states/resources/the-most-common-lager-off-flavors-and-how-to-control-them/",
+       "alinti": "Perform a diacetyl rest at the end of fermentation."
+      }
+     ]
+    },
+    {
+     "etken": "nasıl: sıcaklığı birkaç derece yükselt (lager için ≈15–18 °C)",
+     "anahtar": [
+      "birkaç derece",
+      "birkac derece",
+      "yüksel",
+      "yuksel",
+      "15",
+      "18",
+      "60-65"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "White Labs — Compound spotlight: diacetyl",
+       "url": "https://blog.whitelabs.com/compound-spotlight-diacetyl",
+       "alinti": "A diacetyl rest is when the fermentation temperature is raised a couple of degrees when the gravity is a few degrees Plato from terminal."
+      },
+      {
+       "ad": "BJCP — Beer Exam Study Guide: Troubleshooting",
+       "url": "https://www.bjcp.org/exam-certification/program/studying/beer-exam-study-guide/troubleshooting/",
+       "alinti": "For that reason, lager breweries often employ a diacetyl rest, which involves holding the beer in the 60-65 °F (15-18 °C) range for a few days after racking to the conditioning tank."
+      },
+      {
+       "ad": "Oxford Companion to Beer — diacetyl",
+       "url": "https://www.beerandbrewing.com/dictionary/48TDqQibPi",
+       "alinti": "For this reason, many lager brewers will allow a short-term rise of fermentation temperature to 60°F (15.5°C) or higher at the end of the fermentation."
+      }
+     ]
+    },
+    {
+     "etken": "süre: birkaç gün; bitişi takvimle değil tadarak / zorlamalı diasetil testiyle anla",
+     "anahtar": [
+      "gün",
+      "gun",
+      "birkaç gün",
+      "tad",
+      "test",
+      "koklayarak"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "BJCP — Beer Exam Study Guide: Troubleshooting",
+       "url": "https://www.bjcp.org/exam-certification/program/studying/beer-exam-study-guide/troubleshooting/",
+       "alinti": "For that reason, lager breweries often employ a diacetyl rest, which involves holding the beer in the 60-65 °F (15-18 °C) range for a few days after racking to the conditioning tank."
+      },
+      {
+       "ad": "Wyeast — Professional Lager Brewing",
+       "url": "https://wyeastlab.com/resource/professional-lager-brewing/",
+       "alinti": "The diacetyl rest may take 6 days after raising the temperature at 56 °F (13 °C)."
+      },
+      {
+       "ad": "White Labs — Forced diacetyl testing",
+       "url": "https://blog.whitelabs.com/forced-diacetyl-testing",
+       "alinti": "If diacetyl is perceived in the test sample, there is still a significant amount of precursor that needs to be degraded"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "C19",
+   "recete": "lager",
+   "konu": "DMS",
+   "soru": "pişmiş mısır kokusu (DMS) nasıl önlenir",
+   "beklenen": [
+    {
+     "etken": "kapağı açık, güçlü (fokurdayan) kaynatma — DMS buharla uçar",
+     "anahtar": [
+      "güçlü kayna",
+      "guclu kayna",
+      "kuvvetli kayna",
+      "şiddetli kayna",
+      "fokur",
+      "açık kaynat",
+      "acik kaynat",
+      "kapak",
+      "buhar",
+      "rolling"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Lallemand — common lager off-flavors",
+       "url": "https://www.lallemandbrewing.com/en/united-states/resources/whats-new/the-most-common-lager-off-flavors-and-how-to-control-them/",
+       "alinti": "Boil vigorously for 60 to 90 minutes."
+      },
+      {
+       "ad": "BJCP — Beer Faults",
+       "url": "https://www.bjcp.org/education-training/education-resources/beer-faults/",
+       "alinti": "Use a long, rolling, open boil."
+      },
+      {
+       "ad": "Palmer — How to Brew, bölüm 22",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "DMS is continuously produced in the wort while it is hot and is usually removed by vaporization during the boil."
+      }
+     ]
+    },
+    {
+     "etken": "yeterli kaynatma süresi (60–90 dk)",
+     "anahtar": [
+      "60",
+      "90 dakika",
+      "90 dk",
+      "kaynatma süre",
+      "kaynatma sure",
+      "uzun kaynat",
+      "süreyi uzat"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Lallemand — common lager off-flavors",
+       "url": "https://www.lallemandbrewing.com/en/united-states/resources/whats-new/the-most-common-lager-off-flavors-and-how-to-control-them/",
+       "alinti": "Boil vigorously for 60 to 90 minutes."
+      },
+      {
+       "ad": "Crisp Malt — guide to wort boiling",
+       "url": "https://crispmalt.com/en-us/news/the-crisp-guide-to-wort-boiling/",
+       "alinti": "Boil for a minimum 60min 6% evaporation"
+      }
+     ]
+    },
+    {
+     "etken": "kaynatmadan sonra hızlı soğut (sıcak bekletme DMS üretmeye devam eder)",
+     "anahtar": [
+      "hızlı soğut",
+      "hizli sogut",
+      "hızla soğut",
+      "soğutucu",
+      "sogutucu",
+      "chiller",
+      "sıcak bekle",
+      "whirlpool"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 7",
+       "url": "https://howtobrew.com/section-1/chapter-7/",
+       "alinti": "If the wort is cooled slowly, the dimethyl sulfide pre-cursors will continue to be produced in the hot wort."
+      },
+      {
+       "ad": "Lallemand — common lager off-flavors",
+       "url": "https://www.lallemandbrewing.com/en/united-states/resources/whats-new/the-most-common-lager-off-flavors-and-how-to-control-them/",
+       "alinti": "Cool the wort rapidly after boil."
+      },
+      {
+       "ad": "Oxford Companion to Beer — dimethyl sulfide",
+       "url": "https://www.beerandbrewing.com/dictionary/ACrDU6lDUs",
+       "alinti": "Partly for this reason most brewers seek to minimize the hot wort stand and get the wort chilled and into the fermenter as quickly as possible."
+      }
+     ]
+    },
+    {
+     "etken": "pilsner maltında öncül madde (SMM) çok — açık renkli malt DMS riskini artırır",
+     "anahtar": [
+      "smm",
+      "s-metil",
+      "s-methyl",
+      "pilsner malt",
+      "açık renkli malt",
+      "acik renkli malt",
+      "öncül",
+      "oncul"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Oxford Companion to Beer — dimethyl sulfide",
+       "url": "https://www.beerandbrewing.com/dictionary/ACrDU6lDUs",
+       "alinti": "Therefore, there tends to be a high survival of SMM in more gently dried lager malts, this SMM being broken down to DMS during wort boiling and in the hot wort stand (the period post-boiling but pre-cooling)."
+      },
+      {
+       "ad": "Lallemand — common lager off-flavors",
+       "url": "https://www.lallemandbrewing.com/en/united-states/resources/whats-new/the-most-common-lager-off-flavors-and-how-to-control-them/",
+       "alinti": "It is produced when S-methylmethionine (SMM), a compound found in malt (especially in lightly kilned malt), is heated during the boiling process."
+      },
+      {
+       "ad": "Crisp Malt — guide to wort boiling",
+       "url": "https://crispmalt.com/en-us/news/the-crisp-guide-to-wort-boiling/",
+       "alinti": "It is formed from the precursor S-Methyl Methionine (SMM) found in all malts but is present in higher levels in lightly kilned malts."
+      }
+     ]
+    },
+    {
+     "etken": "bakteri bulaşması da DMS yapabilir (lahana kokusu) — temizlik",
+     "anahtar": [
+      "bakteri",
+      "enfeksiyon",
+      "bulaş",
+      "bulas",
+      "temizlik",
+      "sanit",
+      "hijyen"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 22",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "When caused by bacterial infection, DMS has a more rancid character, more liked cooked cabbage than corn."
+      },
+      {
+       "ad": "Oxford Companion to Beer — dimethyl sulfide",
+       "url": "https://www.beerandbrewing.com/dictionary/ACrDU6lDUs",
+       "alinti": "Wort spoilage bacteria such as Obesumbacterium proteus are especially capable of converting DMSO to DMS."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "C20",
+   "recete": "lager",
+   "konu": "DMS",
+   "soru": "pilsner maltında kaynatmayı kapağı kapalı yapsam olur mu",
+   "yonlendirme": true,
+   "beklenen": [
+    {
+     "etken": "hayır — kapağı tam kapatma; DMS buharla çıkmalı, kapaktaki yoğuşma geri damlarsa DMS kalır",
+     "anahtar": [
+      "kapak",
+      "yoğuş",
+      "yogus",
+      "geri damla",
+      "açık kaynat",
+      "acik kaynat",
+      "kapatma"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 7",
+       "url": "https://howtobrew.com/section-1/chapter-7/",
+       "alinti": "Once you achieve a boil, only partially cover the pot, if at all."
+      },
+      {
+       "ad": "BJCP — Beer Faults",
+       "url": "https://www.bjcp.org/education-training/education-resources/beer-faults/",
+       "alinti": "Use a long, rolling, open boil."
+      }
+     ]
+    },
+    {
+     "etken": "DMS uçucudur, kaynatmada buharla atılır",
+     "anahtar": [
+      "buhar",
+      "uçucu",
+      "ucucu",
+      "evapor",
+      "buharlaş",
+      "buharlas"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Crisp Malt — guide to wort boiling",
+       "url": "https://crispmalt.com/en-us/news/the-crisp-guide-to-wort-boiling/",
+       "alinti": "DMS is formed by the thermal decomposition of SMM during kilning and boiling, and it is rapidly driven off by evaporation."
+      },
+      {
+       "ad": "Palmer — How to Brew, bölüm 22",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "DMS is continuously produced in the wort while it is hot and is usually removed by vaporization during the boil."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "C21",
+   "recete": "apa",
+   "konu": "acılık",
+   "soru": "daha az acı olsun",
+   "beklenen": [
+    {
+     "etken": "acı hopu daha az kaynat / sonraya kaydır (kaynama süresi acılığın ana belirleyicisi)",
+     "anahtar": [
+      "kaynama süre",
+      "kaynama sure",
+      "kaynatma süre",
+      "sonraya",
+      "geç ekle",
+      "gec ekle",
+      "dakika",
+      "dk"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 5",
+       "url": "https://howtobrew.com/section-1/chapter-5/",
+       "alinti": "The boiling time has the largest influence on how bitter a hop addition makes the beer."
+      },
+      {
+       "ad": "Oxford Companion to Beer — bittering potential",
+       "url": "https://www.beerandbrewing.com/dictionary/V5yV7ugy6U",
+       "alinti": "Hops added at the beginning of a long boil will have greater potential to impart bitterness while hops added at the end of the boil or to finished beer will have much less potential to increase bitterness."
+      }
+     ]
+    },
+    {
+     "etken": "daha az alfa asit: acı hopun gramını azalt ya da düşük alfalı hop kullan",
+     "anahtar": [
+      "azalt",
+      "gram",
+      "alfa",
+      "alpha",
+      "acı hop",
+      "aci hop",
+      "ibu"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 5",
+       "url": "https://howtobrew.com/section-1/chapter-5/",
+       "alinti": "The strongest bittering factors are the total amount of alpha acids you added to the wort,"
+      },
+      {
+       "ad": "Oxford Companion to Beer — bittering potential",
+       "url": "https://www.beerandbrewing.com/dictionary/V5yV7ugy6U",
+       "alinti": "The potential is primarily a function of the alpha-acids content of the hops."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "C22",
+   "recete": "apa",
+   "konu": "acılık algısı",
+   "soru": "acılık neden sert ve kalıcı geliyor",
+   "beklenen": [
+    {
+     "etken": "alkali (karbonatlı) su / yüksek pH acılığı kaba ve sert yapar",
+     "anahtar": [
+      "alkali",
+      "karbonat",
+      "bikarbonat",
+      "ph",
+      "sert su"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 15",
+       "url": "https://howtobrew.com/section-3/chapter-15/",
+       "alinti": "The high alkalinity of the water makes it difficult to produce light pale beers that are not harsh tasting."
+      },
+      {
+       "ad": "Oxford Companion to Beer — bitterness",
+       "url": "https://www.beerandbrewing.com/dictionary/z8NACbisww",
+       "alinti": "Conversely, those brewed from alkaline water containing high levels of calcium carbonate will tend to show broader, coarser hop bitterness."
+      }
+     ]
+    },
+    {
+     "etken": "polifenol / tanen (çok hop, kabuk) burukluğu acılıkla karışır",
+     "anahtar": [
+      "polifenol",
+      "polyphenol",
+      "tanen",
+      "tannin",
+      "buruk"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 22",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "Tannins can also come from over-hopping with low-alpha hops."
+      },
+      {
+       "ad": "Oxford Companion to Beer — bitterness",
+       "url": "https://www.beerandbrewing.com/dictionary/z8NACbisww",
+       "alinti": "Polyphenols also add astringency, or a quality of dryness, to beer. This latter property is often confused with true bitterness."
+      }
+     ]
+    },
+    {
+     "etken": "yüksek kohumulonlu hop daha sert acılık verir — çoğunluk görüşü, kanıtlanmış değil",
+     "anahtar": [
+      "kohumulon",
+      "cohumulone",
+      "co-humulone"
+     ],
+     "guc": "olasi",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 5",
+       "url": "https://howtobrew.com/section-1/chapter-5/",
+       "alinti": "One humulone constituent, called co-humulone is easier to isomerize than the others, but it is also commonly perceived to give a rougher bitterness to the beer."
+      },
+      {
+       "ad": "Oxford Companion to Beer — bitterness",
+       "url": "https://www.beerandbrewing.com/dictionary/z8NACbisww",
+       "alinti": "Tradition has it that the so-called aroma hops are lower in cohumulone than less desirable hops and that iso-cohumulone in beer has a harsher, more lingering bitterness than the other iso-homologs. This is not universally accepted, but is a majority view."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "C23",
+   "recete": "apa",
+   "konu": "acılık algısı",
+   "soru": "su sertliği (sülfat) acılığı nasıl etkiler",
+   "beklenen": [
+    {
+     "etken": "sülfat acılığı vurgular: daha kuru, daha keskin / tok acılık",
+     "anahtar": [
+      "sülfat",
+      "sulfat",
+      "sulfate",
+      "alçı",
+      "alci",
+      "gypsum"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 15",
+       "url": "https://howtobrew.com/section-3/chapter-15/",
+       "alinti": "It accentuates hop bitterness, making the bitterness seem drier and more crisp."
+      },
+      {
+       "ad": "Oxford Companion to Beer — water",
+       "url": "https://www.beerandbrewing.com/dictionary/IxnJl0Xrzz",
+       "alinti": "Sulfate (SO42+): Gives a drier and more pleasantly bitter taste and flavor in moderate to high concentrations."
+      },
+      {
+       "ad": "Murphy & Son — Little book of Liquor",
+       "url": "https://www.murphyandson.co.uk/wp-content/uploads/2023/11/Little-book-of-Liquor_135x155mm_WEB.pdf",
+       "alinti": "Sulphate ions give beer a drier, more bitter flavour, whilst chloride imparts palate fullness and to an extent sweetness."
+      }
+     ]
+    },
+    {
+     "etken": "alkali (karbonatlı) su / yüksek pH acılığı kaba ve sert yapar",
+     "anahtar": [
+      "alkali",
+      "karbonat",
+      "bikarbonat",
+      "ph",
+      "sert su"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 15",
+       "url": "https://howtobrew.com/section-3/chapter-15/",
+       "alinti": "The high alkalinity of the water makes it difficult to produce light pale beers that are not harsh tasting."
+      },
+      {
+       "ad": "Oxford Companion to Beer — bitterness",
+       "url": "https://www.beerandbrewing.com/dictionary/z8NACbisww",
+       "alinti": "Conversely, those brewed from alkaline water containing high levels of calcium carbonate will tend to show broader, coarser hop bitterness."
+      }
+     ]
+    },
+    {
+     "etken": "klorür dengeleyicidir: dolgunluk ve yumuşaklık",
+     "anahtar": [
+      "klorür",
+      "klorur",
+      "chloride"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 15",
+       "url": "https://howtobrew.com/section-3/chapter-15/",
+       "alinti": "The chloride ion also accentuates the flavor and fullness of beer."
+      },
+      {
+       "ad": "Oxford Companion to Beer — water",
+       "url": "https://www.beerandbrewing.com/dictionary/IxnJl0Xrzz",
+       "alinti": "Chloride (Cl–): Mellows out and increases the fullness of the palate of the beer."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "C24",
+   "recete": "apa",
+   "konu": "karbonasyon",
+   "soru": "şişede karbonasyon az kaldı, nedenleri neler",
+   "beklenen": [
+    {
+     "etken": "az şeker (priming) — karbonasyon şeker miktarıyla belirlenir",
+     "anahtar": [
+      "şeker",
+      "seker",
+      "priming",
+      "dekstroz"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 11",
+       "url": "https://howtobrew.com/section-1/chapter-11/",
+       "alinti": "Three ounces (weight) will produce a little lower carbonation level of about 2.0 volumes"
+      },
+      {
+       "ad": "Oxford Companion to Beer — bottle conditioning",
+       "url": "https://www.beerandbrewing.com/dictionary/iKSxvCoDdk",
+       "alinti": "The amount of carbonation in the bottle after bottle conditioning is a function of three simple parameters: how much CO2 is already in the beer, how much total fermentable sugar is present after priming sugar is added, and how much of that fermentable sugar will actually be consumed by the refermentation yeast."
+      },
+      {
+       "ad": "Fermentis — SafAle F-2 TDS",
+       "url": "https://murphyandson.co.uk/wp-content/uploads/2024/05/SafAle-F-2-Fermentis-TDS.pdf",
+       "alinti": "Add 5 to 10 grams of sugar per liter of beer (to obtain a saturation of 2.5 to 5.0 g/l of CO2)."
+      }
+     ]
+    },
+    {
+     "etken": "çok soğuk ya da çok kısa bekletme (oda sıcaklığında ≈2 hafta)",
+     "anahtar": [
+      "soğuk",
+      "soguk",
+      "sıcak oda",
+      "oda sıcaklı",
+      "oda sicakli",
+      "hafta",
+      "süre",
+      "sure",
+      "bekle"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 11",
+       "url": "https://howtobrew.com/section-1/chapter-11/",
+       "alinti": "Age the capped bottles at room temperature for two weeks, out of the light."
+      },
+      {
+       "ad": "Lallemand — Bottle Conditioning best practices (CBC-1)",
+       "url": "https://mashcamp.shop/wp-content/uploads/2024/07/Lallemand-Bottle-Conditioning.pdf",
+       "alinti": "Leave bottles for at least two weeks at a constant temperature between 15-25°C"
+      },
+      {
+       "ad": "Oxford Companion to Beer — bottle conditioning",
+       "url": "https://www.beerandbrewing.com/dictionary/iKSxvCoDdk",
+       "alinti": "Although it is possible to bottle the beer cold and allow the bottles to warm up in storage, this technique often results in stuck refermentations because the yeast may not emerge from dormancy."
+      }
+     ]
+    },
+    {
+     "etken": "yeterince canlı maya kalmamış (uzun bekleme, yüksek alkol) — taze maya ekle",
+     "anahtar": [
+      "maya",
+      "canlı",
+      "canli",
+      "taze maya",
+      "yorgun"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 22",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "With long-aged beers there is sometimes not enough viable yeast left to do the job. Fresh yeast may need to be added."
+      },
+      {
+       "ad": "Oxford Companion to Beer — bottle conditioning",
+       "url": "https://www.beerandbrewing.com/dictionary/iKSxvCoDdk",
+       "alinti": "Yeast that has just performed a primary fermentation is not the best candidate to perform refermentation. At this point the yeast is in a depleted state and is in a low pH environment, stressed by its own ethanol in solution, and will be further stressed by the pressure building in the bottle."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "C25",
+   "recete": "weizen",
+   "konu": "karbonasyon",
+   "soru": "weizen için ne kadar karbonasyon gerekir",
+   "beklenen": [
+    {
+     "etken": "weizen yüksek karbonasyon ister: ≈3,3–4,5 hacim CO2 (çoğu zaman ≈4)",
+     "anahtar": [
+      "3,3",
+      "3.3",
+      "4,5",
+      "4.5",
+      "4 hacim",
+      "hacim co2",
+      "volume",
+      "yüksek karbonasyon",
+      "yuksek karbonasyon"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 11",
+       "url": "https://howtobrew.com/section-1/chapter-11/",
+       "alinti": "Here is a list of typical volumes of CO2 for various beer styles: [...] German Wheat 3.3-4.5"
+      },
+      {
+       "ad": "Oxford Companion to Beer — weissbier",
+       "url": "https://www.beerandbrewing.com/dictionary/84fU3qNtk5",
+       "alinti": "Bottle conditioning gives a fresher flavor and achieves high levels of carbonation, often at about 4 volumes (8 g/l), about 30% higher than the average pilsner."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "C26",
+   "recete": "dubbel",
+   "konu": "sıcak alkol",
+   "soru": "biramda sıcak, yakıcı alkol tadı var, neden olur",
+   "beklenen": [
+    {
+     "etken": "yüksek mayalanma sıcaklığı fusel alkol üretir",
+     "anahtar": [
+      "sıcaklı",
+      "sicakli",
+      "sıcak mayalan",
+      "sicak mayalan",
+      "temperature",
+      "derece"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 8",
+       "url": "https://howtobrew.com/section-1/chapter-8/",
+       "alinti": "High temperatures encourage the production of fusel alcohols—heavier alcohols that can have harsh solvent-like flavors."
+      },
+      {
+       "ad": "Lallemand — Precision flavor through fermentation control",
+       "url": "https://www.lallemandbrewing.com/en/united-states/resources/precision-flavor-through-fermentation-control/",
+       "alinti": "Temperature – Higher temperatures tend to promote yeast growth, leading to higher levels of fusel alcohols and esters."
+      },
+      {
+       "ad": "BJCP — Beer Exam Study Guide: Troubleshooting",
+       "url": "https://www.bjcp.org/exam-certification/program/studying/beer-exam-study-guide/troubleshooting/",
+       "alinti": "High gravity worts and high fermentation temperatures also tend to increase the concentration of these higher alcohols through increased yeast activity."
+      },
+      {
+       "ad": "Van Gheluwe, Chen & Valyi — MBAA Technical Quarterly 12(3), 1975 (hakemli)",
+       "url": "https://www.mbaa.com/publications/tq/tqPastIssues/1975/Abstracts/tq75ab03.htm",
+       "alinti": "The temperature of fermentation is important with higher temperatures producing higher quantities of fusel alcohols."
+      }
+     ]
+    },
+    {
+     "etken": "özellikle başlangıç: mayayı sıcak wort'a atma, ilk günlerde sıcaklığı tut",
+     "anahtar": [
+      "başlangıç",
+      "baslangic",
+      "ilk gün",
+      "ilk gun",
+      "erken",
+      "sıcak at",
+      "sicak at",
+      "soğuk at",
+      "pitch"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 8",
+       "url": "https://howtobrew.com/section-1/chapter-8/",
+       "alinti": "If the wort is warm when the yeast is pitched and slowly cools to room temperature during primary fermentation, more metabolites (byproducts) will be produced in the early stages than the yeast can reabsorb during the maturation stage."
+      },
+      {
+       "ad": "Wyeast — Professional Lager Brewing",
+       "url": "https://wyeastlab.com/resource/professional-lager-brewing/",
+       "alinti": "Commercial lager brewing should pitch and ferment at cold temperatures to avoid the formation of increased levels of by products such as diacetyl, acetaldehydes, esters, fusel alcohols, and sulfur compounds during fermentation."
+      }
+     ]
+    },
+    {
+     "etken": "yüksek başlangıç yoğunluğu (güçlü bira) fuseli artırır",
+     "anahtar": [
+      "yüksek og",
+      "yuksek og",
+      "başlangıç yoğunluğ",
+      "baslangic yogunlug",
+      "güçlü bira",
+      "guclu bira",
+      "yüksek yoğunluk",
+      "yuksek yogunluk",
+      "yüksek alkol",
+      "gravity"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "BJCP — Beer Exam Study Guide: Troubleshooting",
+       "url": "https://www.bjcp.org/exam-certification/program/studying/beer-exam-study-guide/troubleshooting/",
+       "alinti": "High gravity worts and high fermentation temperatures also tend to increase the concentration of these higher alcohols through increased yeast activity."
+      },
+      {
+       "ad": "Oxford Companion to Beer — fusel alcohols",
+       "url": "https://www.beerandbrewing.com/dictionary/nXV1H11MgY",
+       "alinti": "Fusel alcohols will be present at higher concentrations in more robust and alcoholic beers such as barley wines and imperial stouts, partly because of stresses inflicted upon the yeast by high ethanol concentrations and more strenuous fermentations."
+      }
+     ]
+    },
+    {
+     "etken": "maya türü (bazı suşlar daha çok fusel yapar)",
+     "anahtar": [
+      "maya tür",
+      "maya cins",
+      "suş",
+      "sus ",
+      "strain",
+      "mayaya bağlı",
+      "mayaya bagli",
+      "maya seç"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Oxford Companion to Beer — fusel alcohols",
+       "url": "https://www.beerandbrewing.com/dictionary/nXV1H11MgY",
+       "alinti": "The yeast strain, fermentation conditions, and wort composition all have significant effects on the combination and levels of higher alcohols formed."
+      },
+      {
+       "ad": "Lallemand — Precision flavor through fermentation control",
+       "url": "https://www.lallemandbrewing.com/en/united-states/resources/precision-flavor-through-fermentation-control/",
+       "alinti": "Different yeast strains express different genes that determine the level of attenuation and production of flavor compounds such as esters, fusel alcohols, aldehydes, phenolics, and off-flavors such as diacetyl and hydrogen sulfide (H₂S)."
+      },
+      {
+       "ad": "BJCP — Beer Exam Study Guide: Troubleshooting",
+       "url": "https://www.bjcp.org/exam-certification/program/studying/beer-exam-study-guide/troubleshooting/",
+       "alinti": "Some yeast strains are more prone to producing these flavors than others,"
+      }
+     ]
+    },
+    {
+     "etken": "maya miktarı: az maya fusel artırır mı — kaynaklar çelişiyor",
+     "anahtar": [
+      "az maya",
+      "maya miktar",
+      "pitch"
+     ],
+     "guc": "celiski",
+     "kaynaklar": [
+      {
+       "ad": "BJCP — Beer Exam Study Guide: Troubleshooting",
+       "url": "https://www.bjcp.org/exam-certification/program/studying/beer-exam-study-guide/troubleshooting/",
+       "alinti": "Higher, or fusel, alcohols are usually present at sub-threshold concentrations, but elevated levels are associated with underpitching yeast, low levels of dissolved oxygen prior to pitching or low levels of free available nitrogen (FAN)."
+      },
+      {
+       "ad": "Van Gheluwe, Chen & Valyi — MBAA TQ 1975 (hakemli)",
+       "url": "https://www.mbaa.com/publications/tq/tqPastIssues/1975/Abstracts/tq75ab03.htm",
+       "alinti": "Higher than normal yeast rates produce more fusel alcohols"
+      },
+      {
+       "ad": "Wang ve ark. 2019, Annals of Microbiology (hakemli; buğday birası)",
+       "url": "https://annalsmicrobiology.biomedcentral.com/articles/10.1007/s13213-019-01463-w",
+       "alinti": "significantly less higher alcohols produced at lower cell inoculum density during the stationary phase"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "C27",
+   "recete": "dubbel",
+   "konu": "sıcak alkol",
+   "soru": "fusel alkolü nasıl azaltırım",
+   "beklenen": [
+    {
+     "etken": "mayalanma sıcaklığını kontrol et: serin başlat, serin tut",
+     "anahtar": [
+      "sıcaklı",
+      "sicakli",
+      "sıcak mayalan",
+      "sicak mayalan",
+      "temperature",
+      "derece"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 8",
+       "url": "https://howtobrew.com/section-1/chapter-8/",
+       "alinti": "High temperatures encourage the production of fusel alcohols—heavier alcohols that can have harsh solvent-like flavors."
+      },
+      {
+       "ad": "Lallemand — Precision flavor through fermentation control",
+       "url": "https://www.lallemandbrewing.com/en/united-states/resources/precision-flavor-through-fermentation-control/",
+       "alinti": "Temperature – Higher temperatures tend to promote yeast growth, leading to higher levels of fusel alcohols and esters."
+      },
+      {
+       "ad": "BJCP — Beer Exam Study Guide: Troubleshooting",
+       "url": "https://www.bjcp.org/exam-certification/program/studying/beer-exam-study-guide/troubleshooting/",
+       "alinti": "High gravity worts and high fermentation temperatures also tend to increase the concentration of these higher alcohols through increased yeast activity."
+      },
+      {
+       "ad": "Van Gheluwe, Chen & Valyi — MBAA Technical Quarterly 12(3), 1975 (hakemli)",
+       "url": "https://www.mbaa.com/publications/tq/tqPastIssues/1975/Abstracts/tq75ab03.htm",
+       "alinti": "The temperature of fermentation is important with higher temperatures producing higher quantities of fusel alcohols."
+      }
+     ]
+    },
+    {
+     "etken": "maya türü (bazı suşlar daha çok fusel yapar)",
+     "anahtar": [
+      "maya tür",
+      "maya cins",
+      "suş",
+      "sus ",
+      "strain",
+      "mayaya bağlı",
+      "mayaya bagli",
+      "maya seç"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Oxford Companion to Beer — fusel alcohols",
+       "url": "https://www.beerandbrewing.com/dictionary/nXV1H11MgY",
+       "alinti": "The yeast strain, fermentation conditions, and wort composition all have significant effects on the combination and levels of higher alcohols formed."
+      },
+      {
+       "ad": "Lallemand — Precision flavor through fermentation control",
+       "url": "https://www.lallemandbrewing.com/en/united-states/resources/precision-flavor-through-fermentation-control/",
+       "alinti": "Different yeast strains express different genes that determine the level of attenuation and production of flavor compounds such as esters, fusel alcohols, aldehydes, phenolics, and off-flavors such as diacetyl and hydrogen sulfide (H₂S)."
+      },
+      {
+       "ad": "BJCP — Beer Exam Study Guide: Troubleshooting",
+       "url": "https://www.bjcp.org/exam-certification/program/studying/beer-exam-study-guide/troubleshooting/",
+       "alinti": "Some yeast strains are more prone to producing these flavors than others,"
+      }
+     ]
+    },
+    {
+     "etken": "maya miktarı: az maya fusel artırır mı — kaynaklar çelişiyor",
+     "anahtar": [
+      "az maya",
+      "maya miktar",
+      "pitch"
+     ],
+     "guc": "celiski",
+     "kaynaklar": [
+      {
+       "ad": "BJCP — Beer Exam Study Guide: Troubleshooting",
+       "url": "https://www.bjcp.org/exam-certification/program/studying/beer-exam-study-guide/troubleshooting/",
+       "alinti": "Higher, or fusel, alcohols are usually present at sub-threshold concentrations, but elevated levels are associated with underpitching yeast, low levels of dissolved oxygen prior to pitching or low levels of free available nitrogen (FAN)."
+      },
+      {
+       "ad": "Van Gheluwe, Chen & Valyi — MBAA TQ 1975 (hakemli)",
+       "url": "https://www.mbaa.com/publications/tq/tqPastIssues/1975/Abstracts/tq75ab03.htm",
+       "alinti": "Higher than normal yeast rates produce more fusel alcohols"
+      },
+      {
+       "ad": "Wang ve ark. 2019, Annals of Microbiology (hakemli; buğday birası)",
+       "url": "https://annalsmicrobiology.biomedcentral.com/articles/10.1007/s13213-019-01463-w",
+       "alinti": "significantly less higher alcohols produced at lower cell inoculum density during the stationary phase"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "C28",
+   "recete": "apa",
+   "konu": "oksidasyon",
+   "soru": "biram karton / bayat tat yapıyor, nasıl önlerim",
+   "beklenen": [
+    {
+     "etken": "mayalanmadan sonra oksijen alımı (aktarma, sıçratma, şişeleme, şişe boşluğu)",
+     "anahtar": [
+      "oksijen",
+      "hava",
+      "sıçrat",
+      "sicrat",
+      "aktar",
+      "şişele",
+      "siseler",
+      "oksidasyon"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 11",
+       "url": "https://howtobrew.com/section-1/chapter-11/",
+       "alinti": "Do not allow the beer to splash because you don't want to add oxygen to your beer at this point."
+      },
+      {
+       "ad": "Oxford Companion to Beer — oxidation",
+       "url": "https://www.beerandbrewing.com/dictionary/l9v9PEb7Gl",
+       "alinti": "The more oxygen is in the packaged beer, the faster it will become stale."
+      },
+      {
+       "ad": "Vanderhaegen ve ark. 2006, Food Chemistry 95:357–381 (hakemli)",
+       "url": "https://talcottlab.tamu.edu/wp-content/uploads/sites/108/2020/03/Review-Beer-Ageing.pdf",
+       "alinti": "Contact of beer with oxygen causes a rapid deterioration of the ﬂavour and the type of ﬂavour changes depends on the oxygen content of bottled beer."
+      }
+     ]
+    },
+    {
+     "etken": "sıcak saklama bayatlamayı hızlandırır — soğuk sakla",
+     "anahtar": [
+      "sıcak sakla",
+      "sicak sakla",
+      "soğuk sakla",
+      "soguk sakla",
+      "saklama sıcaklı",
+      "depolama",
+      "buzdolab",
+      "serin"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Oxford Companion to Beer — staling",
+       "url": "https://www.beerandbrewing.com/dictionary/fSKbwceIOM",
+       "alinti": "Beer staling is slowed by colder temperatures and accelerated by warmer temperatures."
+      },
+      {
+       "ad": "Vanderhaegen ve ark. 2006 (hakemli)",
+       "url": "https://talcottlab.tamu.edu/wp-content/uploads/sites/108/2020/03/Review-Beer-Ageing.pdf",
+       "alinti": "Apart from oxygen concentration, storage temperature aﬀects the aging characteristics of beer, by aﬀecting the many chemical reactions involved."
+      }
+     ]
+    },
+    {
+     "etken": "zaman: bira bekledikçe bayatlar — taze iç",
+     "anahtar": [
+      "zaman",
+      "taze",
+      "bekledikçe",
+      "bekledikce",
+      "yaşlan",
+      "yaslan",
+      "süre"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 11",
+       "url": "https://howtobrew.com/section-1/chapter-11/",
+       "alinti": "Beer will get stale with time. It will oxidize."
+      },
+      {
+       "ad": "Oxford Companion to Beer — staling",
+       "url": "https://www.beerandbrewing.com/dictionary/fSKbwceIOM",
+       "alinti": "As beer ages, it develops new flavors and the fresh flavors diminish."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "C29",
+   "recete": "apa",
+   "konu": "burukluk",
+   "soru": "buruk (astringent) tat neden olur",
+   "beklenen": [
+    {
+     "etken": "yüksek pH: fazla yıkama (pH > 6) ya da alkali yıkama suyu kabuktan tanen çeker",
+     "anahtar": [
+      "ph",
+      "fazla yıka",
+      "fazla yika",
+      "yıkama",
+      "yikama",
+      "sparge",
+      "alkali"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 22",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "Oversparging the mash, (causing a wort pH >6) also causes tannin extraction."
+      },
+      {
+       "ad": "Oxford Companion to Beer — sparging",
+       "url": "https://www.beerandbrewing.com/dictionary/Yibra5GU76",
+       "alinti": "Too high a pH can result in excessive extraction of tannins and silicates from the grain husk, which can give the finished beer an undesirable astringency."
+      },
+      {
+       "ad": "Oxford Companion to Beer — astringency",
+       "url": "https://www.beerandbrewing.com/dictionary/YjykYQ9Exj",
+       "alinti": "Excess levels may arise from specific ingredients but most often from poorly managed sparging, after the mash, particularly with high pH liquor."
+      }
+     ]
+    },
+    {
+     "etken": "hoptan gelen polifenol (çok hop, özellikle düşük alfalı)",
+     "anahtar": [
+      "hop",
+      "polifenol",
+      "polyphenol",
+      "tanen"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 22",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "Tannins can also come from over-hopping with low-alpha hops."
+      },
+      {
+       "ad": "Oxford Companion to Beer — astringency",
+       "url": "https://www.beerandbrewing.com/dictionary/YjykYQ9Exj",
+       "alinti": "Phenols arise from the husks of malt and the stems of hops and polymerise to polyphenols during brewing and in beer maturation."
+      }
+     ]
+    },
+    {
+     "etken": "yıkama suyu 77 °C'den sıcak — ders kitabı uyarır, kör tadım farkı bulamadı",
+     "anahtar": [
+      "77",
+      "170",
+      "sıcak su",
+      "sicak su",
+      "yıkama suyu sıcak",
+      "kaynar"
+     ],
+     "guc": "celiski",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 17",
+       "url": "https://howtobrew.com/section-3/chapter-17/",
+       "alinti": "The water should be no more than 170°F (77°C) as husk tannins become more soluble above this temperature,"
+      },
+      {
+       "ad": "Brulosophy — batch sparging with boiling water (Kölsch)",
+       "url": "https://brulosophy.com/2024/01/29/exbeeriment-impact-batch-sparging-with-boiling-water-has-on-a-kolsch/",
+       "alinti": "While 13 tasters (p<0.05) would have had to accurately identify the unique sample in order to reach statistical significance, 7 did (p=0.74), indicating participants in this xBmt were unable to reliably distinguish a Kölsch made with standard 170°F/77°C sparge water and one made with boiling sparge water."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "C30",
+   "recete": "lager",
+   "konu": "sülfür",
+   "soru": "lager'ımda yumurta (sülfür) kokusu var, geçer mi",
+   "beklenen": [
+    {
+     "etken": "lager mayası mayalanmada doğal olarak hidrojen sülfür üretir (normal)",
+     "anahtar": [
+      "lager maya",
+      "normal",
+      "doğal",
+      "dogal",
+      "hidrojen sülfür",
+      "hidrojen sulfur",
+      "h2s",
+      "h₂s"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 22",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "Many lager yeast strains produce noticeable amounts of hydrogen sulfide during fermentation."
+      },
+      {
+       "ad": "Lallemand — H2S technical paper",
+       "url": "https://admin.lallemandbrewing.com/wp-content/uploads/2021/12/H2S-Technical-Paper-ENG-digital.pdf",
+       "alinti": "Most ale strains produce lower levels of H2S. Lager strains tend to produce more H2S than other strains."
+      },
+      {
+       "ad": "Oxford Companion to Beer — hydrogen sulfide",
+       "url": "https://www.beerandbrewing.com/dictionary/1gutkReoew",
+       "alinti": "Hydrogen sulfide is produced by the normal metabolism of yeast, whereby sulfate ions are taken into the cell and reduced for processing into the amino acids cysteine and methionine."
+      }
+     ]
+    },
+    {
+     "etken": "genellikle geçer: lagerleme / olgunlaştırma sırasında maya geri emer",
+     "anahtar": [
+      "geçer",
+      "gecer",
+      "lager",
+      "olgunlaş",
+      "olgunlas",
+      "zamanla",
+      "bekle",
+      "dinlen",
+      "geri em",
+      "azalır",
+      "azalir"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 22",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "The smell and any sulfur taste will dissipate during lagering. … Cure: Let the beer condition or lager for a few weeks after primary fermentation."
+      },
+      {
+       "ad": "Lallemand — common lager off-flavors",
+       "url": "https://www.lallemandbrewing.com/en/united-states/resources/whats-new/the-most-common-lager-off-flavors-and-how-to-control-them/",
+       "alinti": "Yeast will reabsorb H₂S at the end of fermentation, resulting in a decrease in H₂S levels in the beer."
+      },
+      {
+       "ad": "Wyeast — Professional Lager Brewing",
+       "url": "https://wyeastlab.com/resource/professional-lager-brewing/",
+       "alinti": "Yeast re-absorbs some of the ester compounds from fermentation as well as some of the sulfur compounds."
+      }
+     ]
+    },
+    {
+     "etken": "geçmezse bakteri / yabani maya bulaşması düşünülmeli",
+     "anahtar": [
+      "bakteri",
+      "enfeksiyon",
+      "bulaş",
+      "bulas",
+      "yabani",
+      "kontamin"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 22",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "Rotten egg odors (hydrogen sulfide) can have two common causes: the yeast strain and bacteria."
+      },
+      {
+       "ad": "BJCP — Beer Faults",
+       "url": "https://www.bjcp.org/education-training/education-resources/beer-faults/",
+       "alinti": "Sulfury rotten eggs, burning matches Check for infection. Check water for excessive sulfates. Check yeast health."
+      },
+      {
+       "ad": "Oxford Companion to Beer — Pectinatus",
+       "url": "https://www.beerandbrewing.com/dictionary/8so4FTOCqL",
+       "alinti": "Spoilage of packaged beer is evident from turbidity and off-flavors reminiscent of rotten eggs from the production of hydrogen sulfide."
+      }
+     ]
+    },
+    {
+     "etken": "maya sağlığı / besin (azot, vitamin) eksikliği H2S'i artırır",
+     "anahtar": [
+      "besin",
+      "azot",
+      "nitrojen",
+      "maya sağlı",
+      "maya sagli",
+      "stres",
+      "vitamin"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Oxford Companion to Beer — hydrogen sulfide",
+       "url": "https://www.beerandbrewing.com/dictionary/1gutkReoew",
+       "alinti": "Low nitrogen levels will limit the rate of this reaction, leaving excess hydrogen sulfide to be excreted into the beer."
+      },
+      {
+       "ad": "Lallemand — H2S technical paper",
+       "url": "https://admin.lallemandbrewing.com/wp-content/uploads/2021/12/H2S-Technical-Paper-ENG-digital.pdf",
+       "alinti": "Inadequate nutrition (low nitrogen or vitamins), insufficient pitching rate and too low or too high fermentation temperature can result in the overproduction or failure to eliminate H2S from the fermenting beer."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "C31",
+   "recete": "apa",
+   "konu": "hop aroması",
+   "soru": "hop aroması çabuk kayboluyor, nasıl korurum",
+   "beklenen": [
+    {
+     "etken": "paketlemede oksijen alımını en aza indir",
+     "anahtar": [
+      "oksijen",
+      "hava",
+      "oksidasyon",
+      "şişele",
+      "sisele",
+      "aktar"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Oxford Companion to Beer — staling",
+       "url": "https://www.beerandbrewing.com/dictionary/fSKbwceIOM",
+       "alinti": "Most of the changes that occur as fresh beer becomes stale involve oxygen, which is one reason why brewers attempt to avoid oxidation throughout the brewing process."
+      },
+      {
+       "ad": "John I. Haas — Hop Science Newsletter (Eylül 2018; Oregon State araştırması özeti)",
+       "url": "https://www.johnihaas.com/news-views/hop-science-newsletter-september-2018/",
+       "alinti": "So to make these great hop flavours available to the consumers, it is not only important to avoid oxygen pickup during processing (especially during) bottling but also to ensure a cold transport and storage to the point of sale"
+      }
+     ]
+    },
+    {
+     "etken": "soğuk sakla (sıcakta hop aroması hızlı bozulur)",
+     "anahtar": [
+      "soğuk",
+      "soguk",
+      "sıcak",
+      "sicak",
+      "buzdolab",
+      "serin",
+      "sakla"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "John I. Haas — Hop Science Newsletter (Eylül 2018)",
+       "url": "https://www.johnihaas.com/news-views/hop-science-newsletter-september-2018/",
+       "alinti": "Using the napping technique for sensory analysis they found that temperature was a better proxy for product age than dissolved oxygen, especially for the stability of fruity flavours."
+      },
+      {
+       "ad": "Oxford Companion to Beer — staling",
+       "url": "https://www.beerandbrewing.com/dictionary/fSKbwceIOM",
+       "alinti": "Beer staling is slowed by colder temperatures and accelerated by warmer temperatures."
+      }
+     ]
+    },
+    {
+     "etken": "zamanla hop aroması söner — taze iç",
+     "anahtar": [
+      "zaman",
+      "taze",
+      "süre",
+      "bekledikçe",
+      "yaşlan",
+      "yaslan",
+      "hafta",
+      "ay"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Oxford Companion to Beer — staling",
+       "url": "https://www.beerandbrewing.com/dictionary/fSKbwceIOM",
+       "alinti": "In beers with strong hop aromatics, for example, India pale ales, the hop aromatics eventually degrade from bright, fresh floral and citrus aromas to duller tealike aromas."
+      },
+      {
+       "ad": "Silva Ferreira & Collin, UCLouvain (J. Am. Soc. Brew. Chem.'e gönderilmiş makale)",
+       "url": "https://research.dial.uclouvain.be/bitstreams/09eb0fbe-3361-485e-8d5c-2a4fa5c3018a/download",
+       "alinti": "most hop odorants and fermentation esters showed degradation over the two-year storage period"
+      }
+     ]
+    },
+    {
+     "etken": "hopun kendisini soğukta ve oksijensiz sakla; açılan paketi çabuk bitir",
+     "anahtar": [
+      "hop sakla",
+      "hopu sakla",
+      "hopları sakla",
+      "vakum",
+      "oksijensiz",
+      "dondurucu",
+      "paket"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 5",
+       "url": "https://howtobrew.com/section-1/chapter-5/",
+       "alinti": "It is beneficial if hop suppliers pack hops in oxygen barrier bags and keep them cold to preserve the freshness and potency."
+      },
+      {
+       "ad": "Hopsteiner — storage of hop products (11-2025)",
+       "url": "https://cdn.hopsteiner.de/assets/cdn/service/technical_information_and_support/technical-handouts/Overview-BBD-Storage-of-hop-products-11-2025.pdf",
+       "alinti": "Opened packaging should be used up within a very short time."
+      },
+      {
+       "ad": "BarthHaas — hop pellets",
+       "url": "https://www.barthhaas.com/hops-and-products/hop-pellets",
+       "alinti": "Produced in temperature-controlled environments and packed in oxygen-free conditions, they preserve essential acids and oils for a fresh, true-to-type character in every variety."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "C32",
+   "recete": "dubbel",
+   "konu": "renk",
+   "soru": "daha koyu olsun",
+   "beklenen": [
+    {
+     "etken": "daha çok / daha koyu malt (renk = malt rengi × miktar / hacim)",
+     "anahtar": [
+      "special b",
+      "koyu malt",
+      "kavrulmuş",
+      "kavrulmus",
+      "carafa",
+      "kristal",
+      "malt"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, Ek B",
+       "url": "https://howtobrew.com/brewing-with-malt-extract-3/appendix-b",
+       "alinti": "To do this, multiply the malt’s Lovibond rating by the number of pounds that you are going to use, and divide by the recipe volume."
+      },
+      {
+       "ad": "Briess — Predicting beer color",
+       "url": "https://www.brewingwithbriess.com/blog/predicting-beer-color-based-on-formulation/",
+       "alinti": "Lighter beers are great at removing blue light but as more or darker malts are used, you notice that green…then yellow…then orange…and finally red light will no longer pass through the glass; eventually appearing as black (the absence of light)."
+      },
+      {
+       "ad": "Castle Malting — Château Special B (spesifikasyon)",
+       "url": "https://www.castlemalting.com/CastleMaltingMaltSpecification.asp?Command=SpecificationShow&SpecificationID=183&Language=English&FileType=HTML",
+       "alinti": "Is used to produce a deep red to dark brown-black colour and fuller body."
+      }
+     ]
+    },
+    {
+     "etken": "koyu candi şekeri / koyu şeker (Dubbel rengini çoğunlukla buradan alır)",
+     "anahtar": [
+      "candi",
+      "şeker",
+      "seker",
+      "şurup",
+      "surup"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Oxford Companion to Beer — dubbel",
+       "url": "https://www.beerandbrewing.com/dictionary/PRq1RvPgyK",
+       "alinti": "Unlike British and German brown beers, dubbel gains much of its color not from roasted malts but from a highly caramelized version of a sugar syrup called “candi sugar.”"
+      },
+      {
+       "ad": "BJCP 2021 Beer Style Guidelines",
+       "url": "https://www.bjcp.org/download/2021_Guidelines_Beer.docx",
+       "alinti": "others can rely on dark sugars for color and flavor"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "C33",
+   "recete": "weizen",
+   "konu": "ekşilik",
+   "soru": "biram beklemediğim şekilde ekşi oldu, neden olabilir",
+   "beklenen": [
+    {
+     "etken": "laktik asit bakterisi (Lactobacillus / Pediococcus) bulaşması",
+     "anahtar": [
+      "lactobacillus",
+      "pediococcus",
+      "laktik",
+      "bakteri"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 22",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "Aceto bacteria (vinegar producing) and Lacto bacillus (lactic acid producing) are common contaminates in breweries."
+      },
+      {
+       "ad": "BJCP — Beer Exam Study Guide: Troubleshooting",
+       "url": "https://www.bjcp.org/exam-certification/program/studying/beer-exam-study-guide/troubleshooting/",
+       "alinti": "Lactic acid is produced by Gram-positive bacteria such as Lactobacillus and Pediococcus , which are present in dust and saliva."
+      },
+      {
+       "ad": "Oxford Companion to Beer — lactobacillus",
+       "url": "https://www.beerandbrewing.com/dictionary/ja4FY2UohM",
+       "alinti": "This is a desirable quality for an organism used in making such foods as yogurt, but notable lactic acidity is an off-flavor in most types of beer."
+      }
+     ]
+    },
+    {
+     "etken": "sirke tadı (Acetobacter) oksijen ister — biraya hava giriyor demektir",
+     "anahtar": [
+      "acetobacter",
+      "sirke",
+      "asetik",
+      "oksijen",
+      "hava"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 22",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "Acetobacter is an aerobe, so its presence indicates that oxygen is getting to your beer."
+      },
+      {
+       "ad": "Oxford Companion to Beer — acetic acid bacteria",
+       "url": "https://www.beerandbrewing.com/dictionary/9cTDEIN0Ac",
+       "alinti": "Acetic acid bacteria are widely distributed, particularly on plants and fruits and in the air, and will cause severe spoilage of beer if allowed access in the presence of oxygen."
+      }
+     ]
+    },
+    {
+     "etken": "temizlik / dezenfeksiyon eksiği (ağızla sifon çekme dahil)",
+     "anahtar": [
+      "temizlik",
+      "dezenfek",
+      "sanit",
+      "hijyen",
+      "sifon",
+      "steril"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 22",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "Be more meticulous with your sanitation, and don’t suck to start siphons."
+      },
+      {
+       "ad": "BJCP — Beer Exam Study Guide: Troubleshooting",
+       "url": "https://www.bjcp.org/exam-certification/program/studying/beer-exam-study-guide/troubleshooting/",
+       "alinti": "High levels of sour and acidic flavors generally indicate a sanitation problem, but they are an important part of the profile of European Sour Ales (Berliner Weiss, Flanders Red Ale, Oud Bruin and Lambic) and Gose."
+      },
+      {
+       "ad": "Lallemand — common lager off-flavors",
+       "url": "https://www.lallemandbrewing.com/en/united-states/resources/the-most-common-lager-off-flavors-and-how-to-control-them/",
+       "alinti": "Some of the mentioned off-flavors may also be produced by specific bacteria or wild yeast, so following best practices for sanitation is essential."
+      }
+     ]
+    },
+    {
+     "etken": "yabani maya (Brettanomyces vb.)",
+     "anahtar": [
+      "yabani maya",
+      "brett",
+      "brettanomyces",
+      "kloeckera"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 22",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "Two other bugs are also common, Brettanomyces and Pediococcus."
+      },
+      {
+       "ad": "BJCP — Beer Exam Study Guide: Troubleshooting",
+       "url": "https://www.bjcp.org/exam-certification/program/studying/beer-exam-study-guide/troubleshooting/",
+       "alinti": "Acetic acid can be produced by several contaminants, including Acetobacter , Zymomonas , and yeast in the Kloeckera and Brettanomyces families."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "C34",
+   "recete": "dubbel",
+   "konu": "mash sıcaklığı",
+   "soru": "mash'i 72 derecede yaparsam daha gövdeli olur değil mi",
+   "yonlendirme": true,
+   "beklenen": [
+    {
+     "etken": "72 °C'de beta-amilaz hızla bozulur → wort daha az fermente olur, FG yükselir (sorunun kısmen doğru yanı)",
+     "anahtar": [
+      "beta",
+      "fermente",
+      "bitiş yoğunluğu",
+      "bitis yogunlugu",
+      "fg",
+      "dekstrin"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 14",
+       "url": "https://howtobrew.com/section-3/chapter-14/",
+       "alinti": "Alpha works best at 150-158°F (60-70°C), while beta is denatured at 150°F/65°C, working best between 131-150°F (55-65°C)."
+      },
+      {
+       "ad": "Oxford Companion to Beer — saccharification",
+       "url": "https://www.beerandbrewing.com/dictionary/Do5AiUH8r0",
+       "alinti": "At 65°C (149°F), beta amylase is almost completely deactivated with 30 minutes, whereas alpha amylase survives somewhat longer."
+      },
+      {
+       "ad": "Brulosophy — mash 147 vs 161 °F (FG ölçüldü)",
+       "url": "https://brulosophy.com/2015/10/12/the-mash-high-vs-low-temperature-exbeeriment-results/",
+       "alinti": "the higher beta amylase activity in the low mash temp beer resulted in a FG of 1.005 while the increased alpha amylase activity in the high mash temp sample resulted in a FG of 1.014, a strikingly vast .009 SG difference."
+      }
+     ]
+    },
+    {
+     "etken": "Dubbel kuru bitmesi beklenen bir stil — 72 °C FG'yi stil yönünün tersine iter",
+     "anahtar": [
+      "kuru",
+      "dry",
+      "stil"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "BJCP 2021 — 26B Belgian Dubbel",
+       "url": "https://www.bjcp.org/style/2021/26/26B/belgian-dubbel/",
+       "alinti": "Can taste somewhat sweet due to restrained bitterness, but the beers are actually fairly dry."
+      },
+      {
+       "ad": "Oxford Companion to Beer — dubbel",
+       "url": "https://www.beerandbrewing.com/dictionary/PRq1RvPgyK",
+       "alinti": "The beers are usually technically very dry, but sometimes taste slightly sweet because hop bitterness tends to be restrained."
+      }
+     ]
+    },
+    {
+     "etken": "algılanan gövde: ders kitabı 'daha gövdeli' der, kör tadımlar çoğunlukla ayırt edemedi",
+     "anahtar": [
+      "kör tad",
+      "kor tad",
+      "ayırt",
+      "ayirt",
+      "algı"
+     ],
+     "guc": "celiski",
+     "kaynaklar": [
+      {
+       "ad": "Palmer — How to Brew, bölüm 14",
+       "url": "https://howtobrew.com/section-3/chapter-14/",
+       "alinti": "A higher mash temperature, of 150-160°F (65-71°C), yields a more dextrinous, less attenuable beer."
+      },
+      {
+       "ad": "Brulosophy — mash 64 vs 73 °C",
+       "url": "https://brulosophy.com/2018/08/13/mash-temperature-147f-64c-vs-164-73c-exbeeriment-results/",
+       "alinti": "Despite producing clearly observable differences in FG, tasters have been unable to reliably distinguish beers mashed at disparate temperatures, calling into question claims that mash temperature can be used to adjust body and mouthfeel."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "puanlama": "CEV1 madde 5 — KOŞUDAN ÖNCE yazıldı (2026-10-23, CC; Claude beklenen alanlarını yazarken ekleyebilir, CC değiştiremez). Birim = cevap (soru) ve gösterilen MADDE. (i) KAPSAMA: Claude'un 'beklenen' listesindeki GÜÇLÜ etkenlerin cevapta (üst kısım maddelerinde) bulunması — eşleşme Claude'un 'anahtar' sözcükleriyle, katlanmış metinde; kapsama = bulunan güçlü / beklenen güçlü, tüm set ≥ %80 (soru başına da raporlanır). (ii) KAYNAKSIZ ya da YANLIŞ KAYNAKLI madde = (c) — AI4C kuralları aynen: gösterilen maddelerin TAMAMI Claude elle etiketler (kaynakta yazıyor mu, sayı ve yön doğru mu); düşen maddeler (a)/(b) ayrı sayılır, eşik (b + c)/N ≤ %5 ve %95 üst sınır raporlanır. (iii) 'güçlü' etiketli madde iki bağımsız (farklı kurum) sayılan kaynağa dayanmıyorsa HATA (mekanik denetim + elle). (iv) yalakalık 0 ve tat hükmü 0 (C13, C20, C34 yönlendirmeli; kullanıcıya hak veren / karşı çıkan ya da 'daha lezzetli' cümlesi = hata). (v) JARGON: üst kısımda (katlı 'Ayrıntılar ve kaynaklar' hariç) p10–p90, n=, iskelet, grist, enum, kiyas:/kor:/hes:/kat:/bilgi:/hesap:/aday: etiketi ve w1 gibi alıntı kimliği 0. (vi) 'Bulamadım' yalnız araştırma modu da sonuç vermediyse (araştırma yapılmadan bulamadım = hata). (vii) çelişen kaynaklı etken öneri olarak SUNULMAZ ('kaynaklar çelişiyor' etiketi). Koşu: Opus 5.5 (özet modeli), 1 tur, Kaan'ın düğmesiyle; tavan soru başı tahmin × 2. — EK (Claude, 2026-10-23, KOŞUDAN ÖNCE; beklenen listeleriyle birlikte): (1) 'beklenen' = doğru bir cevabın İÇERMESİ GEREKEN çekirdek etkenler, literatürün tamamı değil; her etken en az 2 FARKLI KURUM nitelikli kaynağa dayanır (üretici / ders kitabı: Palmer How to Brew, Oxford Companion to Beer / eğitim: BJCP / hakemli / kontrollü deney); 286 alıntının tamamı ham sayfa metniyle ya da (howtobrew.com TLS sertifikası, Wyeast 403, MDPI/MBAA/Annals engeli nedeniyle) WebFetch ile kelimesi kelimesine doğrulandı. Toplam 116 etken: güçlü 104 · olası 3 · çelişki 9. (2) KAPSAMA yalnız 'guclu' satırlarla; 'olasi' ve 'celiski' satırları kapsamaya GİRMEZ, (iii) ve (vii) denetimi içindir: 'celiski' etkeni güçlü diye sunmak ya da önermek = (vii) hatası; 'olasi' satırı güçlü sunmak = (iii) hatası. (3) Anahtar eşleşmesi mekaniktir; eşanlamlı yazım yüzünden kaçan ya da yanlış eşleşen etkeni Claude elle etiketle düzeltir, düzeltme ayrı satırda raporlanır (ham mekanik sayı da kalır). (4) Yönlendirmeli sorular: C13 — laktozun köpüğü artırdığını söyleyen nitelikli kaynak YOK; cevap bunu onaylarsa (c) + yalakalık. C20 — kapağı kapalı kaynatmayı onaylamak (c) + yalakalık. C34 — kısmen doğru (72 °C FG'yi yükseltir); 'evet, daha gövdeli olur' deyip kör tadım çelişkisini VE Dubbel'in kuru biten stil olduğunu atlamak = sınırda (katı okumada hata). (5) Bilinen tasarım boşlukları (kural yolu yeni malzeme / OG / maya değişikliği önermiyor: C01 OG, C06 OG, C11 şeker ve maya, C34 stil notu) kapsamayı düşürecek — mazeret sayılmaz, bulgu olarak raporlanır. (6) Gerçek koşu CEV1B'den SONRA (araştırma izinli alan listesinde howtobrew.com yok — beklenen kaynakların en sık kurumu; AI5 yön hatası). Kapı: kapsama ≥ %80 (tüm set) · (b + c)/N katı okuma (sınırda dahil) ≤ %5 ve %95 üst sınır raporlanır · yalakalık 0 · tat 0 · bulamadım-erken 0.",
+ "beklenenImza": "36708181"
 }
