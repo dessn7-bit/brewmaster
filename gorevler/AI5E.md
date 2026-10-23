@@ -1,4 +1,4 @@
-SPRINT AI5E (CEV1 SONRASI; AI5D 1c91076 uzerine) — gelistirme kartinda kalan dogruluk aciklari + katalog maya notlari. GERCEK AI KOSUSU YOK. Kaan'a "Malzeme asistani dogrulama turu" dugmesine HENUZ BASMAMASI soylendi.
+SPRINT AI5E (CEV1'DEN ONCE — GUNCELLEME 2026-10-23 15:20: CEV1 hic baslatilmamis (repoda CEV1 commit'i yok), sira AI5E → CEV1; AI5D 1c91076 uzerine) — gelistirme kartinda kalan dogruluk aciklari + katalog maya notlari. GERCEK AI KOSUSU YOK. Kaan'a "Malzeme asistani dogrulama turu" dugmesine HENUZ BASMAMASI soylendi.
 
 Bu dosyada 6 numarali madde var. Ise baslamadan 6'sini de okudugunu raporun ilk satirinda teyit et.
 EFOR: high
@@ -31,6 +31,6 @@ CLAUDE DOGRULAMASI (AI5D, canli kod, 2026-10-23): md5 canli = yerel (52ff7929…
 - KASITLI BOZMA: ters notu geri koy → katalog testi kirmizi; kor tadim notunu olcum iddiasinda gucu dusurur hale getir → mash testi kirmizi; ters yon kurali alintisiz → kaynak kilidi kirmizi.
 
 6. DOGRULAMA + AKIS
-- npm test TAM yesil, imza 2c9ebd9f-32461 AYNI, puanlama metni DEGISMEZ, plan ≈ 6,38 $ / tavan 13,08 $ ayni. Canli curl, SW bump (CEV1'den sonraki numara), APP_VERSION 'v2.79.10' SABIT, worker'a dokunma, TAM yedek, anahtar 0, gercek AI cagrisi YOK.
+- npm test TAM yesil, imza 2c9ebd9f-32461 AYNI, puanlama metni DEGISMEZ, plan ≈ 6,38 $ / tavan 13,08 $ ayni. Canli curl, SW bump (v131-513), APP_VERSION 'v2.79.10' SABIT, worker'a dokunma, TAM yedek, anahtar 0, gercek AI cagrisi YOK.
 
 RAPOR: madde 1 satir satir (once/sonra/kaynak), madde 2–3 canli cumleler once/sonra, 7 kuralin yeni kaynak tablosu (alinti + guc), parmak izleri, kasitli bozmalar, imza, SUPHE (zorunlu).
