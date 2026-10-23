@@ -3828,7 +3828,7 @@ const CASELER = [
     })
   },
   {
-    kod: 'AU1-AJANDA', ad: 'D2/D5/D6 AJANDA: süre tahmini mash ADIM TOPLAMINDAN (175→215, ısınma hariç yazılı); pitch sıcaklığı gerçek maya sc/ideal (lager 9-15, sabit 18-22 YOK); hop dk > kaynatma UYARISI',
+    kod: 'AU1-AJANDA', ad: 'D2/D5/D6 AJANDA: süre tahmini mash ADIM TOPLAMINDAN (175→215, ısınma hariç yazılı); pitch sıcaklığı gerçek maya sc/ideal (lager 12-18 Fermentis, sabit 18-22 YOK); hop dk > kaynatma UYARISI',
     calistir: (page) => page.evaluate(() => {
       const malt = MALTLAR.find(m => m && m.id && m.g !== 'Şeker' && m.id !== 'rice_hulls');
       const hop = HOPLAR.find(h => h && h.id);
@@ -3837,15 +3837,15 @@ const CASELER = [
       S.mashAdimlar = [{ sc: 46, dk: 15 }, { sc: 67, dk: 45 }, { sc: 72, dk: 25 }, { sc: 76, dk: 15 }]; // toplam 100 dk
       S.maltlar = [{ id: malt.id, kg: 3.16 }];
       S.hoplar = [{ id: hop.id, g: 4, dk: 75, tur: 'boil' }]; // 75 > 70 → fiziken imkânsız
-      S.mayaId = 'w3470'; // lager: sc [9,15], ideal 12
+      S.mayaId = 'w3470'; // lager: sc [12,18] (CEV1 (0): Fermentis "ideally 12–18 °C"; önce katalog 9–15), ideal 12
       // D5 — pitch sıcaklığı
       let a = brewdayAjandaUret();
       const pitch = a.find(x => x.tip === 'pitch');
-      __REG.ok('D5: pitch detayı gerçek maya aralığı (9-15°C) + ideal 12°C', !!pitch && pitch.detay.indexOf('9-15°C (ideal 12°C)') > -1, pitch && pitch.detay);
+      __REG.ok('D5: pitch detayı gerçek maya aralığı (12-18°C, Fermentis) + ideal 12°C', !!pitch && pitch.detay.indexOf('12-18°C (ideal 12°C)') > -1, pitch && pitch.detay);
       __REG.ok('D5: her mayada sabit "18-22°C" talimatı YOK', !pitch || pitch.detay.indexOf('18-22°C') === -1);
       __REG.ok('D5: olmayan alan artık okunmuyor (my?.sic_min çağrısı yok)', String(brewdayAjandaUret).indexOf('my?.sic_min') === -1 && String(brewdayAjandaUret).indexOf('my?.sic_max') === -1);
       S.mayaId = 'us05'; a = brewdayAjandaUret();
-      __REG.ok('D5 karşı-test: ale mayasında 15-24°C (ideal 20°C)', a.find(x => x.tip === 'pitch').detay.indexOf('15-24°C (ideal 20°C)') > -1);
+      __REG.ok('D5 karşı-test: ale mayasında 18-26°C (ideal 20°C) (CEV1: Fermentis US-05)', a.find(x => x.tip === 'pitch').detay.indexOf('18-26°C (ideal 20°C)') > -1);
       // D6 — hop > kaynatma uyarısı
       const hopEv = a.find(x => x.tip === 'hop_add');
       __REG.ok('D6: hop 75 dk > kaynatma 70 dk uyarısı ajandada', !!hopEv && hopEv.detay.indexOf('75 dk > kaynatma 70 dk') > -1, hopEv && hopEv.detay);
@@ -10053,6 +10053,7 @@ const CASELER = [
     calistir: async (page) => {
       const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'tuzak_seti.json'), 'utf8'));
       return page.evaluate((set) => {
+        window.__cev1EskiKatalog(); // CEV1 (0): tarihî koşunun GERÇEK cümleleri O GÜNÜN kataloğuyla (69 maya sc alanı sonra üreticiye göre değişti); bağlam başına yeni sayfa → geri yüklemeye gerek yok
         const A4 = window.BM_AI4, A1 = window.BM_AI1;
         const pk = id => { const it = set.istemler.find(x => x.id === id), tb = set.tabanlar[it.taban], T = { stil: tb.stil, tarif: Object.assign({ hacim: 11, verim: 61, mashSc: 66 }, JSON.parse(JSON.stringify(tb.tarif))) }, c = A4.cozumle(it.istem, T);
           const deg = A1.degisiklikKur(T, c.v), hk = A1.hukum(c.stil, deg), kal = [{ tip: deg.tip, id: deg.yeniId }, { tip: deg.tip, id: deg.eskiId }].filter(k => k.id);
@@ -10112,6 +10113,7 @@ const CASELER = [
       const dis = [{ ad: 'set: 16 doğrulanabilir gerçek cümle (4 doğru, 12 kaynak eksik) + 16 doğrulanamadı (web alıntısı o koşuda saklanmamıştı) · her etikette kanıt', ok: ds.gercek.length === 16 && ds.gercek.filter(x => x.etiket === 'dogru').length === 4 && ds.gercek.filter(x => x.etiket === 'kaynak_eksik').length === 12 && ds.dogrulanamadi.length === 16 && ds.gercek.every(x => x.kanit && x.kanit.length > 10) },
         { ad: 'kişisel veri / anahtar yok', ok: !/Kaan|sk-ant|@/.test(JSON.stringify(ds)) }];
       const ic = await page.evaluate((set, ds) => {
+        window.__cev1EskiKatalog(); // CEV1 (0): tarihî koşunun GERÇEK cümleleri O GÜNÜN kataloğuyla (69 maya sc alanı sonra üreticiye göre değişti); bağlam başına yeni sayfa → geri yüklemeye gerek yok
         const A4 = window.BM_AI4, A1 = window.BM_AI1;
         const pk = g => { if (g.paket) { const k = { tip: g.paket.kalem.split(':')[0], id: g.paket.kalem.split(':')[1] }; return { paket: A4.kanitKur({ stil: g.paket.stil, kalemler: [k], mod: 'tat' }), web: [], kalemler: [k], stil: g.paket.stil }; }
           const it = set.istemler.find(x => x.id === g.id), tb = set.tabanlar[it.taban], T = { stil: tb.stil, tarif: Object.assign({ hacim: 11, verim: 61, mashSc: 66 }, JSON.parse(JSON.stringify(tb.tarif))) }, c = A4.cozumle(it.istem, T);
@@ -10133,6 +10135,7 @@ const CASELER = [
     calistir: async (page) => {
       const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'tuzak_seti.json'), 'utf8')), ds = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'denetleyici_seti.json'), 'utf8'));
       return page.evaluate((set, ds) => {
+        window.__cev1EskiKatalog(); // CEV1 (0): tarihî koşunun GERÇEK cümleleri O GÜNÜN kataloğuyla (69 maya sc alanı sonra üreticiye göre değişti); bağlam başına yeni sayfa → geri yüklemeye gerek yok
         const A4 = window.BM_AI4, A1 = window.BM_AI1;
         const pkI = id => { const it = set.istemler.find(x => x.id === id), tb = set.tabanlar[it.taban], T = { stil: tb.stil, tarif: Object.assign({ hacim: 11, verim: 61, mashSc: 66 }, JSON.parse(JSON.stringify(tb.tarif))) }, c = A4.cozumle(it.istem, T);
           if (c.mod === 'ikame') { const deg = A1.degisiklikKur(T, c.v), hk = A1.hukum(c.stil, deg), kal = [{ tip: deg.tip, id: deg.yeniId }, { tip: deg.tip, id: deg.eskiId }].filter(k => k.id); return { paket: A4.kanitKur({ stil: c.stil, kalemler: kal, hk, deg, mod: 'ikame' }), web: [], kalemler: kal, stil: c.stil }; }
@@ -12299,6 +12302,7 @@ const CASELER = [
     calistir: async (page) => {
       const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'tuzak_seti.json'), 'utf8')), fx = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'fixtures', 'kosu4_opus_ai4.json'), 'utf8'));
       return page.evaluate(async (set, fx) => {
+        window.__cev1EskiKatalog(); // CEV1 (0): koşu #4 cümleleri O GÜNÜN kataloğuyla (69 maya sc alanı sonra üreticiye göre değişti)
         const A = window.BM_AI, A4 = window.BM_AI4, T3 = window.BM_TUZAK, asil = A.sor, deg = [], coz = [], s = JSON.stringify; let N = 0, G0 = 0, G1 = 0;
         try {
           for (const rec of fx.istem) { const it = set.istemler.find(x => x.id === rec.id); if (!rec.ai) continue;
@@ -12833,6 +12837,145 @@ const CASELER = [
       return __REG.al();
     })
   },
+  // ═════════════ SPRINT CEV1 — CEVAP İLKESİ: maya sıcaklık alanları (üretici) · ortak cevap biçimi (AI5 / AI4 / mash) · araştırma modu · cev_seti koşucusu ═════════════
+  {
+    kod: 'CEV1-MAYA', ad: 'MAYA SICAKLIK ALANLARI (CEV1 madde 0): üreticiyle doğrulanan her mayanın sc alanı üreticinin aralığına EŞİT (MAYA_SC_KAYNAK, 102 maya, kaynak + alıntı) · doğrulanmayan (BiraBurada, lc_rye, markasız kveik, mj_m21) kartta SAYI almaz ("paketine bak") · TANIM "Sıcaklık:" metni alanla aynı · HA-18 atu 98–102 + enzim, %95 tavanı yalnız enzimli mayada açık · WY3068 "daha az muz" 18 °C / "daha muzlu" 24 °C · "hem muz hem karanfil daha çok" iki hedef birlikte · AI çağrısı 0 · KASITLI BOZMA',
+    calistir: (page) => page.evaluate(() => {
+      const G = window.BM_AI5, A = window.BM_AI, C = window.BM_CEV;
+      const tara = () => { const by = {}, hata = []; MAYALAR.forEach(m => { by[m.id] = m; });
+        Object.keys(MAYA_SC_KAYNAK).forEach(id => { const k = MAYA_SC_KAYNAK[id], y = by[id]; if (!y) { hata.push(id + ' katalogda yok'); return; } if (y.sc[0] !== k.c[0] || y.sc[1] !== k.c[1]) hata.push(id + ' sc ' + y.sc.join('–') + ' ↔ üretici ' + k.c.join('–')); if (!k.url || !/^https:/.test(k.url) || !String(k.a).trim() || !k.u) hata.push(id + ' kaynak eksik'); if (y.ideal < y.sc[0] || y.ideal > y.sc[1]) hata.push(id + ' ideal dışı'); });
+        Object.keys(TANIM).forEach(id => { const y = by[id]; if (!y) return; const m = /Sıcaklık:\s*([^.]*)\./.exec(TANIM[id]); if (!m) return; const k = MAYA_SC_KAYNAK[id];
+          if (k ? m[1] !== y.sc[0] + '–' + y.sc[1] + ' °C (' + k.u + ')' : !/doğrulanmadı/.test(m[1])) hata.push('TANIM ' + id + ': ' + m[1]); });
+        return hata; };
+      const h0 = tara(), dog = Object.keys(MAYA_SC_KAYNAK), bb = MAYALAR.filter(m => /^bb/.test(m.id));
+      __REG.ok('katalog taraması: doğrulanan ' + dog.length + ' maya, sc ↔ üretici çelişkisi ' + h0.length + ' · BiraBurada ' + bb.length + ' kaydın hiçbiri doğrulanmış değil · doğrulanmayan: ' + MAYALAR.filter(m => !MAYA_SC_KAYNAK[m.id]).length, dog.length === 102 && !h0.length && bb.every(m => !MAYA_SC_KAYNAK[m.id]) && !MAYA_SC_KAYNAK.mj_m21 && !MAYA_SC_KAYNAK.lc_rye, h0.join(' | '));
+      __REG.ok('örnek alanlar: wy3068 ' + MAYALAR.find(m => m.id === 'wy3068').sc.join('–') + ' (Wyeast 64-75°F / 18-24°C) · w3470 ' + MAYALAR.find(m => m.id === 'w3470').sc.join('–') + ' (Fermentis ideally 12–18) · wlp300 ' + MAYALAR.find(m => m.id === 'wlp300').sc.join('–'), MAYALAR.find(m => m.id === 'wy3068').sc.join() === '18,24' && MAYALAR.find(m => m.id === 'w3470').sc.join() === '12,18' && MAYALAR.find(m => m.id === 'wlp300').sc.join() === '20,22' && /18-24°C/.test(MAYA_SC_KAYNAK.wy3068.a));
+      const ha = MAYALAR.find(m => m.id === 'ha18'), cH = window._bmTarifHesap({ maltlar: [{ id: 'pilsner', kg: 2.6 }], hoplar: [], katkilar: [], mayaId: 'ha18', hacim: 11, verim: 70, mashSc: 65 });
+      __REG.ok('HA-18: atu ' + ha.atu.join('–') + ' enzim ' + ha.enzim + ' · doğrulayıcı ' + mayaValid(ha).valid + ' · enzimsiz 98–102 reddedilir · FG ölçümü: OG ' + cH.og.toFixed(3) + ' → FG ' + cH.fg.toFixed(3) + ' (≥ 1,000, anlamlı)', ha.atu.join() === '98,102' && ha.enzim === true && mayaValid(ha).valid && !mayaValid({ id: 'x', ad: 'x', atu: [98, 102], sc: [15, 22], ideal: 20, tip: 'ale' }).valid && cH.fg >= 1.000 && cH.fg < 1.005);
+      const sah = A.hazirMi, sor = A.sor; let ai = 0; A.hazirMi = () => ({ hazir: true }); A.sor = () => { ai++; return Promise.resolve({ ok: false, hata: { mesaj: 't' } }); };
+      const R = m => ({ ad: 'W', stil: 'Weizen / Weissbier', tarif: { maltlar: [{ id: 'wheat', kg: 2 }, { id: 'pilsner', kg: 1.2 }], hoplar: [{ id: 'magnum', g: 8, dk: 60, tur: 'boil', form: 'pellet' }], katkilar: [], mayaId: m, hacim: 11, verim: 60, mashSc: 67, mashAdimlar: [{ sc: 46, dk: 15 }, { sc: 67, dk: 45 }, { sc: 72, dk: 15 }] } });
+      let n = 0; const kos = (m, t) => G.hazirla({ tur: 'tarif', key: 'cev1m:' + (n++), T: JSON.parse(JSON.stringify(R(m))) }, { metin: t });
+      let Z; try { Z = { az: kos('wy3068', 'daha az muz istiyorum'), cok: kos('wy3068', 'daha muzlu olsun'), bbAz: kos('bb_alman_bugday1', 'daha az muz istiyorum'), bbCok: kos('bb_alman_bugday1', 'daha muzlu olsun'), iki: kos('wy3068', 'hem muz hem karanfil daha çok olsun') }; } finally { A.hazirMi = sah; A.sor = sor; }
+      const of = (st, k) => (G.oneriler(st).find(o => o.kural === k) || {}).metin || '';
+      __REG.ok('WY3068: "daha az muz" → "' + of(Z.az, 'fermsc_ters') + '" · "daha muzlu" → "' + of(Z.cok, 'fermsc') + '"', /alt ucunda \(18 °C\)/.test(of(Z.az, 'fermsc_ters')) && /üst ucunda \(24 °C\)/.test(of(Z.cok, 'fermsc')) && /üreticinin ürün sayfasından/.test(of(Z.cok, 'fermsc')) && /üreticinin sıcaklık aralığı 18–24 °C \(Wyeast\)/.test(G.seninRecete(Z.az)));
+      __REG.ok('BB Alman Buğday No1 (doğrulanmamış): sayı YOK → "' + of(Z.bbAz, 'fermsc_ters') + '" · Senin reçetende: "' + G.seninRecete(Z.bbCok).slice(0, 120) + '…"', !/\d+ °C\)/.test(of(Z.bbAz, 'fermsc_ters')) && !/\d+ °C\)/.test(of(Z.bbCok, 'fermsc')) && of(Z.bbAz, 'fermsc_ters').indexOf(G.SC_YOK) >= 0 && /üretici aralığını bulamadım, paketine bak/.test(G.seninRecete(Z.bbCok)) && !/17–22/.test(G.seninRecete(Z.bbCok)));
+      const ki = G.oneriler(Z.iki).map(o => o.kural + ':' + o.guc.k);
+      __REG.ok('"hem muz hem karanfil daha çok olsun" → ' + Z.iki.hedef + ' [' + ki.join(', ') + '] · muz kurallarında çelişki notu · ferulik "uzat" · AI çağrısı ' + ai, Z.iki.durum === 'hazir' && Z.iki.hedef === 'muz_karanfil' && ki.join() === 'pitch:guclu,fermsc:guclu,ferulik:olasi' && /kaynaklar çelişiyor/.test(of(Z.iki, 'pitch')) && /adımını uzat/.test(of(Z.iki, 'ferulik')) && ai === 0);
+      // KASITLI BOZMALAR
+      const w = MAYALAR.find(m => m.id === 'wy3068'), s0 = w.sc.slice(); w.sc = [17, 22]; let b1; try { b1 = tara(); } finally { w.sc = s0; }
+      __REG.ok('KASITLI BOZMA wy3068 eski 17–22 alanı geri → tarama "' + b1[0] + '" → kırmızı', b1.some(x => /^wy3068 sc 17–22/.test(x)));
+      const kk = MAYA_SC_KAYNAK.wy3068; delete MAYA_SC_KAYNAK.wy3068; let b2; try { b2 = of(kos('wy3068', 'daha az muz istiyorum'), 'fermsc_ters'); } finally { MAYA_SC_KAYNAK.wy3068 = kk; }
+      __REG.ok('KASITLI BOZMA wy3068 kaynak kaydı silinince kart sayı vermez → "' + b2 + '" (18 °C beklentisi kırmızı)', !/\(18 °C\)/.test(b2) && b2.indexOf(G.SC_YOK) >= 0);
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'CEV1-BICIM', ad: 'ORTAK CEVAP BİÇİMİ (CEV1 madde 1, 4, 6): AI5 / AI4 / mash kartlarının ÜST kısmı = Anladığım · doğrudan cevap · ≤ 5 madde + kanıt gücü sözcüğü ("güçlü — en az iki bağımsız kaynak …") · Senin reçetende; kaynak listesi (ad + link) ve teknik ayrıntı KATLI · üst kısımda jargon (p10–p90, n=, iskelet, grist, enum, kiyas:/kor:/hes:/kat:/bilgi:/hesap:, w1) 0 · paket / çözüm değişmedi (yalnız görünüm) · KASITLI BOZMA',
+    calistir: async (page) => {
+      const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'tuzak_seti.json'), 'utf8'));
+      return page.evaluate(async (set) => {
+        const G = window.BM_AI5, A4 = window.BM_AI4, M = window.BM_MASH, C = window.BM_CEV, A = window.BM_AI;
+        const ust = html => { const d = document.createElement('div'); d.innerHTML = html; return d; };
+        const ustBolum = d => { const k = d.cloneNode(true); k.querySelectorAll('details').forEach(x => x.remove()); return k; };
+        // (AI5) üç istek: aroma, kuru, stil
+        const R = { ad: 'W', stil: 'Weizen / Weissbier', tarif: { maltlar: [{ id: 'wheat', kg: 2 }, { id: 'pilsner', kg: 1.2 }], hoplar: [{ id: 'magnum', g: 8, dk: 60, tur: 'boil', form: 'pellet' }], katkilar: [], mayaId: 'wy3068', hacim: 11, verim: 60, mashSc: 67, mashAdimlar: [{ sc: 46, dk: 15 }, { sc: 67, dk: 45 }] } };
+        const sah = A.hazirMi, sor = A.sor; A.hazirMi = () => ({ hazir: false }); let i = 0; const L5 = [];
+        try { ['daha muzlu olsun', 'daha kuru olsun', 'daha acı olsun', 'stile yaklaştır'].forEach(t => { const key = 'cev1b:' + (i++); const st = G.hazirla({ tur: 'tarif', key, T: JSON.parse(JSON.stringify(R)) }, { metin: t }); L5.push({ t, st, d: ust(G.kartHTML(key)) }); }); } finally { A.hazirMi = sah; A.sor = sor; }
+        const ozet5 = L5.map(x => { const u = ustBolum(x.d); return x.t + ': anladığım ' + !!u.querySelector('.bm-ai5-anladigim') + ' · cevap ' + !!u.querySelector('.cev-cevap') + ' · madde ' + u.querySelectorAll('.cev-madde').length + ' (kanıt satırı ' + u.querySelectorAll('.cev-madde .cev-guc').length + ') · senin ' + !!u.querySelector('.bm-ai5-senin') + ' · jargon ' + JSON.stringify(C.jargonTara(x.d.innerHTML)) + ' · katlı kaynak listesi ' + !!x.d.querySelector('details .cev-kaynaklar a'); });
+        __REG.ok('AI5 kartı: ' + ozet5.join(' ‖ '), L5.every(x => { const u = ustBolum(x.d), m = u.querySelectorAll('.cev-madde').length; return u.querySelector('.bm-ai5-anladigim') && (m ? u.querySelector('.cev-cevap') && u.querySelectorAll('.cev-madde .cev-guc').length === m && m <= 5 : true) && u.querySelector('.bm-ai5-senin') && !C.jargonTara(x.d.innerHTML).length; }) && L5.filter(x => x.d.querySelector('details .cev-kaynaklar a')).length >= 2);
+        const g1 = ustBolum(L5[0].d).querySelector('.cev-madde[data-guc="guclu"] .cev-guc');
+        __REG.ok('kanıt gücü sözcüğü ortak metin: "' + (g1 && g1.textContent) + '"', !!g1 && g1.textContent.indexOf(C.GUC.guclu) >= 0);
+        // (AI4) ikame sorusu — AI özetsiz (anahtar yok); üst: Anladığım + hüküm cevabı + hesap maddeleri + Senin reçetende; ayrıntıda hüküm kutusu + kanıt parçaları
+        const it = set.istemler.find(x => { const tb = set.tabanlar[x.taban]; const T = { stil: tb.stil, tarif: Object.assign({ hacim: 11, verim: 61, mashSc: 66 }, JSON.parse(JSON.stringify(tb.tarif))) }; return A4.cozumle(x.istem, T).mod === 'ikame'; });
+        const tb = set.tabanlar[it.taban], ctx4 = { tur: 'tarif', key: 'cev1b:ai4', T: { stil: tb.stil, ad: 'T', tarif: Object.assign({ hacim: 11, verim: 61, mashSc: 66 }, JSON.parse(JSON.stringify(tb.tarif))) } };
+        A.hazirMi = () => ({ hazir: false }); let st4; try { st4 = await A4.sor(ctx4, it.istem, { secimYok: true }); } finally { A.hazirMi = sah; }
+        const d4 = ust(A4.kartHTML('cev1b:ai4')), u4 = ustBolum(d4);
+        __REG.ok('AI4 kartı (' + it.id + ' "' + it.istem + '"): anladığım "' + (u4.querySelector('.bm-ai4-anladigim') || {}).textContent + '" · cevap "' + (u4.querySelector('.cev-cevap') || {}).textContent + '" · madde ' + u4.querySelectorAll('.cev-madde').length + ' · senin "' + (u4.querySelector('.cev-senin') || {}).textContent + '" · hüküm kutusu + kanıt KATLI ' + !!d4.querySelector('details .bm-ai1-hukum') + '/' + !!d4.querySelector('details .bm-ai4-kanit') + ' · jargon ' + JSON.stringify(C.jargonTara(d4.innerHTML)),
+          !!u4.querySelector('.bm-ai4-anladigim .bm-ai4-degistir') && /Uygulamanın hesabına göre/.test((u4.querySelector('.cev-cevap') || {}).textContent) && u4.querySelectorAll('.cev-madde').length >= 1 && u4.querySelectorAll('.cev-madde').length <= 5 && /^Senin reçetende:/.test((u4.querySelector('.cev-senin') || {}).textContent) && !!d4.querySelector('details .bm-ai1-hukum') && !!d4.querySelector('details .bm-ai4-kanit') && !u4.querySelector('.bm-ai4-parca') && !C.jargonTara(d4.innerHTML).length);
+        // (mash) kayıtlı M koşusu biçiminde bir cevap — üst: Anladığım + ilk cümle + maddeler (güç) + Senin reçetende; kimlikli cümleler KATLI
+        M.cevap = { tur: 'ai', metin: 'mash 2 derece düşük kaldı ne yapayım', ok: true, istek: { model: 'guclu' }, usd: 0.03, model: 'x', paket: { tip: ['sicaklik'] }, degerler: [],
+          sonuc: { kapsam: 'cevaplandi', durum: 'tamam', dusen: [], gos: [{ metin: 'Uygulamanın hesabına göre 1,2 L kaynar su eklemek sıcaklığı hedefe getirir.', etiket: 'hesap', kaynaklar: ['hesap:sicaklik'] }, { metin: 'Palmer sıcaklığı ölçüp denklemde kullanmayı öneriyor.', etiket: 'veri', kaynaklar: ['kaynak:palmerOlc'] }, { metin: 'Düşük mash sıcaklığı fermente olabilirliği artırır.', etiket: 'yorum', kaynaklar: ['bilgi:sc_fermentabilite'] }] } };
+        const dm = ust(M.soruHTML()), um = ustBolum(dm); M.cevap = null;
+        __REG.ok('mash kartı: anladığım "' + (um.querySelector('.cev-anladigim') || {}).textContent + '" · cevap "' + (um.querySelector('.cev-cevap') || {}).textContent + '" · maddeler ' + [...um.querySelectorAll('.cev-madde')].map(x => x.dataset.guc).join(',') + ' · kimlikli cümleler KATLI ' + dm.querySelectorAll('details .mash-cumle').length + ' · üstte ' + um.querySelectorAll('.mash-cumle').length + ' · Palmer linki katlı ' + !!dm.querySelector('details .cev-kaynaklar a[href*="howtobrew"]') + ' · jargon ' + JSON.stringify(C.jargonTara(dm.innerHTML)),
+          /^Anladığım: mash sıcaklığı sorusu/.test((um.querySelector('.cev-anladigim') || {}).textContent) && /1,2 L kaynar su/.test((um.querySelector('.cev-cevap') || {}).textContent) && [...um.querySelectorAll('.cev-madde')].map(x => x.dataset.guc).join() === 'guclu,olasi' && dm.querySelectorAll('details .mash-cumle').length === 3 && !um.querySelectorAll('.mash-cumle').length && !!dm.querySelector('details .cev-kaynaklar a[href*="howtobrew"]') && !C.jargonTara(dm.innerHTML).length);
+        // KASITLI BOZMA: üstte jargon
+        __REG.ok('KASITLI BOZMA üst kısma "korpus p10–p90 (n 12), kor:stil" yazılınca jargon taraması ' + JSON.stringify(C.jargonTara('<div>korpus p10–p90 (n 12), kor:stil</div><details><div>p10 içeride serbest</div></details>')) + ' → kırmızı', (j => j.length >= 3 && j.indexOf('kor:') >= 0 && j.indexOf('(n 12)') >= 0 && j.indexOf('p10') >= 0)(C.jargonTara('<div>korpus p10–p90 (n 12), kor:stil</div><details><div>p10 içeride serbest</div></details>')));
+        return __REG.al();
+      }, set);
+    }
+  },
+  {
+    kod: 'CEV1-ARASTIRMA', ad: 'ARAŞTIRMA MODU (CEV1 madde 2–3, mock — gerçek AI çağrısı YOK): sorgu üreteci yalnız ≤ 3 İngilizce sorgu (operatör / Türkçe / tekrar elenir) · web izin listesi WEB.arastirma TEK yerde (istek gövdesinde allowed_domains = o liste) · izinli olmayan alan atılır · özetleyici TARAFSIZLAŞTIRILMIŞ konuyu görür (ham soru GİTMEZ) · güç uygulamadan: 2 farklı kurum = güçlü, dergi sayılmaz, aynı etken ters yön = çelişki · donmuş denetleyici + yalakalık katmanı düşürür · tavan aşılınca DURUR · KASITLI BOZMA',
+    calistir: (page) => page.evaluate(async () => {
+      const C = window.BM_CEV, A = window.BM_AI, A4 = window.BM_AI4;
+      const lst = A.WEB.arastirma, iw = A.istekKur('arastirmaweb', '', 'x', null, null, A4.webModel()), ik = A.istekKur('kanitweb', '', 'x', null, null, A4.webModel());
+      __REG.ok('izinli alanlar (' + lst.length + '): ' + lst.join(', ') + ' · araştırma isteğinde allowed_domains = bu liste · AI4 web isteği eski 18 alan (değişmedi)', lst.length === 21 && ['brewingscience.com', 'onlinelibrary.wiley.com', 'tandfonline.com', 'lallemandbrewing.com', 'fermentis.com', 'whitelabs.com', 'wyeastlab.com', 'weyermann.de', 'brulosophy.com', 'byo.com'].every(d => lst.indexOf(d) >= 0) && JSON.stringify(iw.govde.tools[0].allowed_domains) === JSON.stringify(lst) && ik.govde.tools[0].allowed_domains.length === 18);
+      const ornek = ['köpük için laktoz eklemek daha iyi olur değil mi', 'weizen\'de muz aromasını nasıl artırırım', 'mash\'i 72 derecede yaparsam daha gövdeli olur değil mi', 'biram bulanık çıkıyor, nasıl berraklaştırırım', 'diasetil dinlenmesi gerekli mi, ne zaman yapılır'];
+      const tz = ornek.map(C.tarafsiz);
+      __REG.ok('tarafsızlaştırma: ' + ornek.map((o, i) => '"' + o + '" → ' + tz[i]).join(' · '), tz.every(t => !/değil mi|daha iyi olur|olur mu/.test(t)) && /laktoz/.test(tz[0]) && /72 derecede/.test(tz[2]));
+      __REG.ok('sorgu temizliği: ' + JSON.stringify(C.sorguTemizle(['hefeweizen foam stability study', 'site:byo.com foam', 'köpük tutma', 'Hefeweizen foam stability study', 'lactose head retention BYO', 'a b c d e f g h i j k l m', 'fourth query'])), JSON.stringify(C.sorguTemizle(['hefeweizen foam stability study', 'site:byo.com foam', 'köpük tutma', 'Hefeweizen foam stability study', 'lactose head retention BYO', 'a b c d e f g h i j k l m', 'fourth query'])) === JSON.stringify(['hefeweizen foam stability study', 'lactose head retention BYO', 'fourth query']));
+      // mock: sorgu → web → özet
+      const soru = 'köpük için laktoz eklemek daha iyi olur değil mi', gor = {};
+      const W = [{ url: 'https://fermentis.com/en/x', alinti: 'Proteins and hop compounds stabilise foam.' }, { url: 'https://www.brulosophy.com/y', alinti: 'Wheat malt increased foam stability in our test.' }, { url: 'https://byo.com/z', alinti: 'Lactose is unfermentable and adds sweetness.' }, { url: 'https://www.homebrewersassociation.org/q', alinti: 'Lactose adds body and sweetness.' }, { url: 'https://evil.example.com/a', alinti: 'Lactose triples foam.' }];
+      const mock = { sorgu: p => { gor.sorgu = p; return { ok: true, veri: { sorgular: ['lactose head retention BYO', 'foam stability protein study', 'site:x.com bad'] }, maliyet: { usd: 0.001 } }; },
+        web: p => { gor.web = p; return { ok: true, veri: { iddialar: [{ kaynaklar: W.map(w => ({ url: w.url, alinti: w.alinti, baslik: '' })) }], aramalar: 2 }, maliyet: { usd: 0.03 } }; },
+        ozet: p => { gor.ozet = p; return { ok: true, maliyet: { usd: 0.02 }, veri: { maddeler: [
+          { etken: 'Buğday maltı ve protein', etki: 'köpüğü sabitler', yon: 'artirir', kaynaklar: ['w1', 'w2'] },
+          { etken: 'Mayalanmayan bileşenler', etki: 'tatlılık ve gövde katar', yon: 'etkiler', kaynaklar: ['w3', 'w4'] },
+          { etken: 'Protein', etki: 'köpüğü 3 kat artırır', yon: 'artirir', kaynaklar: ['w1'] },
+          { etken: 'Haklısınız, köpük', etki: 'bu yolla artar', yon: 'artirir', kaynaklar: ['w1'] },
+          { etken: 'Buğday maltı ve protein', etki: 'köpüğü azaltır', yon: 'azaltir', kaynaklar: ['w2'] } ] } }; } };
+      const Rr = await C.arastir({ kaynak: 'test', key: 'cev1a:1', soru, stil: 'Weizen / Weissbier' }, { mock });
+      const g = Rr.sonuc.gos, md = x => g.find(y => y.metin.indexOf(x) === 0);
+      __REG.ok('akış: sorgular ' + JSON.stringify(Rr.sorgular) + ' · web bulgusu ' + Rr.web.bulgular.length + ' (izinsiz alan atıldı ' + Rr.web.atilan + ') · gösterilen ' + g.length + ' · düşen ' + Rr.sonuc.dusen.map(x => x.tur).join(',') + ' · maliyet $' + Rr.maliyet.toFixed(3), Rr.durum === 'tamam' && Rr.sorgular.length === 2 && Rr.web.bulgular.length === 4 && Rr.web.atilan === 1 && Rr.sonuc.dusen.length === 2 && Rr.sonuc.dusen.some(x => x.tur === 'yalakalik') && Rr.sonuc.dusen.some(x => x.tur !== 'yalakalik') && Math.abs(Rr.maliyet - 0.051) < 1e-9);
+      __REG.ok('tarafsızlık: sorgu üreteci + özetleyici kullanıcının ham cümlesini ve yönlendirmesini ("değil mi", "daha iyi olur") görmedi · konu "' + Rr.konu + '"', gor.sorgu.soru.indexOf(soru) < 0 && gor.ozet.soru.indexOf(soru) < 0 && gor.ozet.baglam.indexOf(soru) < 0 && Rr.istekOzet.yonlendirmeGitti === false && !/değil mi|daha iyi/.test(gor.ozet.soru + gor.sorgu.soru));
+      __REG.ok('güç uygulamadan: "' + md('Buğday').metin + '" ' + md('Buğday').guc.k + ' (fermentis + brulosophy; aynı etken ters yön → çelişki) · "Mayalanmayan bileşenler" ' + md('Mayalanmayan').guc.k + ' (byo + AHA = dergi, sayılmaz)', g.filter(x => /^Buğday/.test(x.metin)).length === 2 && g.filter(x => /^Buğday/.test(x.metin)).every(x => x.guc.k === 'celiski') && md('Mayalanmayan').guc.k === 'olasi' && md('Mayalanmayan').guc.n === 0);
+      const html = C.arastirmaKart(Rr), d = document.createElement('div'); d.innerHTML = html; const u = d.cloneNode(true); u.querySelectorAll('details').forEach(x => x.remove());
+      __REG.ok('araştırma kartı: "' + u.querySelector('.cev-anladigim').textContent + '" · "' + u.querySelector('.cev-cevap').textContent + '" · madde ' + u.querySelectorAll('.cev-madde').length + ' · katlı: sorgular + izinli alanlar + maliyet · jargon ' + JSON.stringify(C.jargonTara(html)), !!u.querySelector('.cev-anladigim') && /etken buldum/.test(u.querySelector('.cev-cevap').textContent) && /çelişiyor/.test(u.querySelector('.cev-cevap').textContent) && !C.jargonTara(html).length && !!d.querySelector('details .cev-teknik') && !!d.querySelector('details .cev-maliyet'));
+      // tavan: tahmin × 2 aşılınca durur
+      const pahali = Object.assign({}, mock, { sorgu: () => ({ ok: true, veri: { sorgular: ['x study'] }, maliyet: { usd: 99 } }) });
+      const Rt = await C.arastir({ kaynak: 'test', key: 'cev1a:2', soru: 'x' }, { mock: pahali });
+      __REG.ok('tavan: ilk çağrı $99 > tavan $' + (Rt.th ? Rt.th.tavan : '?') + ' → ' + Rt.durum + ' (' + Rt.neden + '), web çağrısı yapılmadı', Rt.durum === 'durdu' && /tavan/.test(Rt.neden) && Rt.cagri.length === 1);
+      // bulamadım: web boş
+      const Rb = await C.arastir({ kaynak: 'test', key: 'cev1a:3', soru: 'y' }, { mock: Object.assign({}, mock, { web: () => ({ ok: true, veri: { iddialar: [] }, maliyet: { usd: 0.03 } }) }) });
+      __REG.ok('bulamadım yalnız ARAMADAN SONRA: ' + Rb.durum + ' · sorgu ' + Rb.sorgular.length + ' · kart "' + (() => { const x = document.createElement('div'); x.innerHTML = C.arastirmaKart(Rb); return x.querySelector('.cev-cevap').textContent; })() + '"', Rb.durum === 'bulamadim' && Rb.sorgular.length > 0);
+      // KASITLI BOZMALAR
+      C.TUR_SAYILIR.dergi = 1; let b1; try { b1 = C.gucHesap(['https://byo.com/z', 'https://www.homebrewersassociation.org/q']).k; } finally { delete C.TUR_SAYILIR.dergi; }
+      __REG.ok('KASITLI BOZMA dergi kaynağı sayılırsa BYO + AHA → ' + b1 + ' → kırmızı', b1 === 'guclu' && C.gucHesap(['https://byo.com/z', 'https://www.homebrewersassociation.org/q']).k === 'olasi');
+      const yy = C.YONLENDIRME; C.YONLENDIRME = []; let b2; try { b2 = C.tarafsiz(soru); } finally { C.YONLENDIRME = yy; }
+      __REG.ok('KASITLI BOZMA tarafsızlaştırma kapalı → "' + b2 + '" (yönlendirme özetleyiciye giderdi) → kırmızı', /değil mi/.test(b2));
+      __REG.ok('aynı kurumun iki sayfası tek kaynak: fermentis ×2 → ' + C.gucHesap(['https://fermentis.com/a', 'https://fermentis.com/b']).k, C.gucHesap(['https://fermentis.com/a', 'https://fermentis.com/b']).k === 'olasi');
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'CEV1-SET', ad: 'CEV SETİ (CEV1 madde 5 + 7): tests/cev_seti.json ≥ 30 kolay soru (weizen muz/karanfil, Dubbel kuru üzüm, gövde, köpük, berraklık, diasetil, DMS, acılık, karbonasyon, sıcak alkol …) · puanlama metni dosyada KOŞUDAN ÖNCE · beklenen listeleri Claude yazmadan GERÇEK KOŞU KİLİTLİ · MOCK TAM TUR: her soru önce kural tablosu, kapsamıyorsa araştırma; üst kısım jargon 0, yalakalık 0, tat 0, araştırmasız bulamadım 0, "güçlü" etiketli madde ≥ 2 kurum · kayıtlı kart ŞERİDİ ve denetleyici imzası aynen',
+    calistir: async (page) => {
+      const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'cev_seti.json'), 'utf8'));
+      return page.evaluate(async (set) => {
+        const C = window.BM_CEV, A = window.BM_AI, A4 = window.BM_AI4;
+        const konular = [...new Set(set.sorular.map(q => q.konu))];
+        __REG.ok('set: ' + set.sorular.length + ' soru, ' + konular.length + ' konu (' + konular.join(', ') + ') · yönlendirmeli ' + set.sorular.filter(q => q.yonlendirme).length + ' · puanlama metni (i)–(vii) · kişisel veri yok', set.sorular.length >= 30 && ['muz', 'karanfil', 'köpük', 'berraklık', 'diasetil', 'DMS', 'karbonasyon', 'sıcak alkol', 'gövde'].every(k => konular.some(x => x.indexOf(k) >= 0)) && /\(i\) KAPSAMA/.test(set.puanlama) && /\(v\) JARGON/.test(set.puanlama) && !/Kaan|sk-ant/.test(JSON.stringify(set.sorular)) && set.receteler.every(r => r.tarif.maltlar.every(m => window.BM_AI1.kayit('malt', m.id)) && window.BM_AI1.kayit('maya', r.tarif.mayaId)));
+        const kl = C.kosKilit(set), gk = await C.kos(set, {});
+        __REG.ok('gerçek koşu kilitli: "' + kl + '" · C.kos (mock değil) → ' + gk.durum, /beklenen etken listesi yok/.test(kl) && gk.durum === 'kilitli');
+        // mock tam tur — sorgu üreteci konudan İngilizce sorgu; web her konuda iki üretici + bir dergi alıntısı (MOCK — gerçek alıntı değil); özet alıntı kimlikleriyle
+        let cagri = { sorgu: 0, web: 0, ozet: 0 };
+        const mock = { sorgu: () => { cagri.sorgu++; return { ok: true, veri: { sorgular: ['beer off flavor cause manufacturer', 'homebrew study'] }, maliyet: { usd: 0.002 } }; },
+          web: () => { cagri.web++; return { ok: true, maliyet: { usd: 0.03 }, veri: { iddialar: [{ kaynaklar: [{ url: 'https://www.lallemandbrewing.com/en/m', alinti: 'Yeast health and fermentation temperature control this compound.' }, { url: 'https://fermentis.com/en/m', alinti: 'Fermentation temperature control this compound.' }, { url: 'https://byo.com/m', alinti: 'Many brewers report this.' }] }] } }; },
+          ozet: () => { cagri.ozet++; return { ok: true, maliyet: { usd: 0.02 }, veri: { maddeler: [{ etken: 'Fermantasyon sıcaklığı', etki: 'bu bileşiği kontrol eder', yon: 'etkiler', kaynaklar: ['w1', 'w2'] }, { etken: 'Maya sağlığı', etki: 'bu bileşiği kontrol eder', yon: 'etkiler', kaynaklar: ['w1'] }] } }; } };
+        const sah = A.hazirMi; A.hazirMi = () => ({ hazir: false }); let o; try { o = await C.kos(set, { mock }); } finally { A.hazirMi = sah; }
+        const m = o.metrik, ar = o.sorular.filter(x => x.yol === 'arastirma');
+        __REG.ok('MOCK TAM TUR: ' + m.soru + ' soru · kural tablosu ' + m.kural + ' · araştırma ' + m.arastirma + ' (sorgu ' + cagri.sorgu + ' / web ' + cagri.web + ' / özet ' + cagri.ozet + ' mock çağrı) · madde ' + m.madde + ' · jargon ' + m.jargon + ' · yalakalık ' + m.yalaka + ' · tat ' + m.tat + ' · güç hatası ' + m.gucHata + ' · araştırmasız bulamadım ' + m.bulamadimErken + ' · yönlendirme özetleyiciye gitti ' + ar.filter(x => x.yonlendirmeGitti).length,
+          o.durum === 'bitti' && m.soru === set.sorular.length && m.kural >= 8 && m.arastirma >= 10 && cagri.sorgu === m.arastirma && m.jargon === 0 && m.yalaka === 0 && m.tat === 0 && m.gucHata === 0 && m.bulamadimErken === 0 && !ar.some(x => x.yonlendirmeGitti) && o.sorular.every(x => (x.maddeler || []).length >= 1 && (x.maddeler || []).length <= 5 || x.yol === 'arastirma' && x.durum !== 'tamam'));
+        const yol = id => (o.sorular.find(x => x.id === id) || {}).yol;
+        const KUR = ['C01', 'C02', 'C03', 'C04', 'C05', 'C06', 'C09', 'C10', 'C11', 'C21', 'C34'], ARS = ['C07', 'C08', 'C12', 'C13', 'C14', 'C15', 'C16', 'C17', 'C18', 'C19', 'C20', 'C22', 'C23', 'C24', 'C25', 'C26', 'C27', 'C28', 'C29', 'C30', 'C31', 'C33'];
+        __REG.ok('yönlendirme: kural tablosu ' + KUR.filter(id => yol(id) === 'kural').length + '/' + KUR.length + ' (muz/karanfil, gövde, kuru, az acı, "72 °C gövde") · araştırma ' + ARS.filter(id => yol(id) === 'arastirma').length + '/' + ARS.length + ' (köpük, berraklık, diasetil, DMS, karbonasyon, sıcak alkol, oksidasyon, burukluk, sülfür, hop aroması, ekşilik, kuru üzüm — CEV1 öncesi "kuru üzüm" → kuru, "köpük nasıl" → stil, "diasetil" → tadım) · C32 "daha koyu" öneri yoksa araştırmaya geçer: ' + yol('C32'), KUR.every(id => yol(id) === 'kural') && ARS.every(id => yol(id) === 'arastirma'), [...KUR, ...ARS].filter(id => yol(id) !== (KUR.indexOf(id) >= 0 ? 'kural' : 'arastirma')).join(','));
+        __REG.ok('C05 (BiraBurada mayası): kart sayı vermiyor — "' + ((o.sorular.find(x => x.id === 'C05') || {}).maddeler || []).map(x => x.metin).find(t => /mayalanma/i.test(t)) + '"', ((o.sorular.find(x => x.id === 'C05') || {}).maddeler || []).some(x => /paketine bak/.test(x.metin)) && !/\(\d+ °C\)/.test(JSON.stringify((o.sorular.find(x => x.id === 'C05') || {}).maddeler)));
+        __REG.ok('denetleyici imzası aynen 2c9ebd9f-32461 · G kapısı şeridi aynen', A4.denetleyiciImza() === '2c9ebd9f-32461' && /yanlış 7\/393 \(üst %3,3; katı okuma\)/.test(window.BM_DOG1.seritMetni('G')) && /7\/411/.test(window.BM_DOG1.seritMetni('M')));
+        return __REG.al();
+      }, set);
+    }
+  },
   // ═════════════ SPRINT AI5E — katalog ters muz/karanfil notu + attenuation metni · ters yön · eski 7 kuralın kanıt gücü · varsayım etiketleri ═════════════
   {
     kod: 'AI5E', ad: 'GELİŞTİRME KARTI DOĞRULUK (AI5E madde 1–5): katalogda "18 °C = daha çok muz; 24 °C = daha çok karanfil" ters notu 0 (Wyeast 3068 metniyle değişti) + attenuation metni ↔ kayıt alanı çelişkisi 0 (otomatik tarama) · ters yön ("daha az muz", "karanfil daha az") yalnız İLİŞKİ cümleli kaynaklarla cevaplanır, AI çağrısı 0 · kör tadım notu gücü yalnız algı iddiasında düşürür (mash = güçlü + ayrı tadım notu + MASH_NOT) · Tinseth / Morey / OG = "hesapla" · üst satırda varsayım sayıları etiketli · G seti / G kapısı aynen · KASITLI BOZMA',
@@ -12872,7 +13015,7 @@ const CASELER = [
       __REG.ok('"daha kuru olsun" mash satırı: "' + (om.metin || '—') + '"', om.guc && om.guc.k === 'guclu' && /Palmer, How to Brew/.test(om.metin) && /Muller 2000/.test(om.metin) && /güçlü\)\./.test(om.metin) && /Tadımda fark: tek deneyde ayırt edilemedi \(Brulosophy\)\./.test(om.metin) && om.metin.indexOf(G.MASH_KISA) >= 0 && !/olası/.test(om.metin));
       // (4) varsayım sayıları etiketli
       const Om = G.oneriler(Z[4].st), op = Om.find(o => o.kural === 'pitch') || {}, of = Om.find(o => o.kural === 'fermsc') || {};
-      __REG.ok('üst satır etiketli: "' + op.metin + '" · "' + of.metin + '"', op.metin.indexOf(G.VARS_HUCRE) >= 0 && /aralığının üst ucunda \(22 °C\)/.test(of.metin) && of.metin.indexOf(G.VARS_DERECE) >= 0 && !/21–22 °C/.test(of.metin));
+      __REG.ok('üst satır etiketli: "' + op.metin + '" · "' + of.metin + '" (CEV1 (0): BB Alman Buğday No1 üretici aralığı doğrulanmadı → sayı yok, "paketine bak")', op.metin.indexOf(G.VARS_HUCRE) >= 0 && of.metin.indexOf(G.SC_YOK) >= 0 && !/\d+ °C\)/.test(of.metin) && !/21–22 °C/.test(of.metin));
       // DEĞİŞMEMESİ GEREKEN — G kapısı şeridi 7/393 (G seti 30 istem parmak izi AI5D case'inde, tuzak / DOG4B DOG4H-COZUM case'inde)
       __REG.ok('G kapısı şeridi aynen: "' + window.BM_DOG1.seritMetni('G') + '"', /yanlış 7\/393 \(üst %3,3; katı okuma\)/.test(window.BM_DOG1.seritMetni('G')));
       // KASITLI BOZMALAR
@@ -14197,6 +14340,10 @@ const WORKER_CASELER = [
 ];
 
 // ═══════════════════════════════ RUNNER ═══════════════════════════════
+
+// SPRINT CEV1 (0): CEV1 ÖNCESİ maya sıcaklık alanları (sc + ideal) ve HA-18 atu — tarihî gerçek koşu cümlelerini yeniden geçiren testler paketi O GÜNÜN kataloğuyla kurar (denetleyiciye dokunulmaz)
+const CEV1_ESKI_SC = {"us05":[15,24,20],"s04":[15,24,18],"s33":[15,22,20],"wy1056":[15,22,19],"wy1272":[15,22,19],"wy1028":[15,22,19],"la_london":[17,22,20],"verdant":[18,23,20],"nottm":[10,22,18],"wy3068":[17,22,20],"wy3638":[18,23,20],"la_munich":[17,22,20],"wy3944":[17,22,20],"w3470":[9,15,12],"s189":[9,15,12],"wy2206":[10,15,12],"wy2308":[8,14,11],"wy2124":[8,15,12],"la_koln":[15,20,19],"t58":[15,24,22],"wy3522":[18,25,21],"wy3711":[18,28,24],"wb06":[15,24,20],"s23":[9,22,13],"be256":[15,28,22],"be134":[15,30,24],"la_windsor":[15,22,20],"la_cbc1":[15,28,22],"la_belle":[15,35,28],"la_philly":[20,35,28],"la_sour_pitch":[35,45,40],"la_helveticus":[35,48,42],"la_farmhouse":[18,28,22],"k97":[12,25,18],"ha18":[15,25,20],"mj_m76":[10,15,12],"wlp001":[19,22,20],"wlp007":[18,20,19],"wlp029":[18,20,19],"wlp300":[19,22,21],"wlp500":[19,22,21],"wlp550":[20,25,22],"wlp565":[20,25,24],"wlp570":[20,25,22],"wlp585":[20,25,24],"wlp670":[21,26,24],"oyl011":[18,20,19],"oyl016":[19,21,20],"oyl057":[21,38,32],"oyl061":[25,38,32],"oyl091":[21,37,30],"oyl200":[19,22,20],"oyl090":[25,35,30],"oyl071":[21,37,30],"oyl500":[21,30,25],"imp_a04":[18,22,20],"imp_a09":[18,22,20],"imp_a10":[18,21,20],"imp_a15":[17,21,19],"imp_a24":[18,21,20],"imp_a38":[17,21,19],"imp_b45":[18,25,22],"imp_b63":[19,24,22],"imp_g01":[19,22,21],"imp_g02":[10,13,11],"imp_l05":[15,20,18],"wy1388":[18,25,22],"wy2001":[10,13,11],"wy2112":[14,17,16]};
+const CEV1_ESKI_HA18 = [82,86];
 async function browserCaseKos(browser, seed, c) {
   const ctx = await browser.createBrowserContext();
   try {
@@ -14209,6 +14356,7 @@ async function browserCaseKos(browser, seed, c) {
       else r.abort().catch(() => {}); // dış ağ YASAK: Firebase/worker/CDN'e tek bayt gitmez
     });
     await page.evaluateOnNewDocument(seedFn, seed);
+    await page.evaluateOnNewDocument((S0, H0) => { window.__cev1EskiKatalog = () => { Object.keys(S0).forEach(id => { const m = MAYALAR.find(x => x.id === id); if (m) { m.sc = [S0[id][0], S0[id][1]]; m.ideal = S0[id][2]; } }); const h = MAYALAR.find(x => x.id === 'ha18'); if (h) { h.atu = H0.slice(); delete h.enzim; } }; }, CEV1_ESKI_SC, CEV1_ESKI_HA18); // CEV1 (0)
     // 'load' DEĞİL: kesilen dış istekler (CDN abort) load'u ara sıra asıyor.
     // domcontentloaded + alttaki app-hazır waitForFunction yeterli ve deterministik.
     // Yerel 3.5MB sayfada goto seyrek (~1/30) asılı kalıyor (Chrome flake) → TEK yeniden deneme.

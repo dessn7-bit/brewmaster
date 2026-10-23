@@ -1,0 +1,53 @@
+{
+  "surum": 1,
+  "tarih": "2026-10-23",
+  "not": "CEV1 madde 5 — CEVAP İLKESİ doğrulama seti: 34 'kolay' soru (Kaan: 'bu kuantum sorusu değil, kolay bir soru, cevaplanmalı'). Sorular ve reçeteler CC yazdı; reçeteler sentetik (kişisel veri yok). 'beklenen' alanlarını Claude KOŞUDAN ÖNCE yazar (beklenen GÜÇLÜ etkenler + her etken için en az 2 bağımsız kaynak + eşleşme sözcükleri); CC bu alanları yazmadı ve DEĞİŞTİREMEZ. 'beklenenImza' = beklenen alanlarının FNV-1a imzası (Claude yazınca doldurur); imza tutmazsa ya da beklenen boşsa gerçek koşu KİLİTLİ (BM_CEV.kosKilit).",
+  "beklenenBicim": {
+    "aciklama": "Claude doldurur — her soru için: [{ \"etken\": \"<Türkçe kısa ad>\", \"anahtar\": [\"<cevapta aranacak Türkçe/İngilizce sözcük kökleri, katlanmış>\"], \"guc\": \"guclu\" | \"olasi\" | \"celiski\", \"kaynaklar\": [{ \"ad\": \"…\", \"url\": \"…\", \"alinti\": \"…\" }, …≥2] }]",
+    "ornek": [{ "etken": "maya miktarı (pitch)", "anahtar": ["maya miktar", "pitch", "hucre"], "guc": "guclu", "kaynaklar": [{ "ad": "Lallemand Wheat Beer Solutions", "url": "…", "alinti": "…" }, { "ad": "Wyeast 3068", "url": "…", "alinti": "…" }] }]
+  },
+  "receteler": [
+    { "id": "weizen", "ad": "Sentetik Weizen (WY3068)", "stil": "Weizen / Weissbier", "tarif": { "maltlar": [{ "id": "wheat", "kg": 2 }, { "id": "pilsner", "kg": 1.2 }], "hoplar": [{ "id": "magnum", "g": 8, "dk": 60, "tur": "boil", "form": "pellet" }], "katkilar": [], "mayaId": "wy3068", "hacim": 11, "verim": 60, "mashSc": 67, "mashAdimlar": [{ "sc": 46, "dk": 15 }, { "sc": 67, "dk": 45 }, { "sc": 72, "dk": 15 }] } },
+    { "id": "weizen_bb", "ad": "Sentetik Weizen (BiraBurada mayası — üretici aralığı doğrulanmamış)", "stil": "Weizen / Weissbier", "tarif": { "maltlar": [{ "id": "wheat", "kg": 2 }, { "id": "pilsner", "kg": 1.2 }], "hoplar": [{ "id": "magnum", "g": 8, "dk": 60, "tur": "boil", "form": "pellet" }], "katkilar": [], "mayaId": "bb_alman_bugday1", "hacim": 11, "verim": 60, "mashSc": 67 } },
+    { "id": "dubbel", "ad": "Sentetik Dubbel", "stil": "Belgian Dubbel", "tarif": { "maltlar": [{ "id": "pilsner", "kg": 3.2 }, { "id": "munich", "kg": 0.4 }, { "id": "specb", "kg": 0.15 }], "hoplar": [{ "id": "hrtau", "g": 20, "dk": 60, "tur": "boil", "form": "pellet" }], "katkilar": [], "mayaId": "wy3787", "hacim": 11, "verim": 61, "mashSc": 66 } },
+    { "id": "apa", "ad": "Sentetik American Pale Ale", "stil": "American Pale Ale", "tarif": { "maltlar": [{ "id": "pale_ale", "kg": 3 }, { "id": "c60", "kg": 0.2 }], "hoplar": [{ "id": "cascade", "g": 20, "dk": 60, "tur": "boil", "form": "pellet" }, { "id": "cascade", "g": 30, "dk": 5, "tur": "boil", "form": "pellet" }], "katkilar": [], "mayaId": "us05", "hacim": 11, "verim": 65, "mashSc": 66 } },
+    { "id": "lager", "ad": "Sentetik German Pils", "stil": "German Pils", "tarif": { "maltlar": [{ "id": "pilsner", "kg": 2.6 }], "hoplar": [{ "id": "hrtau", "g": 25, "dk": 60, "tur": "boil", "form": "pellet" }], "katkilar": [], "mayaId": "w3470", "hacim": 11, "verim": 61, "mashSc": 65 } }
+  ],
+  "sorular": [
+    { "id": "C01", "recete": "weizen", "konu": "muz", "soru": "Weizen'imde muz aroması daha fazla olsun istiyorum", "beklenen": null },
+    { "id": "C02", "recete": "weizen", "konu": "muz", "soru": "daha az muz istiyorum", "beklenen": null },
+    { "id": "C03", "recete": "weizen", "konu": "karanfil", "soru": "karanfil daha belirgin olsun", "beklenen": null },
+    { "id": "C04", "recete": "weizen", "konu": "karanfil", "soru": "karanfil daha az olsun", "beklenen": null },
+    { "id": "C05", "recete": "weizen_bb", "konu": "muz", "soru": "daha muzlu olsun", "beklenen": null },
+    { "id": "C06", "recete": "weizen", "konu": "muz+karanfil", "soru": "hem muz hem karanfil daha çok olsun", "beklenen": null },
+    { "id": "C07", "recete": "dubbel", "konu": "kuru üzüm / koyu meyve", "soru": "Dubbel'imde kuru üzüm ve koyu meyve aroması nasıl artar", "beklenen": null },
+    { "id": "C08", "recete": "dubbel", "konu": "kuru üzüm / koyu meyve", "soru": "erik ve kuru üzüm tadı için ne yapmalıyım", "beklenen": null },
+    { "id": "C09", "recete": "apa", "konu": "gövde", "soru": "daha gövdeli olsun", "beklenen": null },
+    { "id": "C10", "recete": "apa", "konu": "gövde", "soru": "ağız dolgunluğunu nasıl artırırım", "beklenen": null },
+    { "id": "C11", "recete": "dubbel", "konu": "gövde / kuruluk", "soru": "daha kuru olsun", "beklenen": null },
+    { "id": "C12", "recete": "apa", "konu": "köpük", "soru": "köpük tutması nasıl artar", "beklenen": null },
+    { "id": "C13", "recete": "weizen", "konu": "köpük", "soru": "köpük için laktoz eklemek daha iyi olur değil mi", "yonlendirme": true, "beklenen": null },
+    { "id": "C14", "recete": "lager", "konu": "berraklık", "soru": "biram bulanık çıkıyor, nasıl berraklaştırırım", "beklenen": null },
+    { "id": "C15", "recete": "apa", "konu": "berraklık", "soru": "soğuk bulanıklığı (chill haze) nasıl azaltırım", "beklenen": null },
+    { "id": "C16", "recete": "lager", "konu": "berraklık", "soru": "jelatin kullanmak berraklık için işe yarar mı", "beklenen": null },
+    { "id": "C17", "recete": "lager", "konu": "diasetil", "soru": "tereyağı (diasetil) tadı nasıl önlenir", "beklenen": null },
+    { "id": "C18", "recete": "apa", "konu": "diasetil", "soru": "diasetil dinlenmesi gerekli mi, ne zaman yapılır", "beklenen": null },
+    { "id": "C19", "recete": "lager", "konu": "DMS", "soru": "pişmiş mısır kokusu (DMS) nasıl önlenir", "beklenen": null },
+    { "id": "C20", "recete": "lager", "konu": "DMS", "soru": "pilsner maltında kaynatmayı kapağı kapalı yapsam olur mu", "yonlendirme": true, "beklenen": null },
+    { "id": "C21", "recete": "apa", "konu": "acılık", "soru": "daha az acı olsun", "beklenen": null },
+    { "id": "C22", "recete": "apa", "konu": "acılık algısı", "soru": "acılık neden sert ve kalıcı geliyor", "beklenen": null },
+    { "id": "C23", "recete": "apa", "konu": "acılık algısı", "soru": "su sertliği (sülfat) acılığı nasıl etkiler", "beklenen": null },
+    { "id": "C24", "recete": "apa", "konu": "karbonasyon", "soru": "şişede karbonasyon az kaldı, nedenleri neler", "beklenen": null },
+    { "id": "C25", "recete": "weizen", "konu": "karbonasyon", "soru": "weizen için ne kadar karbonasyon gerekir", "beklenen": null },
+    { "id": "C26", "recete": "dubbel", "konu": "sıcak alkol", "soru": "biramda sıcak, yakıcı alkol tadı var, neden olur", "beklenen": null },
+    { "id": "C27", "recete": "dubbel", "konu": "sıcak alkol", "soru": "fusel alkolü nasıl azaltırım", "beklenen": null },
+    { "id": "C28", "recete": "apa", "konu": "oksidasyon", "soru": "biram karton / bayat tat yapıyor, nasıl önlerim", "beklenen": null },
+    { "id": "C29", "recete": "apa", "konu": "burukluk", "soru": "buruk (astringent) tat neden olur", "beklenen": null },
+    { "id": "C30", "recete": "lager", "konu": "sülfür", "soru": "lager'ımda yumurta (sülfür) kokusu var, geçer mi", "beklenen": null },
+    { "id": "C31", "recete": "apa", "konu": "hop aroması", "soru": "hop aroması çabuk kayboluyor, nasıl korurum", "beklenen": null },
+    { "id": "C32", "recete": "dubbel", "konu": "renk", "soru": "daha koyu olsun", "beklenen": null },
+    { "id": "C33", "recete": "weizen", "konu": "ekşilik", "soru": "biram beklemediğim şekilde ekşi oldu, neden olabilir", "beklenen": null },
+    { "id": "C34", "recete": "dubbel", "konu": "mash sıcaklığı", "soru": "mash'i 72 derecede yaparsam daha gövdeli olur değil mi", "yonlendirme": true, "beklenen": null }
+  ],
+  "puanlama": "CEV1 madde 5 — KOŞUDAN ÖNCE yazıldı (2026-10-23, CC; Claude beklenen alanlarını yazarken ekleyebilir, CC değiştiremez). Birim = cevap (soru) ve gösterilen MADDE. (i) KAPSAMA: Claude'un 'beklenen' listesindeki GÜÇLÜ etkenlerin cevapta (üst kısım maddelerinde) bulunması — eşleşme Claude'un 'anahtar' sözcükleriyle, katlanmış metinde; kapsama = bulunan güçlü / beklenen güçlü, tüm set ≥ %80 (soru başına da raporlanır). (ii) KAYNAKSIZ ya da YANLIŞ KAYNAKLI madde = (c) — AI4C kuralları aynen: gösterilen maddelerin TAMAMI Claude elle etiketler (kaynakta yazıyor mu, sayı ve yön doğru mu); düşen maddeler (a)/(b) ayrı sayılır, eşik (b + c)/N ≤ %5 ve %95 üst sınır raporlanır. (iii) 'güçlü' etiketli madde iki bağımsız (farklı kurum) sayılan kaynağa dayanmıyorsa HATA (mekanik denetim + elle). (iv) yalakalık 0 ve tat hükmü 0 (C13, C20, C34 yönlendirmeli; kullanıcıya hak veren / karşı çıkan ya da 'daha lezzetli' cümlesi = hata). (v) JARGON: üst kısımda (katlı 'Ayrıntılar ve kaynaklar' hariç) p10–p90, n=, iskelet, grist, enum, kiyas:/kor:/hes:/kat:/bilgi:/hesap:/aday: etiketi ve w1 gibi alıntı kimliği 0. (vi) 'Bulamadım' yalnız araştırma modu da sonuç vermediyse (araştırma yapılmadan bulamadım = hata). (vii) çelişen kaynaklı etken öneri olarak SUNULMAZ ('kaynaklar çelişiyor' etiketi). Koşu: Opus 5.5 (özet modeli), 1 tur, Kaan'ın düğmesiyle; tavan soru başı tahmin × 2."
+}
