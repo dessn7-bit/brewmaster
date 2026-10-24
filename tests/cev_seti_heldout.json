@@ -1,0 +1,2689 @@
+{
+ "surum": 1,
+ "tarih": "2026-10-24",
+ "not": "CEV HELD-OUT seti (Claude, 2026-10-24) — CC bu soruları ve beklenen listelerini GÖRMEDİ; CEV2B doğrulandıktan sonra repoya eklendi, CC DEĞİŞTİREMEZ. 21 araştırma sorusu (ana setle örtüşmeyen konular: fışkırma, ilaç/plastik tadı, metalik tat, yeşil elma, sirke, başlamayan / takılan mayalanma, hop creep, starter, kuru maya rehidrasyonu, mash pH, lager bekletme, maya besini, havalandırma, sabun, maya / et suyu, klorlu su, enfeksiyon belirtisi, şişede karbonasyon süresi, kuru hop çimen tadı, weizen bulanıklığı). Kaynaklar 4 kör araştırma ajanıyla toplandı, YALNIZ uygulamanın 26 izinli alanından; her alıntı kaydedilen sayfa metninde (curl; howtobrew.com -k; MDPI PDF mdpi-res.com) Claude'un betiğiyle kelimesi kelimesine bulundu. Yalnız WebFetch ile görülen alıntılar (Wyeast 10, ASBC 1980, MBAA 1984 / 2008) ÇIKARILDI; bu yüzden H07 'kapak / hava kilidi sızıntısı' etkeni çıktı (tek doğrulanmış kurum kaldı), H17'nin iki etkeni olasıya indi ve güçler yalnız doğrulanmış alıntılarla, kök alan kurumuyla (dergi byo.com / homebrewersassociation.org sayılmaz; brulosophy.com tek kontrollü deney) yeniden hesaplandı. Ajanın 'sayılmaz' işaretlediği karşı / destek dışı alıntılar (BYO, Brulosophy karşı kanıt, MDPI Foods 2021) gösterilir ama güce girmez. H01 kalsiyum oksalat (ev üretiminde çekirdek değil) çıkarıldı. Reçeteler ana setten birebir. Claude gözden geçirmesi: H12 'yüksek pH → tanen' olasıya indirildi (ASBC alıntısı yön söylemiyor); H20 şeker etkeninden tek kaynaklı 'bitmeden şişeleme' iddiası ayrıldı.",
+ "receteler": [
+  {
+   "id": "weizen",
+   "ad": "Sentetik Weizen (WY3068)",
+   "stil": "Weizen / Weissbier",
+   "tarif": {
+    "maltlar": [
+     {
+      "id": "wheat",
+      "kg": 2
+     },
+     {
+      "id": "pilsner",
+      "kg": 1.2
+     }
+    ],
+    "hoplar": [
+     {
+      "id": "magnum",
+      "g": 8,
+      "dk": 60,
+      "tur": "boil",
+      "form": "pellet"
+     }
+    ],
+    "katkilar": [],
+    "mayaId": "wy3068",
+    "hacim": 11,
+    "verim": 60,
+    "mashSc": 67,
+    "mashAdimlar": [
+     {
+      "sc": 46,
+      "dk": 15
+     },
+     {
+      "sc": 67,
+      "dk": 45
+     },
+     {
+      "sc": 72,
+      "dk": 15
+     }
+    ]
+   }
+  },
+  {
+   "id": "dubbel",
+   "ad": "Sentetik Dubbel",
+   "stil": "Belgian Dubbel",
+   "tarif": {
+    "maltlar": [
+     {
+      "id": "pilsner",
+      "kg": 3.2
+     },
+     {
+      "id": "munich",
+      "kg": 0.4
+     },
+     {
+      "id": "specb",
+      "kg": 0.15
+     }
+    ],
+    "hoplar": [
+     {
+      "id": "hrtau",
+      "g": 20,
+      "dk": 60,
+      "tur": "boil",
+      "form": "pellet"
+     }
+    ],
+    "katkilar": [],
+    "mayaId": "wy3787",
+    "hacim": 11,
+    "verim": 61,
+    "mashSc": 66
+   }
+  },
+  {
+   "id": "apa",
+   "ad": "Sentetik American Pale Ale",
+   "stil": "American Pale Ale",
+   "tarif": {
+    "maltlar": [
+     {
+      "id": "pale_ale",
+      "kg": 3
+     },
+     {
+      "id": "c60",
+      "kg": 0.2
+     }
+    ],
+    "hoplar": [
+     {
+      "id": "cascade",
+      "g": 20,
+      "dk": 60,
+      "tur": "boil",
+      "form": "pellet"
+     },
+     {
+      "id": "cascade",
+      "g": 30,
+      "dk": 5,
+      "tur": "boil",
+      "form": "pellet"
+     }
+    ],
+    "katkilar": [],
+    "mayaId": "us05",
+    "hacim": 11,
+    "verim": 65,
+    "mashSc": 66
+   }
+  },
+  {
+   "id": "lager",
+   "ad": "Sentetik German Pils",
+   "stil": "German Pils",
+   "tarif": {
+    "maltlar": [
+     {
+      "id": "pilsner",
+      "kg": 2.6
+     }
+    ],
+    "hoplar": [
+     {
+      "id": "hrtau",
+      "g": 25,
+      "dk": 60,
+      "tur": "boil",
+      "form": "pellet"
+     }
+    ],
+    "katkilar": [],
+    "mayaId": "w3470",
+    "hacim": 11,
+    "verim": 61,
+    "mashSc": 65
+   }
+  }
+ ],
+ "sorular": [
+  {
+   "id": "H01",
+   "recete": "apa",
+   "soru": "biram şişeyi açınca fışkırıyor, neden olur",
+   "beklenen": [
+    {
+     "etken": "Fazla priming (şişeleme) şekeri",
+     "anahtar": [
+      "priming",
+      "şişeleme şeker",
+      "siseleme seker",
+      "fazla şeker",
+      "fazla seker",
+      "karbonasyon şeker",
+      "karbonasyon seker",
+      "overprim",
+      "too much sugar"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer, How to Brew — Chapter 22: Troubleshooting",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "You used too much priming sugar. Cure: Vent and re-cap all of the bottles."
+      },
+      {
+       "ad": "Oxford Companion to Beer — gushing",
+       "url": "https://www.beerandbrewing.com/dictionary/OYWATj5i7D",
+       "alinti": "Of course, at a very basic level, any factor that causes beer to be severely overcarbonated will cause gushing, whether it is improper application of carbon dioxide or overattenuation or overpriming of bottle-conditioned beer."
+      }
+     ]
+    },
+    {
+     "etken": "Mayalanma bitmeden şişeleme (kalan şeker)",
+     "anahtar": [
+      "bitmeden",
+      "erken şişe",
+      "erken sise",
+      "fermantasyon tamamlan",
+      "mayalanma tamamlan",
+      "kalan şeker",
+      "kalan seker",
+      "son gravite",
+      "fg sabit",
+      "bottled too soon",
+      "residual"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer, How to Brew — Chapter 22: Troubleshooting",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "You bottled before fermentation was complete. Cure: Vent and re-cap all of the bottles."
+      },
+      {
+       "ad": "Oxford Companion to Beer — bottle conditioning",
+       "url": "https://beerandbrewing.com/dictionary/iKSxvCoDdk/",
+       "alinti": "Failure to take this residual fermentable sugar into account can result in over-carbonation and attendant gushing or, at worst, bursting bottles."
+      }
+     ]
+    },
+    {
+     "etken": "Enfeksiyon: yabani maya / bakteri (diastaticus, Brett) şişede şekeri yemeye devam eder",
+     "anahtar": [
+      "enfeksiyon",
+      "yabani maya",
+      "diastati",
+      "brett",
+      "kontamin",
+      "bakteri",
+      "sanitasyon",
+      "hijyen",
+      "wild yeast",
+      "gusher"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer, How to Brew — Chapter 22: Troubleshooting",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "Unexpected fermenters (i.e., wild yeasts and/or bacterial contamination) are a real problem as they will keep on fermenting the beer until there is nothing left but fizzy bitter alcoholic water."
+      },
+      {
+       "ad": "Palmer, How to Brew — Chapter 22: Troubleshooting",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "If it occurs at bottling time, the beer will overcarbonate and will fizz like soda pop, fountaining out of the bottle."
+      },
+      {
+       "ad": "Oxford Companion to Beer — gushing",
+       "url": "https://www.beerandbrewing.com/dictionary/OYWATj5i7D",
+       "alinti": "Overattenuation problems are common in bottle-conditioned beers using wild yeast strains such as Brettanomyces, which can continue to ferment out sugars that Saccharomyces strains will not."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "H02",
+   "recete": "weizen",
+   "soru": "weizen'imin bulanık kalmasını istiyorum, neden berraklaşıyor",
+   "beklenen": [
+    {
+     "etken": "Bulanıklığın kaynağı askıdaki maya (düşük flokülasyonlu weizen mayası); maya çöktükçe berraklaşır",
+     "anahtar": [
+      "askida maya",
+      "askıda maya",
+      "flokulasyon",
+      "flokülasyon",
+      "floküle",
+      "maya cok",
+      "maya çök",
+      "yeast in suspension",
+      "flocculat",
+      "hefe"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "John Palmer, How to Brew — Chapter 22: Is My Beer Ruined?",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "Yeast strains that have low flocculation, such as German Hefeweizen, will cause the beer to be cloudy."
+      },
+      {
+       "ad": "White Labs — WLP300 Hefeweizen Ale Yeast",
+       "url": "https://www.whitelabs.com/yeast-single?id=148&type=YEAST",
+       "alinti": "Low flocculation leaves the desired cloudy look, appropriate for the German wheat beer style."
+      },
+      {
+       "ad": "Oxford Companion to Beer — weissbier",
+       "url": "https://www.beerandbrewing.com/dictionary/84fU3qNtk5",
+       "alinti": "This name is derived from the fact that it is a wheat-based beer that is usually packaged unfiltered, with plenty of yeast turbidity in the finished beer."
+      },
+      {
+       "ad": "BJCP 2021 Style Guidelines — 10A Weissbier",
+       "url": "https://www.bjcp.org/style/2021/10/10A/weissbier/",
+       "alinti": "Can be hazy and have a shine from wheat and yeast, although this can settle out in bottles."
+      }
+     ]
+    },
+    {
+     "etken": "Soğuk dinlendirme, bekleme süresi ve berraklaştırıcılar (jelatin, isinglass, Irish moss) mayayı/bulanıklığı çöktürür",
+     "anahtar": [
+      "soguk dinlendir",
+      "soğuk dinlendir",
+      "cold crash",
+      "cold condition",
+      "berraklastirici",
+      "berraklaştırıcı",
+      "jelatin",
+      "gelatin",
+      "isinglass",
+      "irish moss",
+      "fining"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "John Palmer, How to Brew — Appendix C: Beer Clarity / What is Beer Haze",
+       "url": "https://howtobrew.com/brewing-with-malt-extract-3/appendix-c/",
+       "alinti": "Maybe it’s simply that your yeast has not flocculated (settled out) yet. You could try cold conditioning the beer for a few days to see if that helps."
+      },
+      {
+       "ad": "John Palmer, How to Brew — Chapter 22: Is My Beer Ruined?",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "In all cases, cloudiness can be combated by adding fining agents (e.g. isinglass, gelatin, Polyclar, bentonite) after fermentation."
+      },
+      {
+       "ad": "Oxford Companion to Beer — isinglass",
+       "url": "https://www.beerandbrewing.com/dictionary/szToZUocgW",
+       "alinti": "is a traditional finings, a substance that causes yeast to precipitate out of suspension, leaving beer clear."
+      },
+      {
+       "ad": "BJCP 2021 Style Guidelines — 10A Weissbier",
+       "url": "https://www.bjcp.org/style/2021/10/10A/weissbier/",
+       "alinti": "Can be hazy and have a shine from wheat and yeast, although this can settle out in bottles."
+      }
+     ]
+    },
+    {
+     "etken": "Şişe dibine çöken maya servis sırasında karıştırılıp bardağa eklenir (bulanık sunum)",
+     "anahtar": [
+      "siseyi calkala",
+      "şişeyi çalkala",
+      "dipteki maya",
+      "dibindeki maya",
+      "mayayi karistir",
+      "mayayı karıştır",
+      "rouse",
+      "swirl",
+      "tortuyu bardaga",
+      "tortuyu bardağa"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Oxford Companion to Beer — weissbier",
+       "url": "https://www.beerandbrewing.com/dictionary/84fU3qNtk5",
+       "alinti": "Bottles of hefeweizen are poured carefully to achieve the beautiful mousse-like foam, and then the bottle is swirled with the last of the beer to collect the yeast, which is added to the glass as the finishing touch."
+      },
+      {
+       "ad": "BJCP 2021 Style Guidelines — 10A Weissbier",
+       "url": "https://www.bjcp.org/style/2021/10/10A/weissbier/",
+       "alinti": "The entrant may specify whether the yeast should be roused before serving."
+      }
+     ]
+    },
+    {
+     "etken": "Buğday proteininin bulanıklığa katkısı — kaynaklar çelişiyor (BJCP: buğday bulanıklık verir; Palmer: buğday %40'a çıkınca polifenol azalır, bira çok berrak olur)",
+     "anahtar": [
+      "bugday protein",
+      "buğday protein",
+      "protein bulanik",
+      "protein bulanık",
+      "wheat protein",
+      "polifenol",
+      "polyphenol",
+      "protein-polifenol"
+     ],
+     "guc": "celiski",
+     "kaynaklar": [
+      {
+       "ad": "BJCP 2021 Style Guidelines — 10A Weissbier",
+       "url": "https://www.bjcp.org/style/2021/10/10A/weissbier/",
+       "alinti": "Can be hazy and have a shine from wheat and yeast, although this can settle out in bottles."
+      },
+      {
+       "ad": "John Palmer, How to Brew — Appendix C: Beer Clarity / What is Beer Haze",
+       "url": "https://howtobrew.com/brewing-with-malt-extract-3/appendix-c/",
+       "alinti": "At low levels, 5 to 12% of fermentables, the high protein levels in wheat can cause extensive haze, but as the percentage of wheat increases to 40%, the total polyphenol levels are substantially decreased, and the beer is very clear."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "H03",
+   "recete": "apa",
+   "soru": "biramda ilaç / plastik gibi bir tat var, neden olur",
+   "beklenen": [
+    {
+     "etken": "Klorlu dezenfektan (çamaşır suyu) kalıntısı → klorofenol",
+     "anahtar": [
+      "çamaşır suyu",
+      "camasir suyu",
+      "klorlu dezenfektan",
+      "dezenfektan kalıntı",
+      "dezenfektan kalinti",
+      "durula",
+      "bleach",
+      "sanitizer",
+      "klorofenol",
+      "chlorophenol"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer, How to Brew — Chapter 22: Troubleshooting",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "Chlorophenols result from the reaction of chlorine-based sanitizers (bleach) with phenol compounds and have very low taste thresholds. Rinsing with boiled water after sanitizing is the best way to prevent these flavors."
+      },
+      {
+       "ad": "BJCP — Beer Exam Study Guide (2017), Beer Flavor Descriptors",
+       "url": "https://www.bjcp.org/docs/BJCP_Study_Guide.pdf",
+       "alinti": "Chlorophenols are particularly offensive members of this family with additional bleach-like flavors that are derived from chlorinated water or sanitizer residue."
+      },
+      {
+       "ad": "Oxford Companion to Beer — phenolic",
+       "url": "https://www.beerandbrewing.com/dictionary/9Z95BHQHMb",
+       "alinti": "Chlorine-based cleaners and sanitizers are very popular in breweries. Poor rinsing can result in chlorine contaminating the beer."
+      }
+     ]
+    },
+    {
+     "etken": "Klorlu / kloraminli şebeke suyu",
+     "anahtar": [
+      "klor",
+      "kloramin",
+      "chloramine",
+      "chlorine",
+      "şebeke suyu",
+      "sebeke suyu",
+      "musluk suyu",
+      "campden",
+      "metabisülfit",
+      "metabisulfit"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer, How to Brew — Chapter 4: Water",
+       "url": "https://howtobrew.com/section-1/chapter-4/",
+       "alinti": "Chloramine cannot be easily removed by boiling and will give a medicinal taste to beer."
+      },
+      {
+       "ad": "BJCP — Beer Exam Study Guide (2017), Beer Flavor Descriptors",
+       "url": "https://www.bjcp.org/docs/BJCP_Study_Guide.pdf",
+       "alinti": "Chlorophenols are particularly offensive members of this family with additional bleach-like flavors that are derived from chlorinated water or sanitizer residue."
+      },
+      {
+       "ad": "Oxford Companion to Beer — phenolic",
+       "url": "https://www.beerandbrewing.com/dictionary/9Z95BHQHMb",
+       "alinti": "Chlorine is typically added to main water supplies and must be removed before the water can be used for brewing."
+      }
+     ]
+    },
+    {
+     "etken": "Enfeksiyon: fenol üreten yabani maya / bakteri",
+     "anahtar": [
+      "yabani maya",
+      "wild yeast",
+      "enfeksiyon",
+      "kontamin",
+      "bakteri",
+      "sanitasyon",
+      "hijyen",
+      "spoilage"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer, How to Brew — Chapter 22: Troubleshooting",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "Rinsing with boiled water after sanitizing is the best way to prevent these flavors. Wild (gusher) yeasts can also produce these phenol flavors."
+      },
+      {
+       "ad": "BJCP — Beer Exam Study Guide (2017), Beer Flavor Descriptors",
+       "url": "https://www.bjcp.org/docs/BJCP_Study_Guide.pdf",
+       "alinti": "As noted in Section IV, some wild yeast produce unpleasant phenols flavors and aromas described as medicinal, plastic-like, smoky or reminiscent of adhesive strips or electrical tape."
+      },
+      {
+       "ad": "Oxford Companion to Beer — phenolic",
+       "url": "https://www.beerandbrewing.com/dictionary/9Z95BHQHMb",
+       "alinti": "Certain Gram-negative, indole-negative, short-rod, wort spoilage bacteria have been reported to produce a medicinal phenolic taste in the resultant beer."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "H04",
+   "recete": "lager",
+   "soru": "biramda metalik bir tat var, nereden gelir",
+   "beklenen": [
+    {
+     "etken": "Korunmasız metal ekipman (çizik emaye tencere, aşırı parlatılmış alüminyum, pasive edilmemiş çelik)",
+     "anahtar": [
+      "emaye",
+      "çizik",
+      "cizik",
+      "alüminyum",
+      "aluminyum",
+      "pasiv",
+      "paslanmaz",
+      "ekipman",
+      "unprotected metal"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer, How to Brew — Chapter 22: Troubleshooting",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "Nicks and cracks ceramic coated steel pots are a common cause, as are high iron levels in well water."
+      },
+      {
+       "ad": "Palmer, How to Brew — Chapter 2: Sanitation",
+       "url": "https://howtobrew.com/section-1/chapter-2/",
+       "alinti": "Do not clean aluminum shiny bright because this removes the protective oxides and can result in a metallic taste."
+      },
+      {
+       "ad": "BJCP — Beer Exam Study Guide (2017), Beer Flavor Descriptors",
+       "url": "https://www.bjcp.org/docs/BJCP_Study_Guide.pdf",
+       "alinti": "Stainless steel brewing equipment generally does not contribute any metallic character as long as the surfaces that come into contact with the wort are allowed to passivate (oxidize) prior to use."
+      }
+     ]
+    },
+    {
+     "etken": "Sudaki demir / metal iyonları (özellikle kuyu suyu)",
+     "anahtar": [
+      "demir",
+      "iron",
+      "kuyu suyu",
+      "well water",
+      "sudaki metal",
+      "su arıt",
+      "su arit",
+      "metal iyon",
+      "çözünmüş metal",
+      "cozunmus metal"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer, How to Brew — Chapter 22: Troubleshooting",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "Nicks and cracks ceramic coated steel pots are a common cause, as are high iron levels in well water."
+      },
+      {
+       "ad": "BJCP — Beer Exam Study Guide (2017), Beer Flavor Descriptors",
+       "url": "https://www.bjcp.org/docs/BJCP_Study_Guide.pdf",
+       "alinti": "Brewers who obtain their water from a well should ensure that the water is treated to remove any dissolved metals, and porcelain-enameled steel brewing kettles should be discarded if the porcelain becomes chipped or cracked."
+      }
+     ]
+    },
+    {
+     "etken": "Kötü saklanmış maltta lipid (yağ) oksidasyonu / hidrolizi",
+     "anahtar": [
+      "lipid",
+      "yağ",
+      "yag",
+      "malt sakla",
+      "eski malt",
+      "bayat malt",
+      "kötü saklan",
+      "kotu saklan",
+      "poorly stored",
+      "improperly stored"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer, How to Brew — Chapter 22: Troubleshooting",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "Metallic flavors are usually caused by unprotected metals dissolving into the wort but can also be caused by the hydrolysis of lipids in poorly stored malts."
+      },
+      {
+       "ad": "BJCP — Beer Exam Study Guide (2017), Beer Flavor Descriptors",
+       "url": "https://www.bjcp.org/docs/BJCP_Study_Guide.pdf",
+       "alinti": "They can sometimes arise from oxidation of lipids in improperly stored malt or during beer ageing."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "H05",
+   "recete": "apa",
+   "soru": "biramda yeşil elma tadı var, neden olur",
+   "beklenen": [
+    {
+     "etken": "Bira genç: mayayla olgunlaşma süresi kısa / mayadan erken ayrıldı",
+     "anahtar": [
+      "genç bira",
+      "genc bira",
+      "olgunlaş",
+      "olgunlas",
+      "erken ayır",
+      "erken ayir",
+      "erken aktar",
+      "erken şişe",
+      "erken sise",
+      "maya üzerinde",
+      "maya uzerinde",
+      "green beer",
+      "too young",
+      "maturat"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer, How to Brew — Chapter 22: Troubleshooting",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "Some yeast strains produce more than others, but generally it’s presence indicates that the beer is too young and needs more time on the yeast to maturate."
+      },
+      {
+       "ad": "BJCP — Beer Exam Study Guide (2017), Beer Flavor Descriptors",
+       "url": "https://www.bjcp.org/docs/BJCP_Study_Guide.pdf",
+       "alinti": "Elevated levels are generally present in green beer or if the beer is prematurely removed from the yeast."
+      },
+      {
+       "ad": "White Labs — Compound Spotlight: Acetaldehyde",
+       "url": "https://blog.whitelabs.com/compound-spotlight-acetaldehyde",
+       "alinti": "As you let the beer mature and condition on the yeast, yeast cells will reabsorb the acetaldehyde and convert it to ethanol."
+      }
+     ]
+    },
+    {
+     "etken": "Stresli / sağlıksız maya, yetersiz havalandırma",
+     "anahtar": [
+      "sağlıksız maya",
+      "sagliksiz maya",
+      "sağlıklı maya",
+      "saglikli maya",
+      "stresli",
+      "havalandır",
+      "havalandir",
+      "oksijenlen",
+      "aerat",
+      "oxygenat",
+      "healthy yeast"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer, How to Brew — Chapter 8: Fermentation",
+       "url": "https://howtobrew.com/section-1/chapter-8/",
+       "alinti": "But, if the yeast are stressed, they won’t bother and won’t take the time to process it; it just gets excreted."
+      },
+      {
+       "ad": "BJCP — Beer Exam Study Guide (2017), Beer Flavor Descriptors",
+       "url": "https://www.bjcp.org/docs/BJCP_Study_Guide.pdf",
+       "alinti": "This flavor can also be the result of inadequate wort oxygenation, and while the resultant yeast by-products are normally metabolic intermediates, they can remain after fermentation in some cases."
+      },
+      {
+       "ad": "Oxford Companion to Beer — acetaldehyde",
+       "url": "https://www.beerandbrewing.com/dictionary/3VI3x2O47b",
+       "alinti": "If the yeast is not sufficiently active, either because it is not healthy or because the fermentation temperature is too low, too much acetaldehyde may remain in the beer."
+      },
+      {
+       "ad": "White Labs — Compound Spotlight: Acetaldehyde",
+       "url": "https://blog.whitelabs.com/compound-spotlight-acetaldehyde",
+       "alinti": "Healthy and robust yeast can also accelerate and shorten these timelines."
+      }
+     ]
+    },
+    {
+     "etken": "Bakteri enfeksiyonu (Zymomonas, Acetobacter)",
+     "anahtar": [
+      "bakteri",
+      "enfeksiyon",
+      "kontamin",
+      "zymomonas",
+      "acetobacter",
+      "sanitasyon",
+      "hijyen",
+      "bacterial"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "BJCP — Beer Exam Study Guide (2017), Beer Flavor Descriptors",
+       "url": "https://www.bjcp.org/docs/BJCP_Study_Guide.pdf",
+       "alinti": "It can also be a product of bacterial spoilage by Zymomonas or Acetobacter."
+      },
+      {
+       "ad": "Oxford Companion to Beer — acetaldehyde",
+       "url": "https://www.beerandbrewing.com/dictionary/3VI3x2O47b",
+       "alinti": "Bacterial infections can also interfere with yeast fermentation, leaving elevated levels of acetaldehyde in beer."
+      }
+     ]
+    },
+    {
+     "etken": "Mayalanma sıcaklığı (kaynaklar ters yön: yüksek sıcaklık daha çok üretir ↔ düşük sıcaklıkta daha çok kalır)",
+     "anahtar": [
+      "mayalanma sıcaklığ",
+      "mayalanma sicaklig",
+      "fermantasyon sıcaklığ",
+      "fermantasyon sicaklig",
+      "yüksek sıcaklık",
+      "yuksek sicaklik",
+      "düşük sıcaklık",
+      "dusuk sicaklik",
+      "fermentation temperature"
+     ],
+     "guc": "celiski",
+     "kaynaklar": [
+      {
+       "ad": "White Labs — Compound Spotlight: Acetaldehyde",
+       "url": "https://blog.whitelabs.com/compound-spotlight-acetaldehyde",
+       "alinti": "Higher fermentation temperatures can speed up fermentation timelines, but they will also cause more compounds to be produced, such as acetaldehyde."
+      },
+      {
+       "ad": "Palmer, How to Brew — Chapter 22: Troubleshooting",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "To reduce the likelihood of acetaldehyde in your beer: • Use a cooler initial fermentation temperature"
+      },
+      {
+       "ad": "Oxford Companion to Beer — acetaldehyde",
+       "url": "https://www.beerandbrewing.com/dictionary/3VI3x2O47b",
+       "alinti": "If the yeast is not sufficiently active, either because it is not healthy or because the fermentation temperature is too low, too much acetaldehyde may remain in the beer."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "H06",
+   "recete": "apa",
+   "soru": "biramda sirke gibi ekşi bir tat var, neden olur",
+   "beklenen": [
+    {
+     "etken": "Asetik asit bakterisi (Acetobacter) enfeksiyonu — sanitasyon",
+     "anahtar": [
+      "acetobacter",
+      "asetobakter",
+      "asetik",
+      "acetic",
+      "sirke bakteri",
+      "enfeksiyon",
+      "kontamin",
+      "sanitasyon",
+      "hijyen"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer, How to Brew — Chapter 22: Troubleshooting",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "Aceto bacteria (vinegar producing) and Lacto bacillus (lactic acid producing) are common contaminates in breweries."
+      },
+      {
+       "ad": "BJCP — Beer Exam Study Guide (2017), Beer Flavor Descriptors",
+       "url": "https://www.bjcp.org/docs/BJCP_Study_Guide.pdf",
+       "alinti": "Acetic acid can be produced by several contaminants, including Acetobacter, Zymomonas, and yeast in the Kloeckera and Brettanomyces families."
+      },
+      {
+       "ad": "Oxford Companion to Beer — acetic acid bacteria",
+       "url": "https://www.beerandbrewing.com/dictionary/9cTDEIN0Ac",
+       "alinti": "Acetic acid bacteria are widely distributed, particularly on plants and fruits and in the air, and will cause severe spoilage of beer if allowed access in the presence of oxygen."
+      }
+     ]
+    },
+    {
+     "etken": "Biraya oksijen ulaşması (Acetobacter oksijenle çoğalır)",
+     "anahtar": [
+      "oksijen",
+      "oxygen",
+      "hava al",
+      "hava temas",
+      "aerob",
+      "aerobe",
+      "sızdır",
+      "sizdir",
+      "havalı",
+      "havali"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Palmer, How to Brew — Chapter 22: Troubleshooting",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "Acetobacter is an aerobe, so its presence indicates that oxygen is getting to your beer."
+      },
+      {
+       "ad": "Oxford Companion to Beer — acetic acid bacteria",
+       "url": "https://www.beerandbrewing.com/dictionary/9cTDEIN0Ac",
+       "alinti": "Acetic acid bacteria must have a generous supply of oxygen and cannot grow in its absence."
+      },
+      {
+       "ad": "Oxford Companion to Beer — acetic acid",
+       "url": "https://www.beerandbrewing.com/dictionary/tUHp3R5egg",
+       "alinti": "Acetobacter (acetic acid or vinegar bacteria), a genus of aerobic bacteria, can turn ethanol to acetic acid during fermentation if excessively aerated."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "H07",
+   "recete": "weizen",
+   "soru": "mayalanma 2 gündür başlamadı, neden olabilir",
+   "beklenen": [
+    {
+     "etken": "Sıcaklık çok düşük / sıcaklık şoku",
+     "anahtar": [
+      "soguk",
+      "soğuk",
+      "dusuk sicaklik",
+      "düşük sıcaklık",
+      "isit",
+      "ısıt",
+      "sicaklik sok",
+      "sıcaklık şok",
+      "uykuya",
+      "dormant",
+      "too cold",
+      "run-in"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "John Palmer, How to Brew — Chapter 22: Is My Beer Ruined?",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "The fermentation conditions may be too cold for an otherwise healthy yeast population. Ale yeast strains vary in their temperature sensitivity but tend to go dormant below 60°F."
+      },
+      {
+       "ad": "White Labs — Fermentation Controls: Temperature",
+       "url": "https://blog.whitelabs.com/fermentation-controls-temperature",
+       "alinti": "Drastically lowering the fermentation temperature may slow down the expected fermentation timeline or risk the yeast culture going dormant."
+      },
+      {
+       "ad": "Oxford Companion to Beer — lag phase",
+       "url": "https://www.beerandbrewing.com/dictionary/MkKGQWjuiT",
+       "alinti": "The lag phase may last anywhere from 3 to 15 h, depending on such factors as wort type and gravity, temperature, yeast strain, yeast health, pitching rate, and aeration."
+      }
+     ]
+    },
+    {
+     "etken": "Yetersiz ya da zayıf maya (az hücre, eski/kötü saklanmış paket, starter yok)",
+     "anahtar": [
+      "az maya",
+      "yetersiz maya",
+      "hucre sayisi",
+      "hücre sayısı",
+      "eski paket",
+      "son kullanma",
+      "canlilik",
+      "canlılık",
+      "starter",
+      "underpitch",
+      "pitch rate",
+      "viability"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "John Palmer, How to Brew — Chapter 22: Is My Beer Ruined?",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "There are a lot more yeast cells in a dry yeast packet than in a liquid packet. The liquid packet needs to be grown in a starter to produce enough cells to take on the job of a full five gallon wort."
+      },
+      {
+       "ad": "Oxford Companion to Beer — pitching",
+       "url": "https://www.beerandbrewing.com/dictionary/V04NmdFJJA",
+       "alinti": "Lower pitching rates are associated with slower starts to fermentations, higher rates of yeast reproduction, and greater ester production; the converse is true of higher pitching rates."
+      },
+      {
+       "ad": "White Labs — Basics of Yeast Handling (PDF)",
+       "url": "https://www.whitelabs.com/public/uploads/ckeditor/603816595a29d1614288473.pdf",
+       "alinti": "The initial signs of fermentation should be evident within 12 to 20 hours depending on the age of the yeast."
+      }
+     ]
+    },
+    {
+     "etken": "Yetersiz havalandırma (oksijen)",
+     "anahtar": [
+      "havalandir",
+      "havalandır",
+      "oksijen",
+      "oxygen",
+      "aerat",
+      "calkala",
+      "çalkala",
+      "ppm",
+      "sterol"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "John Palmer, How to Brew — Chapter 6: Yeast",
+       "url": "https://howtobrew.com/section-1/chapter-6/",
+       "alinti": "A long lagtime (more than 24 hours) may indicate that the wort was poorly aerated, not enough yeast was pitched and/or that the yeast was initially in poor shape."
+      },
+      {
+       "ad": "White Labs — Tips for Wort Oxygenation: The Why, What, and How",
+       "url": "https://blog.whitelabs.com/tips-for-wort-oxygenation-the-why-what-and-how",
+       "alinti": "In fermentations where no additional oxygen is added, yeast never reach the cell mass obtained in oxygen-enhanced fermentations, resulting in long lag times and sometimes, not reaching the expected terminal gravity."
+      },
+      {
+       "ad": "Oxford Companion to Beer — lag phase",
+       "url": "https://www.beerandbrewing.com/dictionary/MkKGQWjuiT",
+       "alinti": "During the lag phase, yeast cells rapidly absorb available oxygen. Oxygen is needed for yeast to produce important compounds—most significantly sterols (unsaturated steroid alcohols), which are critical in yeast membrane permeability."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "H08",
+   "recete": "dubbel",
+   "soru": "mayalanma erken durdu, FG yüksek kaldı, ne yapmalıyım",
+   "beklenen": [
+    {
+     "etken": "Sıcaklık düştü / maya erken çöktü — fermentörü ısıt, mayayı karıştırıp askıya al",
+     "anahtar": [
+      "isit",
+      "ısıt",
+      "sicaklik dus",
+      "sıcaklık düş",
+      "karistir",
+      "karıştır",
+      "calkala",
+      "çalkala",
+      "rouse",
+      "askiya",
+      "askıya",
+      "cokmus",
+      "çökmüş",
+      "flokul",
+      "flokül"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "John Palmer, How to Brew — Chapter 22: Is My Beer Ruined?",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "Cure: Moving the fermentor to a warmer room and swirling the fermentor to stir up the yeast and get them back into suspension will often fix the problem."
+      },
+      {
+       "ad": "Oxford Companion to Beer — rousing",
+       "url": "https://www.beerandbrewing.com/dictionary/YOlrfDISvC",
+       "alinti": "Rousing may also refer to the process of “revitalizing” yeast that has flocculated and settled to the bottom of the fermentation vessel before the fermentation is complete or before sufficient diacetyl reduction has been achieved."
+      },
+      {
+       "ad": "White Labs — Fermentation Controls: Temperature",
+       "url": "https://blog.whitelabs.com/fermentation-controls-temperature",
+       "alinti": "A good practice for Imperial beers is increasing your temperature in steps throughout fermentation. As the yeast needs to eat through a larger portion of sugar, an increase in temperature may give the culture the extra boost needed to complete fermentation."
+      }
+     ]
+    },
+    {
+     "etken": "Yüksek OG'ye göre yetersiz/zayıf maya — taze, aktif maya ekle",
+     "anahtar": [
+      "az maya",
+      "yetersiz maya",
+      "zayif maya",
+      "zayıf maya",
+      "underpitch",
+      "maya ekle",
+      "taze maya",
+      "yeni maya",
+      "tekrar maya",
+      "repitch",
+      "pitch rate"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "John Palmer, How to Brew — Chapter 22: Is My Beer Ruined?",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "The other most common cause is weak yeast. Referring back to previous discussions of yeast preparation, weak yeast or low volumes of healthy yeast will often not be up to the task of fermenting a high gravity wort."
+      },
+      {
+       "ad": "Lallemand Brewing — Winter Warmers",
+       "url": "https://www.lallemandbrewing.com/en/united-states/resources/winter-warmers/",
+       "alinti": "In the event of a stuck fermentation, you could try re-pitching more high-performance neutral dry yeast such as LalBrew® House Ale or LalBrew Nottingham™."
+      },
+      {
+       "ad": "White Labs — Fermentation Controls: Yeast Health",
+       "url": "https://blog.whitelabs.com/fermentation-controls-yeast-health",
+       "alinti": "Underpitching may result in failure to reach the necessary total cell population which can lead to slow or stalled fermentations, off-flavors, or poor biomass for harvest."
+      }
+     ]
+    },
+    {
+     "etken": "Başta yetersiz oksijen (sterol eksikliği) eksik/takılan mayalanmaya yol açar",
+     "anahtar": [
+      "oksijen",
+      "oxygen",
+      "havalandir",
+      "havalandır",
+      "aerat",
+      "sterol",
+      "ppm"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Oxford Companion to Beer — sterols",
+       "url": "https://www.beerandbrewing.com/dictionary/GPT2mpwoch",
+       "alinti": "Incomplete or stuck fermentations, by contrast, are often the result of the yeast not having synthesized sufficient sterols because of a lack of dissolved oxygen in the wort at the start of its development."
+      },
+      {
+       "ad": "John Palmer, How to Brew — Chapter 6: Yeast",
+       "url": "https://howtobrew.com/section-1/chapter-6/",
+       "alinti": "Without aeration, fermentations tend to be underattenuated because oxygen availability is a limiting factor for yeast growth—the yeast stop budding when sterol levels for cell membrane growth become depleted."
+      },
+      {
+       "ad": "White Labs — Tips for Wort Oxygenation: The Why, What, and How",
+       "url": "https://blog.whitelabs.com/tips-for-wort-oxygenation-the-why-what-and-how",
+       "alinti": "In fermentations where no additional oxygen is added, yeast never reach the cell mass obtained in oxygen-enhanced fermentations, resulting in long lag times and sometimes, not reaching the expected terminal gravity."
+      }
+     ]
+    },
+    {
+     "etken": "Şıra az mayalanabilir (yüksek mash sıcaklığı / dekstrin) — FG zaten son olabilir; zorla mayalanma testiyle kontrol et",
+     "anahtar": [
+      "mash sicak",
+      "mash sıcak",
+      "dekstrin",
+      "dextrin",
+      "mayalanabilir",
+      "fermente edilebilir",
+      "zorla mayalanma",
+      "forced ferment",
+      "hizli mayalanma testi",
+      "hızlı mayalanma testi",
+      "fermentability"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Lallemand Brewing — Winter Warmers",
+       "url": "https://www.lallemandbrewing.com/en/united-states/resources/winter-warmers/",
+       "alinti": "Be careful though – not all cases of low attenuation are due to poor yeast performance. It is possible that low wort fermentability is the issue."
+      },
+      {
+       "ad": "John Palmer, How to Brew — Chapter 14: How the Mash Works",
+       "url": "https://howtobrew.com/section-3/chapter-14/",
+       "alinti": "A lower mash temperature, of 140-150°F (60-65°C), yields a lighter bodied, more attenuable beer. A higher mash temperature, of 150-160°F (65-71°C), yields a more dextrinous, less attenuable beer."
+      },
+      {
+       "ad": "White Labs — Forced Fermentation Test",
+       "url": "https://www.whitelabs.com/news-update-detail?id=127&type=NEWS",
+       "alinti": "If both forced fermentation and fermentor fermentation are different from your expected calculated FG, it could indicate problems on the hot side, with mash temperature or other factors leading to a fermentation that does not contain enough fermentable sugars."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "H09",
+   "recete": "apa",
+   "soru": "kuru hoptan sonra yoğunluk düşmeye devam etti (hop creep), neden olur",
+   "beklenen": [
+    {
+     "etken": "Şerbetçiotu enzimleri dekstrinleri şekere çevirir → maya yeniden mayalar",
+     "anahtar": [
+      "enzim",
+      "enzym",
+      "dekstrin",
+      "dextrin",
+      "amilaz",
+      "amylase",
+      "amylolytic",
+      "diastatic",
+      "ikinci mayalanma",
+      "secondary fermentation"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "BarthHaas — Hop creep: what is it and how do I avoid it in the brewery?",
+       "url": "https://www.barthhaas.com/en/barthhaas-blog/blog/hop-creep-what-is-it-and-how-do-i-avoid-it-in-the-brewery",
+       "alinti": "Hop creep is an additional fermentation in dry hopped beers initiated by amylolytic, i.e. starch-degrading, enzymes from the hops. These enzymes break down unfermentable dextrins into short-chain oligosaccharides such as maltotriose, maltose and glucose."
+      },
+      {
+       "ad": "Lallemand Brewing — How to fix hop creep? with Jessica Young",
+       "url": "https://www.lallemandbrewing.com/en/global//how-to-fix-hop-creep-with-jessica-young/",
+       "alinti": "Hop creep and thiol release intersect at the same point in the process: both are driven by enzymatic activity during dry hopping in the presence of active yeast."
+      }
+     ]
+    },
+    {
+     "etken": "Sonuç: alkol ve CO₂ artar (şişede aşırı karbonasyon/patlama), bira kurur, gövde incelir",
+     "anahtar": [
+      "asiri karbon",
+      "aşırı karbon",
+      "fazla karbon",
+      "patla",
+      "alkol art",
+      "alkol yuksel",
+      "alkol yüksel",
+      "overcarbon",
+      "exploding",
+      "bottle bomb",
+      "govde",
+      "gövde"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "BarthHaas — Hop creep: what is it and how do I avoid it in the brewery?",
+       "url": "https://www.barthhaas.com/en/barthhaas-blog/blog/hop-creep-what-is-it-and-how-do-i-avoid-it-in-the-brewery",
+       "alinti": "The range of effects extends from an increase in alcohol content and carbonation to changes in the taste such as reduced residual sweetness, lower body and altered mouthfeel."
+      },
+      {
+       "ad": "BarthHaas — Hop creep: what is it and how do I avoid it in the brewery?",
+       "url": "https://www.barthhaas.com/en/barthhaas-blog/blog/hop-creep-what-is-it-and-how-do-i-avoid-it-in-the-brewery",
+       "alinti": "In the worst case, hop creep can even have legal consequences because product safety (exploding bottles) may not be guaranteed."
+      },
+      {
+       "ad": "Lallemand Brewing — How to fix hop creep? with Jessica Young",
+       "url": "https://www.lallemandbrewing.com/en/global//how-to-fix-hop-creep-with-jessica-young/",
+       "alinti": "There are other negatives that can come with hop creep such as increased CO₂, increased alcohol, decreased residual sugar, and increased perceived bitterness."
+      }
+     ]
+    },
+    {
+     "etken": "Diasetil (tereyağı) yeniden oluşur",
+     "anahtar": [
+      "diasetil",
+      "diacetyl",
+      "tereyag",
+      "tereyağ",
+      "butter",
+      "vdk"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "BarthHaas — Hop creep: what is it and how do I avoid it in the brewery?",
+       "url": "https://www.barthhaas.com/en/barthhaas-blog/blog/hop-creep-what-is-it-and-how-do-i-avoid-it-in-the-brewery",
+       "alinti": "What can sometimes have a more dramatic effect than an increased degree of fermentation is the formation of so-called metabolites such as diacetyl - an off-flavor that unpleasantly alters the taste of beer."
+      },
+      {
+       "ad": "Lallemand Brewing — How to fix hop creep? with Jessica Young",
+       "url": "https://www.lallemandbrewing.com/en/global//how-to-fix-hop-creep-with-jessica-young/",
+       "alinti": "The reason that diacetyl increases again is that the yeast restarts fermentation."
+      }
+     ]
+    },
+    {
+     "etken": "Önlem: kuru hopu mayalanma bitmeden/fermentörde yap, yoğunluk sabitlenmeden şişeleme",
+     "anahtar": [
+      "aktif mayalanma",
+      "mayalanma bitmeden",
+      "mayalanma sonunda",
+      "fermentorde",
+      "fermentörde",
+      "yogunluk sabit",
+      "yoğunluk sabit",
+      "sisele",
+      "şişele",
+      "end of primary",
+      "package"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "BarthHaas — Hop creep: what is it and how do I avoid it in the brewery?",
+       "url": "https://www.barthhaas.com/en/barthhaas-blog/blog/hop-creep-what-is-it-and-how-do-i-avoid-it-in-the-brewery",
+       "alinti": "Therefore, the Brewing Solutions team at BarthHaas recommends adding hops only at the end of primary fermentation, for example, when the residual extract is at 5 degrees Plato."
+      },
+      {
+       "ad": "BarthHaas — Hop creep: what is it and how do I avoid it in the brewery?",
+       "url": "https://www.barthhaas.com/en/barthhaas-blog/blog/hop-creep-what-is-it-and-how-do-i-avoid-it-in-the-brewery",
+       "alinti": "When the enzymes from the hops are active after primary fermentation, a few yeast cells are in the beer to ferment it, but not enough to break down the resulting diacetyl again."
+      },
+      {
+       "ad": "Lallemand Brewing — How to fix hop creep? with Jessica Young",
+       "url": "https://www.lallemandbrewing.com/en/global//how-to-fix-hop-creep-with-jessica-young/",
+       "alinti": "Hop creep is always going to happen, but it’s about allowing it to happen in the fermentation vessel rather than in the package."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "H10",
+   "recete": "dubbel",
+   "soru": "maya starter yapmalı mıyım",
+   "beklenen": [
+    {
+     "etken": "Dubbel'in yüksek OG'si daha fazla maya ister — tek sıvı paket yetmeyebilir; starter ya da ek paket",
+     "anahtar": [
+      "yuksek og",
+      "yüksek og",
+      "yuksek gravite",
+      "yüksek gravite",
+      "daha fazla maya",
+      "ek paket",
+      "iki paket",
+      "high gravity",
+      "guclu bira",
+      "güçlü bira",
+      "1.065",
+      "1,065"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "John Palmer, How to Brew — Chapter 6: Yeast",
+       "url": "https://howtobrew.com/section-1/chapter-6/",
+       "alinti": "These pitchable quantities do not require a starter for the lower gravity styles (~4% ABV). Higher gravity styles require more yeast, either by pitching multiple packages or by pitching the pouch to a yeast starter (mini fermentation) to build the cell count."
+      },
+      {
+       "ad": "White Labs — Common Pitch Rate Mistakes (And How To Avoid Them)",
+       "url": "https://blog.whitelabs.com/common-pitch-rate-mistakes-and-how-to-avoid-them",
+       "alinti": "If you bump up that original gravity about 18P (1.072), the recommendation is bumped up as well to nearly double the recommended rate, 1.5 million cells/mL/P or 15 million cells/mL."
+      },
+      {
+       "ad": "Oxford Companion to Beer — pitching",
+       "url": "https://www.beerandbrewing.com/dictionary/V04NmdFJJA",
+       "alinti": "This is only a guide and pitching rates will increase for strong beers to overcome the inhibition of high alcohol concentrations."
+      }
+     ]
+    },
+    {
+     "etken": "Gereken hücre sayısını hesapla (hacim × °Plato × ~0,75–1 milyon hücre/mL/°P); küçük partide tek paket yetebilir",
+     "anahtar": [
+      "hucre sayisi",
+      "hücre sayısı",
+      "milyon hucre",
+      "milyon hücre",
+      "milyar hucre",
+      "milyar hücre",
+      "plato",
+      "pitch orani",
+      "pitch oranı",
+      "pitch rate",
+      "cells/ml"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "John Palmer, How to Brew — Chapter 8: Fermentation",
+       "url": "https://howtobrew.com/section-1/chapter-8/",
+       "alinti": "The general rule of thumb is 1 billion cells per liter per degree Plato. One degree Plato is about 4 gravity points, so a 1.044 OG wort would be 11°P."
+      },
+      {
+       "ad": "White Labs — Common Pitch Rate Mistakes (And How To Avoid Them)",
+       "url": "https://blog.whitelabs.com/common-pitch-rate-mistakes-and-how-to-avoid-them",
+       "alinti": "Ale yeast fermented in the 66-72℉ (18-22℃) with standard original gravities between 10P (1.040) and 18P (1.072) often get a 0.75 million cell/mL/P or 7.5 million cells/mL pitching rate recommendation."
+      },
+      {
+       "ad": "Oxford Companion to Beer — pitching",
+       "url": "https://www.beerandbrewing.com/dictionary/V04NmdFJJA",
+       "alinti": "A typical pitching rate for warm-fermented ales would be 1 million cells/ml/degree Plato original gravity. Therefore, a 12°P wort might be pitched at 12 million cells/ml."
+      }
+     ]
+    },
+    {
+     "etken": "Paket eski / yavaş şişti / kötü saklandı — canlılığı toparlamak için starter",
+     "anahtar": [
+      "eski paket",
+      "son kullanma",
+      "tarihi yaklas",
+      "tarihi yaklaş",
+      "canlilik",
+      "canlılık",
+      "viability",
+      "sisme",
+      "şişme",
+      "yavas sis",
+      "yavaş şiş",
+      "saklama"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "White Labs — How to Make a Yeast Starter 101",
+       "url": "https://blog.whitelabs.com/how-to-make-a-yeast-starter-101",
+       "alinti": "Yet there are times when you may want or need to make a yeast starter, such as using an older package or brewing a bigger beer."
+      },
+      {
+       "ad": "John Palmer, How to Brew — Chapter 6: Yeast",
+       "url": "https://howtobrew.com/section-1/chapter-6/",
+       "alinti": "However, liquid yeast has a shorter shelf life than dry yeast, and it often needs a starter to perk it back up to full health or to increase the overall cell count prior to pitching to your batch."
+      }
+     ]
+    },
+    {
+     "etken": "Kuru maya kullanılıyorsa starter gereksiz (önerilen dozda paket yeterli)",
+     "anahtar": [
+      "kuru maya",
+      "dry yeast",
+      "sachet",
+      "kuru paket",
+      "starter gereksiz",
+      "starter gerekmez",
+      "rehidrat",
+      "rehydrat"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Lallemand Brewing — LalBrew Abbaye Technical Data Sheet (PDF)",
+       "url": "https://www.lallemandbrewing.com/docs/products/tds/TDS_LALBREW_PREM_ABBAYE_ENGLISH_DIGITAL.pdf",
+       "alinti": "Rehydration guidelines are quite simple and present a much lower risk of contamination than a starter, which is unnecessary when using the recommended pitch rate of dried active yeast."
+      },
+      {
+       "ad": "Brülosophy — exBEERiment: Starter vs. Rehydration With Dry Yeast In An American Pale Ale",
+       "url": "https://brulosophy.com/2016/12/05/yeast-pitch-rate-pt-6-starter-vs-rehydration-with-dry-yeast-exbeeriment-results/",
+       "alinti": "These results indicate participants were unable to reliably distinguish a beer fermented with rehydrated dry yeast form the same beer fermented with dry yeast that was first propagated in a starter."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "H11",
+   "recete": "lager",
+   "soru": "kuru mayayı rehidrate etmeli miyim yoksa doğrudan serpeyim mi",
+   "beklenen": [
+    {
+     "etken": "Normal OG'de doğrudan serpmek genelde sorunsuz (sonuçta ölçülebilir fark yok)",
+     "anahtar": [
+      "dogrudan serp",
+      "doğrudan serp",
+      "direkt serp",
+      "serpme",
+      "serpebilir",
+      "direct pitch",
+      "sprinkle",
+      "fark yok",
+      "fark yaratmaz",
+      "e2u"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Fermentis — E2U™ Easy To Use",
+       "url": "https://fermentis.com/easy-2-use",
+       "alinti": "Fermentation performances (kinetic, sugar content, etc…): no significant difference whether you direct pitch or rehydrate"
+      },
+      {
+       "ad": "Lallemand Brewing — Rehydration Protocol (Best Practices PDF)",
+       "url": "https://www.lallemandbrewing.com/docs/products/bp/BEST-PRACTICES_REHYDRATION_DIGITAL.pdf",
+       "alinti": "In most cases,dry-pitched fermentations proceed normally without any problems. However, this option is not recommended in high gravity worts (above 16ºP or SG 1.065) or in soured worts with low pH."
+      },
+      {
+       "ad": "John Palmer, How to Brew — Chapter 9: Fermenting Your First Batch",
+       "url": "https://howtobrew.com/section-1/chapter-9/",
+       "alinti": "Yes, you can just sprinkle it on the surface of the wort. It will rehydrate and get busy. We used to recommend that the yeast be rehydrated and proofed before pitching (to make sure it was alive), but dry yeast is higher quality these days and doesn't suffer in packaging like it used to."
+      },
+      {
+       "ad": "Brülosophy — The Brü Club xBmt Series: Direct Pitch vs. Rehydration With Dry Yeast",
+       "url": "https://brulosophy.com/2018/11/29/direct-pitch-vs-rehydration-with-dry-yeast-the-bru-club-xbmt-series/",
+       "alinti": "Either way, with my results corroborating Marshall’s initial findings, I’m inclined to continue skip the rehydration step and pitch dry yeast direct directly into the wort, even if it means slightly longer lag."
+      }
+     ]
+    },
+    {
+     "etken": "Rehidrasyon önerilmeli mi (ozmotik stres) — kaynaklar çelişiyor",
+     "anahtar": [
+      "rehidrat",
+      "rehidrasyon",
+      "rehydrat",
+      "ozmotik",
+      "osmotic",
+      "ilik suda",
+      "ılık suda",
+      "suda beklet",
+      "onerilen yontem",
+      "önerilen yöntem"
+     ],
+     "guc": "celiski",
+     "kaynaklar": [
+      {
+       "ad": "Lallemand Brewing — Rehydration Protocol (Best Practices PDF) [rehidrasyon önerilir]",
+       "url": "https://www.lallemandbrewing.com/docs/products/bp/BEST-PRACTICES_REHYDRATION_DIGITAL.pdf",
+       "alinti": "Rehydration is a simple process which allows the dry yeast to become liquid yeast, reducing the osmotic stress and enhancing a homogeneous dispersion."
+      },
+      {
+       "ad": "John Palmer, How to Brew — Chapter 22: Is My Beer Ruined? [rehidrasyon önerilir]",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "Dry yeast are dehydrated—they’re parched, they’re in no condition to start work. They need some nice warm water to get rehydrated in, some time to do some stretching, maybe an appetizer, and then they will be ready to tackle a full wort."
+      },
+      {
+       "ad": "Fermentis — E2U™ Easy To Use [fark yok, seçim sizin]",
+       "url": "https://fermentis.com/easy-2-use",
+       "alinti": "When it comes to yeast, E2U™ certification means you can choose to pitch directly into the wort, or proceed to rehydration. It makes no difference, it’s up to you."
+      },
+      {
+       "ad": "Lallemand Brewing — Yeast Pitching, Quality and Recycling (Brewer's Corner) [doğrudan serpme tercih edilir]",
+       "url": "https://www.lallemandbrewing.com/en/united-states/resources/brewers-corner/re-hydration-and-quality/",
+       "alinti": "Dry pitching is the preferred method of inoculating wort. This method is simpler than rehydration and will give more consistent fermentation performance and reduce the risk of contamination."
+      }
+     ]
+    },
+    {
+     "etken": "Rehidrasyon yapılacaksa: doğru su sıcaklığı ve şıraya kademeli eşitleme (sıcaklık şoku), damıtık/RO su kullanma",
+     "anahtar": [
+      "30-35",
+      "30–35",
+      "su sicakligi",
+      "su sıcaklığı",
+      "sicaklik sok",
+      "sıcaklık şok",
+      "kademeli",
+      "damitik",
+      "damıtık",
+      "ro su",
+      "temperature shock",
+      "petite"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Lallemand Brewing — Rehydration Protocol (Best Practices PDF)",
+       "url": "https://www.lallemandbrewing.com/docs/products/bp/BEST-PRACTICES_REHYDRATION_DIGITAL.pdf",
+       "alinti": "Temperature differences greater than 10ºC between yeast and wort will result in a temperature shock. This will cause the formation of petite mutants, leading to long-term or incomplete fermentation and possible formation of undesirable flavors in your beer."
+      },
+      {
+       "ad": "John Palmer, How to Brew — Chapter 22: Is My Beer Ruined?",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "If the water is too cold (below 80°F) the yeast will be sluggish and have a hard time getting rehydrated. If it is too hot (above 105°F) then the yeast are going to get scalded, and refuse to have anything to do with you and your wort."
+      },
+      {
+       "ad": "Fermentis — Questions & Answers",
+       "url": "https://fermentis.com/en/knowledge-center/faq/",
+       "alinti": "Outside this optimal range (as long as the temperature is above 10°C), you will not stun the yeast but you could get a longer lag phase at the beginning of the fermentation."
+      }
+     ]
+    },
+    {
+     "etken": "Lager (soğuk mayalanma) daha yüksek maya dozu ister",
+     "anahtar": [
+      "daha yuksek doz",
+      "daha yüksek doz",
+      "g/hl",
+      "iki paket",
+      "daha fazla maya",
+      "yuksek pitch",
+      "yüksek pitch",
+      "soguk mayalanma",
+      "soğuk mayalanma",
+      "1,5 milyon",
+      "1.5 milyon"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Fermentis — Questions & Answers",
+       "url": "https://fermentis.com/en/knowledge-center/faq/",
+       "alinti": "The recommended pitching rate for our Lager strains in a first use of active dry yeast is from 80 to 120 g/hl, corresponding to 7 to 11 million cells/ml and for Ale from 50 to 80 g/hl corresponding to 3 to 5 million cells/ml."
+      },
+      {
+       "ad": "White Labs — Common Pitch Rate Mistakes (And How To Avoid Them)",
+       "url": "https://blog.whitelabs.com/common-pitch-rate-mistakes-and-how-to-avoid-them",
+       "alinti": "Lager yeast fermented in the 48-55℉ (9-12℃) range requires a larger pitch rate due to less growth from the cooler temperatures."
+      },
+      {
+       "ad": "John Palmer, How to Brew — Chapter 8: Fermentation",
+       "url": "https://howtobrew.com/section-1/chapter-8/",
+       "alinti": "This rule of thumb is rather generous for ales, most ale strains can sufficiently ferment at a rate of 0.75 billion per liter per °P. Lager strains typically need a higher rate, such as 1.5 billion per liter per °P."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "H12",
+   "recete": "dubbel",
+   "soru": "mash pH'ı neden önemli",
+   "beklenen": [
+    {
+     "etken": "Enzim (amilaz) aktivitesi pH’a bağlı; yanlış pH’ta zayıflar",
+     "anahtar": [
+      "enzim",
+      "enzyme",
+      "amilaz",
+      "amylase",
+      "donusum",
+      "dönüşüm",
+      "conversion",
+      "enzymatic"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "John Palmer, How to Brew — Chapter 15: Understanding the Mash pH",
+       "url": "https://howtobrew.com/section-3/chapter-15/",
+       "alinti": "Our goal is to prevent tannin extraction and enzyme impairment due to being in the wrong ballpark."
+      },
+      {
+       "ad": "Oxford Companion to Beer — pH",
+       "url": "https://www.beerandbrewing.com/dictionary/qeh4iQVXXP",
+       "alinti": "In mashes that are too acidic or too alkaline, enzyme activity is impaired and can even stop."
+      },
+      {
+       "ad": "ASBC — Webinar: Mash pH and Wort Composition",
+       "url": "https://www.asbcnet.org/events/webinars/Pages/MashpH-Wort-Composition.aspx",
+       "alinti": "how mash pH influences enzymatic activity, sugar extraction, and the solubility of proteins and polyphenols during mashing."
+      }
+     ]
+    },
+    {
+     "etken": "Yüksek pH kabuktan tanen/polifenol çeker → burukluk",
+     "anahtar": [
+      "tanen",
+      "tannin",
+      "polifenol",
+      "polyphenol",
+      "buruk",
+      "astringen",
+      "kabuk",
+      "husk"
+     ],
+     "guc": "olasi",
+     "kaynaklar": [
+      {
+       "ad": "John Palmer, How to Brew — Chapter 15: Understanding the Mash pH",
+       "url": "https://howtobrew.com/section-3/chapter-15/",
+       "alinti": "The water does not allow the pH of a 100% base malt mash to hit the target range, it remains higher (>pH 6) and this extracts phenolic and tannin compounds from the grain husks."
+      },
+      {
+       "ad": "ASBC — Webinar: Mash pH and Wort Composition",
+       "url": "https://www.asbcnet.org/events/webinars/Pages/MashpH-Wort-Composition.aspx",
+       "alinti": "how mash pH influences enzymatic activity, sugar extraction, and the solubility of proteins and polyphenols during mashing."
+      }
+     ]
+    },
+    {
+     "etken": "Bitmiş biranın kalitesi: lezzet kararlılığı / raf ömrü, maya performansı",
+     "anahtar": [
+      "lezzet kararl",
+      "lezzet stabil",
+      "raf omru",
+      "raf ömrü",
+      "bayatla",
+      "stability",
+      "shelf life",
+      "flavour stability",
+      "maya performans"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Oxford Companion to Beer — pH",
+       "url": "https://www.beerandbrewing.com/dictionary/qeh4iQVXXP",
+       "alinti": "Brewers manage pH values mostly to enhance enzyme performance in the mash and yeast performance in the fermenter, as well as the quality of the finished beer."
+      },
+      {
+       "ad": "Oxford Companion to Beer — acidification",
+       "url": "https://www.beerandbrewing.com/dictionary/kTgG7blfwp",
+       "alinti": "Acidification techniques can reduce the pH to 5.40 and promote the activity of most enzymes involved in the conversion of the components in malt to desirable wort constituents. Fermentation will then be more efficient and the final beer flavor improved."
+      },
+      {
+       "ad": "ASBC — Webinar: Mash pH and Wort Composition",
+       "url": "https://www.asbcnet.org/events/webinars/Pages/MashpH-Wort-Composition.aspx",
+       "alinti": "Mash pH plays an important role in shaping wort composition and directly affects the flavour stability and shelf life of the final beer."
+      }
+     ]
+    },
+    {
+     "etken": "Hedef aralık ≈5,2–5,6 (oda sıcaklığında ölçülen)",
+     "anahtar": [
+      "5,2",
+      "5.2",
+      "5,4",
+      "5.4",
+      "5,6",
+      "5.6",
+      "oda sicakligi",
+      "oda sıcaklığı",
+      "room temperature"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "John Palmer, How to Brew — Chapter 15: Understanding the Mash pH",
+       "url": "https://howtobrew.com/section-3/chapter-15/",
+       "alinti": "Let me state the goal right up front: for best results, the mash pH should be 5.2–5.6 when measured at room temperature on a cooled sample."
+      },
+      {
+       "ad": "Oxford Companion to Beer — pH",
+       "url": "https://www.beerandbrewing.com/dictionary/qeh4iQVXXP",
+       "alinti": "Most mashes, therefore, are kept at a compromise pH range close to 5.4 to 5.6, which is also where proper amounts of zinc, an important yeast nutrient, are leached from the malt into the wort."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "H13",
+   "recete": "lager",
+   "soru": "lager'ı soğukta ne kadar bekletmeliyim",
+   "beklenen": [
+    {
+     "etken": "Soğukta bekletme biranın berraklaşmasını sağlar (protein/tanen çöker)",
+     "anahtar": [
+      "berrak",
+      "clarity",
+      "clear",
+      "bulanik",
+      "bulanık",
+      "haze",
+      "cokel",
+      "çökel",
+      "duru"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "John Palmer, How to Brew — Chapter 10: Brewing Lager Beer",
+       "url": "https://howtobrew.com/section-1/chapter-10/",
+       "alinti": "The other main effect of lagering at cold temperatures is brilliant beer clarity. The traditional near-freezing lagering temperatures cause almost all of the haze forming proteins and tannins to settle out."
+      },
+      {
+       "ad": "Oxford Companion to Beer — lagering",
+       "url": "https://www.beerandbrewing.com/dictionary/rOqc2p417q",
+       "alinti": "The precipitation of these complexes has a positive effect on beer stability and reduces protein hazing in the finished product."
+      },
+      {
+       "ad": "Brülosophy — The Lager Effect | exBEERiment Results",
+       "url": "https://brulosophy.com/2018/12/17/the-lager-effect-exbeeriment-results",
+       "alinti": "The one obvious difference between the beers in this xBmt was the appearance, the lagered version predictably finishing much clearer than the one that wasn’t lagered."
+      }
+     ]
+    },
+    {
+     "etken": "Tat olgunlaşır: kükürt, asetaldehit (yeşil elma) azalır",
+     "anahtar": [
+      "kukurt",
+      "kükürt",
+      "sulfur",
+      "asetaldehit",
+      "acetaldehyde",
+      "yesil elma",
+      "yeşil elma",
+      "olgunlas",
+      "olgunlaş",
+      "matur"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "John Palmer, How to Brew — Chapter 10: Brewing Lager Beer",
+       "url": "https://howtobrew.com/section-1/chapter-10/",
+       "alinti": "Fortunately, these compounds continue to vent during the conditioning (lagering) phase and the chemical precursors of other odious compounds are gradually eaten up by the yeast."
+      },
+      {
+       "ad": "Oxford Companion to Beer — lagering",
+       "url": "https://www.beerandbrewing.com/dictionary/rOqc2p417q",
+       "alinti": "Likewise, any residual acetaldehyde, which can contribute a raw green apple flavor to beer, can decrease by as much as 20% to 70%; 2-3-pentanedione and the volatile, butterscotch-tasting diacetyl, as well as their precursors, are reduced by as much as two-thirds."
+      }
+     ]
+    },
+    {
+     "etken": "Soğuğa almadan önce ılık diasetil dinlenmesi (≈15–18 °C)",
+     "anahtar": [
+      "diasetil dinlen",
+      "diacetyl rest",
+      "diasetil",
+      "ilik olgunlas",
+      "ılık olgunlaş",
+      "sicak olgunlas",
+      "sıcak olgunlaş",
+      "warm maturation"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "John Palmer, How to Brew — Chapter 10: Brewing Lager Beer",
+       "url": "https://howtobrew.com/section-1/chapter-10/",
+       "alinti": "Lager yeast actually maturate better at warmer temperatures with a diacetyl rest (more on this later in the chapter) at 60-65F, (15-18C), so that all of the diacetyl and acetaldehyde reduction is complete before the beer is chilled for lagering."
+      },
+      {
+       "ad": "Oxford Companion to Beer — lagering",
+       "url": "https://www.beerandbrewing.com/dictionary/rOqc2p417q",
+       "alinti": "If there is to be no secondary fermentation, most brewers will employ a short warm phase (up to 62°F/16.5°C) at the end of primary fermentation; this allows the yeast to ferment residual sugar more completely while absorbing unwanted diacetyl."
+      }
+     ]
+    },
+    {
+     "etken": "Süre: birkaç hafta (≈2–4 hafta); daha uzun bekletmenin tada katkısı kör testte ayırt edilemedi",
+     "anahtar": [
+      "hafta",
+      "week",
+      "iki hafta",
+      "2 hafta",
+      "3 hafta",
+      "uc hafta",
+      "üç hafta",
+      "21 gun",
+      "21 gün"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "John Palmer, How to Brew — Chapter 10: Brewing Lager Beer",
+       "url": "https://howtobrew.com/section-1/chapter-10/",
+       "alinti": "I recommend using a diacetyl rest and giving the beer a solid week of warm maturation time before you chill it to lager, and then your lagering time for clarification only needs to be about 2 weeks, regardless of style or strength."
+      },
+      {
+       "ad": "Oxford Companion to Beer — lagering",
+       "url": "https://www.beerandbrewing.com/dictionary/rOqc2p417q",
+       "alinti": "Today, lagering rarely lasts more than a month and 21 days is fairly standard."
+      },
+      {
+       "ad": "Brülosophy — The Lager Effect | exBEERiment Results",
+       "url": "https://brulosophy.com/2018/12/17/the-lager-effect-exbeeriment-results",
+       "alinti": "indicating participants in this xBmt were unable to reliably distinguish a beer that was lagered 11 weeks longer than the same beer that was held cold for only 3 weeks prior to serving."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "H14",
+   "recete": "dubbel",
+   "soru": "yüksek alkollü birada maya besini (nutrient) gerekir mi",
+   "beklenen": [
+    {
+     "etken": "Yüksek OG ve şeker katkısı mayayı strese sokar → besin özellikle faydalı",
+     "anahtar": [
+      "yuksek og",
+      "yüksek og",
+      "yuksek yogunluk",
+      "yüksek yoğunluk",
+      "yuksek alkol",
+      "yüksek alkol",
+      "high gravity",
+      "high-gravity",
+      "adjunct"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Oxford Companion to Beer — yeast nutrients",
+       "url": "https://www.beerandbrewing.com/dictionary/bkLLf5XnkJ",
+       "alinti": "Especially for beers with high levels of alcohol, judicious additions of a nitrogen source may be indicated."
+      },
+      {
+       "ad": "Lallemand Brewing — Yeastlife Extra™",
+       "url": "https://lallemandbrewing.com/en/asia/products/yeastlife-extra-yye-411",
+       "alinti": "It is suitable for all types of brewing, particularly high-gravity and adjunct brewing, where yeast health can be significantly compromised."
+      }
+     ]
+    },
+    {
+     "etken": "Saf maltlı şıra çoğunlukla yeterli besin içerir; rafine şeker (candi) besin getirmez, şırayı seyreltir",
+     "anahtar": [
+      "saf malt",
+      "tum malt",
+      "tüm malt",
+      "all-malt",
+      "rafine seker",
+      "rafine şeker",
+      "refined sugar",
+      "candi",
+      "besin icermez",
+      "besin içermez",
+      "fan"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "John Palmer, How to Brew — Chapter 6: Yeast",
+       "url": "https://howtobrew.com/section-1/chapter-6/",
+       "alinti": "Refined sugars like table sugar, corn sugar and honey do not contain any of these nutrients. An all-malt extract should have all the nutrition that the yeast will need for a good fermentation."
+      },
+      {
+       "ad": "Oxford Companion to Beer — yeast nutrients",
+       "url": "https://www.beerandbrewing.com/dictionary/bkLLf5XnkJ",
+       "alinti": "Malted barley naturally contains a balanced set of these, but high-gravity worts, especially those containing high levels of adjuncts in the form of refined sugars, may not be properly balanced, and yeast performance in these environments may be sluggish."
+      }
+     ]
+    },
+    {
+     "etken": "Çinko sıklıkla eksiktir; eksikliği mayalanmayı yavaşlatır",
+     "anahtar": [
+      "cinko",
+      "çinko",
+      "zinc",
+      "servomyces"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "John Palmer, How to Brew — Chapter 6: Yeast",
+       "url": "https://howtobrew.com/section-1/chapter-6/",
+       "alinti": "Usually the wort supplies all the necessary mineral requirements of the yeast, except for zinc, which is often deficient, or in a non-assimilable form."
+      },
+      {
+       "ad": "Oxford Companion to Beer — yeast nutrients",
+       "url": "https://www.beerandbrewing.com/dictionary/bkLLf5XnkJ",
+       "alinti": "Zinc can be deficient even in all-malt worts, because most of it tends to be lost during lautering."
+      },
+      {
+       "ad": "White Labs — Speed Up Fermentation Timelines with Zinc",
+       "url": "https://blog.whitelabs.com/speed-up-fermentation-timelines-with-zinc",
+       "alinti": "If the zinc levels are too low, yeast growth and fermentation can be negatively impacted, resulting in slower fermentation, incomplete attenuation, and undesirable flavor compounds."
+      }
+     ]
+    },
+    {
+     "etken": "Oksijen (havalandırma): yüksek OG’de daha fazla maya ve oksijen gerekir",
+     "anahtar": [
+      "oksijen",
+      "oxygen",
+      "havalandir",
+      "havalandır",
+      "aerat",
+      "sterol"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "John Palmer, How to Brew — Chapter 6: Yeast",
+       "url": "https://howtobrew.com/section-1/chapter-6/",
+       "alinti": "Higher gravity worts need more yeast for proper fermentation, and thus need more oxygen, but the higher gravity makes it more difficult to dissolve oxygen in the first place."
+      },
+      {
+       "ad": "Oxford Companion to Beer — yeast nutrients",
+       "url": "https://www.beerandbrewing.com/dictionary/bkLLf5XnkJ",
+       "alinti": "Finally, yeast needs oxygen to synthesize sterols and unsaturated fatty acids in the yeast cell membrane."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "H15",
+   "recete": "apa",
+   "soru": "mayayı atmadan önce şırayı havalandırmak neden gerekli",
+   "beklenen": [
+    {
+     "etken": "Maya oksijenle sterol ve doymamış yağ asidi üretir — hücre zarı ve çoğalma için gerekli",
+     "anahtar": [
+      "sterol",
+      "yag asid",
+      "yağ asid",
+      "fatty acid",
+      "hucre zari",
+      "hücre zarı",
+      "membran",
+      "membrane",
+      "tomurcuk",
+      "budding",
+      "cogalma",
+      "çoğalma"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "John Palmer, How to Brew — Chapter 6: Yeast",
+       "url": "https://howtobrew.com/section-1/chapter-6/",
+       "alinti": "Yeast need 8-16 ppm of oxygen (depending on the strain) to synthesize sterols and unsaturated fatty acids for cell membrane biosynthesis."
+      },
+      {
+       "ad": "White Labs — Tips for Wort Oxygenation: The Why, What, and How",
+       "url": "https://blog.whitelabs.com/tips-for-wort-oxygenation-the-why-what-and-how",
+       "alinti": "Yeast depends on oxygen to provide them with the building blocks needed to synthesize fatty acids and sterols, essential components in the yeast cell membrane."
+      },
+      {
+       "ad": "Oxford Companion to Beer — sterols",
+       "url": "https://www.beerandbrewing.com/dictionary/GPT2mpwoch",
+       "alinti": "Yeast uses oxygen to synthesize sterols and unsaturated fatty acids (UFA), largely during the aerobic phase of the fermentation cycle; this is why ample wort aeration at pitching time is essential for successful fermentations."
+      }
+     ]
+    },
+    {
+     "etken": "Oksijen yetersizse: uzun gecikme, yavaş/eksik mayalanma, yüksek kalan FG",
+     "anahtar": [
+      "gecikme",
+      "uzun lag",
+      "lag",
+      "yavas mayalan",
+      "yavaş mayalan",
+      "eksik mayalan",
+      "takil",
+      "takıl",
+      "yuksek fg",
+      "yüksek fg",
+      "underattenu",
+      "stuck"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "White Labs — Tips for Wort Oxygenation: The Why, What, and How",
+       "url": "https://blog.whitelabs.com/tips-for-wort-oxygenation-the-why-what-and-how",
+       "alinti": "In fermentations where no additional oxygen is added, yeast never reach the cell mass obtained in oxygen-enhanced fermentations, resulting in long lag times and sometimes, not reaching the expected terminal gravity."
+      },
+      {
+       "ad": "Oxford Companion to Beer — aeration",
+       "url": "https://www.beerandbrewing.com/dictionary/PmFi6cZqQT",
+       "alinti": "It is normal practice to add oxygen to wort prior to fermentation; absence of sufficient oxygen will hamper yeast reproduction and can lead to poor fermentations."
+      },
+      {
+       "ad": "John Palmer, How to Brew — Chapter 6: Yeast",
+       "url": "https://howtobrew.com/section-1/chapter-6/",
+       "alinti": "Without aeration, fermentations tend to be underattenuated because oxygen availability is a limiting factor for yeast growth—the yeast stop budding when sterol levels for cell membrane growth become depleted."
+      }
+     ]
+    },
+    {
+     "etken": "Zamanlama: yalnız soğutulmuş şırada, mayalanma başlamadan; sıcakken ya da mayalanma ilerledikten sonra oksijen zararlı",
+     "anahtar": [
+      "sicak sira",
+      "sıcak şıra",
+      "sogutulmus",
+      "soğutulmuş",
+      "soguduktan",
+      "soğuduktan",
+      "oksidasyon",
+      "oxidation",
+      "diasetil",
+      "diacetyl",
+      "18 saat",
+      "gec havalandir",
+      "geç havalandır",
+      "hot-side"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "John Palmer, How to Brew — Chapter 6: Yeast",
+       "url": "https://howtobrew.com/section-1/chapter-6/",
+       "alinti": "You should not aerate when the wort is hot, or even warm. Aeration of hot wort will cause the oxygen to chemically bind to various wort compounds."
+      },
+      {
+       "ad": "Fermentis — Questions & Answers",
+       "url": "https://fermentis.com/en/knowledge-center/faq/",
+       "alinti": "We know that after 18 hours of fermentation, adding oxygen increases the diacetyl and aldehyde levels."
+      },
+      {
+       "ad": "Lallemand Brewing — Winter Warmers",
+       "url": "https://www.lallemandbrewing.com/en/united-states/resources/winter-warmers/",
+       "alinti": "Dry yeast is ideal for this purpose since it does not require aeration, which can cause off-flavors if done late in fermentation."
+      }
+     ]
+    },
+    {
+     "etken": "Kuru maya ilk kullanımda havalandırma gerektirir mi — kaynaklar çelişiyor",
+     "anahtar": [
+      "kuru maya",
+      "dry yeast",
+      "ilk kullanim",
+      "ilk kullanım",
+      "first use",
+      "rezerv",
+      "ergosterol",
+      "havalandirma gerekmez",
+      "havalandırma gerekmez"
+     ],
+     "guc": "celiski",
+     "kaynaklar": [
+      {
+       "ad": "Fermentis — Questions & Answers [gerekmez]",
+       "url": "https://fermentis.com/en/knowledge-center/faq/",
+       "alinti": "We don’t recommend aerating the wort in normal conditions. The dry yeast has been produced and dried with a specific know-how of the Lesaffre Group, in order to maximize the Ergosterols content of the cells."
+      },
+      {
+       "ad": "Lallemand Brewing — Lallemand Premium Dry Yeast for Quality, Consistent Fermentations [gerekmez]",
+       "url": "https://www.lallemandbrewing.com/en/continental-europe/resources/lallemand-premium-dry-yeast-for-quality-consistent-fermentations/",
+       "alinti": "While dry yeast can be pitched without aeration (sufficient sterol and unsaturated fatty acid reserves support several cell divisions without requiring oxygen), the re-pitched yeast must be aerated to 8-10 ppm dissolved oxygen."
+      },
+      {
+       "ad": "John Palmer, How to Brew — Chapter 6: Yeast [kuru mayada da havalandır]",
+       "url": "https://howtobrew.com/section-1/chapter-6/",
+       "alinti": "For the beginning brewer, using dry yeast, I recommend the simplest methods of shaking the starter and pouring the wort."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "H16",
+   "recete": "apa",
+   "soru": "biramda sabun gibi bir tat var, neden olur",
+   "beklenen": [
+    {
+     "etken": "Bira mayalanma bittikten sonra uzun süre maya/tortu üzerinde kaldı; tortudaki yağ asitleri (otoliz) sabun tadı verir",
+     "anahtar": [
+      "tortu",
+      "trub",
+      "yag asit",
+      "yağ asit",
+      "fatty acid",
+      "otoliz",
+      "autoly",
+      "kaprilik",
+      "caprylic",
+      "uzun sure maya",
+      "uzun süre maya"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "John Palmer, How to Brew — Chapter 22: Is My Beer Ruined?",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "If you leave the beer in the primary fermentor for a relatively long period of time after primary fermentation is over (“long” depends on the style and other fermentation factors), soapy flavors can result from the breakdown of fatty acids in the trub."
+      },
+      {
+       "ad": "BJCP — CEP Sensory Training Class (A. Luberto 2012, PDF on bjcp.org)",
+       "url": "https://dev.bjcp.org/wp-content/uploads/2012/02/SensoryTraining.pdf",
+       "alinti": "May also be caused by breakdown of fatty acids in the trub, creating “soap”."
+      }
+     ]
+    },
+    {
+     "etken": "İyi durulanmamış bardak veya ekipmanda kalan sabun/deterjan kalıntısı",
+     "anahtar": [
+      "deterjan",
+      "sabun kalinti",
+      "sabun kalıntı",
+      "durula",
+      "rinse",
+      "bardak",
+      "glass",
+      "temizlik maddesi",
+      "cleanser"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "John Palmer, How to Brew — Chapter 22: Is My Beer Ruined?",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "Soapy flavors can be caused by not washing your glass very well, but they can also be produced by the fermentation conditions."
+      },
+      {
+       "ad": "BJCP — CEP Sensory Training Class (A. Luberto 2012, PDF on bjcp.org)",
+       "url": "https://dev.bjcp.org/wp-content/uploads/2012/02/SensoryTraining.pdf",
+       "alinti": "Rack beer off trub <4 weeks. (caprylic) • Avoid use of soap as cleanser. (caprylic)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "H17",
+   "recete": "dubbel",
+   "soru": "biramda maya / et suyu gibi bir tat var, neden olur",
+   "beklenen": [
+    {
+     "etken": "Maya otolizi: ölen maya hücreleri parçalanıp et suyu / et, kükürtlü ve acı \"maya ısırığı\" tadı verir",
+     "anahtar": [
+      "otoliz",
+      "autoly",
+      "olen maya",
+      "ölen maya",
+      "maya hucre",
+      "maya hücre",
+      "yeast bite",
+      "et suyu",
+      "bouillon",
+      "meaty"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "John Palmer, How to Brew — Chapter 22: Is My Beer Ruined?",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "If the yeast is unhealthy and begins autolyzing it will release compounds that initially may be described as yeasty, or smell like beef bullion, or soapy or like a jar of B-vitamins later on."
+      },
+      {
+       "ad": "Oxford Companion to Beer — autolysis",
+       "url": "https://www.beerandbrewing.com/dictionary/DQXAk4DwuE",
+       "alinti": "This is generally a sharp, bitter taste with a meaty and sulphury edge caused by some of the amino acids and nucleotides present in yeast."
+      },
+      {
+       "ad": "BYO — Beat Yeast Bite (magazine)",
+       "url": "https://byo.com/articles/beat-yeast-bite/",
+       "alinti": "This process releases all kinds of nasty compounds into the beer, including fatty acids and sulfur- and nitrogen-containing compounds that cause the aromas and flavors described above as meaty, rubbery, and sour."
+      }
+     ]
+    },
+    {
+     "etken": "Biranın uzun süre (yaşlı) maya tortusu üzerinde bekletilmesi otolizi başlatır",
+     "anahtar": [
+      "tortu uzerinde",
+      "tortu üzerinde",
+      "maya tortusu",
+      "transfer",
+      "aktar",
+      "sekonder",
+      "secondary",
+      "rack",
+      "yasli maya",
+      "yaşlı maya",
+      "uzun sure bekle",
+      "uzun süre bekle"
+     ],
+     "guc": "olasi",
+     "kaynaklar": [
+      {
+       "ad": "Oxford Companion to Beer — autolysis",
+       "url": "https://www.beerandbrewing.com/dictionary/DQXAk4DwuE",
+       "alinti": "Many causes may be cited for autolysis, not least simple old age. However, poor handling of yeast and beer will accelerate autolysis."
+      },
+      {
+       "ad": "BYO — Beat Yeast Bite (magazine)",
+       "url": "https://byo.com/articles/beat-yeast-bite/",
+       "alinti": "After primary fermentation is complete, let the yeast settle, but don’t leave it sitting on the yeast sediment for too long (more than about a week after primary is complete is too long)."
+      },
+      {
+       "ad": "Brulosophy — exBEERiment: Impact Of Extended Time In Primary Fermentation Vessel (Festbier)",
+       "url": "https://brulosophy.com/2019/03/18/impact-of-extended-time-in-primary-fermentation-vessel-exbeeriment-results/",
+       "alinti": "While differences were seemingly present between these xBmt beers, there’s no way of knowing what the cause was, particularly whether or not autolysis was the culprit."
+      }
+     ]
+    },
+    {
+     "etken": "Yüksek sıcaklık ve maya stresi (25 °C üstü, ani sıcaklık değişimi, yüksek gravitede ozmotik şok) otolizi hızlandırır",
+     "anahtar": [
+      "yuksek sicaklik",
+      "yüksek sıcaklık",
+      "25 °c",
+      "25°c",
+      "sicaklik sok",
+      "sıcaklık şok",
+      "ozmotik",
+      "osmotic",
+      "yuksek gravite",
+      "yüksek gravite"
+     ],
+     "guc": "olasi",
+     "kaynaklar": [
+      {
+       "ad": "Oxford Companion to Beer — autolysis",
+       "url": "https://www.beerandbrewing.com/dictionary/DQXAk4DwuE",
+       "alinti": "Common examples are high temperatures, particularly above 25°C, or sudden changes in temperature at pitching or at chilling, and osmotic shock where yeast is pitched into high gravity worts."
+      },
+      {
+       "ad": "BYO — Beat Yeast Bite (magazine)",
+       "url": "https://byo.com/articles/beat-yeast-bite/",
+       "alinti": "Control the temperature during all stages. Heat will rapidly accelerate the autolysis process."
+      }
+     ]
+    },
+    {
+     "etken": "Bira çok genç / maya henüz çökmemiş ya da dökerken dipteki maya bardağa geçmiş (maya tadı)",
+     "anahtar": [
+      "genc bira",
+      "genç bira",
+      "green beer",
+      "cokmemis",
+      "çökmemiş",
+      "askida maya",
+      "askıda maya",
+      "yeast in suspension",
+      "dokerken",
+      "dökerken",
+      "pouring"
+     ],
+     "guc": "olasi",
+     "kaynaklar": [
+      {
+       "ad": "John Palmer, How to Brew — Chapter 22: Is My Beer Ruined?",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "If the beer is green, is too young, and the yeast has not had time to settle out, it will have a yeasty taste. Watch your pouring method too, keep the yeast layer on the bottom of the bottle."
+      },
+      {
+       "ad": "BYO — Beat Yeast Bite (magazine)",
+       "url": "https://byo.com/articles/beat-yeast-bite/",
+       "alinti": "Excessive amounts of live yeast that remain in suspension in your beer during both fermentation and bottle conditioning might cause this flavor to come through."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "H18",
+   "recete": "lager",
+   "soru": "musluk suyum klorlu, bira için ne yapmalıyım",
+   "beklenen": [
+    {
+     "etken": "Klor/kloramin fenollerle birleşip klorofenol oluşturur (ilaç, antiseptik, plastik tadı) — su kullanılmadan önce giderilmeli",
+     "anahtar": [
+      "klorofenol",
+      "chlorophenol",
+      "ilac tadi",
+      "ilaç tadı",
+      "antiseptik",
+      "medicinal",
+      "plastik",
+      "band-aid",
+      "fenol"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Oxford Companion to Beer — phenolic",
+       "url": "https://www.beerandbrewing.com/dictionary/9Z95BHQHMb",
+       "alinti": "Chlorine is typically added to main water supplies and must be removed before the water can be used for brewing."
+      },
+      {
+       "ad": "Oxford Companion to Beer — phenolic",
+       "url": "https://www.beerandbrewing.com/dictionary/9Z95BHQHMb",
+       "alinti": "The main chemicals giving rise to volatile phenols are chlorine and bromine. These two chemicals combine with phenols (including polyphenols) already in the beer to create chlorophenols and bromophenols, respectively."
+      },
+      {
+       "ad": "John Palmer, How to Brew — Chapter 4: Water for Extract Brewing",
+       "url": "https://howtobrew.com/section-1/chapter-4/",
+       "alinti": "Chloramine cannot be easily removed by boiling and will give a medicinal taste to beer."
+      },
+      {
+       "ad": "MDPI Beverages 2021, 7(2), 38 — Habschied et al., Beer Polyphenols—Bitterness, Astringency, and Off-Flavors",
+       "url": "https://www.mdpi.com/2306-5710/7/2/38",
+       "alinti": "Inappropriate use of chlorinated tap water or sanitizers with chlorine or iodine can bring out chlorophenols."
+      }
+     ]
+    },
+    {
+     "etken": "Kampden tableti (sodyum/potasyum metabisülfit) klor ve kloramini dakikalar içinde giderir",
+     "anahtar": [
+      "kampden",
+      "campden",
+      "metabisulfit",
+      "metabisülfit",
+      "metabisulfite",
+      "sulfit",
+      "sülfit",
+      "k-meta"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "John Palmer, How to Brew — Chapter 4: Water for Extract Brewing",
+       "url": "https://howtobrew.com/section-1/chapter-4/",
+       "alinti": "However, chloramine can be effectively removed by adding 1 campden tablet (sodium or potassium metabisulfite)."
+      },
+      {
+       "ad": "John Palmer, How to Brew — Chapter 4: Water for Extract Brewing",
+       "url": "https://howtobrew.com/section-1/chapter-4/",
+       "alinti": "Both chlorine and chloramine are reduced to insignificant levels of sulfate and chloride ions (<10 ppm), within a couple minutes at room temperature."
+      },
+      {
+       "ad": "BJCP — CEP Sensory Training Class (A. Luberto 2012, PDF on bjcp.org)",
+       "url": "https://dev.bjcp.org/wp-content/uploads/2012/02/SensoryTraining.pdf",
+       "alinti": "Fix: Filter tap water/campden tablets (potassium metabisulfite), non chlorine based sanitizers, proper sparging."
+      },
+      {
+       "ad": "BYO Mr. Wizard — Sodium metabisulfite to clear chloramine (magazine)",
+       "url": "https://byo.com/mr-wizard/it-was-suggested-that-adding-sodium-metabisulfite-to-the-water-would-clear-the-chloramine/",
+       "alinti": "These compounds will remove chlorine from both sodium hypochlorite (bleach) and chloramine treated waters."
+      }
+     ]
+    },
+    {
+     "etken": "Aktif karbon (kömür) filtre klor ve kloraminin büyük kısmını tutar",
+     "anahtar": [
+      "aktif karbon",
+      "aktif komur",
+      "aktif kömür",
+      "karbon filtre",
+      "komur filtre",
+      "kömür filtre",
+      "charcoal",
+      "carbon filter",
+      "activated carbon",
+      "aritma filtre",
+      "arıtma filtre"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "John Palmer, How to Brew — Chapter 4: Water for Extract Brewing",
+       "url": "https://howtobrew.com/section-1/chapter-4/",
+       "alinti": "Carbon filtration should remove 80-90% of chlorine and chloramine, but a single campden tablet added to the water before the boil is much more effective."
+      },
+      {
+       "ad": "BJCP — CEP Sensory Training Class (A. Luberto 2012, PDF on bjcp.org)",
+       "url": "https://dev.bjcp.org/wp-content/uploads/2012/02/SensoryTraining.pdf",
+       "alinti": "Fix: Filter tap water/campden tablets (potassium metabisulfite), non chlorine based sanitizers, proper sparging."
+      }
+     ]
+    },
+    {
+     "etken": "Kaynatma serbest kloru uçurur ama kloramini gidermez",
+     "anahtar": [
+      "kaynat",
+      "boil",
+      "kloramin",
+      "chloramine",
+      "serbest klor",
+      "ucur",
+      "uçur",
+      "bekletme"
+     ],
+     "guc": "olasi",
+     "kaynaklar": [
+      {
+       "ad": "John Palmer, How to Brew — Chapter 4: Water for Extract Brewing",
+       "url": "https://howtobrew.com/section-1/chapter-4/",
+       "alinti": "If the water smells like a swimming pool, some odors (like chlorine) can be removed by boiling. Other odors like chloramine, cannot."
+      },
+      {
+       "ad": "BYO Mr. Wizard — Sodium metabisulfite to clear chloramine (magazine)",
+       "url": "https://byo.com/mr-wizard/it-was-suggested-that-adding-sodium-metabisulfite-to-the-water-would-clear-the-chloramine/",
+       "alinti": "The boiling method works very well with water chlorinated with hypochlorite, but is less effective at removing chloramine."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "H19",
+   "recete": "apa",
+   "soru": "biramın enfekte olduğunu nasıl anlarım",
+   "beklenen": [
+    {
+     "etken": "Ekşi, sirke veya elma şırası gibi koku/tat (laktik / asetik asit bakterileri)",
+     "anahtar": [
+      "eksi",
+      "ekşi",
+      "sirke",
+      "vinegar",
+      "asetik",
+      "acetic",
+      "laktik",
+      "lactic",
+      "lacto",
+      "acetobacter"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "John Palmer, How to Brew — Chapter 22: Is My Beer Ruined?",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "Aceto bacteria (vinegar producing) and Lacto bacillus (lactic acid producing) are common contaminates in breweries."
+      },
+      {
+       "ad": "Oxford Companion to Beer — beer spoilers",
+       "url": "https://www.beerandbrewing.com/dictionary/XJPSz2aftG",
+       "alinti": "Beers may become soured by lactic acid bacteria consuming starches or sugars and creating lactic acid or by acetic acid bacteria combining oxygen with alcohol to produce acetic acid."
+      },
+      {
+       "ad": "Oxford Companion to Beer — acetic acid bacteria",
+       "url": "https://www.beerandbrewing.com/dictionary/9cTDEIN0Ac",
+       "alinti": "Because they are acid- and ethanol-tolerant and not inhibited by hop compounds, they grow rapidly in beer, producing acid off-flavors and turbidity."
+      }
+     ]
+    },
+    {
+     "etken": "Beklenmedik bulanıklık, ipliksi/sümüksü (ropy) yapı",
+     "anahtar": [
+      "bulanik",
+      "bulanık",
+      "bulaniklik",
+      "bulanıklık",
+      "haze",
+      "ipliksi",
+      "sumuksu",
+      "sümüksü",
+      "ropy",
+      "jole",
+      "jöle",
+      "turbid"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "John Palmer, How to Brew — Chapter 22: Is My Beer Ruined?",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "Aceto bacteria often produce ropy strands of jelly which can be a good visual indicator, as can excessive cloudiness, after several weeks in the fermentor (although some cloudiness is not unusual, especially in all-grain beers)."
+      },
+      {
+       "ad": "John Palmer, How to Brew — Appendix C: Beer Clarity / What is Beer Haze",
+       "url": "https://howtobrew.com/brewing-with-malt-extract-3/appendix-c/",
+       "alinti": "Bacteria often cause clouding of the beer and characteristic off-flavors."
+      },
+      {
+       "ad": "Oxford Companion to Beer — beer spoilers",
+       "url": "https://www.beerandbrewing.com/dictionary/XJPSz2aftG",
+       "alinti": "The simplest symptoms of spoilage contamination are haze in the beer or muddled, “unclean” flavors."
+      }
+     ]
+    },
+    {
+     "etken": "Durmayan mayalanma, FG beklenenden çok düşük, şişede aşırı karbonasyon / taşma (gushing)",
+     "anahtar": [
+      "tasma",
+      "taşma",
+      "fiskir",
+      "fışkır",
+      "gushing",
+      "gusher",
+      "asiri karbon",
+      "aşırı karbon",
+      "overcarbon",
+      "fg cok dusuk",
+      "fg çok düşük",
+      "diastaticus",
+      "durmayan"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "John Palmer, How to Brew — Chapter 22: Is My Beer Ruined?",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "If it occurs at bottling time, the beer will overcarbonate and will fizz like soda pop, fountaining out of the bottle."
+      },
+      {
+       "ad": "John Palmer, How to Brew — Chapter 22: Is My Beer Ruined?",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "If it is below 10 and still bubbling at several per minute, then a bug has gotten hold."
+      },
+      {
+       "ad": "Oxford Companion to Beer — gushing",
+       "url": "https://www.beerandbrewing.com/dictionary/OYWATj5i7D",
+       "alinti": "Overattenuation problems are common in bottle-conditioned beers using wild yeast strains such as Brettanomyces, which can continue to ferment out sugars that Saccharomyces strains will not."
+      }
+     ]
+    },
+    {
+     "etken": "Beklenmeyen tereyağı (diasetil), ilaç/fenolik, kükürt ya da çürük kokuları",
+     "anahtar": [
+      "tereyag",
+      "tereyağ",
+      "diasetil",
+      "diacetyl",
+      "fenolik",
+      "phenolic",
+      "ilac",
+      "ilaç",
+      "kukurt",
+      "kükürt",
+      "sulfur",
+      "pediococcus",
+      "pedio"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Oxford Companion to Beer — beer spoilers",
+       "url": "https://www.beerandbrewing.com/dictionary/XJPSz2aftG",
+       "alinti": "Furthermore, off-flavors such as buttery (diacetyl), vegetable (dimethyl sulfide), sulfurous, medicinal (phenols), and even putrid (butyric acid) can be formed."
+      },
+      {
+       "ad": "John Palmer, How to Brew — Chapter 22: Is My Beer Ruined?",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "Pediococcus can produce diacetyl (invariably as a contaminant) and acidic aromas and flavors, as well as haze."
+      },
+      {
+       "ad": "John Palmer, How to Brew — Chapter 22: Is My Beer Ruined?",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "Bacterial infections can also produce sulfury odors and if you are not brewing a lager beer, then this is a good sign that you have an infection."
+      },
+      {
+       "ad": "White Labs — WLP661 Pediococcus damnosus",
+       "url": "https://www.whitelabs.com/yeast-single?id=188&type=YEAST",
+       "alinti": "It is a high diacetyl producer and slow growing, so it’s suggested to use in a mixed culture."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "H20",
+   "recete": "apa",
+   "soru": "şişeledikten sonra biram kaç günde karbone olur",
+   "beklenen": [
+    {
+     "etken": "Oda sıcaklığında genellikle 1–2 hafta (birkaç hafta)",
+     "anahtar": [
+      "hafta",
+      "week",
+      "iki hafta",
+      "2 hafta",
+      "bir hafta",
+      "1-2",
+      "gun",
+      "gün"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "John Palmer, How to Brew — Chapter 11: Priming and Bottling",
+       "url": "https://howtobrew.com/section-1/chapter-11/",
+       "alinti": "Age the capped bottles at room temperature for two weeks, out of the light."
+      },
+      {
+       "ad": "Fermentis — SafAle F-2",
+       "url": "https://fermentis.com/en/product/safale-f-2/",
+       "alinti": "Carbonation will be achieved in 1 to 2 weeks"
+      },
+      {
+       "ad": "Oxford Companion to Beer — bottle conditioning",
+       "url": "https://www.beerandbrewing.com/dictionary/iKSxvCoDdk",
+       "alinti": "This technique uses the original fermentation yeast, still suspended in the beer, to consume the added sugars and produce the carbonation, usually within a few weeks."
+      }
+     ]
+    },
+    {
+     "etken": "Sıcaklık: ılık/oda sıcaklığı gerekir; serinde (≈15 °C) daha uzun sürer",
+     "anahtar": [
+      "oda sicakl",
+      "oda sıcakl",
+      "ilik",
+      "ılık",
+      "serin",
+      "15 °c",
+      "15°c",
+      "room temperature"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "Fermentis — SafAle F-2",
+       "url": "https://fermentis.com/en/product/safale-f-2/",
+       "alinti": "carbonation at 15°C can take over 2 weeks."
+      },
+      {
+       "ad": "John Palmer, How to Brew — Chapter 11: Priming and Bottling",
+       "url": "https://howtobrew.com/section-1/chapter-11/",
+       "alinti": "Grow the yeast at the temperature you will be carbonating and storing the beer at (usually room temperature) instead of the original pitching temperature."
+      },
+      {
+       "ad": "Oxford Companion to Beer — bottle conditioning",
+       "url": "https://www.beerandbrewing.com/dictionary/iKSxvCoDdk",
+       "alinti": "The beer will have sugar added to it and then spend a period at warm temperatures; this is a perfect environment in which to grow any unwanted spoilage organisms."
+      }
+     ]
+    },
+    {
+     "etken": "Mayanın miktarı/canlılığı: yorgun maya karbonasyonu geciktirir",
+     "anahtar": [
+      "canli maya",
+      "canlı maya",
+      "canlilik",
+      "canlılık",
+      "vitality",
+      "yorgun maya",
+      "taze maya",
+      "yeni maya",
+      "depleted"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "John Palmer, How to Brew — Chapter 11: Priming and Bottling",
+       "url": "https://howtobrew.com/section-1/chapter-11/",
+       "alinti": "Aging up to two months can improve the flavor considerably, but one week will often do the job of carbonation for the impatient, it depends on the type and vitality of the yeast."
+      },
+      {
+       "ad": "Oxford Companion to Beer — bottle conditioning",
+       "url": "https://www.beerandbrewing.com/dictionary/iKSxvCoDdk",
+       "alinti": "Such yeast may or may not perform the task at hand suitably or within a predictable period of time, which is why most commercial brewers introduce new yeast for bottle conditioning."
+      }
+     ]
+    },
+    {
+     "etken": "Eklenen şeker miktarı karbonasyon düzeyini belirler (süreyi değil)",
+     "anahtar": [
+      "seker miktar",
+      "şeker miktar",
+      "priming",
+      "hacim co2",
+      "volumes",
+      "g/l"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "John Palmer, How to Brew — Chapter 11: Priming and Bottling",
+       "url": "https://howtobrew.com/section-1/chapter-11/",
+       "alinti": "Three ounces (weight) will produce a little lower carbonation level of about 2.0 volumes, and five ounces will produce about 3.0 volumes."
+      },
+      {
+       "ad": "Fermentis — SafAle F-2",
+       "url": "https://fermentis.com/en/product/safale-f-2/",
+       "alinti": "Add 5 to 10 grams of sugar per liter of beer (to obtain a saturation of 2.5 to 5.0 g/l of CO2)."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "H21",
+   "recete": "apa",
+   "soru": "kuru hoptan sonra çimen gibi bitkisel bir tat var, neden olur",
+   "beklenen": [
+    {
+     "etken": "Kuru hopun bira içinde uzun süre bırakılması (çimen/bitkisel/klorofil ve tanenli, çay gibi tat); kaynaklar ≤1 hafta öneriyor",
+     "anahtar": [
+      "temas sure",
+      "temas süre",
+      "uzun sure",
+      "uzun süre",
+      "contact time",
+      "1 hafta",
+      "bir hafta",
+      "hoplari cikar",
+      "hopları çıkar",
+      "klorofil",
+      "chlorophyll",
+      "tanen",
+      "tannin"
+     ],
+     "guc": "olasi",
+     "kaynaklar": [
+      {
+       "ad": "Oxford Companion to Beer — dry hopping",
+       "url": "https://www.beerandbrewing.com/dictionary/96jvGQTSdT",
+       "alinti": "Unpleasant grassy, vegetal, chlorophyll flavors can result from extended contact time with dry hops, so most brewers who dry hop heavily try to keep contact time to 1 week or less."
+      },
+      {
+       "ad": "John Palmer, How to Brew — Chapter 5: Hops",
+       "url": "https://howtobrew.com/section-1/chapter-5/",
+       "alinti": "The drawback here is that the extended time allows for more hop polyphenols and tannins to leach into the wort, which can give the beer a dry aftertaste, like old tea."
+      },
+      {
+       "ad": "BYO — Advanced Dry Hopping: Tips, Techniques & Traps (magazine)",
+       "url": "https://byo.com/article/advanced-dry-hopping-tips-techniques-traps",
+       "alinti": "Higher concentrations, warmer temperature, increased agitation, and extended time all extract more aromatics . . . but also compounds you may not be as excited about like astringent polyphenols, grassy aromatics, and bitter alpha acids."
+      },
+      {
+       "ad": "Brulosophy — exBEERiment: Dry Hop Length, Long vs. Short (2015)",
+       "url": "https://brulosophy.com/2015/10/26/dry-hop-length-long-vs-short-exbeeriment-results/",
+       "alinti": "I found it interesting only one person noted perceiving a “grassiness” in the long dry hop sample, a comment that came following completion of the survey and revelation of the nature of the xBmt."
+      },
+      {
+       "ad": "MDPI Foods 2021, 10(6), 1264 — Titus et al., Impact of Dry Hopping on Beer Flavor Stability",
+       "url": "https://www.mdpi.com/2304-8158/10/6/1264",
+       "alinti": "Descriptive analysis was also performed with an 8-person, trained panel; however, beers were sensorially distinguished by their aging time as opposed to their dry hopping time."
+      }
+     ]
+    },
+    {
+     "etken": "Eski, kötü saklanmış ya da iyi kurutulmamış hop (klorofil / çimen tadı) — taze, soğukta ve oksijensiz saklanmış hop kullan",
+     "anahtar": [
+      "eski hop",
+      "bayat hop",
+      "kotu saklan",
+      "kötü saklan",
+      "saklama",
+      "depolama",
+      "kurutul",
+      "taze hop",
+      "storage",
+      "poorly stored",
+      "vakum",
+      "dondurucu"
+     ],
+     "guc": "guclu",
+     "kaynaklar": [
+      {
+       "ad": "John Palmer, How to Brew — Chapter 22: Is My Beer Ruined?",
+       "url": "https://howtobrew.com/section-4/chapter-22/",
+       "alinti": "Hops are another source of these green flavors. If the hops are poorly stored or not properly dried prior to storage, the chlorophyll compounds will become evident in the beer."
+      },
+      {
+       "ad": "MDPI Beverages 2021, 7(2), 38 — Habschied et al., Beer Polyphenols—Bitterness, Astringency, and Off-Flavors",
+       "url": "https://www.mdpi.com/2306-5710/7/2/38",
+       "alinti": "Grassy reminds one of freshly cut grass or must, and can also be a result of inappropriate hops storage. To avoid this, fresh hops should be used or stored properly, as described above [133]."
+      }
+     ]
+    },
+    {
+     "etken": "Çok yüksek kuru hop dozu / fazla bitkisel madde (özellikle düşük yağlı soylu hoplar)",
+     "anahtar": [
+      "yuksek doz",
+      "yüksek doz",
+      "fazla hop",
+      "cok hop",
+      "çok hop",
+      "doz",
+      "bitkisel madde",
+      "plant material",
+      "vegetative matter",
+      "g/l",
+      "soylu hop",
+      "noble"
+     ],
+     "guc": "olasi",
+     "kaynaklar": [
+      {
+       "ad": "John Palmer, How to Brew — Chapter 5: Hops",
+       "url": "https://howtobrew.com/section-1/chapter-5/",
+       "alinti": "While you may be tempted to use a large portion of noble hops in your beer, you need to consider that this will also add a lot for plant material to the beer, which can contribute to tannic/husky flavors."
+      },
+      {
+       "ad": "BYO — Advanced Dry Hopping: Tips, Techniques & Traps (magazine)",
+       "url": "https://byo.com/article/advanced-dry-hopping-tips-techniques-traps",
+       "alinti": "Higher concentrations, warmer temperature, increased agitation, and extended time all extract more aromatics . . . but also compounds you may not be as excited about like astringent polyphenols, grassy aromatics, and bitter alpha acids."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "puanlama": "Ana setin (tests/cev_seti.json) puanlama metni (i)–(vii) + EK + EK 2 AYNEN uygulanır. Held-out özel: (a) kapsama yalnız 'guclu' satırlarla, mekanik anahtar + Claude elle düzeltmesi ayrı satır; (b) etken sayımı 75: güçlü 64 · olası 7 · çelişki 4, alıntı 207; (c) ana setle AYNI kapı, sonuç AYRI tablo; held-out katı oranı ana setinkinin 2 katını aşarsa 'aşırı uyum' bulgusu (kapı geçse bile şerit 'erken test' kalır); (d) soru kural yoluna giderse (konu kural tablosunda olmadığı hâlde) yönlendirme hatası = cevap düzeyinde (c).",
+ "beklenenImza": "f3853086"
+}
