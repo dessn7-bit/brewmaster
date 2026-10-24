@@ -31957,7 +31957,7 @@ window.BM_AI = (function(){
     '2. Kanıt gücü (güçlü / zayıf / kesin) YAZMA — uygulama kaynak sayısından hesaplar.',
     '3. Tat ya da kalite hükmü verme ("daha lezzetli", "daha iyi", "güzel olur", "tavsiye ederim" YASAK). Kullanıcıya hak verme ya da karşı çıkma.',
     '4. AYNI değişkeni söyleyen tüm alıntılar TEK maddede birleşir (kaynaklar 1–5). Kaynaklar aynı değişken için ters yön ya da farklı değer söylüyorsa iki görüşü AYRI madde yaz (aynı "degisken" metniyle, ikisi de kendi kaynağıyla) ve "celiskiler" alanına yaz; birini seçme.',
-    '5. En çok 6 madde, Türkçe, kısa: degisken = ne değişiyor; yon = artirmak / azaltmak / eklemek / cikarmak / bilgi; deger = alıntıdaki sayı ya da aralık (yoksa boş); etki = konuya ne olur; etki_yonu = konuyu artirir / azaltir / etkilemez.',
+    '5. En çok 6 madde, Türkçe, kısa: degisken = ne değişiyor; yon = artirmak / azaltmak / eklemek / cikarmak / bilgi; deger = alıntıdaki sayı ya da aralık (yoksa boş); etki = konuya ne olur; etki_yonu = konuyu artirir / azaltir / etkilemez. degisken metnine yön sözcüğü (yüksek / düşük / fazla / az) KOYMA — yönü yon alanına yaz. yon = bilgi YALNIZ değişkene bir şey yapılmıyorsa (tanım, hedef değer); "X olursa / X varsa konu artar" ise eklemek ya da artirmak yaz — bilgi maddeleri uygulamada yön çelişkisi için karşılaştırılmaz.', // CEV2B (1, 2)
     '6. dogrudan_cevap: konuya tek cümlelik cevap ve kaynakları (1–3); alıntılar bu soruya cevap vermiyorsa bunu açıkça söyle.'].join('\n'); // CEV2 (3, 5)
   var SISTEMLER = { cevsorgu: SISTEM_CEVSORGU, cevozet: SISTEM_CEVOZET, mash: SISTEM_MASH, gelistir: SISTEM_GELISTIR, hedef: SISTEM_HEDEF, bul: SISTEM_BUL, asistan: SISTEM_ASISTAN, cikar: SISTEM_CIKAR, denetim: SISTEM_DENETIM, web: SISTEM_WEB, ozet: SISTEM_OZET, kanitweb: SISTEM_KANITWEB, secim: SISTEM_SECIM };
   // SPRINT AI2 2: model web arama destekliyor mu? Models API capabilities.server_tools.web_search.supported (gerçek doğrulama AI3). Cihaz-yerel, bm_ öneksiz.
@@ -35180,8 +35180,20 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   //   CEV1B (1): kuru / gövde / acılık / renk satırları ESLEME'den ÇIKTI → eksen × yön tablosu (G.YON_*). Sıra: aroma → tadım → eksen × yön → stil.
   G.ESLEME = [
     ['tadim', /\b(off ?flavou?r|kusur(?!suz)\w*|tadimda|tadimdaki|tereyag\w*|diasetil|diacetyl|solvent|asetaldehit|dms|metalik|kukurt\w*)\b/],
-    ['stil', /\b(stil\w*|bjcp|odul\w*|madalya\w*|standart\w*|gelistir\w*|iyilestir\w*|duzelt\w*|kusursuz|mukemmel|nasil|ne yap\w*|eksik\w*|oneri\w*)\b/]
+    ['stil', /\b(stil\w*|bjcp|odul\w*|madalya\w*|standart\w*)\b/]
   ];
+  //   CEV2B (6b): 'stil' YALNIZ açık sözcükle (yukarıdaki satır) ya da sorunun TAMAMI genel geliştirme isteğiyse (geliştir / iyileştir / düzelt / nasıl / ne yapmalıyım … + başka içerik sözcüğü YOK).
+  //   Başka içerik sözcüğü kalan soru ("biramın bittiğini nasıl anlarım") konu eşleşmese bile ARAŞTIRMA yoluna gider — eskiden 'stil' hedefiyle reçeteyi stile yaklaştırma önerisi çıkıyordu (soruyla ilgisiz).
+  G.CEV2B = { stilAcik:true, kuruUrun:true };
+  G.STIL_GENEL = /\b(gelistir\w*|iyilestir\w*|duzelt\w*|kusursuz|mukemmel|nasil|ne yap\w*|eksik\w*|oneri\w*)\b/;
+  G.STIL_DOLGU = /^(bira\w*|recete\w*|bu|bunu|buna|bunda|su|sunu|benim|beni|bana|ben|sen|siz|nasil|ne|neler|nedir|neresi|yap\w*|gelistir\w*|iyilestir\w*|duzelt\w*|kusursuz|mukemmel|eksik\w*|oneri\w*|oner\w*|mi|mu|mı|mü|misin|musun|daha|iyi|guzel|olur|olsun|olmasi|hale|getir\w*|icin|var|ve|ile|bir|biraz|sey\w*|lazim|gerek\w*|yardim\w*|et|eder\w*|ederim|edebilir\w*|istiyorum|isterim|ister|acaba|genel\w*|olarak|tam|cok|en|hep|her|lutfen|bakar|bak|sence|bence|onu|onun|bunun|kendi|kendim|degil|yok|zaten|artik|hic|simdi|lezzet\w*|tad\w*|tat)$/;
+  G.stilSozSet = null;
+  G.stilSozMu = function(w){ if(!G.stilSozSet){ G.stilSozSet = []; try{ Object.keys(BJCP).forEach(function(k){ norm(k).split(/[^a-z]+/).forEach(function(p){ if(p.length >= 4 && G.stilSozSet.indexOf(p) < 0) G.stilSozSet.push(p); }); }); }catch(e){} }
+    return G.stilSozSet.some(function(p){ return w.indexOf(p) === 0; }); };
+  G.icerikSozcuk = function(n){ return String(n).replace(/[^a-z0-9 ]+/g, ' ').split(/\s+/).filter(function(w){ return w.length >= 3 && !G.STIL_DOLGU.test(w) && !G.stilSozMu(w); }); };
+  //   CEV2B (6a): "kuru hop", "kuru maya", "kuru hoplama", "dry hop" ürün / işlem adıdır — kuruluk değil; konu etiketi bu ad (araştırma yolu)
+  G.URUN_KONU = [['kuru hop', /\b(kuru hop\w*|dry ?hop\w*)\b/], ['kuru maya', /\bkuru maya\w*/]];
+  G.urunKonu = function(metin){ if(!G.CEV2B.kuruUrun) return null; var n = ' ' + norm(metin) + ' '; for(var i = 0; i < G.URUN_KONU.length; i++) if(G.URUN_KONU[i][1].test(n)) return G.URUN_KONU[i][0]; return null; };
   // CEV1B (1): EKSEN × YÖN — TEK TABLO. Eksen sözcüğü (kutup) ve yönü BİRLİKTE okunur; yön okunamazsa ya da aynı eksende iki ters yön varsa BELİRSİZ (iki çip) — ASLA varsayılan "artır".
   //   (Claude held-out 2026-10-23: "acılık çok sert" / "acı az olsun" / "acılık daha yumuşak olsun" → daha acı; "rengi koyu kaçtı" → daha koyu; "kuru bitti, tatlı olsun" → daha kuru — çıplak sözcük ilk eşleşen satırı seçiyordu)
   G.YON_EKSEN = { aci:{ art:'aci', az:'azaci', ad:'acılık' }, renk:{ art:'koyu', az:'acik', ad:'renk' }, govde:{ art:'govde', az:'kuru', ad:'gövde / kuruluk' } };
@@ -35209,7 +35221,8 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     if(pre === 'daha'){ r = G.yonPost(post); return r === -1 || r === 'konu' ? r : 1; }
     return G.yonPost(post); };
   //   metin → { k } | { k:null, belirsiz:[az, art], eksen } | { k:null, konu } | null (eksen sözcüğü yok)
-  G.yonEsle = function(n){ var C = String(n).replace(/\b((?!kesin\b)\w*(?:sin|sun)|istiyorum|olmus|oldu|geldi|kacti|bitti|kaldi)\b/g, '$1 |').split(/\s*(?:\||,|;|\bve\b|\bama\b|\bfakat\b|\bancak\b|\bcunku\b)\s*/).map(function(p){ return p.trim().split(/\s+/).filter(Boolean); }).filter(function(p){ return p.length; });
+  G.yonEsle = function(n){ if(G.CEV2B.kuruUrun) n = String(n).replace(/\bkuru (?=(hop|maya)\w*)/g, 'dry '); // CEV2B (6a): "kuru hop / kuru maya" kuruluk kutbu değil
+    var C = String(n).replace(/\b((?!kesin\b)\w*(?:sin|sun)|istiyorum|olmus|oldu|geldi|kacti|bitti|kaldi)\b/g, '$1 |').split(/\s*(?:\||,|;|\bve\b|\bama\b|\bfakat\b|\bancak\b|\bcunku\b)\s*/).map(function(p){ return p.trim().split(/\s+/).filter(Boolean); }).filter(function(p){ return p.length; });
     var R = {}, bulundu = false, konu = null;
     C.forEach(function(t, ci){ var K = []; t.forEach(function(w, i){ G.YON_KUTUP.forEach(function(k){ if(k[0].test(w)) K.push({ i:i, eksen:k[1], s:k[2], zayif:!!k[3], isim:G.YON_ISIM.test(w) }); }); });
       if(!K.length) return; var guclu = K.filter(function(k){ return !k.zayif; });
@@ -35245,6 +35258,9 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     for(var i = 0; i < G.ESLEME.length; i++){
       if(G.ESLEME[i][0] === 'stil'){ var y = G.yonEsle(n); if(y) return y.k || y.belirsiz ? y : null; } // CEV1B (1): eksen × yön — 'stil' satırından ÖNCE ("acılık nasıl" stile düşmez)
       if(G.ESLEME[i][1].test(n)) return { k:G.ESLEME[i][0], yontem:'deterministik eşleme' }; }
+    if(!G.CEV2B.stilAcik){ if(G.STIL_GENEL.test(n)) return { k:'stil', yontem:'deterministik eşleme' }; return null; } // yalnız kasıtlı bozma
+    //   kesme işaretli ek ("Weizen'imi") içerik sözcüğü değil
+    if(G.STIL_GENEL.test(n)){ var ic = G.icerikSozcuk(norm(String(metin).replace(/['’]\S*/g, ''))); return ic.length ? { k:null, arastir:true, icerik:ic, yontem:'genel soru sözcüğü + başka içerik → araştırma' } : { k:'stil', yontem:'deterministik eşleme' }; }
     return null; };
   // AI5D (1): enum YALNIZ ekranda gösterilen çiplerden (T yoksa: tadım ve aroma çipleri gösterilmez sayılır)
   G.hedefSema = function(T){ return { type:'json_schema', schema:{ type:'object', properties:{ hedef:{ type:'string', enum:G.gorunurHedefler(T).map(function(h){ return h.k; }).concat(['yok']) } }, required:['hedef'], additionalProperties:false } }; };
@@ -35872,6 +35888,9 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     var key = T.key, st = G.durum[key] = { key:key, ctx:ctx, T:T, durum:'hazir', maliyet:0, cagri:[], web:null, anlatim:null };
     var h = opt.hedef ? { k:opt.hedef, yontem:'çip' } : G.hedefEsle(opt.metin || '');
     var kd = opt.hedef ? null : G.konuEsle(opt.metin || '', T); if(kd){ st.metin = String(opt.metin || ''); st.durum = 'kapsamDisi'; st.konu = kd; return st; } // CEV1 (3): kural tablosunda olmayan konu → araştırma modu (eşleme tablosunun 'stil' / 'kuru' / 'tadim' satırına DÜŞMEZ)
+    //   CEV2B (6): genel soru sözcüğü + başka içerik ya da "kuru hop / kuru maya" (eşleşme yok) → araştırma yolu; konu etiketi ürün adı, yoksa sorulan / sorunun kendisi
+    if(!opt.hedef && ((h && h.arastir) || (!h && G.urunKonu(opt.metin || '')))){ st.metin = String(opt.metin || ''); st.durum = 'kapsamDisi'; var CV = window.BM_CEV, so = CV && CV.sorulan ? CV.sorulan(st.metin) : [];
+      st.konu = G.urunKonu(st.metin) || (so.length ? so.join(', ') : '"' + st.metin.trim().replace(/[?!.]+$/, '') + '"'); st.arastirNeden = h && h.arastir ? 'genel soru sözcüğü + başka içerik' : 'ürün / işlem adı'; return st; }
     if(h && !h.k && h.belirsiz){ st.metin = String(opt.metin || ''); st.durum = 'yonBelirsiz'; st.secenek = h.belirsiz.slice(); st.eksen = h.eksen; return st; } // CEV1B (1): yön okunamadı → iki çip (AI'ya gitmez, varsayılan yön YOK)
     // AI5D (1): eşleşme yoksa — tat / aroma isteği → "tanıyamadım" (AI'ya GİTMEZ, para yok); değilse 'hedefSec' (AI ekrandaki çiplerden seçebilir, "yok" → tanıyamadım)
     if(!h){ st.metin = String(opt.metin || ''); var ai = G.aromaIstek(st.metin); if(ai){ st.durum = 'taniyamadim'; st.aroma = ai; } else st.durum = 'hedefSec'; return st; }
@@ -36830,7 +36849,9 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   C.host = function(u){ try{ return new URL(u).hostname.toLowerCase().replace(/^www\./, ''); }catch(e){ return ''; } };
   //   CEV1B (3): kurum = C.ALAN_TUR'daki eşleşen KÖK alan (alt alan adı aynı kurum: admin.lallemandbrewing.com = lallemandbrewing.com, blog.whitelabs.com = whitelabs.com); eşleşmeyen host kendisi
   C.kokAlan = function(h){ return Object.keys(C.ALAN_TUR).find(function(d){ return h === d || h.slice(-(d.length + 1)) === '.' + d; }) || null; };
-  C.kurum = function(u){ var h = C.host(u); return h ? (C.kokAlan(h) || h) : ''; };
+  //   CEV2B (4): aynı kurumun iki alan adı (brewingwithbriess.com = Briess'in eğitim sitesi = briess.com) tek kurum
+  C.KURUM_ES = { 'brewingwithbriess.com':'briess.com' };
+  C.kurum = function(u){ var h = C.host(u), k = h ? (C.kokAlan(h) || h) : ''; return C.KURUM_ES[k] || k; };
   C.kaynakTur = function(u){ var h = C.host(u), path = ''; try{ path = new URL(u).pathname; }catch(e){}
     if(h === 'beerandbrewing.com' && /^\/dictionary\//.test(path)) return 'ders'; // Oxford Companion to Beer sözlüğü (AI5E'de kabul)
     var k = C.kokAlan(h); return k ? C.ALAN_TUR[k] : 'bilinmiyor'; };
@@ -36888,10 +36909,11 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   C.HEDEF_KONU = { kuru:'kuruluk (bitiş yoğunluğu)', govde:'gövde (ağız dolgunluğu)', aci:'acılık', azaci:'acılık', koyu:'renk', acik:'renk', muz:'muz (ester) aroması', azmuz:'muz (ester) aroması', karanfil:'karanfil (fenol) aroması', azkaranfil:'karanfil (fenol) aroması', muz_karanfil:'muz ve karanfil aroması', azmuz_karanfil:'muz ve karanfil aroması', muz_azkaranfil:'muz ve karanfil aroması' };
   C.SORULAN = [[/\blaktoz\w*|\blactose/, 'laktoz'], [/\bjelatin\w*|\bgelatin\w*/, 'jelatin'], [/\bsulfat\w*|\balci\b|\bgypsum/, 'sülfat'], [/\bklorur\w*/, 'klorür'], [/\bkapa[kg]\w*/, function(n){ return C.kapakEtiket(n); }] /* CEV1D (1): bağlama göre */, [/\bpilsner/, 'pilsner maltı'],
     [/\bdiasetil dinlen\w*/, 'diasetil dinlenmesi'], [/\b(sicak|serin|soguk|yuksek|dusuk) (sicaklikta )?mayalan\w*|\bmayalanma sicaklig\w*/, 'mayalanma sıcaklığı'], [/\boksijen\w*|\bhavalandir\w*|\bhava al\w*/, 'oksijen'], [/\bsert su\w*|\bsu sertlig\w*/, 'su sertliği'],
-    [/\birish moss|\bwhirlfloc|\bkarragenan\w*|\bcarrageenan|\bdurultucu\w*/, 'durultucu (Irish moss / Whirlfloc)'], [/\bsoguk(ta)? dinlendir\w*|\bcold crash/, 'soğukta dinlendirme'], [/\bkuru hop\w*|\bdry hop\w*/, 'kuru hop'], [/\bseker\w*|\bcandi\w*|\bdekstroz\w*/, 'şeker'], [/\byulaf\w*/, 'yulaf'], [/\bbugday\w*/, 'buğday'],
+    [/\birish moss|\bwhirlfloc|\bkarragenan\w*|\bcarrageenan|\bdurultucu\w*/, 'durultucu (Irish moss / Whirlfloc)'], [/\bsoguk(ta)? dinlendir\w*|\bcold crash/, 'soğukta dinlendirme'], [/\bkuru hop\w*|\bdry hop\w*/, 'kuru hop'], [/\bkuru maya\w*/, 'kuru maya'], [/\bseker\w*|\bcandi\w*|\bdekstroz\w*/, 'şeker'], [/\byulaf\w*/, 'yulaf'], [/\bbugday\w*/, 'buğday'],
     [/\bkristal malt\w*|\bcarapils|\bcarafoam/, 'kristal / dekstrin malt'], [/\bmaya miktar\w*|\bpitch\w*/, 'maya miktarı']];
   C.konuEtiket = function(soru){ var G = window.BM_AI5; if(!G) return null; var k = G.konuEsle ? G.konuEsle(soru, null) : null; if(k) return k;
-    var h = G.hedefEsle ? G.hedefEsle(soru) : null; if(h && h.k && C.HEDEF_KONU[h.k]) return C.HEDEF_KONU[h.k]; if(h && h.belirsiz && h.eksen) return h.eksen; return null; };
+    var h = G.hedefEsle ? G.hedefEsle(soru) : null; if(h && h.k && C.HEDEF_KONU[h.k]) return C.HEDEF_KONU[h.k]; if(h && h.belirsiz && h.eksen) return h.eksen;
+    return (!h || h.arastir) && G.urunKonu ? G.urunKonu(soru) : null; }; // CEV2B (6a): "kuru hop" / "kuru maya" ürün / işlem adı (kuruluk değil)
   // CEV1D (1): "kapak" etiketi kapağın bağlamıyla — kaynatma / tencere / kazan → kaynatmada kapak · fermentör / mayalanma kovası / kova → mayalanma kabı kapağı · şişe → şişe kapağı ·
   //   bağlamsız "kapağı kapat / kapalı" → kaynatmada kapak (CEV1C DMS kuralıyla aynı okuma) · bağlamsız başka → "kapak" (tahmin yok)
   C.kapakEtiket = function(n){ if(/\b(kaynat\w*|kaynam\w*|kaynar\w*|tencere\w*|kazan\w*)/.test(n)) return 'kaynatmada kapak'; if(/\b(fermentor\w*|fermenter\w*|mayalan\w*|kova\w*|damacana\w*)/.test(n)) return 'mayalanma kabı kapağı';
@@ -36899,6 +36921,7 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   C.sorulan = function(soru){ var n = katla(soru), L = []; C.SORULAN.forEach(function(x){ if(!x[0].test(n)) return; var e = typeof x[1] === 'function' ? x[1](n) : x[1]; if(L.indexOf(e) < 0) L.push(e); });
     var sc = window.BM_AI5 && window.BM_AI5.mashSoruSc ? window.BM_AI5.mashSoruSc(soru) : null; if(sc) L.push('mash sıcaklığı ' + sc + ' °C'); return L; };
   C.tarafsiz = function(soru){ var et = C.konuEtiket(soru), so = C.sorulan(soru);
+    so = so.filter(function(x){ return x !== et; }); // CEV2B (6a): konu = sorulan ("kuru hop") ise tekrar yazılmaz
     if(et) return '"' + et + (so.length ? ' — sorulan: ' + so.join(', ') : '') + '" konusunu etkileyen etkenler';
     if(so.length) return '"sorulan: ' + so.join(', ') + '" — biraya etkileri'; // CEV1C (4): konu eşleşmedi → yalnız sorulan malzeme / işlem / sayı ("şeker eklersem bira kesin daha güzel olur" → sorulan: şeker)
     var t = String(soru || '').replace(/[?!]+/g, ' '); C.YONLENDIRME.forEach(function(re){ t = t.replace(re, ' '); });
@@ -36918,7 +36941,9 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     return { ifadeler:P, sozcukler:W }; };
   // CEV2 (1): "<stil sözcüğü> maltı" malt adıdır, stil adı değil (C20 "pilsner maltında")
   C.soruStilAdi = function(soru, stil){ var n = ' ' + katla(soru).replace(/[^a-z0-9]+/g, ' ').replace(/[a-z]+ malt[a-z]*/g, ' ') + ' '; return C.stilSozcukleri(stil).sozcukler.some(function(w){ return n.indexOf(' ' + w) >= 0; }); };
-  C.sorguStili = function(soru, konu, stil){ if(!stil) return null; if(C.soruStilAdi(soru, stil)) return stil; return C.GENEL_KONU.test(katla(konu)) ? null : stil; };
+  //   CEV2B (6c): tat / koku KUSURU konusu (G.KONULAR kusurları + asetaldehit) soru stili adlandırsa bile STİLSİZ — kusurun nedeni stile özgü değil
+  C.KUSUR_KONU = /diasetil|tereyag|\bdms\b|pismis misir|lahana|klorofenol|ilac|sicak \/ yakici|yakici alkol|fusel|oksidasyon|karton|bayat|burukluk|sulfur|yumurta|asetaldehit|yesil elma|metalik|solvent/;
+  C.sorguStili = function(soru, konu, stil){ if(!stil) return null; if(C.KUSUR_KONU.test(katla(konu))) return null; if(C.soruStilAdi(soru, stil)) return stil; return C.GENEL_KONU.test(katla(konu)) ? null : stil; };
   C.stilSil = function(q, stil){ var S = C.stilSozcukleri(stil), t = ' ' + q + ' ';
     S.ifadeler.forEach(function(f){ t = t.replace(new RegExp('(\\s)' + f.replace(/[^a-z0-9 ]/g, '.').replace(/ +/g, '\\s+') + '(?=\\s)', 'gi'), '$1'); });
     S.sozcukler.forEach(function(w){ t = t.replace(new RegExp('(\\s)' + w + '[a-z]*(?=\\s)', 'gi'), '$1'); });
@@ -37013,14 +37038,27 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   //   net yön = değişkene yapılan (artırmak / eklemek / bilgi = +1, azaltmak / çıkarmak = −1) × KONU'ya etkisi (artırır +1, azaltır −1, etkilemez 0).
   //   Aynı değişken (normalize anahtar) + farklı net yön → çelişki (yön) · aynı net + değer aralıkları çakışmıyor (aynı birim) → çelişki (değer) · aynı net, çelişki yok → TEK madde (kaynaklar toplanır, güç yeniden).
   //   Çelişki ancak iki taraf ALINTILARDA doğrulanırsa gösterilir: her tarafın başka tarafta olmayan en az bir alıntısı + yön tarafında alıntıda değişim / etkisizlik ifadesi (İngilizce sözlük); doğrulanmazsa maddeler ayrı kalır, raporlanır.
-  C.YON_ISARET = { artirmak:1, eklemek:1, bilgi:1, azaltmak:-1, cikarmak:-1 }; C.ETKI_ISARET = { artirir:1, azaltir:-1, etkilemez:0 };
+  //   CEV2B (2): 'bilgi' değişkene yapılanı SÖYLEMEZ → net yön YOK (null): yön çelişkisine ve yön birleştirmesine girmez; aynı anahtarlı başka maddeyle yalnız değer çelişkisi ya da ayrı gösterim
+  C.YON_ISARET = { artirmak:1, eklemek:1, bilgi:null, azaltmak:-1, cikarmak:-1 }; C.ETKI_ISARET = { artirir:1, azaltir:-1, etkilemez:0 };
+  //   CEV2B (1): değişkene yapılan (yön) madde metninde FİİLLE yazılır — "maya miktarı artırılınca — ester azalır" (eskiden "maya miktarı — ester azalır": artırmak mı azaltmak mı okunmuyordu)
+  C.CEV2B = { yonFiil:true, kodTam:true };
+  C.YON_FIIL_AD = { artirmak:'artırılınca', azaltmak:'azaltılınca', eklemek:'eklenince', cikarmak:'çıkarılınca' };
+  C.yonFiil = function(y){ return C.CEV2B.yonFiil && C.YON_FIIL_AD[y] || ''; };
+  //   değişken metni eylemi / yönü ZATEN söylüyorsa ("sıcaklığı artırmak", "düşük sıcaklıkta", "kullanımı") fiil eklenmez — yön okunur, tekrar olmaz
+  C.DEG_EYLEM = /(artir|arttir|azalt|ekle|kullan|cikar|yukselt|dusur|uzat|kisalt|yuksek|dusuk|fazla|artma|artis|azalma|az)/;
+  C.degFiil = function(deg, y){ return C.DEG_EYLEM.test(katla(deg)) ? '' : C.yonFiil(y); };
+  //   değişkenin kendi metni TERS yön sözcüğü taşıyorsa ("düşük sıcaklık" + artırmak) net yön okunmaz (null) — madde gösterilir, gruplama / çelişkiye girmez, raporlanır
+  C.DEG_YON_ART = /\b(yuksek\w*|fazla|cok|artir\w*|artis\w*|artmis\w*|yukselt\w*|uzun\w*|uzat\w*|bol)\b/; C.DEG_YON_AZ = /\b(dusuk\w*|az|azal\w*|dusur\w*|kisa\w*|kisalt\w*|eksil\w*)\b/;
+  C.yonTers = function(deg, y){ var n = katla(deg); return (/^(artirmak|eklemek)$/.test(y) && C.DEG_YON_AZ.test(n)) || (/^(azaltmak|cikarmak)$/.test(y) && C.DEG_YON_ART.test(n)); };
   C.DEG_ES = [[/maya (miktar|doz|hucre|sayi)\w*|hucre sayi\w*|asilama oran\w*|pitch\w*/, 'maya miktari'], [/(mayalanma|fermant\w*|ferment\w*) sicaklig\w*/, 'mayalanma sicakligi'], [/(kaynatma|kaynama) (sure|zaman)\w*/, 'kaynatma suresi'],
     [/(kuru hop|dry hop)\w*( temas)? sure\w*|temas sure\w*/, 'kuru hop temas suresi'], [/karbonasyon\w*|co2 (seviye|hacm|hedef)\w*|hacim co2/, 'karbonasyon seviyesi'], [/lipi[td]\w* oksidasyon\w*/, 'lipit oksidasyonu'],
     [/soguk cokturme|soguk(ta)? dinlendirme|cold crash\w*/, 'soguk cokturme'], [/(mash|mayse) sicaklig\w*/, 'mash sicakligi']];
   C.DEG_DUR = ['artirmak', 'artirilmasi', 'artirma', 'azaltmak', 'azaltilmasi', 'azaltma', 'kullanmak', 'kullanimi', 'kullanilmasi', 'eklemek', 'eklenmesi', 'ekleme', 'cikarmak', 'yukseltmek', 'yukseltilmesi', 'dusurmek', 'dusurulmesi',
     'uzatmak', 'uzatilmasi', 'kisaltmak', 'kisaltilmasi', 'tutmak', 'yuksek', 'dusuk', 'daha', 'fazla', 'ile', 'veya', 'olarak', 'icin', 'bir'];
   C.degAnahtar = function(d){ var n = katla(d).replace(/\([^)]*\)/g, ' '); for(var i = 0; i < C.DEG_ES.length; i++) if(C.DEG_ES[i][0].test(n)) return C.DEG_ES[i][1];
-    return n.replace(/[^a-z0-9 ]+/g, ' ').split(/\s+/).filter(function(w){ return w.length > 2 && C.DEG_DUR.indexOf(w) < 0; }).map(function(w){ return w.slice(0, 5); }).filter(function(w, i, a){ return a.indexOf(w) === i; }).sort().join(' '); };
+    return n.replace(/[^a-z0-9 ]+/g, ' ').split(/\s+/).filter(function(w){ return w.length > 2 && C.DEG_DUR.indexOf(w) < 0; }).map(function(w){ return C.CEV2B.kodTam && /\d/.test(w) ? w : w.slice(0, 5); }).filter(function(w, i, a){ return a.indexOf(w) === i; }).sort().join(' '); };
+  //   CEV2B (3): ürün / suş kodu (C.dKodlar biçimi: WLP002, Wyeast 1056 → WY1056) anahtara TAM girer — 5 harfe kesme 'WLP002' ve 'WLP004'ü 'wlp00' yapıp iki suşu birleştiriyordu; farklı kodlu maddeler hiç birleşmez / çelişmez
+  C.degAnahtarKod = function(d){ var k = C.degAnahtar(d); if(!C.CEV2B.kodTam || !k) return k; var K = C.dKodlar(d).map(function(x){ return x.kod; }).filter(function(v, i, a){ return a.indexOf(v) === i; }).sort(); return K.length ? k + ' #' + K.join(',') : k; };
   C.SAYI_SOZ = { bir:1, iki:2, uc:3, dort:4, bes:5, alti:6, yedi:7, sekiz:8, dokuz:9, on:10 };
   C.BIRIM = [[/^(gun|day)/, 'gun', 1], [/^(hafta|week)/, 'gun', 7], [/^(hacim|volume|vol)/, 'hacim', 1], [/^(dakika|dk|min)/, 'dk', 1], [/^(saat|hour)/, 'dk', 60], [/^(°\s*c|derece)/, 'C', 1], [/^°\s*f/, 'F', 1], [/^ppm/, 'ppm', 1], [/^(g\/l|gr\/l)/, 'g/L', 1], [/^%|^yuzde/, '%', 1]];
   C.degerAralik = function(d){ var n = katla(d).replace(/(\d),(\d)/g, '$1.$2'); if(!n.trim()) return null;
@@ -37031,7 +37069,8 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     if(/\ben (cok|fazla)\b|\bazami\b/.test(once) || /\b(veya|ya da) (daha )?(az|kisa)\b|\baltinda\b/.test(kalan)) a = 0;
     else if(/\ben az\b/.test(once) || /\b(veya|ya da) (daha )?(fazla|uzun)\b|\bustunde\b/.test(kalan)) b = Infinity;
     return { a:Math.min(a, b), b:Math.max(a, b), birim:br[1] }; };
-  C.CUE_DEG = /increas|decreas|higher|lower|\bmore\b|\bless\b|reduc|\brais|go(es)? up|suppress|limit|prevent|enhanc|promot|produc|contribut|caus|\bhelp|start to show|\bform|boost|\bdrop|inhibit|fuller|darker|minimi|accentuat|improv|favou?r|result/i;
+  //   CEV2B (2): yön TAŞIMAYAN fiiller çıktı (produc, contribut, caus, help, form, result, start to show — "Pitch rate influences ester production." yön söylemiyor); artış / azalış / üst / alt / bastırma / sınırlama / önleme / güçlendirme kaldı
+  C.CUE_DEG = /increas|decreas|higher|lower|\bmore\b|\bless\b|reduc|\brais|go(es)? up|suppress|limit|prevent|enhanc|promot|boost|\bdrop|inhibit|fuller|darker|minimi|accentuat|improv|favou?r/i;
   C.CUE_SIFIR = /\bno (significant |measurable |noticeable |perceptible )?(difference|effect|impact|change)|\bnot (a single|due|significant|reliabl|able|detect|identif)|\bneither\b|unable to|did not|could not|was not|were not|no measurable|not distinguish|indistinguishable/i;
   C.celiskiDogrula = function(T, byId){ var neden = [];
     T.forEach(function(t, i){ var ids = t.kaynaklar, diger = []; T.forEach(function(u, j){ if(j !== i) diger = diger.concat(u.kaynaklar); });
@@ -37041,16 +37080,21 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   C.idBirlesik = function(L){ var ids = []; L.forEach(function(x){ x.kaynaklar.forEach(function(id){ if(ids.indexOf(id) < 0) ids.push(id); }); }); return ids; };
   C.birlestir = function(U, byId){ var x = Object.assign({}, U[0]); x.kaynaklar = C.idBirlesik(U); x.urller = x.kaynaklar.map(function(id){ return byId[id] && byId[id].url; }).filter(Boolean); x.guc = C.gucHesap(x.urller); x.birlesen = U.map(function(u){ return u.metin; }); return x; };
   C.celiskiMadde = function(k, g, T, tip, byId){ var host = function(ids){ return ids.map(function(id){ return byId[id] && C.host(byId[id].url); }).filter(function(h, i, a){ return h && a.indexOf(h) === i; }).join(', '); };
-    var taraf = T.map(function(t){ var m = t.maddeler[0]; return { metin:(m.deger ? m.deger + ': ' : '') + (m.etki || m.metin), kaynaklar:t.kaynaklar, kaynakAd:host(t.kaynaklar), net:t.net != null ? t.net : null, aralik:t.aralik || null }; });
+    //   CEV2B (1): her taraf KENDİ yönüyle ("mayalanma sıcaklığı azaltılınca: koyu meyve …") · (5) etki boşsa değer bir kez (eskiden "en çok bir hafta: kuru hop temas süresi (en çok bir hafta)")
+    var taraf = T.map(function(t){ var m = t.maddeler[0], f = C.degFiil(m.degisken, m.yonDeg), yt = f ? m.degisken + ' ' + f : (C.yonFiil(m.yonDeg) ? m.degisken : ''), sol = [yt, m.deger || ''].filter(Boolean).join(', '); return { metin:sol && m.etki ? sol + ': ' + m.etki : (sol || m.etki || m.degisken || m.metin), kaynaklar:t.kaynaklar, kaynakAd:host(t.kaynaklar), net:t.net != null ? t.net : null, aralik:t.aralik || null }; });
     var ids = C.idBirlesik(T);
     return { metin:'⚖️ Kaynaklar çelişiyor — ' + g[0].degisken + ': ' + taraf.map(function(t){ return t.metin + ' (' + t.kaynakAd + ')'; }).join(' ↔ ') + '. Öneri yok.', durum:'ok', celiski:true, celiskiTip:tip, taraflar:taraf, degisken:g[0].degisken, etken:g[0].degisken, anahtar:k,
       kaynaklar:ids, urller:ids.map(function(id){ return byId[id] && byId[id].url; }).filter(Boolean), guc:{ k:'celiski', ad:'kaynaklar çelişiyor', n:0 }, yon:'etkiler', net:null }; };
   C.maddeIsle = function(v, W){ var byId = {}; W.forEach(function(w){ byId[w.id] = w; });
     var L = (v && Array.isArray(v.maddeler) ? v.maddeler : []).slice(0, 8).map(function(m){ var eski = m.degisken == null && m.etken != null, deg = String((eski ? m.etken : m.degisken) || '').trim(), deger = eski ? '' : String(m.deger || '').trim(), etki = String(m.etki || '').trim();
-      var x = C.arastirmaDenetle({ metin:deg + (deger ? ' (' + deger + ')' : '') + (etki ? ' — ' + etki : ''), kaynaklar:m.kaynaklar }, W); x.degisken = deg; x.etken = deg; x.deger = deger; x.etki = etki;
-      if(eski){ x.yonDeg = 'bilgi'; x.etkiYon = m.yon === 'artirir' || m.yon === 'azaltir' || m.yon === 'etkilemez' ? m.yon : null; }
-      else { x.yonDeg = C.YON_DEG.indexOf(m.yon) >= 0 ? m.yon : 'bilgi'; x.etkiYon = C.ETKI_YON.indexOf(m.etki_yonu) >= 0 ? m.etki_yonu : null; }
-      x.yon = x.etkiYon || 'etkiler'; x.net = x.etkiYon == null ? null : C.YON_ISARET[x.yonDeg] * C.ETKI_ISARET[x.etkiYon]; x.anahtar = C.degAnahtar(deg); x.aralik = C.degerAralik(deger);
+      var yd = eski ? 'bilgi' : C.YON_DEG.indexOf(m.yon) >= 0 ? m.yon : 'bilgi', fiil = eski ? '' : C.degFiil(deg, yd); // CEV2B (1): gösterilen (ve denetlenen) metinde yön fiili
+      var x = C.arastirmaDenetle({ metin:deg + (fiil ? ' ' + fiil : '') + (deger ? ' (' + deger + ')' : '') + (etki ? ' — ' + etki : ''), kaynaklar:m.kaynaklar }, W); x.degisken = deg; x.etken = deg; x.deger = deger; x.etki = etki; x.yonDeg = yd; x.eski = eski;
+      if(eski) x.etkiYon = m.yon === 'artirir' || m.yon === 'azaltir' || m.yon === 'etkilemez' ? m.yon : null;
+      else x.etkiYon = C.ETKI_YON.indexOf(m.etki_yonu) >= 0 ? m.etki_yonu : null;
+      //   eski şemada 'yon' konuya etkidir (değişkene yapılan yok) → net = etki; yeni şemada bilgi → null (CEV2B 2)
+      var ys = C.YON_ISARET[yd]; x.yon = x.etkiYon || 'etkiler'; x.net = x.etkiYon == null ? null : eski ? C.ETKI_ISARET[x.etkiYon] : ys == null ? null : ys * C.ETKI_ISARET[x.etkiYon];
+      if(x.net != null && !eski && C.yonTers(deg, yd)){ x.net = null; x.yonTers = true; }
+      x.anahtar = C.degAnahtarKod(deg); x.aralik = C.degerAralik(deger);
       x.urller = x.kaynaklar.map(function(id){ return byId[id] && byId[id].url; }).filter(Boolean); x.guc = C.gucHesap(x.urller); return x; });
     var ok = L.filter(function(x){ return x.durum === 'ok'; }), G = {}, sira = [], rapor = [], cikti = [], birlesen = 0;
     ok.forEach(function(x){ var k = x.anahtar || ('#' + x.metin); if(!G[k]){ G[k] = []; sira.push(k); } G[k].push(x); });
@@ -37064,9 +37108,10 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
           if(p0.birim === q0.birim && Math.min(p0.b, q0.b) - Math.max(p0.a, q0.a) <= 0){ var T2 = T.map(function(t){ return { tip:'deger', aralik:t.maddeler[0].aralik, maddeler:t.maddeler, kaynaklar:t.kaynaklar }; }), dg2 = C.celiskiDogrula(T2, byId); if(dg2.ok){ T = T2; tip = 'deger'; dg = dg2; } } }
         if(dg.ok){ cikti.push(C.celiskiMadde(k, g, T, tip, byId)); var gir = []; T.forEach(function(t){ gir = gir.concat(t.maddeler); }); g.filter(function(x){ return gir.indexOf(x) < 0; }).forEach(function(x){ cikti.push(x); }); return; }
         rapor.push({ degisken:g[0].degisken, tip:tip, kaynak:'uygulama', neden:dg.neden }); }
-      var alt = {}, ak = []; g.forEach(function(x){ var n = String(x.net); if(!alt[n]){ alt[n] = []; ak.push(n); } alt[n].push(x); });
+      var alt = {}, ak = []; g.forEach(function(x, i){ var n = x.net == null && !x.eski ? '#' + i : String(x.net); if(!alt[n]){ alt[n] = []; ak.push(n); } alt[n].push(x); }); // CEV2B (2): yönü okunmayan (yeni şema) madde birleşmez
       ak.forEach(function(n){ if(alt[n].length > 1){ birlesen += alt[n].length - 1; cikti.push(C.birlestir(alt[n], byId)); } else cikti.push(alt[n][0]); }); });
-    ((v && v.celiskiler) || []).forEach(function(c){ var k = C.degAnahtar(c && c.degisken); if(!k) return; if(!cikti.some(function(x){ return x.celiski && x.anahtar === k; }) && !rapor.some(function(r){ return C.degAnahtar(r.degisken) === k; })) rapor.push({ degisken:String(c.degisken), tip:null, kaynak:'AI', neden:['AI çelişki bildirdi; uygulama aynı değişkende iki görüşü (ters yön ya da çakışmayan değer) alıntılarda doğrulayamadı — çelişki gösterilmedi'] }); });
+    ok.filter(function(x){ return x.yonTers; }).forEach(function(x){ rapor.push({ degisken:x.degisken, tip:'yon', kaynak:'uygulama', neden:['değişken metni ters yön sözcüğü taşıyor ("' + x.degisken + '" + ' + x.yonDeg + ') — net yön okunmadı; madde gösterildi, gruplama / çelişkiye girmedi'] }); });
+    ((v && v.celiskiler) || []).forEach(function(c){ var k = C.degAnahtarKod(c && c.degisken); if(!k) return; if(!cikti.some(function(x){ return x.celiski && x.anahtar === k; }) && !rapor.some(function(r){ return C.degAnahtarKod(r.degisken) === k; })) rapor.push({ degisken:String(c.degisken), tip:null, kaynak:'AI', neden:['AI çelişki bildirdi; uygulama aynı değişkende iki görüşü (ters yön ya da çakışmayan değer) alıntılarda doğrulayamadı — çelişki gösterilmedi'] }); });
     var dv = v && v.dogrudan_cevap, dc = null;
     if(dv && String(dv.metin || '').trim()){ dc = C.arastirmaDenetle({ metin:dv.metin, kaynaklar:dv.kaynaklar }, W); if(dc.durum === 'ok' && dc.kaynaklar.length > 3){ dc.durum = 'dusuruldu'; dc.tur = 'kaynaksiz'; dc.neden = 'doğrudan cevapta en çok 3 kaynak'; }
       if(dc.durum === 'ok' && C.jargonVar(dc.metin)){ dc.durum = 'dusuruldu'; dc.tur = 'jargon'; dc.neden = 'doğrudan cevapta iç kimlik / jargon'; } }

@@ -13290,7 +13290,7 @@ const CASELER = [
     })
   },
   {
-    kod: 'CEV2-CELISKI', ad: 'AYNI ETKEN TEK MADDE + ÇELİŞKİ (CEV2 madde 3, AI yok): şema degisken / yon / deger / etki / etki_yonu / kaynaklar + dogrudan_cevap + celiskiler · 2026-10-24 koşusunun 6 kart-içi etiketsiz çelişkisi (C27#3↔#4, C28#2↔#3, C31#0↔#1, C19#0↔#1, C25#2↔#3, C08 sıcaklık ↔ Lallemand Abbaye) GERÇEK alıntılarla sentetik özet → 6/6 "⚖️ Kaynaklar çelişiyor" · aynı değişken + aynı yön → TEK madde (kaynaklar toplanır, güç yeniden) · iki taraf aynı alıntıya dayanıyorsa çelişki GÖSTERİLMEZ, raporlanır · AI\'nın doğrulanamayan çelişki bildirimi raporlanır · KASITLI BOZMA',
+    kod: 'CEV2-CELISKI', ad: 'AYNI ETKEN TEK MADDE + ÇELİŞKİ (CEV2 madde 3, AI yok): şema degisken / yon / deger / etki / etki_yonu / kaynaklar + dogrudan_cevap + celiskiler · 2026-10-24 koşusunun 6 kart-içi etiketsiz çelişkisi (C27#3↔#4, C28#2↔#3, C31#0↔#1, C19#0↔#1, C25#2↔#3, C08 sıcaklık ↔ Lallemand Abbaye) GERÇEK alıntılarla sentetik özet → 5/6 "⚖️ Kaynaklar çelişiyor" (CEV2B: C28 iki tarafı da yon "bilgi" → net yön yok, iki ayrı madde) · aynı değişken + aynı yön → TEK madde (kaynaklar toplanır, güç yeniden) · iki taraf aynı alıntıya dayanıyorsa çelişki GÖSTERİLMEZ, raporlanır · AI\'nın doğrulanamayan çelişki bildirimi raporlanır · KASITLI BOZMA',
     calistir: async (page) => {
       const kayit = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'fixtures', 'cev_kosu_2026-10-24.json'), 'utf8'));
       return page.evaluate(async (kayit) => {
@@ -13306,8 +13306,10 @@ const CASELER = [
           ['C25', [m('karbonasyon seviyesi', 'bilgi', '3–3,5 hacim', 'hefeweizen için hedef', 'artirir', ['w4']), m('karbonasyon seviyesi', 'bilgi', '2,5 hacim', 'weissbier için hedef', 'artirir', ['w6'])]],
           ['C08', [m('mayalanma sıcaklığı', 'artirmak', '', 'ester (meyvemsi) üretimi artar', 'artirir', ['w6']), m('mayalanma sıcaklığı', 'azaltmak', '', 'Abbaye kuru üzüm, hurma, incir gibi koyu meyve aroması üretir', 'artirir', ['w7'])]]];
         const sn = V.map(([id, maddeler]) => { const r = C.maddeIsle({ dogrudan_cevap: { metin: '', kaynaklar: [] }, maddeler, celiskiler: [] }, W(id)); const c = r.gos.find(x => x.celiski); return { id, c, r }; });
-        __REG.ok('6 kart-içi çelişki → ' + sn.filter(x => x.c).length + '/6 "⚖️ Kaynaklar çelişiyor" · ' + sn.map(x => x.id + ' ' + (x.c ? x.c.celiskiTip + ': ' + x.c.metin.slice(0, 110) : '✕ ' + JSON.stringify(x.r.celiskiRapor) + ' düşen ' + x.r.dusen.map(d => d.neden).join('|'))).join(' · '), sn.every(x => x.c && x.c.guc.k === 'celiski' && /Öneri yok\.$/.test(x.c.metin) && x.r.gos.length === 1 && !x.r.dusen.length));
-        __REG.ok('çelişki türü: yön C27 / C28 / C19 / C08 · değer C25 (3–3,5 ↔ 2,5 hacim), C31 (7–9 gün ↔ en çok bir hafta; uzat-alıntısında yön fiili yok → değer çelişkisi)', ['C27', 'C28', 'C19', 'C08'].every(id => (sn.find(x => x.id === id).c || {}).celiskiTip === 'yon') && ['C25', 'C31'].every(id => (sn.find(x => x.id === id).c || {}).celiskiTip === 'deger'));
+        const s5 = sn.filter(x => x.id !== 'C28'), s28 = sn.find(x => x.id === 'C28');
+        __REG.ok('6 kart-içi çelişki → ' + sn.filter(x => x.c).length + '/6 "⚖️ Kaynaklar çelişiyor" · ' + sn.map(x => x.id + ' ' + (x.c ? x.c.celiskiTip + ': ' + x.c.metin.slice(0, 110) : '✕ ' + x.r.gos.length + ' ayrı madde, net ' + x.r.gos.map(g => g.net).join('/') + ', rapor ' + JSON.stringify(x.r.celiskiRapor))).join(' · '), s5.every(x => x.c && x.c.guc.k === 'celiski' && /Öneri yok\.$/.test(x.c.metin) && x.r.gos.length === 1 && !x.r.dusen.length));
+        __REG.ok('CEV2B (2): C28 (iki taraf yon "bilgi") çelişki DEĞİL → 2 ayrı madde, net yön null, birleşmedi', !s28.c && s28.r.gos.length === 2 && s28.r.gos.every(g => g.net === null) && s28.r.birlesen === 0);
+        __REG.ok('çelişki türü: yön C27 / C19 / C08 · değer C25 (3–3,5 ↔ 2,5 hacim), C31 (7–9 gün ↔ en çok bir hafta; uzat-alıntısında yön fiili yok → değer çelişkisi)', ['C27', 'C19', 'C08'].every(id => (sn.find(x => x.id === id).c || {}).celiskiTip === 'yon') && ['C25', 'C31'].every(id => (sn.find(x => x.id === id).c || {}).celiskiTip === 'deger'));
         // aynı yön → birleşir (C14 soğuk çöktürme: AI aynı etkeni iki maddeye bölmüştü)
         const b = C.maddeIsle({ maddeler: [m('soğuk çöktürme', 'eklemek', '', 'protein ve maya pıhtılaşır', 'artirir', ['w4']), m('Soğuk çöktürme (cold crash)', 'eklemek', '', 'bira daha az opak', 'artirir', ['w5'])], celiskiler: [], dogrudan_cevap: { metin: '', kaynaklar: [] } }, W('C14'));
         const k2 = [{ id: 'w1', url: 'https://fermentis.com/a', alinti: 'Fining increases clarity.' }, { id: 'w2', url: 'https://www.lallemandbrewing.com/b', alinti: 'Fining improves clarity.' }];
@@ -13413,12 +13415,12 @@ const CASELER = [
     }
   },
   {
-    kod: 'CEV2-KOSUCU', ad: 'KOŞUCU (CEV2 madde 7, mock): birden fazla set dosyası (tests/cev_seti.json + tests/cev_seti_heldout.json) · her setin AYRI imzası, ikisi de kilit koşulu · held-out dosyası yoksa yalnız ana set · koşu kaydında araştırma denetleyicisi imzası · tests/cev_seti.json DEĞİŞMEDİ (7f7e4ea1) · CEV mock tam tur iki stokta yol değişimi yok, kural yolu 12/12',
+    kod: 'CEV2-KOSUCU', ad: 'KOŞUCU (CEV2 madde 7, mock): birden fazla set dosyası (tests/cev_seti.json + tests/cev_seti_heldout.json) · her setin AYRI imzası, ikisi de kilit koşulu · held-out dosyası yoksa yalnız ana set · koşu kaydında araştırma denetleyicisi imzası · tests/cev_seti.json DEĞİŞMEDİ (7befe7db — Claude CEV2 doğrulaması sonrası yeniden imza) · CEV mock tam tur iki stokta yol değişimi yok, kural yolu 12/12',
     calistir: async (page) => {
       const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'cev_seti.json'), 'utf8'));
       return page.evaluate(async (set) => {
         const C = window.BM_CEV, A = window.BM_AI;
-        __REG.ok('cev_seti imza ' + C.beklenenImza(set) + ' = dosyadaki ' + set.beklenenImza + ' (7f7e4ea1) · kilit ' + C.kosKilit(set), C.beklenenImza(set) === '7f7e4ea1' && set.beklenenImza === '7f7e4ea1' && C.kosKilit(set) === null);
+        __REG.ok('cev_seti imza ' + C.beklenenImza(set) + ' = dosyadaki ' + set.beklenenImza + ' (7befe7db) · kilit ' + C.kosKilit(set), C.beklenenImza(set) === '7befe7db' && set.beklenenImza === '7befe7db' && C.kosKilit(set) === null);
         C._setler = null; const L = await C.setYukle().then(() => C._setler);
         __REG.ok('setYukle: ' + L.map(e => e.ad + ' ' + e.set.sorular.length).join(' + ') + ' (held-out dosyası ' + (L.some(e => e.ad === 'heldout') ? 'VAR' : 'yok → yalnız ana set') + ')', L.length >= 1 && L[0].ad === 'ana' && L[0].set.sorular.length === set.sorular.length);
         const ho = JSON.parse(JSON.stringify(set)); ho.sorular = ho.sorular.slice(0, 12).map(q => Object.assign({}, q, { id: 'H' + q.id })); ho.beklenenImza = C.beklenenImza(ho);
@@ -13432,6 +13434,101 @@ const CASELER = [
         const yol = o => o.sorular.map(s => s.id + ':' + s.yol).join(',');
         __REG.ok('mock tam tur: fixture stok kural ' + oF.metrik.kural + ' / araştırma ' + oF.metrik.arastirma + ' · boş stok kural ' + oB.metrik.kural + ' · yol iki stokta aynı · kural yolu kapsama F ' + JSON.stringify(oF.metrik.kapsama) + ' · kayıtta araştırma imzası ' + oF.arastirmaImza + ' + AI4 ' + oF.denetleyiciImza, oF.metrik.kural === 12 && oB.metrik.kural === 12 && yol(oF) === yol(oB) && oF.arastirmaImza === C.ARASTIRMA_DONMUS && oF.denetleyiciImza === '2c9ebd9f-32461' && oF.metrik.kapsama.bulunan === 32 && oB.metrik.kapsama.bulunan === 32);
         __REG.ok('iki set tek koşu: ' + o2.setler.map(e => e.ad + ' ' + e.soru + ' soru imza ' + e.setImza).join(' · ') + ' · toplam ' + o2.sorular.length + ' · set başına metrik ' + Object.keys(o2.metrikSet || {}).join(', ') + ' · tavan iki setin toplamı', o2.sorular.length === set.sorular.length + 12 && o2.setler.length === 2 && o2.setler[1].setImza === ho.beklenenImza && o2.metrikSet && o2.metrikSet.heldout.soru === 12 && o2.sorular.filter(s => s.set === 'heldout').length === 12);
+        return __REG.al();
+      }, set);
+    }
+  },
+  {
+    kod: 'CEV2B-GRUP', ad: 'GRUPLAMA / ÇELİŞKİ DÜZELTMELERİ (CEV2B madde 1–5, AI yok): (1) yön bilgi dışındaysa madde metninde fiil ("maya miktarı artırılınca — ester azalır"), çelişki tarafı kendi yönüyle, değişken metni ters yön sözcüğü taşıyorsa net yön null + rapor · (2) yon "bilgi" net yön taşımaz; yön taşımayan fiiller (produc, contribut, caus, help, form, result, start to show) değişim ifadesi değil — Claude sentetik A çelişki DEĞİL, sentetik B (Lallemand Abbaye "lower" ↔ White Labs "higher") çelişki · (3) ürün kodu anahtarda TAM (WLP002 ≠ WLP004) · (4) briess.com = brewingwithbriess.com tek kurum · (5) etki boşsa değer bir kez · GERİ OYNATMA 2026-10-24 kaydı · KASITLI BOZMALAR',
+    calistir: async (page) => {
+      const kayit = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'fixtures', 'cev_kosu_2026-10-24.json'), 'utf8'));
+      return page.evaluate(async (kayit) => {
+        const C = window.BM_CEV, W = id => kayit.sorular.find(x => x.id === id).web, bos = { dogrudan_cevap: { metin: '', kaynaklar: [] }, celiskiler: [] };
+        const m = (degisken, yon, deger, etki, etki_yonu, kaynaklar) => ({ degisken, yon, deger, etki, etki_yonu, kaynaklar });
+        const isle = (L, w) => C.maddeIsle(Object.assign({ maddeler: L }, bos), w);
+        // (2) Claude sentetik A / B
+        const wA = [{ id: 'w1', url: 'https://www.whitelabs.com/a', alinti: 'Pitch rate influences ester production.' }, { id: 'w2', url: 'https://www.lallemandbrewing.com/b', alinti: 'Higher pitch rates reduce ester formation.' }];
+        const LA = [m('maya miktarı', 'bilgi', '', 'ester üretimini etkiler', 'artirir', ['w1']), m('maya miktarı', 'artirmak', '', 'ester azalır', 'azaltir', ['w2'])];
+        const wB = [{ id: 'w1', url: 'https://www.lallemandbrewing.com/abbaye', alinti: 'At lower temperatures, Abbaye produces darker fruit aromas and flavors of raisin, date and fig.' }, { id: 'w2', url: 'https://www.whitelabs.com/x', alinti: 'Higher fermentation temperatures increase fruity esters.' }];
+        const LB = [m('mayalanma sıcaklığı', 'azaltmak', '', 'daha koyu meyve aroması', 'artirir', ['w1']), m('mayalanma sıcaklığı', 'artirmak', '', 'meyvemsi ester artar', 'artirir', ['w2'])];
+        const rA = isle(LA, wA), rB = isle(LB, wB), cB = rB.gos.find(x => x.celiski);
+        __REG.ok('(2) sentetik A ("Pitch rate influences ester production." yön söylemiyor, yon bilgi) → çelişki ' + rA.gos.some(x => x.celiski) + ', ' + rA.gos.length + ' ayrı madde · sentetik B → ' + (cB ? cB.metin : '✕ ' + JSON.stringify(rB.celiskiRapor)), !rA.gos.some(x => x.celiski) && rA.gos.length === 2 && !!cB && cB.celiskiTip === 'yon');
+        // (1) yön fiili + çelişki tarafı kendi yönüyle
+        __REG.ok('(1) madde metninde yön fiili: "' + rA.gos[1].metin + '" · bilgi maddesi fiilsiz: "' + rA.gos[0].metin + '" · çelişki tarafları: ' + cB.taraflar.map(t => t.metin).join(' ↔ '), rA.gos[1].metin === 'maya miktarı artırılınca — ester azalır' && rA.gos[0].metin === 'maya miktarı — ester üretimini etkiler' && /azaltılınca: daha koyu meyve/.test(cB.taraflar[0].metin) && /artırılınca: meyvemsi ester artar/.test(cB.taraflar[1].metin));
+        const wT = [{ id: 'w1', url: 'https://www.whitelabs.com/a', alinti: 'Lower temperatures reduce esters.' }, { id: 'w2', url: 'https://www.lallemandbrewing.com/b', alinti: 'Higher temperatures increase esters.' }];
+        const rT = isle([m('düşük mayalanma sıcaklığı', 'artirmak', '', 'ester azalır', 'azaltir', ['w1']), m('mayalanma sıcaklığı', 'artirmak', '', 'ester artar', 'artirir', ['w2'])], wT);
+        const rE = isle([m('mayalanma sıcaklığını artırmak', 'artirmak', '', 'ester artar', 'artirir', ['w2'])], wT);
+        __REG.ok('(1) değişken ters yön sözcüğü ("düşük …" + artırmak) → gösterildi, net ' + rT.gos.map(x => x.net).join('/') + ', çelişki ' + rT.gos.some(x => x.celiski) + ', rapor ' + JSON.stringify(rT.celiskiRapor.map(r => r.neden[0].slice(0, 60))) + ' · değişken eylemi zaten söylüyorsa fiil tekrarlanmaz: "' + rE.gos[0].metin + '"', rT.gos.length === 2 && rT.gos[0].net === null && !rT.gos.some(x => x.celiski) && rT.celiskiRapor.some(r => /ters yön/.test(r.neden[0])) && rE.gos[0].metin === 'mayalanma sıcaklığını artırmak — ester artar');
+        // (3) ürün kodu
+        const wK = [{ id: 'w1', url: 'https://www.whitelabs.com/yeast-bank/wlp002', alinti: 'WLP002 is very flocculent.' }, { id: 'w2', url: 'https://www.whitelabs.com/yeast-bank/wlp004', alinti: 'WLP004 flocculation is medium to high.' }, { id: 'w3', url: 'https://www.whitelabs.com/blog/wlp002', alinti: 'WLP002 drops clear quickly.' }];
+        const rK = isle([m('WLP002 flokülasyon', 'artirmak', '', 'berraklık artar', 'artirir', ['w1']), m('WLP004 flokülasyon', 'artirmak', '', 'berraklık artar', 'artirir', ['w2'])], wK);
+        const rK2 = isle([m('WLP002 flokülasyon', 'artirmak', '', 'berraklık artar', 'artirir', ['w1']), m('WLP002 flokülasyonu', 'artirmak', '', 'berraklık artar', 'artirir', ['w3'])], wK);
+        __REG.ok('(3) anahtar ' + C.degAnahtarKod('WLP002 flokülasyon') + ' ≠ ' + C.degAnahtarKod('WLP004 flokülasyon') + ' → ' + rK.gos.length + ' ayrı madde · WLP002 + WLP002 → ' + rK2.gos.length + ' madde (birleşen ' + rK2.birlesen + ')', rK.gos.length === 2 && rK.birlesen === 0 && rK2.gos.length === 1 && rK2.birlesen === 1);
+        // (4) Briess
+        const gB = C.gucHesap(['https://www.briess.com/a', 'https://www.brewingwithbriess.com/b']), gB2 = C.gucHesap(['https://www.briess.com/a', 'https://www.weyermann.de/b']);
+        __REG.ok('(4) briess.com + brewingwithbriess.com → n ' + gB.n + ' ' + gB.k + ' · briess.com + weyermann.de → n ' + gB2.n + ' ' + gB2.k, gB.n === 1 && gB.k === 'olasi' && gB2.n === 2 && gB2.k === 'guclu');
+        // (5) değer bir kez
+        const r5 = isle([m('kuru hop temas süresi', 'bilgi', '7–9 gün', '', null, ['w1']), m('kuru hop temas süresi', 'bilgi', 'en çok bir hafta', '', null, ['w3'])], W('C31')), c5 = r5.gos.find(x => x.celiski);
+        __REG.ok('(5) etki boş çelişki tarafı: ' + (c5 ? c5.metin : '✕') + ' — "en çok bir hafta" ' + (c5 ? c5.metin.split('en çok bir hafta').length - 1 : 0) + ' kez', !!c5 && c5.metin.split('en çok bir hafta').length - 1 === 1 && c5.celiskiTip === 'deger');
+        // GERİ OYNATMA: kayıtlı maddeler (eski şema: etken — etki) — CEV2 koduyla ölçülen sayılar aynen (gösterilen 103 · düşen 3 · çelişki 0 · birleşen 2; ölçüm 2026-10-24 CEV2B öncesi kod)
+        const katla = t => String(t || '').toLocaleLowerCase('tr').replace(/ı/g, 'i').replace(/ş/g, 's').replace(/ç/g, 'c').replace(/ğ/g, 'g').replace(/ö/g, 'o').replace(/ü/g, 'u');
+        const yonBul = e => { const n = katla(e); if (/(artir|artis|artma|yukselt|uzat|fazla|yuksek)/.test(n)) return 'artirmak'; if (/(azalt|azalma|dusur|kisalt|dusuk)/.test(n)) return 'azaltmak'; if (/(ekle|kullan)/.test(n)) return 'eklemek'; return 'bilgi'; };
+        const etkiBul = e => { const n = katla(e); if (/(artar|artir|yuksel|guclen|iyiles)/.test(n)) return 'artirir'; if (/(azal|duser|onler|engel|sinirla|bastir)/.test(n)) return 'azaltir'; if (/(etkilemez|fark yok|ayirt edil)/.test(n)) return 'etkilemez'; return null; };
+        const top = { gos: 0, dusen: 0, celiski: 0, birlesen: 0 }, yeniT = { gos: 0, yonsuz: 0, fiilli: 0 };
+        kayit.sorular.filter(q => q.yol === 'arastirma').forEach(q => {
+          const L = q.maddeler.map(x => ({ metin: x.metin, kaynaklar: x.kaynaklar })).concat((q.dusen || []).map(d => { const k = /\(([w\d, ]+)\)/.exec(d.neden || ''); return { metin: d.metin, kaynaklar: k ? k[1].split(/,\s*/) : (d.kaynaklar || []) }; }));
+          const parca = x => { const i = x.metin.indexOf(' — '); return i > 0 ? [x.metin.slice(0, i), x.metin.slice(i + 3)] : [x.metin, '']; };
+          const re = C.maddeIsle({ maddeler: L.map(x => { const [e, k] = parca(x); return { etken: e, etki: k, yon: etkiBul(k), kaynaklar: x.kaynaklar }; }), celiskiler: [] }, q.web);
+          top.gos += re.gos.length; top.dusen += re.dusen.length; top.celiski += re.gos.filter(x => x.celiski).length; top.birlesen += re.birlesen;
+          const ry = C.maddeIsle({ maddeler: L.map(x => { const [e, k] = parca(x); return m(e, yonBul(e), '', k, etkiBul(k), x.kaynaklar); }), celiskiler: [] }, q.web);
+          ry.gos.filter(x => !x.celiski).forEach(x => { yeniT.gos++; if (x.yonDeg !== 'bilgi'){ const f = /(artırılınca|azaltılınca|eklenince|çıkarılınca)/.test(x.metin); if (f) yeniT.fiilli++; else if (!C.DEG_EYLEM.test(katla(x.degisken))) yeniT.yonsuz++; } }); });
+        __REG.ok('GERİ OYNATMA eski şema (kayıttaki "etken — etki"): gösterilen ' + top.gos + ' · düşen ' + top.dusen + ' · çelişki ' + top.celiski + ' · birleşen ' + top.birlesen + ' (CEV2B öncesi 103 / 3 / 0 / 2 — değişmedi) · yeni şemaya yeniden kurulum (yön test sözlüğüyle): gösterilen ' + yeniT.gos + ', yön fiili eklenen ' + yeniT.fiilli + ', yön bilgi dışı ama fiili ve eylem sözcüğü olmayan ' + yeniT.yonsuz, top.gos === 103 && top.dusen === 3 && top.celiski === 0 && top.birlesen === 2 && yeniT.yonsuz === 0 && yeniT.gos > 0);
+        // KASITLI BOZMALAR
+        const b = C.CEV2B; let z1, z3, z2;
+        b.yonFiil = false; try { z1 = isle(LA, wA); } finally { b.yonFiil = true; }
+        b.kodTam = false; try { z3 = isle([m('WLP002 flokülasyon', 'artirmak', '', 'berraklık artar', 'artirir', ['w1']), m('WLP004 flokülasyon', 'artirmak', '', 'berraklık artar', 'artirir', ['w2'])], wK); } finally { b.kodTam = true; }
+        const wZ = [{ id: 'w1', url: 'https://www.whitelabs.com/a', alinti: 'Pitch rate can increase or decrease ester levels.' }, { id: 'w2', url: 'https://www.lallemandbrewing.com/b', alinti: 'Higher pitch rates reduce ester formation.' }];
+        const LZ = [m('maya miktarı', 'bilgi', '', 'ester düzeyini etkiler', 'artirir', ['w1']), m('maya miktarı', 'artirmak', '', 'ester azalır', 'azaltir', ['w2'])];
+        const z2a = isle(LZ, wZ); C.YON_ISARET.bilgi = 1; try { z2 = isle(LZ, wZ); } finally { C.YON_ISARET.bilgi = null; }
+        __REG.ok('KASITLI BOZMA: yön fiili kapalı → "' + z1.gos[1].metin + '" (fiil yok → kırmızı) · kod kesme → WLP002 + WLP004 ' + z3.gos.length + ' madde (birleşti → kırmızı) · bilgi +1 → çelişki ' + z2.gos.some(x => x.celiski) + ' (düzeltmeyle ' + z2a.gos.some(x => x.celiski) + ')', !/artırılınca/.test(z1.gos[1].metin) && z3.gos.length === 1 && z2.gos.some(x => x.celiski) && !z2a.gos.some(x => x.celiski));
+        return __REG.al();
+      }, kayit);
+    }
+  },
+  {
+    kod: 'CEV2B-YONLENDIRME', ad: 'YÖNLENDİRME (CEV2B madde 6, AI yok): (a) "kuru hop / kuru maya / kuru hoplama / dry hop" ürün / işlem adı — kuruluk ekseni değil, konu etiketi kuru hop / kuru maya, araştırma yolu; "daha kuru olsun", "kuru bitti tatlı olsun" AYNEN kuruluk · (b) "stil" yalnız açık sözcükle ya da sorunun tamamı genel geliştirme isteğiyse — "nasıl anlarım / nasıl ölçerim / ne yapmalıyım" + başka içerik → araştırma; "biramı nasıl geliştirebilirim", "stile yaklaştır", "BJCP\'ye uysun" AYNEN stil · (c) tat / koku kusuru konusu sorgu STİLSİZ (soru stili adlandırsa bile) · DUR KURALI: tests/cev_seti.json 34 sorunun yolu ve konu etiketi AYNEN · KASITLI BOZMA',
+    calistir: async (page) => {
+      const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'cev_seti.json'), 'utf8'));
+      return page.evaluate(async (set) => {
+        const C = window.BM_CEV, G = window.BM_AI5, r0 = set.receteler.find(x => x.id === 'weizen');
+        const st = soru => G.hazirla({ tur: 'tarif', key: 'cev2b:' + Math.random(), T: { tarif: JSON.parse(JSON.stringify(r0.tarif)), stil: r0.stil, ad: r0.ad } }, { metin: soru });
+        const kuruEksen = soru => { const h = G.hedefEsle(soru), s = st(soru); return !!(h && (h.k === 'kuru' || h.k === 'govde' || (h.belirsiz && /kuruluk/.test(h.eksen || '')))) || s.durum === 'yonBelirsiz' || /kuruluk|gövde/.test(C.konuEtiket(soru) || ''); };
+        // (a) testin kendi tablosu: ürün adı × yüklem
+        const UR = ['kuru hoptan sonra', 'kuru hop süresi', 'kuru hopu ne zaman yapayım,', 'kuru mayayı', 'kuru maya kullansam', 'kuru hoplama', 'dry hop'], YK = ['ne kadar olmalı', 'rehidrate edeyim mi', 'çimen tadı yapar mı', 'kaç gün beklemeliyim'];
+        const A = []; UR.forEach(u => YK.forEach(y => A.push(u + ' ' + y)));
+        const Ak = A.filter(kuruEksen), Ae = A.map(x => [x, C.konuEtiket(x), st(x).durum]).filter(x => !/^kuru (hop|maya)$/.test(x[1] || '') || x[2] !== 'kapsamDisi');
+        __REG.ok('(a) ' + A.length + ' üretilmiş "kuru hop / kuru maya" cümlesi: kuruluk ekseni ' + Ak.length + ' · konu etiketi kuru hop / kuru maya + araştırma yolu olmayan ' + Ae.length + (Ak.length + Ae.length ? ' → ' + JSON.stringify(Ak.concat(Ae.map(x => x.join(' | '))).slice(0, 4)) : ''), Ak.length === 0 && Ae.length === 0);
+        const K = [['daha kuru olsun', 'kuru'], ['kuru bitti tatlı olsun', 'govde'], ['kuru hop yaptım ama bira daha kuru olsun', 'kuru']];
+        __REG.ok('(a) kuruluk aynen: ' + K.map(x => x[0] + ' → ' + (G.hedefEsle(x[0]) || {}).k).join(' · '), K.every(x => (G.hedefEsle(x[0]) || {}).k === x[1]));
+        // (b) genel soru sözcüğü + içerik
+        const NB = ['biramın bittiğini nasıl anlarım', 'FG değerini nasıl ölçerim', 'mayalanma durdu ne yapmalıyım', 'şişeleme zamanını nasıl anlarım', 'hidrometre okumasını nasıl ölçerim', 'oksijen girişini nasıl ölçerim', 'maya canlı mı nasıl anlarım', 'ekipmanı nasıl temizlerim', 'pH metreyi nasıl kalibre ederim', 'şişede tortu kaldı ne yapmalıyım'];
+        const Nst = NB.map(x => [x, st(x)]), Nbad = Nst.filter(x => x[1].hedef === 'stil' || x[1].durum !== 'kapsamDisi');
+        __REG.ok('(b) ' + NB.length + ' "nasıl anlarım / ölçerim / ne yapmalıyım + konu" cümlesi: stil hedefi ' + Nst.filter(x => x[1].hedef === 'stil').length + ' · araştırma yolu ' + Nst.filter(x => x[1].durum === 'kapsamDisi').length + ' (ör. "' + Nst[0][1].konu + '")', Nbad.length === 0);
+        const SB = ['biramı nasıl geliştirebilirim', 'stile yaklaştır', "BJCP'ye uysun", 'biramı nasıl iyileştiririm', 'ne yapmalıyım', 'reçeteyi nasıl düzeltirim', "Weizen'imi nasıl geliştirebilirim", 'ödül alması için ne yapmalıyım'];
+        __REG.ok('(b) stil aynen: ' + SB.map(x => x + ' → ' + (G.hedefEsle(x) || {}).k).join(' · '), SB.every(x => (G.hedefEsle(x) || {}).k === 'stil'));
+        // (c) kusur konusu stilsiz
+        const KS = [["Dubbel'imde diasetil tadı var, nasıl önlenir", 'Belgian Dubbel'], ["Weizen'imde yeşil elma (asetaldehit) tadı var", 'Weizen / Weissbier'], ["Pils'imde pişmiş mısır kokusu var", 'German Pils'], ["Dubbel'imde sıcak yakıcı alkol tadı var", 'Belgian Dubbel']];
+        const KSo = KS.map(x => [x[0], C.sorguStili(x[0], C.tarafsiz(x[0]), x[1])]);
+        const c07 = set.sorular.find(q => q.id === 'C07'), c25 = set.sorular.find(q => q.id === 'C25');
+        __REG.ok('(c) kusur konusu stili adlandırsa da sorgu stilsiz: ' + KSo.map(x => x[0] + ' → ' + x[1]).join(' · ') + ' · C07 (kuru üzüm) ' + C.sorguStili(c07.soru, C.tarafsiz(c07.soru), 'Belgian Dubbel') + ' · C25 (karbonasyon, "weizen için") ' + C.sorguStili(c25.soru, C.tarafsiz(c25.soru), 'Weizen / Weissbier'), KSo.every(x => x[1] === null) && C.sorguStili(c07.soru, C.tarafsiz(c07.soru), 'Belgian Dubbel') === 'Belgian Dubbel' && C.sorguStili(c25.soru, C.tarafsiz(c25.soru), 'Weizen / Weissbier') === 'Weizen / Weissbier');
+        // DUR KURALI: 34 sorunun yolu + konu etiketi (CEV2B öncesi kodla ölçüldü)
+        const ONCE = {"C01":["kural","muz (ester) aroması"],"C02":["kural","muz (ester) aroması"],"C03":["kural","karanfil (fenol) aroması"],"C04":["kural","karanfil (fenol) aroması"],"C05":["kural","muz (ester) aroması"],"C06":["kural","muz ve karanfil aroması"],"C07":["arastirma","kuru üzüm / koyu meyve aroması"],"C08":["arastirma","kuru üzüm / koyu meyve aroması"],"C09":["kural","gövde (ağız dolgunluğu)"],"C10":["kural","gövde (ağız dolgunluğu)"],"C11":["kural","kuruluk (bitiş yoğunluğu)"],"C12":["arastirma","köpük"],"C13":["arastirma","köpük"],"C14":["arastirma","berraklık"],"C15":["arastirma","berraklık"],"C16":["arastirma","berraklık"],"C17":["arastirma","diasetil (tereyağı tadı)"],"C18":["arastirma","diasetil (tereyağı tadı)"],"C19":["arastirma","DMS (pişmiş mısır kokusu)"],"C20":["arastirma","DMS (pişmiş mısır kokusu)"],"C21":["kural","acılık"],"C22":["arastirma","acılık algısı"],"C23":["arastirma","acılık algısı"],"C24":["arastirma","karbonasyon"],"C25":["arastirma","karbonasyon"],"C26":["arastirma","sıcak / yakıcı alkol"],"C27":["arastirma","sıcak / yakıcı alkol"],"C28":["arastirma","oksidasyon (karton / bayat tat)"],"C29":["arastirma","burukluk"],"C30":["arastirma","sülfür (yumurta kokusu)"],"C31":["arastirma","hop aroması"],"C32":["kural","renk"],"C33":["arastirma","ekşilik"],"C34":["kural","gövde (ağız dolgunluğu)"]};
+        const fark = set.sorular.filter(q => { const r = set.receteler.find(x => x.id === q.recete), s = G.hazirla({ tur: 'tarif', key: 'cev2b:dur:' + q.id, T: { tarif: JSON.parse(JSON.stringify(r.tarif)), stil: r.stil, ad: r.ad } }, { metin: q.soru }); const yol = s && s.durum === 'hazir' && G.oneriler(s).length ? 'kural' : 'arastirma'; return yol !== ONCE[q.id][0] || C.konuEtiket(q.soru) !== ONCE[q.id][1]; });
+        __REG.ok('DUR KURALI: cev_seti 34 sorunun yolu (kural 12 / araştırma 22) ve konu etiketi CEV2B öncesiyle aynı — değişen ' + fark.length + (fark.length ? ' ' + fark.map(q => q.id).join(',') : ''), set.sorular.length === 34 && fark.length === 0);
+        // KASITLI BOZMA
+        let za, zb; G.CEV2B.kuruUrun = false; try { za = A.filter(kuruEksen).length; } finally { G.CEV2B.kuruUrun = true; }
+        G.CEV2B.stilAcik = false; try { zb = NB.filter(x => (G.hedefEsle(x) || {}).k === 'stil').length; } finally { G.CEV2B.stilAcik = true; }
+        __REG.ok('KASITLI BOZMA: 6a kapalı → kuruluk ekseni ' + za + ' (kırmızı) · 6b kapalı → stil hedefi ' + zb + '/' + NB.length + ' (kırmızı)', za > 0 && zb > 0);
         return __REG.al();
       }, set);
     }
