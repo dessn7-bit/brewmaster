@@ -13574,6 +13574,44 @@ const CASELER = [
     }
   },
   {
+    kod: 'CEV2D-ETIKETSIZ', ad: 'ETİKETSİZ SORU (CEV2D madde 1, AI yok): etiket de sorulan da yok + yönlendirmesiz → konu = soru: "<soru>" (nasıl / neden / ne kadar / hangi … SİLİNMEZ, "konusunu etkileyen etkenler" çerçevesi yok) · Anladığım: "<soru>" — kaynaklarda aradım. · yönlendirmeli etiketsiz soruda eski temizleme AYNEN · ana set 34 konu metni BİREBİR · KASITLI BOZMA',
+    calistir: async (page) => {
+      const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'cev_seti.json'), 'utf8'));
+      const kay = fs.readFileSync(fileURLToPath(import.meta.url), 'utf8'), blok = kod => { const i = kay.indexOf("kod: '" + kod + "'"), j = kay.indexOf("\n  {\n    kod: '", i + 10); return kay.slice(i, j); };
+      const eskiSor = []; ['CEV1B-TARAFSIZ', 'CEV1C-TARAFSIZ', 'CEV1D'].forEach(k => { const re = /\[\s*'((?:[^'\\]|\\.)+)'\s*,\s*(?:\/|'|\[|null|true|false)/g; let m; const b = blok(k); while ((m = re.exec(b))) { const t = m[1].replace(/\\'/g, "'"); if (/\s/.test(t) && eskiSor.indexOf(t) < 0) eskiSor.push(t); } });
+      return page.evaluate(async ({ set, eskiSor }) => {
+        const C = window.BM_CEV;
+        const katla = t => String(t || '').toLocaleLowerCase('tr').replace(/ı/g, 'i').replace(/ş/g, 's').replace(/ç/g, 'c').replace(/ğ/g, 'g').replace(/ö/g, 'o').replace(/ü/g, 'u').replace(/â/g, 'a');
+        const soz = t => katla(t).replace(/['’][^\s]*/g, '').replace(/[^a-z0-9 ]+/g, ' ').split(/\s+/).filter(Boolean);
+        const etiketsiz = q => !C.konuEtiket(q) && !C.sorulan(q).length;
+        const an = konu => { const R = { konu, durum: 'bulamadim', sonuc: { gos: [], dusen: [], celiskiRapor: [] }, web: { bulgular: [], sinifSay: {}, hatalar: [] }, sorgular: [], cagri: [], maliyet: 0 }; return (C.ustMetni(C.arastirmaKart(R)) || '').split('\n')[0]; };
+        // (a) Claude'un 4 örneği + testin kendi üretilmiş etiketsiz yönlendirmesiz soruları (özne × soru kalıbı)
+        const ORN = ['şişedeki birayı ne kadar süre bekletmeliyim', 'kaynatma neden en az 60 dakika olmalı', 'biramın oksitlendiğini nasıl anlarım', 'hangi hop daha az acılık verir'];
+        const OZ = ['şişedeki bira', 'hidrometre okuması', 'maya starter', 'fermentör sıcaklığı', 'şişeleme şekeri', 'mash suyu'];
+        const KA = [o => o + ' nasıl ayarlanır', o => o + ' neden önemli', o => o + ' ne kadar olmalı', o => o + ' ne zaman kontrol edilir', o => 'hangi ' + o + ' seçilmeli', o => o + ' için kaç gün beklemeliyim', o => o + ' için ne yapmalıyım', o => o + ' ölçmeli miyim', o => o + ' gerekir mi', o => o + ' niye değişiyor'];
+        const U = []; OZ.forEach(o => KA.forEach(k => U.push(k(o))));
+        const A = ORN.concat(U).filter(q => etiketsiz(q) && !C.yonlendirmeVar(q)), Ae = ORN.filter(q => !etiketsiz(q));
+        const kotu = A.map(q => [q, C.tarafsiz(q)]).filter(x => / konusunu etkileyen etkenler/.test(x[1]) || soz(x[0]).some(w => soz(x[1]).indexOf(w) < 0) || x[1] !== 'soru: "' + C.soruTemiz(x[0]) + '"');
+        __REG.ok('(a) etiketsiz yönlendirmesiz ' + A.length + ' soru (Claude örneği ' + ORN.filter(q => A.indexOf(q) >= 0).length + ' + üretilmiş ' + U.filter(q => A.indexOf(q) >= 0).length + '; örneklerden etiketli olan ' + Ae.length + ': ' + Ae.join(' / ') + ' — CEV2C ile zaten etiket + soru) → soru / içerik sözcüğü eksik ya da eski çerçeve ' + kotu.length + (kotu.length ? ' ' + JSON.stringify(kotu.slice(0, 3)) : ''), A.length >= 32 && U.filter(q => A.indexOf(q) >= 0).length >= 30 && kotu.length === 0);
+        const a0 = C.tarafsiz(ORN[1]), l0 = an(a0);
+        __REG.ok('(a) örnek: "' + ORN[1] + '" → ' + a0 + ' · ' + l0 + ' · sorgu ve özet görevine aynı konu · jargon yok', a0 === 'soru: "kaynatma neden en az 60 dakika olmalı"' && /^Anladığım: "kaynatma neden en az 60 dakika olmalı" — kaynaklarda aradım\./.test(l0) && C.SORGU_GOREV(a0, null).indexOf(a0) >= 0 && C.OZET_GOREV(a0).indexOf(a0) >= 0 && !C.jargonVar(l0) && C.tarafsiz('?!') === 'soru konusu belirsiz');
+        // (b) yönlendirmeli etiketsiz sorular: eski temizleme aynen (CEV1B / CEV1C / CEV1D test soruları + üretilmiş yönlendirmeli)
+        const Y = eskiSor.concat(['kaynatma kesin 60 dakika olmalı değil mi', 'hidrometre şart mı bence gereksiz', 'şişeleme şekeri daha iyi olur mu', 'maya starter yapmak bence şart', 'fermentör sıcaklığı kesinlikle önemli değil mi', 'mash suyunu ölçmeye gerek yok herhalde', 'hidrometre okuması normal mi']).filter(q => etiketsiz(q) && C.yonlendirmeVar(q));
+        const yb = Y.filter(q => /^soru: /.test(C.tarafsiz(q)) || / — soru: /.test(C.tarafsiz(q)) || C.yonlendirmeVar(C.tarafsiz(q)) || C.yonlendirmeVar(C.OZET_GOREV(C.tarafsiz(q))));
+        __REG.ok('(b) yönlendirmeli etiketsiz ' + Y.length + ' soru → soru metni ya da yönlendirme konuda / özet görevinde ' + yb.length + ' · örnek "' + Y[Y.length - 1] + '" → ' + C.tarafsiz(Y[Y.length - 1]), Y.length >= 3 && yb.length === 0);
+        // (c) ana set 34 konu metni parmak izi (CEV2C koduyla ölçüldü)
+        const pz = C.fnv(set.sorular.map(q => q.id + '=' + C.tarafsiz(q.soru)).join('\n'));
+        __REG.ok('(c) ana set 34 konu metni parmak izi ' + pz + ' (CEV2C: ' + '5ec68c3c' + ')', pz === '5ec68c3c' && set.sorular.length === 34);
+        // KASITLI BOZMA
+        const B = C.CEV2C; let z1, z2;
+        B.etiketsizSoru = false; try { z1 = A.filter(q => / konusunu etkileyen etkenler/.test(C.tarafsiz(q)) || soz(q).some(w => soz(C.tarafsiz(q)).indexOf(w) < 0)).length; } finally { B.etiketsizSoru = true; }
+        const fy = C.yonlendirmeVar; C.yonlendirmeVar = () => false; try { z2 = Y.filter(q => /^soru: /.test(C.tarafsiz(q))).length; } finally { C.yonlendirmeVar = fy; }
+        __REG.ok('KASITLI BOZMA: eski temizleme yoluna dönüş → ' + z1 + ' soruda soru sözcüğü kayıp (kırmızı) · yönlendirmeliye de soru metni → ' + z2 + ' (kırmızı)', z1 > 0 && z2 > 0);
+        return __REG.al();
+      }, { set, eskiSor });
+    }
+  },
+  {
     kod: 'CEV1B-KOZMETIK', ad: 'KOZMETİK + KONU SÖZLÜĞÜ (CEV1B madde 4–5): "N\'i güçlü" Türkçe eki (1\'i, 2\'si, 3\'ü, 4\'ü, 5\'i) · muz / karanfil okunduysa "aroması" hesaplanmıyor notuna girmez · tanıyamadım / kapsam dışı metni araştırma düğmesi varken "Kaynaklarda araştırabilirim" der, yoksa eski metin · kağıt → oksidasyon, lahana → DMS ya da sülfür (sorulmaz), ilaç / plastik / klor → klorofenol, "metal gibi" → metalik, sirke → ekşilik, fışkırma / taşma / şişe patladı → aşırı karbonasyon (yalnız etiket + araştırma; kural tablosu değişmez)',
     calistir: (page) => page.evaluate(async () => {
       const G = window.BM_AI5;
