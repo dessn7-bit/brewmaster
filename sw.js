@@ -748,7 +748,7 @@
 // HTML degisti (Sprint DOG4: sira nedeni kapali sozluk SN3 + hedefli duzeltme; malzeme asistani dogrulama turu kosucusu + AI4 ek katmani) -> CACHE_VERSION bump v131-503 -> v131-504.
 // HTML degisti (Sprint DOG4B: malzeme asistani soru cozumu A4.cozumle - recete satiri once, tur tutarliligi, grama cikar = miktar, Anladigim karti; set surum 5 + puanlama (vi); SN3 aday uret- disi) -> CACHE_VERSION bump v131-504 -> v131-505.
 // HTML degisti (Sprint DOG4C: soru cozumu varsayilan belirsiz, carpan/fark miktari, kaldirip-koysam = degistir, stil sorudan ezilmez, hop zamani belirsiz) -> CACHE_VERSION bump v131-505 -> v131-506.
-const CACHE_VERSION='bm-cache-v131-516';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
+const CACHE_VERSION='bm-cache-v131-517';   // HTML — her deploy'da bump, eskisi silinir (taze HTML sart)
 const ASSET_CACHE   = 'bm-assets-v1';        // font + ikon + manifest — KALICI, bump'ta silinmez
 const MODEL_CACHE   = 'bm-models-v1';        // workers.dev + jsdelivr — SHA'li/immutable URL, KALICI
 

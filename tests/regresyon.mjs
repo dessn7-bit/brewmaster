@@ -13118,7 +13118,7 @@ const CASELER = [
         __REG.ok('kapsama BOŞ stok ' + tB[0] + '/' + tB[1] + ' · ' + satir(KB), KB.length === 12 && tB[0] === tB[1]);
         const c11 = x => G.oneriler(x.st).map(o => o.kural + (o.tur === 'yon' ? '(yön)' : '(aday)')), F11 = KF.find(x => x.q.id === 'C11'), B11 = KB.find(x => x.q.id === 'C11');
         const mB = G.oneriler(B11.st).find(o => o.kural === 'maya_att');
-        __REG.ok('C11 boş stok: maya etkeni yön maddesi "' + (mB ? mB.metin : '-') + '" · fixture: ' + c11(F11).join(', ') + ' · boş: ' + c11(B11).join(', '), !!mB && /stokunda bu ailede \(\w+\) daha yüksek attenüasyonlu maya yok/.test(mB.metin) && /Lallemand, White Labs; güçlü/.test(mB.metin) && G.kuralGuc(G.kural('maya_att')).k === 'guclu');
+        __REG.ok('C11 boş stok: maya etkeni yön maddesi "' + (mB ? mB.metin : '-') + '" · fixture: ' + c11(F11).join(', ') + ' · boş: ' + c11(B11).join(', '), !!mB && /stokunda bu ailede \([^)]+\) daha yüksek attenüasyonlu maya yok/.test(mB.metin) /* CEV1D (2): Türkçe aile adı (Belçika) */ && /Lallemand, White Labs; güçlü/.test(mB.metin) && G.kuralGuc(G.kural('maya_att')).k === 'guclu');
         __REG.ok('C11: stokta maya adayı varken maya_att yok (aynı etken iki kez yazılmaz)', !B11.st.adaylar.liste.some(a => a.kural === 'maya') && (F11.st.adaylar.liste.some(a => a.kural === 'maya') ? !G.oneriler(F11.st).some(o => o.kural === 'maya_att') : true));
         // (1) C32
         const s32 = G.oneriler(KF.find(x => x.q.id === 'C32').st).find(o => o.kural === 'koyu_candi');
@@ -13189,6 +13189,50 @@ const CASELER = [
       __REG.ok('KASITLI BOZMA "kapak" bağlamı kapalı → "' + b2 + '" (DMS konusu kaybolur) → kırmızı', i >= 0 && !/DMS/.test(b2));
       return __REG.al();
     })
+  },
+  // ═════════════ SPRINT CEV1D — "kapak" bağlamı · kartta ham iç anahtar yok · İngilizce terim (wort / attenuation / grist / kilnli) ═════════════
+  {
+    kod: 'CEV1D', ad: 'KART DİLİ (CEV1D madde 1–3, mock — AI yok): (1) "sorulan" kapak etiketi bağlamıyla (kaynatma / tencere → kaynatmada kapak · fermentör / mayalanma kovası → mayalanma kabı kapağı · şişe → şişe kapağı · bağlamsız → kapak); DMS konusu CEV1C kuralıyla aynen · (2) 12 kural kartında (fixture + BOŞ stok, katlı kısım dahil) ham maya tip anahtarı / step_ kimliği yok; C11 boş stok "(Belçika)"; tüm maya tip değerlerinin Türkçe adı var · (3) C34 "beta-amilaz (şekeri mayalanabilir hale getiren enzim) … şıra daha az mayalanabilir olur"; kartlarda (üst kısım) İngilizce terim yok (wort / attenuation / grist / kilnli); tek yazım "attenüasyon" · KASITLI BOZMALAR',
+    calistir: async (page) => {
+      const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'cev_seti.json'), 'utf8'));
+      return page.evaluate(async (set) => {
+        const C = window.BM_CEV, A = window.BM_AI, G = window.BM_AI5;
+        // (1) kapak bağlamı
+        const K = [['fermentörün kapağını kapalı tutmak şart mı', '"sorulan: mayalanma kabı kapağı" — biraya etkileri'], ['şişe kapağı paslanırsa tat bozar mı', '"sorulan: şişe kapağı" — biraya etkileri'],
+          ['mayalanma kovasının kapağı hava alsa DMS olur mu', '"DMS (pişmiş mısır kokusu) — sorulan: mayalanma kabı kapağı, oksijen" konusunu etkileyen etkenler'],
+          ['kaynatırken tencere kapağını kapatsam sorun olur mu', '"DMS (pişmiş mısır kokusu) — sorulan: kaynatmada kapak" konusunu etkileyen etkenler'],
+          ['Herkes kapağı kapat diyor, doğru mu', '"DMS (pişmiş mısır kokusu) — sorulan: kaynatmada kapak" konusunu etkileyen etkenler'],
+          ['kapak açık kaynatmak gereksiz bence', '"DMS (pişmiş mısır kokusu) — sorulan: kaynatmada kapak" konusunu etkileyen etkenler'], ['kapak paslandı', '"sorulan: kapak" — biraya etkileri']];
+        K.forEach(x => { const k = C.tarafsiz(x[0]); __REG.ok('"' + x[0] + '" → ' + k, k === x[1], 'beklenen ' + x[1]); });
+        const ke = C.kapakEtiket; C.kapakEtiket = () => 'kaynatmada kapak'; let bz; try { bz = C.tarafsiz(K[0][0]); } finally { C.kapakEtiket = ke; }
+        __REG.ok('KASITLI BOZMA kapak bağlamı kapalı → "' + bz + '" → kırmızı', bz !== K[0][1]);
+        // (2) + (3) 12 kural kartı × 2 stok
+        const bos = { sorgu: () => ({ ok: true, veri: { sorgular: [] } }), web: () => ({ ok: true, veri: { iddialar: [] } }), ozet: () => ({ ok: true, veri: { maddeler: [] } }) };
+        const kos = async () => { const out = []; for (const q of set.sorular) { const c = await C.cevapla(set, q, { mock: bos }); if (c.yol === 'kural') out.push({ q, c }); } return out; };
+        const sah = A.hazirMi, st0 = eval('STOK'), tam = h => { const d = document.createElement('div'); d.innerHTML = h; return d.textContent.replace(/\s+/g, ' '); };
+        const tara = async () => { let KF, KB; A.hazirMi = () => ({ hazir: false }); try { KF = await kos(); eval('STOK = []'); KB = await kos(); } finally { eval('STOK = st0'); A.hazirMi = sah; } return { KF, KB, H: KF.concat(KB) }; };
+        const TIP = [...new Set(MAYALAR.map(m => m.tip))], hamTip = TIP.filter(t => G.MAYA_AILE_AD[t] !== t).join('|');
+        const HAM = new RegExp('\\((' + hamTip + ')\\)|aile: (' + hamTip + ')\\b|\\bstep_\\w+|\\b(' + G.KURALLAR.map(r => r.id).filter(i => /_/.test(i)).join('|') + ')\\b');
+        const ING = /\b(wort|attenuation|grist|kilnli|attenuasyon)\b/i;
+        const ham = R => R.H.map(x => { const m = HAM.exec(tam(x.c.html)); return m ? x.q.id + ': ' + m[0] : null; }).filter(Boolean);
+        const R0 = await tara();
+        __REG.ok('kural kartı: fixture ' + R0.KF.length + ' + boş stok ' + R0.KB.length, R0.KF.length === 12 && R0.KB.length === 12);
+        __REG.ok('tüm maya tip değerlerinin Türkçe adı var: ' + TIP.map(t => t + ' → ' + G.MAYA_AILE_AD[t]).join(' · '), TIP.every(t => G.MAYA_AILE_AD[t]));
+        const h0 = ham(R0); __REG.ok('ham iç anahtar (maya tipi / step_ / kural kimliği) 24 kartın tamamında (katlı dahil) ' + h0.length, !h0.length, h0.join(' | '));
+        const m11 = G.oneriler(G.durum['cevset:C11']) && R0.KB.find(x => x.q.id === 'C11').c.maddeler.map(m => m.metin).find(t => /stokunda bu ailede/.test(t));
+        __REG.ok('C11 boş stok: "' + m11 + '"', /stokunda bu ailede \(Belçika\) daha yüksek attenüasyonlu maya yok/.test(m11 || ''));
+        const ust = R0.H.map(x => { const m = ING.exec(x.c.ust); return m ? x.q.id + ': ' + m[0] : null; }).filter(Boolean);
+        __REG.ok('kart üst kısmı İngilizce terim (wort / attenuation / grist / kilnli / attenuasyon) ' + ust.length, !ust.length, ust.join(' | '));
+        const kat = R0.H.map(x => { const t = tam(x.c.html), m = /grist'i|Kilnli|katalog attenuation|görünür attenuation|\(attenuation %|attenuasyon/.exec(t); return m ? x.q.id + ': ' + m[0] : null; }).filter(Boolean);
+        __REG.ok('katlı kısımda uygulama metni İngilizce terim ' + kat.length + ' (kaynak başlığı / İngilizce alıntı kalır)', !kat.length, kat.join(' | '));
+        const c34 = R0.KF.find(x => x.q.id === 'C34').c.maddeler.map(m => m.metin).find(t => /beta-amilaz/.test(t));
+        __REG.ok('C34: "' + c34 + '"', /beta-amilaz \(şekeri mayalanabilir hale getiren enzim\) bu sıcaklıkta hızla bozulur — şıra daha az mayalanabilir olur/.test(c34 || '') && !/wort/.test(c34));
+        // KASITLI BOZMA: Türkçe ad tablosu ham anahtara dönerse tarama yakalar
+        const AD = G.MAYA_AILE_AD; G.MAYA_AILE_AD = Object.assign({}, AD, { belcika: 'belcika' }); let R1; try { R1 = await tara(); } finally { G.MAYA_AILE_AD = AD; }
+        const h1 = ham(R1); __REG.ok('KASITLI BOZMA Belçika adı ham anahtar → ' + h1.length + ' kartta yakalandı → kırmızı', h1.length > 0, h1.join(' | '));
+        return __REG.al();
+      }, set);
+    }
   },
   {
     kod: 'CEV1B-KOZMETIK', ad: 'KOZMETİK + KONU SÖZLÜĞÜ (CEV1B madde 4–5): "N\'i güçlü" Türkçe eki (1\'i, 2\'si, 3\'ü, 4\'ü, 5\'i) · muz / karanfil okunduysa "aroması" hesaplanmıyor notuna girmez · tanıyamadım / kapsam dışı metni araştırma düğmesi varken "Kaynaklarda araştırabilirim" der, yoksa eski metin · kağıt → oksidasyon, lahana → DMS ya da sülfür (sorulmaz), ilaç / plastik / klor → klorofenol, "metal gibi" → metalik, sirke → ekşilik, fışkırma / taşma / şişe patladı → aşırı karbonasyon (yalnız etiket + araştırma; kural tablosu değişmez)',
