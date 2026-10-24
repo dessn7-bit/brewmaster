@@ -4532,7 +4532,7 @@ const MAYALAR=[
   // Fermentis eksikler
   {id:"wb06",ad:"Fermentis WB-06 (Buğday Ale)",atu:[84,89],sc:[18,26],ideal:20,e:"Muz-baharat",tip:"wheat",ek:"dolap",form:'dry',tol:11,alias:["safbrew wb-06 (fermentis)","safbrew - wheat beer yeast wb-06 (fermentis / safale)","fermentis wb-06 dry wheat beer yeast","wb-06"]},
   {id:"s23",ad:"Fermentis S-23 (Lager)",atu:[80,84],sc:[12,18],ideal:13,e:"Temiz lager",tip:"lager",ek:"dolap",form:'dry',tol:11,alias:["saflager s-23 (fermentis)","saflager - german lager yeast s-23 (fermentis / safale)","s-23"]},
-  {id:"be256",ad:"Fermentis BE-256 (Abbey/Tripel)",atu:[82,87],sc:[18,26],ideal:22,e:"Meyve-baharat",tip:"belcika",ek:"isitici",form:'dry',tol:13,alias:["abbey ale (fermentis)","safbrew - abbaye yeast (fermentis / safale)","be-256"]},
+  {id:"be256",ad:"Fermentis BE-256 (Abbey/Tripel)",atu:[82,86],/* CEV2 (6): Fermentis 82-86% (eski 82-87) */sc:[18,26],ideal:22,e:"Meyve-baharat",tip:"belcika",ek:"isitici",form:'dry',tol:13,alias:["abbey ale (fermentis)","safbrew - abbaye yeast (fermentis / safale)","be-256"]},
   {id:"be134",ad:"Fermentis BE-134 (Saison)",atu:[89,93],sc:[18,26],ideal:24,e:"Biber-tropikal",tip:"saison",ek:"isitici",form:'dry',tol:13,alias:["be-134"]},
   // BiraBurada markalı (eşdeğerleri belirtilmiş)
   {id:"bb_ale",ad:"BiraBurada Maya Amerikan Ale (=US-05)",atu:[78,82],sc:[15,24],ideal:20,e:"Temiz-nötr",tip:"ale",ek:"dolap"},
@@ -4751,6 +4751,100 @@ const MAYA_SC_KAYNAK={
   wy3944:{"c":[17,24],"u":"Wyeast","url":"https://wyeastlab.com/product/belgian-witbier/","a":"62-75°F (17-24°C)"}
 };
 function bmMayaScDogru(id){return Object.prototype.hasOwnProperty.call(MAYA_SC_KAYNAK,id)?MAYA_SC_KAYNAK[id]:null;}
+// SPRINT CEV2 (6): maya ATTENÜASYONU ÜRETİCİNİN kendi sayfasından (okuma 2026-10-24; alt ajanlar açtı, alıntı birebir — sayfada etiket ile değer ayrı öğeyse tek boşlukla birleştirildi).
+// c = üreticinin görünür attenüasyon aralığı (%). DOĞRULANMIŞ = katalog atu alanı c'ye BİREBİR eşit (bmMayaAtuDogru). Kural yolu maya ADAYI (değiştir) yalnız mevcut VE aday maya doğrulanmışsa üretilir.
+// Tabloda olmayan: BiraBurada (veri sayfası yok), markasız kveik, lc_rye, mj_m21 (kimlik çelişkisi), Omega (10; değerler omegayeast.com'da değil, cdn.shopify.com PDF'inde konumla eşlendi), sayı vermeyen sayfa (f2, la_cbc1, mj_m76, bakteriler).
+// Katalog alanı üreticiden farklı olanlar DEĞİŞTİRİLMEDİ (FG hesabı + G seti / tuzak parmak izi) — yalnız BE-256 82–87 → 82–86 (görev); fark listesi CEV2 raporunda, bunlar doğrulanmamış sayılır.
+const MAYA_ATU_KAYNAK={
+  be134:{"c":[89,93],"u":"Fermentis","url":"https://fermentis.com/en/product/safale-be-134/","a":"Apparent attenuation 89-93%"},
+  be256:{"c":[82,86],"u":"Fermentis","url":"https://fermentis.com/en/product/safale-be%e2%80%91256/","a":"Apparent attenuation 82-86%"},
+  ha18:{"c":[98,102],"u":"Fermentis","url":"https://fermentis.com/en/product/safbrew-ha%e2%80%9118/","a":"Apparent attenuation 98-102%"},
+  imp_a01:{"c":[73,75],"u":"Imperial Yeast","url":"https://www.imperialyeast.com/yeast-strains/house","a":"Attenuation 73-75%"},
+  imp_a04:{"c":[73,74],"u":"Imperial Yeast","url":"https://www.imperialyeast.com/yeast-strains/barbarian","a":"Attenuation 73-74%"},
+  imp_a09:{"c":[69,74],"u":"Imperial Yeast","url":"https://www.imperialyeast.com/yeast-strains/pub","a":"Attenuation 69-74%"},
+  imp_a10:{"c":[71,75],"u":"Imperial Yeast","url":"https://www.imperialyeast.com/yeast-strains/darkness","a":"Attenuation 71-75%"},
+  imp_a15:{"c":[72,76],"u":"Imperial Yeast","url":"https://www.imperialyeast.com/yeast-strains/independence","a":"Attenuation 72-76%"},
+  imp_a24:{"c":[73,75],"u":"Imperial Yeast","url":"https://www.imperialyeast.com/yeast-strains/dry-hop","a":"Attenuation 73-75%"},
+  imp_a38:{"c":[72,76],"u":"Imperial Yeast","url":"https://www.imperialyeast.com/yeast-strains/juice","a":"Attenuation 72-76%"},
+  imp_b45:{"c":[74,78],"u":"Imperial Yeast","url":"https://www.imperialyeast.com/yeast-strains/gnome","a":"Attenuation 74-78%"},
+  imp_b63:{"c":[74,78],"u":"Imperial Yeast","url":"https://www.imperialyeast.com/yeast-strains/monastic","a":"Attenuation 74-78%"},
+  imp_g01:{"c":[73,77],"u":"Imperial Yeast","url":"https://www.imperialyeast.com/yeast-strains/stefon","a":"Attenuation 73-77%"},
+  imp_g02:{"c":[73,77],"u":"Imperial Yeast","url":"https://www.imperialyeast.com/yeast-strains/kaiser","a":"Attenuation 73-77%"},
+  imp_l05:{"c":[71,75],"u":"Imperial Yeast","url":"https://www.imperialyeast.com/yeast-strains/cablecar","a":"Attenuation 71-75%"},
+  k97:{"c":[80,84],"u":"Fermentis","url":"https://fermentis.com/en/product/safale-k%e2%80%9197/","a":"Apparent attenuation 80-84%"},
+  kveikv:{"c":[76,82],"u":"Lallemand","url":"https://www.lallemandbrewing.com/en/united-states/products/lalbrew-voss-kveik-ale-yeast/","a":"Attenuation 76-82%"},
+  la_abbaye:{"c":[77,83],"u":"Lallemand","url":"https://www.lallemandbrewing.com/en/united-states/products/abbaye-belgian-ale-yeast/","a":"Attenuation 77-83%"},
+  la_belle:{"c":[86,94],"u":"Lallemand","url":"https://www.lallemandbrewing.com/en/united-states/products/belle-saison-beer-yeast/","a":"Attenuation 86-94%"},
+  la_bry97:{"c":[78,84],"u":"Lallemand","url":"https://www.lallemandbrewing.com/en/united-states/products/bry-97-west-coast-ale-yeast/","a":"Attenuation 78-84%"},
+  la_diamond:{"c":[77,83],"u":"Lallemand","url":"https://www.lallemandbrewing.com/en/united-states/products/diamond-lager-yeast/","a":"Attenuation 77-83%"},
+  la_farmhouse:{"c":[78,84],"u":"Lallemand","url":"https://www.lallemandbrewing.com/en/united-states/products/lalbrew-farmhouse/","a":"Attenuation 78-84%"},
+  la_koln:{"c":[78,83],"u":"Lallemand","url":"https://admin.lallemandbrewing.com/wp-content/uploads/2023/05/Koln-TDS-FRA-A4-Print-LalBrew.pdf","a":"PLAGE D’ATTÉNUATION 78 - 83%"},
+  la_london:{"c":[65,72],"u":"Lallemand","url":"https://admin.lallemandbrewing.com/wp-content/uploads/2023/05/London-TDS-FRA-A4-Print-LalBrew.pdf","a":"PLAGE D’ATTÉNUATION 65 - 72 %"},
+  la_munich:{"c":[76,83],"u":"Lallemand","url":"https://www.lallemandbrewing.com/en/united-states/products/munich-classic-wheat-beer-yeast/","a":"Attenuation 76-83%"},
+  la_philly:{"c":[74,82],"u":"Lallemand","url":"https://www.lallemandbrewing.com/en/united-states/products/wildbrew-philly-sour/","a":"Attenuation 74-82%"},
+  la_windsor:{"c":[65,72],"u":"Lallemand","url":"https://www.lallemandbrewing.com/en/united-states/products/windsor-british-style-beer-yeast/","a":"Attenuation 65-72%"},
+  mj_m15:{"c":[70,75],"u":"Mangrove Jack's","url":"https://mangrovejacks.com/products/m15-empire-ale-yeast-10-g","a":"Attenuation: Low-Medium (70 - 75%)"},
+  mj_m20:{"c":[70,75],"u":"Mangrove Jack's","url":"https://mangrovejacks.com/products/m20-bavarian-wheat-10g","a":"Attenuation: Medium (70 - 75%)"},
+  mj_m29:{"c":[85,95],"u":"Mangrove Jack's","url":"https://mangrovejacks.com/products/m29-french-sasion-yeast-10-g","a":"Attenuation: Very High (85 - 95%)"},
+  mj_m31:{"c":[82,92],"u":"Mangrove Jack's","url":"https://mangrovejacks.com/products/belgian-tripel-m31-yeast-10g","a":"Attenuation: Very High (82 - 92%)"},
+  mj_m36:{"c":[74,78],"u":"Mangrove Jack's","url":"https://mangrovejacks.com/products/liberty-bell-ale-m36-yeast-10g","a":"Attenuation: High (74 - 78%)"},
+  mj_m41:{"c":[82,92],"u":"Mangrove Jack's","url":"https://mangrovejacks.com/products/belgian-ale-yeast-10g","a":"Attenuation: Very High (82 - 92%)"},
+  mj_m42:{"c":[77,82],"u":"Mangrove Jack's","url":"https://mangrovejacks.com/products/new-world-strong-ale-m42-yeast-10g","a":"Attenuation: High (77 - 82%)"},
+  mj_m44:{"c":[77,85],"u":"Mangrove Jack's","url":"https://mangrovejacks.com/products/m44-us-west-coast-yeast-10g","a":"Attenuation: High (77 - 85%)"},
+  mj_m47:{"c":[73,77],"u":"Mangrove Jack's","url":"https://mangrovejacks.com/products/belgian-abbey-m47-yeast-10g","a":"Attenuation: Medium (73 - 77%)"},
+  mj_m54:{"c":[77,82],"u":"Mangrove Jack's","url":"https://mangrovejacks.com/products/californian-lager-m54-yeast-10g","a":"Attenuation: High (77 - 82%)"},
+  mj_m66:{"c":[74,82],"u":"Mangrove Jack's","url":"https://mangrovejacks.com/products/m66-hophead-ale-yeast-10g","a":"Attenuation: Medium (74-82 %)"},
+  mj_m84:{"c":[72,76],"u":"Mangrove Jack's","url":"https://mangrovejacks.com/products/m84-bohemian-lager-10g","a":"Attenuation: High (72 - 76%)"},
+  nottm:{"c":[78,84],"u":"Lallemand","url":"https://www.lallemandbrewing.com/en/united-states/products/nottingham-high-performance-ale-yeast/","a":"Attenuation 78-84%"},
+  rva132:{"c":[70,75],"u":"RVA Yeast Labs","url":"https://rvayeastlabs.com/product/rva-132-manchester-ale-boddingtons/","a":"Attenuation: 70-75%"},
+  s04:{"c":[74,82],"u":"Fermentis","url":"https://fermentis.com/en/product/safale-s%e2%80%9104/","a":"Apparent attenuation 74-82%"},
+  s189:{"c":[80,84],"u":"Fermentis","url":"https://fermentis.com/en/product/saflager-s-189/","a":"Apparent attenuation 80-84%"},
+  s23:{"c":[80,84],"u":"Fermentis","url":"https://fermentis.com/en/product/saflager-s%e2%80%9123/","a":"Apparent attenuation 80-84%"},
+  s33:{"c":[68,72],"u":"Fermentis","url":"https://fermentis.com/en/product/safale-s%e2%80%9133/","a":"Apparent attenuation 68-72%"},
+  t58:{"c":[72,78],"u":"Fermentis","url":"https://fermentis.com/en/product/safale-t%e2%80%9158/","a":"Apparent attenuation 72-78%"},
+  us05:{"c":[78,82],"u":"Fermentis","url":"https://fermentis.com/en/product/safale-us-05/","a":"Apparent attenuation 78-82%"},
+  verdant:{"c":[75,82],"u":"Lallemand","url":"https://www.lallemandbrewing.com/en/united-states/products/lalbrew-verdant-ipa/","a":"Attenuation 75-82%"},
+  w3470:{"c":[80,84],"u":"Fermentis","url":"https://fermentis.com/en/product/saflager-w-34-70/","a":"Apparent attenuation 80-84%"},
+  wb06:{"c":[86,90],"u":"Fermentis","url":"https://fermentis.com/en/product/safale-wb-06/","a":"Apparent attenuation 86-90%"},
+  wlp001:{"c":[73,85],"u":"White Labs","url":"https://www.whitelabs.com/yeast-single?id=101&type=YEAST","a":"ATTENUATION : 73% - 85%"},
+  wlp002:{"c":[63,70],"u":"White Labs","url":"https://www.whitelabs.com/yeast-single?id=102&type=YEAST","a":"ATTENUATION : 63% - 70%"},
+  wlp004:{"c":[69,74],"u":"White Labs","url":"https://www.whitelabs.com/yeast-single?id=104&type=YEAST","a":"ATTENUATION : 69% - 74%"},
+  wlp007:{"c":[70,80],"u":"White Labs","url":"https://www.whitelabs.com/yeast-single?id=107&type=YEAST","a":"ATTENUATION : 70% - 80%"},
+  wlp029:{"c":[72,78],"u":"White Labs","url":"https://www.whitelabs.com/yeast-single?id=119&type=YEAST","a":"ATTENUATION : 72% - 78%"},
+  wlp300:{"c":[72,76],"u":"White Labs","url":"https://www.whitelabs.com/yeast-single?id=148&type=YEAST","a":"ATTENUATION : 72% - 76%"},
+  wlp380:{"c":[73,80],"u":"White Labs","url":"https://www.whitelabs.com/yeast-single?id=151&type=YEAST","a":"ATTENUATION : 73% - 80%"},
+  wlp500:{"c":[75,80],"u":"White Labs","url":"https://www.whitelabs.com/yeast-single?id=154&type=YEAST","a":"ATTENUATION : 75% - 80%"},
+  wlp550:{"c":[78,85],"u":"White Labs","url":"https://www.whitelabs.com/yeast-single?id=165&type=YEAST","a":"ATTENUATION : 78% - 85%"},
+  wlp565:{"c":[65,75],"u":"White Labs","url":"https://www.whitelabs.com/yeast-single?id=168&type=YEAST","a":"ATTENUATION : 65% - 75%"},
+  wlp570:{"c":[78,85],"u":"White Labs","url":"https://www.whitelabs.com/yeast-single?id=171&type=YEAST","a":"ATTENUATION : 78% - 85%"},
+  wlp585:{"c":[78,85],"u":"White Labs","url":"https://www.whitelabs.com/yeast-single?id=173&type=YEAST","a":"ATTENUATION : 78% - 85%"},
+  wlp670:{"c":[75,82],"u":"White Labs","url":"https://www.whitelabs.com/yeast-single?id=191&type=YEAST","a":"ATTENUATION : 75% - 82%"},
+  wlp800:{"c":[72,77],"u":"White Labs","url":"https://www.whitelabs.com/yeast-single?id=218&type=YEAST","a":"ATTENUATION : 72% - 77%"},
+  wlp830:{"c":[74,79],"u":"White Labs","url":"https://www.whitelabs.com/yeast-single?id=223&type=YEAST","a":"ATTENUATION : 74% - 79%"},
+  wlp838:{"c":[68,76],"u":"White Labs","url":"https://www.whitelabs.com/yeast-single?id=226&type=YEAST","a":"ATTENUATION : 68% - 76%"},
+  wy1028:{"c":[73,77],"u":"Wyeast","url":"https://wyeastlab.com/product/london-ale/","a":"Apparent Attenuation 73 - 77%"},
+  wy1056:{"c":[73,77],"u":"Wyeast","url":"https://wyeastlab.com/product/american-ale/","a":"Apparent Attenuation 73 - 77%"},
+  wy1084:{"c":[71,75],"u":"Wyeast","url":"https://wyeastlab.com/product/irish-ale/","a":"Apparent Attenuation 71 - 75%"},
+  wy1272:{"c":[72,76],"u":"Wyeast","url":"https://wyeastlab.com/product/american-ale-ii/","a":"Apparent Attenuation 72 - 76%"},
+  wy1318:{"c":[71,75],"u":"Wyeast","url":"https://wyeastlab.com/product/london-ale-iii/","a":"Apparent Attenuation 71 - 75%"},
+  wy1388:{"c":[74,78],"u":"Wyeast","url":"https://wyeastlab.com/product/belgian-strong-ale/","a":"Apparent Attenuation 74 - 78%"},
+  wy1728:{"c":[69,73],"u":"Wyeast","url":"https://wyeastlab.com/product/scottish-ale/","a":"Apparent Attenuation 69 - 73%"},
+  wy1968:{"c":[67,71],"u":"Wyeast","url":"https://wyeastlab.com/product/london-esb-ale/","a":"Apparent Attenuation 67 - 71%"},
+  wy2001:{"c":[72,76],"u":"Wyeast","url":"https://wyeastlab.com/product/pilsner-urquell-h-strain/","a":"Apparent Attenuation 72 - 76%"},
+  wy2112:{"c":[67,71],"u":"Wyeast","url":"https://wyeastlab.com/product/california-lager/","a":"Apparent Attenuation 67 - 71%"},
+  wy2124:{"c":[73,77],"u":"Wyeast","url":"https://wyeastlab.com/product/bohemian-lager/","a":"Apparent Attenuation 73 - 77%"},
+  wy2206:{"c":[73,77],"u":"Wyeast","url":"https://wyeastlab.com/product/bavarian-lager/","a":"Apparent Attenuation 73 - 77%"},
+  wy2308:{"c":[70,74],"u":"Wyeast","url":"https://wyeastlab.com/product/munich-lager/","a":"Apparent Attenuation 70 - 74%"},
+  wy3068:{"c":[73,77],"u":"Wyeast","url":"https://wyeastlab.com/product/weihenstephan-weizen/","a":"Apparent Attenuation 73 - 77%"},
+  wy3333:{"c":[70,76],"u":"Wyeast","url":"https://wyeastlab.com/product/german-wheat/","a":"Apparent Attenuation 70 - 76%"},
+  wy3522:{"c":[72,76],"u":"Wyeast","url":"https://wyeastlab.com/product/belgian-ardennes/","a":"Apparent Attenuation 72 - 76%"},
+  wy3638:{"c":[70,76],"u":"Wyeast","url":"https://wyeastlab.com/product/bavarian-wheat/","a":"Apparent Attenuation 70 - 76%"},
+  wy3711:{"c":[77,83],"u":"Wyeast","url":"https://wyeastlab.com/product/french-saison/","a":"Apparent Attenuation 77 - 83%"},
+  wy3724:{"c":[76,80],"u":"Wyeast","url":"https://wyeastlab.com/product/belgian-saison/","a":"Apparent Attenuation 76 - 80%"},
+  wy3787:{"c":[74,78],"u":"Wyeast","url":"https://wyeastlab.com/product/belgian-high-gravity/","a":"Apparent Attenuation 74 - 78%"},
+  wy3944:{"c":[72,76],"u":"Wyeast","url":"https://wyeastlab.com/product/belgian-witbier/","a":"Apparent Attenuation 72 - 76%"}
+};
+function bmMayaAtuDogru(id){var k=Object.prototype.hasOwnProperty.call(MAYA_ATU_KAYNAK,id)?MAYA_ATU_KAYNAK[id]:null;if(!k)return null;var y=MAYALAR.find(function(m){return m.id===id;});return y&&y.atu&&y.atu[0]===k.c[0]&&y.atu[1]===k.c[1]?k:null;}
 // ═══ SPRINT BV: katalog arama — ad + alias (KİMLİK eşanlamlıları) ═══
 // alias = "bu ham ad BU kaydı adlandırır" (ör. "hallertauer" → Hallertau Mittelfrueh). İKAME DEĞİL:
 // "liberty" Hallertau'yu BULMAZ. Kaynak: _bv_alias_kaynak.js (V2/V3 tablolarının kimlik satırları +
@@ -10873,7 +10967,7 @@ const MUADIL={
   "wb06":[
     {id:"wy3068",ad:"WY3068 Weihenstephan",fark:"✅ Sıvı versiyon. Daha otantik muz/karanfil.",detay:"WB-06 kuru 11.5g: muz/karanfil, pratik. WY3068 sıvı 125mL: aynı Weihenstephan suşu ama daha güçlü muz esteri. Propagasyon şart (24-36 saat önce). Daha sıcak mayalanma, daha az maya ve daha yüksek OG muzu artırır; muz azalınca karanfil öne çıkar (Wyeast 3068 ürün metni). WY3068 daha otantik."},
     {id:"wy3638",ad:"WY3638 Bavarian Wheat",fark:"✅ Çok benzer. Biraz daha nötr.",detay:"Fermentis WB-06 (Buğda: Belirgin muz (izoamil asetat) + hafif karanfil (4-vinil guayakol). → WY3638 Bavarian Wheat: Hefeweizen — biraz daha nötr muz profili "},
-    {id:"bb_wheat",ad:"BiraBurada Maya Alman Weisbier (=WB-06)",fark:"✅ BB Alman Weisbier = WB-06 ile özdeş Hefeweizen profili.",detay:"Fermentis WB-06 (Buğda: Belirgin muz (izoamil asetat) + hafif karanfil (4-vinil guayakol). → BiraBurada Maya Alman: Hefeweizen mayası — muz ve karanfil esteri, WB-06 eşdeğeri "}
+    {id:"bb_wheat",ad:"BiraBurada Maya Alman Weisbier (=WB-06)",fark:"✅ BB Alman Weisbier = WB-06 ile özdeş Hefeweizen profili. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"Fermentis WB-06 (Buğda: Belirgin muz (izoamil asetat) + hafif karanfil (4-vinil guayakol). → BiraBurada Maya Alman: Hefeweizen mayası — muz ve karanfil esteri, WB-06 eşdeğeri "}
   ],
   "wy1056":[
     {id:"us05",ad:"Fermentis US-05",fark:"✅ Kuru versiyon. Aynı profil.",detay:"WY1056 American Ale: US-05'in sıvı versiyonu — çok temiz American Ale. → Fermentis US-05: Çok temiz, nötr — ön planda malzeme tatları "},
@@ -10927,7 +11021,7 @@ const MUADIL={
     {id:"wy3068",ad:"WY3068 Weihenstephan",fark:"✅ WY3068 Weihenstephan = WY3638 için en otantik sıvı muadil.",detay:"WY3638 Bavarian Wheat: Hefeweizen — biraz daha nötr muz profili Attenuation benzer (~%75). → WY3068 Weihenstephan: WB-06'nın sıvı versiyonu — daha otantik muz+karanfil "}
   ],
   "bb16":[
-    {id:"wb06",ad:"Fermentis WB-06 (Buğday Ale)",fark:"✅ BB-16 = WB-06 ile özdeş Hefeweizen mayası.",detay:"BB-16 Wheat Ale: Muz ve karanfil esteri — WB-06 eşdeğeri, BiraBurada yerli maya. → Fermentis WB-06 (Buğda: Belirgin muz (izoamil asetat) + hafif karanfil (4-vinil guayakol) "},
+    {id:"wb06",ad:"Fermentis WB-06 (Buğday Ale)",fark:"✅ BB-16 = WB-06 ile özdeş Hefeweizen mayası. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BB-16 Wheat Ale: Muz ve karanfil esteri — WB-06 eşdeğeri, BiraBurada yerli maya. → Fermentis WB-06 (Buğda: Belirgin muz (izoamil asetat) + hafif karanfil (4-vinil guayakol) "},
     {id:"wy3068",ad:"WY3068 Weihenstephan",fark:"✅ WY3068 Weihenstephan sıvı maya — BB-16'nın en otantik muadili.",detay:"BB-16 Wheat Ale: Muz ve karanfil esteri — WB-06 eşdeğeri, BiraBurada yerli maya. → WY3068 Weihenstephan: WB-06'nın sıvı versiyonu — daha otantik muz+karanfil "}
   ],
   "wy3944":[
@@ -10937,7 +11031,7 @@ const MUADIL={
   "w3470":[
     {id:"s189",ad:"Fermentis S-189 Lager",fark:"✅ Lager profili benzer. Biraz farklı ester.",detay:"W-34/70 Lager (Saflage: Çok temiz lager — Weihenstephan suşu. → Fermentis S-189 Lager: Temiz lager, biraz daha malt ağırlıklı "},
     {id:"la_diamond",ad:"Lallemand Diamond Lager",fark:"✅ Çok temiz lager profili.",detay:"W-34/70 Saflager kuru: Weihenstephan suşu, 9-15°C. Diamond Lager Lallemand kuru: aynı suş, özdeş profil. 1:1 kullan. 9-12°C fermentasyon, 0-2°C 3-4 hafta lagerleme."},
-    {id:"bb_lager",ad:"BiraBurada Lager Maya (=W-34/70)",fark:"✅ BB Lager Mayası = W-34/70 ile özdeş. Yerli tedarik.",detay:"W-34/70 Lager (Saflage: Çok temiz lager — Weihenstephan suşu. → BiraBurada Lager Maya: Temiz lager — W-34/70 eşdeğeri, BiraBurada yerli lager mayası "},
+    {id:"bb_lager",ad:"BiraBurada Lager Maya (=W-34/70)",fark:"✅ BB Lager Mayası = W-34/70 ile özdeş. Yerli tedarik. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"W-34/70 Lager (Saflage: Çok temiz lager — Weihenstephan suşu. → BiraBurada Lager Maya: Temiz lager — W-34/70 eşdeğeri, BiraBurada yerli lager mayası "},
     {id:"wlp830",ad:"WLP830 German Lager",fark:"✅ Aynı soyu (w3470).",detay:"Aynı genetik soy — farklı üretici. Yaklaşık birebir kullanılabilir."},
     {id:"imp_g02",ad:"Imperial G02 Kaiser",fark:"✅ Aynı soyu (w3470).",detay:"Aynı genetik soy — farklı üretici. Yaklaşık birebir kullanılabilir."}],
   "s189":[
@@ -10974,7 +11068,7 @@ const MUADIL={
   ],
   "wy3787":[
     {id:"be256",ad:"Fermentis BE-256 (Abbey/Tripel)",fark:"✅ Trappist tarzı en iyi kuru muadil.",detay:"WY3787 Trappist High G: Trappist yüksek ester — armut, meyve, kompleks Attenuation +4 puan — FG daha düşük. → Fermentis BE-256 (Abbe: Elma, armut, muz, karanfil — Belçika Abbey profili "},
-    {id:"bb_abbaye",ad:"BB Abbaye (Manastır Birası)",fark:"✅ BB Abbaye — Lallemand Abbaye ile özdeş Manastır profili. Yerli kolaylık.",detay:"WY3787 Trappist High G: Trappist yüksek ester — armut, meyve, kompleks. → BB Abbaye (Manastır Bi: Belçika Abbey — meyve, baharat, kompleks "},
+    {id:"bb_abbaye",ad:"BB Abbaye (Manastır Birası)",fark:"✅ BB Abbaye — Lallemand Abbaye ile özdeş Manastır profili. Yerli kolaylık. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"WY3787 Trappist High G: Trappist yüksek ester — armut, meyve, kompleks. → BB Abbaye (Manastır Bi: Belçika Abbey — meyve, baharat, kompleks "},
     {id:"imp_b63",ad:"Imperial B63 Monastic",fark:"✅ Aynı soyu (westmalle).",detay:"Aynı genetik soy — farklı üretici. Yaklaşık birebir kullanılabilir."},
     {id:"la_abbaye",ad:"Lallemand Abbaye",fark:"✅ Aynı soyu (westmalle).",detay:"Aynı genetik soy — farklı üretici. Yaklaşık birebir kullanılabilir."}],
   "wy3711":[
@@ -10992,7 +11086,7 @@ const MUADIL={
   ],
   "be134":[
     {id:"wy3711",ad:"WY3711 French Saison",fark:"✅ WY3711 French Saison — BE-134'ün sıvı muadili. En kuru Saison mayası.",detay:"BE-134 kuru: çok kuru Saison, 18-28°C. WY3711 sıvı, Att %82: French Saison, aynı profil. Propagasyon şart. 20°C başla, günde 2°C artır, 30°C'ye ulaş. Stall yapabilir — açık kap dene."},
-    {id:"la_belle",ad:"Lallemand Belle Saison",fark:"✅ Belle Saison = BE-134 ile özdeş Saison profili.",detay:"Fermentis BE-134 (Sais: Çiçeksi, baharatlı, çok kuru bitiş — Saison tanımı. → Lallemand Belle Saison: Saison — aromatik, çiçeksi, baharatlı, kuru Sıcaklık: 18-26°C→15-35°C."},
+    {id:"la_belle",ad:"Lallemand Belle Saison",fark:"✅ Belle Saison = BE-134 ile özdeş Saison profili. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"Fermentis BE-134 (Sais: Çiçeksi, baharatlı, çok kuru bitiş — Saison tanımı. → Lallemand Belle Saison: Saison — aromatik, çiçeksi, baharatlı, kuru Sıcaklık: 18-26°C→15-35°C."},
     {id:"wlp565",ad:"WLP565 Belgian Saison I",fark:"✅ Aynı soyu (dupont).",detay:"Aynı genetik soy — farklı üretici. Yaklaşık birebir kullanılabilir."}],
   "kveikv":[
     {id:"kveiko",ad:"Kveik Oslo",fark:"✅ Voss Kveik'in en yakın muadili. Çok sıcakta çalışır.",detay:"Kveik Voss (Lallemand): portakal/sitrus esteri, 25-43°C. Kveik Oslo: tropikal/sitrus, 30-42°C. Her ikisi Norveç Kveik ailesi. 24-36 saatte fermantasyon. Att ~%80. Yüksek sıcaklıkta temiz bira için mükemmel."},
@@ -11008,7 +11102,7 @@ const MUADIL={
     {id:"oyl091",ad:"Omega OYL-091 Hornindal Kveik",fark:"✅ Aynı soyu (hornindal).",detay:"Aynı genetik soy — farklı üretici. Yaklaşık birebir kullanılabilir."},
     {id:"oyl057",ad:"Omega OYL-057 HotHead Kveik",fark:"✅ Aynı soyu (hornindal).",detay:"Aynı genetik soy — farklı üretici. Yaklaşık birebir kullanılabilir."}],
   "la_munich":[
-    {id:"wb06",ad:"Fermentis WB-06 (Buğday Ale)",fark:"✅ WB-06 — Munich Classic ile özdeş Hefeweizen profili.",detay:"Lallemand Munich Classic (18-22°C): muz ve karanfil esteri, klasik Hefeweizen. WB-06 (18-24°C): aynı muz/karanfil profili, kuru toz form. Gramaj 1:1. Her ikisi de Hefeweizen/Weissbier için standart."},
+    {id:"wb06",ad:"Fermentis WB-06 (Buğday Ale)",fark:"✅ WB-06 — Munich Classic ile özdeş Hefeweizen profili. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"Lallemand Munich Classic (18-22°C): muz ve karanfil esteri, klasik Hefeweizen. WB-06 (18-24°C): aynı muz/karanfil profili, kuru toz form. Gramaj 1:1. Her ikisi de Hefeweizen/Weissbier için standart."},
     {id:"wy3068",ad:"WY3068 Weihenstephan",fark:"✅ WY3068 — Hefeweizen için en otantik sıvı muadil.",detay:"Lallemand Munich Classic (kuru) ve WY3068 Weihenstephan (sıvı): her ikisi de muz/karanfil dengeli Bavyera Hefeweizen için. WY3068 biraz daha kompleks ester. Gramaj 1:1."}
   ],
   "bb_abbaye":[
@@ -11016,15 +11110,15 @@ const MUADIL={
     {id:"wy3787",ad:"WY3787 Trappist High Grav",fark:"✅ Sıvı Trappist. Daha otantik.",detay:"BB Abbaye (Manastır Bi: Belçika Abbey — meyve, baharat, kompleks Attenuation benzer (~%79). → WY3787 Trappist High G: Trappist yüksek ester — armut, meyve, kompleks "}
   ],
   "bb_ale":[
-    {id:"us05",ad:"Fermentis US-05",fark:"✅ BB Amerikan Ale = US-05 ile özdeş. Temiz ve nötr.",detay:"BiraBurada Maya Amerik: Çok temiz American Ale — US-05 eşdeğeri, BiraBurada yerli maya. → Fermentis US-05: Çok temiz, nötr — ön planda malzeme tatları "},
-    {id:"wy1056",ad:"WY1056 American Ale",fark:"⚠️ BB yeniden paket; orijinali WY1056 American Ale.",detay:"BiraBurada bu mayayı WY1056 American Ale eşdeğer olarak paketliyor. Aynı karakter beklenir."}
+    {id:"us05",ad:"Fermentis US-05",fark:"✅ BB Amerikan Ale = US-05 ile özdeş. Temiz ve nötr. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BiraBurada Maya Amerik: Çok temiz American Ale — US-05 eşdeğeri, BiraBurada yerli maya. → Fermentis US-05: Çok temiz, nötr — ön planda malzeme tatları "},
+    {id:"wy1056",ad:"WY1056 American Ale",fark:"⚠️ BB yeniden paket; orijinali WY1056 American Ale. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BiraBurada bu mayayı WY1056 American Ale eşdeğer olarak paketliyor. Aynı karakter beklenir."}
   ],
   "bb_wheat":[
-    {id:"wb06",ad:"Fermentis WB-06 (Buğday Ale)",fark:"✅ W-34/70 Weihenstephan Lager ile özdeş. 9-15°C.",detay:"BiraBurada Maya Alman: Hefeweizen mayası — muz ve karanfil esteri, WB-06 eşdeğeri. → Fermentis WB-06 (Buğda: Belirgin muz (izoamil asetat) + hafif karanfil (4-vinil guayakol) "},
+    {id:"wb06",ad:"Fermentis WB-06 (Buğday Ale)",fark:"✅ W-34/70 Weihenstephan Lager ile özdeş. 9-15°C. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BiraBurada Maya Alman: Hefeweizen mayası — muz ve karanfil esteri, WB-06 eşdeğeri. → Fermentis WB-06 (Buğda: Belirgin muz (izoamil asetat) + hafif karanfil (4-vinil guayakol) "},
     {id:"wy3068",ad:"WY3068 Weihenstephan",fark:"✅ WY3068 Weihenstephan sıvı versiyon — BB Alman Buğday'dan daha otantik muz karakteri.",detay:"BiraBurada Maya Alman: Hefeweizen mayası — muz ve karanfil esteri, WB-06 eşdeğeri. → WY3068 Weihenstephan: WB-06'nın sıvı versiyonu — daha otantik muz+karanfil "}
   ],
   "bb_belc":[
-    {id:"be256",ad:"Fermentis BE-256 (Abbey/Tripel)",fark:"✅ BE-256 ile özdeş Belçika Abbey profili. Yüksek attenuation ~%82.",detay:"BiraBurada Maya Belçik: Belçika Ale esteri — meyve, baharat, BE-256 eşdeğeri Attenuation benzer (~%80). → Fermentis BE-256 (Abbe: Elma, armut, muz, karanfil — Belçika Abbey profili "},
+    {id:"be256",ad:"Fermentis BE-256 (Abbey/Tripel)",fark:"✅ BE-256 ile özdeş Belçika Abbey profili. Yüksek attenuation ~%82. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BiraBurada Maya Belçik: Belçika Ale esteri — meyve, baharat, BE-256 eşdeğeri Attenuation benzer (~%80). → Fermentis BE-256 (Abbe: Elma, armut, muz, karanfil — Belçika Abbey profili "},
     {id:"t58",ad:"Fermentis T-58",fark:"✅ T-58 Belçika Ale esteri — BB Belçika'nın karanlık Belçika stillere alternatifi.",detay:"BiraBurada Maya Belçik: Belçika Ale esteri — meyve, baharat, BE-256 eşdeğeri Attenuation 6 puan düşük — FG daha yüksek, dolgun bitiş. → Fermentis T-58: Belçika baharat esteri — karanfil, biber nüansı Sıcaklık: 15-30°C→18-26°C."}
   ],
   "bb_tripel":[
@@ -11032,20 +11126,20 @@ const MUADIL={
     {id:"wy3787",ad:"WY3787 Trappist High Grav",fark:"✅ WY3787 Trappist High Grav sıvı versiyon. BB Tripel'den daha otantik.",detay:"BiraBurada Tripel Maya: Belçika Tripel profili — yüksek alkol toleranslı, meyve ve bahara Attenuation 4 puan düşük — FG daha yüksek, dolgun bitiş. → WY3787 Trappist High G: Trappist yüksek ester — armut, meyve, kompleks Sıcaklık: 20-25°C→18-30°C."}
   ],
   "bb_lager":[
-    {id:"w3470",ad:"W-34/70 Lager (Saflager)",fark:"✅ BB Abbaye ile özdeş Belçika Manastır profili. Yerli tedarik.",detay:"BiraBurada Lager Maya: Temiz lager — W-34/70 eşdeğeri, BiraBurada yerli lager mayası. → W-34/70 Lager (Saflage: Çok temiz lager — Weihenstephan suşu "},
-    {id:"la_diamond",ad:"Lallemand Diamond Lager",fark:"✅ Lallemand Diamond — W-34/70'in Lallemand versiyonu. Özdeş lager profili.",detay:"BiraBurada Lager Maya: Temiz lager — W-34/70 eşdeğeri, BiraBurada yerli lager mayası. → Lallemand Diamond Lage: W-34/70 ile özdeş temiz lager "}
+    {id:"w3470",ad:"W-34/70 Lager (Saflager)",fark:"✅ BB Abbaye ile özdeş Belçika Manastır profili. Yerli tedarik. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BiraBurada Lager Maya: Temiz lager — W-34/70 eşdeğeri, BiraBurada yerli lager mayası. → W-34/70 Lager (Saflage: Çok temiz lager — Weihenstephan suşu "},
+    {id:"la_diamond",ad:"Lallemand Diamond Lager",fark:"✅ Lallemand Diamond — W-34/70'in Lallemand versiyonu. Özdeş lager profili. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BiraBurada Lager Maya: Temiz lager — W-34/70 eşdeğeri, BiraBurada yerli lager mayası. → Lallemand Diamond Lage: W-34/70 ile özdeş temiz lager "}
   ],
   "la_windsor":[
     {id:"s04",ad:"Fermentis S-04",fark:"✅ S-04 — Lallemand Windsor için en yakın kuru İngiliz Ale muadili.",detay:"Lallemand Windsor: İngiliz Ale — meyvesel, kremsi, orta ester Attenuation +5 puan — FG daha düşük. → Fermentis S-04: Hafif İngiliz meyvesel ester — elma, armut nüansı "},
     {id:"nottm",ad:"Nottingham Dry (Lallemand)",fark:"✅ Nottingham — Lallemand Windsor için temiz American/İngiliz muadili.",detay:"Lallemand Windsor: İngiliz Ale — meyvesel, kremsi, orta ester Attenuation +9 puan — FG daha düşük. → Nottingham Dry (Lallem: US-05'e çok yakın, hafif daha kuru bitiş "}
   ],
   "la_bry97":[
-    {id:"us05",ad:"Fermentis US-05",fark:"✅ US-05 — BRY-97'nin en yakın kuru muadili. Özdeş American Ale profili.",detay:"Lallemand BRY-97 Ameri: American West Coast — temiz, kuru, US-05 benzeri Attenuation benzer (~%76). → Fermentis US-05: Çok temiz, nötr — ön planda malzeme tatları "},
+    {id:"us05",ad:"Fermentis US-05",fark:"✅ US-05 — BRY-97'nin en yakın kuru muadili. Özdeş American Ale profili. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"Lallemand BRY-97 Ameri: American West Coast — temiz, kuru, US-05 benzeri Attenuation benzer (~%76). → Fermentis US-05: Çok temiz, nötr — ön planda malzeme tatları "},
     {id:"nottm",ad:"Nottingham Dry (Lallemand)",fark:"✅ Nottingham — BRY-97'ye çok yakın temiz ale profili.",detay:"Lallemand BRY-97 Ameri: American West Coast — temiz, kuru, US-05 benzeri Attenuation benzer (~%76). → Nottingham Dry (Lallem: US-05'e çok yakın, hafif daha kuru bitiş "}
   ],
   "la_belle":[
     {id:"be134",ad:"Fermentis BE-134 (Saison)",fark:"✅ BE-134 Saison — La Belle Saison'ın kuru alternatifi.",detay:"Belle Saison Lallemand kuru: çiçeksi Saison. BE-134 kuru: biraz daha kuru. Att farkı ihmal edilebilir. 20-30°C çalışır. Belle Saison biraz daha çiçeksi ester."},
-    {id:"wy3711",ad:"WY3711 French Saison",fark:"✅ WY3711 French Saison — Belle Saison ile özdeş French Saison karakteri.",detay:"Lallemand Belle Saison: Saison — aromatik, çiçeksi, baharatlı, kuru. → WY3711 French Saison: French Saison — çok kuru, çiçeksi, aromatik "}
+    {id:"wy3711",ad:"WY3711 French Saison",fark:"✅ WY3711 French Saison — Belle Saison ile özdeş French Saison karakteri. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"Lallemand Belle Saison: Saison — aromatik, çiçeksi, baharatlı, kuru. → WY3711 French Saison: French Saison — çok kuru, çiçeksi, aromatik "}
   ],
   "la_farmhouse":[
     {id:"be134",ad:"Fermentis BE-134 (Saison)",fark:"✅ BE-134 Saison — Lallemand Belle Saison'ın kuru muadili.",detay:"Lallemand Farmhouse: Farmhouse Ale — Saison profili, aromatik ve kuru. → Fermentis BE-134 (Sais: Çiçeksi, baharatlı, çok kuru bitiş — Saison tanımı Sıcaklık: 18-30°C→18-26°C."},
@@ -11056,8 +11150,8 @@ const MUADIL={
     {id:"la_sour_pitch",ad:"Lallemand WildBrew Sour Pitch",fark:"✅ WildBrew Sour Pitch — Philly Sour ile aynı laktik asit ekşiliği hedefi.",detay:"Philly Sour (Lachancea thermotolerans) normal ale fermantasyonuyla ekşilik üretir. Sour Pitch (Lacto) kettle souring için kullanılır. Her ikisi de laktik asit üretimi yapar ama mekanizma farklı."}
   ],
   "bb_philly":[
-    {id:"la_philly",ad:"Lallemand WildBrew Philly Sour",fark:"✅ Lallemand Philly Sour = BB Philly Sour ile özdeş Lachancea profili.",detay:"BB Philly Sour (Lachan: Ekşi ale — Lachancea thermotolerans ile fermantasyon sırasında la. → Lallemand WildBrew Phi: Ekşi ale — fermantasyon sırasında laktik asit üretir "},
-    {id:"la_helveticus",ad:"Lallemand Helveticus",fark:"⚠️ BB yeniden paket; orijinali Lallemand Helveticus.",detay:"BiraBurada bu mayayı Lallemand Helveticus eşdeğer olarak paketliyor. Aynı karakter beklenir."}
+    {id:"la_philly",ad:"Lallemand WildBrew Philly Sour",fark:"✅ Lallemand Philly Sour = BB Philly Sour ile özdeş Lachancea profili. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BB Philly Sour (Lachan: Ekşi ale — Lachancea thermotolerans ile fermantasyon sırasında la. → Lallemand WildBrew Phi: Ekşi ale — fermantasyon sırasında laktik asit üretir "},
+    {id:"la_helveticus",ad:"Lallemand Helveticus",fark:"⚠️ BB yeniden paket; orijinali Lallemand Helveticus. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BiraBurada bu mayayı Lallemand Helveticus eşdeğer olarak paketliyor. Aynı karakter beklenir."}
   ],
   "ha18":[
     {id:"us05",ad:"Fermentis US-05",fark:"⚠️ Daha düşük attenuation. HA-18 çok yüksek att için.",detay:"Fermentis SafAle HA-18: Çok kuru bitiş — ultra yüksek attenuation Attenuation 9 puan düşük — FG daha yüksek, dolgun bitiş. → Fermentis US-05: Çok temiz, nötr — ön planda malzeme tatları Sıcaklık: 18-28°C→18-22°C."},
@@ -11065,7 +11159,7 @@ const MUADIL={
     {id:"la_belle",ad:"Lallemand Belle Saison",fark:"⚠️ Yüksek atten.",detay:"Benzer yüksek atten."}
   ],
   "la_abbaye":[
-    {id:"bb_abbaye",ad:"BB Abbaye (Manastır Birası)",fark:"✅ Pekmez/Melas — Treacle'ın İngiliz muadili. Özdeş profil.",detay:"Lallemand Abbaye: Belçika Abbey — meyve, baharat, kompleks ester. → BB Abbaye (Manastır Bi: Belçika Abbey — meyve, baharat, kompleks "},
+    {id:"bb_abbaye",ad:"BB Abbaye (Manastır Birası)",fark:"✅ Pekmez/Melas — Treacle'ın İngiliz muadili. Özdeş profil. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"Lallemand Abbaye: Belçika Abbey — meyve, baharat, kompleks ester. → BB Abbaye (Manastır Bi: Belçika Abbey — meyve, baharat, kompleks "},
     {id:"be256",ad:"Fermentis BE-256 (Abbey/Tripel)",fark:"✅ BE-256 — Lallemand Abbaye'nin kuru muadili. Belgian Abbey profili.",detay:"Lallemand Abbaye: Belçika Abbey — meyve, baharat, kompleks ester. → Fermentis BE-256 (Abbe: Elma, armut, muz, karanfil — Belçika Abbey profili "},
     {id:"wy3787",ad:"WY3787 Trappist High Grav",fark:"✅ Aynı soyu (westmalle).",detay:"Aynı genetik soy — farklı üretici. Yaklaşık birebir kullanılabilir."},
     {id:"imp_b63",ad:"Imperial B63 Monastic",fark:"✅ Aynı soyu (westmalle).",detay:"Aynı genetik soy — farklı üretici. Yaklaşık birebir kullanılabilir."}],
@@ -11553,64 +11647,64 @@ const MUADIL={
   "strata":[{id:"mosaic",ad:"Mosaic",fark:"✅ Mosaic üzümsü/tropik, Strata'ya en yakın.",detay:"Strata (AA %12): çilek/üzüm/tropik/kenevir. Mosaic (AA %12.5): yabanmersini/mango. NEIPA 1:1."},{id:"citra",ad:"Citra",fark:"✅ Citra tropik/passionfruit, parlak muadil.",detay:"Strata (AA %12): çilek/üzüm. Citra (AA %12): lime/passionfruit/mango. 1:1."},{id:"simcoe",ad:"Simcoe",fark:"⚠️ Simcoe çam/passionfruit, reçineli alternatif.",detay:"Strata (AA %12): üzüm/kenevir. Simcoe (AA %13): çam/passionfruit/reçine. Yeşil nüans ortak. Aroma."}],
   "kazbek":[{id:"saaz",ad:"Saaz (Czech)",fark:"✅ Kazbek'in ebeveyni Saaz - en yakin muadil.",detay:"Kazbek (AA %7): limon/greyfurt + Saaz cicek/baharat (Saaz x Kafkas yabani). Saaz (AA %3.5): cicek/baharat/topraksi. Genetik ebeveyn; sitrusunu tam vermez. Gramaji dusur. Aroma."},{id:"sterling",ad:"Sterling",fark:"✅ Sterling Saaz-soyu - noble + sitrus, Kazbek'e yakin.",detay:"Kazbek (AA %7): sitrus + Saaz baharat. Sterling (AA %7.5): Saaz-soyu, noble + sitrus. Ayni AA, sitrus-noble karisimi yakin. Aroma."},{id:"lublin",ad:"Lublin (Lubelski)",fark:"⚠️ Lublin Saaz-tipi noble - baharat tabani ortak.",detay:"Kazbek (AA %7): sitrus + Saaz baharat. Lublin (AA %4): Saaz-tipi noble. Baharat-noble ortak; sitrusu vermez. Gramaji artir. Aroma."}],
   "bb34":[
-    {id:"s04",ad:"Fermentis S-04",fark:"✅ BB-34 = İngiliz Ale mayası, S-04 ile özdeş profil.",detay:"BB-34 English Ale: İngiliz Ale esteri — S-04 eşdeğeri, BB-34. → Fermentis S-04: Hafif İngiliz meyvesel ester — elma, armut nüansı "},
-    {id:"wy1968",ad:"WY1968 London ESB",fark:"⚠️ BB yeniden paket; orijinali WY1968 London ESB.",detay:"BiraBurada bu mayayı WY1968 London ESB eşdeğer olarak paketliyor. Aynı karakter beklenir."}
+    {id:"s04",ad:"Fermentis S-04",fark:"✅ BB-34 = İngiliz Ale mayası, S-04 ile özdeş profil. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BB-34 English Ale: İngiliz Ale esteri — S-04 eşdeğeri, BB-34. → Fermentis S-04: Hafif İngiliz meyvesel ester — elma, armut nüansı "},
+    {id:"wy1968",ad:"WY1968 London ESB",fark:"⚠️ BB yeniden paket; orijinali WY1968 London ESB. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BiraBurada bu mayayı WY1968 London ESB eşdeğer olarak paketliyor. Aynı karakter beklenir."}
   ],
   "bb_pilsner":[
-    {id:"w3470",ad:"W-34/70 Lager (Saflager)",fark:"✅ BB New Lager = W-34/70 eşdeğeri. Temiz lager profili.",detay:"BiraBurada BB New Lager, Fermentis W-34/70 ile özdeş veya çok yakın Weihenstephan lager profili. Helles, Märzen, Czech Lager için 8-12°C'de fermente et. 1 paket ile kullan."},
-    {id:"wlp830",ad:"WLP830 German Lager",fark:"⚠️ BB yeniden paket; orijinali WLP830 German Lager.",detay:"BiraBurada bu mayayı WLP830 German Lager eşdeğer olarak paketliyor. Aynı karakter beklenir."}
+    {id:"w3470",ad:"W-34/70 Lager (Saflager)",fark:"✅ BB New Lager = W-34/70 eşdeğeri. Temiz lager profili. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BiraBurada BB New Lager, Fermentis W-34/70 ile özdeş veya çok yakın Weihenstephan lager profili. Helles, Märzen, Czech Lager için 8-12°C'de fermente et. 1 paket ile kullan."},
+    {id:"wlp830",ad:"WLP830 German Lager",fark:"⚠️ BB yeniden paket; orijinali WLP830 German Lager. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BiraBurada bu mayayı WLP830 German Lager eşdeğer olarak paketliyor. Aynı karakter beklenir."}
   ],
   "bb_weissbier":[
-    {id:"wb06",ad:"Fermentis WB-06 (Buğday Ale)",fark:"✅ BB Alman Buğday No1 = WB-06 eşdeğeri. Muz ve karanfil esteri.",detay:"BB Weissbier: Weissbier mayası — muz ve karanfil esteri, WB-06 eşdeğeri. → Fermentis WB-06 (Buğda: Belirgin muz (izoamil asetat) + hafif karanfil (4-vinil guayakol) "},
-    {id:"wy3068",ad:"WY3068 Weihenstephan",fark:"⚠️ BB yeniden paket; orijinali WY3068 Weihenstephan.",detay:"BiraBurada bu mayayı WY3068 Weihenstephan eşdeğer olarak paketliyor. Aynı karakter beklenir."}
+    {id:"wb06",ad:"Fermentis WB-06 (Buğday Ale)",fark:"✅ BB Alman Buğday No1 = WB-06 eşdeğeri. Muz ve karanfil esteri. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BB Weissbier: Weissbier mayası — muz ve karanfil esteri, WB-06 eşdeğeri. → Fermentis WB-06 (Buğda: Belirgin muz (izoamil asetat) + hafif karanfil (4-vinil guayakol) "},
+    {id:"wy3068",ad:"WY3068 Weihenstephan",fark:"⚠️ BB yeniden paket; orijinali WY3068 Weihenstephan. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BiraBurada bu mayayı WY3068 Weihenstephan eşdeğer olarak paketliyor. Aynı karakter beklenir."}
   ],
   "bb_belc2":[
-    {id:"be256",ad:"Fermentis BE-256 (Abbey/Tripel)",fark:"✅ BB Belçika No2 = BE-256 eşdeğeri. Yüksek attenuation, meyveli ester. Att ~%82.",detay:"BB Belçika No2: Belçika Ale No2 — meyve ve baharat esteri, BE-256 eşdeğeri. → Fermentis BE-256 (Abbe: Elma, armut, muz, karanfil — Belçika Abbey profili "},
-    {id:"wlp500",ad:"WLP500 Trappist Ale",fark:"⚠️ BB yeniden paket; orijinali WLP500 Trappist Ale.",detay:"BiraBurada bu mayayı WLP500 Trappist Ale eşdeğer olarak paketliyor. Aynı karakter beklenir."}
+    {id:"be256",ad:"Fermentis BE-256 (Abbey/Tripel)",fark:"✅ BB Belçika No2 = BE-256 eşdeğeri. Yüksek attenuation, meyveli ester. Att ~%82. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BB Belçika No2: Belçika Ale No2 — meyve ve baharat esteri, BE-256 eşdeğeri. → Fermentis BE-256 (Abbe: Elma, armut, muz, karanfil — Belçika Abbey profili "},
+    {id:"wlp500",ad:"WLP500 Trappist Ale",fark:"⚠️ BB yeniden paket; orijinali WLP500 Trappist Ale. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BiraBurada bu mayayı WLP500 Trappist Ale eşdeğer olarak paketliyor. Aynı karakter beklenir."}
   ],
   "bb22a":[
-    {id:"kveikv",ad:"Kveik Voss (Lallemand)",fark:"✅ BB-22 Kveik No1 = Kveik Voss eşdeğeri. Yüksek sıcaklık (~35-40°C) fermantasyon.",detay:"BB-22 Kveik No1: Kveik Voss eşdeğeri — portakal ve sitrus esteri, yüksek sıcaklık Attenuation benzer (~%75). → Kveik Voss (Lallemand): Portakal esteri — sıcak fermantasyonun mucizesi "},
-    {id:"oyl061",ad:"Omega Voss Kveik",fark:"⚠️ BB yeniden paket; orijinali Omega Voss Kveik.",detay:"BiraBurada bu mayayı Omega Voss Kveik eşdeğer olarak paketliyor. Aynı karakter beklenir."}
+    {id:"kveikv",ad:"Kveik Voss (Lallemand)",fark:"✅ BB-22 Kveik No1 = Kveik Voss eşdeğeri. Yüksek sıcaklık (~35-40°C) fermantasyon. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BB-22 Kveik No1: Kveik Voss eşdeğeri — portakal ve sitrus esteri, yüksek sıcaklık Attenuation benzer (~%75). → Kveik Voss (Lallemand): Portakal esteri — sıcak fermantasyonun mucizesi "},
+    {id:"oyl061",ad:"Omega Voss Kveik",fark:"⚠️ BB yeniden paket; orijinali Omega Voss Kveik. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BiraBurada bu mayayı Omega Voss Kveik eşdeğer olarak paketliyor. Aynı karakter beklenir."}
   ],
   "bb_eng_ale":[
-    {id:"us05",ad:"Fermentis US-05",fark:"✅ BB-35 = Amerikan Ale mayası, US-05 eşdeğeri. Att ~%81.",detay:"BB English Ale: İngiliz Ale karakteri — S-04 benzeri, orta ester profili. → Fermentis US-05: Çok temiz, nötr — ön planda malzeme tatları "},
-    {id:"s04",ad:"Fermentis S-04",fark:"⚠️ BB yeniden paket; orijinali Fermentis S-04.",detay:"BiraBurada bu mayayı Fermentis S-04 eşdeğer olarak paketliyor. Aynı karakter beklenir."},
-    {id:"nottm",ad:"Lallemand Nottingham",fark:"⚠️ BB yeniden paket; orijinali Lallemand Nottingham.",detay:"BiraBurada bu mayayı Lallemand Nottingham eşdeğer olarak paketliyor. Aynı karakter beklenir."}
+    {id:"us05",ad:"Fermentis US-05",fark:"✅ BB-35 = Amerikan Ale mayası, US-05 eşdeğeri. Att ~%81. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BB English Ale: İngiliz Ale karakteri — S-04 benzeri, orta ester profili. → Fermentis US-05: Çok temiz, nötr — ön planda malzeme tatları "},
+    {id:"s04",ad:"Fermentis S-04",fark:"⚠️ BB yeniden paket; orijinali Fermentis S-04. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BiraBurada bu mayayı Fermentis S-04 eşdeğer olarak paketliyor. Aynı karakter beklenir."},
+    {id:"nottm",ad:"Lallemand Nottingham",fark:"⚠️ BB yeniden paket; orijinali Lallemand Nottingham. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BiraBurada bu mayayı Lallemand Nottingham eşdeğer olarak paketliyor. Aynı karakter beklenir."}
   ],
   "la_diamond":[
     {id:"w3470",ad:"W-34/70 Lager (Saflager)",fark:"✅ W-34/70 — Diamond Lager'ın en yakın muadili.",detay:"Lallemand Diamond (9-14°C): çok temiz, crisp lager. W-34/70 (9-15°C): benzer temiz profil. Gramaj 1:1. Her ikisi de premium lager mayası — Diamond biraz daha crisp, W-34/70 biraz daha aromatik."},
     {id:"s23",ad:"Fermentis S-23 (Lager)",fark:"✅ S-23 temiz lager — Diamond için geçerli alternatif.",detay:"Lallemand Diamond (9-14°C) ve S-23 (9-14°C) aynı sıcaklık aralığında çalışır. S-23 hafif meyvesel, Diamond daha nötr. Gramaj 1:1."}
   ],
   "mj_m36":[
-    {id:"s04",ad:"Fermentis S-04",fark:"✅ BB İngiliz No04 = S-04 eşdeğeri. İngiliz Ale profili. Att ~%75.",detay:"MJ M36 Liberty Bell Al: Liberty Bell Ale — İngiliz Ale, S-04 eşdeğeri Attenuation benzer (~%75). → Fermentis S-04: Hafif İngiliz meyvesel ester — elma, armut nüansı Sıcaklık: 18-24°C→15-20°C."},
+    {id:"s04",ad:"Fermentis S-04",fark:"✅ BB İngiliz No04 = S-04 eşdeğeri. İngiliz Ale profili. Att ~%75. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"MJ M36 Liberty Bell Al: Liberty Bell Ale — İngiliz Ale, S-04 eşdeğeri Attenuation benzer (~%75). → Fermentis S-04: Hafif İngiliz meyvesel ester — elma, armut nüansı Sıcaklık: 18-24°C→15-20°C."},
     {id:"nottm",ad:"Lallemand Nottingham",fark:"⚠️ Farklı karakterler. M36 Burton Union, Nottingham nötr.",detay:"M36 önceden M79 Burton Union. Nottingham daha nötr."},
     {id:"wy1968",ad:"WY1968 London ESB",fark:"⚠️ Farklı soylar. M36 Burton, WY1968 Whitbread.",detay:"İkisi İngiliz ale ama farklı soy."}
   ],
   "bb_alman_bugday2":[
-    {id:"wb06",ad:"Fermentis WB-06 (Buğday Ale)",fark:"✅ BB Alman Buğday No2 = WB-06 eşdeğeri.",detay:"BB Alman Buğday No2: Alman Hefeweizen mayası No2 — WB-06 eşdeğeri. → Fermentis WB-06 (Buğda: Belirgin muz (izoamil asetat) + hafif karanfil (4-vinil guayakol) "},
-    {id:"wlp300",ad:"WLP300 Hefeweizen",fark:"⚠️ BB yeniden paket; orijinali WLP300 Hefeweizen.",detay:"BiraBurada bu mayayı WLP300 Hefeweizen eşdeğer olarak paketliyor. Aynı karakter beklenir."},
-    {id:"la_munich",ad:"Lallemand Munich Classic",fark:"⚠️ BB yeniden paket; orijinali Lallemand Munich Cla.",detay:"BiraBurada bu mayayı Lallemand Munich Classic eşdeğer olarak paketliyor. Aynı karakter beklenir."}
+    {id:"wb06",ad:"Fermentis WB-06 (Buğday Ale)",fark:"✅ BB Alman Buğday No2 = WB-06 eşdeğeri. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BB Alman Buğday No2: Alman Hefeweizen mayası No2 — WB-06 eşdeğeri. → Fermentis WB-06 (Buğda: Belirgin muz (izoamil asetat) + hafif karanfil (4-vinil guayakol) "},
+    {id:"wlp300",ad:"WLP300 Hefeweizen",fark:"⚠️ BB yeniden paket; orijinali WLP300 Hefeweizen. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BiraBurada bu mayayı WLP300 Hefeweizen eşdeğer olarak paketliyor. Aynı karakter beklenir."},
+    {id:"la_munich",ad:"Lallemand Munich Classic",fark:"⚠️ BB yeniden paket; orijinali Lallemand Munich Cla. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BiraBurada bu mayayı Lallemand Munich Classic eşdeğer olarak paketliyor. Aynı karakter beklenir."}
   ],
   "bb_pamona":[
     {id:"us05",ad:"Fermentis US-05",fark:"⚠️ BB Pamona (Elma/Şarap Mayası) — Standart bira mayası profili farklı, US-05 acil durum muadili.",detay:"BiraBurada Pamona, elma ve şarap fermantasyonu için optimize edilmiş mayasıdır. Standart bira için kullanıldığında US-05 gibi çalışır ama meyve ester profili farklı olabilir. Hard Cider, Apple Wine ve Hybrid stil biralar için asıl maya."},
-    {id:"bb_sarap",ad:"BB Hard Seltzer/Şarap Mayası",fark:"⚠️ BB yeniden paket; orijinali BB Hard Seltzer/Şara.",detay:"BiraBurada bu mayayı BB Hard Seltzer/Şarap Mayası eşdeğer olarak paketliyor. Aynı karakter beklenir."},
-    {id:"la_cbc1",ad:"Lallemand CBC-1",fark:"⚠️ BB yeniden paket; orijinali Lallemand CBC-1.",detay:"BiraBurada bu mayayı Lallemand CBC-1 eşdeğer olarak paketliyor. Aynı karakter beklenir."}
+    {id:"bb_sarap",ad:"BB Hard Seltzer/Şarap Mayası",fark:"⚠️ BB yeniden paket; orijinali BB Hard Seltzer/Şara. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BiraBurada bu mayayı BB Hard Seltzer/Şarap Mayası eşdeğer olarak paketliyor. Aynı karakter beklenir."},
+    {id:"la_cbc1",ad:"Lallemand CBC-1",fark:"⚠️ BB yeniden paket; orijinali Lallemand CBC-1. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BiraBurada bu mayayı Lallemand CBC-1 eşdeğer olarak paketliyor. Aynı karakter beklenir."}
   ],
   "bb_alman_bugday1":[
-    {id:"wb06",ad:"Fermentis WB-06 (Buğday Ale)",fark:"✅ BB Alman Buğday No3 = WB-06 eşdeğeri.",detay:"BB Alman Buğday No1: Alman Hefeweizen mayası No1 — WB-06 eşdeğeri, muz+karanfil. → Fermentis WB-06 (Buğda: Belirgin muz (izoamil asetat) + hafif karanfil (4-vinil guayakol) "},
-    {id:"wy3068",ad:"WY3068 Weihenstephan",fark:"⚠️ BB yeniden paket; orijinali WY3068 Weihenstephan.",detay:"BiraBurada bu mayayı WY3068 Weihenstephan eşdeğer olarak paketliyor. Aynı karakter beklenir."}
+    {id:"wb06",ad:"Fermentis WB-06 (Buğday Ale)",fark:"✅ BB Alman Buğday No3 = WB-06 eşdeğeri. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BB Alman Buğday No1: Alman Hefeweizen mayası No1 — WB-06 eşdeğeri, muz+karanfil. → Fermentis WB-06 (Buğda: Belirgin muz (izoamil asetat) + hafif karanfil (4-vinil guayakol) "},
+    {id:"wy3068",ad:"WY3068 Weihenstephan",fark:"⚠️ BB yeniden paket; orijinali WY3068 Weihenstephan. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BiraBurada bu mayayı WY3068 Weihenstephan eşdeğer olarak paketliyor. Aynı karakter beklenir."}
   ],
   "bb_belc3":[
-    {id:"be256",ad:"Fermentis BE-256 (Abbey/Tripel)",fark:"✅ MJ M85 Bière de Garde = BE-256 eşdeğeri. Yüksek alkol toleransı. Att ~%82.",detay:"BB Belçika No3: Belçika Ale No3 — meyve ve baharat esteri, BE-256 eşdeğeri. → Fermentis BE-256 (Abbe: Elma, armut, muz, karanfil — Belçika Abbey profili "},
-    {id:"wy3787",ad:"WY3787 Trappist High Gravity",fark:"⚠️ BB yeniden paket; orijinali WY3787 Trappist High.",detay:"BiraBurada bu mayayı WY3787 Trappist High Gravity eşdeğer olarak paketliyor. Aynı karakter beklenir."}
+    {id:"be256",ad:"Fermentis BE-256 (Abbey/Tripel)",fark:"✅ MJ M85 Bière de Garde = BE-256 eşdeğeri. Yüksek alkol toleransı. Att ~%82. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BB Belçika No3: Belçika Ale No3 — meyve ve baharat esteri, BE-256 eşdeğeri. → Fermentis BE-256 (Abbe: Elma, armut, muz, karanfil — Belçika Abbey profili "},
+    {id:"wy3787",ad:"WY3787 Trappist High Gravity",fark:"⚠️ BB yeniden paket; orijinali WY3787 Trappist High. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BiraBurada bu mayayı WY3787 Trappist High Gravity eşdeğer olarak paketliyor. Aynı karakter beklenir."}
   ],
   "bb_ipa":[
     {id:"us05",ad:"Fermentis US-05",fark:"⚠️ BB İngiliz Ale American ale maya değil — S-04 gibi İngiliz karakterde olması daha doğru.",detay:"BiraBurada BB İngiliz Ale, İngiliz tarzı ester profili için geliştirilmiştir. US-05'ten daha meyvesel ve dolgun. İngiliz Bitter, Porter, ESB için S-04 veya Nottingham ile de değiştirilebilir."},
-    {id:"verdant",ad:"Lallemand Verdant IPA",fark:"⚠️ BB yeniden paket; orijinali Lallemand Verdant IP.",detay:"BiraBurada bu mayayı Lallemand Verdant IPA eşdeğer olarak paketliyor. Aynı karakter beklenir."},
-    {id:"wy1318",ad:"WY1318 London Ale III",fark:"⚠️ BB yeniden paket; orijinali WY1318 London Ale II.",detay:"BiraBurada bu mayayı WY1318 London Ale III eşdeğer olarak paketliyor. Aynı karakter beklenir."}
+    {id:"verdant",ad:"Lallemand Verdant IPA",fark:"⚠️ BB yeniden paket; orijinali Lallemand Verdant IP. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BiraBurada bu mayayı Lallemand Verdant IPA eşdeğer olarak paketliyor. Aynı karakter beklenir."},
+    {id:"wy1318",ad:"WY1318 London Ale III",fark:"⚠️ BB yeniden paket; orijinali WY1318 London Ale II. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BiraBurada bu mayayı WY1318 London Ale III eşdeğer olarak paketliyor. Aynı karakter beklenir."}
   ],
   "la_cbc1":[
-    {id:"f2",ad:"Fermentis SafAle F-2 (Şişe Kondisyon)",fark:"✅ F-2 — CBC-1 ile özdeş şişe kondisyon işlevi.",detay:"Lallemand CBC-1 (Cask & Bottle Conditioning): yüksek alkol toleranslı, şişe/fıçı kondisyon mayası. Fermentis F-2: aynı amaç, yüksek alkol toleransı. Gramaj 1:1. Her ikisi de priming için kullanılır, normal fermantasyon mayası değil."},
+    {id:"f2",ad:"Fermentis SafAle F-2 (Şişe Kondisyon)",fark:"✅ F-2 — CBC-1 ile özdeş şişe kondisyon işlevi. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"Lallemand CBC-1 (Cask & Bottle Conditioning): yüksek alkol toleranslı, şişe/fıçı kondisyon mayası. Fermentis F-2: aynı amaç, yüksek alkol toleransı. Gramaj 1:1. Her ikisi de priming için kullanılır, normal fermantasyon mayası değil."},
     {id:"us05",ad:"Fermentis US-05",fark:"⚠️ US-05 acil durum muadili — şişe kondisyon için ideal değil.",detay:"CBC-1 şişe kondisyon için tasarlanmış özel mayasıdır. US-05 da şişelemeye dayanıklı ama CBS-1 gibi optimize değil. Şişe kondisyon için CBC-1 veya F-2 tercih edilmeli."}
   ],
   "s23":[
@@ -11622,33 +11716,33 @@ const MUADIL={
     {id:"us05",ad:"Fermentis US-05",fark:"⚠️ US-05 bira mayası — şarap profili vermez, acil durum.",detay:"BB Şarap Mayası nötr/yüksek attenuation için optimize edilmiş. US-05 temiz ale mayasıdır, şarap aroması vermez. Sadece alkol toleransı için benzer ama profil çok farklı."}
   ],
   "bb_alman_bugday3":[
-    {id:"wb06",ad:"Fermentis WB-06 (Buğday Ale)",fark:"✅ BB Weissbier = WB-06 eşdeğeri. Muz ve karanfil esteri.",detay:"BB Alman Buğday No3: Alman Hefeweizen mayası No3 — WB-06 eşdeğeri. → Fermentis WB-06 (Buğda: Belirgin muz (izoamil asetat) + hafif karanfil (4-vinil guayakol) "},
-    {id:"wy3068",ad:"WY3068 Weihenstephan",fark:"⚠️ BB yeniden paket; orijinali WY3068 Weihenstephan.",detay:"BiraBurada bu mayayı WY3068 Weihenstephan eşdeğer olarak paketliyor. Aynı karakter beklenir."},
-    {id:"imp_g01",ad:"Imperial G01 Stefon",fark:"⚠️ BB yeniden paket; orijinali Imperial G01 Stefon.",detay:"BiraBurada bu mayayı Imperial G01 Stefon eşdeğer olarak paketliyor. Aynı karakter beklenir."}
+    {id:"wb06",ad:"Fermentis WB-06 (Buğday Ale)",fark:"✅ BB Weissbier = WB-06 eşdeğeri. Muz ve karanfil esteri. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BB Alman Buğday No3: Alman Hefeweizen mayası No3 — WB-06 eşdeğeri. → Fermentis WB-06 (Buğda: Belirgin muz (izoamil asetat) + hafif karanfil (4-vinil guayakol) "},
+    {id:"wy3068",ad:"WY3068 Weihenstephan",fark:"⚠️ BB yeniden paket; orijinali WY3068 Weihenstephan. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BiraBurada bu mayayı WY3068 Weihenstephan eşdeğer olarak paketliyor. Aynı karakter beklenir."},
+    {id:"imp_g01",ad:"Imperial G01 Stefon",fark:"⚠️ BB yeniden paket; orijinali Imperial G01 Stefon. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BiraBurada bu mayayı Imperial G01 Stefon eşdeğer olarak paketliyor. Aynı karakter beklenir."}
   ],
   "lc_rye":[
     {id:"us05",ad:"Fermentis US-05",fark:"⚠️ Lallemand CBC-1 Şişe Kondisyon Mayası — Ana fermantasyon mayası değil!",detay:"CBC-1 (Cask and Bottle Conditioned), şişe kondisyonu ve refermentasyon için tasarlanmıştır. Ana fermantasyon için US-05 kullan; CBC-1 yalnızca karbonasyon aşamasında eklenir. Yüksek alkol ve CO₂ toleransı vardır."},
     {id:"la_belle",ad:"Lallemand Belle Saison",fark:"⚠️ Rye ve Belle farklı stiller.",detay:"LalBrew Rye rye-forward; Belle Saison farmhouse."}
   ],
   "mj_m42":[
-    {id:"us05",ad:"Fermentis US-05",fark:"✅ BB IPA Mayası = US-05 / American Ale eşdeğeri. Temiz ve kuru profil. Att ~%80.",detay:"MJ M42 New World Stron: New World Strong Ale — güçlü Amerikan Ale, yüksek alkol toleransl Attenuation benzer (~%76). → Fermentis US-05: Çok temiz, nötr — ön planda malzeme tatları Sıcaklık: 18-28°C→18-22°C."},
+    {id:"us05",ad:"Fermentis US-05",fark:"✅ BB IPA Mayası = US-05 / American Ale eşdeğeri. Temiz ve kuru profil. Att ~%80. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"MJ M42 New World Stron: New World Strong Ale — güçlü Amerikan Ale, yüksek alkol toleransl Attenuation benzer (~%76). → Fermentis US-05: Çok temiz, nötr — ön planda malzeme tatları Sıcaklık: 18-28°C→18-22°C."},
     {id:"nottm",ad:"Lallemand Nottingham",fark:"⚠️ Nottingham nötr, M42 New World karakterli.",detay:"İkisi de çok yönlü İngiliz/Amerikan ale. Nottingham daha nötr."},
     {id:"s04",ad:"Fermentis S-04",fark:"⚠️ S-04 klasik English. M42 modern hibrit.",detay:"Farklı karakterler ama benzer kullanım."}
   ],
   "bb22b":[
     {id:"kveikv",ad:"Kveik Voss (Lallemand)",fark:"✅ BB-22 Kveik No2 = Kveik ailesi. Yüksek sıcaklık fermantasyon, meyvesel ester.",detay:"BB-22 Kveik No2: Kveik Oslo eşdeğeri — portakal/sitrus, tropikal nüans Attenuation benzer (~%76). → Kveik Voss (Lallemand): Portakal esteri — sıcak fermantasyonun mucizesi "},
-    {id:"oyl061",ad:"Omega Voss Kveik",fark:"⚠️ BB yeniden paket; orijinali Omega Voss Kveik.",detay:"BiraBurada bu mayayı Omega Voss Kveik eşdeğer olarak paketliyor. Aynı karakter beklenir."}
+    {id:"oyl061",ad:"Omega Voss Kveik",fark:"⚠️ BB yeniden paket; orijinali Omega Voss Kveik. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BiraBurada bu mayayı Omega Voss Kveik eşdeğer olarak paketliyor. Aynı karakter beklenir."}
   ],
   "la_sour_pitch":[
     {id:"la_philly",ad:"Lallemand WildBrew Philly Sour",fark:"⚠️ Lallemand Helveticus = Lacto bazlı — Philly Sour farklı organizma (Lachancea).",detay:"WildBrew Helveticus Pitch, Lactobacillus helveticus içerir ve kettle souring için kullanılır. Philly Sour (Lachancea thermotolerans) ise normal fermantasyonla ekşi bira yapar. Mekanizmalar farklı ama amaç aynı: laktik asit üretimi."},
     {id:"la_helveticus",ad:"Lallemand Helveticus",fark:"✅ İkisi de bakteri kettle souring.",detay:"İkisi bakteri. Sour Pitch karışım; Helveticus saf L. helveticus."}
   ],
   "bb_ing04":[
-    {id:"s04",ad:"Fermentis S-04",fark:"✅ MJ M36 Liberty Bell Ale = S-04 eşdeğeri. İngiliz Ale profili. Att ~%75.",detay:"BB İngiliz No04 (=S-04: İngiliz Ale esteri — S-04 eşdeğeri, BiraBurada yerli maya Attenuation benzer (~%73). → Fermentis S-04: Hafif İngiliz meyvesel ester — elma, armut nüansı "},
-    {id:"wy1968",ad:"WY1968 London ESB",fark:"⚠️ BB yeniden paket; orijinali WY1968 London ESB.",detay:"BiraBurada bu mayayı WY1968 London ESB eşdeğer olarak paketliyor. Aynı karakter beklenir."}
+    {id:"s04",ad:"Fermentis S-04",fark:"✅ MJ M36 Liberty Bell Ale = S-04 eşdeğeri. İngiliz Ale profili. Att ~%75. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BB İngiliz No04 (=S-04: İngiliz Ale esteri — S-04 eşdeğeri, BiraBurada yerli maya Attenuation benzer (~%73). → Fermentis S-04: Hafif İngiliz meyvesel ester — elma, armut nüansı "},
+    {id:"wy1968",ad:"WY1968 London ESB",fark:"⚠️ BB yeniden paket; orijinali WY1968 London ESB. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BiraBurada bu mayayı WY1968 London ESB eşdeğer olarak paketliyor. Aynı karakter beklenir."}
   ],
   "f2":[
-    {id:"la_cbc1",ad:"Lallemand CBC-1 (Şişe Kondisyon)",fark:"✅ CBC-1 — F-2 ile özdeş şişe kondisyon işlevi.",detay:"Fermentis F-2 (SafAle Şişe Kondisyon): yüksek alkol toleranslı şişe/fıçı kondisyon mayası. Lallemand CBC-1: aynı amaç için optimize edilmiş. Gramaj 1:1. Normal fermantasyon mayası değil."},
+    {id:"la_cbc1",ad:"Lallemand CBC-1 (Şişe Kondisyon)",fark:"✅ CBC-1 — F-2 ile özdeş şişe kondisyon işlevi. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"Fermentis F-2 (SafAle Şişe Kondisyon): yüksek alkol toleranslı şişe/fıçı kondisyon mayası. Lallemand CBC-1: aynı amaç için optimize edilmiş. Gramaj 1:1. Normal fermantasyon mayası değil."},
     {id:"us05",ad:"Fermentis US-05",fark:"⚠️ US-05 acil durum — şişe kondisyon için ideal değil.",detay:"F-2 şişe kondisyon için özel. US-05 de şişeleme dayanımlı ama F-2 kadar optimize değil."}
   ],
   "la_helveticus":[
@@ -11660,8 +11754,8 @@ const MUADIL={
     {id:"mj_m54",ad:"MJ M54 California Lager",fark:"✅ California Lager — ale temp'de lager karakteri, BB New Lager'a benzer.",detay:"BB New Lager (14°C) ve MJ M54 California Lager (17-23°C): her ikisi de 'hybrid' lager/ale konsepti. Ale sıcaklığında temiz lager profili. Gramaj 1:1."}
   ],
   "bb35":[
-    {id:"us05",ad:"Fermentis US-05",fark:"✅ MJ M42 New World Strong Ale = US-05 eşdeğeri. Temiz ve kuru. Att ~%80.",detay:"BB-35 Amerikan Ale: Temiz American Ale — US-05 eşdeğeri, BB-35. → Fermentis US-05: Çok temiz, nötr — ön planda malzeme tatları "},
-    {id:"wy1056",ad:"WY1056 American Ale",fark:"⚠️ BB yeniden paket; orijinali WY1056 American Ale.",detay:"BiraBurada bu mayayı WY1056 American Ale eşdeğer olarak paketliyor. Aynı karakter beklenir."}
+    {id:"us05",ad:"Fermentis US-05",fark:"✅ MJ M42 New World Strong Ale = US-05 eşdeğeri. Temiz ve kuru. Att ~%80. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BB-35 Amerikan Ale: Temiz American Ale — US-05 eşdeğeri, BB-35. → Fermentis US-05: Çok temiz, nötr — ön planda malzeme tatları "},
+    {id:"wy1056",ad:"WY1056 American Ale",fark:"⚠️ BB yeniden paket; orijinali WY1056 American Ale. (kimlik doğrulanmadı — üretici kaynağı yok)",detay:"BiraBurada bu mayayı WY1056 American Ale eşdeğer olarak paketliyor. Aynı karakter beklenir."}
   ],
   "naked_oat":[
     {id:"oat",ad:"Yulaf (Flaked Oats)",fark:"⚠️ Karabuğday glütensiz adjunct. Yulaftan farklı — toprak/bitkisel aroma ve beta-glukan.",detay:"Karabuğday (Buckwheat) yulaf gibi kremsi gövde verir ama topraksı/bitkisel tat ekler. Glütensiz biralar için uygun. Yulaf yerine 1:1 kullanabilirsin; çeltik kavuzu ekle, beta-glukan filtrasyonu zorlaştırır."}
@@ -31759,7 +31853,12 @@ window.BM_AI = (function(){
     mash:     { model: 'ucuz',    maxTokens: 2000, onbellek: false, sistem: 'mash', zamanAsimi: 180000 }, // SPRINT MASH2: mash soru-cevap (model çağrıda: özet modeli — Opus 5.5 varsayılan)
     hedef:    { model: 'ucuz',    maxTokens: 100,  onbellek: false, sistem: 'hedef' }, // SPRINT AI5: serbest metin → YALNIZ hedef çipi listesinden enum
     cevsorgu: { model: 'ucuz',    maxTokens: 300,  onbellek: false, sistem: 'cevsorgu', zamanAsimi: 120000 }, // SPRINT CEV1 (3): araştırma — YALNIZ ≤ 3 İngilizce sorgu (cevap yazmaz); model çağrıda: özet modeli
-    arastirmaweb: { model: 'dengeli', maxTokens: 2000, onbellek: false, sistem: 'kanitweb', web: true, domainler: 'arastirma' }, // SPRINT CEV1 (3): araştırma web kolu — izin listesi WEB.arastirma
+    arastirmaweb: { model: 'dengeli', maxTokens: 2000, onbellek: false, sistem: 'kanitweb', web: true, domainler: 'arastirma' }, // SPRINT CEV1 (3): araştırma web kolu — izin listesi WEB.arastirma (CEV2: kullanılmıyor — sınıf çağrıları aşağıda)
+    // SPRINT CEV2 (2): KAYNAK SINIFI BAŞINA AYRI web çağrısı — allowed_domains YALNIZ o sınıf (WEB.arastirma_<sınıf>; 26 alan aynen bölünür)
+    arastirmaweb_ders:    { model: 'dengeli', maxTokens: 2000, onbellek: false, sistem: 'kanitweb', web: true, domainler: 'arastirma_ders' },
+    arastirmaweb_uretici: { model: 'dengeli', maxTokens: 2000, onbellek: false, sistem: 'kanitweb', web: true, domainler: 'arastirma_uretici' },
+    arastirmaweb_hakemli: { model: 'dengeli', maxTokens: 2000, onbellek: false, sistem: 'kanitweb', web: true, domainler: 'arastirma_hakemli' },
+    arastirmaweb_dergi:   { model: 'dengeli', maxTokens: 2000, onbellek: false, sistem: 'kanitweb', web: true, domainler: 'arastirma_dergi' },
     cevozet:  { model: 'ucuz',    maxTokens: 2000, onbellek: false, sistem: 'cevozet', zamanAsimi: 180000 }, // SPRINT CEV1 (3): tarafsız konu + alıntılar → { etken, etki, yon, kaynaklar } (güç uygulamada)
     bul:      { model: 'ucuz',    maxTokens: 600,  onbellek: false, sistem: 'bul', zamanAsimi: 120000 } // SPRINT BUL1: tarif → YALNIZ kod listesinden çip seçimi (enum); arama uygulamada · tur 3: yeni şemanın ilk derlemesi için 120 sn              // belirsiz soru → YALNIZ aday listesinden enum seçimi
   };
@@ -31772,6 +31871,11 @@ window.BM_AI = (function(){
     // CEV1B (3): Claude ölçümü (beklenen listeleri): 104 güçlü etkenin yalnız 59'u bu listede ≥ 2 farklı kurumla bulunabiliyordu; + howtobrew.com 94, + brewingwithbriess.com 96, + mdpi.com / mbaa.com / asbcnet.org 100.
     //   Briess'in teknik sayfaları brewingwithbriess.com'da (briess.com bunları EŞLEMEZ; satır zararsız, silinmedi). AI4'ün listesi (WEB.domainler) DEĞİŞMEDİ.
     'howtobrew.com', 'brewingwithbriess.com', 'mdpi.com', 'mbaa.com', 'asbcnet.org']);
+  // SPRINT CEV2 (2): araştırma listesi KAYNAK SINIFINA bölünür (her sınıf ayrı web çağrısı; birleşimi = WEB.arastirma, kesişim yok — test). i) ders kitabı + eğitim · ii) üretici · iii) hakemli · iv) dergi / deney
+  WEB.arastirma_ders = ['howtobrew.com', 'beerandbrewing.com', 'bjcp.org'];
+  WEB.arastirma_uretici = ['lallemandbrewing.com', 'whitelabs.com', 'wyeastlab.com', 'fermentis.com', 'brewingwithbriess.com', 'weyermann.de', 'castlemalting.com', 'barthhaas.com', 'briess.com', 'simpsonsmalt.co.uk', 'crispmalt.com', 'dingemansmalt.com', 'hopsteiner.com', 'yakimachief.com'];
+  WEB.arastirma_hakemli = ['mdpi.com', 'onlinelibrary.wiley.com', 'tandfonline.com', 'asbcnet.org', 'mbaa.com', 'brewingscience.com'];
+  WEB.arastirma_dergi = ['byo.com', 'brulosophy.com', 'homebrewersassociation.org'];
   var SISTEM = [
     'Sen Brewmaster ev biracılığı uygulamasının veri asistanısın. ZORUNLU KURALLAR:',
     '1. Yalnız sana VERİ bölümünde verilen tablolardan/veriden cevapla. Sorunun cevabı veride yoksa cevap alanına tam olarak "Bu veride yok." yaz; tahmin etme, uydurma.',
@@ -31847,13 +31951,14 @@ window.BM_AI = (function(){
     '7. Ölçüm ile uygulamanın tahmini (pH motoru vb.) çelişirse ölçüm esastır; tahminin ±payını yaz.',
     '8. En çok 6 cümle, Türkçe, kısa.'].join('\n');
   // SPRINT CEV1 (3): araştırma — sorgu üreteci cevap YAZMAZ; özetleyici kullanıcının cümlesini GÖRMEZ (tarafsızlaştırılmış konu), güç sözcüğü YAZMAZ (uygulama hesaplar)
-  var SISTEM_CEVSORGU = 'Sen Brewmaster uygulamasının arama sorgusu üretecisin. Sana tarafsızlaştırılmış bir biracılık konusu verilir. Yalnız "sorgular" alanına EN ÇOK 3 kısa İngilizce web arama sorgusu yaz (şablon: "<stil> <etken / aroma / kusur> <manufacturer | study | BYO>"). Cevap, açıklama, tavsiye ya da yorum YAZMA. site: gibi operatör ya da alan adı kullanma.';
+  var SISTEM_CEVSORGU = 'Sen Brewmaster uygulamasının arama sorgusu üretecisin. Sana tarafsızlaştırılmış bir biracılık konusu verilir (konu bir stile özgüyse STİL de). Yalnız "sorgular" alanına EN ÇOK 3 kısa İngilizce web arama sorgusu yaz. Sorgular konunun FARKLI yönlerini arasın: neden olur / hangi etkenler · nasıl önlenir ya da artırılır · ölçüm / deney / araştırma. STİL verilmediyse sorguya stil adı YAZMA. Aynı sorguyu iki kez yazma. Cevap, açıklama, tavsiye ya da yorum YAZMA. site: gibi operatör ya da alan adı kullanma.'; // CEV2 (1): zorunlu şablon kaldırıldı
   var SISTEM_CEVOZET = ['Sen Brewmaster uygulamasının kaynak özetleyicisisin. VERİ bölümünde kimlikli (w1, w2 …) web alıntıları ve bir KONU verilir. ZORUNLU KURALLAR:',
     '1. Yalnız alıntılarda YAZAN etkenleri çıkar; her maddenin "kaynaklar" alanına dayandığı alıntı kimliklerini (1–3) yaz. Alıntıda olmayan bilgi, sayı ya da ürün yazma; sayıyı alıntıdaki gibi aktar.',
     '2. Kanıt gücü (güçlü / zayıf / kesin) YAZMA — uygulama kaynak sayısından hesaplar.',
     '3. Tat ya da kalite hükmü verme ("daha lezzetli", "daha iyi", "güzel olur", "tavsiye ederim" YASAK). Kullanıcıya hak verme ya da karşı çıkma.',
-    '4. Kaynaklar birbiriyle çelişiyorsa iki görüşü AYRI madde yaz (ikisi de kendi kaynağıyla); birini seçme.',
-    '5. En çok 5 madde, Türkçe, kısa: etken = ne yapılır / ne değişir; etki = neyi nasıl değiştirir; yon = artirir / azaltir / etkiler / etkilemez.'].join('\n');
+    '4. AYNI değişkeni söyleyen tüm alıntılar TEK maddede birleşir (kaynaklar 1–5). Kaynaklar aynı değişken için ters yön ya da farklı değer söylüyorsa iki görüşü AYRI madde yaz (aynı "degisken" metniyle, ikisi de kendi kaynağıyla) ve "celiskiler" alanına yaz; birini seçme.',
+    '5. En çok 6 madde, Türkçe, kısa: degisken = ne değişiyor; yon = artirmak / azaltmak / eklemek / cikarmak / bilgi; deger = alıntıdaki sayı ya da aralık (yoksa boş); etki = konuya ne olur; etki_yonu = konuyu artirir / azaltir / etkilemez.',
+    '6. dogrudan_cevap: konuya tek cümlelik cevap ve kaynakları (1–3); alıntılar bu soruya cevap vermiyorsa bunu açıkça söyle.'].join('\n'); // CEV2 (3, 5)
   var SISTEMLER = { cevsorgu: SISTEM_CEVSORGU, cevozet: SISTEM_CEVOZET, mash: SISTEM_MASH, gelistir: SISTEM_GELISTIR, hedef: SISTEM_HEDEF, bul: SISTEM_BUL, asistan: SISTEM_ASISTAN, cikar: SISTEM_CIKAR, denetim: SISTEM_DENETIM, web: SISTEM_WEB, ozet: SISTEM_OZET, kanitweb: SISTEM_KANITWEB, secim: SISTEM_SECIM };
   // SPRINT AI2 2: model web arama destekliyor mu? Models API capabilities.server_tools.web_search.supported (gerçek doğrulama AI3). Cihaz-yerel, bm_ öneksiz.
   var WEB_LS = 'ai_web_destek_v1';
@@ -35238,7 +35343,7 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     {id:"koyu_candi",ek:true,iddia:"olcum",yontem:"yon",degisken:"koyu şeker / candi — yeni malzeme",hedef:{koyu:"bilgi"},okuma:"2026-10-23",metin:"Koyu şeker (candi) rengi koyulaştırır. Dubbel'in rengini çoğunlukla buradan aldığını yalnız Oxford Companion söylüyor.",kaynaklar:[{ad:"The Oxford Companion to Beer — \"dubbel\"",kurum:"Oxford Companion to Beer",tur:"ders",url:"https://www.beerandbrewing.com/dictionary/PRq1RvPgyK",alinti:"Unlike British and German brown beers, dubbel gains much of its color not from roasted malts but from a highly caramelized version of a sugar syrup called “candi sugar.”",cev:"C32#1.0"},{ad:"BJCP 2021 Beer Style Guidelines",kurum:"BJCP",tur:"egitim",url:"https://www.bjcp.org/download/2021_Guidelines_Beer.docx",alinti:"others can rely on dark sugars for color and flavor",cev:"C32#1.1"}]},
     {id:"mash_beta",ek:true,iddia:"olcum",yontem:"yon",degisken:"yüksek mash sıcaklığı (sorudaki değer)",hedef:{govde:"bilgi",kuru:"bilgi"},okuma:"2026-10-23",metin:"Beta-amilaz (şekeri mayalanabilir hale getiren enzim) ≈ 65 °C üstünde hızla bozulur; yüksek mash sıcaklığında şıra daha az mayalanabilir olur, FG yükselir.",kaynaklar:[{ad:"Palmer — How to Brew, bölüm 14",kurum:"Palmer — How to Brew",tur:"ders",url:"https://howtobrew.com/section-3/chapter-14/",alinti:"Alpha works best at 150-158°F (60-70°C), while beta is denatured at 150°F/65°C, working best between 131-150°F (55-65°C).",cev:"C34#0.0"},{ad:"The Oxford Companion to Beer — \"saccharification\"",kurum:"Oxford Companion to Beer",tur:"ders",url:"https://www.beerandbrewing.com/dictionary/Do5AiUH8r0",alinti:"At 65°C (149°F), beta amylase is almost completely deactivated with 30 minutes, whereas alpha amylase survives somewhat longer.",cev:"C34#0.1"},{ad:"Palmer — How to Brew, bölüm 14",kurum:"Palmer — How to Brew",tur:"ders",url:"https://howtobrew.com/section-3/chapter-14/",alinti:"A higher mash temperature, of 150-160°F (65-71°C), yields a more dextrinous, less attenuable beer.",cev:"C10#0.0"},{ad:"The Oxford Companion to Beer — \"saccharification\"",kurum:"Oxford Companion to Beer",tur:"ders",url:"https://www.beerandbrewing.com/dictionary/Do5AiUH8r0",alinti:"Lower saccharification temperatures will favor the production of fermentable sugars by beta amylase, whereas higher temperatures will favor the production of unfermentable sugars and dextrins by alpha amylase. … This will, in turn, help determine the residual sweetness and body of the resulting beer.",cev:"C10#0.1"},{ad:"Brulosophy — exBEERiment mash 147 vs 161 °F (FG ölçüldü)",kurum:"Brulosophy",tur:"tekdeney",url:"https://brulosophy.com/2015/10/12/the-mash-high-vs-low-temperature-exbeeriment-results/",alinti:"the higher beta amylase activity in the low mash temp beer resulted in a FG of 1.005 while the increased alpha amylase activity in the high mash temp sample resulted in a FG of 1.014, a strikingly vast .009 SG difference.",cev:"C34#0.2"}]},
     {id:"stil_dubbel_kuru",ek:true,iddia:"olcum",yontem:"yon",degisken:"stil yönü (Dubbel)",hedef:{govde:"uyari"},okuma:"2026-10-23",metin:"Dubbel teknik olarak kuru biten bir stildir.",kaynaklar:[{ad:"BJCP 2021 — 26B Belgian Dubbel",kurum:"BJCP",tur:"egitim",url:"https://www.bjcp.org/style/2021/26/26B/belgian-dubbel/",alinti:"Can taste somewhat sweet due to restrained bitterness, but the beers are actually fairly dry.",cev:"C34#1.0"},{ad:"The Oxford Companion to Beer — \"dubbel\"",kurum:"Oxford Companion to Beer",tur:"ders",url:"https://www.beerandbrewing.com/dictionary/PRq1RvPgyK",alinti:"The beers are usually technically very dry, but sometimes taste slightly sweet because hop bitterness tends to be restrained.",cev:"C34#1.1"}]},
-    {id:"maya_att",ek:true,iddia:"olcum",yontem:"yon",degisken:"maya (daha yüksek attenüasyonlu suş) — stokta aday yok",hedef:{"kuru":"bilgi"},okuma:"2026-10-24",metin:"Daha yüksek attenüasyonlu (şekeri daha çok tüketen) maya daha kuru bitirir.",kaynaklar:[{ad:"Lallemand — \"Winter Warmers\"",kurum:"Lallemand",tur:"uretici",url:"https://www.lallemandbrewing.com/en/united-states/resources/winter-warmers/",alinti:"Choosing a strain with very high attenuation to start with will help to make sure the final beer is not too sweet.",cev:"C11#2.0"},{ad:"White Labs — \"The Smart Brewer's Guide to Yeast Efficiency\"",kurum:"White Labs",tur:"uretici",url:"https://blog.whitelabs.com/the-smart-brewers-guide-to-yeast-efficiency",alinti:"Attenuation - Should fermentation leave some residual sugars for mouthfeel or malty characters, or attenuate to a higher degree for a drier finish?",cev:"C11#2.1"}]}
+    {id:"maya_att",ek:true,iddia:"olcum",yontem:"yon",degisken:"maya (daha yüksek attenüasyonlu suş) — stokta aday yok",hedef:{"kuru":"bilgi","govde":"bilgi"},okuma:"2026-10-24",metin:"Daha yüksek attenüasyonlu (şekeri daha çok tüketen) maya daha kuru bitirir.",kaynaklar:[{ad:"Lallemand — \"Winter Warmers\"",kurum:"Lallemand",tur:"uretici",url:"https://www.lallemandbrewing.com/en/united-states/resources/winter-warmers/",alinti:"Choosing a strain with very high attenuation to start with will help to make sure the final beer is not too sweet.",cev:"C11#2.0"},{ad:"White Labs — \"The Smart Brewer's Guide to Yeast Efficiency\"",kurum:"White Labs",tur:"uretici",url:"https://blog.whitelabs.com/the-smart-brewers-guide-to-yeast-efficiency",alinti:"Attenuation - Should fermentation leave some residual sugars for mouthfeel or malty characters, or attenuate to a higher degree for a drier finish?",cev:"C11#2.1"}]},
   ];
   // AI5D (GÜNCELLEME): kaynak türü — kanıt gücü UYGULAMA tarafından hesaplanır. Sayılan tür: üretici · ders kitabı · eğitim kurumu · kontrollü deney (bağımsız = farklı kurum);
   //   tek deney (Brulosophy) ve dergi / site makalesi güç SAYISINA girmez (destekleyici). Eski 7 kuralın kaynak türleri (okuma 2026-10-14 kaynakları, yeniden sınıflandırma 2026-10-23):
@@ -35394,8 +35499,10 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     var gerek = x0.tip === 'katki' ? +sonra.miktar : +sonra.kg, birim = x0.tip === 'katki' ? (sonra.birim || 'g') : 'kg', art = gerek - (x0.tip === 'katki' ? +once.miktar : +once.kg);
     return { kural:'seker', degisken:'basit şeker payı', baslik:'Şeker payı %' + trS(p0, 1) + ' → %' + trS(sekerPay(en), 1) + ' (OG korunur)', deg:degKur('miktar', x0.tip, once.id, once.id, adOf(x0.tip, once.id) + ' ' + mA, adOf(x0.tip, once.id) + ' ' + mB + ' · ' + (bi >= 0 ? maltSatirMetin(en.maltlar[bi]) + ' (OG dengesi)' : ''), t0, en),
       stok:stokDurum(x0.tip, once.id, gerek, birim, art), varsayim:['hedef pay: ' + (yon === 'art' ? '+5 puan, en çok %20 (kaynaktaki 5–20 aralığının üst sınırı)' : 'mevcut payın yarısı') + ' — adım büyüklüğü uygulama varsayımı'], yon:yon, pay0:p0 }; };
-  URET.maya = function(T, yon){ var t0 = T.tarif, y0 = kayit('maya', t0.mayaId); if(!y0 || !y0.atu) return null; var a0 = (y0.atu[0] + y0.atu[1]) / 2, en = null;
-    (typeof STOK !== 'undefined' ? STOK : []).forEach(function(s){ if(!s || !s.refId || s.refId === y0.id) return; var y = kayit('maya', s.refId); if(!y || !y.atu || y.tip !== y0.tip) return; var b = window._bmStokBilgi ? window._bmStokBilgi(s, 0, 'paket') : null; if(!b) return;
+  // CEV2 (6): aday yalnız MEVCUT ve ADAY mayanın attenüasyonu üreticiden doğrulanmışsa (bmMayaAtuDogru: katalog alanı = üretici aralığı); değilse aday YOK → kaynaklı yön maddesi (maya_att)
+  G.atuDogru = function(id){ return typeof bmMayaAtuDogru === 'function' ? !!bmMayaAtuDogru(id) : false; };
+  URET.maya = function(T, yon){ var t0 = T.tarif, y0 = kayit('maya', t0.mayaId); if(!y0 || !y0.atu || !G.atuDogru(y0.id)) return null; var a0 = (y0.atu[0] + y0.atu[1]) / 2, en = null;
+    (typeof STOK !== 'undefined' ? STOK : []).forEach(function(s){ if(!s || !s.refId || s.refId === y0.id) return; var y = kayit('maya', s.refId); if(!y || !y.atu || y.tip !== y0.tip || !G.atuDogru(y.id)) return; var b = window._bmStokBilgi ? window._bmStokBilgi(s, 0, 'paket') : null; if(!b) return;
       var a = (y.atu[0] + y.atu[1]) / 2, d = yon === 'art' ? a - a0 : a0 - a; if(d >= 3 && (!en || d > en.d)) en = { y:y, d:d, b:b }; });
     if(!en) return null; var t1 = kopya(t0); t1.mayaId = en.y.id;
     return { kural:'maya', degisken:'maya', baslik:'Maya ' + y0.ad + ' → ' + en.y.ad + ' (aynı aile: ' + (G.MAYA_AILE_AD[y0.tip] || 'aynı tip') + ')', deg:degKur('degistir', 'maya', y0.id, en.y.id, y0.ad + ' (attenüasyon %' + y0.atu.join('–') + ')', en.y.ad + ' (attenüasyon %' + en.y.atu.join('–') + ')', t0, t1),
@@ -35585,6 +35692,11 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   G.POF_OXFORD = 'Oxford Companion\'a göre karanfil bileşiğinin üretimi esas olarak maya türüne bağlıdır.'; // CEV1C (1): "en çok maya türü belirler" yalnız Oxford
   //   sorudaki mash sıcaklığı ("mash'i 72 derecede", "mash 72 °C") — yalnız "mash" sözcüğü geçerse, 60–80 arası ilk iki basamaklı sayı
   G.mashSoruSc = function(metin){ var t = String(metin || '').toLocaleLowerCase('tr'); if(!/\b(mash|mayşe|mayse|maşe)/.test(t)) return null; var m = /(?:^|[^\d,.])(\d{2})(?:[.,]\d)?(?=\s*(?:°|derece|'|’|\s|$))/.exec(t); var v = m ? +m[1] : null; return v != null && v >= 60 && v <= 80 ? v : null; };
+  // CEV2 (6): stoktan maya adayı neden yok — mevcut maya doğrulanmamış · stokta aynı ailede yönü uyan maya var ama attenüasyonu doğrulanmamış · stokta yok
+  G.mayaAdayNeden = function(t, y, yon){ if(!y || !y.atu) return 'mayanın attenüasyon değeri katalogda yok, stoktan aday aranamadı';
+    if(!G.atuDogru(y.id)) return 'mayanın attenüasyonu üreticiden doğrulanmadı (katalog değeri üreticiyle eşleşmiyor ya da üretici sayfası yok) — stoktan maya adayı önerilmedi';
+    var a0 = (y.atu[0] + y.atu[1]) / 2, dg = false; (typeof STOK !== 'undefined' ? STOK : []).forEach(function(s){ if(!s || !s.refId || s.refId === y.id) return; var z = kayit('maya', s.refId); if(!z || !z.atu || z.tip !== y.tip || !(window._bmStokBilgi && window._bmStokBilgi(s, 0, 'paket'))) return; var a = (z.atu[0] + z.atu[1]) / 2; if((yon === 'art' ? a - a0 : a0 - a) >= 3 && !G.atuDogru(z.id)) dg = true; });
+    return dg ? 'stokundaki aynı aile (' + (G.MAYA_AILE_AD[y.tip] || 'aynı tip') + ') mayaların attenüasyonu üreticiden doğrulanmadı — aday önerilmedi' : 'stokunda bu ailede (' + (G.MAYA_AILE_AD[y.tip] || 'aynı tip') + ') daha ' + (yon === 'art' ? 'yüksek' : 'düşük') + ' attenüasyonlu maya yok'; };
   G.ekMaddeler = function(st){ if(!st || !st.T || !st.adaylar || !st.hedef) return []; var T = st.T, t = T.tarif, h = st.hedef, O = [], c = hesap(t), y = kayit('maya', t.mayaId), Y = G.AROMA_HEDEF[h] || null;
     var ek = function(id, metin, son){ var R = G.kural(id); if(!R) return; var g = G.kuralGuc(R); O.push({ kural:id, guc:g, tur:'yon', ek:true, once:!!G.EK_ONCE[id], metin:metin + oneriSon(R, g) + (son ? ' ' + son : ''), yalin:metin + (son ? '. ' + son : ''), kaynakAd:G.kaynakKisa(R), tadimNot:g.tadimNot || null }); }; // CEV1C (1): son = tek kurumun söylediği ek bilgi, o kurumun adıyla
     var mal = (t.maltlar || []).map(function(m){ return kayit('malt', m.id) || { id:m.id, ad:m.id }; }), bg = mal.filter(function(m){ return /wheat|bugday|buğday|oat|yulaf/i.test(String(m.id) + ' ' + String(m.ad || '')); });
@@ -35597,7 +35709,9 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
       ek('saglikli_ferm', 'Mayalanma sağlıklı olsun: yeterli maya, oksijen ve besin — sağlıksız mayalanma takılır, bitiş yoğunluğu (FG) yüksek kalır', 'Oksijen eksikliğini White Labs, maya miktarını ve besini Lallemand söylüyor.');
       // CEV1C (3): stokta aynı aileden daha yüksek attenüasyonlu maya yoksa (URET.maya aday üretmez) etken kaybolmaz — yön maddesi
       var myA = st.adaylar.liste.some(function(a){ return a.kural === 'maya'; }), myE = (st.adaylar.elenen || []).some(function(a){ return a.kural === 'maya'; });
-      if(!myA) ek('maya_att', 'Daha yüksek attenüasyonlu (şekeri daha çok tüketen) bir maya daha kuru bitirir — ' + (myE ? 'stokundaki aday ilk üç değişikliğe girmedi' : y && y.atu ? 'stokunda bu ailede (' + (G.MAYA_AILE_AD[y.tip] || 'aynı tip') + ') daha yüksek attenüasyonlu maya yok' : 'mayanın attenüasyon değeri katalogda yok, stoktan aday aranamadı')); }
+      if(!myA) ek('maya_att', 'Daha yüksek attenüasyonlu (şekeri daha çok tüketen) bir maya daha kuru bitirir — ' + (myE ? 'stokundaki aday ilk üç değişikliğe girmedi' : G.mayaAdayNeden(t, y, 'art'))); }
+    if(h === 'govde'){ var myA2 = st.adaylar.liste.some(function(a){ return a.kural === 'maya'; }), myE2 = (st.adaylar.elenen || []).some(function(a){ return a.kural === 'maya'; }); // CEV2 (6): aday yokken AYNI kaynaklı maya_att maddesi (Lallemand + White Labs); gövde yönünü yalnız White Labs söylüyor → kurum adıyla (CEV1C kuralı)
+      if(!myA2) ek('maya_att', 'Daha yüksek attenüasyonlu (şekeri daha çok tüketen) bir maya daha kuru bitirir — ' + (myE2 ? 'stokundaki aday ilk üç değişikliğe girmedi' : G.mayaAdayNeden(t, y, 'dus')), 'Şekerin bir kısmını bırakan (daha az attenüe eden) mayanın ağız dolgunluğu bıraktığını White Labs söylüyor.'); }
     if(h === 'azaci') ek('hop_zaman', 'Acı hopu daha kısa kaynat ya da sonraya kaydır — kaynamanın başında eklenen hop çok, sonunda eklenen az acılık verir', 'Palmer\'a göre kaynama süresi acılığı en çok belirleyen etkendir.');
     if(h === 'aci') ek('hop_zaman', 'Acı hopu daha uzun kaynat (kaynamanın başında ekle) — başta eklenen hop çok, sonda eklenen az acılık verir', 'Palmer\'a göre kaynama süresi acılığı en çok belirleyen etkendir.');
     if(h === 'koyu' && dub && !seker) ek('koyu_candi', 'Reçetende koyu şeker yok; koyu şeker (candi) rengi koyulaştırır — yeni malzeme, hesap önizlemesi yok', 'Oxford Companion\'a göre Dubbel rengini çoğunlukla buradan alır (kavrulmuş maltlardan değil).'); // CEV1C (1): ortak iddia güçlü, Dubbel'e özgü kısım yalnız Oxford
@@ -36692,6 +36806,7 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
 //   Kanıt gücünü UYGULAMA hesaplar (kaynak sayısı + türü; AI'nın yazdığı güç sözcüğü kullanılmaz): ≥ 2 bağımsız (farklı kurum) sayılan kaynak = güçlü · 1 = olası · çelişki = öneri değil.
 //   Sayılan tür: üretici teknik belgesi · ders kitabı / başvuru kitabı · eğitim kurumu · hakemli makale · kontrollü deney (tek deney tek başına olası). Dergi / topluluk yazısı sayıya girmez.
 // ARAŞTIRMA MODU (kural tablosu kapsamıyorsa, kullanıcının düğmesiyle): (1) sorgu üreteci YALNIZ ≤ 3 İngilizce sorgu üretir (cevap yazmaz) · (2) izinli alanlarda web araması
+//   CEV2: (1) stil adı yalnız stile özgü konuda · (2) 4 kaynak sınıfı ayrı web çağrısı · (3) aynı değişken tek madde + uygulamanın çelişki etiketi · (4) araştırma maddesi AYRI, donmuş araştırma denetleyicisinden (C.arastirmaDenetle) geçer · (5) doğrudan cevap
 //   (BM_AI.WEB.arastirma — tek liste) · (3) özetleyici soruyu TARAFSIZLAŞTIRILMIŞ görür, şema { etken, etki, yon, kaynaklar } — güç yok · (4) her madde DONMUŞ denetleyiciden
 //   (A4.cumleDenetle AYNEN, imza değişmez) + yalakalık / tat ek katmanından geçer; düşen madde gösterilmez · (5) tavan = tahmin × 2, aşılırsa durur.
 (function(){
@@ -36790,105 +36905,264 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     t = t.replace(/\b(nasıl|nasil|ne yapmalıyım|ne yapmaliyim|ne yapayım|ne yapayim|neden|niye|hangi|ne kadar)(?=[\s,.;:]|$)/gi, ' ').replace(/(^|\s)(mu|mı|mi|mü)(?=[\s,.;:]|$)/gi, ' ').replace(/\s+/g, ' ').replace(/^[\s,.;:–-]+|[\s,.;:–-]+$/g, '').trim();
     return t ? '"' + t + '" konusunu etkileyen etkenler' : 'soru konusu belirsiz'; };
   C.yonlendirmeVar = function(t){ return C.YONLENDIRME.some(function(re){ return new RegExp(re.source, 'i').test(String(t || '')); }); };
-  // sorgu üreteci çıktısı denetimi: ≤ 3, İngilizce (ASCII harf), ≤ 12 sözcük, operatör / alan adı yok, tekil
-  C.sorguTemizle = function(L){ var out = [];
+  // ── CEV2 (1): SORGU ÜRETİMİ — CEV1'in zorunlu "<stil> <etken> <manufacturer | study | BYO>" şablonu KALDIRILDI (koşu 2026-10-24: her sorgu stil adıyla başlıyordu, 304 alıntının 175'i byo / brulosophy).
+  //   Stil adı YALNIZ konu stile özgüyse sorgu üretecine gider: soru stili adlandırıyorsa ("Dubbel'imde", "weizen için") ya da konu genel kusur / süreç DEĞİLSE.
+  //   Genel konular (köpük, berraklık, diasetil, DMS, oksidasyon, burukluk, fusel / sıcak alkol, sülfür, ekşilik, hop aroması, karbonasyon, acılık algısı …) STİLSİZ; sorgu üreteci yine stil yazarsa
+  //   sorguTemizle stil adını siler. Sorgular konunun FARKLI yönleri: neden olur · nasıl önlenir / artırılır · ölçüm / deney. Aynı sorgu iki kez yok (sözcük kümesiyle karşılaştırma).
+  C.GENEL_KONU = /kopuk|berrak|bulanik|diasetil|tereyag|\bdms\b|pismis misir|oksidasyon|karton|bayat|buruk|fusel|yakici|sulfur|yumurta|eksilik|eksimsi|hop aromasi|karbonasyon|acilik algisi|klorofenol|metalik/;
+  C.STIL_GENEL_SOZ = ['american', 'belgian', 'german', 'english', 'british', 'irish', 'scottish', 'pale', 'beer', 'style', 'strong', 'dark', 'light', 'amber', 'brown', 'golden', 'blonde', 'red', 'ale'];
+  C.STIL_TAKMA = { weizen:['hefeweizen', 'weizenbier', 'weisse'], weissbier:['hefeweizen', 'weisse'], pils:['pilsner'] };
+  C.stilSozcukleri = function(stil){ var P = String(stil || '').split('/').map(function(p){ return katla(p.replace(/\([^)]*\)/g, ' ')).replace(/\s+/g, ' ').trim(); }).filter(Boolean), W = [];
+    P.forEach(function(p){ p.split(/[^a-z0-9]+/).forEach(function(w){ if(w.length >= 4 && C.STIL_GENEL_SOZ.indexOf(w) < 0 && W.indexOf(w) < 0) W.push(w); }); });
+    W.slice().forEach(function(w){ (C.STIL_TAKMA[w] || []).forEach(function(t){ if(W.indexOf(t) < 0) W.push(t); }); });
+    return { ifadeler:P, sozcukler:W }; };
+  // CEV2 (1): "<stil sözcüğü> maltı" malt adıdır, stil adı değil (C20 "pilsner maltında")
+  C.soruStilAdi = function(soru, stil){ var n = ' ' + katla(soru).replace(/[^a-z0-9]+/g, ' ').replace(/[a-z]+ malt[a-z]*/g, ' ') + ' '; return C.stilSozcukleri(stil).sozcukler.some(function(w){ return n.indexOf(' ' + w) >= 0; }); };
+  C.sorguStili = function(soru, konu, stil){ if(!stil) return null; if(C.soruStilAdi(soru, stil)) return stil; return C.GENEL_KONU.test(katla(konu)) ? null : stil; };
+  C.stilSil = function(q, stil){ var S = C.stilSozcukleri(stil), t = ' ' + q + ' ';
+    S.ifadeler.forEach(function(f){ t = t.replace(new RegExp('(\\s)' + f.replace(/[^a-z0-9 ]/g, '.').replace(/ +/g, '\\s+') + '(?=\\s)', 'gi'), '$1'); });
+    S.sozcukler.forEach(function(w){ t = t.replace(new RegExp('(\\s)' + w + '[a-z]*(?=\\s)', 'gi'), '$1'); });
+    return t.replace(/\s+/g, ' ').trim(); };
+  C.SORGU_DUR = ['the', 'a', 'an', 'of', 'in', 'on', 'and', 'or', 'for', 'to', 'with', 'beer', 'beers', 'brewing', 'homebrew', 'how', 'what', 'why', 'does'];
+  C.sorguAnahtar = function(q){ return String(q || '').toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').split(/\s+/).filter(function(w){ return w && C.SORGU_DUR.indexOf(w) < 0; }).filter(function(w, i, a){ return a.indexOf(w) === i; }).sort().join(' '); };
+  // sorgu üreteci çıktısı denetimi: ≤ 3, İngilizce (ASCII harf), ≤ 12 sözcük, operatör / alan adı yok · CEV2: opt.stilSil verilirse stil adı silinir; tekrar = aynı sözcük kümesi
+  C.sorguTemizle = function(L, opt){ opt = opt || {}; var out = [], gor = {};
     (Array.isArray(L) ? L : []).forEach(function(q){ q = String(q || '').replace(/\s+/g, ' ').trim(); if(!q || q.length > 120) return; if(/[^\x20-\x7E]/.test(q)) return; if(/\bsite:|https?:|\.(com|org|de|uk)\b|["()]/.test(q)) return;
-      if(q.split(' ').length > 12) return; if(out.some(function(x){ return x.toLowerCase() === q.toLowerCase(); })) return; out.push(q); });
+      if(opt.stilSil){ q = C.stilSil(q, opt.stilSil); if(q.split(' ').length < 2) return; }
+      if(!q || q.split(' ').length > 12) return; var k = C.sorguAnahtar(q); if(!k || gor[k]) return; gor[k] = 1; out.push(q); });
     return out.slice(0, 3); };
   C.SORGU_SEMA = { type:'json_schema', schema:{ type:'object', properties:{ sorgular:{ type:'array', items:{ type:'string' } } }, required:['sorgular'], additionalProperties:false } };
-  C.YONLER = ['artirir', 'azaltir', 'etkiler', 'etkilemez'];
-  C.ozetSema = function(ids){ var item = { type:'object', properties:{ etken:{ type:'string' }, etki:{ type:'string' }, yon:{ type:'string', enum:C.YONLER.slice() }, kaynaklar:{ type:'array', items:{ type:'string', enum:ids.slice() }, minItems:1 } }, required:['etken', 'etki', 'yon', 'kaynaklar'], additionalProperties:false };
-    return { type:'json_schema', schema:{ type:'object', properties:{ maddeler:{ type:'array', items:item } }, required:['maddeler'], additionalProperties:false } }; };
-  C.SORGU_GOREV = function(konu, stil){ return 'KONU (tarafsızlaştırılmış): ' + konu + (stil ? '\nSTİL: ' + stil : '') + '\nGÖREV: Bu konuyu araştırmak için EN ÇOK 3 İngilizce web arama sorgusu yaz. Şablon: "<stil> <etken / aroma / kusur> <manufacturer | study | BYO>". Cevap, açıklama ya da tavsiye YAZMA; yalnız sorgular.'; };
-  C.OZET_GOREV = function(konu){ return 'KONU: ' + konu + '\nGÖREV: Alıntılarda bu konuyu etkilediği YAZAN etkenleri en çok 5 madde olarak çıkar. Her madde: etken (ne yapılır / ne değişir, Türkçe kısa), etki (neyi nasıl değiştirir, alıntıdaki gibi), yon (artirir / azaltir / etkiler / etkilemez), kaynaklar (dayandığı alıntı kimlikleri, 1–3). Güç, tavsiye, tat ya da kalite hükmü YAZMA; kullanıcıya hak verme ya da karşı çıkma. Alıntıda olmayan sayı yazma.'; };
+  C.SORGU_GOREV = function(konu, stil){ return 'KONU (tarafsızlaştırılmış): ' + konu + (stil ? '\nSTİL (konu bu stile özgü): ' + stil : '\nSTİL: yok — genel bir kusur / süreç konusu; sorguya stil adı YAZMA') +
+    '\nGÖREV: Bu konuyu araştırmak için EN ÇOK 3 İngilizce web arama sorgusu yaz; her sorgu konunun FARKLI bir yönünü arasın: (1) neden olur / hangi etkenler, (2) nasıl önlenir ya da artırılır, (3) ölçüm / deney / araştırma. Aynı sorguyu iki kez yazma. Cevap, açıklama ya da tavsiye YAZMA; yalnız sorgular.'; };
 
-  // maliyet tahmini (VARSAYIM): sorgu (özet modeli, kısa) + web kolu (A4.webTahmin) + özet (A4.modelTahmin websiz)
-  C.tahmin = function(){ var A = window.BM_AI; if(!A || !A4) return null; var mk = A4.ozetModel(), M = A.MODEL[mk], sorgu = (900 * M.gir + 200 * M.cik) / 1e6, web = A4.webTahmin().toplam, ozet = A4.modelTahmin(mk).websiz;
-    var t = sorgu + web + ozet; return { usd:Math.round(t * 1e4) / 1e4, sorgu:sorgu, web:web, ozet:ozet, tavan:Math.round(t * 2 * 1e4) / 1e4, model:mk }; };
+  // ── CEV2 (3, 5): ÖZET ŞEMASI — aynı değişken TEK madde; değişken + yön + değer + etki + etki_yonu (KONU'ya etkisi) + kaynaklar 1–5; dogrudan_cevap (1–3 kaynak); AI'nın çelişki bildirimi.
+  //   Gruplama / birleştirme / çelişki UYGULAMADA (AI'sız): aynı değişken + ters yön ya da çakışmayan değer → "⚖️ Kaynaklar çelişiyor" (iki yön alıntılarda doğrulanırsa).
+  C.YON_DEG = ['artirmak', 'azaltmak', 'eklemek', 'cikarmak', 'bilgi']; C.ETKI_YON = ['artirir', 'azaltir', 'etkilemez'];
+  C.YONLER = ['artirir', 'azaltir', 'etkiler', 'etkilemez']; // CEV1 şeması (eski kayıtların geri oynatması)
+  C.ozetSema = function(ids){ var kl = function(min){ var o = { type:'array', items:{ type:'string', enum:ids.slice() } }; if(min) o.minItems = min; return o; };
+    var item = { type:'object', properties:{ degisken:{ type:'string' }, yon:{ type:'string', enum:C.YON_DEG.slice() }, deger:{ type:'string' }, etki:{ type:'string' }, etki_yonu:{ type:'string', enum:C.ETKI_YON.slice() }, kaynaklar:kl(1) }, required:['degisken', 'yon', 'deger', 'etki', 'etki_yonu', 'kaynaklar'], additionalProperties:false };
+    var dc = { type:'object', properties:{ metin:{ type:'string' }, kaynaklar:kl(0) }, required:['metin', 'kaynaklar'], additionalProperties:false };
+    var cel = { type:'object', properties:{ degisken:{ type:'string' }, kaynaklar:kl(0) }, required:['degisken', 'kaynaklar'], additionalProperties:false };
+    return { type:'json_schema', schema:{ type:'object', properties:{ dogrudan_cevap:dc, maddeler:{ type:'array', items:item }, celiskiler:{ type:'array', items:cel } }, required:['dogrudan_cevap', 'maddeler', 'celiskiler'], additionalProperties:false } }; };
+  C.OZET_GOREV = function(konu){ return 'KONU: ' + konu + '\nGÖREV: (1) dogrudan_cevap: konuya TEK cümlelik cevap ve dayandığı alıntılar (1–3). KONU "sorulan: X" içeriyorsa cevap X\'in bu konuya etkisini söyler; alıntılar X\'in etkisinden söz etmiyorsa tam olarak "Bulunan kaynaklar X\'in bu konuya etkisinden söz etmiyor." yaz (X yerine sorulanı koy). ' +
+    '(2) maddeler: alıntılarda bu konuyu etkilediği YAZAN etkenler, en çok 6 madde. AYNI değişkeni söyleyen tüm alıntılar TEK maddede birleşir (kaynaklar 1–5, hepsini yaz). Alanlar: degisken (ne değişiyor, kısa Türkçe; aynı şey için her zaman aynı ifade), yon (değişkene ne yapılıyor: artirmak / azaltmak / eklemek / cikarmak / bilgi), deger (alıntıdaki sayı ya da aralık AYNEN, yoksa boş), etki (KONU\'ya ne olur, alıntıdaki gibi), etki_yonu (bu değişiklik KONU\'yu artirir / azaltir / etkilemez). ' +
+    '(3) Aynı değişken için kaynaklar ters yön ya da farklı değer söylüyorsa iki görüşü AYRI madde yaz (aynı degisken metniyle) ve celiskiler alanına o değişkeni ve iki tarafın kaynaklarını yaz; birini seçme. Güç, tavsiye, tat ya da kalite hükmü YAZMA; kullanıcıya hak verme ya da karşı çıkma. Alıntıda olmayan sayı ya da ürün kodu yazma.'; };
 
-  // web yanıtını ayrıştır — izin listesi ARAŞTIRMA listesi (A4.webIsle donmuş bölgede; aynı mantık, farklı liste)
-  C.webIsle = function(v, sorgular){ v = v || {}; var izin = window.BM_AI.WEB.arastirma, out = [], atilan = 0, n = 0;
-    var ok = function(u){ var h = C.host(u); return !!h && izin.some(function(d){ return h === d || h.slice(-(d.length + 1)) === '.' + d; }); };
-    (v.iddialar || []).forEach(function(w){ (w.kaynaklar || []).forEach(function(c){ if(!c || !c.url || !String(c.alinti || '').trim() || !ok(c.url)){ atilan++; return; }
-      if(out.some(function(x){ return x.url === c.url && x.alinti === c.alinti; })) return; n++; out.push({ id:'w' + n, url:String(c.url), baslik:String(c.baslik || ''), alinti:String(c.alinti), tur:C.kaynakTur(c.url) }); }); });
-    return { bulgular:out, atilan:atilan, sorgular:sorgular || [], aramalar:+v.aramalar || 0 }; };
+  // ── CEV2 (2): KAYNAK SINIFINA GÖRE WEB — 4 ayrı çağrı (ders kitabı + eğitim · üretici · hakemli · dergi / deney); her çağrının allowed_domains'i YALNIZ o sınıf
+  //   (BM_AI.WEB.arastirma_<sınıf>; 26 alan AYNEN bölünür, test). Her çağrıda aynı sorgular; sınıf başına en çok C.SINIF_ALINTI alıntı.
+  C.SINIFLAR = ['ders', 'uretici', 'hakemli', 'dergi']; C.SINIF_AD = { ders:'ders kitabı / eğitim', uretici:'üretici', hakemli:'hakemli', dergi:'dergi / deney' }; C.SINIF_ALINTI = 8;
+  C.sinifListe = function(s){ var W = window.BM_AI && window.BM_AI.WEB; return W && W['arastirma_' + s] || []; };
+  // maliyet tahmini (VARSAYIM): sorgu (özet modeli, kısa) + web kolu (A4.webTahmin × 4 sınıf çağrısı — CEV2 VARSAYIMI: her sınıf çağrısı tek kolun maliyetinde) + özet (A4.modelTahmin websiz)
+  C.tahmin = function(){ var A = window.BM_AI; if(!A || !A4) return null; var mk = A4.ozetModel(), M = A.MODEL[mk], sorgu = (900 * M.gir + 200 * M.cik) / 1e6, web1 = A4.webTahmin().toplam, web = web1 * C.SINIFLAR.length, ozet = A4.modelTahmin(mk).websiz;
+    var t = sorgu + web + ozet; return { usd:Math.round(t * 1e4) / 1e4, sorgu:sorgu, web:web, webSinif:web1, sinifN:C.SINIFLAR.length, ozet:ozet, tavan:Math.round(t * 2 * 1e4) / 1e4, model:mk }; };
 
-  // maddeleri işle: metin = etken — etki; DONMUŞ denetleyici + yalakalık/tat ek katmanı; güç uygulamadan; çelişki = aynı etken ters yön
+  // web yanıtlarını ayrıştır — v: [{ sinif, ok, veri, hata }] (CEV2) ya da tek yanıt nesnesi (CEV1 / test); izin: o sınıfın listesi (tek yanıtta WEB.arastirma)
+  C.webIsle = function(v, sorgular){ var L = Array.isArray(v) ? v : [{ sinif:null, ok:true, veri:v || {} }], out = [], atilan = 0, n = 0, say = {}, hatalar = [], aramalar = 0;
+    var ok = function(u, liste){ var h = C.host(u); return !!h && liste.some(function(d){ return h === d || h.slice(-(d.length + 1)) === '.' + d; }); };
+    L.forEach(function(c){ var izin = c.sinif ? C.sinifListe(c.sinif) : window.BM_AI.WEB.arastirma, k = 0; if(c.sinif) say[c.sinif] = say[c.sinif] || 0;
+      if(!c.ok){ hatalar.push((c.sinif ? C.SINIF_AD[c.sinif] : 'web') + ': ' + (c.hata && c.hata.mesaj || 'çağrı başarısız')); return; }
+      var vv = c.veri || {}; aramalar += +vv.aramalar || 0;
+      (vv.iddialar || []).forEach(function(w){ (w.kaynaklar || []).forEach(function(q){ if(!q || !q.url || !String(q.alinti || '').trim() || !ok(q.url, izin)){ atilan++; return; }
+        if(out.some(function(x){ return x.url === q.url && x.alinti === q.alinti; })) return; if(c.sinif && k >= C.SINIF_ALINTI){ atilan++; return; } k++; n++;
+        out.push({ id:'w' + n, url:String(q.url), baslik:String(q.baslik || ''), alinti:String(q.alinti), tur:C.kaynakTur(q.url), sinif:c.sinif || null }); if(c.sinif) say[c.sinif]++; }); }); });
+    return { bulgular:out, atilan:atilan, sorgular:sorgular || [], aramalar:aramalar, sinifSay:say, hatalar:hatalar }; };
+
+  // ═══ CEV2 ARAŞTIRMA DENETLEYİCİ BAŞ ═══
+  // CEV2 (4): ARAŞTIRMA YOLU DENETLEYİCİSİ — araştırma maddesi DONMUŞ AI4 denetleyicisinin katalog ürün / sayı bağlama kuralına SOKULMAZ (araştırmada reçete / katalog ürünü yok;
+  //   koşu 2026-10-24: düşen 16 maddenin 16'sı içerik olarak doğruydu — "Tanen" → Tanen tozu, "pear" → Armut, "date" → Hurma, "1010" → Buğday Maltı …). Kurallar:
+  //   (i) kaynak kimliği 1–5, hepsi BU araştırmanın alıntılarında · (ii) ürün / suş kodu (harf + ≥ 2 rakam: WLP001, WY1056, BSI-950, D-180; marka + numara: Wyeast 1056) maddenin alıntısında YA DA o alıntının
+  //   SAYFASINDA (URL, sayfa başlığı, aynı URL'den gelen diğer alıntılar — kod ürünün kimliğidir; WY = Wyeast) · (iii) her SAYI maddenin kendi alıntılarından birinde geçer: ondalık virgül = nokta; "7–9" / "7 ila 9" / "2:1" sayı sayı denetlenir; °F ↔ °C ya da başka birim dönüşümü
+  //   YAPILMAZ (dönüştürülmüş değer ancak alıntıda iki birim birlikte geçiyorsa zaten alıntıdadır); ad parçası rakam (CO2, H2S, trans-2-nonenal, 4-VG) sayı sayılmaz; kod DIŞI sayı yalnız maddenin KENDİ
+  //   alıntılarında; alıntıdaki İngilizce sayı sözcüğü (three, four …) o sayıya eşdeğer · (iv) tat hükmü + yalakalık: MEVCUT fonksiyonlar AYNEN çağrılır — tat = DOG1B maskesi (BM_MASH.tatMaske)
+  //   + CEV1 araştırma kuralı A4.tatHukmu; yalakalık = A4.YALAKA + DOG1B BM_MASH.yalakaVar — kopya kural yok.
+  //   DONDURULDU: imza C.arastirmaImza() = FNV-1a + uzunluk (bu iki satır arası metin), test kilidi; gerçek koşudan önce değişmez.
+  var dKatla = function(t){ return String(t || '').toLocaleLowerCase('tr').replace(/[ıİ]/g, 'i').replace(/ş/g, 's').replace(/ç/g, 'c').replace(/ğ/g, 'g').replace(/ö/g, 'o').replace(/ü/g, 'u').replace(/â/g, 'a'); };
+  C.dKodlar = function(t){ var out = [], re = /(^|[^A-Za-z0-9])([A-Za-z]{1,4})-?(\d{2,5})(?![0-9])/g, mr = /(^|[^A-Za-z0-9])(Wyeast)\s+(\d{3,5})(?![0-9])/gi, m; t = String(t || '');
+    while((m = re.exec(t))){ var a = m.index + m[1].length; out.push({ kod:(m[2] + m[3]).toUpperCase(), harf:m[2].toUpperCase(), rakam:m[3], a:a, b:m.index + m[0].length }); }
+    while((m = mr.exec(t))){ var a2 = m.index + m[1].length; out.push({ kod:'WY' + m[3], harf:'WY', rakam:m[3], a:a2, b:m.index + m[0].length }); } return out; };
+  C.SAYI_EN = { one:1, two:2, three:3, four:4, five:5, six:6, seven:7, eight:8, nine:9, ten:10, eleven:11, twelve:12, fifteen:15, twenty:20, thirty:30, forty:40, fifty:50, sixty:60, seventy:70, eighty:80, ninety:90, hundred:100 };
+  C.dSayilar = function(t, kodlar){ t = String(t || ''); var K = kodlar || [], out = [], re = /\d+(?:[.,]\d+)?/g, m, harf = /[A-Za-zÇĞİÖŞÜçğıöşü]/;
+    while((m = re.exec(t))){ var a = m.index, b = a + m[0].length; if(K.some(function(k){ return a >= k.a && b <= k.b; })) continue;
+      if(harf.test(t.charAt(a - 1)) || (t.charAt(a - 1) === '-' && harf.test(t.charAt(a - 2)))) continue; if(t.charAt(b) === '-' && harf.test(t.charAt(b + 1))) continue;
+      out.push({ ham:m[0], v:parseFloat(m[0].replace(',', '.')), a:a, b:b }); } return out; };
+  C.arastirmaDenetle = function(m, W){ var x = { metin:String(m && m.metin || '').trim(), kaynaklar:(Array.isArray(m && m.kaynaklar) ? m.kaynaklar : []).map(String).filter(function(v, i, a){ return a.indexOf(v) === i; }), durum:'ok', tur:null, neden:null };
+    var dus = function(tur, neden){ x.durum = 'dusuruldu'; x.tur = tur; x.neden = neden; return x; }, byId = {}; (W || []).forEach(function(w){ byId[w.id] = w; });
+    if(!x.metin) return dus('bos', 'boş madde');
+    if(!x.kaynaklar.length) return dus('kaynaksiz', 'kaynaksız madde (kaynak kimliği yok)');
+    if(x.kaynaklar.length > 5) return dus('kaynaksiz', 'en çok 5 kaynak (' + x.kaynaklar.length + ' verildi)');
+    var yok = x.kaynaklar.filter(function(id){ return !byId[id]; }); if(yok.length) return dus('kaynaksiz', 'kaynak kimliği bu araştırmanın alıntılarında yok: ' + yok.join(', '));
+    var MS = window.BM_MASH, mt = MS && MS.tatMaske ? MS.tatMaske(x.metin) : { metin:x.metin };
+    if(A4.tatHukmu(mt.metin)) return dus('tat', 'tat / kalite hükmü (öznel yargı) — uygulama göstermez');
+    if(A4.YALAKA.test(dKatla(x.metin)) || (MS && MS.yalakaVar && MS.yalakaVar(x.metin))) return dus('yalakalik', 'onaylama / yalakalık dili');
+    var Q = x.kaynaklar.map(function(id){ return byId[id]; }), alinti = Q.map(function(w){ return String(w.alinti || ''); }).join(' \n ');
+    var url = function(u){ try{ return decodeURIComponent(String(u || '')); }catch(e){ return String(u || ''); } }, sayfa = (W || []).filter(function(w){ return Q.some(function(q){ return q.url === w.url; }); });
+    var yer = sayfa.map(function(w){ return String(w.alinti || '') + ' ' + String(w.baslik || '') + ' ' + url(w.url); }).join(' \n ').toUpperCase().replace(/[-\s‐-―]/g, '');
+    var K = C.dKodlar(x.metin), kotuK = K.filter(function(k){ return yer.indexOf(k.kod) < 0 && !(k.harf === 'WY' && yer.indexOf('WYEAST' + k.rakam) >= 0); }).map(function(k){ return k.kod; });
+    if(kotuK.length) return dus('kod', 'ürün / suş kodu kaynak alıntısında ya da adresinde yok: ' + kotuK.join(', ') + ' (' + x.kaynaklar.join(', ') + ')');
+    var QV = (alinti.match(/\d+(?:[.,]\d+)?/g) || []).map(function(s){ return parseFloat(s.replace(',', '.')); }); (alinti.toLowerCase().match(/[a-z]+/g) || []).forEach(function(w){ if(Object.prototype.hasOwnProperty.call(C.SAYI_EN, w)) QV.push(C.SAYI_EN[w]); });
+    var kotuS = C.dSayilar(x.metin, K).filter(function(s){ return !K.some(function(k){ return k.rakam === s.ham; }) && !QV.some(function(v){ return Math.abs(v - s.v) < 1e-9; }); }).map(function(s){ return s.ham; });
+    if(kotuS.length) return dus('sayi', 'sayı kaynak alıntısında yok: ' + kotuS.join(', ') + ' (' + x.kaynaklar.join(', ') + ')');
+    return x; };
+  // ═══ CEV2 ARAŞTIRMA DENETLEYİCİ SON ═══
+  C.ARASTIRMA_DONMUS = '92f59a3c-5776';
+  C.arastirmaDenetleyiciMetni = function(){ var B = '// ═══ CEV2 ARAŞTIRMA DENETLEYİCİ ' + 'BAŞ ═══', S = '// ═══ CEV2 ARAŞTIRMA DENETLEYİCİ ' + 'SON ═══', sc = document.querySelectorAll('script');
+    for(var i = 0; i < sc.length; i++){ var t = sc[i].textContent || '', a = t.indexOf(B), b = t.indexOf(S); if(a >= 0 && b > a) return t.slice(a, b + S.length).replace(/\r\n/g, '\n'); } return null; };
+  C.arastirmaImza = function(){ var t = C.arastirmaDenetleyiciMetni(); return t ? C.fnv(t) + '-' + t.length : null; };
+
+  // ── CEV2 (3): GRUPLAMA + BİRLEŞTİRME + ÇELİŞKİ (AI'sız) ──
+  //   net yön = değişkene yapılan (artırmak / eklemek / bilgi = +1, azaltmak / çıkarmak = −1) × KONU'ya etkisi (artırır +1, azaltır −1, etkilemez 0).
+  //   Aynı değişken (normalize anahtar) + farklı net yön → çelişki (yön) · aynı net + değer aralıkları çakışmıyor (aynı birim) → çelişki (değer) · aynı net, çelişki yok → TEK madde (kaynaklar toplanır, güç yeniden).
+  //   Çelişki ancak iki taraf ALINTILARDA doğrulanırsa gösterilir: her tarafın başka tarafta olmayan en az bir alıntısı + yön tarafında alıntıda değişim / etkisizlik ifadesi (İngilizce sözlük); doğrulanmazsa maddeler ayrı kalır, raporlanır.
+  C.YON_ISARET = { artirmak:1, eklemek:1, bilgi:1, azaltmak:-1, cikarmak:-1 }; C.ETKI_ISARET = { artirir:1, azaltir:-1, etkilemez:0 };
+  C.DEG_ES = [[/maya (miktar|doz|hucre|sayi)\w*|hucre sayi\w*|asilama oran\w*|pitch\w*/, 'maya miktari'], [/(mayalanma|fermant\w*|ferment\w*) sicaklig\w*/, 'mayalanma sicakligi'], [/(kaynatma|kaynama) (sure|zaman)\w*/, 'kaynatma suresi'],
+    [/(kuru hop|dry hop)\w*( temas)? sure\w*|temas sure\w*/, 'kuru hop temas suresi'], [/karbonasyon\w*|co2 (seviye|hacm|hedef)\w*|hacim co2/, 'karbonasyon seviyesi'], [/lipi[td]\w* oksidasyon\w*/, 'lipit oksidasyonu'],
+    [/soguk cokturme|soguk(ta)? dinlendirme|cold crash\w*/, 'soguk cokturme'], [/(mash|mayse) sicaklig\w*/, 'mash sicakligi']];
+  C.DEG_DUR = ['artirmak', 'artirilmasi', 'artirma', 'azaltmak', 'azaltilmasi', 'azaltma', 'kullanmak', 'kullanimi', 'kullanilmasi', 'eklemek', 'eklenmesi', 'ekleme', 'cikarmak', 'yukseltmek', 'yukseltilmesi', 'dusurmek', 'dusurulmesi',
+    'uzatmak', 'uzatilmasi', 'kisaltmak', 'kisaltilmasi', 'tutmak', 'yuksek', 'dusuk', 'daha', 'fazla', 'ile', 'veya', 'olarak', 'icin', 'bir'];
+  C.degAnahtar = function(d){ var n = katla(d).replace(/\([^)]*\)/g, ' '); for(var i = 0; i < C.DEG_ES.length; i++) if(C.DEG_ES[i][0].test(n)) return C.DEG_ES[i][1];
+    return n.replace(/[^a-z0-9 ]+/g, ' ').split(/\s+/).filter(function(w){ return w.length > 2 && C.DEG_DUR.indexOf(w) < 0; }).map(function(w){ return w.slice(0, 5); }).filter(function(w, i, a){ return a.indexOf(w) === i; }).sort().join(' '); };
+  C.SAYI_SOZ = { bir:1, iki:2, uc:3, dort:4, bes:5, alti:6, yedi:7, sekiz:8, dokuz:9, on:10 };
+  C.BIRIM = [[/^(gun|day)/, 'gun', 1], [/^(hafta|week)/, 'gun', 7], [/^(hacim|volume|vol)/, 'hacim', 1], [/^(dakika|dk|min)/, 'dk', 1], [/^(saat|hour)/, 'dk', 60], [/^(°\s*c|derece)/, 'C', 1], [/^°\s*f/, 'F', 1], [/^ppm/, 'ppm', 1], [/^(g\/l|gr\/l)/, 'g/L', 1], [/^%|^yuzde/, '%', 1]];
+  C.degerAralik = function(d){ var n = katla(d).replace(/(\d),(\d)/g, '$1.$2'); if(!n.trim()) return null;
+    n = n.replace(/\b(bir|iki|uc|dort|bes|alti|yedi|sekiz|dokuz|on)\b/g, function(w){ return String(C.SAYI_SOZ[w]); });
+    var m = /(\d+(?:\.\d+)?)(?:\s*(?:[–—-]|ila|ile|to)\s*(\d+(?:\.\d+)?))?\s*(.*)$/.exec(n); if(!m) return null;
+    var a = +m[1], b = m[2] != null ? +m[2] : a, kalan = String(m[3] || '').trim(), br = C.BIRIM.find(function(u){ return u[0].test(kalan); }); if(!br) return null;
+    a *= br[2]; b *= br[2]; var once = n.slice(0, m.index);
+    if(/\ben (cok|fazla)\b|\bazami\b/.test(once) || /\b(veya|ya da) (daha )?(az|kisa)\b|\baltinda\b/.test(kalan)) a = 0;
+    else if(/\ben az\b/.test(once) || /\b(veya|ya da) (daha )?(fazla|uzun)\b|\bustunde\b/.test(kalan)) b = Infinity;
+    return { a:Math.min(a, b), b:Math.max(a, b), birim:br[1] }; };
+  C.CUE_DEG = /increas|decreas|higher|lower|\bmore\b|\bless\b|reduc|\brais|go(es)? up|suppress|limit|prevent|enhanc|promot|produc|contribut|caus|\bhelp|start to show|\bform|boost|\bdrop|inhibit|fuller|darker|minimi|accentuat|improv|favou?r|result/i;
+  C.CUE_SIFIR = /\bno (significant |measurable |noticeable |perceptible )?(difference|effect|impact|change)|\bnot (a single|due|significant|reliabl|able|detect|identif)|\bneither\b|unable to|did not|could not|was not|were not|no measurable|not distinguish|indistinguishable/i;
+  C.celiskiDogrula = function(T, byId){ var neden = [];
+    T.forEach(function(t, i){ var ids = t.kaynaklar, diger = []; T.forEach(function(u, j){ if(j !== i) diger = diger.concat(u.kaynaklar); });
+      if(!ids.some(function(id){ return diger.indexOf(id) < 0; })) neden.push('taraf ' + (i + 1) + ': kendine ait alıntı yok (iki görüş aynı alıntıya dayanıyor)');
+      if(t.tip === 'yon'){ var re = t.net === 0 ? C.CUE_SIFIR : C.CUE_DEG; if(!ids.some(function(id){ return byId[id] && re.test(byId[id].alinti); })) neden.push('taraf ' + (i + 1) + ': alıntıda ' + (t.net === 0 ? 'etkisizlik' : 'değişim') + ' ifadesi yok'); } });
+    return { ok:!neden.length, neden:neden }; };
+  C.idBirlesik = function(L){ var ids = []; L.forEach(function(x){ x.kaynaklar.forEach(function(id){ if(ids.indexOf(id) < 0) ids.push(id); }); }); return ids; };
+  C.birlestir = function(U, byId){ var x = Object.assign({}, U[0]); x.kaynaklar = C.idBirlesik(U); x.urller = x.kaynaklar.map(function(id){ return byId[id] && byId[id].url; }).filter(Boolean); x.guc = C.gucHesap(x.urller); x.birlesen = U.map(function(u){ return u.metin; }); return x; };
+  C.celiskiMadde = function(k, g, T, tip, byId){ var host = function(ids){ return ids.map(function(id){ return byId[id] && C.host(byId[id].url); }).filter(function(h, i, a){ return h && a.indexOf(h) === i; }).join(', '); };
+    var taraf = T.map(function(t){ var m = t.maddeler[0]; return { metin:(m.deger ? m.deger + ': ' : '') + (m.etki || m.metin), kaynaklar:t.kaynaklar, kaynakAd:host(t.kaynaklar), net:t.net != null ? t.net : null, aralik:t.aralik || null }; });
+    var ids = C.idBirlesik(T);
+    return { metin:'⚖️ Kaynaklar çelişiyor — ' + g[0].degisken + ': ' + taraf.map(function(t){ return t.metin + ' (' + t.kaynakAd + ')'; }).join(' ↔ ') + '. Öneri yok.', durum:'ok', celiski:true, celiskiTip:tip, taraflar:taraf, degisken:g[0].degisken, etken:g[0].degisken, anahtar:k,
+      kaynaklar:ids, urller:ids.map(function(id){ return byId[id] && byId[id].url; }).filter(Boolean), guc:{ k:'celiski', ad:'kaynaklar çelişiyor', n:0 }, yon:'etkiler', net:null }; };
   C.maddeIsle = function(v, W){ var byId = {}; W.forEach(function(w){ byId[w.id] = w; });
-    var ctx = { paket:{ parcalar:[], byId:{}, metin:'', tok:0, f:{} }, web:W, kalemler:[], stil:null, yorum:false };
-    var L = (v && Array.isArray(v.maddeler) ? v.maddeler : []).slice(0, 8).map(function(m){ var metin = String(m.etken || '').trim() + (m.etki ? ' — ' + String(m.etki).trim() : '');
-      var x = A4.cumleDenetle({ metin:metin, kaynaklar:m.kaynaklar }, ctx); x.yon = C.YONLER.indexOf(m.yon) >= 0 ? m.yon : 'etkiler'; x.etken = String(m.etken || '').trim();
-      if(x.durum === 'ok' && A4.YALAKA.test(katla(x.metin))){ x.durum = 'dusuruldu'; x.tur = 'yalakalik'; x.neden = 'onaylama / yalakalık dili'; }
-      if(x.durum === 'ok' && A4.tatHukmu && A4.tatHukmu(x.metin)){ x.durum = 'dusuruldu'; x.tur = 'tat'; x.neden = 'tat / kalite hükmü'; }
+    var L = (v && Array.isArray(v.maddeler) ? v.maddeler : []).slice(0, 8).map(function(m){ var eski = m.degisken == null && m.etken != null, deg = String((eski ? m.etken : m.degisken) || '').trim(), deger = eski ? '' : String(m.deger || '').trim(), etki = String(m.etki || '').trim();
+      var x = C.arastirmaDenetle({ metin:deg + (deger ? ' (' + deger + ')' : '') + (etki ? ' — ' + etki : ''), kaynaklar:m.kaynaklar }, W); x.degisken = deg; x.etken = deg; x.deger = deger; x.etki = etki;
+      if(eski){ x.yonDeg = 'bilgi'; x.etkiYon = m.yon === 'artirir' || m.yon === 'azaltir' || m.yon === 'etkilemez' ? m.yon : null; }
+      else { x.yonDeg = C.YON_DEG.indexOf(m.yon) >= 0 ? m.yon : 'bilgi'; x.etkiYon = C.ETKI_YON.indexOf(m.etki_yonu) >= 0 ? m.etki_yonu : null; }
+      x.yon = x.etkiYon || 'etkiler'; x.net = x.etkiYon == null ? null : C.YON_ISARET[x.yonDeg] * C.ETKI_ISARET[x.etkiYon]; x.anahtar = C.degAnahtar(deg); x.aralik = C.degerAralik(deger);
       x.urller = x.kaynaklar.map(function(id){ return byId[id] && byId[id].url; }).filter(Boolean); x.guc = C.gucHesap(x.urller); return x; });
-    var ok = L.filter(function(x){ return x.durum === 'ok'; }), anahtar = function(x){ return katla(x.etken).replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(function(w){ return w.length > 2; }).slice(0, 3).join(' '); };
-    ok.forEach(function(x){ ok.forEach(function(y){ if(x !== y && anahtar(x) && anahtar(x) === anahtar(y) && ((x.yon === 'artirir' && y.yon === 'azaltir') || (x.yon === 'azaltir' && y.yon === 'artirir'))){ x.guc = { k:'celiski', ad:'kaynaklar çelişiyor', n:x.guc.n }; } }); });
-    return { tum:L, gos:ok, dusen:L.filter(function(x){ return x.durum === 'dusuruldu'; }) }; };
+    var ok = L.filter(function(x){ return x.durum === 'ok'; }), G = {}, sira = [], rapor = [], cikti = [], birlesen = 0;
+    ok.forEach(function(x){ var k = x.anahtar || ('#' + x.metin); if(!G[k]){ G[k] = []; sira.push(k); } G[k].push(x); });
+    sira.forEach(function(k){ var g = G[k]; if(g.length === 1){ cikti.push(g[0]); return; }
+      var netler = g.map(function(x){ return x.net; }).filter(function(n, i, a){ return n != null && a.indexOf(n) === i; }), T = null, tip = null;
+      if(netler.length >= 2){ tip = 'yon'; T = netler.map(function(n){ var u = g.filter(function(x){ return x.net === n; }); return { tip:'yon', net:n, maddeler:u, kaynaklar:C.idBirlesik(u) }; }); }
+      else { var A = g.filter(function(x){ return x.aralik; }); for(var i = 0; i < A.length && !T; i++) for(var j = i + 1; j < A.length && !T; j++){ var p = A[i].aralik, q = A[j].aralik;
+        if(p.birim === q.birim && Math.min(p.b, q.b) - Math.max(p.a, q.a) <= 0){ tip = 'deger'; T = [A[i], A[j]].map(function(x){ return { tip:'deger', aralik:x.aralik, maddeler:[x], kaynaklar:x.kaynaklar.slice() }; }); } } }
+      if(T){ var dg = C.celiskiDogrula(T, byId);
+        if(!dg.ok && tip === 'yon' && T.length === 2 && T.every(function(t){ return t.maddeler.length === 1 && t.maddeler[0].aralik; })){ var p0 = T[0].maddeler[0].aralik, q0 = T[1].maddeler[0].aralik; // CEV2 (3): değer çelişkisine düş
+          if(p0.birim === q0.birim && Math.min(p0.b, q0.b) - Math.max(p0.a, q0.a) <= 0){ var T2 = T.map(function(t){ return { tip:'deger', aralik:t.maddeler[0].aralik, maddeler:t.maddeler, kaynaklar:t.kaynaklar }; }), dg2 = C.celiskiDogrula(T2, byId); if(dg2.ok){ T = T2; tip = 'deger'; dg = dg2; } } }
+        if(dg.ok){ cikti.push(C.celiskiMadde(k, g, T, tip, byId)); var gir = []; T.forEach(function(t){ gir = gir.concat(t.maddeler); }); g.filter(function(x){ return gir.indexOf(x) < 0; }).forEach(function(x){ cikti.push(x); }); return; }
+        rapor.push({ degisken:g[0].degisken, tip:tip, kaynak:'uygulama', neden:dg.neden }); }
+      var alt = {}, ak = []; g.forEach(function(x){ var n = String(x.net); if(!alt[n]){ alt[n] = []; ak.push(n); } alt[n].push(x); });
+      ak.forEach(function(n){ if(alt[n].length > 1){ birlesen += alt[n].length - 1; cikti.push(C.birlestir(alt[n], byId)); } else cikti.push(alt[n][0]); }); });
+    ((v && v.celiskiler) || []).forEach(function(c){ var k = C.degAnahtar(c && c.degisken); if(!k) return; if(!cikti.some(function(x){ return x.celiski && x.anahtar === k; }) && !rapor.some(function(r){ return C.degAnahtar(r.degisken) === k; })) rapor.push({ degisken:String(c.degisken), tip:null, kaynak:'AI', neden:['AI çelişki bildirdi; uygulama aynı değişkende iki görüşü (ters yön ya da çakışmayan değer) alıntılarda doğrulayamadı — çelişki gösterilmedi'] }); });
+    var dv = v && v.dogrudan_cevap, dc = null;
+    if(dv && String(dv.metin || '').trim()){ dc = C.arastirmaDenetle({ metin:dv.metin, kaynaklar:dv.kaynaklar }, W); if(dc.durum === 'ok' && dc.kaynaklar.length > 3){ dc.durum = 'dusuruldu'; dc.tur = 'kaynaksiz'; dc.neden = 'doğrudan cevapta en çok 3 kaynak'; }
+      if(dc.durum === 'ok' && C.jargonVar(dc.metin)){ dc.durum = 'dusuruldu'; dc.tur = 'jargon'; dc.neden = 'doğrudan cevapta iç kimlik / jargon'; } }
+    return { tum:L, gos:cikti, dusen:L.filter(function(x){ return x.durum === 'dusuruldu'; }), celiskiRapor:rapor, birlesen:birlesen, dogrudan:dc && dc.durum === 'ok' ? dc : null, dogrudanDusen:dc && dc.durum !== 'ok' ? dc : null }; };
 
   C.durum = {};
-  // ana akış — ctx: { kaynak:'ai5'|'ai4'|'mash', key, soru, stil, T (reçete bağlamı, isteğe bağlı), ciz (yeniden çizim) }; opt.mock: { sorgu, web, ozet } (test)
+  // ana akış — ctx: { kaynak:'ai5'|'ai4'|'mash', key, soru, stil, T (reçete bağlamı, isteğe bağlı), ciz (yeniden çizim) }; opt.mock: { sorgu, web, ozet } (test; web her sınıf için ayrı çağrılır, p.sinif)
   C.arastir = function(ctx, opt){ opt = opt || {}; var A = window.BM_AI, key = ctx.key || ('cev:' + Date.now());
-    var R = C.durum[key] = { key:key, kaynak:ctx.kaynak, soru:String(ctx.soru || ''), konu:C.tarafsiz(ctx.soru), stil:ctx.stil || null, T:ctx.T || null, durum:'sorgu', cagri:[], maliyet:0, th:C.tahmin(), ciz:ctx.ciz || null };
-    var ciz = function(){ try{ if(R.ciz) R.ciz(); }catch(e){} }, harca = function(tur, r){ var m = r && r.maliyet, u = m ? +m.usd || 0 : 0; R.maliyet += u; R.cagri.push({ tur:tur, ok:!!(r && r.ok), usd:u, model:r && r.model || null }); };
+    var R = C.durum[key] = { key:key, kaynak:ctx.kaynak, soru:String(ctx.soru || ''), konu:C.tarafsiz(ctx.soru), konuEt:C.konuEtiket(ctx.soru), sorulanL:C.sorulan(ctx.soru), stil:ctx.stil || null, T:ctx.T || null, durum:'sorgu', cagri:[], maliyet:0, th:C.tahmin(), ciz:ctx.ciz || null };
+    R.sorguStil = C.sorguStili(R.soru, R.konu, R.stil);
+    var ciz = function(){ try{ if(R.ciz) R.ciz(); }catch(e){} }, harca = function(tur, r, sinif){ var m = r && r.maliyet, u = m ? +m.usd || 0 : 0; R.maliyet += u; R.cagri.push({ tur:tur, sinif:sinif || null, ok:!!(r && r.ok), usd:u, model:r && r.model || null }); };
     var tavanAsti = function(){ return R.th && R.maliyet > R.th.tavan; }, dur = function(neden){ R.durum = 'durdu'; R.neden = neden; ciz(); return R; };
     var sor = function(tur, p){ if(opt.mock) return Promise.resolve(opt.mock[tur] ? opt.mock[tur](p, R) : { ok:false, hata:{ mesaj:'mock yok' } }); return A.sor(p); };
     if(!opt.mock && (!A || !A.hazirMi().hazir)){ R.durum = 'aiyok'; R.neden = 'AI anahtarı yok — araştırma modu AI ile çalışır'; ciz(); return Promise.resolve(R); }
     ciz(); var mk = R.th ? R.th.model : 'ucuz';
-    return sor('sorgu', { kullanim:'cevsorgu', modelKey:mk, baglam:'', soru:C.SORGU_GOREV(R.konu, R.stil), sema:C.SORGU_SEMA }).then(function(r){ harca('sorgu', r);
-      R.sorgular = C.sorguTemizle(r && r.ok && r.veri && r.veri.sorgular); if(!R.sorgular.length) return dur(r && r.ok ? 'sorgu üreteci geçerli sorgu üretmedi' : 'sorgu üreteci çağrısı başarısız: ' + (r && r.hata && r.hata.mesaj || ''));
+    return sor('sorgu', { kullanim:'cevsorgu', modelKey:mk, baglam:'', soru:C.SORGU_GOREV(R.konu, R.sorguStil), sema:C.SORGU_SEMA }).then(function(r){ harca('sorgu', r);
+      R.sorgularHam = r && r.ok && r.veri && Array.isArray(r.veri.sorgular) ? r.veri.sorgular.slice(0, 6) : [];
+      R.sorgular = C.sorguTemizle(R.sorgularHam, { stilSil:R.sorguStil ? null : R.stil }); if(!R.sorgular.length) return dur(r && r.ok ? 'sorgu üreteci geçerli sorgu üretmedi' : 'sorgu üreteci çağrısı başarısız: ' + (r && r.hata && r.hata.mesaj || ''));
       if(tavanAsti()) return dur('maliyet tavanı aşıldı ($' + trS(R.th.tavan, 4) + ')');
       R.durum = 'web'; ciz();
       var soru = 'Şu web aramalarını AYNEN bu sırayla yap (her biri en fazla bir kez):\n' + R.sorgular.map(function(x, i){ return (i + 1) + ') ' + x; }).join('\n') + '\nSonuçlardan yalnız olgu cümlelerini kısa ve atıflı yaz; değerlendirme yapma. Bulamazsan tam olarak "Web\'de güvenilir kaynak bulamadım." yaz.';
-      return sor('web', { kullanim:'arastirmaweb', modelKey:A4.webModel(), baglam:'', soru:soru }).then(function(w){ harca('web', w);
-        R.web = w && w.ok ? C.webIsle(w.veri, R.sorgular) : { bulgular:[], atilan:0, sorgular:R.sorgular, hata:w && w.hata };
+      var cev = [], si = 0, webAdim = function(){ if(si >= C.SINIFLAR.length) return Promise.resolve(); if(si > 0 && tavanAsti()){ R.webTavan = 'maliyet tavanı aşıldı — kalan kaynak sınıfları aranmadı'; return Promise.resolve(); }
+        var s = C.SINIFLAR[si++]; return sor('web', { kullanim:'arastirmaweb_' + s, modelKey:A4.webModel(), baglam:'', soru:soru, sinif:s }).then(function(w){ harca('web', w, s); cev.push({ sinif:s, ok:!!(w && w.ok), veri:w && w.veri, hata:w && w.hata }); return webAdim(); }); };
+      return webAdim().then(function(){
+        R.web = C.webIsle(cev, R.sorgular); if(cev.length && cev.every(function(c){ return !c.ok; })) return dur('web araması başarısız (' + R.web.hatalar.join(' · ').slice(0, 200) + ')');
         if(!R.web.bulgular.length){ R.durum = 'bulamadim'; ciz(); return R; }
         if(tavanAsti()) return dur('maliyet tavanı aşıldı ($' + trS(R.th.tavan, 4) + ')');
         R.durum = 'ozet'; ciz(); var W = R.web.bulgular, ids = W.map(function(x){ return x.id; });
-        var baglam = 'WEB ALINTILARI (izinli kaynaklar; yalnız alıntı metni kanıttır):\n' + W.map(function(x){ return '[' + x.id + '] ' + x.url + (x.baslik ? ' — ' + x.baslik : '') + '\n"' + x.alinti + '"'; }).join('\n');
+        var baglam = 'WEB ALINTILARI (izinli kaynaklar; yalnız alıntı metni kanıttır):\n' + W.map(function(x){ return '[' + x.id + '] (' + (C.SINIF_AD[x.sinif] || C.TUR_AD[x.tur] || '') + ') ' + x.url + (x.baslik ? ' — ' + x.baslik : '') + '\n"' + x.alinti + '"'; }).join('\n');
         return sor('ozet', { kullanim:'cevozet', modelKey:mk, baglam:baglam, soru:C.OZET_GOREV(R.konu), sema:C.ozetSema(ids) }).then(function(o){ harca('ozet', o);
           R.istekOzet = { konu:R.konu, yonlendirmeGitti:C.yonlendirmeVar(C.OZET_GOREV(R.konu)) }; // tarafsızlık kanıtı: kullanıcının yönlendirmesi ("değil mi", "daha iyi olur") özetleyiciye GİTMEZ
           if(!(o && o.ok && o.veri)){ R.durum = 'hata'; R.neden = 'özet alınamadı: ' + (o && o.hata && o.hata.mesaj || ''); ciz(); return R; }
           R.sonuc = C.maddeIsle(o.veri, W); R.durum = R.sonuc.gos.length ? 'tamam' : 'bulamadim'; if(tavanAsti()) R.tavanUyari = 'maliyet tavanı aşıldı ($' + trS(R.th.tavan, 4) + ')'; ciz(); return R; }); }); })
       .catch(function(e){ R.durum = 'hata'; R.neden = String(e && e.message || e); ciz(); return R; }); };
 
+  // CEV2 (5): sorulan malzeme / işlem gösterilen bir maddede geçiyor mu (sözcüklerin her biri, 5 harf kök)
+  C.sorulanGecer = function(s, metin){ var n = katla(metin), W = katla(s).replace(/[^a-z0-9 ]+/g, ' ').split(/\s+/).filter(function(w){ return w.length >= 4; }); return W.length > 0 && W.every(function(w){ return n.indexOf(w.slice(0, 5)) >= 0; }); };
+  // CEV2 (5): doğrudan cevap — (a) özetleyicinin dogrudan_cevap'ı araştırma denetleyicisinden geçtiyse o; (b) geçmediyse / yoksa ve soruda "sorulan" varsa ve hiçbir madde ondan söz etmiyorsa uygulamanın cümlesi;
+  //   ardından güç cümlesi: "en güçlü kanıtlı" YALNIZ gerçekten güçlü etken varsa; yoksa "İki bağımsız kaynakla desteklenen etken bulamadım; aşağıdakiler tek kaynaklı (olası)."
+  C.dogrudanCevap = function(R){ var gos = R.sonuc ? R.sonuc.gos : [], on = '', M = C.sirala(gos), gl = M.filter(function(x){ return x.guc && x.guc.k === 'guclu'; }), ol = M.filter(function(x){ return x.guc && x.guc.k === 'olasi'; });
+    if(R.sonuc && R.sonuc.dogrudan) on = R.sonuc.dogrudan.metin.trim();
+    else if(R.sorulanL && R.sorulanL.length){ var eks = R.sorulanL.filter(function(s){ return !/^mash sıcaklığı/.test(s) && !gos.some(function(x){ return C.sorulanGecer(s, x.metin); }); });
+      if(eks.length) on = 'Sorduğun "' + eks.join('", "') + '" için: bulunan kaynaklı maddelerin hiçbiri bunun ' + (R.konuEt || 'bu konu') + ' üzerine etkisinden söz etmiyor.'; }
+    var s = (on ? on + (/[.!?]$/.test(on) ? ' ' : '. ') : '') + 'İzinli kaynaklarda ' + gos.length + ' etken buldum';
+    s += gl.length ? '; en güçlü kanıtlı olan: ' + (gl[0].degisken || String(gl[0].metin).split(' — ')[0]) + '.' : '. İki bağımsız kaynakla desteklenen etken bulamadım' + (ol.length ? '; aşağıdakiler tek kaynaklı (olası).' : '.');
+    if(M.some(function(x){ return x.guc && x.guc.k === 'celiski'; })) s += ' Bazı konularda kaynaklar çelişiyor — onlar öneri değil.';
+    return { metin:s, dogrudan:on || null, kaynak:R.sonuc && R.sonuc.dogrudan ? 'ozet' : on ? 'uygulama' : null }; };
   // araştırma sonucu → ORTAK KART
   C.arastirmaKart = function(R){ if(!R) return '';
-    if(R.durum === 'sorgu' || R.durum === 'web' || R.durum === 'ozet') return '<div class="cev-arastirma" data-durum="' + R.durum + '" style="margin-top:8px;font-size:12px;color:var(--metin-soluk)">⏳ ' + ({ sorgu:'Arama sorguları hazırlanıyor…', web:'İzinli kaynaklarda aranıyor…', ozet:'Bulunan alıntılar özetleniyor (yalnız kaynaklı maddeler gösterilir)…' })[R.durum] + '</div>';
+    if(R.durum === 'sorgu' || R.durum === 'web' || R.durum === 'ozet') return '<div class="cev-arastirma" data-durum="' + R.durum + '" style="margin-top:8px;font-size:12px;color:var(--metin-soluk)">⏳ ' + ({ sorgu:'Arama sorguları hazırlanıyor…', web:'İzinli kaynaklarda aranıyor (ders kitabı · üretici · hakemli · dergi)…', ozet:'Bulunan alıntılar özetleniyor (yalnız kaynaklı maddeler gösterilir)…' })[R.durum] + '</div>';
     var anl = 'Anladığım: ' + R.konu.replace(/ konusunu etkileyen etkenler$/, '').replace(/^"|"$/g, '') + ' — bunu etkileyen etkenleri kaynaklarda aradım.';
     var gos = R.sonuc ? R.sonuc.gos : [], cev, M = gos.map(function(x){ return { metin:x.metin, guc:x.guc, kaynakAd:x.urller.map(C.host).filter(function(h, i, a){ return a.indexOf(h) === i; }).join(', ') }; });
-    var g1 = C.sirala(M)[0];
-    if(R.durum === 'tamam') cev = 'İzinli kaynaklarda ' + gos.length + ' etken buldum' + (g1 ? '; en güçlü kanıtlı olan: ' + g1.metin.split(' — ')[0] + '.' : '.') + (M.some(function(m){ return m.guc.k === 'celiski'; }) ? ' Bazı maddelerde kaynaklar çelişiyor — onlar öneri değil.' : '');
-    else if(R.durum === 'bulamadim') cev = 'Bulamadım: izinli kaynaklarda (' + (R.sorgular || []).length + ' arama) bu konuyu doğrudan anlatan alıntı çıkmadı.';
+    if(R.durum === 'tamam') cev = C.dogrudanCevap(R).metin;
+    else if(R.durum === 'bulamadim') cev = 'Bulamadım: izinli kaynaklarda (' + (R.sorgular || []).length + ' arama, ' + C.SINIFLAR.length + ' kaynak sınıfı) bu konuyu doğrudan anlatan alıntı çıkmadı.';
     else if(R.durum === 'aiyok') cev = R.neden;
     else cev = 'Araştırma durdu: ' + (R.neden || 'bilinmeyen neden') + '.';
-    var K = (R.web ? R.web.bulgular : []).filter(function(w){ return gos.some(function(x){ return x.kaynaklar.indexOf(w.id) >= 0; }); }).map(function(w){ return { ad:(w.baslik || C.host(w.url)), url:w.url, tur:w.tur }; });
-    var ay = '<div class="cev-teknik" style="font-size:11px;color:var(--metin-soluk);margin-top:6px">Arama sorguları (uygulamanın sorgu üreteci, cevap yazmaz): ' + E((R.sorgular || []).join(' · ') || '—') + '<br>Özetleyicinin gördüğü soru (tarafsızlaştırılmış): ' + E(R.konu) + '<br>İzinli alanlar: ' + E(window.BM_AI.WEB.arastirma.join(', ')) + '</div>';
+    var K = (R.web ? R.web.bulgular : []).filter(function(w){ return gos.some(function(x){ return x.kaynaklar.indexOf(w.id) >= 0; }) || (R.sonuc && R.sonuc.dogrudan && R.sonuc.dogrudan.kaynaklar.indexOf(w.id) >= 0); }).map(function(w){ return { ad:(w.baslik || C.host(w.url)), url:w.url, tur:w.tur }; });
+    var ss = R.web && R.web.sinifSay ? C.SINIFLAR.map(function(s){ return C.SINIF_AD[s] + ' ' + (R.web.sinifSay[s] || 0); }).join(' · ') : '';
+    var ay = '<div class="cev-teknik" style="font-size:11px;color:var(--metin-soluk);margin-top:6px">Arama sorguları (uygulamanın sorgu üreteci, cevap yazmaz): ' + E((R.sorgular || []).join(' · ') || '—') + (R.sorguStil ? ' (stil: ' + E(R.sorguStil) + ')' : ' (stilsiz — genel konu)') + '<br>Özetleyicinin gördüğü soru (tarafsızlaştırılmış): ' + E(R.konu) + '<br>Kaynak sınıfı başına alıntı: ' + E(ss || '—') + (R.web && R.web.hatalar && R.web.hatalar.length ? ' · ✕ ' + E(R.web.hatalar.join(' · ')) : '') + (R.webTavan ? ' · ⚠️ ' + E(R.webTavan) : '') + '<br>İzinli alanlar: ' + E(window.BM_AI.WEB.arastirma.join(', ')) + '</div>';
     if(R.sonuc){ ay += R.sonuc.gos.map(function(x){ return '<div class="cev-alinti" style="font-size:11px;margin-top:3px">• ' + E(x.metin) + ' [' + E(x.kaynaklar.join(', ')) + ']</div>'; }).join('');
       ay += (R.web.bulgular || []).map(function(w){ return '<div style="font-size:10.5px;color:var(--metin-soluk)">[' + E(w.id) + '] "' + E(String(w.alinti).slice(0, 240)) + '" — <a href="' + E(w.url) + '" target="_blank" rel="noopener">' + E(C.host(w.url)) + '</a> (' + E(C.TUR_AD[w.tur] || w.tur) + ')</div>'; }).join('');
-      if(R.sonuc.dusen.length) ay += '<div class="cev-dusen" style="font-size:11px;color:#8a5a00">🗑️ ' + R.sonuc.dusen.length + ' madde denetimden düştü (gösterilmedi): ' + E(R.sonuc.dusen.map(function(x){ return x.neden; }).join(' · ').slice(0, 300)) + '</div>'; }
-    ay += '<div class="cev-maliyet" style="font-size:10.5px;color:var(--metin-soluk);margin-top:4px">bu araştırmanın gerçek AI maliyeti $' + trS(R.maliyet, 4) + (R.th ? ' (tahmin VARSAYIM ≈ $' + trS(R.th.usd, 4) + ', tavan $' + trS(R.th.tavan, 4) + ')' : '') + ' · çağrılar: ' + E(R.cagri.map(function(c){ return c.tur + (c.ok ? '' : ' ✕'); }).join(', ') || 'yok') + (R.tavanUyari ? ' · ⚠️ ' + E(R.tavanUyari) : '') + '</div>';
+      if(R.sonuc.dusen.length) ay += '<div class="cev-dusen" style="font-size:11px;color:#8a5a00">🗑️ ' + R.sonuc.dusen.length + ' madde denetimden düştü (gösterilmedi): ' + E(R.sonuc.dusen.map(function(x){ return x.neden; }).join(' · ').slice(0, 300)) + '</div>';
+      if(R.sonuc.dogrudanDusen) ay += '<div class="cev-dusen" style="font-size:11px;color:#8a5a00">🗑️ özetleyicinin doğrudan cevabı denetimden düştü: ' + E(R.sonuc.dogrudanDusen.neden) + '</div>';
+      if(R.sonuc.celiskiRapor && R.sonuc.celiskiRapor.length) ay += '<div class="cev-celiski-rapor" style="font-size:11px;color:var(--metin-soluk)">⚖️ doğrulanamayan çelişki (gösterilmedi): ' + E(R.sonuc.celiskiRapor.map(function(r){ return r.degisken + ' — ' + r.neden.join('; '); }).join(' · ').slice(0, 300)) + '</div>'; }
+    ay += '<div class="cev-maliyet" style="font-size:10.5px;color:var(--metin-soluk);margin-top:4px">bu araştırmanın gerçek AI maliyeti $' + trS(R.maliyet, 4) + (R.th ? ' (tahmin VARSAYIM ≈ $' + trS(R.th.usd, 4) + ', tavan $' + trS(R.th.tavan, 4) + ')' : '') + ' · çağrılar: ' + E(R.cagri.map(function(c){ return c.tur + (c.sinif ? ':' + c.sinif : '') + (c.ok ? '' : ' ✕'); }).join(', ') || 'yok') + (R.tavanUyari ? ' · ⚠️ ' + E(R.tavanUyari) : '') + '</div>';
     var y = R.T && R.T.tarif && R.T.tarif.mayaId && window.BM_AI1 ? window.BM_AI1.kayit('maya', R.T.tarif.mayaId) : null;
     return C.kartHTML({ sinif:'cev-arastirma', anladigim:anl, cevap:cev, maddeler:M, senin:R.T ? 'Senin reçetende: ' + (R.stil ? 'stil ' + R.stil + '; ' : '') + C.mayaSatiri(y) : null, kaynaklar:K, ayrinti:ay }); };
   C.dugmeHTML = function(onclick){ var t = C.tahmin(); return '<button type="button" class="bm-ayar-btn cev-arastir-btn" style="min-height:44px;margin-top:6px;width:100%;white-space:normal" onclick="' + onclick + '">🔎 Kaynaklarda araştır' + (t ? ' (≈ $' + trS(t.usd, 3) + ', en çok $' + trS(t.tavan, 3) + ')' : '') + '</button>'; };
 
   // ── CEV1 (5): DOĞRULAMA SETİ KOŞUCUSU (tests/cev_seti.json) — gerçek koşu Kaan'ın düğmesiyle; 'beklenen' listeleri Claude yazmadan ve imzası tutmadan KİLİTLİ ──
+  //   CEV2 (7): BİRDEN FAZLA SET — ana set (zorunlu) + Claude'un held-out seti (tests/cev_seti_heldout.json; CC görmez, dosya yoksa yalnız ana set koşar). Her setin AYRI imzası, ikisi de kilit koşulu.
   C.SET_URL = 'tests/cev_seti.json'; C.SON_LS = 'ai_cev_sonuc_v1'; // cihaz-yerel (bm_ öneksiz): yedeğe / senkrona girmez
+  C.SETLER = [{ ad:'ana', url:'tests/cev_seti.json', zorunlu:true, enAz:30 }, { ad:'heldout', url:'tests/cev_seti_heldout.json', zorunlu:false, enAz:10 }];
   C.fnv = function(t){ t = String(t); var h = 0x811c9dc5; for(var i = 0; i < t.length; i++){ h ^= t.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; } return ('0000000' + h.toString(16)).slice(-8); };
   C.beklenenImza = function(set){ return C.fnv(JSON.stringify((set.sorular || []).map(function(q){ return [q.id, q.soru, q.beklenen]; }))); };
-  C.kosKilit = function(set){ if(!set || !Array.isArray(set.sorular) || set.sorular.length < 30) return 'set en az 30 soru değil';
+  C.kosKilit = function(set, enAz){ enAz = enAz || 30; if(!set || !Array.isArray(set.sorular) || set.sorular.length < enAz) return 'set en az ' + enAz + ' soru değil';
     var bos = set.sorular.filter(function(q){ return !Array.isArray(q.beklenen) || !q.beklenen.length; }).length; if(bos) return bos + ' sorunun beklenen etken listesi yok — Claude koşudan ÖNCE yazar (CC yazamaz)';
     var az = set.sorular.filter(function(q){ return q.beklenen.some(function(b){ return !Array.isArray(b.kaynaklar) || b.kaynaklar.length < 2 || !Array.isArray(b.anahtar) || !b.anahtar.length; }); }).map(function(q){ return q.id; });
     if(az.length) return 'beklenen etkende en az 2 kaynak + anahtar sözcük yok: ' + az.join(', ');
     if(set.beklenenImza !== C.beklenenImza(set)) return 'beklenen imzası tutmuyor (beklenen alanları imzadan sonra değişti)'; return null; };
+  // CEV2 (7): liste [{ ad, set, enAz }] — her set kendi kilidinden geçer; ilk kilitli set koşuyu kilitler (neden set adıyla)
+  C.listeKur = function(x){ return Array.isArray(x) ? x : [{ ad:'ana', set:x, enAz:30 }]; };
+  C.listeKilit = function(x){ var L = C.listeKur(x); if(!L.length) return 'set yok'; for(var i = 0; i < L.length; i++){ var k = C.kosKilit(L[i].set, L[i].enAz); if(k) return (L.length > 1 ? L[i].ad + ' seti: ' : '') + k; } return null; };
   C.seriMaddeler = function(L){ return (L || []).map(function(m){ return { metin:m.metin, guc:m.guc && m.guc.k, n:m.guc && m.guc.n != null ? m.guc.n : null, urller:m.urller || [] }; }); };
   // tek soru: önce uygulamanın kural tablosu (AI5 kartı), kapsamıyorsa araştırma modu
   C.cevapla = function(set, q, opt){ opt = opt || {}; var G = window.BM_AI5, r = (set.receteler || []).find(function(x){ return x.id === q.recete; }); if(!r || !G) return Promise.resolve({ id:q.id, hata:'reçete / AI5 yok' });
-    var ctx = { tur:'tarif', key:'cevset:' + q.id, T:{ tarif:JSON.parse(JSON.stringify(r.tarif)), stil:r.stil, ad:r.ad } }, st = G.hazirla(ctx, { metin:q.soru });
+    var on = opt.setAd && opt.setAd !== 'ana' ? 'cevset:' + opt.setAd + ':' : 'cevset:', ctx = { tur:'tarif', key:on + q.id, T:{ tarif:JSON.parse(JSON.stringify(r.tarif)), stil:r.stil, ad:r.ad } }, st = G.hazirla(ctx, { metin:q.soru });
     if(st && st.durum === 'hazir' && G.oneriler(st).length){ var O = G.oneriler(st);
       var M = O.map(function(o){ var R = G.kural(o.kural), u = (R && R.kaynaklar || []).filter(function(k){ return k.url && k.tur !== 'katalog'; }).map(function(k){ return k.url; }); return { metin:o.yalin || o.metin, guc:o.guc, urller:u }; });
-      return Promise.resolve({ id:q.id, yol:'kural', hedef:st.hedef, ust:C.ustMetni(G.ustHTML(st)), html:G.kartHTML(ctx.key), maddeler:M, maliyet:0, cagri:[] }); }
-    return C.arastir({ kaynak:'cev', key:'cevset:' + q.id, soru:q.soru, stil:r.stil, T:ctx.T }, opt).then(function(R){ var html = C.arastirmaKart(R), gos = R.sonuc ? R.sonuc.gos : [];
-      return { id:q.id, yol:'arastirma', durum:R.durum, neden:R.neden || null, konu:R.konu, yonlendirmeGitti:R.istekOzet ? R.istekOzet.yonlendirmeGitti : null, sorgular:R.sorgular || [], ust:C.ustMetni(html), html:html, maddeler:gos.map(function(x){ return { metin:x.metin, guc:x.guc, urller:x.urller, kaynaklar:x.kaynaklar }; }), dusen:R.sonuc ? R.sonuc.dusen.map(function(x){ return { metin:x.metin, tur:x.tur, neden:x.neden }; }) : [], web:R.web ? R.web.bulgular : [], maliyet:R.maliyet, cagri:R.cagri }; }); };
+      return Promise.resolve({ id:q.id, set:opt.setAd || 'ana', yol:'kural', hedef:st.hedef, ust:C.ustMetni(G.ustHTML(st)), html:G.kartHTML(ctx.key), maddeler:M, maliyet:0, cagri:[] }); }
+    return C.arastir({ kaynak:'cev', key:on + q.id, soru:q.soru, stil:r.stil, T:ctx.T }, opt).then(function(R){ var html = C.arastirmaKart(R), gos = R.sonuc ? R.sonuc.gos : [], dc = R.durum === 'tamam' ? C.dogrudanCevap(R) : null;
+      return { id:q.id, set:opt.setAd || 'ana', yol:'arastirma', durum:R.durum, neden:R.neden || null, konu:R.konu, yonlendirmeGitti:R.istekOzet ? R.istekOzet.yonlendirmeGitti : null, sorguStil:R.sorguStil || null, sorgularHam:R.sorgularHam || [], sorgular:R.sorgular || [], ust:C.ustMetni(html), html:html,
+        dogrudan:dc ? { metin:dc.dogrudan, kaynak:dc.kaynak, kaynaklar:R.sonuc.dogrudan ? R.sonuc.dogrudan.kaynaklar : [] } : null, dogrudanDusen:R.sonuc && R.sonuc.dogrudanDusen ? { metin:R.sonuc.dogrudanDusen.metin, neden:R.sonuc.dogrudanDusen.neden } : null,
+        maddeler:gos.map(function(x){ return { metin:x.metin, guc:x.guc, urller:x.urller, kaynaklar:x.kaynaklar, degisken:x.degisken || null, celiski:!!x.celiski, taraflar:x.taraflar || null, birlesen:x.birlesen || null }; }),
+        dusen:R.sonuc ? R.sonuc.dusen.map(function(x){ return { metin:x.metin, tur:x.tur, neden:x.neden, kaynaklar:x.kaynaklar }; }) : [], celiskiRapor:R.sonuc ? R.sonuc.celiskiRapor : [], sinifSay:R.web ? R.web.sinifSay : null, webHata:R.web ? R.web.hatalar : [],
+        web:R.web ? R.web.bulgular : [], maliyet:R.maliyet, cagri:R.cagri }; }); };
   // mekanik puan (madde 5 i, iii, iv, v, vi); (ii) elle etiket — koşu dosyasından şablon
   C.puan = function(q, c){ var p = { kapsama:null, gucHata:[], yalaka:[], tat:[], jargon:C.jargonTara(c.html || ''), bulamadimErken:false };
     var metin = (c.maddeler || []).map(function(m){ return katla(m.metin); }).join(' | ');
@@ -36899,26 +37173,32 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     return { soru:L.length, kural:L.filter(function(x){ return x.yol === 'kural'; }).length, arastirma:L.filter(function(x){ return x.yol === 'arastirma'; }).length, madde:L.reduce(function(a, x){ return a + (x.maddeler || []).length; }, 0),
       kapsama:b ? { bulunan:f, beklenen:b, oran:Math.round(f / b * 1000) / 10 } : null, gucHata:L.reduce(function(a, x){ return a + x.puan.gucHata.length; }, 0), yalaka:L.reduce(function(a, x){ return a + x.puan.yalaka.length; }, 0), tat:L.reduce(function(a, x){ return a + x.puan.tat.length; }, 0),
       jargon:L.reduce(function(a, x){ return a + x.puan.jargon.length; }, 0), bulamadimErken:L.filter(function(x){ return x.puan.bulamadimErken; }).length, usd:Math.round(L.reduce(function(a, x){ return a + (x.maliyet || 0); }, 0) * 1e4) / 1e4 }; };
-  C.kosTavan = function(set){ var t = C.tahmin(); return t ? Math.round(t.tavan * set.sorular.length * 1e4) / 1e4 : null; };
-  // opt.mock: test (AI yok); opt.gercek: Kaan'ın düğmesi (kilit + AI hazır şartı)
-  C.kos = function(set, opt){ opt = opt || {}; if(!opt.mock){ var kl = C.kosKilit(set); if(kl) return Promise.resolve({ durum:'kilitli', neden:kl }); if(!window.BM_AI || !window.BM_AI.hazirMi().hazir) return Promise.resolve({ durum:'kilitli', neden:'AI anahtarı yok' }); }
-    var out = { surum:1, kosuId:Date.now(), tarih:new Date().toISOString(), mock:!!opt.mock, model:window.BM_AI && A4 ? window.BM_AI.MODEL[A4.ozetModel()].ad : null, denetleyiciImza:A4 && A4.denetleyiciImza ? A4.denetleyiciImza() : null, setImza:C.beklenenImza(set), tavan:C.kosTavan(set), sorular:[], durum:'calisiyor' }, i = 0;
-    var adim = function(){ if(i >= set.sorular.length){ out.durum = 'bitti'; out.metrik = C.metrik(out.sorular); C.sonYaz(out); return Promise.resolve(out); }
-      var harc = out.sorular.reduce(function(a, x){ return a + (x.maliyet || 0); }, 0); if(!opt.mock && out.tavan != null && harc > out.tavan){ out.durum = 'durdu'; out.neden = 'koşu tavanı aşıldı ($' + trS(out.tavan, 2) + ')'; out.metrik = C.metrik(out.sorular); C.sonYaz(out); return Promise.resolve(out); }
-      var q = set.sorular[i++]; return C.cevapla(set, q, opt).then(function(c){ c.puan = C.puan(q, c); c.soru = q.soru; out.sorular.push(c); if(opt.adim) try{ opt.adim(out); }catch(e){} return adim(); }); };
+  C.kosTavan = function(x){ var t = C.tahmin(); if(!t) return null; var n = C.listeKur(x).reduce(function(a, e){ return a + (e.set && e.set.sorular ? e.set.sorular.length : 0); }, 0); return Math.round(t.tavan * n * 1e4) / 1e4; };
+  // opt.mock: test (AI yok); gerçek koşu: Kaan'ın düğmesi (her setin kilidi + AI hazır şartı). x: tek set (eski çağrı) ya da [{ ad, set, enAz }]
+  C.kos = function(x, opt){ opt = opt || {}; var L = C.listeKur(x); if(!opt.mock){ var kl = C.listeKilit(L); if(kl) return Promise.resolve({ durum:'kilitli', neden:kl }); if(!window.BM_AI || !window.BM_AI.hazirMi().hazir) return Promise.resolve({ durum:'kilitli', neden:'AI anahtarı yok' }); }
+    var out = { surum:2, kosuId:Date.now(), tarih:new Date().toISOString(), mock:!!opt.mock, model:window.BM_AI && A4 ? window.BM_AI.MODEL[A4.ozetModel()].ad : null, denetleyiciImza:A4 && A4.denetleyiciImza ? A4.denetleyiciImza() : null, arastirmaImza:C.arastirmaImza(),
+      setImza:C.beklenenImza(L[0].set), setler:L.map(function(e){ return { ad:e.ad, url:e.url || null, soru:e.set.sorular.length, setImza:C.beklenenImza(e.set) }; }), tavan:C.kosTavan(L), sorular:[], durum:'calisiyor' }, si = 0, qi = 0;
+    var bitir = function(durum, neden){ out.durum = durum; if(neden) out.neden = neden; out.metrik = C.metrik(out.sorular); if(L.length > 1){ out.metrikSet = {}; L.forEach(function(e){ out.metrikSet[e.ad] = C.metrik(out.sorular.filter(function(s){ return s.set === e.ad; })); }); } C.sonYaz(out); return Promise.resolve(out); };
+    var adim = function(){ while(si < L.length && qi >= L[si].set.sorular.length){ si++; qi = 0; } if(si >= L.length) return bitir('bitti');
+      var harc = out.sorular.reduce(function(a, s){ return a + (s.maliyet || 0); }, 0); if(!opt.mock && out.tavan != null && harc > out.tavan) return bitir('durdu', 'koşu tavanı aşıldı ($' + trS(out.tavan, 2) + ')');
+      var e = L[si], q = e.set.sorular[qi++]; return C.cevapla(e.set, q, Object.assign({}, opt, { setAd:e.ad })).then(function(c){ c.puan = C.puan(q, c); c.soru = q.soru; out.sorular.push(c); if(opt.adim) try{ opt.adim(out); }catch(er){} return adim(); }); };
     return adim(); };
   C.sonYaz = function(o){ if(o.mock) return; try{ var t = JSON.stringify(o); localStorage.setItem(C.SON_LS, t.length < 1500000 ? t : JSON.stringify({ kosuId:o.kosuId, metrik:o.metrik, kirpildi:true })); }catch(e){} C._son = o; };
   C.sonAl = function(){ if(C._son) return C._son; try{ return JSON.parse(localStorage.getItem(C.SON_LS) || 'null'); }catch(e){ return null; } };
   C.indir = function(){ var o = C.sonAl(); if(!o) return false; try{ var b = new Blob([JSON.stringify(o, null, 1)], { type:'application/json' }), a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'brewmaster_cev_' + o.kosuId + '.json'; document.body.appendChild(a); a.click(); a.remove(); return true; }catch(e){ return false; } };
-  C._set = null; C._onay = false;
-  C.setYukle = function(){ if(C._set) return Promise.resolve(C._set); return fetch(C.SET_URL, { cache:'no-store' }).then(function(r){ return r.json(); }).then(function(j){ C._set = j; return j; }); };
-  C.baslat = function(){ return C.setYukle().then(function(set){ if(!C._onay){ C._onay = true; C.panelCiz(); return null; } C._onay = false; C._calisiyor = true; C.panelCiz();
-    return C.kos(set, { adim:function(){ C.panelCiz(); } }).then(function(o){ C._calisiyor = false; C._sonuc = o; C.panelCiz(); return o; }); }); };
-  C.panelHTML = function(){ var set = C._set, kl = set ? C.kosKilit(set) : 'set yükleniyor…', t = C.tahmin(), son = C._sonuc || C.sonAl(), h = '<div class="cev-ayar" style="margin-top:8px;font-size:12px"><div style="font-weight:700">🗣️ Cevap ilkesi (CEV) doğrulama seti</div>';
-    h += '<div style="color:var(--metin-soluk)">' + (set ? set.sorular.length + ' soru · ' : '') + 'önce kural tablosu, kapsamıyorsa araştırma modu · model ' + E(window.BM_AI && A4 ? window.BM_AI.MODEL[A4.ozetModel()].ad : '—') + (t && set ? ' · soru başı ≈ $' + trS(t.usd, 3) + ' (VARSAYIM), koşu tavanı $' + trS(C.kosTavan(set), 2) : '') + '</div>';
+  C._set = null; C._setler = null; C._onay = false;
+  // CEV2 (7): bütün set dosyaları — zorunlu olmayan (held-out) dosya yoksa / okunamazsa atlanır (yalnız ana set)
+  C.setYukle = function(){ if(C._setler) return Promise.resolve(C._set);
+    return Promise.all(C.SETLER.map(function(d){ return fetch(d.url, { cache:'no-store' }).then(function(r){ if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }).then(function(j){ return { ad:d.ad, url:d.url, set:j, enAz:d.enAz }; }, function(e){ if(d.zorunlu) throw e; return null; }); }))
+      .then(function(L){ C._setler = L.filter(Boolean); C._set = C._setler[0].set; return C._set; }); };
+  C.baslat = function(){ return C.setYukle().then(function(){ if(!C._onay){ C._onay = true; C.panelCiz(); return null; } C._onay = false; C._calisiyor = true; C.panelCiz();
+    return C.kos(C._setler, { adim:function(){ C.panelCiz(); } }).then(function(o){ C._calisiyor = false; C._sonuc = o; C.panelCiz(); return o; }); }); };
+  C.panelHTML = function(){ var L = C._setler, kl = L ? C.listeKilit(L) : 'set yükleniyor…', t = C.tahmin(), son = C._sonuc || C.sonAl(), h = '<div class="cev-ayar" style="margin-top:8px;font-size:12px"><div style="font-weight:700">🗣️ Cevap ilkesi (CEV) doğrulama seti</div>';
+    var n = L ? L.reduce(function(a, e){ return a + e.set.sorular.length; }, 0) : 0;
+    h += '<div style="color:var(--metin-soluk)">' + (L ? n + ' soru' + (L.length > 1 ? ' (' + L.map(function(e){ return e.ad + ' ' + e.set.sorular.length; }).join(' + ') + ')' : '') + ' · ' : '') + 'önce kural tablosu, kapsamıyorsa araştırma modu (4 kaynak sınıfı) · model ' + E(window.BM_AI && A4 ? window.BM_AI.MODEL[A4.ozetModel()].ad : '—') + (t && L ? ' · soru başı ≈ $' + trS(t.usd, 3) + ' (VARSAYIM), koşu tavanı $' + trS(C.kosTavan(L), 2) : '') + '</div>';
     if(kl) h += '<div class="cev-kilit" style="color:#8a5a00;margin-top:4px">🔒 Gerçek koşu kilitli: ' + E(kl) + '</div>';
     else if(C._calisiyor) h += '<div>⏳ çalışıyor…</div>';
-    else h += '<button type="button" class="bm-ayar-btn cev-kos-btn" style="min-height:44px;width:100%;margin-top:4px" onclick="BM_CEV.baslat()">' + (C._onay ? 'Eminim — çalıştır (en çok $' + trS(C.kosTavan(set), 2) + ')' : '▶️ CEV setini çalıştır') + '</button>';
+    else h += '<button type="button" class="bm-ayar-btn cev-kos-btn" style="min-height:44px;width:100%;margin-top:4px" onclick="BM_CEV.baslat()">' + (C._onay ? 'Eminim — çalıştır (en çok $' + trS(C.kosTavan(L), 2) + ')' : '▶️ CEV setini çalıştır') + '</button>';
     if(son && son.metrik) h += '<div class="cev-son" style="margin-top:4px">Son koşu ' + E(String(son.tarih || '').slice(0, 16)) + ': ' + son.metrik.soru + ' soru · kural ' + son.metrik.kural + ' · araştırma ' + son.metrik.arastirma + ' · $' + trS(son.metrik.usd, 4) + (son.metrik.kapsama ? ' · kapsama %' + trS(son.metrik.kapsama.oran, 1) : '') + ' · jargon ' + son.metrik.jargon + '</div><button type="button" class="bm-ayar-btn" style="min-height:44px;width:100%;margin-top:4px" onclick="BM_CEV.indir()">💾 Tam sonucu dosya olarak indir</button>';
     return h + '</div>'; };
   C.panelCiz = function(){ document.querySelectorAll('.cev-ayar-kap').forEach(function(el){ el.innerHTML = C.panelHTML(); }); };
