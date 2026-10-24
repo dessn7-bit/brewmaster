@@ -35742,7 +35742,9 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   G.MAX_ONERI = 5; // CEV1 (1c): üstte en çok 5 madde (aday üretimi G.MAX_ADAY = 3 aynen)
   // AI5D (7a): "Anladığım" — sade cümle; aroma eşleşmesinde hesaba katılmayan tat sözcükleri ayrıca söylenir
   G.HEDEF_CUMLE = { stil:'reçeteni stile ve ödüllü örneklere yaklaştırmak istiyorsun', kuru:'daha kuru bir bira istiyorsun', govde:'daha gövdeli bir bira istiyorsun', azaci:'daha az acı bir bira istiyorsun', aci:'daha acı bir bira istiyorsun', koyu:'daha koyu bir bira istiyorsun', acik:'daha açık renkli bir bira istiyorsun', muz:'daha muzlu bir bira istiyorsun', karanfil:'daha karanfilli bir bira istiyorsun', azmuz:'daha az muzlu bir bira istiyorsun', azkaranfil:'daha az karanfilli bir bira istiyorsun', azmuz_karanfil:'muzu daha az, karanfili daha çok istiyorsun', muz_azkaranfil:'muzu daha çok, karanfili daha az istiyorsun', muz_karanfil:'hem muzu hem karanfili daha çok istiyorsun', tadim:'tadımda işaretlediğin sorunu düzeltmek istiyorsun' };
-  G.anladigimMetni = function(st){ if(!st) return ''; if(st.durum === 'kapsamDisi') return 'Anladığım: ' + st.konu + ' hakkında soruyorsun.'; if(st.durum === 'yonBelirsiz') return 'Anladığım: ' + st.eksen + ' hakkında yazdın, ama hangi yöne değişmesini istediğini okuyamadım: \'' + st.metin + '\''; if(st.durum === 'taniyamadim' || st.durum === 'hedefSec') return 'Bunu anlayamadım: \'' + st.metin + '\'';
+  G.anladigimMetni = function(st){ if(!st) return ''; var CV = window.BM_CEV, kp = st.durum === 'kapsamDisi' && CV && CV.konuParca ? CV.konuParca(st.metin || '') : null; // CEV2C (1)
+    if(kp && kp.soru && kp.et) return 'Anladığım: "' + kp.soru + '" — konu: ' + kp.et + '.';
+    if(st.durum === 'kapsamDisi') return 'Anladığım: ' + st.konu + ' hakkında soruyorsun.'; if(st.durum === 'yonBelirsiz') return 'Anladığım: ' + st.eksen + ' hakkında yazdın, ama hangi yöne değişmesini istediğini okuyamadım: \'' + st.metin + '\''; if(st.durum === 'taniyamadim' || st.durum === 'hedefSec') return 'Bunu anlayamadım: \'' + st.metin + '\'';
     return 'Anladığım: ' + (G.HEDEF_CUMLE[st.hedef] || G.hedefAd(st.hedef)) + '.' + (st.kalanAroma && st.kalanAroma.length ? ' (\'' + st.kalanAroma.join(', ') + '\' kısmı bu araçta hesaplanmıyor — tat ve aroma ölçülemiyor.)' : ''); };
   // AI5D (1): tanıyamadım metni — tat / aroma isteğiyse ek cümle
   // CEV1B (4): araştırma düğmesi kartta varsa metin onu söyler ("Kaynaklarda araştırabilirim"); yoksa eski metin
@@ -36920,8 +36922,17 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     if(/\bsise\w*/.test(n)) return 'şişe kapağı'; if(/\b(kapat\w*|kapali\w*)/.test(n)) return 'kaynatmada kapak'; return 'kapak'; };
   C.sorulan = function(soru){ var n = katla(soru), L = []; C.SORULAN.forEach(function(x){ if(!x[0].test(n)) return; var e = typeof x[1] === 'function' ? x[1](n) : x[1]; if(L.indexOf(e) < 0) L.push(e); });
     var sc = window.BM_AI5 && window.BM_AI5.mashSoruSc ? window.BM_AI5.mashSoruSc(soru) : null; if(sc) L.push('mash sıcaklığı ' + sc + ' °C'); return L; };
-  C.tarafsiz = function(soru){ var et = C.konuEtiket(soru), so = C.sorulan(soru);
+  //   CEV2C (1): konu etiketi sorunun geri kalanını SİLMESİN — soru YÖNLENDİRMESİZSE (C.yonlendirmeVar false: iddia / kanaat / "değil mi" / "daha iyi olur" yok)
+  //   konu = etiket + sorunun kendisi ('"karbonasyon" — soru: "şişede karbonasyon az kaldı, nedenleri neler"'); "az kaldı", "ne zaman", "geçer mi" artık kaybolmaz.
+  //   Yönlendirmeliyse BUGÜNKÜ davranış aynen (yalnız etiket + sorulan — yalakalık önlemi); etiket de sorulan da yoksa eski temizleme yolu aynen.
+  C.CEV2C = { soruEkle:true, yonlendirmeliyeDe:false };
+  C.soruTemiz = function(soru){ return String(soru || '').replace(/[?]+/g, ' ').replace(/\s+/g, ' ').replace(/^[\s,.;:!–-]+|[\s,.;:!–-]+$/g, '').trim(); };
+  C.konuParca = function(soru){ var et = C.konuEtiket(soru), so = C.sorulan(soru);
     so = so.filter(function(x){ return x !== et; }); // CEV2B (6a): konu = sorulan ("kuru hop") ise tekrar yazılmaz
+    var bas = et ? et + (so.length ? ' — sorulan: ' + so.join(', ') : '') : so.length ? 'sorulan: ' + so.join(', ') : null, yon = C.yonlendirmeVar(soru), st = C.soruTemiz(soru);
+    return { et:et, so:so, bas:bas, yonlendirmeli:yon, soru:bas && st && C.CEV2C.soruEkle && (!yon || C.CEV2C.yonlendirmeliyeDe) ? st : null }; };
+  C.tarafsiz = function(soru){ var P = C.konuParca(soru), et = P.et, so = P.so;
+    if(P.bas && P.soru) return '"' + P.bas + '" — soru: "' + P.soru + '"';
     if(et) return '"' + et + (so.length ? ' — sorulan: ' + so.join(', ') : '') + '" konusunu etkileyen etkenler';
     if(so.length) return '"sorulan: ' + so.join(', ') + '" — biraya etkileri'; // CEV1C (4): konu eşleşmedi → yalnız sorulan malzeme / işlem / sayı ("şeker eklersem bira kesin daha güzel olur" → sorulan: şeker)
     var t = String(soru || '').replace(/[?!]+/g, ' '); C.YONLENDIRME.forEach(function(re){ t = t.replace(re, ' '); });
@@ -37162,7 +37173,8 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   // araştırma sonucu → ORTAK KART
   C.arastirmaKart = function(R){ if(!R) return '';
     if(R.durum === 'sorgu' || R.durum === 'web' || R.durum === 'ozet') return '<div class="cev-arastirma" data-durum="' + R.durum + '" style="margin-top:8px;font-size:12px;color:var(--metin-soluk)">⏳ ' + ({ sorgu:'Arama sorguları hazırlanıyor…', web:'İzinli kaynaklarda aranıyor (ders kitabı · üretici · hakemli · dergi)…', ozet:'Bulunan alıntılar özetleniyor (yalnız kaynaklı maddeler gösterilir)…' })[R.durum] + '</div>';
-    var anl = 'Anladığım: ' + R.konu.replace(/ konusunu etkileyen etkenler$/, '').replace(/^"|"$/g, '') + ' — bunu etkileyen etkenleri kaynaklarda aradım.';
+    //   CEV2C (1): konu sorunun kendisini taşıyorsa Anladığım = soru + etiket (jargon yok)
+    var kp = /^"(.*)" — soru: "(.*)"$/.exec(R.konu || ''), anl = kp ? 'Anladığım: "' + kp[2] + '" (konu: ' + kp[1] + ') — kaynaklarda aradım.' : 'Anladığım: ' + R.konu.replace(/ konusunu etkileyen etkenler$/, '').replace(/^"|"$/g, '') + ' — bunu etkileyen etkenleri kaynaklarda aradım.';
     var gos = R.sonuc ? R.sonuc.gos : [], cev, M = gos.map(function(x){ return { metin:x.metin, guc:x.guc, kaynakAd:x.urller.map(C.host).filter(function(h, i, a){ return a.indexOf(h) === i; }).join(', ') }; });
     if(R.durum === 'tamam') cev = C.dogrudanCevap(R).metin;
     else if(R.durum === 'bulamadim') cev = 'Bulamadım: izinli kaynaklarda (' + (R.sorgular || []).length + ' arama, ' + C.SINIFLAR.length + ' kaynak sınıfı) bu konuyu doğrudan anlatan alıntı çıkmadı.';

@@ -13207,7 +13207,7 @@ const CASELER = [
           ['kaynatırken tencere kapağını kapatsam sorun olur mu', '"DMS (pişmiş mısır kokusu) — sorulan: kaynatmada kapak" konusunu etkileyen etkenler'],
           ['Herkes kapağı kapat diyor, doğru mu', '"DMS (pişmiş mısır kokusu) — sorulan: kaynatmada kapak" konusunu etkileyen etkenler'],
           ['kapak açık kaynatmak gereksiz bence', '"DMS (pişmiş mısır kokusu) — sorulan: kaynatmada kapak" konusunu etkileyen etkenler'], ['kapak paslandı', '"sorulan: kapak" — biraya etkileri']];
-        K.forEach(x => { const k = C.tarafsiz(x[0]); __REG.ok('"' + x[0] + '" → ' + k, k === x[1], 'beklenen ' + x[1]); });
+        K.forEach(x => { const k = C.tarafsiz(x[0]), et = /^("[^"]+")/.exec(x[1])[1]; __REG.ok('"' + x[0] + '" → ' + k, k === x[1] || (!C.yonlendirmeVar(x[0]) && k === et + ' — soru: "' + C.soruTemiz(x[0]) + '"'), 'beklenen ' + x[1] + ' (CEV2C: yönlendirmesizse etiket + soru)'); });
         const ke = C.kapakEtiket; C.kapakEtiket = () => 'kaynatmada kapak'; let bz; try { bz = C.tarafsiz(K[0][0]); } finally { C.kapakEtiket = ke; }
         __REG.ok('KASITLI BOZMA kapak bağlamı kapalı → "' + bz + '" → kırmızı', bz !== K[0][1]);
         // (2) + (3) 12 kural kartı × 2 stok
@@ -13531,6 +13531,46 @@ const CASELER = [
         __REG.ok('KASITLI BOZMA: 6a kapalı → kuruluk ekseni ' + za + ' (kırmızı) · 6b kapalı → stil hedefi ' + zb + '/' + NB.length + ' (kırmızı)', za > 0 && zb > 0);
         return __REG.al();
       }, set);
+    }
+  },
+  {
+    kod: 'CEV2C-KONU', ad: 'KONU METNİ SORUYU SİLMESİN (CEV2C madde 1, AI yok): yönlendirmesiz soruda konu = etiket + sorunun kendisi ("karbonasyon" — soru: "şişede karbonasyon az kaldı …") → (a) içerik sözcükleri konu metninde (ana set 34 + CEV1B / CEV1C / CEV1D tarafsızlaştırma soruları + testin kendi 30 yönlendirmesiz sorusu) · (b) yönlendirmeli soruda bugünkü davranış AYNEN (yalnız etiket + sorulan; iddia / kanaat 0; özetleyici görevinde yönlendirme yok) · aynı konu sorgu üretecine ve özetleyiciye gider, Anladığım satırı soru + etiket · KASITLI BOZMA',
+    calistir: async (page) => {
+      const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'cev_seti.json'), 'utf8'));
+      // CEV1B / CEV1C / CEV1D tarafsızlaştırma vakalarının soruları (bu dosyanın kendi listeleri — kaynaktan okunur, kopya yok)
+      const kay = fs.readFileSync(fileURLToPath(import.meta.url), 'utf8'), blok = kod => { const i = kay.indexOf("kod: '" + kod + "'"), j = kay.indexOf("\n  {\n    kod: '", i + 10); return kay.slice(i, j); };
+      const sorular = {}; ['CEV1B-TARAFSIZ', 'CEV1C-TARAFSIZ', 'CEV1D'].forEach(k => { const L = []; const re = /\[\s*'((?:[^'\\]|\\.)+)'\s*,\s*(?:\/|'|\[|null|true|false)/g; let m; const b = blok(k); while ((m = re.exec(b))) { const t = m[1].replace(/\\'/g, "'"); if (/\s/.test(t) && L.indexOf(t) < 0) L.push(t); } sorular[k] = L; });
+      return page.evaluate(async ({ set, sorular }) => {
+        const C = window.BM_CEV, G = window.BM_AI5;
+        const katla = t => String(t || '').toLocaleLowerCase('tr').replace(/ı/g, 'i').replace(/ş/g, 's').replace(/ç/g, 'c').replace(/ğ/g, 'g').replace(/ö/g, 'o').replace(/ü/g, 'u').replace(/â/g, 'a');
+        const DOLGU = /^(nasil|neden|niye|nicin|hangi|hangisi|kadar|ne|mi|mu|mı|mü|midir|mudur|bir|ve|ile|icin|olur|olsun|daha|cok|biraz|bu|su|o)$/;
+        const icerik = t => katla(t).replace(/['’][^\s]*/g, '').replace(/[^a-z0-9 ]+/g, ' ').split(/\s+/).filter(w => w.length >= 3 && !DOLGU.test(w));
+        // testin kendi 30 yönlendirmesiz sorusu (biçim × olay)
+        const BIC = [x => 'kuru hoptan sonra ' + x, x => 'kuru mayayı ' + x, x => 'şişede ' + x, x => x + ' ne zaman olur', x => x + ' geçer mi'];
+        const OLAY = ['bulanıklık arttı', 'karbonasyon az kaldı', 'çimen tadı çıktı', 'tortu oluştu', 'köpük tutmuyor', 'yumurta kokusu geldi'];
+        const URET = []; BIC.forEach(b => OLAY.forEach(o => URET.push(b(o))));
+        const tum = { ana: set.sorular.map(q => q.soru), CEV1B: sorular['CEV1B-TARAFSIZ'], CEV1C: sorular['CEV1C-TARAFSIZ'], CEV1D: sorular['CEV1D'], uretilmis: URET };
+        const sayi = {}; let eksik = [], yonlu = [];
+        Object.keys(tum).forEach(k => { let n = 0, y = 0; tum[k].forEach(q => { const konu = C.tarafsiz(q); if (C.yonlendirmeVar(q)){ y++; yonlu.push([k, q, konu]); return; } n++; const kn = katla(konu); icerik(q).forEach(w => { if (kn.indexOf(w) < 0) eksik.push(k + ': "' + q + '" → ' + w + ' yok (' + konu + ')'); }); }); sayi[k] = n + ' yönlendirmesiz / ' + y + ' yönlendirmeli'; });
+        __REG.ok('(a) İÇERİK KORUNUMU: ' + Object.keys(sayi).map(k => k + ' ' + sayi[k]).join(' · ') + ' → konu metninde eksik içerik sözcüğü ' + eksik.length + (eksik.length ? ' ' + JSON.stringify(eksik.slice(0, 4)) : ''), eksik.length === 0 && tum.CEV1B.length >= 10 && tum.CEV1C.length >= 15 && tum.CEV1D.length >= 5 && URET.length === 30 && URET.every(q => !C.yonlendirmeVar(q)));
+        const c24 = C.tarafsiz(set.sorular.find(q => q.id === 'C24').soru), kh = C.tarafsiz('kuru hoptan sonra bulanıklık arttı');
+        __REG.ok('(a) örnek: C24 → ' + c24 + ' · ' + kh, c24 === '"karbonasyon" — soru: "şişede karbonasyon az kaldı, nedenleri neler"' && /— soru: "kuru hoptan sonra bulanıklık arttı"$/.test(kh));
+        // (b) yönlendirmeli: bugünkü davranış — etiket (+ sorulan) yalnız, iddia / kanaat yok
+        const yb = yonlu.filter(x => / — soru: /.test(x[2]) || C.yonlendirmeVar(x[2]) || C.yonlendirmeVar(C.OZET_GOREV(x[2])) || C.yonlendirmeVar(C.SORGU_GOREV(x[2], null)));
+        const anaY = set.sorular.filter(q => C.yonlendirmeVar(q.soru)).map(q => q.id);
+        __REG.ok('(b) YALAKALIK: yönlendirmeli ' + yonlu.length + ' soru (ana set ' + anaY.join(', ') + ') → konu / sorgu görevi / özet görevinde soru metni ya da yönlendirme ' + yb.length + (yb.length ? ' ' + JSON.stringify(yb.slice(0, 3)) : ''), yb.length === 0 && ['C13', 'C20', 'C34'].every(id => anaY.indexOf(id) >= 0));
+        // aynı konu sorgu üretecine + özetleyiciye; Anladığım satırı soru + etiket
+        const R = { konu: C.tarafsiz(set.sorular.find(q => q.id === 'C30').soru), durum: 'bulamadim', sonuc: { gos: [], dusen: [], celiskiRapor: [] }, web: { bulgular: [], sinifSay: {}, hatalar: [] }, sorgular: [], cagri: [], maliyet: 0 };
+        let anl = ''; try { anl = (C.ustMetni(C.arastirmaKart(R)) || '').split('\n')[0]; } catch (e) { anl = 'HATA ' + e.message; }
+        const r0 = set.receteler.find(x => x.id === 'lager'), stK = G.hazirla({ tur: 'tarif', key: 'cev2c:anl', T: { tarif: JSON.parse(JSON.stringify(r0.tarif)), stil: r0.stil, ad: r0.ad } }, { metin: set.sorular.find(q => q.id === 'C30').soru });
+        __REG.ok('aynı konu iki göreve: sorgu "' + C.SORGU_GOREV(R.konu, null).split('\n')[0] + '" · özet "' + C.OZET_GOREV(R.konu).split('\n')[0] + '" · araştırma kartı ' + anl.slice(0, 120) + ' · AI5 kartı ' + G.anladigimMetni(stK), C.SORGU_GOREV(R.konu, null).indexOf(R.konu) >= 0 && C.OZET_GOREV(R.konu).indexOf(R.konu) >= 0 && /geçer mi/.test(anl) && /geçer mi/.test(G.anladigimMetni(stK)) && !C.jargonVar(anl));
+        // KASITLI BOZMA
+        const B = C.CEV2C; let z1, z2;
+        B.yonlendirmeliyeDe = true; try { z1 = yonlu.filter(x => / — soru: /.test(C.tarafsiz(x[1])) && C.yonlendirmeVar(C.tarafsiz(x[1]))).length; } finally { B.yonlendirmeliyeDe = false; }
+        B.soruEkle = false; try { z2 = set.sorular.filter(q => !C.yonlendirmeVar(q.soru)).filter(q => icerik(q.soru).some(w => katla(C.tarafsiz(q.soru)).indexOf(w) < 0)).length; } finally { B.soruEkle = true; }
+        __REG.ok('KASITLI BOZMA: yönlendirmeliye de soru metni → konuda yönlendirme ' + z1 + ' (kırmızı) · etiket-yalnız geri dönünce ana sette içerik kaybı ' + z2 + ' soru (kırmızı)', z1 > 0 && z2 > 0);
+        return __REG.al();
+      }, { set, sorular });
     }
   },
   {
