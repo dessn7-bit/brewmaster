@@ -67,9 +67,13 @@ const MODEL = {
   'v12c_v5_model_14cat_d4cbc398.json': '_step105_v12cv5/fold1.json', 'v12c_v5_label_encoder_14cat_d4cbc398.json': '_step105_v12cv5_label_encoder.json',
   'v12slug_v5_model_2df2431a.json': 'v12slug_v5_model_2df2431a.json', 'v12slug_v5_label_encoder_2df2431a.json': 'v12slug_v5_label_encoder_2df2431a.json',
   'v20slug_v5_alpha030_40dcee6c.json': 'v20slug_v5_alpha030_40dcee6c.json', 'b1_v8_17484c93.onnx': '_step105_b1v8_fold1.onnx',
-  'b1_v8_calibration_29744456.json': '_step105_calibration/calibration_params.json' };
+  'b1_v8_calibration_29744456.json': '_step105_calibration/calibration_params.json',
+  'b1_v8_calibration_c60695de.json': '_step105_calibration/calibration_params_s2.json' }; // Sprint 2 (kusur 3): doğru 116 alanlık OOF'la yeniden uydurulan kalibrasyon
 const html = htmlBuf.toString('utf8');
 for (const m of html.matchAll(/'\/(v_cluster_[a-z_]+_[0-9a-f]{8}\.json)'/g)) MODEL[m[1]] = m[1];
+// Sprint 2: Python tarafı (python_tahmin.py / analiz.py) HTML'in istediği kalibrasyon dosyasını kullanır (iki taraf aynı dosya)
+const kalAd = (/(b1_v8_calibration_[0-9a-f]{8}\.json)/.exec(html) || [])[1];
+if (kalAd && MODEL[kalAd]) ENV.ESITLIK_KAL = path.join(W, MODEL[kalAd]);
 const istenen = new Set([...html.matchAll(/brewmaster-models\.dessn7\.workers\.dev\/([A-Za-z0-9_.]+\.(?:json|onnx))/g)].map(m => m[1]));
 const b1sha = (/const B1_SHA8 = '([0-9a-f]{8})'/.exec(html) || [])[1]; if (b1sha) istenen.add('b1_v8_' + b1sha + '.onnx');
 const shaHata = [];
@@ -161,7 +165,10 @@ await page.evaluate(() => {
       (raw.hops || []).forEach(h => { const c = coz('hop', h.name); es.hop.push({ ham: h.name, id: c && c.id, tip: c && c.tip, use: h.use, t: h.time_min }); if (!c) return;
         if (c.tip !== 'hop') { S.katkilar.push({ id: c.id, g: +h.amount_g || 0 }); return; }
         const dry = /dry/i.test(h.use || ''), wp = /whirl|hop ?stand/i.test(h.use || '');
-        S.hoplar.push({ id: c.id, g: +h.amount_g || 0, dk: (h.time_min == null ? 60 : +h.time_min), tur: dry ? 'dryhop' : (wp ? 'whirlpool' : 'boil') }); });
+        // Sprint 2: ÜRETİM nesnesi — editör kuru hop'u tur 'dry_hop' + dk 0 + dryDays (gün) olarak tutar (seçenek / kayıt / eski yazım çevirisi 'dry' / 'dryhop' → 'dry_hop');
+        //   ham BeerXML kuru hop time_min = gün × 1440 → dryDays = time_min / 1440 (yoksa ya da 0 ise editör varsayılanı 5 — dönüştürme kaybı). Ham alfa → cAA (kullanıcının girdiği AA).
+        const tm = h.time_min == null ? null : +h.time_min, hb = { id: c.id, g: +h.amount_g || 0, dk: dry ? 0 : (tm == null ? 60 : tm), tur: dry ? 'dry_hop' : (wp ? 'whirlpool' : 'boil') };
+        if (dry) hb.dryDays = tm >= 1440 ? tm / 1440 : 5; if (+h.alpha > 0) hb.cAA = +h.alpha; S.hoplar.push(hb); });
       if (raw.yeast) { const y = coz('maya', String(raw.yeast)); es.maya = { ham: String(raw.yeast).slice(0, 120), id: y && y.id }; if (y) S.mayaId = y.id; }
       const ms = +raw.mash_steps; if (ms >= 1) S.mashAdimlar = Array.from({ length: ms }, () => ({ sc: S.mashSc || 66, dk: 60 }));
       return es;

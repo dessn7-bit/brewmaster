@@ -41221,7 +41221,9 @@ syncBaslat();
   }
 
   // Adim 105 KATMAN A: Isotonic calibration cache + load + interpolate
-  var CALIBRATION_URL = 'https://brewmaster-models.dessn7.workers.dev/b1_v8_calibration_29744456.json';
+  // EŞİTLİK SPRINT 2 kusur 3: kalibrasyon doğru 116 alanlık OOF'la yeniden uyduruldu (eskisi 29744456 ek 20 alan 0 iken uydurulmuştu); çapraz uydurmalı ECE 0,0069 → 0,0036
+  //   Dosya R2'de DEĞİL: repoda HTML'in yanında, aynı kökten (GitHub Pages) iner; sw.js kurulum listesinde (çevrimdışı). Diğer modeller R2'de aynen.
+  var CALIBRATION_URL = 'b1_v8_calibration_c60695de.json';
   var _calibrationCache = null;
   var _calibrationLoadingPromise = null;
   function loadCalibration() {
@@ -41382,14 +41384,23 @@ syncBaslat();
     var seen = Object.keys(seenSet);
     var flags = rxList.map(function(rx){ return seen.some(function(n){return rx.test(n);}) ? 1 : 0; });
     var diversity = seen.length;
-    var dryHopCount = hops.filter(function(h){ return (h.t === 0 || h.tip === 'dryhop' || (typeof h.t === 'number' && h.t === 0)); }).length;
+    // EŞİTLİK SPRINT 2 kusur 2: editör hop nesnesi {id, g, dk, tur, dryDays, cAA} (eskiden h.gr / h.t okunuyordu → acı / aroma / oran / kuru hop sayısı hep 0).
+    //   Eğitim (working/_step105_b1v8_retrain.py extract_new_20, satır 81–95) ham BeerXML time_min'i kullanır: acı = time_min ≥ 60, aroma = time_min < 30, 'kuru hop aşaması' = time_min == 0 sayısı.
+    //   Ham veride kuru hop time_min = gün × 1440 (10080 = 7 gün) → eğitim tanımında kuru hop ACI sayılır (≥ 60). time_min tür + dk ile, uygulamanın kendi BeerXML dışa aktarımıyla
+    //   (satır ~4037: dry_hop → dryDays × 1440, diğerleri → dk) aynı kuralla kurulur: boil / fwh / whirlpool / hop_stand → dk · dry_hop (+ eski 'dry' / 'dryhop') → (dryDays || 5) × 1440.
+    var hopTm = function(h){ if (!h) return null; var t = h.tur;
+      if (t === 'dry_hop' || t === 'dryhop' || t === 'dry') return (+h.dryDays || 5) * 1440;
+      if (t == null && typeof h.t === 'number') return h.t; // eski V1 biçimi (h.t)
+      var d = (h.dk == null || h.dk === '') ? NaN : +h.dk; return isNaN(d) ? null : d; };
+    var dryHopCount = hops.filter(function(h){ return hopTm(h) === 0; }).length;
     var bittering = 0, aroma = 0, alphaSum = 0, alphaCnt = 0;
     for (var k=0;k<hops.length;k++) {
-      var h = hops[k]; var amt = +h.gr || 0; var tm = (typeof h.t === 'number' ? h.t : null);
+      var h = hops[k]; if (!h) continue; var amt = +(h.g != null ? h.g : h.gr) || 0; var tm = hopTm(h);
       if (tm !== null && tm >= 60) bittering += amt;
       else if (tm !== null && tm < 30) aroma += amt;
+      // kusur 6: eğitimde reçetedeki alfa (raw hops.alpha > 0) → editörde kullanıcının girdiği AA (cAA); cAA yoksa katalog AA (uygulamanın IBU hesabı ve BeerXML dışa aktarımı da bunu kullanır — RAPOR: eğitimde alfasız hop ortalamaya girmez)
       var entry = (typeof HOPLAR !== 'undefined') ? HOPLAR.find(function(z){return z && z.id===h.id;}) : null;
-      var alpha = entry && (entry.alpha || entry.aa);
+      var alpha = (h.cAA != null && +h.cAA > 0) ? +h.cAA : (entry && (entry.alpha || entry.aa));
       if (typeof alpha === 'number' && alpha > 0) { alphaSum += alpha; alphaCnt++; }
     }
     var bToA = aroma > 0 ? bittering / aroma : 0;
@@ -41406,7 +41417,9 @@ syncBaslat();
     if (featObj && typeof featObj === 'object') {
       for (var mi=0;mi<markerKeys.length;mi++) if (featObj[markerKeys[mi]]) markerCount++;
     }
-    var katkiActive = katkiIds.length;
+    // EŞİTLİK SPRINT 2 kusur 6: eğitimde katki_active_count = features'taki doğru katki_* bayrağı sayısı (extract_new_20 satır 108–109), kalem kimliği sayısı DEĞİL
+    var katkiActive = 0;
+    if (featObj && typeof featObj === 'object') { for (var kk in featObj) if (kk.indexOf('katki_') === 0 && featObj[kk]) katkiActive++; }
     var sfs = featObj ? ((featObj['katki_smoke'] || 0) + (featObj['katki_fruit'] || 0) + (featObj['katki_spice_herb'] || 0)) : 0;
     return [
       flags[0], flags[1], flags[2], flags[3], flags[4], flags[5],

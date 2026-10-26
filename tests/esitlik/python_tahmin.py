@@ -26,7 +26,7 @@ M_S = boost(f'{W}/v12slug_v5_model_2df2431a.json')
 B1_LGB = lgb.Booster(model_file=f'{W}/_step105_b1v8/fold1.model')
 B1_ONNX = ort.InferenceSession(f'{W}/_step105_b1v8_fold1.onnx', providers=['CPUExecutionProvider'])
 B1_CL = json.load(open(f'{W}/_step105_label_encoder_14cat.json', encoding='utf-8'))['classes']
-CAL = json.load(open(f'{W}/_step105_calibration/calibration_params.json', encoding='utf-8'))
+CAL = json.load(open(os.environ.get('ESITLIK_KAL') or f'{W}/_step105_calibration/calibration_params.json', encoding='utf-8'))  # Sprint 2: HTML'in istediği kalibrasyon
 assert CAL['labels'] == B1_CL
 ISO = []
 for c in CAL['curves']:

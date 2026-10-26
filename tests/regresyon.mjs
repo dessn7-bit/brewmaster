@@ -13993,6 +13993,52 @@ const CASELER = [
     }
   },
   {
+    kod: 'ESIT2-B1EXT', ad: 'B1 EK ALANLARI (Eşitlik Sprint 2 kusur 2 + 6, AI yok): build20Extension editörün GERÇEK hop nesnesini okur ({id, g, dk, tur, dryDays, cAA}; eskiden h.gr / h.t → hep 0) · zaman eğitimin BeerXML kuralıyla (kuru hop dryDays × 1440, diğerleri dk; uygulamanın dışa aktarımıyla aynı) · beş tür (boil 60 / fwh 60 / whirlpool 15 / hop_stand 30 / dry_hop 5 gün) + boil dk 0 için acı / aroma / kuru hop aşaması / oran / alfa = Python extract_new_20 (working/_step105_b1v8_retrain.py satır 81–95, beklenenler o koddan) · eski yazım dry / dryhop = dry_hop · alfa: cAA varsa o, yoksa katalog · katki_active_count = doğru katki_* bayrağı sayısı (kimlik sayısı değil)',
+    calistir: (page) => page.evaluate(() => {
+      const B = window.BM_B1, L0 = window.__bmGetV12ClusterLabels;
+      // ek 20 alan taban 89'a bağlı değil: V12 etiket listesi (ağdan gelir) yerine 89 uzunlukta yer tutucu
+      window.__bmGetV12ClusterLabels = () => ({ feature_list: Array.from({ length: 89 }, (_, i) => 'f' + i) });
+      const EXT = ['cascade', 'citra', 'galaxy', 'simcoe', 'centennial', 'amarillo', 'diversity', 'dry_phase', 'bitter', 'aroma', 'ratio', 'alpha', 'mash_steps', 'multi', 'eff', 'batch', 'og_per_l', 'marker', 'katki_active', 'sfs'];
+      const v = (hoplar, ek) => { const r = Object.assign({ _og: 1.05, og: 1.05, _fg: 1.01, _ibu: 30, _srm: 6, _abv: 5, hopIds: hoplar.map(h => h.id), maltIds: ['pilsner'], katkiIds: [], hoplar, maltlar: [{ id: 'pilsner', kg: 4 }], katkilar: [], hacim: 20, mash_steps: 1, verim: 70, percents: {} }, ek || {});
+        const a = B.buildFeatures(r); const o = {}; EXT.forEach((k, i) => { o[k] = a ? +a[89 + i] : null; }); return o; };
+      const aa = (HOPLAR.find(h => h.id === 'citra') || {}).aa;
+      // Python extract_new_20 çıktısı (working/_esitlik/s2/hop_tablo.py: BeerXML satırı time_min = 60 / 60 / 15 / 30 / 7200 / 0, amount 10 g, alpha 12)
+      const PY = { boil: [0, 10, 0, 0], fwh: [0, 10, 0, 0], whirlpool: [0, 0, 10, 0], hop_stand: [0, 0, 0, 0], dry_hop: [0, 10, 0, 0], boil_dk0: [1, 0, 10, 0] };
+      const ED = { boil: { tur: 'boil', dk: 60 }, fwh: { tur: 'fwh', dk: 60 }, whirlpool: { tur: 'whirlpool', dk: 15 }, hop_stand: { tur: 'hop_stand', dk: 30 }, dry_hop: { tur: 'dry_hop', dk: 0, dryDays: 5 }, boil_dk0: { tur: 'boil', dk: 0 } };
+      const satir = Object.keys(ED).map(k => { const o = v([Object.assign({ id: 'citra', g: 10, cAA: 12 }, ED[k])]); const js = [o.dry_phase, o.bitter, o.aroma, o.ratio]; return { k, js, py: PY[k], alfa: o.alpha, esit: JSON.stringify(js) === JSON.stringify(PY[k]) && o.alpha === 12 }; });
+      __REG.ok('beş tür (+ boil dk 0) [kuru hop aşaması, acı g, aroma g, oran] tarayıcı = Python: ' + satir.map(s => s.k + ' ' + JSON.stringify(s.js) + (s.esit ? '' : ' ✕ Python ' + JSON.stringify(s.py) + ' alfa ' + s.alfa)).join(' · '), satir.every(s => s.esit));
+      const k2 = v([{ id: 'citra', g: 20, dk: 60, tur: 'boil', cAA: 12 }, { id: 'citra', g: 10, dk: 10, tur: 'boil' }, { id: 'cascade', g: 40, dk: 0, tur: 'dry_hop', dryDays: 4 }]);
+      __REG.ok('karışık reçete: acı ' + k2.bitter + ' g (boil 60 + kuru hop 4 gün = 5760 dk ≥ 60 → eğitim tanımında acı) · aroma ' + k2.aroma + ' · oran ' + k2.ratio + ' · alfa ort ' + k2.alpha + ' (cAA 12 + katalog ' + aa + ' + katalog cascade) · çeşit ' + k2.diversity, k2.bitter === 60 && k2.aroma === 10 && k2.ratio === 6 && k2.diversity === 2);
+      const eski = ['dry', 'dryhop'].map(t => v([{ id: 'citra', g: 10, dk: 0, tur: t, dryDays: 5, cAA: 12 }]));
+      __REG.ok('eski yazım dry / dryhop = dry_hop (yüklemede de dry_hop\'a çevriliyor): ' + eski.map(o => JSON.stringify([o.dry_phase, o.bitter, o.aroma])).join(' · '), eski.every(o => o.bitter === 10 && o.aroma === 0 && o.dry_phase === 0));
+      const al1 = v([{ id: 'citra', g: 10, dk: 60, tur: 'boil', cAA: 6.5 }]), al2 = v([{ id: 'citra', g: 10, dk: 60, tur: 'boil', cAA: null }]);
+      __REG.ok('alfa: cAA 6,5 → ' + al1.alpha + ' · cAA yok → katalog ' + al2.alpha + ' (citra aa ' + aa + ')', al1.alpha === 6.5 && al2.alpha === Math.round(aa * 1e4) / 1e4);
+      const ka = (() => { const r = { _og: 1.05, og: 1.05, hoplar: [], maltlar: [{ id: 'pilsner', kg: 4 }], katkilar: [{ id: 'kakao', g: 50 }, { id: 'vanilya', g: 5 }, { id: 'maya_besini', g: 2 }], katkiIds: ['kakao', 'vanilya', 'maya_besini'], hopIds: [], maltIds: ['pilsner'], hacim: 20, percents: {} };
+        const fo = window.__bmBuildFeaturesV12(r), bay = Object.keys(fo).filter(k => k.indexOf('katki_') === 0 && fo[k]); const a = B.buildFeatures(r); return { bay, n: a ? +a[89 + 18] : null }; })();
+      __REG.ok('katki_active_count = doğru katki_* bayrağı ' + JSON.stringify(ka.bay) + ' → ' + ka.n + ' (3 katkı kalemi; kimlik sayımı 3 verirdi)', ka.n === ka.bay.length && ka.n !== 3);
+      window.__bmGetV12ClusterLabels = L0;
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'ESIT2-KAL', ad: 'B1 KALİBRASYON DOSYASI (Eşitlik Sprint 2 kusur 3): CALIBRATION_URL aynı kökten göreli (R2 değil) · dosya repoda HTML\'in yanında · ad = içeriğin sha256-8\'i (değişirse ad değişir) · 14 küme etiketi B1 sınıflarıyla aynı sırada, her eğri x / y monoton · sw.js kurulum listesinde BİREBİR aynı URL · kişisel veri / anahtar yok',
+    calistir: async () => {
+      const r = [], ok = (ad, k, d) => r.push({ ad, ok: !!k, detay: d === undefined ? '' : String(d) });
+      const html = fs.readFileSync(path.join(KOK, HTML_AD), 'utf8'), sw = fs.readFileSync(path.join(KOK, 'sw.js'), 'utf8');
+      const m = /var CALIBRATION_URL = '([^']+)';/.exec(html), ad = m && m[1];
+      ok('CALIBRATION_URL göreli (aynı kök): ' + ad, !!ad && !/^https?:/.test(ad) && /^b1_v8_calibration_[0-9a-f]{8}\.json$/.test(ad));
+      const p = ad ? path.join(KOK, ad) : null, var_ = p && fs.existsSync(p), buf = var_ ? fs.readFileSync(p) : null;
+      const sha = buf ? crypto.createHash('sha256').update(buf).digest('hex').slice(0, 8) : null;
+      ok('dosya repoda, ad = sha256-8: ' + sha, var_ && ad === 'b1_v8_calibration_' + sha + '.json');
+      const j = buf ? JSON.parse(buf.toString('utf8')) : {}, CL = ['bock', 'brown_ale', 'ipa', 'lager', 'lager_dark', 'pale_ale', 'pilsner', 'porter', 'saison', 'sour', 'stout', 'strong_ale', 'wheat', 'specialty'];
+      const mon = (j.curves || []).every(c => c.x.length === c.y.length && c.x.every((v, i) => i === 0 || v >= c.x[i - 1]) && c.y.every((v, i) => i === 0 || v >= c.y[i - 1]));
+      ok('isotonic · 14 etiket B1 sırasıyla · eğriler monoton', j.method === 'isotonic' && JSON.stringify(j.labels) === JSON.stringify(CL) && (j.curves || []).length === 14 && mon);
+      ok('sw.js kurulum listesinde aynı URL', sw.includes("'./" + ad + "'"));
+      ok('anahtar / kişisel veri yok (sk-ant 0, yalnız küme adı + sayı + not)', buf && !/sk-ant/.test(buf.toString()) && Object.keys(j).join() === 'method,n_classes,labels,curves,n_train,cv_folds,not');
+      return r;
+    }
+  },
+  {
     kod: 'CEV1B-KOZMETIK', ad: 'KOZMETİK + KONU SÖZLÜĞÜ (CEV1B madde 4–5): "N\'i güçlü" Türkçe eki (1\'i, 2\'si, 3\'ü, 4\'ü, 5\'i) · muz / karanfil okunduysa "aroması" hesaplanmıyor notuna girmez · tanıyamadım / kapsam dışı metni araştırma düğmesi varken "Kaynaklarda araştırabilirim" der, yoksa eski metin · kağıt → oksidasyon, lahana → DMS ya da sülfür (sorulmaz), ilaç / plastik / klor → klorofenol, "metal gibi" → metalik, sirke → ekşilik, fışkırma / taşma / şişe patladı → aşırı karbonasyon (yalnız etiket + araştırma; kural tablosu değişmez)',
     calistir: (page) => page.evaluate(async () => {
       const G = window.BM_AI5;

@@ -77,7 +77,7 @@ for i in ids:
     mot['V12c'].append(kars(js['v12c'], py['v12c'])); mot['V12_slug'].append(kars(js['v12s'], py['v12s'])); mot['B1_ONNX'].append(kars(js['b1Onnx'], py['b1_onnx']))
     for c, pr in js['vc'].items(): mot['V_cluster'].append(kars(pr, py['vc'][c]['probs']))
 R['motor_esitligi'] = {k: ozet(v) for k, v in mot.items()}
-CAL = json.load(open(f'{W}/_step105_calibration/calibration_params.json', encoding='utf-8')); ISO = []
+CAL = json.load(open(os.environ.get('ESITLIK_KAL') or f'{W}/_step105_calibration/calibration_params.json', encoding='utf-8')); ISO = []  # Sprint 2: HTML'in istediği kalibrasyon
 for c in CAL['curves']:
     iso = IsotonicRegression(out_of_bounds='clip', y_min=0.0, y_max=1.0); iso.fit(np.array(c['x']), np.array(c['y'])); ISO.append(iso)
 def pycal(raw):
