@@ -68,7 +68,7 @@ const MODEL = {
   'v12slug_v5_model_2df2431a.json': 'v12slug_v5_model_2df2431a.json', 'v12slug_v5_label_encoder_2df2431a.json': 'v12slug_v5_label_encoder_2df2431a.json',
   'v20slug_v5_alpha030_40dcee6c.json': 'v20slug_v5_alpha030_40dcee6c.json', 'b1_v8_17484c93.onnx': '_step105_b1v8_fold1.onnx',
   'b1_v8_calibration_29744456.json': '_step105_calibration/calibration_params.json',
-  'b1_v8_calibration_c60695de.json': '_step105_calibration/calibration_params_s2.json' }; // Sprint 2 (kusur 3): doğru 116 alanlık OOF'la yeniden uydurulan kalibrasyon
+  'b1_v8_calibration_697eb644.json': '_step105_calibration/calibration_params_s2.json' }; // Sprint 2 (kusur 3): doğru 116 alanlık OOF'la yeniden uydurulan kalibrasyon
 const html = htmlBuf.toString('utf8');
 for (const m of html.matchAll(/'\/(v_cluster_[a-z_]+_[0-9a-f]{8}\.json)'/g)) MODEL[m[1]] = m[1];
 // Sprint 2: Python tarafı (python_tahmin.py / analiz.py) HTML'in istediği kalibrasyon dosyasını kullanır (iki taraf aynı dosya)
