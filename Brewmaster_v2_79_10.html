@@ -1478,14 +1478,16 @@ window.bmTipografiPanelRender = function(){
     return slugLoadingPromise;
   }
   function evalTree(t, features) {
-    let nid=0; const left=t.left_children,right=t.right_children,splitIdx=t.split_indices,splitCond=t.split_conditions,defaultLeft=t.default_left,baseW=t.base_weights;
+    // EŞİTLİK SPRINT 1 kusur 1: yaprak değeri XGBoost JSON'da split_conditions[yaprak] (xgboost'un kendi tahmini bunu kullanır); base_weights
+    //   normal eğitimde yaprakta aynı değerdir (V12c davranışı değişmez) ama refit edilen V_cluster alt-küme modellerinde farklı → tarayıcı yanlış skor veriyordu
+    let nid=0; const left=t.left_children,right=t.right_children,splitIdx=t.split_indices,splitCond=t.split_conditions,defaultLeft=t.default_left;
     while (left[nid] !== -1) {
       const fIdx=splitIdx[nid]; const fVal=features[fIdx]; const threshold=splitCond[nid];
       if (fVal == null || isNaN(fVal)) nid = defaultLeft[nid] ? left[nid] : right[nid];
       else if (fVal < threshold) nid = left[nid];
       else nid = right[nid];
     }
-    return baseW[nid];
+    return splitCond[nid];
   }
   function predictRawWith(model, features) {
     // base_score init (boost_from_average=1) — Python xgb.Booster.predict ile birebir uyum, Asama 2 V28h_v2 17/17 PASS
@@ -20516,18 +20518,20 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
           // Adım 110 — Tam emsal uygulama: Pilsner/Munich/Vienna/Wheat/Aromatic Abbey için
           // explicit ID list. Kaan F12 kanıt: pct_pilsner=0 + pct_other=57.32 (regex barke
           // ID'sini kaçırıyor → Weyermann Barke Pilsner unrecognized).
-          var _PALE_ALE_IDS = ['pale_ale','pale_ale_malt','pale','bisk','biskuvi','biscuit','biskuvi_arpa','chateau_biscuit','victory','viking_pale','best_pale','briess_pale','extra_pale','thracian_pale','muntons_propino','muntons_spa','halcyon','tipple','fawcett_mild','golden_promise','maris','maris_extra','crisp_pa','best_heidel','chateau_bld'];
+          var _PALE_ALE_IDS = ['pale_ale','pale_ale_malt','pale','bisk','biskuvi','biscuit','biskuvi_arpa','chateau_biscuit','viking_pale','best_pale','briess_pale','extra_pale','thracian_pale','muntons_propino','muntons_spa','halcyon','tipple','fawcett_mild','golden_promise','maris','maris_extra','crisp_pa','best_heidel','chateau_bld'];
           var _SUGAR_KATKI_IDS = ['koyu_candy','koyu_candi','candi','candi_s','candi_drk','candi_amb','candi_clr','candy_clr','candy_amb','candy_drk','candi_sugar','acik_candi','kahve_candi','nobet_sek','beyaz_seker','esmer_seker','kahverengi_seker','sugar','glikoz','dextrose','dex','sek','lak','bal','honey','maple','invert_no1','invert_no2','invert_no3','invert1','invert2','invert3','molasses','demerara','turbinado'];
           // Adım 110 + 111 — Comprehensive explicit ID lists (MALTLAR 173 entry priority-resolved audit, working/_step111_malt_inventory_full.json)
           var _PILSNER_IDS = ['pilsner','bel_pils','barke','bohem_pils','bohemian','viking_pils','best_pils','synergy','chateau_pils','thracian_pils'];
           var _MUNICH_IDS = ['munich','dark_munich','mel','thracian_ruby','munich_light','viking_munich','best_munich','chateau_munich','thracian_munich','chateau_melano','chateau_munich_light','chateau_melano_light','best_munich_dark','best_melano','best_melano_light'];
           var _VIENNA_IDS = ['vienna','viking_vienna','thracian_vienna','chateau_vienna','best_vienna'];
           var _WHEAT_IDS = ['wheat','dark_wheat','smoked_oak','best_wheat','chateau_wheat','thracian_wheat','black_wheat','best_heidel_wheat'];
-          var _AROMATIC_ABBEY_IDS = ['specb','aromatic','abbey_malt','best_aromatic','chateau_specb','chateau_abbey'];
+          // EŞİTLİK SPRINT 1 kusur 5: victory eğitimde aromatic_abbey (brulo / aha / b3 ayrıştırıcıları + v8 veri: 339/340 cat, rmwoods tek-victory 3000/3000 pct_aromatic_abbey);
+          //   eskiden hem _PALE_ALE_IDS hem _ROAST_IDS'teydi (iki kez sayılıyordu, pct_aromatic_abbey'e hiç girmiyordu)
+          var _AROMATIC_ABBEY_IDS = ['specb','aromatic','abbey_malt','best_aromatic','chateau_specb','chateau_abbey','victory'];
           // Adım 111 — 9 yeni kategori explicit ID list (audit ile false positive temizliği)
           var _CRYSTAL_IDS = ['c20','c40','c60','c80','c120','carapils','muntons_caramalt','best_caramel_a','thracian_cara_bl','thracian_cara_ar','cara_aroma','cara_belge','cara_rye','cara_wheat','cara_red','cara_hell','cara_dark','cara_pils_w','cara_foam','cara_munich1','cara_munich2','cara_munich3','cara45','cara120','dingemans_cara8','dingemans_cara20','chateau_cara_blond','chateau_cara_ruby','chateau_cara_gold','crystal_light','crystal_med','crystal_dark','crystal_extra','simp_heritage','c10','c150','kristal_arpa','koyu_kristal','karamela_arpa','chateau_cara_belge','chateau_cara_clair','best_special_x','best_caramel_p','best_caramel_h'];
           var _CHOC_IDS = ['choc','pale_choc','crf1','crf2','crf3','roast_wheat','pale_choc2','chateau_choc','best_choc','bohem_choc'];
-          var _ROAST_IDS = ['victory','roast','black','briess_sroast','chateau_black','dehusked_black','bitter_roast'];
+          var _ROAST_IDS = ['roast','black','briess_sroast','chateau_black','dehusked_black','bitter_roast'];
           var _RYE_IDS = ['rye','flaked_rye','kizil_rye'];
           var _RICE_IDS = ['rice','rice_flaked','rice_hulls'];
           var _OATS_IDS = ['oat','oat_malt','fawcett_oat','raw_oat'];
@@ -20535,21 +20539,26 @@ function rEditorGenel(og, ogKaynak, srm, ibu, maya, fg, fgKaynak, abv, rk, uy){
           var _SMOKED_IDS = ['smoked','smoked_peat','isli_malt'];
           var _SIXROW_IDS = ['briess_6row'];
 
+          // EŞİTLİK SPRINT 1 kusur 5: PAYDA = tüm fermente edilebilir kütle (şeker grubundaki maltlar + katkı şekeri DAHİL) — eğitimle aynı
+          //   (Python: total_w = raw.malts amount_kg toplamı, şeker de malt satırı; v8 şekerli 634/634 reçete, rmwoods şekerli 2000 örnekte 1509 tüm-kütle ↔ 63 şeker-hariç). Eskiden _toplamMaltKg
+          //   (şeker grubu HARİÇ) bölüyordu → şeker payı paya eklenip paydaya girmiyordu, tane yüzdeleri toplamı %100'ü aşıyordu. _toplamMaltKg başka yerlerde aynen.
+          var _katkiSekerKg = (typeof S !== 'undefined' && S.katkilar ? S.katkilar : []).reduce(function(s, k){ return k && k.id && _SUGAR_KATKI_IDS.indexOf(k.id) >= 0 ? s + (+(k.g || k.gram || k.miktar) || 0) / 1000 : s; }, 0);
+          var _paydaKg = (S.maltlar||[]).reduce(function(s, m){ return m && m.id ? s + (m.kg || 0) : s; }, 0) + _katkiSekerKg;
           var _explicitPctMalt = function(idList){
-            if (!_toplamMaltKg) return 0;
+            if (!_paydaKg) return 0;
             return (S.maltlar||[]).reduce(function(s, m){
               if (!m || !m.id) return s;
               return idList.indexOf(m.id) >= 0 ? s + (m.kg || 0) : s;
-            }, 0) / _toplamMaltKg * 100;
+            }, 0) / _paydaKg * 100;
           };
           var _explicitPctKatki = function(idList){
-            if (typeof S === 'undefined' || !S.katkilar || !_toplamMaltKg) return 0;
+            if (typeof S === 'undefined' || !S.katkilar || !_paydaKg) return 0;
             var totalG = (S.katkilar||[]).reduce(function(s, k){
               if (!k || !k.id) return s;
               if (idList.indexOf(k.id) >= 0) return s + (+(k.g || k.gram || k.miktar) || 0);
               return s;
             }, 0);
-            return (totalG / 1000) / _toplamMaltKg * 100;
+            return (totalG / 1000) / _paydaKg * 100;
           };
 
           var _sugarKatkiPct = _explicitPctKatki(_SUGAR_KATKI_IDS);
