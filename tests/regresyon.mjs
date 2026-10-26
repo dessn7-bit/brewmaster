@@ -13611,6 +13611,121 @@ const CASELER = [
       }, { set, eskiSor });
     }
   },
+  // ═════════════ SPRINT CEV2E — koşu koruması: SW yenileme kalkanı · tam sonuç IndexedDB her sorudan sonra · Devam · indirme hangi koşu ═════════════
+  {
+    kod: 'CEV2E-KALKAN', ad: 'SW YENİLEME KORUMASI (CEV2E madde 1): açık AI test koşusu varken _guvenliMi false — 7 koşucu (BM_CEV._calisiyor, BM_DOG1 / BM_AI4DOG / BM_TUZAK / BM_BUL / BM_AI5 .calisiyor, BM_MASH.kosuyor) · koşu sürüyor + _devralindi → location.reload ÇAĞRILMAZ (sahte reload sayacı 0), banner çıkar · koşu bitince bekleyen güncelleme güvenli anda uygulanır · KASITLI BOZMA',
+    calistir: (page) => page.evaluate(async () => {
+      const K = window._bmSwKalkan, Y = window._bmAiKosuSuruyor; let n = 0;
+      const sifirla = () => { try { sessionStorage.removeItem('bm_sw_reload_ts'); sessionStorage.removeItem('bm_sw_reload_n'); } catch (e) {} const b = document.getElementById('bmYeniSurumBar'); if (b) b.remove(); K.test({ yenilendi: false, bekleyen: false }); };
+      __REG.ok('kalkan erişimi + ortak yardımcı: _bmSwKalkan ' + !!K + ' · _bmAiKosuSuruyor ' + typeof Y + ' · koşucu listesi ' + (Y && Y.KOSUCULAR.map(k => k[0] + '.' + k[1]).join(', ')), !!K && typeof Y === 'function' && Y.KOSUCULAR.length === 7);
+      K.test({ ilkCtrl: true, reload: () => { n++; }, yas: () => 999999 });
+      const odak = document.activeElement; if (odak && odak.blur) odak.blur();
+      sifirla(); const g0 = K.guvenliMi(), l0 = Y.liste().slice();
+      __REG.ok('koşu yokken: suruyor ' + Y() + ' · liste ' + JSON.stringify(l0) + ' · _guvenliMi ' + g0 + ' (sayfa ' + (typeof ekran !== 'undefined' ? ekran : '?') + ')', !Y() && l0.length === 0 && g0 === true);
+      const sonuc = [];
+      for (const [m, b] of Y.KOSUCULAR) {
+        sifirla(); const M = window[m], es = M[b]; M[b] = true; let g, l, r0 = n, ban, bek;
+        try { l = Y.liste().slice(); g = K.guvenliMi(); K.devralindi(); ban = !!document.getElementById('bmYeniSurumBar'); bek = K.test({}).bekleyen; K.bekleyeniDene(false); } finally { M[b] = es; }
+        sonuc.push({ k: m + '.' + b, g, l: l.join(','), reload: n - r0, ban, bek });
+        const r1 = n; K.bekleyeniDene(false); sonuc[sonuc.length - 1].sonra = n - r1;
+      }
+      __REG.ok('7 koşucu, her biri sürerken: _guvenliMi false · devralindi + bekleyeniDene → reload ' + sonuc.map(s => s.reload).join('/') + ' (hepsi 0) · banner ' + sonuc.filter(s => s.ban).length + '/7 · bekleyen ' + sonuc.filter(s => s.bek).length + '/7 · koşu bitince güvenli anda reload ' + sonuc.map(s => s.sonra).join('/'), sonuc.every(s => s.g === false && s.l === s.k && s.reload === 0 && s.ban && s.bek && s.sonra === 1), JSON.stringify(sonuc));
+      // gerçek CEV koşusu (mock, takılan): C.baslat yolu C._calisiyor'u kurar; kos sırasında kalkan kapalı
+      const C = window.BM_CEV; sifirla(); const r2 = n; C._calisiyor = true; try { K.devralindi(); } finally { C._calisiyor = false; }
+      __REG.ok('BM_CEV._calisiyor = true iken controllerchange (devralindi) → reload ' + (n - r2), n - r2 === 0);
+      // KASITLI BOZMA: yardımcı kalkanı bilmezse aynı durumda reload olur
+      sifirla(); const r3 = n, yEs = window._bmAiKosuSuruyor; window._bmAiKosuSuruyor = () => false; window.BM_DOG1.calisiyor = true;
+      try { K.devralindi(); } finally { window._bmAiKosuSuruyor = yEs; window.BM_DOG1.calisiyor = false; }
+      __REG.ok('KASITLI BOZMA: yardımcı devre dışı + DOG1 sürüyor → reload ' + (n - r3) + ' (1 → kırmızı)', n - r3 === 1);
+      sifirla(); K.test({ ilkCtrl: false });
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'CEV2E-KAYIT', ad: 'TAM SONUÇ IDB + DEVAM + İNDİRME (CEV2E madde 2–5, mock, AI yok): (fp) 55 soruluk mock koşunun çıktı parmak izi (yol / durum / konu / madde metni / maliyet) CEV2E öncesiyle AYNI · (a) 20. soruda (C20) takılan koşu + bellek sıfırlama → dizinde yarım (19/55, sürmekte C20) → Devam → 55/55, biten soru tekrar 0, maliyet tek seferlikle aynı · (b) soru başı ≥ 60 KB × 55 (≥ 3 MB) IDB\'ye her soruda yazılır, indirilen dosya byte byte aynı, localStorage\'da yalnız dizin · (c) set / AI4 / araştırma denetleyici imzası değişince Devam REDDİ · tavan yarımın harcamasıyla · IDB yazılamazsa koşu durmaz + uyarı + bellekten indirme · eski ai_cev_sonuc_v1 göçü · son 3 koşu · dosya adı brewmaster_cev_<id>_<bitti|yarim>.json · KASITLI BOZMALAR',
+    calistir: async (page) => {
+      const eski = fs.readFileSync(path.join(KOK, 'tests', 'fixtures', 'cev_kosu_2026-10-24.json'), 'utf8');
+      return page.evaluate(async (eski) => {
+        const C = window.BM_CEV, A = window.BM_AI, IDB0 = C.IDB.ad, DZ0 = C.DIZIN_LS;
+        C.IDB.ad = 'bm_ai_cev_regtest'; C.DIZIN_LS = 'ai_cev_dizin_regtest'; localStorage.removeItem(C.DIZIN_LS); C._son = null;
+        const silDb = () => new Promise(r => { const q = indexedDB.deleteDatabase(C.IDB.ad); q.onsuccess = q.onerror = q.onblocked = () => r(); });
+        await silDb();
+        const sah = A.hazirMi; A.hazirMi = () => ({ hazir: false });
+        try {
+          C._setler = null; await C.setYukle(); const L = C._setler, TOP = L.reduce((a, e) => a + e.set.sorular.length, 0);
+          __REG.ok('setler: ' + L.map(e => e.ad + ' ' + e.set.sorular.length + ' imza ' + C.beklenenImza(e.set)).join(' + ') + ' (held-out içeriği okunmaz; yalnız imza + sayı)', L.length === 2 && TOP === 55 && C.beklenenImza(L[0].set) === '7befe7db' && C.beklenenImza(L[1].set) === 'f3853086' && L[1].set.sorular.length === 21);
+          const mockF = (takil) => ({ sorgu: (p, R) => takil && takil(R) ? new Promise(() => {}) : ({ ok: true, veri: { sorgular: ['beer off flavor cause manufacturer', 'homebrew study'] }, maliyet: { usd: 0.002 } }),
+            web: () => ({ ok: true, maliyet: { usd: 0.03 }, veri: { iddialar: [{ kaynaklar: [{ url: 'https://www.lallemandbrewing.com/en/m', alinti: 'Yeast health and fermentation temperature control this compound.' }, { url: 'https://fermentis.com/en/m', alinti: 'Fermentation temperature control this compound.' }, { url: 'https://byo.com/m', alinti: 'Many brewers report this.' }] }] } }),
+            ozet: () => ({ ok: true, maliyet: { usd: 0.02 }, veri: { maddeler: [{ degisken: 'mayalanma sıcaklığı', yon: 'artirmak', deger: '', etki: 'bu bileşik artar', etki_yonu: 'artirir', kaynaklar: ['w1', 'w2'] }, { degisken: 'maya sağlığı', yon: 'bilgi', deger: '', etki: 'bu bileşiği kontrol eder', etki_yonu: null, kaynaklar: ['w1'] }], dogrudan_cevap: { metin: '', kaynaklar: [] }, celiskiler: [] } }) });
+          const fp = (o, ad) => C.fnv(JSON.stringify(o.sorular.filter(s => s.set === ad).map(s => [s.id, s.yol, s.durum || null, s.konu || null, (s.maddeler || []).map(m => m.metin), s.maliyet])));
+          // (fp) tek seferlik mock koşu — kalıcı DEĞİL (eski davranış: mock yazılmaz)
+          const o1 = await C.kos(L, { mock: mockF() });
+          __REG.ok('(fp) tek seferlik mock 55 soru: durum ' + o1.durum + ' · kural ' + o1.metrik.kural + ' / araştırma ' + o1.metrik.arastirma + ' · $' + o1.metrik.usd + ' · parmak izi ana ' + fp(o1, 'ana') + ' / heldout ' + fp(o1, 'heldout') + ' (CEV2E öncesi 246c0955 / 2a7e8a16, $6.106) · dizine yazılmadı ' + (C.dizinAl().length === 0) + ' · C._son ' + C._son,
+            o1.durum === 'bitti' && o1.sorular.length === 55 && fp(o1, 'ana') === '246c0955' && fp(o1, 'heldout') === '2a7e8a16' && o1.metrik.usd === 6.106 && C.dizinAl().length === 0 && C._son === null);
+          // (a) 20. soruda takılan kalıcı koşu → sayfa yenileme benzetimi → Devam
+          const pr = C.kos(L, { mock: mockF(R => R.key === 'cevset:C20'), kaydet: true }); pr.then(() => {}, () => {});
+          for (let i = 0; i < 2000 && ((C.dizinAl()[0] || {}).suren || {}).id !== 'C20'; i++) await new Promise(r => setTimeout(r, 5));
+          await C.bekle(); const e1 = C.dizinAl()[0]; const id = e1.kosuId;
+          C._son = null; C._calisiyor = false; // bellek sıfırlandı (sayfa yenilendi)
+          const panel1 = C.panelHTML(), lsBoy = (localStorage.getItem(C.DIZIN_LS) || '').length;
+          __REG.ok('(a) takılan koşu: dizin durum ' + e1.durum + ' · ' + e1.biten + '/' + e1.toplam + ' soru · sürmekte ' + JSON.stringify(e1.suren) + ' · harcanan $' + e1.usd + ' · panel "Yarım koşu" ' + /Yarım koşu: .*, 19\/55 soru bitti, harcanan \$/.test(panel1) + ' + Devam ' + /cev-devam-btn/.test(panel1) + ' + İndir ' + /brewmaster_cev_\d+_yarim\.json/.test(panel1) + ' + "en çok 1 sorunun harcaması iki kez olabilir" ' + /en çok 1 sorunun harcaması iki kez olabilir/.test(panel1) + ' · localStorage dizini ' + lsBoy + ' karakter',
+            e1.durum === 'calisiyor' && e1.biten === 19 && e1.toplam === 55 && e1.suren && e1.suren.id === 'C20' && /Yarım koşu: .*, 19\/55 soru bitti, harcanan \$/.test(panel1) && /cev-devam-btn/.test(panel1) && /brewmaster_cev_\d+_yarim\.json/.test(panel1) && /en çok 1 sorunun harcaması iki kez olabilir/.test(panel1) && lsBoy < 3000);
+          const rec = await C.idbOku('kosu:' + id); rec.suren = e1.suren; const ilk = rec.sorular.map(s => s.set + ':' + s.id);
+          const cv = C.cevapla, say = {}; C.cevapla = function (set, q, opt) { const k = opt.setAd + ':' + q.id; say[k] = (say[k] || 0) + 1; return cv.apply(this, arguments); };
+          let o2; try { o2 = await C.kos(L, { mock: mockF(), kaydet: true, devam: rec }); } finally { C.cevapla = cv; }
+          const tekrar = ilk.filter(k => say[k]).length, tek = new Set(o2.sorular.map(s => s.set + ':' + s.id)).size; await C.bekle(); const e2 = C.dizinAl()[0];
+          __REG.ok('(a) Devam: durum ' + o2.durum + ' · ' + o2.sorular.length + '/55 (tekil ' + tek + ') · bu turda koşan ' + Object.keys(say).length + ' (beklenen 36) · biten soru tekrar ' + tekrar + ' · $' + o2.metrik.usd + ' (tek seferlik $' + o1.metrik.usd + ') · parmak izi ' + fp(o2, 'ana') + ' / ' + fp(o2, 'heldout') + ' · kesilen ' + o2.kesilen + ' · devam ' + o2.devam + ' · dizin ' + e2.durum + ' → ' + C.dosyaAdi(e2),
+            o2.durum === 'bitti' && o2.sorular.length === 55 && tek === 55 && Object.keys(say).length === 36 && tekrar === 0 && o2.metrik.usd === o1.metrik.usd && fp(o2, 'ana') === '246c0955' && fp(o2, 'heldout') === '2a7e8a16' && o2.kesilen === 1 && e2.durum === 'bitti' && C.dosyaAdi(e2) === 'brewmaster_cev_' + id + '_bitti.json');
+          // (c) imza değişince Devam reddi (yarım kayıt üzerinde)
+          const yar = JSON.parse(JSON.stringify(rec)); yar.durum = 'calisiyor'; yar.sorular = yar.sorular.slice(0, 5);
+          const red = async (f) => { const r = JSON.parse(JSON.stringify(yar)); f(r); const n0 = {}; C.cevapla = function (set, q, opt) { n0[q.id] = 1; return cv.apply(this, arguments); }; try { return [await C.kos(L, { mock: mockF(), devam: r }), Object.keys(n0).length]; } finally { C.cevapla = cv; } };
+          const R1 = await red(r => { r.denetleyiciImza = 'eski-1'; }), R2 = await red(r => { r.arastirmaImza = 'eski-2'; }), R3 = await red(r => { r.setler[0].setImza = 'deadbeef'; }), R4 = await red(r => { r.setler[1].setImza = '00000000'; }), R5 = await red(r => { r.setler = r.setler.slice(0, 1); }), R6 = await red(r => { r.durum = 'bitti'; });
+          const Rx = [R1, R2, R3, R4, R5, R6];
+          __REG.ok('(c) Devam reddi: ' + Rx.map(x => x[0].durum + ' "' + String(x[0].neden).slice(0, 70) + '" çağrı ' + x[1]).join(' · '), Rx.every(x => x[0].durum === 'reddedildi' && x[1] === 0) && /denetleyici imzası/.test(R1[0].neden) && /araştırma denetleyici/.test(R2[0].neden) && /ana seti imzası/.test(R3[0].neden) && /heldout seti imzası/.test(R4[0].neden) && /set listesi/.test(R5[0].neden) && /zaten bitti/.test(R6[0].neden));
+          // tavan yarımın harcamasıyla birlikte
+          const tv = JSON.parse(JSON.stringify(yar)); tv.tavan = 0.5; tv.sorular.forEach(s => { s.maliyet = 0.2; });
+          const nT = {}; C.cevapla = function (set, q, opt) { nT[q.id] = 1; return cv.apply(this, arguments); }; let oT; try { oT = await C.kos(L, { mock: mockF(), devam: tv, tavanSina: true }); } finally { C.cevapla = cv; }
+          __REG.ok('tavan: yarım koşu $' + C.harcanan(tv) + ' > tavan $0.5 → Devam ' + oT.durum + ' (' + oT.neden + ') · yeni çağrı ' + Object.keys(nT).length, oT.durum === 'durdu' && /tavanı/.test(oT.neden) && Object.keys(nT).length === 0);
+          // (b) büyük sonuç: soru başı ≥ 60 KB × 55 → IDB her soruda; indirilen dosya byte byte aynı
+          const big = { surum: 2, kosuId: id + 7, tarih: new Date().toISOString(), durum: 'calisiyor', setler: [{ ad: 'ana', soru: 34 }, { ad: 'heldout', soru: 21 }], sorular: [] };
+          for (let i = 0; i < 55; i++) { big.sorular.push({ id: 'S' + i, set: i < 34 ? 'ana' : 'heldout', maliyet: 0.1, web: [{ alinti: ('alıntı ' + i + ' ğüşiöç ').repeat(4100) }] }); await C.kaydet(big); }
+          const toplam = JSON.stringify(big).length, durMem = C._son; C._son = null; await C.bekle();
+          const dosya = await C.indirMetin(big.kosuId), lsBoy2 = (localStorage.getItem(C.DIZIN_LS) || '').length, soruBoy = JSON.stringify(big.sorular[0]).length;
+          let blob = null, adY = null; const cou = URL.createObjectURL, ck = HTMLAnchorElement.prototype.click; URL.createObjectURL = b => { blob = b; return 'blob:test'; }; HTMLAnchorElement.prototype.click = function () { adY = this.download; };
+          let ind; try { ind = await C.indir(big.kosuId); } finally { URL.createObjectURL = cou; HTMLAnchorElement.prototype.click = ck; }
+          const btxt = blob ? await blob.text() : '';
+          __REG.ok('(b) büyük koşu: soru başı ' + soruBoy + ' karakter · toplam ' + toplam + ' karakter (≥ 3 M) · IDB\'den indirme metni JSON.stringify(o, null, 1) ile AYNI ' + (dosya === JSON.stringify(big, null, 1)) + ' · indir() blob AYNI ' + (btxt === JSON.stringify(big, null, 1)) + ' · dosya adı ' + adY + ' · localStorage dizini ' + lsBoy2 + ' karakter · IDB hata ' + C.idbHata,
+            soruBoy >= 61440 && toplam >= 3e6 && dosya === JSON.stringify(big, null, 1) && ind === true && btxt === dosya && adY === 'brewmaster_cev_' + big.kosuId + '_yarim.json' && lsBoy2 < 3000 && !C.idbHata);
+          C._son = durMem;
+          // son 3 koşu + panel satırları (her koşu ayrı satır + kendi indir düğmesi)
+          for (let i = 0; i < 2; i++) { const s = { kosuId: id + 100 + i, tarih: new Date().toISOString(), durum: 'bitti', setler: [{ ad: 'ana', soru: 34 }, { ad: 'heldout', soru: 21 }], sorular: [{ id: 'x', set: 'ana', maliyet: 0 }] }; await C.kaydet(s); }
+          await C.bekle(); const K = (await C.idbAnahtarlar()).sort(), D = C.dizinAl(); C._son = null; const panel2 = C.panelHTML();
+          __REG.ok('son 3 koşu: dizin ' + D.map(e => e.kosuId + ':' + e.durum).join(', ') + ' · IDB anahtar ' + K.length + ' · panelde koşu satırı ' + (panel2.match(/class="cev-kosu"/g) || []).length + ', indir düğmesi ' + (panel2.match(/cev-indir-btn/g) || []).length + ' · satırda setler "ana 34 + heldout 21" ' + /setler ana 34 \+ heldout 21/.test(panel2),
+            D.length === 3 && K.length === 3 && K.every(k => D.some(e => 'kosu:' + e.kosuId === k)) && !D.some(e => e.kosuId === id) && (panel2.match(/class="cev-kosu"/g) || []).length === 3 && (panel2.match(/cev-indir-btn/g) || []).length === 3 && /setler ana 34 \+ heldout 21/.test(panel2));
+          // göç: eski ai_cev_sonuc_v1 (koşu #1, 2026-10-24) → IDB + dizin; LS kopyası silinir; indirme içeriği aynı
+          localStorage.removeItem(C.DIZIN_LS); await C.idbAnahtarlar().then(K => Promise.all(K.map(k => C.idbSil(k)))); localStorage.setItem(C.SON_LS, eski);
+          await C.gocle(); const eo = JSON.parse(eski), gd = C.dizinAl(), gt = await C.indirMetin(eo.kosuId);
+          __REG.ok('göç: koşu #1 ' + eo.kosuId + ' → dizin ' + gd.map(e => e.kosuId + ':' + e.durum + ' ' + e.biten + '/' + e.toplam).join(',') + ' · ai_cev_sonuc_v1 silindi ' + (localStorage.getItem(C.SON_LS) === null) + ' · indirme içeriği aynı ' + (gt === JSON.stringify(eo, null, 1)),
+            gd.length === 1 && String(gd[0].kosuId) === '1792848045701' && gd[0].durum === 'bitti' && gd[0].biten === 34 && localStorage.getItem(C.SON_LS) === null && gt === JSON.stringify(eo, null, 1));
+          // IDB yazılamazsa: koşu durmaz, panel uyarı, bellekten indirme
+          C.CEV2E.idb = false; let o3, t3, p3; try { o3 = await C.kos(L[0].set, { mock: mockF(), kaydet: true }); await C.bekle(); p3 = C.panelHTML(); t3 = await C.indirMetin(o3.kosuId); } finally { C.CEV2E.idb = true; }
+          __REG.ok('IDB yazılamazsa: koşu ' + o3.durum + ' ' + o3.sorular.length + ' soru · uyarı "' + (C.idbHata || '') + '" panelde ' + /cev-idb-hata/.test(p3) + ' · bellekten indirme ' + (t3 === JSON.stringify(o3, null, 1)),
+            o3.durum === 'bitti' && o3.sorular.length === 34 && !!C.idbHata && /cev-idb-hata/.test(p3) && t3 === JSON.stringify(o3, null, 1));
+          C.idbHata = null;
+          // KASITLI BOZMALAR
+          const rb = await C.idbOku('kosu:' + eo.kosuId); // (göçten) — atlama bozması için yarım kayıt kullanılır
+          const yb = JSON.parse(JSON.stringify(yar)); C.CEV2E.atla = false; const nb = {}; C.cevapla = function (set, q, opt) { nb[opt.setAd + ':' + q.id] = 1; return cv.apply(this, arguments); };
+          let ob; try { ob = await C.kos(L, { mock: mockF(), devam: yb }); } finally { C.CEV2E.atla = true; C.cevapla = cv; }
+          const tb = yar.sorular.filter(s => nb[s.set + ':' + s.id]).length;
+          C.CEV2E.imza = false; let oi; try { oi = await C.kos(L, { mock: mockF(), devam: (() => { const r = JSON.parse(JSON.stringify(yar)); r.denetleyiciImza = 'eski'; return r; })() }); } finally { C.CEV2E.imza = true; }
+          C.CEV2E.idb = false; const bk = { kosuId: id + 999, tarih: '', durum: 'calisiyor', setler: [], sorular: [{ id: 'z', set: 'ana' }] }; let ti; try { await C.kaydet(bk); C._son = null; ti = await C.indirMetin(bk.kosuId); } finally { C.CEV2E.idb = true; C.idbHata = null; }
+          __REG.ok('KASITLI BOZMA: atlama kapalı → biten soru tekrar ' + tb + ' (kırmızı) · imza denetimi kapalı → Devam ' + oi.durum + ' (kırmızı) · IDB kapalı + bellek sıfır → indirme ' + (ti === null ? 'YOK (sonuç kayıp → kırmızı)' : 'var') + ' · göç kaydı okundu ' + !!rb,
+            tb === 5 && ob.durum === 'bitti' && oi.durum === 'bitti' && ti === null && !!rb);
+        } finally { A.hazirMi = sah; C._son = null; C._calisiyor = false; localStorage.removeItem(C.DIZIN_LS); localStorage.removeItem(C.SON_LS); await silDb(); C.IDB.ad = IDB0; C.DIZIN_LS = DZ0; }
+        return __REG.al();
+      }, eski);
+    }
+  },
   {
     kod: 'CEV1B-KOZMETIK', ad: 'KOZMETİK + KONU SÖZLÜĞÜ (CEV1B madde 4–5): "N\'i güçlü" Türkçe eki (1\'i, 2\'si, 3\'ü, 4\'ü, 5\'i) · muz / karanfil okunduysa "aroması" hesaplanmıyor notuna girmez · tanıyamadım / kapsam dışı metni araştırma düğmesi varken "Kaynaklarda araştırabilirim" der, yoksa eski metin · kağıt → oksidasyon, lahana → DMS ya da sülfür (sorulmaz), ilaç / plastik / klor → klorofenol, "metal gibi" → metalik, sirke → ekşilik, fışkırma / taşma / şişe patladı → aşırı karbonasyon (yalnız etiket + araştırma; kural tablosu değişmez)',
     calistir: (page) => page.evaluate(async () => {

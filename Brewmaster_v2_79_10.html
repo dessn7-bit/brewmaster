@@ -37234,35 +37234,118 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
       kapsama:b ? { bulunan:f, beklenen:b, oran:Math.round(f / b * 1000) / 10 } : null, gucHata:L.reduce(function(a, x){ return a + x.puan.gucHata.length; }, 0), yalaka:L.reduce(function(a, x){ return a + x.puan.yalaka.length; }, 0), tat:L.reduce(function(a, x){ return a + x.puan.tat.length; }, 0),
       jargon:L.reduce(function(a, x){ return a + x.puan.jargon.length; }, 0), bulamadimErken:L.filter(function(x){ return x.puan.bulamadimErken; }).length, usd:Math.round(L.reduce(function(a, x){ return a + (x.maliyet || 0); }, 0) * 1e4) / 1e4 }; };
   C.kosTavan = function(x){ var t = C.tahmin(); if(!t) return null; var n = C.listeKur(x).reduce(function(a, e){ return a + (e.set && e.set.sorular ? e.set.sorular.length : 0); }, 0); return Math.round(t.tavan * n * 1e4) / 1e4; };
+  // ── CEV2E: KOŞU KORUMASI (koşu davranışı — yol, paket, sorgu, özet, puan — DEĞİŞMEZ; yalnız kayıt / devam / koruma) ──
+  //   Tam sonuç IndexedDB 'bm_ai_cev'/'sonuc' anahtar 'kosu:<kosuId>' — HER SORUDAN SONRA yazılır (DOG1 deseni; 1,5 M karakter kırpması YOK); localStorage'da yalnız küçük DİZİN (C.DIZIN_LS).
+  //   IDB yazılamazsa koşu DURMAZ: panelde uyarı, sonuç bellekte (C._son) — indirme bellekten çalışır. Son C.IDB_TUT koşu tutulur (eski ai_cev_sonuc_v1 kaydı göçle dahil).
+  //   Yarım koşu (durum 'calisiyor' sayfa yenilenmiş / 'durdu') → Devam: yalnız BİTMEMİŞ sorular; biten soru tekrar koşmaz, harcaması iki kez sayılmaz; tavan yarımın harcamasıyla birlikte.
+  //   Devam REDDEDİLİR: set imzası (her set), AI4 denetleyici imzası ya da araştırma denetleyici imzası koşunun kaydından farklıysa.
+  C.IDB = { ad:'bm_ai_cev', depo:'sonuc' }; C.IDB_TUT = 3; C.DIZIN_LS = 'ai_cev_dizin_v1'; // cihaz-yerel (bm_ öneksiz): yedeğe / senkrona girmez
+  C.CEV2E = { idb:true, atla:true, imza:true }; // yalnız kasıtlı bozma (test) için
+  var cevAnahtarsiz = function(t){ return String(t).replace(/sk-ant-[A-Za-z0-9_\-]+/g, 'sk-ant-***'); };
+  var cevIdbAc = function(){ return new Promise(function(res, rej){ try{ if(!window.indexedDB) return rej(new Error('IndexedDB yok')); var q = indexedDB.open(C.IDB.ad, 1); q.onupgradeneeded = function(){ if(!q.result.objectStoreNames.contains(C.IDB.depo)) q.result.createObjectStore(C.IDB.depo); }; q.onsuccess = function(){ res(q.result); }; q.onerror = function(){ rej(q.error || new Error('IndexedDB açılamadı')); }; }catch(e){ rej(e); } }); };
+  var cevIdbIs = function(mod, f){ return cevIdbAc().then(function(db){ return new Promise(function(res, rej){ var t, r; try{ t = db.transaction(C.IDB.depo, mod); r = f(t.objectStore(C.IDB.depo)); }catch(e){ try{ db.close(); }catch(_){} return rej(e); } t.oncomplete = function(){ db.close(); res(r ? r.result : true); }; t.onerror = t.onabort = function(){ try{ db.close(); }catch(_){} rej(t.error || new Error('IndexedDB işlem hatası')); }; }); }); };
+  C.idbYazMetin = function(k, t){ if(!C.CEV2E.idb) return Promise.reject(new Error('IndexedDB kapalı (bozma)')); return cevIdbIs('readwrite', function(st){ return st.put(t, k); }); };
+  C.idbYaz = function(k, v){ return C.idbYazMetin(k, cevAnahtarsiz(JSON.stringify(v))); };
+  C.idbOkuMetin = function(k){ return cevIdbIs('readonly', function(st){ return st.get(k); }).then(function(t){ return t || null; }); };
+  C.idbOku = function(k){ return C.idbOkuMetin(k).then(function(t){ return t ? JSON.parse(t) : null; }); };
+  C.idbSil = function(k){ return cevIdbIs('readwrite', function(st){ return st.delete(k); }); };
+  C.idbAnahtarlar = function(){ return cevIdbIs('readonly', function(st){ return st.getAllKeys(); }); };
+  C.dizinAl = function(){ try{ var d = JSON.parse(localStorage.getItem(C.DIZIN_LS) || '[]'); return Array.isArray(d) ? d : []; }catch(e){ return []; } };
+  C.harcanan = function(o){ return Math.round((o.sorular || []).reduce(function(a, s){ return a + (s.maliyet || 0); }, 0) * 1e4) / 1e4; };
+  C.dizinSatir = function(o){ return { kosuId:o.kosuId, tarih:o.tarih, durum:o.durum, neden:o.neden || null, biten:(o.sorular || []).length, toplam:(o.setler || []).reduce(function(a, e){ return a + (e.soru || 0); }, 0), setler:(o.setler || []).map(function(e){ return { ad:e.ad, soru:e.soru }; }),
+    usd:C.harcanan(o), model:o.model || null, suren:o.suren || null, kesilen:o.kesilen || 0, devam:o.devam || 0, metrik:o.metrik || null, mock:!!o.mock, kirpildi:!!o.kirpildi, idbYok:!!o.idbYok }; };
+  // dizine yaz (kosuId'ye göre tek satır, yeniden eskiye, en çok C.IDB_TUT); düşen koşunun IDB kaydı silinir
+  C.dizinGuncelle = function(o){ var L = C.dizinAl().filter(function(e){ return e && String(e.kosuId) !== String(o.kosuId); }); L.push(C.dizinSatir(o)); L.sort(function(a, b){ return b.kosuId - a.kosuId; });
+    var dus = L.slice(C.IDB_TUT); L = L.slice(0, C.IDB_TUT); try{ localStorage.setItem(C.DIZIN_LS, JSON.stringify(L)); }catch(e){ C.dizinHata = String(e && e.message || e); return false; }
+    dus.forEach(function(e){ C._yaz = C._yaz.then(function(){ return C.idbSil('kosu:' + e.kosuId); }).catch(function(){ return null; }); }); return true; };
+  C._yaz = Promise.resolve(true); C.idbHata = null; C.dizinHata = null;
+  // anlık görüntü (metin) kuyruğa — sonraki değişiklikler yazılanı etkilemez; hata koşuyu DURDURMAZ
+  C.kaydet = function(o){ var k = 'kosu:' + o.kosuId, t = cevAnahtarsiz(JSON.stringify(o)); C.dizinGuncelle(o);
+    C._yaz = C._yaz.then(function(){ return C.idbYazMetin(k, t); }).then(function(){ C.idbHata = null; return true; }, function(e){ C.idbHata = String(e && e.message || e); o.idbYok = true; C.dizinGuncelle(o); try{ C.panelCiz(); }catch(_){} return false; }); return C._yaz; };
+  C.bekle = function(){ return C._yaz; };
+  // eski kayıt (ai_cev_sonuc_v1, CEV2E öncesi; koşu #1 dahil) → IDB + dizin; LS kopyası YALNIZ IDB yazımı başarılıysa silinir
+  C.gocle = function(){ var t; try{ t = localStorage.getItem(C.SON_LS); }catch(e){ return Promise.resolve(false); } if(!t) return Promise.resolve(false);
+    var o; try{ o = JSON.parse(t); }catch(e){ return Promise.resolve(false); } if(!o || !o.kosuId) return Promise.resolve(false);
+    if(C.dizinAl().some(function(e){ return String(e.kosuId) === String(o.kosuId); })){ try{ localStorage.removeItem(C.SON_LS); }catch(e){} return Promise.resolve(true); }
+    if(!Array.isArray(o.sorular)){ o.durum = o.durum || 'bitti'; o.sorular = []; o.kirpildi = true; o.idbYok = true; C.dizinGuncelle(o); try{ localStorage.removeItem(C.SON_LS); }catch(e){} return Promise.resolve(true); }
+    if(!o.setler) o.setler = [{ ad:'ana', url:C.SET_URL, soru:o.sorular.length, setImza:o.setImza || null }];
+    C._yaz = C._yaz.then(function(){ return C.idbYazMetin('kosu:' + o.kosuId, cevAnahtarsiz(t)); }).then(function(){ C.dizinGuncelle(o); try{ localStorage.removeItem(C.SON_LS); }catch(e){} return true; }, function(e){ C.idbHata = String(e && e.message || e); return false; }); return C._yaz; };
+  // Devam reddi: set imzası (her set, aynı set listesi) · AI4 denetleyici imzası · araştırma denetleyici imzası
+  C.devamRed = function(rec, L){ if(!rec || !Array.isArray(rec.sorular)) return 'kayıt yok ya da kırpılmış (tam sonuç yok)'; if(rec.durum === 'bitti') return 'koşu zaten bitti';
+    if(!C.CEV2E.imza) return null;
+    var ri = A4 && A4.denetleyiciImza ? A4.denetleyiciImza() : null; if(rec.denetleyiciImza !== ri) return 'denetleyici imzası değişti (kayıt ' + rec.denetleyiciImza + ', şimdi ' + ri + ')';
+    if(rec.arastirmaImza !== C.arastirmaImza()) return 'araştırma denetleyici imzası değişti (kayıt ' + rec.arastirmaImza + ', şimdi ' + C.arastirmaImza() + ')';
+    var rs = rec.setler || [], ad = function(x){ return x.map(function(e){ return e.ad; }).join('+'); }; if(ad(rs) !== ad(L)) return 'set listesi değişti (kayıt ' + ad(rs) + ', şimdi ' + ad(L) + ')';
+    for(var i = 0; i < L.length; i++){ var s = C.beklenenImza(L[i].set); if(rs[i].setImza !== s) return L[i].ad + ' seti imzası değişti (kayıt ' + rs[i].setImza + ', şimdi ' + s + ')'; } return null; };
   // opt.mock: test (AI yok); gerçek koşu: Kaan'ın düğmesi (her setin kilidi + AI hazır şartı). x: tek set (eski çağrı) ya da [{ ad, set, enAz }]
+  //   CEV2E: opt.devam = yarım koşunun kaydı (yalnız bitmemiş sorular) · opt.kaydet = mock koşuyu da kalıcı yaz (yalnız test) · gerçek koşu HER ZAMAN kalıcı
   C.kos = function(x, opt){ opt = opt || {}; var L = C.listeKur(x); if(!opt.mock){ var kl = C.listeKilit(L); if(kl) return Promise.resolve({ durum:'kilitli', neden:kl }); if(!window.BM_AI || !window.BM_AI.hazirMi().hazir) return Promise.resolve({ durum:'kilitli', neden:'AI anahtarı yok' }); }
-    var out = { surum:2, kosuId:Date.now(), tarih:new Date().toISOString(), mock:!!opt.mock, model:window.BM_AI && A4 ? window.BM_AI.MODEL[A4.ozetModel()].ad : null, denetleyiciImza:A4 && A4.denetleyiciImza ? A4.denetleyiciImza() : null, arastirmaImza:C.arastirmaImza(),
-      setImza:C.beklenenImza(L[0].set), setler:L.map(function(e){ return { ad:e.ad, url:e.url || null, soru:e.set.sorular.length, setImza:C.beklenenImza(e.set) }; }), tavan:C.kosTavan(L), sorular:[], durum:'calisiyor' }, si = 0, qi = 0;
-    var bitir = function(durum, neden){ out.durum = durum; if(neden) out.neden = neden; out.metrik = C.metrik(out.sorular); if(L.length > 1){ out.metrikSet = {}; L.forEach(function(e){ out.metrikSet[e.ad] = C.metrik(out.sorular.filter(function(s){ return s.set === e.ad; })); }); } C.sonYaz(out); return Promise.resolve(out); };
-    var adim = function(){ while(si < L.length && qi >= L[si].set.sorular.length){ si++; qi = 0; } if(si >= L.length) return bitir('bitti');
-      var harc = out.sorular.reduce(function(a, s){ return a + (s.maliyet || 0); }, 0); if(!opt.mock && out.tavan != null && harc > out.tavan) return bitir('durdu', 'koşu tavanı aşıldı ($' + trS(out.tavan, 2) + ')');
-      var e = L[si], q = e.set.sorular[qi++]; return C.cevapla(e.set, q, Object.assign({}, opt, { setAd:e.ad })).then(function(c){ c.puan = C.puan(q, c); c.soru = q.soru; out.sorular.push(c); if(opt.adim) try{ opt.adim(out); }catch(er){} return adim(); }); };
+    var out, kal = !opt.mock || !!opt.kaydet, bit = {}, si = 0, qi = 0;
+    if(opt.devam){ var red = C.devamRed(opt.devam, L); if(red) return Promise.resolve({ durum:'reddedildi', neden:'Devam reddedildi: ' + red, kosuId:opt.devam.kosuId });
+      out = opt.devam; out.durum = 'calisiyor'; delete out.neden; out.devam = (out.devam || 0) + 1; (out.devamTarih = out.devamTarih || []).push(new Date().toISOString()); if(out.suren){ out.kesilen = (out.kesilen || 0) + 1; out.suren = null; }
+      if(C.CEV2E.atla) out.sorular.forEach(function(s){ bit[s.set + ':' + s.id] = 1; }); if(!C.CEV2E.atla) out.sorular = []; }
+    else out = { surum:2, kosuId:Date.now(), tarih:new Date().toISOString(), mock:!!opt.mock, model:window.BM_AI && A4 ? window.BM_AI.MODEL[A4.ozetModel()].ad : null, denetleyiciImza:A4 && A4.denetleyiciImza ? A4.denetleyiciImza() : null, arastirmaImza:C.arastirmaImza(),
+      setImza:C.beklenenImza(L[0].set), setler:L.map(function(e){ return { ad:e.ad, url:e.url || null, soru:e.set.sorular.length, setImza:C.beklenenImza(e.set) }; }), tavan:C.kosTavan(L), sorular:[], durum:'calisiyor' };
+    if(kal){ C._son = out; C.kaydet(out); }
+    var bitir = function(durum, neden){ out.durum = durum; if(neden) out.neden = neden; out.suren = null; out.metrik = C.metrik(out.sorular); if(L.length > 1){ out.metrikSet = {}; L.forEach(function(e){ out.metrikSet[e.ad] = C.metrik(out.sorular.filter(function(s){ return s.set === e.ad; })); }); } C.sonYaz(out, kal); return Promise.resolve(out); };
+    var adim = function(){ while(si < L.length && (qi >= L[si].set.sorular.length || bit[L[si].ad + ':' + L[si].set.sorular[qi].id])){ if(qi >= L[si].set.sorular.length){ si++; qi = 0; } else qi++; } if(si >= L.length) return bitir('bitti');
+      var harc = out.sorular.reduce(function(a, s){ return a + (s.maliyet || 0); }, 0); if((!opt.mock || opt.tavanSina) && out.tavan != null && harc > out.tavan) return bitir('durdu', 'koşu tavanı aşıldı ($' + trS(out.tavan, 2) + ')');
+      var e = L[si], q = e.set.sorular[qi++]; out.suren = { set:e.ad, id:q.id }; if(kal) C.dizinGuncelle(out); // soru ortasında kesilirse dizinde görünür → Devam'da yeniden koşar
+      return C.cevapla(e.set, q, Object.assign({}, opt, { setAd:e.ad })).then(function(c){ c.puan = C.puan(q, c); c.soru = q.soru; out.sorular.push(c); out.suren = null; if(kal) C.kaydet(out); if(opt.adim) try{ opt.adim(out); }catch(er){} return adim(); }); };
     return adim(); };
-  C.sonYaz = function(o){ if(o.mock) return; try{ var t = JSON.stringify(o); localStorage.setItem(C.SON_LS, t.length < 1500000 ? t : JSON.stringify({ kosuId:o.kosuId, metrik:o.metrik, kirpildi:true })); }catch(e){} C._son = o; };
-  C.sonAl = function(){ if(C._son) return C._son; try{ return JSON.parse(localStorage.getItem(C.SON_LS) || 'null'); }catch(e){ return null; } };
-  C.indir = function(){ var o = C.sonAl(); if(!o) return false; try{ var b = new Blob([JSON.stringify(o, null, 1)], { type:'application/json' }), a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'brewmaster_cev_' + o.kosuId + '.json'; document.body.appendChild(a); a.click(); a.remove(); return true; }catch(e){ return false; } };
-  C._set = null; C._setler = null; C._onay = false;
+  C.sonYaz = function(o, kal){ if(kal === undefined) kal = !o.mock; if(kal){ C._son = o; C.kaydet(o); } };
+  C.sonAl = function(){ if(C._son) return C._son; var d = C.dizinAl()[0]; return d || null; };
+  // tam sonucun METNİ (indirilen dosyanın içeriği): bellekteki koşu ise bellekten, değilse IDB'den
+  C.indirMetin = function(id){ var b = C._son && String(C._son.kosuId) === String(id) ? C._son : null; if(b) return Promise.resolve(JSON.stringify(b, null, 1));
+    return C.bekle().then(function(){ return C.idbOku('kosu:' + id); }).then(function(o){ return o ? JSON.stringify(o, null, 1) : null; }); };
+  C.dosyaAdi = function(e){ return 'brewmaster_cev_' + e.kosuId + '_' + (e.durum === 'bitti' ? 'bitti' : 'yarim') + '.json'; };
+  C.indir = function(id){ var e = id != null ? C.dizinAl().find(function(x){ return String(x.kosuId) === String(id); }) || (C._son && String(C._son.kosuId) === String(id) ? C.dizinSatir(C._son) : null) : (C._son ? C.dizinSatir(C._son) : C.dizinAl()[0]);
+    if(!e) return Promise.resolve(false); var ad = C.dosyaAdi(e);
+    return C.indirMetin(e.kosuId).then(function(t){ if(!t){ C._mesaj = 'Koşu ' + e.kosuId + ' tam sonucu bulunamadı (IndexedDB\'de yok' + (e.kirpildi ? '; eski kayıt kırpılmıştı' : '') + ').'; C.panelCiz(); return false; }
+      try{ var b = new Blob([t], { type:'application/json' }), a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = ad; document.body.appendChild(a); a.click(); a.remove(); return true; }catch(er){ return false; } }, function(er){ C._mesaj = 'İndirilemedi: ' + String(er && er.message || er); C.panelCiz(); return false; }); };
+  C._set = null; C._setler = null; C._onay = false; C._devamOnay = null; C._mesaj = '';
   // CEV2 (7): bütün set dosyaları — zorunlu olmayan (held-out) dosya yoksa / okunamazsa atlanır (yalnız ana set)
   C.setYukle = function(){ if(C._setler) return Promise.resolve(C._set);
     return Promise.all(C.SETLER.map(function(d){ return fetch(d.url, { cache:'no-store' }).then(function(r){ if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }).then(function(j){ return { ad:d.ad, url:d.url, set:j, enAz:d.enAz }; }, function(e){ if(d.zorunlu) throw e; return null; }); }))
       .then(function(L){ C._setler = L.filter(Boolean); C._set = C._setler[0].set; return C._set; }); };
-  C.baslat = function(){ return C.setYukle().then(function(){ if(!C._onay){ C._onay = true; C.panelCiz(); return null; } C._onay = false; C._calisiyor = true; C.panelCiz();
-    return C.kos(C._setler, { adim:function(){ C.panelCiz(); } }).then(function(o){ C._calisiyor = false; C._sonuc = o; C.panelCiz(); return o; }); }); };
-  C.panelHTML = function(){ var L = C._setler, kl = L ? C.listeKilit(L) : 'set yükleniyor…', t = C.tahmin(), son = C._sonuc || C.sonAl(), h = '<div class="cev-ayar" style="margin-top:8px;font-size:12px"><div style="font-weight:700">🗣️ Cevap ilkesi (CEV) doğrulama seti</div>';
+  C.baslat = function(){ return C.setYukle().then(function(){ if(!C._onay){ C._onay = true; C.panelCiz(); return null; } C._onay = false; C._calisiyor = true; C._mesaj = ''; C.panelCiz();
+    return C.kos(C._setler, { adim:function(){ C.panelCiz(); } }).then(function(o){ C._calisiyor = false; C._sonuc = o; C.panelCiz(); return o; }, function(e){ C._calisiyor = false; C._mesaj = 'Koşu hata verdi: ' + String(e && e.message || e); C.panelCiz(); return null; }); }); };
+  // CEV2E (3): yarım koşuyu sürdür — iki adımlı onay (gerçek koşu gibi); kayıt bellekten (aynı oturum) ya da IDB'den
+  C.devam = function(id){ return C.setYukle().then(function(){ if(C._calisiyor) return null; var kl = C.listeKilit(C._setler); if(kl){ C._mesaj = 'Devam kilitli: ' + kl; C.panelCiz(); return null; }
+      if(!window.BM_AI || !window.BM_AI.hazirMi().hazir){ C._mesaj = 'Devam için AI anahtarı gerekli.'; C.panelCiz(); return null; }
+      if(String(C._devamOnay) !== String(id)){ C._devamOnay = id; C.panelCiz(); return null; } C._devamOnay = null;
+      var e = C.dizinAl().find(function(x){ return String(x.kosuId) === String(id); }), oku = C._son && String(C._son.kosuId) === String(id) ? Promise.resolve(JSON.parse(JSON.stringify(C._son))) : C.bekle().then(function(){ return C.idbOku('kosu:' + id); });
+      return oku.then(function(rec){ if(rec && e && e.suren && !rec.suren) rec.suren = e.suren; var red = C.devamRed(rec, C._setler); if(red){ C._mesaj = 'Devam reddedildi: ' + red; C.panelCiz(); return null; }
+        C._calisiyor = true; C._mesaj = ''; C.panelCiz();
+        return C.kos(C._setler, { devam:rec, adim:function(){ C.panelCiz(); } }).then(function(o){ C._calisiyor = false; C._sonuc = o; if(o && o.durum === 'reddedildi') C._mesaj = o.neden; C.panelCiz(); return o; }, function(er){ C._calisiyor = false; C._mesaj = 'Devam hata verdi: ' + String(er && er.message || er); C.panelCiz(); return null; }); }); }); };
+  C.setOzet = function(e){ return (e.setler || []).map(function(s){ return s.ad + ' ' + s.soru; }).join(' + ') || '—'; };
+  // CEV2E (3, 4): koşu listesi — her koşu ayrı satır: tarih · kosuId · durum · biten/toplam soru · setler · harcama + kendi İndir düğmesi; yarımda Devam
+  C.kosuListeHTML = function(){ var D = C.dizinAl(), h = '';
+    if(C._son && !C._son.mock && !D.some(function(e){ return String(e.kosuId) === String(C._son.kosuId); })) D = [C.dizinSatir(C._son)].concat(D); // IDB/dizin yazılamadıysa bellekteki koşu
+    D.forEach(function(e){ var surer = C._calisiyor && C._son && String(C._son.kosuId) === String(e.kosuId), bitti = e.durum === 'bitti';
+      var dur = bitti ? 'bitti' : surer ? 'çalışıyor' : 'yarım' + (e.durum === 'durdu' && e.neden ? ' (' + e.neden + ')' : '');
+      h += '<div class="cev-kosu" data-kosu="' + E(e.kosuId) + '" data-durum="' + (bitti ? 'bitti' : surer ? 'calisiyor' : 'yarim') + '" style="margin-top:6px;padding:6px 8px;border:1px solid var(--cizgi,#ddd);border-radius:8px">';
+      if(!bitti && !surer) h += '<div class="cev-yarim" style="font-weight:700">Yarım koşu: ' + E(String(e.tarih || '').slice(0, 16).replace('T', ' ')) + ', ' + e.biten + '/' + e.toplam + ' soru bitti, harcanan $' + trS(e.usd, 4) + '</div>';
+      h += '<div style="color:var(--metin-soluk)">' + E(String(e.tarih || '').slice(0, 16).replace('T', ' ')) + ' · koşu ' + E(e.kosuId) + ' · ' + E(dur) + ' · ' + e.biten + '/' + e.toplam + ' soru · setler ' + E(C.setOzet(e)) + ' · $' + trS(e.usd, 4) + (e.model ? ' · ' + E(e.model) : '') + (e.metrik && bitti ? ' · kural ' + e.metrik.kural + ' · araştırma ' + e.metrik.arastirma + (e.metrik.kapsama ? ' · kapsama %' + trS(e.metrik.kapsama.oran, 1) : '') + ' · jargon ' + e.metrik.jargon : '') + '</div>';
+      if(!bitti && (e.suren || e.kesilen)) h += '<div class="cev-kesilen" style="color:#8a5a00">⚠️ ' + (e.suren ? 'Bir soru ortasında kesildi (' + E(e.suren.set + ' ' + e.suren.id) + ') — Devam o soruyu baştan koşar; ' : '') + 'en çok 1 sorunun harcaması iki kez olabilir (kesilen sorunun yapılmış çağrılarının tutarı bilinmiyor, toplama girmedi).</div>';
+      if(e.idbYok) h += '<div style="color:#8c1d18">⚠️ Tam sonuç IndexedDB\'de yok' + (e.kirpildi ? ' (eski kayıt kırpılmıştı)' : '') + (surer || (C._son && String(C._son.kosuId) === String(e.kosuId)) ? ' — yalnız bu oturumda bellekte: HEMEN indir.' : '.') + '</div>';
+      h += '<div style="display:flex;gap:6px;margin-top:4px">';
+      if(!bitti && !surer && !e.kirpildi) h += '<button type="button" class="bm-ayar-btn cev-devam-btn" style="min-height:44px;flex:1" onclick="BM_CEV.devam(' + Number(e.kosuId) + ')">' + (String(C._devamOnay) === String(e.kosuId) ? 'Eminim — devam et (kalan ' + (e.toplam - e.biten) + ' soru)' : '▶️ Devam') + '</button>';
+      if(!e.kirpildi || surer) h += '<button type="button" class="bm-ayar-btn cev-indir-btn" style="min-height:44px;flex:1" onclick="BM_CEV.indir(' + Number(e.kosuId) + ')">💾 İndir (' + E(C.dosyaAdi(e)) + ')</button>';
+      h += '</div></div>'; });
+    return h; };
+  C.panelHTML = function(){ var L = C._setler, kl = L ? C.listeKilit(L) : 'set yükleniyor…', t = C.tahmin(), h = '<div class="cev-ayar" style="margin-top:8px;font-size:12px"><div style="font-weight:700">🗣️ Cevap ilkesi (CEV) doğrulama seti</div>';
     var n = L ? L.reduce(function(a, e){ return a + e.set.sorular.length; }, 0) : 0;
     h += '<div style="color:var(--metin-soluk)">' + (L ? n + ' soru' + (L.length > 1 ? ' (' + L.map(function(e){ return e.ad + ' ' + e.set.sorular.length; }).join(' + ') + ')' : '') + ' · ' : '') + 'önce kural tablosu, kapsamıyorsa araştırma modu (4 kaynak sınıfı) · model ' + E(window.BM_AI && A4 ? window.BM_AI.MODEL[A4.ozetModel()].ad : '—') + (t && L ? ' · soru başı ≈ $' + trS(t.usd, 3) + ' (VARSAYIM), koşu tavanı $' + trS(C.kosTavan(L), 2) : '') + '</div>';
     if(kl) h += '<div class="cev-kilit" style="color:#8a5a00;margin-top:4px">🔒 Gerçek koşu kilitli: ' + E(kl) + '</div>';
-    else if(C._calisiyor) h += '<div>⏳ çalışıyor…</div>';
+    else if(C._calisiyor) h += '<div>⏳ çalışıyor… ' + (C._son ? C._son.sorular.length + '/' + (C._son.setler || []).reduce(function(a, e){ return a + e.soru; }, 0) + ' soru · $' + trS(C.harcanan(C._son), 4) : '') + ' — her soru bitince kaydedilir; sayfa kapanırsa Devam ile sürer</div>';
     else h += '<button type="button" class="bm-ayar-btn cev-kos-btn" style="min-height:44px;width:100%;margin-top:4px" onclick="BM_CEV.baslat()">' + (C._onay ? 'Eminim — çalıştır (en çok $' + trS(C.kosTavan(L), 2) + ')' : '▶️ CEV setini çalıştır') + '</button>';
-    if(son && son.metrik) h += '<div class="cev-son" style="margin-top:4px">Son koşu ' + E(String(son.tarih || '').slice(0, 16)) + ': ' + son.metrik.soru + ' soru · kural ' + son.metrik.kural + ' · araştırma ' + son.metrik.arastirma + ' · $' + trS(son.metrik.usd, 4) + (son.metrik.kapsama ? ' · kapsama %' + trS(son.metrik.kapsama.oran, 1) : '') + ' · jargon ' + son.metrik.jargon + '</div><button type="button" class="bm-ayar-btn" style="min-height:44px;width:100%;margin-top:4px" onclick="BM_CEV.indir()">💾 Tam sonucu dosya olarak indir</button>';
+    if(C.idbHata) h += '<div class="cev-idb-hata" style="color:#8c1d18;margin-top:4px">⚠️ Tam sonuç IndexedDB\'ye yazılamadı (' + E(C.idbHata) + ') — koşu sürer; sonuç bu oturumda bellekte: bitince HEMEN indir (Devam yalnız bu oturumda).</div>';
+    if(C._mesaj) h += '<div class="cev-mesaj" style="color:#8c1d18;margin-top:4px">' + E(C._mesaj) + '</div>';
+    h += C.kosuListeHTML();
     return h + '</div>'; };
   C.panelCiz = function(){ document.querySelectorAll('.cev-ayar-kap').forEach(function(el){ el.innerHTML = C.panelHTML(); }); };
-  C.kartAyarHTML = function(){ setTimeout(function(){ C.setYukle().then(C.panelCiz, function(){}); }, 0); return '<div class="cev-ayar-kap">' + C.panelHTML() + '</div>'; };
+  C.kartAyarHTML = function(){ setTimeout(function(){ C.gocle().then(function(){ return C.setYukle(); }).then(C.panelCiz, function(){}); }, 0); return '<div class="cev-ayar-kap">' + C.panelHTML() + '</div>'; };
 })();
 // ═══ SPRINT CEV1 MODÜL SON ═══
 
@@ -42132,6 +42215,12 @@ syncBaslat();
 //     kalici ~113MB model cache'i dahil) ve bm_push_sub'i siler -> push aboneligi olur.
 // COZUM: resume/focus/periyodik update kontrolu + controllerchange'de KORUMALI otomatik yenileme,
 // guvenli degilse ust banner. Reload firtinasi ve veri kaybi acikca engellendi.
+// CEV2E (1): acik AI test kosusu var mi — SW otomatik yenilemesi (_guvenliMi) bunu bekler. Kosucular ve 'calisiyor' bayraklari:
+// BM_CEV._calisiyor (CEV seti) · BM_DOG1.calisiyor (M/G dogrulama turu) · BM_AI4DOG.calisiyor (malzeme dogrulama turu) · BM_TUZAK.calisiyor (tuzak / AI6 karsilastirma)
+// BM_BUL.calisiyor (BUL seti) · BM_AI5.calisiyor (G grubu) · BM_MASH.kosuyor (M grubu). Supheye dusersen 'suruyor' (guvenli taraf: yenileme yok, banner).
+window._bmAiKosuSuruyor = function(){ return window._bmAiKosuSuruyor.liste().length > 0; };
+window._bmAiKosuSuruyor.KOSUCULAR = [['BM_CEV','_calisiyor'],['BM_DOG1','calisiyor'],['BM_AI4DOG','calisiyor'],['BM_TUZAK','calisiyor'],['BM_BUL','calisiyor'],['BM_AI5','calisiyor'],['BM_MASH','kosuyor']];
+window._bmAiKosuSuruyor.liste = function(){ var L = []; try{ window._bmAiKosuSuruyor.KOSUCULAR.forEach(function(k){ var m = window[k[0]]; if(m && m[k[1]]) L.push(k[0] + '.' + k[1]); }); }catch(_e){ L.push('denetlenemedi'); } return L; };
 if ('serviceWorker' in navigator) {
   (function(){
     // Sayfa acilisinda controller VAR MIYDI? Yoksa bu ilk kurulumdur -> asla reload etme.
@@ -42139,6 +42228,8 @@ if ('serviceWorker' in navigator) {
     var _reg = null, _sonKontrol = 0, _yenilendi = false;
     // Sprint BY: yeni SW devraldı ama kalkan yüzünden yenilenemedi → sayfa ESKİ HTML'de. Güvenli ilk anda yenilenir.
     var _bekleyenGuncelleme = false;
+    // CEV2E: yenileme + sayfa yasi tek yerden (test sahte reload ile sayar; davranis AYNEN)
+    var _reload = function(){ location.reload(); }, _yasAl = function(){ return performance.now(); };
 
     // ── VERI KORUMA (AQ1/AU1 kalicilik disiplini): acik is varken ZORLA yenileme YOK ──
     function _guvenliMi(){
@@ -42146,6 +42237,7 @@ if ('serviceWorker' in navigator) {
         if (window._brewday && window._brewday.aktif) return false;      // brewday suruyor
         if (window._brewday && window._brewday.timerInt) return false;   // brewday timer donuyor
         if (window._brewTimerInt) return false;                          // kaynatma timer donuyor
+        if (window._bmAiKosuSuruyor && window._bmAiKosuSuruyor()) return false; // CEV2E: acik AI test kosusu (yenileme kosuyu oldurur)
         if (document.querySelector('.brewday-modal')) return false;      // acik brewday modali
         if (document.querySelector('[role="dialog"]')) return false;     // herhangi acik dialog
         var ae = document.activeElement;                                 // kullanici yaziyor
@@ -42201,12 +42293,12 @@ if ('serviceWorker' in navigator) {
       if (_yenilendi) return;                       // sayfa omru boyunca en fazla bir kez
       // Soguk acilis: HTML zaten network-first ile TAZE geldi; sadece SW surumu yetisti.
       // Bu durumda reload GEREKSIZ olur -> sayfa yasi kisaysa sessizce gec.
-      var yas; try{ yas = performance.now(); }catch(_e){ yas = 999999; }
+      var yas; try{ yas = _yasAl(); }catch(_e){ yas = 999999; }
       if (yas < 15000) { console.log('[BM SW] yeni SW devraldi, HTML zaten taze (' + Math.round(yas) + 'ms) — reload yok'); return; }
       if (_guvenliMi() && _stormOk()) {
         _yenilendi = true; _stormIsaretle();
         console.log('[BM SW] yeni surum — otomatik yenileniyor');
-        location.reload();
+        _reload();
       } else {
         console.log('[BM SW] yeni surum hazir ama acik is/kalkan var — banner gosteriliyor (bekleyen)');
         _bekleyenGuncelleme = true;
@@ -42214,6 +42306,9 @@ if ('serviceWorker' in navigator) {
       }
     }
     navigator.serviceWorker.addEventListener('controllerchange', _devralindi);
+    // CEV2E: kalkan test erisimi (regresyon: kosu suruyor + devralindi -> reload 0)
+    window._bmSwKalkan = { guvenliMi:function(){ return _guvenliMi(); }, devralindi:function(){ return _devralindi(); }, bekleyeniDene:function(b){ return _bekleyeniDene(b); },
+      test:function(o){ o = o || {}; if('ilkCtrl' in o) _ilkCtrl = o.ilkCtrl; if(o.reload) _reload = o.reload; if(o.yas) _yasAl = o.yas; if('yenilendi' in o) _yenilendi = o.yenilendi; if('bekleyen' in o) _bekleyenGuncelleme = o.bekleyen; return { yenilendi:_yenilendi, bekleyen:_bekleyenGuncelleme }; } };
 
     // Sprint BY: BEKLEYEN güncellemeyi güvenli ilk anda uygula. Kalkanlar AYNEN (_guvenliMi + _stormOk): brewday/timer,
     // açık dialog, odaklı giriş, açık editör → yenileme YOK. bannerTekrar: yalnız kullanıcı uygulamaya DÖNDÜĞÜNDE
@@ -42223,7 +42318,7 @@ if ('serviceWorker' in navigator) {
       if (_guvenliMi() && _stormOk()) {
         _yenilendi = true; _stormIsaretle();
         console.log('[BM SW] bekleyen surum — guvenli an, otomatik yenileniyor');
-        location.reload();
+        _reload();
       } else if (bannerTekrar) {
         _bannerGoster();
       }
