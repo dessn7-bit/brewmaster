@@ -36983,6 +36983,7 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   //   opt.red (dizi) verilirse reddedilen her sorgu nedeniyle yazılır — geçerli sorgu 0 ise sorgu üreteci BİR kez bu nedenlerle yeniden çağrılır (C.arastir)
   C.CEV3 = { kisalt:true, yeniden:true, aralikNit:true, optimum:true, etkisizlik:true, tekMadde:true, forum:true, idSil:true, kusurMaske:true, dogrulayici:true, oneriMaske:true, atifKurtar:true }; // yalnız kasıtlı bozma testi kapatır
   C.CEV4 = { ozetKural:true, onarim:true, ayricaYon:true, yedekDurust:true }; // CEV4 — yalnız kasıtlı bozma testi kapatır
+  C.CEV4B = { zitNet:true, onarimKart:true }; // CEV4B — yalnız kasıtlı bozma testi kapatır (madde 2'nin bayrağı C.CEV3B.tarafKalan)
   C.SORGU_MAX = 12;
   C.sorguKisalt = function(q, stil){ var W = q.split(' '); if(W.length <= C.SORGU_MAX || !C.CEV3.kisalt) return q;
     W = W.filter(function(w){ return C.SORGU_DUR.indexOf(w.toLowerCase()) < 0; }); q = W.join(' ');
@@ -37228,6 +37229,12 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     for(var i = 0; i < yk.length; i++){ var L = Y[yk[i]], P = L.filter(function(x){ return x.etkiYon === 'artirir'; }), N = L.filter(function(x){ return x.etkiYon === 'azaltir'; });
       if(P.length && N.length) return [[P, 1], [N, -1]].map(function(e){ return { tip:'yon', net:e[1], maddeler:e[0], kaynaklar:C.idBirlesik(e[0]) }; }); }
     return null; };
+  //   CEV4B (1): iki net yön de okunuyor ve ZIT (+1 ↔ −1; fiil farklı olabilir: "artırılınca … artar" ↔ "azaltılınca … artar") → çelişki tarafları. Etkisizlik (net 0) tarafı girmez.
+  C.zitNet = function(g){ var P = g.filter(function(x){ return x.net === 1; }), N = g.filter(function(x){ return x.net === -1; });
+    return P.length && N.length ? [[P, 1], [N, -1]].map(function(e){ return { tip:'yon', net:e[1], maddeler:e[0], kaynaklar:C.idBirlesik(e[0]) }; }) : null; };
+  //   CEV4B (1/3): iki madde ZIT mı — (a) iki net yön okunuyor ve zıt · (b) aynı yapılan (yonDeg, 'bilgi' dahil) + zıt etki yönü (değişken metni ters yön sözcüğü taşıyan madde (b)'ye girmez — C.tersEtki ile aynı)
+  C.zitMi = function(a, b){ if(!a || !b) return false; if((a.net === 1 && b.net === -1) || (a.net === -1 && b.net === 1)) return true; if(a.yonTers || b.yonTers) return false;
+    var e = { artirir:1, azaltir:-1 }; return (a.yonDeg || 'bilgi') === (b.yonDeg || 'bilgi') && !!e[a.etkiYon] && !!e[b.etkiYon] && e[a.etkiYon] === -e[b.etkiYon]; };
   C.maddeIsle = function(v, W){ var byId = {}; W.forEach(function(w){ byId[w.id] = w; });
     var L = (v && Array.isArray(v.maddeler) ? v.maddeler : []).slice(0, 8).map(function(m){ var eski = m.degisken == null && m.etken != null, deg = C.idSil((eski ? m.etken : m.degisken) || ''), deger = eski ? '' : C.idSil(m.deger || ''), etki = C.idSil(m.etki || '');
       var yd = eski ? 'bilgi' : C.YON_DEG.indexOf(m.yon) >= 0 ? m.yon : 'bilgi', fiil = eski ? '' : C.degFiil(deg, yd); // CEV2B (1): gösterilen (ve denetlenen) metinde yön fiili
@@ -37252,7 +37259,11 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
       else { var A = g.filter(aralikli); for(var i = 0; i < A.length && !T; i++) for(var j = i + 1; j < A.length && !T; j++){ if(C.aralikAyrik(A[i].aralik, A[j].aralik)){ tip = 'deger'; T = [A[i], A[j]].map(function(x){ return { tip:'deger', aralik:x.aralik, maddeler:[x], kaynaklar:x.kaynaklar.slice() }; }); } } }
       if(!T && C.CEV4.ayricaYon){ var T4 = C.tersEtki(g); if(T4){ tip = 'yon'; T = T4; } } // CEV4 (3): yönü okunmayan (bilgi) maddelerde aynı fiil + zıt etki yönü de çelişki adayı
       if(T && tip === 'yon' && C.CEV3.optimum && C.optimumMu(T, byId)){ birlesen += g.length - 1; cikti.push(C.optimumMadde(k, g, byId)); rapor.push({ degisken:g[0].degisken, tip:'optimum', kaynak:'uygulama', neden:['çelişki değil: azı da çoğu da aynı sonucu veriyor (optimum) — tek madde'] }); return; }
-      if(T && tip === 'yon' && C.CEV3.etkisizlik){ var ez = C.etkisizlikDegil(T, byId); if(ez){ rapor.push({ degisken:g[0].degisken, tip:'etkisizlik', kaynak:'uygulama', neden:[ez] }); T = null; } }
+      var ezOldu = false; if(T && tip === 'yon' && C.CEV3.etkisizlik){ var ez = C.etkisizlikDegil(T, byId); if(ez){ rapor.push({ degisken:g[0].degisken, tip:'etkisizlik', kaynak:'uygulama', neden:[ez] }); T = null; ezOldu = true; } }
+      var aday = function(T5){ var gir4 = []; T5.forEach(function(t){ gir4 = gir4.concat(t.maddeler); }); var dis4 = g.filter(function(x){ return gir4.indexOf(x) < 0; });
+        var cm = C.celiskiMadde(k, g, T5, 'yon', byId, C.CEV3.tekMadde ? dis4 : []); var dg5 = C.celiskiDogrula(T5, byId); if(!dg5.ok){ cm.tersAday = true; cm.adayNeden = dg5.neden.slice(); } cikti.push(cm); if(!C.CEV3.tekMadde) dis4.forEach(function(x){ cikti.push(x); }); };
+      //   CEV4B (1): etkisizlik istisnası etkisizlik tarafını çelişkiden çıkardı ama kalan maddelerde zıt yön (±1 ya da aynı fiil + zıt etki) varsa → yine çelişki adayı ("Ayrıca" OLMAZ)
+      if(ezOldu && C.CEV4.ayricaYon && C.CEV4B.zitNet){ var Tz = C.tersEtki(g) || C.zitNet(g); if(Tz){ aday(Tz); return; } }
       if(T){ var dg = C.celiskiDogrula(T, byId);
         if(!dg.ok && tip === 'yon' && T.length === 2 && T.every(function(t){ return t.maddeler.length === 1 && aralikli(t.maddeler[0]); })){ var p0 = T[0].maddeler[0].aralik, q0 = T[1].maddeler[0].aralik; // CEV2 (3): değer çelişkisine düş
           if(C.aralikAyrik(p0, q0)){ var T2 = T.map(function(t){ return { tip:'deger', aralik:t.maddeler[0].aralik, maddeler:t.maddeler, kaynaklar:t.kaynaklar }; }), dg2 = C.celiskiDogrula(T2, byId); if(dg2.ok){ T = T2; tip = 'deger'; dg = dg2; } } }
@@ -37260,9 +37271,10 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
           cikti.push(C.celiskiMadde(k, g, T, tip, byId, C.CEV3.tekMadde ? dis : [])); if(!C.CEV3.tekMadde) dis.forEach(function(x){ cikti.push(x); }); return; }
         //   CEV4 (3): zıt etki yönü ASLA "Ayrıca" olmaz (koşu #3 C12#0 / C13#0: aynı değişken + aynı fiil, artırır ↔ azaltır tek 'güçlü' maddede) — uygulama iki tarafı alıntıda doğrulayamasa da
         //   ÇELİŞKİ ADAYI olarak doğrulayıcıya gider (tersAday); gercek_celiski true → ⚖️ çelişki maddesi, değilse celiskiRapor (taraflar normal madde olarak gösterilmez)
-        var T5 = tip === 'yon' && C.CEV4.ayricaYon ? C.tersEtki(g) : null; // yalnız AYNI fiil + ZIT etki yönü (fiil zıt, etki aynı → eski yol: rapor + tek madde)
-        if(T5){ T = T5; var gir4 = []; T.forEach(function(t){ gir4 = gir4.concat(t.maddeler); }); var dis4 = g.filter(function(x){ return gir4.indexOf(x) < 0; });
-          var cm = C.celiskiMadde(k, g, T, tip, byId, C.CEV3.tekMadde ? dis4 : []); var dg5 = C.celiskiDogrula(T, byId); if(!dg5.ok){ cm.tersAday = true; cm.adayNeden = dg5.neden.slice(); } cikti.push(cm); if(!C.CEV3.tekMadde) dis4.forEach(function(x){ cikti.push(x); }); return; }
+        //   CEV4B (1): ayrıca iki NET yön zıtsa (fiil farklı: "artırılınca … artar" ↔ "azaltılınca … artar") ve değer çelişkisi yolunda da (tip deger) aynı fiil + zıt etki → çelişki adayı. Fiil zıt + etki aynı + net okunmuyor → eski yol.
+        var T5 = C.CEV4.ayricaYon && (tip === 'yon' || C.CEV4B.zitNet) ? C.tersEtki(g) : null; // önce AYNI fiil + ZIT etki yönü
+        if(!T5 && C.CEV4.ayricaYon && C.CEV4B.zitNet) T5 = C.zitNet(g);
+        if(T5){ aday(T5); return; }
         rapor.push({ degisken:g[0].degisken, tip:tip, kaynak:'uygulama', neden:dg.neden }); }
       if(C.CEV3.tekMadde){ birlesen += g.length - 1; cikti.push(C.birlestirTek(g, byId)); return; }
       var alt = {}, ak = []; g.forEach(function(x, i){ var n = x.net == null && !x.eski ? '#' + i : String(x.net); if(!alt[n]){ alt[n] = []; ak.push(n); } alt[n].push(x); }); // CEV2B (2): yönü okunmayan (yeni şema) madde birleşmez
@@ -37286,6 +37298,7 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   //   Parçalar birlikte maddeyi karşılıyorsa madde destekli kalır (kaynaklar = destekleyen + parça) ama GÜÇ YALNIZ tam destekleyen kurumlardan (0 ise "olası — parçalı destek"); koşu #3: güçlü 51 maddenin 10'u parça destekle sayılmıştı.
   //   Yön kuralı (değişken + fiil + etki alıntıyla ters / kendi içinde çelişik ya da alıntı yön verirken madde yönsüz → kismi / yon). Çelişki ADAYI (tersAday: uygulama alıntıda doğrulayamadı, zıt etki yönü)
   //   gerçek çelişki değilse taraflar normal madde olarak GÖSTERİLMEZ (rapor). Eski kayıtların yanıtında 'parca' yok → boş liste (davranış v1 ile aynı). Bozma bayrağı C.CEV3B.parca (blok dışında).
+  //   CEV4B (2) — yeniden donduruldu (önceki imza b4c7ce4a-16326): çelişki adayında gercek_celiski true ama bir taraf desteksiz → kalan destekli taraf(lar) aynı net yöndeyse normal madde (bozma bayrağı C.CEV3B.tarafKalan).
   C.DOGRULA_KARAR = ['destekli', 'kismi', 'desteksiz'];
   C.DOGRULA_SORUN = ['yok', 'kesik_alinti', 'kosul_atildi', 'baglam_genellendi', 'yalniz_forum', 'yanlis_kaynak', 'ceviri', 'yon', 'sayi', 'birlestirme'];
   C.DOGRULA_GOREV = function(konu){ return ['KONU (tarafsızlaştırılmış): ' + konu,
@@ -37338,6 +37351,14 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
           y.taraflar = (a.taraflar || []).map(function(t, j){ var ids = B.kaynakD ? hep(tar[j].d, tar[j].p) : t.kaynaklar; return Object.assign({}, t, { kaynaklar:ids, kaynakAd:C.hostlar(ids, byId) }); });
           yan.forEach(function(x, j){ if(kabulMu(x.r, x.d, x.p)) ay.push(Object.assign({}, x.m, { kaynaklar:B.kaynakD ? hep(x.d, x.p) : x.m.kaynaklar })); else dus(x.m, 'dogrulama', 'çelişki maddesinin "ayrıca" parçası — ' + neden(x.r, hep(x.d, x.p)), x.r); });
           y.ayrica = ay; y.kaynaklar = C.idBirlesik(y.taraflar.concat(ay)); y.urller = y.kaynaklar.map(function(id){ return byId[id].url; }); y.metin = C.celiskiMetin(a.degisken, y.taraflar, ay, byId); y.dogrulama = 'destekli'; gos.push(y); return; }
+        //   CEV4B (2): çelişki ADAYINDA (tersAday) gercek_celiski true ama taraflardan biri / birkaçı destekli DEĞİL → karşı taraf düştüğü için çelişki kalmaz: kalan destekli taraflar aynı net yöndeyse (ya da tek taraf kaldıysa)
+        //   normal madde olarak gösterilir (kaynak = destekleyen + parça, güç yalnız tam destekleyenden — kabul), düşen taraf 'dusen'e; kalanlar hâlâ zıtsa aşağıdaki rapor yolu. gercek_celiski false → rapor (taraflar gösterilmez).
+        if(B.tarafKalan && a.tersAday && r.gercek_celiski === true){ var kal = [], dt = []; tar.forEach(function(x, j){ (kabulMu(x.r, x.d, x.p) ? kal : dt).push(j); });
+          var nk = kal.map(function(j){ return a.taraflar && a.taraflar[j] ? a.taraflar[j].net : null; });
+          if(kal.length && dt.length && nk.every(function(n){ return n === nk[0]; })){
+            rapor.push({ degisken:a.degisken, tip:'dogrulayici', kaynak:'dogrulayici', neden:['doğrulayıcı: çelişki adayının ' + dt.map(function(j){ return (j + 1) + '. tarafı'; }).join(', ') + ' desteklenmedi' + (r.not ? ' — ' + r.not : '') + ' — karşı taraf düştüğü için çelişki kalmadı; desteklenen taraf normal madde olarak gösterildi: ' + kal.map(function(j){ return a.taraflar[j].metin; }).join(' · ')] });
+            tk.forEach(function(x, j){ if(kabulMu(x.r, x.d, x.p)) gos.push(kabul(x.m, x.d, x.p)); else dus(x.m, forumMu(hep(x.d, x.p)) ? 'forum' : 'dogrulama', (j < nT ? 'çelişki adayının tarafı ' + (j + 1) : '"ayrıca" parçası') + ' — ' + neden(x.r, hep(x.d, x.p)), x.r); });
+            return; } }
         rapor.push({ degisken:a.degisken, tip:'dogrulayici', kaynak:'dogrulayici', neden:['doğrulayıcı: ' + (r.gercek_celiski === true ? 'tarafların biri desteklenmiyor' : 'gerçek çelişki değil') + (r.not ? ' — ' + r.not : '') + ' — çelişki maddesi kalktı' +
           (a.tersAday ? '; zıt etki yönü (uygulama alıntıda doğrulayamadı) — taraflar normal madde olarak GÖSTERİLMEDİ: ' + (a.taraflar || []).map(function(t){ return t.metin; }).join(' ↔ ') : '')] });
         tk.forEach(function(x, j){ if(a.tersAday && j < nT) return; if(kabulMu(x.r, x.d, x.p)) gos.push(kabul(x.m, x.d, x.p)); else dus(x.m, forumMu(hep(x.d, x.p)) ? 'forum' : 'dogrulama', (j < nT ? 'çelişki tarafı ' + (j + 1) : '"ayrıca" parçası') + ' — ' + neden(x.r, hep(x.d, x.p)), x.r); });
@@ -37355,7 +37376,7 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
       else dogrudanDusen = Object.assign({}, dc, { durum:'dusuruldu', tur:'dogrulama', neden:neden(rd, hep(dd, dp)) }); }
     return { gos:gos, dusen:dusen, rapor:rapor, dogrudan:dogrudan, dogrudanDusen:dogrudanDusen }; };
   // ═══ CEV3 DOĞRULAYICI SON ═══
-  C.CEV3B = { gucD:true, kismiGizle:true, kaynakD:true, yenidenDenetle:true, oneriAlinti:true, parca:true }; // yalnız kasıtlı bozma testi (CEV4: parca)
+  C.CEV3B = { gucD:true, kismiGizle:true, kaynakD:true, yenidenDenetle:true, oneriAlinti:true, parca:true, tarafKalan:true }; // yalnız kasıtlı bozma testi (CEV4: parca · CEV4B: tarafKalan)
   C.dogrulayiciMetni = function(){ var B = '// ═══ CEV3 DOĞRULAYICI ' + 'BAŞ ═══', S = '// ═══ CEV3 DOĞRULAYICI ' + 'SON ═══', sc = document.querySelectorAll('script');
     for(var i = 0; i < sc.length; i++){ var t = sc[i].textContent || '', a = t.indexOf(B), b = t.indexOf(S); if(a >= 0 && b > a) return t.slice(a, b + S.length).replace(/\r\n/g, '\n'); } return null; };
   C.dogrulayiciImza = function(){ var t = C.dogrulayiciMetni(); return t ? C.fnv(t) + '-' + t.length : null; };
@@ -37379,6 +37400,27 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
         var y = C.maddeIsle({ maddeler:[Object.assign({}, m, { kaynaklar:k })] }, W).tum[0]; y.onarildi = true; y.onarimKaynak = x.metin; y.onarimSorun = x.sorun; yeni.push(y); n++; });
       x.onarim = 'yeniden'; kayit.push({ metin:x.metin, sorun:x.sorun, eylem:'yeniden', yeni:n, kaynakDisi:at }); });
     return { yeni:yeni, kayit:kayit }; };
+  //   CEV4B (3): ikinci doğrulamadan geçen ONARILMIŞ maddeler gösterilenlerle (diğer onarılanlar dahil) aynı değişken anahtarıyla (C.degAnahtarKod) karşılaştırılır:
+  //   ZIT (C.zitMi) → onarılan madde GÖSTERİLMEZ, celiskiRapor (önceden gösterilen kalır; iki yeni onarılan birbirine zıtsa ikisi de rapora) · aynı anahtarda çelişki / optimum maddesi varsa → gösterilmez, rapor
+  //   (bilinçli: bağlam farkı denetlenmeden zıt yön yan yana gösterilmez; kapsama kaybı kabul) · ZIT DEĞİL → ayrı madde olmaz, mevcut maddeye eklenir (etki / değer farklıysa "Ayrıca: …"), kaynaklar birleşir,
+  //   güç = iki maddenin TAM destekleyen kimliklerinin (kaynaklar − parca) birleşimiyle C.dogrulaGuc2 (parça kimliği güce girmez; C.gucHesap — mekanik — KULLANILMAZ).
+  C.onarimBirlestir = function(x, y, byId){ var tam = function(m){ return (m.kaynaklar || []).filter(function(id){ return (m.parca || []).indexOf(id) < 0; }); };
+    var d = C.idBirlesik([{ kaynaklar:tam(x) }, { kaynaklar:tam(y) }]), hep = C.idBirlesik([x, y]), p = hep.filter(function(id){ return d.indexOf(id) < 0; }), z = Object.assign({}, x);
+    z.kaynaklar = hep; z.urller = hep.map(function(id){ return byId[id] && byId[id].url; }).filter(Boolean); z.parca = p; z.guc = C.dogrulaGuc2(d, p, byId); z.dogrulama = 'destekli';
+    var ayni = katla(y.etki || '') === katla(x.etki || '') && (!y.deger || katla(y.deger) === katla(x.deger || ''));
+    if(!ayni) z.metin = x.metin + (/ Ayrıca: /.test(x.metin) ? '; ' : '. Ayrıca: ') + y.metin + ' (' + C.hostlar(y.kaynaklar, byId) + ')';
+    z.kartParca = (x.kartParca || [x]).concat([y]); z.onarimEk = (x.onarimEk || []).concat([y.metin]); z.birlesen = (x.birlesen || [x.metin]).concat([y.metin]); return z; };
+  C.onarimKart = function(G, Y, W){ var byId = {}, gos = G.slice(), rapor = [], red = {}, birlesen = 0; (W || []).forEach(function(w){ byId[w.id] = w; });
+    var an = function(x){ return x.anahtar || C.degAnahtarKod(x.degisken) || ('#' + x.metin); }, ozel = function(x){ return !!(x.celiski || x.optimum); };
+    var rap = function(y, nd, karsi){ rapor.push({ degisken:y.degisken, tip:'onarim', kaynak:'uygulama', neden:[nd + ': "' + y.metin + '" ↔ "' + karsi + '" — onarılan madde gösterilmedi'] }); };
+    Y.forEach(function(y, i){ var Z = G.filter(function(x){ return an(x) === an(y); }), o = Z.filter(ozel)[0], zt = Z.filter(function(x){ return C.zitMi(x, y); })[0];
+      if(o){ red[i] = 1; rap(y, 'aynı değişken için ' + (o.celiski ? 'çelişki' : 'optimum') + ' maddesi gösteriliyor', o.metin); }
+      else if(zt){ red[i] = 1; rap(y, 'onarılan madde gösterilen maddeyle zıt yönde; çelişki doğrulanmadı', zt.metin); } });
+    Y.forEach(function(y, i){ if(red[i] === 1) return; Y.forEach(function(w, j){ if(j <= i || red[j] === 1 || an(w) !== an(y) || !C.zitMi(w, y)) return; red[i] = red[i] || 2; red[j] = red[j] || 2;
+      rapor.push({ degisken:y.degisken, tip:'onarim', kaynak:'uygulama', neden:['iki onarılan madde birbirine zıt yönde; çelişki doğrulanmadı: "' + y.metin + '" ↔ "' + w.metin + '" — ikisi de gösterilmedi'] }); }); });
+    Y.forEach(function(y, i){ if(red[i]) return; var j = -1; gos.forEach(function(x, q){ if(j < 0 && !ozel(x) && an(x) === an(y)) j = q; });
+      if(j < 0){ gos.push(y); return; } birlesen++; gos[j] = C.onarimBirlestir(gos[j], y, byId); });
+    return { gos:gos, rapor:rapor, birlesen:birlesen, ret:Object.keys(red).length }; };
   C.ARASTIRMA_MAX = 6; // CEV3 (3): birleştirme + doğrulama sonrası en çok 6 madde gösterilir; kalanı 'Ayrıntılar'da (düşen değil)
   //   CEV3: sonuç birleşimi — U = doğrulayıcı kararı (dogrulaUygula) · null = doğrulayıcı yok (bozma / aday yok) · false = doğrulayıcı çağrısı başarısız (hiçbir madde gösterilmez)
   C.sonucKur = function(S0, U){ if(U === false) return { tum:S0.tum, gos:[], fazla:[], dusen:S0.dusen, dogrulanmayan:S0.gos, celiskiRapor:S0.celiskiRapor, birlesen:S0.birlesen, dogrudan:null, dogrudanDusen:S0.dogrudanDusen, dogrulama:false };
@@ -37435,7 +37477,9 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
               return sor('dogrula2', { kullanim:'cevdogrula', modelKey:mk, baglam:C.dogrulaPaket(A2, null, W), soru:C.DOGRULA_GOREV(R.konu), sema:C.dogrulaSema(A2.map(function(a, i){ return 'm' + (i + 1); }), ids) }).then(function(d2){ harca('dogrula2', d2);
                 if(!(d2 && d2.ok && d2.veri && typeof d2.veri === 'object')){ R.dogrulamaHam2 = null; A2.forEach(function(y){ U.dusen.push(Object.assign({}, y, { durum:'dusuruldu', tur:'dogrulama', neden:'onarılan madde: ikinci doğrulama çağrısı başarısız' })); }); return son(); }
                 R.dogrulamaHam2 = d2.veri; var U2 = C.dogrulaUygula(A2, null, d2.veri, W); R.onarim.gosterilen = U2.gos.length;
-                U.gos = U.gos.concat(U2.gos); U.dusen = U.dusen.concat(U2.dusen.map(function(x){ return Object.assign(x, { neden:'onarılan madde — ' + x.neden }); })); U.rapor = U.rapor.concat(U2.rapor); return son(); }); }); };
+                //   CEV4B (3): onarılan maddeler kartla tutarlı (zıt → rapor, aynı değişken → mevcut maddeye eklenir)
+                var OK2 = C.CEV4B.onarimKart ? C.onarimKart(U.gos, U2.gos, W) : { gos:U.gos.concat(U2.gos), rapor:[], birlesen:0, ret:0 }; R.onarim.kartRet = OK2.ret; R.onarim.kartBirlesen = OK2.birlesen;
+                U.gos = OK2.gos; U.rapor = U.rapor.concat(OK2.rapor); U.dusen = U.dusen.concat(U2.dusen.map(function(x){ return Object.assign(x, { neden:'onarılan madde — ' + x.neden }); })); U.rapor = U.rapor.concat(U2.rapor); return son(); }); }); };
           if(!C.CEV3.dogrulayici || (!Ad.length && !S0.dogrudan)){ R.sonuc = C.sonucKur(S0, null); return bitir(); }
           if(tavanAsti()) return dur('maliyet tavanı aşıldı ($' + trS(R.th.tavan, 4) + ')');
           //   CEV3 (6): DOĞRULAYICI — soru başına BİR çağrı; başarısızsa hiçbir madde gösterilmez (durum 'dogrulanamadi', 'durdu' değil; harcama kaydı aynen)
