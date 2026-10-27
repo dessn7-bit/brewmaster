@@ -37649,8 +37649,14 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   C.setYukle = function(){ if(C._setler) return Promise.resolve(C._set);
     return Promise.all(C.SETLER.map(function(d){ return fetch(d.url, { cache:'no-store' }).then(function(r){ if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }).then(function(j){ return { ad:d.ad, url:d.url, set:j, enAz:d.enAz }; }, function(e){ if(d.zorunlu) throw e; return null; }); }))
       .then(function(L){ C._setler = L.filter(Boolean); C._set = C._setler[0].set; return C._set; }); };
-  C.baslat = function(){ return C.setYukle().then(function(){ if(!C._onay){ C._onay = true; C.panelCiz(); return null; } C._onay = false; C._calisiyor = true; C._mesaj = ''; C.panelCiz();
-    return C.kos(C._setler, { adim:function(){ C.panelCiz(); } }).then(function(o){ C._calisiyor = false; C._sonuc = o; C.panelCiz(); return o; }, function(e){ C._calisiyor = false; C._mesaj = 'Koşu hata verdi: ' + String(e && e.message || e); C.panelCiz(); return null; }); }); };
+  //   KOS-SES (2026-10-27): başlamayan koşu SESSİZ kalmaz — set yüklenemezse / kilitliyse / AI hazır değilse / kos 'kilitli'·'reddedildi' dönerse neden panelde (cev-mesaj) ve görünür alana kaydırılır (telefonda 'basınca bir şey olmuyor' bildirimi)
+  C.mesajGoster = function(m){ C._mesaj = m; C.panelCiz(); try{ var el = document.querySelector('.cev-ayar-kap .cev-mesaj'); if(el && el.scrollIntoView) el.scrollIntoView({ block:'center' }); }catch(e){} };
+  C.baslat = function(){ return C.setYukle().then(function(){ var A = window.BM_AI, h = A && A.hazirMi ? A.hazirMi() : null, kl = C.listeKilit(C._setler);
+      if(kl){ C._onay = false; C.mesajGoster('Başlamadı — koşu kilitli: ' + kl); return null; }
+      if(!h || !h.hazir){ C._onay = false; C.mesajGoster('Başlamadı — ' + (h && h.mesaj ? h.mesaj : 'AI modülü yüklenmedi; sayfayı yenileyip tekrar dene.')); return null; }
+      if(!C._onay){ C._onay = true; C._mesaj = ''; C.panelCiz(); return null; } C._onay = false; C._calisiyor = true; C._mesaj = ''; C.panelCiz();
+    return C.kos(C._setler, { adim:function(){ C.panelCiz(); } }).then(function(o){ C._calisiyor = false; C._sonuc = o; if(o && (o.durum === 'kilitli' || o.durum === 'reddedildi')) C.mesajGoster('Başlamadı — ' + (o.neden || o.durum)); else C.panelCiz(); return o; }, function(e){ C._calisiyor = false; C.mesajGoster('Koşu hata verdi: ' + String(e && e.message || e)); return null; }); })
+    .catch(function(e){ C._onay = false; C._calisiyor = false; C.mesajGoster('Başlamadı — soru setleri yüklenemedi ya da beklenmeyen hata: ' + String(e && e.message || e) + ' (internet bağlantısını kontrol edip sayfayı yenile).'); return null; }); };
   // CEV2E (3): yarım koşuyu sürdür — iki adımlı onay (gerçek koşu gibi); kayıt bellekten (aynı oturum) ya da IDB'den
   C.devam = function(id){ return C.setYukle().then(function(){ if(C._calisiyor) return null; var kl = C.listeKilit(C._setler); if(kl){ C._mesaj = 'Devam kilitli: ' + kl; C.panelCiz(); return null; }
       if(!window.BM_AI || !window.BM_AI.hazirMi().hazir){ C._mesaj = 'Devam için AI anahtarı gerekli.'; C.panelCiz(); return null; }
