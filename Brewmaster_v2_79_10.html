@@ -37436,7 +37436,7 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   C.arastir = function(ctx, opt){ opt = opt || {}; var A = window.BM_AI, key = ctx.key || ('cev:' + Date.now());
     var R = C.durum[key] = { key:key, kaynak:ctx.kaynak, soru:String(ctx.soru || ''), konu:C.tarafsiz(ctx.soru), konuEt:C.konuEtiket(ctx.soru), sorulanL:C.sorulan(ctx.soru), stil:ctx.stil || null, T:ctx.T || null, durum:'sorgu', cagri:[], maliyet:0, th:C.tahmin(), ciz:ctx.ciz || null };
     R.sorguStil = C.sorguStili(R.soru, R.konu, R.stil);
-    var ciz = function(){ try{ if(R.ciz) R.ciz(); }catch(e){} }, harca = function(tur, r, sinif){ var m = r && r.maliyet, u = m ? +m.usd || 0 : 0; R.maliyet += u; R.cagri.push({ tur:tur, sinif:sinif || null, ok:!!(r && r.ok), usd:u, model:r && r.model || null }); };
+    var ciz = function(){ try{ if(R.ciz) R.ciz(); }catch(e){} }, harca = function(tur, r, sinif){ var m = r && r.maliyet, u = m ? +m.usd || 0 : 0; R.maliyet += u; R.cagri.push({ tur:tur, sinif:sinif || null, ok:!!(r && r.ok), usd:u, model:r && r.model || null, hata:r && !r.ok && r.hata && C.KESINTI_TUR.indexOf(r.hata.tur) >= 0 ? r.hata.tur : undefined }); };
     var tavanAsti = function(){ return R.th && R.maliyet > R.th.tavan; }, dur = function(neden){ R.durum = 'durdu'; R.neden = neden; ciz(); return R; };
     var sor = function(tur, p){ if(opt.mock){ var mf = opt.mock[tur] || (tur === 'dogrula2' ? opt.mock.dogrula : null); return Promise.resolve(mf ? mf(p, R) : { ok:false, hata:{ mesaj:'mock yok' } }); } return A.sor(p); }; // CEV4: dogrula2 mock'u yoksa dogrula
     if(!opt.mock && (!A || !A.hazirMi().hazir)){ R.durum = 'aiyok'; R.neden = 'AI anahtarı yok — araştırma modu AI ile çalışır'; ciz(); return Promise.resolve(R); }
@@ -37620,6 +37620,10 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     for(var i = 0; i < L.length; i++){ var s = C.beklenenImza(L[i].set); if(rs[i].setImza !== s) return L[i].ad + ' seti imzası değişti (kayıt ' + rs[i].setImza + ', şimdi ' + s + ')'; } return null; };
   // opt.mock: test (AI yok); gerçek koşu: Kaan'ın düğmesi (her setin kilidi + AI hazır şartı). x: tek set (eski çağrı) ya da [{ ad, set, enAz }]
   //   CEV2E: opt.devam = yarım koşunun kaydı (yalnız bitmemiş sorular) · opt.kaydet = mock koşuyu da kalıcı yaz (yalnız test) · gerçek koşu HER ZAMAN kalıcı
+  // KESINTI (Claude, 2026-10-27): hesap / anahtar / ağ / sunucu türü çağrı hatasında koşu DURUR, o soru kaydedilmez → ▶️ Devam o sorudan sürer.
+  //   Önceden hata alan soru 'bitti' sayılıp set sonuna kadar gidiliyordu (2026-10-27 09:47 koşusu: 401 ile 55/55 'bitti', $0). Gerçek koşu #2/#3'te başarısız çağrı 0/554 — davranış bu koşuları etkilemez.
+  //   'istek' / 'model' (uygulama tarafı, tekrar koşunca aynı hata) eski davranışta kalır.
+  C.KESINTI_TUR = ['anahtar', 'gecersiz', 'anahtar_yok', 'hesap', 'izin', 'cevrimdisi', 'hiz', 'sunucu', 'ag', 'zamanasimi'];
   C.kos = function(x, opt){ opt = opt || {}; var L = C.listeKur(x); if(!opt.mock){ var kl = C.listeKilit(L); if(kl) return Promise.resolve({ durum:'kilitli', neden:kl }); if(!window.BM_AI || !window.BM_AI.hazirMi().hazir) return Promise.resolve({ durum:'kilitli', neden:'AI anahtarı yok' }); }
     var out, kal = !opt.mock || !!opt.kaydet, bit = {}, si = 0, qi = 0;
     if(opt.devam){ var red = C.devamRed(opt.devam, L); if(red) return Promise.resolve({ durum:'reddedildi', neden:'Devam reddedildi: ' + red, kosuId:opt.devam.kosuId });
@@ -37632,7 +37636,9 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     var adim = function(){ while(si < L.length && (qi >= L[si].set.sorular.length || bit[L[si].ad + ':' + L[si].set.sorular[qi].id])){ if(qi >= L[si].set.sorular.length){ si++; qi = 0; } else qi++; } if(si >= L.length) return bitir('bitti');
       var harc = out.sorular.reduce(function(a, s){ return a + (s.maliyet || 0); }, 0); if((!opt.mock || opt.tavanSina) && out.tavan != null && harc > out.tavan) return bitir('durdu', 'koşu tavanı aşıldı ($' + trS(out.tavan, 2) + ')');
       var e = L[si], q = e.set.sorular[qi++]; out.suren = { set:e.ad, id:q.id }; if(kal) C.dizinGuncelle(out); // soru ortasında kesilirse dizinde görünür → Devam'da yeniden koşar
-      return C.cevapla(e.set, q, Object.assign({}, opt, { setAd:e.ad })).then(function(c){ c.puan = C.puan(q, c); c.soru = q.soru; out.sorular.push(c); out.suren = null; if(kal) C.kaydet(out); if(opt.adim) try{ opt.adim(out); }catch(er){} return adim(); }); };
+      return C.cevapla(e.set, q, Object.assign({}, opt, { setAd:e.ad })).then(function(c){ var kes = (c && c.cagri || []).filter(function(z){ return z.hata; });
+        if(kes.length){ out.kesinti = (out.kesinti || []).concat([{ set:e.ad, id:q.id, tur:kes[0].hata, usd:Math.round((c.maliyet || 0) * 1e4) / 1e4, tarih:new Date().toISOString() }]); return bitir('durdu', 'API hatası (' + kes[0].hata + ') — ' + e.ad + ' ' + q.id + ' kaydedilmedi; sorun giderilince ▶️ Devam bu sorudan sürer'); }
+        c.puan = C.puan(q, c); c.soru = q.soru; out.sorular.push(c); out.suren = null; if(kal) C.kaydet(out); if(opt.adim) try{ opt.adim(out); }catch(er){} return adim(); }); };
     return adim(); };
   C.sonYaz = function(o, kal){ if(kal === undefined) kal = !o.mock; if(kal){ C._son = o; C.kaydet(o); } };
   C.sonAl = function(){ if(C._son) return C._son; var d = C.dizinAl()[0]; return d || null; };
@@ -37660,7 +37666,7 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
       if(!h || !h.hazir){ C._onay = false; C.mesajGoster('Başlamadı — ' + (h && h.mesaj ? h.mesaj : 'AI modülü yüklenmedi; sayfayı yenileyip tekrar dene.')); return null; }
       var mkr = C.modelKapi(); if(mkr){ C._onay = false; C.mesajGoster('Başlamadı — ' + mkr); return null; }
       if(!C._onay){ C._onay = true; C._mesaj = ''; C.panelCiz(); return null; } C._onay = false; C._calisiyor = true; C._mesaj = ''; C.panelCiz();
-    return C.kos(C._setler, { adim:function(){ C.panelCiz(); } }).then(function(o){ C._calisiyor = false; C._sonuc = o; if(o && (o.durum === 'kilitli' || o.durum === 'reddedildi')) C.mesajGoster('Başlamadı — ' + (o.neden || o.durum)); else C.panelCiz(); return o; }, function(e){ C._calisiyor = false; C.mesajGoster('Koşu hata verdi: ' + String(e && e.message || e)); return null; }); })
+    return C.kos(C._setler, { adim:function(){ C.panelCiz(); } }).then(function(o){ C._calisiyor = false; C._sonuc = o; if(o && (o.durum === 'kilitli' || o.durum === 'reddedildi')) C.mesajGoster('Başlamadı — ' + (o.neden || o.durum)); else if(o && o.durum === 'durdu') C.mesajGoster('Durdu — ' + (o.neden || '')); else C.panelCiz(); return o; }, function(e){ C._calisiyor = false; C.mesajGoster('Koşu hata verdi: ' + String(e && e.message || e)); return null; }); })
     .catch(function(e){ C._onay = false; C._calisiyor = false; C.mesajGoster('Başlamadı — soru setleri yüklenemedi ya da beklenmeyen hata: ' + String(e && e.message || e) + ' (internet bağlantısını kontrol edip sayfayı yenile).'); return null; }); };
   // CEV2E (3): yarım koşuyu sürdür — iki adımlı onay (gerçek koşu gibi); kayıt bellekten (aynı oturum) ya da IDB'den
   C.devam = function(id){ return C.setYukle().then(function(){ if(C._calisiyor) return null; var kl = C.listeKilit(C._setler); if(kl){ C._mesaj = 'Devam kilitli: ' + kl; C.panelCiz(); return null; }
@@ -37670,7 +37676,7 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
       var e = C.dizinAl().find(function(x){ return String(x.kosuId) === String(id); }), oku = C._son && String(C._son.kosuId) === String(id) ? Promise.resolve(JSON.parse(JSON.stringify(C._son))) : C.bekle().then(function(){ return C.idbOku('kosu:' + id); });
       return oku.then(function(rec){ if(rec && e && e.suren && !rec.suren) rec.suren = e.suren; var red = C.devamRed(rec, C._setler); if(red){ C._mesaj = 'Devam reddedildi: ' + red; C.panelCiz(); return null; }
         C._calisiyor = true; C._mesaj = ''; C.panelCiz();
-        return C.kos(C._setler, { devam:rec, adim:function(){ C.panelCiz(); } }).then(function(o){ C._calisiyor = false; C._sonuc = o; if(o && o.durum === 'reddedildi') C._mesaj = o.neden; C.panelCiz(); return o; }, function(er){ C._calisiyor = false; C._mesaj = 'Devam hata verdi: ' + String(er && er.message || er); C.panelCiz(); return null; }); }); }); };
+        return C.kos(C._setler, { devam:rec, adim:function(){ C.panelCiz(); } }).then(function(o){ C._calisiyor = false; C._sonuc = o; if(o && (o.durum === 'reddedildi' || o.durum === 'durdu')) C._mesaj = (o.durum === 'durdu' ? 'Durdu — ' : '') + (o.neden || ''); C.panelCiz(); return o; }, function(er){ C._calisiyor = false; C._mesaj = 'Devam hata verdi: ' + String(er && er.message || er); C.panelCiz(); return null; }); }); }); };
   C.setOzet = function(e){ return (e.setler || []).map(function(s){ return s.ad + ' ' + s.soru; }).join(' + ') || '—'; };
   // CEV2E (3, 4): koşu listesi — her koşu ayrı satır: tarih · kosuId · durum · biten/toplam soru · setler · harcama + kendi İndir düğmesi; yarımda Devam
   C.kosuListeHTML = function(){ var D = C.dizinAl(), h = '';
