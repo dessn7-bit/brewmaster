@@ -14209,7 +14209,7 @@ const CASELER = [
     }
   },
   {
-    kod: 'CEV4B-ONARIM', ad: 'ONARILAN MADDE KARTLA TUTARLI (CEV4B madde 3, mock C.arastir): ikinci doğrulamadan geçen onarılmış madde gösterilenlerle (diğer onarılanlar dahil) aynı değişken anahtarıyla karşılaştırılır — ZIT → gösterilmez, celiskiRapor (gösterilen kalır) · iki yeni onarılan birbirine zıt → ikisi de rapor · AYNI yön → ayrı madde olmaz, mevcut maddeye eklenir ("Ayrıca", kaynaklar birleşir), güç = TAM destekleyen kimliklerin birleşimi (parça kimliği sayılmaz; gucHesap kullanılmaz) · farklı değişken → ayrı madde (değişmedi) · maliyet / çağrı sayısı aynı · KASITLI BOZMA',
+    kod: 'CEV4B-ONARIM', ad: 'ONARILAN MADDE KARTLA TUTARLI (CEV4B madde 3 + CEV4C güç yalnız aynı iddiada, mock C.arastir): ikinci doğrulamadan geçen onarılmış madde gösterilenlerle (diğer onarılanlar dahil) aynı değişken anahtarıyla karşılaştırılır — ZIT → gösterilmez, celiskiRapor (gösterilen kalır) · iki yeni onarılan birbirine zıt → ikisi de rapor · AYNI yön → ayrı madde olmaz, mevcut maddeye eklenir ("Ayrıca", kaynaklar birleşir), güç = TAM destekleyen kimliklerin birleşimi (parça kimliği sayılmaz; gucHesap kullanılmaz) · farklı değişken → ayrı madde (değişmedi) · maliyet / çağrı sayısı aynı · KASITLI BOZMA',
     calistir: (page) => page.evaluate(async () => {
       const C = window.BM_CEV, A = window.BM_AI, sah = A.hazirMi; A.hazirMi = () => ({ hazir: false });
       try {
@@ -14234,14 +14234,23 @@ const CASELER = [
         const rp = R => R.sonuc.celiskiRapor.filter(r => r.tip === 'onarim');
         __REG.ok('ZIT → sıcaklık maddesi ' + sicak(g1).length + ' ("' + (sicak(g1)[0] || {}).metin + '"), onarılan gösterildi ' + g1.some(x => x.onarildi) + ', rapor "' + (rp(R1)[0] ? rp(R1)[0].neden[0].slice(0, 110) : '✕') + '" · AYNI yön → sıcaklık maddesi ' + sicak(g2).length + ' "' + s2.metin + '" kaynak ' + (s2.kaynaklar || []).join(',') + ' parça ' + (s2.parca || []).join(',') + ' güç ' + (s2.guc ? s2.guc.ad + ' n ' + s2.guc.n : '✕') + ' · farklı değişken → ' + g3.length + ' madde · iki onarılan zıt → gösterilen ' + g4.length + ', rapor ' + rp(R4).length + ' · çağrı sayısı (onar / dogrula2) ' + [R1, R2, R3, R4].map(R => R.cagri.filter(c => c.tur === 'onar').length + '/' + R.cagri.filter(c => c.tur === 'dogrula2').length).join(' '),
           sicak(g1).length === 1 && /ester artar$/.test(sicak(g1)[0].metin) && !g1.some(x => x.onarildi) && rp(R1).length === 1 && /zıt yönde; çelişki doğrulanmadı/.test(rp(R1)[0].neden[0]) && R1.onarim.kartRet === 1
-          && sicak(g2).length === 1 && /ester artar\. Ayrıca: mayalanma sıcaklığı artırılınca — ale suşlarında meyvemsi ester artabilir \(/.test(s2.metin) && s2.kaynaklar.join() === 'w1,w2,w4,w3' && s2.parca.join() === 'w3' && s2.guc.k === 'guclu' && s2.guc.n === 3 && R2.onarim.kartBirlesen === 1
+          && sicak(g2).length === 1 && /ester artar\. Ayrıca: mayalanma sıcaklığı artırılınca — ale suşlarında meyvemsi ester artabilir \(/.test(s2.metin) && s2.kaynaklar.join() === 'w1,w2,w4,w3' && s2.parca.join() === 'w3' && s2.guc.k === 'guclu' && s2.guc.n === 2 && /^w1,w2$/.test((sicak(g2)[0].atifOnce || []).join()) && R2.onarim.kartBirlesen === 1
           && g3.length === 2 && g4.length === 1 && rp(R4).length === 1 && /ikisi de gösterilmedi/.test(rp(R4)[0].neden[0]) && [R1, R2, R3, R4].every(R => R.cagri.filter(c => c.tur === 'onar').length === 1 && R.cagri.filter(c => c.tur === 'dogrula2').length === 1));
         // güç birleşiminde parça kimliği sayılmıyor: tam destek yalnız w1 (whitelabs) + onarılan yalnız parça (w2 lallemand, w4 bjcp) → olası
         const G0 = [{ degisken: 'x', anahtar: 'x', metin: 'x artırılınca — y artar', etki: 'y artar', net: 1, yonDeg: 'artirmak', etkiYon: 'artirir', kaynaklar: ['w1'], parca: [] }];
-        const Y0 = [{ degisken: 'x', anahtar: 'x', metin: 'x artırılınca — y artabilir', etki: 'y artabilir', net: 1, yonDeg: 'artirmak', etkiYon: 'artirir', kaynaklar: ['w2', 'w4'], parca: ['w2', 'w4'] }];
+        const Y0 = [{ degisken: 'x', anahtar: 'x', metin: 'x artırılınca — y artar', etki: 'y artar', net: 1, yonDeg: 'artirmak', etkiYon: 'artirir', kaynaklar: ['w2', 'w4'], parca: ['w2', 'w4'] }];
         const W0 = WEB.map((w, i) => Object.assign({ id: 'w' + (i + 1) }, w)), K0 = C.onarimKart(G0, Y0, W0), k0 = K0.gos[0];
         __REG.ok('güç birleşimi: tam w1 + yalnız parça w2,w4 (üç kurum) → ' + k0.guc.ad + ' n ' + k0.guc.n + ' "' + k0.guc.not + '" (mekanik gucHesap ' + C.gucHesap(k0.urller).ad + ')', K0.gos.length === 1 && k0.guc.k === 'olasi' && k0.guc.n === 1 && /parçalı destek/.test(k0.guc.not) && k0.parca.join() === 'w2,w4');
         C.CEV4B.onarimKart = false; let zb; try { zb = await kos('cev4b5', [om('mayalanma sıcaklığı', 'artirmak', 'bu lager suşunda ester oluşumu azalabilir', 'azaltir', ['w3'])]); } finally { C.CEV4B.onarimKart = true; }
+        // CEV4C: güç birleşimi YALNIZ aynı iddiada — sentetik: x tek kaynak (whitelabs) olası; y onarılan (fermentis)
+        const xg = { degisken: 'mayalanma sıcaklığı', anahtar: 'mayalanma sıcaklığı', metin: 'mayalanma sıcaklığı artırılınca — ester artar', etki: 'ester artar', net: 1, yonDeg: 'artirmak', etkiYon: 'artirir', kaynaklar: ['w1'], parca: [] };
+        xg.guc = C.dogrulaGuc2(['w1'], [], Object.fromEntries(W0.map(w => [w.id, w])));
+        const yF = { degisken: 'mayalanma sıcaklığı', anahtar: 'mayalanma sıcaklığı', metin: 'mayalanma sıcaklığı artırılınca — bu lager suşunda ester oluşumu değişebilir', etki: 'bu lager suşunda ester oluşumu değişebilir', net: null, yonDeg: 'artirmak', etkiYon: null, kaynaklar: ['w3'], parca: [] };
+        const yA = Object.assign({}, yF, { metin: 'mayalanma sıcaklığı artırılınca — ester artar', etki: 'ester artar', net: 1, etkiYon: 'artirir' });
+        const kF = C.onarimKart([xg], [yF], W0).gos[0], kA = C.onarimKart([xg], [yA], W0).gos[0];
+        C.CEV4B.gucAyni = false; let kB; try { kB = C.onarimKart([xg], [yF], W0).gos[0]; } finally { C.CEV4B.gucAyni = true; }
+        __REG.ok('CEV4C: x tek kaynak (' + xg.guc.ad + ' n ' + xg.guc.n + ') + onarılan FARKLI etki (fermentis, "Ayrıca") → ' + kF.guc.ad + ' n ' + kF.guc.n + ', kaynaklar ' + kF.kaynaklar.join(',') + ', metin "' + kF.metin + '" · AYNI etki → ' + kA.guc.ad + ' n ' + kA.guc.n + ' · KASITLI BOZMA (aynı-iddia kuralı kapalı) farklı etki → ' + kB.guc.ad + ' n ' + kB.guc.n + ' (kırmızı olmalı: güçlü n 2)',
+          xg.guc.k === 'olasi' && kF.guc.k === 'olasi' && kF.guc.n === 1 && kF.kaynaklar.join() === 'w1,w3' && / Ayrıca: .*\(fermentis\.com\)$/.test(kF.metin) && kA.guc.k === 'guclu' && kA.guc.n === 2 && kB.guc.k === 'guclu' && kB.guc.n === 2);
         __REG.ok('KASITLI BOZMA: madde 3 kapalı → zıt sıcaklık maddeleri yan yana ' + sicak(zb.sonuc.gos).length + ' (kırmızı olmalı: 2)', sicak(zb.sonuc.gos).length === 2);
       } finally { A.hazirMi = sah; }
       return __REG.al();

@@ -36983,7 +36983,7 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   //   opt.red (dizi) verilirse reddedilen her sorgu nedeniyle yazılır — geçerli sorgu 0 ise sorgu üreteci BİR kez bu nedenlerle yeniden çağrılır (C.arastir)
   C.CEV3 = { kisalt:true, yeniden:true, aralikNit:true, optimum:true, etkisizlik:true, tekMadde:true, forum:true, idSil:true, kusurMaske:true, dogrulayici:true, oneriMaske:true, atifKurtar:true }; // yalnız kasıtlı bozma testi kapatır
   C.CEV4 = { ozetKural:true, onarim:true, ayricaYon:true, yedekDurust:true }; // CEV4 — yalnız kasıtlı bozma testi kapatır
-  C.CEV4B = { zitNet:true, onarimKart:true }; // CEV4B — yalnız kasıtlı bozma testi kapatır (madde 2'nin bayrağı C.CEV3B.tarafKalan)
+  C.CEV4B = { zitNet:true, onarimKart:true, gucAyni:true }; // CEV4B — yalnız kasıtlı bozma testi kapatır (madde 2'nin bayrağı C.CEV3B.tarafKalan)
   C.SORGU_MAX = 12;
   C.sorguKisalt = function(q, stil){ var W = q.split(' '); if(W.length <= C.SORGU_MAX || !C.CEV3.kisalt) return q;
     W = W.filter(function(w){ return C.SORGU_DUR.indexOf(w.toLowerCase()) < 0; }); q = W.join(' ');
@@ -37403,11 +37403,13 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   //   CEV4B (3): ikinci doğrulamadan geçen ONARILMIŞ maddeler gösterilenlerle (diğer onarılanlar dahil) aynı değişken anahtarıyla (C.degAnahtarKod) karşılaştırılır:
   //   ZIT (C.zitMi) → onarılan madde GÖSTERİLMEZ, celiskiRapor (önceden gösterilen kalır; iki yeni onarılan birbirine zıtsa ikisi de rapora) · aynı anahtarda çelişki / optimum maddesi varsa → gösterilmez, rapor
   //   (bilinçli: bağlam farkı denetlenmeden zıt yön yan yana gösterilmez; kapsama kaybı kabul) · ZIT DEĞİL → ayrı madde olmaz, mevcut maddeye eklenir (etki / değer farklıysa "Ayrıca: …"), kaynaklar birleşir,
-  //   güç = iki maddenin TAM destekleyen kimliklerinin (kaynaklar − parca) birleşimiyle C.dogrulaGuc2 (parça kimliği güce girmez; C.gucHesap — mekanik — KULLANILMAZ).
+  //   güç (YALNIZ aynı iddiada — CEV4C; farklı iddiada x.guc aynen) = iki maddenin TAM destekleyen kimliklerinin (kaynaklar − parca) birleşimiyle C.dogrulaGuc2 (parça kimliği güce girmez; C.gucHesap — mekanik — KULLANILMAZ).
   C.onarimBirlestir = function(x, y, byId){ var tam = function(m){ return (m.kaynaklar || []).filter(function(id){ return (m.parca || []).indexOf(id) < 0; }); };
     var d = C.idBirlesik([{ kaynaklar:tam(x) }, { kaynaklar:tam(y) }]), hep = C.idBirlesik([x, y]), p = hep.filter(function(id){ return d.indexOf(id) < 0; }), z = Object.assign({}, x);
-    z.kaynaklar = hep; z.urller = hep.map(function(id){ return byId[id] && byId[id].url; }).filter(Boolean); z.parca = p; z.guc = C.dogrulaGuc2(d, p, byId); z.dogrulama = 'destekli';
+    z.kaynaklar = hep; z.urller = hep.map(function(id){ return byId[id] && byId[id].url; }).filter(Boolean); z.parca = p; z.dogrulama = 'destekli';
     var ayni = katla(y.etki || '') === katla(x.etki || '') && (!y.deger || katla(y.deger) === katla(x.deger || ''));
+    //   CEV4C: güç birleşimi YALNIZ aynı iddiada (etki aynı, değer aynı ya da boş); farklı iddiada ('Ayrıca') ana maddenin gücü x.guc AYNEN — y'nin kaynağı x'in iddiasını söylemiyor (koşu #3 (iii) sınıfı)
+    z.guc = ayni || !C.CEV4B.gucAyni ? C.dogrulaGuc2(d, p, byId) : x.guc;
     if(!ayni) z.metin = x.metin + (/ Ayrıca: /.test(x.metin) ? '; ' : '. Ayrıca: ') + y.metin + ' (' + C.hostlar(y.kaynaklar, byId) + ')';
     z.kartParca = (x.kartParca || [x]).concat([y]); z.onarimEk = (x.onarimEk || []).concat([y.metin]); z.birlesen = (x.birlesen || [x.metin]).concat([y.metin]); return z; };
   C.onarimKart = function(G, Y, W){ var byId = {}, gos = G.slice(), rapor = [], red = {}, birlesen = 0; (W || []).forEach(function(w){ byId[w.id] = w; });
