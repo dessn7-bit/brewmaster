@@ -32084,6 +32084,7 @@ window.BM_AI = (function(){
     var tip = govde && govde.error && govde.error.type || '', msj = maskele(govde && govde.error && govde.error.message || '');
     var kredi = /credit|balance|billing|spend|purchase|plans? ?& ?billing|payment/i.test(msj);
     if (durum === 401) return { tur: 'anahtar', mesaj: 'Anahtar geçersiz ya da iptal edilmiş (401). Anahtarı kontrol et: console.anthropic.com ▸ API Keys.', api: msj };
+    if (durum === 400 && /workspace|anthropic-workspace-id/i.test(msj)) return { tur: 'calisma_alani', mesaj: 'Anahtar bir çalışma alanına (workspace) bağlı değil — Console\'da çalışma alanına bağlı anahtar oluştur.', api: msj }; // CEV5 (0): 400 'not scoped to a workspace' anahtar sorunu (eskiden 'istek' — uygulama tarafı sanılıyordu)
     if (durum === 402 || (durum === 400 && kredi)) return { tur: 'hesap', mesaj: 'Hesap/kredi durumu — kod hatası DEĞİL. Anthropic hesabında kredi yok ya da harcama limitine ulaşıldı (' + durum + '). console.anthropic.com ▸ Billing.', api: msj };
     if (durum === 429 && !retryAfter) return { tur: 'hesap', mesaj: 'Hesabın aylık harcama tavanına ulaşıldı (429, bekleme süresi yok) — kod hatası DEĞİL. console.anthropic.com ▸ Limits.', api: msj };
     if (durum === 429) return { tur: 'hiz', mesaj: 'Hız sınırı (429) — ' + retryAfter + ' sn sonra tekrar dene.', api: msj };
@@ -36915,8 +36916,10 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   C.maddeHTML = function(m){ var g = m.guc || { k:'olasi' };
     return '<li class="cev-madde" data-guc="' + E(g.k) + '"' + (m.kural ? ' data-kural="' + E(m.kural) + '"' : '') + ' style="margin:4px 0">' + E(m.metin) +
       '<div class="cev-guc" style="font-size:11px;color:' + (g.k === 'guclu' ? '#1e6b2a' : g.k === 'celiski' ? '#8c1d18' : 'var(--metin-soluk)') + '">Kanıt: ' + E(C.gucMetni(g.k)) + (m.kaynakAd ? ' · ' + E(m.kaynakAd) : '') + '</div>' + (m.ek ? '<div class="cev-madde-ek" style="font-size:11px;color:var(--metin-soluk)">' + E(m.ek) + '</div>' : '') + '</li>'; };
+  //   CEV5 (2b): aynı güç içinde maddeyi destekleyen FARKLI KURUM sayısı (m.urller = tam + parça; kök alan — C.kurum) azalan; eşitlikte özet sırası. Kural yolu maddelerinde urller yok → sıra aynı.
+  C.kurumSay = function(m){ var s = {}; ((m && m.urller) || []).forEach(function(u){ var k = C.kurum(u); if(k) s[k] = 1; }); return Object.keys(s).length; };
   C.sirala = function(L){ var r = function(m){ var k = m.guc && m.guc.k; return Object.prototype.hasOwnProperty.call(C.GUC_SIRA, k) ? C.GUC_SIRA[k] : 9; };
-    L = (L || []).map(function(m, i){ return { m:m, i:i }; }); L.sort(function(a, b){ return (r(a.m) - r(b.m)) || (a.i - b.i); }); return L.map(function(x){ return x.m; }); };
+    L = (L || []).map(function(m, i){ return { m:m, i:i, n:C.CEV5 && C.CEV5.siraKurum ? C.kurumSay(m) : 0 }; }); L.sort(function(a, b){ return (r(a.m) - r(b.m)) || (b.n - a.n) || (a.i - b.i); }); return L.map(function(x){ return x.m; }); };
   C.kaynakListeHTML = function(K){ var gor = {}, L = (K || []).filter(function(k){ var a = (k.url || '') + '|' + k.ad; if(gor[a]) return false; gor[a] = 1; return true; });
     if(!L.length) return '';
     return '<div class="cev-kaynaklar" style="margin-top:6px"><div style="font-weight:700">📚 Kaynaklar</div><ul style="margin:2px 0;padding-left:18px">' + L.map(function(k){ return '<li>' + (k.url ? '<a href="' + E(k.url) + '" target="_blank" rel="noopener">' + E(k.ad) + '</a>' : E(k.ad)) + (k.tur ? ' <small style="color:var(--metin-soluk)">(' + E(C.TUR_AD[k.tur] || k.tur) + ')</small>' : '') + '</li>'; }).join('') + '</ul></div>'; };
@@ -36990,7 +36993,9 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   C.soruStilAdi = function(soru, stil){ var n = ' ' + katla(soru).replace(/[^a-z0-9]+/g, ' ').replace(/[a-z]+ malt[a-z]*/g, ' ') + ' '; return C.stilSozcukleri(stil).sozcukler.some(function(w){ return n.indexOf(' ' + w) >= 0; }); };
   //   CEV2B (6c): tat / koku KUSURU konusu (G.KONULAR kusurları + asetaldehit) soru stili adlandırsa bile STİLSİZ — kusurun nedeni stile özgü değil
   C.KUSUR_KONU = /diasetil|tereyag|\bdms\b|pismis misir|lahana|klorofenol|ilac|sicak \/ yakici|yakici alkol|fusel|oksidasyon|karton|bayat|burukluk|sulfur|yumurta|asetaldehit|yesil elma|metalik|solvent/;
-  C.sorguStili = function(soru, konu, stil){ if(!stil) return null; if(C.KUSUR_KONU.test(katla(konu))) return null; if(C.soruStilAdi(soru, stil)) return stil; return C.GENEL_KONU.test(katla(konu)) ? null : stil; };
+  //   CEV5 (1): stil YALNIZ soru metni stilin adını / takma adını içeriyorsa (C.soruStilAdi). Eski 'konu genel değilse reçete stilini ekle' dalı (C.GENEL_KONU) KALKTI — sözlük ana setin konularından kurulmuştu,
+  //   held-out sorularının çoğunda soru stili adlandırmadığı halde reçete stili sorguya giriyordu (kod düzeyinde aşırı uyum). C.GENEL_KONU yalnız bozma testi için kalır (başka yerde kullanılmıyor).
+  C.sorguStili = function(soru, konu, stil){ if(!stil) return null; if(C.KUSUR_KONU.test(katla(konu))) return null; if(C.soruStilAdi(soru, stil)) return stil; return !C.CEV5.sorguStil && !C.GENEL_KONU.test(katla(konu)) ? stil : null; };
   C.stilSil = function(q, stil){ var S = C.stilSozcukleri(stil), t = ' ' + q + ' ';
     S.ifadeler.forEach(function(f){ t = t.replace(new RegExp('(\\s)' + f.replace(/[^a-z0-9 ]/g, '.').replace(/ +/g, '\\s+') + '(?=\\s)', 'gi'), '$1'); });
     S.sozcukler.forEach(function(w){ t = t.replace(new RegExp('(\\s)' + w + '[a-z]*(?=\\s)', 'gi'), '$1'); });
@@ -37003,6 +37008,7 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   C.CEV3 = { kisalt:true, yeniden:true, aralikNit:true, optimum:true, etkisizlik:true, tekMadde:true, forum:true, idSil:true, kusurMaske:true, dogrulayici:true, oneriMaske:true, atifKurtar:true }; // yalnız kasıtlı bozma testi kapatır
   C.CEV4 = { ozetKural:true, onarim:true, ayricaYon:true, yedekDurust:true }; // CEV4 — yalnız kasıtlı bozma testi kapatır
   C.CEV4B = { zitNet:true, onarimKart:true, gucAyni:true }; // CEV4B — yalnız kasıtlı bozma testi kapatır (madde 2'nin bayrağı C.CEV3B.tarafKalan)
+  C.CEV5 = { sorguStil:true, kesikOnarim:true, dcOnarim:true, siraKurum:true, anahtarKisa:true }; // CEV5 — yalnız kasıtlı bozma testi kapatır (madde 3–4'ün bayrakları donmuş bloğun dışında: C.CEV3B.tekTaraf / cekirdek)
   C.SORGU_MAX = 12;
   C.sorguKisalt = function(q, stil){ var W = q.split(' '); if(W.length <= C.SORGU_MAX || !C.CEV3.kisalt) return q;
     W = W.filter(function(w){ return C.SORGU_DUR.indexOf(w.toLowerCase()) < 0; }); q = W.join(' ');
@@ -37036,7 +37042,8 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     '(5) KAPSAM YAZILIR: alıntı bulguyu belirli bir stil, maya suşu, ürün, lager ya da ale, endüstriyel ya da ev ölçeği veya belirli bir deney koşulu için söylüyorsa bu kapsam maddeye (etki ya da değer alanına) yazılır. Kapsamı farklı değerler aynı maddeye konmaz — ayrı madde yaz.',
     '(6) PARÇA BİRLEŞTİRİLMEZ: iki alıntının parçaları tek iddiada birleştirilmez; maddedeki her iddia en az bir alıntıda TAMAMIYLA yazılı olmalı. Aynı iddiayı söyleyen alıntılar birleşir; farklı iddialar ayrı madde olur.',
     '(7) DEĞİŞKEN = biracının değiştirdiği şey (malzeme, sıcaklık, süre, miktar, işlem). Bir sonuç ya da ölçü (bir maddenin oluşumu, giderilmesi, etkinliği, içeriği) değişken değildir — onu etki alanına, ona yol açan işlemi değişken alanına yaz. yon etkideki düzeyle tutarlı olmalı: etki "düşük …" düzeyinden söz ediyorsa yon azaltmak, "yüksek …" düzeyinden söz ediyorsa artirmak.',
-    '(8) YÖN BOŞ BIRAKILMAZ: alıntı yön veriyorsa (increased / higher / more / lower / reduced / less / longer / shorter) yon = bilgi YAZMA; artirmak / azaltmak / eklemek / cikarmak\'tan uygun olanı yaz.'];
+    '(8) YÖN BOŞ BIRAKILMAZ: alıntı yön veriyorsa (increased / higher / more / lower / reduced / less / longer / shorter) yon = bilgi YAZMA; artirmak / azaltmak / eklemek / cikarmak\'tan uygun olanı yaz.',
+    '(9) TEŞHİS: KONU bir şeyin NASIL ANLAŞILACAĞINI ya da belirtisini soruyorsa maddeler gözlenebilir işaretler olabilir — değişken = işaret (koku, tat, görünüm, ölçüm sonucu), yon = bilgi, etki = alıntıya göre işaretin neyi gösterdiği. Nedeni ya da önlemeyi söyleyen alıntılar ayrı madde olarak yazılabilir.']; // CEV5 (5)
 
   // ── CEV2 (2): KAYNAK SINIFINA GÖRE WEB — 4 ayrı çağrı (ders kitabı + eğitim · üretici · hakemli · dergi / deney); her çağrının allowed_domains'i YALNIZ o sınıf
   //   (BM_AI.WEB.arastirma_<sınıf>; 26 alan AYNEN bölünür, test). Her çağrıda aynı sorgular; sınıf başına en çok C.SINIF_ALINTI alıntı.
@@ -37050,9 +37057,12 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   //   çağrı başı ölçülen: sorgu $0,0047 · web sınıfı $0,0341 · özet $0,0683 · doğrulama $0,0877. VARSAYIM: onarım çağrısı ≈ ölçülen özet çağrısı (en çok 3 madde × aday, girdi yalnız o maddelerin alıntıları — üst sınır),
   //   ikinci doğrulama ≈ ölçülen doğrulama çağrısı (tam alıntı paketi gider); olasılık 21/22. Başka model seçiliyse giriş fiyatı oranıyla ölçeklenir.
   C.OLCUM_KOSU3 = { model:'guclu', soruN:22, adayliSoru:21, aday:44, sorgu:0.0047, webSinif:0.0341, ozet:0.0683, dogrula:0.0877 };
+  //   CEV5 (2): koşu #4 ölçümü (Opus 5.5): onarım 0,0791 $ / 2 çağrı, ikinci doğrulama 0,1210 $ / 2 çağrı → çağrı başı 0,0396 / 0,0605. Adaylı soru oranı CEV5 kuralıyla koşu #4 ANA kesitinde AI'sız sayıldı
+  //   (kesik alıntı + düşen doğrudan cevap dahil; ADAYLI_SORU ölçümden). VARSAYIM: onarım çağrısı maliyeti aday sayısıyla değişmez (koşu #4 iki çağrının ortalaması).
+  C.OLCUM_KOSU4 = { model:'guclu', soruN:22, adayliSoru:11, onar:0.0791 / 2, dogrula2:0.1210 / 2 };
   C.tahmin = function(){ var A = window.BM_AI; if(!A || !A4) return null; var mk = A4.ozetModel(), M = A.MODEL[mk], sorgu = (900 * M.gir + 200 * M.cik) / 1e6, web1 = A4.webTahmin().toplam, web = web1 * C.SINIFLAR.length, ozet = A4.modelTahmin(mk).websiz;
     var dogrula = C.CEV3.dogrulayici ? (C.DOGRULA_TOK.gir * M.gir + C.DOGRULA_TOK.cik * M.cik) / 1e6 : 0, O = C.OLCUM_KOSU3, oran = A.MODEL[O.model] ? M.gir / A.MODEL[O.model].gir : 1;
-    var onarim = C.CEV3.dogrulayici && C.CEV4.onarim ? (O.adayliSoru / O.soruN) * (O.ozet + O.dogrula) * oran : 0, t = sorgu + web + ozet + dogrula + onarim;
+    var O4 = C.OLCUM_KOSU4, onarim = C.CEV3.dogrulayici && C.CEV4.onarim ? (O4.adayliSoru / O4.soruN) * (O4.onar + O4.dogrula2) * oran : 0, t = sorgu + web + ozet + dogrula + onarim; // CEV5: koşu #4 ölçümü (eskiden koşu #3 özet + doğrulama varsayımı)
     return { usd:Math.round(t * 1e4) / 1e4, sorgu:sorgu, web:web, webSinif:web1, sinifN:C.SINIFLAR.length, ozet:ozet, dogrula:dogrula, onarim:onarim, tavan:Math.round(t * 2 * 1e4) / 1e4, model:mk }; };
 
   // web yanıtlarını ayrıştır — v: [{ sinif, ok, veri, hata }] (CEV2) ya da tek yanıt nesnesi (CEV1 / test); izin: o sınıfın listesi (tek yanıtta WEB.arastirma)
@@ -37130,7 +37140,10 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   C.DEG_DUR = ['artirmak', 'artirilmasi', 'artirma', 'azaltmak', 'azaltilmasi', 'azaltma', 'kullanmak', 'kullanimi', 'kullanilmasi', 'eklemek', 'eklenmesi', 'ekleme', 'cikarmak', 'yukseltmek', 'yukseltilmesi', 'dusurmek', 'dusurulmesi',
     'uzatmak', 'uzatilmasi', 'kisaltmak', 'kisaltilmasi', 'tutmak', 'yuksek', 'dusuk', 'daha', 'fazla', 'ile', 'veya', 'olarak', 'icin', 'bir'];
   C.degAnahtar = function(d){ var n = katla(d).replace(/\([^)]*\)/g, ' '); for(var i = 0; i < C.DEG_ES.length; i++) if(C.DEG_ES[i][0].test(n)) return C.DEG_ES[i][1];
-    return n.replace(/[^a-z0-9 ]+/g, ' ').split(/\s+/).filter(function(w){ return w.length > 2 && C.DEG_DUR.indexOf(w) < 0; }).map(function(w){ return C.CEV2B.kodTam && /\d/.test(w) ? w : w.slice(0, 5); }).filter(function(w, i, a){ return a.indexOf(w) === i; }).sort().join(' '); };
+    var W = n.replace(/[^a-z0-9 ]+/g, ' ').split(/\s+/), k = W.filter(function(w){ return w.length > 2 && C.DEG_DUR.indexOf(w) < 0; }).map(function(w){ return C.CEV2B.kodTam && /\d/.test(w) ? w : w.slice(0, 5); }).filter(function(w, i, a){ return a.indexOf(w) === i; }).sort().join(' ');
+    //   CEV5 (3b): yalnız kısa sözcüklü değişken ('pH', 'O2') boş anahtar veriyordu → madde kendi metniyle tek başına kalıyor, aynı değişkenin zıt etkili maddeleri (koşu #4 C29 #3 / #4) hiç gruplanmıyordu
+    if(!k && C.CEV5.anahtarKisa) k = W.filter(function(w){ return w.length >= 2 && C.DEG_DUR.indexOf(w) < 0; }).filter(function(w, i, a){ return a.indexOf(w) === i; }).sort().join(' ');
+    return k; };
   //   CEV2B (3): ürün / suş kodu (C.dKodlar biçimi: WLP002, Wyeast 1056 → WY1056) anahtara TAM girer — 5 harfe kesme 'WLP002' ve 'WLP004'ü 'wlp00' yapıp iki suşu birleştiriyordu; farklı kodlu maddeler hiç birleşmez / çelişmez
   C.degAnahtarKod = function(d){ var k = C.degAnahtar(d); if(!C.CEV2B.kodTam || !k) return k; var K = C.dKodlar(d).map(function(x){ return x.kod; }).filter(function(v, i, a){ return a.indexOf(v) === i; }).sort(); return K.length ? k + ' #' + K.join(',') : k; };
   C.SAYI_SOZ = { bir:1, iki:2, uc:3, dort:4, bes:5, alti:6, yedi:7, sekiz:8, dokuz:9, on:10 };
@@ -37318,6 +37331,7 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   //   Yön kuralı (değişken + fiil + etki alıntıyla ters / kendi içinde çelişik ya da alıntı yön verirken madde yönsüz → kismi / yon). Çelişki ADAYI (tersAday: uygulama alıntıda doğrulayamadı, zıt etki yönü)
   //   gerçek çelişki değilse taraflar normal madde olarak GÖSTERİLMEZ (rapor). Eski kayıtların yanıtında 'parca' yok → boş liste (davranış v1 ile aynı). Bozma bayrağı C.CEV3B.parca (blok dışında).
   //   CEV4B (2) — yeniden donduruldu (önceki imza b4c7ce4a-16326): çelişki adayında gercek_celiski true ama bir taraf desteksiz → kalan destekli taraf(lar) aynı net yöndeyse normal madde (bozma bayrağı C.CEV3B.tarafKalan).
+  //   CEV5 (3–4) — yeniden donduruldu (önceki imza 534be960-18088): gerçek olmayan çelişkide destekli taraflar TEK madde (optimum / bağlam; C.CEV3B.tekTaraf) · şemada 'cekirdek', güç çekirdek kurumlarından + değer kaynağı adıyla (C.CEV3B.cekirdek) · düşen doğrudan cevapta karar.
   C.DOGRULA_KARAR = ['destekli', 'kismi', 'desteksiz'];
   C.DOGRULA_SORUN = ['yok', 'kesik_alinti', 'kosul_atildi', 'baglam_genellendi', 'yalniz_forum', 'yanlis_kaynak', 'ceviri', 'yon', 'sayi', 'birlestirme'];
   C.DOGRULA_GOREV = function(konu){ return ['KONU (tarafsızlaştırılmış): ' + konu,
@@ -37333,10 +37347,11 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     '8. ÖNERİ İÇEREN madde ("önerilir", "tavsiye edilir"): önerinin kendisi destekleyen alıntıda yazmalı (should / recommend / avoid / do not / best to …); alıntı yalnız olgu yazıyorsa karar kismi.',
     '9. İŞARETLİ madde: değeri özetleyicinin atıf yapmadığı bir alıntıda geçiyor; o alıntı maddeyi söylüyorsa destekleyene yaz (kural 2), söylemiyorsa yazma.',
     '10. YÖN: maddede değişkene uygulanan fiil (artırılınca / azaltılınca / eklenince / çıkarılınca) alıntıdaki yönle aynı olmalı. "Değişken + fiil + etki" birlikte okunduğunda alıntıyla ters ya da kendi içinde çelişik bir anlam çıkıyorsa (örneğin biracının ekleyemeyeceği bir sonucun "eklenmesi", ya da etkide yazan düzeyin fiilin tersi olması) karar kismi, sorun yon. Alıntı yön veriyor (increased / higher / lower / reduced …) ama madde yön söylemiyorsa karar kismi, sorun yon.',
-    '11. Çelişki maddesinin taraflarında ve doğrudan cevapta da destekleyen / parca ayrımı aynıdır.'].join('\n'); };
+    '11. Çelişki maddesinin taraflarında ve doğrudan cevapta da destekleyen / parca ayrımı aynıdır.',
+    '12. cekirdek: maddenin ÇEKİRDEK iddiasını — değişken + değişkene yapılan + etkinin yönü; sayı ve aralık HARİÇ — KENDİ metninde tek başına söyleyen alıntıların kimlikleri (destekleyendekiler dahil; sayıyı farklı yazan ya da hiç yazmayan alıntı çekirdeği söylüyorsa yazılır). Yalnız konuyu anan ya da başka şey söyleyen alıntıyı yazma. Çelişki maddesinde her taraf için ayrı.'].join('\n'); };
   C.dogrulaSema = function(mIds, wIds){ var kl = { type:'array', items:{ type:'string', enum:wIds.slice() } }, kr = { type:'string', enum:C.DOGRULA_KARAR.slice() };
-    var tr = { type:'object', properties:{ taraf:{ type:'string', enum:['1', '2', '3', '4', '5', '6', '7', '8'] }, karar:kr, destekleyen:kl, parca:kl }, required:['taraf', 'karar', 'destekleyen', 'parca'], additionalProperties:false };
-    var it = { type:'object', properties:{ id:{ type:'string', enum:mIds.slice() }, karar:kr, destekleyen:kl, parca:kl, sorun:{ type:'string', enum:C.DOGRULA_SORUN.slice() }, not:{ type:'string' }, gercek_celiski:{ type:'boolean' }, taraflar:{ type:'array', items:tr } }, required:['id', 'karar', 'destekleyen', 'parca', 'sorun', 'not', 'gercek_celiski', 'taraflar'], additionalProperties:false };
+    var tr = { type:'object', properties:{ taraf:{ type:'string', enum:['1', '2', '3', '4', '5', '6', '7', '8'] }, karar:kr, destekleyen:kl, parca:kl, cekirdek:kl }, required:['taraf', 'karar', 'destekleyen', 'parca', 'cekirdek'], additionalProperties:false };
+    var it = { type:'object', properties:{ id:{ type:'string', enum:mIds.slice() }, karar:kr, destekleyen:kl, parca:kl, cekirdek:kl, sorun:{ type:'string', enum:C.DOGRULA_SORUN.slice() }, not:{ type:'string' }, gercek_celiski:{ type:'boolean' }, taraflar:{ type:'array', items:tr } }, required:['id', 'karar', 'destekleyen', 'parca', 'cekirdek', 'sorun', 'not', 'gercek_celiski', 'taraflar'], additionalProperties:false };
     var dc = { type:'object', properties:{ karar:{ type:'string', enum:C.DOGRULA_KARAR.concat(['yok']) }, destekleyen:kl, parca:kl }, required:['karar', 'destekleyen', 'parca'], additionalProperties:false };
     return { type:'json_schema', schema:{ type:'object', properties:{ maddeler:{ type:'array', items:it }, dogrudan_cevap:dc }, required:['maddeler', 'dogrudan_cevap'], additionalProperties:false } }; };
   C.dogrulaParca = function(a){ return a.celiski ? (a.tarafM || []).concat(a.ayrica || []) : []; };
@@ -37359,8 +37374,27 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     var kabulMu = function(r, d, p){ var u = hep(d, p); return !!r && (r.karar === 'destekli' || !B.kismiGizle) && u.length > 0 && !forumMu(u); };
     var dus = function(a, tur, neden, r){ dusen.push(Object.assign({}, a, { durum:'dusuruldu', tur:tur, neden:neden, karar:r && r.karar || null, sorun:r && r.sorun || null, not:r && r.not || null })); };
     var neden = function(r, d){ return forumMu(d) ? 'destekleyen alıntılar yalnız forum (sayılmaz)' : 'doğrulayıcı: ' + (r ? r.karar : 'karar yok') + (r && r.sorun && r.sorun !== 'yok' ? ' (' + r.sorun + ')' : '') + (r && r.not ? ' — ' + r.not : ''); };
-    var kabul = function(a, d, p){ p = p || []; var y = Object.assign({}, a), ids = B.kaynakD ? hep(d, p) : a.kaynaklar.slice(); y.atifOnce = a.kaynaklar.slice(); y.kaynaklar = ids; y.urller = ids.map(function(id){ return byId[id] ? byId[id].url : null; }).filter(Boolean);
-      y.guc = B.gucD ? C.dogrulaGuc2(d, p, byId) : a.guc; y.parca = p.slice(); y.dogrulama = 'destekli'; if(a.kurtar){ y.durum = 'ok'; y.tur = null; y.neden = null; y.kurtarildi = true; } return y; };
+    //   CEV5 (4): ÇEKİRDEK destek — r.cekirdek (değişken + yapılan + etki yönü, değer HARİÇ, tek başına söyleyen alıntılar; destekleyen + parça içinde kalanlar) varsa güç = çekirdekteki farklı kurum (dergi / forum sayılmaz);
+    //   yoksa (eski kayıt) v2: dogrulaGuc2. Değer yalnız onu söyleyen alıntıyla: değer kaynaklarının kurumu çekirdek kurumlarından farklıysa madde metninde "(değer: kurum)" yazılır.
+    var cek = function(r, d, p){ if(!B.cekirdek || !r || !Array.isArray(r.cekirdek)) return null; var u = hep(d, p); return C.idBirlesik([{ kaynaklar:d }, { kaynaklar:gec(r.cekirdek).filter(function(id){ return u.indexOf(id) >= 0; }) }]); };
+    var gucR = function(r, d, p){ var c = cek(r, d, p); if(!c) return C.dogrulaGuc2(d, p, byId); var g = C.dogrulaGuc(c, byId); g.cekirdek = c.slice(); g.parca = (p || []).length; if(g.n === 0) g.not = 'çekirdeği tek başına söyleyen sayılır kaynak yok'; return g; };
+    var sayilar = function(t){ var V = (String(t || '').match(/\d+(?:[.,]\d+)?/g) || []).map(function(v){ return parseFloat(v.replace(',', '.')); }); (String(t || '').toLowerCase().match(/[a-z]+/g) || []).forEach(function(w){ if(Object.prototype.hasOwnProperty.call(C.SAYI_EN, w)) V.push(C.SAYI_EN[w]); }); return V; };
+    var degerNot = function(y, a, r, d, p){ var c = cek(r, d, p), V = sayilar(a.deger); if(!c || !a.deger || a.celiski || a.optimum || !V.length || y.metin.indexOf('(' + a.deger + ')') < 0) return;
+      var vi = hep(d, p).filter(function(id){ var Q = sayilar(byId[id].alinti); return V.every(function(v){ return Q.some(function(q){ return Math.abs(q - v) < 1e-9; }); }); }), ks = function(ids){ return ids.map(function(id){ return C.kurum(byId[id].url); }).filter(function(k, i, A){ return k && A.indexOf(k) === i; }).sort().join(','); };
+      if(vi.length && ks(vi) !== ks(c)){ y.metin = y.metin.replace('(' + a.deger + ')', '(' + a.deger + ': ' + C.hostlar(vi, byId) + ')'); y.degerKaynak = vi; } };
+    var kabul = function(a, d, p, r){ p = p || []; var y = Object.assign({}, a), ids = B.kaynakD ? hep(d, p) : a.kaynaklar.slice(); y.atifOnce = a.kaynaklar.slice(); y.kaynaklar = ids; y.urller = ids.map(function(id){ return byId[id] ? byId[id].url : null; }).filter(Boolean);
+      y.guc = B.gucD ? gucR(r, d, p) : a.guc; y.parca = p.slice(); y.dogrulama = 'destekli'; if(a.kurtar){ y.durum = 'ok'; y.tur = null; y.neden = null; y.kurtarildi = true; } degerNot(y, a, r, d, p); return y; };
+    //   CEV5 (3a): çelişki (ya da çelişki adayı) gerçek değilse destekli taraflar GİZLENMEZ, TEK madde: değişken yönü zıt + etki yönü aynı → optimum ("hem yetersizi hem fazlası"), değilse bağlam maddesi;
+    //   güç = en zayıf tarafın gücü (her taraf kendi çekirdeğinden); öneri dili yok; desteksiz taraf düşer; iki taraf da desteksizse gizlenir (rapor).
+    var tekMadde = function(a, K, ay){ var dg = katla(a.degisken || '');
+      var T = K.map(function(x){ var t = (a.taraflar || [])[x.j] || {}, ids = hep(x.d, x.p), mt = String(t.metin || x.m.metin || ''); if(dg && katla(mt).indexOf(dg) === 0) mt = mt.slice(String(a.degisken).length).replace(/^[\s:,;—–-]+/, '');
+        return { metin:mt, ids:ids, ad:C.hostlar(ids, byId), net:t.net, ey:x.m.etkiYon || null, guc:gucR(x.r, x.d, x.p), p:x.p }; });
+      var opt = T.length === 2 && ((T[0].net === 1 && T[1].net === -1) || (T[0].net === -1 && T[1].net === 1)) && !!T[0].ey && T[0].ey === T[1].ey, par = T.map(function(t){ return t.metin + ' (' + t.ad + ')'; });
+      var y = Object.assign({}, (a.tarafM || [])[K[0].j] || {}), ids = C.idBirlesik(T.map(function(t){ return { kaynaklar:t.ids }; }).concat(ay)), zay = T.slice().sort(function(u, v){ return u.guc.n - v.guc.n; })[0].guc;
+      y.metin = a.degisken + ': ' + (opt ? 'hem yetersizi hem fazlası aynı sonucu veriyor — ' + par.join('; ') : par[0] + '; başka bağlamda: ' + par.slice(1).join('; başka bağlamda: ')) + (ay.length ? '. Ayrıca: ' + ay.map(function(m){ return m.metin + ' (' + C.hostlar(m.kaynaklar, byId) + ')'; }).join('; ') : '');
+      y.kaynaklar = ids; y.urller = ids.map(function(id){ return byId[id].url; }); y.parca = C.idBirlesik(T.map(function(t){ return { kaynaklar:t.p }; })); y.guc = Object.assign({}, zay, { not:(zay.not ? zay.not + ' · ' : '') + 'iki tarafın zayıf olanı' });
+      y.celiski = false; y.tersAday = false; delete y.taraflar; delete y.tarafM; delete y.ayrica; y.tekTaraf = opt ? 'optimum' : 'baglam'; y.optimum = opt; y.net = null; y.durum = 'ok'; y.anahtar = a.anahtar; y.degisken = a.degisken; y.etken = a.degisken; y.deger = '';
+      y.atifOnce = a.kaynaklar.slice(); y.dogrulama = 'destekli'; y.birlesen = T.map(function(t){ return t.metin; }); return y; };
     A.forEach(function(a, i){ var r = R['m' + (i + 1)];
       if(!r){ dus(a, 'dogrulama', 'doğrulayıcı bu maddeye karar vermedi'); return; }
       var d = gec(r.destekleyen), p = pc(r, d), u = hep(d, p);
@@ -37376,41 +37410,54 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
           var nk = kal.map(function(j){ return a.taraflar && a.taraflar[j] ? a.taraflar[j].net : null; });
           if(kal.length && dt.length && nk.every(function(n){ return n === nk[0]; })){
             rapor.push({ degisken:a.degisken, tip:'dogrulayici', kaynak:'dogrulayici', neden:['doğrulayıcı: çelişki adayının ' + dt.map(function(j){ return (j + 1) + '. tarafı'; }).join(', ') + ' desteklenmedi' + (r.not ? ' — ' + r.not : '') + ' — karşı taraf düştüğü için çelişki kalmadı; desteklenen taraf normal madde olarak gösterildi: ' + kal.map(function(j){ return a.taraflar[j].metin; }).join(' · ')] });
-            tk.forEach(function(x, j){ if(kabulMu(x.r, x.d, x.p)) gos.push(kabul(x.m, x.d, x.p)); else dus(x.m, forumMu(hep(x.d, x.p)) ? 'forum' : 'dogrulama', (j < nT ? 'çelişki adayının tarafı ' + (j + 1) : '"ayrıca" parçası') + ' — ' + neden(x.r, hep(x.d, x.p)), x.r); });
+            tk.forEach(function(x, j){ if(kabulMu(x.r, x.d, x.p)) gos.push(kabul(x.m, x.d, x.p, x.r)); else dus(x.m, forumMu(hep(x.d, x.p)) ? 'forum' : 'dogrulama', (j < nT ? 'çelişki adayının tarafı ' + (j + 1) : '"ayrıca" parçası') + ' — ' + neden(x.r, hep(x.d, x.p)), x.r); });
             return; } }
+        if(B.tekTaraf && r.gercek_celiski !== true){ var k5 = [], d5 = []; tar.forEach(function(x, j){ (kabulMu(x.r, x.d, x.p) ? k5 : d5).push(j); });
+          if(k5.length){ var ay5 = [];
+            yan.forEach(function(x){ if(kabulMu(x.r, x.d, x.p)) ay5.push(Object.assign({}, x.m, { kaynaklar:hep(x.d, x.p) })); else dus(x.m, 'dogrulama', 'çelişki maddesinin "ayrıca" parçası — ' + neden(x.r, hep(x.d, x.p)), x.r); });
+            d5.forEach(function(j){ var x = tar[j]; dus(x.m, forumMu(hep(x.d, x.p)) ? 'forum' : 'dogrulama', 'çelişki tarafı ' + (j + 1) + ' — ' + neden(x.r, hep(x.d, x.p)), x.r); });
+            var y5 = k5.length >= 2 ? tekMadde(a, k5.map(function(j){ return Object.assign({ j:j }, tar[j]); }), ay5) : kabul(tar[k5[0]].m, tar[k5[0]].d, tar[k5[0]].p, tar[k5[0]].r);
+            if(k5.length === 1 && ay5.length) y5.metin += '. Ayrıca: ' + ay5.map(function(m){ return m.metin + ' (' + C.hostlar(m.kaynaklar, byId) + ')'; }).join('; ');
+            gos.push(y5); rapor.push({ degisken:a.degisken, tip:'dogrulayici', kaynak:'dogrulayici', neden:['doğrulayıcı: gerçek çelişki değil' + (r.not ? ' — ' + r.not : '') + ' — ' + (k5.length >= 2 ? 'taraflar TEK madde olarak gösterildi (' + (y5.tekTaraf === 'optimum' ? 'optimum' : 'bağlam') + ')' : 'desteklenen taraf normal madde olarak gösterildi') + (d5.length ? '; desteklenmeyen taraf düştü' : '')] }); return; } }
         rapor.push({ degisken:a.degisken, tip:'dogrulayici', kaynak:'dogrulayici', neden:['doğrulayıcı: ' + (r.gercek_celiski === true ? 'tarafların biri desteklenmiyor' : 'gerçek çelişki değil') + (r.not ? ' — ' + r.not : '') + ' — çelişki maddesi kalktı' +
           (a.tersAday ? '; zıt etki yönü (uygulama alıntıda doğrulayamadı) — taraflar normal madde olarak GÖSTERİLMEDİ: ' + (a.taraflar || []).map(function(t){ return t.metin; }).join(' ↔ ') : '')] });
-        tk.forEach(function(x, j){ if(a.tersAday && j < nT) return; if(kabulMu(x.r, x.d, x.p)) gos.push(kabul(x.m, x.d, x.p)); else dus(x.m, forumMu(hep(x.d, x.p)) ? 'forum' : 'dogrulama', (j < nT ? 'çelişki tarafı ' + (j + 1) : '"ayrıca" parçası') + ' — ' + neden(x.r, hep(x.d, x.p)), x.r); });
+        tk.forEach(function(x, j){ if(a.tersAday && j < nT) return; if(kabulMu(x.r, x.d, x.p)) gos.push(kabul(x.m, x.d, x.p, x.r)); else dus(x.m, forumMu(hep(x.d, x.p)) ? 'forum' : 'dogrulama', (j < nT ? 'çelişki tarafı ' + (j + 1) : '"ayrıca" parçası') + ' — ' + neden(x.r, hep(x.d, x.p)), x.r); });
         return; }
       if(a.kurtar){ var on = 'araştırma denetleyicisi: ' + a.neden + ' · ', x3;
         if(!kabulMu(r, d, p) || !u.some(function(id){ return a.kurtar.indexOf(id) >= 0; })){ dus(a, a.tur, on + (kabulMu(r, d, p) ? 'doğrulayıcının destekleyeni değeri taşıyan alıntıyı içermiyor' : neden(r, u)), r); return; }
         x3 = C.arastirmaDenetle({ metin:a.denetimMetni || a.metin, kaynaklar:u }, W); if(x3.durum !== 'ok'){ dus(a, a.tur, on + 'destekleyenle yeniden: ' + x3.neden, r); return; }
-        if(oneriYok(a, u)){ dus(a, 'dogrulama', on + 'öneri destekleyen alıntıda yazmıyor', r); return; } gos.push(kabul(a, d, p)); return; }
+        if(oneriYok(a, u)){ dus(a, 'dogrulama', on + 'öneri destekleyen alıntıda yazmıyor', r); return; } gos.push(kabul(a, d, p, r)); return; }
       if(!kabulMu(r, d, p)){ dus(a, forumMu(u) ? 'forum' : 'dogrulama', neden(r, u), r); return; }
       if(oneriYok(a, u)){ dus(a, 'dogrulama', 'doğrulayıcı destekli dedi ama öneri destekleyen alıntıda yazmıyor (should / recommend / avoid …)', r); return; }
       if(B.yenidenDenetle && !a.birlesen && !a.optimum && u.length <= 5){ var x2 = C.arastirmaDenetle({ metin:a.denetimMetni || a.metin, kaynaklar:u }, W); if(x2.durum !== 'ok'){ dus(a, 'dogrulama', 'destekleyen alıntılarla araştırma denetimi: ' + x2.neden, r); return; } }
-      gos.push(kabul(a, d, p)); });
+      gos.push(kabul(a, d, p, r)); });
     if(dc){ var rd = v && v.dogrudan_cevap, dd = rd ? gec(rd.destekleyen) : [], dp = rd ? pc(rd, dd) : [];
       if(rd && kabulMu(rd, dd, dp) && !oneriYok(dc, hep(dd, dp))) dogrudan = Object.assign({}, dc, { kaynaklar:B.kaynakD ? hep(dd, dp) : dc.kaynaklar, atifOnce:(dc.kaynaklar || []).slice(), dogrulama:'destekli' });
-      else dogrudanDusen = Object.assign({}, dc, { durum:'dusuruldu', tur:'dogrulama', neden:neden(rd, hep(dd, dp)) }); }
+      else dogrudanDusen = Object.assign({}, dc, { durum:'dusuruldu', tur:'dogrulama', karar:rd && rd.karar || null, neden:neden(rd, hep(dd, dp)) }); } // CEV5 (2a): karar onarım adayı için
     return { gos:gos, dusen:dusen, rapor:rapor, dogrudan:dogrudan, dogrudanDusen:dogrudanDusen }; };
   // ═══ CEV3 DOĞRULAYICI SON ═══
-  C.CEV3B = { gucD:true, kismiGizle:true, kaynakD:true, yenidenDenetle:true, oneriAlinti:true, parca:true, tarafKalan:true }; // yalnız kasıtlı bozma testi (CEV4: parca · CEV4B: tarafKalan)
+  C.CEV3B = { gucD:true, kismiGizle:true, kaynakD:true, yenidenDenetle:true, oneriAlinti:true, parca:true, tarafKalan:true, tekTaraf:true, cekirdek:true }; // yalnız kasıtlı bozma testi (CEV4: parca · CEV4B: tarafKalan · CEV5: tekTaraf, cekirdek)
   C.dogrulayiciMetni = function(){ var B = '// ═══ CEV3 DOĞRULAYICI ' + 'BAŞ ═══', S = '// ═══ CEV3 DOĞRULAYICI ' + 'SON ═══', sc = document.querySelectorAll('script');
     for(var i = 0; i < sc.length; i++){ var t = sc[i].textContent || '', a = t.indexOf(B), b = t.indexOf(S); if(a >= 0 && b > a) return t.slice(a, b + S.length).replace(/\r\n/g, '\n'); } return null; };
   C.dogrulayiciImza = function(){ var t = C.dogrulayiciMetni(); return t ? C.fnv(t) + '-' + t.length : null; };
   //   CEV4 (2): ONARIM TURU — doğrulayıcının 'kismi' + sorun ∈ C.ONARIM_SORUN dediği maddeler (çelişki tarafları ve çelişki adayları HARİÇ; kesik_alinti / yalniz_forum / yon onarılmaz) soru başına TEK onarım çağrısına (özet modeli) gider:
   //   girdi = madde + doğrulayıcının notu + YALNIZ o maddenin alıntıları; eylem 'yeniden' (çekince / kapsam ekle, birleşimi ayır — en çok C.ONARIM_MAX madde) ya da 'birak'. Yeniden yazılanlar araştırma denetleyicisinden (donmuş) ve AYNI donmuş
   //   doğrulayıcıdan ikinci kez geçer (TEK çağrı, yalnız onarılanlar); destekli değilse düşer. Onarılan madde ikinci kez onarılmaz. Kayıt: onarimHam, dogrulamaHam2.
+  //   CEV5 (2a): + kesik_alinti (koşu #4: düşen 52 maddenin 50'si içerik olarak doğruydu, çoğu kesik alıntıya dayanan küçük alt iddia yüzünden) · + düşen doğrudan cevap (karar kismi) — aynı tek onarım çağrısında.
+  //   yon / yanlis_kaynak / yalniz_forum / ceviri / sayi yine onarılmaz.
   C.ONARIM_SORUN = ['kosul_atildi', 'baglam_genellendi', 'birlestirme']; C.ONARIM_MAX = 3;
-  C.onarimAday = function(U){ return ((U && U.dusen) || []).filter(function(x){ return x.tur === 'dogrulama' && x.karar === 'kismi' && C.ONARIM_SORUN.indexOf(x.sorun) >= 0 && !x.onarildi && !x.celiski; }); };
-  C.onarimPaket = function(L, W){ var byId = {}; (W || []).forEach(function(w){ byId[w.id] = w; });
+  C.onarimSorun = function(){ return C.ONARIM_SORUN.concat(C.CEV5.kesikOnarim ? ['kesik_alinti'] : []); };
+  C.onarimAday = function(U){ var S = C.onarimSorun(); return ((U && U.dusen) || []).filter(function(x){ return x.tur === 'dogrulama' && x.karar === 'kismi' && S.indexOf(x.sorun) >= 0 && !x.onarildi && !x.celiski; }); };
+  C.dcOnarimAday = function(U){ var x = U && U.dogrudanDusen; return C.CEV5.dcOnarim && x && x.karar === 'kismi' && !x.onarildi && (x.kaynaklar || []).length ? x : null; };
+  C.onarimPaket = function(L, W, dc){ var byId = {}, al = function(ids){ return ids.filter(function(id){ return byId[id]; }).map(function(id){ var w = byId[id]; return '  [' + id + '] ' + w.url + (w.baslik ? ' — ' + w.baslik : '') + '\n  "' + w.alinti + '"'; }).join('\n'); }; (W || []).forEach(function(w){ byId[w.id] = w; });
     return 'ONARILACAK MADDELER (kaynak doğrulayıcısı düşürdü; yalnız GÖRÜNEN alıntı metni kanıttır; "…" ya da "..." ile biten alıntı kesiktir):\n' + L.map(function(x, i){ var ids = (x.kaynaklar || []).filter(function(id){ return byId[id]; });
-      return '[o' + (i + 1) + '] ' + x.metin + (x.deger ? '\n  değer: ' + x.deger : '') + '\n  doğrulayıcının sorunu: ' + x.sorun + (x.not ? ' — ' + x.not : '') + '\n  bu maddenin alıntıları:\n' + ids.map(function(id){ var w = byId[id]; return '  [' + id + '] ' + w.url + (w.baslik ? ' — ' + w.baslik : '') + '\n  "' + w.alinti + '"'; }).join('\n'); }).join('\n\n'); };
-  C.ONARIM_GOREV = function(konu){ return 'KONU: ' + konu + '\nGÖREV: Her onarılacak madde (o1, o2 …) için BİR karar yaz; hiçbirini atlama. eylem = yeniden: doğrulayıcının notunu gidererek maddeyi YALNIZ o maddenin alıntılarına göre yeniden yaz — düşürülmüş çekinceyi geri koy, kapsamı (stil / suş / ürün / ölçek / deney koşulu) yaz, birleştirilmiş farklı bulguları ayrı maddelere ayır (en çok ' + C.ONARIM_MAX + ' madde). eylem = birak: not bu alıntılarla giderilemiyorsa (maddeler boş). Yeni bilgi, sayı ya da ürün ekleme; kaynaklar alanına yalnız o maddenin alıntı kimliklerinden iddianın TAMAMINI söyleyenleri yaz. Alanlar özetleyicininkiyle aynı: degisken, yon, deger, etki, etki_yonu, kaynaklar. Güç, tavsiye, tat ya da kalite hükmü YAZMA.\n' + C.OZET_KURAL4.join('\n'); };
-  C.onarimSema = function(oIds, wIds){ var item = C.ozetSema(wIds).schema.properties.maddeler.items;
+      return '[o' + (i + 1) + '] ' + x.metin + (x.deger ? '\n  değer: ' + x.deger : '') + '\n  doğrulayıcının sorunu: ' + x.sorun + (x.not ? ' — ' + x.not : '') + '\n  bu maddenin alıntıları:\n' + al(ids); }).join('\n\n') +
+      '\n\nONARILACAK DOĞRUDAN CEVAP: ' + (dc ? dc.metin + '\n  doğrulayıcı: ' + (dc.karar || 'kismi') + '\n  bu cevabın alıntıları:\n' + al(dc.kaynaklar || []) : 'yok'); }; // CEV5 (2a)
+  C.ONARIM_GOREV = function(konu){ return 'KONU: ' + konu + '\nGÖREV: Her onarılacak madde (o1, o2 …) için BİR karar yaz; hiçbirini atlama. Sorun kesik_alinti ise: alıntının kesik kısmına dayanan alt iddiayı AT; yalnız görünen metnin söylediğini yaz. dogrudan_cevap: ONARILACAK DOĞRUDAN CEVAP varsa eylem yeniden (konuya TEK cümlelik cevap; yalnız o cevabın alıntılarından, kaynaklar 1–3) ya da birak; yoksa eylem yok (metin boş, kaynaklar boş). eylem = yeniden: doğrulayıcının notunu gidererek maddeyi YALNIZ o maddenin alıntılarına göre yeniden yaz — düşürülmüş çekinceyi geri koy, kapsamı (stil / suş / ürün / ölçek / deney koşulu) yaz, birleştirilmiş farklı bulguları ayrı maddelere ayır (en çok ' + C.ONARIM_MAX + ' madde). eylem = birak: not bu alıntılarla giderilemiyorsa (maddeler boş). Yeni bilgi, sayı ya da ürün ekleme; kaynaklar alanına yalnız o maddenin alıntı kimliklerinden iddianın TAMAMINI söyleyenleri yaz. Alanlar özetleyicininkiyle aynı: degisken, yon, deger, etki, etki_yonu, kaynaklar. Güç, tavsiye, tat ya da kalite hükmü YAZMA.\n' + C.OZET_KURAL4.join('\n'); };
+  C.onarimSema = function(oIds, wIds){ var item = C.ozetSema(wIds).schema.properties.maddeler.items; oIds = oIds.length ? oIds : ['o1']; // CEV5: yalnız doğrudan cevap onarılıyorsa enum boş kalmasın
     var on = { type:'object', properties:{ id:{ type:'string', enum:oIds.slice() }, eylem:{ type:'string', enum:['yeniden', 'birak'] }, maddeler:{ type:'array', items:item } }, required:['id', 'eylem', 'maddeler'], additionalProperties:false };
-    return { type:'json_schema', schema:{ type:'object', properties:{ onarimlar:{ type:'array', items:on } }, required:['onarimlar'], additionalProperties:false } }; };
+    var dc = { type:'object', properties:{ eylem:{ type:'string', enum:['yeniden', 'birak', 'yok'] }, metin:{ type:'string' }, kaynaklar:{ type:'array', items:{ type:'string', enum:wIds.slice() } } }, required:['eylem', 'metin', 'kaynaklar'], additionalProperties:false }; // CEV5 (2a)
+    return { type:'json_schema', schema:{ type:'object', properties:{ onarimlar:{ type:'array', items:on }, dogrudan_cevap:dc }, required:['onarimlar', 'dogrudan_cevap'], additionalProperties:false } }; };
   //   yanıt → yeni aday maddeler (C.maddeIsle ile — donmuş araştırma denetleyicisi + forum + kimlik silme aynen); kaynak kimliği yalnız o maddenin alıntılarından (dışarıdaki kimlik atılır, hiç kalmazsa madde yazılmaz)
   C.onarimIsle = function(L, v, W){ var R = {}, yeni = [], kayit = []; ((v && v.onarimlar) || []).forEach(function(r){ if(r && r.id && !R[r.id]) R[r.id] = r; });
     L.forEach(function(x, i){ var r = R['o' + (i + 1)], izin = x.kaynaklar || [];
@@ -37419,6 +37466,11 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
         var y = C.maddeIsle({ maddeler:[Object.assign({}, m, { kaynaklar:k })] }, W).tum[0]; y.onarildi = true; y.onarimKaynak = x.metin; y.onarimSorun = x.sorun; yeni.push(y); n++; });
       x.onarim = 'yeniden'; kayit.push({ metin:x.metin, sorun:x.sorun, eylem:'yeniden', yeni:n, kaynakDisi:at }); });
     return { yeni:yeni, kayit:kayit }; };
+  //   CEV5 (2a): onarılan doğrudan cevap — kaynak yalnız o cevabın alıntılarından (en çok 3), donmuş araştırma denetleyicisi + kusur / öneri maskesi + jargon (C.maddeIsle'deki doğrudan cevap yolu aynen); geçmezse null
+  C.onarimDcIsle = function(dc, v, W){ var r = v && v.dogrudan_cevap; if(!dc || !r || r.eylem !== 'yeniden' || !String(r.metin || '').trim()) return null;
+    var k = (Array.isArray(r.kaynaklar) ? r.kaynaklar : []).map(String).filter(function(id, i, a){ return (dc.kaynaklar || []).indexOf(id) >= 0 && a.indexOf(id) === i; }).slice(0, 3); if(!k.length) return null;
+    var met = C.idSil(r.metin), dm = C.kusurMaske(met), x = C.arastirmaDenetle({ metin:dm, kaynaklar:k }, W); x.metin = met; x.denetimMetni = dm; x.oneri = C.oneriVar(met); x.onarildi = true; x.onarimKaynak = dc.metin;
+    if(x.durum === 'ok' && C.jargonVar(x.metin)){ x.durum = 'dusuruldu'; x.tur = 'jargon'; x.neden = 'doğrudan cevapta iç kimlik / jargon'; } return x; };
   //   CEV4B (3): ikinci doğrulamadan geçen ONARILMIŞ maddeler gösterilenlerle (diğer onarılanlar dahil) aynı değişken anahtarıyla (C.degAnahtarKod) karşılaştırılır:
   //   ZIT (C.zitMi) → onarılan madde GÖSTERİLMEZ, celiskiRapor (önceden gösterilen kalır; iki yeni onarılan birbirine zıtsa ikisi de rapora) · aynı anahtarda çelişki / optimum maddesi varsa → gösterilmez, rapor
   //   (bilinçli: bağlam farkı denetlenmeden zıt yön yan yana gösterilmez; kapsama kaybı kabul) · ZIT DEĞİL → ayrı madde olmaz, mevcut maddeye eklenir (etki / değer farklıysa "Ayrıca: …"), kaynaklar birleşir,
@@ -37432,7 +37484,7 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     if(!ayni) z.metin = x.metin + (/ Ayrıca: /.test(x.metin) ? '; ' : '. Ayrıca: ') + y.metin + ' (' + C.hostlar(y.kaynaklar, byId) + ')';
     z.kartParca = (x.kartParca || [x]).concat([y]); z.onarimEk = (x.onarimEk || []).concat([y.metin]); z.birlesen = (x.birlesen || [x.metin]).concat([y.metin]); return z; };
   C.onarimKart = function(G, Y, W){ var byId = {}, gos = G.slice(), rapor = [], red = {}, birlesen = 0; (W || []).forEach(function(w){ byId[w.id] = w; });
-    var an = function(x){ return x.anahtar || C.degAnahtarKod(x.degisken) || ('#' + x.metin); }, ozel = function(x){ return !!(x.celiski || x.optimum); };
+    var an = function(x){ return x.anahtar || C.degAnahtarKod(x.degisken) || ('#' + x.metin); }, ozel = function(x){ return !!(x.celiski || x.optimum || x.tekTaraf); }; // CEV5: tek madde (bağlam) da özel — onarılan buna eklenmez
     var rap = function(y, nd, karsi){ rapor.push({ degisken:y.degisken, tip:'onarim', kaynak:'uygulama', neden:[nd + ': "' + y.metin + '" ↔ "' + karsi + '" — onarılan madde gösterilmedi'] }); };
     Y.forEach(function(y, i){ var Z = G.filter(function(x){ return an(x) === an(y); }), o = Z.filter(ozel)[0], zt = Z.filter(function(x){ return C.zitMi(x, y); })[0];
       if(o){ red[i] = 1; rap(y, 'aynı değişken için ' + (o.celiski ? 'çelişki' : 'optimum') + ' maddesi gösteriliyor', o.metin); }
@@ -37485,19 +37537,21 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
           R.ozetHam = o.veri; var S0 = C.maddeIsle(o.veri, W), Ad = S0.gos.concat(S0.dusen.filter(function(x){ return x.kurtar; })); R.dogrulaAday = Ad; R.dogrulaDc = S0.dogrudan; // CEV3 (7): ham özet kayda
           var bitir = function(){ R.durum = R.sonuc.gos.length ? 'tamam' : 'bulamadim'; if(tavanAsti()) R.tavanUyari = 'maliyet tavanı aşıldı ($' + trS(R.th.tavan, 4) + ')'; ciz(); return R; };
           //   CEV4 (2): onarım turu — en çok 1 onarım çağrısı + 1 ikinci doğrulama (yalnız onarılanlar); başarısızlıkta ilk doğrulamanın sonucu aynen
-          var onar = function(U){ var L = C.CEV4.onarim ? C.onarimAday(U) : [], son = function(){ R.sonuc = C.sonucKur(S0, U); return bitir(); };
-            if(!L.length) return son(); R.onarim = { aday:L.length, ok:false };
+          var onar = function(U){ var L = C.CEV4.onarim ? C.onarimAday(U) : [], dcA = C.CEV4.onarim ? C.dcOnarimAday(U) : null, son = function(){ R.sonuc = C.sonucKur(S0, U); return bitir(); };
+            if(!L.length && !dcA) return son(); R.onarim = { aday:L.length, dcAday:!!dcA, ok:false };
             if(tavanAsti()){ R.onarim.atlandi = 'maliyet tavanı'; return son(); }
             R.durum = 'onar'; ciz();
-            return sor('onar', { kullanim:'cevonar', modelKey:mk, baglam:C.onarimPaket(L, W), soru:C.ONARIM_GOREV(R.konu), sema:C.onarimSema(L.map(function(x, i){ return 'o' + (i + 1); }), ids) }).then(function(o2){ harca('onar', o2);
+            return sor('onar', { kullanim:'cevonar', modelKey:mk, baglam:C.onarimPaket(L, W, dcA), soru:C.ONARIM_GOREV(R.konu), sema:C.onarimSema(L.map(function(x, i){ return 'o' + (i + 1); }), ids) }).then(function(o2){ harca('onar', o2);
               R.onarimHam = o2 && o2.ok ? o2.veri : null; if(!(o2 && o2.ok && o2.veri)){ L.forEach(function(x){ x.onarim = 'basarisiz'; }); R.onarim.hata = o2 && o2.hata && o2.hata.mesaj || 'onarım çağrısı başarısız'; return son(); }
               var OI = C.onarimIsle(L, o2.veri, W), A2 = OI.yeni.filter(function(y){ return y.durum === 'ok'; }); R.onarim.ok = true; R.onarim.kayit = OI.kayit; R.onarim.yeni = OI.yeni.length;
+              var dcY = dcA ? C.onarimDcIsle(dcA, o2.veri, W) : null; if(dcA) R.onarim.dc = dcY ? (dcY.durum === 'ok' ? 'yeniden' : 'denetimde düştü: ' + dcY.neden) : 'birak'; if(dcY && dcY.durum !== 'ok') dcY = null; // CEV5 (2a)
               OI.yeni.filter(function(y){ return y.durum !== 'ok'; }).forEach(function(y){ U.dusen.push(Object.assign({}, y, { neden:'onarılan madde — ' + y.neden })); });
-              if(!A2.length) return son(); if(tavanAsti()){ R.onarim.atlandi = 'maliyet tavanı (ikinci doğrulama)'; A2.forEach(function(y){ U.dusen.push(Object.assign({}, y, { durum:'dusuruldu', tur:'dogrulama', neden:'onarılan madde: ikinci doğrulama yapılmadı (maliyet tavanı)' })); }); return son(); }
+              if(!A2.length && !dcY) return son(); if(tavanAsti()){ R.onarim.atlandi = 'maliyet tavanı (ikinci doğrulama)'; A2.forEach(function(y){ U.dusen.push(Object.assign({}, y, { durum:'dusuruldu', tur:'dogrulama', neden:'onarılan madde: ikinci doğrulama yapılmadı (maliyet tavanı)' })); }); return son(); }
               R.durum = 'dogrula2'; ciz();
-              return sor('dogrula2', { kullanim:'cevdogrula', modelKey:mk, baglam:C.dogrulaPaket(A2, null, W), soru:C.DOGRULA_GOREV(R.konu), sema:C.dogrulaSema(A2.map(function(a, i){ return 'm' + (i + 1); }), ids) }).then(function(d2){ harca('dogrula2', d2);
+              return sor('dogrula2', { kullanim:'cevdogrula', modelKey:mk, baglam:C.dogrulaPaket(A2, dcY, W), soru:C.DOGRULA_GOREV(R.konu), sema:C.dogrulaSema(A2.length ? A2.map(function(a, i){ return 'm' + (i + 1); }) : ['m1'], ids) }).then(function(d2){ harca('dogrula2', d2);
                 if(!(d2 && d2.ok && d2.veri && typeof d2.veri === 'object')){ R.dogrulamaHam2 = null; A2.forEach(function(y){ U.dusen.push(Object.assign({}, y, { durum:'dusuruldu', tur:'dogrulama', neden:'onarılan madde: ikinci doğrulama çağrısı başarısız' })); }); return son(); }
-                R.dogrulamaHam2 = d2.veri; var U2 = C.dogrulaUygula(A2, null, d2.veri, W); R.onarim.gosterilen = U2.gos.length;
+                R.dogrulamaHam2 = d2.veri; var U2 = C.dogrulaUygula(A2, dcY, d2.veri, W); R.onarim.gosterilen = U2.gos.length;
+                if(dcY){ R.onarim.dcSonuc = U2.dogrudan ? 'destekli' : 'düştü'; if(U2.dogrudan){ U.dogrudan = Object.assign({}, U2.dogrudan, { onarildi:true }); U.dogrudanDusen = null; } } // CEV5 (2a): onarılan doğrudan cevap geçerse kartın başına
                 //   CEV4B (3): onarılan maddeler kartla tutarlı (zıt → rapor, aynı değişken → mevcut maddeye eklenir)
                 var OK2 = C.CEV4B.onarimKart ? C.onarimKart(U.gos, U2.gos, W) : { gos:U.gos.concat(U2.gos), rapor:[], birlesen:0, ret:0 }; R.onarim.kartRet = OK2.ret; R.onarim.kartBirlesen = OK2.birlesen;
                 U.gos = OK2.gos; U.rapor = U.rapor.concat(OK2.rapor); U.dusen = U.dusen.concat(U2.dusen.map(function(x){ return Object.assign(x, { neden:'onarılan madde — ' + x.neden }); })); U.rapor = U.rapor.concat(U2.rapor); return son(); }); }); };
@@ -37642,7 +37696,7 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   // KESINTI (Claude, 2026-10-27): hesap / anahtar / ağ / sunucu türü çağrı hatasında koşu DURUR, o soru kaydedilmez → ▶️ Devam o sorudan sürer.
   //   Önceden hata alan soru 'bitti' sayılıp set sonuna kadar gidiliyordu (2026-10-27 09:47 koşusu: 401 ile 55/55 'bitti', $0). Gerçek koşu #2/#3'te başarısız çağrı 0/554 — davranış bu koşuları etkilemez.
   //   'istek' / 'model' (uygulama tarafı, tekrar koşunca aynı hata) eski davranışta kalır.
-  C.KESINTI_TUR = ['anahtar', 'gecersiz', 'anahtar_yok', 'hesap', 'izin', 'cevrimdisi', 'hiz', 'sunucu', 'ag', 'zamanasimi'];
+  C.KESINTI_TUR = ['anahtar', 'gecersiz', 'anahtar_yok', 'hesap', 'izin', 'cevrimdisi', 'hiz', 'sunucu', 'ag', 'zamanasimi', 'calisma_alani']; // CEV5 (0): çalışma alanına bağlı olmayan anahtar da koşuyu durdurur
   C.kos = function(x, opt){ opt = opt || {}; var L = C.listeKur(x); if(!opt.mock){ var kl = C.listeKilit(L); if(kl) return Promise.resolve({ durum:'kilitli', neden:kl }); if(!window.BM_AI || !window.BM_AI.hazirMi().hazir) return Promise.resolve({ durum:'kilitli', neden:'AI anahtarı yok' }); }
     var out, kal = !opt.mock || !!opt.kaydet, bit = {}, si = 0, qi = 0;
     if(opt.devam){ var red = C.devamRed(opt.devam, L); if(red) return Promise.resolve({ durum:'reddedildi', neden:'Devam reddedildi: ' + red, kosuId:opt.devam.kosuId });
