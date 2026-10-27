@@ -1,0 +1,968 @@
+{
+ "aciklama": "Eşitlik Sprint 3 kusur 7: katalog mayası → eğitim verisinde (v8) o mayaya eşlenen reçetelerin yeast_* bayrakları (oran ≥ 0.5). Eşleme uygulamanın kendi _bmKatCoz eşleyicisiyle. Üretici: ml/maya_bayrak_egitim.py + ml/maya_bayrak_tablosu.mjs",
+ "esik_recete": 5,
+ "oran_esik": 0.5,
+ "egitim_recete": 376810,
+ "ilk_dizge": 20000,
+ "ilk_dizge_recete": 371917,
+ "eslenen_recete": 263069,
+ "katalog_maya": 132,
+ "tablo": {
+  "us05": {
+   "n": 63174,
+   "bayrak": [
+    "yeast_american"
+   ],
+   "oran": {
+    "yeast_belgian": 0.001,
+    "yeast_abbey": 0.001,
+    "yeast_saison": 0.001,
+    "yeast_english": 0.004,
+    "yeast_american": 1,
+    "yeast_german_lager": 0,
+    "yeast_czech_lager": 0,
+    "yeast_american_lager": 0,
+    "yeast_kolsch": 0,
+    "yeast_altbier": 0,
+    "yeast_cal_common": 0,
+    "yeast_brett": 0.001,
+    "yeast_lacto": 0.002,
+    "yeast_sour_blend": 0.001,
+    "yeast_witbier": 0,
+    "yeast_wheat_german": 0,
+    "yeast_wit": 0
+   }
+  },
+  "s04": {
+   "n": 21425,
+   "bayrak": [
+    "yeast_english"
+   ],
+   "oran": {
+    "yeast_belgian": 0.002,
+    "yeast_abbey": 0,
+    "yeast_saison": 0,
+    "yeast_kveik": 0,
+    "yeast_english": 0.999,
+    "yeast_american": 0.003,
+    "yeast_german_lager": 0,
+    "yeast_czech_lager": 0,
+    "yeast_american_lager": 0,
+    "yeast_kolsch": 0,
+    "yeast_cal_common": 0,
+    "yeast_brett": 0.002,
+    "yeast_lacto": 0.001,
+    "yeast_sour_blend": 0.001,
+    "yeast_witbier": 0,
+    "yeast_wheat_german": 0,
+    "yeast_wit": 0
+   }
+  },
+  "s33": {
+   "n": 2413,
+   "bayrak": [
+    "yeast_belgian"
+   ],
+   "oran": {
+    "yeast_belgian": 1,
+    "yeast_abbey": 0.005,
+    "yeast_saison": 0.003,
+    "yeast_english": 0.009,
+    "yeast_american": 0.003,
+    "yeast_german_lager": 0,
+    "yeast_kolsch": 0.001,
+    "yeast_brett": 0.002,
+    "yeast_lacto": 0,
+    "yeast_sour_blend": 0.004,
+    "yeast_witbier": 0.001,
+    "yeast_wheat_german": 0.002,
+    "yeast_wit": 0.001
+   }
+  },
+  "wy1056": {
+   "n": 19756,
+   "bayrak": [
+    "yeast_american"
+   ],
+   "oran": {
+    "yeast_belgian": 0,
+    "yeast_abbey": 0,
+    "yeast_english": 0.001,
+    "yeast_american": 0.998,
+    "yeast_kolsch": 0,
+    "yeast_altbier": 0,
+    "yeast_brett": 0,
+    "yeast_lacto": 0,
+    "yeast_sour_blend": 0
+   }
+  },
+  "wy1272": {
+   "n": 17745,
+   "bayrak": [
+    "yeast_american"
+   ],
+   "oran": {
+    "yeast_belgian": 0,
+    "yeast_american": 0.997,
+    "yeast_lacto": 0
+   }
+  },
+  "wy1318": {
+   "n": 5036,
+   "bayrak": [
+    "yeast_english"
+   ],
+   "oran": {
+    "yeast_english": 1,
+    "yeast_brett": 0,
+    "yeast_lacto": 0
+   }
+  },
+  "wy1028": {
+   "n": 2894,
+   "bayrak": [
+    "yeast_english"
+   ],
+   "oran": {
+    "yeast_english": 0.981,
+    "yeast_american": 0,
+    "yeast_brett": 0,
+    "yeast_lacto": 0
+   }
+  },
+  "wy1084": {
+   "n": 3611,
+   "bayrak": [
+    "yeast_english"
+   ],
+   "oran": {
+    "yeast_english": 0.964
+   }
+  },
+  "wy1728": {
+   "n": 3692,
+   "bayrak": [
+    "yeast_english"
+   ],
+   "oran": {
+    "yeast_belgian": 0.001,
+    "yeast_abbey": 0.001,
+    "yeast_english": 0.979,
+    "yeast_american": 0,
+    "yeast_altbier": 0
+   }
+  },
+  "la_london": {
+   "n": 9,
+   "bayrak": [
+    "yeast_english"
+   ],
+   "oran": {
+    "yeast_english": 1
+   }
+  },
+  "nottm": {
+   "n": 13932,
+   "bayrak": [
+    "yeast_english"
+   ],
+   "oran": {
+    "yeast_english": 1,
+    "yeast_sour_blend": 0
+   }
+  },
+  "wy3068": {
+   "n": 3479,
+   "bayrak": [
+    "yeast_wheat_german"
+   ],
+   "oran": {
+    "yeast_belgian": 0,
+    "yeast_abbey": 0,
+    "yeast_wheat_german": 1
+   }
+  },
+  "wy3638": {
+   "n": 429,
+   "bayrak": [
+    "yeast_wheat_german"
+   ],
+   "oran": {
+    "yeast_wheat_german": 0.981
+   }
+  },
+  "wy3944": {
+   "n": 2663,
+   "bayrak": [
+    "yeast_belgian",
+    "yeast_witbier",
+    "yeast_wit"
+   ],
+   "oran": {
+    "yeast_belgian": 0.995,
+    "yeast_witbier": 1,
+    "yeast_wheat_german": 0,
+    "yeast_wit": 1
+   }
+  },
+  "w3470": {
+   "n": 3329,
+   "bayrak": [
+    "yeast_german_lager"
+   ],
+   "oran": {
+    "yeast_belgian": 0.001,
+    "yeast_abbey": 0,
+    "yeast_saison": 0.001,
+    "yeast_english": 0.002,
+    "yeast_american": 0.002,
+    "yeast_german_lager": 1,
+    "yeast_czech_lager": 0.002,
+    "yeast_american_lager": 0.002,
+    "yeast_kolsch": 0.001,
+    "yeast_altbier": 0,
+    "yeast_cal_common": 0,
+    "yeast_brett": 0,
+    "yeast_lacto": 0,
+    "yeast_witbier": 0.001,
+    "yeast_wheat_german": 0.001,
+    "yeast_wit": 0.001
+   }
+  },
+  "s189": {
+   "n": 135,
+   "bayrak": [
+    "yeast_german_lager"
+   ],
+   "oran": {
+    "yeast_german_lager": 1
+   }
+  },
+  "wy2206": {
+   "n": 1501,
+   "bayrak": [
+    "yeast_german_lager"
+   ],
+   "oran": {
+    "yeast_english": 0.001,
+    "yeast_german_lager": 1
+   }
+  },
+  "wy2308": {
+   "n": 1052,
+   "bayrak": [
+    "yeast_german_lager"
+   ],
+   "oran": {
+    "yeast_belgian": 0.001,
+    "yeast_german_lager": 1
+   }
+  },
+  "wy2124": {
+   "n": 1622,
+   "bayrak": [
+    "yeast_german_lager",
+    "yeast_czech_lager"
+   ],
+   "oran": {
+    "yeast_german_lager": 1,
+    "yeast_czech_lager": 0.972,
+    "yeast_brett": 0.001
+   }
+  },
+  "t58": {
+   "n": 3108,
+   "bayrak": [
+    "yeast_belgian"
+   ],
+   "oran": {
+    "yeast_belgian": 1,
+    "yeast_abbey": 0.009,
+    "yeast_saison": 0.008,
+    "yeast_english": 0.007,
+    "yeast_american": 0.001,
+    "yeast_german_lager": 0.001,
+    "yeast_kolsch": 0,
+    "yeast_brett": 0.005,
+    "yeast_lacto": 0.001,
+    "yeast_sour_blend": 0.001,
+    "yeast_witbier": 0.001,
+    "yeast_wheat_german": 0.001,
+    "yeast_wit": 0.001
+   }
+  },
+  "wy3522": {
+   "n": 24,
+   "bayrak": [
+    "yeast_belgian"
+   ],
+   "oran": {
+    "yeast_belgian": 0.917,
+    "yeast_abbey": 0.042,
+    "yeast_brett": 0.083,
+    "yeast_sour_blend": 0.042
+   }
+  },
+  "wy3787": {
+   "n": 2260,
+   "bayrak": [
+    "yeast_abbey"
+   ],
+   "oran": {
+    "yeast_belgian": 0.095,
+    "yeast_abbey": 1,
+    "yeast_saison": 0.001,
+    "yeast_english": 0.002,
+    "yeast_american": 0.004,
+    "yeast_german_lager": 0,
+    "yeast_brett": 0.003,
+    "yeast_lacto": 0.001,
+    "yeast_sour_blend": 0,
+    "yeast_witbier": 0,
+    "yeast_wit": 0
+   }
+  },
+  "wy3711": {
+   "n": 4761,
+   "bayrak": [
+    "yeast_saison"
+   ],
+   "oran": {
+    "yeast_belgian": 0.001,
+    "yeast_saison": 1,
+    "yeast_kveik": 0,
+    "yeast_brett": 0.001,
+    "yeast_lacto": 0.001,
+    "yeast_sour_blend": 0.001
+   }
+  },
+  "wy3724": {
+   "n": 2067,
+   "bayrak": [
+    "yeast_belgian",
+    "yeast_saison"
+   ],
+   "oran": {
+    "yeast_belgian": 0.996,
+    "yeast_saison": 1,
+    "yeast_brett": 0.001,
+    "yeast_witbier": 0,
+    "yeast_wit": 0
+   }
+  },
+  "wb06": {
+   "n": 3069,
+   "bayrak": [
+    "yeast_wheat_german"
+   ],
+   "oran": {
+    "yeast_belgian": 0.002,
+    "yeast_abbey": 0.001,
+    "yeast_saison": 0.001,
+    "yeast_english": 0.002,
+    "yeast_american": 0,
+    "yeast_brett": 0.001,
+    "yeast_lacto": 0.001,
+    "yeast_sour_blend": 0,
+    "yeast_witbier": 0.002,
+    "yeast_wheat_german": 1,
+    "yeast_wit": 0.002
+   }
+  },
+  "s23": {
+   "n": 2608,
+   "bayrak": [
+    "yeast_german_lager"
+   ],
+   "oran": {
+    "yeast_belgian": 0.001,
+    "yeast_abbey": 0,
+    "yeast_saison": 0,
+    "yeast_english": 0.004,
+    "yeast_american": 0.002,
+    "yeast_german_lager": 1,
+    "yeast_czech_lager": 0.002,
+    "yeast_american_lager": 0.022,
+    "yeast_kolsch": 0,
+    "yeast_altbier": 0,
+    "yeast_cal_common": 0.002,
+    "yeast_brett": 0.001,
+    "yeast_witbier": 0,
+    "yeast_wheat_german": 0,
+    "yeast_wit": 0
+   }
+  },
+  "be256": {
+   "n": 797,
+   "bayrak": [
+    "yeast_abbey"
+   ],
+   "oran": {
+    "yeast_belgian": 0.356,
+    "yeast_abbey": 0.947,
+    "yeast_saison": 0.069,
+    "yeast_wheat_german": 0.001
+   }
+  },
+  "be134": {
+   "n": 70,
+   "bayrak": [
+    "yeast_belgian",
+    "yeast_saison"
+   ],
+   "oran": {
+    "yeast_belgian": 0.757,
+    "yeast_abbey": 0.014,
+    "yeast_saison": 1
+   }
+  },
+  "la_windsor": {
+   "n": 863,
+   "bayrak": [
+    "yeast_english"
+   ],
+   "oran": {
+    "yeast_english": 0.985
+   }
+  },
+  "la_bry97": {
+   "n": 1252,
+   "bayrak": [
+    "yeast_english",
+    "yeast_american"
+   ],
+   "oran": {
+    "yeast_saison": 0.001,
+    "yeast_english": 0.97,
+    "yeast_american": 1,
+    "yeast_brett": 0.001,
+    "yeast_sour_blend": 0.001
+   }
+  },
+  "la_belle": {
+   "n": 1984,
+   "bayrak": [
+    "yeast_saison"
+   ],
+   "oran": {
+    "yeast_saison": 1
+   }
+  },
+  "la_abbaye": {
+   "n": 6,
+   "bayrak": [
+    "yeast_belgian",
+    "yeast_abbey"
+   ],
+   "oran": {
+    "yeast_belgian": 1,
+    "yeast_abbey": 1
+   }
+  },
+  "k97": {
+   "n": 314,
+   "bayrak": [
+    "yeast_kolsch"
+   ],
+   "oran": {
+    "yeast_english": 0.003,
+    "yeast_kolsch": 0.71,
+    "yeast_altbier": 0.003,
+    "yeast_brett": 0.01,
+    "yeast_lacto": 0.01,
+    "yeast_wheat_german": 0.003
+   }
+  },
+  "mj_m15": {
+   "n": 95,
+   "bayrak": [],
+   "oran": {}
+  },
+  "mj_m20": {
+   "n": 403,
+   "bayrak": [
+    "yeast_wheat_german"
+   ],
+   "oran": {
+    "yeast_wheat_german": 0.983
+   }
+  },
+  "mj_m21": {
+   "n": 89,
+   "bayrak": [
+    "yeast_belgian",
+    "yeast_witbier",
+    "yeast_wit"
+   ],
+   "oran": {
+    "yeast_belgian": 0.989,
+    "yeast_witbier": 1,
+    "yeast_wit": 1
+   }
+  },
+  "mj_m29": {
+   "n": 127,
+   "bayrak": [
+    "yeast_saison"
+   ],
+   "oran": {
+    "yeast_belgian": 0.039,
+    "yeast_saison": 1,
+    "yeast_brett": 0.008
+   }
+  },
+  "mj_m31": {
+   "n": 82,
+   "bayrak": [
+    "yeast_belgian",
+    "yeast_abbey"
+   ],
+   "oran": {
+    "yeast_belgian": 1,
+    "yeast_abbey": 1,
+    "yeast_saison": 0.012
+   }
+  },
+  "mj_m36": {
+   "n": 185,
+   "bayrak": [],
+   "oran": {
+    "yeast_belgian": 0.005,
+    "yeast_english": 0.005,
+    "yeast_wheat_german": 0.011
+   }
+  },
+  "mj_m41": {
+   "n": 446,
+   "bayrak": [
+    "yeast_belgian"
+   ],
+   "oran": {
+    "yeast_belgian": 1,
+    "yeast_abbey": 0.186
+   }
+  },
+  "mj_m42": {
+   "n": 196,
+   "bayrak": [],
+   "oran": {}
+  },
+  "mj_m44": {
+   "n": 1654,
+   "bayrak": [
+    "yeast_american"
+   ],
+   "oran": {
+    "yeast_american": 1
+   }
+  },
+  "mj_m47": {
+   "n": 57,
+   "bayrak": [
+    "yeast_belgian",
+    "yeast_abbey"
+   ],
+   "oran": {
+    "yeast_belgian": 0.947,
+    "yeast_abbey": 0.93
+   }
+  },
+  "mj_m54": {
+   "n": 128,
+   "bayrak": [
+    "yeast_cal_common"
+   ],
+   "oran": {
+    "yeast_german_lager": 0.063,
+    "yeast_cal_common": 0.93
+   }
+  },
+  "mj_m76": {
+   "n": 86,
+   "bayrak": [
+    "yeast_german_lager"
+   ],
+   "oran": {
+    "yeast_german_lager": 1,
+    "yeast_cal_common": 0.012
+   }
+  },
+  "mj_m84": {
+   "n": 263,
+   "bayrak": [
+    "yeast_german_lager",
+    "yeast_czech_lager"
+   ],
+   "oran": {
+    "yeast_english": 0.004,
+    "yeast_german_lager": 1,
+    "yeast_czech_lager": 0.992
+   }
+  },
+  "wlp001": {
+   "n": 24367,
+   "bayrak": [
+    "yeast_american"
+   ],
+   "oran": {
+    "yeast_english": 0,
+    "yeast_american": 1,
+    "yeast_german_lager": 0,
+    "yeast_brett": 0,
+    "yeast_lacto": 0
+   }
+  },
+  "wlp002": {
+   "n": 6010,
+   "bayrak": [
+    "yeast_english"
+   ],
+   "oran": {
+    "yeast_english": 1,
+    "yeast_american": 0
+   }
+  },
+  "wlp004": {
+   "n": 5722,
+   "bayrak": [
+    "yeast_english"
+   ],
+   "oran": {
+    "yeast_english": 0.998,
+    "yeast_american": 0,
+    "yeast_sour_blend": 0
+   }
+  },
+  "wlp007": {
+   "n": 6587,
+   "bayrak": [
+    "yeast_english"
+   ],
+   "oran": {
+    "yeast_english": 1,
+    "yeast_american": 0.001
+   }
+  },
+  "wlp029": {
+   "n": 3319,
+   "bayrak": [
+    "yeast_kolsch"
+   ],
+   "oran": {
+    "yeast_english": 0.191,
+    "yeast_american": 0.002,
+    "yeast_kolsch": 0.991,
+    "yeast_altbier": 0.001,
+    "yeast_brett": 0.001,
+    "yeast_lacto": 0.002
+   }
+  },
+  "wlp300": {
+   "n": 2442,
+   "bayrak": [
+    "yeast_wheat_german"
+   ],
+   "oran": {
+    "yeast_american": 0,
+    "yeast_wheat_german": 1
+   }
+  },
+  "wlp500": {
+   "n": 1496,
+   "bayrak": [
+    "yeast_abbey"
+   ],
+   "oran": {
+    "yeast_belgian": 0.238,
+    "yeast_abbey": 1,
+    "yeast_american": 0.001,
+    "yeast_brett": 0.001,
+    "yeast_sour_blend": 0.001,
+    "yeast_wheat_german": 0.001
+   }
+  },
+  "wlp550": {
+   "n": 2278,
+   "bayrak": [
+    "yeast_belgian"
+   ],
+   "oran": {
+    "yeast_belgian": 0.998,
+    "yeast_abbey": 0,
+    "yeast_american": 0,
+    "yeast_brett": 0,
+    "yeast_sour_blend": 0
+   }
+  },
+  "wlp565": {
+   "n": 1335,
+   "bayrak": [
+    "yeast_belgian",
+    "yeast_saison"
+   ],
+   "oran": {
+    "yeast_belgian": 1,
+    "yeast_abbey": 0.001,
+    "yeast_saison": 1,
+    "yeast_brett": 0.002,
+    "yeast_lacto": 0.001
+   }
+  },
+  "wlp570": {
+   "n": 1075,
+   "bayrak": [
+    "yeast_belgian"
+   ],
+   "oran": {
+    "yeast_belgian": 1,
+    "yeast_abbey": 0.001,
+    "yeast_brett": 0.002
+   }
+  },
+  "wlp585": {
+   "n": 57,
+   "bayrak": [
+    "yeast_belgian",
+    "yeast_saison"
+   ],
+   "oran": {
+    "yeast_belgian": 1,
+    "yeast_saison": 1
+   }
+  },
+  "wlp670": {
+   "n": 470,
+   "bayrak": [
+    "yeast_belgian",
+    "yeast_saison",
+    "yeast_brett",
+    "yeast_sour_blend"
+   ],
+   "oran": {
+    "yeast_belgian": 1,
+    "yeast_abbey": 0.004,
+    "yeast_saison": 1,
+    "yeast_english": 0.002,
+    "yeast_american": 0.002,
+    "yeast_altbier": 0.002,
+    "yeast_brett": 1,
+    "yeast_lacto": 0.002,
+    "yeast_sour_blend": 1,
+    "yeast_witbier": 0.002,
+    "yeast_wheat_german": 0.002,
+    "yeast_wit": 0.002
+   }
+  },
+  "wlp800": {
+   "n": 756,
+   "bayrak": [
+    "yeast_german_lager"
+   ],
+   "oran": {
+    "yeast_german_lager": 1,
+    "yeast_czech_lager": 0.172,
+    "yeast_kolsch": 0.001
+   }
+  },
+  "wlp830": {
+   "n": 1455,
+   "bayrak": [
+    "yeast_german_lager"
+   ],
+   "oran": {
+    "yeast_german_lager": 1,
+    "yeast_czech_lager": 0.001,
+    "yeast_kolsch": 0.001,
+    "yeast_cal_common": 0.001,
+    "yeast_wheat_german": 0.002
+   }
+  },
+  "wlp838": {
+   "n": 458,
+   "bayrak": [
+    "yeast_german_lager"
+   ],
+   "oran": {
+    "yeast_german_lager": 1,
+    "yeast_american_lager": 0.002
+   }
+  },
+  "imp_a01": {
+   "n": 13,
+   "bayrak": [],
+   "oran": {}
+  },
+  "imp_a10": {
+   "n": 5,
+   "bayrak": [],
+   "oran": {}
+  },
+  "imp_a38": {
+   "n": 7,
+   "bayrak": [],
+   "oran": {}
+  },
+  "wy1968": {
+   "n": 4585,
+   "bayrak": [
+    "yeast_english"
+   ],
+   "oran": {
+    "yeast_english": 1
+   }
+  },
+  "wy1388": {
+   "n": 1041,
+   "bayrak": [
+    "yeast_belgian"
+   ],
+   "oran": {
+    "yeast_belgian": 0.998,
+    "yeast_abbey": 0.003,
+    "yeast_english": 0.001,
+    "yeast_altbier": 0.001,
+    "yeast_brett": 0.001,
+    "yeast_lacto": 0.002
+   }
+  },
+  "wy2001": {
+   "n": 328,
+   "bayrak": [
+    "yeast_german_lager"
+   ],
+   "oran": {
+    "yeast_american": 0.009,
+    "yeast_german_lager": 1
+   }
+  },
+  "wy2112": {
+   "n": 4198,
+   "bayrak": [
+    "yeast_cal_common"
+   ],
+   "oran": {
+    "yeast_german_lager": 0.05,
+    "yeast_czech_lager": 0,
+    "yeast_cal_common": 1
+   }
+  },
+  "wlp380": {
+   "n": 147,
+   "bayrak": [
+    "yeast_wheat_german"
+   ],
+   "oran": {
+    "yeast_english": 0.007,
+    "yeast_brett": 0.007,
+    "yeast_witbier": 0.007,
+    "yeast_wheat_german": 1,
+    "yeast_wit": 0.007
+   }
+  }
+ },
+ "esik_alti": {
+  "verdant": {
+   "n": 4,
+   "bayrak": [],
+   "oran": {}
+  },
+  "la_munich": {
+   "n": 2,
+   "bayrak": [
+    "yeast_wheat_german"
+   ],
+   "oran": {
+    "yeast_wheat_german": 1
+   }
+  },
+  "kveiko": {
+   "n": 1,
+   "bayrak": [
+    "yeast_kveik"
+   ],
+   "oran": {
+    "yeast_kveik": 1
+   }
+  },
+  "kveik_fg": {
+   "n": 1,
+   "bayrak": [
+    "yeast_kveik"
+   ],
+   "oran": {
+    "yeast_kveik": 1
+   }
+  },
+  "la_diamond": {
+   "n": 2,
+   "bayrak": [
+    "yeast_german_lager"
+   ],
+   "oran": {
+    "yeast_german_lager": 1
+   }
+  },
+  "mj_m66": {
+   "n": 2,
+   "bayrak": [
+    "yeast_american"
+   ],
+   "oran": {
+    "yeast_american": 0.5
+   }
+  },
+  "oyl091": {
+   "n": 1,
+   "bayrak": [
+    "yeast_kveik"
+   ],
+   "oran": {
+    "yeast_kveik": 1
+   }
+  },
+  "imp_a04": {
+   "n": 2,
+   "bayrak": [],
+   "oran": {}
+  },
+  "imp_a09": {
+   "n": 1,
+   "bayrak": [],
+   "oran": {}
+  },
+  "imp_a15": {
+   "n": 2,
+   "bayrak": [],
+   "oran": {}
+  },
+  "imp_a24": {
+   "n": 1,
+   "bayrak": [],
+   "oran": {}
+  },
+  "imp_b63": {
+   "n": 3,
+   "bayrak": [
+    "yeast_belgian"
+   ],
+   "oran": {
+    "yeast_belgian": 1
+   }
+  },
+  "imp_g01": {
+   "n": 1,
+   "bayrak": [],
+   "oran": {}
+  },
+  "rva132": {
+   "n": 3,
+   "bayrak": [],
+   "oran": {}
+  },
+  "wy3333": {
+   "n": 1,
+   "bayrak": [],
+   "oran": {}
+  }
+ }
+}

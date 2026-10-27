@@ -14303,6 +14303,53 @@ const CASELER = [
     }
   },
   {
+    kod: 'ESIT3-MAYA', ad: 'MAYA BAYRAKLARI = EĞİTİM (Eşitlik Sprint 3 kusur 7, AI yok): eğitimdeki yeast_* bayrakları tek regex değil, birden çok kuralın birleşimi → katalog mayası başına eğitimde (v8) o mayaya eşlenen reçetelerin gerçek bayrakları (ml/maya_bayrak_egitim.json, üretici ml/maya_bayrak_egitim.py + ml/maya_bayrak_tablosu.mjs) · HTML tablosu dosyayla birebir · tablodaki HER katalog mayası için __bmBuildFeaturesV12 bayrakları = eğitim (uyuşmayan 0; önce 34/69) · tabloda olmayan maya (BiraBurada vb., eğitimde yok) eski kural · ikinci maya bayrakları eklenir · KASITLI BOZMA',
+    calistir: async (page) => {
+      const T = JSON.parse(fs.readFileSync(path.join(KOK, 'ml/maya_bayrak_egitim.json'), 'utf8')).tablo;
+      return page.evaluate((T) => {
+        const B = (id, tip, ek) => { const fo = window.__bmBuildFeaturesV12(Object.assign({ mayaId: id, _mayaTip: tip, percents: {} }, ek || {})); return Object.keys(fo).filter(k => /^yeast_/.test(k) && k !== 'yeast_neipa' && k !== 'yeast_attenuation' && fo[k]).map(k => k.slice(6)).sort().join(' '); };
+        const H = window._BM_YEAST_EGITIM || {}, ids = Object.keys(T), tabloFark = ids.filter(id => (H[id] || '').split(' ').filter(Boolean).sort().join(' ') !== T[id].bayrak.map(b => b.slice(6)).sort().join(' ')).concat(Object.keys(H).filter(id => !T[id]));
+        __REG.ok('HTML _BM_YEAST_EGITIM = ml/maya_bayrak_egitim.json (' + ids.length + ' maya)', ids.length >= 60 && !tabloFark.length, tabloFark.join(','));
+        const kat = MAYALAR.filter(m => T[m.id]), uy = kat.filter(m => B(m.id, m.tip) === T[m.id].bayrak.map(b => b.slice(6)).sort().join(' '));
+        __REG.ok('katalog düzeyi: tablodaki ' + kat.length + ' mayanın ' + uy.length + '\'i eğitimle aynı bayrak setini üretiyor (uyuşmayan ' + (kat.length - uy.length) + ')', kat.length === ids.length && uy.length === kat.length, kat.filter(m => uy.indexOf(m) < 0).map(m => m.id + ' [' + B(m.id, m.tip) + ']').join(' · '));
+        const ozel = [['s04', 'ale', 'english'], ['wy1056', 'ale', 'american'], ['wy1968', 'ale', 'english'], ['s23', 'lager', 'german_lager'], ['nottm', 'ale', 'english'], ['wy1272', 'ale', 'american'], ['la_bry97', 'ale', 'american english']].map(x => [x[0], B(x[0], x[1]), x[2]]);
+        __REG.ok('örnekler (eski kodda s04 / nottm / wy1968 İngiliz değildi, wy1056 hem İngiliz hem Amerikan, s23 Amerikan lager): ' + ozel.map(x => x[0] + ' → ' + (x[1] || '—')).join(' · '), ozel.every(x => x[1] === x[2]));
+        const eski = [['bb_alman_bugday1', 'wheat', 'wheat_german'], ['bb_abbaye', 'belcika', 'abbey'], ['bb22a', 'kveik', 'kveik'], ['bb_ale', 'ale', ''], ['bb_philly', 'sour', 'sour_blend']].map(x => [x[0], T[x[0]] ? 'TABLODA' : B(x[0], x[1]), x[2]]);
+        __REG.ok('tabloda olmayan maya eski kuralda (tip / kimlik): ' + eski.map(x => x[0] + ' → ' + (x[1] || '—')).join(' · '), eski.every(x => x[1] === x[2]));
+        const m2 = B('us05', 'ale', { maya2Id: 'wlp670' }), m3 = B('bb_ale', 'ale', { maya2Id: 's04' });
+        __REG.ok('ikinci maya: us05 + wlp670 → ' + m2 + ' · bb_ale + s04 → ' + m3 + ' (eğitimde maya metni tüm mayaları içerir)', m2 === 'american belgian brett saison sour_blend' && m3 === 'english');
+        const yedek = H.s04; delete H.s04; let boz; try { boz = B('s04', 'ale'); } finally { H.s04 = yedek; }
+        __REG.ok('KASITLI BOZMA: s04 tablodan çıkınca eski kural → "' + (boz || '—') + '" (kırmızı olmalı: english değil)', boz !== 'english' && B('s04', 'ale') === 'english');
+        return __REG.al();
+      }, T);
+    }
+  },
+  {
+    kod: 'ESIT3-K8', ad: 'IBU 0 · 0 DAKİKALIK HOP · MAYA METNİ (Eşitlik Sprint 3 kusur 8, AI yok): (a) hesaplanan IBU 0 modele 0 gider (eğitimde ham IBU 0 → 0; 25 yalnız IBU hesaplanmamışsa) · (b) 0 dakikalık kaynatma hopu taban 89 alanda GEÇ hop (late_hop_pct; eğitimde v8 time_min 0 → geç, 60 değil), dk girilmemişse 60 · B1 ek alanları (Sprint 2: dk 0 = kuru hop aşaması) bu yoldan BAĞIMSIZ, aynı kalır · (c) buildText7 maya adını uiR.mayaId / maya2Id\'den alır (uiR.maya diye alan yok)',
+    calistir: (page) => page.evaluate(() => {
+      const F = r => window.__bmBuildFeaturesV12(Object.assign({ percents: {} }, r));
+      const i0 = F({ _ibu: 0 }).ibu, iu = F({}).ibu, i33 = F({ _ibu: 33 }).ibu;
+      __REG.ok('IBU: hesap 0 → ' + i0 + ' · hesap yok → ' + iu + ' · 33 → ' + i33, i0 === 0 && iu === 25 && i33 === 33);
+      const S0 = S.hoplar; let a, b, c;
+      try {
+        S.hoplar = [{ id: 'citra', g: 10, dk: 60, tur: 'boil' }, { id: 'citra', g: 10, dk: 0, tur: 'boil' }]; a = F({}).late_hop_pct;
+        S.hoplar = [{ id: 'citra', g: 10, dk: 60, tur: 'boil' }, { id: 'citra', g: 10, tur: 'boil' }]; b = F({}).late_hop_pct;
+        S.hoplar = [{ id: 'citra', g: 10, dk: 60, tur: 'boil' }, { id: 'citra', g: 10, dk: 15, tur: 'boil' }]; c = F({}).late_hop_pct;
+      } finally { S.hoplar = S0; }
+      __REG.ok('late_hop_pct: 60 + 0 dk → ' + a + ' (eski 0) · 60 + dk yok → ' + b + ' · 60 + 15 dk → ' + c, a === 50 && b === 0 && c === 50);
+      const L0 = window.__bmGetV12ClusterLabels; window.__bmGetV12ClusterLabels = () => ({ feature_list: Array.from({ length: 89 }, (_, i) => 'f' + i) });
+      let e, t1, t0;
+      try {
+        const r = h => ({ _og: 1.05, og: 1.05, _ibu: 30, hopIds: ['citra'], maltIds: ['pilsner'], katkiIds: [], hoplar: h, maltlar: [{ id: 'pilsner', kg: 4 }], katkilar: [], hacim: 20, mash_steps: 1, verim: 70, percents: {} });
+        const v = window.BM_B1.buildFeatures(r([{ id: 'citra', g: 10, dk: 0, tur: 'boil', cAA: 12 }])); e = [v[89 + 7], v[89 + 8], v[89 + 9], v[89 + 10]];
+        t1 = window.BM_B1.buildFeatures(Object.assign(r([]), { mayaId: 'bb_pamona' }))[109 + 4]; t0 = window.BM_B1.buildFeatures(Object.assign(r([]), { mayaId: 'us05' }))[109 + 4];
+      } finally { window.__bmGetV12ClusterLabels = L0; }
+      __REG.ok('B1 ek alanları boil dk 0 → [kuru hop aşaması, acı, aroma, oran] ' + JSON.stringify(e) + ' (Sprint 2 ile aynı: [1, 0, 10, 0])', JSON.stringify(e) === '[1,0,10,0]');
+      __REG.ok('buildText7 maya adı mayaId\'den: bb_pamona ("Elma" adında) → has_fruit_general ' + t1 + ' · us05 → ' + t0, t1 === 1 && t0 === 0);
+      return __REG.al();
+    })
+  },
+  {
     kod: 'CEV1B-KOZMETIK', ad: 'KOZMETİK + KONU SÖZLÜĞÜ (CEV1B madde 4–5): "N\'i güçlü" Türkçe eki (1\'i, 2\'si, 3\'ü, 4\'ü, 5\'i) · muz / karanfil okunduysa "aroması" hesaplanmıyor notuna girmez · tanıyamadım / kapsam dışı metni araştırma düğmesi varken "Kaynaklarda araştırabilirim" der, yoksa eski metin · kağıt → oksidasyon, lahana → DMS ya da sülfür (sorulmaz), ilaç / plastik / klor → klorofenol, "metal gibi" → metalik, sirke → ekşilik, fışkırma / taşma / şişe patladı → aşırı karbonasyon (yalnız etiket + araştırma; kural tablosu değişmez)',
     calistir: (page) => page.evaluate(async () => {
       const G = window.BM_AI5;

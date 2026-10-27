@@ -1515,6 +1515,13 @@ window.bmTipografiPanelRender = function(){
     for (let i=0;i<numClass;i++) exps[i] /= sum;
     return exps;
   }
+  // EŞİTLİK SPRINT 3 kusur 7: maya bayrakları eğitimdeki GERÇEK bayraklardan. Eğitim bayrakları tek bir regex değil, birden çok kuralın
+  //   birleşimidir (_step18c1c5_phase3_rebuild.py: yeni = eski bayrak VEYA yeni desen) → katalog mayası başına eğitimde o mayaya eşlenen
+  //   reçetelerin bayrakları (oran ≥ 0,5, en az 5 reçete). Üretici: ml/maya_bayrak_egitim.py + ml/maya_bayrak_tablosu.mjs → ml/maya_bayrak_egitim.json
+  //   (npm test ESIT3-MAYA birebir denetler). Tabloda olmayan maya (eğitimde yok: BiraBurada vb.) eski kurala kalır.
+  var _BM_YEAST_EGITIM = {us05:'american', s04:'english', s33:'belgian', wy1056:'american', wy1272:'american', wy1318:'english', wy1028:'english', wy1084:'english', wy1728:'english', la_london:'english', nottm:'english', wy3068:'wheat_german', wy3638:'wheat_german', wy3944:'belgian witbier wit', w3470:'german_lager', s189:'german_lager', wy2206:'german_lager', wy2308:'german_lager', wy2124:'german_lager czech_lager', t58:'belgian', wy3522:'belgian', wy3787:'abbey', wy3711:'saison', wy3724:'belgian saison', wb06:'wheat_german', s23:'german_lager', be256:'abbey', be134:'belgian saison', la_windsor:'english', la_bry97:'english american', la_belle:'saison', la_abbaye:'belgian abbey', k97:'kolsch', mj_m15:'', mj_m20:'wheat_german', mj_m21:'belgian witbier wit', mj_m29:'saison', mj_m31:'belgian abbey', mj_m36:'', mj_m41:'belgian', mj_m42:'', mj_m44:'american', mj_m47:'belgian abbey', mj_m54:'cal_common', mj_m76:'german_lager', mj_m84:'german_lager czech_lager', wlp001:'american', wlp002:'english', wlp004:'english', wlp007:'english', wlp029:'kolsch', wlp300:'wheat_german', wlp500:'abbey', wlp550:'belgian', wlp565:'belgian saison', wlp570:'belgian', wlp585:'belgian saison', wlp670:'belgian saison brett sour_blend', wlp800:'german_lager', wlp830:'german_lager', wlp838:'german_lager', imp_a01:'', imp_a10:'', imp_a38:'', wy1968:'english', wy1388:'belgian', wy2001:'german_lager', wy2112:'cal_common', wlp380:'wheat_german'};
+  window._BM_YEAST_EGITIM = _BM_YEAST_EGITIM;
+  function _bmYeastEgitim(id){ return (id && Object.prototype.hasOwnProperty.call(_BM_YEAST_EGITIM, id)) ? (' ' + _BM_YEAST_EGITIM[id] + ' ') : null; }
   // V12 buildFeatures — Adım 61 P2 (Adım 2.7) self-contained rewrite
   // V85 bağımlılığı YOK. 89 feature, V19 model uyumlu.
   // KATKI bug fix: KATKI_SIG regex KATKILAR.ad string'inde çalışır (id'ler Türkçe abbreviation).
@@ -1665,7 +1672,8 @@ window.bmTipografiPanelRender = function(){
           total_boil_g += g;
         } else {
           total_boil_g += g;
-          var dk = +hp.dk || 60;
+          // EŞİTLİK SPRINT 3 kusur 8b: eğitimde 0 dakikalık hop GEÇ hop sayılır (v8 ham time_min 0 → late_hop_pct; 60 varsayımı yanlış). Yalnız dk girilmemişse 60.
+          var dk = (hp.dk == null || hp.dk === '' || isNaN(+hp.dk)) ? 60 : +hp.dk;
           if (dk <= 20) late_g += g;
         }
       }
@@ -1683,22 +1691,26 @@ window.bmTipografiPanelRender = function(){
     var late_hop_pct_val = (total_boil_g > 0) ? ((late_g + whirlpool_g) / total_boil_g) * 100 : 0;
 
     // Yeast feature flags
-    var yeast_belgian = ((mt === 'belcika' || mt === 'saison' || mt === 'wit') && !isAbbey) ? 1 : 0;
-    var yeast_abbey = isAbbey ? 1 : 0;
-    var yeast_saison = (mt === 'saison') ? 1 : 0;
-    var yeast_kveik = (mt === 'kveik') ? 1 : 0;
-    var yeast_english = (mt === 'ale' && (mid.indexOf('wlp00') >= 0 || mid.indexOf('wy10') >= 0 || mid.indexOf('wy11') >= 0)) ? 1 : 0;
-    var yeast_american = (mt === 'ale' && (mid.indexOf('us05') >= 0 || mid.indexOf('us-05') >= 0 || mid.indexOf('wy10') >= 0 || mid.indexOf('bry97') >= 0)) ? 1 : 0;
-    var yeast_german_lager = (mt === 'lager' && (mid.indexOf('wy20') >= 0 || mid.indexOf('wy21') >= 0 || mid.indexOf('w-34') >= 0 || mid.indexOf('w34') >= 0)) ? 1 : 0;
-    var yeast_czech_lager = (mt === 'lager' && mid.indexOf('wy21') >= 0) ? 1 : 0;
-    var yeast_american_lager = (mt === 'lager' && (mid.indexOf('wy20') >= 0 || mid.indexOf('s-23') >= 0 || mid.indexOf('s23') >= 0)) ? 1 : 0;
-    var yeast_kolsch = (mid.indexOf('wlp029') >= 0 || mid.indexOf('wy2565') >= 0) ? 1 : 0;
-    var yeast_altbier = (mid.indexOf('wy1007') >= 0) ? 1 : 0;
-    var yeast_cal_common = (mid.indexOf('wlp810') >= 0 || mid.indexOf('wy2112') >= 0) ? 1 : 0;
-    var yeast_witbier = (mt === 'wit') ? 1 : 0;
-    var yeast_wheat_german = (mt === 'wheat') ? 1 : 0;
-    var yeast_wit = (mt === 'wit') ? 1 : 0;
-    var yeast_sour_blend = (mt === 'sour') ? 1 : 0;
+    // EŞİTLİK SPRINT 3 kusur 7: tablodaki maya → eğitimin bayrakları; tabloda olmayan maya → eski kural (aşağıdaki ikinci argüman).
+    //   İkinci maya (maya2Id) tablodaysa bayrakları eklenir (eğitimde maya metni tüm mayaları içerir); değilse eskisi gibi yalnız brett / lacto metinden.
+    var _yt1 = _bmYeastEgitim(r.mayaId), _yt2 = _bmYeastEgitim(r.maya2Id);
+    var _yk = function(ad, eski){ var a = _yt1 !== null ? _yt1.indexOf(' ' + ad + ' ') >= 0 : !!eski; var b = _yt2 !== null && _yt2.indexOf(' ' + ad + ' ') >= 0; return (a || b) ? 1 : 0; };
+    var yeast_belgian = _yk('belgian', (mt === 'belcika' || mt === 'saison' || mt === 'wit') && !isAbbey);
+    var yeast_abbey = _yk('abbey', isAbbey);
+    var yeast_saison = _yk('saison', mt === 'saison');
+    var yeast_kveik = _yk('kveik', mt === 'kveik');
+    var yeast_english = _yk('english', mt === 'ale' && (mid.indexOf('wlp00') >= 0 || mid.indexOf('wy10') >= 0 || mid.indexOf('wy11') >= 0));
+    var yeast_american = _yk('american', mt === 'ale' && (mid.indexOf('us05') >= 0 || mid.indexOf('us-05') >= 0 || mid.indexOf('wy10') >= 0 || mid.indexOf('bry97') >= 0));
+    var yeast_german_lager = _yk('german_lager', mt === 'lager' && (mid.indexOf('wy20') >= 0 || mid.indexOf('wy21') >= 0 || mid.indexOf('w-34') >= 0 || mid.indexOf('w34') >= 0));
+    var yeast_czech_lager = _yk('czech_lager', mt === 'lager' && mid.indexOf('wy21') >= 0);
+    var yeast_american_lager = _yk('american_lager', mt === 'lager' && (mid.indexOf('wy20') >= 0 || mid.indexOf('s-23') >= 0 || mid.indexOf('s23') >= 0));
+    var yeast_kolsch = _yk('kolsch', mid.indexOf('wlp029') >= 0 || mid.indexOf('wy2565') >= 0);
+    var yeast_altbier = _yk('altbier', mid.indexOf('wy1007') >= 0);
+    var yeast_cal_common = _yk('cal_common', mid.indexOf('wlp810') >= 0 || mid.indexOf('wy2112') >= 0);
+    var yeast_witbier = _yk('witbier', mt === 'wit');
+    var yeast_wheat_german = _yk('wheat_german', mt === 'wheat');
+    var yeast_wit = _yk('wit', mt === 'wit');
+    var yeast_sour_blend = _yk('sour_blend', mt === 'sour');
     // D-1.9q: yeast_neipa Vermont/Kveik/NEIPA blend strain detection (postProcess only, model'e girmez)
     var NEIPA_YEAST_IDS = ['verdant','imp_a38','bb_belc_neipa33','bb_ing04','kveikv','kveiko','kveik_fg','oyl061','oyl091','oyl090','oyl057','oyl071','bb22a','bb22b','mj_m44'];
     var yeast_neipa = (NEIPA_YEAST_IDS.indexOf(mid) >= 0) ? 1 : 0;
@@ -1711,6 +1723,12 @@ window.bmTipografiPanelRender = function(){
     var hasBrett = /\bbrett(anomyces)?\b|\bwlp\s*0?(644|645|648|650|651|652|653|654|655|656|660|665|670|671|672|4639)\b|\bwy?\s*0?5(112|151|526|512|733|378)\b|bruxellensis|lambicus|drie|trois|clausenii/.test(yeastStr);
     var hasLacto = /\blacto(bacillus)?\b|\bwlp\s*0?(67[127]|693|672|6727|677)\b|\bwy?\s*0?5(335|223|424)\b/.test(yeastStr);
     var hasPedio = /\bpedio(coccus)?\b|\bwlp\s*0?661\b|damnosus/.test(yeastStr);
+    // EŞİTLİK SPRINT 3 kusur 7: yeast_brett / yeast_lacto tablodaki mayada eğitimden; tabloda olmayan mayada eski metin regex'i (yalnız o mayanın metni)
+    var _brettRx = /\bbrett(anomyces)?\b|\bwlp\s*0?(644|645|648|650|651|652|653|654|655|656|660|665|670|671|672|4639)\b|\bwy?\s*0?5(112|151|526|512|733|378)\b|bruxellensis|lambicus|drie|trois|clausenii/;
+    var _lactoRx = /\blacto(bacillus)?\b|\bwlp\s*0?(67[127]|693|672|6727|677)\b|\bwy?\s*0?5(335|223|424)\b/;
+    var _ys2 = (mid2 + ' ' + mAd2).trim();
+    var yeast_brett = (_yk('brett', _brettRx.test((mid + ' ' + mAd).trim())) || (_yt2 === null && _brettRx.test(_ys2))) ? 1 : 0;
+    var yeast_lacto = (_yk('lacto', _lactoRx.test((mid + ' ' + mAd).trim())) || (_yt2 === null && _lactoRx.test(_ys2))) ? 1 : 0;
     var hasCleanUS = /\bus[\s-]?05\b|\bs[\s-]?04\b|\b(safale|safbrew|nottingham|windsor|bry[\s-]?97)\b|\bwlp\s*0?(001|002|005|007|008|029|051|060|095|099)\b|\bwy?\s*0?(1056|1968|1318|1098|1272|1275)\b/.test(yeastStr);
 
     // 15 has_X feature
@@ -1720,7 +1738,7 @@ window.bmTipografiPanelRender = function(){
     var has_chili = _flag(HAS_SIG.chili, katkiAdStr);
     var has_smoke_katki = _flag(HAS_SIG.smoke, katkiAdStr);
     var has_smoke = (has_smoke_katki || pct_smoked > 0) ? 1 : 0;
-    var has_belgian_yeast = (yeast_belgian || yeast_abbey || yeast_saison || mt === 'belcika' || mt === 'saison' || mt === 'wit') ? 1 : 0;
+    var has_belgian_yeast = (isAbbey || mt === 'belcika' || mt === 'saison' || mt === 'wit') ? 1 : 0; // EŞİTLİK SPRINT 3: eski tanımın aynısı (eski yeast_belgian / abbey / saison yalnız mt ve isAbbey'den geliyordu); has_* bu sprintte değişmedi
     var has_clean_us05_isolate = hasCleanUS ? 1 : 0;
     var has_coriander = _flag(HAS_SIG.coriander, katkiAdStr);
     var has_orange_peel = _flag(HAS_SIG.orange_peel, katkiAdStr);
@@ -1730,7 +1748,8 @@ window.bmTipografiPanelRender = function(){
     var has_whirlpool_heavy = (whirlpool_per_l >= 2.5) ? 1 : 0;
 
     return {
-      og: r._og || 1.05, fg: r._fg || 1.012, abv: r._abv || 5, ibu: r._ibu || 25, srm: r._srm || 6,
+      // EŞİTLİK SPRINT 3 kusur 8a: IBU 0 eğitimde 0 (v8: ham ibu 0 → features.ibu 0, aha / byo / recipator / rmwoods); 25 yalnız IBU hesaplanmamışsa
+      og: r._og || 1.05, fg: r._fg || 1.012, abv: r._abv || 5, ibu: (r._ibu != null && isFinite(+r._ibu)) ? +r._ibu : 25, srm: r._srm || 6,
       pct_pilsner: pct_pilsner, pct_pale_ale: pct_pale_ale, pct_munich: pct_munich, pct_vienna: pct_vienna,
       pct_wheat: pct_wheat, pct_oats: pct_oats, pct_rye: pct_rye, pct_crystal: pct_crystal,
       pct_choc: pct_choc, pct_roast: pct_roast, pct_smoked: pct_smoked, pct_corn: pct_corn,
@@ -1740,8 +1759,8 @@ window.bmTipografiPanelRender = function(){
       yeast_english: yeast_english, yeast_american: yeast_american,
       yeast_german_lager: yeast_german_lager, yeast_czech_lager: yeast_czech_lager, yeast_american_lager: yeast_american_lager,
       yeast_kolsch: yeast_kolsch, yeast_altbier: yeast_altbier, yeast_cal_common: yeast_cal_common,
-      yeast_brett: hasBrett ? 1 : 0,
-      yeast_lacto: hasLacto ? 1 : 0,
+      yeast_brett: yeast_brett,
+      yeast_lacto: yeast_lacto,
       yeast_sour_blend: yeast_sour_blend,
       yeast_witbier: yeast_witbier, yeast_wheat_german: yeast_wheat_german, yeast_wit: yeast_wit, yeast_neipa: yeast_neipa, has_neipa_name: has_neipa_name,
       hop_american_c: _flag(HOP_SIG.american_c, hopAdStr),
@@ -41608,12 +41627,12 @@ syncBaslat();
       var e = KATK.find(function(x){ return x && x.id === k.id; });
       if (e && e.ad) parts.push(e.ad);
     });
-    var mayaId = null;
-    if (uiR.maya) mayaId = (typeof uiR.maya === 'object') ? uiR.maya.id : uiR.maya;
-    if (mayaId) {
+    // EŞİTLİK SPRINT 3 kusur 8c: maya uiR.mayaId / maya2Id'de (uiR.maya alanı yok → maya adı hiç eklenmiyordu). Python extract_7_features raw.yeast + raw.yeasts metnini ekler.
+    [uiR.mayaId, uiR.maya2Id].forEach(function(mayaId){
+      if (!mayaId) return;
       var em = MAYA.find(function(x){ return x && x.id === mayaId; });
       if (em && em.ad) parts.push(em.ad);
-    }
+    });
     return parts.join(' ');
   }
 
