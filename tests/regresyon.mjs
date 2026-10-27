@@ -13905,10 +13905,10 @@ const CASELER = [
       return page.evaluate(async ([kayit, etiket]) => {
         const C = window.BM_CEV, LAB = {}; etiket.etiketler.forEach(t => { LAB[t.id] = t; });
         const IMZA = C.dogrulayiciImza();
-        __REG.ok('doğrulayıcı DONDURULDU: imza ' + IMZA + ' (beklenen 7ef54d16-26640 — CEV5B v5; CEV5 v4 21cf0998-24444; CEV4B v3 534be960-18088; CEV4 v2 b4c7ce4a-16326; CEV3 imzası 5ac684b3-13526) · araştırma denetleyicisi ' + C.arastirmaImza() + ' · AI4 ' + window.BM_AI4.denetleyiciImza(), IMZA === '7ef54d16-26640' && C.arastirmaImza() === '92f59a3c-5776' && window.BM_AI4.denetleyiciImza() === '2c9ebd9f-32461');
+        __REG.ok('doğrulayıcı DONDURULDU: imza ' + IMZA + ' (beklenen 33762479-30573 — CEV6 v6; CEV5B v5 7ef54d16-26640; CEV5 v4 21cf0998-24444; CEV4B v3 534be960-18088; CEV4 v2 b4c7ce4a-16326; CEV3 imzası 5ac684b3-13526) · araştırma denetleyicisi ' + C.arastirmaImza() + ' · AI4 ' + window.BM_AI4.denetleyiciImza(), IMZA === '33762479-30573' && C.arastirmaImza() === '92f59a3c-5776' && window.BM_AI4.denetleyiciImza() === '2c9ebd9f-32461');
         const sm = C.dogrulaSema(['m1', 'm2'], ['w1', 'w2']).schema, it = sm.properties.maddeler.items.properties;
         __REG.ok('şema: karar ' + JSON.stringify(it.karar.enum) + ' · sorun ' + JSON.stringify(it.sorun.enum) + ' · id/destekleyen enum · gercek_celiski ' + it.gercek_celiski.type + ' · taraf başına karar · dogrudan_cevap ' + JSON.stringify(sm.properties.dogrudan_cevap.properties.karar.enum),
-          JSON.stringify(it.karar.enum) === '["destekli","kismi","desteksiz"]' && it.sorun.enum.length === 10 && JSON.stringify(it.id.enum) === '["m1","m2"]' && JSON.stringify(it.destekleyen.items.enum) === '["w1","w2"]' && it.gercek_celiski.type === 'boolean' && !!it.taraflar.items.properties.karar && sm.properties.dogrudan_cevap.properties.karar.enum.indexOf('yok') >= 0);
+          JSON.stringify(it.karar.enum) === '["destekli","kismi","desteksiz"]' && it.sorun.enum.length === 12 /* CEV6: + agirlik, anlam */ && JSON.stringify(it.id.enum) === '["m1","m2"]' && JSON.stringify(it.destekleyen.items.enum) === '["w1","w2"]' && it.gercek_celiski.type === 'boolean' && !!it.taraflar.items.properties.karar && sm.properties.dogrudan_cevap.properties.karar.enum.indexOf('yok') >= 0);
         const kotu = t => !!t && (t.etiket === 'c' || t.etiket === 'sinirda');
         const AR = kayit.sorular.filter(q => q.yol === 'arastirma' && (q.maddeler || []).length);
         const aday = q => q.maddeler.map(m => Object.assign({}, m, { durum: 'ok', denetimMetni: m.metin, tarafM: m.celiski ? m.taraflar.map(t => ({ metin: t.metin, kaynaklar: t.kaynaklar.slice(), degisken: m.degisken })) : undefined, ayrica: m.celiski ? [] : undefined }));
@@ -14002,7 +14002,7 @@ const CASELER = [
       return page.evaluate(async ([metinler]) => {
         const C = window.BM_CEV, K = C.OZET_KURAL4.join('\n'), g = C.OZET_GOREV('"köpük" — soru: "x"'), o = C.ONARIM_GOREV('"köpük" — soru: "x"');
         const imza = C.fnv(K) + '-' + K.length;
-        __REG.ok('kurallar özet görevinde ' + (g.indexOf(K) >= 0) + ' · onarım görevinde ' + (o.indexOf(K) >= 0) + ' · test kilidi ' + imza + ' (beklenen c622f6aa-1773 — CEV5 (9) teşhis kuralı; CEV4 576cb860-1468) · ' + C.OZET_KURAL4.length + ' satır', g.indexOf(K) >= 0 && o.indexOf(K) >= 0 && imza === 'c622f6aa-1773');
+        __REG.ok('kurallar özet görevinde ' + (g.indexOf(K) >= 0) + ' · onarım görevinde ' + (o.indexOf(K) >= 0) + ' · test kilidi ' + imza + ' (beklenen 54be170a-2728 — CEV6 (10)–(13); CEV5 c622f6aa-1773; CEV4 576cb860-1468) · ' + C.OZET_KURAL4.length + ' satır', g.indexOf(K) >= 0 && o.indexOf(K) >= 0 && imza === '54be170a-2728');
         const ic = [[/may \/ can \/ could \/ might → "-abilir"/, 'çekince may/can'], [/usually \/ typically \/ often \/ generally \/ in general → "genellikle" ya da "çoğunlukla"/, 'usually/generally'], [/"genel kabule göre"/, 'genel kabul'], [/"bir yazara göre"/, 'tek kişi'],
           [/stil, maya suşu, ürün, lager ya da ale, endüstriyel ya da ev ölçeği veya belirli bir deney koşulu/, 'kapsam'], [/Kapsamı farklı değerler aynı maddeye konmaz/, 'kapsam ayrı'], [/iki alıntının parçaları tek iddiada birleştirilmez/, 'birleştirme'],
           [/DEĞİŞKEN = biracının değiştirdiği şey \(malzeme, sıcaklık, süre, miktar, işlem\)/, 'değişken'], [/sonuç ya da ölçü .* değişken değildir/, 'sonuç değişken değil'], [/"düşük …" düzeyinden söz ediyorsa yon azaltmak/, 'yon düzey'], [/alıntı yön veriyorsa .* yon = bilgi YAZMA/, 'yön boş bırakılmaz']];
@@ -14025,7 +14025,7 @@ const CASELER = [
     calistir: async (page) => {
       const k3 = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'fixtures', 'cev_kosu3_2026-10-26_ana.json'), 'utf8'));
       return page.evaluate(async ([k3]) => {
-        const C = window.BM_CEV, AR = k3.sorular.filter(q => q.yol === 'arastirma' && q.ozetHam); const __e5 = Object.assign({}, C.CEV5), __tt = C.CEV3B.tekTaraf; Object.keys(C.CEV5).forEach(k => { C.CEV5[k] = false; }); C.CEV3B.tekTaraf = false; // CEV5 öncesi davranış kilitli (CEV5 kuralları kapalı; yenisi CEV5-* testlerinde)
+        const C = window.BM_CEV, AR = k3.sorular.filter(q => q.yol === 'arastirma' && q.ozetHam); const __e5 = Object.assign({}, C.CEV5), __tt = C.CEV3B.tekTaraf, __e6 = Object.assign({}, C.CEV6), __b6 = [C.CEV3B.adayDisi, C.CEV3B.sorun6]; Object.keys(C.CEV5).forEach(k => { C.CEV5[k] = false; }); C.CEV3B.tekTaraf = false; Object.keys(C.CEV6).forEach(k => { C.CEV6[k] = false; }); C.CEV3B.adayDisi = false; C.CEV3B.sorun6 = false; /* CEV6 öncesi davranış da kilitli */ // CEV5 öncesi davranış kilitli (CEV5 kuralları kapalı; yenisi CEV5-* testlerinde)
         const kur = q => { const S0 = C.maddeIsle(q.ozetHam, q.web), Ad = S0.gos.concat(S0.dusen.filter(x => x.kurtar)); const U = q.dogrulamaHam ? C.dogrulaUygula(Ad, S0.dogrudan, q.dogrulamaHam, q.web) : null; return { S0, Ad, s: C.sonucKur(S0, U) }; };
         const imzaQ = q => JSON.stringify((q.maddeler || []).map(m => m.metin)) + '|' + JSON.stringify((q.fazla || []).map(m => m.metin));
         const imzaS = s => JSON.stringify(s.gos.map(m => m.metin)) + '|' + JSON.stringify(s.fazla.map(m => m.metin));
@@ -14054,7 +14054,7 @@ const CASELER = [
           S1.gos.length === 1 && a1.celiski && a1.tersAday && u1.gos.length === 0 && /taraflar normal madde olarak GÖSTERİLMEDİ/.test(u1.rapor[0].neden[0]) && u2.gos.length === 1 && u2.gos[0].celiski && u3.gos.length === 0 && s0.gos.length === 0 && s0.celiskiRapor.some(r => /doğrulayıcı yok/.test(r.neden.join(' '))) && S2.gos.length === 1 && !S2.gos[0].tersAday);
         C.CEV4.ayricaYon = false; let zb; try { zb = ayr({ r: kur(q12) }); } finally { C.CEV4.ayricaYon = true; }
         __REG.ok('KASITLI BOZMA: kural kapalı → C12 "Ayrıca" + yoğunluk ' + zb + ' (kırmızı olmalı: 1)', zb === 1);
-        Object.assign(C.CEV5, __e5); C.CEV3B.tekTaraf = __tt; return __REG.al();
+        Object.assign(C.CEV5, __e5); C.CEV3B.tekTaraf = __tt; Object.assign(C.CEV6, __e6); C.CEV3B.adayDisi = __b6[0]; C.CEV3B.sorun6 = __b6[1]; return __REG.al();
       }, [k3]);
     }
   },
@@ -14062,7 +14062,7 @@ const CASELER = [
     kod: 'CEV4-DOGRULAYICI', ad: 'DOĞRULAYICI v2 (CEV4 madde 4, YENİDEN DONDURMA; mock — uygulama mantığı): imza değişti (önceki 5ac684b3-13526), araştırma denetleyicisi 92f59a3c-5776 ve AI4 2c9ebd9f-32461 AYNI · görevde destekleyen = maddenin TAMAMINI tek başına söyleyen, parca = yalnız bir parçası; yön kuralı (değişken + fiil + etki alıntıyla ters / kendi içinde çelişik, ya da alıntı yön verirken madde yönsüz → kismi / yon) · şemada parca (madde, taraf, doğrudan cevap) · paket güç / kurum sayısı TAŞIMAZ (E1) · sentetik paketler: parça destek → destekli ama güç = tam destekleyen kurum (0 → "olası — parçalı destek"), ters şablon ve yönsüz madde → düşer (onarılmaz), zıt "Ayrıca" → rapor (CEV4-AYRICA) · eski kayıt (parca yok) v1 ile aynı · KASITLI BOZMALAR',
     calistir: (page) => page.evaluate(() => {
       const C = window.BM_CEV, IMZA = C.dogrulayiciImza();
-      __REG.ok('doğrulayıcı v2 DONDURULDU: imza ' + IMZA + ' (beklenen 7ef54d16-26640 — CEV5B v5; CEV5 v4 21cf0998-24444; CEV4B v3 534be960-18088; v2 b4c7ce4a-16326; önceki 5ac684b3-13526) · araştırma ' + C.arastirmaImza() + ' · AI4 ' + window.BM_AI4.denetleyiciImza(), IMZA === '7ef54d16-26640' && IMZA !== '21cf0998-24444' && IMZA !== '534be960-18088' && IMZA !== 'b4c7ce4a-16326' && IMZA !== '5ac684b3-13526' && C.arastirmaImza() === '92f59a3c-5776' && window.BM_AI4.denetleyiciImza() === '2c9ebd9f-32461');
+      __REG.ok('doğrulayıcı v2 DONDURULDU: imza ' + IMZA + ' (beklenen 33762479-30573 — CEV6 v6; CEV5B v5 7ef54d16-26640; CEV5 v4 21cf0998-24444; CEV4B v3 534be960-18088; v2 b4c7ce4a-16326; önceki 5ac684b3-13526) · araştırma ' + C.arastirmaImza() + ' · AI4 ' + window.BM_AI4.denetleyiciImza(), IMZA === '33762479-30573' && IMZA !== '21cf0998-24444' && IMZA !== '534be960-18088' && IMZA !== 'b4c7ce4a-16326' && IMZA !== '5ac684b3-13526' && C.arastirmaImza() === '92f59a3c-5776' && window.BM_AI4.denetleyiciImza() === '2c9ebd9f-32461');
       const G = C.DOGRULA_GOREV('KONU'), sm = C.dogrulaSema(['m1'], ['w1', 'w2']).schema, it = sm.properties.maddeler.items;
       const g1 = /TAMAMINI .* TEK BAŞINA/.test(G), g2 = /parca: maddenin yalnız BİR PARÇASINI/.test(G), g3 = /10\. YÖN: .*kendi içinde çelişik.*madde yön söylemiyorsa karar kismi, sorun yon/.test(G);
       const s1 = it.required.indexOf('parca') >= 0, s2 = it.properties.taraflar.items.required.indexOf('parca') >= 0, s3 = sm.properties.dogrudan_cevap.required.indexOf('parca') >= 0;
@@ -14158,9 +14158,9 @@ const CASELER = [
     calistir: async (page) => {
       const k3 = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'fixtures', 'cev_kosu3_2026-10-26_ana.json'), 'utf8'));
       return page.evaluate(async ([k3]) => {
-        const C = window.BM_CEV, IMZA = C.dogrulayiciImza(); const __e5 = Object.assign({}, C.CEV5), __tt = C.CEV3B.tekTaraf; Object.keys(C.CEV5).forEach(k => { C.CEV5[k] = false; }); C.CEV3B.tekTaraf = false; // CEV5 öncesi davranış kilitli (CEV5 kuralları kapalı; yenisi CEV5-* testlerinde)
+        const C = window.BM_CEV, IMZA = C.dogrulayiciImza(); const __e5 = Object.assign({}, C.CEV5), __tt = C.CEV3B.tekTaraf, __e6 = Object.assign({}, C.CEV6), __b6 = [C.CEV3B.adayDisi, C.CEV3B.sorun6]; Object.keys(C.CEV5).forEach(k => { C.CEV5[k] = false; }); C.CEV3B.tekTaraf = false; Object.keys(C.CEV6).forEach(k => { C.CEV6[k] = false; }); C.CEV3B.adayDisi = false; C.CEV3B.sorun6 = false; /* CEV6 öncesi davranış da kilitli */ // CEV5 öncesi davranış kilitli (CEV5 kuralları kapalı; yenisi CEV5-* testlerinde)
         __REG.ok('doğrulayıcı YENİDEN DONDURULDU: imza ' + IMZA + ' (önceki b4c7ce4a-16326) · araştırma ' + C.arastirmaImza() + ' · AI4 ' + window.BM_AI4.denetleyiciImza() + ' · madde 2 kodu donmuş blokta ' + /CEV4B \(2\)/.test(C.dogrulayiciMetni() || ''),
-          IMZA === '7ef54d16-26640' && C.arastirmaImza() === '92f59a3c-5776' && window.BM_AI4.denetleyiciImza() === '2c9ebd9f-32461' && /B\.tarafKalan && a\.tersAday/.test(C.dogrulayiciMetni()));
+          IMZA === '33762479-30573' && C.arastirmaImza() === '92f59a3c-5776' && window.BM_AI4.denetleyiciImza() === '2c9ebd9f-32461' && /B\.tarafKalan && a\.tersAday/.test(C.dogrulayiciMetni()));
         const bos = { dogrudan_cevap: { metin: '', kaynaklar: [] }, celiskiler: [] };
         const m = (deg, y, e, ey, k, dg) => ({ degisken: deg, yon: y, deger: dg || '', etki: e, etki_yonu: ey, kaynaklar: [k] });
         // (1a) farklı fiil + zıt net yön; ikinci alıntı yön sözcüksüz → uygulama doğrulayamaz → aday
@@ -14204,7 +14204,7 @@ const CASELER = [
         C.CEV3B.tarafKalan = false; let zb2; try { zb2 = C.dogrulaUygula([a1], null, v(true, 'destekli', 'desteksiz'), W1); } finally { C.CEV3B.tarafKalan = true; }
         __REG.ok('KASITLI BOZMA: madde 1 kapalı → "Ayrıca" ile tek madde ' + zb.gos.filter(x => !x.celiski && /Ayrıca/.test(x.metin)).length + ' (kırmızı olmalı: 1) · madde 2 kapalı → desteklenen taraf gösterilen ' + zb2.gos.length + ' (kırmızı olmalı: 0)',
           zb.gos.filter(x => !x.celiski && /Ayrıca/.test(x.metin)).length === 1 && zb2.gos.length === 0);
-        Object.assign(C.CEV5, __e5); C.CEV3B.tekTaraf = __tt; return __REG.al();
+        Object.assign(C.CEV5, __e5); C.CEV3B.tekTaraf = __tt; Object.assign(C.CEV6, __e6); C.CEV3B.adayDisi = __b6[0]; C.CEV3B.sorun6 = __b6[1]; return __REG.al();
       }, [k3]);
     }
   },
@@ -14376,13 +14376,102 @@ const CASELER = [
     }
   },
   {
+    kod: 'CEV6-DEGER', ad: 'FARKLI DEĞER "AYRICA" OLMAZ + DEĞER ATFI TAM EŞLEŞME + DOĞRULAYICI agirlik / anlam / genişlemiş kosul_atildi + İÇ TERİM (CEV6 madde 1–5; donmuş blok YENİDEN DONDURULDU, AI yok): aynı değişkende ayrık ya da karşılaştırılamaz (ölçü türü farklı) iki değer → değer tipi çelişki ADAYI, çakışan / biri boş → "Ayrıca" · aday OLMAYAN birleşik maddede doğrulayıcı gercek_celiski / celiski_turu bildirirse parçalar taraf olur (⚖️ ya da CEV5B tek madde), taraf yoksa gösterilmez + rapor · "(değer: kurum)" her ";" parçası ayrı, sayı kümesi + birim + niteleyici tam (sayı sözcüğü, °F ↔ °C) · agirlik → kismi (onarılır), anlam → desteksiz (onarılmaz), doğrudan cevap şemasında sorun · özetleyici kuralları (10)–(13) · "iskelet" → "yapı" · E1 / E2 · koşu #5 ana kesiti önce → sonra · KASITLI BOZMALAR',
+    calistir: async (page) => {
+      const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'cev_seti.json'), 'utf8')), k5 = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'fixtures', 'cev_kosu5_2026-10-27_ana.json'), 'utf8'));
+      const metinler = []; const topla = o => { if (typeof o === 'string') { if (o.length > 20) metinler.push(o); } else if (Array.isArray(o)) o.forEach(topla); else if (o && typeof o === 'object') Object.values(o).forEach(topla); };
+      topla(set.sorular); ['cev_kosu3_2026-10-26_ana.json', 'cev_kosu4_2026-10-27_ana.json', 'cev_kosu5_2026-10-27_ana.json'].forEach(f => JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'fixtures', f), 'utf8')).sorular.forEach(q => { (q.web || []).forEach(w => metinler.push(w.alinti || '')); if (q.ozetHam) topla(q.ozetHam); }));
+      return page.evaluate(async ([metinler, k5]) => {
+        const C = window.BM_CEV, B = C.CEV3B, sm = C.dogrulaSema(['m1'], ['w1', 'w2']).schema, it = sm.properties.maddeler.items, G = C.DOGRULA_GOREV('KONU'), dcS = sm.properties.dogrudan_cevap;
+        __REG.ok('doğrulayıcı YENİDEN DONDURULDU: imza ' + C.dogrulayiciImza() + ' (önceki 7ef54d16-26640) · araştırma ' + C.arastirmaImza() + ' · AI4 ' + window.BM_AI4.denetleyiciImza() + ' · sorun enum agirlik + anlam · doğrudan cevapta sorun zorunlu · görev kural 3 (ya da / koşul), 5 (numaralı parça), 14, 15',
+          C.dogrulayiciImza() === '33762479-30573' && C.arastirmaImza() === '92f59a3c-5776' && window.BM_AI4.denetleyiciImza() === '2c9ebd9f-32461' && it.properties.sorun.enum.includes('agirlik') && it.properties.sorun.enum.includes('anlam') && dcS.required.includes('sorun') &&
+          /yalnız birini tek ya da baskın neden gibi sunuyor, ya da alıntıdaki koşul \(eğer \/ when \/ if \/ provided\) düşmüş \(kosul_atildi\)/.test(G) && /BİRLEŞTİRİLMİŞ maddenin numaralı parçaları/.test(G) && /14\. agirlik: .*karar kismi, sorun agirlik/.test(G) && /15\. anlam: .*karar desteksiz, sorun anlam/.test(G));
+        const bos = { dogrudan_cevap: { metin: '', kaynaklar: [] }, celiskiler: [] }, md = (deg, y, dg, e, ey, k) => ({ degisken: deg, yon: y, deger: dg, etki: e, etki_yonu: ey, kaynaklar: k });
+        const W = [{ id: 'w1', url: 'https://www.lallemandbrewing.com/a', alinti: 'Boil for 60 to 90 minutes to drive off DMS.' }, { id: 'w2', url: 'https://beerandbrewing.com/b', alinti: 'With mostly pilsner malt, boil for at least 90 minutes.' },
+          { id: 'w3', url: 'https://www.whitelabs.com/c', alinti: 'The rest usually lasts a two day period.' }, { id: 'w4', url: 'https://brewingscience.com/d', alinti: 'Hold the rest for 1 to 2 days before cooling.' },
+          { id: 'w5', url: 'https://byo.com/e', alinti: 'Raise the beer to 65-68°F near the end.' }, { id: 'w6', url: 'https://www.wyeastlab.com/f', alinti: 'Start when about 60% attenuation is reached.' },
+          { id: 'w7', url: 'https://www.whitelabs.com/g', alinti: 'Start with 3 to 4 gravity points left.' }, { id: 'w8', url: 'https://brewingscience.com/h', alinti: 'Rest for 5 to 7 days in some breweries.' }];
+        // (1) değer farkı → aday
+        const S = arr => C.maddeIsle({ maddeler: arr, ...bos }, W);
+        const sA = S([md('dinlenme süresi', 'bilgi', '1-2 gün', 'diasetil azalır', 'azaltir', ['w4', 'w8']), md('dinlenme süresi', 'bilgi', '5-7 gün', 'diasetil azalır', 'azaltir', ['w4', 'w8'])]);
+        const sK = S([md('başlama zamanı', 'bilgi', '3-4 puan kala', 'dinlenme başlar', null, ['w7']), md('başlama zamanı', 'bilgi', '%60 attenüasyon', 'dinlenme başlar', null, ['w6'])]);
+        const sC = S([md('kaynatma süresi', 'artirmak', '60–90 dakika', 'DMS azalır', 'azaltir', ['w1']), md('kaynatma süresi', 'artirmak', 'en az 90 dakika', 'pilsner maltında DMS azalır', 'azaltir', ['w2'])]);
+        const sB = S([md('kaynatma süresi', 'artirmak', '60–90 dakika', 'DMS azalır', 'azaltir', ['w1']), md('kaynatma süresi', 'artirmak', '', 'DMS uçar', 'azaltir', ['w2'])]);
+        const c1 = x => x.gos.length === 1 && x.gos[0].celiski && x.gos[0].celiskiTip === 'deger', ay = x => x.gos.length === 1 && !x.gos[0].celiski && /Ayrıca|değerler/.test(x.gos[0].metin);
+        __REG.ok('ayrık (1-2 gün ↔ 5-7 gün, iki madde aynı alıntılara dayanıyor — uygulama çelişkiyi doğrulayamaz) → değer adayı ' + c1(sA) + ' (' + (sA.gos[0] && sA.gos[0].degerFark) + ') · karşılaştırılamaz (puan ↔ %) → aday ' + c1(sK) + ' (' + (sK.gos[0] && sK.gos[0].degerFark) + ') · çakışan (60–90 ↔ en az 90) → "Ayrıca" ' + ay(sC) + ' · biri boş → "Ayrıca" ' + ay(sB),
+          c1(sA) && sA.gos[0].degerFark === 'ayrik' && c1(sK) && sK.gos[0].degerFark === 'karsilastirilamaz' && ay(sC) && ay(sB));
+        const v1 = (ek, dc) => ({ maddeler: [Object.assign({ id: 'm1', karar: 'destekli', destekleyen: [], parca: [], cekirdek: [], sorun: 'yok', not: '', gercek_celiski: false, celiski_turu: 'yok', taraflar: [] }, ek)], dogrudan_cevap: dc || { karar: 'yok', destekleyen: [], parca: [], sorun: 'yok' } });
+        const tr2 = (a, b) => [{ taraf: '1', karar: 'destekli', destekleyen: [a], parca: [], cekirdek: [a] }, { taraf: '2', karar: 'destekli', destekleyen: [b], parca: [], cekirdek: [b] }];
+        const uA = C.dogrulaUygula(sA.gos, null, v1({ celiski_turu: 'deger_farki', taraflar: tr2('w4', 'w8') }), W);
+        __REG.ok('değer adayı + doğrulayıcı deger_farki (iki taraf destekli) → "' + (uA.gos[0] ? uA.gos[0].metin : '✕') + '" ' + (uA.gos[0] && uA.gos[0].guc.ad), uA.gos.length === 1 && /kaynaklar farklı değer veriyor — /.test(uA.gos[0].metin) && !/Ayrıca/.test(uA.gos[0].metin) && uA.gos[0].guc.k === 'olasi');
+        C.CEV6.degerAday = false; let bA; try { bA = S([md('dinlenme süresi', 'bilgi', '1-2 gün', 'diasetil azalır', 'azaltir', ['w4', 'w8']), md('dinlenme süresi', 'bilgi', '5-7 gün', 'diasetil azalır', 'azaltir', ['w4', 'w8'])]); } finally { C.CEV6.degerAday = true; }
+        __REG.ok('KASITLI BOZMA: değer adayı kapalı → ayrık değerler "Ayrıca" ile tek maddede (kırmızı olmalı)', ay(bA) && !c1(bA));
+        // (1) aday OLMAYAN birleşik madde + doğrulayıcı türü
+        const W2 = [{ id: 'x1', url: 'https://beerandbrewing.com/x', alinti: 'Weissbier often reaches about 4 volumes.' }, { id: 'x2', url: 'https://www.whitelabs.com/y', alinti: 'One brewery targets 3.5 volumes.' }];
+        const sM = C.maddeIsle({ maddeler: [md('hedef CO2', 'bilgi', 'yaklaşık 4 hacim', 'weissbier yüksek karbonasyon', null, ['x1']), md('hedef CO2', 'bilgi', '3.5 hacim', 'bir bira fabrikasının hedefi', null, ['x2'])], ...bos }, W2), aM = sM.gos[0], pk = C.dogrulaPaket(sM.gos, null, W2);
+        const vM = ek => v1(Object.assign({ destekleyen: ['x1', 'x2'], cekirdek: ['x1', 'x2'] }, ek)), uG = C.dogrulaUygula(sM.gos, null, vM({ gercek_celiski: true, celiski_turu: 'gercek', taraflar: tr2('x1', 'x2') }), W2),
+          uB = C.dogrulaUygula(sM.gos, null, vM({ celiski_turu: 'baglam', taraflar: tr2('x1', 'x2') }), W2), uT = C.dogrulaUygula(sM.gos, null, vM({ celiski_turu: 'baglam', taraflar: [] }), W2), uY = C.dogrulaUygula(sM.gos, null, vM({}), W2);
+        __REG.ok('aday değil (çakışan değer → birleşik, parça ' + (aM.parcaM ? aM.parcaM.length : 0) + ', pakette "parça 1/2" ' + (/parça 1: .*\n.*parça 2: /.test(pk)) + ') · doğrulayıcı gerçek çelişki → "' + (uG.gos[0] ? uG.gos[0].metin.slice(0, 60) : '✕') + '…" · baglam → "' + (uB.gos[0] ? uB.gos[0].metin.slice(0, 110) : '✕') + '…" · tür var taraf yok → gösterilen ' + uT.gos.length + ', rapor ' + uT.rapor.length + ' · tür yok → normal ' + (uY.gos[0] && !uY.gos[0].celiski),
+          !aM.celiski && aM.parcaM && aM.parcaM.length === 2 && /parça 1: .*\n.*parça 2: /.test(pk) && uG.gos.length === 1 && uG.gos[0].celiski && /^⚖️/.test(uG.gos[0].metin) && uB.gos.length === 1 && /farklı koşulda: /.test(uB.gos[0].metin) && !/Ayrıca/.test(uB.gos[0].metin) &&
+          uT.gos.length === 0 && uT.rapor.some(r => /taraf bilgisi yok/.test(r.neden.join(' '))) && uY.gos.length === 1 && !uY.gos[0].celiski && /Ayrıca|değerler/.test(uY.gos[0].metin));
+        B.adayDisi = false; let uGb; try { uGb = C.dogrulaUygula(sM.gos, null, vM({ gercek_celiski: true, celiski_turu: 'gercek', taraflar: tr2('x1', 'x2') }), W2); } finally { B.adayDisi = true; }
+        __REG.ok('KASITLI BOZMA: aday dışı kural kapalı → gerçek çelişki işaretsiz normal madde (kırmızı olmalı)', uGb.gos.length === 1 && !uGb.gos[0].celiski);
+        // (2) değer atfı
+        const at = (deger, ids, d, ce) => { const a = C.maddeIsle({ maddeler: [md('kaynatma süresi', 'artirmak', deger, 'DMS azalır', 'azaltir', ids)], ...bos }, W).gos[0]; return C.dogrulaUygula([a], null, v1({ destekleyen: d, parca: ids.filter(x => d.indexOf(x) < 0), cekirdek: ce }), W).gos[0].metin; };
+        const t1 = at('en az 90 dakika', ['w1', 'w2'], [], ['w1']), t2 = at('1-2 gün; iki gün', ['w3', 'w4'], ['w3', 'w4'], ['w3', 'w4']), t3 = at('en çok 90 dakika', ['w1', 'w2'], ['w2'], ['w1']), t4 = (() => { const by = {}; W.forEach(w => { by[w.id] = w; }); return '(' + C.degerAtif('18–20 °C', ['w5', 'w1'], by, ['w1']).metin + ')'; })() /* araştırma denetleyicisi alıntıda olmayan °C sayısını zaten düşürür → yardımcı doğrudan */, t5 = at('60–90 dakika', ['w1', 'w2'], ['w1'], ['w2']);
+        __REG.ok('atıf: "' + t1 + '" · "' + t2 + '" · niteleyici uyumsuz "' + t3 + '" · °F ↔ °C "' + t4 + '" · aralık "' + t5 + '"',
+          /\(en az 90 dakika: beerandbrewing\.com\)/.test(t1) && !/lallemand/.test(t1) && /\(1-2 gün: brewingscience\.com; iki gün: whitelabs\.com\)/.test(t2) && /\(en çok 90 dakika\)/.test(t3) && /\(18–20 °C: byo\.com\)/.test(t4) && /\(60–90 dakika: lallemandbrewing\.com\)/.test(t5));
+        C.CEV6.atifTam = false; let tb; try { tb = at('en az 90 dakika', ['w1', 'w2'], [], ['w1']); } finally { C.CEV6.atifTam = true; }
+        __REG.ok('KASITLI BOZMA: tam eşleşme kapalı → "' + tb + '" ("60 to 90" diyen kurum "en az 90"a bağlanır; kırmızı olmalı)', /lallemand/.test(tb));
+        // (3) yeni sorun türleri + onarım uygunluğu
+        const sX = S([md('mayalanma sıcaklığı', 'artirmak', '', 'ester artar', 'artirir', ['w5'])]), aX = sX.gos[0], dc0 = { metin: 'Sıcaklık çoğunlukla belirleyicidir.', kaynaklar: ['w5'], durum: 'ok' };
+        const u = (sor, kar, dcr) => C.dogrulaUygula([aX], dc0, v1({ karar: kar, destekleyen: ['w5'], cekirdek: ['w5'], sorun: sor }, dcr), W);
+        const uAg = u('agirlik', 'destekli'), uAn = u('anlam', 'kismi'), uKo = u('kosul_atildi', 'kismi'), uDa = u('yok', 'destekli', { karar: 'destekli', destekleyen: ['w5'], parca: [], sorun: 'agirlik' }), uDn = u('yok', 'destekli', { karar: 'kismi', destekleyen: ['w5'], parca: [], sorun: 'anlam' }), uDe = u('yok', 'destekli', { karar: 'destekli', destekleyen: ['w5'], parca: [] });
+        __REG.ok('agirlik (destekli yazılsa da) → kismi, onarım adayı ' + C.onarimAday(uAg).length + ' · anlam → ' + (uAn.dusen[0] && uAn.dusen[0].karar) + ', onarım adayı ' + C.onarimAday(uAn).length + ' · kosul_atildi → onarım ' + C.onarimAday(uKo).length + ' · doğrudan cevap agirlik → ' + (uDa.dogrudanDusen && uDa.dogrudanDusen.karar) + ' (onarım ' + !!C.dcOnarimAday(uDa) + '), anlam → ' + (uDn.dogrudanDusen && uDn.dogrudanDusen.karar) + ' (onarım ' + !!C.dcOnarimAday(uDn) + ') · eski kayıt (sorun yok) → gösterilen ' + !!uDe.dogrudan,
+          uAg.gos.length === 0 && uAg.dusen[0].karar === 'kismi' && C.onarimAday(uAg).length === 1 && uAn.dusen[0].karar === 'desteksiz' && C.onarimAday(uAn).length === 0 && C.onarimAday(uKo).length === 1 &&
+          uDa.dogrudanDusen && uDa.dogrudanDusen.karar === 'kismi' && !!C.dcOnarimAday(uDa) && uDn.dogrudanDusen && uDn.dogrudanDusen.karar === 'desteksiz' && !C.dcOnarimAday(uDn) && !!uDe.dogrudan);
+        B.sorun6 = false; let uAb; try { uAb = u('agirlik', 'destekli'); } finally { B.sorun6 = true; }
+        __REG.ok('KASITLI BOZMA: sorun6 kapalı → agirlik "destekli" madde gösterilir (kırmızı olmalı)', uAb.gos.length === 1);
+        // (4) özetleyici kuralları + (5) iç terim
+        const K = C.OZET_KURAL4.join('\n'), sI = S([md('az modifiye malt', 'eklemek', '', 'köpük için iskelet oluşturan bileşikler sağlar', 'artirir', ['w1'])]);
+        __REG.ok('özetleyici (10) ya da / koşul · (11) sıklık / ağırlık · (12) farklı etkenler önce · (13) iç terim yok · test kilidi ' + C.fnv(K) + '-' + K.length + ' · iskelet → "' + sI.gos[0].metin + '" jargon ' + C.jargonVar(sI.gos[0].metin),
+          /\(10\) YA DA \/ KOŞUL:/.test(K) && /\(11\) SIKLIK VE AĞIRLIK:/.test(K) && /\(12\) FARKLI ETKENLER ÖNCE:/.test(K) && /\(13\) İÇ TERİM YOK:/.test(K) && C.fnv(K) + '-' + K.length === '54be170a-2728' && /yapı oluşturan/.test(sI.gos[0].metin) && !C.jargonVar(sI.gos[0].metin));
+        C.CEV6.sadeTerim = false; let sIb; try { sIb = S([md('az modifiye malt', 'eklemek', '', 'köpük için iskelet oluşturan bileşikler sağlar', 'artirir', ['w1'])]); } finally { C.CEV6.sadeTerim = true; }
+        __REG.ok('KASITLI BOZMA: sade terim kapalı → jargon taraması yakalar (kırmızı olmalı)', C.jargonVar(sIb.gos[0].metin));
+        // E1 / E2
+        const pkA = C.dogrulaPaket(sA.gos.concat(sM.gos), null, W.concat(W2));
+        __REG.ok('E1: paket güç / kurum sayısı taşımaz', !/güçlü|olası|kurum sayısı|\bn ?\d\b/i.test(pkA));
+        const sozc = t => String(t).toLocaleLowerCase('tr').replace(/[^a-zçğıöşü0-9 ]+/gi, ' ').split(/\s+/).filter(Boolean), dz = new Set();
+        metinler.forEach(t => { const w = sozc(t); for (let i = 0; i + 6 <= w.length; i++) dz.add(w.slice(i, i + 6).join(' ')); });
+        const gw = sozc(G + '\n' + K + '\n' + C.ONARIM_GOREV('KONU')), es = []; for (let i = 0; i + 6 <= gw.length; i++) if (dz.has(gw.slice(i, i + 6).join(' '))) es.push(gw.slice(i, i + 6).join(' '));
+        __REG.ok('E2: doğrulayıcı / özet / onarım görev metinlerinde set + koşu #3 / #4 / #5 alıntı ve özetleriyle ortak 6 sözcüklük dizi ' + es.length + (es.length ? ' (' + es.slice(0, 3).join(' | ') + ')' : ''), !es.length);
+        // koşu #5 ana kesiti (kayıtlı ham yanıtlar, AI'sız)
+        const kur = q => { const W5 = q.web, S0 = C.maddeIsle(q.ozetHam, W5), Ad = S0.gos.concat(S0.dusen.filter(x => x.kurtar)), U = C.dogrulaUygula(Ad, S0.dogrudan, q.dogrulamaHam, W5);
+          const L = C.onarimAday(U), dcA = C.dcOnarimAday(U);
+          if ((L.length || dcA) && q.onarimHam) { const OI = C.onarimIsle(L, q.onarimHam, W5), A2 = OI.yeni.filter(y => y.durum === 'ok'); let dcY = dcA ? C.onarimDcIsle(dcA, q.onarimHam, W5) : null; if (dcY && dcY.durum !== 'ok') dcY = null;
+            OI.yeni.filter(y => y.durum !== 'ok').forEach(y => U.dusen.push(y));
+            if ((A2.length || dcY) && q.dogrulamaHam2) { const U2 = C.dogrulaUygula(A2, dcY, q.dogrulamaHam2, W5); if (dcY && U2.dogrudan) { U.dogrudan = Object.assign({}, U2.dogrudan, { onarildi: true }); U.dogrudanDusen = null; }
+              const OK2 = C.onarimKart(U.gos, U2.gos, W5); U.gos = OK2.gos; U.rapor = U.rapor.concat(OK2.rapor).concat(U2.rapor); U.dusen = U.dusen.concat(U2.dusen); } }
+          return { Ad, s: C.sonucKur(S0, U) }; };
+        const AR = k5.sorular.filter(q => q.yol === 'arastirma' && q.ozetHam && q.dogrulamaHam), imzaQ = q => JSON.stringify((q.maddeler || []).map(m => m.metin)), imzaS = s => JSON.stringify(s.gos.map(m => m.metin));
+        const e6 = Object.assign({}, C.CEV6), b6 = [B.adayDisi, B.sorun6]; Object.keys(C.CEV6).forEach(k => { C.CEV6[k] = false; }); B.adayDisi = false; B.sorun6 = false; let once;
+        try { once = AR.map(q => ({ id: q.id, ayni: imzaQ(q) === imzaS(kur(q).s) })); } finally { Object.assign(C.CEV6, e6); B.adayDisi = b6[0]; B.sorun6 = b6[1]; }
+        const sonra = AR.map(q => ({ id: q.id, r: kur(q), q })), deg = sonra.filter(x => imzaQ(x.q) !== imzaS(x.r.s)).map(x => x.id), gm = id => sonra.find(x => x.id === id).r.s.gos.map(m => m.metin).join(' || ');
+        const ad = id => sonra.find(x => x.id === id).r.Ad.filter(a => a.celiski && a.celiskiTip === 'deger' && a.degerFark).length;
+        __REG.ok('koşu #5 ana kesiti (' + AR.length + ' araştırma sorusu): CEV6 kapalı → kayıtla aynı ' + once.filter(x => x.ayni).length + '/' + AR.length + ' · açık → değişen ' + JSON.stringify(deg) + ' · C25 aday dışı bağlam → tek madde "farklı koşulda" ' + /Hedef CO2 hacmi[^|]*farklı koşulda: /.test(gm('C25')) + ' · C18 "iki gün: whitelabs" ' + /iki gün: whitelabs\.com/.test(gm('C18')) + ' · C20 "en az 90 dakika" yalnız beerandbrewing ' + /\(en az 90 dakika: beerandbrewing\.com\)/.test(gm('C20')) + ' · değer adayı C18 ' + ad('C18') + ' / C23 ' + ad('C23'),
+          once.every(x => x.ayni) && deg.every(id => ['C12', 'C13', 'C18', 'C20', 'C23', 'C25'].includes(id)) && /Hedef CO2 hacmi[^|]*farklı koşulda: /.test(gm('C25')) && /iki gün: whitelabs\.com/.test(gm('C18')) && /\(en az 90 dakika: beerandbrewing\.com\)/.test(gm('C20')) && ad('C18') === 1 && ad('C23') === 1);
+        return __REG.al();
+      }, [metinler, k5]);
+    }
+  },
+  {
     kod: 'CEV5B-TUR', ad: 'TEK MADDE BAŞLIĞI DOĞRULAYICININ TÜRÜNDEN (CEV5B madde 1–3; donmuş blok YENİDEN DONDURULDU, AI yok): şemada çelişki maddesi başına celiski_turu (gercek · optimum · baglam · deger_farki · farkli_sonuc · yok), görevde örneksiz tanımları · gerçek olmayan çelişkide tek madde başlığı türden — optimum "azı da fazlası da sorun olabilir" ("aynı sonucu veriyor" YOK), baglam "farklı koşulda", deger_farki "kaynaklar farklı değer veriyor", farkli_sonuc "ayrıca"; tür yok / tanınmıyor (eski kayıt) → tarafsız "taraf 1; taraf 2" · tür ↔ gercek_celiski uyuşmazsa gercek_celiski geçerli + rapor "tür uyuşmadı" · güç / desteksiz taraf kuralı aynen · CEV3 optimum maddesi iki farklı etkiyi kendi kurumuyla yazar · koşu #4 ana kesiti: C15 / C25 / C26 / C27 önce → sonra, uygulamanın "aynı sonucu veriyor" / "başka bağlamda" iddiası 0 · maliyet aynı · KASITLI BOZMALAR',
     calistir: async (page) => {
       const k4 = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'fixtures', 'cev_kosu4_2026-10-27_ana.json'), 'utf8'));
       return page.evaluate(async ([k4]) => {
         const C = window.BM_CEV, sm = C.dogrulaSema(['m1'], ['w1', 'w2']).schema, it = sm.properties.maddeler.items, G = C.DOGRULA_GOREV('KONU');
         __REG.ok('doğrulayıcı imza ' + C.dogrulayiciImza() + ' (önceki 21cf0998-24444) · şemada celiski_turu zorunlu, enum ' + JSON.stringify(it.properties.celiski_turu.enum) + ' · görev kural 13 beş tanım',
-          C.dogrulayiciImza() === '7ef54d16-26640' && it.required.includes('celiski_turu') && JSON.stringify(it.properties.celiski_turu.enum) === '["yok","gercek","optimum","baglam","deger_farki","farkli_sonuc"]' && /13\. celiski_turu: .*gercek: .*optimum: .*baglam: .*deger_farki: .*farkli_sonuc: .*Çelişki maddesi değilse yok\./.test(G));
+          C.dogrulayiciImza() === '33762479-30573' && it.required.includes('celiski_turu') && JSON.stringify(it.properties.celiski_turu.enum) === '["yok","gercek","optimum","baglam","deger_farki","farkli_sonuc"]' && /13\. celiski_turu: .*gercek: .*optimum: .*baglam: .*deger_farki: .*farkli_sonuc: .*Çelişki maddesi değilse yok\./.test(G));
         const bos = { dogrudan_cevap: { metin: '', kaynaklar: [] }, celiskiler: [] }, m = (deg, y, e, ey, k) => ({ degisken: deg, yon: y, deger: '', etki: e, etki_yonu: ey, kaynaklar: [k] });
         const W = [{ id: 'w1', url: 'https://www.whitelabs.com/a', alinti: 'Increasing aeration increases fusel alcohol formation.' }, { id: 'w2', url: 'https://www.lallemandbrewing.com/b', alinti: 'Under-aeration can contribute to fusel alcohols.' }];
         const a = C.maddeIsle({ maddeler: [m('havalandırma', 'artirmak', 'fusel artar', 'artirir', 'w1'), m('havalandırma', 'azaltmak', 'fusel artabilir', 'artirir', 'w2')], ...bos }, W).gos[0];
@@ -14426,8 +14515,8 @@ const CASELER = [
       topla(set.sorular); k4.sorular.forEach(q => (q.web || []).forEach(w => metinler.push(w.alinti || '')));
       return page.evaluate(async ([metinler, k4]) => {
         const C = window.BM_CEV, IMZA = C.dogrulayiciImza(), sm = C.dogrulaSema(['m1'], ['w1', 'w2']).schema, it = sm.properties.maddeler.items, tr = it.properties.taraflar.items, G = C.DOGRULA_GOREV('KONU');
-        __REG.ok('doğrulayıcı YENİDEN DONDURULDU: imza ' + IMZA + ' (CEV5B 7ef54d16-26640; CEV5 21cf0998-24444) · araştırma ' + C.arastirmaImza() + ' · AI4 ' + window.BM_AI4.denetleyiciImza() + ' · şema cekirdek madde ' + it.required.includes('cekirdek') + ' / taraf ' + tr.required.includes('cekirdek') + ' · görev kural 12 ' + /12\. cekirdek: .*sayı ve aralık HARİÇ/.test(G),
-          IMZA === '7ef54d16-26640' && C.arastirmaImza() === '92f59a3c-5776' && window.BM_AI4.denetleyiciImza() === '2c9ebd9f-32461' && it.required.includes('cekirdek') && tr.required.includes('cekirdek') && /12\. cekirdek: .*sayı ve aralık HARİÇ/.test(G));
+        __REG.ok('doğrulayıcı YENİDEN DONDURULDU: imza ' + IMZA + ' (CEV6 33762479-30573; CEV5B 7ef54d16-26640; CEV5 21cf0998-24444) · araştırma ' + C.arastirmaImza() + ' · AI4 ' + window.BM_AI4.denetleyiciImza() + ' · şema cekirdek madde ' + it.required.includes('cekirdek') + ' / taraf ' + tr.required.includes('cekirdek') + ' · görev kural 12 ' + /12\. cekirdek: .*sayı ve aralık HARİÇ/.test(G),
+          IMZA === '33762479-30573' && C.arastirmaImza() === '92f59a3c-5776' && window.BM_AI4.denetleyiciImza() === '2c9ebd9f-32461' && it.required.includes('cekirdek') && tr.required.includes('cekirdek') && /12\. cekirdek: .*sayı ve aralık HARİÇ/.test(G));
         const W = [{ id: 'w1', url: 'https://www.lallemandbrewing.com/a', alinti: 'Boil for 60–90 minutes to drive off DMS.' }, { id: 'w2', url: 'https://www.crispmalt.com/b', alinti: 'A vigorous boil drives off DMS precursors.' }, { id: 'w3', url: 'https://www.byo.com/c', alinti: 'A strong rolling boil removes DMS.' }, { id: 'w4', url: 'https://www.brewingscience.com/d', alinti: 'DMS is volatile and is driven off during the boil.' }];
         const S = C.maddeIsle({ maddeler: [{ degisken: 'kaynatma süresi', yon: 'artirmak', deger: '60–90 dakika', etki: 'DMS uçar', etki_yonu: 'azaltir', kaynaklar: ['w1', 'w2', 'w3', 'w4'] }], dogrudan_cevap: { metin: '', kaynaklar: [] }, celiskiler: [] }, W), a = S.gos[0];
         const v = (ek) => ({ maddeler: [Object.assign({ id: 'm1', karar: 'destekli', destekleyen: ['w1'], parca: ['w2', 'w3', 'w4'], sorun: 'yok', not: '', gercek_celiski: false, taraflar: [] }, ek)], dogrudan_cevap: { karar: 'yok', destekleyen: [], parca: [] } });
@@ -14453,7 +14542,7 @@ const CASELER = [
     kod: 'CEV5-TESHIS', ad: 'TEŞHİS SORULARI (CEV5 madde 5, AI yok): özetleyici kuralı (9) — soru bir şeyin NASIL ANLAŞILACAĞINI / belirtisini soruyorsa maddeler gözlenebilir işaretler olabilir (değişken = işaret, yon bilgi); neden / önleme ayrı madde · özet ve onarım görevinde · test kilidi CEV4-OZET\'te güncellendi (c622f6aa-1773) · set örneği yok',
     calistir: (page) => page.evaluate(() => {
       const C = window.BM_CEV, K = C.OZET_KURAL4.join('\n'), g = C.OZET_GOREV('"oksidasyon" — soru: "x"'), o = C.ONARIM_GOREV('"oksidasyon" — soru: "x"');
-      __REG.ok('kural (9) var: işaret = değişken, yon bilgi, neden / önleme ayrı · özet görevinde ' + (g.indexOf(K) >= 0) + ' · onarım görevinde ' + (o.indexOf(K) >= 0) + ' · ' + C.OZET_KURAL4.length + ' satır', /\(9\) TEŞHİS: KONU bir şeyin NASIL ANLAŞILACAĞINI ya da belirtisini soruyorsa/.test(K) && /değişken = işaret/.test(K) && /yon = bilgi/.test(K) && /Nedeni ya da önlemeyi söyleyen alıntılar ayrı madde/.test(K) && g.indexOf(K) >= 0 && o.indexOf(K) >= 0 && C.OZET_KURAL4.length === 7);
+      __REG.ok('kural (9) var: işaret = değişken, yon bilgi, neden / önleme ayrı · özet görevinde ' + (g.indexOf(K) >= 0) + ' · onarım görevinde ' + (o.indexOf(K) >= 0) + ' · ' + C.OZET_KURAL4.length + ' satır', /\(9\) TEŞHİS: KONU bir şeyin NASIL ANLAŞILACAĞINI ya da belirtisini soruyorsa/.test(K) && /değişken = işaret/.test(K) && /yon = bilgi/.test(K) && /Nedeni ya da önlemeyi söyleyen alıntılar ayrı madde/.test(K) && g.indexOf(K) >= 0 && o.indexOf(K) >= 0 && C.OZET_KURAL4.length === 11); // CEV6: + (10)–(13)
       return __REG.al();
     })
   },
