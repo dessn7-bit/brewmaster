@@ -37651,15 +37651,21 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
       .then(function(L){ C._setler = L.filter(Boolean); C._set = C._setler[0].set; return C._set; }); };
   //   KOS-SES (2026-10-27): başlamayan koşu SESSİZ kalmaz — set yüklenemezse / kilitliyse / AI hazır değilse / kos 'kilitli'·'reddedildi' dönerse neden panelde (cev-mesaj) ve görünür alana kaydırılır (telefonda 'basınca bir şey olmuyor' bildirimi)
   C.mesajGoster = function(m){ C._mesaj = m; C.panelCiz(); try{ var el = document.querySelector('.cev-ayar-kap .cev-mesaj'); if(el && el.scrollIntoView) el.scrollIntoView({ block:'center' }); }catch(e){} };
+  // MODEL-KAPI (Claude, 2026-10-27): CEV gerçek koşusu YALNIZ Opus 5.5 ile — önceki koşular (#2, #3) Opus; Opus bu cihazda denetlenmemişse A4.ozetModel() sessizce Haiku'ya düşüyordu (Kaan'ın telefonu).
+  C.MODEL_GEREK = 'guclu';
+  C.modelKapi = function(){ var A = window.BM_AI; if(!A || !A4) return 'AI modülü yüklenmedi; sayfayı yenileyip tekrar dene.'; var mk = A4.ozetModel(); if(mk === C.MODEL_GEREK) return null; var u = A4.modelKullanilir(C.MODEL_GEREK), ad = A.MODEL[C.MODEL_GEREK].ad;
+    return 'bu cihazda model ' + A.MODEL[mk].ad + '; CEV koşusu yalnız ' + ad + ' ile yapılır (önceki koşular ' + ad + ' — karşılaştırma için şart). ' + (u.ok ? 'Ayarlar ▸ 🧠 Özet modeli\'nde ' + ad + '\'i seç.' : ad + ' bu cihazda kullanılamıyor: ' + u.neden + '.'); };
   C.baslat = function(){ return C.setYukle().then(function(){ var A = window.BM_AI, h = A && A.hazirMi ? A.hazirMi() : null, kl = C.listeKilit(C._setler);
       if(kl){ C._onay = false; C.mesajGoster('Başlamadı — koşu kilitli: ' + kl); return null; }
       if(!h || !h.hazir){ C._onay = false; C.mesajGoster('Başlamadı — ' + (h && h.mesaj ? h.mesaj : 'AI modülü yüklenmedi; sayfayı yenileyip tekrar dene.')); return null; }
+      var mkr = C.modelKapi(); if(mkr){ C._onay = false; C.mesajGoster('Başlamadı — ' + mkr); return null; }
       if(!C._onay){ C._onay = true; C._mesaj = ''; C.panelCiz(); return null; } C._onay = false; C._calisiyor = true; C._mesaj = ''; C.panelCiz();
     return C.kos(C._setler, { adim:function(){ C.panelCiz(); } }).then(function(o){ C._calisiyor = false; C._sonuc = o; if(o && (o.durum === 'kilitli' || o.durum === 'reddedildi')) C.mesajGoster('Başlamadı — ' + (o.neden || o.durum)); else C.panelCiz(); return o; }, function(e){ C._calisiyor = false; C.mesajGoster('Koşu hata verdi: ' + String(e && e.message || e)); return null; }); })
     .catch(function(e){ C._onay = false; C._calisiyor = false; C.mesajGoster('Başlamadı — soru setleri yüklenemedi ya da beklenmeyen hata: ' + String(e && e.message || e) + ' (internet bağlantısını kontrol edip sayfayı yenile).'); return null; }); };
   // CEV2E (3): yarım koşuyu sürdür — iki adımlı onay (gerçek koşu gibi); kayıt bellekten (aynı oturum) ya da IDB'den
   C.devam = function(id){ return C.setYukle().then(function(){ if(C._calisiyor) return null; var kl = C.listeKilit(C._setler); if(kl){ C._mesaj = 'Devam kilitli: ' + kl; C.panelCiz(); return null; }
       if(!window.BM_AI || !window.BM_AI.hazirMi().hazir){ C._mesaj = 'Devam için AI anahtarı gerekli.'; C.panelCiz(); return null; }
+      var mkr = C.modelKapi(); if(mkr){ C._mesaj = 'Devam başlamadı — ' + mkr; C.panelCiz(); return null; }
       if(String(C._devamOnay) !== String(id)){ C._devamOnay = id; C.panelCiz(); return null; } C._devamOnay = null;
       var e = C.dizinAl().find(function(x){ return String(x.kosuId) === String(id); }), oku = C._son && String(C._son.kosuId) === String(id) ? Promise.resolve(JSON.parse(JSON.stringify(C._son))) : C.bekle().then(function(){ return C.idbOku('kosu:' + id); });
       return oku.then(function(rec){ if(rec && e && e.suren && !rec.suren) rec.suren = e.suren; var red = C.devamRed(rec, C._setler); if(red){ C._mesaj = 'Devam reddedildi: ' + red; C.panelCiz(); return null; }
