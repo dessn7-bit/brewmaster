@@ -37201,9 +37201,10 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   C.NIT_ATIF_SONRA = [[/^\s*(maximum|max\b|at most|or less|or fewer|en fazla|en cok)/, 'ust', false], [/^\s*(minimum|at least|or more)/, 'alt', false], [/^\s*(\+|(veya|ya da|ve) (daha )?(fazla|uzun|yuksek|uzeri|ustu|sicak|buyuk|cok)|or (more|higher|above|greater|longer|warmer|over)|and (above|up|higher|over|more|longer))/, 'alt', false],
     [/^\s*((['’]?n?[iu]n\s+|['’])?(uzeri|ustu|uzerinde|ustunde)|['’]?[dt][ae]n (daha )?(uzun|fazla|cok|yuksek|buyuk|sicak))/, 'alt', true],
     [/^\s*((veya|ya da|ve) (daha )?(az|kisa|dusuk|kucuk|soguk|alti|asagisi)|or (less|lower|below|fewer|shorter|cooler|under)|and (below|under|lower|less|shorter))/, 'ust', false],
-    [/^\s*((['’]?n?[iu]n\s+|['’])?(alti|altinda|asagisi|asagida)|['’]?[dt][ae]n (daha )?(kisa|az|dusuk|kucuk|soguk))/, 'ust', true], [/^\s*(or so|or thereabouts|civari|civarinda|dolaylari)/, 'yak', false]];
+    [/^\s*((['’]?n?[iu]n\s+|['’])?(alti|altinda|asagisi|asagida)|['’]?[dt][ae]n (daha )?(kisa|az|dusuk|kucuk|soguk))/, 'ust', true], [/^\s*(or so|or thereabouts|civari|civarinda|dolaylari)/, 'yak', false],
+    [/^['’]?y?[ae]\s+(kadar|degin)\b/, 'ust', false, 'kadar']]; // CEV8B (2): '36 saate kadar', "5 ppm'e kadar", "%10'a kadar", '-e değin' ≈ up to (dahil)
   C.nitAtif = function(once, sonra){ var n = null; C.NIT_ATIF_ONCE.some(function(x){ if(x[0].test(once)){ n = { y:x[1], k:x[2] }; return true; } return false; }); if(n) return n;
-    var s = String(sonra || '').replace(/\([^)]*\)/g, ' ').split(/[;,]/)[0]; C.NIT_ATIF_SONRA.some(function(x){ if(x[0].test(s)){ n = { y:x[1], k:x[2] }; return true; } return false; }); return n; };
+    var s = String(sonra || '').replace(/\([^)]*\)/g, ' ').split(/[;,]/)[0]; C.NIT_ATIF_SONRA.some(function(x){ if(x[3] && !(C.CEV8B || {})[x[3]]) return false; if(x[0].test(s)){ n = { y:x[1], k:x[2] }; return true; } return false; }); return n; };
   C.ORAN_RE = /\bper\b|\bbasina\b|\bher\b.{0,25}\bicin\b|\/\s*(°\s*p\b|plato|gal\b|bbl|hl\b)/;
   C.nitBul = function(once, sonra){ var n = null; C.NIT_ONCE.some(function(x){ if(x[0].test(once)){ n = x[1]; return true; } return false; }); if(n) return n;
     var s = String(sonra || '').replace(/\([^)]*\)/g, ' ').split(/[;,]/)[0]; C.NIT_SONRA.some(function(x){ if(x[0].test(s)){ n = x[1]; return true; } return false; }); return n; };
@@ -37329,7 +37330,9 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   //   (sayı sözcükleri rakama: alıntıda İngilizce, parçada Türkçe; °F → °C (±0,6), hafta → gün, gün / saat → dakika; "en az" ↔ alt sınır, "en çok / up to" ↔ üst sınır). Eşleşen kurum yoksa parça atıfsız.
   //   Koşu #5: atıf "bütün sayılar alıntıda geçiyor mu" diye gevşek kuruluyordu ("60 to 90" diyen kurum "en az 90"a, "1 to 2" diyen kurum "iki gün"e bağlandı).
   C.degerIfadeler = function(t, dil){ var S = dil === 'en' ? C.SAYI_EN : C.SAYI_SOZ, n = katla(String(t || '')).replace(/(\d),(\d)/g, '$1.$2').replace(/%\s*(\d+(?:\.\d+)?(?:\s*[–—-]\s*\d+(?:\.\d+)?)?)/g, '$1 %');
-    if((C.CEV8 || {}).nitSim && dil !== 'en') n = n.replace(/(\d[\d.]*\s*(?:°\s*[cf]|[a-z%\/]+)?\s*(?:['’](?:n?[iu]n)?\s*)?)\balti(nda|ndaki)?\b/g, '$1altinda'); // CEV8 (1): '15 °C altı' — 'altı' burada niteleyici, sayı sözcüğü (6) değil
+    if((C.CEV8 || {}).nitSim && dil !== 'en') n = (C.CEV8B || {}).esdeger
+      ? n.replace(/(\d[\d.]*\s*(?:°\s*[cf]|[a-z%\/]+)?\s*(?:\(\s*\d[^()]*\)\s*)?(?:['’](?:n?[iu]n)?\s*)?(?:(?:veya|ya da)\s+(?:daha\s+)?)?)\balti(nda|ndaki|na)?\b/g, '$1altinda') // CEV8B (1): '15 °C (59 °F) altı', '60 °C (140 °F) altına'
+      : n.replace(/(\d[\d.]*\s*(?:°\s*[cf]|[a-z%\/]+)?\s*(?:['’](?:n?[iu]n)?\s*)?)\balti(nda|ndaki)?\b/g, '$1altinda'); // CEV8 (1): '15 °C altı' — 'altı' burada niteleyici, sayı sözcüğü (6) değil
     n = n.replace(/\b[a-z]+\b/g, function(w){ return Object.prototype.hasOwnProperty.call(S, w) ? String(S[w]) : w; });
     var E = [], C8 = C.CEV8 || {}, nitA = function(a, b, sonra){ if(C8.nitSim){ var x = C.nitAtif(n.slice(Math.max(0, a - 40), a), String(sonra || '').slice(0, 40)); return x ? { nit:x.y, nk:x.k } : { nit:null, nk:false }; } return { nit:C.nitBul(n.slice(Math.max(0, a - 30), a), String(sonra || '').slice(0, 40)), nk:false }; };
     //   CEV8 (1): oran 'a:b' (ve oran bağlamında 'a/b') TEK ifade — değer a/b, birim 'oran'; '2:1 or higher' → oran alt (dahil). Eşleşen metin boşlukla örtülür (ana döngü iki ayrı sayı okumaz).
@@ -37339,9 +37342,28 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
     while((m = re.exec(n))){ var a = +m[1], b = m[2] != null ? +m[2] : a, u = n.slice(m.index + m[0].length).replace(/^\s+/, ''), br = C.BIRIM.find(function(x){ return x[0].test(u); });
       var birim = br ? br[1] : null, V = [a, b].map(function(x){ return br ? x * br[2] : x; }), tol = 1e-9, sonra = br ? u.slice(u.match(br[0])[0].length) : u;
       if(birim === 'F'){ V = V.map(function(x){ return (x - 32) * 5 / 9; }); birim = 'C'; tol = 0.6; } else if(birim === 'C') tol = 0.6; if(birim === 'gun'){ V = V.map(function(x){ return x * 1440; }); birim = 'dk'; }
-      var q8 = nitA(m.index, 0, sonra); E.push({ V:V.filter(function(x, i, A){ return A.indexOf(x) === i; }).sort(function(x, y){ return x - y; }), birim:birim, tol:tol, nit:q8.nit, nk:q8.nk }); }
+      var q8 = nitA(m.index, 0, sonra); E.push({ V:V.filter(function(x, i, A){ return A.indexOf(x) === i; }).sort(function(x, y){ return x - y; }), birim:birim, tol:tol, nit:q8.nit, nk:q8.nk, _a:m.index, _b:br ? n.length - sonra.length : n.length - u.length + ((/^(°\s*p|[a-z]+)/.exec(u) || [''])[0]).length, _u:br ? null : u.slice(0, 12) }); }
+    if(C8.nitSim && (C.CEV8B || {}).esdeger) E = C.esdegerBirlestir(E, n);
+    var sil = function(e){ delete e._a; delete e._b; delete e._u; if(e.es) e.es.forEach(sil); }; E.forEach(sil);
     return E; };
-  C.ifadeEs = function(p, q){ var C8 = C.CEV8 || {}; if(C8.oran && ((p.birim === 'oran') !== (q.birim === 'oran'))) return false; // CEV8 (1): oran ile düz sayı eşleşmez
+  //   CEV8B (1): sayı + birim ardından PARANTEZ içinde ya da '/' ile verilen EŞDEĞER birimli sayı ('15 °C (59 °F) altı', 'below 59°F / 15°C', 'above 70°F (21°C)') TEK ifade;
+  //   niteleyici çiftin önünde ya da arkasında olabilir, ikisine de uygulanır. Eşdeğer = aynı ölçü (°F → °C dönüşümünden sonra) tolerans içinde aynı değer, ya da ham birim çifti gal ↔ L, lb ↔ kg, oz ↔ g, °P ↔ SG (±%5).
+  //   Eşdeğer olmayan parantez içi sayı ('(%6 buharlaşma)') ayrı ifade kalır. Yalnız atıf yolu (C.degerIfadeler); aralık / çelişki yolu değişmez.
+  C.ESDEGER_HAM = [[/^(gal)/, /^(l\b|lt\b|litre|liter)/, 3.785], [/^(lb|pound)/, /^(kg|kilo)/, 0.4536], [/^(oz|ounce)/, /^(g\b|gr\b|gram)/, 28.35]];
+  C.esdegerMi = function(x, y){ if(x.V.length !== y.V.length) return false;
+    if(x.birim && x.birim === y.birim){ var t = Math.max(x.tol, y.tol, 1e-9); return x.V.every(function(v, i){ return Math.abs(v - y.V[i]) <= Math.max(t, Math.abs(v) * 0.03); }); }
+    if(x.birim || y.birim) return false; var ux = String(x._u || ''), uy = String(y._u || ''), yak = function(a, b){ return Math.abs(a - b) <= Math.abs(b) * 0.05; };
+    var sg = function(p, g){ return g > 0.98 && g < 1.2 && Math.abs(1 + p / (258.6 - p / 258.2 * 227.1) - g) <= 0.002; }; // °P → SG (ASBC yaklaşık formül, ±2 puan)
+    if(/^(°\s*p|plato)/.test(ux) && (!/^[a-z°]/.test(uy) || /^sg\b/.test(uy))) return x.V.every(function(v, i){ return sg(v, y.V[i]); }); if(/^(°\s*p|plato)/.test(uy) && (!/^[a-z°]/.test(ux) || /^sg\b/.test(ux))) return x.V.every(function(v, i){ return sg(y.V[i], v); });
+    return C.ESDEGER_HAM.some(function(e){ var k = e[0].test(ux) && e[1].test(uy) ? e[2] : e[1].test(ux) && e[0].test(uy) ? 1 / e[2] : 0; return k && x.V.every(function(v, i){ return yak(v * k, y.V[i]); }); }); };
+  C.esdegerBirlestir = function(E, n){ var R = [], i; for(i = 0; i < E.length; i++){ var x = E[i], y = E[i + 1];
+      if(y && x._b != null && y._a != null && !x.oran && !y.oran){ var ara = n.slice(x._b, y._a); var par = /^\s*\(\s*$/.test(ara), bol = /^\s*\/\s*$/.test(ara);
+        if((par || bol) && C.esdegerMi(x, y)){ var nit = x.nit, nk = x.nk;
+          if(!nit && y.nit){ nit = y.nit; nk = y.nk; }
+          if(!nit && par){ var q = C.nitAtif('', n.slice(y._b).replace(/^\s*\)/, '').slice(0, 40)); if(q){ nit = q.y; nk = q.k; } }
+          var X = Object.assign({}, x, { nit:nit, nk:nk }), Y = Object.assign({}, y, { nit:nit, nk:nk }); R.push(Object.assign({}, X, { esdeger:true, es:[X, Y] })); i++; continue; } }
+      R.push(x); } return R; };
+  C.ifadeEs = function(p, q){ if(p.es || q.es) return (p.es || [p]).some(function(a){ return (q.es || [q]).some(function(b){ return C.ifadeEs(a, b); }); }); /* CEV8B (1): eşdeğer birim çiftinin iki biçimi */ var C8 = C.CEV8 || {}; if(C8.oran && ((p.birim === 'oran') !== (q.birim === 'oran'))) return false; // CEV8 (1): oran ile düz sayı eşleşmez
     if(p.birim && p.birim !== q.birim) return false; if(p.V.length !== q.V.length) return false; var tol = p.birim ? Math.max(p.tol, q.tol) : 1e-9;
     if(!p.V.every(function(v, i){ return Math.abs(v - q.V[i]) <= tol; })) return false;
     //   CEV8 (1): SİMETRİK — alt / ust iki yönde de aynı niteleyiciyle eşleşir (kesin ↔ kesin, dahil ↔ dahil); niteleyicisiz ↔ yak denk; alt / ust ↔ niteleyicisiz / yak EŞLEŞMEZ
@@ -37373,6 +37395,7 @@ window._BUL_TICARI = [{"b":"Bud Light","kod":"1A","ad":"American Light Lager","s
   //   paketlerinde alıntı satırına aynı işaret: "…" / "..." ile ya da cümle sonu noktalaması (. ! ?) olmadan biten → [KESİK]; ilk sözcüğü zamir (EN: this, it, they, these, those, that, such, which, he, she; TR: bu, şu, o, bunlar …) → [ÖZNE ALINTIDA YOK].
   //   Baştaki Markdown / madde imi / tırnak ve sondaki kapanış tırnağı / parantez işaretten önce atılır.
   C.CEV7 = { isaret:true, sadeWort:true, ayriParca:true, ekOnarim:true, kullanilmayan:true }; // CEV7 — yalnız kasıtlı bozma testi kapatır (madde 2–4'ün bayrakları donmuş bloğun dışında: C.CEV3B.tekBaslik / ayriParca / sorun7)
+  C.CEV8B = { esdeger:true, kadar:true }; // CEV8B — yalnız kasıtlı bozma testi kapatır (donmuş bloğun DIŞINDA)
   C.CEV8 = { nitSim:true, nitKesin:true, oran:true, kullanilmayanMadde:true, kapsama:true, kukla:true, brulo:true, baglamKural:true, wortIyelik:true }; // CEV8 — yalnız kasıtlı bozma testi kapatır (hepsi donmuş bloğun DIŞINDA; doğrulayıcı imzası değişmez)
   C.ZAMIR_EN = /^(this|it|they|these|those|that|such|which|he|she)$/; C.ZAMIR_TR = /^(bu|şu|o|bunlar|şunlar|onlar|bunun|onun|bunu|onu|buna|ona|bunlardan|onlardan|bunların|onların)$/;
   C.alintiIsaret = function(t){ if(!C.CEV7.isaret) return []; var s = String(t || '').trim(), I = [];

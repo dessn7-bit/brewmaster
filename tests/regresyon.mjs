@@ -14585,6 +14585,48 @@ const CASELER = [
     }
   },
   {
+    kod: 'CEV8B-ATIF', ad: 'DEĞER ATFI: PARANTEZLİ / "/" EŞDEĞER BİRİM TEK İFADE + TÜRKÇE "-e / -a kadar" ÜST SINIR (CEV8B madde 1–3; donmuş blok DEĞİŞMEDİ, AI yok): "15 °C (59 °F) altı" niteleyicisi çiftin ikisine, "below 59°F / 15°C", "above 70°F (21°C)", "(59 °F) or below", gal ↔ L, °P ↔ SG; eşdeğer olmayan parantez ayrı; "altı hafta" sayı; "36 saate kadar" ↔ "up to 36 hours" · koşu #7 ana kesiti CEV8 ↔ CEV8 + CEV8B · KASITLI BOZMALAR',
+    calistir: async (page) => {
+      const k7 = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'fixtures', 'cev_kosu7_2026-10-29_ana.json'), 'utf8'));
+      return page.evaluate(async ([k7]) => {
+        const C = window.BM_CEV;
+        __REG.ok('imzalar AYNI: doğrulayıcı ' + C.dogrulayiciImza() + ' · araştırma ' + C.arastirmaImza() + ' · AI4 ' + window.BM_AI4.denetleyiciImza(), C.dogrulayiciImza() === '6d7e6c6e-35582' && C.arastirmaImza() === '92f59a3c-5776' && window.BM_AI4.denetleyiciImza() === '2c9ebd9f-32461');
+        const es = (tr, en) => { const P = C.degerIfadeler(tr, 'tr'), Q = C.degerIfadeler(en, 'en'); return P.length > 0 && P.every(e => Q.some(q => C.ifadeEs(e, q))); };
+        const NT = [['15°C (59°F) altı', 'Dry hop below 59°F / 15°C.', true], ['15°C (59°F) altı', 'let it warm (to about 60°F/16°C)', false], ['15°C (59°F) altı', 'below 15 °C', true], ['15°C (59°F) altı', 'Hold at 59°F (15°C) or below.', false],
+          ['15 °C (59 °F) veya altı', 'Hold at 59°F (15°C) or below.', true], ['15 °C veya altı', 'Hold at 59°F (15°C) or below.', true], ['15°C altı', 'below 59°F / 15°C', true], ['15 °C', 'below 59°F / 15°C', false], ['yaklaşık 16 °C', 'let it warm (to about 60°F/16°C)', true], ['yaklaşık 15 °C', 'below 59°F / 15°C', false],
+          ['21 °C (70 °F) üzeri', 'Keep it above 70°F (21°C).', true], ['21 °C üzeri', 'Keep it 70°F (21°C) or above.', false], ['21 °C ve üzeri', 'Keep it 70°F (21°C) or higher.', true], ['60 °C (140 °F) altına', 'until it drops below 140°F (60 °C)', true], ['60 °C (140 °F) altına', 'cool to 140°F (60 °C)', false],
+          ['19 L (5 gal)', 'Boil 5 gal (19 L) of wort.', true], ['19 L', 'Boil 5 gal (19 L) of wort.', true], ['12 °P (1.048 SG)', 'an OG of 1.048', true], ['60 dakika (%6 buharlaşma)', 'Boil for 60 minutes (6% evaporation).', true], ['60 dakika (%6 buharlaşma)', 'Boil for 60 minutes.', false],
+          ['altı hafta', 'lager for six weeks', true], ['altı hafta', 'lager for about six weeks', true],
+          ['36 saate kadar', 'held for up to 36 hours.', true], ['36 saate kadar', 'held for 36 hours.', false], ['36 saate kadar', 'held for at least 36 hours.', false], ['en fazla 36 saat', 'held for up to 36 hours.', true], ["5 ppm'e kadar", 'up to 5 ppm', true], ["5 ppm'e kadar", 'at least 5 ppm', false],
+          ['en az 5 ppm', 'up to 5 ppm', false], ["%10'a kadar", 'up to 10%', true], ["%10'a kadar", '10% of the grist', false], ['5 güne değin', 'up to 5 days', true], ['36 saat kadar', 'up to 36 hours', false], ['yaklaşık 36 saat', 'up to 36 hours', false]];
+        const ny = NT.filter(x => es(x[0], x[1]) !== x[2]);
+        __REG.ok('eşdeğer birim + "-e kadar" ' + NT.length + ' sentetik (parça / alıntı, parantez / "/", önde / arkada niteleyici, eşdeğer olmayan parantez, altı = sayı, yaklaşık ↔ altı yok, up to ↔ -e kadar, en az ↔ -e kadar yok): yanlış ' + JSON.stringify(ny.map(x => x[0] + ' ↔ ' + x[1] + ' → ' + !x[2])), !ny.length);
+        const e1 = C.degerIfadeler('15°C (59°F) altı', 'tr'), e2 = C.degerIfadeler('below 59°F / 15°C', 'en'), e3 = C.degerIfadeler('5 gal (19 L) for 60 minutes (6% evaporation)', 'en');
+        __REG.ok('tek ifade: "15°C (59°F) altı" ' + e1.length + ' (ust kesin ' + (e1[0] && e1[0].nit + ' ' + e1[0].nk) + ') · "below 59°F / 15°C" ' + e2.length + ' · "5 gal (19 L) … (6% evaporation)" ' + e3.length + ' (eşdeğer olmayan parantez ayrı)',
+          e1.length === 1 && e1[0].nit === 'ust' && e1[0].nk === true && e2.length === 1 && e2[0].nit === 'ust' && e3.length === 3 && !Object.keys(e1[0]).some(k => k[0] === '_'));
+        // degerAtif (koşu #7'deki sınıf: ikinci kurum "yaklaşık" diyor)
+        const W = [{ id: 'w1', url: 'https://www.whitelabs.com/a', alinti: 'Dry hop below 59°F / 15°C to limit hop creep.' }, { id: 'w2', url: 'https://beerandbrewing.com/b', alinti: 'Then let it warm (to about 60°F/16°C) before dry hopping.' }, { id: 'w3', url: 'https://wyeastlab.com/c', alinti: 'The starter can be held for up to 36 hours.' }],
+          by = {}; W.forEach(w => { by[w.id] = w; }); const at = d => C.degerAtif(d, ['w1', 'w2', 'w3'], by, []).metin;
+        const a1 = at('15°C (59°F) altı'), a2 = at('36 saate kadar'), a3 = at('yaklaşık 16 °C');
+        __REG.ok('degerAtif: "' + a1 + '" · "' + a2 + '" · "' + a3 + '"', a1 === '15°C (59°F) altı: whitelabs.com' && a2 === '36 saate kadar: wyeastlab.com' && a3 === 'yaklaşık 16 °C: beerandbrewing.com');
+        // KASITLI BOZMALAR
+        const B = C.CEV8B; B.esdeger = false; let bz1, bz2; try { bz1 = at('15°C (59°F) altı'); bz2 = es('15 °C', 'below 59°F / 15°C'); } finally { B.esdeger = true; }
+        B.kadar = false; let bz3; try { bz3 = at('36 saate kadar'); } finally { B.kadar = true; }
+        __REG.ok('KASITLI BOZMA esdeger kapalı → "' + bz1 + '" (beerandbrewing yanlış atıf) · niteleyicisiz "15 °C" ↔ "below 59°F / 15°C" ' + bz2 + ' (eşdeğer ikinci sayı niteleyicisiz kalır) · kadar kapalı → "' + bz3 + '" (atıfsız) — kırmızı olmalı', /beerandbrewing/.test(bz1) && bz2 === true && bz3 === '36 saate kadar');
+        // koşu #7 ana kesiti: CEV8 ↔ CEV8 + CEV8B (kayıtlı ham çıktılarla, AI'sız)
+        const kur = q => { const Wq = q.web, S0 = C.maddeIsle(q.ozetHam, Wq), Ad = S0.gos.concat(S0.dusen.filter(x => x.kurtar)); let U = q.dogrulamaHam ? C.dogrulaUygula(Ad, S0.dogrudan, q.dogrulamaHam, Wq) : null;
+          if (U) { const L = C.onarimAday(U), dcA = C.dcOnarimAday ? C.dcOnarimAday(U) : null; if ((L.length || dcA) && q.onarimHam) { const OI = C.onarimIsle(L, q.onarimHam, Wq), A2 = OI.yeni.filter(y => y.durum === 'ok'); let dcY = dcA ? C.onarimDcIsle(dcA, q.onarimHam, Wq) : null; if (dcY && dcY.durum !== 'ok') dcY = null;
+            OI.yeni.filter(y => y.durum !== 'ok').forEach(y => { U.dusen.push(Object.assign({}, y, { neden: 'onarılan madde — ' + y.neden })); });
+            if ((A2.length || dcY) && q.dogrulamaHam2) { const U2 = C.dogrulaUygula(A2, dcY, q.dogrulamaHam2, Wq); if (dcY && U2.dogrudan) { U.dogrudan = Object.assign({}, U2.dogrudan, { onarildi: true }); U.dogrudanDusen = null; } const OK2 = C.onarimKart(U.gos, U2.gos, Wq); U.gos = OK2.gos; U.rapor = U.rapor.concat(OK2.rapor, U2.rapor); U.dusen = U.dusen.concat(U2.dusen); } } }
+          const S = C.sonucKur(S0, U); return JSON.stringify([S.gos.map(x => [x.metin, x.guc && x.guc.k, x.guc && x.guc.n]), S.fazla.map(x => x.metin), S.dogrudan && S.dogrudan.metin]); };
+        const Q = k7.sorular.filter(q => q.yol === 'arastirma' && q.ozetHam && q.web), A0 = {}; B.esdeger = false; B.kadar = false; try { Q.forEach(q => { A0[q.id] = kur(q); }); } finally { B.esdeger = true; B.kadar = true; }
+        const fark = Q.filter(q => kur(q) !== A0[q.id]).map(q => q.id);
+        __REG.ok('koşu #7 ana kesiti ' + Q.length + ' araştırma sorusu: CEV8 ↔ CEV8 + CEV8B değişen ' + JSON.stringify(fark) + ' (beklenen: yok — bu kesitte parantezli eşdeğer + niteleyici ya da "-e kadar" atıfı yok)', Q.length === 22 && !fark.length);
+        return __REG.al();
+      }, [k7]);
+    }
+  },
+  {
     kod: 'CEV8-ATIF', ad: 'DEĞER ATFI NİTELEYİCİSİ + KULLANILMAYAN GEREKÇE + KAPSAMA TURU + ZAMİR İŞARETİ + BRULOSOPHY SINIFI + BAĞLAM KURALI + wort İYELİK (CEV8 madde 1–8; donmuş blok DEĞİŞMEDİ, AI yok): niteleyici SİMETRİK (alt / ust ↔ niteleyicisiz ya da yak eşleşmez, iki yönde; kesin ↔ dahil ayrı), Türkçe ek niteleyici (-dan uzun / az, altı, \'in üzeri), oran "a:b" tek ifade · (15) kesik yalnız tam önerme yoksa + baska_maddede madde numarası + dayanaksız sayımı · kapsama turu şeması, girdisi (forum / yinelenen hariç), yeni madde aynı doğrulayıcıdan, ayni_etken gösterimi (geçersiz grup yok sayılır), kayıt · kukla özne / bağlaç / gösterme sıfatı · brulosophy yalnız exbeeriment sayfası deney · (16) bağlam · wort ekleri · E2 · koşu #7 ana kesiti önce → sonra · mock 55 tam tur (kapsama dahil) · maliyet · KASITLI BOZMALAR',
     calistir: async (page) => {
       const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'cev_seti.json'), 'utf8')), k7 = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'fixtures', 'cev_kosu7_2026-10-29_ana.json'), 'utf8'));
