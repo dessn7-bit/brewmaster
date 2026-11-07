@@ -93,3 +93,22 @@ Karşılaştırma programla yapıldı. Farklar üretici sayfası ya da repodaki 
   - DIY Dog maya eşleşmesini 363'ten yaklaşık 400'e çıkarır.
 - **KAT-E (off-flavor):** 5 yeni aile, kaynaklı içerik.
 - **DD-1 (DIY Dog):** metin etiketleme → (b) örnek tablosu → (c) ML (Kaan'ın kusur 4 kararıyla).
+
+## 7. Ek: öteki sohbetin ikinci listesi (Claude, 2026-11-07 19:30)
+- **Claude Code Remote Control — KABUL.**
+  - Resmî belge (code.claude.com/docs/en/remote-control): Pro / Max / Team / Enterprise'da var, API anahtarıyla çalışmaz.
+  - Laptopta çalışan CC oturumu telefondan (Claude uygulaması) ya da claude.ai/code'dan sürdürülür. Dosya ve araçlar laptopta kalır.
+  - Laptop uyursa ya da ağ koparsa, makine dönünce kendisi yeniden bağlanır. CC kapatılınca oturum yaklaşık 4 saat geri getirilebilir.
+  - DEVIR_2026-10-27 "Kaan uzaktayken CC'ye prompt veremez" sorununu çözer.
+  - Kullanım: CC içinde `/remote-control` (ya da `/config` içinden otomatik bağlanma). Laptop açık ve CC çalışır durumda kalmalı.
+  - Kural aynen: gerçek CEV koşusu sürerken CC'ye sprint verilmez.
+- **LLM Panel (OpenAI + Anthropic + Google) — KOŞULLU KABUL, yalnız onay koşusunda.**
+  - Bugünkü kör etiketçilerin ikisi de Claude; kör noktaları ortak olabilir. 25/25 yeniden denetimi ben yapıyorum, o da aynı aile.
+  - Öneri: TAZE held-out 2 onay koşusunda bir kez, başka şirketin modeliyle (bir tane yeter) karar maddelerinin tamamı + rastgele 60 kabul edilen madde etiketlenir. Kabul maddelerindeki uyuşmazlık oranı raporlanır.
+  - Maliyet kabaca 3–6 $ (VARSAYIM: yaklaşık 2 M giriş token'ı). OpenAI ya da Google API anahtarı gerekir; anahtarlar Kaan'ın laptopunda kalır, betiği CC koşturur. Hesap ve harcama kararı Kaan'ın.
+- **Scrapling — RET (gerekçe düzeltildi).** "28 maya" açığı sayfa bulamamaktan değil, MAYA_ATU_KAYNAK'taki 87 üretici linkli alıntı ile katalog `atu` değerinin uyuşmamasından kaynaklanıyor. Yani bir uzlaştırma işi; toplu tarama gerekmiyor. Yeni suşlar (KAT-D) da sayfa sayfa okunabiliyor (BarthHaas / White Labs sayfaları bu oturumda okundu).
+- **healthchecks.io — KABUL (kuyruk (c) push işine).**
+  - Worker `brewmaster-models`'te 5 dakikalık cron var (`_cronTick`: KV'deki alarmları push'lar). Cron durursa ya da push'lar topluca 404 / 410 dönerse kimse fark etmiyor.
+  - Öneri: başarılı tick'te ping, toplu hatada `/fail`. Ping adresi worker secret'ı olur, public repoya girmez. Ücretsiz hesabı Kaan açar (e-posta ister).
+- **Cloudflare MCP — ŞİMDİLİK RET.** Worker R2 (modeller) + KV (alarmlar) + cron kullanıyor. Push sorununa (c) bakarken worker loglarını okumak için işe yarayabilir; o iş açılınca yeniden değerlendirilir.
+- **HopDatabase sayısı:** öteki sohbet 113 dedi. 113, brewers-almanack'ın HopDatabase'den aldığı alt küme; HopDatabase'in kendisinde 220 kayıt var (website/public/data/hops.json).
