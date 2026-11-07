@@ -1,0 +1,23 @@
+# DIY Dog (BrewDog) — kaynak notu
+
+- **Veri:** github.com/alxiw/punkapi, `data/*.json` (415 dosya), commit e6c12ab, Claude çekti (2026-11-07).
+  - Orijinal punkapi.com (sammdec) 2024'te kapandı. alxiw kopyası onu sürdürüyor, kodu MIT lisanslı.
+- **Orijin ve izin:** BrewDog DIY Dog kitabı (2016'dan beri ücretsiz).
+  - BrewDog sayfası: "copy them, tear them to pieces, bastardise them, adapt them" (efp.brewdog.com/es/blog/diy-dog).
+  - Ticari kullanım ya da atıf şartı yazmıyor. Brewmaster ticari değil; atıf yine de verilir.
+- **Dosyalar:**
+  - `diydog_v3_415.json` — `kayitlar[i].ham` = kaynak kaydı BİREBİR, `kayitlar[i].ek` = Claude işaretleri.
+  - `diydog_derle.py` — üreten betik; girdiler betiğin başında yazılı.
+- **İşaretler (`ek`):**
+  - `maya_bm`: Brewmaster MAYALAR kimlikleri. 363/415 tam eşleşiyor, eşleşmeyen 52'nin çoğu katalogda olmayan suş (Wyeast 2007, 2126, 1010; WLP013, 099, 351, 4000; S-189; Brett harmanı; şampanya).
+  - `stil_adayi`: BrewDog'un KENDİ metnindeki stil sözcüğü (önce ad + slogan, yoksa açıklama). Sonuç: tek aday 342, birden çok 43, yok 30.
+    - OG / IBU / SRM'den stil TÜRETİLMEZ, çünkü Nisan'daki (adım 32) "metric" etiketleri döngüseldi.
+    - Bu bir EĞİTİM ETİKETİ DEĞİL; etiketleme ayrı iş.
+  - `anomali`: kaynak değeri değiştirilmez, yalnız işaretlenir.
+    - FG ≥ OG: 14 (yer değişmiş olabilir).
+    - ABV ↔ OG/FG tutarsız: 48 (dondurarak damıtılmış TNP / Sink The Bismarck / End of History ve fıçı / şeker ekleri dahil).
+    - Mash 0 ya da boş: 5. Fermantasyon sıcaklığı boş: 12, aşırı: 1. SRM ↔ EBC tutarsız: 11.
+  - `beerxml_v7_dosya`: Nisan'daki stuartraetaylor/diydog-beerxml kaydı (`_v7_recipes_diydog.json`) ile ad eşleşmesi, 317/415. O kayıtlarda hop dakikası ve alfa var; v3'te yalnız start / middle / end / dry hop.
+- **DÜZELTME (adım 48 raporu, 2026-04-27):** "diydog yeast field aslında BOŞ — BrewDog kasten strain vermiyor" doğru değil.
+  - v3'te 414/415 kayıtta maya adı var. Nisan'daki BeerXML kayıtlarında da ad vardı ("American Ale II" gibi).
+  - Boş görünen şey, o günkü maya sınıflandırıcısının bu adları tanımamasıydı. DIY Dog bu gerekçeyle veri setinden çıkarılmıştı.
