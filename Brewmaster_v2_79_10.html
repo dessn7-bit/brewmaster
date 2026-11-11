@@ -41377,8 +41377,8 @@ syncBaslat();
       var orn = r.n ? '<span class="nd-stil-ozet nd6-ornek" title="Yayımlanmış reçeteler (birebir): bu stilin yayımlanmış / ödüllü reçetelerini birebir yapıp yapamayacağın (stoğuna göre) — ' + say + '"><span class="nd6-uzun">Yayımlanmış reçeteler (birebir): ' + say + '</span><span class="nd6-kisa">Tarifler ' + say.replace(/ · /g, ' ').replace(/(✅|🟡|🔴|❔) /g, '$1') + '</span></span>' : '';
       return '<div class="nd6-satir">' + window._nd6RozetHTML(stil) + orn + '</div>';
     };
-    // süzgeç 1 = ✅ / 🟨 (miktar yetiyor); süzgeç 2 = + alınacak ve az kalem toplamı en çok 2
-    window._nd6Uygun = function(q){ return !!q && (window.__ndFiltre === 2 ? (q.durum === 'ok' || q.durum === 'muadil' || ((q.durum === 'yakin' || q.durum === 'az') && (q.alinacak + (q.azN || 0)) <= 2)) : (q.durum === 'ok' || q.durum === 'muadil')); };
+    // süzgeç 1 = ✅ / 🟨 (miktar yetiyor; ND6B 1: "az" geçmez); süzgeç 2 = bunlar + en çok 2 kalem alınacak (ND6 1 metni; kurulamayan hariç)
+    window._nd6Uygun = function(q){ return !!q && (window.__ndFiltre === 2 ? (q.durum !== 'kurulamaz' && q.alinacak <= 2) : (q.durum === 'ok' || q.durum === 'muadil')); };
     // süzgeç + sıralama: {hazir, liste}; ikisi de kapalıysa null (eski yol)
     window._nd6Listele = function(stiller){
       var f = !!window.__ndFiltre, s = window.__nd6Sira === 'stok'; if((!f && !s) || (!f && !stiller.length)) return null;
@@ -41392,8 +41392,8 @@ syncBaslat();
     window._nd6SiraHTML = function(){ var st = window.__nd6Sira === 'stok';
       return '<div class="nd-filtre-not nd6-sira">Sıra: <b>' + (st ? 'stoğuma en uygun önce' : 'yaygınlık') + '</b> · <button type="button" class="nd-mini" onclick="_nd6SiraDegis()" aria-pressed="' + (st ? 'true' : 'false') + '">' + (st ? 'yaygınlık sırasına dön' : '📦 stoğuma en uygun önce') + '</button></div>'; };
     window._nd6FiltreNotHTML = function(){ if(!window.__ndFiltre) return '';
-      return '<div class="nd-filtre-not">Süzgeç: ' + (window.__ndFiltre === 1 ? 'stoğunla eksiksiz kurulanlar (✅ ve 🟨)' : '✅ · 🟨 ve en çok 2 kalemi alınacak ya da az olanlar') + ' · '
-        + '<button type="button" class="nd-mini" onclick="_ndFiltreSari()">' + (window.__ndFiltre === 2 ? 'alınacak / az kalemi olanları çıkar' : 'en çok 2 kalemi alınacak ya da az olanları da göster') + '</button></div>'; };
+      return '<div class="nd-filtre-not">Süzgeç: ' + (window.__ndFiltre === 1 ? 'stoğunla eksiksiz kurulanlar (✅ ve 🟨)' : '✅ · 🟨 ve en çok 2 kalem alınacak olanlar') + ' · '
+        + '<button type="button" class="nd-mini" onclick="_ndFiltreSari()">' + (window.__ndFiltre === 2 ? 'alınacak kalemi olanları çıkar' : 'en çok 2 kalem alınacak olanları da göster') + '</button></div>'; };
     var AC_LS = 'nd6_aciklama_gizli';
     window._nd6AciklamaGizliMi = function(){ try{ return localStorage.getItem(AC_LS) === '1'; }catch(e){ return !!window.__nd6AcGizli; } };
     window._nd6AciklamaGizle = function(g){ window.__nd6AcGizli = g !== false; try{ if(g === false) localStorage.removeItem(AC_LS); else localStorage.setItem(AC_LS, '1'); }catch(e){} if(window._brCiz) window._brCiz(); };
