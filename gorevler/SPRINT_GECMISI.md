@@ -151,3 +151,46 @@ Bir sprintin ayrıntısını ararken: `grep -n "<SPRİNT ADI>" gorevler/SPRINT_G
   - 6 ekran dili
   - 7 test + bağımsız doğrulayıcı
 - Sıra Kaan'a soruldu. Öneri: FB1 → ND6 → KUCUK1.
+
+1j3z5. **TANIMA TEŞHİSİ → ND7** (Claude, 2026-11-11; Kaan: "bütün 988 reçetenin yapılabilir olması … neden program tanımıyor").
+
+**Satır düzeyi tanıma (ölçüm)**
+- Malt: 4383 satırın 827'si tanınmıyor; 623 farklı yazım var, 520'si tek sefer geçiyor.
+- Hop: 3310 satırın 495'i tanınmıyor; 199 farklı yazım.
+- Maya: 967 satırın 414'ü tanınmıyor; 373 farklı yazım.
+- Ek: 385 satırın 136'sı tanınmıyor.
+
+**Örnek düzeyi (ölçüm)**
+- Malt, hop ve mayası tamamen tanınan örnek: 200/988 (ek dahil 154).
+- "Stoğumla oluştur" düğmesi 156 örnekte açık.
+- Düğmenin tek engeli şunlar olan örnekler: malt 161 · maya 96 · hop 69 · miktar 8.
+
+**Sonda (`_bmKatCoz`)**
+
+| Yazım | Sonuç |
+|---|---|
+| "pilsner malt" | pilsner ✓ |
+| "briess pilsner malt" | YOK |
+| "munich malt 10l" | YOK |
+| "citra (fresh)" | YOK |
+| "wlp830" | ✓ |
+| "wyeast 2124" | ✓ |
+| "WLP830 or Wyeast 2124" | YOK |
+| "carafa ii malt" | YOK (crf2 var) |
+| hersbrucker / cluster / mt. hood / wlp833 / wlp940 / wyeast 2007 / wlp400 | katalogda YOK |
+
+**Simülasyon (TAHMİN, malt + hop + maya tamamen tanınan örnek)**
+- Bugün: 200.
+- Marka, renk ve biçim sözcükleri ayıklanırsa: 240.
+- Maya VEYA kuralı eklenirse: 254.
+- ≈32 eksik hop eklenirse: 312.
+- Kalan engel: kristal/karamel ailesinin belirsiz adları ("crystal malt" 57 satır, "caramel munich" 30, "caramunich" 18, carafa ii/iii 30+) ve eksik maya kodları.
+
+**Görev: gorevler/ND7.md (7 madde, ND6'dan SONRA)**
+- 0 ölçüm
+- 1 okuyucu (marka, renk, biçim; konsantre biçim ayrı ürün)
+- 2 sınıf kuralı (rengi belirsiz kristal / Carafa)
+- 3 katalog eklemeleri (KAT-C + KAT-D, yalnız kaynakla)
+- 4 maya kod okuma
+- 5 tanınamayan satır engel olmasın ("özel kalem — senin seçimin"; her örnekte Stoğumla oluştur)
+- 6 test + doğrulayıcı (bugün tanınan ≈7.170 satırda kimlik değişimi 0)
