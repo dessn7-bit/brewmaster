@@ -393,3 +393,137 @@ Bir sprintin ayrıntısını ararken: `grep -n "<SPRİNT ADI>" gorevler/SPRINT_G
 4. CLAUDE.md'deki dosya boyutu satırı güncellendi.
 
 **Yeni sıra:** ND7 → ND7K → ND8 → KUCUK1 → FB1.
+
+1j3z11. **ND7 YAPILDI** (CC, 2026-11-11; SW v131-544; gorevler/ND7.md 9 madde: 0, 0b, 1, 2, 3, 4, 4b, 5, 6; gerçek API yok, Firebase yok). Model: Fable 5.2.
+
+**Ne yapıldı**
+- Bayraklar: `window.BM_ND7 = { okuyucu, sinif, maya, tablo }` (hepsi açık). Dördü de kapalıyken tanıma ND7 öncesiyle birebir (ND7-KAPALI + nd7_tanima --bayrak=kapali).
+- Madde 1 okuyucu: marka / malt evi, parantez notu (parantezdeki marka / köken dahil), paket / miktar notu, biçim sözcüğü (fresh, wet, whole, pellet, leaf, homegrown) ayıklanır; renk okuma ±%25 (6 °L altında ±1,5 °L); Cryo / LupoMax / Incognito / lupulin ayrı ürün. `_bmKatCoz`'un önünde tek noktada: sözlük → gömülü tablo → kural.
+- Madde 2 sınıf kalemleri: kristal (renk belirtilmemiş), Carafa Type 1 / 2 / 3 (kabuklu ya da Special; Weyermann ürün sayfaları: Type 1 800–1000, Type 2 1100–1200, Type 3 1300–1500 EBC, Special türleri aynı aralık), candi (renksiz + açık / amber / koyu), bal, noble hop, maya aileleri (ale, lager, buğday, saison, kveik, Belçika, Kölsch, lakto), meyve (yalnız meyvenin kendisi), meşe (yalnız yalın meşe). Köken / özellik niteleyicili maya satırı ("English ale yeast") ve üretici adıyla yazılmış kodsuz maya ÜYESİZ sınıfta (herhangi bir maya karşılamaz → ❔). Stokta sınıftan kalem varsa satır karşılanır ("tarif türü belirtmiyor — stoktaki X"); önce miktarı YETEN üye seçilir.
+- Madde 3: katalogda olmayan gerçek ürün "katalog_bekliyor" (snf_b_hop / malt / ekstrakt / seker / maya / katki). Tür ADDAN seçilir (tahıl listesindeki meyve suyu, içki, aroma "katkı" sayılır). Kataloğa ürün EKLENMEDİ. Aday listesi tests/nd7k_aday.json (ürün adında marka kalır).
+- Madde 4 maya: boşluklu / "No." / çok kodlu yazımlar; kimlik ilk katalog koduna, öbürleri seçenek. Kod katalog kimliğinin kendisiyse (Omega OYL-011, Imperial A10) doğrudan bağlanır.
+- Madde 4b: iskelet_veri.js yeniden üretildi (sha256-10 2ab21bcd71 → deaf106959).
+- Madde 5 tablo: 1389 farklı yazım için tek satırlık kayıt (tests/nd7_esleme.json; uygulamaya gömülü, `_nd7_build.js` üretir, `--kontrol` güncelliği sınar). Elle karar 190 yazım / 132 kayıt (tests/nd7_elle.json, hepsi gerekçeli).
+- Madde 5 düğme: "📦 Stoğumla oluştur" yalnız iki nedenle kapalı: grist miktarı kaynakta yok ya da mayşe hop'u var. Katalog bekleyen / doldurulamayan sınıf satırı reçeteye ÖZEL KALEM olarak yazılır (hesaba girmez, notta söylenir, hedef OG özel paya göre düşer).
+- Madde 0b: arama sonuç satırları ana listeyle aynı düzen; süzgeç 2 = alınacak + miktarı eksik ≤ 2; ≤ 430 px'te kısa etiketler.
+- Regresyon bulguları üzerine: "ne alırsam açılır" sepeti sınıf satırını (herhangi bir üye) ve "A ya da B" mayayı biliyor; gristinde özel kalem olan planda BJCP renk bandı uyarısı yerine "Renk bandı denetlenemedi"; birebir rozetinde katalog bekleyen ürün / üyesi olmayan sınıf / varsayım hop satırı ❔ (ND7.md madde 5 son satır).
+
+**Ölçüm — tests/nd7_tanima.mjs (988 örnek)**
+
+| | ÖNCE (bayraklar kapalı = v131-543) | SONRA |
+|---|---|---|
+| malt satırı | 4451 · tanınmayan 839 (632 yazım) | ürün 3937 · sınıf 118 · katalog bekliyor 381 · proses 13 · artık 2 · tanınmayan 0 |
+| hop satırı | 3355 · tanınmayan 502 (204 yazım) | 3386 (ek'ten taşınan + varsayım) · ürün 2950 · sınıf 25 · bekliyor 397 · proses 7 · artık 7 · tanınmayan 0 |
+| maya satırı | 987 · tanınmayan 394 (357 yazım) | ürün 635 · sınıf 91 · bekliyor 239 · proses 21 · artık 1 · tanınmayan 0 |
+| ek satırı | 781 · tanınmayan 303 (204 yazım) | 778 · ürün 500 · sınıf 3 · bekliyor 114 · proses 157 · artık 4 · tanınmayan 0 |
+| TOPLAM tanınmayan satır | 2038 | 0 |
+| malt + hop + maya tam tanınan örnek | 210 | 988 |
+| "Stoğumla oluştur" görünen | 170 | 985 |
+| hop satırı olmayan örnek | 31 | 7 |
+
+- "Tanınan" = ürün YA DA sınıf YA DA katalog bekleyen. Ürüne bağlanan satır oranı: malt %81 → %88, hop %85 → %87, maya %60 → %64. Asıl kazanç ND7K'da (katalog eklemeleri) gelecek.
+- Satır sayıları ND7.md'deki sayılardan farklı (ör. ek 781 ↔ 385): sayım tanımı farklı (bu ölçüm her ek satırını sayıyor).
+- Bugün tanınan yazımlarda kimlik değişimi: 0 (ND7-KIMLIK; doğrulayıcı 1738 dolu sonuçta ayrıca ölçtü).
+- Düğmesi kapalı kalan 3 örnek (hepsi mayşe hop'u): nhc Berliner Weisse:0, nhc Scottish Ale / Wee Heavy:2, nhc Chili Beer:0.
+- Hop satırı olmayan 31 örnek: 23'ünde iskelet hopları VARSAYIM etiketiyle · 1'inde hop ek kalemlerden taşındı (taşıma 2 örnekte çalıştı) · 5'i gerçekten hopsuz stil (Gruit Ale ×2, Botanical Ale ×3) · 2'sinde iskelette de hop yok (kay Dark American Lager:1, nhc Lambic / Gueuze:0).
+
+**Eşleme tablosu (1389 yazım):** ürün 349 · sınıf 165 · katalog bekliyor 746 · proses 116 · artık 13 · tanınmayan 0.
+
+**tests/nd7k_aday.json:** ekstrakt 28 ürün / 47 satır · hop 90 / 392 · katkı 118 / 133 · malt 234 / 298 · maya 90 / 239 · şeker 20 / 22. Toplam 580 ürün / 1131 satır.
+
+**Ölçüm — tests/nd6_olcum.mjs (fixture stoğu, 56 kalem)**
+
+| | ND7 öncesi (v131-543; CC ölçümü, kayıt repo dışı) | ND7 |
+|---|---|---|
+| örnek rozeti | ✅ 0 · 🟡 246 · 🔴 713 · ❔ 29 | ✅ 0 · 🟡 227 · 🔴 740 · ❔ 21 |
+| "Stoğumla oluştur" görünen / tam | 170 / 69 | 985 / 104 |
+| boş iskelet stokla eksiksiz | 4 | 3 |
+| iskelet + stok: alınacak 0 / tam | 103 / 79 | 101 / 76 |
+| stil rozeti | 🟨 66 · 🟡 133 · az 23 · 🔴 17 | 🟨 68 · 🟡 128 · az 26 · 🔴 17 |
+
+- ❔ kalemi olan örnek 677 (malt 303, maya 320, hop 272, katkı 85): katalog bekleyen ürün / üyesiz sınıf / varsayım hop satırları.
+- Stil tarafındaki küçük oynama iskelet yeniden üretiminden.
+
+**Madde 4b — iskelet_veri.js yeniden üretimi (HEAD'e göre)**
+- Maya alanı farklı 25 stil = 13 değişen + 12 boşken dolan; boşalan 0. Eski → yeni (stildeki örnek sayısı n; seçilen mayanın payı):
+  - Değişen: Blonde Ale / Cream Ale us05 → oyl011 (n 10; pay 0,09 — us05, wlp001, wy1968 ile EŞİT, sıra belirledi) · Bourbon Barrel Aged Stout wy1084 → wlp007 (n 3) · Dry Irish Stout s04 → nottm (n 3) · English Barleywine wy1968 → wlp002 (n 3) · Kölsch wlp830 → wlp029 (n 6; wlp830 ile EŞİT) · Festbier / Wiesn wy2308 → wlp830 (n 3) · New Zealand Pale Ale us05 → nottm (n 3) · New Zealand Pilsner us05 → w3470 (n 3) · Pastry Stout wy1056 → us05 (n 3) · Rice Lager wlp830 → w3470 (n 3) · Saison (table) wlp565 → la_belle (n 3) · Triple IPA wlp001 → imp_a38 (n 3) · Wood-Aged Beer / Barrel Aged wlp007 → imp_a10 (n 8; pay 0,11 — wlp007, wy1056, wlp500 ile EŞİT).
+  - Dolan: Barrel-Aged Belgian Quad wy3787 · Blanche Sour / Sour Witbier wy3711 (n 1) · Session Sour la_belle · Craft Pilsner w3470 · German Helles Exportbier wlp830 · Herb Wheat Beer wy3068 · Kveik NEIPA oyl061 · Lager IPA wlp830 · Mexican Amber Lager wlp830 · Norwegian Farmhouse / Kveik oyl061 · Sour IPA oyl200 · Yuzu IPA / Japanese Hop Beer imp_a04 (belirtilmeyenler n 3).
+- Grist değişen 53 stil, hop değişen 13 stil; Saison (super) zayıf → türetilmiş.
+- Elle ↔ türetilmiş seçimi değişen 4 stil: Belgian Blonde Ale, Belgian Strong Golden Ale, Bock türetilmiş → elle · Session Ale / Ordinary Bitter elle → türetilmiş.
+  - Belgian Strong Golden Ale'de türetilmiş grist'in bazı pilsner → pale_ale oldu (yeni tanınan satırlar); tutarlılık kapısı (SRM 6,1) yakaladı, elle iskelet kullanılıyor.
+
+**Testler**
+- 581 case (ND6B sonunda 570). Yeni 11: ND7-OKUYUCU, ND7-RENK, ND7-SINIF, ND7-MAYA, ND7-KIMLIK, ND7-OZEL, ND7-SEPET, ND7-KURAL2, ND7-KAPALI, ND7-TABLO, ND7-0B.
+- Tam koşu (o günkü 579 case, vaka vaka ön planda): 562 geçti, 17 kırmızı. 17'nin 15'i ND7 kuralıyla beklentisi değişen eski case (aşağıda), 1'i sepet hatası (düzeltildi), 1'i AI5-KIYAS.
+- Sonraki düzeltmelerin (sepet, ❔ kuralı, doğrulayıcı bulguları, iskelet yeniden üretimi) her birinden sonra etkilenebilecek case'ler baştan koşuldu. SON koşu (tur 3 düzeltmelerinden ve son iskelet üretiminden sonra): 196 case (182 kod, -ND6 eşleriyle) → 196/196 geçti. Kalan 385 case son koddayken yeniden KOŞULMADI (ilk tam koşuda geçtiler; bellek sınırı, tam koşu ≈ 90 dk).
+- Üç imza AYNI: 2c9ebd9f-32461 · 92f59a3c-5776 · 6d7e6c6e-35582. CEV mock 55 + kural yolu d30af8de: CEV3-KAYIT, CEV4-ONARIM, CEV9-ONCELIK son kodda geçti.
+- AI5-KIYAS ilk üretimde kırmızıydı (Dubbel'de seçim türetilmişe dönmüştü); doğrulayıcı düzeltmelerinden sonraki üretimde Dubbel yeniden elle → case yeşil. Beklenen değere DOKUNULMADI.
+- **ND7_ONCESI (15 case, BM_ND7 kapalı koşar; beklenen değerlere dokunulmadı; gerekçeler tests/regresyon.mjs'te; `ND7_YENI=1` ile bayraklar açık koşar):** ND2-ALIAS, ND2-ALIAS-ND6 (renk uyuşmazlığında bağlanmaz · BV REDDET carafa ii / munich malt 10l · iki kodlu maya belirsiz) · ND1-MALZEME (iki kod = belirsiz) · ND1-DURUM, ND4-DURUM (AHA Schwarzbier ✅ + ≈ bekler; hop'ları artık varsayım → ❔) · ND1-ONIZLE ("❔ eşlenemedi" metni) · ND2-DUGME (eşlenemeyen gristli örnek arar, yok) · ND3-HOP (homegrown chinook / citra (fresh) bağlanmaz) · ND5-MALZEMELI (miktarsız ek kalemde düğme yok) · UYG1-DENGE (OG ±0,002 her planda; renk bandı kuralı) · UYG1-OLUSTUR (alınacak sayımı, özel katkı notu) · ISK2-ROLCOZ (stok analizinde rol düzeyi kullanılmaz) · ND6-KAPALI (imzada ek yok) · ND6-MAYA (iki kodlu satırı kimlik eşlemesi çözmez) · ND6-ES (rozet metni).
+- **ND6_ONCESI'ne eklenen 2 (ekran, 0b):** CB1-ARAMA, ND1-GIRIS — arama satırında "✨ Yeni reçete" bekliyorlar. Bunların ayrı -ND6 sürümü YAZILMADI; yeni düzeni ND7-0B sınıyor.
+- ND7 kararıyla güncellenen beklentiler (görev metni gereği): süzgeç 2 (ND1-FILTRE-ND6, ND6-EKRAN, ND6B-ROZET) · ISK1-HASH ND6_ONCESI'nden çıktı, ISK1-HASH-ND6 sabiti deaf106959.
+
+**Ekran görüntüleri (repo dışı):** C:\Users\Kaan\bm_yedek\nd7_ekran\ — nd7_{360,390,412}_{1_uc_secim,2_liste,3_arama}.png. 360 px'te ilk satır görünür, araç çubuğu etiketleri kesilmiyor.
+
+**BAĞIMSIZ DOĞRULAYICI (işi görmemiş alt ajan) — TUR 1 (commit öncesi)**
+- Doğrulananlar: diff yalnız sprint dosyalarında, donmuş bloklara değmiyor, üç imza aynı · nd7_tanima önce / sonra sayıları · bayraklar kapalı = HEAD ile satır satır birebir (9574 satır) · önceden tanınan 1738 kimlikte değişen 0 · kataloğa ürün eklenmedi (MALTLAR 187, HOPLAR 77, MAYALAR 132, KATKILAR 199; içerik aynı) · iskelet özeti · SW 544 · yeni case'ler geçiyor, eski beklentilerde yalnız izinli değişiklikler · nd6_olcum sayıları · sızıntı 0 (anahtar deseni 0, Firebase adresi 0, fixture'a özgü 121 dizeden eklenen satırlarda geçen 0) · sözdizimi + satır sonu.
+- YANLIŞ bulduğu ve DÜZELTİLENLER:
+  1. "Her elle karar gerekçeli" yanlıştı: 14 kayıt / 36 yazımın gerekçesi boştu → dolduruldu; ND7-TABLO artık hepsini sınıyor.
+  2. Parantezdeki marka / köken eşlemeyi engelliyordu ("special b malt (dingeman)", "pale malt (u.k.)" …) → okuyucu düzeltildi.
+  3. Katalogda aynı ürün varken "bekliyor" kalan yazımlar (torrefied wheat, maize flakes, chateau cara ruby, spitz malt …) → 26 yazım elle karara eklendi. Kendi taramamda ayrıca Omega / Imperial kodlu 16 maya yazımı çıktı (kod sözlükte yoktu) → kimlikten bağlanıyor.
+  4. Bekleyen ürünün türü satırın listesinden seçiliyordu (tahıl listesindeki şeftali, tekila, limon suyu "malt" olmuştu) → tür addan; hop artık, su tuzu proses.
+  5. Sınıf üyelikleri gevşekti → meşe yalnız cips / spiral / küp; ale sınıfından Kölsch, şarap, şişe kondisyon mayaları çıktı; lakto sınıfına Helveticus girdi; candi'de amber / koyu ayrı sınıf.
+  6. Renk ailesi dardı ve eşitlikte ilk kayıt seçiliyordu → "Crystal Extra Dark 160" aileye girdi; Fawcett kayıtları yalnız "Fawcett" yazıyorsa aday; eşit uzak iki kayıt → ürün seçilmez (kristal sınıfı).
+  7. "briess smoked malt" kayın isli malta bağlanıyordu → isli maltta marka ayıklama yalnız Weyermann / BestMalz'da.
+  8. Kullanılmayan sabit (KIMLIK_SOZ) silindi; ek kalemden hop taşıma sabit çeşit listesinden kurtuldu.
+  9. Kayıttaki "≈ 51 yazım" → 45 yazım / 51 satır; "13 + 6" → doğrusu yukarıdaki listede.
+- Düzeltmeden BIRAKILAN bulgular (Claude kararı): rastgele 50 satırdan `bairds chocolate 350°l` → 400 °L (görev metnindeki ±%25 içinde) · `rahr two-row malt` → kataloğun 2-row kaydı (sözlük markasız "2-row"u zaten o kayda bağlıyor) · `floor-malted pilsner malt` bekliyor (katalogda Weyermann Floor-Malted Bohemian Pilsner var) · `weyermann carafa ii malt` → kabuklu ürün, `carafa ii` → sınıf (sözlükte "weyermann carafa ii" zaten kabuklu ürüne bağlı) · L. helveticus satırı lakto sınıfında (sınıfta L. plantarum ürünü de var).
+- Doğrulayamadıkları: Carafa için Weyermann sayfaları (ağ kapalıydı; CC sprint içinde WebFetch ile okudu) · "ND7 öncesi" nd6_olcum sütunu ve tam koşu sayıları (kayıtları repo dışında).
+
+**BAĞIMSIZ DOĞRULAYICI — TUR 2 (aynı alt ajan, düzeltmelerden sonra)**
+- Tur 1'deki dokuz düzeltmenin hepsini kendi ölçümüyle doğruladı; R1–R9, R11–R13 doğru (tablo, tanıma, kimlik değişimi 0, aday listesi, iskelet, nd6_olcum, case'ler, imzalar, sızıntı, kayıt sayıları). Repo dışı kayıtları da okudu: ND7 öncesi nd6_olcum sütunu ve koşu sayıları kayıtlarla aynı.
+- Yeni bulduğu ve DÜZELTİLENLER:
+  1. Adlandırılmış maya genel sınıfa düşüyordu (Yeast Bay Sigmund's Voss, CellarScience Berlin, SafLager Western European) → üretici adı satırın herhangi bir yerindeyse "kodsuz" sınıf; HotHead Ale → Omega OYL-057 (elle).
+  2. "English / Scottish / American ale yeast", "Mexican lager yeast" genel ale / lager sınıfındaydı → üyesiz "niteleyicili" sınıf (10 yazım).
+  3. Ana mayası başka olan satır lakto sınıfındaydı → üretici denetimi lakto denetiminden önce.
+  4. "invert #3 or d-90 candi syrup" (sınıf) ile "invert no. 3 sugar or dark belgian candi" (ürün) çelişiyordu → ikisi de invert3.
+  5. Katalogda karşılığı olan 11 yazım daha elle karara girdi (debittered black malt, rolled oats, quaker oats, brown sugar light, dark muscovado, demerara, spelt (dinkel), caramel/crystal 60l (60srm), coffee whole bean …); "best spelt malt (bestmalz)" okuyucudan çözülüyor. Kendi taramamda 7 kodsuz maya yazımı daha: Lallemand Abbaye, Belle Saison ×3, Wyeast French Saison, Imperial Darkness → ürün; Lallemand NovaLager → katalog bekliyor.
+  6. "Toasted Coconut Flakes" malt adayıydı → katkı adayı.
+  7. Meyve sınıfı 52 üyeydi → yalnız meyvenin kendisi (kabuk, zest, toz, konsantre, kestane, hibiskus, balkabağı çıktı).
+  8. ISK1-HASH-ND6 başlığı düzeltildi; "brewers gold" gerekçesi tamamlandı.
+- Düzeltilmeden bırakılanlar: `black molasses` (katalogda üç ayrı melas / treacle kaydı var, hangisi belli değil) · `sea salt and lime juice` (iki malzeme tek satırda) · `heidleberg malt 1.5 srm` · `rahr premium pilsner malt` · `medium brown sugar`.
+- Doğrulayamadığı: Weyermann sayfaları (ağ kapalı) · 581 case'in tamamının son kodda geçtiği (kayıt 196 case).
+- Tur 2 düzeltmeleri iskeleti ve tabloyu değiştirdiği için dosyalar yeniden üretildi ve etkilenen 196 case yeniden koşuldu (hepsi geçti).
+
+**BAĞIMSIZ DOĞRULAYICI — TUR 3**
+- Tur 2 düzeltmelerini ve sayıları doğruladı (S1–S9 doğru). Yeni ürün bağlamalarının hepsini tek tek yargıladı ve rastgele 30 satır daha seçti: **yanlış ürüne bağlanmış satır yok**.
+- Bulduğu ve DÜZELTİLENLER:
+  1. Kodsuz mayada tutarsızlık: adı + üreticisi katalog kaydının adıyla aynı olan 9 yazım daha ürüne bağlandı (White Labs California Ale → WLP001 ×2, English Ale → WLP002 ×2, Dry English Ale → WLP007, Trappist Ale → WLP500, German Ale/Kölsch → WLP029, Hefeweizen IV → WLP380, Wyeast German Wheat → WY3333). "lallemand wildbrew helveticus …; then voss kveik" BAĞLANMADI: satırda önce ekşitme bakterisi yazıyor, ilk ürün kuralı onu reçete mayası yapardı.
+  2. `flaked coconut` → katalogdaki Hindistan Cevizi (Flake/Toz). `toasted coconut flakes` kavrulmuş olduğu için bekliyor (gerekçesi yazıldı).
+  3. Kayıt hataları: CLAUDE.md'deki satır sayısı ve "üç turda" sözü düzeltildi; bu bölüm eklendi.
+- Düzeltilmeden bırakılan notları: `(3.28) great western premium 2-row` bekliyor (`rahr premium pilsner malt` ile aynı kalıp: "Premium" ayrı ürün adı olabilir) · `wine yeast at bottling (e.g. scott labs` aday adına süreç notu girmiş · katalogdaki muscovado kaydı koyu / açık ayırmıyor · kahve kaydı "orta kavrulmuş" diyor, tarif kavurmayı yazmıyor · meyve sınıfında `ananas` ve `bergamot_meyve` adlarındaki sözcük yüzünden dışarıda kaldı.
+- Tur 3 düzeltmelerinden sonra tablo + iskelet yeniden üretildi, etkilenen 196 case yeniden koşuldu (196/196). Bu son 9 + 1 elle bağlama doğrulayıcıya TUR 4'te gösterildi (aşağıda).
+
+**BAĞIMSIZ DOĞRULAYICI — TUR 4 (commit öncesi son hâl)**
+- T1–T9'un hepsi doğru: son 10 yazımın her biri aynı ürün · tablo, tanıma, aday listesi, iskelet (deaf106959), nd6_olcum sayıları · önceden tanınan 1738 kimlikte değişen 0 · üç imza aynı · sızıntı 0 · kayıtlardaki sayılar ölçümleriyle aynı · son koşu (196/196) son kod / veri değişikliğinden sonra başlamış.
+- Yanlış ürün bağlaması: yok. Başka yanlış: yok.
+- Doğrulayamadıkları (ASKIDA): 581 case'in tamamının son kodda geçtiği (kayıt 196 case; kendisi 16 case koştu) · Carafa için Weyermann sayfaları (ağ kapalıydı) · "ND7 öncesi" nd6_olcum kaydının hangi kod durumunda alındığı.
+
+**CLAUDE KARARI BEKLEYENLER**
+1. ND7_ONCESI'ndeki 15 case ve ND6_ONCESI'ne eklenen 2 case: yeni beklentiyle <kod>-ND7 sürümleri yazılsın mı?
+2. ND3-HOP: "homegrown chinook" → chinook, "citra (fresh)" → citra. ND7.md madde 1 bunu istiyor; BV kuralı tersini söylüyordu.
+3. Marka / köken ayıklanarak bağlanan malt yazımları (tabloda "okuyucu-marka" 69 yazım / 99 satır, "okuyucu-köken" 22 yazım / 31 satır; toplam 130 satır): ör. "belgian pale malt" → pale_ale, "rahr two-row malt" → kataloğun 2-row kaydı (adı "Briess 2-Row Brewers Malt").
+4. Tamamı özel kalem olan gristler (özel pay 1): reçete kuruluyor ama hesaplanan OG 1,000. Notta yazıyor; yine de düğme bu örneklerde kapatılsın mı?
+5. ❔ kuralı: ND7.md madde 5'in son satırını "katalog bekleyen ürün, üyesiz sınıf ve varsayım hop satırı birebir rozetinde ❔" diye okudum. Üyesi olan sınıf satırı stokta yoksa "yok" sayılıyor.
+6. İskelette eşit paylı mayalarda sıra belirliyor; ayrıca tek örneğe dayanan dolgular var (Blanche Sour / Sour Witbier n 1) (Blonde Ale / Cream Ale → oyl011, Wood-Aged → imp_a10): eşitlikte eski seçim korunsun mu?
+7. Tahıl listesine yazılmış hop (2 satır: "fuggles pellet hops", "german blanc, fwh") "artık" sayıldı; reçeteye hop olarak girmiyor.
+8. Doğrulayıcının düzeltilmeden bırakılan bulguları (yukarıda).
+
+**YAPILMAYANLAR (dürüst liste)**
+- Madde 4 ikinci bölüm: kodsuz maya adları üretici kataloğuna bakılarak koda bağlanmadı. Yalnız adı + üreticisi katalog kaydıyla aynı olan 16 yazım ürüne bağlandı; kalan 47 yazım / 55 satır "maya — üretici adıyla yazılmış, kodu yok" sınıfında (üyesiz → ❔).
+- Madde 2: "medium / dark crystal" niteleyicileri kaynaklı renk aralığına bağlanmadı; hepsi renksiz kristal sınıfında. Hedef SRM'yi en az kaydıran stok kalemi seçimi yapılmadı (ilk yeten üye seçiliyor).
+- Madde 5: miktarı kaynakta olmayan satıra iskelet g/L medyanından "varsayım" miktar verme YAPILMADI (miktarsız ek kalem notta kalıyor).
+- Madde 5: hop'suz AHA örneklerinde kaynak kontrolü / derleyici düzeltmesi yapılmadı; hepsi "kaynakta hop bilgisi yok" sayıldı.
+- "Stoğumla oluştur" 985/988 (hedef 988).
+- Artık satır 14 (malt 2, hop 7, maya 1, ek 4).
+- Örnek verisinde bozuk tırnak karakterleri var (ör. "farmer's market" peaches); tabloya olduğu gibi girdi.
+- İki düğmeye `aria-label` bayraktan bağımsız eklendi (görünen metin aynı).
