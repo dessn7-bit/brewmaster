@@ -2,7 +2,7 @@ SPRINT ND7 — 988 örneğin HER satırı tanınsın (tanınmayan satır SIFIR) 
 
 Claude, 2026-11-11. Kaan: "bütün 988 reçetenin yapılabilir olması … neden program tanımıyor" + "bütün hepsini program tanıyıp ayrıca muadillerle eşleştirmeli". ND6'dan SONRA verilir. Muadil eşleştirme ayrı görev: ND8 (bu sprintin ardından).
 HEDEF: 988 örnekteki malt / hop / maya / ek satırlarının TAMAMI bir kimliğe bağlanır — belirli ürün, ya da ürün yazılmamışsa SINIF kalemi. Sprint sonunda tanınmayan satır sayısı 0 olmalı; 0 olmuyorsa kalan her satır tek tek gerekçesiyle listelenir, Claude karar verir.
-Bu dosyada 7 madde var (0–6). İşe başlamadan 7'sini de okuduğunu raporun ilk satırında teyit et.
+Bu dosyada 8 madde var (0–6 ve 4b). İşe başlamadan 8'ini de okuduğunu raporun ilk satırında teyit et. ND6B'den SONRA verilir.
 EFOR: high. MODEL: model-bağımsız; modelini ilk satırda belirt.
 
 DURUM (Claude yerelde ölçtü, Playwright, ağ kapalı; sen kendi ölçümünle teyit et)
@@ -97,6 +97,13 @@ KURALLAR
 - Kodsuz tanımlayıcı satır ("belgian wit ale yeast (white labs …)", "german ale (wyeast …)"):
   - üretici + ürün adı, ÜRETİCİNİN KENDİ kataloğunda o adla TEK ürüne karşılık geliyorsa o koda bağlanır (kaynak url'si eşleme tablosunda);
   - birden çok ürüne karşılık geliyorsa bağlanmaz.
+
+4b. iskelet_veri.js YENİDEN ÜRETİMİ (Claude kararı, ND6 doğrulaması 2026-11-11)
+- ND6'da bilerek üretilmedi. Eski MUADIL ✅ zinciriyle seçilen maya, yeni tabloyla 33 stilde değişiyor ya da boşalıyordu.
+- Bu sprintte, madde 4'teki maya okuyucusu ve ND6 VEYA kuralı devredeyken yeniden üret.
+- Raporda şu liste olsun: değişen her stil için eski maya → yeni maya ve dayandığı örnek satırı sayısı.
+- Boşalan maya 0 olmalı. Boşalan çıkarsa üretme, listele.
+- ISK1-HASH ve ISK1-HASH-ND6 beklentilerini Claude onayıyla güncelle: liste rapora girer, Claude kontrol eder.
 
 5. EŞLEME TABLOSU — HER YAZIM (BM_ND7.tablo)
 - Örnek verisindeki tanınmayan HER farklı yazım (bugün ≈1.320: malt 623 · hop 199 · maya 373 · ek 127) için tek satırlık kayıt: yazım → ürün id / sınıf id / yeni katalog id + hangi kural (okuyucu / renk / sınıf / yeni kayıt / elle) + elle olanlarda gerekçe. Tablo uygulamaya gömülü veri olur; _bmKatCoz sözlükten sonra bu tabloya bakar.

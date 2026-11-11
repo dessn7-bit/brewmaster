@@ -261,3 +261,55 @@ Bir sprintin ayrıntısını ararken: `grep -n "<SPRİNT ADI>" gorevler/SPRINT_G
 - Paket içinde "ND6 öncesi" (bayraklar kapalı) koşan 18 case — ekran (7): AL5-AK-ENTEGRASYON, AV4-DOLDUR-REGRESYON, BQ1-KARAKTER, BR3-KORUNAN, BS1-TUMSTIL, BT1-GRUP, ND1-FILTRE · veri (7): ND2-ALIAS, ND3-MUADIL, UYG2-MAYA, KAT1-SEPET, AI1-HUKUM, CEV2-MAYA, ISK1-HASH · ai (4): AI2-TUZAK, AI5B-YON, DOG4-K4, AI4-ONKONTROL. Nedenleri tests/regresyon.mjs ND6_ONCESI'nde.
 
 **Test.** npm test 6 dilim (--parca): 93/93 ×5 + 89/89 = 554/554 (546 eski + 8 yeni ND6-*: ROZET, EKRAN, KAPALI, MUADIL, MAYA, ES, ISK, DIL). Üç imza AYNI (2c9ebd9f-32461 · 92f59a3c-5776 · 6d7e6c6e-35582); CEV mock 55 ve kural yolu d30af8de bayraklar AÇIKKEN aynı. Eklenen satırlarda anahtar taraması 0; fixture içeriği diff'te 0. Koşucu: ND6_ONCESI (18 case bayraklar kapalı), tuzak_kos.mjs BM_ND6_KAPALI=1 okur.
+
+1j3z9. **CLAUDE ND6 DOĞRULAMASI + KARARLAR** (2026-11-11). ND6 commit 6d4b831, SW v131-541. CC'nin modeli Fable 5.2.
+
+**Doğrulama: neye bakıldı, ne çıktı**
+
+| Kontrol | Sonuç |
+|---|---|
+| Canlı md5 | 24aa847b… — yerel dosyayla aynı |
+| SW sürümü | 541 |
+| Üç imza (çalışma anında) | aynı: 2c9ebd9f-32461 · 92f59a3c-5776 · 6d7e6c6e-35582 |
+| BM_ND6 bayrakları | üretimde 6'sı da açık |
+
+**Bayraklar kapalıyken** (Claude'un kendi betiği, 26 Haziran stoğu): sonuç ND6 öncesiyle birebir aynı.
+- Örnek rozetleri: 13 / 462 / 513.
+- İskelet-stok: plan 191, alınacak 0: 87, tam 62, plan çıkmayan 48.
+- MUADIL: ✅ 503, bunların 10'u kaynaklı.
+
+**Bayraklar açıkken:** CC raporuyla birebir aynı.
+- Örnek rozetleri: ✅ 1 · 🟡 261 · 🔴 694 · ❔ 32.
+- İskelet-stok: plan 239, alınacak 0: 98, tam 74, plan çıkmayan 0. Süre 0,94 sn.
+- MUADIL:
+  - ✅ 41 kayıt; 41'i de kaynaklı.
+  - ⚠️ 1012 kayıt, ❌ 20 kayıt.
+  - kararlar.json'daki 107 kararın 107'si uygulanmış.
+  - c60 → koyu_kristal artık ⚠️, sayısı ve kaynağı yazılı.
+- Ekran: "Stoğumla kur" ve "Boş iskelet" düğmeleri görünüyor.
+
+**Diff taraması**
+- Anahtar: 0.
+- Senkron sırrı: 0. Tek eşleşme fixture yükleyicisinin bm_sync_v1 dışlama listesi.
+- Stok içeriği: 0. Diff'te geçen adlar katalog adları.
+- tests/fixtures git'te yok.
+
+**Claude kararları**
+1. **AI geri oynatmaları** (AI2-TUZAK, AI4-ONKONTROL, AI5B-YON, DOG4-K4) bayraklar KAPALI koşmaya devam eder.
+   - Bunlar o günün tablosuyla kaydedilmiş koşuların dondurulmuş geri oynatmaları.
+   - Tuzak seti C grubunun 12 isteminin "kaynak" alanı eski MUADIL ✅ satırının kendisi. Beklentinin eskimesinin nedeni veri; AI tarafında bir gerileme değil.
+   - Sonuç: AI4 doğrulama turu (gerçek koşu, Kaan düğmesi) bu hâliyle KOŞULAMAZ. Ön kontrol ve C grubu, veri yüzünden kalır.
+   - ND8'den sonra tuzak seti v5 hazırlanacak: C grubu kaynaklı tablodan yeniden türetilecek, yeni imza alınacak. Bu işi Claude yapar.
+2. **iskelet_veri.js** ND6'da yeniden üretilmez.
+   - ND7 madde 4b'de, maya okuyucusu ve VEYA kuralı geldikten sonra üretilir.
+   - Eski → yeni maya listesi rapora girer; boşalan maya 0 olmalı.
+3. **(=KOD) suş köprüsü** ⚠️ "satıcı beyanı" olur, ✅ olmaz.
+   - Kör doğrulamada BB maya kimliklerinin yalnız satıcı beyanına dayandığı görüldü.
+4. **ND6B'ye giden düzeltmeler:**
+   - süzgeç 1'den "az var" olan stiller çıkar;
+   - "alınacak" yalnız reçeteye giren satırları sayar;
+   - bayrak korumasız kalan satırlar bayrağa alınır;
+   - 360 px düzeni;
+   - "veri" ve "ekran" türündeki 14 eski case için bayraklar açık koşan yeni sürümler yazılır. Beklentiler ND6 kuralından türetilir; Claude onaylı.
+
+**Yeni sıra:** ND6B → ND7 → ND8 → KUCUK1 → FB1.
