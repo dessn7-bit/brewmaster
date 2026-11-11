@@ -217,3 +217,5 @@ Bir sprintin ayrıntısını ararken: `grep -n "<SPRİNT ADI>" gorevler/SPRINT_G
 - 5 test + bağımsız doğrulayıcı; ardından Claude kör örneklem yapar (✅ isabeti < %90 → tur tekrarı)
 
 Önerilen sıra: FB1 → ND6 → ND7 → ND8 → KUCUK1.
+
+1j3z7. **KAAN KARARI — FB1 SONRAYA** (2026-11-11 13:18): "Bunu sonraya alalım". Yeni sıra: ND6 → ND7 → ND8 → KUCUK1 → FB1. ND6 promptu verildi. Risk Kaan'a anlatıldı: eşitleme verisi (reçeteler, stok, cihaz bilgisi) şifresiz okunabilir durumda kalıyor; yazma hiç denenmedi; API anahtarı bu veride yok.
