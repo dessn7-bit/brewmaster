@@ -16281,13 +16281,13 @@ const CASELER = [
       let ayni = 0, sinif = 0, stilOk = 0, notOk = 0; const fark = [];
       sec.forEach(s => {
         const q = window._bmIskStokDurum(s), p = window._bmStokUyarla('isk', s, 0);
-        const tanim = !p ? q.durum === 'kurulamaz' : (q.alinacak === p.alinacak.length && q.durum === (p.alinacak.length >= 3 ? 'eksik' : (p.alinacak.length > 0 || (p.bolumYok || []).length) ? 'yakin' : p.satirlar.some(z => !z.proses && !z.alinacak && z.secilen && z.secilen.derece >= 3) ? 'muadil' : 'ok'));
+        const tanim = !p ? q.durum === 'kurulamaz' : ((() => { const mk = p.miktarsiz || [], R = p.satirlar.filter(z => !z.proses && mk.indexOf(z) < 0), al = R.filter(z => z.alinacak).length, az = R.some(z => !z.alinacak && ((z.secilen && z.secilen.az) || z.azToplam)) || (p.yetersiz || []).length > 0; return q.alinacak === al && q.durum === (al >= 3 ? 'eksik' : (al > 0 || (p.bolumYok || []).length) ? 'yakin' : az ? 'az' : R.some(z => !z.alinacak && z.secilen && z.secilen.derece >= 3) ? 'muadil' : 'ok'); })()); // ND6B (1): reçeteye giren satırlar + az
         if (tanim) sinif++;
         if (!p) { ayni++; stilOk++; notOk++; return; }
         window.__nd6SonKur = null; const id = window._bmIskeletStokumla(s), k = window.__nd6SonKur;
         if (id && k && k.stil === s && k.alinacak === q.alinacak) ayni++; else fark.push(s + ':' + q.alinacak + '≠' + (k ? k.alinacak : 'yok'));
         if (S.stil === s && S.maltlar.length > 0) stilOk++;
-        const n = String(S.notlar || ''), alN = (n.match(/^Alınacaklar[^\n]*: (.*)$/m) || [, ''])[1].split(' · ').filter(Boolean).length + ((n.match(/stoğunda yok — alınacak/g) || []).length);
+        const n = String(S.notlar || ''), alN = (n.match(/^Alınacaklar[^\n]*: (.*)$/m) || [, ''])[1].split(' · ').filter(Boolean).length; // ND6B (1): miktarsız katkı sayılmaz
         if (alN === q.alinacak) notOk++; else fark.push(s + ' not ' + alN + '≠' + q.alinacak);
       });
       __REG.ok('20 stil: rozetin alınacak sayısı = kurulan reçetenin alınacak sayısı', ayni === 20, ayni + '/20 ' + fark.join(' | '));
@@ -16295,7 +16295,7 @@ const CASELER = [
       __REG.ok('20 stil: kurulan reçete stili ve maltları taşıyor', stilOk === 20, stilOk + '/20');
       __REG.ok('20 stil: reçete notundaki alınacak kalem sayısı = rozet', notOk === 20, notOk + '/20 ' + fark.join(' | '));
       const m = window._nd6Metin;
-      __REG.ok('rozet metinleri: ✅ / 🟨 / 🟡 / 🔴 + "az var" eki + eksik bölüm', m({ durum: 'ok', bolumYok: [], az: false }) === '✅ Stoğunla eksiksiz' && m({ durum: 'muadil', yakinN: 2, bolumYok: [], az: true }) === '🟨 Muadille eksiksiz — 2 satır yakın muadil · az var' && m({ durum: 'yakin', alinacak: 2, bolumYok: [], az: false }) === '🟡 2 kalem alınacak' && m({ durum: 'eksik', alinacak: 4, bolumYok: [], az: false }) === '🔴 4 kalem alınacak' && /İskelette maya yok/.test(m({ durum: 'yakin', alinacak: 0, bolumYok: ['maya'], az: false })));
+      __REG.ok('rozet metinleri: ✅ / 🟨 / 🟡 / 🔴 + "n kalem az" (ND6B) + eksik bölüm', m({ durum: 'ok', bolumYok: [], az: false }) === '✅ Stoğunla eksiksiz' && m({ durum: 'muadil', yakinN: 2, bolumYok: [], azN: 0 }) === '🟨 Muadille eksiksiz — 2 satır yakın muadil' && m({ durum: 'az', azN: 2, alinacak: 0, bolumYok: [] }) === '🟡 2 kalem az' && m({ durum: 'yakin', alinacak: 2, bolumYok: [], az: false }) === '🟡 2 kalem alınacak' && m({ durum: 'eksik', alinacak: 4, bolumYok: [], az: false }) === '🔴 4 kalem alınacak' && /İskelette maya yok/.test(m({ durum: 'yakin', alinacak: 0, bolumYok: ['maya'], az: false })));
       return __REG.al();
     })
   },
@@ -16306,13 +16306,13 @@ const CASELER = [
       await page.waitForFunction(() => document.querySelector('#br-tam .nd6-rozet') && !document.querySelector('#br-tam .nd6-bekle'), { timeout: 60000 });
       const a = await page.evaluate(() => { const T = document.getElementById('br-tam'), sat = [...T.querySelectorAll('.br-satir')];
         return { satir: sat.length, kur: T.querySelectorAll('.nd6-kur').length, iki: T.querySelectorAll('.br-btn-iki').length, eski: [...T.querySelectorAll('.br-btn-ana')].filter(b => /Yeni reçete/.test(b.textContent)).length,
-          rozet: sat.every(x => x.querySelector('.nd6-rozet')), rozetMetin: sat.every((x, i) => x.querySelector('.nd6-rozet').textContent === window._nd6Metin(window._bmIskStokDurum(window.__brSon[i]))),
-          ornek: [...T.querySelectorAll('.nd6-ornek')].every(x => /^Yayımlanmış reçeteler \(birebir\): ✅ \d+ · 🟡 \d+ · 🔴 \d+ · ❔ \d+$/.test(x.textContent)), ornekN: T.querySelectorAll('.nd6-ornek').length,
+          rozet: sat.every(x => x.querySelector('.nd6-rozet')), rozetMetin: sat.every((x, i) => x.querySelector('.nd6-rozet .nd6-uzun').textContent === window._nd6Metin(window._bmIskStokDurum(window.__brSon[i]))),
+          ornek: [...T.querySelectorAll('.nd6-ornek .nd6-uzun')].every(x => /^Yayımlanmış reçeteler \(birebir\): ✅ \d+ · 🟡 \d+ · 🔴 \d+ · ❔ \d+$/.test(x.textContent)), ornekN: T.querySelectorAll('.nd6-ornek').length,
           aciklama: (T.querySelector('.nd6-aciklama') || {}).textContent || '', tasma: document.documentElement.scrollWidth > window.innerWidth + 1, yaygin: window.__brSon.slice() }; });
       await page.evaluate(() => { _ndFiltreTik(); });
       await page.waitForFunction(() => !document.querySelector('#br-tam .nd-bekle'), { timeout: 90000 });
-      const f = await page.evaluate(() => { const d = s => window._bmIskStokDurum(s), o = { n1: window.__brSon.length, u1: window.__brSon.every(s => ['ok', 'muadil'].indexOf(d(s).durum) >= 0), not1: (document.querySelector('#br-tam .nd-filtre-not') || {}).textContent || '' };
-        _ndFiltreSari(); o.n2 = window.__brSon.length; o.u2 = window.__brSon.every(s => d(s).durum === 'ok' || d(s).durum === 'muadil' || (d(s).durum === 'yakin' && d(s).alinacak <= 2));
+      const f = await page.evaluate(() => { const d = s => window._bmIskStokDurum(s), o = { n1: window.__brSon.length, u1: window.__brSon.every(s => ['ok', 'muadil'].indexOf(d(s).durum) >= 0 && !d(s).az), not1: (document.querySelector('#br-tam .nd-filtre-not') || {}).textContent || '' };
+        _ndFiltreSari(); o.n2 = window.__brSon.length; o.u2 = window.__brSon.every(s => d(s).durum === 'ok' || d(s).durum === 'muadil' || ((d(s).durum === 'yakin' || d(s).durum === 'az') && d(s).alinacak + d(s).azN <= 2)); // ND6B (1)
         window.__ndFiltre = 0; _nd6SiraDegis(); const L = window.__brSon.map(s => (d(s) || { sira: 10 }).sira); o.sira = L.every((v, i) => !i || L[i - 1] <= v); o.siraN = L.length; o.siraMetin = (document.querySelector('#br-tam .br-sonuc-bas') || {}).textContent || '';
         _nd6SiraDegis(); o.geri = window.__brSon.slice(); return o; });
       const k = await page.evaluate(() => { document.querySelector('#br-tam .nd6-anladim').click(); const gizli = !document.querySelector('#br-tam .nd6-aciklama') && window._nd6AciklamaGizliMi() && (window._brCiz(), !document.querySelector('#br-tam .nd6-aciklama'));
@@ -16477,9 +16477,566 @@ const CASELER = [
       const p = P(s3), deg = p.satirlar.filter(z => z.secilen && z.secilen.derece > 1); window._bmIskeletStokumla(s3);
       const n = String(S.notlar), blok = (() => { const L = (n.split('Uyarlamalar: ')[1] || '').split('\n').slice(1), o = []; for (const x of L) { if (x.indexOf('• ') !== 0) break; o.push(x); } return o; })();
       __REG.ok('değişen her satır notta (' + deg.length + ' satır)', blok.length === deg.length && deg.length >= 2, blok.length + '/' + deg.length);
-      __REG.ok('her satır "X yerine Y (etiket…)" biçiminde', blok.every(x => /^• .+ yerine .+ \((✅ kaynaklı|✅ eşdeğer|⚠️ yakın|≈ özellik benzeri|karışım)/.test(x)));
+      __REG.ok('her satır "X yerine Y (etiket…)" biçiminde', blok.every(x => /^• .+ yerine .+ \((✅ kaynaklı|✅ aynı suş kodu|⚠️ yakın|⚠️ satıcı beyanı|≈ özellik benzeri|karışım)/.test(x)));
       __REG.ok('⚠️ ve ≈ satırlarında fark yazılı ("fark: …")', blok.filter(x => /\((⚠️ yakın|≈ özellik benzeri)/.test(x)).every(x => /\((⚠️ yakın|≈ özellik benzeri), fark: [^)]/.test(x)) && blok.some(x => /\(⚠️ yakın, fark:/.test(x)) && blok.some(x => /\(≈ özellik benzeri, fark:/.test(x)));
-      __REG.ok('✅ kaynaklı etiketi yalnız kaynak alanı olan muadilde', deg.filter(z => z.secilen.derece === 2).every(z => { const satir = blok.find(x => x.indexOf('• ' + z.orijAd + ' yerine ' + z.secilen.ad) === 0) || ''; return z.secilen.kaynak ? /\(✅ kaynaklı\)/.test(satir) : /\(✅ eşdeğer\)/.test(satir); }));
+      __REG.ok('✅ kaynaklı etiketi yalnız kaynak alanı olan muadilde', deg.filter(z => z.secilen.derece === 2).every(z => { const satir = blok.find(x => x.indexOf('• ' + z.orijAd + ' yerine ' + z.secilen.ad) === 0) || ''; return z.secilen.kaynak ? /\(✅ kaynaklı\)/.test(satir) : /\(✅ aynı suş kodu\)/.test(satir); }));
+      __REG.ok('notta "✅ eşdeğer" yazmıyor (ND6B 0c)', !/✅ eşdeğer/.test(n));
+      return __REG.al();
+    })
+  },
+  // ND2-ALIAS-ND6: eski: "WLP001, Wyeast 1056" ✅-muadil çift olduğu için ilk koda bağlanır → yeni: çiftin ✅ kaydı kaynak alanı taşımıyor, yani ✅ değil; kimlik eşlemesi YOK, satır VEYA okunur (stok boş → ilk kod; ikinci kod stokta → o), çünkü ND6 (3b) "✅ yalnız kaynakla" + ND6 (4) maya "A ya da B".
+  {
+    kod: 'ND2-ALIAS-ND6', ad: 'ND6 (bayraklar AÇIK) — MALT EŞLEME (BV alias = KİMLİK): ≥10 gerçek dergi yazımı alias ile doğru kayda · renk uyuşmazlığında BAĞLANMAZ (75/55 °L kristal, 200 °L çikolata) · BV REDDET adları (kabuklu Carafa II, "munich malt 10l") bağlanmaz · "light dry malt extract" → DME (formu yazmayan "light malt extract" ne DME ne LME — belirsiz) · boşluklu maya kodu · çok kodlu satır yalnız hepsi ✅-muadilse · K1–K3 grist eşleme ≥%80',
+    calistir: (page) => page.evaluate(() => {
+      const C = (t, h) => window._bmKatCoz(t, h);
+      const dergi = [['2-row pale malt', 'briess_pale'], ['maris otter pale malt', 'maris'], ['crystal malt (60 °l)', 'c60'], ['60° l crystal malt', 'c60'], ['flaked maize', 'corn'],
+        ['chocolate malt (350 °l)', 'choc'], ['special b malt', 'specb'], ['german pilsner malt', 'pilsner'], ['dextrin malt', 'carapils'], ['weyermann carafa special iii malt', 'crf3']];
+      const ham = new Set(); window._bmOrnekHepsi().forEach(e => (window._bmOrnekNesne(e.kaynak, e.stil, e.idx).g || []).forEach(x => ham.add(String(x[0]).toLowerCase().trim())));
+      const yanlis = dergi.filter(([h, b]) => C('malt', h) !== b), veride = dergi.filter(([h]) => ham.has(h));
+      __REG.ok(dergi.length + ' dergi yazımı alias ile doğru kayda', yanlis.length === 0, yanlis.map(([h]) => h + '→' + C('malt', h)).join(' | '));
+      __REG.ok('yazımların hepsi örnek verisinde GERÇEKTEN geçiyor (uydurma yazım yok)', veride.length === dergi.length, veride.length + '/' + dergi.length);
+      const renk = ['crystal malt (75 °l)', '55° l crystal malt', '200° l chocolate malt'];
+      __REG.ok('renk uyuşmazlığı → BAĞLANMAZ (katalogda o °L kaydı yok / choc r400)', renk.every(h => C('malt', h) === null), renk.map(h => h + '→' + C('malt', h)).join(' | '));
+      __REG.ok('BV REDDET adları bağlanmaz (kabuklu Carafa II ≠ Carafa Special; "munich malt 10l")', C('malt', 'carafa ii') === null && C('malt', 'munich malt 10l') === null);
+      __REG.ok('DME: "light dry malt extract" → dme; formu yazmayan "light malt extract" (kuru mu sıvı mı belirsiz) HİÇBİR kayda bağlanmaz', window._bmMetinCoz('katki', 'light dry malt extract') === 'dme' && window._bmMetinCoz('katki', 'light malt extract') === null, window._bmMetinCoz('katki', 'light malt extract'));
+      __REG.ok('maya: boşluklu kod "wlp 001" → wlp001', C('maya', 'wlp 001') === 'wlp001');
+      const esd = (a, b) => (MUADIL[a] || []).some(m => m.id === b && window._bmMuadilTam(m)) || (MUADIL[b] || []).some(m => m.id === a && window._bmMuadilTam(m));
+      { const ksz = (a, b) => [[a, b], [b, a]].every(([x, y]) => { const e = (MUADIL_ESKI[x] || []).find(m => m && m.id === y), k = _ND6_MUADIL_KARAR[x + '>' + y]; return !e || (!(e.kaynak && e.kaynak.url) && !(k && k[0] === 'o')); });
+        const yedek = STOK.slice(); STOK.length = 0; const v0 = window._bmMayaVeya('WLP001, Wyeast 1056'); STOK.push({ id: 'n2a6', ad: MAYALAR.find(m => m.id === 'wy1056').ad, refId: 'wy1056', g: 'Maya', miktar: 1, birim: 'pk' }); const v1 = window._bmMayaVeya('WLP001, Wyeast 1056'); STOK.length = 0; yedek.forEach(x => STOK.push(x));
+        __REG.ok('maya: "WLP001, Wyeast 1056" — çiftin ✅ kaydı kaynaksız → ✅ DEĞİL → kimlik eşlemesi YOK; VEYA: stok boşken ilk kod (alınacak), ikinci kod stoktaysa o', ksz('wlp001', 'wy1056') && !esd('wlp001', 'wy1056') && C('maya', 'WLP001, Wyeast 1056') === null && !!v0 && v0.id === 'wlp001' && v0.karsilayan === null && !!v1 && v1.id === 'wy1056' && v1.karsilayan === 'wy1056'); }
+      __REG.ok('maya: ✅-muadil OLMAYAN iki kod → belirsiz, eşleme YOK', !esd('wlp001', 'wlp300') && C('maya', 'WLP001 or WLP300') === null, C('maya', 'WLP001 or WLP300'));
+      let es = 0, top = 0; window._bmOrnekHepsi().filter(e => e.kaynak !== 'k4').forEach(e => { const r = window._bmOrnekKuru(e.kaynak, e.stil, e.idx); if (r) r.g.forEach(k => { top++; if (k.id) es++; }); });
+      __REG.ok('K1–K3 grist eşleme oranı ≥ %80 (ND2 hedefi)', top > 3000 && es / top >= 0.80, es + '/' + top + ' %' + (100 * es / top).toFixed(1));
+      return __REG.al();
+    })
+  },
+  // ND3-MUADIL-ND6: eski: 7 ✅ çiftin hepsi stokta → "🔁 muadil" → yeni: çift yalnız KAYNAK ALANI olan ✅ ise 🔁 muadil; kaynaksız ✅ artık ⚠️ "(kaynak bekliyor)" → kalem "yok" + yakın alternatif, durum / eksik AYNI ve ⚠️ aday olarak görünür, çünkü ND6 (3b) "✅ yalnız kaynakla".
+  {
+    kod: 'ND3-MUADIL-ND6', ad: 'ND6 (bayraklar AÇIK) — MUADIL DENETİMİ (veri sayfasıyla): yeni ✅ (Briess 2-Row→Thracian Pale · Belgian Pilsner→Pilsner/Viking · Munich Light→Munich · Chocolate→BEST Chocolate · Fuggle↔Willamette) stokta → 🔁 muadil; ⚠️\'e inen (mısır→yulaf, Munich Dark→Melanoidin, EKG→Fuggle, Cascade→Willamette, Mosaic→Citra — KAT1 ✅, ISK1 madde 7 ile ⚠️) stokta → "yok" + yakın alternatif, durum İYİLEŞMEZ; her ND3 satırı kaynak etiketi taşır',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('ND3 Muadil', {});
+      const H = window._bmOrnekHepsi(), kuru = e => window._bmOrnekKuru(e.kaynak, e.stil, e.idx);
+      const KAT = { malt: MALTLAR, hop: HOPLAR, maya: MAYALAR, katki: KATKILAR };
+      const giris = (tip, id, mik) => { const x = KAT[tip].find(a => a.id === id); return { id: 'n3m' + tip + id, ad: x.ad, refId: id, g: tip === 'malt' ? 'Malt' : tip === 'hop' ? 'Hop' : tip === 'maya' ? 'Maya' : 'Katkı', miktar: mik, birim: tip === 'malt' ? 'kg' : tip === 'maya' ? 'paket' : 'g' }; };
+      // hedef kalemi (id) gramlı içeren, muadil adayını İÇERMEYEN bir örnek; stok: hedef HARİÇ her şey + aday
+      const dene = (tip, id, aday) => {
+        const e = H.find(e => { if (e.kaynak === 'aha') return false; const r = kuru(e); const L = r.g.concat(r.h); return L.some(k => k.id === id && k.mik > 0) && L.every(k => k.id !== aday); });
+        if (!e) return { yok: true };
+        const r = kuru(e), L = r.g.concat(r.h, r.ek, r.y ? [r.y] : []); STOK.length = 0; const ek = {};
+        L.forEach(k => { if (!k.id || k.id === id || ek[k.id]) return; ek[k.id] = 1; STOK.push(giris(k.tip, k.id, k.tip === 'maya' ? 3 : k.mik > 0 ? k.mik * 50 : 1000)); });
+        const s0 = window._bmOrnekStok(e.kaynak, e.stil, e.idx); STOK.push(giris(tip, aday, 999));
+        const s1 = window._bmOrnekStok(e.kaynak, e.stil, e.idx), sat = s1.g.concat(s1.h).find(x => x.k.id === id), sat0 = s0.g.concat(s0.h).find(x => x.k.id === id);
+        const n = s0.g.concat(s0.h).filter(x => x.k.id === id).length; // hedef kalem örnekte birden çok satırda olabilir (Milkshake IPA'da Mosaic 3 satır)
+        return { e: e.stil, n, d0: sat0.d, d: sat.d, mu: sat.mu && sat.mu.id, yakin: sat.yakin && sat.yakin.id, eksik0: s0.eksik, eksik1: s1.eksik, durum0: s0.durum, durum1: s1.durum };
+      };
+      const tam = [['malt', 'briess_pale', 'thracian_pale'], ['malt', 'bel_pils', 'pilsner'], ['malt', 'bel_pils', 'viking_pils'], ['malt', 'munich_light', 'munich'], ['malt', 'choc', 'best_choc'], ['hop', 'fuggles', 'willamette'], ['hop', 'willamette', 'fuggles']]; // mosaic→citra: ND3 ⚠️ → KAT1 ✅ (Charles Faram) → ISK1 madde 7: ikinci kaynak yok → yine ⚠️
+      tam.forEach(([tip, id, a]) => { const r = dene(tip, id, a), mu = (MUADIL[id] || []).find(m => m.id === a), kay = !!(mu && window._bmMuadilTam(mu)), kaynakVar = !!(mu && mu.kaynak && mu.kaynak.url);
+        __REG.ok('kural: ' + id + ' → ' + a + ' ✅ ise kaynak alanı VAR; kaynak yoksa ✅ DEĞİL', kay === (kay && kaynakVar) && (kay || /^(⚠️|❌)/.test(String(mu.fark).trim())), String(mu && mu.fark).slice(0, 60));
+        if (kay) __REG.ok('kaynaklı ✅ ' + id + ' yok + ' + a + ' stokta → 🔁 muadil (eksik sayısı hedefin satır sayısı kadar azalır)', !r.yok && r.d0 === 'yok' && r.d === 'muadil' && r.mu === a && r.n >= 1 && r.eksik1 === r.eksik0 - r.n, JSON.stringify(r));
+        else { const uy = String(mu.fark).trim().indexOf('⚠️') === 0, A = window._bmIkameAday({ tip, id, gerek: 0.1, birim: tip === 'malt' ? 'kg' : 'g', rol: 'aci' }), ad = A.find(z => z.id === a);
+          __REG.ok('kaynaksız ✅ artık ' + (uy ? '⚠️' : '❌') + ': ' + id + ' yok + ' + a + ' stokta → "yok"' + (uy ? ' + yakın alternatif' : '') + ', durum / eksik AYNI (stokta sayılmaz)', !r.yok && r.d === 'yok' && r.eksik1 === r.eksik0 && r.durum1 === r.durum0 && (!uy || r.yakin === a), JSON.stringify(r));
+          __REG.ok(id + ' → ' + a + ': ikame adayında ✅ (derece 2) DEĞİL' + (uy ? '; ⚠️ aday (derece 3) olarak görünür' : ''), !(ad && ad.derece === 2) && (!uy || (!!ad && ad.derece === 3)), ad ? String(ad.derece) : 'aday yok'); } });
+      const yari = [['malt', 'corn', 'oat'], ['malt', 'dark_munich', 'mel'], ['hop', 'ekg', 'fuggles'], ['hop', 'cascade', 'willamette'], ['hop', 'mosaic', 'citra']];
+      yari.forEach(([tip, id, a]) => { const r = dene(tip, id, a); __REG.ok('⚠️ ' + id + ' yok + ' + a + ' stokta → "yok" + yakın alternatif, durum/eksik AYNI', !r.yok && r.d === 'yok' && r.yakin === a && r.eksik1 === r.eksik0 && r.durum1 === r.durum0, JSON.stringify(r)); });
+      const etiket = ['briess_pale', 'bel_pils', 'munich_light', 'choc', 'corn', 'dark_munich', 'mel', 'ekg', 'fuggles', 'styrian', 'willamette', 'cascade', 'mosaic'].every(k => (MUADIL[k] || []).some(m => /\[ND3/.test(m.fark)));
+      __REG.ok('değişen her MUADIL anahtarında ND3 kaynak etiketi', etiket);
+      __REG.ok('mısır→yulaf: yanlış satır metni (Halcyon) kaldırıldı', (MUADIL.corn || []).every(m => !/Halcyon/.test(m.fark)));
+      STOK.length = 0;
+      return __REG.al();
+    })
+  },
+  // UYG2-MAYA-ND6: eski: stoktaki BB-35 (=US-05) aynı suş kodu köprüsüyle ✅ (derece 2) ve stokta sayılır → yeni: "(=KOD)" köprüsü SATICI BEYANI: ⚠️ (derece 3), ⚠️ adayların en üstünde, metni "⚠️ satıcı beyanı: … ile aynı (doğrulanmadı)", stok kontrolünde SAYILMAZ, çünkü ND6B (0c) + ND6 (3) "maya ✅ yalnız aynı suş kanıtıyla".
+  {
+    kod: 'UYG2-MAYA-ND6', ad: 'ND6 (bayraklar AÇIK) — MAYA HATASI (kök neden: motor Sprint 7 köprüsünün "eşdeğer suş kodu" ve "ters ✅" kademelerini bilmiyordu): stoktaki BB-35 (=US-05) WLP001 satırını ✅ karşılar · tüm örneklerde: önizlemede stokta görünen maya uyarlamada ASLA özellik benzerine düşmez',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('UYG2 Maya', {});
+      const giris = id => { const x = MAYALAR.find(a => a.id === id); return { id: 'u2m' + id + Math.random(), ad: x.ad, refId: id, g: 'Maya', miktar: 2, birim: 'paket' }; };
+      STOK.length = 0; STOK.push(giris('bb35')); STOK.push(giris('s04'));
+      const A = window._bmIkameAday({ tip: 'maya', id: 'us05', gerek: 1, birim: 'pk' }), kb = window._mayaKodBilgi('bb35'), ku = window._mayaKodBilgi('us05'), i3 = A.findIndex(a => a.derece === 3), Aw = window._bmIkameAday({ tip: 'maya', id: 'wlp001', gerek: 1, birim: 'pk' });
+      __REG.ok('US-05 satırı: stoktaki BB-35 "(=US-05)" SATICI BEYANI → ⚠️ derece 3, ⚠️ adayların EN ÜSTÜNDE, ✅ (derece 2) aday yok; WLP001 satırında da BB-35 ✅ değil', !!kb && kb.kod === 'US-05' && kb.beyan === true && !!ku && ku.beyan === false && i3 >= 0 && A[i3].id === 'bb35' && A[i3].beyan === true && /^⚠️ satıcı beyanı: US-05 ile aynı \(doğrulanmadı\)$/.test(A[i3].fark) && !A.some(a => a.derece === 2) && !Aw.some(a => a.id === 'bb35' && a.derece <= 2), A.map(a => a.derece + ':' + a.id).join(' ') + ' | ' + Aw.map(a => a.derece + ':' + a.id).join(' '));
+      __REG.ok('stok kontrolü: satıcı beyanı köprüsü kalemi karşılamaz (stokYetersizMaya US-05 → eksik); US-05 stoğa girince karşılar', stokYetersizMaya({ mayaId: 'us05' }).eksik.length === 1 && (STOK.push(giris('us05')), stokYetersizMaya({ mayaId: 'us05' }).eksik.length === 0));
+      STOK.length = 0; MAYALAR.filter(m => ['bb35', 'bb_wheat', 'bb_belc', 's04', 'bb34', 'kveikv'].includes(m.id)).forEach(m => STOK.push(giris(m.id)));
+      const H = window._bmOrnekHepsi(), bad = [];
+      H.forEach(e => { if (!window._bmOrnekMalzemeliMi(e.kaynak, e.stil, e.idx)) return; const s = window._bmOrnekStok(e.kaynak, e.stil, e.idx); if (!s.y) return;
+        if (['stokta', 'bilinmiyor', 'dogrulanmadi', 'muadil'].includes(s.y.d)) { const p = window._bmStokUyarla(e.kaynak, e.stil, e.idx), z = p.satirlar.find(q => q.grup === 'y'); if (!z.secilen || z.secilen.derece > 2) bad.push(e.stil + ' ' + e.kaynak + e.idx + ' → ' + (z.secilen ? z.secilen.derece + ':' + z.secilen.id : 'yok')); } });
+      __REG.ok('değişmez: önizlemede stokta görünen maya → uyarlamada derece ≤2 (tüm kurulabilir örnekler)', !bad.length, bad.slice(0, 5).join(' | '));
+      STOK.length = 0;
+      return __REG.al();
+    })
+  },
+  // KAT1-SEPET-ND6: eski: Bisküvi ihtiyacının ✅ alternatiflerinde Amber Malt var → yeni: sepet alternatifi yalnız KAYNAK ALANI olan ✅ muadil; Bisküvi → Amber kaydı kaynaksızsa alternatiflerde YOK, çünkü ND6 (3b) "✅ yalnız kaynakla".
+  {
+    kod: 'KAT1-SEPET-ND6', ad: 'ND6 (bayraklar AÇIK) — SEPET FARKI KÖK NEDENİ (UYG2): kod değil STOK — buğday 2 → 5 kg olunca American Wheat IPA örneklerinin ihtiyacından buğday düştü, Bisküvi\'nin ✅ muadili Amber Malt tek kalemle ✅ açan aday oldu; aynı stokla motor değişmeden sonuç aynı',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('KAT1 Sepet', {});
+      const H = window._bmOrnekHepsi(), e = H.find(x => x.kaynak === 'kay' && x.stil === 'American Wheat IPA / Hoppy Wheat' && x.idx === 0);
+      if (!e) { __REG.ok('American Wheat IPA K3 örneği', false); return __REG.al(); }
+      const kuru = window._bmOrnekKuru(e.kaynak, e.stil, e.idx), wheat = kuru.g.find(k => k.id === 'wheat');
+      const gir = (id, mik, b) => ({ id: 'k1s' + id, ad: MALTLAR.find(a => a.id === id).ad, refId: id, g: 'Malt', miktar: mik, birim: b || 'kg' });
+      STOK.length = 0; STOK.push(gir('wheat', wheat.mik / 2));
+      const n1 = window._bmOrnekIhtiyac(window._bmOrnekStok(e.kaynak, e.stil, e.idx)) || [];
+      STOK.length = 0; STOK.push(gir('wheat', wheat.mik * 2));
+      const n2 = window._bmOrnekIhtiyac(window._bmOrnekStok(e.kaynak, e.stil, e.idx)) || [];
+      __REG.ok('buğday yetersizken ihtiyaçta buğday VAR; yeterliyken YOK (ihtiyaç kümesi stokla küçülür)', n1.some(k => k.id === 'wheat') && !n2.some(k => k.id === 'wheat'), n1.map(k => k.id) + ' → ' + n2.map(k => k.id));
+      const bisk = n2.find(k => k.id === 'bisk');
+      { const kOk = (a, b) => { const m = (MUADIL[a] || []).find(x => x && x.id === b); return !!(m && window._bmMuadilTam(m) && m.kaynak && m.kaynak.url); };
+        __REG.ok('Bisküvi ihtiyacının alternatifleri YALNIZ kaynaklı ✅ muadiller; Amber Malt alternatiflerde ancak kaydı kaynaklı ✅ ise var', !!bisk && (bisk.alt || []).every(a => kOk('bisk', a.id)) && (bisk.alt || []).some(a => a.id === 'amber') === kOk('bisk', 'amber'), (bisk && (bisk.alt || []).map(a => a.id).join(',')) + ' | amber kaynaklı ✅: ' + kOk('bisk', 'amber')); }
+      STOK.length = 0;
+      return __REG.al();
+    })
+  },
+  // AI1-HUKUM-ND6: eski: Schwarzbier'de Carafa Special III → siyah buğday maltı "kaynaklı ✅ muadil" → yeni: derece tablodan — kayıt kaynak alanı olan ✅ ise ✅; değilse ⚠️ ve hüküm "MUADIL tablosunda yakın ama farklı" (en az dikkat), çünkü ND6 (3b) + (3d) "kaynaklı muadil etiketi yalnız kaynak alanı olan ✅ için".
+  {
+    kod: 'AI1-HUKUM-ND6', ad: 'ND6 (bayraklar AÇIK) — HÜKÜM UYGULAMADAN (madde 4): AI "olur / olumlu" dese de hüküm BANT DIŞI kalır (aynı hüküm, AI cevabından bağımsız) · ton olumlu + değişikliğin riski → "AI ile hesap çelişiyor — hesap esas" · önceden de bant dışı olan eksen çelişki sayılmaz',
+    calistir: (page) => page.evaluate(async () => {
+      const A1 = window.BM_AI1; __REG.yeniKayit('REGTEST AI1 hukum', {});
+      S.stil = 'Schwarzbier'; S.hacim = 11; S.verim = 61; S.maltlar = [{ id: 'pilsner', kg: 1.6 }, { id: 'munich', kg: 1 }, { id: 'crf3', kg: 0.13 }]; S.hoplar = [{ id: 'magnum', g: 10, tur: 'boil', dk: 60 }]; S.mayaId = 'w3470';
+      const es = { islem: 'miktar', kalem: 'malt:2', yeni_kalem: '', miktar: 700, birim: 'g' };
+      A1.rastgele = () => 0.2; /* A = mevcut, B = değişiklik → mock tonu A→B yönünde */
+      const kos = async (ton, yorum) => { const m = __REG.ai1Mock({ esleme: es, asistan: { iddialar: [{ metin: yorum, katman: 'yorum' }], ton: ton } }); try { await A1.sor({ tur: 'recete' }, 'Carafa 700 g olsa olur mu?'); return A1.durum.recete; } finally { m.geri(); } };
+      const a = await kos('olumlu', 'Olur, gayet güzel olur.'), aHk = JSON.stringify(a.o.hk), aCel = a.sonuc.celiski;
+      const b = await kos('olumsuz', 'Olmaz.');
+      __REG.ok('SRM banttan çıkar → hüküm RİSK', a.o.hk.seviye === 'risk' && a.o.hk.satirlar.some(s => /bandı dışına çıkar: SRM/.test(s)), a.o.hk.satirlar.join(' | '));
+      __REG.ok('hüküm AI cevabından BAĞIMSIZ (olumlu ve olumsuz AI → aynı hüküm)', aHk === JSON.stringify(b.o.hk));
+      __REG.ok('ton olumlu + risk → çelişki uyarısı; ton olumsuz → yok', aCel === true && b.sonuc.celiski === false);
+      A1.durum.recete = a; const html = A1.kartHTML('recete');
+      __REG.ok('kartta hüküm başta + "AI ile hesap çelişiyor — hesap esas"', html.indexOf('bm-ai1-hukum') >= 0 && html.indexOf('bm-ai1-hukum') < html.indexOf('bm-ai1-bolum') && /AI ile hesap çelişiyor — hesap esas/.test(html));
+      const T = A1.baglamTarif({ tur: 'recete' }), d2 = A1.degisiklikKur(T, { islem: 'degistir', kalem: 'malt:2', yeni_kalem: 'siyah buğday maltı', miktar: 0, birim: '' }), h2 = A1.hukum('Schwarzbier', d2);
+      { const mu2 = (MUADIL[d2.eskiId] || []).find(m => m && m.id === d2.yeniId), kOk = !!(mu2 && window._bmMuadilTam(mu2) && mu2.kaynak && mu2.kaynak.url), uy = !!mu2 && String(mu2.fark).trim().indexOf('⚠️') === 0;
+        __REG.ok('muadil derecesi tablodan: kaynaklı ✅ → "✅"; kaynaksız (⚠️) → "⚠️" + hüküm satırı "yakın ama farklı" + seviye en az dikkat; "kaynaklı muadil" satırı yalnız ✅ derecesinde', !!mu2 && (kOk ? (h2.derece === '✅' && h2.satirlar.some(x => /kaynaklı muadil/.test(x))) : (uy && h2.derece === '⚠️' && h2.satirlar.some(x => /MUADIL tablosunda yakın ama farklı/.test(x)) && !h2.satirlar.some(x => /kaynaklı muadil/.test(x)) && (h2.seviye === 'dikkat' || h2.seviye === 'risk'))), JSON.stringify({ d: h2.derece, s: h2.seviye, kOk, uy })); }
+      const T3 = { stil: 'Dubbel', tarif: { maltlar: [{ id: 'pilsner', kg: 3 }], hoplar: [], katkilar: [], mayaId: null, hacim: 10, verim: 61, mashSc: 67 } }, d3 = A1.degisiklikKur(T3, { islem: 'ekle', kalem: '', yeni_kalem: 'lavanta', miktar: 40, birim: 'g' }), h3 = A1.hukum('Dubbel', d3);
+      A1.rastgele = () => 0.8; const c2 = await kos('olumsuz', 'Olmaz.');
+      __REG.ok('sıra ters (A = değişiklik): AI "A→B olumsuz" = değişiklik yönünde olumlu → çelişki yine yakalanır', c2.sonuc.celiski === true && c2.sonuc.ton === 'olumlu' && JSON.stringify(c2.o.hk) === aHk);
+      A1.rastgele = Math.random;
+      __REG.ok('katkı dozu katalog azamisini aşınca RİSK (4 g/L > 1,5)', h3.seviye === 'risk' && h3.satirlar.some(s => /azami dozunu aşar/.test(s)));
+      return __REG.al();
+    })
+  },
+  // CEV2-MAYA-ND6: eski: kimlik iddiası taşıyan her MUADIL maya kaydı "kimlik doğrulanmadı" etiketli ve ✅ / ⚠️ öneki aynen → yeni: kimlik iddiası taşıyan hiçbir kayıt kaynaksız ✅ değil — ya kaynak alanlı ✅, ya ⚠️ "(kaynak bekliyor)" (eski metin + etiket duruyor), ya da doğrulama kararıyla ⚠️ / ❌ (kaynaklı gerekçe), çünkü ND6 (3a) + (3b).
+  {
+    kod: 'CEV2-MAYA-ND6', ad: 'ND6 (bayraklar AÇIK) — KURAL YOLU MAYA ADAYI (CEV2 madde 6, AI yok): MAYA_ATU_KAYNAK (üreticinin kendi sayfası, url + birebir alıntı) · doğrulanmış = katalog atu alanı üretici aralığına EŞİT · aday (değiştir) yalnız mevcut VE aday doğrulanmışsa · BE-256 82–86 (Fermentis) · C09 / C10 / C11 fixture stok + BB IPA + BB Belçika + US-05 + WY3787 → BiraBurada adayı YOK, kaynaklı maya yön maddesi VAR · MUADIL kaynaksız kimlik iddiası "doğrulanmadı" etiketli · KASITLI BOZMA',
+    calistir: async (page) => {
+      const set = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'cev_seti.json'), 'utf8'));
+      return page.evaluate(async (set) => {
+        const C = window.BM_CEV, A = window.BM_AI, G = window.BM_AI5, K = eval('MAYA_ATU_KAYNAK'), MY = eval('MAYALAR'), MU = eval('MUADIL');
+        const URET = ['fermentis.com', 'lallemandbrewing.com', 'whitelabs.com', 'wyeastlab.com', 'imperialyeast.com', 'mangrovejacks.com', 'rvayeastlabs.com'], ids = Object.keys(K);
+        const kotu = ids.filter(id => { const k = K[id], h = C.host(k.url); return !URET.some(d => h === d || h.endsWith('.' + d)) || !k.c.every(v => k.a.indexOf(String(v)) >= 0) || !MY.find(m => m.id === id); });
+        const dg = ids.filter(id => bmMayaAtuDogru(id)), fark = ids.filter(id => !bmMayaAtuDogru(id));
+        __REG.ok('MAYA_ATU_KAYNAK ' + ids.length + ' maya: hepsi üreticinin kendi alanında + alıntıda iki sayı (kötü ' + JSON.stringify(kotu) + ') · doğrulanmış (katalog = üretici) ' + dg.length + ' · katalog üreticiden FARKLI ' + fark.length + ': ' + fark.map(id => id + ' ' + MY.find(m => m.id === id).atu.join('–') + '↔' + K[id].c.join('–')).join(', '), !kotu.length && ids.length >= 80 && !ids.some(id => /^bb|^oyl|^kveiko|^kveik_fg|^lc_rye|^mj_m21/.test(id)));
+        const be = MY.find(m => m.id === 'be256');
+        __REG.ok('BE-256 atu ' + be.atu.join('–') + ' = Fermentis "' + K.be256.a + '" · doğrulanmış · BiraBurada / Omega doğrulanmamış', be.atu[0] === 82 && be.atu[1] === 86 && !!bmMayaAtuDogru('be256') && !bmMayaAtuDogru('bb_ipa') && !bmMayaAtuDogru('bb_belc') && !bmMayaAtuDogru('oyl004') && !!bmMayaAtuDogru('us05') && !!bmMayaAtuDogru('wy3787'));
+        const bos = { sorgu: () => ({ ok: true, veri: { sorgular: [] } }), web: () => ({ ok: true, veri: { iddialar: [] } }), ozet: () => ({ ok: true, veri: { maddeler: [] } }) };
+        const ek = [['bb_ipa', 'BB IPA Mayası'], ['bb_belc', 'BB Belçika Tipi'], ['us05', 'Fermentis US-05'], ['wy3787', 'WY3787 Trappist High Grav']].map(([r, ad], i) => ({ ad, birim: 'paket', g: 'Maya', id: 'cev2t' + i, miktar: 2, uyari: 0, refId: r }));
+        const kos = async () => { const out = {}; for (const id of ['C09', 'C10', 'C11']) { const q = set.sorular.find(x => x.id === id), c = await C.cevapla(set, q, { mock: bos }); out[id] = { c, st: G.durum['cevset:' + id], p: C.puan(q, c) }; } return out; };
+        const sah = A.hazirMi, st0 = eval('STOK'); let O, B; A.hazirMi = () => ({ hazir: false });
+        const stk = st0.concat(ek); window.__cev2stk = stk;
+        try { eval('STOK = window.__cev2stk'); O = await kos(); const gd = G.atuDogru; G.atuDogru = () => true; try { B = await kos(); } finally { G.atuDogru = gd; } } finally { eval('STOK = st0'); A.hazirMi = sah; }
+        const sat = o => G.oneriler(o.st).map(x => x.kural + (x.tur === 'yon' ? '(yön)' : '(aday)')).join(', '), aday = o => G.oneriler(o.st).filter(x => x.kural === 'maya' && x.tur !== 'yon');
+        const yon = (o, k) => G.oneriler(o.st).find(x => x.kural === k);
+        __REG.ok('stok + BB IPA + BB Belçika + US-05 + WY3787: C09 ' + sat(O.C09) + ' · C10 ' + sat(O.C10) + ' · C11 ' + sat(O.C11) + ' → maya adayı ' + ['C09', 'C10', 'C11'].map(id => aday(O[id]).length).join('/') + ' · yön: C09 "' + (yon(O.C09, 'maya_att') || {}).metin + '" · C11 "' + (yon(O.C11, 'maya_att') || {}).metin + '"', ['C09', 'C10', 'C11'].every(id => !aday(O[id]).length) && !!yon(O.C09, 'maya_att') && !!yon(O.C10, 'maya_att') && !!yon(O.C11, 'maya_att') && /doğrulanmadı/.test(yon(O.C09, 'maya_att').metin) && /doğrulanmadı/.test(yon(O.C11, 'maya_att').metin) && !/BB IPA|BB Belçika/.test(O.C09.c.ust + O.C10.c.ust + O.C11.c.ust));
+        __REG.ok('kapsama (Claude anahtarları) bu stokla C09 ' + O.C09.p.kapsama.bulunan + '/' + O.C09.p.kapsama.beklenen + ' · C10 ' + O.C10.p.kapsama.bulunan + '/' + O.C10.p.kapsama.beklenen + ' · C11 ' + O.C11.p.kapsama.bulunan + '/' + O.C11.p.kapsama.beklenen, ['C09', 'C10', 'C11'].every(id => O[id].p.kapsama.bulunan === O[id].p.kapsama.beklenen));
+        __REG.ok('KASITLI BOZMA doğrulama kapalı → BB adayı geri gelir (C09 ' + aday(B.C09).map(x => x.metin.slice(0, 70)).join(' | ') + ') → kırmızı', aday(B.C09).some(x => /BB IPA/.test(x.metin)));
+        const MID = new Set(MY.map(m => m.id)), KIM = /eşdeğer|yeniden paket|orijinali|özdeş|aynı suş|klonu/i; let n = 0, et = 0;
+        Object.keys(MU).forEach(k => { if (!MID.has(k)) return; MU[k].forEach(e => { if (MID.has(e.id) && KIM.test(e.fark)) { n++; if (/kimlik doğrulanmadı/.test(e.fark)) et++; } }); });
+        { const ME = MUADIL_ESKI, KR_ = _ND6_MUADIL_KARAR; let nE = 0, uyan = 0; const aykiri = [];
+          Object.keys(ME).forEach(k => { if (!MID.has(k)) return; ME[k].forEach(e => { if (!(MID.has(e.id) && KIM.test(e.fark))) return; nE++; const y = MU[k].find(z => z.id === e.id), f = String(y.fark).trim(), kr = KR_[k + '>' + e.id], esk = String(e.fark).trim();
+            const ok = f.indexOf('✅') === 0 ? !!(y.kaynak && y.kaynak.url)
+              : kr && (kr[0] === 'u' || kr[0] === 'x') ? (f.indexOf(kr[0] === 'u' ? '⚠️' : '❌') === 0 && !!(y.kaynak && y.kaynak.url))
+              : kr && kr[0] === 'b' ? / \(kaynak bulunamadı\)$/.test(f)
+              : esk.indexOf('✅') === 0 ? (f.indexOf('⚠️') === 0 && / \(kaynak bekliyor\)$/.test(f) && /kimlik doğrulanmadı/.test(f)) : f === esk;
+            if (ok) uyan++; else aykiri.push(k + '>' + e.id); }); });
+          const m42 = MU.mj_m42.find(e => e.id === 'us05');
+          __REG.ok('MUADIL maya kimlik iddiası (eski tabloda) ' + nE + ' = ' + n + ' eski sayım · hepsi kurala uyuyor (kaynaklı ✅ / ⚠️ kaynak bekliyor + etiket / kararla ⚠️-❌ / değişmeyen ⚠️) · kaynaksız ✅ kimlik iddiası 0 · mj_m42 → us05 ✅ ancak kaynak alanıyla', nE > 0 && uyan === nE && m42.fark.startsWith('✅') === !!(m42.kaynak && m42.kaynak.url && m42.fark.startsWith('✅')), aykiri.slice(0, 5).join(' | ')); }
+        return __REG.al();
+      }, set);
+    }
+  },
+  // AL5-AK-ENTEGRASYON-ND6: eski: her satırda "✨ Yeni reçete" → yeni: iskeleti olan her satırda ana düğme "📦 Stoğumla kur" + ikincil "✨ Boş iskelet"; "✨ Yeni reçete" ve "📋 Doldur" yok, çünkü ND6 (1) "ana düğme stok-öncelikli".
+  {
+    kod: 'AL5-AK-ENTEGRASYON-ND6', ad: 'ND6 (bayraklar AÇIK) — AK ENTEGRASYONU (sprintin asıl değeri): profil seçicide "🎯 Hedef yap" satırları "📋 Doldur"a döndü — kapsama ölçülüyor',
+    calistir: (page) => page.evaluate(() => {
+      const T = window._PROFIL_STIL, K = window.STIL_ISKELET;
+      let oneri = 0, iskSonra = 0, iskOnce = 0;
+      Object.values(T).forEach(v => v[1].forEach(x => {
+        oneri++;
+        if (K[x[0]]) iskSonra++;
+        if (K[x[0]] && K[x[0]].kaynak !== 'cikarim_v3') iskOnce++;
+      }));
+      __REG.ok('profil önerilerinin >=%95\'i artık doldurulabilir', iskSonra / oneri >= 0.95, iskSonra + '/' + oneri + ' = %' + Math.round(100 * iskSonra / oneri));
+      __REG.ok('AL öncesi oran ~%75 idi → net kazanç', iskOnce / oneri < 0.80 && iskSonra > iskOnce, '%' + Math.round(100 * iskOnce / oneri) + ' → %' + Math.round(100 * iskSonra / oneri) + ' (+' + (iskSonra - iskOnce) + ' satır)');
+      // koyu+dengeli+dolgun kovası: AK'da Robust Porter "Hedef yap" idi, artık "Doldur"
+      const koyu = T['koyu|dengeli|dolgun'][1].map(x => x[0]);
+      __REG.ok('Robust Porter bu kovada öneriliyor', koyu.indexOf('Robust Porter') >= 0, koyu.join(' · '));
+      __REG.ok('Robust Porter artık İSKELETLİ (AK\'da değildi)', !!K['Robust Porter'] && K['Robust Porter'].kaynak === 'cikarim_v3');
+      // UI kanıtı: o kovada "Hedef yap" düğmesi kalmadı
+      __REG.yeniKayit('AL5 Bira', {});
+      ekran = 'editor'; sekme = 'genel';
+      _bmProfilSec('renk', 'koyu'); _bmProfilSec('aci', 'dengeli'); _bmProfilSec('govde', 'dolgun');
+      _brAc(); // SPRINT BR: öneri listesi tam ekranda
+      const dom = document.getElementById('ekran').innerHTML;
+      const tumIskeletli = koyu.every(a => !!K[a]);
+      __REG.ok('kovadaki TÜM öneriler iskeletli', tumIskeletli, koyu.filter(a => !K[a]).join(',') || 'hepsi');
+      __REG.ok('UI: bu kovada "🎯 Hedef yap" düğmesi KALMADI', tumIskeletli ? dom.indexOf('🎯 Hedef yap') < 0 : true);
+      { const T6 = document.getElementById('br-tam'), sat = [...T6.querySelectorAll('.br-satir')], isk = sat.filter((x, i) => window._bmIskeletVar(window.__brSon[i]));
+        __REG.ok('ND6 (1): "📋 Doldur" ve "✨ Yeni reçete" YOK; iskeletli her satırda ana düğme "Stoğumla kur" + ikincil "Boş iskelet" (iskeletsiz satırda "✨ Boş reçete")', (dom.match(/📋 Doldur/g) || []).length === 0 && (dom.match(/✨ Yeni reçete/g) || []).length === 0 && isk.length >= 5 && isk.every(x => x.querySelectorAll('.nd6-kur').length === 1 && x.querySelector('.nd6-kur').getAttribute('aria-label') === 'Stoğumla kur' && x.querySelectorAll('.br-btn-iki').length === 1 && x.querySelector('.br-btn-iki').getAttribute('aria-label') === 'Boş iskelet') && sat.filter(x => isk.indexOf(x) < 0).every(x => /✨ Boş reçete/.test(x.textContent) && !x.querySelector('.nd6-kur')), isk.length + '/' + sat.length); }
+      _brKapat();
+      return __REG.al();
+    })
+  },
+  // AV4-DOLDUR-REGRESYON-ND6: eski: her öneri satırında birincil düğme "✨ Yeni reçete" → yeni: her satırın birincil düğmesi (.br-btn-ana) iskeletli stilde "📦 Stoğumla kur" (dolu zemin, kalın), yanında ikincil "✨ Boş iskelet", çünkü ND6 (1).
+  {
+    kod: 'AV4-DOLDUR-REGRESYON-ND6', ad: 'ND6 (bayraklar AÇIK) — AÇIK REÇETEYİ DOLDURMA editörde (Hedef Stil + İskeleti Doldur; ND1: ekrandaki "📋 Doldur" kaldırıldı): AÇIK reçeteyi doldurur, YENİ reçete OLUŞTURMAZ; bmStilIskeletDoldur parametresiz çağrıda eski gibi davranır; öneri satırında İKİ eylem de var',
+    calistir: async (page) => {
+      await page.setViewport({ width: 390, height: 844 });
+      return page.evaluate(() => {
+        const key = 'koyu|dengeli|dolgun';
+        const idx = window._PROFIL_STIL[key][1].findIndex(x => !!STIL_ISKELET[x[0]]);
+        const ad = window._PROFIL_STIL[key][1][idx][0];
+        const id = __REG.yeniKayit('REGTEST AV4', {});
+        S.hacim = 11; S.verim = 61; S.maltlar = []; S.hoplar = []; S.mayaId = '';
+        const n0 = KR.length;
+        S.stil = ad; bmStilIskeletDoldur(); // ND1: açık reçeteyi doldurma editörde (Hedef Stil + İskeleti Doldur)
+        __REG.ok('YENİ reçete OLUŞTURMADI (KR sabit)', KR.length === n0, n0 + ' → ' + KR.length);
+        __REG.ok('AÇIK reçetede kaldı (_editId değişmedi)', String(_editId) === String(id), String(_editId));
+        __REG.ok('açık reçete DOLDU (eski davranış birebir)', S.stil === ad && (S.maltlar || []).length > 0 && (S.hoplar || []).length > 0, S.stil + ' / ' + (S.maltlar || []).length + ' malt');
+        // parametresiz bmStilIskeletDoldur eski davranış (flash + dönüş)
+        S.maltlar = []; S.hoplar = [];
+        const r = bmStilIskeletDoldur();
+        __REG.ok('bmStilIskeletDoldur() parametresiz: iskelet yine doluyor', (S.maltlar || []).length > 0 && r && r.katman === 'B', r ? r.katman : String(r));
+        __REG.ok('sessiz mod flash\'ı bastırıyor ama davranışı DEĞİŞTİRMİYOR', String(bmStilIskeletDoldur).indexOf('if(!sessiz && typeof flash') > -1);
+        // UI: iki eylem de basılıyor
+        tarifAc(id); sekme = 'genel'; window.__akProfil = { renk: 'koyu', aci: 'dengeli', govde: 'dolgun', maya: '', malt: '' }; _brAc();
+        const yeni = Array.from(document.querySelectorAll('#br-tam .br-satir .br-btn-ana')), ikincil = Array.from(document.querySelectorAll('#br-tam .br-satir .br-btn-iki')), eskiDugme = Array.from(document.querySelectorAll('#ekran button')).filter(b => /Yeni reçete/.test(b.innerText));
+        const dold = Array.from(document.querySelectorAll('#ekran button')).filter(b => /^(📋 Doldur|🎯 Hedef yap)$/.test(b.innerText.trim()));
+        const drop = Array.from(document.querySelectorAll('#ekran button')).filter(b => /İskeleti Doldur/.test(b.innerText));
+        // SPRINT BS1: liste artık kırpılmıyor; kapalı durumda ilk _BR_ILK_ACIK satır çizilir.
+        const sat = Math.min(window._BR_ILK_ACIK, window._brSonuc().stiller.length);
+        __REG.ok('her öneri satırında TEK birincil düğme; iskeletli satırda "Stoğumla kur" + ikincil "Boş iskelet"; "✨ Yeni reçete" yok', yeni.length === sat && eskiDugme.length === 0 && yeni.filter(b => b.classList.contains('nd6-kur')).length === ikincil.length && ikincil.length >= 1, yeni.length + '/' + sat + ' · ikincil ' + ikincil.length);
+        __REG.ok('ND1: ekranda "Doldur/Hedef yap" YOK (tek mod)', dold.length === 0, dold.length);
+        __REG.ok('"📦 Stoğumla kur" birincil düğme (dolu zemin, kalın); ikincil düğme saydam zeminli', getComputedStyle(yeni[0]).backgroundColor !== 'rgba(0, 0, 0, 0)' && parseFloat(getComputedStyle(yeni[0]).fontWeight) >= 700 && getComputedStyle(ikincil[0]).backgroundColor === 'rgba(0, 0, 0, 0)', getComputedStyle(yeni[0]).backgroundColor);
+        __REG.ok('AK3 REGRESYONU: dropdown + "İskeleti Doldur" AYNEN yerinde', !!document.querySelector('select[aria-label="Hedef stil"]') && drop.length === 1, 'dropdown butonu ' + drop.length);
+        // öneri satırları panelin genişliğini taşırmıyor (yeni sütun mobilde metni ezmiyor)
+        const panel = document.getElementById('br-tam');
+        const tasan = Array.from(panel.querySelectorAll('*')).filter(e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.right > panel.getBoundingClientRect().right + 1; });
+        __REG.ok('390px: tam ekranda yatay taşma YOK', tasan.length === 0, tasan.length + ' taşan');
+        _brKapat();
+        return __REG.al();
+      });
+    }
+  },
+  // BQ1-KARAKTER-ND6: eski: satır başına 1 "✨ Yeni reçete" → yeni: satır başına 1 birincil düğme (iskeletli stilde "📦 Stoğumla kur") + iskeletli satırda 1 ikincil "✨ Boş iskelet", çünkü ND6 (1).
+  {
+    kod: 'BQ1-KARAKTER-ND6', ad: 'ND6 (bayraklar AÇIK) — SATIRDA KARAKTER: her öneri satırında maya + malt karakteri görünüyor (Dunkelweizen ile Wee Heavy ayırt edilebiliyor); satır düzeni (Yeni reçete / Doldur / N reçete / ABV bandı / kalite-değil şerhi) BOZULMADI',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('BQ1 Karakter', {});
+      ekran = 'editor'; sekme = 'genel';
+      const pan = () => (document.getElementById('br-tam') || { innerHTML: '' }).innerHTML;
+      _bmProfilSifirla();
+      _bmProfilSec('renk', 'koyu'); _bmProfilSec('aci', 'dengeli'); _bmProfilSec('govde', 'dolgun');
+      _brAc();
+      const d = pan();
+      // SPRINT BS1: liste kırpılmıyor — kapalıyken ilk _BR_ILK_ACIK satır
+      const ILK = window._BR_ILK_ACIK;
+      const satir = (d.match(/reçete bu profilde/g) || []).length;
+      __REG.ok(ILK + ' öneri satırı (BS1: kırpma yok, ilk parti)', satir === ILK, satir);
+      let tam = 0;
+      d.split('reçete bu profilde').slice(1).forEach(seg => { const s = seg.slice(0, 500); if (s.indexOf('🧬') >= 0 && s.indexOf('🌾') >= 0) tam++; });
+      __REG.ok('HER satırda maya + tahıl karakteri var', tam === satir, tam + '/' + satir);
+      { const T6 = document.getElementById('br-tam'), sat6 = [...T6.querySelectorAll('.br-satir')];
+        __REG.ok('satır başına 1 birincil düğme; iskeletli satırda "Stoğumla kur" + 1 ikincil "Boş iskelet"; "✨ Yeni reçete" yok', sat6.length === satir && sat6.every((x, i) => x.querySelectorAll('.br-btn-ana').length === 1 && (window._bmIskeletVar(window.__brSon[i]) ? (x.querySelectorAll('.nd6-kur').length === 1 && x.querySelectorAll('.br-btn-iki').length === 1) : x.querySelectorAll('.br-btn-iki').length === 0)) && (d.match(/✨ Yeni reçete/g) || []).length === 0, sat6.length + '/' + satir); }
+      __REG.ok('ND1: "Doldur/Hedef yap" düğmesi YOK (tek mod)', ((d.match(/📋 Doldur/g) || []).length + (d.match(/🎯 Hedef yap/g) || []).length) === 0);
+      __REG.ok('ABV bandı satırda duruyor', /ABV/.test(d));
+      __REG.ok('kalite-değil uyarısı duruyor (AN dili)', d.indexOf('kalite değerlendirmesi değil') >= 0);
+      __REG.ok('karakterin korpustan geldiği + köken şerhi dipnotta', d.indexOf('maya KÖKENİNİ') >= 0);
+      _bmProfilSifirla();
+      _bmProfilSec('renk', 'amber'); _bmProfilSec('aci', 'malt'); _bmProfilSec('govde', 'dolgun');
+      const d2 = pan();
+      const dw = d2.slice(d2.indexOf('Dunkelweizen'), d2.indexOf('Dunkelweizen') + 700);
+      const wh = d2.slice(d2.indexOf('Wee Heavy'), d2.indexOf('Wee Heavy') + 700);
+      __REG.ok('Dunkelweizen satırı "baharatlı" diyor', dw.indexOf('🧬 baharatlı') >= 0);
+      __REG.ok('Wee Heavy satırı "meyveli" diyor (ayırt edilebiliyor)', wh.indexOf('🧬 meyveli') >= 0);
+      _brKapat(); _bmProfilSifirla();
+      return __REG.al();
+    })
+  },
+  // BR3-KORUNAN-ND6: eski: tam ekrandan "✨ Yeni reçete" AV1 yoluyla yeni reçete açar → yeni: ana düğme "📦 Stoğumla kur" stoktaki malzemelerle YENİ reçete kurar (alınacak sayısı rozetle aynı), ikincil "✨ Boş iskelet" eski AV1 yolunu AYNEN çağırır; ikisi de açık reçeteyi korur, çünkü ND6 (1).
+  {
+    kod: 'BR3-KORUNAN-ND6', ad: 'ND6 (bayraklar AÇIK) — MEVCUT AKIŞ KORUNDU: 🎯 Hedef Stil dropdown\'u + 📋 İskeleti Doldur AYNEN yerinde; BQ1\'in ikinci-adım süzgeç kutusu KALDIRILDI (tek yerde toplandı); tam ekrandan "✨ Yeni reçete" ve "📋 Doldur" AV/AK yollarını AYNEN çağırıyor',
+    calistir: (page) => page.evaluate(() => {
+      const id = __REG.yeniKayit('BR3 Korunan', {});
+      ekran = 'editor'; sekme = 'genel'; _bmProfilSifirla(); render();
+      const dom = document.getElementById('ekran').innerHTML;
+      __REG.ok('dropdown AYNEN duruyor', dom.indexOf('🎯 Hedef Stil:') >= 0 && !!document.querySelector('select[aria-label="Hedef stil"]'));
+      __REG.ok('dropdown 200+ BJCP stili listeliyor', (dom.match(/<option value="/g) || []).length >= 200, (dom.match(/<option value="/g) || []).length);
+      __REG.ok('"📋 İskeleti Doldur" AYNEN duruyor', dom.indexOf('bmStilIskeletDoldur()') >= 0);
+      __REG.ok('BQ1 ikinci-adım süzgeç kutusu KALDIRILDI', dom.indexOf('Listeyi daralt') < 0 && dom.indexOf('korpusta bu stilleri yapanların baskın seçimi') < 0);
+      __REG.ok('eski <details> paneli KALDIRILDI (artık düğme)', !document.querySelector('details.bm-profil-sec'));
+      // AV1 yolu: tam ekrandan yeni reçete
+      _bmProfilSec('renk', 'koyu'); _bmProfilSec('aci', 'dengeli'); _bmProfilSec('govde', 'dolgun');
+      _brAc();
+      const n0 = KR.length;
+      const kur6 = document.querySelector('#br-tam .br-satir .nd6-kur'), btn = document.querySelector('#br-tam .br-satir .br-btn-iki'), st6 = window.__brSon[0], q6 = window._bmIskStokDurum(st6);
+      __REG.ok('ana düğme "Stoğumla kur" + ikincil "Boş iskelet" ilk satırda; "✨ Yeni reçete" yok', !!kur6 && !!btn && /_nd6StokKurIx\(0\)/.test(kur6.getAttribute('onclick')) && /_brYeniIx\(0\)/.test(btn.getAttribute('onclick')) && !Array.from(document.querySelectorAll('#br-tam button')).some(b => /Yeni reçete/.test(b.textContent)));
+      kur6.click();
+      __REG.ok('ana düğme: stoktan YENİ reçete kuruldu (KR +1), doğru stil, alınacak sayısı rozetle aynı, ekran kapandı', KR.length === n0 + 1 && S.stil === st6 && window.__nd6SonKur.alinacak === q6.alinacak && /📦 STOĞUMA UYARLANDI/.test(String(S.notlar)) && !document.getElementById('br-tam'), KR.length - n0 + ' · ' + S.stil);
+      tarifAc(id); sekme = 'genel'; _brAc(); const n0b = KR.length, btnB = document.querySelector('#br-tam .br-satir .br-btn-iki');
+      __REG.ok('ikincil "Boş iskelet" düğmesi var (eski AV1 yolu)', !!btnB);
+      const beklenen = window.__brSon[0];
+      btnB.click();
+      __REG.ok('AV1 yolu (Boş iskelet): YENİ reçete oluştu, not stoğa uyarlama notu DEĞİL', KR.length === n0b + 1 && !/📦 STOĞUMA UYARLANDI/.test(String(S.notlar)), n0b + ' → ' + KR.length);
+      __REG.ok('AV1 yolu: doğru stil', S.stil === beklenen, S.stil + ' = ' + beklenen);
+      __REG.ok('eylem sonrası tam ekran kapandı', !document.getElementById('br-tam'));
+      // AK yolu: Doldur AÇIK reçeteyi doldurur, yeni reçete OLUŞTURMAZ
+      tarifAc(id); sekme = 'genel';
+      S.hacim = 11; S.verim = 61; S.maltlar = []; S.hoplar = []; S.mayaId = '';
+      _brAc();
+      const n1 = KR.length;
+      const dbtn = Array.from(document.querySelectorAll('#br-tam button')).filter(b => /^(📋 Doldur|🎯 Hedef yap)$/.test(b.textContent.trim()))[0];
+      __REG.ok('ND1: tam ekranda "📋 Doldur / 🎯 Hedef yap" YOK', !dbtn);
+      _brKapat(); S.stil = window.__brSon[0]; bmStilIskeletDoldur(); // açık reçeteyi doldurma: editör yolu
+      __REG.ok('AK yolu: YENİ reçete OLUŞTURMADI', KR.length === n1, n1 + ' → ' + KR.length);
+      __REG.ok('AK yolu: AÇIK reçete doldu', (S.maltlar || []).length > 0 && (S.hoplar || []).length > 0, (S.maltlar || []).length + ' malt');
+      __REG.ok('AK yolu: açık reçetede kalındı', String(_editId) === String(id), String(_editId));
+      _bmProfilSifirla();
+      return __REG.al();
+    })
+  },
+  // BS1-TUMSTIL-ND6: eski: 73 satırın her birinde "✨ Yeni reçete" → yeni: 73 satırın her birinde tek birincil düğme (iskeletli stilde "📦 Stoğumla kur"); "✨ Boş iskelet" eski _brYeniIx yolunu aynı indeksle çağırır, çünkü ND6 (1).
+  {
+    kod: 'BS1-TUMSTIL-ND6', ad: 'ND6 (bayraklar AÇIK) — TÜM STİLLER (Kaan: "hepsi gözüksün"): sonuç listesi artık KIRPILMIYOR — eşleşen tüm stiller erişilebilir; ilk 12 açık, gerisi "▾ N stil daha" ile tek dokunuşta; sıralama yaygınlık (n × iskelet 1,35) AYNEN; her satırda reçete sayısı + %; uzun listede sonuç başlığı YAPIŞKAN',
+    calistir: (page) => page.evaluate(() => {
+      __REG.yeniKayit('BS1 Tum', {});
+      ekran = 'editor'; sekme = 'genel'; _bmProfilSifirla(); _brAc();
+      const ov = () => document.getElementById('br-tam');
+      __REG.ok('kırpma kapalı (_BR_MAX_ONERI = 0)', window._BR_MAX_ONERI === 0, window._BR_MAX_ONERI);
+      __REG.ok('ilk parti 12 satır', window._BR_ILK_ACIK === 12, window._BR_ILK_ACIK);
+      const s = window._brSonuc();
+      __REG.ok('hiç seçim yok → 73 stil eşleşiyor', s.stiller.length === 73, s.stiller.length);
+      let d = ov().innerHTML;
+      __REG.ok('kapalıyken 12 satır çizili', (d.match(/reçete bu profilde/g) || []).length === 12, (d.match(/reçete bu profilde/g) || []).length);
+      __REG.ok('"▾ 61 stil daha" düğmesi var (gizli stil sayısı YAZILI)', /▾ 61 stil daha/.test(d), (d.match(/▾ \d+ stil daha/) || ['YOK'])[0]);
+      __REG.ok('başlıkta toplam stil sayısı var (73)', /<b>73<\/b> stil/.test(d));
+      // AÇ
+      const daha = ov().querySelector('.br-daha');
+      __REG.ok('düğme ≥44 px dokunma hedefi', daha.getBoundingClientRect().height >= 44, Math.round(daha.getBoundingClientRect().height));
+      daha.click();
+      d = ov().innerHTML;
+      const satir = (d.match(/reçete bu profilde/g) || []).length;
+      __REG.ok('açılınca 73 stilin HEPSİ satır oldu', satir === 73, satir);
+      __REG.ok('kısalt düğmesi geldi', /▴ ilk 12 stille kısalt/.test(d));
+      __REG.ok('her satırda reçete sayısı + % (şeffaflık korundu)', (d.match(/reçete bu profilde \(%/g) || []).length === 73, (d.match(/reçete bu profilde \(%/g) || []).length);
+      __REG.ok('her satırda tek birincil düğme (73); iskeletli satırlarda "Stoğumla kur"; "✨ Yeni reçete" yok', ov().querySelectorAll('.br-satir .br-btn-ana').length === 73 && ov().querySelectorAll('.br-satir .nd6-kur').length === window.__brSon.filter(a => window._bmIskeletVar(a)).length && (d.match(/✨ Yeni reçete/g) || []).length === 0, ov().querySelectorAll('.br-satir .nd6-kur').length + ' kur');
+      // SIRALAMA: n × (iskelet ? 1.35 : 1) AZALAN
+      const L = window.__brSon, m = s.m, ISK = window.STIL_ISKELET;
+      let bozuk = 0;
+      for (let i = 1; i < L.length; i++) {
+        const a = m[L[i - 1]] * (ISK[L[i - 1]] ? 1.35 : 1), b = m[L[i]] * (ISK[L[i]] ? 1.35 : 1);
+        if (a < b - 1e-9) bozuk++;
+      }
+      __REG.ok('sıralama yaygınlık (n × iskelet 1,35) — AK/AM mantığı AYNEN', bozuk === 0, bozuk + ' ihlal');
+      __REG.ok('en yaygın stil ilk sırada (American IPA)', L[0] === 'American IPA', L[0] + ' (' + m[L[0]] + ')');
+      // YAPIŞKAN başlık: uzun listede yön kaybı yok
+      const gov = ov().querySelector('.br-tam-govde');
+      const gvUst = Math.round(gov.getBoundingClientRect().top);
+      gov.scrollTop = gov.scrollHeight;
+      const basY = Math.round(ov().querySelector('.br-sonuc-bas').getBoundingClientRect().top);
+      __REG.ok('uzun listede sonuç başlığı YAPIŞKAN (üstte kalıyor)', basY >= gvUst - 1 && basY <= gvUst + 14, basY + ' vs gövde üst ' + gvUst);
+      gov.scrollTop = 0;
+      // kısalt geri alıyor
+      ov().querySelector('.br-daha').click();
+      __REG.ok('kısalt → tekrar 12 satır', (ov().innerHTML.match(/reçete bu profilde/g) || []).length === 12);
+      // eylem düğmeleri TAM listeye göre indeksli (kayma yok)
+      window._brHepsiAc();
+      const btn = Array.from(ov().querySelectorAll('button')).filter(b => /_brYeniIx/.test(b.getAttribute('onclick') || ''));
+      const ix = btn.map(b => +b.getAttribute('onclick').match(/\((\d+)\)/)[1]);
+      __REG.ok('73 düğme, indeksler 0..72 sıralı (yanlış stil açılmaz)', ix.length === 73 && ix.every((v, i) => v === i), ix.length + ' düğme');
+      _brKapat(); _bmProfilSifirla();
+      return __REG.al();
+    })
+  },
+  // BT1-GRUP-ND6: eski: 360 px'te kaydırmadan en az 1 öneri satırı görünür (eski tek düğmeli satırla) → yeni: AYNI beklenti ND6 satırıyla (rozet + örnek sayımı + iki düğme) da sağlanır, çünkü ND6B (2) "360 px'te ilk sonuç satırı kaydırmadan tam görünsün" (dar ekranda ızgara satır; açıklama + sıra satırı listenin altında).
+  {
+    kod: 'BT1-GRUP-ND6', ad: 'ND6 (bayraklar AÇIK) — EKSEN GRUPLAMA (ölçümle zorunlu oldu): 8 eksen birden açıkken 390×844\'te sonuç başlığı 328 px aşağıda kalıyordu; temel (renk/acılık/gövde/güç) hep açık + detay (maya/tahıl/malt/hop) katlı yapıldı. 390 ve 360\'ta sonuç ARTIK seçimsizken bile görünür alanda; detay grubunda seçim varsa kendiliğinden açılır',
+    calistir: async (page) => {
+      let hepsi = [];
+      for (const [w, h] of [[390, 844], [360, 640]]) {
+        await page.setViewport({ width: w, height: h });
+        await page.waitForFunction(() => {
+          const s = document.querySelector('.bm-sidebar');
+          if (!s) return true;
+          if (getComputedStyle(s).position !== 'fixed') return true;
+          return s.getBoundingClientRect().right <= 0.5;
+        }, { timeout: 4000 });
+        const c = await page.evaluate((w) => {
+          const kayit = KR.find(k => k && k.biraAd === 'BT1 grup');
+          if (!kayit) __REG.yeniKayit('BT1 grup', {}); else tarifAc(kayit.id);
+          ekran = 'editor'; sekme = 'genel';
+          _bmProfilSifirla(); render(); _brAc();
+          const ov = () => document.getElementById('br-tam');
+          const mesafe = () => {
+            const gov = ov().querySelector('.br-tam-govde'), bas = ov().querySelector('.br-sonuc-bas');
+            return Math.round(bas.getBoundingClientRect().top - gov.getBoundingClientRect().bottom);
+          };
+          __REG.ok(w + ': seçimsizken YALNIZ 4 temel eksen açık', ov().querySelectorAll('.br-eksen').length === 4, ov().querySelectorAll('.br-eksen').length);
+          // ÖLÇÜLDÜ (gruplama sonrası): 390×844 → 0 seçimde -146 px (görünür),
+          // 360×640 → 0 seçimde +110 px (kısa kaydırma), 3 seçimde -160 px (görünür).
+          // 360'ta 4 temel eksen + başlık + alt çubuk zaten 640 px'i dolduruyor;
+          // iddia ölçülen gerçeğe göre yazıldı, ölçüm iddiaya göre DEĞİL.
+          const m0 = mesafe();
+          if (w >= 390) __REG.ok(w + ': seçim YOKKEN bile sonuç başlığı görünür alanda', m0 < 0, m0 + ' px');
+          else __REG.ok(w + ': seçim yokken başlık en fazla bir kısa kaydırma uzakta', m0 < 160, m0 + ' px');
+          _bmProfilSec('renk', 'koyu'); _bmProfilSec('aci', 'dengeli'); _bmProfilSec('govde', 'dolgun');
+          const m3 = mesafe();
+          __REG.ok(w + ': 3 seçimde sonuç başlığı GÖRÜNÜR alanda', m3 < 0, m0 + ' → ' + m3 + ' px');
+          __REG.ok(w + ': BS tabanına göre KAZANÇ (6 eksen açıkken 3 seçimde 360\'ta -70 px idi)', m3 < m0, m0 + ' → ' + m3);
+          const satir = Array.from(ov().querySelectorAll('.br-satir')).filter(e =>
+            e.getBoundingClientRect().bottom <= ov().querySelector('.br-tam-govde').getBoundingClientRect().bottom + 1).length;
+          __REG.ok(w + ': kaydırmadan en az 1 öneri satırı görünüyor', satir >= 1, satir + ' satır');
+          // detay grubu
+          const grup = ov().querySelector('.br-grup');
+          __REG.ok(w + ': grup düğmesi ≥44 px', grup.getBoundingClientRect().height >= 44, Math.round(grup.getBoundingClientRect().height));
+          __REG.ok(w + ': grup düğmesi taşmıyor', grup.getBoundingClientRect().right <= innerWidth + 0.5);
+          grup.click();
+          __REG.ok(w + ': açılınca 8 eksen', ov().querySelectorAll('.br-eksen').length === 8, ov().querySelectorAll('.br-eksen').length);
+          const cips = Array.from(ov().querySelectorAll('.br-cip'));
+          __REG.ok(w + ': tüm çipler ≥44 px', cips.every(b => b.getBoundingClientRect().height >= 44), cips.filter(b => b.getBoundingClientRect().height < 44).length + ' küçük');
+          __REG.ok(w + ': hiçbir çip taşmıyor', cips.every(b => { const r = b.getBoundingClientRect(); return r.left >= -0.5 && r.right <= innerWidth + 0.5; }));
+          __REG.ok(w + ': belge yatay taşmıyor', document.documentElement.scrollWidth <= innerWidth + 1);
+          ov().querySelector('.br-grup').click();
+          __REG.ok(w + ': tekrar tık → 4 eksene döndü', ov().querySelectorAll('.br-eksen').length === 4);
+          // detayda SEÇİM varsa kendiliğinden açılır
+          _bmProfilSec('hop', 'tropik');
+          __REG.ok(w + ': detayda seçim yapılınca grup KENDİLİĞİNDEN açık', ov().querySelectorAll('.br-eksen').length === 8, ov().querySelectorAll('.br-eksen').length);
+          __REG.ok(w + ': grup başlığı seçim sayısını gösteriyor', /1 seçili/.test(ov().querySelector('.br-grup').textContent), ov().querySelector('.br-grup').textContent.trim().slice(-24));
+          _bmProfilSifirla();
+          __REG.ok(w + ': sıfırla → grup kapandı, 4 eksen', ov().querySelectorAll('.br-eksen').length === 4);
+          _brKapat();
+          return __REG.al();
+        }, w);
+        hepsi = hepsi.concat(c);
+      }
+      await page.setViewport({ width: 1024, height: 800 });
+      return hepsi;
+    }
+  },
+  // ISK1-HASH-ND6: eski: canlı türetme saklanan iskeletle birebir → yeni: iskelet_veri.js DEĞİŞMEDİ (özet = ND6 öncesi sürümün özeti) ve uygulama SAKLANAN dosyayı okur (yeniden üretim ND7); canlı türetme stoktan bağımsız kalır, çünkü Claude kararı ND6B (0b) + ND6 (3) "maya ✅ zinciri yeni tabloyu okur".
+  {
+    kod: 'ISK1-HASH-ND6', ad: 'ND6 (bayraklar AÇIK) — İSKELET DOSYASI DEĞİŞMEDİ: iskelet_veri.js özeti ND6 öncesi sürümle aynı (yeniden üretim ND7) · örnek verisi özeti + HTML / sw.js adresi aynen · uygulama iskeleti SAKLANAN dosyadan okur · canlı türetme stoktan bağımsız (VEYA kuralı türetmede kapalı)',
+    calistir: async (page) => {
+      const out = []; const ok = (ad, k, d) => out.push({ ad, ok: !!k, detay: d === undefined ? '' : String(d) });
+      const html = fs.readFileSync(path.join(KOK, HTML_AD), 'utf8'), sw = fs.readFileSync(path.join(KOK, 'sw.js'), 'utf8'), iv = fs.readFileSync(path.join(KOK, 'iskelet_veri.js'), 'utf8');
+      const ozet = t => crypto.createHash('sha256').update(t).digest('hex').slice(0, 10), q = ozet(iv), ov = ozet(fs.readFileSync(path.join(KOK, 'ornek_veri.js'), 'utf8').replace(/\r\n/g, '\n'));
+      const ND6_ONCESI_OZET = '2ab21bcd71'; // git show b64fb41:iskelet_veri.js (LF) sha256-10 — ND6 öncesi sürüm; dosya ND7'de yeniden üretilince bu sabit bilerek güncellenir
+      ok('iskelet_veri.js özeti = ND6 ÖNCESİ sürümün özeti (satır sonu bağımsız) — dosya yeniden üretilmedi', ozet(iv.split('\r\n').join('\n')) === ND6_ONCESI_OZET, ozet(iv.split('\r\n').join('\n')) + ' vs ' + ND6_ONCESI_OZET);
+      const m = /"ornekV":"([0-9a-f]+)"/.exec(iv);
+      ok('iskelet_veri.js örnek özeti = ornek_veri.js özeti', !!m && m[1] === ov, (m && m[1]) + ' vs ' + ov);
+      ok('HTML ve sw.js aynı içerik özetli adresi taşıyor', (html.match(/<script src="iskelet_veri\.js\?v=/g) || []).length === 1 && html.indexOf('iskelet_veri.js?v=' + q + '"') > 0 && sw.indexOf("'./iskelet_veri.js?v=" + q + "'") >= 0, q);
+      const r = await page.evaluate(() => { const T = window._ISKELET_TURETILMIS.stiller, A = x => JSON.stringify([x.grist, x.hop, x.katki, x.hedef, x.mashSc, x.durum, x.ref]); let n = 0, mayaDisi = 0, saklanan = 0, bayrak = window.BM_ND6.muadil && window.BM_ND6.maya;
+        const ad = Object.keys(T).filter(s => T[s].durum === 'turetilmis' || T[s].durum === 'zayif'), c1 = {};
+        ad.forEach(s => { n++; const c = window._bmIskTuret(s); c1[s] = c ? c.mayaId : null; if (!c || A(c) !== A(T[s])) mayaDisi++; const al = window._bmIskeletAl(s); if (al && (al.isk === T[s] || al.turetilmis === T[s])) saklanan++; }); // saklanan nesnenin KENDİSİ (canlı türetme değil); elle iskelet seçilmişse türetilmiş alanında
+        const yedek = STOK.slice(); STOK.length = 0; const stoksuz = ad.every(s => { const c = window._bmIskTuret(s); return (c ? c.mayaId : null) === c1[s]; }); yedek.forEach(x => STOK.push(x));
+        return { n, mayaDisi, saklanan, stoksuz, bayrak }; });
+      ok('bayraklar açık (muadil + maya)', r.bayrak && r.n > 150, String(r.n));
+      ok('uygulama iskeleti SAKLANAN dosyadan okur (_bmIskeletAl dosyadaki nesnenin kendisini döndürür, ' + r.n + ' stil)', r.saklanan === r.n, r.saklanan + '/' + r.n);
+      ok('canlı türetme stoktan bağımsız (stok boşken aynı maya): maya VEYA kuralı türetmede kapalı', r.stoksuz);
+      return out;
+    }
+  },
+  // ND1-FILTRE-ND6: eski: "Yapabilirim" süzgeci listeyi ✅ ÖRNEĞİ olan stillere indirir → yeni: süzgeç iskelet-stok durumundan — 1 = ✅ / 🟨 (miktar yetiyor), 2 = + alınacak ve az kalem toplamı en çok 2; boş stokta dürüst mesaj "eksiksiz kurulabilen stil yok"; örnek listesi (önizleme) süzgeci aynen örnek durumundan, çünkü ND6 (1) "süzgeç iskelet-stok durumunu kullanır" + ND6B (1) "süzgeç 1 az var olanı geçirmez".
+  {
+    kod: 'ND1-FILTRE-ND6', ad: 'ND6 (bayraklar AÇIK) — "Yapabilirim" süzgeci İSKELET-STOK durumundan: parçalı hesap + bekleme · 1 = yalnız ✅ / 🟨 (miktarı yetmeyen "az" stil GEÇMEZ) · 2 = + alınacak / az toplamı ≤ 2 · boş stokta dürüst boş mesaj · ekran kapalıyken (Reçete Doktoru) rozet / süzme yok',
+    calistir: async (page) => {
+      const kur = await page.evaluate(() => { window._bmProfilSifirla(); window.__ndFiltre = 0; window.__nd6Sira = ''; window._nd6IskSifirla(); _brAc(); _ndFiltreTik();
+        return { bekle: !!document.querySelector('#br-tam .nd-bekle'), pressed: document.querySelector('#br-tam .nd-filtre').getAttribute('aria-pressed'), tum: window._brSonuc().stiller.slice() }; });
+      await page.waitForFunction(() => !document.querySelector('#br-tam .nd-bekle'), { timeout: 90000 });
+      const r = await page.evaluate((tum) => { const d = s => window._bmIskStokDurum(s), L1 = window.__brSon.slice(), bek1 = tum.filter(s => d(s) && (d(s).durum === 'ok' || d(s).durum === 'muadil'));
+        const o = { n1: L1.length, ayni1: JSON.stringify(L1) === JSON.stringify(bek1), azYok: L1.every(s => !d(s).az), azVar: tum.filter(s => d(s) && d(s).durum === 'az').length };
+        _ndFiltreSari(); const L2 = window.__brSon.slice(), bek2 = tum.filter(s => d(s) && (d(s).durum === 'ok' || d(s).durum === 'muadil' || ((d(s).durum === 'yakin' || d(s).durum === 'az') && d(s).alinacak + d(s).azN <= 2)));
+        o.n2 = L2.length; o.ayni2 = JSON.stringify(L2) === JSON.stringify(bek2); o.not2 = (document.querySelector('#br-tam .nd-filtre-not') || {}).textContent || '';
+        window.__ndFiltre = 1; STOK.length = 0; window._brCiz(); return o; }, kur.tum);
+      await page.waitForFunction(() => !document.querySelector('#br-tam .nd-bekle'), { timeout: 90000 });
+      const b = await page.evaluate(() => { window._brCiz(); const t = document.getElementById('br-tam').textContent, bos = /stoğunla eksiksiz kurulabilen stil yok/.test(t), satir = document.querySelectorAll('#br-tam .br-satir').length;
+        window.__ndFiltre = 0; _brKapat(); const box = document.createElement('div'); box.innerHTML = window._bmOrnekListeHTML('Coffee Stout');
+        return { bos, satir, kapali: !box.querySelector('.nd-rozet') && !box.querySelector('.nd6-rozet') && box.querySelectorAll('.bm-ornek-satir').length === 3 }; });
+      return [
+        { ad: 'çip açıldı (aria-pressed) + ilk anda bekleme durumu (parçalı hesap)', ok: kur.pressed === 'true' && kur.bekle, detay: JSON.stringify({ p: kur.pressed, b: kur.bekle }) },
+        { ad: 'süzgeç 1: liste = iskelet-stok durumu ✅ / 🟨 olan stiller (sıra korunur), ' + r.n1 + ' stil', ok: r.ayni1, detay: r.n1 + '/' + kur.tum.length },
+        { ad: 'süzgeç 1: miktarı yetmeyen ("az") stil GEÇMEZ', ok: r.azYok, detay: 'listede az 0 · profilde "az" durumlu stil ' + r.azVar },
+        { ad: 'süzgeç 2: + alınacak ve az kalem toplamı en çok 2 olanlar; not metni bunu söyler', ok: r.ayni2 && r.n2 >= r.n1 && /en çok 2 kalemi alınacak ya da az/.test(r.not2), detay: r.n2 + ' ≥ ' + r.n1 },
+        { ad: 'stok boş → DÜRÜST boş mesaj ("stoğunla eksiksiz kurulabilen stil yok"), satır yok', ok: b.bos && b.satir === 0 },
+        { ad: 'ekran kapalıyken (Reçete Doktoru) rozet / süzme YOK — Coffee Stout 3 satır', ok: b.kapali }
+      ];
+    }
+  },
+  // ── SPRINT ND6B (2026-11-11) ──
+  {
+    kod: 'ND6B-KOD', ad: 'MAYA "(=KOD)" SUŞ KÖPRÜSÜ = SATICI BEYANI (ND6B 0c): katalog adındaki ve stok adındaki "(=KOD)" işareti hiçbir yerde ✅ / aynen sayılmaz — ikame adayında ⚠️ (derece 3, ⚠️ kayıtların en üstünde, "⚠️ satıcı beyanı: KOD ile aynı (doğrulanmadı)"), stok kontrolünde (stokYetersizMaya, örnek rozeti, iskelet rozeti) karşılamaz, reçete notunda "✅ eşdeğer" yazmaz · bayrak kapalıyken eski (✅ aynı suş kodu)',
+    calistir: (page) => page.evaluate(() => {
+      const KB = window._mayaKodBilgi, beyanli = MAYALAR.filter(m => { const b = KB(m.id); return b && b.beyan; }), kodlu = id => MAYALAR.find(m => { const b = KB(m.id); return b && !b.beyan && b.kod === KB(id).kod; });
+      const cift = beyanli.map(m => [m, kodlu(m.id)]).filter(x => x[1]);
+      __REG.ok('katalogda "(=KOD)" adlı mayalar var ve kodun gerçek ürünü de katalogda (ön koşul: en az 1 çift)', beyanli.length >= 1 && cift.length >= 1 && beyanli.every(m => /\(=\s*[A-Z0-9]/i.test(m.ad)), beyanli.length + ' / ' + cift.length);
+      const gir = (m, ad) => ({ id: 'kb' + Math.random(), ad: ad || m.ad, refId: ad ? undefined : m.id, g: 'Maya', miktar: 2, birim: 'paket' });
+      let adayOk = 0, stokOk = 0, tersOk = 0, ornekOk = 0; const fark = [];
+      cift.forEach(([bm, gm]) => { STOK.length = 0; STOK.push(gir(bm));
+        const A = window._bmIkameAday({ tip: 'maya', id: gm.id, gerek: 1, birim: 'pk' }), a = A.find(z => z.id === bm.id), i3 = A.findIndex(z => z.derece === 3);
+        if (a && a.derece === 3 && a.beyan === true && A[i3].id === bm.id && a.fark === '⚠️ satıcı beyanı: ' + KB(bm.id).kod + ' ile aynı (doğrulanmadı)' && !A.some(z => z.derece <= 2)) adayOk++; else fark.push('aday ' + gm.id + '←' + bm.id);
+        if (stokYetersizMaya({ mayaId: gm.id }).eksik.length === 1) stokOk++; else fark.push('stok ' + gm.id);
+        STOK.length = 0; STOK.push(gir(gm)); const B = window._bmIkameAday({ tip: 'maya', id: bm.id, gerek: 1, birim: 'pk' }), b = B.find(z => z.id === gm.id);
+        if (b && b.derece === 3 && b.beyan === true && stokYetersizMaya({ mayaId: bm.id }).eksik.length === 1) tersOk++; else fark.push('ters ' + bm.id + '←' + gm.id); });
+      __REG.ok(cift.length + ' çift: stokta "(=KOD)" mayası → gerçek ürün satırında ⚠️ derece 3, en üstte, satıcı beyanı metni, ✅ / aynen aday yok', adayOk === cift.length, fark.join(' | '));
+      __REG.ok(cift.length + ' çift: stok kontrolü köprüyü SAYMAZ (stokYetersizMaya → eksik)', stokOk === cift.length, fark.join(' | '));
+      __REG.ok(cift.length + ' çift: ters yön de aynı (stokta gerçek ürün, satır "(=KOD)" mayası → ⚠️ + eksik)', tersOk === cift.length, fark.join(' | '));
+      // stok ADINDAKİ "(=KOD)" (katalog dışı özel kalem)
+      const g0 = cift[0][1], kod0 = KB(g0.id).kod; STOK.length = 0; STOK.push(gir(null, 'Özel Maya (=' + kod0 + ')'));
+      const C_ = window._bmIkameAday({ tip: 'maya', id: g0.id, gerek: 1, birim: 'pk' });
+      __REG.ok('stok adındaki "(=' + kod0 + ')" işareti: ⚠️ derece 3 satıcı beyanı, stok kontrolünde sayılmaz', C_.length >= 1 && C_[0].derece === 3 && C_[0].beyan === true && /^⚠️ satıcı beyanı: /.test(C_[0].fark) && !C_.some(z => z.derece <= 2) && stokYetersizMaya({ mayaId: g0.id }).eksik.length === 1, C_.map(z => z.derece + ':' + z.id).join(' '));
+      // örnek rozeti + iskelet rozeti + reçete notu
+      STOK.length = 0; STOK.push(gir(cift[0][0])); const H = window._bmOrnekHepsi(), e = H.find(x => { const r = window._bmOrnekKuru(x.kaynak, x.stil, x.idx); return r && r.y && r.y.id === g0.id && !r.y.veya; });
+      const so = e ? window._bmOrnekStok(e.kaynak, e.stil, e.idx) : null;
+      __REG.ok('örnek rozeti: mayası ' + g0.id + ' olan örnekte maya satırı "yok" (stokta yalnız "(=KOD)" mayası var)', !!so && so.y.d === 'yok', so ? so.y.d : 'örnek yok');
+      const st = Object.keys(BJCP).filter(s => window._bmIskeletVar(s)), si = st.find(s => { const p = window._bmStokUyarla('isk', s, 0); return p && p.satirlar.some(z => z.grup === 'y' && z.secilen && z.secilen.beyan); });
+      const pi = si ? window._bmStokUyarla('isk', si, 0) : null, qi = si ? window._bmIskStokDurum(si) : null;
+      __REG.ok('iskelet rozeti: mayası satıcı beyanıyla karşılanan stil ✅ OLAMAZ (en iyi 🟨); maya satırı derece 3', !!pi && pi.satirlar.find(z => z.grup === 'y').secilen.derece === 3 && qi.durum !== 'ok' && qi.yakinN >= 1, si + ' ' + (qi && qi.durum));
+      if (si) window._bmIskeletStokumla(si);
+      __REG.ok('reçete notu: "⚠️ satıcı beyanı: … ile aynı (doğrulanmadı)"; "✅ eşdeğer" YAZMAZ', !!si && /\(⚠️ satıcı beyanı: [A-Z0-9\/-]+ ile aynı \(doğrulanmadı\)\)/.test(String(S.notlar)) && !/✅ eşdeğer/.test(String(S.notlar)));
+      // hiçbir plan satırında beyanlı köprü ✅ / aynen değil (fixture + sentetik stok fark etmez: kural)
+      const kotu = []; st.forEach(s => { const p = window._bmStokUyarla('isk', s, 0); (p ? p.satirlar : []).forEach(z => { if (z.grup !== 'y' || !z.secilen || z.secilen.derece > 2 || z.secilen.id === z.orijId) return; const b1 = KB(z.orijId), b2 = KB(z.secilen.id), kayn = !!z.secilen.kaynak; if (!kayn && ((b1 && b1.beyan) || (b2 && b2.beyan))) kotu.push(s); }); });
+      __REG.ok('239 iskelet planında satıcı beyanına dayanan ✅ maya satırı 0', kotu.length === 0, kotu.slice(0, 4).join(' | '));
+      // bayrak kapalı = eski
+      window.BM_ND6.muadil = false; window.BM_ND6.uygula(); STOK.length = 0; STOK.push(gir(cift[0][0]));
+      const E = window._bmIkameAday({ tip: 'maya', id: g0.id, gerek: 1, birim: 'pk' });
+      __REG.ok('bayrak kapalı: eski davranış (derece 2 "✅ aynı suş kodu", stokta sayılır)', E[0] && E[0].id === cift[0][0].id && E[0].derece === 2 && /aynı suş kodu/.test(E[0].fark) && stokYetersizMaya({ mayaId: g0.id }).eksik.length === 0);
+      window.BM_ND6.muadil = true; window.BM_ND6.uygula(); STOK.length = 0;
+      return __REG.al();
+    })
+  },
+  {
+    kod: 'ND6B-ROZET', ad: 'ROZET / SÜZGEÇ DÜZELTMELERİ (ND6B 1): 239 stilin TAMAMINDA rozet ↔ kurulan reçete birebir · "n kalem alınacak" yalnız reçeteye GİREN satırları sayar (miktarsız katkı sayılmaz, notta ayrı satır) · ✅ / 🟨 yalnız miktar yetiyorsa, yetmiyorsa "🟡 n kalem az" · bayrak korumasız satırlar bayrağın içinde',
+    calistir: (page) => page.evaluate(() => {
+      const st = Object.keys(BJCP).filter(s => window._bmIskeletVar(s)); let ayni = 0, notOk = 0, sinif = 0, mkOk = 0, mkN = 0, azOk = 0, azN = 0; const fark = [];
+      st.forEach(s => { const q = window._bmIskStokDurum(s), p = window._bmStokUyarla('isk', s, 0), mks = p.miktarsiz || [], rec = p.satirlar.filter(z => !z.proses && mks.indexOf(z) < 0);
+        const al = rec.filter(z => z.alinacak).length, az = rec.filter(z => !z.alinacak && ((z.secilen && z.secilen.az) || z.azToplam)).length || (p.yetersiz || []).length, yk = rec.filter(z => !z.alinacak && z.secilen && z.secilen.derece >= 3).length;
+        const bek = al >= 3 ? 'eksik' : (al > 0 || (p.bolumYok || []).length) ? 'yakin' : az ? 'az' : yk ? 'muadil' : 'ok';
+        if (q.durum === bek && q.alinacak === al && q.azN === az) sinif++; else fark.push(s + ' sınıf ' + q.durum + '≠' + bek);
+        if ((q.durum === 'ok' || q.durum === 'muadil') ? az === 0 : true) azOk++; if (q.durum === 'az') azN++;
+        window.__nd6SonKur = null; const id = window._bmIskeletStokumla(s), k = window.__nd6SonKur, n = String(S.notlar || '');
+        if (id && k && k.stil === s && S.stil === s && k.alinacak === q.alinacak) ayni++; else fark.push(s + ' kur ' + (k ? k.alinacak : 'yok') + '≠' + q.alinacak);
+        const alN = (n.match(/^Alınacaklar[^\n]*: (.*)$/m) || [, ''])[1].split(' · ').filter(Boolean).length; if (alN === q.alinacak) notOk++; else fark.push(s + ' not ' + alN + '≠' + q.alinacak);
+        if (mks.length) { mkN++; if (mks.every(z => !(S.katkilar || []).some(x => x.id === z.orijId)) && /Miktarı kaynakta olmayan katkılar reçeteye EKLENMEDİ/.test(n) && q.alinacak === al) mkOk++; } });
+      __REG.ok(st.length + ' stilin TAMAMINDA rozetin alınacak sayısı = kurulan reçetenin alınacak sayısı', st.length > 200 && ayni === st.length, ayni + '/' + st.length + ' ' + fark.slice(0, 4).join(' | '));
+      __REG.ok('rozet sınıfı tanımla aynı (alınacak ≥ 3 🔴 · 1–2 ya da eksik bölüm 🟡 · az 🟡 "n kalem az" · yakın muadil 🟨 · ✅)', sinif === st.length, sinif + '/' + st.length + ' ' + fark.slice(0, 4).join(' | '));
+      __REG.ok('reçete notundaki "Alınacaklar" listesi uzunluğu = rozet (' + st.length + ' stil)', notOk === st.length, notOk + '/' + st.length);
+      __REG.ok('miktarsız katkılı ' + mkN + ' stil: katkı reçetede yok, notta ayrı satırda, rozet sayısına GİRMEZ', mkN > 0 && mkOk === mkN, mkOk + '/' + mkN);
+      __REG.ok('✅ / 🟨 rozetli hiçbir stilde miktarı yetmeyen kalem yok; "az" durumlu stil sayısı ' + azN, azOk === st.length);
+      const m = window._nd6Metin, u = d => { window.__ndFiltre = 1; const a = window._nd6Uygun(d); window.__ndFiltre = 2; const b = window._nd6Uygun(d); window.__ndFiltre = 0; return [a, b]; };
+      __REG.ok('metin: "🟡 2 kalem az" · alınacak + az birlikte "🟡 1 kalem alınacak · 2 kalem az" · eski "az var" eki yok', m({ durum: 'az', azN: 2, alinacak: 0, bolumYok: [] }) === '🟡 2 kalem az' && m({ durum: 'yakin', azN: 2, alinacak: 1, bolumYok: [] }) === '🟡 1 kalem alınacak · 2 kalem az' && m({ durum: 'ok', azN: 0, bolumYok: [] }) === '✅ Stoğunla eksiksiz' && m({ durum: 'muadil', yakinN: 3, azN: 0, bolumYok: [] }) === '🟨 Muadille eksiksiz — 3 satır yakın muadil' && m({ durum: 'az', azN: 1, alinacak: 0, bolumYok: [] }, true) === '🟡 1 kalem az');
+      __REG.ok('süzgeç 1 "az" stili GEÇİRMEZ; süzgeç 2 alınacak + az ≤ 2 ise geçirir', JSON.stringify(u({ durum: 'az', azN: 2, alinacak: 0 })) === '[false,true]' && JSON.stringify(u({ durum: 'az', azN: 3, alinacak: 0 })) === '[false,false]' && JSON.stringify(u({ durum: 'yakin', azN: 1, alinacak: 2 })) === '[false,false]' && JSON.stringify(u({ durum: 'muadil', azN: 0, alinacak: 0 })) === '[true,true]');
+      // bayrak korumaları
+      const N = window.BM_ND6; ['ana', 'isk', 'muadil', 'maya', 'es', 'dil'].forEach(k => { N[k] = false; }); N.uygula();
+      const im = window._bmStokImza(), say = window._ndStilSay(st[0], im), pk = window._bmStokUyarla('isk', st.find(s => window._bmStokUyarla('isk', s, 0)), 0), hz = _stokMayaHazirlik();
+      window.__nd6SonKur = 'x'; window._bmIskeletStokumla(st.find(s => window._bmStokUyarla('isk', s, 0)));
+      __REG.ok('bayraklar kapalı: durum sözlüğünde "taninmadi" yok · stil sayımında "taninmadi" alanı yok · plan satırında "veya" alanı yok · hazırlıkta beyan kümesi yok · __nd6SonKur yazılmaz', !('taninmadi' in window._ND_DURUM) && !('taninmadi' in say) && pk.satirlar.every(z => !('veya' in z)) && !('stokKodlarG' in hz) && window.__nd6SonKur === 'x', JSON.stringify(Object.keys(window._ND_DURUM)));
+      ['ana', 'isk', 'muadil', 'maya', 'es', 'dil'].forEach(k => { N[k] = true; }); N.uygula();
       return __REG.al();
     })
   }
@@ -16614,6 +17171,9 @@ const CEV1_ESKI_HA18 = [82,86];
 // SPRINT ND6: ND6'DAN ÖNCE yazılmış ve O GÜNÜN ekranını / MUADIL tablosunu sınayan case'ler paketi BM_ND6 bayrakları KAPALI kurar
 // (bayrak kapalı = davranış birebir eski; CEV1_ESKI_SC deseni: beklenen değerlere DOKUNULMADI). Her kod için neden yazılı.
 // Listede OLMAYAN tüm case'ler uygulamanın varsayılanıyla (bayraklar AÇIK) koşar; ND6-* case'leri yeni davranışı sınar.
+// CLAUDE KARARI (ND6B 0a, 2026-11-11): 'ai' türündeki dört geri oynatma (AI2-TUZAK, AI4-ONKONTROL, AI5B-YON, DOG4-K4) bu listede bayraklar KAPALI koşmaya DEVAM eder —
+//   bunlar o günün MUADIL tablosuyla kaydedilmiş AI koşularının dondurulmuş geri oynatmalarıdır; tuzak seti C grubunun "kaynak" alanı eski ✅ satırının kendisi, set donmuş, değiştirilmez.
+//   'veri' ve 'ekran' türündeki 14 case'in her biri için bayraklar AÇIK koşan <eski kod>-ND6 case'i var (beklenti ND6 kuralından türetildi; Claude onaylı). Eski case'ler dokunulmadan kalır.
 const ND6_ONCESI = {
   "AL5-AK-ENTEGRASYON": ["ekran","stil satırında \"✨ Yeni reçete\" düğmesini sayar — ND6 (1) ile ana düğme \"📦 Stoğumla kur\", ikincil \"✨ Boş iskelet\""],
   "AV4-DOLDUR-REGRESYON": ["ekran","stil satırındaki \"✨ Yeni reçete\" düğmesinin ölçüsünü okur — ND6 (1) düğme düzeni"],

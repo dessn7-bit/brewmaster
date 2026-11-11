@@ -94,9 +94,10 @@ function olc(bayrak) {
     }
     const p = window._bmStokUyarla('isk', st, 0);
     if (!p) { c.nullStiller.push(st); if (window._bmIskStokNeden) { const nd = window._bmIskStokNeden(st); const kk = nd ? nd.kod : '?'; c.nedenDag[kk] = (c.nedenDag[kk] || 0) + 1; } return; }
-    c.plan++; const al = p.alinacak.length; c.alinacakDag[al] = (c.alinacakDag[al] || 0) + 1;
+    const mk = p.miktarsiz || []; // ND6B (1): alınacak = REÇETEYE GİREN satırlar (miktarı kaynakta olmayan katkı sayılmaz); bayraklar kapalıyken mk boş → eski sayım
+    c.plan++; const al = p.alinacak.filter(z => mk.indexOf(z) < 0).length; c.alinacakDag[al] = (c.alinacakDag[al] || 0) + 1; if (mk.length) d.miktarsiz = (d.miktarsiz || 0) + mk.length;
     if (!al) { c.alinacak0++; if (!(p.yetersiz || []).length) c.tam++; }
-    p.satirlar.forEach(z => { if (z.proses) d.proses++; else if (z.alinacak) d.alinacak++; else if (z.secilen) d[{ 1: 'aynen', 2: 'ok', 3: 'uyari', 4: 'ozellik', 5: 'bilesik' }[z.secilen.derece]]++; });
+    p.satirlar.forEach(z => { if (z.proses) d.proses++; else if (mk.indexOf(z) >= 0) { /* reçeteye girmez */ } else if (z.alinacak) d.alinacak++; else if (z.secilen) { d[{ 1: 'aynen', 2: 'ok', 3: 'uyari', 4: 'ozellik', 5: 'bilesik' }[z.secilen.derece]]++; if (z.secilen.beyan) d.beyan = (d.beyan || 0) + 1; } });
     if (window._bmIskStokDurum) { const q = window._bmIskStokDurum(st); if (q) { rozet.n++; rozet.dag[q.durum] = (rozet.dag[q.durum] || 0) + 1; } }
   });
   c.sure_ms = Math.round(performance.now() - t0);
@@ -124,7 +125,7 @@ async function main() {
     console.log('(b) "Yeni reçete / boş iskelet" ' + y.n + ' stil: stokla eksiksiz ' + y.eksiksiz + ' · eksik kalem dağılımı ' + JSON.stringify(y.dagilim));
     console.log('(c) iskelet + stok ' + c.n + ' stil: plan ' + c.plan + ' · alınacak 0 ' + c.alinacak0 + ' · tam ' + c.tam + ' · null ' + c.nullStiller.length + ' · alınacak dağılımı ' + JSON.stringify(c.alinacakDag) + ' · ' + c.sure_ms + ' ms' + (Object.keys(c.nedenDag).length ? ' · null nedenleri ' + JSON.stringify(c.nedenDag) : ''));
     if (arg('null')) console.log('    null stiller: ' + c.nullStiller.join(' | '));
-    console.log('(d) seçilen derece: aynen ' + d.aynen + ' · ✅ ' + d.ok + ' · ⚠️ ' + d.uyari + ' · ≈ ' + d.ozellik + ' · bileşik ' + d.bilesik + ' · alınacak ' + d.alinacak + ' · (proses ' + d.proses + ')');
+    console.log('(d) seçilen derece: aynen ' + d.aynen + ' · ✅ ' + d.ok + ' · ⚠️ ' + d.uyari + ' · ≈ ' + d.ozellik + ' · bileşik ' + d.bilesik + ' · alınacak ' + d.alinacak + ' · (proses ' + d.proses + (d.miktarsiz ? ' · reçeteye girmeyen miktarsız katkı ' + d.miktarsiz : '') + (d.beyan ? ' · ⚠️ içinde satıcı beyanı ' + d.beyan : '') + ')');
     if (r.rozet) console.log('(e) iskelet-stok rozeti ' + r.rozet.n + ' stil: ' + JSON.stringify(r.rozet.dag));
     return 0;
   } finally { await browser.close().catch(() => {}); srv.close(); }
