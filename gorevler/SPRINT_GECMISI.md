@@ -94,3 +94,60 @@ Bir sprintin ayrıntısını ararken: `grep -n "<SPRİNT ADI>" gorevler/SPRINT_G
 1j3z2. **CEV GERÇEK KOŞUSU #9 — CLAUDE ETİKETİ** (koşu 2026-11-08 20:32 UTC, kosuId 1794169976706, SW v131-540, Opus 5.5, 55 soru (ana 34 + held-out 1 21), durum bitti, 23,21 $ — ana 12,11 · held-out 11,10; çağrı: sorgu 0,20 · web 5,87 · özet 6,34 · kapsama 2,74 · doğrula 5,29 · onar 1,13 · doğrula2 1,64; üç imza + set imzaları aynı; kural yolu 12 soru parmak izi a3d351b2 = koşu #8 → koşu #2 etiketi 0/44). Etiket: araştırma 500 madde (gösterilen 254 + katlı 144 + doğrudan 43 + düşen 58 + düşen doğrudan 1), 12 kör alt-etiketçi (6 grup × A/B), uyuşan + bayraksız 478 kabul, 22 Claude kararı (12 sayfa WebFetch: byo sulfur → H2S; crispmalt Chapon; byo soapy/oksijen; whitelabs FANMax üç deneme profili; legacy BJCP buttery; byo diacetyl "these factors"; howtobrew 22 too cool; lallemand 0,5 g/L yeniden aşılama; BJCP acetaldehyde; beerandbrewing flame-out; ASBC 2011 wheat beer; BarthHaas hop suyu), 25/25 rastgele yeniden denetim (tohum 20261109), 30 güçlü madde tek tek (hata C16#f0, H03#2). SONUÇ: katı (b+c+sınırda) 7/544 = %1,29, üst %2,40 (kesin 1/544 üst %0,87; katlı hariç 5/400 üst %2,61; ana 4/300 üst %3,03, held-out 3/244 üst %3,15) → GEÇTİ. Hatalar: sınırda H14#f0 (deneme profili genel uygulama gibi), C17#f1 ("as much as" düşmüş), H11#0 (kapsam çekincesi), H07#D (kesik + farklı sorun), C07#0 (koyu candi koşulu), C22#0 (hop suyu → bira); b C33#x1 ("tatlıdır" çeviri). Değer atfı hatası 0 (koşu #8: 2); H08#0 iki kör "c" dedi, Claude koşu #8 H10#0 / #7 H15#1 emsaliyle doğru (kaynak listesi tarafın tamamına). H12#2 içerik doğru, tur_hata (1. taraf sorun tarafı değil). KAPSAMA: mekanik 126/166; Claude ilk el sayımı 136; YENİ yöntem — iki kör kapsama yargıcı (yalnız beklenen + üst kısım metni; TALIMAT_KAPSAMA: aynı değişken + aynı yön, çekirdek = ilk yan cümle, genel ifade ancak açıkça kapsıyorsa, yalnız bağlam sayılmaz): A 95, B 96 / 134 (birbirine 133/134). Claude ile ayrışan 9 etken (C13#E1 genel köpük proteini yönsüz, C15#E0 bileşim yok, C15#E2 kazan berraklaştırıcısı belirsiz, C17#E1 yönsüz "etkiler", C19#E3 pilsner = yüksek SMM yok, C26#E1 başlangıç sıcaklığı eylemi yok, C31#E3 hop saklama eylemi yok, H10#E1 hücre sayısı hesabı yok, H21#E0 ıslak hop ≠ eski hop) — Claude yeniden okudu, 9'unda yargıçlar haklı → 127/166 = %76,5 (ana 81/102, held-out 46/64) → GEÇEMEDİ. Kaçan 39: KATLI 11 (C19 pilsner SMM, C26 yüksek OG, C28 zaman, C30 maya besini, C33 Acetobacter oksijen, H02 tortuyu karıştır, H09 diasetil, H13 diasetil dinlenmesi, H14 oksijen, H20 şeker = düzey, H21 hop saklama), DÜŞEN 4 (C13 yağ/deterjan, C15 Irish moss, C17 bakteri, C29 hop polifenolü), üstte yönsüz/kısmi/bağlam 6, YOK 18 (web alıntısında anahtar geçen 10: C14, C15, C22, H04, H05, H08, H10, H13×2, H19; geçmeyen 8: C13 laktoz, C19 bakteri, C28 sıcak saklama, H03 enfeksiyon, H09 önlem, H11 lager dozu, H19 ropy, H19 durmayan mayalanma — gösterge, elle doğrulanmadı). CEV9 etkisi: özet hatası 0, kapsama turu 43/43, 101 yeni madde, öncelik geçersiz 0; gösterilen 254'ün 231'i öncelik listesinden → artık sıralama değil, modelin "en doğrudan" SEÇİMİ beklenen etkeni dışarıda bırakıyor + 6 yer sınırı. Kesik alıntı %46,7 (koşu #8 %49). (vii) 6: C07 D Abbaye serin öneri, C12 dekstrin malt, C27 yüksek aşılama güçlü, C29 76 °C tek taraf, H02 buğday tek taraf, H05 sıcaklık tek taraf. Tat 0, yalakalık 0, jargon 0, bulamadım-erken 0. Fixture: tests/fixtures/cev_kosu9_2026-11-08_{TAM_heldout_iceriyor, ana, etiket_claude_TAM_heldout_iceriyor, ana_etiket_claude}.json (-f; kapsama etken tablosu A/B/Claude ilk/son dahil). Not: koşu #8'in 129'u tek kişilik sayımdı; aynı katı ölçütle daha düşük olabilir — mekanik 128 → 126 karşılaştırılabilir ölçü.
 
 1j3z3. **KOŞU #9 KAÇAK İNCELEMESİ + CEV10 TASLAĞI** (Claude, 2026-11-09; Kaan kararı: CEV10 ve held-out 2 bir sonraki kredi döneminde). Kaçan 39 güçlü etkenin web alıntıları iki kör ajanla sınıflandı (açık 19 · kısmi 15 · yok 5). Yer × kaynak: katlı 11 (açık 9), düşen 4 (açık 2), üstte yönsüz/eksik 6 (açık 4), cevapta yok 18 (açık 4 · kısmi 9 · yok 5). Sınıflar: SEÇİM 9 (ilk 6'yı aynı işlem adımının varyantları dolduruyor), ÖZETLEME 8 (madde yazılmamış ya da yönü düşürülmüş), BAŞLIK 1+ ("… eklenince" kalıbı istenmeyen nedende yön hatası → doğrulayıcı düşürdü), KESİK ALINTI 15, ARAMA 5. Taslak: gorevler/CEV10_TASLAK.md (E2: set örneği yok) — 1 kesik alıntı tamamlama (web_fetch ucuz model + yerel birebir eşleşme, doğrulayıcı istemi aynı), 2 üst kısım çeşitliliği (işlem adımı grubu), 3 yön koruma kuralı, 4 `yon: varlik` başlığı, 5 teşhis sorgusu; Kaan'a: üst kısım 6 → 8 mi, tamamlama maliyeti (VARSAYIM +0,5–3 $/koşu). SÜREÇ DÜZELTMESİ: held-out 2 ayrıntısı (soru, beklenen, etiket notu) CC'nin okuduğu dosyalara YAZILMAZ — yalnız sayılar; held-out 1 ayrıntıları geçmişte SPRINT_GECMISI ve CEV9.md'ye yazılmıştı (bağımsızlık kaybının nedenlerinden biri). Kaynak tablosu: Claude scratch k9/kacak_kaynak.json → TAM fixture'a eklenecek.
+
+1j3z4. **"NE DEMLEYEBİLİRİM?" TEŞHİSİ + MUADIL DOĞRULAMASI → ND6** (Claude, 2026-11-11). Kaan'ın şikâyeti: "o kadar malzeme var bi türlü eksiksiz reçete çıkmıyor … muadiller doğru mu".
+
+**Ölçüm yöntemi**
+- Playwright ile yerel olarak, ağ kapalı ve senkron anahtarı yüklenmeden ölçüldü.
+- Stok olarak 26 Haziran yedeği kullanıldı (56 kalem). Yalnız sayılar kaydedildi, stok içeriği yazılmadı.
+- Hacim 11 L. Örnek sayısı 988.
+
+**Stil satırındaki rozet (yayımlanmış örneği birebir yapabilir misin)**
+- Dağılım: ✅ 13 · 🟡 462 · 🔴 513. En az bir stil ✅ veren stil sayısı 9/228.
+- Tavan: katalogdaki her kalem bol miktarda stokta olsa bile ✅ yalnız 171/988 olur.
+  - 817 örnekte en az bir kalem eşlenemiyor (❔). ND4 kuralına göre ❔ taşıyan örnek ✅ olamaz.
+  - ❔ olan kalemlerin dağılımı (örnek sayısı): malt 516 · maya 414 · hop 289 · katkı 100.
+- Maya ❔ ayrıntısı:
+  - 154 satırda hiç kod yok.
+  - 186 satırda tek kod var ve katalogda yok (WLP833, WLP940, WLP810, WY2007 vb.).
+  - 74 satır "A ya da B" biçiminde; 38'inde kodlardan biri katalogda.
+- Hop ❔ ayrıntısı: çoğu katalog eksiği (Hersbrucker 26, Cluster 25, Crystal 20, Mt. Hood 14+4, Sorachi 12, Liberty 11 …). Bu iş KAT-C'nin konusu.
+- Malt ❔ ayrıntısı: belirsiz ya da marka adları (caramel munich 21, caramunich 14, crystal 13, carafa ii 10 …).
+
+**"✨ Yeni reçete" (ana düğme)**
+- `_stilIskeletHesap` sabit katalog kimlikleri kullanıyor, stoğa bakmıyor.
+- 239 iskeletin 9'u bu stokla eksiksiz.
+
+**"📦 İskeleti stoğumla oluştur" (var ama gömülü)**
+- Yol: `_bmIskeletStokumla` → `_bmStokUyarla('isk')`.
+- 191 stilde plan çıkıyor: 87'sinde alınacak kalem 0, 62'si tam. 48 stilde null dönüyor. Tüm hesap ≈0,9 sn sürüyor.
+- Seçilen ikame derecelerinin dağılımı (satır sayısı): aynen 363 · ✅ 436 · ⚠️ 120 · ≈ 134 · bileşik 29 · alınacak 165.
+
+**"📦 Stoğumla oluştur" (örnekten)**
+- Yalnız 156/988 örnekte görünüyor; bunların 59'u tam.
+
+**MUADIL ✅ kayıtları**
+- 503 kaydın yalnız 10'unda kaynak alanı var.
+- AI4 kanıt paketi yine de her ✅'yi "kaynaklı muadil" diye etiketliyor.
+
+**Kör doğrulama**
+- 5 alt ajan çalıştı. Ölçüt koşudan önce yazıldı (dis_kaynak/muadil_dogrulama_2026-11-11/TALIMAT.md).
+- 107 kayıt denetlendi (83 seçilmiş + 24 rastgele, seed 20261111): ✅ 32 · ⚠️ 59 · ❌ 10 · bulamadım 6.
+  - Rastgele 24'ün sonucu: ✅ 8.
+  - Seçilmiş 21 maya ✅'sinin hiçbirinde "aynı suş" kanıtı yok.
+- 7 kayıtta Claude kararı doğrulayıcınınkinden farklı:
+  - 5 kaydı sınıf kuralı ❌ yapmıştı; Claude ⚠️ yaptı.
+  - 2 kayıt Hitit sayfası yüzünden "bulamadım" almıştı. Claude hititmalt.com sayfalarını açtı: Koyu Kristal EBC 60–80, Karamela EBC 265–310.
+- Bulunan veri hataları OZET.md'de.
+
+**Görev**
+- gorevler/ND6.md, 8 madde:
+  - 0 ölçüm altyapısı
+  - 1 ana düğme stok-öncelikli + iskelet-stok rozeti + süzgeç
+  - 2 çalışmayan 48 stil
+  - 3 MUADIL ✅ disiplini: doğrulama kararları uygulanır; kaynaksız ✅ → ⚠️ "(kaynak bekliyor)"; veri hataları
+  - 4 maya "A ya da B" satırında VEYA kuralı
+  - 5 ❔ ayrı durum
+  - 6 ekran dili
+  - 7 test + bağımsız doğrulayıcı
+- Sıra Kaan'a soruldu. Öneri: FB1 → ND6 → KUCUK1.
