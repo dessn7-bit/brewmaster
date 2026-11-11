@@ -527,3 +527,68 @@ Bir sprintin ayrıntısını ararken: `grep -n "<SPRİNT ADI>" gorevler/SPRINT_G
 - Artık satır 14 (malt 2, hop 7, maya 1, ek 4).
 - Örnek verisinde bozuk tırnak karakterleri var (ör. "farmer's market" peaches); tabloya olduğu gibi girdi.
 - İki düğmeye `aria-label` bayraktan bağımsız eklendi (görünen metin aynı).
+
+1j3z12. **CLAUDE ND7 DOĞRULAMASI + KARARLAR** (2026-11-12). ND7: commit 4642980, SW v131-544. CC'nin modeli Fable 5.2.
+
+**Canlı sürüm ve tanıma ölçümü**
+- Canlı md5 b6cc42fe… yerel dosyayla aynı. SW 544.
+- tests/nd7_tanima.mjs'i Claude kendi ortamında koştu; sonuçlar CC'nin raporuyla birebir aynı:
+  - malt / hop / maya / ek'te tanınmayan satır 0;
+  - malzemeli örnek 985/988;
+  - hopsuz örnek 7.
+
+**Tam regresyon (Claude ortamı, son kod, 6 dilim)**
+- Ortam: Puppeteer, Playwright Chromium, --no-sandbox sarmalayıcı.
+- Dilim sonuçları: 97 · 97 · 97 · 96/97 · 96/97 · 96 → toplam 579/581.
+- Kırmızı 1, BUL1-KURU: beklenti sabit "kahve içeren 2 stout örneği". ND7 daha çok kahve satırı tanıdığı için bu sayı değişti; sorun veri kaynaklı. CC'nin 196 vakalık kısmi koşusu bu vakayı içermiyordu.
+- Kırmızı 2, DOG4F-COZUM: zaman aşımı (protocolTimeout 900 sn).
+  - Aynı makinede ND7 öncesi kodla (v131-543, worktree) 819 sn'de geçiyor.
+  - Neden: ND7 window._bmKatCoz'u küresel sarıyor. Bu çözücüyü A1._kalemBul1 (asistanın kalem bulucusu) ve soru çözücü de kullanıyor (satır ~33806). Yani ND7, kapsamı dışındaki AI yollarını hem yavaşlatıyor hem de davranışını değiştiriyor.
+
+**Kör eşleme denetimi**
+- Örneklem: 104 tekil eşleme, seed 20261112. "Sözlük" ve "proses" kuralları dışarıda tutuldu.
+- 2 alt ajan çalıştı. Elinde katalog dökümü ve sınıf tanımları vardı; gerektiğinde üretici sayfalarına baktılar.
+- Kararlar: A 33 · B 20 · C 8 · D 0 · E 10 · F 2 · G 18 · H 3 · I 6 · J 3 · belirsiz 1.
+- Kural bazında:
+
+  | Kural | A | B | C | Diğer |
+  |---|---|---|---|---|
+  | okuyucu-marka | – | 10/10 | – | – |
+  | köken | 5 | 3 | 2 | – |
+  | renk | 4 | 3 | 5 | – |
+  | okuyucu | 11 | 1 | – | – |
+  | maya-kod | 10 | – | – | – |
+  | sınıf | – | – | – | E 10 · F 2 |
+  | bekliyor | – | – | – | G 9 · H 2 · belirsiz 1 |
+  | artık | – | – | – | I 5 · J 3 |
+
+- Sonuç:
+  - Yanlış türe bağlanan satır yok.
+  - Ürüne bağlanan satırların yaklaşık yarısı ise "aynı ürün değil". Bunlar şu an birebir rozetinde "aynen" sayılıyor.
+  - "Artık" diye ayrılan 3 gerçek hop satırı kayboluyor: German Blanc FWH, Galaxy 7,5 g, Fuggles pellet.
+  - Bir tarifte birlikte kullanılan iki mayadan ikincisi düşüyor.
+  - Rahr yazımları tutarsız iki yola dağılmış.
+  - Katalogda Dingemans renk birimi şüphesi var: cara20, cara45, cara8 ve amber kayıtları doğrulanmadı.
+
+**Ekran**
+- 360 px arama görüntüsünde yeni düzen var.
+- Araç çubuğu etiketleri artık kesilmiyor ("Tarif · Malz. · Yapılır").
+
+**Ağ**
+- CC, canlı md5'i beklerken gecikme yaratmak için httpbin.org'a 7 istek attı. ND7B kuralıyla yasaklandı.
+
+**Claude kararları (ND7B)**
+- (a) fark işareti: marka / köken / renk / biçim. Birebir rozetinde bu satırlar 🟨 sayılır.
+- (b) Taze hop 1:1 aktarılmaz; aktarmak için kaynaklı oran gerekir.
+- (c) Kaybolan satırlar geri alınır.
+- (d) Maya karışımı iki ayrı satır olur.
+- (e) Denetim düzeltmeleri uygulanır.
+- (f) Dingemans ve Castle renkleri üretici sayfasından kontrol edilir.
+- (g) OG hesaplanamıyorsa düğme kapanır.
+- (h) Mayşe hopu ele alınır.
+- (i) İskelette eşit paylı mayada stil adına göre seçilir; 3'ten az örnekli stil eski seçimini korur.
+- (j) ND7 katmanı yalnız örnek ve stok yollarında çalışır. AI yolları eski çözücüyü kullanır. DOG4F süresi v543'ün %10 fazlasını geçemez.
+- (k) BUL1-KURU vakası ND7_ONCESI listesine alınır; yanına kurala dayalı bir -ND7 sürümü yazılır.
+- 17 eski vakanın -ND7 sürümü yazılır.
+
+**Yeni sıra:** ND7B → ND7K → ND8 → KUCUK1 → FB1.

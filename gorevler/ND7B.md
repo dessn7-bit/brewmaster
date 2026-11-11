@@ -2,11 +2,14 @@ SPRINT ND7B — ND7 takip: "aynı ürün değil" işareti, kaybolan satırlar, k
 
 Claude, 2026-11-12. ND7 raporu (4642980, SW v131-544) Claude tarafından doğrulandı. Doğrulama sonuçları ve kararlar gorevler/SPRINT_GECMISI.md 1j3z12'de.
 Bu sprint ND7K'dan ÖNCE verilir.
-Bu dosyada 4 madde var (0–3). İşe başlamadan 4'ünü de okuduğunu raporun ilk satırında teyit et; modelini yaz.
+Bu dosyada 4 madde var (0–3); madde 0'da (a)–(k) alt maddeleri. İşe başlamadan 4'ünü de okuduğunu raporun ilk satırında teyit et; modelini yaz.
 EFOR: high.
 
 DURUM (Claude ölçtü)
-- Claude'un kendi ortamında 6 dilim tam regresyon koşuldu, kod v131-544: sonuç 1j3z12'de.
+- Claude kendi ortamında tam regresyonu son kodla 6 dilimde koştu (v131-544): 579/581 geçti. Kalan 2 vaka:
+  - BUL1-KURU kırmızı. Beklentisi "kahve içeren yalnız 2 stout örneği". ND7 artık daha çok kahve satırı tanıdığı için bu sayı değişti; sorun veri kaynaklı beklenti. CC'nin 196 vakalık kısmi koşusu bu vakayı içermiyordu.
+  - DOG4F-COZUM zaman aşımı (protocolTimeout 900 sn). Aynı makinede ND7 öncesi kodla (v131-543) 819 sn'de geçiyor; ND7 koduyla 900 sn'yi aşıyor.
+  - Neden: ND7 katmanı window._bmKatCoz'u KÜRESEL sarıyor. Bu çözücüyü asistanın kalem bulucusu (A1._kalemBul1) ve soru çözücü de kullanıyor. Yani ND7, kapsamı dışındaki AI yollarını hem YAVAŞLATIYOR hem de DAVRANIŞINI değiştiriyor: daha gevşek eşleme, marka ayıklama.
 - nd7_tanima sayıları raporla birebir aynı:
   - tanınmayan satır 0;
   - malzemeli örnek 985;
@@ -135,6 +138,25 @@ KURALLAR
 - Örnek sayısı 3'ün altında olan stilde türetilmiş maya önceki seçimi değiştirmez. Önceki seçim yoksa doldurur ve "zayıf" etiketi taşır.
 - Değişen stil listesini raporla.
 
+(j) ND7 KATMANININ KAPSAMI (Claude kararı)
+- ND7 okuyucu / sınıf / tablo katmanı YALNIZ şu yollarda çalışır:
+  - örnek satırı çözümü (_bmOrnekKuru ve ND / "Stoğumla" yolları);
+  - stok eşleme.
+- window._bmKatCoz'un eski davranışı AI yolları için AYNEN korunur. AI yolları: A1._kalemBul1, soru çözücü, AI4 / CEV kanıt paketi ve diğer çağıranlar.
+  - Bunun için ayrı bir giriş açılır (ör. _bmKatCozOrnek). Örnek yolları bu yeni girişi çağırır.
+  - Bayrak kapalıyken davranış birebir eski.
+- Ölç ve raporla:
+  - _bmKatCoz çağıran her yerin listesi ve hangi girişi kullandığı.
+  - A1._kalemBul1 sonuçları ND7 öncesi ile birebir aynı mı. Test: G seti ve tuzak setindeki tüm istem metinleri, A1'in bulduğu kalemler önce ↔ sonra.
+  - DOG4F-COZUM süresi, aynı makinede v131-543 ↔ ND7B. ND7B süresi v131-543 süresinin %10 fazlasını geçmemeli.
+- Asistanın daha iyi kalem tanıması istenirse ayrı bir sprint konusu olur. Orada ayrıca ölçülür; G ve tuzak setleri ile soru çözücü held-out'ları değerlendirilir.
+
+(k) BUL1-KURU
+- Bu vaka ND7_ONCESI listesine alınır (bayraklar kapalı, beklentiye dokunulmaz).
+- Bayraklar açıkken koşan sürümü yazılır: BUL1-KURU-ND7.
+  - Ölçtüğü özellik: "kuruluk kısıtı değil, kahve kısıtı; tatlı çipli ve çipsiz istem aynı sayıda sonuç verir".
+  - Sabit 2 sayısı yerine, ND7 tablosuyla kahve içeren stout örneklerinin sayısı kuraldan hesaplanır.
+
 1. ESKİ VAKALARIN YENİ SÜRÜMLERİ
 - ND7_ONCESI'ndeki 15 vaka ile ND6_ONCESI'ne eklenen 2 vakanın (CB1-ARAMA, ND1-GIRIS) bayraklar açık sürümü yazılır. Ad: <kod>-ND7.
 - Beklenti ND7 / ND7B kuralından türetilir, ölçülen değerden DEĞİL. Her vakanın başında tek satır yorum: "eski → yeni, çünkü <kural>".
@@ -149,7 +171,7 @@ KURALLAR
 - Düzeltilen katalog renkleri: kayıt, eski, yeni, kaynak.
 
 3. TEST + KAYIT
-- npm test 6 dilim (--parca), yeni vakalar dahil. Tam paket SON kodla koşulur.
+- npm test 6 dilim (--parca), yeni vakalar dahil. Tam paket SON kodla koşulur. DOG4F-COZUM süresi raporda yazılır.
   - Bellek yetmezse dilimler sırayla, küçük parçalarla koşulur; kapsamın tam olduğu raporda gösterilir.
 - CEV mock 55, üç imza AYNI, kural yolu d30af8de.
 - Commit + push, sw.js CACHE_VERSION +1, canlı md5 = yerel, eklenen satırlarda anahtar taraması 0, fixture içeriği diff'te 0.
