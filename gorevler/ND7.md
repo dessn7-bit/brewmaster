@@ -2,7 +2,7 @@ SPRINT ND7 — 988 örneğin HER satırı tanınsın (tanınmayan satır SIFIR) 
 
 Claude, 2026-11-11. Kaan: "bütün 988 reçetenin yapılabilir olması … neden program tanımıyor" + "bütün hepsini program tanıyıp ayrıca muadillerle eşleştirmeli". ND6'dan SONRA verilir. Muadil eşleştirme ayrı görev: ND8 (bu sprintin ardından).
 HEDEF: 988 örnekteki malt / hop / maya / ek satırlarının TAMAMI bir kimliğe bağlanır — belirli ürün, ya da ürün yazılmamışsa SINIF kalemi. Sprint sonunda tanınmayan satır sayısı 0 olmalı; 0 olmuyorsa kalan her satır tek tek gerekçesiyle listelenir, Claude karar verir.
-Bu dosyada 8 madde var (0–6 ve 4b). İşe başlamadan 8'ini de okuduğunu raporun ilk satırında teyit et. ND6B'den SONRA verilir.
+Bu dosyada 9 madde var: 0, 0b, 1, 2, 3, 4, 4b, 5, 6. Katalog eklemeleri AYRI sprinte, gorevler/ND7K.md'ye taşındı (Claude, 2026-11-11: yüzlerce ürünün kaynaklı eklenmesi tek sprinte sığmaz); madde 3 bu sprintte yalnız geçici bağlamayı ve aday listesini anlatır. İşe başlamadan 9 maddeyi de okuduğunu raporun ilk satırında teyit et. ND6B'den SONRA verilir.
 EFOR: high. MODEL: model-bağımsız; modelini ilk satırda belirt.
 
 DURUM (Claude yerelde ölçtü, Playwright, ağ kapalı; sen kendi ölçümünle teyit et)
@@ -56,6 +56,16 @@ KURALLAR
 - Kataloğa eklenen her kayıt üretici/yetiştirici sayfasından: değer + url + ≤15 sözcük alıntı. Kaynak yoksa EKLENMEZ, listede "kaynak bulunamadı" kalır. HopDatabase gibi derlemeler tek başına kaynak sayılmaz (Nectaron hatası görüldü).
 - Repo PUBLIC: örnek verisinden yalnız malzeme adı + miktar (olgu); yeni kazıma yok.
 
+0b. ND6B TAKİBİ (Claude kararları, ND6B doğrulaması 2026-11-11)
+- Stil ARAMA sonuç satırları ana listeyle aynı düzene geçer: "📦 Stoğumla kur" + "✨ Boş iskelet" düğmeleri, iskelet-stok rozeti ve süzgeç.
+- Süzgeç 2, "alınacak + az" toplamı en çok 2 olan stilleri geçirir.
+  - Not metni: "en çok 2 kalem alınacak ya da miktarı eksik".
+  - Gerekçe: "az" olan kalem de satın alınacak kalemdir.
+  - ND1-FILTRE-ND6 beklentisi bu kurala göre güncellenir.
+- 360 px'te üst araç çubuğundaki etiketler kesilmesin. Bugün kesilenler: "Tarif çeşidi", "Yapabilirim", arama kutusundaki yer tutucu metin.
+  - Kısa etiket kullanılabilir, simge bırakılabilir.
+  - 360, 390 ve 412 px ekran görüntülerini C:\Users\Kaan\bm_yedek\nd7_ekran\ altına koy.
+
 0. ÖLÇÜM ALTYAPISI
 - tests/nd7_tanima.mjs. Ölçülecekler:
   - satır düzeyi tanıma (tip başına);
@@ -83,13 +93,12 @@ KURALLAR
 - Örneğin hedef SRM'si biliniyorsa, renk seçimi önce/sonra SRM'yi en az kaydıran stok kalemi olsun.
 - "Carafa II / III" (Special ya da dehusked sözcüğü yok): Weyermann'ın kabuklu ve Special türlerinin rengi aynı aralıkta. SINIF kalemi "Carafa Type N (kabuklu ya da Special)" olur; stokta hangisi varsa o, not ile. Renk aynılığını Weyermann ürün belgesinden kendin doğrula (url: dis_kaynak/muadil_dogrulama_2026-11-11/kararlar.json); doğrulanamazsa sınıf kalemi kurulmaz.
 
-3. KATALOG EKLEMELERİ (KAT-C + KAT-D birleşik; veri)
-- Kapsam: örnek verisinde adı geçen ve katalogda olmayan HER gerçek ürün (hop, maya, malt, ekstrakt, katkı) — sıklık sınırı YOK. Liste nd7_tanima çıktısından gelir.
-- Kaynağı bulunamayan ürün kataloğa ürün olarak girmez; satır en yakın SINIF kalemine bağlanır ve eşleme tablosunda "ürün kaynağı bulunamadı → sınıf" diye işaretlenir.
-- Hop: alfa, beta, yağ, köken, aroma tanımı — yetiştirici sayfasından.
-- Maya: tür, zayıflama, sıcaklık, flokülasyon, fenol (POF) — üretici sayfasından. Hiçbir yeni mayaya ✅ MUADIL yazılmaz; ✅ ancak "aynı suş" kanıtıyla (ND6 madde 3 kuralı).
-- Malt / ekstrakt: renk, ekstrakt, sınıf — üretici belgesinden.
-- Raporda: eklenen / kaynak bulunamayan / bilerek eklenmeyen listesi + nedenleri.
+3. (ND7K'ya taşındı) KATALOGDA OLMAYAN GERÇEK ÜRÜNLER — bu sprintte
+- Katalogda olmayan gerçek bir ürünü adlandıran satır bu sprintte geçici olarak en yakın SINIF kalemine bağlanır. Örnek: "Hersbrucker" → "Alman aroma hopu — ürün kataloğa eklenecek".
+- Eşleme tablosunda bu satırlar "katalog_bekliyor: <ürün adı>" diye işaretlenir.
+- Bu işaretli ürünlerin listesi tests/nd7k_aday.json'a yazılır: ürün adı, tür, kaç satırda geçtiği.
+  ND7K bu listeyle başlar.
+- Sınıf seçimi tahmine dayanmaz. Sınıf yalnız ürün adının kendisinden belliyse kullanılır (ör. bir hop çeşidi adı → "hop — çeşit kataloğa eklenecek"). Bunun ötesinde aroma ya da renk sınıfı TAHMİN EDİLMEZ.
 
 4. MAYA SATIRI OKUMA (BM_ND7.maya)
 - Tüm kodlar çıkarılır: "WLP 833", "Wyeast No. 2007", "OYL-402", "W-34/70" gibi boşluklu ya da noktalı yazımlar da.
@@ -111,7 +120,7 @@ KURALLAR
 - Ürün değil ama gerçek bir malzeme olan satır ("4 Swanson probiotics", "yeast cultured from a Coopers bottle") uygun sınıfa bağlanır (ör. "laktik bakteri — probiyotik kaynaklı", "maya — şişeden üretilmiş").
 - Sonuç: tanınmayan satır 0. Kalırsa liste + neden, Claude karar verir.
 - Miktarı kaynakta olmayan satır: ISK1 deseniyle stil iskeletinin g/L medyanından "varsayım" etiketli miktar alır; o da yoksa "miktar senin kararın".
-- Hedef: HER örnekte "📦 Stoğumla oluştur" görünür.
+- Hedef: HER örnekte "📦 Stoğumla oluştur" görünür. "katalog_bekliyor" satırları sınıf kalemi olarak işler.
 - Hop satırı olmayan 31 örnek KARIŞIK (Claude baktı):
   - Gerçekten hopsuz olanlar var: Gruit, Botanical, bazı sour'lar. Bunlarda düğme hop satırı şartı aramaz.
   - Çoğu VERİ BOŞLUĞU: AHA örneklerinde hop dizisi boş. Örnekler: Schwarzbier, Weizen, Altbier, Wee Heavy, Dry Irish Stout, Mild. kay örneklerinde de var: Dark American Lager, Session Stout, Pre-Prohibition Porter, Steinbier.

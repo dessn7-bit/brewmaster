@@ -351,3 +351,45 @@ Bir sprintin ayrıntısını ararken: `grep -n "<SPRİNT ADI>" gorevler/SPRINT_G
 **Son düzeltme (v131-543, doğrulayıcı bulguları sonrası):** süzgeç 2 koşulu + iki test iddiası + başlıklar; ardından stil ekranı / ND6 / ND6B case'leri yeniden koşuldu (liste raporda), tam paket yeniden koşulmadı.
 
 **Test.** npm test 570 case (554 + 16 yeni), HEPSİ PASS (v131-542 koduyla). Koşu biçimi: dilim 1–4 `--parca=i/6` ile 95/95 ×4; 5. ve 6. dilimin vakaları (381–570) bellek azlığı yüzünden (sistem arka plan koşusunu iki kez durdurdu; Unity açık) ön planda küçük parçalarla koşuldu — `--parca=32..36/48` (60/60) + `--parca=433..570/570` vaka vaka (138/138); kapsam 6 dilimle aynı. Üç imza AYNI; CEV mock 55 ve kural yolu d30af8de aynı (ilgili CEV case'leri bayraklar açıkken yeşil). Eklenen satırlarda anahtar 0; fixture içeriği diff'te 0.
+
+1j3z10. **CLAUDE ND6B DOĞRULAMASI + KARARLAR** (2026-11-11). Commitler 8453ed9 ve 824c9b5. SW v131-543. CC'nin modeli Fable 5.2.
+
+**Sürüm ve imzalar**
+- Canlı dosya yereldekiyle aynı: md5 80358d6f…, SW 543.
+- Dosya 5.027.120 bayt, 43.404 satır.
+- Üç imza çalışma anında aynı.
+
+**Bayraklar kapalıyken** (Claude'un betiği, fixture stok): sonuçlar v540 ile birebir aynı.
+- Örnek rozetleri: 13 / 462 / 513.
+- İskelet-stok: plan 191, alınacak 0 olan 87, tam 62, plan çıkmayan 48.
+- MUADIL: 503 kayıt, 10'u kaynaklı.
+
+**Bayraklar açıkken** (Claude'un betiği, fixture stok)
+- Örnek rozetleri: ✅ 0, 🟡 246, 🔴 713, ❔ 29.
+- Stil rozetleri (`_bmIskStokDurum`): 🟨 muadil 66, 🟡 az 23, 🟡 alınacak 133, 🔴 eksik 17. Bir stilin iskeleti yok.
+- Maya köprüsü: "(=KOD)" taşıyan 56 maya satırının 0'ı ✅ sayılıyor, 56'sı ⚠️.
+- İskelet-stok sayımı eski tanımla: alınacak 0 olan 98, tam 74.
+  - CC'nin raporu 103 ve 79 diyor. Fark sayım tanımından: miktarsız katkılar artık sayılmıyor (28 satır). CC'nin doğrulayıcısı ND6 kodunu bu yeni tanımla koşunca o da 103 ve 79 buldu.
+
+**v131-543 değişikliği ve testler**
+- Değişiklik 4 satır: süzgeç 2'nin mantığı ve ekran metni.
+- İlgili 88 test yeniden koştu ve geçti. Bu yeterli; tam paket yeniden koşulmayacak.
+
+**360 px ekran görüntüsü** (Claude baktı: nd6b_360_2_liste.png)
+- Liste satırlarının hepsi sığıyor.
+- Üst araç çubuğunda etiketler kesiliyor: "Tarif çeşidi", "Yapabilirim", arama kutusundaki yer tutucu metin.
+
+**Claude kararları**
+1. ND7 madde 0b:
+   - Arama sonuç satırları da yeni düzene geçecek.
+   - Süzgeç 2: "alınacak + az" toplamı en çok 2. "Az" kalem de satın alınacak kalemdir.
+   - 360 px'te araç çubuğundaki kesik etiketler düzelecek.
+2. Katalog eklemeleri ND7'den ayrıldı ve yeni sprint oldu: **ND7K** (gorevler/ND7K.md).
+   - Gerekçe: yüzlerce ürünü kaynaklı eklemek ND7'ye sığmıyor.
+   - ND7 bu ürünleri geçici olarak "katalog_bekliyor" sınıfına bağlar ve aday listesini tests/nd7k_aday.json'a yazar.
+3. tests/fixtures altında git'te izlenen 48 dosyanın 16'sı held-out içeriyor (Claude'un kendi force-add'leri dahil).
+   - Held-out 1 zaten bağımsız sayılmıyor, bu dosyalar KALIR.
+   - Held-out 2 ve sonrasının TAM dosyaları public repoya eklenmez; özel repoda ya da Kaan'ın bilgisayarında durur.
+4. CLAUDE.md'deki dosya boyutu satırı güncellendi.
+
+**Yeni sıra:** ND7 → ND7K → ND8 → KUCUK1 → FB1.
