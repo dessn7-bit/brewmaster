@@ -592,3 +592,5 @@ Bir sprintin ayrıntısını ararken: `grep -n "<SPRİNT ADI>" gorevler/SPRINT_G
 - 17 eski vakanın -ND7 sürümü yazılır.
 
 **Yeni sıra:** ND7B → ND7K → ND8 → KUCUK1 → FB1.
+
+1j3z12-ek (2026-11-12): DOG4F-COZUM, ND7 koduyla süre sınırı uzatılınca (geçici kopya, commit edilmedi) 935 sn'de GEÇTİ. ND7 öncesi süre 819 sn: %14 yavaşlama, sonuç aynı. "Davranış değişti" ifadesi düzeltildi: AI kalem bulucusunda değişim ÖLÇÜLMEDİ, ND7B (j) ölçecek.

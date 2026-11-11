@@ -8,8 +8,8 @@ EFOR: high.
 DURUM (Claude ölçtü)
 - Claude kendi ortamında tam regresyonu son kodla 6 dilimde koştu (v131-544): 579/581 geçti. Kalan 2 vaka:
   - BUL1-KURU kırmızı. Beklentisi "kahve içeren yalnız 2 stout örneği". ND7 artık daha çok kahve satırı tanıdığı için bu sayı değişti; sorun veri kaynaklı beklenti. CC'nin 196 vakalık kısmi koşusu bu vakayı içermiyordu.
-  - DOG4F-COZUM zaman aşımı (protocolTimeout 900 sn). Aynı makinede ND7 öncesi kodla (v131-543) 819 sn'de geçiyor; ND7 koduyla 900 sn'yi aşıyor.
-  - Neden: ND7 katmanı window._bmKatCoz'u KÜRESEL sarıyor. Bu çözücüyü asistanın kalem bulucusu (A1._kalemBul1) ve soru çözücü de kullanıyor. Yani ND7, kapsamı dışındaki AI yollarını hem YAVAŞLATIYOR hem de DAVRANIŞINI değiştiriyor: daha gevşek eşleme, marka ayıklama.
+  - DOG4F-COZUM zaman aşımı (protocolTimeout 900 sn). Aynı makinede ND7 öncesi kodla (v131-543) 819 sn'de geçiyor. ND7 koduyla süre sınırı uzatılınca 935 sn'de GEÇİYOR: sonuç aynı, %14 yavaş.
+  - Neden: ND7 katmanı window._bmKatCoz'u KÜRESEL sarıyor. Bu çözücüyü asistanın kalem bulucusu (A1._kalemBul1) ve soru çözücü de kullanıyor. Yani ND7, kapsamı dışındaki AI yollarını YAVAŞLATIYOR (%14). Davranışını da DEĞİŞTİREBİLİR (daha gevşek eşleme, marka ayıklama); bu ölçülmedi, (j) ölçecek.
 - nd7_tanima sayıları raporla birebir aynı:
   - tanınmayan satır 0;
   - malzemeli örnek 985;
