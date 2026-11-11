@@ -219,3 +219,45 @@ Bir sprintin ayrıntısını ararken: `grep -n "<SPRİNT ADI>" gorevler/SPRINT_G
 Önerilen sıra: FB1 → ND6 → ND7 → ND8 → KUCUK1.
 
 1j3z7. **KAAN KARARI — FB1 SONRAYA** (2026-11-11 13:18): "Bunu sonraya alalım". Yeni sıra: ND6 → ND7 → ND8 → KUCUK1 → FB1. ND6 promptu verildi. Risk Kaan'a anlatıldı: eşitleme verisi (reçeteler, stok, cihaz bilgisi) şifresiz okunabilir durumda kalıyor; yazma hiç denenmedi; API anahtarı bu veride yok.
+
+1j3z8. **ND6 YAPILDI** (CC, 2026-11-11; SW v131-541; gorevler/ND6.md 8 madde, gerçek API çağrısı YOK, Firebase YOK). Model: Fable 5.2.
+
+**Yapı.** `window.BM_ND6 = { ana, isk, muadil, maya, es, dil }` — her bayrak kapalıyken davranış birebir eski (ölçüm: bayraklar kapalı = ND6 öncesi kod, tüm sayılar aynı). Bayrak değişince `BM_ND6.uygula()`.
+
+**Ölçüm (tests/nd6_olcum.mjs; fixture stok 56 kalem, 11 L; önce → sonra, bayraklar açık).**
+- MUADIL ✅: 503 (kaynak alanlı 10) → 41 (hepsi kaynak alanlı) · ⚠️ 560 → 1012 · ❌ 10 → 20.
+- Yayımlanmış örnek rozeti (988): ✅ 13 → 1 · 🟡 462 → 261 · 🔴 513 → 694 · ❔ ayrı durum 0 → 32. ❔ kalemli örnek 817 → 803 (maya ❔ 414 → 374).
+- "Stoğumla oluştur" görünen örnek 156 → 170; tam 59 → 69.
+- "✨ Boş iskelet" (eski ana düğme) stokla eksiksiz: 9 → 6 / 239.
+- İskelet + stok (yeni ana düğme): plan 191 → 239 · alınacak 0: 87 → 98 · tam 62 → 74 · null 48 → 0.
+- Seçilen derece (satır): aynen 363 → 443 · ✅ 436 → 226 · ⚠️ 120 → 290 · ≈ 134 → 311 · bileşik 29 → 30 · alınacak 165 → 244.
+- Stil rozeti (239): ✅ 3 · 🟨 83 · 🟡 129 · 🔴 24. (Bayraklar kapalıyken aynı tanımla: ✅ 22 · 🟨 65 · 🟡 90 · 🔴 14 + 48 kurulamaz.)
+- Tek bayrak etkisi: yalnız muadil → örnek ✅ 13 → 1, maya ❔ 414 → 491 (✅ çift kuralı düşüyor); yalnız maya → örnek ✅ 13 → 15, maya ❔ 414 → 374, Stoğumla oluştur 156 → 170; yalnız es → 🟡 462 → 382 + ❔ 80; yalnız isk → plan 239, tam 73.
+
+**Madde 1 (ana).** Stil satırı: ana düğme "📦 Stoğumla kur" (_nd6StokKurIx → _bmIskeletStokumla), ikincil "✨ Boş iskelet" (_brYeniIx). Rozet `_bmIskStokDurum(stil)` = `_bmStokUyarla('isk', stil, 0)` planı (düğmenin kurduğu planla aynı): ok / muadil / yakin (1–2 alınacak ya da iskelette bölüm yok) / eksik (3+) / kurulamaz + "az var" eki. İkinci satır "Yayımlanmış reçeteler (birebir): ✅ · 🟡 · 🔴 · ❔". Süzgeç 1 = ✅ / 🟨, 2 = + en çok 2 alınacak; "stoğuma en uygun önce" sırası. Hesap parçalı (12'şer), stok imzası değişince yenilenir (imza bayrakları da taşır).
+
+**Madde 2 (isk) — null dönen 48 stil ve nedenleri** (hepsi artık plan veriyor; miktar / maya uydurulmadı):
+- İskelette MAYA yok (28): Czech Pale Lager, Saison (super), Norwegian Farmhouse / Kveik, American Wild Ale, Yuzu IPA / Japanese Hop Beer, Mexican Lager, German Helles Exportbier, Lager IPA, Australian Sparkling Ale, Helles Weizenbock / Weizenbock Hell, Herb Wheat Beer, Blanche Sour / Sour Witbier, Thiolized IPA / Biotech IPA, Oat Cream Lager, Craft Pilsner, Sour IPA, Zoigl Beer, Light Craft Lager, Session Sour, Birthday Cake Stout, Tepache Beer, Provision Ale, Barrel-Aged Belgian Quad, Mexican Light Lager, Mexican Pale Lager, Mexican Amber Lager, Kveik NEIPA, Oat Cream IPA → reçete mayasız kurulur, not + rozet "iskelette maya yok".
+- İskelette HOP satırı yok (8): Dark American Lager, Lambic / Gueuze, Framboise / Fruit Lambic, Sahti / Nordic Farmhouse, Australian Sparkling Ale, Australian Wheat Beer, Botanical Ale, Kvass → hop'suz kurulur, notta söylenir.
+- Katkı miktarı kaynakta yok (18): Norwegian Farmhouse / Kveik, Honey Ale / Braggot, Milkshake IPA, Sahti / Nordic Farmhouse, Peanut Butter Stout, Mixed Berry Sour, Honey Beer, Spiced Witbier, Australian Wheat Beer, Blanche Sour / Sour Witbier, Honey Lager, Golden Stout, Nordic Pale Ale, Cucumber Gose, Pumpkin Stout, S'mores Stout, Tepache Beer, Fruited Sour / Gose → katkı reçeteye EKLENMEZ, notta "miktar senin kararın"; stokta yoksa alınacak sayılır.
+- (6 stil iki nedeni birlikte taşıyor: 28 + 8 + 18 − 6 = 48.) Plan hiç çıkmazsa düğme: "Bu stilin iskeleti stokla kurulamıyor: <neden>" (_bmIskStokNeden).
+
+**Madde 3 (muadil).** Tablonun kaynak metni değişmedi; yama çalışma anında: `_ND6_MUADIL_KARAR` (kararlar.json 107 kayıt → yama_uret.mjs: ✅ 32 · ⚠️ 59 · ❌ 10 · bulunamadı 6; "karar" alanı) + kaynak alanı olmayan kalan 387 ✅ → ⚠️ "(kaynak bekliyor)" + 9 eski kaynaklı ✅ aynen. `MUADIL_ESKI` = eski tablo. Veri düzeltmeleri `_ND6_VERI_DUZELTME` (her biri url + ifade): CaraHell 20–30 EBC, Carapils 2,5–6,5 EBC, CaraMunich II 110–130 ↔ Koyu Kristal 60–80, Fawcett Dark Crystal II 110–130 °L (gramaj %90 notu çıktı), Kazbek → Saaz gramaj ARTIR, Torrified Wheat "kendi enzimi yok, maltla mayşelenir" (3 MUADIL kaydı + TANIM), M36 ↔ No04 notları (karar gerekçesiyle), BB Pamona tanımı (hibrit IPA ale mayası; AD değiştirilmedi — maya adı stil motorunun metin özelliğine giriyor, ESIT3-K8). karamela_arpa → c120: Claude kararı ✅, kaynak listesi boştu → kaynak aynı Hitit sayfası (crystal_dark kaydındaki url + alıntı). BB Pamona atenüasyonu (80–95) DEĞİŞTİRİLMEDİ (alıntılı sayı yok — askıda). (d) A4.MUADIL_KOD / muadilEtiket donmuş AI4B bloğunun DIŞINDA: etiket metnine dokunulmadı; yeni tabloda her ✅ kaynak alanlı olduğu için "kaynaklı muadil" doğru; ek olarak A1.muadilDerece kaynak alanı olmayan ✅'yi ⚠️ döndürür. Doğrulanmış ❌ çift özellik benzeri (≈) diye de önerilmez.
+- AÇIK NOKTA: maya "aynı suş kodu" köprüsü (_mayaKod: katalog adındaki "(=US-05)" etiketi) MUADIL tablosunun dışında ve satıcı beyanına dayanıyor; ✅ sayılmaya devam ediyor, notta "✅ eşdeğer" (kaynaklı değil) yazıyor → ND8.
+
+**Madde 4 (maya).** `_bmMayaKodlar` + `_bmMayaVeya`: ada göre çözülemeyen, ≥ 2 katalog kodu taşıyan maya satırı VEYA okunur (stokta olan ilk seçenek; yoksa ilk katalog kodu; katalogda yoksa ❔). `_bmKatCoz` değişmedi. Satırda ve reçete notunda hangi seçenekle karşılandığı yazılır. Malzeme indeksi tüm seçenekleri taşır.
+
+**Madde 5 (es).** Durum "taninmadi": yok / az 0, ❔ ≥ 1 → "❔ n kalem tanınmadı — kontrol edilemedi"; stil sayımında ayrı sütun; süzgeç 2 saymaz.
+
+**Madde 6 (dil).** İki satırlık açıklama sonuç başlığının altında, "✕ gizle" ile kapanır (tercih bu cihazda, anahtar nd6_aciklama_gizli). Not biçimi: "X yerine Y (✅ kaynaklı / ✅ eşdeğer / ⚠️ yakın, fark: … / ≈ özellik benzeri, fark: … / karışım)".
+- BİLİNEN MALİYET: 360 px genişlikte stil satırı yükseldiği için "kaydırmadan tam görünen 1 satır" (BT1 ölçüsü) artık sağlanmıyor (açıklama gizliyken de); 390 px geçiyor.
+
+**AI geri oynatmaları — YENİ TABLOYLA DEĞİŞENLER (beklenen değer AYARLANMADI; CLAUDE KARARI BEKLİYOR).** Paket içinde bu case'ler O GÜNÜN tablosuyla (bayraklar kapalı) koşuyor; yeni tabloyla görmek için `ND6_AI_YENI=1 node tests/regresyon.mjs --case=<kod>`:
+- AI2-TUZAK: tuzak seti mock "iyi" koşusunda kontrol grubu 12/12 → 4/12 (eşik ≥ %80) — setin beklediği "kaynaklı muadil" dereceleri kaynak bekleyen ✅ kayıtlara dayanıyor.
+- AI5B-YON ve DOG4-K4: koşu #4 gerçek cümleleri yeniden geçirilince karar değişiyor (C05#2 ucuz, C05#0 dengeli, C05#7 güçlü: ok → düşürüldü; paketteki muadil derecesi / hesap değerleri değişti).
+- AI4-ONKONTROL: ön kontrol mock koşusu (AI6 planı) yeni tabloyla geçmiyor (aynı neden: kontrol istemlerindeki muadil derecesi).
+- G seti / CEV mock 55 / kural yolu d30af8de: DEĞİŞMEDİ (bayraklar açıkken yeşil).
+- İSKELET TÜRETMESİ (ISK1-HASH): canlı türetme maya seçerken MUADIL ✅ eşdeğerliğini kullanıyor; yeni tabloyla 227 türetilmiş stilin 33'ünde maya değişir ya da boşalır. iskelet_veri.js YENİDEN ÜRETİLMEDİ (uygulama saklanan dosyayı okur; rozet / plan sayıları saklanan iskeletlerle). _isk_build.js bir sonraki çalışmada bu 33 stili değiştirir → karar Claude'da. Maya VEYA kuralı türetmede kapalı (stok bilgisi türetmeye sızmasın).
+- Paket içinde "ND6 öncesi" (bayraklar kapalı) koşan 18 case — ekran (7): AL5-AK-ENTEGRASYON, AV4-DOLDUR-REGRESYON, BQ1-KARAKTER, BR3-KORUNAN, BS1-TUMSTIL, BT1-GRUP, ND1-FILTRE · veri (7): ND2-ALIAS, ND3-MUADIL, UYG2-MAYA, KAT1-SEPET, AI1-HUKUM, CEV2-MAYA, ISK1-HASH · ai (4): AI2-TUZAK, AI5B-YON, DOG4-K4, AI4-ONKONTROL. Nedenleri tests/regresyon.mjs ND6_ONCESI'nde.
+
+**Test.** npm test 6 dilim (--parca): 93/93 ×5 + 89/89 = 554/554 (546 eski + 8 yeni ND6-*: ROZET, EKRAN, KAPALI, MUADIL, MAYA, ES, ISK, DIL). Üç imza AYNI (2c9ebd9f-32461 · 92f59a3c-5776 · 6d7e6c6e-35582); CEV mock 55 ve kural yolu d30af8de bayraklar AÇIKKEN aynı. Eklenen satırlarda anahtar taraması 0; fixture içeriği diff'te 0. Koşucu: ND6_ONCESI (18 case bayraklar kapalı), tuzak_kos.mjs BM_ND6_KAPALI=1 okur.

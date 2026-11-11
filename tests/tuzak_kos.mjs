@@ -64,6 +64,8 @@ let sonuc = null, kod = 0, gecmisGordu = 0;
 try {
   const ctx = await br.createBrowserContext(); // gizli bağlam: localStorage bellekte
   const pg = await ctx.newPage();
+  // SPRINT ND6: regresyon paketi "ND6 öncesi" case'inden çağırırsa (BM_ND6_KAPALI=1) sayfa BM_ND6 bayrakları kapalı kurulur (O GÜNÜN MUADIL tablosu)
+  if (process.env.BM_ND6_KAPALI === '1') await pg.evaluateOnNewDocument(() => { let v; Object.defineProperty(window, 'BM_ND6', { configurable: true, get() { return v; }, set(z) { v = z; if (z) ['ana', 'isk', 'muadil', 'maya', 'es', 'dil'].forEach(k => { z[k] = false; }); } }); });
   await pg.setRequestInterception(true);
   pg.on('request', q => { const u = q.url(); if (u.startsWith('http://127.0.0.1') || u.startsWith('data:') || (GERCEK && u.startsWith('https://api.anthropic.com/'))) q.continue(); else q.abort(); });
   await pg.goto('http://127.0.0.1:' + srv.address().port + '/Brewmaster_v2_79_10.html', { waitUntil: 'domcontentloaded' });
