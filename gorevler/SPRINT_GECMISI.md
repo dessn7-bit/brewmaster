@@ -194,3 +194,26 @@ Bir sprintin ayrıntısını ararken: `grep -n "<SPRİNT ADI>" gorevler/SPRINT_G
 - 4 maya kod okuma
 - 5 tanınamayan satır engel olmasın ("özel kalem — senin seçimin"; her örnekte Stoğumla oluştur)
 - 6 test + doğrulayıcı (bugün tanınan ≈7.170 satırda kimlik değişimi 0)
+
+1j3z6. **ND7 HEDEFİ GENİŞLEDİ + ND8** (Claude, 2026-11-11; Kaan: "bütün hepsini program tanıyıp ayrıca muadillerle eşleştirmeli").
+
+**ND7**
+- Hedef: tanınmayan satır SIFIR.
+- SINIF kalemleri eklenir. Örnekler: renk belirtilmemiş kristal, türü belirtilmemiş meyve / bal / candi / meşe / lager mayası.
+  - Stokta o sınıftan bir kalem varsa, tarif yazıldığı gibi karşılanmış sayılır.
+- Tanınmayan her yazım için eşleme tablosu hazırlanır (≈1.320 yazım).
+- Kataloğa sıklık sınırı olmadan ekleme yapılır; kaynak yoksa satır sınıfa bağlanır.
+- Hop satırı olmayan 31 örnek tek tek incelendi; durum karışık:
+  - Gerçekten hopsuz olanlar: Gruit ve Botanical.
+  - Veri boşluğu olanlar: AHA'da Schwarzbier, Weizen, Altbier, Wee Heavy, Dry Irish Stout, Mild; kay'da Dark American Lager, Session Stout, Pre-Prohibition Porter, Steinbier.
+  - Hopun ek kalemlere düştüğü örnek: NHC Belgian Strong Ale 3.
+
+**ND8** (gorevler/ND8.md, 6 madde)
+- 0 kapsam ölçümü
+- 1 "(kaynak bekliyor)" kayıtlarının yeniden doğrulanması
+- 2 her kalemin en az bir kaynaklı ✅/⚠️ yolu ya da gerekçeli "muadili yok"; yerel ürünlere öncelik
+- 3 maya: ✅ yalnız aynı suş; ⚠️ sayısal fark
+- 4 ekran: derece, fark ve kaynak
+- 5 test + bağımsız doğrulayıcı; ardından Claude kör örneklem yapar (✅ isabeti < %90 → tur tekrarı)
+
+Önerilen sıra: FB1 → ND6 → ND7 → ND8 → KUCUK1.

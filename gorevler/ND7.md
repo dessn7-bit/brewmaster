@@ -1,6 +1,7 @@
-SPRINT ND7 — 988 örneğin hepsi "Stoğumla oluştur"a açılsın: malzeme TANIMA (gerçek API çağrısı YOK)
+SPRINT ND7 — 988 örneğin HER satırı tanınsın (tanınmayan satır SIFIR) ve hepsi "Stoğumla oluştur"a açılsın (gerçek API çağrısı YOK)
 
-Claude, 2026-11-11. Kaan: "bütün 988 reçetenin yapılabilir olması … neden program tanımıyor". ND6'dan SONRA verilir.
+Claude, 2026-11-11. Kaan: "bütün 988 reçetenin yapılabilir olması … neden program tanımıyor" + "bütün hepsini program tanıyıp ayrıca muadillerle eşleştirmeli". ND6'dan SONRA verilir. Muadil eşleştirme ayrı görev: ND8 (bu sprintin ardından).
+HEDEF: 988 örnekteki malt / hop / maya / ek satırlarının TAMAMI bir kimliğe bağlanır — belirli ürün, ya da ürün yazılmamışsa SINIF kalemi. Sprint sonunda tanınmayan satır sayısı 0 olmalı; 0 olmuyorsa kalan her satır tek tek gerekçesiyle listelenir, Claude karar verir.
 Bu dosyada 7 madde var (0–6). İşe başlamadan 7'sini de okuduğunu raporun ilk satırında teyit et.
 EFOR: high. MODEL: model-bağımsız; modelini ilk satırda belirt.
 
@@ -74,15 +75,17 @@ KURALLAR
 - Konsantre biçimler AYRI üründür, sessizce pellet'e BAĞLANMAZ: Cryo, LupoMax, Incognito, lupulin tozu. Katalogda karşılığı varsa ona bağlanır (cc, cm …), yoksa madde 3'e aday olur.
 - Tek ve aynı noktada çalışır (_bmKatCoz'un önünde). Arama (_bmMalzemeAra) ve ND aynı sonucu görür.
 
-2. SINIF KURALI — belirsiz genel adlar (BM_ND7.sinif)
-- Renk vermeyen "crystal malt / caramel malt / caramunich / caramel munich / medium crystal" satırı bir ürüne bağlanmaz. Satır "kristal/karamel maltı — renk belirtilmemiş" SINIF kalemi olur.
-  - "Birebir" rozetinde ❔ kalır (yayımlanmış tarif belirsiz).
-  - "Stoğumla oluştur"da stoktaki bir kristal/karamel maltıyla doldurulur ve ⚠️ işaretlenir: "tarif rengi vermiyor; stoktaki X (n °L) konuldu".
+2. SINIF KALEMLERİ — ürünü yazılmamış satırlar (BM_ND7.sinif)
+- Sınıf kalemi = katalogda yeni bir "tür" kaydı (ör. "Kristal/karamel maltı — renk belirtilmemiş", "Meyve — türü belirtilmemiş", "Bal — türü belirtilmemiş", "Candi şekeri/şurubu — renk belirtilmemiş", "Meşe — biçimi belirtilmemiş", "Lager mayası — suş belirtilmemiş"). Tarif ürünü yazmadığı için, stoktaki o sınıftan HERHANGİ bir kalem tarifi yazıldığı gibi karşılar; bu yüzden sınıf kalemi "birebir" rozetinde de ❔ DEĞİLDİR: stokta o sınıftan kalem varsa karşılanmış sayılır ve satırda "tarif türü belirtmiyor; stoktaki X kullanıldı" notu yazar.
+- Sınıf listesi örnek verisindeki gerçek yazımlardan çıkar; her sınıfın üyelik kuralı açık yazılır (hangi katalog kayıtları o sınıftan).
+- Renk vermeyen "crystal malt / caramel malt / caramunich / caramel munich / medium crystal" satırı bir ürüne bağlanmaz; "kristal/karamel maltı — renk belirtilmemiş" SINIF kalemine bağlanır. "Medium / dark / extra dark crystal" gibi niteleyiciler sınıf içinde renk aralığı olarak okunur (aralık kaynakla: üreticilerin bu adla sattığı ürünlerin renkleri).
+  - "Stoğumla oluştur"da stoktaki o sınıftan bir kalemle doldurulur, not: "tarif rengi vermiyor; stoktaki X (n °L) konuldu".
 - Örneğin hedef SRM'si biliniyorsa, renk seçimi önce/sonra SRM'yi en az kaydıran stok kalemi olsun.
 - "Carafa II / III" (Special ya da dehusked sözcüğü yok): Weyermann'ın kabuklu ve Special türlerinin rengi aynı aralıkta. SINIF kalemi "Carafa Type N (kabuklu ya da Special)" olur; stokta hangisi varsa o, not ile. Renk aynılığını Weyermann ürün belgesinden kendin doğrula (url: dis_kaynak/muadil_dogrulama_2026-11-11/kararlar.json); doğrulanamazsa sınıf kalemi kurulmaz.
 
 3. KATALOG EKLEMELERİ (KAT-C + KAT-D birleşik; veri)
-- Kapsam: tanınmayan satırlarda EN AZ 2 kez geçen hop, maya, malt ve ekstraktlar. Liste nd7_tanima çıktısından gelir.
+- Kapsam: örnek verisinde adı geçen ve katalogda olmayan HER gerçek ürün (hop, maya, malt, ekstrakt, katkı) — sıklık sınırı YOK. Liste nd7_tanima çıktısından gelir.
+- Kaynağı bulunamayan ürün kataloğa ürün olarak girmez; satır en yakın SINIF kalemine bağlanır ve eşleme tablosunda "ürün kaynağı bulunamadı → sınıf" diye işaretlenir.
 - Hop: alfa, beta, yağ, köken, aroma tanımı — yetiştirici sayfasından.
 - Maya: tür, zayıflama, sıcaklık, flokülasyon, fenol (POF) — üretici sayfasından. Hiçbir yeni mayaya ✅ MUADIL yazılmaz; ✅ ancak "aynı suş" kanıtıyla (ND6 madde 3 kuralı).
 - Malt / ekstrakt: renk, ekstrakt, sınıf — üretici belgesinden.
@@ -95,12 +98,21 @@ KURALLAR
   - üretici + ürün adı, ÜRETİCİNİN KENDİ kataloğunda o adla TEK ürüne karşılık geliyorsa o koda bağlanır (kaynak url'si eşleme tablosunda);
   - birden çok ürüne karşılık geliyorsa bağlanmaz.
 
-5. TANINAMAYAN SATIR ENGEL OLMASIN (BM_ND7.ozel)
-- Okuyucu + sınıf + katalog sonrası hâlâ ürüne bağlanamayan satır "özel kalem — senin seçimin" olur. Örnekler: "fruit", "honey (type not specified)", şişeden üretilmiş maya.
-  - "Stoğumla oluştur"da satır yerinde kalır, adı ve kaynaktaki miktarı görünür, Kaan stoktan bir kalem seçebilir ya da boş bırakır.
-  - Bu satır düğmeyi KAPATMAZ.
+5. EŞLEME TABLOSU — HER YAZIM (BM_ND7.tablo)
+- Örnek verisindeki tanınmayan HER farklı yazım (bugün ≈1.320: malt 623 · hop 199 · maya 373 · ek 127) için tek satırlık kayıt: yazım → ürün id / sınıf id / yeni katalog id + hangi kural (okuyucu / renk / sınıf / yeni kayıt / elle) + elle olanlarda gerekçe. Tablo uygulamaya gömülü veri olur; _bmKatCoz sözlükten sonra bu tabloya bakar.
+- "Elle" kayıtlar BV kuralına uyar (aynı ürün ya da açık sınıf); tahminle ürün bağlanmaz — emin değilsen sınıf.
+- Ürün değil ama gerçek bir malzeme olan satır ("4 Swanson probiotics", "yeast cultured from a Coopers bottle") uygun sınıfa bağlanır (ör. "laktik bakteri — probiyotik kaynaklı", "maya — şişeden üretilmiş").
+- Sonuç: tanınmayan satır 0. Kalırsa liste + neden, Claude karar verir.
 - Miktarı kaynakta olmayan satır: ISK1 deseniyle stil iskeletinin g/L medyanından "varsayım" etiketli miktar alır; o da yoksa "miktar senin kararın".
-- Hedef: malt + hop + maya satırı olan HER örnekte "📦 Stoğumla oluştur" görünür (hop satırı hiç olmayan 31 örnek ayrı listelenir).
+- Hedef: HER örnekte "📦 Stoğumla oluştur" görünür.
+- Hop satırı olmayan 31 örnek KARIŞIK (Claude baktı):
+  - Gerçekten hopsuz olanlar var: Gruit, Botanical, bazı sour'lar. Bunlarda düğme hop satırı şartı aramaz.
+  - Çoğu VERİ BOŞLUĞU: AHA örneklerinde hop dizisi boş. Örnekler: Schwarzbier, Weizen, Altbier, Wee Heavy, Dry Irish Stout, Mild. kay örneklerinde de var: Dark American Lager, Session Stout, Pre-Prohibition Porter, Steinbier.
+  - Bir örnekte hop ek kalemlere düşmüş: NHC Belgian Strong Ale 3, "compressed homegrown Cascade".
+- Her biri sınıflanır. İşlem sırası:
+  - Kaynakta hop bilgisi varsa: derleyici (builder) düzeltilir.
+  - Kaynakta hop bilgisi yoksa: "kaynakta hop bilgisi yok" etiketi konur. Stoğumla oluştur'da stil iskeletinin hop satırları "varsayım" etiketiyle gelir (ISK1 deseni).
+  - Ek kalemlere düşmüş hop: hop satırına taşınır.
 - "Birebir" rozeti (yayımlanmış tarifi aynen) bu satırları ❔ saymaya devam eder; dürüstlük için ayrı.
 
 6. TEST + KAYIT
@@ -117,7 +129,7 @@ KURALLAR
 - BAĞIMSIZ DOĞRULAMA (Kaan kuralı, ZORUNLU): rapordan önce işi GÖRMEMİŞ bir doğrulayıcı alt ajan kendi başına bakar:
   - diff ve üç imza;
   - nd7_tanima önce/sonra (kendisi koşar);
-  - rastgele 30 yeni eşleme: aynı ürün mü, kural doğru mu;
+  - eşleme tablosundan rastgele 50 satır: aynı ürün ya da doğru sınıf mı, kural doğru mu;
   - rastgele 10 yeni katalog kaydı: url açılıyor mu, değer sayfada var mı;
   - bugün tanınan satırlarda kimlik değişimi 0;
   - sızıntı grep'i.
