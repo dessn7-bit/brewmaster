@@ -2,6 +2,22 @@ SPRINT ND7K — Katalogda olmayan gerçek ürünlerin KAYNAKLI eklenmesi (KAT-C 
 
 Claude, 2026-11-11. ND7'den SONRA verilir. ND7 bu sprintin girdisini hazırlar: tests/nd7k_aday.json. Bu dosya, örnek verisinde adı geçen ama katalogda olmayan ürünlerin listesidir. ND7'de bu ürünlerin satırları geçici olarak "katalog_bekliyor" sınıfına bağlanmıştır.
 
+ND7B SONRASI EK (Claude, 2026-11-13; Kaan kararı: ND7B biter bitmez aynı oturumda ND7K'ya geçilecek)
+- BAŞLAMA ŞARTI: ND7B commit + push edilmiş, canlı md5 = yerel, tam regresyon son kodla koşulmuş, ND7B doğrulayıcısı bitmiş ve ND7B raporu yazılmış olmalı.
+  - ND7B'de çözülemeyen kırmızı test ya da "Claude kararı bekleyen ve ND7K'yı etkileyen" bir madde varsa ND7K'ya BAŞLAMA. Durumu yazıp dur.
+  - Etkileyen maddeler: fark işareti (a), kaybolan satırlar (c), renk düzeltmeleri (f), ND7 katmanının kapsamı (j).
+- ND7B'nin (a) maddesi: marka ürünü katalogda yoksa satır fark='marka' ile aynı türden kayda geçici bağlanmış ve ürün tests/nd7k_aday.json'a eklenmiştir.
+  - ND7K bu ürünü kaynakla eklerse satır ürüne yeniden bağlanır ve fark alanı KALKAR.
+  - Eklenemezse fark='marka' kalır.
+- ND7B'nin (f) maddesinde düzeltilen katalog renklerine dokunma. Yeni eklenen Dingemans ve Castle ürünlerinde birimi (EBC ↔ °L) üretici sayfasından AYRICA doğrula.
+- KATALOG ORTAK: Yeni ürünler MALTLAR / HOPLAR / MAYALAR / KATKILAR'a girer. Eski sözlük çözücüsü de bunları tanıyacağı için AI yolları da etkilenir: asistanın kalem bulucusu, soru çözücü, AI4 / CEV kanıt paketi.
+  - Bu bilinçli bir değişikliktir ama ÖLÇÜLÜR. tests/nd7b_a1_karsilastir.mjs ile A1 kalem bulucusunu önce / sonra karşılaştır (G seti + tuzak seti istemleri).
+  - Değişen her istemi listele.
+  - G seti / tuzak / CEV mock 55 / kural yolu d30af8de geri oynatmalarında değişen sonuç olursa liste + neden yaz. Beklenen değer AYARLANMAZ, karar Claude'da.
+- Ürünlerin hepsi tek oturumda bitmeyebilir. Sıra: önce satır sayısı en yüksek ürünler.
+  - Bitmeyenler sınıfta kalır ve raporda "sırada" diye listelenir.
+  - Yarım iş commit edilmez. Her commit kendi içinde tutarlı olur, testleri geçer ve yayına hazırdır.
+
 Bu dosyada 5 madde var (0–4). İşe başlamadan 5'ini de okuduğunu raporun ilk satırında teyit et; modelini yaz.
 
 EFOR: high.
@@ -12,6 +28,7 @@ Kaynak araştırması çok olduğu için paralel alt ajanlar kullan:
 
 KURALLAR
 - ND6 KURALLAR bölümü aynen geçerli: heldout açılmaz, üç imza AYNI, gerçek API yok, Firebase yok, Kaan'dan iş istenmez, bayrak kapalıyken eski davranış (BM_ND7K).
+- AĞ: bekleme ya da deneme için üçüncü taraf servislere istek ATILMAZ. Dış istek yalnız GitHub'a ve kaynak doğrulaması için üretici, yetiştirici ya da satıcı sayfalarına.
 - Kataloğa giren her ürünün her sayısal değeri için şunlar zorunlu:
   - üretici ya da yetiştirici sayfasının url'si;
   - ≤15 sözcük birebir alıntı.
