@@ -14,6 +14,15 @@ Kaan kod bilmiyor. Tüm kod okuma, yazma, düzenleme, deploy işlerini Claude ya
 5. Tamamlandığında deploy et
 6. Claude yerel git repo'su üzerinde çalışır, GitHub ile git pull/push senkron. Brewmaster'ın yedeği = GitHub.
 
+## Çalışma disiplini (2026-11-13)
+- Belirsizlik: geri dönüşü zor ya da kapsamı değiştiren bir kararsa DUR ve sor. Değilse en makul yorumu seç, raporda "VARSAYIM" diye yaz, devam et (Kaan çoğu zaman başında değil).
+- Yalnız gerekeni değiştir: görevin gerektirmediği koda, yoruma, biçime dokunma; bozuk olmayanı yeniden düzenleme; mevcut stile uy. İlgisiz ölü kodu raporda yaz, silme; yalnız kendi değişikliğinin boşa çıkardığını temizle. Her değişen satır görevdeki bir maddeye bağlanabilmeli.
+- Birden çok yolun çağırdığı bir fonksiyonu değiştirmeden önce çağıranları listele; görev dışındaki bir yolun davranışı değişecekse DUR ve raporla.
+- Zor hata: önce hatayı her seferinde kırmızıya düşüren hızlı bir komut kur (tek case ya da küçük betik), sonra 3–5 sıralı hipotez yaz ve sırayla ele. Aynı soruna 3 düzeltme denemesi tutmadıysa dur, yaklaşımı sorgula, raporda yaz.
+- Bulgu alma: doğrulayıcının ya da Claude'un (sohbet) bulgusunu uygulamadan önce kodda / veride doğrula; yanlışsa kanıtla itiraz et. Görev dosyasındaki "Claude kararı" bir tercihse uygula; dayandığı olgu tutmuyorsa uygulamadan önce kanıtla bildir.
+- Doğrulayıcı raporu iki ayrı bölüm: (1) Talimat — görevdeki her madde, numarasıyla: tamam / eksik / istenmemiş fazlalık / yanlış. (2) Kural — CLAUDE.md ve brewmaster-dev kurallarına aykırılık. İki bölüm birleştirilmez.
+Kaynak: multica-ai/andrej-karpathy-skills; obra/superpowers (systematic-debugging, receiving-code-review); mattpocock/skills (diagnosing-bugs, writing-for-agents) — 2026-11-13.
+
 ## İletişim
 - Dil: Türkçe
 - Kaan'a "kralım" deme

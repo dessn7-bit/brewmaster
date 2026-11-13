@@ -8,7 +8,7 @@ description: Brewmaster tek-dosya PWA (Brewmaster_v2_79_10.html) ve sw.js uzerin
 Brewmaster: tek-dosya Turkce ev-yapimi bira recete PWA'si. Bu dosyalara dokunan her isde bu protokole uy.
 
 ## Proje
-- Ana dosya: Brewmaster_v2_79_10.html (~25.9k satir, ~3.5MB, tek dosya).
+- Ana dosya: Brewmaster_v2_79_10.html (tek dosya; güncel boyut ve satır sayısı CLAUDE.md "Proje" bölümünde).
 - Repo: github.com/dessn7-bit/brewmaster (public), branch main, GitHub Pages.
 - sw.js: const CACHE_VERSION='bm-cache-v131-N'. HER HTML degisiminde N'yi bir artir.
 - Dosya cok buyuk: tam cat / tam-dosya view YAPMA (token israfi). Hedefli grep, sed -n, satir-arali view kullan.
@@ -44,7 +44,6 @@ Brewmaster: tek-dosya Turkce ev-yapimi bira recete PWA'si. Bu dosyalara dokunan 
 
 ## Calisma bicimi
 - Kullaniciya "kopyala/yapistir" veya "su satiri duzenle" deme; tum okuma/yazma/deploy CC'de.
-- Belirsizlikte sor, kor degistirme.
 
 ## Playwright / runtime test notlari
 - Recipe state S closure-bound const; window.S ile AYNI referans olmayabilir. Test/otomasyonda state mutasyonu eval('S.xxx = ...') ile yapilmali; window.S.xxx = ... calc/render zincirine ulasmaz.
@@ -71,3 +70,7 @@ Brewmaster: tek-dosya Turkce ev-yapimi bira recete PWA'si. Bu dosyalara dokunan 
 - Paralel iş (örn. çok-cluster fix) için subagent fan-out kullanılabilir.
 - Sub-sprint disiplini DEĞİŞMEZ: 1 sub-sprint = 1 commit + 1 SW bump + 1 memory kaydı. Subagent'lar paralel çalışır, sonuç TEK commit'te toplanır; her subagent ayrı commit/SW bump AÇMAZ.
 - Her subagent çıktısı ana akışta 3-katman doğrulamadan geçer.
+
+4) Sadelik (yalnız bu görevde yazdığın yeni kod için):
+- İstenenden fazla özellik, tek kullanımlık soyutlama, istenmemiş ayar, olamayacak durum için hata yakalama ekleme.
+- Yeni kod belirgin şekilde daha kısa yazılabiliyorsa kısalt. Mevcut kodu bu gerekçeyle yeniden yazma.
