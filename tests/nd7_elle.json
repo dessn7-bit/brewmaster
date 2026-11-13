@@ -139,5 +139,42 @@
     ["u","malt:invert3","Invert No. 3 — katalog kaydıyla aynı ürün (renk 70 ↔ 60 °L, ±%25 içinde)",["invert sugar #3 (70 °l)"]],
     ["u","katki:treacle","iki ad da aynı katalog kaydı (Treacle / Blackstrap Molasses)",["treacle or molasses"]],
     ["u","katki:kahve_cekirdek","kahve çekirdeği — katalog kaydıyla aynı ürün (kavurma derecesi tarifte yazmıyor)",["coffee, whole bean"]]
-  ]
+  ],
+  "nd7b": {
+    "_aciklama": "SPRINT ND7B — ND7 kararlarının ÜSTÜNE yazılan elle kararlar (BM_ND7B.tablo açıkken geçerli; _ND7B_TABLO katmanına gider). Biçim: [karar, hedef, gerekçe, [yazımlar], { fark, farkNot, aday, zaman, alfa }]. Ek karar: t = yanlış listeye yazılmış gerçek malzeme (hedef 'hop:id'). fark verilmezse kuraldan hesaplanır (BM_ND7.farkHesap). mayaKarisim: yazım → [parçalar] (birlikte kullanılan mayalar) ya da false (bölünmez).",
+    "malt": [
+      ["u","malt:dehusked_black","(e) markasız \"debittered black malt\": jenerik kabuksuz siyah malt kaydı; Dingemans'a özel kayıt değil",["debittered black malt"]],
+      ["u","malt:briess_pale","(e) U.S. pale malt: katalogdaki ABD baz pale (2-row) kaydı; tarif üretici yazmıyor. Kayıt rengi 2 °L ↔ üretici: \"Color ..... 2.1 SRM\" (https://brewingwithbriess.com/wp-content/uploads/documents/Briess-PISB-Brewers-Malt.pdf)",["u.s. pale malt"],{"fark":"marka","farkNot":"tarif üretici yazmıyor · kayıt tek üreticinin ürünü (Briess 2-Row Brewers Malt)"}],
+      ["u","malt:briess_pale","(a) Rahr'ın 2-row baz maltı (üreticideki adı The Brewer's Standard 2-Row; \"Color °Lovibond 1.9 - 2.3°\" — https://rahrmaltingco.com/rahr-the-brewers-standard-2-row/) katalogda yok: aynı türden ABD 2-row baz malt kaydına GEÇİCİ bağlı; tüm yazımlar aynı yoldan",["rahr 2-row","rahr 2-row barley malt","rahr 2-row brewer's malt","rahr 2-row malt","rahr pale 2-row malt","rahr pale two-row malt","rahr standard 2-row","rahr standard 2-row malt","rahr two-row malt"],{"aday":"Rahr Standard 2-Row"}],
+      ["u","malt:briess_pale","(a) Great Western'ın 2-row baz maltı katalogda yok: aynı türden ABD 2-row baz malt kaydına GEÇİCİ bağlı; tüm yazımlar aynı yoldan (Premium 2-Row ayrı ürün adı — bekliyor)",["great western 2-row malt","great western two-row malt","great western us domestic two-row malt","great western domestic two-row malt (2 °l)"],{"aday":"Great Western 2-Row"}],
+      ["b","snf_b_malt|Dingemans Cara 50 MD (Cara Vienna / Caravienne)","(e) üretici sayfası: \"Cara 50 MD is also known as Cara Vienna.\" (\"Colour: 40 - 60 EBC\", \"Lovibond: 20,00\" — https://www.dingemansmout.be/malt/cara-50-md). Katalogdaki dingemans_cara20 = Cara 20 MD (\"Lovibond: 8,00\" — https://www.dingemansmout.be/malt/cara-20-md) AYRI ürün → BAĞLANMADI; Cara 50 MD katalogda yok",["belgian caravienne malt (21 °l)","caravienne","caravienne (bel)","caravienne malt","caravienne malt (22 °l)","dingemans caravienne malt"]],
+      ["t","hop:fuggles","(c) tahıl listesine yazılmış hop (Fuggles pellet; kullanım zamanı kaynakta yok)",["fuggles pellet hops"]],
+      ["t","hop:hrblc","(c) tahıl listesine yazılmış ilk şıra hopu: German Blanc = Hallertau Blanc, FWH",["german blanc, fwh"],{"zaman":"FWH"}],
+      ["u","malt:wheat","(a) Rahr Red Wheat Malt katalogda yok: aynı türden buğday maltı kaydına GEÇİCİ bağlı; iki yazım aynı yoldan (doğrulayıcı bulgusu)",["rahr red wheat malt","wheat malt, red (rahr)"],{"aday":"Rahr Red Wheat Malt"}],
+      ["u","malt:briess_pale","(a) \"U.S. pale malt\" ile aynı ürün adı (ABD baz pale): aynı yoldan — katalogdaki ABD 2-row kaydı, tarif üretici yazmıyor (doğrulayıcı bulgusu)",["us pale malt","american pale malt"],{"fark":"marka","farkNot":"tarif üretici yazmıyor · kayıt tek üreticinin ürünü (Briess 2-Row Brewers Malt)"}],
+      ["u","malt:bel_pils","Dingemans pilsner maltı: katalogdaki Belçika pilsner kaydının üreticileri arasında Dingemans var ve kaydın alias'ı \"dingemans pilsner malt\" — aynı ürün (doğrulayıcı bulgusu: jenerik pilsner yerine bu kayıt)",["pilsen (dingemans)"],{"fark":""}],
+      ["u","malt:chateau_bld","Castle pale malt = katalogdaki Château Pale Ale (Castle) kaydı (alias \"chateau pale malt\") — aynı üreticinin ürünü (doğrulayıcı bulgusu: jenerik pale ale yerine bu kayıt)",["castle pale malt"],{"fark":""}]
+    ],
+    "hop": [
+      ["u","hop:hitit_bg","(e) Brewer's Gold çeşidi; katalogdaki kayıt Türkiye ekimi (Hitit). Tarif köken yazmıyor → çeşit aynı, köken farklı olabilir",["brewer's gold","brewers gold"],{"fark":"koken","farkNot":"tarif köken yazmıyor · kayıt Türkiye ekimi Brewer's Gold (Hitit)"}],
+      ["s","snf_hop_belirsiz","(c) gerçek hop satırı; çeşit adı kaynakta yok (yalnız alfa değeri / kullanım yazıyor)",["50% a.a.","18.5% a.a.","9.8% a.a.","dry hop 4 days"]],
+      ["u","hop:willamette","(b) yıllandırılmış (aged) Willamette: çeşit aynı, biçim farklı",["willamette (aged)"]],
+      ["u","hop:spalt","(b) fırında yıllandırılmış Spalt: çeşit aynı, biçim farklı",["oven-aged spalt"]]
+    ],
+    "maya": [
+      ["s","snf_maya_kveik","(e) Escarpment Labs'in tek bir \"Kveik\" ürünü yok (Voss Kveik, Hornindal Kveik Blend, Ebbegarden Kveik Blend, Årset Kveik Blend, Lærdal Kveik … — https://escarpmentlabs.com/products/voss-kveik): suş belirtilmemiş kveik",["kveik yeast (escarpment labs) or bread yeast"]],
+      ["b","snf_b_maya|Imperial L13 Global","(e) Imperial Yeast L13 Global (\"L13 Global\" — https://www.imperialyeast.com/yeast-strains/global); katalogda yok",["imperial global, 2nd generation slurry (1.5milli"]],
+      ["t","hop:galaxy","(c) maya alanına yazılmış hop satırı: Galaxy pellet, %15 alfa; zaman '2nd 15 minute' belirsiz → zaman boş",["7.5 g au galaxy pellets 15% a.a. @ 2nd 15 minute"],{"alfa":15}]
+    ],
+    "ek": [
+      ["u","katki:dme","(e) ekşitilmiş şıra (evde yapılır, satın alınan ürün değil); asıl malzeme light DME",["soured wort (sub-recipe: 8 oz light dme"]],
+      ["b","snf_b_katki|Baker's dark chocolate","(e) belirsiz: Baker's markası koyu çikolata mı, pastacılık (baker's) koyu çikolatası mı kaynaktan anlaşılmıyor",["chocolate, baker's dark"]]
+    ],
+    "mayaKarisim": {
+      "wyeast 2278 wyeast 2124, and white labs wlp820 b": ["Wyeast 2278","Wyeast 2124","White Labs WLP820"],
+      "wyeast 2278 wyeast 2124, and white labs wlp820 blend, 1 gallon slurry, decanted)": ["Wyeast 2278","Wyeast 2124","White Labs WLP820"],
+      "east coast yeast ecy23 (oud brune), or an english ale yeast and lactobacillus blend": false,
+      "saccharomyces \"bruxellensis\" trois wlp644 (white labs, ale, 90.0%); wlp644, wlp648, wlp653": ["White Labs WLP644","White Labs WLP648","White Labs WLP653"]
+    }
+  }
 }

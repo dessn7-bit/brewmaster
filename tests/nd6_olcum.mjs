@@ -72,11 +72,11 @@ function olc(bayrak) {
   Object.keys(MUADIL).forEach(k => (MUADIL[k] || []).forEach(m => { if (!m) return; mT++; const f = String(m.fark || '').trim(); if (f.indexOf('✅') === 0) { mOk++; if (m.kaynak && m.kaynak.url) mOkK++; } else if (f.indexOf('⚠️') === 0) mUy++; else if (f.indexOf('❌') === 0) mX++; }));
   out.muadil = { kayit: mT, ok: mOk, okKaynakli: mOkK, uyari: mUy, yanlis: mX };
   // (a) örnek rozetleri
-  const H = window._bmOrnekHepsi(), a = { n: 0, ok: 0, yakin: 0, eksik: 0, taninmadi: 0, esOlan: 0, es: { malt: 0, hop: 0, maya: 0, katki: 0 }, mayaCokKod: 0, malzemeli: 0, malzemeliTam: 0 };
+  const H = window._bmOrnekHepsi(), a = { n: 0, ok: 0, farkli: 0, yakin: 0, eksik: 0, taninmadi: 0, farkOlan: 0, kapaliOg: 0, esOlan: 0, es: { malt: 0, hop: 0, maya: 0, katki: 0 }, mayaCokKod: 0, malzemeli: 0, malzemeliTam: 0 };
   H.forEach(e => {
     const s = window._bmOrnekStok(e.kaynak, e.stil, e.idx); if (!s) return; a.n++; a[s.durum] = (a[s.durum] || 0) + 1;
-    if (s.eslenemedi > 0) a.esOlan++;
-    const tum = s.g.concat(s.h, s.ek, s.y ? [s.y] : []).filter(x => !x.proses && x.d === 'eslenemedi');
+    if (s.eslenemedi > 0) a.esOlan++; if (s.farkN > 0) a.farkOlan++; if (window._bmOrnekKapaliNeden && window._bmOrnekKapaliNeden(e.kaynak, e.stil, e.idx)) a.kapaliOg++; // SPRINT ND7B: 🟨 fark taşıyan örnek · (g) kapalı düğme
+    const tum = s.g.concat(s.h, s.ek, s.y ? [s.y] : [], s.yEk || []).filter(x => !x.proses && x.d === 'eslenemedi');
     ['malt', 'hop', 'maya', 'katki'].forEach(t => { if (tum.some(x => x.k.tip === t) || (t === 'katki' && s.ekAdsiz)) a.es[t]++; });
     if (window._bmOrnekMalzemeliMi(e.kaynak, e.stil, e.idx)) { a.malzemeli++; const p = window._bmStokUyarla(e.kaynak, e.stil, e.idx); if (p && !p.alinacak.length && !(p.yetersiz || []).length) a.malzemeliTam++; }
   });
@@ -121,7 +121,7 @@ async function main() {
     const o = r.ornek, y = r.yeniRecete, c = r.iskStok, d = r.derece, m = r.muadil;
     console.log('ND6 ÖLÇÜM — bayraklar: ' + (r.bayraklar ? JSON.stringify(r.bayraklar) : 'BM_ND6 yok (ND6 öncesi kod)') + ' · hacim ' + r.hacim + ' L · stok ' + r.stokKalem + ' kalem');
     console.log('MUADIL  kayıt ' + m.kayit + ' · ✅ ' + m.ok + ' (kaynak alanlı ' + m.okKaynakli + ') · ⚠️ ' + m.uyari + ' · ❌ ' + m.yanlis);
-    console.log('(a) örnek ' + o.n + ': ✅ ' + o.ok + ' · 🟡 ' + o.yakin + ' · 🔴 ' + o.eksik + (o.taninmadi ? ' · ❔ tanınmadı ' + o.taninmadi : '') + ' | ❔ kalemli örnek ' + o.esOlan + ' (malt ' + o.es.malt + ', maya ' + o.es.maya + ', hop ' + o.es.hop + ', katkı ' + o.es.katki + ') | "Stoğumla oluştur" görünen ' + o.malzemeli + ', tam ' + o.malzemeliTam);
+    console.log('(a) örnek ' + o.n + ': ✅ ' + o.ok + ' · 🟡 ' + o.yakin + ' · 🔴 ' + o.eksik + (o.taninmadi ? ' · ❔ tanınmadı ' + o.taninmadi : '') + (o.farkli != null ? ' · 🟨 yakın ürünle ' + o.farkli + ' (fark taşıyan örnek ' + o.farkOlan + ')' : '') + ' | ❔ kalemli örnek ' + o.esOlan + ' (malt ' + o.es.malt + ', maya ' + o.es.maya + ', hop ' + o.es.hop + ', katkı ' + o.es.katki + ') | "Stoğumla oluştur" görünen ' + o.malzemeli + ', tam ' + o.malzemeliTam + (o.kapaliOg != null ? ', OG hesaplanamadığı için kapalı ' + o.kapaliOg : ''));
     console.log('(b) "Yeni reçete / boş iskelet" ' + y.n + ' stil: stokla eksiksiz ' + y.eksiksiz + ' · eksik kalem dağılımı ' + JSON.stringify(y.dagilim));
     console.log('(c) iskelet + stok ' + c.n + ' stil: plan ' + c.plan + ' · alınacak 0 ' + c.alinacak0 + ' · tam ' + c.tam + ' · null ' + c.nullStiller.length + ' · alınacak dağılımı ' + JSON.stringify(c.alinacakDag) + ' · ' + c.sure_ms + ' ms' + (Object.keys(c.nedenDag).length ? ' · null nedenleri ' + JSON.stringify(c.nedenDag) : ''));
     if (arg('null')) console.log('    null stiller: ' + c.nullStiller.join(' | '));

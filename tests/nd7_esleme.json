@@ -1,12 +1,62 @@
 {
- "aciklama": "SPRINT ND7 eşleme tablosu denetim dökümü (_nd7_build.js üretir; elle düzenleme tests/nd7_elle.json).",
+ "aciklama": "SPRINT ND7 + ND7B eşleme tablosu denetim dökümü (_nd7_build.js üretir; elle düzenleme tests/nd7_elle.json). Satırlar ND7B bayrakları AÇIK hâli gösterir; \"nd7b\": true = ND7 (v131-544) satırından farklı.",
  "ozet": {
+  "u": 360,
+  "s": 166,
+  "b": 738,
+  "p": 116,
+  "a": 6,
+  "t": 3,
+  "yok": 0
+ },
+ "ozetNd7": {
   "u": 349,
   "s": 165,
   "b": 746,
   "p": 116,
   "a": 13,
   "yok": 0
+ },
+ "fark": {
+  "yazim": {
+   "marka": 87,
+   "koken": 15,
+   "renk": 56,
+   "bicim": 12
+  },
+  "satir": {
+   "marka": 116,
+   "koken": 27,
+   "renk": 70,
+   "bicim": 21
+  }
+ },
+ "katalogRenk": [
+  {
+   "id": "dingemans_black",
+   "eski": 545,
+   "yeni": 530,
+   "url": "https://www.dingemansmout.be/malt/mroost-1400-md",
+   "alinti": "Lovibond: 530,00 · Colour: 1300 - 1500 EBC · Our Mroost 1400 MD malt, or de-bittered black"
+  }
+ ],
+ "mayaKarisimElle": {
+  "wyeast 2278 wyeast 2124, and white labs wlp820 b": [
+   "Wyeast 2278",
+   "Wyeast 2124",
+   "White Labs WLP820"
+  ],
+  "wyeast 2278 wyeast 2124, and white labs wlp820 blend, 1 gallon slurry, decanted)": [
+   "Wyeast 2278",
+   "Wyeast 2124",
+   "White Labs WLP820"
+  ],
+  "east coast yeast ecy23 (oud brune), or an english ale yeast and lactobacillus blend": false,
+  "saccharomyces \"bruxellensis\" trois wlp644 (white labs, ale, 90.0%); wlp644, wlp648, wlp653": [
+   "White Labs WLP644",
+   "White Labs WLP648",
+   "White Labs WLP653"
+  ]
  },
  "siniflar": {
   "snf_kristal": {
@@ -1088,9 +1138,10 @@
    "yazim": "chocolate, baker's dark",
    "satir": 1,
    "karar": "katalog_bekliyor",
-   "hedef": "snf_b_katki (Katkı — ürün kataloğa eklenecek): Chocolate, Baker's Dark",
-   "kural": "katalog_bekliyor",
-   "not": ""
+   "hedef": "snf_b_katki (Katkı — ürün kataloğa eklenecek): Baker's dark chocolate",
+   "kural": "elle",
+   "not": "(e) belirsiz: Baker's markası koyu çikolata mı, pastacılık (baker's) koyu çikolatası mı kaynaktan anlaşılmıyor",
+   "nd7b": true
   },
   {
    "grup": "ek",
@@ -1171,7 +1222,10 @@
    "karar": "ürün",
    "hedef": "hop:cascade (Cascade)",
    "kural": "okuyucu",
-   "not": "ek kalemlere düşmüş hop"
+   "not": "ek kalemlere düşmüş hop",
+   "fark": "bicim",
+   "farkNot": "alfa değeri bilinmiyor; katalog değeri kullanıldı",
+   "nd7b": true
   },
   {
    "grup": "ek",
@@ -1180,7 +1234,10 @@
    "karar": "ürün",
    "hedef": "hop:cascade (Cascade)",
    "kural": "okuyucu",
-   "not": "ek kalemlere düşmüş hop"
+   "not": "ek kalemlere düşmüş hop",
+   "fark": "bicim",
+   "farkNot": "alfa değeri bilinmiyor; katalog değeri kullanıldı",
+   "nd7b": true
   },
   {
    "grup": "ek",
@@ -2140,10 +2197,11 @@
    "grup": "ek",
    "yazim": "soured wort (sub-recipe: 8 oz light dme",
    "satir": 1,
-   "karar": "katalog_bekliyor",
-   "hedef": "snf_b_katki (Katkı — ürün kataloğa eklenecek): Soured Wort",
-   "kural": "katalog_bekliyor",
-   "not": ""
+   "karar": "ürün",
+   "hedef": "katki:dme (DME (Kuru Malt Ekstrakt))",
+   "kural": "elle",
+   "not": "(e) ekşitilmiş şıra (evde yapılır, satın alınan ürün değil); asıl malzeme light DME",
+   "nd7b": true
   },
   {
    "grup": "ek",
@@ -2437,10 +2495,11 @@
    "grup": "hop",
    "yazim": "18.5% a.a.",
    "satir": 1,
-   "karar": "artık",
-   "hedef": "",
-   "kural": "artık",
-   "not": ""
+   "karar": "sınıf",
+   "hedef": "snf_hop_belirsiz (Hop — çeşit belirtilmemiş)",
+   "kural": "elle",
+   "not": "(c) gerçek hop satırı; çeşit adı kaynakta yok (yalnız alfa değeri / kullanım yazıyor)",
+   "nd7b": true
   },
   {
    "grup": "hop",
@@ -2455,19 +2514,21 @@
    "grup": "hop",
    "yazim": "50% a.a.",
    "satir": 2,
-   "karar": "artık",
-   "hedef": "",
-   "kural": "artık",
-   "not": ""
+   "karar": "sınıf",
+   "hedef": "snf_hop_belirsiz (Hop — çeşit belirtilmemiş)",
+   "kural": "elle",
+   "not": "(c) gerçek hop satırı; çeşit adı kaynakta yok (yalnız alfa değeri / kullanım yazıyor)",
+   "nd7b": true
   },
   {
    "grup": "hop",
    "yazim": "9.8% a.a.",
    "satir": 1,
-   "karar": "artık",
-   "hedef": "",
-   "kural": "artık",
-   "not": ""
+   "karar": "sınıf",
+   "hedef": "snf_hop_belirsiz (Hop — çeşit belirtilmemiş)",
+   "kural": "elle",
+   "not": "(c) gerçek hop satırı; çeşit adı kaynakta yok (yalnız alfa değeri / kullanım yazıyor)",
+   "nd7b": true
   },
   {
    "grup": "hop",
@@ -2662,19 +2723,25 @@
    "grup": "hop",
    "yazim": "brewer's gold",
    "satir": 6,
-   "karar": "katalog_bekliyor",
-   "hedef": "snf_b_hop (Hop — çeşit kataloğa eklenecek): Brewer's Gold",
+   "karar": "ürün",
+   "hedef": "hop:hitit_bg (Hitit Brewers Gold (Türk yerli))",
    "kural": "elle",
-   "not": "hop çeşidi; katalogda yalnız Türkiye ekimi ayrı bir kayıt var (Hitit Brewers Gold) — köken farklı olduğu için ona bağlanmadı"
+   "not": "(e) Brewer's Gold çeşidi; katalogdaki kayıt Türkiye ekimi (Hitit). Tarif köken yazmıyor → çeşit aynı, köken farklı olabilir",
+   "fark": "koken",
+   "farkNot": "tarif köken yazmıyor · kayıt Türkiye ekimi Brewer's Gold (Hitit)",
+   "nd7b": true
   },
   {
    "grup": "hop",
    "yazim": "brewers gold",
    "satir": 1,
-   "karar": "katalog_bekliyor",
-   "hedef": "snf_b_hop (Hop — çeşit kataloğa eklenecek): Brewer's Gold",
+   "karar": "ürün",
+   "hedef": "hop:hitit_bg (Hitit Brewers Gold (Türk yerli))",
    "kural": "elle",
-   "not": "hop çeşidi; katalogda yalnız Türkiye ekimi ayrı bir kayıt var (Hitit Brewers Gold) — köken farklı olduğu için ona bağlanmadı"
+   "not": "(e) Brewer's Gold çeşidi; katalogdaki kayıt Türkiye ekimi (Hitit). Tarif köken yazmıyor → çeşit aynı, köken farklı olabilir",
+   "fark": "koken",
+   "farkNot": "tarif köken yazmıyor · kayıt Türkiye ekimi Brewer's Gold (Hitit)",
+   "nd7b": true
   },
   {
    "grup": "hop",
@@ -2728,7 +2795,10 @@
    "karar": "ürün",
    "hedef": "hop:cascade (Cascade)",
    "kural": "elle",
-   "not": "biçim notu: wet (yaş hop) — çeşit aynı"
+   "not": "biçim notu: wet (yaş hop) — çeşit aynı",
+   "fark": "bicim",
+   "farkNot": "taze hop: kuru karşılığı senin kararın",
+   "nd7b": true
   },
   {
    "grup": "hop",
@@ -2764,7 +2834,10 @@
    "karar": "ürün",
    "hedef": "hop:centn (Centennial)",
    "kural": "elle",
-   "not": "biçim notu: wet (yaş hop) — çeşit aynı"
+   "not": "biçim notu: wet (yaş hop) — çeşit aynı",
+   "fark": "bicim",
+   "farkNot": "taze hop: kuru karşılığı senin kararın",
+   "nd7b": true
   },
   {
    "grup": "hop",
@@ -2773,7 +2846,10 @@
    "karar": "ürün",
    "hedef": "hop:centn (Centennial)",
    "kural": "okuyucu",
-   "not": "biçim: home grown"
+   "not": "biçim: home grown",
+   "fark": "bicim",
+   "farkNot": "alfa değeri bilinmiyor; katalog değeri kullanıldı",
+   "nd7b": true
   },
   {
    "grup": "hop",
@@ -2818,7 +2894,10 @@
    "karar": "ürün",
    "hedef": "hop:citra (Citra)",
    "kural": "elle",
-   "not": "biçim notu: fresh — çeşit aynı"
+   "not": "biçim notu: fresh — çeşit aynı",
+   "fark": "bicim",
+   "farkNot": "taze hop: kuru karşılığı senin kararın",
+   "nd7b": true
   },
   {
    "grup": "hop",
@@ -3004,10 +3083,11 @@
    "grup": "hop",
    "yazim": "dry hop 4 days",
    "satir": 1,
-   "karar": "artık",
-   "hedef": "",
-   "kural": "artık",
-   "not": ""
+   "karar": "sınıf",
+   "hedef": "snf_hop_belirsiz (Hop — çeşit belirtilmemiş)",
+   "kural": "elle",
+   "not": "(c) gerçek hop satırı; çeşit adı kaynakta yok (yalnız alfa değeri / kullanım yazıyor)",
+   "nd7b": true
   },
   {
    "grup": "hop",
@@ -3295,7 +3375,10 @@
    "karar": "ürün",
    "hedef": "hop:chinook (Chinook)",
    "kural": "okuyucu",
-   "not": "biçim: homegrown"
+   "not": "biçim: homegrown",
+   "fark": "bicim",
+   "farkNot": "alfa değeri bilinmiyor; katalog değeri kullanıldı",
+   "nd7b": true
   },
   {
    "grup": "hop",
@@ -3304,7 +3387,10 @@
    "karar": "ürün",
    "hedef": "hop:hrtau (Hallertau Mittelfrueh)",
    "kural": "okuyucu",
-   "not": "biçim: homegrown"
+   "not": "biçim: homegrown",
+   "fark": "bicim",
+   "farkNot": "alfa değeri bilinmiyor; katalog değeri kullanıldı",
+   "nd7b": true
   },
   {
    "grup": "hop",
@@ -3313,7 +3399,10 @@
    "karar": "ürün",
    "hedef": "hop:magnum (Magnum)",
    "kural": "okuyucu",
-   "not": "biçim: homegrown"
+   "not": "biçim: homegrown",
+   "fark": "bicim",
+   "farkNot": "alfa değeri bilinmiyor; katalog değeri kullanıldı",
+   "nd7b": true
   },
   {
    "grup": "hop",
@@ -3322,7 +3411,10 @@
    "karar": "ürün",
    "hedef": "hop:tettn (Tettnanger)",
    "kural": "okuyucu",
-   "not": "biçim: homegrown"
+   "not": "biçim: homegrown",
+   "fark": "bicim",
+   "farkNot": "alfa değeri bilinmiyor; katalog değeri kullanıldı",
+   "nd7b": true
   },
   {
    "grup": "hop",
@@ -3661,10 +3753,13 @@
    "grup": "hop",
    "yazim": "oven-aged spalt",
    "satir": 1,
-   "karar": "sınıf",
-   "hedef": "snf_hop_aged (Yıllandırılmış (aged) hop — çeşit belirtilmemiş)",
+   "karar": "ürün",
+   "hedef": "hop:spalt (Spalt (Spalter geleneksel))",
    "kural": "elle",
-   "not": "yıllandırılmış hop (çeşit yazsa da yıllandırma acılığı ve aromayı değiştirir; taze çeşitle aynı ürün değil)"
+   "not": "(b) fırında yıllandırılmış Spalt: çeşit aynı, biçim farklı",
+   "fark": "bicim",
+   "farkNot": "yıllandırılmış hop: alfa değeri bilinmiyor; IBU hesabına girmez",
+   "nd7b": true
   },
   {
    "grup": "hop",
@@ -4156,10 +4251,13 @@
    "grup": "hop",
    "yazim": "willamette (aged)",
    "satir": 1,
-   "karar": "sınıf",
-   "hedef": "snf_hop_aged (Yıllandırılmış (aged) hop — çeşit belirtilmemiş)",
+   "karar": "ürün",
+   "hedef": "hop:willamette (Willamette)",
    "kural": "elle",
-   "not": "yıllandırılmış hop (çeşit yazsa da yıllandırma acılığı ve aromayı değiştirir; taze çeşitle aynı ürün değil)"
+   "not": "(b) yıllandırılmış (aged) Willamette: çeşit aynı, biçim farklı",
+   "fark": "bicim",
+   "farkNot": "yıllandırılmış hop: alfa değeri bilinmiyor; IBU hesabına girmez",
+   "nd7b": true
   },
   {
    "grup": "hop",
@@ -4239,8 +4337,9 @@
    "satir": 1,
    "karar": "ürün",
    "hedef": "malt:cara_foam (CaraFoam (Weyermann))",
-   "kural": "okuyucu-marka",
-   "not": ""
+   "kural": "okuyucu-aynımarka",
+   "not": "",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -4312,7 +4411,10 @@
    "karar": "ürün",
    "hedef": "malt:dark_munich (Munich Dark (Aroma))",
    "kural": "renk",
-   "not": "renk 10 °L → 9 °L"
+   "not": "renk 10 °L → 9 °L",
+   "fark": "renk",
+   "farkNot": "renk 10 °L (tarif) ↔ 9 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -4357,7 +4459,10 @@
    "karar": "ürün",
    "hedef": "malt:pale_choc (Pale Chocolate Malt)",
    "kural": "renk",
-   "not": "renk 200 °L → 225 °L"
+   "not": "renk 200 °L → 225 °L",
+   "fark": "renk",
+   "farkNot": "renk 200 °L (tarif) ↔ 225 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -4366,7 +4471,10 @@
    "karar": "ürün",
    "hedef": "malt:pale_choc (Pale Chocolate Malt)",
    "kural": "renk",
-   "not": "renk 200 °L → 225 °L"
+   "not": "renk 200 °L → 225 °L",
+   "fark": "renk",
+   "farkNot": "renk 200 °L (tarif) ↔ 225 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -4375,7 +4483,10 @@
    "karar": "ürün",
    "hedef": "malt:pale_choc (Pale Chocolate Malt)",
    "kural": "renk",
-   "not": "renk 200 °L → 225 °L"
+   "not": "renk 200 °L → 225 °L",
+   "fark": "renk",
+   "farkNot": "renk 200 °L (tarif) ↔ 225 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -4384,7 +4495,10 @@
    "karar": "ürün",
    "hedef": "malt:pale_choc (Pale Chocolate Malt)",
    "kural": "renk",
-   "not": "renk 200 °L → 225 °L"
+   "not": "renk 200 °L → 225 °L",
+   "fark": "renk",
+   "farkNot": "renk 200 °L (tarif) ↔ 225 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -4492,7 +4606,10 @@
    "karar": "ürün",
    "hedef": "malt:c40 (Crystal 40 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 45 °L → 40 °L"
+   "not": "renk 45 °L → 40 °L",
+   "fark": "renk",
+   "farkNot": "renk 45 °L (tarif) ↔ 40 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -4501,7 +4618,10 @@
    "karar": "ürün",
    "hedef": "malt:c40 (Crystal 40 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 45 °L → 40 °L"
+   "not": "renk 45 °L → 40 °L",
+   "fark": "renk",
+   "farkNot": "renk 45 °L (tarif) ↔ 40 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -4510,7 +4630,10 @@
    "karar": "ürün",
    "hedef": "malt:c40 (Crystal 40 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 45 °L → 40 °L"
+   "not": "renk 45 °L → 40 °L",
+   "fark": "renk",
+   "farkNot": "renk 45 °L (tarif) ↔ 40 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -4519,7 +4642,10 @@
    "karar": "ürün",
    "hedef": "malt:choc (Chocolate Malt)",
    "kural": "renk",
-   "not": "renk 475 °L → 400 °L"
+   "not": "renk 475 °L → 400 °L",
+   "fark": "renk",
+   "farkNot": "renk 475 °L (tarif) ↔ 400 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -4546,7 +4672,10 @@
    "karar": "ürün",
    "hedef": "malt:c60 (Crystal 60 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 55 °L → 60 °L"
+   "not": "renk 55 °L → 60 °L",
+   "fark": "renk",
+   "farkNot": "renk 55 °L (tarif) ↔ 60 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -4573,7 +4702,10 @@
    "karar": "ürün",
    "hedef": "malt:c60 (Crystal 60 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 65 °L → 60 °L"
+   "not": "renk 65 °L → 60 °L",
+   "fark": "renk",
+   "farkNot": "renk 65 °L (tarif) ↔ 60 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -4582,7 +4714,10 @@
    "karar": "ürün",
    "hedef": "malt:c80 (Crystal 80 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 75 °L → 80 °L"
+   "not": "renk 75 °L → 80 °L",
+   "fark": "renk",
+   "farkNot": "renk 75 °L (tarif) ↔ 80 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -4591,7 +4726,10 @@
    "karar": "ürün",
    "hedef": "malt:c80 (Crystal 80 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 75 °L → 80 °L"
+   "not": "renk 75 °L → 80 °L",
+   "fark": "renk",
+   "farkNot": "renk 75 °L (tarif) ↔ 80 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -4600,7 +4738,10 @@
    "karar": "ürün",
    "hedef": "malt:c80 (Crystal 80 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 75 °L → 80 °L"
+   "not": "renk 75 °L → 80 °L",
+   "fark": "renk",
+   "farkNot": "renk 75 °L (tarif) ↔ 80 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -4609,7 +4750,10 @@
    "karar": "ürün",
    "hedef": "malt:c80 (Crystal 80 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 75 °L → 80 °L"
+   "not": "renk 75 °L → 80 °L",
+   "fark": "renk",
+   "farkNot": "renk 75 °L (tarif) ↔ 80 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -4618,7 +4762,10 @@
    "karar": "ürün",
    "hedef": "malt:c80 (Crystal 80 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 77 °L → 80 °L"
+   "not": "renk 77 °L → 80 °L",
+   "fark": "renk",
+   "farkNot": "renk 77 °L (tarif) ↔ 80 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -4636,7 +4783,10 @@
    "karar": "ürün",
    "hedef": "malt:c80 (Crystal 80 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 90 °L → 80 °L"
+   "not": "renk 90 °L → 80 °L",
+   "fark": "renk",
+   "farkNot": "renk 90 °L (tarif) ↔ 80 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -4645,7 +4795,10 @@
    "karar": "ürün",
    "hedef": "malt:c80 (Crystal 80 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 90 °L → 80 °L"
+   "not": "renk 90 °L → 80 °L",
+   "fark": "renk",
+   "farkNot": "renk 90 °L (tarif) ↔ 80 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -4654,7 +4807,10 @@
    "karar": "ürün",
    "hedef": "malt:c80 (Crystal 80 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 90 °L → 80 °L"
+   "not": "renk 90 °L → 80 °L",
+   "fark": "renk",
+   "farkNot": "renk 90 °L (tarif) ↔ 80 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -4681,7 +4837,11 @@
    "karar": "ürün",
    "hedef": "malt:chit (Chit Malt (BestMalz))",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici admiral · kayıt: BestMalz",
+   "nd7b": true,
+   "aday": "Admiral Chit Malt"
   },
   {
    "grup": "malt",
@@ -4807,16 +4967,22 @@
    "karar": "ürün",
    "hedef": "malt:pale_ale (Pale Ale Malt)",
    "kural": "okuyucu-köken",
-   "not": ""
+   "not": "",
+   "fark": "koken",
+   "farkNot": "tarifteki köken kaydın üreticileri arasında yok (kayıt: Weyermann, Crisp, Simpsons, Hitit (yerli))",
+   "nd7b": true
   },
   {
    "grup": "malt",
    "yazim": "american pale malt",
    "satir": 1,
    "karar": "ürün",
-   "hedef": "malt:pale_ale (Pale Ale Malt)",
-   "kural": "okuyucu-köken",
-   "not": ""
+   "hedef": "malt:briess_pale (Briess 2-Row Brewers Malt)",
+   "kural": "elle",
+   "not": "(a) \"U.S. pale malt\" ile aynı ürün adı (ABD baz pale): aynı yoldan — katalogdaki ABD 2-row kaydı, tarif üretici yazmıyor (doğrulayıcı bulgusu)",
+   "fark": "marka",
+   "farkNot": "tarif üretici yazmıyor · kayıt tek üreticinin ürünü (Briess 2-Row Brewers Malt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -4825,7 +4991,10 @@
    "karar": "ürün",
    "hedef": "malt:pilsner (Pilsner Malt)",
    "kural": "okuyucu-köken",
-   "not": ""
+   "not": "",
+   "fark": "koken",
+   "farkNot": "tarifteki köken kaydın üreticileri arasında yok (kayıt: Weyermann, BestMalz, Hitit (yerli))",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -4834,7 +5003,10 @@
    "karar": "ürün",
    "hedef": "malt:wheat (Buğday Maltı)",
    "kural": "okuyucu",
-   "not": ""
+   "not": "",
+   "fark": "koken",
+   "farkNot": "tarifteki köken kaydın üreticileri arasında yok (kayıt: Weyermann, BestMalz, Muntons, Hitit (yerli))",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -4906,7 +5078,11 @@
    "karar": "ürün",
    "hedef": "malt:choc (Chocolate Malt)",
    "kural": "renk",
-   "not": "renk 350 °L → 400 °L"
+   "not": "renk 350 °L → 400 °L",
+   "fark": "renk",
+   "farkNot": "renk 350 °L (tarif) ↔ 400 °L (kayıt) · üretici de farklı (bairds)",
+   "nd7b": true,
+   "aday": "Bairds Chocolate 350°l"
   },
   {
    "grup": "malt",
@@ -4924,7 +5100,11 @@
    "karar": "ürün",
    "hedef": "malt:c80 (Crystal 80 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 75 °L → 80 °L"
+   "not": "renk 75 °L → 80 °L",
+   "fark": "renk",
+   "farkNot": "renk 75 °L (tarif) ↔ 80 °L (kayıt) · üretici de farklı (bairds)",
+   "nd7b": true,
+   "aday": "Bairds Crystal 70/80l"
   },
   {
    "grup": "malt",
@@ -5066,9 +5246,10 @@
    "yazim": "belgian caravienne malt (21 °l)",
    "satir": 2,
    "karar": "katalog_bekliyor",
-   "hedef": "snf_b_malt (Malt / tahıl — ürün kataloğa eklenecek): Belgian Caravienne Malt 21 °l",
-   "kural": "katalog_bekliyor",
-   "not": ""
+   "hedef": "snf_b_malt (Malt / tahıl — ürün kataloğa eklenecek): Dingemans Cara 50 MD (Cara Vienna / Caravienne)",
+   "kural": "elle",
+   "not": "(e) üretici sayfası: \"Cara 50 MD is also known as Cara Vienna.\" (\"Colour: 40 - 60 EBC\", \"Lovibond: 20,00\" — https://www.dingemansmout.be/malt/cara-50-md). Katalogdaki dingemans_cara20 = Cara 20 MD (\"Lovibond: 8,00\" — https://www.dingemansmout.be/malt/cara-20-md) AYRI ürün → BAĞLANMADI; Cara 50 MD katalogda yok",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -5095,7 +5276,10 @@
    "karar": "ürün",
    "hedef": "malt:pale_ale (Pale Ale Malt)",
    "kural": "okuyucu-köken",
-   "not": ""
+   "not": "",
+   "fark": "koken",
+   "farkNot": "tarifteki köken kaydın üreticileri arasında yok (kayıt: Weyermann, Crisp, Simpsons, Hitit (yerli))",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -5104,7 +5288,10 @@
    "karar": "ürün",
    "hedef": "malt:pale_ale (Pale Ale Malt)",
    "kural": "okuyucu-köken",
-   "not": ""
+   "not": "",
+   "fark": "koken",
+   "farkNot": "tarifteki köken kaydın üreticileri arasında yok (kayıt: Weyermann, Crisp, Simpsons, Hitit (yerli))",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -5113,7 +5300,10 @@
    "karar": "ürün",
    "hedef": "malt:wheat (Buğday Maltı)",
    "kural": "okuyucu",
-   "not": ""
+   "not": "",
+   "fark": "koken",
+   "farkNot": "tarifteki köken kaydın üreticileri arasında yok (kayıt: Weyermann, BestMalz, Muntons, Hitit (yerli))",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -5121,8 +5311,9 @@
    "satir": 2,
    "karar": "ürün",
    "hedef": "malt:chit (Chit Malt (BestMalz))",
-   "kural": "okuyucu-marka",
-   "not": ""
+   "kural": "okuyucu-aynımarka",
+   "not": "",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -5139,8 +5330,9 @@
    "satir": 2,
    "karar": "ürün",
    "hedef": "malt:best_redx (BestMalz Red X (Red Color Malt))",
-   "kural": "okuyucu-marka",
-   "not": ""
+   "kural": "okuyucu-aynımarka",
+   "not": "",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -5149,7 +5341,11 @@
    "karar": "ürün",
    "hedef": "malt:spelt (Kavuzlu Buğday (Spelt/Dinkel))",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici bestmalz · kayıt: Weyermann",
+   "nd7b": true,
+   "aday": "Best Spelt Malt Bestmalz"
   },
   {
    "grup": "malt",
@@ -5158,7 +5354,11 @@
    "karar": "ürün",
    "hedef": "malt:wheat (Buğday Maltı)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici bestmalz · kayıt: Weyermann, BestMalz, Muntons, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Best Wheat Malt"
   },
   {
    "grup": "malt",
@@ -5167,7 +5367,11 @@
    "karar": "ürün",
    "hedef": "malt:smoked (İsli Malt — Kayın (Beech))",
    "kural": "elle",
-   "not": "Rauchmalt = Weyermann'ın kayın isli maltının adı (katalog: İsli Malt — Kayın)"
+   "not": "Rauchmalt = Weyermann'ın kayın isli maltının adı (katalog: İsli Malt — Kayın)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici bestmalz · kayıt: Weyermann, Viking Malt (Polonya VK), Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Bestmalz Rauchmalt"
   },
   {
    "grup": "malt",
@@ -5176,7 +5380,11 @@
    "karar": "ürün",
    "hedef": "malt:spelt (Kavuzlu Buğday (Spelt/Dinkel))",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici bestmalz · kayıt: Weyermann",
+   "nd7b": true,
+   "aday": "Bestmalz Spelt Malt"
   },
   {
    "grup": "malt",
@@ -5302,7 +5510,11 @@
    "karar": "ürün",
    "hedef": "malt:aromatic (Aromatic Malt (Dingemans))",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici briess · kayıt: Dingemans",
+   "nd7b": true,
+   "aday": "Briess Aromatic Malt"
   },
   {
    "grup": "malt",
@@ -5428,7 +5640,11 @@
    "karar": "ürün",
    "hedef": "malt:pale_ale (Pale Ale Malt)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici briess · kayıt: Weyermann, Crisp, Simpsons, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Briess Pale Ale Malt"
   },
   {
    "grup": "malt",
@@ -5437,7 +5653,11 @@
    "karar": "ürün",
    "hedef": "malt:pale_ale (Pale Ale Malt)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici briess · kayıt: Weyermann, Crisp, Simpsons, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Briess Pale Malt"
   },
   {
    "grup": "malt",
@@ -5446,7 +5666,11 @@
    "karar": "ürün",
    "hedef": "malt:pilsner (Pilsner Malt)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici briess · kayıt: Weyermann, BestMalz, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Briess Pilsen Malt"
   },
   {
    "grup": "malt",
@@ -5455,7 +5679,11 @@
    "karar": "ürün",
    "hedef": "malt:pilsner (Pilsner Malt)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici briess · kayıt: Weyermann, BestMalz, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Briess Pilsner Malt"
   },
   {
    "grup": "malt",
@@ -5464,7 +5692,11 @@
    "karar": "ürün",
    "hedef": "malt:wheat (Buğday Maltı)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici briess · kayıt: Weyermann, BestMalz, Muntons, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Briess Red Wheat Malt"
   },
   {
    "grup": "malt",
@@ -5482,7 +5714,11 @@
    "karar": "ürün",
    "hedef": "malt:rye (Çavdar Maltı)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici briess · kayıt: Weyermann, Simpsons, Muntons, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Briess Rye Malt"
   },
   {
    "grup": "malt",
@@ -5500,7 +5736,11 @@
    "karar": "ürün",
    "hedef": "malt:wheat (Buğday Maltı)",
    "kural": "okuyucu",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici briess · kayıt: Weyermann, BestMalz, Muntons, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Briess White Wheat"
   },
   {
    "grup": "malt",
@@ -5509,7 +5749,10 @@
    "karar": "ürün",
    "hedef": "malt:c60 (Crystal 60 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 55 °L → 60 °L"
+   "not": "renk 55 °L → 60 °L",
+   "fark": "renk",
+   "farkNot": "renk 55 °L (tarif) ↔ 60 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -5518,7 +5761,10 @@
    "karar": "ürün",
    "hedef": "malt:c60 (Crystal 60 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 65 °L → 60 °L"
+   "not": "renk 65 °L → 60 °L",
+   "fark": "renk",
+   "farkNot": "renk 65 °L (tarif) ↔ 60 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -5599,7 +5845,10 @@
    "karar": "ürün",
    "hedef": "malt:pale_ale (Pale Ale Malt)",
    "kural": "okuyucu-köken",
-   "not": ""
+   "not": "",
+   "fark": "koken",
+   "farkNot": "tarifteki köken kaydın üreticileri arasında yok (kayıt: Weyermann, Crisp, Simpsons, Hitit (yerli))",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -5995,7 +6244,10 @@
    "karar": "ürün",
    "hedef": "malt:c80 (Crystal 80 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 90 °L → 80 °L"
+   "not": "renk 90 °L → 80 °L",
+   "fark": "renk",
+   "farkNot": "renk 90 °L (tarif) ↔ 80 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -6067,7 +6319,10 @@
    "karar": "ürün",
    "hedef": "malt:cara_munich1 (CaraMunich I (Weyermann))",
    "kural": "renk",
-   "not": "renk 40 °L → 35 °L"
+   "not": "renk 40 °L → 35 °L",
+   "fark": "renk",
+   "farkNot": "renk 40 °L (tarif) ↔ 35 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -6076,7 +6331,10 @@
    "karar": "ürün",
    "hedef": "malt:cara_munich3 (CaraMunich III (Weyermann / BestMalz))",
    "kural": "renk",
-   "not": "renk 60 °L → 57 °L"
+   "not": "renk 60 °L → 57 °L",
+   "fark": "renk",
+   "farkNot": "renk 60 °L (tarif) ↔ 57 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -6128,36 +6386,40 @@
    "yazim": "caravienne",
    "satir": 3,
    "karar": "katalog_bekliyor",
-   "hedef": "snf_b_malt (Malt / tahıl — ürün kataloğa eklenecek): Caravienne",
-   "kural": "katalog_bekliyor",
-   "not": ""
+   "hedef": "snf_b_malt (Malt / tahıl — ürün kataloğa eklenecek): Dingemans Cara 50 MD (Cara Vienna / Caravienne)",
+   "kural": "elle",
+   "not": "(e) üretici sayfası: \"Cara 50 MD is also known as Cara Vienna.\" (\"Colour: 40 - 60 EBC\", \"Lovibond: 20,00\" — https://www.dingemansmout.be/malt/cara-50-md). Katalogdaki dingemans_cara20 = Cara 20 MD (\"Lovibond: 8,00\" — https://www.dingemansmout.be/malt/cara-20-md) AYRI ürün → BAĞLANMADI; Cara 50 MD katalogda yok",
+   "nd7b": true
   },
   {
    "grup": "malt",
    "yazim": "caravienne (bel)",
    "satir": 1,
    "karar": "katalog_bekliyor",
-   "hedef": "snf_b_malt (Malt / tahıl — ürün kataloğa eklenecek): Caravienne (Bel)",
-   "kural": "katalog_bekliyor",
-   "not": ""
+   "hedef": "snf_b_malt (Malt / tahıl — ürün kataloğa eklenecek): Dingemans Cara 50 MD (Cara Vienna / Caravienne)",
+   "kural": "elle",
+   "not": "(e) üretici sayfası: \"Cara 50 MD is also known as Cara Vienna.\" (\"Colour: 40 - 60 EBC\", \"Lovibond: 20,00\" — https://www.dingemansmout.be/malt/cara-50-md). Katalogdaki dingemans_cara20 = Cara 20 MD (\"Lovibond: 8,00\" — https://www.dingemansmout.be/malt/cara-20-md) AYRI ürün → BAĞLANMADI; Cara 50 MD katalogda yok",
+   "nd7b": true
   },
   {
    "grup": "malt",
    "yazim": "caravienne malt",
    "satir": 10,
    "karar": "katalog_bekliyor",
-   "hedef": "snf_b_malt (Malt / tahıl — ürün kataloğa eklenecek): Caravienne Malt",
-   "kural": "katalog_bekliyor",
-   "not": ""
+   "hedef": "snf_b_malt (Malt / tahıl — ürün kataloğa eklenecek): Dingemans Cara 50 MD (Cara Vienna / Caravienne)",
+   "kural": "elle",
+   "not": "(e) üretici sayfası: \"Cara 50 MD is also known as Cara Vienna.\" (\"Colour: 40 - 60 EBC\", \"Lovibond: 20,00\" — https://www.dingemansmout.be/malt/cara-50-md). Katalogdaki dingemans_cara20 = Cara 20 MD (\"Lovibond: 8,00\" — https://www.dingemansmout.be/malt/cara-20-md) AYRI ürün → BAĞLANMADI; Cara 50 MD katalogda yok",
+   "nd7b": true
   },
   {
    "grup": "malt",
    "yazim": "caravienne malt (22 °l)",
    "satir": 1,
    "karar": "katalog_bekliyor",
-   "hedef": "snf_b_malt (Malt / tahıl — ürün kataloğa eklenecek): Caravienne Malt 22 °l",
-   "kural": "katalog_bekliyor",
-   "not": ""
+   "hedef": "snf_b_malt (Malt / tahıl — ürün kataloğa eklenecek): Dingemans Cara 50 MD (Cara Vienna / Caravienne)",
+   "kural": "elle",
+   "not": "(e) üretici sayfası: \"Cara 50 MD is also known as Cara Vienna.\" (\"Colour: 40 - 60 EBC\", \"Lovibond: 20,00\" — https://www.dingemansmout.be/malt/cara-50-md). Katalogdaki dingemans_cara20 = Cara 20 MD (\"Lovibond: 8,00\" — https://www.dingemansmout.be/malt/cara-20-md) AYRI ürün → BAĞLANMADI; Cara 50 MD katalogda yok",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -6166,7 +6428,11 @@
    "karar": "ürün",
    "hedef": "malt:pilsner (Pilsner Malt)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici cargill · kayıt: Weyermann, BestMalz, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Cargill Pilsner Malt"
   },
   {
    "grup": "malt",
@@ -6191,9 +6457,10 @@
    "yazim": "castle pale malt",
    "satir": 1,
    "karar": "ürün",
-   "hedef": "malt:pale_ale (Pale Ale Malt)",
-   "kural": "okuyucu-marka",
-   "not": ""
+   "hedef": "malt:chateau_bld (Chateau Pale Ale (Castle))",
+   "kural": "elle",
+   "not": "Castle pale malt = katalogdaki Château Pale Ale (Castle) kaydı (alias \"chateau pale malt\") — aynı üreticinin ürünü (doğrulayıcı bulgusu: jenerik pale ale yerine bu kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -6256,7 +6523,10 @@
    "karar": "ürün",
    "hedef": "malt:choc (Chocolate Malt)",
    "kural": "renk",
-   "not": "renk 350 °L → 400 °L"
+   "not": "renk 350 °L → 400 °L",
+   "fark": "renk",
+   "farkNot": "renk 350 °L (tarif) ↔ 400 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -6265,7 +6535,10 @@
    "karar": "ürün",
    "hedef": "malt:choc (Chocolate Malt)",
    "kural": "renk",
-   "not": "renk 350 °L → 400 °L"
+   "not": "renk 350 °L → 400 °L",
+   "fark": "renk",
+   "farkNot": "renk 350 °L (tarif) ↔ 400 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -6274,7 +6547,10 @@
    "karar": "ürün",
    "hedef": "malt:choc (Chocolate Malt)",
    "kural": "renk",
-   "not": "renk 350 °L → 400 °L"
+   "not": "renk 350 °L → 400 °L",
+   "fark": "renk",
+   "farkNot": "renk 350 °L (tarif) ↔ 400 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -6373,7 +6649,11 @@
    "karar": "ürün",
    "hedef": "malt:c40 (Crystal 40 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 45 °L → 40 °L"
+   "not": "renk 45 °L → 40 °L",
+   "fark": "renk",
+   "farkNot": "renk 45 °L (tarif) ↔ 40 °L (kayıt) · üretici de farklı (crisp)",
+   "nd7b": true,
+   "aday": "Crisp 45° L Crystal Malt"
   },
   {
    "grup": "malt",
@@ -6382,7 +6662,11 @@
    "karar": "ürün",
    "hedef": "malt:c80 (Crystal 80 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 80 °L → 80 °L"
+   "not": "renk 80 °L → 80 °L",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici crisp · kayıt: Briess, Simpsons",
+   "nd7b": true,
+   "aday": "Crisp 80l Crystal"
   },
   {
    "grup": "malt",
@@ -6391,7 +6675,11 @@
    "karar": "ürün",
    "hedef": "malt:black (Black Malt (Patent Malt))",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici crisp · kayıt: Crisp, Simpsons",
+   "nd7b": true,
+   "aday": "Crisp Black Malt"
   },
   {
    "grup": "malt",
@@ -6400,7 +6688,11 @@
    "karar": "ürün",
    "hedef": "malt:c60 (Crystal 60 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 60 °L → 60 °L"
+   "not": "renk 60 °L → 60 °L",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici crisp · kayıt: Briess, Simpsons",
+   "nd7b": true,
+   "aday": "Crisp C60"
   },
   {
    "grup": "malt",
@@ -6436,7 +6728,11 @@
    "karar": "ürün",
    "hedef": "malt:pale_choc (Pale Chocolate Malt)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici crisp · kayıt: Simpsons, Crisp",
+   "nd7b": true,
+   "aday": "Crisp Pale Chocolate"
   },
   {
    "grup": "malt",
@@ -6445,7 +6741,11 @@
    "karar": "ürün",
    "hedef": "malt:pale_ale (Pale Ale Malt)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici crisp · kayıt: Weyermann, Crisp, Simpsons, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Crisp Pale Malt"
   },
   {
    "grup": "malt",
@@ -6454,7 +6754,11 @@
    "karar": "ürün",
    "hedef": "malt:pale_ale (Pale Ale Malt)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici crisp · kayıt: Weyermann, Crisp, Simpsons, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Crisp Pale Malt"
   },
   {
    "grup": "malt",
@@ -6463,7 +6767,11 @@
    "karar": "ürün",
    "hedef": "malt:wheat (Buğday Maltı)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici crisp · kayıt: Weyermann, BestMalz, Muntons, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Crisp Wheat Malt"
   },
   {
    "grup": "malt",
@@ -6499,7 +6807,10 @@
    "karar": "ürün",
    "hedef": "malt:c40 (Crystal 40 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 45 °L → 40 °L"
+   "not": "renk 45 °L → 40 °L",
+   "fark": "renk",
+   "farkNot": "renk 45 °L (tarif) ↔ 40 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -6589,7 +6900,10 @@
    "karar": "ürün",
    "hedef": "malt:c40 (Crystal 40 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 45 °L → 40 °L"
+   "not": "renk 45 °L → 40 °L",
+   "fark": "renk",
+   "farkNot": "renk 45 °L (tarif) ↔ 40 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -6598,7 +6912,10 @@
    "karar": "ürün",
    "hedef": "malt:c40 (Crystal 40 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 45 °L → 40 °L"
+   "not": "renk 45 °L → 40 °L",
+   "fark": "renk",
+   "farkNot": "renk 45 °L (tarif) ↔ 40 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -6607,7 +6924,10 @@
    "karar": "ürün",
    "hedef": "malt:c80 (Crystal 80 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 75 °L → 80 °L"
+   "not": "renk 75 °L → 80 °L",
+   "fark": "renk",
+   "farkNot": "renk 75 °L (tarif) ↔ 80 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -6616,7 +6936,10 @@
    "karar": "ürün",
    "hedef": "malt:c80 (Crystal 80 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 90 °L → 80 °L"
+   "not": "renk 90 °L → 80 °L",
+   "fark": "renk",
+   "farkNot": "renk 90 °L (tarif) ↔ 80 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -6661,7 +6984,10 @@
    "karar": "ürün",
    "hedef": "malt:c40 (Crystal 40 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 45 °L → 40 °L"
+   "not": "renk 45 °L → 40 °L",
+   "fark": "renk",
+   "farkNot": "renk 45 °L (tarif) ↔ 40 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -6697,7 +7023,10 @@
    "karar": "ürün",
    "hedef": "malt:c80 (Crystal 80 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 75 °L → 80 °L"
+   "not": "renk 75 °L → 80 °L",
+   "fark": "renk",
+   "farkNot": "renk 75 °L (tarif) ↔ 80 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -6706,7 +7035,10 @@
    "karar": "ürün",
    "hedef": "malt:c80 (Crystal 80 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 75 °L → 80 °L"
+   "not": "renk 75 °L → 80 °L",
+   "fark": "renk",
+   "farkNot": "renk 75 °L (tarif) ↔ 80 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -6930,8 +7262,9 @@
    "satir": 1,
    "karar": "ürün",
    "hedef": "malt:dark_munich (Munich Dark (Aroma))",
-   "kural": "okuyucu-marka",
-   "not": ""
+   "kural": "okuyucu-aynımarka",
+   "not": "",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -6983,9 +7316,10 @@
    "yazim": "debittered black malt",
    "satir": 5,
    "karar": "ürün",
-   "hedef": "malt:dingemans_black (Debittered Black Malt (Dingemans))",
+   "hedef": "malt:dehusked_black (Dehusked Black Malt)",
    "kural": "elle",
-   "not": "ad katalog kaydıyla aynı: Debittered Black Malt (Dingemans)"
+   "not": "(e) markasız \"debittered black malt\": jenerik kabuksuz siyah malt kaydı; Dingemans'a özel kayıt değil",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -7030,7 +7364,11 @@
    "karar": "ürün",
    "hedef": "malt:specb (Special B)",
    "kural": "renk",
-   "not": "renk 150 °L ≈ 115 °L"
+   "not": "renk 150 °L ≈ 115 °L",
+   "fark": "renk",
+   "farkNot": "renk 150 °L (tarif) ↔ 115 °L (kayıt) · üretici de farklı (dingemans)",
+   "nd7b": true,
+   "aday": "Dingemans 150° L Special B Malt"
   },
   {
    "grup": "malt",
@@ -7055,9 +7393,10 @@
    "yazim": "dingemans caravienne malt",
    "satir": 1,
    "karar": "katalog_bekliyor",
-   "hedef": "snf_b_malt (Malt / tahıl — ürün kataloğa eklenecek): Dingemans Caravienne Malt",
-   "kural": "katalog_bekliyor",
-   "not": ""
+   "hedef": "snf_b_malt (Malt / tahıl — ürün kataloğa eklenecek): Dingemans Cara 50 MD (Cara Vienna / Caravienne)",
+   "kural": "elle",
+   "not": "(e) üretici sayfası: \"Cara 50 MD is also known as Cara Vienna.\" (\"Colour: 40 - 60 EBC\", \"Lovibond: 20,00\" — https://www.dingemansmout.be/malt/cara-50-md). Katalogdaki dingemans_cara20 = Cara 20 MD (\"Lovibond: 8,00\" — https://www.dingemansmout.be/malt/cara-20-md) AYRI ürün → BAĞLANMADI; Cara 50 MD katalogda yok",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -7183,7 +7522,11 @@
    "karar": "ürün",
    "hedef": "malt:aromatic (Aromatic Malt (Dingemans))",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici dwc · kayıt: Dingemans",
+   "nd7b": true,
+   "aday": "Dwc Aromatic Malt"
   },
   {
    "grup": "malt",
@@ -7192,7 +7535,11 @@
    "karar": "ürün",
    "hedef": "malt:pale_ale (Pale Ale Malt)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici dwc · kayıt: Weyermann, Crisp, Simpsons, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Dwc Pale Malt"
   },
   {
    "grup": "malt",
@@ -7219,7 +7566,10 @@
    "karar": "ürün",
    "hedef": "malt:c40 (Crystal 40 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 45 °L → 40 °L"
+   "not": "renk 45 °L → 40 °L",
+   "fark": "renk",
+   "farkNot": "renk 45 °L (tarif) ↔ 40 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -7336,7 +7686,11 @@
    "karar": "ürün",
    "hedef": "malt:pale_choc (Pale Chocolate Malt)",
    "kural": "renk",
-   "not": "renk 200 °L → 225 °L"
+   "not": "renk 200 °L → 225 °L",
+   "fark": "renk",
+   "farkNot": "renk 200 °L (tarif) ↔ 225 °L (kayıt) · üretici de farklı (fawcett)",
+   "nd7b": true,
+   "aday": "Fawcett 200° L Pale Chocolate Malt"
   },
   {
    "grup": "malt",
@@ -7372,7 +7726,11 @@
    "karar": "ürün",
    "hedef": "malt:golden_promise (Golden Promise (Simpsons))",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici fawcett · kayıt: Simpsons",
+   "nd7b": true,
+   "aday": "Fawcett Golden Promise Pale Malt"
   },
   {
    "grup": "malt",
@@ -7417,16 +7775,25 @@
    "karar": "ürün",
    "hedef": "malt:pilsner (Pilsner Malt)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici mfb · kayıt: Weyermann, BestMalz, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Franco-Belges Pilsner Malt"
   },
   {
    "grup": "malt",
    "yazim": "fuggles pellet hops",
    "satir": 1,
-   "karar": "artık",
-   "hedef": "",
-   "kural": "artık",
-   "not": ""
+   "karar": "taşındı",
+   "hedef": "hop:fuggles (Fuggles)",
+   "kural": "elle",
+   "not": "(c) tahıl listesine yazılmış hop (Fuggles pellet; kullanım zamanı kaynakta yok)",
+   "ekstra": {
+    "zaman": null,
+    "alfa": null
+   },
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -7444,7 +7811,11 @@
    "karar": "ürün",
    "hedef": "malt:pale_ale (Pale Ale Malt)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici gambrinus · kayıt: Weyermann, Crisp, Simpsons, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Gambrinus Pale"
   },
   {
    "grup": "malt",
@@ -7453,7 +7824,11 @@
    "karar": "ürün",
    "hedef": "malt:pale_ale (Pale Ale Malt)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici gambrinus · kayıt: Weyermann, Crisp, Simpsons, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Gambrinus Pale Malt"
   },
   {
    "grup": "malt",
@@ -7462,16 +7837,25 @@
    "karar": "ürün",
    "hedef": "malt:pilsner (Pilsner Malt)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici gambrinus · kayıt: Weyermann, BestMalz, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Gambrinus Pilsner Malt"
   },
   {
    "grup": "malt",
    "yazim": "german blanc, fwh",
    "satir": 1,
-   "karar": "artık",
-   "hedef": "",
-   "kural": "artık",
-   "not": ""
+   "karar": "taşındı",
+   "hedef": "hop:hrblc (Hallertau Blanc)",
+   "kural": "elle",
+   "not": "(c) tahıl listesine yazılmış ilk şıra hopu: German Blanc = Hallertau Blanc, FWH",
+   "ekstra": {
+    "zaman": "FWH",
+    "alfa": null
+   },
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -7507,7 +7891,11 @@
    "karar": "ürün",
    "hedef": "malt:pale_ale (Pale Ale Malt)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici gladfields · kayıt: Weyermann, Crisp, Simpsons, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Gladfields Pale Ale Malt"
   },
   {
    "grup": "malt",
@@ -7542,8 +7930,12 @@
    "satir": 1,
    "karar": "ürün",
    "hedef": "malt:briess_pale (Briess 2-Row Brewers Malt)",
-   "kural": "okuyucu-marka",
-   "not": ""
+   "kural": "elle",
+   "not": "(a) Great Western'ın 2-row baz maltı katalogda yok: aynı türden ABD 2-row baz malt kaydına GEÇİCİ bağlı; tüm yazımlar aynı yoldan (Premium 2-Row ayrı ürün adı — bekliyor)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici great western · kayıt: Briess",
+   "nd7b": true,
+   "aday": "Great Western 2-Row"
   },
   {
    "grup": "malt",
@@ -7561,7 +7953,11 @@
    "karar": "ürün",
    "hedef": "malt:c150 (Crystal 150L (Briess))",
    "kural": "renk",
-   "not": "renk 150 °L → 150 °L"
+   "not": "renk 150 °L → 150 °L",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici great western · kayıt: Briess",
+   "nd7b": true,
+   "aday": "Great Western Crystal Malt 150 °l"
   },
   {
    "grup": "malt",
@@ -7570,7 +7966,11 @@
    "karar": "ürün",
    "hedef": "malt:c40 (Crystal 40 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 40 °L → 40 °L"
+   "not": "renk 40 °L → 40 °L",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici great western · kayıt: Briess, Simpsons",
+   "nd7b": true,
+   "aday": "Great Western Crystal Malt 40 °l"
   },
   {
    "grup": "malt",
@@ -7579,7 +7979,11 @@
    "karar": "ürün",
    "hedef": "malt:c80 (Crystal 80 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 80 °L → 80 °L"
+   "not": "renk 80 °L → 80 °L",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici great western · kayıt: Briess, Simpsons",
+   "nd7b": true,
+   "aday": "Great Western Crystal Malt 80 °l"
   },
   {
    "grup": "malt",
@@ -7588,7 +7992,11 @@
    "karar": "ürün",
    "hedef": "malt:c120 (Crystal 120 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 120 °L → 120 °L"
+   "not": "renk 120 °L → 120 °L",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici great western · kayıt: Briess, Simpsons",
+   "nd7b": true,
+   "aday": "Great Western Crystal Malt, 120°l"
   },
   {
    "grup": "malt",
@@ -7597,7 +8005,11 @@
    "karar": "ürün",
    "hedef": "malt:c40 (Crystal 40 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 40 °L → 40 °L"
+   "not": "renk 40 °L → 40 °L",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici great western · kayıt: Briess, Simpsons",
+   "nd7b": true,
+   "aday": "Great Western Crystal Malt, 40°l"
   },
   {
    "grup": "malt",
@@ -7606,7 +8018,11 @@
    "karar": "ürün",
    "hedef": "malt:c80 (Crystal 80 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 75 °L → 80 °L"
+   "not": "renk 75 °L → 80 °L",
+   "fark": "renk",
+   "farkNot": "renk 75 °L (tarif) ↔ 80 °L (kayıt) · üretici de farklı (great western)",
+   "nd7b": true,
+   "aday": "Great Western Crystal Malt, 75°l"
   },
   {
    "grup": "malt",
@@ -7615,7 +8031,11 @@
    "karar": "ürün",
    "hedef": "malt:pale_ale (Pale Ale Malt)",
    "kural": "renk",
-   "not": "renk 2 °L ≈ 3 °L"
+   "not": "renk 2 °L ≈ 3 °L",
+   "fark": "renk",
+   "farkNot": "renk 2 °L (tarif) ↔ 3 °L (kayıt) · üretici de farklı (great western)",
+   "nd7b": true,
+   "aday": "Great Western Domestic Pale Malt 2 °l"
   },
   {
    "grup": "malt",
@@ -7624,16 +8044,24 @@
    "karar": "ürün",
    "hedef": "malt:pale_ale (Pale Ale Malt)",
    "kural": "renk",
-   "not": "renk 2 °L ≈ 3 °L"
+   "not": "renk 2 °L ≈ 3 °L",
+   "fark": "renk",
+   "farkNot": "renk 2 °L (tarif) ↔ 3 °L (kayıt) · üretici de farklı (great western)",
+   "nd7b": true,
+   "aday": "Great Western Domestic Pale Malt 2 °l"
   },
   {
    "grup": "malt",
    "yazim": "great western domestic two-row malt (2 °l)",
    "satir": 1,
-   "karar": "katalog_bekliyor",
-   "hedef": "snf_b_malt (Malt / tahıl — ürün kataloğa eklenecek): Great Western Domestic Two-Row Malt 2 °l",
-   "kural": "katalog_bekliyor",
-   "not": ""
+   "karar": "ürün",
+   "hedef": "malt:briess_pale (Briess 2-Row Brewers Malt)",
+   "kural": "elle",
+   "not": "(a) Great Western'ın 2-row baz maltı katalogda yok: aynı türden ABD 2-row baz malt kaydına GEÇİCİ bağlı; tüm yazımlar aynı yoldan (Premium 2-Row ayrı ürün adı — bekliyor)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici great western · kayıt: Briess",
+   "nd7b": true,
+   "aday": "Great Western 2-Row"
   },
   {
    "grup": "malt",
@@ -7651,7 +8079,11 @@
    "karar": "ürün",
    "hedef": "malt:pale_ale (Pale Ale Malt)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici great western · kayıt: Weyermann, Crisp, Simpsons, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Great Western Pale Ale Malt"
   },
   {
    "grup": "malt",
@@ -7660,7 +8092,11 @@
    "karar": "ürün",
    "hedef": "malt:pale_ale (Pale Ale Malt)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici great western · kayıt: Weyermann, Crisp, Simpsons, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Great Western Pale Malt"
   },
   {
    "grup": "malt",
@@ -7669,7 +8105,11 @@
    "karar": "ürün",
    "hedef": "malt:pilsner (Pilsner Malt)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici great western · kayıt: Weyermann, BestMalz, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Great Western Pilsner Malt"
   },
   {
    "grup": "malt",
@@ -7695,8 +8135,12 @@
    "satir": 3,
    "karar": "ürün",
    "hedef": "malt:briess_pale (Briess 2-Row Brewers Malt)",
-   "kural": "okuyucu-marka",
-   "not": ""
+   "kural": "elle",
+   "not": "(a) Great Western'ın 2-row baz maltı katalogda yok: aynı türden ABD 2-row baz malt kaydına GEÇİCİ bağlı; tüm yazımlar aynı yoldan (Premium 2-Row ayrı ürün adı — bekliyor)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici great western · kayıt: Briess",
+   "nd7b": true,
+   "aday": "Great Western 2-Row"
   },
   {
    "grup": "malt",
@@ -7704,8 +8148,12 @@
    "satir": 1,
    "karar": "ürün",
    "hedef": "malt:briess_pale (Briess 2-Row Brewers Malt)",
-   "kural": "okuyucu-köken",
-   "not": ""
+   "kural": "elle",
+   "not": "(a) Great Western'ın 2-row baz maltı katalogda yok: aynı türden ABD 2-row baz malt kaydına GEÇİCİ bağlı; tüm yazımlar aynı yoldan (Premium 2-Row ayrı ürün adı — bekliyor)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici great western · kayıt: Briess",
+   "nd7b": true,
+   "aday": "Great Western 2-Row"
   },
   {
    "grup": "malt",
@@ -7714,7 +8162,11 @@
    "karar": "ürün",
    "hedef": "malt:wheat (Buğday Maltı)",
    "kural": "renk",
-   "not": "renk 2 °L ≈ 2 °L"
+   "not": "renk 2 °L ≈ 2 °L",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici great western · kayıt: Weyermann, BestMalz, Muntons, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Great Western Wheat Malt 2 °l"
   },
   {
    "grup": "malt",
@@ -7723,7 +8175,11 @@
    "karar": "ürün",
    "hedef": "malt:wheat (Buğday Maltı)",
    "kural": "renk",
-   "not": "renk 2 °L ≈ 2 °L"
+   "not": "renk 2 °L ≈ 2 °L",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici great western · kayıt: Weyermann, BestMalz, Muntons, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Great Western Wheat Malt 2 °l"
   },
   {
    "grup": "malt",
@@ -7795,7 +8251,11 @@
    "karar": "ürün",
    "hedef": "malt:c60 (Crystal 60 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 55 °L → 60 °L"
+   "not": "renk 55 °L → 60 °L",
+   "fark": "renk",
+   "farkNot": "renk 55 °L (tarif) ↔ 60 °L (kayıt) · üretici de farklı (bairds)",
+   "nd7b": true,
+   "aday": "Hugh Baird 55° L Crystal Malt"
   },
   {
    "grup": "malt",
@@ -7840,7 +8300,11 @@
    "karar": "ürün",
    "hedef": "malt:pale_ale (Pale Ale Malt)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici joe white · kayıt: Weyermann, Crisp, Simpsons, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Joe White Pale Ale Malt"
   },
   {
    "grup": "malt",
@@ -7939,7 +8403,11 @@
    "karar": "ürün",
    "hedef": "malt:pilsner (Pilsner Malt)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici m/w · kayıt: Weyermann, BestMalz, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "M/W Pilsner Malt"
   },
   {
    "grup": "malt",
@@ -7948,7 +8416,11 @@
    "karar": "ürün",
    "hedef": "malt:wheat (Buğday Maltı)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici m/w · kayıt: Weyermann, BestMalz, Muntons, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "M/W Wheat Malt"
   },
   {
    "grup": "malt",
@@ -8002,7 +8474,11 @@
    "karar": "ürün",
    "hedef": "malt:pilsner (Pilsner Malt)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici mfb · kayıt: Weyermann, BestMalz, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Malteries Franco-Belge Pilsner Malt"
   },
   {
    "grup": "malt",
@@ -8011,7 +8487,11 @@
    "karar": "ürün",
    "hedef": "malt:briess_pale (Briess 2-Row Brewers Malt)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici malteurop · kayıt: Briess",
+   "nd7b": true,
+   "aday": "Malteurop Pale Two-Row Malt"
   },
   {
    "grup": "malt",
@@ -8263,7 +8743,10 @@
    "karar": "ürün",
    "hedef": "malt:dark_munich (Munich Dark (Aroma))",
    "kural": "renk",
-   "not": "renk 10 °L → 9 °L"
+   "not": "renk 10 °L → 9 °L",
+   "fark": "renk",
+   "farkNot": "renk 10 °L (tarif) ↔ 9 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -8353,7 +8836,11 @@
    "karar": "ürün",
    "hedef": "malt:c60 (Crystal 60 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 60 °L → 60 °L"
+   "not": "renk 60 °L → 60 °L",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici muntons · kayıt: Briess, Simpsons",
+   "nd7b": true,
+   "aday": "Muntons 60° L Crystal Malt"
   },
   {
    "grup": "malt",
@@ -8380,7 +8867,11 @@
    "karar": "ürün",
    "hedef": "malt:pale_ale (Pale Ale Malt)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici muntons · kayıt: Weyermann, Crisp, Simpsons, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Muntons Pale Ale Malt"
   },
   {
    "grup": "malt",
@@ -8398,7 +8889,10 @@
    "karar": "ürün",
    "hedef": "malt:pale_ale (Pale Ale Malt)",
    "kural": "okuyucu-köken",
-   "not": ""
+   "not": "",
+   "fark": "koken",
+   "farkNot": "tarifteki köken kaydın üreticileri arasında yok (kayıt: Weyermann, Crisp, Simpsons, Hitit (yerli))",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -8407,7 +8901,10 @@
    "karar": "ürün",
    "hedef": "malt:pilsner (Pilsner Malt)",
    "kural": "okuyucu-köken",
-   "not": ""
+   "not": "",
+   "fark": "koken",
+   "farkNot": "tarifteki köken kaydın üreticileri arasında yok (kayıt: Weyermann, BestMalz, Hitit (yerli))",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -8533,7 +9030,11 @@
    "karar": "ürün",
    "hedef": "malt:pale_choc (Pale Chocolate Malt)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici crisp · kayıt: Simpsons, Crisp",
+   "nd7b": true,
+   "aday": "Pale Chocolate Crisp"
   },
   {
    "grup": "malt",
@@ -8542,7 +9043,10 @@
    "karar": "ürün",
    "hedef": "malt:pale_ale (Pale Ale Malt)",
    "kural": "renk",
-   "not": "renk 2 °L ≈ 3 °L"
+   "not": "renk 2 °L ≈ 3 °L",
+   "fark": "renk",
+   "farkNot": "renk 2 °L (tarif) ↔ 3 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -8605,16 +9109,21 @@
    "karar": "ürün",
    "hedef": "malt:c60 (Crystal 60 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 55 °L → 60 °L"
+   "not": "renk 55 °L → 60 °L",
+   "fark": "renk",
+   "farkNot": "renk 55 °L (tarif) ↔ 60 °L (kayıt) · üretici de farklı (patagonia)",
+   "nd7b": true,
+   "aday": "Patagonia Caramel 55l"
   },
   {
    "grup": "malt",
    "yazim": "pilsen (dingemans)",
    "satir": 2,
    "karar": "ürün",
-   "hedef": "malt:pilsner (Pilsner Malt)",
-   "kural": "okuyucu-marka",
-   "not": ""
+   "hedef": "malt:bel_pils (Belgian Pilsner)",
+   "kural": "elle",
+   "not": "Dingemans pilsner maltı: katalogdaki Belçika pilsner kaydının üreticileri arasında Dingemans var ve kaydın alias'ı \"dingemans pilsner malt\" — aynı ürün (doğrulayıcı bulgusu: jenerik pilsner yerine bu kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -8658,26 +9167,38 @@
    "satir": 2,
    "karar": "ürün",
    "hedef": "malt:briess_pale (Briess 2-Row Brewers Malt)",
-   "kural": "okuyucu-marka",
-   "not": ""
+   "kural": "elle",
+   "not": "(a) Rahr'ın 2-row baz maltı (üreticideki adı The Brewer's Standard 2-Row; \"Color °Lovibond 1.9 - 2.3°\" — https://rahrmaltingco.com/rahr-the-brewers-standard-2-row/) katalogda yok: aynı türden ABD 2-row baz malt kaydına GEÇİCİ bağlı; tüm yazımlar aynı yoldan",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici rahr · kayıt: Briess",
+   "nd7b": true,
+   "aday": "Rahr Standard 2-Row"
   },
   {
    "grup": "malt",
    "yazim": "rahr 2-row barley malt",
    "satir": 1,
-   "karar": "katalog_bekliyor",
-   "hedef": "snf_b_malt (Malt / tahıl — ürün kataloğa eklenecek): Rahr 2-Row Barley Malt",
-   "kural": "katalog_bekliyor",
-   "not": ""
+   "karar": "ürün",
+   "hedef": "malt:briess_pale (Briess 2-Row Brewers Malt)",
+   "kural": "elle",
+   "not": "(a) Rahr'ın 2-row baz maltı (üreticideki adı The Brewer's Standard 2-Row; \"Color °Lovibond 1.9 - 2.3°\" — https://rahrmaltingco.com/rahr-the-brewers-standard-2-row/) katalogda yok: aynı türden ABD 2-row baz malt kaydına GEÇİCİ bağlı; tüm yazımlar aynı yoldan",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici rahr · kayıt: Briess",
+   "nd7b": true,
+   "aday": "Rahr Standard 2-Row"
   },
   {
    "grup": "malt",
    "yazim": "rahr 2-row brewer's malt",
    "satir": 1,
-   "karar": "katalog_bekliyor",
-   "hedef": "snf_b_malt (Malt / tahıl — ürün kataloğa eklenecek): Rahr 2-Row Brewer's Malt",
-   "kural": "katalog_bekliyor",
-   "not": ""
+   "karar": "ürün",
+   "hedef": "malt:briess_pale (Briess 2-Row Brewers Malt)",
+   "kural": "elle",
+   "not": "(a) Rahr'ın 2-row baz maltı (üreticideki adı The Brewer's Standard 2-Row; \"Color °Lovibond 1.9 - 2.3°\" — https://rahrmaltingco.com/rahr-the-brewers-standard-2-row/) katalogda yok: aynı türden ABD 2-row baz malt kaydına GEÇİCİ bağlı; tüm yazımlar aynı yoldan",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici rahr · kayıt: Briess",
+   "nd7b": true,
+   "aday": "Rahr Standard 2-Row"
   },
   {
    "grup": "malt",
@@ -8685,8 +9206,12 @@
    "satir": 1,
    "karar": "ürün",
    "hedef": "malt:briess_pale (Briess 2-Row Brewers Malt)",
-   "kural": "okuyucu-marka",
-   "not": ""
+   "kural": "elle",
+   "not": "(a) Rahr'ın 2-row baz maltı (üreticideki adı The Brewer's Standard 2-Row; \"Color °Lovibond 1.9 - 2.3°\" — https://rahrmaltingco.com/rahr-the-brewers-standard-2-row/) katalogda yok: aynı türden ABD 2-row baz malt kaydına GEÇİCİ bağlı; tüm yazımlar aynı yoldan",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici rahr · kayıt: Briess",
+   "nd7b": true,
+   "aday": "Rahr Standard 2-Row"
   },
   {
    "grup": "malt",
@@ -8730,8 +9255,12 @@
    "satir": 2,
    "karar": "ürün",
    "hedef": "malt:briess_pale (Briess 2-Row Brewers Malt)",
-   "kural": "okuyucu-marka",
-   "not": ""
+   "kural": "elle",
+   "not": "(a) Rahr'ın 2-row baz maltı (üreticideki adı The Brewer's Standard 2-Row; \"Color °Lovibond 1.9 - 2.3°\" — https://rahrmaltingco.com/rahr-the-brewers-standard-2-row/) katalogda yok: aynı türden ABD 2-row baz malt kaydına GEÇİCİ bağlı; tüm yazımlar aynı yoldan",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici rahr · kayıt: Briess",
+   "nd7b": true,
+   "aday": "Rahr Standard 2-Row"
   },
   {
    "grup": "malt",
@@ -8740,7 +9269,11 @@
    "karar": "ürün",
    "hedef": "malt:pale_ale (Pale Ale Malt)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici rahr · kayıt: Weyermann, Crisp, Simpsons, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Rahr Pale Ale Malt"
   },
   {
    "grup": "malt",
@@ -8749,7 +9282,11 @@
    "karar": "ürün",
    "hedef": "malt:pale_ale (Pale Ale Malt)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici rahr · kayıt: Weyermann, Crisp, Simpsons, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Rahr Pale Malt"
   },
   {
    "grup": "malt",
@@ -8757,8 +9294,12 @@
    "satir": 2,
    "karar": "ürün",
    "hedef": "malt:briess_pale (Briess 2-Row Brewers Malt)",
-   "kural": "okuyucu-marka",
-   "not": ""
+   "kural": "elle",
+   "not": "(a) Rahr'ın 2-row baz maltı (üreticideki adı The Brewer's Standard 2-Row; \"Color °Lovibond 1.9 - 2.3°\" — https://rahrmaltingco.com/rahr-the-brewers-standard-2-row/) katalogda yok: aynı türden ABD 2-row baz malt kaydına GEÇİCİ bağlı; tüm yazımlar aynı yoldan",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici rahr · kayıt: Briess",
+   "nd7b": true,
+   "aday": "Rahr Standard 2-Row"
   },
   {
    "grup": "malt",
@@ -8767,7 +9308,11 @@
    "karar": "ürün",
    "hedef": "malt:pilsner (Pilsner Malt)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici rahr · kayıt: Weyermann, BestMalz, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Rahr Pils"
   },
   {
    "grup": "malt",
@@ -8776,7 +9321,11 @@
    "karar": "ürün",
    "hedef": "malt:pilsner (Pilsner Malt)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici rahr · kayıt: Weyermann, BestMalz, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Rahr Pilsner"
   },
   {
    "grup": "malt",
@@ -8793,26 +9342,38 @@
    "satir": 1,
    "karar": "ürün",
    "hedef": "malt:wheat (Buğday Maltı)",
-   "kural": "okuyucu-marka",
-   "not": ""
+   "kural": "elle",
+   "not": "(a) Rahr Red Wheat Malt katalogda yok: aynı türden buğday maltı kaydına GEÇİCİ bağlı; iki yazım aynı yoldan (doğrulayıcı bulgusu)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici rahr · kayıt: Weyermann, BestMalz, Muntons, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Rahr Red Wheat Malt"
   },
   {
    "grup": "malt",
    "yazim": "rahr standard 2-row",
    "satir": 2,
-   "karar": "katalog_bekliyor",
-   "hedef": "snf_b_malt (Malt / tahıl — ürün kataloğa eklenecek): Rahr Standard 2-Row",
-   "kural": "katalog_bekliyor",
-   "not": ""
+   "karar": "ürün",
+   "hedef": "malt:briess_pale (Briess 2-Row Brewers Malt)",
+   "kural": "elle",
+   "not": "(a) Rahr'ın 2-row baz maltı (üreticideki adı The Brewer's Standard 2-Row; \"Color °Lovibond 1.9 - 2.3°\" — https://rahrmaltingco.com/rahr-the-brewers-standard-2-row/) katalogda yok: aynı türden ABD 2-row baz malt kaydına GEÇİCİ bağlı; tüm yazımlar aynı yoldan",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici rahr · kayıt: Briess",
+   "nd7b": true,
+   "aday": "Rahr Standard 2-Row"
   },
   {
    "grup": "malt",
    "yazim": "rahr standard 2-row malt",
    "satir": 1,
-   "karar": "katalog_bekliyor",
-   "hedef": "snf_b_malt (Malt / tahıl — ürün kataloğa eklenecek): Rahr Standard 2-Row Malt",
-   "kural": "katalog_bekliyor",
-   "not": ""
+   "karar": "ürün",
+   "hedef": "malt:briess_pale (Briess 2-Row Brewers Malt)",
+   "kural": "elle",
+   "not": "(a) Rahr'ın 2-row baz maltı (üreticideki adı The Brewer's Standard 2-Row; \"Color °Lovibond 1.9 - 2.3°\" — https://rahrmaltingco.com/rahr-the-brewers-standard-2-row/) katalogda yok: aynı türden ABD 2-row baz malt kaydına GEÇİCİ bağlı; tüm yazımlar aynı yoldan",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici rahr · kayıt: Briess",
+   "nd7b": true,
+   "aday": "Rahr Standard 2-Row"
   },
   {
    "grup": "malt",
@@ -8820,8 +9381,12 @@
    "satir": 3,
    "karar": "ürün",
    "hedef": "malt:briess_pale (Briess 2-Row Brewers Malt)",
-   "kural": "okuyucu-marka",
-   "not": ""
+   "kural": "elle",
+   "not": "(a) Rahr'ın 2-row baz maltı (üreticideki adı The Brewer's Standard 2-Row; \"Color °Lovibond 1.9 - 2.3°\" — https://rahrmaltingco.com/rahr-the-brewers-standard-2-row/) katalogda yok: aynı türden ABD 2-row baz malt kaydına GEÇİCİ bağlı; tüm yazımlar aynı yoldan",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici rahr · kayıt: Briess",
+   "nd7b": true,
+   "aday": "Rahr Standard 2-Row"
   },
   {
    "grup": "malt",
@@ -8902,7 +9467,10 @@
    "karar": "ürün",
    "hedef": "malt:roast (Roasted Barley)",
    "kural": "okuyucu-köken",
-   "not": ""
+   "not": "",
+   "fark": "koken",
+   "farkNot": "tarifteki köken kaydın üreticileri arasında yok (kayıt: Crisp, Simpsons, Hitit Kara Malt No:3 (yerli))",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -8920,7 +9488,11 @@
    "karar": "ürün",
    "hedef": "malt:roast (Roasted Barley)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici muntons · kayıt: Crisp, Simpsons, Hitit Kara Malt No:3 (yerli)",
+   "nd7b": true,
+   "aday": "Roasted Barley Muntons"
   },
   {
    "grup": "malt",
@@ -8947,7 +9519,11 @@
    "karar": "ürün",
    "hedef": "malt:pilsner (Pilsner Malt)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici root shoot · kayıt: Weyermann, BestMalz, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Root Shoot Pilsner Malt"
   },
   {
    "grup": "malt",
@@ -8992,7 +9568,11 @@
    "karar": "ürün",
    "hedef": "malt:pale_ale (Pale Ale Malt)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici simpsons · kayıt: Weyermann, Crisp, Simpsons, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Simpsons Best Pale Ale Malt"
   },
   {
    "grup": "malt",
@@ -9109,7 +9689,10 @@
    "karar": "ürün",
    "hedef": "malt:specb (Special B)",
    "kural": "renk",
-   "not": "renk 147.5 °L ≈ 115 °L"
+   "not": "renk 147.5 °L ≈ 115 °L",
+   "fark": "renk",
+   "farkNot": "renk 147,5 °L (tarif) ↔ 115 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -9118,7 +9701,11 @@
    "karar": "ürün",
    "hedef": "malt:specb (Special B)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici dingemans · kayıt: Dingemans, Castle",
+   "nd7b": true,
+   "aday": "Special B Malt Dingeman"
   },
   {
    "grup": "malt",
@@ -9163,7 +9750,11 @@
    "karar": "ürün",
    "hedef": "malt:pilsner (Pilsner Malt)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici swaen · kayıt: Weyermann, BestMalz, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Swaen Pilsner Malt"
   },
   {
    "grup": "malt",
@@ -9190,7 +9781,11 @@
    "karar": "ürün",
    "hedef": "malt:pale_choc (Pale Chocolate Malt)",
    "kural": "renk",
-   "not": "renk 200 °L → 225 °L"
+   "not": "renk 200 °L → 225 °L",
+   "fark": "renk",
+   "farkNot": "renk 200 °L (tarif) ↔ 225 °L (kayıt) · üretici de farklı (fawcett)",
+   "nd7b": true,
+   "aday": "Thomas Fawcett 200° L Chocolate Malt"
   },
   {
    "grup": "malt",
@@ -9199,7 +9794,11 @@
    "karar": "ürün",
    "hedef": "malt:golden_promise (Golden Promise (Simpsons))",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici fawcett · kayıt: Simpsons",
+   "nd7b": true,
+   "aday": "Thomas Fawcett Golden Promise"
   },
   {
    "grup": "malt",
@@ -9208,7 +9807,11 @@
    "karar": "ürün",
    "hedef": "malt:roast (Roasted Barley)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici fawcett · kayıt: Crisp, Simpsons, Hitit Kara Malt No:3 (yerli)",
+   "nd7b": true,
+   "aday": "Thomas Fawcett Roasted Barley"
   },
   {
    "grup": "malt",
@@ -9271,16 +9874,22 @@
    "karar": "ürün",
    "hedef": "malt:briess_pale (Briess 2-Row Brewers Malt)",
    "kural": "okuyucu",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarif üretici yazmıyor · kayıt tek üreticinin ürünü (Briess 2-Row Brewers Malt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
    "yazim": "u.s. pale malt",
    "satir": 1,
    "karar": "ürün",
-   "hedef": "malt:pale_ale (Pale Ale Malt)",
-   "kural": "okuyucu-köken",
-   "not": ""
+   "hedef": "malt:briess_pale (Briess 2-Row Brewers Malt)",
+   "kural": "elle",
+   "not": "(e) U.S. pale malt: katalogdaki ABD baz pale (2-row) kaydı; tarif üretici yazmıyor. Kayıt rengi 2 °L ↔ üretici: \"Color ..... 2.1 SRM\" (https://brewingwithbriess.com/wp-content/uploads/documents/Briess-PISB-Brewers-Malt.pdf)",
+   "fark": "marka",
+   "farkNot": "tarif üretici yazmıyor · kayıt tek üreticinin ürünü (Briess 2-Row Brewers Malt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -9298,7 +9907,10 @@
    "karar": "ürün",
    "hedef": "malt:c80 (Crystal 80 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 77 °L → 80 °L"
+   "not": "renk 77 °L → 80 °L",
+   "fark": "renk",
+   "farkNot": "renk 77 °L (tarif) ↔ 80 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -9316,7 +9928,10 @@
    "karar": "ürün",
    "hedef": "malt:c80 (Crystal 80 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 77 °L → 80 °L"
+   "not": "renk 77 °L → 80 °L",
+   "fark": "renk",
+   "farkNot": "renk 77 °L (tarif) ↔ 80 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -9325,7 +9940,10 @@
    "karar": "ürün",
    "hedef": "malt:c80 (Crystal 80 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 77 °L → 80 °L"
+   "not": "renk 77 °L → 80 °L",
+   "fark": "renk",
+   "farkNot": "renk 77 °L (tarif) ↔ 80 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -9370,7 +9988,10 @@
    "karar": "ürün",
    "hedef": "malt:c80 (Crystal 80 (Briess/Simpsons))",
    "kural": "renk",
-   "not": "renk 90 °L → 80 °L"
+   "not": "renk 90 °L → 80 °L",
+   "fark": "renk",
+   "farkNot": "renk 90 °L (tarif) ↔ 80 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -9379,7 +10000,10 @@
    "karar": "ürün",
    "hedef": "malt:pale_ale (Pale Ale Malt)",
    "kural": "okuyucu-köken",
-   "not": ""
+   "not": "",
+   "fark": "koken",
+   "farkNot": "tarifteki köken kaydın üreticileri arasında yok (kayıt: Weyermann, Crisp, Simpsons, Hitit (yerli))",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -9388,16 +10012,22 @@
    "karar": "ürün",
    "hedef": "malt:pale_ale (Pale Ale Malt)",
    "kural": "renk",
-   "not": "renk 3.5 °L ≈ 3 °L"
+   "not": "renk 3.5 °L ≈ 3 °L",
+   "fark": "koken",
+   "farkNot": "tarifteki köken kaydın üreticileri arasında yok (kayıt: Weyermann, Crisp, Simpsons, Hitit (yerli))",
+   "nd7b": true
   },
   {
    "grup": "malt",
    "yazim": "us pale malt",
    "satir": 1,
    "karar": "ürün",
-   "hedef": "malt:pale_ale (Pale Ale Malt)",
-   "kural": "okuyucu-köken",
-   "not": ""
+   "hedef": "malt:briess_pale (Briess 2-Row Brewers Malt)",
+   "kural": "elle",
+   "not": "(a) \"U.S. pale malt\" ile aynı ürün adı (ABD baz pale): aynı yoldan — katalogdaki ABD 2-row kaydı, tarif üretici yazmıyor (doğrulayıcı bulgusu)",
+   "fark": "marka",
+   "farkNot": "tarif üretici yazmıyor · kayıt tek üreticinin ürünü (Briess 2-Row Brewers Malt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -9406,7 +10036,10 @@
    "karar": "ürün",
    "hedef": "malt:wheat (Buğday Maltı)",
    "kural": "okuyucu-köken",
-   "not": ""
+   "not": "",
+   "fark": "koken",
+   "farkNot": "tarifteki köken kaydın üreticileri arasında yok (kayıt: Weyermann, BestMalz, Muntons, Hitit (yerli))",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -9442,7 +10075,11 @@
    "karar": "ürün",
    "hedef": "malt:pilsner (Pilsner Malt)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici weyermann · kayıt: Weyermann, BestMalz, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Wayermann Pilsner"
   },
   {
    "grup": "malt",
@@ -9451,7 +10088,11 @@
    "karar": "ürün",
    "hedef": "malt:pilsner (Pilsner Malt)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici weyermann · kayıt: Weyermann, BestMalz, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Weyerman Pilsner Malt"
   },
   {
    "grup": "malt",
@@ -9477,8 +10118,9 @@
    "satir": 1,
    "karar": "ürün",
    "hedef": "malt:cara_munich2 (CaraMunich II (Weyermann))",
-   "kural": "okuyucu-marka",
-   "not": ""
+   "kural": "okuyucu-aynımarka",
+   "not": "",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -9595,7 +10237,10 @@
    "karar": "ürün",
    "hedef": "malt:cara_munich3 (CaraMunich III (Weyermann / BestMalz))",
    "kural": "renk",
-   "not": "renk 53 °L ≈ 57 °L"
+   "not": "renk 53 °L ≈ 57 °L",
+   "fark": "renk",
+   "farkNot": "renk 53 °L (tarif) ↔ 57 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -9612,8 +10257,9 @@
    "satir": 1,
    "karar": "ürün",
    "hedef": "malt:cara_wheat (CaraWheat (Weyermann))",
-   "kural": "okuyucu-marka",
-   "not": ""
+   "kural": "okuyucu-aynımarka",
+   "not": "",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -9630,8 +10276,9 @@
    "satir": 1,
    "karar": "ürün",
    "hedef": "malt:munich_light (Munich Type 1 Light (Weyermann))",
-   "kural": "okuyucu-marka",
-   "not": ""
+   "kural": "okuyucu-aynımarka",
+   "not": "",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -9640,7 +10287,11 @@
    "karar": "ürün",
    "hedef": "malt:wheat (Buğday Maltı)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici weyermann · kayıt: Weyermann, BestMalz, Muntons, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Weyermann Malted Wheat"
   },
   {
    "grup": "malt",
@@ -9658,7 +10309,10 @@
    "karar": "ürün",
    "hedef": "malt:dark_munich (Munich Dark (Aroma))",
    "kural": "renk",
-   "not": "renk 10 °L → 9 °L"
+   "not": "renk 10 °L → 9 °L",
+   "fark": "renk",
+   "farkNot": "renk 10 °L (tarif) ↔ 9 °L (kayıt)",
+   "nd7b": true
   },
   {
    "grup": "malt",
@@ -9667,7 +10321,11 @@
    "karar": "ürün",
    "hedef": "malt:pale_ale (Pale Ale Malt)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici weyermann · kayıt: Weyermann, Crisp, Simpsons, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Weyermann Pale Ale Malt"
   },
   {
    "grup": "malt",
@@ -9676,7 +10334,11 @@
    "karar": "ürün",
    "hedef": "malt:pale_ale (Pale Ale Malt)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici weyermann · kayıt: Weyermann, Crisp, Simpsons, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Weyermann Pale Malt"
   },
   {
    "grup": "malt",
@@ -9685,7 +10347,11 @@
    "karar": "ürün",
    "hedef": "malt:smoked (İsli Malt — Kayın (Beech))",
    "kural": "elle",
-   "not": "Rauchmalt = Weyermann'ın kayın isli maltının adı (katalog: İsli Malt — Kayın)"
+   "not": "Rauchmalt = Weyermann'ın kayın isli maltının adı (katalog: İsli Malt — Kayın)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici weyermann · kayıt: Weyermann, Viking Malt (Polonya VK), Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Weyermann Rauchmalt"
   },
   {
    "grup": "malt",
@@ -9703,7 +10369,11 @@
    "karar": "ürün",
    "hedef": "malt:vienna (Vienna Malt)",
    "kural": "renk",
-   "not": "renk 3 °L ≈ 3 °L"
+   "not": "renk 3 °L ≈ 3 °L",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici weyermann · kayıt: Weyermann, BestMalz, Muntons, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Weyermann Vienna 3l"
   },
   {
    "grup": "malt",
@@ -9712,7 +10382,11 @@
    "karar": "ürün",
    "hedef": "malt:wheat (Buğday Maltı)",
    "kural": "okuyucu-marka",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici weyermann · kayıt: Weyermann, BestMalz, Muntons, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Weyermenn Wheat Malt"
   },
   {
    "grup": "malt",
@@ -9763,10 +10437,14 @@
    "grup": "malt",
    "yazim": "wheat malt, red (rahr)",
    "satir": 1,
-   "karar": "katalog_bekliyor",
-   "hedef": "snf_b_malt (Malt / tahıl — ürün kataloğa eklenecek): Rahr Wheat Malt, Red",
-   "kural": "katalog_bekliyor",
-   "not": ""
+   "karar": "ürün",
+   "hedef": "malt:wheat (Buğday Maltı)",
+   "kural": "elle",
+   "not": "(a) Rahr Red Wheat Malt katalogda yok: aynı türden buğday maltı kaydına GEÇİCİ bağlı; iki yazım aynı yoldan (doğrulayıcı bulgusu)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici rahr · kayıt: Weyermann, BestMalz, Muntons, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "Rahr Red Wheat Malt"
   },
   {
    "grup": "malt",
@@ -9793,7 +10471,11 @@
    "karar": "ürün",
    "hedef": "malt:wheat (Buğday Maltı)",
    "kural": "okuyucu",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici briess · kayıt: Weyermann, BestMalz, Muntons, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "White Wheat Briess"
   },
   {
    "grup": "malt",
@@ -9802,7 +10484,11 @@
    "karar": "ürün",
    "hedef": "malt:wheat (Buğday Maltı)",
    "kural": "okuyucu",
-   "not": ""
+   "not": "",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici rahr · kayıt: Weyermann, BestMalz, Muntons, Hitit (yerli)",
+   "nd7b": true,
+   "aday": "White Wheat Rahr"
   },
   {
    "grup": "malt",
@@ -10609,10 +11295,15 @@
    "grup": "maya",
    "yazim": "7.5 g au galaxy pellets 15% a.a. @ 2nd 15 minute",
    "satir": 1,
-   "karar": "artık",
-   "hedef": "",
-   "kural": "artık",
-   "not": ""
+   "karar": "taşındı",
+   "hedef": "hop:galaxy (Galaxy)",
+   "kural": "elle",
+   "not": "(c) maya alanına yazılmış hop satırı: Galaxy pellet, %15 alfa; zaman '2nd 15 minute' belirsiz → zaman boş",
+   "ekstra": {
+    "zaman": null,
+    "alfa": 15
+   },
+   "nd7b": true
   },
   {
    "grup": "maya",
@@ -11284,10 +11975,11 @@
    "grup": "maya",
    "yazim": "imperial global, 2nd generation slurry (1.5milli",
    "satir": 1,
-   "karar": "sınıf",
-   "hedef": "snf_maya_siseden (Maya — şişeden / bulamaçtan üretilmiş)",
-   "kural": "sınıf",
-   "not": ""
+   "karar": "katalog_bekliyor",
+   "hedef": "snf_b_maya (Maya / kültür — suş kataloğa eklenecek): Imperial L13 Global",
+   "kural": "elle",
+   "not": "(e) Imperial Yeast L13 Global (\"L13 Global\" — https://www.imperialyeast.com/yeast-strains/global); katalogda yok",
+   "nd7b": true
   },
   {
    "grup": "maya",
@@ -11402,9 +12094,10 @@
    "yazim": "kveik yeast (escarpment labs) or bread yeast",
    "satir": 1,
    "karar": "sınıf",
-   "hedef": "snf_maya_kodsuz (Maya — üretici adıyla yazılmış, kodu yok)",
-   "kural": "sınıf",
-   "not": "kveik yeast (escarpment labs) or bread yeast"
+   "hedef": "snf_maya_kveik (Kveik — suş belirtilmemiş)",
+   "kural": "elle",
+   "not": "(e) Escarpment Labs'in tek bir \"Kveik\" ürünü yok (Voss Kveik, Hornindal Kveik Blend, Ebbegarden Kveik Blend, Årset Kveik Blend, Lærdal Kveik … — https://escarpmentlabs.com/products/voss-kveik): suş belirtilmemiş kveik",
+   "nd7b": true
   },
   {
    "grup": "maya",

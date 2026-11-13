@@ -1,25 +1,25 @@
 {
- "aciklama": "ND7K girdisi: örnek verisinde adı geçen ama katalogda olmayan ürünler (ND7'de \"katalog_bekliyor\" sınıfına bağlandı). _nd7_build.js üretir.",
+ "aciklama": "ND7K girdisi: örnek verisinde adı geçen ama katalogda olmayan ürünler. \"gecici\" alanı dolu olanlar ND7B (a) gereği geçici olarak aynı türden katalog kaydına fark işaretiyle bağlı (ürün eklenince yeniden bağlanır); öbürleri \"katalog_bekliyor\". _nd7_build.js üretir.",
  "ozet": {
   "ekstrakt": {
    "urun": 28,
    "satir": 47
   },
   "hop": {
-   "urun": 90,
-   "satir": 392
+   "urun": 89,
+   "satir": 385
   },
   "katkı": {
-   "urun": 118,
-   "satir": 133
+   "urun": 117,
+   "satir": 132
   },
   "malt": {
-   "urun": 234,
-   "satir": 298
+   "urun": 302,
+   "satir": 416
   },
   "maya": {
-   "urun": 90,
-   "satir": 239
+   "urun": 91,
+   "satir": 240
   },
   "şeker": {
    "urun": 20,
@@ -393,15 +393,6 @@
    "satir": 8,
    "yazimlar": [
     "summit"
-   ]
-  },
-  {
-   "urun": "Brewer's Gold",
-   "tur": "hop",
-   "satir": 7,
-   "yazimlar": [
-    "brewer's gold",
-    "brewers gold"
    ]
   },
   {
@@ -1164,6 +1155,14 @@
    ]
   },
   {
+   "urun": "Baker's dark chocolate",
+   "tur": "katkı",
+   "satir": 1,
+   "yazimlar": [
+    "chocolate, baker's dark"
+   ]
+  },
+  {
    "urun": "Black Or Long Pepper",
    "tur": "katkı",
    "satir": 1,
@@ -1281,14 +1280,6 @@
    "satir": 1,
    "yazimlar": [
     "chipotle peppers"
-   ]
-  },
-  {
-   "urun": "Chocolate, Baker's Dark",
-   "tur": "katkı",
-   "satir": 1,
-   "yazimlar": [
-    "chocolate, baker's dark"
    ]
   },
   {
@@ -1876,14 +1867,6 @@
    ]
   },
   {
-   "urun": "Soured Wort",
-   "tur": "katkı",
-   "satir": 1,
-   "yazimlar": [
-    "soured wort (sub-recipe: 8 oz light dme"
-   ]
-  },
-  {
    "urun": "Spice Blend: Equal Parts Coriander, Cumi",
    "tur": "katkı",
    "satir": 1,
@@ -1956,12 +1939,46 @@
    ]
   },
   {
-   "urun": "Caravienne Malt",
+   "urun": "Dingemans Cara 50 MD (Cara Vienna / Caravienne)",
    "tur": "malt",
-   "satir": 10,
+   "satir": 18,
    "yazimlar": [
-    "caravienne malt"
+    "belgian caravienne malt (21 °l)",
+    "caravienne",
+    "caravienne (bel)",
+    "caravienne malt",
+    "caravienne malt (22 °l)",
+    "dingemans caravienne malt"
    ]
+  },
+  {
+   "urun": "Rahr Standard 2-Row",
+   "tur": "malt",
+   "satir": 15,
+   "yazimlar": [
+    "rahr 2-row",
+    "rahr 2-row barley malt",
+    "rahr 2-row brewer's malt",
+    "rahr 2-row malt",
+    "rahr pale 2-row malt",
+    "rahr pale two-row malt",
+    "rahr standard 2-row",
+    "rahr standard 2-row malt",
+    "rahr two-row malt"
+   ],
+   "gecici": "malt:briess_pale"
+  },
+  {
+   "urun": "Great Western 2-Row",
+   "tur": "malt",
+   "satir": 6,
+   "yazimlar": [
+    "great western 2-row malt",
+    "great western domestic two-row malt (2 °l)",
+    "great western two-row malt",
+    "great western us domestic two-row malt"
+   ],
+   "gecici": "malt:briess_pale"
   },
   {
    "urun": "Caramel Vienna Malt",
@@ -2022,12 +2039,31 @@
    ]
   },
   {
-   "urun": "Caravienne",
+   "urun": "Briess Aromatic Malt",
    "tur": "malt",
    "satir": 3,
    "yazimlar": [
-    "caravienne"
-   ]
+    "briess aromatic malt"
+   ],
+   "gecici": "malt:aromatic"
+  },
+  {
+   "urun": "Briess Pilsner Malt",
+   "tur": "malt",
+   "satir": 3,
+   "yazimlar": [
+    "briess pilsner malt"
+   ],
+   "gecici": "malt:pilsner"
+  },
+  {
+   "urun": "Briess Red Wheat Malt",
+   "tur": "malt",
+   "satir": 3,
+   "yazimlar": [
+    "briess red wheat malt"
+   ],
+   "gecici": "malt:wheat"
   },
   {
    "urun": "Coffee Malt",
@@ -2044,6 +2080,26 @@
    "yazimlar": [
     "floor-malted pilsner malt"
    ]
+  },
+  {
+   "urun": "Great Western Domestic Pale Malt 2 °l",
+   "tur": "malt",
+   "satir": 3,
+   "yazimlar": [
+    "great western domestic pale malt (2 °l)",
+    "great western domestic pale malt 2 °l"
+   ],
+   "gecici": "malt:pale_ale"
+  },
+  {
+   "urun": "Great Western Wheat Malt 2 °l",
+   "tur": "malt",
+   "satir": 3,
+   "yazimlar": [
+    "great western wheat malt (2 °l)",
+    "great western wheat malt 2 °l"
+   ],
+   "gecici": "malt:wheat"
   },
   {
    "urun": "Weyermann Caraamber Malt",
@@ -2070,12 +2126,13 @@
    ]
   },
   {
-   "urun": "Belgian Caravienne Malt 21 °l",
+   "urun": "Admiral Chit Malt",
    "tur": "malt",
    "satir": 2,
    "yazimlar": [
-    "belgian caravienne malt (21 °l)"
-   ]
+    "admiral chit malt"
+   ],
+   "gecici": "malt:chit"
   },
   {
    "urun": "Briess Black Barley 500 °l",
@@ -2093,6 +2150,24 @@
    "yazimlar": [
     "briess brewers malt"
    ]
+  },
+  {
+   "urun": "Briess Pale Malt",
+   "tur": "malt",
+   "satir": 2,
+   "yazimlar": [
+    "briess pale malt"
+   ],
+   "gecici": "malt:pale_ale"
+  },
+  {
+   "urun": "Briess Pilsen Malt",
+   "tur": "malt",
+   "satir": 2,
+   "yazimlar": [
+    "briess pilsen malt"
+   ],
+   "gecici": "malt:pilsner"
   },
   {
    "urun": "Carafa Special Malt",
@@ -2135,12 +2210,40 @@
    ]
   },
   {
+   "urun": "Crisp 45° L Crystal Malt",
+   "tur": "malt",
+   "satir": 2,
+   "yazimlar": [
+    "crisp 45° l crystal malt"
+   ],
+   "gecici": "malt:c40"
+  },
+  {
    "urun": "Crisp Caramalt 15 °l",
    "tur": "malt",
    "satir": 2,
    "yazimlar": [
     "crisp caramalt (15 °l)"
    ]
+  },
+  {
+   "urun": "Crisp Pale Malt",
+   "tur": "malt",
+   "satir": 2,
+   "yazimlar": [
+    "crisp pale malt",
+    "crisp pale malt (or other english pale malt)"
+   ],
+   "gecici": "malt:pale_ale"
+  },
+  {
+   "urun": "Crisp Wheat Malt",
+   "tur": "malt",
+   "satir": 2,
+   "yazimlar": [
+    "crisp wheat malt"
+   ],
+   "gecici": "malt:wheat"
   },
   {
    "urun": "Crystal Malt 15 °l",
@@ -2159,6 +2262,15 @@
    ]
   },
   {
+   "urun": "Dwc Pale Malt",
+   "tur": "malt",
+   "satir": 2,
+   "yazimlar": [
+    "dwc pale malt"
+   ],
+   "gecici": "malt:pale_ale"
+  },
+  {
    "urun": "English Extra Dark Crystal Malt 180 °l",
    "tur": "malt",
    "satir": 2,
@@ -2167,12 +2279,48 @@
    ]
   },
   {
+   "urun": "Gambrinus Pilsner Malt",
+   "tur": "malt",
+   "satir": 2,
+   "yazimlar": [
+    "gambrinus pilsner malt"
+   ],
+   "gecici": "malt:pilsner"
+  },
+  {
    "urun": "Golden Naked Oats",
    "tur": "malt",
    "satir": 2,
    "yazimlar": [
     "golden naked oats"
    ]
+  },
+  {
+   "urun": "Great Western Pale Ale Malt",
+   "tur": "malt",
+   "satir": 2,
+   "yazimlar": [
+    "great western pale ale malt"
+   ],
+   "gecici": "malt:pale_ale"
+  },
+  {
+   "urun": "Great Western Pilsner Malt",
+   "tur": "malt",
+   "satir": 2,
+   "yazimlar": [
+    "great western pilsner malt"
+   ],
+   "gecici": "malt:pilsner"
+  },
+  {
+   "urun": "Joe White Pale Ale Malt",
+   "tur": "malt",
+   "satir": 2,
+   "yazimlar": [
+    "joe white pale ale malt"
+   ],
+   "gecici": "malt:pale_ale"
   },
   {
    "urun": "Mecca Grade Pelton Pilsner Malt",
@@ -2189,6 +2337,15 @@
    "yazimlar": [
     "munich malt - 20l"
    ]
+  },
+  {
+   "urun": "Muntons Pale Ale Malt",
+   "tur": "malt",
+   "satir": 2,
+   "yazimlar": [
+    "muntons pale ale malt"
+   ],
+   "gecici": "malt:pale_ale"
   },
   {
    "urun": "Oats",
@@ -2208,12 +2365,41 @@
    ]
   },
   {
-   "urun": "Rahr Standard 2-Row",
+   "urun": "Rahr Pale Ale Malt",
    "tur": "malt",
    "satir": 2,
    "yazimlar": [
-    "rahr standard 2-row"
-   ]
+    "rahr pale ale malt"
+   ],
+   "gecici": "malt:pale_ale"
+  },
+  {
+   "urun": "Rahr Pale Malt",
+   "tur": "malt",
+   "satir": 2,
+   "yazimlar": [
+    "rahr pale malt"
+   ],
+   "gecici": "malt:pale_ale"
+  },
+  {
+   "urun": "Rahr Pilsner",
+   "tur": "malt",
+   "satir": 2,
+   "yazimlar": [
+    "rahr pilsner"
+   ],
+   "gecici": "malt:pilsner"
+  },
+  {
+   "urun": "Rahr Red Wheat Malt",
+   "tur": "malt",
+   "satir": 2,
+   "yazimlar": [
+    "rahr red wheat malt",
+    "wheat malt, red (rahr)"
+   ],
+   "gecici": "malt:wheat"
   },
   {
    "urun": "Rye Bread, Loaf",
@@ -2246,6 +2432,15 @@
    "yazimlar": [
     "weyermann floor malted bohemian pi"
    ]
+  },
+  {
+   "urun": "Weyermann Malted Wheat",
+   "tur": "malt",
+   "satir": 2,
+   "yazimlar": [
+    "weyermann malted wheat"
+   ],
+   "gecici": "malt:wheat"
   },
   {
    "urun": "105° L Simpsons Double Roasted Cry",
@@ -2424,12 +2619,30 @@
    ]
   },
   {
+   "urun": "Bairds Chocolate 350°l",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "bairds chocolate 350°l"
+   ],
+   "gecici": "malt:choc"
+  },
+  {
    "urun": "Bairds Crystal 70/80",
    "tur": "malt",
    "satir": 1,
    "yazimlar": [
     "bairds crystal 70/80"
    ]
+  },
+  {
+   "urun": "Bairds Crystal 70/80l",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "bairds crystal 70/80l"
+   ],
+   "gecici": "malt:c80"
   },
   {
    "urun": "Baronesse Pilsner Malt",
@@ -2478,6 +2691,42 @@
    "yazimlar": [
     "best heidelberg malt"
    ]
+  },
+  {
+   "urun": "Best Spelt Malt Bestmalz",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "best spelt malt (bestmalz)"
+   ],
+   "gecici": "malt:spelt"
+  },
+  {
+   "urun": "Best Wheat Malt",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "best wheat malt"
+   ],
+   "gecici": "malt:wheat"
+  },
+  {
+   "urun": "Bestmalz Rauchmalt",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "bestmalz rauchmalt"
+   ],
+   "gecici": "malt:smoked"
+  },
+  {
+   "urun": "Bestmalz Spelt Malt",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "bestmalz spelt malt"
+   ],
+   "gecici": "malt:spelt"
   },
   {
    "urun": "Black Barley Malt",
@@ -2592,12 +2841,30 @@
    ]
   },
   {
+   "urun": "Briess Pale Ale Malt",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "briess pale ale malt"
+   ],
+   "gecici": "malt:pale_ale"
+  },
+  {
    "urun": "Briess Roasted Barley, 300 °l",
    "tur": "malt",
    "satir": 1,
    "yazimlar": [
     "briess roasted barley, 300 °l"
    ]
+  },
+  {
+   "urun": "Briess Rye Malt",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "briess rye malt"
+   ],
+   "gecici": "malt:rye"
   },
   {
    "urun": "Briess Smoked Malt",
@@ -2614,6 +2881,15 @@
    "yazimlar": [
     "wheat - white malt (briess)"
    ]
+  },
+  {
+   "urun": "Briess White Wheat",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "briess white wheat"
+   ],
+   "gecici": "malt:wheat"
   },
   {
    "urun": "British Mild Malt",
@@ -2808,20 +3084,13 @@
    ]
   },
   {
-   "urun": "Caravienne (Bel)",
+   "urun": "Cargill Pilsner Malt",
    "tur": "malt",
    "satir": 1,
    "yazimlar": [
-    "caravienne (bel)"
-   ]
-  },
-  {
-   "urun": "Caravienne Malt 22 °l",
-   "tur": "malt",
-   "satir": 1,
-   "yazimlar": [
-    "caravienne malt (22 °l)"
-   ]
+    "cargill pilsner malt"
+   ],
+   "gecici": "malt:pilsner"
   },
   {
    "urun": "Cherrywood Smoked Malt",
@@ -2864,6 +3133,33 @@
    ]
   },
   {
+   "urun": "Crisp 80l Crystal",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "crisp 80l crystal"
+   ],
+   "gecici": "malt:c80"
+  },
+  {
+   "urun": "Crisp Black Malt",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "crisp black malt"
+   ],
+   "gecici": "malt:black"
+  },
+  {
+   "urun": "Crisp C60",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "crisp c60"
+   ],
+   "gecici": "malt:c60"
+  },
+  {
    "urun": "Crisp Crystal Extra Dark - 120l",
    "tur": "malt",
    "satir": 1,
@@ -2878,6 +3174,15 @@
    "yazimlar": [
     "crisp dark crystal malt (77 °l)"
    ]
+  },
+  {
+   "urun": "Crisp Pale Chocolate",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "crisp pale chocolate"
+   ],
+   "gecici": "malt:pale_choc"
   },
   {
    "urun": "Crystal 120, 2-Row",
@@ -3000,12 +3305,13 @@
    ]
   },
   {
-   "urun": "Dingemans Caravienne Malt",
+   "urun": "Dingemans 150° L Special B Malt",
    "tur": "malt",
    "satir": 1,
    "yazimlar": [
-    "dingemans caravienne malt"
-   ]
+    "dingemans 150° l special b malt"
+   ],
+   "gecici": "malt:specb"
   },
   {
    "urun": "Double-Roasted Crystal Malt",
@@ -3046,6 +3352,15 @@
    "yazimlar": [
     "durst or weyermann munich malt (8 °l)"
    ]
+  },
+  {
+   "urun": "Dwc Aromatic Malt",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "dwc aromatic malt"
+   ],
+   "gecici": "malt:aromatic"
   },
   {
    "urun": "English Crystal 15 °l",
@@ -3112,6 +3427,15 @@
    ]
   },
   {
+   "urun": "Fawcett 200° L Pale Chocolate Malt",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "fawcett 200° l pale chocolate malt"
+   ],
+   "gecici": "malt:pale_choc"
+  },
+  {
    "urun": "Fawcett 85° L Dark Crystal Malt",
    "tur": "malt",
    "satir": 1,
@@ -3126,6 +3450,15 @@
    "yazimlar": [
     "fawcett 90°l dark crystal malt"
    ]
+  },
+  {
+   "urun": "Fawcett Golden Promise Pale Malt",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "fawcett golden promise pale malt"
+   ],
+   "gecici": "malt:golden_promise"
   },
   {
    "urun": "Floor-Malted Pilsner",
@@ -3144,6 +3477,15 @@
    ]
   },
   {
+   "urun": "Franco-Belges Pilsner Malt",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "franco-belges pilsner malt"
+   ],
+   "gecici": "malt:pilsner"
+  },
+  {
    "urun": "Gambrinus Ipa Malt",
    "tur": "malt",
    "satir": 1,
@@ -3152,12 +3494,39 @@
    ]
   },
   {
+   "urun": "Gambrinus Pale",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "gambrinus pale"
+   ],
+   "gecici": "malt:pale_ale"
+  },
+  {
+   "urun": "Gambrinus Pale Malt",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "gambrinus pale malt"
+   ],
+   "gecici": "malt:pale_ale"
+  },
+  {
    "urun": "German Or Czech Pilsner Malt",
    "tur": "malt",
    "satir": 1,
    "yazimlar": [
     "german or czech pilsner malt"
    ]
+  },
+  {
+   "urun": "Gladfields Pale Ale Malt",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "gladfields pale ale malt"
+   ],
+   "gecici": "malt:pale_ale"
   },
   {
    "urun": "Golden Promise Or Pale Ale Malt",
@@ -3192,12 +3561,58 @@
    ]
   },
   {
-   "urun": "Great Western Domestic Two-Row Malt 2 °l",
+   "urun": "Great Western Crystal Malt 150 °l",
    "tur": "malt",
    "satir": 1,
    "yazimlar": [
-    "great western domestic two-row malt (2 °l)"
-   ]
+    "great western crystal malt (150 °l)"
+   ],
+   "gecici": "malt:c150"
+  },
+  {
+   "urun": "Great Western Crystal Malt 40 °l",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "great western crystal malt 40 °l"
+   ],
+   "gecici": "malt:c40"
+  },
+  {
+   "urun": "Great Western Crystal Malt 80 °l",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "great western crystal malt 80 °l"
+   ],
+   "gecici": "malt:c80"
+  },
+  {
+   "urun": "Great Western Crystal Malt, 120°l",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "great western crystal malt, 120°l"
+   ],
+   "gecici": "malt:c120"
+  },
+  {
+   "urun": "Great Western Crystal Malt, 40°l",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "great western crystal malt, 40°l"
+   ],
+   "gecici": "malt:c40"
+  },
+  {
+   "urun": "Great Western Crystal Malt, 75°l",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "great western crystal malt, 75°l"
+   ],
+   "gecici": "malt:c80"
   },
   {
    "urun": "Great Western Idaho Pilsner Malt",
@@ -3206,6 +3621,15 @@
    "yazimlar": [
     "great western idaho pilsner malt"
    ]
+  },
+  {
+   "urun": "Great Western Pale Malt",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "great western pale malt"
+   ],
+   "gecici": "malt:pale_ale"
   },
   {
    "urun": "Great Western Premium 2 Row",
@@ -3240,6 +3664,15 @@
    ]
   },
   {
+   "urun": "Hugh Baird 55° L Crystal Malt",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "hugh baird 55° l crystal malt"
+   ],
+   "gecici": "malt:c60"
+  },
+  {
    "urun": "Kiln Coffee Malt 150 °l",
    "tur": "malt",
    "satir": 1,
@@ -3256,6 +3689,24 @@
    ]
   },
   {
+   "urun": "M/W Pilsner Malt",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "m/w pilsner malt"
+   ],
+   "gecici": "malt:pilsner"
+  },
+  {
+   "urun": "M/W Wheat Malt",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "m/w wheat malt"
+   ],
+   "gecici": "malt:wheat"
+  },
+  {
    "urun": "Malted Maize",
    "tur": "malt",
    "satir": 1,
@@ -3270,6 +3721,24 @@
    "yazimlar": [
     "malted red wheat"
    ]
+  },
+  {
+   "urun": "Malteries Franco-Belge Pilsner Malt",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "malteries franco-belge pilsner malt"
+   ],
+   "gecici": "malt:pilsner"
+  },
+  {
+   "urun": "Malteurop Pale Two-Row Malt",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "malteurop pale two-row malt"
+   ],
+   "gecici": "malt:briess_pale"
   },
   {
    "urun": "Mecca Gateway Malt",
@@ -3440,6 +3909,15 @@
    ]
   },
   {
+   "urun": "Muntons 60° L Crystal Malt",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "muntons 60° l crystal malt"
+   ],
+   "gecici": "malt:c60"
+  },
+  {
    "urun": "Optic (arpa çeşidi) maltı",
    "tur": "malt",
    "satir": 1,
@@ -3504,6 +3982,15 @@
    ]
   },
   {
+   "urun": "Pale Chocolate Crisp",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "pale chocolate (crisp)"
+   ],
+   "gecici": "malt:pale_choc"
+  },
+  {
    "urun": "Pale Pils Malt 1.5-2 °l",
    "tur": "malt",
    "satir": 1,
@@ -3526,6 +4013,15 @@
    "yazimlar": [
     "pale two-row or pils malt"
    ]
+  },
+  {
+   "urun": "Patagonia Caramel 55l",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "patagonia caramel 55l"
+   ],
+   "gecici": "malt:c60"
   },
   {
    "urun": "Pilsner Ger",
@@ -3552,22 +4048,6 @@
    ]
   },
   {
-   "urun": "Rahr 2-Row Barley Malt",
-   "tur": "malt",
-   "satir": 1,
-   "yazimlar": [
-    "rahr 2-row barley malt"
-   ]
-  },
-  {
-   "urun": "Rahr 2-Row Brewer's Malt",
-   "tur": "malt",
-   "satir": 1,
-   "yazimlar": [
-    "rahr 2-row brewer's malt"
-   ]
-  },
-  {
    "urun": "Rahr Distiller's Malt",
    "tur": "malt",
    "satir": 1,
@@ -3584,27 +4064,20 @@
    ]
   },
   {
+   "urun": "Rahr Pils",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "rahr pils"
+   ],
+   "gecici": "malt:pilsner"
+  },
+  {
    "urun": "Rahr Premium Pilsner Malt",
    "tur": "malt",
    "satir": 1,
    "yazimlar": [
     "rahr premium pilsner malt"
-   ]
-  },
-  {
-   "urun": "Rahr Standard 2-Row Malt",
-   "tur": "malt",
-   "satir": 1,
-   "yazimlar": [
-    "rahr standard 2-row malt"
-   ]
-  },
-  {
-   "urun": "Rahr Wheat Malt, Red",
-   "tur": "malt",
-   "satir": 1,
-   "yazimlar": [
-    "wheat malt, red (rahr)"
    ]
   },
   {
@@ -3624,6 +4097,15 @@
    ]
   },
   {
+   "urun": "Roasted Barley Muntons",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "roasted barley (muntons)"
+   ],
+   "gecici": "malt:roast"
+  },
+  {
    "urun": "Roasted Malt",
    "tur": "malt",
    "satir": 1,
@@ -3632,12 +4114,30 @@
    ]
   },
   {
+   "urun": "Root Shoot Pilsner Malt",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "root shoot pilsner malt"
+   ],
+   "gecici": "malt:pilsner"
+  },
+  {
    "urun": "Rye Bread",
    "tur": "malt",
    "satir": 1,
    "yazimlar": [
     "rye bread"
    ]
+  },
+  {
+   "urun": "Simpsons Best Pale Ale Malt",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "simpsons best pale ale malt"
+   ],
+   "gecici": "malt:pale_ale"
   },
   {
    "urun": "Simpsons Crystal Dark Malt",
@@ -3704,12 +4204,30 @@
    ]
   },
   {
+   "urun": "Special B Malt Dingeman",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "special b malt (dingeman)"
+   ],
+   "gecici": "malt:specb"
+  },
+  {
    "urun": "Spring Optic Pale Malt",
    "tur": "malt",
    "satir": 1,
    "yazimlar": [
     "spring optic pale malt"
    ]
+  },
+  {
+   "urun": "Swaen Pilsner Malt",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "swaen pilsner malt"
+   ],
+   "gecici": "malt:pilsner"
   },
   {
    "urun": "Teff (Cereal Mashed With 2 Lb/0.91 Kg Of The 2-Row)",
@@ -3726,6 +4244,33 @@
    "yazimlar": [
     "the swaen - platinumswaen sauer -"
    ]
+  },
+  {
+   "urun": "Thomas Fawcett 200° L Chocolate Malt",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "thomas fawcett 200° l chocolate malt"
+   ],
+   "gecici": "malt:pale_choc"
+  },
+  {
+   "urun": "Thomas Fawcett Golden Promise",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "thomas fawcett golden promise"
+   ],
+   "gecici": "malt:golden_promise"
+  },
+  {
+   "urun": "Thomas Fawcett Roasted Barley",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "thomas fawcett roasted barley"
+   ],
+   "gecici": "malt:roast"
   },
   {
    "urun": "Toasted Malt",
@@ -3800,6 +4345,24 @@
    ]
   },
   {
+   "urun": "Wayermann Pilsner",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "wayermann pilsner"
+   ],
+   "gecici": "malt:pilsner"
+  },
+  {
+   "urun": "Weyerman Pilsner Malt",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "weyerman pilsner malt"
+   ],
+   "gecici": "malt:pilsner"
+  },
+  {
    "urun": "Weyermann Cara-Amber Malt",
    "tur": "malt",
    "satir": 1,
@@ -3824,12 +4387,75 @@
    ]
   },
   {
+   "urun": "Weyermann Pale Ale Malt",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "weyermann pale ale malt"
+   ],
+   "gecici": "malt:pale_ale"
+  },
+  {
+   "urun": "Weyermann Pale Malt",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "weyermann pale malt"
+   ],
+   "gecici": "malt:pale_ale"
+  },
+  {
+   "urun": "Weyermann Rauchmalt",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "weyermann rauchmalt"
+   ],
+   "gecici": "malt:smoked"
+  },
+  {
+   "urun": "Weyermann Vienna 3l",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "weyermann vienna 3l"
+   ],
+   "gecici": "malt:vienna"
+  },
+  {
+   "urun": "Weyermenn Wheat Malt",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "weyermenn wheat malt"
+   ],
+   "gecici": "malt:wheat"
+  },
+  {
    "urun": "Wheat, Unmalted (Wheat Berries)",
    "tur": "malt",
    "satir": 1,
    "yazimlar": [
     "wheat, unmalted (wheat berries)"
    ]
+  },
+  {
+   "urun": "White Wheat Briess",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "white wheat (briess)"
+   ],
+   "gecici": "malt:wheat"
+  },
+  {
+   "urun": "White Wheat Rahr",
+   "tur": "malt",
+   "satir": 1,
+   "yazimlar": [
+    "white wheat (rahr)"
+   ],
+   "gecici": "malt:wheat"
   },
   {
    "urun": "White Labs WLP833",
@@ -4367,6 +4993,14 @@
    "satir": 1,
    "yazimlar": [
     "1 pack imperial yeast b56 rustic"
+   ]
+  },
+  {
+   "urun": "Imperial L13 Global",
+   "tur": "maya",
+   "satir": 1,
+   "yazimlar": [
+    "imperial global, 2nd generation slurry (1.5milli"
    ]
   },
   {
