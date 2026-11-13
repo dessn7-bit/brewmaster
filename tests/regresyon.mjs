@@ -7188,9 +7188,9 @@ const CASELER = [
       // eski → yeni: "Hallertau 'liberty' ile bulunmuyor" → "Hallertau YASAK listesindeki hiçbir yazımla bulunmuyor", çünkü 1c (i): ikame adı Hallertau'yu bulmaz (liberty bu değişmezin tek örneğiydi)
       const hr = HOPLAR.find(h => h && h.id === 'hrtau'), hrB = YASAK.filter(a => _bmKatEsles(hr, a));
       __REG.ok('Hallertau Mittelfrueh YASAK listesindeki ' + YASAK.length + ' yazımın hiçbiriyle BULUNMUYOR', !!hr && hrB.length === 0, hrB.join(', '));
-      // eski → yeni: (yok) → "kendi kaydı olan her ad, kaydın KATALOGDAKİ adıyla arandığında filtrede yalnız kendi kaydını buluyor", çünkü 1c (ii): ND7K bu adların ürününü kataloğa ekledi; bulunan kayıt kendisi olmalı
-      const ownH = OWN.filter(k => { const b = bul(String(k.ad).toLowerCase()); return b.length !== 1 || b[0] !== k.id; });
-      __REG.ok('kendi kaydı olan ' + OWN.length + ' kayıt (' + OWN.map(k => k.id).join(', ') + ') katalogdaki adıyla aranınca filtrede YALNIZ kendi kaydını buluyor', OWN.length > 0 && ownH.length === 0, ownH.map(k => '"' + k.ad + '" → ' + (bul(String(k.ad).toLowerCase()).join('+') || 'yok')).join(' ; '));
+      // eski → yeni: "kendi kaydı olan her ad, katalogdaki adıyla TÜM katalogda (malt + hop + maya + katkı) aranınca yalnız kendi kaydını buluyor" → "… KENDİ GRUBUNUN filtresinde (hop kaydı hop filtresinde, malt kaydı malt filtresinde) yalnız kendi kaydını buluyor", çünkü 1c (ii) + Claude kararı 2026-11-13: editör filtreleri grup başına çalışır; başka gruptaki adaş ürün (ör. maya M36 "Liberty Bell") sızıntı değildir
+      const bulG = (t, a) => KL[t].filter(m => _bmKatEsles(m, a)).map(m => m.id), ownH = OWN.filter(k => { const b = bulG(k.t, String(k.ad).toLowerCase()); return b.length !== 1 || b[0] !== k.id; });
+      __REG.ok('kendi kaydı olan ' + OWN.length + ' kayıt (' + OWN.map(k => k.t + ':' + k.id).join(', ') + ') katalogdaki adıyla KENDİ GRUBUNUN filtresinde aranınca YALNIZ kendi kaydını buluyor', OWN.length > 0 && ownH.length === 0, ownH.map(k => k.t + ' "' + k.ad + '" → ' + (bulG(k.t, String(k.ad).toLowerCase()).join('+') || 'yok')).join(' ; '));
       // kaydından yalnız noktalamayla ayrılan YASAK yazımı ("mt hood" ↔ "Mt. Hood"): kırmızı değil, BİLGİ (Claude kararı 1c: bilinen eksik → KUCUK1)
       const eksik = YASAK.filter(a => kendi(a).some(k => !_bmKatEsles(KL[k.t].find(m => m && m.id === k.id), a)));
       __REG.ok('BİLGİ — bilinen eksik → KUCUK1 (filtre noktalamayı yok saymıyor): ' + eksik.length + ' yazım', true, eksik.map(a => '"' + a + '" ↔ ' + kendi(a).map(k => k.ad).join(' / ')).join(' ; '));
@@ -18203,7 +18203,7 @@ const CASELER = [
   },
   {
     // ND7B-KATALOG: kural (f) + (i) — renk düzeltmesi yalnız üretici sayfasından (url + alıntı); iskelette eşit paylı mayada stili adıyla anan maya, yoksa önceki seçim; örnek < 3 → önceki seçim korunur.
-    kod: 'ND7B-KATALOG', ad: 'ND7B (f)(i) KATALOG RENGİ + İSKELET MAYASI: her renk düzeltmesinde üretici alan adı url\'si + alıntı; alıntıdaki değer = yeni değer; bayrak yalnız listedeki kayıtların rengini değiştirir · iskelet: "eşit pay: önceki seçim korundu" / "örnek < 3: önceki seçim korundu" izli stillerde maya = ND7 öncesi iskeletin mayası; "stili adıyla anan" izli stilde maya adında stil adı geçer; önceki seçimi olmayan örnek < 3 stilde "zayıf" etiketi · her stilde seçilen maya izdeki adaylar arasında en yüksek paylı, eşit payda / örnek < 3\'te izin yazdığı kural geçerli (ND7K kataloğu açık) · canlı türetme = saklanan dosya',
+    kod: 'ND7B-KATALOG', ad: 'ND7B (f)(i) KATALOG RENGİ + İSKELET MAYASI: her renk düzeltmesinde üretici alan adı url\'si + alıntı; alıntıdaki değer = yeni değer; bayrak yalnız listedeki kayıtların rengini değiştirir · iskelet: "eşit pay: önceki seçim korundu" / "örnek < 3: önceki seçim korundu" izli stillerde maya = ND7 öncesi iskeletin mayası; "stili adıyla anan" izli stilde maya adında stil adı geçer; önceki seçimi olmayan örnek < 3 stilde "zayıf" etiketi · her stilde seçilen maya izdeki adaylar arasında en yüksek paylı, eşit payda / örnek < 3\'te izin yazdığı kural geçerli (ND7K kataloğu açık)',
     calistir: (page) => page.evaluate(() => {
       const B = window.BM_ND7B, R = window._BM_ND7B_RENK, r0 = {}, T = window._ISKELET_TURETILMIS.stiller, ON = window._BM_ISK_ONCEKI_MAYA;
       __REG.ok('renk düzeltmeleri (' + R.length + '): her kayıtta üretici alan adında https url + alıntı; alıntıda yeni değer yazıyor; eski ≠ yeni', R.length > 0 && R.every(d => /^https:\/\/www\.(?:dingemansmout\.be|castlemalting\.com)\//.test(d.url) && String(d.alinti).length > 5 && String(d.alinti).indexOf(String(d.yeni)) >= 0 && d.eski !== d.yeni && MALTLAR.some(m => m.id === d.id)), R.map(d => d.id + ' ' + d.eski + '→' + d.yeni).join(', '));
@@ -18223,8 +18223,7 @@ const CASELER = [
         const ok = /^örnek < 3: önceki seçim korundu/.test(k7) ? nEx < 3 && sec === ON[s] : /^eşit pay: önceki seçim korundu/.test(k7) ? es.length > 1 && sec === ON[s] : /^eşit pay: stili adıyla anan/.test(k7) ? es.length > 1 && es.indexOf(sec) >= 0 : es.indexOf(sec) >= 0; // iz yok ya da "örnek < 3: önceki seçim yok — zayıf": en yüksek paylı aday
         if (!ok) kHata.push(s + ': seçilen ' + sec + ' · iz "' + (k7 || '-') + '" · en yüksek pay ' + es.join('+') + ' · örnek ' + nEx); });
       __REG.ok('iskelet (ND7K kataloğu açık, canlı türetme): ' + kBak + ' stilin hepsinde seçilen maya izdeki adaylar arasında en yüksek paylı; eşit payda / örnek < 3\'te izin yazdığı kural (önceki seçim / stili adıyla anan) geçerli', kBak > 100 && kHata.length === 0, kHata.slice(0, 6).join(' ; '));
-      const canli = ['Blonde Ale / Cream Ale', 'Kölsch', 'Saison (table)', 'Dry Irish Stout'].map(s => { const d = window._bmIskTuret(s, {}); return d ? d.mayaId : null; });
-      __REG.ok('canlı türetme saklanan dosyayla aynı mayayı verir (4 stil)', canli.join(',') === ['Blonde Ale / Cream Ale', 'Kölsch', 'Saison (table)', 'Dry Irish Stout'].map(s => T[s].mayaId).join(','), canli.join(','));
+      // eski → yeni: "canlı türetme saklanan dosyayla aynı mayayı verir (4 stil)" bu vakadan ÇIKTI → ND7K-ISK-CANLI (bütün ND7K bayrakları açık, her stil), çünkü Claude kararı 2026-11-13: iskelet_veri.js bütün ND7K bayrakları açıkken üretildi; bu vaka ND7K tablo katmanı kapalı koşuyor
       return __REG.al();
     })
   },
@@ -18407,6 +18406,20 @@ const CASELER = [
       __REG.ok('işaretli seçim taşıyan stil var ve iz notu "tariflerin çoğu X diyor; katalogdaki en yakın Y (fark: …)" yazıyor', isStil.length > 0 && notOk, isStil.join(' ; '));
       let isaretK = 0; stiller.forEach(s => { const d = kp[s]; if (!d || !d.iz) return; (d.iz.hop || []).concat(d.iz.grist || [], d.hop || []).forEach(x => { if (x.fark) isaretK++; }); });
       __REG.ok('isk bayrağı kapalı = v131-545: hiçbir seçim işaret taşımaz', isaretK === 0, String(isaretK));
+      return __REG.al();
+    })
+  },
+  {
+    // ND7K-ISK-CANLI: CLAUDE KARARI (2026-11-13) — ND7B-KATALOG'daki "canlı türetme = saklanan dosya (4 stil)" iddiası buraya taşındı. iskelet_veri.js bütün ND7K bayrakları AÇIKKEN üretildi → aynı ayarla canlı türetme her stilde dosyadaki mayayı verir.
+    //   ND7K_ONCESI'nde DEĞİL: bayraklar sayfanın varsayılanıyla (hepsi açık) koşar.
+    kod: 'ND7K-ISK-CANLI', ad: 'ND7K İSKELET DOSYASI = CANLI TÜRETME (maya): bütün ND7K bayrakları açıkken iskelet_veri.js\'teki HER stil için canlı _bmIskTuret mayaId = dosyadaki mayaId',
+    calistir: (page) => page.evaluate(() => {
+      const K = window.BM_ND7K || {}, kap = ['fark', 'tablo', 'ai', 'maya2', 'isk', 'katalog'].filter(k => K[k] !== true);
+      __REG.ok('bütün ND7K bayrakları açık (fark, tablo, ai, maya2, isk, katalog)', kap.length === 0, kap.join(', '));
+      // beklenti kuraldan: dosya bu ayarla üretildi → canlı türetme her stilde aynı maya (mayasız stilde ikisi de boş)
+      const T = window._ISKELET_TURETILMIS.stiller, st = Object.keys(T), fark = [];
+      st.forEach(s => { const d = window._bmIskTuret(s, {}), c = (d && d.mayaId) || null, f = T[s].mayaId || null; if (c !== f) fark.push(s + ': canlı ' + c + ' · dosya ' + f); });
+      __REG.ok('iskelet_veri.js\'teki ' + st.length + ' stilin hepsinde canlı _bmIskTuret mayaId = dosyadaki mayaId (fark ' + fark.length + ')', st.length > 100 && fark.length === 0, fark.slice(0, 6).join(' ; '));
       return __REG.al();
     })
   },
