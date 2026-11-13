@@ -127,3 +127,12 @@ EFOR: high. MODEL: model-bağımsız; modelini ilk satırda belirt. Kaynak araş
   - Bulgular raporda ayrı bölüm.
 - CLAUDE.md'ye 1–3 satır, ayrıntı gorevler/SPRINT_GECMISI.md sonuna.
 - SONRA: Claude, ND6'daki gibi kör alt ajanlarla rastgele 50 kaydı yeniden doğrular. ✅ isabeti %90'ın altındaysa tur tekrarlanır.
+
+## ND7K SONRASI EK (Claude, 2026-11-13) — yukarıdakilerle çelişirse BU bölüm geçerli
+
+1. DURUM yeniden ölçülür: ND7K kataloğa 76 kaynaklı ürün ekledi (hop 30 · maya 27 · malt 19; tests/nd7k_urun.json). Bunların muadil kaydı yok; madde 2'nin kapsam hedefi bunlar için de geçerli. Önce/sonra tablosu v131-546'ya göre.
+2. Bayrak: yeni davranış BM_ND8 içinde (kapalıyken MUADIL ve ikame motoru v131-546 ile birebir). Dondurulmuş AI geri oynatmaları (ND6_ONCESI / ND7K_ONCESI listelerindekiler: AI2-TUZAK, AI4-ONKONTROL, AI5B-YON, DOG4-K4, DOG4D–H-COZUM, BUL2C-ISTEK) BM_ND8 KAPALI koşar; yeni davranışı ayrı vaka sınar. Canlı AI yolları yeni tabloyu kullanır (kaynaklı muadil istenen davranış); AI4 kanıt paketi ve A1 kalem bulucu farkını ND7K Ö6 ölçümüyle aynı yöntemle ölç ve raporla (beklenti: yalnız MUADIL'e dayanan satırlar değişir).
+3. Çalışma yolu (ND7K'daki gibi): dal nd8-calisma; main'e DOKUNMA, yayın yok. Yerelde yalnız ND8 vakaları + doğrudan etkilenen gruplar (ND3, ND6, UYG, ISK) --case ile, her koşudan önce boş bellek ≥ 2 GB. Tam paketi Claude bulutta koşar; "main'e al" dedikten sonra yayın + canlı md5 + asıl doğrulayıcı. Madde 5'teki "npm test 6 dilim" yerelde KOŞULMAZ.
+4. Kaynak araştırması: 429 / 403 dönen sitelerde ısrar yok — kayıt "sırada" listesine, raporda ayrı. Alıntı ≤ 15 sözcük; httpbin vb. üçüncü taraf ağ isteği yok.
+5. Doğrulayıcı raporu CLAUDE.md "Çalışma disiplini"ndeki iki bölümlü biçimde (Talimat / Kural).
+6. Kör doğrulamadan bilinenler: dis_kaynak/muadil_dogrulama_2026-11-11/kararlar.json'daki 107 karar ND6'da uygulandı; o kararlar yeniden tartışılmaz, yalnız kaynak alanı eksikse tamamlanır.
