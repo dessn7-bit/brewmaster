@@ -165,3 +165,20 @@ KURALLAR
   - Değişen stil listesini ver.
 - Ö9 ek kural (kaynağında hop olmayan örneğin varsayım hopu iskeleti beslemesin): KABUL. Doğru; döngüsel kanıtı kesiyor.
 - Bellek: Tam regresyonu daha küçük dilimlerle koş (ör. --parca=i/12). Dilimler sırayla koşulur, kapsamın tam olduğu raporda gösterilir.
+
+ÖN ADIMLAR EK KARARLARI 2 (Claude, 2026-11-13 10:40)
+- Ö9 DÜZELTME (Claude'un kendi kuralı aşırı katıydı):
+  - Sorun: "Önce farksız aday" seçimi iskeleti seyrek geçen maltlara kaydırdı. Örnekler: Session IPA → Pale Ale Malt, Robust Porter → özel kavrulmuş, Oud Bruin → 6-row.
+  - Yeni kural: iskelet seçimi Ö9 ÖNCESİ gibi sıklığa göre yapılır. Fark taşıyan eşlemeler de sayılır.
+  - Fark yalnız İŞARET olarak taşınır. İskelet satırında not: "tariflerin çoğu X diyor; katalogdaki en yakın Y (fark: marka / köken / renk)".
+  - Hop ve malt için aynı kural geçerli.
+  - Ö9 ek kuralı yerinde kalır: kaynağında hop olmayan örneğin varsayım hopu kanıt sayılmaz.
+  - İskeleti yeniden üret. v131-545 iskeletiyle farkları listele. Bu farklar yalnız şunlardan gelmeli: işaret, Ö3, Cara 45 düzeltmesi, varsayım hopu kuralı.
+- TAM REGRESYON BULUTTA:
+  - Kaan'ın makinesinde bellek yetmiyor (1,4 GB boş).
+  - CC tam paketi YEREL koşmaz. Yalnız ilgili hızlı vakaları ön planda koşar: ND7K testleri, BV1-SEMA, ISK, ND ve UYG vakaları.
+  - Çalışma bir DAL'a push edilir: nd7k-calisma. main'e push yok, yayın yok.
+  - Dalda iki commit olur: ön adımlar ve 76 ürün.
+  - Claude tam paketi bulut ortamında dalın başında koşar ve sonucu Kaan aracılığıyla bildirir.
+  - Yeşilse dal main'e hızlı ileri (fast-forward) alınır. Ardından yayın, canlı md5, Ö6 / A1 son ölçümü ve asıl doğrulayıcı gelir.
+  - Kırmızıysa Claude hangi commit'te kırıldığını iki commit arasında ayırır.
