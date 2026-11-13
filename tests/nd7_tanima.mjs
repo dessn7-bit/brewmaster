@@ -23,7 +23,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const KOK = path.resolve(__dirname, '..'), HTML_AD = 'Brewmaster_v2_79_10.html', PORT = 8753, TABAN = 'http://127.0.0.1:' + PORT;
 const argv = process.argv.slice(2);
 const arg = ad => { const a = argv.find(x => x === '--' + ad || x.startsWith('--' + ad + '=')); return !a ? null : a.includes('=') ? a.split('=').slice(1).join('=') : true; };
-const BAYRAK = typeof arg('bayrak') === 'string' ? arg('bayrak') : null, BAYRAK7 = typeof arg('nd7b') === 'string' ? arg('nd7b') : null, JSON_CIKTI = !!arg('json'), DOK = typeof arg('dok') === 'string' ? arg('dok') : null;
+const BAYRAK = typeof arg('bayrak') === 'string' ? arg('bayrak') : null, BAYRAK7 = typeof arg('nd7b') === 'string' ? arg('nd7b') : null, BAYRAK9 = typeof arg('nd7k') === 'string' ? arg('nd7k') : null, JSON_CIKTI = !!arg('json'), DOK = typeof arg('dok') === 'string' ? arg('dok') : null;
 const ALT_HTML = process.env.ND7_HTML || null; // karşılaştırma için başka bir HTML sürümü (ör. git show <commit>:… çıktısı)
 
 function fixtureYukle() {
@@ -55,12 +55,14 @@ function sunucuKur() {
 }
 
 // ── sayfa içi ──
-function olc(bayrak, dokIste, bayrak7) {
+function olc(bayrak, dokIste, bayrak7, bayrak9) {
+  const K9 = window.BM_ND7K || null, AD9 = K9 ? Object.keys(K9).filter(k => typeof K9[k] === 'boolean') : [];
+  if (K9 && bayrak9) { const ac9 = bayrak9 === 'acik' ? AD9 : bayrak9 === 'kapali' ? [] : bayrak9.split(','); AD9.forEach(k => { K9[k] = ac9.indexOf(k) >= 0; }); if (typeof K9.uygula === 'function') K9.uygula(); } // SPRINT ND7K: --nd7k=kapali|acik|<liste>
   const B7 = window.BM_ND7B || null, AD7 = B7 ? Object.keys(B7).filter(k => typeof B7[k] === 'boolean') : [];
   if (B7 && bayrak7) { const ac7 = bayrak7 === 'acik' ? AD7 : bayrak7 === 'kapali' ? [] : bayrak7.split(','); AD7.forEach(k => { B7[k] = ac7.indexOf(k) >= 0; }); if (typeof B7.uygula === 'function') B7.uygula(); } // SPRINT ND7B: --nd7b=kapali|acik|<liste>
   const N = window.BM_ND7 || null, ADLAR = N ? Object.keys(N).filter(k => typeof N[k] === 'boolean') : [];
   if (N && bayrak) { const ac = bayrak === 'acik' ? ADLAR : bayrak === 'kapali' ? [] : bayrak.split(','); ADLAR.forEach(k => { N[k] = ac.indexOf(k) >= 0; }); if (typeof N.uygula === 'function') N.uygula(); }
-  const out = { bayraklar: N ? Object.fromEntries(ADLAR.map(k => [k, N[k]])) : null, nd7b: B7 ? Object.fromEntries(AD7.map(k => [k, B7[k]])) : null, nd6: window.BM_ND6 ? Object.fromEntries(Object.keys(window.BM_ND6).filter(k => typeof window.BM_ND6[k] === 'boolean').map(k => [k, window.BM_ND6[k]])) : null };
+  const out = { bayraklar: N ? Object.fromEntries(ADLAR.map(k => [k, N[k]])) : null, nd7b: B7 ? Object.fromEntries(AD7.map(k => [k, B7[k]])) : null, nd7k: K9 ? Object.fromEntries(AD9.map(k => [k, K9[k]])) : null, nd6: window.BM_ND6 ? Object.fromEntries(Object.keys(window.BM_ND6).filter(k => typeof window.BM_ND6[k] === 'boolean').map(k => [k, window.BM_ND6[k]])) : null };
   const H = window._bmOrnekHepsi(), T = { malt: null, hop: null, maya: null, ek: null }; Object.keys(T).forEach(k => { T[k] = { satir: 0, urun: 0, sinif: 0, bekliyor: 0, proses: 0, artik: 0, taninmayan: 0, kural: {}, fark: { marka: 0, koken: 0, renk: 0, bicim: 0 } }; });
   const nd7b = { farkSatir: 0, farkOrnek: 0, tasinan: [], mayaKarisim: [], mayse: [], kapaliOg: [], tazeHop: [] }; // SPRINT ND7B ölçümleri (örnek referansı = kaynak stil:idx, kamuya açık)
   const yok = {}, dok = [], ornek = { n: 0, mhm: 0, hepsi: 0, malzemeli: 0, ekAdsizOrnek: 0, ekAdsizSatir: 0, hopsuz: 0, mayasiz: 0 };
@@ -106,7 +108,7 @@ async function main() {
     await page.evaluateOnNewDocument(v => { try { if (!localStorage.getItem('__bm_reg_seed')) { for (const k in v) { try { localStorage.setItem(k, v[k]); } catch (e) {} } localStorage.setItem('__bm_reg_seed', '1'); } } catch (e) {} }, seed);
     await page.goto(TABAN + '/' + HTML_AD, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForFunction(() => typeof render === 'function' && Array.isArray(KR) && typeof window._bmOrnekHepsi === 'function' && window._ndVeriVar && window._ndVeriVar() && !!window._ISKELET_TURETILMIS, { timeout: 60000 });
-    const r = await page.evaluate(olc, BAYRAK, !!DOK, BAYRAK7);
+    const r = await page.evaluate(olc, BAYRAK, !!DOK, BAYRAK7, BAYRAK9);
     if (DOK) { fs.writeFileSync(DOK, JSON.stringify({ dok: r.dok, tumTaninmayan: r.tumTaninmayan })); delete r.dok; delete r.tumTaninmayan; }
     if (JSON_CIKTI) { console.log(JSON.stringify(r)); return 0; }
     console.log('ND7 TANIMA — BM_ND7: ' + (r.bayraklar ? JSON.stringify(r.bayraklar) : 'yok (ND7 öncesi kod)') + ' · örnek ' + r.ornek.n);

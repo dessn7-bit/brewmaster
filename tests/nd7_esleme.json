@@ -1,6 +1,15 @@
 {
- "aciklama": "SPRINT ND7 + ND7B eşleme tablosu denetim dökümü (_nd7_build.js üretir; elle düzenleme tests/nd7_elle.json). Satırlar ND7B bayrakları AÇIK hâli gösterir; \"nd7b\": true = ND7 (v131-544) satırından farklı.",
+ "aciklama": "SPRINT ND7 + ND7B + ND7K eşleme tablosu denetim dökümü (_nd7_build.js üretir; elle düzenleme tests/nd7_elle.json). Satırlar ND7B + ND7K bayrakları AÇIK hâli gösterir; \"nd7b\": true = ND7 (v131-544) satırından farklı; \"nd7k\": true = ND7B (v131-545) satırından farklı (\"onceki\" = ND7B hedefi).",
  "ozet": {
+  "u": 361,
+  "s": 166,
+  "b": 738,
+  "p": 116,
+  "a": 5,
+  "t": 3,
+  "yok": 0
+ },
+ "ozetNd7b": {
   "u": 360,
   "s": 166,
   "b": 738,
@@ -19,17 +28,26 @@
  },
  "fark": {
   "yazim": {
-   "marka": 87,
+   "marka": 73,
    "koken": 15,
-   "renk": 56,
+   "renk": 54,
    "bicim": 12
   },
   "satir": {
-   "marka": 116,
+   "marka": 102,
    "koken": 27,
-   "renk": 70,
+   "renk": 67,
    "bicim": 21
+  },
+  "sozluk": {
+   "yazim": 65,
+   "satir": 90
   }
+ },
+ "yeniKayit": {
+  "yazim": 0,
+  "satir": 0,
+  "urun": {}
  },
  "katalogRenk": [
   {
@@ -3192,10 +3210,13 @@
    "grup": "hop",
    "yazim": "fresh grated",
    "satir": 1,
-   "karar": "artık",
-   "hedef": "",
+   "karar": "ürün",
+   "hedef": "katki:zencefil (Zencefil (Taze veya Kuru))",
    "kural": "elle",
-   "not": "ayrıştırma artığı (zencefil satırının parçası)"
+   "not": "Ö4: ad, kaynağın diğer kaydından — aynı tarifin (2010, OG 1.085, 18,9 L, aynı grist ve maya) öbür kaydı satırı \"fresh grated, peeled ginger root\" diye adlandırıyor",
+   "nd7b": true,
+   "nd7k": true,
+   "onceki": "artık"
   },
   {
    "grup": "hop",
@@ -5353,12 +5374,11 @@
    "satir": 1,
    "karar": "ürün",
    "hedef": "malt:wheat (Buğday Maltı)",
-   "kural": "okuyucu-marka",
+   "kural": "okuyucu-aynımarka",
    "not": "",
-   "fark": "marka",
-   "farkNot": "tarifteki üretici bestmalz · kayıt: Weyermann, BestMalz, Muntons, Hitit (yerli)",
    "nd7b": true,
-   "aday": "Best Wheat Malt"
+   "nd7k": true,
+   "onceki": "malt:wheat (fark marka)"
   },
   {
    "grup": "malt",
@@ -6674,12 +6694,11 @@
    "satir": 1,
    "karar": "ürün",
    "hedef": "malt:black (Black Malt (Patent Malt))",
-   "kural": "okuyucu-marka",
+   "kural": "okuyucu-aynımarka",
    "not": "",
-   "fark": "marka",
-   "farkNot": "tarifteki üretici crisp · kayıt: Crisp, Simpsons",
    "nd7b": true,
-   "aday": "Crisp Black Malt"
+   "nd7k": true,
+   "onceki": "malt:black (fark marka)"
   },
   {
    "grup": "malt",
@@ -6727,12 +6746,11 @@
    "satir": 1,
    "karar": "ürün",
    "hedef": "malt:pale_choc (Pale Chocolate Malt)",
-   "kural": "okuyucu-marka",
+   "kural": "okuyucu-aynımarka",
    "not": "",
-   "fark": "marka",
-   "farkNot": "tarifteki üretici crisp · kayıt: Simpsons, Crisp",
    "nd7b": true,
-   "aday": "Crisp Pale Chocolate"
+   "nd7k": true,
+   "onceki": "malt:pale_choc (fark marka)"
   },
   {
    "grup": "malt",
@@ -6740,12 +6758,11 @@
    "satir": 1,
    "karar": "ürün",
    "hedef": "malt:pale_ale (Pale Ale Malt)",
-   "kural": "okuyucu-marka",
+   "kural": "okuyucu-aynımarka",
    "not": "",
-   "fark": "marka",
-   "farkNot": "tarifteki üretici crisp · kayıt: Weyermann, Crisp, Simpsons, Hitit (yerli)",
    "nd7b": true,
-   "aday": "Crisp Pale Malt"
+   "nd7k": true,
+   "onceki": "malt:pale_ale (fark marka)"
   },
   {
    "grup": "malt",
@@ -6753,12 +6770,11 @@
    "satir": 1,
    "karar": "ürün",
    "hedef": "malt:pale_ale (Pale Ale Malt)",
-   "kural": "okuyucu-marka",
+   "kural": "okuyucu-aynımarka",
    "not": "",
-   "fark": "marka",
-   "farkNot": "tarifteki üretici crisp · kayıt: Weyermann, Crisp, Simpsons, Hitit (yerli)",
    "nd7b": true,
-   "aday": "Crisp Pale Malt"
+   "nd7k": true,
+   "onceki": "malt:pale_ale (fark marka)"
   },
   {
    "grup": "malt",
@@ -7366,27 +7382,34 @@
    "kural": "renk",
    "not": "renk 150 °L ≈ 115 °L",
    "fark": "renk",
-   "farkNot": "renk 150 °L (tarif) ↔ 115 °L (kayıt) · üretici de farklı (dingemans)",
+   "farkNot": "renk 150 °L (tarif) ↔ 115 °L (kayıt)",
    "nd7b": true,
-   "aday": "Dingemans 150° L Special B Malt"
+   "nd7k": true,
+   "onceki": "malt:specb (fark renk)"
   },
   {
    "grup": "malt",
    "yazim": "dingemans cara 45 malt",
    "satir": 1,
    "karar": "ürün",
-   "hedef": "malt:cara45 (Cara 45 MD (Dingemans))",
+   "hedef": "malt:cara120 (Cara 120 MD (Dingemans) — 120 EBC)",
    "kural": "elle",
-   "not": "Dingemans Cara 45 = katalogdaki Cara 45 MD (Dingemans)"
+   "not": "Ö5: Dingemans Cara 45 (ABD adı, 45 °L) = Cara 120 MD (üretici: \"Colour EBC: 120 Lovibond: 45,00\"); çift kayıt birleştirildi",
+   "nd7b": true,
+   "nd7k": true,
+   "onceki": "malt:cara45"
   },
   {
    "grup": "malt",
    "yazim": "dingemans cara 45 malt (added at mash-out)",
    "satir": 1,
    "karar": "ürün",
-   "hedef": "malt:cara45 (Cara 45 MD (Dingemans))",
+   "hedef": "malt:cara120 (Cara 120 MD (Dingemans) — 120 EBC)",
    "kural": "elle",
-   "not": "Dingemans Cara 45 = katalogdaki Cara 45 MD (Dingemans)"
+   "not": "Ö5: Dingemans Cara 45 (ABD adı, 45 °L) = Cara 120 MD (üretici: \"Colour EBC: 120 Lovibond: 45,00\"); çift kayıt birleştirildi",
+   "nd7b": true,
+   "nd7k": true,
+   "onceki": "malt:cara45"
   },
   {
    "grup": "malt",
@@ -8029,26 +8052,30 @@
    "yazim": "great western domestic pale malt (2 °l)",
    "satir": 1,
    "karar": "ürün",
-   "hedef": "malt:pale_ale (Pale Ale Malt)",
-   "kural": "renk",
-   "not": "renk 2 °L ≈ 3 °L",
-   "fark": "renk",
-   "farkNot": "renk 2 °L (tarif) ↔ 3 °L (kayıt) · üretici de farklı (great western)",
+   "hedef": "malt:briess_pale (Briess 2-Row Brewers Malt)",
+   "kural": "elle",
+   "not": "Ö3: Great Western \"domestic pale malt\" jenerik ABD 2-row kaydına; üretici farklı (Great Western 2-Row yazımlarıyla aynı yol)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici great western · kayıt: Briess",
    "nd7b": true,
-   "aday": "Great Western Domestic Pale Malt 2 °l"
+   "nd7k": true,
+   "onceki": "malt:pale_ale (fark renk)",
+   "aday": "Great Western 2-Row"
   },
   {
    "grup": "malt",
    "yazim": "great western domestic pale malt 2 °l",
    "satir": 2,
    "karar": "ürün",
-   "hedef": "malt:pale_ale (Pale Ale Malt)",
-   "kural": "renk",
-   "not": "renk 2 °L ≈ 3 °L",
-   "fark": "renk",
-   "farkNot": "renk 2 °L (tarif) ↔ 3 °L (kayıt) · üretici de farklı (great western)",
+   "hedef": "malt:briess_pale (Briess 2-Row Brewers Malt)",
+   "kural": "elle",
+   "not": "Ö3: Great Western \"domestic pale malt\" jenerik ABD 2-row kaydına; üretici farklı (Great Western 2-Row yazımlarıyla aynı yol)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici great western · kayıt: Briess",
    "nd7b": true,
-   "aday": "Great Western Domestic Pale Malt 2 °l"
+   "nd7k": true,
+   "onceki": "malt:pale_ale (fark renk)",
+   "aday": "Great Western 2-Row"
   },
   {
    "grup": "malt",
@@ -9029,12 +9056,11 @@
    "satir": 1,
    "karar": "ürün",
    "hedef": "malt:pale_choc (Pale Chocolate Malt)",
-   "kural": "okuyucu-marka",
+   "kural": "okuyucu-aynımarka",
    "not": "",
-   "fark": "marka",
-   "farkNot": "tarifteki üretici crisp · kayıt: Simpsons, Crisp",
    "nd7b": true,
-   "aday": "Pale Chocolate Crisp"
+   "nd7k": true,
+   "onceki": "malt:pale_choc (fark marka)"
   },
   {
    "grup": "malt",
@@ -9567,12 +9593,11 @@
    "satir": 1,
    "karar": "ürün",
    "hedef": "malt:pale_ale (Pale Ale Malt)",
-   "kural": "okuyucu-marka",
+   "kural": "okuyucu-aynımarka",
    "not": "",
-   "fark": "marka",
-   "farkNot": "tarifteki üretici simpsons · kayıt: Weyermann, Crisp, Simpsons, Hitit (yerli)",
    "nd7b": true,
-   "aday": "Simpsons Best Pale Ale Malt"
+   "nd7k": true,
+   "onceki": "malt:pale_ale (fark marka)"
   },
   {
    "grup": "malt",
@@ -9700,12 +9725,11 @@
    "satir": 1,
    "karar": "ürün",
    "hedef": "malt:specb (Special B)",
-   "kural": "okuyucu-marka",
+   "kural": "okuyucu-aynımarka",
    "not": "",
-   "fark": "marka",
-   "farkNot": "tarifteki üretici dingemans · kayıt: Dingemans, Castle",
    "nd7b": true,
-   "aday": "Special B Malt Dingeman"
+   "nd7k": true,
+   "onceki": "malt:specb (fark marka)"
   },
   {
    "grup": "malt",
@@ -10074,12 +10098,11 @@
    "satir": 1,
    "karar": "ürün",
    "hedef": "malt:pilsner (Pilsner Malt)",
-   "kural": "okuyucu-marka",
+   "kural": "okuyucu-aynımarka",
    "not": "",
-   "fark": "marka",
-   "farkNot": "tarifteki üretici weyermann · kayıt: Weyermann, BestMalz, Hitit (yerli)",
    "nd7b": true,
-   "aday": "Wayermann Pilsner"
+   "nd7k": true,
+   "onceki": "malt:pilsner (fark marka)"
   },
   {
    "grup": "malt",
@@ -10087,12 +10110,11 @@
    "satir": 1,
    "karar": "ürün",
    "hedef": "malt:pilsner (Pilsner Malt)",
-   "kural": "okuyucu-marka",
+   "kural": "okuyucu-aynımarka",
    "not": "",
-   "fark": "marka",
-   "farkNot": "tarifteki üretici weyermann · kayıt: Weyermann, BestMalz, Hitit (yerli)",
    "nd7b": true,
-   "aday": "Weyerman Pilsner Malt"
+   "nd7k": true,
+   "onceki": "malt:pilsner (fark marka)"
   },
   {
    "grup": "malt",
@@ -10286,12 +10308,11 @@
    "satir": 2,
    "karar": "ürün",
    "hedef": "malt:wheat (Buğday Maltı)",
-   "kural": "okuyucu-marka",
+   "kural": "okuyucu-aynımarka",
    "not": "",
-   "fark": "marka",
-   "farkNot": "tarifteki üretici weyermann · kayıt: Weyermann, BestMalz, Muntons, Hitit (yerli)",
    "nd7b": true,
-   "aday": "Weyermann Malted Wheat"
+   "nd7k": true,
+   "onceki": "malt:wheat (fark marka)"
   },
   {
    "grup": "malt",
@@ -10320,12 +10341,11 @@
    "satir": 1,
    "karar": "ürün",
    "hedef": "malt:pale_ale (Pale Ale Malt)",
-   "kural": "okuyucu-marka",
+   "kural": "okuyucu-aynımarka",
    "not": "",
-   "fark": "marka",
-   "farkNot": "tarifteki üretici weyermann · kayıt: Weyermann, Crisp, Simpsons, Hitit (yerli)",
    "nd7b": true,
-   "aday": "Weyermann Pale Ale Malt"
+   "nd7k": true,
+   "onceki": "malt:pale_ale (fark marka)"
   },
   {
    "grup": "malt",
@@ -10333,12 +10353,11 @@
    "satir": 1,
    "karar": "ürün",
    "hedef": "malt:pale_ale (Pale Ale Malt)",
-   "kural": "okuyucu-marka",
+   "kural": "okuyucu-aynımarka",
    "not": "",
-   "fark": "marka",
-   "farkNot": "tarifteki üretici weyermann · kayıt: Weyermann, Crisp, Simpsons, Hitit (yerli)",
    "nd7b": true,
-   "aday": "Weyermann Pale Malt"
+   "nd7k": true,
+   "onceki": "malt:pale_ale (fark marka)"
   },
   {
    "grup": "malt",
@@ -10348,10 +10367,9 @@
    "hedef": "malt:smoked (İsli Malt — Kayın (Beech))",
    "kural": "elle",
    "not": "Rauchmalt = Weyermann'ın kayın isli maltının adı (katalog: İsli Malt — Kayın)",
-   "fark": "marka",
-   "farkNot": "tarifteki üretici weyermann · kayıt: Weyermann, Viking Malt (Polonya VK), Hitit (yerli)",
    "nd7b": true,
-   "aday": "Weyermann Rauchmalt"
+   "nd7k": true,
+   "onceki": "malt:smoked (fark marka)"
   },
   {
    "grup": "malt",
@@ -10370,10 +10388,9 @@
    "hedef": "malt:vienna (Vienna Malt)",
    "kural": "renk",
    "not": "renk 3 °L ≈ 3 °L",
-   "fark": "marka",
-   "farkNot": "tarifteki üretici weyermann · kayıt: Weyermann, BestMalz, Muntons, Hitit (yerli)",
    "nd7b": true,
-   "aday": "Weyermann Vienna 3l"
+   "nd7k": true,
+   "onceki": "malt:vienna (fark marka)"
   },
   {
    "grup": "malt",
@@ -10381,12 +10398,11 @@
    "satir": 1,
    "karar": "ürün",
    "hedef": "malt:wheat (Buğday Maltı)",
-   "kural": "okuyucu-marka",
+   "kural": "okuyucu-aynımarka",
    "not": "",
-   "fark": "marka",
-   "farkNot": "tarifteki üretici weyermann · kayıt: Weyermann, BestMalz, Muntons, Hitit (yerli)",
    "nd7b": true,
-   "aday": "Weyermenn Wheat Malt"
+   "nd7k": true,
+   "onceki": "malt:wheat (fark marka)"
   },
   {
    "grup": "malt",
@@ -13736,6 +13752,528 @@
    "hedef": "snf_maya_kodsuz (Maya — üretici adıyla yazılmış, kodu yok)",
    "kural": "sınıf",
    "not": "yeast bay lactobacillus blend"
+  }
+ ],
+ "sozlukFark": [
+  {
+   "yazim": "rahr white wheat malt",
+   "satir": 7,
+   "hedef": "malt:wheat (Buğday Maltı)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici rahr · kayıt: Weyermann, BestMalz, Muntons, Hitit (yerli)",
+   "aday": "Rahr White Wheat Malt"
+  },
+  {
+   "yazim": "durst pils malt",
+   "satir": 5,
+   "hedef": "malt:pilsner (Pilsner Malt)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici durst · kayıt: Weyermann, BestMalz, Hitit (yerli)",
+   "aday": "Durst Pils Malt"
+  },
+  {
+   "yazim": "durst pilsner malt",
+   "satir": 4,
+   "hedef": "malt:pilsner (Pilsner Malt)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici durst · kayıt: Weyermann, BestMalz, Hitit (yerli)",
+   "aday": "Durst Pilsner Malt"
+  },
+  {
+   "yazim": "briess white wheat malt",
+   "satir": 3,
+   "hedef": "malt:wheat (Buğday Maltı)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici briess · kayıt: Weyermann, BestMalz, Muntons, Hitit (yerli)",
+   "aday": "Briess White Wheat Malt"
+  },
+  {
+   "yazim": "durst wheat malt",
+   "satir": 3,
+   "hedef": "malt:wheat (Buğday Maltı)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici durst · kayıt: Weyermann, BestMalz, Muntons, Hitit (yerli)",
+   "aday": "Durst Wheat Malt"
+  },
+  {
+   "yazim": "great western white wheat malt",
+   "satir": 3,
+   "hedef": "malt:wheat (Buğday Maltı)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici great western · kayıt: Weyermann, BestMalz, Muntons, Hitit (yerli)",
+   "aday": "Great Western White Wheat Malt"
+  },
+  {
+   "yazim": "briess blackprinz malt",
+   "satir": 2,
+   "hedef": "malt:dehusked_black (Dehusked Black Malt)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici briess · kayıt: Weyermann (Carafa III), Simpsons",
+   "aday": "Briess Blackprinz Malt"
+  },
+  {
+   "yazim": "dingemans chocolate malt",
+   "satir": 2,
+   "hedef": "malt:choc (Chocolate Malt)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici dingemans · kayıt: Crisp, Simpsons, Briess",
+   "aday": "Dingemans Chocolate Malt"
+  },
+  {
+   "yazim": "durst vienna malt",
+   "satir": 2,
+   "hedef": "malt:vienna (Vienna Malt)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici durst · kayıt: Weyermann, BestMalz, Muntons, Hitit (yerli)",
+   "aday": "Durst Vienna Malt"
+  },
+  {
+   "yazim": "fawcett chocolate malt",
+   "satir": 2,
+   "hedef": "malt:choc (Chocolate Malt)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici fawcett · kayıt: Crisp, Simpsons, Briess",
+   "aday": "Fawcett Chocolate Malt"
+  },
+  {
+   "yazim": "fawcett pale chocolate malt",
+   "satir": 2,
+   "hedef": "malt:pale_choc (Pale Chocolate Malt)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici fawcett · kayıt: Simpsons, Crisp",
+   "aday": "Fawcett Pale Chocolate Malt"
+  },
+  {
+   "yazim": "joe white white wheat malt",
+   "satir": 2,
+   "hedef": "malt:wheat (Buğday Maltı)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici joe white · kayıt: Weyermann, BestMalz, Muntons, Hitit (yerli)",
+   "aday": "Joe White White Wheat Malt"
+  },
+  {
+   "yazim": "baird black malt 530 °l",
+   "satir": 1,
+   "hedef": "malt:black (Black Malt (Patent Malt))",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici bairds · kayıt: Crisp, Simpsons",
+   "aday": "Baird Black Malt 530 °l"
+  },
+  {
+   "yazim": "baird roasted barley 575 °l",
+   "satir": 1,
+   "hedef": "malt:roast (Roasted Barley)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici bairds · kayıt: Crisp, Simpsons, Hitit Kara Malt No:3 (yerli)",
+   "aday": "Baird Roasted Barley 575 °l"
+  },
+  {
+   "yazim": "baird's maris otter",
+   "satir": 1,
+   "hedef": "malt:maris (Maris Otter)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici bairds · kayıt: Crisp, Simpsons, Fawcett, Muntons",
+   "aday": "Baird's Maris Otter"
+  },
+  {
+   "yazim": "briess black malt (500 °l)",
+   "satir": 1,
+   "hedef": "malt:black (Black Malt (Patent Malt))",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici briess · kayıt: Crisp, Simpsons",
+   "aday": "Briess Black Malt 500 °l"
+  },
+  {
+   "yazim": "briess black patent malt",
+   "satir": 1,
+   "hedef": "malt:black (Black Malt (Patent Malt))",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici briess · kayıt: Crisp, Simpsons",
+   "aday": "Briess Black Patent Malt"
+  },
+  {
+   "yazim": "briess bonlander munich malt",
+   "satir": 1,
+   "hedef": "malt:munich (Munich Malt)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici briess · kayıt: Weyermann, BestMalz, Hitit (yerli 6L)",
+   "aday": "Briess Bonlander Munich Malt"
+  },
+  {
+   "yazim": "briess flaked barley, 1.5 °l",
+   "satir": 1,
+   "hedef": "malt:fbar (Arpa (Flaked Barley))",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici briess · kayıt: Herhangi",
+   "aday": "Briess Flaked Barley, 1.5 °l"
+  },
+  {
+   "yazim": "briess flaked corn",
+   "satir": 1,
+   "hedef": "malt:corn (Mısır (Flaked Corn))",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici briess · kayıt: Herhangi",
+   "aday": "Briess Flaked Corn"
+  },
+  {
+   "yazim": "briess flaked oats",
+   "satir": 1,
+   "hedef": "malt:oat (Yulaf (Flaked Oats))",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici briess · kayıt: Herhangi",
+   "aday": "Briess Flaked Oats"
+  },
+  {
+   "yazim": "briess flaked rice",
+   "satir": 1,
+   "hedef": "malt:rice_flaked (Pirinç (Flaked Rice))",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici briess · kayıt: Herhangi",
+   "aday": "Briess Flaked Rice"
+  },
+  {
+   "yazim": "briess raw wheat",
+   "satir": 1,
+   "hedef": "malt:rwh (Ham Buğday (Unmalted))",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici briess · kayıt: Herhangi",
+   "aday": "Briess Raw Wheat"
+  },
+  {
+   "yazim": "briess red flaked wheat",
+   "satir": 1,
+   "hedef": "malt:flaked_wheat (Buğday (Flaked Wheat))",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici briess · kayıt: Herhangi",
+   "aday": "Briess Red Flaked Wheat"
+  },
+  {
+   "yazim": "briess roasted barley",
+   "satir": 1,
+   "hedef": "malt:roast (Roasted Barley)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici briess · kayıt: Crisp, Simpsons, Hitit Kara Malt No:3 (yerli)",
+   "aday": "Briess Roasted Barley"
+  },
+  {
+   "yazim": "briess torrified wheat",
+   "satir": 1,
+   "hedef": "malt:torr_wh (Torrified Wheat)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici briess · kayıt: Crisp, Simpsons",
+   "aday": "Briess Torrified Wheat"
+  },
+  {
+   "yazim": "briess unmalted wheat",
+   "satir": 1,
+   "hedef": "malt:rwh (Ham Buğday (Unmalted))",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici briess · kayıt: Herhangi",
+   "aday": "Briess Unmalted Wheat"
+  },
+  {
+   "yazim": "dextrin malt (proximity)",
+   "satir": 1,
+   "hedef": "malt:carapils (Carapils / Dextrin)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici proximity · kayıt: Briess, Weyermann",
+   "aday": "Dextrin Malt Proximity"
+  },
+  {
+   "yazim": "dextrose (briess)",
+   "satir": 1,
+   "hedef": "malt:dex (Dekstroz (Monohydrate))",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici briess · kayıt: Herhangi",
+   "aday": "Dextrose Briess"
+  },
+  {
+   "yazim": "dingemans 5.5° l munich malt",
+   "satir": 1,
+   "hedef": "malt:munich (Munich Malt)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici dingemans · kayıt: Weyermann, BestMalz, Hitit (yerli 6L)",
+   "aday": "Dingemans 5.5° L Munich Malt"
+  },
+  {
+   "yazim": "dingemans black patent malt",
+   "satir": 1,
+   "hedef": "malt:black (Black Malt (Patent Malt))",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici dingemans · kayıt: Crisp, Simpsons",
+   "aday": "Dingemans Black Patent Malt"
+  },
+  {
+   "yazim": "dingemans munich malt",
+   "satir": 1,
+   "hedef": "malt:munich (Munich Malt)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici dingemans · kayıt: Weyermann, BestMalz, Hitit (yerli 6L)",
+   "aday": "Dingemans Munich Malt"
+  },
+  {
+   "yazim": "dmc dextrin malt",
+   "satir": 1,
+   "hedef": "malt:carapils (Carapils / Dextrin)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici dingemans · kayıt: Briess, Weyermann",
+   "aday": "Dmc Dextrin Malt"
+  },
+  {
+   "yazim": "durst 3° l vienna malt",
+   "satir": 1,
+   "hedef": "malt:vienna (Vienna Malt)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici durst · kayıt: Weyermann, BestMalz, Muntons, Hitit (yerli)",
+   "aday": "Durst 3° L Vienna Malt"
+  },
+  {
+   "yazim": "durst malz wheat malt",
+   "satir": 1,
+   "hedef": "malt:wheat (Buğday Maltı)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici durst · kayıt: Weyermann, BestMalz, Muntons, Hitit (yerli)",
+   "aday": "Durst Malz Wheat Malt"
+  },
+  {
+   "yazim": "durst munich malt",
+   "satir": 1,
+   "hedef": "malt:munich (Munich Malt)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici durst · kayıt: Weyermann, BestMalz, Hitit (yerli 6L)",
+   "aday": "Durst Munich Malt"
+  },
+  {
+   "yazim": "durst munich malt (8 °l)",
+   "satir": 1,
+   "hedef": "malt:munich (Munich Malt)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici durst · kayıt: Weyermann, BestMalz, Hitit (yerli 6L)",
+   "aday": "Durst Munich Malt 8 °l"
+  },
+  {
+   "yazim": "dwc munich malt",
+   "satir": 1,
+   "hedef": "malt:munich (Munich Malt)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici dwc · kayıt: Weyermann, BestMalz, Hitit (yerli 6L)",
+   "aday": "Dwc Munich Malt"
+  },
+  {
+   "yazim": "fawcett brown malt",
+   "satir": 1,
+   "hedef": "malt:brown (Brown Malt)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici fawcett · kayıt: Crisp, Simpsons, Muntons",
+   "aday": "Fawcett Brown Malt"
+  },
+  {
+   "yazim": "flaked maize (thomas fawcett)",
+   "satir": 1,
+   "hedef": "malt:corn (Mısır (Flaked Corn))",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici fawcett · kayıt: Herhangi",
+   "aday": "Flaked Maize Thomas Fawcett"
+  },
+  {
+   "yazim": "great western flaked oats (2 °l)",
+   "satir": 1,
+   "hedef": "malt:oat (Yulaf (Flaked Oats))",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici great western · kayıt: Herhangi",
+   "aday": "Great Western Flaked Oats 2 °l"
+  },
+  {
+   "yazim": "great western munich malt (10 °l)",
+   "satir": 1,
+   "hedef": "malt:dark_munich (Munich Dark (Aroma))",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici great western · kayıt: Weyermann",
+   "aday": "Great Western Munich Malt 10 °l"
+  },
+  {
+   "yazim": "great western munich malt 10 °l",
+   "satir": 1,
+   "hedef": "malt:dark_munich (Munich Dark (Aroma))",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici great western · kayıt: Weyermann",
+   "aday": "Great Western Munich Malt 10 °l"
+  },
+  {
+   "yazim": "hugh baird 60° l brown malt",
+   "satir": 1,
+   "hedef": "malt:brown (Brown Malt)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici bairds · kayıt: Crisp, Simpsons, Muntons",
+   "aday": "Hugh Baird 60° L Brown Malt"
+  },
+  {
+   "yazim": "hugh baird maris otter pale malt",
+   "satir": 1,
+   "hedef": "malt:maris (Maris Otter)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici bairds · kayıt: Crisp, Simpsons, Fawcett, Muntons",
+   "aday": "Hugh Baird Maris Otter Pale Malt"
+  },
+  {
+   "yazim": "hugh bairds 600° l black malt",
+   "satir": 1,
+   "hedef": "malt:black (Black Malt (Patent Malt))",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici bairds · kayıt: Crisp, Simpsons",
+   "aday": "Hugh Bairds 600° L Black Malt"
+  },
+  {
+   "yazim": "ireks munich malt",
+   "satir": 1,
+   "hedef": "malt:munich (Munich Malt)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici ireks · kayıt: Weyermann, BestMalz, Hitit (yerli 6L)",
+   "aday": "Ireks Munich Malt"
+  },
+  {
+   "yazim": "ireks vienna malt",
+   "satir": 1,
+   "hedef": "malt:vienna (Vienna Malt)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici ireks · kayıt: Weyermann, BestMalz, Muntons, Hitit (yerli)",
+   "aday": "Ireks Vienna Malt"
+  },
+  {
+   "yazim": "joe white dark munich malt",
+   "satir": 1,
+   "hedef": "malt:dark_munich (Munich Dark (Aroma))",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici joe white · kayıt: Weyermann",
+   "aday": "Joe White Dark Munich Malt"
+  },
+  {
+   "yazim": "mecca grade metolius munich malt",
+   "satir": 1,
+   "hedef": "malt:munich (Munich Malt)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici mecca grade · kayıt: Weyermann, BestMalz, Hitit (yerli 6L)",
+   "aday": "Mecca Grade Metolius Munich Malt"
+  },
+  {
+   "yazim": "mfb vienna malt",
+   "satir": 1,
+   "hedef": "malt:vienna (Vienna Malt)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici mfb · kayıt: Weyermann, BestMalz, Muntons, Hitit (yerli)",
+   "aday": "Mfb Vienna Malt"
+  },
+  {
+   "yazim": "munich (dingemans)",
+   "satir": 1,
+   "hedef": "malt:munich (Munich Malt)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici dingemans · kayıt: Weyermann, BestMalz, Hitit (yerli 6L)",
+   "aday": "Munich Dingemans"
+  },
+  {
+   "yazim": "munich malt (proximity)",
+   "satir": 1,
+   "hedef": "malt:munich (Munich Malt)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici proximity · kayıt: Weyermann, BestMalz, Hitit (yerli 6L)",
+   "aday": "Munich Malt Proximity"
+  },
+  {
+   "yazim": "munton s roasted barley",
+   "satir": 1,
+   "hedef": "malt:roast (Roasted Barley)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici muntons · kayıt: Crisp, Simpsons, Hitit Kara Malt No:3 (yerli)",
+   "aday": "Munton S Roasted Barley"
+  },
+  {
+   "yazim": "pilsner (durst)",
+   "satir": 1,
+   "hedef": "malt:pilsner (Pilsner Malt)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici durst · kayıt: Weyermann, BestMalz, Hitit (yerli)",
+   "aday": "Pilsner Durst"
+  },
+  {
+   "yazim": "pilsner malt (great western)",
+   "satir": 1,
+   "hedef": "malt:pilsner (Pilsner Malt)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici great western · kayıt: Weyermann, BestMalz, Hitit (yerli)",
+   "aday": "Pilsner Malt Great Western"
+  },
+  {
+   "yazim": "proximity dextrin malt",
+   "satir": 1,
+   "hedef": "malt:carapils (Carapils / Dextrin)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici proximity · kayıt: Briess, Weyermann",
+   "aday": "Proximity Dextrin Malt"
+  },
+  {
+   "yazim": "rahr unmalted wheat",
+   "satir": 1,
+   "hedef": "malt:rwh (Ham Buğday (Unmalted))",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici rahr · kayıt: Herhangi",
+   "aday": "Rahr Unmalted Wheat"
+  },
+  {
+   "yazim": "simpsons amber malt",
+   "satir": 1,
+   "hedef": "malt:amber (Amber Malt)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici simpsons · kayıt: Crisp, Thomas Fawcett, Muntons",
+   "aday": "Simpsons Amber Malt"
+  },
+  {
+   "yazim": "thomas fawcetts chocolate malt (425 °l)",
+   "satir": 1,
+   "hedef": "malt:choc (Chocolate Malt)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici fawcett · kayıt: Crisp, Simpsons, Briess",
+   "aday": "Thomas Fawcetts Chocolate Malt 425 °l"
+  },
+  {
+   "yazim": "thomas fawcetts roasted barley (550 °l)",
+   "satir": 1,
+   "hedef": "malt:roast (Roasted Barley)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici fawcett · kayıt: Crisp, Simpsons, Hitit Kara Malt No:3 (yerli)",
+   "aday": "Thomas Fawcetts Roasted Barley 550 °l"
+  },
+  {
+   "yazim": "weyermann pale chocolate malt",
+   "satir": 1,
+   "hedef": "malt:pale_choc (Pale Chocolate Malt)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici weyermann · kayıt: Simpsons, Crisp",
+   "aday": "Weyermann Pale Chocolate Malt"
+  },
+  {
+   "yazim": "wheat (durst)",
+   "satir": 1,
+   "hedef": "malt:wheat (Buğday Maltı)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici durst · kayıt: Weyermann, BestMalz, Muntons, Hitit (yerli)",
+   "aday": "Wheat Durst"
+  },
+  {
+   "yazim": "wheat malt (briess)",
+   "satir": 1,
+   "hedef": "malt:wheat (Buğday Maltı)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici briess · kayıt: Weyermann, BestMalz, Muntons, Hitit (yerli)",
+   "aday": "Wheat Malt Briess"
+  },
+  {
+   "yazim": "white wheat malt (great western)",
+   "satir": 1,
+   "hedef": "malt:wheat (Buğday Maltı)",
+   "fark": "marka",
+   "farkNot": "tarifteki üretici great western · kayıt: Weyermann, BestMalz, Muntons, Hitit (yerli)",
+   "aday": "White Wheat Malt Great Western"
   }
  ]
 }

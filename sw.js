@@ -765,7 +765,7 @@ const MODEL_CACHE   = 'bm-models-v1';        // workers.dev + jsdelivr — SHA'l
 const CRITICAL_HTML = [
   './Brewmaster_v2_79_10.html',
   './ornek_veri.js?v=51d7928d8f',   // SPRINT CC4: örnek tabloları — HTML'deki <script src> ile BİREBİR aynı URL (test kilitli)
-  './iskelet_veri.js?v=411c8c4944',   // SPRINT ISK1: türetilmiş iskelet — HTML'deki <script src> ile BİREBİR aynı URL (test kilitli)
+  './iskelet_veri.js?v=a9f665cbd5',   // SPRINT ISK1: türetilmiş iskelet — HTML'deki <script src> ile BİREBİR aynı URL (test kilitli)
   './korpus_kullanim.js?v=f59cfd719f',   // SPRINT AI2: topluluk kullanım tablosu — HTML'deki <script src> ile BİREBİR aynı URL (test kilitli)
   './b1_v8_calibration_697eb644.json',   // EŞİTLİK SPRINT 2: B1 kalibrasyonu (aynı kök; ad = sha256-8, içerik değişirse ad değişir) — HTML'deki CALIBRATION_URL ile BİREBİR
 ];

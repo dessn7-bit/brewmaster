@@ -16926,7 +16926,7 @@ const CASELER = [
       const out = []; const ok = (ad, k, d) => out.push({ ad, ok: !!k, detay: d === undefined ? '' : String(d) });
       const html = fs.readFileSync(path.join(KOK, HTML_AD), 'utf8'), sw = fs.readFileSync(path.join(KOK, 'sw.js'), 'utf8'), iv = fs.readFileSync(path.join(KOK, 'iskelet_veri.js'), 'utf8');
       const ozet = t => crypto.createHash('sha256').update(t).digest('hex').slice(0, 10), q = ozet(iv), ov = ozet(fs.readFileSync(path.join(KOK, 'ornek_veri.js'), 'utf8').replace(/\r\n/g, '\n'));
-      const ND6_ONCESI_OZET = '411c8c4944'; /* ND7B (i): dosya eşit paylı maya kuralıyla YENİDEN ÜRETİLDİ (ND7 özeti deaf106959) */ // ND7 (4b): dosya ND7'de maya okuyucusu devredeyken YENİDEN ÜRETİLDİ (eski özet 2ab21bcd71 = ND6 öncesi sürüm). Sabit = ND7 üretiminin sha256-10'u (LF); dosya bir daha üretilirse bilerek güncellenir
+      const ND6_ONCESI_OZET = 'a9f665cbd5'; /* ND7K ön adımlar: dosya Ö3 / Ö5 / Ö9 (işaret + varsayım hopu kuralı) ile YENİDEN ÜRETİLDİ (ND7B özeti 411c8c4944) — görev gereği; karar Claude'da */ /* ND7B (i): dosya eşit paylı maya kuralıyla YENİDEN ÜRETİLDİ (ND7 özeti deaf106959) */ // ND7 (4b): dosya ND7'de maya okuyucusu devredeyken YENİDEN ÜRETİLDİ (eski özet 2ab21bcd71 = ND6 öncesi sürüm). Sabit = ND7 üretiminin sha256-10'u (LF); dosya bir daha üretilirse bilerek güncellenir
       ok('iskelet_veri.js özeti = ND7 üretiminin özeti (satır sonu bağımsız) — dosya ND7 (4b) üretiminden sonra değişmedi', ozet(iv.split('\r\n').join('\n')) === ND6_ONCESI_OZET, ozet(iv.split('\r\n').join('\n')) + ' vs ' + ND6_ONCESI_OZET);
       const m = /"ornekV":"([0-9a-f]+)"/.exec(iv);
       ok('iskelet_veri.js örnek özeti = ornek_veri.js özeti', !!m && m[1] === ov, (m && m[1]) + ' vs ' + ov);
@@ -17276,7 +17276,7 @@ const CASELER = [
       ok('tablodaki ' + t.n + ' satırın hedefi geçerli (katalog kimliği / tanımlı sınıf / bekleyen ürün adı)', t.n > 1300 && t.gecersiz.length === 0, t.gecersiz.slice(0, 4).join(' | '));
       ok('elle kararların TAMAMI tabloda uygulanmış (' + t.elleUy + '/' + elle.length + ')', t.elleUy === elle.length);
       ok('elle olmayan satırlarda tablo = kuralın çıktısı (fark 0)', t.kuralFark.length === 0, t.kuralFark.slice(0, 4).join(' | '));
-      const aSatir = A.adaylar.reduce((s, a) => s + a.yazimlar.length, 0), turler = Object.keys(A.ozet).sort().join(','); t.b = D.satirlar.filter(x => x.karar === 'katalog_bekliyor').length + D.satirlar.filter(x => x.aday).length; // ND7B (a): aday listesi = ND7B dökümündeki bekleyen satırlar + geçici bağlı (fark dolu) marka ürünleri
+      const aSatir = A.adaylar.reduce((s, a) => s + a.yazimlar.length, 0), turler = Object.keys(A.ozet).sort().join(','); t.b = D.satirlar.filter(x => x.karar === 'katalog_bekliyor').length + D.satirlar.filter(x => x.aday).length + (D.sozlukFark || []).length; // ND7B (a): aday listesi = ND7B dökümündeki bekleyen satırlar + geçici bağlı (fark dolu) marka ürünleri · ND7K Ö2: + sözlük (alias) yolundan farklı üreticili yazımlar (dökümde sozlukFark) — görev gereği, karar Claude'da
       ok('nd7k_aday.json: aday yazım sayısı = tablodaki katalog_bekliyor satırı (' + t.b + '); türler hop / maya / malt / ekstrakt / şeker / katkı; her adayda ürün adı + satır sayısı', aSatir === t.b && turler === 'ekstrakt,hop,katkı,malt,maya,şeker' && A.adaylar.every(a => a.urun && a.satir > 0 && a.yazimlar.length > 0), aSatir + ' / ' + t.b + ' · ' + turler);
       ok('denetim dökümü (tests/nd7_esleme.json) tabloyla aynı satır sayısında ve tanınmayan 0', D.satirlar.length === t.n && D.ozet.yok === 0, D.satirlar.length + ' / ' + t.n);
       return out;
@@ -18182,6 +18182,182 @@ const CASELER = [
       __REG.ok('canlı türetme saklanan dosyayla aynı mayayı verir (4 stil)', canli.join(',') === ['Blonde Ale / Cream Ale', 'Kölsch', 'Saison (table)', 'Dry Irish Stout'].map(s => T[s].mayaId).join(','), canli.join(','));
       return __REG.al();
     })
+  },
+  {
+    // ═══ SPRINT ND7K ÖN ADIMLAR (Ö1–Ö9; Claude kararları 2026-11-13). Beklentiler kararın metninden türetilir; ölçüm sabiti yok. ═══
+    // ND7K-FARK: Ö1 "kaydın adı ya da üretici alanı birden çok üretici sayıyorsa ve tarifin üreticisi bunlardan biriyse fark BOŞ; üreticisiz jenerik kayıt + markalı tarif → marka"
+    //            Ö2 "örnek yolunda sözlük (alias) eşlemeleri de denetlenir: alias metni kaydın üreticisinden FARKLI bir üretici adı içeriyorsa fark = marka; AI girişi değişmez".
+    kod: 'ND7K-FARK', ad: 'ND7K Ö1 + Ö2 FARK: tarifin üreticisi kaydın saydığı üreticilerden biriyse fark = marka YOK (çok üreticili kayıt dahil) · üreticisi kayıtta sayılmayan markalı satır fark = marka (sözlükten tanınan satır dahil) · AI girişi (_bmKatCoz) aynı kimliği verir, fark taşımaz · bayrak kapalı = v131-545',
+    calistir: (page) => page.evaluate(() => {
+      const N = window.BM_ND7, K = window.BM_ND7K, H = window._bmOrnekHepsi();
+      // bağımsız üretici okuması (test içi): yazımda geçen üretici adı → kaydın ad + üretici alanında aynı üretici geçiyor mu
+      const UR = [['weyermann', /weyerman+|wyermann|wayermann|weyermenn/], ['briess', /briess|breiss/], ['crisp', /\bcrisp\b/], ['simpsons', /simpsons/], ['rahr', /\brahr\b/], ['great western', /great western/], ['dingemans', /dingemans?\b/], ['muntons', /muntons?\b|munton s/], ['fawcett', /fawcett/], ['bairds', /\bbairds?\b|baird s/], ['durst', /\bdurst\b/], ['gambrinus', /gambrinus/], ['joe white', /joe white/]];
+      const ureticiler = s => UR.filter(u => u[1].test(String(s).toLowerCase())).map(u => u[0]);
+      let ayniFark = 0, ayniN = 0, farkliBos = 0, farkliN = 0, sozlukFark = 0, cokUretici = 0; const ornekA = [], ornekF = [];
+      H.forEach(e => { const r = window._bmOrnekKuru(e.kaynak, e.stil, e.idx); r.g.forEach(k => { if (!k.id || k.tip !== 'malt') return; const m = MALTLAR.find(x => x.id === k.id), tM = ureticiler(k.ham); if (!m || !tM.length) return;
+        const kM = ureticiler(m.ad + ' , ' + (m.mo || ''));
+        if (tM.some(b => kM.indexOf(b) >= 0)) { ayniN++; if (kM.length > 1) cokUretici++; if (k.fark === 'marka') { ayniFark++; if (ornekA.length < 4) ornekA.push(k.ham + ' → ' + k.id); } }
+        else { farkliN++; if (!k.fark) { farkliBos++; if (ornekF.length < 4) ornekF.push(k.ham + ' → ' + k.id); } if (!k.kural && k.fark === 'marka') sozlukFark++; } }); });
+      __REG.ok('Ö1: tarifin üreticisi kaydın saydığı üreticilerden biri olan ' + ayniN + ' malt satırının hiçbiri fark = marka taşımaz (çok üreticili kayıtta ' + cokUretici + ' satır)', ayniN > 0 && cokUretici > 0 && ayniFark === 0, ornekA.join(' ; '));
+      __REG.ok('Ö1 + Ö2: tarifin üreticisi kayıtta SAYILMAYAN ' + farkliN + ' malt satırının hepsi fark dolu (marka ya da renk); bunların sözlükten tanınanı (kural adı yok) ' + sozlukFark + ' satır fark = marka', farkliN > 0 && farkliBos === 0 && sozlukFark > 0, ornekF.join(' ; '));
+      // adı kararda geçen durumlar: çok üreticili kayıt + sayılan üretici → boş · sözlük yolu + sayılmayan üretici → marka · jenerik kayıt + markalı tarif → marka
+      const pale = MALTLAR.find(m => m.id === 'pale_ale'), wheat = MALTLAR.find(m => m.id === 'wheat');
+      const cz = N.coz('malt', 'crisp pale malt');
+      __REG.ok('Ö1: "crisp pale malt" → Pale Ale Malt (üretici alanı Crisp\'i sayıyor: ' + pale.mo + ') fark boş', cz && cz.id === 'pale_ale' && ureticiler(pale.mo).indexOf('crisp') >= 0 && !cz.fark, JSON.stringify(cz));
+      const sf = N.satir('malt', 'rahr white wheat malt', { tip: 'malt', id: window._bmKatCoz('malt', 'rahr white wheat malt') });
+      __REG.ok('Ö2: "rahr white wheat malt" sözlükten Buğday Maltı (üretici alanı Rahr\'ı saymıyor: ' + wheat.mo + ') → örnek girişinde fark = marka', window._bmKatCoz('malt', 'rahr white wheat malt') === 'wheat' && ureticiler(wheat.mo).indexOf('rahr') < 0 && sf && sf.fark === 'marka', JSON.stringify(sf));
+      const sAyni = N.satir('malt', 'weyermann wheat malt', { tip: 'malt', id: 'wheat' });
+      __REG.ok('Ö2: alias metnindeki üretici kaydın üreticilerinden biriyse fark yok ("weyermann wheat malt" ↔ ' + wheat.mo + ')', ureticiler(wheat.mo).indexOf('weyermann') >= 0 && !(sAyni && sAyni.fark), JSON.stringify(sAyni));
+      __REG.ok('Ö2: AI girişi değişmez — _bmKatCoz aynı kimliği verir (ND7 öncesi çözücüyle birebir) ve fark taşımaz', window._bmKatCoz('malt', 'rahr white wheat malt') === window._bmKatCozEski('malt', 'rahr white wheat malt') && typeof window._bmKatCoz('malt', 'rahr white wheat malt') === 'string');
+      // bayrak kapalı = v131-545: sıkı okuma (tek üreticili kayıt dışında marka) + sözlük yolunda fark yok
+      K.fark = false; K.tablo = false; K.uygula();
+      const czK = N.coz('malt', 'crisp pale malt'), sfK = N.satir('malt', 'rahr white wheat malt', { tip: 'malt', id: 'wheat' });
+      __REG.ok('fark + tablo bayrağı kapalı = v131-545: "crisp pale malt" fark = marka (çok üreticili kayıt istisna değildi) · sözlük satırı fark taşımaz', czK && czK.fark === 'marka' && !(sfK && sfK.fark), JSON.stringify(czK) + ' / ' + JSON.stringify(sfK));
+      K.fark = true; K.tablo = true; K.uygula();
+      __REG.ok('yeniden açınca "crisp pale malt" fark boş', !N.coz('malt', 'crisp pale malt').fark);
+      return __REG.al();
+    })
+  },
+  {
+    // ND7K-AI: Ö6 "AI4 ödüllü örnek listesi bir AI yoludur; ND7 öncesi tanımayla çalışır. Örnek araması ekranı (ND) yeni tanımayı kullanmaya devam eder."
+    kod: 'ND7K-AI', ad: 'ND7K Ö6 AI4 ÖDÜLLÜ ÖRNEK LİSTESİ ND7 ÖNCESİ TANIMAYLA: A4.odulluOrnekler her katalog kalemi için, BM_ND7 / BM_ND7B / BM_ND7K kapalıyken üretilen listeyle birebir aynı · örnek araması ekranının indeksi yeni tanımayı taşır (tablo yazımı olan örnekte ND7 kimliği var, AI indeksinde yok) · indeks kurulurken bayraklar geri açılır',
+    calistir: (page) => page.evaluate(() => {
+      const N = window.BM_ND7, B = window.BM_ND7B, K = window.BM_ND7K, A4 = window.BM_AI4;
+      const hepsi = []; [['malt', MALTLAR], ['hop', HOPLAR], ['maya', MAYALAR], ['katki', KATKILAR]].forEach(([t, L]) => L.forEach(x => { if (x && x.id) hepsi.push([t, x.id]); }));
+      const liste = () => { const o = {}; hepsi.forEach(([t, id]) => { o[t + ':' + id] = A4.odulluOrnekler(t, id, null).map(x => [x.k, x.stil, x.ad, x.miktar, x.odul].join('¦')); }); return o; };
+      const imzaOnce = window._bmStokImza(), acik = liste();
+      const bay = o => Object.keys(o).filter(k => typeof o[k] === 'boolean');
+      __REG.ok('AI indeksi kurulduktan sonra bayraklar yerinde (hepsi açık) ve örnek girişi ND7 kimliğini veriyor', bay(N).every(k => N[k]) && bay(B).every(k => B[k]) && bay(K).every(k => K[k]) && window._bmStokImza() === imzaOnce);
+      // ekran indeksi ↔ AI indeksi: ND7 tablosundaki bir ÜRÜN yazımını taşıyan örnek
+      const T = N.tabloVeri().malt, yz = Object.keys(T).filter(y => T[y][0] === 'u' && /^malt:/.test(T[y][1])); let ekranVar = 0, aiYok = 0, bakilan = 0;
+      const EK = window._bmMalzemeIndex(), AI = window._bmMalzemeIndexEski();
+      EK.forEach((e, i) => { const o = window._bmOrnekNesne(e.kaynak, e.stil, e.idx) || {}; (o.g || []).forEach(x => { const y = N.nrm(x[0]); if (yz.indexOf(y) < 0 || bakilan >= 60 || window._bmMetinCoz('katki', x[0]) || window._bmOrnekBlackPatent(x[0], e.kaynak) || window._bmKatCozEski('malt', x[0])) return; const z = N.coz('malt', x[0]); if (!z || !z.id || z.tip !== 'malt') return; bakilan++;
+        if (e.ids['malt:' + z.id]) ekranVar++; const a = AI.find(q => q.kaynak === e.kaynak && q.stil === e.stil && q.idx === e.idx); if (a && a.ham.some(h => N.nrm(h.ham) === y)) aiYok++; }); });
+      __REG.ok('örnek araması ekranı yeni tanımayla: tablo yazımı taşıyan ' + bakilan + ' satırın hepsinde ekran indeksinde ND7 kimliği var; AI indeksinde aynı satır tanınmamış (ham) duruyor', bakilan > 0 && ekranVar === bakilan && aiYok === bakilan, ekranVar + ' / ' + aiYok + ' / ' + bakilan);
+      __REG.ok('AI indeksi ayrı nesneler: ekran indeksinin kayıtları değişmedi (aynı örnek sayısı, ayrı referans)', EK.length === AI.length && EK[0] !== AI[0]);
+      // ND7 öncesi tanıma: bütün bayraklar kapalıyken (ai dahil → eski yol _bmMalzemeAra) üretilen liste
+      const sak = []; [N, B, K].forEach(o => bay(o).forEach(k => { sak.push([o, k, o[k]]); o[k] = false; })); K.uygula(); B.uygula();
+      const kapali = liste();
+      sak.forEach(x => { x[0][x[1]] = x[2]; }); K.uygula(); B.uygula();
+      const farkli = Object.keys(acik).filter(k => JSON.stringify(acik[k]) !== JSON.stringify(kapali[k])), dolu = Object.keys(acik).filter(k => acik[k].length).length;
+      __REG.ok('A4.odulluOrnekler: ' + hepsi.length + ' katalog kaleminin hepsinde liste ND7 öncesi tanımayla üretilenle birebir (ödüllü örneği olan ' + dolu + ' kalem)', dolu > 0 && farkli.length === 0, farkli.slice(0, 6).join(' ; '));
+      // ai bayrağı kapalıyken liste ekran indeksinden (v131-545 davranışı): en az bir kalemde farklı (yeni tanıma daha çok satır tanır)
+      K.ai = false; const v545 = liste(); K.ai = true;
+      __REG.ok('ai bayrağı kapalı = v131-545 (liste ekran indeksinden): ND7 öncesi listeden farklı kalem var', Object.keys(v545).some(k => JSON.stringify(v545[k]) !== JSON.stringify(acik[k])));
+      return __REG.al();
+    })
+  },
+  {
+    // ND7K-MAYA2: Ö8 "karışımdaki ikinci maya editörün maya2Id alanına yazılır; not da kalır. Üçüncü maya varsa yalnız not."
+    kod: 'ND7K-MAYA2', ad: 'ND7K Ö8 İKİNCİ MAYA: karışımlı her örnekte planın 2. mayası = karışımın İKİNCİ satırının katalog kimliği (katalogda yoksa boş) · üçüncü maya reçeteye yazılmaz · oluşturulan reçetede S.maya2Id dolu + not duruyor · bayrak kapalıyken 2. maya alanı boş',
+    calistir: (page) => page.evaluate(() => {
+      const K = window.BM_ND7K, H = window._bmOrnekHepsi(), katVar = id => MAYALAR.some(m => m && m.id === id);
+      STOK.length = 0; window._nd6OnbSifirla(); if (window._bmUyarlaSifirla) window._bmUyarlaSifirla(); // stok boş: stoktan seçim yok, kimlikler tarifin kendi mayaları
+      let karisim = 0, bakilan = 0, yazilan = 0, bosKalan = 0, ucuncu = 0; const hata = []; let ornek2 = null, ornek3 = null;
+      H.forEach(e => { const r = window._bmOrnekKuru(e.kaynak, e.stil, e.idx); if (!r || !r.yEk || !r.yEk.length) return; karisim++;
+        if (!window._bmOrnekMalzemeliMi(e.kaynak, e.stil, e.idx)) return; const p = window._bmStokUyarla(e.kaynak, e.stil, e.idx); if (!p) return; bakilan++;
+        const a = r.y && r.y.id, b = r.yEk[0].id, bek = (a && b && katVar(a) && katVar(b) && a !== b) ? b : null, c = r.yEk[1] ? r.yEk[1].id : null;
+        if ((p.tarif.maya2Id || null) !== bek) hata.push(e.stil + ':' + e.idx + ' beklenen ' + bek + ' çıkan ' + p.tarif.maya2Id);
+        if (bek) { yazilan++; if (!ornek2) ornek2 = e; } else bosKalan++;
+        if (r.yEk.length > 1) { ucuncu++; if (c && (p.tarif.maya2Id === c && c !== b || p.tarif.mayaId === c && c !== a)) hata.push(e.stil + ':' + e.idx + ' üçüncü maya reçetede'); if (bek && !ornek3) ornek3 = e; } });
+      __REG.ok('maya karışımlı ' + karisim + ' örnek; planı kurulan ' + bakilan + ' örneğin hepsinde 2. maya = karışımın ikinci satırının katalog kimliği (ikisi de katalogda ve farklıysa; değilse boş): yazılan ' + yazilan + ' · boş ' + bosKalan + ' · üç mayalı ' + ucuncu, karisim > 0 && bakilan > 0 && yazilan > 0 && hata.length === 0, hata.slice(0, 5).join(' ; '));
+      if (ornek2) { const e = ornek2, r = window._bmOrnekKuru(e.kaynak, e.stil, e.idx); window._bmUyarlaSifirla(); const id = window._bmStokumlaOlustur(e.kaynak, e.stil, e.idx), not = String(S.notlar || '');
+        __REG.ok('oluşturulan reçetede (' + e.stil + ') maya = ilk maya, 2. maya alanı = ikinci maya; notta "2. maya alanına yazıldı" ve karışım açıklaması var', !!id && S.mayaId === r.y.id && S.maya2Id === r.yEk[0].id && /BİRLİKTE kullanıyor/.test(not) && /2\. maya alanına yazıldı/.test(not), S.mayaId + ' / ' + S.maya2Id); }
+      else __REG.ok('oluşturma denemesi için ikinci mayası katalogda olan örnek var', false);
+      if (ornek3) { const e = ornek3; window._bmUyarlaSifirla(); window._bmStokumlaOlustur(e.kaynak, e.stil, e.idx); const not = String(S.notlar || '');
+        __REG.ok('üç mayalı örnekte (' + e.stil + ') üçüncü maya yalnız notta ("öbürleri yalnız not")', /öbürleri yalnız not/.test(not), not.slice(0, 200)); }
+      K.maya2 = false; K.uygula(); if (window._bmUyarlaSifirla) window._bmUyarlaSifirla();
+      if (ornek2) { const e = ornek2, p = window._bmStokUyarla(e.kaynak, e.stil, e.idx); window._bmStokumlaOlustur(e.kaynak, e.stil, e.idx);
+        __REG.ok('maya2 bayrağı kapalı = v131-545: plan 2. maya taşımaz, reçetenin 2. maya alanı boş, not "senin eklemen için" diyor', !p.tarif.maya2Id && !S.maya2Id && /senin eklemen için/.test(String(S.notlar || '')), String(p.tarif.maya2Id) + ' / ' + String(S.maya2Id)); }
+      K.maya2 = true; K.uygula();
+      return __REG.al();
+    })
+  },
+  {
+    // ND7K-ISK: Ö9 (EK KARARLAR 2) "iskelet seçimi Ö9 ÖNCESİ gibi sıklığa göre yapılır, fark taşıyan eşlemeler de sayılır; fark yalnız İŞARET: 'tariflerin çoğu X diyor; katalogdaki en yakın Y (fark: …)'. Hop ve malt için aynı.
+    //   Ek kural: kaynağında hop olmayan örneğin varsayım hopu kanıt sayılmaz."
+    kod: 'ND7K-ISK', ad: 'ND7K Ö9 İSKELET (hop + malt): seçilen kimlik fark işareti gözetilmeden sıklıkla seçilenle aynı (malt: isk bayrağı kapalı türetmeyle birebir; hop: varsayım hopu dışlanınca kapalı türetmeyle birebir) · işaret yalnız seçilen kaydın ağırlığının yarısından fazlası farklı eşlemeden geliyorsa (bağımsız sayım) · iz notu "tariflerin çoğu … diyor; katalogdaki en yakın …" · saklanan iskelet = canlı türetme · bayrak kapalı = işaret yok',
+    calistir: (page) => page.evaluate(() => {
+      const K = window.BM_ND7K, T = window._ISKELET_TURETILMIS.stiller, stiller = Object.keys(BJCP), A = window._BM_ISK_AGIRLIK || {};
+      const ac = {}; stiller.forEach(s => { ac[s] = window._bmIskTuret(s, {}); });
+      K.isk = false; K.uygula(); const kp = {}; stiller.forEach(s => { kp[s] = window._bmIskTuret(s, {}); }); K.isk = true; K.uygula();
+      const kad = (kaynak, o) => kaynak === 'nhc' || kaynak === 'aha' ? 'K1' : (o.k || 'K3');
+      let gBak = 0, gIs = 0, hBak = 0, hIs = 0, varsayimStil = 0; const hata = [], isStil = [];
+      stiller.forEach(s => { const d = ac[s], z = kp[s]; if (!d || !d.iz) return;
+        const EX = []; (window._bmOrnekListe(s) || []).forEach(x => { const o = window._bmOrnekNesne(x.kaynak, s, x.idx), r = o ? window._bmOrnekKuru(x.kaynak, s, x.idx) : null; if (r && r.g.length) EX.push({ o, r, w: A[kad(x.kaynak, o)] || 1, kaynak: x.kaynak }); });
+        const varsayimVar = EX.some(e => e.o._hopVarsay); if (varsayimVar) varsayimStil++;
+        // MALT: seçim kapalı türetmeyle aynı; işaret bağımsız sayımla
+        if (z && JSON.stringify((d.iz.grist || []).map(g => g.rol + ':' + g.id)) !== JSON.stringify(((z.iz || {}).grist || []).map(g => g.rol + ':' + g.id))) hata.push(s + ' malt seçimi kapalı türetmeden farklı');
+        (d.iz.grist || []).forEach(g => { if (g.renk && g.medyan == null) return; gBak++; let top = 0, fk = 0;
+          (g.o || []).forEach(i => { const e = EX[i]; if (!e) return; e.r.g.forEach(k => { if (!(k.kaynakMik > 0) || (window._bmProsesYardimci && window._bmProsesYardimci(k)) || k.tip !== 'malt' || k.id !== g.id) return; const ra = window._bmIskRolAl(k); if (!ra || ra.rol !== g.rol || ra.duzey) return; top += e.w; if (k.fark) fk += e.w; }); });
+          const bek = top > 0 && fk > top / 2 + 1e-9; if (!!g.fark !== bek) hata.push(s + ' malt ' + g.rol + ' ' + g.id + ' işaret ' + !!g.fark + ' ≠ beklenen ' + bek + ' (' + fk + '/' + top + ')'); if (g.fark) { gIs++; if (isStil.indexOf(s) < 0) isStil.push(s); } });
+        // HOP: varsayım hopu olmayan stilde seçim kapalı türetmeyle aynı; işaret bağımsız sayımla (örnek başına bir kez)
+        if (z && !varsayimVar && JSON.stringify((d.iz.hop || []).map(h => h.sinif + ':' + h.id)) !== JSON.stringify(((z.iz || {}).hop || []).map(h => h.sinif + ':' + h.id))) hata.push(s + ' hop seçimi kapalı türetmeden farklı');
+        (d.iz.hop || []).forEach(h => { hBak++; let top = 0, fk = 0;
+          EX.forEach(e => { if (e.o._hopVarsay) return; let gor = false, far = false; window._bmOrnekHopNorm(e.kaynak, e.o).forEach((hx, i) => { const k = e.r.h[i]; if (window._bmIskHopSinif(hx[2]) !== h.sinif || !k || k.tip !== 'hop' || k.id !== h.id) return; if (!gor) { gor = true; far = !!k.fark; } }); if (gor) { top += e.w; if (far) fk += e.w; } });
+          const bek = top > 0 && fk > top / 2 + 1e-9; if (!!h.fark !== bek) hata.push(s + ' hop ' + h.sinif + ' ' + h.id + ' işaret ' + !!h.fark + ' ≠ beklenen ' + bek); if (h.fark) { hIs++; if (isStil.indexOf(s) < 0) isStil.push(s); } });
+        const kay = T[s]; if (kay && kay.grist && (JSON.stringify(kay.grist) !== JSON.stringify(d.grist) || JSON.stringify(kay.hop) !== JSON.stringify(d.hop) || kay.mayaId !== d.mayaId)) hata.push(s + ' saklanan iskelet ≠ canlı türetme'); });
+      __REG.ok(gBak + ' malt rolü + ' + hBak + ' hop sınıfı: seçim sıklığa göre (fark eşlemesi dahil), işaret bağımsız sayımla aynı (malt işaretli ' + gIs + ' · hop işaretli ' + hIs + ' · ' + isStil.length + ' stil); varsayım hoplu ' + varsayimStil + ' stil; saklanan iskelet = canlı türetme', gBak > 100 && hBak > 100 && hata.length === 0, hata.slice(0, 6).join(' ; '));
+      const notOk = isStil.filter(s => { const A2 = window._bmIskeletAl(s); return A2 && A2.tur !== 'elle' && A2.tur !== 'odunc'; }).every(s => /tariflerin çoğu .+ diyor; katalogdaki en yakın .+ \(fark: (marka|köken|renk|biçim)\)/.test(window._bmIskeletIzNot(s, { isk: ac[s], tur: 'turetilmis' })));
+      __REG.ok('işaretli seçim taşıyan stil var ve iz notu "tariflerin çoğu X diyor; katalogdaki en yakın Y (fark: …)" yazıyor', isStil.length > 0 && notOk, isStil.join(' ; '));
+      let isaretK = 0; stiller.forEach(s => { const d = kp[s]; if (!d || !d.iz) return; (d.iz.hop || []).concat(d.iz.grist || [], d.hop || []).forEach(x => { if (x.fark) isaretK++; }); });
+      __REG.ok('isk bayrağı kapalı = v131-545: hiçbir seçim işaret taşımaz', isaretK === 0, String(isaretK));
+      return __REG.al();
+    })
+  },
+  {
+    // ND7K-KATALOG: Ö5 "doğrulanırsa çift kaydı birleştir: tek id kalır, öbürü alias olur, mevcut başvurular korunur" · Ö4 "aynı tarifin öbür kaydı malzemeyi adlandırıyorsa o katkıya bağla" · Ö3 "domestic pale malt: jenerik ABD 2-row kaydına fark = marka ile"
+    kod: 'ND7K-KATALOG', ad: 'ND7K Ö3 + Ö4 + Ö5: birleştirilen her çift kayıtta üretici / dağıtıcı url + alıntı; tanıma ve sözlük yalnız kalan kimliği verir; eski kimlik hâlâ çözülür (aynı renk ve ekstrakt), seçim dışı; stokta biri öbürünü karşılar · "fresh grated" → zencefil · Great Western "domestic pale malt" → ABD 2-row kaydı + fark marka · bayrak kapalı = v131-545',
+    calistir: (page) => page.evaluate(() => {
+      const N = window.BM_ND7, K = window.BM_ND7K, BL = window._BM_ND7K_BIRLESIK, bul = id => MALTLAR.find(m => m && m.id === id);
+      const kayOk = BL.every(d => d.kaynak.length >= 2 && d.kaynak.every(k => /^https:\/\/(www\.)?(dingemansmout\.be|rahrbsg\.com|southernhomebrew\.com)\//.test(k.url) && k.alinti && k.alinti.trim().split(/\s+/).length <= 15) && d.kaynak.some(k => /dingemansmout\.be/.test(k.url)) && d.kaynak.some(k => /rahrbsg\.com/.test(k.url)));
+      __REG.ok(BL.length + ' birleştirme: her birinde üretici (dingemansmout.be) + ABD dağıtıcısı (rahrbsg.com) url\'si ve en çok 15 sözcük alıntı', BL.length > 0 && kayOk);
+      __REG.ok('ad eşlemesini açıkça yazan satıcı sayfası her birleştirmede var (ABD adı + EBC aynı alıntıda); görünen ad değişmedi (malt adı ML / stil motoru girdisi)', BL.every(d => d.kaynak.some(k => /southernhomebrew\.com/.test(k.url) && /Dingemans Cara \d+ \(\d+ ?EBC\)/.test(k.alinti))) && bul('cara120').ad === 'Cara 120 MD (Dingemans) — 120 EBC' && bul('dingemans_cara20').ad === 'Dingemans Cara 20 (Belçika Crystal)');
+      __REG.ok('her çiftte eski kayıt gizli takma kayıt (birlesik = kalan) olarak katalogda duruyor; renk ve ekstrakt kalan kayıtla aynı (kayıtlı reçetelerin hesabı değişmez)', BL.every(d => { const e = bul(d.eski), k = bul(d.kalan); return e && k && e.birlesik === d.kalan && !k.birlesik && e.r === k.r && e.gu === k.gu; }));
+      __REG.ok('alıntıdaki Lovibond değeri kalan kaydın rengi', BL.every(d => { const k = bul(d.kalan), m = d.kaynak.map(q => /Lovibond:\s*(\d+)[.,]/.exec(q.alinti)).filter(Boolean)[0]; return m && +m[1] === k.r; }));
+      __REG.ok('sözlük ve örnek girişi yalnız kalan kimliği verir (eklenen her takma ad + eski kaydın eski adı)', BL.every(d => d.alias.every(a => window._bmKatCoz('malt', a) === d.kalan && window._bmKatCozOrnek('malt', a) === d.kalan)) && N.coz('malt', 'dingemans cara 45 malt').id === 'cara120' && !N.coz('malt', 'dingemans cara 45 malt').fark);
+      __REG.ok('seçim listelerinin süzgeci: gizli takma kayıt sayısı = birleştirme sayısı', MALTLAR.filter(m => m && m.birlesik).length === BL.length);
+      const stokSak = STOK.slice(); let stokOk = true;
+      BL.forEach(d => { [[d.eski, d.kalan], [d.kalan, d.eski]].forEach(([stokta, aranan]) => { STOK.length = 0; STOK.push({ id: '9990901', refId: stokta, ad: 'ND7K test', g: 'Malt', miktar: 1, birim: 'kg' }); if (!(_stokMalBul(aranan, bul(aranan).ad) === 0)) stokOk = false; }); STOK.length = 0; STOK.push({ id: '9990902', refId: 'pilsner', ad: 'ND7K test', g: 'Malt', miktar: 1, birim: 'kg' }); if (_stokMalBul(d.kalan, 'yok-boyle-bir-ad') >= 0) stokOk = false; });
+      STOK.length = 0; stokSak.forEach(x => STOK.push(x));
+      __REG.ok('stokta çiftin biri öbürünü karşılar (iki yönde); ilgisiz stok kalemi karşılamaz', stokOk);
+      // Ö4: aynı tarifin öbür kaydı adı veriyor
+      const zg = N.coz('hop', 'fresh grated'), ikiz = window._bmOrnekHepsi().some(e => { const o = window._bmOrnekNesne(e.kaynak, e.stil, e.idx) || {}; return (o.h || []).some(x => /^fresh grated, peeled ginger root/i.test(x[0])); });
+      __REG.ok('Ö4: "fresh grated" (adsız satır) → zencefil; örnek verisinde aynı satırı adıyla yazan kayıt var ("fresh grated, peeled ginger root"); not "ad, kaynağın diğer kaydından"', ikiz && zg && zg.tip === 'katki' && zg.id === 'zencefil' && /kaynağın diğer kaydından/.test(zg.not || ''), JSON.stringify(zg));
+      const zt = N.coz('hop', '0.25 tsp.');
+      __REG.ok('Ö4: "0.25 tsp." adsız → artık kalır', !!(zt && zt.artik), JSON.stringify(zt));
+      // Ö3
+      const dp = N.coz('malt', 'great western domestic pale malt 2 °l'), gw = N.coz('malt', 'great western 2-row malt');
+      __REG.ok('Ö3: Great Western "domestic pale malt" → Great Western 2-row yazımlarıyla aynı kayıt (ABD 2-row) + fark = marka', dp && gw && dp.id === gw.id && dp.fark === 'marka' && gw.fark === 'marka', JSON.stringify(dp));
+      // bayrak kapalı
+      K.katalog = false; K.tablo = false; K.uygula();
+      __REG.ok('katalog + tablo bayrağı kapalı = v131-545: gizli takma kayıt yok, eski adlar eski kimliğe, "fresh grated" artık, stok eşdeğerliği yok', MALTLAR.every(m => !m.birlesik) && window._bmKatCoz('malt', 'cara 45l') === 'cara45' && N.coz('malt', 'dingemans cara 45 malt').id === 'cara45' && !!N.coz('hop', 'fresh grated').artik && window._bmBirlesikEs('cara45') === null && bul('cara120').ad.indexOf('ABD adı') < 0);
+      K.katalog = true; K.tablo = true; K.uygula();
+      __REG.ok('yeniden açınca birleştirme geri gelir', window._bmKatCoz('malt', 'cara 45l') === 'cara120' && bul('cara45').birlesik === 'cara120');
+      return __REG.al();
+    })
+  },
+  {
+    // ND7K-KAPALI: kural "bayrak kapalıyken eski davranış (BM_ND7K)".
+    kod: 'ND7K-KAPALI', ad: 'ND7K BAYRAKLARI KAPALI = v131-545: ND7K tablo katmanındaki her yazım ND7B / ND7 satırının verdiği sonuca döner · sözlükten tanınan satır fark taşımaz · iskelet hopunda işaret yok · plan 2. maya taşımaz · AI4 listesi ekran indeksinden · katalogda yeni kayıt / gizli takma kayıt yok',
+    calistir: (page) => page.evaluate(() => {
+      const N = window.BM_ND7, B = window.BM_ND7B, K = window.BM_ND7K, AD = Object.keys(K).filter(k => typeof K[k] === 'boolean'), H = window._bmOrnekHepsi();
+      __REG.ok('ND7K bayrakları: fark, tablo, ai, maya2, isk, katalog — varsayılan hepsi açık', AD.slice().sort().join(',') === 'ai,fark,isk,katalog,maya2,tablo' && AD.every(k => K[k] === true));
+      const T9 = K.tabloVeri(), T7 = B.tabloVeri(), T = N.tabloVeri(), n9 = Object.keys(T9).reduce((s, g) => s + Object.keys(T9[g]).length, 0);
+      const yeniN = K.yeniIds().length, katN = MALTLAR.length + HOPLAR.length + MAYALAR.length + KATKILAR.length;
+      AD.forEach(k => { K[k] = false; }); K.uygula();
+      let uyusmaz = 0, sozFark = 0; const orn = [];
+      Object.keys(T9).forEach(g => Object.keys(T9[g]).forEach(y => { const r = T7[g][y] || T[g][y], z = N.coz(g, y); // katman kapalı: alttaki satır ne diyorsa o
+        const bek = !r ? 'yok' : r[0] === 'u' ? r[1] + '|' + (r[4] || '') : r[0], cik = !z ? 'yok' : z.id ? z.tip + ':' + z.id + '|' + (z.fark || '') : z.tasi ? 't' : z.sinif ? (z.bekliyor ? 'b' : 's') : z.proses ? 'p' : z.artik ? 'a' : '?';
+        if (r && bek !== cik) { uyusmaz++; if (orn.length < 5) orn.push(g + ' ' + y + ': ' + bek + ' ≠ ' + cik); } }));
+      __REG.ok('kapalı: ND7K katmanındaki ' + n9 + ' yazımın hepsi alttaki (ND7B / ND7) satırın sonucunu verir', n9 > 0 && uyusmaz === 0, orn.join(' ; '));
+      H.forEach(e => { const r = window._bmOrnekKuru(e.kaynak, e.stil, e.idx); r.g.forEach(k => { if (k.id && !k.kural && k.fark) sozFark++; }); });
+      __REG.ok('kapalı: sözlükten tanınan (kural adı olmayan) hiçbir malt satırı fark taşımaz', sozFark === 0, String(sozFark));
+      __REG.ok('kapalı: katalogda yeni kayıt yok (' + yeniN + ' kayıt çıkarıldı), gizli takma kayıt yok', MALTLAR.length + HOPLAR.length + MAYALAR.length + KATKILAR.length === katN - yeniN && MALTLAR.every(m => !m.birlesik) && K.yeniIds().every(k => { const p = k.split(':'), L = p[0] === 'malt' ? MALTLAR : p[0] === 'hop' ? HOPLAR : p[0] === 'maya' ? MAYALAR : KATKILAR; return !L.some(x => x.id === p[1]); }));
+      AD.forEach(k => { K[k] = true; }); K.uygula();
+      __REG.ok('yeniden açınca katalog eski boyutunda, katman geri etkin', MALTLAR.length + HOPLAR.length + MAYALAR.length + KATKILAR.length === katN && MALTLAR.some(m => m.birlesik));
+      return __REG.al();
+    })
   }
 ];
 
@@ -18371,6 +18547,13 @@ const ND7B_ONCESI = {
   "ND7-KAPALI": ["BM_ND7 bayraklarını tek tek açıp window._bmKatCoz sonucuna bakar — ND7B (j) kapsam açıkken _bmKatCoz her durumda eski çözücü; ND7B kapalı davranışını ND7B-KAPALI sınar"],
   "ND7-SEPET": ["\"ihtiyaç yalnız şu durumlarda null: adsız ek kalem · eşlenemeyen satır · katalog bekleyen ürün · üyesiz sınıf\" — ND7B (a): fark dolu satırı olan örnek satın almayla ✅ olmaz (en çok 🟨) → ihtiyaç null; sepet ↔ stok analizi tutarlılığını ND4-SEPET (bayraklar açık) sınıyor"]
 };
+// SPRINT ND7K: ND7B'de (ve öncesinde) yazılmış, ND7K kararlarının (Ö1–Ö9, yeni katalog kayıtları) sonucunu değiştirdiği vakalar BM_ND7K bayrakları KAPALI koşar (beklenen değerlere DOKUNULMADI;
+//   bayrak kapalı = v131-545 davranışı; iskelet_veri.js yeniden üretimi bayrakla geri alınmaz). Yeni davranışı ND7K-* vakaları sınar. ND7K_YENI=1 → bayraklar açık (ne değiştiğini görmek için). Karar Claude'da.
+const ND7K_ONCESI = {
+  "ND7B-KAPALI": ["ND7B bayrakları kapalıyken hiçbir satırda fark / okuyucu-aynımarka yok bekler — ND7K tablo katmanı (Ö1 kararıyla fark boşalan okuyucu-aynımarka satırları, Ö3 fark marka) ND7B bayraklarından bağımsız; ND7K kapalı davranışını ND7K-KAPALI sınar"],
+  "ND7B-FARK": ["sözlükten tanınan satırda fark yok bekler — ND7K Ö2: örnek yolunda sözlük (alias) eşlemesi de denetlenir, kaydın üreticisinden farklı üretici adı taşıyan alias fark = marka; yeni kural ND7K-FARK'ta"]
+};
+function nd7kKapat() { let v; Object.defineProperty(window, 'BM_ND7K', { configurable: true, get() { return v; }, set(x) { v = x; if (x) ['fark', 'tablo', 'ai', 'maya2', 'isk', 'katalog'].forEach(k => { x[k] = false; }); } }); }
 function nd7bKapat() { let v; Object.defineProperty(window, 'BM_ND7B', { configurable: true, get() { return v; }, set(x) { v = x; if (x) ['kapsam', 'tablo', 'satir', 'renk', 'og', 'isk'].forEach(k => { x[k] = false; }); } }); }
 function nd7Kapat() { let v; Object.defineProperty(window, 'BM_ND7', { configurable: true, get() { return v; }, set(x) { v = x; if (x) ['okuyucu', 'sinif', 'maya', 'tablo'].forEach(k => { x[k] = false; }); } }); }
 const nd6Oncesi = c => { const e = ND6_ONCESI[c.kod]; return !!e && !(e[0] === 'ai' && process.env.ND6_AI_YENI === '1'); };
@@ -18389,6 +18572,7 @@ async function browserCaseKos(browser, seed, c) {
     await page.evaluateOnNewDocument(seedFn, seed);
     if (ND7_ONCESI[c.kod] && process.env.ND7_YENI !== '1') await page.evaluateOnNewDocument(nd7Kapat); // SPRINT ND7: O GÜNÜN ayarı (ND7_YENI=1 → bayraklar açık; ne değiştiğini görmek için)
     if (ND7B_ONCESI[c.kod] && process.env.ND7B_YENI !== '1') await page.evaluateOnNewDocument(nd7bKapat); // SPRINT ND7B: O GÜNÜN ayarı
+    if ((ND7K_ONCESI[c.kod] || ND7B_ONCESI[c.kod] || ND7_ONCESI[c.kod]) && process.env.ND7K_YENI !== '1') await page.evaluateOnNewDocument(nd7kKapat); // SPRINT ND7K: O GÜNÜN ayarı (ND7 / ND7B öncesi koşan vakalar da ND7K'sız)
     if (nd6Oncesi(c)) { await page.evaluateOnNewDocument(nd6Kapat); process.env.BM_ND6_KAPALI = "1"; } else delete process.env.BM_ND6_KAPALI; // SPRINT ND6: O GÜNÜN ayarı (alt süreç koşucuları da okur)
     await page.evaluateOnNewDocument((S0, H0) => { window.__cev1EskiKatalog = () => { Object.keys(S0).forEach(id => { const m = MAYALAR.find(x => x.id === id); if (m) { m.sc = [S0[id][0], S0[id][1]]; m.ideal = S0[id][2]; } }); const h = MAYALAR.find(x => x.id === 'ha18'); if (h) { h.atu = H0.slice(); delete h.enzim; } }; }, CEV1_ESKI_SC, CEV1_ESKI_HA18); // CEV1 (0)
     // 'load' DEĞİL: kesilen dış istekler (CDN abort) load'u ara sıra asıyor.
