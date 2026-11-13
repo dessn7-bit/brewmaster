@@ -130,11 +130,11 @@ async function main() {
   });
   // ND7K sözlük yeniden bağlama: bugün sözlükten (alias) başka kayda bağlanan yazım → yeni katalog kaydı (tabloya 'yeni_kayit'; örnek girişinde sözlükten önce okunur)
   const sozIdx = {}; (R.soz || []).forEach(q => { (sozIdx[q.g + '|' + q.y] = sozIdx[q.g + '|' + q.y] || []).push(q); });
-  const sozYeni = {}, sozKullan = []; (E9.sozluk || []).forEach(k => { const hedef = k[0], gerekce = k[1]; if (!gerekce) throw new Error('ND7K sözlük kararı gerekçesiz: ' + hedef); if (!YENI[hedef]) throw new Error('ND7K sözlük kararı: hedef yeni katalog kaydı değil ' + hedef);
+  const sozYeni = {}, sozKullan = [], sozDok = []; /* sözlük yeniden bağlamaları dökümde AYRI listede (satirlar = sözlüğün tanımadığı yazımlar) */ (E9.sozluk || []).forEach(k => { const hedef = k[0], gerekce = k[1]; if (!gerekce) throw new Error('ND7K sözlük kararı gerekçesiz: ' + hedef); if (!YENI[hedef]) throw new Error('ND7K sözlük kararı: hedef yeni katalog kaydı değil ' + hedef);
     const tip = hedef.split(':')[0], g = tip; (k[2] || []).forEach(y => { const q = sozIdx[g + '|' + y]; if (!q) { sozKullan.push(g + '|' + y); return; } if (T9[g][y] || T7[g][y] || T[g][y]) throw new Error('ND7K sözlük kararı: yazım zaten tabloda ' + y);
       const n = q.reduce((s, z) => s + z.n, 0); T9[g][y] = ['u', hedef, 'yeni_kayit', gerekce]; sozYeni[g + '|' + y] = hedef; yeniYazim++; yeniSatir += n;
       const yb = yeniBag[hedef] = yeniBag[hedef] || { yazim: 0, satir: 0, farkKalkan: 0, bekliyordan: 0 }; yb.yazim++; yb.satir += n; yb.sozlukten = (yb.sozlukten || 0) + n;
-      denetim.push({ grup: g, yazim: y, satir: n, karar: 'ürün', hedef: hedef + ' (' + R.kat[hedef] + ')', kural: 'yeni_kayit', not: gerekce, nd7b: true, nd7k: true, onceki: q.map(z => z.hedef).join(' / ') + ' (sözlük)' }); }); });
+      sozDok.push({ grup: g, yazim: y, satir: n, karar: 'ürün', hedef: hedef + ' (' + R.kat[hedef] + ')', kural: 'yeni_kayit', not: gerekce, nd7b: true, nd7k: true, onceki: q.map(z => z.hedef).join(' / ') + ' (sözlük)' }); }); });
   // ND7K Ö2: sözlükten (alias) tanınan, kaydın üreticisinden farklı üretici adı taşıyan malt yazımları — fark 'marka' (çalışma anında N.aliasFark); ürün aday listesine "gecici" + "sozluk" işaretiyle girer
   const sozFark = (R.sozFark || []).filter(q => !sozYeni['malt|' + q.y]).sort((p, q) => q.n - p.n || (p.y < q.y ? -1 : 1)); let sozSatir = 0;
   sozFark.forEach(q => { sozSatir += q.n; const k = 'malt|' + q.urun; (aday[k] = aday[k] || { urun: q.urun, tur: 'malt', satir: 0, yazimlar: [], gecici: 'malt:' + q.id }); aday[k].satir += q.n; aday[k].yazimlar.push(q.y); if (!aday[k].gecici) aday[k].gecici = 'malt:' + q.id; aday[k].sozluk = true; });
@@ -162,7 +162,7 @@ async function main() {
   if (!ayni || !ayni7 || !ayni9) fs.writeFileSync(HF, h);
   const yaz = (f, o) => fs.writeFileSync(f, JSON.stringify(o, null, 1).split(LF).join(CR + LF) + CR + LF);
   yaz(OUT, { aciklama: 'SPRINT ND7 + ND7B + ND7K eşleme tablosu denetim dökümü (_nd7_build.js üretir; elle düzenleme tests/nd7_elle.json). Satırlar ND7B + ND7K bayrakları AÇIK hâli gösterir; "nd7b": true = ND7 (v131-544) satırından farklı; "nd7k": true = ND7B (v131-545) satırından farklı ("onceki" = ND7B hedefi).', ozet: say9, ozetNd7b: say7, ozetNd7: say, fark: { yazim: farkSay, satir: farkSatir, sozluk: { yazim: sozFark.length, satir: sozSatir } }, yeniKayit: { yazim: yeniYazim, satir: yeniSatir, urun: yeniBag }, katalogRenk: R.renk, mayaKarisimElle: MB, siniflar: R.snf, satirlar: denetim,
-    sozlukFark: sozFark.map(q => ({ yazim: q.y, satir: q.n, hedef: 'malt:' + q.id + ' (' + R.kat['malt:' + q.id] + ')', fark: 'marka', farkNot: q.farkNot, aday: q.urun })) });
+    sozlukYeniden: sozDok, sozlukFark: sozFark.map(q => ({ yazim: q.y, satir: q.n, hedef: 'malt:' + q.id + ' (' + R.kat['malt:' + q.id] + ')', fark: 'marka', farkNot: q.farkNot, aday: q.urun })) });
   yaz(ADAY, { aciklama: 'ND7K girdisi: örnek verisinde adı geçen ama katalogda olmayan ürünler. "gecici" alanı dolu olanlar ND7B (a) gereği geçici olarak aynı türden katalog kaydına fark işaretiyle bağlı (ürün eklenince yeniden bağlanır); "sozluk": true = satır sözlük (alias) yolundan tanınıyor (ND7K Ö2); öbürleri "katalog_bekliyor". _nd7_build.js üretir.', ozet: turSay, adaylar: A });
   console.log('[nd7] yazıldı: ' + (ayni ? '' : 'HTML tablo · ') + (ayni7 ? '' : 'HTML ND7B tablosu · ') + (ayni9 ? '' : 'HTML ND7K tablosu · ') + 'tests/nd7_esleme.json · tests/nd7k_aday.json');
 }

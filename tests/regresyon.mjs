@@ -16926,7 +16926,7 @@ const CASELER = [
       const out = []; const ok = (ad, k, d) => out.push({ ad, ok: !!k, detay: d === undefined ? '' : String(d) });
       const html = fs.readFileSync(path.join(KOK, HTML_AD), 'utf8'), sw = fs.readFileSync(path.join(KOK, 'sw.js'), 'utf8'), iv = fs.readFileSync(path.join(KOK, 'iskelet_veri.js'), 'utf8');
       const ozet = t => crypto.createHash('sha256').update(t).digest('hex').slice(0, 10), q = ozet(iv), ov = ozet(fs.readFileSync(path.join(KOK, 'ornek_veri.js'), 'utf8').replace(/\r\n/g, '\n'));
-      const ND6_ONCESI_OZET = 'a9f665cbd5'; /* ND7K ön adımlar: dosya Ö3 / Ö5 / Ö9 (işaret + varsayım hopu kuralı) ile YENİDEN ÜRETİLDİ (ND7B özeti 411c8c4944) — görev gereği; karar Claude'da */ /* ND7B (i): dosya eşit paylı maya kuralıyla YENİDEN ÜRETİLDİ (ND7 özeti deaf106959) */ // ND7 (4b): dosya ND7'de maya okuyucusu devredeyken YENİDEN ÜRETİLDİ (eski özet 2ab21bcd71 = ND6 öncesi sürüm). Sabit = ND7 üretiminin sha256-10'u (LF); dosya bir daha üretilirse bilerek güncellenir
+      const ND6_ONCESI_OZET = '175e00e587'; /* ND7K (2): 76 kaynaklı ürün eklendi, satırlar yeniden bağlandı, dosya YENİDEN ÜRETİLDİ (ön adım özeti a9f665cbd5) — görev gereği; karar Claude'da */ /* ND7K ön adımlar: dosya Ö3 / Ö5 / Ö9 (işaret + varsayım hopu kuralı) ile YENİDEN ÜRETİLDİ (ND7B özeti 411c8c4944) — görev gereği; karar Claude'da */ /* ND7B (i): dosya eşit paylı maya kuralıyla YENİDEN ÜRETİLDİ (ND7 özeti deaf106959) */ // ND7 (4b): dosya ND7'de maya okuyucusu devredeyken YENİDEN ÜRETİLDİ (eski özet 2ab21bcd71 = ND6 öncesi sürüm). Sabit = ND7 üretiminin sha256-10'u (LF); dosya bir daha üretilirse bilerek güncellenir
       ok('iskelet_veri.js özeti = ND7 üretiminin özeti (satır sonu bağımsız) — dosya ND7 (4b) üretiminden sonra değişmedi', ozet(iv.split('\r\n').join('\n')) === ND6_ONCESI_OZET, ozet(iv.split('\r\n').join('\n')) + ' vs ' + ND6_ONCESI_OZET);
       const m = /"ornekV":"([0-9a-f]+)"/.exec(iv);
       ok('iskelet_veri.js örnek özeti = ornek_veri.js özeti', !!m && m[1] === ov, (m && m[1]) + ' vs ' + ov);
@@ -18236,7 +18236,7 @@ const CASELER = [
       __REG.ok('örnek araması ekranı yeni tanımayla: tablo yazımı taşıyan ' + bakilan + ' satırın hepsinde ekran indeksinde ND7 kimliği var; AI indeksinde aynı satır tanınmamış (ham) duruyor', bakilan > 0 && ekranVar === bakilan && aiYok === bakilan, ekranVar + ' / ' + aiYok + ' / ' + bakilan);
       __REG.ok('AI indeksi ayrı nesneler: ekran indeksinin kayıtları değişmedi (aynı örnek sayısı, ayrı referans)', EK.length === AI.length && EK[0] !== AI[0]);
       // ND7 öncesi tanıma: bütün bayraklar kapalıyken (ai dahil → eski yol _bmMalzemeAra) üretilen liste
-      const sak = []; [N, B, K].forEach(o => bay(o).forEach(k => { sak.push([o, k, o[k]]); o[k] = false; })); K.uygula(); B.uygula();
+      const sak = []; [N, B, K].forEach(o => bay(o).filter(k => !(o === K && k === 'katalog')).forEach(k => { sak.push([o, k, o[k]]); o[k] = false; })); K.uygula(); B.uygula(); // görev KATALOG ORTAK: yeni katalog kayıtları eski çözücüde de tanınır — referans ND7 öncesi TANIMA + aynı katalog
       const kapali = liste();
       sak.forEach(x => { x[0][x[1]] = x[2]; }); K.uygula(); B.uygula();
       const farkli = Object.keys(acik).filter(k => JSON.stringify(acik[k]) !== JSON.stringify(kapali[k])), dolu = Object.keys(acik).filter(k => acik[k].length).length;
@@ -18356,6 +18356,70 @@ const CASELER = [
       __REG.ok('kapalı: katalogda yeni kayıt yok (' + yeniN + ' kayıt çıkarıldı), gizli takma kayıt yok', MALTLAR.length + HOPLAR.length + MAYALAR.length + KATKILAR.length === katN - yeniN && MALTLAR.every(m => !m.birlesik) && K.yeniIds().every(k => { const p = k.split(':'), L = p[0] === 'malt' ? MALTLAR : p[0] === 'hop' ? HOPLAR : p[0] === 'maya' ? MAYALAR : KATKILAR; return !L.some(x => x.id === p[1]); }));
       AD.forEach(k => { K[k] = true; }); K.uygula();
       __REG.ok('yeniden açınca katalog eski boyutunda, katman geri etkin', MALTLAR.length + HOPLAR.length + MAYALAR.length + KATKILAR.length === katN && MALTLAR.some(m => m.birlesik));
+      return __REG.al();
+    })
+  },
+  {
+    // ═══ SPRINT ND7K (1)–(4) — KAYNAKLI YENİ KATALOG KAYITLARI. Beklentiler görev metninden: "kaynaksız alan olmaz (veri testi, tüm yeni kayıtlar)" · "yeni ürüne bağlı satır stok kontrolünde doğru id ile aranır" · "bayrak kapalı → eski". ═══
+    // ND7K-URUN-VERI: kural "kataloğa giren her ürünün her sayısal değeri için üretici ya da yetiştirici sayfasının url'si + ≤ 15 sözcük birebir alıntı; değeri bulunamayan alan boş; MUADIL kaydı yazılmaz, hiçbir yeni ürüne ✅ yazılmaz".
+    kod: 'ND7K-URUN-VERI', ad: 'ND7K YENİ KAYIT VERİSİ: her yeni kayıt katalog dizisinde ve işaretli · her SAYISAL alanın kaynağı var (https url + en çok 15 sözcük alıntı; alıntıdaki sayılar alan değerini içerir) · türetilen alanlar kaynaklı alandan yeniden hesaplanınca aynı · kaynak url\'si topluluk / perakende listesi değil · MUADIL kaydı ve ✅ yok',
+    calistir: (page) => page.evaluate(() => {
+      const K = window.BM_ND7K, U = window._BM_ND7K_URUN || {}, KAT = { malt: MALTLAR, hop: HOPLAR, maya: MAYALAR, katki: KATKILAR }, hepsi = [];
+      ['malt', 'hop', 'maya', 'katki'].forEach(t => (U[t] || []).forEach(u => hepsi.push([t, u])));
+      const sozcuk = s => String(s).trim().split(/\s+/).length, sayilar = s => (String(s).replace(/(\d),(\d)/g, '$1.$2').match(/\d+(?:\.\d+)?/g) || []).map(Number), orta = a => (a[0] + a[1]) / 2, r1 = x => Math.round(x * 10 + 1e-9) / 10;
+      const SAY = { hop: { alfa: 'alfa', beta: 'beta', yag: 'yag' }, maya: { zayiflama: 'atu', sicaklik: 'scF' }, malt: { renk: 'renkAr', ekstrakt: 'ekstrakt', maxOran: 'maxOran', nem: 'nem' }, katki: {} };
+      const YASAK = /hopdatabase|beermaverick|hopslist|brewersfriend|byo\.com|morebeer|northernbrewer|wikipedia|homebrewtalk|reddit|web\.archive/i;
+      const yok = [], kaynaksiz = [], alinti = [], deger = [], turet = [], url = [], cift = {}, ciftL = [];
+      hepsi.forEach(([t, u]) => { const ad = t + ':' + u.id; if (cift[ad]) ciftL.push(ad); cift[ad] = 1;
+        if (KAT[t].indexOf(u) < 0 || u.nd7k !== true || KAT[t].filter(x => x && x.id === u.id).length !== 1) yok.push(ad);
+        const KY = Array.isArray(u.kaynak) ? u.kaynak : []; if (!KY.length) kaynaksiz.push(ad + ' (kaynak listesi yok)');
+        KY.forEach(q => { if (!/^https:\/\/[a-z0-9.-]+\//i.test(q.url || '') || YASAK.test(q.url)) url.push(ad + ' ' + q.url); if (!q.alinti || sozcuk(q.alinti) > 15) alinti.push(ad + ' ' + q.alinti); });
+        Object.keys(SAY[t]).forEach(a => { const v = u[SAY[t][a]]; if (v == null) return; const kay = KY.filter(q => String(q.alan).split(',').map(x => x.trim()).some(x => x === a || x === a + '2'));
+          if (!kay.length) { kaynaksiz.push(ad + ' ' + a); return; } const tum = [].concat(...kay.map(q => sayilar(q.alinti)));
+          (Array.isArray(v) ? v : [v]).filter(x => x != null).forEach(x => { if (!tum.some(y => Math.abs(y - x) < 1e-9)) deger.push(ad + ' ' + a + ' ' + x); }); });
+        if (t === 'hop' && !(u.aa > 0 && Math.abs(u.aa - r1(orta(u.alfa))) < 1e-9)) turet.push(ad + ' aa');
+        if (t === 'maya') { const sc = u.scF.map(f => Math.round((f - 32) / 1.8)); if (!(u.sc[0] === sc[0] && u.sc[1] === sc[1] && u.ideal === Math.round(orta(sc)) && u.atu[0] > 0 && u.atu[1] >= u.atu[0])) turet.push(ad + ' sc / ideal / atu'); }
+        if (t === 'malt' && !(u.gu === Math.round(u.ekstrakt * 3.84) && Math.abs(u.r - r1(orta(u.renkAr))) < 1e-9)) turet.push(ad + ' gu / r'); });
+      __REG.ok(hepsi.length + ' yeni kayıt (malt ' + (U.malt || []).length + ' · hop ' + (U.hop || []).length + ' · maya ' + (U.maya || []).length + '): hepsi katalog dizisinde, nd7k işaretli, kimlik tür içinde tek', hepsi.length > 0 && yok.length === 0 && ciftL.length === 0 && K.yeniIds().length === hepsi.length, yok.concat(ciftL).slice(0, 6).join(' ; '));
+      __REG.ok('kaynaksız sayısal alan yok (hop: alfa / beta / yağ · maya: zayıflama / sıcaklık · malt: renk / ekstrakt / en fazla oran / nem)', kaynaksiz.length === 0, kaynaksiz.slice(0, 6).join(' ; '));
+      __REG.ok('her kaynak: https url (topluluk / perakende / arşiv listesi değil) + en çok 15 sözcük alıntı', url.length === 0 && alinti.length === 0, url.concat(alinti).slice(0, 4).join(' ; '));
+      __REG.ok('alıntıdaki sayılar alan değerini içeriyor (her aralık ucu / tek değer)', deger.length === 0, deger.slice(0, 6).join(' ; '));
+      __REG.ok('türetilen alanlar kaynaklı alandan: hop aa = alfa aralığının ortası · maya sc = °F → °C, ideal = aralığın ortası · malt gu = ekstrakt % × 3,84, r = renk aralığının ortası', turet.length === 0, turet.slice(0, 6).join(' ; '));
+      const yeni = {}; hepsi.forEach(([t, u]) => { yeni[u.id] = t; }); let muAnahtar = 0, muGecen = 0;
+      if (typeof MUADIL !== 'undefined') Object.keys(MUADIL).forEach(k => { if (yeni[k]) muAnahtar++; (Array.isArray(MUADIL[k]) ? MUADIL[k] : []).forEach(m => { if (m && yeni[m.id]) muGecen++; }); });
+      __REG.ok('MUADIL tablosunda yeni kimlik yok (anahtar ' + muAnahtar + ' · liste içi ' + muGecen + '); kayıtlarda ✅ yok', muAnahtar === 0 && muGecen === 0 && !hepsi.some(([t, u]) => /✅/.test(JSON.stringify(u))));
+      return __REG.al();
+    })
+  },
+  {
+    // ND7K-URUN-BAG: kural (2) "katalog_bekliyor satırları yeni ürüne bağlanır; eşleme tablosunda kural yeni_kayit" · ND7B eki "ürün kaynakla eklenirse satır ürüne yeniden bağlanır ve fark alanı KALKAR" · (4) "yeni ürüne bağlı satır stok kontrolünde doğru id ile aranır" · "bayrak kapalı → eski".
+    kod: 'ND7K-URUN-BAG', ad: 'ND7K YENİDEN BAĞLAMA: tabloda kuralı yeni_kayit olan her yazım yeni bir katalog kaydına gider, fark = marka taşımaz · her yeni kayda en az bir satır bağlı · stok kontrolü yeni kimlikle arar (ürün stokta → satır karşılanır; yalnız eski geçici kayıt stokta → karşılanmaz; stok boş → yok) · bayrak kapalı → satır eski hâline (katalog bekliyor / farkla geçici kayıt) döner',
+    calistir: (page) => page.evaluate(() => {
+      const N = window.BM_ND7, B = window.BM_ND7B, K = window.BM_ND7K, T9 = K.tabloVeri(), T7 = B.tabloVeri(), T = N.tabloVeri(), yeniSet = {}; K.yeniIds().forEach(k => { yeniSet[k] = 1; });
+      const YK = []; Object.keys(T9).forEach(g => Object.keys(T9[g]).forEach(y => { if (T9[g][y][2] === 'yeni_kayit') YK.push([g, y, T9[g][y]]); }));
+      const hedefDisi = YK.filter(x => !yeniSet[x[2][1]]), markaFark = YK.filter(x => x[2][4] === 'marka'), cozYanlis = YK.filter(x => { const z = N.coz(x[0], x[1]); return !z || (z.tip + ':' + z.id) !== x[2][1]; });
+      __REG.ok('tabloda yeni_kayit kurallı ' + YK.length + ' yazım: hepsi yeni katalog kaydına gidiyor, çözücü aynı kimliği veriyor, fark = marka yok', YK.length > 0 && hedefDisi.length === 0 && markaFark.length === 0 && cozYanlis.length === 0, hedefDisi.concat(markaFark, cozYanlis).slice(0, 5).map(x => x[1]).join(' ; '));
+      // örnek satırları: yeni kimliğe bağlı satırlar
+      const H = window._bmOrnekHepsi(), bagli = {}, ornekSatir = {}; let satir = 0;
+      H.forEach(e => { const r = window._bmOrnekKuru(e.kaynak, e.stil, e.idx); if (!r) return; [['g', r.g], ['h', r.h], ['y', (r.y ? [r.y] : []).concat(r.yEk || [])], ['ek', r.ek]].forEach(([b, L]) => L.forEach((k, i) => { if (!k.id || !yeniSet[k.tip + ':' + k.id]) return; satir++; bagli[k.tip + ':' + k.id] = (bagli[k.tip + ':' + k.id] || 0) + 1; if (!ornekSatir[k.tip + ':' + k.id] && (b === 'g' || b === 'h') && !k.fark) ornekSatir[k.tip + ':' + k.id] = { e, b, i }; })); });
+      const bos = K.yeniIds().filter(k => !bagli[k]);
+      __REG.ok('988 örnekte yeni kayıtlara bağlı ' + satir + ' satır; satırı olmayan yeni kayıt yok', satir > 0 && bos.length === 0, bos.join(' ; '));
+      // stok kontrolü doğru kimlikle: malt + hop satırlarında (maya stok köprüsü ayrı kural)
+      const stokSak = STOK.slice(), kimlikler = Object.keys(ornekSatir).slice(0, 14), kayitBul = k => { const p = k.split(':'); return (p[0] === 'malt' ? MALTLAR : HOPLAR).find(x => x.id === p[1]); }; const hata = [];
+      const durum = q => { window._nd6OnbSifirla(); const st = window._bmOrnekStok(q.e.kaynak, q.e.stil, q.e.idx), x = st ? st[q.b][q.i] : null; return x ? x.d : 'yok-satir'; };
+      kimlikler.forEach(k => { const q = ornekSatir[k], rec = kayitBul(k), malt = k.indexOf('malt:') === 0, eskiSatir = T7[malt ? 'malt' : 'hop'][window.BM_ND7.nrm(window._bmOrnekKuru(q.e.kaynak, q.e.stil, q.e.idx)[q.b][q.i].ham)] || null;
+        STOK.length = 0; STOK.push({ id: '9990911', refId: rec.id, ad: rec.ad, g: malt ? 'Malt' : 'Hop', miktar: malt ? 500 : 50000, birim: malt ? 'kg' : 'g' }); const d1 = durum(q);
+        STOK.length = 0; const d0 = durum(q);
+        let d2 = null; if (eskiSatir && eskiSatir[0] === 'u') { const ep = eskiSatir[1].split(':'), er = (ep[0] === 'malt' ? MALTLAR : HOPLAR).find(x => x.id === ep[1]); if (er) { STOK.push({ id: '9990912', refId: er.id, ad: er.ad, g: malt ? 'Malt' : 'Hop', miktar: malt ? 500 : 50000, birim: malt ? 'kg' : 'g' }); d2 = durum(q); } }
+        if (['stokta', 'bilinmiyor'].indexOf(d1) < 0 || d0 !== 'yok' || (d2 !== null && d2 !== 'yok')) hata.push(k + ' stokta:' + d1 + ' boş:' + d0 + ' eski geçici kayıt stokta:' + d2); });
+      STOK.length = 0; stokSak.forEach(x => STOK.push(x)); window._nd6OnbSifirla();
+      __REG.ok(kimlikler.length + ' yeni kayıt için stok denemesi: ürün stokta → satır karşılanır · stok boş → yok · yalnız eski geçici kayıt stokta → yok (muadil kaydı yazılmadı)', kimlikler.length > 0 && hata.length === 0, hata.slice(0, 4).join(' ; '));
+      // bayrak kapalı → eski
+      K.katalog = false; K.tablo = false; K.uygula();
+      const geri = YK.filter(x => { const r = T7[x[0]][x[1]] || T[x[0]][x[1]], z = N.coz(x[0], x[1]); if (!r) return !!(z && z.id && yeniSet[z.tip + ':' + z.id]); return r[0] === 'u' ? !(z && (z.tip + ':' + z.id) === r[1]) : r[0] === 'b' ? !(z && z.sinif && z.bekliyor) : false; });
+      __REG.ok('katalog + tablo bayrağı kapalı → ' + YK.length + ' yazımın hepsi alttaki satırın sonucuna döner (katalog bekliyor / geçici kayıt); katalogda yeni kayıt yok', geri.length === 0 && K.yeniIds().every(k => { const p = k.split(':'); return !(p[0] === 'malt' ? MALTLAR : p[0] === 'hop' ? HOPLAR : p[0] === 'maya' ? MAYALAR : KATKILAR).some(x => x.id === p[1]); }), geri.slice(0, 5).map(x => x[1]).join(' ; '));
+      K.katalog = true; K.tablo = true; K.uygula();
+      __REG.ok('yeniden açınca yeni kayıtlar katalogda ve satırlar yeniden bağlı', K.yeniIds().length > 0 && YK.every(x => { const z = N.coz(x[0], x[1]); return z && (z.tip + ':' + z.id) === x[2][1]; }));
       return __REG.al();
     })
   }
@@ -18551,9 +18615,16 @@ const ND7B_ONCESI = {
 //   bayrak kapalı = v131-545 davranışı; iskelet_veri.js yeniden üretimi bayrakla geri alınmaz). Yeni davranışı ND7K-* vakaları sınar. ND7K_YENI=1 → bayraklar açık (ne değiştiğini görmek için). Karar Claude'da.
 const ND7K_ONCESI = {
   "ND7B-KAPALI": ["ND7B bayrakları kapalıyken hiçbir satırda fark / okuyucu-aynımarka yok bekler — ND7K tablo katmanı (Ö1 kararıyla fark boşalan okuyucu-aynımarka satırları, Ö3 fark marka) ND7B bayraklarından bağımsız; ND7K kapalı davranışını ND7K-KAPALI sınar"],
+  "ND7-SINIF": ["\"katalogda olmayan gerçek ürün → katalog_bekliyor\" örneği olarak Hersbrucker / Golden Naked Oats / WLP833 kullanır — ND7K (1): üçü de kaynakla KATALOĞA EKLENDİ; yeni kural ND7K-URUN-BAG'da"],
+  "ND7-TABLO": ["\"elle olmayan satırlarda tablo = kuralın çıktısı\" — ND7K: katalog büyüdü, kural yolu bazı yazımları yeni kayda çözüyor (briess pilsen malt → Briess Pilsen, crisp wheat malt → Crisp Wheat …); ND7 tablosu donmuş kalır, yeni bağlar ND7K katmanında"],
+  "ND7B-KAPSAM": ["_bmKatCoz (ND7 öncesi sözlük) tablo yazımlarının hiçbirini bağlamaz bekler — ND7K KATALOG ORTAK: yeni katalog kayıtlarının adları eski sözlükte de tanınır (bilinçli, A1 ölçümüyle raporlandı); \"briess pilsner malt\" artık Briess Pilsen kaydına bağlı"],
+  "ND7B-KATALOG": ["iskelet eşit paylı maya örnekleri (Blonde Ale → us05 …) — ND7K: yeni maya kayıtları (WLP080, WY2565 …) örnek sayımına girdi, eşit pay durumu değişti"],
+  "ND3-HOP-ND7": ["Hersbrucker / Mt. Hood / Cluster / US Golding / NZ Cascade (Taiheke) için \"katalogda yok → katalog bekliyor, başka hopa bağlanmaz\" bekler — ND7K (1)(2): bu çeşitler üretici / yetiştirici kaynağıyla KATALOĞA EKLENDİ ve satırlar KENDİ yeni kayıtlarına bağlandı (başka hopa değil); yeni kural ND7K-URUN-BAG'da"],
   "ND7B-FARK": ["sözlükten tanınan satırda fark yok bekler — ND7K Ö2: örnek yolunda sözlük (alias) eşlemesi de denetlenir, kaydın üreticisinden farklı üretici adı taşıyan alias fark = marka; yeni kural ND7K-FARK'ta"]
 };
-function nd7kKapat() { let v; Object.defineProperty(window, 'BM_ND7K', { configurable: true, get() { return v; }, set(x) { v = x; if (x) ['fark', 'tablo', 'ai', 'maya2', 'isk', 'katalog'].forEach(k => { x[k] = false; }); } }); }
+// ND7 / ND7B öncesi koşup yeniden üretilen iskelet_veri.js planına bakan vakalar: dosya yeni katalog kimliklerine başvurur (bayrakla geri alınmaz) → ND7K kapalı ama katalog AÇIK
+const ND7K_KATALOG_ACIK = { 'ND6-KAPALI': 1, 'ND6-KAPALI-ND7': 1 };
+function nd7kKapat(katalogKalsin) { let v; Object.defineProperty(window, 'BM_ND7K', { configurable: true, get() { return v; }, set(x) { v = x; if (x) ['fark', 'tablo', 'ai', 'maya2', 'isk', 'katalog'].forEach(k => { if (!(katalogKalsin && k === 'katalog')) x[k] = false; }); } }); } // katalogKalsin: ND7 / ND7B öncesi koşan vakalar — yeniden üretilen iskelet_veri.js yeni katalog kimliklerine başvurur (dosya bayrakla geri alınmaz), katalog açık kalır
 function nd7bKapat() { let v; Object.defineProperty(window, 'BM_ND7B', { configurable: true, get() { return v; }, set(x) { v = x; if (x) ['kapsam', 'tablo', 'satir', 'renk', 'og', 'isk'].forEach(k => { x[k] = false; }); } }); }
 function nd7Kapat() { let v; Object.defineProperty(window, 'BM_ND7', { configurable: true, get() { return v; }, set(x) { v = x; if (x) ['okuyucu', 'sinif', 'maya', 'tablo'].forEach(k => { x[k] = false; }); } }); }
 const nd6Oncesi = c => { const e = ND6_ONCESI[c.kod]; return !!e && !(e[0] === 'ai' && process.env.ND6_AI_YENI === '1'); };
@@ -18572,7 +18643,7 @@ async function browserCaseKos(browser, seed, c) {
     await page.evaluateOnNewDocument(seedFn, seed);
     if (ND7_ONCESI[c.kod] && process.env.ND7_YENI !== '1') await page.evaluateOnNewDocument(nd7Kapat); // SPRINT ND7: O GÜNÜN ayarı (ND7_YENI=1 → bayraklar açık; ne değiştiğini görmek için)
     if (ND7B_ONCESI[c.kod] && process.env.ND7B_YENI !== '1') await page.evaluateOnNewDocument(nd7bKapat); // SPRINT ND7B: O GÜNÜN ayarı
-    if ((ND7K_ONCESI[c.kod] || ND7B_ONCESI[c.kod] || ND7_ONCESI[c.kod]) && process.env.ND7K_YENI !== '1') await page.evaluateOnNewDocument(nd7kKapat); // SPRINT ND7K: O GÜNÜN ayarı (ND7 / ND7B öncesi koşan vakalar da ND7K'sız)
+    if ((ND7K_ONCESI[c.kod] || ND7B_ONCESI[c.kod] || ND7_ONCESI[c.kod]) && process.env.ND7K_YENI !== '1') await page.evaluateOnNewDocument(nd7kKapat, !!ND7K_KATALOG_ACIK[c.kod]); // SPRINT ND7K: O GÜNÜN ayarı (ND7 / ND7B öncesi koşan vakalar da ND7K'sız)
     if (nd6Oncesi(c)) { await page.evaluateOnNewDocument(nd6Kapat); process.env.BM_ND6_KAPALI = "1"; } else delete process.env.BM_ND6_KAPALI; // SPRINT ND6: O GÜNÜN ayarı (alt süreç koşucuları da okur)
     await page.evaluateOnNewDocument((S0, H0) => { window.__cev1EskiKatalog = () => { Object.keys(S0).forEach(id => { const m = MAYALAR.find(x => x.id === id); if (m) { m.sc = [S0[id][0], S0[id][1]]; m.ideal = S0[id][2]; } }); const h = MAYALAR.find(x => x.id === 'ha18'); if (h) { h.atu = H0.slice(); delete h.enzim; } }; }, CEV1_ESKI_SC, CEV1_ESKI_HA18); // CEV1 (0)
     // 'load' DEĞİL: kesilen dış istekler (CDN abort) load'u ara sıra asıyor.
