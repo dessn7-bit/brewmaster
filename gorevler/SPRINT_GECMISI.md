@@ -744,3 +744,49 @@ Bir sprintin ayrıntısını ararken: `grep -n "<SPRİNT ADI>" gorevler/SPRINT_G
 - **Ö7 BUL1-KURU-ND7:** Kabul edildi. Claude'un "aynı sayı" önermesi yanlıştı; kahveli stoutlardan biri kuru.
 - **Ö8 İkinci maya:** maya2Id alanına yazılır.
 - **Ö9 İskelet:** Farklı ürüne yapılan bir eşleme, ürün seçerken "aynı ürün" sayılmaz.
+
+1j3z15. **ND7K YAPILDI** (CC, 2026-11-13; SW v131-546; gorevler/ND7K.md (1)–(2) + ÖN ADIMLAR Ö1–Ö9 + ek kararlar 1–2; gerçek API yok, Firebase yok). Çalışma dalı `nd7k-calisma`: 60bba33 (ön adımlar, SW değişmedi) · aa94cf2 (76 ürün + yeniden bağlama, SW v131-546) · 4b8fd11 + 16e2940 (test beklentileri, Claude kararları 1a–1e + doğrulayıcı M1 / M2) · e4f8670 (iki iddia düzeltmesi) → main'e fast-forward e4f8670 (canlı md5 01d8bdbc… = git blob).
+
+**Bayraklar:** `window.BM_ND7K = { fark, tablo, ai, maya2, isk, katalog }`, `K7.uygula()`. Kapalıyken tanıma v131-545 ile aynı; yeniden üretilen iskelet_veri.js bayrakla geri alınmaz.
+
+**Ön adımlar (Claude kararları)**
+- Ö1 çok üreticili kayıt: tarifin üreticisi kaydın `mo` alanındaki üreticilerden biriyse fark yok (marka farkı 116 → 102 satır, ilk commit).
+- Ö2 sözlük (alias) yolu: alias'ta kayıttan farklı üretici → fark marka (örnek yolu; AI girişi `_bmKatCoz` değişmedi).
+- Ö3 Great Western "domestic pale malt" → briess_pale + fark marka; Premium Two Row üretici sitesinde var, California Select bulunamadı (ayrı aday).
+- Ö4 "fresh grated" → katki:zencefil (aynı tarifin öbür kaydı).
+- Ö5 `_BM_ND7K_BIRLESIK`: cara45 → cara120, dingemans_cara8 → dingemans_cara20 (eski kayıt gizli, listelerden süzülür, stok eşdeğerliği `_bmBirlesikEs`); görünen adlar ve alias alanı değişmedi (BV1-SEMA, stil motoru / ML girdisi).
+- Ö6 AI4 ödüllü örnek listesi ND7 öncesi tanımayla (`_bmMalzemeIndexEski`).
+- Ö8 karışımın ikinci mayası `maya2Id`'ye; üçüncüsü yalnız not.
+- Ö9 (ek kararlar 2) iskelet seçimi sıklığa göre (fark eşlemesi dahil); seçilen kaydın ağırlığının yarısından fazlası farklı eşlemeden geliyorsa işaret + not "tariflerin çoğu X diyor; katalogdaki en yakın Y (fark: …)"; kaynağında hop olmayan örneğin varsayım hopu kanıt sayılmaz.
+
+**Ürünler** (her sayısal değer url + ≤ 15 sözcük birebir alıntı; muadil / ✅ yok)
+
+| Tür | Eklenen | Eklenemeyen (neden) | Sırada |
+|---|---|---|---|
+| Hop | 30 | Citra LupoMax, Mosaic LupoMax, Citra Incognito: üreticide çeşide özgü alfa yok · Amarillo Lupo: ad eşlemesi üretici sayfasında yok · Zamba: ürün bulunamadı | Pacific Jade (nzhops 429) |
+| Maya | 27 | Wyeast 1764: ürün bulunamadı | Omega OYL-402 (omegayeast 429) |
+| Malt | 19 | GW California Select: ürün yok · GW Pale Ale Malt: bu adla ürün yok · Briess Black Barley: ekstrakt yok · Muntons Pale Ale: tablo görsel · Joe White Pale Ale: ürün yok · Mecca Grade ×2: alan adı park sayfası · Cargill Special Pale: 403 | — |
+
+- Yeniden bağlama: 241 yazım, 529 satır yeni kayıtlara (kural `yeni_kayit`). "simcoe lupuln2" bilerek bağlanmadı (LupuLN2 = Cryo üretici sayfasında gösterilmedi).
+- Fark işareti: marka 102 → 68 satır · renk 67 → 70 · sözlük yolunda üretici farkı 90 → 86.
+- Katalog bekleyen satır: malt 374 → 323 · hop 390 → 108 · maya 260 → 97. OG hesaplanamadığı için kapalı örnek 107 → 98. Stoğumla oluştur görünen 881 → 890, tam 106 → 162.
+- Cara satırları: dingemans cara 45 (2) cara45 → cara120 · caravienne ailesi (15) → dingemans_cara50 (fark yok) · caravienne 21 / 22 °L (3) → Cara 50 MD + fark renk · dmc / dingeman caramel vienna (3) ve belgian caramel vienna 20 °L (1) → Cara 50 MD · cara 45l → sözlük cara120. Dokunulmayan: 25 °L, 51 °L, MFB, markasız caramel vienna, "cara 120 malt".
+
+**İskelet:** v131-545 → 60bba33: 40 stilde fark, seçimi değişen 6 (Ö3: American Stout / Foreign Extra Stout grist pale_ale → briess_pale; varsayım hopu: Belgian Strong Golden, Dry Irish Stout, Schwarzbier, Wee Heavy); 31 malt rolü + 7 hop seçimi yalnız işaret. 60bba33 → aa94cf2: seçimi değişen 72 stil, boşalan alan 0; mayasız stil 25 → 18; değişikliklerin 93/101'i doğrudan yeni kayıt, 8'i dolaylı. iskelet_veri.js özeti (sha256 ilk 10) 411c8c4944 → a9f665cbd5 → 175e00e587.
+
+**Ölçümler (aa94cf2):** Ö6 AI4 kanıt paketi 123 istemde v131-543 ile fark 0; 595 eski kalemin ödüllü örnek listesi fark 0 (+76 yeni). A1 v131-545'e göre tek istemde değişti: tuzak T:B06 "Zerdova Gold" artık Brewer's Gold'a bağlanmıyor ("Gold" yeni kayıtlarla belirsizleşti). Üç imza aynı. Diff'te anahtar / Firebase / httpbin 0.
+
+**Bağımsız doğrulayıcı (CC, kısa tur):** 20 rastgele ürünün 18'i üretici sayfasıyla doğrulandı, 2 askıda (yakimachief 429: Cryo Simcoe, Falconer's Flight); en uzun alıntı 15 sözcük; MUADIL / ✅ 0; iskelet farklarının tamamı açıklandı. Not: WLP566 °C değeri °F'tan çevrildi (sayfadaki °C'den 1 derece farklı).
+
+**Claude bulut tam regresyonu (aa94cf2, 613 vaka):** 603 geçti, 9 kırmızı (hepsi yeni katalog / yeniden üretilen dosyalardan; uygulama davranışında hata yok), DOG4F sonucu beklendi. Claude ürün denetimi: 6 ürün üretici sayfasıyla birebir; 45 rastgele yeniden bağlanan yazımda yanlış bağ 0.
+
+**Adım 3 — test beklentileri (Claude kararları 1a–1e; yalnız tests/regresyon.mjs)**
+- 1a: DOG4D / DOG4E / DOG4F / DOG4G / DOG4H-COZUM ve BUL2C-ISTEK `ND7K_ONCESI`'ne girdi (dondurulmuş AI geri oynatmaları o günün kataloğuyla; ND6 (a) gerekçesi). Yeni katalog açık davranışını ND7K-AI-SORU sınar.
+- 1b: yeni vaka ND7K-AI-SORU: (i) tuzak taban dubbel'de "mayayı WLP530 ile değiştirsem" → DEĞİŞTİR, maya wlp530; (ii) katalogda kaydı olmayan ilk WLP kodu (çalışma anında seçilir) → yok / belirsiz, kendiliğinden değiştirilmez; (iii) tuzak + b, c, e, f, g parmak izleri ND7K açıkken birebir; DOG4D'de değişen her madde ND7K'nın eklediği bir ürünü anıyor (aa94cf2 bulut koşusunda b3af54f6/11588 → 4a1bcd2e/11909); (iv) BUL istemleri: şema enum dışında birebir, kod listesine yalnız ND7K kimlikleri (`malz:<tip>:<id>`) eklendi, silinen yok. Aynı sayfada ND7K kapalıyken izler ve BUL görüntüsü dondurulmuş değerlerle aynı (denetim iddiaları).
+- 1c: BV2-IKAME-SIZINTI / BV3-ARAMA: alias sızıntısı iddiası aynen; Hallertau YASAK listesindeki 26 yazımın hiçbiriyle bulunmuyor; kendi kaydı olan adlar kaydın katalogdaki adıyla aranınca kendi grubunun filtresinde ve type-ahead'de yalnız kendi kaydını buluyor; katalog boşluğu çalışma anında seçilen, eşleme dökümünde `katalog_bekliyor` olan kaydı olmayan adla sınanıyor; noktalama farkı ("mt hood" ↔ Mt. Hood) kırmızı değil, "BİLGİ — bilinen eksik → KUCUK1" satırı (karar gorevler/KUCUK1.md'ye eklendi).
+- 1d: ND7B-FARK Rahr iddiası: 9 yazımın hepsi `malt:rahr_2row`, fark boş (kaydın üreticisi Rahr), ürün ND7K aday listesinde yok.
+- 1e: ND7B-KATALOG ND7K kataloğu açık koşar; Blonde Ale / Wood-Aged / Kölsch değer örnekleri yerine kural: her stilde seçilen maya bağımsız sayımla en yüksek paylı aday, eşit payda / örnek < 3'te izin yazdığı kural geçerli. Renk iddialarına dokunulmadı.
+- Bağımsız doğrulayıcı (iki tur, koşu yok): M1 bağımsız maya sayımı motorla aynı kipte (`__nd6TuretModu`) · M2 kaydı olmayan ad ayrıca eşleme dökümünde `katalog_bekliyor` olmalı (yoksa "hallertauer hersbrucker" seçilebilirdi) → 16e2940.
+- Claude bulut koşusu (16e2940, değişen 11 vaka + DOG4F): 9 geçti (DOG4D/E/F/G/H-COZUM, BUL2C-ISTEK, BV3-ARAMA, ND7B-FARK, ND7K-AI-SORU); BİLGİ satırı 1 yazım ("mt hood"). İki kırmızı test kurgusundan: BV2 (ii) tüm katalogda arıyordu ("Liberty" → liberty + mj_m36, M36 "Liberty Bell" ale mayası; editör filtreleri grup başına, sızıntı değil) · ND7B-KATALOG "canlı türetme = saklanan dosya (4 stil)" ND7K tablo katmanı kapalıyken koşuyordu (canlı us05, wlp029, wlp565, s04; dosya bütün bayraklar açıkken üretildi; Claude ölçümü: bütün bayraklar açıkken 228 stilde fark 0).
+- Düzeltme (e4f8670, Claude kararı): BV2 (ii) kendi grubunun filtresi · "canlı türetme = saklanan dosya" ND7B-KATALOG'dan çıktı → yeni vaka ND7K-ISK-CANLI (ND7K_ONCESI'nde değil, bütün ND7K bayrakları açık): iskelet_veri.js'teki her stilde canlı `_bmIskTuret` mayaId = dosya. CC yerel `--case` ile BV2-IKAME-SIZINTI, ND7B-KATALOG, ND7K-ISK-CANLI 3/3 geçti (boş bellek 7,1 GB). Not: vaka dosyadaki 239 stilin hepsini karşılaştırıyor (mayalı 221, mayasız 18 boş = boş); Claude'un "228" sayısıyla fark açıklanmadı.
+- main: fast-forward e4f8670 (60bba33 · aa94cf2 · 4b8fd11 · 16e2940 · e4f8670); canlı md5 01d8bdbc3ed848f37aa8608997cf4420 = git blob, SW v131-546. Ö6 / A1 yeniden koşulmadı (HTML aa94cf2'den beri değişmedi).
