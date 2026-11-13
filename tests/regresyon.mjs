@@ -7178,10 +7178,27 @@ const CASELER = [
         'caramunich', 'crystal malt', 'munich malt 10l', 'rahr 2-row pale', 'pale malt, 2 row, uk', 'chocolate rye', 'invert sugar', 'rice', 'tnt'];
       const sizan = YASAK.filter(a => hepsi.has(a)).map(a => a + '→' + hepsi.get(a));
       __REG.ok('ikame/belirsiz ' + YASAK.length + ' ad hiçbir kaydın alias\'ı değil', sizan.length === 0, sizan.join(' '));
-      __REG.ok('Hallertau Mittelfrueh arama "liberty" ile BULUNMUYOR', !_bmKatEsles(HOPLAR.find(h => h && h.id === 'hrtau'), 'liberty'));
-      __REG.ok('"liberty" hop filtresi boş (katalog boşluğu dürüstçe görünür)', HOPLAR.filter(h => _bmKatEsles(h, 'liberty')).length === 0);
+      // CLAUDE KARARI 1c (2026-11-13): ND7K (1) Liberty, Mt. Hood, Hersbrucker, Strisselspalt ve Vanguard'ı üretici kaynağıyla kataloğa ekledi. Değişmez: ikame adları Hallertau'ya (ya da başka bir ürüne) alias olarak SIZMAZ (yukarıdaki iddia aynen).
+      const nrm = s => _bmTrNorm(String(s || '')).replace(/[.'’]/g, '').replace(/\s+/g, ' ').trim(), U7 = window._BM_ND7K_URUN || {}, KL = { malt: MALTLAR, hop: HOPLAR, maya: MAYALAR, katki: KATKILAR };
+      const kendi = a => { const o = []; Object.keys(KL).forEach(t => (U7[t] || []).forEach(x => { if (nrm(x.ad).indexOf(nrm(a)) >= 0) o.push({ t, id: x.id, ad: String(x.ad) }); })); return o; };
+      const N7 = window.BM_ND7, tanir = a => ['malt', 'hop', 'maya'].some(t => { const z = (N7 && N7.coz && N7.coz(t, a)) || {}; return !!z.id && KL[t].some(x => x && x.id === z.id); });
+      const kaydiYok = a => !kendi(a).length && !Object.keys(KL).some(t => KL[t].some(x => x && [x.ad].concat(x.alias || []).some(s => nrm(s).indexOf(nrm(a)) >= 0))) && !tanir(a);
+      const OWN = [], ownG = {}; YASAK.forEach(a => kendi(a).forEach(k => { if (!ownG[k.id]) { ownG[k.id] = 1; OWN.push(k); } }));
+      const bul = a => Object.keys(KL).map(t => KL[t].filter(m => _bmKatEsles(m, a)).map(m => m.id)).reduce((p, c) => p.concat(c), []);
+      // eski → yeni: "Hallertau 'liberty' ile bulunmuyor" → "Hallertau YASAK listesindeki hiçbir yazımla bulunmuyor", çünkü 1c (i): ikame adı Hallertau'yu bulmaz (liberty bu değişmezin tek örneğiydi)
+      const hr = HOPLAR.find(h => h && h.id === 'hrtau'), hrB = YASAK.filter(a => _bmKatEsles(hr, a));
+      __REG.ok('Hallertau Mittelfrueh YASAK listesindeki ' + YASAK.length + ' yazımın hiçbiriyle BULUNMUYOR', !!hr && hrB.length === 0, hrB.join(', '));
+      // eski → yeni: (yok) → "kendi kaydı olan her ad, kaydın KATALOGDAKİ adıyla arandığında filtrede yalnız kendi kaydını buluyor", çünkü 1c (ii): ND7K bu adların ürününü kataloğa ekledi; bulunan kayıt kendisi olmalı
+      const ownH = OWN.filter(k => { const b = bul(String(k.ad).toLowerCase()); return b.length !== 1 || b[0] !== k.id; });
+      __REG.ok('kendi kaydı olan ' + OWN.length + ' kayıt (' + OWN.map(k => k.id).join(', ') + ') katalogdaki adıyla aranınca filtrede YALNIZ kendi kaydını buluyor', OWN.length > 0 && ownH.length === 0, ownH.map(k => '"' + k.ad + '" → ' + (bul(String(k.ad).toLowerCase()).join('+') || 'yok')).join(' ; '));
+      // kaydından yalnız noktalamayla ayrılan YASAK yazımı ("mt hood" ↔ "Mt. Hood"): kırmızı değil, BİLGİ (Claude kararı 1c: bilinen eksik → KUCUK1)
+      const eksik = YASAK.filter(a => kendi(a).some(k => !_bmKatEsles(KL[k.t].find(m => m && m.id === k.id), a)));
+      __REG.ok('BİLGİ — bilinen eksik → KUCUK1 (filtre noktalamayı yok saymıyor): ' + eksik.length + ' yazım', true, eksik.map(a => '"' + a + '" ↔ ' + kendi(a).map(k => k.ad).join(' / ')).join(' ; '));
+      // eski → yeni: "'liberty' hop filtresi boş" → "çalışma anında seçilen kaydı olmayan YASAK yazımıyla bütün katalog filtreleri boş", çünkü 1c (iii): Liberty artık katalogda; katalog boşluğu kaydı olmayan adla sınanır
+      const bos = YASAK.find(kaydiYok);
+      __REG.ok('katalog boşluğu dürüstçe görünür: kaydı olmayan yazım (çalışma anında seçildi: "' + bos + '") malt / hop / maya / katkı filtrelerinin hiçbirinde yok', !!bos && bul(bos).length === 0, bos ? bul(bos).join('+') : 'YASAK listesinde kaydı olmayan yazım kalmadı');
       return __REG.al();
-    })
+    }).then(c => (c.filter(x => /^BİLGİ/.test(x.ad) && x.detay).forEach(x => console.log('     ℹ️  ' + x.ad + ' [' + x.detay + ']')), c)) // bilgi satırı: sayı > 0 iken çıktıda görünür
   },
   {
     kod: 'BV3-ARAMA', ad: 'alias tüketicileri: (a) _bmKatEsles filtreleri (editör malt/hop/maya listeleri + stok ekleme) ad VEYA alias içerir; (b) canlı type-ahead _bmAramaCiz ad eşleşmelerini ÖNCE, alias eşleşmelerini SONRA sıralar ve satırda "≈ eş ad" gösterir; (c) Enter kısayolu ad yoksa en iyi alias\'ı seçer; (d) reçete listesi araması "hallertauer" → Hallertau içeren reçete',
@@ -7215,9 +7232,27 @@ const CASELER = [
       _bmAramaCiz('hop', 'citra');
       const s3 = [...p.querySelectorAll('[onmousedown]')];
       __REG.ok('(b) ad eşleşmesi olan aramada alias ipucu hiç yok ("citra")', s3.length === 3 && s3.every(x => !x.querySelector('.bm-arama-es')), s3.length + ' satır');
-      _bmAramaCiz('hop', 'liberty');
-      __REG.ok('(b) "liberty" → "Eşleşen yok" (ikame önerilmez)', /Eşleşen yok/.test(p.textContent), p.textContent.slice(0, 40));
       if (kurduk) p.remove();
+      // CLAUDE KARARI 1c (2026-11-13): ND7K (1) Liberty'yi (ve BV2 YASAK listesindeki birkaç adın ürününü) üretici kaynağıyla kataloğa ekledi. Değişmez: ikame adı başka ürüne alias olarak sızmaz.
+      const YASAK = ['liberty', 'mount hood', 'mt hood', 'hersbrucker', 'hallertauer hersbrucker', 'strisselspalt', 'vanguard', 'new zealand hallertau',
+        'carafa i', 'carafa ii', 'carafa iii', 'caravienne', 'caraamber', 'carastan', 'crystal 15l', 'caramel/crystal 30l', 'golden naked oats',
+        'caramunich', 'crystal malt', 'munich malt 10l', 'rahr 2-row pale', 'pale malt, 2 row, uk', 'chocolate rye', 'invert sugar', 'rice', 'tnt']; // BV2-IKAME-SIZINTI listesi
+      const nrm = s => _bmTrNorm(String(s || '')).replace(/[.'’]/g, '').replace(/\s+/g, ' ').trim(), U7 = window._BM_ND7K_URUN || {}, KL = { malt: MALTLAR, hop: HOPLAR, maya: MAYALAR, katki: KATKILAR };
+      const kendi = a => { const o = []; Object.keys(KL).forEach(t => (U7[t] || []).forEach(x => { if (nrm(x.ad).indexOf(nrm(a)) >= 0) o.push({ t, id: x.id, ad: String(x.ad) }); })); return o; };
+      const N7 = window.BM_ND7, tanir = a => ['malt', 'hop', 'maya'].some(t => { const z = (N7 && N7.coz && N7.coz(t, a)) || {}; return !!z.id && KL[t].some(x => x && x.id === z.id); });
+      const kaydiYok = a => !kendi(a).length && !Object.keys(KL).some(t => KL[t].some(x => x && [x.ad].concat(x.alias || []).some(s => nrm(s).indexOf(nrm(a)) >= 0))) && !tanir(a);
+      const OWN = [], ownG = {}; YASAK.forEach(a => kendi(a).forEach(k => { if (!ownG[k.id]) { ownG[k.id] = 1; OWN.push(k); } }));
+      const taCiz = (t, q) => { const cfg = _bmAramaCfg[t]; let pp = document.getElementById(cfg.panel), kur = false; if (!pp) { pp = document.createElement('div'); pp.id = cfg.panel; document.body.appendChild(pp); kur = true; } _bmAramaCiz(t, q);
+        const o = { yok: /Eşleşen yok/.test(pp.textContent), ids: [...pp.querySelectorAll('[onmousedown]')].map(x => (/bmAramaSec\("[a-z]+","([^"]+)"\)/.exec(x.getAttribute('onmousedown')) || [])[1]), es: !!pp.querySelector('.bm-arama-es') }; if (kur) pp.remove(); return o; };
+      // eski → yeni: (yok) → "kendi kaydı olan her ad, kaydın KATALOGDAKİ adıyla type-ahead'de aranınca yalnız kendi kaydı, ad eşleşmesi (≈ eş ad değil)", çünkü 1c (ii)
+      const TA = OWN.filter(k => _bmAramaCfg[k.t]), taH = TA.filter(k => { const r = taCiz(k.t, k.ad); return r.yok || r.es || r.ids.length !== 1 || r.ids[0] !== k.id; });
+      __REG.ok('(b) kendi kaydı olan ' + TA.length + ' kayıt (' + TA.map(k => k.id).join(', ') + ') katalogdaki adıyla type-ahead\'de YALNIZ kendi kaydı, ad eşleşmesi (≈ eş ad değil)', TA.length > 0 && taH.length === 0, taH.map(k => { const r = taCiz(k.t, k.ad); return '"' + k.ad + '" → ' + (r.yok ? 'Eşleşen yok' : r.ids.join('+') + (r.es ? ' (≈ eş ad)' : '')); }).join(' ; '));
+      // kaydından yalnız noktalamayla ayrılan YASAK yazımı ("mt hood" ↔ "Mt. Hood"): kırmızı değil, BİLGİ (Claude kararı 1c: bilinen eksik → KUCUK1)
+      const eksik = YASAK.filter(a => kendi(a).some(k => _bmAramaCfg[k.t] && taCiz(k.t, a).ids.indexOf(k.id) < 0));
+      __REG.ok('BİLGİ — bilinen eksik → KUCUK1 (type-ahead noktalamayı yok saymıyor): ' + eksik.length + ' yazım', true, eksik.map(a => '"' + a + '" ↔ ' + kendi(a).map(k => k.ad).join(' / ')).join(' ; '));
+      // eski → yeni: '"liberty" → "Eşleşen yok"' → "çalışma anında seçilen kaydı olmayan YASAK yazımı malt / hop / maya type-ahead'inde 'Eşleşen yok'", çünkü 1c (iii): Liberty artık katalogda
+      const bos = YASAK.find(kaydiYok), bosR = bos ? ['malt', 'hop', 'maya'].map(t => ({ t, r: taCiz(t, bos) })) : [];
+      __REG.ok('(b) kaydı olmayan yazım (çalışma anında seçildi: "' + bos + '") → malt / hop / maya type-ahead "Eşleşen yok" (ikame önerilmez)', !!bos && bosR.every(x => x.r.yok), bosR.map(x => x.t + ':' + (x.r.yok ? 'yok' : x.r.ids.join('+'))).join(' '));
       // (c) Enter yedeği
       const e1 = _bmAliasIlk(HOPLAR, _bmTrNorm('hallertauer'));
       __REG.ok('(c) Enter yedeği: "hallertauer" → hrtau (tam alias, "hallertauer magnum"dan önce)', e1 && e1.id === 'hrtau', e1 && e1.id);
@@ -7233,7 +7268,7 @@ const CASELER = [
       __REG.ok('(d) reçete araması "hallertauer" → Hallertau içeren reçete listede', /REGTEST BV Hallertau/.test(liste));
       __REG.ok('(d) reçete araması "liberty" → o reçete listede YOK', !/REGTEST BV Hallertau/.test(liste2));
       return __REG.al();
-    })
+    }).then(c => (c.filter(x => /^BİLGİ/.test(x.ad) && x.detay).forEach(x => console.log('     ℹ️  ' + x.ad + ' [' + x.detay + ']')), c)) // bilgi satırı: sayı > 0 iken çıktıda görünür
   },
 
   // ── SPRINT BW — AI altyapısı (BYOK). Test ortamı dış ağı kestiği için fetch SAHTE yanıtla değiştirilir;
@@ -18066,7 +18101,9 @@ const CASELER = [
       const om = D.satirlar.filter(x => x.kural === 'okuyucu-marka');
       ok('eşleme dökümü: okuyucu-marka kuralıyla gelen ' + om.length + ' yazımın TAMAMINDA fark = marka; fark alanı yalnız marka / koken / renk / bicim', om.length > 0 && om.every(x => x.fark === 'marka') && D.satirlar.every(x => !x.fark || ['marka', 'koken', 'renk', 'bicim'].indexOf(x.fark) >= 0), om.filter(x => x.fark !== 'marka').slice(0, 3).map(x => x.yazim).join(' | '));
       const rahr = D.satirlar.filter(x => x.grup === 'malt' && /^rahr (?:pale |standard )?(?:2-row|two-row)\b/.test(x.yazim)); // Rahr'ın 2-row baz maltı (North Star Pils, Premium Pilsner ayrı ürün)
-      ok('aynı ürünün tüm yazımları aynı yoldan: "Rahr … 2-row" ' + rahr.length + ' yazımın hepsi aynı katalog kaydına, fark = marka; ürün ND7K aday listesinde "geçici" işaretiyle', rahr.length >= 5 && rahr.every(x => x.karar === 'ürün' && x.fark === 'marka' && x.hedef.split(' ')[0] === rahr[0].hedef.split(' ')[0]) && A.adaylar.some(a => /Rahr/.test(a.urun) && a.gecici === rahr[0].hedef.split(' ')[0] && rahr.every(x => a.yazimlar.indexOf(x.yazim) >= 0)), rahr.map(x => x.karar + ':' + (x.fark || '-')).join(','));
+      // eski beklenti "hepsi aynı geçici kayda, fark = marka; ürün ND7K aday listesinde 'geçici'" → yeni "hepsi rahr_2row'a, fark boş; ürün aday listesinde yok", çünkü 1d: eşleme dökümü ND7K dönemi (ND7K AÇIK bağlam), ND7K (1) Rahr Standard 2-Row'u kataloğa ekledi ve kaydın üreticisi Rahr → aynı marka, ND7B (a) kuralıyla fark boş; değişmez "aynı ürünün yazımları aynı yoldan" kalır
+      const U7 = JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'nd7k_urun.json'), 'utf8')).urunler.find(u => u.id === 'rahr_2row'), rk = rahr.length ? rahr[0].hedef.split(' ')[0] : '';
+      ok('aynı ürünün tüm yazımları aynı yoldan (ND7K dönemi eşleme dökümü): "Rahr … 2-row" ' + rahr.length + ' yazımın hepsi aynı kayda (' + rk + '), fark boş (kaydın üreticisi ' + (U7 ? U7.kayit.mo : '?') + ' → aynı marka); ürün ND7K aday listesinde yok', rahr.length >= 5 && rk === 'malt:rahr_2row' && rahr.every(x => x.karar === 'ürün' && !x.fark && x.hedef.split(' ')[0] === rk) && !!U7 && /rahr/i.test(U7.kayit.mo || '') && !A.adaylar.some(a => a.gecici === rk || rahr.some(x => a.yazimlar.indexOf(x.yazim) >= 0)), rahr.map(x => x.karar + ':' + (x.fark || '-') + ':' + x.hedef.split(' ')[0]).join(','));
       const r = await page.evaluate(() => {
         const N = window.BM_ND7, Z = (g, h) => N.coz(g, h) || {}, kat = (t, id) => (t === 'malt' ? MALTLAR : t === 'hop' ? HOPLAR : t === 'maya' ? MAYALAR : KATKILAR).find(a => a.id === id), o = {};
         o.marka = Z('malt', 'rahr pale ale malt'); o.markaKayit = (kat('malt', o.marka.id) || {}).mo || '';
@@ -18166,7 +18203,7 @@ const CASELER = [
   },
   {
     // ND7B-KATALOG: kural (f) + (i) — renk düzeltmesi yalnız üretici sayfasından (url + alıntı); iskelette eşit paylı mayada stili adıyla anan maya, yoksa önceki seçim; örnek < 3 → önceki seçim korunur.
-    kod: 'ND7B-KATALOG', ad: 'ND7B (f)(i) KATALOG RENGİ + İSKELET MAYASI: her renk düzeltmesinde üretici alan adı url\'si + alıntı; alıntıdaki değer = yeni değer; bayrak yalnız listedeki kayıtların rengini değiştirir · iskelet: "eşit pay: önceki seçim korundu" / "örnek < 3: önceki seçim korundu" izli stillerde maya = ND7 öncesi iskeletin mayası; "stili adıyla anan" izli stilde maya adında stil adı geçer; önceki seçimi olmayan örnek < 3 stilde "zayıf" etiketi · Blonde Ale / Cream Ale = us05, Kölsch mayası adında Kölsch · canlı türetme = saklanan dosya',
+    kod: 'ND7B-KATALOG', ad: 'ND7B (f)(i) KATALOG RENGİ + İSKELET MAYASI: her renk düzeltmesinde üretici alan adı url\'si + alıntı; alıntıdaki değer = yeni değer; bayrak yalnız listedeki kayıtların rengini değiştirir · iskelet: "eşit pay: önceki seçim korundu" / "örnek < 3: önceki seçim korundu" izli stillerde maya = ND7 öncesi iskeletin mayası; "stili adıyla anan" izli stilde maya adında stil adı geçer; önceki seçimi olmayan örnek < 3 stilde "zayıf" etiketi · her stilde seçilen maya izdeki adaylar arasında en yüksek paylı, eşit payda / örnek < 3\'te izin yazdığı kural geçerli (ND7K kataloğu açık) · canlı türetme = saklanan dosya',
     calistir: (page) => page.evaluate(() => {
       const B = window.BM_ND7B, R = window._BM_ND7B_RENK, r0 = {}, T = window._ISKELET_TURETILMIS.stiller, ON = window._BM_ISK_ONCEKI_MAYA;
       __REG.ok('renk düzeltmeleri (' + R.length + '): her kayıtta üretici alan adında https url + alıntı; alıntıda yeni değer yazıyor; eski ≠ yeni', R.length > 0 && R.every(d => /^https:\/\/www\.(?:dingemansmout\.be|castlemalting\.com)\//.test(d.url) && String(d.alinti).length > 5 && String(d.alinti).indexOf(String(d.yeni)) >= 0 && d.eski !== d.yeni && MALTLAR.some(m => m.id === d.id)), R.map(d => d.id + ' ' + d.eski + '→' + d.yeni).join(', '));
@@ -18177,7 +18214,15 @@ const CASELER = [
       const adGecer = s => { const m = MAYALAR.find(x => x.id === T[s].mayaId), t = m ? (m.ad + ' ' + (m.e || '')).toLowerCase() : ''; return s.toLowerCase().split('/').map(x => x.trim()).filter(x => x.length >= 4).some(p => t.indexOf(p) >= 0); };
       __REG.ok('iskelet: "stili adıyla anan maya" izli ' + anan.length + ' stilde seçilen mayanın katalog adı / tanımı stil adını içerir', anan.length > 0 && anan.every(adGecer), anan.filter(s => !adGecer(s)).join(' | '));
       __REG.ok('iskelet: örnek < 3 ve önceki seçimi olmayan stilde maya "zayıf" etiketli (' + zay.length + '); bu stillerin hiçbirinde ND7 öncesi seçim yok', zay.every(s => !ON[s] && T[s].nTum < 3), zay.join(' | '));
-      __REG.ok('Claude\'un örnekleri: Blonde Ale / Cream Ale (eşit pay, stili anan yok) → önceki seçim us05 · Wood-Aged Beer → önceki seçim wlp007 · Kölsch (eşit pay) → adında Kölsch geçen maya', T['Blonde Ale / Cream Ale'].mayaId === 'us05' && ON['Blonde Ale / Cream Ale'] === 'us05' && T['Wood-Aged Beer / Barrel Aged'].mayaId === 'wlp007' && /k[öo]lsch/i.test((MAYALAR.find(m => m.id === T['Kölsch'].mayaId) || {}).ad || ''), T['Blonde Ale / Cream Ale'].mayaId + ' · ' + T['Wood-Aged Beer / Barrel Aged'].mayaId + ' · ' + T['Kölsch'].mayaId);
+      // eski → yeni: "Blonde Ale / Cream Ale → us05 · Wood-Aged → wlp007 · Kölsch adında Kölsch" (değer örnekleri) → "her stilde seçilen maya, izdeki adaylar arasında en yüksek paylı; eşit payda / örnek < 3'te izin yazdığı kural (önceki seçim / stili adıyla anan) geçerli", çünkü 1e: ND7B (i) kuralı, ND7K kataloğu açık; beklenti değerden değil kuraldan (paylar örneklerden bağımsız sayılır)
+      const AG = window._BM_ISK_AGIRLIK || {}, kad = (k, o) => k === 'nhc' || k === 'aha' ? 'K1' : (o.k || 'K3'), kHata = []; let kBak = 0;
+      st.forEach(s => { const d = window._bmIskTuret(s, {}), m = d && d.iz && d.iz.maya; if (!m || !d.mayaId) return; kBak++; const my = {}; let nEx = 0;
+        (window._bmOrnekListe(s) || []).forEach(x => { const o = window._bmOrnekNesne(x.kaynak, s, x.idx), r = o ? window._bmOrnekKuru(x.kaynak, s, x.idx) : null; if (!r || !r.g.length) return; nEx++; if (!o.y) return;
+          const id = (r.y && r.y.id) ? r.y.id : ((r.yEk || []).filter(k => k.id)[0] || {}).id; if (id) my[id] = (my[id] || 0) + (AG[kad(x.kaynak, o)] || 1); });
+        const top = Math.max(...Object.values(my)), es = Object.keys(my).filter(id => Math.abs(my[id] - top) <= 1e-9), k7 = m.kural7 || '', sec = d.mayaId;
+        const ok = /^örnek < 3: önceki seçim korundu/.test(k7) ? nEx < 3 && sec === ON[s] : /^eşit pay: önceki seçim korundu/.test(k7) ? es.length > 1 && sec === ON[s] : /^eşit pay: stili adıyla anan/.test(k7) ? es.length > 1 && es.indexOf(sec) >= 0 : es.indexOf(sec) >= 0; // iz yok ya da "örnek < 3: önceki seçim yok — zayıf": en yüksek paylı aday
+        if (!ok) kHata.push(s + ': seçilen ' + sec + ' · iz "' + (k7 || '-') + '" · en yüksek pay ' + es.join('+') + ' · örnek ' + nEx); });
+      __REG.ok('iskelet (ND7K kataloğu açık, canlı türetme): ' + kBak + ' stilin hepsinde seçilen maya izdeki adaylar arasında en yüksek paylı; eşit payda / örnek < 3\'te izin yazdığı kural (önceki seçim / stili adıyla anan) geçerli', kBak > 100 && kHata.length === 0, kHata.slice(0, 6).join(' ; '));
       const canli = ['Blonde Ale / Cream Ale', 'Kölsch', 'Saison (table)', 'Dry Irish Stout'].map(s => { const d = window._bmIskTuret(s, {}); return d ? d.mayaId : null; });
       __REG.ok('canlı türetme saklanan dosyayla aynı mayayı verir (4 stil)', canli.join(',') === ['Blonde Ale / Cream Ale', 'Kölsch', 'Saison (table)', 'Dry Irish Stout'].map(s => T[s].mayaId).join(','), canli.join(','));
       return __REG.al();
@@ -18246,6 +18291,66 @@ const CASELER = [
       __REG.ok('ai bayrağı kapalı = v131-545 (liste ekran indeksinden): ND7 öncesi listeden farklı kalem var', Object.keys(v545).some(k => JSON.stringify(v545[k]) !== JSON.stringify(acik[k])));
       return __REG.al();
     })
+  },
+  {
+    // ND7K-AI-SORU: CLAUDE KARARI 1b (2026-11-13). Dondurulmuş AI geri oynatmaları (DOG4D–H, BUL2C-ISTEK) ND7K_ONCESI'nde yeni katalog KAPALI koşar; bu vaka aynı setleri ND7K bayrakları AÇIK sınar.
+    //   Beklentiler kuraldan: (i) WLP530 artık katalog ürünü → DEĞİŞTİR · (ii) katalogda olmayan kod → bilinmeyen, reçete mayası kendisiyle değiştirilmez (DOG4D Y2a kuralı)
+    //   (iii) katalog açılınca çözümü değişen madde yalnız yeni ürünü anan madde · (iv) BUL istemlerinde fark yalnız yeni katalog kimliklerinin kod listesine girmesi.
+    kod: 'ND7K-AI-SORU', ad: 'ND7K YENİ KATALOG AÇIKKEN SORU ÇÖZÜCÜ + BUL İSTEMLERİ: (i) "mayayı WLP530 ile değiştirsem" → DEĞİŞTİR, maya → wlp530 · (ii) katalogda kaydı olmayan WLP kodu (çalışma anında seçilir) → yok / belirsiz, reçete mayası kendisiyle değiştirilmez · (iii) tuzak v5, DOG4B, DOG4C, DOG4E, DOG4F, DOG4G parmak izleri katalog açıkken de birebir; DOG4D\'de değişen her maddenin metninde ND7K\'nın eklediği bir ürünün kodu / adı geçer · (iv) BUL2C görüntüsü: 40 tarifte AI\'ya gidiş, soru metni ve şema (kod listesi dışında) birebir; kod listesi farkı yalnız ND7K\'nın eklediği kimlikler',
+    calistir: async (page) => {
+      const rd = n => JSON.parse(fs.readFileSync(path.join(KOK, 'tests', n), 'utf8'));
+      const set = rd('tuzak_seti.json'), S = { b: rd('dog4b_cozum_seti.json'), c: rd('dog4c_cozum_seti.json'), d: rd('dog4d_cozum_seti.json'), e: rd('dog4e_cozum_seti.json'), f: rd('dog4f_cozum_seti.json'), g: rd('dog4g_cozum_seti.json') };
+      const bset = rd('bul_seti.json'), snap = rd(path.join('fixtures', 'bul_istek_2026-10-14.json'));
+      return page.evaluate(async (set, S, bset, snap) => {
+        const A4 = window.BM_AI4, K = window.BM_ND7K, B7 = window.BM_ND7B, B = window.BM_BUL, bay = o => Object.keys(o).filter(k => typeof o[k] === 'boolean');
+        const T = (tb, ek) => { const t = set.tabanlar[tb], o = { stil: t.stil, tarif: Object.assign({ hacim: 11, verim: 61, mashSc: 66 }, JSON.parse(JSON.stringify(t.tarif))) }; if (ek) o.tarif.katkilar.push(JSON.parse(JSON.stringify(ek))); return o; };
+        const KL = { malt: MALTLAR, hop: HOPLAR, maya: MAYALAR, katki: KATKILAR }, U = window._BM_ND7K_URUN || {}, yeni = [], yeniId = {};
+        Object.keys(KL).forEach(t => (U[t] || []).forEach(x => { yeni.push({ t, id: x.id, ad: String(x.ad) }); yeniId[x.id] = 1; }));
+        __REG.ok('ND7K bayrakları açık; ' + yeni.length + ' yeni katalog kaydı listelerde', bay(K).length > 0 && bay(K).every(k => K[k]) && yeni.length > 0 && yeni.every(x => KL[x.t].some(m => m && m.id === x.id)));
+        // (i) WLP530 artık katalog ürünü
+        const tD = T('dubbel'), c1 = A4.cozumle('mayayı WLP530 ile değiştirsem', tD), v1 = c1.v || {};
+        __REG.ok('(i) "mayayı WLP530 ile değiştirsem" → DEĞİŞTİR, maya → wlp530 (ND7K kataloğa ekledi)', !!yeniId.wlp530 && c1.mod === 'ikame' && v1.islem === 'degistir' && v1.kalem === 'maya' && v1.yeni_kalem === 'wlp530', c1.mod + ' ' + JSON.stringify(c1.v || c1.bilinmeyen || c1.neden || null));
+        // (ii) katalogda kaydı olmayan WLP kodu — çalışma anında seçilir (hiçbir maya kaydının metninde geçmeyen ilk WLP numarası)
+        const kodVar = {}; MAYALAR.forEach(m => { if (!m) return; (JSON.stringify(m).toLowerCase().match(/wlp\s*-?\s*\d{3,4}/g) || []).forEach(k => { kodVar[+k.replace(/\D/g, '')] = 1; }); });
+        let bos = null; for (let i = 500; i <= 999 && !bos; i++) if (!kodVar[i]) bos = 'WLP' + i;
+        const c2 = bos ? A4.cozumle('mayayı ' + bos + ' ile değiştirsem', tD) : null;
+        __REG.ok('(ii) katalogda kaydı olmayan kod (çalışma anında: ' + bos + ') → mod yok / belirsiz; reçete mayası (' + tD.tarif.mayaId + ') kendisiyle değiştirilmez', !!c2 && (c2.mod === 'yok' || c2.mod === 'belirsiz') && !(c2.v && c2.v.yeni_kalem === tD.tarif.mayaId), c2 ? c2.mod + ' ' + JSON.stringify(c2.v || c2.bilinmeyen || c2.neden || null) : 'boş WLP kodu bulunamadı');
+        // (iii) parmak izleri (DOG4H ile aynı tanım)
+        const fnv = t => { let x = 0x811c9dc5; for (let i = 0; i < t.length; i++) { x ^= t.charCodeAt(i); x = Math.imul(x, 0x01000193) >>> 0; } return x.toString(16).padStart(8, '0'); };
+        const f = c => [c.mod, c.islem || null, c.eski || null, c.yeni || null, c.v || null, c.miktar || null, c.stil], P = A => { const p = JSON.stringify(A); return fnv(p) + '/' + p.length; };
+        const LS = { t: set.istemler.map(i => ({ id: i.id, taban: i.taban, soru: i.istem })), b: S.b.istemler.filter(x => ['E01', 'E02', 'E03', 'E04', 'E05', 'E06'].indexOf(x.id) < 0), c: S.c.istemler, d: S.d.istemler, e: S.e.istemler, f: S.f.istemler, g: S.g.istemler };
+        const BEK = { t: 'cb74f605/11217', b: '3d8a0ef9/23172', c: '63030f24/12289', d: 'b3af54f6/11588', e: '0db4a347/12484', f: 'bf8ae693/3424', g: '97a6e9cb/1483' }, AD = { t: 'tuzak v5', b: 'DOG4B', c: 'DOG4C', d: 'DOG4D', e: 'DOG4E', f: 'DOG4F', g: 'DOG4G' };
+        const coz = it => f(A4.cozumle(it.soru, T(it.taban, it.ekKatki)));
+        // (iv) BUL istemleri (BUL2C-ISTEK ile aynı alanlar; şema kod listesinden ayrı ölçülür: aiSema'nın enum'u kod listesinin kendisi)
+        const bul = () => { B.indeks(); const o = {}; bset.tarifler.forEach(t => { const c = B.coz(t.metin), r = { ai: c.cozulemeyen.length > 0 }; if (r.ai) { const i = B.istekKur(t.metin, c.cipler, 'ucuz'), s = JSON.parse(JSON.stringify(i.sema)); s.schema.properties.secimler.items.properties.kod.enum = [];
+          Object.assign(r, { soru: i.soru, kod: i.kod.map(x => x.kod), bag: i.baglam.split('\n'), baglamKod: B.kontrolKodu(i.baglam), semaKod: B.kontrolKodu(JSON.stringify(i.sema)), semaYapi: JSON.stringify(s) }); } o[t.id] = r; }); return o; };
+        const ac = {}; Object.keys(LS).forEach(k => { ac[k] = LS[k].map(coz); }); const bAc = bul();
+        // ND7K bayrakları KAPALI (ND7K_ONCESI bağlamı) — aynı sayfada; sonra geri açılır
+        const sak = bay(K).map(k => [k, K[k]]), kp = {}; let bKp;
+        sak.forEach(([k]) => { K[k] = false; }); K.uygula(); B7.uygula();
+        try { Object.keys(LS).forEach(k => { kp[k] = LS[k].map(coz); }); bKp = bul(); } finally { sak.forEach(([k, v]) => { K[k] = v; }); K.uygula(); B7.uygula(); B.indeks(); }
+        const kpFp = Object.keys(LS).map(k => AD[k] + ' ' + P(kp[k])), acFp = Object.keys(LS).map(k => AD[k] + ' ' + P(ac[k]));
+        __REG.ok('denetim: ND7K kapalıyken (aynı sayfada) yedi parmak izi dondurulmuş değerlerle birebir: ' + kpFp.join(' · '), Object.keys(LS).every(k => P(kp[k]) === BEK[k]));
+        const ayni = ['t', 'b', 'c', 'e', 'f', 'g'];
+        __REG.ok('(iii) katalog AÇIK: tuzak v5, DOG4B, DOG4C, DOG4E, DOG4F, DOG4G parmak izleri birebir: ' + ayni.map(k => AD[k] + ' ' + P(ac[k])).join(' · '), ayni.every(k => P(ac[k]) === BEK[k]), ayni.filter(k => P(ac[k]) !== BEK[k]).map(k => AD[k] + ' ' + P(ac[k]) + ' ≠ ' + BEK[k]).join(' ; '));
+        const nr = s => String(s || '').toLowerCase().replace(/[\s\-.'’_]/g, '');
+        const anan = yeni.map(x => { const a = [nr(x.id), nr(String(x.ad).split('(')[0])]; (String(x.ad).match(/\b[a-z]{1,4}[\s-]?\d{2,5}\b/gi) || []).forEach(k => a.push(nr(k))); return { x, a: a.filter(s => s.length >= 4) }; });
+        const anar = q => anan.filter(y => y.a.some(s => nr(q).indexOf(s) >= 0)).map(y => y.x.id);
+        const dDeg = LS.d.map((it, i) => ({ it, i })).filter(o => JSON.stringify(ac.d[o.i]) !== JSON.stringify(kp.d[o.i])), dAnmaz = dDeg.filter(o => !anar(o.it.soru).length);
+        __REG.ok('(iii) DOG4D (katalog açık ' + P(ac.d) + ', dondurulmuş ' + BEK.d + '): değişen ' + dDeg.length + ' maddenin hepsinin metninde ND7K\'nın eklediği bir ürünün kodu / adı geçiyor (' + dDeg.map(o => o.it.id + ' → ' + anar(o.it.soru).join('+')).join(', ') + '); geçmeyen değişen madde 0', dDeg.length > 0 && dAnmaz.length === 0, dAnmaz.map(o => o.it.id + ' "' + o.it.soru + '"').join(' ; '));
+        // (iv)
+        const snapF = bset.tarifler.filter(t => { const a = snap.istemler.find(x => x.id === t.id), r = bKp[t.id]; return !a || r.ai !== a.ai || (r.ai && (r.soru !== a.soru || r.kod.length !== a.kodN || r.baglamKod !== a.baglamKod || r.semaKod !== a.semaKod)); }).map(t => t.id);
+        __REG.ok('denetim: ND7K kapalıyken BUL istemleri dondurulmuş görüntüyle birebir (40 tarif)', bset.tarifler.length === 40 && snapF.length === 0, snapF.join(', '));
+        const ayr = [], kodF = []; bset.tarifler.forEach(t => { const a = snap.istemler.find(x => x.id === t.id), r = bAc[t.id], z = bKp[t.id];
+          if (!a || r.ai !== a.ai) { ayr.push(t.id + ':ai'); return; } if (!r.ai) return; if (r.soru !== a.soru) ayr.push(t.id + ':soru'); if (r.semaYapi !== z.semaYapi) ayr.push(t.id + ':şema');
+          const ek = r.kod.filter(k => z.kod.indexOf(k) < 0), eks = z.kod.filter(k => r.kod.indexOf(k) < 0), bagEk = r.bag.filter(l => z.bag.indexOf(l) < 0), bagEks = z.bag.filter(l => r.bag.indexOf(l) < 0);
+          if (ek.length || eks.length || bagEk.length || bagEks.length) kodF.push({ id: t.id, ek, eks, bagEk, bagEks }); });
+        __REG.ok('(iv) katalog AÇIK: 40 tarifte AI\'ya gidiş, soru metni ve şema (kod listesi dışında) dondurulmuş görüntüyle birebir', ayr.length === 0, ayr.join(', '));
+        const kotu = kodF.filter(o => o.eks.length || o.ek.some(k => !(/^malz:(malt|hop|maya|katki):/.test(k) && yeniId[k.split(':').slice(2).join(':')])) || o.bagEks.length || o.bagEk.some(l => !o.ek.some(k => l.indexOf(k + ' = ') === 0)));
+        __REG.ok('(iv) kod listesi farkı olan ' + kodF.length + ' tarifte (' + kodF.map(o => o.id + ' +' + o.ek.length).join(', ') + ') fark yalnız ND7K\'nın eklediği kimlikler (eksilen kod 0; bağlamda yalnız bu kodların satırları)', kotu.length === 0, kotu.map(o => o.id + ' ek: ' + o.ek.join(',') + ' eksilen: ' + o.eks.join(',')).join(' ; '));
+        return __REG.al();
+      }, set, S, bset, snap);
+    }
   },
   {
     // ND7K-MAYA2: Ö8 "karışımdaki ikinci maya editörün maya2Id alanına yazılır; not da kalır. Üçüncü maya varsa yalnız not."
@@ -18618,12 +18723,19 @@ const ND7K_ONCESI = {
   "ND7-SINIF": ["\"katalogda olmayan gerçek ürün → katalog_bekliyor\" örneği olarak Hersbrucker / Golden Naked Oats / WLP833 kullanır — ND7K (1): üçü de kaynakla KATALOĞA EKLENDİ; yeni kural ND7K-URUN-BAG'da"],
   "ND7-TABLO": ["\"elle olmayan satırlarda tablo = kuralın çıktısı\" — ND7K: katalog büyüdü, kural yolu bazı yazımları yeni kayda çözüyor (briess pilsen malt → Briess Pilsen, crisp wheat malt → Crisp Wheat …); ND7 tablosu donmuş kalır, yeni bağlar ND7K katmanında"],
   "ND7B-KAPSAM": ["_bmKatCoz (ND7 öncesi sözlük) tablo yazımlarının hiçbirini bağlamaz bekler — ND7K KATALOG ORTAK: yeni katalog kayıtlarının adları eski sözlükte de tanınır (bilinçli, A1 ölçümüyle raporlandı); \"briess pilsner malt\" artık Briess Pilsen kaydına bağlı"],
-  "ND7B-KATALOG": ["iskelet eşit paylı maya örnekleri (Blonde Ale → us05 …) — ND7K: yeni maya kayıtları (WLP080, WY2565 …) örnek sayımına girdi, eşit pay durumu değişti"],
+  "ND7B-KATALOG": ["iskelet eşit paylı maya örnekleri (Blonde Ale → us05 …) — ND7K: yeni maya kayıtları (WLP080, WY2565 …) örnek sayımına girdi, eşit pay durumu değişti; CLAUDE KARARI 1e: iskelet iddiaları ND7K kataloğu AÇIK sınanır (ND7K_KATALOG_ACIK; iskelet_veri.js ND7K'da yeniden üretildi, bayrakla geri alınmaz), örnek beklentileri ND7B (i) kuralından yeniden türetildi"],
   "ND3-HOP-ND7": ["Hersbrucker / Mt. Hood / Cluster / US Golding / NZ Cascade (Taiheke) için \"katalogda yok → katalog bekliyor, başka hopa bağlanmaz\" bekler — ND7K (1)(2): bu çeşitler üretici / yetiştirici kaynağıyla KATALOĞA EKLENDİ ve satırlar KENDİ yeni kayıtlarına bağlandı (başka hopa değil); yeni kural ND7K-URUN-BAG'da"],
-  "ND7B-FARK": ["sözlükten tanınan satırda fark yok bekler — ND7K Ö2: örnek yolunda sözlük (alias) eşlemesi de denetlenir, kaydın üreticisinden farklı üretici adı taşıyan alias fark = marka; yeni kural ND7K-FARK'ta"]
+  "ND7B-FARK": ["sözlükten tanınan satırda fark yok bekler — ND7K Ö2: örnek yolunda sözlük (alias) eşlemesi de denetlenir, kaydın üreticisinden farklı üretici adı taşıyan alias fark = marka; yeni kural ND7K-FARK'ta"],
+  // CLAUDE KARARI 1a (2026-11-13): dondurulmuş AI geri oynatmaları — ND6 (a) kararıyla aynı gerekçe: o günün kataloğuyla kaydedilmiş setlerin / koşuların geri oynatması, yeni katalog KAPALI koşar. Katalog açık davranışını ND7K-AI-SORU sınar.
+  "DOG4D-COZUM": ["dondurulmuş soru seti (dog4d_cozum_seti.json) o günün kataloğuyla yazıldı: Y2a / D058 / D072'de WLP530 'bilinmeyen ürün' (beklenen yok) — ND7K (1) WLP530'u üretici kaynağıyla kataloğa ekledi, çözücü artık DEĞİŞTİR → wlp530; DOG4D parmak izi (97 madde, b3af54f6/11588) değişiyor"],
+  "DOG4E-COZUM": ["DOG4D parmak izini (b3af54f6/11588) o günün kataloğuyla birebir bekler — ND7K (1) WLP530 kataloğa girdi, DOG4D'nin WLP530 maddeleri değişiyor"],
+  "DOG4F-COZUM": ["DOG4D parmak izini (b3af54f6/11588) o günün kataloğuyla birebir bekler — ND7K (1) WLP530 kataloğa girdi, DOG4D'nin WLP530 maddeleri değişiyor"],
+  "DOG4G-COZUM": ["DOG4D parmak izini (b3af54f6/11588) o günün kataloğuyla birebir bekler — ND7K (1) WLP530 kataloğa girdi, DOG4D'nin WLP530 maddeleri değişiyor"],
+  "DOG4H-COZUM": ["DOG4D parmak izini (b3af54f6/11588) o günün kataloğuyla birebir bekler — ND7K (1) WLP530 kataloğa girdi, DOG4D'nin WLP530 maddeleri değişiyor"],
+  "BUL2C-ISTEK": ["dondurulmuş BUL koşusunun istem görüntüsü (tests/fixtures/bul_istek_2026-10-14.json) o günün kataloğuyla alındı — ND7K (1) yeni katalog kalemleri U03'ün kod listesine (dolayısıyla bağlam ve şema enum'una) girdi"]
 };
 // ND7 / ND7B öncesi koşup yeniden üretilen iskelet_veri.js planına bakan vakalar: dosya yeni katalog kimliklerine başvurur (bayrakla geri alınmaz) → ND7K kapalı ama katalog AÇIK
-const ND7K_KATALOG_ACIK = { 'ND6-KAPALI': 1, 'ND6-KAPALI-ND7': 1 };
+const ND7K_KATALOG_ACIK = { 'ND6-KAPALI': 1, 'ND6-KAPALI-ND7': 1, 'ND7B-KATALOG': 1 }; // ND7B-KATALOG: CLAUDE KARARI 1e
 function nd7kKapat(katalogKalsin) { let v; Object.defineProperty(window, 'BM_ND7K', { configurable: true, get() { return v; }, set(x) { v = x; if (x) ['fark', 'tablo', 'ai', 'maya2', 'isk', 'katalog'].forEach(k => { if (!(katalogKalsin && k === 'katalog')) x[k] = false; }); } }); } // katalogKalsin: ND7 / ND7B öncesi koşan vakalar — yeniden üretilen iskelet_veri.js yeni katalog kimliklerine başvurur (dosya bayrakla geri alınmaz), katalog açık kalır
 function nd7bKapat() { let v; Object.defineProperty(window, 'BM_ND7B', { configurable: true, get() { return v; }, set(x) { v = x; if (x) ['kapsam', 'tablo', 'satir', 'renk', 'og', 'isk'].forEach(k => { x[k] = false; }); } }); }
 function nd7Kapat() { let v; Object.defineProperty(window, 'BM_ND7', { configurable: true, get() { return v; }, set(x) { v = x; if (x) ['okuyucu', 'sinif', 'maya', 'tablo'].forEach(k => { x[k] = false; }); } }); }

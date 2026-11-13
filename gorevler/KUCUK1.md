@@ -100,3 +100,5 @@ Yapılacaklar:
 ## Sonra
 1. Claude kontrolü: canlı md5, imzalar, mock, Pages 404, hata sınıfı sentetik.
 2. Sıradaki (Kaan'a sorulur): GitHub Actions regresyon (öncelik 7) ya da push yeniden abonelik (öncelik 9).
+
+Claude kararı (2026-11-13, ND7K): editör ve arama (_bmKatEsles ve type-ahead) noktalamayı yok saysın; 'mt hood' → Mt. Hood (Mount Hood). BV2 / BV3 'bilinen eksik' satırı bu düzeltmeyle 0'a inmeli.
