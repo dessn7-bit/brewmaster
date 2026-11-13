@@ -7170,7 +7170,7 @@ const CASELER = [
   },
   {
     kod: 'BV2-IKAME-SIZINTI', ad: 'alias = KİMLİK, ikame DEĞİL: V2/V3 build-time tablolarında ikame olarak eşlenen adlar (Liberty/Mt Hood/Hersbrucker/Strisselspalt/Vanguard→Hallertau, kabuklu Carafa→Special, en-yakın-°L crystal, golden naked oats→yulaf, pirinç→pirinç KABUĞU) katalog alias\'ına SIZMIYOR — aksi halde arama "Liberty yok, ne kullanayım?" sorusuna yanlış "zaten var" derdi',
-    calistir: (page) => page.evaluate(() => {
+    calistir: (page) => page.evaluate((KB) => {
       const tum = [].concat(MALTLAR, HOPLAR, MAYALAR).filter(Boolean);
       const hepsi = new Map(); tum.forEach(x => (x.alias || []).forEach(a => hepsi.set(a, x.id)));
       const YASAK = ['liberty', 'mount hood', 'mt hood', 'hersbrucker', 'hallertauer hersbrucker', 'strisselspalt', 'vanguard', 'new zealand hallertau',
@@ -7182,7 +7182,7 @@ const CASELER = [
       const nrm = s => _bmTrNorm(String(s || '')).replace(/[.'’]/g, '').replace(/\s+/g, ' ').trim(), U7 = window._BM_ND7K_URUN || {}, KL = { malt: MALTLAR, hop: HOPLAR, maya: MAYALAR, katki: KATKILAR };
       const kendi = a => { const o = []; Object.keys(KL).forEach(t => (U7[t] || []).forEach(x => { if (nrm(x.ad).indexOf(nrm(a)) >= 0) o.push({ t, id: x.id, ad: String(x.ad) }); })); return o; };
       const N7 = window.BM_ND7, tanir = a => ['malt', 'hop', 'maya'].some(t => { const z = (N7 && N7.coz && N7.coz(t, a)) || {}; return !!z.id && KL[t].some(x => x && x.id === z.id); });
-      const kaydiYok = a => !kendi(a).length && !Object.keys(KL).some(t => KL[t].some(x => x && [x.ad].concat(x.alias || []).some(s => nrm(s).indexOf(nrm(a)) >= 0))) && !tanir(a);
+      const kaydiYok = a => !kendi(a).length && !Object.keys(KL).some(t => KL[t].some(x => x && [x.ad].concat(x.alias || []).some(s => nrm(s).indexOf(nrm(a)) >= 0))) && !tanir(a) && KB.indexOf(a) >= 0; // KB: ND7K dönemi eşleme dökümünde katalog_bekliyor yazımlar (boşluğun kanıtı)
       const OWN = [], ownG = {}; YASAK.forEach(a => kendi(a).forEach(k => { if (!ownG[k.id]) { ownG[k.id] = 1; OWN.push(k); } }));
       const bul = a => Object.keys(KL).map(t => KL[t].filter(m => _bmKatEsles(m, a)).map(m => m.id)).reduce((p, c) => p.concat(c), []);
       // eski → yeni: "Hallertau 'liberty' ile bulunmuyor" → "Hallertau YASAK listesindeki hiçbir yazımla bulunmuyor", çünkü 1c (i): ikame adı Hallertau'yu bulmaz (liberty bu değişmezin tek örneğiydi)
@@ -7194,15 +7194,15 @@ const CASELER = [
       // kaydından yalnız noktalamayla ayrılan YASAK yazımı ("mt hood" ↔ "Mt. Hood"): kırmızı değil, BİLGİ (Claude kararı 1c: bilinen eksik → KUCUK1)
       const eksik = YASAK.filter(a => kendi(a).some(k => !_bmKatEsles(KL[k.t].find(m => m && m.id === k.id), a)));
       __REG.ok('BİLGİ — bilinen eksik → KUCUK1 (filtre noktalamayı yok saymıyor): ' + eksik.length + ' yazım', true, eksik.map(a => '"' + a + '" ↔ ' + kendi(a).map(k => k.ad).join(' / ')).join(' ; '));
-      // eski → yeni: "'liberty' hop filtresi boş" → "çalışma anında seçilen kaydı olmayan YASAK yazımıyla bütün katalog filtreleri boş", çünkü 1c (iii): Liberty artık katalogda; katalog boşluğu kaydı olmayan adla sınanır
+      // eski → yeni: "'liberty' hop filtresi boş" → "çalışma anında seçilen kaydı olmayan YASAK yazımıyla bütün katalog filtreleri boş", çünkü 1c (iii): Liberty artık katalogda; katalog boşluğu kaydı olmayan adla sınanır (kaydı olmayan = hiçbir kaydın adında / alias'ında yok, ND7 tanıması ürüne bağlamıyor VE eşleme dökümünde katalog_bekliyor)
       const bos = YASAK.find(kaydiYok);
       __REG.ok('katalog boşluğu dürüstçe görünür: kaydı olmayan yazım (çalışma anında seçildi: "' + bos + '") malt / hop / maya / katkı filtrelerinin hiçbirinde yok', !!bos && bul(bos).length === 0, bos ? bul(bos).join('+') : 'YASAK listesinde kaydı olmayan yazım kalmadı');
       return __REG.al();
-    }).then(c => (c.filter(x => /^BİLGİ/.test(x.ad) && x.detay).forEach(x => console.log('     ℹ️  ' + x.ad + ' [' + x.detay + ']')), c)) // bilgi satırı: sayı > 0 iken çıktıda görünür
+    }, JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'nd7_esleme.json'), 'utf8')).satirlar.filter(x => x.karar === 'katalog_bekliyor').map(x => x.yazim)).then(c => (c.filter(x => /^BİLGİ/.test(x.ad) && x.detay).forEach(x => console.log('     ℹ️  ' + x.ad + ' [' + x.detay + ']')), c)) // bilgi satırı: sayı > 0 iken çıktıda görünür
   },
   {
     kod: 'BV3-ARAMA', ad: 'alias tüketicileri: (a) _bmKatEsles filtreleri (editör malt/hop/maya listeleri + stok ekleme) ad VEYA alias içerir; (b) canlı type-ahead _bmAramaCiz ad eşleşmelerini ÖNCE, alias eşleşmelerini SONRA sıralar ve satırda "≈ eş ad" gösterir; (c) Enter kısayolu ad yoksa en iyi alias\'ı seçer; (d) reçete listesi araması "hallertauer" → Hallertau içeren reçete',
-    calistir: (page) => page.evaluate(() => {
+    calistir: (page) => page.evaluate((KB) => {
       const ids = (L, q) => L.filter(x => _bmKatEsles(x, q)).map(x => x.id);
       __REG.ok('(a) hop "hallertauer" → hrtau', ids(HOPLAR, 'hallertauer').includes('hrtau'), ids(HOPLAR, 'hallertauer').join(','));
       __REG.ok('(a) malt "2-row" → briess_pale', ids(MALTLAR, '2-row').includes('briess_pale'), ids(MALTLAR, '2-row').join(','));
@@ -7240,7 +7240,7 @@ const CASELER = [
       const nrm = s => _bmTrNorm(String(s || '')).replace(/[.'’]/g, '').replace(/\s+/g, ' ').trim(), U7 = window._BM_ND7K_URUN || {}, KL = { malt: MALTLAR, hop: HOPLAR, maya: MAYALAR, katki: KATKILAR };
       const kendi = a => { const o = []; Object.keys(KL).forEach(t => (U7[t] || []).forEach(x => { if (nrm(x.ad).indexOf(nrm(a)) >= 0) o.push({ t, id: x.id, ad: String(x.ad) }); })); return o; };
       const N7 = window.BM_ND7, tanir = a => ['malt', 'hop', 'maya'].some(t => { const z = (N7 && N7.coz && N7.coz(t, a)) || {}; return !!z.id && KL[t].some(x => x && x.id === z.id); });
-      const kaydiYok = a => !kendi(a).length && !Object.keys(KL).some(t => KL[t].some(x => x && [x.ad].concat(x.alias || []).some(s => nrm(s).indexOf(nrm(a)) >= 0))) && !tanir(a);
+      const kaydiYok = a => !kendi(a).length && !Object.keys(KL).some(t => KL[t].some(x => x && [x.ad].concat(x.alias || []).some(s => nrm(s).indexOf(nrm(a)) >= 0))) && !tanir(a) && KB.indexOf(a) >= 0; // KB: ND7K dönemi eşleme dökümünde katalog_bekliyor yazımlar (boşluğun kanıtı)
       const OWN = [], ownG = {}; YASAK.forEach(a => kendi(a).forEach(k => { if (!ownG[k.id]) { ownG[k.id] = 1; OWN.push(k); } }));
       const taCiz = (t, q) => { const cfg = _bmAramaCfg[t]; let pp = document.getElementById(cfg.panel), kur = false; if (!pp) { pp = document.createElement('div'); pp.id = cfg.panel; document.body.appendChild(pp); kur = true; } _bmAramaCiz(t, q);
         const o = { yok: /Eşleşen yok/.test(pp.textContent), ids: [...pp.querySelectorAll('[onmousedown]')].map(x => (/bmAramaSec\("[a-z]+","([^"]+)"\)/.exec(x.getAttribute('onmousedown')) || [])[1]), es: !!pp.querySelector('.bm-arama-es') }; if (kur) pp.remove(); return o; };
@@ -7250,7 +7250,7 @@ const CASELER = [
       // kaydından yalnız noktalamayla ayrılan YASAK yazımı ("mt hood" ↔ "Mt. Hood"): kırmızı değil, BİLGİ (Claude kararı 1c: bilinen eksik → KUCUK1)
       const eksik = YASAK.filter(a => kendi(a).some(k => _bmAramaCfg[k.t] && taCiz(k.t, a).ids.indexOf(k.id) < 0));
       __REG.ok('BİLGİ — bilinen eksik → KUCUK1 (type-ahead noktalamayı yok saymıyor): ' + eksik.length + ' yazım', true, eksik.map(a => '"' + a + '" ↔ ' + kendi(a).map(k => k.ad).join(' / ')).join(' ; '));
-      // eski → yeni: '"liberty" → "Eşleşen yok"' → "çalışma anında seçilen kaydı olmayan YASAK yazımı malt / hop / maya type-ahead'inde 'Eşleşen yok'", çünkü 1c (iii): Liberty artık katalogda
+      // eski → yeni: '"liberty" → "Eşleşen yok"' → "çalışma anında seçilen kaydı olmayan YASAK yazımı malt / hop / maya type-ahead'inde 'Eşleşen yok'", çünkü 1c (iii): Liberty artık katalogda (kaydı olmayan: BV2'deki tanım)
       const bos = YASAK.find(kaydiYok), bosR = bos ? ['malt', 'hop', 'maya'].map(t => ({ t, r: taCiz(t, bos) })) : [];
       __REG.ok('(b) kaydı olmayan yazım (çalışma anında seçildi: "' + bos + '") → malt / hop / maya type-ahead "Eşleşen yok" (ikame önerilmez)', !!bos && bosR.every(x => x.r.yok), bosR.map(x => x.t + ':' + (x.r.yok ? 'yok' : x.r.ids.join('+'))).join(' '));
       // (c) Enter yedeği
@@ -7268,7 +7268,7 @@ const CASELER = [
       __REG.ok('(d) reçete araması "hallertauer" → Hallertau içeren reçete listede', /REGTEST BV Hallertau/.test(liste));
       __REG.ok('(d) reçete araması "liberty" → o reçete listede YOK', !/REGTEST BV Hallertau/.test(liste2));
       return __REG.al();
-    }).then(c => (c.filter(x => /^BİLGİ/.test(x.ad) && x.detay).forEach(x => console.log('     ℹ️  ' + x.ad + ' [' + x.detay + ']')), c)) // bilgi satırı: sayı > 0 iken çıktıda görünür
+    }, JSON.parse(fs.readFileSync(path.join(KOK, 'tests', 'nd7_esleme.json'), 'utf8')).satirlar.filter(x => x.karar === 'katalog_bekliyor').map(x => x.yazim)).then(c => (c.filter(x => /^BİLGİ/.test(x.ad) && x.detay).forEach(x => console.log('     ℹ️  ' + x.ad + ' [' + x.detay + ']')), c)) // bilgi satırı: sayı > 0 iken çıktıda görünür
   },
 
   // ── SPRINT BW — AI altyapısı (BYOK). Test ortamı dış ağı kestiği için fetch SAHTE yanıtla değiştirilir;
@@ -18216,9 +18216,9 @@ const CASELER = [
       __REG.ok('iskelet: örnek < 3 ve önceki seçimi olmayan stilde maya "zayıf" etiketli (' + zay.length + '); bu stillerin hiçbirinde ND7 öncesi seçim yok', zay.every(s => !ON[s] && T[s].nTum < 3), zay.join(' | '));
       // eski → yeni: "Blonde Ale / Cream Ale → us05 · Wood-Aged → wlp007 · Kölsch adında Kölsch" (değer örnekleri) → "her stilde seçilen maya, izdeki adaylar arasında en yüksek paylı; eşit payda / örnek < 3'te izin yazdığı kural (önceki seçim / stili adıyla anan) geçerli", çünkü 1e: ND7B (i) kuralı, ND7K kataloğu açık; beklenti değerden değil kuraldan (paylar örneklerden bağımsız sayılır)
       const AG = window._BM_ISK_AGIRLIK || {}, kad = (k, o) => k === 'nhc' || k === 'aha' ? 'K1' : (o.k || 'K3'), kHata = []; let kBak = 0;
-      st.forEach(s => { const d = window._bmIskTuret(s, {}), m = d && d.iz && d.iz.maya; if (!m || !d.mayaId) return; kBak++; const my = {}; let nEx = 0;
-        (window._bmOrnekListe(s) || []).forEach(x => { const o = window._bmOrnekNesne(x.kaynak, s, x.idx), r = o ? window._bmOrnekKuru(x.kaynak, s, x.idx) : null; if (!r || !r.g.length) return; nEx++; if (!o.y) return;
-          const id = (r.y && r.y.id) ? r.y.id : ((r.yEk || []).filter(k => k.id)[0] || {}).id; if (id) my[id] = (my[id] || 0) + (AG[kad(x.kaynak, o)] || 1); });
+      st.forEach(s => { const d = window._bmIskTuret(s, {}), m = d && d.iz && d.iz.maya; if (!m || !d.mayaId) return; kBak++; const my = {}; let nEx = 0; const tm = window.__nd6TuretModu; window.__nd6TuretModu = true; // motorla aynı kip (_bmIskTuret sarmalayıcısı)
+        try { (window._bmOrnekListe(s) || []).forEach(x => { const o = window._bmOrnekNesne(x.kaynak, s, x.idx), r = o ? window._bmOrnekKuru(x.kaynak, s, x.idx) : null; if (!r || !r.g.length) return; nEx++; if (!o.y) return;
+          const id = (r.y && r.y.id) ? r.y.id : ((r.yEk || []).filter(k => k.id)[0] || {}).id; if (id) my[id] = (my[id] || 0) + (AG[kad(x.kaynak, o)] || 1); }); } finally { window.__nd6TuretModu = tm; }
         const top = Math.max(...Object.values(my)), es = Object.keys(my).filter(id => Math.abs(my[id] - top) <= 1e-9), k7 = m.kural7 || '', sec = d.mayaId;
         const ok = /^örnek < 3: önceki seçim korundu/.test(k7) ? nEx < 3 && sec === ON[s] : /^eşit pay: önceki seçim korundu/.test(k7) ? es.length > 1 && sec === ON[s] : /^eşit pay: stili adıyla anan/.test(k7) ? es.length > 1 && es.indexOf(sec) >= 0 : es.indexOf(sec) >= 0; // iz yok ya da "örnek < 3: önceki seçim yok — zayıf": en yüksek paylı aday
         if (!ok) kHata.push(s + ': seçilen ' + sec + ' · iz "' + (k7 || '-') + '" · en yüksek pay ' + es.join('+') + ' · örnek ' + nEx); });
