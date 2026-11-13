@@ -139,3 +139,29 @@ KURALLAR
   Bulgular raporda ayrı bölüm olur.
 - CLAUDE.md'ye 1–2 satır yaz; ayrıntı gorevler/SPRINT_GECMISI.md sonuna.
 - SONRA: Claude rastgele 50 yeni kaydı kör alt ajanlarla yeniden doğrular.
+
+ÖN ADIMLAR EK KARARLARI (Claude, 2026-11-13 09:50; CC'nin ara mesajına cevap)
+- Ö5 eski kimlik: Gizli tutulması KABUL. Kayıtlı reçete ve stok bozulmasın.
+  - Listede görünmez.
+  - Tanıma yalnız kalan kimliği verir.
+  - Stokta biri öbürünü karşılar.
+- Ö5 kaynak: Ad eşlemesini açıkça yazan satıcı sayfaları var. Claude açtı:
+  - southernhomebrew.com/dica820eb10.html — "Dingemans Cara 8 (20 EBC) 10LB" → Cara 8 = Cara 20 MD.
+  - southernhomebrew.com/dica20510.html — "Dingemans Cara 20 (50EBC) 10LB" → ABD'deki "Cara 20" = 50 EBC = Cara 50 MD, yani Caravienne.
+  - Bu iki url'yi Ö5 kaydına ekle.
+- YENİ TUZAK — ABD adlandırması: ABD kaynaklı tariflerde (aha, nhc, byo) "Dingemans Cara 20" 20 °L demektir, yani 50 EBC olan Cara 50 MD / Caravienne. Katalogdaki dingemans_cara20 ise 20 EBC (≈8 °L) olan Cara 20 MD.
+  - Eşleme tablosunda "cara 20", "cara-20", "cara20", "caravienne", "cara vienna", "cara 45" ve "cara 8" yazımlarının hepsini incele.
+  - Satırda °L rengi varsa renge göre bağla.
+  - Renk yoksa ve örnek ABD kaynaklıysa:
+    - "Cara 20" → Cara 50 MD;
+    - "Cara 45" → Cara 120 MD;
+    - "Cara 8" → Cara 20 MD.
+  - "MD" ekli yazımlar EBC'dir.
+  - Cara 50 MD ürünü ND7K'da kaynakla eklenir. Kaynak: Dingemans sayfası "Cara 50 MD is also known as Cara Vienna". Eklenene kadar bu satırlar katalog_bekliyor olarak kalır.
+  - Değişen satırları listele.
+  - dingemans_cara20 kaydının id'si değişmez. Görünen ada açıklayıcı ek yalnız stil motoru ve ML girdisini değiştirmiyorsa konur; değiştiriyorsa konmaz, listelenir.
+- Ö9 kapsamı: Hop + MALT için uygula.
+  - Aynı role tam (farksız) eşlenen aday varsa o seçilir. Yoksa farklı aday seçilir ve fark notu taşır.
+  - Değişen stil listesini ver.
+- Ö9 ek kural (kaynağında hop olmayan örneğin varsayım hopu iskeleti beslemesin): KABUL. Doğru; döngüsel kanıtı kesiyor.
+- Bellek: Tam regresyonu daha küçük dilimlerle koş (ör. --parca=i/12). Dilimler sırayla koşulur, kapsamın tam olduğu raporda gösterilir.
