@@ -717,3 +717,30 @@ Bir sprintin ayrıntısını ararken: `grep -n "<SPRİNT ADI>" gorevler/SPRINT_G
 - Doğrulayamadıkları (ASKIDA): fixture'a özgü içeriğin diff'e girip girmediği (dosyayı açmadan) · ilk tam koşunun 597/605 öyküsü (kayıtlar yalnız son koşuyu tutuyor) · (f)'deki öbür 29 kaydın üretici sayfası karşılaştırması ve Caravienne = Cara 50 MD (ağ izni tek sayfaydı; CC iki Dingemans sayfasını kendi WebFetch'iyle okudu, Castle / Crisp / Rahr / Briess / Escarpment / Imperial değerleri araştırma alt ajanının tek okumasına dayanıyor) · (b) "taze : kuru oran bulunamadı" beyanı.
 - Doğrulayıcı düzeltmelerinden sonra tam paket SON kodla yeniden, 6 dilim: 101 · 101 · 101 · 101 · 101 · 100 = **605/605** (koşu boyunca HTML / regresyon.mjs / sw.js / iskelet_veri.js / tablo dosyaları md5'i değişmedi; DOG4F-COZUM 427,8 sn).
 - TUR 2 (aynı doğrulayıcı, düzeltmelerden sonra): yedi maddenin hepsi doğrulandı, yeni yanlış yok — 6 yazımın yeni hedefi / farkı / aday karşılığı · iki --kontrol çıkış 0, iskelet 411c8c4944 · nd7_tanima / nd6_olcum sayıları kayıtla birebir · üçüncü tam koşu 605/605, md5'ler güncel · v543 ↔ çalışma ağacı kalem bulucu farkı 0 · HTML LF boyutu 5.270.050 bayt (birinci turdaki bayt bulgusunu geri aldı: kendi ölçüm hatası) · ND7B-FARK, ND7B-KATALOG, ISK1-HASH, ISK1-HASH-ND6 PASS. Notu: "pilsen (dingemans)" → bel_pils (çok üreticili kayıt) elle farksız, "weyermann pilsner malt" → pilsner kuraldan fark = marka — sıkı marka okumasıyla aynı sınıftan tutarsızlık (açık madde 3).
+
+1j3z14. **CLAUDE ND7B DOĞRULAMASI + ND7K ÖN KARARLARI** (2026-11-13). ND7B: commit 1102a0e, SW v131-545.
+
+**Doğrulama: neye bakıldı, ne çıktı**
+
+| Kontrol | Sonuç |
+|---|---|
+| Canlı dosya | md5 2069e4c9… — yereldekiyle aynı |
+| SW sürümü | v131-545 |
+| Üç imza (çalışma anında) | değişmemiş |
+| A1 kalem bulucusu (Claude kendi koştu; v543 HTML'i git show ile çıkarıldı) | v543 ↔ ND7B: 123 istem, 293 tekil çağrı, 246 çözüm/tarama, 77 doğrudan — fark 0 |
+| Örnek rozetleri (Claude betiği, fixture stok) | 🟡 225 · 🔴 744 · ❔ 19 — CC ile aynı |
+| Stil rozetleri | 🟨 68 · 🟡 128 · az 26 · 🔴 17 — CC ile aynı |
+| İskelet-stok, eski tanımla sayım | alınacak 0 olan 95, tam 70. CC'nin yeni tanımla saydığı 100 / 75 ile tutarlı; fark yalnız sayım tanımından |
+| Diff taraması | anahtar 0 · Firebase 0 · httpbin 0 |
+| Fixture'a özgü ad (fixture'ı Claude açtı) | 0. Diff'te geçen 3 ad katalog kaydı adı: Pilsner Malt, Hallertau Blanc, Hitit Brewers Gold |
+
+**ND7K ön kararları** (ayrıntı gorevler/ND7K.md "ÖN ADIMLAR")
+- **Ö1 Çok üreticili katalog kaydı:** Tarifin üreticisi kayıtta sayılan üreticilerden biriyse ve nominal ürün aynıysa fark boş kalır.
+- **Ö2 Sözlük takma adları:** Örnek yolunda, kaydın üreticisinden farklı bir üretici adı taşıyan alias fark='marka' alır.
+- **Ö3 Great Western:** Premium 2-Row ve California Select 2-Row üretici sayfasından doğrulanır; ayrı ürünlerse ayrı aday olur.
+- **Ö4 "fresh grated":** Aynı tarifin öbür kaydı malzemenin adını veriyorsa o ada bağlanır.
+- **Ö5 Dingemans Cara 8 / Cara 45:** Cara 20 MD ve Cara 120 MD'nin ABD adları olup olmadıkları doğrulanır; doğrulanırsa çift kayıt birleştirilir. Caravienne = Cara 50 MD, ND7K adayı.
+- **Ö6 AI4 ödüllü örnek listesi:** ND7 öncesi tanımayla çalışır. G ve tuzak setlerinde kanıt paketi v543 ile birebir aynı kalmalı.
+- **Ö7 BUL1-KURU-ND7:** Kabul edildi. Claude'un "aynı sayı" önermesi yanlıştı; kahveli stoutlardan biri kuru.
+- **Ö8 İkinci maya:** maya2Id alanına yazılır.
+- **Ö9 İskelet:** Farklı ürüne yapılan bir eşleme, ürün seçerken "aynı ürün" sayılmaz.

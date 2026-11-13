@@ -2,8 +2,34 @@ SPRINT ND7K — Katalogda olmayan gerçek ürünlerin KAYNAKLI eklenmesi (KAT-C 
 
 Claude, 2026-11-11. ND7'den SONRA verilir. ND7 bu sprintin girdisini hazırlar: tests/nd7k_aday.json. Bu dosya, örnek verisinde adı geçen ama katalogda olmayan ürünlerin listesidir. ND7'de bu ürünlerin satırları geçici olarak "katalog_bekliyor" sınıfına bağlanmıştır.
 
+ÖN ADIMLAR — Claude kararları (ND7B doğrulaması, 2026-11-13). ND7B raporunda "karar bekliyor" denen her madde burada karara bağlandı. Bu ön adımlar ND7K'nın asıl işinden ÖNCE yapılır, AYRI bir commit olur, testleri geçer ve yayınlanır. Başlama şartı bununla karşılanmış sayılır.
+- Ö1 (a) marka istisnası:
+  - Katalog kaydının adı ya da üretici alanı birden çok üretici sayıyorsa (ör. "Briess/Simpsons") ve tarifin üreticisi bunlardan biriyse, nominal ürün de aynıysa fark BOŞ olur (aynı ürün).
+  - Üreticisiz jenerik kayıt + markalı tarif → fark='marka' (bugünkü gibi).
+- Ö2 (a) sözlük yolu: örnek yolunda sözlük (alias) eşlemeleri de denetlenir. Alias metni, kaydın üreticisinden FARKLI bir üretici adı içeriyorsa fark='marka' olur. Bu yalnız örnek girişinde geçerli; AI girişi değişmez. Sayıyı raporla.
+- Ö3 (a) Great Western:
+  - "Premium 2-Row" ve "California Select 2-Row" ayrı Great Western ürünleri olabilir. Üretici sayfasından doğrula; ayrıysa aday listesinde AYRI kayıt olur, birleştirilmez.
+  - "domestic pale malt" (Great Western): jenerik ABD 2-row kaydına fark='marka' ile.
+- Ö4 (c) "fresh grated" (42,5 g): aynı tarifin örnek verisindeki öbür kaydı malzemeyi adlandırıyorsa (ör. zencefil), o katkıya bağla. Not: "ad, kaynağın diğer kaydından". Adlandırmıyorsa artık kalır. "0.25 tsp." adsız olduğu için artık kalır.
+- Ö5 (f) Dingemans:
+  - ABD'de satılan "Cara 8" ve "Cara 45" adlarının Cara 20 MD ve Cara 120 MD olup olmadığını doğrula (ABD adları °L ile verilir). Kaynak: üretici ya da ABD dağıtıcısı sayfası, url + alıntı.
+  - Doğrulanırsa çift kaydı birleştir: tek id kalır, öbürü alias olur, mevcut başvurular korunur.
+  - Doğrulanamazsa dokunma, listele.
+  - Caravienne = Cara 50 MD (Dingemans sayfası). Ürün olarak ND7K adayı.
+- Ö6 (j) AI4 ödüllü örnek listesi (A4.odulluOrnekler → _bmMalzemeAra) bir AI yoludur.
+  - ND7B (j) gereği ND7 öncesi tanımayla çalışır. Örnek araması ekranı (ND) yeni tanımayı kullanmaya devam eder; AI4'ün kanıt paketine giden liste eski tanımayla üretilir.
+  - G seti ve tuzak seti istemleri için AI4 kanıt paketi v131-543 ile birebir aynı olmalı. Ölçümle göster.
+  - Yeni tanımanın AI yollarına alınması AYRI bir sprint konusudur.
+- Ö7 (k) BUL1-KURU-ND7: CC'nin yazdığı sürüm kabul. Claude'un "tatlı çipli ve çipsiz aynı sayı" önermesi yanlıştı: kahveli stout örneklerinden biri kuru.
+- Ö8 (d) ikinci maya: editörde maya2Id alanı var. Karışımdaki ikinci maya bu alana yazılır; not da kalır.
+  - Üçüncü maya varsa yalnız not.
+- Ö9 iskelet hopu: iskelet türetmesi, fark alanı dolu bir eşlemeyi "aynı ürün" gibi ürün seçimine katmaz.
+  - Örnek: Brewer's Gold → hitit_bg (köken farkı), 3 stilde.
+  - Aynı role tam (farksız) eşlenen aday varsa o seçilir. Yoksa seçim fark notuyla işaretlenir.
+  - ND7K jenerik Brewer's Gold ürününü kaynakla eklerse iskelet yeniden türetilir.
+
 ND7B SONRASI EK (Claude, 2026-11-13; Kaan kararı: ND7B biter bitmez aynı oturumda ND7K'ya geçilecek)
-- BAŞLAMA ŞARTI: ND7B commit + push edilmiş, canlı md5 = yerel, tam regresyon son kodla koşulmuş, ND7B doğrulayıcısı bitmiş ve ND7B raporu yazılmış olmalı.
+- BAŞLAMA ŞARTI (karşılandı, 2026-11-13): ND7B yayında (1102a0e, v131-545). Claude doğruladı. Bekleyen kararlar yukarıdaki ÖN ADIMLAR'da.
   - ND7B'de çözülemeyen kırmızı test ya da "Claude kararı bekleyen ve ND7K'yı etkileyen" bir madde varsa ND7K'ya BAŞLAMA. Durumu yazıp dur.
   - Etkileyen maddeler: fark işareti (a), kaybolan satırlar (c), renk düzeltmeleri (f), ND7 katmanının kapsamı (j).
 - ND7B'nin (a) maddesi: marka ürünü katalogda yoksa satır fark='marka' ile aynı türden kayda geçici bağlanmış ve ürün tests/nd7k_aday.json'a eklenmiştir.
